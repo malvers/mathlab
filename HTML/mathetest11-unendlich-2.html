@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Das unendlich Große — Teil 2 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w39-unendlich-2",
+  "version": "v1",
+  "submit": false,
+  "solutions": "always",
+  "title": "Aufgaben · Das unendlich Große · Teil 2",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 39, KW 24 · 20 schwerere Aufgaben: Abzählbarkeit, Diagonalverfahren, Grenzwerte · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 24 · Teil 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Wie schafft Hilberts Hotel Platz für EINEN neuen Gast, obwohl alle Zimmer belegt sind?",
+      "opts": [
+        "jeder Gast zieht ein Zimmer weiter, Zimmer $1$ wird frei",
+        "ein Gast muss gehen",
+        "es geht nicht",
+        "man baut ein Zimmer an"
+      ],
+      "steps": [
+        "Gast aus Zimmer $n$ zieht nach $n+1$.",
+        "Jeder hat wieder ein Zimmer, denn zu jedem $n$ gibt es $n+1$.",
+        "Zimmer $1$ ist nun frei — bei endlich vielen Zimmern ginge das nicht."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wie schafft das Hotel Platz für UNENDLICH viele neue Gäste?",
+      "opts": [
+        "jeder rückt um eins",
+        "jeder Gast zieht von $n$ nach $2n$ — alle ungeraden Zimmer werden frei",
+        "man verdoppelt die Zimmerzahl",
+        "das geht nicht"
+      ],
+      "steps": [
+        "Gast $n$ zieht in Zimmer $2n$.",
+        "Belegt sind dann nur noch die geraden Zimmer.",
+        "Die unendlich vielen ungeraden Zimmer stehen bereit."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was heißt „gleichmächtig“?",
+      "opts": [
+        "beide Mengen sind gleich groß im Sinne von Zahlen",
+        "beide enthalten dieselben Elemente",
+        "es gibt eine eindeutige Zuordnung zwischen beiden Mengen",
+        "beide sind endlich"
+      ],
+      "steps": [
+        "Man vergleicht Mengen über eine Paarung, nicht über Abzählen.",
+        "Findet man eine Zuordnung ohne Rest, sind sie gleichmächtig.",
+        "Bei unendlichen Mengen kann eine echte Teilmenge gleichmächtig zur ganzen Menge sein."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Gibt es genauso viele Quadratzahlen wie natürliche Zahlen?",
+      "opts": [
+        "nein, es gibt mehr",
+        "nein, es gibt viel weniger",
+        "das lässt sich nicht entscheiden",
+        "ja — $n \\mapsto n^2$ ordnet jeder Zahl genau eine Quadratzahl zu"
+      ],
+      "steps": [
+        "Die Zuordnung $1\\to1$, $2\\to4$, $3\\to9$ … lässt keine aus und trifft keine doppelt.",
+        "Also sind beide Mengen gleichmächtig.",
+        "Genau das nannte Galilei paradox — es ist aber korrekt."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Sind die rationalen Zahlen abzählbar?",
+      "opts": [
+        "nur mit Auswahlaxiom",
+        "nein, es gibt zu viele",
+        "nur die positiven",
+        "ja, Cantors Diagonalabzählung erfasst alle Brüche"
+      ],
+      "steps": [
+        "Man ordnet alle Brüche in ein Gitter aus Zähler und Nenner.",
+        "Dann läuft man diagonal durch und überspringt Kürzbares.",
+        "So bekommt jeder Bruch eine natürliche Nummer."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was zeigt Cantors Diagonalverfahren?",
+      "opts": [
+        "es gibt endlich viele reelle Zahlen",
+        "die rationalen Zahlen sind überabzählbar",
+        "die reellen Zahlen sind ÜBERabzählbar",
+        "alle unendlichen Mengen sind gleich groß"
+      ],
+      "steps": [
+        "Man nimmt an, es gäbe eine Liste ALLER reellen Zahlen zwischen $0$ und $1$.",
+        "Aus der Diagonale baut man eine Zahl, die sich von jeder Listenzahl unterscheidet.",
+        "Sie fehlt in der Liste — also war die Annahme falsch."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie entsteht im Diagonalverfahren die neue Zahl?",
+      "opts": [
+        "man addiert alle Zahlen",
+        "man nimmt den Mittelwert",
+        "man streicht die Diagonale",
+        "die $n$-te Nachkommastelle wird gegenüber der $n$-ten Listenzahl geändert"
+      ],
+      "steps": [
+        "Von der ersten Zahl nimmt man die erste Stelle und ändert sie.",
+        "Von der zweiten die zweite und so weiter.",
+        "Die entstehende Zahl unterscheidet sich von jeder Listenzahl an mindestens einer Stelle."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Welche Menge ist überabzählbar?",
+      "opts": [
+        "die reellen Zahlen",
+        "die natürlichen Zahlen",
+        "die ganzen Zahlen",
+        "die rationalen Zahlen"
+      ],
+      "steps": [
+        "Natürliche, ganze und rationale Zahlen lassen sich durchnummerieren.",
+        "Für die reellen Zahlen ist das nach Cantor unmöglich.",
+        "Man sagt: sie haben eine größere Mächtigkeit."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wogegen strebt $\\dfrac{1}{n^2}$ für immer größere $n$?",
+      "opts": [
+        "gegen unendlich",
+        "gegen $\\dfrac12$",
+        "gegen $1$",
+        "gegen $0$"
+      ],
+      "steps": [
+        "Der Nenner wächst über alle Grenzen.",
+        "Der Bruch wird beliebig klein, bleibt aber positiv.",
+        "Der Grenzwert ist $0$, wird aber nie erreicht."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was ergibt die unendliche Summe $\\dfrac13 + \\dfrac19 + \\dfrac{1}{27} + \\ldots$?",
+      "opts": [
+        "$\\dfrac12$",
+        "$1$",
+        "$\\dfrac13$",
+        "sie wächst über alle Grenzen"
+      ],
+      "steps": [
+        "Geometrische Reihe mit $a_1 = \\dfrac13$ und $q = \\dfrac13$.",
+        "Summe $= \\dfrac{a_1}{1-q} = \\dfrac{1/3}{2/3}$",
+        "$= \\dfrac12$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Warum ist $0{,}\\overline{9} = 1$?",
+      "opts": [
+        "es ist falsch",
+        "die Differenz wäre kleiner als jede positive Zahl, also null",
+        "es ist eine Näherung",
+        "das gilt nur ungefähr"
+      ],
+      "steps": [
+        "Wäre $0{,}\\overline9 < 1$, gäbe es eine Zahl dazwischen.",
+        "Eine solche Zahl lässt sich nicht angeben.",
+        "Rechnerisch: $\\dfrac13 = 0{,}\\overline3$, mal drei ergibt $0{,}\\overline9 = 1$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was besagt Zenons Paradoxon von Achilles und der Schildkröte?",
+      "opts": [
+        "die Schildkröte gewinnt tatsächlich",
+        "scheinbar holt Achilles nie auf — die unendliche Summe der Zeiten ist aber endlich",
+        "Achilles ist langsamer",
+        "Bewegung ist unmöglich"
+      ],
+      "steps": [
+        "Jeder Vorsprung wird eingeholt, dabei entsteht ein neuer, kleinerer.",
+        "Die Zeitabschnitte bilden eine geometrische Reihe.",
+        "Ihre Summe ist endlich — Achilles überholt zu einem bestimmten Zeitpunkt."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wie viele Primzahlen gibt es?",
+      "opts": [
+        "unendlich viele — Euklids Beweis",
+        "das ist unbekannt",
+        "genau $1000$",
+        "endlich viele"
+      ],
+      "steps": [
+        "Annahme: es gäbe nur endlich viele $p_1,\\ldots,p_n$.",
+        "Die Zahl $p_1\\cdots p_n + 1$ ist durch keine davon teilbar.",
+        "Also gibt es eine weitere Primzahl — Widerspruch."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was ist der Unterschied zwischen „unendlich viele“ und „beliebig viele“?",
+      "opts": [
+        "beliebig viele meint: zu jeder Schranke gibt es mehr; unendlich viele ist eine Aussage über die Menge selbst",
+        "beliebig viele ist mehr",
+        "unendlich viele ist eine Zahl",
+        "es gibt keinen Unterschied"
+      ],
+      "steps": [
+        "„Beliebig groß“ beschreibt einen Prozess ohne obere Schranke.",
+        "„Unendlich viele“ beschreibt die Mächtigkeit einer Menge.",
+        "In der Analysis begegnet man dem ersten, in der Mengenlehre dem zweiten."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Ist $\\infty$ eine Zahl, mit der man rechnen kann wie mit $5$?",
+      "opts": [
+        "nein — es ist ein Symbol für unbeschränktes Verhalten",
+        "ja, die größte Zahl",
+        "ja, in der Mengenlehre",
+        "ja, aber nur bei Grenzwerten"
+      ],
+      "steps": [
+        "$\\infty - \\infty$ oder $\\dfrac{\\infty}{\\infty}$ sind nicht festgelegt.",
+        "Deshalb ist $\\infty$ kein Element der reellen Zahlen.",
+        "Es beschreibt, wohin ein Prozess läuft."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wie viele irrationale Zahlen gibt es im Vergleich zu rationalen?",
+      "opts": [
+        "überabzählbar viele mehr — fast jede reelle Zahl ist irrational",
+        "endlich viele",
+        "gleich viele",
+        "weniger"
+      ],
+      "steps": [
+        "Die rationalen Zahlen sind abzählbar.",
+        "Die reellen sind überabzählbar.",
+        "Nimmt man die abzählbare Menge weg, bleibt eine überabzählbare übrig."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wogegen strebt $\\left(1 + \\dfrac1n\\right)^n$ für große $n$?",
+      "opts": [
+        "gegen unendlich",
+        "gegen die Eulersche Zahl $e \\approx 2{,}718$",
+        "gegen $2$",
+        "gegen $1$"
+      ],
+      "steps": [
+        "Die Basis nähert sich $1$, der Exponent wächst — beides wirkt gegeneinander.",
+        "Der Grenzwert ist gerade $e$.",
+        "Für $n = 1000$ ergibt sich bereits $\\approx 2{,}717$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein Hotel mit unendlich vielen Zimmern ist voll. Ein Bus mit unendlich vielen Gästen kommt. Was zeigt das Beispiel?",
+      "opts": [
+        "bei unendlichen Mengen widerspricht der Verstand oft der Logik",
+        "dass Unendlichkeit unmöglich ist",
+        "dass das Hotel schlecht geplant ist",
+        "dass Gäste warten müssen"
+      ],
+      "steps": [
+        "Im Endlichen bedeutet „voll“ endgültig.",
+        "Im Unendlichen lässt sich durch Umziehen Platz schaffen.",
+        "Genau diese Überraschung macht das Gedankenexperiment wertvoll."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Welche Aussage über Unendlichkeiten ist richtig?",
+      "opts": [
+        "alle Unendlichkeiten sind gleich",
+        "es gibt verschieden große Unendlichkeiten",
+        "Unendlichkeit ist die größte Zahl",
+        "es gibt genau zwei Unendlichkeiten"
+      ],
+      "steps": [
+        "Abzählbar unendlich (natürliche Zahlen) ist die kleinste Stufe.",
+        "Die reellen Zahlen sind echt mächtiger.",
+        "Cantor zeigte: zu jeder Menge gibt es eine mächtigere (Potenzmenge)."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Warum ist die Beschäftigung mit dem Unendlichen mehr als eine Spielerei?",
+      "opts": [
+        "weil Computer damit rechnen",
+        "weil es in der Klausur vorkommt",
+        "Grenzwert und Unendlichkeit sind das Fundament der Analysis",
+        "weil es Rätsel sind"
+      ],
+      "steps": [
+        "Ableitung und Integral beruhen auf Grenzprozessen.",
+        "Ohne einen klaren Begriff vom Unendlichen bliebe das unscharf.",
+        "Deshalb kommt in Klasse 12 die Analysis genau hier an."
+      ],
+      "solution": 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Monte Carlo — Teil 2 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w37-montecarlo-2",
+  "version": "v1",
+  "submit": false,
+  "solutions": "always",
+  "title": "Aufgaben · Monte Carlo · Teil 2",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 37, KW 22 (Wahlbereich II) · 20 schwerere Aufgaben: Schätzungen rechnen, Genauigkeit, Anwendungen · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 22 · Teil 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Von $20\\,000$ Punkten im Einheitsquadrat liegen $15\\,660$ im Viertelkreis. Welche $\\pi$-Schätzung ergibt das?",
+      "opts": [
+        "etwa $6{,}264$",
+        "etwa $3{,}14$ exakt",
+        "etwa $0{,}783$",
+        "etwa $3{,}132$"
+      ],
+      "steps": [
+        "Anteil: $\\dfrac{15660}{20000} = 0{,}783$.",
+        "Dieser Anteil entspricht $\\dfrac{\\pi}{4}$.",
+        "$\\pi \\approx 4\\cdot0{,}783 = 3{,}132$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wann liegt ein Punkt $(x\\mid y)$ im Viertelkreis mit $r=1$?",
+      "opts": [
+        "wenn $x \\le 1$ und $y \\le 1$",
+        "wenn $x + y \\le 1$",
+        "wenn $x^2 + y^2 \\le 1$",
+        "wenn $x\\cdot y \\le 1$"
+      ],
+      "steps": [
+        "Der Abstand zum Ursprung ist $\\sqrt{x^2+y^2}$.",
+        "Innerhalb des Kreises ist dieser Abstand höchstens $1$.",
+        "Quadriert: $x^2+y^2 \\le 1$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie hängt die Genauigkeit von der Wurfzahl ab?",
+      "opts": [
+        "der Fehler wächst",
+        "der Fehler sinkt etwa mit $\\dfrac{1}{\\sqrt{n}}$",
+        "der Fehler sinkt proportional zu $\\dfrac1n$",
+        "der Fehler bleibt gleich"
+      ],
+      "steps": [
+        "Monte Carlo ist eine Stichprobenmethode.",
+        "Für zehnfache Genauigkeit braucht es hundertfach mehr Würfe.",
+        "Das macht das Verfahren robust, aber langsam."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein Rechteck ist $40\\ \\mathrm{cm^2}$ groß, $28\\,\\%$ der Punkte liegen in der eingezeichneten Figur. Wie groß ist deren Fläche etwa?",
+      "opts": [
+        "$68\\ \\mathrm{cm^2}$",
+        "$1{,}4\\ \\mathrm{cm^2}$",
+        "$11{,}2\\ \\mathrm{cm^2}$",
+        "$28\\ \\mathrm{cm^2}$"
+      ],
+      "steps": [
+        "Der Anteil der Treffer entspricht dem Flächenanteil.",
+        "$0{,}28 \\cdot 40$",
+        "$= 11{,}2\\ \\mathrm{cm^2}$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Welche Voraussetzung müssen die Zufallspunkte erfüllen?",
+      "opts": [
+        "sie müssen auf einem Gitter liegen",
+        "sie müssen im Kreis liegen",
+        "sie müssen alle verschieden sein",
+        "sie müssen gleichmäßig über die Bezugsfläche verteilt sein"
+      ],
+      "steps": [
+        "Nur bei Gleichverteilung entspricht der Trefferanteil dem Flächenanteil.",
+        "Häufungen an einer Stelle verzerren das Ergebnis.",
+        "Deshalb sind gute Zufallszahlen entscheidend."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie viele Würfe braucht man grob für zwei sichere Nachkommastellen bei $\\pi$?",
+      "opts": [
+        "etwa $100$",
+        "etwa $1000$",
+        "Größenordnung $10^5$ und mehr",
+        "etwa $10$"
+      ],
+      "steps": [
+        "Der Fehler sinkt mit $\\dfrac{1}{\\sqrt n}$.",
+        "Für $0{,}01$ Genauigkeit braucht es $n$ in der Größenordnung $10^4$ bis $10^5$.",
+        "Und selbst dann schwankt die letzte Stelle noch."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was ist der Unterschied zwischen Monte Carlo und der Streifenmethode?",
+      "opts": [
+        "Monte Carlo ist exakt",
+        "die Streifenmethode braucht Zufallszahlen",
+        "Monte Carlo nutzt Zufall, die Streifenmethode ein festes Raster",
+        "es gibt keinen Unterschied"
+      ],
+      "steps": [
+        "Die Streifenmethode zerlegt systematisch in gleich breite Abschnitte.",
+        "Monte Carlo wirft Punkte zufällig hin und zählt Treffer.",
+        "In hohen Dimensionen ist der Zufall im Vorteil."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie bestimmt man die Fläche eines unregelmäßigen Sees auf einer Karte?",
+      "opts": [
+        "Rechteck um den See legen, Punkte werfen, Trefferanteil mal Rechteckfläche",
+        "das geht nicht",
+        "den See in Quadrate zerschneiden und zählen",
+        "den Umfang messen"
+      ],
+      "steps": [
+        "Die bekannte Bezugsfläche ist das Rechteck.",
+        "Der Anteil der Punkte im See entspricht dem Flächenanteil.",
+        "Multipliziert mit der Rechteckfläche ergibt sich die Seefläche."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Kann Monte Carlo ein exaktes Ergebnis liefern?",
+      "opts": [
+        "ja, wenn die Zufallszahlen gut sind",
+        "nein, immer nur eine Schätzung mit Unsicherheit",
+        "ja, bei genügend vielen Würfen",
+        "ja, bei einfachen Figuren"
+      ],
+      "steps": [
+        "Jede Schätzung beruht auf einer endlichen Stichprobe.",
+        "Mehr Würfe verkleinern die Streuung, beseitigen sie aber nicht.",
+        "Deshalb gehört zur Angabe immer die Wurfzahl."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was zeigt ein Diagramm der $\\pi$-Schätzung über der Wurfzahl?",
+      "opts": [
+        "gleichmäßiges Wachstum",
+        "starke Schwankungen am Anfang, dann Einpendeln um $3{,}14$",
+        "zufällige Sprünge bis zum Schluss",
+        "eine Gerade"
+      ],
+      "steps": [
+        "Bei wenigen Würfen wirkt jeder Treffer stark.",
+        "Mit wachsender Zahl verlieren einzelne Punkte an Gewicht.",
+        "Die Kurve nähert sich dem wahren Wert an."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Welche Rolle spielt Monte Carlo in der Wirtschaft?",
+      "opts": [
+        "Risiken werden über viele Zufallsszenarien durchgerechnet",
+        "es spielt keine Rolle",
+        "Aktienkurse werden exakt vorhergesagt",
+        "Bilanzen werden geprüft"
+      ],
+      "steps": [
+        "Für unsichere Größen werden Verteilungen angenommen.",
+        "Tausende simulierte Szenarien ergeben eine Verteilung des Ergebnisses.",
+        "Daraus liest man Wahrscheinlichkeiten für Verluste ab."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wie baut man eine Monte-Carlo-Simulation in einer Tabellenkalkulation auf?",
+      "opts": [
+        "das geht nur mit Programmierung",
+        "eine Spalte mit Formeln genügt",
+        "man braucht ein Diagramm",
+        "zwei Spalten Zufallszahlen, eine Spalte Trefferprüfung, dann den Anteil bilden"
+      ],
+      "steps": [
+        "Spalten $x$ und $y$ mit Zufallszahlen füllen.",
+        "Dritte Spalte: prüft $x^2+y^2 \\le 1$ und liefert $1$ oder $0$.",
+        "Der Mittelwert dieser Spalte ist der Trefferanteil."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Warum heißt das Verfahren „Monte Carlo“?",
+      "opts": [
+        "es ist eine Abkürzung",
+        "nach seinem Erfinder",
+        "nach dem Ort der ersten Anwendung in der Schule",
+        "nach dem Spielcasino — es beruht auf dem Zufall"
+      ],
+      "steps": [
+        "Entwickelt wurde es in den 1940er Jahren im Kernforschungsprogramm.",
+        "Der Deckname spielte auf das Casino in Monaco an.",
+        "Der Zufall ist das Werkzeug, nicht das Ziel."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Von $1000$ Würfen liegen $770$ im Viertelkreis. Wie groß ist die $\\pi$-Schätzung?",
+      "opts": [
+        "$3{,}08$",
+        "$0{,}77$",
+        "$3{,}14$",
+        "$2{,}31$"
+      ],
+      "steps": [
+        "$\\dfrac{770}{1000} = 0{,}77$",
+        "$\\pi \\approx 4\\cdot0{,}77$",
+        "$= 3{,}08$ — bei nur $1000$ Würfen ist das eine typische Abweichung."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wofür ist Monte Carlo besonders geeignet?",
+      "opts": [
+        "für exakte Beweise",
+        "für Probleme mit vielen Einflussgrößen und unregelmäßigen Bereichen",
+        "für lineare Gleichungen",
+        "für einfache Flächen wie Rechtecke"
+      ],
+      "steps": [
+        "Bei glatten, einfachen Problemen sind klassische Verfahren schneller.",
+        "Sobald die Dimension steigt, bricht das Raster ein — der Zufall nicht.",
+        "Deshalb ist Monte Carlo in Physik und Finanzwesen Standard."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Warum liefert Monte Carlo bei jedem Lauf ein anderes Ergebnis?",
+      "opts": [
+        "weil $\\pi$ sich ändert",
+        "weil jeder Lauf eine neue Stichprobe zieht",
+        "weil die Formel falsch ist",
+        "weil der Rechner ungenau ist"
+      ],
+      "steps": [
+        "Die geworfenen Punkte sind jedes Mal andere.",
+        "Damit ändert sich der Trefferanteil leicht.",
+        "Die Streuung sinkt mit wachsender Wurfzahl."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein Viertelkreis mit $r=1$ liegt im Einheitsquadrat. Wie groß ist das Flächenverhältnis?",
+      "opts": [
+        "$\\dfrac{\\pi}{4} \\approx 0{,}785$",
+        "$\\dfrac{\\pi}{2}$",
+        "$\\pi$",
+        "$\\dfrac14$"
+      ],
+      "steps": [
+        "Viertelkreisfläche: $\\dfrac{\\pi r^2}{4} = \\dfrac{\\pi}{4}$.",
+        "Quadratfläche: $1$.",
+        "Verhältnis: $\\dfrac{\\pi}{4} \\approx 0{,}785$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was gehört zu einer ehrlichen Angabe eines Monte-Carlo-Ergebnisses?",
+      "opts": [
+        "möglichst viele Nachkommastellen",
+        "Wurfzahl und Hinweis auf die Streuung",
+        "der Name des Rechners",
+        "nur der Schätzwert"
+      ],
+      "steps": [
+        "Ohne Wurfzahl lässt sich die Güte nicht beurteilen.",
+        "Ein Wert aus $100$ Würfen ist etwas anderes als einer aus $10^6$.",
+        "Sinnvoll ist zusätzlich die Angabe eines Schwankungsbereichs."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Warum ist das Verfahren didaktisch reizvoll?",
+      "opts": [
+        "es braucht keine Mathematik",
+        "es liefert exakte Werte",
+        "eine berühmte Konstante entsteht aus purem Zufall und einer Abzählung",
+        "es ist besonders schnell"
+      ],
+      "steps": [
+        "Zwei Zufallszahlen und eine Abstandsprüfung genügen.",
+        "Trotzdem erscheint $\\pi$ — sichtbar, nachvollziehbar, überraschend.",
+        "Zugleich zeigt es die Grenzen von Stichproben."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Man verdoppelt die Wurfzahl. Um welchen Faktor sinkt der erwartete Fehler etwa?",
+      "opts": [
+        "gar nicht",
+        "auf die Hälfte",
+        "auf ein Viertel",
+        "etwa $\\sqrt2 \\approx 1{,}41$"
+      ],
+      "steps": [
+        "Der Fehler geht wie $\\dfrac{1}{\\sqrt n}$.",
+        "Doppeltes $n$ heißt Faktor $\\dfrac{1}{\\sqrt2}$.",
+        "Also sinkt der Fehler nur um rund $30\\,\\%$."
+      ],
+      "solution": 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

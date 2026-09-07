@@ -501,7 +501,9 @@ body.editing #plan-table td.mat .mat-act[hidden] { display: none; }
 #plan-table a.quiz-btn {
     display: inline-block;
     padding: 1px 10px;
-    border-radius: 999px;
+    /* 6px statt 999px: Knopf, keine Pille - wie in den Nav-Dropdowns
+       (Doc, 07.09.2026: "nicht so pillig"). */
+    border-radius: 6px;
     border: 1px solid rgba(245, 194, 66, 0.55);
     background: rgba(245, 194, 66, 0.16);
     color: var(--lambda);
@@ -525,8 +527,20 @@ body.editing #plan-table td.mat .mat-act[hidden] { display: none; }
 #plan-table .aufg-drop { position: relative; display: inline-block; }
 #plan-table .aufg-drop > a.quiz-btn { cursor: pointer; }
 #plan-table .aufg-drop .drop-menu { position: fixed; top: auto; left: auto; gap: 5px; }
-#plan-table .aufg-drop .drop-menu a.quiz-btn { display: block; text-align: center; }
+/* Menue-Eintraege lesen sich als Zeilen: volle Breite, etwas mehr Hoehe.
+   Die 6px-Ecken kommen schon von a.quiz-btn oben. */
+#plan-table .aufg-drop .drop-menu a.quiz-btn {
+    display: block;
+    text-align: center;
+    padding: 3px 10px;
+}
 #plan-table .aufg-drop .drop-menu .mat-pill-wrap { display: flex; align-items: center; gap: 4px; }
+/* Alle Einträge gleich breit, so breit wie der breiteste (Doc, 07.09.2026).
+   Die Spalte misst sich am längsten Label (white-space: nowrap), die Pillen
+   füllen sie aus - auch die, die im Besitzer-Modus noch ein ✕ danebenhaben. */
+#plan-table .aufg-drop .drop-menu > a.quiz-btn,
+#plan-table .aufg-drop .drop-menu > .mat-pill-wrap { width: 100%; box-sizing: border-box; }
+#plan-table .aufg-drop .drop-menu .mat-pill-wrap a.quiz-btn { flex: 1; }
 
 /* short explanation line above the pill list in the paste dialog */
 .mat-modal .mm-info {

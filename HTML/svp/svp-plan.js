@@ -186,11 +186,29 @@
     const UPLOAD_LABEL = /^\s*(upload|abgabe)\b/i;
     function isUploadEntry(en) { return UPLOAD_LABEL.test(en.label || ''); }
 
+    /* Eigene Links zeigen im Material auf docalvers.de - auf Docs lokalem
+       Server (serve.py, :8765) landet man damit auf der LIVE-Seite und testet
+       nicht, was gerade gebaut wurde (Doc, 07.09.2026: "dies verweisen auch
+       local auf docalvers"). Lokal wird der eigene Host deshalb abgeschnitten:
+       serve.py liefert HTML/ als Wurzel, die absolute Pfadangabe passt also auf
+       beiden Seiten. Fremde Hosts (SharePoint, YouTube) bleiben unberührt. */
+    const IST_LOKAL = /^(localhost|127\.0\.0\.1|\[::1\])$/i.test(location.hostname);
+    function siteHref(url) {
+        if (!IST_LOKAL) return url;
+        return String(url == null ? '' : url)
+            .replace(/^https?:\/\/(?:www\.)?docalvers\.de(?=\/|$)/i, '') || url;
+    }
+
     /* Textaufgaben-Blatt: liegt unter /aufgaben/ und wandert nicht in die
        Material-Zeile, sondern in die "Aufgaben"-Pille neben das Wochenquiz
        (Doc, 07.09.2026: "ein Drop wo drauf steht Aufgaben"). Erkennung an der
-       URL - das Label darf der Plan frei benennen ("3 Textaufgaben"). */
-    function isExerciseEntry(en) { return /\/aufgaben\//i.test(en.url || ''); }
+       URL - das Label darf der Plan frei benennen ("3 Textaufgaben").
+       Ein zweiter, schwererer Aufgabensatz ("mathetest11-<thema>-2.html",
+       Doc 07.09.2026 nachmittags: "Aufgaben 1" / "Aufgaben 2") wandert aus
+       demselben Grund in die Pille statt in die Material-Zeile. */
+    function isExerciseEntry(en) {
+        return /\/aufgaben\//i.test(en.url || '') || /\bmathetest\d+-[\w-]+-2\.html$/i.test(en.url || '');
+    }
 
     // Default pill label when none was typed: derived from the link type.
     // Ein Office-Dokument in der Desktop-App oeffnen. Office registriert dafuer
@@ -382,7 +400,7 @@
                Fenster (openMat) kann das nicht. */
             if (isUploadEntry(en)) {
                 a.className = 'badge mat-upload';
-                a.href = en.url;
+                a.href = siteHref(en.url);
                 a.target = '_blank';
                 a.rel = 'noopener';
                 a.title = 'Dateien hochladen — oeffnet OneDrive';
@@ -419,7 +437,7 @@
                 return;
             }
             a.className = 'badge b-green mat-pill';
-            a.href = en.url;
+            a.href = siteHref(en.url);
             a.target = '_blank';
             a.rel = 'noopener';
             a.appendChild(matIconEl(en.url, label));
@@ -587,7 +605,7 @@
     function aufgLink(item) {
         const a = document.createElement('a');
         a.className = 'quiz-btn';
-        a.href = item.href;
+        a.href = siteHref(item.href);
         a.target = '_blank';
         a.rel = 'noopener';
         a.textContent = item.label;

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Numerische Verfahren — Teil 2 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w36-numerik-2",
+  "version": "v1",
+  "submit": false,
+  "solutions": "always",
+  "title": "Aufgaben · Numerische Verfahren · Teil 2",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 36, KW 21 (Wahlbereich I) · 20 schwerere Aufgaben: Bisektion rechnen, Genauigkeit abschätzen, Flächen nähern · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 21 · Teil 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "$f(x)=x^2-3$ mit $f(1)=-2$ und $f(2)=1$. Welche Stelle prüft die Bisektion zuerst?",
+      "opts": [
+        "$x = 1{,}5$",
+        "$x = 1{,}75$",
+        "$x = 3$",
+        "$x = 2$"
+      ],
+      "steps": [
+        "Die Bisektion halbiert das Intervall.",
+        "Mitte von $[1;2]$ ist $1{,}5$.",
+        "Dort wird das Vorzeichen von $f$ geprüft."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "$f(1{,}5) = -0{,}75 < 0$. Mit welchem Intervall geht es weiter?",
+      "opts": [
+        "$[1;2]$",
+        "$[1{,}5;2]$",
+        "$[1;1{,}5]$",
+        "$[1{,}5;1{,}75]$"
+      ],
+      "steps": [
+        "Die Nullstelle liegt dort, wo das Vorzeichen wechselt.",
+        "$f(1{,}5)<0$ und $f(2)>0$ — der Wechsel liegt rechts.",
+        "Also weiter mit $[1{,}5;2]$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wie verkleinert sich die Intervalllänge bei der Bisektion pro Schritt?",
+      "opts": [
+        "sie viertelt sich",
+        "sie sinkt um einen festen Betrag",
+        "sie bleibt gleich",
+        "sie halbiert sich"
+      ],
+      "steps": [
+        "Jeder Schritt teilt das Intervall genau in der Mitte.",
+        "Nach $n$ Schritten ist die Länge $\\dfrac{L_0}{2^n}$.",
+        "Das ist exponentielle Verkleinerung — verlässlich, aber langsam."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie viele Schritte braucht man etwa, um von Länge $1$ auf unter $0{,}01$ zu kommen?",
+      "opts": [
+        "$3$",
+        "$7$",
+        "$10$",
+        "$100$"
+      ],
+      "steps": [
+        "$\\dfrac{1}{2^n} < 0{,}01 \\Rightarrow 2^n > 100$.",
+        "$2^6 = 64$, $2^7 = 128$.",
+        "Also sieben Schritte."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Welchen Wert nähert die Bisektion bei $f(x)=x^2-3$ auf $[1;2]$ an?",
+      "opts": [
+        "$3$",
+        "$1{,}5$",
+        "$\\sqrt3 \\approx 1{,}732$",
+        "$2$"
+      ],
+      "steps": [
+        "Nullstelle von $x^2-3$ ist $x = \\sqrt3$.",
+        "Sie liegt zwischen $1$ und $2$.",
+        "Die Bisektion engt das Intervall darum immer weiter ein."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Warum funktioniert die Bisektion bei $f(x)=x^2+1$ auf $[-2;2]$ nicht?",
+      "opts": [
+        "sie funktioniert doch",
+        "das Intervall ist zu groß",
+        "die Funktion ist nicht stetig",
+        "es gibt keinen Vorzeichenwechsel — $f$ ist überall positiv"
+      ],
+      "steps": [
+        "Voraussetzung ist $f(a)\\cdot f(b) < 0$.",
+        "Hier ist $f(-2)=5$ und $f(2)=5$ — beide positiv.",
+        "Ohne Vorzeichenwechsel greift der Zwischenwertsatz nicht."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Warum scheitert die Bisektion bei $f(x)=x^2$ auf $[-1;1]$, obwohl es eine Nullstelle gibt?",
+      "opts": [
+        "sie scheitert nicht",
+        "das Intervall ist zu klein",
+        "die Funktion berührt die Achse nur, ohne das Vorzeichen zu wechseln",
+        "es gibt zwei Nullstellen"
+      ],
+      "steps": [
+        "$f(-1) = 1$ und $f(1) = 1$ — beide positiv.",
+        "Bei $x=0$ liegt eine doppelte Nullstelle ohne Vorzeichenwechsel.",
+        "Die Bisektion findet nur Nullstellen mit Vorzeichenwechsel."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie nähert man einen Flächeninhalt unter einer Kurve numerisch?",
+      "opts": [
+        "mit einer einzigen großen Rechteckfläche",
+        "durch Ableiten",
+        "mit schmalen Rechteck- oder Trapezstreifen",
+        "durch Raten"
+      ],
+      "steps": [
+        "Das Gebiet wird in schmale Streifen zerlegt.",
+        "Jeder Streifen wird als Rechteck oder Trapez berechnet.",
+        "Die Summe nähert die gesuchte Fläche."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was passiert bei der Streifenmethode, wenn man die Streifenzahl verdoppelt?",
+      "opts": [
+        "die Fläche verdoppelt sich",
+        "das Ergebnis ändert sich nicht",
+        "die Näherung wird genauer, der Rechenaufwand steigt",
+        "die Näherung wird schlechter"
+      ],
+      "steps": [
+        "Schmalere Streifen schmiegen sich besser an die Kurve.",
+        "Der systematische Fehler sinkt.",
+        "Dafür sind doppelt so viele Rechnungen nötig."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Fläche unter $f(x)=2x$ von $0$ bis $3$: welcher exakte Wert kommt heraus?",
+      "opts": [
+        "$3$",
+        "$18$",
+        "$9$",
+        "$6$"
+      ],
+      "steps": [
+        "Es entsteht ein Dreieck mit Grundseite $3$ und Höhe $f(3)=6$.",
+        "$A = \\dfrac{3\\cdot6}{2}$",
+        "$= 9$ — hier ist die Näherung überflüssig."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Welche Gleichung lässt sich NICHT geschlossen, sondern nur numerisch lösen?",
+      "opts": [
+        "$x^2 = 16$",
+        "$2x + 3 = 7$",
+        "$2^x = 8$",
+        "$x = \\cos x$"
+      ],
+      "steps": [
+        "Bei $x = \\cos x$ steht $x$ zugleich innen und außen.",
+        "Es gibt keine elementare Umformung, die $x$ isoliert.",
+        "Numerisch findet man $x \\approx 0{,}739$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was ist ein sinnvolles Abbruchkriterium?",
+      "opts": [
+        "nach genau zehn Schritten",
+        "wenn das Ergebnis rund aussieht",
+        "wenn der Rechner langsam wird",
+        "die Intervalllänge ist kleiner als die geforderte Genauigkeit"
+      ],
+      "steps": [
+        "Die Intervalllänge ist eine garantierte Fehlerschranke.",
+        "Ist sie kleiner als die gewünschte Genauigkeit, ist man fertig.",
+        "Eine feste Schrittzahl sagt dagegen nichts über die Genauigkeit."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was bedeutet „Konvergenz“ eines Verfahrens?",
+      "opts": [
+        "das Verfahren bricht ab",
+        "die Näherungen streben gegen den gesuchten Wert",
+        "das Ergebnis ist exakt",
+        "die Rechnung wird schneller"
+      ],
+      "steps": [
+        "Mit jedem Schritt kommt man dem Ziel näher.",
+        "Ein divergentes Verfahren entfernt sich stattdessen.",
+        "Konvergenz allein sagt noch nichts über die Geschwindigkeit."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Warum ist die Bisektion langsam, aber beliebt?",
+      "opts": [
+        "sie ist unempfindlich und kommt garantiert ans Ziel, sofern ein Vorzeichenwechsel vorliegt",
+        "sie braucht keine Funktionswerte",
+        "sie liefert exakte Ergebnisse",
+        "sie ist die schnellste Methode"
+      ],
+      "steps": [
+        "Pro Schritt gewinnt man nur eine Halbierung — das Newton-Verfahren ist schneller.",
+        "Dafür kann die Bisektion nicht „entgleisen“.",
+        "Zuverlässigkeit schlägt in der Praxis oft Geschwindigkeit."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Ein numerisches Ergebnis lautet $1{,}41421356$. Wie gibt man es sinnvoll an?",
+      "opts": [
+        "mit allen Stellen",
+        "mit der Genauigkeit, die das Verfahren garantiert, z. B. $1{,}414$",
+        "gerundet auf $1$",
+        "als $\\sqrt2$"
+      ],
+      "steps": [
+        "Nur so viele Stellen angeben, wie die Fehlerschranke deckt.",
+        "Mehr Stellen täuschen Genauigkeit vor.",
+        "Wenn der exakte Wert bekannt ist, nennt man ihn zusätzlich."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wozu dient eine Wertetabelle vor dem numerischen Lösen?",
+      "opts": [
+        "um die Lösung abzulesen",
+        "um die Ableitung zu bestimmen",
+        "um ein Intervall mit Vorzeichenwechsel zu finden",
+        "um Zeit zu sparen"
+      ],
+      "steps": [
+        "Man tastet die Funktion grob ab.",
+        "Wo das Vorzeichen wechselt, liegt eine Nullstelle.",
+        "Dieses Intervall ist der Startpunkt für die Bisektion."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was unterscheidet ein numerisches von einem exakten Ergebnis?",
+      "opts": [
+        "das exakte ist immer länger",
+        "das numerische ist eine Näherung mit angebbarer Fehlerschranke",
+        "das numerische ist immer falsch",
+        "es gibt keinen Unterschied"
+      ],
+      "steps": [
+        "Exakt: $\\sqrt2$. Numerisch: $1{,}414\\ldots$ mit Fehlerschranke.",
+        "Für praktische Zwecke reicht die Näherung meist völlig.",
+        "Für Beweise braucht man den exakten Wert."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "$f(2) = -1$ und $f(3) = 4$. Was garantiert der Zwischenwertsatz für stetiges $f$?",
+      "opts": [
+        "im Intervall $(2;3)$ liegt mindestens eine Nullstelle",
+        "zwei Nullstellen",
+        "genau eine Nullstelle",
+        "keine Nullstelle"
+      ],
+      "steps": [
+        "Eine stetige Funktion springt nicht.",
+        "Beim Wechsel von negativ zu positiv muss sie die Null überqueren.",
+        "Über die Anzahl sagt der Satz nichts — es können auch drei sein."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Warum sind numerische Verfahren für Rechner so geeignet?",
+      "opts": [
+        "sie kommen ohne Funktionswerte aus",
+        "sie liefern exakte Ergebnisse",
+        "sie brauchen wenig Speicher",
+        "sie bestehen aus wenigen, stets gleichen Schritten in einer Schleife"
+      ],
+      "steps": [
+        "Halbieren, Vorzeichen prüfen, Intervall ersetzen — immer dasselbe.",
+        "Genau solche Schleifen sind für Rechner ideal.",
+        "Der Mensch legt Startwerte und Abbruchkriterium fest."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Welche Rolle spielen numerische Verfahren in der Praxis?",
+      "opts": [
+        "die meisten realen Gleichungen sind nur so lösbar",
+        "sie werden kaum verwendet",
+        "sie ersetzen die exakte Mathematik vollständig",
+        "sie sind reine Schulmathematik"
+      ],
+      "steps": [
+        "Statik, Strömung, Wetter, Simulationen: fast alles läuft numerisch.",
+        "Geschlossene Lösungen gibt es nur für wenige Sonderfälle.",
+        "Die exakte Theorie liefert aber die Begründung, warum die Verfahren funktionieren."
+      ],
+      "solution": 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

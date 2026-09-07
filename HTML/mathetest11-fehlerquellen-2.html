@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Die üblichen Verdächtigen — Teil 2 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w35-fehlerquellen-2",
+  "version": "v1",
+  "submit": false,
+  "solutions": "always",
+  "title": "Aufgaben · Die üblichen Verdächtigen · Teil 2",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 35, KW 20 · 20 schwerere Aufgaben: typische Fehler finden und benennen · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 20 · Teil 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Wo steckt der Fehler in $(a - b)^2 = a^2 - b^2$?",
+      "opts": [
+        "das Vorzeichen ist falsch",
+        "das Mittelglied $-2ab$ fehlt",
+        "es ist richtig",
+        "es fehlt ein Faktor $2$ vor $a^2$"
+      ],
+      "steps": [
+        "$(a-b)^2 = (a-b)(a-b) = a^2 - 2ab + b^2$.",
+        "$a^2 - b^2$ ist die DRITTE binomische Formel — sie gehört zu $(a+b)(a-b)$.",
+        "Gegenprobe mit $a=3$, $b=1$: $4$ gegen $8$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wo steckt der Fehler in $\\dfrac{a+b}{c} = \\dfrac{a}{c} + b$?",
+      "opts": [
+        "es fehlt ein Minus",
+        "es ist richtig",
+        "der Bruch ist gar nicht zerlegbar",
+        "auch $b$ muss durch $c$ geteilt werden"
+      ],
+      "steps": [
+        "Ein Bruchstrich wirkt auf den GANZEN Zähler.",
+        "Richtig: $\\dfrac{a+b}{c} = \\dfrac{a}{c} + \\dfrac{b}{c}$.",
+        "Gegenprobe mit $a=b=c=2$: $2$ gegen $3$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wo steckt der Fehler in $-2(x - 5) = -2x - 10$?",
+      "opts": [
+        "die Klammer darf nicht aufgelöst werden",
+        "es ist richtig",
+        "es fehlt ein Faktor",
+        "das Minus muss auch die $-5$ treffen: $+10$"
+      ],
+      "steps": [
+        "$-2 \\cdot (-5) = +10$.",
+        "Richtig: $-2x + 10$.",
+        "Probe mit $x=0$: links $10$, rechts $-10$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wo steckt der Fehler in „aus $x^2 = 7x$ folgt $x = 7$“?",
+      "opts": [
+        "durch $x$ geteilt — dabei geht die Lösung $x=0$ verloren",
+        "es ist richtig",
+        "$7$ ist keine Lösung",
+        "man muss die Wurzel ziehen"
+      ],
+      "steps": [
+        "$x^2 - 7x = 0 \\Rightarrow x(x-7) = 0$.",
+        "Also $x = 0$ ODER $x = 7$.",
+        "Division durch eine Variable, die null sein kann, ist keine Äquivalenzumformung."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wo steckt der Fehler in $\\sqrt{a} + \\sqrt{b} = \\sqrt{a+b}$?",
+      "opts": [
+        "es ist richtig",
+        "es gilt nur für $a=b$",
+        "die Wurzel ist nicht additiv",
+        "es fehlt ein Faktor $2$"
+      ],
+      "steps": [
+        "Gegenprobe mit $a=b=4$: links $2+2=4$, rechts $\\sqrt8 \\approx 2{,}83$.",
+        "Nur für Produkte gilt $\\sqrt{a}\\cdot\\sqrt{b} = \\sqrt{ab}$.",
+        "Für Summen gibt es keine solche Regel."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wo steckt der Fehler in „$30\\,\\%$ Rabatt und danach $30\\,\\%$ Aufschlag ergibt den alten Preis“?",
+      "opts": [
+        "es ist richtig",
+        "die Prozente beziehen sich auf verschiedene Grundwerte: $0{,}7\\cdot1{,}3 = 0{,}91$",
+        "der Aufschlag müsste $70\\,\\%$ sein",
+        "Rabatt und Aufschlag sind nie gleich"
+      ],
+      "steps": [
+        "Der Rabatt bezieht sich auf den alten, der Aufschlag auf den gesenkten Preis.",
+        "$0{,}7\\cdot1{,}3 = 0{,}91$.",
+        "Es fehlen $9\\,\\%$ zum Ausgangswert."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wo steckt der Fehler in $\\log(ab) = \\log a \\cdot \\log b$?",
+      "opts": [
+        "es fehlt die Basis",
+        "es gilt nur für $a=b$",
+        "aus dem Produkt wird eine SUMME von Logarithmen",
+        "es ist richtig"
+      ],
+      "steps": [
+        "Die Produktregel lautet $\\log(ab) = \\log a + \\log b$.",
+        "Gegenprobe: $\\log_2(4\\cdot8) = \\log_2 32 = 5$, aber $2\\cdot3 = 6$.",
+        "Multiplikation im Argument wird zur Addition davor."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wo steckt der Fehler in $\\dfrac{2^8}{2^2} = 2^4$?",
+      "opts": [
+        "es ist richtig",
+        "der Bruch lässt sich nicht kürzen",
+        "Exponenten werden subtrahiert, nicht dividiert: $2^6$",
+        "die Basis muss auch geteilt werden"
+      ],
+      "steps": [
+        "Potenzgesetz: $\\dfrac{a^m}{a^n} = a^{m-n}$.",
+        "$8 - 2 = 6$, also $2^6 = 64$.",
+        "$8:2 = 4$ wäre die Division der Exponenten — falsch."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wo steckt der Fehler in „$\\sqrt{x} = -5$, also $x = 25$“?",
+      "opts": [
+        "man darf nicht quadrieren",
+        "es ist richtig",
+        "die Wurzel ist nie negativ — die Gleichung hat keine Lösung",
+        "$x$ müsste $-25$ sein"
+      ],
+      "steps": [
+        "$\\sqrt{x}$ liefert per Definition einen nicht-negativen Wert.",
+        "$-5$ kann also nie herauskommen.",
+        "Quadrieren erzeugt hier eine Scheinlösung — die Probe deckt sie auf."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wo steckt der Fehler in „$f(x) = \\dfrac{x}{x^2-4}$ ist für alle $x$ definiert“?",
+      "opts": [
+        "nur $x = 0$ ist verboten",
+        "es ist richtig",
+        "bei $x = 2$ und $x = -2$ wird der Nenner null",
+        "nur $x = 2$ ist verboten"
+      ],
+      "steps": [
+        "$x^2 - 4 = 0$ für $x = 2$ und $x = -2$.",
+        "An beiden Stellen ist die Funktion nicht definiert.",
+        "Der Zähler spielt für den Definitionsbereich keine Rolle."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wo steckt der Fehler in „$x^2 = 36$, also $x = 6$“?",
+      "opts": [
+        "es ist richtig",
+        "$x$ müsste $18$ sein",
+        "man darf nicht wurzeln",
+        "die zweite Lösung $x = -6$ fehlt"
+      ],
+      "steps": [
+        "Quadrieren löscht das Vorzeichen.",
+        "$(-6)^2 = 36$ ebenso wie $6^2$.",
+        "Also $x = \\pm 6$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wo steckt der Fehler in „der Anstieg ist $\\dfrac{\\Delta x}{\\Delta y}$“?",
+      "opts": [
+        "es fehlt ein Minus",
+        "Zähler und Nenner sind vertauscht",
+        "es ist richtig",
+        "man muss die Differenz quadrieren"
+      ],
+      "steps": [
+        "Der Anstieg ist Höhenänderung pro Schritt nach rechts.",
+        "Also $m = \\dfrac{\\Delta y}{\\Delta x}$.",
+        "Vertauscht bekäme eine steile Gerade einen kleinen Wert."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wo steckt der Fehler in „$(3x)^2 = 3x^2$“?",
+      "opts": [
+        "es ist richtig",
+        "auch die $3$ wird quadriert: $9x^2$",
+        "es müsste $6x^2$ heißen",
+        "der Exponent gehört nur zur Klammer"
+      ],
+      "steps": [
+        "Die Klammer umfasst beide Faktoren.",
+        "$(3x)^2 = 3^2\\cdot x^2 = 9x^2$.",
+        "Probe mit $x=1$: $9$ gegen $3$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wo steckt der Fehler in „$P(A) = 1{,}3$“?",
+      "opts": [
+        "es fehlt ein Prozentzeichen",
+        "Wahrscheinlichkeiten liegen immer zwischen $0$ und $1$",
+        "es ist richtig",
+        "$P$ muss ganzzahlig sein"
+      ],
+      "steps": [
+        "$P = 1$ bedeutet bereits: das Ereignis tritt sicher ein.",
+        "Mehr als sicher gibt es nicht.",
+        "Ein Wert über $1$ zeigt einen Rechen- oder Denkfehler an."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wo steckt der Fehler in „Ergebnis: $12{,}748$ Personen“?",
+      "opts": [
+        "Personen sind ganzzahlig — im Sachkontext runden und begründen",
+        "es ist richtig",
+        "es fehlt eine Einheit",
+        "das Ergebnis ist zu groß"
+      ],
+      "steps": [
+        "Die Rechnung darf Nachkommastellen liefern.",
+        "Die Antwort im Sachkontext nicht.",
+        "Ob auf- oder abgerundet wird, ergibt sich aus der Situation."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wo steckt der Fehler in „$\\cos(2x) = 2\\cos x$“?",
+      "opts": [
+        "es müsste $\\cos^2 x$ heißen",
+        "der Kosinus ist nicht linear definiert — beides ist gleich",
+        "es ist richtig",
+        "ein Faktor im Argument wirkt anders als ein Faktor davor"
+      ],
+      "steps": [
+        "Gegenprobe mit $x = 0$: links $\\cos 0 = 1$, rechts $2\\cos 0 = 2$.",
+        "Der Faktor im Argument staucht die Kurve waagerecht.",
+        "Vor der Funktion würde er sie senkrecht strecken."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wo steckt der Fehler in „bei $0{,}8^{\\,t} < 0{,}25$ folgt $t < \\dfrac{\\ln 0{,}25}{\\ln 0{,}8}$“?",
+      "opts": [
+        "es müsste $\\ln 0{,}8 : \\ln 0{,}25$ heißen",
+        "der Logarithmus ist nicht anwendbar",
+        "es ist richtig",
+        "beim Teilen durch $\\ln 0{,}8 < 0$ dreht sich das Zeichen: $t >$"
+      ],
+      "steps": [
+        "$\\ln 0{,}8 \\approx -0{,}223$ ist negativ.",
+        "Division durch eine negative Zahl kehrt das Ungleichheitszeichen um.",
+        "Richtig: $t > \\dfrac{\\ln 0{,}25}{\\ln 0{,}8} \\approx 6{,}2$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wo steckt der Fehler in „$\\dfrac{x^2 - 4}{x - 2} = x^2 - 2$“?",
+      "opts": [
+        "gekürzt wird nur bei Faktoren: richtig ist $x + 2$ (für $x \\ne 2$)",
+        "es ist richtig",
+        "man darf gar nicht kürzen",
+        "es müsste $x - 2$ heißen"
+      ],
+      "steps": [
+        "Zähler faktorisieren: $x^2-4 = (x-2)(x+2)$.",
+        "Jetzt lässt sich $(x-2)$ kürzen.",
+        "Übrig bleibt $x+2$, mit der Bedingung $x \\ne 2$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wie findet man solche Fehler am schnellsten?",
+      "opts": [
+        "noch einmal genau hinsehen",
+        "Zahlen einsetzen und beide Seiten vergleichen",
+        "die Formel auswendig lernen",
+        "den Rechner fragen"
+      ],
+      "steps": [
+        "Ein einziges konkretes Beispiel widerlegt eine falsche Regel sofort.",
+        "Meist genügen kleine Zahlen wie $1$, $2$ oder $-1$.",
+        "Diese Gegenprobe kostet Sekunden und ist verlässlich."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was ist der beste Umgang mit einem Fehler in der Klassenarbeit?",
+      "opts": [
+        "auf mehr Glück hoffen",
+        "ihn verstehen, benennen und die Regel neu sichern",
+        "die Aufgabe künftig auslassen",
+        "ihn schnell vergessen"
+      ],
+      "steps": [
+        "Ein verstandener Fehler wiederholt sich seltener.",
+        "Wer die Regel dahinter neu formuliert, hat mehr gelernt als aus einer richtigen Aufgabe.",
+        "Deshalb lohnt die Auswertung mehr als die Note."
+      ],
+      "solution": 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

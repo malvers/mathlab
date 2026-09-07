@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Übung Stochastik — Teil 2 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w34-stochastik-uebung-2",
+  "version": "v1",
+  "submit": false,
+  "solutions": "always",
+  "title": "Aufgaben · Übung Stochastik · Teil 2",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 34, KW 18 (LB 1) · 20 schwerere Aufgaben: Pfade, Tafeln, Erwartungswert gemischt · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 18 · Teil 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Wie groß ist $P(\\text{Augenzahl} > 4)$ bei einem fairen Würfel?",
+      "opts": [
+        "$\\dfrac16$",
+        "$\\dfrac13$",
+        "$\\dfrac23$",
+        "$\\dfrac12$"
+      ],
+      "steps": [
+        "Günstig sind die Augenzahlen $5$ und $6$.",
+        "$\\dfrac{2}{6}$",
+        "$= \\dfrac13$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Eine Münze wird fünfmal geworfen. Wie viele Ergebnisfolgen gibt es?",
+      "opts": [
+        "$10$",
+        "$32$",
+        "$25$",
+        "$16$"
+      ],
+      "steps": [
+        "Pro Wurf zwei Möglichkeiten.",
+        "$2^5$",
+        "$= 32$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wie groß ist $P(\\text{genau dreimal Kopf})$ bei fünf Münzwürfen?",
+      "opts": [
+        "$\\dfrac{3}{32}$",
+        "$\\dfrac{1}{32}$",
+        "$\\dfrac{5}{32}$",
+        "$\\dfrac{10}{32}$"
+      ],
+      "steps": [
+        "Anzahl der Pfade mit drei Treffern: $\\binom53 = 10$.",
+        "Jeder Pfad hat die Wahrscheinlichkeit $\\dfrac{1}{32}$.",
+        "$10 \\cdot \\dfrac1{32} = \\dfrac{10}{32} = 0{,}3125$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Aus $6$ roten und $4$ blauen Kugeln wird zweimal OHNE Zurücklegen gezogen. $P(\\text{beide rot})$?",
+      "opts": [
+        "$\\dfrac{9}{25}$",
+        "$\\dfrac{1}{3}$",
+        "$\\dfrac{3}{5}$",
+        "$\\dfrac{2}{5}$"
+      ],
+      "steps": [
+        "$\\dfrac{6}{10}\\cdot\\dfrac59 = \\dfrac{30}{90}$",
+        "$= \\dfrac13$",
+        "Mit Zurücklegen wären es $0{,}36$ — etwas mehr."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein Ereignis hat $P(A) = 0{,}82$. Wie groß ist $P(\\overline{A})$?",
+      "opts": [
+        "$0{,}18$",
+        "$1{,}82$",
+        "$-0{,}82$",
+        "$0{,}82$"
+      ],
+      "steps": [
+        "$P(\\overline A) = 1 - P(A)$",
+        "$= 1 - 0{,}82$",
+        "$= 0{,}18$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Zwei Würfel: wie groß ist $P(\\text{Augensumme } 5)$?",
+      "opts": [
+        "$\\dfrac{4}{36}$",
+        "$\\dfrac{5}{36}$",
+        "$\\dfrac{1}{36}$",
+        "$\\dfrac{6}{36}$"
+      ],
+      "steps": [
+        "Günstige Paare: $(1,4)$, $(2,3)$, $(3,2)$, $(4,1)$.",
+        "Das sind vier von $36$ Möglichkeiten.",
+        "$\\dfrac{4}{36} = \\dfrac19$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Zwei Würfel: wie groß ist $P(\\text{Augensumme } 7)$?",
+      "opts": [
+        "$\\dfrac{1}{6}$ ist falsch",
+        "$\\dfrac{7}{36}$",
+        "$\\dfrac{6}{36}$",
+        "$\\dfrac{5}{36}$"
+      ],
+      "steps": [
+        "Günstig: $(1,6),(2,5),(3,4),(4,3),(5,2),(6,1)$ — sechs Paare.",
+        "$\\dfrac{6}{36} = \\dfrac16$",
+        "Die Sieben ist die häufigste Augensumme."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "$P(A)=0{,}6$, $P(B)=0{,}3$, unabhängig. Wie groß ist $P(A\\cap B)$?",
+      "opts": [
+        "$0{,}3$",
+        "$0{,}18$",
+        "$0{,}5$",
+        "$0{,}9$"
+      ],
+      "steps": [
+        "Bei Unabhängigkeit: $P(A\\cap B) = P(A)\\cdot P(B)$.",
+        "$0{,}6\\cdot0{,}3$",
+        "$= 0{,}18$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Von $800$ Personen sind $300$ unter $30$; davon haben $90$ ein Abo. $P(\\text{Abo}\\mid\\text{jung})$?",
+      "opts": [
+        "$0{,}3$",
+        "$0{,}1125$",
+        "$0{,}9$",
+        "$0{,}375$"
+      ],
+      "steps": [
+        "Grundgesamtheit: die $300$ jungen Personen.",
+        "$\\dfrac{90}{300}$",
+        "$= 0{,}3$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wie groß ist $P(\\text{mindestens eine Sechs})$ bei fünf Würfen?",
+      "opts": [
+        "etwa $0{,}833$",
+        "etwa $0{,}598$",
+        "etwa $0{,}167$",
+        "etwa $0{,}402$"
+      ],
+      "steps": [
+        "Gegenereignis: keine Sechs, $\\left(\\dfrac56\\right)^5 \\approx 0{,}402$.",
+        "$1 - 0{,}402 = 0{,}598$",
+        "Also knapp $60\\,\\%$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein Spiel kostet $3$ € Einsatz und zahlt mit $P=0{,}2$ genau $12$ € aus. Wie groß ist der erwartete Gewinn?",
+      "opts": [
+        "$+2{,}4$ €",
+        "$+9$ €",
+        "$-0{,}6$ €",
+        "$0$ €"
+      ],
+      "steps": [
+        "Erwarteter Auszahlung: $0{,}2\\cdot12 = 2{,}4$ €.",
+        "Abzüglich Einsatz: $2{,}4 - 3$",
+        "$= -0{,}6$ € — das Spiel ist nachteilig."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was bedeutet „faires Spiel“?",
+      "opts": [
+        "der Erwartungswert des Gewinns ist null",
+        "es gibt keinen Zufall",
+        "man gewinnt genauso oft wie man verliert",
+        "alle Spieler zahlen gleich viel"
+      ],
+      "steps": [
+        "Fair heißt: auf lange Sicht bleibt weder Gewinn noch Verlust.",
+        "Formal: $E = 0$.",
+        "Gleich häufig gewinnen reicht nicht — die Höhen zählen mit."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Aus einem Skatblatt ($32$ Karten) werden zwei Karten OHNE Zurücklegen gezogen. $P(\\text{beide Herz})$?",
+      "opts": [
+        "$\\dfrac{1}{16}$",
+        "$\\dfrac{8}{32}$",
+        "$\\dfrac{64}{1024}$",
+        "$\\dfrac{56}{992} = \\dfrac{7}{124}$"
+      ],
+      "steps": [
+        "$8$ Herzkarten von $32$: erster Zug $\\dfrac{8}{32}$.",
+        "Danach $7$ von $31$: $\\dfrac{7}{31}$.",
+        "$\\dfrac{8}{32}\\cdot\\dfrac{7}{31} = \\dfrac{56}{992} = \\dfrac{7}{124} \\approx 0{,}056$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Die relative Häufigkeit weicht bei $15$ Versuchen stark vom theoretischen Wert ab. Was folgt?",
+      "opts": [
+        "nichts Ungewöhnliches — bei kleinen Stichproben ist die Streuung groß",
+        "der Versuch ist manipuliert",
+        "die Theorie ist falsch",
+        "man muss die Rechnung wiederholen"
+      ],
+      "steps": [
+        "Je kleiner die Stichprobe, desto größer die zufällige Schwankung.",
+        "Erst bei vielen Versuchen nähert sich die relative Häufigkeit an.",
+        "Das ist genau die Aussage des Gesetzes der großen Zahlen."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Welche Aussage über Wahrscheinlichkeiten ist immer richtig?",
+      "opts": [
+        "$P(A) + P(B) = 1$",
+        "$P(A) > 0$",
+        "$0 \\le P(A) \\le 1$",
+        "$P(A)$ ist immer ein Bruch"
+      ],
+      "steps": [
+        "Kleiner als null wäre sinnlos, größer als eins ebenfalls.",
+        "$P = 0$ (unmögliches) und $P=1$ (sicheres Ereignis) sind erlaubt.",
+        "Die Summe zweier beliebiger Ereignisse ist nur bei Gegenereignissen $1$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein Baumdiagramm hat vier Stufen mit je zwei Ästen. Wie viele Pfade?",
+      "opts": [
+        "$8$",
+        "$32$",
+        "$16$",
+        "$4$"
+      ],
+      "steps": [
+        "$2^4$",
+        "$= 16$",
+        "Jeder Pfad entspricht einer Ergebnisfolge."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Warum lohnt sich das Gegenereignis bei „mindestens“-Aufgaben?",
+      "opts": [
+        "weil „gar nicht“ nur ein einziger Pfadtyp ist",
+        "weil das Gegenereignis leichter zu zählen ist als jede Alternative",
+        "weil man dann nicht multiplizieren muss",
+        "weil das Ergebnis größer wird"
+      ],
+      "steps": [
+        "„Mindestens einmal“ deckt viele verschiedene Pfade ab.",
+        "„Kein einziges Mal“ ist ein einziges Muster.",
+        "$P = 1 - P(\\text{keinmal})$ ist deshalb der kürzere Weg."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Ein Glücksrad hat $4$ rote, $5$ blaue und $3$ grüne Felder gleicher Größe. $P(\\text{nicht blau})$?",
+      "opts": [
+        "$\\dfrac{3}{12}$",
+        "$\\dfrac{7}{12}$",
+        "$\\dfrac{1}{2}$",
+        "$\\dfrac{5}{12}$"
+      ],
+      "steps": [
+        "Insgesamt $12$ Felder, davon $5$ blau.",
+        "Nicht blau: $4 + 3 = 7$ Felder.",
+        "$\\dfrac{7}{12}$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Bei einem Bernoulli-Versuch mit $p=0{,}4$ und vier Stufen: $P(\\text{genau zwei Treffer})$?",
+      "opts": [
+        "etwa $0{,}24$",
+        "etwa $0{,}5$",
+        "etwa $0{,}16$",
+        "etwa $0{,}346$"
+      ],
+      "steps": [
+        "Ein Pfad: $0{,}4^2\\cdot0{,}6^2 = 0{,}0576$.",
+        "Anzahl der Pfade: $\\binom42 = 6$.",
+        "$6\\cdot0{,}0576 = 0{,}3456$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Ein Test hat $P(\\text{positiv}) = 0{,}06$ und $P(\\text{krank}\\cap\\text{positiv}) = 0{,}0099$. Wie groß ist $P(\\text{krank}\\mid\\text{positiv})$?",
+      "opts": [
+        "etwa $0{,}0099$",
+        "etwa $0{,}06$",
+        "etwa $0{,}165$",
+        "etwa $0{,}99$"
+      ],
+      "steps": [
+        "$P(\\text{krank}\\mid\\text{positiv}) = \\dfrac{P(\\text{krank}\\cap\\text{positiv})}{P(\\text{positiv})}$",
+        "$= \\dfrac{0{,}0099}{0{,}06}$",
+        "$\\approx 0{,}165$ — die meisten positiven Befunde sind falsch."
+      ],
+      "solution": 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
