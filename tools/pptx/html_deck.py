@@ -9,10 +9,13 @@ records those calls and writes a 960x540 HTML deck: real text, CSS instead of a
 background bitmap, KaTeX for the $...$ formulas, one click per level-0 bullet
 exactly like the PowerPoint build. Nothing in the .pptx pipeline is touched.
 
-Slide 0 (Auftaktfolie) is left out on purpose: the morning images are foreign
-material and this repo is public.
+Slide 0 (Auftaktfolie) is included, with a licence-clean image (Pixabay Content
+License, HTML/decks/morning/) and a time-aware greeting - the browser corrects
+"Good morning!" to whatever time it actually is, something a .pptx never can.
 """
+import collections
 import html as _html
+import json
 import os
 import re
 import sys
@@ -21,12 +24,21 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 from design_lib import (INK, BODY, MUTED, STROKE, CARD, CODE_BG, CODE_INK, CODE_MUTED,
-                        ORANGE, RED, GREEN, W, H, MARGIN, CONTENT_W, TITLE_Y, RULE_Y,
-                        BODY_Y, BODY_H, FOOT_Y, FOOTER_TEXT)
+                        ORANGE, RED, GREEN, GREET_BG, W, H, MARGIN, CONTENT_W, TITLE_Y,
+                        RULE_Y, BODY_Y, BODY_H, FOOT_Y, FOOTER_TEXT)
 
 OUT_DIR = os.path.join(HERE, "..", "..", "HTML", "decks")
 LAB_MIN_H = 640.0         # labs warn below 980x620 - give them a window that clears it
 KATEX = "../morpheus/vendor/katex"
+
+# Begruessungsfolie geometry - mirrors build_design.py's layout "Begrüßung" (the
+# single source of truth for the .pptx master). Kept in sync by hand: a change
+# there needs the same change here.
+GREET_QUOTE = "Nur das Schöne wird die Welt retten!"
+GREET_AUTHOR = "Fjodor Dostojewski"
+GREET_IMG_W = 312.0
+GREET_X = GREET_IMG_W + 24
+GREET_W = W - GREET_X - MARGIN
 
 
 # ------------------------------------------------------------------ markup ---
@@ -57,6 +69,56 @@ def markup(text):
     return _tex_spans(text) if "$" in text else _bold(text)
 
 
+_CREDITS_CACHE = None
+
+
+def _credit_for(image):
+    """{author, page} for a morning/ image, read from HTML/decks/morning/credits.json -
+    used for the tiny attribution link Pixabay's licence asks for but does not require."""
+    global _CREDITS_CACHE
+    if _CREDITS_CACHE is None:
+        try:
+            with open(os.path.join(OUT_DIR, "morning", "credits.json"), encoding="utf-8") as f:
+                _CREDITS_CACHE = {r["file"]: r for r in json.load(f)}
+        except (OSError, ValueError):
+            _CREDITS_CACHE = {}
+    row = _CREDITS_CACHE.get(os.path.basename(image))
+    if not row:
+        return None
+    m = re.search(r"/([a-z0-9\-]+-\d+)_\d+\.(?:jpg|png)$", row.get("source", ""))
+    page = "https://pixabay.com/photos/%s/" % m.group(1) if m else row.get("source")
+    return {"author": row.get("author", ""), "page": page}
+
+
+def web_morning_image(key):
+    """Which of the 20 clean-licence Pixabay images belongs to which HTML deck.
+
+    Separate from slides.morning_image(), which draws from tools/pptx/img/morning/ -
+    a pool that still mixes those 20 with the 25 older, unlicensed motifs from
+    Stift.pptx. This one only ever sees HTML/decks/morning/, so every HTML deck
+    stays public-safe no matter which build script calls it. Same self-healing,
+    least-used, stable-by-key logic as the .pptx side."""
+    global _CREDITS_CACHE
+    if _CREDITS_CACHE is None:
+        _credit_for("")            # populate the cache as a side effect
+    pool = sorted(_CREDITS_CACHE)
+    if not pool:
+        return None
+    zuordnung = os.path.join(OUT_DIR, "morning", "zuordnung.json")
+    try:
+        with open(zuordnung, encoding="utf-8") as f:
+            table = json.load(f)
+    except (OSError, ValueError):
+        table = {}
+    if table.get(key) not in pool:
+        used = collections.Counter(v for v in table.values() if v in pool)
+        table[key] = min(pool, key=lambda name: (used[name], name))
+        with open(zuordnung, "w", encoding="utf-8") as f:
+            json.dump(dict(sorted(table.items())), f, indent=2, ensure_ascii=False)
+            f.write("\n")
+    return "morning/" + table[key]
+
+
 def click_groups(lines):
     """One click per level-0 line; deeper lines join the group above them."""
     groups = []
@@ -85,11 +147,15 @@ def bullet_list(lines, kind="line", start=0):
 class HtmlDeck:
     """Same call surface as slides.Deck / omml.MathDeck - writes HTML."""
 
-    def __init__(self, out_name, **kw):
+    def __init__(self, out_name, greeting=True, greet_text="Good morning!",
+                 greet_quote=GREET_QUOTE, greet_author=GREET_AUTHOR, greet_image=None):
         self.name = os.path.splitext(os.path.basename(out_name))[0]
         self.slides = []
         self.doc_title = self.name
         self.subtitle = ""
+        if greeting:
+            img = greet_image or web_morning_image(os.path.basename(out_name))
+            self.greeting(greet_text, greet_quote, greet_author, img)
 
     # ------------------------------------------------------------ slides ---
     def _slide(self, cls, body):
@@ -97,8 +163,35 @@ class HtmlDeck:
                 % _html.escape(FOOTER_TEXT, quote=False))
         self.slides.append('<section class="slide %s">%s%s</section>' % (cls, body, foot))
 
-    def greeting(self, *a, **kw):
-        return None                     # Folie 0 stays out of the web version
+    def greeting(self, text="Good morning!", quote=GREET_QUOTE, author=GREET_AUTHOR,
+                 image=None, index=0):
+        """The Auftaktfolie - every HTML deck gets one automatically, same as the
+        .pptx (see __init__ and slides.Deck.__init__), drawing its image from the
+        clean-licence pool via web_morning_image() so nothing unlicensed ever
+        reaches a public page.
+
+        `text` is only the no-JS fallback. The live page knows the viewer's own
+        clock, so it corrects "Good morning!" to whatever time it actually is -
+        something a .pptx, built once and reused for months, can never do."""
+        pic = ""
+        if image:
+            src = image if not os.path.isabs(image) else os.path.relpath(image, OUT_DIR)
+            pic = '<img class="greet-pic" src="%s" alt="">' % _html.escape(src, quote=True)
+            credit = _credit_for(image)
+            if credit and credit["author"]:
+                pic += ('<a class="greet-credit" href="%s" target="_blank" '
+                        'rel="noopener">%s</a>'
+                        % (_html.escape(credit["page"], quote=True),
+                           _html.escape(credit["author"], quote=False)))
+        body = """
+      <div class="greet-ground"></div>%s
+      <p class="greet-lead" id="greet-text">%s</p>
+      <p class="greet-quote">%s</p>
+      <p class="greet-author">%s</p>
+      <p class="foot">%s</p><p class="pageno"></p>""" % (
+            pic, _html.escape(text, quote=False), markup(quote), markup(author),
+            _html.escape(FOOTER_TEXT, quote=False))
+        self.slides.insert(index, '<section class="slide greet">%s</section>' % body)
 
     def title(self, kicker, title, sub):
         self.doc_title, self.subtitle = title, sub
@@ -202,7 +295,8 @@ CSS = """
 :root{
   --ink:#__INK__; --body:#__BODY__; --muted:#__MUTED__; --stroke:#__STROKE__;
   --card:#__CARD__; --orange:#__ORANGE__; --red:#__RED__; --green:#__GREEN__;
-  --codebg:#__CODEBG__; --codeink:#__CODEINK__;
+  --codebg:#__CODEBG__; --codeink:#__CODEINK__; --codemuted:#__CODEMUTED__;
+  --greetbg:#__GREETBG__;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:#0E244E;overflow:hidden}
@@ -224,7 +318,7 @@ body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
   width:__CW__px;height:1px;background:rgba(14,36,78,.16)}
 .foot{position:absolute;left:__M__px;top:__FOOTT__px;font-size:10px;letter-spacing:1.2px;
   color:var(--muted)}
-.pageno{position:absolute;right:__M__px;top:__FOOTT__px;font-size:10px;letter-spacing:1.2px;
+.pageno{position:absolute;right:24px;top:__FOOTT__px;font-size:10px;letter-spacing:1.2px;
   color:var(--muted)}
 
 h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
@@ -311,6 +405,27 @@ p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:
   display:grid;place-items:center}
 .pic img{max-width:100%;max-height:100%}
 
+/* --- greeting (Auftaktfolie) --------------------------------------------- */
+.slide.greet{background-image:none;background-color:var(--greetbg)}
+.slide.greet::before{left:__GFX__px;width:__GFW__px;background:rgba(230,236,248,.14)}
+.slide.greet .foot{left:__GFX__px;color:var(--codemuted)}
+.slide.greet .pageno{color:var(--codemuted)}
+.greet-ground{position:absolute;inset:0;background:var(--greetbg)}
+.greet-pic{position:absolute;left:0;top:0;width:__GIMGW__px;height:__H__px;
+  object-fit:cover;display:block}
+.greet-credit{position:absolute;left:10px;bottom:8px;font-size:9px;
+  font-family:Raleway,sans-serif;color:rgba(255,255,255,.5);text-decoration:none;
+  letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.greet-credit:hover{color:rgba(255,255,255,.9);text-decoration:underline}
+.greet-lead{position:absolute;left:__GLX__px;top:168px;width:__GLW__px;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:46px;color:var(--orange);
+  line-height:1.05;letter-spacing:-.5px}
+.greet-quote{position:absolute;left:__GQX__px;top:368px;width:__GQW__px;text-align:center;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:17px;color:var(--orange);
+  line-height:1.2}
+.greet-author{position:absolute;left:__GAX__px;top:404px;width:__GAW__px;text-align:center;
+  font-size:11px;color:var(--codemuted);letter-spacing:.3px}
+
 /* --- lab in a slide ------------------------------------------------------ */
 .labnote{position:absolute;left:__M__px;width:__CW__px;font-size:15px;color:var(--muted)}
 .labframe{position:absolute;left:__M__px;width:__CW__px;overflow:hidden;
@@ -349,6 +464,15 @@ p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:
 """
 
 JS = """
+// time-aware greeting - the browser knows the real clock, a .pptx never does
+(function(){
+  var h = new Date().getHours();
+  var t = h < 5 ? 'Good night!' : h < 12 ? 'Good morning!' :
+          h < 18 ? 'Good afternoon!' : h < 22 ? 'Good evening!' : 'Good night!';
+  var el = document.getElementById('greet-text');
+  if (el) el.textContent = t;
+})();
+
 const deck = document.getElementById('deck');
 const slides = [...document.querySelectorAll('.slide')];
 let si = 0, step = 0;
@@ -476,7 +600,11 @@ for _k, _v in {"__INK__": INK, "__BODY__": BODY, "__MUTED__": MUTED, "__STROKE__
                "__TY__": TITLE_Y, "__RY__": RULE_Y, "__BY__": BODY_Y, "__BH__": BODY_H,
                "__FOOT__": FOOT_Y, "__FOOTT__": FOOT_Y + 8,
                "__MC__": MARGIN + 28, "__MQ__": MARGIN + 32,
-               "__LABBAR__": TITLE_Y + 4}.items():
+               "__LABBAR__": TITLE_Y + 4, "__CODEMUTED__": CODE_MUTED, "__GREETBG__": GREET_BG,
+               "__GIMGW__": GREET_IMG_W, "__GFX__": GREET_X, "__GFW__": GREET_W,
+               "__GLX__": GREET_X + 97, "__GLW__": GREET_W - 97,
+               "__GQX__": GREET_X + 150, "__GQW__": GREET_W - 150,
+               "__GAX__": GREET_X + 260, "__GAW__": GREET_W - 260}.items():
     _s = ("%g" % _v) if isinstance(_v, float) else str(_v)
     CSS = CSS.replace(_k, _s)
     JS = JS.replace(_k, _s)

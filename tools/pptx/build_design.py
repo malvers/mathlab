@@ -232,17 +232,18 @@ greet_fld = ('<a:p><a:pPr algn="r"><a:buNone/></a:pPr>'
 rebuild(L[9], "Begrüßung", [
     shape(100, "greet-ground", 0, 0, W, H, fill(GREET_BG)),
     placeholder(102, "Bild", '<p:ph type="pic" idx="2"/>', 0, 0, GREET_IMG_W, H),
-    # Gruss linksbuendig, Zitat mittig, Urheber rechts - eine Diagonale nach unten rechts
-    placeholder(105, "Gruß", TITLE_PH, GREET_X + 57, 168, GREET_W - 57, 76,
+    # Gruss linksbuendig, Zitat mittig, Urheber rechts - eine Diagonale nach unten rechts.
+    # Der Textblock steht bewusst mit Luft zum Bildrand, nicht direkt daneben (Doc 07.09.2026).
+    placeholder(105, "Gruß", TITLE_PH, GREET_X + 97, 168, GREET_W - 97, 76,
                 lst_style=lvl(1, 46, FONT_B_LIGHT, ORANGE, line_spacing=1.05,
                               spc=-0.5, align="l"),
                 prompt="Good morning!"),
-    placeholder(106, "Zitat", body_ph(1), GREET_X + 110, 368, GREET_W - 110, 32,
+    placeholder(106, "Zitat", body_ph(1), GREET_X + 150, 368, GREET_W - 150, 32,
                 lst_style=lvl(1, 17, FONT_B_LIGHT, ORANGE, line_spacing=1.2,
                               align="ctr"),
                 prompt="Zitat"),
     # Urheber sitzt rechts unter dem Zitatende, nicht mittig darunter
-    placeholder(107, "Urheber", body_ph(3), GREET_X + 220, 404, GREET_W - 220, 20,
+    placeholder(107, "Urheber", body_ph(3), GREET_X + 260, 404, GREET_W - 260, 20,
                 lst_style=lvl(1, 11, FONT_B, CODE_MUTED, line_spacing=1.0, align="ctr"),
                 prompt="Urheber"),
     # unser Footer, nur hell statt dunkel - der Master ist auf dieser Folie ausgeblendet
