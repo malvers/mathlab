@@ -78,6 +78,10 @@
         [...headRow.children].forEach(function (th) {
             const t = th.textContent.trim();
             if (t === 'Nr.' || t === 'KW') th.classList.add('num-col');
+            /* "Nr." zaehlt die Schulwochen - kurz "SW", die Langform steht im
+               Tooltip (Doc, 07.09.2026). Zentral hier, damit alle 17 Plaene sie
+               bekommen, ohne dass jede Seite angefasst werden muss. */
+            if (t === 'Nr.') { th.textContent = 'SW'; th.title = 'Schulwoche'; }
             if (t === 'Woche') th.classList.add('date-col');
             /* Bemerkungen-Spalte entfaellt (Doc, 07.09.2026: "ganz raus") - sie war
                das Letzte, was Wochenzeilen noch mehrzeilig machte. Der Text bleibt in
