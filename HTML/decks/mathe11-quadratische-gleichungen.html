@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quadratische Gleichungen</title>
+<meta name="description" content="pq-Formel, Satz von Vieta und die Frage, wie viele Lösungen es überhaupt gibt">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:grid;place-items:center}
+.pic img{max-width:100%;max-height:100%}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Mathematik · Berufliches Gymnasium 11 · KW 47</p>
+      <h1>Quadratische Gleichungen</h1>
+      <p class="sub">pq-Formel, Satz von Vieta und die Frage, wie viele Lösungen es überhaupt gibt</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Fahrplan dieser Woche</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Lernbereich 3 — Stunden <b>21 bis 25 von 75</b></p>
+<p class="line l0 step" data-g="1">Drei Blöcke: <b>ohne Formel lösen</b>, <b>pq-Formel</b>, <b>Vieta und Diskriminante</b></p>
+<p class="line l0 step" data-g="2">Alles mit überschaubaren Zahlen, also <b>ohne Hilfsmittel</b></p>
+<p class="line l0 step" data-g="3">Dazu die <b>Auswertung der Klassenarbeit 1</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Ohne Formel geht es oft schneller</h2>
+      <p class="sub">Erst hinsehen, dann rechnen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wenn kein absolutes Glied da ist</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="x^2 - 7x = 0"></span>: <b>ausklammern</b> statt Formel</p>
+<p class="line l0 step" data-g="1"><span class="tex" data-tex="x(x - 7) = 0"></span>, also <span class="tex" data-tex="x = 0"></span> oder <span class="tex" data-tex="x = 7"></span></p>
+<p class="line l0 step" data-g="2"><span class="tex" data-tex="3x^2 - 12x = 0"></span> gibt <span class="tex" data-tex="3x(x - 4) = 0"></span>, also <span class="tex" data-tex="x = 0"></span> oder <span class="tex" data-tex="x = 4"></span></p>
+<p class="line l0 step" data-g="3">Die Lösung <span class="tex" data-tex="x = 0"></span> geht verloren, wenn man durch <span class="tex" data-tex="x"></span> teilt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wenn kein x-Glied da ist</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="2x^2 - 8 = 0"></span>: nach <span class="tex" data-tex="x^2"></span> auflösen</p>
+<p class="line l0 step" data-g="1"><span class="tex" data-tex="x^2 = 4"></span>, also <span class="tex" data-tex="x = 2"></span> und <span class="tex" data-tex="x = -2"></span> — <b>beide</b></p>
+<p class="line l0 step" data-g="2"><span class="tex" data-tex="x^2 = 3x"></span> ist eine Falle: erst alles auf eine Seite bringen</p>
+<p class="line l0 step" data-g="3"><span class="tex" data-tex="x^2 - 3x = 0"></span> gibt <span class="tex" data-tex="x = 0"></span> und <span class="tex" data-tex="x = 3"></span></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wenn ein Quadrat dasteht</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="(x - 1)^2 = 9"></span>: die Wurzel hat <b>zwei</b> Vorzeichen</p>
+<p class="line l0 step" data-g="1"><span class="tex" data-tex="x - 1 = 3"></span> oder <span class="tex" data-tex="x - 1 = -3"></span></p>
+<p class="line l0 step" data-g="2">Also <span class="tex" data-tex="x = 4"></span> und <span class="tex" data-tex="x = -2"></span></p>
+<p class="line l0 step" data-g="3">Ausmultiplizieren wäre hier ein Umweg</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Erst schauen, ob ein Faktor fehlt. Die Formel ist der Weg für alles, was übrig bleibt.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Die pq-Formel</h2>
+      <p class="sub">Für die Normalform, und nur für die</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Formel und ihre Bedingung</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Für <span class="tex" data-tex="x^2 + px + q = 0"></span> gilt <span class="tex" data-tex="x_{1,2} = -\dfrac{p}{2} \pm \sqrt{\left(\dfrac{p}{2}\right)^2 - q}"></span></p>
+<p class="line l0 step" data-g="1">Wichtig: der Faktor vor <span class="tex" data-tex="x^2"></span> muss **<span class="tex" data-tex="1"></span>** sein — sonst vorher teilen</p>
+<p class="line l0 step" data-g="2"><span class="tex" data-tex="x^2 - 4x - 5 = 0"></span>: <span class="tex" data-tex="p = -4"></span>, <span class="tex" data-tex="q = -5"></span></p>
+<p class="line l0 step" data-g="3"><span class="tex" data-tex="x = 2 \pm \sqrt{4 + 5} = 2 \pm 3"></span>, also <span class="tex" data-tex="x = 5"></span> und <span class="tex" data-tex="x = -1"></span></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Zwei Beispiele zum Mitrechnen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="x^2 - 5x + 6 = 0"></span> gibt <span class="tex" data-tex="x = 2{,}5 \pm \sqrt{6{,}25 - 6}"></span></p>
+<p class="line l0 step" data-g="1"><span class="tex" data-tex="\sqrt{0{,}25} = 0{,}5"></span>, also <span class="tex" data-tex="x = 2"></span> und <span class="tex" data-tex="x = 3"></span></p>
+<p class="line l0 step" data-g="2"><span class="tex" data-tex="x^2 + 2x - 15 = 0"></span> gibt <span class="tex" data-tex="x = -1 \pm 4"></span>, also <span class="tex" data-tex="x = 3"></span> und <span class="tex" data-tex="x = -5"></span></p>
+<p class="line l0 step" data-g="3"><b>Immer die Probe</b> über Vieta: Summe und Produkt prüfen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Diskriminante entscheidet die Anzahl</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="D = \left(\dfrac{p}{2}\right)^2 - q"></span> steht unter der Wurzel</p>
+<p class="line l0 step" data-g="1"><span class="tex" data-tex="D &gt; 0"></span>: <b>zwei</b> Lösungen, der Graph schneidet die <span class="tex" data-tex="x"></span>-Achse</p>
+<p class="line l0 step" data-g="2"><span class="tex" data-tex="D = 0"></span>: <b>eine</b> Lösung, der Graph berührt sie — etwa <span class="tex" data-tex="x^2 - 8x + 16 = 0"></span></p>
+<p class="line l0 step" data-g="3"><span class="tex" data-tex="D &lt; 0"></span>: <b>keine</b> reelle Lösung, etwa <span class="tex" data-tex="x^2 + 2x + 5 = 0"></span></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Rückwärts: den Parameter bestimmen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Für welches <span class="tex" data-tex="c"></span> hat <span class="tex" data-tex="x^2 + 6x + c = 0"></span> genau eine Lösung?</p>
+<p class="line l0 step" data-g="1">Genau eine heißt <span class="tex" data-tex="D = 0"></span>, also <span class="tex" data-tex="9 - c = 0"></span></p>
+<p class="line l0 step" data-g="2">Damit <span class="tex" data-tex="c = 9"></span> — und tatsächlich ist <span class="tex" data-tex="x^2 + 6x + 9 = (x + 3)^2"></span></p>
+<p class="line l0 step" data-g="3">Solche Aufgaben löst man <b>immer über die Diskriminante</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Vieta</h2>
+      <p class="sub">Summe und Produkt statt Formel</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Satz von Vieta</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Für <span class="tex" data-tex="x^2 + px + q = 0"></span> mit Lösungen <span class="tex" data-tex="x_1"></span> und <span class="tex" data-tex="x_2"></span> gilt:</p>
+<p class="line l0 step" data-g="1"><span class="tex" data-tex="x_1 + x_2 = -p"></span> und <span class="tex" data-tex="x_1 \cdot x_2 = q"></span></p>
+<p class="line l0 step" data-g="2">Lösungen <span class="tex" data-tex="2"></span> und <span class="tex" data-tex="-6"></span>: Produkt <span class="tex" data-tex="q = -12"></span>, Summe <span class="tex" data-tex="-4"></span>, also <span class="tex" data-tex="p = 4"></span></p>
+<p class="line l0 step" data-g="3">Als Probe nach jeder pq-Rechnung in fünf Sekunden zu machen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Faktorisieren und Gleichungen bauen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="x^2 - x - 12"></span>: gesucht sind zwei Zahlen mit Produkt <span class="tex" data-tex="-12"></span> und Summe <span class="tex" data-tex="-1"></span></p>
+<p class="line l0 step" data-g="1">Das sind <span class="tex" data-tex="-4"></span> und <span class="tex" data-tex="3"></span>, also <span class="tex" data-tex="x^2 - x - 12 = (x - 4)(x + 3)"></span></p>
+<p class="line l0 step" data-g="2">Umgekehrt zu <span class="tex" data-tex="x = 3"></span> und <span class="tex" data-tex="x = -5"></span>: <span class="tex" data-tex="(x - 3)(x + 5) = x^2 + 2x - 15"></span></p>
+<p class="line l0 step" data-g="3">Nullstellen von <span class="tex" data-tex="f(x) = x^2 - 2x - 8"></span> so: <span class="tex" data-tex="(x - 4)(x + 2)"></span>, also <span class="tex" data-tex="4"></span> und <span class="tex" data-tex="-2"></span></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Sachaufgaben mit Summe und Produkt</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Zwei Zahlen mit Summe <span class="tex" data-tex="12"></span> und Produkt <span class="tex" data-tex="35"></span></p>
+<p class="line l0 step" data-g="1">Also <span class="tex" data-tex="x^2 - 12x + 35 = 0"></span> — Vorzeichen bei <span class="tex" data-tex="p"></span> beachten</p>
+<p class="line l0 step" data-g="2">Lösungen <span class="tex" data-tex="5"></span> und <span class="tex" data-tex="7"></span></p>
+<p class="line l0 step" data-g="3">Rechteck mit <span class="tex" data-tex="U = 20"></span> cm und <span class="tex" data-tex="A = 21"></span> cm²: Seiten <span class="tex" data-tex="3"></span> cm und <span class="tex" data-tex="7"></span> cm</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Welcher Weg wann?</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0">Ohne Formel</p>
+<p class="col l1 step" data-g="0">kein absolutes Glied → ausklammern</p>
+<p class="col l1 step" data-g="0">kein <span class="tex" data-tex="x"></span>-Glied → Wurzel ziehen</p>
+<p class="col l1 step" data-g="0">Quadrat sichtbar → beide Vorzeichen</p>
+<p class="col l1 step" data-g="0">kleine ganze Zahlen → Vieta raten</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1">Mit pq-Formel</p>
+<p class="col l1 step" data-g="1">Normalform, alle drei Glieder da</p>
+<p class="col l1 step" data-g="1">Zahlen passen nicht ins Kopfrechnen</p>
+<p class="col l1 step" data-g="1">Anzahl der Lösungen gefragt</p>
+<p class="col l1 step" data-g="1">Parameter gesucht → über <span class="tex" data-tex="D"></span></p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Jetzt ihr</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>20 Aufgaben</b> im Mathe-Labor — alle drei Wege, gemischt</p>
+<p class="line l0 step" data-g="1">Vor jeder Aufgabe zehn Sekunden hinsehen: <b>geht es ohne Formel?</b></p>
+<p class="line l0 step" data-g="2">Nach jeder Lösung die Vieta-Probe — sie kostet nichts</p>
+<p class="line l0 step" data-g="3"><b>docalvers.de/mathetest11-quadratische-gleichungen.html</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script>
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  if (e.target.closest('#hud') || e.target.closest('.labbar a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+}
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>

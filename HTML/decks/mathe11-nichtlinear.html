@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Nichtlineare Gleichungen und Prozente</title>
 <meta name="description" content="Inhaltlich lösen statt umformen — und binomische Formeln in beide Richtungen">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
 <link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
 <script defer src="../morpheus/vendor/katex/katex.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
@@ -139,11 +141,11 @@ p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:
 .step.on{opacity:1}
 
 /* --- HUD ---------------------------------------------------------------- */
-#hud{position:fixed;right:14px;bottom:12px;display:flex;gap:10px;align-items:center;
-  font-family:Orbitron,sans-serif;font-size:12px;color:var(--ink);z-index:9}
-#hud button{font:inherit;color:inherit;background:rgba(255,255,255,.72);border:0;
-  border-radius:6px;padding:6px 10px;cursor:pointer}
-#hud button:hover{background:#fff}
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
 #bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
   transition:width .25s ease;z-index:9}
 
@@ -283,7 +285,7 @@ p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:
 <p class="line l0 step" data-g="3"><b>docalvers.de/mathetest11-nichtlinear.html</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
 </div></div>
 <div id="bar"></div>
-<div id="hud"><span id="no"></span><button id="full">Vollbild</button></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
 <script>
 const deck = document.getElementById('deck');
 const slides = [...document.querySelectorAll('.slide')];
@@ -307,7 +309,6 @@ function paint(){
   slides.forEach((s, i) => s.classList.toggle('on', i === si));
   const sl = slides[si];
   sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
-  document.getElementById('no').textContent = (si + 1) + ' / ' + slides.length;
   document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
 }
 function next(){
@@ -334,11 +335,32 @@ addEventListener('click', e => {
   if (e.target.closest('.labbar button')) { next(); return; }
   next();
 });   // clicks inside a lab stay in the lab - they never reach this document
-function full(){
-  if (document.fullscreenElement) document.exitFullscreen();
-  else document.documentElement.requestFullscreen();
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
 }
-document.getElementById('full').onclick = full;
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
 
 // #7 in the URL opens slide 7 fully built - handy for linking a single slide
 function fromHash(){
