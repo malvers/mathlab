@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Kreisteilung</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        /* Zaehlwerk und Folge - nur was das Lab zusaetzlich braucht, Rest kommt zentral */
+        .kt-rows { display: flex; flex-direction: column; gap: 7px; }
+
+        .kt-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 10px;
+            font-size: 0.82rem;
+        }
+
+        .kt-row .kt-key { color: #9fb4d6; letter-spacing: 0.3px; }
+
+        .kt-row .kt-val {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            color: #9de8ff;
+            text-shadow: 0 0 8px rgba(0, 210, 255, 0.45);
+        }
+
+        .kt-row.kt-hit .kt-val { color: #f5c242; text-shadow: 0 0 10px rgba(245, 194, 66, 0.5); }
+
+        .kt-row.kt-miss .kt-val { color: #e06a5e; text-shadow: 0 0 10px rgba(176, 36, 24, 0.55); }
+
+        .kt-note {
+            margin-top: 9px;
+            font-size: 0.76rem;
+            line-height: 1.45;
+            color: #cfe0f5;
+            border-left: 2px solid rgba(245, 194, 66, 0.65);
+            padding-left: 9px;
+        }
+
+        .kt-note.kt-warn { border-left-color: #b02418; }
+
+        .kt-seq {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .kt-chip {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.72rem;
+            padding: 3px 7px;
+            border: 1px solid rgba(157, 232, 255, 0.28);
+            border-radius: 4px;
+            color: #9fb4d6;
+            white-space: nowrap;
+        }
+
+        .kt-chip.on {
+            border-color: #f5c242;
+            color: #f5c242;
+            box-shadow: 0 0 10px rgba(245, 194, 66, 0.25) inset;
+        }
+
+        .kt-chip small { opacity: 0.6; font-size: 0.66rem; }
+
+        .kt-btns { display: flex; flex-wrap: wrap; gap: 7px; }
+
+        #canvas { touch-action: none; }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/coach-box.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        // CyberI18n.get() gibt bei fehlendem Key den Key zurueck - Fallback nur ueber getOr()
+        const T = (k, fb) => (typeof CyberI18n !== 'undefined' && CyberI18n.getOr)
+            ? CyberI18n.getOr('kreis.' + k, fb) : fb;
+
+        function dbg(m) { try { if (window.DebugWindow) DebugWindow.log('○ ' + m); } catch (e) { } }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: T('subtitle', 'Kreisteilung'),
+        });
+        CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        /* ------------------------------------------------------------------ Zustand */
+        const MAX_N = 16;
+        const S = {
+            n: 6,
+            angles: [],
+            fill: true,
+            chords: true,
+            cuts: true,
+            numbers: false,
+            drag: -1,
+            g: null            // zuletzt gebauter Graph
+        };
+
+        const TAU = Math.PI * 2;
+        const comb = (n, k) => {
+            if (k > n) return 0;
+            let r = 1;
+            for (let i = 0; i < k; i++) r = r * (n - i) / (i + 1);
+            return Math.round(r);
+        };
+        // Die Formel hinter der Folge: jede Ecke, jeder Schnittpunkt, jede Sehne zaehlt einmal
+        const maxRegions = n => comb(n, 4) + comb(n, 2) + 1;
+
+        function regular(n) {
+            // -PI/2: der erste Punkt sitzt oben, wie im Java-Original
+            return Array.from({ length: n }, (_, i) => -Math.PI / 2 + TAU * i / n);
+        }
+
+        function jitter() {
+            // allgemeine Lage: kein Punkt symmetrisch zum anderen, also keine Mehrfachschnitte
+            S.angles = S.angles.map(a => a + (Math.random() - 0.5) * (TAU / S.n) * 0.55);
+            normalizeAngles();
+        }
+
+        function normalizeAngles() {
+            S.angles = S.angles.map(a => ((a % TAU) + TAU) % TAU).sort((x, y) => x - y);
+        }
+
+        function setN(n) {
+            S.n = Math.max(1, Math.min(MAX_N, n));
+            S.angles = regular(S.n);
+            normalizeAngles();
+        }
+
+        /* -------------------------------------------------------------------- Graph */
+        // Planarer Graph aus Bogen- und Sehnenstuecken; die Flaechen kommen aus einem
+        // Halbkanten-Umlauf, nicht aus einer Formel - deshalb zaehlt er auch die
+        // entarteten Faelle richtig (regelmaessiges Sechseck: 30 statt 31).
+        function buildGraph() {
+            const n = S.n;
+            const V = S.angles.map(a => ({ x: Math.cos(a), y: Math.sin(a), a, pt: true }));
+            const chords = [];
+            for (let i = 0; i < n; i++)
+                for (let j = i + 1; j < n; j++)
+                    chords.push({ a: i, b: j, on: [{ v: i, t: 0 }, { v: j, t: 1 }] });
+
+            // Schnittpunkte, zusammengelegt ueber ein Raster - so werden drei Sehnen
+            // durch einen Punkt auch wirklich EIN Punkt.
+            const MERGE = 1e-9, CELL = 1e-6;
+            const grid = new Map();
+            const key = (x, y) => Math.round(x / CELL) + ',' + Math.round(y / CELL);
+            const findOrAdd = (x, y) => {
+                const gx = Math.round(x / CELL), gy = Math.round(y / CELL);
+                for (let dx = -1; dx <= 1; dx++)
+                    for (let dy = -1; dy <= 1; dy++) {
+                        const bucket = grid.get((gx + dx) + ',' + (gy + dy));
+                        if (!bucket) continue;
+                        for (const vi of bucket)
+                            if (Math.hypot(V[vi].x - x, V[vi].y - y) < MERGE) return vi;
+                    }
+                V.push({ x, y, pt: false });
+                const vi = V.length - 1;
+                const k = key(x, y);
+                if (!grid.has(k)) grid.set(k, []);
+                grid.get(k).push(vi);
+                return vi;
+            };
+
+            for (let i = 0; i < chords.length; i++) {
+                const A = chords[i], p1 = V[A.a], p2 = V[A.b];
+                const d1x = p2.x - p1.x, d1y = p2.y - p1.y;
+                for (let j = i + 1; j < chords.length; j++) {
+                    const B = chords[j];
+                    if (A.a === B.a || A.a === B.b || A.b === B.a || A.b === B.b) continue;
+                    const p3 = V[B.a], p4 = V[B.b];
+                    const d2x = p4.x - p3.x, d2y = p4.y - p3.y;
+                    const den = d1x * d2y - d1y * d2x;
+                    if (Math.abs(den) < 1e-14) continue;
+                    const t = ((p3.x - p1.x) * d2y - (p3.y - p1.y) * d2x) / den;
+                    const u = ((p3.x - p1.x) * d1y - (p3.y - p1.y) * d1x) / den;
+                    const E = 1e-12;
+                    if (t <= E || t >= 1 - E || u <= E || u >= 1 - E) continue;
+                    const vi = findOrAdd(p1.x + t * d1x, p1.y + t * d1y);
+                    A.on.push({ v: vi, t });
+                    B.on.push({ v: vi, t: u });
+                }
+            }
+
+            const cutCount = V.length - n;
+            const edges = [];
+            const order = Array.from({ length: n }, (_, i) => i).sort((i, j) => V[i].a - V[j].a);
+            if (n >= 2)
+                for (let k = 0; k < n; k++)
+                    edges.push({ u: order[k], v: order[(k + 1) % n], arc: true });
+            for (const c of chords) {
+                c.on.sort((p, q) => p.t - q.t);
+                for (let k = 0; k + 1 < c.on.length; k++)
+                    if (c.on[k].v !== c.on[k + 1].v)
+                        edges.push({ u: c.on[k].v, v: c.on[k + 1].v, arc: false });
+            }
+
+            // Halbkanten: 2m = u->v, 2m+1 = v->u
+            const darts = [];
+            edges.forEach((e, m) => {
+                darts.push({ from: e.u, to: e.v, e: m, arc: e.arc, fwd: true });
+                darts.push({ from: e.v, to: e.u, e: m, arc: e.arc, fwd: false });
+            });
+            const dirAngle = d => {
+                if (d.arc) {
+                    const th = V[d.from].a;   // Tangente, in Laufrichtung
+                    return d.fwd ? Math.atan2(Math.cos(th), -Math.sin(th))
+                        : Math.atan2(-Math.cos(th), Math.sin(th));
+                }
+                return Math.atan2(V[d.to].y - V[d.from].y, V[d.to].x - V[d.from].x);
+            };
+            const around = V.map(() => []);
+            darts.forEach((d, i) => around[d.from].push(i));
+            const pos = new Map();
+            around.forEach(list => {
+                list.sort((i, j) => dirAngle(darts[i]) - dirAngle(darts[j]));
+                list.forEach((di, k) => pos.set(di, k));
+            });
+            const nextInFace = i => {
+                const t = i ^ 1;                      // Gegenkante
+                const list = around[darts[t].from];
+                return list[(pos.get(t) + 1) % list.length];
+            };
+
+            const seen = new Uint8Array(darts.length);
+            const faces = [];
+            for (let i = 0; i < darts.length; i++) {
+                if (seen[i]) continue;
+                const face = [];
+                let d = i, guard = 0;
+                do {
+                    seen[d] = 1;
+                    face.push(d);
+                    d = nextInFace(d);
+                } while (d !== i && ++guard < darts.length + 5);
+                faces.push(face);
+            }
+
+            const g = { n, V, edges, darts, faces, cutCount, outer: -1, areas: [] };
+            let best = -1, bestA = -1;
+            faces.forEach((f, i) => {
+                const poly = facePolyline(g, f);
+                const a = shoelace(poly);
+                g.areas.push(a);
+                if (Math.abs(a) > bestA) { bestA = Math.abs(a); best = i; }
+            });
+            g.outer = best;                            // die Aussenflaeche ist der ganze Kreis
+            g.regions = n <= 1 ? 1 : faces.length - 1;
+            dbg('n=' + n + '  V=' + V.length + ' E=' + edges.length + ' F=' + faces.length +
+                '  Euler=' + (V.length - edges.length + faces.length) + '  Flaechen=' + g.regions);
+            return g;
+        }
+
+        function mod2pi(a) { const m = ((a % TAU) + TAU) % TAU; return m < 1e-12 ? TAU : m; }
+
+        function facePolyline(g, face) {
+            const out = [];
+            for (const di of face) {
+                const d = g.darts[di], A = g.V[d.from], B = g.V[d.to];
+                if (d.arc) {
+                    const th0 = A.a;
+                    const sweep = d.fwd ? mod2pi(B.a - A.a) : -mod2pi(A.a - B.a);
+                    const steps = Math.max(2, Math.ceil(Math.abs(sweep) / (Math.PI / 48)));
+                    for (let s = 0; s < steps; s++) {
+                        const th = th0 + sweep * s / steps;
+                        out.push([Math.cos(th), Math.sin(th)]);
+                    }
+                } else {
+                    out.push([A.x, A.y]);
+                }
+            }
+            return out;
+        }
+
+        function shoelace(p) {
+            let a = 0;
+            for (let i = 0; i < p.length; i++) {
+                const q = p[(i + 1) % p.length];
+                a += p[i][0] * q[1] - q[0] * p[i][1];
+            }
+            return a / 2;
+        }
+
+        /* ------------------------------------------------------------------ Zeichnen */
+        let cx = 0, cy = 0, R = 1;
+
+        function layout() {
+            const rect = container.getBoundingClientRect();
+            cx = rect.width / 2;
+            cy = rect.height / 2;
+            R = Math.min(rect.width, rect.height) * 0.40;
+        }
+
+        const sx = x => cx + R * x;
+        const sy = y => cy + R * y;
+
+        function faceStyle(g, i) {
+            const poly = facePolyline(g, g.faces[i]);
+            let mx = 0, my = 0;
+            poly.forEach(p => { mx += p[0]; my += p[1]; });
+            mx /= poly.length; my /= poly.length;
+            const ang = Math.atan2(my, mx), rad = Math.min(1, Math.hypot(mx, my));
+            const hue = ((ang / TAU) * 360 + 360) % 360;
+            return 'hsla(' + hue.toFixed(1) + ', ' + (48 + 26 * rad).toFixed(0) + '%, ' +
+                (58 - 16 * rad).toFixed(0) + '%, 0.34)';
+        }
+
+        function facePath(g, face) {
+            ctx.beginPath();
+            let started = false;
+            for (const di of face) {
+                const d = g.darts[di], A = g.V[d.from], B = g.V[d.to];
+                if (!started) { ctx.moveTo(sx(A.x), sy(A.y)); started = true; }
+                if (d.arc) ctx.arc(cx, cy, R, A.a, B.a, !d.fwd);
+                else ctx.lineTo(sx(B.x), sy(B.y));
+            }
+            ctx.closePath();
+        }
+
+        function draw() {
+            const rect = container.getBoundingClientRect();
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            const g = S.g;
+            if (!g) return;
+
+            if (S.fill && S.n >= 2) {
+                for (let i = 0; i < g.faces.length; i++) {
+                    if (i === g.outer) continue;
+                    facePath(g, g.faces[i]);
+                    ctx.fillStyle = faceStyle(g, i);
+                    ctx.fill();
+                }
+            }
+
+            // Kreis
+            ctx.beginPath();
+            ctx.arc(cx, cy, R, 0, TAU);
+            ctx.strokeStyle = 'rgba(157, 232, 255, 0.85)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Sehnen
+            if (S.chords) {
+                ctx.strokeStyle = 'rgba(207, 224, 245, 0.5)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                for (let i = 0; i < S.n; i++)
+                    for (let j = i + 1; j < S.n; j++) {
+                        ctx.moveTo(sx(g.V[i].x), sy(g.V[i].y));
+                        ctx.lineTo(sx(g.V[j].x), sy(g.V[j].y));
+                    }
+                ctx.stroke();
+            }
+
+            // Schnittpunkte
+            if (S.cuts) {
+                ctx.fillStyle = 'rgba(245, 194, 66, 0.95)';
+                for (let i = S.n; i < g.V.length; i++) {
+                    ctx.beginPath();
+                    ctx.arc(sx(g.V[i].x), sy(g.V[i].y), 2.6, 0, TAU);
+                    ctx.fill();
+                }
+            }
+
+            // Kreispunkte
+            for (let i = 0; i < S.n; i++) {
+                const x = sx(g.V[i].x), y = sy(g.V[i].y);
+                ctx.beginPath();
+                ctx.arc(x, y, i === S.drag ? 8 : 6, 0, TAU);
+                ctx.fillStyle = i === S.drag ? '#f5c242' : '#b02418';
+                ctx.fill();
+                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+                ctx.stroke();
+                if (S.numbers) {
+                    ctx.fillStyle = '#cfe0f5';
+                    ctx.font = '12px Orbitron, monospace';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(String(i + 1), cx + (R + 18) * g.V[i].x, cy + (R + 18) * g.V[i].y);
+                }
+            }
+        }
+
+        /* ---------------------------------------------------------------- Ablesungen */
+        function readouts() {
+            const g = S.g, n = S.n;
+            const max = maxRegions(n);
+            const hit = g.regions === max;
+            const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+            set('kt-n', n);
+            set('kt-chords', comb(n, 2));
+            set('kt-cuts', g.cutCount + (g.cutCount === comb(n, 4) ? '' : ' / ' + comb(n, 4)));
+            set('kt-faces', g.regions);
+            set('kt-max', max);
+            const row = document.getElementById('kt-faces-row');
+            if (row) row.className = 'kt-row ' + (hit ? 'kt-hit' : 'kt-miss');
+            const note = document.getElementById('kt-note');
+            if (note) {
+                note.className = 'kt-note' + (hit ? '' : ' kt-warn');
+                note.innerHTML = hit
+                    ? T('note_max', 'Allgemeine Lage: keine drei Sehnen durch einen Punkt — das Maximum ist erreicht.')
+                    : T('note_deg', 'Entartet: hier treffen sich drei oder mehr Sehnen in einem Punkt. Jeder solche Treffpunkt kostet genau eine Fläche.') +
+                    ' <b>' + (max - g.regions) + '</b> ' + T('note_lost', 'weniger als möglich.');
+            }
+            const seq = document.getElementById('kt-seq');
+            if (seq)
+                seq.innerHTML = Array.from({ length: MAX_N }, (_, i) => i + 1).map(k =>
+                    '<span class="kt-chip' + (k === n ? ' on' : '') + '"><small>' + k + ':</small> ' +
+                    maxRegions(k) + '</span>').join('');
+        }
+
+        function rebuild() {
+            S.g = buildGraph();
+            readouts();
+            draw();
+        }
+
+        /* -------------------------------------------------------------------- Ziehen */
+        function pointerAngle(ev) {
+            const rect = canvas.getBoundingClientRect();
+            return Math.atan2(ev.clientY - rect.top - cy, ev.clientX - rect.left - cx);
+        }
+
+        function nearestPoint(ev) {
+            const rect = canvas.getBoundingClientRect();
+            const px = ev.clientX - rect.left, py = ev.clientY - rect.top;
+            let best = -1, bd = 18;
+            for (let i = 0; i < S.n; i++) {
+                const d = Math.hypot(px - sx(S.g.V[i].x), py - sy(S.g.V[i].y));
+                if (d < bd) { bd = d; best = i; }
+            }
+            return best;
+        }
+
+        canvas.addEventListener('pointerdown', ev => {
+            const i = nearestPoint(ev);
+            if (i < 0) return;
+            S.drag = i;
+            canvas.setPointerCapture(ev.pointerId);
+            draw();
+        });
+
+        canvas.addEventListener('pointermove', ev => {
+            if (S.drag < 0) {
+                canvas.style.cursor = nearestPoint(ev) >= 0 ? 'grab' : 'default';
+                return;
+            }
+            canvas.style.cursor = 'grabbing';
+            const a = ((pointerAngle(ev) % TAU) + TAU) % TAU;
+            // Punkte duerfen sich nicht uebereinanderlegen - sonst zerfaellt der Graph
+            const MIN = 0.012;
+            let ok = true;
+            S.angles.forEach((b, k) => {
+                if (k === S.drag) return;
+                const d = Math.abs(((a - b + Math.PI) % TAU + TAU) % TAU - Math.PI);
+                if (d < MIN) ok = false;
+            });
+            if (!ok) return;
+            S.angles[S.drag] = a;
+            rebuild();
+        });
+
+        const endDrag = () => { if (S.drag >= 0) { S.drag = -1; draw(); } };
+        canvas.addEventListener('pointerup', endDrag);
+        canvas.addEventListener('pointercancel', endDrag);
+
+        window.addEventListener('keydown', ev => {
+            if (ev.metaKey || ev.ctrlKey || ev.altKey) return;   // Cmd-Shift-R nicht schlucken
+            const k = ev.key.toLowerCase();
+            if (k === 'arrowup' || k === '+') { setNAndSync(S.n + 1); ev.preventDefault(); }
+            else if (k === 'arrowdown' || k === '-') { setNAndSync(S.n - 1); ev.preventDefault(); }
+            else if (k === 'f') { S.fill = !S.fill; syncBoxes(); draw(); }
+            else if (k === 'i') { S.numbers = !S.numbers; syncBoxes(); draw(); }
+            else if (k === 'g') { S.angles = regular(S.n); rebuild(); }
+            else if (k === 'z') { jitter(); rebuild(); }
+        });
+
+        /* ----------------------------------------------------------------------- UI */
+        function setNAndSync(n) {
+            setN(n);
+            const sl = document.getElementById('kt-slider');
+            const lb = document.getElementById('kt-slider-label');
+            if (sl) sl.value = S.n;
+            if (lb) lb.textContent = S.n;
+            rebuild();
+        }
+
+        function syncBoxes() {
+            [['kt-fill', 'fill'], ['kt-chords-box', 'chords'], ['kt-cuts-box', 'cuts'],
+            ['kt-numbers', 'numbers']].forEach(([id, key]) => {
+                const el = document.getElementById(id);
+                if (el) el.checked = S[key];
+            });
+        }
+
+        function buildUI() {
+            CyberUI.createCard('ui-container', T('card_points', 'Punkte auf dem Kreis'), `
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                    <div>
+                        <div class="label-row">
+                            <span>${T('points', 'Anzahl n')}</span>
+                            <span id="kt-slider-label" class="cyber-number"
+                                  style="font-size:0.8rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45);">${S.n}</span>
+                        </div>
+                        <input type="range" id="kt-slider" min="1" max="${MAX_N}" step="1" value="${S.n}">
+                    </div>
+                    <div class="kt-btns">
+                        <button class="cyber-btn" id="kt-regular">${T('btn_regular', 'Regelmäßig')}</button>
+                        <button class="cyber-btn" id="kt-jitter">${T('btn_general', 'Allgemeine Lage')}</button>
+                    </div>
+                    <div class="kt-note">${T('hint_drag', 'Punkte lassen sich mit der Maus auf dem Kreis verschieben — damit sieht man den Sprung 30 → 31.')}</div>
+                </div>`);
+
+            CyberUI.createCard('ui-container', T('card_count', 'Zählwerk'), `
+                <div class="kt-rows">
+                    <div class="kt-row"><span class="kt-key">${T('c_points', 'Punkte n')}</span><span class="kt-val" id="kt-n">-</span></div>
+                    <div class="kt-row"><span class="kt-key">${T('c_chords', 'Sehnen')}</span><span class="kt-val" id="kt-chords">-</span></div>
+                    <div class="kt-row"><span class="kt-key">${T('c_cuts', 'Schnittpunkte')}</span><span class="kt-val" id="kt-cuts">-</span></div>
+                    <div class="kt-row" id="kt-faces-row"><span class="kt-key">${T('c_faces', 'Flächen')}</span><span class="kt-val" id="kt-faces">-</span></div>
+                    <div class="kt-row"><span class="kt-key">${T('c_max', 'maximal möglich')}</span><span class="kt-val" id="kt-max">-</span></div>
+                </div>
+                <div class="kt-note" id="kt-note"></div>`);
+
+            CyberUI.createCard('ui-container', T('card_seq', 'Die Folge'), `
+                <div class="kt-seq" id="kt-seq"></div>
+                <div class="kt-note">${T('seq_note', 'C(n,4) + C(n,2) + 1 — 1, 2, 4, 8, 16 … und dann eben <b>31</b>, nicht 32.')}</div>`);
+
+            CyberUI.createCard('ui-container', T('card_view', 'Anzeige'), `
+                <div style="display:flex; flex-direction:column; gap:9px;">
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="kt-fill" checked> <span>${T('v_fill', 'Flächen färben')}</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="kt-chords-box" checked> <span>${T('v_chords', 'Sehnen')}</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="kt-cuts-box" checked> <span>${T('v_cuts', 'Schnittpunkte')}</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="kt-numbers"> <span>${T('v_numbers', 'Nummern')}</span></label>
+                </div>`);
+
+            document.getElementById('kt-slider').addEventListener('input', e => {
+                document.getElementById('kt-slider-label').textContent = e.target.value;
+                setN(parseInt(e.target.value, 10));
+                rebuild();
+            });
+            document.getElementById('kt-regular').addEventListener('click', () => { S.angles = regular(S.n); rebuild(); });
+            document.getElementById('kt-jitter').addEventListener('click', () => { jitter(); rebuild(); });
+            [['kt-fill', 'fill'], ['kt-chords-box', 'chords'], ['kt-cuts-box', 'cuts'],
+            ['kt-numbers', 'numbers']].forEach(([id, key]) => {
+                document.getElementById(id).addEventListener('change', e => { S[key] = e.target.checked; draw(); });
+            });
+        }
+
+        (function setCoachText() {
+            const box = document.getElementById('math-coach-box');
+            if (box) box.classList.add('visible');
+            const el = document.getElementById('coach-title-slot');
+            if (el) el.textContent = T('coach_title', 'Kreisteilungsproblem');
+            const c = document.getElementById('coach-content');
+            if (c) c.innerHTML = T('coach',
+                'n Punkte auf einem Kreis, alle Sehnen gezeichnet — in wie viele Flächen zerfällt die Kreisscheibe? ' +
+                '1, 2, 4, 8, 16 … und dann <b>31</b>. Die Verdopplung bricht bei n = 6. ' +
+                'Verschiebe einen Punkt des regelmäßigen Sechsecks: sobald sich die drei langen Diagonalen ' +
+                'nicht mehr im Mittelpunkt treffen, springt die Zahl von 30 auf 31.');
+        })();
+
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            const w = Math.max(1, rect.width);
+            const h = Math.max(1, rect.height);
+            canvas.width = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
+
+        function init() {
+            resizeCanvasToContainer();
+            layout();
+            if (!S.g) rebuild(); else draw();
+        }
+
+        setN(S.n);
+        buildUI();
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(() => { init(); rebuild(); });
+        init();
+        rebuild();
+    </script>
+</body>
+
+</html>
