@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Matrizen — Teil 2 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w25-matrizen-2",
+  "version": "v1",
+  "submit": false,
+  "solutions": "always",
+  "title": "Aufgaben · Matrizen · Teil 2",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 25, KW 10 (LB 4) · 20 schwerere Aufgaben: Formate, Einträge lesen, Systeme in Matrixform · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 10 · Teil 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Wie viele Einträge hat eine $6 \\times 7$-Matrix?",
+      "opts": [
+        "$49$",
+        "$13$",
+        "$42$",
+        "$36$"
+      ],
+      "steps": [
+        "Zeilen mal Spalten.",
+        "$6 \\cdot 7 = 42$",
+        "Die Summe $13$ wäre die Anzahl der Zeilen plus Spalten — nicht die Einträge."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was bedeutet der Eintrag $a_{32}$?",
+      "opts": [
+        "dritte Zeile, zweite Spalte",
+        "die Summe von Zeile 3 und Spalte 2",
+        "dritte Spalte, zweite Zeile",
+        "der Wert $32$"
+      ],
+      "steps": [
+        "Der erste Index ist immer die Zeile.",
+        "Der zweite Index ist die Spalte.",
+        "Also Zeile $3$, Spalte $2$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Welches Format hat die Koeffizientenmatrix von $2x+3y-z=4$, $x-y+2z=0$?",
+      "opts": [
+        "$2 \\times 4$",
+        "$2 \\times 3$",
+        "$3 \\times 3$",
+        "$3 \\times 2$"
+      ],
+      "steps": [
+        "Zwei Gleichungen ergeben zwei Zeilen.",
+        "Drei Unbekannte ergeben drei Spalten.",
+        "Also $2 \\times 3$ — die rechte Seite kommt erst in der ERWEITERTEN Matrix dazu."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Welches Format hat die ERWEITERTE Koeffizientenmatrix desselben Systems?",
+      "opts": [
+        "$4 \\times 2$",
+        "$2 \\times 4$",
+        "$2 \\times 3$",
+        "$3 \\times 4$"
+      ],
+      "steps": [
+        "Die erweiterte Matrix nimmt die rechte Seite als zusätzliche Spalte auf.",
+        "Aus $2 \\times 3$ wird $2 \\times 4$.",
+        "Der senkrechte Strich trennt Koeffizienten und Ergebnisse."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wofür steht $A\\cdot\\vec{x} = \\vec{b}$?",
+      "opts": [
+        "für ein lineares Gleichungssystem in Kurzform",
+        "für ein Skalarprodukt",
+        "für die Multiplikation zweier Matrizen",
+        "für eine Determinante"
+      ],
+      "steps": [
+        "$A$ enthält die Koeffizienten, $\\vec x$ die Unbekannten, $\\vec b$ die rechte Seite.",
+        "Ausmultipliziert entstehen genau die einzelnen Gleichungen.",
+        "Die Schreibweise ist kompakt und für Rechner ideal."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was kennzeichnet eine symmetrische Matrix?",
+      "opts": [
+        "$A = A^\\mathsf{T}$, sie ist an der Hauptdiagonale gespiegelt gleich",
+        "alle Einträge sind gleich",
+        "sie ist quadratisch mit lauter Nullen",
+        "die Zeilensummen sind gleich"
+      ],
+      "steps": [
+        "Spiegeln an der Hauptdiagonale vertauscht $a_{ij}$ und $a_{ji}$.",
+        "Bleibt die Matrix dabei unverändert, heißt sie symmetrisch.",
+        "Symmetrische Matrizen sind immer quadratisch."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Welche Matrix ist die Einheitsmatrix $I_3$?",
+      "opts": [
+        "erste Zeile $1$, Rest $0$",
+        "alle Einträge $1$",
+        "Diagonale aus lauter Einsen, sonst Nullen",
+        "alle Einträge $0$"
+      ],
+      "steps": [
+        "Auf der Hauptdiagonale stehen Einsen, überall sonst Nullen.",
+        "Sie wirkt bei der Multiplikation wie die Zahl $1$.",
+        "$A \\cdot I = A$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein Betrieb notiert für $5$ Produkte den Bedarf an $3$ Rohstoffen. Welches Format hat die Bedarfsmatrix (Produkte als Zeilen)?",
+      "opts": [
+        "$8 \\times 1$",
+        "$15 \\times 1$",
+        "$5 \\times 3$",
+        "$3 \\times 5$"
+      ],
+      "steps": [
+        "Zeilen zuerst: $5$ Produkte.",
+        "Spalten danach: $3$ Rohstoffe.",
+        "Also $5 \\times 3$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Welches Format hat $A^\\mathsf{T}$, wenn $A$ das Format $3 \\times 7$ hat?",
+      "opts": [
+        "$7 \\times 3$",
+        "$3 \\times 7$",
+        "$7 \\times 7$",
+        "$3 \\times 3$"
+      ],
+      "steps": [
+        "Transponieren vertauscht Zeilen und Spalten.",
+        "Aus $3 \\times 7$ wird $7 \\times 3$.",
+        "Zweimal transponiert ergibt wieder das Original."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wann sind zwei Matrizen gleich?",
+      "opts": [
+        "wenn sie dieselbe Anzahl Einträge haben",
+        "wenn beide quadratisch sind",
+        "wenn ihre Summen gleich sind",
+        "wenn Format und alle Einträge übereinstimmen"
+      ],
+      "steps": [
+        "Erst muss das Format passen, sonst ist der Vergleich sinnlos.",
+        "Dann muss jeder einzelne Eintrag übereinstimmen.",
+        "Gleiche Einträgezahl reicht nicht: $2\\times6$ und $3\\times4$ sind verschieden."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was ist eine untere Dreiecksmatrix?",
+      "opts": [
+        "alle Einträge unterhalb sind $1$",
+        "unterhalb der Diagonale stehen nur Nullen",
+        "oberhalb der Hauptdiagonale stehen nur Nullen",
+        "sie hat nur eine Zeile"
+      ],
+      "steps": [
+        "Die Einträge stehen auf und unterhalb der Hauptdiagonale.",
+        "Oberhalb ist alles null.",
+        "Beim Gauß-Verfahren strebt man die obere Dreiecksform an."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie viele Unbekannte hat ein System mit Koeffizientenmatrix im Format $4 \\times 6$?",
+      "opts": [
+        "vierundzwanzig",
+        "vier",
+        "sechs",
+        "zehn"
+      ],
+      "steps": [
+        "Die Spaltenzahl entspricht der Anzahl der Unbekannten.",
+        "Also sechs Unbekannte in vier Gleichungen.",
+        "Mehr Unbekannte als Gleichungen — typischerweise unendlich viele Lösungen."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was ist ein Zeilenvektor?",
+      "opts": [
+        "die Diagonale einer Matrix",
+        "eine Matrix mit genau einer Zeile",
+        "eine Matrix mit genau einer Spalte",
+        "eine quadratische Matrix"
+      ],
+      "steps": [
+        "Format $1 \\times n$.",
+        "Ein Spaltenvektor hätte das Format $n \\times 1$.",
+        "Beides sind Spezialfälle von Matrizen."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Welche Matrix gehört zum System $x + 4y = 9$, $3x - 2y = 1$?",
+      "opts": [
+        "$\\begin{pmatrix} 1 & 4 & 9 \\\\ 3 & -2 & 1 \\end{pmatrix}$",
+        "$\\begin{pmatrix} 1 & 3 \\\\ 4 & -2 \\end{pmatrix}$",
+        "$\\begin{pmatrix} 9 & 1 \\\\ 1 & 3 \\end{pmatrix}$",
+        "$\\begin{pmatrix} 1 & 4 \\\\ 3 & -2 \\end{pmatrix}$"
+      ],
+      "steps": [
+        "Jede Gleichung wird zu einer Zeile.",
+        "Die Koeffizienten stehen spaltenweise nach Unbekannten sortiert.",
+        "Die rechte Seite gehört zur erweiterten Matrix, nicht zur Koeffizientenmatrix."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was ist die Nullmatrix?",
+      "opts": [
+        "eine Matrix mit Nullen auf der Diagonale",
+        "eine $1\\times1$-Matrix mit Eintrag $0$",
+        "eine Matrix ohne Einträge",
+        "eine Matrix, in der jeder Eintrag $0$ ist"
+      ],
+      "steps": [
+        "Alle Einträge sind null, das Format kann beliebig sein.",
+        "Sie ist das neutrale Element der Addition: $A + 0 = A$.",
+        "Eine Matrix mit Nullen nur auf der Diagonale wäre etwas anderes."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wozu dienen Matrizen in der Computergrafik?",
+      "opts": [
+        "um Drehungen, Streckungen und Verschiebungen kompakt zu beschreiben",
+        "um Dateien zu komprimieren",
+        "um Farben zu speichern",
+        "um Zufallszahlen zu erzeugen"
+      ],
+      "steps": [
+        "Jede solche Abbildung lässt sich als Matrix schreiben.",
+        "Mehrere Schritte hintereinander werden zu einem Matrizenprodukt.",
+        "Grafikkarten sind genau darauf optimiert."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Eine Matrix ist zugleich Diagonalmatrix und obere Dreiecksmatrix. Was folgt?",
+      "opts": [
+        "das ist unmöglich",
+        "sie muss die Nullmatrix sein",
+        "sie muss die Einheitsmatrix sein",
+        "das ist möglich — jede Diagonalmatrix ist auch obere Dreiecksmatrix"
+      ],
+      "steps": [
+        "Bei einer Diagonalmatrix ist unterhalb UND oberhalb alles null.",
+        "Die Bedingung „oberhalb egal, unterhalb null“ ist damit erfüllt.",
+        "Also ist jede Diagonalmatrix auch eine obere (und untere) Dreiecksmatrix."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Warum schreibt man Gleichungssysteme als Matrix?",
+      "opts": [
+        "weil die Rechenschritte dann schematisch und maschinell ausführbar sind",
+        "weil man dann keine Unbekannten mehr braucht",
+        "weil es kürzer aussieht",
+        "weil Matrizen immer lösbar sind"
+      ],
+      "steps": [
+        "Die Namen der Variablen sind für die Rechnung unwichtig — nur die Koeffizienten zählen.",
+        "Das Gauß-Verfahren wird damit zu festen Zeilenoperationen.",
+        "Genau das lässt sich programmieren."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Welche Bedeutung hat eine Zeile aus lauter Nullen in der erweiterten Matrix (inkl. rechter Seite)?",
+      "opts": [
+        "die Matrix ist falsch aufgestellt",
+        "die Gleichung ist überflüssig, das System kann mehrdeutig sein",
+        "das System hat keine Lösung",
+        "die Lösung ist null"
+      ],
+      "steps": [
+        "$0 = 0$ ist immer wahr und schränkt nichts ein.",
+        "Es bleiben weniger unabhängige Gleichungen als Unbekannte.",
+        "Typische Folge: unendlich viele Lösungen."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Welche Bedeutung hat eine Zeile $0\\ 0\\ 0 \\mid 5$?",
+      "opts": [
+        "die Zeile darf gestrichen werden",
+        "die Lösung ist $5$",
+        "das System hat unendlich viele Lösungen",
+        "das System hat keine Lösung"
+      ],
+      "steps": [
+        "Ausgeschrieben heißt die Zeile $0 = 5$.",
+        "Das ist nie erfüllbar.",
+        "Damit ist die Lösungsmenge leer."
+      ],
+      "solution": 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

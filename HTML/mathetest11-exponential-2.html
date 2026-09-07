@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Wachstum und Zerfall II: Exponentialfunktionen — Teil 2 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w10-exponential-2",
+  "version": "v1",
+  "submit": false,       /* Uebungsblatt der Woche: kein Abgeben */
+  "solutions": "always",  /* Loesung pro Aufgabe sofort aufklappbar */
+  "title": "Aufgaben · Wachstum und Zerfall II: Exponentialfunktionen · Teil 2",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 10, KW 45 (LB 3) · 20 schwerere Aufgaben: mehrere Zinsjahre, verkettete Halbwertszeiten, Verdopplungszeit-Faustregel · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 45 · Teil 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Welcher Faktor gehört zu einer Abnahme um $8{,}5\\,\\%$?",
+      "opts": [
+        "$1{,}085$",
+        "$0{,}085$",
+        "$0{,}915$",
+        "$0{,}85$"
+      ],
+      "steps": [
+        "Es bleiben $100\\,\\% - 8{,}5\\,\\% = 91{,}5\\,\\%$ übrig.",
+        "Als Faktor: $0{,}915$",
+        "Der Faktor ist immer $1$ minus (bzw. plus) den Prozentsatz als Dezimalzahl."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "$1500$ € werden mit $4\\,\\%$ pro Jahr verzinst. Wie viel sind es nach $3$ Jahren?",
+      "opts": [
+        "$1698{,}56$ €",
+        "$1560$ €",
+        "$1687{,}30$ €",
+        "$1680{,}00$ €"
+      ],
+      "steps": [
+        "$K(t) = 1500 \\cdot 1{,}04^{\\,t}$",
+        "$K(3) = 1500 \\cdot 1{,}04^3 = 1500 \\cdot 1{,}124864$",
+        "Also $1687{,}30$ € (gerundet). Feste Zinsen ($3\\cdot 60=180$ €) kämen auf nur $1680$ € — der Unterschied ist der Zinseszins."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Für $f(x) = 50 \\cdot 3^x$: wie groß ist $f(4)$?",
+      "opts": [
+        "$1350$",
+        "$600$",
+        "$4050$",
+        "$4100$"
+      ],
+      "steps": [
+        "$3^4 = 81$",
+        "$f(4) = 50 \\cdot 81$",
+        "Also $4050$. Erst potenzieren, dann mit $50$ multiplizieren."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie viel eines radioaktiven Stoffes ist nach VIER Halbwertszeiten noch da?",
+      "opts": [
+        "$\\dfrac{1}{12}$",
+        "$\\dfrac{1}{16}$",
+        "$\\dfrac{1}{8}$",
+        "$\\dfrac{1}{4}$"
+      ],
+      "steps": [
+        "Jede Halbwertszeit halbiert den Bestand erneut.",
+        "$\\dfrac12\\cdot\\dfrac12\\cdot\\dfrac12\\cdot\\dfrac12 = \\dfrac{1}{16}$",
+        "Nicht $4 \\cdot \\dfrac12$ rechnen — die Faktoren werden multipliziert, nicht addiert."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Bakterien verdreifachen sich alle $30$ Minuten. Um welchen Faktor wächst die Kultur in $2{,}5$ Stunden?",
+      "opts": [
+        "$243$",
+        "$729$",
+        "$81$",
+        "$15$"
+      ],
+      "steps": [
+        "$2{,}5$ Stunden $= 150$ Minuten $= 5$ Zeitschritte à $30$ Minuten.",
+        "Jeder Schritt verdreifacht: $3^5$",
+        "$3^5 = 243$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Eine Tabelle zeigt $8,\\ 12,\\ 18,\\ 27$. Ist das exponentielles Wachstum?",
+      "opts": [
+        "Nein, weil die Zahlen nicht gerade sind.",
+        "Das lässt sich nicht entscheiden.",
+        "Nein, die Differenzen $4, 6, 9$ sind nicht gleich.",
+        "Ja, der Quotient ist konstant $1{,}5$."
+      ],
+      "steps": [
+        "Für exponentielles Wachstum zählt der QUOTIENT, nicht die Differenz.",
+        "$\\dfrac{12}{8}=1{,}5$, $\\dfrac{18}{12}=1{,}5$, $\\dfrac{27}{18}=1{,}5$ — konstant.",
+        "Ungleiche Differenzen sind bei Exponentialfunktionen normal, kein Widerspruch."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wo schneidet $f(x) = 7 \\cdot 0{,}5^x$ die $y$-Achse?",
+      "opts": [
+        "bei $y = 0$",
+        "bei $y = 3{,}5$",
+        "bei $y = 0{,}5$",
+        "bei $y = 7$"
+      ],
+      "steps": [
+        "Auf der $y$-Achse ist $x = 0$.",
+        "$f(0) = 7 \\cdot 0{,}5^0 = 7 \\cdot 1$",
+        "Also $y = 7$ — der Vorfaktor ist immer der Startwert, denn jede Zahl hoch null ist $1$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie viele Nullstellen hat $f(x) = -3 \\cdot 2^x$?",
+      "opts": [
+        "unendlich viele",
+        "eine bei $x=-3$",
+        "eine bei $x=0$",
+        "keine — der Graph nähert sich der $x$-Achse, erreicht sie aber nie"
+      ],
+      "steps": [
+        "$2^x$ ist für jedes $x$ positiv, also ist $-3\\cdot 2^x$ für jedes $x$ negativ.",
+        "Negativ zu sein heißt: niemals null.",
+        "Die $x$-Achse ist eine Asymptote, aber keine Nullstelle liegt vor."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Ein Auto verliert jährlich $12\\,\\%$ seines Wertes. Welcher Term beschreibt den Wert nach $t$ Jahren (Startwert $A$)?",
+      "opts": [
+        "$A \\cdot 0{,}88^{\\,t}$",
+        "$A \\cdot 0{,}12^{\\,t}$",
+        "$A - 0{,}12t\\cdot A$",
+        "$A \\cdot 1{,}12^{\\,t}$"
+      ],
+      "steps": [
+        "Pro Jahr bleiben $88\\,\\%$ übrig, das ist der Faktor $0{,}88$.",
+        "Nach $t$ Jahren wird $t$-mal mit diesem Faktor multipliziert: $A\\cdot 0{,}88^{\\,t}$.",
+        "$A - 0{,}12t\\cdot A$ wäre linearer Verlust — hier bezieht sich der Verlust aber immer auf den aktuellen (schon gesunkenen) Wert."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wie groß ist $2^{15}$?",
+      "opts": [
+        "$30000$",
+        "$65536$",
+        "$32768$",
+        "$16384$"
+      ],
+      "steps": [
+        "$2^{10}=1024$, also $2^{15}=2^{10}\\cdot 2^5=1024\\cdot 32$",
+        "$1024 \\cdot 32 = 32768$",
+        "$2^{14}=16384$ und $2^{16}=65536$ sind die Nachbarn — leicht zu verwechseln."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "$1000$ € wachsen $20$ Jahre lang entweder mit $5\\,\\%$ Zinseszins oder mit festen $50$ €/Jahr. Was ist am Ende mehr wert?",
+      "opts": [
+        "die feste Zinszahlung",
+        "der Zinseszins",
+        "beides gleich",
+        "das hängt vom Startkapital ab"
+      ],
+      "steps": [
+        "Fest: $1000 + 20\\cdot 50 = 2000$ €",
+        "Zinseszins: $1000\\cdot 1{,}05^{20}\\approx 2653$ €",
+        "Je länger die Laufzeit, desto größer wird der Vorsprung des Zinseszinses."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wie verläuft der Graph von $f(x) = 1{,}5^x$?",
+      "opts": [
+        "erst fallend, dann steigend",
+        "streng monoton fallend",
+        "konstant",
+        "streng monoton steigend"
+      ],
+      "steps": [
+        "Die Basis ist größer als $1$.",
+        "Jeder Schritt nach rechts vergrößert den Wert um den Faktor $1{,}5$.",
+        "Also streng monoton steigend, und zwar immer schneller."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "$600$ mg eines Stoffes zerfallen mit der Halbwertszeit $8$ Tage. Wie viel ist nach $24$ Tagen übrig?",
+      "opts": [
+        "$200$ mg",
+        "$75$ mg",
+        "$150$ mg",
+        "$0$ mg"
+      ],
+      "steps": [
+        "$24$ Tage sind drei Halbwertszeiten ($24 : 8 = 3$).",
+        "$600 \\to 300 \\to 150 \\to 75$",
+        "Es bleiben $75$ mg."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein Bestand verfünffacht sich alle $6$ Stunden. Welcher Term beschreibt ihn (Startwert $N_0$)?",
+      "opts": [
+        "$N_0 \\cdot 5t$",
+        "$N_0 \\cdot 6^{\\,t/5}$",
+        "$N_0 \\cdot 5^{\\,t/6}$",
+        "$N_0 \\cdot 5^{\\,6t}$"
+      ],
+      "steps": [
+        "Nach $6$ Stunden soll der Faktor $5$ erreicht sein.",
+        "Der Exponent zählt die Zeitschritte: $\\dfrac{t}{6}$",
+        "Probe mit $t=6$: $5^{6/6}=5^1=5$ — passt."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein Faktor von $0{,}72$ pro Schritt entspricht welcher prozentualen Änderung?",
+      "opts": [
+        "$-72\\,\\%$",
+        "$-0{,}28\\,\\%$",
+        "$+28\\,\\%$",
+        "$-28\\,\\%$"
+      ],
+      "steps": [
+        "$0{,}72 = 1 - 0{,}28$",
+        "Ein Faktor unter $1$ bedeutet Abnahme.",
+        "Also eine Abnahme um $28\\,\\%$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Für eine Exponentialfunktion gilt $f(0)=150$ und $f(1)=165$. Wie groß ist $f(3)$?",
+      "opts": [
+        "$219{,}6$",
+        "$200$",
+        "$199{,}65$",
+        "$195$"
+      ],
+      "steps": [
+        "Wachstumsfaktor: $q = \\dfrac{165}{150} = 1{,}1$",
+        "$f(3) = 150 \\cdot 1{,}1^3 = 150 \\cdot 1{,}331$",
+        "Also $199{,}65$. Einfach $150+3\\cdot 15=195$ zu rechnen wäre linear gedacht, nicht exponentiell."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was stimmt über exponentielles Wachstum am Anfang verglichen mit später?",
+      "opts": [
+        "Es bleibt immer moderat.",
+        "Es ist am Anfang am schnellsten und wird dann langsamer.",
+        "Am Anfang wirkt es harmlos klein, später explodiert es.",
+        "Es wächst von Anfang an am schnellsten."
+      ],
+      "steps": [
+        "Bei kleinen $x$ liefert $1{,}05^x$ kaum sichtbaren Zuwachs.",
+        "Weil sich der Faktor immer auf den bereits gewachsenen Wert bezieht, beschleunigt sich das Wachstum selbst.",
+        "Nach vielen Schritten übersteigt es jede Erwartung — die Reiskörner-Sage zeigt genau das."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Welche Funktion wächst LANGFRISTIG am schnellsten: $x^3$, $1{,}2^x$, $1000x$ oder $500x^2$?",
+      "opts": [
+        "$1{,}2^x$",
+        "$1000x$",
+        "$x^3$",
+        "$500x^2$"
+      ],
+      "steps": [
+        "Für kleine $x$ liegen die Potenzfunktionen weit vorn — $1{,}2^x$ startet winzig.",
+        "Aber jede Exponentialfunktion mit Basis größer als $1$ überholt irgendwann jede Potenzfunktion, egal wie hoch deren Exponent ist.",
+        "Bei sehr großem $x$ gewinnt also $1{,}2^x$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Ein Guthaben wächst mit $q=1{,}03$ pro Jahr. Nach wie vielen Jahren hat es sich ungefähr verdoppelt?",
+      "opts": [
+        "nach etwa $70$ Jahren",
+        "nach etwa $35$ Jahren",
+        "nach etwa $3$ Jahren",
+        "nach etwa $23$ Jahren"
+      ],
+      "steps": [
+        "Faustregel für die Verdopplungszeit: $\\dfrac{70}{p}$ mit $p$ in Prozent.",
+        "Hier ist $p = 3$, also $\\dfrac{70}{3} \\approx 23{,}3$.",
+        "Nach etwa $23$ Jahren hat sich das Guthaben verdoppelt."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie viele VOLLE Halbwertszeiten braucht ein Stoff, um auf unter $1\\,\\%$ des Anfangswerts zu fallen?",
+      "opts": [
+        "$7$",
+        "$5$",
+        "$6$",
+        "$10$"
+      ],
+      "steps": [
+        "Nach $n$ Halbwertszeiten bleibt der Anteil $\\left(\\dfrac12\\right)^n$.",
+        "$\\left(\\dfrac12\\right)^6 = \\dfrac{1}{64} \\approx 1{,}56\\,\\%$ — noch über $1\\,\\%$.",
+        "$\\left(\\dfrac12\\right)^7 = \\dfrac{1}{128} \\approx 0{,}78\\,\\%$ — erst hier wird die $1\\,\\%$-Grenze unterschritten."
+      ],
+      "solution": 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Gleichungen mit Hilfsmitteln — Teil 2 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w6-werkzeuge-2",
+  "version": "v1",
+  "submit": false,
+  "solutions": "always",
+  "title": "Aufgaben · Gleichungen mit Hilfsmitteln · Teil 2",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 6, KW 39 (LB 2) · 20 schwerere Aufgaben: feinere CAS-Fallen, Definitionsbereich, Beweis vs. Beispiel · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 39 · Teil 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Ein CAS löst $x^2 - 4 = 0$ im exakten Modus und gibt $x=2 \\lor x=-2$ aus. Was liefert derselbe Befehl im numerischen Modus?",
+      "opts": [
+        "eine Fehlermeldung",
+        "nur $x = 2$",
+        "dieselben Werte, nur als Dezimalzahlen ($2{,}0$ und $-2{,}0$)",
+        "nur eine Näherung ohne $x=-2$"
+      ],
+      "steps": [
+        "Exakt und numerisch unterscheiden sich in der DARSTELLUNG, nicht in der Lösungsmenge.",
+        "Beide Lösungen bleiben erhalten, nur als Dezimalzahl statt als Bruch/Ganzzahl.",
+        "Also $2{,}0$ und $-2{,}0$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Das CAS berechnet $\\sqrt{2}\\cdot\\sqrt{8}$ exakt zu $4$. Was liefert derselbe Ausdruck im numerischen Modus?",
+      "opts": [
+        "eine Fehlermeldung",
+        "eine Zahl sehr nah an $4$, eventuell nicht exakt $4{,}0$",
+        "$2{,}83$",
+        "exakt $4{,}0$, garantiert"
+      ],
+      "steps": [
+        "Numerisch werden $\\sqrt{2}$ und $\\sqrt{8}$ zuerst einzeln gerundet und dann multipliziert.",
+        "Dadurch kann ein winziger Rundungsfehler entstehen, z. B. $3{,}9999999999999996$.",
+        "Mathematisch ist das Ergebnis exakt $4$ — numerisch nur sehr nah dran."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein CAS soll $x^2+1=0$ lösen. Im Modus „nur reelle Lösungen“ liefert es „keine Lösung“. Was liefert derselbe Befehl im Modus „komplexe Lösungen“?",
+      "opts": [
+        "$x = 1$ oder $x = -1$",
+        "weiterhin keine Lösung",
+        "$x = i$ oder $x = -i$",
+        "$x = 0$"
+      ],
+      "steps": [
+        "Reell gibt es wirklich keine Lösung, denn $x^2 \\ge 0$ für jede reelle Zahl.",
+        "Lässt man komplexe Zahlen zu, gilt $i^2 = -1$, also $x^2 = -1$.",
+        "Also $x = i$ oder $x = -i$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Löse $\\dfrac{2}{x-3} = \\dfrac{4}{x+1}$ und beachte den Definitionsbereich.",
+      "opts": [
+        "$x = 7$",
+        "$x = 3$ (ausgeschlossen)",
+        "$x = -7$",
+        "$x = -1$ (ausgeschlossen)"
+      ],
+      "steps": [
+        "Über Kreuz multiplizieren: $2(x+1) = 4(x-3)$",
+        "$2x+2 = 4x-12 \\Rightarrow 14 = 2x$",
+        "Also $x = 7$ — und das liegt außerhalb der verbotenen Werte $x=3$, $x=-1$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Beim Lösen von $\\sqrt{2x+3}=x$ liefert Quadrieren $x^2-2x-3=0$, also $x=3$ oder $x=-1$. Welche ist die tatsächliche Lösung?",
+      "opts": [
+        "nur $x=3$",
+        "nur $x=-1$",
+        "keine von beiden",
+        "beide"
+      ],
+      "steps": [
+        "Probe $x=3$: $\\sqrt{2\\cdot3+3}=\\sqrt{9}=3$ — stimmt.",
+        "Probe $x=-1$: $\\sqrt{2\\cdot(-1)+3}=\\sqrt{1}=1$, aber die rechte Seite ist $-1$ — falsch.",
+        "Quadrieren erzeugt manchmal Scheinlösungen. Nur $x=3$ ist echt."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Ein CAS meldet für $\\tan(90^\\circ)$ einen Fehler statt einer Zahl. Warum?",
+      "opts": [
+        "die Funktion ist bei $90^\\circ$ nicht definiert (Polstelle)",
+        "der Wert ist $0$",
+        "das CAS kann keine Gradzahlen verarbeiten",
+        "das ist ein Rundungsfehler"
+      ],
+      "steps": [
+        "$\\tan(x) = \\dfrac{\\sin x}{\\cos x}$, und $\\cos(90^\\circ) = 0$.",
+        "Division durch null ist nicht definiert.",
+        "Das ist keine Software-Panne, sondern mathematisch korrekt."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Das CAS löst $x^3 = x$ und gibt drei Lösungen aus: $x=0,\\ 1,\\ -1$. Wie kontrolliert man das ohne CAS?",
+      "opts": [
+        "nur eine der drei probieren reicht",
+        "ohne CAS lässt sich das nicht prüfen",
+        "die Anzahl der Lösungen zählen reicht als Beweis",
+        "jede Zahl einzeln einsetzen und nachrechnen (Probe)"
+      ],
+      "steps": [
+        "Probe $x=0$: $0^3=0$ ✓. Probe $x=1$: $1^3=1$ ✓. Probe $x=-1$: $(-1)^3=-1$ ✓.",
+        "Alle drei bestehen die Probe durch Einsetzen.",
+        "Eine Probe je Lösung reicht aus — man muss nicht raten, welche zählt."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Für welche $x$ ist der Term $\\dfrac{1}{\\sqrt{x-4}}$ nicht definiert?",
+      "opts": [
+        "für kein $x$",
+        "für alle $x < 4$ (ohne $x=4$)",
+        "nur für $x = 4$",
+        "für alle $x \\le 4$"
+      ],
+      "steps": [
+        "Unter der Wurzel darf nichts Negatives stehen: $x - 4 \\ge 0$, also $x \\ge 4$.",
+        "Zusätzlich darf der Nenner nicht null werden: $\\sqrt{x-4} \\ne 0$, also $x \\ne 4$.",
+        "Zusammen bleibt nur $x > 4$ erlaubt — undefiniert ist also jedes $x \\le 4$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Ein Rechner zeigt $\\sqrt{-1}$ als Fehler, ein anderes CAS zeigt $i$. Woran liegt der Unterschied?",
+      "opts": [
+        "je nachdem, ob das Gerät nur reelle oder auch komplexe Zahlen kennt",
+        "das hängt vom Rechenweg ab, den man vorher gewählt hat",
+        "eines der beiden Geräte rechnet grundsätzlich falsch",
+        "das liegt an einem Rundungsfehler"
+      ],
+      "steps": [
+        "In den reellen Zahlen hat $\\sqrt{-1}$ tatsächlich keine Lösung.",
+        "Ein CAS mit komplexem Zahlenmodus kennt $i$ mit $i^2=-1$ und gibt $\\sqrt{-1}=i$ aus.",
+        "Kein Gerät rechnet falsch — sie arbeiten nur in verschiedenen Zahlenmengen."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Ein CAS berechnet $0{,}1 + 0{,}1 + 0{,}1$ und zeigt $0{,}30000000000000004$. Ist das ein Rechenfehler?",
+      "opts": [
+        "ja, das CAS hat sich verrechnet",
+        "nein, weil $0{,}1$ als Zahl gar nicht existiert",
+        "ja, richtig wäre $0{,}3$ ohne jede Abweichung möglich",
+        "nein, das liegt an der binären Gleitkommadarstellung von Dezimalbrüchen"
+      ],
+      "steps": [
+        "Computer speichern Zahlen binär, und $0{,}1$ lässt sich binär nicht endlich darstellen.",
+        "Dadurch entstehen winzige Rundungsfehler weit hinter dem Komma.",
+        "Das ist eine bekannte, harmlose Eigenschaft der Gleitkommaarithmetik — kein Fehler des CAS."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Ein Sachkontext verlangt eine natürliche Zahl als Lösung. Das CAS liefert $x=4$ und $x=4{,}0000001$ (Rundungsartefakt). Was ist zu tun?",
+      "opts": [
+        "beide getrennt als gültige Lösungen angeben",
+        "beide als $x=4$ deuten — Sachkontext und Rundung erlauben das",
+        "die zweite Lösung bevorzugen, weil sie präziser aussieht",
+        "die Aufgabe hat keine Lösung"
+      ],
+      "steps": [
+        "Der Sachkontext (natürliche Zahl) ist die Instanz, an der man das Ergebnis prüft, nicht das CAS.",
+        "$4{,}0000001$ ist kein echter zweiter Wert, sondern numerisches Rauschen um $4$.",
+        "Beide Ausgaben meinen dieselbe Lösung: $x = 4$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Löse $|x - 3| = 5$ (Betragsgleichung).",
+      "opts": [
+        "$x = 8$ oder $x = -2$",
+        "$x = 8$ oder $x = 2$",
+        "$x = \\pm 5$",
+        "nur $x = 8$"
+      ],
+      "steps": [
+        "Der Betrag ist $5$, wenn der Inhalt entweder $5$ oder $-5$ ist.",
+        "Fall 1: $x - 3 = 5 \\Rightarrow x = 8$. Fall 2: $x - 3 = -5 \\Rightarrow x = -2$.",
+        "Beide Fälle prüfen, nicht nur den ersten."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Welche Aussage über $\\log(0)$ trifft zu, wenn das CAS eine Fehlermeldung zeigt?",
+      "opts": [
+        "der Wert ist $0$",
+        "das CAS ist falsch eingestellt",
+        "der Logarithmus ist bei $0$ nicht definiert",
+        "der Wert ist $1$"
+      ],
+      "steps": [
+        "Der Logarithmus ist die Umkehrung des Potenzierens: $\\log(x)=y$ bedeutet $10^y=x$.",
+        "Für keinen Exponenten $y$ gilt $10^y=0$ — die Potenz wird beliebig klein, aber nie null.",
+        "Deshalb ist $\\log(0)$ nicht definiert, und die Fehlermeldung ist korrekt."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein CAS zeigt für $2^{100}$ eine sehr lange Ganzzahl, ein Taschenrechner zeigt $1{,}267650600\\text{E}{+}30$. Was bedeutet das?",
+      "opts": [
+        "das CAS kann keine großen Zahlen darstellen",
+        "beide Werte sind exakt gleich lang",
+        "der Taschenrechner rundet auf eine feste Stellenzahl, das CAS rechnet exakt",
+        "der Taschenrechner hat sich verrechnet"
+      ],
+      "steps": [
+        "Taschenrechner haben eine feste Anzeigebreite und wechseln bei großen Zahlen in die wissenschaftliche Notation.",
+        "Dabei gehen die hinteren, weniger bedeutsamen Ziffern verloren.",
+        "Ein CAS mit exaktem Modus behält alle $31$ Stellen von $2^{100}$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie viele reelle Lösungen hat $x^4 + 1 = 0$?",
+      "opts": [
+        "vier",
+        "keine",
+        "zwei",
+        "eine"
+      ],
+      "steps": [
+        "Die Gleichung ist gleichbedeutend mit $x^4 = -1$.",
+        "Für jede reelle Zahl $x$ gilt $x^4 \\ge 0$ — eine vierte Potenz kann nie negativ sein.",
+        "Also gibt es keine reelle Lösung."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein CAS liefert für $\\sqrt[3]{-8}$ den Wert $-2$, ein anderes Werkzeug meldet einen Fehler. Woran liegt das?",
+      "opts": [
+        "manche Werkzeuge lassen bei ungeradem Wurzelexponenten nur nicht-negative Radikanden zu",
+        "eines der beiden Werkzeuge rechnet grundsätzlich falsch",
+        "das hängt vom Ladezustand des Geräts ab",
+        "$-2$ ist falsch, richtig wäre $2$"
+      ],
+      "steps": [
+        "Mathematisch gilt $(-2)^3 = -8$, also ist $-2$ die reelle Lösung von $\\sqrt[3]{-8}$.",
+        "Manche Definitionen erlauben Wurzeln mit ungeradem Exponenten nur für $x \\ge 0$ und melden sonst einen Fehler.",
+        "Beide Werkzeuge sind in sich konsistent — sie folgen nur unterschiedlichen Konventionen."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Löse die Gleichung $2^{x+1} = 32$.",
+      "opts": [
+        "$x = 15$",
+        "$x = 5$",
+        "$x = 16$",
+        "$x = 4$"
+      ],
+      "steps": [
+        "$32 = 2^5$, also $2^{x+1} = 2^5$",
+        "Gleiche Basis, gleiche Exponenten: $x + 1 = 5$",
+        "Also $x = 4$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Ein CAS wertet $\\dfrac{d}{dx}(x^2)$ an der Stelle $x=3$ exakt zu $6$ aus, numerisch zu $6{,}000000001$. Was ist für eine Beweisführung verlässlicher?",
+      "opts": [
+        "die numerische, weil sie „genauer“ aussieht",
+        "keine von beiden, man muss von Hand rechnen",
+        "beide sind gleich verlässlich",
+        "die exakte Ausgabe $6$, weil sie symbolisch und rundungsfrei ist"
+      ],
+      "steps": [
+        "Ein Beweis braucht ein Ergebnis, das exakt gilt, nicht nur „sehr nah dran“.",
+        "Der numerische Wert enthält bauartbedingtes Rundungsrauschen.",
+        "Für eine Argumentation zählt der exakte, symbolische Wert."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was ist der wichtigste Unterschied zwischen einer Vermutung, die ein CAS „an vielen Beispielen bestätigt hat“, und einem Beweis?",
+      "opts": [
+        "ein CAS kann grundsätzlich nicht beweisen, nur zeichnen",
+        "Beispiele zeigen nie alle Fälle, ein Beweis gilt für ALLE Fälle zugleich",
+        "Beispiele sind grundsätzlich falsch",
+        "ein Beweis braucht immer ein CAS"
+      ],
+      "steps": [
+        "Auch $1000$ geprüfte Beispiele schließen nicht aus, dass Beispiel $1001$ die Aussage widerlegt.",
+        "Ein Beweis argumentiert allgemein, ohne auf einzelne Zahlen zurückzugreifen.",
+        "Deshalb ersetzt keine noch so große Beispielsammlung einen Beweis."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein CAS vereinfacht $\\dfrac{x^2-1}{x-1}$ zu $x+1$. Was übersieht diese Anzeige?",
+      "opts": [
+        "dass $x+1$ auch für $x=1$ gilt",
+        "dass $x=1$ nicht zum Definitionsbereich gehört",
+        "dass die Vereinfachung falsch ist",
+        "dass der Bruch nie gekürzt werden darf"
+      ],
+      "steps": [
+        "Kürzen setzt $x-1 \\neq 0$ voraus.",
+        "Der Ausgangsterm ist an $x=1$ nicht definiert, $x+1$ dagegen schon.",
+        "Der Graph hat dort eine Definitionslücke — das CAS zeigt sie nicht an."
+      ],
+      "solution": 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

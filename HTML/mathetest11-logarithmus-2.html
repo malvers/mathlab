@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Der Logarithmus — Teil 2 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w20-logarithmus-2",
+  "version": "v1",
+  "submit": false,
+  "solutions": "always",
+  "title": "Aufgaben · Der Logarithmus · Teil 2",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 20, KW 2 (LB 3) · 20 schwerere Aufgaben: Logarithmengesetze anwenden, Basiswechsel, logarithmische Skalen · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 2 · Teil 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Wie groß ist $\\log_3 81$?",
+      "opts": [
+        "$4$",
+        "$27$",
+        "$9$",
+        "$3$"
+      ],
+      "steps": [
+        "Gesucht ist der Exponent mit $3^? = 81$.",
+        "$3^4 = 81$",
+        "Also $\\log_3 81 = 4$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wie groß ist $\\log_2 \\dfrac{1}{16}$?",
+      "opts": [
+        "$4$",
+        "$-16$",
+        "$\\dfrac{1}{4}$",
+        "$-4$"
+      ],
+      "steps": [
+        "$\\dfrac{1}{16} = 2^{-4}$",
+        "Der Logarithmus liefert den Exponenten.",
+        "Also $-4$ — Werte unter $1$ ergeben negative Logarithmen."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Fasse zusammen: $\\log_2 8 + \\log_2 4$",
+      "opts": [
+        "$12$",
+        "$32$",
+        "$5$",
+        "$2$"
+      ],
+      "steps": [
+        "Produktregel: $\\log_2 8 + \\log_2 4 = \\log_2 32$",
+        "$2^5 = 32$",
+        "Also $5$. (Oder direkt: $3 + 2 = 5$.)"
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Vereinfache $\\log_a(x^3) - \\log_a(x)$ für $x > 0$.",
+      "opts": [
+        "$3\\log_a x$",
+        "$\\log_a(x^2)$ ist falsch",
+        "$2\\log_a x$",
+        "$\\dfrac{\\log_a x}{3}$"
+      ],
+      "steps": [
+        "Potenzregel: $\\log_a(x^3) = 3\\log_a x$",
+        "$3\\log_a x - \\log_a x = 2\\log_a x$",
+        "Das ist dasselbe wie $\\log_a(x^2)$ — beide Schreibweisen sind richtig."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie groß ist $\\log_5 5^7$?",
+      "opts": [
+        "$7$",
+        "$35$",
+        "$5$",
+        "$1$"
+      ],
+      "steps": [
+        "Logarithmus und Potenz zur gleichen Basis heben sich auf.",
+        "$\\log_a a^n = n$",
+        "Also $7$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was ergibt $2^{\\log_2 9}$?",
+      "opts": [
+        "$2$",
+        "$18$",
+        "$81$",
+        "$9$"
+      ],
+      "steps": [
+        "Der Logarithmus liefert genau den Exponenten, der $9$ erzeugt.",
+        "Setzt man ihn wieder ein, kommt $9$ heraus.",
+        "Potenz und Logarithmus sind Umkehrungen voneinander."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie rechnet man $\\log_3 50$ mit einem Rechner ohne Basis-3-Taste?",
+      "opts": [
+        "$\\dfrac{\\ln 50}{\\ln 3}$",
+        "$\\ln 50 - \\ln 3$",
+        "$\\dfrac{\\ln 3}{\\ln 50}$",
+        "$\\ln(50 \\cdot 3)$"
+      ],
+      "steps": [
+        "Basiswechsel: $\\log_a b = \\dfrac{\\ln b}{\\ln a}$",
+        "Also $\\dfrac{\\ln 50}{\\ln 3} \\approx 3{,}56$.",
+        "Probe: $3^{3{,}56} \\approx 50$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Welchen Definitionsbereich hat $f(x) = \\log_2(x - 4)$?",
+      "opts": [
+        "$x > 4$",
+        "$x > 0$",
+        "alle reellen Zahlen",
+        "$x \\ge 4$"
+      ],
+      "steps": [
+        "Das Argument des Logarithmus muss positiv sein: $x - 4 > 0$",
+        "Also $x > 4$.",
+        "Die $4$ selbst ist ausgeschlossen, denn $\\log_2 0$ existiert nicht."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wo liegt die Nullstelle von $f(x) = \\log_3(x)$?",
+      "opts": [
+        "bei $x = 3$",
+        "es gibt keine",
+        "bei $x = 1$",
+        "bei $x = 0$"
+      ],
+      "steps": [
+        "$\\log_a 1 = 0$ für jede Basis, denn $a^0 = 1$.",
+        "Also schneidet der Graph die $x$-Achse bei $x = 1$.",
+        "Bei $x = 0$ ist die Funktion gar nicht definiert."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie verläuft $f(x) = \\log_{0{,}5} x$?",
+      "opts": [
+        "streng monoton fallend",
+        "erst steigend, dann fallend",
+        "konstant",
+        "streng monoton steigend"
+      ],
+      "steps": [
+        "Die Basis liegt zwischen $0$ und $1$.",
+        "Die zugehörige Exponentialfunktion $0{,}5^x$ fällt — die Umkehrung fällt ebenfalls.",
+        "Für Basen größer als $1$ steigt der Logarithmus dagegen."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Ein Erdbeben der Stärke $7$ ist im Vergleich zu Stärke $5$ (Richterskala) …",
+      "opts": [
+        "$2$-mal so stark",
+        "$100$-mal so stark",
+        "$10$-mal so stark",
+        "$20$-mal so stark"
+      ],
+      "steps": [
+        "Die Richterskala ist logarithmisch zur Basis $10$.",
+        "Ein Schritt bedeutet den Faktor $10$, zwei Schritte $10^2$.",
+        "Also $100$-mal so große Amplitude."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Löse $\\log_2 x = 5$.",
+      "opts": [
+        "$x = 25$",
+        "$x = 32$",
+        "$x = 10$",
+        "$x = 2{,}5$"
+      ],
+      "steps": [
+        "Die Gleichung sagt: $2^5 = x$.",
+        "$2^5 = 32$",
+        "Also $x = 32$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Vereinfache $\\log_a(x) + \\log_a(y) - \\log_a(z)$.",
+      "opts": [
+        "$\\log_a\\left(\\dfrac{x}{yz}\\right)$",
+        "$\\log_a(x + y - z)$",
+        "$\\log_a\\left(\\dfrac{xy}{z}\\right)$",
+        "$\\log_a(xyz)$"
+      ],
+      "steps": [
+        "Summe von Logarithmen wird zum Produkt im Argument.",
+        "Differenz wird zum Quotienten.",
+        "Also $\\log_a\\left(\\dfrac{xy}{z}\\right)$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Warum ist $\\log_a(x+y)$ NICHT gleich $\\log_a x + \\log_a y$?",
+      "opts": [
+        "doch, beide sind gleich",
+        "weil $a$ positiv sein muss",
+        "weil der Logarithmus nicht definiert ist",
+        "die Summenregel gilt für das Produkt im Argument, nicht für die Summe"
+      ],
+      "steps": [
+        "Die Regel lautet $\\log_a(x\\cdot y) = \\log_a x + \\log_a y$.",
+        "Gegenprobe: $\\log_2(2+2) = \\log_2 4 = 2$, aber $\\log_2 2 + \\log_2 2 = 2$ — hier zufällig gleich.",
+        "Mit $x=y=4$: $\\log_2 8 = 3$, aber $2+2 = 4$ — verschieden. Die Regel gilt also nicht."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie groß ist $\\ln e^3$?",
+      "opts": [
+        "$1$",
+        "$e^3$",
+        "$3$",
+        "$\\dfrac{3}{e}$"
+      ],
+      "steps": [
+        "$\\ln$ ist der Logarithmus zur Basis $e$.",
+        "$\\ln e^n = n$",
+        "Also $3$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein pH-Wert von $3$ statt $6$ bedeutet für die Konzentration …",
+      "opts": [
+        "$3$-mal so hoch",
+        "$1000$-mal so hoch",
+        "$1000$-mal so niedrig",
+        "halb so hoch"
+      ],
+      "steps": [
+        "$\\mathrm{pH} = -\\log_{10}(c)$ — kleinere pH-Werte bedeuten größere Konzentration.",
+        "Drei Stufen bedeuten den Faktor $10^3$.",
+        "Also $1000$-mal so hoch."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Warum sind logarithmische Skalen in Diagrammen nützlich?",
+      "opts": [
+        "weil sie die Zahlen kleiner machen",
+        "weil sie Größenordnungen über viele Zehnerpotenzen sichtbar machen",
+        "weil sie Rechenfehler verhindern",
+        "weil sie schöner aussehen"
+      ],
+      "steps": [
+        "Auf einer linearen Achse verschwinden kleine Werte neben sehr großen.",
+        "Logarithmisch wird jeder Zehnerschritt gleich breit dargestellt.",
+        "Exponentielles Wachstum erscheint dort als Gerade."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Löse $\\log_5(x+1) = 2$.",
+      "opts": [
+        "$x = 25$",
+        "$x = 11$",
+        "$x = 9$",
+        "$x = 24$"
+      ],
+      "steps": [
+        "Die Gleichung bedeutet $5^2 = x + 1$.",
+        "$25 = x + 1 \\Rightarrow x = 24$",
+        "Probe: $\\log_5 25 = 2$ ✓"
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Welche Aussage ist FALSCH?",
+      "opts": [
+        "$\\log_a(x^n) = (\\log_a x)^n$",
+        "$\\log_a(x\\cdot y) = \\log_a x + \\log_a y$",
+        "$\\log_a a = 1$",
+        "$\\log_a 1 = 0$"
+      ],
+      "steps": [
+        "Die Potenzregel lautet $\\log_a(x^n) = n\\cdot\\log_a x$ — der Exponent kommt als FAKTOR nach vorn.",
+        "$(\\log_a x)^n$ wäre der potenzierte Logarithmus, etwas ganz anderes.",
+        "Gegenprobe: $\\log_2(4^2) = \\log_2 16 = 4$, aber $(\\log_2 4)^2 = 2^2 = 4$ — hier zufällig gleich; mit $x=8$, $n=2$: $\\log_2 64 = 6$ gegen $3^2 = 9$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wie hängen $f(x) = 3^x$ und $g(x) = \\log_3 x$ zusammen?",
+      "opts": [
+        "sie sind identisch",
+        "sie sind parallel",
+        "$g$ ist die Ableitung von $f$",
+        "sie sind Umkehrfunktionen, ihre Graphen spiegeln sich an $y=x$"
+      ],
+      "steps": [
+        "$3^x$ macht aus dem Exponenten die Potenz, $\\log_3$ macht das rückgängig.",
+        "$g(f(x)) = \\log_3(3^x) = x$",
+        "Ihre Graphen liegen deshalb spiegelbildlich zur Geraden $y = x$."
+      ],
+      "solution": 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

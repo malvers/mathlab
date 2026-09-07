@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Wachstum und Zerfall I: lineare Funktionen — Teil 2 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w9-linear-2",
+  "version": "v1",
+  "submit": false,       /* Uebungsblatt der Woche: kein Abgeben */
+  "solutions": "always",  /* Loesung pro Aufgabe sofort aufklappbar */
+  "title": "Aufgaben · Wachstum und Zerfall I: lineare Funktionen · Teil 2",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 9, KW 44 (LB 3) · 20 schwerere Aufgaben: negative Punkte, ungleiche Tabellenschritte, zwei Bedingungen kombinieren · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 44 · Teil 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Welchen Anstieg hat die Gerade durch $P(-2 \\mid 7)$ und $Q(3 \\mid -3)$?",
+      "opts": [
+        "$2$",
+        "$-5$",
+        "$0{,}5$",
+        "$-2$"
+      ],
+      "steps": [
+        "$m = \\dfrac{-3-7}{3-(-2)} = \\dfrac{-10}{5}$",
+        "Also $m = -2$.",
+        "Der Nenner ist der Abstand der $x$-Werte, nicht ihre Summe."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Ein Tarif kostet $12$ € Grundgebühr und $0{,}08$ € je Minute. Was zahlt man für $350$ Minuten?",
+      "opts": [
+        "$40$ €",
+        "$38$ €",
+        "$28$ €",
+        "$42$ €"
+      ],
+      "steps": [
+        "$K(x) = 0{,}08x + 12$",
+        "$K(350) = 0{,}08 \\cdot 350 + 12 = 28 + 12$",
+        "Also $40$ €."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Eine Miete sinkt mit $H(t) = 800 - 15t$. Was bedeutet der Anstieg $m = -15$?",
+      "opts": [
+        "Der Startwert ist $15$.",
+        "Der Wert steigt pro Zeiteinheit um $15$.",
+        "Nach $15$ Zeiteinheiten ist der Wert null.",
+        "Der Wert sinkt pro Zeiteinheit um $15$."
+      ],
+      "steps": [
+        "Der Anstieg beschreibt die Änderung PRO Schritt, nicht den Startwert.",
+        "Ein negativer Anstieg bedeutet: der Wert wird kleiner.",
+        "Pro Zeiteinheit sinkt der Wert um $15$ — der Startwert ($800$) und die Nullstelle sind etwas anderes."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Eine Tabelle zeigt $x=0,2,5,9$ und $f(x)=3,9,18,30$. Ist $f$ linear?",
+      "opts": [
+        "Nein, weil $x$ nicht in gleichen Schritten steigt.",
+        "Ja — pro $x$-Einheit ändert sich $f$ immer um $3$.",
+        "Nein, die Differenzen $6, 9, 12$ sind nicht gleich.",
+        "Das lässt sich ohne mehr Punkte nicht sagen."
+      ],
+      "steps": [
+        "Bei ungleichen $x$-Schritten muss man die Differenz PRO EINHEIT vergleichen, nicht die rohe Differenz.",
+        "$\\dfrac{9-3}{2-0}=3$, $\\dfrac{18-9}{5-2}=3$, $\\dfrac{30-18}{9-5}=3$ — überall $3$ pro Einheit.",
+        "Konstante Änderung pro Einheit heißt linear, auch wenn die $x$-Schritte selbst unterschiedlich groß sind."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein Wasserstand von $120$ cm sinkt täglich um $4$ cm. An welchem Tag steht er bei $50$ cm?",
+      "opts": [
+        "$t = 70$",
+        "$t = 17{,}5$",
+        "$t = 17$",
+        "$t = 20$"
+      ],
+      "steps": [
+        "Modell: $h(t) = 120 - 4t$",
+        "$120 - 4t = 50 \\Rightarrow 4t = 70$",
+        "Also $t = 17{,}5$ Tage."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Liegt der Punkt $(-3 \\mid 11)$ auf dem Graphen von $f(x) = -2x + 5$?",
+      "opts": [
+        "Ja, denn $f(-3) = 11$.",
+        "Nein, $f(-3) = -1$.",
+        "Das lässt sich nicht entscheiden.",
+        "Nein, $f(-3) = 1$."
+      ],
+      "steps": [
+        "Einsetzen: $f(-3) = -2\\cdot(-3) + 5 = 6 + 5$",
+        "$f(-3) = 11$",
+        "Der Wert stimmt mit dem $y$-Wert überein — der Punkt liegt auf dem Graphen."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Welche Gerade ist parallel zu $y = 4x - 7$?",
+      "opts": [
+        "$y = 4x + 2$",
+        "$y = -4x - 7$",
+        "$y = 7x - 4$",
+        "$y = \\dfrac{1}{4}x - 7$"
+      ],
+      "steps": [
+        "Parallele Geraden haben denselben Anstieg.",
+        "Gesucht ist also eine Gleichung mit $m = 4$.",
+        "$y = 4x + 2$ hat denselben Anstieg, nur einen anderen Achsenabschnitt."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Tarif A: $0{,}15$ €/min ohne Grundgebühr. Tarif B: $10$ € $+\\ 0{,}05$ €/min. Ab wann lohnt sich B?",
+      "opts": [
+        "ab $150$ Minuten",
+        "nie",
+        "ab $50$ Minuten",
+        "ab $100$ Minuten"
+      ],
+      "steps": [
+        "Gleichsetzen: $0{,}15x = 10 + 0{,}05x$",
+        "$0{,}1x = 10$, also $x = 100$",
+        "Bis $100$ Minuten ist A günstiger, danach B."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wo liegt die Nullstelle von $f(x) = -5x + 13$?",
+      "opts": [
+        "$x = -2{,}6$",
+        "$x = 2{,}6$",
+        "$x = 13$",
+        "$x = 2$"
+      ],
+      "steps": [
+        "$-5x + 13 = 0$",
+        "$5x = 13$, also $x = \\dfrac{13}{5}$",
+        "$x = 2{,}6$"
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was bedeutet ein Anstieg von $m = \\dfrac{3}{4}$ im Steigungsdreieck?",
+      "opts": [
+        "$3$ nach rechts, $4$ nach oben",
+        "$4$ nach rechts, $3$ nach oben",
+        "$4$ nach rechts, $3$ nach unten",
+        "$3$ nach rechts, $3$ nach oben"
+      ],
+      "steps": [
+        "$m = \\dfrac{\\text{Höhenänderung}}{\\text{Schritt nach rechts}} = \\dfrac{3}{4}$",
+        "Zähler ist die Höhenänderung, Nenner der Schritt nach rechts.",
+        "Also: vier nach rechts, drei nach oben."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Für Fahrenheit gilt $F = 1{,}8\\,C + 32$. Welche Celsius-Temperatur entspricht $98{,}6\\,{}^\\circ$F (Körpertemperatur)?",
+      "opts": [
+        "$66{,}6\\,{}^\\circ$C",
+        "$39\\,{}^\\circ$C",
+        "$37\\,{}^\\circ$C",
+        "$55\\,{}^\\circ$C"
+      ],
+      "steps": [
+        "Erst die $32$ abziehen: $98{,}6 - 32 = 66{,}6$",
+        "Dann durch $1{,}8$ teilen: $66{,}6 : 1{,}8 = 37$",
+        "Falle: nicht sofort durch $1{,}8$ teilen — erst die Summanden rückgängig machen, dann die Faktoren."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Eine Gerade hat den Anstieg $m = \\dfrac{3}{2}$ und geht durch $P(4 \\mid 1)$. Wie lautet ihre Gleichung?",
+      "opts": [
+        "$y = 1{,}5x + 5$",
+        "$y = 1{,}5x + 1$",
+        "$y = 1{,}5x - 7$",
+        "$y = 1{,}5x - 5$"
+      ],
+      "steps": [
+        "Ansatz $y = 1{,}5x + n$, Punkt einsetzen: $1 = 1{,}5\\cdot 4 + n$",
+        "$1 = 6 + n$, also $n = -5$",
+        "Gleichung: $y = 1{,}5x - 5$"
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Welche Gleichung beschreibt KEINE Funktion?",
+      "opts": [
+        "$y = 5x$",
+        "$y = 0$",
+        "$x = -2$",
+        "$y = -2$"
+      ],
+      "steps": [
+        "Bei $x = -2$ (eine Senkrechte) gehören zu einer einzigen Stelle unendlich viele $y$-Werte.",
+        "Das verletzt die Eindeutigkeit — kein Funktionsgraph.",
+        "$y = -2$ ist dagegen eine waagerechte Gerade und sehr wohl eine (konstante) Funktion."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Zwischen $(-4 \\mid -10)$ und $(6 \\mid 20)$ wird linear interpoliert. Welcher Wert gehört zu $x=2$?",
+      "opts": [
+        "$14$",
+        "$2$",
+        "$8$",
+        "$-4$"
+      ],
+      "steps": [
+        "$m = \\dfrac{20-(-10)}{6-(-4)} = \\dfrac{30}{10} = 3$; mit $(-4,-10)$: $-10 = 3\\cdot(-4)+n \\Rightarrow n=2$.",
+        "$f(x) = 3x + 2$",
+        "$f(2) = 6 + 2 = 8$"
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein Gewinn wird durch $G(x) = 25x - 40$ beschrieben ($x$ = verkaufte Stücke). Was bedeutet die $40$?",
+      "opts": [
+        "einen Rabatt von $40\\,\\%$",
+        "den Gewinn pro Stück",
+        "die Fixkosten, die man erst ab einer bestimmten Stückzahl wieder hereinholt",
+        "die Anzahl der verkauften Stücke"
+      ],
+      "steps": [
+        "$G(0) = -40$: ohne Verkauf steht man mit $40$ € im Minus.",
+        "Das sind Fixkosten, die zuerst erwirtschaftet werden müssen.",
+        "Der Gewinn PRO Stück steckt im Anstieg ($25$), nicht im Achsenabschnitt."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Welche Tabelle gehört zu einer linearen Funktion: $2,\\ 3{,}5,\\ 5,\\ 6{,}5$?",
+      "opts": [
+        "Ja, konstante Differenz $1{,}5$.",
+        "Das lässt sich nicht entscheiden.",
+        "Nein, das sind keine ganzen Zahlen.",
+        "Nein, der Quotient ist nicht konstant."
+      ],
+      "steps": [
+        "Differenzen bilden: $3{,}5-2=1{,}5$, $5-3{,}5=1{,}5$, $6{,}5-5=1{,}5$",
+        "Die Differenz ist überall gleich.",
+        "Linearität braucht keine ganzen Zahlen — nur eine konstante Differenz."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Ein Graph ist eine Gerade mit negativem Anstieg. Was weiß man dadurch SICHER über sein Änderungsverhalten?",
+      "opts": [
+        "Man weiß noch nichts Genaues.",
+        "Der Funktionswert sinkt in jedem gleich großen $x$-Schritt um denselben Betrag.",
+        "Der Funktionswert sinkt jedes Mal um denselben Faktor.",
+        "Der Funktionswert kann auch mal steigen."
+      ],
+      "steps": [
+        "Eine Gerade hat einen konstanten Anstieg — per Definition.",
+        "Konstanter Anstieg heißt konstante Änderung PRO SCHRITT, nicht pro Faktor (das wäre exponentiell).",
+        "Bei einer echten Geraden gibt es keine Ausnahme, an der sie mal steigt."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Eine Gerade hat die Nullstelle $x=6$ und geht durch $(0 \\mid 3)$. Wie lautet ihre Gleichung?",
+      "opts": [
+        "$y = -0{,}5x + 3$",
+        "$y = 0{,}5x + 3$",
+        "$y = -2x + 3$",
+        "$y = -0{,}5x - 3$"
+      ],
+      "steps": [
+        "Durch $(0\\mid 3)$ ist der Achsenabschnitt $n=3$.",
+        "Nullstelle bei $x=6$: $0 = m\\cdot 6 + 3 \\Rightarrow m = -0{,}5$",
+        "Also $y = -0{,}5x + 3$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Eine Tabelle zeigt $x=0,5,10$ und $f(x)=20,45,70$. Wie groß ist die Änderung PRO Einheit?",
+      "opts": [
+        "$2{,}5$",
+        "$4{,}5$",
+        "$5$",
+        "$25$"
+      ],
+      "steps": [
+        "Differenz über $5$ Schritte: $45-20=25$",
+        "Pro Einheit: $\\dfrac{25}{5} = 5$",
+        "Probe mit dem zweiten Abschnitt: $\\dfrac{70-45}{10-5} = \\dfrac{25}{5} = 5$ — passt."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Firma A: $200$ € Fixkosten $+\\ 8$ €/Stück. Firma B: $350$ € Fixkosten $+\\ 5$ €/Stück. Ab wie vielen Stücken ist B günstiger?",
+      "opts": [
+        "nie",
+        "ab $30$ Stück",
+        "ab $150$ Stück",
+        "ab $50$ Stück"
+      ],
+      "steps": [
+        "Gleichsetzen: $200 + 8x = 350 + 5x$",
+        "$3x = 150$, also $x = 50$",
+        "Ab $50$ Stück lohnt sich B, weil die niedrigeren Stückkosten die höheren Fixkosten wettmachen."
+      ],
+      "solution": 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

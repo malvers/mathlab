@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Keine, eine, unendlich viele — Teil 2 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w27-loesungsmengen-2",
+  "version": "v1",
+  "submit": false,
+  "solutions": "always",
+  "title": "Aufgaben · Keine, eine, unendlich viele · Teil 2",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 27, KW 12 (LB 4) · 20 schwerere Aufgaben: Lösungsmengen erkennen und aufschreiben, Parameterform, Sachbezug · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 12 · Teil 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Löse: $3x - 6y = 9$ und $-x + 2y = -3$.",
+      "opts": [
+        "keine Lösung",
+        "$x=3$, $y=0$",
+        "$x=0$, $y=-1{,}5$",
+        "unendlich viele Lösungen"
+      ],
+      "steps": [
+        "Zweite Zeile mal $3$: $-3x + 6y = -9$.",
+        "Addieren: $0 = 0$ — die Gleichungen sind abhängig.",
+        "Beide beschreiben dieselbe Gerade, also unendlich viele Lösungen."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Löse: $x + 3y = 5$ und $2x + 6y = 7$.",
+      "opts": [
+        "unendlich viele Lösungen",
+        "keine Lösung",
+        "$x=1$, $y=\\dfrac43$",
+        "$x=5$, $y=0$"
+      ],
+      "steps": [
+        "Erste Zeile mal $2$: $2x + 6y = 10$.",
+        "Vergleich mit der zweiten Zeile: $10 \\neq 7$.",
+        "Parallele Geraden — leere Lösungsmenge."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein System mit vier Unbekannten hat nach dem Eliminieren drei nichttriviale Zeilen. Was folgt?",
+      "opts": [
+        "vier Lösungen",
+        "ein Freiheitsgrad, also eine einparametrige Lösungsmenge",
+        "genau eine Lösung",
+        "keine Lösung"
+      ],
+      "steps": [
+        "Vier Unbekannte, drei unabhängige Bedingungen.",
+        "Eine Variable bleibt frei wählbar.",
+        "Die Lösung wird mit einem Parameter $t$ beschrieben."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wie schreibt man eine einparametrige Lösungsmenge korrekt auf?",
+      "opts": [
+        "$L = \\mathbb{R}$",
+        "$L = \\{2, 1, 0\\}$",
+        "$L = (2 \\mid 1 \\mid 0)$",
+        "$L = \\{(2+t \\mid 1-t \\mid t) \\mid t \\in \\mathbb{R}\\}$"
+      ],
+      "steps": [
+        "Jede Koordinate wird in Abhängigkeit vom Parameter angegeben.",
+        "Der Parameter durchläuft alle reellen Zahlen.",
+        "Ein einzelnes Tripel wäre nur EINE der unendlich vielen Lösungen."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was ist ein homogenes Gleichungssystem?",
+      "opts": [
+        "es hat keine Lösung",
+        "alle Koeffizienten sind gleich",
+        "alle rechten Seiten sind null",
+        "es hat gleich viele Gleichungen wie Unbekannte"
+      ],
+      "steps": [
+        "Homogen heißt $A\\vec x = \\vec 0$.",
+        "Der Nullvektor ist dann immer eine Lösung.",
+        "Deshalb ist ein homogenes System nie unlösbar."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie viele Lösungen hat ein homogenes System mindestens?",
+      "opts": [
+        "unendlich viele",
+        "eine — die triviale Lösung mit lauter Nullen",
+        "keine",
+        "zwei"
+      ],
+      "steps": [
+        "Setzt man alle Unbekannten null, sind alle Gleichungen erfüllt.",
+        "Diese triviale Lösung existiert immer.",
+        "Zusätzlich kann es unendlich viele weitere geben."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein System hat fünf Unbekannte und drei Gleichungen. Was ist typisch?",
+      "opts": [
+        "genau eine Lösung",
+        "keine Lösung",
+        "mindestens zwei Freiheitsgrade, also unendlich viele Lösungen",
+        "fünf Lösungen"
+      ],
+      "steps": [
+        "Weniger Bedingungen als Unbekannte lassen Variablen frei.",
+        "Bei drei unabhängigen Zeilen bleiben zwei Parameter.",
+        "Widersprechen sich die Gleichungen, ist die Menge dennoch leer."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Drei Ebenen haben keinen gemeinsamen Punkt, schneiden sich aber paarweise. Wie heißt diese Lage?",
+      "opts": [
+        "sie fallen zusammen",
+        "sie schneiden sich in einer Geraden",
+        "sie sind parallel",
+        "sie bilden ein Dreiecksprisma"
+      ],
+      "steps": [
+        "Je zwei Ebenen schneiden sich in einer Geraden.",
+        "Die drei Schnittgeraden sind parallel und liegen versetzt.",
+        "Ein gemeinsamer Punkt existiert nicht — das System ist unlösbar."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was bedeutet die Lösung $(0 \\mid 0 \\mid 0)$ bei einem homogenen System?",
+      "opts": [
+        "nur die triviale Lösung — das System ist eindeutig lösbar",
+        "alle Ebenen fallen zusammen",
+        "das System hat keine Lösung",
+        "die Rechnung ist falsch"
+      ],
+      "steps": [
+        "Der Nullvektor ist immer eine Lösung eines homogenen Systems.",
+        "Ist er die EINZIGE, war die Koeffizientenmatrix von vollem Rang.",
+        "Dann schneiden sich die Ebenen genau im Ursprung."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wie erkennt man beim Gauß-Verfahren die eindeutige Lösbarkeit?",
+      "opts": [
+        "die Matrix ist quadratisch",
+        "es treten nur positive Zahlen auf",
+        "die letzte Zeile lautet $0=0$",
+        "jede Unbekannte hat ein Pivot, keine Zeile ist widersprüchlich"
+      ],
+      "steps": [
+        "Ein Pivot je Spalte heißt: jede Unbekannte ist festgelegt.",
+        "Bleibt eine Spalte ohne Pivot, entsteht ein Parameter.",
+        "Eine Zeile $0 = c$ mit $c \\neq 0$ macht das System unlösbar."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Löse: $x + y + z = 6$, $2x + 2y + 2z = 12$, $x - y = 0$.",
+      "opts": [
+        "keine Lösung",
+        "genau eine Lösung",
+        "unendlich viele Lösungen mit $x = y$",
+        "$x=y=z=2$ als einzige Lösung"
+      ],
+      "steps": [
+        "Die zweite Zeile ist das Doppelte der ersten — sie bringt nichts Neues.",
+        "Es bleiben zwei unabhängige Gleichungen für drei Unbekannte.",
+        "Mit $x=y$ und $2x+z=6$ ergibt sich eine einparametrige Lösungsmenge."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Warum ist $(2 \\mid 2 \\mid 2)$ im vorigen System nur EINE von vielen Lösungen?",
+      "opts": [
+        "weil es drei Gleichungen gibt",
+        "weil ein Freiheitsgrad bleibt, z. B. auch $(1\\mid1\\mid4)$ passt",
+        "weil die Rechnung falsch ist",
+        "weil das System homogen ist"
+      ],
+      "steps": [
+        "Probe mit $(1\\mid1\\mid4)$: $1+1+4=6$ ✓ und $1-1=0$ ✓",
+        "Auch $(3\\mid3\\mid0)$ erfüllt beide Bedingungen.",
+        "Alle Lösungen liegen auf einer Geraden im Raum."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was prüft man, bevor man „keine Lösung“ notiert?",
+      "opts": [
+        "ob die widersprüchliche Zeile wirklich durch erlaubte Umformungen entstand",
+        "ob die Zahlen gerade sind",
+        "ob ein CAS dasselbe sagt",
+        "ob das System quadratisch ist"
+      ],
+      "steps": [
+        "Ein Vorzeichenfehler erzeugt schnell eine scheinbar widersprüchliche Zeile.",
+        "Deshalb Rechenweg nachvollziehen oder mit anderer Reihenfolge wiederholen.",
+        "Erst dann ist die leere Lösungsmenge belegt."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Zwei Geraden im Raum schneiden sich nicht und sind nicht parallel. Wie heißt das?",
+      "opts": [
+        "identisch",
+        "kollinear",
+        "windschief",
+        "orthogonal"
+      ],
+      "steps": [
+        "Im Raum können Geraden aneinander vorbeilaufen.",
+        "Sie haben dann weder gemeinsamen Punkt noch gleiche Richtung.",
+        "Das zugehörige Gleichungssystem ist unlösbar."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein Mischungsproblem führt auf $x = -4$ Liter. Was folgt?",
+      "opts": [
+        "man rundet auf $0$",
+        "das System hat unendlich viele Lösungen",
+        "man nimmt $4$ Liter",
+        "die Rechnung ist formal richtig, im Sachkontext gibt es keine Lösung"
+      ],
+      "steps": [
+        "Negative Mengen sind physikalisch nicht möglich.",
+        "Der Sachkontext schränkt die mathematische Lösungsmenge ein.",
+        "Also: rechnerische Lösung nennen und begründet verwerfen."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie lautet die Lösungsmenge von $0 \\cdot x = 0$?",
+      "opts": [
+        "nur $x = 1$",
+        "nur $x = 0$",
+        "alle reellen Zahlen",
+        "leere Menge"
+      ],
+      "steps": [
+        "Jede Zahl mal null ergibt null.",
+        "Die Gleichung ist also für jedes $x$ erfüllt.",
+        "$L = \\mathbb{R}$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie lautet die Lösungsmenge von $0 \\cdot x = 7$?",
+      "opts": [
+        "$x = 7$",
+        "$x = 0$",
+        "alle reellen Zahlen",
+        "leere Menge"
+      ],
+      "steps": [
+        "Links steht für jedes $x$ die Zahl null.",
+        "$0 = 7$ ist nie wahr.",
+        "Also $L = \\{\\}$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Ein System beschreibt drei Ebenen, die sich alle in EINER Geraden schneiden. Wie viele Lösungen gibt es?",
+      "opts": [
+        "genau drei",
+        "unendlich viele, alle auf dieser Geraden",
+        "keine",
+        "genau eine"
+      ],
+      "steps": [
+        "Jeder Punkt der Schnittgeraden erfüllt alle drei Gleichungen.",
+        "Eine Gerade enthält unendlich viele Punkte.",
+        "Die Lösung wird mit einem Parameter beschrieben."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wie viele Lösungen kann ein LINEARES Gleichungssystem grundsätzlich haben?",
+      "opts": [
+        "keine, genau eine oder unendlich viele",
+        "beliebig viele, auch genau zwei",
+        "immer genau eine",
+        "höchstens so viele wie Unbekannte"
+      ],
+      "steps": [
+        "Zwei verschiedene Lösungen erzeugen automatisch unendlich viele (alle Punkte dazwischen).",
+        "Genau zwei ist deshalb unmöglich.",
+        "Es bleiben drei Fälle: leer, eindeutig, unendlich."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was besagt der Rang einer Koeffizientenmatrix anschaulich?",
+      "opts": [
+        "wie viele Zeilen die Matrix hat",
+        "wie groß die Zahlen sind",
+        "wie viele Unbekannte es gibt",
+        "wie viele Gleichungen wirklich unabhängig sind"
+      ],
+      "steps": [
+        "Beim Eliminieren bleiben nur die unabhängigen Zeilen als Stufen übrig.",
+        "Deren Anzahl ist der Rang.",
+        "Rang gleich Unbekanntenzahl bedeutet eindeutige Lösbarkeit."
+      ],
+      "solution": 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

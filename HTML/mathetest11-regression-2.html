@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Regression — Teil 2 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w18-regression-2",
+  "version": "v1",
+  "submit": false,
+  "solutions": "always",
+  "title": "Aufgaben · Regression · Teil 2",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 18, KW 52 (LB 3) · 20 schwerere Aufgaben: Modellwahl begründen, Prognosen bewerten, Grenzen der Extrapolation · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 52 · Teil 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Messwerte: $(0 \\mid 3)$, $(1 \\mid 7)$, $(2 \\mid 11)$, $(3 \\mid 15)$. Welche Regressionsgerade passt exakt?",
+      "opts": [
+        "$y = 4x + 3$",
+        "$y = 7x$",
+        "$y = 3x + 4$",
+        "$y = 4x$"
+      ],
+      "steps": [
+        "Differenzen: immer $+4$ pro Schritt — der Anstieg ist $4$.",
+        "Bei $x = 0$ steht $3$: das ist der Achsenabschnitt.",
+        "Also $y = 4x + 3$, und alle vier Punkte liegen exakt darauf."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Messwerte: $(0 \\mid 4)$, $(1 \\mid 12)$, $(2 \\mid 36)$, $(3 \\mid 108)$. Welches Modell passt?",
+      "opts": [
+        "$y = 4x^2 + 4$",
+        "$y = 8x + 4$",
+        "$y = 4 \\cdot 3^x$",
+        "$y = 3 \\cdot 4^x$"
+      ],
+      "steps": [
+        "Quotienten: $12:4 = 3$, $36:12 = 3$, $108:36 = 3$.",
+        "Konstanter Faktor $3$, Startwert $4$.",
+        "Also exponentiell: $y = 4\\cdot 3^x$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was bedeutet $R^2 = 0{,}55$?",
+      "opts": [
+        "die Daten sind fehlerhaft",
+        "das Modell erklärt die Streuung nur zur Hälfte — Vorsicht",
+        "das Modell passt hervorragend",
+        "es gibt keinen Zusammenhang"
+      ],
+      "steps": [
+        "$R^2$ liegt zwischen $0$ und $1$ und misst, wie viel der Streuung das Modell erfasst.",
+        "$0{,}55$ heißt: knapp die Hälfte bleibt unerklärt.",
+        "Ein anderes Modell oder mehr Daten wären angebracht."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "In einer Stadt steigen zugleich Eisverkauf und Sonnenbrände. Was folgt daraus?",
+      "opts": [
+        "Eis verursacht Sonnenbrand",
+        "Sonnenbrand steigert den Eisverkauf",
+        "die Daten müssen falsch sein",
+        "beide hängen von einer dritten Größe ab (Sonnenschein)"
+      ],
+      "steps": [
+        "Ein hoher Zusammenhang beweist keine Ursache.",
+        "Hier wirkt eine gemeinsame Ursache im Hintergrund: warmes, sonniges Wetter.",
+        "Das nennt man Scheinkorrelation."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Eine Regression liefert $y = -0{,}8x + 60$ für den Bestand in Jahren. Was sagt der Anstieg?",
+      "opts": [
+        "pro Jahr sinkt der Bestand um $0{,}8$ Einheiten",
+        "nach $0{,}8$ Jahren ist der Bestand null",
+        "der Bestand startet bei $0{,}8$",
+        "der Bestand sinkt um $80\\,\\%$ pro Jahr"
+      ],
+      "steps": [
+        "Der Anstieg ist die Änderung pro Schritt auf der $x$-Achse.",
+        "Negativ heißt: es wird weniger.",
+        "$60$ ist dagegen der Startwert bei $x = 0$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Ein lineares Modell für das Wachstum eines Kindes sagt für das Alter $40$ eine Größe von $3{,}2$ m voraus. Was zeigt das?",
+      "opts": [
+        "dass das Modell im Messbereich falsch war",
+        "dass Extrapolation weit über den Messbereich hinaus unsinnig wird",
+        "dass die Regression falsch gerechnet wurde",
+        "dass Menschen weiter wachsen"
+      ],
+      "steps": [
+        "Im Messbereich (z. B. $2$ bis $12$ Jahre) kann das Modell sehr gut passen.",
+        "Außerhalb gilt der beobachtete Zusammenhang aber nicht mehr.",
+        "Extrapolation braucht immer eine inhaltliche Begründung."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was ist ein Ausreißer?",
+      "opts": [
+        "ein fehlender Messwert",
+        "der Mittelwert aller Messwerte",
+        "ein Messwert, der weit von den übrigen abweicht",
+        "der größte Messwert"
+      ],
+      "steps": [
+        "Ausreißer liegen deutlich außerhalb des Musters der übrigen Daten.",
+        "Sie können echte Ereignisse oder Messfehler sein.",
+        "Vor dem Löschen prüft man immer, woher der Wert stammt."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Warum zeichnet man Daten vor der Regression?",
+      "opts": [
+        "weil der Rechner sonst nicht rechnet",
+        "weil man die Form des Zusammenhangs sieht und Ausreißer erkennt",
+        "weil man dann keine Formel mehr braucht",
+        "weil Diagramme im Bericht schöner aussehen"
+      ],
+      "steps": [
+        "Ein Blick auf die Punktwolke verrät, ob linear, quadratisch oder exponentiell überhaupt sinnvoll ist.",
+        "Ausreißer und Lücken fallen sofort auf.",
+        "Ein $R^2$ allein kann eine völlig falsche Modellwahl verdecken."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Zwei Modelle passen ähnlich gut auf dieselben Daten. Welches nimmt man?",
+      "opts": [
+        "das mit dem größeren Anstieg",
+        "immer das quadratische",
+        "das einfachere, das sich sachlich begründen lässt",
+        "immer das mit mehr Parametern"
+      ],
+      "steps": [
+        "Mehr Parameter passen sich immer besser an, auch an zufälliges Rauschen.",
+        "Das nennt man Überanpassung.",
+        "Sachlogik und Einfachheit entscheiden, nicht die dritte Nachkommastelle von $R^2$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was beschreibt die Methode der kleinsten Quadrate?",
+      "opts": [
+        "alle Abstände werden gleich groß",
+        "der größte Abstand wird minimal",
+        "die Gerade geht durch möglichst viele Punkte",
+        "die Summe der quadrierten senkrechten Abstände wird minimal"
+      ],
+      "steps": [
+        "Für jeden Messpunkt wird der senkrechte Abstand zur Kurve genommen.",
+        "Diese Abstände werden quadriert und summiert.",
+        "Die Kurve mit der kleinsten Summe gewinnt."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Warum quadriert man die Abweichungen, statt sie einfach zu addieren?",
+      "opts": [
+        "damit alle Werte positiv aussehen",
+        "damit positive und negative Abweichungen sich nicht aufheben",
+        "weil Quadrate schöner sind",
+        "weil sonst der Rechner überläuft"
+      ],
+      "steps": [
+        "Punkte über und unter der Geraden hätten sonst entgegengesetzte Vorzeichen.",
+        "In der Summe könnten sich große Fehler gegenseitig wegkürzen.",
+        "Quadrieren macht alle Beiträge positiv und bestraft große Abweichungen stärker."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein Rechner bekommt drei Punkte und soll eine quadratische Regression rechnen. Was passiert?",
+      "opts": [
+        "die Parabel geht exakt durch alle drei Punkte",
+        "es bleibt eine Restabweichung",
+        "es gibt unendlich viele Lösungen",
+        "der Rechner meldet einen Fehler"
+      ],
+      "steps": [
+        "Eine Parabel hat drei Parameter $a$, $b$, $c$.",
+        "Drei Punkte legen sie eindeutig fest.",
+        "Ein $R^2 = 1$ sagt hier nichts über die Modellgüte — es ist nur Arithmetik."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Ein heißes Getränk kühlt ab und nähert sich der Raumtemperatur. Welches Modell ist geeignet?",
+      "opts": [
+        "periodisch",
+        "quadratisches Fallen",
+        "lineares Fallen",
+        "exponentielle Annäherung an eine Grenze"
+      ],
+      "steps": [
+        "Die Abkühlung ist am Anfang schnell und wird immer langsamer.",
+        "Die Temperatur nähert sich der Raumtemperatur, erreicht sie aber nie ganz.",
+        "Ein lineares Modell würde irgendwann unter die Raumtemperatur fallen."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Warum gibt man dem Anstieg einer Regressionsgeraden eine Einheit?",
+      "opts": [
+        "weil es Vorschrift ist",
+        "damit die Zahl größer wirkt",
+        "weil Einheiten die Rechnung vereinfachen",
+        "weil er eine Änderungsrate ist, z. B. „€ pro Stunde“"
+      ],
+      "steps": [
+        "Der Anstieg ist $\\dfrac{\\text{Änderung von } y}{\\text{Änderung von } x}$.",
+        "Er trägt also die Einheit von $y$ geteilt durch die von $x$.",
+        "Erst mit Einheit wird die Zahl im Sachkontext lesbar."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Messwerte liegen fast auf einer Geraden, ein einzelner Punkt weit daneben. Was tun?",
+      "opts": [
+        "den Punkt prüfen und die Regression mit und ohne ihn vergleichen",
+        "den Punkt unverändert lassen und nichts sagen",
+        "den Punkt sofort löschen",
+        "alle Daten verwerfen"
+      ],
+      "steps": [
+        "Ein Ausreißer kann Messfehler oder echtes Ereignis sein.",
+        "Beide Rechnungen zeigen, wie stark er das Ergebnis beeinflusst.",
+        "Was man tut, wird im Bericht offengelegt."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Eine Regression liefert $y = 2{,}0001x + 0{,}0003$. Wie gibt man das sinnvoll an?",
+      "opts": [
+        "genau so, mit allen Stellen",
+        "gerundet, z. B. $y \\approx 2x$ — mit Blick auf die Messgenauigkeit",
+        "gar nicht, das Modell ist unbrauchbar",
+        "als $y = 2{,}00010000x$"
+      ],
+      "steps": [
+        "Mehr Nachkommastellen als die Messung hergibt, täuschen Genauigkeit vor.",
+        "Die Rundung richtet sich nach der Genauigkeit der Rohdaten.",
+        "Hier ist $y \\approx 2x$ die ehrliche Angabe."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Welche Größe sagt, wie gut ein Modell die Streuung der Daten erfasst?",
+      "opts": [
+        "der Anstieg",
+        "der Achsenabschnitt",
+        "die Anzahl der Messpunkte",
+        "das Bestimmtheitsmaß $R^2$"
+      ],
+      "steps": [
+        "$R^2$ liegt zwischen $0$ und $1$.",
+        "$1$ hieße: das Modell erklärt die Streuung vollständig.",
+        "Anstieg und Achsenabschnitt beschreiben dagegen die Lage der Kurve."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Ein exponentielles Modell für einen Bestand liefert für $t = 100$ mehr Individuen als Atome auf der Erde. Was folgt?",
+      "opts": [
+        "das Modell gilt nur in einem begrenzten Zeitraum",
+        "exponentielles Wachstum gibt es nicht",
+        "die Rechnung ist falsch",
+        "der Bestand wächst tatsächlich so"
+      ],
+      "steps": [
+        "Exponentielles Wachstum ist auf kurze Sicht oft eine gute Näherung.",
+        "Reale Bestände stoßen an Grenzen: Platz, Nahrung, Energie.",
+        "Das Modell muss also mit einem Gültigkeitsbereich versehen werden."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Bei welchen Daten passt eine quadratische Regression besser als eine lineare?",
+      "opts": [
+        "wenn die Punkte auf einer Geraden liegen",
+        "wenn die Punktwolke deutlich gekrümmt ist",
+        "immer",
+        "wenn es nur zwei Punkte gibt"
+      ],
+      "steps": [
+        "Eine Gerade kann eine gekrümmte Punktwolke nicht abbilden.",
+        "Die Krümmung sieht man im Streudiagramm sofort.",
+        "Bei zwei Punkten wäre eine Parabel ohnehin nicht bestimmt."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was gehört zu einer ehrlichen Auswertung dazu?",
+      "opts": [
+        "nur das Modell mit dem größten $R^2$ zeigen",
+        "Modellwahl begründen, Gültigkeitsbereich nennen, Ausreißer offenlegen",
+        "die Daten glätten, bis das Modell passt",
+        "möglichst viele Nachkommastellen angeben"
+      ],
+      "steps": [
+        "Eine Zahl ohne Kontext ist wertlos.",
+        "Wer den Bereich nennt, in dem das Modell gilt, macht die Grenzen sichtbar.",
+        "Weggelassene Daten muss man benennen — sonst ist es Schönfärberei."
+      ],
+      "solution": 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

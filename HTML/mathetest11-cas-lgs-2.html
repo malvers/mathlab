@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Rechnen mit Matrizen — Teil 2 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w28-cas-lgs-2",
+  "version": "v1",
+  "submit": false,
+  "solutions": "always",
+  "title": "Aufgaben · Rechnen mit Matrizen · Teil 2",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 28, KW 14 (LB 4, Abschluss) · 20 schwerere Aufgaben: Matrizenoperationen rechnen, CAS-Ausgaben deuten, Sachbezug prüfen · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 14 · Teil 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Was ergibt $\\begin{pmatrix} 2 & -1 \\\\ 0 & 3 \\end{pmatrix} + \\begin{pmatrix} 1 & 4 \\\\ 5 & -3 \\end{pmatrix}$?",
+      "opts": [
+        "$\\begin{pmatrix} 1 & 5 \\\\ 5 & 0 \\end{pmatrix}$",
+        "$\\begin{pmatrix} 3 & 3 \\\\ 5 & 0 \\end{pmatrix}$",
+        "$\\begin{pmatrix} 2 & -4 \\\\ 0 & -9 \\end{pmatrix}$",
+        "$\\begin{pmatrix} 3 & 3 \\\\ 5 & 6 \\end{pmatrix}$"
+      ],
+      "steps": [
+        "Eintragsweise addieren.",
+        "$2+1=3$, $-1+4=3$, $0+5=5$, $3+(-3)=0$.",
+        "Also die erste Matrix."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was ergibt $-3 \\cdot \\begin{pmatrix} 2 & 0 \\\\ -1 & 4 \\end{pmatrix}$?",
+      "opts": [
+        "$\\begin{pmatrix} -6 & -3 \\\\ 3 & -12 \\end{pmatrix}$",
+        "$\\begin{pmatrix} -6 & 0 \\\\ 3 & -12 \\end{pmatrix}$",
+        "$\\begin{pmatrix} 6 & 0 \\\\ -3 & 12 \\end{pmatrix}$",
+        "$\\begin{pmatrix} -6 & 0 \\\\ -1 & 4 \\end{pmatrix}$"
+      ],
+      "steps": [
+        "Jeder Eintrag wird mit $-3$ multipliziert — auch die Null.",
+        "$-3\\cdot2=-6$, $-3\\cdot0=0$, $-3\\cdot(-1)=3$, $-3\\cdot4=-12$.",
+        "Also die erste Matrix."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was ergibt $\\begin{pmatrix} 1 & 2 & 3 \\\\ 4 & 5 & 6 \\end{pmatrix}^\\mathsf{T}$?",
+      "opts": [
+        "eine $3\\times2$-Matrix mit erster Zeile $(1\\ 4)$",
+        "eine $2\\times3$-Matrix mit erster Zeile $(1\\ 2)$",
+        "dieselbe Matrix",
+        "eine $3\\times2$-Matrix mit erster Zeile $(1\\ 2)$"
+      ],
+      "steps": [
+        "Transponieren macht aus Zeilen Spalten.",
+        "Aus $2\\times3$ wird $3\\times2$.",
+        "Die erste Spalte $(1,4)$ wird zur ersten Zeile $(1\\ 4)$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wann lassen sich zwei Matrizen addieren?",
+      "opts": [
+        "nur wenn sie dasselbe Format haben",
+        "wenn beide quadratisch sind",
+        "wenn die Spaltenzahl der einen der Zeilenzahl der anderen entspricht",
+        "immer"
+      ],
+      "steps": [
+        "Addiert wird eintragsweise — dazu muss zu jedem Eintrag ein Partner existieren.",
+        "Also müssen Zeilen- und Spaltenzahl übereinstimmen.",
+        "Die letzte Bedingung gilt für die MULTIPLIKATION."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was gilt für $(A^\\mathsf{T})^\\mathsf{T}$?",
+      "opts": [
+        "$= A^2$",
+        "$=$ die Einheitsmatrix",
+        "$= A$",
+        "$= -A$"
+      ],
+      "steps": [
+        "Zweimal Zeilen und Spalten vertauschen führt zum Ausgangszustand zurück.",
+        "Also ist die doppelte Transposition die Identität.",
+        "Das gilt für jede Matrix, unabhängig vom Format."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein Betrieb braucht laut Bedarfsmatrix $B$ (Produkte × Rohstoffe) und Stückzahlvektor $\\vec s$ … wofür steht $B^\\mathsf{T}\\cdot\\vec s$?",
+      "opts": [
+        "die Stückzahl je Produkt",
+        "den Gesamtbedarf je Rohstoff",
+        "den Gewinn",
+        "die Kosten je Produkt"
+      ],
+      "steps": [
+        "$B$ hat Produkte als Zeilen, Rohstoffe als Spalten.",
+        "Transponiert stehen die Rohstoffe in den Zeilen.",
+        "Multipliziert mit den Stückzahlen ergibt sich je Rohstoff die Gesamtmenge."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Das CAS liefert für ein LGS die Ausgabe $x = 3 - 2t$, $y = t$, $z = 1$. Was heißt das?",
+      "opts": [
+        "keine Lösung",
+        "unendlich viele Lösungen mit einem freien Parameter $t$",
+        "genau eine Lösung",
+        "drei verschiedene Lösungen"
+      ],
+      "steps": [
+        "Ein Parameter in der Ausgabe steht für einen Freiheitsgrad.",
+        "Jeder Wert von $t$ liefert eine gültige Lösung.",
+        "Zum Beispiel $t=0$: $(3\\mid0\\mid1)$, $t=1$: $(1\\mid1\\mid1)$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Das CAS meldet beim Lösen „keine Lösung“. Was ist der erste Schritt?",
+      "opts": [
+        "die Eingabe auf Tippfehler prüfen",
+        "das System von Hand lösen",
+        "das Ergebnis übernehmen",
+        "ein anderes CAS versuchen"
+      ],
+      "steps": [
+        "Ein vertauschtes Vorzeichen oder eine falsche Zahl erzeugt schnell einen Widerspruch.",
+        "Erst wenn die Eingabe stimmt, ist die Aussage belastbar.",
+        "Danach lohnt die inhaltliche Frage: kann das Problem überhaupt lösbar sein?"
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Ein LGS beschreibt eine Mischung dreier Sorten. Das CAS liefert einen negativen Anteil. Was folgt?",
+      "opts": [
+        "die Mischung ist besonders günstig",
+        "man nimmt den Betrag",
+        "das CAS hat sich verrechnet",
+        "mathematisch korrekt, im Sachkontext unmöglich — Annahmen prüfen"
+      ],
+      "steps": [
+        "Negative Mengen kann man nicht mischen.",
+        "Entweder war eine Vorgabe unrealistisch oder das Modell unvollständig.",
+        "Die Lösung wird begründet verworfen."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was ist das neutrale Element der Matrizenaddition?",
+      "opts": [
+        "die Nullmatrix im passenden Format",
+        "es gibt keines",
+        "die Einheitsmatrix",
+        "die Zahl $0$"
+      ],
+      "steps": [
+        "$A + 0 = A$ für jede Matrix $A$.",
+        "Die Nullmatrix muss dasselbe Format haben wie $A$.",
+        "Die Einheitsmatrix ist dagegen neutral bei der Multiplikation."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Eine $4\\times4$-Matrix wird mit dem Skalar $0$ multipliziert. Was entsteht?",
+      "opts": [
+        "die $4\\times4$-Nullmatrix",
+        "die Einheitsmatrix",
+        "die Zahl $0$",
+        "eine leere Matrix"
+      ],
+      "steps": [
+        "Jeder Eintrag wird mit null multipliziert.",
+        "Das Format bleibt erhalten.",
+        "Also die Nullmatrix im Format $4\\times4$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was unterscheidet skalare Multiplikation von Matrizenmultiplikation?",
+      "opts": [
+        "Matrizenmultiplikation ist eintragsweise",
+        "skalar: jeder Eintrag mal Zahl; Matrizen: Zeilen mal Spalten",
+        "skalar geht nur bei quadratischen Matrizen",
+        "es gibt keinen Unterschied"
+      ],
+      "steps": [
+        "Ein Skalar wird auf jeden Eintrag einzeln angewendet.",
+        "Bei zwei Matrizen wird jede Zeile mit jeder Spalte verrechnet.",
+        "Deshalb müssen dort die Formate zueinander passen."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wie prüft man eine CAS-Lösung eines LGS am schnellsten?",
+      "opts": [
+        "ein zweites CAS befragen",
+        "die Determinante berechnen",
+        "die Rechnung des CAS nachvollziehen",
+        "die Werte in die ursprünglichen Gleichungen einsetzen"
+      ],
+      "steps": [
+        "Einsetzen kostet Sekunden und deckt Eingabefehler auf.",
+        "Es prüft zugleich, ob man das richtige System eingegeben hat.",
+        "Die interne Rechnung des CAS nachzuvollziehen wäre unnötig aufwendig."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Was bedeutet es für ein Anwendungsproblem, wenn die Koeffizientenmatrix zwei GLEICHE Zeilen hat?",
+      "opts": [
+        "es gibt keine Lösung",
+        "das System ist besonders stabil",
+        "eine Bedingung wurde doppelt erfasst — es fehlt Information",
+        "die Lösung ist eindeutig"
+      ],
+      "steps": [
+        "Zwei identische Zeilen liefern beim Eliminieren $0=0$.",
+        "Es bleiben weniger unabhängige Bedingungen als gedacht.",
+        "Für eine eindeutige Lösung fehlt eine echte zusätzliche Information."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wann heißt eine Matrix symmetrisch?",
+      "opts": [
+        "wenn alle Zeilensummen gleich sind",
+        "wenn sie quadratisch ist",
+        "wenn $a_{ij} = a_{ji}$ für alle $i,j$ gilt",
+        "wenn sie nur Nullen und Einsen enthält"
+      ],
+      "steps": [
+        "Spiegeln an der Hauptdiagonale lässt die Matrix unverändert.",
+        "Formal: $A = A^\\mathsf{T}$.",
+        "Nur quadratische Matrizen können symmetrisch sein."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was gilt für die Matrizenaddition?",
+      "opts": [
+        "sie ist nicht kommutativ",
+        "sie ändert das Format",
+        "sie ist kommutativ: $A+B = B+A$",
+        "sie ist nur für quadratische Matrizen definiert"
+      ],
+      "steps": [
+        "Addiert wird eintragsweise, und Zahlen addieren sich in beliebiger Reihenfolge.",
+        "Also gilt $A+B = B+A$.",
+        "Die MULTIPLIKATION von Matrizen ist dagegen nicht kommutativ."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein CAS löst ein System mit acht Unbekannten in Sekunden. Was bleibt trotzdem Aufgabe des Menschen?",
+      "opts": [
+        "die Rechenschritte kontrollieren",
+        "Modell aufstellen, Ergebnis deuten und auf Plausibilität prüfen",
+        "nichts",
+        "das Ergebnis abschreiben"
+      ],
+      "steps": [
+        "Das CAS rechnet, es versteht die Aufgabe aber nicht.",
+        "Ob die Gleichungen die Situation richtig abbilden, entscheidet der Mensch.",
+        "Ebenso, ob das Ergebnis im Sachkontext Sinn ergibt."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Warum ist die Matrixschreibweise für Rechner so praktisch?",
+      "opts": [
+        "sie vermeidet Rundungsfehler",
+        "sie funktioniert auch ohne Zahlen",
+        "Matrizen brauchen weniger Speicher",
+        "die Rechenschritte sind schematisch und immer gleich"
+      ],
+      "steps": [
+        "Zeilenoperationen lassen sich als feste Schleifen programmieren.",
+        "Die Variablennamen spielen keine Rolle mehr.",
+        "Deshalb steckt hinter jedem CAS-Löser genau dieses Schema."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Welches Format hat das Ergebnis von $A + A^\\mathsf{T}$, wenn $A$ das Format $3\\times3$ hat?",
+      "opts": [
+        "$3\\times3$ und symmetrisch",
+        "$9\\times1$",
+        "$6\\times6$",
+        "$3\\times3$, aber nicht symmetrisch"
+      ],
+      "steps": [
+        "$A^\\mathsf{T}$ hat bei quadratischem $A$ dasselbe Format, die Addition ist also möglich.",
+        "Für den Eintrag gilt $a_{ij}+a_{ji}$, und das ist symmetrisch in $i$ und $j$.",
+        "Also eine symmetrische $3\\times3$-Matrix."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wozu dient die erweiterte Koeffizientenmatrix?",
+      "opts": [
+        "sie speichert die Lösung",
+        "sie enthält die Unbekannten",
+        "sie führt Koeffizienten und rechte Seite gemeinsam durch das Gauß-Verfahren",
+        "sie ist immer quadratisch"
+      ],
+      "steps": [
+        "Jede Zeilenumformung muss auch die rechte Seite betreffen.",
+        "Schreibt man beides zusammen, kann man das nicht vergessen.",
+        "Der Strich in der Matrix markiert nur die Trennung."
+      ],
+      "solution": 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

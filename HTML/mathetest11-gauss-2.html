@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Das Gauß-Verfahren — Teil 2 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w26-gauss-2",
+  "version": "v1",
+  "submit": false,
+  "solutions": "always",
+  "title": "Aufgaben · Das Gauß-Verfahren · Teil 2",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 26, KW 11 (LB 4) · 20 schwerere Aufgaben: Systeme mit drei Unbekannten, Zeilenoperationen, Proben · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 11 · Teil 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Löse: $x + y = 7$ und $2x - y = 2$.",
+      "opts": [
+        "$x=5$, $y=2$",
+        "$x=3$, $y=4$",
+        "$x=4$, $y=3$",
+        "$x=2$, $y=5$"
+      ],
+      "steps": [
+        "Zeilen addieren: $3x = 9$, also $x = 3$.",
+        "Einsetzen: $3 + y = 7 \\Rightarrow y = 4$.",
+        "Probe: $2\\cdot3 - 4 = 2$ ✓"
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Löse: $3x + 2y = 16$ und $x - y = 2$.",
+      "opts": [
+        "$x=3$, $y=1$",
+        "$x=4$, $y=2$",
+        "$x=2$, $y=4$",
+        "$x=6$, $y=-1$"
+      ],
+      "steps": [
+        "Zweite Zeile mit $2$ multiplizieren: $2x - 2y = 4$.",
+        "Addieren: $5x = 20 \\Rightarrow x = 4$.",
+        "$4 - y = 2 \\Rightarrow y = 2$; Probe: $12+4=16$ ✓"
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Löse: $x + y + z = 9$, $y + z = 6$, $z = 4$.",
+      "opts": [
+        "$x=3$, $y=4$, $z=2$",
+        "$x=4$, $y=2$, $z=3$",
+        "$x=2$, $y=3$, $z=4$",
+        "$x=3$, $y=2$, $z=4$"
+      ],
+      "steps": [
+        "Von unten nach oben: $z = 4$, dann $y + 4 = 6 \\Rightarrow y = 2$.",
+        "$x + 2 + 4 = 9 \\Rightarrow x = 3$.",
+        "Probe in allen drei Zeilen stimmt."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Welche Zeilenumformung ist beim Gauß-Verfahren NICHT erlaubt?",
+      "opts": [
+        "eine Zeile mit $0$ multiplizieren",
+        "eine Zeile mit $3$ multiplizieren",
+        "zwei Zeilen vertauschen",
+        "das Doppelte einer Zeile zu einer anderen addieren"
+      ],
+      "steps": [
+        "Mit null multipliziert verschwindet die Information dieser Gleichung.",
+        "Die Lösungsmenge würde sich dadurch ändern.",
+        "Erlaubt sind: tauschen, mit einer Zahl ungleich null multiplizieren, Vielfache addieren."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Nach dem Eliminieren steht in der letzten Zeile $0 = -3$. Was folgt?",
+      "opts": [
+        "das System hat keine Lösung",
+        "die Rechnung muss falsch sein",
+        "das System hat unendlich viele Lösungen",
+        "$z = -3$"
+      ],
+      "steps": [
+        "$0 = -3$ ist eine falsche Aussage.",
+        "Damit kann kein Wertepaar alle Gleichungen erfüllen.",
+        "Die Lösungsmenge ist leer."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Nach dem Eliminieren steht in der letzten Zeile $0 = 0$. Was folgt?",
+      "opts": [
+        "das System hat keine Lösung",
+        "eine Gleichung war überflüssig — meist unendlich viele Lösungen",
+        "alle Unbekannten sind null",
+        "es gibt genau eine Lösung"
+      ],
+      "steps": [
+        "$0=0$ ist immer wahr und schränkt nichts ein.",
+        "Es bleiben weniger unabhängige Gleichungen als Unbekannte.",
+        "Die Lösung wird dann mit einem Parameter beschrieben."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein Betrieb mischt zwei Sorten: $x + y = 200$ und $4x + 7y = 1100$. Wie groß ist $y$?",
+      "opts": [
+        "$y=150$",
+        "$y=100$",
+        "$y=80$",
+        "$y=120$"
+      ],
+      "steps": [
+        "Erste Zeile mal $4$: $4x+4y = 800$.",
+        "Subtrahieren: $3y = 300 \\Rightarrow y = 100$.",
+        "Also $x = 100$; Probe: $400 + 700 = 1100$ ✓"
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Löse: $2x + 4y = 10$ und $x + 2y = 5$.",
+      "opts": [
+        "unendlich viele Lösungen",
+        "$x=1$, $y=2$",
+        "$x=5$, $y=0$",
+        "keine Lösung"
+      ],
+      "steps": [
+        "Die erste Zeile ist genau das Doppelte der zweiten.",
+        "Nach dem Eliminieren bleibt $0=0$.",
+        "Beide Gleichungen beschreiben dieselbe Gerade — unendlich viele Lösungen."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Löse: $x - 3y = 4$ und $-2x + 6y = 5$.",
+      "opts": [
+        "$x=4$, $y=0$",
+        "keine Lösung",
+        "$x=1$, $y=-1$",
+        "unendlich viele Lösungen"
+      ],
+      "steps": [
+        "Erste Zeile mal $2$: $2x - 6y = 8$.",
+        "Addieren: $0 = 13$ — falsche Aussage.",
+        "Die Geraden sind parallel, also keine Lösung."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Warum tauscht man beim Gauß-Verfahren manchmal Zeilen?",
+      "opts": [
+        "weil die Reihenfolge vorgeschrieben ist",
+        "um die Lösung zu ändern",
+        "um eine Null an der Stelle des Pivots zu vermeiden",
+        "um Rechenzeit zu sparen"
+      ],
+      "steps": [
+        "Zum Eliminieren teilt man durch das Pivotelement.",
+        "Steht dort eine Null, geht das nicht.",
+        "Ein Zeilentausch ändert die Lösungsmenge nicht — er ist immer erlaubt."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie viele unabhängige Gleichungen braucht man für eine eindeutige Lösung mit vier Unbekannten?",
+      "opts": [
+        "fünf",
+        "acht",
+        "vier",
+        "drei"
+      ],
+      "steps": [
+        "Für jede Unbekannte braucht es eine unabhängige Bedingung.",
+        "Weniger Gleichungen lassen Freiheitsgrade offen.",
+        "Mehr Gleichungen sind erlaubt, dürfen sich aber nicht widersprechen."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was bedeutet „unabhängige Gleichungen“?",
+      "opts": [
+        "jede Gleichung enthält alle Unbekannten",
+        "keine Gleichung lässt sich aus den anderen kombinieren",
+        "die Gleichungen haben verschiedene rechte Seiten",
+        "alle Gleichungen haben verschiedene Zahlen"
+      ],
+      "steps": [
+        "Ist eine Gleichung ein Vielfaches oder eine Summe anderer, bringt sie nichts Neues.",
+        "Beim Eliminieren fällt sie als $0=0$ heraus.",
+        "Nur unabhängige Gleichungen schränken die Lösungsmenge weiter ein."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Geometrisch: was beschreibt eine lineare Gleichung mit drei Unbekannten?",
+      "opts": [
+        "eine Ebene im Raum",
+        "eine Gerade",
+        "einen Punkt",
+        "eine Kugel"
+      ],
+      "steps": [
+        "$ax+by+cz=d$ hat als Lösungsmenge eine Ebene.",
+        "Zwei Ebenen schneiden sich meist in einer Geraden.",
+        "Drei Ebenen treffen sich im günstigen Fall in einem Punkt."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Aus der Stufenform folgt $-3z = 12$. Wie geht es weiter?",
+      "opts": [
+        "$z = -4$, dann rückwärts einsetzen",
+        "$z = 4$, dann rückwärts einsetzen",
+        "man muss neu anfangen",
+        "$z = -36$"
+      ],
+      "steps": [
+        "Durch $-3$ teilen: $z = -4$.",
+        "Mit diesem Wert in die Zeile darüber gehen.",
+        "So arbeitet man sich von unten nach oben durch."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Löse: $x + 2y - z = 3$, $2y - z = 1$, $z = 1$.",
+      "opts": [
+        "$x=1$, $y=1$, $z=1$",
+        "$x=2$, $y=2$, $z=1$",
+        "$x=2$, $y=1$, $z=1$",
+        "$x=3$, $y=0$, $z=1$"
+      ],
+      "steps": [
+        "$z = 1$, damit $2y - 1 = 1 \\Rightarrow y = 1$.",
+        "$x + 2 - 1 = 3 \\Rightarrow x = 2$.",
+        "Probe in Zeile 1: $2 + 2 - 1 = 3$ ✓"
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie prüft man eine gefundene Lösung am sichersten?",
+      "opts": [
+        "alle Werte in JEDE ursprüngliche Gleichung einsetzen",
+        "die Stufenform noch einmal rechnen",
+        "dem CAS vertrauen",
+        "nur in die erste Gleichung einsetzen"
+      ],
+      "steps": [
+        "Ein Rechenfehler beim Eliminieren zeigt sich erst in einer der anderen Zeilen.",
+        "Deshalb reicht eine einzelne Gleichung als Probe nicht.",
+        "Die Probe erfolgt immer im URSPRÜNGLICHEN System."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was ist das Ziel des Gauß-Verfahrens?",
+      "opts": [
+        "möglichst viele Nullen",
+        "eine Diagonalmatrix",
+        "die Stufenform, aus der man von unten nach oben auflösen kann",
+        "alle Koeffizienten auf $1$ zu bringen"
+      ],
+      "steps": [
+        "Unter der Hauptdiagonale wird alles zu null.",
+        "Die letzte Zeile enthält dann nur noch eine Unbekannte.",
+        "Von dort arbeitet man sich rückwärts hoch."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein System aus drei Gleichungen mit drei Unbekannten hat die Lösung $(1 \\mid 2 \\mid 3)$. Was bedeutet das geometrisch?",
+      "opts": [
+        "die Ebenen fallen zusammen",
+        "die drei Ebenen schneiden sich in genau diesem Punkt",
+        "die Ebenen schneiden sich in einer Geraden",
+        "die Ebenen sind parallel"
+      ],
+      "steps": [
+        "Jede Gleichung beschreibt eine Ebene.",
+        "Eine eindeutige Lösung heißt: genau ein gemeinsamer Punkt.",
+        "Seine Koordinaten sind $x=1$, $y=2$, $z=3$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Warum ist das Gauß-Verfahren dem Einsetzungsverfahren bei großen Systemen überlegen?",
+      "opts": [
+        "es funktioniert auch bei nichtlinearen Systemen",
+        "es liefert genauere Ergebnisse",
+        "es läuft schematisch ab und ist maschinell umsetzbar",
+        "es braucht keine Probe"
+      ],
+      "steps": [
+        "Die Schritte sind immer dieselben, unabhängig von der Größe.",
+        "Beim Einsetzen wachsen die Terme schnell unübersichtlich.",
+        "Deshalb rechnet jedes CAS intern mit Gauß (bzw. Varianten davon)."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Löse: $4x + 2y = 14$ und $x = 2$.",
+      "opts": [
+        "$y = 6$",
+        "$y = 7$",
+        "$y = 1$",
+        "$y = 3$"
+      ],
+      "steps": [
+        "$x = 2$ direkt einsetzen: $8 + 2y = 14$.",
+        "$2y = 6 \\Rightarrow y = 3$.",
+        "Probe: $4\\cdot2 + 2\\cdot3 = 14$ ✓"
+      ],
+      "solution": 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

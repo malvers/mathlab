@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Vierfeldertafeln — Teil 2 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w30-vierfeldertafel-2",
+  "version": "v1",
+  "submit": false,
+  "solutions": "always",
+  "title": "Aufgaben · Vierfeldertafeln · Teil 2",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 30, KW 16 (LB 1) · 20 schwerere Aufgaben: Tafeln vervollständigen, bedingte Wahrscheinlichkeit, Unabhängigkeit prüfen · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 16 · Teil 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "In einer Firma mit $200$ Beschäftigten sind $120$ Frauen; $90$ Beschäftigte arbeiten in Teilzeit, davon $70$ Frauen. Wie viele Männer arbeiten Vollzeit?",
+      "opts": [
+        "$50$",
+        "$80$",
+        "$30$",
+        "$60$"
+      ],
+      "steps": [
+        "Männer gesamt: $200-120 = 80$.",
+        "Männer in Teilzeit: $90-70 = 20$.",
+        "Männer Vollzeit: $80-20 = 60$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Dieselbe Firma: wie groß ist $P(\\text{Teilzeit} \\mid \\text{Frau})$?",
+      "opts": [
+        "$\\dfrac{9}{20}$",
+        "$\\dfrac{7}{9}$",
+        "$\\dfrac{7}{12}$",
+        "$\\dfrac{1}{2}$"
+      ],
+      "steps": [
+        "Bedingt auf Frauen: Grundgesamtheit sind die $120$ Frauen.",
+        "Davon $70$ in Teilzeit.",
+        "$\\dfrac{70}{120} = \\dfrac{7}{12} \\approx 0{,}58$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Dieselbe Firma: wie groß ist $P(\\text{Frau} \\mid \\text{Teilzeit})$?",
+      "opts": [
+        "$\\dfrac{7}{12}$",
+        "$\\dfrac{9}{20}$",
+        "$\\dfrac{3}{5}$",
+        "$\\dfrac{7}{9}$"
+      ],
+      "steps": [
+        "Jetzt sind die $90$ Teilzeitkräfte die Grundgesamtheit.",
+        "Davon sind $70$ Frauen.",
+        "$\\dfrac{70}{90} = \\dfrac{7}{9} \\approx 0{,}78$ — deutlich anders als die vorige Frage."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "$P(A)=0{,}6$, $P(B)=0{,}5$, $P(A\\cap B)=0{,}3$. Sind $A$ und $B$ unabhängig?",
+      "opts": [
+        "das lässt sich nicht entscheiden",
+        "ja, denn $0{,}6\\cdot0{,}5 = 0{,}3$",
+        "nur wenn $A = B$",
+        "nein"
+      ],
+      "steps": [
+        "Unabhängigkeit bedeutet $P(A\\cap B) = P(A)\\cdot P(B)$.",
+        "$0{,}6 \\cdot 0{,}5 = 0{,}3$ — genau der angegebene Wert.",
+        "Also unabhängig."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "$P(A)=0{,}4$, $P(B)=0{,}5$, $P(A\\cap B)=0{,}1$. Was folgt?",
+      "opts": [
+        "$P(B\\mid A) = 0{,}5$",
+        "sie sind unabhängig",
+        "sie schließen einander aus",
+        "$A$ und $B$ sind abhängig, denn $0{,}2 \\neq 0{,}1$"
+      ],
+      "steps": [
+        "$P(A)\\cdot P(B) = 0{,}4\\cdot0{,}5 = 0{,}2$.",
+        "Der tatsächliche Schnitt ist mit $0{,}1$ kleiner.",
+        "Die Ereignisse behindern sich also gegenseitig — sie sind abhängig."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Eine Tafel zeigt $P(A\\cap B)=0{,}25$ und $P(A\\cap\\overline{B})=0{,}35$. Wie groß ist $P(A)$?",
+      "opts": [
+        "$0{,}6$",
+        "$0{,}35$",
+        "$0{,}1$",
+        "$0{,}25$"
+      ],
+      "steps": [
+        "$A$ zerfällt vollständig in „mit $B$“ und „ohne $B$“.",
+        "$P(A) = 0{,}25 + 0{,}35$",
+        "$= 0{,}6$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was ergibt $P(A) + P(\\overline{A})$?",
+      "opts": [
+        "$P(A)$",
+        "$0$",
+        "$1$",
+        "das hängt von $A$ ab"
+      ],
+      "steps": [
+        "Ein Ereignis tritt ein oder es tritt nicht ein — dazwischen gibt es nichts.",
+        "Beide Fälle zusammen decken alles ab.",
+        "Also immer $1$."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Von $500$ Fahrzeugen sind $300$ Diesel; $80$ Fahrzeuge sind älter als zehn Jahre, davon $60$ Diesel. Wie groß ist $P(\\text{alt} \\mid \\text{Diesel})$?",
+      "opts": [
+        "$0{,}75$",
+        "$0{,}2$",
+        "$0{,}16$",
+        "$0{,}12$"
+      ],
+      "steps": [
+        "Grundgesamtheit: die $300$ Diesel.",
+        "Davon $60$ alt.",
+        "$\\dfrac{60}{300} = 0{,}2$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein Test: $1\\,\\%$ der Menschen sind krank, der Test erkennt Kranke zu $99\\,\\%$ und liefert bei Gesunden $5\\,\\%$ falsch-positive. Wie groß ist etwa $P(\\text{krank} \\mid \\text{positiv})$?",
+      "opts": [
+        "etwa $17\\,\\%$",
+        "etwa $1\\,\\%$",
+        "etwa $50\\,\\%$",
+        "etwa $99\\,\\%$"
+      ],
+      "steps": [
+        "Krank und positiv: $0{,}01\\cdot0{,}99 = 0{,}0099$.",
+        "Gesund und positiv: $0{,}99\\cdot0{,}05 = 0{,}0495$.",
+        "$\\dfrac{0{,}0099}{0{,}0099+0{,}0495} \\approx 0{,}167$ — die meisten positiven Tests sind falsch."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Warum ist $P(A\\mid B)$ meist nicht dasselbe wie $P(B\\mid A)$?",
+      "opts": [
+        "weil die Grundgesamtheit eine andere ist",
+        "weil eine der beiden immer größer ist",
+        "sie sind immer gleich",
+        "weil die Reihenfolge der Ereignisse zählt"
+      ],
+      "steps": [
+        "Bei $P(A\\mid B)$ rechnet man innerhalb aller Fälle mit $B$.",
+        "Bei $P(B\\mid A)$ innerhalb aller Fälle mit $A$.",
+        "Sind $A$ und $B$ unterschiedlich häufig, kommen sehr verschiedene Werte heraus."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "$60\\,\\%$ der Schüler lernen Spanisch, $24\\,\\%$ lernen Spanisch UND Französisch. Wie groß ist $P(\\text{Franz}\\mid\\text{Span})$?",
+      "opts": [
+        "$0{,}4$",
+        "$0{,}24$",
+        "$0{,}6$",
+        "$0{,}144$"
+      ],
+      "steps": [
+        "$P(F\\mid S) = \\dfrac{P(F\\cap S)}{P(S)}$",
+        "$= \\dfrac{0{,}24}{0{,}6}$",
+        "$= 0{,}4$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was gilt für die Summe der vier inneren Felder einer Vierfeldertafel mit relativen Häufigkeiten?",
+      "opts": [
+        "sie ist die Summe der Randfelder",
+        "das hängt von den Daten ab",
+        "sie ist $0{,}5$",
+        "sie ist $1$"
+      ],
+      "steps": [
+        "Die vier Felder zerlegen die Gesamtheit vollständig und überschneidungsfrei.",
+        "Zusammen decken sie alle Fälle ab.",
+        "Also ergeben sie in Summe $1$ — eine gute Kontrolle."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Zwei Ereignisse schließen einander aus ($P(A\\cap B)=0$) und beide haben positive Wahrscheinlichkeit. Sind sie unabhängig?",
+      "opts": [
+        "ja",
+        "das lässt sich nicht entscheiden",
+        "nur wenn $P(A)=P(B)$",
+        "nein — tritt $A$ ein, ist $B$ ausgeschlossen"
+      ],
+      "steps": [
+        "Unabhängig hieße $P(A\\cap B) = P(A)\\cdot P(B) > 0$.",
+        "Tatsächlich ist der Schnitt aber null.",
+        "Sich ausschließende Ereignisse sind also gerade NICHT unabhängig."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie füllt man eine Vierfeldertafel am sichersten aus?",
+      "opts": [
+        "man rechnet ohne Tafel",
+        "von rechts unten nach links oben",
+        "mit absoluten Zahlen und den Randsummen als Kontrolle",
+        "nur mit Prozentwerten"
+      ],
+      "steps": [
+        "Absolute Zahlen lassen sich leichter addieren und prüfen.",
+        "Zeilen- und Spaltensummen müssen zur Gesamtzahl passen.",
+        "Erst am Ende rechnet man in relative Häufigkeiten um."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was besagt der Satz von der totalen Wahrscheinlichkeit anschaulich?",
+      "opts": [
+        "die Summe aller Ereignisse ist $1$",
+        "alle Wahrscheinlichkeiten sind gleich",
+        "ein Ereignis wird über alle Fälle zerlegt und die Teile werden addiert",
+        "bedingte Wahrscheinlichkeiten sind immer kleiner"
+      ],
+      "steps": [
+        "Man zerlegt die Grundgesamtheit in Fälle (z. B. krank/gesund).",
+        "In jedem Fall berechnet man den Beitrag zum Ereignis.",
+        "Die Beiträge werden addiert — genau die Spaltensumme der Tafel."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "In einer Tafel sind bekannt: Gesamt $400$, $A$: $160$, $B$: $250$, $A\\cap B$: $100$. Wie groß ist $\\overline{A}\\cap\\overline{B}$?",
+      "opts": [
+        "$60$",
+        "$90$",
+        "$150$",
+        "$240$"
+      ],
+      "steps": [
+        "$A\\cap\\overline B = 160-100 = 60$; $\\overline A\\cap B = 250-100 = 150$.",
+        "Summe der drei bekannten Felder: $100+60+150 = 310$.",
+        "$400 - 310 = 90$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Wie berechnet man $P(B\\mid A)$ aus einer Tafel mit absoluten Zahlen?",
+      "opts": [
+        "Feld $A\\cap B$ geteilt durch die Gesamtzahl",
+        "Randsumme $B$ geteilt durch Gesamtzahl",
+        "Feld $A\\cap B$ geteilt durch Randsumme $B$",
+        "Feld $A\\cap B$ geteilt durch die Randsumme von $A$"
+      ],
+      "steps": [
+        "Die Bedingung $A$ legt fest, worauf sich der Anteil bezieht.",
+        "Zähler: die Fälle, in denen zusätzlich $B$ eintritt.",
+        "Nenner: alle Fälle mit $A$ — die Randsumme von $A$."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "$P(A)=0{,}3$ und $P(B\\mid A)=0{,}5$. Wie groß ist $P(A\\cap B)$?",
+      "opts": [
+        "$0{,}15$",
+        "$0{,}8$",
+        "$0{,}6$",
+        "$0{,}5$"
+      ],
+      "steps": [
+        "Aus $P(B\\mid A) = \\dfrac{P(A\\cap B)}{P(A)}$ folgt …",
+        "$P(A\\cap B) = P(B\\mid A)\\cdot P(A)$",
+        "$= 0{,}5\\cdot0{,}3 = 0{,}15$."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Eine Tafel zeigt: $P(A\\cap B) = P(A)\\cdot P(B)$. Was folgt für $P(B\\mid A)$?",
+      "opts": [
+        "$P(B\\mid A) = P(A)$",
+        "$P(B\\mid A) = 1$",
+        "$P(B\\mid A) = P(B)$",
+        "$P(B\\mid A) = 0$"
+      ],
+      "steps": [
+        "$P(B\\mid A) = \\dfrac{P(A\\cap B)}{P(A)} = \\dfrac{P(A)P(B)}{P(A)}$",
+        "$= P(B)$.",
+        "Genau das ist die Bedeutung von Unabhängigkeit: die Bedingung ändert nichts."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Warum reicht es bei einer Vierfeldertafel, drei Werte zu kennen?",
+      "opts": [
+        "weil alle Felder gleich groß sind",
+        "das reicht nicht",
+        "weil das vierte Feld immer null ist",
+        "die übrigen ergeben sich aus den Randsummen"
+      ],
+      "steps": [
+        "Gesamtzahl und zwei Randsummen legen viel fest.",
+        "Aus einem inneren Feld und den Rändern folgen die anderen drei durch Subtraktion.",
+        "Deshalb ist die Tafel ein so wirksames Ordnungswerkzeug."
+      ],
+      "solution": 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

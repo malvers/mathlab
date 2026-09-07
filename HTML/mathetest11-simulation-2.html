@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Simulieren statt rechnen — Teil 2 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  "id": "mathe11-w31-simulation-2",
+  "version": "v1",
+  "submit": false,
+  "solutions": "always",
+  "title": "Aufgaben · Simulieren statt rechnen · Teil 2",
+  "subtitle": "Berufliches Gymnasium · Klasse 11 · Woche 31, KW 17 (LB 1, Abschluss) · 20 schwerere Aufgaben: Simulationen aufbauen, Ergebnisse deuten, Erwartungswert · genau eine Antwort pro Aufgabe",
+  "dashSub": "BGY · Klasse 11 · KW 17 · Teil 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe",
+  "back": "svp/mathe/mathe11.html",
+  "questions": [
+    {
+      "q": "Ein Würfel zeigt in $1200$ Würfen $180$-mal die Sechs. Was folgt?",
+      "opts": [
+        "die Simulation ist fehlerhaft",
+        "die Sechs kommt zu oft",
+        "die relative Häufigkeit $0{,}15$ liegt nahe bei $\\dfrac16 \\approx 0{,}167$ — unauffällig",
+        "der Würfel ist gezinkt"
+      ],
+      "steps": [
+        "Erwartet wären etwa $200$ Sechsen.",
+        "$180$ liegt im Rahmen der üblichen Schwankung.",
+        "Erst deutlich größere Abweichungen wären ein Hinweis."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Wie simuliert man ein Ereignis mit Wahrscheinlichkeit $0{,}35$ mit Zufallszahlen aus $[0;1)$?",
+      "opts": [
+        "man braucht ganze Zahlen",
+        "Treffer bei genau $0{,}35$",
+        "Treffer, wenn die Zufallszahl kleiner als $0{,}35$ ist",
+        "Treffer, wenn sie größer als $0{,}35$ ist"
+      ],
+      "steps": [
+        "Die Zufallszahlen sind gleichmäßig über $[0;1)$ verteilt.",
+        "Der Anteil unterhalb von $0{,}35$ beträgt genau $35\\,\\%$.",
+        "Also: kleiner als $0{,}35$ zählt als Treffer."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Ein Glücksrad mit den Anteilen $50\\,\\%$, $30\\,\\%$, $20\\,\\%$ wird simuliert. Wie teilt man $[0;1)$?",
+      "opts": [
+        "$[0;0{,}2)$, $[0{,}2;0{,}5)$, $[0{,}5;1)$ mit anderer Zuordnung",
+        "$[0;0{,}5)$, $[0{,}5;0{,}8)$, $[0{,}8;1)$",
+        "drei gleich große Teile",
+        "$[0;0{,}5)$, $[0{,}5;0{,}3)$, $[0{,}3;0{,}2)$"
+      ],
+      "steps": [
+        "Die Intervalle müssen lückenlos aneinander anschließen.",
+        "Ihre Längen entsprechen den Wahrscheinlichkeiten: $0{,}5$, $0{,}3$, $0{,}2$.",
+        "Zusammen ergeben sie genau $[0;1)$."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Eine Simulation mit $100$ Läufen ergibt $0{,}58$, eine mit $100\\,000$ Läufen $0{,}502$. Welcher Wert ist verlässlicher?",
+      "opts": [
+        "der aus $100\\,000$ Läufen",
+        "der aus $100$ Läufen",
+        "beide gleich",
+        "der Mittelwert beider"
+      ],
+      "steps": [
+        "Nach dem Gesetz der großen Zahlen nähert sich die relative Häufigkeit der Wahrscheinlichkeit.",
+        "Je mehr Läufe, desto kleiner die zufällige Schwankung.",
+        "$0{,}502$ ist also die bessere Schätzung."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was ist der Erwartungswert beim Wurf eines fairen Würfels?",
+      "opts": [
+        "$3$",
+        "$4$",
+        "$3{,}5$",
+        "$6$"
+      ],
+      "steps": [
+        "$E = \\dfrac{1+2+3+4+5+6}{6} = \\dfrac{21}{6}$",
+        "$= 3{,}5$",
+        "Der Wert selbst kommt nie vor — er ist ein Durchschnitt auf lange Sicht."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Bei einem Spiel gewinnt man mit $P=0{,}25$ zwölf Euro, sonst verliert man vier Euro. Ist es fair?",
+      "opts": [
+        "das hängt vom Einsatz ab",
+        "nein, es ist vorteilhaft",
+        "ja, der Erwartungswert ist null",
+        "nein, es ist nachteilig"
+      ],
+      "steps": [
+        "$E = 0{,}25\\cdot12 + 0{,}75\\cdot(-4)$",
+        "$= 3 - 3 = 0$",
+        "Erwartungswert null bedeutet: auf lange Sicht ein Nullsummenspiel."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Bei einem anderen Spiel gewinnt man mit $P=0{,}2$ zehn Euro, sonst verliert man drei Euro. Wie steht es?",
+      "opts": [
+        "fair",
+        "nachteilig, $E = -0{,}4$ €",
+        "vorteilhaft, $E = +0{,}4$ €",
+        "nicht berechenbar"
+      ],
+      "steps": [
+        "$E = 0{,}2\\cdot10 + 0{,}8\\cdot(-3)$",
+        "$= 2 - 2{,}4 = -0{,}4$",
+        "Pro Spiel verliert man im Schnitt $40$ Cent."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Was ist ein Denkfehler beim Roulette („nach fünfmal Schwarz muss Rot kommen“)?",
+      "opts": [
+        "die Kugel hat kein Gedächtnis — jede Drehung ist unabhängig",
+        "die Bank manipuliert",
+        "das Gesetz der großen Zahlen gleicht sofort aus",
+        "Rot ist tatsächlich wahrscheinlicher geworden"
+      ],
+      "steps": [
+        "Jede Drehung ist ein neuer, unabhängiger Versuch.",
+        "Vergangene Ergebnisse ändern die Wahrscheinlichkeit nicht.",
+        "Das Gesetz der großen Zahlen wirkt über sehr viele Versuche, nicht als Ausgleich."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Was sind Pseudozufallszahlen?",
+      "opts": [
+        "echte Zufallszahlen aus physikalischen Quellen",
+        "fehlerhafte Zufallszahlen",
+        "Zahlen ohne Muster",
+        "deterministisch berechnete Zahlen, die sich wie Zufall verhalten"
+      ],
+      "steps": [
+        "Ein Algorithmus erzeugt sie aus einem Startwert (Seed).",
+        "Mit demselben Seed kommt dieselbe Folge heraus — praktisch zum Reproduzieren.",
+        "Für Unterricht und Simulation reicht das völlig."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Warum liefert dieselbe Simulation bei jedem Lauf andere Ergebnisse?",
+      "opts": [
+        "weil jeder Lauf neue Zufallszahlen zieht",
+        "weil sich die Wahrscheinlichkeit ändert",
+        "weil der Rechner ungenau ist",
+        "weil das Modell falsch ist"
+      ],
+      "steps": [
+        "Simulation heißt: Stichproben ziehen.",
+        "Verschiedene Stichproben führen zu verschiedenen relativen Häufigkeiten.",
+        "Mit mehr Läufen werden die Unterschiede kleiner."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wie schätzt man aus einer Simulation eine Wahrscheinlichkeit?",
+      "opts": [
+        "Treffer geteilt durch Anzahl der Läufe",
+        "der größte beobachtete Wert",
+        "Anzahl der Läufe geteilt durch Treffer",
+        "Treffer mal Anzahl der Läufe"
+      ],
+      "steps": [
+        "Die relative Häufigkeit ist der Schätzwert.",
+        "$\\hat p = \\dfrac{\\text{Treffer}}{n}$",
+        "Je größer $n$, desto zuverlässiger."
+      ],
+      "solution": 0
+    },
+    {
+      "q": "Wie groß ist die Wahrscheinlichkeit, dass in einer Gruppe von $23$ Personen zwei am selben Tag Geburtstag haben?",
+      "opts": [
+        "etwa $99\\,\\%$",
+        "etwa $50\\,\\%$",
+        "etwa $23\\,\\%$",
+        "etwa $6\\,\\%$"
+      ],
+      "steps": [
+        "Gegenereignis: alle $23$ haben verschiedene Geburtstage.",
+        "$\\dfrac{365}{365}\\cdot\\dfrac{364}{365}\\cdots\\dfrac{343}{365} \\approx 0{,}49$",
+        "Also etwa $51\\,\\%$ für mindestens ein gemeinsames Datum — überraschend hoch."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Welches Problem lässt sich gut simulieren, aber nur mühsam berechnen?",
+      "opts": [
+        "das Werfen einer Münze",
+        "die Augensumme zweier Würfel",
+        "das Geburtstagsproblem mit Zusatzbedingungen",
+        "das Ziehen einer Kugel"
+      ],
+      "steps": [
+        "Einfache Versuche rechnet man direkt aus.",
+        "Sobald viele Stufen und Abhängigkeiten dazukommen, wird die Formel unhandlich.",
+        "Eine Simulation liefert dann schnell eine gute Schätzung."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was zeigt ein Diagramm der relativen Häufigkeit über der Versuchszahl typischerweise?",
+      "opts": [
+        "gleichmäßiges Wachstum",
+        "eine Gerade",
+        "zufällige Sprünge bis zum Ende",
+        "starke Schwankungen am Anfang, dann Einpendeln auf einen Wert"
+      ],
+      "steps": [
+        "Bei wenigen Versuchen wirkt jeder einzelne Ausgang stark.",
+        "Mit wachsender Zahl verlieren einzelne Ergebnisse an Gewicht.",
+        "Die Kurve nähert sich der theoretischen Wahrscheinlichkeit."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie prüft man, ob eine Simulation korrekt aufgebaut ist?",
+      "opts": [
+        "möglichst viele Läufe machen",
+        "das Ergebnis mit der Erwartung vergleichen und übernehmen",
+        "gar nicht",
+        "an einem Fall mit bekanntem theoretischem Wert testen"
+      ],
+      "steps": [
+        "Zum Beispiel den Münzwurf simulieren: heraus muss etwa $0{,}5$ kommen.",
+        "Weicht das deutlich ab, steckt ein Fehler im Aufbau.",
+        "Erst danach setzt man die Simulation auf das unbekannte Problem an."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Wie viele Läufe braucht man ungefähr, um eine Wahrscheinlichkeit auf zwei Nachkommastellen zu schätzen?",
+      "opts": [
+        "etwa tausend",
+        "etwa hundert",
+        "mehrere zehntausend",
+        "zehn genügen"
+      ],
+      "steps": [
+        "Die Streuung der Schätzung sinkt mit $\\dfrac{1}{\\sqrt{n}}$.",
+        "Für eine Genauigkeit von etwa $0{,}01$ braucht es Größenordnung $10^4$ Läufe.",
+        "Zehnfache Genauigkeit kostet hundertfach mehr Läufe."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was ist bei der Deutung einer Simulation zu beachten?",
+      "opts": [
+        "es gilt nur für diesen Rechner",
+        "das Ergebnis ist eine Schätzung mit Unsicherheit, kein exakter Wert",
+        "es ersetzt die Theorie",
+        "es ist exakt"
+      ],
+      "steps": [
+        "Jede Simulation beruht auf einer Stichprobe.",
+        "Ein zweiter Lauf liefert einen leicht anderen Wert.",
+        "Deshalb gehört zur Angabe immer der Hinweis auf die Zahl der Läufe."
+      ],
+      "solution": 1
+    },
+    {
+      "q": "Ein Würfelwurf soll mit Zufallszahlen aus $[0;1)$ simuliert werden. Welche Formel passt?",
+      "opts": [
+        "Ganzzahlanteil der Zufallszahl",
+        "Zufallszahl mal $6$",
+        "Zufallszahl plus $1$",
+        "Ganzzahlanteil von $6\\cdot\\text{Zufallszahl}$, dann $+1$"
+      ],
+      "steps": [
+        "$6\\cdot z$ liegt in $[0;6)$.",
+        "Der Ganzzahlanteil liefert $0$ bis $5$.",
+        "Plus eins ergibt die Augenzahlen $1$ bis $6$, alle gleich wahrscheinlich."
+      ],
+      "solution": 3
+    },
+    {
+      "q": "Warum simuliert man in der Praxis überhaupt?",
+      "opts": [
+        "weil Rechnen zu anstrengend ist",
+        "weil es schneller geht als jede Rechnung",
+        "weil viele reale Vorgänge zu komplex für geschlossene Formeln sind",
+        "weil Simulationen exakter sind"
+      ],
+      "steps": [
+        "Wetter, Verkehr, Finanzmärkte haben zu viele Einflussgrößen.",
+        "Eine Simulation bildet den Ablauf nach, statt ihn geschlossen zu lösen.",
+        "Sie liefert Schätzungen samt Streuung — oft das Beste, was erreichbar ist."
+      ],
+      "solution": 2
+    },
+    {
+      "q": "Was verbindet die Simulation mit der Informatik?",
+      "opts": [
+        "gar nichts",
+        "beide brauchen Zufallszahlen aus dem Internet",
+        "man beschreibt den Zufallsversuch als Algorithmus und lässt ihn oft laufen",
+        "beide arbeiten ohne Mathematik"
+      ],
+      "steps": [
+        "Der Versuch wird in Schritte zerlegt: ziehen, vergleichen, zählen.",
+        "Diese Schleife läuft tausendfach.",
+        "Damit ist Simulation angewandte Informatik — Modell, Algorithmus, Auswertung."
+      ],
+      "solution": 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
