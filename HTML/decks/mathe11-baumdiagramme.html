@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Baumdiagramme</title>
+<meta name="description" content="Mehrstufige Zufallsversuche — entlang der Pfade multiplizieren, über die Pfade addieren">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:grid;place-items:center}
+.pic img{max-width:100%;max-height:100%}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Mathematik · Berufliches Gymnasium 11 · KW 15</p>
+      <h1>Baumdiagramme</h1>
+      <p class="sub">Mehrstufige Zufallsversuche — entlang der Pfade multiplizieren, über die Pfade addieren</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Fahrplan dieser Woche</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Neuer Lernbereich 1</b> — Stunden <b>1 bis 5 von 15</b>, Stochastik</p>
+<p class="line l0 step" data-g="1">Drei Blöcke: <b>die zwei Pfadregeln</b>, <b>mit und ohne Zurücklegen</b>, <b>das Gegenereignis</b></p>
+<p class="line l0 step" data-g="2">Anwendungen: Urnen, Glücksspiele, Qualitätskontrolle</p>
+<p class="line l0 step" data-g="3">Zwei Regeln tragen die ganze Woche</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Die zwei Pfadregeln</h2>
+      <p class="sub">Multiplizieren und addieren</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was ein Pfad ist</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ein Pfad ist <b>ein möglicher Ausgang</b> des ganzen Versuchs</p>
+<p class="line l0 step" data-g="1">Von der Wurzel bis zum Ende, Stufe für Stufe</p>
+<p class="line l0 step" data-g="2"><b>Pfadmultiplikation</b>: entlang eines Pfades werden die Wahrscheinlichkeiten <b>multipliziert</b></p>
+<p class="line l0 step" data-g="3"><b>Pfadaddition</b>: gehören mehrere Pfade zum Ereignis, werden sie <b>addiert</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Probe, die immer geht</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die Summe <b>aller</b> Pfadwahrscheinlichkeiten ist immer **<span class="tex" data-tex="1"></span>**</p>
+<p class="line l0 step" data-g="1">Ebenso die Summe der Äste an jeder einzelnen Verzweigung</p>
+<p class="line l0 step" data-g="2">Stimmt das nicht, ist irgendwo ein Ast falsch beschriftet</p>
+<p class="line l0 step" data-g="3">Ein Glücksrad mit <span class="tex" data-tex="8"></span> Feldern, zweimal gedreht, hat <span class="tex" data-tex="8 \cdot 8 = 64"></span> Pfade</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Erste Beispiele</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Zweimal Kopf mit fairer Münze: <span class="tex" data-tex="\dfrac{1}{2} \cdot \dfrac{1}{2} = \dfrac{1}{4}"></span></p>
+<p class="line l0 step" data-g="1">Zwei Sechsen mit zwei Würfeln: <span class="tex" data-tex="\dfrac{1}{6} \cdot \dfrac{1}{6} = \dfrac{1}{36}"></span></p>
+<p class="line l0 step" data-g="2"><b>Genau eine</b> Sechs: zwei Pfade, also <span class="tex" data-tex="2 \cdot \dfrac{1}{6} \cdot \dfrac{5}{6} = \dfrac{10}{36}"></span></p>
+<p class="line l0 step" data-g="3">Der Faktor <span class="tex" data-tex="2"></span> ist der häufigste Vergessene</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Entlang eines Pfades wird multipliziert, über mehrere Pfade wird addiert.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Mit oder ohne Zurücklegen</h2>
+      <p class="sub">Der Unterschied steckt in der zweiten Stufe</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Mit Zurücklegen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Urne mit <span class="tex" data-tex="3"></span> roten und <span class="tex" data-tex="2"></span> blauen Kugeln: <span class="tex" data-tex="P(\text{rot}) = \dfrac{3}{5}"></span></p>
+<p class="line l0 step" data-g="1">Nach dem Zurücklegen ist die Urne <b>wieder wie vorher</b></p>
+<p class="line l0 step" data-g="2">Zweimal rot also <span class="tex" data-tex="\dfrac{3}{5} \cdot \dfrac{3}{5} = \dfrac{9}{25}"></span></p>
+<p class="line l0 step" data-g="3">Die Äste der zweiten Stufe tragen <b>dieselben</b> Zahlen wie die der ersten</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Ohne Zurücklegen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Nach dem ersten Zug ist eine Kugel weg — es sind nur noch <span class="tex" data-tex="4"></span> da</p>
+<p class="line l0 step" data-g="1">Zweimal rot: <span class="tex" data-tex="\dfrac{3}{5} \cdot \dfrac{2}{4} = \dfrac{3}{10}"></span></p>
+<p class="line l0 step" data-g="2">Die zweite Stufe hat also <b>andere</b> Wahrscheinlichkeiten je nach erstem Zug</p>
+<p class="line l0 step" data-g="3">Genau das ist der einzige Unterschied im Baumdiagramm</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Ein zweites Beispiel</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="4"></span> weiße und <span class="tex" data-tex="6"></span> schwarze Kugeln, ohne Zurücklegen</p>
+<p class="line l0 step" data-g="1">Erste weiß, zweite schwarz: <span class="tex" data-tex="\dfrac{4}{10} \cdot \dfrac{6}{9}"></span></p>
+<p class="line l0 step" data-g="2">Das ergibt <span class="tex" data-tex="\dfrac{24}{90} = \dfrac{4}{15}"></span></p>
+<p class="line l0 step" data-g="3">Der Nenner der zweiten Stufe ist <b>immer</b> um eins kleiner</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Unabhängig oder nicht</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Zwei Ereignisse sind <b>stochastisch unabhängig</b>, wenn das eine die Wahrscheinlichkeit des anderen nicht ändert</p>
+<p class="line l0 step" data-g="1">Ziehen <b>mit</b> Zurücklegen ist unabhängig</p>
+<p class="line l0 step" data-g="2">Ziehen <b>ohne</b> Zurücklegen ist es nicht</p>
+<p class="line l0 step" data-g="3">Addieren darf man nur bei Ereignissen, die sich <b>gegenseitig ausschließen</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Das Gegenereignis</h2>
+      <p class="sub">Der Trick bei „mindestens“</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum der Umweg schneller ist</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Mindestens einmal Kopf bei drei Würfen — das sind <b>sieben</b> Pfade</p>
+<p class="line l0 step" data-g="1">Das Gegenteil ist <b>ein</b> Pfad: dreimal Zahl, also <span class="tex" data-tex="\dfrac{1}{8}"></span></p>
+<p class="line l0 step" data-g="2">Also <span class="tex" data-tex="P = 1 - \dfrac{1}{8} = \dfrac{7}{8}"></span></p>
+<p class="line l0 step" data-g="3">Bei <b>mindestens</b> lohnt fast immer das Gegenereignis</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Noch ein Beispiel</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Dreimal würfeln, <b>nie</b> eine Sechs</p>
+<p class="line l0 step" data-g="1"><span class="tex" data-tex="\left(\dfrac{5}{6}\right)^3 = \dfrac{125}{216}"></span></p>
+<p class="line l0 step" data-g="2">Mindestens eine Sechs wäre dann <span class="tex" data-tex="1 - \dfrac{125}{216}"></span></p>
+<p class="line l0 step" data-g="3">Also rund <span class="tex" data-tex="42\,\%"></span> — deutlich mehr, als die meisten schätzen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Zwei Anwendungen</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0">Qualitätskontrolle</p>
+<p class="col l1 step" data-g="0">Maschine A: <span class="tex" data-tex="60\,\%"></span>, <span class="tex" data-tex="2\,\%"></span> Ausschuss</p>
+<p class="col l1 step" data-g="0">Maschine B: <span class="tex" data-tex="40\,\%"></span>, <span class="tex" data-tex="5\,\%"></span> Ausschuss</p>
+<p class="col l1 step" data-g="0">gesamt <span class="tex" data-tex="0{,}6 \cdot 0{,}02 + 0{,}4 \cdot 0{,}05"></span></p>
+<p class="col l1 step" data-g="0">also <span class="tex" data-tex="3{,}2\,\%"></span></p></div>
+        <div class="card right"><p class="col l0 step" data-g="1">Medizinischer Test</p>
+<p class="col l1 step" data-g="1">erkennt Kranke zu <span class="tex" data-tex="99\,\%"></span></p>
+<p class="col l1 step" data-g="1">das ist ein <b>Ast</b>, keine Aussage</p>
+<p class="col l1 step" data-g="1">nämlich nur der Zweig „krank“</p>
+<p class="col l1 step" data-g="1">die Umkehrung folgt nächste Woche</p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Jetzt ihr</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>20 Aufgaben</b> im Mathe-Labor — Pfadregeln, Urnen, Gegenereignis</p>
+<p class="line l0 step" data-g="1">Bei jeder Aufgabe zuerst den <b>Baum skizzieren</b>, dann rechnen</p>
+<p class="line l0 step" data-g="2">Und immer prüfen: <b>mit oder ohne Zurücklegen?</b></p>
+<p class="line l0 step" data-g="3"><b>docalvers.de/mathetest11-baumdiagramme.html</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script>
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  if (e.target.closest('#hud') || e.target.closest('.labbar a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+}
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>

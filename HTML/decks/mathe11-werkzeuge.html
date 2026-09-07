@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Exakt oder numerisch</title>
+<meta name="description" content="Gleichungen mit CAS und GTR lösen — und wissen, was das Ergebnis wert ist">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:grid;place-items:center}
+.pic img{max-width:100%;max-height:100%}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Mathematik · Berufliches Gymnasium 11 · KW 38</p>
+      <h1>Exakt oder numerisch</h1>
+      <p class="sub">Gleichungen mit CAS und GTR lösen — und wissen, was das Ergebnis wert ist</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Fahrplan dieser Woche</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>5 Stunden</b>, Lernbereich 2 — Stunden <b>11 bis 15 von 20</b></p>
+<p class="line l0 step" data-g="1">Ab jetzt <b>mit Hilfsmitteln</b>: CAS, GTR, GeoGebra</p>
+<p class="line l0 step" data-g="2">Drei Blöcke: <b>exakt oder numerisch</b>, <b>was das Werkzeug nicht weiß</b>, <b>Lösungswege bewerten</b></p>
+<p class="line l0 step" data-g="3">Die neue Frage ist nicht „wie rechne ich das“, sondern <b>„welche Ebene brauche ich“</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Exakt oder numerisch</h2>
+      <p class="sub">Zwei Antworten auf dieselbe Frage</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was der exakte Modus liefert</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="x^2 = 2"></span> exakt gelöst heißt <span class="tex" data-tex="x = \sqrt{2}"></span> und <span class="tex" data-tex="x = -\sqrt{2}"></span></p>
+<p class="line l0 step" data-g="1">Das CAS gibt **<span class="tex" data-tex="\sqrt{2}"></span> selbst** aus, keine Dezimalzahl</p>
+<p class="line l0 step" data-g="2">Genauso bleibt <span class="tex" data-tex="\dfrac{1}{3}"></span> ein Bruch — der Rechner zeigt <span class="tex" data-tex="0{,}3333333"></span></p>
+<p class="line l0 step" data-g="3">Exakt heißt: <b>ohne jeden Rundungsfehler</b>, dafür oft unanschaulich</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was eine numerische Lösung ist</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Eine <b>Näherung</b> mit endlich vielen Stellen — fast nie der genaue Wert</p>
+<p class="line l0 step" data-g="1"><span class="tex" data-tex="2^x = 10"></span> hat die exakte Lösung <span class="tex" data-tex="x = \log_2 10"></span>, numerisch <span class="tex" data-tex="x \approx 3{,}32"></span></p>
+<p class="line l0 step" data-g="2">Für Sachaufgaben ist die Näherung meist die <b>brauchbarere</b> Antwort</p>
+<p class="line l0 step" data-g="3">Für Beweise und Weiterrechnen ist sie <b>wertlos</b> — Fehler wachsen mit</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum Rechner manchmal seltsam antworten</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="0{,}1 + 0{,}2"></span> ergibt auf vielen Geräten <span class="tex" data-tex="0{,}30000000000000004"></span></p>
+<p class="line l0 step" data-g="1">Kein Defekt: der Rechner speichert <b>binär</b>, und <span class="tex" data-tex="0{,}1"></span> ist binär periodisch</p>
+<p class="line l0 step" data-g="2">Dieselbe Ursache wie <span class="tex" data-tex="\dfrac{1}{3} = 0{,}333\ldots"></span> im Zehnersystem</p>
+<p class="line l0 step" data-g="3">Folge: <b>nie auf Gleichheit prüfen</b>, wenn numerisch gerechnet wurde</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die drei Werkzeugebenen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Kopf und Papier</b> — kleine Zahlen, Struktur sichtbar, Kontrolle sofort</p>
+<p class="line l0 step" data-g="1"><b>Exaktes CAS</b> — Terme umformen, Wurzeln und Brüche behalten</p>
+<p class="line l0 step" data-g="2"><b>Numerik</b> — was sich nicht auflösen lässt, etwa <span class="tex" data-tex="x = \cos x"></span></p>
+<p class="line l0 step" data-g="3">Die Kunst ist die <b>Wahl der Ebene</b>, nicht die Bedienung des Geräts</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Das Werkzeug rechnet. Welche Ebene die Aufgabe braucht, entscheidest du.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Was das Werkzeug nicht weiß</h2>
+      <p class="sub">Es kennt die Aufgabe nicht — nur die Gleichung</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Definitionsbereich fehlt dem CAS</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="\dfrac{1}{x - 2} = 3"></span> ergibt <span class="tex" data-tex="x = \dfrac{7}{3}"></span> — erlaubt, denn <span class="tex" data-tex="x \neq 2"></span></p>
+<p class="line l0 step" data-g="1"><span class="tex" data-tex="\dfrac{x + 1}{x^2 - 9}"></span> ist <b>nicht definiert</b> für <span class="tex" data-tex="x = 3"></span> und <span class="tex" data-tex="x = -3"></span></p>
+<p class="line l0 step" data-g="2">Der Nenner darf nie null werden, unter der Wurzel nichts Negatives stehen</p>
+<p class="line l0 step" data-g="3"><b>Immer selbst notieren</b>, bevor gerechnet wird</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Scheinlösungen: erfundene Lösungen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="\sqrt{x + 6} = x"></span> quadriert ergibt <span class="tex" data-tex="x = 3"></span> und <span class="tex" data-tex="x = -2"></span></p>
+<p class="line l0 step" data-g="1">Probe <span class="tex" data-tex="x = 3"></span>: <span class="tex" data-tex="\sqrt{9} = 3"></span> — <b>stimmt</b></p>
+<p class="line l0 step" data-g="2">Probe <span class="tex" data-tex="x = -2"></span>: <span class="tex" data-tex="\sqrt{4} = 2"></span>, aber rechts steht <span class="tex" data-tex="-2"></span> — <b>stimmt nicht</b></p>
+<p class="line l0 step" data-g="3">Quadrieren ist <b>keine</b> Äquivalenzumformung: es kann Lösungen hinzufügen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Sachzusammenhang entscheidet mit</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Gesucht ist eine Seitenlänge, das CAS liefert <span class="tex" data-tex="x = 4"></span> und <span class="tex" data-tex="x = -7"></span></p>
+<p class="line l0 step" data-g="1">Mathematisch sind <b>beide</b> richtig — als Länge taugt nur <span class="tex" data-tex="x = 4"></span></p>
+<p class="line l0 step" data-g="2">Die zweite Lösung wird <b>begründet verworfen</b>, nicht verschwiegen</p>
+<p class="line l0 step" data-g="3">Deshalb lohnt die Probe auch dann, wenn das CAS gerechnet hat</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Ein CAS beantwortet die Gleichung, die du eintippst — nicht die Aufgabe, die du meinst.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Ergebnisse lesen</h2>
+      <p class="sub">Wie viele Lösungen — und was heißt „oder“?</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Antwort des CAS richtig lesen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Auf <span class="tex" data-tex="x^2 - 5x + 6 = 0"></span> kommt „<span class="tex" data-tex="x = 2"></span> oder <span class="tex" data-tex="x = 3"></span>“</p>
+<p class="line l0 step" data-g="1">Das sind <b>zwei</b> Lösungen — beide erfüllen die Gleichung, jede für sich</p>
+<p class="line l0 step" data-g="2"><span class="tex" data-tex="(x - 1)(x + 4) = 0"></span> liest man direkt ab: <span class="tex" data-tex="x = 1"></span> oder <span class="tex" data-tex="x = -4"></span></p>
+<p class="line l0 step" data-g="3">Ein Produkt ist null, sobald <b>ein</b> Faktor null ist</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wie viele Lösungen sind es wirklich?</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="x^3 - 4x = 0"></span> ausklammern: <span class="tex" data-tex="x(x^2 - 4) = 0"></span> — <b>drei</b> Lösungen</p>
+<p class="line l0 step" data-g="1">Nämlich <span class="tex" data-tex="x = 0"></span>, <span class="tex" data-tex="x = 2"></span> und <span class="tex" data-tex="x = -2"></span></p>
+<p class="line l0 step" data-g="2"><span class="tex" data-tex="x^2 - 6x + 9 = 0"></span> ist <span class="tex" data-tex="(x - 3)^2 = 0"></span> — nur <b>eine</b> Lösung, doppelt</p>
+<p class="line l0 step" data-g="3">Manche CAS zeigen sie zweimal an: das ist <b>eine</b> Zahl, nicht zwei</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Von Hand geht manchmal schneller</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="\dfrac{x}{3} + \dfrac{x - 1}{4} = 2"></span>: Hauptnenner <span class="tex" data-tex="12"></span>, fertig in zwei Zeilen</p>
+<p class="line l0 step" data-g="1">Kleine ganze Zahlen, klare Struktur — <b>Papier schlägt Tippen</b></p>
+<p class="line l0 step" data-g="2">Und man <b>sieht</b>, was passiert, statt nur ein Ergebnis abzulesen</p>
+<p class="line l0 step" data-g="3">Umgekehrt: <span class="tex" data-tex="x = \cos x"></span> lässt sich <b>nur numerisch</b> lösen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Womit rechne ich was?</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0">Von Hand</p>
+<p class="col l1 step" data-g="0">kleine ganze Zahlen</p>
+<p class="col l1 step" data-g="0">Struktur soll sichtbar bleiben</p>
+<p class="col l1 step" data-g="0">Kontrolle des CAS-Ergebnisses</p>
+<p class="col l1 step" data-g="0">in der Klausur ohne Hilfsmittel</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1">Mit Werkzeug</p>
+<p class="col l1 step" data-g="1">sperrige Zahlen aus Messungen</p>
+<p class="col l1 step" data-g="1">Gleichungen ohne geschlossene Lösung</p>
+<p class="col l1 step" data-g="1">viele gleichartige Rechnungen</p>
+<p class="col l1 step" data-g="1">Graphen zum Abschätzen</p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Genauigkeit: nicht mehr behaupten als man weiß</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Längen auf cm genau gemessen, das CAS zeigt <span class="tex" data-tex="12{,}3456789"></span> m</p>
+<p class="line l0 step" data-g="1">Das Ergebnis kann <b>nicht genauer</b> sein als die Messung</p>
+<p class="line l0 step" data-g="2">Also auf <b>cm runden</b>: <span class="tex" data-tex="12{,}35"></span> m</p>
+<p class="line l0 step" data-g="3">Alle weiteren Stellen sind Rechenrauschen, keine Information</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Jetzt ihr</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>20 Aufgaben</b> im Mathe-Labor — Werkzeugebenen, exakt oder numerisch, bewerten</p>
+<p class="line l0 step" data-g="1">Jede Aufgabe hat einen <b>Lösungsweg</b> zum Aufklappen</p>
+<p class="line l0 step" data-g="2">Bei jeder Aufgabe mitdenken: <b>welche Ebene</b> hätte ich gewählt?</p>
+<p class="line l0 step" data-g="3"><b>docalvers.de/mathetest11-werkzeuge.html</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script>
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  if (e.target.closest('#hud') || e.target.closest('.labbar a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+}
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>

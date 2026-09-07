@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quadratische Funktionen</title>
+<meta name="description" content="Scheitelpunkt, Normalform — und warum ein fallender Stein keine Gerade beschreibt">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:grid;place-items:center}
+.pic img{max-width:100%;max-height:100%}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Mathematik · Berufliches Gymnasium 11 · KW 46</p>
+      <h1>Quadratische Funktionen</h1>
+      <p class="sub">Scheitelpunkt, Normalform — und warum ein fallender Stein keine Gerade beschreibt</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Fahrplan dieser Woche</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Lernbereich 3 — Stunden <b>16 bis 20 von 75</b></p>
+<p class="line l0 step" data-g="1">Drei Blöcke: <b>Scheitelpunktform</b>, <b>Normalform</b>, <b>beschleunigte Bewegung</b></p>
+<p class="line l0 step" data-g="2">Der Physikbezug ist kein Beiwerk: <span class="tex" data-tex="s(t) = \dfrac{a}{2}\,t^2"></span> <b>ist</b> eine Parabel</p>
+<p class="line l0 step" data-g="3">Am Ende <b>20 Aufgaben</b> — Scheitel ablesen, umformen, Wurf und freier Fall</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Die Scheitelpunktform</h2>
+      <p class="sub">Alles Wichtige steht schon da</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Ablesen statt rechnen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="f(x) = (x - d)^2 + e"></span> hat den Scheitel <span class="tex" data-tex="S(d \mid e)"></span></p>
+<p class="line l0 step" data-g="1"><span class="tex" data-tex="f(x) = (x - 3)^2 + 2"></span> also <span class="tex" data-tex="S(3 \mid 2)"></span> — <b>Vorzeichen umdrehen</b> bei <span class="tex" data-tex="d"></span></p>
+<p class="line l0 step" data-g="2"><span class="tex" data-tex="f(x) = (x + 4)^2 - 1"></span> gibt <span class="tex" data-tex="S(-4 \mid -1)"></span></p>
+<p class="line l0 step" data-g="3">Die Symmetrieachse ist immer <span class="tex" data-tex="x = d"></span>, bei <span class="tex" data-tex="(x - 5)^2"></span> also <span class="tex" data-tex="x = 5"></span></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was der Faktor vor dem Quadrat macht</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="f(x) = 3x^2"></span> ist gegenüber der Normalparabel <b>gestreckt</b>, also schmaler</p>
+<p class="line l0 step" data-g="1">Ein Faktor zwischen <span class="tex" data-tex="0"></span> und <span class="tex" data-tex="1"></span> staucht sie, macht sie also breiter</p>
+<p class="line l0 step" data-g="2">Ein <b>negativer</b> Faktor öffnet nach unten: <span class="tex" data-tex="f(x) = -2x^2 + 5"></span></p>
+<p class="line l0 step" data-g="3">Bei nach unten geöffneten Parabeln ist der Scheitel der <b>höchste</b> Punkt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Von der Scheitelform zur Normalform</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="f(x) = (x - 2)^2 - 5"></span> ausmultiplizieren</p>
+<p class="line l0 step" data-g="1"><span class="tex" data-tex="(x - 2)^2 = x^2 - 4x + 4"></span>, also <span class="tex" data-tex="f(x) = x^2 - 4x - 1"></span></p>
+<p class="line l0 step" data-g="2">Der <span class="tex" data-tex="y"></span>-Achsenabschnitt ist immer das <b>absolute Glied</b></p>
+<p class="line l0 step" data-g="3">Bei <span class="tex" data-tex="f(x) = x^2 - 4x + 3"></span> also der Punkt <span class="tex" data-tex="(0 \mid 3)"></span></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Zurück: quadratische Ergänzung</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="f(x) = x^2 - 6x + 11"></span> — die Hälfte von <span class="tex" data-tex="-6"></span> ist <span class="tex" data-tex="-3"></span></p>
+<p class="line l0 step" data-g="1"><span class="tex" data-tex="x^2 - 6x = (x - 3)^2 - 9"></span>, also <span class="tex" data-tex="f(x) = (x - 3)^2 + 2"></span></p>
+<p class="line l0 step" data-g="2">Damit ist der Scheitel <span class="tex" data-tex="S(3 \mid 2)"></span> abgelesen</p>
+<p class="line l0 step" data-g="3">Rezept: <b>halbieren, quadrieren, wieder abziehen</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Die Scheitelpunktform verrät den Scheitel, die Normalform den y-Achsenabschnitt. Beide beschreiben dieselbe Parabel.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Nullstellen und Verlauf</h2>
+      <p class="sub">Wie viele Schnittpunkte kann es geben?</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Nullstellen ablesen und zählen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="f(x) = x^2 - 9"></span> hat die Nullstellen <span class="tex" data-tex="x = 3"></span> und <span class="tex" data-tex="x = -3"></span></p>
+<p class="line l0 step" data-g="1">Eine Parabel hat <b>zwei, eine oder keine</b> Nullstelle</p>
+<p class="line l0 step" data-g="2">Zwei, wenn sie die Achse schneidet, eine, wenn sie sie berührt</p>
+<p class="line l0 step" data-g="3">Keine, wenn sie ganz oberhalb oder ganz unterhalb verläuft</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Verschieben statt neu zeichnen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="f(x) = x^2 + 3"></span> ist die Normalparabel, um <span class="tex" data-tex="3"></span> <b>nach oben</b> geschoben</p>
+<p class="line l0 step" data-g="1">Ihr Scheitel liegt bei <span class="tex" data-tex="(0 \mid 3)"></span>, Nullstellen hat sie keine</p>
+<p class="line l0 step" data-g="2"><span class="tex" data-tex="(x - 5)^2"></span> ist um <span class="tex" data-tex="5"></span> <b>nach rechts</b> geschoben</p>
+<p class="line l0 step" data-g="3">Im Term steht <span class="tex" data-tex="-5"></span>, verschoben wird nach <span class="tex" data-tex="+5"></span> — die klassische Falle</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Beschleunigte Bewegung</h2>
+      <p class="sub">Wo diese Parabeln in der Wirklichkeit vorkommen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der freie Fall</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="s(t) = \dfrac{g}{2}\,t^2"></span> mit <span class="tex" data-tex="g \approx 10"></span> m/s²</p>
+<p class="line l0 step" data-g="1">Nach <span class="tex" data-tex="3"></span> s also <span class="tex" data-tex="s = 5 \cdot 9 = 45"></span> m</p>
+<p class="line l0 step" data-g="2">Die Geschwindigkeit wächst dagegen <b>linear</b>: <span class="tex" data-tex="v = g\,t = 30"></span> m/s</p>
+<p class="line l0 step" data-g="3">Weg quadratisch, Geschwindigkeit linear — das ist der Kern</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Doppelte Zeit, vierfacher Weg</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Verdoppelt man die Fallzeit, wird der Weg <b>viermal</b> so lang</p>
+<p class="line l0 step" data-g="1">Denn <span class="tex" data-tex="t"></span> steht im Quadrat: <span class="tex" data-tex="(2t)^2 = 4t^2"></span></p>
+<p class="line l0 step" data-g="2">Deshalb ist <span class="tex" data-tex="s(t)"></span> <b>keine</b> gleichmäßige Zunahme</p>
+<p class="line l0 step" data-g="3">Ein Auto mit <span class="tex" data-tex="a = 4"></span> m/s² fährt in <span class="tex" data-tex="5"></span> s: <span class="tex" data-tex="s = 2 \cdot 25 = 50"></span> m</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Wurf: nach unten geöffnete Parabel</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="h(t) = -5t^2 + 20t"></span> in Metern</p>
+<p class="line l0 step" data-g="1">Am Boden ist <span class="tex" data-tex="h = 0"></span>: <span class="tex" data-tex="t(-5t + 20) = 0"></span>, also <span class="tex" data-tex="t = 0"></span> und <span class="tex" data-tex="t = 4"></span> s</p>
+<p class="line l0 step" data-g="2">Der Scheitel liegt in der Mitte zwischen den Nullstellen, bei <span class="tex" data-tex="t = 2"></span> s</p>
+<p class="line l0 step" data-g="3">Maximale Höhe <span class="tex" data-tex="h(2) = -20 + 40 = 20"></span> m</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Zwei Bewegungen im Vergleich</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0">Gleichförmig</p>
+<p class="col l1 step" data-g="0"><span class="tex" data-tex="s(t) = v \cdot t"></span></p>
+<p class="col l1 step" data-g="0">Graph ist eine Gerade</p>
+<p class="col l1 step" data-g="0">doppelte Zeit, doppelter Weg</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1">Gleichmäßig beschleunigt</p>
+<p class="col l1 step" data-g="1"><span class="tex" data-tex="s(t) = \dfrac{a}{2}\,t^2"></span></p>
+<p class="col l1 step" data-g="1">Graph ist eine Parabel</p>
+<p class="col l1 step" data-g="1">doppelte Zeit, vierfacher Weg</p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Jetzt ihr</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>20 Aufgaben</b> im Mathe-Labor — Scheitel, Normalform, Fall und Wurf</p>
+<p class="line l0 step" data-g="1">Umstellen nicht vergessen: <span class="tex" data-tex="s = \dfrac{a}{2}t^2"></span> nach <span class="tex" data-tex="a"></span> gibt <span class="tex" data-tex="a = \dfrac{2s}{t^2}"></span></p>
+<p class="line l0 step" data-g="2">Bei Sachaufgaben immer fragen: <b>nach oben oder nach unten geöffnet?</b></p>
+<p class="line l0 step" data-g="3"><b>docalvers.de/mathetest11-quadratisch.html</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script>
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  if (e.target.closest('#hud') || e.target.closest('.labbar a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+}
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>
