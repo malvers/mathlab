@@ -24,6 +24,17 @@
 
 const LABS_DATA = [
     {
+        "id": "kreisteilung",
+        "href": "kreisteilung.html",
+        "title": "Kreisteilung",
+        "description": "n Punkte auf einem Kreis, alle Sehnen gezeichnet \u2014 in wie viele Fl\u00e4chen zerf\u00e4llt die Scheibe? 1, 2, 4, 8, 16 \u2026 und dann 31, nicht 32. Der ber\u00fchmteste Reinfall beim Weiterraten. Das Lab z\u00e4hlt die Fl\u00e4chen nicht mit der Formel C(n,4) + C(n,2) + 1, sondern l\u00e4uft den planaren Graphen aus Bogen- und Sehnenst\u00fccken wirklich ab \u2014 deshalb zeigt es auch den entarteten Fall: das regelm\u00e4\u00dfige Sechseck hat nur 30 Fl\u00e4chen, weil sich drei Diagonalen im Mittelpunkt treffen. Jeder Punkt l\u00e4sst sich auf dem Kreis verschieben, und der Sprung von 30 auf 31 passiert vor den Augen.",
+        "tagline": "Geometrie / Kombinatorik / 1, 2, 4, 8, 16, 31",
+        "icon": LAB_ICONS["kreisteilung"],
+        "category": "geometrie neu hot highlight grade10 grade11 grade12",
+        "keywords": "kreisteilung kreis sehnen chords schnittpunkte flaechen regionen zerlegung kombinatorik binomialkoeffizient eulerformel eulersche polyederformel folge vermutung induktion gegenbeispiel moser moserkreis sechseck diagonalen entartet cutcircle 31",
+        "color": "gold"
+    },
+    {
         "id": "brahmagupta",
         "href": "brahmagupta.html",
         "title": "Satz von Brahmagupta",
