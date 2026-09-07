@@ -115,6 +115,9 @@ d.bullets("Die drei Formeln", [
     ("Wer sie **rückwärts** liest, kann faktorisieren — darum geht es am Ende", 0),
 ])
 
+d.lab("Das Quadrat einer Summe zum Anfassen", "binomischeslabor.html",
+      note="Zieh am Schieber: das Quadrat zerfällt in $p^2$, zweimal $pq$ und $q^2$ — dieselbe Formel, andere Buchstaben.")
+
 d.bullets("Vorwärts: ausmultiplizieren", [
     ("$(x + 7)^2 = x^2 + 14x + 49$ — mit $a = x$ und $b = 7$", 0),
     ("$(2a - 3b)^2$: **beide** Teile quadrieren, auch die Zahlen", 0),

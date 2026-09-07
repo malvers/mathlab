@@ -300,6 +300,16 @@ class Deck:
             add_click_build(s, [(body, lines)])
         return s
 
+    def lab(self, title, src, lines=None, note="", **kw):
+        """A Mathe-Labor belonging to this slide. PowerPoint cannot run the lab, so
+        here it becomes a normal bullet slide that names it; the HTML deck
+        (tools/pptx/html_deck.py) puts the live lab into the same frame."""
+        lines = list(lines or [])
+        if note:
+            lines.insert(0, (note, 0))
+        lines.append(("**docalvers.de/" + src + "**", 0))
+        return self.bullets(title, lines)
+
     def picture(self, title, path, lines=None, width=CONTENT_W, gap=6):
         """Picture across the top (scaled to width), bullets underneath."""
         s, body = self._content("Inhalt", title, lines)

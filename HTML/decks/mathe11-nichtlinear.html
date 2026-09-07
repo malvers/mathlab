@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nichtlineare Gleichungen und Prozente</title>
+<meta name="description" content="Inhaltlich lösen statt umformen — und binomische Formeln in beide Richtungen">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:grid;place-items:center}
+.pic img{max-width:100%;max-height:100%}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:14px;bottom:12px;display:flex;gap:10px;align-items:center;
+  font-family:Orbitron,sans-serif;font-size:12px;color:var(--ink);z-index:9}
+#hud button{font:inherit;color:inherit;background:rgba(255,255,255,.72);border:0;
+  border-radius:6px;padding:6px 10px;cursor:pointer}
+#hud button:hover{background:#fff}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Mathematik · Berufliches Gymnasium 11 · KW 37</p>
+      <h1>Nichtlineare Gleichungen und Prozente</h1>
+      <p class="sub">Inhaltlich lösen statt umformen — und binomische Formeln in beide Richtungen</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Fahrplan dieser Woche</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>5 Stunden</b>, Lernbereich 2 — Stunden <b>6 bis 10 von 20</b></p>
+<p class="line l0 step" data-g="1">Drei Blöcke: <b>inhaltlich lösen</b>, <b>Proportionalität und Prozent</b>, <b>binomische Formeln</b></p>
+<p class="line l0 step" data-g="2">Neu ist die Denkweise: die Gleichung <b>vorlesen</b> statt sofort umformen</p>
+<p class="line l0 step" data-g="3">Am Ende <b>20 Aufgaben</b> zur Selbstkontrolle im Mathe-Labor</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Inhaltlich lösen</h2>
+      <p class="sub">Was fragt die Gleichung eigentlich?</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Vorlesen statt umformen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="a^3 = 8"></span> heißt: <b>welche Zahl</b> ergibt dreimal mit sich selbst <span class="tex" data-tex="8"></span>?</p>
+<p class="line l0 step" data-g="1">Antwort im Kopf: <span class="tex" data-tex="a = 2"></span> — kein Umformen nötig</p>
+<p class="line l0 step" data-g="2"><span class="tex" data-tex="2^k = 16"></span> heißt: <b>wie oft</b> muss ich <span class="tex" data-tex="2"></span> verdoppeln? Also <span class="tex" data-tex="k = 4"></span></p>
+<p class="line l0 step" data-g="3"><b>Immer die Probe</b>: einsetzen und nachrechnen — das ersetzt den Rechenweg</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Gerader Exponent: zwei Lösungen oder keine</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="x^2 = 49"></span> hat <b>zwei</b> Lösungen: <span class="tex" data-tex="x = 7"></span> und <span class="tex" data-tex="x = -7"></span></p>
+<p class="line l0 step" data-g="1">Das Wurzelzeichen liefert nur die <b>positive</b> — die zweite muss man mitdenken</p>
+<p class="line l0 step" data-g="2"><span class="tex" data-tex="x^2 = -9"></span> hat in den reellen Zahlen <b>keine</b> Lösung: kein Quadrat wird negativ</p>
+<p class="line l0 step" data-g="3">Merke: <b>gerader</b> Exponent, also zwei Lösungen, eine oder gar keine</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Ungerader Exponent und Wurzeln</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="x^3 = -27"></span> hat <b>genau eine</b> Lösung: <span class="tex" data-tex="x = -3"></span></p>
+<p class="line l0 step" data-g="1">Ungerade Potenzen <b>behalten das Vorzeichen</b> — deshalb geht Negatives hier</p>
+<p class="line l0 step" data-g="2"><span class="tex" data-tex="\sqrt{x} = 6"></span>: beide Seiten <b>quadrieren</b>, also <span class="tex" data-tex="x = 36"></span></p>
+<p class="line l0 step" data-g="3">Unter der Wurzel darf nichts Negatives stehen — Definitionsbereich mitprüfen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Zehnerpotenzen und die Null im Exponenten</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="10^x = 1000"></span>: die <span class="tex" data-tex="1000"></span> hat <b>drei Nullen</b>, also <span class="tex" data-tex="x = 3"></span></p>
+<p class="line l0 step" data-g="1"><span class="tex" data-tex="5^x = 1"></span>: <b>jede</b> Zahl hoch null ergibt eins, also <span class="tex" data-tex="x = 0"></span></p>
+<p class="line l0 step" data-g="2">Das ist keine Ausnahme, sondern folgt aus <span class="tex" data-tex="5^x : 5^x = 5^{x-x}"></span></p>
+<p class="line l0 step" data-g="3">Aus dieser Frage wird später der <b>Logarithmus</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Die meisten dieser Gleichungen beantwortet man, indem man sie laut vorliest.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Proportionalität und Prozent</h2>
+      <p class="sub">Die Mathematik, die im Alltag am häufigsten vorkommt</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die drei Größen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Grundwert</b> <span class="tex" data-tex="G"></span> — das Ganze, wovon die Rede ist</p>
+<p class="line l0 step" data-g="1"><b>Prozentsatz</b> <span class="tex" data-tex="p"></span> — wie viele Hundertstel davon</p>
+<p class="line l0 step" data-g="2"><b>Prozentwert</b> <span class="tex" data-tex="W"></span> — der Anteil selbst: <span class="tex" data-tex="W = G \cdot \dfrac{p}{100}"></span></p>
+<p class="line l0 step" data-g="3">Der häufigste Fehler ist nicht die Formel, sondern der <b>falsche Grundwert</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Um wie viel Prozent hat sich etwas geändert?</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ein Preis steigt von <span class="tex" data-tex="80"></span> € auf <span class="tex" data-tex="92"></span> €</p>
+<p class="line l0 step" data-g="1"><b>Änderung zuerst</b>: <span class="tex" data-tex="92 - 80 = 12"></span> €</p>
+<p class="line l0 step" data-g="2"><b>Immer auf den alten Wert</b> beziehen: <span class="tex" data-tex="\dfrac{12}{80} = 0{,}15"></span></p>
+<p class="line l0 step" data-g="3">Also <span class="tex" data-tex="15\,\%"></span> Steigerung — auf <span class="tex" data-tex="92"></span> bezogen käme falsch <span class="tex" data-tex="13\,\%"></span> heraus</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Rückwärts: vom neuen Preis zum alten</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Nach <span class="tex" data-tex="20\,\%"></span> Rabatt kostet eine Jacke <span class="tex" data-tex="68"></span> €. Was kostete sie vorher?</p>
+<p class="line l0 step" data-g="1"><span class="tex" data-tex="68"></span> € sind <b>nicht</b> der Grundwert, sondern <span class="tex" data-tex="80\,\%"></span> davon</p>
+<p class="line l0 step" data-g="2">Also <span class="tex" data-tex="G \cdot 0{,}8 = 68"></span>, damit <span class="tex" data-tex="G = \dfrac{68}{0{,}8} = 85"></span> €</p>
+<p class="line l0 step" data-g="3">Falle: <span class="tex" data-tex="20\,\%"></span> von <span class="tex" data-tex="68"></span> dazuzählen ergibt <span class="tex" data-tex="81{,}60"></span> € — <b>falscher Grundwert</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Wachstumsfaktor spart alle Zwischenschritte</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="+15\,\%"></span> heißt **mal <span class="tex" data-tex="1{,}15"></span>**, <span class="tex" data-tex="-20\,\%"></span> heißt **mal <span class="tex" data-tex="0{,}8"></span>**</p>
+<p class="line l0 step" data-g="1">Mehrere Änderungen werden <b>multipliziert</b>, nicht addiert</p>
+<p class="line l0 step" data-g="2"><span class="tex" data-tex="+10\,\%"></span> und danach <span class="tex" data-tex="-10\,\%"></span>: <span class="tex" data-tex="1{,}1 \cdot 0{,}9 = 0{,}99"></span></p>
+<p class="line l0 step" data-g="3">Man landet also <span class="tex" data-tex="1\,\%"></span> <b>unter</b> dem Anfang — nicht wieder beim Ausgangswert</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Zwei Sorten von Zusammenhang</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0">Proportional</p>
+<p class="col l1 step" data-g="0"><span class="tex" data-tex="4"></span> kg Äpfel kosten <span class="tex" data-tex="6"></span> €</p>
+<p class="col l1 step" data-g="0">doppelt so viel, doppelt so teuer</p>
+<p class="col l1 step" data-g="0"><span class="tex" data-tex="10"></span> kg kosten <span class="tex" data-tex="15"></span> €</p>
+<p class="col l1 step" data-g="0"><b>Quotient</b> bleibt gleich</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1">Antiproportional</p>
+<p class="col l1 step" data-g="1"><span class="tex" data-tex="3"></span> Maschinen brauchen <span class="tex" data-tex="12"></span> h</p>
+<p class="col l1 step" data-g="1">mehr Maschinen, weniger Zeit</p>
+<p class="col l1 step" data-g="1"><span class="tex" data-tex="5"></span> Maschinen brauchen <span class="tex" data-tex="7{,}2"></span> h</p>
+<p class="col l1 step" data-g="1"><b>Produkt</b> bleibt gleich</p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Prozent heißt Hundertstel — und der Grundwert ist immer das, wovon die Rede war.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Binomische Formeln</h2>
+      <p class="sub">Einmal vorwärts, einmal rückwärts</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die drei Formeln</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="(a + b)^2 = a^2 + 2ab + b^2"></span></p>
+<p class="line l0 step" data-g="1"><span class="tex" data-tex="(a - b)^2 = a^2 - 2ab + b^2"></span></p>
+<p class="line l0 step" data-g="2"><span class="tex" data-tex="(a + b)(a - b) = a^2 - b^2"></span></p>
+<p class="line l0 step" data-g="3">Wer sie <b>rückwärts</b> liest, kann faktorisieren — darum geht es am Ende</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content lab">
+      <h3>Das Quadrat einer Summe zum Anfassen</h3><div class="rules"></div><p class="labnote" style="top:146px">Zieh am Schieber: das Quadrat zerfällt in <span class="tex" data-tex="p^2"></span>, zweimal <span class="tex" data-tex="pq"></span> und <span class="tex" data-tex="q^2"></span> — dieselbe Formel, andere Buchstaben.</p>
+      <div class="labframe" style="top:172px;height:314px">
+        <iframe src="../binomischeslabor.html" title="Das Quadrat einer Summe zum Anfassen" style="width:1663.18px;height:640px;transform:scale(0.490625)"></iframe>
+      </div>
+      <div class="labbar">
+        <a href="../binomischeslabor.html" target="_blank" rel="noopener">Neuer Tab</a>
+        <button class="labnext">Weiter &#9656;</button>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Vorwärts: ausmultiplizieren</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="(x + 7)^2 = x^2 + 14x + 49"></span> — mit <span class="tex" data-tex="a = x"></span> und <span class="tex" data-tex="b = 7"></span></p>
+<p class="line l0 step" data-g="1"><span class="tex" data-tex="(2a - 3b)^2"></span>: <b>beide</b> Teile quadrieren, auch die Zahlen</p>
+<p class="line l0 step" data-g="2"><span class="tex" data-tex="a^2 = 4a^2"></span>, <span class="tex" data-tex="b^2 = 9b^2"></span>, Mittelterm <span class="tex" data-tex="2 \cdot 2a \cdot 3b = 12ab"></span></p>
+<p class="line l0 step" data-g="3">Ergebnis <span class="tex" data-tex="4a^2 - 12ab + 9b^2"></span> — der Mittelterm fehlt nie</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Das dritte Binom erkennt man am Minus</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="(5 + y)(5 - y) = 25 - y^2"></span> — die gemischten Glieder heben sich auf</p>
+<p class="line l0 step" data-g="1">Nachrechnen: <span class="tex" data-tex="+5y"></span> und <span class="tex" data-tex="-5y"></span> ergeben zusammen null</p>
+<p class="line l0 step" data-g="2">Deshalb bleibt nur die <b>Differenz der Quadrate</b> übrig</p>
+<p class="line l0 step" data-g="3">Genau diese Form braucht man gleich zum Faktorisieren</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Rückwärts: eine Differenz von Quadraten zerlegen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="x^2 - 81"></span>: beides sind Quadrate, <span class="tex" data-tex="x^2"></span> und <span class="tex" data-tex="9^2"></span></p>
+<p class="line l0 step" data-g="1">Also <span class="tex" data-tex="x^2 - 81 = (x + 9)(x - 9)"></span></p>
+<p class="line l0 step" data-g="2"><span class="tex" data-tex="49x^2 - 16"></span>: auch <span class="tex" data-tex="49x^2"></span> ist ein Quadrat, nämlich <span class="tex" data-tex="(7x)^2"></span></p>
+<p class="line l0 step" data-g="3">Also <span class="tex" data-tex="49x^2 - 16 = (7x + 4)(7x - 4)"></span></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Rückwärts: ein vollständiges Quadrat erkennen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><span class="tex" data-tex="x^2 + 10x + 25"></span> — passt das auf <span class="tex" data-tex="a^2 + 2ab + b^2"></span>?</p>
+<p class="line l0 step" data-g="1"><b>Probe am Mittelterm</b>: <span class="tex" data-tex="b = 5"></span>, denn <span class="tex" data-tex="2 \cdot x \cdot 5 = 10x"></span></p>
+<p class="line l0 step" data-g="2">Und der letzte Term stimmt: <span class="tex" data-tex="5^2 = 25"></span></p>
+<p class="line l0 step" data-g="3">Also <span class="tex" data-tex="x^2 + 10x + 25 = (x + 5)^2"></span></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Die sechs Fallen dieser Woche</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0">Beim Lösen und Rechnen</p>
+<p class="col l1 step" data-g="0">bei <span class="tex" data-tex="x^2 = 49"></span> die Lösung <span class="tex" data-tex="-7"></span> vergessen</p>
+<p class="col l1 step" data-g="0"><span class="tex" data-tex="\sqrt{x} = 6"></span> gewurzelt statt quadriert</p>
+<p class="col l1 step" data-g="0">prozentuale Änderung auf den <b>neuen</b> Wert bezogen</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1">Bei Prozenten und Binomen</p>
+<p class="col l1 step" data-g="1"><span class="tex" data-tex="+10\,\%"></span> und <span class="tex" data-tex="-10\,\%"></span> für ein Nullsummenspiel gehalten</p>
+<p class="col l1 step" data-g="1">bei <span class="tex" data-tex="(2a - 3b)^2"></span> die Zahlen nicht mitquadriert</p>
+<p class="col l1 step" data-g="1"><span class="tex" data-tex="x^2 + 81"></span> zerlegen wollen — nur die <b>Differenz</b> geht</p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Jetzt ihr</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>20 Aufgaben</b> im Mathe-Labor — genau diese drei Blöcke</p>
+<p class="line l0 step" data-g="1">Jede Aufgabe hat einen <b>Lösungsweg</b> zum Aufklappen: erst rechnen, dann nachsehen</p>
+<p class="line l0 step" data-g="2">Diese Woche außerdem: <b>Eingangstest IBB</b> — ob die Note zählt, entscheidet ihr <b>unmittelbar danach</b></p>
+<p class="line l0 step" data-g="3"><b>docalvers.de/mathetest11-nichtlinear.html</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><span id="no"></span><button id="full">Vollbild</button></div>
+<script>
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('no').textContent = (si + 1) + ' / ' + slides.length;
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  if (e.target.closest('#hud') || e.target.closest('.labbar a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+function full(){
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen();
+}
+document.getElementById('full').onclick = full;
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>
