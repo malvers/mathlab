@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Textaufgaben: Das Gauß-Verfahren — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Drei Textaufgaben mit Lösungen zu „Das Gauß-Verfahren“, KW 11: je eine Aufgabe für die Anforderungsbereiche I, II und III.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Textaufgaben: Das Gauß-Verfahren</h1>
+  <div class="sub">Berufliches Gymnasium · Klasse 11 · KW 11 · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/mathe11.html">Zum Plan</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Bälle für den Sportverein</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Ein Sportgeschäft liefert an drei Vereine, auf den Lieferscheinen fehlen die Einzelpreise. <b>Verein 1</b>: $1$ Fußball, $1$ Handball, $1$ Volleyball für $75$ €. <b>Verein 2</b>: $2$ Fußbälle, $1$ Handball, $3$ Volleybälle für $145$ €. <b>Verein 3</b>: $1$ Fußball, $2$ Handbälle, $3$ Volleybälle für $140$ €. Die Preise heißen $f$, $h$, $v$.</p>
+    <ol class="parts">
+      <li>Stelle das Gleichungssystem auf und schreibe die erweiterte Koeffizientenmatrix.</li>
+      <li>Bringe das System mit dem Gauß-Verfahren auf Stufenform. Notiere zu jedem Schritt die Zeilenumformung.</li>
+      <li>Berechne die drei Preise durch Rückwärtseinsetzen und mache die Probe in allen drei Ausgangsgleichungen.</li>
+      <li>Ein vierter Verein bestellt $5$ Fußbälle, $4$ Handbälle und $6$ Volleybälle. Was kostet das?</li>
+    </ol>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Der vermessene Brückenbogen</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Ein Brückenbogen hat die Form einer Parabel $f(x) = ax^2 + bx + c$; $x$ ist der Abstand vom linken Auflager, $f(x)$ die Höhe des Bogens über der Fahrbahn, beides in Metern. Ein Vermessungstrupp misst drei Punkte: bei $x = 2$ ist der Bogen $3{,}6$ m hoch, bei $x = 5$ genau $7{,}5$ m und bei $x = 12$ genau $9{,}6$ m.</p>
+    <ol class="parts">
+      <li>Stelle aus den drei Messpunkten ein lineares Gleichungssystem für $a$, $b$ und $c$ auf.</li>
+      <li>Löse es mit dem Gauß-Verfahren. Tipp: nach dem Eliminieren von $c$ lassen sich die beiden Zeilen durch $3$ bzw. $10$ teilen.</li>
+      <li>Wie weit spannt der Bogen (Abstand der beiden Auflager), und wie hoch ist er in der Mitte?</li>
+      <li>Was bedeutet das Ergebnis $c = 0$ im Sachzusammenhang? Erkläre, warum drei Messpunkte nötig sind, indem du eine zweite Funktion angibst, die nur durch die ersten beiden Punkte geht.</li>
+    </ol>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Drei Dünger, ein Rezept?</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Eine Gärtnerei mischt aus drei Düngern $100$ kg Blumendünger. Die Gehalte in Prozent, jeweils Stickstoff (N), Phosphor (P), Kalium (K): <b>Dünger A</b> $20 / 10 / 10$, <b>Dünger B</b> $10 / 10 / 20$, <b>Dünger C</b> $15 / 10 / 15$. Die Mischung soll $16$ kg N, $10$ kg P und $14$ kg K enthalten. Der Gärtner behauptet: <b>„Drei Gleichungen, drei Unbekannte, also gibt es genau eine Rezeptur.“</b> Die Mengen heißen $a$, $b$, $c$ in kg.</p>
+    <ol class="parts">
+      <li>Stelle die Gleichungen für N, P und K auf. Was fällt an der P-Gleichung auf?</li>
+      <li>Führe das Gauß-Verfahren durch. Was steht in der letzten Zeile?</li>
+      <li>Beurteile die Behauptung. Gib zwei verschiedene brauchbare Rezepturen an und begründe an der Zusammensetzung von C, warum es nicht genau eine gibt.</li>
+      <li>Ein Kunde wünscht stattdessen $18$ kg N, $10$ kg P und $14$ kg K. Zeige mit dem Gauß-Verfahren, was passiert, und erkläre das Ergebnis am Düngerregal.</li>
+    </ol>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Bälle für den Sportverein</h3>
+      <p><b>a)</b> $f + h + v = 75$, $\quad 2f + h + 3v = 145$, $\quad f + 2h + 3v = 140$. Erweiterte Koeffizientenmatrix: $\begin{pmatrix} 1 &amp; 1 &amp; 1 &amp; 75 \\ 2 &amp; 1 &amp; 3 &amp; 145 \\ 1 &amp; 2 &amp; 3 &amp; 140 \end{pmatrix}$.</p>
+      <p><b>b)</b> Zeile 2 minus $2 \cdot$ Zeile 1: $-h + v = -5$. Zeile 3 minus Zeile 1: $h + 2v = 65$. Jetzt die neue Zeile 3 plus die neue Zeile 2: $3v = 60$. Stufenform: $f + h + v = 75$, $\quad -h + v = -5$, $\quad 3v = 60$, als Matrix $\begin{pmatrix} 1 &amp; 1 &amp; 1 &amp; 75 \\ 0 &amp; -1 &amp; 1 &amp; -5 \\ 0 &amp; 0 &amp; 3 &amp; 60 \end{pmatrix}$.</p>
+      <p><b>c)</b> Von unten: $3v = 60$, also $v = 20$. Dann $-h + 20 = -5$, also $h = 25$. Dann $f + 25 + 20 = 75$, also $f = 30$. Probe in den <b>Ausgangsgleichungen</b>: $30 + 25 + 20 = 75$; $60 + 25 + 60 = 145$; $30 + 50 + 60 = 140$. Ein Fußball kostet $30$ €, ein Handball $25$ €, ein Volleyball $20$ €.</p>
+      <p><b>d)</b> $5 \cdot 30 + 4 \cdot 25 + 6 \cdot 20 = 150 + 100 + 120 = 370$ €.</p>
+      <p class="why">Falle in c): die Probe in den umgeformten Zeilen sagt nichts, dort stimmt es auch nach einem Rechenfehler. Immer in die drei Ausgangsgleichungen einsetzen.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Der vermessene Brückenbogen</h3>
+      <p><b>a)</b> Einsetzen der Punkte: $4a + 2b + c = 3{,}6$, $\quad 25a + 5b + c = 7{,}5$, $\quad 144a + 12b + c = 9{,}6$. Drei Unbekannte, drei Gleichungen, die Unbekannten sind die Koeffizienten, nicht $x$.</p>
+      <p><b>b)</b> Zeile 2 minus Zeile 1: $21a + 3b = 3{,}9$, geteilt durch $3$: $7a + b = 1{,}3$. Zeile 3 minus Zeile 1: $140a + 10b = 6$, geteilt durch $10$: $14a + b = 0{,}6$. Neue Zeile 3 minus neue Zeile 2: $7a = -0{,}7$, also $a = -0{,}1$. Rückwärts: $b = 1{,}3 - 7 \cdot (-0{,}1) = 2$ und $c = 3{,}6 - 4 \cdot (-0{,}1) - 2 \cdot 2 = 0$. Also $f(x) = -0{,}1x^2 + 2x$. Probe: $f(2) = -0{,}4 + 4 = 3{,}6$; $f(5) = -2{,}5 + 10 = 7{,}5$; $f(12) = -14{,}4 + 24 = 9{,}6$.</p>
+      <p><b>c)</b> Auflager sind die Nullstellen: $-0{,}1x^2 + 2x = x \cdot (-0{,}1x + 2) = 0$, also $x = 0$ oder $x = 20$. Spannweite $20$ m. Die Mitte liegt aus Symmetriegründen bei $x = 10$: $f(10) = -10 + 20 = 10$ m Höhe.</p>
+      <p><b>d)</b> $c = f(0) = 0$: am linken Auflager, bei $x = 0$, hat der Bogen die Höhe $0$, er beginnt auf Fahrbahnhöhe. Das passt zur Messanordnung. Drei Unbekannte brauchen drei unabhängige Gleichungen; mit zwei Punkten bleibt eine Wahlfreiheit. Beispiel: die Gerade $g(x) = 1{,}3x + 1$ (also $a = 0$) geht durch $(2 \mid 3{,}6)$ und $(5 \mid 7{,}5)$, denn $2{,}6 + 1 = 3{,}6$ und $6{,}5 + 1 = 7{,}5$, aber nicht durch $(12 \mid 9{,}6)$, denn $g(12) = 16{,}6$. Erst der dritte Punkt legt $a$ fest.</p>
+      <p class="why">Falle in a): $x$ ist hier keine Unbekannte, sondern eine gemessene Zahl. Unbekannt sind $a$, $b$, $c$; wer nach $x$ auflösen will, hat das Problem nicht verstanden.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Drei Dünger, ein Rezept?</h3>
+      <p><b>a)</b> N: $0{,}2a + 0{,}1b + 0{,}15c = 16$, P: $0{,}1a + 0{,}1b + 0{,}1c = 10$, K: $0{,}1a + 0{,}2b + 0{,}15c = 14$. Die P-Gleichung ist mal $10$ genau $a + b + c = 100$, die Massenbilanz: alle drei Dünger haben $10\,\%$ Phosphor, also hat jede $100$-kg-Mischung automatisch $10$ kg P. Mit $20$ multipliziert werden die anderen beiden ganzzahlig: $4a + 2b + 3c = 320$ und $2a + 4b + 3c = 280$.</p>
+      <p><b>b)</b> Zeile 1: $a + b + c = 100$. Zeile 2 minus $4 \cdot$ Zeile 1: $-2b - c = -80$, also $2b + c = 80$. Zeile 3 minus $2 \cdot$ Zeile 1: $2b + c = 80$. Die beiden neuen Zeilen sind gleich, ihre Differenz ergibt $0 = 0$. Eine wahre, aber leere Aussage: die dritte Gleichung war überflüssig, das System hat <b>unendlich viele</b> Lösungen.</p>
+      <p><b>c)</b> Die Behauptung ist falsch: drei Gleichungen sind nur dann drei Bedingungen, wenn keine aus den anderen folgt. Aus $2b + c = 80$ folgt $b = 40 - \dfrac{c}{2}$ und $a = 100 - b - c = 60 - \dfrac{c}{2}$. Für $c = 0$: $a = 60$, $b = 40$. Für $c = 20$: $a = 50$, $b = 30$. Probe für die zweite: N $10 + 3 + 3 = 16$, K $5 + 6 + 3 = 14$, Masse $100$. Grund: C ist genau das <b>Mittel aus A und B</b>, $\dfrac{20 + 10}{2} = 15$, $\dfrac{10 + 10}{2} = 10$, $\dfrac{10 + 20}{2} = 15$. Also wirken $20$ kg C wie $10$ kg A plus $10$ kg B, und C bringt keine neue Bedingung ins Spiel. Brauchbar sind alle $c$ von $0$ bis $80$ kg; bei $c = 80$ ist $b = 0$.</p>
+      <p><b>d)</b> Rechte Seiten jetzt $360$, $100$, $280$. Zeile 2 minus $4 \cdot$ Zeile 1: $2b + c = 40$. Zeile 3 minus $2 \cdot$ Zeile 1: $2b + c = 80$. Differenz: $0 = 40$, eine falsche Aussage, <b>keine Lösung</b>. Am Regal sieht man warum: in jedem der drei Dünger machen N und K zusammen $30\,\%$ aus. $100$ kg Mischung enthalten also immer genau $30$ kg N plus K, egal wie man mischt. Gewünscht sind $18 + 14 = 32$ kg, das kann keine Rezeptur leisten. Der Widerspruch im Gauß-Verfahren ist die Rechenform dieser Sachgrenze.</p>
+      <p class="why">Drei Gleichungen sind nicht automatisch drei unabhängige Bedingungen. Erst die letzte Zeile der Stufenform verrät, ob genau eine, keine oder unendlich viele Lösungen dastehen.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>

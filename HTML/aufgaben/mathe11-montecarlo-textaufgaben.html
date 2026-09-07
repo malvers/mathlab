@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Textaufgaben: Die Monte-Carlo-Methode — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Drei Textaufgaben mit Lösungen zu „Die Monte-Carlo-Methode“, KW 22: je eine Aufgabe für die Anforderungsbereiche I, II und III.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Textaufgaben: Die Monte-Carlo-Methode</h1>
+  <div class="sub">Berufliches Gymnasium · Klasse 11 · KW 22 · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/mathe11.html">Zum Plan</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Pi aus Zufallspunkten</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>In ein Quadrat mit der Seitenlänge $1$ wird ein Viertelkreis mit Radius $1$ gelegt. Dann werden zufällig Punkte gleichmäßig über das Quadrat gestreut und die Treffer im Viertelkreis gezählt.</p>
+    <ol class="parts">
+      <li>Berechne den theoretischen Anteil der Viertelkreisfläche an der Quadratfläche.</li>
+      <li>Bei $1\,000$ Punkten liegen $782$ im Viertelkreis. Welchen Schätzwert für $\pi$ liefert das?</li>
+      <li>Wie weit liegt dieser Schätzwert vom wahren Wert entfernt?</li>
+      <li>Die Genauigkeit wächst etwa mit $\dfrac{1}{\sqrt{n}}$. Wie viele Punkte bräuchte man, um $\pi$ auf zwei Nachkommastellen zu bestimmen?</li>
+    </ol>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Wie groß ist der Teich?</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Auf einem rechteckigen Grundstück von $40$ m mal $30$ m liegt ein Teich mit unregelmäßigem Rand. Seine Fläche lässt sich nicht mit einer Formel berechnen, deshalb wird ein Luftbild mit zufällig gesetzten Punkten ausgewertet.</p>
+    <ol class="parts">
+      <li>Erkläre, warum sich die Teichfläche aus dem Anteil der Punkte im Teich ergibt.</li>
+      <li>Von $500$ Punkten liegen $137$ im Teich. Schätze die Teichfläche.</li>
+      <li>Eine zweite Serie mit ebenfalls $500$ Punkten ergibt $145$ Treffer. Berechne diese Schätzung und die Schätzung aus allen $1\,000$ Punkten zusammen.</li>
+      <li>Warum ist die Schätzung aus $1\,000$ Punkten verlässlicher als jede der beiden einzelnen? Gib die ungefähre Genauigkeit an.</li>
+    </ol>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Mit genug Punkten geht alles</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Ein Mitschüler sagt: <b>„Mit genügend Zufallspunkten bekomme ich $\pi$ auf beliebig viele Stellen — und das schneller als mit jeder Formel.“</b></p>
+    <ol class="parts">
+      <li>Wie viele Punkte bräuchte er für vier Nachkommastellen? Rechne mit der Genauigkeit $\dfrac{4}{\sqrt{n}}$.</li>
+      <li>Wie viele für sechs Nachkommastellen? Beurteile die Größenordnung.</li>
+      <li>Vergleiche mit dem Streifenverfahren aus der Vorwoche: dort halbiert sich der Fehler beim Verdoppeln der Streifen. Was bedeutet der Unterschied?</li>
+      <li>Beurteile die Aussage. Wofür ist die Monte-Carlo-Methode dann wirklich das Mittel der Wahl?</li>
+    </ol>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Pi aus Zufallspunkten</h3>
+      <p><b>a)</b> Quadratfläche $1 \cdot 1 = 1$, Viertelkreisfläche $\dfrac{\pi \cdot 1^2}{4} = \dfrac{\pi}{4}$. Der Anteil ist also $\dfrac{\pi}{4} \approx 0{,}7854$ — rund $78{,}5\,\%$ der Punkte sollten im Viertelkreis landen.</p>
+      <p><b>b)</b> Trefferanteil $\dfrac{782}{1\,000} = 0{,}782$. Weil dieser Anteil ungefähr $\dfrac{\pi}{4}$ ist, gilt $\pi \approx 4 \cdot 0{,}782 = 3{,}128$.</p>
+      <p><b>c)</b> $\pi \approx 3{,}14159$, die Abweichung beträgt also rund $0{,}0136$. Schon die erste Nachkommastelle stimmt, die zweite nicht mehr.</p>
+      <p><b>d)</b> Der Fehler im <b>Anteil</b> ist etwa $\dfrac{1}{\sqrt{n}}$; für $\pi$ wird er mit $4$ multipliziert. Verlangt ist $\dfrac{4}{\sqrt{n}} \approx 0{,}01$, also $\sqrt{n} \approx 400$ und damit $n \approx 160\,000$ Punkte. Für zwei Stellen ist das schon ein erheblicher Aufwand.</p>
+      <p class="why">Der Trefferanteil ist $\dfrac{\pi}{4}$, nicht $\pi$. Wer die Multiplikation mit $4$ vergisst, erhält $0{,}782$ und hält es für einen misslungenen Versuch.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Wie groß ist der Teich?</h3>
+      <p><b>a)</b> Die Punkte sind gleichmäßig über das Grundstück verteilt, also ist die Chance, in einem bestimmten Bereich zu landen, proportional zu dessen Fläche. Der Anteil der Treffer schätzt daher den Flächenanteil des Teichs, und die gesuchte Fläche ist Grundstücksfläche mal Trefferanteil.</p>
+      <p><b>b)</b> Grundstück: $40 \cdot 30 = 1\,200\ \mathrm{m^2}$. Trefferanteil $\dfrac{137}{500} = 0{,}274$. Schätzung: $1\,200 \cdot 0{,}274 = 328{,}8\ \mathrm{m^2}$.</p>
+      <p><b>c)</b> Zweite Serie: $\dfrac{145}{500} = 0{,}29$ und $1\,200 \cdot 0{,}29 = 348\ \mathrm{m^2}$. Zusammen: $\dfrac{137 + 145}{1\,000} = \dfrac{282}{1\,000} = 0{,}282$ und $1\,200 \cdot 0{,}282 = 338{,}4\ \mathrm{m^2}$.</p>
+      <p><b>d)</b> Beide Einzelserien liegen fast $20\ \mathrm{m^2}$ auseinander — allein durch Zufallsschwankung. Mehr Punkte bedeuten weniger Streuung: die Genauigkeit wächst mit $\dfrac{1}{\sqrt{n}}$, also von $\dfrac{1}{\sqrt{500}} \approx 0{,}045$ auf $\dfrac{1}{\sqrt{1\,000}} \approx 0{,}032$. Auf die Fläche bezogen sind das rund $\pm 38\ \mathrm{m^2}$ — die Schätzung von $338\ \mathrm{m^2}$ sollte man also auf etwa $340\ \mathrm{m^2}$ runden und keine Nachkommastelle angeben.</p>
+      <p class="why">Die vielen Nachkommastellen des Taschenrechners täuschen Genauigkeit vor. $328{,}8\ \mathrm{m^2}$ suggeriert Zentimeter, dabei ist nicht einmal die Zehnerstelle gesichert.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Mit genug Punkten geht alles</h3>
+      <p><b>a)</b> $\dfrac{4}{\sqrt{n}} \approx 0{,}0001$ verlangt $\sqrt{n} \approx 40\,000$, also $n \approx 1{,}6 \cdot 10^9$ — rund <b>anderthalb Milliarden</b> Punkte für vier Stellen.</p>
+      <p><b>b)</b> $\dfrac{4}{\sqrt{n}} \approx 0{,}000001$ verlangt $\sqrt{n} \approx 4 \cdot 10^6$, also $n \approx 1{,}6 \cdot 10^{13}$. Das sind zehntausendmal so viele Punkte wie in a) — jede zusätzliche Stelle kostet den Faktor $100$. Selbst mit schnellen Rechnern ist das keine sinnvolle Methode, um $\pi$ zu bestimmen.</p>
+      <p><b>c)</b> Beim Streifenverfahren sinkt der Fehler proportional zu $\dfrac{1}{n}$, bei Monte Carlo nur mit $\dfrac{1}{\sqrt{n}}$. Für zehnfache Genauigkeit braucht das eine zehnmal so viele Schritte, das andere hundertmal so viele. In einer Dimension ist das Streifenverfahren dem Zufall also deutlich überlegen.</p>
+      <p><b>d)</b> Die Aussage ist falsch, jedenfalls für $\pi$: dafür gibt es Reihenformeln, die mit wenigen Schritten viele Stellen liefern. Der Vorteil von Monte Carlo liegt anderswo. Erstens bei <b>komplizierten Gebieten</b>, deren Rand sich nicht durch eine Formel beschreiben lässt — wie der Teich in Aufgabe 2. Zweitens bei Problemen mit <b>vielen Größen</b> gleichzeitig: dort wächst der Aufwand des Streifenverfahrens explosionsartig, während die $\dfrac{1}{\sqrt{n}}$-Genauigkeit von Monte Carlo unabhängig von der Zahl der Größen bleibt. Genau deshalb steckt das Verfahren in Grafikprogrammen und Finanzmodellen.</p>
+      <p class="why">„Mehr Rechenzeit hilft immer“ stimmt nur, wenn man die Größenordnung kennt. Der Faktor $100$ je zusätzlicher Stelle macht aus einer Sekunde schnell ein Jahr.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>

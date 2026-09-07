@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Textaufgaben: Numerische Verfahren — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Drei Textaufgaben mit Lösungen zu „Numerische Verfahren“, KW 21: je eine Aufgabe für die Anforderungsbereiche I, II und III.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Textaufgaben: Numerische Verfahren</h1>
+  <div class="sub">Berufliches Gymnasium · Klasse 11 · KW 21 · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/mathe11.html">Zum Plan</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Die Kiste mit dem Wunschvolumen</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Eine würfelähnliche Kiste soll so gebaut werden, dass ihr Volumen um genau $5$ mehr beträgt als ihre Kantenlänge: $x^3 - x - 5 = 0$. Für diese Gleichung gibt es keine handliche Lösungsformel, also wird sie <b>numerisch</b> eingegrenzt.</p>
+    <ol class="parts">
+      <li>Zeige, dass zwischen $x = 1$ und $x = 2$ eine Lösung liegen muss.</li>
+      <li>Führe drei Schritte der Bisektion aus und gib nach jedem Schritt das neue Intervall an.</li>
+      <li>Wie lang ist das Intervall nach $n$ Halbierungen? Gib eine Formel an.</li>
+      <li>Wie viele Schritte braucht man, um die Lösung auf drei Nachkommastellen genau zu kennen?</li>
+    </ol>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Die Fläche in Streifen</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Gesucht ist der Flächeninhalt unter der Parabel $f(x) = x^2$ zwischen $x = 0$ und $x = 1$. Statt einer Formel wird die Fläche durch Rechtecke angenähert.</p>
+    <ol class="parts">
+      <li>Teile das Intervall in $4$ gleiche Streifen und berechne Untersumme und Obersumme.</li>
+      <li>Zwischen welchen Werten liegt die gesuchte Fläche also? Wie groß ist die Unsicherheit?</li>
+      <li>Wiederhole die Rechnung mit $8$ Streifen und vergleiche die Unsicherheit.</li>
+      <li>Begründe allgemein, wie sich die Differenz von Ober- und Untersumme verhält, wenn man die Streifenzahl verdoppelt.</li>
+    </ol>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Exakt ist immer besser?</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Ein Mitschüler sagt: <b>„Numerische Verfahren sind nur Notlösungen. Wenn man richtig rechnen kann, bekommt man immer eine exakte Lösung.“</b></p>
+    <ol class="parts">
+      <li>Nenne zwei Gleichungen aus diesem Schuljahr, für die es keine allgemeine Lösungsformel gibt, und begründe kurz.</li>
+      <li>Untersuche $f(x) = x^2$ auf dem Intervall $[-1; 1]$ mit der Bisektion. Was passiert, und warum?</li>
+      <li>Nenne eine Situation, in der ein numerisches Ergebnis der exakten Lösung praktisch überlegen ist.</li>
+      <li>Beurteile die Aussage und formuliere, wann man exakt und wann numerisch arbeitet.</li>
+    </ol>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Die Kiste mit dem Wunschvolumen</h3>
+      <p><b>a)</b> $f(1) = 1 - 1 - 5 = -5$ und $f(2) = 8 - 2 - 5 = 1$. Die Funktionswerte haben <b>verschiedene Vorzeichen</b>, und $f$ ist als Polynom ohne Sprünge. Also muss der Graph dazwischen die $x$-Achse schneiden — es gibt mindestens eine Lösung in $[1; 2]$.</p>
+      <p><b>b)</b> Erster Schritt: $f(1{,}5) = 3{,}375 - 1{,}5 - 5 = -3{,}125 &lt; 0$, also neues Intervall $[1{,}5; 2]$. Zweiter Schritt: $f(1{,}75) \approx -1{,}391 &lt; 0$, also $[1{,}75; 2]$. Dritter Schritt: $f(1{,}875) \approx -0{,}283 &lt; 0$, also $[1{,}875; 2]$. Die Lösung liegt danach zwischen $1{,}875$ und $2$.</p>
+      <p><b>c)</b> Jeder Schritt halbiert das Intervall. Aus der Startlänge $1$ wird nach $n$ Schritten die Länge $\dfrac{1}{2^n}$. Nach drei Schritten sind das $0{,}125$, was zum Intervall aus b) passt.</p>
+      <p><b>d)</b> Drei Nachkommastellen verlangen eine Intervalllänge unter $0{,}001$, also $2^n &gt; 1\,000$. Wegen $2^9 = 512$ und $2^{10} = 1\,024$ genügen <b>$10$ Schritte</b>. Die Lösung ist dann auf $\pm 0{,}001$ bekannt; sie liegt bei rund $1{,}904$.</p>
+      <p class="why">Die Bisektion braucht zwingend einen <b>Vorzeichenwechsel</b> an den Rändern. Ohne ihn liefert das Verfahren keine Aussage, auch wenn im Intervall Nullstellen liegen.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Die Fläche in Streifen</h3>
+      <p><b>a)</b> Streifenbreite $h = 0{,}25$. Die Funktion steigt, also liefert der <b>linke</b> Rand die Untersumme und der <b>rechte</b> die Obersumme. Untersumme: $(0 + 0{,}0625 + 0{,}25 + 0{,}5625) \cdot 0{,}25 = 0{,}875 \cdot 0{,}25 = 0{,}21875$. Obersumme: $(0{,}0625 + 0{,}25 + 0{,}5625 + 1) \cdot 0{,}25 = 1{,}875 \cdot 0{,}25 = 0{,}46875$.</p>
+      <p><b>b)</b> Die Fläche liegt zwischen $0{,}21875$ und $0{,}46875$. Die Unsicherheit ist die Differenz $0{,}25$ — noch reichlich grob. Als bester Schätzwert bietet sich die Mitte an: $0{,}34375$.</p>
+      <p><b>c)</b> Mit $h = 0{,}125$: Untersumme $\dfrac{0 + 1 + 4 + 9 + 16 + 25 + 36 + 49}{512} = \dfrac{140}{512} = 0{,}2734$, Obersumme $\dfrac{204}{512} = 0{,}3984$. Die Unsicherheit ist jetzt $0{,}125$, also genau <b>halb</b> so groß wie vorher. Der wahre Wert $\dfrac{1}{3} \approx 0{,}3333$ liegt in beiden Intervallen.</p>
+      <p><b>d)</b> Bei einer monotonen Funktion unterscheiden sich Ober- und Untersumme nur um die Randstreifen: die Differenz beträgt $\left(f(1) - f(0)\right) \cdot h = 1 \cdot h$. Verdoppelt man die Streifenzahl, halbiert sich $h$ und damit auch die Differenz. Um die Unsicherheit zu zehnteln, braucht man also die zehnfache Streifenzahl — die Genauigkeit wächst hier deutlich schneller als bei einer Simulation mit Zufallszahlen.</p>
+      <p class="why">Ob der linke oder der rechte Rand die Untersumme liefert, hängt von der <b>Monotonie</b> ab. Bei einer fallenden Funktion ist es genau umgekehrt, und wer das ungeprüft übernimmt, vertauscht Ober- und Untersumme.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Exakt ist immer besser?</h3>
+      <p><b>a)</b> Erstens $x^3 - x - 5 = 0$ aus Aufgabe 1: für Gleichungen dritten Grades gibt es zwar eine Formel, sie ist aber unhandlich und liefert hier keinen brauchbaren Ausdruck. Zweitens gemischte Gleichungen wie $2^x = 3x$, in denen die Unbekannte gleichzeitig im Exponenten und in der Basis steht — dafür gibt es mit unseren Mitteln überhaupt kein Auflösungsverfahren. Beide lassen sich nur eingrenzen.</p>
+      <p><b>b)</b> $f(-1) = 1$ und $f(1) = 1$ — <b>kein</b> Vorzeichenwechsel. Die Bisektion meldet, dass sie nichts finden kann, obwohl bei $x = 0$ eine Nullstelle liegt. Der Grund: die Parabel berührt die Achse nur, sie durchquert sie nicht. Das Verfahren findet nur Nullstellen mit Vorzeichenwechsel.</p>
+      <p><b>c)</b> Wenn eine Zahl gebraucht wird und keine Formel: eine Kantenlänge von $1{,}904$ m lässt sich zuschneiden, ein exakter Wurzelausdruck nicht. Auch beim Vergleich zweier Größen und beim Zeichnen eines Graphen ist die Näherung die brauchbarere Antwort, solange man ihre Genauigkeit kennt.</p>
+      <p><b>d)</b> Die Aussage ist falsch. Es gibt Gleichungen ohne Lösungsformel, und es gibt Aufgaben, in denen die exakte Form nicht weiterhilft. <b>Exakt</b> rechnet man, solange man weiterrechnen, umformen oder etwas beweisen will — Näherungen schleppen dabei Fehler mit. <b>Numerisch</b> rechnet man, wenn keine Formel existiert oder wenn ein konkreter Zahlenwert gebraucht wird. Entscheidend ist in beiden Fällen, die Genauigkeit anzugeben: eine Näherung ohne Fehlerschranke ist wertlos.</p>
+      <p class="why">„Numerisch“ heißt nicht „ungenau“. Ein Verfahren mit angegebener Fehlerschranke ist verlässlicher als eine exakte Rechnung, in der sich unbemerkt ein Vorzeichenfehler versteckt.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>

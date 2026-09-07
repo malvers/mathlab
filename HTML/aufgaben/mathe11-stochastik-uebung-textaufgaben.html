@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Textaufgaben: Übung Stochastik — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Drei Textaufgaben mit Lösungen zu „Übung Stochastik“, KW 18: je eine Aufgabe für die Anforderungsbereiche I, II und III.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Textaufgaben: Übung Stochastik</h1>
+  <div class="sub">Berufliches Gymnasium · Klasse 11 · KW 18 · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/mathe11.html">Zum Plan</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Die Losbox beim Schulfest</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Am Stand der Klasse 11 steht eine Losbox mit $10$ Losen, davon sind $4$ Gewinne. Wer ein Los zieht, behält es, es wird also <b>nicht zurückgelegt</b>.</p>
+    <ol class="parts">
+      <li>Wie groß ist die Wahrscheinlichkeit, mit einem Los zu gewinnen? Wie groß ist die für eine Niete?</li>
+      <li>Jemand zieht zwei Lose nacheinander. Wie groß ist die Wahrscheinlichkeit für zwei Gewinne?</li>
+      <li>Wie groß ist die Wahrscheinlichkeit für genau einen Gewinn bei zwei Losen?</li>
+      <li>Wie groß ist die Wahrscheinlichkeit für mindestens einen Gewinn bei zwei Losen? Rechne über das Gegenereignis und prüfe mit b) und c).</li>
+    </ol>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Bremsen in der Fahrradwerkstatt</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Eine Fahrradwerkstatt wertet die Inspektionen eines Monats aus: $200$ Räder wurden geprüft, darunter $120$ E-Bikes. Bei $30$ E-Bikes und bei $10$ der übrigen Räder musste die Bremse repariert werden.</p>
+    <ol class="parts">
+      <li>Lege eine Vierfeldertafel an (E-Bike / kein E-Bike, Bremse defekt / in Ordnung) und fülle alle Felder samt Randsummen.</li>
+      <li>Wie groß ist die Wahrscheinlichkeit, dass ein zufällig gewähltes Rad einen Bremsdefekt hat? Wie groß ist sie, wenn man weiß, dass es ein E-Bike ist? Und wenn es keines ist?</li>
+      <li>Sind die Merkmale „E-Bike“ und „Bremsdefekt“ stochastisch unabhängig? Rechne nach und deute das Ergebnis.</li>
+      <li>Der Werkstattleiter sagt: „Drei von vier Rädern mit Bremsdefekt sind E-Bikes, also hat jedes E-Bike zu $75\,\%$ einen Bremsdefekt.“ Prüfe beide Teile der Aussage.</li>
+    </ol>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Ist das Glücksrad fair?</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Am Nachbarstand dreht man für $1$ € Einsatz ein Glücksrad mit $10$ gleich großen Feldern: Auf einem Feld steht „$5$ €“, auf zwei Feldern „$2$ €“, die übrigen sieben sind Nieten. Ein Mitschüler behauptet: <b>„Das Spiel ist fair, im Schnitt bekommt man seinen Euro zurück.“</b></p>
+    <ol class="parts">
+      <li>Berechne den Erwartungswert des Gewinns (Auszahlung minus Einsatz) und prüfe die Behauptung.</li>
+      <li>Am Abend wurde $300$-mal gedreht. Welchen Überschuss kann der Stand erwarten? Ist dieser Betrag sicher?</li>
+      <li>Wie müsste der Hauptgewinn geändert werden, damit das Spiel fair ist? Und alternativ der Einsatz?</li>
+      <li>Eine Mitschülerin hat $10$-mal gespielt und $3$ € Plus gemacht. Sie sagt: „Deine Rechnung stimmt nicht.“ Beurteile.</li>
+    </ol>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Die Losbox beim Schulfest</h3>
+      <p><b>a)</b> Günstige durch mögliche: $P(\text{Gewinn}) = \dfrac{4}{10} = 0{,}4$. Gegenereignis: $P(\text{Niete}) = 1 - 0{,}4 = 0{,}6$.</p>
+      <p><b>b)</b> Nach dem ersten Gewinn sind nur noch $9$ Lose da, davon $3$ Gewinne. Pfadregel: $\dfrac{4}{10} \cdot \dfrac{3}{9} = \dfrac{12}{90} = \dfrac{2}{15} \approx 0{,}133$.</p>
+      <p><b>c)</b> Zwei Pfade: erst Gewinn, dann Niete, oder umgekehrt. $\dfrac{4}{10} \cdot \dfrac{6}{9} + \dfrac{6}{10} \cdot \dfrac{4}{9} = \dfrac{24}{90} + \dfrac{24}{90} = \dfrac{48}{90} = \dfrac{8}{15} \approx 0{,}533$.</p>
+      <p><b>d)</b> Gegenereignis „keine Gewinne“: $\dfrac{6}{10} \cdot \dfrac{5}{9} = \dfrac{30}{90} = \dfrac{1}{3}$. Also $P(\text{mindestens einer}) = 1 - \dfrac{1}{3} = \dfrac{2}{3}$. Probe: $\dfrac{2}{15} + \dfrac{8}{15} = \dfrac{10}{15} = \dfrac{2}{3}$, und alle drei Fälle zusammen $\dfrac{2}{15} + \dfrac{8}{15} + \dfrac{5}{15} = 1$.</p>
+      <p class="why">Falle in b): mit Zurücklegen rechnen, also $0{,}4 \cdot 0{,}4 = 0{,}16$. Das Los bleibt aber draußen, die zweite Stufe hat andere Zahlen.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Bremsen in der Fahrradwerkstatt</h3>
+      <p><b>a)</b> E-Bike und defekt $30$, E-Bike und in Ordnung $120 - 30 = 90$; kein E-Bike und defekt $10$, kein E-Bike und in Ordnung $80 - 10 = 70$. Randsummen: $120$ E-Bikes und $80$ andere, $40$ defekt und $160$ in Ordnung, gesamt $200$.</p>
+      <p><b>b)</b> $P(\text{defekt}) = \dfrac{40}{200} = 0{,}2$. Mit Bedingung immer Teilmenge durch Bedingung: $P(\text{defekt} \mid \text{E-Bike}) = \dfrac{30}{120} = 0{,}25$ und $P(\text{defekt} \mid \text{kein E-Bike}) = \dfrac{10}{80} = 0{,}125$.</p>
+      <p><b>c)</b> Unabhängig hieße $P(\text{E-Bike} \cap \text{defekt}) = P(\text{E-Bike}) \cdot P(\text{defekt})$. Links: $\dfrac{30}{200} = 0{,}15$. Rechts: $0{,}6 \cdot 0{,}2 = 0{,}12$. Ungleich, also <b>abhängig</b>. Deutung: Bei E-Bikes ist ein Bremsdefekt doppelt so wahrscheinlich wie bei anderen Rädern ($0{,}25$ gegen $0{,}125$), sie sind schwerer und schneller.</p>
+      <p><b>d)</b> Erster Teil: $P(\text{E-Bike} \mid \text{defekt}) = \dfrac{30}{40} = 0{,}75$, das stimmt. Zweiter Teil: gemeint ist $P(\text{defekt} \mid \text{E-Bike}) = \dfrac{30}{120} = 0{,}25$, also $25\,\%$, nicht $75\,\%$. Die Bedingung wurde umgedreht: „unter den Defekten“ ist etwas anderes als „unter den E-Bikes“.</p>
+      <p class="why">Die beiden bedingten Wahrscheinlichkeiten $P(A \mid B)$ und $P(B \mid A)$ haben denselben Zähler $30$, aber verschiedene Nenner. Wer sie vertauscht, rechnet richtig und antwortet falsch.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Ist das Glücksrad fair?</h3>
+      <p><b>a)</b> Jede Auszahlung mal ihre Wahrscheinlichkeit: $0{,}1 \cdot 5 + 0{,}2 \cdot 2 + 0{,}7 \cdot 0 = 0{,}5 + 0{,}4 = 0{,}9$ €. Abzüglich Einsatz: $0{,}9 - 1 = -0{,}10$ €. Der Erwartungswert ist <b>nicht</b> null, das Spiel ist nicht fair: Im Schnitt verliert man $10$ Cent pro Drehung.</p>
+      <p><b>b)</b> $300 \cdot 0{,}10 = 30$ €. Das ist der langfristige Durchschnitt, kein Versprechen: An einem Abend können fünf Hauptgewinne fallen oder gar keiner. Bei $300$ Drehungen liegt der Überschuss aber mit hoher Wahrscheinlichkeit in der Nähe von $30$ €, bei $10$ Drehungen wäre fast alles möglich.</p>
+      <p><b>c)</b> Fair heißt Erwartungswert der Auszahlung gleich Einsatz. Hauptgewinn $x$: $0{,}1 \cdot x + 0{,}4 = 1$, also $0{,}1 x = 0{,}6$ und $x = 6$ €. Probe: $0{,}6 + 0{,}4 = 1$. Alternativ den Einsatz auf die erwartete Auszahlung senken: $0{,}90$ € pro Drehung.</p>
+      <p><b>d)</b> Beides passt zusammen. Bei $10$ Spielen erwartet man $-1$ €, aber ein einziger Hauptgewinn dreht das Vorzeichen: $5 + 4 \cdot 2 = 13$ € Auszahlung bei $10$ € Einsatz ergibt genau $+3$ €. Der Erwartungswert beschreibt den Durchschnitt über sehr viele Spiele, nicht das Ergebnis von zehn. Erst bei hunderten Drehungen wird das Minus sichtbar, und genau darauf verlässt sich der Stand.</p>
+      <p class="why">Falle in a): die $0{,}90$ € als Gewinn anzusehen. Das ist die Auszahlung. Der Gewinn ist Auszahlung minus Einsatz, sonst wäre jedes Spiel mit Auszahlung fair.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>

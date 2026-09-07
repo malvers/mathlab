@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Textaufgaben: Matrizen: Begriff und Darstellung — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Drei Textaufgaben mit Lösungen zu „Matrizen: Begriff und Darstellung“, KW 10: je eine Aufgabe für die Anforderungsbereiche I, II und III.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Textaufgaben: Matrizen: Begriff und Darstellung</h1>
+  <div class="sub">Berufliches Gymnasium · Klasse 11 · KW 10 · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/mathe11.html">Zum Plan</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Die Müsli-Manufaktur</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Eine kleine Manufaktur füllt drei Müslisorten in $500$-g-Packungen. Rezept je Packung in Gramm: <b>Frucht</b>: $300$ Haferflocken, $50$ Nüsse, $150$ Trockenfrüchte, keine Schokolade. <b>Nuss</b>: $300$ Haferflocken, $150$ Nüsse, $50$ Trockenfrüchte, keine Schokolade. <b>Schoko</b>: $350$ Haferflocken, $50$ Nüsse, keine Trockenfrüchte, $100$ Schokostücke.</p>
+    <ol class="parts">
+      <li>Schreibe die Rezepte als Matrix $Z$: Zeilen sind die Sorten, Spalten die Zutaten in der genannten Reihenfolge. Welches Format hat $Z$, wie viele Einträge?</li>
+      <li>Was bedeuten die Einträge $z_{23}$ und $z_{32}$ im Sachzusammenhang? Warum darf man die beiden Indizes nicht vertauschen?</li>
+      <li>Bilde $Z^\mathsf{T}$. Welches Format hat die transponierte Matrix, und was steht jetzt in einer Zeile? Ist eine der beiden Matrizen quadratisch?</li>
+      <li>Ein Bioladen bestellt $20$ Packungen Frucht, $10$ Packungen Nuss und $30$ Packungen Schoko. Schreibe die Bestellung als Spaltenvektor $\vec{n}$ und gib sein Format an. Welche Zeilensumme hat jede Zeile von $Z$, und warum?</li>
+    </ol>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Die Kioskkasse</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Am Schulkiosk ist der Bondrucker ausgefallen. Im Kassenbuch stehen nur die Stückzahlen und die Tageseinnahmen: <b>Montag</b> $4$ Kaffee, $6$ Brötchen, $2$ Croissants, zusammen $20{,}80$ €. <b>Dienstag</b> $5$ Kaffee, $3$ Brötchen, $4$ Croissants, zusammen $23{,}30$ €. <b>Mittwoch</b> $2$ Kaffee, $8$ Brötchen, $3$ Croissants, zusammen $20{,}00$ €. Die Preise $k$, $b$, $c$ sind unbekannt.</p>
+    <ol class="parts">
+      <li>Stelle das lineare Gleichungssystem für die drei Preise auf.</li>
+      <li>Schreibe es in der Form $A \cdot \vec{x} = \vec{b}$. Gib $A$, $\vec{x}$ und $\vec{b}$ mit ihren Formaten an. Wofür stehen die Zeilen, wofür die Spalten von $A$?</li>
+      <li>Gib die erweiterte Koeffizientenmatrix an. Erkläre, warum man die Unbekannten dabei weglassen darf und was passiert, wenn man in einer Zeile die Reihenfolge der Spalten vertauscht.</li>
+      <li>Die Kioskleiterin meint, die Preise seien $2{,}50$ €, $1{,}20$ € und $1{,}80$ €. Prüfe das durch Einsetzen in <b>alle</b> drei Gleichungen.</li>
+    </ol>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Die Fahrzeitentabelle</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Ein Lieferdienst notiert die Fahrzeiten in Minuten zwischen vier Stationen $A$, $B$, $C$, $D$ als Matrix, Zeile = Start, Spalte = Ziel: $F = \begin{pmatrix} 0 &amp; 12 &amp; 20 &amp; 15 \\ 12 &amp; 0 &amp; 8 &amp; 25 \\ 20 &amp; 8 &amp; 0 &amp; 10 \\ 15 &amp; 25 &amp; 10 &amp; 0 \end{pmatrix}$. Ein Praktikant hat dazu vier Behauptungen aufgeschrieben. Prüfe jede mit Begründung oder Gegenbeispiel.</p>
+    <ol class="parts">
+      <li>„$F$ ist symmetrisch, denn $F^\mathsf{T} = F$. Symmetrische Matrizen sind Diagonalmatrizen, also ist $F$ eine Diagonalmatrix.“</li>
+      <li>„Auf der Hauptdiagonale stehen nur Nullen, also ist $F$ die Nullmatrix.“ Erkläre außerdem, warum die Diagonale hier zwingend aus Nullen besteht.</li>
+      <li>„Wegen $F^\mathsf{T} = F$ genügt es, die Einträge oberhalb der Hauptdiagonale zu speichern.“ Wie viele Zahlen sind das bei $4$ Stationen, wie viele bei $n$ Stationen, wie viele bei $50$?</li>
+      <li>Im Berufsverkehr dauert die Fahrt von $A$ nach $B$ weiter $12$ Minuten, zurück aber $18$. Ist die neue Matrix noch symmetrisch? Was bedeutet $F^\mathsf{T}$ dann im Sachzusammenhang, und wie viele Zahlen muss man jetzt speichern?</li>
+    </ol>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Die Müsli-Manufaktur</h3>
+      <p><b>a)</b> $Z = \begin{pmatrix} 300 &amp; 50 &amp; 150 &amp; 0 \\ 300 &amp; 150 &amp; 50 &amp; 0 \\ 350 &amp; 50 &amp; 0 &amp; 100 \end{pmatrix}$. Drei Zeilen (Sorten), vier Spalten (Zutaten): Format $3 \times 4$, also $3 \cdot 4 = 12$ Einträge. Zeilen zuerst, Spalten danach.</p>
+      <p><b>b)</b> $z_{23}$: Zeile $2$, Spalte $3$, also Sorte Nuss, Zutat Trockenfrüchte: $50$ g. $z_{32}$: Zeile $3$, Spalte $2$, also Sorte Schoko, Zutat Nüsse: ebenfalls $50$ g. Die Zahl ist zufällig dieselbe, die Bedeutung nicht. Der erste Index ist immer die Zeile; vertauscht man ihn, landet man bei einer anderen Sorte und einer anderen Zutat.</p>
+      <p><b>c)</b> $Z^\mathsf{T} = \begin{pmatrix} 300 &amp; 300 &amp; 350 \\ 50 &amp; 150 &amp; 50 \\ 150 &amp; 50 &amp; 0 \\ 0 &amp; 0 &amp; 100 \end{pmatrix}$, Format $4 \times 3$. Jetzt ist jede Zeile eine <b>Zutat</b> und zeigt, wie viel davon in jede der drei Sorten geht, etwa Zeile $4$: Schokostücke nur in Sorte $3$. Keine der beiden ist quadratisch, dafür müssten Zeilen- und Spaltenzahl gleich sein.</p>
+      <p><b>d)</b> $\vec{n} = \begin{pmatrix} 20 \\ 10 \\ 30 \end{pmatrix}$, Format $3 \times 1$: eine Zeile je Sorte, in derselben Reihenfolge wie die Zeilen von $Z$. Jede Zeile von $Z$ hat die Summe $500$: $300 + 50 + 150 + 0 = 500$, $300 + 150 + 50 + 0 = 500$, $350 + 50 + 0 + 100 = 500$, denn jede Packung wiegt $500$ g. Die Zeilensumme ist die Probe für das Rezept.</p>
+      <p class="why">Falle in c): beim Transponieren wandert $z_{23} = 50$ an die Stelle $(3, 2)$ und $z_{32} = 50$ an die Stelle $(2, 3)$. Dass hier beide $50$ sind, ist Zufall; $z_{13} = 150$ steht danach an der Stelle $(3, 1)$.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Die Kioskkasse</h3>
+      <p><b>a)</b> $4k + 6b + 2c = 20{,}80$, $\quad 5k + 3b + 4c = 23{,}30$, $\quad 2k + 8b + 3c = 20{,}00$. Jede Zeile ist ein Tag, jeder Summand ist Stückzahl mal Preis.</p>
+      <p><b>b)</b> $A = \begin{pmatrix} 4 &amp; 6 &amp; 2 \\ 5 &amp; 3 &amp; 4 \\ 2 &amp; 8 &amp; 3 \end{pmatrix}$ mit Format $3 \times 3$, $\vec{x} = \begin{pmatrix} k \\ b \\ c \end{pmatrix}$ und $\vec{b} = \begin{pmatrix} 20{,}80 \\ 23{,}30 \\ 20{,}00 \end{pmatrix}$, beide $3 \times 1$. Zeilen von $A$: die Tage (Gleichungen). Spalten von $A$: die Produkte (Unbekannte), Spalte $1$ gehört zu $k$, Spalte $2$ zu $b$, Spalte $3$ zu $c$. Drei Spalten, drei Unbekannte.</p>
+      <p><b>c)</b> $\begin{pmatrix} 4 &amp; 6 &amp; 2 &amp; 20{,}80 \\ 5 &amp; 3 &amp; 4 &amp; 23{,}30 \\ 2 &amp; 8 &amp; 3 &amp; 20{,}00 \end{pmatrix}$, Format $3 \times 4$. Die Unbekannten stecken in der <b>Spaltenposition</b>: Spalte $1$ heißt immer $k$, Spalte $2$ immer $b$, also braucht man die Buchstaben nicht mitzuschreiben. Genau deshalb darf man die Spaltenreihenfolge in <b>einer</b> Zeile nicht vertauschen: dann stünde die Kaffeezahl in der Brötchenspalte, und die Zeile beschreibt einen anderen Tag, den es nie gab. Zeilen darf man vertauschen, das ändert nur die Reihenfolge der Tage.</p>
+      <p><b>d)</b> Montag: $4 \cdot 2{,}50 + 6 \cdot 1{,}20 + 2 \cdot 1{,}80 = 10 + 7{,}20 + 3{,}60 = 20{,}80$. Dienstag: $5 \cdot 2{,}50 + 3 \cdot 1{,}20 + 4 \cdot 1{,}80 = 12{,}50 + 3{,}60 + 7{,}20 = 23{,}30$. Mittwoch: $2 \cdot 2{,}50 + 8 \cdot 1{,}20 + 3 \cdot 1{,}80 = 5 + 9{,}60 + 5{,}40 = 20{,}00$. Alle drei stimmen, die Preise passen zum Kassenbuch. Ob es die <b>einzigen</b> passenden Preise sind, klärt erst das Lösungsverfahren der nächsten Woche.</p>
+      <p class="why">Falle in b): $\vec{b}$ ist die rechte Seite, nicht der Brötchenpreis $b$. Zwei Dinge, die zufällig denselben Buchstaben tragen; der Pfeil macht den Unterschied.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Die Fahrzeitentabelle</h3>
+      <p><b>a)</b> Der erste Teil stimmt: Spiegeln an der Hauptdiagonale ändert nichts, zum Beispiel $f_{12} = f_{21} = 12$ und $f_{34} = f_{43} = 10$, also $F^\mathsf{T} = F$. Der Schluss ist falsch: symmetrisch heißt nur $f_{ij} = f_{ji}$; eine Diagonalmatrix verlangt, dass <b>außerhalb</b> der Diagonale nur Nullen stehen. $F$ hat dort lauter Fahrzeiten ungleich null. Richtig ist die Umkehrung: jede Diagonalmatrix ist symmetrisch, denn außerhalb der Diagonale steht überall $0 = 0$.</p>
+      <p><b>b)</b> Falsch. Die Nullmatrix hat <b>überall</b> Nullen, $F$ nur auf der Diagonale. Die Diagonale muss hier aus Nullen bestehen, weil $f_{ii}$ die Fahrzeit von einer Station zu sich selbst ist, und die ist $0$. Eine Matrix mit Nullen auf der Diagonale und Werten daneben ist also weder Null- noch Diagonalmatrix, sie hat einfach keinen besonderen Namen.</p>
+      <p><b>c)</b> Richtig. Die Diagonale ist bekannt (Nullen), die untere Hälfte ist das Spiegelbild der oberen. Bei $4$ Stationen liegen oberhalb der Diagonale $3 + 2 + 1 = 6$ Einträge statt $16$. Allgemein: $n^2$ Einträge, davon $n$ auf der Diagonale, die Hälfte des Rests liegt oben: $\dfrac{n^2 - n}{2} = \dfrac{n(n - 1)}{2}$. Für $n = 50$: $\dfrac{50 \cdot 49}{2} = 1\,225$ Zahlen statt $2\,500$, nicht einmal die Hälfte.</p>
+      <p><b>d)</b> Nein: jetzt ist $f_{12} = 12$, aber $f_{21} = 18$, also $F^\mathsf{T} \neq F$. Transponieren vertauscht Zeile und Spalte, also <b>Start und Ziel</b>: $F^\mathsf{T}$ ist die Tabelle der <b>Rückfahrten</b>. Ohne Symmetrie braucht man alle Einträge außerhalb der Diagonale, bei $4$ Stationen $16 - 4 = 12$, allgemein $n(n - 1)$, bei $50$ Stationen $2\,450$. Die Symmetrie war eine Annahme des Modells (Hin- und Rückweg gleich lang), keine Eigenschaft von Matrizen.</p>
+      <p class="why">„Symmetrisch, also diagonal“ verwechselt Bedingung und Folge. Die Einheitsmatrix ist beides, das verleitet dazu. Aber symmetrisch ist eine viel schwächere Eigenschaft.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>

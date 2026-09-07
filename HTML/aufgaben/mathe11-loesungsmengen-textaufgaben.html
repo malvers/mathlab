@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Textaufgaben: Keine, eine, unendlich viele — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Drei Textaufgaben mit Lösungen zu „Keine, eine, unendlich viele“, KW 12: je eine Aufgabe für die Anforderungsbereiche I, II und III.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Textaufgaben: Keine, eine, unendlich viele</h1>
+  <div class="sub">Berufliches Gymnasium · Klasse 11 · KW 12 · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/mathe11.html">Zum Plan</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Drei Systeme aus dem Übungszirkel</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Im Übungszirkel liegen drei Systeme mit je zwei Gleichungen. <b>(1)</b> $x + y = 10$ und $2x - y = 2$. <b>(2)</b> $x + y = 10$ und $2x + 2y = 14$. <b>(3)</b> $x + y = 10$ und $3x + 3y = 30$.</p>
+    <ol class="parts">
+      <li>Löse System (1) und deute das Ergebnis geometrisch.</li>
+      <li>Untersuche System (2). Was passiert beim Rechnen, und wie lautet die Lösungsmenge?</li>
+      <li>Untersuche System (3) und gib die Lösungsmenge an.</li>
+      <li>Woran sieht man den Fall schon an den Koeffizienten, ohne zu rechnen?</li>
+    </ol>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Die Erdmischung</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Eine Gärtnerei mischt aus drei Erdsorten $x$, $y$ und $z$ (in Sack) eine Charge. Es gilt: $x + y + z = 60$ Sack insgesamt, $2x + 3y + 4z = 190$ Einheiten Nährstoff und $3x + 4y + 5z = 250$ Einheiten Volumen.</p>
+    <ol class="parts">
+      <li>Bringe das System mit dem Gauß-Verfahren auf Stufenform.</li>
+      <li>Welcher der drei Fälle liegt vor? Gib die Lösungsmenge mit einem Parameter an.</li>
+      <li>Alle drei Mengen müssen null oder positiv sein. Welche Werte darf der Parameter annehmen?</li>
+      <li>Gib eine konkrete Lösung an und mache die Probe in allen drei Gleichungen. Warum ist die Aufgabe unterbestimmt?</li>
+    </ol>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Drei Gleichungen, drei Unbekannte, eine Lösung?</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Ein Mitschüler behauptet: <b>„Wenn ich genauso viele Gleichungen habe wie Unbekannte, gibt es immer genau eine Lösung.“</b></p>
+    <ol class="parts">
+      <li>Widerlege die Behauptung mit dem System aus Aufgabe 2.</li>
+      <li>Ändere in diesem System die rechte Seite der dritten Gleichung von $250$ auf $251$ und rechne erneut. Was ergibt sich?</li>
+      <li>Woran erkennt man in der Stufenform, welcher der drei Fälle vorliegt?</li>
+      <li>Beurteile die Behauptung und deute alle drei Fälle geometrisch, wenn jede Gleichung eine Ebene im Raum beschreibt.</li>
+    </ol>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Drei Systeme aus dem Übungszirkel</h3>
+      <p><b>a)</b> Addieren der beiden Gleichungen beseitigt $y$: $3x = 12$, also $x = 4$ und damit $y = 6$. Lösungsmenge $L = \{(4 \mid 6)\}$. Geometrisch sind es zwei Geraden, die sich in genau einem Punkt schneiden.</p>
+      <p><b>b)</b> Die zweite Gleichung halbiert ergibt $x + y = 7$. Zusammen mit $x + y = 10$ folgt durch Subtraktion $0 = -3$ — eine <b>falsche</b> Aussage. Es gibt keine Lösung, also $L = \{\}$. Geometrisch sind die Geraden <b>parallel</b> und verschieden.</p>
+      <p><b>c)</b> Die zweite Gleichung durch $3$ geteilt ergibt wieder $x + y = 10$. Die zweite Gleichung sagt also nichts Neues, es bleibt eine Gleichung mit zwei Unbekannten. Für jedes $x$ passt $y = 10 - x$: $L = \{(x \mid 10 - x) \mid x \in \mathbb{R}\}$. Geometrisch fallen die beiden Geraden <b>zusammen</b>.</p>
+      <p><b>d)</b> Man vergleicht die Verhältnisse der Koeffizienten. Bei (2) ist $\dfrac{2}{1} = \dfrac{2}{1}$ für die linken Seiten, aber $\dfrac{14}{10} \neq 2$ für die rechte — gleiche Richtung, verschobene Lage, also parallel. Bei (3) stimmt auch das Verhältnis der rechten Seiten, $\dfrac{30}{10} = 3$ — dieselbe Gerade. Bei (1) sind die linken Verhältnisse schon verschieden, $\dfrac{2}{1} \neq \dfrac{-1}{1}$, also genau ein Schnittpunkt.</p>
+      <p class="why">Ein System hat nie zwei oder fünf Lösungen. Kommt beim Rechnen etwas anderes heraus als <b>keine</b>, <b>eine</b> oder <b>unendlich viele</b>, steckt ein Rechenfehler drin.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Die Erdmischung</h3>
+      <p><b>a)</b> Zweite Zeile minus zweimal die erste: $y + 2z = 70$. Dritte Zeile minus dreimal die erste: $y + 2z = 70$. Die Stufenform lautet also $x + y + z = 60$, $y + 2z = 70$ und in der dritten Zeile $0 = 0$.</p>
+      <p><b>b)</b> Die dritte Zeile ist eine <b>wahre</b> Aussage ohne Information — es gibt unendlich viele Lösungen. Mit $z$ als Parameter: $y = 70 - 2z$ und $x = 60 - y - z = 60 - (70 - 2z) - z = z - 10$. Also $L = \{(z - 10 \mid 70 - 2z \mid z) \mid z \in \mathbb{R}\}$.</p>
+      <p><b>c)</b> $x \geq 0$ verlangt $z \geq 10$. $y \geq 0$ verlangt $70 - 2z \geq 0$, also $z \leq 35$. Und $z \geq 0$ ist damit schon erfüllt. Sachlich sinnvoll ist also $10 \leq z \leq 35$.</p>
+      <p><b>d)</b> Für $z = 20$: $y = 70 - 40 = 30$ und $x = 20 - 10 = 10$. Probe: $10 + 30 + 20 = 60$; $20 + 90 + 80 = 190$; $30 + 120 + 100 = 250$ — alle drei stimmen. Unterbestimmt ist die Aufgabe, weil die dritte Gleichung keine neue Information enthält: sie ist die Summe aus der ersten und der zweiten. Drei Gleichungen bedeuten nicht automatisch drei <b>unabhängige</b> Bedingungen.</p>
+      <p class="why">Bei unendlich vielen Lösungen ist die Antwort nicht „unlösbar“, sondern eine Lösungs<b>schar</b>. Erst der Sachzusammenhang engt sie ein — hier auf $26$ ganzzahlige Mischungen.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Drei Gleichungen, drei Unbekannte, eine Lösung?</h3>
+      <p><b>a)</b> Das System aus Aufgabe 2 hat drei Gleichungen und drei Unbekannte, aber unendlich viele Lösungen — etwa $(10 \mid 30 \mid 20)$ und $(0 \mid 50 \mid 10)$, beide erfüllen alle drei Gleichungen. Ein Gegenbeispiel genügt, die Behauptung ist falsch.</p>
+      <p><b>b)</b> Die ersten beiden Schritte sind dieselben: $y + 2z = 70$ aus der zweiten Zeile, aber nun $y + 2z = 71$ aus der dritten. Die Differenz ergibt $0 = 1$ — eine falsche Aussage. Jetzt ist $L = \{\}$, das System hat <b>keine</b> Lösung. Eine einzige geänderte Ziffer kippt den Fall.</p>
+      <p><b>c)</b> Man liest die letzte Zeile: Steht dort $0 = 0$, gibt es unendlich viele Lösungen. Steht dort $0 = c$ mit $c \neq 0$, gibt es keine. Bleiben für jede Unbekannte eine eigene Stufe, also drei echte Stufen, gibt es genau eine Lösung.</p>
+      <p><b>d)</b> Die Behauptung ist falsch. Jede Gleichung beschreibt eine Ebene. <b>Genau eine Lösung</b>: die drei Ebenen treffen sich in einem Punkt. <b>Unendlich viele</b>: sie schneiden sich in einer gemeinsamen Geraden, oder zwei Ebenen fallen zusammen. <b>Keine Lösung</b>: es gibt keinen Punkt, der auf allen dreien liegt — etwa bei parallelen Ebenen oder wenn die drei Schnittgeraden ein Prisma bilden.</p>
+      <p class="why">Gleich viele Gleichungen wie Unbekannte garantiert nichts. Entscheidend ist, ob die Gleichungen <b>unabhängig</b> sind — eine Gleichung, die die Summe zweier anderer ist, zählt nicht mit.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Textaufgaben: Der Funktionsbegriff — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Drei Textaufgaben mit Lösungen zu „Der Funktionsbegriff“, KW 40: je eine Aufgabe für die Anforderungsbereiche I, II und III.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Textaufgaben: Der Funktionsbegriff</h1>
+  <div class="sub">Berufliches Gymnasium · Klasse 11 · KW 40 · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/mathe11.html">Zum Plan</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Der Tank läuft leer</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Ein Wassertank enthält $600$ Liter. Ein Ventil lässt gleichmäßig $40$ Liter je Minute ab. Die Füllmenge nach $t$ Minuten beschreibt $f(t) = 600 - 40t$.</p>
+    <ol class="parts">
+      <li>Berechne $f(0)$, $f(5)$ und $f(10)$ und sage in Worten, was jeder Wert bedeutet.</li>
+      <li>Bestimme die Nullstelle von $f$ und deute sie im Sachzusammenhang.</li>
+      <li>Gib den Definitionsbereich und den Wertebereich an, die im Sachzusammenhang sinnvoll sind.</li>
+      <li>Ist $f$ monoton steigend oder fallend? Nach wie vielen Minuten sind noch $150$ Liter im Tank?</li>
+    </ol>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Die Tunneleinfahrt</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Ein Tunnel hat einen halbkreisförmigen Querschnitt: die Fahrbahn ist $10$ m breit, in der Mitte ist der Tunnel $5$ m hoch. Legt man den Nullpunkt in die Fahrbahnmitte, so beschreibt $h(x) = \sqrt{25 - x^2}$ die Höhe des Bogens an der Stelle $x$.</p>
+    <ol class="parts">
+      <li>Bestimme den Definitionsbereich von $h$ rechnerisch und erkläre, was er im Tunnel bedeutet.</li>
+      <li>Berechne $h(3)$ und $h(4)$. Bestimme die Nullstellen von $h$ und deute sie.</li>
+      <li>Zeige, dass $h(-x) = h(x)$ gilt, und benenne die Symmetrie. Warum ist der <b>ganze</b> Kreis keine Funktion, der Halbkreis aber schon?</li>
+      <li>Ein Lastwagen ist $2{,}60$ m breit und $3{,}80$ m hoch. Passt er mittig durch den Tunnel? Rechne mit der ungünstigsten Stelle.</li>
+    </ol>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Zu jedem Wert genau eine Stelle?</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Ein Mitschüler fasst zusammen: <b>„Eine Funktion ist eindeutig. Also gehört auch zu jedem $y$ genau ein $x$.“</b></p>
+    <ol class="parts">
+      <li>Prüfe die Behauptung an $f(x) = x^2$, indem du $f(2)$ und $f(-2)$ berechnest.</li>
+      <li>Ist $f$ trotzdem eine Funktion? Begründe mit der Definition und mit dem Senkrechten-Test.</li>
+      <li>Übertrage auf einen Tagesverlauf: Ein Thermometer misst um $9$ Uhr $12\ ^\circ$C, um $14$ Uhr $19\ ^\circ$C und um $19$ Uhr wieder $12\ ^\circ$C. Welche Zuordnung ist eine Funktion, welche nicht?</li>
+      <li>Beurteile die Behauptung und formuliere, was Eindeutigkeit bei einer Funktion genau verlangt.</li>
+    </ol>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Der Tank läuft leer</h3>
+      <p><b>a)</b> $f(0) = 600$: zu Beginn sind $600$ Liter im Tank. $f(5) = 600 - 200 = 400$: nach fünf Minuten noch $400$ Liter. $f(10) = 600 - 400 = 200$: nach zehn Minuten noch $200$ Liter.</p>
+      <p><b>b)</b> $600 - 40t = 0$ ergibt $40t = 600$, also $t = 15$. Nach <b>$15$ Minuten</b> ist der Tank leer — die Nullstelle ist die Leerlaufzeit.</p>
+      <p><b>c)</b> Sinnvoll ist $D = \{t \mid 0 \leq t \leq 15\}$: vorher gibt es keine Messung, nachher ist der Tank leer und die Formel würde negative Mengen liefern. Der Wertebereich ist $W = \{y \mid 0 \leq y \leq 600\}$.</p>
+      <p><b>d)</b> Der Vorfaktor $-40$ ist negativ, also ist $f$ streng monoton <b>fallend</b>. Aus $600 - 40t = 150$ folgt $40t = 450$, also $t = 11{,}25$ Minuten, das sind $11$ Minuten und $15$ Sekunden. Probe: $600 - 40 \cdot 11{,}25 = 600 - 450 = 150$.</p>
+      <p class="why">Der rechnerische Definitionsbereich der Formel ist ganz $\mathbb{R}$, der sachliche nur $0 \leq t \leq 15$. Für $t = 20$ liefert die Formel $-200$ Liter — rechnerisch richtig, sachlich Unsinn.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Die Tunneleinfahrt</h3>
+      <p><b>a)</b> Unter der Wurzel darf nichts Negatives stehen: $25 - x^2 \geq 0$, also $x^2 \leq 25$ und damit $-5 \leq x \leq 5$. Das ist genau die $10$ m breite Fahrbahn, gemessen von der Mitte aus je $5$ m nach links und rechts.</p>
+      <p><b>b)</b> $h(3) = \sqrt{25 - 9} = \sqrt{16} = 4$ m und $h(4) = \sqrt{25 - 16} = \sqrt{9} = 3$ m. Nullstellen: $\sqrt{25 - x^2} = 0$ ergibt $x^2 = 25$, also $x = -5$ und $x = 5$ — dort trifft der Bogen auf die Fahrbahn, das sind die beiden Tunnelwände.</p>
+      <p><b>c)</b> $h(-x) = \sqrt{25 - (-x)^2} = \sqrt{25 - x^2} = h(x)$, weil das Quadrat das Vorzeichen frisst. Der Graph ist also <b>achsensymmetrisch zur $y$-Achse</b>. Beim ganzen Kreis gehören zu jedem $x$ zwischen $-5$ und $5$ zwei Höhen, $+\sqrt{25 - x^2}$ und $-\sqrt{25 - x^2}$ — eine Senkrechte trifft ihn zweimal, das ist keine Funktion. Die Wurzel liefert nur den oberen Bogen und damit genau einen Wert.</p>
+      <p><b>d)</b> Der Lastwagen steht mittig, seine Ecken sind $1{,}30$ m von der Mitte entfernt. Dort ist der Tunnel am niedrigsten für das Fahrzeug: $h(1{,}30) = \sqrt{25 - 1{,}69} = \sqrt{23{,}31} \approx 4{,}83$ m. Das ist mehr als $3{,}80$ m, der Lastwagen <b>passt</b> mit gut einem Meter Luft.</p>
+      <p class="why">Nicht die Tunnelmitte entscheidet, sondern die <b>Ecke</b> des Fahrzeugs. Wer $h(0) = 5$ m mit der Fahrzeughöhe vergleicht, rechnet an der falschen Stelle — bei einem breiteren Fahrzeug wird das gefährlich.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Zu jedem Wert genau eine Stelle?</h3>
+      <p><b>a)</b> $f(2) = 4$ und $f(-2) = (-2)^2 = 4$. Zum Wert $y = 4$ gehören also <b>zwei</b> Stellen, $x = 2$ und $x = -2$. Die Behauptung ist damit widerlegt.</p>
+      <p><b>b)</b> Ja, $f$ ist eine Funktion: zu jedem $x$ gehört genau ein $y$ — $2$ hat nur den Wert $4$, $-2$ hat nur den Wert $4$. Verboten ist allein, dass <b>eine</b> Stelle zwei Werte bekommt. Der Senkrechten-Test prüft genau das: jede senkrechte Gerade trifft die Normalparabel höchstens einmal.</p>
+      <p><b>c)</b> „Jeder Uhrzeit ihre Temperatur“ ist eine Funktion: zu jedem Zeitpunkt gibt es genau eine Temperatur. „Jeder Temperatur ihre Uhrzeit“ ist <b>keine</b> Funktion: zu $12\ ^\circ$C gehören $9$ Uhr <b>und</b> $19$ Uhr. Dass zwei Stellen denselben Wert haben, ist erlaubt und im Alltag der Normalfall.</p>
+      <p><b>d)</b> Die Behauptung ist falsch. Eindeutigkeit verlangt nur eine Richtung: <b>jedem $x$ genau ein $y$</b>. Die umgekehrte Eindeutigkeit ist eine zusätzliche Eigenschaft, die viele Funktionen nicht haben — sie entscheidet später darüber, ob sich eine Funktion umkehren lässt.</p>
+      <p class="why">„Eindeutig“ heißt nicht „umkehrbar“. Wer beides verwechselt, hält $f(x) = x^2$ für keine Funktion und verliert bei $x^2 = 49$ später die Lösung $x = -7$.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>

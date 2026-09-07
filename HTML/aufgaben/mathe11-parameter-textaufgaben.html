@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Textaufgaben: Strecken, Stauchen, Verschieben — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Drei Textaufgaben mit Lösungen zu „Strecken, Stauchen, Verschieben“, KW 8: je eine Aufgabe für die Anforderungsbereiche I, II und III.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Textaufgaben: Strecken, Stauchen, Verschieben</h1>
+  <div class="sub">Berufliches Gymnasium · Klasse 11 · KW 8 · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/mathe11.html">Zum Plan</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Am Mischpult</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Ein reiner Ton wird im Tonstudio durch die Schwingung $f(t) = \sin t$ beschrieben: $t$ ist die Zeit, $f(t)$ die Auslenkung der Membran. Am Mischpult gibt es vier Regler, und jeder verändert den Term auf seine Weise.</p>
+    <ol class="parts">
+      <li>Der <b>Lautstärkeregler</b> verdreifacht jede Auslenkung. Gib den neuen Term $g(t)$ an, den Wertebereich und die Amplitude. Was passiert mit den Nullstellen?</li>
+      <li>Der Ton wird <b>eine Oktave höher</b> gespielt: die Schwingung läuft doppelt so schnell ab. Gib den Term $h(t)$ an. Wie groß sind jetzt Periode und Amplitude?</li>
+      <li>Der <b>Verzögerungsregler</b> lässt den Ton um eine Viertelperiode, also um $\dfrac{\pi}{2}$, später beginnen. Gib den Term $k(t)$ an und beschreibe, was mit dem Graphen passiert.</li>
+      <li>Ein <b>Gleichspannungsanteil</b> hebt das ganze Signal um $0{,}5$ an. Gib den Term $m(t)$ und den Wertebereich an. Wie viele Nullstellen hat $m$ auf einer Periode, wie viele hatte $f$?</li>
+    </ol>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Der Tunnelbogen</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Ein Straßentunnel hat als Querschnitt eine nach unten geöffnete Parabel: <b>$8$ m breit, in der Mitte $4$ m hoch</b>. Die Ingenieurin baut den Bogen aus der Normalparabel $f(x) = x^2$ zusammen. Der linke Fußpunkt liegt bei $x = 0$, Höhen in Metern.</p>
+    <ol class="parts">
+      <li>Welche Eingriffe machen aus der Normalparabel den Bogen $h(x)$? Bestimme den Term. Tipp: Scheitelpunkt zuerst, dann den Faktor aus einem Fußpunkt.</li>
+      <li>Ein Lkw ist $2{,}40$ m breit und $3{,}60$ m hoch und fährt genau in der Mitte. Passt er durch? Rechne mit der Höhe des Bogens an der Lkw-Kante.</li>
+      <li>Für eine zweigleisige Bahnstrecke soll ein zweiter Tunnel <b>doppelt so breit</b>, aber genauso hoch werden. Welcher Parameter erledigt das? Gib den Term $h_2(x)$ an und prüfe Scheitel und Fußpunkte.</li>
+      <li>Ein Praktikant schlägt für den breiten Tunnel $2 \cdot h(x)$ vor. Was würde dieser Bogen tatsächlich beschreiben?</li>
+    </ol>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Ein Jahr früher oder fünf Prozent mehr?</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Ein Sparvertrag wächst mit $K(t) = 1\,000 \cdot 1{,}05^t$, $t$ in Jahren, $K$ in Euro. Eine Bankberaterin behauptet: <b>„Ein Jahr früher anfangen bringt genau dasselbe wie $5\,\%$ mehr Startkapital.“</b> In der Sprache der Woche: die Verschiebung $K(t + 1)$ nach links soll dasselbe sein wie die Streckung $1{,}05 \cdot K(t)$.</p>
+    <ol class="parts">
+      <li>Prüfe die Behauptung für $t = 0$ und für $t = 10$.</li>
+      <li>Begründe mit einem Potenzgesetz, dass die beiden Eingriffe für <b>jedes</b> $t$ dasselbe ergeben. Verallgemeinere: welcher Streckfaktor gehört zu einer Verschiebung um $c$ Jahre nach links?</li>
+      <li>Gilt „Verschieben nach links ist dasselbe wie Strecken“ auch für die Normalparabel $f(x) = x^2$? Prüfe mit $f(x + 1)$ und einem Faktor $c \cdot f(x)$ an der Stelle $x = 0$.</li>
+      <li>Um wie viele Jahre müsste man früher anfangen, damit es einer <b>Verdopplung</b> des Startkapitals entspricht? Deute das Ergebnis.</li>
+    </ol>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Am Mischpult</h3>
+      <p><b>a)</b> Außen mal drei: $g(t) = 3 \sin t$. Jeder Funktionswert wird verdreifacht, also Wertebereich $-3 \le y \le 3$ und Amplitude $3$. Die Nullstellen bleiben, wo sie sind, denn $3 \cdot 0 = 0$: Streckung in $y$-Richtung, die Nulldurchgänge sind unverändert.</p>
+      <p><b>b)</b> Innen mal zwei: $h(t) = \sin(2t)$. Was bei $f$ nach der Zeit $2\pi$ geschehen ist, ist bei $h$ schon nach $\pi$ geschehen. Periode $\dfrac{2\pi}{2} = \pi$. Die Amplitude bleibt $1$, denn die $2$ steht innen und wirkt nur waagerecht.</p>
+      <p><b>c)</b> Später beginnen heißt: der Graph wandert nach <b>rechts</b>. Innen ist alles verkehrt herum, also Minus: $k(t) = \sin(t - \tfrac{\pi}{2})$. Probe: $k(\tfrac{\pi}{2}) = \sin 0 = 0$, der Nulldurchgang, der bei $f$ bei $t = 0$ lag, liegt jetzt bei $t = \tfrac{\pi}{2}$.</p>
+      <p><b>d)</b> Außen plus: $m(t) = \sin t + 0{,}5$. Wertebereich $-0{,}5 \le y \le 1{,}5$. Nullstellen: $\sin t = -0{,}5$ hat auf einer Periode zwei Lösungen, genau wie $\sin t = 0$, also weiterhin zwei, aber an <b>anderen Stellen</b>. Eine Verschiebung nach oben verändert Nullstellen, ein Faktor außen nicht.</p>
+      <p class="why">Falle in b): $\sin(2t)$ hat die Amplitude $1$, nicht $2$. Der Faktor innen betrifft nur die Periode, nie die Höhe; $2 \sin t$ wäre der doppelt so laute Ton.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Der Tunnelbogen</h3>
+      <p><b>a)</b> Scheitel in der Mitte bei $(4 \mid 4)$: Verschiebung um $4$ nach rechts und $4$ nach oben, Spiegelung an der $x$-Achse (nach unten geöffnet) und Stauchung mit einem Faktor $a$: $h(x) = a(x - 4)^2 + 4$. Fußpunkt $h(0) = 0$: $16a + 4 = 0$, also $a = -\dfrac{1}{4}$. Ergebnis $h(x) = -\dfrac{1}{4}(x - 4)^2 + 4$. Probe: $h(8) = -\dfrac{1}{4} \cdot 16 + 4 = 0$.</p>
+      <p><b>b)</b> Der Lkw reicht von $x = 2{,}8$ bis $x = 5{,}2$. Höhe des Bogens an der Kante: $h(5{,}2) = -\dfrac{1}{4} \cdot 1{,}2^2 + 4 = -0{,}36 + 4 = 3{,}64$ m. Das sind $3{,}64 - 3{,}60 = 0{,}04$ m, also $4$ cm Luft: er passt, knapp. Wegen der Symmetrie gilt links dasselbe.</p>
+      <p><b>c)</b> Breiter in $x$-Richtung heißt innen, verkehrt herum: $h_2(x) = h(\tfrac{1}{2}x)$. Einsetzen: $h_2(x) = -\dfrac{1}{4}(\tfrac{1}{2}x - 4)^2 + 4 = -\dfrac{1}{16}(x - 8)^2 + 4$. Scheitel $(8 \mid 4)$, Fußpunkte $h_2(0) = -\dfrac{64}{16} + 4 = 0$ und $h_2(16) = 0$: $16$ m breit, $4$ m hoch.</p>
+      <p><b>d)</b> $2 \cdot h(x)$ verdoppelt jeden Funktionswert: der Bogen wäre $8$ m hoch, aber immer noch $8$ m breit, denn die Nullstellen $0$ und $8$ bleiben bei einem Faktor außen erhalten. Breite steuert man innen, Höhe außen.</p>
+      <p class="why">Falle in c): $h(2x)$ macht den Tunnel halb so breit, nicht doppelt. Innen bewirkt der Faktor $\tfrac{1}{2}$ die Verdopplung.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Ein Jahr früher oder fünf Prozent mehr?</h3>
+      <p><b>a)</b> $t = 0$: $K(1) = 1\,000 \cdot 1{,}05 = 1\,050$ und $1{,}05 \cdot K(0) = 1{,}05 \cdot 1\,000 = 1\,050$. $t = 10$: $K(11) = 1\,000 \cdot 1{,}05^{11} \approx 1\,710{,}34$ und $1{,}05 \cdot K(10) = 1{,}05 \cdot 1\,000 \cdot 1{,}05^{10}$, also derselbe Term, ebenfalls $\approx 1\,710{,}34$. An beiden Stellen stimmt es.</p>
+      <p><b>b)</b> $K(t + 1) = 1\,000 \cdot 1{,}05^{t + 1} = 1\,000 \cdot 1{,}05^t \cdot 1{,}05 = 1{,}05 \cdot K(t)$ nach dem Potenzgesetz $a^{t + 1} = a^t \cdot a$. Das gilt für jedes $t$. Allgemein: $K(t + c) = 1{,}05^c \cdot K(t)$, eine Verschiebung um $c$ nach links ist bei dieser Funktion eine Streckung mit dem Faktor $1{,}05^c$. Für $c = 2$ also Faktor $1{,}05^2 = 1{,}1025$, das sind $10{,}25\,\%$ mehr, nicht $10\,\%$.</p>
+      <p><b>c)</b> Nein. $f(0 + 1) = 1$, aber $c \cdot f(0) = c \cdot 0 = 0$ für jedes $c$. Kein Streckfaktor kann die verschobene Parabel erzeugen, schon die Nullstelle wandert von $0$ nach $-1$, und Strecken lässt Nullstellen unverändert. Die Gleichheit von Verschieben und Strecken ist eine <b>Besonderheit der Exponentialfunktionen</b>, keine allgemeine Regel.</p>
+      <p><b>d)</b> Gesucht ist $c$ mit $1{,}05^c = 2$: $c = \dfrac{\lg 2}{\lg 1{,}05} \approx 14{,}2$. Rund $14$ Jahre früher anfangen wirkt wie das doppelte Startkapital. Deutung: bei prozentualem Wachstum ist <b>Zeit</b> gleichwertig mit <b>Kapital</b>, jedes Jahr Vorsprung ist ein fester Faktor. Das gilt aber nur, solange der Zinssatz die ganze Zeit $5\,\%$ bleibt.</p>
+      <p class="why">$2 \cdot 1{,}05^t$ und $1{,}05^{2t}$ sind verschiedene Dinge: das erste verdoppelt das Kapital, das zweite lässt die Zeit doppelt so schnell laufen, also $1{,}1025$ pro Jahr.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>

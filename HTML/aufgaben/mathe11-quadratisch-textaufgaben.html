@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Textaufgaben: Quadratische Funktionen — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Drei Textaufgaben mit Lösungen zu „Quadratische Funktionen“, KW 46: je eine Aufgabe für die Anforderungsbereiche I, II und III.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Textaufgaben: Quadratische Funktionen</h1>
+  <div class="sub">Berufliches Gymnasium · Klasse 11 · KW 46 · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/mathe11.html">Zum Plan</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Die Wasserfontäne</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Eine Fontäne im Park wird durch $h(x) = -0{,}5(x - 4)^2 + 8$ beschrieben. Dabei ist $x$ die waagerechte Entfernung von der Düse in Metern und $h$ die Höhe des Wasserstrahls in Metern.</p>
+    <ol class="parts">
+      <li>Lies den Scheitelpunkt ab und sage, was er im Park bedeutet. In welche Richtung ist die Parabel geöffnet?</li>
+      <li>Berechne $h(0)$ und erkläre, was das über die Lage der Düse aussagt.</li>
+      <li>Wo trifft das Wasser wieder auf den Boden? Löse die Gleichung inhaltlich, ohne Ausmultiplizieren.</li>
+      <li>Rechne die Scheitelpunktform in die Normalform $h(x) = ax^2 + bx + c$ um und prüfe dein Ergebnis an der Stelle $x = 4$.</li>
+    </ol>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Der weite Wurf</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Ein Ball wird aus $1{,}8$ m Höhe geworfen. Seine Flugbahn beschreibt $h(x) = -0{,}05x^2 + x + 1{,}8$, mit $x$ als Wurfweite in Metern.</p>
+    <ol class="parts">
+      <li>Deute die Zahl $1{,}8$ und das Vorzeichen von $-0{,}05$ im Sachzusammenhang.</li>
+      <li>Berechne den Scheitelpunkt mit $x_S = -\dfrac{b}{2a}$ und gib die Scheitelpunktform an.</li>
+      <li>In welcher Entfernung ist der Ball genau $5$ m hoch? Nutze die Scheitelpunktform.</li>
+      <li>Wie weit fliegt der Ball, bis er auf dem Boden aufkommt? Runde auf zwei Nachkommastellen.</li>
+    </ol>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Doppelt so schnell, doppelter Bremsweg?</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Ein Mitschüler sagt: <b>„Wenn ich doppelt so schnell fahre, brauche ich doppelt so weit zum Anhalten.“</b> In der Fahrschule gelten die Faustformeln: Bremsweg $s_B = \left(\dfrac{v}{10}\right)^2$ und Reaktionsweg $s_R = \dfrac{v}{10} \cdot 3$, jeweils in Metern bei $v$ in $\dfrac{\mathrm{km}}{\mathrm{h}}$.</p>
+    <ol class="parts">
+      <li>Berechne den Bremsweg bei $50$ und bei $100\ \dfrac{\mathrm{km}}{\mathrm{h}}$ und vergleiche.</li>
+      <li>Berechne beide Reaktionswege und die gesamten Anhaltewege. Um welchen Faktor wächst der Anhalteweg?</li>
+      <li>Begründe mit der Bewegungsgleichung $s = \dfrac{a}{2}t^2$, warum der Bremsweg quadratisch von der Geschwindigkeit abhängt, der Reaktionsweg aber nicht.</li>
+      <li>Beurteile die Behauptung. Was folgt daraus für das Fahren in der Stadt?</li>
+    </ol>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Die Wasserfontäne</h3>
+      <p><b>a)</b> Aus $(x - 4)^2$ folgt $d = 4$, das Vorzeichen dreht sich um. Mit $e = 8$ ist der Scheitel $S(4 \mid 8)$: der Strahl erreicht in $4$ m Entfernung seinen <b>höchsten Punkt</b> von $8$ m. Der Faktor $-0{,}5$ ist negativ, die Parabel ist also nach unten geöffnet, und der Scheitel ist der höchste Punkt.</p>
+      <p><b>b)</b> $h(0) = -0{,}5 \cdot (0 - 4)^2 + 8 = -0{,}5 \cdot 16 + 8 = -8 + 8 = 0$. Die Düse sitzt also genau auf Bodenhöhe.</p>
+      <p><b>c)</b> $-0{,}5(x - 4)^2 + 8 = 0$ ergibt $0{,}5(x - 4)^2 = 8$ und damit $(x - 4)^2 = 16$. Vorgelesen: welche Zahl ergibt quadriert $16$? Das sind $4$ und $-4$, also $x - 4 = 4$ oder $x - 4 = -4$ und damit $x = 8$ oder $x = 0$. Das Wasser landet in <b>$8$ m</b> Entfernung; $x = 0$ ist die Düse selbst.</p>
+      <p><b>d)</b> $(x - 4)^2 = x^2 - 8x + 16$, also $h(x) = -0{,}5(x^2 - 8x + 16) + 8 = -0{,}5x^2 + 4x - 8 + 8 = -0{,}5x^2 + 4x$. Probe: $h(4) = -0{,}5 \cdot 16 + 16 = -8 + 16 = 8$ — das ist der Scheitelwert aus a).</p>
+      <p class="why">In $(x - 4)^2$ steht der Scheitel bei $x = +4$, nicht bei $-4$. Und beim Ausmultiplizieren muss $-0{,}5$ <b>alle drei</b> Summanden treffen, auch die $16$.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Der weite Wurf</h3>
+      <p><b>a)</b> $h(0) = 1{,}8$: die $1{,}8$ ist die <b>Abwurfhöhe</b>, der Ball ist bei $x = 0$ noch in der Hand. Der negative Faktor $-0{,}05$ öffnet die Parabel nach unten — der Ball steigt erst und fällt dann, wie es sein muss.</p>
+      <p><b>b)</b> $x_S = -\dfrac{1}{2 \cdot (-0{,}05)} = -\dfrac{1}{-0{,}1} = 10$. Höhe dort: $h(10) = -0{,}05 \cdot 100 + 10 + 1{,}8 = -5 + 11{,}8 = 6{,}8$. Scheitel $S(10 \mid 6{,}8)$, Scheitelpunktform $h(x) = -0{,}05(x - 10)^2 + 6{,}8$.</p>
+      <p><b>c)</b> $-0{,}05(x - 10)^2 + 6{,}8 = 5$ ergibt $0{,}05(x - 10)^2 = 1{,}8$ und $(x - 10)^2 = 36$. Also $x - 10 = 6$ oder $x - 10 = -6$, damit $x = 16$ m oder $x = 4$ m. Der Ball ist <b>zweimal</b> auf $5$ m Höhe: beim Steigen nach $4$ m und beim Fallen nach $16$ m.</p>
+      <p><b>d)</b> $-0{,}05(x - 10)^2 + 6{,}8 = 0$ ergibt $(x - 10)^2 = 136$, also $x = 10 + \sqrt{136} \approx 10 + 11{,}66 = 21{,}66$ m. Die zweite rechnerische Lösung $x \approx -1{,}66$ liegt hinter dem Werfer und entfällt.</p>
+      <p class="why">Der Scheitel liegt bei $10$ m, die Landung aber nicht bei $20$ m. Symmetrisch wäre das nur bei Abwurf vom Boden — die Abwurfhöhe $1{,}8$ m verschiebt die Landung nach hinten.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Doppelt so schnell, doppelter Bremsweg?</h3>
+      <p><b>a)</b> Bei $50$: $s_B = 5^2 = 25$ m. Bei $100$: $s_B = 10^2 = 100$ m. Der Bremsweg wird <b>viermal</b> so lang, nicht doppelt so lang.</p>
+      <p><b>b)</b> Reaktionswege: $5 \cdot 3 = 15$ m und $10 \cdot 3 = 30$ m — dieser Teil verdoppelt sich tatsächlich. Anhaltewege: $25 + 15 = 40$ m und $100 + 30 = 130$ m. Der Anhalteweg wächst um den Faktor $\dfrac{130}{40} = 3{,}25$.</p>
+      <p><b>c)</b> Während der Reaktionszeit fährt das Auto mit <b>konstanter</b> Geschwindigkeit, der Weg ist $v$ mal Zeit — das ist linear in $v$. Beim Bremsen wirkt eine konstante Verzögerung, und in $s = \dfrac{a}{2}t^2$ steckt die Zeit im Quadrat. Da die Bremszeit selbst proportional zu $v$ ist, wächst der Bremsweg mit $v^2$.</p>
+      <p><b>d)</b> Die Behauptung ist falsch: nur der Reaktionsweg verdoppelt sich, der Bremsweg vervierfacht sich, der Anhalteweg wächst insgesamt auf mehr als das Dreifache. In der Stadt heißt das: der Unterschied zwischen $30$ und $50\ \dfrac{\mathrm{km}}{\mathrm{h}}$ ist kein Drittel mehr Weg, sondern aus $18$ m werden $40$ m — an genau dieser Stelle steht meistens jemand auf der Straße.</p>
+      <p class="why">Der Bremsweg allein ist nicht der Anhalteweg. Wer die Reaktionszeit vergisst, unterschätzt bei $50\ \dfrac{\mathrm{km}}{\mathrm{h}}$ die Strecke um $15$ m, also um mehr als drei Autolängen.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Textaufgaben: Vermischte Übungen — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Drei Textaufgaben mit Lösungen zu „Vermischte Übungen“, KW 23: je eine Aufgabe für die Anforderungsbereiche I, II und III.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Textaufgaben: Vermischte Übungen</h1>
+  <div class="sub">Berufliches Gymnasium · Klasse 11 · KW 23 · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/mathe11.html">Zum Plan</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Der Ferienjob</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Für einen Ferienjob gibt es $11{,}50$ € je Stunde und zusätzlich eine feste Fahrtkostenpauschale von $25$ € je Woche. Der Wochenlohn für $h$ Stunden ist $L(h) = 11{,}50h + 25$.</p>
+    <ol class="parts">
+      <li>Was verdient man in einer Woche mit $40$ Stunden?</li>
+      <li>Wie viele Stunden muss man arbeiten, um auf $600$ € zu kommen?</li>
+      <li>Der Stundenlohn steigt um $8\,\%$. Wie hoch ist er dann?</li>
+      <li>Stelle $L = s \cdot h + p$ nach $h$ um und berechne damit die Stundenzahl für $600$ € beim neuen Stundenlohn.</li>
+    </ol>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Vier Gleichungen, welches Werkzeug?</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Im Übungszirkel liegen vier Gleichungen nebeneinander: <b>(1)</b> $5x - 7 = 2x + 8$, <b>(2)</b> $x^2 - 6x + 5 = 0$, <b>(3)</b> $2^x = 64$ und <b>(4)</b> $x^2 = 5x$.</p>
+    <ol class="parts">
+      <li>Ordne jeder Gleichung das passende Werkzeug zu und begründe kurz.</li>
+      <li>Löse alle vier Gleichungen.</li>
+      <li>Was fällt an den Lösungen auf?</li>
+      <li>Bei welcher Gleichung passieren erfahrungsgemäß die meisten Fehler? Erkläre den typischen Fehler und wie man ihn vermeidet.</li>
+    </ol>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Ergebnis da, also fertig?</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Vier Schülerinnen und Schüler legen ihre Ergebnisse vor. <b>(1)</b> „Ein Rechteck mit Umfang $20$ m und Fläche $30\ \mathrm{m^2}$ hat die Seiten …“ <b>(2)</b> „Die Wahrscheinlichkeit beträgt $1{,}2$.“ <b>(3)</b> „Die Seitenlänge ist $-4$ cm.“ <b>(4)</b> „Der Verein hat nach dem Modell $2\,183{,}7$ Mitglieder.“</p>
+    <ol class="parts">
+      <li>Prüfe Aussage (1) rechnerisch. Stelle dazu eine quadratische Gleichung auf.</li>
+      <li>Bestimme, welche Fläche bei Umfang $20$ m höchstens möglich ist. Bestätigt das dein Ergebnis aus a)?</li>
+      <li>Ordne die vier Aussagen ein: Welche sind mathematisch unmöglich, welche nur sachlich unbrauchbar?</li>
+      <li>Formuliere eine kurze Prüfliste, die man nach jeder Rechnung durchgeht.</li>
+    </ol>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Der Ferienjob</h3>
+      <p><b>a)</b> $L(40) = 11{,}50 \cdot 40 + 25 = 460 + 25 = 485$ €.</p>
+      <p><b>b)</b> $11{,}50h + 25 = 600$ ergibt $11{,}50h = 575$ und damit $h = 50$ Stunden. Probe: $11{,}50 \cdot 50 = 575$, plus $25$ sind $600$ €.</p>
+      <p><b>c)</b> $11{,}50 \cdot 1{,}08 = 12{,}42$ €. Der Wachstumsfaktor $1{,}08$ ist schneller als der Umweg über $8\,\%$ von $11{,}50$ und anschließendes Addieren, führt aber zum selben Ergebnis: $0{,}92 + 11{,}50 = 12{,}42$.</p>
+      <p><b>d)</b> $L - p = s \cdot h$, also $h = \dfrac{L - p}{s}$. Mit $L = 600$, $p = 25$ und $s = 12{,}42$: $h = \dfrac{575}{12{,}42} \approx 46{,}3$ Stunden. Durch die Lohnerhöhung spart man also knapp vier Stunden Arbeit für denselben Betrag.</p>
+      <p class="why">Die Pauschale gehört nicht in den Stundenlohn. Wer $\dfrac{600}{11{,}50} \approx 52{,}2$ rechnet, vergisst die $25$ € und arbeitet zwei Stunden zu viel.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Vier Gleichungen, welches Werkzeug?</h3>
+      <p><b>a)</b> (1) <b>Äquivalenzumformung</b>: eine lineare Gleichung, sortieren und normieren genügt. (2) <b>pq-Formel oder Vieta</b>: Normalform mit absolutem Glied. (3) <b>gleiche Basis</b>: rechts steht eine Zweierpotenz, dann vergleicht man die Exponenten. (4) <b>Ausklammern</b>: kein absolutes Glied, also nicht die pq-Formel bemühen.</p>
+      <p><b>b)</b> (1) $3x = 15$, also $x = 5$. (2) Über Vieta: gesucht sind zwei Zahlen mit Summe $6$ und Produkt $5$ — das sind $1$ und $5$. (3) $64 = 2^6$, also $x = 6$. (4) $x^2 - 5x = 0$, ausgeklammert $x(x - 5) = 0$, also $x = 0$ oder $x = 5$.</p>
+      <p><b>c)</b> In drei von vier Gleichungen kommt die Lösung $5$ vor — die Aufgaben sind bewusst so gebaut. Das ist eine bequeme Kontrolle, aber kein Argument: geprüft wird durch <b>Einsetzen</b>, nicht durch Wiedererkennen.</p>
+      <p><b>d)</b> Bei (4). Der typische Fehler ist, beide Seiten durch $x$ zu teilen: dann bleibt $x = 5$ übrig, und die Lösung $x = 0$ geht verloren. Vermeiden lässt sich das mit einer festen Regel: <b>zuerst alles auf eine Seite bringen, sodass rechts null steht</b>, und dann ausklammern statt teilen. Ein Produkt ist genau dann null, wenn ein Faktor null ist — so bleiben beide Lösungen erhalten.</p>
+      <p class="why">Die pq-Formel ist nicht der Universalschlüssel. Bei (3) ist sie gar nicht anwendbar, bei (4) unnötig, und bei (1) wäre sie ein Umweg — das Werkzeug wählt man <b>vor</b> dem Rechnen.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Ergebnis da, also fertig?</h3>
+      <p><b>a)</b> Bei Umfang $20$ m gilt $a + b = 10$, also $b = 10 - a$. Die Fläche: $a(10 - a) = 30$, umgestellt $a^2 - 10a + 30 = 0$. Diskriminante: $D = 25 - 30 = -5 &lt; 0$ — es gibt <b>keine</b> reelle Lösung. Ein solches Rechteck existiert nicht.</p>
+      <p><b>b)</b> Die Flächenfunktion $A(a) = -a^2 + 10a$ hat den Scheitel bei $a = 5$ mit $A(5) = 25\ \mathrm{m^2}$. Mehr als $25\ \mathrm{m^2}$ sind bei Umfang $20$ m nicht möglich, und das Maximum liefert das Quadrat mit $5$ m Seite. Die geforderten $30\ \mathrm{m^2}$ liegen darüber — das bestätigt a) auf zweitem Weg.</p>
+      <p><b>c)</b> <b>Mathematisch unmöglich</b> sind (1) und (2): das Rechteck kann es nicht geben, und eine Wahrscheinlichkeit liegt immer zwischen $0$ und $1$. <b>Nur sachlich unbrauchbar</b> sind (3) und (4): $-4$ ist eine korrekte Lösung einer Gleichung, taugt aber nicht als Länge, und $2\,183{,}7$ ist als Modellwert richtig, nur eben keine Mitgliederzahl — hier rundet man auf $2\,184$ und sagt dazu, dass es eine Prognose ist.</p>
+      <p><b>d)</b> Kurze Prüfliste: <b>Erstens</b> die Probe — eingesetzt, stimmt es? <b>Zweitens</b> der Bereich — ist die Zahl als Länge, Anzahl oder Wahrscheinlichkeit überhaupt zulässig? <b>Drittens</b> die Größenordnung — passt das Ergebnis zur Aufgabe, oder ist es tausendmal zu groß? <b>Viertens</b> die Einheit — steht am Ende $\mathrm{m}$, $\mathrm{m^2}$ oder $\mathrm{m^3}$? <b>Fünftens</b> die Frage — ist wirklich das beantwortet, was gefragt war?</p>
+      <p class="why">Eine negative Diskriminante ist kein Rechenfehler, sondern ein <b>Ergebnis</b>: die Aufgabe hat keine Lösung. Wer trotzdem die Wurzel zieht, erfindet Zahlen.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>

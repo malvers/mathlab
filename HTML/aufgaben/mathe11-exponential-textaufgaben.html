@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Textaufgaben: Exponentielles Wachstum und Zerfall — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Drei Textaufgaben mit Lösungen zu „Exponentielles Wachstum und Zerfall“, KW 44: je eine Aufgabe für die Anforderungsbereiche I, II und III.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Textaufgaben: Exponentielles Wachstum und Zerfall</h1>
+  <div class="sub">Berufliches Gymnasium · Klasse 11 · KW 44 · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/mathe11.html">Zum Plan</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Das Sparbuch der Patentante</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Zur Geburt legt eine Patentante $2\,000$ € an. Das Konto wird mit $4\,\%$ im Jahr verzinst, die Zinsen bleiben auf dem Konto.</p>
+    <ol class="parts">
+      <li>Gib den Wachstumsfaktor $q$ an und stelle die Funktionsgleichung $K(t)$ auf.</li>
+      <li>Berechne den Kontostand nach einem und nach zwei Jahren. Woher kommen die Cent-Beträge im zweiten Jahr?</li>
+      <li>Wie viel Geld liegt nach $10$ Jahren auf dem Konto?</li>
+      <li>Ein Mitschüler rechnet: „$10$ Jahre mal $4\,\%$ sind $40\,\%$, also $2\,800$ €.“ Vergleiche mit deinem Ergebnis und erkläre die Differenz.</li>
+    </ol>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Der Lieferwagen verliert an Wert</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Ein Lieferwagen kostet neu $24\,000$ €. Er verliert jedes Jahr $25\,\%$ seines jeweils aktuellen Werts. Ein Taschenrechner ist erlaubt, Logarithmen sind noch nicht im Werkzeugkasten.</p>
+    <ol class="parts">
+      <li>Gib den Abnahmefaktor an und stelle die Funktionsgleichung $W(t)$ auf.</li>
+      <li>Wie viel ist der Wagen nach $3$ Jahren noch wert?</li>
+      <li>Nach welcher Zeit ist der Wagen nur noch die Hälfte wert? Grenze durch Probieren auf eine Nachkommastelle ein.</li>
+      <li>Ab wann ist der Wagen weniger als $3\,000$ € wert? Kann sein Wert rechnerisch auf null sinken? Begründe an der Funktionsgleichung.</li>
+    </ol>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Fünf Prozent oder fünf Stück?</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Ein Mitschüler meint: <b>„Bei einem Startwert von $100$ ist es doch fast egal, ob etwas um $5\,\%$ im Jahr wächst oder um $5$ Einheiten im Jahr — das sind ja beide Male $5$.“</b></p>
+    <ol class="parts">
+      <li>Vergleiche beide Modelle nach $1$, $5$ und $20$ Jahren in einer Tabelle.</li>
+      <li>Ab welchem Jahr liegt das exponentielle Modell um mehr als $10\,\%$ über dem linearen? Grenze durch Probieren ein.</li>
+      <li>Wie lange dauert es in jedem Modell, bis sich der Anfangswert verdoppelt hat?</li>
+      <li>Beurteile die Aussage. Erkläre, warum die Faustregel „Verdopplungszeit $\approx \dfrac{70}{p}$“ hier so gut passt.</li>
+    </ol>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Das Sparbuch der Patentante</h3>
+      <p><b>a)</b> $q = 1 + \dfrac{4}{100} = 1{,}04$. Damit $K(t) = 2\,000 \cdot 1{,}04^t$ mit $t$ in Jahren.</p>
+      <p><b>b)</b> $K(1) = 2\,000 \cdot 1{,}04 = 2\,080$ €. $K(2) = 2\,000 \cdot 1{,}04^2 = 2\,163{,}20$ €. Im zweiten Jahr werden nicht nur die $2\,000$ € verzinst, sondern auch die $80$ € Zinsen aus dem ersten Jahr: $80 \cdot 0{,}04 = 3{,}20$ €. Genau diese <b>Zinsen auf die Zinsen</b> ergeben den Cent-Betrag.</p>
+      <p><b>c)</b> $K(10) = 2\,000 \cdot 1{,}04^{10} \approx 2\,000 \cdot 1{,}480244 \approx 2\,960{,}49$ €.</p>
+      <p><b>d)</b> Sein Ergebnis wäre $2\,800$ €, das sind rund $160{,}49$ € zu wenig. Er hat <b>linear</b> gerechnet, also jedes Jahr $80$ € auf den Ursprungsbetrag. Tatsächlich wächst die Verzinsungsbasis jedes Jahr mit, deshalb wird der Zuwachs von Jahr zu Jahr größer: im ersten Jahr $80$ €, im zehnten schon rund $113{,}86$ €.</p>
+      <p class="why">Prozente über mehrere Jahre werden <b>multipliziert</b>, nicht addiert. Aus $4\,\%$ über zehn Jahre werden nicht $40\,\%$, sondern rund $48{,}02\,\%$.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Der Lieferwagen verliert an Wert</h3>
+      <p><b>a)</b> Abnahme um $25\,\%$ heißt: es bleiben $75\,\%$, also $q = 0{,}75$ — <b>nicht</b> $-0{,}25$. Damit $W(t) = 24\,000 \cdot 0{,}75^t$ mit $t$ in Jahren.</p>
+      <p><b>b)</b> $W(3) = 24\,000 \cdot 0{,}75^3 = 24\,000 \cdot 0{,}421875 = 10\,125$ €.</p>
+      <p><b>c)</b> Gesucht ist $t$ mit $0{,}75^t = 0{,}5$. Probieren: $0{,}75^2 = 0{,}5625$, also noch über der Hälfte; $0{,}75^3 \approx 0{,}4219$, also schon darunter. Feiner: $0{,}75^{2{,}4} \approx 0{,}5014$ und $0{,}75^{2{,}5} \approx 0{,}4871$. Der halbe Wert ist also nach etwa $2{,}4$ Jahren erreicht, gut zwei Jahre und fünf Monate.</p>
+      <p><b>d)</b> $W(7) = 24\,000 \cdot 0{,}75^7 \approx 3\,203{,}61$ €, $W(8) \approx 2\,402{,}71$ €. Ab dem <b>achten Jahr</b> liegt der Wert unter $3\,000$ €. Rechnerisch auf null sinken kann er nie: $0{,}75^t$ ist für jedes $t$ echt größer als null, ein Produkt aus positiven Zahlen wird nicht null. Der Wert wird beliebig klein, erreicht die Null aber nicht — die Funktion hat keine Nullstelle.</p>
+      <p class="why">$25\,\%$ Wertverlust je Jahr heißt nicht, dass der Wagen nach vier Jahren nichts mehr wert ist. Die $25\,\%$ beziehen sich jedes Mal auf den <b>Restwert</b>, nicht auf den Neupreis: nach vier Jahren sind es noch $7\,593{,}75$ €.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Fünf Prozent oder fünf Stück?</h3>
+      <p><b>a)</b> Linear $L(t) = 100 + 5t$, exponentiell $E(t) = 100 \cdot 1{,}05^t$. Nach $1$ Jahr: $105$ und $105$. Nach $5$ Jahren: $125$ und $127{,}63$. Nach $20$ Jahren: $200$ und $265{,}33$. Im ersten Jahr stimmen beide überein, danach zieht das exponentielle Modell davon.</p>
+      <p><b>b)</b> Der Quotient $\dfrac{E(t)}{L(t)}$ wächst: bei $t = 10$ ist er $\dfrac{162{,}89}{150} \approx 1{,}086$, bei $t = 11$ ist er $\dfrac{171{,}03}{155} \approx 1{,}103$. Ab dem <b>elften Jahr</b> liegt das exponentielle Modell um mehr als $10\,\%$ höher.</p>
+      <p><b>c)</b> Linear: $100 + 5t = 200$ ergibt $t = 20$ Jahre. Exponentiell durch Probieren: $1{,}05^{14} \approx 1{,}980$ und $1{,}05^{15} \approx 2{,}079$ — die Verdopplung liegt zwischen $14$ und $15$ Jahren, rund $14{,}2$ Jahre.</p>
+      <p><b>d)</b> Die Aussage stimmt nur für das erste Jahr, in dem beide Modelle zufällig denselben Zuwachs haben. Danach ist der Unterschied grundsätzlich: linear kommt jedes Jahr derselbe Betrag dazu, exponentiell wächst der Zuwachs mit dem Bestand. Die Faustregel liefert $\dfrac{70}{5} = 14$ Jahre und trifft die berechneten $14{,}2$ Jahre fast genau; sie gilt für kleine Prozentsätze und macht die Verdopplungszeit ohne Rechner abschätzbar.</p>
+      <p class="why">Der Vergleich „$5\,\%$ gegen $5$ Einheiten“ funktioniert nur beim Startwert. Schon im zweiten Jahr sind es $5{,}25$ statt $5$ — und dieser Vorsprung verzinst sich selbst weiter.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+</body>
+</html>
