@@ -24,6 +24,17 @@
 
 const LABS_DATA = [
     {
+        "id": "marionwalter",
+        "href": "marionwalter.html",
+        "title": "Satz von Marion Walter",
+        "description": "Drittle jede Seite eines beliebigen Dreiecks und verbinde jeden Teilungspunkt mit der gegen\u00fcberliegenden Ecke. Die sechs Cevianen schlie\u00dfen ein Sechseck ein \u2014 und dessen Fl\u00e4che ist immer genau ein Zehntel der Dreiecksfl\u00e4che, egal wie schief das Dreieck steht. Das Lab behauptet das nicht, es misst: das Sechseck entsteht als Schnitt der sechs Halbebenen, die Fl\u00e4che kommt aus der Gau\u00dfschen Trapezformel, und die Abweichung zum exakten Wert steht daneben. Teilt man die Seiten stattdessen bei k/n, liefert 2(n\u22122k)\u00b2/((2n\u2212k)(n+k)) das Verh\u00e4ltnis \u2014 nur die Drittelung macht den glatten Zehntel. Auf Wunsch f\u00e4rbt das Lab alle 19 Teilfl\u00e4chen ein.",
+        "tagline": "Geometrie / Dreieck / immer ein Zehntel",
+        "icon": LAB_ICONS["marionwalter"],
+        "category": "geometrie dreiecke neu hot highlight grade8 grade9 grade10",
+        "keywords": "marion walter marionwalter zehntel sechseck hexagon dreieck cevianen cevian trisektion drittelung dreiteilung teilungspunkte flaecheninhalt flaechenverhaeltnis verhaeltnis affin affine abbildung invariant schwerpunkt seitenhalbierende arrangement teilflaechen mittendreieck 1/10",
+        "color": "gold"
+    },
+    {
         "id": "kreisteilung",
         "href": "kreisteilung.html",
         "title": "Kreisteilung",

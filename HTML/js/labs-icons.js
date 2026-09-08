@@ -4,6 +4,25 @@
  */
 
 const LAB_ICONS = {
+    "marionwalter": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="14,84 86,84 50,15" fill="rgba(0, 210, 255, 0.06)" stroke="#00D2FF" stroke-width="2.2" />
+            <!-- six cevians: every trisection point meets the opposite corner -->
+            <g stroke="rgba(121, 158, 49, 0.95)" stroke-width="1.1">
+                <line x1="50" y1="15" x2="38" y2="84" /><line x1="50" y1="15" x2="62" y2="84" />
+                <line x1="14" y1="84" x2="74" y2="61" /><line x1="14" y1="84" x2="62" y2="38" />
+                <line x1="86" y1="84" x2="38" y2="38" /><line x1="86" y1="84" x2="26" y2="61" />
+            </g>
+            <!-- the hexagon they close in - exactly one tenth of the triangle -->
+            <polygon points="59,66.8 57.2,56.4 50,49.5 42.8,56.4 41,66.8 50,70.2"
+                     fill="rgba(245, 194, 66, 0.85)" stroke="#F5C242" stroke-width="1.4" />
+            <g fill="#799E31" stroke="rgba(255, 255, 255, 0.8)" stroke-width="0.9">
+                <circle cx="38" cy="84" r="2.1" /><circle cx="62" cy="84" r="2.1" /><circle cx="74" cy="61" r="2.1" />
+                <circle cx="62" cy="38" r="2.1" /><circle cx="38" cy="38" r="2.1" /><circle cx="26" cy="61" r="2.1" />
+            </g>
+            <g fill="#B02418" stroke="rgba(255, 255, 255, 0.85)" stroke-width="1.2">
+                <circle cx="14" cy="84" r="3.2" /><circle cx="86" cy="84" r="3.2" /><circle cx="50" cy="15" r="3.2" />
+            </g>
+        </svg>`,
     "kreisteilung": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <circle cx="50" cy="50" r="34" fill="rgba(0, 210, 255, 0.06)" stroke="#00D2FF" stroke-width="2.2" />
             <!-- all fifteen chords of the regular hexagon -->
