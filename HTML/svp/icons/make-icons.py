@@ -5,10 +5,22 @@ import subprocess, sys, colorsys
 from collections import deque
 from PIL import Image
 
+# (app folder, icns name, output name). Only file types with an app that every
+# pupil has on their own machine belong here. A VIDEO icon deliberately does NOT:
+# QuickTime was tried on 08.09.2026 and dropped again - it is a Mac program, and
+# the plan is read on Windows too (Doc: "nimm bitte ein movie icon sonst zu Mac").
+# The camera is drawn in svp-plan.js instead, see MOVIE_PATH.
 SRC = [("Microsoft PowerPoint", "Powerpoint_macOS", "ppt"),
        ("Microsoft Word", "Word_macOS", "doc"),
        ("Microsoft Excel", "Excel_macOS", "xls"),
        ("Adobe Acrobat Reader", "ACR_App", "pdf")]
+
+APP_DIR = {}   # anything outside /Applications goes here
+
+# Without an argument every icon is rebuilt; with one (e.g. "ppt") only that one.
+# A full run silently changes all four whenever an app was updated, so touch a
+# single icon with the filter rather than rebuilding the lot.
+ONLY = sys.argv[1:]
 
 def light(p):
     # anything colourless — the plate AND its grey drop shadow. The logos
@@ -20,9 +32,10 @@ def light(p):
     return sat < 0.18
 
 for app, icns, out in SRC:
+    if ONLY and out not in ONLY: continue
     tmp = "/tmp/%s_raw.png" % out
     subprocess.run(["sips", "-s", "format", "png", "-Z", "128",
-                    "/Applications/%s.app/Contents/Resources/%s.icns" % (app, icns),
+                    "%s/%s.app/Contents/Resources/%s.icns" % (APP_DIR.get(app, "/Applications"), app, icns),
                     "--out", tmp], check=True, capture_output=True)
     im = Image.open(tmp).convert("RGBA")
     w, h = im.size

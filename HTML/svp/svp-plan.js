@@ -132,6 +132,12 @@
     // File-type icon for a material pill; SharePoint share links carry the
     // app in the path (/:p:/ = PowerPoint, /:w:/ = Word, /:x:/ = Excel,
     // /:b:/ = PDF), otherwise the label/extension decides.
+    /* A video file we can hand to the browser itself. Those get the built-in
+       player in the viewer instead of an iframe - it needs no Microsoft round
+       trip, carries no chrome, and plays where a frame would be refused. */
+    const VIDEO_EXT = /\.(mp4|m4v|mov|webm)(\?|#|$)/i;
+    function matVideoFile(url) { return VIDEO_EXT.test(url); }
+
     function matKind(url, label) {
         const l = ((label || '') + ' ' + url).toLowerCase();
         if (url.indexOf('/:p:/') >= 0 || l.indexOf('ppt') >= 0) return 'ppt';
@@ -139,8 +145,12 @@
         if (url.indexOf('/:x:/') >= 0 || l.indexOf('.xls') >= 0) return 'xls';
         if (url.indexOf('/:b:/') >= 0 || l.indexOf('pdf') >= 0) return 'pdf';
         if (/youtu\.be\/|youtube\.com\//i.test(url)) return 'yt';
+        /* SharePoint files a video share under /:v:/, the same way it uses
+           /:p:/ for a deck; a plain file link is recognised by its ending. */
+        if (url.indexOf('/:v:/') >= 0 || VIDEO_EXT.test(url)) return 'video';
         return 'link';
     }
+
 
     // App icons instead of emoji: emoji look different on every device and
     // grey out inside the pill. These are the macOS app icons the kids see on
@@ -167,6 +177,21 @@
     // Praesentation (Leinwand mit Pfeil) — Strichsymbol fuer "in der App oeffnen",
     // damit der Menuepunkt zu den getippten Zeichen passt statt zum bunten Logo.
     const PRESENT_PATH = 'M3.5 4.5h17v11h-17z M12 15.5v3.5 M8.7 21.5 12 19l3.3 2.5';
+
+    /* Film statt QuickTime-Symbol (Doc, 08.09.2026: "nimm bitte ein movie icon
+       sonst zu Mac"). Die vier Buerosymbole sind Programmsymbole, weil jedes
+       Kind sie im eigenen Dock hat - fuer eine Videodatei gibt es kein solches
+       Programm, das auf Windows wie auf dem Mac gilt.
+       ZWEITER ANLAUF: der erste Entwurf war ein Filmstreifen mit Loechern und
+       Abspieldreieck - bei den 16 px, die nach dem Innenabstand von .mat-ico-drawn
+       uebrig bleiben, wurden die Loecher zu dunkelblauem Matsch und das Zeichen
+       wirkte neben dem YouTube-Symbol zu klein (Doc: "dunkelblau kaum sichtbar",
+       "zu klein", "check YT icon"). Jetzt eine Kamera aus zwei VOLLEN Flaechen,
+       ohne jede Aussparung, ueber die ganze Breite wie das YouTube-Zeichen. */
+    const MOVIE_PATH =
+        'M3.5 4.2h9A2.5 2.5 0 0 1 15 6.7v10.6a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 17.3V6.7' +
+        'A2.5 2.5 0 0 1 3.5 4.2z ' +
+        'M17 9.6l5.3-4A1 1 0 0 1 24 6.4v11.2a1 1 0 0 1-1.7.8L17 14.4z';
 
     // Plain link: drawn, not typed — the \u2197 character sits too high in its
     // line in most fonts, an SVG is centred by construction.
@@ -206,7 +231,11 @@
         const kind = matKind(url, label);
         /* no Mac app to take these from — brand/plain glyphs instead */
         if (kind === 'yt') return drawnIcon('mat-ico-drawn', YT_PATH, 'rgb(255, 0, 0)');
-        if (kind === 'link') return drawnIcon('mat-ico-drawn', LINK_PATH, 'rgb(120, 160, 220)');
+        if (kind === 'link') return drawnIcon('mat-ico-drawn mat-ico-link', LINK_PATH, 'rgb(120, 160, 220)');
+        /* Farbe kommt aus svp.css, nicht von hier: dunkelblau im hellen Thema
+           (Doc, 08.09.2026), hell im dunklen - eine feste Farbe waere in einem
+           der beiden Themen kaum zu sehen. */
+        if (kind === 'video') return drawnIcon('mat-ico-drawn mat-ico-movie', MOVIE_PATH, 'currentColor');
         const img = document.createElement('img');
         img.className = 'mat-ico';
         img.src = ICON_BASE + kind + '.png';
@@ -245,6 +274,49 @@
        Doc 07.09.2026 nachmittags: "Aufgaben 1" / "Aufgaben 2") wandert aus
        demselben Grund in die Pille statt in die Material-Zeile - das gilt fuer
        jedes Fach, nicht nur fuer Mathe (Doc 08.09.2026, Info BGY 12). */
+    /* Filme bekommen rechts einen eigenen Reiter, statt zwischen Decks und
+       Arbeitsblaettern zu stehen (Doc, 08.09.2026: "da sollen die Videos aus
+       Mat rein"). Sie werden NICHT getrennt gepflegt - beide Reiter lesen
+       dieselbe Materialzeile, hier wird nur sortiert. Was ein Video ist,
+       entscheidet dieselbe matKind() wie beim Symbol, damit Reiter und Symbol
+       nie auseinanderlaufen. */
+    /* Alle Materialpillen eines Streifens gleich breit (Doc, 08.09.2026:
+       "alle gleich breit"). Gemessen statt fest verdrahtet, genau wie bei den
+       Bereich-Pillen weiter unten: die breiteste gibt das Mass, schmaler ginge
+       nur durch Abschneiden. ACHTUNG, nur im SICHTBAREN Zustand messbar - eine
+       zugeklappte Woche und ein verborgener Reiter liefern lauter Nullen.
+       Deshalb wird nach dem Aufklappen und nach jedem Reiterwechsel neu
+       gemessen, nicht nur beim Zeichnen. */
+    function equalizeMatPills(block) {
+        if (!block || !block.offsetParent) return;
+        const pills = Array.prototype.slice.call(block.querySelectorAll('a.mat-pill'));
+        if (!pills.length) return;
+        pills.forEach(function (p) { p.style.width = ''; });
+        let w = 0;
+        pills.forEach(function (p) { w = Math.max(w, p.getBoundingClientRect().width); });
+        if (w) pills.forEach(function (p) { p.style.width = w + 'px'; });
+    }
+    function equalizeRefPills(ref) {
+        if (!ref) return;
+        equalizeMatPills(ref.matBlock);
+        equalizeMatPills(ref.vidBlock);
+    }
+
+    /* Zeigt oder versteckt den Videos-Reiter einer Woche. Wird an zwei Stellen
+       gebraucht: beim Bauen der Reiter (die Zeile kann laengst Material haben)
+       und bei jeder Materialaenderung. */
+    function setVideoReiter(ref, anzahl) {
+        const p = ref && ref.rPanes;
+        if (!p || !p.videos) return;
+        p.videos.btn.hidden = !anzahl;
+        if (!anzahl && p.videos.btn.classList.contains('on') && ref.showRechts) ref.showRechts('zusatz');
+    }
+
+    function isVideoEntry(en) {
+        const k = matKind(en.url || '', en.label || '');
+        return k === 'video' || k === 'yt';
+    }
+
     function isExerciseEntry(en) {
         /* Ein Eintrag, den der Plan "Aufgaben ..." nennt, gehoert in die Pille -
            unabhaengig vom Dateinamen (Doc 08.09.2026, Info 11: die Wochenblaetter
@@ -326,6 +398,14 @@
     // well signed in the viewer is (Doc, 06.09.2026, "refused to connect").
     function matEmbeddable(url) {
         if (/\/_layouts\//i.test(url) || /\/:f:\//.test(url)) return false;
+        if (matVideoFile(url)) return true;          /* our own player, always frameable */
+        /* A VIDEO share link (/:v:/) is the exception among the SharePoint
+           shapes: measured 08.09.2026 on the live page, it answers "refused to
+           connect" even with action=embedview, because OneDrive serves the
+           Stream player from its own page instead of the WOPI frame that the
+           document types land on. So it keeps its own window. Only a real
+           video FILE gets the in-page player. */
+        if (url.indexOf('/:v:/') >= 0) return false;
         return /\/:[pwxb]:\//.test(url) || /sharepoint\.com|officeapps\.live\.com/i.test(url);
     }
 
@@ -370,18 +450,33 @@
         head.appendChild(tools);
         box.appendChild(head);
 
-        const frame = document.createElement('iframe');
-        frame.className = 'mv-frame';
-        frame.src = matHref(url);
-        frame.title = label || matDefaultLabel(url);
-        frame.setAttribute('allowfullscreen', '');   /* the viewer's own \u26f6 */
-        frame.setAttribute('allow', 'fullscreen');
+        /* A plain video file is played by the browser itself - no iframe, no
+           Microsoft, no waiting. The Office chrome bar is missing there, so the
+           stage drops the extra strip it reserves for it. */
+        const istVideo = matVideoFile(url);
+        let frame;
+        if (istVideo) {
+            frame = document.createElement('video');
+            frame.className = 'mv-frame mv-video';
+            frame.src = url;
+            frame.controls = true;
+            frame.preload = 'metadata';
+            frame.setAttribute('playsinline', '');
+            frame.title = label || matDefaultLabel(url);
+        } else {
+            frame = document.createElement('iframe');
+            frame.className = 'mv-frame';
+            frame.src = matHref(url);
+            frame.title = label || matDefaultLabel(url);
+            frame.setAttribute('allowfullscreen', '');   /* the viewer's own \u26f6 */
+            frame.setAttribute('allow', 'fullscreen');
+        }
         /* The OneDrive player paints a black stage and leaves a hairline of it
            above and below the slide (its own rounding). The stage clips the
            frame, which is a few pixels taller and pulled up by half of that —
            so the deck starts right under our title row. */
         const stage = document.createElement('div');
-        stage.className = 'mv-stage';
+        stage.className = 'mv-stage' + (istVideo ? ' mv-stage-video' : '');
         /* Die Office-Oberflaeche laedt nach dem Dokument noch von einem guten
            Dutzend Microsoft-Hosts nach; ohne Anzeige sieht das aus, als haenge
            es (Doc, 06.09.2026). Die Anzeige verschwindet, sobald der Rahmen
@@ -389,11 +484,15 @@
         const laedt = document.createElement('div');
         laedt.className = 'mv-laedt';
         laedt.textContent = 'Wird geladen …';
-        stage.appendChild(laedt);
         const fertig = function () { laedt.remove(); };
-        frame.addEventListener('load', fertig);
-        frame.addEventListener('error', fertig);
-        setTimeout(fertig, 20000);
+        /* Only the Office frame needs the hint: it loads from a dozen Microsoft
+           hosts and looks stuck meanwhile. The player brings its own progress. */
+        if (!istVideo) {
+            stage.appendChild(laedt);
+            frame.addEventListener('load', fertig);
+            frame.addEventListener('error', fertig);
+            setTimeout(fertig, 20000);
+        }
         stage.appendChild(frame);
         box.appendChild(stage);
 
@@ -740,7 +839,10 @@
         ref.matTd.dataset.src = text;
         const alle = parseMat(text);
         const ex = alle.filter(isExerciseEntry);
-        renderMaterial(ref.matBlock, text, ref, isExerciseEntry);
+        /* Beide Reiter lesen DIESELBE Zeile, nur mit umgekehrtem Filter -
+           dadurch gibt es nichts doppelt zu pflegen. */
+        renderMaterial(ref.matBlock, text, ref, en => isExerciseEntry(en) || isVideoEntry(en));
+        renderMaterial(ref.vidBlock, text, ref, en => !isVideoEntry(en));
         ref.matTd.textContent = '';
         /* Doc, 07.09.2026: "die nach unten ziehen" - Aufgaben-Pille und Material
            stehen zusammen im Streifen der Aufklappzeile, die Wochenzeile bleibt
@@ -787,11 +889,23 @@
             });
             ref.matTd.appendChild(flag);
         }
+        const vids = alle.filter(isVideoEntry).length;
         if (hasMat) {
-            if (!ref.matBlock.parentNode) ref.ensureSubRow().side.appendChild(ref.matBlock);
+            const sub = ref.ensureSubRow();
+            const ziel = sub.panes || null;
+            if (!ref.matBlock.parentNode) (ziel ? ziel.zusatz.pane : sub.side).appendChild(ref.matBlock);
+            if (ziel && !ref.vidBlock.parentNode) ziel.videos.pane.appendChild(ref.vidBlock);
         } else if (ref.matBlock.parentNode) {
             ref.matBlock.remove();
+            if (ref.vidBlock.parentNode) ref.vidBlock.remove();
         }
+        /* Ohne Film bleibt rechts nur "Zusatzmaterial" stehen - ein leerer Reiter
+           waere in den allermeisten Wochen nur Rauschen. Steht ausserhalb des
+           Material-Zweigs: eine Woche ganz ohne Material laeuft da nicht hinein
+           und behielte sonst einen Reiter, hinter dem nichts liegt. Verschwindet
+           der letzte Film, waehrend der Reiter offen ist, springt die Anzeige
+           zurueck, sonst zeigt die Haelfte ins Leere. */
+        setVideoReiter(ref, vids);
         decorateMatCell(ref);
     }
 
@@ -2785,9 +2899,9 @@
 
         // Expandable sub-row, created on demand: bullets under the topic
         // column, materials in the free area under Bemerkungen/Material.
-        let detailTr = null, subMain = null, subSide = null, chev = null;
+        let detailTr = null, subMain = null, subSide = null, rPanes = null, chev = null;
         function ensureSubRow() {
-            if (detailTr) return { main: subMain, side: subSide };
+            if (detailTr) return { main: subMain, side: subSide, panes: rPanes };
             /* ref.ul / ref.notesEl are created below, together with the tabs */
             detailTr = document.createElement('tr');
             detailTr.className = 'detail-row';
@@ -2903,14 +3017,42 @@
                 ref.notesEl = notesEl;
                 ref.showPane = showPane;
             }
-            /* Rechte Haelfte der Kopfzeile - beschriftet wie ein Reiter, damit die
-               Linie durchlaeuft und das Material sichtbar darunter haengt. */
-            const matLabel = document.createElement('span');
-            matLabel.className = 'sub-tab sub-tab-mat';
-            matLabel.textContent = 'Zusatzmaterial';
-            subHeadR.appendChild(matLabel);
+            /* Rechte Haelfte der Kopfzeile: zwei echte Reiter wie links (Doc,
+               08.09.2026: "neben Zusatzm noch Videos als tab wie links").
+               Anders als links haengen sie NICHT an der Anmeldung - das Material
+               ist oeffentlich, die Klasse soll die Filme sehen. "Videos" wird in
+               updateMaterial ein- und ausgeblendet: hat die Woche keinen Film,
+               steht dort nur "Zusatzmaterial" und es sieht aus wie vorher. */
+            const rTabs = document.createElement('div');
+            rTabs.className = 'sub-tabs';
+            subHeadR.appendChild(rTabs);
             subSide = document.createElement('div');
             subSide.className = 'sub-side';
+            rPanes = {};
+            const showR = function (name) {
+                for (const k in rPanes) {
+                    rPanes[k].btn.classList.toggle('on', k === name);
+                    rPanes[k].pane.hidden = k !== name;
+                }
+                equalizeMatPills(name === 'videos' ? ref.vidBlock : ref.matBlock);
+            };
+            [['zusatz', 'Zusatzmaterial'], ['videos', 'Videos']].forEach(function (t, k) {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'sub-tab' + (k ? '' : ' on');
+                b.textContent = t[1];
+                b.addEventListener('click', function (ev) { ev.stopPropagation(); showR(t[0]); });
+                rTabs.appendChild(b);
+                const pane = document.createElement('div');
+                pane.className = 'sub-pane';
+                pane.dataset.pane = t[0];
+                pane.hidden = !!k;
+                subSide.appendChild(pane);
+                rPanes[t[0]] = { btn: b, pane: pane };
+            });
+            ref.showRechts = showR;
+            ref.rPanes = rPanes;
+            setVideoReiter(ref, parseMat(ref.matTd ? (ref.matTd.dataset.src || '') : '').filter(isVideoEntry).length);
             subBody.appendChild(subSide);
             subMain.appendChild(subBody);
             detailTr.appendChild(subMain);
@@ -2930,12 +3072,13 @@
             /* Doc, 07.09.2026: "mach die Chevis ganz nach vorn" - der Pfeil steht
                jetzt vor der Wochennummer, nicht mehr vor dem Thema. */
             tds[0].insertBefore(chev, tds[0].firstChild);
-            return { main: subMain, side: subSide };
+            return { main: subMain, side: subSide, panes: rPanes };
         }
         function toggleSubRow() {
             if (!detailTr) return;
             tr.classList.toggle('open');
             detailTr.classList.toggle('open');
+            equalizeRefPills(ref);
             syncOpenWeeks();
         }
         /* The chevron promises content. An empty sub-row only exists because
@@ -2958,6 +3101,7 @@
             if (!detailTr) return;
             tr.classList.add('open');
             detailTr.classList.add('open');
+            equalizeRefPills(ref);
             syncOpenWeeks();
         };
 
@@ -2976,6 +3120,8 @@
         ref.quizBtn = buildQuizBtn(quizSource(ov, row));
         ref.matBlock = document.createElement('div');
         ref.matBlock.className = 'mat-block';
+        ref.vidBlock = document.createElement('div');
+        ref.vidBlock.className = 'mat-block';
         updateMaterial(ref, ov.material != null ? ov.material : row.material);
         wireMaterialDrop(ref);
         if (initialOpen.has(i)) ref.openSubRow(); /* restore remembered state */
@@ -3002,10 +3148,14 @@
         if (w) pills.forEach(p => { p.style.width = w + 'px'; });
     }
 
-    if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(equalizeLbCells);
-    } else {
+    function equalizeAll() {
         equalizeLbCells();
+        rendered.forEach(equalizeRefPills);
+    }
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(equalizeAll);
+    } else {
+        equalizeAll();
     }
     window.addEventListener('resize', equalizeLbCells);
 

@@ -12,6 +12,8 @@
        zweimal heller). Auf dem dunklen Grund praktisch weiss. */
     --head: rgb(248, 251, 255);
     --lambda: rgb(245, 194, 66);
+    /* Width of the link-card column on the landing pages (see .card-grid) */
+    --card-col: 720px;
     --ypsilon: rgb(176, 36, 24);
     --phi: rgb(121, 158, 49);
     --cyan: rgb(90, 190, 230);
@@ -428,13 +430,20 @@ body.editing .mat-block a.mat-pill:has(> .mat-ico) { padding-right: 26px; }
     min-height: 26px;
 }
 #plan-table .detail-row .sub-head-l { flex: 0 0 50%; min-width: 0; }
-#plan-table .detail-row .sub-head-r { flex: 1 1 auto; min-width: 0; }
+/* Wie die linke Haelfte ein Flex-Kasten: sonst haengt die Beschriftung rechts
+   als Inline-Element an einer Textgrundlinie, unter ihr kommt Zeilenraum dazu,
+   und die graue Linie sitzt tiefer als links (Doc, 08.09.2026: "da ist die
+   graue auch runter"). Links steht .sub-tabs, das ist selbst schon flex. */
+#plan-table .detail-row .sub-head-r { flex: 1 1 auto; min-width: 0; display: flex; }
 /* Gemalte Beschriftung der beiden Haelften - sieht aus wie ein Reiter, laesst
    sich aber nicht anklicken. Farbe wie die grosse Tabellenkopfzeile (Doc,
    07.09.2026), damit es als Spaltenueberschrift gelesen wird. */
 /* .sub-tab kommt weiter unten in der Datei und wuerde sonst gewinnen - deshalb
    beide Klassen zusammen. */
-.sub-tab.sub-tab-mat { display: inline-block; cursor: default; color: var(--head); }
+/* inline-flex, nicht inline-block: als Flex-Kind wird daraus ein flex-Kasten,
+   und erst dann zentriert das align-items aus .sub-tab die Beschriftung in den
+   26 px senkrecht - sonst klebte sie oben. */
+.sub-tab.sub-tab-mat { display: inline-flex; cursor: default; color: var(--head); }
 .sub-tab.sub-tab-mat:hover { color: var(--head); }
 #plan-table .detail-row .sub-left { flex: 0 0 50%; min-width: 0; }
 #plan-table .detail-row .sub-side { flex: 1 1 auto; min-width: 0; padding-top: 2px; }
@@ -443,6 +452,9 @@ body.editing .mat-block a.mat-pill:has(> .mat-ico) { padding-right: 26px; }
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    /* Rechtsbuendig (Doc, 08.09.2026) - die Pillen haengen damit an derselben
+       Kante wie der rechte Rand der Aufklappzeile. */
+    justify-content: flex-end;
     gap: 6px 8px;
     text-align: left;
 }
@@ -455,6 +467,17 @@ body.editing .mat-block a.mat-pill:has(> .mat-ico) { padding-right: 26px; }
     /* eine Spur Farbe bleibt - ganz durchsichtig war zu wenig. currentColor
        heisst: jede Pille toent in ihrer eigenen Farbe, in hell wie in dunkel. */
     background: color-mix(in srgb, currentColor 7%, transparent);
+    /* Blau statt Gruen (Doc, 08.09.2026, als Versuch: "die Farbe blueish auch
+       die Schrift"). EINE Farbe genuegt: der Hintergrund wird eine Zeile
+       darueber per color-mix aus currentColor gemischt, der Rand haengt hier
+       daneben. .b-green selbst bleibt unangetastet - es faerbt auch die
+       Navigationspillen, die gruen bleiben sollen. */
+    color: rgb(150, 186, 236);
+    border-color: rgba(120, 160, 220, 0.5);
+}
+html.svp-light #plan-table .detail-row .sub-side .mat-block a.mat-pill {
+    color: rgb(30, 60, 120);
+    border-color: rgba(40, 70, 120, 0.45);
 }
 .sub-label {
     display: inline-block;
@@ -1298,16 +1321,19 @@ button.action {
     line-height: 1.25;
     letter-spacing: 0.06em;
     color: var(--text);
-    background: rgba(121, 158, 49, 0.16);
-    border: 1px solid rgba(121, 158, 49, 0.5);
+    /* Blau statt Gruen (Doc, 08.09.2026: "die auch so") - derselbe Ton wie die
+       Materialpillen, damit Werkzeugleiste und Plan zusammengehoeren. Der
+       orange und der graue Knopf weiter unten bleiben, was sie sind. */
+    background: rgba(120, 160, 220, 0.16);
+    border: 1px solid rgba(120, 160, 220, 0.5);
     border-radius: 8px;
     padding: 9px 16px;
     cursor: pointer;
 }
 
 button.action:hover {
-    background: rgba(121, 158, 49, 0.3);
-    border-color: rgb(121, 158, 49);
+    background: rgba(120, 160, 220, 0.3);
+    border-color: rgb(120, 160, 220);
     filter: none;
 }
 
@@ -2024,19 +2050,38 @@ a.link-card.c-red {
 a.link-card.c-red:hover { border-color: rgba(176, 36, 24, 0.7); }
 html.svp-light a.link-card.c-red .card-title { color: var(--ypsilon); }
 
+/* Werkzeug cards: one quiet grey for all of them — cyan, violet and red side by
+   side made the block read like a paint box (Doc, 08.09.2026). Same greys as the
+   .b-grey badge, so dark and light stay in step. */
+a.link-card.c-grey {
+    background: rgba(170, 190, 220, 0.11);
+    border-color: rgba(170, 190, 220, 0.42);
+}
+a.link-card.c-grey:hover { border-color: rgba(170, 190, 220, 0.7); }
+a.link-card.c-grey .card-title { color: rgba(200, 214, 236, 0.9); }
+html.svp-light a.link-card.c-grey {
+    background: rgba(40, 70, 120, 0.09);
+    border-color: rgba(40, 70, 120, 0.42);
+}
+html.svp-light a.link-card.c-grey .card-title { color: rgb(72, 86, 112); }
+
 /* Forces a card into column 1 → starts a new grid row (separates the
    Fach cards from the personal cards, works with any responsive column count) */
 a.link-card.row-break { grid-column: 1; }
 
 /* Start page grouped by Schulart: one section per Schulart, its cards below.
    A section whose cards are all switched off in ⚙ hides its heading too. */
-.svp-section { margin-bottom: 26px; }
+/* The section rides the same centred card column as everything else, so the
+   rubric heading and its rule are exactly as wide as the cards below it. */
+.svp-section { max-width: var(--card-col); margin: 0 auto 26px; }
 .svp-section.nav-hidden { display: none; }
 .svp-section .section-title {
-    max-width: 1200px;
-    margin: 0 auto 10px;
+    max-width: var(--card-col);
+    margin: 0 0 10px;
     font-family: 'Orbitron', sans-serif;
-    font-size: 0.72rem;
+    /* The Schulart is the only rubric on the start page since the subtitle went
+       (Doc, 08.09.2026) — it carries that weight now, so it reads bigger. */
+    font-size: 0.95rem;
     font-weight: 400;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -2049,14 +2094,26 @@ a.link-card.row-break { grid-column: 1; }
     border-bottom: 1px solid var(--line);
 }
 
+/* One card per row, like the notes list on notes.html, on a narrow column that
+   sits centred on the page (Doc, 08.09.2026). The old auto-fit grid gave a
+   section with one card the full width and a section with four a quarter each,
+   so nothing lined up; stretched over the whole 1200 px track the cards then
+   read far too wide. --card-col is the one number to tune.
+   Header and footer join the same track below, so the whole page is one
+   centred column. */
 .card-grid {
-    max-width: 1200px;
+    max-width: var(--card-col);
     margin: 0 auto;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    /* All rows share the height of the tallest card — cards line up evenly */
-    grid-auto-rows: 1fr;
+    grid-template-columns: 1fr;
     gap: 14px;
+}
+
+/* Only the landing pages — the plan pages keep their wide 1200 px track for the
+   tables. :has() scopes it without touching a single HTML file. */
+body:has(.card-grid) header.page-head,
+body:has(.card-grid) footer.page-foot {
+    max-width: var(--card-col);
 }
 
 /* Expandable week rows with detail bullet lists */
@@ -2102,7 +2159,11 @@ tr.detail-row li {
     padding: 2px 0;
 }
 
-tr.detail-row li::marker { color: var(--lambda); }
+/* Blau wie die Materialpillen und die Werkzeugknoepfe (Doc, 08.09.2026:
+   "bullets blau"). Nur die Punkte der Aufklappzeile - die Liste im
+   LB-Panel behaelt ihr Orange. */
+tr.detail-row li::marker { color: rgb(150, 186, 236); }
+html.svp-light tr.detail-row li::marker { color: rgb(30, 60, 120); }
 
 /* --- sub-row tabs: "Inhalt" (bullets) and "Notizen" (free text) ----------
    Same 34px indent as the bullet list, so tabs, bullets and the topic text
@@ -2122,11 +2183,33 @@ tr.detail-row li::marker { color: var(--lambda); }
     font-size: 0.6rem;
     letter-spacing: 0.09em;
     text-transform: uppercase;
-    padding: 4px 10px;
+    /* Der Unterstrich des aktiven Reiters soll auf der grauen Querlinie der
+       Kopfhaelfte liegen, auf deren UNTERkante (Doc, 08.09.2026).
+       NICHT ueber den Innenabstand loesen - das war der erste Versuch und es
+       konvergiert nicht: sobald der Reiter hoeher wird als die 26 px
+       Mindesthoehe der Haelfte, waechst die Haelfte mit, die graue Linie
+       wandert nach unten und der Strich laeuft ihr ewig hinterher.
+       Stattdessen bekommt der Reiter GENAU die Hoehe der Haelfte, damit sie
+       nie durch ihn waechst, und wird um die Staerke der Linie nach unten
+       geschoben, sodass sein 2 px starker Rand die 1 px starke Linie
+       ueberdeckt und mit ihr unten abschliesst. */
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    height: 26px;             /* = min-height von .sub-head-l/.sub-head-r */
+    position: relative;
+    top: 1px;                 /* = Staerke der grauen Linie */
+    padding: 0 10px;
     cursor: pointer;
 }
 
 .sub-tab:hover { color: var(--text); }
+/* Nach einem Mausklick blieb ein blauer Rahmen um den Reiter stehen - der
+   Fokusring des Browsers (Doc, 08.09.2026: "wo kommt der blaue Rahmen her?").
+   Fuer die Maus weg, fuer die Tastatur bleibt er: ohne ihn waere nicht mehr
+   zu sehen, wo man beim Durchtabben steht. */
+.sub-tab:focus { outline: none; }
+.sub-tab:focus-visible { outline: 2px solid var(--head); outline-offset: 2px; border-radius: 4px; }
 /* Aktiver Reiter in der Farbe der Tabellenkopfzeile, Unterstrich ebenso
    (Doc, 07.09.2026) - er ist 2 px stark und hebt sich dadurch von der
    1-px-Linie der Kopfhaelfte ab. */
@@ -3084,11 +3167,34 @@ body.form-preview #svp-form {
     background: rgb(14, 36, 78);
 }
 
+/* Der eingebaute Abspieler braucht keinen der Kniffe, die der Office-Rahmen
+   verlangt: keine Werkzeugleiste, die abgeschnitten werden muesste, und keine
+   schwarze Buehne, aus der ein Haarstrich stehen bleibt. Also volle 16:9 und
+   kein Versatz - object-fit haelt ein abweichendes Seitenverhaeltnis heil,
+   statt das Bild zu verzerren. */
+.mat-view .mv-stage-video { height: calc(var(--mv-w) * 9 / 16); }
+.mat-view .mv-video {
+    height: 100%;
+    margin-top: 0;
+    object-fit: contain;
+    background: rgb(14, 36, 78);
+}
+
 /* phones: use the whole screen, the deck needs the room */
 @media (max-width: 760px) {
     .mat-view-wrap { padding: 0; }
     .mat-view { width: 100vw; height: 100dvh; border-radius: 0; border: 0; }
     .mat-view .mv-stage { height: calc(100dvh - var(--mv-head)); }
+}
+
+/* Auf dem Handy fuellt ein Office-Blatt zu Recht den ganzen Schirm. Ein Film
+   soll dagegen nur so hoch sein wie sein Bild: sonst spannt die Buehne ueber
+   die volle Hoehe, das Bild sitzt per object-fit in der Mitte, und die
+   Bedienknoepfe des Abspielers kleben ganz unten in einer leeren blauen
+   Flaeche (gemessen 08.09.2026: Bild 390x219 in einem Kasten von 390x798). */
+@media (max-width: 760px) {
+    .mat-view:has(.mv-stage-video) { height: auto; }
+    .mat-view .mv-stage-video { height: calc(100vw * 9 / 16); }
 }
 
 @media print { .mat-view-wrap { display: none !important; } }
@@ -3106,6 +3212,18 @@ body.form-preview #svp-form {
 /* Drawn glyphs (YouTube, plain link) need the transparent frame the macOS app
    icons bring along, otherwise they tower over them. */
 .mat-ico-drawn { padding: 0.42em; box-sizing: border-box; }
+/* Der Pfeil zeichnet nur 16 der 24 Einheiten seines Kastens aus, YouTube und
+   die Kamera fuellen ihn ganz. Mit demselben Innenabstand kam er deshalb nur
+   mit 10,8 px Tinte an statt mit 16,2 und sah verloren aus (Doc, 08.09.2026:
+   "das Link icon ist zu klein"). Ohne Innenabstand trifft er die 16,2 px der
+   anderen gezeichneten Zeichen genau. */
+.mat-ico-link { padding: 0.125em; }   /* 14,6 px Tinte - ohne Abstand waren 16,2 einen Tick zu viel */
+/* Die Kamera fuer Videodateien traegt kein Markenrot und kein Programmlogo,
+   also muss sie sich dem Thema beugen: dunkelblau auf hellem Grund (Doc,
+   08.09.2026: "und dunkelblau pls"), aufgehellt auf dunklem - sonst ist sie
+   in einem der beiden Themen kaum zu sehen. */
+.mat-ico-movie path { fill: rgb(150, 186, 236); }
+html.svp-light .mat-ico-movie path { fill: rgb(20, 44, 92); }
 /* A flex row instead of a text line: every material pill is then exactly as
    high as its icon plus the padding — an app icon and a drawn one give the
    same height, and both sit centred next to the label. The padding is for the

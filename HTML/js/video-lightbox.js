@@ -48,6 +48,30 @@
             return m ? m[1] : null;
         },
 
+        /* Sekunden aus einem YouTube-Zeitstempel: "983", "983s" und "16m23s"
+           kommen alle vor, je nachdem wie der Link entstanden ist. */
+        seconds(wert) {
+            const t = String(wert || '').trim();
+            if (!t) return null;
+            if (/^\d+$/.test(t)) return Number(t);
+            const m = t.match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$/i);
+            if (!m || !(m[1] || m[2] || m[3])) return null;
+            return (+(m[1] || 0)) * 3600 + (+(m[2] || 0)) * 60 + (+(m[3] || 0));
+        },
+
+        /* Anfang und Ende aus dem Link. Ohne das begann jeder Link wieder bei
+           null - fuer eine Stelle mitten in einem 22-Minuten-Film unbrauchbar
+           (Doc, 08.09.2026). "t" ist die Form, die YouTubes eigenes Teilen-Menue
+           erzeugt, "start"/"end" die der Einbettung. */
+        spanne(url) {
+            const q = String(url);
+            const hol = (name) => {
+                const m = q.match(new RegExp('[?&#]' + name + '=([^&#]+)'));
+                return m ? VideoLightbox.seconds(decodeURIComponent(m[1])) : null;
+            };
+            return { start: hol('t') ?? hol('start'), end: hol('end') };
+        },
+
         close() {
             const wrap = document.querySelector('.lab-video-wrap');
             if (!wrap) return;
@@ -92,8 +116,11 @@
             const iframe = document.createElement('iframe');
             /* Runs straight away and without a control bar; a click on the picture pauses and
                resumes, Esc closes. */
+            const sp = VideoLightbox.spanne(url);
             iframe.src = 'https://www.youtube-nocookie.com/embed/' + id +
-                         '?autoplay=1&controls=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3';
+                         '?autoplay=1&controls=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3' +
+                         (sp.start ? '&start=' + sp.start : '') +
+                         (sp.end ? '&end=' + sp.end : '');
             iframe.title = title;
             iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
             iframe.setAttribute('allowfullscreen', '');
