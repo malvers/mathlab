@@ -307,8 +307,43 @@ nav.quick-nav a.badge.nav-hidden { display: none; }
 /* Material: compact 📎 marker in the week row, link pills down in the
    expanded sub-row where there is room */
 #plan-table td.mat { white-space: nowrap; }
+
+/* Material-Marker rechts neben der Aufgaben-Pille (Doc, 08.09.2026: "schoen
+   bitte"): gleiche Geometrie wie a.quiz-btn, aber in den ruhigen Linienfarben -
+   die Aufgaben bleiben das Bunte, die Klammer sagt nur "hier liegt was". */
+#plan-table td.mat .mat-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    vertical-align: middle;
+    margin-left: 8px;
+    padding: 1px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--card-soft);
+    color: var(--muted);
+    font-size: 0.72rem;
+    line-height: 1.5;
+    cursor: pointer;
 }
-#plan-table td.mat .mat-flag { cursor: pointer; font-size: 0.9em; }
+
+#plan-table td.mat .mat-flag:hover {
+    color: var(--text);
+    border-color: rgba(120, 160, 220, 0.45);
+}
+
+#plan-table td.mat .mat-flag svg {
+    display: block;
+    width: 13px;
+    height: 13px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+#plan-table td.mat .mat-flag-n { font-variant-numeric: tabular-nums; }
 .mat-block { margin: 8px 0 2px; text-align: right; }
 .mat-block a.mat-pill {
     display: inline-block;
@@ -1430,6 +1465,21 @@ nav.quick-nav a.cloud:hover { color: var(--text); }
     color: var(--muted);
     margin-left: auto;
 }
+
+/* Subtitle and pill legend share one line above the toolbar's divider - the
+   row is built in svp-plan.js, which lifts the legend out of the toolbar. */
+.page-head .head-legend-row {
+    display: flex;
+    align-items: center;
+    gap: 10px 16px;
+    flex-wrap: wrap;
+}
+
+.page-head .head-legend-row .subtitle { margin-bottom: 0; }
+
+/* The legend stayed out of the printout while it lived in the (hidden)
+   toolbar - it keeps doing so up here. */
+@media print { .page-head .head-legend-row .legend { display: none; } }
 
 /* One line box for the whole row: the PDF button, the plain pills and the
    ▾ variant pills all carry different font metrics - without a fixed height
@@ -3082,3 +3132,44 @@ body.form-preview #svp-form {
 .svp-search-count[hidden] { display: none; }
 
 @media print { .svp-search, .svp-search-count { display: none !important; } }
+
+/* ---- Plan search (built into the toolbar by svp-plan.js) ---------------
+   The field sits between the buttons and the legend: .legend keeps its
+   margin-left:auto and the field gets one too, so the free space is split
+   between them and the box lands in the gap. */
+.toolbar .plan-search {
+    margin-left: auto;
+    width: clamp(140px, 20vw, 240px);
+    max-width: 100%;
+}
+
+.toolbar .svp-search-count { margin-left: 2px; }
+
+/* Phone: the field takes the whole line instead of hanging in the right
+   corner at 140 px - there is nothing beside it there anyway. */
+@media (max-width: 760px) {
+    .toolbar .plan-search { margin-left: 0; width: 100%; }
+}
+
+/* Nothing found - say so in red instead of a silent "0 von 38" */
+.svp-search-count.none { color: var(--ypsilon); }
+
+/* Weeks the search filtered out. The id beats tr.detail-row.open, which is
+   what makes an open sub-row visible - without it a hit-less week whose
+   sub-row was open would stay on screen. */
+#plan-table tr.plan-miss,
+#plan-table tr.plan-miss.open { display: none; }
+
+/* Print what is on screen: a filtered plan prints filtered. The !important
+   is needed against the print rule that forces every sub-row open. */
+@media print {
+    #plan-table tr.plan-miss,
+    #plan-table tr.plan-miss.open { display: none !important; }
+}
+
+/* Hits, painted by the CSS Custom Highlight API (see planSearchRun) - the
+   same look as the note search in notes.html. */
+::highlight(plan-find) {
+    background: rgba(245, 194, 66, 0.42);
+    color: var(--text);
+}

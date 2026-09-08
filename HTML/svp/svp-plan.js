@@ -246,6 +246,12 @@
        demselben Grund in die Pille statt in die Material-Zeile - das gilt fuer
        jedes Fach, nicht nur fuer Mathe (Doc 08.09.2026, Info BGY 12). */
     function isExerciseEntry(en) {
+        /* Ein Eintrag, den der Plan "Aufgaben ..." nennt, gehoert in die Pille -
+           unabhaengig vom Dateinamen (Doc 08.09.2026, Info 11: die Wochenblaetter
+           heissen dort inf11test-<thema>.html, ohne die -2 der Mathe-Zweitsaetze).
+           Nur die Mehrzahl zaehlt: ein einzelnes "Aufgabe"-Material bleibt in der
+           Material-Zeile, wo es bisher steht. */
+        if (/^\s*Aufgaben\b/i.test(en.label || '')) return true;
         return /\/aufgaben\//i.test(en.url || '') || /(?:^|\/)[\w-]*test[\w-]*-2\.html$/i.test(en.url || '');
     }
 
@@ -749,7 +755,34 @@
         /* Doc, 07.09.2026: die Aufgaben-Pille steht wieder in der Wochenzeile - dort
            ist sie erreichbar, ohne die Woche aufzuklappen. */
         if (aufg) ref.matTd.appendChild(aufg);
-        if (text && (n > 0 || !alle.length || matTail(text))) {
+        const hasMat = !!text && (n > 0 || !alle.length || matTail(text));
+        /* Doc, 08.09.2026: "da gabs frueher ein paperclip wenn Material da" - seit
+           die Pillen in den Streifen der Aufklappzeile gewandert sind, sieht man der
+           Wochenzeile sonst nicht an, dass dort etwas liegt. Der Marker steht rechts
+           neben der Aufgaben-Pille und klappt die Zeile auf. */
+        if (hasMat) {
+            const flag = document.createElement('span');
+            flag.className = 'mat-flag';
+            /* Gezeichnete Klammer statt Emoji: die nimmt die Textfarbe an und
+               passt sich dem Theme an - ein Emoji bleibt immer bunt. */
+            flag.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+                + '<path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19'
+                + 'a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>';
+            if (n > 1) {
+                const cnt = document.createElement('span');
+                cnt.className = 'mat-flag-n';
+                cnt.textContent = n;
+                flag.appendChild(cnt);
+            }
+            flag.title = n > 1 ? n + ' Materialien \u2014 Zeile aufklappen'
+                               : 'Material \u2014 Zeile aufklappen';
+            flag.addEventListener('click', function (e) {
+                e.stopPropagation();      /* sonst schliesst der Zeilenklick gleich wieder */
+                ref.openSubRow();
+            });
+            ref.matTd.appendChild(flag);
+        }
+        if (hasMat) {
             if (!ref.matBlock.parentNode) ref.ensureSubRow().side.appendChild(ref.matBlock);
         } else if (ref.matBlock.parentNode) {
             ref.matBlock.remove();
@@ -3782,12 +3815,206 @@
             legend.insertBefore(lehrplan, legend.firstChild);
         }
 
+        /* Doc, 08.09.2026: "zieh die hoch ueber die Linie" - the pill row moves
+           out of the toolbar up into the head, onto the subtitle line, right
+           aligned. Below the divider only the actions are left. Done here for
+           all 20 plan pages at once, no page carries a legend of its own. */
+        const headEl = document.querySelector('header.page-head');
+        const subtitle = headEl && headEl.querySelector('.subtitle');
+        if (subtitle) {
+            const row = document.createElement('div');
+            row.className = 'head-legend-row';
+            subtitle.parentNode.insertBefore(row, subtitle);
+            row.appendChild(subtitle);
+            row.appendChild(legend);
+        } else if (headEl) {
+            headEl.appendChild(legend);
+        }
+
         // Any click outside closes open variant dropdowns.
         document.addEventListener('click', function () {
             document.querySelectorAll('.badge-drop.open')
                 .forEach(d => d.classList.remove('open'));
         });
     }
+
+    /* ---- Suche im Plan ---------------------------------------------------
+       Doc, 08.09.2026: a search box between the toolbar buttons and the legend,
+       "auch ueber Inhalte" - so it must not stop at the topic line.
+
+       Searched is exactly what the page shows: SW, KW, Woche, the Bereich pill,
+       Ustd., Thema, the bullets and Notizen of the sub-row, the Material- and
+       Aufgaben pills. Deliberately NOT searched:
+         - Bemerkungen: that column is gone since 07.09. (see headRow above), so
+           a hit there would flag a row for a reason nobody can see;
+         - rendered formulas (.katex): the KaTeX markup carries the source a
+           second time, every hit would be found and painted twice;
+         - the fixed captions of the sub-row (Inhalt/Notizen/Zusatzmaterial):
+           they stand in every week and would match all of them at once.
+
+       Hits are painted with the CSS Custom Highlight API, exactly like the
+       search in notes.html: it draws over the text without writing into the
+       DOM, so the contenteditable cells - and everything saveEdits reads back
+       out of them - stay untouched. */
+    const SEARCH_SKIP = '.sub-head, .katex, .shift-col, .sub-tools, .chev';
+    const SEARCH_UML = { 'ä': 'ae', 'ö': 'oe', 'ü': 'ue', 'ß': 'ss' };
+
+    /* Folding recipe from js/labs-search.js - including its trap: FIRST spell
+       the umlauts out, THEN strip the remaining accents. The other way round
+       "würfel" becomes "wurfel" and never finds "wuerfel" again. */
+    function planFold(value) {
+        return String(value == null ? '' : value)
+            .normalize('NFC')
+            .toLowerCase()
+            .replace(/[äöüß]/g, function (ch) { return SEARCH_UML[ch]; })
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+    }
+
+    /* The same folding per character, so a position in the folded text can be
+       mapped back onto the original text node: at[k] is where folded character
+       k started ("Würfel" folds to "wuerfel", 7 characters over 6). */
+    function planFoldMap(src) {
+        let folded = '';
+        const at = [];
+        for (let i = 0; i < src.length; i++) {
+            const piece = planFold(src[i]);
+            for (let k = 0; k < piece.length; k++) at.push(i);
+            folded += piece;
+        }
+        at.push(src.length);
+        return { folded: folded, at: at };
+    }
+
+    /* Every searchable text node of a row, already folded. Rebuilt on each
+       keystroke - 40 weeks are a few thousand characters, and a cache would
+       only go stale the moment Doc types in the plan. */
+    function planSearchParts(root) {
+        const out = [];
+        if (!root) return out;
+        const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+            acceptNode: function (n) {
+                if (!n.data.trim()) return NodeFilter.FILTER_REJECT;
+                const el = n.parentElement;
+                if (!el || el.closest(SEARCH_SKIP)) return NodeFilter.FILTER_REJECT;
+                return NodeFilter.FILTER_ACCEPT;
+            }
+        });
+        for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+            const fm = planFoldMap(n.data);
+            out.push({ node: n, folded: fm.folded, at: fm.at });
+        }
+        return out;
+    }
+
+    let searchInput = null;
+    let searchCount = null;
+    let searchOpened = [];   /* sub-rows this search opened - closed again on clear */
+
+    function planSearchRun() {
+        if (!searchInput) return;
+        const terms = planFold(searchInput.value.trim()).split(/\s+/).filter(Boolean);
+        searchOpened.forEach(function (tr) {
+            tr.classList.remove('open');
+            const s = tr.nextElementSibling;
+            if (s && s.classList.contains('detail-row')) s.classList.remove('open');
+        });
+        searchOpened = [];
+        if (window.CSS && CSS.highlights) CSS.highlights.delete('plan-find');
+        const ranges = [];
+        let hits = 0, total = 0;
+
+        for (const r of rendered) {
+            const tr = r.ferienTd ? r.ferienTd.parentElement
+                : (r.dateTd ? r.dateTd.parentElement : null);
+            if (!tr) continue;
+            const next = tr.nextElementSibling;
+            const detail = next && next.classList.contains('detail-row') ? next : null;
+            total++;
+            if (!terms.length) {
+                tr.classList.remove('plan-miss');
+                if (detail) detail.classList.remove('plan-miss');
+                continue;
+            }
+            /* Every word has to be found somewhere in the row (AND), the parts
+               are joined with a line break so nothing matches across two cells. */
+            const parts = planSearchParts(tr).concat(planSearchParts(detail));
+            const hay = parts.map(function (p) { return p.folded; }).join('\n');
+            const ok = terms.every(function (t) { return hay.includes(t); });
+            tr.classList.toggle('plan-miss', !ok);
+            if (detail) detail.classList.toggle('plan-miss', !ok);
+            if (!ok) continue;
+            hits++;
+
+            let deep = false, inNotes = false;
+            for (const p of parts) {
+                for (const t of terms) {
+                    for (let k = p.folded.indexOf(t); k !== -1; k = p.folded.indexOf(t, k + t.length)) {
+                        const range = document.createRange();
+                        range.setStart(p.node, p.at[k]);
+                        range.setEnd(p.node, p.at[k + t.length]);
+                        ranges.push(range);
+                        if (!detail || !detail.contains(p.node)) continue;
+                        deep = true;
+                        if (p.node.parentElement.closest('[data-pane="notizen"]')) inNotes = true;
+                    }
+                }
+            }
+            /* A hit in the bullets or in the Notizen is invisible while the week
+               is folded up, so the search opens it - and folds it back when the
+               query goes away. openWeeks stays untouched on purpose: this is the
+               search's doing, not Doc's own open state. */
+            if (deep && detail && !detail.classList.contains('open')) {
+                tr.classList.add('open');
+                detail.classList.add('open');
+                searchOpened.push(tr);
+            }
+            if (inNotes && r.showPane) r.showPane('notizen');
+        }
+
+        searchCount.hidden = !terms.length;
+        searchCount.textContent = hits + ' von ' + total;
+        searchCount.classList.toggle('none', terms.length > 0 && hits === 0);
+        if (ranges.length && window.CSS && CSS.highlights && window.Highlight) {
+            CSS.highlights.set('plan-find', new Highlight(...ranges));
+        }
+    }
+
+    function planSearchClear() {
+        if (!searchInput || !searchInput.value) return;
+        searchInput.value = '';
+        planSearchRun();
+    }
+
+    (function buildPlanSearch() {
+        const bar = document.querySelector('.toolbar');
+        if (!bar) return;
+        searchInput = document.createElement('input');
+        searchInput.type = 'search';
+        searchInput.id = 'plan-search';
+        searchInput.className = 'svp-search plan-search';
+        searchInput.placeholder = 'Suchen …';
+        searchInput.autocomplete = 'off';
+        searchInput.setAttribute('aria-label', 'Im Plan suchen');
+        searchInput.title = 'Sucht in Woche, Bereich, Thema, Stichpunkten, Notizen und Material';
+        searchCount = document.createElement('span');
+        searchCount.className = 'svp-search-count';
+        searchCount.hidden = true;
+        /* At the right end of the toolbar (margin-left:auto). The legend used to
+           sit there, but it has moved up over the divider - if a page still has
+           it down here, the field goes in front of it. */
+        const anchor = legend && legend.parentNode === bar ? legend : null;
+        bar.insertBefore(searchInput, anchor);
+        bar.insertBefore(searchCount, anchor);
+        searchInput.addEventListener('input', planSearchRun);
+        searchInput.addEventListener('search', planSearchRun);   /* the native ✕ */
+        searchInput.addEventListener('keydown', function (e) {
+            e.stopPropagation();   /* the rows listen for keys as well */
+            if (e.key !== 'Escape') return;
+            searchInput.value = '';
+            planSearchRun();
+        });
+    })();
 
     function setAllDetails(open) {
         document.querySelectorAll('tr.detail-row').forEach(r => {
@@ -3899,6 +4126,9 @@
                 setMathText(el, srcOf(el));
             }
         });
+        /* Entering edit mode gives every week a sub-row, leaving it re-renders
+           the text - both change what a running search would find. */
+        planSearchRun();
     }
 
     function saveEdits() {
@@ -4363,6 +4593,9 @@
        holiday rows and the spacer of the detail rows. */
     function setShiftMode(on) {
         shiftMode = !!on;
+        /* Shifting with a running filter would be a trap: "the week above" is
+           not the row above on screen while half the plan is hidden. */
+        if (shiftMode) planSearchClear();
         document.body.classList.toggle('shifting', shiftMode);
         document.querySelectorAll('#plan-table tr.ferien > td')
             .forEach(function (td) { td.colSpan = shiftMode ? 8 : 7; });
@@ -4517,6 +4750,8 @@
             if (r.ul) buildDetailList(r.ul, ov.details || row.details || []);
             if (r.refreshExpandable) r.refreshExpandable();
         }
+        /* The rows carry new text now - a running search has to judge them again. */
+        planSearchRun();
     }
 
     function pushRemote() {
