@@ -195,7 +195,7 @@ const LABS_DATA = [
         "description": "Eine einzige Rechnung, vier Ebenen tiefer: Hochsprache → Assembler → Maschinenbytes → Volladdierer aus Logikgattern. Auf jeder Ebene dieselbe Information, nur eine Abstraktion tiefer — der Übertrag rieselt sichtbar durch die Gatter, und ein Bit ist am Ende nur Spannung an oder aus.",
         "tagline": "Vom Code zu den Bits / Wie ein Computer rechnet",
         "icon": LAB_ICONS["einsundeins"],
-        "category": "arithmetik logik fun hot highlight neu grade8 grade9",
+        "category": "arithmetik logik fun hot highlight grade8 grade9",
         "keywords": "binär bit byte hex assembler maschinencode informatik volladdierer logikgatter xor and übertrag carry null eins strom spannung transistor cpu",
         "color": "gold"
     },
@@ -206,7 +206,7 @@ const LABS_DATA = [
         "description": "Im Lab 1 + 1 = 2 sind die Volladdierer fest verdrahtet \u2014 hier ist keiner verdrahtet. Ein winziges neuronales Netz aus 32 Zahlen bekommt nur die acht Zeilen der Wahrheitstabelle zu sehen und soll das Addieren selbst finden: durch Evolution (CMA-ES), ganz ohne Ableitung. Danach rechnen acht Kopien des gelernten Netzes in Reihe jede Summe bis 255 \u2014 und man sieht, dass seine Ausg\u00e4nge nie exakt 0 oder 1 sind, sondern 0,03 und 0,97.",
         "tagline": "Netz lernt Rechnen / Evolution statt Backpropagation",
         "icon": LAB_ICONS["neuroaddierer"],
-        "category": "logik informatik fun hot highlight neu grade9 grade10",
+        "category": "logik informatik fun hot highlight grade9 grade10",
         "keywords": "ki neuronales netz machine learning evolution cmaes rechenberg evolutionsstrategie backpropagation gewichte training volladdierer xor \u00fcbertrag carry bit lernen gradient",
         "color": "gold"
     },
@@ -639,7 +639,7 @@ const LABS_DATA = [
         "description": "Conways zellulärer Automat: Aus drei simplen Regeln entstehen Gleiter, Oszillatoren und ganze Welten. Zeichne Startmuster und sieh zu, wie Ordnung und Chaos sich abwechseln.",
         "tagline": "Zellulärer Automat / Emergenz",
         "icon": LAB_ICONS["gameoflife"],
-        "category": "fun logik neu grade8 grade9",
+        "category": "fun logik grade8 grade9",
         "keywords": "game of life conway zellulärer automat gleiter glider emergenz simulation muster regeln",
         "color": "green"
     },
@@ -650,7 +650,7 @@ const LABS_DATA = [
         "description": "Das dunkle Schwesterfraktal der Mandelbrot-Menge: Ein einziger Betrag in der Iterationsformel lässt brennende Schiffe am Horizont erscheinen. Zoome in die flammende Struktur.",
         "tagline": "Fraktale / Komplexe Dynamik",
         "icon": LAB_ICONS["burningship"],
-        "category": "fraktale neu uni grade11 grade12",
+        "category": "fraktale hot uni grade11 grade12",
         "keywords": "burning ship fraktal mandelbrot komplexe zahlen iteration escape time zoom",
         "color": "orange"
     },
@@ -661,7 +661,7 @@ const LABS_DATA = [
         "description": "Turing-Muster live: Zwei Chemikalien reagieren und diffundieren — heraus kommen Streifen, Punkte und Korallen wie auf Tierfellen. Stelle Zufuhr und Zerfall ein und züchte eigene Muster.",
         "tagline": "Turing-Muster / Gray-Scott",
         "icon": LAB_ICONS["reaction-diffusion"],
-        "category": "fun neu uni grade11 grade12",
+        "category": "fun hot uni grade11 grade12",
         "keywords": "reaction diffusion turing muster gray scott simulation chemie pattern streifen punkte",
         "color": "purple"
     },
@@ -694,7 +694,7 @@ const LABS_DATA = [
         "description": "Newtons Gravitationsgesetz zum Anfassen: Setze Massen ins All, gib ihnen Startgeschwindigkeit und beobachte Bahnen, Einfänge und Kollisionen im Mehrkörper-Tanz.",
         "tagline": "Physik / Mehrkörperproblem",
         "icon": LAB_ICONS["gravitation"],
-        "category": "fun physik neu grade9 grade10",
+        "category": "fun physik grade9 grade10",
         "keywords": "gravitation newton schwerkraft orbit planet bahn mehrkörper simulation physik masse",
         "color": "blue"
     },
@@ -705,7 +705,7 @@ const LABS_DATA = [
         "description": "Wann schlagen alle Glocken gleichzeitig? Eine Geschichte aus Bagdad führt zum kleinsten gemeinsamen Vielfachen — mit Tutor, der Schritt für Schritt zu kgV und Brüchen begleitet.",
         "tagline": "Arithmetik / kgV mit Tutor",
         "icon": LAB_ICONS["glocken"],
-        "category": "arithmetik fun neu grade5 grade6",
+        "category": "arithmetik fun grade5 grade6",
         "keywords": "glocken bagdad kgv kleinstes gemeinsames vielfaches brüche teiler tutor quest",
         "color": "gold"
     },
@@ -716,7 +716,7 @@ const LABS_DATA = [
         "description": "Langleys berüchtigtes Winkelrätsel von 1922: Ein gleichschenkliges Dreieck, zwei innere Linien — und ein Winkel, der die Welt seit 100 Jahren ärgert. Miss, probiere, beweise.",
         "tagline": "Geometrie / Adventitious Angles",
         "icon": LAB_ICONS["langley"],
-        "category": "geometrie dreiecke neu grade8 grade9",
+        "category": "geometrie dreiecke grade8 grade9",
         "keywords": "langley winkel dreieck rätsel geometrie beweis adventitious angles 80 20",
         "color": "green"
     },
@@ -727,7 +727,7 @@ const LABS_DATA = [
         "description": "Eine einzige Gleichung, die als Graph das Batman-Logo zeichnet: Beträge, Wurzeln und Fallunterscheidungen als Superhelden-Mathematik. Zerlege die Formel Stück für Stück.",
         "tagline": "Funktionen / Implizite Kurven",
         "icon": LAB_ICONS["batman"],
-        "category": "fun funktionen neu grade10 grade11",
+        "category": "fun funktionen grade10 grade11",
         "keywords": "batman kurve gleichung graph implizit betrag wurzel funktion logo",
         "color": "blue"
     },
@@ -738,7 +738,7 @@ const LABS_DATA = [
         "description": "Die Erde als Uhr: Zeitzonen, Sonnenstand und Tag-Nacht-Grenze live auf der Weltkarte. Sieh, wo gerade die Sonne aufgeht, während bei uns Mitternacht schlägt.",
         "tagline": "Zeitzonen / Astronomie",
         "icon": LAB_ICONS["worldclock"],
-        "category": "fun neu",
+        "category": "fun grade5 grade6",
         "keywords": "weltuhr zeitzonen erde sonne tag nacht terminator karte uhrzeit utc",
         "color": "blue"
     },
@@ -804,7 +804,7 @@ const LABS_DATA = [
         "description": "Costa-Blanca-Ausflüge zum Abhaken: 22 recherchierte Ziele von Altea bis Valencia mit Fotos, Insider-Tipps und Fortschrittsbalken — in vier Sprachen (DE/EN/ES/IT).",
         "tagline": "Reise / Ausflugs-Checkliste",
         "icon": LAB_ICONS["costablanca"],
-        "category": "sonst neu",
+        "category": "sonst",
         "keywords": "costa blanca altea calpe checkliste ausflüge reise spanien highlights urlaub",
         "color": "orange"
     }
