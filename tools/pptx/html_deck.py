@@ -18,6 +18,7 @@ import html as _html
 import json
 import os
 import re
+import shutil
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -117,6 +118,21 @@ def web_morning_image(key):
             json.dump(dict(sorted(table.items())), f, indent=2, ensure_ascii=False)
             f.write("\n")
     return "morning/" + table[key]
+
+
+def asset(path):
+    """Copy a picture into HTML/decks/img/ and return the src to use from a deck.
+
+    Diagrams are generated into tools/pptx/img/, which is git-ignored and lies
+    outside the served root - a deck pointing there would show a broken image on
+    the web. The .pptx embeds its pictures, so only the HTML twin needs this."""
+    if not os.path.isabs(path):
+        return path
+    dst_dir = os.path.join(OUT_DIR, "img")
+    os.makedirs(dst_dir, exist_ok=True)
+    name = os.path.basename(path)
+    shutil.copyfile(path, os.path.join(dst_dir, name))
+    return "img/" + name
 
 
 def click_groups(lines):
@@ -238,6 +254,48 @@ class HtmlDeck:
                     '<div class="codepanel"><pre>%s</pre></div>'
                     % (markup(title), "\n".join(rows) or " "))
 
+    def table_top(self, title, rows, col_w, lines, marks=None, font_size=12, row_h=None,
+                  bold_cols=(), mono_cols=(), align=None, x=None):
+        """Full-width table on top, bullets underneath - the HTML twin of
+        slides.Deck.table_top. Same numbers, same look: the .pptx draws a native
+        table, here they become a <table> with the authored column widths. The
+        canvas is 960 units wide in both worlds, so pt map to px 1:1."""
+        marks = marks or {}
+        row_h = row_h or font_size * 1.85
+        left = MARGIN if x is None else x
+        cols = "".join('<col style="width:%gpx">' % w for w in col_w)
+        out = []
+        for r, row in enumerate(rows):
+            head = r == 0
+            cells = []
+            for c, text in enumerate(row):
+                cls = []
+                if not head:
+                    if c in bold_cols:
+                        cls.append("b")
+                    if c in mono_cols:
+                        cls.append("m")
+                if align and align[c]:
+                    cls.append("a" + align[c])
+                tint = marks.get((r, c), marks.get(r))
+                tag = "th" if head else "td"
+                cells.append("<%s%s%s>%s</%s>" % (
+                    tag,
+                    ' class="%s"' % " ".join(cls) if cls else "",
+                    ' style="background:#%s"' % tint if tint and not head else "",
+                    markup(str(text)), tag))
+            out.append("<tr>%s</tr>" % "".join(cells))
+        table = ('<table class="dtable" style="left:%gpx;top:%gpx;width:%gpx;'
+                 'font-size:%gpx"><colgroup>%s</colgroup>%s</table>'
+                 % (left, BODY_Y, sum(col_w), font_size, cols, "".join(out)))
+        body = ""
+        if lines:
+            top = BODY_Y + row_h * len(rows) + 14
+            body = ('<div class="body" style="top:%gpx;height:%gpx">%s</div>'
+                    % (top, FOOT_Y - top - 8, bullet_list(lines)[0]))
+        self._slide("content", '<h3>%s</h3><div class="rules"></div>%s%s'
+                    % (markup(title), table, body))
+
     def lab(self, title, src, lines=None, note="", bottom=486.0):
         """A Mathe-Labor page inside the slide - the thing PowerPoint cannot do.
         `src` is relative to the site root, e.g. "binomischeslabor.html". The lab is
@@ -266,7 +324,7 @@ class HtmlDeck:
                    _html.escape(src, quote=True)))
 
     def picture(self, title, path, lines=None, **kw):
-        src = os.path.relpath(path, OUT_DIR) if os.path.isabs(path) else path
+        src = asset(path)
         self._slide("content", '<h3>%s</h3><div class="rules"></div>'
                     '<div class="pic"><img src="%s" alt=""></div>%s'
                     % (markup(title), _html.escape(src, quote=True),
@@ -404,6 +462,19 @@ p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:
 .pic{position:absolute;left:__M__px;top:__BY__px;width:__CW__px;height:__BH__px;
   display:grid;place-items:center}
 .pic img{max-width:100%;max-height:100%}
+
+/* --- table_top ---------------------------------------------------------- */
+.dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
+  font-family:Raleway,system-ui,sans-serif}
+.dtable th,.dtable td{padding:0 6px;text-align:left;overflow:hidden;white-space:nowrap;
+  border:.75px solid var(--stroke);line-height:1.85}
+.dtable th{background:var(--ink);color:#fff;font-family:Orbitron,Raleway,sans-serif;
+  font-weight:700;font-size:.75em;border-color:var(--ink)}
+.dtable td{background:#fff;color:var(--body)}
+.dtable td.b{font-weight:700;color:var(--ink)}
+.dtable td.m{font-family:Menlo,monospace}
+.dtable .ac{text-align:center}
+.dtable .ar{text-align:right}
 
 /* --- greeting (Auftaktfolie) --------------------------------------------- */
 .slide.greet{background-image:none;background-color:var(--greetbg)}

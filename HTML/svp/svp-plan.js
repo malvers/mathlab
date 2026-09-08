@@ -241,11 +241,12 @@
        Material-Zeile, sondern in die "Aufgaben"-Pille neben das Wochenquiz
        (Doc, 07.09.2026: "ein Drop wo drauf steht Aufgaben"). Erkennung an der
        URL - das Label darf der Plan frei benennen ("3 Textaufgaben").
-       Ein zweiter, schwererer Aufgabensatz ("mathetest11-<thema>-2.html",
+       Ein zweiter, schwererer Aufgabensatz ("<fach>test<klasse>-<thema>-2.html",
        Doc 07.09.2026 nachmittags: "Aufgaben 1" / "Aufgaben 2") wandert aus
-       demselben Grund in die Pille statt in die Material-Zeile. */
+       demselben Grund in die Pille statt in die Material-Zeile - das gilt fuer
+       jedes Fach, nicht nur fuer Mathe (Doc 08.09.2026, Info BGY 12). */
     function isExerciseEntry(en) {
-        return /\/aufgaben\//i.test(en.url || '') || /\bmathetest\d+-[\w-]+-2\.html$/i.test(en.url || '');
+        return /\/aufgaben\//i.test(en.url || '') || /(?:^|\/)[\w-]*test[\w-]*-2\.html$/i.test(en.url || '');
     }
 
     // Default pill label when none was typed: derived from the link type.
