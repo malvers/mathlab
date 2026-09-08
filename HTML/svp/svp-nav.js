@@ -27,23 +27,23 @@
         ['mathe/mathe5.html', 'MA 5', 'b-grey', 'Mathematik Klasse 5'],
         ['mathe/mathegy9.html', 'MA 9', 'b-grey', 'Mathematik Klasse 9 (Gymnasium)'],
         ['mathe/mathegy10.html', 'MA 10', 'b-grey', 'Mathematik Klasse 10 (Gymnasium)'],
-        ['mathe/mathe11.html', 'MA 11', 'b-grey', 'Mathematik Klasse 11'],
-        ['mathe/mathe12.html', 'MA 12', 'b-grey', 'Mathematik Klasse 12'],
-        ['mathe/mathe13.html', 'MA 13', 'b-grey', 'Mathematik Klasse 13'],
-        ['mathe/uebung.html', 'Üben', 'b-grey', 'Übung macht den Meister'],
+        ['mathe/mathe11.html', 'MA 11', 'b-grey', 'Mathematik Klasse 11 (BGY)'],
+        ['mathe/mathe12.html', 'MA 12', 'b-grey', 'Mathematik Klasse 12 (BGY)'],
+        ['mathe/mathe13.html', 'MA 13', 'b-grey', 'Mathematik Klasse 13 (BGY)'],
         ['physik/phygy10.html', 'PH 10', 'b-grey', 'Physik Klasse 10 (Gymnasium)'],
-        ['wr/wr11.html', 'W/R 11', 'b-grey', 'Wirtschaftslehre/Recht Klasse 11'],
+        ['wr/wr11.html', 'W/R 11', 'b-grey', 'Wirtschaftslehre/Recht Klasse 11 (BGY)'],
         ['informatik/informatik9.html', 'INF 9', 'b-grey', 'Informatik Klasse 9'],
-        ['informatik/inf11.html', 'INF 11', 'b-grey', 'Informatik Klasse 11'],
-        ['informatik/inf12.html', 'INF 12', 'b-grey', 'Informatik Klasse 12'],
-        ['informatik/inf13.html', 'INF 13', 'b-grey', 'Informatik Klasse 13'],
-        ['informatik/informatik11.html', 'IS 11', 'b-grey', 'Informatiksysteme Klasse 11'],
-        ['informatik/informatik12.html', 'IS 12', 'b-grey', 'Informatiksysteme Klasse 12'],
-        ['informatik/informatik13.html', 'IS 13', 'b-grey', 'Informatiksysteme Klasse 13'],
+        ['informatik/inf11.html', 'INF 11', 'b-grey', 'Informatik Klasse 11 (BGY)'],
+        ['informatik/inf12.html', 'INF 12', 'b-grey', 'Informatik Klasse 12 (BGY)'],
+        ['informatik/inf13.html', 'INF 13', 'b-grey', 'Informatik Klasse 13 (BGY)'],
+        ['informatik/informatik11.html', 'IS 11', 'b-grey', 'Informatiksysteme Klasse 11 (BGY)'],
+        ['informatik/informatik12.html', 'IS 12', 'b-grey', 'Informatiksysteme Klasse 12 (BGY)'],
+        ['informatik/informatik13.html', 'IS 13', 'b-grey', 'Informatiksysteme Klasse 13 (BGY)'],
         /* FO, nicht FOS: die Lerngruppen heissen FOS25-1, FOG25-2 usw. - im
            Menue stand die Schulform genauso, das war verwechselbar (Doc, 02.09.2026). */
-        ['informatik/fos11.html', 'FO 11', 'b-grey', 'Informatik Fachoberschule Klasse 11'],
-        ['informatik/fos12.html', 'FO 12', 'b-grey', 'Informatik Fachoberschule Klasse 12'],
+        ['informatik/fos11.html', 'FO 11', 'b-grey', 'Informatik Fachoberschule Klasse 11 (FO)'],
+        ['informatik/fos12.html', 'FO 12', 'b-grey', 'Informatik Fachoberschule Klasse 12 (FO)'],
+        ['mathe/uebung.html', 'Üben', 'b-grey', 'Übung macht den Meister'],
         ['notes.html', 'Notizen', 'b-grey', 'Notizen'],
         ['konzepte.html', 'Konzepte', 'b-grey', 'Konzepte'],
         ['operatoren.html', 'Operatoren', 'b-grey', 'Operatoren'],
@@ -59,7 +59,8 @@
        03.09.2026: "die Farben aus den SP") - the nav row itself stays grey
        (02.09.). Pinned as in stundenplan.html: Mat = blue, Inf = orange,
        GKInf = green. INF 12/13 are the Grundkurse, INF 11 / FO / OS 9 run as
-       plain "Inf". Pages without a Stundenplan subject stay grey. */
+       plain "Inf". Pages without a Stundenplan subject stay grey - that includes
+       "Ueben", which is a tool and not a plan (Doc, 08.09.2026). */
     const SP_HUE = {
         'mathe/mathe5.html': 'b-cyan',
         'mathe/mathegy9.html': 'b-cyan',
@@ -67,7 +68,6 @@
         'mathe/mathe11.html': 'b-cyan',
         'mathe/mathe12.html': 'b-cyan',
         'mathe/mathe13.html': 'b-cyan',
-        'mathe/uebung.html': 'b-cyan',
         'informatik/informatik9.html': 'b-orange',
         'informatik/inf11.html': 'b-orange',
         'informatik/inf12.html': 'b-green',
@@ -92,14 +92,14 @@
             ['Mathematik', ['mathe/mathegy9.html', 'mathe/mathegy10.html']],
             ['Physik', ['physik/phygy10.html']]
         ]],
-        ['Berufliches Gymnasium', [
+        ['Berufliches Gymnasium (BGY)', [
             ['Mathematik', ['mathe/mathe11.html', 'mathe/mathe12.html', 'mathe/mathe13.html']],
             ['Informatik', ['informatik/inf11.html', 'informatik/inf12.html', 'informatik/inf13.html']],
             ['Informatiksysteme', ['informatik/informatik11.html', 'informatik/informatik12.html',
                                    'informatik/informatik13.html']],
             ['Wirtschaft/Recht', ['wr/wr11.html']]
         ]],
-        ['Fachoberschule', [
+        ['Fachoberschule (FO)', [
             ['Informatik', ['informatik/fos11.html', 'informatik/fos12.html']]
         ]],
         /* "Mehr" is not a Schulart — it stays at the far right, next to the gear */
@@ -118,7 +118,11 @@
     // '/svp/' and '/svp/index.html' are the same page.
     function norm(path) { return path.replace(/index\.html$/, ''); }
 
-    // Per-browser pill visibility, keyed by href (stable across label changes).
+    // Pill visibility, keyed by href (stable across label changes). localStorage
+    // is the offline copy and the only store when nobody is logged in; with an
+    // svp session the same list lives in Supabase (table svp_prefs, one row per
+    // account), so the choice follows Doc from machine to machine (Doc,
+    // 08.09.2026). The DB wins as soon as it answers - see pullPrefs below.
     const STORE_KEY = 'svp-nav-hidden';
     let hidden;
     try { hidden = new Set(JSON.parse(localStorage.getItem(STORE_KEY) || '[]')); }
@@ -127,8 +131,15 @@
     // Stundenplan out of the panel); deleting cleans up old stored state.
     const ALWAYS_ON = ['index.html', PLAN_HREF];
     for (const h of ALWAYS_ON) hidden.delete(h);
-    function saveHidden() {
+    /* Rows of the gear panel, filled while it is built - a list arriving from
+       the DB has to tick the boxes afterwards. */
+    const epRows = [];
+    function saveLocal() {
         try { localStorage.setItem(STORE_KEY, JSON.stringify([...hidden])); } catch (e) { }
+    }
+    function saveHidden() {
+        saveLocal();
+        pushPrefs();
     }
 
     const header = document.querySelector('header.page-head') || document.body;
@@ -311,6 +322,7 @@
             saveHidden();
         });
 
+        epRows.push({ href: href, box: box, badge: t });
         row.appendChild(box);
         row.appendChild(t);
         grid.appendChild(row);
@@ -513,6 +525,116 @@
         document.addEventListener('DOMContentLoaded', applyCardVisibility);
     } else {
         applyCardVisibility();
+    }
+
+    /* ---------- Cloud sync of the pill choice (table svp_prefs) ----------
+       Logged out nothing changes: localStorage stays the only store. With a
+       session the list is read once at load and written back on every click,
+       so a second machine sees the same pills (Doc, 08.09.2026).
+       Pages like index.html or konzepte.html do not load svp-auth.js at all,
+       so the session is sniffed straight out of localStorage and the auth core
+       is pulled in on demand - and only then. */
+
+    /* Repaint everything the choice touches: pills (the current page always
+       stays visible), the panel checkboxes, folded dropdown rows, link cards. */
+    function repaintChoice() {
+        for (const href in pills) {
+            const p = pills[href];
+            p.classList.toggle('nav-hidden', hidden.has(href) && !p.classList.contains('active'));
+        }
+        epRows.forEach(function (r) {
+            r.box.checked = !hidden.has(r.href);
+            r.badge.classList.toggle('on', r.box.checked);
+        });
+        syncDropRows();
+        applyCardVisibility();
+    }
+
+    /* svp-auth.js, but at most one copy: a page that ships it may load it after
+       this script, so waiting beats injecting a second instance. */
+    let authWait = null;
+    function withAuth() {
+        if (window.svpAuth) return Promise.resolve(window.svpAuth);
+        if (!hasSession()) return Promise.resolve(null);
+        if (!authWait) {
+            authWait = new Promise(function (resolve) {
+                if (document.querySelector('script[src*="svp-auth.js"]')) {
+                    /* already in the page - it just has not run yet */
+                    let tries = 0;
+                    const t = setInterval(function () {
+                        if (window.svpAuth || ++tries > 50) { clearInterval(t); resolve(window.svpAuth || null); }
+                    }, 100);
+                    return;
+                }
+                const s = document.createElement('script');
+                s.src = base + 'svp-auth.js';
+                s.onload = function () { resolve(window.svpAuth || null); };
+                s.onerror = function () { resolve(null); };
+                document.head.appendChild(s);
+            });
+        }
+        return authWait;
+    }
+
+    /* The account's uid sits in the JWT payload; PostgREST needs it in the body
+       so the upsert can name its conflict target. */
+    function myUid(auth) {
+        try {
+            const part = auth.session.access_token.split('.')[1];
+            return JSON.parse(atob(part.replace(/-/g, '+').replace(/_/g, '/'))).sub || '';
+        } catch (e) { return ''; }
+    }
+
+    let cloudUid = '';   // set once the account has answered - gate for writing
+    let pushTimer = null;
+
+    async function pullPrefs() {
+        const auth = await withAuth();
+        if (!auth || !auth.hasSession()) return;
+        let res;
+        try { res = await auth.api('svp_prefs?select=hidden', { method: 'GET' }); }
+        catch (e) { return; }                       // offline: keep the local list
+        if (!res.ok) return;                        // table missing or 403: stay local
+        const rows = await res.json().catch(() => []);
+        cloudUid = myUid(auth);
+        if (!cloudUid) return;
+        if (rows.length && Array.isArray(rows[0].hidden)) {
+            hidden = new Set(rows[0].hidden);
+            for (const h of ALWAYS_ON) hidden.delete(h);
+            saveLocal();                            // localStorage is now the cache
+            repaintChoice();
+        } else {
+            pushPrefs(true);                        // first login: this browser seeds the row
+        }
+    }
+
+    function pushPrefs(now) {
+        if (!cloudUid) return;                      // logged out or DB never answered
+        clearTimeout(pushTimer);
+        /* A click can be the last thing before the tab closes, so keep the wait
+           short; svpAuth.api sends with keepalive. */
+        pushTimer = setTimeout(async function () {
+            const auth = await withAuth();
+            if (!auth || !auth.hasSession()) return;
+            try {
+                await auth.api('svp_prefs?on_conflict=user_id', {
+                    method: 'POST',
+                    headers: { Prefer: 'resolution=merge-duplicates' },
+                    body: JSON.stringify({
+                        user_id: cloudUid,
+                        hidden: [...hidden],
+                        updated_at: new Date().toISOString()
+                    })
+                });
+            } catch (e) { /* offline - localStorage keeps the choice */ }
+        }, now ? 0 : 400);
+    }
+
+    /* After load: every script tag of the page has run, so withAuth() sees an
+       svpAuth that the page brought along instead of fetching a second one. */
+    if (hasSession()) {
+        if (document.readyState === 'complete') pullPrefs();
+        else window.addEventListener('load', pullPrefs);
     }
 
     function closePanel() { editWrap.classList.remove('open'); }
