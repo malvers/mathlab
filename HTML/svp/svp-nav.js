@@ -30,6 +30,7 @@
         ['mathe/mathe11.html', 'MA 11', 'b-grey', 'Mathematik Klasse 11 (BGY)'],
         ['mathe/mathe12.html', 'MA 12', 'b-grey', 'Mathematik Klasse 12 (BGY)'],
         ['mathe/mathe13.html', 'MA 13', 'b-grey', 'Mathematik Klasse 13 (BGY)'],
+        ['mathe/abitur.html', 'Abi MA', 'b-grey', 'Training Abitur Mathematik (BGY)'],
         ['physik/phygy10.html', 'PH 10', 'b-grey', 'Physik Klasse 10 (Gymnasium)'],
         ['wr/wr11.html', 'W/R 11', 'b-grey', 'Wirtschaftslehre/Recht Klasse 11 (BGY)'],
         ['informatik/informatik9.html', 'INF 9', 'b-grey', 'Informatik Klasse 9'],
@@ -93,7 +94,8 @@
             ['Physik', ['physik/phygy10.html']]
         ]],
         ['Berufliches Gymnasium (BGY)', [
-            ['Mathematik', ['mathe/mathe11.html', 'mathe/mathe12.html', 'mathe/mathe13.html']],
+            ['Mathematik', ['mathe/mathe11.html', 'mathe/mathe12.html', 'mathe/mathe13.html',
+                            'mathe/abitur.html']],
             ['Informatik', ['informatik/inf11.html', 'informatik/inf12.html', 'informatik/inf13.html']],
             ['Informatiksysteme', ['informatik/informatik11.html', 'informatik/informatik12.html',
                                    'informatik/informatik13.html']],

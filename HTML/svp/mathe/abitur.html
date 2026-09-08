@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Abitur Mathematik | Stoffverteilungspl&auml;ne</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="../svp.css">
+    <script src="../svp-gate.js"></script>
+    <style>
+        /* Collapsible cards, same shape as the operator cards on operatoren.html —
+           colours, header and footer all come from svp.css, only the layout of this
+           page lives here. */
+        .abi-list {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            gap: 14px;
+        }
+
+        .abi-card {
+            background: var(--card-soft);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 14px 16px;
+            /* Grid items are min-width:auto by default — without this the wide BE
+               table would push the whole card past the viewport on a phone,
+               .abi-tablewrap's overflow notwithstanding. */
+            min-width: 0;
+        }
+
+        .abi-head {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .abi-chev {
+            color: var(--muted);
+            font-size: 0.95rem;
+            padding-top: 2px;
+            transition: transform 0.15s;
+        }
+
+        .abi-card.open .abi-chev { transform: rotate(90deg); }
+
+        .abi-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.95rem;
+            letter-spacing: 0.03em;
+            color: var(--lambda);
+        }
+
+        .abi-card.c-geo .abi-title { color: var(--cyan); }
+        .abi-card.c-alg .abi-title { color: var(--violet); }
+        .abi-card.c-sto .abi-title { color: var(--phi); }
+        .abi-card.c-open .abi-title { color: rgb(235, 120, 105); }
+        html.svp-light .abi-card.c-open .abi-title { color: var(--ypsilon); }
+
+        .abi-sub {
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .abi-card:not(.open) .abi-body { display: none; }
+
+        .abi-body {
+            padding: 12px 2px 2px 26px;
+            line-height: 1.55;
+            font-size: 0.95rem;
+        }
+
+        .abi-body p { margin: 0 0 10px; }
+        .abi-body p:last-child { margin-bottom: 0; }
+
+        .abi-body ul { margin: 0 0 10px; padding-left: 18px; }
+        .abi-body li { margin-bottom: 4px; }
+
+        .abi-body h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 400;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin: 14px 0 6px;
+        }
+
+        .abi-body h3:first-child { margin-top: 0; }
+
+        .abi-body b { color: var(--head); font-weight: 600; }
+
+        /* Tables scroll on their own so a narrow phone never scrolls the page
+           sideways (Doc: we work responsive). */
+        .abi-tablewrap { overflow-x: auto; margin: 0 0 12px; }
+
+        table.abi-table {
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            min-width: 480px;
+        }
+
+        table.abi-table th,
+        table.abi-table td {
+            border-bottom: 1px solid var(--row-line);
+            padding: 5px 12px 5px 0;
+            text-align: left;
+            vertical-align: top;
+            white-space: nowrap;
+        }
+
+        table.abi-table th {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 400;
+            font-size: 0.74rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        table.abi-table td.num,
+        table.abi-table th.num { text-align: right; padding-right: 18px; }
+        table.abi-table tr.sum td { color: var(--lambda); }
+
+        .abi-note {
+            border-left: 3px solid var(--lambda);
+            padding: 2px 0 2px 12px;
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="../">&larr; Stoffverteilungspl&auml;ne</a>
+        <h1>Training Abitur Mathematik</h1>
+        <div class="subtitle">
+            Berufliches Gymnasium Sachsen &middot; Grund- und Leistungskurs, Wahlpflicht 1 und 2 &middot;
+            ausgewertet: die Originalpr&uuml;fungen der Jahrg&auml;nge 2021/22 bis 2024/25
+        </div>
+    </header>
+
+    <div class="abi-list">
+
+        <section class="abi-card open">
+            <div class="abi-head" onclick="this.parentElement.classList.toggle('open')">
+                <span class="abi-chev">&#9656;</span>
+                <div>
+                    <div class="abi-title">So ist die Pr&uuml;fung gebaut</div>
+                    <div class="abi-sub">Teil A ohne Hilfsmittel, Teil B mit Rechner &middot;
+                        Stand der beiden letzten Jahrg&auml;nge</div>
+                </div>
+            </div>
+            <div class="abi-body">
+                <h3>Teil A &ndash; ohne Hilfsmittel</h3>
+                <p>Erlaubt sind nur Lineal und Geodreieck. Der Teil wird nach fester Zeit eingesammelt,
+                    erst danach kommt der Taschenrechner auf den Tisch.</p>
+                <ul>
+                    <li><b>Grundkurs:</b> 85 Minuten Arbeitszeit plus 15 Minuten zum Lesen und Ausw&auml;hlen,
+                        <b>25 BE</b>. Drei Pflichtaufgaben, dazu je eine Wahlaufgabe aus Gruppe&nbsp;1
+                        (Aufgabe 4&ndash;6) und Gruppe&nbsp;2 (Aufgabe 7&ndash;9).</li>
+                    <li><b>Leistungskurs:</b> 95 + 15 Minuten, <b>30 BE</b>. Vier Pflichtaufgaben und
+                        zwei beliebige aus sechs Wahlaufgaben (5&ndash;10).</li>
+                    <li>Auf der letzten Seite wird angekreuzt, welche Wahlaufgaben bewertet werden sollen &ndash;
+                        wer das vergisst, verschenkt Punkte.</li>
+                </ul>
+
+                <h3>Teil B &ndash; mit Rechner und Formelsammlung</h3>
+                <p>Hilfsmittel: W&ouml;rterbuch, eingef&uuml;hrte Tabellen- und Formelsammlung,
+                    Zeichenger&auml;te, ein grafikf&auml;higer Taschenrechner mit oder ohne CAS.
+                    Die Gesamtarbeitszeit einschlie&szlig;lich Teil A betr&auml;gt <b>255 Minuten</b> im
+                    Grundkurs und <b>300 Minuten</b> im Leistungskurs.</p>
+                <ul>
+                    <li>Drei Pflichtaufgaben, alle drei sind zu l&ouml;sen: <b>Analysis</b>,
+                        <b>Analytische Geometrie</b> (Wahlpflicht&nbsp;1) beziehungsweise
+                        <b>Lineare Algebra</b> (Wahlpflicht&nbsp;2) und <b>Stochastik</b>.</li>
+                    <li>Wahlpflicht&nbsp;2 bekommt eine eigene dreiseitige Formelsammlung
+                        &bdquo;Anwendungen der Matrizenrechnung&ldquo; beigelegt (Gozinto, Kostenvektoren,
+                        Leontief).</li>
+                    <li>Jede Aufgabe auf einen eigenen Reinschriftbogen.</li>
+                </ul>
+
+                <p class="abi-note">2021/22 und 2022/23 war Teil B anders geschnitten: zwei
+                    Pflichtaufgaben und eine von zwei Wahlaufgaben (3a Geometrie / 3b Stochastik).
+                    Seit 2023/24 sind es drei Pflichtaufgaben ohne Wahl.</p>
+            </div>
+        </section>
+
+        <section class="abi-card">
+            <div class="abi-head" onclick="this.parentElement.classList.toggle('open')">
+                <span class="abi-chev">&#9656;</span>
+                <div>
+                    <div class="abi-title">Bewertungseinheiten 2022 bis 2025</div>
+                    <div class="abi-sub">Wie sich die Punkte auf die Teile verteilen &ndash; und dass
+                        2025 sp&uuml;rbar weniger wurden</div>
+                </div>
+            </div>
+            <div class="abi-body">
+                <div class="abi-tablewrap">
+                    <table class="abi-table">
+                        <tr>
+                            <th>Jahr</th>
+                            <th>Kurs</th>
+                            <th class="num">Teil A</th>
+                            <th class="num">Analysis</th>
+                            <th class="num">Geo / Algebra</th>
+                            <th class="num">Stochastik</th>
+                            <th class="num">Gesamt</th>
+                        </tr>
+                        <tr><td>2021/22</td><td>GK</td><td class="num">25</td><td class="num">40</td>
+                            <td class="num">25</td><td class="num">10</td><td class="num">100</td></tr>
+                        <tr><td>2021/22</td><td>LK</td><td class="num">30</td><td class="num">50</td>
+                            <td class="num">25</td><td class="num">15</td><td class="num">120</td></tr>
+                        <tr><td>2022/23</td><td>GK</td><td class="num">25</td><td class="num">40</td>
+                            <td class="num">25</td><td class="num">10</td><td class="num">100</td></tr>
+                        <tr><td>2022/23</td><td>LK</td><td class="num">30</td><td class="num">50</td>
+                            <td class="num">25</td><td class="num">15</td><td class="num">120</td></tr>
+                        <tr><td>2023/24</td><td>GK</td><td class="num">25</td><td class="num">30</td>
+                            <td class="num">25</td><td class="num">20</td><td class="num">100</td></tr>
+                        <tr><td>2023/24</td><td>LK</td><td class="num">30</td><td class="num">40</td>
+                            <td class="num">25</td><td class="num">25</td><td class="num">120</td></tr>
+                        <tr class="sum"><td>2024/25</td><td>GK</td><td class="num">25</td><td class="num">25</td>
+                            <td class="num">15</td><td class="num">15</td><td class="num">80</td></tr>
+                        <tr class="sum"><td>2024/25</td><td>LK</td><td class="num">30</td><td class="num">30</td>
+                            <td class="num">20</td><td class="num">20</td><td class="num">100</td></tr>
+                    </table>
+                </div>
+                <p>In den ersten drei Jahrg&auml;ngen z&auml;hlte die Analysis fast die H&auml;lfte
+                    aller Punkte. 2023/24 wurde zugunsten der Stochastik umverteilt, 2024/25 wurde
+                    die ganze Arbeit auf <b>80 BE (GK)</b> beziehungsweise <b>100 BE (LK)</b>
+                    gek&uuml;rzt &ndash; bei gleichzeitig l&auml;ngerer Arbeitszeit in Teil A
+                    (75&nbsp;&rarr;&nbsp;85 Minuten im GK). Pro Punkt bleibt also mehr Zeit.</p>
+                <p class="abi-note">Wahlpflicht 1 und Wahlpflicht 2 haben in jedem Jahrgang dieselbe
+                    Analysis- und dieselbe Stochastikaufgabe. Unterschiedlich ist nur die mittlere
+                    Pflichtaufgabe &ndash; Vektorgeometrie gegen Matrizen &ndash; und ein Teil der
+                    Wahlaufgaben in Teil A.</p>
+            </div>
+        </section>
+
+        <section class="abi-card">
+            <div class="abi-head" onclick="this.parentElement.classList.toggle('open')">
+                <span class="abi-chev">&#9656;</span>
+                <div>
+                    <div class="abi-title">Teil A &ndash; der Kopfrechenteil</div>
+                    <div class="abi-sub">F&uuml;nf Ankreuzaufgaben, dann kleine Aufgaben zu allen
+                        drei Gebieten</div>
+                </div>
+            </div>
+            <div class="abi-body">
+                <p>Aufgabe&nbsp;1 ist in <b>allen 16 ausgewerteten Arbeiten</b> derselbe Typ: f&uuml;nf
+                    Ankreuzaufgaben mit je f&uuml;nf Antworten, genau eine ist richtig, je 1&nbsp;BE.
+                    Es gibt keine Teilpunkte und keinen Abzug &ndash; also nie ein Feld leer lassen.</p>
+
+                <h3>Was in den Ankreuzaufgaben gefragt wurde</h3>
+                <ul>
+                    <li>Ableitung und Stammfunktion im Kopf: <i>3&middot;sin&nbsp;x</i>,
+                        <i>&radic;x</i>, <i>2/(3x)</i>, Produkt- und Kettenregel</li>
+                    <li>Wende- und Extremstellen aus der Scheitelform ablesen</li>
+                    <li>Definitions- und Wertebereich, Grenzwerte, Asymptoten
+                        (<i>lim&nbsp;2<sup>x</sup></i>, <i>y&nbsp;=&nbsp;3</i>)</li>
+                    <li>Bestimmte Integrale, deren Wert aus Symmetrie null ist</li>
+                    <li>Aussagen &uuml;ber ganzrationale Funktionen 4. Grades (immer ein Wendepunkt?
+                        immer eine Nullstelle?)</li>
+                    <li>Punktlage im Raum, L&auml;nge und Orthogonalit&auml;t von Vektoren, Skalarprodukt</li>
+                    <li>Bernoulliketten: Erwartungswert, Varianz, Formel f&uuml;r genau <i>k</i> Treffer</li>
+                    <li>Wahlpflicht&nbsp;2 zus&auml;tzlich: Aussagen &uuml;ber Matrizen
+                        (transponiert, invertierbar, quadratisch)</li>
+                    <li>Ab 2024/25 auch <b>Graphen zuordnen</b>: f&uuml;nf kleine Bilder, welches
+                        geh&ouml;rt zu <i>e<sup>x</sup>&middot;(x&sup2;&minus;3)</i>?</li>
+                </ul>
+
+                <h3>Der Rest von Teil A</h3>
+                <p>Danach folgen kurze Aufgaben zu je 5&nbsp;BE aus allen drei Gebieten &ndash;
+                    Punktprobe an einer Ebene, Fl&auml;che zwischen zwei Parabeln, Vierfeldertafel,
+                    Vektoren an einer Pyramide, Erwartungswert beim Ziehen ohne Zur&uuml;cklegen.
+                    Alles ohne Rechner und in wenigen Zeilen l&ouml;sbar, wenn die Standardverfahren
+                    sitzen.</p>
+            </div>
+        </section>
+
+        <section class="abi-card">
+            <div class="abi-head" onclick="this.parentElement.classList.toggle('open')">
+                <span class="abi-chev">&#9656;</span>
+                <div>
+                    <div class="abi-title">Analysis &ndash; Pflichtaufgabe 1</div>
+                    <div class="abi-sub">Immer: eine Funktionsuntersuchung und ein Sachkontext</div>
+                </div>
+            </div>
+            <div class="abi-body">
+                <h3>Teil 1: die reine Funktionsuntersuchung</h3>
+                <ul>
+                    <li>Ganzrationale Funktion dritten Grades (jedes Jahr, meist zuerst):
+                        Nullstellen, Hoch-, Tief- und Wendepunkt, Monotonie, Symmetrie</li>
+                    <li>Tangenten: waagerechte Tangente, Anstiegswinkel, <b>Paare paralleler
+                        Tangenten</b>, Tangente als Begrenzung einer Fl&auml;che</li>
+                    <li>Fl&auml;chen: zwischen Graph und Achse, zwischen zwei Graphen, Fl&auml;che im
+                        Verh&auml;ltnis 1:2 teilen, Gerade suchen, die halbiert</li>
+                    <li>Verschieben, Strecken, Spiegeln: <i>g(x)&nbsp;=&nbsp;25&middot;f(x/100)</i>,
+                        <i>h(x)&nbsp;=&nbsp;f(x+1)&minus;2</i> &ndash; beschreiben, nicht nachrechnen</li>
+                    <li>Exponentialfunktionen, im Leistungskurs auch als Schar:
+                        <i>2&middot;x&middot;e<sup>&minus;x</sup></i>,
+                        <i>5&middot;t&middot;e<sup>&minus;0,05t</sup>+5</i>,
+                        <i>2&middot;x&middot;e<sup>&minus;a&middot;x</sup></i></li>
+                    <li>2024/25 im LK erstmals eine Sinusfunktion mit zwei Parametern
+                        <i>&minus;a&middot;sin(x/b)+a</i> samt Achsenskalierung auf dem Arbeitsblatt</li>
+                </ul>
+
+                <h3>Teil 2: der Sachkontext</h3>
+                <p>Eine Gr&ouml;&szlig;e wird durch eine Funktion modelliert, dazu geh&ouml;rt fast
+                    immer eine Abbildung. Gesehen in vier Jahrg&auml;ngen: Autobahnkreuz,
+                    Wasserrutsche, Carport f&uuml;r ein Wohnmobil, Wasserpflanzen auf einem See,
+                    Applausst&auml;rke bei einem Talentwettbewerb, Geschwindigkeit eines ICE,
+                    Staul&auml;nge an einer Baustelle.</p>
+                <ul>
+                    <li><b>&Auml;nderungsraten:</b> durchschnittliche gegen momentane, &bdquo;wann nimmt
+                        es am st&auml;rksten ab?&ldquo; &rarr; Wendestelle</li>
+                    <li><b>Ohne Knick &uuml;bergehen:</b> zwei Bedingungen, gleicher Funktionswert und
+                        gleiche Ableitung &ndash; kommt in jedem zweiten Jahrgang</li>
+                    <li>Fl&auml;che unter dem Graphen als zur&uuml;ckgelegte Strecke oder als zu
+                        bepflanzende Fl&auml;che deuten</li>
+                    <li>Aus dem Graphen der <b>Ableitung</b> auf die Ausgangsfunktion schlie&szlig;en
+                        und Aussagen beurteilen</li>
+                    <li>Grafisch ermitteln <b>auf dem Arbeitsblatt</b>: einzeichnen, ablesen, begr&uuml;nden</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="abi-card c-geo">
+            <div class="abi-head" onclick="this.parentElement.classList.toggle('open')">
+                <span class="abi-chev">&#9656;</span>
+                <div>
+                    <div class="abi-title">Analytische Geometrie &ndash; Wahlpflicht 1</div>
+                    <div class="abi-sub">Ein K&ouml;rper aus der Wirklichkeit, in Koordinaten gelegt</div>
+                </div>
+            </div>
+            <div class="abi-body">
+                <p>Das Muster ist in allen vier Jahrg&auml;ngen gleich: ein Bauwerk oder K&ouml;rper wird
+                    durch Eckpunkte im Koordinatensystem beschrieben, eine L&auml;ngeneinheit entspricht
+                    einem Meter. Gesehen: schiefes Prisma, Anbau mit Glasdach, Pavillon, Wohngeb&auml;ude
+                    mit Dachk&ouml;rper, Werbemast, das Gewandhaus Leipzig, das Saarpolygon.</p>
+                <ul>
+                    <li><b>Nachweise am Viereck:</b> Rechteck, Trapez, Raute, Drachenviereck &ndash;
+                        oder eben <i>kein</i> Rechteck</li>
+                    <li>Fehlenden Eckpunkt erg&auml;nzen, Mittelpunkte, Spiegelpunkte</li>
+                    <li>Geraden: Gleichung aufstellen, Punktprobe, Schnittpunkt, windschief oder nicht</li>
+                    <li>Ebenen in Koordinatenform, Punkt in der Ebene, <b>Schnittwinkel</b> Gerade&ndash;Ebene,
+                        Teilungsverh&auml;ltnis einer Raumdiagonale</li>
+                    <li>Fl&auml;cheninhalt &uuml;ber das Kreuzprodukt, Volumen, 2024/25 sogar das
+                        <b>A/V-Verh&auml;ltnis</b> zweier K&ouml;rper im Vergleich</li>
+                    <li>Abst&auml;nde, Lotfu&szlig;punkt, k&uuml;rzeste Verbindung &uuml;ber eine Kante</li>
+                    <li><b>Schattenwurf:</b> Sonnenlicht als Richtungsvektor, Schatten auf der x-y-Ebene &ndash;
+                        in drei von vier Jahrg&auml;ngen dabei</li>
+                    <li><b>Terme deuten:</b> &bdquo;Nennen Sie die Gr&ouml;&szlig;e, die mit diesem Term
+                        berechnet wird&ldquo; oder &bdquo;Formulieren Sie eine passende Aufgabe&ldquo; &ndash;
+                        r&uuml;ckw&auml;rts denken, nicht rechnen</li>
+                    <li>Ebenenscharen <i>E<sub>t</sub></i>: zeigen, dass eine Gerade in allen Ebenen liegt</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="abi-card c-alg">
+            <div class="abi-head" onclick="this.parentElement.classList.toggle('open')">
+                <span class="abi-chev">&#9656;</span>
+                <div>
+                    <div class="abi-title">Lineare Algebra &ndash; Wahlpflicht 2</div>
+                    <div class="abi-sub">Matrizen als Werkzeug, dann Produktion und Wirtschaft</div>
+                </div>
+            </div>
+            <div class="abi-body">
+                <h3>Der technische Teil</h3>
+                <ul>
+                    <li>Matrizen aufstellen nach einer <b>Bildungsvorschrift</b> f&uuml;r
+                        <i>a<sub>ik</sub></i>, besondere Eigenschaft benennen</li>
+                    <li>Transponierte, Einheitsmatrix, <b>Inverse</b> &ndash; und wann sie nicht existiert</li>
+                    <li>Lineare Gleichungssysteme in Matrixform: L&ouml;sungsmenge, unendlich viele
+                        L&ouml;sungen nachweisen, allgemeiner L&ouml;sungsvektor, das zugeh&ouml;rige
+                        homogene System</li>
+                    <li>Parameter <i>k</i> so bestimmen, dass das System <b>keine</b> L&ouml;sung hat</li>
+                </ul>
+
+                <h3>Der Anwendungsteil</h3>
+                <ul>
+                    <li><b>Materialverflechtung:</b> Rohstoff&ndash;Zwischenprodukt&ndash;Endprodukt,
+                        Gozinto-Graph vervollst&auml;ndigen, <i>M<sub>RE</sub></i> berechnen,
+                        Bedarf und Lagerbestand, variable Kosten und Deckungsbeitrag
+                        (Fahrradrahmen, Kamin&ouml;fen)</li>
+                    <li><b>Leontief-Modell:</b> Technologiematrix ablesen, Leontief-Inverse,
+                        Produktion und Konsum, Verflechtungsdiagramm erg&auml;nzen</li>
+                </ul>
+                <p class="abi-note">Die dreiseitige Formelsammlung liegt der Arbeit bei. Wer sie kennt,
+                    spart im Anwendungsteil viel Zeit &ndash; wer sie in der Pr&uuml;fung zum ersten Mal
+                    sieht, verliert sie.</p>
+            </div>
+        </section>
+
+        <section class="abi-card c-sto">
+            <div class="abi-head" onclick="this.parentElement.classList.toggle('open')">
+                <span class="abi-chev">&#9656;</span>
+                <div>
+                    <div class="abi-title">Stochastik &ndash; Pflichtaufgabe 3</div>
+                    <div class="abi-sub">Vierfeldertafel, Binomialverteilung, Hypothesentest &ndash;
+                        in dieser Reihenfolge</div>
+                </div>
+            </div>
+            <div class="abi-body">
+                <p>Die Stochastikaufgabe ist die am besten vorhersagbare der ganzen Pr&uuml;fung.
+                    Sie l&auml;uft in allen vier Jahrg&auml;ngen dieselbe Treppe hinauf.</p>
+                <ul>
+                    <li><b>Vierfeldertafel</b> aus einem Text vervollst&auml;ndigen und ein Feld im
+                        Sachzusammenhang beschreiben</li>
+                    <li><b>Bedingte Wahrscheinlichkeit</b> und die Frage nach <b>stochastischer
+                        Unabh&auml;ngigkeit</b> &ndash; jedes Jahr</li>
+                    <li><b>Baumdiagramm</b> zeichnen, Pfadregeln, R&uuml;ckschluss auf die Ursache
+                        (Bayes, ohne dass das Wort f&auml;llt)</li>
+                    <li><b>Binomialverteilung:</b> genau <i>k</i>, mindestens <i>k</i>, h&ouml;chstens
+                        <i>k</i>, Erwartungswert, Standardabweichung &ndash; und die Lieblingsfrage
+                        &bdquo;innerhalb einer Standardabweichung um den Erwartungswert&ldquo;</li>
+                    <li><b>Mindestens-Aufgaben:</b> wie viele Versuche, damit mit 90&nbsp;% Wahrscheinlichkeit
+                        wenigstens einer gelingt</li>
+                    <li><b>Terme deuten:</b> &bdquo;Beschreiben Sie ein Ereignis, dessen Wahrscheinlichkeit
+                        mit diesem Term berechnet wird&ldquo; &ndash; in fast jeder Arbeit, oft nur 1&nbsp;BE
+                        und trotzdem der Stolperstein</li>
+                    <li><b>Hypothesentest</b> als Abschluss: Nullhypothese, ein- oder zweiseitig,
+                        Ablehnungsbereich zum Signifikanzniveau, Entscheidung <i>und</i> eine Empfehlung
+                        im Sachzusammenhang. Im Leistungskurs zus&auml;tzlich <b>Fehler 1. und 2. Art</b>.</li>
+                    <li>Kleine Klassiker daneben: Gl&uuml;cksrad mit drei Sektoren, Urne ohne
+                        Zur&uuml;cklegen, Zufallsgr&ouml;&szlig;e und Erwartungswert</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="abi-card">
+            <div class="abi-head" onclick="this.parentElement.classList.toggle('open')">
+                <span class="abi-chev">&#9656;</span>
+                <div>
+                    <div class="abi-title">Die Abbildungen</div>
+                    <div class="abi-sub">Ohne Bilder ist es kein Training &ndash; was in den Originalen
+                        steckt und wie wir es machen</div>
+                </div>
+            </div>
+            <div class="abi-body">
+                <h3>Wie viele es sind</h3>
+                <p>Gez&auml;hlt in den Aufgabenheften: 2021/22 und 2022/23 kamen 2 bis 8 Verweise auf
+                    eine Abbildung je Arbeit vor, 2023/24 waren es 8 bis 13, 2024/25 <b>10 bis 19</b>.
+                    Die Pr&uuml;fung wird bildlastiger, nicht weniger. Dazu kommen die Aufgaben, in denen
+                    die Sch&uuml;lerinnen und Sch&uuml;ler selbst zeichnen sollen &ndash; skizzieren,
+                    veranschaulichen, in ein Arbeitsblatt eintragen.</p>
+
+                <h3>Welche Typen vorkommen</h3>
+                <ul>
+                    <li>Funktionsgraph im Koordinatensystem, oft <b>ohne Skalierung</b> &ndash; die soll
+                        erg&auml;nzt werden</li>
+                    <li>Balkendiagramme einer Binomialverteilung: Wahrscheinlichkeitsfunktion und
+                        kumulierte Verteilungsfunktion nebeneinander, eine davon leer zum Ausf&uuml;llen</li>
+                    <li>K&ouml;rper im Schr&auml;gbild: Pyramide, schiefes Prisma, Quader, Dachk&ouml;rper</li>
+                    <li>Sachskizzen: Autobahnkreuz, Rutschbahn im L&auml;ngsschnitt, Carport, Werbemast</li>
+                    <li>Baumdiagramme und Vierfeldertafeln, meist unvollst&auml;ndig</li>
+                    <li>Verflechtungsdiagramme (Gozinto) in Wahlpflicht&nbsp;2</li>
+                    <li>Seit 2024/25 auch f&uuml;nf kleine Graphen als Antwortm&ouml;glichkeiten einer
+                        Ankreuzaufgabe</li>
+                    <li>Ein separates <b>Arbeitsblatt</b> mit der vergr&ouml;&szlig;erten Abbildung zum
+                        Hineinzeichnen</li>
+                </ul>
+
+                <h3>Warum wir sie selbst zeichnen</h3>
+                <p>Die Originale d&uuml;rfen nur im Unterricht verwendet und nicht weitergegeben werden.
+                    Die PDFs bleiben deshalb auf dem Rechner und kommen <b>nicht</b> ins Repository und
+                    nicht auf docalvers.de &ndash; beides ist &ouml;ffentlich. Aufgabentypen und
+                    Sachverhalte &uuml;bernehmen wir frei, Wortlaut und Abbildungen machen wir selbst.</p>
+                <p>Technisch ist das kein Hindernis, im Gegenteil: In den Originalen sind die Abbildungen
+                    <i>und</i> ein Gro&szlig;teil der Formelzeichen als kleine Rasterbilder eingebettet
+                    &ndash; typische Gr&ouml;&szlig;e um 400&times;500 Pixel, im Druck schon grenzwertig.
+                    Unsere Bl&auml;tter zeichnen die Abbildung als <b>SVG direkt im Dokument</b>: scharf
+                    auf jedem Bildschirm, scharf im Druck, in Hell und Dunkel lesbar, und die Zahlen
+                    stimmen, weil der Generator sie aus derselben Funktion rechnet, mit der auch die
+                    L&ouml;sung nachgepr&uuml;ft wird.</p>
+            </div>
+        </section>
+
+        <section class="abi-card c-open">
+            <div class="abi-head" onclick="this.parentElement.classList.toggle('open')">
+                <span class="abi-chev">&#9656;</span>
+                <div>
+                    <div class="abi-title">&Uuml;bungsaufgaben</div>
+                    <div class="abi-sub">Noch keine da &ndash; hier kommen sie hin</div>
+                </div>
+            </div>
+            <div class="abi-body">
+                <p>Geplant sind Bl&auml;tter im gleichen Format wie die Textaufgaben zu Klasse 11:
+                    HTML zum Lesen und Drucken, Aufgaben mit Teilaufgaben a) bis d), L&ouml;sung je
+                    Aufgabe auf Knopfdruck, im Ausdruck auf einer eigenen Seite. Ein Blatt je Baustein
+                    der Pr&uuml;fung &ndash; Analysis, Geometrie, Matrizen, Stochastik &ndash; getrennt
+                    nach Grund- und Leistungskurs.</p>
+                <p>Bis dahin ist diese Seite die Landkarte: Sie sagt, was drankommt und in welcher
+                    Reihenfolge ge&uuml;bt werden sollte.</p>
+            </div>
+        </section>
+
+    </div>
+
+    <footer class="page-foot">
+        Quelle der Auswertung: Original-Pr&uuml;fungsaufgaben des
+        <a href="https://www.schule.sachsen.de/pruefungsaufgaben.html" target="_blank" rel="noopener">S&auml;chsischen
+            Staatsministeriums f&uuml;r Kultus</a>, Jahrg&auml;nge 2021/22 bis 2024/25, Berufliches Gymnasium
+        &middot; Lehrplan:
+        <a href="https://www.schulportal.sachsen.de/lplandb/lehrplan/183" target="_blank" rel="noopener">BGY
+            Mathematik (2021)</a>
+    </footer>
+    <script src="../svp-nav.js"></script>
+</body>
+
+</html>
