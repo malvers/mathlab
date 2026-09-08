@@ -341,6 +341,16 @@ nav.quick-nav a.badge.nav-hidden { display: none; }
 }
 
 #plan-table td.mat .mat-flag-n { font-variant-numeric: tabular-nums; }
+
+/* Doc, 08.09.2026: "die clips ohne zahl sind zu flach" - ohne die Zahl fehlte
+   die Textzeile, die die Hoehe macht, und der Knopf fiel um gut 2 px in sich
+   zusammen. Eine nulldichte Stuetze in Zeilenhoehe haelt ihn auf, egal ob eine
+   Zahl daneben steht. */
+#plan-table td.mat .mat-flag::before {
+    content: "";
+    width: 0;
+    height: 1.5em;
+}
 .mat-block { margin: 8px 0 2px; text-align: right; }
 .mat-block a.mat-pill {
     display: inline-block;
@@ -3147,13 +3157,20 @@ body.form-preview #svp-form {
     width: auto;
     min-width: 120px;
     align-self: stretch;
+    padding-right: 62px;   /* Platz fuer den Zaehler, der im Feld sitzt */
 }
 
-/* Fixed slot so the stretched field keeps its width when the count appears */
+/* Doc, 08.09.2026: "rechts buendig" - der Zaehler stand rechts NEBEN dem Feld
+   und hielt es 64 px vom Rand weg (gemessen). Jetzt zieht ihn ein negativer
+   Abstand in das rechte Polster des Feldes hinein: der Zaehler steht im Feld,
+   und das Feld endet buendig mit Leiste und Tabelle.
+   -62px = 52px Zaehlerbreite + 10px gap der Leiste. */
 .toolbar .svp-search-count {
-    margin-left: 2px;
+    margin-left: -62px;
     min-width: 52px;
+    padding-right: 10px;
     text-align: right;
+    pointer-events: none;
 }
 
 /* Phone: always a line of its own, never squeezed in beside a button. */

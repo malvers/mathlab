@@ -66,6 +66,29 @@
                 { lb: 'wb', title: 'Datenkomprimierung: wie Dateien schrumpfen', sub: 'Verlustfrei gegen verlustbehaftet, Huffman am eigenen Text — und woran man ein überkomprimiertes Bild erkennt.' }
             ]
         },
+        /* BGY 12 (Grundkurs) — lb1 "Informatische Modellierung", lb2 "Modellierung von
+           Datenbanken", lb3 "Algorithmen und Programme" (Beginn, Rest in Jgst. 13),
+           wb "Künstliche Intelligenz". Eine einzige Lerngruppe (BGY25), die Bezeichnung
+           kommt aus inf12.untis.json — deshalb data-groups auf der Seite. */
+        inf12: {
+            page: 'inf12.html', back: 'Informatik BGY 12',
+            sub: 'Lernbereich 1 \u201eInformatische Modellierung\u201c, Lernbereich 2 \u201eModellierung von Datenbanken\u201c, Lernbereich 3 \u201eAlgorithmen und Programme\u201c + Wahlbereich \u201eK\u00fcnstliche Intelligenz\u201c',
+            switchLabel: 'Kurs wechseln',
+            klassen: [['a', 'BGY25']],
+            labels: { lb1: ['LB 1', 'b-orange'], lb2: ['LB 2', 'b-cyan'], lb3: ['LB 3', 'b-violet'], wb: ['Wahlbereich', 'b-green'] },
+            topics: [
+                { lb: 'lb1', title: 'Was ein Modell weglässt', sub: 'Wetter, Verkehr, Epidemie: dieselbe Wirklichkeit in drei Modellen — und die Entscheidung, die jeweils daran hängt.' },
+                { lb: 'lb1', title: 'Prozesse sichtbar machen: eEPK und BPMN', sub: 'Ein echter Ablauf aus Betrieb oder Schule, zweimal notiert — welche Notation trägt welche Frage?' },
+                { lb: 'lb1', title: 'Warum Großprojekte aus dem Ruder laufen', sub: 'Netzplan, kritischer Pfad, Meilensteine — vorgeführt an einem berühmten Fehlschlag wie BER oder Elbphilharmonie.' },
+                { lb: 'lb1', title: 'Klassen statt Kästen', sub: 'Objekte, Attribute, Methoden: ein Gegenstand aus der eigenen Fachrichtung objektorientiert modelliert.' },
+                { lb: 'lb2', title: 'Von der Miniwelt zum ER-Diagramm', sub: 'Wie aus einer Beschreibung in Alltagssprache ein Datenmodell wird — an einem selbst gewählten Beispiel entwickelt.' },
+                { lb: 'lb2', title: 'Wenn eine Tabelle sich selbst widerspricht', sub: 'Redundanz und Anomalien an einem kaputten Schema — und die Reparatur durch Normalisierung.' },
+                { lb: 'lb2', title: 'SQL live: eine Frage an Millionen Zeilen', sub: 'SELECT, JOIN, GROUP BY am laufenden System vorgeführt — wie aus Rohdaten eine Antwort wird.' },
+                { lb: 'lb2', title: 'Wem gehören die Daten in der Datenbank?', sub: 'Auskunft, Berichtigung, Löschung: was die DSGVO technisch verlangt — und was das für den Entwurf bedeutet.' },
+                { lb: 'lb3', title: 'Sortieren im Wettrennen', sub: 'Zwei Verfahren an 10, 1.000 und einer Million Zahlen — Laufzeit zum Zusehen statt zum Glauben.' },
+                { lb: 'wb', title: 'Wie ein neuronales Netz lernt — und wo es irrt', sub: 'Trainingsdaten, Muster, Fehler: ein selbst trainiertes Beispiel, dazu Bias und Halluzination als Grenze.' }
+            ]
+        },
         /* FOS 11 — lb1 "Persönliches Informationsmanagement", lb2 "IT-Sicherheit und Ökologie",
            wb "Kryptografie in der Informatik" */
         fos11: {
