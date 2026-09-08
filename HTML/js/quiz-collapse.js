@@ -29,14 +29,15 @@
     '.card.folded .qtoggle svg { transform: rotate(-90deg); }',
     '.card.folded .qtext { margin-bottom: 0; }',
     '.card.folded .opts, .card.folded .solbtn, .card.folded .solution { display: none; }',
-    '.qbar { display: flex; justify-content: flex-end; margin: 0 0 10px; }',
+    '.qbar { display: flex; justify-content: flex-end; gap: 8px; margin: 0 0 10px; }',
     '.qbar .btn-fold {',
     '  font-family: "Orbitron", sans-serif; font-size: 0.68rem; letter-spacing: 0.06em;',
     '  background: transparent; color: rgb(96, 128, 36);',
     '  border: 1px solid rgba(121, 158, 49, 0.6); border-radius: 6px;',
     '  padding: 4px 12px; cursor: pointer;',
     '}',
-    '.qbar .btn-fold:hover { background: rgba(121, 158, 49, 0.14); }'
+    '.qbar .btn-fold:hover:not(:disabled) { background: rgba(121, 158, 49, 0.14); }',
+    '.qbar .btn-fold:disabled { opacity: 0.45; cursor: default; }'
   ].join('\n');
 
   function injectStyle() {
@@ -136,15 +137,60 @@
 
     const bar = document.createElement('div');
     bar.className = 'qbar';
+
     const all = document.createElement('button');
     all.type = 'button';
     all.className = 'btn-fold';
-    all.textContent = 'Alle einklappen';
+    function syncFold() {
+      const open = cards.some(function (c) { return !c.classList.contains('folded'); });
+      all.textContent = open ? 'Alle einklappen' : 'Alle ausklappen';
+    }
     all.addEventListener('click', function () {
       const fold = cards.some(function (c) { return !c.classList.contains('folded'); });
       cards.forEach(function (c) { setFolded(c, fold); });
-      all.textContent = fold ? 'Alle ausklappen' : 'Alle einklappen';
+      syncFold();
     });
+    syncFold();
+
+    /* Doc, 08.09.2026: ein Knopf oben, der alle Loesungen auf einmal aufschlaegt.
+       Er klickt schlicht die vorhandenen Loesungsknoepfe durch - so bleiben deren
+       Beschriftung und aria-expanded richtig, und die Engine muss nichts davon
+       wissen. Eingeklappte Karten macht er vorher auf: .card.folded blendet die
+       Loesung aus, sie waere sonst offen und trotzdem unsichtbar. */
+    function solBtns() {
+      return Array.prototype.slice.call(quizEl.querySelectorAll('.solbtn'));
+    }
+    function isOpen(b) { return b.getAttribute('aria-expanded') === 'true'; }
+
+    if (solBtns().length) {
+      const sol = document.createElement('button');
+      sol.type = 'button';
+      sol.className = 'btn-fold btn-sol';
+      function syncSol() {
+        const bs = solBtns();
+        /* Bei einem echten Test sind die Loesungen bis zum Abgeben gesperrt -
+           dann ist auch dieser Knopf gesperrt, sonst waere er ein Schluessel. */
+        const locked = bs.length > 0 && bs.every(function (b) { return b.disabled; });
+        sol.disabled = locked;
+        sol.title = locked ? 'Wird nach dem Abgeben freigeschaltet' : '';
+        sol.textContent = (bs.length > 0 && bs.every(isOpen))
+          ? 'Lösungen ausblenden' : 'Alle Lösungen';
+      }
+      sol.addEventListener('click', function () {
+        const bs = solBtns().filter(function (b) { return !b.disabled; });
+        const show = bs.some(function (b) { return !isOpen(b); });
+        if (show) cards.forEach(function (c) { setFolded(c, false); });
+        bs.forEach(function (b) { if (isOpen(b) !== show) b.click(); });
+        syncFold();
+        syncSol();
+      });
+      syncSol();
+      /* Nach dem Abgeben gibt die Engine die Loesungsknoepfe frei. Das hier
+         merkt es, ohne dass die beiden Dateien voneinander wissen muessen. */
+      document.addEventListener('click', function () { setTimeout(syncSol, 0); });
+      bar.appendChild(sol);
+    }
+
     bar.appendChild(all);
     quizEl.parentNode.insertBefore(bar, quizEl);
   }
