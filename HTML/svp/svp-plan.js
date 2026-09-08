@@ -768,14 +768,19 @@
             flag.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
                 + '<path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19'
                 + 'a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>';
-            if (n > 1) {
-                const cnt = document.createElement('span');
-                cnt.className = 'mat-flag-n';
-                cnt.textContent = n;
-                flag.appendChild(cnt);
-            }
-            flag.title = n > 1 ? n + ' Materialien \u2014 Zeile aufklappen'
-                               : 'Material \u2014 Zeile aufklappen';
+            /* Doc, 08.09.2026: auch die 1 wird geschrieben - eine Klammer ohne
+               Zahl sah aus wie "Anzahl unbekannt". Der Zaehler n kennt nur die
+               geparsten Eintraege; steht das Material als freier Text oder als
+               Rest hinter dem letzten Eintrag, ist n gleich 0, obwohl da genau
+               eine Sache liegt. Deshalb nie unter 1 - die Klammer erscheint
+               ohnehin nur, wenn hasMat gilt. */
+            const shown = n > 0 ? n : 1;
+            const cnt = document.createElement('span');
+            cnt.className = 'mat-flag-n';
+            cnt.textContent = shown;
+            flag.appendChild(cnt);
+            flag.title = shown > 1 ? shown + ' Materialien \u2014 Zeile aufklappen'
+                                   : 'ein Material \u2014 Zeile aufklappen';
             flag.addEventListener('click', function (e) {
                 e.stopPropagation();      /* sonst schliesst der Zeilenklick gleich wieder */
                 ref.openSubRow();
