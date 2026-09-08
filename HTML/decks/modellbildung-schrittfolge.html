@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wie ein Modell entsteht</title>
+<meta name="description" content="Vier Schritte, drei Eigenschaften — und warum jedes Modell etwas weglässt">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8; --codemuted:#7E8FB5;
+  --greetbg:#000028;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:24px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:grid;place-items:center}
+.pic img{max-width:100%;max-height:100%}
+
+/* --- table_top ---------------------------------------------------------- */
+.dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
+  font-family:Raleway,system-ui,sans-serif}
+.dtable th,.dtable td{padding:0 6px;text-align:left;overflow:hidden;white-space:nowrap;
+  border:.75px solid var(--stroke);line-height:1.85}
+.dtable th{background:var(--ink);color:#fff;font-family:Orbitron,Raleway,sans-serif;
+  font-weight:700;font-size:.75em;border-color:var(--ink)}
+.dtable td{background:#fff;color:var(--body)}
+.dtable td.b{font-weight:700;color:var(--ink)}
+.dtable td.m{font-family:Menlo,monospace}
+.dtable .ac{text-align:center}
+.dtable .ar{text-align:right}
+
+/* --- greeting (Auftaktfolie) --------------------------------------------- */
+.slide.greet{background-image:none;background-color:var(--greetbg)}
+.slide.greet::before{left:336px;width:552px;background:rgba(230,236,248,.14)}
+.slide.greet .foot{left:336px;color:var(--codemuted)}
+.slide.greet .pageno{color:var(--codemuted)}
+.greet-ground{position:absolute;inset:0;background:var(--greetbg)}
+.greet-pic{position:absolute;left:0;top:0;width:312px;height:540px;
+  object-fit:cover;display:block}
+.greet-credit{position:absolute;left:10px;bottom:8px;font-size:9px;
+  font-family:Raleway,sans-serif;color:rgba(255,255,255,.5);text-decoration:none;
+  letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.greet-credit:hover{color:rgba(255,255,255,.9);text-decoration:underline}
+.greet-lead{position:absolute;left:433px;top:168px;width:455px;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:46px;color:var(--orange);
+  line-height:1.05;letter-spacing:-.5px}
+.greet-quote{position:absolute;left:486px;top:368px;width:402px;text-align:center;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:17px;color:var(--orange);
+  line-height:1.2}
+.greet-author{position:absolute;left:596px;top:404px;width:292px;text-align:center;
+  font-size:11px;color:var(--codemuted);letter-spacing:.3px}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-e4747d778946.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/hot-air-balloons-1807521/" target="_blank" rel="noopener">sasint</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 12</p>
+      <h1>Wie ein Modell entsteht</h1>
+      <p class="sub">Vier Schritte, drei Eigenschaften — und warum jedes Modell etwas weglässt</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Warum überhaupt modellieren?</h2>
+      <p class="sub">Die Wirklichkeit passt in keinen Rechner</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Zu groß, zu bunt, zu unordentlich</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Kein System der Welt lässt sich <b>vollständig</b> beschreiben — es gibt immer ein Detail mehr</p>
+<p class="line l0 step" data-g="1">Ein <b>Modell</b> ist der handliche Ersatz: klein genug zum Denken, genau genug zum Arbeiten</p>
+<p class="line l0 step" data-g="2">Modellieren heißt deshalb vor allem: <b>entscheiden, was wegfällt</b></p>
+<p class="line l0 step" data-g="3">Und jede dieser Entscheidungen hat einen Grund — nämlich den <b>Zweck</b> des Modells</p>
+<p class="line l0 step" data-g="4">Wer den Zweck nicht kennt, kann ein Modell weder bauen noch <b>beurteilen</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Modelle, die ihr längst benutzt</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:150px"><col style="width:250px"><col style="width:230px"><col style="width:186px"></colgroup><tr><th>Modell</th><th>lässt weg</th><th>behält</th><th>Zweck</th></tr><tr><td class="b">Stadtplan</td><td>Häuserhöhe, Farbe, Menschen</td><td>Straßen, Namen, Lage</td><td>sich zurechtfinden</td></tr><tr><td class="b">Klassenliste</td><td>Aussehen, Charakter, Hobbys</td><td>Name, Klasse, Geburtsdatum</td><td>verwalten</td></tr><tr><td class="b">Wettermodell</td><td>jede einzelne Wolke</td><td>Druck, Temperatur im Raster</td><td>vorhersagen</td></tr><tr><td class="b">Flugsimulator</td><td>Absturzgefahr</td><td>Steuerverhalten, Instrumente</td><td>gefahrlos üben</td></tr></table><div class="body" style="top:266.375px;height:229.625px"><p class="line l0 step" data-g="0">Alle vier lassen <b>mehr</b> weg, als sie behalten — und sind genau deshalb brauchbar</p>
+<p class="line l0 step" data-g="1">Dasselbe Original trägt viele Modelle: eine Stadt als Plan, als Netz, als Datenbank</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Die Schrittfolge</h2>
+      <p class="sub">Abgrenzen, abstrahieren, modellieren, prüfen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Vier Schritte — und ein Rücksprung</h3><div class="rules"></div><div class="pic"><img src="img/pap-modellbildung.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Der letzte Schritt führt zurück: Modellbildung ist ein <b>Kreislauf</b>, keine Einbahnstraße</p>
+<p class="line l0 step" data-g="1">Geprüft wird <b>gegen den Zweck</b>, nicht gegen die Wirklichkeit — die verliert immer</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die vier Schritte im Einzelnen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:150px"><col style="width:216px"><col style="width:230px"><col style="width:220px"></colgroup><tr><th>Schritt</th><th>Leitfrage</th><th>Ergebnis</th><th>typischer Fehler</th></tr><tr><td class="b">Abgrenzen</td><td>Was gehört dazu?</td><td>Systemgrenze, Zweck</td><td style="background:#F2CFCB">alles hineinnehmen</td></tr><tr><td class="b">Abstrahieren</td><td>Was ist wesentlich?</td><td>Liste der Merkmale</td><td style="background:#F2CFCB">Details retten wollen</td></tr><tr><td class="b">Modellieren</td><td>Wie schreibe ich es auf?</td><td>Diagramm, Schema, Code</td><td style="background:#F2CFCB">gleich programmieren</td></tr><tr><td class="b">Prüfen</td><td>Trägt es den Zweck?</td><td>Freigabe oder Rücksprung</td><td style="background:#F2CFCB">gar nicht prüfen</td></tr></table><div class="body" style="top:266.375px;height:229.625px"><p class="line l0 step" data-g="0">Die Reihenfolge ist kein Ritual: wer <b>abstrahiert, bevor er abgegrenzt hat</b>, lässt das Falsche weg</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Schritt 1: Abgrenzen — die Systemgrenze</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Zwei Fragen, schriftlich beantwortet: <b>Wozu</b> brauche ich das Modell, und <b>für wen</b>?</p>
+<p class="line l0 step" data-g="1">Dann eine Linie ziehen: was ist <b>drinnen</b>, was ist <b>draußen</b>, was ist die <b>Schnittstelle</b>?</p>
+<p class="line l0 step" data-g="2">Beispiel Mensa: die Bestellung ist drinnen, die Buchhaltung der Stadt ist draußen</p>
+<p class="line l0 step" data-g="3">Draußen heißt nicht unwichtig — es heißt <b>nicht Gegenstand dieses Modells</b></p>
+<p class="line l0 step" data-g="4">Ohne Grenze wächst jedes Modell, bis es so unhandlich ist wie die Wirklichkeit</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Schritt 2: Abstrahieren — weglassen mit Absicht</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Abstrahieren</b> heißt: vom Einzelnen wegsehen und das Gemeinsame benennen</p>
+<p class="line l0 step" data-g="1">Aus „Anna, Ben, Chiara“ wird die <b>Klasse Schüler</b> mit den Merkmalen Name und Nummer</p>
+<p class="line l0 step" data-g="2">Die Probe: <b>Fehlt dem Zweck etwas?</b> Nur dann darf ein Merkmal zurück ins Modell</p>
+<p class="line l0 step" data-g="3">Ein Merkmal, das niemand je auswertet, ist Ballast — es kostet Pflege und Vertrauen</p>
+<p class="line l0 step" data-g="4">Weglassen ist eine <b>fachliche Entscheidung</b> und gehört deshalb dokumentiert</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Drei Eigenschaften</h2>
+      <p class="sub">Woran man ein Modell überhaupt erkennt</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Verkürzung, Abbildung, Pragmatik</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:12px"><colgroup><col style="width:190px"><col style="width:336px"><col style="width:290px"></colgroup><tr><th>Eigenschaft</th><th>besagt</th><th>am Stadtplan</th></tr><tr><td class="b">Abbildung</td><td>Es gibt ein Original, das abgebildet wird</td><td>die echte Stadt</td></tr><tr><td class="b">Verkürzung</td><td>Nicht alle Merkmale des Originals kommen mit</td><td>keine Häuserfarben</td></tr><tr><td class="b" style="background:#FBEBBF">Pragmatik</td><td style="background:#FBEBBF">Für wen, wozu und wann es gilt</td><td style="background:#FBEBBF">für Fußgänger, heute</td></tr></table><div class="body" style="top:248.8px;height:247.2px"><p class="line l0 step" data-g="0">Die drei Merkmale stammen aus Herbert Stachowiaks <b>Allgemeiner Modelltheorie</b> (1973)</p>
+<p class="line l0 step" data-g="1">Sie sind ein <b>Prüfraster</b>: fehlt eines, redet man nicht über ein Modell</p>
+<p class="line l0 step" data-g="2"><b>Pragmatik</b> ist das am häufigsten vergessene — und das, an dem Modelle scheitern</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Pragmatik ausbuchstabiert</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Für wen?</b> Ein Netzplan für Fahrgäste ist kein Netzplan für Gleisbauer</p>
+<p class="line l0 step" data-g="1"><b>Wozu?</b> Ein Modell zum Vorhersagen darf anderes weglassen als eines zum Erklären</p>
+<p class="line l0 step" data-g="2"><b>Wann?</b> Modelle veralten: Straßen ändern sich, Lehrpläne auch</p>
+<p class="line l0 step" data-g="3">Deshalb gehört zu jedem Modell ein Satz, der <b>Zweck, Adressat und Stand</b> nennt</p>
+<p class="line l0 step" data-g="4">Fehlt dieser Satz, streiten später zwei Leute über ein Modell, das jeder anders liest</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>Fallbeispiel</h2>
+      <p class="sub">Die Ausleihe in der Schulbibliothek</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Dieselben vier Schritte, an einem Fall</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:150px"><col style="width:666px"></colgroup><tr><th>Schritt</th><th>so haben wir entschieden</th></tr><tr><td class="b">Abgrenzen</td><td>Zweck: wissen, wer welches Buch hat. Drinnen: Buch, Schüler, Ausleihe. Draußen: Einkauf, Mahngebühren, Regalordnung</td></tr><tr><td class="b">Abstrahieren</td><td>Buch: Signatur, Titel, Autor. Schüler: Nummer, Name, Klasse. Ausleihe: wer, was, ab wann, bis wann</td></tr><tr><td class="b">Modellieren</td><td>drei Kästen mit ihren Merkmalen, dazwischen die Beziehung „leiht aus“ als Tabelle mit Datum</td></tr><tr><td class="b">Prüfen</td><td>Testfrage: Wer hat gerade Signatur B-114? Wer hat überzogen? Beides beantwortbar — das Modell trägt</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Nichts davon ist Programmieren — hier fällt noch keine Zeile Code</p>
+<p class="line l0 step" data-g="1">Erst wenn diese vier Zeilen stehen, lohnt sich der Rechner. Vorher rät man nur</p>
+<p class="line l0 step" data-g="2"><b>Draußen</b> heißt: kommt vielleicht später, aber nicht in dieses Modell</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was wir bewusst weggelassen haben</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Zustand des Buchs</b> — für die Frage „wer hat es?“ ohne Belang</p>
+<p class="line l0 step" data-g="1"><b>Telefonnummern</b> — hätte Folgen für den Datenschutz und keinen Nutzen für den Zweck</p>
+<p class="line l0 step" data-g="2"><b>Wie oft ein Buch schon gelesen wurde</b> — interessant, aber ein anderer Zweck, ein anderes Modell</p>
+<p class="line l0 step" data-g="3">Jede Streichung mit einem Satz begründet: das ist die <b>Dokumentation der Abstraktion</b></p>
+<p class="line l0 step" data-g="4">Ändert sich der Zweck, ändert sich das Modell — nicht umgekehrt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Ein Modell ist nie die Wirklichkeit, sondern eine Verkürzung für einen Zweck. Wer den Zweck nicht kennt, kann das Modell nicht beurteilen.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Modelle</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Herbert Stachowiak</b> schrieb 1973 die drei Merkmale auf, die bis heute jede Definition trägt</p>
+<p class="line l0 step" data-g="1"><b>Harry Beck</b> zeichnete 1933 den Londoner U-Bahn-Plan geografisch <b>falsch</b> — und dafür lesbar</p>
+<p class="line l0 step" data-g="2"><b>George Box</b>, Statistiker: „Alle Modelle sind falsch, aber manche sind nützlich“ (1976)</p>
+<p class="line l0 step" data-g="3">Das Wettermodell <b>ICON-D2</b> des Deutschen Wetterdienstes rechnet in Kacheln von rund <b>2 km</b> — eine einzelne Gewitterzelle ist kleiner als ein Kästchen</p>
+<p class="line l0 step" data-g="4">Die <b>Mercator-Karte</b> macht Grönland so groß wie Afrika. Sie ist trotzdem richtig — für ihren Zweck: Kurse als gerade Linien</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: eine Miniwelt in vier Schritten</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Zu zweit <b>eine</b> Miniwelt wählen: Mensa, Vertretungsplan oder Sporttag-Anmeldung</p>
+<p class="line l0 step" data-g="1"><b>Abgrenzen</b>: Zweck und Adressat in einem Satz, dann drinnen, draußen und Schnittstelle</p>
+<p class="line l0 step" data-g="2"><b>Abstrahieren</b>: je Gegenstand höchstens fünf Merkmale — zu jedem gestrichenen ein Grund</p>
+<p class="line l0 step" data-g="3"><b>Modellieren</b>: Kästen mit Merkmalen, Beziehungen beschriften. Papier reicht</p>
+<p class="line l0 step" data-g="4"><b>Prüfen</b>: zwei Testfragen beantworten und die drei Eigenschaften am eigenen Modell nachweisen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script>
+// time-aware greeting - the browser knows the real clock, a .pptx never does
+(function(){
+  var h = new Date().getHours();
+  var t = h < 5 ? 'Good night!' : h < 12 ? 'Good morning!' :
+          h < 18 ? 'Good afternoon!' : h < 22 ? 'Good evening!' : 'Good night!';
+  var el = document.getElementById('greet-text');
+  if (el) el.textContent = t;
+})();
+
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  if (e.target.closest('#hud') || e.target.closest('.labbar a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+}
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>
