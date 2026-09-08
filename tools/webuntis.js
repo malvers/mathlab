@@ -273,6 +273,7 @@ function extractFunction(src, name) {
 }
 
 // The browser's own text builders, evaluated straight out of svp-plan.js.
+// markPlain   - strips the inline marks (<b>, <i>, <c1> ...) that untisPlain drops first
 // untisPlain  - LaTeX to readable plain text (WebUntis cannot render $...$)
 // untisFit    - fit to 250 chars in three stages (full / abbreviated / drop whole steps)
 // untisSpread - one step per lesson, per learning group, "Festigung: ..." for the rest
@@ -281,16 +282,21 @@ let browserFns = null;
 function browser() {
   if (browserFns) return browserFns;
   const src = fs.readFileSync(ABBREV_SRC, 'utf8');
-  const names = ['untisAbbrev', 'untisPlain', 'untisFit', 'untisSpread', 'untisBlocks'];
+  const names = ['markPlain', 'untisAbbrev', 'untisPlain', 'untisFit', 'untisSpread', 'untisBlocks'];
   const parts = names.map(n => {
     const f = extractFunction(src, n);
     if (!f) throw new Error(`${n}() nicht in ${path.relative(REPO, ABBREV_SRC)} gefunden - Namen geaendert?`);
     return f;
   });
   const table = extractLiteral(src, 'SVP_ABBREV', '[', ']') || [];
+  // markPlain() reads the tag regex next to it; lifted verbatim so the CLI recognises exactly
+  // the tags the browser does (without it every plan call died: "markPlain is not defined").
+  const markRe = (src.match(/const MARK_RE = (\/[^\n]*?\/[a-z]*);/) || [])[1];
+  if (!markRe) throw new Error(`MARK_RE nicht in ${path.relative(REPO, ABBREV_SRC)} gefunden - Namen geaendert?`);
   browserFns = new Function('SVP_ABBREV', 'UNTIS_MAX', `
     const window = { SVP_ABBREV };
     let abbrevRules = null;
+    const MARK_RE = ${markRe};
     ${parts.join('\n')}
     return { untisPlain, untisFit, untisSpread, untisBlocks };
   `)(table, TOPIC_MAX);
@@ -490,9 +496,10 @@ async function proposals(lessons, all, pages, plans) {
   return out;
 }
 
-// Regenerate the <plan>.untis.json files the SVP badges read. Runs as its own
-// command and automatically after 'plan' wrote something, so the badges never
-// show a state older than the last write.
+// Regenerate the <plan>.untis.json files the SVP badges read - the FULL rebuild, one GET per
+// lesson of the school year (768 in 2026/27, about two and a half minutes). Runs as its own
+// command, i.e. from the 06:00/12:30 LaunchAgent, and also catches hand edits and deletions
+// made in WebUntis itself. After a write, `plan` only patches what it wrote: patchStatus().
 async function runStatus(session) {
   const pages = loadMap();
   const years = await rpc('getSchoolyears');
@@ -573,6 +580,55 @@ async function runStatus(session) {
     console.log(`${path.relative(REPO, mapOut)}: ${mapIndex.length} Planseiten`);
   }
   if (!Object.keys(byPage).length) console.log('Keine Stunde passt zu einer Planseite - webuntis-svp-map.json pruefen.');
+}
+
+// After a write only the lessons just written have changed, so the badge files get exactly
+// those entries patched in instead of a full re-read (Doc, 08.09.2026: "liest er alle 768
+// Stunden zurueck ... warum?" - the button took two and a half minutes for four lessons).
+// `entries` = [{ page, l, text }] where `text` is what was READ BACK, not what was sent: the
+// files must show what WebUntis really holds. Whatever this cannot place - a missing file, a
+// lesson that is not in it (moved since the last full run) - hands over to runStatus(), so the
+// files are never left half-right. WebUntis mirrors a topic across gapless periods; a mirrored
+// neighbour that was not itself written stays as it was until the next full run.
+async function patchStatus(session, entries) {
+  const byPage = {};
+  for (const e of entries) (byPage[e.page] ||= []).push(e);
+  let stale = null;
+  for (const [page, list] of Object.entries(byPage)) {
+    const out = path.join(REPO, page.replace(/\.html$/, '.untis.json'));
+    let data;
+    try { data = JSON.parse(fs.readFileSync(out, 'utf8')); } catch (e) { stale = `${path.relative(REPO, out)} fehlt`; break; }
+    for (const e of list) {
+      const kw = String(isoWeek(parseYmd(e.l.date)));
+      const klasse = e.l.klassen.join(',');
+      const hit = ((data.weeks || {})[kw] || []).find(x => x.date === e.l.date && x.start === e.l.start && x.klasse === klasse);
+      if (!hit) { stale = `${e.l.date} ${e.l.start} ${klasse} steht nicht in ${path.relative(REPO, out)}`; break; }
+      hit.written = !!(e.text || '').trim();
+      hit.text = e.text || '';
+    }
+    if (stale) break;
+    data.generated = new Date().toISOString();
+    fs.writeFileSync(out, JSON.stringify(data, null, 1));
+    const flat = Object.values(data.weeks).flat();
+    console.log(`${path.relative(REPO, out)}: ${list.length} Stunde${list.length === 1 ? '' : 'n'} nachgetragen, ${flat.filter(x => x.written).length}/${flat.length} eingetragen`);
+  }
+  if (stale) {
+    console.log(`${stale} - Badge-Daten werden komplett neu gebaut.`);
+    await runStatus(session);
+    return;
+  }
+  // The short list stundenplan.html reads: add what now carries text, drop what lost it.
+  const outW = path.join(REPO, 'HTML', 'svp', 'untis-written.json');
+  let written = [];
+  try { written = JSON.parse(fs.readFileSync(outW, 'utf8')).written || []; } catch (e) { /* starts empty */ }
+  const set = new Set(written);
+  for (const e of entries) {
+    const key = `${e.l.date}|${e.l.start}|${e.l.klassen.join(',')}`;
+    if ((e.text || '').trim()) set.add(key); else set.delete(key);
+  }
+  written = [...set].sort();
+  fs.writeFileSync(outW, JSON.stringify({ generated: new Date().toISOString(), written }, null, 1));
+  console.log(`${path.relative(REPO, outW)}: ${written.length} Stunden mit Stoff`);
 }
 
 async function main() {
@@ -907,16 +963,17 @@ async function main() {
       }
       // Writing: report AFTER the fact, otherwise the caller shows the state from before its own
       // click. Every entry is read back; only a confirmed one counts.
-      let done = 0; const bad = [];
+      let done = 0; const bad = [], patched = [];
       for (const p of open) {
         const label = `${p.l.date.slice(6)}.${p.l.date.slice(4, 6)}. ${p.l.start} ${p.l.klassen.join(',')}`;
         try {
           await writeTopic(p.l.ttId, p.text);
           const back = (await readTopics([p.l.ttId]))[String(p.l.ttId)] || '';
+          patched.push({ page: p.page, l: p.l, text: back });
           if (back.trim() === p.text.trim()) done++; else bad.push(label);
         } catch (e) { bad.push(`${label} (${e.message})`); }
       }
-      await runStatus(session);
+      if (patched.length) await patchStatus(session, patched);
       console.log('KLASSENBUCH: ' + `${done} Stunde${done === 1 ? '' : 'n'} eingetragen`
         + (bad.length ? ` \u00b7 ${bad.length} FEHLGESCHLAGEN: ${bad.join(', ')}` : ''));
       process.exitCode = bad.length ? 1 : 0;
@@ -932,19 +989,19 @@ async function main() {
       say(`    waer: ${c.text}`);
     }
 
-    let written = 0;
+    const patched = [];
     for (const p of open) {
       const label = `${p.l.date} ${p.l.start} ${p.l.subject} ${p.l.klassen.join(',')}`;
       if (dry) { say(`${label}: WUERDE schreiben (${p.why}) -> ${p.text}`); continue; }
       await writeTopic(p.l.ttId, p.text);
       const back = (await readTopics([p.l.ttId]))[String(p.l.ttId)] || '';
       const ok = back.trim() === p.text.trim();
-      if (ok) written++;
+      patched.push({ page: p.page, l: p.l, text: back });
       say(`${label}: ${ok ? 'eingetragen' : 'FEHLER, Rueckgelesenes weicht ab'} -> ${back}`);
     }
     if (!open.length) say('Nichts offen - alles steht schon im Klassenbuch.');
     if (unmapped.size) say(`Ohne Planseite (in ${path.basename(MAP_FILE)} nachtragen): ${[...unmapped].join(', ')}`);
-    if (written) { say('Badge-Daten aktualisieren:'); await runStatus(session); }
+    if (patched.length) { say('Badge-Daten aktualisieren:'); await patchStatus(session, patched); }
     return;
   }
 
