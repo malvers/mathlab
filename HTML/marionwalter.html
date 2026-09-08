@@ -94,6 +94,8 @@
 
         .formula-box .katex-display { margin: 0; }
 
+        #mw-proof-formula .katex { font-size: 0.86em; }
+
         #canvas { touch-action: none; }
     </style>
 </head>
@@ -185,7 +187,11 @@
             fill: true,
             cells: false,
             hex: [],
-            cellList: null
+            cellList: null,
+            mode: 'labor',        // labor | beweis
+            step: 0,              // proof: current step, 0 .. PROOF_LAST
+            showSolution: false,  // proof: reveal the step left as an exercise
+            free: null            // proof: the triangle we came from
         };
 
         const NAMES = ['A', 'B', 'C'];
@@ -382,6 +388,102 @@
             return { p: p / g, q: q / g, value: p / q };
         }
 
+        /* ------------------------------------------------------- Proof mode data */
+        // The proof runs on the normalised triangle A=(0,0), B=(1,0), C=(0,1).
+        // NORM is where that triangle sits on the canvas - a right angle at A,
+        // legs of equal length, so the drawing matches the coordinates.
+        const NORM = [{ x: 0.14, y: 0.86 }, { x: 0.86, y: 0.86 }, { x: 0.14, y: 0.14 }];
+        const PROOF_LAST = 7;
+
+        // The coach box floats over the top left of the canvas - exactly where the
+        // corner C of the normalised triangle would sit. So the triangle is placed
+        // into the largest free square: either right of the box or below it,
+        // whichever is roomier. Measured every time, so it survives every resize.
+        function normTriangle() {
+            const rect = container.getBoundingClientRect();
+            const pad = 60;                       // room for the coordinate labels
+            const box = document.getElementById('math-coach-box');
+            const b = (box && box.classList.contains('visible') && box.offsetWidth)
+                ? box.getBoundingClientRect() : null;
+            const far = toUnit(rect.width - pad, rect.height - pad);
+            const near = toUnit(pad, pad);
+            const cand = [];
+            const push = (x0, y0) => {
+                const side = Math.min(far.x - x0, far.y - y0);
+                if (side > 0.08) cand.push({ x0, y0, side });
+            };
+            if (b) {
+                push(toUnit(b.right - rect.left + pad, 0).x, near.y);   // right of the box
+                push(near.x, toUnit(0, b.bottom - rect.top + pad).y);   // below the box
+            } else {
+                push(near.x, near.y);
+            }
+            if (!cand.length) return NORM.map(p => ({ x: p.x, y: p.y }));
+            const best = cand.sort((p, q) => q.side - p.side)[0];
+            return [
+                { x: best.x0, y: best.y0 + best.side },
+                { x: best.x0 + best.side, y: best.y0 + best.side },
+                { x: best.x0, y: best.y0 }
+            ];
+        }
+
+        // A point of the normalised triangle, carried into unit coordinates:
+        // A + x*(B-A) + y*(C-A). Works for every triangle, so the overlays stay
+        // correct while the triangle is still morphing into place.
+        function fromMath(x, y) {
+            const A = S.tri[0], B = S.tri[1], C = S.tri[2];
+            return {
+                x: A.x + x * (B.x - A.x) + y * (C.x - A.x),
+                y: A.y + x * (B.y - A.y) + y * (C.y - A.y)
+            };
+        }
+
+        const proofOn = () => S.mode === 'beweis';
+
+        // The six division points of the trisected unit triangle
+        const DIV6 = [
+            { x: 1 / 3, y: 0, lab: '(1/3, 0)' }, { x: 2 / 3, y: 0, lab: '(2/3, 0)' },
+            { x: 2 / 3, y: 1 / 3, lab: '(2/3, 1/3)' }, { x: 1 / 3, y: 2 / 3, lab: '(1/3, 2/3)' },
+            { x: 0, y: 2 / 3, lab: '(0, 2/3)' }, { x: 0, y: 1 / 3, lab: '(0, 1/3)' }
+        ];
+
+        // The six hexagon corners, counterclockwise. They fall into two families:
+        // the quarters (fam 0) and the fifths (fam 1).
+        const HEX6 = [
+            { x: 1 / 4, y: 1 / 4, lab: '(1/4, 1/4)', fam: 0 },
+            { x: 2 / 5, y: 1 / 5, lab: '(2/5, 1/5)', fam: 1 },
+            { x: 1 / 2, y: 1 / 4, lab: '(1/2, 1/4)', fam: 0 },
+            { x: 2 / 5, y: 2 / 5, lab: '(2/5, 2/5)', fam: 1 },
+            { x: 1 / 4, y: 1 / 2, lab: '(1/4, 1/2)', fam: 0 },
+            { x: 1 / 5, y: 2 / 5, lab: '(1/5, 2/5)', fam: 1 }
+        ];
+
+        // Shoelace contribution of every edge, x_i*y_(i+1) - x_(i+1)*y_i. Two of
+        // them vanish: those edges lie on cevians through the origin A.
+        const SHOELACE = [
+            { v: -1 / 20, lab: '-1/20' }, { v: 0, lab: '0' }, { v: 1 / 10, lab: '+1/10' },
+            { v: 1 / 10, lab: '+1/10' }, { v: 0, lab: '0' }, { v: -1 / 20, lab: '-1/20' }
+        ];
+
+        // The exercise in the last step: sides divided at 1/4 and 3/4
+        const HEX6_N4 = [
+            { x: 1 / 5, y: 1 / 5, lab: '(1/5, 1/5)', fam: 0 },
+            { x: 3 / 7, y: 1 / 7, lab: '(3/7, 1/7)', fam: 1 },
+            { x: 3 / 5, y: 1 / 5, lab: '(3/5, 1/5)', fam: 0 },
+            { x: 3 / 7, y: 3 / 7, lab: '(3/7, 3/7)', fam: 1 },
+            { x: 1 / 5, y: 3 / 5, lab: '(1/5, 3/5)', fam: 0 },
+            { x: 1 / 7, y: 3 / 7, lab: '(1/7, 3/7)', fam: 1 }
+        ];
+
+        // cevians() hands them back in a fixed order: 0,1 from C onto AB,
+        // 2,3 from A onto BC, 4,5 from B onto CA.
+        function proofHotCevians() {
+            if (!proofOn()) return null;
+            if (S.step === 2) return [0, 1, 2, 3, 4, 5];
+            if (S.step === 3) return [0, 5];          // C -> (1/3,0) and B -> (0,1/3)
+            return null;
+        }
+
         /* --------------------------------------------------------------- Drawing */
         let cx = 0, cy = 0, SC = 1;
 
@@ -427,7 +529,7 @@
                 });
             }
 
-            if (S.fill && S.hex.length >= 3) {
+            if (S.fill && S.hex.length >= 3 && !(proofOn() && S.step === 5)) {
                 path(S.hex);
                 ctx.fillStyle = S.cells ? COL.hexOn : COL.hex;   // stay readable on top of the cells
                 ctx.fill();
@@ -437,14 +539,16 @@
             }
 
             if (S.cevians) {
-                ctx.strokeStyle = COL.cev;
-                ctx.lineWidth = 1.3;
-                ctx.beginPath();
-                cevians().forEach(c => {
+                const hot = proofHotCevians();
+                cevians().forEach((c, i) => {
+                    const lit = !hot || hot.indexOf(i) >= 0;
+                    ctx.strokeStyle = !hot ? COL.cev : (lit ? COL.hexLine : 'rgba(121, 158, 49, 0.20)');
+                    ctx.lineWidth = (hot && lit) ? 2.6 : 1.3;
+                    ctx.beginPath();
                     ctx.moveTo(sx(c.a), sy(c.a));
                     ctx.lineTo(sx(c.b), sy(c.b));
+                    ctx.stroke();
                 });
-                ctx.stroke();
             }
 
             path(S.tri);
@@ -462,7 +566,7 @@
                         ctx.lineWidth = 1.2;
                         ctx.strokeStyle = 'rgba(255,255,255,0.8)';
                         ctx.stroke();
-                        if (S.labels) {
+                        if (S.labels && !(proofOn() && S.step >= 1)) {
                             const G = centroid(S.tri);
                             const dx = sx(p) - sx(G), dy = sy(p) - sy(G);
                             const L = Math.hypot(dx, dy) || 1;
@@ -486,7 +590,7 @@
                 ctx.lineWidth = 1.6;
                 ctx.strokeStyle = 'rgba(255,255,255,0.85)';
                 ctx.stroke();
-                if (S.labels) {
+                if (S.labels && !(proofOn() && S.step >= 1)) {
                     const G = centroid(S.tri);
                     const dx = sx(p) - sx(G), dy = sy(p) - sy(G);
                     const L = Math.hypot(dx, dy) || 1;
@@ -496,6 +600,115 @@
                     ctx.textBaseline = 'middle';
                     ctx.fillText(NAMES[i], sx(p) + dx / L * 22, sy(p) + dy / L * 22);
                 }
+            }
+
+            if (proofOn()) drawProof();
+        }
+
+        /* --------------------------------------------------- Proof mode drawing */
+        // Text with a dark halo - the overlays sit on top of filled cells
+        function tag(p, text, color, size, off) {
+            const G = centroid(S.tri);
+            const dx = sx(p) - sx(G), dy = sy(p) - sy(G);
+            const L = Math.hypot(dx, dy) || 1;
+            const tx = sx(p) + dx / L * off, ty = sy(p) + dy / L * off;
+            ctx.font = size + 'px Orbitron, monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.lineWidth = 3.5;
+            ctx.strokeStyle = 'rgba(6, 14, 30, 0.85)';
+            ctx.strokeText(text, tx, ty);
+            ctx.fillStyle = color;
+            ctx.fillText(text, tx, ty);
+        }
+
+        function proofDot(p, r, fill) {
+            ctx.beginPath();
+            ctx.arc(sx(p), sy(p), r, 0, Math.PI * 2);
+            ctx.fillStyle = fill;
+            ctx.fill();
+            ctx.lineWidth = 1.4;
+            ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+            ctx.stroke();
+        }
+
+        const FAM = ['#f5c242', 'rgb(121, 158, 49)'];
+
+        function drawProof() {
+            const st = S.step;
+
+            // Where we came from - that faint outline is the affine map at work
+            if (st === 1 && S.free) {
+                ctx.save();
+                ctx.setLineDash([6, 5]);
+                ctx.strokeStyle = 'rgba(157, 232, 255, 0.35)';
+                ctx.lineWidth = 1.4;
+                path(S.free);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // The corners carry their coordinates now - one label, not two
+            if (st >= 1 && S.labels) {
+                [[0, 0, 'A (0, 0)'], [1, 0, 'B (1, 0)'], [0, 1, 'C (0, 1)']].forEach(c => {
+                    tag(fromMath(c[0], c[1]), c[2], '#9de8ff', 12, 34);
+                });
+            }
+
+            // Step 3 only needs the two endpoints its two lines run to
+            if (st === 2 || st === 3) {
+                const show = (st === 2) ? DIV6 : [DIV6[0], DIV6[5]];
+                show.forEach(d => tag(fromMath(d.x, d.y), d.lab, '#cfe0f5', 11, 28));
+            }
+
+            // The worked example: two lines, one crossing
+            if (st === 3) {
+                const p = fromMath(1 / 4, 1 / 4);
+                proofDot(p, 8, '#f5c242');
+                tag(p, '(1/4, 1/4)', '#f5c242', 12, 26);
+            }
+
+            // The shoelace fan: one triangle from A to every edge, signed
+            if (st === 5) {
+                const A = fromMath(0, 0);
+                for (let i = 0; i < 6; i++) {
+                    const v1 = HEX6[i], v2 = HEX6[(i + 1) % 6], t = SHOELACE[i];
+                    const poly = [A, fromMath(v1.x, v1.y), fromMath(v2.x, v2.y)];
+                    path(poly);
+                    ctx.fillStyle = t.v > 0 ? 'rgba(121, 158, 49, 0.34)'
+                        : t.v < 0 ? 'rgba(176, 36, 24, 0.34)' : 'rgba(157, 232, 255, 0.10)';
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(10, 20, 40, 0.45)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                    const m = centroid(poly);
+                    ctx.font = '11px Orbitron, monospace';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.lineWidth = 3.5;
+                    ctx.strokeStyle = 'rgba(6, 14, 30, 0.85)';
+                    ctx.strokeText(t.lab, sx(m), sy(m));
+                    ctx.fillStyle = t.v === 0 ? '#9fb4d6' : '#ffffff';
+                    ctx.fillText(t.lab, sx(m), sy(m));
+                }
+            }
+
+            // The six corners
+            if (st >= 4 && st <= 6) {
+                HEX6.forEach((v, i) => {
+                    const p = fromMath(v.x, v.y);
+                    proofDot(p, 6, FAM[v.fam]);
+                    if (st === 4) tag(p, v.lab, FAM[v.fam], 11, 26);
+                    if (st === 5) tag(p, 'V' + (i + 1), '#cfe0f5', 11, 20);
+                });
+            }
+
+            if (st === 7 && S.showSolution) {
+                HEX6_N4.forEach(v => {
+                    const p = fromMath(v.x, v.y);
+                    proofDot(p, 6, FAM[v.fam]);
+                    tag(p, v.lab, FAM[v.fam], 11, 26);
+                });
             }
         }
 
@@ -632,7 +845,10 @@
             return best;
         }
 
+        const dragAllowed = () => !proofOn() || S.step === 0;
+
         canvas.addEventListener('pointerdown', ev => {
+            if (!dragAllowed()) return;
             const i = nearestVertex(ev);
             if (i < 0) return;
             S.drag = i;
@@ -642,7 +858,7 @@
 
         canvas.addEventListener('pointermove', ev => {
             if (S.drag < 0) {
-                canvas.style.cursor = nearestVertex(ev) >= 0 ? 'grab' : 'default';
+                canvas.style.cursor = (dragAllowed() && nearestVertex(ev) >= 0) ? 'grab' : 'default';
                 return;
             }
             canvas.style.cursor = 'grabbing';
@@ -653,6 +869,7 @@
             const test = S.tri.map((p, i) => i === S.drag ? u : p);
             if (polyArea(test) < 0.02) return;   // keep the triangle non degenerate
             S.tri[S.drag] = u;
+            if (proofOn()) S.free = S.tri.map(p => ({ x: p.x, y: p.y }));
             rebuild();
         });
 
@@ -663,6 +880,16 @@
         window.addEventListener('keydown', ev => {
             if (ev.metaKey || ev.ctrlKey || ev.altKey) return;   // do not swallow Cmd-Shift-R
             const key = ev.key.toLowerCase();
+            if (key === 'p') { setMode(proofOn() ? 'labor' : 'beweis'); return; }
+            if (proofOn()) {
+                if (key === 'arrowright') { gotoStep(S.step + 1); ev.preventDefault(); }
+                else if (key === 'arrowleft') { gotoStep(S.step - 1); ev.preventDefault(); }
+                else if (key === 'f') { S.cells = !S.cells; syncBoxes(); rebuild(); }
+                else if (key === 'h') { S.fill = !S.fill; syncBoxes(); draw(); }
+                else if (key === 'b') { S.labels = !S.labels; syncBoxes(); draw(); }
+                else if (key === 'c') { S.cevians = !S.cevians; syncBoxes(); draw(); }
+                return;
+            }
             if (key === 'arrowup') { setDivision(S.n + 1, S.k); ev.preventDefault(); }
             else if (key === 'arrowdown') { setDivision(S.n - 1, S.k); ev.preventDefault(); }
             else if (key === 'arrowright') { setDivision(S.n, S.k + 1); ev.preventDefault(); }
@@ -676,6 +903,159 @@
             else if (key === 'b') { S.labels = !S.labels; syncBoxes(); draw(); }
             else if (key === 'c') { S.cevians = !S.cevians; syncBoxes(); draw(); }
         });
+
+        /* ------------------------------------------------------- Proof mode logic */
+        /* Step texts. German is the fallback, translations live in marion.proof_* */
+        const PROOF_DE = [
+            {
+                short: 'BEHAUPTUNG',
+                title: 'VORAUSSETZUNG & BEHAUPTUNG',
+                body: 'Ein <b>beliebiges</b> Dreieck ABC. Jede Seite wird gedrittelt, und jeder der sechs Teilungspunkte wird mit der gegenüberliegenden Ecke verbunden. Die sechs Cevianen umschließen ein Sechseck.<br><br><b>Behauptung:</b> Dessen Fläche ist immer genau <b>ein Zehntel</b> der Dreiecksfläche.<br><br>Zieh in diesem Schritt ruhig an den Ecken — die Messung links rührt sich nicht.'
+            },
+            {
+                short: 'AFFIN NORMIEREN',
+                title: 'SCHRITT 1 • AFFIN NORMIEREN',
+                body: 'Eine affine Abbildung multipliziert <b>alle</b> Flächen mit demselben Faktor |det|. Flächen<b>verhältnisse</b> bleiben dabei also unverändert. Und weil affine Abbildungen Teilverhältnisse erhalten, werden Drittelungspunkte wieder auf Drittelungspunkte abgebildet — die ganze Konstruktion wandert mit.<br><br>Je zwei Dreiecke lassen sich affin aufeinander abbilden. Wir dürfen uns also das bequemste aussuchen: <b>A = (0,0), B = (1,0), C = (0,1)</b>. Was dort gilt, gilt überall.'
+            },
+            {
+                short: 'SECHS GERADEN',
+                title: 'SCHRITT 2 • DIE SECHS GERADEN',
+                body: 'Jetzt sind die Teilungspunkte einfach abzulesen: auf AB die Punkte (1/3, 0) und (2/3, 0), auf CA die Punkte (0, 1/3) und (0, 2/3), auf BC die Punkte (2/3, 1/3) und (1/3, 2/3).<br><br>Jeder wird mit der Gegenecke verbunden. Sechs Geraden, jede mit einer Gleichung, die man in einer Zeile hinschreibt.'
+            },
+            {
+                short: 'EIN ECKPUNKT',
+                title: 'SCHRITT 3 • EIN ECKPUNKT',
+                body: 'Zwei der sechs Geraden herausgegriffen: die von <b>B</b> nach (0, 1/3) und die von <b>C</b> nach (1/3, 0). Gleichsetzen:<br><br>(1 − x)/3 = 1 − 3x &nbsp;⟹&nbsp; 1 − x = 3 − 9x &nbsp;⟹&nbsp; 8x = 2 &nbsp;⟹&nbsp; <b>x = 1/4</b>,<br>und damit y = (1 − 1/4)/3 = <b>1/4</b>.<br><br>Der Schnittpunkt <b>(1/4, 1/4)</b> ist eine Ecke des Sechsecks. Die anderen fünf gehen genauso — lineare Gleichungen, mehr passiert nicht.'
+            },
+            {
+                short: 'ALLE SECHS',
+                title: 'SCHRITT 4 • ALLE SECHS ECKEN',
+                body: 'Dieselbe Rechnung fünfmal mehr. Die sechs Ecken fallen in zwei Familien zu je dreien, und alle Zahlen bleiben klein:<br><br><b>Viertel:</b> (1/4, 1/4), (1/2, 1/4), (1/4, 1/2)<br><b>Fünftel:</b> (2/5, 1/5), (2/5, 2/5), (1/5, 2/5)<br><br>Die Familien sind kein Zufall: die Konstruktion überlebt das zyklische Vertauschen von A, B, C, und diese Vertauschung schiebt jede Familie in sich herum. Im gleichseitigen Dreieck sieht man es als Drehung um 120°.'
+            },
+            {
+                short: 'SCHNÜRSENKEL',
+                title: 'SCHRITT 5 • SCHNÜRSENKELFORMEL',
+                body: 'Ein Vieleck mit bekannten Ecken hat eine berechenbare Fläche: die <b>Schnürsenkelformel</b> addiert die vorzeichenbehafteten Flächen der Dreiecke vom Ursprung <b>A</b> zu jeder Kante — hier eingefärbt, grün positiv, rot negativ.<br><br>Zwei der sechs Beiträge sind <b>null</b>: diese Kanten liegen auf Cevianen durch A, das Dreieck fällt in sich zusammen. Übrig bleiben vier:<br><br>−1/20 + 0 + 1/10 + 1/10 + 0 − 1/20 = <b>1/10</b> &nbsp;⟹&nbsp; Fläche = <b>1/20</b>.'
+            },
+            {
+                short: 'q.e.d.',
+                title: 'q.e.d.',
+                body: 'Das normierte Dreieck hat die Fläche 1/2, das Sechseck die Fläche 1/20. Also ist das Verhältnis<br><br>(1/20) : (1/2) = <b>1/10</b>.<br><br>Und weil Flächenverhältnisse affin invariant sind (Schritt 1), gilt derselbe Zehntel in <b>jedem</b> Dreieck — gleichseitig, spitz, stumpf, ganz egal. <b>q.e.d.</b>'
+            },
+            {
+                short: 'JETZT DU',
+                title: 'SCHRITT 7 • JETZT DU',
+                body: 'Die Methode trägt weiter. Statt zu dritteln teilen wir jede Seite jetzt bei <b>1/4</b> und <b>3/4</b> — so ist es hier gezeichnet.<br><br><b>Aufgabe:</b> Bestimme die sechs Ecken und daraus die Fläche des Sechsecks. Welcher Bruchteil der Dreiecksfläche bleibt übrig?<br><br>Tipp: Es gibt wieder zwei Familien zu je dreien, und die Nenner sind diesmal 5 und 7.',
+                solution: 'Die sechs Ecken sind (1/5, 1/5), (3/5, 1/5), (1/5, 3/5) sowie (3/7, 1/7), (3/7, 3/7), (1/7, 3/7). Die Schnürsenkelformel liefert die Fläche <b>4/35</b>, das Verhältnis also <b>8/35</b> ≈ 0,229 — mehr als das Doppelte des Zehntels.<br><br>Allgemein steht die Formel im Labor-Modus in der Karte „Verallgemeinerung“: 2(n − 2k)² / ((2n − k)(n + k)). Für n = 3, k = 1 kommt 2·1/(5·4) = 1/10 heraus — das ist der Fall, den Marion Walter berühmt gemacht hat.'
+            }
+        ];
+
+        const PROOF_TEX = [
+            '\\frac{A_{6}}{A_{\\triangle}} \\overset{?}{=} \\frac{1}{10}',
+            '\\begin{aligned} A&=(0,0) \\\\ B&=(1,0) \\\\ C&=(0,1) \\\\ A_{\\triangle}&=\\tfrac12 \\end{aligned}',
+            '\\begin{aligned} y&=\\tfrac{x}{2}, & y&=2x \\\\ y&=\\tfrac{2}{3}(1-x), & y&=\\tfrac{1}{3}(1-x) \\\\ y&=1-3x, & y&=1-\\tfrac{3}{2}x \\end{aligned}',
+            '\\begin{aligned} \\tfrac13(1-x) &= 1-3x \\\\ 8x &= 2 \\\\ x=\\tfrac14, \; y&=\\tfrac14 \\end{aligned}',
+            '\\begin{aligned} &\\left(\\tfrac14,\\tfrac14\\right),\\left(\\tfrac12,\\tfrac14\\right),\\left(\\tfrac14,\\tfrac12\\right) \\\\ &\\left(\\tfrac25,\\tfrac15\\right),\\left(\\tfrac25,\\tfrac25\\right),\\left(\\tfrac15,\\tfrac25\\right) \\end{aligned}',
+            '\\begin{aligned} 2A_{6} &= \\textstyle\\sum_i \\left(x_i y_{i+1} - x_{i+1} y_i\\right) \\\\ &= -\\tfrac1{20}+\\tfrac1{10}+\\tfrac1{10}-\\tfrac1{20} \\\\ &= \\tfrac1{10} \\end{aligned}',
+            '\\frac{A_{6}}{A_{\\triangle}} = \\frac{1/20}{1/2} = \\frac{1}{10} \;\\square',
+            '\\frac{A_{6}}{A_{\\triangle}} \\overset{?}{=} \;?\\qquad \\tfrac{k}{n}=\\tfrac14'
+        ];
+
+        const proofText = (i, field) => T('proof_' + field + '_' + i, PROOF_DE[i][field]);
+
+        /* The triangle glides into its normalised position - that glide is the
+           affine map of step 1, so it is worth showing instead of jumping. */
+        let morphAnim = null;
+
+        function morphTo(target) {
+            if (morphAnim) { cancelAnimationFrame(morphAnim); morphAnim = null; }
+            const from = S.tri.map(p => ({ x: p.x, y: p.y }));
+            const done = from.every((p, i) => Math.hypot(p.x - target[i].x, p.y - target[i].y) < 1e-4);
+            if (done) { rebuild(); return; }
+            const t0 = performance.now();
+            const ease = u => u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+            const frame = now => {
+                const u = Math.min(1, (now - t0) / 650), e = ease(u);
+                S.tri = from.map((p, i) => ({
+                    x: p.x + (target[i].x - p.x) * e,
+                    y: p.y + (target[i].y - p.y) * e
+                }));
+                rebuild();
+                morphAnim = (u < 1) ? requestAnimationFrame(frame) : null;
+            };
+            morphAnim = requestAnimationFrame(frame);
+        }
+
+        // Steps 1 to 6 live on the normalised triangle with the trisection,
+        // step 7 opens the general case with the division at 1/4.
+        function applyProofState() {
+            if (!proofOn()) return;
+            S.n = (S.step === PROOF_LAST) ? 4 : 3;
+            S.k = 1;
+            syncSliders();
+            morphTo(S.step >= 1 ? normTriangle() : (S.free || S.tri));
+        }
+
+        function gotoStep(i) {
+            const next = Math.max(0, Math.min(PROOF_LAST, i));
+            if (next === S.step) return;
+            S.step = next;
+            if (next !== PROOF_LAST) S.showSolution = false;
+            applyProofState();
+            buildUI();
+            draw();
+        }
+
+        function setMode(m) {
+            if (m === S.mode) return;
+            if (m === 'beweis') {
+                S.free = S.tri.map(p => ({ x: p.x, y: p.y }));
+                S.mode = 'beweis';
+                S.step = 0;
+                S.showSolution = false;
+                applyProofState();
+            } else {
+                S.mode = 'labor';
+                setDivision(3, 1);
+                morphTo(S.free || S.tri);
+            }
+            buildUI();
+            draw();
+        }
+
+        function renderCoach() {
+            const box = document.getElementById('math-coach-box');
+            if (box) box.classList.add('visible');
+            const title = document.getElementById('coach-title-slot');
+            const body = document.getElementById('coach-content');
+            if (title) {
+                title.textContent = proofOn()
+                    ? proofText(S.step, 'title')
+                    : T('coach_title', 'Satz von Marion Walter');
+            }
+            if (!body) return;
+            if (proofOn()) {
+                body.innerHTML = (S.step === PROOF_LAST && S.showSolution)
+                    ? proofText(PROOF_LAST, 'solution')
+                    : proofText(S.step, 'body');
+                return;
+            }
+            body.innerHTML = T('coach',
+                'Drittle jede Seite eines beliebigen Dreiecks und verbinde jeden Teilungspunkt mit der ' +
+                'gegenüberliegenden Ecke. Die sechs Cevianen umschließen ein Sechseck — und dessen Fläche ist ' +
+                'immer <b>ein Zehntel</b> der Dreiecksfläche. Marion Walter (1928–2021) hat den Satz 1993 ' +
+                'bekannt gemacht. Ziehe die Ecken, so schief das Dreieck auch wird: der Zehntel bleibt.');
+        }
+
+        function renderProofFormula() {
+            const box = document.getElementById('mw-proof-formula');
+            if (!box || typeof katex === 'undefined') return;
+            const tex = (S.step === PROOF_LAST && S.showSolution)
+                ? '\\frac{A_{6}}{A_{\\triangle}} = \\frac{2(n-2k)^2}{(2n-k)(n+k)} = \\frac{8}{35}'
+                : PROOF_TEX[S.step];
+            try { katex.render(tex, box, { throwOnError: false, displayMode: true }); }
+            catch (err) { box.textContent = tex; }
+        }
 
         /* -------------------------------------------------------------------- UI */
         const MAX_N = 12;
@@ -707,39 +1087,72 @@
         }
 
         function buildUI() {
-            CyberUI.createCard('ui-container', T('card_tri', 'Dreieck'), `
-                <div style="display:flex; flex-direction:column; gap:12px;">
-                    <div class="mw-btns">
-                        <button class="cyber-btn" id="mw-equi">${T('btn_equi', 'Gleichseitig')}</button>
-                        <button class="cyber-btn" id="mw-right">${T('btn_right', 'Rechtwinklig')}</button>
-                        <button class="cyber-btn" id="mw-rand">${T('btn_rand', 'Zufällig')}</button>
-                    </div>
-                    <div class="mw-note">${T('hint_drag', 'Die Ecken A, B, C lassen sich mit der Maus ziehen — das Flächenverhältnis bleibt, weil affine Abbildungen Teil- und Flächenverhältnisse erhalten.')}</div>
-                </div>`);
+            document.getElementById('ui-container').innerHTML = '';
 
-            CyberUI.createCard('ui-container', T('card_div', 'Teilung der Seiten'), `
-                <div style="display:flex; flex-direction:column; gap:14px;">
-                    <div>
-                        <div class="label-row">
-                            <span>${T('lbl_n', 'Nenner n')}</span>
-                            <span id="mw-n-label" class="cyber-number"
-                                  style="font-size:0.8rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45);">${S.n}</span>
+            CyberUI.createCard('ui-container', T('card_mode', 'Modus'), `
+                <div id="mw-mode-slot"></div>
+                <div class="mw-note">${T('hint_mode', 'Taste <b>p</b> schaltet zwischen Labor und Beweis um.')}</div>`);
+            CyberUI.createRadioGroup('mw-mode-slot', null, [
+                { label: T('mode_labor', 'LABOR (AUSPROBIEREN)'), value: 'labor' },
+                { label: T('mode_beweis', 'BEWEIS (SCHRITT FÜR SCHRITT)'), value: 'beweis' }
+            ], S.mode, setMode);
+
+            if (proofOn()) {
+                CyberUI.createCard('ui-container', T('card_proof', 'Beweis'), `
+                    <div class="step-nav">
+                        <button class="cyber-btn" id="mw-step-prev" title="${T('prev', 'Zurück')}">◀</button>
+                        <div class="step-count" id="mw-step-count"></div>
+                        <button class="cyber-btn" id="mw-step-next" title="${T('next', 'Weiter')}">▶</button>
+                    </div>
+                    <div id="mw-step-jump" style="margin-top:12px"></div>
+                    <div class="formula-box" id="mw-proof-formula" style="margin-top:10px"></div>
+                    <div id="mw-step-extra"></div>`, 'rgb(245, 194, 66)');
+                document.getElementById('mw-step-count').textContent =
+                    (S.step + 1) + ' / ' + (PROOF_LAST + 1);
+                document.getElementById('mw-step-prev').onclick = () => gotoStep(S.step - 1);
+                document.getElementById('mw-step-next').onclick = () => gotoStep(S.step + 1);
+                CyberUI.createDropdown('mw-step-jump',
+                    PROOF_DE.map((p, i) => ({ id: String(i), label: i + ' • ' + proofText(i, 'short') })),
+                    id => gotoStep(parseInt(id, 10)), String(S.step));
+                if (S.step === PROOF_LAST) {
+                    CyberUI.createCheckbox('mw-step-extra', T('show_solution', 'LÖSUNG ZEIGEN'), S.showSolution,
+                        v => { S.showSolution = v; buildUI(); draw(); }, 'rgb(121, 158, 49)');
+                }
+            } else {
+                CyberUI.createCard('ui-container', T('card_tri', 'Dreieck'), `
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <div class="mw-btns">
+                            <button class="cyber-btn" id="mw-equi">${T('btn_equi', 'Gleichseitig')}</button>
+                            <button class="cyber-btn" id="mw-right">${T('btn_right', 'Rechtwinklig')}</button>
+                            <button class="cyber-btn" id="mw-rand">${T('btn_rand', 'Zufällig')}</button>
                         </div>
-                        <input type="range" id="mw-n" min="2" max="${MAX_N}" step="1" value="${S.n}">
-                    </div>
-                    <div>
-                        <div class="label-row">
-                            <span>${T('lbl_k', 'Zähler k')}</span>
-                            <span id="mw-k-label" class="cyber-number"
-                                  style="font-size:0.8rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45);">${S.k}</span>
+                        <div class="mw-note">${T('hint_drag', 'Die Ecken A, B, C lassen sich mit der Maus ziehen — das Flächenverhältnis bleibt, weil affine Abbildungen Teil- und Flächenverhältnisse erhalten.')}</div>
+                    </div>`);
+
+                CyberUI.createCard('ui-container', T('card_div', 'Teilung der Seiten'), `
+                    <div style="display:flex; flex-direction:column; gap:14px;">
+                        <div>
+                            <div class="label-row">
+                                <span>${T('lbl_n', 'Nenner n')}</span>
+                                <span id="mw-n-label" class="cyber-number"
+                                      style="font-size:0.8rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45);">${S.n}</span>
+                            </div>
+                            <input type="range" id="mw-n" min="2" max="${MAX_N}" step="1" value="${S.n}">
                         </div>
-                        <input type="range" id="mw-k" min="1" max="${S.n - 1}" step="1" value="${S.k}">
-                    </div>
-                    <div class="mw-btns">
-                        <button class="cyber-btn" id="mw-third">${T('btn_third', 'Drittelung 1/3')}</button>
-                    </div>
-                    <div class="mw-note">${T('hint_div', 'Jede Seite bekommt Punkte bei k/n und (n−k)/n, jeder wird mit der gegenüberliegenden Ecke verbunden. k/n = 1/3 ist Marion Walters Fall.')}</div>
-                </div>`);
+                        <div>
+                            <div class="label-row">
+                                <span>${T('lbl_k', 'Zähler k')}</span>
+                                <span id="mw-k-label" class="cyber-number"
+                                      style="font-size:0.8rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45);">${S.k}</span>
+                            </div>
+                            <input type="range" id="mw-k" min="1" max="${S.n - 1}" step="1" value="${S.k}">
+                        </div>
+                        <div class="mw-btns">
+                            <button class="cyber-btn" id="mw-third">${T('btn_third', 'Drittelung 1/3')}</button>
+                        </div>
+                        <div class="mw-note">${T('hint_div', 'Jede Seite bekommt Punkte bei k/n und (n−k)/n, jeder wird mit der gegenüberliegenden Ecke verbunden. k/n = 1/3 ist Marion Walters Fall.')}</div>
+                    </div>`);
+            }
 
             CyberUI.createCard('ui-container', T('card_meas', 'Messung'), `
                 <div class="mw-rows">
@@ -754,9 +1167,11 @@
                 <div class="mw-bar-label" id="mw-bar-label"></div>
                 <div class="mw-note" id="mw-note"></div>`);
 
-            CyberUI.createCard('ui-container', T('card_formula', 'Verallgemeinerung'), `
-                <div class="formula-box" id="mw-formula"></div>
-                <div class="mw-note">${T('hint_formula', 'Auf dem rechtwinkligen Einheitsdreieck ausgerechnet — und weil Flächenverhältnisse affin invariant sind, gilt das Ergebnis für jedes Dreieck. n = 3, k = 1 liefert 2·1/(5·4) = 1/10.')}</div>`);
+            if (!proofOn()) {
+                CyberUI.createCard('ui-container', T('card_formula', 'Verallgemeinerung'), `
+                    <div class="formula-box" id="mw-formula"></div>
+                    <div class="mw-note">${T('hint_formula', 'Auf dem rechtwinkligen Einheitsdreieck ausgerechnet — und weil Flächenverhältnisse affin invariant sind, gilt das Ergebnis für jedes Dreieck. n = 3, k = 1 liefert 2·1/(5·4) = 1/10.')}</div>`);
+            }
 
             CyberUI.createCard('ui-container', T('card_view', 'Anzeige'), `
                 <div style="display:flex; flex-direction:column; gap:9px;">
@@ -766,34 +1181,30 @@
                     <label class="cyber-checkbox-wrapper"><input type="checkbox" id="mw-box-fill" checked> <span>${T('v_fill', 'Sechseck füllen')}</span></label>
                     <label class="cyber-checkbox-wrapper"><input type="checkbox" id="mw-box-cells"> <span>${T('v_cells', 'Alle Teilflächen')}</span></label>
                 </div>
-                <div class="mw-note">${T('keys', 'Tasten: <b>d</b> Drittelung, <b>g</b> gleichseitig, <b>w</b> rechtwinklig, <b>z</b> zufällig, <b>f</b> Teilflächen, <b>h</b> Sechseck, <b>b</b> Beschriftung, <b>c</b> Cevianen, Pfeile für n und k.')}</div>`);
+                <div class="mw-note">${proofOn()
+                    ? T('keys_proof', 'Tasten: <b>◀ ▶</b> blättern durch den Beweis, <b>p</b> zurück ins Labor, <b>f</b> Teilflächen, <b>h</b> Sechseck, <b>b</b> Beschriftung, <b>c</b> Cevianen.')
+                    : T('keys', 'Tasten: <b>d</b> Drittelung, <b>g</b> gleichseitig, <b>w</b> rechtwinklig, <b>z</b> zufällig, <b>f</b> Teilflächen, <b>h</b> Sechseck, <b>b</b> Beschriftung, <b>c</b> Cevianen, Pfeile für n und k.')}</div>`);
 
-            document.getElementById('mw-n').addEventListener('input', e => setDivision(parseInt(e.target.value, 10), S.k));
-            document.getElementById('mw-k').addEventListener('input', e => setDivision(S.n, parseInt(e.target.value, 10)));
-            document.getElementById('mw-third').addEventListener('click', () => setDivision(3, 1));
-            document.getElementById('mw-equi').addEventListener('click', equilateral);
-            document.getElementById('mw-right').addEventListener('click', rightAngled);
-            document.getElementById('mw-rand').addEventListener('click', randomTriangle);
+            const on = (id, ev, fn) => { const el = document.getElementById(id); if (el) el.addEventListener(ev, fn); };
+            on('mw-n', 'input', e => setDivision(parseInt(e.target.value, 10), S.k));
+            on('mw-k', 'input', e => setDivision(S.n, parseInt(e.target.value, 10)));
+            on('mw-third', 'click', () => setDivision(3, 1));
+            on('mw-equi', 'click', equilateral);
+            on('mw-right', 'click', rightAngled);
+            on('mw-rand', 'click', randomTriangle);
             BOXES.forEach(([id, key]) => {
-                document.getElementById(id).addEventListener('change', e => {
+                on(id, 'change', e => {
                     S[key] = e.target.checked;
                     if (key === 'cells') rebuild(); else draw();
                 });
             });
-        }
 
-        (function setCoachText() {
-            const box = document.getElementById('math-coach-box');
-            if (box) box.classList.add('visible');
-            const el = document.getElementById('coach-title-slot');
-            if (el) el.textContent = T('coach_title', 'Satz von Marion Walter');
-            const c = document.getElementById('coach-content');
-            if (c) c.innerHTML = T('coach',
-                'Drittle jede Seite eines beliebigen Dreiecks und verbinde jeden Teilungspunkt mit der ' +
-                'gegenüberliegenden Ecke. Die sechs Cevianen umschließen ein Sechseck — und dessen Fläche ist ' +
-                'immer <b>ein Zehntel</b> der Dreiecksfläche. Marion Walter (1928–2021) hat den Satz 1993 ' +
-                'bekannt gemacht. Ziehe die Ecken, so schief das Dreieck auch wird: der Zehntel bleibt.');
-        })();
+            syncSliders();
+            syncBoxes();
+            readouts();
+            renderProofFormula();
+            renderCoach();
+        }
 
         /* ------------------------------------------------------------------ Setup */
         function resizeCanvasToContainer() {
@@ -810,6 +1221,7 @@
         function init() {
             resizeCanvasToContainer();
             layout();
+            if (proofOn() && S.step >= 1 && !morphAnim) S.tri = normTriangle();
             draw();
         }
 
