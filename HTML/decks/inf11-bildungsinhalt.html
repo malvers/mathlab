@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Informatik als Medium anderer Wissenschaften</title>
+<meta name="description" content="Wo informatische Methoden in fremden Fächern arbeiten — und wo was hingehört">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8; --codemuted:#7E8FB5;
+  --greetbg:#000028;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:24px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:grid;place-items:center}
+.pic img{max-width:100%;max-height:100%}
+
+/* --- table_top ---------------------------------------------------------- */
+.dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
+  font-family:Raleway,system-ui,sans-serif}
+.dtable th,.dtable td{padding:0 6px;text-align:left;overflow:hidden;white-space:nowrap;
+  border:.75px solid var(--stroke);line-height:1.85}
+.dtable th{background:var(--ink);color:#fff;font-family:Orbitron,Raleway,sans-serif;
+  font-weight:700;font-size:.75em;border-color:var(--ink)}
+.dtable td{background:#fff;color:var(--body)}
+.dtable td.b{font-weight:700;color:var(--ink)}
+.dtable td.m{font-family:Menlo,monospace}
+.dtable .ac{text-align:center}
+.dtable .ar{text-align:right}
+
+/* --- greeting (Auftaktfolie) --------------------------------------------- */
+.slide.greet{background-image:none;background-color:var(--greetbg)}
+.slide.greet::before{left:336px;width:552px;background:rgba(230,236,248,.14)}
+.slide.greet .foot{left:336px;color:var(--codemuted)}
+.slide.greet .pageno{color:var(--codemuted)}
+.greet-ground{position:absolute;inset:0;background:var(--greetbg)}
+.greet-pic{position:absolute;left:0;top:0;width:312px;height:540px;
+  object-fit:cover;display:block}
+.greet-credit{position:absolute;left:10px;bottom:8px;font-size:9px;
+  font-family:Raleway,sans-serif;color:rgba(255,255,255,.5);text-decoration:none;
+  letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.greet-credit:hover{color:rgba(255,255,255,.9);text-decoration:underline}
+.greet-lead{position:absolute;left:433px;top:168px;width:455px;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:46px;color:var(--orange);
+  line-height:1.05;letter-spacing:-.5px}
+.greet-quote{position:absolute;left:486px;top:368px;width:402px;text-align:center;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:17px;color:var(--orange);
+  line-height:1.2}
+.greet-author{position:absolute;left:596px;top:404px;width:292px;text-align:center;
+  font-size:11px;color:var(--codemuted);letter-spacing:.3px}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-036c2f3a8ea9.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/sunrise-9631245/" target="_blank" rel="noopener">ChiemSeherin</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 11</p>
+      <h1>Informatik als Medium anderer Wissenschaften</h1>
+      <p class="sub">Wo informatische Methoden in fremden Fächern arbeiten — und wo was hingehört</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Vier Bereiche, eine Wissenschaft</h2>
+      <p class="sub">Wiederholung — und die Frage nach der Zuordnung</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wo wir stehen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Letzte Woche: die <b>vier Wissenschaftsbereiche</b> der Informatik</p>
+<p class="line l0 step" data-g="1">Heute die Gegenprobe: <b>Zuordnen</b> — wo gehört eine konkrete Aufgabe hin?</p>
+<p class="line l0 step" data-g="2">Und der Blick nach außen: Informatik arbeitet in <b>fremden Fächern</b> mit</p>
+<p class="line l0 step" data-g="3">Leitfrage der Stunde: Ist Informatik nur ein Fach — oder ein <b>Werkzeug für alle Fächer</b>?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die vier Wissenschaftsbereiche</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:122px"><col style="width:226px"><col style="width:240px"><col style="width:228px"></colgroup><tr><th>Bereich</th><th>Leitfrage</th><th>laut Lehrplan</th><th>Beispiel</th></tr><tr><td class="b">theoretisch</td><td>Was ist überhaupt berechenbar?</td><td>Lösbarkeit, Sprachen, Automaten</td><td>Beweis, dass etwas unlösbar ist</td></tr><tr><td class="b">technisch</td><td>Wie ist der Rechner gebaut?</td><td>Hardware und Betriebssystem</td><td>Prozessor, Speicherverwaltung</td></tr><tr><td class="b">praktisch</td><td>Wie baut man Software planvoll?</td><td>Software Engineering</td><td>Anforderungen, Test, Wartung</td></tr><tr><td class="b">angewandt</td><td>Wie hilft das einem anderen Fach?</td><td>Methoden in fremden Gebieten</td><td>CT-Bild, Wetter, Übersetzung</td></tr></table><div class="body" style="top:257.125px;height:238.875px"><p class="line l0 step" data-g="0">Die mittlere Spalte steht <b>so</b> im Lehrplan — daran wird auch geprüft</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Hardware und Betriebssystem — wohin?</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Der Lehrplan ordnet beides der <b>technischen Informatik</b> zu</p>
+<p class="line l0 step" data-g="1">Begründung: Es geht um <b>die Maschine selbst</b> — Bauteile und ihre Verwaltung</p>
+<p class="line l0 step" data-g="2">Das Betriebssystem teilt Prozessorzeit, Speicher und Geräte zu — es steht <b>direkt an der Hardware</b></p>
+<p class="line l0 step" data-g="3">Ehrlich dazugesagt: Viele <b>Lehrbücher</b> zählen Betriebssysteme zur praktischen Informatik</p>
+<p class="line l0 step" data-g="4">Bei uns gilt die Zuordnung des <b>Lehrplans</b> — und die Begründung zählt mehr als das Etikett</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Software Engineering — wohin?</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Der Lehrplan ordnet es der <b>praktischen Informatik</b> zu</p>
+<p class="line l0 step" data-g="1">Es geht nicht um <b>eine</b> clevere Zeile Code, sondern um <b>große Programme über Jahre</b></p>
+<p class="line l0 step" data-g="2">Anforderungen klären, entwerfen, programmieren, testen, warten — planvoll statt drauflos</p>
+<p class="line l0 step" data-g="3">Die Leitfrage lautet: Wie bauen <b>viele Menschen gemeinsam</b> Software, die hält?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Zuordnungsübung — und die Begründung dazu</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:330px"><col style="width:140px"><col style="width:346px"></colgroup><tr><th>Aufgabe</th><th>Bereich</th><th>warum</th></tr><tr><td class="b">Schaltplan eines Prozessors entwerfen</td><td style="background:#E6ECF8">technisch</td><td>die Maschine selbst</td></tr><tr><td class="b">Beweisen, dass ein Problem unlösbar ist</td><td style="background:#FBEBBF">theoretisch</td><td>gilt für jeden Rechner</td></tr><tr><td class="b">Testplan für eine Krankenhaus-Software</td><td style="background:#DDE8C6">praktisch</td><td>planvoll Software bauen</td></tr><tr><td class="b">Sprachmodell für Dialektforschung</td><td style="background:#F2CFCB">angewandt</td><td>Frage kommt aus der Sprachwissenschaft</td></tr><tr><td class="b">Speicherverwaltung eines Betriebssystems</td><td style="background:#E6ECF8">technisch</td><td>Verwaltung der Bauteile</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Ohne Begründung ist eine Zuordnung nur geraten — <b>ein Satz</b> genügt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Informatik in fremden Gebieten</h2>
+      <p class="sub">Physik, Medizin, Sprache</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Angewandte Informatik: immer dasselbe Muster</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ein <b>fremdes Fach</b> hat eine Frage, die es allein nicht beantworten kann</p>
+<p class="line l0 step" data-g="1">Die Frage wird <b>modelliert</b> — aus Wirklichkeit werden Daten und Regeln</p>
+<p class="line l0 step" data-g="2">Ein informatisches <b>Verfahren</b> rechnet: Simulation, Rekonstruktion, Statistik, Lernverfahren</p>
+<p class="line l0 step" data-g="3">Das Ergebnis wird <b>zurückübersetzt</b> und vom Fach geprüft — nicht von der Informatik</p>
+<p class="line l0 step" data-g="4">Merke: Die Frage bleibt beim Fach. Nur der <b>Weg</b> zur Antwort führt über den Rechner</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Physik: rechnen, was man nicht messen kann</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ein Klima über 100 Jahre und eine Sternexplosion passen in <b>kein Labor</b></p>
+<p class="line l0 step" data-g="1">Die Simulation gilt deshalb als <b>dritte Säule</b> neben Theorie und Experiment</p>
+<p class="line l0 step" data-g="2"><b>Monte-Carlo-Verfahren</b>: mit Zufallszahlen so oft würfeln, bis die Statistik stimmt</p>
+<p class="line l0 step" data-g="3">Wetterdienste rechnen die Atmosphäre in einem <b>Gitter</b> — Kachel für Kachel, Stunde für Stunde</p>
+<p class="line l0 step" data-g="4">Und die Physik hat zurückgegeben: Das <b>WWW</b> entstand 1989 am CERN für den Austausch von Papern</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Physik konkret</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:268px"><col style="width:292px"><col style="width:256px"></colgroup><tr><th>Fachfrage</th><th>informatische Methode</th><th>Ergebnis</th></tr><tr><td class="b">Wie wird das Wetter übermorgen?</td><td>numerische Simulation im Gitter</td><td>Vorhersage mit Unsicherheit</td></tr><tr><td class="b">Was passiert bei einer Teilchenkollision?</td><td>Mustererkennung in riesigen Datenmengen</td><td>Spur eines seltenen Teilchens</td></tr><tr><td class="b">Wie verhält sich ein Material unter Druck?</td><td>Simulation vieler Atome</td><td>Werkstoff am Rechner erprobt</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Gemeinsam ist allen: <b>zu groß, zu schnell, zu gefährlich</b> für das Experiment</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Medizin: aus Messwerten wird ein Bild</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ein <b>Computertomograf</b> fotografiert nicht — er misst nur die Schwächung von Röntgenstrahlen</p>
+<p class="line l0 step" data-g="1">Gemessen werden <b>Summen entlang von Strahlen</b>, aus vielen Richtungen</p>
+<p class="line l0 step" data-g="2">Das Schnittbild wird daraus <b>berechnet</b> (Rückprojektion; Mathematik von Johann Radon, 1917)</p>
+<p class="line l0 step" data-g="3">Ohne Informatik gäbe es <b>kein einziges CT-Bild</b> — der Rechner ist Teil des Geräts</p>
+<p class="line l0 step" data-g="4">Danach geht es weiter: Bilder <b>segmentieren</b>, Verläufe vergleichen, Befunde vorschlagen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Medizin konkret</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:268px"><col style="width:292px"><col style="width:256px"></colgroup><tr><th>Fachfrage</th><th>informatische Methode</th><th>Ergebnis</th></tr><tr><td class="b">Wie sieht es im Körper aus?</td><td>Rekonstruktion aus Projektionen</td><td>CT- und MRT-Schnittbilder</td></tr><tr><td class="b">Welches Gen gehört zu welcher Krankheit?</td><td>Sequenzalignment auf A, C, G, T</td><td>Treffer in der Datenbank</td></tr><tr><td class="b">Wirkt dieses Medikament?</td><td>Statistik über große Studien</td><td>belastbare Aussage statt Bauchgefühl</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Für den Rechner ist <b>DNA eine Zeichenkette</b> — damit wird Biologie zu Textverarbeitung</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Sprache: Text als Datenstrom</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Tokenisierung</b>: Der Satz wird zuerst in Wörter und Satzzeichen zerlegt</p>
+<p class="line l0 step" data-g="1">Danach Wortarten bestimmen, Satzbau analysieren, Bedeutung annähern</p>
+<p class="line l0 step" data-g="2"><b>Zipfsches Gesetz</b>: Wenige Wörter kommen sehr oft vor, sehr viele fast nie</p>
+<p class="line l0 step" data-g="3">Maschinelle Übersetzung und Spracherkennung sind heute <b>gelernte</b> Verfahren, keine Regelwerke</p>
+<p class="line l0 step" data-g="4"><b>Stilometrie</b>: Unauffällige Wörter wie „und“ und „aber“ verraten, wer einen Text geschrieben hat</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Sprache konkret</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:268px"><col style="width:292px"><col style="width:256px"></colgroup><tr><th>Fachfrage</th><th>informatische Methode</th><th>Ergebnis</th></tr><tr><td class="b">Wer hat diesen anonymen Text verfasst?</td><td>Häufigkeiten von Funktionswörtern messen</td><td>Autorschaft wahrscheinlich</td></tr><tr><td class="b">Wie verändert sich ein Dialekt?</td><td>große Textsammlungen auswerten</td><td>Karten und Zeitreihen</td></tr><tr><td class="b">Was heißt dieser Satz auf Deutsch?</td><td>trainiertes Übersetzungsmodell</td><td>Übersetzung samt Fehlerquellen</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Auch hier gilt: Das Urteil über das Ergebnis fällt die <b>Sprachwissenschaft</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Informatik als Bildungsinhalt</h2>
+      <p class="sub">Warum das alle angeht</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Anwenden ist nicht gestalten</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0"><b>Anwenden</b></p>
+<p class="col l1 step" data-g="0">Ein fertiges Programm bedienen</p>
+<p class="col l1 step" data-g="0">Ergebnisse übernehmen</p>
+<p class="col l1 step" data-g="0">Die Methode bleibt eine Black Box</p>
+<p class="col l1 step" data-g="0">Reicht für den Alltag</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1"><b>Gestalten</b></p>
+<p class="col l1 step" data-g="1">Das Problem selbst modellieren</p>
+<p class="col l1 step" data-g="1">Ein Verfahren auswählen und anpassen</p>
+<p class="col l1 step" data-g="1">Das Ergebnis kritisch prüfen</p>
+<p class="col l1 step" data-g="1">Genau das ist angewandte Informatik</p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum Informatik Bildungsinhalt ist</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Wer <b>Modelle</b> versteht, erkennt, was ein Ergebnis weglässt — und was es damit nicht sagt</p>
+<p class="line l0 step" data-g="1">Wer <b>Grenzen</b> kennt, glaubt keiner Vorhersage blind, nur weil ein Rechner sie geliefert hat</p>
+<p class="line l0 step" data-g="2">Informatische Methoden entscheiden längst mit — in Medizin, Justiz, Verwaltung, Schule</p>
+<p class="line l0 step" data-g="3">Mitreden können setzt voraus, die <b>Methode zu verstehen</b>, nicht nur das Programm zu bedienen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Angewandte Informatik heißt: Die Frage kommt aus einem anderen Fach, der Weg zur Antwort führt über informatische Methoden — und beurteilt wird das Ergebnis wieder vom Fach.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Den <b>Nobelpreis für die Computertomografie</b> (1979) bekamen ein Physiker und ein Ingenieur — Cormack und Hounsfield</p>
+<p class="line l0 step" data-g="1">Die Mathematik dahinter lag seit <b>1917</b> herum: Johann Radon rechnete sie ohne jede Anwendung aus</p>
+<p class="line l0 step" data-g="2"><b>Tim Berners-Lee</b> schrieb 1989 einen Vorschlag, den sein Chef mit „vague, but exciting“ kommentierte — daraus wurde das Web</p>
+<p class="line l0 step" data-g="3">Das <b>Humangenomprojekt</b> brauchte 13 Jahre bis 2003; heute wird ein Genom an einem Tag gelesen</p>
+<p class="line l0 step" data-g="4">1963 klärten zwei Statistiker mit Wortzählungen, wer die umstrittenen <b>Federalist Papers</b> geschrieben hatte — Informatik als Detektiv der Literaturwissenschaft</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: Kurzrecherche + Mini-Vortrag</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Ein</b> Anwendungsgebiet wählen: Physik, Medizin, Sprache — oder ein eigenes Fach</p>
+<p class="line l0 step" data-g="1"><b>Recherchieren</b> (15 Minuten): Welche Frage stellt das Fach, welche Methode löst sie?</p>
+<p class="line l0 step" data-g="2"><b>Zuordnen</b>: Zu welchem Wissenschaftsbereich gehört euer Beispiel — mit einem Satz Begründung</p>
+<p class="line l0 step" data-g="3"><b>Vortragen</b> (2 Minuten): Fachproblem, informatische Methode, Zuordnung, Quelle</p>
+<p class="line l0 step" data-g="4">Bewertet wird die <b>Begründung</b>, nicht die Zahl der Folien</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script>
+// time-aware greeting - the browser knows the real clock, a .pptx never does
+(function(){
+  var h = new Date().getHours();
+  var t = h < 5 ? 'Good night!' : h < 12 ? 'Good morning!' :
+          h < 18 ? 'Good afternoon!' : h < 22 ? 'Good evening!' : 'Good night!';
+  var el = document.getElementById('greet-text');
+  if (el) el.textContent = t;
+})();
+
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  if (e.target.closest('#hud') || e.target.closest('.labbar a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+}
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>
