@@ -3815,20 +3815,18 @@
             legend.insertBefore(lehrplan, legend.firstChild);
         }
 
-        /* Doc, 08.09.2026: "zieh die hoch ueber die Linie" - the pill row moves
-           out of the toolbar up into the head, onto the subtitle line, right
-           aligned. Below the divider only the actions are left. Done here for
-           all 20 plan pages at once, no page carries a legend of its own. */
+        /* Doc, 08.09.2026: "zieh die hoch ueber die Linie ... weiter nach unten
+           bis kurz ueber die Linie" - the pill row leaves the toolbar and
+           becomes the last line of the head, right aligned, a few pixels above
+           the divider. Below the line only the actions and the search are left.
+           Done here for all 20 plan pages at once, no page carries its own. */
         const headEl = document.querySelector('header.page-head');
-        const subtitle = headEl && headEl.querySelector('.subtitle');
-        if (subtitle) {
+        if (headEl) {
             const row = document.createElement('div');
             row.className = 'head-legend-row';
-            subtitle.parentNode.insertBefore(row, subtitle);
-            row.appendChild(subtitle);
             row.appendChild(legend);
-        } else if (headEl) {
-            headEl.appendChild(legend);
+            headEl.appendChild(row);
+            headEl.classList.add('with-legend');
         }
 
         // Any click outside closes open variant dropdowns.
@@ -3972,8 +3970,9 @@
             if (inNotes && r.showPane) r.showPane('notizen');
         }
 
-        searchCount.hidden = !terms.length;
-        searchCount.textContent = hits + ' von ' + total;
+        /* The counter keeps its slot even while empty - otherwise the field
+           would jump narrower the moment the first letter is typed. */
+        searchCount.textContent = terms.length ? hits + ' von ' + total : '';
         searchCount.classList.toggle('none', terms.length > 0 && hits === 0);
         if (ranges.length && window.CSS && CSS.highlights && window.Highlight) {
             CSS.highlights.set('plan-find', new Highlight(...ranges));
@@ -3999,7 +3998,6 @@
         searchInput.title = 'Sucht in Woche, Bereich, Thema, Stichpunkten, Notizen und Material';
         searchCount = document.createElement('span');
         searchCount.className = 'svp-search-count';
-        searchCount.hidden = true;
         /* At the right end of the toolbar (margin-left:auto). The legend used to
            sit there, but it has moved up over the divider - if a page still has
            it down here, the field goes in front of it. */
