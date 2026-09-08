@@ -19,6 +19,10 @@
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
     <style>
         /* Readouts and hint boxes - everything else comes from the central layout */
+
+        /* The shared box carries no offsets - every lab places it itself. */
+        #math-coach-box { left: 24px; top: 24px; }
+
         .mw-rows { display: flex; flex-direction: column; gap: 7px; }
 
         .mw-row {
@@ -75,7 +79,7 @@
             box-shadow: 0 0 10px rgba(245, 194, 66, 0.45);
         }
 
-        .mw-bar-label {
+        .mw-bar-note {
             margin-top: 5px;
             font-size: 0.72rem;
             color: #9fb4d6;
@@ -90,11 +94,11 @@
             overflow-x: auto;
         }
 
-        .formula-box .katex { font-size: 1.05em; }
+        .formula-box .katex { font-size: 1.35em; }
 
         .formula-box .katex-display { margin: 0; }
 
-        #mw-proof-formula .katex { font-size: 0.86em; }
+        #mw-proof-formula .katex { font-size: 1em; }
 
         #canvas { touch-action: none; }
     </style>
@@ -733,7 +737,7 @@
 
             // Tenth bar: the triangle holds q/p hexagons, one of them is lit
             const bar = document.getElementById('mw-bar');
-            const lab = document.getElementById('mw-bar-label');
+            const lab = document.getElementById('mw-bar-note');
             if (bar && lab) {
                 const parts = ex.p === 1 ? ex.q : 0;
                 if (parts >= 2 && parts <= 30) {
@@ -776,7 +780,9 @@
 
         function rebuild() {
             S.hex = centralPolygon();
-            S.cellList = S.cells ? buildCells() : null;
+            // Always counted, never only when the checkbox is on - the readout would
+            // otherwise show a dash that explains nothing. Costs 0.35 ms per rebuild.
+            S.cellList = buildCells();
             readouts();
             draw();
         }
@@ -1164,7 +1170,7 @@
                     <div class="mw-row"><span class="mw-key">${T('m_cells', 'Teilflächen')}</span><span class="mw-val" id="mw-cells">-</span></div>
                 </div>
                 <div class="mw-bar" id="mw-bar"></div>
-                <div class="mw-bar-label" id="mw-bar-label"></div>
+                <div class="mw-bar-note" id="mw-bar-note"></div>
                 <div class="mw-note" id="mw-note"></div>`);
 
             if (!proofOn()) {
@@ -1175,11 +1181,11 @@
 
             CyberUI.createCard('ui-container', T('card_view', 'Anzeige'), `
                 <div style="display:flex; flex-direction:column; gap:9px;">
-                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="mw-box-cev" checked> <span>${T('v_cev', 'Cevianen')}</span></label>
-                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="mw-box-marks" checked> <span>${T('v_marks', 'Teilungspunkte')}</span></label>
-                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="mw-box-labels" checked> <span>${T('v_labels', 'Beschriftung')}</span></label>
-                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="mw-box-fill" checked> <span>${T('v_fill', 'Sechseck füllen')}</span></label>
-                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="mw-box-cells"> <span>${T('v_cells', 'Alle Teilflächen')}</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" class="cyber-checkbox" id="mw-box-cev" checked> <span class="cyber-label">${T('v_cev', 'Cevianen')}</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" class="cyber-checkbox" id="mw-box-marks" checked> <span class="cyber-label">${T('v_marks', 'Teilungspunkte')}</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" class="cyber-checkbox" id="mw-box-labels" checked> <span class="cyber-label">${T('v_labels', 'Beschriftung')}</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" class="cyber-checkbox" id="mw-box-fill" checked> <span class="cyber-label">${T('v_fill', 'Sechseck füllen')}</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" class="cyber-checkbox" id="mw-box-cells"> <span class="cyber-label">${T('v_cells', 'Alle Teilflächen')}</span></label>
                 </div>
                 <div class="mw-note">${proofOn()
                     ? T('keys_proof', 'Tasten: <b>◀ ▶</b> blättern durch den Beweis, <b>p</b> zurück ins Labor, <b>f</b> Teilflächen, <b>h</b> Sechseck, <b>b</b> Beschriftung, <b>c</b> Cevianen.')
