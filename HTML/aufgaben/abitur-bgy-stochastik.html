@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Abitur-Training: Stochastik — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Abitur-Training Mathematik BGY, Stochastik: Vierfeldertafel, Binomialverteilung und Signifikanztest, mit Lösungen und Abbildungen.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* figures: drawn as inline SVG by tools/aufgaben/svgfig.py, never as a bitmap -
+   sharp on screen and in print, and the coordinates come from the same numbers
+   that verify() checks (Doc, 08.09.2026). */
+figure.fig{margin:14px 0 4px;text-align:center;break-inside:avoid;page-break-inside:avoid}
+figure.fig svg{max-width:100%;height:auto;display:inline-block;vertical-align:top}
+figure.fig figcaption{margin-top:4px;color:var(--muted);font-size:13.5px}
+.sol figure.fig{margin:10px 0 6px}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* per-task solution: button under the task, the solution opens right there
+   (Doc, 07.09.2026). The copy is built by JS from the solutions section, so
+   the sheet keeps exactly one source for every solution text. */
+.solbtn{font-family:Orbitron,system-ui,sans-serif;font-size:11px;letter-spacing:1px;
+  color:var(--green);background:transparent;cursor:pointer;margin-top:14px;
+  border:.75px solid rgba(121,158,49,.5);border-radius:4px;padding:7px 12px}
+.solbtn:hover{border-color:var(--green);background:rgba(121,158,49,.08)}
+.solinline{margin:14px 0 0;background:rgba(121,158,49,.07)}
+.solinline h3{display:none}
+.solinline[hidden]{display:none}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  /* the inline copies stay out of print - the solutions keep their own page */
+  .solbtn,.solinline{display:none!important}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Abitur-Training: Stochastik</h1>
+  <div class="sub">Berufliches Gymnasium · Pflichtaufgabe 3 · Grund- und Leistungskurs · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/abitur.html">Zur Übersicht</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Grillstand auf dem Schulfest</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Auf dem Schulfest eines Beruflichen Gymnasiums sind $60\ \%$ der Besucher Schülerinnen und Schüler (Ereignis $S$). $45\ \%$ aller Besucher essen am Grillstand (Ereignis $G$). $30\ \%$ aller Besucher sind Schülerinnen oder Schüler <b>und</b> essen am Grillstand. Ein Besucher wird zufällig ausgewählt.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 470 200" width="470" height="200" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Unvollstaendige Vierfeldertafel mit den Ereignissen S und G"><rect x="24" y="20" width="105" height="40" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><rect x="129" y="20" width="105" height="40" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="181.5" y="40" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">G</text><rect x="234" y="20" width="105" height="40" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="286.5" y="40" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">Ḡ</text><rect x="339" y="20" width="105" height="40" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="391.5" y="40" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">Σ</text><rect x="24" y="60" width="105" height="40" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="76.5" y="80" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">S</text><rect x="129" y="60" width="105" height="40" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="181.5" y="80" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">0,30</text><rect x="234" y="60" width="105" height="40" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><rect x="339" y="60" width="105" height="40" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><rect x="24" y="100" width="105" height="40" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="76.5" y="120" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">S̄</text><rect x="129" y="100" width="105" height="40" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><rect x="234" y="100" width="105" height="40" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><rect x="339" y="100" width="105" height="40" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><rect x="24" y="140" width="105" height="40" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="76.5" y="160" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">Σ</text><rect x="129" y="140" width="105" height="40" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="181.5" y="160" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">0,45</text><rect x="234" y="140" width="105" height="40" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><rect x="339" y="140" width="105" height="40" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="391.5" y="160" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">1</text><text x="235" y="190" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">G: isst am Grillstand   ·   S: Schülerin oder Schüler</text></svg>
+      <figcaption>Die unvollständige Vierfeldertafel zum Sachverhalt.</figcaption>
+    </figure>
+    <ol class="parts">
+      <li>Übernehmen Sie die Vierfeldertafel und vervollständigen Sie sie.</li>
+      <li>Bestimmen Sie die Wahrscheinlichkeit dafür, dass eine zufällig ausgewählte Schülerin oder ein zufällig ausgewählter Schüler am Grillstand isst.</li>
+      <li>Untersuchen Sie, ob die Ereignisse $S$ und $G$ stochastisch unabhängig sind.</li>
+      <li>Beschreiben Sie im Sachzusammenhang ein Ereignis, dessen Wahrscheinlichkeit $0{,}15$ beträgt.</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Die Losbude</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>An einer Losbude gewinnt jedes Los unabhängig von den anderen mit der Wahrscheinlichkeit $p = 0{,}25$. Eine Klasse zieht $12$ Lose. Die Zufallsgröße $X$ beschreibt die Anzahl der Gewinne.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 520 310" width="520" height="310" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Balkendiagramm der Binomialverteilung fuer n gleich 12 und p gleich 0,25"><defs><clipPath id="f4-clip"><rect x="51" y="21" width="450" height="250"/></clipPath><marker id="f4-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker><marker id="f4-ar-6E7E9F" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#6E7E9F"/></marker><marker id="f4-ar-B02418" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#B02418"/></marker></defs><line x1="52" y1="270" x2="500" y2="270" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f4-ar-0E244E)"/><line x1="81.87" y1="270" x2="81.87" y2="22" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f4-ar-0E244E)"/><text x="502" y="286" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">k</text><text x="69.87" y="20" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">P(X = k)</text><text x="74.87" y="285" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="115.05" y1="266.5" x2="115.05" y2="273.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="115.05" y="286" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">1</text><line x1="148.24" y1="266.5" x2="148.24" y2="273.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="148.24" y="286" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">2</text><line x1="181.42" y1="266.5" x2="181.42" y2="273.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="181.42" y="286" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">3</text><line x1="214.61" y1="266.5" x2="214.61" y2="273.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="214.61" y="286" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">4</text><line x1="247.79" y1="266.5" x2="247.79" y2="273.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="247.79" y="286" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">5</text><line x1="280.98" y1="266.5" x2="280.98" y2="273.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="280.98" y="286" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">6</text><line x1="314.16" y1="266.5" x2="314.16" y2="273.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="314.16" y="286" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">7</text><line x1="347.35" y1="266.5" x2="347.35" y2="273.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="347.35" y="286" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">8</text><line x1="380.53" y1="266.5" x2="380.53" y2="273.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="380.53" y="286" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">9</text><line x1="413.72" y1="266.5" x2="413.72" y2="273.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="413.72" y="286" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">10</text><line x1="446.9" y1="266.5" x2="446.9" y2="273.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="446.9" y="286" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">11</text><line x1="480.09" y1="266.5" x2="480.09" y2="273.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="480.09" y="286" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">12</text><line x1="78.37" y1="231.25" x2="85.37" y2="231.25" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="74.87" y="235.25" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">0,05</text><line x1="78.37" y1="192.5" x2="85.37" y2="192.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="74.87" y="196.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">0,10</text><line x1="78.37" y1="153.75" x2="85.37" y2="153.75" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="74.87" y="157.75" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">0,15</text><line x1="78.37" y1="115" x2="85.37" y2="115" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="74.87" y="119" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">0,20</text><line x1="78.37" y1="76.25" x2="85.37" y2="76.25" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="74.87" y="80.25" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">0,25</text><line x1="78.37" y1="37.5" x2="85.37" y2="37.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="74.87" y="41.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">0,30</text><rect x="71.58" y="245.45" width="20.57" height="24.55" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="104.76" y="171.8" width="20.57" height="98.2" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="137.95" y="89.97" width="20.57" height="180.03" rx="0" fill="#799E31" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="171.13" y="69.97" width="20.57" height="200.03" rx="0" fill="#799E31" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="204.32" y="119.98" width="20.57" height="150.02" rx="0" fill="#799E31" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="237.51" y="189.99" width="20.57" height="80.01" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="270.69" y="238.88" width="20.57" height="31.12" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="303.88" y="261.11" width="20.57" height="8.89" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="337.06" y="268.15" width="20.57" height="1.85" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="370.25" y="269.73" width="20.57" height="0.27" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="403.43" y="269.97" width="20.57" height="0.03" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="436.62" y="270" width="20.57" height="0" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="469.8" y="270" width="20.57" height="0" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><line x1="181.42" y1="270" x2="181.42" y2="37.5" stroke="#B02418" stroke-width="1.3" stroke-linecap="round" stroke-dasharray="4 3"/><line x1="131.64" y1="49.13" x2="231.2" y2="49.13" stroke="#6E7E9F" stroke-width="1.2" marker-end="url(#f4-ar-6E7E9F)"/><line x1="231.2" y1="49.13" x2="131.64" y2="49.13" stroke="#6E7E9F" stroke-width="1.2" marker-end="url(#f4-ar-6E7E9F)"/><text x="181.42" y="42.13" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">eine Standardabweichung</text><text x="294.25" y="80.12" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#B02418" text-anchor="start" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Erwartungswert 3</text><line x1="290.93" y1="82.45" x2="185.42" y2="103.38" stroke="#B02418" stroke-width="1.1" marker-end="url(#f4-ar-B02418)"/></svg>
+      <figcaption>Die Verteilung von X. Grün markiert sind die Werte innerhalb einer Standardabweichung um den Erwartungswert.</figcaption>
+    </figure>
+    <ol class="parts">
+      <li>Geben Sie den Erwartungswert und die Standardabweichung von $X$ an.</li>
+      <li>Berechnen Sie die Wahrscheinlichkeit für genau drei Gewinne und die Wahrscheinlichkeit für mindestens einen Gewinn.</li>
+      <li>Bestimmen Sie die Wahrscheinlichkeit dafür, dass die Anzahl der Gewinne höchstens eine Standardabweichung vom Erwartungswert abweicht.</li>
+      <li>Ermitteln Sie, wie viele Lose mindestens gezogen werden müssen, damit mit einer Wahrscheinlichkeit von mindestens $99\ \%$ wenigstens ein Gewinn dabei ist.</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Lohnt sich die Bude noch?</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Der Veranstalter wirbt damit, dass mindestens jedes vierte Los gewinnt. Am Ende des Tages werden $200$ zufällig ausgewählte verkaufte Lose überprüft; darunter sind $38$ Gewinne. Die Behauptung soll mit einem linksseitigen Signifikanztest auf dem Signifikanzniveau $\alpha = 5\ \%$ überprüft werden.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 540 300" width="540" height="300" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Balkendiagramm der Binomialverteilung fuer n gleich 200 mit markiertem Ablehnungsbereich"><defs><clipPath id="f5-clip"><rect x="55" y="21" width="466" height="240"/></clipPath><marker id="f5-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="56" y1="260" x2="520" y2="260" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f5-ar-0E244E)"/><line x1="-262.05" y1="260" x2="-262.05" y2="22" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f5-ar-0E244E)"/><text x="522" y="276" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">k</text><text x="-274.05" y="20" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">P(X = k)</text><text x="-269.05" y="275" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="119.17" y1="256.5" x2="119.17" y2="263.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="119.17" y="276" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">35</text><line x1="173.63" y1="256.5" x2="173.63" y2="263.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="173.63" y="276" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">40</text><line x1="228.09" y1="256.5" x2="228.09" y2="263.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="228.09" y="276" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">45</text><line x1="282.55" y1="256.5" x2="282.55" y2="263.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="282.55" y="276" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">50</text><line x1="337.01" y1="256.5" x2="337.01" y2="263.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="337.01" y="276" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">55</text><line x1="391.47" y1="256.5" x2="391.47" y2="263.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="391.47" y="276" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">60</text><line x1="445.93" y1="256.5" x2="445.93" y2="263.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="445.93" y="276" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">65</text><line x1="500.39" y1="256.5" x2="500.39" y2="263.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="500.39" y="276" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">70</text><line x1="-265.55" y1="196.53" x2="-258.55" y2="196.53" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="-269.05" y="200.53" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">0,02</text><line x1="-265.55" y1="133.07" x2="-258.55" y2="133.07" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="-269.05" y="137.07" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">0,04</text><line x1="-265.55" y1="69.6" x2="-258.55" y2="69.6" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="-269.05" y="73.6" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">0,06</text><rect x="60.47" y="259.35" width="8.5" height="0.65" rx="0" fill="#B02418" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="71.36" y="258.81" width="8.5" height="1.19" rx="0" fill="#B02418" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="82.25" y="257.91" width="8.5" height="2.09" rx="0" fill="#B02418" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="93.14" y="256.45" width="8.5" height="3.55" rx="0" fill="#B02418" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="104.03" y="254.19" width="8.5" height="5.81" rx="0" fill="#B02418" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="114.93" y="250.82" width="8.5" height="9.18" rx="0" fill="#B02418" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="125.82" y="245.97" width="8.5" height="14.03" rx="0" fill="#B02418" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="136.71" y="239.28" width="8.5" height="20.72" rx="0" fill="#B02418" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="147.6" y="230.37" width="8.5" height="29.63" rx="0" fill="#B02418" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="158.49" y="218.97" width="8.5" height="41.03" rx="0" fill="#B02418" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="169.39" y="204.96" width="8.5" height="55.04" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="180.28" y="188.4" width="8.5" height="71.6" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="191.17" y="169.65" width="8.5" height="90.35" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="202.06" y="149.33" width="8.5" height="110.67" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="212.95" y="128.37" width="8.5" height="131.63" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="223.85" y="107.9" width="8.5" height="152.1" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="234.74" y="89.16" width="8.5" height="170.84" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="245.63" y="73.41" width="8.5" height="186.59" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="256.52" y="61.75" width="8.5" height="198.25" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="267.41" y="55.01" width="8.5" height="204.99" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="278.31" y="53.64" width="8.5" height="206.36" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="289.2" y="57.69" width="8.5" height="202.31" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="300.09" y="66.76" width="8.5" height="193.24" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="310.98" y="80.13" width="8.5" height="179.87" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="321.87" y="96.79" width="8.5" height="163.21" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="332.77" y="115.58" width="8.5" height="144.42" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="343.66" y="135.35" width="8.5" height="124.65" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="354.55" y="155.03" width="8.5" height="104.97" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="365.44" y="173.73" width="8.5" height="86.27" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="376.33" y="190.79" width="8.5" height="69.21" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="387.23" y="205.79" width="8.5" height="54.21" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="398.12" y="218.53" width="8.5" height="41.47" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="409.01" y="229.01" width="8.5" height="30.99" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="419.9" y="237.37" width="8.5" height="22.63" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="430.79" y="243.85" width="8.5" height="16.15" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="441.69" y="248.74" width="8.5" height="11.26" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="452.58" y="252.32" width="8.5" height="7.68" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="463.47" y="254.88" width="8.5" height="5.12" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="474.36" y="256.66" width="8.5" height="3.34" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="485.25" y="257.87" width="8.5" height="2.13" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="496.15" y="258.67" width="8.5" height="1.33" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><rect x="507.04" y="259.19" width="8.5" height="0.81" rx="0" fill="#F5C242" stroke="#FFFFFF" stroke-width="0.8" opacity="1.0"/><line x1="282.55" y1="260" x2="282.55" y2="41.04" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="4 3"/><text x="288.55" y="45.04" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="start" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Erwartungswert 50</text><line x1="168.19" y1="260" x2="168.19" y2="85.47" stroke="#B02418" stroke-width="1.4" stroke-linecap="round"/><text x="162.19" y="79.12" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#B02418" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Ablehnungsbereich</text><circle cx="151.85" cy="220.33" r="4.2" fill="#799E31" stroke="#FFFFFF" stroke-width="1.4"/><text x="151.85" y="210.33" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">beobachtet: 38</text></svg>
+      <figcaption>Die Verteilung unter der Nullhypothese. Rot der Ablehnungsbereich, grün der beobachtete Wert 38.</figcaption>
+    </figure>
+    <ol class="parts">
+      <li>Geben Sie die Nullhypothese an und begründen Sie, warum linksseitig getestet wird.</li>
+      <li>Bestimmen Sie den Ablehnungsbereich der Nullhypothese.</li>
+      <li>Treffen Sie eine Entscheidung und formulieren Sie eine Empfehlung für den Veranstalter.</li>
+      <li>Geben Sie die tatsächliche Wahrscheinlichkeit für einen Fehler 1. Art an und beschreiben Sie den Fehler 2. Art im Sachzusammenhang.</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Grillstand auf dem Schulfest</h3>
+      <p><b>a)</b> Zeilen- und Spaltensummen füllen die Tafel: $P(S \cap \overline{G}) = 0{,}60 - 0{,}30 = 0{,}30$, $P(\overline{S} \cap G) = 0{,}45 - 0{,}30 = 0{,}15$, $P(\overline{S} \cap \overline{G}) = 1 - 0{,}60 - 0{,}45 + 0{,}30 = 0{,}25$, $P(\overline{S}) = 0{,}40$ und $P(\overline{G}) = 0{,}55$.</p>
+      <p><b>b)</b> Gefragt ist die bedingte Wahrscheinlichkeit $P_S(G) = \dfrac{P(S \cap G)}{P(S)} = \dfrac{0{,}30}{0{,}60} = 0{,}5$, also $50\ \%$.</p>
+      <p><b>c)</b> Bei Unabhängigkeit müsste $P(S) \cdot P(G) = P(S \cap G)$ gelten. Es ist aber $0{,}60 \cdot 0{,}45 = 0{,}27 \neq 0{,}30$. Die Ereignisse sind also <b>abhängig</b> — Schülerinnen und Schüler gehen etwas häufiger an den Grillstand als der Durchschnitt.</p>
+      <p><b>d)</b> $P(\overline{S} \cap G) = 0{,}15$: „Der ausgewählte Besucher ist <b>keine</b> Schülerin und kein Schüler und isst am Grillstand.“</p>
+      <figure class="fig">
+        <svg viewBox="0 0 470 200" width="470" height="200" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vollstaendig ausgefuellte Vierfeldertafel"><rect x="24" y="20" width="105" height="40" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><rect x="129" y="20" width="105" height="40" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="181.5" y="40" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">G</text><rect x="234" y="20" width="105" height="40" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="286.5" y="40" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">Ḡ</text><rect x="339" y="20" width="105" height="40" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="391.5" y="40" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">Σ</text><rect x="24" y="60" width="105" height="40" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="76.5" y="80" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">S</text><rect x="129" y="60" width="105" height="40" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="181.5" y="80" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">0,30</text><rect x="234" y="60" width="105" height="40" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="286.5" y="80" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">0,30</text><rect x="339" y="60" width="105" height="40" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="391.5" y="80" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">0,60</text><rect x="24" y="100" width="105" height="40" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="76.5" y="120" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">S̄</text><rect x="129" y="100" width="105" height="40" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="181.5" y="120" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">0,15</text><rect x="234" y="100" width="105" height="40" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="286.5" y="120" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">0,25</text><rect x="339" y="100" width="105" height="40" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="391.5" y="120" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">0,40</text><rect x="24" y="140" width="105" height="40" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="76.5" y="160" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">Σ</text><rect x="129" y="140" width="105" height="40" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="181.5" y="160" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">0,45</text><rect x="234" y="140" width="105" height="40" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="286.5" y="160" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">0,55</text><rect x="339" y="140" width="105" height="40" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="391.5" y="160" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">1</text></svg>
+        <figcaption>Die vollständige Tafel zu a).</figcaption>
+      </figure>
+      <figure class="fig">
+        <svg viewBox="0 0 500 250" width="500" height="250" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Baumdiagramm mit den vier Pfaden und ihren Wahrscheinlichkeiten"><circle cx="60" cy="130" r="3.4" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.3"/><line x1="65.62" y1="127.89" x2="224.38" y2="68.11" stroke="#6E7E9F" stroke-width="1.3" stroke-linecap="round"/><text x="145" y="89" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="middle">0,60</text><line x1="65.62" y1="132.11" x2="224.38" y2="191.89" stroke="#6E7E9F" stroke-width="1.3" stroke-linecap="round"/><text x="145" y="175" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="middle">0,40</text><circle cx="230" cy="66" r="3.4" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.3"/><text x="230" y="56" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic">S</text><circle cx="230" cy="194" r="3.4" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.3"/><text x="230" y="211" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic">S̄</text><line x1="235.84" y1="64.63" x2="394.16" y2="27.37" stroke="#6E7E9F" stroke-width="1.3" stroke-linecap="round"/><text x="315" y="37" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="middle">0,50</text><line x1="235.84" y1="67.37" x2="394.16" y2="104.63" stroke="#6E7E9F" stroke-width="1.3" stroke-linecap="round"/><text x="315" y="99" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="middle">0,50</text><line x1="235.84" y1="192.63" x2="394.16" y2="155.37" stroke="#6E7E9F" stroke-width="1.3" stroke-linecap="round"/><text x="315" y="165" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="middle">0,375</text><line x1="235.84" y1="195.37" x2="394.16" y2="232.63" stroke="#6E7E9F" stroke-width="1.3" stroke-linecap="round"/><text x="315" y="227" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="middle">0,625</text><circle cx="400" cy="26" r="3.4" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.3"/><text x="410" y="31" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic">G</text><text x="446" y="31" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#6E7E9F" text-anchor="start">→  0,30</text><circle cx="400" cy="106" r="3.4" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.3"/><text x="410" y="111" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic">Ḡ</text><text x="446" y="111" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#6E7E9F" text-anchor="start">→  0,30</text><circle cx="400" cy="154" r="3.4" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.3"/><text x="410" y="159" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic">G</text><text x="446" y="159" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#6E7E9F" text-anchor="start">→  0,15</text><circle cx="400" cy="234" r="3.4" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.3"/><text x="410" y="239" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic">Ḡ</text><text x="446" y="239" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#6E7E9F" text-anchor="start">→  0,25</text></svg>
+        <figcaption>Derselbe Sachverhalt als Baumdiagramm — die Pfadwahrscheinlichkeiten rechts sind genau die vier Felder.</figcaption>
+      </figure>
+      <p class="why">$P_S(G) = 0{,}5$ und $P(S \cap G) = 0{,}30$ sind zwei verschiedene Dinge. Beim ersten ist die Grundmenge nur noch die Schülerschaft, beim zweiten sind es alle Besucher.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Die Losbude</h3>
+      <p><b>a)</b> $X$ ist binomialverteilt mit $n = 12$ und $p = 0{,}25$. $E(X) = n \cdot p = 3$ und $\sigma = \sqrt{n \cdot p \cdot (1-p)} = \sqrt{12 \cdot 0{,}25 \cdot 0{,}75} = \sqrt{2{,}25} = 1{,}5$.</p>
+      <p><b>b)</b> $P(X = 3) = \binom{12}{3} \cdot 0{,}25^3 \cdot 0{,}75^9 = 220 \cdot 0{,}25^3 \cdot 0{,}75^9 \approx 0{,}258$. Für mindestens einen Gewinn über das Gegenereignis: $P(X \geq 1) = 1 - P(X = 0) = 1 - 0{,}75^{12} \approx 0{,}968$.</p>
+      <p><b>c)</b> Eine Standardabweichung um den Erwartungswert heißt $3 - 1{,}5 \leq X \leq 3 + 1{,}5$, also $1{,}5 \leq X \leq 4{,}5$. Da $X$ nur ganze Zahlen annimmt, ist das $P(2 \leq X \leq 4) = P(X = 2) + P(X = 3) + P(X = 4) \approx 0{,}684$.</p>
+      <p><b>d)</b> Gesucht ist das kleinste $n$ mit $1 - 0{,}75^{\,n} \geq 0{,}99$, also $0{,}75^{\,n} \leq 0{,}01$. Logarithmieren: $n \geq \dfrac{\ln 0{,}01}{\ln 0{,}75} \approx 16{,}01$. Da $n$ ganzzahlig ist, werden <b>17 Lose</b> gebraucht.</p>
+      <p class="why">Beim Logarithmieren dreht sich das Ungleichheitszeichen um, weil $\ln 0{,}75$ negativ ist. Und $16{,}01$ wird <b>aufgerundet</b> — $16$ Lose reichen noch nicht ganz.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Lohnt sich die Bude noch?</h3>
+      <p><b>a)</b> $H_0$: $p \geq 0{,}25$ („mindestens jedes vierte Los gewinnt“), $H_1$: $p &lt; 0{,}25$. Zweifel entstehen nur bei <b>zu wenigen</b> Gewinnen, deshalb liegt der Ablehnungsbereich links. Unter $H_0$ wird mit dem Randwert $p = 0{,}25$ gerechnet: $X$ ist binomialverteilt mit $n = 200$ und $p = 0{,}25$, $E(X) = 50$ und $\sigma = \sqrt{200 \cdot 0{,}25 \cdot 0{,}75} \approx 6{,}12$.</p>
+      <p><b>b)</b> Gesucht ist das größte $k$ mit $P(X \leq k) \leq 0{,}05$. Aus der Tabelle beziehungsweise mit dem Rechner: $P(X \leq 39) \approx 0{,}0405$ und $P(X \leq 40) \approx 0{,}0579$. Also ist $\overline{A} = \{0;\,1;\,\dots;\,39\}$ der Ablehnungsbereich, $A = \{40;\,\dots;\,200\}$ der Annahmebereich.</p>
+      <p><b>c)</b> Der beobachtete Wert $38$ liegt im Ablehnungsbereich. $H_0$ wird also verworfen: Auf dem Niveau von $5\ \%$ spricht die Stichprobe dagegen, dass mindestens jedes vierte Los gewinnt. Empfehlung: Der Veranstalter sollte die Werbeaussage zurücknehmen oder den Anteil der Gewinnlose erhöhen.</p>
+      <p><b>d)</b> Der Fehler 1. Art ist die Wahrscheinlichkeit, $H_0$ zu verwerfen, obwohl sie stimmt: $P(X \leq 39 \mid p = 0{,}25) \approx 0{,}0405$, also rund $4{,}1\ \%$ — weniger als die zugelassenen $5\ \%$, weil $X$ nur ganze Werte annimmt. Der Fehler 2. Art wäre: Der Anteil der Gewinnlose liegt tatsächlich unter $25\ \%$, die Stichprobe ergibt aber $40$ oder mehr Gewinne — die Werbeaussage bliebe unbeanstandet, obwohl sie falsch ist.</p>
+      <p class="why">Das Signifikanzniveau wird <b>nicht</b> ausgeschöpft. $5\ \%$ ist eine Schranke, die tatsächliche Irrtumswahrscheinlichkeit ist der Wert an der Grenze des Ablehnungsbereichs — hier $4{,}1\ \%$. Wer $k = 40$ nimmt, überschreitet mit $5{,}8\ \%$ das Niveau.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+// Per task its own solution, right under the task (Doc, 07.09.2026). The block
+// is copied from the solutions section on first click - after KaTeX has run, so
+// the formulas come along rendered. The original stays where it is: the
+// solutions page in print and the big toggle above keep working unchanged.
+document.querySelectorAll('.task .solbtn').forEach((btn, i) => {
+  let box = null;
+  btn.onclick = () => {
+    if (!box) {
+      const src = document.querySelectorAll('#sol .sol')[i];
+      if (!src) return;
+      box = src.cloneNode(true);
+      box.className = 'sol solinline';
+      box.hidden = true;
+      btn.after(box);
+    }
+    box.hidden = !box.hidden;
+    btn.textContent = box.hidden ? 'Lösung anzeigen' : 'Lösung verbergen';
+  };
+});
+</script>
+</body>
+</html>

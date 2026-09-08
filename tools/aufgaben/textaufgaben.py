@@ -40,20 +40,36 @@ def markup(text):
 
 
 class Sheet:
-    def __init__(self, name, title, kw, klasse="Berufliches Gymnasium · Klasse 11"):
+    """One worksheet.
+
+    kind/suffix/sub let the same layout carry a second series next to the weekly
+    Textaufgaben - the Abitur training sheets (Doc, 08.09.2026). Everything else,
+    including the figures, is shared."""
+
+    def __init__(self, name, title, kw=None, klasse="Berufliches Gymnasium · Klasse 11",
+                 kind="Textaufgaben", suffix="-textaufgaben", sub=None, desc=None,
+                 plan=("../svp/mathe/mathe11.html", "Zum Plan")):
         assert re.fullmatch(r"[a-z0-9-]+", name), "lowercase names only: " + name
         self.name, self.title, self.kw, self.klasse = name, title, kw, klasse
+        self.kind, self.suffix, self.sub, self.desc, self.plan = kind, suffix, sub, desc, plan
         self.tasks = []
         self.verifiers = []
 
-    def task(self, title, afb, intro, parts, solution, falle=None):
+    def task(self, title, afb, intro, parts, solution, falle=None, figs=None, solfigs=None):
+        """figs/solfigs: list of (svg, caption) - drawn under the intro resp. the solution."""
         assert afb in AFB, "afb must be 1, 2 or 3"
         assert 2 <= len(parts) <= 4, "2 to 4 parts per task"
         assert len(parts) == len(solution), "one solution paragraph per part (%s)" % title
         for s in solution:
             assert s.strip(), "empty solution in " + title
+        for f in list(figs or []) + list(solfigs or []):
+            assert isinstance(f, tuple) and len(f) == 2, "figure must be (svg, caption)"
+            assert f[0].lstrip().startswith("<svg"), "figure is not an SVG in " + title
+            # a $ inside a figure would leave an unpaired one behind for KaTeX
+            assert "$" not in f[0] and "$" not in (f[1] or ""), "no $ inside a figure: " + title
         self.tasks.append(dict(title=title, afb=afb, intro=intro, parts=list(parts),
-                               solution=list(solution), falle=falle))
+                               solution=list(solution), falle=falle,
+                               figs=list(figs or []), solfigs=list(solfigs or [])))
 
     def verify(self, fn):
         """Register a function with plain asserts - every number in the solutions gets
@@ -61,17 +77,27 @@ class Sheet:
         self.verifiers.append(fn)
 
     # ---------------------------------------------------------------- output --
+    @staticmethod
+    def _figs_html(figs, indent="    "):
+        out = []
+        for svg, caption in figs:
+            cap = ('\n%s  <figcaption>%s</figcaption>' % (indent, markup(caption))) if caption else ""
+            out.append('%s<figure class="fig">\n%s  %s%s\n%s</figure>'
+                       % (indent, indent, svg, cap, indent))
+        return ("\n" + "\n".join(out)) if out else ""
+
     def _task_html(self, n, t):
         num, name = AFB[t["afb"]]
         parts = "\n".join("      <li>%s</li>" % markup(p) for p in t["parts"])
         return """  <section class="task afb%d">
     <div class="task-head"><h2>%s</h2><span class="afb">AFB <b>%s</b> · %s</span></div>
-    <p>%s</p>
+    <p>%s</p>%s
     <ol class="parts">
 %s
     </ol>
     <button class="solbtn" type="button">Lösung anzeigen</button>
-  </section>""" % (t["afb"], markup(t["title"]), num, name, markup(t["intro"]), parts)
+  </section>""" % (t["afb"], markup(t["title"]), num, name, markup(t["intro"]),
+                   self._figs_html(t["figs"]), parts)
 
     def _sol_html(self, n, t):
         lines = "\n".join('      <p><b>%s)</b> %s</p>' % ("abcd"[i], markup(s))
@@ -79,19 +105,25 @@ class Sheet:
         falle = ('\n      <p class="why">%s</p>' % markup(t["falle"])) if t["falle"] else ""
         return """    <div class="sol">
       <h3>%d · %s</h3>
-%s%s
-    </div>""" % (n, markup(t["title"]), lines, falle)
+%s%s%s
+    </div>""" % (n, markup(t["title"]), lines, self._figs_html(t["solfigs"], "      "), falle)
 
     def render(self):
         assert [t["afb"] for t in self.tasks] == [1, 2, 3], "exactly three tasks, AFB I, II, III in this order"
         tasks = "\n\n".join(self._task_html(i + 1, t) for i, t in enumerate(self.tasks))
         sols = "\n\n".join(self._sol_html(i + 1, t) for i, t in enumerate(self.tasks))
-        sub = "%s · KW %s · drei Aufgaben, Anforderungsbereiche I bis III" % (self.klasse, self.kw)
-        desc = ("Drei Textaufgaben mit Lösungen zu „%s“, KW %s: je eine Aufgabe für die "
-                "Anforderungsbereiche I, II und III." % (self.title, self.kw))
+        week = (" · KW %s" % self.kw) if self.kw else ""
+        sub = self.sub or ("%s%s · drei Aufgaben, Anforderungsbereiche I bis III"
+                           % (self.klasse, week))
+        desc = self.desc or ("Drei Textaufgaben mit Lösungen zu „%s“%s: je eine Aufgabe für die "
+                             "Anforderungsbereiche I, II und III."
+                             % (self.title, (", KW %s" % self.kw) if self.kw else ""))
         return (PAGE.replace("__TITLE__", _html.escape(self.title, quote=False))
+                    .replace("__KIND__", _html.escape(self.kind, quote=False))
                     .replace("__DESC__", _html.escape(desc, quote=True))
                     .replace("__SUB__", _html.escape(sub, quote=False))
+                    .replace("__PLANHREF__", _html.escape(self.plan[0], quote=True))
+                    .replace("__PLANTEXT__", _html.escape(self.plan[1], quote=False))
                     .replace("__KATEX__", KATEX)
                     .replace("__CSS__", CSS)
                     .replace("__TASKS__", tasks)
@@ -106,7 +138,7 @@ class Sheet:
         for ch in page:
             assert ch == "\n" or ch == "\t" or ord(ch) >= 32, "control character in text (missing r-prefix?)"
         os.makedirs(OUT_DIR, exist_ok=True)
-        path = path or os.path.join(OUT_DIR, self.name + "-textaufgaben.html")
+        path = path or os.path.join(OUT_DIR, self.name + self.suffix + ".html")
         with open(path, "w", encoding="utf-8") as f:
             f.write(page)
         print("%s  (%d Aufgaben, %d Teilaufgaben)" % (os.path.normpath(path), len(self.tasks),
@@ -159,6 +191,14 @@ ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left
   color:var(--red);font-weight:700}
 .hint{color:var(--muted);font-size:15px;margin-top:8px}
 b{font-weight:700;color:var(--ink)}
+
+/* figures: drawn as inline SVG by tools/aufgaben/svgfig.py, never as a bitmap -
+   sharp on screen and in print, and the coordinates come from the same numbers
+   that verify() checks (Doc, 08.09.2026). */
+figure.fig{margin:14px 0 4px;text-align:center;break-inside:avoid;page-break-inside:avoid}
+figure.fig svg{max-width:100%;height:auto;display:inline-block;vertical-align:top}
+figure.fig figcaption{margin-top:4px;color:var(--muted);font-size:13.5px}
+.sol figure.fig{margin:10px 0 6px}
 
 /* solutions */
 #sol{margin-top:36px}
@@ -256,7 +296,7 @@ PAGE = """<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Textaufgaben: __TITLE__ — Doc Alvers Mathe-Labor</title>
+<title>__KIND__: __TITLE__ — Doc Alvers Mathe-Labor</title>
 <meta name="description" content="__DESC__">
 <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
 <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
@@ -268,12 +308,12 @@ PAGE = """<!DOCTYPE html>
 <body>
 <main class="sheet">
   <div class="brand">Doc Alvers Mathe-Labor</div>
-  <h1>Textaufgaben: __TITLE__</h1>
+  <h1>__KIND__: __TITLE__</h1>
   <div class="sub">__SUB__</div>
   <div class="rules"></div>
   <div class="tools">
     <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
-    <a class="btn" href="../svp/mathe/mathe11.html">Zum Plan</a>
+    <a class="btn" href="__PLANHREF__">__PLANTEXT__</a>
   </div>
 
 __TASKS__
