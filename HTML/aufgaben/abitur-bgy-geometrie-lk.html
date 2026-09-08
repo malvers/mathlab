@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Abitur-Training: Analytische Geometrie — Leistungskurs — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Abitur-Training Mathematik BGY Leistungskurs, Analytische Geometrie: Walmdachhaus im Koordinatensystem, Teilungsverhältnis einer Raumdiagonale, A/V-Verhältnis und Ebenenschar, mit Lösungen und Abbildungen.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* figures: drawn as inline SVG by tools/aufgaben/svgfig.py, never as a bitmap -
+   sharp on screen and in print, and the coordinates come from the same numbers
+   that verify() checks (Doc, 08.09.2026). */
+figure.fig{margin:14px 0 4px;text-align:center;break-inside:avoid;page-break-inside:avoid}
+figure.fig svg{max-width:100%;height:auto;display:inline-block;vertical-align:top}
+figure.fig figcaption{margin-top:4px;color:var(--muted);font-size:13.5px}
+.sol figure.fig{margin:10px 0 6px}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* per-task solution: button under the task, the solution opens right there
+   (Doc, 07.09.2026). The copy is built by JS from the solutions section, so
+   the sheet keeps exactly one source for every solution text. */
+.solbtn{font-family:Orbitron,system-ui,sans-serif;font-size:11px;letter-spacing:1px;
+  color:var(--green);background:transparent;cursor:pointer;margin-top:14px;
+  border:.75px solid rgba(121,158,49,.5);border-radius:4px;padding:7px 12px}
+.solbtn:hover{border-color:var(--green);background:rgba(121,158,49,.08)}
+.solinline{margin:14px 0 0;background:rgba(121,158,49,.07)}
+.solinline h3{display:none}
+.solinline[hidden]{display:none}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  /* the inline copies stay out of print - the solutions keep their own page */
+  .solbtn,.solinline{display:none!important}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Abitur-Training: Analytische Geometrie — Leistungskurs</h1>
+  <div class="sub">Berufliches Gymnasium · Leistungskurs · Pflichtaufgabe · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/abitur.html">Zur Übersicht</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Das Wohnhaus mit Walmdach</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Ein Wohnhaus mit Walmdach wird modellhaft durch den Körper mit den Eckpunkten $A(0 \mid 0 \mid 0)$, $B(6 \mid 0 \mid 0)$, $C(6 \mid 10 \mid 0)$, $D(0 \mid 10 \mid 0)$, $E(0 \mid 0 \mid 4)$, $F(6 \mid 0 \mid 4)$, $G(6 \mid 10 \mid 4)$ und $H$ beschrieben. Das Rechteck $ABCD$ ist die Grundfläche, das Rechteck $EFGH$ die Traufebene. Die Firstlinie verbindet $P(3 \mid 3 \mid 6)$ mit $Q(3 \mid 7 \mid 6)$. Die $x$-$y$-Ebene ist der waagerechte Baugrund, eine Längeneinheit entspricht einem Meter.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 610 400" width="610" height="400" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schraegbild des Wohnhauses mit Walmdach und den Eckpunkten A bis H sowie P und Q"><defs><marker id="f1-ar-6E7E9F" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#6E7E9F"/></marker></defs><line x1="145" y1="252" x2="51.9" y2="371.7" stroke="#6E7E9F" stroke-width="1.1" marker-end="url(#f1-ar-6E7E9F)"/><text x="41.9" y="385.7" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#6E7E9F" text-anchor="end" font-style="italic">x</text><line x1="145" y1="252" x2="582" y2="252" stroke="#6E7E9F" stroke-width="1.1" marker-end="url(#f1-ar-6E7E9F)"/><text x="592" y="266" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#6E7E9F" text-anchor="start" font-style="italic">y</text><line x1="145" y1="252" x2="145" y2="24" stroke="#6E7E9F" stroke-width="1.1" marker-end="url(#f1-ar-6E7E9F)"/><text x="155" y="20" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#6E7E9F" text-anchor="start" font-style="italic">z</text><path d="M 65.2 202.6 L 445.2 202.6 L 371.1 75.3 L 219.1 75.3 Z" fill="#F5C242" opacity="0.34"/><path d="M 145 100 L 65.2 202.6 L 219.1 75.3 Z" fill="#F5C242" opacity="0.22"/><path d="M 525 100 L 445.2 202.6 L 371.1 75.3 Z" fill="#F5C242" opacity="0.22"/><path d="M 65.2 354.6 L 445.2 354.6 L 445.2 202.6 L 65.2 202.6 Z" fill="#799E31" opacity="0.16"/><path d="M 525 252 L 445.2 354.6 L 445.2 202.6 L 525 100 Z" fill="#B02418" opacity="0.1"/><line x1="65.2" y1="354.6" x2="445.2" y2="354.6" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="445.2" y1="354.6" x2="525" y2="252" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="65.2" y1="354.6" x2="65.2" y2="202.6" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="445.2" y1="354.6" x2="445.2" y2="202.6" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="525" y1="252" x2="525" y2="100" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="145" y1="100" x2="65.2" y2="202.6" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="65.2" y1="202.6" x2="445.2" y2="202.6" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="445.2" y1="202.6" x2="525" y2="100" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="145" y1="100" x2="219.1" y2="75.3" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="65.2" y1="202.6" x2="219.1" y2="75.3" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="445.2" y1="202.6" x2="371.1" y2="75.3" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="525" y1="100" x2="371.1" y2="75.3" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="219.1" y1="75.3" x2="371.1" y2="75.3" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="145" y1="252" x2="65.2" y2="354.6" stroke="#6E7E9F" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="5 4"/><line x1="145" y1="252" x2="525" y2="252" stroke="#6E7E9F" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="5 4"/><line x1="145" y1="252" x2="145" y2="100" stroke="#6E7E9F" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="5 4"/><line x1="145" y1="100" x2="525" y2="100" stroke="#6E7E9F" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="5 4"/><circle cx="145" cy="252" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="138" y="245" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">A</text><circle cx="65.2" cy="354.6" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="57.2" y="359.6" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">B</text><circle cx="445.2" cy="354.6" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="452.2" y="369.6" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">C</text><circle cx="525" cy="252" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="532" y="267" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">D</text><circle cx="145" cy="100" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="137" y="105" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">E</text><circle cx="65.2" cy="202.6" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="57.2" y="207.6" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">F</text><circle cx="445.2" cy="202.6" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="452.2" y="217.6" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">G</text><circle cx="525" cy="100" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="533" y="105" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">H</text><circle cx="219.1" cy="75.3" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="212.1" y="68.3" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">P</text><circle cx="371.1" cy="75.3" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="378.1" y="68.3" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Q</text><text x="295.1" y="55.3" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">First</text></svg>
+      <figcaption>Das Wohnhaus im Koordinatensystem. Nur die Ecke A liegt verdeckt; ihre Kanten und die verdeckte Traufkante sind gestrichelt.</figcaption>
+    </figure>
+    <ol class="parts">
+      <li>Ergänzen Sie die Koordinaten des fehlenden Eckpunktes $H$ und geben Sie die Länge der Firstlinie $\overline{PQ}$ an.</li>
+      <li>Weisen Sie rechnerisch nach, dass die Wandfläche $BCGF$ ein Rechteck ist, und berechnen Sie ihren Flächeninhalt.</li>
+      <li>Weisen Sie nach, dass die Dachfläche $FGQP$ ein gleichschenkliges Trapez, aber kein Parallelogramm ist.</li>
+      <li>Berechnen Sie mithilfe des Kreuzprodukts den Flächeninhalt der Dachfläche $FGQP$ und den des Walmdreiecks $EFP$. Geben Sie damit die gesamte Dachfläche an.</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Ebene, Raumdiagonale und Kompaktheit</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Betrachtet wird weiterhin das Wohnhaus aus Aufgabe 1. Die Punkte $B$, $D$ und $E$ legen eine Ebene $\sigma$ fest, die in der Ecke bei $A$ ein Stück des Baukörpers abschneidet. Die Strecke von $A$ nach $G$ ist die Raumdiagonale des quaderförmigen Wohnteils $ABCDEFGH$.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 610 400" width="610" height="400" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Die Ebene durch B, D und E schneidet die Raumdiagonale von A nach G im Punkt S"><defs><marker id="f2-ar-6E7E9F" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#6E7E9F"/></marker></defs><line x1="145" y1="252" x2="51.9" y2="371.7" stroke="#6E7E9F" stroke-width="1.1" marker-end="url(#f2-ar-6E7E9F)"/><text x="41.9" y="385.7" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#6E7E9F" text-anchor="end" font-style="italic">x</text><line x1="145" y1="252" x2="582" y2="252" stroke="#6E7E9F" stroke-width="1.1" marker-end="url(#f2-ar-6E7E9F)"/><text x="592" y="266" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#6E7E9F" text-anchor="start" font-style="italic">y</text><line x1="145" y1="252" x2="145" y2="24" stroke="#6E7E9F" stroke-width="1.1" marker-end="url(#f2-ar-6E7E9F)"/><text x="155" y="20" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#6E7E9F" text-anchor="start" font-style="italic">z</text><path d="M 65.2 354.6 L 525 252 L 145 100 Z" fill="#799E31" opacity="0.3"/><line x1="65.2" y1="354.6" x2="445.2" y2="354.6" stroke="#6E7E9F" stroke-width="1.1" stroke-linecap="round"/><line x1="445.2" y1="354.6" x2="525" y2="252" stroke="#6E7E9F" stroke-width="1.1" stroke-linecap="round"/><line x1="65.2" y1="354.6" x2="65.2" y2="202.6" stroke="#6E7E9F" stroke-width="1.1" stroke-linecap="round"/><line x1="445.2" y1="354.6" x2="445.2" y2="202.6" stroke="#6E7E9F" stroke-width="1.1" stroke-linecap="round"/><line x1="525" y1="252" x2="525" y2="100" stroke="#6E7E9F" stroke-width="1.1" stroke-linecap="round"/><line x1="145" y1="100" x2="65.2" y2="202.6" stroke="#6E7E9F" stroke-width="1.1" stroke-linecap="round"/><line x1="65.2" y1="202.6" x2="445.2" y2="202.6" stroke="#6E7E9F" stroke-width="1.1" stroke-linecap="round"/><line x1="445.2" y1="202.6" x2="525" y2="100" stroke="#6E7E9F" stroke-width="1.1" stroke-linecap="round"/><line x1="145" y1="100" x2="219.1" y2="75.3" stroke="#6E7E9F" stroke-width="1.1" stroke-linecap="round"/><line x1="65.2" y1="202.6" x2="219.1" y2="75.3" stroke="#6E7E9F" stroke-width="1.1" stroke-linecap="round"/><line x1="445.2" y1="202.6" x2="371.1" y2="75.3" stroke="#6E7E9F" stroke-width="1.1" stroke-linecap="round"/><line x1="525" y1="100" x2="371.1" y2="75.3" stroke="#6E7E9F" stroke-width="1.1" stroke-linecap="round"/><line x1="219.1" y1="75.3" x2="371.1" y2="75.3" stroke="#6E7E9F" stroke-width="1.1" stroke-linecap="round"/><line x1="145" y1="252" x2="65.2" y2="354.6" stroke="#6E7E9F" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="5 4"/><line x1="145" y1="252" x2="525" y2="252" stroke="#6E7E9F" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="5 4"/><line x1="145" y1="252" x2="145" y2="100" stroke="#6E7E9F" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="5 4"/><line x1="145" y1="100" x2="525" y2="100" stroke="#6E7E9F" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="5 4"/><path d="M 65.2 354.6 L 525 252 L 145 100 Z" fill="none" stroke="#799E31" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><line x1="145" y1="252" x2="445.2" y2="202.6" stroke="#B02418" stroke-width="2.0" stroke-linecap="round"/><circle cx="145" cy="252" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="138" y="245" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">A</text><circle cx="65.2" cy="354.6" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="57.2" y="359.6" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">B</text><circle cx="525" cy="252" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="532" y="267" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">D</text><circle cx="145" cy="100" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="137" y="105" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">E</text><circle cx="445.2" cy="202.6" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="453.2" y="207.6" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">G</text><circle cx="245.07" cy="235.53" r="3.4" fill="#B02418" stroke="#FFFFFF" stroke-width="1.4"/><text x="245.07" y="226.53" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">S</text><text x="238.1" y="280.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#799E31" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Ebene BDE</text></svg>
+      <figcaption>Die Ebene durch B, D und E schneidet die Ecke bei A ab. Der Schnittpunkt S liegt auf der roten Raumdiagonale von A nach G.</figcaption>
+    </figure>
+    <ol class="parts">
+      <li>Weisen Sie nach, dass $\sigma: 10x + 6y + 15z = 60$ eine Gleichung der Ebene durch $B$, $D$ und $E$ ist.</li>
+      <li>Berechnen Sie die Größe des Winkels, unter dem die Raumdiagonale $\overline{AG}$ die Ebene $\sigma$ schneidet.</li>
+      <li>Die Ebene $\sigma$ schneidet die Raumdiagonale $\overline{AG}$ im Punkt $S$. Bestimmen Sie die Koordinaten von $S$ und das Verhältnis, in dem $S$ die Strecke $\overline{AG}$ teilt.</li>
+      <li>Berechnen Sie das Volumen des Wohnhauses und vergleichen Sie sein Verhältnis von Oberfläche zu Volumen mit dem eines Flachdachbaus gleicher Grundfläche und gleichen Volumens. Zur Oberfläche zählen Bodenplatte, Wände und Dachflächen.</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Die Ebenenschar am First</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Die Firstlinie liegt auf der Geraden $g$ durch $P(3 \mid 3 \mid 6)$ und $Q(3 \mid 7 \mid 6)$. Für jede reelle Zahl $t$ ist durch $E_t: t \cdot x + z = 3t + 6$ eine Ebene gegeben.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 500 486" width="500" height="486" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schnitt senkrecht zur Firstlinie: die Ebenen der Schar erscheinen als Geraden durch den Firstpunkt"><defs><clipPath id="f4-clip"><rect x="35" y="15" width="442" height="442"/></clipPath><marker id="f4-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="56" y1="456" x2="56" y2="16" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="96" y1="456" x2="96" y2="16" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="136" y1="456" x2="136" y2="16" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="176" y1="456" x2="176" y2="16" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="216" y1="456" x2="216" y2="16" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="256" y1="456" x2="256" y2="16" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="296" y1="456" x2="296" y2="16" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="336" y1="456" x2="336" y2="16" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="376" y1="456" x2="376" y2="16" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="416" y1="456" x2="416" y2="16" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="456" y1="456" x2="456" y2="16" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="36" y1="436" x2="476" y2="436" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="36" y1="396" x2="476" y2="396" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="36" y1="356" x2="476" y2="356" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="36" y1="316" x2="476" y2="316" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="36" y1="276" x2="476" y2="276" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="36" y1="236" x2="476" y2="236" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="36" y1="196" x2="476" y2="196" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="36" y1="156" x2="476" y2="156" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="36" y1="116" x2="476" y2="116" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="36" y1="76" x2="476" y2="76" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="36" y1="36" x2="476" y2="36" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="36" y1="396" x2="476" y2="396" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f4-ar-0E244E)"/><line x1="96" y1="456" x2="96" y2="16" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f4-ar-0E244E)"/><text x="478" y="412" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">x</text><text x="84" y="14" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">z</text><text x="89" y="411" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="56" y1="392.5" x2="56" y2="399.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="56" y="412" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-1</text><line x1="136" y1="392.5" x2="136" y2="399.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="136" y="412" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">1</text><line x1="176" y1="392.5" x2="176" y2="399.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="176" y="412" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">2</text><line x1="216" y1="392.5" x2="216" y2="399.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="216" y="412" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">3</text><line x1="256" y1="392.5" x2="256" y2="399.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="256" y="412" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">4</text><line x1="296" y1="392.5" x2="296" y2="399.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="296" y="412" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">5</text><line x1="336" y1="392.5" x2="336" y2="399.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="336" y="412" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">6</text><line x1="376" y1="392.5" x2="376" y2="399.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="376" y="412" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">7</text><line x1="416" y1="392.5" x2="416" y2="399.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="416" y="412" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">8</text><line x1="456" y1="392.5" x2="456" y2="399.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="456" y="412" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">9</text><line x1="92.5" y1="436" x2="99.5" y2="436" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="89" y="440" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-1</text><line x1="92.5" y1="356" x2="99.5" y2="356" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="89" y="360" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">1</text><line x1="92.5" y1="316" x2="99.5" y2="316" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="89" y="320" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">2</text><line x1="92.5" y1="276" x2="99.5" y2="276" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="89" y="280" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">3</text><line x1="92.5" y1="236" x2="99.5" y2="236" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="89" y="240" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">4</text><line x1="92.5" y1="196" x2="99.5" y2="196" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="89" y="200" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">5</text><line x1="92.5" y1="156" x2="99.5" y2="156" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="89" y="160" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">6</text><line x1="92.5" y1="116" x2="99.5" y2="116" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="89" y="120" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">7</text><line x1="92.5" y1="76" x2="99.5" y2="76" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="89" y="80" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">8</text><line x1="92.5" y1="36" x2="99.5" y2="36" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="89" y="40" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">9</text><path d="M 96 396 L 336 396 L 336 236 L 216 156 L 96 236 Z" fill="#F5C242" opacity="0.18"/><path d="M 96 396 L 336 396 L 336 236 L 216 156 L 96 236 Z" fill="none" stroke="#F5C242" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/><line x1="100" y1="388" x2="276" y2="36" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round"/><line x1="48" y1="268" x2="396" y2="36" stroke="#B02418" stroke-width="1.9" stroke-linecap="round"/><line x1="48" y1="156" x2="464" y2="156" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round"/><line x1="48" y1="44" x2="464" y2="321.33" stroke="#B02418" stroke-width="1.9" stroke-linecap="round"/><line x1="156" y1="36" x2="332" y2="388" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round"/><text x="285" y="40" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="start" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">t = -2</text><text x="147" y="40" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">t = 2</text><text x="405" y="40" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#B02418" text-anchor="start" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">t = -2/3</text><text x="464" y="337.33" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#B02418" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">t = 2/3</text><text x="464" y="147" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">t = 0</text><line x1="216" y1="396" x2="216" y2="36" stroke="#799E31" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="5 4"/><text x="223" y="40" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#799E31" text-anchor="start" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">x = 3</text><circle cx="216" cy="156" r="4.2" fill="#B02418" stroke="#FFFFFF" stroke-width="1.4"/><line x1="200" y1="150" x2="158" y2="137" stroke="#6E7E9F" stroke-width="1.0" stroke-linecap="round"/><text x="138" y="134" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">First</text></svg>
+      <figcaption>Schnitt senkrecht zur Firstlinie. Jede Ebene der Schar erscheint als Gerade durch den Firstpunkt; die gestrichelte Senkrechte gehört zu keinem t.</figcaption>
+    </figure>
+    <ol class="parts">
+      <li>Weisen Sie nach, dass die Gerade $g$ in <b>jeder</b> Ebene $E_t$ liegt.</li>
+      <li>Geben Sie an, welche Eckpunkte des Hauses in der Ebene $E_{2/3}$ liegen, und deuten Sie das Ergebnis geometrisch.</li>
+      <li>Berechnen Sie den Schnittwinkel der beiden Dachebenen $E_{-2/3}$ und $E_{2/3}$ und geben Sie an, wie groß der Öffnungswinkel des Daches am First ist.</li>
+      <li>Beurteilen Sie die Aussage: „Jede Ebene, die die Firstgerade $g$ enthält, lässt sich in der Form $E_t$ schreiben.“</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Das Wohnhaus mit Walmdach</h3>
+      <p><b>a)</b> $H$ liegt senkrecht über $D$ auf Traufhöhe. Aus $\overrightarrow{DH} = \overrightarrow{AE} = \begin{pmatrix}0\\0\\4\end{pmatrix}$ folgt $H(0 \mid 10 \mid 4)$. Für die Firstlinie ist $\overrightarrow{PQ} = \begin{pmatrix}0\\4\\0\end{pmatrix}$, also $\overline{PQ} = 4$ m.</p>
+      <p><b>b)</b> $\overrightarrow{BC} = \begin{pmatrix}0\\10\\0\end{pmatrix}$ und $\overrightarrow{FG} = \begin{pmatrix}0\\10\\0\end{pmatrix}$ sind gleich, $BCGF$ ist also ein <b>Parallelogramm</b>. Mit $\overrightarrow{BF} = \begin{pmatrix}0\\0\\4\end{pmatrix}$ ist $\overrightarrow{BC} \circ \overrightarrow{BF} = 0 + 0 + 0 = 0$, benachbarte Seiten stehen also senkrecht aufeinander. Ein Parallelogramm mit einem rechten Winkel ist ein <b>Rechteck</b>; sein Flächeninhalt beträgt $10 \cdot 4 = 40$ m².</p>
+      <p><b>c)</b> Es ist $\overrightarrow{FG} = \begin{pmatrix}0\\10\\0\end{pmatrix}$ und $\overrightarrow{PQ} = \begin{pmatrix}0\\4\\0\end{pmatrix} = 0{,}4 \cdot \overrightarrow{FG}$: die beiden Seiten sind <b>parallel</b>, aber verschieden lang — ein Trapez und kein Parallelogramm. Für die Schenkel gilt $\overrightarrow{FP} = \begin{pmatrix}-3\\3\\2\end{pmatrix}$ und $\overrightarrow{GQ} = \begin{pmatrix}-3\\-3\\2\end{pmatrix}$ mit $\left|\overrightarrow{FP}\right| = \left|\overrightarrow{GQ}\right| = \sqrt{9+9+4} = \sqrt{22}$. Das Trapez ist also <b>gleichschenklig</b>.</p>
+      <p><b>d)</b> Zerlegung in die Dreiecke $FGQ$ und $FQP$ mit $\overrightarrow{FQ} = \begin{pmatrix}-3\\7\\2\end{pmatrix}$: $\overrightarrow{FG} \times \overrightarrow{FQ} = \begin{pmatrix}20\\0\\30\end{pmatrix}$ und $\overrightarrow{FQ} \times \overrightarrow{FP} = \begin{pmatrix}8\\0\\12\end{pmatrix}$, also $A_{FGQP} = \tfrac12\sqrt{1300} + \tfrac12\sqrt{208} = 5\sqrt{13} + 2\sqrt{13} = 7\sqrt{13} \approx 25{,}2$ m². Für das Walmdreieck ist $\overrightarrow{EF} \times \overrightarrow{EP} = \begin{pmatrix}0\\-12\\18\end{pmatrix}$ und damit $A_{EFP} = \tfrac12\sqrt{468} = 3\sqrt{13} \approx 10{,}8$ m². Beide Formen kommen doppelt vor: $A_{\text{Dach}} = 2 \cdot 7\sqrt{13} + 2 \cdot 3\sqrt{13} = 20\sqrt{13} \approx 72{,}1$ m².</p>
+      <p class="why">Die Höhe des Trapezes ist <b>nicht</b> die Schenkellänge $\sqrt{22} \approx 4{,}69$. Senkrecht zur Firstlinie gemessen ist die Dachbreite nur $\sqrt{13} \approx 3{,}61$ — wer mit $\sqrt{22}$ rechnet, erhält $32{,}8$ m² statt $25{,}2$ m² und macht das Dach um fast ein Drittel zu groß.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Ebene, Raumdiagonale und Kompaktheit</h3>
+      <p><b>a)</b> Mit $\overrightarrow{BD} = \begin{pmatrix}-6\\10\\0\end{pmatrix}$ und $\overrightarrow{BE} = \begin{pmatrix}-6\\0\\4\end{pmatrix}$ ist $\vec{n} = \overrightarrow{BD} \times \overrightarrow{BE} = \begin{pmatrix}40\\24\\60\end{pmatrix}$, gekürzt $\begin{pmatrix}10\\6\\15\end{pmatrix}$ — das sind die Koeffizienten der Gleichung. Einsetzen der drei Punkte: $B$: $10 \cdot 6 = 60$, $D$: $6 \cdot 10 = 60$, $E$: $15 \cdot 4 = 60$. Alle drei erfüllen die Gleichung, und da sie nicht auf einer Geraden liegen, ist $\sigma$ genau diese Ebene.</p>
+      <p><b>b)</b> Die Gerade durch $A$ und $G$ hat den Richtungsvektor $\vec{u} = \overrightarrow{AG} = \begin{pmatrix}6\\10\\4\end{pmatrix}$ mit $\left|\vec{u}\right| = \sqrt{36+100+16} = \sqrt{152} = 2\sqrt{38}$; weiter ist $\left|\vec{n}\right| = \sqrt{100+36+225} = \sqrt{361} = 19$ und $\vec{n} \circ \vec{u} = 60 + 60 + 60 = 180$. Für den Schnittwinkel zwischen Gerade und Ebene gilt $\sin \alpha = \dfrac{\left|\vec{n} \circ \vec{u}\right|}{\left|\vec{n}\right| \cdot \left|\vec{u}\right|} = \dfrac{180}{19 \cdot 2\sqrt{38}} = \dfrac{90}{19\sqrt{38}} \approx 0{,}7684$, also $\alpha \approx 50{,}2^\circ$.</p>
+      <p><b>c)</b> Die Gerade $AG$ lautet $\vec{x} = t \cdot \begin{pmatrix}6\\10\\4\end{pmatrix}$. Einsetzen in $\sigma$: $60t + 60t + 60t = 180t = 60$, also $t = \tfrac13$ und $S\left(2 \mid \tfrac{10}{3} \mid \tfrac43\right)$. Wegen $t = \tfrac13$ ist $\overline{AS} : \overline{SG} = \tfrac13 : \tfrac23$, das Teilungsverhältnis ist also <b>$1 : 2$</b>. Elegant sieht man das so: Da $ABCDEFGH$ ein Quader mit $A$ im Ursprung ist, gilt $\overrightarrow{OG} = \overrightarrow{OB} + \overrightarrow{OD} + \overrightarrow{OE}$, und $S$ mit $\overrightarrow{OS} = \tfrac13\left(\overrightarrow{OB} + \overrightarrow{OD} + \overrightarrow{OE}\right)$ ist gerade der Schwerpunkt des Dreiecks $BDE$.</p>
+      <p><b>d)</b> Der Wohnteil ist ein Quader: $V_1 = 6 \cdot 10 \cdot 4 = 240$ m³. Das Walmdach zerfällt in ein Prisma über der Firstlänge $4$ — Querschnitt ist ein Dreieck mit Grundseite $6$ und Höhe $2$, also $6$ m² — und zwei Pyramiden mit der Grundfläche $6 \cdot 3 = 18$ und der Höhe $2$: $V_2 = 6 \cdot 4 + 2 \cdot \tfrac13 \cdot 18 \cdot 2 = 24 + 24 = 48$ m³. Zusammen $V = 288$ m³. Zur Oberfläche tragen bei: Bodenplatte $60$ m², Wände $2 \cdot (6+10) \cdot 4 = 128$ m² und Dach $20\sqrt{13} \approx 72{,}1$ m² — zusammen $A \approx 260{,}1$ m², also $\dfrac{A}{V} \approx 0{,}90\ \text{m}^{-1}$. Der Flachdachbau hat die Höhe $h = \dfrac{288}{60} = 4{,}8$ m und damit $A = 2 \cdot 60 + 32 \cdot 4{,}8 = 273{,}6$ m², also $\dfrac{A}{V} = 0{,}95\ \text{m}^{-1}$. Obwohl das geneigte Dach zusätzliche Fläche kostet, ist das Walmdachhaus die <b>kompaktere</b> Bauform: es braucht rund $5\ \%$ weniger Hüllfläche je Kubikmeter.</p>
+      <figure class="fig">
+        <svg viewBox="0 0 560 336" width="560" height="336" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Beide Bauformen im Querschnitt, gleicher Massstab"><defs><clipPath id="f3-clip"><rect x="15" y="13" width="530" height="312"/></clipPath><marker id="f3-ar-6E7E9F" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#6E7E9F"/></marker></defs><line x1="27.48" y1="232.15" x2="532.52" y2="232.15" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round"/><path d="M 44.7 232.15 L 216.87 232.15 L 216.87 117.33 L 130.78 59.93 L 44.7 117.33 Z" fill="#F5C242" opacity="0.20"/><path d="M 44.7 232.15 L 216.87 232.15 L 216.87 117.33 L 130.78 59.93 L 44.7 117.33 Z" fill="none" stroke="#F5C242" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/><path d="M 343.13 232.15 L 515.3 232.15 L 515.3 94.37 L 343.13 94.37 Z" fill="#6E7E9F" opacity="0.20"/><path d="M 343.13 232.15 L 515.3 232.15 L 515.3 94.37 L 343.13 94.37 Z" fill="none" stroke="#6E7E9F" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/><text x="130.78" y="256.55" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#0E244E" text-anchor="middle">Walmdachhaus</text><text x="130.78" y="280.94" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="middle">V = 288 m³, A ≈ 260,1 m²</text><text x="130.78" y="305.34" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="middle">A : V ≈ 0,90 pro Meter</text><text x="429.22" y="256.55" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#0E244E" text-anchor="middle">Flachdachbau, h = 4,8 m</text><text x="429.22" y="280.94" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="middle">V = 288 m³, A = 273,6 m²</text><text x="429.22" y="305.34" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="middle">A : V = 0,95 pro Meter</text><line x1="44.7" y1="36.96" x2="216.87" y2="36.96" stroke="#6E7E9F" stroke-width="1.2" marker-end="url(#f3-ar-6E7E9F)"/><line x1="216.87" y1="36.96" x2="44.7" y2="36.96" stroke="#6E7E9F" stroke-width="1.2" marker-end="url(#f3-ar-6E7E9F)"/><text x="130.78" y="29.96" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">6 m</text><line x1="343.13" y1="36.96" x2="515.3" y2="36.96" stroke="#6E7E9F" stroke-width="1.2" marker-end="url(#f3-ar-6E7E9F)"/><line x1="515.3" y1="36.96" x2="343.13" y2="36.96" stroke="#6E7E9F" stroke-width="1.2" marker-end="url(#f3-ar-6E7E9F)"/><text x="429.22" y="29.96" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">6 m</text></svg>
+        <figcaption>Zu d): Beide Bauformen im Querschnitt. Der Flachdachbau muss für dasselbe Volumen 0,8 m höhere Wände bekommen — das kostet mehr Hüllfläche, als das geneigte Dach kostet.</figcaption>
+      </figure>
+      <p class="why">Beim Winkel zwischen Gerade und Ebene steht der <b>Sinus</b>, nicht der Kosinus. Wer $\cos\alpha = 0{,}7684$ setzt, erhält $39{,}8^\circ$ — das ist der Winkel zwischen Gerade und <b>Normale</b>. Beide ergänzen sich zu $90^\circ$.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Die Ebenenschar am First</h3>
+      <p><b>a)</b> Eine Gleichung von $g$ ist $\vec{x} = \begin{pmatrix}3\\3\\6\end{pmatrix} + r \cdot \begin{pmatrix}0\\1\\0\end{pmatrix}$, $r \in \mathbb{R}$; ein beliebiger Punkt von $g$ hat also die Koordinaten $(3 \mid 3+r \mid 6)$. Einsetzen in $E_t$ liefert $t \cdot 3 + 6 = 3t + 6$ — eine wahre Aussage, und zwar <b>unabhängig von $r$ und von $t$</b>. Der Grund: In der Gleichung von $E_t$ kommt $y$ nicht vor, und auf $g$ sind $x = 3$ und $z = 6$ konstant. Damit liegt $g$ in jeder Ebene der Schar.</p>
+      <p><b>b)</b> $E_{2/3}: \tfrac23 x + z = 8$, mit $3$ multipliziert $2x + 3z = 24$. Einsetzen: $F(6 \mid 0 \mid 4)$: $12 + 12 = 24$, $G(6 \mid 10 \mid 4)$: $24$, $P$: $6 + 18 = 24$, $Q$: $24$ — diese vier liegen in der Ebene. Für die übrigen Punkte kommt heraus: $A$ und $D$: $0$; $B$, $C$, $E$ und $H$: $12$. Die vier Punkte $F$, $G$, $Q$, $P$ sind genau die Ecken der großen Dachfläche aus Aufgabe 1: $E_{2/3}$ ist die <b>Ebene dieser Dachfläche</b>. Entsprechend gehört $t = -\tfrac23$ zur gegenüberliegenden Dachfläche $EHQP$.</p>
+      <p><b>c)</b> Aus $E_{-2/3}: -2x + 3z = 12$ und $E_{2/3}: 2x + 3z = 24$ liest man die Normalenvektoren $\vec{n_1} = \begin{pmatrix}-2\\0\\3\end{pmatrix}$ und $\vec{n_2} = \begin{pmatrix}2\\0\\3\end{pmatrix}$ ab. Es folgt $\cos \varphi = \dfrac{\left|\vec{n_1} \circ \vec{n_2}\right|}{\left|\vec{n_1}\right| \cdot \left|\vec{n_2}\right|} = \dfrac{\left|-4+9\right|}{\sqrt{13} \cdot \sqrt{13}} = \dfrac{5}{13} \approx 0{,}3846$, also $\varphi \approx 67{,}4^\circ$. Der Öffnungswinkel des Daches am First ist der Nebenwinkel dazu: $180^\circ - 67{,}4^\circ \approx 112{,}6^\circ$.</p>
+      <p><b>d)</b> Die Aussage ist <b>falsch</b>. Gegenbeispiel ist die Ebene $x = 3$: wegen $x_P = x_Q = 3$ enthält sie die ganze Gerade $g$. In jeder Gleichung $t \cdot x + z = 3t + 6$ hat $z$ jedoch den Koeffizienten $1$, und auch nach Multiplikation mit einem $\lambda \neq 0$ bleibt dieser Koeffizient von null verschieden — in $x = 3$ kommt $z$ überhaupt nicht vor. Die Schar erfasst also alle Ebenen durch $g$ <b>bis auf diese eine</b>; für $t \to \pm\infty$ nähern sich die Ebenen $E_t$ ihr nur an. Richtig wäre: Jede Ebene durch $g$, die nicht senkrecht zur $x$-$y$-Ebene steht, gehört zur Schar.</p>
+      <p class="why">Der Schnittwinkel zweier Ebenen ist stets der <b>spitze</b> Winkel, hier $67{,}4^\circ$. Wer ihn als Dachöffnung angibt, verwechselt ihn mit seinem Nebenwinkel $112{,}6^\circ$ — ein First mit $67^\circ$ gehörte zu einem deutlich steileren Dach als dem gezeichneten.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+// Per task its own solution, right under the task (Doc, 07.09.2026). The block
+// is copied from the solutions section on first click - after KaTeX has run, so
+// the formulas come along rendered. The original stays where it is: the
+// solutions page in print and the big toggle above keep working unchanged.
+document.querySelectorAll('.task .solbtn').forEach((btn, i) => {
+  let box = null;
+  btn.onclick = () => {
+    if (!box) {
+      const src = document.querySelectorAll('#sol .sol')[i];
+      if (!src) return;
+      box = src.cloneNode(true);
+      box.className = 'sol solinline';
+      box.hidden = true;
+      btn.after(box);
+    }
+    box.hidden = !box.hidden;
+    btn.textContent = box.hidden ? 'Lösung anzeigen' : 'Lösung verbergen';
+  };
+});
+</script>
+</body>
+</html>
