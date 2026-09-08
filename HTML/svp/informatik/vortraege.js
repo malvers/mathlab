@@ -210,7 +210,15 @@
     /* which ids the database really has rows for - a duplicated topic has none
        until they are created, see ensureRows() */
     const rowsIn = new Set();
-    const expanded = new Set();   /* rows whose third field was opened by hand */
+    /* Wie viele Namensfelder eine Zeile zeigt. Zwei sind die Regel, drei fuer
+       ein Trio - und eins fuer alle, die allein vortragen (Doc, 08.09.2026:
+       "wenn man alleine arbeiten moechte soll das auch gehen"). Nur im Browser,
+       nichts davon steht in der Datenbank. Belegte Plaetze bleiben immer
+       sichtbar, egal was hier steht: minFields setzt die Untergrenze. */
+    const fields = new Map();     /* id -> gewuenschte Feldzahl 1..3 */
+    const minFields = (i) => { const s = S(i); return s[2].taken ? 3 : s[1].taken ? 2 : 1; };
+    const fieldCount = (i) => Math.max(minFields(i), fields.get(i) || 2);
+    const allThree = () => list.length > 0 && list.every((e) => fieldCount(e.id) >= 3);
     const mine = new Set(Object.keys(loadJSON(MINE_KEY)));
     const markMine = (i, j) => { mine.add(i + '-' + j); const o = {}; mine.forEach((k) => { o[k] = 1; }); saveJSON(MINE_KEY, o); };
 
@@ -502,7 +510,7 @@
             const i = t.id;
             const lb = LB_LABEL[t.lb] || LB_LABEL[Object.keys(LB_LABEL)[0]];
             const taken = rowTaken(i);
-            const third = S(i)[2].taken || expanded.has(i);
+            const n = fieldCount(i);
             const inp = (j) => {
                 const ro = editable(i, j) ? '' : ' readonly';
                 const ttl = editable(i, j) ? '' : (unlocked()
@@ -514,13 +522,22 @@
                     '" value="' + esc(slotValue(i, j)) + '" placeholder="Name ' + (j + 1) + '"' + ro + ttl +
                     ' autocomplete="off" spellcheck="false" aria-label="Name ' + (j + 1) + ' für Thema ' + (pos + 1) + '"></div>';
             };
-            /* the toggle only ever ADDS a field; an occupied third slot cannot be
-               folded away, otherwise a name would vanish from the page */
-            const more = '<button type="button" class="vt-more" id="more-' + i + '"' +
-                (S(i)[2].taken ? ' hidden' : '') +
-                ' title="' + (third ? 'Drittes Namensfeld ausblenden' : 'Dritten Namen zulassen') + '"' +
-                ' aria-label="Drittes Namensfeld für Thema ' + (pos + 1) + '">' + (third ? '−' : '+') + '</button>';
-            return '<div class="vt-row' + (taken ? ' taken' : '') + (third ? ' three' : '') + '" id="row-' + i + '">' +
+            /* Ein Feld mehr geht bis drei, ein Feld weniger bis eins - aber nur,
+               solange das letzte Feld frei ist. Ein belegtes wegzuklappen wuerde
+               einen Namen von der Seite verschwinden lassen. Bei zwei Feldern
+               stehen darum beide Knoepfe nebeneinander. */
+            const canAdd = n < 3;
+            const canDrop = n > 1 && !S(i)[n - 1].taken;
+            const knopf = (id, sign, title) =>
+                '<button type="button" class="vt-more" id="' + id + '-' + i + '"' +
+                ' title="' + title + '"' +
+                ' aria-label="' + title + ' bei Thema ' + (pos + 1) + '">' + sign + '</button>';
+            const more = '<span class="vt-more-box">' +
+                (canDrop ? knopf('less', '−', 'Ein Namensfeld weniger') : '') +
+                (canAdd ? knopf('more', '+', 'Ein Namensfeld mehr') : '') +
+                '</span>';
+            return '<div class="vt-row' + (taken ? ' taken' : '') +
+                (n === 3 ? ' three' : n === 1 ? ' one' : '') + '" id="row-' + i + '">' +
                 /* Direct child of the card, not of .vt-nr: the badge is pinned to
                    the CARD's corner, and .vt-nr is itself positioned (it centres
                    the number), which would otherwise become its anchor. */
@@ -541,7 +558,7 @@
                                       : 'Bewertungsbogen ' + r[1] + ' für diesen Vortrag') +
                                 '">' + r[1] + (sent ? ' ✓' : '') + '</button>';
                         }).join('') + '</div>' +
-                '</div>' + inp(0) + inp(1) + (third ? inp(2) : '') + more +
+                '</div>' + inp(0) + (n > 1 ? inp(1) : '') + (n > 2 ? inp(2) : '') + more +
                 '</div>';
         }).join('');
 
@@ -559,13 +576,20 @@
                     flushAll();
                 });
             });
-            const btn = $('more-' + i);
-            if (btn) btn.addEventListener('click', async () => {
-                /* folding the column away must not swallow a half-typed name */
-                if (expanded.has(i)) { await flushSave(i, 2); expanded.delete(i); } else expanded.add(i);
+            const addBtn = $('more-' + i);
+            if (addBtn) addBtn.addEventListener('click', () => {
+                const next = Math.min(3, fieldCount(i) + 1);
+                fields.set(i, next);
                 render();
-                const el = $('name-' + i + '-2');
+                const el = $('name-' + i + '-' + (next - 1));
                 if (el && !el.readOnly) el.focus();
+            });
+            const lessBtn = $('less-' + i);
+            if (lessBtn) lessBtn.addEventListener('click', async () => {
+                /* folding a field away must not swallow a half-typed name */
+                await flushSave(i, fieldCount(i) - 1);
+                fields.set(i, Math.max(1, fieldCount(i) - 1));
+                render();
             });
             [0, 1, 2].forEach((j) => {
                 const el = $('name-' + i + '-' + j);
@@ -626,9 +650,9 @@
             failed.delete(i + '-' + j);
             dirty.delete(i + '-' + j);
             const o = {}; mine.forEach((k) => { o[k] = 1; }); saveJSON(MINE_KEY, o);
-            /* the third field was on screen because it was taken; keep it open,
+            /* the field was on screen because it was taken; keep it open,
                otherwise it vanishes under the hand that just cleared it */
-            if (j === 2) expanded.add(i);
+            fields.set(i, Math.max(fieldCount(i), j + 1));
             render();
             setStatus('Eintrag gelöscht.');
             const el = $('name-' + i + '-' + j);
@@ -774,11 +798,11 @@
 
     /* open on every topic, or fold every free one away again */
     async function toggleAllThird() {
-        if (expanded.size >= list.length) {
+        if (allThree()) {
             for (const e of list) await flushSave(e.id, 2);
-            expanded.clear();
+            list.forEach((e) => fields.set(e.id, 2));
         } else {
-            list.forEach((e) => expanded.add(e.id));
+            list.forEach((e) => fields.set(e.id, 3));
         }
         render();
     }
@@ -786,7 +810,7 @@
     function updateAllBtn() {
         const b = allBtn();
         if (!b) return;
-        const on = expanded.size >= list.length;
+        const on = allThree();
         b.textContent = on ? '− Dritter Name' : '+ Dritter Name';
         b.title = on
             ? 'Das dritte Namensfeld überall wieder ausblenden (belegte bleiben)'
@@ -959,7 +983,7 @@
         if (from < 0 || !removable(id)) return;
         readDom();
         list.splice(from, 1);
-        expanded.delete(id);
+        fields.delete(id);
         saveTopics();
         render();
     }
@@ -1143,7 +1167,7 @@
                 myNames.clear();
                 failed.clear();
                 dirty.clear();
-                expanded.clear();
+                fields.clear();
                 await refresh();
                 setStatus('Alle Namen dieser Klasse gelöscht.');
             } catch (e) { setStatus('Löschen fehlgeschlagen: ' + e.message, true); }
@@ -1380,9 +1404,11 @@
         'Namen an: die Namen h&auml;ngen am Thema, nicht an der Position. ' +
         'Die <b>Namen</b> liegen dagegen verschl&uuml;sselt in der Cloud: eintragen kann sie jeder, lesen kann sie ' +
         'nur Doc Alvers &mdash; angemeldet und mit dem Schl&uuml;ssel-Passwort. Ohne Schl&uuml;ssel zeigt die Liste ' +
-        'nur, welche Themen schon vergeben sind. Macht ein Thema ausnahmsweise ein Trio, blendet das <b>+</b> ' +
-        'am rechten Zeilenrand ein drittes Namensfeld ein &mdash; <b>+ Dritter Name</b> oben tut das f&uuml;r alle ' +
-        'Themen auf einmal. Beim Drucken erscheinen die Namen nur im entsperrten Zustand.';
+        'nur, welche Themen schon vergeben sind. Zwei Namen sind die Regel: <b>+</b> und <b>&minus;</b> am rechten ' +
+        'Zeilenrand machen daraus ein Trio oder einen einzelnen Vortrag &mdash; <b>+ Dritter Name</b> oben ' +
+        'schaltet das dritte Feld f&uuml;r alle Themen auf einmal ein. Ein Feld, in dem schon ein Name steht, ' +
+        'l&auml;sst sich nicht wegklappen; erst den Eintrag l&ouml;schen. ' +
+        'Beim Drucken erscheinen die Namen nur im entsperrten Zustand.';
 
     /* What this page is called in prose. On a data-groups page the real name
        only arrives with the .untis.json - until then the key stands in, with
