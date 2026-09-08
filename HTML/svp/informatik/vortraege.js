@@ -974,6 +974,80 @@
         await ensureRows();
     }
 
+    /* A talk of Doc's own, appended under the last card. Deliberately NOT tied
+       to the edit mode: the list grows during a lesson ("wir sind elf"), and
+       switching a whole page into edit mode just to get one more card was the
+       long way round (Doc, 08.09.2026). The card carries a placeholder title
+       and opens it for typing right away - only that one field, the rest of
+       the page stays as it was. */
+    const NEW_TITLE = 'Neues Thema';
+    const NEW_SUB = 'Leitfrage \u2026';
+
+    async function addCard() {
+        readDom();
+        const last = list[list.length - 1];
+        const card = {
+            id: nextId(),
+            lb: (last && last.lb) || Object.keys(LB_LABEL)[0],
+            title: NEW_TITLE,
+            sub: NEW_SUB
+        };
+        list.push(card);
+        S(card.id);
+        saveTopics();
+        render();
+        openCard(card.id);
+        const row = $('row-' + card.id);
+        if (row) row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        await ensureRows();
+    }
+
+    /* Open ONE card - title AND Leitfrage - for typing, whether or not the page
+       is in edit mode, and write it away when the caret leaves the card for
+       good. Tab carries on from the title into the Leitfrage. In edit mode
+       everything is editable anyway and "Fertig" does the saving, so there this
+       only sets the caret. */
+    function openCard(id) {
+        const row = $('row-' + id);
+        if (!row) return;
+        const cells = [row.querySelector('.vt-title-text'), row.querySelector('.vt-sub')].filter(Boolean);
+        if (!cells.length) return;
+        if (!editing) {
+            cells.forEach((c) => { c.contentEditable = 'true'; });
+            /* Tab lands in the Leitfrage while the placeholder still stands
+               there - typing has to replace it, not append to it. */
+            cells.forEach((c) => c.addEventListener('focus', () => {
+                const t = c.textContent.trim();
+                if (t === NEW_TITLE || t === NEW_SUB) selectAll(c);
+            }));
+            const stop = (ev) => {
+                /* moving from the title into the Leitfrage is not leaving */
+                if (ev.relatedTarget && row.contains(ev.relatedTarget)) return;
+                row.removeEventListener('focusout', stop);
+                if (editing) return;              /* edit mode took over meanwhile */
+                cells.forEach((c) => { c.contentEditable = 'false'; });
+                saveTopics();
+                render();
+            };
+            row.addEventListener('focusout', stop);
+        }
+        cells[0].focus();
+        selectAll(cells[0]);
+    }
+
+    /* typing replaces the placeholder instead of appending to it */
+    function selectAll(el) {
+        try {
+            const r = document.createRange();
+            r.selectNodeContents(el);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(r);
+        } catch (e) { }
+    }
+
+    window.vtAddTopic = function () { addCard(); };
+
     /* Only a copy can go again: a built-in topic stays in the list, and a topic
        somebody has signed up for is never quietly dropped. */
     function removable(id) { return id >= TOPICS.length && !rowTaken(id); }
@@ -1397,6 +1471,7 @@
        left untouched. */
     const HINT = 'Klick auf <b>&#9998; Bearbeiten</b> macht Thema und Leitfrage editierbar &mdash; gespeichert wird beim Klick auf ' +
         '&bdquo;Fertig&ldquo;, lokal in diesem Browser (localStorage), und gilt f&uuml;r beide Klassen gemeinsam. ' +
+        '<b>+ Vortrag hinzuf&uuml;gen</b> unter der Liste h&auml;ngt jederzeit ein weiteres Thema an &mdash; auch ohne Bearbeiten-Modus. ' +
         'Im Bearbeiten-Modus ist die <b>Nummer der Anfasser</b>: damit l&auml;sst sich die Reihenfolge ziehen. Die ' +
         '<b>rechte Maustaste</b> auf einer Karte dupliziert ein Thema, schiebt es eine Position h&ouml;her oder ' +
         'tiefer und nimmt eine Kopie wieder heraus. Eine Kopie bekommt <b>eigene, leere Namensfelder</b> &mdash; ' +
@@ -1467,12 +1542,20 @@
         box.className = 'vt-list';
         box.id = 'list';
 
+        /* Under the last card, not in the button bar at the top: a new talk
+           belongs at the end of the list, where the eye already is. */
+        const addBox = document.createElement('div');
+        addBox.className = 'vt-add';
+        addBox.innerHTML =
+            '<button class="action secondary" id="btn-add" ' +
+            'title="Ein weiteres Thema unter das letzte h&auml;ngen">+ Vortrag hinzuf&uuml;gen</button>';
+
         const hint = document.createElement('div');
         hint.className = 'vt-hint';
         hint.innerHTML = HINT;
 
         const frag = document.createDocumentFragment();
-        [head, bar, box, hint].forEach((el) => frag.appendChild(el));
+        [head, bar, box, addBox, hint].forEach((el) => frag.appendChild(el));
         document.body.insertBefore(frag, document.body.firstChild);
 
         const go = (id, fn) => { const b = $(id); if (b) b.addEventListener('click', fn); };
@@ -1480,6 +1563,7 @@
         go('btn-print', () => window.print());
         go('btn-edit', () => window.vtToggleEdit());
         go('btn-orig', () => window.vtOriginal());
+        go('btn-add', () => window.vtAddTopic());
         go('btn-reset', () => window.vtToggleConfirm(true));
         go('btn-wipe-yes', () => window.vtResetNames());
         go('btn-wipe-no', () => window.vtToggleConfirm(false));
