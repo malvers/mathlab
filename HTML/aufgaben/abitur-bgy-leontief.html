@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Abitur-Training: Leontief-Modell und Matrizen mit Parameter — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="Abitur-Training Mathematik BGY, Wahlpflicht 2: Leontief-Modell mit drei Sektoren, Technologiematrix, Leontief-Inverse und eine Matrix mit Parameter — mit Lösungen und Abbildungen.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--orange)}
+.task.afb2::before{background:var(--green)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+
+/* figures: drawn as inline SVG by tools/aufgaben/svgfig.py, never as a bitmap -
+   sharp on screen and in print, and the coordinates come from the same numbers
+   that verify() checks (Doc, 08.09.2026). */
+figure.fig{margin:14px 0 4px;text-align:center;break-inside:avoid;page-break-inside:avoid}
+figure.fig svg{max-width:100%;height:auto;display:inline-block;vertical-align:top}
+figure.fig figcaption{margin-top:4px;color:var(--muted);font-size:13.5px}
+.sol figure.fig{margin:10px 0 6px}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* per-task solution: button under the task, the solution opens right there
+   (Doc, 07.09.2026). The copy is built by JS from the solutions section, so
+   the sheet keeps exactly one source for every solution text. */
+.solbtn{font-family:Orbitron,system-ui,sans-serif;font-size:11px;letter-spacing:1px;
+  color:var(--green);background:transparent;cursor:pointer;margin-top:14px;
+  border:.75px solid rgba(121,158,49,.5);border-radius:4px;padding:7px 12px}
+.solbtn:hover{border-color:var(--green);background:rgba(121,158,49,.08)}
+.solinline{margin:14px 0 0;background:rgba(121,158,49,.07)}
+.solinline h3{display:none}
+.solinline[hidden]{display:none}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  /* the inline copies stay out of print - the solutions keep their own page */
+  .solbtn,.solinline{display:none!important}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>Abitur-Training: Leontief-Modell und Matrizen mit Parameter</h1>
+  <div class="sub">Berufliches Gymnasium · Wahlpflicht 2 · Leistungskurs · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/abitur.html">Zur Übersicht</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Drei Sektoren, eine Tabelle</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Eine Modellregion wird durch die drei Sektoren $S_1$ (Rohstoffe), $S_2$ (Energie) und $S_3$ (Fertigung) beschrieben. Die Tabelle zeigt, wie viele Mengeneinheiten (ME) jeder Sektor an die anderen liefert, wie viel in den Konsum geht und wie groß die Gesamtproduktion ist. Eine <b>Zeile</b> gehört zum liefernden Sektor, eine <b>Spalte</b> zum empfangenden.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 576 200" width="576" height="200" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Input-Output-Tabelle mit den Lieferungen zwischen drei Sektoren, dem Konsum und der Gesamtproduktion"><text x="288" y="20" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#6E7E9F" text-anchor="middle">Alle Angaben in Mengeneinheiten (ME)</text><rect x="9" y="34" width="93" height="39" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="55.5" y="53.5" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">von / an</text><rect x="102" y="34" width="93" height="39" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="148.5" y="53.5" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">S₁</text><rect x="195" y="34" width="93" height="39" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="241.5" y="53.5" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">S₂</text><rect x="288" y="34" width="93" height="39" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="334.5" y="53.5" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">S₃</text><rect x="381" y="34" width="93" height="39" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="427.5" y="53.5" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">Konsum</text><rect x="474" y="34" width="93" height="39" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="520.5" y="53.5" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">Gesamt</text><rect x="9" y="73" width="93" height="39" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="55.5" y="92.5" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">S₁</text><rect x="102" y="73" width="93" height="39" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="148.5" y="92.5" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">0</text><rect x="195" y="73" width="93" height="39" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="241.5" y="92.5" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">60</text><rect x="288" y="73" width="93" height="39" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="334.5" y="92.5" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">200</text><rect x="381" y="73" width="93" height="39" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="427.5" y="92.5" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">40</text><rect x="474" y="73" width="93" height="39" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="520.5" y="92.5" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">300</text><rect x="9" y="112" width="93" height="39" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="55.5" y="131.5" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">S₂</text><rect x="102" y="112" width="93" height="39" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="148.5" y="131.5" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">60</text><rect x="195" y="112" width="93" height="39" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="241.5" y="131.5" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">20</text><rect x="288" y="112" width="93" height="39" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="334.5" y="131.5" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">40</text><rect x="381" y="112" width="93" height="39" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="427.5" y="131.5" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">80</text><rect x="474" y="112" width="93" height="39" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="520.5" y="131.5" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">200</text><rect x="9" y="151" width="93" height="39" rx="0" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.0"/><text x="55.5" y="170.5" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">S₃</text><rect x="102" y="151" width="93" height="39" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="148.5" y="170.5" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">120</text><rect x="195" y="151" width="93" height="39" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="241.5" y="170.5" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">80</text><rect x="288" y="151" width="93" height="39" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="334.5" y="170.5" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">80</text><rect x="381" y="151" width="93" height="39" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="427.5" y="170.5" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">120</text><rect x="474" y="151" width="93" height="39" rx="0" fill="#FFFFFF" stroke="#0E244E" stroke-width="1.0"/><text x="520.5" y="170.5" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#2C3C60" text-anchor="middle" dominant-baseline="middle">400</text></svg>
+      <figcaption>Input-Output-Tabelle der drei Sektoren. Die Zeilensumme aus Lieferungen und Konsum ergibt jeweils die Gesamtproduktion.</figcaption>
+    </figure>
+    <figure class="fig">
+      <svg viewBox="0 0 620 398" width="620" height="398" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Verflechtungsdiagramm der drei Sektoren mit Lieferungen, Eigenverbrauch und Konsum"><defs><marker id="f2-ar-6E7E9F" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#6E7E9F"/></marker><marker id="f2-ar-B02418" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#B02418"/></marker></defs><rect x="117" y="80" width="96" height="56" rx="5" fill="#EEF2F8" stroke="#0E244E" stroke-width="1.3"/><text x="165" y="105" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">S₁</text><text x="165" y="123" font-family="Raleway, system-ui, sans-serif" font-size="10.5" fill="#6E7E9F" text-anchor="middle">300 ME</text><rect x="407" y="80" width="96" height="56" rx="5" fill="#FCF3D8" stroke="#0E244E" stroke-width="1.3"/><text x="455" y="105" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">S₂</text><text x="455" y="123" font-family="Raleway, system-ui, sans-serif" font-size="10.5" fill="#6E7E9F" text-anchor="middle">200 ME</text><rect x="252" y="257" width="96" height="56" rx="5" fill="#EAF1DC" stroke="#0E244E" stroke-width="1.3"/><text x="300" y="282" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" dominant-baseline="middle">S₃</text><text x="300" y="300" font-family="Raleway, system-ui, sans-serif" font-size="10.5" fill="#6E7E9F" text-anchor="middle">400 ME</text><line x1="222" y1="117" x2="398" y2="117" stroke="#6E7E9F" stroke-width="1.2" marker-end="url(#f2-ar-6E7E9F)"/><text x="310" y="134" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">60</text><line x1="398" y1="99" x2="222" y2="99" stroke="#6E7E9F" stroke-width="1.2" marker-end="url(#f2-ar-6E7E9F)"/><text x="310" y="90" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">60</text><line x1="184.66" y1="148.61" x2="266.03" y2="255.3" stroke="#6E7E9F" stroke-width="1.2" marker-end="url(#f2-ar-6E7E9F)"/><text x="215.01" y="213.84" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">200</text><line x1="280.34" y1="244.39" x2="198.97" y2="137.7" stroke="#6E7E9F" stroke-width="1.2" marker-end="url(#f2-ar-6E7E9F)"/><text x="249.99" y="187.16" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">120</text><line x1="417.78" y1="136.84" x2="323.68" y2="244.3" stroke="#6E7E9F" stroke-width="1.2" marker-end="url(#f2-ar-6E7E9F)"/><text x="360.95" y="186.01" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">40</text><line x1="337.22" y1="256.16" x2="431.32" y2="148.7" stroke="#6E7E9F" stroke-width="1.2" marker-end="url(#f2-ar-6E7E9F)"/><text x="394.05" y="214.99" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">80</text><path d="M 503.0 95.0 C 551.0 76.0, 551.0 140.0, 505.0 121.0" fill="none" stroke="#6E7E9F" stroke-width="1.2" marker-end="url(#f2-ar-6E7E9F)"/><text x="559" y="112" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">20</text><path d="M 287.0 313.0 C 266.0 357.0, 334.0 357.0, 313.0 315.0" fill="none" stroke="#6E7E9F" stroke-width="1.2" marker-end="url(#f2-ar-6E7E9F)"/><text x="300" y="373" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">80</text><line x1="165" y1="76" x2="165" y2="36" stroke="#B02418" stroke-width="1.3" marker-end="url(#f2-ar-B02418)"/><text x="178" y="56" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#B02418" text-anchor="start">40</text><text x="165" y="26" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#2C3C60" text-anchor="middle">Konsum</text><line x1="455" y1="76" x2="455" y2="36" stroke="#B02418" stroke-width="1.3" marker-end="url(#f2-ar-B02418)"/><text x="468" y="56" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#B02418" text-anchor="start">80</text><text x="455" y="26" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#2C3C60" text-anchor="middle">Konsum</text><line x1="352" y1="285" x2="440" y2="285" stroke="#B02418" stroke-width="1.3" marker-end="url(#f2-ar-B02418)"/><text x="396" y="276" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#B02418" text-anchor="middle">120</text><text x="448" y="289" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#2C3C60" text-anchor="start">Konsum</text><text x="8" y="388" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="start">Zahlen an den Pfeilen: Lieferungen in ME</text></svg>
+      <figcaption>Dasselbe Modell als Verflechtungsdiagramm. Die Schleifen an S₂ und S₃ sind der Eigenverbrauch, die roten Pfeile führen aus dem Modell heraus in den Konsum.</figcaption>
+    </figure>
+    <ol class="parts">
+      <li>Bestimmen Sie die Technologiematrix $A$ (Inputmatrix) des Modells.</li>
+      <li>Die letzte Spalte der Tabelle ist der Produktionsvektor $\vec{x}$. Bestätigen Sie mit $\vec{y} = (E - A) \cdot \vec{x}$, dass sich daraus genau die Konsumspalte der Tabelle ergibt.</li>
+      <li>Deuten Sie das Element $a_{13} = 0{,}5$ im Sachzusammenhang.</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Wenn die Nachfrage steigt</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Die Region rechnet mit einer neuen Endnachfrage $\vec{y}_2 = \begin{pmatrix}60\\100\\140\end{pmatrix}$, also mit je $20$ ME mehr in jedem Sektor. Gesucht ist die Gesamtproduktion, die diese Nachfrage möglich macht. Aus $\vec{x} = A \cdot \vec{x} + \vec{y}$ folgt $(E - A) \cdot \vec{x} = \vec{y}$ und daraus $\vec{x} = (E - A)^{-1} \cdot \vec{y}$. Die Matrix $(E - A)^{-1}$ heißt <b>Leontief-Inverse</b>; ihre Einträge werden mit $l_{ij}$ bezeichnet.</p>
+    <ol class="parts">
+      <li>Zeigen Sie, dass $E - A$ invertierbar ist, und geben Sie die Leontief-Inverse an.</li>
+      <li>Berechnen Sie die Gesamtproduktion $\vec{x}_2$ zur Nachfrage $\vec{y}_2$.</li>
+      <li>Deuten Sie das Element $l_{13} = 1{,}2$ im Sachzusammenhang.</li>
+      <li>Erklären Sie, warum sich die Mehrproduktion gegenüber Aufgabe 1 allein aus den Zeilensummen von $(E - A)^{-1}$ ablesen lässt, und geben Sie sie an.</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Eine Matrix mit Parameter</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Ob sich ein Verflechtungsmodell überhaupt umkehren lässt, entscheidet die Determinante. Für jede reelle Zahl $k$ sei $A_k = \begin{pmatrix}k &amp; 2 &amp; 0\\1 &amp; k &amp; 1\\0 &amp; 2 &amp; k\end{pmatrix}$ und $\vec{b} = \begin{pmatrix}2\\1\\2\end{pmatrix}$.</p>
+    <ol class="parts">
+      <li>Berechnen Sie $\det(A_k)$ in Abhängigkeit von $k$ und bestimmen Sie alle $k$, für die $A_k$ keine Inverse besitzt.</li>
+      <li>Bestimmen Sie für $k = 1$ die Lösung des Gleichungssystems $A_k \cdot \vec{x} = \vec{b}$.</li>
+      <li>Untersuchen Sie für die in a) gefundenen Werte von $k$, ob $A_k \cdot \vec{x} = \vec{b}$ keine oder unendlich viele Lösungen hat. Geben Sie die Lösungsmenge an, wo es unendlich viele sind.</li>
+      <li>Beurteilen Sie die Aussage: „Eine Matrix, deren Einträge alle positiv sind, ist immer invertierbar.“</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Drei Sektoren, eine Tabelle</h3>
+      <p><b>a)</b> Jede <b>Spalte</b> der Tabelle wird durch die Gesamtproduktion des Sektors geteilt, der über dieser Spalte steht: die Spalte $S_1$ durch $300$, die Spalte $S_2$ durch $200$, die Spalte $S_3$ durch $400$. Damit ist $A = \begin{pmatrix}0 &amp; 0{,}3 &amp; 0{,}5\\0{,}2 &amp; 0{,}1 &amp; 0{,}1\\0{,}4 &amp; 0{,}4 &amp; 0{,}2\end{pmatrix}$, denn zum Beispiel $a_{21} = \tfrac{60}{300} = 0{,}2$, $a_{32} = \tfrac{80}{200} = 0{,}4$ und $a_{13} = \tfrac{200}{400} = 0{,}5$.</p>
+      <p><b>b)</b> Mit $\vec{x} = \begin{pmatrix}300\\200\\400\end{pmatrix}$ und $E - A = \begin{pmatrix}1 &amp; -0{,}3 &amp; -0{,}5\\-0{,}2 &amp; 0{,}9 &amp; -0{,}1\\-0{,}4 &amp; -0{,}4 &amp; 0{,}8\end{pmatrix}$ wird zeilenweise multipliziert: $1 \cdot 300 - 0{,}3 \cdot 200 - 0{,}5 \cdot 400 = 300 - 60 - 200 = 40$, $-0{,}2 \cdot 300 + 0{,}9 \cdot 200 - 0{,}1 \cdot 400 = -60 + 180 - 40 = 80$ und $-0{,}4 \cdot 300 - 0{,}4 \cdot 200 + 0{,}8 \cdot 400 = -120 - 80 + 320 = 120$. Das ist genau die Konsumspalte der Tabelle.</p>
+      <p><b>c)</b> Für <b>eine</b> ME Gesamtproduktion des Sektors $S_3$ werden $0{,}5$ ME aus $S_1$ als Vorleistung gebraucht. In der Tabelle steht das als $200$ ME Lieferung bei einer Gesamtproduktion von $400$ ME: $S_3$ ist der Sektor, der am stärksten von den Rohstoffen abhängt.</p>
+      <p class="why">Geteilt wird <b>spaltenweise</b>, also durch die Gesamtproduktion des Sektors, der die Lieferung <b>erhält</b>: $a_{12} = \tfrac{60}{200} = 0{,}3$ und nicht $\tfrac{60}{300} = 0{,}2$. Wer zeilenweise teilt, bekommt die Outputmatrix — eine ganz andere Matrix. Mit ihr liefert $(E - A) \cdot \vec{x}$ in der ersten Zeile $-6\tfrac{2}{3}$ statt der $40$ ME Konsum.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Wenn die Nachfrage steigt</h3>
+      <p><b>a)</b> Entwicklung nach der ersten Zeile: $\det(E - A) = 1 \cdot \big(0{,}9 \cdot 0{,}8 - (-0{,}1) \cdot (-0{,}4)\big) - (-0{,}3) \cdot \big((-0{,}2) \cdot 0{,}8 - (-0{,}1) \cdot (-0{,}4)\big) + (-0{,}5) \cdot \big((-0{,}2) \cdot (-0{,}4) - 0{,}9 \cdot (-0{,}4)\big) = 1 \cdot 0{,}68 - (-0{,}3) \cdot (-0{,}2) + (-0{,}5) \cdot 0{,}44 = 0{,}68 - 0{,}06 - 0{,}22 = 0{,}4$. Wegen $0{,}4 \neq 0$ existiert die Inverse. Der Gauß-Jordan-Algorithmus mit dem Schema $(E - A \mid E)$ liefert $(E - A)^{-1} = \begin{pmatrix}1{,}7 &amp; 1{,}1 &amp; 1{,}2\\0{,}5 &amp; 1{,}5 &amp; 0{,}5\\1{,}1 &amp; 1{,}3 &amp; 2{,}1\end{pmatrix}$. Probe mit der ersten Zeile von $E - A$: $1 \cdot 1{,}7 - 0{,}3 \cdot 0{,}5 - 0{,}5 \cdot 1{,}1 = 1$ und $1 \cdot 1{,}1 - 0{,}3 \cdot 1{,}5 - 0{,}5 \cdot 1{,}3 = 0$.</p>
+      <p><b>b)</b> $\vec{x}_2 = (E - A)^{-1} \cdot \vec{y}_2$: $1{,}7 \cdot 60 + 1{,}1 \cdot 100 + 1{,}2 \cdot 140 = 102 + 110 + 168 = 380$, $0{,}5 \cdot 60 + 1{,}5 \cdot 100 + 0{,}5 \cdot 140 = 30 + 150 + 70 = 250$ und $1{,}1 \cdot 60 + 1{,}3 \cdot 100 + 2{,}1 \cdot 140 = 66 + 130 + 294 = 490$. Also $\vec{x}_2 = \begin{pmatrix}380\\250\\490\end{pmatrix}$ ME.</p>
+      <p><b>c)</b> Steigt die Endnachfrage nach dem Gut des Sektors $S_3$ um <b>eine</b> ME, so muss $S_1$ insgesamt $1{,}2$ ME mehr produzieren. Darin stecken die direkte Lieferung an $S_3$ und alle indirekten Wege, auf denen $S_1$ über $S_2$ und $S_3$ noch einmal gebraucht wird — deshalb ist $l_{13} = 1{,}2$ größer als $a_{13} = 0{,}5$.</p>
+      <p><b>d)</b> Die Abbildung $\vec{y} \mapsto (E - A)^{-1} \cdot \vec{y}$ ist linear, also ist $\Delta\vec{x} = (E - A)^{-1} \cdot \Delta\vec{y}$. Mit $\Delta\vec{y} = \begin{pmatrix}20\\20\\20\end{pmatrix}$ wird jede Zeile der Inversen einfach aufsummiert und mit $20$ multipliziert. Die Zeilensummen sind $1{,}7 + 1{,}1 + 1{,}2 = 4$, $\;0{,}5 + 1{,}5 + 0{,}5 = 2{,}5$ und $1{,}1 + 1{,}3 + 2{,}1 = 4{,}5$, also $\Delta\vec{x} = \begin{pmatrix}80\\50\\90\end{pmatrix}$ ME. Das passt zu b): $380 - 300 = 80$, $\;250 - 200 = 50$, $\;490 - 400 = 90$.</p>
+      <figure class="fig">
+        <svg viewBox="0 0 470 290" width="470" height="290" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Balkenvergleich der Gesamtproduktion vor und nach der Erhoehung der Nachfrage"><defs><clipPath id="f3-clip"><rect x="51" y="23" width="398" height="228"/></clipPath><marker id="f3-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="52" y1="250" x2="448" y2="250" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f3-ar-0E244E)"/><line x1="134.88" y1="250" x2="134.88" y2="24" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f3-ar-0E244E)"/><text x="450" y="266" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic"></text><text x="122.88" y="22" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">ME</text><text x="127.88" y="265" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="131.38" y1="214.69" x2="138.38" y2="214.69" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="127.88" y="218.69" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">100</text><line x1="131.38" y1="179.38" x2="138.38" y2="179.38" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="127.88" y="183.38" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">200</text><line x1="131.38" y1="144.06" x2="138.38" y2="144.06" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="127.88" y="148.06" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">300</text><line x1="131.38" y1="108.75" x2="138.38" y2="108.75" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="127.88" y="112.75" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">400</text><line x1="131.38" y1="73.44" x2="138.38" y2="73.44" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="127.88" y="77.44" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">500</text><line x1="131.38" y1="38.12" x2="138.38" y2="38.12" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="127.88" y="42.12" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">600</text><rect x="149.62" y="144.06" width="31.31" height="105.94" rx="0" fill="#6E7E9F" stroke="#FFFFFF" stroke-width="1" opacity="0.75"/><text x="165.27" y="138.06" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#0E244E" text-anchor="middle">300</text><rect x="180.93" y="115.81" width="31.31" height="134.19" rx="0" fill="#799E31" stroke="#FFFFFF" stroke-width="1" opacity="1"/><text x="196.59" y="109.81" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#0E244E" text-anchor="middle">380</text><text x="180.93" y="268" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic">S₁</text><rect x="241.71" y="179.38" width="31.31" height="70.62" rx="0" fill="#6E7E9F" stroke="#FFFFFF" stroke-width="1" opacity="0.75"/><text x="257.37" y="173.38" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#0E244E" text-anchor="middle">200</text><rect x="273.02" y="161.72" width="31.31" height="88.28" rx="0" fill="#799E31" stroke="#FFFFFF" stroke-width="1" opacity="1"/><text x="288.68" y="155.72" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#0E244E" text-anchor="middle">250</text><text x="273.02" y="268" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic">S₂</text><rect x="333.8" y="108.75" width="31.31" height="141.25" rx="0" fill="#6E7E9F" stroke="#FFFFFF" stroke-width="1" opacity="0.75"/><text x="349.46" y="102.75" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#0E244E" text-anchor="middle">400</text><rect x="365.12" y="76.97" width="31.31" height="173.03" rx="0" fill="#799E31" stroke="#FFFFFF" stroke-width="1" opacity="1"/><text x="380.77" y="70.97" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#0E244E" text-anchor="middle">490</text><text x="365.12" y="268" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic">S₃</text><rect x="148.7" y="31.06" width="14" height="12" rx="0" fill="#6E7E9F" opacity="0.75"/><text x="168.7" y="42.06" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="start">bisher</text><rect x="148.7" y="54.02" width="14" height="12" rx="0" fill="#799E31"/><text x="168.7" y="65.02" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="start">bei der neuen Nachfrage</text></svg>
+        <figcaption>Gesamtproduktion vorher und bei der neuen Nachfrage. Je 20 ME mehr Konsum verlangen 80, 50 und 90 ME mehr Produktion.</figcaption>
+      </figure>
+      <p class="why">Invertiert wird $E - A$, <b>nicht</b> $A$ — und die Inverse steht <b>links</b> vom Vektor: $\vec{x} = (E - A)^{-1} \cdot \vec{y}$. Das Produkt $\vec{y} \cdot (E - A)^{-1}$ wäre für einen Spaltenvektor gar nicht definiert.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Eine Matrix mit Parameter</h3>
+      <p><b>a)</b> Entwicklung nach der ersten Spalte: $\det(A_k) = k \cdot \begin{vmatrix}k &amp; 1\\2 &amp; k\end{vmatrix} - 1 \cdot \begin{vmatrix}2 &amp; 0\\2 &amp; k\end{vmatrix} = k \cdot (k^2 - 2) - 2k = k^3 - 4k = k \cdot (k - 2) \cdot (k + 2)$. Die Determinante ist genau für $k = -2$, $k = 0$ und $k = 2$ null; für diese drei Werte existiert $A_k^{-1}$ nicht, für alle anderen $k$ schon.</p>
+      <p><b>b)</b> Für $k = 1$ ist $\det(A_1) = 1 - 4 = -3 \neq 0$, es gibt also genau eine Lösung. Das System lautet $x_1 + 2x_2 = 2$, $\;x_1 + x_2 + x_3 = 1$, $\;2x_2 + x_3 = 2$. Aus der ersten Gleichung folgt $x_1 = 2 - 2x_2$, aus der dritten $x_3 = 2 - 2x_2$. Eingesetzt in die zweite: $(2 - 2x_2) + x_2 + (2 - 2x_2) = 4 - 3x_2 = 1$, also $x_2 = 1$ und damit $x_1 = 0$, $x_3 = 0$. Lösung: $\vec{x} = \begin{pmatrix}0\\1\\0\end{pmatrix}$.</p>
+      <p><b>c)</b> <b>$k = 0$:</b> Das System lautet $2x_2 = 2$, $\;x_1 + x_3 = 1$, $\;2x_2 = 2$. Die erste und die dritte Gleichung sind gleich, es bleiben zwei unabhängige Gleichungen für drei Unbekannte: $x_2 = 1$ und $x_1 + x_3 = 1$. Es gibt <b>unendlich viele</b> Lösungen, $L = \left\{\begin{pmatrix}t\\1\\1-t\end{pmatrix} \Big| \; t \in \mathbb{R}\right\}$. <b>$k = 2$:</b> Aus $2x_1 + 2x_2 = 2$ folgt $x_1 = 1 - x_2$, aus $2x_2 + 2x_3 = 2$ folgt $x_3 = 1 - x_2$; die mittlere Gleichung wird zu $(1 - x_2) + 2x_2 + (1 - x_2) = 2$, verlangt ist aber $1$ — <b>keine</b> Lösung. <b>$k = -2$:</b> Aus $-2x_1 + 2x_2 = 2$ folgt $x_2 = x_1 + 1$, aus $2x_2 - 2x_3 = 2$ folgt $x_3 = x_1$; die mittlere Gleichung wird zu $x_1 - 2(x_1 + 1) + x_1 = -2 \neq 1$ — ebenfalls <b>keine</b> Lösung.</p>
+      <p><b>d)</b> Die Aussage ist <b>falsch</b>. Gegenbeispiel: $\begin{pmatrix}2 &amp; 3\\4 &amp; 6\end{pmatrix}$ hat lauter positive Einträge, aber $\det = 2 \cdot 6 - 3 \cdot 4 = 0$ — die zweite Zeile ist das Doppelte der ersten. Über die Invertierbarkeit entscheidet allein, ob die Determinante null ist, nicht das Vorzeichen der Einträge. Die Gegenrichtung zeigt Aufgabe 2: $E - A$ hat mehrere negative Einträge und ist wegen $\det = 0{,}4 \neq 0$ trotzdem invertierbar.</p>
+      <figure class="fig">
+        <svg viewBox="0 0 520 340" width="520" height="340" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Graph der Determinante in Abhaengigkeit vom Parameter k mit den drei markierten Nullstellen"><defs><clipPath id="f4-clip"><rect x="43" y="21" width="452" height="286"/></clipPath><marker id="f4-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="70.47" y1="306" x2="70.47" y2="22" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="136.65" y1="306" x2="136.65" y2="22" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="202.82" y1="306" x2="202.82" y2="22" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="269" y1="306" x2="269" y2="22" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="335.18" y1="306" x2="335.18" y2="22" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="401.35" y1="306" x2="401.35" y2="22" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="467.53" y1="306" x2="467.53" y2="22" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="297.65" x2="494" y2="297.65" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="264.24" x2="494" y2="264.24" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="230.82" x2="494" y2="230.82" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="197.41" x2="494" y2="197.41" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="164" x2="494" y2="164" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="130.59" x2="494" y2="130.59" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="97.18" x2="494" y2="97.18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="63.76" x2="494" y2="63.76" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="30.35" x2="494" y2="30.35" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="164" x2="494" y2="164" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f4-ar-0E244E)"/><line x1="269" y1="306" x2="269" y2="22" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f4-ar-0E244E)"/><text x="496" y="180" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">k</text><text x="257" y="20" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">d(k)</text><line x1="70.47" y1="160.5" x2="70.47" y2="167.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="70.47" y="180" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-3</text><line x1="136.65" y1="160.5" x2="136.65" y2="167.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="136.65" y="180" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-2</text><line x1="202.82" y1="160.5" x2="202.82" y2="167.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="202.82" y="180" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-1</text><line x1="335.18" y1="160.5" x2="335.18" y2="167.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="335.18" y="180" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">1</text><line x1="401.35" y1="160.5" x2="401.35" y2="167.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="401.35" y="180" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">2</text><line x1="467.53" y1="160.5" x2="467.53" y2="167.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="467.53" y="180" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">3</text><line x1="265.5" y1="297.65" x2="272.5" y2="297.65" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="262" y="301.65" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-16</text><line x1="265.5" y1="264.24" x2="272.5" y2="264.24" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="262" y="268.24" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-12</text><line x1="265.5" y1="230.82" x2="272.5" y2="230.82" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="262" y="234.82" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-8</text><line x1="265.5" y1="197.41" x2="272.5" y2="197.41" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="262" y="201.41" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-4</text><line x1="265.5" y1="130.59" x2="272.5" y2="130.59" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="262" y="134.59" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">4</text><line x1="265.5" y1="97.18" x2="272.5" y2="97.18" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="262" y="101.18" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">8</text><line x1="265.5" y1="63.76" x2="272.5" y2="63.76" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="262" y="67.76" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">12</text><line x1="265.5" y1="30.35" x2="272.5" y2="30.35" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="262" y="34.35" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">16</text><g clip-path="url(#f4-clip)"><path d="M 50.62 353.92 L 52.3 347.89 L 53.98 341.97 L 55.66 336.16 L 57.34 330.45 L 59.02 324.84 L 60.7 319.34 L 62.38 313.93 L 64.06 308.63 L 65.74 303.43 L 67.42 298.32 L 69.1 293.32 L 70.78 288.41 L 72.46 283.6 L 74.14 278.88 L 75.82 274.26 L 77.5 269.74 L 79.18 265.3 L 80.86 260.97 L 82.54 256.72 L 84.21 252.56 L 85.89 248.49 L 87.57 244.52 L 89.25 240.63 L 90.93 236.83 L 92.61 233.11 L 94.29 229.48 L 95.97 225.94 L 97.65 222.48 L 99.33 219.11 L 101.01 215.82 L 102.69 212.61 L 104.37 209.48 L 106.05 206.43 L 107.73 203.46 L 109.41 200.57 L 111.09 197.76 L 112.77 195.02 L 114.45 192.36 L 116.13 189.78 L 117.81 187.27 L 119.49 184.84 L 121.17 182.47 L 122.85 180.18 L 124.53 177.96 L 126.21 175.82 L 127.89 173.74 L 129.57 171.73 L 131.25 169.79 L 132.93 167.91 L 134.61 166.1 L 136.29 164.36 L 137.97 162.68 L 139.65 161.07 L 141.33 159.52 L 143.01 158.03 L 144.69 156.6 L 146.37 155.24 L 148.05 153.93 L 149.73 152.68 L 151.41 151.49 L 153.09 150.36 L 154.77 149.29 L 156.45 148.27 L 158.13 147.3 L 159.81 146.39 L 161.49 145.54 L 163.17 144.73 L 164.85 143.98 L 166.53 143.28 L 168.21 142.62 L 169.89 142.02 L 171.57 141.47 L 173.25 140.96 L 174.93 140.5 L 176.61 140.08 L 178.29 139.71 L 179.97 139.39 L 181.65 139.11 L 183.33 138.87 L 185.01 138.67 L 186.69 138.52 L 188.37 138.4 L 190.05 138.32 L 191.73 138.28 L 193.41 138.28 L 195.09 138.32 L 196.77 138.39 L 198.45 138.5 L 200.13 138.64 L 201.81 138.82 L 203.49 139.03 L 205.17 139.27 L 206.85 139.54 L 208.52 139.84 L 210.2 140.17 L 211.88 140.53 L 213.56 140.92 L 215.24 141.34 L 216.92 141.78 L 218.6 142.24 L 220.28 142.74 L 221.96 143.25 L 223.64 143.79 L 225.32 144.35 L 227 144.93 L 228.68 145.53 L 230.36 146.16 L 232.04 146.8 L 233.72 147.45 L 235.4 148.13 L 237.08 148.82 L 238.76 149.53 L 240.44 150.25 L 242.12 150.99 L 243.8 151.74 L 245.48 152.5 L 247.16 153.27 L 248.84 154.06 L 250.52 154.85 L 252.2 155.66 L 253.88 156.47 L 255.56 157.28 L 257.24 158.11 L 258.92 158.94 L 260.6 159.78 L 262.28 160.62 L 263.96 161.46 L 265.64 162.3 L 267.32 163.15 L 269 164 L 270.68 164.85 L 272.36 165.7 L 274.04 166.54 L 275.72 167.38 L 277.4 168.22 L 279.08 169.06 L 280.76 169.89 L 282.44 170.72 L 284.12 171.53 L 285.8 172.34 L 287.48 173.15 L 289.16 173.94 L 290.84 174.73 L 292.52 175.5 L 294.2 176.26 L 295.88 177.01 L 297.56 177.75 L 299.24 178.47 L 300.92 179.18 L 302.6 179.87 L 304.28 180.55 L 305.96 181.2 L 307.64 181.84 L 309.32 182.47 L 311 183.07 L 312.68 183.65 L 314.36 184.21 L 316.04 184.75 L 317.72 185.26 L 319.4 185.76 L 321.08 186.22 L 322.76 186.66 L 324.44 187.08 L 326.12 187.47 L 327.8 187.83 L 329.48 188.16 L 331.15 188.46 L 332.83 188.73 L 334.51 188.97 L 336.19 189.18 L 337.87 189.36 L 339.55 189.5 L 341.23 189.61 L 342.91 189.68 L 344.59 189.72 L 346.27 189.72 L 347.95 189.68 L 349.63 189.6 L 351.31 189.48 L 352.99 189.33 L 354.67 189.13 L 356.35 188.89 L 358.03 188.61 L 359.71 188.29 L 361.39 187.92 L 363.07 187.5 L 364.75 187.04 L 366.43 186.53 L 368.11 185.98 L 369.79 185.38 L 371.47 184.72 L 373.15 184.02 L 374.83 183.27 L 376.51 182.46 L 378.19 181.61 L 379.87 180.7 L 381.55 179.73 L 383.23 178.71 L 384.91 177.64 L 386.59 176.51 L 388.27 175.32 L 389.95 174.07 L 391.63 172.76 L 393.31 171.4 L 394.99 169.97 L 396.67 168.48 L 398.35 166.93 L 400.03 165.32 L 401.71 163.64 L 403.39 161.9 L 405.07 160.09 L 406.75 158.21 L 408.43 156.27 L 410.11 154.26 L 411.79 152.18 L 413.47 150.04 L 415.15 147.82 L 416.83 145.53 L 418.51 143.16 L 420.19 140.73 L 421.87 138.22 L 423.55 135.64 L 425.23 132.98 L 426.91 130.24 L 428.59 127.43 L 430.27 124.54 L 431.95 121.57 L 433.63 118.52 L 435.31 115.39 L 436.99 112.18 L 438.67 108.89 L 440.35 105.52 L 442.03 102.06 L 443.71 98.52 L 445.39 94.89 L 447.07 91.17 L 448.75 87.37 L 450.43 83.48 L 452.11 79.51 L 453.79 75.44 L 455.46 71.28 L 457.14 67.03 L 458.82 62.7 L 460.5 58.26 L 462.18 53.74 L 463.86 49.12 L 465.54 44.4 L 467.22 39.59 L 468.9 34.68 L 470.58 29.68 L 472.26 24.57 L 473.94 19.37 L 475.62 14.07 L 477.3 8.66 L 478.98 3.16 L 480.66 -2.45 L 482.34 -8.16 L 484.02 -13.97 L 485.7 -19.89 L 487.38 -25.92" fill="none" stroke="#B02418" stroke-width="2.1" stroke-linejoin="round" stroke-linecap="round"/></g><circle cx="136.65" cy="164" r="4.4" fill="#799E31" stroke="#FFFFFF" stroke-width="1.4"/><circle cx="269" cy="164" r="4.4" fill="#799E31" stroke="#FFFFFF" stroke-width="1.4"/><circle cx="401.35" cy="164" r="4.4" fill="#799E31" stroke="#FFFFFF" stroke-width="1.4"/><text x="60.54" y="53.74" font-family="Raleway, system-ui, sans-serif" font-size="12.5" fill="#2C3C60" text-anchor="start">Nullstellen: k = -2, k = 0, k = 2</text></svg>
+        <figcaption>Die Determinante als Funktion von k. Zwischen den Nullstellen wechselt sie das Vorzeichen — genau dort bricht die Eindeutigkeit weg.</figcaption>
+      </figure>
+      <p class="why">$\det(A_k) = 0$ heißt nur <b>nicht eindeutig lösbar</b>. Ob dann gar keine oder unendlich viele Lösungen herauskommen, entscheidet erst die rechte Seite $\vec{b}$: bei $k = 0$ passt sie zu den Gleichungen, bei $k = \pm 2$ nicht.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+// Per task its own solution, right under the task (Doc, 07.09.2026). The block
+// is copied from the solutions section on first click - after KaTeX has run, so
+// the formulas come along rendered. The original stays where it is: the
+// solutions page in print and the big toggle above keep working unchanged.
+document.querySelectorAll('.task .solbtn').forEach((btn, i) => {
+  let box = null;
+  btn.onclick = () => {
+    if (!box) {
+      const src = document.querySelectorAll('#sol .sol')[i];
+      if (!src) return;
+      box = src.cloneNode(true);
+      box.className = 'sol solinline';
+      box.hidden = true;
+      btn.after(box);
+    }
+    box.hidden = !box.hidden;
+    btn.textContent = box.hidden ? 'Lösung anzeigen' : 'Lösung verbergen';
+  };
+});
+</script>
+</body>
+</html>
