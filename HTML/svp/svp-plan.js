@@ -3820,6 +3820,33 @@
         if (!go()) setTimeout(go, 400);
     })();
 
+    /* Die laufende Kalenderwoche bleibt dauerhaft markiert (Doc, 08.09.2026).
+       Innerhalb eines Schuljahres kommt jede KW genau einmal vor, ein Vergleich
+       der Nummer genuegt also. In den Ferien trifft nichts zu - die Ferienzeilen
+       tragen keine kw, dann bleibt der Plan eben unmarkiert. Zentral hier, damit
+       alle Plaene es bekommen. */
+    function isoWeek(d) {
+        const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));   /* Donnerstag dieser Woche */
+        const jan1 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+        return Math.ceil(((t - jan1) / 86400000 + 1) / 7);
+    }
+
+    (function markCurrentWeek() {
+        const now = String(isoWeek(new Date()));
+        const go = () => {
+            const hit = rendered.find(r => String(r.kw) === now);
+            const tr = hit && hit.dateTd && hit.dateTd.closest('tr');
+            if (!tr) return false;
+            tr.classList.add('kw-now');
+            tr.title = 'laufende Kalenderwoche';
+            const sub = tr.nextElementSibling;
+            if (sub && sub.classList.contains('detail-row')) sub.classList.add('kw-now-sub');
+            return true;
+        };
+        if (!go()) setTimeout(go, 400);
+    })();
+
     // Toolbar helper: expand/collapse all detail rows at once.
     window.togglePlanDetails = function () {
         const rows = Array.from(document.querySelectorAll('tr.detail-row'));
