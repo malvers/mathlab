@@ -27,6 +27,15 @@ BADGE = (b'<div id="local-badge" style="position:fixed;top:8px;right:8px;z-index
 
 BODY_END = re.compile(rb'</body\s*>', re.IGNORECASE)
 
+# Red lambda for local tabs. Every page in HTML/ links resources/favicon.svg and
+# resources/favicon.png, so swapping the two files here paints the tab icon red
+# without touching a single page — the tab strip then shows at a glance which
+# tabs come off this machine (Doc, 08.09.2026).
+LOCAL_ICONS = {
+    '/resources/favicon.svg': 'resources/favicon-local.svg',
+    '/resources/favicon.png': 'resources/favicon-local.png',
+}
+
 
 def inject(html):
     """Put the badge right before the last </body>; pages without one get it appended."""
@@ -55,6 +64,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         super().end_headers()
 
     def do_GET(self):
+        swap = LOCAL_ICONS.get(self.path.split('?', 1)[0])
+        if swap and os.path.isfile(os.path.join(HTML_DIR, swap)):
+            self.path = '/' + swap                # served as usual, just the red file
         path = self.translate_path(self.path)
         if os.path.isdir(path):
             if not self.path.split('?', 1)[0].endswith('/'):
