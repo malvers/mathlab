@@ -60,10 +60,16 @@ export function compose(sceneNames, bubbles, { outDir, out, crop = '760:760:132:
   });
   bubbles.forEach((_, i) => {
     const src = i === 0 ? '[base]' : `[o${i - 1}]`;
-    const dst = i === bubbles.length - 1 ? `[v]` : `[o${i}]`;
+    const dst = i === bubbles.length - 1 ? `[vraw]` : `[o${i}]`;
     parts.push(`${src}[b${i}]overlay=x=W-w-24:y=H-h-24:eof_action=pass${dst}`);
   });
-  if (!bubbles.length) parts.push(`[base]null[v]`);
+  if (!bubbles.length) parts.push(`[base]null[vraw]`);
+  /* The screencast frames are full-range JPEG, so without this every master came out
+     tagged yuvj420p / color_range pc (measured 07.09.2026 on reaction-diffusion,
+     brahmagupta and shell). YouTube copes, local players and previews do not, and the
+     picture reads a touch too contrasty. -pix_fmt alone does NOT fix it - the range has
+     to be converted in the graph and the result labelled. */
+  parts.push(`[vraw]scale=w=iw:h=ih:in_range=full:out_range=limited,format=yuv420p[v]`);
   if (music) {
     parts.push(`[${mIdx}:a]volume=${music.gain ?? 0.12},atrim=0:${total.toFixed(2)},afade=t=in:st=0:d=1.5,afade=t=out:st=${(total - 2.5).toFixed(2)}:d=2.5[mus]`);
     parts.push(`[anarr][mus]amix=inputs=2:normalize=0,atrim=0:${total.toFixed(2)}[a]`);
@@ -72,6 +78,10 @@ export function compose(sceneNames, bubbles, { outDir, out, crop = '760:760:132:
   }
   ff([...ins, '-filter_complex', parts.join(';'),
     '-map', '[v]', '-map', '[a]', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'medium',
+    /* -color_primaries / -color_trc alone leave both tags 'unknown' (measured); x264
+       only writes them into the stream when told through its own parameters. */
+    '-color_range', 'tv', '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709',
+    '-x264-params', 'colorprim=bt709:transfer=bt709:colormatrix=bt709:range=tv',
     '-c:a', 'aac', '-b:a', '160k', out]);
   // central video library — every final lands here as well (Desktop alias points at it)
   const lib = VIDEO_LIB;
