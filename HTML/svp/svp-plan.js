@@ -287,6 +287,14 @@
        zugeklappte Woche und ein verborgener Reiter liefern lauter Nullen.
        Deshalb wird nach dem Aufklappen und nach jedem Reiterwechsel neu
        gemessen, nicht nur beim Zeichnen. */
+    /* Ein Klick soll den Reiter NICHT fokussieren. Sonst zieht der Browser
+       seinen Fokusring darum, und der bleibt nach dem Klick stehen (Doc,
+       08.09.2026: "irgendwie kommt der immer noch"). Das reine CSS reichte
+       nicht - Chrome wertet den Klick je nach Vorgeschichte als
+       Tastaturfokus. Die Tastatur bleibt unberuehrt: Tab fokussiert weiter
+       und zeigt den Ring, nur die Maus tut es nicht mehr. */
+    function keinMausfokus(ev) { ev.preventDefault(); }
+
     function equalizeMatPills(block) {
         if (!block || !block.offsetParent) return;
         const pills = Array.prototype.slice.call(block.querySelectorAll('a.mat-pill'));
@@ -308,7 +316,10 @@
     function setVideoReiter(ref, anzahl) {
         const p = ref && ref.rPanes;
         if (!p || !p.videos) return;
-        p.videos.btn.hidden = !anzahl;
+        /* Doc, 08.09.2026: "wenn keine vids da sind grey ... not selectable".
+           Vorher war der Reiter versteckt - dann springt die Kopfzeile je nach
+           Woche. Jetzt steht er immer da und ist nur gesperrt. */
+        p.videos.btn.disabled = !anzahl;
         if (!anzahl && p.videos.btn.classList.contains('on') && ref.showRechts) ref.showRechts('zusatz');
     }
 
@@ -2966,6 +2977,7 @@
                     b.type = 'button';
                     b.className = 'sub-tab' + (k ? '' : ' on');
                     b.textContent = t[1];
+                    b.addEventListener('mousedown', keinMausfokus);
                     b.addEventListener('click', function (ev) { ev.stopPropagation(); showPane(t[0]); });
                     tabs.appendChild(b);
                     const pane = document.createElement('div');
@@ -3041,6 +3053,7 @@
                 b.type = 'button';
                 b.className = 'sub-tab' + (k ? '' : ' on');
                 b.textContent = t[1];
+                b.addEventListener('mousedown', keinMausfokus);
                 b.addEventListener('click', function (ev) { ev.stopPropagation(); showR(t[0]); });
                 rTabs.appendChild(b);
                 const pane = document.createElement('div');
