@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Satz von Marion Walter</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <style>
+        /* Readouts and hint boxes - everything else comes from the central layout */
+        .mw-rows { display: flex; flex-direction: column; gap: 7px; }
+
+        .mw-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 10px;
+            font-size: 0.82rem;
+        }
+
+        .mw-row .mw-key { color: #9fb4d6; letter-spacing: 0.3px; }
+
+        .mw-row .mw-val {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            color: #9de8ff;
+            text-shadow: 0 0 8px rgba(0, 210, 255, 0.45);
+        }
+
+        .mw-row.mw-hit .mw-val { color: #f5c242; text-shadow: 0 0 10px rgba(245, 194, 66, 0.5); }
+
+        .mw-row.mw-miss .mw-val { color: #e06a5e; text-shadow: 0 0 10px rgba(176, 36, 24, 0.55); }
+
+        .mw-note {
+            margin-top: 9px;
+            font-size: 0.76rem;
+            line-height: 1.45;
+            color: #cfe0f5;
+            border-left: 2px solid rgba(245, 194, 66, 0.65);
+            padding-left: 9px;
+        }
+
+        .mw-note.mw-warn { border-left-color: #b02418; }
+
+        .mw-btns { display: flex; flex-wrap: wrap; gap: 7px; }
+
+        /* Tenth bar: as many cells as the triangle holds hexagons, one of them lit */
+        .mw-bar {
+            display: flex;
+            gap: 3px;
+            margin-top: 10px;
+        }
+
+        .mw-bar span {
+            flex: 1 1 0;
+            height: 14px;
+            border: 1px solid rgba(157, 232, 255, 0.30);
+            border-radius: 3px;
+        }
+
+        .mw-bar span.on {
+            background: rgba(245, 194, 66, 0.85);
+            border-color: #f5c242;
+            box-shadow: 0 0 10px rgba(245, 194, 66, 0.45);
+        }
+
+        .mw-bar-label {
+            margin-top: 5px;
+            font-size: 0.72rem;
+            color: #9fb4d6;
+            text-align: center;
+            letter-spacing: 0.4px;
+        }
+
+        .formula-box {
+            padding: 2px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            overflow-x: auto;
+        }
+
+        .formula-box .katex { font-size: 1.05em; }
+
+        .formula-box .katex-display { margin: 0; }
+
+        #canvas { touch-action: none; }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/coach-box.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        // CyberI18n.get() returns the key itself when it is missing - only getOr() gives a fallback
+        const T = (k, fb) => (typeof CyberI18n !== 'undefined' && CyberI18n.getOr)
+            ? CyberI18n.getOr('marion.' + k, fb) : fb;
+
+        function dbg(m) { try { if (window.DebugWindow) DebugWindow.log('△ ' + m); } catch (e) { } }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: T('subtitle', 'Satz von Marion Walter'),
+        });
+        CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        /* ------------------------------------------------------------------- State */
+        // Triangle corners live in unit coordinates (0..1, y downwards) so the shape
+        // survives every resize. A is bottom left, B bottom right, C on top -
+        // counterclockwise in the mathematical sense.
+        const S = {
+            tri: [{ x: 0.16, y: 0.84 }, { x: 0.88, y: 0.78 }, { x: 0.42, y: 0.10 }],
+            n: 3,                 // denominator of the division
+            k: 1,                 // numerator: points sit at k/n and (n-k)/n on every side
+            drag: -1,
+            cevians: true,
+            marks: true,
+            labels: true,
+            fill: true,
+            cells: false,
+            hex: [],
+            cellList: null
+        };
+
+        const NAMES = ['A', 'B', 'C'];
+        const COL = {
+            tri: 'rgba(157, 232, 255, 0.95)',
+            cev: 'rgba(121, 158, 49, 0.85)',
+            hex: 'rgba(245, 194, 66, 0.42)',
+            hexOn: 'rgba(245, 194, 66, 0.85)',
+            hexLine: '#f5c242',
+            mark: 'rgba(121, 158, 49, 1)',
+            vertex: '#b02418',
+            text: '#cfe0f5'
+        };
+
+        /* --------------------------------------------------------------- Geometry */
+        const sub = (p, q) => ({ x: p.x - q.x, y: p.y - q.y });
+        const lerp = (p, q, t) => ({ x: p.x + t * (q.x - p.x), y: p.y + t * (q.y - p.y) });
+
+        function polyArea(p) {
+            let a = 0;
+            for (let i = 0; i < p.length; i++) {
+                const q = p[(i + 1) % p.length];
+                a += p[i].x * q.y - q.x * p[i].y;
+            }
+            return Math.abs(a) / 2;
+        }
+
+        function centroid(p) {
+            let x = 0, y = 0;
+            p.forEach(q => { x += q.x; y += q.y; });
+            return { x: x / p.length, y: y / p.length };
+        }
+
+        // The two division points on side i, walking from corner i to corner i+1
+        function divPoints(i) {
+            const P = S.tri[i], Q = S.tri[(i + 1) % 3];
+            return [lerp(P, Q, S.k / S.n), lerp(P, Q, (S.n - S.k) / S.n)];
+        }
+
+        // Every side sends its two points to the opposite corner - six cevians in total
+        function cevians() {
+            const out = [];
+            for (let i = 0; i < 3; i++) {
+                const apex = S.tri[(i + 2) % 3];
+                divPoints(i).forEach(q => out.push({ a: apex, b: q, side: i }));
+            }
+            return out;
+        }
+
+        // The central cell of a line arrangement is convex: clip the triangle with the
+        // half plane of every cevian that holds the centroid. No case distinctions,
+        // and it stays correct when the hexagon shrinks to a point (k/n = 1/2).
+        function clipHalfPlane(poly, p, q) {
+            const side = z => (q.x - p.x) * (z.y - p.y) - (q.y - p.y) * (z.x - p.x);
+            const out = [];
+            for (let i = 0; i < poly.length; i++) {
+                const a = poly[i], b = poly[(i + 1) % poly.length];
+                const sa = side(a), sb = side(b);
+                if (sa >= 0) out.push(a);
+                if ((sa > 0 && sb < 0) || (sa < 0 && sb > 0)) {
+                    const u = sa / (sa - sb);
+                    out.push(lerp(a, b, u));
+                }
+            }
+            return out;
+        }
+
+        function centralPolygon() {
+            // k/n = 1/2 turns all six cevians into the three medians: they meet in the
+            // centroid, the hexagon has shrunk to that single point.
+            if (2 * S.k === S.n) return [];
+            const G = centroid(S.tri);
+            let poly = S.tri.slice();
+            for (const c of cevians()) {
+                const s = (c.b.x - c.a.x) * (G.y - c.a.y) - (c.b.y - c.a.y) * (G.x - c.a.x);
+                poly = (s > 0) ? clipHalfPlane(poly, c.a, c.b) : clipHalfPlane(poly, c.b, c.a);
+                if (poly.length < 3) return [];
+            }
+            return poly;
+        }
+
+        /* ------------------------------------------------- Arrangement (all cells) */
+        // Planar graph of the six cevians plus the three sides. The faces come from a
+        // half edge walk, not from a formula - so every degenerate case counts right.
+        function buildCells() {
+            const segs = [];
+            const seen = new Set();
+            const push = (a, b) => {
+                const key = [a.x, a.y, b.x, b.y].map(v => v.toFixed(9)).sort().join('|');
+                if (seen.has(key)) return;           // k/n = 1/2 makes cevians coincide
+                seen.add(key);
+                segs.push({ a, b });
+            };
+            for (let i = 0; i < 3; i++) push(S.tri[i], S.tri[(i + 1) % 3]);
+            cevians().forEach(c => push(c.a, c.b));
+
+            const V = [];
+            const find = (x, y) => {
+                for (let i = 0; i < V.length; i++)
+                    if (Math.hypot(V[i].x - x, V[i].y - y) < 1e-7) return i;
+                V.push({ x, y });
+                return V.length - 1;
+            };
+            const on = segs.map(() => []);
+            segs.forEach((s, i) => {
+                on[i].push({ v: find(s.a.x, s.a.y), t: 0 }, { v: find(s.b.x, s.b.y), t: 1 });
+            });
+
+            const E = 1e-9;
+            for (let i = 0; i < segs.length; i++) {
+                const A = segs[i], d1 = sub(A.b, A.a);
+                for (let j = i + 1; j < segs.length; j++) {
+                    const B = segs[j], d2 = sub(B.b, B.a);
+                    const den = d1.x * d2.y - d1.y * d2.x;
+                    if (Math.abs(den) < 1e-12) continue;
+                    const t = ((B.a.x - A.a.x) * d2.y - (B.a.y - A.a.y) * d2.x) / den;
+                    const u = ((B.a.x - A.a.x) * d1.y - (B.a.y - A.a.y) * d1.x) / den;
+                    if (t < -E || t > 1 + E || u < -E || u > 1 + E) continue;
+                    // Endpoints are allowed: a division point is interior to its side
+                    const vi = find(A.a.x + t * d1.x, A.a.y + t * d1.y);
+                    on[i].push({ v: vi, t });
+                    on[j].push({ v: vi, t: u });
+                }
+            }
+
+            const edges = [];
+            const ekey = new Set();
+            on.forEach(list => {
+                list.sort((p, q) => p.t - q.t);
+                for (let k = 0; k + 1 < list.length; k++) {
+                    const u = list[k].v, v = list[k + 1].v;
+                    if (u === v) continue;
+                    const key = Math.min(u, v) + ':' + Math.max(u, v);
+                    if (ekey.has(key)) continue;
+                    ekey.add(key);
+                    edges.push({ u, v });
+                }
+            });
+
+            // Half edges: 2m goes u -> v, 2m+1 goes back
+            const darts = [];
+            edges.forEach(e => { darts.push({ from: e.u, to: e.v }, { from: e.v, to: e.u }); });
+            const ang = d => Math.atan2(V[d.to].y - V[d.from].y, V[d.to].x - V[d.from].x);
+            const around = V.map(() => []);
+            darts.forEach((d, i) => around[d.from].push(i));
+            const pos = new Map();
+            around.forEach(list => {
+                list.sort((i, j) => ang(darts[i]) - ang(darts[j]));
+                list.forEach((di, k) => pos.set(di, k));
+            });
+            const nextInFace = i => {
+                const t = i ^ 1;                       // opposite half edge
+                const list = around[darts[t].from];
+                return list[(pos.get(t) + 1) % list.length];
+            };
+
+            const used = new Uint8Array(darts.length);
+            const faces = [];
+            for (let i = 0; i < darts.length; i++) {
+                if (used[i]) continue;
+                const poly = [];
+                let d = i, guard = 0;
+                do {
+                    used[d] = 1;
+                    poly.push(V[darts[d].from]);
+                    d = nextInFace(d);
+                } while (d !== i && ++guard < darts.length + 5);
+                faces.push(poly);
+            }
+
+            // The outer face wraps everything, so it owns the biggest area
+            let best = -1, bestA = -1;
+            const areas = faces.map((f, i) => {
+                const a = polyArea(f);
+                if (a > bestA) { bestA = a; best = i; }
+                return a;
+            });
+            const cells = faces.filter((_, i) => i !== best).map((poly, i) => poly);
+            dbg('cells: V=' + V.length + ' E=' + edges.length + ' F=' + faces.length +
+                ' Euler=' + (V.length - edges.length + faces.length) + ' Teilflaechen=' + cells.length);
+            return cells;
+        }
+
+        /* ------------------------------------------------------- Exact ratio, k/n */
+        // Hexagon / triangle = 2 (n-2k)^2 / ((2n-k)(n+k)) - derived on the right angled
+        // unit triangle, and by affine invariance that settles every triangle.
+        const gcd = (a, b) => b ? gcd(b, a % b) : a;
+
+        function exactRatio() {
+            const n = S.n, k = S.k;
+            let p = 2 * (n - 2 * k) * (n - 2 * k);
+            let q = (2 * n - k) * (n + k);
+            const g = gcd(Math.abs(p), Math.abs(q)) || 1;
+            return { p: p / g, q: q / g, value: p / q };
+        }
+
+        /* --------------------------------------------------------------- Drawing */
+        let cx = 0, cy = 0, SC = 1;
+
+        function layout() {
+            const rect = container.getBoundingClientRect();
+            cx = rect.width / 2;
+            cy = rect.height / 2;
+            SC = Math.min(rect.width, rect.height) * 0.86;
+        }
+
+        const sx = p => cx + (p.x - 0.5) * SC;
+        const sy = p => cy + (p.y - 0.5) * SC;
+        const toUnit = (mx, my) => ({ x: (mx - cx) / SC + 0.5, y: (my - cy) / SC + 0.5 });
+
+        function path(poly) {
+            ctx.beginPath();
+            poly.forEach((p, i) => i ? ctx.lineTo(sx(p), sy(p)) : ctx.moveTo(sx(p), sy(p)));
+            ctx.closePath();
+        }
+
+        function cellColor(poly) {
+            const G = centroid(S.tri), m = centroid(poly);
+            const a = Math.atan2(m.y - G.y, m.x - G.x);
+            const r = Math.min(1, Math.hypot(m.x - G.x, m.y - G.y) * 4);
+            const hue = ((a / (2 * Math.PI)) * 360 + 360) % 360;
+            return 'hsla(' + hue.toFixed(1) + ', ' + (46 + 26 * r).toFixed(0) + '%, ' +
+                (60 - 16 * r).toFixed(0) + '%, 0.30)';
+        }
+
+        function draw() {
+            const rect = container.getBoundingClientRect();
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            ctx.lineJoin = 'round';
+
+            if (S.cells && S.cellList) {
+                S.cellList.forEach(poly => {
+                    path(poly);
+                    ctx.fillStyle = cellColor(poly);
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(10, 20, 40, 0.35)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                });
+            }
+
+            if (S.fill && S.hex.length >= 3) {
+                path(S.hex);
+                ctx.fillStyle = S.cells ? COL.hexOn : COL.hex;   // stay readable on top of the cells
+                ctx.fill();
+                ctx.strokeStyle = COL.hexLine;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            if (S.cevians) {
+                ctx.strokeStyle = COL.cev;
+                ctx.lineWidth = 1.3;
+                ctx.beginPath();
+                cevians().forEach(c => {
+                    ctx.moveTo(sx(c.a), sy(c.a));
+                    ctx.lineTo(sx(c.b), sy(c.b));
+                });
+                ctx.stroke();
+            }
+
+            path(S.tri);
+            ctx.strokeStyle = COL.tri;
+            ctx.lineWidth = 2.4;
+            ctx.stroke();
+
+            if (S.marks) {
+                for (let i = 0; i < 3; i++) {
+                    divPoints(i).forEach((p, j) => {
+                        ctx.beginPath();
+                        ctx.arc(sx(p), sy(p), 4, 0, Math.PI * 2);
+                        ctx.fillStyle = COL.mark;
+                        ctx.fill();
+                        ctx.lineWidth = 1.2;
+                        ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+                        ctx.stroke();
+                        if (S.labels) {
+                            const G = centroid(S.tri);
+                            const dx = sx(p) - sx(G), dy = sy(p) - sy(G);
+                            const L = Math.hypot(dx, dy) || 1;
+                            ctx.fillStyle = COL.text;
+                            ctx.font = '11px Orbitron, monospace';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            const frac = j === 0 ? S.k + '/' + S.n : (S.n - S.k) + '/' + S.n;
+                            ctx.fillText(frac, sx(p) + dx / L * 16, sy(p) + dy / L * 16);
+                        }
+                    });
+                }
+            }
+
+            for (let i = 0; i < 3; i++) {
+                const p = S.tri[i];
+                ctx.beginPath();
+                ctx.arc(sx(p), sy(p), i === S.drag ? 9 : 7, 0, Math.PI * 2);
+                ctx.fillStyle = i === S.drag ? COL.hexLine : COL.vertex;
+                ctx.fill();
+                ctx.lineWidth = 1.6;
+                ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+                ctx.stroke();
+                if (S.labels) {
+                    const G = centroid(S.tri);
+                    const dx = sx(p) - sx(G), dy = sy(p) - sy(G);
+                    const L = Math.hypot(dx, dy) || 1;
+                    ctx.fillStyle = COL.text;
+                    ctx.font = 'bold 15px Orbitron, monospace';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(NAMES[i], sx(p) + dx / L * 22, sy(p) + dy / L * 22);
+                }
+            }
+        }
+
+        /* ------------------------------------------------------------- Readouts */
+        function readouts() {
+            const triA = polyArea(S.tri);
+            const hexA = S.hex.length >= 3 ? polyArea(S.hex) : 0;
+            const measured = triA > 0 ? hexA / triA : 0;
+            const ex = exactRatio();
+            const diff = Math.abs(measured - ex.value);
+            const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+
+            set('mw-t', S.k + '/' + S.n);
+            set('mw-measured', measured.toFixed(6));
+            set('mw-exact', ex.p + '/' + ex.q);
+            set('mw-inverse', measured > 1e-12 ? '1 : ' + (1 / measured).toFixed(4) : '—');
+            set('mw-diff', diff.toExponential(1));
+            set('mw-cells', S.cellList ? S.cellList.length : '—');
+
+            const row = document.getElementById('mw-exact-row');
+            if (row) row.className = 'mw-row ' + (ex.p === 1 && ex.q === 10 ? 'mw-hit' : '');
+
+            // Tenth bar: the triangle holds q/p hexagons, one of them is lit
+            const bar = document.getElementById('mw-bar');
+            const lab = document.getElementById('mw-bar-label');
+            if (bar && lab) {
+                const parts = ex.p === 1 ? ex.q : 0;
+                if (parts >= 2 && parts <= 30) {
+                    bar.innerHTML = Array.from({ length: parts },
+                        (_, i) => '<span' + (i === 0 ? ' class="on"' : '') + '></span>').join('');
+                    lab.textContent = T('bar_label', 'Das Dreieck fasst genau') + ' ' + parts + ' ' +
+                        T('bar_label2', 'solche Sechsecke.');
+                } else {
+                    bar.innerHTML = '';
+                    lab.textContent = ex.p === 0
+                        ? T('bar_degenerate', 'Alle sechs Cevianen sind Seitenhalbierende — das Sechseck schrumpft auf den Schwerpunkt.')
+                        : T('bar_odd', 'Kein glatter Stammbruch — deshalb ist gerade die Drittelung so besonders.');
+                }
+            }
+
+            const note = document.getElementById('mw-note');
+            if (note) {
+                const marion = (S.n === 3 && S.k === 1);
+                note.className = 'mw-note' + (marion ? '' : ' mw-warn');
+                note.innerHTML = marion
+                    ? T('note_marion', 'Drittelung — der Satz von Marion Walter: das Sechseck hat <b>ein Zehntel</b> der Dreiecksfläche. Ziehe die Ecken: das Verhältnis rührt sich nicht.')
+                    : T('note_other', 'Andere Teilung — der Zehntel ist weg. Zurück mit <b>1/3</b>.');
+            }
+
+            renderFormula();
+        }
+
+        function renderFormula() {
+            const box = document.getElementById('mw-formula');
+            if (!box || typeof katex === 'undefined') return;
+            const n = S.n, k = S.k, ex = exactRatio();
+            const tex = '\\begin{aligned}' +
+                '\\frac{A_{\\text{6-Eck}}}{A_{\\triangle}} &= \\frac{2\\,(n-2k)^2}{(2n-k)(n+k)} \\\\[4pt]' +
+                '&= \\frac{2\\cdot(' + (n - 2 * k) + ')^2}{' + (2 * n - k) + '\\cdot' + (n + k) + '}' +
+                ' = \\frac{' + ex.p + '}{' + ex.q + '}' +
+                '\\end{aligned}';
+            try { katex.render(tex, box, { throwOnError: false, displayMode: true }); }
+            catch (err) { box.textContent = tex; }
+        }
+
+        function rebuild() {
+            S.hex = centralPolygon();
+            S.cellList = S.cells ? buildCells() : null;
+            readouts();
+            draw();
+        }
+
+        /* --------------------------------------------------------------- Presets */
+        function setTriangle(pts) {
+            S.tri = pts.map(p => ({ x: p.x, y: p.y }));
+            rebuild();
+        }
+
+        function equilateral() {
+            const R = 0.44, cxu = 0.5, cyu = 0.54;
+            setTriangle([
+                { x: cxu - R * Math.sqrt(3) / 2, y: cyu + R / 2 },
+                { x: cxu + R * Math.sqrt(3) / 2, y: cyu + R / 2 },
+                { x: cxu, y: cyu - R }
+            ]);
+        }
+
+        function rightAngled() {
+            setTriangle([{ x: 0.16, y: 0.86 }, { x: 0.88, y: 0.86 }, { x: 0.16, y: 0.14 }]);
+        }
+
+        // Signed area in unit coordinates: y points down, so a negative sign means
+        // counterclockwise in the usual mathematical sense.
+        function signedArea(p) {
+            let a = 0;
+            for (let i = 0; i < p.length; i++) {
+                const q = p[(i + 1) % p.length];
+                a += p[i].x * q.y - q.x * p[i].y;
+            }
+            return a / 2;
+        }
+
+        // A stays bottom left and A, B, C run counterclockwise - the naming Doc uses
+        function orderCorners(p) {
+            if (signedArea(p) > 0) p = [p[0], p[2], p[1]];
+            let best = 0, bestScore = Infinity;
+            p.forEach((q, i) => {
+                const score = q.x + (1 - q.y);      // small x, large y = bottom left
+                if (score < bestScore) { bestScore = score; best = i; }
+            });
+            return [p[best], p[(best + 1) % 3], p[(best + 2) % 3]];
+        }
+
+        function randomTriangle() {
+            let p;
+            do {
+                p = Array.from({ length: 3 }, () => ({
+                    x: 0.08 + Math.random() * 0.84,
+                    y: 0.08 + Math.random() * 0.84
+                }));
+            } while (polyArea(p) < 0.10);   // no needle triangles
+            setTriangle(orderCorners(p));
+        }
+
+        /* ---------------------------------------------------------------- Pointer */
+        function nearestVertex(ev) {
+            const rect = canvas.getBoundingClientRect();
+            const mx = ev.clientX - rect.left, my = ev.clientY - rect.top;
+            let best = -1, bd = 22;
+            for (let i = 0; i < 3; i++) {
+                const d = Math.hypot(mx - sx(S.tri[i]), my - sy(S.tri[i]));
+                if (d < bd) { bd = d; best = i; }
+            }
+            return best;
+        }
+
+        canvas.addEventListener('pointerdown', ev => {
+            const i = nearestVertex(ev);
+            if (i < 0) return;
+            S.drag = i;
+            canvas.setPointerCapture(ev.pointerId);
+            draw();
+        });
+
+        canvas.addEventListener('pointermove', ev => {
+            if (S.drag < 0) {
+                canvas.style.cursor = nearestVertex(ev) >= 0 ? 'grab' : 'default';
+                return;
+            }
+            canvas.style.cursor = 'grabbing';
+            const rect = canvas.getBoundingClientRect();
+            const u = toUnit(ev.clientX - rect.left, ev.clientY - rect.top);
+            u.x = Math.max(0.03, Math.min(0.97, u.x));
+            u.y = Math.max(0.03, Math.min(0.97, u.y));
+            const test = S.tri.map((p, i) => i === S.drag ? u : p);
+            if (polyArea(test) < 0.02) return;   // keep the triangle non degenerate
+            S.tri[S.drag] = u;
+            rebuild();
+        });
+
+        const endDrag = () => { if (S.drag >= 0) { S.drag = -1; draw(); } };
+        canvas.addEventListener('pointerup', endDrag);
+        canvas.addEventListener('pointercancel', endDrag);
+
+        window.addEventListener('keydown', ev => {
+            if (ev.metaKey || ev.ctrlKey || ev.altKey) return;   // do not swallow Cmd-Shift-R
+            const key = ev.key.toLowerCase();
+            if (key === 'arrowup') { setDivision(S.n + 1, S.k); ev.preventDefault(); }
+            else if (key === 'arrowdown') { setDivision(S.n - 1, S.k); ev.preventDefault(); }
+            else if (key === 'arrowright') { setDivision(S.n, S.k + 1); ev.preventDefault(); }
+            else if (key === 'arrowleft') { setDivision(S.n, S.k - 1); ev.preventDefault(); }
+            else if (key === 'd') setDivision(3, 1);
+            else if (key === 'g') equilateral();
+            else if (key === 'w') rightAngled();
+            else if (key === 'z') randomTriangle();
+            else if (key === 'f') { S.cells = !S.cells; syncBoxes(); rebuild(); }
+            else if (key === 'h') { S.fill = !S.fill; syncBoxes(); draw(); }
+            else if (key === 'b') { S.labels = !S.labels; syncBoxes(); draw(); }
+            else if (key === 'c') { S.cevians = !S.cevians; syncBoxes(); draw(); }
+        });
+
+        /* -------------------------------------------------------------------- UI */
+        const MAX_N = 12;
+
+        function setDivision(n, k) {
+            S.n = Math.max(2, Math.min(MAX_N, n));
+            S.k = Math.max(1, Math.min(S.n - 1, k));
+            syncSliders();
+            rebuild();
+        }
+
+        function syncSliders() {
+            const sn = document.getElementById('mw-n'), sk = document.getElementById('mw-k');
+            if (sn) sn.value = S.n;
+            if (sk) { sk.max = S.n - 1; sk.value = S.k; }
+            const ln = document.getElementById('mw-n-label'), lk = document.getElementById('mw-k-label');
+            if (ln) ln.textContent = S.n;
+            if (lk) lk.textContent = S.k;
+        }
+
+        const BOXES = [['mw-box-cev', 'cevians'], ['mw-box-marks', 'marks'], ['mw-box-labels', 'labels'],
+        ['mw-box-fill', 'fill'], ['mw-box-cells', 'cells']];
+
+        function syncBoxes() {
+            BOXES.forEach(([id, key]) => {
+                const el = document.getElementById(id);
+                if (el) el.checked = S[key];
+            });
+        }
+
+        function buildUI() {
+            CyberUI.createCard('ui-container', T('card_tri', 'Dreieck'), `
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div class="mw-btns">
+                        <button class="cyber-btn" id="mw-equi">${T('btn_equi', 'Gleichseitig')}</button>
+                        <button class="cyber-btn" id="mw-right">${T('btn_right', 'Rechtwinklig')}</button>
+                        <button class="cyber-btn" id="mw-rand">${T('btn_rand', 'Zufällig')}</button>
+                    </div>
+                    <div class="mw-note">${T('hint_drag', 'Die Ecken A, B, C lassen sich mit der Maus ziehen — das Flächenverhältnis bleibt, weil affine Abbildungen Teil- und Flächenverhältnisse erhalten.')}</div>
+                </div>`);
+
+            CyberUI.createCard('ui-container', T('card_div', 'Teilung der Seiten'), `
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                    <div>
+                        <div class="label-row">
+                            <span>${T('lbl_n', 'Nenner n')}</span>
+                            <span id="mw-n-label" class="cyber-number"
+                                  style="font-size:0.8rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45);">${S.n}</span>
+                        </div>
+                        <input type="range" id="mw-n" min="2" max="${MAX_N}" step="1" value="${S.n}">
+                    </div>
+                    <div>
+                        <div class="label-row">
+                            <span>${T('lbl_k', 'Zähler k')}</span>
+                            <span id="mw-k-label" class="cyber-number"
+                                  style="font-size:0.8rem; color:#9de8ff; text-shadow:0 0 8px rgba(0,210,255,0.45);">${S.k}</span>
+                        </div>
+                        <input type="range" id="mw-k" min="1" max="${S.n - 1}" step="1" value="${S.k}">
+                    </div>
+                    <div class="mw-btns">
+                        <button class="cyber-btn" id="mw-third">${T('btn_third', 'Drittelung 1/3')}</button>
+                    </div>
+                    <div class="mw-note">${T('hint_div', 'Jede Seite bekommt Punkte bei k/n und (n−k)/n, jeder wird mit der gegenüberliegenden Ecke verbunden. k/n = 1/3 ist Marion Walters Fall.')}</div>
+                </div>`);
+
+            CyberUI.createCard('ui-container', T('card_meas', 'Messung'), `
+                <div class="mw-rows">
+                    <div class="mw-row"><span class="mw-key">${T('m_t', 'Teilung k/n')}</span><span class="mw-val" id="mw-t">-</span></div>
+                    <div class="mw-row"><span class="mw-key">${T('m_meas', 'gemessen 6-Eck / Δ')}</span><span class="mw-val" id="mw-measured">-</span></div>
+                    <div class="mw-row" id="mw-exact-row"><span class="mw-key">${T('m_exact', 'exakt')}</span><span class="mw-val" id="mw-exact">-</span></div>
+                    <div class="mw-row"><span class="mw-key">${T('m_inv', 'Δ : 6-Eck')}</span><span class="mw-val" id="mw-inverse">-</span></div>
+                    <div class="mw-row"><span class="mw-key">${T('m_diff', 'Abweichung')}</span><span class="mw-val" id="mw-diff">-</span></div>
+                    <div class="mw-row"><span class="mw-key">${T('m_cells', 'Teilflächen')}</span><span class="mw-val" id="mw-cells">-</span></div>
+                </div>
+                <div class="mw-bar" id="mw-bar"></div>
+                <div class="mw-bar-label" id="mw-bar-label"></div>
+                <div class="mw-note" id="mw-note"></div>`);
+
+            CyberUI.createCard('ui-container', T('card_formula', 'Verallgemeinerung'), `
+                <div class="formula-box" id="mw-formula"></div>
+                <div class="mw-note">${T('hint_formula', 'Auf dem rechtwinkligen Einheitsdreieck ausgerechnet — und weil Flächenverhältnisse affin invariant sind, gilt das Ergebnis für jedes Dreieck. n = 3, k = 1 liefert 2·1/(5·4) = 1/10.')}</div>`);
+
+            CyberUI.createCard('ui-container', T('card_view', 'Anzeige'), `
+                <div style="display:flex; flex-direction:column; gap:9px;">
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="mw-box-cev" checked> <span>${T('v_cev', 'Cevianen')}</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="mw-box-marks" checked> <span>${T('v_marks', 'Teilungspunkte')}</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="mw-box-labels" checked> <span>${T('v_labels', 'Beschriftung')}</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="mw-box-fill" checked> <span>${T('v_fill', 'Sechseck füllen')}</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="mw-box-cells"> <span>${T('v_cells', 'Alle Teilflächen')}</span></label>
+                </div>
+                <div class="mw-note">${T('keys', 'Tasten: <b>d</b> Drittelung, <b>g</b> gleichseitig, <b>w</b> rechtwinklig, <b>z</b> zufällig, <b>f</b> Teilflächen, <b>h</b> Sechseck, <b>b</b> Beschriftung, <b>c</b> Cevianen, Pfeile für n und k.')}</div>`);
+
+            document.getElementById('mw-n').addEventListener('input', e => setDivision(parseInt(e.target.value, 10), S.k));
+            document.getElementById('mw-k').addEventListener('input', e => setDivision(S.n, parseInt(e.target.value, 10)));
+            document.getElementById('mw-third').addEventListener('click', () => setDivision(3, 1));
+            document.getElementById('mw-equi').addEventListener('click', equilateral);
+            document.getElementById('mw-right').addEventListener('click', rightAngled);
+            document.getElementById('mw-rand').addEventListener('click', randomTriangle);
+            BOXES.forEach(([id, key]) => {
+                document.getElementById(id).addEventListener('change', e => {
+                    S[key] = e.target.checked;
+                    if (key === 'cells') rebuild(); else draw();
+                });
+            });
+        }
+
+        (function setCoachText() {
+            const box = document.getElementById('math-coach-box');
+            if (box) box.classList.add('visible');
+            const el = document.getElementById('coach-title-slot');
+            if (el) el.textContent = T('coach_title', 'Satz von Marion Walter');
+            const c = document.getElementById('coach-content');
+            if (c) c.innerHTML = T('coach',
+                'Drittle jede Seite eines beliebigen Dreiecks und verbinde jeden Teilungspunkt mit der ' +
+                'gegenüberliegenden Ecke. Die sechs Cevianen umschließen ein Sechseck — und dessen Fläche ist ' +
+                'immer <b>ein Zehntel</b> der Dreiecksfläche. Marion Walter (1928–2021) hat den Satz 1993 ' +
+                'bekannt gemacht. Ziehe die Ecken, so schief das Dreieck auch wird: der Zehntel bleibt.');
+        })();
+
+        /* ------------------------------------------------------------------ Setup */
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            const w = Math.max(1, rect.width);
+            const h = Math.max(1, rect.height);
+            canvas.width = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
+
+        function init() {
+            resizeCanvasToContainer();
+            layout();
+            draw();
+        }
+
+        buildUI();
+        syncSliders();
+        syncBoxes();
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(() => { init(); rebuild(); });
+        window.addEventListener('load', () => rebuild());   // KaTeX arrives with defer
+        init();
+        rebuild();
+    </script>
+</body>
+
+</html>
