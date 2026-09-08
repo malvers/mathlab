@@ -38,6 +38,40 @@
         if (bar && cards && cards.parentNode) cards.parentNode.insertBefore(bar, cards);
     })();
 
+    // Page footer: the usage hint and the holiday dates used to be copied into
+    // each of the 17 plan pages by hand, which had drifted into four different
+    // wordings and one stale holiday line. Both describe central behaviour and
+    // central data, so they are built here; the page keeps only its own text.
+    // Order on screen: usage hint, page text, holidays.
+    // data-ferien="abi" on the footer stops the list after Easter — the Jgst. 13
+    // plans end before Pfingsten.
+    const FOOT_USAGE =
+        'Wochenzeile anklicken \u2192 Stundenskizze ausklappen; beim Drucken werden alle Details ' +
+        'ausgeklappt. \u201eBearbeiten\u201c macht Themen und Bullets editierbar (Speichern beim ' +
+        'Klick auf \u201eFertig\u201c, lokal im Browser); \u201eZur\u00fccksetzen\u201c l\u00e4dt ' +
+        'das Original.';
+
+    const FERIEN_2026_27 = [
+        'Herbst 12.\u201324.10.26',
+        'Weihnachten 23.12.26\u201302.01.27',
+        'Winter 08.\u201319.02.27',
+        'Ostern 26.03.\u201302.04.27',
+        'Pfingsten 07.05. + 15.\u201318.05.27',
+        'Sommer ab 10.07.27'
+    ];
+    const FERIEN_BUSSTAG = 'Bu\u00df- und Bettag Mi 18.11.26 unterrichtsfrei';
+
+    (function buildPageFoot() {
+        const foot = document.querySelector('footer.page-foot');
+        if (!foot) return;
+        const bisOstern = foot.dataset.ferien === 'abi';
+        const terms = (bisOstern ? FERIEN_2026_27.slice(0, 4) : FERIEN_2026_27)
+            .concat(FERIEN_BUSSTAG);
+        const ferien = 'Ferientermine Sachsen 2026/27 (SMK): ' + terms.join(' \u00b7 ') + '.';
+        const own = foot.innerHTML.trim();
+        foot.innerHTML = FOOT_USAGE + (own ? ' ' + own : '') + ' ' + ferien;
+    })();
+
     /* Kopf und Werkzeugleiste bleiben beim Scrollen stehen, der Plan (Karten
        plus Tabelle) zieht darunter weg. Zentral verpackt — keine Plan-Seite
        muss dafuer angefasst werden. */
