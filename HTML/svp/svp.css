@@ -309,8 +309,8 @@ nav.quick-nav a.badge.nav-hidden { display: none; }
 #plan-table td.mat { white-space: nowrap; }
 
 /* Material-Marker rechts neben der Aufgaben-Pille (Doc, 08.09.2026: "schoen
-   bitte"): gleiche Geometrie wie a.quiz-btn, aber in den ruhigen Linienfarben -
-   die Aufgaben bleiben das Bunte, die Klammer sagt nur "hier liegt was". */
+   bitte", dann "clip auch gelbisch"): Geometrie UND Farben wie a.quiz-btn,
+   die beiden Knoepfe gehoeren sichtbar zusammen. */
 #plan-table td.mat .mat-flag {
     display: inline-flex;
     align-items: center;
@@ -319,18 +319,15 @@ nav.quick-nav a.badge.nav-hidden { display: none; }
     margin-left: 8px;
     padding: 1px 8px;
     border-radius: 6px;
-    border: 1px solid var(--line);
-    background: var(--card-soft);
-    color: var(--muted);
+    border: 1px solid rgba(245, 194, 66, 0.55);
+    background: rgba(245, 194, 66, 0.16);
+    color: var(--lambda);
     font-size: 0.72rem;
     line-height: 1.5;
     cursor: pointer;
 }
 
-#plan-table td.mat .mat-flag:hover {
-    color: var(--text);
-    border-color: rgba(120, 160, 220, 0.45);
-}
+#plan-table td.mat .mat-flag:hover { background: rgba(245, 194, 66, 0.3); }
 
 #plan-table td.mat .mat-flag svg {
     display: block;
@@ -1466,16 +1463,21 @@ nav.quick-nav a.cloud:hover { color: var(--text); }
     margin-left: auto;
 }
 
-/* Subtitle and pill legend share one line above the toolbar's divider - the
-   row is built in svp-plan.js, which lifts the legend out of the toolbar. */
+/* Last line of the head, right above the toolbar's divider: the pill legend,
+   lifted out of the toolbar by svp-plan.js and pushed to the right. */
 .page-head .head-legend-row {
     display: flex;
+    justify-content: flex-end;
     align-items: center;
-    gap: 10px 16px;
+    gap: 8px 16px;
     flex-wrap: wrap;
+    margin-top: 10px;
 }
 
-.page-head .head-legend-row .subtitle { margin-bottom: 0; }
+/* ... and the head keeps only a hair of air below it, so the pills sit just
+   above the line instead of floating in the middle of the gap. */
+header.page-head.with-legend,
+.plan-sticky header.page-head.with-legend { margin-bottom: 6px; }
 
 /* The legend stayed out of the printout while it lived in the (hidden)
    toolbar - it keeps doing so up here. */
@@ -3137,18 +3139,26 @@ body.form-preview #svp-form {
    The field sits between the buttons and the legend: .legend keeps its
    margin-left:auto and the field gets one too, so the free space is split
    between them and the box lands in the gap. */
+/* Doc, 08.09.2026: "so hoch wie die butts und ueber den ganzen Platz" - the
+   field takes the whole rest of the toolbar line, and align-self: stretch
+   makes it exactly as tall as the buttons beside it (no hard-coded height). */
 .toolbar .plan-search {
-    margin-left: auto;
-    width: clamp(140px, 20vw, 240px);
-    max-width: 100%;
+    flex: 1 1 220px;
+    width: auto;
+    min-width: 120px;
+    align-self: stretch;
 }
 
-.toolbar .svp-search-count { margin-left: 2px; }
+/* Fixed slot so the stretched field keeps its width when the count appears */
+.toolbar .svp-search-count {
+    margin-left: 2px;
+    min-width: 52px;
+    text-align: right;
+}
 
-/* Phone: the field takes the whole line instead of hanging in the right
-   corner at 140 px - there is nothing beside it there anyway. */
+/* Phone: always a line of its own, never squeezed in beside a button. */
 @media (max-width: 760px) {
-    .toolbar .plan-search { margin-left: 0; width: 100%; }
+    .toolbar .plan-search { flex-basis: 100%; }
 }
 
 /* Nothing found - say so in red instead of a silent "0 von 38" */
