@@ -11,7 +11,8 @@
        dashSub: '...',              // optional: sub line of the ?auswertung view
        back: 'svp/',                // optional: "Zur Übersicht" button (href) top left above the
                                     //   title — for tests opened in a new tab from an svp plan
-       submit: false,               // optional: hide "Abgeben" (Uebungsmodus)
+       submit: false,               // optional: hide the button entirely
+       submitLabel: 'Auswertung',   // optional: rename it (default "Abgeben")
        version: 'v9',               // optional: data pool version, default 'v1'
        solutions: 'always',         // optional: readable without submitting; 'none' = no panel
        gradeScale: [[95, 1], ...],  // optional
@@ -26,6 +27,8 @@
   'use strict';
 
   const CFG = window.QUIZ || {};
+  /* Uebungsblaetter nennen den Knopf "Auswertung", Tests behalten "Abgeben" */
+  const SUBMIT_LABEL = CFG.submitLabel || 'Abgeben';
   /* Uebungsmodus: solutions readable right away instead of after "Abgeben" */
   const FREE_SOLUTIONS = CFG.solutions === 'always';
   /* quizzes without step-by-step solutions (e.g. infotest9) hide the panel */
@@ -51,7 +54,7 @@
       '</div>' +
       (CFG.submit === false ? '' :
         '<div class="actions" id="submitBox">' +
-          '<button class="btn" id="submitBtn" type="button">Abgeben</button>' +
+          '<button class="btn" id="submitBtn" type="button">' + SUBMIT_LABEL + '</button>' +
           '<div class="hint" id="hint"></div>' +
         '</div>') +
       '<div class="card" id="result" style="display:none">' +
@@ -212,7 +215,7 @@
       solBtn.setAttribute('aria-expanded', solOpen ? 'true' : 'false');
       solBtn.setAttribute('aria-label', 'Lösung zu Frage ' + (qi + 1) + ' anzeigen');
       solBtn.disabled = !(FREE_SOLUTIONS || TEST_MODE);
-      solBtn.title = solBtn.disabled ? 'Wird nach dem Abgeben freigeschaltet' : '';
+      solBtn.title = solBtn.disabled ? 'Wird nach "' + SUBMIT_LABEL + '" freigeschaltet' : '';
       sol.hidden = !solOpen;
       solBtn.addEventListener('click', function () {
         const open = sol.hidden;

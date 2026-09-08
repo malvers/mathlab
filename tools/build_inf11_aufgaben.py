@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Weekly practice sheets (20 tasks) for BGY Informatik, Jahrgangsstufe 11.
 
-Uebungsblatt, not a test: no "Abgeben" button, every solution readable right
-away (submit=False, solutions='always') - same mode as the Mathe-11 sheets.
+Uebungsblatt, not a test - but it keeps its submit button, labelled
+"Auswertung", so the class can see its own score (solutions='always')
+- same mode as the Mathe-11 sheets.
 The page markup, scoring and the teacher dashboard live in js/quiz-engine.js;
 this generator only carries the questions.
 
@@ -68,7 +69,7 @@ def build(slug, nr, kw, lb, topic, blurb, qs, course=INF11):
         questions.append({"q": q, "opts": opts, "steps": steps, "solution": slots[i - 1]})
     quiz = {
         "id": qid, "version": "v1",
-        "submit": False,          # Uebungsblatt der Woche: kein Abgeben
+        "submitLabel": "Auswertung",  # Uebungsblatt: der Knopf heisst Auswertung
         "solutions": "always",    # Loesung pro Aufgabe sofort aufklappbar
         "title": f"Aufgaben · {topic}",
         "subtitle": f"{course['subtitle']} · Woche {nr} ({lb}) · {len(qs)} Aufgaben: "
