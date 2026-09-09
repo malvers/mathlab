@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ein DBMS bedienen I</title>
+<meta name="description" content="Tabellen anlegen, Daten eingeben, sortieren — mit SQLite">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8; --codemuted:#7E8FB5;
+  --greetbg:#000028;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:24px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:grid;place-items:center}
+.pic img{max-width:100%;max-height:100%}
+
+/* --- table_top ---------------------------------------------------------- */
+.dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
+  font-family:Raleway,system-ui,sans-serif}
+.dtable th,.dtable td{padding:0 6px;text-align:left;overflow:hidden;white-space:nowrap;
+  border:.75px solid var(--stroke);line-height:1.85}
+.dtable th{background:var(--ink);color:#fff;font-family:Orbitron,Raleway,sans-serif;
+  font-weight:700;font-size:.75em;border-color:var(--ink)}
+.dtable td{background:#fff;color:var(--body)}
+.dtable td.b{font-weight:700;color:var(--ink)}
+.dtable td.m{font-family:Menlo,monospace}
+.dtable .ac{text-align:center}
+.dtable .ar{text-align:right}
+
+/* --- greeting (Auftaktfolie) --------------------------------------------- */
+.slide.greet{background-image:none;background-color:var(--greetbg)}
+.slide.greet::before{left:336px;width:552px;background:rgba(230,236,248,.14)}
+.slide.greet .foot{left:336px;color:var(--codemuted)}
+.slide.greet .pageno{color:var(--codemuted)}
+.greet-ground{position:absolute;inset:0;background:var(--greetbg)}
+.greet-pic{position:absolute;left:0;top:0;width:312px;height:540px;
+  object-fit:cover;display:block}
+.greet-credit{position:absolute;left:10px;bottom:8px;font-size:9px;
+  font-family:Raleway,sans-serif;color:rgba(255,255,255,.5);text-decoration:none;
+  letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.greet-credit:hover{color:rgba(255,255,255,.9);text-decoration:underline}
+.greet-lead{position:absolute;left:433px;top:168px;width:455px;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:46px;color:var(--orange);
+  line-height:1.05;letter-spacing:-.5px}
+.greet-quote{position:absolute;left:486px;top:368px;width:402px;text-align:center;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:17px;color:var(--orange);
+  line-height:1.2}
+.greet-author{position:absolute;left:596px;top:404px;width:292px;text-align:center;
+  font-size:11px;color:var(--codemuted);letter-spacing:.3px}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-038f4b571b96.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/coffee-4597416/" target="_blank" rel="noopener">fotografierende</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — FOS 12</p>
+      <h1>Ein DBMS bedienen I</h1>
+      <p class="sub">Tabellen anlegen, Daten eingeben, sortieren — mit SQLite</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Das Werkzeug: SQLite</h2>
+      <p class="sub">Eine Datei, ein Programm — die ganze Datenbank</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum SQLite?</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die ganze Datenbank ist <b>eine Datei</b>: schule.db — kopieren, mailen, fertig</p>
+<p class="line l0 step" data-g="1">Kein Server, keine Installation im Netz: läuft <b>sofort</b> auf jedem Rechner</p>
+<p class="line l0 step" data-g="2">Steckt in <b>jedem Smartphone</b> und in jedem Browser — die meistverbreitete Datenbank der Welt</p>
+<p class="line l0 step" data-g="3">Grafisch: <b>DB Browser for SQLite</b> — Konsole: <b>sqlite3</b></p>
+<p class="line l0 step" data-g="4">Die Sprache ist <b>SQL</b> — dieselbe wie bei MySQL, PostgreSQL, Oracle</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Zwei Wege, ein Ergebnis</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0">Grafische Oberfläche</p>
+<p class="col l1 step" data-g="0">Tabelle anlegen per <b>Dialog</b>: Spalte, Typ, Häkchen</p>
+<p class="col l1 step" data-g="0">Daten <b>eintippen</b> wie in einer Tabellenkalkulation</p>
+<p class="col l1 step" data-g="0">Sortieren: <b>Klick</b> auf den Spaltenkopf</p>
+<p class="col l1 step" data-g="0">Gut zum <b>Ausprobieren</b> und Nachsehen</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1">SQL-Befehle</p>
+<p class="col l1 step" data-g="1"><b>CREATE TABLE</b>, <b>INSERT</b>, <b>ORDER BY</b></p>
+<p class="col l1 step" data-g="1"><b>Wiederholbar</b>: Skript speichern, neu ausführen</p>
+<p class="col l1 step" data-g="1"><b>Kopierbar</b>: in jedem DBMS fast gleich</p>
+<p class="col l1 step" data-g="1">Das lernen wir — die Oberfläche erklärt sich selbst</p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Tabellen anlegen</h2>
+      <p class="sub">Erst die Struktur: Spalten, Datentypen, Schlüssel</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Plan: vier Tabellen für schule.db</h3><div class="rules"></div><div class="pic"><img src="img/schema-schule.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Das ist die <b>aufgeteilte</b> Kursliste aus der letzten Woche</p>
+<p class="line l0 step" data-g="1">Reihenfolge beim Anlegen: erst <b>Lehrkraft</b> und <b>Schüler</b>, dann Kurs, dann Belegung</p>
+<p class="line l0 step" data-g="2">Warum? Ein <b>Fremdschlüssel</b> braucht die Tabelle, auf die er zeigt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Schritt 1: Lehrkraft und Schüler anlegen</h3><div class="rules"></div><div class="codepanel"><pre>-- schule.db: Tabellen ohne Fremdschlüssel zuerst
+CREATE TABLE Lehrkraft (
+  LNr        INTEGER PRIMARY KEY,
+  Name       TEXT    NOT NULL,
+  Durchwahl  INTEGER CHECK (Durchwahl BETWEEN 10 AND 99)
+);
+
+CREATE TABLE Schueler (
+  SNr           INTEGER PRIMARY KEY,
+  Name          TEXT NOT NULL,
+  Klasse        TEXT NOT NULL CHECK (Klasse IN ('FO12a', 'FO12b')),
+  Geburtsdatum  TEXT                  -- 'JJJJ-MM-TT', siehe Datentypen
+);</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Schritt 2: Kurs und Belegung — mit Fremdschlüsseln</h3><div class="rules"></div><div class="codepanel"><pre>PRAGMA foreign_keys = ON;              -- SQLite prüft Fremdschlüssel nur auf Wunsch!
+CREATE TABLE Kurs (
+  KNr   INTEGER PRIMARY KEY,
+  Fach  TEXT    NOT NULL,
+  Raum  TEXT,
+  LNr   INTEGER NOT NULL REFERENCES Lehrkraft(LNr)
+);
+
+CREATE TABLE Belegung (
+  SNr INTEGER NOT NULL REFERENCES Schueler(SNr),
+  KNr INTEGER NOT NULL REFERENCES Kurs(KNr),
+  PRIMARY KEY (SNr, KNr)               -- zusammengesetzter Schlüssel: jedes Paar nur einmal
+);</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Datentypen: was in eine Spalte darf</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:12px"><colgroup><col style="width:130px"><col style="width:170px"><col style="width:190px"><col style="width:326px"></colgroup><tr><th>Typ</th><th>Bedeutung</th><th>Beispiel</th><th>Spalte</th></tr><tr><td class="b">INTEGER</td><td>ganze Zahl</td><td class="m">1004</td><td>SNr, Durchwahl</td></tr><tr><td class="b">REAL</td><td>Kommazahl</td><td class="m">1.75</td><td>Größe, Preis</td></tr><tr><td class="b">TEXT</td><td>Zeichenkette</td><td class="m">'Lena Krause'</td><td>Name, Klasse</td></tr><tr><td class="b">TEXT als Datum</td><td>'JJJJ-MM-TT'</td><td class="m">'2008-04-17'</td><td>Geburtsdatum</td></tr></table><div class="body" style="top:271px;height:225px"><p class="line l0 step" data-g="0">Text immer in <b>einfachen</b> Anführungszeichen: 'FO12a'</p>
+<p class="line l0 step" data-g="1">SQLite hat <b>keinen</b> Datumstyp — Datum als Text in <b>ISO-Form</b> speichern</p>
+<p class="line l0 step" data-g="2">Warum ISO? <b>'2008-04-17' &lt; '2009-01-03'</b> — sortiert sich von selbst richtig</p>
+<p class="line l0 step" data-g="3">Falle: '17.04.2008' sortiert nach dem <b>Tag</b> — nicht nach dem Jahr</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Daten eingeben</h2>
+      <p class="sub">INSERT, UPDATE, DELETE — und was das DBMS ablehnt</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>INSERT: Datensätze eintragen</h3><div class="rules"></div><div class="codepanel"><pre>-- Reihenfolge der Werte = Reihenfolge der Spalten
+INSERT INTO Lehrkraft VALUES (1, 'Alvers', 31);
+INSERT INTO Lehrkraft VALUES (2, 'Schulze', 42);
+
+-- sicherer: Spalten nennen, mehrere Zeilen auf einmal
+INSERT INTO Schueler (SNr, Name, Klasse, Geburtsdatum) VALUES
+  (1001, 'Lena Krause', 'FO12a', '2008-04-17'),
+  (1002, 'Tim Vogel',   'FO12a', '2007-11-02'),
+  (1003, 'Mia Hahn',    'FO12b', '2008-09-30');
+
+INSERT INTO Kurs (KNr, Fach, Raum, LNr) VALUES (3, 'Informatik', '204', 1);
+INSERT INTO Belegung VALUES (1001, 3), (1002, 3), (1003, 3);</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was das DBMS ablehnt</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:420px"><col style="width:240px"><col style="width:156px"></colgroup><tr><th>Versuch</th><th>Antwort von SQLite</th><th>Regel</th></tr><tr><td class="m">INSERT INTO Schueler VALUES (1001, 'Ali', 'FO12a', NULL)</td><td class="m" style="background:#F2CFCB">UNIQUE constraint failed</td><td>Entität</td></tr><tr><td class="m">INSERT INTO Schueler VALUES (1005, NULL, 'FO12b', NULL)</td><td class="m" style="background:#F2CFCB">NOT NULL constraint failed</td><td>Entität</td></tr><tr><td class="m">INSERT INTO Schueler VALUES (1006, 'Jo', 'FO12x', NULL)</td><td class="m" style="background:#F2CFCB">CHECK constraint failed</td><td>Wertebereich</td></tr><tr><td class="m">INSERT INTO Kurs VALUES (7, 'Chemie', '118', 9)</td><td class="m" style="background:#F2CFCB">FOREIGN KEY constraint failed</td><td>Referenz</td></tr></table><div class="body" style="top:257.125px;height:238.875px"><p class="line l0 step" data-g="0">Das DBMS <b>prüft jede Zeile</b> gegen die Regeln aus CREATE TABLE</p>
+<p class="line l0 step" data-g="1">Fehlermeldung lesen: sie nennt die <b>verletzte Regel</b> — nicht die Zeile</p>
+<p class="line l0 step" data-g="2">Fremdschlüssel-Fehler nur, wenn <b>PRAGMA foreign_keys = ON</b> gesetzt ist</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>UPDATE und DELETE: nie ohne WHERE</h3><div class="rules"></div><div class="codepanel"><pre>-- Informatik zieht um: EINE Änderung, weil der Raum nur einmal gespeichert ist
+UPDATE Kurs SET Raum = '210' WHERE Fach = 'Informatik';
+
+-- Ben Roth verlässt die Schule: erst die Belegungen, dann der Schüler
+DELETE FROM Belegung WHERE SNr = 1004;
+DELETE FROM Schueler WHERE SNr = 1004;
+
+-- Der Kurs Mathematik bleibt erhalten - keine Löschanomalie mehr
+
+-- GEFAHR: ohne WHERE trifft es ALLE Zeilen
+UPDATE Kurs SET Raum = '210';          -- alle Kurse in Raum 210
+DELETE FROM Schueler;                  -- Tabelle leer, keine Rückfrage</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>Sortieren</h2>
+      <p class="sub">ORDER BY — eine Reihenfolge, die das DBMS herstellt</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>ORDER BY: das DBMS sortiert, nicht du</h3><div class="rules"></div><div class="codepanel"><pre>-- alle Schüler, alphabetisch
+SELECT * FROM Schueler ORDER BY Name;
+
+-- absteigend: die Jüngsten zuerst
+SELECT Name, Geburtsdatum FROM Schueler ORDER BY Geburtsdatum DESC;
+
+-- mehrere Schlüssel: erst Klasse, innerhalb der Klasse nach Name
+SELECT Klasse, Name FROM Schueler ORDER BY Klasse, Name;
+
+-- nur die ersten drei
+SELECT Name FROM Schueler ORDER BY Geburtsdatum LIMIT 3;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Sortieren mit zwei Schlüsseln</h3><div class="rules"></div><div class="body" style="width:404px"><p class="line l0 step" data-g="0"><b>Erster Schlüssel</b> sortiert grob: Klasse</p>
+<p class="line l0 step" data-g="1"><b>Zweiter Schlüssel</b> entscheidet bei Gleichstand: Geburtsdatum</p>
+<p class="line l0 step" data-g="2"><b>DESC</b> = absteigend, ASC = aufsteigend (Standard)</p>
+<p class="line l0 step" data-g="3">Die Daten in der Tabelle <b>bleiben</b> unsortiert — nur das Ergebnis ist geordnet</p></div><table class="dtable" style="left:578px;top:150px;width:310px;font-size:11px"><colgroup><col style="width:70px"><col style="width:120px"><col style="width:120px"></colgroup><tr><th>Klasse</th><th>Name</th><th>Geburtsdatum</th></tr><tr><td style="background:#FBEBBF">FO12a</td><td style="background:#FBEBBF">Lena Krause</td><td class="m" style="background:#FBEBBF">2008-04-17</td></tr><tr><td style="background:#FBEBBF">FO12a</td><td style="background:#FBEBBF">Tim Vogel</td><td class="m" style="background:#FBEBBF">2007-11-02</td></tr><tr><td style="background:#DDE8C6">FO12b</td><td style="background:#DDE8C6">Mia Hahn</td><td class="m" style="background:#DDE8C6">2008-09-30</td></tr><tr><td style="background:#DDE8C6">FO12b</td><td style="background:#DDE8C6">Ben Roth</td><td class="m" style="background:#DDE8C6">2008-01-25</td></tr></table><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Falle: Zahlen als Text sortieren</h3><div class="rules"></div><div class="body" style="width:404px"><p class="line l0 step" data-g="0">Als <b>TEXT</b> gespeichert, sortiert SQLite <b>zeichenweise</b>: '1' kommt vor '9', also '10' vor '9'</p>
+<p class="line l0 step" data-g="1">Als <b>INTEGER</b> gespeichert, sortiert es <b>nach Wert</b>: 9 vor 10</p>
+<p class="line l0 step" data-g="2">Deshalb: <b>Datentyp</b> beim Anlegen richtig wählen</p>
+<p class="line l0 step" data-g="3">Fun Fact: derselbe Fehler lässt in Dateilisten Datei10 vor Datei2 stehen</p></div><table class="dtable" style="left:588px;top:150px;width:300px;font-size:11px"><colgroup><col style="width:150px"><col style="width:150px"></colgroup><tr><th class="ar">Raum als TEXT</th><th class="ar">Raum als INTEGER</th></tr><tr><td class="m ar" style="background:#F2CFCB">'118'</td><td class="m ar">9</td></tr><tr><td class="m ar">'204'</td><td class="m ar">10</td></tr><tr><td class="m ar">'210'</td><td class="m ar">118</td></tr><tr><td class="m ar" style="background:#F2CFCB">'9'</td><td class="m ar">204</td></tr><tr><td class="m ar" style="background:#F2CFCB">'95'</td><td class="m ar">210</td></tr></table><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Erst die Struktur, dann die Daten. Und nie ein UPDATE oder DELETE ohne WHERE.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: schule.db anlegen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>schule.db</b> anlegen — mit DB Browser for SQLite oder sqlite3</p>
+<p class="line l0 step" data-g="1">Die <b>vier Tabellen</b> mit den Regeln aus den Folien erstellen (PRAGMA nicht vergessen)</p>
+<p class="line l0 step" data-g="2">Je Tabelle <b>fünf Datensätze</b> eintragen — eure eigenen Namen sind erlaubt</p>
+<p class="line l0 step" data-g="3"><b>Drei Sortierungen</b>: nach Name, nach Geburtsdatum absteigend, nach Klasse und Name</p>
+<p class="line l0 step" data-g="4"><b>Einen Fehlversuch</b> provozieren: Fehlermeldung notieren und die Regel benennen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script>
+// time-aware greeting - the browser knows the real clock, a .pptx never does
+(function(){
+  var h = new Date().getHours();
+  var t = h < 5 ? 'Good night!' : h < 12 ? 'Good morning!' :
+          h < 18 ? 'Good afternoon!' : h < 22 ? 'Good evening!' : 'Good night!';
+  var el = document.getElementById('greet-text');
+  if (el) el.textContent = t;
+})();
+
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  if (e.target.closest('#hud') || e.target.closest('.labbar a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+}
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>

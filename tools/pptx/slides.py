@@ -270,8 +270,12 @@ class Deck:
         return s
 
     def table_bullets(self, title, lines, rows, col_w, marks=None, font_size=11,
-                      bold_cols=(), mono_cols=(), align=None, body_w=404, y=None):
-        """Bullets left, native table right (top aligned with the body)."""
+                      bold_cols=(), mono_cols=(), align=None, body_w=404, y=None,
+                      more=()):
+        """Bullets left, native table right (top aligned with the body).
+        `more`: further tables on the same slide, each a dict with rows, col_w and
+        y (top edge), plus any add_table keyword - the Datenbanken deck puts the
+        Lehrkraft table under the Kurs table to show the dangling foreign key."""
         s, body = self._content("Inhalt", title, lines)
         self.place(body, MARGIN, BODY_Y, body_w, BODY_H)
         self._check_body(lines, body_w, BODY_H, title)
@@ -280,6 +284,13 @@ class Deck:
         add_table(s, rows, W - MARGIN - sum(col_w), y if y is not None else BODY_Y + 4,
                   col_w, font_size=font_size, marks=marks, bold_cols=bold_cols,
                   mono_cols=mono_cols, align=align)
+        for t in more:
+            t = dict(t)
+            t_rows, t_cols, t_y = t.pop("rows"), t.pop("col_w"), t.pop("y")
+            bad = check_fit(t_rows, t_cols, t.get("font_size", font_size),
+                            t.get("bold_cols", ()), t.get("mono_cols", ()))
+            assert not bad, (title, bad)
+            add_table(s, t_rows, W - MARGIN - sum(t_cols), t_y, t_cols, **t)
         add_click_build(s, [(body, lines)])
         return s
 
