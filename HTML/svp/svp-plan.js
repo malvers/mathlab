@@ -4625,10 +4625,9 @@
            Pillenbreite muss neu gemessen werden. */
         equalizeLbCells();
         if (!btn) btn = planEditButton();
-        /* Doc, 09.09.2026: "stift raus" - der Knopf heisst nur noch
-           "Bearbeiten"; der Haken am Speichern bleibt, er zeigt an, dass
-           etwas zu sichern ist. */
-        if (btn) btn.textContent = editing ? '✔ Speichern' : 'Bearbeiten';
+        /* Doc, 09.09.2026: "stift raus", dann auch der Haken - der Knopf traegt
+           nur noch Text: "Bearbeiten" bzw. "Speichern". */
+        if (btn) btn.textContent = editing ? 'Speichern' : 'Bearbeiten';
         if (cancelBtn) cancelBtn.hidden = !editing;
     };
 
