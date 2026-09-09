@@ -40,9 +40,10 @@ Türkçe 🇹🇷
 %pause 500
 
 # 
+90pt
+17 programlama dili
 60pt
-16 programlama dili
-40pt
+%spacer
 hypertext markup language
 cascading styles sheets
 apple script
@@ -56,6 +57,7 @@ JAVA
 bash
 JSON
 GLSL
+REST
 SQL
 C++
 C

@@ -40,9 +40,10 @@ turco 🇹🇷
 %pause 500
 
 # 
+90pt
+17 linguagens de programação
 60pt
-16 linguagens de programação
-40pt
+%spacer
 hypertext markup language
 cascading styles sheets
 apple script
@@ -56,6 +57,7 @@ JAVA
 bash
 JSON
 GLSL
+REST
 SQL
 C++
 C

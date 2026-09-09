@@ -40,9 +40,10 @@ Turks 🇹🇷
 %pause 500
 
 # 
+90pt
+17 programmeertalen
 60pt
-16 programmeertalen
-40pt
+%spacer
 hypertext markup language
 cascading styles sheets
 apple script
@@ -56,6 +57,7 @@ JAVA
 bash
 JSON
 GLSL
+REST
 SQL
 C++
 C

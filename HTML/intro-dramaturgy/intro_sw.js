@@ -40,9 +40,10 @@ Kituruki 🇹🇷
 %pause 500
 
 # 
+90pt
+Lugha 17 za programu
 60pt
-Lugha 16 za programu
-40pt
+%spacer
 hypertext markup language
 cascading styles sheets
 apple script
@@ -56,6 +57,7 @@ JAVA
 bash
 JSON
 GLSL
+REST
 SQL
 C++
 C
