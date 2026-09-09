@@ -41,7 +41,7 @@ turco 🇹🇷
 
 # 
 60pt
-14 linguagens de programação
+16 linguagens de programação
 40pt
 hypertext markup language
 cascading styles sheets
@@ -53,6 +53,8 @@ JSON
 JAVA
 kotlin
 swift
+C
+C++
 GLSL
 SQL
 bash
