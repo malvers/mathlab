@@ -20,7 +20,8 @@
     .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: middle; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TrackballControls.js"></script>
+<script src="../js/cyber-trackball.js"></script>
     <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
     <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
 </head>
@@ -145,9 +146,8 @@
     renderer.setSize(innerWidth, innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    const controls = new THREE.OrbitControls(cam, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
+    // The SGI trackball, shared with every other 3D lab.
+    const controls = CyberTrackball.make(THREE.TrackballControls, cam, renderer.domElement);
     controls.target.set(0, 0, 175);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.55));

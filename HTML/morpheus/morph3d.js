@@ -12,6 +12,18 @@
 
     const GEOM_KEY = 'draw20-morph3d-geom';
 
+    // The popup is opened with an EMPTY url and written into, so its document
+    // has no base to resolve relative paths against — every script it loads
+    // needs an absolute URL. Derive the shared trackball's from this file's own
+    // location, so it works over http and over file:// alike.
+    const TRACKBALL_URL = (function () {
+        // currentScript is this file while the surrounding IIFE evaluates; the
+        // page's own URL is an equally good base if anything ever loads this
+        // as a module, since morph.html sits one level below js/ too.
+        const base = (document.currentScript && document.currentScript.src) || location.href;
+        return new URL('../js/cyber-trackball.js', base).href;
+    })();
+
     // Tracks the most recently opened popup window so we can detect "still open"
     // for auto-refresh on formula changes.
     let popupWin = null;
@@ -117,7 +129,8 @@
     }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TrackballControls.js"></script>
+<script src="${TRACKBALL_URL}"></script>
 </head><body>
 <div id="hud">
     <div class="row"><span class="swatch" style="background:#adff2f"></span>PNG · DRAWING · <span id="hud-png-pts">–</span> Pts</div>
@@ -308,8 +321,11 @@
         document.body.appendChild(renderer.domElement);
 
         cam.up.set(0, 1, 0); // Explicit up before constructing controls
-        const controls = new THREE.OrbitControls(cam, renderer.domElement);
-        controls.enableDamping = false; // No inertia/Nachlauf — camera stops instantly on release
+        // The SGI trackball, shared with every other 3D lab. Dragging is 1:1
+        // with no damping lag, which is what the old enableDamping=false was
+        // after; a deliberate flick does now keep spinning until the next
+        // click — set controls.noSpin = true here if that is unwanted.
+        const controls = CyberTrackball.make(THREE.TrackballControls, cam, renderer.domElement);
         controls.target.set(0, 0, 175);
 
         scene.add(new THREE.AmbientLight(0xffffff, 0.55));
@@ -744,7 +760,7 @@
             if (e.buttons !== 0) dragMoved = true;
         });
         renderer.domElement.addEventListener('click', (e) => {
-            if (dragMoved) return; // OrbitControls was rotating — ignore click
+            if (dragMoved) return; // the trackball was rotating — ignore click
             const rect = renderer.domElement.getBoundingClientRect();
             pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
             pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
@@ -797,8 +813,9 @@
         // Canonical-view shortcuts. Camera is placed 'd' units away from the
         // scene target on the chosen axis, looking back toward target.
         // Top/Bottom would be degenerate with world-up=(0,1,0) → add a tiny
-        // tilt along Z so cam.up stays (0,1,0) consistently and OrbitControls
-        // doesn't flip its internal "up" reference between views.
+        // tilt along Z so cam.up stays (0,1,0) consistently. The trackball
+        // needs it too: with up exactly along the view direction there is no
+        // camera basis to turn the ball in, and rotation would go dead.
         function setView(name) {
             const t = TARGET_HOME;
             const d = 1100;
