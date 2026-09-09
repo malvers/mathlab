@@ -77,7 +77,11 @@ html.svp-light {
 /* Light-scheme fixes for the few places where a variable swap isn't enough:
    brightening filters and the dark secondary button read wrong on white. */
 html.svp-light nav.quick-nav a.badge:hover { filter: brightness(0.92); }
-html.svp-light nav.quick-nav a.badge.active { filter: none; background: rgba(40, 70, 120, 0.08); }
+html.svp-light nav.quick-nav a.badge.active {
+    filter: none;
+    background: rgba(40, 70, 120, 0.08);
+    border-color: rgba(40, 70, 120, 0.5);
+}
 html.svp-light .badge-link:hover { filter: brightness(0.92); }
 
 html.svp-light button.action.secondary {
@@ -325,10 +329,26 @@ nav.quick-nav .badge { text-decoration: none; line-height: 14px; }
     .nav-year { color: #444; }
 }
 
+/* Doc, 09.09.2026: "mach mal die Raender der elemente so duenn wie oben", dann
+   "auch die HG Farbe wie oben" - die Pillen der Reihe tragen Rand UND Fuellung
+   des Jahres-Kastens darueber: var(--line) statt der 0.42 aus .b-grey, und
+   dieselben 8 % Blau als Grund. Betrifft nur die Navileiste; die grauen Pillen
+   im Plan bleiben, wie sie sind. Die aktive Pille behaelt ihre Kontur, die
+   kommt vom outline in currentColor. */
+nav.quick-nav a.badge {
+    border-color: var(--line);
+    background: rgba(120, 160, 220, 0.08);
+}
+
 nav.quick-nav a.badge:hover { filter: brightness(1.35); }
 
+/* Doc, 09.09.2026: "hier auch bitte duenner" - der aktive Eintrag trug Rand UND
+   outline, zusammen ein 2 px dicker dunkler Ring. Jetzt nur der Rand, eine Spur
+   kraeftiger als bei den anderen Pillen; erkennbar bleibt er ausserdem an der
+   helleren Fuellung. */
 nav.quick-nav a.badge.active {
-    outline: 1px solid currentColor;
+    outline: none;
+    border-color: rgba(120, 160, 220, 0.55);
     filter: brightness(1.25);
 }
 
@@ -350,7 +370,11 @@ nav.quick-nav a.badge.nav-hidden { display: none; }
 #plan-table td.mat .mat-flag {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    justify-content: center;
+    /* Doc, 09.09.2026: "clip und zahl x zent" - der Abstand steht als Rand an
+       der Zahl, nicht als gap: die nulldichte Stuetze ::before ist ein Flex-
+       Kind und bekam vom gap sonst 5 px ab - Klammer und Zahl sassen damit
+       5 px zu weit rechts in der Pille. */
     vertical-align: middle;
     margin-left: 8px;
     padding: 1px 8px;
@@ -381,12 +405,14 @@ html.svp-light #plan-table a.quiz-btn:hover { background: rgba(40, 70, 120, 0.16
     height: 13px;
     fill: none;
     stroke: currentColor;
-    stroke-width: 2;
+    /* Doc, 09.09.2026: "die Klammer leichter" - 1.5 statt 2, dieselbe Strich-
+       staerke wie die Icons in der Navileiste. */
+    stroke-width: 1.5;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
 
-#plan-table td.mat .mat-flag-n { font-variant-numeric: tabular-nums; }
+#plan-table td.mat .mat-flag-n { font-variant-numeric: tabular-nums; margin-left: 5px; }
 
 /* Doc, 08.09.2026: "die clips ohne zahl sind zu flach" - ohne die Zahl fehlte
    die Textzeile, die die Hoehe macht, und der Knopf fiel um gut 2 px in sich
@@ -830,7 +856,16 @@ body.shifting #plan-table .shift-col { display: table-cell; }
 /* Export-Menü: dieselbe Optik wie die Dropdowns der Quick-Nav
    (.nav-drop-panel), damit die Seite eine Sprache spricht. */
 .export-drop { position: relative; display: inline-flex; }
-.export-caret { margin-left: 4px; font-size: 0.85em; }
+/* Doc, 09.09.2026: "chevi groesser" - der Pfeil war mit 0.85em kleiner als die
+   Beschriftung; line-height:1 haelt die Knopfhoehe trotzdem bei 34.4 px. */
+.export-caret {
+    margin-left: 5px;
+    font-size: 1.25em;
+    /* line-height:0 haelt die Zeilenbox des Knopfes flach - sonst waere er mit
+       dem groesseren Pfeil 2 px hoeher als seine Nachbarn (gemessen). */
+    line-height: 0;
+    vertical-align: -0.06em;
+}
 .export-menu {
     display: flex;
     flex-direction: column;
@@ -1721,6 +1756,15 @@ tbody td {
 tbody tr:last-child td { border-bottom: none; }
 
 td.num { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Doc, 09.09.2026: "SW weiter rechts" - die SW-Spalte bekommt links Luft, damit
+   die Nummer nicht am Tabellenrand klebt (und in der laufenden Woche nicht am
+   orangen Balken). Zweite Zelle, nicht erste: davor steht die im Normalfall
+   ausgeblendete Pfeil-Spalte des Verschieben-Modus. */
+#plan-table tbody td:nth-child(2) { padding-left: 16px; }
+/* Doc, 09.09.2026: "die Buchstaben SW 3px nach rechts", dann zweimal "noch
+   1px" - nur die Ueberschrift, die Zahlen darunter bleiben, wo sie sind. */
+#plan-table thead th:nth-child(2) { padding-left: 21px; }
 /* zweizeilig (siehe setDateText) und so schmal wie ihr Inhalt —
    der gewonnene Platz geht an die Thema-Spalte */
 td.date { white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -2562,14 +2606,19 @@ tr.wk-edit .sub-tabs:not(.on-notizen) .sub-tools { display: inline-flex; }
    the surrounding cell text instead of blowing up the line height. */
 #plan-table .katex { font-size: 1.05em; }
 
+/* Ferienzeile (Doc, 09.09.2026: "die Farbe passt ni ... schrift groesser"):
+   Cyan gehoert seit den Bereich-Pillen zu Lernbereich 2 - die Ferien haben
+   damit ausgerechnet die Farbe eines Stoffgebiets getragen. Jetzt neutral in
+   der gedaempften Schriftfarbe auf einem blaugrauen Band, und eine Stufe
+   groesser (0.68 -> 0.8 rem). */
 tr.ferien td {
-    background: rgba(90, 190, 230, 0.07);
-    color: var(--cyan);
+    background: rgba(120, 160, 220, 0.07);
+    color: var(--muted);
     font-family: 'Orbitron', sans-serif;
-    font-size: 0.68rem;
+    font-size: 0.8rem;
     letter-spacing: 0.08em;
     text-align: center;
-    padding: 8px 12px;
+    padding: 9px 12px;
 }
 
 footer.page-foot {
@@ -3499,7 +3548,11 @@ html.svp-light .mat-ico-movie path { fill: rgb(20, 44, 92); }
    One look for every "Suchen ..." box on the svp pages. */
 .svp-search {
     box-sizing: border-box;
-    background: var(--input-bg);
+    /* Doc, 09.09.2026: "den HG von der SZ wie die butts" - dasselbe Blau wie
+       button.action statt des weissen Eingabefeldes, damit die Suchzeile mit
+       den Knoepfen daneben eine Leiste ergibt. Ein Wert fuer beide Schemata,
+       genau wie bei den Knoepfen. */
+    background: rgba(120, 160, 220, 0.16);
     border: 1px solid var(--line);
     border-radius: 7px;
     padding: 7px 9px;
@@ -3509,6 +3562,18 @@ html.svp-light .mat-ico-movie path { fill: rgb(20, 44, 92); }
     font-family: 'Orbitron', sans-serif;
     font-size: 0.72rem;
     letter-spacing: 0.06em;
+}
+
+/* Doc, 09.09.2026: "suche font gleich" - Schriftart, -groesse und Laufweite
+   waren schon dieselben wie bei den Knoepfen (Orbitron 11.52px/0.69px,
+   gemessen); unterschiedlich war nur die Farbe: der Platzhalter kam im
+   ausgegrauten Browser-Ton. Jetzt in der Schriftfarbe der Knopfbeschriftung,
+   aber eine Spur zurueckgenommen - Doc: "bisssl grauer, hat ja semantisch
+   anders": ein Platzhalter ist eben kein Knopfetikett. opacity:1 muss dabei
+   sein, sonst blasst Firefox ihn ein zweites Mal ab. */
+.svp-search::placeholder {
+    color: color-mix(in srgb, var(--text) 68%, transparent);
+    opacity: 1;
 }
 
 .svp-search:focus {

@@ -66,7 +66,7 @@ window.addEventListener('load', function(){
     if (!page || !sel) { done(); return; }
 
     var frame = document.createElement('iframe');
-    frame.style.cssText = 'width:1500px;height:900px;border:0';
+    frame.style.cssText = 'width:1500px;height:' + (q.get('h') || 900) + 'px;border:0';
     frame.src = page;
     frame.addEventListener('load', function(){
       var doc = frame.contentDocument;
@@ -82,7 +82,7 @@ window.addEventListener('load', function(){
         doc.querySelectorAll(sel).forEach(function(el){
           var r = el.getBoundingClientRect();
           var cs = frame.contentWindow.getComputedStyle(el);
-          out.push('"'+el.textContent.trim().slice(0, 40)+'": l='+r.left.toFixed(1)+
+          out.push('"'+el.textContent.trim().slice(0, 40)+'": t='+r.top.toFixed(1)+' l='+r.left.toFixed(1)+
             ' r='+r.right.toFixed(1)+' w='+r.width.toFixed(1)+
             ' h='+r.height.toFixed(1)+' pad='+cs.padding+
             ' fs='+cs.fontSize+' ls='+cs.letterSpacing+
