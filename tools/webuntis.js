@@ -112,6 +112,20 @@ async function writeTopic(ttId, text) {
   return r.result;
 }
 
+// "Anwesenheit kontrolliert" for periods whose topic was just written. The tick means "I
+// looked who is missing", so it is only ever set together with Doc's own click on Eintragen -
+// never by the 18:00 dry run, never for a period that was not written in the same breath
+// (Doc, 09.09.2026: "klar! an Eintragen"). The mobile API calls it submitAbsencesChecked2017
+// (the un-suffixed name answers "Method not found" - measured); it takes a set of periodIds
+// and answers {}; an unknown id is silently ignored and setting it twice is harmless. There
+// is no clean way to read the tick back: only getPeriodData2017 carries it, and that drags
+// student data along, so the write is fire-and-forget on purpose.
+async function markAbsencesChecked(ttIds) {
+  if (!ttIds.length) return;
+  const r = await intern('submitAbsencesChecked2017', { periodIds: ttIds });
+  if (r.error) throw new Error(`${r.error.message} (code ${r.error.code})`);
+}
+
 // Read the stored classbook text of one period - WITHOUT any student data.
 // History: this used to be getPeriodData2017, switched off on 02.09.2026 on Doc's call
 // ("Schuelernamen? Neeee") because that answer also carries `referencedStudents` with full names
@@ -896,12 +910,15 @@ async function main() {
     //   --dry    report only, write nothing
     //   --force  overwrite a DIFFERENT existing text (a hand correction) as well
     //   --line   one summary line plus exit code 1 when something is open (for the app)
+    //   --nur-stoff  write the topic only, leave "Anwesenheit kontrolliert" alone (default: the
+    //            tick is set for every period written and read back - see markAbsencesChecked)
     // Since 06.09.2026 this also handles Termin-mode pages (block teaching, fos12) and builds
     // its text with the browser's own functions, so both ways write the same line.
     const args = process.argv.slice(3);
     const dry = args.includes('--dry');
     const force = args.includes('--force');
     const line = args.includes('--line');
+    const nurStoff = args.includes('--nur-stoff');
     const offen = args.includes('--offen');
     const say = (...a) => { if (!line) console.log(...a); };
 
@@ -963,18 +980,24 @@ async function main() {
       }
       // Writing: report AFTER the fact, otherwise the caller shows the state from before its own
       // click. Every entry is read back; only a confirmed one counts.
-      let done = 0; const bad = [], patched = [];
+      let done = 0; const bad = [], patched = [], ticked = [];
       for (const p of open) {
         const label = `${p.l.date.slice(6)}.${p.l.date.slice(4, 6)}. ${p.l.start} ${p.l.klassen.join(',')}`;
         try {
           await writeTopic(p.l.ttId, p.text);
           const back = (await readTopics([p.l.ttId]))[String(p.l.ttId)] || '';
           patched.push({ page: p.page, l: p.l, text: back });
-          if (back.trim() === p.text.trim()) done++; else bad.push(label);
+          if (back.trim() === p.text.trim()) { done++; ticked.push(p.l.ttId); } else bad.push(label);
         } catch (e) { bad.push(`${label} (${e.message})`); }
       }
       if (patched.length) await patchStatus(session, patched);
-      console.log('KLASSENBUCH: ' + `${done} Stunde${done === 1 ? '' : 'n'} eingetragen`
+      // the tick rides on the same click, only for periods whose text came back confirmed
+      let tick = '';
+      if (!nurStoff && ticked.length) {
+        try { await markAbsencesChecked(ticked); tick = ` \u00b7 Anwesenheit kontrolliert: ${ticked.length}`; }
+        catch (e) { bad.push(`Anwesenheit kontrolliert (${e.message})`); }
+      }
+      console.log('KLASSENBUCH: ' + `${done} Stunde${done === 1 ? '' : 'n'} eingetragen` + tick
         + (bad.length ? ` \u00b7 ${bad.length} FEHLGESCHLAGEN: ${bad.join(', ')}` : ''));
       process.exitCode = bad.length ? 1 : 0;
       return;
@@ -989,15 +1012,23 @@ async function main() {
       say(`    waer: ${c.text}`);
     }
 
-    const patched = [];
+    const patched = [], ticked = [];
     for (const p of open) {
       const label = `${p.l.date} ${p.l.start} ${p.l.subject} ${p.l.klassen.join(',')}`;
       if (dry) { say(`${label}: WUERDE schreiben (${p.why}) -> ${p.text}`); continue; }
       await writeTopic(p.l.ttId, p.text);
       const back = (await readTopics([p.l.ttId]))[String(p.l.ttId)] || '';
       const ok = back.trim() === p.text.trim();
+      if (ok) ticked.push(p.l.ttId);
       patched.push({ page: p.page, l: p.l, text: back });
       say(`${label}: ${ok ? 'eingetragen' : 'FEHLER, Rueckgelesenes weicht ab'} -> ${back}`);
+    }
+    if (!nurStoff && open.length) {
+      if (dry) say(`WUERDE "Anwesenheit kontrolliert" setzen: ${open.length} Stunde${open.length === 1 ? '' : 'n'} (--nur-stoff laesst es)`);
+      else if (ticked.length) {
+        try { await markAbsencesChecked(ticked); say(`"Anwesenheit kontrolliert" gesetzt: ${ticked.length} Stunde${ticked.length === 1 ? '' : 'n'}`); }
+        catch (e) { say(`"Anwesenheit kontrolliert" FEHLGESCHLAGEN: ${e.message}`); }
+      }
     }
     if (!open.length) say('Nichts offen - alles steht schon im Klassenbuch.');
     if (unmapped.size) say(`Ohne Planseite (in ${path.basename(MAP_FILE)} nachtragen): ${[...unmapped].join(', ')}`);
@@ -1021,7 +1052,7 @@ async function main() {
       return;
     }
   }
-  console.error(`Unknown command "${cmd}". Try: whoami | timetable [VON] [BIS] | topic <ttId> "<Text>" | plan [YYYYMMDD] [--dry] [--force] | status | ${Object.keys(map).join(' | ')}`);
+  console.error(`Unknown command "${cmd}". Try: whoami | timetable [VON] [BIS] | topic <ttId> "<Text>" | plan [YYYYMMDD] [--dry] [--force] [--nur-stoff] | status | ${Object.keys(map).join(' | ')}`);
   process.exit(1);
 }
 

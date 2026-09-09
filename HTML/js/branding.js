@@ -272,26 +272,9 @@ const CyberBranding = {
     _navLoadRequested: false,
     _overlaysLoadRequested: false,
 
-    // True when the page is served off this machine: the local server, the LAN
-    // address a tablet uses, or a plain file:// open.
-    isLocalOrigin() {
-        if (location.protocol === "file:") return true;
-        const h = (location.hostname || "").replace(/^\[|\]$/g, "").toLowerCase();
-        return h === "localhost" || h === "127.0.0.1" || h === "::1"
-            || h.endsWith(".local") || h.endsWith(".localhost")
-            || /^192\.168\./.test(h)
-            || /^10\./.test(h)
-            || /^172\.(1[6-9]|2\d|3[01])\./.test(h);
-    },
-
     ensureFavicon(href = "resources/favicon.svg") {
         const head = document.head || document.getElementsByTagName("head")[0];
         if (!head) return;
-
-        // Local pages fly the red icon so a wall of tabs shows at a glance which
-        // ones are this machine and which are the live site.
-        const local = this.isLocalOrigin();
-        if (local) href = "resources/favicon-local.svg";
 
         // Prefer one managed favicon link and keep it stable across labs.
         let link = head.querySelector('link[rel="icon"][data-cyber-favicon="1"]');
@@ -304,16 +287,6 @@ const CyberBranding = {
         link.setAttribute("type", "image/svg+xml");
         const resolved = /^https?:\/\//i.test(href) ? href : resolveCyberHtmlAsset(href);
         link.setAttribute("href", resolved);
-
-        // The static <link rel="icon"> tags in the page head would otherwise win the
-        // browser's pick (the 256x256 PNG especially) — point them at the red one too.
-        if (local) {
-            head.querySelectorAll('link[rel~="icon"]:not([data-cyber-favicon="1"])').forEach((el) => {
-                el.setAttribute("type", "image/svg+xml");
-                el.removeAttribute("sizes");
-                el.setAttribute("href", resolved);
-            });
-        }
     },
 
     ensureCoreModuleLoaded() {

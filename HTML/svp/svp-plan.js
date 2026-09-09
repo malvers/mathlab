@@ -280,13 +280,15 @@
        dieselbe Materialzeile, hier wird nur sortiert. Was ein Video ist,
        entscheidet dieselbe matKind() wie beim Symbol, damit Reiter und Symbol
        nie auseinanderlaufen. */
-    /* Alle Materialpillen eines Streifens gleich breit (Doc, 08.09.2026:
-       "alle gleich breit"). Gemessen statt fest verdrahtet, genau wie bei den
-       Bereich-Pillen weiter unten: die breiteste gibt das Mass, schmaler ginge
-       nur durch Abschneiden. ACHTUNG, nur im SICHTBAREN Zustand messbar - eine
-       zugeklappte Woche und ein verborgener Reiter liefern lauter Nullen.
-       Deshalb wird nach dem Aufklappen und nach jedem Reiterwechsel neu
-       gemessen, nicht nur beim Zeichnen. */
+    /* Alle Materialpillen der SEITE gleich breit (Doc, 09.09.2026: "ich denke
+       ueber die ganze Seite" - vorher galt das Mass nur innerhalb einer Woche,
+       und die Pillen sprangen von Zeile zu Zeile). Gemessen statt fest
+       verdrahtet, genau wie bei den Bereich-Pillen weiter unten: die breiteste
+       gibt das Mass, schmaler ginge nur durch Abschneiden. ACHTUNG, nur im
+       SICHTBAREN Zustand messbar - eine zugeklappte Woche und ein verborgener
+       Reiter liefern lauter Nullen. Deshalb wird nach dem Aufklappen, nach
+       jedem Reiterwechsel und nach jeder Materialaenderung neu gemessen, nicht
+       nur beim Zeichnen. */
     /* Ein Klick soll den Reiter NICHT fokussieren. Sonst zieht der Browser
        seinen Fokusring darum, und der bleibt nach dem Klick stehen (Doc,
        08.09.2026: "irgendwie kommt der immer noch"). Das reine CSS reichte
@@ -295,20 +297,37 @@
        und zeigt den Ring, nur die Maus tut es nicht mehr. */
     function keinMausfokus(ev) { ev.preventDefault(); }
 
-    function equalizeMatPills(block) {
-        if (!block || !block.offsetParent) return;
-        const pills = Array.prototype.slice.call(block.querySelectorAll('a.mat-pill'));
+    function equalizeMatPillsNow() {
+        const pills = Array.prototype.slice.call(
+            document.querySelectorAll('.mat-block a.mat-pill'));
         if (!pills.length) return;
         pills.forEach(function (p) { p.style.width = ''; });
         let w = 0;
-        pills.forEach(function (p) { w = Math.max(w, p.getBoundingClientRect().width); });
+        pills.forEach(function (p) {
+            /* zugeklappte Woche oder verborgener Reiter: misst 0 und wuerde
+               das Mass der ganzen Seite kaputtmessen */
+            if (!p.offsetParent) return;
+            w = Math.max(w, p.getBoundingClientRect().width);
+        });
+        /* Das Mass geht an ALLE Pillen, auch an die gerade verborgenen: so
+           steht eine Woche schon im Moment des Aufklappens richtig da,
+           statt erst nach dem naechsten Durchgang zu springen. */
         if (w) pills.forEach(function (p) { p.style.width = w + 'px'; });
     }
-    function equalizeRefPills(ref) {
-        if (!ref) return;
-        equalizeMatPills(ref.matBlock);
-        equalizeMatPills(ref.vidBlock);
+    /* Ein Durchgang je Bild statt einer je Aufruf: der Cloud-Abgleich ruft
+       updateMaterial fuer JEDE Zeile auf, und seit das Mass die ganze Seite
+       umfasst waere jeder dieser Aufrufe ein Lauf ueber alle Pillen. */
+    let matEqualJob = 0;
+    function equalizeMatPills() {
+        if (matEqualJob) return;
+        matEqualJob = requestAnimationFrame(function () {
+            matEqualJob = 0;
+            equalizeMatPillsNow();
+        });
     }
+    /* Bleibt als Name stehen, weil an den Aufrufstellen eine Woche gemeint ist
+       - gemessen wird laengst die ganze Seite. */
+    function equalizeRefPills() { equalizeMatPills(); }
 
     /* Zeigt oder versteckt den Videos-Reiter einer Woche. Wird an zwei Stellen
        gebraucht: beim Bauen der Reiter (die Zeile kann laengst Material haben)
@@ -920,6 +939,13 @@
            zurueck, sonst zeigt die Haelfte ins Leere. */
         setVideoReiter(ref, vids);
         decorateMatCell(ref);
+        /* renderMaterial builds every pill from scratch, so the width measured
+           earlier is gone by now. Without this the pills are equally wide only
+           until the next update - and the cloud sync runs one after every
+           render (Doc, 09.09.2026: "hier immer alle gleichbreit"). Costs
+           nothing on a folded week: equalizeMatPills leaves at once when the
+           block is not visible. */
+        equalizeRefPills(ref);
     }
 
     // Drop a single link from a week (the ✕ inside its pill).
@@ -1236,7 +1262,7 @@
         /* Outside the edit mode the menu is the short list: open, copy, and
            the desktop app. Changing or removing the entry stays an edit-mode
            action - the cell holds the raw text only there. */
-        const editing = document.body.classList.contains('editing');
+        const editing = !!(ref && ref.tr && ref.tr.classList.contains('wk-edit'));
         const punkte = [
             ['⧉', 'Kopieren', function () { copyOneMat(ref, url, label); }, 'ctx-ico-gross'],
             ['↗', 'Öffnen', function () { openMat(url, label); }, '']];
@@ -1359,8 +1385,10 @@
     // clipboard holds something — so an untouched plan looks as before.
     function updateMatButtons(ref) {
         const clip = readClip();
-        const copy = ref.matTd.querySelector('.mat-copy');
-        const paste = ref.matTd.querySelector('.mat-paste');
+        const strip = ref.matTools;
+        if (!strip) return;          /* Aufklappzeile noch nicht gebaut */
+        const copy = strip.querySelector('.mat-copy');
+        const paste = strip.querySelector('.mat-paste');
         if (copy) copy.hidden = !(ref.matTd.dataset.src || '').trim();
         if (paste) {
             paste.hidden = !clip;
@@ -1378,10 +1406,18 @@
         if (e.key === CLIP_KEY) refreshMatButtons();
     });
 
+    /* ⧉, ⇩ und + stehen seit dem 09.09.2026 NICHT mehr in der Wochenzeile,
+       sondern in der Zusatzmaterial-Zeile der Aufklappzeile (Doc: "runter
+       damit"). Grund: in der Wochenzeile nahmen sie der Themenspalte 60 px,
+       zusammen mit dem Untis-Chip 116 px - lange Titel brachen dann um und die
+       Zeile wurde beim Umschalten 17 px hoeher. Unten ist auf jeder
+       Fensterbreite Platz, und sie stehen bei den Pillen, auf die sie wirken. */
     function decorateMatCell(ref) {
         if (!CAN_EDIT_MAT || !ref.matTd) return;
         if (matRefs.indexOf(ref) < 0) matRefs.push(ref);
-        if (!ref.matTd.querySelector('.mat-add')) {
+        const strip = ref.matTools;
+        if (!strip) return;          /* kommt beim Bauen der Aufklappzeile nach */
+        if (!strip.querySelector('.mat-add')) {
             const copy = document.createElement('span');
             copy.className = 'mat-act mat-copy';
             copy.textContent = '⧉';
@@ -1390,7 +1426,7 @@
                 e.stopPropagation();
                 copyMaterial(ref, copy);
             });
-            ref.matTd.appendChild(copy);
+            strip.appendChild(copy);
 
             const paste = document.createElement('span');
             paste.className = 'mat-act mat-paste';
@@ -1399,7 +1435,7 @@
                 e.stopPropagation();
                 pasteMaterial(ref);
             });
-            ref.matTd.appendChild(paste);
+            strip.appendChild(paste);
 
             const btn = document.createElement('span');
             btn.className = 'mat-add';
@@ -1409,7 +1445,7 @@
                 e.stopPropagation();
                 openMatModal(ref);
             });
-            ref.matTd.appendChild(btn);
+            strip.appendChild(btn);
         }
         updateMatButtons(ref);
     }
@@ -1517,6 +1553,9 @@
     // object. planRows is PLAN padded out to cover them, so index i means the
     // same row everywhere (render, edits, shift).
     const planRows = window.PLAN.slice();
+    /* Vor dem ersten Zeichnen: was in localStorage liegt, kann die zerkauten
+       Formeln vom 09.09.2026 enthalten (siehe heileMathe weiter unten). */
+    heileMathe(saved);
     Object.keys(saved).forEach(function (k) {
         const i = Number(k);
         if (!Number.isInteger(i) || i < 0) return;
@@ -1744,8 +1783,24 @@
        "17.–21." / "08.26", and for a range across months "31.08.–" / "04.09.26".
        The break is a <br>, so textContent still yields the original string and
        saving the cell is unaffected. */
+    /* Der Monat gehoert in BEIDE Haelften (Doc, 09.09.2026: "manchmal fehlt
+       09."). In den Plandateien steht die deutsche Kurzform "14.–18.09.26",
+       sobald beide Tage im selben Monat liegen - ueber einen Monatswechsel
+       hinweg steht er ohnehin zweimal da ("28.09.–02.10.26"), und genau dieser
+       Wechsel sah aus wie zwei verschiedene Schreibweisen. Ausgeschrieben wird
+       erst beim Anzeigen: die Plandateien bleiben, wie sie sind. */
+    function datumLang(t) {
+        const m = t.match(/^(\d{1,2})\.[\u2013-](\d{1,2})\.(\d{1,2})\.(\d{2})$/);
+        return m ? m[1] + '.' + m[3] + '.\u2013' + m[2] + '.' + m[3] + '.' + m[4] : t;
+    }
+
     function setDateText(el, text) {
-        const t = String(text == null ? '' : text).trim();
+        const roh = String(text == null ? '' : text).trim();
+        /* Gespeichert wird der rohe Text, nicht der ausgeschriebene - sonst
+           schriebe das erste Speichern die lange Form in die Overrides und in
+           die Cloud, und die Plandateien waeren nicht mehr die Quelle. */
+        el.dataset.src = roh;
+        const t = datumLang(roh);
         el.textContent = '';
         const m = t.match(/^(\d{1,2}\.[–-]\d{1,2}\.)(\d{1,2}\.\d{2})$/)
             || t.match(/^(\d{1,2}\.\d{1,2}\.[–-])(\d{1,2}\.\d{1,2}\.\d{2})$/);
@@ -2909,7 +2964,7 @@
 
         const ref = {
             i, dateTd: tds[2], uTd: tds[4], topicSpan, remarkTd: tds[6], matTd, ul: null,
-            lbTd: tds[3], lbCell: lbCells[i],
+            lbTd: tds[3], lbCell: lbCells[i], tr: tr,
             /* structural fields: never edited by hand, but carried through every
                save so a shifted plan keeps its Bereich, Nummer and KW */
             type: rowType, nr: ov.nr != null ? ov.nr : row.nr, kw: ov.kw != null ? ov.kw : row.kw,
@@ -2919,11 +2974,21 @@
         // Expandable sub-row, created on demand: bullets under the topic
         // column, materials in the free area under Bemerkungen/Material.
         let detailTr = null, subMain = null, subSide = null, rPanes = null, chev = null;
+        /* Markiert genau diese Woche als "wird gerade bearbeitet". Beide Zeilen
+           tragen die Klasse: die Wochenzeile fuer +/⧉/⇩ und den Untis-Chip, die
+           Aufklappzeile fuer das ✕ an den Pillen und die Auszeichnungs-Leiste. */
+        ref.markEdit = function (an) {
+            tr.classList.toggle('wk-edit', !!an);
+            if (detailTr) detailTr.classList.toggle('wk-edit', !!an);
+        };
         function ensureSubRow() {
             if (detailTr) return { main: subMain, side: subSide, panes: rPanes };
             /* ref.ul / ref.notesEl are created below, together with the tabs */
             detailTr = document.createElement('tr');
             detailTr.className = 'detail-row';
+            /* Die Aufklappzeile entsteht spaeter als die Markierung - hier
+               holt sie sie nach, sonst fehlte ihr das ✕ an den Pillen. */
+            if (tr.classList.contains('wk-edit')) detailTr.classList.add('wk-edit');
             subMain = document.createElement('td');
             /* Doc, 07.09.2026: the week row shows the topic on one line, so the full
                title stands here - and the whole row width is used: the old layout kept
@@ -3054,7 +3119,7 @@
                     rPanes[k].btn.classList.toggle('on', k === name);
                     rPanes[k].pane.hidden = k !== name;
                 }
-                equalizeMatPills(name === 'videos' ? ref.vidBlock : ref.matBlock);
+                equalizeMatPills();
             };
             [['zusatz', 'Zusatzmaterial'], ['videos', 'Videos']].forEach(function (t, k) {
                 const b = document.createElement('button');
@@ -3071,6 +3136,63 @@
                 subSide.appendChild(pane);
                 rPanes[t[0]] = { btn: b, pane: pane };
             });
+            /* Stift am rechten Ende derselben Zeile (Doc, 09.09.2026: "gib mir
+               da bitte einen Stift zum bearbeiten dieser Woche"). Er schaltet
+               dasselbe Bearbeiten ein wie der Knopf in der Werkzeugleiste,
+               klappt aber NUR diese Woche auf statt alle - genau das macht ihn
+               hier oben nuetzlich. Nur fuer Angemeldete; ein Besucher sieht
+               dieselbe Kopfzeile wie bisher. */
+            if (CAN_EDIT_MAT) {
+                const stift = document.createElement('button');
+                stift.type = 'button';
+                stift.className = 'sub-edit';
+                stift.textContent = '\u270e';
+                stift.title = 'Diese Woche bearbeiten';
+                stift.setAttribute('aria-label', 'Diese Woche bearbeiten');
+                stift.addEventListener('mousedown', keinMausfokus);
+                stift.addEventListener('click', function (ev) {
+                    ev.stopPropagation();   /* sonst klappt der Zeilenklick zu */
+                    editWeek(ref);
+                });
+                subHeadR.appendChild(stift);
+                /* Solange DIESE Woche bearbeitet wird, steht an derselben Stelle
+                   das Paar Speichern/Abbrechen (Doc, 09.09.2026: "wenn editmode
+                   mach da zwei kleine SPEICHERN ABBRECHEN"). Das ist der Weg
+                   heraus, ohne dass der Blick in die Werkzeugleiste wandert. */
+                const fertig = document.createElement('div');
+                fertig.className = 'sub-done';
+                /* Links im selben Kasten: die Materialwerkzeuge dieser Woche.
+                   Sie erscheinen und verschwinden mit Speichern/Abbrechen, es
+                   gibt also nur eine Sichtbarkeitsregel fuer beides. */
+                ref.matTools = document.createElement('div');
+                ref.matTools.className = 'sub-mat-tools';
+                fertig.appendChild(ref.matTools);
+                /* Der Untis-Chip kann schon da sein - decorateUntis laeuft nach
+                   einem fetch und weiss nicht, wann eine Woche aufgeklappt
+                   wird. Dann wandert er hier an seinen Platz. */
+                if (ref.untisChip) ref.matTools.appendChild(ref.untisChip);
+                const mach = function (klasse, text, titel, fn) {
+                    const b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = klasse;
+                    b.textContent = text;
+                    b.title = titel;
+                    b.addEventListener('mousedown', keinMausfokus);
+                    b.addEventListener('click', function (ev) {
+                        ev.stopPropagation();
+                        fn();
+                    });
+                    fertig.appendChild(b);
+                };
+                mach('sub-done-btn sub-save', 'Speichern', 'Änderungen dieser Woche speichern',
+                    function () { window.togglePlanEdit(null); });
+                mach('sub-done-btn sub-cancel', 'Abbrechen', 'Bearbeiten beenden und Änderungen verwerfen',
+                    cancelEdits);
+                subHeadR.appendChild(fertig);
+                /* Die Knoepfe selbst baut decorateMatCell - beim ersten Lauf
+                   gab es die Leiste noch nicht, also hier nachziehen. */
+                decorateMatCell(ref);
+            }
             ref.showRechts = showR;
             ref.rPanes = rPanes;
             setVideoReiter(ref, parseMat(ref.matTd ? (ref.matTd.dataset.src || '') : '').filter(isVideoEntry).length);
@@ -3086,7 +3208,7 @@
                so the chevron itself has to open the sub-row - otherwise a week
                that was closed when Doc hit "Bearbeiten" can never take a note. */
             chev.addEventListener('click', function (ev) {
-                if (!document.body.classList.contains('editing')) return;
+                if (!tr.classList.contains('wk-edit')) return;
                 ev.stopPropagation();
                 toggleSubRow();
             });
@@ -3112,7 +3234,7 @@
                 || !!subSide.querySelector('.mat-pill, a, button');
             /* logged in every week stays openable - that is the only way to
                reach the Notizen of a week that has no bullets */
-            const show = has || notesAllowed() || document.body.classList.contains('editing');
+            const show = has || notesAllowed() || tr.classList.contains('wk-edit');
             tr.classList.toggle('expandable', show);
             if (chev) chev.hidden = !show;
             if (!show) { tr.classList.remove('open'); detailTr.classList.remove('open'); }
@@ -3127,7 +3249,11 @@
         };
 
         tr.addEventListener('click', () => {
-            if (document.body.classList.contains('editing')) return;
+            /* Nur die Woche im Bearbeiten laesst den Zeilenklick liegen (ihre
+               Zellen sind contenteditable, ein Klick setzt den Cursor). Alle
+               anderen Wochen bleiben auf- und zuklappbar - beim Stift ist das
+               der Normalfall, denn die Seite bleibt sonst, wie sie war. */
+            if (tr.classList.contains('wk-edit')) return;
             if (!detailTr || !tr.classList.contains('expandable')) return;
             toggleSubRow();
         });
@@ -3171,14 +3297,17 @@
 
     function equalizeAll() {
         equalizeLbCells();
-        rendered.forEach(equalizeRefPills);
+        equalizeMatPills();
     }
     if (document.fonts && document.fonts.ready) {
         document.fonts.ready.then(equalizeAll);
     } else {
         equalizeAll();
     }
-    window.addEventListener('resize', equalizeLbCells);
+    /* Auf Resize auch die Materialpillen neu messen: sie stehen in einer
+       schmaleren Spalte als die Bereichspillen und schneiden ihren Text ab,
+       sobald der Platz nicht reicht - dann ist das alte Mass falsch. */
+    window.addEventListener('resize', equalizeAll);
 
     /* WebUntis-Status unter der Bereich-Pille.
        WebUntis hat kein CORS, der Browser kommt also nie selbst dran. Die
@@ -3906,11 +4035,19 @@
             chip.title = untisTitle(entries, data.generated);
             chip.addEventListener('click', function (ev) {
                 ev.stopPropagation(); /* not the row's detail toggle */
-                /* Der Chip zeigt immer an, handelt aber nur im Bearbeiten. */
-                if (!document.body.classList.contains('editing')) return;
+                /* Der Chip zeigt immer an, handelt aber nur in der Woche, die
+                   gerade bearbeitet wird. */
+                if (!r.tr || !r.tr.classList.contains('wk-edit')) return;
                 untisDialog(r, entries, chip, data, url);
             });
-            (r.lbCell || r.lbTd).appendChild(chip);
+            /* Der Chip steht seit dem 09.09.2026 unten in der Zusatzmaterial-
+               Zeile, nicht mehr in der Bereich-Spalte: dort nahm er der
+               Themenspalte 56 px, und lange Titel brachen deshalb im
+               Bearbeiten um (Doc: die Zeile wurde hoeher). Ist die
+               Aufklappzeile noch nicht gebaut, holt ensureSubRow ihn nach. */
+            r.untisChip = chip;
+            if (r.matTools) r.matTools.insertBefore(chip, r.matTools.firstChild);
+            else (r.lbCell || r.lbTd).appendChild(chip);
         }
         /* Die Chips kommen erst nach dem Rendern dazu und koennen eine Zelle
            breiter machen - also nochmal ausgleichen. */
@@ -4256,30 +4393,47 @@
 
     // Cells that may contain $...$ math (detail lis queried live — edit mode
     // can add new ones via Enter inside the contenteditable ul).
+    function mathCellsOf(r) {
+        const out = [];
+        if (r.topicSpan) out.push(r.topicSpan);
+        if (r.remarkTd) out.push(r.remarkTd);
+        if (r.ul) r.ul.querySelectorAll('li').forEach(function (li) { out.push(li); });
+        return out;
+    }
     function eachMathCandidate(fn) {
-        for (const r of rendered) {
-            if (r.topicSpan) fn(r.topicSpan);
-            if (r.remarkTd) fn(r.remarkTd);
-            if (r.ul) r.ul.querySelectorAll('li').forEach(fn);
-        }
+        for (const r of rendered) mathCellsOf(r).forEach(fn);
     }
 
-    function setEditable(on) {
-        const flag = on ? 'true' : 'false';
+    /* `nur` = genau diese Woche bearbeiten (der Stift in der Aufklappzeile),
+       ohne Angabe die ganze Seite (der Knopf in der Werkzeugleiste). Was eine
+       Woche bearbeitbar macht, haengt an ihrer Klasse wk-edit - contenteditable
+       hier, und im CSS das ✕ an den Pillen, +/⧉/⇩, der Untis-Chip und die
+       Auszeichnungs-Leiste. body.editing bleibt fuer die Werkzeugleiste. */
+    function setEditable(on, nur) {
         for (const r of rendered) {
+            const an = on && (!nur || r === nur);
+            const flag = an ? 'true' : 'false';
             /* Every week gets a sub-row while editing, so a note can be written
                anywhere - refreshExpandable takes the empty ones back afterwards. */
-            if (on && !r.ferienTd && r.ensureSubRow) r.ensureSubRow();
+            if (an && !r.ferienTd && r.ensureSubRow) r.ensureSubRow();
             /* An empty bullet list has nothing to type into; give it one blank
                line to start from (empty lines are dropped again on save). */
-            if (on && r.ul && !r.ul.querySelector('li')) r.ul.appendChild(document.createElement('li'));
+            if (an && r.ul && !r.ul.querySelector('li')) r.ul.appendChild(document.createElement('li'));
             // Material is deliberately NOT edited as raw text here: the pills
             // in the sub-row have their own ✕ while editing, and new links go
             // through the + dialog. A long SharePoint URL in this cell used to
             // blow the table far past the window.
-            for (const el of [r.ferienTd, r.dateTd, r.uTd, r.topicSpan, r.remarkTd, r.ul]) {
+            /* Das Datum bleibt aussen vor (Doc, 09.09.2026: "ausser Datum, das
+               kann man mal generell raus nehmen") - es kommt aus dem Schuljahr
+               und wird ueber "Verschieben" bewegt, nicht von Hand getippt. Ein
+               vertipptes Datum haette lautlos die ganze Wochenfolge verbogen. */
+            for (const el of [r.ferienTd, r.uTd, r.topicSpan, r.remarkTd, r.ul]) {
                 if (el) el.setAttribute('contenteditable', flag);
             }
+            /* Eine frueher gesetzte Markierung muss wieder weg, sonst bliebe das
+               Datum in einem Browser editierbar, der die Seite schon offen hat. */
+            if (r.dateTd) r.dateTd.removeAttribute('contenteditable');
+            if (r.markEdit) r.markEdit(an);
         }
         if (!on) for (const r of rendered) {
             /* drop the blank starter bullets again, else an untouched week keeps
@@ -4293,16 +4447,42 @@
         // (possibly edited) text. saveEdits runs before this, so it saves raw.
         // Marks stay real elements in both directions - they are what Doc
         // clicks the little tool strip for, so he must see them while typing.
-        eachMathCandidate(el => {
-            if (on) {
-                if (el.dataset.src != null) paintSrc(el, el.dataset.src, true);
-            } else {
-                setMathText(el, srcOf(el));
-            }
-        });
+        /* Den rohen $...$-Text zeigt nur die Woche, die wirklich bearbeitet
+           wird - der Rest der Seite bleibt gesetzt. WICHTIG: eine Zeile, die
+           schon gesetzt ist, darf NICHT erneut durch setMathText(srcOf(el))
+           laufen. srcOf() liest den DOM, und in einer gesetzten Zelle steht
+           KaTeX: die unsichtbare MathML-Fassung, der \u0024-Quelltext in
+           <annotation> und die sichtbare Formel. Aus "$x^2$" wuerde dabei
+           "x2x^2x2". Deshalb merkt sich jede Zeile ihren Zustand und wird nur
+           beim WECHSEL angefasst. */
+        for (const r of rendered) {
+            const roh = on && (!nur || r === nur);
+            if (!!r.rohModus === roh) continue;
+            r.rohModus = roh;
+            /* Die Zellen werden hier frisch gesucht: im Bearbeiten koennen
+               neue Stichpunkte entstanden sein, die auch zurueckverwandelt
+               werden muessen. */
+            mathCellsOf(r).forEach(function (el) {
+                if (roh) {
+                    if (el.dataset.src != null) paintSrc(el, el.dataset.src, true);
+                } else {
+                    setMathText(el, srcOf(el));
+                }
+            });
+        }
         /* Entering edit mode gives every week a sub-row, leaving it re-renders
            the text - both change what a running search would find. */
         planSearchRun();
+    }
+
+    /* Quelltext einer Zelle. Steht die Zeile im Bearbeiten, ist das, was da
+       steht, der Quelltext. Sonst haelt ihn dataset.src - aus einer gesetzten
+       Zelle wuerde srcOf() die KaTeX-Innereien lesen und "$x^2$" als "x2x^2x2"
+       speichern. Genau das ist am 09.09.2026 passiert, als der Stift nur noch
+       eine Woche bearbeitete: alle anderen Zeilen blieben gesetzt. */
+    function quelleVon(r, el) {
+        if (r.rohModus) return srcOf(el);
+        return el.dataset.src != null ? el.dataset.src : srcOf(el);
     }
 
     function saveEdits() {
@@ -4315,10 +4495,11 @@
                     nr: r.nr,
                     kw: r.kw,
                     type: r.type,
-                    date: r.dateTd.textContent.trim(),
+                    date: r.dateTd.dataset.src != null
+                        ? r.dateTd.dataset.src : r.dateTd.textContent.trim(),
                     u: r.uTd.textContent.trim(),
-                    topic: r.topicSpan.textContent.trim(),
-                    remark: r.remarkTd.textContent.trim()
+                    topic: quelleVon(r, r.topicSpan).trim(),
+                    remark: quelleVon(r, r.remarkTd).trim()
                 };
                 /* Material and Bullets are always written, even when empty:
                    a missing key means "not overridden", and the renderer would
@@ -4333,7 +4514,7 @@
                 });
                 entry.details = r.ul
                     ? Array.from(r.ul.querySelectorAll('li'))
-                        .map(li => srcOf(li).trim())
+                        .map(li => quelleVon(r, li).trim())
                         .filter(t => markPlain(t).trim().length)
                     : [];  /* no sub-row rendered = no bullets on screen */
                 /* Notizen deliberately NOT in `entry` - see NOTES_KEY above. */
@@ -4375,7 +4556,19 @@
        save are wired at load time) and continues straight into edit mode. */
     const EDIT_AFTER_LOGIN = 'svp-edit-after-login';
 
-    window.togglePlanEdit = function (btn) {
+    /* Der Stift einer Woche schaltet dasselbe Bearbeiten ein wie der Knopf in
+       der Werkzeugleiste - dessen Beschriftung muss also mitwandern, auch wenn
+       er den Klick nicht bekommen hat. */
+    function planEditButton() {
+        const bar = document.querySelector('.toolbar');
+        if (!bar) return null;
+        return [...bar.querySelectorAll('button')]
+            .find(function (b) { return /Bearbeiten|Speichern/.test(b.textContent); }) || null;
+    }
+
+    /* opts.woche: nur diese Woche aufklappen statt aller - der Weg des Stifts. */
+    window.togglePlanEdit = function (btn, opts) {
+        opts = opts || {};
         if (!document.body.classList.contains('editing') && window.svpAuth && !svpAuth.hasSession()) {
             svpAuth.loginDialog(function () {
                 try { sessionStorage.setItem(EDIT_AFTER_LOGIN, '1'); } catch (e) { }
@@ -4384,7 +4577,7 @@
             return;
         }
         if (!document.body.classList.contains('editing') && !editUnlocked()) {
-            askEditPwd(() => window.togglePlanEdit(btn));
+            askEditPwd(() => window.togglePlanEdit(btn, opts));
             return;
         }
         const editing = document.body.classList.toggle('editing');
@@ -4392,22 +4585,61 @@
            the math from the raw text. Opening all weeks runs *after*
            setEditable(true), which is where the missing sub-rows are built. */
         if (!editing) saveEdits();
-        setEditable(editing);
-        if (editing) setAllDetails(true);
+        setEditable(editing, editing ? opts.woche : null);
+        /* Alle Wochen aufzuklappen ist der Weg des Werkzeugleisten-Knopfes; der
+           Stift meint genau eine Woche und laesst den Rest, wie er ist. */
+        if (editing && opts.woche) opts.woche.openSubRow();
+        else if (editing) setAllDetails(true);
         if (!editing) setShiftMode(false); /* the arrows belong to edit mode */
         /* Der Untis-Chip zeigt sich nur im Bearbeiten (Doc, 07.09.2026) - er
            taucht also gerade erst auf oder verschwindet, und die gemeinsame
            Pillenbreite muss neu gemessen werden. */
         equalizeLbCells();
+        if (!btn) btn = planEditButton();
         if (btn) btn.textContent = editing ? '✔ Speichern' : '✎ Bearbeiten';
         if (cancelBtn) cancelBtn.hidden = !editing;
     };
+
+    /* Stift an einer Woche: ins Bearbeiten, diese Woche auf, Cursor ins Thema -
+       von dort erreicht die Tabulatortaste den Rest der Zeile. Steht die Seite
+       schon im Bearbeiten, bleibt nur das Aufklappen und der Sprung dorthin. */
+    function editWeek(ref) {
+        if (document.body.classList.contains('editing')) {
+            /* Schon im Bearbeiten: die Marke wandert zur angeklickten Woche.
+               Getipptes geht dabei nicht verloren - es steht im DOM, und
+               saveEdits liest beim Speichern ohnehin ALLE Zeilen. */
+            setEditable(true, ref);
+            ref.openSubRow();
+        } else {
+            window.togglePlanEdit(null, { woche: ref });
+        }
+        if (!document.body.classList.contains('editing')) return;   /* Anmeldung/Passwort abgebrochen */
+        const ziel = ref.topicSpan;
+        if (!ziel) return;
+        ziel.focus();
+        const sel = window.getSelection && window.getSelection();
+        if (sel && document.createRange) {
+            const rg = document.createRange();
+            rg.selectNodeContents(ziel);
+            rg.collapse(false);          /* Cursor ans Ende, nichts markiert */
+            sel.removeAllRanges();
+            sel.addRange(rg);
+        }
+    }
 
     /* "Abbrechen": leave edit mode WITHOUT saving. Nothing was written yet —
        saveEdits only runs on "Speichern" — so a reload restores the last saved
        state. The unload guard has to stay quiet, otherwise the safety net would
        persist exactly the changes we are throwing away. */
     let cancelBtn = null;
+    /* Bearbeiten verlassen, OHNE zu speichern - geschrieben wurde noch nichts
+       (saveEdits laeuft nur beim Speichern), ein Neuladen holt also den zuletzt
+       gesicherten Stand zurueck. Das Netz beim Schliessen muss dabei still
+       bleiben, sonst schriebe es genau das weg, was wir verwerfen. */
+    function cancelEdits() {
+        skipUnloadSave = true;
+        location.reload();
+    }
     (function () {
         const bar = document.querySelector('.toolbar');
         if (!bar) return;
@@ -4419,10 +4651,7 @@
         cancelBtn.textContent = 'Abbrechen';
         cancelBtn.title = 'Bearbeiten beenden und Änderungen verwerfen';
         cancelBtn.hidden = true;
-        cancelBtn.addEventListener('click', function () {
-            skipUnloadSave = true;
-            location.reload();
-        });
+        cancelBtn.addEventListener('click', cancelEdits);
         if (editBtn) bar.insertBefore(cancelBtn, editBtn.nextSibling);
         else bar.appendChild(cancelBtn);
         /* came back from the login dialog → continue into edit mode */
@@ -4899,7 +5128,83 @@
     }
 
     // Re-applies an edits object to the already rendered table (remote wins).
+
+    /* --- Reparatur: von KaTeX zerkaute Formeln in den Overrides ------------
+       Am 09.09.2026 hat ein Fehler in setEditable/saveEdits beim Speichern den
+       DOM einer GESETZTEN Zelle als Quelltext gelesen. KaTeX legt dort drei
+       Fassungen uebereinander - die unsichtbare MathML-Fassung, den
+       \u0024-Quelltext in <annotation> und die sichtbare Formel -, also wurde aus
+       "$x^2$" die Kette "x2x^2x2". Der Fehler ist behoben (siehe quelleVon),
+       aber der Schaden steht in localStorage und in der Cloud.
+
+       Erkannt wird er hart: der Plan hat an dieser Stelle \u0024...\u0024, der
+       gespeicherte Text hat KEIN \u0024 mehr, enthaelt aber einen Befehl aus genau
+       dieser Formel (oder ein Nullbreiten-Leerzeichen, das nur KaTeX setzt).
+       Dann gilt der Plan. Eine echte Aenderung von Hand faellt nicht darunter:
+       sie behielte die \u0024 oder haette die Befehle nicht mehr. */
+    /* KEIN const hier oben in der Datei: heileMathe laeuft schon vor dem ersten
+       Zeichnen, also weit vor dieser Stelle. Eine spaeter deklarierte const
+       liegt dann noch in der temporalen Todeszone und wirft - und mit ihr
+       stirbt das ganze Skript, bevor eine einzige Wochenzeile gebaut ist
+       (Doc, 09.09.2026: "irgendwie sind alle Wochen weg?"). Der Wert steht
+       deshalb direkt in istZerkaut. */
+    function mathBefehle(text) {
+        const out = [];
+        String(text || '').replace(/\$([^$]+)\$/g, function (_, inner) {
+            (inner.match(/\\[a-zA-Z]+|[\^_]/g) || []).forEach(function (t) { out.push(t); });
+            return '';
+        });
+        return out;
+    }
+    function istZerkaut(gespeichert, plan) {
+        if (typeof gespeichert !== 'string' || typeof plan !== 'string') return false;
+        if (!plan.includes('$') || gespeichert.includes('$')) return false;
+        if (gespeichert.includes('\u200b')) return true;   /* Nullbreiten-Leerzeichen: nur KaTeX setzt das */
+        const befehle = mathBefehle(plan);
+        if (befehle.some(function (b) { return gespeichert.includes(b); })) return true;
+        /* Formeln ohne Befehl, z. B. \u0024y = x\u0024: da hilft kein Erkennungszeichen.
+           KaTeX legt die Formel dreifach ab, der zerkaute Text ist also LAENGER
+           als der Plantext ohne die \u0024 - und der Teil vor der ersten Formel ist
+           unveraendert. Eine Aenderung von Hand faellt nicht darunter: die
+           behielte die \u0024 (im Bearbeiten steht der Quelltext da) oder waere
+           kuerzer, weil die Formel weg ist. */
+        const ohne = plan.split('$').join('');
+        const kopf = plan.slice(0, plan.indexOf('$'));
+        return gespeichert.length > ohne.length && gespeichert.startsWith(kopf);
+    }
+    /* Repariert die Karte an Ort und Stelle und meldet, wie viele Felder
+       zurueckgeholt wurden. */
+    function heileMathe(map) {
+        if (!map) return 0;
+        let n = 0;
+        Object.keys(map).forEach(function (k) {
+            const ov = map[k], row = planRows[k];
+            if (!ov || !row) return;
+            ['topic', 'remark'].forEach(function (feld) {
+                if (istZerkaut(ov[feld], row[feld])) { ov[feld] = row[feld]; n++; }
+            });
+            if (Array.isArray(ov.details) && Array.isArray(row.details)) {
+                ov.details.forEach(function (d, i) {
+                    if (istZerkaut(d, row.details[i])) { ov.details[i] = row.details[i]; n++; }
+                });
+            }
+        });
+        if (n) {
+            try { localStorage.setItem(KEY, JSON.stringify(map)); } catch (e) { }
+            /* Spaet und abgesichert: beim ersten Lauf steht die Wolken-Anzeige
+               noch gar nicht im Dokument. */
+            setTimeout(function () {
+                try {
+                    setCloud('\u2601 ' + n + ' Formel' + (n === 1 ? '' : 'n') +
+                        ' aus dem Plan geholt \u2014 bitte einmal speichern', false);
+                } catch (e) { }
+            }, 0);
+        }
+        return n;
+    }
+
     function applyEdits(map) {
+        heileMathe(map);
         /* Badges, numbers and the row count are baked into the DOM at render
            time, so a structurally different state — someone shifted the plan on
            another device — needs a real reload, not a text update. */
