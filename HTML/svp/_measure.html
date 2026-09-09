@@ -3,6 +3,18 @@
 <link rel="stylesheet" href="svp.css">    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
     <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
 </head><body>
+<script>
+/* Schema fuer Screenshots vorwaehlen: _measure.html?theme=light setzt den
+   Schluessel, den svp-gate.js beim naechsten Aufruf einer Planseite liest -
+   mit demselben --user-data-dir laesst sich so headless im hellen Schema
+   fotografieren, ohne im Browser zu klicken. */
+(function(){
+  var t = new URLSearchParams(location.search).get('theme');
+  if (t === 'light' || t === 'dark') {
+    try { localStorage.setItem('svp-theme', t); } catch (e) { }
+  }
+})();
+</script>
 <script src="svp-nav.js"></script>
 <script>
 window.addEventListener('load', function(){
@@ -10,11 +22,76 @@ window.addEventListener('load', function(){
     var out = [];
     document.querySelectorAll('nav.quick-nav .badge').forEach(function(b){
       var r = b.getBoundingClientRect();
+      if (!r.height) return;                 /* pills inside closed menus */
       var cs = getComputedStyle(b);
-      out.push(b.textContent.trim()+': h='+r.height.toFixed(1)+' lh='+cs.lineHeight+' fs='+cs.fontSize+' ff='+cs.fontFamily.split(',')[0]);
+      var svg = b.querySelector('svg');
+      var sr = svg && svg.getBoundingClientRect();
+      var name = b.textContent.trim() || ('[icon ' + (b.className.match(/nav-[a-z]+/) || ['?'])[0] + ']');
+      out.push(name+': w='+r.width.toFixed(1)+' h='+r.height.toFixed(1)+
+        ' pad='+cs.padding+' lh='+cs.lineHeight+' fs='+cs.fontSize+
+        (sr ? ' svg='+sr.width.toFixed(1)+'x'+sr.height.toFixed(1) : ''));
     });
-    var pre = document.createElement('pre'); pre.id='RESULT'; pre.textContent = out.join('\n');
-    document.body.appendChild(pre);
+    /* Der Auth-Knopf heisst je nach Sitzung "Login" oder "Logout" - die
+       breitere Beschriftung wird an einer Kopie gemessen, ohne anzumelden. */
+    var auth = document.querySelector('nav.quick-nav a.nav-auth');
+    if (auth) {
+      ['Login', 'Logout'].forEach(function(label){
+        var clone = auth.cloneNode(true);
+        clone.textContent = label;
+        auth.parentNode.appendChild(clone);
+        out.push('[auth "'+label+'"]: w='+clone.getBoundingClientRect().width.toFixed(1));
+        clone.remove();
+      });
+    }
+    /* Kopfband: sitzt die Pillenreihe mittig zwischen Jahres-Kasten und
+       Bandunterkante? */
+    ['.nav-band', '.nav-year', 'nav.quick-nav'].forEach(function(sel){
+      var el = document.querySelector(sel);
+      if (!el) return;
+      var r = el.getBoundingClientRect();
+      out.push(sel+': top='+r.top.toFixed(1)+' bottom='+r.bottom.toFixed(1)+
+        ' h='+r.height.toFixed(1));
+    });
+    function done(){
+      var pre = document.createElement('pre'); pre.id='RESULT'; pre.textContent = out.join('\n');
+      document.body.appendChild(pre);
+    }
+
+    /* Beliebige Planseite ausmessen, ohne sie anzufassen:
+         _measure.html?page=mathe/mathe11.html&sel=.title-group button
+       laedt die Seite in einen iframe (gleiche Herkunft, also lesbar) und misst
+       dort jedes Element, auf das der Selektor passt. */
+    var q = new URLSearchParams(location.search);
+    var page = q.get('page'), sel = q.get('sel');
+    if (!page || !sel) { done(); return; }
+
+    var frame = document.createElement('iframe');
+    frame.style.cssText = 'width:1500px;height:900px;border:0';
+    frame.src = page;
+    frame.addEventListener('load', function(){
+      var doc = frame.contentDocument;
+      /* der Kopf wird per Skript umgebaut - erst messen, wenn er steht */
+      setTimeout(function(){
+        /* &click=<selector>: erst etwas aufklappen, dann messen - so laesst
+           sich auch ein Menue ausmessen, das nur nach einem Klick existiert. */
+        var clickSel = q.get('click');
+        if (clickSel) {
+          var target = doc.querySelector(clickSel);
+          if (target) target.click();
+        }
+        doc.querySelectorAll(sel).forEach(function(el){
+          var r = el.getBoundingClientRect();
+          var cs = frame.contentWindow.getComputedStyle(el);
+          out.push('"'+el.textContent.trim().slice(0, 40)+'": l='+r.left.toFixed(1)+
+            ' r='+r.right.toFixed(1)+' w='+r.width.toFixed(1)+
+            ' h='+r.height.toFixed(1)+' pad='+cs.padding+
+            ' fs='+cs.fontSize+' ls='+cs.letterSpacing+
+            ' ff='+cs.fontFamily.split(',')[0]+' cls='+el.className);
+        });
+        done();
+      }, 1200);
+    });
+    document.body.appendChild(frame);
   });
 });
 </script></body></html>

@@ -814,9 +814,17 @@
         pill.title = items.length + ' Aufgabensätze zum Thema dieser Woche';
         const menu = document.createElement('div');
         menu.className = 'drop-menu';
+        /* Doc, 09.09.2026: "rechtsbuendig" - das Menue haengt mit seiner RECHTEN
+           Kante an der rechten Kante der Pille, nicht mit der linken an der
+           linken: es steht am rechten Rand der Tabelle und lief sonst ueber die
+           Themenspalte. position:fixed, also zaehlt right vom Fensterrand. */
         wrap._place = function () {
             const r = pill.getBoundingClientRect();
-            menu.style.left = Math.round(r.left) + 'px';
+            menu.style.left = 'auto';
+            /* clientWidth, nicht innerWidth: innerWidth zaehlt die Scrollleiste
+               mit, das Menue haenge sonst um deren Breite daneben (gemessen). */
+            menu.style.right =
+                Math.round(document.documentElement.clientWidth - r.right) + 'px';
             menu.style.top = Math.round(r.bottom + 6) + 'px';
         };
         pill.addEventListener('click', function (e) {
@@ -4063,17 +4071,27 @@
             .catch(() => { /* keine Statusdatei: Plan bleibt unverändert */ });
     })();
 
-    // Legend: replace the static dot list with the same pills as the
-    // Bereich column, generated from the page's BADGE definition.
+    /* Bereich-Pillen: jede steht seit dem 09.09.2026 IN ihrer Lernbereich-
+       Karte (Doc: "mach die Pillen da hin"), nicht mehr in einer eigenen Zeile
+       ueber der Trennlinie. Die Karten tragen data-lb mit denselben Schluesseln
+       wie window.BADGE, jede Pille findet ihre Karte also von allein.
+       Pillen ohne Karte (ORGA, UEBUNG) fallen ganz weg - "ORGA oben weg" (Doc).
+       Die statische Punkte-Liste in der Werkzeugleiste wird damit ueberfluessig
+       und verschwindet; der Lehrplan-Knopf zieht in buildPlanSearch an das
+       rechte Ende der Werkzeugleiste, hinter das Suchfeld. */
     const legend = document.querySelector('.toolbar .legend');
-    if (legend) {
-        legend.textContent = '';
+    if (legend) legend.remove();
+
+    (function badgesIntoCards() {
         for (const key in window.BADGE) {
+            const card = document.querySelector('.meta-card[data-lb="' + key + '"]');
+            if (!card) continue;                    // ORGA & Co: keine Karte, keine Pille
+            const head = card.querySelector('.k') || card;
             const [cls, label] = window.BADGE[key];
             const alts = window.ALT_BADGES && window.ALT_BADGES[key];
 
             // Bereich with variants (window.ALT_BADGES[key] = [[label, pdfPage],
-            // ...]): one pill with a caret that opens a dropdown — chosen
+            // ...]): one pill with a caret that opens a dropdown - chosen
             // variant first, then the alternatives, each deep-linking into the
             // Lehrplan PDF.
             if (alts && window.LB_INFO && window.LB_INFO.pdf) {
@@ -4082,10 +4100,10 @@
 
                 const pill = document.createElement('span');
                 pill.className = 'badge ' + cls;
-                pill.textContent = label + ' ▾';
+                pill.textContent = label + ' \u25be';
                 pill.title = 'Varianten anzeigen';
                 pill.addEventListener('click', function (e) {
-                    e.stopPropagation();
+                    e.stopPropagation();            /* nicht die Karte aufklappen */
                     const wasOpen = wrap.classList.contains('open');
                     document.querySelectorAll('.badge-drop.open')
                         .forEach(d => d.classList.remove('open'));
@@ -4095,51 +4113,30 @@
 
                 const menu = document.createElement('div');
                 menu.className = 'drop-menu';
-                const entries = [[label + ' ✓', lbPdfLink(key) || window.LB_INFO.pdf, true]].concat(
+                const entries = [[label + ' \u2713', lbPdfLink(key) || window.LB_INFO.pdf, true]].concat(
                     alts.map(([l, p]) => [l, window.LB_INFO.pdf + '#page=' + p, false]));
                 for (const [entryLabel, href, chosen] of entries) {
                     const item = document.createElement('span');
                     item.className = 'badge badge-link ' + cls + (chosen ? ' chosen' : '');
                     item.textContent = entryLabel;
-                    item.title = (chosen ? 'Gewählte Variante' : 'Nicht gewählte Variante') +
-                        ' — Lehrplan (PDF) an dieser Stelle öffnen';
-                    item.addEventListener('click', function () { window.open(href, '_blank'); });
+                    item.title = (chosen ? 'Gew\u00e4hlte Variante' : 'Nicht gew\u00e4hlte Variante') +
+                        ' \u2014 Lehrplan (PDF) an dieser Stelle \u00f6ffnen';
+                    item.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        window.open(href, '_blank');
+                    });
                     menu.appendChild(item);
                 }
                 wrap.appendChild(menu);
-                legend.appendChild(wrap);
+                head.appendChild(wrap);
                 continue;
             }
 
             const pill = document.createElement('span');
             pill.className = 'badge ' + cls;
             pill.textContent = label;
-            linkBadge(pill, key);
-            legend.appendChild(pill);
-        }
-
-        /* The Lehrplan (PDF) button belongs next to the Bereich pills, not up in
-           the heading: they all point into the same document (Doc, 01.09.2026).
-           It is moved, not rebuilt, so every page keeps its own PDF link - and
-           it goes in front of the pills, in a compact size. */
-        const lehrplan = document.querySelector('.page-head .head-row button.action.orange');
-        if (lehrplan && /Lehrplan/i.test(lehrplan.textContent)) {
-            lehrplan.classList.add('legend-lehrplan');
-            legend.insertBefore(lehrplan, legend.firstChild);
-        }
-
-        /* Doc, 08.09.2026: "zieh die hoch ueber die Linie ... weiter nach unten
-           bis kurz ueber die Linie" - the pill row leaves the toolbar and
-           becomes the last line of the head, right aligned, a few pixels above
-           the divider. Below the line only the actions and the search are left.
-           Done here for all 20 plan pages at once, no page carries its own. */
-        const headEl = document.querySelector('header.page-head');
-        if (headEl) {
-            const row = document.createElement('div');
-            row.className = 'head-legend-row';
-            row.appendChild(legend);
-            headEl.appendChild(row);
-            headEl.classList.add('with-legend');
+            linkBadge(pill, key);                   /* stoppt den Klick selbst */
+            head.appendChild(pill);
         }
 
         // Any click outside closes open variant dropdowns.
@@ -4147,7 +4144,7 @@
             document.querySelectorAll('.badge-drop.open')
                 .forEach(d => d.classList.remove('open'));
         });
-    }
+    })();
 
     /* ---- Suche im Plan ---------------------------------------------------
        Doc, 08.09.2026: a search box between the toolbar buttons and the legend,
@@ -4311,12 +4308,28 @@
         searchInput.title = 'Sucht in Woche, Bereich, Thema, Stichpunkten, Notizen und Material';
         searchCount = document.createElement('span');
         searchCount.className = 'svp-search-count';
-        /* At the right end of the toolbar (margin-left:auto). The legend used to
-           sit there, but it has moved up over the divider - if a page still has
-           it down here, the field goes in front of it. */
+        /* At the right end of the toolbar: the pill legend that used to sit
+           there is gone (the pills live in the Lernbereich cards now), so the
+           field simply takes the rest of the line. */
         const anchor = legend && legend.parentNode === bar ? legend : null;
         bar.insertBefore(searchInput, anchor);
         bar.insertBefore(searchCount, anchor);
+
+        /* Doc, 09.09.2026: "LP doch da hoch" + "vor Eingangstest" - der
+           Lehrplan-Knopf bleibt oben im Kopf und steht direkt hinter dem Titel,
+           VOR dem Eingangstest, statt ganz rechts allein. Verschoben, nicht neu
+           gebaut, damit jede Seite ihren eigenen PDF-Link behaelt. */
+        /* An der Beschriftung erkannt, nicht an der Farbe: der Knopf traegt seit
+           dem 09.09.2026 denselben Stil wie der Eingangstest (Doc: "Stil wie
+           ET"), also .action.secondary statt .action.orange. */
+        const lehrplan = [...document.querySelectorAll('.page-head .head-row button.action')]
+            .find(function (b) { return /Lehrplan/i.test(b.textContent); });
+        const titleGroup = document.querySelector('.page-head .head-row .title-group');
+        if (lehrplan && titleGroup) {
+            const firstBtn = [...titleGroup.children]
+                .find(function (el) { return el !== lehrplan && el.tagName !== 'H1'; });
+            titleGroup.insertBefore(lehrplan, firstBtn || null);
+        }
         searchInput.addEventListener('input', planSearchRun);
         searchInput.addEventListener('search', planSearchRun);   /* the native ✕ */
         searchInput.addEventListener('keydown', function (e) {

@@ -108,8 +108,10 @@
         /* Stundenplan is deliberately NOT in here — Doc wants it as its own
            pill at the right end of the row, one click instead of two. */
         ['Mehr', [
+            /* Doc, 09.09.2026: "BM ganz unten" - die Bewertungsmatrix schliesst
+               das Menue ab, hinter dem Timer. */
             [null, ['notes.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
-                    'punktetabelle.html', 'bewertungsmatrix.html', '../fokus.html']]
+                    'punktetabelle.html', '../fokus.html', 'bewertungsmatrix.html']]
         ], true, true]
     ];
 
@@ -178,6 +180,9 @@
         a.href = base + href;
         a.textContent = label;
         if (NEW_TAB.has(href)) { a.target = '_blank'; a.rel = 'noopener'; }
+        /* Home traegt eine eigene Klasse: es steht am linken Ende der Reihe und
+           haelt dieselbe Breite wie Login/Logout am rechten (Doc, 09.09.2026). */
+        if (href === 'index.html') a.classList.add('nav-home');
         if (norm(a.pathname) === norm(location.pathname)) a.classList.add('active');
         // Hidden pills stay hidden — except the one for the current page.
         if (hidden.has(href) && !a.classList.contains('active')) a.classList.add('nav-hidden');
@@ -282,7 +287,25 @@
     const pencil = document.createElement('a');
     pencil.className = 'badge b-grey nav-edit';
     pencil.href = '#';
-    pencil.textContent = '⚙';
+    /* Doc, 09.09.2026: "icon bissl leichter und groesser xy zentriert" - das
+       Zahnrad ist kein Textglyph mehr (das sass tief und links in der Pille und
+       brachte die schwere Emoji-Zeichnung mit), sondern dieselbe gestrichelte
+       SVG-Linie wie Vollbild und QR: 15 px statt 13, Strichstaerke 1.5 statt
+       1.7, und per inline-flex in beiden Achsen mittig. */
+    pencil.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" '
+        + 'stroke="currentColor" stroke-width="1.5" stroke-linecap="round" '
+        + 'stroke-linejoin="round" aria-hidden="true">'
+        + '<circle cx="12" cy="12" r="3"/>'
+        + '<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 '
+        + '1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 '
+        + '19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 '
+        + '.33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 '
+        + '0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 '
+        + '1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 '
+        + '1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 '
+        + '0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>'
+        + '</svg>';
+    pencil.setAttribute('aria-label', 'Pillen ein-/ausblenden');
     pencil.title = 'Pillen ein-/ausblenden';
     editWrap.appendChild(pencil);
 
@@ -331,37 +354,41 @@
     }
     panel.appendChild(grid);
 
-    // Colour scheme switch: two pills in the nav row, left of the QR pill (Doc, 26.08.2026 —
+    // Colour scheme switch in the nav row, left of the QR pill (Doc, 26.08.2026 —
     // moved out of this panel). svp-gate.js applies the stored choice in <head>, so a
     // reload never flashes the wrong scheme.
+    // Doc, 09.09.2026: "mach hier eine Taste toggle" — one pill instead of the
+    // pair "Dunkel | Hell". It is labelled with what a click does, not with what
+    // is on: "wenn hell is on -> dunkel" (Doc).
     const themeWrap = document.createElement('span');
     themeWrap.className = 'nav-theme-wrap';
-    themeWrap.setAttribute('role', 'group');
-    themeWrap.setAttribute('aria-label', 'Farbschema');
-    const THEMES = [['dark', 'Dunkel'], ['light', 'Hell']];
+    const THEME_LABEL = { dark: 'Dunkel', light: 'Hell' };
     let theme = 'dark';
     try { if (localStorage.getItem('svp-theme') === 'light') theme = 'light'; } catch (e) { }
     // uebung.html has no svp-gate.js, so apply the class here as well.
     document.documentElement.classList.toggle('svp-light', theme === 'light');
 
-    const themeBtns = {};
+    const themeBtn = document.createElement('a');
+    themeBtn.className = 'badge b-grey nav-theme';
+    themeBtn.href = '#';
+    themeBtn.setAttribute('role', 'switch');
+
     function applyTheme(next) {
         theme = next;
+        const other = next === 'light' ? 'dark' : 'light';
         document.documentElement.classList.toggle('svp-light', next === 'light');
-        for (const key in themeBtns) themeBtns[key].classList.toggle('on', key === next);
+        themeBtn.textContent = THEME_LABEL[other];
+        themeBtn.title = 'Farbschema ' + THEME_LABEL[other] + ' einschalten';
+        themeBtn.setAttribute('aria-label', themeBtn.title);
+        themeBtn.setAttribute('aria-checked', next === 'light' ? 'true' : 'false');
         try { localStorage.setItem('svp-theme', next); } catch (e) { }
     }
-    for (const [key, label] of THEMES) {
-        const t = document.createElement('a');
-        t.className = 'badge b-grey nav-theme';
-        t.href = '#';
-        t.textContent = label;
-        t.title = 'Farbschema: ' + label;
-        t.addEventListener('click', function (e) { e.preventDefault(); applyTheme(key); });
-        themeBtns[key] = t;
-        themeWrap.appendChild(t);
-    }
-    themeBtns[theme].classList.add('on');
+    themeBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        applyTheme(theme === 'light' ? 'dark' : 'light');
+    });
+    applyTheme(theme);
+    themeWrap.appendChild(themeBtn);
 
     editWrap.appendChild(panel);
     navRight.appendChild(editWrap);
@@ -378,8 +405,10 @@
         + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
     const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
         + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
-    const svgWrap = (d) => '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" '
-        + 'stroke="currentColor" stroke-width="1.7" stroke-linecap="round" '
+    /* Doc, 09.09.2026: die drei Icon-Pillen (Zahnrad, Vollbild, QR) tragen jetzt
+       dasselbe Mass - 15 px Zeichnung, Strichstaerke 1.5. */
+    const svgWrap = (d) => '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" '
+        + 'stroke="currentColor" stroke-width="1.5" stroke-linecap="round" '
         + 'stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
 
     const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
@@ -437,7 +466,8 @@
         location.reload();
     });
     renderAuthPill();
-    navRight.appendChild(authPill);
+    /* Doc, 09.09.2026: "logout/in ganz rechts" - der Auth-Knopf schliesst die
+       Reihe ab und wird deshalb erst nach QR und Farbschema angehaengt. */
 
     // QR pill next to Login/Logout: opens the usual white-card overlay with
     // a QR code deep-linking to this page's live URL. qrcode.min.js is only
@@ -447,12 +477,16 @@
     qrPill.href = '#';
     qrPill.title = 'QR-Code zum Teilen dieser Seite';
     qrPill.setAttribute('aria-label', 'QR-Code zum Teilen dieser Seite');
-    qrPill.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    qrPill.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
         + '<path d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"></path>'
         + '<path d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z"></path></svg>';
     qrPill.addEventListener('click', function (e) { e.preventDefault(); showQr(); });
-    navRight.appendChild(themeWrap); // Dunkel | Hell, directly left of the QR pill
+    /* Reihenfolge rechts (Doc, 09.09.2026: "nimm den QR neben den Fulls und
+       logout/in ganz rechts"): Zahnrad, Vollbild, QR als Werkzeug-Block,
+       danach mit Abstand das Farbschema und ganz aussen Login/Logout. */
     navRight.appendChild(qrPill);
+    navRight.appendChild(themeWrap);
+    navRight.appendChild(authPill);
 
     let qrOverlay = null;
     function renderQr() {
