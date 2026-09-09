@@ -55,16 +55,16 @@
             background: rgba(7, 17, 31, 0.82); border: 0.5px solid rgba(2, 100, 123, 0.9);
             border-radius: 10px; padding: 10px 13px; backdrop-filter: blur(3px);
         }
-        #v-hud .katex { font-size: 1.02em; }
+        #v-hud .katex { font-size: 1.12em; }
         .v-hud-row { display: flex; justify-content: space-between; gap: 14px; align-items: baseline; padding: 2px 0; }
-        .v-hud-lab { font-family: 'Orbitron', sans-serif; font-size: 0.56rem; letter-spacing: 1px; color: #8fa3bd; }
+        .v-hud-lab { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; letter-spacing: 1px; color: #8fa3bd; }
         .v-hud-val { font-family: Arial, Helvetica, sans-serif; font-size: 0.95rem; font-weight: 600; color: #fff; }
         .v-hud-note { font-family: Arial, Helvetica, sans-serif; font-size: 0.82rem; color: #a9b4c6; margin-top: 6px; line-height: 1.35; }
 
         /* hint strip under the stage: says what can be dragged */
         #v-tip {
             position: absolute; left: 12px; bottom: 10px; z-index: 5; pointer-events: none;
-            font-family: 'Orbitron', sans-serif; font-size: 0.6rem; letter-spacing: 1.1px;
+            font-family: 'Orbitron', sans-serif; font-size: 0.72rem; letter-spacing: 1.1px;
             color: rgba(255, 255, 255, 0.42);
         }
 
@@ -81,7 +81,7 @@
         .v-doc-tab { display: none; }
         .v-doc-tab.active { display: block; }
         .v-plan {
-            font-family: 'Orbitron', sans-serif; font-size: 0.55rem; letter-spacing: 1.5px;
+            font-family: 'Orbitron', sans-serif; font-size: 0.68rem; letter-spacing: 1.5px;
             color: #6d8199; margin: 0 2px 10px; display: flex; align-items: center; gap: 7px;
         }
         .v-plan::before {
@@ -95,7 +95,7 @@
             border-radius: 12px; padding: 13px 15px 15px; margin-bottom: 14px;
         }
         .v-doc-card > h3 {
-            font-family: 'Orbitron', sans-serif; font-size: 0.62rem; letter-spacing: 2px;
+            font-family: 'Orbitron', sans-serif; font-size: 0.74rem; letter-spacing: 2px;
             color: rgb(245, 194, 66); margin: 0 0 10px; font-weight: 700;
         }
         .v-doc-card.v-tasks > h3 { color: rgb(121, 158, 49); }
@@ -105,7 +105,11 @@
         .v-doc-body b, .v-doc-body strong { color: #fff; font-weight: 600; }
         .v-doc-body ul { margin: 0 0 9px; padding-left: 18px; }
         .v-doc-body li { margin-bottom: 4px; }
-        .v-doc-body .katex { font-size: 1.03em; }
+        /* formulas read larger than the running text, display maths larger still */
+        .v-doc-body .katex, .v-task-q .katex, .v-task-body .katex { font-size: 1.2em; }
+        .v-doc-body .katex-display > .katex,
+        .v-task-body .katex-display > .katex,
+        #v-hud .katex-display > .katex { font-size: 1.5em; }
         /* a wide formula must scroll inside its own box — the column must never scroll sideways */
         .v-doc-body .katex-display, .v-task-body .katex-display, #v-hud .katex-display {
             margin: 10px 0; overflow-x: auto; overflow-y: hidden; padding-bottom: 4px;
@@ -139,15 +143,14 @@
         .v-task-no {
             flex: 0 0 auto; width: 21px; height: 21px; border-radius: 50%;
             background: rgba(121, 158, 49, 0.22); border: 1px solid rgba(121, 158, 49, 0.8);
-            color: rgb(160, 200, 90); font-family: 'Orbitron', sans-serif; font-size: 0.62rem;
+            color: rgb(160, 200, 90); font-family: 'Orbitron', sans-serif; font-size: 0.74rem;
             display: flex; align-items: center; justify-content: center; margin-top: 1px;
         }
         .v-task-q { color: #cfd8e6; font-size: 0.87rem; line-height: 1.5; }
-        .v-task-q .katex { font-size: 1.02em; }
         .v-task-btn {
             margin: 8px 6px 0 30px; padding: 4px 11px; border-radius: 6px; cursor: pointer;
             background: rgba(2, 100, 123, 0.18); border: 0.5px solid rgba(2, 100, 123, 0.9);
-            color: #7fd8ee; font-family: 'Orbitron', sans-serif; font-size: 0.54rem; letter-spacing: 1px;
+            color: #7fd8ee; font-family: 'Orbitron', sans-serif; font-size: 0.68rem; letter-spacing: 1px;
             transition: background 0.15s, color 0.15s;
         }
         .v-task-btn:hover { background: rgba(2, 100, 123, 0.38); color: #fff; }
@@ -163,7 +166,7 @@
         .v-task-body p { margin: 0 0 7px; }
         .v-task-body p:last-child { margin-bottom: 0; }
         .v-task-body .katex-display { margin: 8px 0; }
-        .v-step { color: rgb(245, 194, 66); font-family: 'Orbitron', sans-serif; font-size: 0.55rem; letter-spacing: 1.2px; display: block; margin: 9px 0 3px; }
+        .v-step { color: rgb(245, 194, 66); font-family: 'Orbitron', sans-serif; font-size: 0.68rem; letter-spacing: 1.2px; display: block; margin: 9px 0 3px; }
         .v-step:first-child { margin-top: 0; }
         .v-res { color: rgb(160, 200, 90); font-weight: 600; }
 
@@ -177,7 +180,7 @@
         .v-mini {
             padding: 5px 11px; border-radius: 6px; cursor: pointer; flex: 1 1 auto;
             background: rgba(2, 100, 123, 0.18); border: 0.5px solid rgba(2, 100, 123, 0.9);
-            color: #7fd8ee; font-family: 'Orbitron', sans-serif; font-size: 0.54rem; letter-spacing: 1px;
+            color: #7fd8ee; font-family: 'Orbitron', sans-serif; font-size: 0.68rem; letter-spacing: 1px;
         }
         .v-mini:hover { background: rgba(2, 100, 123, 0.4); color: #fff; }
 

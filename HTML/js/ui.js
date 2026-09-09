@@ -553,7 +553,7 @@ class CyberUI {
 
             .instrument-title {
                 font-family: 'Orbitron', sans-serif;
-                font-size: 0.65rem;
+                font-size: 0.78rem;
                 letter-spacing: 2px;
                 color: rgba(255, 255, 255, 0.4);
                 text-transform: uppercase;
@@ -1536,7 +1536,7 @@ class CyberUI {
         const html = `
             <div class="cyber-control-group">
                 <div class="control-header">
-                    <span class="cyber-label" style="color:rgba(255,255,255,0.7); font-size:0.7rem; font-family:'Orbitron';">${label}</span>
+                    <span class="cyber-label" style="color:rgba(255,255,255,0.7); font-size:0.85rem; font-family:'Orbitron';">${label}</span>
                     <span id="${displayId}" class="val-display" style="color:${color}">${fmt(value)}</span>
                 </div>
                 <input type="range" class="cyber-slider" id="${sliderId}" 
