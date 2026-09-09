@@ -2,6 +2,7 @@
 """Render a deck build script as a sharp HTML slide show instead of a .pptx.
 
     python3 tools/pptx/html_deck.py build_nichtlinear_mathe11.py
+    python3 tools/pptx/html_deck.py --prefix fos12- build_datenbanken_fos12.py
 
 The build scripts describe every slide semantically (title, bullets, chapter,
 merksatz, two columns). This module offers a stand-in for `omml.MathDeck` that
@@ -29,6 +30,7 @@ from design_lib import (INK, BODY, MUTED, STROKE, CARD, CODE_BG, CODE_INK, CODE_
                         RULE_Y, BODY_Y, BODY_H, FOOT_Y, FOOTER_TEXT)
 
 OUT_DIR = os.path.join(HERE, "..", "..", "HTML", "decks")
+PREFIX = ""               # set by --prefix on the command line, see __main__
 LAB_MIN_H = 640.0         # labs warn below 980x620 - give them a window that clears it
 KATEX = "../morpheus/vendor/katex"
 
@@ -165,7 +167,11 @@ class HtmlDeck:
 
     def __init__(self, out_name, greeting=True, greet_text="Good morning!",
                  greet_quote=GREET_QUOTE, greet_author=GREET_AUTHOR, greet_image=None):
-        self.name = os.path.splitext(os.path.basename(out_name))[0]
+        # HTML/decks/ is one flat, public namespace. The Mathe-11 .pptx names carry their
+        # own prefix; the Informatik series do not (their OneDrive folder was the prefix),
+        # so "normalisierung" or "wiederholung-lb1" would collide between FOS 12 and
+        # Inf 11/13. --prefix puts the series in front of the file name, nothing else.
+        self.name = PREFIX + os.path.splitext(os.path.basename(out_name))[0]
         self.slides = []
         self.doc_title = self.name
         self.subtitle = ""
@@ -254,15 +260,13 @@ class HtmlDeck:
                     '<div class="codepanel"><pre>%s</pre></div>'
                     % (markup(title), "\n".join(rows) or " "))
 
-    def table_top(self, title, rows, col_w, lines, marks=None, font_size=12, row_h=None,
-                  bold_cols=(), mono_cols=(), align=None, x=None):
-        """Full-width table on top, bullets underneath - the HTML twin of
-        slides.Deck.table_top. Same numbers, same look: the .pptx draws a native
-        table, here they become a <table> with the authored column widths. The
-        canvas is 960 units wide in both worlds, so pt map to px 1:1."""
+    @staticmethod
+    def _table(rows, col_w, left, top, marks=None, font_size=12, bold_cols=(),
+               mono_cols=(), align=None):
+        """One <table> with the authored column widths, placed like the native
+        PowerPoint table it stands for. The canvas is 960 units wide in both
+        worlds, so pt map to px 1:1. Shared by table_top and table_bullets."""
         marks = marks or {}
-        row_h = row_h or font_size * 1.85
-        left = MARGIN if x is None else x
         cols = "".join('<col style="width:%gpx">' % w for w in col_w)
         out = []
         for r, row in enumerate(rows):
@@ -285,9 +289,18 @@ class HtmlDeck:
                     ' style="background:#%s"' % tint if tint and not head else "",
                     markup(str(text)), tag))
             out.append("<tr>%s</tr>" % "".join(cells))
-        table = ('<table class="dtable" style="left:%gpx;top:%gpx;width:%gpx;'
-                 'font-size:%gpx"><colgroup>%s</colgroup>%s</table>'
-                 % (left, BODY_Y, sum(col_w), font_size, cols, "".join(out)))
+        return ('<table class="dtable" style="left:%gpx;top:%gpx;width:%gpx;'
+                'font-size:%gpx"><colgroup>%s</colgroup>%s</table>'
+                % (left, top, sum(col_w), font_size, cols, "".join(out)))
+
+    def table_top(self, title, rows, col_w, lines, marks=None, font_size=12, row_h=None,
+                  bold_cols=(), mono_cols=(), align=None, x=None):
+        """Full-width table on top, bullets underneath - the HTML twin of
+        slides.Deck.table_top. Same numbers, same look: the .pptx draws a native
+        table, here it becomes a <table> with the authored column widths."""
+        row_h = row_h or font_size * 1.85
+        table = self._table(rows, col_w, MARGIN if x is None else x, BODY_Y, marks,
+                            font_size, bold_cols, mono_cols, align)
         body = ""
         if lines:
             top = BODY_Y + row_h * len(rows) + 14
@@ -295,6 +308,29 @@ class HtmlDeck:
                     % (top, FOOT_Y - top - 8, bullet_list(lines)[0]))
         self._slide("content", '<h3>%s</h3><div class="rules"></div>%s%s'
                     % (markup(title), table, body))
+
+    def table_bullets(self, title, lines, rows, col_w, marks=None, font_size=11,
+                      bold_cols=(), mono_cols=(), align=None, body_w=404, y=None,
+                      more=()):
+        """Bullets on the left, table on the right - the twin of
+        slides.Deck.table_bullets, same numbers: the body keeps `body_w`, the
+        table hangs off the right margin and starts 4 px under the rule.
+        `more`: further tables, same dicts as in slides.Deck (rows, col_w, y, ...)."""
+        table = self._table(rows, col_w, W - MARGIN - sum(col_w),
+                            BODY_Y + 4 if y is None else y, marks, font_size,
+                            bold_cols, mono_cols, align)
+        for t in more:
+            t = dict(t)
+            t_rows, t_cols, t_y = t.pop("rows"), t.pop("col_w"), t.pop("y")
+            t.pop("name", None)                       # a PowerPoint shape name, nothing here
+            table += self._table(t_rows, t_cols, W - MARGIN - sum(t_cols), t_y,
+                                 t.get("marks"), t.get("font_size", font_size),
+                                 t.get("bold_cols", ()), t.get("mono_cols", ()),
+                                 t.get("align"))
+        body = ('<div class="body" style="width:%gpx">%s</div>'
+                % (body_w, bullet_list(lines)[0]))
+        self._slide("content", '<h3>%s</h3><div class="rules"></div>%s%s'
+                    % (markup(title), body, table))
 
     def lab(self, title, src, lines=None, note="", bottom=486.0):
         """A Mathe-Labor page inside the slide - the thing PowerPoint cannot do.
@@ -693,6 +729,9 @@ def build(script):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
+    args = sys.argv[1:]
+    if args[:1] == ["--prefix"] and len(args) >= 3:
+        PREFIX, args = args[1], args[2:]
+    if len(args) < 1:
         sys.exit(__doc__)
-    build(sys.argv[1])
+    build(args[0])

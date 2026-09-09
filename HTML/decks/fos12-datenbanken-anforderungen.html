@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Anforderungen an Datenbanken</title>
+<meta name="description" content="Redundanz, Konsistenz, Integrität — was eine einzige Tabelle alles falsch machen kann">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8; --codemuted:#7E8FB5;
+  --greetbg:#000028;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:24px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:grid;place-items:center}
+.pic img{max-width:100%;max-height:100%}
+
+/* --- table_top ---------------------------------------------------------- */
+.dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
+  font-family:Raleway,system-ui,sans-serif}
+.dtable th,.dtable td{padding:0 6px;text-align:left;overflow:hidden;white-space:nowrap;
+  border:.75px solid var(--stroke);line-height:1.85}
+.dtable th{background:var(--ink);color:#fff;font-family:Orbitron,Raleway,sans-serif;
+  font-weight:700;font-size:.75em;border-color:var(--ink)}
+.dtable td{background:#fff;color:var(--body)}
+.dtable td.b{font-weight:700;color:var(--ink)}
+.dtable td.m{font-family:Menlo,monospace}
+.dtable .ac{text-align:center}
+.dtable .ar{text-align:right}
+
+/* --- greeting (Auftaktfolie) --------------------------------------------- */
+.slide.greet{background-image:none;background-color:var(--greetbg)}
+.slide.greet::before{left:336px;width:552px;background:rgba(230,236,248,.14)}
+.slide.greet .foot{left:336px;color:var(--codemuted)}
+.slide.greet .pageno{color:var(--codemuted)}
+.greet-ground{position:absolute;inset:0;background:var(--greetbg)}
+.greet-pic{position:absolute;left:0;top:0;width:312px;height:540px;
+  object-fit:cover;display:block}
+.greet-credit{position:absolute;left:10px;bottom:8px;font-size:9px;
+  font-family:Raleway,sans-serif;color:rgba(255,255,255,.5);text-decoration:none;
+  letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.greet-credit:hover{color:rgba(255,255,255,.9);text-decoration:underline}
+.greet-lead{position:absolute;left:433px;top:168px;width:455px;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:46px;color:var(--orange);
+  line-height:1.05;letter-spacing:-.5px}
+.greet-quote{position:absolute;left:486px;top:368px;width:402px;text-align:center;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:17px;color:var(--orange);
+  line-height:1.2}
+.greet-author{position:absolute;left:596px;top:404px;width:292px;text-align:center;
+  font-size:11px;color:var(--codemuted);letter-spacing:.3px}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-315354e2703f.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/mountain-7866362/" target="_blank" rel="noopener">yoshitaka2</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — FOS 12</p>
+      <h1>Anforderungen an Datenbanken</h1>
+      <p class="sub">Redundanz, Konsistenz, Integrität — was eine einzige Tabelle alles falsch machen kann</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Eine „schlechte“ Tabelle</h2>
+      <p class="sub">Die Kursliste der FO 12 — alles in einer Liste. Was kann da schiefgehen?</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Alles in einer Tabelle: die Kursliste</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:13px"><colgroup><col style="width:70px"><col style="width:170px"><col style="width:80px"><col style="width:160px"><col style="width:146px"><col style="width:80px"><col style="width:110px"></colgroup><tr><th class="ar">SNr</th><th class="al">Name</th><th class="al">Klasse</th><th class="al">Kurs</th><th class="al">Lehrkraft</th><th class="ar">Raum</th><th class="ar">Durchwahl</th></tr><tr><td class="ar">1001</td><td class="b al">Lena Krause</td><td class="al">FO12a</td><td class="al">Informatik</td><td class="al">Alvers</td><td class="ar">204</td><td class="ar">31</td></tr><tr><td class="ar">1001</td><td class="b al">Lena Krause</td><td class="al">FO12a</td><td class="al">Physik</td><td class="al">Schulze</td><td class="ar">305</td><td class="ar">42</td></tr><tr><td class="ar">1002</td><td class="b al">Tim Vogel</td><td class="al">FO12a</td><td class="al">Informatik</td><td class="al">Alvers</td><td class="ar">204</td><td class="ar">31</td></tr><tr><td class="ar">1002</td><td class="b al">Tim Vogel</td><td class="al">FO12a</td><td class="al">Physik</td><td class="al">Schulze</td><td class="ar">305</td><td class="ar">42</td></tr><tr><td class="ar">1003</td><td class="b al">Mia Hahn</td><td class="al">FO12b</td><td class="al">Informatik</td><td class="al">Alvers</td><td class="ar">204</td><td class="ar">31</td></tr><tr><td class="ar">1004</td><td class="b al">Ben Roth</td><td class="al">FO12b</td><td class="al">Mathematik</td><td class="al">Berger</td><td class="ar">118</td><td class="ar">27</td></tr></table><div class="body" style="top:342px;height:154px"><p class="line l0 step" data-g="0"><b>Aufgabe</b>: Findet mindestens drei Stellen, an denen dieselbe Information mehrfach steht.</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Redundanz: dieselbe Information mehrfach</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:12px"><colgroup><col style="width:70px"><col style="width:170px"><col style="width:80px"><col style="width:160px"><col style="width:146px"><col style="width:80px"><col style="width:110px"></colgroup><tr><th class="ar">SNr</th><th class="al">Name</th><th class="al">Klasse</th><th class="al">Kurs</th><th class="al">Lehrkraft</th><th class="ar">Raum</th><th class="ar">Durchwahl</th></tr><tr><td class="ar">1001</td><td class="b al" style="background:#FBEBBF">Lena Krause</td><td class="al" style="background:#FBEBBF">FO12a</td><td class="al">Informatik</td><td class="al" style="background:#DDE8C6">Alvers</td><td class="ar" style="background:#DDE8C6">204</td><td class="ar" style="background:#DDE8C6">31</td></tr><tr><td class="ar">1001</td><td class="b al" style="background:#FBEBBF">Lena Krause</td><td class="al" style="background:#FBEBBF">FO12a</td><td class="al">Physik</td><td class="al">Schulze</td><td class="ar">305</td><td class="ar">42</td></tr><tr><td class="ar">1002</td><td class="b al" style="background:#FBEBBF">Tim Vogel</td><td class="al" style="background:#FBEBBF">FO12a</td><td class="al">Informatik</td><td class="al" style="background:#DDE8C6">Alvers</td><td class="ar" style="background:#DDE8C6">204</td><td class="ar" style="background:#DDE8C6">31</td></tr><tr><td class="ar">1002</td><td class="b al" style="background:#FBEBBF">Tim Vogel</td><td class="al" style="background:#FBEBBF">FO12a</td><td class="al">Physik</td><td class="al">Schulze</td><td class="ar">305</td><td class="ar">42</td></tr><tr><td class="ar">1003</td><td class="b al">Mia Hahn</td><td class="al">FO12b</td><td class="al">Informatik</td><td class="al" style="background:#DDE8C6">Alvers</td><td class="ar" style="background:#DDE8C6">204</td><td class="ar" style="background:#DDE8C6">31</td></tr><tr><td class="ar">1004</td><td class="b al">Ben Roth</td><td class="al">FO12b</td><td class="al">Mathematik</td><td class="al">Berger</td><td class="ar">118</td><td class="ar">27</td></tr></table><div class="body" style="top:314px;height:182px"><p class="line l0 step" data-g="0"><b>Redundanz</b> = dieselbe Information steht an mehreren Stellen</p>
+<p class="line l0 step" data-g="1">Name und Klasse: pro Kurs <b>noch einmal</b> abgetippt</p>
+<p class="line l0 step" data-g="2">Alvers, 204, 31: <b>dreimal</b> gespeichert — für <b>eine</b> Lehrkraft</p>
+<p class="line l0 step" data-g="3">Kostet Speicher, vor allem aber: jede Änderung muss <b>überall</b> nachgezogen werden</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Anomalien</h2>
+      <p class="sub">Drei Arten, wie eine redundante Tabelle kaputtgeht</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Änderungsanomalie: eine Änderung, viele Zeilen</h3><div class="rules"></div><div class="body" style="width:404px"><p class="line l0 step" data-g="0">Informatik zieht um in <b>Raum 210</b></p>
+<p class="line l0 step" data-g="1">Drei Zeilen ändern — <b>eine wird vergessen</b></p>
+<p class="line l0 step" data-g="2">Jetzt hat ein Kurs <b>zwei Räume</b>: die Tabelle widerspricht sich</p>
+<p class="line l0 step" data-g="3">Fachwort: <b>Änderungsanomalie</b> (Update-Anomalie)</p></div><table class="dtable" style="left:528px;top:150px;width:360px;font-size:11px"><colgroup><col style="width:112px"><col style="width:100px"><col style="width:88px"><col style="width:60px"></colgroup><tr><th class="al">Name</th><th class="al">Kurs</th><th class="al">Lehrkraft</th><th class="ar">Raum</th></tr><tr><td class="al">Lena Krause</td><td class="al">Informatik</td><td class="al">Alvers</td><td class="ar" style="background:#DDE8C6">210</td></tr><tr><td class="al">Tim Vogel</td><td class="al">Informatik</td><td class="al">Alvers</td><td class="ar" style="background:#DDE8C6">210</td></tr><tr><td class="al">Mia Hahn</td><td class="al">Informatik</td><td class="al">Alvers</td><td class="ar" style="background:#F2CFCB">204</td></tr></table><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Einfügeanomalie: kein Platz für Neues</h3><div class="rules"></div><div class="body" style="width:404px"><p class="line l0 step" data-g="0">Neue Lehrkraft <b>Frau Lang</b> kommt — hat noch <b>keinen Kurs</b></p>
+<p class="line l0 step" data-g="1">Eine Zeile braucht Schüler <b>und</b> Kurs: ohne beides <b>keine Zeile</b></p>
+<p class="line l0 step" data-g="2">Ausweg „leere Felder“ (NULL) erzeugt <b>Datenmüll</b></p>
+<p class="line l0 step" data-g="3">Fachwort: <b>Einfügeanomalie</b> (Insert-Anomalie)</p></div><table class="dtable" style="left:514px;top:150px;width:374px;font-size:11px"><colgroup><col style="width:52px"><col style="width:100px"><col style="width:92px"><col style="width:78px"><col style="width:52px"></colgroup><tr><th class="ar">SNr</th><th class="al">Name</th><th class="al">Kurs</th><th class="al">Lehrkraft</th><th class="ar">Raum</th></tr><tr><td class="ar">1003</td><td class="al">Mia Hahn</td><td class="al">Informatik</td><td class="al">Alvers</td><td class="ar">204</td></tr><tr><td class="ar">1004</td><td class="al">Ben Roth</td><td class="al">Mathematik</td><td class="al">Berger</td><td class="ar">118</td></tr><tr><td class="ar" style="background:#F2CFCB">NULL</td><td class="al" style="background:#F2CFCB">NULL</td><td class="al" style="background:#F2CFCB">NULL</td><td class="al">Lang</td><td class="ar">112</td></tr></table><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Löschanomalie: mit dem Schüler geht der Kurs</h3><div class="rules"></div><div class="body" style="width:404px"><p class="line l0 step" data-g="0"><b>Ben Roth</b> verlässt die Schule — seine Zeile wird gelöscht</p>
+<p class="line l0 step" data-g="1">Er war der <b>Einzige</b> im Mathematik-Kurs</p>
+<p class="line l0 step" data-g="2">Mit ihm verschwinden <b>Kurs, Lehrkraft, Raum und Durchwahl</b></p>
+<p class="line l0 step" data-g="3">Fachwort: <b>Löschanomalie</b> (Delete-Anomalie)</p></div><table class="dtable" style="left:500px;top:150px;width:388px;font-size:11px"><colgroup><col style="width:96px"><col style="width:92px"><col style="width:78px"><col style="width:50px"><col style="width:72px"></colgroup><tr><th class="al">Name</th><th class="al">Kurs</th><th class="al">Lehrkraft</th><th class="ar">Raum</th><th class="ar">Durchwahl</th></tr><tr><td class="al">Mia Hahn</td><td class="al">Informatik</td><td class="al">Alvers</td><td class="ar">204</td><td class="ar">31</td></tr><tr><td class="al">Tim Vogel</td><td class="al">Physik</td><td class="al">Schulze</td><td class="ar">305</td><td class="ar">42</td></tr><tr><td class="al" style="background:#F2CFCB">Ben Roth</td><td class="al" style="background:#F2CFCB">Mathematik</td><td class="al" style="background:#F2CFCB">Berger</td><td class="ar" style="background:#F2CFCB">118</td><td class="ar" style="background:#F2CFCB">27</td></tr></table><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Redundanz ist der Nährboden für Anomalien. Jede Information gehört genau einmal in die Datenbank.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Konsistenz und Integrität</h2>
+      <p class="sub">Widerspruchsfrei bleiben — mit Regeln, die das DBMS selbst überwacht</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Konsistenz: die Datenbank widerspricht sich nicht</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0">Konsistent</p>
+<p class="col l1 step" data-g="0">Jede Frage hat <b>genau eine</b> Antwort</p>
+<p class="col l1 step" data-g="0">„Wo ist Informatik?“ → <b>204</b></p>
+<p class="col l1 step" data-g="0">Alle Zeilen erzählen <b>dieselbe</b> Geschichte</p>
+<p class="col l1 step" data-g="0">Zustand nach <b>jeder</b> Änderung erhalten</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1">Inkonsistent</p>
+<p class="col l1 step" data-g="1">Zeile 1 sagt <b>210</b>, Zeile 5 sagt <b>204</b></p>
+<p class="col l1 step" data-g="1">Welche stimmt? <b>Niemand</b> weiß es</p>
+<p class="col l1 step" data-g="1">Der Fehler fällt erst auf, wenn jemand <b>vor der falschen Tür</b> steht</p>
+<p class="col l1 step" data-g="1">Typische Folge von <b>Redundanz</b></p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Integrität: Regeln, die Konsistenz erzwingen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Konsistenz</b> ist ein <b>Zustand</b> — <b>Integrität</b> sind die <b>Regeln</b>, die ihn sichern</p>
+<p class="line l0 step" data-g="1">Das <b>DBMS</b> prüft die Regeln bei jedem Einfügen, Ändern, Löschen</p>
+<p class="line l0 step" data-g="2">Verstoß → die Operation wird <b>abgelehnt</b>, nicht „irgendwie gespeichert“</p>
+<p class="line l0 step" data-g="3">Vier Regelarten: <b>Entität</b>, <b>Referenz</b>, <b>Wertebereich</b>, <b>Semantik</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fall 1: Zwei Max Meier</h3><div class="rules"></div><div class="body" style="width:404px"><p class="line l0 step" data-g="0">Zwei <b>Max Meier</b> im Jahrgang — wer bekommt die Note?</p>
+<p class="line l0 step" data-g="1"><b>Primärschlüssel</b>: jeder Datensatz hat einen <b>eindeutigen</b> Wert (SNr)</p>
+<p class="line l0 step" data-g="2">Der Schlüssel darf <b>nie leer</b> (NULL) sein</p>
+<p class="line l0 step" data-g="3">Regel: <b>Entitätsintegrität</b></p></div><table class="dtable" style="left:648px;top:150px;width:240px;font-size:11px"><colgroup><col style="width:60px"><col style="width:110px"><col style="width:70px"></colgroup><tr><th class="ar">SNr</th><th class="al">Name</th><th class="al">Klasse</th></tr><tr><td class="b ar">1007</td><td class="al" style="background:#FBEBBF">Max Meier</td><td class="al">FO12a</td></tr><tr><td class="b ar">1012</td><td class="al" style="background:#FBEBBF">Max Meier</td><td class="al">FO12b</td></tr><tr><td class="b ar" style="background:#F2CFCB">NULL</td><td class="al">Sara Kern</td><td class="al">FO12a</td></tr></table><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fall 2: Der Kurs ohne Lehrkraft</h3><div class="rules"></div><div class="body" style="width:404px"><p class="line l0 step" data-g="0">Kurs Chemie verweist auf Lehrkraft <b>Nr. 9</b> — die gibt es nicht</p>
+<p class="line l0 step" data-g="1"><b>Fremdschlüssel</b> muss auf einen <b>vorhandenen</b> Datensatz zeigen</p>
+<p class="line l0 step" data-g="2">Lehrkraft löschen? Nur wenn <b>kein Kurs</b> mehr auf sie zeigt — oder Kurse <b>mitlöschen</b></p>
+<p class="line l0 step" data-g="3">Regel: <b>referentielle Integrität</b></p></div><table class="dtable" style="left:678px;top:150px;width:210px;font-size:11px"><colgroup><col style="width:50px"><col style="width:110px"><col style="width:50px"></colgroup><tr><th class="ar">KNr</th><th class="al">Fach</th><th class="ar">LNr</th></tr><tr><td class="b ar">3</td><td class="al">Informatik</td><td class="ar">1</td></tr><tr><td class="b ar">4</td><td class="al">Physik</td><td class="ar">2</td></tr><tr><td class="b ar">5</td><td class="al">Chemie</td><td class="ar" style="background:#F2CFCB">9</td></tr></table><table class="dtable" style="left:672px;top:264px;width:216px;font-size:11px"><colgroup><col style="width:50px"><col style="width:90px"><col style="width:76px"></colgroup><tr><th class="ar">LNr</th><th class="al">Name</th><th class="ar">Durchwahl</th></tr><tr><td class="b ar">1</td><td class="al">Alvers</td><td class="ar">31</td></tr><tr><td class="b ar">2</td><td class="al">Schulze</td><td class="ar">42</td></tr><tr><td class="b ar">3</td><td class="al">Berger</td><td class="ar">27</td></tr></table><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fall 3: Note 7 und der 31. Februar</h3><div class="rules"></div><div class="body" style="width:404px"><p class="line l0 step" data-g="0">Jedes Feld hat einen <b>Datentyp</b> und einen <b>Wertebereich</b></p>
+<p class="line l0 step" data-g="1">Note 7, 31. Februar, Klasse 12x: das DBMS lehnt <b>ab</b></p>
+<p class="line l0 step" data-g="2">Festgelegt beim Anlegen der Tabelle: <b>INTEGER</b>, <b>DATE</b>, <b>CHECK</b></p>
+<p class="line l0 step" data-g="3">Regel: <b>Wertebereichsintegrität</b> (Domäne)</p></div><table class="dtable" style="left:562px;top:150px;width:326px;font-size:11px"><colgroup><col style="width:104px"><col style="width:92px"><col style="width:130px"></colgroup><tr><th class="al">Feld</th><th class="al">Eingabe</th><th class="al">erlaubt</th></tr><tr><td class="b al">Note</td><td class="al" style="background:#F2CFCB">7</td><td class="al">1 bis 6</td></tr><tr><td class="b al">Geburtsdatum</td><td class="al" style="background:#F2CFCB">31.02.2009</td><td class="al">gültiges Datum</td></tr><tr><td class="b al">Klasse</td><td class="al" style="background:#F2CFCB">FO12x</td><td class="al">FO12a, FO12b</td></tr><tr><td class="b al">Durchwahl</td><td class="al" style="background:#F2CFCB">abc</td><td class="al">10 bis 99</td></tr></table><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fall 4: Regeln aus der Wirklichkeit</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Manche Regeln stehen in <b>keinem</b> Datentyp</p>
+<p class="line l0 step" data-g="1">Ein Kurs hat <b>höchstens 30</b> Teilnehmende</p>
+<p class="line l0 step" data-g="2">Abmeldung nur <b>vor</b> Kursbeginn</p>
+<p class="line l0 step" data-g="3">Eine Lehrkraft ist nicht in <b>zwei Räumen</b> zur selben Zeit</p>
+<p class="line l0 step" data-g="4">Regel: <b>semantische Integrität</b> — Fachregeln, im DBMS als CHECK oder Trigger</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: wenn Regeln fehlen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Christopher Null</b>, Journalist: Web-Formulare halten seinen Nachnamen für <b>„leer“</b></p>
+<p class="line l0 step" data-g="1"><b>Jahr-2000-Problem</b>: Jahreszahlen mit <b>zwei Ziffern</b> — ein Wertebereichsfehler für Milliarden</p>
+<p class="line l0 step" data-g="2">Dresdens <b>01067</b>: wer die PLZ als Zahl speichert, verliert die <b>Null</b></p>
+<p class="line l0 step" data-g="3"><b>Bobby Tables</b> (xkcd): Eingaben, die selbst SQL sind — Regeln prüfen ist auch <b>Schutz</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Regeln im CREATE TABLE: das DBMS passt auf</h3><div class="rules"></div><div class="codepanel"><pre>-- Regeln, die das DBMS selbst überwacht
+CREATE TABLE Lehrkraft (
+  LNr        INTEGER PRIMARY KEY,               -- Entitätsintegrität
+  Name       TEXT    NOT NULL,
+  Durchwahl  INTEGER CHECK (Durchwahl BETWEEN 10 AND 99)  -- Wertebereich
+);
+CREATE TABLE Kurs (
+  KNr   INTEGER PRIMARY KEY,
+  Fach  TEXT    NOT NULL,
+  Raum  TEXT    CHECK (Raum IN ('118', '204', '210', '305')),
+  LNr   INTEGER NOT NULL REFERENCES Lehrkraft(LNr)   -- referentielle Integrität
+);</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Ausblick: die Tabelle aufteilen</h3><div class="rules"></div><div class="pic"><img src="img/schema.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Jede Tabelle beschreibt <b>eine</b> Sache: Schüler, Kurs, Lehrkraft</p>
+<p class="line l0 step" data-g="1">Zusammenhang über <b>Schlüssel</b> statt über abgetippte Namen</p>
+<p class="line l0 step" data-g="2">Wie man sauber aufteilt: <b>Normalformen</b> — in ein paar Wochen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Konsistenz ist der Zustand. Integritätsregeln sind die Wächter. Redundanz ist der Feind von beiden.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: die Pizzeria-Tabelle</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Tabelle <b>Bestellungen</b> einer Pizzeria: Kunde, Adresse, Pizza, Preis, Fahrer, Fahrer-Handy</p>
+<p class="line l0 step" data-g="1">Findet <b>drei Redundanzen</b></p>
+<p class="line l0 step" data-g="2">Erfindet je <b>eine</b> Einfüge-, Änderungs- und Löschanomalie</p>
+<p class="line l0 step" data-g="3">Formuliert <b>drei Integritätsregeln</b> — und nennt die Regelart</p>
+<p class="line l0 step" data-g="4">Bonus: Wie würdet ihr die Tabelle <b>aufteilen</b>?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script>
+// time-aware greeting - the browser knows the real clock, a .pptx never does
+(function(){
+  var h = new Date().getHours();
+  var t = h < 5 ? 'Good night!' : h < 12 ? 'Good morning!' :
+          h < 18 ? 'Good afternoon!' : h < 22 ? 'Good evening!' : 'Good night!';
+  var el = document.getElementById('greet-text');
+  if (el) el.textContent = t;
+})();
+
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  if (e.target.closest('#hud') || e.target.closest('.labbar a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+}
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>
