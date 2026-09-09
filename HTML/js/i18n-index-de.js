@@ -119,7 +119,6 @@
                 "pythagorasbeweis": { title: "Pythagoras Beweis", description: "Geometrischer Beweis des Satzes von Pythagoras durch Flächenzerlegung." },
                 "gleichschenkligesDreieck": { title: "Gleichschenkliges Dreieck", description: "Spezielle Dreiecke und ihre Eigenschaften interaktiv berechnen." },
                 "eulergerade": { title: "Euler Feuerbach und Napoleon", description: "Die faszinierende Geometrie des Dreiecks: Euler-Gerade und Feuerbach-Kreis." },
-                "easyhard": { title: "Geometrie Knobelei", description: "Ein anspruchsvolles geometrisches Rätsel. Bestimme den fehlenden Winkel." },
                 "winkelsumme": { title: "Polygon-Labor", description: "Berechne die Winkelsumme in beliebigen n-Ecken." },
                 "beweisinwinkellsumme": { title: "Beweis Innenwinkelsatz", description: "Warum beträgt die Winkelsumme im Dreieck immer 180°? Der Beweis Schritt für Schritt." },
                 "butterfly": { title: "Schmetterlingskurve", description: "Eine faszinierende transzendente Kurve, definiert durch Polarkoordinaten." },

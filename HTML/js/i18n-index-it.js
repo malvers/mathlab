@@ -117,7 +117,6 @@
                 "pythagorasbeweis": { title: "Dimostrazione Pitagora", description: "Dimostrazione geometrica del teorema di Pitagora tramite scomposizione di aree." },
                 "gleichschenkligesDreieck": { title: "Triangolo Isoscele", description: "Calcola triangoli speciali e le loro proprietà in modo interattivo." },
                 "eulergerade": { title: "Euler Feuerbach e Napoleone", description: "L'affascinante geometria del triangolo: retta di Eulero e cerchio di Feuerbach." },
-                "easyhard": { title: "Rompicapo Geometrico", description: "Un puzzle geometrico impegnativo. Determina l'angolo mancante." },
                 "winkelsumme": { title: "Lab dei Poligoni", description: "Calcola la somma degli angoli in qualsiasi n-agono." },
                 "beweisinwinkellsumme": { title: "Dimostrazione Angolo Interno", description: "Perché la somma degli angoli di un triangolo è sempre 180°? La dimostrazione passo dopo passo." },
                 "butterfly": { title: "Curva a Farfalla", description: "Un'affascinante curva trascendente definita da coordinate polari." },

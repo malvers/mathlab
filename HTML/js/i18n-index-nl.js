@@ -117,7 +117,6 @@
                 "pythagorasbeweis": { title: "Bewijs Pythagoras", description: "Meetkundig bewijs van de stelling van Pythagoras via oppervlakteverdeling." },
                 "gleichschenkligesDreieck": { title: "Gelijkbenige driehoek", description: "Bereken bijzondere driehoeken en hun eigenschappen interactief." },
                 "eulergerade": { title: "Euler, Feuerbach en Napoleon", description: "Fascinerende driehoeksmeetkunde: Eulerlijn en Feuerbach-cirkel." },
-                "easyhard": { title: "Meetkundepuzzel", description: "Een pittig meetkundig raadsel. Bepaal de ontbrekende hoek." },
                 "winkelsumme": { title: "Veelhoeken-lab", description: "Bereken de hoekensom in elke n-hoek." },
                 "beweisinwinkellsumme": { title: "Bewijs binnenhoeken", description: "Waarom is de hoekensom in een driehoek altijd 180°? Het bewijs stap voor stap." },
                 "butterfly": { title: "Vlinderkromme", description: "Een intrigerende transcendente kromme in poolcoördinaten." },

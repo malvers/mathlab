@@ -276,14 +276,6 @@ FEATURES
 - Interaktive Exploration: Fokussierung und Start der Labore per Klick.
 - Tiefen-Projektion: Skalierung basierend auf der virtuellen Z-Koordinate.`,
 
-        "easyhard": `ÜBERSICHT:
-Modul „easy/hard“ – gestufte Aufgaben oder Schwierigkeitsgrade für gezieltes Training.
-
-FEATURES
-- Schwierigkeitswahl: Umschalten zwischen Basis- und Expertenmodus.
-- Aufgaben-Matrix: Strukturierte Präsentation didaktischer Einheiten.
-- Hilfe-System: Schneller Zugriff auf Kurzinformationen über das Navigations-Icon.`,
-
         "zahlenerkennung": `KONZEPT:
 Künstliche neuronale Netze können lernen. Sie sind nicht programmiert darauf Muster zu erkennen, sie lernen Muster. Hier zeigt Dir das Labor, wie ein KNN geschriebene Zahlen lernt.
 
@@ -627,15 +619,8 @@ Artificial neural networks can learn. They are not programmed to recognize patte
 
 FEATURES & CONTROLS:
 - Training Management: The network can be trained with various batches of training data.
-- Validation: Test the recognition rate for hand-drawn or mouse-written numbers in real time.`,
+- Validation: Test the recognition rate for hand-drawn or mouse-written numbers in real time.`
 
-        "easyhard": `OVERVIEW:
-Module "easy/hard" – tiered tasks or difficulty levels for targeted training.
-
-FEATURES & CONTROLS:
-- Difficulty Choice: Toggle between basic and expert mode.
-- Task Matrix: Structured presentation of didactic units.
-- Help System: Quick access to info via navigation icon.`
     },
 
     "es": {
@@ -1050,17 +1035,6 @@ CARACTERÍSTICAS Y CONTROLES:
 
 INTERFAZ:
 Interfaz cinemática como hub central de la suite.`,
-
-        "easyhard": `RESUMEN:
-Módulo "easy/hard": tareas escalonadas para entrenamiento dirigido.
-
-CARACTERÍSTICAS Y CONTROLES:
-- Dificultad: Alterna entre básico y experto.
-- Matriz: Presentación de unidades didácticas.
-- Ayuda: Acceso rápido vía icono de navegación.
-
-INTERFAZ:
-Diseño con navegación de marca central.`,
 
         "ann_labor": `REDES NEURONALES ARTIFICIALES: Todo el mundo habla de la Inteligencia Artificial, pero ¿cómo funciona exactamente? Este laboratorio muestra detalladamente el proceso de aprendizaje de una red neuronal artificial. Se puede ajustar el número de nodos por "hidden layer" (capa oculta), así como el número de capas ocultas. A través de las cuatro operaciones aritméticas básicas, se puede estudiar cómo aprende una red de este tipo.`,
 
@@ -1487,17 +1461,6 @@ FONCTIONNALITÉS & COMMANDES :
 INTERFACE :
 Interface cinématique, hub central de la suite.`,
 
-        "easyhard": `RÉSUMÉ :
-Module "easy/hard" : tâches graduées pour entraînement ciblé.
-
-FONCTIONNALITÉS & COMMANDES :
-- Difficulté : Bascule entre mode base et expert.
-- Matrice : Unités didactiques structurées.
-- Aide : Accès rapide via icône navigation.
-
-INTERFACE :
-Design avec navigation de marque.`,
-
         "ann_labor": `RÉSEAUX DE NEURONES ARTIFICIELS : Tout le monde parle d'intelligence artificielle, mais comment cela fonctionne-t-il exactement ? Ce laboratoire montre en détail le processus d'apprentissage d'un réseau de neurones artificiels. On peut régler le nombre de nœuds par « hidden layer » (couche cachée) ainsi que le nombre de couches cachées. À l'aide des quatre opérations arithmétiques de base, on peut étudier comment un tel réseau apprend.`,
 
         "zahlenerkennung": `CONCEPT :
@@ -1918,17 +1881,6 @@ CARATTERISTICHE E COMANDI:
 INTERFACCIA:
 Interfaccia cinematica, hub centrale della suite.`,
 
-        "easyhard": `RIASSUNTO:
-Modulo "easy/hard": compiti graduati per training mirato.
-
-CARATTERISTICHE E COMANDI:
-- Difficoltà: Passa tra base ed esperto.
-- Matrice: Unità didattiche strutturate.
-- Aiuto: Accesso rapido via icona navigazione.
-
-INTERFACCIA:
-Design con navigazione di marca.`,
-
         "ann_labor": `RETI NEURALI ARTIFICIALI: Tutti parlano di intelligenza artificiale, ma come funziona esattamente? Questo laboratorio mostra in dettaglio il processo di apprendimento di una rete neurale artificiale. È possibile regolare il numero di nodi per ogni "hidden layer" (strato nascosto) e il numero di strati nascosti. Utilizzando le quattro operazioni aritmetiche di base, si può studiare come impara una rete di questo tipo.`,
 
         "zahlenerkennung": `CONCETTO:
@@ -2348,17 +2300,6 @@ RECURSOS E CONTROLOS:
 
 INTERFACE:
 Interface cinemática, hub central da suite.`,
-
-        "easyhard": `RESUMO:
-Módulo "easy/hard": tarefas graduadas para treino direcionado.
-
-RECURSOS E CONTROLOS:
-- Dificuldade: Alterna entre base e perito.
-- Matriz: Unidades didáticas estruturadas.
-- Ajuda: Acesso rápido via ícone de navegação.
-
-INTERFACE:
-Design com navegação de marca.`,
 
         "ann_labor": `REDES NEURONAIS ARTIFICIAIS: Toda a gente fala de Inteligência Artificial, mas como é que funciona exatamente? Este laboratório mostra detalhadamente o processo de aprendizagem de uma rede neuronal artificial. É possível ajustar o número de nós por "hidden layer" (camada oculta), bem como o número de camadas ocultas. À l'aide des quatre opérations arithmétiques de base, on peut étudier comment un tel réseau apprend.`,
 

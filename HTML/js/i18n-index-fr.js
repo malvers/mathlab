@@ -117,7 +117,6 @@
                 "pythagorasbeweis": { title: "Preuve Pythagore", description: "Preuve géométrique du théorème de Pythagore par décomposition d'aires." },
                 "gleichschenkligesDreieck": { title: "Triangle Isocèle", description: "Calculez des triangles spéciaux et leurs propriétés de manière interactive." },
                 "eulergerade": { title: "Euler Feuerbach et Napoléon", description: "La géométrie fascinante du triangle : droite d'Euler et cercle de Feuerbach." },
-                "easyhard": { title: "Casse-tête Géométrique", description: "Une énigme géométrique difficile. Déterminez l'angle manquant." },
                 "winkelsumme": { title: "Labo Polygone", description: "Calculez la somme des angles de n'importe quel n-gone." },
                 "beweisinwinkellsumme": { title: "Preuve Angle Interne", description: "Pourquoi la somme des angles d'un triangle est-elle toujours de 180° ? La preuve étape par étape." },
                 "butterfly": { title: "Courbe Papillon", description: "Une courbe transcendante fascinante définie par des coordonnées polaires." },

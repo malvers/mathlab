@@ -343,17 +343,6 @@ const LABS_DATA = [
         "color": "blue"
     },
     {
-        "id": "easyhard",
-        "href": "easyhard.html",
-        "title": "Geometrie Knobelei",
-        "description": "Ein anspruchsvolles geometrisches Rätsel. Kannst du den fehlenden Winkel nur durch Logik bestimmen?",
-        "tagline": "Logik-Rätsel / Langley / Problemlösung",
-        "icon": LAB_ICONS["easyhard"],
-        "category": "dreiecke grade8",
-        "keywords": "geometrie dreieck problem knobeln problemloesen",
-        "color": "orange"
-    },
-    {
         "id": "gleichschenkligesDreieck",
         "href": "gleichschenkligesDreieck.html",
         "title": "Gleichschenkliges Dreieck",
