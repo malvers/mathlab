@@ -41,6 +41,7 @@
     <meta name="twitter:description" content="Kugelflächenfunktionen Y_ℓ^m in 3D: Kugelfläche und optionale |Y|²-Punktwolke, KaTeX-Formeln, Orbitwechsel. Cyber-Lab-Optik, Trackball, Auto-Rotation.">
     <meta name="twitter:image" content="https://docalvers.de/resources/og/atomorbitale.jpg">
     <!-- OG:END -->
+    <script src="js/cyber-trackball.js"></script>
 <script src="js/i18n.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
@@ -1329,14 +1330,8 @@
           scene.environment = pmremGenerator.fromScene(envScene, 0.04).texture;
           envScene.dispose();
         
-          controls = new TrackballControls(camera, renderer.domElement);
-          controls.rotateSpeed = 1.3;
-          controls.zoomSpeed = 1.05;
-          controls.panSpeed = 0.32;
-          controls.staticMoving = false;
-          controls.dynamicDampingFactor = 0.14;
-          controls.minDistance = 140;
-          controls.maxDistance = 12000;
+          controls = CyberTrackball.make(TrackballControls, camera, renderer.domElement,
+              { minDistance: 140, maxDistance: 12000 });
           controls.target.set(0, 0, 0);
         
           meshGroup = new THREE.Group();
