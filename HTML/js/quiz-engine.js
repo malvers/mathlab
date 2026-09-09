@@ -138,6 +138,24 @@
     });
   }
 
+  /* Eine Zeichnung zur Frage: das Quiz kann dasselbe wie die Aufgabenblaetter,
+     naemlich ein fertiges Inline-SVG aus tools/aufgaben/svgfig.py (Doc, 09.09.2026:
+     "wir haben gestern zum Abitraining ultracoole SVGs gemacht"). Das Feld ist
+     optional - Fragen ohne fig sehen aus wie bisher. Der Inhalt stammt aus dem
+     eigenen Generator, nicht von aussen. */
+  function addFigure(card, item) {
+    if (!item.fig) return;
+    const fig = document.createElement('figure');
+    fig.className = 'qfig';
+    fig.innerHTML = item.fig;
+    if (item.figcap) {
+      const cap = document.createElement('figcaption');
+      cap.textContent = item.figcap;
+      fig.appendChild(cap);
+    }
+    card.appendChild(fig);
+  }
+
   const quizEl = document.getElementById('quiz');
   const hintEl = document.getElementById('hint');
   const submitBtn = document.getElementById('submitBtn');
@@ -182,6 +200,7 @@
       renderMath(qt, item.q);
       card.appendChild(num);
       card.appendChild(qt);
+      addFigure(card, item);
       item.opts.forEach(function (opt, oi) {
         const b = document.createElement('button');
         b.type = 'button';
