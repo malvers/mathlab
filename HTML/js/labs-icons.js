@@ -4,6 +4,21 @@
  */
 
 const LAB_ICONS = {
+    "vektoren": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- the parallelogram of the sum, dashed like a construction line -->
+            <path d="M16 84 L58 72 L82 32 L40 44 Z" fill="rgba(121, 158, 49, 0.13)"
+                  stroke="rgba(121, 158, 49, 0.5)" stroke-width="1.3" stroke-dasharray="4 3" stroke-linejoin="round" />
+            <!-- a -->
+            <line x1="16" y1="84" x2="48.4" y2="74.7" stroke="#F5C242" stroke-width="2.6" stroke-linecap="round" />
+            <polygon points="58,72 49.5,78.5 47.3,70.9" fill="#F5C242" />
+            <!-- b -->
+            <line x1="16" y1="84" x2="34.9" y2="52.6" stroke="#00D2FF" stroke-width="2.6" stroke-linecap="round" />
+            <polygon points="40,44 38.3,54.7 31.5,50.5" fill="#00D2FF" />
+            <!-- the sum, on the diagonal -->
+            <line x1="16" y1="84" x2="72.6" y2="39.4" stroke="rgb(121, 158, 49)" stroke-width="2.9" stroke-linecap="round" />
+            <polygon points="82,32 75.6,43.2 69.6,35.6" fill="rgb(121, 158, 49)" />
+            <circle cx="16" cy="84" r="3.6" fill="#ffffff" />
+        </svg>`,
     "marionwalter": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <polygon points="14,84 86,84 50,15" fill="rgba(0, 210, 255, 0.06)" stroke="#00D2FF" stroke-width="2.2" />
             <!-- six cevians: every trisection point meets the opposite corner -->
