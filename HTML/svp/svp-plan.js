@@ -625,8 +625,10 @@
                     removeMatEntry(ref, url);
                 });
                 /* Single pill actions live in a context menu: right-click on
-                   the desktop, long press on a tablet. Only while editing, so a
-                   normal right-click still gets the browser's own menu. */
+                   the desktop, long press on a tablet. Wired for the owner in
+                   both modes (Doc, 09.09.2026) - outside the edit mode it is the
+                   short list, and the browser's own menu never shows. Visitors
+                   are not wired at all and keep the browser menu. */
                 wirePillMenu(a, ref, url, label, en.datei);
                 wirePillTouch(a, ref, en, true);
                 wrap.appendChild(a);
@@ -1231,14 +1233,20 @@
         titel.textContent = label || matDefaultLabel(url);
         menu.appendChild(titel);
         const desktop = officeEdit(url, label, datei);
+        /* Outside the edit mode the menu is the short list: open, copy, and
+           the desktop app. Changing or removing the entry stays an edit-mode
+           action - the cell holds the raw text only there. */
+        const editing = document.body.classList.contains('editing');
         const punkte = [
             ['⧉', 'Kopieren', function () { copyOneMat(ref, url, label); }, 'ctx-ico-gross'],
             ['↗', 'Öffnen', function () { openMat(url, label); }, '']];
         if (desktop) punkte.push([drawnIcon('ctx-ico-svg', PRESENT_PATH, 'currentColor', 1.7),
             'Bearbeiten in ' + desktop.name,
             function () { location.href = desktop.href; }, '']);
-        punkte.push(['✎', 'Bearbeiten', function () { openMatModal(ref, url); }, '']);
-        punkte.push(['✕', 'Entfernen', function () { removeMatEntry(ref, url); }, '']);
+        if (editing) {
+            punkte.push(['✎', 'Bearbeiten', function () { openMatModal(ref, url); }, '']);
+            punkte.push(['✕', 'Entfernen', function () { removeMatEntry(ref, url); }, '']);
+        }
         punkte.forEach(function (def) {
             const b = document.createElement('button');
             b.type = 'button';
@@ -1279,9 +1287,10 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePillMenu(); });
     window.addEventListener('scroll', closePillMenu, true);
 
+    /* Owner only (see renderMaterial): the browser menu is suppressed in both
+       modes, the item list adapts to the mode inside openPillMenu. */
     function wirePillMenu(a, ref, url, label, datei) {
         a.addEventListener('contextmenu', function (e) {
-            if (!document.body.classList.contains('editing')) return; /* native menu */
             e.preventDefault();
             e.stopPropagation();
             openPillMenu(e.clientX, e.clientY, ref, url, label, datei);
@@ -1290,7 +1299,7 @@
 
     // Touch gestures on a pill (Doc's rule for the pad):
     //   short tap  -> description tooltip (if the link has one, else navigate)
-    //   long press -> open the link; while editing: the pill context menu
+    //   long press -> open the link; for the owner: the pill context menu
     // The timer is cancelled by moving the finger or lifting early.
     function wirePillTouch(a, ref, en, editable) {
         let timer = null, moved = false, fired = false;
@@ -1302,8 +1311,7 @@
                 if (moved) return;
                 fired = true;
                 hideMatTip();
-                if (editable && document.body.classList.contains('editing'))
-                    openPillMenu(t.clientX, t.clientY, ref, en.url, en.label, en.datei);
+                if (editable) openPillMenu(t.clientX, t.clientY, ref, en.url, en.label, en.datei);
                 else openMat(en.url, en.label);
             }, 500);
         }, { passive: true });
