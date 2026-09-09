@@ -117,7 +117,6 @@
                 "pythagorasbeweis": { title: "Pisagor Kanıtı", description: "Pisagor teoreminin alan ayrıştırmasıyla geometrik kanıtı." },
                 "gleichschenkligesDreieck": { title: "İkizkenar Üçgen", description: "Özel üçgenleri ve özelliklerini etkileşimli olarak hesaplayın." },
                 "eulergerade": { title: "Euler Feuerbach ve Napolyon", description: "Üçgenin büyüleyici geometrisi: Euler çizgisi ve Feuerbach çemberi." },
-                "easyhard": { title: "Geometri Bulmacası", description: "Zorlu bir geometrik bilmece. Eksik açıyı belirleyin." },
                 "winkelsumme": { title: "Poligon Laboratuvarı", description: "Herhangi bir n-gendeki açıların toplamını hesaplayın." },
                 "beweisinwinkellsumme": { title: "İç Açı Kanıtı", description: "Bir üçgende açıların toplamı neden her zaman 180°'dir? Adım adım kanıt." },
                 "butterfly": { title: "Kelebek Eğrisi", description: "Kutupsal koordinatlarla tanımlanan büyüleyici bir aşkın eğri." },

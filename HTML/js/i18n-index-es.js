@@ -117,7 +117,6 @@
                 "pythagorasbeweis": { title: "Prueba de Pitágoras", description: "Prueba geométrica del teorema de Pitágoras mediante descomposición de áreas." },
                 "gleichschenkligesDreieck": { title: "Triángulo Isósceles", description: "Calcule triángulos especiales y sus propiedades de forma interactiva." },
                 "eulergerade": { title: "Euler Feuerbach y Napoleon", description: "La fascinante geometría del triángulo: recta de Euler y círculo de Feuerbach." },
-                "easyhard": { title: "Puzzle de Geometría", description: "Un acertijo geométrico desafiante. Determine el ángulo que falta." },
                 "winkelsumme": { title: "Laboratorio de Polígonos", description: "Calcule la suma de los ángulos en cualquier n-ágono." },
                 "beweisinwinkellsumme": { title: "Prueba del Ángulo Interior", description: "¿Por qué la suma de los ángulos de un triángulo es siempre 180°? La prueba paso a paso." },
                 "butterfly": { title: "Curva de Mariposa", description: "Una fascinante curva trascendente definida por coordenadas polares." },

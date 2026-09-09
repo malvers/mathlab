@@ -117,7 +117,6 @@
                 "pythagorasbeweis": { title: "Uthibitisho wa Pythagoras", description: "Uthibitisho wa kijiometri wa nadharia ya Pythagorean kwa mtengano wa eneo." },
                 "gleichschenkligesDreieck": { title: "Pembetatu ya Isosceles", description: "Kuhesabu pembetatu maalum na mali zao kwa maingiliano." },
                 "eulergerade": { title: "Euler Feuerbach na Napoleon", description: "Jiometri ya kuvutia ya pembetatu: Mstari wa Euler na mduara wa Feuerbach." },
-                "easyhard": { title: "Jiometri Puzzle", description: "Kitendawili cha kijiometri cha changamoto. Amua pembe inayokosekana." },
                 "winkelsumme": { title: "Maabara ya Polygon", description: "Kokotoa jumla ya pembe katika n-gon yoyote." },
                 "beweisinwinkellsumme": { title: "Uthibitisho wa Angle ya Ndani", description: "Kwa nini jumla ya pembe katika pembetatu daima ni 180 °? Ushahidi hatua kwa hatua." },
                 "butterfly": { title: "Kipepeo Curve", description: "Mviringo wa kuvuka mipaka unaovutia unaofafanuliwa na viwianishi vya polar." },

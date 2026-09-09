@@ -117,7 +117,6 @@
                 "pythagorasbeweis": { title: "Pythagoras Proof", description: "Geometric proof of the Pythagorean theorem by area decomposition." },
                 "gleichschenkligesDreieck": { title: "Isosceles Triangle", description: "Calculate special triangles and their properties interactively." },
                 "eulergerade": { title: "Euler Feuerbach and Napoleon", description: "The fascinating geometry of the triangle: Euler line and Feuerbach circle." },
-                "easyhard": { title: "Geometry Puzzle", description: "A challenging geometric riddle. Determine the missing angle." },
                 "winkelsumme": { title: "Polygon Lab", description: "Calculate the sum of angles in any n-gon." },
                 "beweisinwinkellsumme": { title: "Interior Angle Proof", description: "Why is the sum of angles in a triangle always 180°? The proof step by step." },
                 "butterfly": { title: "Butterfly Curve", description: "A fascinating transcendental curve defined by polar coordinates." },

@@ -276,14 +276,6 @@ FEATURES
 - Interaktive Exploration: Fokussierung und Start der Labore per Klick.
 - Tiefen-Projektion: Skalierung basierend auf der virtuellen Z-Koordinate.`,
 
-        "easyhard": `ÜBERSICHT:
-Modul „easy/hard“ – gestufte Aufgaben oder Schwierigkeitsgrade für gezieltes Training.
-
-FEATURES
-- Schwierigkeitswahl: Umschalten zwischen Basis- und Expertenmodus.
-- Aufgaben-Matrix: Strukturierte Präsentation didaktischer Einheiten.
-- Hilfe-System: Schneller Zugriff auf Kurzinformationen über das Navigations-Icon.`,
-
         "zahlenerkennung": `KONZEPT:
 Künstliche neuronale Netze können lernen. Sie sind nicht programmiert darauf Muster zu erkennen, sie lernen Muster. Hier zeigt Dir das Labor, wie ein KNN geschriebene Zahlen lernt.
 
@@ -609,19 +601,6 @@ FEATURES & CONTROLS:
 - Lab Matrix: Modules fly from the center towards the viewer.
 - Interactive Exploration: Focus and start labs via click.
 - Depth Projection: Scaling based on virtual Z-coordinate.`,
-
-        "easyhard": `OVERVIEW:
-Module "easy/hard" – tiered tasks or difficulty levels for targeted training.
-
-FEATURES & CONTROLS:
-- Difficulty Choice: Toggle between basic and expert mode.
-- Task Matrix: Structured presentation of didactic units.
-- Help System: Quick access to info via navigation icon.
-
-INTERFAZ:
-- Campos (Arriba): Definir números base.
-- Matriz (Centro): Disposición vertical.
-- Consola (Abajo): Inicio, Reset y navegación.`,
 
         "subtraktion": `ANTECEDENTES MATEMÁTICOS:
 La resta escrita calcula la diferencia entre un minuendo y un sustraendo utilizando el método de desagrupación.
@@ -1018,18 +997,8 @@ CARACTERÍSTICAS Y CONTROLES:
 - Proyección: Escalado por coordenada Z.
 
 INTERFAZ:
-Interfaz cinemática como hub central de la suite.`,
+Interfaz cinemática como hub central de la suite.`
 
-        "easyhard": `RESUMEN:
-Módulo "easy/hard": tareas escalonadas para entrenamiento dirigido.
-
-CARACTERÍSTICAS Y CONTROLES:
-- Dificultad: Alterna entre básico y experto.
-- Matriz: Presentación de unidades didácticas.
-- Ayuda: Acceso rápido vía icono de navegación.
-
-INTERFAZ:
-Diseño con navegación de marca central.`
     },
     "fr": {
         "addition": `CONTEXTE MATHÉMATIQUE :
@@ -1440,18 +1409,8 @@ FONCTIONNALITÉS & COMMANDES :
 - Projection : Échelle par coordonnée Z.
 
 INTERFACE :
-Interface cinématique, hub central de la suite.`,
+Interface cinématique, hub central de la suite.`
 
-        "easyhard": `RÉSUMÉ :
-Module "easy/hard" : tâches graduées pour entraînement ciblé.
-
-FONCTIONNALITÉS & COMMANDES :
-- Difficulté : Bascule entre mode base et expert.
-- Matrice : Unités didactiques structurées.
-- Aide : Accès rapide via icône navigation.
-
-INTERFACE :
-Design avec navigation de marque.`
     },
     "it": {
         "addition": `CONTESTO MATEMATICO:
@@ -1862,18 +1821,8 @@ CARATTERISTICHE E COMANDI:
 - Proiezione: Scala per coordinata Z.
 
 INTERFACCIA:
-Interfaccia cinematica, hub centrale della suite.`,
+Interfaccia cinematica, hub centrale della suite.`
 
-        "easyhard": `RIASSUNTO:
-Modulo "easy/hard": compiti graduati per training mirato.
-
-CARATTERISTICHE E COMANDI:
-- Difficoltà: Passa tra base ed esperto.
-- Matrice: Unità didattiche strutturate.
-- Aiuto: Accesso rapido via icona navigazione.
-
-INTERFACCIA:
-Design con navigazione di marca.`
     },
     "pt": {
         "addition": `CONTEXTO MATEMÁTICO:
@@ -2171,18 +2120,8 @@ Ecossistema em galáxia dinâmica via raycasting.
 RECURSOS E CONTROLOS:
 - Matriz: Módulos voando do centro.
 - Exploração: Foco e arranque via clique.
-- Projeção: Escala por coordenada Z.`,
+- Projeção: Escala por coordenada Z.`
 
-        "easyhard": `RESUMO:
-Módulo "easy/hard": tarefas graduadas para treino direcionado.
-
-RECURSOS E CONTROLOS:
-- Dificuldade: Alterna entre base e perito.
-- Matriz: Unidades didáticas estruturadas.
-- Ajuda: Acesso rápido via ícone de navegação.
-
-INTERFACE:
-Design com navegação de marca.`
     }
 };
 

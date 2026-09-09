@@ -272,15 +272,6 @@ const LAB_ICONS = {
             <circle cx="50" cy="50" r="2" fill="white" />
             <circle cx="80" cy="40" r="2" fill="white" />
         </svg>`,
-    "easyhard": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="20,85 80,85 50,20" fill="rgba(157, 78, 221, 0.4)" stroke="rgb(128, 128, 128)" stroke-width="1.5" stroke-linejoin="round" />
-            <line x1="20" y1="85" x2="62" y2="38" stroke="rgb(128, 128, 128)" stroke-width="1.2" />
-            <line x1="80" y1="85" x2="38" y2="38" stroke="rgb(128, 128, 128)" stroke-width="1.2" />
-            <circle cx="20" cy="85" r="4" fill="#666" />
-            <circle cx="80" cy="85" r="4" fill="#666" />
-            <circle cx="50" cy="20" r="7" fill="#ff9800" />
-            <text x="50" y="25" font-family="'Orbitron', sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle">?</text>
-        </svg>`,
     "gleichschenkligesDreieck": "📐",
     "parabellabor": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <path d="M 20,20 Q 50,110 80,20" fill="none" stroke="var(--neon-purple)" stroke-width="2" stroke-linecap="round" />

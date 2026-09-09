@@ -295,14 +295,6 @@ FEATURES
 - Interaktive Exploration: Fokussierung und Start der Labore per Klick.
 - Tiefen-Projektion: Skalierung basierend auf der virtuellen Z-Koordinate.`,
 
-        "easyhard": `ÜBERSICHT:
-Modul „easy/hard“ – gestufte Aufgaben oder Schwierigkeitsgrade für gezieltes Training.
-
-FEATURES
-- Schwierigkeitswahl: Umschalten zwischen Basis- und Expertenmodus.
-- Aufgaben-Matrix: Strukturierte Präsentation didaktischer Einheiten.
-- Hilfe-System: Schneller Zugriff auf Kurzinformationen über das Navigations-Icon.`,
-
         "zahlenerkennung": `KONZEPT:
 Künstliche neuronale Netze können lernen. Sie sind nicht programmiert darauf Muster zu erkennen, sie lernen Muster. Hier zeigt Dir das Labor, wie ein KNN geschriebene Zahlen lernt.
 
