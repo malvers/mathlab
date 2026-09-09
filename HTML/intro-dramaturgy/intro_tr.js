@@ -45,20 +45,20 @@ Türkçe 🇹🇷
 40pt
 hypertext markup language
 cascading styles sheets
-type script
+apple script
 java script
+type script
 python
-Latex
-JSON
-JAVA
 kotlin
+Latex
 swift
-C
-C++
+JAVA
+bash
+JSON
 GLSL
 SQL
-bash
-apple script
+C++
+C
 
 #notranslate 
 60pt
