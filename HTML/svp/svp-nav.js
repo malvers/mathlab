@@ -93,7 +93,10 @@
             ['Mathematik', ['mathe/mathegy9.html', 'mathe/mathegy10.html']],
             ['Physik', ['physik/phygy10.html']]
         ]],
-        ['Berufliches Gymnasium (BGY)', [
+        /* Doc, 09.09.2026: "nimm BGY und FO raus" - die Kuerzel hinter den
+           Schulformen sind aus den Navi-Knoepfen raus; die Pillen im Menue
+           (MA 11, FO 12 ...) tragen sie weiter. */
+        ['Berufliches Gymnasium', [
             ['Mathematik', ['mathe/mathe11.html', 'mathe/mathe12.html', 'mathe/mathe13.html',
                             'mathe/abitur.html']],
             ['Informatik', ['informatik/inf11.html', 'informatik/inf12.html', 'informatik/inf13.html']],
@@ -101,7 +104,7 @@
                                    'informatik/informatik13.html']],
             ['Wirtschaft/Recht', ['wr/wr11.html']]
         ]],
-        ['Fachoberschule (FO)', [
+        ['Fachoberschule', [
             ['Informatik', ['informatik/fos11.html', 'informatik/fos12.html']]
         ]],
         /* "Mehr" is not a Schulart — it stays at the far right, next to the gear */

@@ -2861,7 +2861,19 @@
     let openWeeks;
     try { openWeeks = new Set(JSON.parse(localStorage.getItem(OPEN_KEY) || '[]')); }
     catch (e) { openWeeks = new Set(); }
+    /* Doc, 09.09.2026: "wenn zu -> Wochen auf, wenn auf Wochen zu" - der Knopf
+       heisst nicht mehr "Alle auf/zu", sondern sagt, was ein Klick tut. Steht
+       auch nur eine Woche offen, ist die naechste Tat das Zuklappen. */
+    function syncToggleAllLabel() {
+        const btn = document.querySelector('.toolbar button[onclick*="togglePlanDetails"]');
+        if (!btn) return;
+        const anyOpen = !!document.querySelector('tr.detail-row.open');
+        btn.textContent = anyOpen ? 'Wochen zu' : 'Wochen auf';
+        btn.title = anyOpen ? 'Alle Wochen zuklappen' : 'Alle Wochen aufklappen';
+    }
+
     function syncOpenWeeks() {
+        syncToggleAllLabel();   /* auch im Bearbeiten-Modus, der Knopf bleibt sichtbar */
         if (document.body.classList.contains('editing')) return;
         openWeeks.clear();
         document.querySelectorAll('tr.expandable.open[data-i]').forEach(function (row) {
@@ -4404,6 +4416,10 @@
         setAllDetails(rows.some(r => !r.classList.contains('open')));
     };
 
+    /* Beim Laden koennen Wochen aus dem letzten Besuch offen sein - dann muss
+       der Knopf gleich "Wochen zu" heissen, ohne dass jemand geklickt hat. */
+    syncToggleAllLabel();
+
     // Cells that may contain $...$ math (detail lis queried live — edit mode
     // can add new ones via Enter inside the contenteditable ul).
     function mathCellsOf(r) {
@@ -4609,7 +4625,10 @@
            Pillenbreite muss neu gemessen werden. */
         equalizeLbCells();
         if (!btn) btn = planEditButton();
-        if (btn) btn.textContent = editing ? '✔ Speichern' : '✎ Bearbeiten';
+        /* Doc, 09.09.2026: "stift raus" - der Knopf heisst nur noch
+           "Bearbeiten"; der Haken am Speichern bleibt, er zeigt an, dass
+           etwas zu sichern ist. */
+        if (btn) btn.textContent = editing ? '✔ Speichern' : 'Bearbeiten';
         if (cancelBtn) cancelBtn.hidden = !editing;
     };
 
