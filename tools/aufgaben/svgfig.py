@@ -123,6 +123,62 @@ class Canvas:
                  % (fmt(x1), fmt(y1), fmt(x2), fmt(y2), color, width, mid,
                     ' stroke-dasharray="%s"' % dash if dash else ""))
 
+    def legend(self, x, y, entries, size=11.5, gap=17, swatch=17, box=True):
+        """entries = [(text, colour, kind)] with kind in 'line' | 'dash' | 'fill' | 'dot'.
+        Four sheets each built their own before this existed."""
+        if box:
+            wide = swatch + 8 + max(len(t) for t, _, _ in entries) * size * 0.55
+            self.rect(x - 7, y - size, wide + 14, gap * len(entries) + 8,
+                      fill=PAPER, stroke="#DCE4F0", width=1, rx=4, opacity=0.92)
+        for i, (text, color, kind) in enumerate(entries):
+            cy = y + i * gap
+            if kind == "fill":
+                self.rect(x, cy - 6, swatch, 11, fill=color, opacity=0.45)
+            elif kind == "dot":
+                self.circle(x + swatch / 2.0, cy, 3.6, color)
+            else:
+                self.line(x, cy, x + swatch, cy, color, 2.1,
+                          dash="5 3" if kind == "dash" else None)
+            self.text(x + swatch + 8, cy + 4, text, size, BODY, "start")
+
+    def sector(self, cx, cy, r, a0, a1, fill=ORANGE, opacity=0.75, stroke=PAPER, width=1.4,
+               label=None, lcolor=INK, lsize=12.5, lr=0.62):
+        """Pie sector, angles in degrees, 0 = 12 o'clock, clockwise - the way a Gluecksrad
+        is described. Label sits at lr times the radius."""
+        def pt(a):
+            rad = math.radians(a - 90)
+            return (cx + r * math.cos(rad), cy + r * math.sin(rad))
+        x0, y0 = pt(a0)
+        x1, y1 = pt(a1)
+        large = 1 if (a1 - a0) % 360 > 180 else 0
+        d = ("M %s %s L %s %s A %s %s 0 %d 1 %s %s Z"
+             % (fmt(cx), fmt(cy), fmt(x0), fmt(y0), fmt(r), fmt(r), large, fmt(x1), fmt(y1)))
+        self.raw('<path d="%s" fill="%s" opacity="%s" stroke="%s" stroke-width="%s"/>'
+                 % (d, fill, opacity, stroke, width))
+        if label:
+            mx, my = pt((a0 + a1) / 2.0)
+            self.text(cx + (mx - cx) * lr, cy + (my - cy) * lr + 4, label, lsize, lcolor,
+                      halo=PAPER)
+
+    def arc(self, cx, cy, r, a0, a1, color=MUTED, width=1.3, label=None, lsize=11.5, lr=1.35):
+        """Angle arc between two directions, angles in degrees measured from the x-axis,
+        counter-clockwise - for marking an angle in a figure."""
+        def pt(a):
+            rad = math.radians(-a)
+            return (cx + r * math.cos(rad), cy + r * math.sin(rad))
+        x0, y0 = pt(a0)
+        x1, y1 = pt(a1)
+        large = 1 if abs(a1 - a0) > 180 else 0
+        sweep = 0 if a1 > a0 else 1
+        self.raw('<path d="M %s %s A %s %s 0 %d %d %s %s" fill="none" stroke="%s"'
+                 ' stroke-width="%s"/>'
+                 % (fmt(x0), fmt(y0), fmt(r), fmt(r), large, sweep, fmt(x1), fmt(y1),
+                    color, width))
+        if label:
+            mx, my = pt((a0 + a1) / 2.0)
+            self.text(cx + (mx - cx) * lr, cy + (my - cy) * lr + 4, label, lsize, color,
+                      halo=PAPER)
+
     # ------------------------------------------------------------------ output --
     def svg(self, label=None):
         defs = ("<defs>%s</defs>" % "".join(self.defs)) if self.defs else ""
@@ -178,7 +234,11 @@ class Plot(Canvas):
             v += ystep
 
     def axes(self, xstep=1, ystep=1, xlabel="x", ylabel="y", xticks=True, yticks=True,
-             origin="O", skip_x=(0,), skip_y=(0,), xdec=0, ydec=0):
+             origin="O", skip_x=(0,), skip_y=(0,), xdec=0, ydec=0, defer_labels=False):
+        """defer_labels=True draws the ticks but keeps their numbers back until
+        draw_labels() is called - put that after the curves and filled areas, otherwise
+        the data paints over the numbers (four sheets ran into this)."""
+        self._pending = []
         ax, ay = self.X(0), self.Y(0)
         self.arrow(self.X(self.x0), ay, self.X(self.x1), ay, INK, 1.3)
         self.arrow(ax, self.Y(self.y0), ax, self.Y(self.y1), INK, 1.3)
@@ -186,20 +246,41 @@ class Plot(Canvas):
         self.text(ax - 12, self.Y(self.y1) - 2, ylabel, 14, INK, "end", italic=True)
         if origin:
             self.text(ax - 7, ay + 15, origin, 12, MUTED, "end", italic=True)
+        def label(x, y, s, anchor):
+            if defer_labels:
+                self._pending.append((x, y, s, anchor))
+            else:
+                self.text(x, y, s, 11.5, MUTED, anchor)
         if xticks:
             u = math.ceil(self.x0 / xstep) * xstep
             while u <= self.x1 - 0.2 * xstep:
                 if all(abs(u - s) > 1e-9 for s in skip_x):
                     self.line(self.X(u), ay - 3.5, self.X(u), ay + 3.5, INK, 1.1)
-                    self.text(self.X(u), ay + 16, num(u, xdec), 11.5, MUTED)
+                    label(self.X(u), ay + 16, num(u, xdec), "middle")
                 u += xstep
         if yticks:
             v = math.ceil(self.y0 / ystep) * ystep
             while v <= self.y1 - 0.2 * ystep:
                 if all(abs(v - s) > 1e-9 for s in skip_y):
                     self.line(ax - 3.5, self.Y(v), ax + 3.5, self.Y(v), INK, 1.1)
-                    self.text(ax - 7, self.Y(v) + 4, num(v, ydec), 11.5, MUTED, "end")
+                    label(ax - 7, self.Y(v) + 4, num(v, ydec), "end")
                 v += ystep
+
+    def draw_labels(self, halo=PAPER):
+        """Emit the tick numbers held back by axes(defer_labels=True) - call it after
+        everything that could paint over them."""
+        for x, y, s, anchor in getattr(self, "_pending", []):
+            self.text(x, y, s, 11.5, MUTED, anchor, halo=halo)
+        self._pending = []
+
+    def vmeasure(self, u, v1, v2, label=None, color=MUTED, side=1, size=11.5):
+        """Vertical measure at x = u between two y values, arrows on both ends."""
+        x = self.X(u)
+        self.arrow(x, self.Y(v1), x, self.Y(v2), color, 1.2)
+        self.arrow(x, self.Y(v2), x, self.Y(v1), color, 1.2)
+        if label:
+            self.text(x + 8 * side, (self.Y(v1) + self.Y(v2)) / 2.0 + 4, label, size, color,
+                      "start" if side > 0 else "end", halo=PAPER)
 
     # -------------------------------------------------------------------- data --
     def _samples(self, fn, a, b, n=260):
@@ -400,6 +481,23 @@ class Diagram(Canvas):
                               "above": (0, -10, "middle"), "below": (0, 17, "middle")}[pos]
             self.text(x + dx, y + dy, label, size, INK, anchor, italic=True)
 
+    def selfloop(self, x, y, w=58, h=40, label=None, color=MUTED, width=1.2, size=11,
+                 side=1):
+        """Arrow that leaves a box and comes back to it - the own-consumption edge in a
+        Leontief diagram. side=1 loops to the right, -1 to the left."""
+        r = 18
+        sx, sy = x + side * w / 2.0, y - h * 0.22
+        ex, ey = x + side * w / 2.0, y + h * 0.22
+        cx = x + side * (w / 2.0 + r * 2.1)
+        mid = self.arrowhead(color)
+        self.raw('<path d="M %s %s C %s %s, %s %s, %s %s" fill="none" stroke="%s"'
+                 ' stroke-width="%s" marker-end="url(#%s)"/>'
+                 % (fmt(sx), fmt(sy), fmt(cx), fmt(sy - r), fmt(cx), fmt(ey + r),
+                    fmt(ex), fmt(ey), color, width, mid))
+        if label:
+            self.text(cx + side * 12, y + 4, label, size, BODY, "start" if side > 0 else "end",
+                      halo=PAPER)
+
     def branch(self, p, q, label=None, color=MUTED, width=1.3, size=11.5, lift=9):
         """A tree branch with its probability written along it, just off the line."""
         (x1, y1), (x2, y2) = p, q
@@ -410,3 +508,31 @@ class Diagram(Canvas):
             mx, my = (x1 + x2) / 2.0, (y1 + y2) / 2.0
             # push the text away from the line, on the side the branch points to
             self.text(mx - uy * 0, my + (-lift if uy < 0 else lift + 4), label, size, BODY)
+
+
+# ------------------------------------------------------------------- panels ---
+def panel(canvases, gap=20, captions=None, csize=12, cheight=20, label=None):
+    """Several figures side by side in ONE svg - for "the same thing for two values of t".
+
+    Takes Canvas objects (not their svg() strings), so the ids in their defs stay unique
+    and nothing collides. Each figure keeps its own coordinate system.
+    """
+    cap = cheight if captions else 0
+    w = sum(c.w for c in canvases) + gap * (len(canvases) - 1)
+    h = max(c.h for c in canvases) + cap
+    defs, body = [], []
+    dx = 0
+    for i, c in enumerate(canvases):
+        defs.extend(c.defs)
+        body.append('<g transform="translate(%s,0)">%s</g>' % (fmt(dx), "".join(c.body)))
+        if captions:
+            body.append('<text x="%s" y="%s" font-family="%s" font-size="%s" fill="%s"'
+                        ' text-anchor="middle">%s</text>'
+                        % (fmt(dx + c.w / 2.0), fmt(h - 5), SANS, csize, MUTED,
+                           esc(captions[i])))
+        dx += c.w + gap
+    head = ("<defs>%s</defs>" % "".join(defs)) if defs else ""
+    role = ' role="img" aria-label="%s"' % esc(label) if label else ' role="presentation"'
+    return ('<svg viewBox="0 0 %d %d" width="%d" height="%d" preserveAspectRatio="xMidYMid meet"'
+            ' xmlns="http://www.w3.org/2000/svg"%s>%s%s</svg>'
+            % (w, h, w, h, role, head, "".join(body)))

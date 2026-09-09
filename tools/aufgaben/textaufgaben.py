@@ -191,6 +191,8 @@ ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left
   color:var(--red);font-weight:700}
 .hint{color:var(--muted);font-size:15px;margin-top:8px}
 b{font-weight:700;color:var(--ink)}
+/* formula plus the punctuation that follows it - see the KaTeX pass in the script */
+.nowrap{white-space:nowrap}
 
 /* figures: drawn as inline SVG by tools/aufgaben/svgfig.py, never as a bitmap -
    sharp on screen and in print, and the coordinates come from the same numbers
@@ -256,6 +258,19 @@ addEventListener('load', () => {
       const span = document.createElement('span');
       try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
       catch (err) { span.textContent = part; }
+      // A formula is an inline-block, so a comma or full stop right after it can wrap
+      // onto the next line all by itself. Keep the two together (Doc, 09.09.2026).
+      const next = parts[i + 1];
+      const tail = next && /^[.,;:!?)\\]]/.test(next) ? next[0] : '';
+      if (tail) {
+        parts[i + 1] = next.slice(1);
+        const keep = document.createElement('span');
+        keep.className = 'nowrap';
+        keep.appendChild(span);
+        keep.appendChild(document.createTextNode(tail));
+        frag.appendChild(keep);
+        return;
+      }
       frag.appendChild(span);
     });
     node.parentNode.replaceChild(frag, node);
