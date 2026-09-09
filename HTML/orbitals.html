@@ -557,7 +557,6 @@
                         </div>
                     </div>
                     <div class="kff-side-btns">
-                        <button type="button" class="cyber-btn" id="toggle-rotate" style="border-color: rgba(0, 210, 255, 0.4);"><script>document.write(CyberI18n.get('orbitals.rotation'))</script></button>
                         <button type="button" class="cyber-btn" id="help-toggle" style="border-color: rgba(0, 210, 255, 0.4);"><script>document.write(CyberI18n.get('orbitals.help_btn'))</script></button>
                     </div>
                 </div>
@@ -986,7 +985,7 @@
           resolution: 180,
           specular: 32,
           opacity: 1,
-          autoRotate: true,
+          autoRotate: false,      // space bar turns it on; the old button is gone
           /** Cloud mode: |Y|² point cloud on, spherical surface hidden (toggleable). */
           showProbabilityCloud: false,
           ambientOn: true,
@@ -1380,10 +1379,9 @@
         
         function tick() {
           requestAnimationFrame(tick);
-          const dt = autoRotateClock.getDelta();
-          if (state.autoRotate && meshGroup) {
-            meshGroup.rotation.y += dt * 0.5;
-          }
+          // The idle turn is the shared one in CyberTrackball now — it orbits
+          // the camera rather than spinning the mesh, so every lab turns alike.
+          controls.autoRotate = state.autoRotate;
           controls.update();
           updateStats();
           renderer.render(scene, camera);
@@ -1483,10 +1481,6 @@
             });
           }
           syncProbCloudSwitchUi();
-        
-          document.getElementById("toggle-rotate").addEventListener("click", () => {
-            state.autoRotate = !state.autoRotate;
-          });
         
           document.getElementById("help-toggle").addEventListener("click", () => {
             const panel = document.getElementById("help-panel");

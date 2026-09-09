@@ -451,12 +451,21 @@
                 camera.lookAt(0, 0, 0);
             }
 
+            let _saveTimer = null;
             function saveState() {
-                localStorage.setItem(STORE, JSON.stringify({
-                    cam: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
-                    wire: wireMesh.visible,
-                    m: { x: M.x, y: M.y, z: M.z },
-                }));
+                // Debounced: 'change' fires on every frame the camera moves, and
+                // localStorage.setItem is synchronous. Since the trackball can
+                // spin freely after a flick, an undebounced listener would write
+                // to disk sixty times a second for as long as it keeps turning.
+                if (_saveTimer) return;
+                _saveTimer = setTimeout(() => {
+                    _saveTimer = null;
+                    localStorage.setItem(STORE, JSON.stringify({
+                        cam: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
+                        wire: wireMesh.visible,
+                        m: { x: M.x, y: M.y, z: M.z },
+                    }));
+                }, 250);
             }
 
             controls.addEventListener('change', saveState);
@@ -1157,11 +1166,17 @@
                 if (_polySaved?.target) {
                     _polyControls.target.set(_polySaved.target.x, _polySaved.target.y, _polySaved.target.z);
                 }
+                let _polySaveTimer = null;
                 _polyControls.addEventListener('change', () => {
-                    localStorage.setItem('gravitation_poly_view', JSON.stringify({
-                        cam: { x: _polyCamera.position.x, y: _polyCamera.position.y, z: _polyCamera.position.z },
-                        target: { x: _polyControls.target.x, y: _polyControls.target.y, z: _polyControls.target.z }
-                    }));
+                    // Debounced for the same reason as saveState above.
+                    if (_polySaveTimer) return;
+                    _polySaveTimer = setTimeout(() => {
+                        _polySaveTimer = null;
+                        localStorage.setItem('gravitation_poly_view', JSON.stringify({
+                            cam: { x: _polyCamera.position.x, y: _polyCamera.position.y, z: _polyCamera.position.z },
+                            target: { x: _polyControls.target.x, y: _polyControls.target.y, z: _polyControls.target.z }
+                        }));
+                    }, 250);
                 });
                 _polyScene.add(new THREE.AmbientLight(0xffffff, 0.4));
                 const dl=new THREE.DirectionalLight(0xffeedd,1.2); dl.position.set(3,5,4); _polyScene.add(dl);

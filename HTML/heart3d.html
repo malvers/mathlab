@@ -56,7 +56,8 @@
 
     <!-- Three.js & OrbitControls -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TrackballControls.js"></script>
+    <script src="js/cyber-trackball.js"></script>
         <script src="js/cyber-left-chrome.js"></script>
 <script src="js/branding/briefings.js"></script>
     <script src="js/branding/overlays.js"></script>
@@ -106,13 +107,12 @@
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             container.appendChild(renderer.domElement);
 
-            const controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
+            // The SGI trackball, shared with every other 3D lab. Damping and
+            // the idle turn come with it; autoRotateSpeed keeps its old units.
+            const controls = CyberTrackball.make(THREE.TrackballControls, camera, renderer.domElement,
+                { minDistance: 2.5, maxDistance: 10.0 });
             controls.autoRotate = true;
             controls.autoRotateSpeed = 2.0;
-            controls.minDistance = 2.5;
-            controls.maxDistance = 10.0;
 
             // 3. Raymarching Shaders
             const vertexShader = `
