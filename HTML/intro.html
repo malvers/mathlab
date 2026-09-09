@@ -1357,6 +1357,10 @@
                     items.push({ t: 'media', fast: !!e.fast });
                     continue;
                 }
+                if (e.spacer) {
+                    items.push({ t: 'text', text: '\u00A0', pt: e.fontSizePt });
+                    continue;
+                }
                 if (e.text != null && String(e.text).trim() !== '') {
                     const lab = String(e.text).trim();
                     const isDomain = /^docalvers\.[a-z]{2}$/i.test(lab);
@@ -3048,6 +3052,7 @@
          * Sound: «%sound path» — WAV/MP3/OGG/M4A (e.g. resources/kids.wav); a lone audio URL/path line counts too.
          * Image: «%picture path» or «%picturehttps://…» — local path (e.g. resources/kids.webp) or URL; WebP/JPEG/PNG/GIF/SVG.
          * Emoji: «%emoji 😎» or «%emoji😎» — behaves like a keyword (colored emoji).
+         * Spacer: «%spacer» — one empty line in the stack, as tall as a text line at the current size.
          * S (and default on load): play all sections from #1 in order — advance only after all words finished flying (or caught) and %button animations done; short pause; last section stops. ←/→ / drop cancel.
          */
         function isCwNavTargetToken(t) {
@@ -3296,6 +3301,12 @@
                     if (!isNaN(ms) && ms > 0) {
                         current.push({ kind: 'pause', ms: ms });
                     }
+                    continue;
+                }
+
+                if (/^%spacer\b/i.test(line)) {
+                    /* Empty line: an NBSP word, so it keeps the height of a text line at the current size. */
+                    current.push({ text: '\u00A0', fontSizePt: currentPt, spacer: true });
                     continue;
                 }
 
