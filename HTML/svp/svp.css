@@ -1449,6 +1449,21 @@ h1 {
     padding-top: 10px;
 }
 
+/* Doc, 09.09.2026: "gleiche Breite fix" - die drei staendig sichtbaren Knoepfe
+   der Werkzeugleiste sind gleich breit und bleiben es: ihre Beschriftungen
+   wechseln ("Wochen auf"/"Wochen zu", "Bearbeiten"/"Speichern"), und ohne feste
+   Breite ruckelte die Leiste bei jedem Klick. 120 px ist die breiteste der
+   Beschriftungen ("Wochen auf" 117.4 px, gemessen mit _measure.html).
+   Die nur im Bearbeiten-Modus sichtbaren Knoepfe (Zuruecksetzen, Verschieben,
+   Abbrechen) tragen laengere Woerter und behalten ihre Inhaltsbreite. */
+.toolbar > .export-drop > button.export-toggle,
+.toolbar > button[onclick*="togglePlanDetails"],
+.toolbar > button[onclick*="togglePlanEdit"] {
+    width: 120px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
 /* Aktionsfarbe bleibt Grün, aber dezent: flach statt Verlauf, Text in der
    normalen Schriftfarbe. Kräftig wird erst der Hover. */
 button.action {
