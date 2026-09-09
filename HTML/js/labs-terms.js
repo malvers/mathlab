@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 64 labs, 1112 terms, 2026-09-08
+ * 65 labs, 1187 terms, 2026-09-09
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -50,7 +50,7 @@ const LABS_TERMS = {
     "litchi3d": ["Form-Faktor (Y)", "Frucht-Reife", "SDF KONTROLLE", "Stachel-Intensität"],
     "logikspiel": ["Antwort", "BESTÄTIGEN", "HILFE ANFORDERN", "HILFE-PROTOKOLL", "LEVEL", "MISSIONS-STATUS", "MUL (X)", "NÄCHSTES PROTOKOLL", "PROTOKOLL GELÖST!", "PROTOKOLL NEUSTART", "PROTOKOLL-AUSWAHL", "RECHEN-MODUS", "Zahlen-Puzzle", "ZEIT", "ZÜGE"],
     "mandelbrot-deep": ["DETAILGRAD", "FRAKTAL", "FRAKTAL-PARAMETER", "FRAKTALE · MANDELBROT & JULIA", "Gitterlinien", "IMAGINÄR-TEIL (C_im)", "JULIA-MENGE", "LABOR-MODUS", "MANDELBROT", "MAX. ITERATIONEN", "NAVIGATION", "ORBIT", "REAL-TEIL (C_re)", "Rechnung anzeigen", "Stabile Punkte", "START FLIGHT", "STOP FLIGHT", "Stoppuhr", "ZOOMFAKTOR"],
-    "marionwalter": ["Abweichung", "Alle Teilflächen", "Cevianen", "Das Dreieck fasst genau", "Dreieck", "Drittelung 1/3", "exakt", "gemessen 6-Eck / Δ", "Gleichseitig", "Messung", "Nenner n", "Rechtwinklig", "Satz von Marion Walter", "Sechseck füllen", "solche Sechsecke", "Teilflächen", "Teilung der Seiten", "Teilung k/n", "Teilungspunkte", "Verallgemeinerung", "Zähler k", "Zufällig", "Δ : 6-Eck"],
+    "marionwalter": ["Abweichung", "Alle Teilflächen", "Cevianen", "Das Dreieck fasst genau", "Dreieck", "Drittelung 1/3", "exakt", "gemessen 6-Eck / Δ", "Gleichseitig", "Messung", "Nenner n", "Rechtwinklig", "Satz von Marion Walter", "SCHRITT 1 • AFFIN NORMIEREN", "SCHRITT 2 • DIE SECHS GERADEN", "SCHRITT 3 • EIN ECKPUNKT", "SCHRITT 4 • ALLE SECHS ECKEN", "SCHRITT 5 • SCHNÜRSENKELFORMEL", "SCHRITT 7 • JETZT DU", "Sechseck füllen", "solche Sechsecke", "Teilflächen", "Teilung der Seiten", "Teilung k/n", "Teilungspunkte", "Verallgemeinerung", "VORAUSSETZUNG & BEHAUPTUNG", "Zähler k", "Zufällig", "Δ : 6-Eck"],
     "multiplikation": ["Faktor 1 (Multiplikand)", "Faktor 2 (Multiplikator)", "SCHRIFTLICHE MULTIPLIKATION", "Schrittweise"],
     "neuroaddierer": ["Backpropagation", "Evolution (CMA-ES)", "LERNEN"],
     "opti-lens": ["Bedienfeld ausblenden", "CALLS", "CONTROL FLAGS", "DIMENSION", "EVOLUTION DATA", "FITNESS", "FOCUS OSCILLATE", "GENERATION", "Optimierung einer Linse · CMA-ES", "OPTIMIZE BACK", "OPTIMIZE FRONT", "PENALTY", "REFRACTION", "REFRACTION (n)", "RESET VIEWRV", "SHOW POINTS", "SIGMA", "SYMMETRY MODE", "SYSTEM CONFIG"],
@@ -67,6 +67,7 @@ const LABS_TERMS = {
     "transformationen": ["ACHSE SPIEGELN", "HL FIXIEREN", "KONGRUENT", "MESSWERTE", "NICHT KONGRUENT", "PUNKT SPIEGELN", "ROTATION", "SKALIERUNG", "Transformationen", "URBILD (START)"],
     "triangulierer": ["Auswahl löschen", "DELAUNAY TRIANGULIERUNG", "DREIECK", "FLÄCHE", "Mehrfach-Modus", "Summe Δ", "SUMME Σ", "Zielbereich"],
     "uhrzeitwinkel": ["WINKEL ZWISCHEN ZEIGERN", "Winkel α", "Winkel β", "ZEITSTEUERUNG"],
+    "vektoren": ["a ∥ b machen", "Abstand zwischen", "alles zusammen", "Anzeigen", "auf Länge L strecken", "Aufgaben", "Aufgabentyp", "Bedienung", "Betrag und Einheitsvektor", "Dreiecksart über Seitenlängen", "Ebene E", "Ebene E₁", "Ebene E₂", "Ebene und Ebene", "echt parallel", "Einheitskreis", "Einheitsvektor", "Erster Vektor", "Faktor", "Gerade g", "Gerade h", "Gerade und Ebene", "Gerade und Ebene (u und n)", "identisch", "keine zweite Gerade", "Koeffizienten", "Komponenten x und y", "Koordinatenform", "Laufparameter r", "Lesart", "Mittelpunkt einer Strecke", "Normalenvektor", "nur das halbe — Dreieck", "orthogonal machen", "Ortsvektor und Verbindungsvektor", "Ortsvektor von P", "parallel machen", "Parallelogramm und Diagonalen", "Projektion von b auf a", "Punkt X", "Punktprobe mit T", "Rechenart", "Repräsentanten", "schneidend", "Skalarmultiplikation r · a", "Spannvektoren", "Spat mit drittem Vektor c", "Spitze D", "Spurpunkte", "Subtraktion a − b", "T auf g", "T daneben", "Theorie", "Untersuchen", "Vektor a", "Vektor b", "Vektor c", "Vektor von A nach B", "windschief", "Ziel treffen", "Ziellänge", "Zielpunkt T", "Zurücksetzen", "zwei Ebenen (Normalen)", "zwei Geraden (Richtungen)", "zwei Vektoren", "Zweite Gerade h", "Zweiter Vektor"],
     "voicerecorder": ["iPad & iPhone", "Voice Recorder"],
     "winkellabor": ["NEBENWINKEL-SUMME", "PARALLELEN", "PARALLELEN: AN", "PARALLELEN: AUS", "TRANSVERSALE", "WINKEL-ANALYSE", "Winkel-Labor"],
     "winkelsumme": ["ECKEN", "INNENWINKELSUMME", "WINKEL-ANALYSE", "WINKEL-PROTOKOLL", "Winkelsumme-Labor"],

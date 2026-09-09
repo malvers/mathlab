@@ -24,6 +24,17 @@
 
 const LABS_DATA = [
     {
+        "id": "vektoren",
+        "href": "vektoren.html",
+        "title": "Vektoren",
+        "description": "Analytische Geometrie von der ersten Verschiebung bis zur Pr\u00fcfungsreife \u2014 elf Kapitel, die aufeinander aufbauen. Vorne zieht man Pfeile mit der Maus und sieht, dass derselbe Vektor \u00fcberall stehen darf; hinten dreht man Ebenen im Raum und liest Lotfu\u00dfpunkt und Abstand ab. Das Labor sagt nie an, was herauskommt: die Lagebeziehung zweier Geraden wird aus den aktuellen Zahlen gerechnet, und wer den Richtungsvektor \u00fcber den Sonderfall hinwegschiebt, sieht das Urteil von parallel auf windschief kippen. Jedes Kapitel bringt kurze Theorie, eine B\u00fchne zum Anfassen und drei bis f\u00fcnf Aufgaben mit ausklappbarem L\u00f6sungsweg \u2014 Schreibweise wie an der Tafel, mit Schr\u00e4gstrichen im Punkt und dem Ringoperator im Skalarprodukt.",
+        "tagline": "Geometrie / Vektorrechnung / 11 Kapitel",
+        "icon": LAB_ICONS["vektoren"],
+        "category": "geometrie neu highlight hot grade11 grade12 uni",
+        "keywords": "vektor vektoren vektorrechnung analytische geometrie ortsvektor verbindungsvektor repraesentant pfeilklasse betrag laenge einheitsvektor normieren linearkombination linear abhaengig unabhaengig basis gerade parameterform stuetzvektor richtungsvektor punktprobe lagebeziehung windschief parallel identisch schnittpunkt ebene normalenform koordinatenform parameterform spurpunkte normalenvektor skalarprodukt orthogonal senkrecht winkel kreuzprodukt vektorprodukt spatprodukt komplanar flaecheninhalt parallelogramm dreieck abstand lot lotfusspunkt hesse spiegelung mittelpunkt diagonalenschnittpunkt pyramide volumen oberstufe abitur leistungskurs",
+        "color": "gold"
+    },
+    {
         "id": "marionwalter",
         "href": "marionwalter.html",
         "title": "Satz von Marion Walter",

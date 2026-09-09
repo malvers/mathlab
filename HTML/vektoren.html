@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Vektoren</title>
+    <meta name="description" content="Analytische Geometrie von Grund auf: Ortsvektoren, Rechnen, Betrag, Linearkombination, Geraden, Ebenen, Lagebeziehungen, Skalar- und Kreuzprodukt, Abstände und Anwendungen — elf Kapitel zum Ziehen, Schieben und Nachrechnen.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="js/cyber-tabbar.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        /* ---- stage: visualisation left, theory + exercises right ---- */
+        #tab-stage { display: flex; align-items: stretch; min-height: 0; }
+        #v-stage { flex: 1 1 auto; position: relative; min-width: 0; }
+        #v-canvas-wrap { position: absolute; inset: 0; }
+        #v-canvas-wrap canvas { display: block; }
+        #v-3d { position: absolute; inset: 0; }
+        #v-3d canvas { width: 100% !important; height: 100% !important; }
+
+        /* floating live-values panel over the stage */
+        #v-hud {
+            position: absolute; top: 12px; left: 12px; z-index: 5;
+            max-width: min(46%, 360px); max-height: calc(100% - 24px);
+            overflow-y: auto; scrollbar-width: none; pointer-events: none;
+        }
+        #v-hud::-webkit-scrollbar { display: none; }
+        #v-hud .v-hud-box {
+            background: rgba(7, 17, 31, 0.82); border: 0.5px solid rgba(2, 100, 123, 0.9);
+            border-radius: 10px; padding: 10px 13px; backdrop-filter: blur(3px);
+        }
+        #v-hud .katex { font-size: 1.02em; }
+        .v-hud-row { display: flex; justify-content: space-between; gap: 14px; align-items: baseline; padding: 2px 0; }
+        .v-hud-lab { font-family: 'Orbitron', sans-serif; font-size: 0.56rem; letter-spacing: 1px; color: #8fa3bd; }
+        .v-hud-val { font-family: Arial, Helvetica, sans-serif; font-size: 0.95rem; font-weight: 600; color: #fff; }
+        .v-hud-note { font-family: Arial, Helvetica, sans-serif; font-size: 0.82rem; color: #a9b4c6; margin-top: 6px; line-height: 1.35; }
+
+        /* hint strip under the stage: says what can be dragged */
+        #v-tip {
+            position: absolute; left: 12px; bottom: 10px; z-index: 5; pointer-events: none;
+            font-family: 'Orbitron', sans-serif; font-size: 0.6rem; letter-spacing: 1.1px;
+            color: rgba(255, 255, 255, 0.42);
+        }
+
+        /* ---- documentation column ---- */
+        #v-doc {
+            flex: 0 0 400px; width: 400px; overflow-y: auto; padding: 14px 14px 40px;
+            background: #060e1c; border-left: 1px solid rgba(255, 255, 255, 0.08);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        #v-doc::-webkit-scrollbar { width: 9px; }
+        #v-doc::-webkit-scrollbar-track { background: #060e1c; }
+        #v-doc::-webkit-scrollbar-thumb { background: rgba(2, 100, 123, 0.75); border-radius: 5px; }
+        #v-doc { scrollbar-width: thin; scrollbar-color: rgba(2, 100, 123, 0.75) #060e1c; }
+        .v-doc-tab { display: none; }
+        .v-doc-tab.active { display: block; }
+        .v-plan {
+            font-family: 'Orbitron', sans-serif; font-size: 0.55rem; letter-spacing: 1.5px;
+            color: #6d8199; margin: 0 2px 10px; display: flex; align-items: center; gap: 7px;
+        }
+        .v-plan::before {
+            content: ''; width: 6px; height: 6px; border-radius: 50%;
+            background: #40506a; flex: 0 0 auto;
+        }
+        .v-plan-test { color: rgb(245, 194, 66); }
+        .v-plan-test::before { background: rgb(245, 194, 66); box-shadow: 0 0 7px rgba(245, 194, 66, 0.6); }
+        .v-doc-card {
+            background: rgba(10, 21, 38, 0.9); border: 0.5px solid rgba(2, 100, 123, 0.65);
+            border-radius: 12px; padding: 13px 15px 15px; margin-bottom: 14px;
+        }
+        .v-doc-card > h3 {
+            font-family: 'Orbitron', sans-serif; font-size: 0.62rem; letter-spacing: 2px;
+            color: rgb(245, 194, 66); margin: 0 0 10px; font-weight: 700;
+        }
+        .v-doc-card.v-tasks > h3 { color: rgb(121, 158, 49); }
+        .v-doc-body { color: #cfd8e6; font-size: 0.88rem; line-height: 1.55; }
+        .v-doc-body p { margin: 0 0 9px; }
+        .v-doc-body p:last-child { margin-bottom: 0; }
+        .v-doc-body b, .v-doc-body strong { color: #fff; font-weight: 600; }
+        .v-doc-body ul { margin: 0 0 9px; padding-left: 18px; }
+        .v-doc-body li { margin-bottom: 4px; }
+        .v-doc-body .katex { font-size: 1.03em; }
+        /* a wide formula must scroll inside its own box — the column must never scroll sideways */
+        .v-doc-body .katex-display, .v-task-body .katex-display, #v-hud .katex-display {
+            margin: 10px 0; overflow-x: auto; overflow-y: hidden; padding-bottom: 4px;
+            scrollbar-width: thin; scrollbar-color: rgba(2, 100, 123, 0.7) transparent;
+        }
+        .v-doc-body .katex-display::-webkit-scrollbar,
+        .v-task-body .katex-display::-webkit-scrollbar { height: 6px; }
+        .v-doc-body .katex-display::-webkit-scrollbar-thumb,
+        .v-task-body .katex-display::-webkit-scrollbar-thumb { background: rgba(2, 100, 123, 0.7); border-radius: 3px; }
+        /* inline maths inside running text may wrap rather than push the column open */
+        .v-doc-body, .v-task-body { overflow-wrap: anywhere; }
+        .v-doc-body .katex, .v-task-body .katex { white-space: normal; }
+        .v-key {
+            border-left: 2.5px solid rgb(245, 194, 66); background: rgba(245, 194, 66, 0.07);
+            padding: 8px 11px; margin: 10px 0; border-radius: 0 7px 7px 0;
+        }
+        .v-key .katex-display { margin: 4px 0; }
+        .v-aha {
+            border-left: 2.5px solid rgb(121, 158, 49); background: rgba(121, 158, 49, 0.08);
+            padding: 8px 11px; margin: 10px 0; border-radius: 0 7px 7px 0; color: #dbe6d2;
+        }
+        .v-warn {
+            border-left: 2.5px solid rgb(176, 36, 24); background: rgba(176, 36, 24, 0.1);
+            padding: 8px 11px; margin: 10px 0; border-radius: 0 7px 7px 0; color: #f0d6d2;
+        }
+
+        /* ---- exercises ---- */
+        .v-task { border-top: 1px solid rgba(255, 255, 255, 0.08); padding: 11px 0 4px; }
+        .v-task:first-child { border-top: none; padding-top: 2px; }
+        .v-task-head { display: flex; gap: 9px; align-items: flex-start; }
+        .v-task-no {
+            flex: 0 0 auto; width: 21px; height: 21px; border-radius: 50%;
+            background: rgba(121, 158, 49, 0.22); border: 1px solid rgba(121, 158, 49, 0.8);
+            color: rgb(160, 200, 90); font-family: 'Orbitron', sans-serif; font-size: 0.62rem;
+            display: flex; align-items: center; justify-content: center; margin-top: 1px;
+        }
+        .v-task-q { color: #cfd8e6; font-size: 0.87rem; line-height: 1.5; }
+        .v-task-q .katex { font-size: 1.02em; }
+        .v-task-btn {
+            margin: 8px 6px 0 30px; padding: 4px 11px; border-radius: 6px; cursor: pointer;
+            background: rgba(2, 100, 123, 0.18); border: 0.5px solid rgba(2, 100, 123, 0.9);
+            color: #7fd8ee; font-family: 'Orbitron', sans-serif; font-size: 0.54rem; letter-spacing: 1px;
+            transition: background 0.15s, color 0.15s;
+        }
+        .v-task-btn:hover { background: rgba(2, 100, 123, 0.38); color: #fff; }
+        .v-task-btn.open { background: rgba(245, 194, 66, 0.16); border-color: rgba(245, 194, 66, 0.8); color: rgb(245, 194, 66); }
+        .v-task-btn.v-hint { background: rgba(245, 194, 66, 0.1); border-color: rgba(245, 194, 66, 0.5); color: rgb(226, 186, 100); }
+        .v-task-body {
+            display: none; margin: 9px 0 4px 30px; padding: 10px 12px; border-radius: 8px;
+            background: rgba(255, 255, 255, 0.035); border-left: 2px solid rgba(2, 100, 123, 0.9);
+            color: #c3cddc; font-size: 0.85rem; line-height: 1.55;
+        }
+        .v-task-body.v-hint-body { border-left-color: rgba(245, 194, 66, 0.8); }
+        .v-task-body.open { display: block; }
+        .v-task-body p { margin: 0 0 7px; }
+        .v-task-body p:last-child { margin-bottom: 0; }
+        .v-task-body .katex-display { margin: 8px 0; }
+        .v-step { color: rgb(245, 194, 66); font-family: 'Orbitron', sans-serif; font-size: 0.55rem; letter-spacing: 1.2px; display: block; margin: 9px 0 3px; }
+        .v-step:first-child { margin-top: 0; }
+        .v-res { color: rgb(160, 200, 90); font-weight: 600; }
+
+        /* ---- sidebar ---- */
+        .v-tab { display: none; }
+        .v-tab.active { display: block; }
+        .v-tab .cyber-control-group { margin-top: 7px !important; margin-bottom: 0 !important; }
+        .v-tab .cyber-control-group input[type="range"] { min-height: 20px !important; padding: 4px 0 !important; }
+        .v-note { font-size: 0.82rem; color: #a9b4c6; line-height: 1.4; font-family: Arial, Helvetica, sans-serif; width: 0; min-width: 100%; box-sizing: border-box; }
+        .v-btnrow { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 4px; }
+        .v-mini {
+            padding: 5px 11px; border-radius: 6px; cursor: pointer; flex: 1 1 auto;
+            background: rgba(2, 100, 123, 0.18); border: 0.5px solid rgba(2, 100, 123, 0.9);
+            color: #7fd8ee; font-family: 'Orbitron', sans-serif; font-size: 0.54rem; letter-spacing: 1px;
+        }
+        .v-mini:hover { background: rgba(2, 100, 123, 0.4); color: #fff; }
+
+        /* the chapter counter next to the tab strip */
+        #v-progress {
+            flex: 0 0 auto; align-self: center; margin: 0 20px 0 12px;
+            width: 0; overflow: hidden;
+        }
+        #tab-bar .tab-btn { padding: 11px 10px; font-size: 0.6rem; letter-spacing: 0.8px; }
+        #tab-bar .tab-btn .v-no { color: rgba(245, 194, 66, 0.55); margin-right: 5px; }
+        #tab-bar .tab-btn.active .v-no { color: rgb(245, 194, 66); }
+
+        /* ---- responsive: stack the documentation under the stage ---- */
+        @media (max-width: 1180px) { #v-doc { flex-basis: 330px; width: 330px; } }
+        @media (max-width: 900px) {
+            #tab-stage { flex-direction: column; overflow-y: auto; }
+            #v-stage { flex: 0 0 auto; height: auto; }
+            /* stop floating the values over a small drawing — stack them underneath instead */
+            #v-canvas-wrap, #v-3d { position: relative; inset: auto; height: min(52vh, 420px); }
+            #v-hud {
+                position: static; max-width: none; max-height: none; overflow: visible;
+                margin: 10px 12px 0; pointer-events: auto;
+            }
+            #v-tip { position: static; margin: 8px 12px 2px; }
+            #v-doc { flex: 1 1 auto; width: auto; border-left: none; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+        }
+        @media (max-width: 560px) {
+            #v-canvas-wrap, #v-3d { height: min(46vh, 340px); }
+            /* #v-progress stays: it is the spacer that keeps tabs out from under the branding */
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content" class="has-tabbar">
+        <div id="tab-strip">
+            <div id="tab-bar"></div>
+            <div id="v-progress"></div>
+        </div>
+        <div id="tab-stage">
+            <div id="v-stage">
+                <div id="v-canvas-wrap">
+                    <div class="cyber-grid"></div>
+                    <canvas id="canvas"></canvas>
+                </div>
+                <div id="v-3d" hidden></div>
+                <div id="v-hud"></div>
+                <div id="v-tip"></div>
+            </div>
+            <aside id="v-doc"></aside>
+        </div>
+    </main>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+    </script>
+    <script type="module">
+        import * as THREE_MOD from "three";
+        import { TrackballControls } from "three/addons/controls/TrackballControls.js";
+        window.THREE = { ...THREE_MOD, TrackballControls };
+        window.dispatchEvent(new Event('three-ready'));
+    </script>
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+    <script src="js/vektoren-core.js"></script>
+    <script src="js/vektoren-geom.js"></script>
+    <script src="js/vektoren-mod-grundlagen.js"></script>
+    <script src="js/vektoren-mod-geraden.js"></script>
+    <script src="js/vektoren-mod-produkte.js"></script>
+    <script src="js/vektoren-mod-abstand.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Vektoren',
+        });
+        // This lab is meant to be worked through, tablet included — the documentation
+        // column stacks under the stage below 900px. So: opt out of the default
+        // 980x620 banner (documented in ui.js) and warn only on a genuinely tiny screen.
+        CyberUI.init({ screenWarning: false });
+        CyberUI.ensureScreenWarning({
+            minWidth: 380, minHeight: 480,
+            message: 'Für die Vektoren-Labore ist der Bildschirm sehr klein — quer halten hilft.',
+        });
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+        // on a narrow screen the stage needs the room more than the controls do
+        if (window.innerWidth < 900) document.getElementById('side-panel').classList.add('collapsed');
+
+        // ------------------------------------------------------------------
+        // Chapter list — the order a learner works through, 1 to 11
+        // ------------------------------------------------------------------
+        // `plan` links a chapter to the seven-stage learning plan and to the test tasks
+        const CHAPTERS = [
+            { id: 'grundlagen', tab: 'Begriff', dim: 2, plan: 'Etappe 1 + 3 · Testaufgabe 3b', test: true },
+            { id: 'rechnen', tab: 'Rechnen', dim: 2, plan: 'Etappe 2 · Testaufgabe 1', test: true },
+            { id: 'betrag', tab: 'Betrag', dim: 2, plan: 'Etappe 4 · Testaufgabe 3a', test: true },
+            { id: 'linkomb', tab: 'Lin.-Komb.', dim: 2, plan: 'Vertiefung — nicht im Test' },
+            { id: 'geraden', tab: 'Geraden', dim: 3, plan: 'Etappe 7 · Testaufgabe 4a/b', test: true },
+            { id: 'ebenen', tab: 'Ebenen', dim: 3, plan: 'Über den Test hinaus — LK' },
+            { id: 'lage', tab: 'Lage', dim: 3, plan: 'Über den Test hinaus — LK' },
+            { id: 'skalar', tab: 'Skalar', dim: 3, plan: 'Etappe 5 · Testaufgabe 2', test: true },
+            { id: 'kreuz', tab: 'Kreuz', dim: 3, plan: 'Über den Test hinaus — LK' },
+            { id: 'abstand', tab: 'Abstände', dim: 3, plan: 'Über den Test hinaus — LK' },
+            { id: 'anwendung', tab: 'Anwendung', dim: 3, plan: 'Über den Test hinaus — LK' },
+        ];
+
+        // ------------------------------------------------------------------
+        // Shell: build tab bar, sidebar slots and documentation slots
+        // ------------------------------------------------------------------
+        const bar = document.getElementById('tab-bar');
+        const sb = document.getElementById('ui-container');
+        const doc = document.getElementById('v-doc');
+        CHAPTERS.forEach((ch, i) => {
+            const b = document.createElement('button');
+            b.className = 'tab-btn';
+            b.dataset.tab = ch.id;
+            b.innerHTML = `<span class="v-no">${i + 1}</span>${ch.tab.toUpperCase()}`;
+            bar.appendChild(b);
+
+            const s = document.createElement('div');
+            s.className = 'v-tab';
+            s.id = 'sb-' + ch.id;
+            sb.appendChild(s);
+
+            const d = document.createElement('div');
+            d.className = 'v-doc-tab';
+            d.id = 'doc-' + ch.id;
+            d.innerHTML =
+                `<div class="v-plan${ch.test ? ' v-plan-test' : ''}">${ch.plan}</div>` +
+                `<div class="v-doc-card"><h3>Theorie</h3><div class="v-doc-body" id="doc-theory-${ch.id}"></div></div>` +
+                `<div class="v-doc-card v-tasks"><h3>Aufgaben</h3><div class="v-doc-body" id="doc-tasks-${ch.id}"></div></div>`;
+            doc.appendChild(d);
+        });
+
+        // ------------------------------------------------------------------
+        // Stages — one 2D canvas and one 3D scene, shared by every chapter
+        // ------------------------------------------------------------------
+        const stage2 = new VekLab.Stage2D(document.getElementById('canvas'));
+        const stage3 = new VekLab.Stage3D(document.getElementById('v-3d'));
+        const wrap2 = document.getElementById('v-canvas-wrap');
+        const host3 = document.getElementById('v-3d');
+        const hud = document.getElementById('v-hud');
+        const tip = document.getElementById('v-tip');
+
+        let current = null;   // active chapter id
+        let chapterNo = 1;    // 1-based, shown in the hint line under the stage
+        const built = {};     // chapters whose build() has already run
+
+        /** The API a chapter module gets handed. */
+        function contextFor(id) {
+            return {
+                id,
+                sidebar: 'sb-' + id,
+                stage2, stage3,
+                /** Fill the floating value panel over the stage. */
+                hud(html) { if (current === id) queueHud(html); },
+                /** One line of grey text at the bottom left of the stage. */
+                tip(t) { if (current === id) tip.textContent = `KAPITEL ${chapterNo} / ${CHAPTERS.length}` + (t ? '  ·  ' + t : ''); },
+                theory: html => VekLab.theory(id, html),
+                tasks: list => VekLab.tasks(id, list),
+                redraw: () => { if (current === id) renderStage(); },
+            };
+        }
+
+        // KaTeX is expensive — collapse HUD updates from a drag into one per frame
+        let hudPending = null, hudRaf = 0;
+        function queueHud(html) {
+            hudPending = html;
+            if (hudRaf) return;
+            hudRaf = requestAnimationFrame(() => {
+                hudRaf = 0;
+                hud.innerHTML = hudPending ? `<div class="v-hud-box">${hudPending}</div>` : '';
+                VekLab.renderMath(hud);
+            });
+        }
+
+        function renderStage() {
+            const ch = CHAPTERS.find(c => c.id === current);
+            if (!ch) return;
+            if (ch.dim === 3) stage3.render(); else stage2.render();
+        }
+
+        function switchTab(id) {
+            const ch = CHAPTERS.find(c => c.id === id);
+            if (!ch) return;
+            current = id;
+            document.querySelectorAll('#tab-bar .tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+            document.querySelectorAll('#ui-container .v-tab').forEach(d => d.classList.toggle('active', d.id === 'sb-' + id));
+            document.querySelectorAll('#v-doc .v-doc-tab').forEach(d => d.classList.toggle('active', d.id === 'doc-' + id));
+            chapterNo = CHAPTERS.indexOf(ch) + 1;
+            doc.scrollTop = 0;
+            hud.innerHTML = '';
+            tip.textContent = `KAPITEL ${CHAPTERS.indexOf(ch) + 1} / ${CHAPTERS.length}`;
+
+            wrap2.hidden = ch.dim === 3;
+            host3.hidden = ch.dim !== 3;
+
+            const mod = VekLab.modules[id];
+            if (mod) {
+                const ctx = contextFor(id);
+                if (!built[id]) { mod.build(ctx); built[id] = true; }
+                stage2.clearHandles();
+                stage2.draw = null;
+                stage3.draw = null;
+                if (ch.dim === 3) stage3.onReady(() => { stage3.draw = s => mod.draw(s, ctx); stage3.resize(); if (mod.onShow) mod.onShow(ctx); renderStage(); });
+                else { stage2.draw = s => mod.draw(s, ctx); stage2.onChange = () => { if (mod.onDrag) mod.onDrag(ctx); }; if (mod.onShow) mod.onShow(ctx); }
+            }
+            requestAnimationFrame(() => { resizeAll(); renderStage(); layoutStrip(); });
+            const u = new URL(location.href);
+            u.searchParams.set('tab', id);
+            history.replaceState(null, '', u);
+        }
+        bar.addEventListener('click', e => {
+            const b = e.target.closest('.tab-btn');
+            if (b) switchTab(b.dataset.tab);
+        });
+
+        /** Keep the tab strip clear of the branding overlay, whose width is not fixed. */
+        function layoutStrip() {
+            const strip = document.getElementById('tab-strip');
+            const brand = document.getElementById('branding-master-title') || document.querySelector('[id^="branding"]');
+            if (!strip) return;
+            let gap = 20;
+            if (brand) {
+                const sr = strip.getBoundingClientRect(), br = brand.getBoundingClientRect();
+                if (br.width) gap = Math.max(20, Math.round(sr.right - br.left + 14));
+            }
+            document.getElementById('v-progress').style.marginRight = gap + 'px';
+            const act = document.querySelector('#tab-bar .tab-btn.active');
+            if (act) act.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        }
+        window.addEventListener('load', layoutStrip);
+        document.fonts.ready.then(layoutStrip);
+        setTimeout(layoutStrip, 1200);
+
+        function resizeAll() {
+            stage2.resize();
+            if (stage3.ready) stage3.resize();
+        }
+        window.addEventListener('resize', () => { resizeAll(); renderStage(); layoutStrip(); });
+
+        // deep link ?tab=geraden
+        const q = new URLSearchParams(location.search);
+        const start = CHAPTERS.some(c => c.id === q.get('tab')) ? q.get('tab') : 'grundlagen';
+        window.addEventListener('katex-ready', () => { document.querySelectorAll('#v-doc, #v-hud').forEach(el => VekLab.renderMath(el)); });
+        switchTab(start);
+
+        // keyboard: chapter forward / back (but never swallow Cmd-Shift-R)
+        document.addEventListener('keydown', e => {
+            if (e.metaKey || e.ctrlKey || e.altKey) return;
+            if (/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) return;
+            const i = CHAPTERS.findIndex(c => c.id === current);
+            if (e.key === 'ArrowRight' && i < CHAPTERS.length - 1) switchTab(CHAPTERS[i + 1].id);
+            if (e.key === 'ArrowLeft' && i > 0) switchTab(CHAPTERS[i - 1].id);
+        });
+    </script>
+</body>
+
+</html>
