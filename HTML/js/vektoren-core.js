@@ -492,10 +492,12 @@
             this.renderer.domElement.style.display = 'block';
 
             this.controls = new T.TrackballControls(this.camera, this.renderer.domElement);
-            this.controls.rotateSpeed = 3.0;
-            this.controls.zoomSpeed = 1.2;
-            this.controls.panSpeed = 0.8;
-            this.controls.staticMoving = true;
+            // same feel as koerper.html / orbitals.html — do not retune per lab
+            this.controls.rotateSpeed = 1.3;
+            this.controls.zoomSpeed = 1.05;
+            this.controls.panSpeed = 0.32;
+            this.controls.staticMoving = false;
+            this.controls.dynamicDampingFactor = 0.14;
 
             this.scene.add(new T.AmbientLight(0xffffff, 0.85));
             const dl = new T.DirectionalLight(0xffffff, 0.6);
