@@ -34,8 +34,6 @@
                 <h1>Stundenplan</h1>
                 <div class="subtitle caps" id="sub">&nbsp;</div>
             </div>
-            <!-- opened in a new tab from the svp menu, so browser-back has nowhere to go -->
-            <button class="action secondary" id="back" type="button" title="Zur SVP-Übersicht">Zur Übersicht</button>
         </div>
     </header>
 
@@ -68,8 +66,11 @@
                  kommt mit `node tools/webuntis.js year --alle` zurueck.
             <button class="action" id="optbtn" type="button" title="Stundenplan optimieren (Simulated Annealing)">Editieren</button>
             -->
+            <!-- Veroeffentlichen-Knopf ausgeblendet (Doc, 10.09.2026). Nicht loeschen -
+                 zum Reaktivieren einkommentieren; der Handler unten prueft, ob es ihn gibt.
             <button class="action secondary" id="pubbtn" type="button"
                 title="Meine eigenen Stunden für die Schülerinnen und Schüler veröffentlichen (meinplan.html)">Veröffentlichen</button>
+            -->
         </div>
 
         <section class="tt-opt" id="opt" hidden>
@@ -1582,7 +1583,6 @@
         document.getElementById('prev').addEventListener('click', () => step(-1));
         document.getElementById('next').addEventListener('click', () => step(1));
         document.getElementById('today').addEventListener('click', () => showWeek(weekForToday()));
-        document.getElementById('back').addEventListener('click', () => { location.href = './'; });
         document.addEventListener('keydown', e => {
             if (e.target.tagName === 'INPUT') return;
             if (e.key === 'ArrowLeft') step(-1);
@@ -1721,6 +1721,8 @@
                     + 'Erst das Schuljahr holen:<br><code>node tools/webuntis.js year</code></div>';
             });
     </script>
+    <!-- shared nav band on top, like every other svp page (Doc, 10.09.2026) -->
+    <script src="svp-nav.js"></script>
 
 </body>
 

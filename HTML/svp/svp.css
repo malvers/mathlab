@@ -309,7 +309,12 @@ nav.quick-nav .badge { text-decoration: none; line-height: 14px; }
 .nav-band {
     background: var(--panel);
     border-bottom: 1px solid var(--line);
-    margin: calc(-1 * clamp(12px, 3vw, 40px)) calc(-1 * clamp(12px, 3vw, 40px)) 20px;
+    /* Pulls the band over the body padding so it runs edge to edge. A page
+       with its own body padding sets --band-pull-top / --band-pull-x to the
+       same values (stundenplan.css does, Doc 10.09.2026) - otherwise the band
+       overhangs and the page scrolls sideways. */
+    margin: calc(-1 * var(--band-pull-top, clamp(12px, 3vw, 40px)))
+            calc(-1 * var(--band-pull-x, clamp(12px, 3vw, 40px))) 20px;
     /* Doc, 09.09.2026: "y zentriert zwischen den Linien", danach "2px runter" -
        unter dem Jahres-Kasten stand die Pillenreihe erst 12 px hoch und 17 px
        tief (gemessen mit _measure.html), mittig waeren 14.5/14.5. Sie steht
