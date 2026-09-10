@@ -751,10 +751,67 @@ async function pushUntisCache() {
   await saveUntis(rows);
 }
 
+// Publish Doc's own lessons for the students (meinplan.html): exactly the rows the
+// "Veröffentlichen" button in stundenplan.html writes, now also at the end of every `year` run
+// (Doc, 10.09.2026: "automatisch frueh und abends") - so the 06:00/12:30 LaunchAgent and the
+// 18:00 app keep the students' page fresh without a click. Reads what `year` just wrote into
+// plandaten/; only the lessons of index.teacher leave the machine, slimmed like the button's
+// slim(). Keep both in step. Never throws - a failed upload must not take the rest of the run down.
+const PUBLIC_TEACHER = 'Dr. Michael R. Alvers';   // Untis says "Alvers, Michael" - the students' page carries the full name (Doc)
+async function publishPlan(dir = path.join(REPO, 'HTML', 'svp', 'plandaten')) {
+  try {
+    const index = JSON.parse(fs.readFileSync(path.join(dir, 'index.json'), 'utf8'));
+    if (!index.teacher) throw new Error('index.json ohne teacher');
+    // WebUntis has no rooms for the Fachoberschule courses; raeume.json fills that gap, Untis wins.
+    let rooms = {};
+    try { rooms = JSON.parse(fs.readFileSync(path.join(REPO, 'HTML', 'svp', 'raeume.json'), 'utf8')).byClass || {}; } catch (e) { /* optional */ }
+    const fallbackRoom = l => {
+      for (const c of l.classes || []) {
+        const hit = rooms[c + '|' + l.subject] || rooms[c];
+        if (hit) return [hit];
+      }
+      return [];
+    };
+    const slim = l => ({
+      date: l.date, startTime: l.startTime, endTime: l.endTime,
+      subject: l.subject, classes: l.classes || [],
+      rooms: (l.rooms && l.rooms.length) ? l.rooms : fallbackRoom(l),
+      code: l.code || null, info: l.info || null,
+      substText: l.substText || null, lstext: l.lstext || null,
+    });
+    const rows = index.weeks.map(wk => {
+      const d = JSON.parse(fs.readFileSync(path.join(dir, `w${wk}.json`), 'utf8'));
+      return { week: String(wk), payload: {
+        week: wk, teacher: PUBLIC_TEACHER, school: index.school, generatedAt: index.generatedAt,
+        timegrid: d.timegrid,
+        lessons: d.lessons.filter(l => (l.teachers || []).includes(index.teacher)).map(slim),
+      } };
+    });
+    const tag = '$p' + crypto.randomBytes(6).toString('hex') + '$';
+    let written = 0;
+    for (let i = 0; i < rows.length; i += 10) {   // ten weeks per statement keeps each request small
+      const values = rows.slice(i, i + 10).map(r => {
+        const json = JSON.stringify(r.payload);
+        if (json.includes(tag)) throw new Error('dollar-quote tag collision');
+        return `('${r.week.replace(/'/g, "''")}', ${tag}${json}${tag}::jsonb, now())`;
+      });
+      const back = await supaQuery('insert into public.svp_public_plan (week, payload, updated_at) values ' + values.join(', ') +
+        ' on conflict (week) do update set payload = excluded.payload, updated_at = excluded.updated_at returning week');
+      written += back.length;
+    }
+    const lessons = rows.reduce((s, r) => s + r.payload.lessons.length, 0);
+    console.log(`Supabase svp_public_plan: ${written}/${rows.length} Wochen, ${lessons} Stunden veroeffentlicht (meinplan.html)`);
+  } catch (e) {
+    console.error(`Supabase svp_public_plan NICHT geschrieben (${e.message}) - nachholen mit: node tools/webuntis.js publish`);
+  }
+}
+
 async function main() {
   const cmd = process.argv[2] || 'whoami';
   // Needs no WebUntis login: resends the local status cache to Supabase.
   if (cmd === 'untis-push') { await pushUntisCache(); return; }
+  // Needs no WebUntis login either: publishes the students' plan from the local plandaten/.
+  if (cmd === 'publish') { await publishPlan(); return; }
   const cred = loadCred();
   const session = await login(cred);
 
@@ -958,6 +1015,8 @@ async function main() {
 
     const mb = weeks.reduce((s, w) => s + fs.statSync(path.join(outDir, `w${w}.json`)).size, 0) / 1048576;
     console.log(`${total} Stunden, ${weeks.length} Wochen, ${Object.keys(teachers).length} Lehrkräfte -> ${outDir} (${mb.toFixed(1)} MB)`);
+    // Keep the students' page (meinplan.html) in step with every fetch - morning job and evening app.
+    await publishPlan(outDir);
     return;
   }
   if (cmd === 'names') {
