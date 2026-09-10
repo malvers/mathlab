@@ -37,7 +37,6 @@
         <div class="head-row">
             <div class="title-group">
                 <h1 id="who">Mein Stundenplan</h1>
-                <div class="subtitle caps" id="sub">&nbsp;</div>
             </div>
         </div>
     </header>
@@ -125,10 +124,8 @@
             const lessons = (payload.lessons || []).slice()
                 .sort((a, b) => a.date - b.date || a.startTime - b.startTime);
 
+            /* just the name, nothing beneath it (Doc, 10.09.2026: "das Wort Stundenplan weg") */
             $('who').textContent = payload.teacher || 'Mein Stundenplan';
-            /* The heading carries the name, the line below says what this is -
-               the school name was the one thing nobody here needs to be told. */
-            $('sub').textContent = 'Stundenplan';
 
             const byDay = new Map();
             for (const l of lessons) {
