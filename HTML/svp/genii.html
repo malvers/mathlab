@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vorführklasse GENII | Stoffverteilungspläne</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+    <link rel="stylesheet" href="svp.css">
+    <script src="svp-gate.js"></script>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht</a>
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Vorf&uuml;hrklasse GENII</h1>
+            </div>
+        </div>
+        <div class="subtitle">Leistungstest mit Zettel-Codes &middot; 24 Wissenschaftler als Klasse &middot;
+            eigener Datenpool</div>
+    </header>
+
+    <!-- Launch pad for demonstrating the Leistungstest (DSB appointment, Doc
+         10.09.2026): the three stations in the order they are shown. -->
+    <section class="svp-section">
+        <h2 class="section-title">Vorf&uuml;hrung in drei Schritten</h2>
+        <div class="card-grid">
+            <!-- Security architecture first: encryption and GDPR before the demo -->
+            <a class="link-card c-grey" href="genii-prolog.html">
+                <div class="card-title">0 &middot; Sicherheitsarchitektur</div>
+                <div class="card-sub">Architektur zwischen Sch&uuml;ler, Datenbank und Dozentenrechner</div>
+                <div class="card-desc">Warum AES-256 &middot; warum DSGVO-konform &middot; was wo liegt &middot;
+                    schulintern hosten</div>
+            </a>
+            <a class="link-card c-cyan" href="leistungstest.html?test" target="_blank" rel="noopener">
+                <div class="card-title">1 &middot; Zettel</div>
+                <div class="card-sub">Decknamen, Codes und QR f&uuml;r die ganze Klasse</div>
+                <div class="card-desc">Zuordnungsliste nur auf diesem Rechner und nur in diesem Browser &middot;
+                    Klarnamen versiegelt, sichtbar nur nach nochmaliger Passworteingabe</div>
+            </a>
+            <a class="link-card c-violet" id="geniiTest" href="../infotestfos12.html?klasse=GENII"
+               target="_blank" rel="noopener">
+                <div class="card-title">2 &middot; Test</div>
+                <div class="card-sub">So sieht es der Sch&uuml;ler nach dem QR-Scan</div>
+                <div class="card-desc" id="geniiCode">noch ohne Code &middot; erst Zettel erzeugen (Schritt 1),
+                    dann steht hier ein Code aus der Liste</div>
+            </a>
+            <a class="link-card c-red" href="../infotestfos12.html?klasse=GENII&amp;auswertung"
+               target="_blank" rel="noopener">
+                <div class="card-title">3 &middot; Auswertung</div>
+                <div class="card-sub">Live-Ergebnisse der Gruppe GENII</div>
+                <div class="card-desc">nur mit Passwort &middot; Einzelscores unter Pseudonym &middot;
+                    Gruppenleistung pro Frage</div>
+            </a>
+        </div>
+    </section>
+
+    <footer class="page-foot">
+        Klarnamen verlassen diesen Browser nie &middot; auf dem Server liegen nur Code und Punkte
+    </footer>
+    <script>
+        /* Step 2 opens the test the way a pupil sees it after scanning: with a
+           code from the GENII sheet kept in this browser (leistungstest.html
+           stores aliases and codes in clear, only the names are sealed). A
+           random one each time - the server takes one submission per code, so
+           repeated demos do not all run into the same used-up slip. */
+        (function () {
+            var card = document.getElementById('geniiTest');
+            var note = document.getElementById('geniiCode');
+            var rec = null;
+            try { rec = JSON.parse(localStorage.getItem('svp-leistungstest-v1') || '{}').GENII; } catch (e) { }
+            var ids = (rec && rec.ids) || [];
+            if (!ids.length) return;
+            var id = ids[Math.floor(Math.random() * ids.length)];
+            card.href = '../infotestfos12.html?klasse=GENII&code=' + encodeURIComponent(id.code);
+            note.textContent = 'mit dem Zettel ' + id.alias + ' \u00b7 ' + id.code +
+                ' \u00b7 bei jedem Laden ein anderer aus der Liste';
+        })();
+    </script>
+    <script src="svp-nav.js"></script>
+</body>
+
+</html>

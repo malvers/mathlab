@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sicherheitsarchitektur · Vorführklasse GENII | Stoffverteilungspläne</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+    <link rel="stylesheet" href="svp.css">
+    <script src="svp-gate.js"></script>
+    <script src="qrcode.min.js"></script>
+    <style>
+        /* Page-only pieces: the architecture diagram, the "what lives where"
+           table and the argument lists. Cards, header, footer and section
+           titles come from svp.css like on genii.html. */
+        /* A wider column than the landing pages (Doc, 10.09.2026: "alles etwas
+           breiter") - the diagram needs the room. Same central variable. */
+        :root { --card-col: 1040px; }
+        .pro-arch {
+            --arrow: 92px;
+            --gap: 6px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+        }
+        .pro-node {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 12px 12px 10px;
+            background: var(--card-soft);
+            min-width: 0;
+        }
+        .pro-node h3 {
+            margin: 0 0 2px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+        .pro-node .pro-where { font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; }
+        .pro-node ul { margin: 0; padding-left: 16px; font-size: 0.9rem; line-height: 1.4; }
+        .pro-node li { margin: 2px 0; }
+        .pro-teacher { border-color: rgba(245, 194, 66, 0.55); background: rgba(245, 194, 66, 0.1); }
+        .pro-teacher h3, .pro-teacher li::marker { color: var(--lambda); }
+        .pro-server { border-color: rgba(90, 190, 230, 0.5); background: rgba(90, 190, 230, 0.1); }
+        .pro-server h3, .pro-server li::marker { color: var(--cyan); }
+        .pro-pupil { border-color: rgba(121, 158, 49, 0.6); background: rgba(121, 158, 49, 0.1); }
+        .pro-pupil h3, .pro-pupil li::marker { color: var(--phi); }
+
+        /* Arrows carry data towards the teacher: pupil -> server -> teacher.
+           Narrow: stacked, the arrow points up. Wide: in a row, it points left. */
+        .pro-arrow {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 2px 0 2px 22px;
+            font-size: 0.84rem;
+            color: var(--muted);
+        }
+        .pro-arrow .pro-shaft {
+            position: relative;
+            flex: none;
+            width: 2px;
+            height: 30px;
+            background: var(--text);
+            opacity: 0.55;
+        }
+        .pro-arrow .pro-shaft::before {
+            content: '';
+            position: absolute;
+            left: -5px;
+            top: -2px;
+            border: 6px solid transparent;
+            border-top: 0;
+            border-bottom: 9px solid var(--text);
+        }
+        .pro-arrow b { display: block; color: var(--text); font-weight: 600; }
+
+        /* The paper slip never touches the server. Narrow: the sample slip
+           sits in a dashed box below the stack; wide: a U runs round the
+           server and the slip hangs below it (media block further down). */
+        .pro-paper { display: none; }
+        .pro-slipwrap {
+            margin-top: 8px;
+            border: 2px dashed rgba(245, 194, 66, 0.6);
+            border-radius: 10px;
+            padding: 10px 12px 14px;
+            text-align: center;
+        }
+        .pro-slip-label { font-size: 0.9rem; margin-bottom: 8px; }
+        .pro-slip-label b { color: var(--lambda); }
+        /* Sample slip in the look of leistungstest.html's .lt-slip */
+        .pro-slip {
+            display: inline-grid;
+            grid-template-columns: auto auto;
+            gap: 12px;
+            align-items: center;
+            max-width: 100%;
+            padding: 12px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: var(--card);
+            text-align: left;
+        }
+        .pro-slip .s-name { font-size: 0.9rem; opacity: 0.75; margin-bottom: 2px; }
+        .pro-slip .s-alias { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.05rem; letter-spacing: 0.04em; }
+        .pro-slip .s-code { font-family: 'Orbitron', sans-serif; font-size: 1.35rem; letter-spacing: 0.14em; color: var(--lambda); margin-top: 2px; }
+        .pro-slip .s-note { max-width: 180px; font-size: 0.72rem; opacity: 0.8; margin-top: 6px; line-height: 1.4; }
+        .pro-slip .s-qr { width: 88px; height: 88px; }
+        .pro-slip .s-qr svg { width: 100%; height: 100%; display: block; }
+
+        @media (min-width: 700px) {
+            .pro-arch {
+                grid-template-columns: 1fr var(--arrow) 1fr var(--arrow) 1fr;
+                column-gap: var(--gap);
+                row-gap: 0;
+                /* boxes equally tall (Doc), arrows stay centred between them */
+                align-items: stretch;
+            }
+            .pro-arrow {
+                flex-direction: column;
+                align-self: center;
+                gap: 6px;
+                padding: 0;
+                text-align: center;
+            }
+            .pro-arrow .pro-shaft { width: 100%; height: 2px; }
+            .pro-arrow .pro-shaft::before {
+                left: -2px;
+                top: -5px;
+                border: 6px solid transparent;
+                border-left: 0;
+                border-right: 9px solid var(--text);
+            }
+            /* A U from under the teacher to under the pupil, round the
+               server: the end points sit at the centres of the outer nodes. */
+            .pro-paper {
+                grid-column: 1 / -1;
+                position: relative;
+                height: 26px;
+                margin: 0 calc((100% - 2 * var(--arrow) - 4 * var(--gap)) / 6);
+                padding: 0;
+                display: block;
+                border: 2px dashed rgba(245, 194, 66, 0.6);
+                border-top: 0;
+                border-radius: 0 0 12px 12px;
+            }
+            .pro-paper::after {
+                content: '';
+                position: absolute;
+                right: -8px;
+                top: -3px;
+                border: 7px solid transparent;
+                border-top: 0;
+                border-bottom: 10px solid rgba(245, 194, 66, 0.9);
+            }
+            .pro-slipwrap {
+                grid-column: 1 / -1;
+                margin-top: 8px;
+                border: 0;
+                padding: 0;
+            }
+        }
+
+        /* Ablauf step by step (Doc, 10.09.2026): at first only the Dozent's
+           machine, then keys or a click bring in pupil, slip, server, the
+           right arrow, the left arrow and last the key sentence. */
+        .pro-stage [data-step] { transition: opacity 0.35s ease; }
+        .pro-stage [data-step].is-dim { opacity: 0.25; }
+        .pro-stage:not(.is-done) .pro-arch { cursor: pointer; }
+        /* Two triangles centred in the "Ablauf" title row: back / next */
+        .pro-stage { position: relative; }
+        .pro-nav {
+            position: absolute;
+            top: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 14px;
+        }
+        .pro-nav button {
+            width: 28px;
+            height: 24px;
+            padding: 0;
+            border: 0;
+            background: none;
+            color: var(--muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pro-nav button::before { content: ''; border: 7px solid transparent; }
+        #proPrev::before { border-left: 0; border-right: 11px solid currentColor; }
+        #proNext::before { border-right: 0; border-left: 11px solid currentColor; }
+        .pro-nav button:hover:not(:disabled) { color: var(--lambda); }
+        .pro-nav button:disabled { opacity: 0.3; cursor: default; }
+
+        /* All section titles of this page in bold (Doc, 10.09.2026) - the
+           landing pages keep svp.css's regular weight */
+        .card-grid .svp-section .section-title { font-weight: 700; }
+
+        /* Tag right behind the h1 */
+        .pro-kt {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.78rem;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            padding-bottom: 6px;
+        }
+
+        .pro-key {
+            margin: 18px 0 0;
+            padding: 12px 16px;
+            border-left: 4px solid var(--ypsilon);
+            background: rgba(176, 36, 24, 0.12);
+            border-radius: 0 10px 10px 0;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.86rem;
+            letter-spacing: 0.03em;
+            line-height: 1.5;
+        }
+
+        .pro-scroll { overflow-x: auto; }
+        .pro-tab { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.92rem; }
+        .pro-tab th, .pro-tab td {
+            padding: 7px 10px;
+            border-bottom: 1px solid var(--row-line);
+            text-align: left;
+            vertical-align: top;
+        }
+        .pro-tab thead th {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 400;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+        .pro-tab tbody th { font-weight: 600; }
+        /* svp.css gives every table min-width 760px (the plan tables). This one
+           is small and must fit the 720px column and a 390px phone - measured,
+           the 760px pushed the whole page sideways. */
+        .pro-tab { min-width: 0; }
+        .pro-tab tbody th, .pro-tab td { white-space: normal; }
+        /* svp.css centres sections with margin auto, and auto margins stop a
+           grid item from stretching: the table section shrank to 650px. */
+        .card-grid > .svp-section { min-width: 0; width: 100%; }
+        /* Phone: all four columns stay in view instead of scrolling sideways */
+        @media (max-width: 520px) {
+            .pro-tab { font-size: 0.8rem; }
+            .pro-tab th, .pro-tab td { padding: 6px 5px; }
+            .pro-tab thead th { font-size: 0.56rem; letter-spacing: 0.02em; white-space: normal; }
+        }
+        .pro-tab .no { color: rgb(235, 120, 105); }
+        html.svp-light .pro-tab .no { color: var(--ypsilon); }
+        .pro-tab .yes { color: var(--phi); }
+
+        .pro-list { margin: 0; padding-left: 20px; font-size: 1rem; line-height: 1.5; }
+        .pro-list li { margin: 0 0 10px; }
+        .pro-list li::marker { color: var(--lambda); }
+        .pro-list b { color: var(--head); }
+        .pro-note { margin: 4px 0 0; font-size: 0.92rem; color: var(--muted); line-height: 1.5; }
+        /* The one sentence that matters most in the encryption section */
+        /* indented to the text of the list above (same 20px as .pro-list) */
+        .pro-alert { margin: 6px 0 0 20px; font-size: 1.12rem; font-weight: 600; line-height: 1.45; color: rgb(235, 120, 105); }
+        html.svp-light .pro-alert { color: var(--ypsilon); }
+        /* same red for a single line, e.g. in the Dozentenrechner box */
+        .pro-red { color: rgb(235, 120, 105); }
+        html.svp-light .pro-red { color: var(--ypsilon); }
+
+        /* Footnote marks and the list that spells the abbreviations out. A
+           hyphenated term stays in one piece with its mark - the browser
+           broke "PBKDF2-SHA-" / "256" (Doc, 10.09.2026). */
+        .pro-term { white-space: nowrap; }
+        .pro-fn { font-size: 0.68em; line-height: 0; margin-left: 1px; }
+        /* blue like the bullets on the plan pages, never underlined (Doc) */
+        .pro-fn a, .pro-fn a:hover { color: rgb(150, 186, 236); text-decoration: none; }
+        html.svp-light .pro-fn a, html.svp-light .pro-fn a:hover { color: rgb(30, 60, 120); }
+        .pro-fns { margin: 0; padding-left: 26px; font-size: 0.86rem; line-height: 1.5; color: var(--muted); }
+        .pro-fns li { margin: 0 0 3px; }
+        .pro-fns li::marker { color: rgb(150, 186, 236); }
+        html.svp-light .pro-fns li::marker { color: rgb(30, 60, 120); }
+        .pro-fns li:target { color: var(--text); }
+    </style>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="genii.html">&larr; GENII</a>
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Sicherheitsarchitektur</h1>
+                <span class="pro-kt">identisch zum Kompetenztest Sachsen</span>
+            </div>
+        </div>
+        <div class="subtitle">Ablauf &middot; Verschl&uuml;sselung &middot; DSGVO &middot; schulintern hosten</div>
+    </header>
+
+    <!-- The card-grid wrapper puts the page on the same centred column as
+         genii.html: svp.css keys header, sections and footer on
+         body:has(.card-grid). -->
+    <div class="card-grid">
+    <!-- Opening talk for the Leistungstest demo (DSB appointment 16.09.2026):
+         who holds what, and why names and results only meet on the teacher's
+         machine. Every claim here mirrors svp-crypto.js, quiz-engine.js and the
+         column grants on quiz_submissions (checked 10.09.2026). -->
+    <section class="svp-section pro-stage" id="proAblauf">
+        <h2 class="section-title">Ablauf</h2>
+        <div class="pro-nav">
+            <button type="button" id="proPrev" aria-label="Schritt zur&uuml;ck" title="zur&uuml;ck (&larr;)"></button>
+            <button type="button" id="proNext" aria-label="n&auml;chster Schritt" title="weiter (&rarr;)"></button>
+        </div>
+        <div class="pro-arch">
+            <div class="pro-node pro-teacher">
+                <h3>Dozentenrechner</h3>
+                <div class="pro-where">Browser des Dozenten &middot; Festplatte verschl&uuml;sselt (<span class="pro-term">FileVault<sup class="pro-fn"><a href="#fn1">1</a></sup></span>)</div>
+                <ul>
+                    <li>Klarnamen und Zuordnung Name&nbsp;&harr;&nbsp;Code</li>
+                    <li>versiegelt, &ouml;ffnen nur mit Passwort</li>
+                    <li class="pro-red" data-step="6">Name + Ergebnis nur hier</li>
+                </ul>
+            </div>
+            <div class="pro-arrow" data-step="5">
+                <div class="pro-shaft"></div>
+                <div><b>Punkte je Code</b>nur f&uuml;r diesen Code</div>
+            </div>
+            <div class="pro-node pro-server" data-step="3">
+                <h3>Datenbank</h3>
+                <div class="pro-where">Supabase &middot; EU &middot; Stockholm (eu-north-1)</div>
+                <ul>
+                    <li>nur Code, Antworten, Punkte</li>
+                    <li>kein Name, kein Konto, keine Mail</li>
+                    <li>Code und Antworten &ouml;ffentlich nicht lesbar</li>
+                </ul>
+            </div>
+            <div class="pro-arrow" data-step="4">
+                <div class="pro-shaft"></div>
+                <div><b>Code + Antworten</b>per HTTPS</div>
+            </div>
+            <div class="pro-node pro-pupil" data-step="1">
+                <h3>Sch&uuml;ler</h3>
+                <div class="pro-where">eigenes Handy &middot; ohne Konto, ohne App</div>
+                <ul>
+                    <li>scannt den QR-Code vom Zettel</li>
+                    <li>kennt nur Deckname und Code</li>
+                    <li>sieht sein eigenes Ergebnis</li>
+                </ul>
+            </div>
+            <div class="pro-paper" data-step="2"></div>
+            <!-- Sample slip, same content as a real one from leistungstest.html;
+                 the code K7WP is made up (GENII demo pool) -->
+            <div class="pro-slipwrap" data-step="2">
+                <div class="pro-slip-label"><b>Zettel auf Papier</b> &middot; am Server vorbei</div>
+                <div class="pro-slip">
+                    <div>
+                        <div class="s-name">Musterschüler</div>
+                        <div class="s-alias">BERYLL</div>
+                        <div class="s-code">K7WP</div>
+                        <div class="s-note">QR scannen, Code eintragen, Test bearbeiten. Deinen Namen nirgends
+                            eingeben.</div>
+                    </div>
+                    <div class="s-qr" id="proSlipQr"></div>
+                </div>
+            </div>
+        </div>
+        <p class="pro-key" data-step="7">Die Klarnamen verlassen den Dozentenrechner nie.<br>
+            Der Server kennt nur Codes &mdash; wem ein Code geh&ouml;rt, steht allein auf dem Dozentenrechner.</p>
+    </section>
+
+    <section class="svp-section">
+        <h2 class="section-title">Was liegt wo</h2>
+        <div class="pro-scroll">
+            <table class="pro-tab">
+                <thead>
+                    <tr><th></th><th>Dozenten&shy;rechner</th><th>Datenbank</th><th>Sch&uuml;ler</th></tr>
+                </thead>
+                <tbody>
+                    <tr><th>Klarname</th><td class="yes">versiegelt</td><td class="no">nie</td><td>&mdash;</td></tr>
+                    <tr><th>Zuordnung Name&nbsp;&harr;&nbsp;Code</th><td class="yes">versiegelt</td><td class="no">nie</td><td>eigener Zettel</td></tr>
+                    <tr><th>Zettel-Code</th><td>ja</td><td>ja, &ouml;ffentlich nicht lesbar</td><td>eigener Zettel</td></tr>
+                    <tr><th>Antworten</th><td>&mdash;</td><td>ja, &ouml;ffentlich nicht lesbar</td><td>beim Test</td></tr>
+                    <tr><th>Punkte</th><td>je Code abrufbar</td><td>ja, ohne Code</td><td>eigenes Ergebnis</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="svp-section">
+        <h2 class="section-title">Verschl&uuml;sselungstechnologie</h2>
+        <ul class="pro-list">
+            <li><b>AES-256.</b> Jeder Klarname wird mit <span class="pro-term">AES-256-GCM<sup class="pro-fn"><a href="#fn2">2</a></sup></span> versiegelt &mdash; dem Verfahren, das die
+                NSA<sup class="pro-fn"><a href="#fn3">3</a></sup> f&uuml;r Verschlusssachen bis TOP SECRET zul&auml;sst (CNSSP&nbsp;15<sup class="pro-fn"><a href="#fn4">4</a></sup>) und das BSI<sup class="pro-fn"><a href="#fn5">5</a></sup>
+                empfiehlt (<span class="pro-term">TR-02102-1<sup class="pro-fn"><a href="#fn6">6</a></sup></span>).</li>
+            <li><b>Schl&uuml;sselpaar statt Passwort.</b> Ein &ouml;ffentlicher Schl&uuml;ssel versiegelt,
+                nur der private &ouml;ffnet (ECIES<sup class="pro-fn"><a href="#fn7">7</a></sup>, Kurve <span class="pro-term">P-256<sup class="pro-fn"><a href="#fn8">8</a></sup></span>). Jeder Name bekommt einen eigenen
+                Einmalschl&uuml;ssel.</li>
+            <li><b>Der private Schl&uuml;ssel liegt nie offen.</b> Er ist mit der Passphrase verpackt
+                (<span class="pro-term">PBKDF2-SHA-256<sup class="pro-fn"><a href="#fn9">9</a></sup></span>, 250&#8239;000 Runden) und wird nur im offenen Tab entpackt &mdash;
+                Tab zu, Namen zu.</li>
+            <li><b>Auch unterwegs und auf dem Server.</b> Transport per TLS<sup class="pro-fn"><a href="#fn10">10</a></sup>, die Datenbank ist ruhend
+                mit AES-256 verschl&uuml;sselt.</li>
+            <li><b>Schl&uuml;ssell&auml;nge.</b> Ein Schl&uuml;ssel mit n Bit hat 2<sup>n</sup> M&ouml;glichkeiten, jedes
+                Bit mehr verdoppelt den Aufwand. Unsere Schl&uuml;ssel sind 256 Bit lang: rund 10<sup>77</sup>
+                M&ouml;glichkeiten, fast so viele wie Atome im Universum. Die ganze Kette erreicht 128 Bit Sicherheit
+                (<span class="pro-term">Kurve P-256</span>) &mdash; selbst bei einer Trillion Versuchen pro Sekunde
+                dauert das Durchprobieren hunderte Male l&auml;nger, als das Universum alt ist. Geknackt wurde AES seit
+                seiner Standardisierung 2001 noch nie, die Kurve P-256 ebenso wenig.</li>
+        </ul>
+        <p class="pro-alert">Wichtiger als die Schl&uuml;ssell&auml;nge: Die Namen gehen gar nicht erst zum Server.
+            Was dort nicht liegt, kann dort auch nicht verloren gehen!</p>
+    </section>
+
+    <section class="svp-section">
+        <h2 class="section-title">Das System ist DSGVO-konform</h2>
+        <ul class="pro-list">
+            <li><b>Pseudonymisierung</b> nach Art.&nbsp;4 Nr.&nbsp;5 DSGVO<sup class="pro-fn"><a href="#fn11">11</a></sup>: Die Zusatzinformation &mdash; die
+                Zuordnungsliste &mdash; liegt getrennt, nur auf dem Dozentenrechner und versiegelt.</li>
+            <li><b>Datenminimierung</b> nach Art.&nbsp;5 Abs.&nbsp;1 lit.&nbsp;c DSGVO: Der Server bekommt nur
+                Code, Antworten und Punkte. Kein Name, kein Konto, keine E-Mail.</li>
+            <li><b>Technische Ma&szlig;nahmen</b> nach Art.&nbsp;32 Abs.&nbsp;1 lit.&nbsp;a DSGVO:
+                Verschl&uuml;sselung und Pseudonymisierung, dazu Spaltenrechte in der Datenbank &mdash;
+                Code und Antworten sind von au&szlig;en nicht abrufbar.</li>
+            <li><b>Speicherort EU</b>: Supabase-Rechenzentrum in Stockholm (AWS eu-north-1<sup class="pro-fn"><a href="#fn12">12</a></sup>).</li>
+            <li><b>Rechtsgrundlage</b> der Leistungserhebung: &sect;&nbsp;63a S&auml;chsSchulG<sup class="pro-fn"><a href="#fn13">13</a></sup>
+                i.&nbsp;V.&nbsp;m. der DSGVO und der VwV<sup class="pro-fn"><a href="#fn14">14</a></sup> Schuldatenschutz.</li>
+        </ul>
+    </section>
+
+    <!-- Fallback only, not a plan (Doc via forloop-c7, 10.09.2026). Facts
+         from the official self-hosting guide; the effort is an estimate. -->
+    <section class="svp-section">
+        <h2 class="section-title">Schulintern hosten: Supabase auf dem Schulserver</h2>
+        <p class="pro-note" style="margin: 0 0 10px">R&uuml;ckfalloption, kein Vorhaben: Supabase ist Open Source
+            (MIT, Apache&nbsp;2, PostgreSQL) und l&auml;uft offiziell selbst gehostet per Docker Compose.</p>
+        <ul class="pro-list">
+            <li><b>Dieselbe Software.</b> Postgres, Anmeldung, Datenbank-API, Realtime, Storage, Edge Functions
+                und Dashboard. Die Seiten bleiben, getauscht werden nur Server-Adresse und Schl&uuml;ssel.</li>
+            <li><b>Daten an der Schule.</b> Physisch im Haus und unter eigener Kontrolle.</li>
+            <li><b>Ein kleiner Linux-Server.</b> Mindestens 4&nbsp;GB RAM, 2 Kerne, 40&nbsp;GB SSD
+                (empfohlen 8&nbsp;GB, 4 Kerne, 80&nbsp;GB).</li>
+            <li><b>Voraussetzung Schul-IT.</b> Erreichbar per HTTPS unter eigener Domain, dazu der Betrieb:
+                Updates, Backups, &Uuml;berwachung und ein Mailserver f&uuml;r die Anmelde-Mails.</li>
+            <li><b>Aufwand (Sch&auml;tzung).</b> Einrichten etwa ein halber Tag, Umzug der Daten ein bis zwei Tage.</li>
+        </ul>
+        <p class="pro-note">Quelle: <a href="https://supabase.com/docs/guides/self-hosting/docker" target="_blank"
+                rel="noopener">supabase.com/docs/guides/self-hosting/docker</a></p>
+    </section>
+
+    <!-- The abbreviations spelled out (Doc, 10.09.2026: footnotes instead of
+         names in the running text) -->
+    <section class="svp-section">
+        <h2 class="section-title">Fu&szlig;noten</h2>
+        <ol class="pro-fns">
+            <li id="fn1">FileVault &ndash; die in macOS eingebaute Verschl&uuml;sselung der ganzen Festplatte (XTS-AES-128
+                mit 256-Bit-Schl&uuml;ssel). Ohne Anmeldepasswort oder Wiederherstellungsschl&uuml;ssel ist ein
+                verlorener oder gestohlener Rechner nicht lesbar. Der Wiederherstellungsschl&uuml;ssel liegt nur beim
+                Dozenten, nicht in der iCloud.</li>
+            <li id="fn2">AES-256-GCM &ndash; Advanced Encryption Standard mit 256-Bit-Schl&uuml;ssel im Galois/Counter Mode</li>
+            <li id="fn3">NSA &ndash; National Security Agency, Nachrichtendienst der USA</li>
+            <li id="fn4">CNSSP&nbsp;15 &ndash; Committee on National Security Systems Policy No.&nbsp;15 (USA)</li>
+            <li id="fn5">BSI &ndash; Bundesamt f&uuml;r Sicherheit in der Informationstechnik</li>
+            <li id="fn6">TR-02102-1 &ndash; Technische Richtlinie des BSI &bdquo;Kryptographische Verfahren: Empfehlungen
+                und Schl&uuml;ssell&auml;ngen&ldquo;</li>
+            <li id="fn7">ECIES &ndash; Elliptic Curve Integrated Encryption Scheme</li>
+            <li id="fn8">P-256 &ndash; elliptische Kurve nach dem Standard des NIST (National Institute of Standards and
+                Technology, USA)</li>
+            <li id="fn9">PBKDF2-SHA-256 &ndash; Password-Based Key Derivation Function&nbsp;2 mit dem Secure Hash
+                Algorithm (256&nbsp;Bit)</li>
+            <li id="fn10">TLS &ndash; Transport Layer Security</li>
+            <li id="fn11">DSGVO &ndash; Datenschutz-Grundverordnung, Verordnung (EU) 2016/679</li>
+            <li id="fn12">AWS &ndash; Amazon Web Services; eu-north-1 ist deren Region Stockholm</li>
+            <li id="fn13">S&auml;chsSchulG &ndash; Schulgesetz f&uuml;r den Freistaat Sachsen</li>
+            <li id="fn14">VwV &ndash; Verwaltungsvorschrift</li>
+        </ol>
+    </section>
+    </div>
+
+    <footer class="page-foot">
+        Klarnamen verlassen diesen Browser nie &middot; auf dem Server liegen nur Code und Punkte
+    </footer>
+    <script>
+        /* Ablauf step by step: → / Space / PageDown or a click on the diagram
+           = next, ← / PageUp / Shift+Space = back. A key is only taken while
+           there is a step to go, so once everything shows the page scrolls
+           as usual. Without JS everything is visible. */
+        (function () {
+            var stage = document.getElementById('proAblauf');
+            var prev = document.getElementById('proPrev');
+            var next = document.getElementById('proNext');
+            var els = [].slice.call(stage.querySelectorAll('[data-step]'));
+            var max = Math.max.apply(null, els.map(function (e) { return +e.dataset.step; }));
+            var step = 0;
+            function paint() {
+                els.forEach(function (e) { e.classList.toggle('is-dim', +e.dataset.step > step); });
+                stage.classList.toggle('is-done', step >= max);
+                prev.disabled = step <= 0;
+                next.disabled = step >= max;
+            }
+            function go(d) {
+                var n = Math.min(max, Math.max(0, step + d));
+                if (n === step) return false;
+                step = n;
+                paint();
+                return true;
+            }
+            document.addEventListener('keydown', function (e) {
+                if (e.metaKey || e.ctrlKey || e.altKey || e.defaultPrevented) return;
+                var t = e.target;
+                if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+                /* a focused button keeps Space/Enter for itself, arrows still step */
+                if (t && t.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return;
+                var d = { ArrowRight: 1, PageDown: 1, ' ': 1, ArrowLeft: -1, PageUp: -1 }[e.key];
+                if (e.key === ' ' && e.shiftKey) d = -1;
+                if (d && go(d)) e.preventDefault();
+            });
+            stage.querySelector('.pro-arch').addEventListener('click', function () { go(1); });
+            prev.addEventListener('click', function () { go(-1); });
+            next.addEventListener('click', function () { go(1); });
+            /* a mouse click takes no focus (no focus ring left standing),
+               Tab still reaches the buttons */
+            [prev, next].forEach(function (btn) {
+                btn.addEventListener('mousedown', function (e) { e.preventDefault(); });
+            });
+
+            /* Sample slip: a real, scannable QR like on leistungstest.html,
+               pointing at the GENII demo pool with the made-up code */
+            var qrBox = document.getElementById('proSlipQr');
+            if (typeof qrcode !== 'undefined') {
+                var qr = qrcode(0, 'M');
+                qr.addData('https://docalvers.de/infotestfos12.html?klasse=GENII&code=K7WP');
+                qr.make();
+                qrBox.innerHTML = qr.createSvgTag({ scalable: true });
+            }
+            paint();
+        })();
+    </script>
+    <script src="svp-nav.js"></script>
+</body>
+
+</html>
