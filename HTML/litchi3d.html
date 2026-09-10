@@ -113,7 +113,7 @@
             // the idle turn come with it; autoRotateSpeed keeps its old units.
             const controls = CyberTrackball.make(THREE.TrackballControls, camera, renderer.domElement,
                 { minDistance: 2.5, maxDistance: 10.0 });
-            controls.autoRotate = true;
+            controls.autoRotate = false;   // no idle turn - the fruit only moves when dragged
             controls.autoRotateSpeed = 1.2;
 
             // 3. Procedural Shader logic
@@ -216,11 +216,32 @@
                     vec3 colRed = vec3(0.8, 0.05, 0.1);
                     vec3 colPink = vec3(1.0, 0.1, 0.4);
                     vec3 baseColor = mix(colRed, colPink, (p.y + 1.2) * 0.4) * u_Reife;
-                    vec3 lightDir = normalize(vec3(1.5, 2.5, 2.0));
-                    float diff = max(dot(n, lightDir), 0.15);
-                    float spec = pow(max(dot(reflect(-lightDir, n), -rd), 0.0), 24.0) * 0.4;
+                    // Three-point studio rig carried by the camera, so no side is ever
+                    // left in the dark. Same rig as heart3d; the camera basis comes
+                    // straight out of the matrix the raymarcher already uses.
+                    vec3 camRight = normalize((cameraWorldMatrix * vec4(1.0, 0.0, 0.0, 0.0)).xyz);
+                    vec3 camUp    = normalize((cameraWorldMatrix * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
+                    vec3 camBack  = normalize((cameraWorldMatrix * vec4(0.0, 0.0, 1.0, 0.0)).xyz);
+
+                    vec3 keyDir  = normalize(camBack * 0.9 + camRight * 0.6 + camUp * 0.7);
+                    vec3 fillDir = normalize(camBack * 0.5 - camRight * 0.8 - camUp * 0.1);
+                    vec3 backDir = normalize(-camBack * 0.8 + camUp * 0.5);
+                    // A touch of world-fixed top light keeps the turn from looking flat.
+                    vec3 topDir  = normalize(vec3(0.2, 1.0, 0.3));
+
+                    float key  = max(dot(n, keyDir), 0.0);
+                    float fill = max(dot(n, fillDir), 0.0);
+                    float back = max(dot(n, backDir), 0.0);
+                    float top  = max(dot(n, topDir), 0.0);
+                    // Weaker fill than heart3d: this albedo is already saturated red and
+                    // washes out - the peak has to stay near the old diffuse maximum of 1.0,
+                    // while the far side comes up from 0.15 to about 0.34.
+                    float lit = key * 0.85 + fill * 0.22 + back * 0.10 + top * 0.08 + 0.12;
+
+                    float spec = pow(max(dot(reflect(-keyDir, n), -rd), 0.0), 24.0) * 0.4;
+                    spec += pow(max(dot(reflect(-fillDir, n), -rd), 0.0), 24.0) * 0.15;
                     float fresnel = pow(1.0 - max(dot(n, -rd), 0.0), 3.0) * 0.3;
-                    vec3 finalColor = baseColor * diff + spec + fresnel * vec3(1.0, 0.6, 0.6);
+                    vec3 finalColor = baseColor * lit + spec + fresnel * vec3(1.0, 0.6, 0.6);
                     gl_FragColor = vec4(finalColor, 1.0);
                 }
             `;
@@ -247,14 +268,20 @@
             function updateEquation() {
                 const bumps = raymarchMaterial.uniforms.u_Bumps.value.toFixed(3);
                 const shape = raymarchMaterial.uniforms.u_Shape.value.toFixed(2);
-                const tex = `d(p) = \\sqrt{x^2 + (y/{\\color{#ff3333}${shape}})^2 + z^2} - 1.0 - ({\\color{#ff8800}${bumps}} \\cdot \\text{spikes})`;
+                // Same colours as the sliders - straight from the central layout.
+                const cRed = CyberFormula.color('--neon-red');
+                const cOrange = CyberFormula.color('--neon-orange');
+                const tex = `d(p) = \\sqrt{x^2 + (y/{\\color{${cRed}}${shape}})^2 + z^2} - 1.0 - ({\\color{${cOrange}}${bumps}} \\cdot \\text{spikes})`;
                 CyberFormula.set(tex);
             }
 
             function animate() {
                 requestAnimationFrame(animate);
                 controls.update();
-                raymarchMaterial.uniforms.u_time.value = performance.now() / 1000;
+                // The halves no longer orbit each other - that orbit turned the whole
+                // pair about the vertical axis and read as an idle turn. u_time stays
+                // at 0, the halves sit side by side; the fruit only moves when dragged.
+                // raymarchMaterial.uniforms.u_time.value = performance.now() / 1000;
                 raymarchMaterial.uniforms.cameraWorldMatrix.value.copy(camera.matrixWorld);
                 raymarchMaterial.uniforms.cameraProjectionMatrixInverse.value.copy(camera.projectionMatrixInverse);
                 renderer.render(scene, camera);
