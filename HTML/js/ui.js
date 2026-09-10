@@ -782,33 +782,6 @@ class CyberUI {
                 to { opacity: 1; transform: translateY(0); }
             }
 
-            /* --- HIGH-FIDELITY NUMBER WIDGETS --- */
-            .cyber-number-widget {
-                display: inline-flex;
-                gap: 2px;
-                align-items: center;
-                justify-content: flex-start;
-                min-height: 32px;
-            }
-
-            .cyber-digit-box {
-                width: 20px;
-                height: 32px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-family: 'Orbitron', sans-serif;
-                font-size: 1.4rem;
-                font-weight: bold;
-                color: var(--neon-blue);
-                text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
-                transition: all 0.1s ease;
-            }
-
-            .cyber-digit-box.separator {
-                width: 10px;
-                opacity: 0.6;
-            }
 
             /* --- DROPDOWN PANEL FIX --- */
             .dropdown-panel {
@@ -1973,55 +1946,6 @@ class CyberUI {
         });
     }
 
-    /**
-     * Updates a high-fidelity Cyber-Number-Widget with stable digit alignment.
-     * @param {string} containerId - Target container ID
-     * @param {number} value - Numeric value
-     * @param {number} decimals - Precision
-     * @param {number} minDigits - Integer padding
-     * @param {object|null} styleConfig - Optional per-widget overrides
-     */
-    static updateNumberWidget(containerId, value, decimals = 2, minDigits = 1, styleConfig = null) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-
-        let str;
-        if (typeof value === 'number' && styleConfig?.thousandsSep) {
-            str = Math.floor(value).toLocaleString('de-DE'); // z.B. 45.000
-        } else {
-            str = (typeof value === 'number') ? value.toFixed(decimals) : String(value);
-        }
-        const parts = str.split('.');
-        if (!styleConfig?.thousandsSep) {
-            while (parts[0].replace(/\./g, '').length < minDigits) parts[0] = ' ' + parts[0];
-            str = parts.join('.');
-        }
-
-        let html = '';
-        for (let char of str) {
-            if (char === '.' || char === ',' || char === '-' || char === ':') {
-                html += `<div class="cyber-digit-box separator">${char}</div>`;
-            } else if (char === ' ') {
-                html += `<div class="cyber-digit-box" style="opacity:0;">0</div>`;
-            } else {
-                html += `<div class="cyber-digit-box">${char}</div>`;
-            }
-        }
-        container.innerHTML = html;
-
-        // Optional style overrides for a single widget instance (backward-compatible).
-        if (styleConfig && typeof styleConfig === 'object') {
-            const digits = container.querySelectorAll('.cyber-digit-box');
-            for (const el of digits) {
-                if (styleConfig.fontSize) el.style.fontSize = styleConfig.fontSize;
-                if (styleConfig.digitWidth && !el.classList.contains('separator')) el.style.width = styleConfig.digitWidth;
-                if (styleConfig.digitHeight && !el.classList.contains('separator')) el.style.height = styleConfig.digitHeight;
-                if (styleConfig.separatorWidth && el.classList.contains('separator')) el.style.width = styleConfig.separatorWidth;
-                if (styleConfig.color) el.style.color = styleConfig.color;
-                if (styleConfig.textShadow) el.style.textShadow = styleConfig.textShadow;
-            }
-        }
-    }
 }
 
 /** Programmatic invoke like keyboard shortcut (e.g. from labs). */

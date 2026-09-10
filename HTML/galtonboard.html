@@ -27,6 +27,7 @@
     <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-clock.css">
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <style>
@@ -88,18 +89,6 @@
         #balls-counter-widget {
             justify-content: flex-start !important;
             align-self: flex-start;
-        }
-
-        #balls-counter-widget .cyber-digit-box {
-            color: #ffb866;
-            text-shadow: 0 0 10px rgba(255, 170, 95, 0.55);
-            font-size: 2.8rem;
-            width: 32px;
-            height: 48px;
-        }
-
-        #balls-counter-widget .cyber-digit-box.separator {
-            width: 10px;
         }
 
         /* Restore previous local slider styling */
@@ -181,7 +170,7 @@
     <main id="main-content">
         <div id="balls-counter">
             <div id="balls-counter-label"></div>
-            <div id="balls-counter-widget" class="cyber-number-widget"></div>
+            <div id="balls-counter-widget" class="cyber-digits"></div>
         </div>
         <div id="board-wrap"><canvas id="board"></canvas></div>
     </main>
@@ -193,6 +182,7 @@
     <script src="js/branding/nav.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js?v=539"></script>
+    <script src="js/cyber-clock.js"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById("side-panel");
@@ -723,14 +713,14 @@
                     sim.balls = sim.balls.filter((b) => !b.dead);
                 }
                 draw();
-                CyberUI.updateNumberWidget("balls-counter-widget", sim.droppedCount, 0, 3, {
-                    fontSize: "3.2rem",
+                CyberClock.digits("balls-counter-widget", sim.droppedCount, { minDigits: 3, style: {
+                    size: "3.2rem",
                     digitWidth: "36px",
-                    digitHeight: "54px",
-                    separatorWidth: "12px",
+                    height: "54px",
+                    sepWidth: "12px",
                     color: "#ffb866",
-                    textShadow: "0 0 10px rgba(255, 170, 95, 0.55)"
-                });
+                    shadow: "0 0 10px rgba(255, 170, 95, 0.55)"
+                } });
                 CyberUI.updateStatsGrid("data-container", [
                     { label: CyberI18n.get('galton.rows'), value: sim.rows, color: "#00d2ff" },
                     { label: CyberI18n.get('galton.balls_active'), value: sim.balls.length, color: "#ffd36a" },

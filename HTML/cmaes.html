@@ -28,6 +28,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-clock.css">
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <style>
@@ -103,6 +104,7 @@
     <script src="js/branding/nav.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js?v=539"></script>
+    <script src="js/cyber-clock.js"></script>
     <script src="js/cyber-canvas.js"></script>
     <script src="js/cmaes-logic.js"></script>
     <script>
@@ -218,20 +220,20 @@
                 <div style="display: flex; flex-direction: column; gap: 5px; align-items: flex-start;">
                     <div class="telemetry-item">
                         <div class="telemetry-label">${CyberI18n.get('cmaes.generation')}</div>
-                        <div id="widget-gen" class="cyber-number-widget"></div>
+                        <div id="widget-gen" class="cyber-digits"></div>
                     </div>
                     <div class="telemetry-item">
                         <div class="telemetry-label">${CyberI18n.get('cmaes.fitness')}</div>
-                        <div id="widget-fit" class="cyber-number-widget"></div>
+                        <div id="widget-fit" class="cyber-digits"></div>
                     </div>
                     <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); width: 100%; margin: 5px 0;">
                     <div class="telemetry-item">
                         <div class="telemetry-label">${CyberI18n.get('cmaes.perimeter')}</div>
-                        <div id="widget-umfang" class="cyber-number-widget"></div>
+                        <div id="widget-umfang" class="cyber-digits"></div>
                     </div>
                     <div class="telemetry-item">
                         <div class="telemetry-label">${CyberI18n.get('cmaes.area')}</div>
-                        <div id="widget-flaeche" class="cyber-number-widget"></div>
+                        <div id="widget-flaeche" class="cyber-digits"></div>
                     </div>
                 </div>
             `);
@@ -272,10 +274,10 @@
         }
 
         function updateTelemetry() {
-            CyberUI.updateNumberWidget('widget-gen', generation, 0, 1);
-            CyberUI.updateNumberWidget('widget-fit', Math.abs(fitness), 4, 1);
-            CyberUI.updateNumberWidget('widget-umfang', CMAESLogic.getPerimeter(blockPoints), 2, 1);
-            CyberUI.updateNumberWidget('widget-flaeche', CMAESLogic.getArea(blockPoints), 2, 1);
+            CyberClock.digits('widget-gen', generation);
+            CyberClock.digits('widget-fit', Math.abs(fitness), { decimals: 4 });
+            CyberClock.digits('widget-umfang', CMAESLogic.getPerimeter(blockPoints), { decimals: 2 });
+            CyberClock.digits('widget-flaeche', CMAESLogic.getArea(blockPoints), { decimals: 2 });
         }
 
         function animate() {

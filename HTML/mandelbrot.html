@@ -27,6 +27,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-clock.css">
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
@@ -257,25 +258,16 @@
             min-height: 0;
         }
 
-        /* Overrides global cyber-lab-overrides.css (justify-content:flex-start !important) */
-        .mb-fractal-stable-panel #mb-fractal-stable-widget.cyber-number-widget {
-            justify-content: center !important;
-            width: fit-content !important;
-            max-width: 100%;
-            margin-left: auto !important;
-            margin-right: auto !important;
-            align-items: center !important;
-            flex-wrap: wrap !important;
-        }
-
-        /* cyber-lab-overrides: digits default cyan !important — fixed gold for top panel only */
-        .mb-fractal-stable-panel #mb-fractal-stable-widget .cyber-digit-box {
-            color: #f2bb44 !important;
-            text-shadow: 0 0 12px rgba(242, 187, 68, 0.48) !important;
-        }
-
+        /* the digits widget, centred and gold in the top panel */
         #mb-fractal-stable-widget {
+            justify-content: center;
+            width: fit-content;
+            max-width: 100%;
+            margin: 0 auto;
+            flex-wrap: wrap;
             align-self: center;
+            --cc-digit: #f2bb44;
+            --cc-shadow: 0 0 12px rgba(242, 187, 68, 0.48);
         }
 
         .mb-fractal-stable-label {
@@ -956,7 +948,7 @@
                     <div id="mb-fractal-stable-panel" class="mb-fractal-formula-box mb-fractal-stable-panel" hidden>
                         <div class="mb-fractal-stable-inner">
                             <span id="mb-fractal-stable-label" class="mb-fractal-stable-label"></span>
-                            <div id="mb-fractal-stable-widget" class="cyber-number-widget" aria-live="polite"></div>
+                            <div id="mb-fractal-stable-widget" class="cyber-digits" aria-live="polite"></div>
                             <div id="mb-fractal-stable-note" class="mb-fractal-stable-note" hidden></div>
                         </div>
                     </div>
@@ -1029,6 +1021,7 @@
     <script src="js/branding/nav.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js?v=544"></script>
+    <script src="js/cyber-clock.js"></script>
     <script src="js/cyber-canvas.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
     <script>
@@ -2918,14 +2911,9 @@ body.cyber-shell-grid #cyber-left-chrome-inner {
                 }
                 panel.hidden = false;
                 const n = orbitScanStableHits.length;
-                const digitStyle = {
-                    fontSize: '1.22rem',
-                    digitWidth: '17px',
-                    digitHeight: '30px',
-                    separatorWidth: '8px',
-                };
-                if (typeof CyberUI !== 'undefined' && typeof CyberUI.updateNumberWidget === 'function') {
-                    CyberUI.updateNumberWidget('mb-fractal-stable-widget', n, 0, 1, digitStyle);
+                const digitStyle = { size: '1.22rem', digitWidth: '17px', height: '30px', sepWidth: '8px' };
+                if (window.CyberClock) {
+                    CyberClock.digits(widgetMount, n, { style: digitStyle });
                 } else {
                     widgetMount.textContent = String(n);
                     widgetMount.style.color = '';
