@@ -48,8 +48,6 @@
             <div class="mp-week" id="week">&nbsp;</div>
             <button class="mp-nav" id="next" type="button" aria-label="Nächste Woche"></button>
             <button class="action secondary" id="today" type="button">Diese Woche</button>
-            <button class="action secondary" id="theme" type="button"
-                title="Hell oder dunkel umschalten">Hell / Dunkel</button>
             <div class="mp-stamp" id="stamp"></div>
         </div>
 
@@ -221,20 +219,6 @@
             if (e.key === 'ArrowLeft') step(-1);
             if (e.key === 'ArrowRight') step(1);
         });
-
-        /* Same colour-scheme key as every other svp page */
-        (function () {
-            const btn = $('theme');
-            const sync = () => {
-                btn.textContent = document.documentElement.classList.contains('svp-light') ? 'Dunkel' : 'Hell';
-            };
-            btn.addEventListener('click', () => {
-                const light = document.documentElement.classList.toggle('svp-light');
-                try { localStorage.setItem('svp-theme', light ? 'light' : 'dark'); } catch (e) { }
-                sync();
-            });
-            sync();
-        })();
 
         db('svp_public_plan?select=week&order=week.asc')
             .then(rows => {
