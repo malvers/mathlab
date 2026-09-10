@@ -373,7 +373,7 @@
             cols: 110,
             rampId: 'classic',
             customRamp: '',
-            mode: 'chars',          // chars | color | dots | braille
+            mode: 'chars',          // chars | color | dots | braille | rings
             lightOnDark: true,      // bright pixel -> dense glyph (screen); off = paper look
             dither: true,           // Floyd-Steinberg error diffusion
             showThumb: true,
@@ -469,7 +469,8 @@
                 { label: CyberI18n.get('ascii.mode_chars'), value: 'chars' },
                 { label: CyberI18n.get('ascii.mode_color'), value: 'color' },
                 { label: CyberI18n.get('ascii.mode_dots'), value: 'dots' },
-                { label: CyberI18n.get('ascii.mode_braille'), value: 'braille' }
+                { label: CyberI18n.get('ascii.mode_braille'), value: 'braille' },
+                { label: CyberI18n.get('ascii.mode_rings'), value: 'rings' }
             ], state.mode, (v) => { state.mode = v; update(); });
 
             CyberUI.createCheckbox('chk-box', CyberI18n.get('ascii.cb_light'), state.lightOnDark, (on) => {
@@ -693,7 +694,7 @@
             if (!source || !source.w || !source.h) return null;
             const mode = state.mode;
             const cols = state.cols;
-            const cellAspect = mode === 'dots' ? 1 : ASPECT;
+            const cellAspect = mode === 'dots' || mode === 'rings' ? 1 : ASPECT;
             const rows = Math.max(1, Math.round(cols * (source.h / source.w) * cellAspect));
             const sx = mode === 'braille' ? 2 : 1;      // sub-samples per cell
             const sy = mode === 'braille' ? 4 : 1;
@@ -725,7 +726,7 @@
             const plain = Float32Array.from(dens);          // kept for the magnifier
             const ramp = rampChars();
             const m = ramp.length;
-            const useDither = state.dither && mode !== 'dots' && !state.customFn;
+            const useDither = state.dither && mode !== 'dots' && mode !== 'rings' && !state.customFn;
             if (useDither) ditherFS(dens, sw, sh, mode === 'braille' ? 2 : m);
 
             /* 3. per cell: aggregate colour, pick the glyph */
@@ -788,6 +789,54 @@
                 : { bg: 'rgb(238, 242, 250)', ink: 'rgb(14, 36, 78)' };
         }
 
+        /* Rings: concentric circles around the picture centre, one ring per cell width D.
+           The line width follows the tone, w = d · D, so the inked share of each ring band
+           equals the density - the halftone idea, bent into circles. */
+        const RING_MIN = 0.06;                  // hairline floor keeps the rings visible in the dark
+        function drawRings(x0, y0, D, cols, rows) {
+            const cD = last.cD;
+            const W = cols * D, H = rows * D;
+            const cx = x0 + W / 2, cy = y0 + H / 2;
+            // bilinear lookup of the density between cell centres
+            const dAt = (x, y) => {
+                let u = (x - x0) / D - 0.5, v = (y - y0) / D - 0.5;
+                u = u < 0 ? 0 : u > cols - 1 ? cols - 1 : u;
+                v = v < 0 ? 0 : v > rows - 1 ? rows - 1 : v;
+                const c0 = Math.floor(u), r0 = Math.floor(v);
+                const c1 = Math.min(c0 + 1, cols - 1), r1 = Math.min(r0 + 1, rows - 1);
+                const fu = u - c0, fv = v - r0;
+                const a = cD[r0 * cols + c0] + (cD[r0 * cols + c1] - cD[r0 * cols + c0]) * fu;
+                const b = cD[r1 * cols + c0] + (cD[r1 * cols + c1] - cD[r1 * cols + c0]) * fu;
+                return a + (b - a) * fv;
+            };
+            const rMax = Math.hypot(W, H) / 2;
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(x0, y0, W, H);
+            ctx.clip();
+            // one path for all rings: outer edge forward, inner edge backward, so the
+            // nonzero rule fills only the band between them
+            ctx.beginPath();
+            for (let r = D; r < rMax + D; r += D) {
+                const n = Math.max(24, Math.ceil(4 * Math.PI * r / D));    // a sample every half cell
+                const cs = new Float32Array(n), sn = new Float32Array(n), hw = new Float32Array(n);
+                for (let j = 0; j < n; j++) {
+                    const t = 2 * Math.PI * j / n;
+                    cs[j] = Math.cos(t);
+                    sn[j] = Math.sin(t);
+                    hw[j] = Math.max(RING_MIN, dAt(cx + r * cs[j], cy + r * sn[j])) * D / 2;   // half line width
+                }
+                ctx.moveTo(cx + (r + hw[0]) * cs[0], cy + (r + hw[0]) * sn[0]);
+                for (let j = 1; j < n; j++) ctx.lineTo(cx + (r + hw[j]) * cs[j], cy + (r + hw[j]) * sn[j]);
+                ctx.closePath();
+                ctx.moveTo(cx + (r - hw[0]) * cs[0], cy + (r - hw[0]) * sn[0]);
+                for (let j = n - 1; j > 0; j--) ctx.lineTo(cx + (r - hw[j]) * cs[j], cy + (r - hw[j]) * sn[j]);
+                ctx.closePath();
+            }
+            ctx.fill();
+            ctx.restore();
+        }
+
         function render() {
             const dpr = window.devicePixelRatio || 1;
             const rect = container.getBoundingClientRect();
@@ -802,7 +851,7 @@
 
             const { cols, rows, mode, chars } = last;
             let cw, chh, fontSize = 0;
-            if (mode === 'dots') {
+            if (mode === 'dots' || mode === 'rings') {
                 cw = chh = Math.min(W / cols, H / rows);
             } else {
                 fontSize = Math.min(W / (cols * ADV), H / (rows * LINE));
@@ -813,7 +862,9 @@
             last.geo = { x0, y0, cw, chh, fontSize };
 
             ctx.fillStyle = col.ink;
-            if (mode === 'dots') {
+            if (mode === 'rings') {
+                drawRings(x0, y0, cw, cols, rows);
+            } else if (mode === 'dots') {
                 const rmax = cw * 0.5;
                 for (let r = 0; r < rows; r++) {
                     for (let c = 0; c < cols; c++) {
@@ -926,6 +977,8 @@
             if (last.mode === 'braille') {
                 html += T('lupe_braille', { dith: last.dithered ? T('with_dither') : '', dots: last.dots[i], ch: esc(ch),
                     u: ch.charCodeAt(0).toString(16).toUpperCase() });
+            } else if (last.mode === 'rings') {
+                html += T('lupe_rings', { v: de(Math.max(RING_MIN, d), 2) });
             } else if (last.mode === 'dots') {
                 html += T('lupe_halftone', { v: de(Math.sqrt(d), 2) });
             } else if (state.customFn) {
@@ -935,7 +988,7 @@
                 if (last.dithered && kU !== kP) html += T('lupe_dither', { k: kU });
                 html += T('lupe_char', { k: kU, ch: esc(glyph(ch)) });
             }
-            if (last.mode !== 'braille') {
+            if (last.mode !== 'braille' && last.mode !== 'rings') {
                 html += '<div class="asc-ramp" style="margin-top:8px">' +
                     Array.from(ramp).map((x, j) => j === kU && last.mode !== 'dots' ? '<b>' + esc(glyph(x)) + '</b>' : esc(glyph(x))).join('') +
                     '</div>';
