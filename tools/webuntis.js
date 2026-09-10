@@ -204,11 +204,16 @@ function hhmm(t) { return String(t).padStart(4, '0').replace(/(\d{2})(\d{2})/, '
 // not be filled with the Informatik plan.
 const MAP_FILE = path.join(__dirname, 'webuntis-svp-map.json');
 const REPO = path.join(__dirname, '..');
+// Local copy of what goes to Supabase: svp_untis is the only place the pages read, this cache is
+// what patchStatus() patches and what `untis-push` resends. It sits in plandaten/, which is
+// gitignored - the status data (dates, lesson topics) must never be in the public repo again.
+const UNTIS_CACHE = path.join(REPO, 'HTML', 'svp', 'plandaten', 'untis');
+const WRITTEN_ROW = '_written';   // svp_untis row that stundenplan.html reads for its orange U
 
 function loadMap() {
   if (!fs.existsSync(MAP_FILE)) return [];
   const raw = JSON.parse(fs.readFileSync(MAP_FILE, 'utf8'));
-  return (raw.pages || []).map(e => ({
+  return (raw.pages || []).filter(e => (e.classes || []).length).map(e => ({
     page: e.page,
     subject: String(e.subject || '').toLowerCase(),
     classes: new Set(e.classes || []),
@@ -216,6 +221,15 @@ function loadMap() {
 }
 
 // The plan page for one lesson, or null when nothing is mapped for it.
+// Entries in webuntis-svp-map.json with fixed "groups" and no classes: pages whose Vortrag page
+// needs its Lerngruppen although none of Doc's lessons belong to it (fos11 since SJ 2026/27).
+function loadStaticGroups() {
+  if (!fs.existsSync(MAP_FILE)) return [];
+  const raw = JSON.parse(fs.readFileSync(MAP_FILE, 'utf8'));
+  return (raw.pages || []).filter(e => e.groups && !(e.classes || []).length)
+    .map(e => ({ page: '/' + e.page.replace(/^HTML\//, ''), classes: [], subjects: [], groups: e.groups }));
+}
+
 function pageFor(lesson, pages) {
   const subject = String(lesson.subject || '').toLowerCase();
   const hit = pages.find(p => p.subject === subject && lesson.klassen.some(k => p.classes.has(k)));
@@ -539,8 +553,10 @@ async function runStatus(session) {
     });
   }
   const mapIndex = [];
+  const untisRows = [];
+  const generated = new Date().toISOString();
   for (const [page, data] of Object.entries(byPage)) {
-    const out = path.join(REPO, page.replace(/\.html$/, '.untis.json'));
+    const pagePath = '/' + page.replace(/^HTML\//, '');
     /* e.klasse is the display name of a lesson and joins coupled classes
        ("BGY26-1,BGY26-2"). The page matches this list against single class
        names, so split it again - otherwise a course whose lessons are all
@@ -554,13 +570,17 @@ async function runStatus(session) {
       .map(e => e.subject).filter(Boolean))].sort();
     const n = Object.values(data.weeks).flat().length;
     const done = Object.values(data.weeks).flat().filter(e => e.written).length;
-    fs.writeFileSync(out, JSON.stringify({
-      generated: new Date().toISOString(), page: '/' + page.replace(/^HTML\//, ''),
+    /* Lerngruppen so, wie die Vortragsseiten sie brauchen: e.klasse ungeteilt, gekoppelte
+       Klassen also als EINE Gruppe ("FOG25-2,FOW25-2"). Nur Kuerzel - die gehen in die
+       oeffentliche svp-map.json, alles andere nach Supabase. */
+    const groups = [...new Set(Object.values(data.weeks).flat().map(e => e.klasse).filter(Boolean))].sort();
+    untisRows.push({ page: pagePath, data: {
+      generated, page: pagePath,
       webuntis: `${BASE}/WebUntis/?school=${SCHOOL}#/basic/mytimetable`,
       classes, subjects, weeks: data.weeks,
-    }, null, 1));
-    console.log(`${path.relative(REPO, out)}: ${done}/${n} Stunden eingetragen, ${Object.keys(data.weeks).length} Wochen`);
-    mapIndex.push({ page: '/' + page.replace(/^HTML\//, ''), classes, subjects });
+    } });
+    console.log(`${pagePath}: ${done}/${n} Stunden eingetragen, ${Object.keys(data.weeks).length} Wochen`);
+    mapIndex.push({ page: pagePath, classes, subjects, groups });
   }
 
   /* Zweiter kleiner Index fuer stundenplan.html: WELCHE Stunde traegt schon Stoff.
@@ -576,22 +596,29 @@ async function runStatus(session) {
       }
     }
     written.sort();
-    const outW = path.join(REPO, 'HTML', 'svp', 'untis-written.json');
-    fs.writeFileSync(outW, JSON.stringify({ generated: new Date().toISOString(), written }, null, 1));
-    console.log(`${path.relative(REPO, outW)}: ${written.length} Stunden mit Stoff`);
+    untisRows.push({ page: WRITTEN_ROW, data: { generated, written } });
+    console.log(`${WRITTEN_ROW}: ${written.length} Stunden mit Stoff`);
   }
+  await saveUntis(untisRows);
 
   /* Kleiner Index fuer stundenplan.html: welche Stunde gehoert zu welchem
      Stoffverteilungsplan. Der Browser kommt an tools/webuntis-svp-map.json
      nicht heran (liegt ausserhalb des Web-Roots), und plandaten/ ist
      gitignored - deshalb hier, neben den Planseiten. Erzeugt, nicht gepflegt:
      die eine Quelle bleibt webuntis-svp-map.json. */
+  for (const st of loadStaticGroups()) if (!mapIndex.some(m => m.page === st.page)) mapIndex.push(st);
   if (mapIndex.length) {
     const mapOut = path.join(REPO, 'HTML', 'svp', 'svp-map.json');
-    fs.writeFileSync(mapOut, JSON.stringify({
-      generated: new Date().toISOString(), pages: mapIndex.sort((a, b) => a.page.localeCompare(b.page)),
-    }, null, 1));
-    console.log(`${path.relative(REPO, mapOut)}: ${mapIndex.length} Planseiten`);
+    const pages = mapIndex.sort((a, b) => a.page.localeCompare(b.page));
+    /* This one file stays in the public repo (class codes only, no dates, no topics), so it is
+       only rewritten when something in it changed - a fresh timestamp alone used to leave it
+       "modified" after every single run. */
+    let old = null;
+    try { old = JSON.parse(fs.readFileSync(mapOut, 'utf8')).pages; } catch (e) { /* first run */ }
+    if (JSON.stringify(old) !== JSON.stringify(pages)) {
+      fs.writeFileSync(mapOut, JSON.stringify({ generated, pages }, null, 1));
+      console.log(`${path.relative(REPO, mapOut)}: ${pages.length} Planseiten`);
+    } else console.log(`${path.relative(REPO, mapOut)}: unveraendert`);
   }
   if (!Object.keys(byPage).length) console.log('Keine Stunde passt zu einer Planseite - webuntis-svp-map.json pruefen.');
 }
@@ -608,8 +635,10 @@ async function patchStatus(session, entries) {
   const byPage = {};
   for (const e of entries) (byPage[e.page] ||= []).push(e);
   let stale = null;
+  const rows = [];
   for (const [page, list] of Object.entries(byPage)) {
-    const out = path.join(REPO, page.replace(/\.html$/, '.untis.json'));
+    const pagePath = '/' + page.replace(/^HTML\//, '');
+    const out = untisCacheFile(pagePath);
     let data;
     try { data = JSON.parse(fs.readFileSync(out, 'utf8')); } catch (e) { stale = `${path.relative(REPO, out)} fehlt`; break; }
     for (const e of list) {
@@ -622,7 +651,7 @@ async function patchStatus(session, entries) {
     }
     if (stale) break;
     data.generated = new Date().toISOString();
-    fs.writeFileSync(out, JSON.stringify(data, null, 1));
+    rows.push({ page: pagePath, data });
     const flat = Object.values(data.weeks).flat();
     console.log(`${path.relative(REPO, out)}: ${list.length} Stunde${list.length === 1 ? '' : 'n'} nachgetragen, ${flat.filter(x => x.written).length}/${flat.length} eingetragen`);
   }
@@ -632,7 +661,7 @@ async function patchStatus(session, entries) {
     return;
   }
   // The short list stundenplan.html reads: add what now carries text, drop what lost it.
-  const outW = path.join(REPO, 'HTML', 'svp', 'untis-written.json');
+  const outW = untisCacheFile(WRITTEN_ROW);
   let written = [];
   try { written = JSON.parse(fs.readFileSync(outW, 'utf8')).written || []; } catch (e) { /* starts empty */ }
   const set = new Set(written);
@@ -641,12 +670,91 @@ async function patchStatus(session, entries) {
     if ((e.text || '').trim()) set.add(key); else set.delete(key);
   }
   written = [...set].sort();
-  fs.writeFileSync(outW, JSON.stringify({ generated: new Date().toISOString(), written }, null, 1));
-  console.log(`${path.relative(REPO, outW)}: ${written.length} Stunden mit Stoff`);
+  rows.push({ page: WRITTEN_ROW, data: { generated: new Date().toISOString(), written } });
+  console.log(`${WRITTEN_ROW}: ${written.length} Stunden mit Stoff`);
+  await saveUntis(rows);
+}
+
+// ---------- svp_untis (Supabase) ----------
+// Until 10.09.2026 the status went into <plan>.untis.json next to each plan page - public on
+// GitHub Pages, lesson topics and dates included. Now it goes into the table svp_untis, which
+// only Doc can read (RLS). Writing uses the Management API with the Supabase CLI token
+// (~/.supabase/access-token), exactly like tools/svp-material.py: no key in the repo, and the
+// table needs no write policy at all.
+
+function untisCacheFile(page) {
+  if (page === WRITTEN_ROW) return path.join(UNTIS_CACHE, 'untis-written.json');
+  return path.join(UNTIS_CACHE, page.replace(/^\/svp\//, '').replace(/\.html$/, '.untis.json'));
+}
+
+async function supaQuery(sql) {
+  const tokFile = path.join(os.homedir(), '.supabase', 'access-token');
+  if (!fs.existsSync(tokFile)) throw new Error(`${tokFile} fehlt (supabase login)`);
+  const authSrc = fs.readFileSync(path.join(REPO, 'HTML/svp/svp-auth.js'), 'utf8');
+  const ref = (authSrc.match(/DB_URL\s*=\s*'https:\/\/([a-z0-9]+)\.supabase\.co'/) || [])[1];
+  if (!ref) throw new Error('Projekt-Ref nicht in svp-auth.js gefunden');
+  const res = await fetch(`https://api.supabase.com/v1/projects/${ref}/database/query`, {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + fs.readFileSync(tokFile, 'utf8').trim(),
+      'Content-Type': 'application/json',
+      // Cloudflare in front of api.supabase.com answers a bare client with 403 "error code: 1010"
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
+    },
+    body: JSON.stringify({ query: sql }),
+  });
+  const text = await res.text();
+  if (!res.ok) throw new Error(`Supabase ${res.status}: ${text.slice(0, 300)}`);
+  return JSON.parse(text || '[]');
+}
+
+// Upsert rows [{ page, data }] into svp_untis and keep the local cache in step. The cache is
+// written first: if Supabase is unreachable the run still has its result, and `untis-push`
+// sends it later. Never throws - a failed upload must not take the rest of the run down.
+async function saveUntis(rows) {
+  for (const r of rows) {
+    const file = untisCacheFile(r.page);
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, JSON.stringify(r.data, null, 1));
+  }
+  try {
+    const tag = '$u' + crypto.randomBytes(6).toString('hex') + '$';
+    const values = rows.map(r => {
+      const json = JSON.stringify(r.data);
+      if (json.includes(tag)) throw new Error('dollar-quote tag collision');
+      const ts = r.data.generated ? `'${String(r.data.generated).replace(/'/g, '')}'::timestamptz` : 'now()';
+      return `('${r.page.replace(/'/g, "''")}', ${tag}${json}${tag}::jsonb, ${ts})`;
+    });
+    const back = await supaQuery('insert into public.svp_untis (page, data, generated) values ' + values.join(', ') +
+      ' on conflict (page) do update set data = excluded.data, generated = excluded.generated returning page');
+    console.log(`Supabase svp_untis: ${back.length}/${rows.length} Zeilen geschrieben`);
+  } catch (e) {
+    console.error(`Supabase svp_untis NICHT geschrieben (${e.message}). Lokal liegt alles in ${path.relative(REPO, UNTIS_CACHE)} - nachholen mit: node tools/webuntis.js untis-push`);
+  }
+}
+
+// untis-push: resend the local cache to Supabase without asking WebUntis (after an offline run).
+async function pushUntisCache() {
+  const rows = [];
+  const walk = (dir) => {
+    for (const f of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, f.name);
+      if (f.isDirectory()) walk(p);
+      else if (f.name.endsWith('.json')) {
+        const data = JSON.parse(fs.readFileSync(p, 'utf8'));
+        rows.push({ page: data.page || WRITTEN_ROW, data });
+      }
+    }
+  };
+  if (fs.existsSync(UNTIS_CACHE)) walk(UNTIS_CACHE);
+  if (!rows.length) { console.log(`Nichts in ${path.relative(REPO, UNTIS_CACHE)} - erst: node tools/webuntis.js status`); return; }
+  await saveUntis(rows);
 }
 
 async function main() {
   const cmd = process.argv[2] || 'whoami';
+  // Needs no WebUntis login: resends the local status cache to Supabase.
+  if (cmd === 'untis-push') { await pushUntisCache(); return; }
   const cred = loadCred();
   const session = await login(cred);
 
@@ -1052,7 +1160,7 @@ async function main() {
       return;
     }
   }
-  console.error(`Unknown command "${cmd}". Try: whoami | timetable [VON] [BIS] | topic <ttId> "<Text>" | plan [YYYYMMDD] [--dry] [--force] [--nur-stoff] | status | ${Object.keys(map).join(' | ')}`);
+  console.error(`Unknown command "${cmd}". Try: whoami | timetable [VON] [BIS] | topic <ttId> "<Text>" | plan [YYYYMMDD] [--dry] [--force] [--nur-stoff] | status | untis-push | ${Object.keys(map).join(' | ')}`);
   process.exit(1);
 }
 
