@@ -111,7 +111,7 @@
             // the idle turn come with it; autoRotateSpeed keeps its old units.
             const controls = CyberTrackball.make(THREE.TrackballControls, camera, renderer.domElement,
                 { minDistance: 2.5, maxDistance: 10.0 });
-            controls.autoRotate = true;
+            controls.autoRotate = false;   // no idle turn - the heart only moves when dragged
             controls.autoRotateSpeed = 2.0;
 
             // 3. Raymarching Shaders
@@ -138,13 +138,25 @@
                     return term*term*term - x*x*z*z*z - u_B*y*y*z*z*z;
                 }
 
+                /**
+                 * Analytic gradient of heartSDF. The central difference it replaces
+                 * subtracted two nearly equal cubics, and right where the vertical
+                 * component crosses zero float32 cancelled away the digits that
+                 * carried the answer - that was the seam across the middle.
+                 * Same axis swap as heartSDF: x = p.x, y = p.z, z = p.y.
+                 */
                 vec3 calcNormal(vec3 p) {
-                    vec2 e = vec2(0.001, 0.0);
-                    return normalize(vec3(
-                        heartSDF(p + e.xyy) - heartSDF(p - e.xyy),
-                        heartSDF(p + e.yxy) - heartSDF(p - e.yxy),
-                        heartSDF(p + e.yyx) - heartSDF(p - e.yyx)
-                    ));
+                    float x = p.x;
+                    float y = p.z;
+                    float z = p.y;
+                    float term = x*x + u_A*y*y + z*z - 1.0;
+                    float t2 = term * term;
+                    float z2 = z * z;
+                    float z3 = z2 * z;
+                    float dFdx = 6.0*x*t2 - 2.0*x*z3;
+                    float dFdy = 6.0*u_A*y*t2 - 2.0*u_B*y*z3;
+                    float dFdz = 6.0*z*t2 - 3.0*z2*(x*x + u_B*y*y);
+                    return normalize(vec3(dFdx, dFdz, dFdy));
                 }
 
                 vec2 sphIntersect(vec3 ro, vec3 rd, float r) {
@@ -202,13 +214,33 @@
                     vec3 colBot = vec3(0.0, 0.82, 1.0); 
                     vec3 baseAlbedo = mix(colBot, colTop, clamp((p.y + 1.0) / 2.0, 0.0, 1.0));
                     
-                    vec3 lightDir = normalize(vec3(1.0, 1.5, 2.0));
                     vec3 viewDir = normalize(ro - p);
-                    float diff = max(dot(n, lightDir), 0.0);
-                    float spec = pow(max(dot(n, normalize(lightDir + viewDir)), 0.0), 128.0) * 1.5;
+
+                    // Three-point studio rig carried by the camera, so no side is ever
+                    // left in the dark. The camera basis comes straight out of the
+                    // matrix the raymarcher already uses.
+                    vec3 camRight = normalize((cameraWorldMatrix * vec4(1.0, 0.0, 0.0, 0.0)).xyz);
+                    vec3 camUp    = normalize((cameraWorldMatrix * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
+                    vec3 camBack  = normalize((cameraWorldMatrix * vec4(0.0, 0.0, 1.0, 0.0)).xyz);
+
+                    vec3 keyDir  = normalize(camBack * 0.9 + camRight * 0.6 + camUp * 0.7);
+                    vec3 fillDir = normalize(camBack * 0.5 - camRight * 0.8 - camUp * 0.1);
+                    vec3 backDir = normalize(-camBack * 0.8 + camUp * 0.5);
+                    // A touch of world-fixed top light keeps the turn from looking flat.
+                    vec3 topDir  = normalize(vec3(0.2, 1.0, 0.3));
+
+                    float key  = max(dot(n, keyDir), 0.0);
+                    float fill = max(dot(n, fillDir), 0.0);
+                    float back = max(dot(n, backDir), 0.0);
+                    float top  = max(dot(n, topDir), 0.0);
+
+                    float spec = pow(max(dot(n, normalize(keyDir + viewDir)), 0.0), 128.0) * 1.5;
+                    spec += pow(max(dot(n, normalize(fillDir + viewDir)), 0.0), 64.0) * 0.35;
                     float rim = pow(1.0 - max(dot(n, viewDir), 0.0), 3.0) * 0.8;
-                    
-                    gl_FragColor = vec4(baseAlbedo * (diff + 0.3) + spec + vec3(1.0, 0.5, 0.8) * rim, 1.0);
+
+                    float lit = key * 0.85 + fill * 0.32 + back * 0.16 + top * 0.12 + 0.22;
+
+                    gl_FragColor = vec4(baseAlbedo * lit + spec + vec3(1.0, 0.5, 0.8) * rim, 1.0);
                 }
             `;
 
@@ -232,7 +264,10 @@
             function updateEquation() {
                 const a = raymarchMaterial.uniforms.u_A.value.toFixed(2);
                 const b = raymarchMaterial.uniforms.u_B.value.toFixed(3);
-                const tex = `(x^{2} + {\\color{#00d2ff}${a}} \\, y^{2} + z^{2} - 1)^{3} - x^{2}z^{3} - {\\color{#ff8800}${b}} \\, y^{2}z^{3} = 0`;
+                // Same colours as the two sliders - straight from the central layout.
+                const cBlue = CyberFormula.color('--neon-blue');
+                const cOrange = CyberFormula.color('--neon-orange');
+                const tex = `(x^{2} + {\\color{${cBlue}}${a}} \\, y^{2} + z^{2} - 1)^{3} - x^{2}z^{3} - {\\color{${cOrange}}${b}} \\, y^{2}z^{3} = 0`;
                 CyberFormula.set(tex);
             }
 

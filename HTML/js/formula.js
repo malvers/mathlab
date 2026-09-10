@@ -73,6 +73,23 @@ const CyberFormula = {
         anchor.appendChild(container);
     },
 
+    /**
+     * KaTeX-safe hex for a CSS custom property, so a formula can wear the same
+     * colour as the control next to it instead of a second hard-coded value.
+     * `\color{}` swallows neither `rgb(...)` nor the spaces inside it.
+     */
+    color(varName, fallback = '#ffffff') {
+        const raw = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+        if (!raw) return fallback;
+        if (/^#[0-9a-f]{3,8}$/i.test(raw)) return raw;
+        const m = raw.match(/^rgba?\(([^)]+)\)$/i);
+        if (!m) return raw;                      // a named colour: KaTeX knows those
+        const parts = m[1].split(/[\s,\/]+/).map(Number);
+        if (parts.length < 3 || parts.slice(0, 3).some((v) => !Number.isFinite(v))) return fallback;
+        const hex = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0');
+        return '#' + hex(parts[0]) + hex(parts[1]) + hex(parts[2]);
+    },
+
     set(tex, renderOpts = {}) {
         const container = document.getElementById(this.containerId);
         if (!container || !window.katex) return;
