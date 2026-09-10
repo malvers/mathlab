@@ -300,7 +300,7 @@
             return { hard, site, newOverlap: 0, moved };
         }
 
-        /* Stunden, die im WebUntis-Klassenbuch schon Stoff tragen (untis-written.json, weiter
+        /* Stunden, die im WebUntis-Klassenbuch schon Stoff tragen (svp_untis, weiter
            unten geladen). Hier oben deklariert, damit render() sie in jedem Fall kennt. */
         const UNTIS_WRITTEN = new Set();
         const untisKey = (l) => l.date + '|' + hhmm(l.startTime) + '|' + (l.classes || []).join(',');
@@ -1469,11 +1469,16 @@
             .catch(() => { });
 
         /* Welche Stunde traegt schon Stoff im WebUntis-Klassenbuch? Erzeugt von
-           tools/webuntis.js status als untis-written.json - nur die gefuellten Stunden, also
-           eine kurze Liste. Ist sie da, bekommt die Kachel oben links ein oranges U
-           (Doc, 06.09.2026). Fehlt sie, sieht der Plan aus wie vorher. */
-        fetch('untis-written.json?v=' + Date.now())
-            .then(r => r.ok ? r.json() : null)
+           tools/webuntis.js status - nur die gefuellten Stunden, also eine kurze Liste. Ist
+           sie da, bekommt die Kachel oben links ein oranges U (Doc, 06.09.2026). Seit dem
+           10.09.2026 kommt sie aus Supabase (svp_untis, Zeile _written) statt aus der
+           oeffentlichen untis-written.json - lesen darf nur Doc. Ohne Anmeldung kein U,
+           der Plan sieht dann aus wie vorher. */
+        (window.svpAuth && svpAuth.hasSession()
+            ? svpAuth.api('svp_untis?page=eq._written&select=data')
+                .then(r => r.ok ? r.json() : null)
+                .then(rows => (rows && rows.length ? rows[0].data : null))
+            : Promise.resolve(null))
             .then(m => {
                 if (!m || !m.written) return;
                 for (const k of m.written) UNTIS_WRITTEN.add(k);

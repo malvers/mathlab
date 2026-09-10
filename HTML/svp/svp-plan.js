@@ -2719,7 +2719,7 @@
     /* Der Vortrags-Knopf als Dropdown, wenn ein Plan mehrere Lerngruppen hat.
        FOS 12 laeuft in fuenf Gruppen durch denselben Stoff - die Themenliste ist
        eine, die NAMEN haengen an der Gruppe. Statt fuenf Knoepfen also einer mit
-       Auswahl (Doc, 01.09.2026). Die Gruppen kommen aus <plan>.untis.json, damit
+       Auswahl (Doc, 01.09.2026). Die Gruppen kommen aus svp-map.json, damit
        es keine zweite, von Hand gepflegte Liste gibt. Aussehen und Verhalten
        teilt er sich mit dem Export-Menue. */
     (function buildVortraegeMenu() {
@@ -2729,15 +2729,17 @@
         const target = btn.dataset.href;
         if (!src || !target) return;
         const slug = (v) => String(v).replace(/[^A-Za-z0-9-]+/g, '_');
+        /* data-groups nennt den Plan ("fos12.untis.json"); die Gruppen selbst stehen
+           seit dem 10.09.2026 in svp-map.json - nur Klassenkuerzel, deshalb weiter
+           oeffentlich. Termine und Stundeninhalte liegen in Supabase hinter dem Login. */
+        const planPage = new URL(src.replace(/\.untis\.json$/, '.html'), location.href).pathname;
 
-        fetch(src, { cache: 'no-store' })
+        fetch(SVP_DIR + 'svp-map.json', { cache: 'no-store' })
             .then(res => (res.ok ? res.json() : null))
-            .then(data => {
-                if (!data || !data.weeks) return;                 /* keine Datei: Knopf bleibt Knopf */
-                const seen = new Set();
-                for (const kw of Object.keys(data.weeks)) {
-                    for (const e of data.weeks[kw]) if (e.klasse) seen.add(e.klasse);
-                }
+            .then(map => {
+                const entry = map && (map.pages || []).find(p => planPage.endsWith(p.page));
+                if (!entry || !entry.groups) return;              /* keine Gruppen: Knopf bleibt Knopf */
+                const seen = new Set(entry.groups);
                 if (seen.size < 2) return;                        /* eine Gruppe braucht kein Menue */
 
                 const drop = document.createElement('div');
@@ -3331,9 +3333,9 @@
 
     /* WebUntis-Status unter der Bereich-Pille.
        WebUntis hat kein CORS, der Browser kommt also nie selbst dran. Die
-       Daten liefert tools/webuntis.js status als <plan>.untis.json neben der
-       Seite - ein Eintrag je Kalenderwoche, ein Punkt je Stunde. Fehlt die
-       Datei (jede Seite ohne Kurs-Zuordnung), bleibt alles wie vorher. */
+       Daten schreibt tools/webuntis.js status nach Supabase (svp_untis, nur Doc
+       liest) - ein Eintrag je Kalenderwoche, ein Punkt je Stunde. Fehlt die
+       Zeile (jede Seite ohne Kurs-Zuordnung), bleibt alles wie vorher. */
     function untisTitle(entries, generated) {
         const lines = entries.map(e => {
             const d = String(e.date);
@@ -3723,7 +3725,7 @@
     }
 
     /* Dialog fuer eine Kalenderwoche: Text links, die Stunden dieser Woche
-       rechts. Der Stand kommt LIVE aus WebUntis, nicht aus der .untis.json -
+       rechts. Der Stand kommt LIVE aus WebUntis, nicht aus svp_untis -
        die ist nur der Aufhaenger (Datumsbereich + Klassen der Seite) und kann
        Tage alt sein. */
     /* Dialog fuer eine Kalenderwoche: eine Editbox und "Send now". Mehr soll
@@ -3732,12 +3734,12 @@
        geschrieben wird, stehen als eine Zeile darunter; angekreuzt wird nur
        dort, wo schon etwas ANDERES drinsteht - eine Handkorrektur in WebUntis
        darf nie stillschweigend sterben. Der Stand kommt live aus WebUntis,
-       nicht aus der .untis.json - die ist nur der Aufhaenger (Datumsbereich +
+       nicht aus svp_untis - der ist nur der Aufhaenger (Datumsbereich +
        Klassen der Seite) und kann Tage alt sein. */
     function untisDialog(ref, entries, chip, data, url) {
         /* Im Termin-Modus sind die Stunden schon ausgewaehlt (Klasse + Tag +
            Doppelstunde); der Live-Abruf darf dann nur genau diese zeigen. */
-        /* Klassen normalisiert vergleichen: die .untis.json haelt gekoppelte
+        /* Klassen normalisiert vergleichen: svp_untis haelt gekoppelte
            Klassen als "FOG25-2,FOW25-2" in Untis-Reihenfolge, der Live-Abruf
            liefert ein Array - auf gleiche Reihenfolge kann man sich nicht
            verlassen, also beide sortiert. */
@@ -3752,7 +3754,7 @@
         const classes = (data && data.classes) || [];
         /* Fach MUSS mitfiltern: Doc unterrichtet in BGY26-1/2 sowohl Mat als
            auch Inf, die Mathe-Seite bot deshalb sieben Stunden an statt fuenf
-           (Doc, 31.08.2026). Fehlt subjects in einer aelteren .untis.json,
+           (Doc, 31.08.2026). Fehlt subjects in einem aelteren Stand,
            bleibt es beim reinen Klassenfilter wie bisher. */
         const subjects = (data && data.subjects) || [];
 
@@ -4004,8 +4006,8 @@
     }
 
     /* ---- Lokales Echo des Chip-Stands ------------------------------------
-       Der Chip liest <plan>.untis.json - eine Datei, die nur
-       "tools/webuntis.js status" auf Docs Rechner erzeugt. Was der Dialog
+       Der Chip liest den Stand aus svp_untis (bis 10.09.2026: <plan>.untis.json),
+       den nur "tools/webuntis.js status" auf Docs Rechner schreibt. Was der Dialog
        gerade nach WebUntis geschrieben hat, steht dort noch nicht drin: der
        Chip wurde im Moment des Sendens orange und war nach dem naechsten
        Reload wieder weiss (Doc, 30.08.2026 - der Text stand da laengst drin).
@@ -4074,13 +4076,17 @@
         equalizeLbCells();
     }
 
+    /* Der Stand kommt seit dem 10.09.2026 aus Supabase (svp_untis), nicht mehr aus
+       <plan>.untis.json neben der Seite: die Datei lag oeffentlich im Repo, mit
+       Stundeninhalten und Terminen (Doc: "supa ist mir lieber"). Lesen darf nur Doc
+       (RLS), ohne Anmeldung gibt es also keine Chips - der Plan bleibt wie er ist. */
     (function loadUntis() {
-        const src = location.pathname.replace(/\.html$/, '.untis.json');
-        if (src === location.pathname) return;
-        fetch(src, { cache: 'no-store' })
+        if (!/\.html$/.test(location.pathname)) return;
+        if (!window.svpAuth || !svpAuth.hasSession()) return;
+        svpAuth.api('svp_untis?page=eq.' + encodeURIComponent(location.pathname) + '&select=data')
             .then(res => (res.ok ? res.json() : null))
-            .then(data => { if (data) decorateUntis(data); })
-            .catch(() => { /* keine Statusdatei: Plan bleibt unverändert */ });
+            .then(rows => { if (rows && rows.length && rows[0].data) decorateUntis(rows[0].data); })
+            .catch(() => { /* kein Stand oder offline: Plan bleibt unverändert */ });
     })();
 
     /* Bereich-Pillen: jede steht seit dem 09.09.2026 IN ihrer Lernbereich-

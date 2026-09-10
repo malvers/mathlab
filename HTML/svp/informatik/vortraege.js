@@ -13,7 +13,7 @@
        mit vielen Gruppen aber aus der URL (?g=FOS25-1). Der Stoff ist fuer alle
        Gruppen derselbe - nur die Namen haengen an der Gruppe, deshalb reicht EINE
        Seite mit Auswahl statt einer Datei je Gruppe (Doc, 01.09.2026). */
-    const GROUPS_SRC = script && script.dataset.groups;   /* <plan>.untis.json */
+    const GROUPS_SRC = script && script.dataset.groups;   /* <plan>.untis.json - names the plan, groups come from svp-map.json */
     const slug = (s) => String(s).replace(/[^A-Za-z0-9-]+/g, '_');
     let urlG = '';
     try { urlG = new URLSearchParams(location.search).get('g') || ''; } catch (e) { }
@@ -69,7 +69,7 @@
         /* BGY 12 (Grundkurs) — lb1 "Informatische Modellierung", lb2 "Modellierung von
            Datenbanken", lb3 "Algorithmen und Programme" (Beginn, Rest in Jgst. 13),
            wb "Künstliche Intelligenz". Eine einzige Lerngruppe (BGY25), die Bezeichnung
-           kommt aus inf12.untis.json — deshalb data-groups auf der Seite. */
+           kommt aus svp-map.json — deshalb data-groups auf der Seite. */
         inf12: {
             page: 'inf12.html', back: 'Informatik BGY 12',
             sub: 'Lernbereich 1 \u201eInformatische Modellierung\u201c, Lernbereich 2 \u201eModellierung von Datenbanken\u201c, Lernbereich 3 \u201eAlgorithmen und Programme\u201c + Wahlbereich \u201eK\u00fcnstliche Intelligenz\u201c',
@@ -1249,11 +1249,11 @@
         if (window.svpGate) svpGate.run(wipe); else wipe();
     };
 
-    /* Die Umschaltleiste aus den echten Lerngruppen des Plans: die .untis.json
-       fuehrt je Stunde die Klasse, gekoppelte Gruppen als "FOG25-2,FOW25-2".
-       Genau diese Zeichenkette ist der Schluessel in der Datenbank, damit die
-       Namen einer Gruppe nicht bei einer anderen auftauchen. Ohne die Datei
-       bleibt die Leiste, wie sie in der Seite steht. */
+    /* Die Umschaltleiste aus den echten Lerngruppen des Plans: svp-map.json
+       fuehrt sie je Planseite unter groups, gekoppelte Gruppen als "FOG25-2,FOW25-2"
+       (tools/webuntis.js baut sie aus den Stunden). Genau diese Zeichenkette ist
+       der Schluessel in der Datenbank, damit die Namen einer Gruppe nicht bei einer
+       anderen auftauchen. Ohne die Datei bleibt die Leiste, wie sie in der Seite steht. */
     async function buildSwitch() {
         if (!GROUPS_SRC) return;
         const box = document.querySelector('.vt-switch');
@@ -1262,20 +1262,24 @@
            eine FALSCHE Lerngruppe an, ohne ein Wort - der gefaehrlichste Fall
            ueberhaupt (Doc, 01.09.2026: "da steht aber immer FOS"). Jeder Ausweg
            sagt jetzt, was los ist. */
-        let data = null, why = '';
+        /* Die Gruppen stehen seit dem 10.09.2026 in svp-map.json (nur Klassenkuerzel,
+           oeffentlich). data-groups nennt weiter den Plan ("fos12.untis.json") - die
+           Datei selbst liegt jetzt in Supabase hinter Docs Login, und diese Seite
+           oeffnen Schueler ohne Anmeldung. */
+        const planPage = new URL(GROUPS_SRC.replace(/\.untis\.json$/, '.html'), location.href).pathname;
+        let map = null, why = '';
         try {
-            const res = await fetch(GROUPS_SRC, { cache: 'no-store' });
-            if (res.ok) data = await res.json(); else why = 'HTTP ' + res.status;
+            const res = await fetch(new URL('../svp-map.json', script.src).href, { cache: 'no-store' });
+            if (res.ok) map = await res.json(); else why = 'HTTP ' + res.status;
         } catch (e) { why = e.message; }
-        if (!data || !data.weeks) {
-            setStatus('Lerngruppen nicht ladbar (' + GROUPS_SRC + (why ? ': ' + why : '') + ') — der Kopf zeigt vielleicht die falsche Klasse.', true);
+        const entry = map && (map.pages || []).find(p => planPage.endsWith(p.page));
+        if (!entry || !entry.groups) {
+            const detail = why || (map ? planPage + ' fehlt oder hat keine Gruppen' : 'leer');
+            setStatus('Lerngruppen nicht ladbar (svp-map.json: ' + detail + ') — der Kopf zeigt vielleicht die falsche Klasse.', true);
             return;
         }
-        const seen = new Set();
-        for (const kw of Object.keys(data.weeks)) {
-            for (const e of data.weeks[kw]) if (e.klasse) seen.add(e.klasse);
-        }
-        if (!seen.size) { setStatus('In ' + GROUPS_SRC + ' steht keine Lerngruppe.', true); return; }
+        const seen = new Set(entry.groups);
+        if (!seen.size) { setStatus('In svp-map.json steht keine Lerngruppe für ' + planPage + '.', true); return; }
         /* Schluessel statt Klartext: ein Komma ("FOG25-2,FOW25-2") ist in einem
            PostgREST-Filter ein Trennzeichen und wuerde die Abfrage zerlegen.
            Der Schluessel steht in URL und Datenbank, der Klartext nur im Kopf. */
@@ -1486,7 +1490,7 @@
         'Beim Drucken erscheinen die Namen nur im entsperrten Zustand.';
 
     /* What this page is called in prose. On a data-groups page the real name
-       only arrives with the .untis.json - until then the key stands in, with
+       only arrives with svp-map.json - until then the key stands in, with
        the underscores of a coupled group read back as a plus, exactly as
        buildSwitch will spell it. */
     function klasseLabel() {
