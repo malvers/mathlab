@@ -51,6 +51,8 @@
         ['punktetabelle.html', 'Punkte BGY', 'b-grey', 'Punktetabelle - Notenspiegel BGY'],
         ['bewertungsmatrix.html', 'Bewertungsmatrix', 'b-grey',
          'Bewertungsmatrix Vortrag - Coach- und Publikumsbogen'],
+        /* Vorfuehrklasse for the Leistungstest demo (Doc, 10.09.2026) */
+        ['genii.html', 'Demo GENII', 'b-grey', 'Vorführklasse GENII - Leistungstest und Sicherheitsarchitektur'],
         /* the lab lives one level up, in HTML/ - base + href resolves the '..' */
         ['../fokus.html', 'Timer', 'b-grey', 'Fokus-Timer - stiller Countdown mit Musik'],
         [PLAN_HREF, 'Stundenplan', 'b-grey', PLAN_TITLE],
@@ -114,7 +116,9 @@
             /* Doc, 09.09.2026: "BM ganz unten" - die Bewertungsmatrix schliesst
                das Menue ab, hinter dem Timer. */
             [null, ['notes.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
-                    'punktetabelle.html', '../fokus.html', 'bewertungsmatrix.html']]
+                    'punktetabelle.html', '../fokus.html', 'bewertungsmatrix.html']],
+            /* Doc, 10.09.2026: the demo class last, below a divider */
+            [null, ['genii.html']]
         ], true, true]
     ];
 
