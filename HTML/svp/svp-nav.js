@@ -80,8 +80,10 @@
     };
 
     // These open in a new tab so the current plan stays put.
+    // The Stundenplan no longer does (Doc, 10.09.2026: "auf click SP unter dem
+    // Header wie alles sonst") - it opens in place, below this nav band.
     const NEW_TAB = new Set(['notes.html', 'konzepte.html', 'operatoren.html',
-        'punktetabelle.html', '../fokus.html', PLAN_HREF]);
+        'punktetabelle.html', '../fokus.html']);
 
     // The pill row only carries Home, Notizen and one dropdown per Schulart —
     // everything else lives inside those. [pill label, [[caption|null, hrefs]],
