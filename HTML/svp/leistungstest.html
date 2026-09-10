@@ -16,7 +16,9 @@
     <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
     <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
     <link rel="stylesheet" href="svp.css">
+    <link rel="stylesheet" href="../js/cyber-clock.css">
     <script src="svp-gate.js"></script>
+    <script src="../js/cyber-clock.js"></script>
     <script src="qrcode.min.js"></script>
     <script src="svp-auth.js"></script>
     <script src="svp-crypto.js"></script>
@@ -34,6 +36,11 @@
             border: 1px solid var(--line);
             border-radius: 14px;
             padding: 16px 18px;
+            /* Grid items do not shrink below their content by default: the
+               four-column table pushed the one grid track to ~800 px and the
+               whole page scrolled sideways on a phone. With 0 the table
+               scrolls inside .lt-scroll and the slips stack (Doc, 10.09.2026). */
+            min-width: 0;
         }
 
         .lt-title {
@@ -156,7 +163,7 @@
             font-size: 0.78rem;
             letter-spacing: 0.06em;
             padding: 9px 16px;
-            border-radius: 999px;
+            border-radius: 8px;   /* the corners of every svp button (button.action, "Export") */
             border: 1px solid var(--line);
             background: transparent;
             color: inherit;
@@ -166,7 +173,8 @@
         .lt-btn:hover { border-color: var(--phi); color: var(--phi); }
         .lt-btn.primary { border-color: var(--lambda); color: var(--lambda); }
         .lt-btn.primary:hover { background: rgba(245, 194, 66, 0.14); }
-        .lt-btn.on { border-color: var(--phi); color: var(--phi); background: rgba(121, 158, 49, 0.12); }
+        /* switched on = the blue of button.action:hover (Doc, 10.09.2026: "blauisch") */
+        .lt-btn.on { border-color: rgb(120, 160, 220); background: rgba(120, 160, 220, 0.3); }
         .lt-btn.danger:hover { border-color: var(--ypsilon); color: var(--ypsilon); }
         .lt-btn[disabled] { opacity: 0.4; cursor: default; }
 
@@ -180,6 +188,32 @@
         .lt-tab th { font-family: Orbitron, system-ui, sans-serif; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
         .lt-tab td.code { font-family: Orbitron, system-ui, sans-serif; letter-spacing: 0.08em; color: var(--lambda); white-space: nowrap; }
         .lt-tab td.alias { font-family: Orbitron, system-ui, sans-serif; letter-spacing: 0.05em; white-space: nowrap; }
+        /* Ergebnis column: points per code, asked from the server by code only.
+           Red is lighter on the dark theme - the palette red drowns in navy. */
+        .lt-listcard { --lt-red: rgb(235, 120, 105); }
+        html.svp-light .lt-listcard { --lt-red: var(--ypsilon); }
+        .lt-tab td.result { font-family: Orbitron, system-ui, sans-serif; letter-spacing: 0.05em; white-space: nowrap; color: var(--phi); }
+        .lt-tab td.result.low { color: var(--lt-red); }
+        .lt-tab td.result.none { color: var(--muted); }
+        /* fixed digit slots (CyberClock.digits, the site's one digits widget): the scores stand
+           digit under digit, slash under slash; digits take the cell's colour, plain weight */
+        .lt-tab td.result .cyber-digits { --cc-size: 1em; --cc-digit: currentColor; --cc-dw: 0.85em;
+            --cc-sw: 0.9em; --cc-weight: 400; gap: 1px; vertical-align: middle; }
+        /* Note: same scale as the test page; 1-2 green, 5-6 red, the rest orange */
+        .lt-tab td.grade { font-family: Orbitron, system-ui, sans-serif; color: var(--lambda); }
+        .lt-tab td.grade.good { color: var(--phi); }
+        .lt-tab td.grade.low { color: var(--lt-red); }
+        .lt-tab td.grade.none { color: var(--muted); }
+        .lt-tab tr[data-code] { cursor: pointer; }
+        .lt-tab tr[data-code]:hover > td, .lt-tab tr.sel > td { background: var(--row-line); }
+        /* one pupil's answers, question by question (click on a row) */
+        .lt-detail { margin-top: 12px; }
+        .lt-detail[hidden] { display: none; }
+        .lt-detail .d-head { font-family: Orbitron, system-ui, sans-serif; font-size: 0.85rem; letter-spacing: 0.04em; margin-bottom: 8px; }
+        .lt-qgrid { display: flex; flex-wrap: wrap; gap: 5px; }
+        .lt-q { font-family: Orbitron, system-ui, sans-serif; font-size: 0.72rem; min-width: 30px; padding: 4px 0; text-align: center; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); }
+        .lt-q.ok { color: var(--phi); border-color: var(--phi); background: rgba(121, 158, 49, 0.12); }
+        .lt-q.bad { color: var(--lt-red); border-color: var(--lt-red); background: rgba(176, 36, 24, 0.12); }
         /* the scroll box rounds its height and clips the table's own bottom
            edge - so the last line is drawn by the box itself, always */
         .lt-scroll { overflow-x: auto; border-bottom: 1px solid var(--line); }
@@ -294,7 +328,8 @@
             body.print-slips .lt-slip .s-code { color: #000; }
 
             .lt-tab th, .lt-tab td { border-color: #666; }
-            .lt-tab td.code, .lt-tab td.alias { color: #000; }
+            .lt-tab td.code, .lt-tab td.alias, .lt-tab td.result, .lt-tab td.grade { color: #000; }
+            .lt-detail { display: none !important; }
         }
     </style>
 </head>
@@ -366,7 +401,9 @@
             <div class="lt-scroll">
                 <table class="lt-tab" id="ltTable"></table>
             </div>
+            <div class="lt-detail" id="ltDetail" hidden></div>
             <div class="lt-btns">
+                <button type="button" class="lt-btn" id="ltResults">Ergebnisse abrufen</button>
                 <button type="button" class="lt-btn" id="ltPrintList">Liste drucken</button>
                 <button type="button" class="lt-btn" id="ltCsv">Liste als CSV sichern</button>
             </div>
@@ -601,6 +638,7 @@
             const LOCKED = '\u2022\u2022\u2022 gesperrt';
 
             function render() {
+                paintUnlock();   /* names may have appeared or gone - the button follows */
                 if (!entries.length) {
                     listCard.hidden = slipCard.hidden = true;
                     elState.textContent = 'Noch keine Decknamen erzeugt.';
@@ -610,12 +648,16 @@
                 document.getElementById('ltSlipTitle').textContent = groupKey();
                 elState.textContent = entries.length + ' SuS in ' + groupKey() + ' · gespeichert nur in diesem Browser.';
 
-                let html = '<tr><th>Klarname</th><th>Deckname</th><th>Code</th></tr>';
+                let html = '<tr><th>Klarname</th><th>Deckname</th><th>Code</th><th>Ergebnis</th><th>Note</th></tr>';
                 entries.forEach(function (e) {
-                    html += '<tr><td>' + (e.name ? esc(e.name) : LOCKED) + '</td><td class="alias">' + esc(e.alias) +
-                        '</td><td class="code">' + esc(e.code) + '</td></tr>';
+                    html += '<tr data-code="' + esc(e.code) + '"><td>' + (e.name ? esc(e.name) : LOCKED) +
+                        '</td><td class="alias">' + esc(e.alias) + '</td><td class="code">' + esc(e.code) +
+                        '</td><td class="result" data-code="' + esc(e.code) + '">\u2026</td>' +
+                        '<td class="grade" data-code="' + esc(e.code) + '">\u2026</td></tr>';
                 });
                 elTable.innerHTML = html;
+                elDetail.hidden = true;
+                fillResults(false);
 
                 const url = testUrl();
                 elSlips.innerHTML = '';
@@ -643,6 +685,146 @@
                         slip.appendChild(m);
                     });
                     elSlips.appendChild(slip);
+                });
+            }
+
+            /* --- Ergebnis column (Doc, 10.09.2026) ---------------------------
+               Per code the page asks the server for exactly that one submission
+               (rpc quiz_result - nothing else of the pool is readable). Only the
+               code travels, the name stays in this browser. Quiz id and answer
+               key come from the test page itself (hidden iframe, same origin), so
+               there is no second copy of either that could drift apart. */
+            const elDetail = document.getElementById('ltDetail');
+            const results = {};      /* 'pool|code' -> { score, total, answers } or null */
+            const metaCache = {};    /* test file -> Promise({ id, version, questions }) */
+            function quizMeta(url) {
+                const file = url.split('?')[0];
+                if (!metaCache[file]) {
+                    metaCache[file] = new Promise(function (ok, no) {
+                        const f = document.createElement('iframe');
+                        f.hidden = true;
+                        f.src = file + '?test';
+                        f.onload = function () {
+                            try {
+                                const q = f.contentWindow.QUIZ || {};
+                                /* copied out before the frame goes */
+                                ok(JSON.parse(JSON.stringify({ id: q.id, version: q.version || 'v1',
+                                    questions: q.questions || [],
+                                    gradeScale: f.contentWindow.quizGradeScale || q.gradeScale || [] })));
+                            } catch (e) { no(e); }
+                            f.remove();
+                        };
+                        f.onerror = function () { f.remove(); no(new Error('test page')); };
+                        document.body.appendChild(f);
+                    });
+                    metaCache[file].catch(function () { delete metaCache[file]; });
+                }
+                return metaCache[file];
+            }
+            /* the pool id exactly as quiz-engine.js builds it: id-version-klasse */
+            function poolOf(meta, url) {
+                const klasse = (new URLSearchParams(url.split('?')[1] || '').get('klasse') || '')
+                    .replace(/[^a-z0-9_-]/gi, '').slice(0, 20);
+                return meta.id + '-' + meta.version + (klasse ? '-' + klasse : '');
+            }
+            function fillResults(force) {
+                const url = testUrl();
+                if (!url || !entries.length || !window.svpAuth) return;
+                const codes = entries.map(function (e) { return e.code; });
+                quizMeta(url).then(function (meta) {
+                    const pool = poolOf(meta, url);
+                    codes.forEach(function (code) {
+                        const key = pool + '|' + code;
+                        if (!force && key in results) { paintResult(code, results[key], meta); return; }
+                        fetch(svpAuth.DB_URL + '/rest/v1/rpc/quiz_result', {
+                            method: 'POST',
+                            headers: { apikey: svpAuth.DB_KEY, Authorization: 'Bearer ' + svpAuth.DB_KEY,
+                                       'Content-Type': 'application/json' },
+                            body: JSON.stringify({ p_quiz: pool, p_code: code })
+                        }).then(function (r) {
+                            if (!r.ok) throw new Error('HTTP ' + r.status);
+                            return r.json();
+                        }).then(function (rows) {
+                            results[key] = rows[0] || null;
+                            paintResult(code, results[key], meta);
+                        }).catch(function () { paintResult(code, undefined, meta); });
+                    });
+                }).catch(function () {
+                    elState.textContent = 'Ergebnisse: die Testseite liess sich nicht lesen.';
+                });
+            }
+            /* the grade exactly as the test page gives it: rounded percent, first
+               step of the scale it reaches */
+            function gradeOf(meta, res) {
+                const pct = Math.round(res.score / res.total * 100);
+                const step = (meta.gradeScale || []).find(function (st) { return pct >= st[0]; });
+                return step ? step[1] : '';
+            }
+            function paintResult(code, res, meta) {
+                const td = elTable.querySelector('td.result[data-code="' + code + '"]');
+                const tg = elTable.querySelector('td.grade[data-code="' + code + '"]');
+                if (!td || !tg) return;
+                td.classList.remove('low', 'none');
+                tg.classList.remove('good', 'low', 'none');
+                if (res === undefined) {
+                    td.textContent = tg.textContent = '?';
+                    td.title = tg.title = 'Server gerade nicht erreichbar';
+                    return;
+                }
+                if (!res) {
+                    td.textContent = tg.textContent = '\u2014';
+                    td.classList.add('none'); tg.classList.add('none');
+                    td.title = tg.title = 'noch keine Abgabe';
+                    return;
+                }
+                const slots = document.createElement('span');
+                td.textContent = '';
+                td.appendChild(slots);
+                /* pad to the longest possible value: 4 digits for "33/33" */
+                CyberClock.digits(slots, res.score + '/' + res.total, { minDigits: 2 * String(res.total).length });
+                td.title = Math.round(res.score / res.total * 100) + ' %';
+                if (res.score < res.total / 2) td.classList.add('low');
+                const g = gradeOf(meta, res);
+                tg.textContent = g;
+                tg.title = td.title;
+                if (g && g <= 2) tg.classList.add('good');
+                else if (g >= 5) tg.classList.add('low');
+            }
+            /* Click on a row: that pupil's answers as green/red tiles, the
+               question itself in the tooltip. Click again closes. */
+            elTable.addEventListener('click', function (ev) {
+                const tr = ev.target.closest('tr[data-code]');
+                if (!tr) return;
+                const again = tr.classList.contains('sel');
+                elTable.querySelectorAll('tr.sel').forEach(function (t) { t.classList.remove('sel'); });
+                if (again) { elDetail.hidden = true; return; }
+                tr.classList.add('sel');
+                showDetail(tr.dataset.code);
+            });
+            function showDetail(code) {
+                const e = entries.find(function (x) { return x.code === code; });
+                const url = testUrl();
+                if (!e || !url) return;
+                quizMeta(url).then(function (meta) {
+                    const res = results[poolOf(meta, url) + '|' + code];
+                    const who = (e.name ? esc(e.name) : LOCKED) + ' \u00b7 ' + esc(e.alias) + ' \u00b7 ' + esc(code);
+                    if (!res) {
+                        elDetail.innerHTML = '<div class="d-head">' + who + ' \u2014 noch keine Abgabe</div>';
+                    } else {
+                        let tiles = '';
+                        meta.questions.forEach(function (q, i) {
+                            const a = res.answers && res.answers[i] != null ? res.answers[i] : -1;
+                            const cls = a === q.solution ? 'ok' : (a < 0 ? '' : 'bad');
+                            const tip = 'Frage ' + (i + 1) + ' \u00b7 ' +
+                                (a >= 0 ? 'gew\u00e4hlt ' + 'ABCD'.charAt(a) : 'keine Antwort') +
+                                ' \u00b7 richtig ' + 'ABCD'.charAt(q.solution) + ' \u00b7 ' + q.q;
+                            tiles += '<span class="lt-q ' + cls + '" title="' + esc(tip) + '">' + (i + 1) + '</span>';
+                        });
+                        elDetail.innerHTML = '<div class="d-head">' + who + ' \u2014 ' + res.score + '/' + res.total +
+                            ' (' + Math.round(res.score / res.total * 100) + ' %) \u00b7 Note ' + gradeOf(meta, res) +
+                            '</div><div class="lt-qgrid">' + tiles + '</div>';
+                    }
+                    elDetail.hidden = false;
                 });
             }
 
@@ -691,7 +873,8 @@
             let localLists = null;
             function prefillFromLocal() {
                 const key = groupKey();
-                let list = localLists && localLists[key];
+                /* the Vorfuehrklasse brings its own (public) names */
+                let list = key === DEMO_GROUP ? DEMO : localLists && localLists[key];
                 /* The file holds a sealed blob, not names - so it needs the
                    passphrase like everything else. Locked means: say so, do not
                    prefill. */
@@ -845,6 +1028,29 @@
                 build(true);
             }
 
+            /* Vorfuehrklasse GENII (Doc, 10.09.2026): with ?test the dropdown
+               gets a demo group whose pupils are famous scientists. GENII is an
+               ordinary group key, so the slips' QR carries klasse=GENII and the
+               answers land in a pool of their own - the old Demo drawer printed
+               the real class into the QR and would have written into its pool.
+               Also offered when a GENII test run sends the teacher here via
+               the QR-Codes pill (?ziel=...klasse=GENII). */
+            const DEMO_GROUP = 'GENII';
+            function addDemoGroup() {
+                const ziel = new URLSearchParams(location.search).get('ziel') || '';
+                if (!demoMode && !/[?&]klasse=GENII(&|$)/.test(ziel)) return;
+                const o = document.createElement('option');
+                o.value = '../infotestfos12.html?klasse=' + DEMO_GROUP;
+                o.textContent = 'Informatik · GENII · Vorführklasse';
+                /* ?test is the demonstration: only GENII in the list, the real
+                   groups stay out of sight (Doc, 10.09.2026). Coming in via the
+                   QR-Codes pill (?ziel=...) the whole list stays. */
+                if (demoMode) Array.prototype.slice.call(elTest.options).forEach(function (x) { x.remove(); });
+                elTest.insertBefore(o, elTest.firstChild);
+                elTest.value = o.value;
+                demoMode = false;   /* from here on GENII is filed under its own key */
+            }
+
             /* No button any more: typing or pasting into the box builds the
                sheet by itself. build(true) never throws a code away - existing
                names keep theirs, new names get one. Two guards: an empty box
@@ -907,12 +1113,20 @@
             });
 
             const unlockBtn = document.getElementById('ltUnlock');
+            /* The button follows what is ON SCREEN, not only the key: the GENII
+               names (public) or names pasted while locked stand in the table
+               without a passphrase, and a closed padlock next to them said
+               the opposite (Doc, 10.09.2026). */
+            function namesShown() {
+                return entries.some(function (e) { return e.name; });
+            }
             function paintUnlock() {
                 const on = unlocked();
-                unlockBtn.textContent = on ? '\uD83D\uDD13 Namen verbergen' : '\uD83D\uDD12 Namen anzeigen';
-                unlockBtn.title = on ? 'Schluessel wieder sperren'
-                                     : 'Passwort eingeben, um die Klarnamen zu entschluesseln';
-                unlockBtn.classList.toggle('primary', !on);
+                const shown = on || namesShown();
+                unlockBtn.textContent = shown ? '\uD83D\uDD13 Namen verbergen' : '\uD83D\uDD12 Namen anzeigen';
+                unlockBtn.title = shown ? 'Namen ausblenden und Schluessel sperren'
+                                        : 'Passwort eingeben, um die Klarnamen zu entschluesseln';
+                unlockBtn.classList.toggle('primary', !shown);
                 /* The empty box must say WHY it is empty. Locked it reads
                    "verborgen", open it explains how to fill it - example names in
                    a placeholder only look like real data that got lost. */
@@ -921,19 +1135,19 @@
                     : '\u2022\u2022\u2022 Namen verborgen \u2014 gesperrt';
             }
             unlockBtn.addEventListener('click', function () {
-                if (!window.svpCrypto || !svpCrypto.available) { elState.textContent = 'Verschluesselung steht hier nicht zur Verfuegung.'; return; }
-                if (unlocked()) {
+                if (unlocked() || namesShown()) {
                     /* Locking has to take the text box with it. Nulling the names
                        in `entries` only blanks the TABLE - the box keeps whatever
                        it was last given, and the plain names stay on screen next
                        to a closed padlock. */
-                    svpCrypto.lock();
+                    if (window.svpCrypto) svpCrypto.lock();   /* harmless when already locked */
                     entries.forEach(function (e) { e.name = null; });
                     elNames.value = '';
                     paintUnlock();
                     render();
                     return;
                 }
+                if (!window.svpCrypto || !svpCrypto.available) { elState.textContent = 'Verschluesselung steht hier nicht zur Verfuegung.'; return; }
                 /* Unwrapping the private key reads it from Supabase, and THAT
                    needs a login - which is per origin, so being signed in on
                    docalvers.de does not help on localhost. Without this step the
@@ -962,6 +1176,7 @@
             document.getElementById('ltPrintList').addEventListener('click', function () { printAs('print-list'); });
             document.getElementById('ltPrintSlips').addEventListener('click', function () { printAs('print-slips'); });
             document.getElementById('ltCsv').addEventListener('click', csv);
+            document.getElementById('ltResults').addEventListener('click', function () { fillResults(true); });
             /* Choosing a Lerngruppe names the group, so the stored list and the
                printed sheet carry the Untis code instead of an empty field. */
             /* Switching the Lerngruppe switches the whole sheet: its stored
@@ -998,6 +1213,7 @@
                never called on load before, which is exactly how plain names
                survived a reload while the page said "gesperrt". */
             elNames.value = '';
+            addDemoGroup();
             zielFromUrl();
             restore();
             demoFromUrl();

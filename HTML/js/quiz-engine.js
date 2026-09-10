@@ -34,6 +34,9 @@
   /* quizzes without step-by-step solutions (e.g. infotest9) hide the panel */
   const NO_SOLUTIONS = CFG.solutions === 'none';
 
+  const FOOT_ANON = 'Doc Alvers Mathe-Labor · Es werden keine persönlichen Daten gespeichert, ' +
+    'nur anonyme Gesamt-Zähler.';
+
   /* The page markup is identical for every quiz, so the engine builds it. */
   function buildPage() {
     const wrap = document.createElement('div');
@@ -63,9 +66,9 @@
         '<div id="review"></div>' +
         '<div class="avg" id="classavg">Klassen-Durchschnitt wird geladen …</div>' +
       '</div>' +
-      '<footer>Doc Alvers Mathe-Labor · Es werden keine persönlichen Daten gespeichert, ' +
-      'nur anonyme Gesamt-Zähler.</footer>';
+      '<footer></footer>';
     wrap.querySelector('h1').textContent = CFG.title || '';
+    wrap.querySelector('footer').textContent = FOOT_ANON;
     wrap.querySelector('.sub').textContent = CFG.subtitle || '';
 
     document.body.appendChild(wrap);
@@ -82,15 +85,45 @@
   const KLASSE = (PARAMS.get('klasse') || '').replace(/[^a-z0-9_-]/gi, '').slice(0, 20);
   /* ?code = the slip code from leistungstest.html; sent with the submission
      so the sealed local list can match results back to names. Server enforces
-     one submission per (quiz, code). */
-  const CODE = (PARAMS.get('code') || '').toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 20);
+     one submission per (quiz, code). The QR brings it along; the code field
+     (placeCodeField) takes it by hand - the slip says "Code eintragen", so
+     there has to be a place to type it (Doc, 10.09.2026). */
+  /* Slip codes: 4 characters from leistungstest.html's alphabet - no I, O, 0, 1. */
+  const CODE_RE = /^[2-9A-HJ-NP-Z]{4}$/;
+  function normCode(s) {
+    return String(s).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
+  }
+  let code = normCode(PARAMS.get('code') || '');
+  /* Slips for this very test and group exist in this browser: leistungstest.html
+     keeps them under 'svp-leistungstest-v1' on the same origin. Then the teacher
+     is looking at a Leistungstest even without a code in the address - above
+     all in the dashboard, which never carries one (Doc, 10.09.2026). Pupils
+     bring their code anyway, so their view is unchanged. */
+  function slipsHere() {
+    if (!KLASSE) return false;
+    try {
+      const rec = JSON.parse(localStorage.getItem('svp-leistungstest-v1') || '{}')[KLASSE];
+      if (!rec || !rec.test) return false;
+      return rec.test.split('?')[0].replace(/^.*\//, '') === location.pathname.replace(/^.*\//, '');
+    } catch (e) { return false; }
+  }
+  const SLIPS = slipsHere();
+  /* empty is fine: without slips the test simply stays anonymous */
+  function codeOk() { return !code || CODE_RE.test(code); }
   /* With a code the footer claim "anonymous" would be wrong: the submission is
      pseudonymous (Art. 4 Nr. 5 DSGVO) - say so. */
-  if (CODE) {
+  function tagFooter() {
     const foot = document.querySelector('.wrap footer');
-    if (foot) foot.textContent = 'Doc Alvers Mathe-Labor · Abgabe pseudonym unter deinem Zettel-Code ' +
-      CODE + ' — ohne Namen. Die Zuordnung existiert nur auf dem Rechner der Lehrkraft.';
+    if (!foot) return;
+    foot.textContent = code && codeOk()
+      ? 'Doc Alvers Mathe-Labor · Abgabe pseudonym unter deinem Zettel-Code ' + code +
+        ' — ohne Namen. Die Zuordnung existiert nur auf dem Rechner der Lehrkraft.'
+      : SLIPS
+      ? 'Doc Alvers Mathe-Labor · Abgaben pseudonym unter Zettel-Codes — ohne Namen. ' +
+        'Die Zuordnung existiert nur auf dem Rechner der Lehrkraft.'
+      : FOOT_ANON;
   }
+  tagFooter();
   const QUIZ_ID = TEST_MODE ? CFG.id + '-test'
                             : CFG.id + '-' + (CFG.version || 'v1') + (KLASSE ? '-' + KLASSE : '');
   /* soft lock against double submits per browser; tied to QUIZ_ID so a new
@@ -99,6 +132,9 @@
 
   /* Grading scale: [min percentage, grade]. A page may override it via QUIZ.gradeScale. */
   const GRADE_SCALE = CFG.gradeScale || [[95, 1], [80, 2], [60, 3], [40, 4], [20, 5], [0, 6]];
+  /* the scale actually in force, for the Note column of svp/leistungstest.html
+     (it loads this page in a hidden frame) - one scale, not a copy there */
+  window.quizGradeScale = GRADE_SCALE;
 
   function gradeFor(pct) {
     for (let i = 0; i < GRADE_SCALE.length; i++) {
@@ -249,14 +285,18 @@
     });
   }
 
-  /* "Abgeben" unlocks only once every question has been answered. */
+  /* "Abgeben" unlocks only once every question has been answered - and a
+     Zettel-Code, if one was typed, is complete and valid. */
   function updateSubmitState() {
     if (!submitBtn) return;
-    if (TEST_MODE) { submitBtn.disabled = false; return; }
-    const open = answers.filter(function (a) { return a < 0; }).length;
-    submitBtn.disabled = open > 0;
+    const open = TEST_MODE ? 0 : answers.filter(function (a) { return a < 0; }).length;
+    const badCode = !codeOk();
+    submitBtn.disabled = open > 0 || badCode;
     if (hintEl) {
-      hintEl.textContent = open === 0 ? ''
+      hintEl.textContent = badCode
+        ? (code.length < 4 ? 'Zettel-Code: noch ' + (4 - code.length) + ' Zeichen.'
+                           : 'Diesen Zettel-Code gibt es nicht - bitte mit dem Zettel vergleichen.')
+        : open === 0 ? ''
         : 'Noch ' + open + (open === 1 ? ' Frage offen.' : ' Fragen offen.');
     }
   }
@@ -272,9 +312,11 @@
   }
 
   function submit() {
-    if (locked) return;
+    if (locked || !codeOk()) return;
     locked = true;
     if (submitBtn) submitBtn.disabled = true;
+    const codeInput = document.getElementById('codeInput');
+    if (codeInput) codeInput.disabled = true;
 
     let score = 0;
     document.querySelectorAll('.opt').forEach(function (b) {
@@ -326,7 +368,7 @@
             p_answers: answers,
             p_score: score,
             p_total: QUESTIONS.length,
-            p_code: CODE || null
+            p_code: code || null
           })
         });
 
@@ -513,6 +555,38 @@
     }
   }
 
+  /* Zettel-Code: shows the code the QR brought along, and takes it by hand
+     when the address was typed. Sits under the subtitle, above the questions -
+     the slip says "QR scannen, Code eintragen, Test bearbeiten". */
+  function placeCodeField() {
+    const row = document.createElement('label');
+    row.className = 'coderow';
+    row.htmlFor = 'codeInput';
+    row.innerHTML = '<span>Zettel-Code</span>' +
+      '<input id="codeInput" type="text" maxlength="8" autocomplete="off" ' +
+      'autocapitalize="characters" spellcheck="false" placeholder="falls vorhanden">';
+    const input = row.querySelector('input');
+    input.value = code;
+    input.addEventListener('input', function () {
+      const v = normCode(input.value);
+      if (input.value !== v) input.value = v;
+      code = v;
+      paintCode(input);
+      tagFooter();
+      tagContext();
+      updateSubmitState();
+    });
+    paintCode(input);
+    const sub = document.querySelector('.wrap .sub');
+    sub.parentNode.insertBefore(row, sub.nextSibling);
+  }
+
+  /* green once valid; red only for a complete but impossible code, not while typing */
+  function paintCode(input) {
+    input.classList.toggle('ok', CODE_RE.test(code));
+    input.classList.toggle('bad', code.length === 4 && !CODE_RE.test(code));
+  }
+
   /* Der Rueckweg aus der Auswertung steht rechts neben der Ueberschrift, auf
      deren Schriftlinie. Dafuer wandert die <h1> in eine gemeinsame Zeile
      (.titlerow) - nur so richtet der Flexbox-Baseline-Modus beide wirklich
@@ -665,6 +739,26 @@
     else if (KLASSE) sub.textContent += ' · Klasse ' + KLASSE;
   }
 
+  /* With a Zettel-Code the page is a Leistungstest, no longer anonymous:
+     "Anonymer Eingangstest ..." turns into "Leistungstest ..." in the heading
+     and the tab, and the sub line says so (Doc, 10.09.2026). Follows the
+     code like the footer does, so typing one flips it too. */
+  const TAB_TITLE = document.title;
+  let subBase = null;
+  function tagContext() {
+    const coded = (!!code && codeOk()) || SLIPS;
+    const swap = function (t) {
+      return coded ? t.replace(/^Anonymer Eingangstest/, 'Leistungstest') : t;
+    };
+    document.querySelector('.wrap h1').textContent = swap(CFG.title || '');
+    document.title = swap(TAB_TITLE);
+    const sub = document.querySelector('.wrap .sub');
+    if (subBase === null) subBase = sub.textContent;   /* after tagSubline: keeps "· Klasse ..." */
+    sub.textContent = coded
+      ? subBase.replace('anonyme Einzelscores', 'Einzelscores unter Zettel-Code') + ' · Leistungstest mit Zettel-Code'
+      : subBase;
+  }
+
   /* KaTeX is deferred: if it arrives after the first paint, redraw the math.
      Every element rendered by renderMath() keeps its source in data-src. */
   window.addEventListener('load', function () {
@@ -681,6 +775,7 @@
       initDashboard();
       placeBackToTestButton();
       tagSubline();
+      tagContext();
     });
   } else {
     if (submitBtn) submitBtn.addEventListener('click', submit);
@@ -692,8 +787,10 @@
     if (CFG.submit !== false) placeEvalButton();   /* nach init, damit die .qbar schon steht */
     placePlanButton();
     if (CFG.submit !== false) placeSlipButton();   /* zuletzt: braucht den Plan-Knopf schon in der Leiste */
+    if (CFG.submit !== false) placeCodeField();    /* Uebungsmodus gibt nie ab - kein Code noetig */
     updateSubmitState();
     tagSubline();
+    tagContext();
     /* Demo helper (?test): key r fills a random answer set, ~95% correct. */
     if (TEST_MODE) {
       document.addEventListener('keydown', function (e) {

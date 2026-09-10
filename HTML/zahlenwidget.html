@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOC ALVERS MATHE-LABORE | Zahlen-Widget</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="js/cyber-clock.css">
     <style>
         :root {
             --neon-blue: #00d2ff;
@@ -38,32 +39,14 @@
             box-shadow: 0 0 30px rgba(0, 210, 255, 0.1);
         }
 
-        /* --- NUMBER WIDGET CSS (BOXES REMOVED) --- */
-        .cyber-number-widget {
-            display: inline-flex;
-            gap: 2px; /* A bit tighter without borders */
-            align-items: center;
-        }
-
-        .cyber-digit-box {
-            width: 24px; /* Fixed width for stability */
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent; /* Box removed */
-            border: none; /* Border removed */
-            font-size: 1.8rem; /* Slightly larger for stronger presence */
-            font-weight: 700;
-            color: var(--neon-blue);
-            text-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
-            transition: all 0.1s ease;
-        }
-
-        .cyber-digit-box.separator {
-            width: 10px;
-            color: var(--neon-blue);
-            text-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
+        /* the central digits widget (js/cyber-clock.js) in the showcase size */
+        .cyber-digits {
+            --cc-size: 1.8rem;
+            --cc-dw: 24px;
+            --cc-h: 44px;
+            --cc-sw: 10px;
+            --cc-digit: var(--neon-blue);
+            --cc-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
         }
 
         .label {
@@ -105,17 +88,17 @@
     <div class="showcase-container">
         <div>
             <div class="label">Fitness Value</div>
-            <div id="widget-fitness" class="cyber-number-widget"></div>
+            <div id="widget-fitness" class="cyber-digits"></div>
         </div>
 
         <div>
             <div class="label">Sigma Strategy</div>
-            <div id="widget-sigma" class="cyber-number-widget"></div>
+            <div id="widget-sigma" class="cyber-digits"></div>
         </div>
 
         <div>
             <div class="label">Generations</div>
-            <div id="widget-gen" class="cyber-number-widget"></div>
+            <div id="widget-gen" class="cyber-digits"></div>
         </div>
 
         <div class="control-panel">
@@ -124,44 +107,11 @@
         </div>
     </div>
 
-    <script src="js/ui.js?v=4"></script>
+    <script src="js/cyber-clock.js"></script>
     <script>
-        CyberUI.init();
-
-        /**
-         * Builds a cyber number widget inside a container.
-         * @param {string} containerId - Target element ID
-         * @param {number} value - Value to display
-         * @param {number} decimals - Decimal places
-         * @param {number} minDigits - Minimum integer digits (for layout stability)
-         */
-        function updateCyberWidget(containerId, value, decimals = 2, minDigits = 1) {
-            const container = document.getElementById(containerId);
-            if (!container) return;
-
-            // Format value
-            let str = value.toFixed(decimals);
-            
-            // Leading padding to prevent visual jitter
-            const parts = str.split('.');
-            while (parts[0].length < minDigits) {
-                parts[0] = ' ' + parts[0];
-            }
-            str = parts.join('.');
-
-            // Build HTML
-            let html = '';
-            for (let char of str) {
-                if (char === '.' || char === ',' || char === '-') {
-                    html += `<div class="cyber-digit-box separator">${char}</div>`;
-                } else if (char === ' ') {
-                    html += `<div class="cyber-digit-box" style="border-color:transparent; background:transparent;"></div>`;
-                } else {
-                    html += `<div class="cyber-digit-box">${char}</div>`;
-                }
-            }
-            
-            container.innerHTML = html;
+        /* the showcase uses the widget as every page does: CyberClock.digits(id, value, opts) */
+        function updateCyberWidget(containerId, value, decimals, minDigits) {
+            CyberClock.digits(containerId, value, { decimals: decimals, minDigits: minDigits });
         }
 
         // --- DEMO LOGIC ---

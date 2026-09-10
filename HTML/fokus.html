@@ -12,6 +12,7 @@
     <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-clock.css">
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="js/lab-shell-minimal.css">
@@ -43,6 +44,7 @@
             top: 50%;
             transform: translate(-50%, -50%);
             justify-content: center !important;
+            --cc-sep-opacity: 1;   /* the colon as bright as the digits */
             pointer-events: none;
             z-index: 5;
         }
@@ -97,8 +99,8 @@
             </div>
             <canvas id="canvas"></canvas>
             <!-- Orbitron digits have different widths, so plain text shifts on every tick.
-                 CyberUI's digit widget puts each glyph in a fixed cell instead. -->
-            <div id="clock-widget" class="cyber-number-widget"></div>
+                 The central digits widget (js/cyber-clock.js) puts each glyph in a fixed cell. -->
+            <div id="clock-widget" class="cyber-digits"></div>
         </div>
     </main>
 
@@ -114,6 +116,7 @@
     <script src="js/branding/nav.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/cyber-clock.js"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -331,26 +334,14 @@
                 if (key === clockKey) return;
                 clockKey = key;
                 const cells = cellWidths(size);
-                CyberUI.updateNumberWidget('clock-widget', text, 0, 1, {
-                    fontSize: size + 'px',
+                CyberClock.digits('clock-widget', text, { style: {
+                    size: size + 'px',
                     digitWidth: cells.digit + 'px',
-                    digitHeight: Math.round(size * 1.18) + 'px',
-                    separatorWidth: cells.sep + 'px',
+                    height: Math.round(size * 1.18) + 'px',
+                    sepWidth: cells.sep + 'px',
                     color: 'rgba(255, 255, 255, 0.96)',
-                    textShadow: '0 0 ' + Math.round(size * 0.16) + 'px rgba(7, 15, 32, 0.9)'
-                });
-                // The shared stylesheet pins .separator to width:10px !important, which the
-                // widget's own separatorWidth cannot beat - at this size the colon gets crushed.
-                // Overriding it here keeps the fix local instead of editing shared CSS.
-                const box = document.getElementById('clock-widget');
-                box.querySelectorAll('.cyber-digit-box').forEach((el) => {
-                    el.style.setProperty('height', Math.round(size * 1.18) + 'px', 'important');
-                    el.style.setProperty('line-height', '1', 'important');
-                    if (el.classList.contains('separator')) {
-                        el.style.setProperty('width', cells.sep + 'px', 'important');
-                        el.style.setProperty('opacity', '1', 'important');
-                    }
-                });
+                    shadow: '0 0 ' + Math.round(size * 0.16) + 'px rgba(7, 15, 32, 0.9)'
+                } });
             }
 
             // CC BY obliges us to name the photographer wherever the picture is shown.

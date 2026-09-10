@@ -12,6 +12,7 @@
     <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-clock.css">
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="js/lab-shell-minimal.css">
@@ -449,12 +450,12 @@
                         <div id="train-bar"></div>
                     </div>
                     <div id="train-seen-wrap" style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:10px;padding:8px 18px;border:1px solid rgba(0,210,255,0.2);border-radius:10px;background:rgba(0,210,255,0.06);margin-top:8px;align-self:center;">
-                        <div id="train-seen" class="cyber-number-widget"></div>
+                        <div id="train-seen" class="cyber-digits"></div>
                         <span id="train-seen-label"
                             style="font-family:'Orbitron',sans-serif;font-size:17px;color:rgba(255,255,255,0.5);letter-spacing:0.06em;">Beispiele geladen</span>
                     </div>
                     <div id="train-stopwatch-wrap" style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px;padding:6px 18px;border:1px solid rgba(0,210,255,0.12);border-radius:10px;background:rgba(0,210,255,0.04);margin-top:6px;align-self:center;">
-                        <div id="train-stopwatch" class="cyber-number-widget"></div>
+                        <div id="train-stopwatch" class="cyber-digits"></div>
                     </div>
                     <button id="btn-training-done" onclick="finishTraining()" style="display:none;margin-top:12px;padding:10px 36px;font-family:'Orbitron',sans-serif;font-size:14px;letter-spacing:0.1em;background:rgba(173,255,47,0.12);border:1px solid rgba(173,255,47,0.5);color:#adff2f;border-radius:8px;cursor:pointer;">OK</button>
                 </div>
@@ -476,6 +477,7 @@
     <script src="js/branding/nav.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/cyber-clock.js"></script>
     <script>
         // ── Local translations ──────────────────────────────────────────────────────
         const LAB_T = {
@@ -566,8 +568,8 @@
         // ── Sidebar cards ───────────────────────────────────────────────────────────
         document.getElementById('ui-container').insertAdjacentHTML('beforeend', '<div id="result-cards-wrap" style="display:none"></div>');
         CyberUI.createCard('result-cards-wrap', t('card_result'), `
-        <div id="result-digit" class="cyber-number-widget dim" style="display:flex;width:100%;justify-content:center;min-height:90px;"></div>
-        <div id="result-conf" class="cyber-number-widget" style="display:flex;width:100%;justify-content:center;min-height:20px;margin-top:5px;"></div>
+        <div id="result-digit" class="cyber-digits dim" style="display:flex;width:100%;justify-content:center;min-height:90px;"></div>
+        <div id="result-conf" class="cyber-digits" style="display:flex;width:100%;justify-content:center;min-height:20px;margin-top:5px;"></div>
         <button class="cyber-btn" onclick="clearDraw()"
             style="width:100%;margin-top:14px;border-color:rgba(0,210,255,0.35);">
             ${t('clear')}
@@ -782,9 +784,8 @@
             stopStopwatch();
             swStart = performance.now();
             function tick() {
-                CyberUI.updateNumberWidget('train-stopwatch', swFmt(performance.now() - swStart), 0, 0, {
-                    fontSize: '17px', digitWidth: '12px', digitHeight: '23px',
-                    color: '#00d2ff'
+                CyberClock.digits('train-stopwatch', swFmt(performance.now() - swStart), {
+                    style: { size: '17px', digitWidth: '12px', height: '23px', color: '#00d2ff' }
                 });
                 swRaf = requestAnimationFrame(tick);
             }
@@ -851,8 +852,9 @@
             initDraw();
             hasStrokes = false;
             const rd = document.getElementById('result-digit');
-            rd.className = 'cyber-number-widget dim';
-            rd.innerHTML = '<div class="cyber-digit-box" style="font-size:80px;width:60px;height:88px;opacity:0.18;">—</div>';
+            rd.className = 'cyber-digits dim';
+            CyberClock.digits(rd, '—', { style: { size: '80px', digitWidth: '60px', sepWidth: '60px', height: '88px',
+                color: 'rgba(255,255,255,0.18)', shadow: 'none' } });
             document.getElementById('result-conf').innerHTML = '';
             for (let i = 0; i <= 9; i++) {
                 const b = document.getElementById('bar-' + i);
@@ -950,16 +952,16 @@
                 p.classList.remove('top');
             }
             const rdEl = document.getElementById('result-digit');
-            rdEl.className = 'cyber-number-widget';
-            CyberUI.updateNumberWidget('result-digit', top, 0, 1, {
-                fontSize: '80px', digitWidth: '60px', digitHeight: '88px',
-                color: '#adff2f', textShadow: '0 0 40px rgba(173,255,47,0.5)'
-            });
+            rdEl.className = 'cyber-digits';
+            CyberClock.digits('result-digit', top, { style: {
+                size: '80px', digitWidth: '60px', height: '88px',
+                color: '#adff2f', shadow: '0 0 40px rgba(173,255,47,0.5)'
+            } });
             const c = (probs[top] * 100).toFixed(1);
-            CyberUI.updateNumberWidget('result-conf', parseFloat(c), 1, 2, {
-                fontSize: '12px', digitWidth: '8px', digitHeight: '18px',
+            CyberClock.digits('result-conf', parseFloat(c), { decimals: 1, minDigits: 2, style: {
+                size: '12px', digitWidth: '8px', height: '18px',
                 color: 'rgba(255,255,255,0.45)'
-            });
+            } });
             coachEl.textContent = `${t('predicted')}: ${top}  ·  ${t('conf')}: ${c}%`;
             wasPredicted = true;
         }
@@ -1138,10 +1140,7 @@
             document.getElementById('load-spinner').style.display = 'flex';
             seenLabel.textContent = 'Beispiele geladen';
             seenLabel.style.color = 'rgba(255,255,255,0.35)';
-            CyberUI.updateNumberWidget('train-seen', 0, 0, 6, {
-                fontSize: '17px', digitWidth: '12px', digitHeight: '23px',
-                color: 'rgba(255,255,255,0.35)', thousandsSep: true
-            });
+            CyberClock.digits('train-seen', 0, { thousands: true, style: { size: '17px', digitWidth: '12px', height: '23px', color: 'rgba(255,255,255,0.35)' } });
             overlay.classList.add('visible');
 
             // Zwei Frames warten bis display:flex wirklich gerendert ist
@@ -1167,10 +1166,8 @@
                         bar.style.width = pct + '%';
                         seenLabel.style.color = '#adff2f';
                         seenLabel.style.textShadow = '0 0 10px rgba(173,255,47,0.6)';
-                        CyberUI.updateNumberWidget('train-seen', done, 0, 6, {
-                            fontSize: '17px', digitWidth: '12px', digitHeight: '23px',
-                            color: '#adff2f', textShadow: '0 0 10px rgba(173,255,47,0.6)', thousandsSep: true
-                        });
+                        CyberClock.digits('train-seen', done, { thousands: true, style: { size: '17px', digitWidth: '12px', height: '23px', color: '#adff2f',
+                            shadow: '0 0 10px rgba(173,255,47,0.6)' } });
                         
                         // Zeichne 10x10 Grid der aktuell geladenen Daten
                         const ac = document.getElementById('mnist-anim');
@@ -1232,9 +1229,7 @@
             coachEl.textContent   = 'Modell wird trainiert …';
             seenLabel.textContent = 'Beispiele trainiert';
             seenLabel.style.color = '#00d2ff';
-            CyberUI.updateNumberWidget('train-seen', 0, 0, 6, {
-                fontSize: '17px', digitWidth: '12px', digitHeight: '23px', color: '#00d2ff', thousandsSep: true
-            });
+            CyberClock.digits('train-seen', 0, { thousands: true, style: { size: '17px', digitWidth: '12px', height: '23px', color: '#00d2ff' } });
             startMnistAnim(pixels, labels, N);
 
             const N_ACTUAL = N;
@@ -1296,9 +1291,7 @@
                         bar.style.transition = 'none';
                         bar.style.width = `${Math.min(100, Math.round(epochFrac * 100))}%`;
                         const trained = Math.min((currentEpoch * N_ACTUAL) + (batch + 1) * 256, (currentEpoch + 1) * N_ACTUAL);
-                        CyberUI.updateNumberWidget('train-seen', trained, 0, 6, {
-                            fontSize: '17px', digitWidth: '12px', digitHeight: '23px', color: '#00d2ff', thousandsSep: true
-                        });
+                        CyberClock.digits('train-seen', trained, { thousands: true, style: { size: '17px', digitWidth: '12px', height: '23px', color: '#00d2ff' } });
                         if ((batch + 1) % 5 === 0) {
                             computeAndShowClassAcc(null);
                         }

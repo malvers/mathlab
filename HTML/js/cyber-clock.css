@@ -1,6 +1,6 @@
-/* Reusable fixed-box clock — each digit sits in a fixed-width slot, so the time never jitters
-   as the digits change. Colours/size are CSS variables; override per use site.
-   Markup is built by cyber-clock.js (CyberClock.mount / CyberClock.set). */
+/* THE fixed-slot digits widget — each digit sits in a fixed-width slot, so nothing jitters
+   as values change. Colours/size are CSS variables; override per use site.
+   Markup is built by cyber-clock.js (CyberClock.mount / set / mountNum / setNum / digits). */
 .cyber-clock {
     --cc-size: 1.4rem;        /* overall size */
     --cc-digit: #fff;         /* digit colour */
@@ -43,3 +43,22 @@
     font-weight: 700;
     color: var(--cc-digit);
 }
+
+/* General digits (CyberClock.digits): telemetry in the labs, score columns in tables.
+   Slot height, weight, colour and glow come from variables — the labs set their neon look
+   centrally in cyber-lab-overrides.css, a light page like the svp sets its own. */
+.cyber-digits {
+    --cc-dw: 0.7em;
+    --cc-sw: 0.35em;
+    --cc-colon: var(--cc-digit);      /* separators in the digit colour */
+    gap: 2px;
+}
+.cyber-digits .cc-d, .cyber-digits .cc-sep {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--cc-h, auto);
+    font-weight: var(--cc-weight, 700);
+    text-shadow: var(--cc-shadow, none);
+}
+.cyber-digits .cc-sep { opacity: var(--cc-sep-opacity, 1); }
