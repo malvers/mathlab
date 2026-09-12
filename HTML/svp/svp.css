@@ -3228,6 +3228,78 @@ body.form-preview #svp-form {
 /* all three grading places for this talk are taken */
 .vt-grade.full { color: var(--phi); border-color: rgba(121, 158, 49, 0.6); }
 
+/* Date of the talk, in the title line (Doc, 12.09.2026). Pupils see a quiet
+   tag; logged in, the tag sits over an invisible native date picker. */
+.vt-date {
+    position: relative;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    line-height: 14px;
+    padding: 3px 9px;
+    color: var(--lambda);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.vt-date.edit { cursor: pointer; }
+.vt-date.edit:hover { border-color: var(--lambda); }
+.vt-date.empty { color: var(--muted); border-style: dashed; }
+
+/* covers the whole tag, so a click anywhere lands on the picker; the
+   calendar follows the page's scheme */
+.vt-date input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    cursor: pointer;
+    color-scheme: dark;
+}
+
+html.svp-light .vt-date input { color-scheme: light; }
+
+/* Doc's mark for the talk - only on a logged-in, unlocked page. Grey
+   placeholder = computed from the sheets, typed value = his override. */
+.vt-note-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 8px;
+}
+
+.vt-note {
+    width: 3.4em;
+    box-sizing: border-box;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    text-align: center;
+    line-height: 14px;
+    padding: 3px 4px;
+    color: var(--text);
+    background: var(--input-bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    outline: none;
+}
+
+.vt-note::placeholder { color: var(--muted); opacity: 1; }
+.vt-note:focus { border-color: var(--lambda); }
+/* typed over by hand: in the accent, so it never passes for the computed one */
+.vt-note.over { color: var(--lambda); border-color: var(--lambda); }
+
+.vt-note-pct {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.72rem;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
 /* edit mode: dashed outlines come from .editing [contenteditable] above */
 .vt-list.editing [contenteditable="true"] { padding: 1px 4px; border-radius: 4px; }
 
@@ -3402,7 +3474,7 @@ body.form-preview #svp-form {
 
 @media print {
     .vt-actions, .vt-hint, .vt-confirm, .vt-switch, .vt-more, .vt-more-box, .vt-status,
-    .vt-menu, .vt-grade, .vt-grade-lbl, .vt-grades, .vt-add { display: none !important; }
+    .vt-menu, .vt-grade, .vt-grade-lbl, .vt-grades, .vt-add, .vt-date.empty { display: none !important; }
 
     .vt-row {
         break-inside: avoid;
