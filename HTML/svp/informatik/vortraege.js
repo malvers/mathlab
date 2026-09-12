@@ -534,6 +534,21 @@
         try { el.setSelectionRange(d.start, d.end); } catch (e) { }
     }
 
+    /* "-" is out of play while the last field holds a name - stored in the
+       cloud or only just typed (Doc, 12.09.2026: "wenn ein Name drin ist
+       nicht -"). Grey then, and the tooltip says why. */
+    function syncLess(i) {
+        const b = $('less-' + i);
+        if (!b) return;
+        const n = fieldCount(i);
+        const last = $('name-' + i + '-' + (n - 1));
+        const full = S(i)[n - 1].taken || !!(last && last.value.trim());
+        b.disabled = n <= 1 || full;
+        b.title = n <= 1 ? 'Ein Namensfeld bleibt immer'
+            : full ? 'Im letzten Feld steht ein Name — erst den Eintrag löschen'
+            : 'Ein Namensfeld weniger';
+    }
+
     function render() {
         const box = $('list');
         const draft = grabDrafts();
@@ -555,19 +570,21 @@
                     '" value="' + esc(slotValue(i, j)) + '" placeholder="Name ' + (j + 1) + '"' + ro + ttl +
                     ' autocomplete="off" spellcheck="false" aria-label="Name ' + (j + 1) + ' für Thema ' + (pos + 1) + '"></div>';
             };
-            /* Ein Feld mehr geht bis drei, ein Feld weniger bis eins - aber nur,
-               solange das letzte Feld frei ist. Ein belegtes wegzuklappen wuerde
-               einen Namen von der Seite verschwinden lassen. Bei zwei Feldern
-               stehen darum beide Knoepfe nebeneinander. */
+            /* One field more goes up to three, one field less down to one - but
+               only while the last field is free: folding a taken one away would
+               make a name vanish from the page. Both buttons are always there
+               (Doc, 12.09.2026); the one that cannot act right now is disabled
+               and its tooltip says why. The state of "-" comes from syncLess,
+               because a name only just typed counts as well. */
             const canAdd = n < 3;
-            const canDrop = n > 1 && !S(i)[n - 1].taken;
-            const knopf = (id, sign, title) =>
+            const knopf = (id, sign, title, ok, why) =>
                 '<button type="button" class="vt-more" id="' + id + '-' + i + '"' +
-                ' title="' + title + '"' +
+                (ok ? '' : ' disabled') +
+                ' title="' + (ok ? title : why) + '"' +
                 ' aria-label="' + title + ' bei Thema ' + (pos + 1) + '">' + sign + '</button>';
             const more = '<span class="vt-more-box">' +
-                (canDrop ? knopf('less', '−', 'Ein Namensfeld weniger') : '') +
-                (canAdd ? knopf('more', '+', 'Ein Namensfeld mehr') : '') +
+                knopf('less', '−', 'Ein Namensfeld weniger', true, '') +
+                knopf('more', '+', 'Ein Namensfeld mehr', canAdd, 'Mehr als drei Namen gehen nicht') +
                 '</span>';
             return '<div class="vt-row' + (taken ? ' taken' : '') +
                 (n === 3 ? ' three' : n === 1 ? ' one' : '') + '" id="row-' + i + '">' +
@@ -636,7 +653,7 @@
                 }
                 el.classList.toggle('unsaved', failed.has(i + '-' + j));
                 el.addEventListener('focus', () => { lastFocus = el.id; });
-                el.addEventListener('input', () => { dirty.add(i + '-' + j); queueSave(i, j); });
+                el.addEventListener('input', () => { dirty.add(i + '-' + j); queueSave(i, j); syncLess(i); });
                 el.addEventListener('blur', () => flushSave(i, j));
                 /* Enter means "done" - otherwise the field keeps the name to
                    itself until the pupil happens to click somewhere else */
@@ -649,6 +666,7 @@
             el.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } });
         });
         putDrafts(draft);
+        list.forEach((t) => syncLess(t.id));      /* after the drafts: a typed name counts */
         sizeNrColumn();
         setEditing(editing);
         updateCount();
@@ -1441,6 +1459,16 @@
                 gb.textContent = r[1] + (sent ? ' ✓' : '');
                 if (sent) gb.title = 'Bewertung ' + r[1] + ' ist abgegeben';
             });
+            /* the second sheet coming in turns the locked mark into *** */
+            const nl = $('notelock-' + i);
+            if (nl) {
+                const given = noteGiven(i);
+                const t = given ? NOTE_GIVEN : NOTE_NONE;
+                nl.textContent = given ? '***' : '–';
+                nl.classList.toggle('none', !given);
+                nl.title = t;
+                nl.setAttribute('aria-label', t);
+            }
         });
     }
 
@@ -1522,10 +1550,12 @@
          schedule (a group that is ready moves to the top), the DATES by
          place (place 1 is the first Friday, whoever stands there), and Doc's
          MARKS by talk.
-       The date is shown to everybody; Doc sets it, logged in. The mark only
-       appears on a page that is logged in AND unlocked, is worked out from the
-       two sealed sheets (weights and scale in svp-noten.js), and Doc can
-       overwrite it. Dates are plain text, they are no secret; marks are
+       The date is shown to everybody; Doc sets it, logged in. The mark field
+       is shown to everybody as well, but its value only on a page that is
+       logged in AND unlocked - everybody else just sees *** once a mark is
+       given (Doc, 12.09.2026). The mark is worked out from the two sealed
+       sheets (weights and scale in svp-noten.js), and Doc can overwrite it.
+       Dates are plain text, they are no secret; marks are
        stored as ciphertext only. */
     const TOPICS_PAGE = '/svp/vortraege/' + PLAN;
     const META_PAGE = TOPICS_PAGE + '/' + KLASSE;
@@ -1750,9 +1780,30 @@
         return pct === null ? null : { pct: pct, note: N.note(pct) };
     }
 
+    /* Is there a mark for this talk? Both sheets in (then it is worked out)
+       or Doc typed one - that much is readable without the key. */
+    function noteGiven(i) {
+        const s = bewIn[i];
+        return !!(meta.noten[i] || (s && s.coach && s.publikum));
+    }
+    const NOTE_GIVEN = 'Note vergeben — sehen kann sie nur Doc Alvers';
+    const NOTE_NONE = 'Noch keine Note vergeben';
+
+    /* Everybody else sees the field as well, but only WHETHER a mark is
+       given: *** or – (Doc, 12.09.2026), never the value. */
+    function noteLockHtml(i) {
+        const given = noteGiven(i);
+        const t = given ? NOTE_GIVEN : NOTE_NONE;
+        return '<span class="vt-note-box">' +
+            '<span class="vt-grade-lbl">Note</span>' +
+            '<span class="vt-note locked' + (given ? '' : ' none') + '" id="notelock-' + i + '"' +
+            ' title="' + t + '" aria-label="' + t + '">' + (given ? '***' : '–') + '</span>' +
+            '</span>';
+    }
+
     /* Grey placeholder = computed, typed value = Doc's override. */
     function noteHtml(i, pos) {
-        if (!gradesVisible()) return '';
+        if (!gradesVisible()) return noteLockHtml(i);
         const c = noteCalc(i);
         const s = sheetPts[i] || {};
         const over = noteOver[i] || '';
@@ -1839,7 +1890,8 @@
         'schaltet das dritte Feld f&uuml;r alle Themen auf einmal ein. Ein Feld, in dem schon ein Name steht, ' +
         'l&auml;sst sich nicht wegklappen; erst den Eintrag l&ouml;schen. ' +
         'Beim Drucken erscheinen die Namen nur im entsperrten Zustand. ' +
-        'Das <b>Datum</b> neben dem Titel setzt Doc Alvers angemeldet per Klick. Die <b>Note</b> sieht nur er, ' +
+        'Das <b>Datum</b> neben dem Titel setzt Doc Alvers angemeldet per Klick. Das Feld <b>Note</b> steht bei jedem ' +
+        'Vortrag: <b>&ndash;</b> hei&szlig;t noch keine Note, <b>***</b> hei&szlig;t vergeben. Die Note selbst sieht nur er, ' +
         'angemeldet und entsperrt: errechnet aus Coach- und Publikumsbogen, von Hand &uuml;berschreibbar &mdash; ' +
         'Feld leeren stellt die errechnete wieder her.';
 

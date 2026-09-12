@@ -3088,8 +3088,8 @@ body.form-preview #svp-form {
 /* Allein vortragen: ein Feld, dafuer breiter (Doc, 08.09.2026). */
 .vt-row.one { grid-template-columns: 52px 1fr minmax(150px, 300px) auto; }
 
-/* Die Knopfgruppe am rechten Zeilenrand: bei zwei Feldern stehen - und +
-   nebeneinander, sonst steht dort nur einer. */
+/* The button group at the right edge of the row: - and + are always both
+   there (Doc, 12.09.2026); the one that cannot act right now is dimmed. */
 .vt-more-box { display: flex; gap: 6px; }
 
 /* the toggle itself: a quiet +/- at the right edge, never in print.
@@ -3109,6 +3109,9 @@ body.form-preview #svp-form {
 }
 
 .vt-more:hover { color: var(--phi); border-color: var(--phi); }
+/* shown, but out of play: last field taken (-) or three fields already (+) */
+.vt-more:disabled,
+.vt-more:disabled:hover { opacity: 0.4; color: var(--muted); border-color: var(--line); cursor: default; }
 
 /* a claimed topic gets the φ-green tint */
 .vt-row.taken {
@@ -3264,8 +3267,9 @@ body.form-preview #svp-form {
 
 html.svp-light .vt-date input { color-scheme: light; }
 
-/* Doc's mark for the talk - only on a logged-in, unlocked page. Grey
-   placeholder = computed from the sheets, typed value = his override. */
+/* Doc's mark for the talk. Logged in and unlocked: grey placeholder =
+   computed from the sheets, typed value = his override. Everybody else
+   gets the locked field: –, or *** once a mark is given. */
 .vt-note-box {
     display: inline-flex;
     align-items: center;
@@ -3292,6 +3296,15 @@ html.svp-light .vt-date input { color-scheme: light; }
 .vt-note:focus { border-color: var(--lambda); }
 /* typed over by hand: in the accent, so it never passes for the computed one */
 .vt-note.over { color: var(--lambda); border-color: var(--lambda); }
+/* locked: a plain box of the input's size, nothing to click or type */
+.vt-note.locked {
+    display: inline-block;
+    height: 22px;            /* = the input: 14px line + 2 x 3px padding + 2 x 1px border */
+    cursor: default;
+    user-select: none;
+}
+/* no mark yet: the dash in grey, like the placeholder in Doc's field */
+.vt-note.locked.none { color: var(--muted); }
 
 .vt-note-pct {
     font-family: 'Outfit', sans-serif;
