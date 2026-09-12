@@ -526,6 +526,7 @@
 
     <script src="svp-auth.js"></script>
     <script src="svp-crypto.js"></script>
+    <script src="svp-noten.js"></script>
     <script>
         (function () {
             'use strict';
@@ -614,11 +615,11 @@
             let talk = '';
             try { talk = new URLSearchParams(location.search).get('v') || ''; } catch (e) { }
 
-            /* A talk is graded twice, and the two do not count the same: the
-               Coach carries three votes, the audience one (Doc, 04.09.2026).
-               The talk id ends in the role, so the sibling sheet is one string
-               replacement away. */
-            const WEIGHT = { coach: 3, publikum: 1 };
+            /* A talk is graded twice: the Coach and the audience. How the two
+               count is set in svp-noten.js, shared with the list of talks (Doc,
+               12.09.2026: 3 : 3, it was 3 : 1). The talk id ends in the role,
+               so the sibling sheet is one string replacement away. */
+            const WEIGHT = svpNoten.WEIGHT;
             const ROLE_LABEL = { coach: 'Coach', publikum: 'Publikum' };
             const role = (talk.match(/-(coach|publikum)$/) || [])[1] || '';
             const otherRole = role === 'coach' ? 'publikum' : (role === 'publikum' ? 'coach' : '');
@@ -842,21 +843,24 @@
                to a Publikum sheet in THIS browser - that is the case when Doc
                fills both himself instead of letting the three send. */
             function publikumScore() {
-                if (publikum && publikum.got !== null) return { got: publikum.got, cloud: true };
+                if (publikum && publikum.got !== null) return { got: publikum.got, max: publikum.max, cloud: true };
                 const local = scoreOf('svp-bewertungsmatrix:' + talk.replace(/-[a-z]+$/, '-publikum'));
                 return local === null ? null : { got: local, cloud: false };
             }
 
-            /* Doc's sheet counts three votes, the audience one. Shown on the
-               Coach sheet only - that is where the mark is decided, and a pupil
-               must not see the other grades anyway. */
+            /* Weighted as in svp-noten.js, and by SHARE of each sheet's own
+               maximum - the audience may have used the other language. Shown
+               on the Coach sheet only - that is where the mark is decided, and
+               a pupil must not see the other grades anyway. */
             function drawSummary() {
                 if (role !== 'coach') { elSummary.hidden = true; return; }
                 const mine = totals();
                 const other = publikumScore();
                 if (!mine.any || !other) { elSummary.hidden = true; return; }
-                const total = (mine.got * WEIGHT.coach + other.got * WEIGHT.publikum) /
-                    (WEIGHT.coach + WEIGHT.publikum);
+                const pct = svpNoten.combine({ got: mine.got, max: mine.max },
+                    { got: other.got, max: other.max || mine.max });
+                if (pct === null) { elSummary.hidden = true; return; }
+                const total = pct * mine.max;
                 const sh = sheet();
                 elSummary.hidden = false;
                 elSummary.innerHTML = '';
@@ -866,7 +870,7 @@
                     (state.lang === 'de' ? 'zusammen ' : 'together ');
                 const b = document.createElement('b');
                 b.textContent = fmt(total) + ' ' + sh.of + ' ' + mine.max +
-                    ' · ' + fmt(total / mine.max * 100) + ' %';
+                    ' · ' + fmt(pct * 100) + ' % · ' + (state.lang === 'de' ? 'Note ' : 'grade ') + svpNoten.note(pct);
                 elSummary.appendChild(txt);
                 elSummary.appendChild(b);
             }
@@ -1207,10 +1211,11 @@
                     drawVerdict();
                     return;
                 }
-                publikum = { got: null, names: '' };
+                publikum = { got: null, max: null, names: '' };
                 try {
                     const d = JSON.parse(await svpCrypto.open(rows[0].data_enc));
                     if (typeof d.got === 'number') publikum.got = d.got;
+                    if (typeof d.max === 'number') publikum.max = d.max;
                 } catch (e) { status('Bewertung des Publikums nicht lesbar.', 'err'); }
                 try { publikum.names = await svpCrypto.open(rows[0].name_enc); } catch (e) { }
                 if (publikum.got !== null) {

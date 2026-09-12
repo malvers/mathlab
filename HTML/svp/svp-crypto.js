@@ -189,31 +189,44 @@
     /* `title` is optional and only relabels the dialog - the talk pages call it
        without one and keep "Vortragsnamen". Same key, same passphrase; only the
        heading follows the page the user is standing on. */
+    /* The card is a real <form> with a hidden username, so the browser's
+       password manager (Chrome, Keychain) offers to save the passphrase and
+       fills it in next time (Doc, 12.09.2026). The username is a fixed label
+       and NOT the login e-mail: on the same origin Chrome would otherwise mix
+       the passphrase up with the account password. Only the passphrase is
+       stored there - the unlocked key itself still lives in sessionStorage
+       alone, never on disk. */
+    const PM_USER = 'SVP-Schlüssel';
+
     function passDialog(mode, onOk, title) {
         const create = mode === 'create';
+        const ac = create ? 'new-password' : 'current-password';
         const overlay = document.createElement('div');
         overlay.className = 'svp-gate-overlay';
         overlay.innerHTML =
-            '<div class="svp-gate-card">' +
+            '<form class="svp-gate-card" id="svp-cry-form" autocomplete="on">' +
             '  <div class="svp-gate-title">' + (title || 'Vortragsnamen') + '</div>' +
             '  <div class="svp-gate-sub">' +
             (create ? 'Neues Schl&uuml;ssel-Passwort vergeben &mdash; ohne dieses Passwort sind die Namen sp&auml;ter nicht mehr lesbar.'
                 : 'Schl&uuml;ssel-Passwort eingeben, um die Namen zu sehen') +
             '  </div>' +
-            '  <input type="password" id="svp-cry-p1" placeholder="Schl&uuml;ssel-Passwort" aria-label="Schl&uuml;ssel-Passwort" autocomplete="off">' +
-            (create ? '  <input type="password" id="svp-cry-p2" placeholder="Wiederholen" aria-label="Passwort wiederholen" autocomplete="off">' : '') +
+            '  <input type="text" name="username" autocomplete="username" value="' + PM_USER + '" style="display:none" tabindex="-1" aria-hidden="true">' +
+            '  <input type="password" name="password" id="svp-cry-p1" placeholder="Schl&uuml;ssel-Passwort" aria-label="Schl&uuml;ssel-Passwort" autocomplete="' + ac + '">' +
+            (create ? '  <input type="password" name="password2" id="svp-cry-p2" placeholder="Wiederholen" aria-label="Passwort wiederholen" autocomplete="new-password">' : '') +
             '  <div class="svp-gate-row">' +
             '    <button type="button" class="action secondary" id="svp-cry-cancel">Abbrechen</button>' +
-            '    <button type="button" class="action" id="svp-cry-go">' + (create ? 'Schl&uuml;ssel erzeugen' : 'Entsperren') + '</button>' +
+            '    <button type="submit" class="action" id="svp-cry-go">' + (create ? 'Schl&uuml;ssel erzeugen' : 'Entsperren') + '</button>' +
             '  </div>' +
             '  <div class="svp-gate-err" id="svp-cry-err">&nbsp;</div>' +
-            '</div>';
+            '</form>';
         document.body.appendChild(overlay);
+        const form = overlay.querySelector('#svp-cry-form');
         const p1 = overlay.querySelector('#svp-cry-p1');
         const p2 = overlay.querySelector('#svp-cry-p2');
         const err = overlay.querySelector('#svp-cry-err');
         const go = overlay.querySelector('#svp-cry-go');
         async function run() {
+            if (go.disabled) return;              /* a second Enter while the first still runs */
             const pass = p1.value;
             if (create && pass.length < 8) { err.textContent = 'Mindestens 8 Zeichen'; return; }
             if (create && pass !== p2.value) { err.textContent = 'Die beiden Eingaben sind verschieden'; return; }
@@ -228,12 +241,14 @@
                 p1.select();
                 return;
             }
+            /* removing the form after a good passphrase is the cue for the
+               password manager's "save?" - a wrong one keeps it on screen */
             overlay.remove();
             if (onOk) onOk();
         }
-        go.addEventListener('click', run);
+        /* Enter and the button both arrive here as a submit - no page load */
+        form.addEventListener('submit', (e) => { e.preventDefault(); run(); });
         overlay.querySelector('#svp-cry-cancel').addEventListener('click', () => overlay.remove());
-        [p1, p2].forEach((el) => el && el.addEventListener('keydown', (e) => { if (e.key === 'Enter') run(); }));
         overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
         p1.focus();
     }

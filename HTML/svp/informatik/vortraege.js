@@ -30,6 +30,14 @@
             sub: 'Lernbereich 1 \u201eInformationen und Daten\u201c + Wahlbereich \u201eInformatik und Automatisierung\u201c',
             switchLabel: 'Klasse wechseln', artikel: 'der', vor: 'Klasse ',
             klassen: [['a', '9a'], ['b', '9b']],
+            /* Talk dates by PLACE in the list - the Friday lessons of 9a and 9b
+               in Untis, one talk per lesson (Doc, 12.09.2026). 09.10. is
+               cancelled, then the autumn holidays; after Christmas the lessons
+               move to the morning, still on Fridays. Only the starting point:
+               Doc changes each date on the page, and his choice wins (META_PAGE). */
+            dates: ['2026-09-25', '2026-10-02', '2026-10-30', '2026-11-06', '2026-11-13',
+                    '2026-11-20', '2026-11-27', '2026-12-04', '2026-12-11', '2026-12-18',
+                    '2027-01-08', '2027-01-15'],
             labels: { lb1: ['LB 1', 'b-green'], wb: ['Wahlbereich', 'b-teal'] },
             topics: [
                 { lb: 'lb1', title: 'Big Data im Alltag', sub: 'Welche Daten erzeugt dein Smartphone an einem einzigen Tag — und wer verdient damit Geld?' },
@@ -184,6 +192,31 @@
     let list = loadList();
     const topics = () => list;
     const posOf = (id) => list.findIndex((e) => e.id === id);
+    /* The shared topics in THEIR order - the one a Lerngruppe without an order
+       of its own shows. `list` is the same set, arranged for this Lerngruppe
+       (see META_PAGE). */
+    let catalogue = list.slice();
+
+    /* the topics in the order of `order`; any not named there go to the end */
+    function arrange(cat, order) {
+        if (!Array.isArray(order) || !order.length) return cat.slice();
+        const byId = new Map(cat.map((e) => [e.id, e]));
+        const out = [];
+        order.forEach((id) => { const e = byId.get(+id); if (e) { out.push(e); byId.delete(+id); } });
+        cat.forEach((e) => { if (byId.has(e.id)) out.push(e); });
+        return out;
+    }
+
+    /* Texts from the list, but the shared order left alone: moving a card in
+       9a must not move it in 9b. New topics are appended, removed ones drop out. */
+    function mergeCatalogue(prev, cur) {
+        const byId = new Map(cur.map((e) => [e.id, e]));
+        const pick = (e) => ({ id: e.id, lb: e.lb, title: e.title, sub: e.sub });
+        const out = [];
+        (prev || []).forEach((p) => { const e = byId.get(p.id); if (e) { out.push(pick(e)); byId.delete(p.id); } });
+        cur.forEach((e) => { if (byId.has(e.id)) out.push(pick(e)); });
+        return out;
+    }
 
     /* ------------------------------------------------------------------
        Names — encrypted, in the cloud, never in plain text on any device.
@@ -545,7 +578,8 @@
                 '<div class="vt-nr"' + (editing ? ' title="Ziehen, um die Reihenfolge zu ändern"' : '') +
                     '><span class="vt-nr-num">' + (pos + 1) + '</span></div>' +
                 '<div class="vt-topic">' +
-                    '<div class="vt-title"><span class="vt-title-text">' + esc(t.title) + '</span></div>' +
+                    '<div class="vt-title"><span class="vt-title-text">' + esc(t.title) + '</span>' +
+                        dateHtml(i, pos) + '</div>' +
                     '<div class="vt-sub">' + esc(t.sub) + '</div>' +
                     '<div class="vt-grades"><span class="vt-grade-lbl">Bewerten</span>' +
                         ROLES.map(function (r) {
@@ -557,7 +591,7 @@
                                 (sent ? 'Bewertung ' + r[1] + ' ist abgegeben'
                                       : 'Bewertungsbogen ' + r[1] + ' für diesen Vortrag') +
                                 '">' + r[1] + (sent ? ' ✓' : '') + '</button>';
-                        }).join('') + '</div>' +
+                        }).join('') + noteHtml(i, pos) + '</div>' +
                 '</div>' + inp(0) + (n > 1 ? inp(1) : '') + (n > 2 ? inp(2) : '') + more +
                 '</div>';
         }).join('');
@@ -576,6 +610,7 @@
                     flushAll();
                 });
             });
+            wireMeta(i, pos);                     /* date and mark, see META_PAGE */
             const addBtn = $('more-' + i);
             if (addBtn) addBtn.addEventListener('click', () => {
                 const next = Math.min(3, fieldCount(i) + 1);
@@ -619,6 +654,7 @@
         updateCount();
         updateAllBtn();
         updateKeyBtn();
+        updateEditBtns();
     }
 
     /* The tallest topic block sets the height of all of them, so the cards line
@@ -862,7 +898,7 @@
             });
             return;
         }
-        if (unlocked()) { svpCrypto.lock(); await decryptAll(); render(); setStatus(''); return; }
+        if (unlocked()) { svpCrypto.lock(); await decryptAll(); await loadNoten(); render(); setStatus(''); return; }
         svpCrypto.passDialog('unlock', async () => { await refresh(); setStatus('Namen entschlüsselt.'); });
     }
 
@@ -896,10 +932,16 @@
 
     function saveTopics() {
         readDom();
-        saveJSON(KEY_TOPICS, {
-            v: 2,
-            list: list.map((e) => ({ id: e.id, lb: e.lb, title: e.title, sub: e.sub }))
-        });
+        persistTopics();
+    }
+
+    /* The list as it stands goes into the shared topics (their own order kept,
+       see mergeCatalogue) and, as the order of THIS Lerngruppe, into the cloud. */
+    function persistTopics() {
+        catalogue = mergeCatalogue(catalogue, list);
+        const ts = new Date().toISOString();
+        saveJSON(KEY_TOPICS, { v: 2, list: catalogue, ts: ts });
+        pushTopics(ts);
     }
 
     window.vtToggleEdit = function () {
@@ -911,9 +953,12 @@
     window.vtOriginal = function () {
         try { localStorage.removeItem(KEY_TOPICS); } catch (e) { }
         /* back to the built-in ten, in their built-in order - the names stay
-           where they are, they hang on the ids and those do not change */
+           where they are, they hang on the ids and those do not change. The
+           cloud follows, so the pupils see the same. */
         list = loadList();
         list.forEach((e) => S(e.id));
+        catalogue = [];
+        persistTopics();
         editing = false;
         render();
     };
@@ -1466,6 +1511,311 @@
         if (!win) location.href = url;
     }
 
+    /* ---------- shared list, date and mark per talk ----------
+       All of it lives in svp_plan_edits (anon-readable, written by Doc only)
+       under page keys of its own - svp-plan.js keys by real paths, so these
+       rows never meet a plan page. Two rows (Doc, 12.09.2026):
+       - TOPICS_PAGE, per plan: the topics themselves (title, Leitfrage, the
+         copies), shared by the Lerngruppen as before - but in the cloud now,
+         so the pupils see Doc's list and not just the built-in ten.
+       - META_PAGE, per Lerngruppe: the ORDER of the talks, which is the
+         schedule (a group that is ready moves to the top), the DATES by
+         place (place 1 is the first Friday, whoever stands there), and Doc's
+         MARKS by talk.
+       The date is shown to everybody; Doc sets it, logged in. The mark only
+       appears on a page that is logged in AND unlocked, is worked out from the
+       two sealed sheets (weights and scale in svp-noten.js), and Doc can
+       overwrite it. Dates are plain text, they are no secret; marks are
+       stored as ciphertext only. */
+    const TOPICS_PAGE = '/svp/vortraege/' + PLAN;
+    const META_PAGE = TOPICS_PAGE + '/' + KLASSE;
+    let meta = { order: null, dates: {}, noten: {} };
+    /* the shared topics as the cloud has them: { list, ts } or null */
+    let cloudCat = null;
+    let metaLoaded = false;
+    const logged = () => !!(A() && A().hasSession());
+    const gradesVisible = () => logged() && unlocked();
+
+    /* weights and scale are shared with bewertungsmatrix.html */
+    if (!window.svpNoten && script && script.src) {
+        const sn = document.createElement('script');
+        sn.src = new URL('../svp-noten.js', script.src).href;
+        document.head.appendChild(sn);
+    }
+
+    function cleanList(arr) {
+        const seen = new Set();
+        const out = [];
+        (Array.isArray(arr) ? arr : []).forEach((e) => {
+            const id = +(e && e.id);
+            if (!Number.isFinite(id) || id < 0 || seen.has(id)) return;
+            seen.add(id);
+            out.push({
+                id: id,
+                lb: e.lb || Object.keys(LB_LABEL)[0],
+                title: typeof e.title === 'string' ? e.title : '',
+                sub: typeof e.sub === 'string' ? e.sub : ''
+            });
+        });
+        return out;
+    }
+
+    /* both rows in one read */
+    async function loadMeta() {
+        const a = A();
+        if (!a) return;
+        try {
+            const pages = '(' + [TOPICS_PAGE, META_PAGE].map((p) => '"' + p + '"').join(',') + ')';
+            const res = await fetch(a.DB_URL + '/rest/v1/svp_plan_edits?page=in.' +
+                encodeURIComponent(pages) + '&select=page,edits,ts', {
+                headers: { apikey: a.DB_KEY, Authorization: 'Bearer ' + a.DB_KEY }
+            });
+            if (!res.ok) return;
+            const rows = await res.json();
+            const own = rows.find((r) => r.page === META_PAGE);
+            const cat = rows.find((r) => r.page === TOPICS_PAGE);
+            const o = (own && own.edits) || {};
+            meta = {
+                order: Array.isArray(o.order) ? o.order.map(Number) : null,
+                dates: o.dates && typeof o.dates === 'object' ? o.dates : {},
+                noten: o.noten && typeof o.noten === 'object' ? o.noten : {}
+            };
+            const cl = cat && cat.edits ? cleanList(cat.edits.list) : [];
+            cloudCat = cl.length ? { list: cl, ts: Date.parse(cat.ts) || 0 } : null;
+            metaLoaded = true;
+        } catch (e) { /* offline: this browser's list and the built-in dates stay */ }
+    }
+
+    /* One change at a time, each on top of a fresh read - so a date set on the
+       laptop does not wipe a mark typed on the phone a minute before. The
+       topics go through the same queue, so list and order never overtake
+       each other. */
+    let metaChain = Promise.resolve();
+    let metaBusy = 0;
+    function queueCloud(job) {
+        metaBusy++;
+        const run = metaChain.then(job).finally(() => { metaBusy--; });
+        metaChain = run.catch(() => { });
+        return run;
+    }
+
+    async function postEdits(page, edits, ts) {
+        const res = await A().api('svp_plan_edits', {
+            method: 'POST',
+            headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+            body: JSON.stringify([{ page: page, edits: edits, ts: ts || new Date().toISOString() }])
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+    }
+
+    /* `change(meta)` edits the freshly read row of this Lerngruppe, which is
+       then written back */
+    function setMeta(change) {
+        return queueCloud(async () => {
+            if (!logged()) throw new Error('nicht angemeldet');
+            metaLoaded = false;
+            await loadMeta();
+            if (!metaLoaded) throw new Error('Cloud nicht erreichbar');
+            change(meta);
+            await postEdits(META_PAGE, meta);
+        });
+    }
+
+    /* The topics and this Lerngruppe's order go up after every change of the
+       list. Logged out nothing leaves the browser - and the buttons that
+       change the list are not even shown then (updateEditBtns). */
+    function pushTopics(ts) {
+        if (!logged()) return Promise.resolve();
+        const cat = catalogue.map((e) => ({ id: e.id, lb: e.lb, title: e.title, sub: e.sub }));
+        const order = list.map((e) => e.id);
+        ts = ts || new Date().toISOString();
+        return queueCloud(async () => {
+            await postEdits(TOPICS_PAGE, { v: 2, list: cat }, ts);
+            metaLoaded = false;
+            await loadMeta();
+            if (!metaLoaded) throw new Error('Cloud nicht erreichbar');
+            meta.order = order;
+            await postEdits(META_PAGE, meta);
+        }).then(() => setStatus('☁ Liste gespeichert'),
+            (e) => setStatus('☁ Liste NICHT in der Cloud: ' + e.message, true));
+    }
+
+    /* Which list to show: the cloud's - unless this browser holds a NEWER one
+       of Doc's (changed while offline), which goes up instead. While the cloud
+       has none yet, a browser with a list of its own (Doc's) hands it over; a
+       browser that only knows the built-in ten never does, so a fresh device
+       cannot flatten Doc's topics. */
+    function applyCloudList() {
+        if (editing || metaBusy || !metaLoaded) return;
+        const local = loadJSON(KEY_TOPICS);
+        const hasLocal = Array.isArray(local.list) && local.list.length > 0;
+        const localTs = Date.parse(local.ts || '') || 0;
+        let push = false;
+        if (cloudCat && !(logged() && hasLocal && localTs > cloudCat.ts)) {
+            catalogue = cloudCat.list.map((e) => Object.assign({}, e));
+            saveJSON(KEY_TOPICS, { v: 2, list: catalogue, ts: new Date(cloudCat.ts).toISOString() });
+        } else if (logged() && hasLocal) {
+            push = true;
+        }
+        list = arrange(catalogue, meta.order);
+        list.forEach((e) => S(e.id));
+        if (push) pushTopics(local.ts || undefined);
+    }
+
+    /* Changing the list changes it for everybody now, so only Doc - logged
+       in - gets the buttons for it. */
+    function updateEditBtns() {
+        const on = logged();
+        ['btn-edit', 'btn-add'].forEach((id) => { const b = $(id); if (b) b.hidden = !on; });
+    }
+
+    /* The date belongs to the PLACE: place 1 is the first Friday, whoever
+       stands there. Doc's date wins; one he emptied stays empty instead of
+       falling back to the built-in one. */
+    function dateOf(pos) {
+        if (Object.prototype.hasOwnProperty.call(meta.dates, pos)) return meta.dates[pos] || '';
+        return (PLAN_DEF.dates && PLAN_DEF.dates[pos]) || '';
+    }
+
+    const WEEKDAY = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+    /* 'YYYY-MM-DD' -> 'Fr 25.09.'; built by hand, so a browser set to English
+       does not turn it into 09/25 */
+    function fmtDate(iso, withYear) {
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+        if (!m) return '';
+        const d = new Date(+m[1], +m[2] - 1, +m[3]);
+        return WEEKDAY[d.getDay()] + ' ' + m[3] + '.' + m[2] + '.' + (withYear ? m[1] : '');
+    }
+
+    function dateHtml(i, pos) {
+        const iso = dateOf(pos);
+        const txt = fmtDate(iso);
+        if (!logged()) {
+            return txt ? '<span class="vt-date" title="Vortrag am ' + fmtDate(iso, true) + '">' + txt + '</span>' : '';
+        }
+        /* The native picker lies invisibly over the tag: a click opens the
+           calendar, the tag keeps showing the date in German. */
+        return '<label class="vt-date edit' + (txt ? '' : ' empty') + '" title="Datum des Vortrags ändern">' +
+            (txt || 'Datum') +
+            '<input type="date" id="date-' + i + '" value="' + esc(iso) + '"' +
+            ' aria-label="Datum für Thema ' + (pos + 1) + '"></label>';
+    }
+
+    /* Decrypted points per talk and role, and Doc's overrides - in MEMORY
+       only, cleared the moment the key is locked again. */
+    const sheetPts = {};      /* id -> { coach: {got, max}, publikum: {got, max} } */
+    const noteOver = {};      /* id -> text Doc typed over the computed mark */
+    /* ciphertext -> plain text: the 20 s poll must not re-open every sheet */
+    const openCache = new Map();
+    async function openCached(blob) {
+        if (openCache.has(blob)) return openCache.get(blob);
+        const t = await svpCrypto.open(blob);
+        openCache.set(blob, t);
+        return t;
+    }
+
+    async function loadNoten() {
+        for (const k in sheetPts) delete sheetPts[k];
+        for (const k in noteOver) delete noteOver[k];
+        if (!gradesVisible()) { openCache.clear(); return; }
+        const a = A();
+        try {
+            const qs = 'plan=eq.' + encodeURIComponent(PLAN) +
+                '&klasse=eq.' + encodeURIComponent(KLASSE) + '&select=idx,rolle,taken,data_enc';
+            const res = await fetch(a.DB_URL + '/rest/v1/' + TABLE_BEW + '?' + qs, {
+                headers: { apikey: a.DB_KEY, Authorization: 'Bearer ' + a.DB_KEY }
+            });
+            if (res.ok) {
+                for (const r of await res.json()) {
+                    if (!r.taken || !r.data_enc) continue;
+                    try {
+                        const d = JSON.parse(await openCached(r.data_enc));
+                        if (typeof d.got !== 'number') continue;
+                        (sheetPts[r.idx] = sheetPts[r.idx] || {})[r.rolle] = { got: d.got, max: d.max };
+                    } catch (e) { /* unreadable sheet: no points from it */ }
+                }
+            }
+        } catch (e) { /* offline: no computed marks, overrides still below */ }
+        for (const k of Object.keys(meta.noten)) {
+            try { noteOver[k] = JSON.parse(await openCached(meta.noten[k])).note || ''; } catch (e) { }
+        }
+    }
+
+    const pctTxt = (p) => Math.round(p * 100) + ' %';
+
+    function noteCalc(i) {
+        const N = window.svpNoten;
+        const s = sheetPts[i] || {};
+        const pct = N ? N.combine(s.coach, s.publikum) : null;
+        return pct === null ? null : { pct: pct, note: N.note(pct) };
+    }
+
+    /* Grey placeholder = computed, typed value = Doc's override. */
+    function noteHtml(i, pos) {
+        if (!gradesVisible()) return '';
+        const c = noteCalc(i);
+        const s = sheetPts[i] || {};
+        const over = noteOver[i] || '';
+        const W = window.svpNoten ? svpNoten.WEIGHT : null;
+        const why = c
+            ? 'Errechnet: Note ' + c.note + ' aus ' + pctTxt(c.pct) +
+                (W ? ' (Coach ×' + W.coach + ', Publikum ×' + W.publikum + ')' : '')
+            : s.coach ? 'Der Publikumsbogen fehlt noch'
+            : s.publikum ? 'Der Coach-Bogen fehlt noch' : 'Noch kein Bogen abgegeben';
+        return '<span class="vt-note-box">' +
+            '<span class="vt-grade-lbl">Note</span>' +
+            '<input type="text" class="vt-note' + (over ? ' over' : '') + '" id="note-' + i + '"' +
+            ' value="' + esc(over) + '" placeholder="' + (c ? c.note : '–') + '"' +
+            ' maxlength="4" autocomplete="off" spellcheck="false"' +
+            ' title="' + esc(why + (over ? ' · von Hand überschrieben' : '') + ' — Feld leeren = errechnete Note') + '"' +
+            ' aria-label="Note für Thema ' + (pos + 1) + '">' +
+            (c ? '<span class="vt-note-pct">' + pctTxt(c.pct) + '</span>' : '') +
+            '</span>';
+    }
+
+    function wireMeta(i, pos) {
+        const dIn = $('date-' + i);
+        if (dIn) {
+            /* Chrome opens the calendar only from its icon - hand it over */
+            dIn.addEventListener('click', () => { try { dIn.showPicker(); } catch (e) { } });
+            dIn.addEventListener('change', () => saveDate(pos, dIn.value));
+        }
+        const nIn = $('note-' + i);
+        if (nIn) {
+            nIn.addEventListener('change', () => saveNote(i, nIn.value.trim()));
+            nIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); nIn.blur(); } });
+        }
+    }
+
+    async function saveDate(pos, iso) {
+        try {
+            setStatus('speichere Datum …');
+            await setMeta((m) => { m.dates[pos] = iso || ''; });
+            setStatus('☁ Datum gespeichert');
+        } catch (e) {
+            await loadMeta();                     /* show what is really stored */
+            setStatus('☁ Datum NICHT gespeichert: ' + e.message, true);
+        }
+        if (!editing) render();
+    }
+
+    async function saveNote(i, text) {
+        if (text === (noteOver[i] || '')) return;
+        try {
+            setStatus('speichere Note …');
+            const plain = JSON.stringify({ note: text });
+            const blob = text ? await svpCrypto.seal(plain) : null;
+            await setMeta((m) => { if (blob) m.noten[i] = blob; else delete m.noten[i]; });
+            if (blob) openCache.set(blob, plain);
+            if (text) noteOver[i] = text; else delete noteOver[i];
+            setStatus(text ? '☁ Note gespeichert (verschlüsselt)' : '☁ Note zurück auf den errechneten Wert');
+        } catch (e) {
+            await loadMeta();
+            setStatus('☁ Note NICHT gespeichert: ' + e.message, true);
+        }
+        if (!editing) render();
+    }
+
     /* ---------- the page around the list -------------------------------
        Head, button bar and hint used to stand in each of the eight HTML files:
        82 lines apiece, 63 of them identical, so every change of wording meant
@@ -1474,7 +1824,8 @@
        Lerngruppe it shows. A page that brings its own #list (the test rig) is
        left untouched. */
     const HINT = 'Klick auf <b>&#9998; Bearbeiten</b> macht Thema und Leitfrage editierbar &mdash; gespeichert wird beim Klick auf ' +
-        '&bdquo;Fertig&ldquo;, lokal in diesem Browser (localStorage), und gilt f&uuml;r beide Klassen gemeinsam. ' +
+        '&bdquo;Fertig&ldquo;, in der Cloud (nur angemeldet). Die Themen gelten f&uuml;r beide Klassen gemeinsam, ' +
+        'die <b>Reihenfolge</b> je Klasse &mdash; sie ist der Vortragsplan, das Datum h&auml;ngt am Platz. ' +
         '<b>+ Vortrag hinzuf&uuml;gen</b> unter der Liste h&auml;ngt jederzeit ein weiteres Thema an &mdash; auch ohne Bearbeiten-Modus. ' +
         'Im Bearbeiten-Modus ist die <b>Nummer der Anfasser</b>: damit l&auml;sst sich die Reihenfolge ziehen. Die ' +
         '<b>rechte Maustaste</b> auf einer Karte dupliziert ein Thema, schiebt es eine Position h&ouml;her oder ' +
@@ -1487,7 +1838,10 @@
         'Zeilenrand machen daraus ein Trio oder einen einzelnen Vortrag &mdash; <b>+ Dritter Name</b> oben ' +
         'schaltet das dritte Feld f&uuml;r alle Themen auf einmal ein. Ein Feld, in dem schon ein Name steht, ' +
         'l&auml;sst sich nicht wegklappen; erst den Eintrag l&ouml;schen. ' +
-        'Beim Drucken erscheinen die Namen nur im entsperrten Zustand.';
+        'Beim Drucken erscheinen die Namen nur im entsperrten Zustand. ' +
+        'Das <b>Datum</b> neben dem Titel setzt Doc Alvers angemeldet per Klick. Die <b>Note</b> sieht nur er, ' +
+        'angemeldet und entsperrt: errechnet aus Coach- und Publikumsbogen, von Hand &uuml;berschreibbar &mdash; ' +
+        'Feld leeren stellt die errechnete wieder her.';
 
     /* What this page is called in prose. On a data-groups page the real name
        only arrives with svp-map.json - until then the key stands in, with
@@ -1594,6 +1948,9 @@
            "jemand anderem belegt" for one's own name (audit, 04.09.2026). */
         await Promise.all(Object.keys(chains).map((k) => chains[k]));
         try { await fetchSlots(); } catch (e) { setStatus('☁ Liste nicht geladen: ' + e.message, true); }
+        await loadMeta();
+        applyCloudList();
+        await loadNoten();
         /* Only the 20 s poll used to respect the open edit mode; coming back to
            the tab redrew regardless and swallowed the change that had not been
            confirmed with "Fertig" yet (Doc, 04.09.2026). The fresh slot data is
@@ -1609,6 +1966,9 @@
         render();                                   /* topics first, names follow */
         if (!window.svpCrypto || !svpCrypto.available) {
             setStatus('Verschlüsselung im Browser nicht verfügbar — Namen sind hier nicht bearbeitbar.', true);
+            await loadMeta();                       /* list and dates are plain text, they still come */
+            applyCloudList();
+            render();
             return;
         }
         await svpCrypto.ready;                      /* re-arm an unlocked key after a reload */
@@ -1639,7 +1999,7 @@
             if (Object.keys(timers).length) return;
             if (saving) return;                   /* a write is still on its way */
             const act = document.activeElement;
-            if (act && act.tagName === 'INPUT' && act.id.indexOf('name-') === 0) return;
+            if (act && act.tagName === 'INPUT' && /^(name|note|date)-/.test(act.id)) return;
             refresh();
         }, 20000);
     })();
