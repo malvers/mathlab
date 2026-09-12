@@ -48,7 +48,11 @@
         ['notes.html', 'Notizen', 'b-grey', 'Notizen'],
         ['konzepte.html', 'Konzepte', 'b-grey', 'Konzepte'],
         ['operatoren.html', 'Operatoren', 'b-grey', 'Operatoren'],
-        ['punktetabelle.html', 'Punkte BGY', 'b-grey', 'Punktetabelle - Notenspiegel BGY'],
+        /* Doc, 12.09.2026: "Notenschluessel" with a sub-menu BGY / OS GY - one
+           page, the query picks the scale (see punktetabelle.html). Named
+           "Notenspiegel" like both sheets (Doc, same day: "oh und notenspiegel"). */
+        ['punktetabelle.html', 'BGY', 'b-grey', 'Notenspiegel BGY - Klasse 11 und 12/13'],
+        ['punktetabelle.html?s=osgy', 'OS GY', 'b-grey', 'Notenspiegel Oberschule und Gymnasium'],
         ['bewertungsmatrix.html', 'Bewertungsmatrix', 'b-grey',
          'Bewertungsmatrix Vortrag - Coach- und Publikumsbogen'],
         /* Vorfuehrklasse for the Leistungstest demo (Doc, 10.09.2026) */
@@ -83,7 +87,7 @@
     // The Stundenplan no longer does (Doc, 10.09.2026: "auf click SP unter dem
     // Header wie alles sonst") - it opens in place, below this nav band.
     const NEW_TAB = new Set(['notes.html', 'konzepte.html', 'operatoren.html',
-        'punktetabelle.html', '../fokus.html']);
+        'punktetabelle.html', 'punktetabelle.html?s=osgy', '../fokus.html']);
 
     // The pill row only carries Home, Notizen and one dropdown per Schulart —
     // everything else lives inside those. [pill label, [[caption|null, hrefs]],
@@ -117,8 +121,10 @@
         ['Mehr', [
             /* Doc, 09.09.2026: "BM ganz unten" - die Bewertungsmatrix schliesst
                das Menue ab, hinter dem Timer. */
+            /* An entry is an href or a sub-menu { sub: label, hrefs: [...] }. */
             [null, ['notes.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
-                    'punktetabelle.html', '../fokus.html', 'bewertungsmatrix.html']],
+                    { sub: 'Notenspiegel', hrefs: ['punktetabelle.html', 'punktetabelle.html?s=osgy'] },
+                    '../fokus.html', 'bewertungsmatrix.html']],
             /* Doc, 10.09.2026: the demo class last, below a divider */
             [null, ['genii.html']]
         ], true, true]
@@ -126,10 +132,26 @@
 
     // every href that moved into a dropdown leaves the plain row
     const IN_DROP = new Set();
-    DROPS.forEach(([, rows]) => rows.forEach(([, hrefs]) => hrefs.forEach(h => IN_DROP.add(h))));
+    DROPS.forEach(([, rows]) => rows.forEach(([, hrefs]) => hrefs.forEach(function (h) {
+        if (typeof h === 'string') IN_DROP.add(h); else h.hrefs.forEach(x => IN_DROP.add(x));
+    })));
 
     // '/svp/' and '/svp/index.html' are the same page.
     function norm(path) { return path.replace(/index\.html$/, ''); }
+
+    /* Two entries can share one page and differ only in the query
+       (punktetabelle.html and ?s=osgy): the one whose query matches is the
+       current page; a plain link stands for its page whenever no sibling
+       claims the query - so mathe11.html?kw=3 still marks MA 11. */
+    const HERE = norm(location.pathname);
+    const CLAIMED = LINKS.some(function ([h]) {
+        const u = new URL(base + h);
+        return u.search && norm(u.pathname) === HERE && u.search === location.search;
+    });
+    function isHere(a) {
+        if (norm(a.pathname) !== HERE) return false;
+        return CLAIMED ? a.search === location.search : !a.search;
+    }
 
     // Pill visibility, keyed by href (stable across label changes). localStorage
     // is the offline copy and the only store when nobody is logged in; with an
@@ -192,7 +214,7 @@
         /* Home traegt eine eigene Klasse: es steht am linken Ende der Reihe und
            haelt dieselbe Breite wie Login/Logout am rechten (Doc, 09.09.2026). */
         if (href === 'index.html') a.classList.add('nav-home');
-        if (norm(a.pathname) === norm(location.pathname)) a.classList.add('active');
+        if (isHere(a)) a.classList.add('active');
         // Hidden pills stay hidden — except the one for the current page.
         if (hidden.has(href) && !a.classList.contains('active')) a.classList.add('nav-hidden');
         pills[href] = a;
@@ -203,11 +225,16 @@
     // Rows of every dropdown, so a subject without visible pills can fold away.
     const dropRows = [];
     const dropWraps = [];
+    const subBoxes = [];
     function syncDropRows() {
         dropRows.forEach(function (r) {
             const leer = r.items.every(a => a.classList.contains('nav-hidden'));
             r.line.classList.toggle('nd-empty', leer);
             if (r.title) r.title.classList.toggle('nd-empty', leer);
+        });
+        /* a sub-menu with every entry switched off in ⚙ goes as a whole */
+        subBoxes.forEach(function (s) {
+            s.box.classList.toggle('nd-empty', s.items.every(a => a.classList.contains('nav-hidden')));
         });
         /* nothing left inside? then the pill stays put but greys out (Doc, 31.08.2026 —
            a dropdown that opens an empty panel looked broken) */
@@ -216,6 +243,61 @@
                 .every(l => l.classList.contains('nd-empty'));
             w.classList.toggle('nd-off', leer);
             if (leer) w.classList.remove('open');
+        });
+    }
+
+    /* Sub-menu inside a dropdown (Doc, 12.09.2026: "Notenschluessel und sein
+       sub mit BGY und OS GY", then "ein Dreieck nach rechts und ein Submenu
+       zeigen"): a pill with a ▸ whose entries show in a small panel beside
+       it - on hover with a mouse, on click/tap everywhere. It opens to the
+       right; where that would leave the window, to the left. */
+    function makeSub(label, items) {
+        const box = document.createElement('div');
+        box.className = 'nd-sub';
+        const head = document.createElement('a');
+        head.className = 'badge b-grey nd-sub-head';
+        head.href = '#';
+        head.textContent = label;
+        head.setAttribute('aria-haspopup', 'true');
+        head.setAttribute('aria-expanded', 'false');
+        const caret = document.createElement('span');
+        caret.className = 'nd-caret';
+        caret.setAttribute('aria-hidden', 'true');
+        caret.textContent = '▸';
+        head.appendChild(caret);
+        const fly = document.createElement('div');
+        fly.className = 'nd-sub-panel';
+        items.forEach(a => fly.appendChild(a));
+        /* A hidden panel has no width, so measure once it shows. rAF runs
+           before the paint - a flip never flashes on the wrong side. */
+        function place() {
+            box.classList.remove('nd-left');
+            requestAnimationFrame(function () {
+                if (fly.offsetWidth && fly.getBoundingClientRect().right > window.innerWidth - 8) {
+                    box.classList.add('nd-left');
+                }
+            });
+        }
+        head.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation(); // the dropdown around it stays open
+            const open = !box.classList.contains('open');
+            box.classList.toggle('open', open);
+            head.setAttribute('aria-expanded', open ? 'true' : 'false');
+            place();
+        });
+        box.addEventListener('mouseenter', place);
+        /* on one of its own pages the head pill is marked */
+        if (items.some(a => a.classList.contains('active'))) head.classList.add('active');
+        box.appendChild(head);
+        box.appendChild(fly);
+        subBoxes.push({ box: box, items: items });
+        return box;
+    }
+    function closeSubs() {
+        subBoxes.forEach(function (s) {
+            s.box.classList.remove('open');
+            s.box.querySelector('.nd-sub-head').setAttribute('aria-expanded', 'false');
         });
     }
 
@@ -235,7 +317,26 @@
         const names = [];
         let active = false;
         rows.forEach(function (row) {
-            const items = row[1].map(h => pills[h]).filter(Boolean);
+            const items = [];
+            const line = document.createElement('div');
+            line.className = 'nd-row';
+            row[1].forEach(function (entry) {
+                if (typeof entry === 'string') {
+                    const a = pills[entry];
+                    if (!a) return;
+                    names.push(a.textContent);
+                    if (a.classList.contains('active')) active = true;
+                    items.push(a);
+                    line.appendChild(a);
+                    return;
+                }
+                const subItems = entry.hrefs.map(h => pills[h]).filter(Boolean);
+                if (!subItems.length) return;
+                names.push(entry.sub);
+                if (subItems.some(a => a.classList.contains('active'))) active = true;
+                items.push(...subItems);
+                line.appendChild(makeSub(entry.sub, subItems));
+            });
             if (!items.length) return;
             if (row[0]) {
                 const cap = document.createElement('div');
@@ -243,13 +344,6 @@
                 cap.textContent = row[0];
                 panel.appendChild(cap);
             }
-            const line = document.createElement('div');
-            line.className = 'nd-row';
-            items.forEach(function (a) {
-                names.push(a.textContent);
-                if (a.classList.contains('active')) active = true;
-                line.appendChild(a);
-            });
             panel.appendChild(line);
             dropRows.push({ title: row[0] ? panel.lastElementChild.previousElementSibling : null,
                             line: line, items: items });
@@ -266,6 +360,7 @@
             const wasOpen = wrap.classList.contains('open');
             document.querySelectorAll('.nav-drop-wrap.open')
                 .forEach(w => w.classList.remove('open'));
+            closeSubs(); // a dropdown always opens with its sub-menus shut
             wrap.classList.toggle('open', !wasOpen);
         });
         /* Schularten sit left of Notizen, "Mehr" at the end (the gear and the
@@ -285,6 +380,7 @@
 
     function closeDrops() {
         document.querySelectorAll('.nav-drop-wrap.open').forEach(w => w.classList.remove('open'));
+        closeSubs();
     }
     document.addEventListener('click', closeDrops);
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDrops(); });
@@ -538,7 +634,12 @@
     // single page — those follow the folder: hidden once every pill inside it is.
     const basePath = new URL(base).pathname;
     const pathToHref = {};
-    for (const [href] of LINKS) pathToHref[norm(new URL(base + href).pathname)] = href;
+    /* first entry wins - punktetabelle.html?s=osgy must not take over the
+       plain page's key */
+    for (const [href] of LINKS) {
+        const key = norm(new URL(base + href).pathname);
+        if (!(key in pathToHref)) pathToHref[key] = href;
+    }
 
     function cardHidden(card) {
         /* A card may name the pills it stands for: data-nav="a.html b.html".

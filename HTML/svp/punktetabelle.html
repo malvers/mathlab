@@ -357,7 +357,7 @@
     <header class="page-head">
         <a class="back-link" href="./">&larr; &Uuml;bersicht</a>
         <h1>Punktetabelle</h1>
-        <div class="subtitle">Notenspiegel Berufliches Gymnasium (BGY) &middot; Klasse 11 und 12/13</div>
+        <div class="subtitle" id="ptSub">Notenspiegel Berufliches Gymnasium (BGY) &middot; Klasse 11 und 12/13</div>
     </header>
 
     <div class="pt-wrap">
@@ -367,7 +367,7 @@
                     <button type="button" data-stufe="11">Klasse 11</button>
                     <button type="button" data-stufe="12" class="on">Klasse 12 &amp; 13</button>
                 </div>
-                <label class="pt-field" for="ptTotal">Bewertungseinheiten gesamt
+                <label class="pt-field" for="ptTotal"><span id="ptTotalLbl">Bewertungseinheiten gesamt</span>
                     <input id="ptTotal" type="number" min="1" max="300" step="1" value="30"></label>
                 <label class="pt-field" for="ptGot">erreicht
                     <input id="ptGot" type="number" min="0" max="300" step="0.5" placeholder="&ndash;"></label>
@@ -386,7 +386,7 @@
         </section>
 
         <section class="pt-card">
-            <div class="pt-foot">
+            <div class="pt-foot" id="ptFoot">
                 Grundlage sind die Prozentschwellen des Notenspiegels am Beruflichen Gymnasium.
                 Die Seite h&auml;lt keine Tabelle vor, sie rechnet sie:
                 <em>ben&ouml;tigte Bewertungseinheiten = aufgerundet(Schwelle &times; Gesamt-BE)</em>.
@@ -422,14 +422,31 @@
                            ['4', 0.45, 4], ['5', 0.25, 5], ['6', 0, 6]],
                     below: '6',
                     from: 10
+                },
+                /* Notenspiegel Oberschule und Gymnasium, valid from 2021/22 (Doc,
+                   12.09.2026, sheet "Notenschluessel OS-GY"): the thresholds of
+                   Klasse 11, but rounded to the nearest point, not up. The sheet
+                   runs from 15 to 55 Punkte. */
+                osgy: {
+                    caption: 'Note',
+                    title: 'Notenspiegel Oberschule und Gymnasium',
+                    rows: [['1', 0.95, 1], ['2', 0.80, 2], ['3', 0.65, 3],
+                           ['4', 0.45, 4], ['5', 0.25, 5], ['6', 0, 6]],
+                    below: '6',
+                    from: 15,
+                    to: 55,
+                    round: true
                 }
             };
 
-            /* Rounding up, but only on a genuine remainder: 0.95 * 20 is
+            /* BGY rounds up, but only on a genuine remainder: 0.95 * 20 is
                19.000000000000004 in binary floating point, and a naive ceil would
-               ask for 20 units instead of 19. */
+               ask for 20 units instead of 19. OS/GY rounds to the nearest point,
+               ,5 upwards - checked against all 246 cells of the sheet (rounding
+               up misses 81 of them). */
             function need(p, total) {
-                return Math.ceil(Number((p * total).toFixed(9)));
+                const x = Number((p * total).toFixed(9));
+                return SCALES[stufe].round ? Math.round(x) : Math.ceil(x);
             }
 
             const seg = document.getElementById('ptSeg');
@@ -439,17 +456,41 @@
             const elNote = document.getElementById('ptNote');
             const elMatrix = document.getElementById('ptMatrix');
             const elMatrixTitle = document.getElementById('ptMatrixTitle');
-            let stufe = 12;
+
+            /* ?s=osgy: the Oberschule/Gymnasium sheet - one scale, no Klassen
+               switch, counted in Punkte instead of Bewertungseinheiten. */
+            const OSGY = new URLSearchParams(location.search).get('s') === 'osgy';
+            let stufe = OSGY ? 'osgy' : 12;
+            const UNIT = OSGY ? { long: 'Punkte', short: 'Punkten' }
+                              : { long: 'Bewertungseinheiten', short: 'BE' };
+            if (OSGY) {
+                seg.style.display = 'none';
+                document.title = 'Notenspiegel OS/GY | Stoffverteilungspläne';
+                document.getElementById('ptSub').textContent =
+                    'Notenspiegel Oberschule und Gymnasium (OS/GY) · gültig ab Schuljahr 2021/22';
+                document.getElementById('ptTotalLbl').textContent = 'Punkte gesamt';
+                elNote.textContent = 'Erreichte Punkte eintragen.';
+                document.getElementById('ptFoot').innerHTML =
+                    'Grundlage ist der Notenspiegel f&uuml;r Oberschule und Gymnasium, g&uuml;ltig ab ' +
+                    'Schuljahr 2021/22 &mdash; dieselben Prozentschwellen wie am BGY in Klasse 11, ' +
+                    'aber gerundet statt aufgerundet: <em>ben&ouml;tigte Punkte = gerundet(Schwelle ' +
+                    '&times; Gesamtpunkte)</em>, ,5 aufw&auml;rts. Gegen den Aushang gepr&uuml;ft ' +
+                    '&mdash; 246 Zellen (15 bis 55 Punkte), keine Abweichung. Die Seite rechnet, ' +
+                    'gilt also f&uuml;r jede Gesamtzahl.';
+            }
 
             function pct(p) {
                 return '≥ ' + (p * 100).toFixed(1).replace('.0', '').replace('.', ',') + ' %';
             }
 
-            /* Every total worth printing: each step up to 50, then in fives. */
+            /* Every total worth printing: each step up to 50 (OS/GY: 55, where
+               its sheet ends), then in fives. */
             function totals() {
+                const sc = SCALES[stufe];
+                const top = sc.to || 50;
                 const out = [];
-                for (let t = SCALES[stufe].from; t <= 50; t++) out.push(t);
-                for (let t = 55; t <= 100; t += 5) out.push(t);
+                for (let t = sc.from; t <= top; t++) out.push(t);
+                for (let t = top + 5; t <= 100; t += 5) out.push(t);
                 return out;
             }
 
@@ -466,7 +507,7 @@
                 const total = Math.max(1, Number(elTotal.value) || 1);
                 if (elGot.value === '') {
                     elBig.textContent = '–';
-                    elNote.textContent = 'Erreichte Bewertungseinheiten eintragen.';
+                    elNote.textContent = 'Erreichte ' + UNIT.long + ' eintragen.';
                     return;
                 }
                 const got = Number(elGot.value);
@@ -475,13 +516,13 @@
                 if (!isFinite(got) || got < 0 || got > total) {
                     elBig.textContent = '?';
                     elNote.textContent = got < 0
-                        ? 'Negative Bewertungseinheiten gibt es nicht.'
-                        : got + ' von ' + total + ' BE - mehr als der Test hergibt.';
+                        ? 'Negative ' + UNIT.long + ' gibt es nicht.'
+                        : got + ' von ' + total + ' ' + UNIT.short + ' - mehr als der Test hergibt.';
                     return;
                 }
                 const m = markFor(got, total);
                 elBig.textContent = stufe === 12 ? m.label + ' NP' : 'Note ' + m.label;
-                elNote.textContent = got + ' von ' + total + ' BE · ' +
+                elNote.textContent = got + ' von ' + total + ' ' + UNIT.short + ' · ' +
                     (got / total * 100).toFixed(1).replace('.', ',') + ' %';
             }
 

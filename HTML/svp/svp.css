@@ -1194,6 +1194,52 @@ nav.quick-nav a.nav-drop { cursor: pointer; }
 .nav-drop-panel .nd-row + .nd-row { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--row-line); }
 /* a subject whose pills are all switched off in ⚙ hides its caption too */
 .nav-drop-panel .nd-title.nd-empty, .nav-drop-panel .nd-row.nd-empty { display: none; }
+/* Sub-menu inside a dropdown (Doc, 12.09.2026: "ein Dreieck nach rechts und
+   ein Submenu zeigen" - Notenschluessel): the head pill carries a ▸ at its
+   right end, its entries sit in a small panel beside it, in the dropdown's
+   own look. */
+.nav-drop-panel .nd-sub { position: relative; display: flex; flex-direction: column; }
+.nav-drop-panel .nd-sub-head { position: relative; }
+.nav-drop-panel .nd-caret {
+    position: absolute;
+    right: 7px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.85em;
+}
+.nav-drop-panel .nd-sub-panel {
+    display: none;
+    position: absolute;
+    /* padding + border of this panel: its first entry sits level with the head */
+    top: -11px;
+    /* past the dropdown's own padding and border, plus a small gap */
+    left: calc(100% + 15px);
+    z-index: 81;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px var(--shadow);
+}
+/* invisible bridge over the gap, so the mouse can travel from head to panel */
+.nav-drop-panel .nd-sub-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 100%;
+    width: 17px;
+}
+.nav-drop-panel .nd-sub.nd-left .nd-sub-panel { left: auto; right: calc(100% + 15px); }
+.nav-drop-panel .nd-sub.nd-left .nd-sub-panel::before { right: auto; left: 100%; }
+.nav-drop-panel .nd-sub.open .nd-sub-panel { display: flex; }
+@media (hover: hover) {
+    .nav-drop-panel .nd-sub:hover .nd-sub-panel { display: flex; }
+}
+.nav-drop-panel .nd-sub-panel .badge { text-align: center; }
+.nav-drop-panel .nd-sub.nd-empty { display: none; }
 /* every pill inside switched off in ⚙: the dropdown greys out instead of
    opening an empty panel (Doc, 31.08.2026) */
 /* Empty Schulart: hide the pill entirely (Doc, 03.09.2026 - was greyed out
