@@ -112,18 +112,77 @@ async function writeTopic(ttId, text) {
   return r.result;
 }
 
-// "Anwesenheit kontrolliert" for periods whose topic was just written. The tick means "I
-// looked who is missing", so it is only ever set together with Doc's own click on Eintragen -
-// never by the 18:00 dry run, never for a period that was not written in the same breath
-// (Doc, 09.09.2026: "klar! an Eintragen"). The mobile API calls it submitAbsencesChecked2017
-// (the un-suffixed name answers "Method not found" - measured); it takes a set of periodIds
-// and answers {}; an unknown id is silently ignored and setting it twice is harmless. There
-// is no clean way to read the tick back: only getPeriodData2017 carries it, and that drags
-// student data along, so the write is fire-and-forget on purpose.
-async function markAbsencesChecked(ttIds) {
-  if (!ttIds.length) return;
-  const r = await intern('submitAbsencesChecked2017', { periodIds: ttIds });
-  if (r.error) throw new Error(`${r.error.message} (code ${r.error.code})`);
+// "Anwesenheit kontrolliert" - the tick means "I looked who is missing", so it only ever rides on
+// Doc's own click (Eintragen in "WebUntis holen", `plan`, `anwesenheit`), never on a dry run
+// (Doc, 09.09.2026: "klar! an Eintragen"). Since 14.09.2026 it concerns EVERY own lesson that has
+// begun and was not cancelled, no matter who wrote the topic - before, a lesson filled through the
+// SVP dialog never got it and the app offered no button (Doc: "Freitag NICHT gesetzt").
+// READING, measured 14.09.2026 - the web UI's own "Offene Stunden" list:
+//   POST /WebUntis/api/rest/view/v1/classreg/open-periods   (Bearer JWT from /api/token/new)
+//   {teacherId, filter:"ABSENCE_OPEN", dateRange:{start,end}} -> periods[] with period.id (= ttId),
+//   absCheckNeeded, absChecked - no student field in sight, so getPeriodData2017 stays switched off.
+// WRITING, measured 14.09.2026: submitAbsencesChecked2017 (same shape as BetterUntis'
+// postAbsencesChecked) answers {} on this server but CHANGES NOTHING. What works is what the web
+// UI's button does - the legacy class register form:
+//   POST /WebUntis/classregpage.do?ttid=X   reload=0, ttid=X, _csrf, absencechecked=absencechecked
+// The CSRF token is session-wide and sits as "csrfToken" in the EMPTY embedded.do shell, so the
+// class register page itself (it carries the student list) is never loaded. The answer is a tiny
+// {args, method, success, onSuccessCall}. One POST ticks the whole block (double lesson), so the
+// open list is re-read after every send and a ticked partner is skipped. Every tick is read back;
+// one that did not stick is reported as failed, never as done.
+async function openAbsencePeriods(session, from, to) {
+  const iso = d => `${String(d).slice(0, 4)}-${String(d).slice(4, 6)}-${String(d).slice(6, 8)}`;
+  const jwt = (await (await fetch(`${BASE}/WebUntis/api/token/new`, { headers: { Cookie: cookies } })).text()).trim();
+  const res = await fetch(`${BASE}/WebUntis/api/rest/view/v1/classreg/open-periods`, {
+    method: 'POST',
+    headers: { Cookie: cookies, Authorization: 'Bearer ' + jwt, 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ teacherId: session.user?.elemId, filter: 'ABSENCE_OPEN', dateRange: { start: iso(from), end: iso(to) } }),
+  });
+  const text = await res.text();
+  // Belt and braces, as in readTopic: should this list ever carry student data, stop.
+  if (/"(referencedStudents|students|studentIds|stAbsences)"/.test(text)) throw new Error('Unerwartete Schuelerdaten in open-periods - Abbruch.');
+  if (!res.ok) throw new Error(`open-periods HTTP ${res.status}`);
+  return new Set((JSON.parse(text).periods || []).filter(p => p.absCheckNeeded && !p.absChecked).map(p => String(p.period.id)));
+}
+
+async function markAbsencesChecked(session, lessons) {
+  if (!lessons.length) return;
+  const shellRes = await fetch(`${BASE}/WebUntis/embedded.do?isEmbeddedInModal=true`, { headers: { Cookie: cookies } });
+  for (const c of (shellRes.headers.getSetCookie ? shellRes.headers.getSetCookie() : [])) cookies += '; ' + c.split(';')[0];
+  const csrf = ((await shellRes.text()).match(/"csrfToken":"([^"]+)"/) || [])[1];
+  if (!csrf) throw new Error('csrfToken nicht gefunden (embedded.do)');
+  const dates = lessons.map(l => l.date).sort();
+  let open = await openAbsencePeriods(session, dates[0], dates[dates.length - 1]);
+  for (const l of lessons) {
+    if (!open.has(String(l.ttId))) continue;              // already ticked, e.g. with its block partner
+    const res = await fetch(`${BASE}/WebUntis/classregpage.do?ttid=${l.ttId}`, {
+      method: 'POST',
+      headers: { Cookie: cookies, 'Content-Type': 'application/x-www-form-urlencoded',
+        'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json', 'X-CSRF-TOKEN': csrf },
+      body: new URLSearchParams({ reload: '0', ttid: String(l.ttId), _csrf: csrf, absencechecked: 'absencechecked' }),
+    });
+    const text = await res.text();                         // never printed or stored
+    let ok = res.ok;
+    try { if (JSON.parse(text).success === false) ok = false; } catch { ok = false; }
+    if (!ok) throw new Error(`classregpage.do ${res.status} bei ${l.date} ${l.start}`);
+    await new Promise(r => setTimeout(r, 150));
+    open = await openAbsencePeriods(session, dates[0], dates[dates.length - 1]);
+  }
+  const still = open;
+  const stuck = lessons.filter(l => still.has(String(l.ttId)));
+  if (stuck.length) throw new Error(`WebUntis hat den Haken nicht uebernommen (${stuck.length} von ${lessons.length} weiter offen)`);
+}
+
+// Own lessons (from myLessons) that have begun - attendance is taken at the start - were not
+// cancelled, and that WebUntis itself still lists as "Abwesenheit offen".
+async function ticksOpen(session, lessons) {
+  const now = new Date(), today = ymd(now);
+  const hm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  const begun = lessons.filter(l => l.code !== 'cancelled' && (l.date < today || (l.date === today && l.start <= hm)));
+  if (!begun.length) return [];
+  const dates = begun.map(l => l.date).sort();
+  const open = await openAbsencePeriods(session, dates[0], dates[dates.length - 1]);
+  return begun.filter(l => open.has(String(l.ttId)));
 }
 
 // Read the stored classbook text of one period - WITHOUT any student data.
@@ -1078,7 +1137,7 @@ async function main() {
     //   --force  overwrite a DIFFERENT existing text (a hand correction) as well
     //   --line   one summary line plus exit code 1 when something is open (for the app)
     //   --nur-stoff  write the topic only, leave "Anwesenheit kontrolliert" alone (default: the
-    //            tick is set for every period written and read back - see markAbsencesChecked)
+    //            tick goes to every own lesson of the range that has begun - see markAbsencesChecked)
     // Since 06.09.2026 this also handles Termin-mode pages (block teaching, fos12) and builds
     // its text with the browser's own functions, so both ways write the same line.
     const args = process.argv.slice(3);
@@ -1108,9 +1167,13 @@ async function main() {
     const plans = {};
     // The whole year is needed anyway: Termin mode counts a group's appointments from it, and
     // week mode spreads the steps over the week's lessons.
-    const all = (await myLessons(year.startDate, year.endDate, session)).filter(l => pageFor(l, pages));
-    const lessons = all.filter(l => Number(l.date) >= Number(from) && Number(l.date) <= Number(to));
-    if (!lessons.length) {
+    const mine = await myLessons(year.startDate, year.endDate, session);
+    const all = mine.filter(l => pageFor(l, pages));
+    const inRange = l => Number(l.date) >= Number(from) && Number(l.date) <= Number(to);
+    const lessons = all.filter(inRange);
+    // The tick belongs to every own lesson of the range, with or without a plan page.
+    const tickable = nurStoff ? [] : await ticksOpen(session, mine.filter(inRange));
+    if (!lessons.length && !tickable.length) {
       if (line) console.log('KLASSENBUCH: keine eigenen Stunden im Zeitraum');
       else console.log(`Keine Stunden mit Planseite zwischen ${from} und ${to}.`);
       return;
@@ -1137,12 +1200,19 @@ async function main() {
       // Only EMPTY lessons belong in this line. A lesson whose text differs from today's plan is
       // not a gap - it has content, usually because the plan was edited afterwards - and would
       // otherwise nag every single day for the rest of the school year.
-      const groups = [...new Set(open.map(p => p.l.klassen.join(',')))];
-      if (dry || !open.length) {
-        console.log('KLASSENBUCH: ' + (open.length
-          ? `${open.length} Stunde${open.length === 1 ? '' : 'n'} ohne Lernstoff` + (groups.length ? ' \u00b7 ' + groups.join(', ') : '')
+      if (dry || (!open.length && !tickable.length)) {
+        // The app ("WebUntis holen", deliberately not rebuilt - a rebuild resets its macOS
+        // permissions) shows the Eintragen button only for a line containing "ohne Lernstoff" or
+        // "FEHLGESCHLAGEN". So an open tick is reported together with the (true) "0 Stunden ohne
+        // Lernstoff", otherwise there would be no button to set it.
+        const parts = [];
+        if (open.length || tickable.length) parts.push(`${open.length} Stunde${open.length === 1 ? '' : 'n'} ohne Lernstoff`);
+        if (tickable.length) parts.push(`Anwesenheit offen: ${tickable.length} Stunde${tickable.length === 1 ? '' : 'n'}`);
+        const groups = [...new Set([...open.map(p => p.l.klassen.join(',')), ...tickable.map(l => l.klassen.join(','))])];
+        console.log('KLASSENBUCH: ' + (parts.length
+          ? parts.join(' \u00b7 ') + (groups.length ? ' \u00b7 ' + groups.join(', ') : '')
           : 'alles eingetragen'));
-        process.exitCode = open.length ? 1 : 0;
+        process.exitCode = parts.length ? 1 : 0;
         return;
       }
       // Writing: report AFTER the fact, otherwise the caller shows the state from before its own
@@ -1158,10 +1228,12 @@ async function main() {
         } catch (e) { bad.push(`${label} (${e.message})`); }
       }
       if (patched.length) await patchStatus(session, patched);
-      // the tick rides on the same click, only for periods whose text came back confirmed
+      // the tick rides on the same click - for every lesson of the range that has begun, not only
+      // for the ones just written (see markAbsencesChecked)
       let tick = '';
-      if (!nurStoff && ticked.length) {
-        try { await markAbsencesChecked(ticked); tick = ` \u00b7 Anwesenheit kontrolliert: ${ticked.length}`; }
+      if (tickable.length) {
+        const ids = tickable.map(l => l.ttId);
+        try { await markAbsencesChecked(session, tickable); tick = ` \u00b7 Anwesenheit kontrolliert: ${ids.length}`; }
         catch (e) { bad.push(`Anwesenheit kontrolliert (${e.message})`); }
       }
       console.log('KLASSENBUCH: ' + `${done} Stunde${done === 1 ? '' : 'n'} eingetragen` + tick
@@ -1190,16 +1262,34 @@ async function main() {
       patched.push({ page: p.page, l: p.l, text: back });
       say(`${label}: ${ok ? 'eingetragen' : 'FEHLER, Rueckgelesenes weicht ab'} -> ${back}`);
     }
-    if (!nurStoff && open.length) {
-      if (dry) say(`WUERDE "Anwesenheit kontrolliert" setzen: ${open.length} Stunde${open.length === 1 ? '' : 'n'} (--nur-stoff laesst es)`);
-      else if (ticked.length) {
-        try { await markAbsencesChecked(ticked); say(`"Anwesenheit kontrolliert" gesetzt: ${ticked.length} Stunde${ticked.length === 1 ? '' : 'n'}`); }
+    if (tickable.length) {
+      const ids = tickable.map(l => l.ttId);
+      if (dry) say(`WUERDE "Anwesenheit kontrolliert" setzen: ${ids.length} Stunde${ids.length === 1 ? '' : 'n'} (--nur-stoff laesst es)`);
+      else {
+        try { await markAbsencesChecked(session, tickable); say(`"Anwesenheit kontrolliert" gesetzt: ${ids.length} Stunde${ids.length === 1 ? '' : 'n'}`); }
         catch (e) { say(`"Anwesenheit kontrolliert" FEHLGESCHLAGEN: ${e.message}`); }
       }
     }
     if (!open.length) say('Nichts offen - alles steht schon im Klassenbuch.');
     if (unmapped.size) say(`Ohne Planseite (in ${path.basename(MAP_FILE)} nachtragen): ${[...unmapped].join(', ')}`);
     if (patched.length) { say('Badge-Daten aktualisieren:'); await patchStatus(session, patched); }
+    return;
+  }
+
+  if (cmd === 'anwesenheit') {
+    // "Anwesenheit kontrolliert" for every own lesson of the school year that has begun, was not
+    // cancelled and is still "Abwesenheit offen" in WebUntis. --dry only lists them.
+    const dry = process.argv.includes('--dry');
+    const years = await rpc('getSchoolyears');
+    const todayN = Number(ymd(new Date()));
+    const year = years.find(y => Number(y.startDate) <= todayN && Number(y.endDate) >= todayN)
+      || years[years.length - 1];
+    const open = await ticksOpen(session, await myLessons(year.startDate, todayN, session));
+    for (const l of open) console.log(`${l.date} ${l.start} ${l.subject} ${l.klassen.join(',')}`);
+    if (!open.length) { console.log('Nichts offen.'); return; }
+    if (dry) { console.log(`WUERDE "Anwesenheit kontrolliert" setzen: ${open.length} Stunden`); return; }
+    await markAbsencesChecked(session, open);
+    console.log(`"Anwesenheit kontrolliert" gesetzt: ${open.length} Stunden`);
     return;
   }
 
@@ -1219,7 +1309,7 @@ async function main() {
       return;
     }
   }
-  console.error(`Unknown command "${cmd}". Try: whoami | timetable [VON] [BIS] | topic <ttId> "<Text>" | plan [YYYYMMDD] [--dry] [--force] [--nur-stoff] | status | untis-push | ${Object.keys(map).join(' | ')}`);
+  console.error(`Unknown command "${cmd}". Try: whoami | timetable [VON] [BIS] | topic <ttId> "<Text>" | plan [YYYYMMDD] [--dry] [--force] [--nur-stoff] | anwesenheit [--dry] | status | untis-push | ${Object.keys(map).join(' | ')}`);
   process.exit(1);
 }
 

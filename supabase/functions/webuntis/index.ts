@@ -200,6 +200,60 @@ async function readTopics(u: Untis, ttIds: number[]): Promise<Record<string, str
   return out;
 }
 
+/* "Anwesenheit kontrolliert" (14.09.2026, Doc: "Freitag NICHT gesetzt"): a topic sent from the SVP
+   dialog now also sets the tick - but only for a lesson that has already begun and was not
+   cancelled (attendance is taken at the start; a topic typed in ahead of time must not claim it).
+   Measured 14.09.2026: submitAbsencesChecked2017 (BetterUntis' call) answers {} but changes
+   nothing on this server. What works is the web UI's own button, the legacy class register form
+   POST /WebUntis/classregpage.do?ttid=X (reload, ttid, _csrf, absencechecked=absencechecked); the
+   session-wide CSRF token comes from the EMPTY embedded.do shell, so the class register page with
+   its student list is never loaded. Read back through classreg/open-periods (no student fields).
+   Mirrors markAbsencesChecked() in tools/webuntis.js. The function runs in UTC, the timetable in
+   Dresden time - hence berlinNow(). */
+function berlinNow() {
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(new Date()).map(x => [x.type, x.value]));
+  return { ymd: `${p.year}${p.month}${p.day}`, hm: `${p.hour}:${p.minute}` };
+}
+
+async function tickIfBegun(u: Untis, userData: any, ttId: number): Promise<true | string> {
+  const now = berlinNow();
+  const from = new Date(Date.now() - 200 * 864e5).toISOString().slice(0, 10).replace(/-/g, '');
+  const l = (await myLessons(u, userData, from, now.ymd)).find((x: any) => x.ttId === ttId);
+  if (!l) return 'nicht unter den eigenen Stunden bis heute';
+  if (l.code === 'cancelled') return 'Stunde ausgefallen';
+  if (l.date === now.ymd && l.start > now.hm) return 'Stunde hat noch nicht begonnen';
+
+  /* CSRF token from the empty shell page - never from the class register page itself */
+  const shell = await fetch(`${BASE}/WebUntis/embedded.do?isEmbeddedInModal=true`, { headers: { Cookie: u.cookies } });
+  const sc = typeof shell.headers.getSetCookie === 'function' ? shell.headers.getSetCookie() : [];
+  for (const c of sc) u.cookies += '; ' + c.split(';')[0];
+  const csrf = ((await shell.text()).match(/"csrfToken":"([^"]+)"/) || [])[1];
+  if (!csrf) return 'csrfToken nicht gefunden';
+
+  const res = await fetch(`${BASE}/WebUntis/classregpage.do?ttid=${ttId}`, {
+    method: 'POST',
+    headers: { Cookie: u.cookies, 'Content-Type': 'application/x-www-form-urlencoded',
+      'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json', 'X-CSRF-TOKEN': csrf },
+    body: new URLSearchParams({ reload: '0', ttid: String(ttId), _csrf: csrf, absencechecked: 'absencechecked' }),
+  });
+  await res.text();   /* ~100 bytes {args, method, success, onSuccessCall} - not passed on */
+  if (!res.ok) return `classregpage.do HTTP ${res.status}`;
+
+  /* read back: is the period still listed as "Abwesenheit offen"? */
+  const jwt = (await (await fetch(`${BASE}/WebUntis/api/token/new`, { headers: { Cookie: u.cookies } })).text()).trim();
+  const iso = `${l.date.slice(0, 4)}-${l.date.slice(4, 6)}-${l.date.slice(6, 8)}`;
+  const op = await fetch(`${BASE}/WebUntis/api/rest/view/v1/classreg/open-periods`, {
+    method: 'POST',
+    headers: { Cookie: u.cookies, Authorization: 'Bearer ' + jwt, 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ teacherId: userData?.elemId, filter: 'ABSENCE_OPEN', dateRange: { start: iso, end: iso } }),
+  }).then(r => r.json());
+  const still = (op.periods || []).some((p: any) => p.period?.id === ttId && p.absCheckNeeded && !p.absChecked);
+  return still ? 'WebUntis hat den Haken nicht uebernommen' : true;
+}
+
 // ---------- handler ----------
 
 Deno.serve(async (req) => {
@@ -272,7 +326,8 @@ Deno.serve(async (req) => {
           error: 'In WebUntis steht bereits ein anderer Text.' });
       }
       if (before !== null && before.trim() === topic) {
-        return json({ ok: true, ttId, topic, stored: before, unchanged: true });
+        const absenceChecked = await tickIfBegun(u, userData, ttId).catch(e => (e as Error).message);
+        return json({ ok: true, ttId, topic, stored: before, unchanged: true, absenceChecked });
       }
 
       const w = await u.intern('submitLessonTopic', { ttId, lessonTopic: topic });
@@ -282,7 +337,9 @@ Deno.serve(async (req) => {
          verwirft oder kappt. Was hier als `stored` zurueckgeht, steht wirklich drin. */
       const after = await readTopic(u, ttId);
       const stored = after ?? '';
-      return json({ ok: stored.trim() === topic.trim(), ttId, topic, stored });
+      /* the lesson was held either way - the tick does not depend on the read-back */
+      const absenceChecked = await tickIfBegun(u, userData, ttId).catch(e => (e as Error).message);
+      return json({ ok: stored.trim() === topic.trim(), ttId, topic, stored, absenceChecked });
     }
 
     return json({ error: 'unbekannte action' }, 400);
