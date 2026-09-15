@@ -699,6 +699,7 @@
         updateAllBtn();
         updateKeyBtn();
         updateEditBtns();
+        renderFundus();
     }
 
     /* The tallest topic block sets the height of all of them, so the cards line
@@ -982,7 +983,9 @@
     /* The list as it stands goes into the shared topics (their own order kept,
        see mergeCatalogue) and, as the order of THIS Lerngruppe, into the cloud. */
     function persistTopics() {
-        catalogue = mergeCatalogue(catalogue, list);
+        /* The Fundus goes along: mergeCatalogue drops whatever is missing, and a
+           topic put aside here must stay in the list of the other Lerngruppe. */
+        catalogue = mergeCatalogue(catalogue, list.concat(fundusTopics()));
         const ts = new Date().toISOString();
         saveJSON(KEY_TOPICS, { v: 2, list: catalogue, ts: ts });
         pushTopics(ts);
@@ -1003,6 +1006,7 @@
         list.forEach((e) => S(e.id));
         catalogue = [];
         persistTopics();
+        list = list.filter((e) => !inFundus(e.id));   /* the Fundus stays put aside */
         editing = false;
         render();
     };
@@ -1044,7 +1048,9 @@
        whole point is two groups on the same subject, not two cards fighting
        over one set of names. */
     function nextId() {
-        const used = new Set(list.map((e) => e.id));
+        /* the catalogue as well: a topic in this Lerngruppe's Fundus keeps its
+           id and its places, a new card must not land on them */
+        const used = new Set(list.concat(catalogue).map((e) => e.id));
         let n = TOPICS.length;
         while (used.has(n)) n++;
         return n;
@@ -1149,6 +1155,52 @@
         fields.delete(id);
         saveTopics();
         render();
+    }
+
+    /* Fundus (Doc, 15.09.2026: "nicht loeschen -> Fundus"): a topic without a
+       name leaves the list of THIS Lerngruppe but stays in the shared topics,
+       with its id and its places, and can come back at any time. Stored as
+       meta.fundus next to the order (META_PAGE); the fundus write is queued
+       before pushTopics, so the order written after it cannot undo it. */
+    function toFundus(id) {
+        const from = posOf(id);
+        if (from < 0 || rowTaken(id)) return;
+        readDom();
+        meta.fundus = uniqIds(meta.fundus.concat(id));
+        setMeta((m) => { m.fundus = uniqIds((m.fundus || []).concat(id)); })
+            .catch((e) => setStatus('☁ Fundus NICHT gespeichert: ' + e.message, true));
+        list.splice(from, 1);
+        fields.delete(id);
+        saveTopics();
+        render();
+    }
+
+    function fromFundus(id) {
+        const t = catalogue.find((e) => e.id === id);
+        if (!t) return;
+        readDom();
+        meta.fundus = meta.fundus.filter((x) => x !== id);
+        setMeta((m) => { m.fundus = uniqIds(m.fundus).filter((x) => x !== id); })
+            .catch((e) => setStatus('☁ Fundus NICHT gespeichert: ' + e.message, true));
+        list.push(Object.assign({}, t));
+        S(id);
+        saveTopics();
+        render();
+    }
+
+    /* Below the list, for Doc only: what this Lerngruppe has put aside */
+    function renderFundus() {
+        const box = $('fundus');
+        if (!box) return;
+        const aside = logged() ? fundusTopics() : [];
+        box.hidden = !aside.length;
+        box.innerHTML = aside.length
+            ? '<div class="vt-fundus-head">Fundus <span class="vt-fundus-n">' + aside.length + '</span></div>' +
+              aside.map((t) => '<div class="vt-fundus-row"><span class="vt-fundus-title">' + esc(t.title) + '</span>' +
+                  '<button type="button" class="action secondary" id="unfund-' + t.id + '"' +
+                  ' title="Wieder ans Ende der Liste">↑ Zurück in die Liste</button></div>').join('')
+            : '';
+        aside.forEach((t) => { const b = $('unfund-' + t.id); if (b) b.addEventListener('click', () => fromFundus(t.id)); });
     }
 
     /* A duplicated topic has no places in the database yet, and an anonymous
@@ -1282,6 +1334,10 @@
                 ? 'Nur selbst angelegte Kopien lassen sich entfernen'
                 : 'Für dieses Thema ist schon ein Name eingetragen'),
             removable(id), () => removeCard(id));
+        item('⇩  In den Fundus', rowTaken(id)
+            ? 'Für dieses Thema ist schon ein Name eingetragen'
+            : 'Aus der Liste dieser Lerngruppe nehmen — das Thema bleibt erhalten und kann zurückgeholt werden',
+            !rowTaken(id), () => toFundus(id));
         document.body.appendChild(menu);
         /* keep the whole menu on screen, whichever corner it was opened in */
         menu.style.left = Math.max(8, Math.min(x, window.innerWidth - menu.offsetWidth - 8)) + 'px';
@@ -1585,7 +1641,13 @@
        stored as ciphertext only. */
     const TOPICS_PAGE = '/svp/vortraege/' + PLAN;
     const META_PAGE = TOPICS_PAGE + '/' + KLASSE;
-    let meta = { order: null, dates: {}, noten: {} };
+    let meta = { order: null, dates: {}, noten: {}, fundus: [] };
+    /* the Fundus of this Lerngruppe - ids put aside, see toFundus() */
+    function uniqIds(a) {
+        return [...new Set((Array.isArray(a) ? a : []).map(Number).filter((n) => Number.isFinite(n) && n >= 0))];
+    }
+    function inFundus(id) { return meta.fundus.includes(id); }
+    function fundusTopics() { return catalogue.filter((e) => inFundus(e.id)); }
     /* the shared topics as the cloud has them: { list, ts } or null */
     let cloudCat = null;
     let metaLoaded = false;
@@ -1634,7 +1696,8 @@
             meta = {
                 order: Array.isArray(o.order) ? o.order.map(Number) : null,
                 dates: o.dates && typeof o.dates === 'object' ? o.dates : {},
-                noten: o.noten && typeof o.noten === 'object' ? o.noten : {}
+                noten: o.noten && typeof o.noten === 'object' ? o.noten : {},
+                fundus: uniqIds(o.fundus)
             };
             const cl = cat && cat.edits ? cleanList(cat.edits.list) : [];
             cloudCat = cl.length ? { list: cl, ts: Date.parse(cat.ts) || 0 } : null;
@@ -1713,7 +1776,7 @@
         } else if (logged() && hasLocal) {
             push = true;
         }
-        list = arrange(catalogue, meta.order);
+        list = arrange(catalogue, meta.order).filter((e) => !inFundus(e.id));
         list.forEach((e) => S(e.id));
         if (push) pushTopics(local.ts || undefined);
     }
@@ -1989,12 +2052,18 @@
             '<button class="action secondary" id="btn-add" ' +
             'title="Ein weiteres Thema unter das letzte h&auml;ngen">+ Vortrag hinzuf&uuml;gen</button>';
 
+        /* Doc's Fundus, filled by renderFundus() */
+        const fund = document.createElement('div');
+        fund.className = 'vt-fundus';
+        fund.id = 'fundus';
+        fund.hidden = true;
+
         const hint = document.createElement('div');
         hint.className = 'vt-hint';
         hint.innerHTML = HINT;
 
         const frag = document.createDocumentFragment();
-        [head, bar, box, addBox, hint].forEach((el) => frag.appendChild(el));
+        [head, bar, box, addBox, fund, hint].forEach((el) => frag.appendChild(el));
         document.body.insertBefore(frag, document.body.firstChild);
 
         const go = (id, fn) => { const b = $(id); if (b) b.addEventListener('click', fn); };
