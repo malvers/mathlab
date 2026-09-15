@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jahresrückblick</title>
+<meta name="description" content="Was vom Schuljahr bleibt — und was in Klasse 12 darauf aufbaut">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8; --codemuted:#7E8FB5;
+  --greetbg:#000028;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:24px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+/* with a picture: text on the left, picture + licence line on the right */
+.slide.chapter.has-pic h2{width:420px;font-size:28px}
+.slide.chapter.has-pic .sub{width:420px}
+.slide.chapter.has-pic .hair{width:448px;top:372px}   /* room for a two-line sub */
+.chap-pic{position:absolute;left:560px;top:150px;width:328px;height:230px;margin:0;
+  display:block;overflow:hidden;background:var(--card);
+  border:.75px solid rgba(14,36,78,.12)}
+.chap-pic img{width:100%;height:100%;object-fit:contain;display:block}   /* never cropped */
+.chap-credit{position:absolute;left:560px;top:388px;width:328px;font-size:9px;line-height:1.3;
+  color:var(--muted);text-decoration:none;letter-spacing:.2px}
+a.chap-credit:hover{color:var(--red);text-decoration:underline}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:grid;place-items:center}
+.pic img{max-width:100%;max-height:100%}
+
+/* --- table_top ---------------------------------------------------------- */
+.dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
+  font-family:Raleway,system-ui,sans-serif}
+.dtable th,.dtable td{padding:0 6px;text-align:left;overflow:hidden;white-space:nowrap;
+  border:.75px solid var(--stroke);line-height:1.85}
+.dtable th{background:var(--ink);color:#fff;font-family:Orbitron,Raleway,sans-serif;
+  font-weight:700;font-size:.75em;border-color:var(--ink)}
+.dtable td{background:#fff;color:var(--body)}
+.dtable td.b{font-weight:700;color:var(--ink)}
+.dtable td.m{font-family:Menlo,monospace}
+.dtable .ac{text-align:center}
+.dtable .ar{text-align:right}
+
+/* --- greeting (Auftaktfolie) --------------------------------------------- */
+.slide.greet{background-image:none;background-color:var(--greetbg)}
+.slide.greet::before{left:336px;width:552px;background:rgba(230,236,248,.14)}
+.slide.greet .foot{left:336px;color:var(--codemuted)}
+.slide.greet .pageno{color:var(--codemuted)}
+.greet-ground{position:absolute;inset:0;background:var(--greetbg)}
+.greet-pic{position:absolute;left:0;top:0;width:312px;height:540px;
+  object-fit:cover;display:block}
+.greet-credit{position:absolute;left:10px;bottom:8px;font-size:9px;
+  font-family:Raleway,sans-serif;color:rgba(255,255,255,.5);text-decoration:none;
+  letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.greet-credit:hover{color:rgba(255,255,255,.9);text-decoration:underline}
+.greet-lead{position:absolute;left:433px;top:168px;width:455px;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:46px;color:var(--orange);
+  line-height:1.05;letter-spacing:-.5px}
+.greet-quote{position:absolute;left:486px;top:368px;width:402px;text-align:center;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:17px;color:var(--orange);
+  line-height:1.2}
+.greet-author{position:absolute;left:596px;top:404px;width:292px;text-align:center;
+  font-size:11px;color:var(--codemuted);letter-spacing:.3px}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-8d9b7990b606.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/road-6790127/" target="_blank" rel="noopener">shogun</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 11</p>
+      <h1>Jahresrückblick</h1>
+      <p class="sub">Was vom Schuljahr bleibt — und was in Klasse 12 darauf aufbaut</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Ein Jahr im Überblick</h2>
+      <p class="sub">Vier Lernbereiche und ein Wahlbereich</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/jahresrueckblick-webstuhl.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:A_Jacquard_loom_showing_information_punchcards,_National_Museum_of_Scotland.jpg" target="_blank" rel="noopener">Jacquard-Webstuhl mit Lochkarten — Foto: Stephencdickson, CC BY-SA 4.0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wo wir stehen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Letzte Woche: Puffer — Wiederholung quer durchs Jahr</p>
+<p class="line l0 step" data-g="1">Das Schuljahr ist fast geschafft — Zeit für den <b>großen Überblick</b></p>
+<p class="line l0 step" data-g="2">Heute: die Kernthemen in 10 Fragen, eure Rückmeldung, der Blick auf <b>Klasse 12</b></p>
+<p class="line l0 step" data-g="3">Leitfrage: Was habe ich gelernt, das <b>über das Schuljahr hinaus</b> trägt?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Das Schuljahr auf einen Blick</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:150px"><col style="width:330px"><col style="width:336px"></colgroup><tr><th>Bereich</th><th>Thema</th><th>Kern</th></tr><tr><td class="b" style="background:#FBEBBF">LB 1</td><td>Informatik als Wissenschaft</td><td>vier Bereiche: theoretisch, technisch, praktisch, angewandt</td></tr><tr><td class="b" style="background:#E6ECF8">LB 2</td><td>Persönliches Informationsmanagement</td><td>vom Signal zum Wissen, Quellen prüfen, präsentieren</td></tr><tr><td class="b" style="background:#F2CFCB">LB 3</td><td>IT-Sicherheit und Ökologie</td><td>Schutzziele, Datensicherheit, Kryptologie, Datenschutz</td></tr><tr><td class="b">LB 4</td><td>Projekt Informationsmanagement</td><td>eine offene Frage im Team bearbeiten</td></tr><tr><td class="b" style="background:#DDE8C6">Wahlbereich</td><td>Datenkomprimierung und Fehlererkennung</td><td>Lauflängencodierung, Prüfbits, Prüfziffern</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Dazu die Exkurse: Wissensmanagementsysteme, Präsentieren, Digitalisierung</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Kernbegriffe</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:330px"><col style="width:486px"></colgroup><tr><th>Frage</th><th>Antwort</th></tr><tr><td class="b">Welche vier Wissenschaftsbereiche?</td><td>theoretische, technische, praktische, angewandte Informatik</td></tr><tr><td class="b">Der Weg vom Signal zum Wissen?</td><td>Signal, Nachricht, Information, Wissen</td></tr><tr><td class="b">Die Schritte des Informationsmanagements?</td><td>Bedarf klären, beschaffen, aufbereiten, nutzen, bewerten</td></tr><tr><td class="b">Der Kern der IT-Sicherheit?</td><td>Vertraulichkeit, Integrität, Verfügbarkeit</td></tr><tr><td class="b">Was ist eine Aussage wert?</td><td>so viel wie ihr Beleg</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Bei den Schutzzielen kommen Authentizität und Verbindlichkeit häufig hinzu</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Rote Fäden</h2>
+      <p class="sub">Was über alle Lernbereiche trägt</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/jahresrueckblick-faden.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Red_thread_(yarn).jpg" target="_blank" rel="noopener">Roter Faden — Foto: 多多123, CC BY 4.0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Das Modell</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Der Begriff aus Klasse 11, der in Klasse 12 <b>am weitesten trägt</b></p>
+<p class="line l1 step" data-g="0"><b>Abbildung</b>: Ein Modell steht für ein Original</p>
+<p class="line l1 step" data-g="0"><b>Verkürzung</b>: Es lässt Merkmale weg</p>
+<p class="line l1 step" data-g="0"><b>Pragmatik</b>: Es gilt für einen bestimmten Zweck</p>
+<p class="line l0 step" data-g="1">Verkürzung ist ein Merkmal, kein Mangel — beim Zweckwechsel muss man <b>neu prüfen</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Sicherheit und Daten</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Sicherheit ist ein <b>Zustand auf Zeit</b> — morgen kann eine neue Lücke bekannt werden</p>
+<p class="line l0 step" data-g="1">Und immer eine <b>Abwägung</b>: Mehr Schutz kostet Aufwand und Bequemlichkeit</p>
+<p class="line l0 step" data-g="2">Deshalb steht die Bewertung des Schutzbedarfs am Anfang</p>
+<p class="line l0 step" data-g="3">Wichtigste Regel für personenbezogene Daten: <b>nur erheben, was für den Zweck nötig ist</b></p>
+<p class="line l0 step" data-g="4">Verschlüsselung ist erst die zweite Verteidigungslinie</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Arbeiten, präsentieren, urteilen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:230px"><col style="width:586px"></colgroup><tr><th>Thema</th><th>Was bleibt</th></tr><tr><td class="b">Projekt</td><td>eine offene Frage in bearbeitbare Schritte zerlegen</td></tr><tr><td class="b">Zusammenarbeit</td><td>klare Zuständigkeiten und eine gemeinsame Fassung</td></tr><tr><td class="b">Präsentation</td><td>eine klare Botschaft, die beim Publikum ankommt</td></tr><tr><td class="b">digitale Werkzeuge</td><td>Nutzen, Kosten und Nebenwirkungen abwägen</td></tr><tr><td class="b">Automatisierung</td><td>Tätigkeiten verschieben sich — neue entstehen, andere fallen weg</td></tr><tr><td class="b">Fachsprache</td><td>macht Aussagen eindeutig und damit überprüfbar</td></tr></table><div class="body" style="top:302.45px;height:193.55px"><p class="line l0 step" data-g="0">Im Beruf gefragt: Informationen <b>beschaffen, bewerten und verständlich weitergeben</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Ausblick auf Klasse 12</h2>
+      <p class="sub">Modellierung, Datenbanken, Algorithmen</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/jahresrueckblick-modell.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Miniature_Kingdom_2019_Stockholm_1.jpg" target="_blank" rel="noopener">Modelleisenbahn Miniature Kingdom, Stockholm — Foto: Dependability, CC BY-SA 4.0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Grundkurs Informatik in Klasse 12</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:150px"><col style="width:300px"><col style="width:366px"></colgroup><tr><th>Bereich</th><th>Thema</th><th>Worum es geht</th></tr><tr><td class="b" style="background:#FBEBBF">LB 1</td><td>Informatische Modellierung</td><td>Modellbegriff, Prozesse modellieren, Projekte planen</td></tr><tr><td class="b" style="background:#E6ECF8">LB 2</td><td>Modellierung von Datenbanken</td><td>ER-Modell, Tabellen, Abfragen mit SQL</td></tr><tr><td class="b" style="background:#F2CFCB">LB 3</td><td>Algorithmen und Programme</td><td>Sprachen, Struktogramme — weiter in Klasse 13</td></tr><tr><td class="b" style="background:#DDE8C6">Wahlbereich</td><td>Künstliche Intelligenz</td><td>Teilgebiete der KI, ein kleines Experiment</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Der große neue Schwerpunkt: <b>informatische Modellierung von Prozessen und Datenbanken</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Gut vorbereitet in Klasse 12</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Neuer Stoff baut auf Begriffen auf: <b>Grundbegriffe und Modellvorstellung</b> sicher beherrschen</p>
+<p class="line l0 step" data-g="1">Wer dort unsicher ist, trägt die Lücke mit</p>
+<p class="line l0 step" data-g="2">Keine Software vorab installieren — die Werkzeuge lernt ihr im Kurs kennen</p>
+<p class="line l0 step" data-g="3">Guter Vorsatz: <b>die eigenen Lücken benennen und gezielt schließen</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die wichtigste Frage der Informatik</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Nicht: Welche Programmiersprache ist die beste? Welcher Rechner der schnellste?</p>
+<p class="line l0 step" data-g="1">Sondern: <b>Wie stelle ich ein Problem so dar, dass es lösbar wird?</b></p>
+<p class="line l0 step" data-g="2">Die Darstellung entscheidet über die Lösbarkeit — genau das ist <b>Modellbildung</b></p>
+<p class="line l0 step" data-g="3">Werkzeuge und Geräte sind austauschbar — dieses Denken bleibt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Werkzeuge wechseln, das Denken bleibt: Probleme zerlegen, Informationen prüfen, Daten schützen — und jede Lösung beginnt mit einem Modell.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Das Wort <b>Informatik</b> prägte Karl Steinbuch 1957</p>
+<p class="line l0 step" data-g="1">Die drei Modellmerkmale Abbildung, Verkürzung, Pragmatik stammen von <b>Herbert Stachowiak</b> (1973)</p>
+<p class="line l0 step" data-g="2">Das <b>relationale Datenmodell</b>, auf dem Datenbanken mit Tabellen beruhen, beschrieb Edgar F. Codd 1970</p>
+<p class="line l0 step" data-g="3">Die Abfragesprache <b>SQL</b> entstand in den 1970er-Jahren bei IBM — und ist bis heute Standard</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Quiz-Rückblick</b>: die Kernthemen des Jahres in 10 Fragen — nach jeder Frage: Warum stimmt die Antwort?</p>
+<p class="line l0 step" data-g="1"><b>Feedbackrunde</b>: Was hat euch geholfen, was sollte im nächsten Jahr anders laufen?</p>
+<p class="line l0 step" data-g="2"><b>Lückenliste</b>: Jede und jeder notiert zwei Begriffe, die noch wackeln — euer Plan für Klasse 12</p>
+<p class="line l0 step" data-g="3"><b>Ausblick</b>: Welches Thema aus Klasse 12 reizt euch am meisten — und warum?</p>
+<p class="line l0 step" data-g="4">Zum Schluss: <b>Aufgaben (20)</b> auf der Planseite — Lösung pro Aufgabe zum Aufklappen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script>
+// time-aware greeting - the browser knows the real clock, a .pptx never does
+(function(){
+  var h = new Date().getHours();
+  var t = h < 5 ? 'Good night!' : h < 12 ? 'Good morning!' :
+          h < 18 ? 'Good afternoon!' : h < 22 ? 'Good evening!' : 'Good night!';
+  var el = document.getElementById('greet-text');
+  if (el) el.textContent = t;
+})();
+
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  // links (lab bar, picture credits) open - they do not turn the page as well
+  if (e.target.closest('#hud') || e.target.closest('a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+}
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Folien, die wirken</title>
+<meta name="description" content="Exkurs Präsentieren — Diagramme, Farbe, Schrift und Weißraum">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8; --codemuted:#7E8FB5;
+  --greetbg:#000028;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:24px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+/* with a picture: text on the left, picture + licence line on the right */
+.slide.chapter.has-pic h2{width:420px;font-size:28px}
+.slide.chapter.has-pic .sub{width:420px}
+.slide.chapter.has-pic .hair{width:448px;top:372px}   /* room for a two-line sub */
+.chap-pic{position:absolute;left:560px;top:150px;width:328px;height:230px;margin:0;
+  display:block;overflow:hidden;background:var(--card);
+  border:.75px solid rgba(14,36,78,.12)}
+.chap-pic img{width:100%;height:100%;object-fit:contain;display:block}   /* never cropped */
+.chap-credit{position:absolute;left:560px;top:388px;width:328px;font-size:9px;line-height:1.3;
+  color:var(--muted);text-decoration:none;letter-spacing:.2px}
+a.chap-credit:hover{color:var(--red);text-decoration:underline}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:grid;place-items:center}
+.pic img{max-width:100%;max-height:100%}
+
+/* --- table_top ---------------------------------------------------------- */
+.dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
+  font-family:Raleway,system-ui,sans-serif}
+.dtable th,.dtable td{padding:0 6px;text-align:left;overflow:hidden;white-space:nowrap;
+  border:.75px solid var(--stroke);line-height:1.85}
+.dtable th{background:var(--ink);color:#fff;font-family:Orbitron,Raleway,sans-serif;
+  font-weight:700;font-size:.75em;border-color:var(--ink)}
+.dtable td{background:#fff;color:var(--body)}
+.dtable td.b{font-weight:700;color:var(--ink)}
+.dtable td.m{font-family:Menlo,monospace}
+.dtable .ac{text-align:center}
+.dtable .ar{text-align:right}
+
+/* --- greeting (Auftaktfolie) --------------------------------------------- */
+.slide.greet{background-image:none;background-color:var(--greetbg)}
+.slide.greet::before{left:336px;width:552px;background:rgba(230,236,248,.14)}
+.slide.greet .foot{left:336px;color:var(--codemuted)}
+.slide.greet .pageno{color:var(--codemuted)}
+.greet-ground{position:absolute;inset:0;background:var(--greetbg)}
+.greet-pic{position:absolute;left:0;top:0;width:312px;height:540px;
+  object-fit:cover;display:block}
+.greet-credit{position:absolute;left:10px;bottom:8px;font-size:9px;
+  font-family:Raleway,sans-serif;color:rgba(255,255,255,.5);text-decoration:none;
+  letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.greet-credit:hover{color:rgba(255,255,255,.9);text-decoration:underline}
+.greet-lead{position:absolute;left:433px;top:168px;width:455px;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:46px;color:var(--orange);
+  line-height:1.05;letter-spacing:-.5px}
+.greet-quote{position:absolute;left:486px;top:368px;width:402px;text-align:center;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:17px;color:var(--orange);
+  line-height:1.2}
+.greet-author{position:absolute;left:596px;top:404px;width:292px;text-align:center;
+  font-size:11px;color:var(--codemuted);letter-spacing:.3px}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-cce75491cf44.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/morning-7190996/" target="_blank" rel="noopener">AysegulAytoeren</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 11</p>
+      <h1>Folien, die wirken</h1>
+      <p class="sub">Exkurs Präsentieren — Diagramme, Farbe, Schrift und Weißraum</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Das richtige Diagramm</h2>
+      <p class="sub">Linie, Balken, Kreis, Punktwolke</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/exkurs-praesentieren-playfair.png" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Playfair_TimeSeries-2.png" target="_blank" rel="noopener">Eines der ersten Liniendiagramme, William Playfair 1786 — gemeinfrei, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wo wir stehen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Im Projekt habt ihr schon präsentiert — heute geht es um die <b>Regeln dahinter</b></p>
+<p class="line l0 step" data-g="1">Letzte Woche: Wissen teilen im Wiki</p>
+<p class="line l0 step" data-g="2">Heute der zweite Exkurs: Schnuppern in den Wahlbereich <b>Präsentieren</b></p>
+<p class="line l0 step" data-g="3">Leitfrage: <b>Hilft</b> diese Folie dem Publikum, die Aussage zu verstehen?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Welches Diagramm wofür?</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:220px"><col style="width:290px"><col style="width:306px"></colgroup><tr><th>Diagramm</th><th>zeigt</th><th>Vorsicht</th></tr><tr><td class="b" style="background:#E6ECF8">Liniendiagramm</td><td>Entwicklung über die Zeit</td><td>Achsenausschnitt nur mit Hinweis</td></tr><tr><td class="b" style="background:#DDE8C6">Balkendiagramm</td><td>Vergleich einzelner Werte</td><td>Werteachse beginnt bei null</td></tr><tr><td class="b" style="background:#FBEBBF">Kreisdiagramm</td><td>Anteile an einem Ganzen</td><td>wenige Kategorien, Summe 100 Prozent</td></tr><tr><td class="b" style="background:#F2CFCB">Streudiagramm</td><td>Zusammenhang zweier Größen</td><td>zeigt keine Ursache</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Beim Streudiagramm trägt jeder Punkt <b>zwei Werte</b> — ein Muster zeigt einen Zusammenhang</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Kreis oder Balken?</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Der Kreis zeigt nur <b>Anteile an einem Ganzen</b> — die Summe muss 100 Prozent sein</p>
+<p class="line l0 step" data-g="1">Ab etwa <b>fünf Segmenten</b> wird er unlesbar</p>
+<p class="line l0 step" data-g="2"><b>Winkel</b> lassen sich schlechter vergleichen als <b>Längen</b></p>
+<p class="line l0 step" data-g="3">Im Zweifel: Balken</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der abgeschnittene Nullpunkt</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:220px"><col style="width:298px"><col style="width:298px"></colgroup><tr><th>Wert</th><th>Balken, Achse ab 0</th><th>Balken, Achse ab 45</th></tr><tr><td class="b">50</td><td>50 Einheiten lang</td><td>5 Einheiten lang</td></tr><tr><td class="b">55</td><td>55 Einheiten lang</td><td>10 Einheiten lang</td></tr><tr><td class="b">wirkt wie</td><td style="background:#DDE8C6">10 Prozent mehr</td><td style="background:#F2CFCB">doppelt so viel</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Die <b>Balkenlänge</b> wird als Größe gelesen — deshalb beginnt die Werteachse bei null</p>
+<p class="line l0 step" data-g="1"><b>3D-Balken</b> täuschen ähnlich: Die Tiefe trägt keine Information, vordere Balken wirken größer</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Kernaussage zeigen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die <b>Überschrift</b> nennt die Aussage, nicht das Thema</p>
+<p class="line l0 step" data-g="1">Statt Ergebnisse der Umfrage besser: Die meisten kommen mit dem Bus</p>
+<p class="line l0 step" data-g="2"><b>Eine</b> Farbe für das Wichtige, Grau für den Rest</p>
+<p class="line l0 step" data-g="3">Der Blick soll wissen, wohin</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Gestalten fürs Publikum</h2>
+      <p class="sub">Farbe, Kontrast, Schrift, Weißraum</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/exkurs-praesentieren-ishihara.png" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Ishihara_9.svg" target="_blank" rel="noopener">Farbtafel nach Ishihara — Shinobu Ishihara, gemeinfrei, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Farbe mit Bedeutung</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Farbe <b>sparsam</b> einsetzen — jede Farbe bedeutet etwas</p>
+<p class="line l0 step" data-g="1">Nie als <b>einziges</b> Unterscheidungsmerkmal</p>
+<p class="line l0 step" data-g="2">Etwa jeder zwölfte Mann kann Rot und Grün nicht sicher unterscheiden</p>
+<p class="line l0 step" data-g="3">Form, Muster oder Beschriftung müssen die Farbe stützen</p>
+<p class="line l0 step" data-g="4">Wenige Farben mit klarer Bedeutung wirken stärker als viele</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Kontrast und Schrift</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Beamer verlieren viel <b>Kontrast</b> gegenüber dem Bildschirm — Hellgrau auf Weiß verschwindet</p>
+<p class="line l0 step" data-g="1">Dunkel auf Hell oder Hell auf Dunkel, klar getrennt — auch für die letzte Reihe</p>
+<p class="line l0 step" data-g="2">Fließtext mindestens etwa <b>24 Punkt</b> — wer verkleinern muss, hat zu viel Text</p>
+<p class="line l0 step" data-g="3"><b>Serifenlose</b> Schriften bleiben bei Projektion besser lesbar</p>
+<p class="line l0 step" data-g="4">Wichtiger als die Schriftart ist ausreichende <b>Größe</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Weniger ist mehr</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0"><b>Text</b></p>
+<p class="col l1 step" data-g="0">Stichpunkte statt ganzer Sätze</p>
+<p class="col l1 step" data-g="0">wenige Zeilen je Folie</p>
+<p class="col l1 step" data-g="0">der Sprechtext gehört in die Notizen</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1"><b>Weißraum</b></p>
+<p class="col l1 step" data-g="1">führt den Blick</p>
+<p class="col l1 step" data-g="1">lässt die Aussage wirken</p>
+<p class="col l1 step" data-g="1">ist Absicht, kein Mangel</p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Sieben Punkte sind zu viel</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Das Publikum <b>liest voraus</b> und hört nicht mehr zu</p>
+<p class="line l0 step" data-g="1">Was vollständig lesbar ist, wird gelesen</p>
+<p class="line l0 step" data-g="2">Schrittweiser Aufbau hilft nur teilweise</p>
+<p class="line l0 step" data-g="3">Besser: die Punkte auf <b>mehrere Folien</b> verteilen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Bilder und Barrierefreiheit</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Bilder sollen die Aussage <b>stützen</b>, nicht dekorieren</p>
+<p class="line l0 step" data-g="1">Ein Bild, das die Sache zeigt, spart viele Worte — ein beliebiges Symbolbild lenkt ab</p>
+<p class="line l0 step" data-g="2">Auflösung, Rechte und Quelle gehören dazu</p>
+<p class="line l0 step" data-g="3"><b>Barrierefrei</b>: Kontrast, große Schrift, Alternativtexte</p>
+<p class="line l0 step" data-g="4">Was nur im Bild steht, sollte man auch <b>sagen</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Planen, vorführen, weitergeben</h2>
+      <p class="sub">Storyboard, Vorlage, Format, Feedback</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/exkurs-praesentieren-storyboard.png" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Charge-concept_art-storyboard.png" target="_blank" rel="noopener">Storyboard zum Film Charge — Andy Goralczyk, Blender Foundation, CC BY 4.0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Erst das Storyboard</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ein <b>Storyboard</b> ist eine Skizze der Folienfolge — bevor gestaltet wird</p>
+<p class="line l0 step" data-g="1">Auf Papier lässt sich die Reihenfolge schnell ändern</p>
+<p class="line l0 step" data-g="2">Im Programm bindet man sich zu früh an die Gestaltung</p>
+<p class="line l0 step" data-g="3">Das Storyboard klärt zuerst die <b>Dramaturgie</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eine Vorlage für alle Folien</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Wechselnde Layouts wirken unruhig — die Aufmerksamkeit soll beim <b>Inhalt</b> bleiben</p>
+<p class="line l0 step" data-g="1">Die Vorlage übernimmt Position, Größe und Farbe</p>
+<p class="line l0 step" data-g="2">Eine Änderung wirkt an <b>einer Stelle</b> für alle Folien — wie beim CMS</p>
+<p class="line l0 step" data-g="3"><b>Foliennummer</b> dezent unten — damit man sich in der Diskussion auf Folien beziehen kann</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Welches Format wofür?</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:180px"><col style="width:200px"><col style="width:436px"></colgroup><tr><th>Format</th><th>wofür</th><th>warum</th></tr><tr><td class="b" style="background:#DDE8C6">PDF</td><td>Weitergabe</td><td>Schriften und Umbrüche eingebettet — sieht überall gleich aus</td></tr><tr><td class="b">Quellformat</td><td>Weiterarbeiten</td><td>bleibt bearbeitbar</td></tr><tr><td class="b">Video</td><td>Aufzeichnung</td><td>ersetzt die Folien nicht</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Zur Weitergabe <b>PDF</b> — wer weiterarbeiten soll, bekommt zusätzlich das Quellformat</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Feedback, das hilft</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Kurzpräsentation von zwei Minuten, mit Kamera oder Tablet aufgenommen</p>
+<p class="line l0 step" data-g="1">Aufnahmen nur mit <b>Einverständnis</b> — und nach der Stunde löschen</p>
+<p class="line l0 step" data-g="2">Zuerst: Was war gut? Dann <b>ein</b> konkreter Tipp</p>
+<p class="line l0 step" data-g="3">Beschreiben, was man sieht: Du hast oft zur Wand gesprochen — statt: Das war schlecht</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Jede Gestaltungsentscheidung beantwortet eine Frage: Hilft es dem Publikum, die Aussage zu verstehen? Das richtige Diagramm, Farbe mit Bedeutung, große Schrift und viel Weißraum.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>William Playfair</b> erfand 1786 das Linien- und das Balkendiagramm, 1801 das Kreisdiagramm</p>
+<p class="line l0 step" data-g="1"><b>Florence Nightingale</b> zeigte mit Diagrammen, dass im Krimkrieg mehr Soldaten an Krankheiten starben als an Wunden</p>
+<p class="line l0 step" data-g="2">Die Farbtafeln von <b>Shinobu Ishihara</b> gibt es seit 1917 — sie werden bis heute benutzt</p>
+<p class="line l0 step" data-g="3">Das <b>PDF</b> stammt von 1993 und ist seit 2008 eine ISO-Norm</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Diagramm-Check</b>: drei Diagramme aus Zeitung oder Netz — passt der Typ, beginnt die Achse bei null?</p>
+<p class="line l0 step" data-g="1"><b>Umbauen</b>: eine überladene Folie in zwei klare Folien verwandeln — mit aussagender Überschrift</p>
+<p class="line l0 step" data-g="2"><b>Präsentationstraining</b>: zwei Minuten vortragen, mit Videofeedback</p>
+<p class="line l0 step" data-g="3"><b>Feedbackbogen</b>: ein Lob und ein konkreter Tipp zu Diagramm, Schrift und Weißraum</p>
+<p class="line l0 step" data-g="4">Zum Schluss: <b>Aufgaben (20)</b> auf der Planseite — Lösung pro Aufgabe zum Aufklappen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script>
+// time-aware greeting - the browser knows the real clock, a .pptx never does
+(function(){
+  var h = new Date().getHours();
+  var t = h < 5 ? 'Good night!' : h < 12 ? 'Good morning!' :
+          h < 18 ? 'Good afternoon!' : h < 22 ? 'Good evening!' : 'Good night!';
+  var el = document.getElementById('greet-text');
+  if (el) el.textContent = t;
+})();
+
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  // links (lab bar, picture credits) open - they do not turn the page as well
+  if (e.target.closest('#hud') || e.target.closest('a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+}
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>

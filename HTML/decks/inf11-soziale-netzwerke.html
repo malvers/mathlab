@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sicher in sozialen Netzwerken</title>
+<meta name="description" content="Was ich preisgebe, wer mitliest — und wie ich mich und andere schütze">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8; --codemuted:#7E8FB5;
+  --greetbg:#000028;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:24px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+/* with a picture: text on the left, picture + licence line on the right */
+.slide.chapter.has-pic h2{width:420px;font-size:28px}
+.slide.chapter.has-pic .sub{width:420px}
+.slide.chapter.has-pic .hair{width:448px;top:372px}   /* room for a two-line sub */
+.chap-pic{position:absolute;left:560px;top:150px;width:328px;height:230px;margin:0;
+  display:block;overflow:hidden;background:var(--card);
+  border:.75px solid rgba(14,36,78,.12)}
+.chap-pic img{width:100%;height:100%;object-fit:contain;display:block}   /* never cropped */
+.chap-credit{position:absolute;left:560px;top:388px;width:328px;font-size:9px;line-height:1.3;
+  color:var(--muted);text-decoration:none;letter-spacing:.2px}
+a.chap-credit:hover{color:var(--red);text-decoration:underline}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:grid;place-items:center}
+.pic img{max-width:100%;max-height:100%}
+
+/* --- table_top ---------------------------------------------------------- */
+.dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
+  font-family:Raleway,system-ui,sans-serif}
+.dtable th,.dtable td{padding:0 6px;text-align:left;overflow:hidden;white-space:nowrap;
+  border:.75px solid var(--stroke);line-height:1.85}
+.dtable th{background:var(--ink);color:#fff;font-family:Orbitron,Raleway,sans-serif;
+  font-weight:700;font-size:.75em;border-color:var(--ink)}
+.dtable td{background:#fff;color:var(--body)}
+.dtable td.b{font-weight:700;color:var(--ink)}
+.dtable td.m{font-family:Menlo,monospace}
+.dtable .ac{text-align:center}
+.dtable .ar{text-align:right}
+
+/* --- greeting (Auftaktfolie) --------------------------------------------- */
+.slide.greet{background-image:none;background-color:var(--greetbg)}
+.slide.greet::before{left:336px;width:552px;background:rgba(230,236,248,.14)}
+.slide.greet .foot{left:336px;color:var(--codemuted)}
+.slide.greet .pageno{color:var(--codemuted)}
+.greet-ground{position:absolute;inset:0;background:var(--greetbg)}
+.greet-pic{position:absolute;left:0;top:0;width:312px;height:540px;
+  object-fit:cover;display:block}
+.greet-credit{position:absolute;left:10px;bottom:8px;font-size:9px;
+  font-family:Raleway,sans-serif;color:rgba(255,255,255,.5);text-decoration:none;
+  letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.greet-credit:hover{color:rgba(255,255,255,.9);text-decoration:underline}
+.greet-lead{position:absolute;left:433px;top:168px;width:455px;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:46px;color:var(--orange);
+  line-height:1.05;letter-spacing:-.5px}
+.greet-quote{position:absolute;left:486px;top:368px;width:402px;text-align:center;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:17px;color:var(--orange);
+  line-height:1.2}
+.greet-author{position:absolute;left:596px;top:404px;width:292px;text-align:center;
+  font-size:11px;color:var(--codemuted);letter-spacing:.3px}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-5b727befa819.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/09-55-47-721/" target="_blank" rel="noopener">Wolfgang_Hasselmann</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 11</p>
+      <h1>Sicher in sozialen Netzwerken</h1>
+      <p class="sub">Was ich preisgebe, wer mitliest — und wie ich mich und andere schütze</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wo wir stehen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Bisher: Bedrohungen und Schutzziele — meist aus Sicht von Betrieben und Schulen</p>
+<p class="line l0 step" data-g="1">Heute geht es um <b>euch</b>: eure Profile, eure Fotos, eure Kontakte</p>
+<p class="line l0 step" data-g="2">Soziale Netzwerke leben von Daten — die meisten davon liefert ihr <b>selbst</b></p>
+<p class="line l0 step" data-g="3">Leitfrage: Was kann jemand über mich herausfinden — und wie begrenze ich das?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Was ich preisgebe</h2>
+      <p class="sub">Profile, Fotos, Metadaten</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/soziale-netzwerke-fussspuren.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Footprints_on_the_beach_-_Nea_Peramos.jpg" target="_blank" rel="noopener">Fußspuren am Strand — Foto: Annatsach, CC0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Einmal im Netz, immer im Netz</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Faustregel: nur veröffentlichen, was auch <b>in einigen Jahren</b> noch öffentlich sein darf</p>
+<p class="line l0 step" data-g="1">Löschen ist keine Garantie: <b>Kopien, Screenshots und Archive</b> bleiben</p>
+<p class="line l0 step" data-g="2">Sichtbarkeitseinstellungen ändern daran wenig — jeder Betrachter kann kopieren</p>
+<p class="line l0 step" data-g="3">Deshalb wirkt Sparsamkeit <b>vor</b> dem Posten am besten</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Mehr verraten als gedacht</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:300px"><col style="width:516px"></colgroup><tr><th>Was</th><th>verrät möglicherweise</th></tr><tr><td class="b">Metadaten im Foto</td><td>Aufnahmezeit, Gerät, oft den Aufnahmeort</td></tr><tr><td class="b">Hintergrund im Profilbild</td><td>Schulkleidung, Gebäude, Straßenschilder</td></tr><tr><td class="b">Wohnadresse im Profil</td><td>wo man mich im echten Leben findet</td></tr><tr><td class="b">viele kleine Angaben</td><td>zusammen ein vollständiges Bild</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Viele Netzwerke entfernen Metadaten beim Hochladen — aber <b>nicht alle</b></p>
+<p class="line l0 step" data-g="1">Ein neutraler Hintergrund löst das Problem mit dem Profilbild</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Datenverknüpfung und Doxing</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Einzeln harmlose Angaben ergeben <b>verknüpft</b> ein Persönlichkeitsprofil</p>
+<p class="line l0 step" data-g="1">Hobby hier, Schule dort, Urlaubsfoto da — zusammen weiß man, <b>wer, wo, wann</b></p>
+<p class="line l0 step" data-g="2"><b>Doxing</b>: private Daten einer Person gezielt sammeln und veröffentlichen</p>
+<p class="line l0 step" data-g="3">Ziel ist meist <b>Einschüchterung</b> — Sparsamkeit und getrennte Konten erschweren es</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Konto und Kontakte</h2>
+      <p class="sub">Einstellungen in eigener Hand</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/soziale-netzwerke-tuerkette.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Door_chain.JPG" target="_blank" rel="noopener">Türkette — Foto: Santeri Viinamäki, CC BY 4.0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Sicherheitseinstellungen prüfen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Standardeinstellungen sind oft die <b>offensten</b></p>
+<p class="line l0 step" data-g="1">Sinnvoll für private Konten: Beiträge nur für <b>bestätigte Kontakte</b> sichtbar</p>
+<p class="line l0 step" data-g="2">Alles verbergen macht das Konto sinnlos — ganz öffentlich macht es angreifbar</p>
+<p class="line l0 step" data-g="3"><b>Zwei-Faktor-Authentisierung</b>: Ein gestohlenes Passwort allein reicht nicht mehr zur Übernahme</p>
+<p class="line l0 step" data-g="4">Gegen Inhalte hilft sie nicht — aber gegen die häufigste Art, Konten zu übernehmen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Kontakte und Konten</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Freundschaftsanfrage von Unbekannten: Profil prüfen, <b>im Zweifel ablehnen</b></p>
+<p class="line l0 step" data-g="1">Gefälschte Profile nutzen gern <b>gemeinsame Kontakte</b> als Türöffner</p>
+<p class="line l0 step" data-g="2">Private und schulische Konten <b>trennen</b> — sonst vermischen sich Inhalte und Kontakte</p>
+<p class="line l0 step" data-g="3">„Mit Konto XY fortfahren“: Der Dienst erhält Daten des verknüpften Kontos</p>
+<p class="line l0 step" data-g="4">Wird das Hauptkonto übernommen, fallen <b>alle</b> verknüpften Dienste mit</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Mobbing und Grooming</h2>
+      <p class="sub">Erkennen, sichern, Hilfe holen</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/soziale-netzwerke-cybermobbing.png" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Against_Cyberbullying.png" target="_blank" rel="noopener">Gegen Cybermobbing — Grafik: .i.s.b.e.i.g.e., CC BY-SA 4.0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Cybermobbing</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Cybermobbing</b>: wiederholtes Schikanieren einer Person über digitale Kanäle</p>
+<p class="line l0 step" data-g="1">Kennzeichen: <b>Wiederholung</b> und ein Machtgefälle — ein einmaliger Streit ist es noch nicht</p>
+<p class="line l0 step" data-g="2">Öffentlichkeit und Dauerhaftigkeit verschärfen es: Zu Hause ist nicht Schluss</p>
+<p class="line l0 step" data-g="3">Erste Reaktion: <b>Beweise sichern</b> (Screenshots mit Datum) und <b>nicht antworten</b></p>
+<p class="line l0 step" data-g="4">Das eigene Konto zu löschen, vernichtet die Beweise</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Hilfe holen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Vertrauenspersonen</b> in der Schule und die <b>Meldewege der Plattform</b> nutzen</p>
+<p class="line l0 step" data-g="1">Bei Straftaten die <b>Polizei</b>: Beleidigung, Bedrohung und Verleumdung sind strafbar</p>
+<p class="line l0 step" data-g="2">Anonym und kostenlos: die <b>Nummer gegen Kummer</b>, 116 111</p>
+<p class="line l0 step" data-g="3">Wer Mobbing mitbekommt: nicht mitmachen, melden, den Betroffenen zur Seite stehen</p>
+<p class="line l0 step" data-g="4">Alleinbleiben ist der schlechteste Weg</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Grooming erkennen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Grooming</b>: Erwachsene knüpfen gezielt Kontakt zu Minderjährigen — mit sexueller Absicht</p>
+<p class="line l0 step" data-g="1">Der Kontakt beginnt harmlos und wird schrittweise vertraulicher</p>
+<p class="line l0 step" data-g="2">Warnzeichen: Bitte um <b>Geheimhaltung</b> und Wechsel in einen privaten Kanal</p>
+<p class="line l0 step" data-g="3">Dann: Kontakt abbrechen, Beweise sichern, einer Vertrauensperson Bescheid sagen</p>
+<p class="line l0 step" data-g="4">Gegenüber Kindern ist schon die Anbahnung übers Netz <b>strafbar</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>Was der Feed mir zeigt</h2>
+      <p class="sub">Empfehlungen, Empörung, Kettenbriefe</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/soziale-netzwerke-filterblase.png" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Filter_bubble_versus_echo_chamber.svg" target="_blank" rel="noopener">Filterblase und Echokammer — Grafik: Metalicat, CC0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Empfehlungssysteme</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Sie zeigen bevorzugt Inhalte, die zum <b>bisherigen Verhalten</b> passen</p>
+<p class="line l0 step" data-g="1">Die Auswahl steuern <b>Verweildauer und Klicks</b> — Widersprechendes erscheint seltener</p>
+<p class="line l0 step" data-g="2">Gemessen wird Beteiligung, <b>nicht Richtigkeit</b></p>
+<p class="line l0 step" data-g="3">Empörung erzeugt zuverlässig Reaktionen — deshalb ist Empörendes besonders sichtbar</p>
+<p class="line l0 step" data-g="4">Gegenmittel: bewusst <b>andere Quellen</b> suchen und vor dem Teilen kurz prüfen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Kettenbriefe und fremde Fotos</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Kettenbrief</b>: eine unbelegte Behauptung, die durch Weiterleiten Reichweite gewinnt</p>
+<p class="line l0 step" data-g="1">Erkennungszeichen: der Aufruf zum <b>Weiterleiten</b> — echte Warnungen brauchen das nicht</p>
+<p class="line l0 step" data-g="2">Fremde Fotos teilen: <b>Urheberrecht</b> am Bild und <b>Recht am eigenen Bild</b> der Abgebildeten</p>
+<p class="line l0 step" data-g="3">Die Erlaubnis des Fotografen genügt also nicht — bei Minderjährigen fragt man auch die Eltern</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Jugend- und Verbraucherschutz</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">In die Datenverarbeitung solcher Dienste willigt man in Deutschland ab <b>16</b> selbst ein — jünger nur mit den Eltern</p>
+<p class="line l0 step" data-g="1">Seit 2024 gilt EU-weit der <b>Digital Services Act</b>: keine Werbung für Minderjährige auf Grundlage von Profilen</p>
+<p class="line l0 step" data-g="2">Sehr große Plattformen müssen einen Feed <b>ohne Profiling</b> anbieten</p>
+<p class="line l0 step" data-g="3">„Kostenlos“ heißt oft: Man bezahlt mit <b>Daten</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Was ich nicht veröffentliche, kann niemand missbrauchen — erst sparsam sein, dann Einstellungen prüfen, und bei Mobbing oder Grooming: Beweise sichern, Hilfe holen.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Metadaten stehen im <b>EXIF</b>-Format in der Bilddatei — dort ist auch Platz für GPS-Koordinaten</p>
+<p class="line l0 step" data-g="1">Das <b>Recht am eigenen Bild</b> steht im Kunsturhebergesetz von <b>1907</b> — älter als der Rundfunk</p>
+<p class="line l0 step" data-g="2">Die <b>Wayback Machine</b> des Internet Archive sammelt seit 1996 öffentliche Webseiten — auch längst gelöschte</p>
+<p class="line l0 step" data-g="3"><b>Doxing</b> kommt von engl. „docs“: Dokumente über jemanden ausgraben und verbreiten</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Einstellungs-Check</b> am eigenen Smartphone: Wer sieht Beiträge, Freundesliste, Standort?</p>
+<p class="line l0 step" data-g="1">Eure Daten bleiben bei euch — ihr notiert nur, <b>was</b> ihr geändert habt</p>
+<p class="line l0 step" data-g="2"><b>Placemat</b> zu viert: Was schützt mich? Erst still schreiben, dann in der Mitte einigen</p>
+<p class="line l0 step" data-g="3"><b>Plakat</b>: zehn Handlungsempfehlungen für Jüngere — mit Material von klicksafe</p>
+<p class="line l0 step" data-g="4">Zum Schluss: <b>Aufgaben (20)</b> auf der Planseite — Lösung pro Aufgabe zum Aufklappen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script>
+// time-aware greeting - the browser knows the real clock, a .pptx never does
+(function(){
+  var h = new Date().getHours();
+  var t = h < 5 ? 'Good night!' : h < 12 ? 'Good morning!' :
+          h < 18 ? 'Good afternoon!' : h < 22 ? 'Good evening!' : 'Good night!';
+  var el = document.getElementById('greet-text');
+  if (el) el.textContent = t;
+})();
+
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  // links (lab bar, picture credits) open - they do not turn the page as well
+  if (e.target.closest('#hud') || e.target.closest('a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+}
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>

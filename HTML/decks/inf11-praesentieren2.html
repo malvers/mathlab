@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rückmeldung, Bewertung, Rückblick</title>
+<meta name="description" content="Feedback geben und nehmen, fair bewerten, das Projekt auswerten">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8; --codemuted:#7E8FB5;
+  --greetbg:#000028;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:24px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+/* with a picture: text on the left, picture + licence line on the right */
+.slide.chapter.has-pic h2{width:420px;font-size:28px}
+.slide.chapter.has-pic .sub{width:420px}
+.slide.chapter.has-pic .hair{width:448px;top:372px}   /* room for a two-line sub */
+.chap-pic{position:absolute;left:560px;top:150px;width:328px;height:230px;margin:0;
+  display:block;overflow:hidden;background:var(--card);
+  border:.75px solid rgba(14,36,78,.12)}
+.chap-pic img{width:100%;height:100%;object-fit:contain;display:block}   /* never cropped */
+.chap-credit{position:absolute;left:560px;top:388px;width:328px;font-size:9px;line-height:1.3;
+  color:var(--muted);text-decoration:none;letter-spacing:.2px}
+a.chap-credit:hover{color:var(--red);text-decoration:underline}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:grid;place-items:center}
+.pic img{max-width:100%;max-height:100%}
+
+/* --- table_top ---------------------------------------------------------- */
+.dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
+  font-family:Raleway,system-ui,sans-serif}
+.dtable th,.dtable td{padding:0 6px;text-align:left;overflow:hidden;white-space:nowrap;
+  border:.75px solid var(--stroke);line-height:1.85}
+.dtable th{background:var(--ink);color:#fff;font-family:Orbitron,Raleway,sans-serif;
+  font-weight:700;font-size:.75em;border-color:var(--ink)}
+.dtable td{background:#fff;color:var(--body)}
+.dtable td.b{font-weight:700;color:var(--ink)}
+.dtable td.m{font-family:Menlo,monospace}
+.dtable .ac{text-align:center}
+.dtable .ar{text-align:right}
+
+/* --- greeting (Auftaktfolie) --------------------------------------------- */
+.slide.greet{background-image:none;background-color:var(--greetbg)}
+.slide.greet::before{left:336px;width:552px;background:rgba(230,236,248,.14)}
+.slide.greet .foot{left:336px;color:var(--codemuted)}
+.slide.greet .pageno{color:var(--codemuted)}
+.greet-ground{position:absolute;inset:0;background:var(--greetbg)}
+.greet-pic{position:absolute;left:0;top:0;width:312px;height:540px;
+  object-fit:cover;display:block}
+.greet-credit{position:absolute;left:10px;bottom:8px;font-size:9px;
+  font-family:Raleway,sans-serif;color:rgba(255,255,255,.5);text-decoration:none;
+  letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.greet-credit:hover{color:rgba(255,255,255,.9);text-decoration:underline}
+.greet-lead{position:absolute;left:433px;top:168px;width:455px;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:46px;color:var(--orange);
+  line-height:1.05;letter-spacing:-.5px}
+.greet-quote{position:absolute;left:486px;top:368px;width:402px;text-align:center;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:17px;color:var(--orange);
+  line-height:1.2}
+.greet-author{position:absolute;left:596px;top:404px;width:292px;text-align:center;
+  font-size:11px;color:var(--codemuted);letter-spacing:.3px}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-f55e4d02d16b.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/mountains-6118187/" target="_blank" rel="noopener">RyanK14</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 11</p>
+      <h1>Rückmeldung, Bewertung, Rückblick</h1>
+      <p class="sub">Feedback geben und nehmen, fair bewerten, das Projekt auswerten</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Rückmeldung geben und nehmen</h2>
+      <p class="sub">Beschreiben statt werten</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/praesentieren2-dosentelefon.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Chris_Potter_-_3D_Tin_Can_Phones.jpg" target="_blank" rel="noopener">Dosentelefon — Bild: Chris Potter, CC BY 2.0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wo wir stehen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Letzte Woche: die ersten Vorträge, die ersten Portfolios sind abgegeben</p>
+<p class="line l0 step" data-g="1">Heute tragen die <b>übrigen Gruppen</b> vor</p>
+<p class="line l0 step" data-g="2">Danach: <b>Bewertung</b> — daraus entsteht die Projektnote — und die <b>Auswertung</b></p>
+<p class="line l0 step" data-g="3">Damit ist Lernbereich 4 abgeschlossen</p>
+<p class="line l0 step" data-g="4">Leitfrage der Stunde: Was nehmt ihr aus dem Projekt <b>fürs nächste Mal</b> mit?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Fahrplan des Projekts</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:90px"><col style="width:330px"><col style="width:396px"></colgroup><tr><th>Ustd.</th><th>Phase</th><th>Ergebnis der Phase</th></tr><tr><td class="b">1–2</td><td style="background:#DDE8C6">Themenwahl und Planung</td><td>Leitfrage, Projektskizze, Meilensteine</td></tr><tr><td class="b">3–4</td><td style="background:#DDE8C6">Recherche</td><td>geordnetes, belegtes Material</td></tr><tr><td class="b">5–6</td><td style="background:#DDE8C6">Erarbeitung I</td><td>Gliederung und Rohfassung</td></tr><tr><td class="b">7–8</td><td style="background:#DDE8C6">Erarbeitung II</td><td>geprüfte Endfassung</td></tr><tr><td class="b">9–10</td><td style="background:#DDE8C6">Präsentation ausarbeiten</td><td>Foliensatz und Generalprobe</td></tr><tr><td class="b">11–12</td><td style="background:#DDE8C6">Präsentationen I</td><td>erste Vorträge, Portfolio-Abgabe</td></tr><tr><td class="b" style="background:#FBEBBF">13–14</td><td style="background:#FBEBBF">Präsentationen II und Auswertung</td><td style="background:#FBEBBF">Bewertung und Reflexion</td></tr></table><div class="body" style="top:322.8px;height:173.2px"><p class="line l0 step" data-g="0">Grün: geschafft — Orange: <b>heute</b>, der letzte Schritt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Rückmeldung geben und nehmen</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0"><b>Geben</b></p>
+<p class="col l1 step" data-g="0">konkret Beobachtetes beschreiben</p>
+<p class="col l1 step" data-g="0">einen Vorschlag machen</p>
+<p class="col l1 step" data-g="0">zwei konkrete Punkte statt zehn allgemeine</p>
+<p class="col l1 step" data-g="0">häufiger Fehler: allgemein und wohlwollend, ohne Nutzen</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1"><b>Nehmen</b></p>
+<p class="col l1 step" data-g="1">zuhören</p>
+<p class="col l1 step" data-g="1">nachfragen, wenn etwas unklar ist</p>
+<p class="col l1 step" data-g="1">nicht sofort rechtfertigen — das beendet die Rückmeldung</p>
+<p class="col l1 step" data-g="1">was ihr annehmt, entscheidet ihr später</p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Werten oder beschreiben?</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:390px"><col style="width:150px"><col style="width:276px"></colgroup><tr><th>gesagt</th><th>Art</th><th>Wirkung</th></tr><tr><td>Die Folien waren schlecht.</td><td style="background:#F2CFCB">Wertung</td><td>nicht überprüfbar, löst Abwehr aus</td></tr><tr><td>Ich habe die dritte Folie nicht lesen können.</td><td style="background:#DDE8C6">Beobachtung</td><td>überprüfbar, annehmbar</td></tr><tr><td>Du hast den Übergang schlecht gemacht.</td><td style="background:#F2CFCB">Du-Botschaft</td><td>schreibt eine Eigenschaft zu</td></tr><tr><td>Auf mich wirkte der Übergang abrupt.</td><td style="background:#DDE8C6">Ich-Botschaft</td><td>die Wirkung lässt sich nicht bestreiten</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Die <b>Ich-Botschaft</b> benennt die Wirkung auf einen selbst — statt dem anderen eine Eigenschaft zuzuschreiben</p>
+<p class="line l0 step" data-g="1">Die Wertung darf folgen — aber nach der Beobachtung</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Feedbackrunde</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Reihenfolge: <b>erst die Gruppe selbst</b>, dann das Publikum, <b>zuletzt die Lehrkraft</b></p>
+<p class="line l0 step" data-g="1">Die Selbsteinschätzung zuerst verhindert bloßes Zustimmen</p>
+<p class="line l0 step" data-g="2">Die Lehrkraft zuletzt setzt keinen Rahmen vorweg — so kommen mehr Beobachtungen zusammen</p>
+<p class="line l0 step" data-g="3">Der <b>Beobachtungsbogen</b> macht Rückmeldung konkret — danach geht er an die Gruppe</p>
+<p class="line l0 step" data-g="4">Stark abweichende Rückmeldungen? Ernst nehmen und nach dem <b>Grund</b> fragen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Fair bewerten</h2>
+      <p class="sub">Kriterien, Gewichtung, Gruppennote</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/praesentieren2-waage.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Balance_scale_IMGP9722.jpg" target="_blank" rel="noopener">Balkenwaage — Foto: Nikodem Nijaki, CC BY-SA 3.0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was ein faires Raster ausmacht</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die Kriterien sind <b>vorher bekannt</b> — wer sie kennt, kann sie erfüllen</p>
+<p class="line l0 step" data-g="1">Erkennbare <b>Abstufungen</b> machen die Note nachvollziehbar</p>
+<p class="line l0 step" data-g="2">Nachträglich festgelegte Kriterien sind nicht fair</p>
+<p class="line l0 step" data-g="3">Auch die <b>Gewichtung</b> wird vorher bekannt gegeben</p>
+<p class="line l0 step" data-g="4">Ein Vortrag ist mehr als sein Inhalt: Aufbau, Medien, Vortragsweise, Umgang mit Fragen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Worauf bei der Projektnote geachtet wird</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:200px"><col style="width:616px"></colgroup><tr><th>Bereich</th><th>worauf geachtet wird</th></tr><tr><td class="b">Inhalt</td><td>sachlich richtig, ausreichend tief, die Leitfrage beantwortet</td></tr><tr><td class="b">Aufbau</td><td>Motivation und Einführung, klare Gliederung, roter Faden</td></tr><tr><td class="b">Medieneinsatz</td><td>ansprechende Folien mit Seitenzahlen, Quellen korrekt zitiert</td></tr><tr><td class="b">Vortragsweise</td><td>frei und sicher, verständlich fürs Publikum, Zeit eingehalten</td></tr><tr><td class="b">Umgang mit Fragen</td><td>souverän und ehrlich antworten</td></tr><tr><td class="b">Portfolio</td><td>Projektskizze, Protokolle, Bericht mit Quellen, Eigenständigkeitserklärung</td></tr></table><div class="body" style="top:302.45px;height:193.55px"><p class="line l0 step" data-g="0">Die Kriterien für den Vortrag stehen in der <b>Bewertungsmatrix</b>: docalvers.de/svp/bewertungsmatrix.html</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Gruppenleistung gerecht bewerten</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0"><b>Gemeinsam</b></p>
+<p class="col l1 step" data-g="0">gemeinsame Anteile gemeinsam bewerten</p>
+<p class="col l1 step" data-g="0">zum Beispiel Bericht, Foliensatz, Portfolio</p>
+<p class="col l1 step" data-g="0">immer nur eine Gruppennote wäre nicht gerecht</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1"><b>Einzeln</b></p>
+<p class="col l1 step" data-g="1">individuell zurechenbare Anteile einzeln</p>
+<p class="col l1 step" data-g="1">zum Beispiel der eigene Vortragsteil</p>
+<p class="col l1 step" data-g="1">die Note selbst verteilen überfordert die Gruppe</p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Leitfrage nicht beantwortet — gescheitert?</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Eine Gruppe konnte ihre Leitfrage nicht beantworten?</p>
+<p class="line l0 step" data-g="1">Bewertet wird die <b>Qualität von Vorgehen und Begründung</b>, nicht nur das Ergebnis</p>
+<p class="line l0 step" data-g="2">Auch ein begründetes Nichtergebnis ist ein Ergebnis</p>
+<p class="line l0 step" data-g="3">Bewertet wird die fachliche Arbeit, nicht das Glück</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Das Projekt auswerten</h2>
+      <p class="sub">Aus Erfahrung wird Wissen</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/praesentieren2-logbuch.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Page_from_the_logbook_of_the_Dutch_warship_Medea_in_1786.jpg" target="_blank" rel="noopener">Logbuch des Kriegsschiffs Medea, 1786 — A. A. Buyskes, gemeinfrei, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum auswerten?</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die Auswertung überführt <b>Erfahrung in Wissen</b>, das beim nächsten Mal verfügbar ist</p>
+<p class="line l0 step" data-g="1">Ohne Auswertung bleibt Erfahrung zufällig</p>
+<p class="line l0 step" data-g="2">Genau das ist der Kern von <b>Wissensmanagement</b> — wie in Lernbereich 2</p>
+<p class="line l0 step" data-g="3">Es geht um den <b>Weg</b>, nicht um das Produkt — die Ergebnisse stehen im Bericht</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Projektreflexion</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:300px"><col style="width:516px"></colgroup><tr><th>Frage</th><th>Beispiel für eine gute Antwort</th></tr><tr><td class="b" style="background:#DDE8C6">Was lief gut?</td><td>Die Aufteilung nach Teilfragen hat Doppelarbeit verhindert</td></tr><tr><td class="b" style="background:#F2CFCB">Was lief nicht gut?</td><td>Die Auswertung der Umfrage hat viel länger gedauert als geplant</td></tr><tr><td class="b" style="background:#E6ECF8">Was machen wir nächstes Mal anders?</td><td>Für die Auswertung doppelt so viel Zeit einplanen</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Aus einem misslungenen Teil: die <b>Ursache</b> benennen und eine <b>konkrete Änderung</b> ableiten</p>
+<p class="line l0 step" data-g="1">Schuldzuweisungen bringen niemanden weiter</p>
+<p class="line l0 step" data-g="2">Der Blick nach vorn ist der wertvollste Teil</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Selbsteinschätzung und Vergleich</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0"><b>Selbsteinschätzung</b></p>
+<p class="col l1 step" data-g="0">macht den eigenen Anteil und den Lernzuwachs bewusst</p>
+<p class="col l1 step" data-g="0">ersetzt keine Fremdbewertung</p>
+<p class="col l1 step" data-g="0">Ehrlichkeit ist wichtiger als Bescheidenheit</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1"><b>Vergleich in der Klasse</b></p>
+<p class="col l1 step" data-g="1">Vorgehensweisen vergleichen, nicht nur Ergebnisse</p>
+<p class="col l1 step" data-g="1">aus fremden Wegen lernt man am meisten</p>
+<p class="col l1 step" data-g="1">ein Ranking hilft niemandem weiter</p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Festhalten und redlich bleiben</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die Auswertung <b>kurz und schriftlich</b> festhalten: die drei wichtigsten Erkenntnisse</p>
+<p class="line l0 step" data-g="1">Was nicht aufgeschrieben ist, ist in vier Wochen weg</p>
+<p class="line l0 step" data-g="2">Drei Punkte werden gelesen, zehn Seiten nicht</p>
+<p class="line l0 step" data-g="3">Ideen aus anderen Projekten übernommen? Ebenfalls <b>kennzeichnen</b> — auch mündliche Anregungen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Rückmeldung beschreibt konkret und macht einen Vorschlag, bewertet wird nach vorher bekannten Kriterien — und die Auswertung macht aus Erfahrung Wissen fürs nächste Projekt.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Feedback</b> kommt aus der Technik: Ein Teil des Ausgangs wird auf den Eingang zurückgeführt</p>
+<p class="line l0 step" data-g="1">Auch das Pfeifen, wenn ein Mikrofon dem Lautsprecher zu nahe kommt, heißt <b>Rückkopplung</b> — englisch feedback</p>
+<p class="line l0 step" data-g="2">Die <b>Ich-Botschaft</b> machte der US-Psychologe Thomas Gordon bekannt</p>
+<p class="line l0 step" data-g="3"><b>Logbuch</b> kommt vom Log, einem Holzscheit an einer Leine: Die Knoten darin gaben der Einheit Knoten ihren Namen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Checkliste Projektabschluss</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Alle <b>Vorträge</b> gehalten, alle <b>Portfolios</b> abgegeben</p>
+<p class="line l0 step" data-g="1">Die <b>Beobachtungsbögen</b> sind bei den Gruppen</p>
+<p class="line l0 step" data-g="2"><b>Selbsteinschätzung</b> geschrieben: eigene Aufgaben und ihr Ergebnis</p>
+<p class="line l0 step" data-g="3"><b>Reflexion</b> in der Gruppe: gut, nicht gut, nächstes Mal anders</p>
+<p class="line l0 step" data-g="4">Die <b>drei wichtigsten Erkenntnisse</b> schriftlich festgehalten</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Vortragende Gruppen</b>: vortragen, Fragen beantworten, Portfolio abgeben</p>
+<p class="line l0 step" data-g="1"><b>Publikum</b>: Beobachtungsbogen führen, Rückmeldung beschreibend und mit Vorschlag</p>
+<p class="line l0 step" data-g="2"><b>Projektauswertung</b> in der Gruppe: Was lief gut, was nicht, was machen wir anders?</p>
+<p class="line l0 step" data-g="3"><b>Selbsteinschätzung</b> schreiben, die drei wichtigsten Erkenntnisse festhalten</p>
+<p class="line l0 step" data-g="4">Zum Schluss: <b>Aufgaben (20)</b> auf der Planseite — Lösung pro Aufgabe zum Aufklappen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script>
+// time-aware greeting - the browser knows the real clock, a .pptx never does
+(function(){
+  var h = new Date().getHours();
+  var t = h < 5 ? 'Good night!' : h < 12 ? 'Good morning!' :
+          h < 18 ? 'Good afternoon!' : h < 22 ? 'Good evening!' : 'Good night!';
+  var el = document.getElementById('greet-text');
+  if (el) el.textContent = t;
+})();
+
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  // links (lab bar, picture credits) open - they do not turn the page as well
+  if (e.target.closest('#hud') || e.target.closest('a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+}
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>

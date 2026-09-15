@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Datensicherheit mit System</title>
+<meta name="description" content="Baulich, technisch, organisatorisch, personell — und ein Backup, das im Ernstfall trägt">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8; --codemuted:#7E8FB5;
+  --greetbg:#000028;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:24px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+/* with a picture: text on the left, picture + licence line on the right */
+.slide.chapter.has-pic h2{width:420px;font-size:28px}
+.slide.chapter.has-pic .sub{width:420px}
+.slide.chapter.has-pic .hair{width:448px;top:372px}   /* room for a two-line sub */
+.chap-pic{position:absolute;left:560px;top:150px;width:328px;height:230px;margin:0;
+  display:block;overflow:hidden;background:var(--card);
+  border:.75px solid rgba(14,36,78,.12)}
+.chap-pic img{width:100%;height:100%;object-fit:contain;display:block}   /* never cropped */
+.chap-credit{position:absolute;left:560px;top:388px;width:328px;font-size:9px;line-height:1.3;
+  color:var(--muted);text-decoration:none;letter-spacing:.2px}
+a.chap-credit:hover{color:var(--red);text-decoration:underline}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:grid;place-items:center}
+.pic img{max-width:100%;max-height:100%}
+
+/* --- table_top ---------------------------------------------------------- */
+.dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
+  font-family:Raleway,system-ui,sans-serif}
+.dtable th,.dtable td{padding:0 6px;text-align:left;overflow:hidden;white-space:nowrap;
+  border:.75px solid var(--stroke);line-height:1.85}
+.dtable th{background:var(--ink);color:#fff;font-family:Orbitron,Raleway,sans-serif;
+  font-weight:700;font-size:.75em;border-color:var(--ink)}
+.dtable td{background:#fff;color:var(--body)}
+.dtable td.b{font-weight:700;color:var(--ink)}
+.dtable td.m{font-family:Menlo,monospace}
+.dtable .ac{text-align:center}
+.dtable .ar{text-align:right}
+
+/* --- greeting (Auftaktfolie) --------------------------------------------- */
+.slide.greet{background-image:none;background-color:var(--greetbg)}
+.slide.greet::before{left:336px;width:552px;background:rgba(230,236,248,.14)}
+.slide.greet .foot{left:336px;color:var(--codemuted)}
+.slide.greet .pageno{color:var(--codemuted)}
+.greet-ground{position:absolute;inset:0;background:var(--greetbg)}
+.greet-pic{position:absolute;left:0;top:0;width:312px;height:540px;
+  object-fit:cover;display:block}
+.greet-credit{position:absolute;left:10px;bottom:8px;font-size:9px;
+  font-family:Raleway,sans-serif;color:rgba(255,255,255,.5);text-decoration:none;
+  letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.greet-credit:hover{color:rgba(255,255,255,.9);text-decoration:underline}
+.greet-lead{position:absolute;left:433px;top:168px;width:455px;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:46px;color:var(--orange);
+  line-height:1.05;letter-spacing:-.5px}
+.greet-quote{position:absolute;left:486px;top:368px;width:402px;text-align:center;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:17px;color:var(--orange);
+  line-height:1.2}
+.greet-author{position:absolute;left:596px;top:404px;width:292px;text-align:center;
+  font-size:11px;color:var(--codemuted);letter-spacing:.3px}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-63dd3f10eabe.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/grass-8420611/" target="_blank" rel="noopener">IndigoBunting</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 11</p>
+      <h1>Datensicherheit mit System</h1>
+      <p class="sub">Baulich, technisch, organisatorisch, personell — und ein Backup, das im Ernstfall trägt</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Vier Gruppen</h2>
+      <p class="sub">Baulich, technisch, organisatorisch, personell</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/datensicherheit-serverraum.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:NOIRLab_HQ_Server_Racks_(6V6A0402-CC).jpg" target="_blank" rel="noopener">Serverschränke — Foto: NOIRLab/NSF/AURA/T. Slovinský, CC BY 4.0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wo wir stehen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Letzte Woche: soziale Netzwerke — was ihr selbst für eure Daten tun könnt</p>
+<p class="line l0 step" data-g="1">Heute der Blick einer <b>Organisation</b>: Schule, Betrieb, Verwaltung</p>
+<p class="line l0 step" data-g="2">Die Schutzziele kennt ihr schon: Vertraulichkeit, Integrität, Verfügbarkeit</p>
+<p class="line l0 step" data-g="3">Leitfrage: Was braucht die <b>Schul-IT</b>, damit Daten sicher sind — und reicht dafür Technik?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Vier Gruppen von Maßnahmen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:160px"><col style="width:210px"><col style="width:446px"></colgroup><tr><th>Gruppe</th><th>worum es geht</th><th>Beispiele</th></tr><tr><td class="b" style="background:#FBEBBF">baulich</td><td>Räume und Gebäude</td><td>abschließbarer Serverraum, Brandschutz, Schutz vor Wasser</td></tr><tr><td class="b" style="background:#E6ECF8">technisch</td><td>Geräte und Programme</td><td>Updates, Virenschutz, Firewall, Verschlüsselung</td></tr><tr><td class="b" style="background:#DDE8C6">organisatorisch</td><td>Abläufe, Zuständigkeiten</td><td>wer Rechte vergibt und entzieht, Backup-Plan</td></tr><tr><td class="b" style="background:#F2CFCB">personell</td><td>Menschen und Rollen</td><td>Schulung, Verpflichtung auf Vertraulichkeit, sorgfältige Auswahl</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Die Einteilung hilft, <b>keine Gruppe zu vergessen</b> — Technik ist nur ein Viertel davon</p>
+<p class="line l0 step" data-g="1">Auch das Ausscheiden gehört dazu: Schlüssel zurück, Konten sperren — eine <b>personelle</b> Maßnahme</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum Technik allein nicht reicht</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Der offene Serverraum entwertet die beste Firewall</p>
+<p class="line l0 step" data-g="1">Der ungeschulte Mensch öffnet dem Angreifer die Tür — freiwillig</p>
+<p class="line l0 step" data-g="2">Ohne Regeln bleibt Technik unkoordiniert: Wer spielt Updates ein, wer prüft das Backup?</p>
+<p class="line l0 step" data-g="3">Deshalb gehören <b>alle vier Gruppen</b> zusammen — die Kette ist so stark wie ihr schwächstes Glied</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Menschen und Abläufe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Clean Desk</b>: keine vertraulichen Unterlagen offen liegen lassen, Bildschirm sperren</p>
+<p class="line l0 step" data-g="1">Das kostet nichts und wirkt sofort — Papier ist ein unterschätzter Weg, auf dem Daten abfließen</p>
+<p class="line l0 step" data-g="2"><b>Homeoffice</b>: sichere Verbindung, Umgang mit Unterlagen, keine Einsicht durch Dritte</p>
+<p class="line l1 step" data-g="2">Auch Mitbewohner sind Dritte</p>
+<p class="line l0 step" data-g="3"><b>Dokumentieren</b>: Nur was aufgeschrieben ist, bleibt nachvollziehbar — auch bei Personalwechsel</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Schutzbedarf zuerst</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Nicht alle Daten sind gleich schutzbedürftig</p>
+<p class="line l0 step" data-g="1"><b>Schutzbedarfsfeststellung</b>: Wie schwer wäre der Schaden bei Verlust oder Offenlegung?</p>
+<p class="line l0 step" data-g="2">Zeugnisnoten und Gesundheitsdaten brauchen mehr Schutz als der Speiseplan der Mensa</p>
+<p class="line l0 step" data-g="3">Der Schutzbedarf bestimmt den Aufwand — er steht am <b>Anfang</b> jedes Sicherheitskonzepts</p>
+<p class="line l0 step" data-g="4">Überprüft wird das Konzept <b>regelmäßig</b> und nach jeder größeren Änderung</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Zutritt, Zugang, Zugriff</h2>
+      <p class="sub">Drei Wörter, drei Ebenen</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/datensicherheit-codeschloss.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Key_code_lock_(cropped).jpg" target="_blank" rel="noopener">Codeschloss an einer Tür — Foto: Khrystinasnell, CC0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Drei Ebenen — oft verwechselt</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:120px"><col style="width:110px"><col style="width:310px"><col style="width:276px"></colgroup><tr><th>Begriff</th><th>betrifft</th><th>Frage</th><th>Beispiele</th></tr><tr><td class="b" style="background:#FBEBBF">Zutritt</td><td>Räume</td><td>Wer darf den Serverraum betreten?</td><td>Schloss, Chipkarte, Besucherliste</td></tr><tr><td class="b" style="background:#DDE8C6">Zugang</td><td>Systeme</td><td>Wer darf sich anmelden?</td><td>Benutzerkonto, Passwort, zweiter Faktor</td></tr><tr><td class="b" style="background:#E6ECF8">Zugriff</td><td>Daten</td><td>Was darf man danach lesen oder ändern?</td><td>Berechtigungskonzept, Dateirechte</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Merkhilfe: <b>Zutritt</b> mit den Füßen, <b>Zugang</b> mit dem Login, <b>Zugriff</b> auf die Daten</p>
+<p class="line l0 step" data-g="1">Ein sauberes Konzept regelt jede Ebene einzeln</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Das Berechtigungskonzept</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Es legt fest, welche <b>Rolle</b> auf welche Daten zugreifen darf</p>
+<p class="line l0 step" data-g="1">Rechte hängen an Rollen, nicht an Personen — beim Rollenwechsel ändern sie sich mit</p>
+<p class="line l0 step" data-g="2"><b>Prinzip der geringsten Rechte</b>: jede Rolle bekommt nur, was ihre Aufgabe erfordert</p>
+<p class="line l0 step" data-g="3">Beispiel: Eine Lehrkraft trägt Noten nur in ihren eigenen Kursen ein</p>
+<p class="line l0 step" data-g="4">Wer eine Aufgabe abgibt, verliert auch die Rechte dazu</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Adminrechte und getrennte Netze</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ein Programm erbt die Rechte des angemeldeten Kontos</p>
+<p class="line l0 step" data-g="1">Deshalb: <b>Alltagskonto ohne Adminrechte</b> — sonst läuft Schadsoftware mit vollen Rechten</p>
+<p class="line l0 step" data-g="2"><b>Netzsegmentierung</b> trennt Bereiche wie Verwaltung, Unterricht und Gäste</p>
+<p class="line l0 step" data-g="3">Das <b>Gästenetz</b> bringt Besucher ins Internet, aber nicht an interne Systeme</p>
+<p class="line l0 step" data-g="4">Ein befallenes Gerät kommt so nicht überall hin</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Pflege im Alltag</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Patch-Management</b>: Updates prüfen, verteilen und dokumentieren — geregelt statt nebenbei</p>
+<p class="line l0 step" data-g="1"><b>Software-Inventarliste</b>: Schützen kann man nur, wovon man weiß, dass es läuft</p>
+<p class="line l0 step" data-g="2">Wird eine neue Lücke bekannt, zeigt die Liste sofort, wer betroffen ist</p>
+<p class="line l0 step" data-g="3"><b>VPN</b> für den Zugriff von außen: ein verschlüsselter Tunnel ins interne Netz</p>
+<p class="line l1 step" data-g="3">Gegen Schadsoftware auf dem Gerät selbst hilft ein VPN nicht</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Strom und Backup</h2>
+      <p class="sub">Damit Daten verfügbar bleiben</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/datensicherheit-bandarchiv.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Interior_of_StorageTek_tape_library_at_NERSC_(1).jpg" target="_blank" rel="noopener">Bandarchiv mit Greifarm — Foto: Derrick Coetzee, CC0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Strom, Hitze, Diebstahl</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>USV</b> (unterbrechungsfreie Stromversorgung): überbrückt Ausfälle, Server fahren geordnet herunter</p>
+<p class="line l0 step" data-g="1"><b>Überspannungsschutz</b> bewahrt Geräte vor Spannungsspitzen, zum Beispiel bei Gewitter</p>
+<p class="line l0 step" data-g="2">Server erzeugen Wärme — Serverräume werden <b>gekühlt</b> und überwacht</p>
+<p class="line l0 step" data-g="3"><b>Diebstahlschutz</b>: verschlossene Räume, Kabelschlösser, Inventarliste</p>
+<p class="line l0 step" data-g="4">Laptops mit <b>verschlüsselter</b> Festplatte: Gestohlen ist dann nur das Gerät, nicht die Daten</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die 3-2-1-Regel</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:80px"><col style="width:420px"><col style="width:316px"></colgroup><tr><th>Zahl</th><th>Regel</th><th>schützt gegen</th></tr><tr><td class="b" style="background:#FBEBBF">3</td><td>drei Kopien der Daten: das Original und zwei Sicherungen</td><td>den Defekt eines Datenträgers</td></tr><tr><td class="b" style="background:#DDE8C6">2</td><td>auf zwei verschiedenen Medien</td><td>Fehler, die einen ganzen Medientyp treffen</td></tr><tr><td class="b" style="background:#F2CFCB">1</td><td>eine Kopie außer Haus</td><td>Feuer, Wasser, Diebstahl</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Gegen <b>Ransomware</b> hilft nur eine Kopie, die <b>getrennt</b> aufbewahrt wird</p>
+<p class="line l0 step" data-g="1">Dauerhaft verbundene Sicherungen werden einfach mitverschlüsselt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Drei Arten zu sichern</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:140px"><col style="width:250px"><col style="width:196px"><col style="width:230px"></colgroup><tr><th>Art</th><th>was gesichert wird</th><th>Vorteil</th><th>Nachteil</th></tr><tr><td class="b">Vollsicherung</td><td>jedes Mal alles</td><td>einfach wiederherzustellen</td><td>viel Zeit und Speicher</td></tr><tr><td class="b">differenziell</td><td>alles seit der letzten Vollsicherung</td><td>Voll plus letzte genügen</td><td>wächst bis zur nächsten Vollsicherung</td></tr><tr><td class="b">inkrementell</td><td>alles seit der letzten Sicherung</td><td>schnell, wenig Speicher</td><td>braucht die ganze Kette</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Ein Backup zählt erst, wenn die <b>Wiederherstellung getestet</b> ist</p>
+<p class="line l0 step" data-g="1">Der Sicherungsplan — was, wie oft, wohin, wer prüft — ist eine <b>organisatorische</b> Maßnahme</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fallbeispiel Schul-IT</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:370px"><col style="width:150px"><col style="width:296px"></colgroup><tr><th>Befund</th><th>Gruppe</th><th>besser so</th></tr><tr><td>Der Serverraum dient als Abstellkammer und steht oft offen</td><td style="background:#FBEBBF">baulich</td><td>abschließen, Schlüssel nur für Zuständige</td></tr><tr><td>Alle Lehrkräfte arbeiten mit Adminrechten</td><td style="background:#DDE8C6">organisatorisch</td><td>Alltagskonten ohne Adminrechte</td></tr><tr><td>Das Backup liegt auf einer USB-Platte neben dem Server</td><td style="background:#E6ECF8">technisch</td><td>3-2-1: eine Kopie außer Haus</td></tr><tr><td>Niemand weiß, wer die Updates einspielt</td><td style="background:#DDE8C6">organisatorisch</td><td>Zuständigkeit festlegen, Patch-Plan</td></tr><tr><td>Das WLAN-Passwort hängt am Schwarzen Brett</td><td style="background:#F2CFCB">personell</td><td>schulen, Gästenetz einrichten</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Jeder Befund passt zu einer Gruppe — manche berühren auch zwei</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der erste Schritt bei knappen Mitteln</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die häufigsten Schäden entstehen an drei Stellen: <b>Updates, Sicherungen, Rechte</b></p>
+<p class="line l0 step" data-g="1">Diese drei in Ordnung zu bringen kostet vor allem Sorgfalt, nicht Geld</p>
+<p class="line l0 step" data-g="2">Teure Technik ohne diese Grundlagen verpufft</p>
+<p class="line l0 step" data-g="3">Danach: Schutzbedarf feststellen, Konzept aufschreiben, regelmäßig prüfen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Datensicherheit braucht alle vier Gruppen — baulich, technisch, organisatorisch, personell. Zutritt, Zugang und Zugriff werden getrennt geregelt, und das Backup folgt der 3-2-1-Regel.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">1998 löschte bei Pixar ein Befehl große Teile von <b>Toy Story 2</b> — die Sicherung war unbrauchbar, gerettet hat den Film die Kopie einer Mitarbeiterin im Homeoffice</p>
+<p class="line l0 step" data-g="1">Im März 2021 brannte in Straßburg ein Rechenzentrum von OVHcloud ab — wer keine Kopie außer Haus hatte, verlor Daten</p>
+<p class="line l0 step" data-g="2">Der <b>31. März</b> ist der World Backup Day — der Tag vor dem 1. April</p>
+<p class="line l0 step" data-g="3">Die 3-2-1-Regel wird dem Fotografen <b>Peter Krogh</b> zugeschrieben</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Kategorisierungsübung</b>: Maßnahmenkarten den vier Gruppen zuordnen</p>
+<p class="line l0 step" data-g="1"><b>Fallbeispiel Schul-IT</b> in Gruppen: Schwachstellen finden, Gruppe bestimmen, Maßnahme vorschlagen</p>
+<p class="line l0 step" data-g="2"><b>Backup-Strategien vergleichen</b>: Wie sichert ihr eure eigenen Daten — erfüllt das die 3-2-1-Regel?</p>
+<p class="line l0 step" data-g="3">Zum Schluss: <b>Aufgaben (20)</b> auf der Planseite — Lösung pro Aufgabe zum Aufklappen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script>
+// time-aware greeting - the browser knows the real clock, a .pptx never does
+(function(){
+  var h = new Date().getHours();
+  var t = h < 5 ? 'Good night!' : h < 12 ? 'Good morning!' :
+          h < 18 ? 'Good afternoon!' : h < 22 ? 'Good evening!' : 'Good night!';
+  var el = document.getElementById('greet-text');
+  if (el) el.textContent = t;
+})();
+
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  // links (lab bar, picture credits) open - they do not turn the page as well
+  if (e.target.closest('#hud') || e.target.closest('a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+}
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vom Signal zur Information</title>
+<meta name="description" content="Signal, Nachricht, Information, Daten — und wie aus der Welt Bits werden">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8; --codemuted:#7E8FB5;
+  --greetbg:#000028;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:24px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+/* with a picture: text on the left, picture + licence line on the right */
+.slide.chapter.has-pic h2{width:420px;font-size:28px}
+.slide.chapter.has-pic .sub{width:420px}
+.slide.chapter.has-pic .hair{width:448px;top:372px}   /* room for a two-line sub */
+.chap-pic{position:absolute;left:560px;top:150px;width:328px;height:230px;margin:0;
+  display:block;overflow:hidden;background:var(--card);
+  border:.75px solid rgba(14,36,78,.12)}
+.chap-pic img{width:100%;height:100%;object-fit:contain;display:block}   /* never cropped */
+.chap-credit{position:absolute;left:560px;top:388px;width:328px;font-size:9px;line-height:1.3;
+  color:var(--muted);text-decoration:none;letter-spacing:.2px}
+a.chap-credit:hover{color:var(--red);text-decoration:underline}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:grid;place-items:center}
+.pic img{max-width:100%;max-height:100%}
+
+/* --- table_top ---------------------------------------------------------- */
+.dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
+  font-family:Raleway,system-ui,sans-serif}
+.dtable th,.dtable td{padding:0 6px;text-align:left;overflow:hidden;white-space:nowrap;
+  border:.75px solid var(--stroke);line-height:1.85}
+.dtable th{background:var(--ink);color:#fff;font-family:Orbitron,Raleway,sans-serif;
+  font-weight:700;font-size:.75em;border-color:var(--ink)}
+.dtable td{background:#fff;color:var(--body)}
+.dtable td.b{font-weight:700;color:var(--ink)}
+.dtable td.m{font-family:Menlo,monospace}
+.dtable .ac{text-align:center}
+.dtable .ar{text-align:right}
+
+/* --- greeting (Auftaktfolie) --------------------------------------------- */
+.slide.greet{background-image:none;background-color:var(--greetbg)}
+.slide.greet::before{left:336px;width:552px;background:rgba(230,236,248,.14)}
+.slide.greet .foot{left:336px;color:var(--codemuted)}
+.slide.greet .pageno{color:var(--codemuted)}
+.greet-ground{position:absolute;inset:0;background:var(--greetbg)}
+.greet-pic{position:absolute;left:0;top:0;width:312px;height:540px;
+  object-fit:cover;display:block}
+.greet-credit{position:absolute;left:10px;bottom:8px;font-size:9px;
+  font-family:Raleway,sans-serif;color:rgba(255,255,255,.5);text-decoration:none;
+  letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.greet-credit:hover{color:rgba(255,255,255,.9);text-decoration:underline}
+.greet-lead{position:absolute;left:433px;top:168px;width:455px;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:46px;color:var(--orange);
+  line-height:1.05;letter-spacing:-.5px}
+.greet-quote{position:absolute;left:486px;top:368px;width:402px;text-align:center;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:17px;color:var(--orange);
+  line-height:1.2}
+.greet-author{position:absolute;left:596px;top:404px;width:292px;text-align:center;
+  font-size:11px;color:var(--codemuted);letter-spacing:.3px}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-5b727befa819.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/09-55-47-721/" target="_blank" rel="noopener">Wolfgang_Hasselmann</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 11</p>
+      <h1>Vom Signal zur Information</h1>
+      <p class="sub">Signal, Nachricht, Information, Daten — und wie aus der Welt Bits werden</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Vier Begriffe, eine Kette</h2>
+      <p class="sub">Signal, Nachricht, Information, Daten</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/grundbegriffe-ampel.png" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Japanese_horizontal_traffic_light_at_red_light.svg" target="_blank" rel="noopener">Ampel auf Rot — Momiji-Penguin, CC0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wo wir stehen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Lernbereich 1 ist geschafft — von der Rechenuhr bis zum Mikroprozessor</p>
+<p class="line l0 step" data-g="1">Heute beginnt <b>Lernbereich 2</b>: Persönliches Informationsmanagement</p>
+<p class="line l0 step" data-g="2">Zuerst die Wörter, mit denen die Informatik arbeitet — im Alltag gehen sie wild durcheinander</p>
+<p class="line l0 step" data-g="3">Leitfrage: Speichert ein Rechner <b>Daten</b> oder <b>Information</b> — und ist das dasselbe?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Begriffskette an der Ampel</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:150px"><col style="width:360px"><col style="width:306px"></colgroup><tr><th>Begriff</th><th>Was es ist</th><th>an der Ampel</th></tr><tr><td class="b" style="background:#FBEBBF">Signal</td><td>der physikalische Träger der Nachricht</td><td>das rote Licht</td></tr><tr><td class="b" style="background:#DDE8C6">Nachricht</td><td>Zeichen, nach Regeln zusammengesetzt</td><td>„Rot“ im Code der Ampel</td></tr><tr><td class="b" style="background:#F2CFCB">Information</td><td>die Bedeutung für den Empfänger</td><td>„halten!“</td></tr><tr><td class="b" style="background:#E6ECF8">Daten</td><td>Zeichen, festgehalten zur Verarbeitung</td><td>Schaltprotokoll der Ampelsteuerung</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Die Kette gilt überall: Schall, Licht, Strom — erst der <b>Empfänger</b> macht daraus Information</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Nachricht ist nicht Information</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Dieselbe Nachricht „Morgen um 8“ bedeutet für jeden Empfänger etwas anderes</p>
+<p class="line l0 step" data-g="1">Wer den Code nicht kennt, empfängt Zeichen — aber <b>keine Information</b></p>
+<p class="line l0 step" data-g="2"><b>Redundanz</b>: Anteile einer Nachricht, die keine zusätzliche Information tragen</p>
+<p class="line l0 step" data-g="3">Redundanz ist nicht nutzlos: Sie lässt eine Nachricht <b>Störungen überstehen</b></p>
+<p class="line l0 step" data-g="4">Deshalb ist „Daten sind Information“ ungenau: Daten werden erst <b>durch Deutung</b> zu Information</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Analog und digital</h2>
+      <p class="sub">Stufenlos gegen abzählbar</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/grundbegriffe-abtastung.png" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Signal_Sampling.svg" target="_blank" rel="noopener">Abgetastetes Signal — CC0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Zwei Arten, eine Größe darzustellen</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0"><b>Analog</b></p>
+<p class="col l1 step" data-g="0">stufenlos — jeder Zwischenwert ist möglich</p>
+<p class="col l1 step" data-g="0">Beispiele: Schallplatte, Zeigeruhr, Quecksilberthermometer</p>
+<p class="col l1 step" data-g="0">jede Kopie fügt Rauschen hinzu</p>
+<p class="col l1 step" data-g="0">die Kopie der Kopie wird schlechter</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1"><b>Digital</b></p>
+<p class="col l1 step" data-g="1">nur abzählbar viele Werte, feste Stufen</p>
+<p class="col l1 step" data-g="1">Beispiele: Musikdatei, Digitaluhr, Fieberthermometer mit Display</p>
+<p class="col l1 step" data-g="1">die Stufen werden eindeutig wiedererkannt</p>
+<p class="col l1 step" data-g="1">deshalb ist jede Kopie <b>verlustfrei</b></p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Das Bit</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Das <b>Bit</b> ist die kleinste Informationseinheit: genau zwei Zustände, 0 oder 1</p>
+<p class="line l0 step" data-g="1">Rechner arbeiten binär, weil sich <b>zwei Zustände technisch sicher</b> unterscheiden lassen</p>
+<p class="line l0 step" data-g="2">Mit <span class="tex" data-tex="n"></span> Bit lassen sich <span class="tex" data-tex="2^{n}"></span> verschiedene Werte darstellen</p>
+<p class="line l0 step" data-g="3">10 Bit ergeben <span class="tex" data-tex="2^{10} = 1024"></span> Werte</p>
+<p class="line l0 step" data-g="4">Für 200 verschiedene Zeichen reichen 7 Bit nicht (<span class="tex" data-tex="2^{7} = 128"></span>) — man braucht <b>8 Bit</b> (<span class="tex" data-tex="2^{8} = 256"></span>)</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wie viele Bit brauche ich?</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:120px"><col style="width:180px"><col style="width:516px"></colgroup><tr><th>Bit</th><th>Werte</th><th>reicht zum Beispiel für</th></tr><tr><td class="b">1</td><td>2</td><td>ja oder nein, an oder aus</td></tr><tr><td class="b">4</td><td>16</td><td>eine Hexadezimalziffer</td></tr><tr><td class="b">7</td><td>128</td><td>den ASCII-Zeichensatz</td></tr><tr><td class="b">8</td><td>256</td><td>ein Byte — 200 verschiedene Zeichen</td></tr><tr><td class="b">16</td><td>65 536</td><td>Messwerte einer Musik-CD</td></tr><tr><td class="b">24</td><td>16 777 216</td><td>Farben eines Bildpunkts (3 × 8 Bit)</td></tr></table><div class="body" style="top:302.45px;height:193.55px"><p class="line l0 step" data-g="0">Jedes Bit mehr <b>verdoppelt</b> die Zahl der möglichen Werte</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Digitalisieren</h2>
+      <p class="sub">Abtasten, quantisieren, codieren</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/grundbegriffe-aliasing.png" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Signal_aliasing_demonstration.svg" target="_blank" rel="noopener">Aliasing: zu selten abgetastet — Laurens R. Krol, CC0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Drei Schritte, immer in dieser Reihenfolge</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Abtasten</b>: das analoge Signal in festen Zeitabständen messen</p>
+<p class="line l0 step" data-g="1"><b>Quantisieren</b>: jeden Messwert auf eine feste Anzahl von Stufen runden</p>
+<p class="line l0 step" data-g="2"><b>Codieren</b>: jede Stufe als Bitfolge schreiben</p>
+<p class="line l0 step" data-g="3">Unwiderruflich verloren sind dabei die Werte <b>zwischen</b> zwei Messpunkten und zwei Stufen</p>
+<p class="line l0 step" data-g="4">Mehr Messpunkte und mehr Stufen heißt: genauer — aber auch <b>mehr Daten</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Das Abtasttheorem</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Kernaussage: Die Abtastrate muss <b>mehr als doppelt so hoch</b> sein wie die höchste vorkommende Frequenz</p>
+<p class="line l0 step" data-g="1">Die Musik-CD tastet 44 100-mal pro Sekunde ab — genug für Töne bis etwa 20 000 Hz, die Grenze des Gehörs</p>
+<p class="line l0 step" data-g="2">Das Telefon tastet nur 8 000-mal ab — deshalb klingt eine Stimme dort dünn</p>
+<p class="line l0 step" data-g="3">Wird zu selten abgetastet, entsteht <b>Aliasing</b>: eine falsche, viel tiefere Frequenz</p>
+<p class="line l0 step" data-g="4">Aus dem Kino bekannt: Wagenräder, die sich scheinbar <b>rückwärts</b> drehen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Ton und Bild — dieselben drei Schritte</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:180px"><col style="width:318px"><col style="width:318px"></colgroup><tr><th>Schritt</th><th>beim Ton</th><th>beim Foto</th></tr><tr><td class="b">abtasten</td><td>Messpunkte pro Sekunde</td><td>Aufteilung in Bildpunkte</td></tr><tr><td class="b">quantisieren</td><td>Stufen der Lautstärke</td><td>Stufen von Helligkeit und Farbe</td></tr><tr><td class="b">codieren</td><td>Bits je Messwert</td><td>Bits je Bildpunkt</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Graustufenbild mit 100 × 200 Bildpunkten und 8 Bit je Punkt: 160 000 Bit = <b>20 000 Byte</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>Daten, Information, Wissen</h2>
+      <p class="sub">Und was Digitalisierung heißt</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/grundbegriffe-dikw.png" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:DIKW_Pyramid.svg" target="_blank" rel="noopener">DIKW-Pyramide — Longlivetheux, CC BY-SA 4.0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Von Daten zu Wissen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Daten</b> werden gedeutet — so entsteht <b>Information</b></p>
+<p class="line l0 step" data-g="1">Verknüpfte Information, die man anwenden kann, ist <b>Wissen</b></p>
+<p class="line l0 step" data-g="2">Beispiel: 38,9 sind Daten, „38,9 Grad Fieber“ ist Information, „jetzt zum Arzt“ ist Wissen</p>
+<p class="line l0 step" data-g="3">Ein Rechner speichert Daten — <b>Wissen</b> entsteht erst wieder in einem Kopf</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was „Digitalisierung“ meint</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Im engen Sinn</b>: eine analoge Größe in Zahlen umwandeln — abtasten, quantisieren, codieren</p>
+<p class="line l0 step" data-g="1"><b>Im weiten Sinn</b>: Arbeit, Schule und Alltag laufen über digitale Technik</p>
+<p class="line l0 step" data-g="2">Beides hängt zusammen: Erst wenn etwas als Daten vorliegt, kann ein Rechner es verarbeiten</p>
+<p class="line l0 step" data-g="3">Die Grenze: Erfahrung und Urteilskraft lassen sich <b>nicht</b> abtasten</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Ein Signal trägt eine Nachricht, ihre Bedeutung ist die Information, festgehalten wird sie als Daten — und digitalisieren heißt: abtasten, quantisieren, codieren.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Claude Shannon machte 1948 das <b>Bit</b> zum Maß der Information — das Wort „bit“ hatte ihm John Tukey vorgeschlagen</p>
+<p class="line l0 step" data-g="1">Die 44 100 Hz der CD stammen aus der <b>Videotechnik</b>: Frühe Digitalaufnahmen wurden auf Videobändern gespeichert</p>
+<p class="line l0 step" data-g="2">Im <b>Morsecode</b> ist das häufigste Zeichen das kürzeste: das E ist ein einziger Punkt</p>
+<p class="line l0 step" data-g="3">Mit 24 Bit je Bildpunkt zeigt ein Bildschirm über <b>16 Millionen</b> Farben</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Begriffslandkarte</b> in Partnerarbeit: Signal, Nachricht, Information, Daten, Wissen, Bit, analog, digital — mit beschrifteten Pfeilen</p>
+<p class="line l0 step" data-g="1"><b>Codier-Experiment</b> ohne Rechner: eine Nachricht mit Klopfzeichen oder Taschenlampe übertragen — mit eurem eigenen Code aus kurz und lang</p>
+<p class="line l0 step" data-g="2">Wie viele Zeichen braucht euer Code für 26 Buchstaben? (Tipp: <span class="tex" data-tex="2^{5} = 32"></span>)</p>
+<p class="line l0 step" data-g="3"><b>Einordnen</b>: QR-Code, Fieberthermometer, Klingelton — was ist Signal, Nachricht, Information, Daten?</p>
+<p class="line l0 step" data-g="4">Zum Schluss: <b>Aufgaben (20)</b> auf der Planseite — Lösung pro Aufgabe zum Aufklappen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script>
+// time-aware greeting - the browser knows the real clock, a .pptx never does
+(function(){
+  var h = new Date().getHours();
+  var t = h < 5 ? 'Good night!' : h < 12 ? 'Good morning!' :
+          h < 18 ? 'Good afternoon!' : h < 22 ? 'Good evening!' : 'Good night!';
+  var el = document.getElementById('greet-text');
+  if (el) el.textContent = t;
+})();
+
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  // links (lab bar, picture credits) open - they do not turn the page as well
+  if (e.target.closest('#hud') || e.target.closest('a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+}
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>
