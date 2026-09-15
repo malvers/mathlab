@@ -212,12 +212,36 @@ class Deck:
         fill_ph(s, 1, [(sub, 0)])
         return s
 
-    def chapter(self, num, title, sub):
+    def chapter(self, num, title, sub, image=None, credit=None, credit_url=None):
+        """Chapter divider; with `image` the picture goes right, the text narrows -
+        same geometry as html_deck.HtmlDeck.chapter. A relative `image` is taken
+        from HTML/decks/ (where the web twin serves it)."""
         s = self._add("Kapitel")
         fill_ph(s, 10, [(f"Kapitel {num:02d}", 0)])
         s.shapes.title.text_frame.text = title
-        self._check_title(title, 34, 700)
-        fill_ph(s, 1, [(sub, 0)])
+        self._check_title(title, 28 if image else 34, 420 if image else 700)
+        sub_ph = fill_ph(s, 1, [(sub, 0)])
+        if image:
+            s.shapes.title.width = emu(420)
+            for par in s.shapes.title.text_frame.paragraphs:   # 28 pt like the web twin
+                for r in par.runs:
+                    r.font.size = Pt(28)
+            if sub_ph is not None and hasattr(sub_ph, "width"):
+                sub_ph.width = emu(420)
+            path = image if os.path.isabs(image) else os.path.normpath(os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), "..", "..", "HTML", "decks", image))
+            iw, ih = Image.open(path).size
+            w, h = 328, 328 * ih / iw
+            if h > 230:
+                w, h = 230 * iw / ih, 230
+            s.shapes.add_picture(path, emu(560 + (328 - w) / 2), emu(150 + (230 - h) / 2), emu(w), emu(h))
+            if credit:
+                tb = s.shapes.add_textbox(emu(560), emu(388), emu(328), emu(14))
+                run = tb.text_frame.paragraphs[0].add_run()
+                run.text = credit
+                run.font.size = Pt(7)
+                if credit_url:
+                    run.hyperlink.address = credit_url
         return s
 
     def bullets(self, title, lines):
