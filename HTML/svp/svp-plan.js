@@ -332,9 +332,16 @@
     /* Zeigt oder versteckt den Videos-Reiter einer Woche. Wird an zwei Stellen
        gebraucht: beim Bauen der Reiter (die Zeile kann laengst Material haben)
        und bei jeder Materialaenderung. */
-    function setVideoReiter(ref, anzahl) {
+    function setVideoReiter(ref, anzahl, zusatz) {
         const p = ref && ref.rPanes;
         if (!p || !p.videos) return;
+        /* Doc, 15.09.2026: "schreib immer noch klein dahinter wieviel" - the count
+           after each tab name, always, (0) included. */
+        const zahl = function (tab, n) {
+            if (tab && tab.count && n != null) tab.count.textContent = '(' + n + ')';
+        };
+        zahl(p.videos, anzahl);
+        zahl(p.zusatz, zusatz);
         /* Doc, 08.09.2026: "wenn keine vids da sind grey ... not selectable".
            Vorher war der Reiter versteckt - dann springt die Kopfzeile je nach
            Woche. Jetzt steht er immer da und ist nur gesperrt. */
@@ -945,7 +952,11 @@
            und behielte sonst einen Reiter, hinter dem nichts liegt. Verschwindet
            der letzte Film, waehrend der Reiter offen ist, springt die Anzeige
            zurueck, sonst zeigt die Haelfte ins Leere. */
-        setVideoReiter(ref, vids);
+        /* what the Zusatzmaterial tab holds: no exercises, no films; free text alone
+           still counts as one, like the paperclip */
+        const zusatz = alle.filter(en => !isExerciseEntry(en) && !isVideoEntry(en)).length
+            || (matTail(text) ? 1 : 0);
+        setVideoReiter(ref, vids, zusatz);
         decorateMatCell(ref);
         /* renderMaterial builds every pill from scratch, so the width measured
            earlier is gone by now. Without this the pills are equally wide only
@@ -3148,6 +3159,9 @@
                 b.type = 'button';
                 b.className = 'sub-tab' + (k ? '' : ' on');
                 b.textContent = t[1];
+                const count = document.createElement('span');   /* filled by setVideoReiter */
+                count.className = 'sub-count';
+                b.appendChild(count);
                 b.addEventListener('mousedown', keinMausfokus);
                 b.addEventListener('click', function (ev) { ev.stopPropagation(); showR(t[0]); });
                 rTabs.appendChild(b);
@@ -3156,7 +3170,7 @@
                 pane.dataset.pane = t[0];
                 pane.hidden = !!k;
                 subSide.appendChild(pane);
-                rPanes[t[0]] = { btn: b, pane: pane };
+                rPanes[t[0]] = { btn: b, pane: pane, count: count };
             });
             /* Stift am rechten Ende derselben Zeile (Doc, 09.09.2026: "gib mir
                da bitte einen Stift zum bearbeiten dieser Woche"). Er schaltet
@@ -3217,7 +3231,10 @@
             }
             ref.showRechts = showR;
             ref.rPanes = rPanes;
-            setVideoReiter(ref, parseMat(ref.matTd ? (ref.matTd.dataset.src || '') : '').filter(isVideoEntry).length);
+            const src0 = ref.matTd ? (ref.matTd.dataset.src || '') : '';
+            const alle0 = parseMat(src0);
+            setVideoReiter(ref, alle0.filter(isVideoEntry).length,
+                alle0.filter(en => !isExerciseEntry(en) && !isVideoEntry(en)).length || (matTail(src0) ? 1 : 0));
             subBody.appendChild(subSide);
             subMain.appendChild(subBody);
             detailTr.appendChild(subMain);

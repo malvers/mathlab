@@ -37,7 +37,7 @@ body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
   width:816px;height:1px;background:rgba(14,36,78,.16)}
 .foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
   color:var(--muted)}
-.pageno{position:absolute;right:24px;top:512px;font-size:10px;letter-spacing:1.2px;
+.pageno{position:absolute;right:72px;top:512px;font-size:10px;letter-spacing:1.2px;
   color:var(--muted)}
 
 h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
@@ -188,10 +188,34 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 
 /* --- HUD ---------------------------------------------------------------- */
 #hud{position:fixed;right:10px;bottom:8px;z-index:9}
-#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
-  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button{display:flex;align-items:center;justify-content:center;width:22px;height:22px;padding:0;border:0;border-radius:5px;
+  background:#7E8FB5;box-shadow:0 1px 1px rgba(0,0,0,.12);   /* Dostojewski's colour on the greeting slide */
+  color:#fff;opacity:.85;cursor:pointer;transition:opacity .2s}
 #hud button:hover{opacity:1}
-#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#hud button svg{display:block;width:13px;height:13px;margin:0;stroke-width:1.4;flex:none}
+#hud button[hidden]{display:none}   /* flex would otherwise show a hidden button */
+/* slide number typed for a jump (1 7 Enter) */
+#jump{position:fixed;right:10px;bottom:42px;z-index:9;padding:4px 10px;border-radius:7px;
+  background:rgba(255,255,255,.85);box-shadow:0 1px 4px rgba(0,0,0,.28);color:#0E244E;
+  font:600 14px Raleway,system-ui,sans-serif}
+/* overview of all slides (o, grid button in the HUD bottom right) */
+#hud{display:flex;gap:4px}          /* overview, play and fullscreen side by side */
+#hud #ovbtn svg{width:14px;height:14px}
+#overview{position:fixed;inset:0;z-index:20;background:rgba(14,36,78,.94);overflow:auto;padding:28px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:18px;align-content:start;
+  grid-auto-rows:max-content}   /* the tiles' overflow:hidden would let the rows shrink to the window */
+#overview[hidden]{display:none}
+.ov-cell{position:relative;cursor:pointer;border-radius:6px;overflow:hidden;
+  outline:3px solid transparent;box-shadow:0 2px 10px rgba(0,0,0,.35)}
+.ov-cell:hover{outline-color:#799E31}
+.ov-cell.cur{outline-color:#F5C242}
+.ov-thumb{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#fff}
+.ov-thumb > .slide{display:block!important;position:absolute;left:0;top:0;width:960px;height:540px;
+  transform-origin:0 0;pointer-events:none}
+.ov-thumb .step{opacity:1!important}
+.ov-num{position:absolute;left:8px;bottom:6px;padding:2px 7px;border-radius:5px;
+  background:rgba(14,36,78,.78);color:#fff;font:600 12px Raleway,system-ui,sans-serif}
+@media print{#ovbtn,#overview,#jump{display:none!important}}
 #bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
   transition:width .25s ease;z-index:9}
 
@@ -365,6 +389,105 @@ addEventListener('click', e => {
   if (e.target.closest('.labbar button')) { next(); return; }
   next();
 });   // clicks inside a lab stay in the lab - they never reach this document
+// type the slide number, then Enter: 1 7 Enter jumps to slide 17 (Doc, 15.09.2026) - like
+// PowerPoint the slide starts unbuilt; Esc or a 2.5 s pause drops the typed number
+(function () {
+  let buf = '', timer = 0;
+  const box = document.createElement('div');
+  box.id = 'jump';
+  box.hidden = true;
+  document.body.appendChild(box);
+  const clear = function () { buf = ''; box.hidden = true; };
+  addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (/^[0-9]$/.test(e.key)) {
+      buf = (buf + e.key).replace(/^0+/, '').slice(-3);
+      box.textContent = 'Folie ' + (buf || '0');
+      box.hidden = false;
+      clearTimeout(timer); timer = setTimeout(clear, 2500);
+      e.preventDefault();
+    } else if (e.key === 'Enter' && buf) {
+      const n = parseInt(buf, 10);
+      clear();
+      if (n >= 1 && n <= slides.length) {
+        if (typeof narr !== 'undefined') narr.stop();   // a jump pauses Solita like turning by hand
+        si = n - 1; step = 0; paint();
+      }
+      e.preventDefault();
+    } else if (e.key === 'Escape' && buf) { clear(); }
+  });
+})();
+// overview of all slides: o (or the grid button bottom right) opens it, a click jumps there,
+// Esc, o or a click beside the tiles closes it (Doc, 15.09.2026: "Uebersicht ueber alle Folien")
+(function () {
+  const ov = document.createElement('div');
+  ov.id = 'overview';
+  ov.hidden = true;
+  document.body.appendChild(ov);
+  const btn = document.createElement('button');
+  btn.id = 'ovbtn';
+  btn.type = 'button';
+  btn.title = 'Übersicht aller Folien (o)';
+  btn.setAttribute('aria-label', 'Übersicht aller Folien');
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">'
+    + '<rect x="2.5" y="2.5" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="2.5" width="8.5" height="8.5" rx="1.2"/>'
+    + '<rect x="2.5" y="13" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="13" width="8.5" height="8.5" rx="1.2"/></svg>';
+  const hudBox = document.getElementById('hud');   // bottom right, next to play and fullscreen
+  if (hudBox) hudBox.insertBefore(btn, hudBox.firstChild); else document.body.appendChild(btn);
+  let built = false;
+  function close() { ov.hidden = true; }
+  function build() {
+    slides.forEach(function (s, i) {
+      const cell = document.createElement('div');
+      cell.className = 'ov-cell';
+      const thumb = document.createElement('div');
+      thumb.className = 'ov-thumb';
+      const c = s.cloneNode(true);                     // a copy, fully built, without ids
+      c.querySelectorAll('[id]').forEach(function (e) { e.removeAttribute('id'); });
+      c.classList.add('on');
+      thumb.appendChild(c);
+      const num = document.createElement('span');
+      num.className = 'ov-num';
+      num.textContent = i + 1;
+      cell.appendChild(thumb);
+      cell.appendChild(num);
+      cell.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (typeof narr !== 'undefined') narr.stop();
+        si = i; step = 0; paint(); close();
+      });
+      ov.appendChild(cell);
+    });
+    built = true;
+  }
+  function scale() {
+    ov.querySelectorAll('.ov-thumb').forEach(function (t) {
+      t.firstChild.style.transform = 'scale(' + (t.clientWidth / 960) + ')';
+    });
+  }
+  function open() {
+    if (typeof narr !== 'undefined') narr.stop();
+    if (!built) build();
+    ov.hidden = false;
+    [].forEach.call(ov.children, function (c, i) { c.classList.toggle('cur', i === si); });
+    scale();
+    if (ov.children[si]) ov.children[si].scrollIntoView({ block: 'center' });
+  }
+  btn.addEventListener('click', function (e) { e.stopPropagation(); if (ov.hidden) open(); else close(); });
+  ov.addEventListener('click', function (e) { e.stopPropagation(); close(); });
+  addEventListener('resize', function () { if (!ov.hidden) scale(); });
+  addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'o' || e.key === 'O') {
+      if (ov.hidden) open(); else close();
+      e.preventDefault(); e.stopImmediatePropagation(); return;
+    }
+    if (!ov.hidden) {                                  // nothing underneath moves meanwhile
+      if (e.key === 'Escape') close();
+      e.preventDefault(); e.stopImmediatePropagation();
+    }
+  }, true);
+})();
 // fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
 const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
   + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';

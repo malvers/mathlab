@@ -15,7 +15,10 @@ comes from the same numbers the solution is checked against.
 Every id inside a figure is suffixed with a per-figure counter, so several figures can
 sit on one page without their arrow markers stealing each other's definitions.
 """
+import base64
 import math
+import os
+import re
 
 # Palette of the sheets (tools/pptx/design_lib.py) - one look for slides and worksheets.
 INK = "#0E244E"
@@ -30,8 +33,23 @@ SANS = "Raleway, system-ui, sans-serif"
 # Variables are set in an italic serif, the way a textbook sets them - it keeps
 # axis names apart from the plain numbers on the ticks.
 MATH = "Cambria Math, Georgia, Times New Roman, serif"
+# Numbers in KaTeX's own font (tex=True, texlabel, frac), so a figure's numbers look exactly
+# like the $...$ on the slide beside it (Doc 15.09.2026: every number in LaTeX). An SVG shown
+# as <img> cannot reach the page's fonts, so the font is embedded once per figure.
+TEX = "KaTeX_Main, Cambria Math, Times New Roman, serif"
+_TEX_FONT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "HTML",
+                         "morpheus", "vendor", "katex", "fonts", "KaTeX_Main-Regular.woff2")
+_TEX_PLAIN = [("\\mid", "|"), ("\\cdot", "·"), ("\\approx", "≈"), ("{,}", ","),
+              ("\\,", " "), ("\\%", "%")]
 
 _SEQ = [0]
+
+
+def _tex_plain(s):
+    """The few TeX commands a figure label needs, as plain characters."""
+    for a, b in _TEX_PLAIN:
+        s = s.replace(a, b)
+    return s
 
 
 def esc(s):
@@ -92,10 +110,29 @@ class Canvas:
                     ' stroke="%s" stroke-width="%s"' % (stroke, width) if stroke else "",
                     ' opacity="%s"' % opacity if opacity is not None else ""))
 
+    def _tex_font(self):
+        if not any("KaTeX_Main" in d for d in self.defs):
+            with open(_TEX_FONT, "rb") as f:
+                b64 = base64.b64encode(f.read()).decode()
+            self.defs.append('<style>@font-face{font-family:KaTeX_Main;'
+                             'src:url(data:font/woff2;base64,%s) format("woff2")}</style>' % b64)
+
     def text(self, x, y, s, size=13, color=BODY, anchor="middle", italic=False,
-             weight=None, family=None, baseline=None, halo=None):
+             weight=None, family=None, baseline=None, halo=None, tex=False):
         """halo=<colour> paints the paper colour behind the glyphs, so a label stays
-        readable where it has to sit on top of a grid line or a curve."""
+        readable where it has to sit on top of a grid line or a curve.
+        tex=True sets the whole label in KaTeX's font - or, when it holds $...$, only
+        those parts ("$1.$ Stufe: Lena")."""
+        s = str(s)
+        content = esc(s)
+        if tex:
+            self._tex_font()
+            if "$" in s:
+                parts = re.split(r"\$([^$]*)\$", s)
+                content = "".join('<tspan font-family="%s">%s</tspan>' % (TEX, esc(_tex_plain(p)))
+                                  if i % 2 else esc(p) for i, p in enumerate(parts) if p)
+            else:
+                family, italic, content = family or TEX, False, esc(_tex_plain(s))
         self.raw('<text x="%s" y="%s" font-family="%s" font-size="%s" fill="%s"'
                  ' text-anchor="%s"%s%s%s%s>%s</text>'
                  % (fmt(x), fmt(y), family or (MATH if italic else SANS), size, color, anchor,
@@ -104,7 +141,25 @@ class Canvas:
                     ' dominant-baseline="%s"' % baseline if baseline else "",
                     ' stroke="%s" stroke-width="4" paint-order="stroke"'
                     ' stroke-linejoin="round"' % halo if halo else "",
-                    esc(s)))
+                    content))
+
+    def frac(self, x, y, num, den, size=14, color=BODY, anchor="middle"):
+        """A stacked fraction in KaTeX's font with its bar at height y - the way
+        $\\frac{1}{3}$ looks on the slide. Returns its width."""
+        w = max(len(str(num)), len(str(den))) * size * 0.5 + size * 0.3
+        cx = x + {"start": w / 2.0, "end": -w / 2.0}.get(anchor, 0)
+        self.line(cx - w / 2.0, y, cx + w / 2.0, y, color, max(0.8, size / 16.0), cap="butt")
+        self.text(cx, y - size * 0.22, num, size, color, tex=True)
+        self.text(cx, y + size * 0.86, den, size, color, tex=True)
+        return w
+
+    def texlabel(self, x, y, s, size=14, color=BODY, anchor="middle"):
+        """A number label in KaTeX's font, vertically centred on y; "a/b" becomes a
+        stacked fraction."""
+        m = re.fullmatch(r"\s*(\d+)\s*/\s*(\d+)\s*", str(s))
+        if m:
+            return self.frac(x, y, m.group(1), m.group(2), size, color, anchor)
+        self.text(x, y + size * 0.32, s, size, color, anchor, tex=True)
 
     def arrowhead(self, color):
         """One marker per colour, defined once per figure."""
@@ -474,12 +529,12 @@ class Diagram(Canvas):
                     self.text(cx + cw / 2.0, cy + ch / 2.0, s, size,
                               INK if head else BODY, italic=head, baseline="middle")
 
-    def node(self, x, y, label=None, pos="right", color=INK, size=13):
+    def node(self, x, y, label=None, pos="right", color=INK, size=13, tex=False):
         self.circle(x, y, 3.4, color, PAPER, 1.3)
         if label:
             dx, dy, anchor = {"right": (10, 5, "start"), "left": (-10, 5, "end"),
                               "above": (0, -10, "middle"), "below": (0, 17, "middle")}[pos]
-            self.text(x + dx, y + dy, label, size, INK, anchor, italic=True)
+            self.text(x + dx, y + dy, label, size, INK, anchor, italic=not tex, tex=tex)
 
     def selfloop(self, x, y, w=58, h=40, label=None, color=MUTED, width=1.2, size=11,
                  side=1):
@@ -498,13 +553,18 @@ class Diagram(Canvas):
             self.text(cx + side * 12, y + 4, label, size, BODY, "start" if side > 0 else "end",
                       halo=PAPER)
 
-    def branch(self, p, q, label=None, color=MUTED, width=1.3, size=11.5, lift=9):
-        """A tree branch with its probability written along it, just off the line."""
+    def branch(self, p, q, label=None, color=MUTED, width=1.3, size=11.5, lift=9, tex=False):
+        """A tree branch with its probability written along it, just off the line.
+        tex=True writes it in KaTeX's font, "1/3" as a stacked fraction."""
         (x1, y1), (x2, y2) = p, q
         d = math.hypot(x2 - x1, y2 - y1) or 1.0
         ux, uy = (x2 - x1) / d, (y2 - y1) / d
         self.line(x1 + ux * 6, y1 + uy * 6, x2 - ux * 6, y2 - uy * 6, color, width)
-        if label:
+        if label and tex:
+            mx, my = (x1 + x2) / 2.0, (y1 + y2) / 2.0
+            half = size * 0.86 if "/" in str(label) else size * 0.36
+            self.texlabel(mx, my + (-(lift + half) if uy < 0 else lift + half), label, size, BODY)
+        elif label:
             mx, my = (x1 + x2) / 2.0, (y1 + y2) / 2.0
             # push the text away from the line, on the side the branch points to
             self.text(mx - uy * 0, my + (-lift if uy < 0 else lift + 4), label, size, BODY)
