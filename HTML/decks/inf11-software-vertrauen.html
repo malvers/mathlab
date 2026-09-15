@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Software, der man trauen kann</title>
+<meta name="description" content="Woher Programme kommen, womit wir bezahlen — und was Geräte die Umwelt kosten">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8; --codemuted:#7E8FB5;
+  --greetbg:#000028;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:24px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+/* with a picture: text on the left, picture + licence line on the right */
+.slide.chapter.has-pic h2{width:420px;font-size:28px}
+.slide.chapter.has-pic .sub{width:420px}
+.slide.chapter.has-pic .hair{width:448px;top:372px}   /* room for a two-line sub */
+.chap-pic{position:absolute;left:560px;top:150px;width:328px;height:230px;margin:0;
+  display:block;overflow:hidden;background:var(--card);
+  border:.75px solid rgba(14,36,78,.12)}
+.chap-pic img{width:100%;height:100%;object-fit:contain;display:block}   /* never cropped */
+.chap-credit{position:absolute;left:560px;top:388px;width:328px;font-size:9px;line-height:1.3;
+  color:var(--muted);text-decoration:none;letter-spacing:.2px}
+a.chap-credit:hover{color:var(--red);text-decoration:underline}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:grid;place-items:center}
+.pic img{max-width:100%;max-height:100%}
+
+/* --- table_top ---------------------------------------------------------- */
+.dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
+  font-family:Raleway,system-ui,sans-serif}
+.dtable th,.dtable td{padding:0 6px;text-align:left;overflow:hidden;white-space:nowrap;
+  border:.75px solid var(--stroke);line-height:1.85}
+.dtable th{background:var(--ink);color:#fff;font-family:Orbitron,Raleway,sans-serif;
+  font-weight:700;font-size:.75em;border-color:var(--ink)}
+.dtable td{background:#fff;color:var(--body)}
+.dtable td.b{font-weight:700;color:var(--ink)}
+.dtable td.m{font-family:Menlo,monospace}
+.dtable .ac{text-align:center}
+.dtable .ar{text-align:right}
+
+/* --- greeting (Auftaktfolie) --------------------------------------------- */
+.slide.greet{background-image:none;background-color:var(--greetbg)}
+.slide.greet::before{left:336px;width:552px;background:rgba(230,236,248,.14)}
+.slide.greet .foot{left:336px;color:var(--codemuted)}
+.slide.greet .pageno{color:var(--codemuted)}
+.greet-ground{position:absolute;inset:0;background:var(--greetbg)}
+.greet-pic{position:absolute;left:0;top:0;width:312px;height:540px;
+  object-fit:cover;display:block}
+.greet-credit{position:absolute;left:10px;bottom:8px;font-size:9px;
+  font-family:Raleway,sans-serif;color:rgba(255,255,255,.5);text-decoration:none;
+  letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.greet-credit:hover{color:rgba(255,255,255,.9);text-decoration:underline}
+.greet-lead{position:absolute;left:433px;top:168px;width:455px;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:46px;color:var(--orange);
+  line-height:1.05;letter-spacing:-.5px}
+.greet-quote{position:absolute;left:486px;top:368px;width:402px;text-align:center;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:17px;color:var(--orange);
+  line-height:1.2}
+.greet-author{position:absolute;left:596px;top:404px;width:292px;text-align:center;
+  font-size:11px;color:var(--codemuted);letter-spacing:.3px}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-6560a60ba0d7.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/breakfast-6526807/" target="_blank" rel="noopener">blandinejoannic</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 11</p>
+      <h1>Software, der man trauen kann</h1>
+      <p class="sub">Woher Programme kommen, womit wir bezahlen — und was Geräte die Umwelt kosten</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Herkunft prüfen</h2>
+      <p class="sub">Trojaner, Hintertüren, Signaturen</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/software-vertrauen-trojanisches-pferd.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:The_Procession_of_the_Trojan_Horse_in_Troy_by_Giovanni_Domenico_Tiepolo_(cropped).jpg" target="_blank" rel="noopener">Trojanisches Pferd — Gemälde von G. D. Tiepolo, gemeinfrei, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wo wir stehen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Letzte Woche: Strategien zur Datensicherheit — baulich, technisch, organisatorisch, personell</p>
+<p class="line l0 step" data-g="1">Heute die Frage davor: <b>Welcher Software</b> vertrauen wir überhaupt?</p>
+<p class="line l0 step" data-g="2">Dazu die Folgen digitaler Medien für Wirtschaft, Gesellschaft und Umwelt</p>
+<p class="line l0 step" data-g="3">Leitfrage: Woran erkenne ich vertrauenswürdige Software — und was kostet meine Mediennutzung wirklich?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Trojaner und Hintertür</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0"><b>Trojaner</b></p>
+<p class="col l1 step" data-g="0">tarnt sich als nützliches Programm</p>
+<p class="col l1 step" data-g="0">enthält eine versteckte Schadfunktion</p>
+<p class="col l1 step" data-g="0">der Nutzer installiert ihn selbst</p>
+<p class="col l1 step" data-g="0">benannt nach dem Trojanischen Pferd</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1"><b>Back-Door</b> (Hintertür)</p>
+<p class="col l1 step" data-g="1">ein verborgener Zugang, der die normale Anmeldung umgeht</p>
+<p class="col l1 step" data-g="1">vom Hersteller eingebaut oder von Angreifern</p>
+<p class="col l1 step" data-g="1">oft von einem Trojaner nachgeladen</p>
+<p class="col l1 step" data-g="1">von außen kaum zu erkennen</p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Woher kommt die Software?</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Vertrauenswürdig: die <b>Seite des Herstellers</b> oder das geprüfte Verzeichnis des Betriebssystems</p>
+<p class="line l0 step" data-g="1">Downloadportale bündeln Installer oft mit <b>Zusatzsoftware</b></p>
+<p class="line l0 step" data-g="2">Links aus Foren oder Werbeanzeigen sind kein sicherer Weg</p>
+<p class="line l0 step" data-g="3"><b>Prüfsumme</b>: zeigt, ob die Datei unverändert angekommen ist</p>
+<p class="line l1 step" data-g="3">Der Vergleichswert muss aus einer anderen, sicheren Quelle stammen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Signatur und offener Quelltext</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Eine <b>signierte</b> Anwendung weist per digitaler Signatur ihre Herkunft nach</p>
+<p class="line l0 step" data-g="1">Das Betriebssystem prüft beim Start: Herausgeber bekannt, Datei unverändert?</p>
+<p class="line l0 step" data-g="2">Über die <b>Qualität</b> der Software sagt die Signatur nichts</p>
+<p class="line l0 step" data-g="3"><b>Quelloffen</b>: Der Quelltext kann unabhängig geprüft werden</p>
+<p class="line l1 step" data-g="3">Einsehbar heißt aber nicht automatisch geprüft — Fehler und Updates gibt es hier wie dort</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wenn die Quelle selbst befallen ist</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Supply-Chain-Angriff</b>: Die Schadfunktion kommt mit einem Update oder einer Komponente, der man vertraut</p>
+<p class="line l0 step" data-g="1">Signatur und Prüfsumme helfen dann nicht — das Paket stammt ja wirklich vom Hersteller</p>
+<p class="line l0 step" data-g="2"><b>End of Life</b>: Der Hersteller liefert keine Sicherheitsupdates mehr, bekannte Lücken bleiben offen</p>
+<p class="line l0 step" data-g="3">Die ehrlichste Antwort auf „Ist diese Software sicher?“: nach heutigem Stand ohne bekannte Lücken — mehr lässt sich nicht sagen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Daten als Währung</h2>
+      <p class="sub">Apps, Werbung, Geschäftsmodelle</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/software-vertrauen-litfasssaeule.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:D%C3%BCsseldorf,_Litfa%C3%9Fs%C3%A4ule_--_2015_--_8222.jpg" target="_blank" rel="noopener">Litfaßsäule in Düsseldorf — Foto: Dietmar Rabich, CC BY-SA 4.0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Vor der Installation einer App</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die wichtigste Frage: <b>Welche Berechtigungen</b> verlangt sie — und wozu braucht sie diese?</p>
+<p class="line l0 step" data-g="1">Eine Taschenlampen-App braucht keine Kontakte</p>
+<p class="line l0 step" data-g="2">Unpassende Berechtigungen sind das deutlichste Warnzeichen — Bewertungen lassen sich kaufen</p>
+<p class="line l0 step" data-g="3"><b>Telemetrie</b>: Nutzungsdaten, die eine Anwendung an den Hersteller sendet</p>
+<p class="line l1 step" data-g="3">Umfang und Zweck stehen in der Datenschutzerklärung, vieles lässt sich abschalten</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Womit bezahlen wir kostenlose Dienste?</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Betrieb und Entwicklung kosten Geld — bezahlt wird mit <b>Daten und Aufmerksamkeit</b> für Werbung</p>
+<p class="line l0 step" data-g="1">Die Frage lautet immer: Womit verdient dieser Dienst?</p>
+<p class="line l0 step" data-g="2"><b>Dark Pattern</b>: eine Gestaltung, die zu einer Entscheidung drängt, die man so nicht wollte</p>
+<p class="line l1 step" data-g="2">Beispiel: „Zustimmen“ groß und bunt, „Ablehnen“ grau und versteckt</p>
+<p class="line l0 step" data-g="3"><b>Werbeblocker</b> schützen vor Schadcode aus Werbenetzen — und entziehen Angeboten die Finanzierung</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wirtschaftliche Bedeutung</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Unter den wertvollsten Unternehmen der Welt sind heute überwiegend <b>Technologiekonzerne</b></p>
+<p class="line l0 step" data-g="1">Werbung ist das Kerngeschäft von Suchmaschinen und sozialen Netzwerken</p>
+<p class="line l0 step" data-g="2"><b>Netzwerkeffekt</b>: Je mehr Menschen eine Plattform nutzen, desto wertvoller wird sie</p>
+<p class="line l0 step" data-g="3">Wer die Aufmerksamkeit bündelt, hat Marktmacht — über Preise, Regeln und Sichtbarkeit</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Pro und Kontra</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0"><b>Pro: Meinungsvielfalt</b></p>
+<p class="col l1 step" data-g="0">jede und jeder kann veröffentlichen</p>
+<p class="col l1 step" data-g="0">Nachrichten verbreiten sich schnell, auch aus Krisengebieten</p>
+<p class="col l1 step" data-g="0">Minderheiten finden Gehör</p>
+<p class="col l1 step" data-g="0">Missstände werden öffentlich</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1"><b>Kontra: Gefahren für den Rechtsstaat</b></p>
+<p class="col l1 step" data-g="1">Falschmeldungen verbreiten sich oft schneller als ihre Richtigstellung</p>
+<p class="col l1 step" data-g="1">Hassrede schüchtert ein und verdrängt Stimmen</p>
+<p class="col l1 step" data-g="1">Desinformation kann Vertrauen in Wahlen und Gerichte beschädigen</p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Software in der Schule</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Zentral ist: Werden <b>personenbezogene Daten</b> verarbeitet — und auf welcher Rechtsgrundlage?</p>
+<p class="line l0 step" data-g="1"><b>Auftragsverarbeitung</b>: Ein Dienstleister verarbeitet Daten im Auftrag und nach Weisung</p>
+<p class="line l1 step" data-g="1">Verantwortlich bleibt die Schule — ein Vertrag regelt Zweck, Umfang und Schutzmaßnahmen</p>
+<p class="line l0 step" data-g="2"><b>Lokal betrieben</b>: Die Daten bleiben im Haus, Betrieb und Sicherung trägt die Schule selbst</p>
+<p class="line l0 step" data-g="3"><b>Cloud</b>: nimmt Arbeit ab und gibt Kontrolle aus der Hand — eine Abwägung, keine Glaubensfrage</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Der Fußabdruck</h2>
+      <p class="sub">Ökologisch und sozial verträglich</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/software-vertrauen-elektroschrott.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Keyboards_and_mice_in_pile_of_ewaste.jpg" target="_blank" rel="noopener">Elektroschrott — Foto: Reconrabbit, CC0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wo der Fußabdruck entsteht</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Den größten Teil der Umweltlast eines Smartphones verursacht die <b>Herstellung</b>, nicht das Laden</p>
+<p class="line l0 step" data-g="1">Abbau seltener Rohstoffe und Fertigung dominieren die Bilanz</p>
+<p class="line l0 step" data-g="2">Ein Jahr längere Nutzung wiegt deshalb schwerer als sparsames Laden</p>
+<p class="line l0 step" data-g="3">Auch Netze und Rechenzentren brauchen Strom — Streaming in hoher Auflösung überträgt mehr Daten</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Länger nutzen, richtig entsorgen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Reparieren</b> und Weitergeben verlängert die Nutzungsdauer</p>
+<p class="line l0 step" data-g="1">Elektrogeräte gehören <b>nicht in den Hausmüll</b> — Wertstoffhöfe und viele Händler nehmen sie zurück</p>
+<p class="line l0 step" data-g="2">Aus Altgeräten lassen sich Rohstoffe zurückgewinnen — aus der Schublade nicht</p>
+<p class="line l0 step" data-g="3"><b>Nachhaltige Software</b> läuft auch auf älteren Geräten und zwingt nicht zum Neukauf</p>
+<p class="line l1 step" data-g="3">Software treibt den Gerätewechsel oft stärker an als Verschleiß</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Sozial verträglich</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Rohstoffabbau und Fertigung finden oft unter <b>harten Arbeitsbedingungen</b> statt</p>
+<p class="line l0 step" data-g="1">Auch das Moderieren von Inhalten in sozialen Netzwerken ist belastende Arbeit</p>
+<p class="line l0 step" data-g="2">Siegel und Herstellerangaben geben erste Hinweise</p>
+<p class="line l0 step" data-g="3">Sozial verträglich heißt: Arbeitsbedingungen bei Herstellung und Betrieb <b>mitdenken</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Gesundheitsbewusst nutzen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Bildschirmpausen</b>: Augen und Nacken brauchen Abwechslung — zwischendurch in die Ferne schauen</p>
+<p class="line l0 step" data-g="1">Unwichtige <b>Benachrichtigungen abschalten</b> — ständige Unterbrechungen kosten Konzentration</p>
+<p class="line l0 step" data-g="2">Das Handy nachts aus dem Schlafzimmer: helles Licht am Abend kann das Einschlafen stören</p>
+<p class="line l0 step" data-g="3">Bewusst entscheiden, wie viel Zeit wofür — Bildschirmzeit-Funktionen helfen dabei</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Vertrauenswürdige Software kommt aus geprüfter Quelle, verlangt nur passende Rechte und bekommt Updates — und am nachhaltigsten ist ein Gerät, das lange genutzt wird.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Der Name <b>Trojaner</b> ist eigentlich falsch: Im Trojanischen Pferd saßen die Griechen, nicht die Trojaner</p>
+<p class="line l0 step" data-g="1">2024 wurde eine Hintertür im Werkzeug <b>xz</b> entdeckt, kurz bevor sie viele Linux-Server erreichte — aufgefallen war einem Entwickler, dass Anmeldungen rund eine halbe Sekunde zu lange dauerten</p>
+<p class="line l0 step" data-g="2">2022 fielen laut UN-Bericht weltweit <b>62 Millionen Tonnen</b> Elektroschrott an — nicht einmal ein Viertel wurde nachweislich recycelt</p>
+<p class="line l0 step" data-g="3">Seit Ende 2024 schreibt die EU <b>USB-C</b> als einheitlichen Ladeanschluss für neue Handys vor</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Softwarevergleich</b> im PC-Kabinett: zwei Programme für denselben Zweck nach Kriterien bewerten — Quelle, Berechtigungen, Updates, Datenschutz, Kosten</p>
+<p class="line l0 step" data-g="1"><b>Pro-und-Kontra-Debatte</b>: Stärken soziale Netzwerke die Meinungsvielfalt — oder gefährden sie den Rechtsstaat?</p>
+<p class="line l0 step" data-g="2"><b>Digitale Nachhaltigkeit</b>: Wie lange nutzt ihr euer Smartphone — und was würde die Nutzung verlängern?</p>
+<p class="line l0 step" data-g="3">Zum Schluss: <b>Aufgaben (20)</b> auf der Planseite — Lösung pro Aufgabe zum Aufklappen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script>
+// time-aware greeting - the browser knows the real clock, a .pptx never does
+(function(){
+  var h = new Date().getHours();
+  var t = h < 5 ? 'Good night!' : h < 12 ? 'Good morning!' :
+          h < 18 ? 'Good afternoon!' : h < 22 ? 'Good evening!' : 'Good night!';
+  var el = document.getElementById('greet-text');
+  if (el) el.textContent = t;
+})();
+
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  // links (lab bar, picture credits) open - they do not turn the page as well
+  if (e.target.closest('#hud') || e.target.closest('a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+}
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>

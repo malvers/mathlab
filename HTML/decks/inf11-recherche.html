@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Recherchieren mit Plan</title>
+<meta name="description" content="Gezielt suchen, Quellen prüfen, sauber belegen">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8; --codemuted:#7E8FB5;
+  --greetbg:#000028;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:24px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+/* with a picture: text on the left, picture + licence line on the right */
+.slide.chapter.has-pic h2{width:420px;font-size:28px}
+.slide.chapter.has-pic .sub{width:420px}
+.slide.chapter.has-pic .hair{width:448px;top:372px}   /* room for a two-line sub */
+.chap-pic{position:absolute;left:560px;top:150px;width:328px;height:230px;margin:0;
+  display:block;overflow:hidden;background:var(--card);
+  border:.75px solid rgba(14,36,78,.12)}
+.chap-pic img{width:100%;height:100%;object-fit:contain;display:block}   /* never cropped */
+.chap-credit{position:absolute;left:560px;top:388px;width:328px;font-size:9px;line-height:1.3;
+  color:var(--muted);text-decoration:none;letter-spacing:.2px}
+a.chap-credit:hover{color:var(--red);text-decoration:underline}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:grid;place-items:center}
+.pic img{max-width:100%;max-height:100%}
+
+/* --- table_top ---------------------------------------------------------- */
+.dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
+  font-family:Raleway,system-ui,sans-serif}
+.dtable th,.dtable td{padding:0 6px;text-align:left;overflow:hidden;white-space:nowrap;
+  border:.75px solid var(--stroke);line-height:1.85}
+.dtable th{background:var(--ink);color:#fff;font-family:Orbitron,Raleway,sans-serif;
+  font-weight:700;font-size:.75em;border-color:var(--ink)}
+.dtable td{background:#fff;color:var(--body)}
+.dtable td.b{font-weight:700;color:var(--ink)}
+.dtable td.m{font-family:Menlo,monospace}
+.dtable .ac{text-align:center}
+.dtable .ar{text-align:right}
+
+/* --- greeting (Auftaktfolie) --------------------------------------------- */
+.slide.greet{background-image:none;background-color:var(--greetbg)}
+.slide.greet::before{left:336px;width:552px;background:rgba(230,236,248,.14)}
+.slide.greet .foot{left:336px;color:var(--codemuted)}
+.slide.greet .pageno{color:var(--codemuted)}
+.greet-ground{position:absolute;inset:0;background:var(--greetbg)}
+.greet-pic{position:absolute;left:0;top:0;width:312px;height:540px;
+  object-fit:cover;display:block}
+.greet-credit{position:absolute;left:10px;bottom:8px;font-size:9px;
+  font-family:Raleway,sans-serif;color:rgba(255,255,255,.5);text-decoration:none;
+  letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.greet-credit:hover{color:rgba(255,255,255,.9);text-decoration:underline}
+.greet-lead{position:absolute;left:433px;top:168px;width:455px;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:46px;color:var(--orange);
+  line-height:1.05;letter-spacing:-.5px}
+.greet-quote{position:absolute;left:486px;top:368px;width:402px;text-align:center;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:17px;color:var(--orange);
+  line-height:1.2}
+.greet-author{position:absolute;left:596px;top:404px;width:292px;text-align:center;
+  font-size:11px;color:var(--codemuted);letter-spacing:.3px}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-aa020236ea17.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/tree-4741598/" target="_blank" rel="noopener">jplenio</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 11</p>
+      <h1>Recherchieren mit Plan</h1>
+      <p class="sub">Gezielt suchen, Quellen prüfen, sauber belegen</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Suchen mit Plan</h2>
+      <p class="sub">Frage, Suchbegriffe, Operatoren</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/recherche-lupe.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Magnifying_glass_on_antique_table.jpg" target="_blank" rel="noopener">Lupe auf antikem Tisch — Foto: Stéphane Magnenat, CC BY-SA 4.0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wo wir stehen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Letzte Woche: der Kreislauf des Informationsmanagements — Bedarf klären, beschaffen, aufbereiten, nutzen, bewerten</p>
+<p class="line l0 step" data-g="1">Heute geht es um den zweiten Schritt: <b>beschaffen</b> — die Recherche</p>
+<p class="line l0 step" data-g="2">Suchen kann jeder. <b>Gut</b> suchen heißt: schnell finden, was stimmt</p>
+<p class="line l0 step" data-g="3">Leitfrage: Wie finde ich zu meiner Frage Quellen, <b>denen ich trauen kann</b>?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Am Anfang steht die Frage</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Eine gute Recherche beginnt nicht mit der Suchmaschine, sondern mit einer <b>möglichst genauen Frage</b></p>
+<p class="line l0 step" data-g="1">Die Frage entscheidet, was überhaupt ein Treffer ist</p>
+<p class="line l0 step" data-g="2">Zu ungenau: „Rechenzentren“ — genauer: „Wie viel Strom verbrauchen Rechenzentren in Deutschland?“</p>
+<p class="line l0 step" data-g="3">Aus der Frage die <b>Suchbegriffe</b> ableiten: Fachwörter, Synonyme, auch englische Begriffe</p>
+<p class="line l0 step" data-g="4">Zwei Minuten Nachdenken sparen eine Stunde Suchen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Suchoperatoren</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:170px"><col style="width:336px"><col style="width:310px"></colgroup><tr><th>Eingabe</th><th>Wirkung</th><th>Beispiel</th></tr><tr><td class="b" style="background:#FBEBBF">"Wortfolge"</td><td>sucht die Wörter genau in dieser Reihenfolge</td><td>"digitale Souveränität"</td></tr><tr><td class="b" style="background:#DDE8C6">site:</td><td>sucht nur auf einer Website oder Domain</td><td>site:bildung.sachsen.de Lehrplan</td></tr><tr><td class="b">-Wort</td><td>schließt ein Wort aus</td><td>Jaguar -Auto</td></tr><tr><td class="b">OR</td><td>findet Seiten mit dem einen oder dem anderen Wort</td><td>Rechenzentrum OR Datacenter</td></tr><tr><td class="b">filetype:</td><td>sucht nur Dateien eines Typs</td><td>Stromverbrauch filetype:pdf</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Anführungszeichen und site: schneiden den <b>Beifang</b> am stärksten zusammen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Filterblase und Werbung</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Suchmaschinen und Netzwerke <b>personalisieren</b>: Sie zeigen bevorzugt, was zur bisherigen Nutzung passt</p>
+<p class="line l0 step" data-g="1">So entsteht eine <b>Filterblase</b> — widersprechende Sichtweisen erscheinen seltener</p>
+<p class="line l0 step" data-g="2">Gegenmittel: bewusst andere Quellen und Suchwege wählen</p>
+<p class="line l0 step" data-g="3">Bezahlte Treffer müssen als <b>Anzeige</b> gekennzeichnet sein — auch redaktionell aussehende Texte können Werbung sein</p>
+<p class="line l0 step" data-g="4">Leitfrage bei jedem Text: Wer verdient daran, dass ich das glaube?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Drei Wege zu Quellen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:230px"><col style="width:293px"><col style="width:293px"></colgroup><tr><th>Suchweg</th><th>Stärke</th><th>Schwäche</th></tr><tr><td class="b" style="background:#FBEBBF">Suchmaschine</td><td>riesige Abdeckung, schnell</td><td>ungeprüft, sortiert nach Beliebtheit</td></tr><tr><td class="b" style="background:#DDE8C6">Bibliothekskatalog</td><td>geprüfte Bücher und Zeitschriften</td><td>zeigt vor allem den Bestand der Bibliothek</td></tr><tr><td class="b" style="background:#E6ECF8">Fachportal, Fachdatenbank</td><td>fachlich geprüft, meist zitierfähig</td><td>engere Abdeckung, oft nur mit Zugang</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Kataloge und Fachdatenbanken gehören zum <b>Deep Web</b>: Die Websuche erfasst sie nicht</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Deep Web ist nicht Darknet</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Deep Web</b>: alles, was Suchmaschinen nicht erfassen — hinter Anmeldungen oder in Datenbanken</p>
+<p class="line l0 step" data-g="1">Dazu gehören Bibliothekskataloge, Fachdatenbanken, euer Schulportal</p>
+<p class="line l0 step" data-g="2">Das ist ganz <b>legal</b> — nur eben nicht über die Websuche erreichbar</p>
+<p class="line l0 step" data-g="3"><b>Darknet</b>: abgeschottete Netze wie Tor — dort finden sich auch illegale Angebote</p>
+<p class="line l0 step" data-g="4">Für die Schule heißt das: direkt im Katalog oder im Fachportal suchen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Quellen verstehen</h2>
+      <p class="sub">Primär, sekundär, verantwortlich</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/recherche-lesesaal.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:LOC_Main_Reading_Room_Highsmith.jpg" target="_blank" rel="noopener">Lesesaal der Library of Congress — Foto: Carol M. Highsmith, gemeinfrei, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Primär- und Sekundärquellen</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0"><b>Primärquelle</b></p>
+<p class="col l1 step" data-g="0">die ursprüngliche Veröffentlichung</p>
+<p class="col l1 step" data-g="0">stammt von denen, die die Arbeit gemacht haben</p>
+<p class="col l1 step" data-g="0">Beispiele: die Studie selbst, der Gesetzestext</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1"><b>Sekundärquelle</b></p>
+<p class="col l1 step" data-g="1">berichtet über eine andere Quelle</p>
+<p class="col l1 step" data-g="1">erklärt und ordnet ein — kann aber verkürzen</p>
+<p class="col l1 step" data-g="1">Beispiele: Zeitungsartikel über die Studie, Lexikoneintrag, Erklärvideo</p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Und Wikipedia?</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ein Wikipedia-Artikel ist eine <b>Übersicht</b> — nicht die Quelle, auf der die Aussage beruht</p>
+<p class="line l0 step" data-g="1">Deshalb taugt er nicht als <b>alleinige</b> Quelle für eine Facharbeit</p>
+<p class="line l0 step" data-g="2">Er ist aber ein guter <b>Startpunkt</b>: Fachbegriffe, Überblick, Zusammenhänge</p>
+<p class="line l0 step" data-g="3">Die Belege stehen unten in den <b>Einzelnachweisen</b> — dorthin führt der nächste Schritt</p>
+<p class="line l0 step" data-g="4">Bei wichtigen Aussagen gilt: zurück zur <b>Primärquelle</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Woran man eine glaubwürdige Quelle erkennt</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:210px"><col style="width:330px"><col style="width:276px"></colgroup><tr><th>Prüffrage</th><th>gutes Zeichen</th><th>Warnzeichen</th></tr><tr><td class="b" style="background:#FBEBBF">Wer steht dahinter?</td><td>benannte, verantwortliche Person oder Einrichtung</td><td>kein Autor, kein Impressum</td></tr><tr><td class="b" style="background:#DDE8C6">Womit belegt?</td><td>nachvollziehbare Belege, Weg zur Primärquelle</td><td>Behauptungen ohne Beleg</td></tr><tr><td class="b" style="background:#E6ECF8">Wie aktuell?</td><td>Datum passt zur Frage</td><td>kein Datum, veraltete Zahlen</td></tr><tr><td class="b" style="background:#F2CFCB">Mit welcher Absicht?</td><td>informieren, erklären</td><td>verkaufen, überreden</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Nichts über den Inhalt sagen: modernes Design, hoher Platz in der Trefferliste, viele Aufrufe</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Das Impressum</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Das Impressum ist die <b>gesetzlich vorgeschriebene</b> Angabe, wer für eine Seite verantwortlich ist</p>
+<p class="line l0 step" data-g="1">Es nennt Betreiber, Anschrift und Vertretungsberechtigte</p>
+<p class="line l0 step" data-g="2">Nicht verwechseln: Es ist weder Quellenliste noch Datenschutzerklärung</p>
+<p class="line l0 step" data-g="3">Fehlt es bei einem deutschen Angebot, ist das ein <b>Warnzeichen</b></p>
+<p class="line l0 step" data-g="4">Erst das Impressum macht Verantwortung greifbar — wer etwas verantwortet, ist überprüfbar</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Prüfen und belegen</h2>
+      <p class="sub">Unabhängig, aktuell, nachvollziehbar</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/recherche-lincoln.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:Abraham_Lincoln_LCCN2003654314.jpg" target="_blank" rel="noopener">Montage: Lincolns Kopf auf dem Körper von John C. Calhoun — gemeinfrei, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Drei Seiten schreiben dasselbe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Abschreiben vervielfacht die Aussage — <b>nicht den Beleg</b></p>
+<p class="line l0 step" data-g="1">Gehen alle drei auf dieselbe Ursprungsquelle zurück, folgt daraus: nichts</p>
+<p class="line l0 step" data-g="2">Erst <b>unabhängige</b> Quellen erhöhen die Sicherheit</p>
+<p class="line l0 step" data-g="3">Steht eine Behauptung nur auf einer Seite: <b>zurückstellen</b> und nach unabhängigen Belegen suchen</p>
+<p class="line l0 step" data-g="4">Eine einzelne Fundstelle ist weder Beweis noch Widerlegung</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Bilder prüfen, Datum lesen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Bilder werden oft aus dem Zusammenhang gerissen — aus einem anderen Jahr, einem anderen Land</p>
+<p class="line l0 step" data-g="1">Schnellster Test: die <b>Rückwärtssuche</b> nach dem Bild findet frühere Verwendungen</p>
+<p class="line l0 step" data-g="2">Das <b>Erscheinungsdatum</b> entscheidet, ob die Angaben aktuell genug für die Frage sind</p>
+<p class="line l0 step" data-g="3">Bei Marktzahlen zählt Aktualität, bei Definitionen weniger</p>
+<p class="line l0 step" data-g="4">Eine alte Quelle kann die bessere sein — wenn sie das Original ist</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Ordnen, was man gefunden hat</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die Treffer nach der <b>eigenen Fragestellung</b> ordnen — nicht nach Datum oder Alphabet</p>
+<p class="line l0 step" data-g="1">Doppelte Aussagen aus derselben Ursprungsquelle <b>zusammenfassen</b> — sie zählen nur einmal</p>
+<p class="line l0 step" data-g="2">Danach wird sichtbar, wo noch <b>Lücken</b> sind</p>
+<p class="line l0 step" data-g="3">Quellen zusammenführen heißt auch: fremde Gedanken <b>kennzeichnen</b> — sonst ist es ein Plagiat</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Quellenangabe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Für eine Internetseite gehören dazu: <b>Autor oder Herausgeber, Titel, URL und Abrufdatum</b></p>
+<p class="line l1 step" data-g="0">Herausgeber: Titel der Seite. URL, abgerufen am 12.10.2026</p>
+<p class="line l0 step" data-g="1">Das <b>Abrufdatum</b>, weil sich Inhalte im Netz jederzeit ändern oder verschwinden können</p>
+<p class="line l0 step" data-g="2">Autor und Titel machen die Angabe auch ohne Klick verständlich</p>
+<p class="line l0 step" data-g="3">Für wichtige Belege lohnt zusätzlich ein <b>Archivlink</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Recherchetagebuch und Sättigung</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Das <b>Recherchetagebuch</b> notiert, wo mit welchen Begriffen gesucht wurde</p>
+<p class="line l0 step" data-g="1">Es verhindert doppelte Suchen und zeigt, was noch nicht abgesucht ist</p>
+<p class="line l0 step" data-g="2">Der Browserverlauf zeigt nur Klicks — <b>nicht die Suchstrategie</b></p>
+<p class="line l0 step" data-g="3">Fertig ist die Recherche, wenn neue Suchen überwiegend Bekanntes liefern und die Frage beantwortet ist</p>
+<p class="line l0 step" data-g="4">Dieser Punkt heißt <b>Sättigung</b> — feste Zahlen wie „zehn Quellen“ sind willkürlich</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Gut recherchieren heißt: mit einer genauen Frage beginnen, gezielt suchen, jede Quelle auf Urheber, Belege und Aktualität prüfen — und alles so notieren, dass andere es nachprüfen können.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die erste Suchmaschine hieß <b>Archie</b> (1990) — sie durchsuchte noch keine Webseiten, sondern Dateiarchive</p>
+<p class="line l0 step" data-g="1">Der Name <b>Google</b> spielt auf „Googol“ an: eine 1 mit 100 Nullen</p>
+<p class="line l0 step" data-g="2">Das berühmte Lincoln-Porträt ist eine <b>Montage</b>: Lincolns Kopf sitzt auf dem Körper des Politikers John C. Calhoun</p>
+<p class="line l0 step" data-g="3">Die <b>Wayback Machine</b> des Internet Archive speichert seit 1996 Webseiten — inzwischen Hunderte Milliarden</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Rechercheauftrag</b> in Partnerarbeit: eine genaue Frage formulieren, dann mit mindestens zwei Operatoren suchen</p>
+<p class="line l0 step" data-g="1">Führt dabei ein kurzes <b>Recherchetagebuch</b>: Suchort, Suchbegriffe, Ergebnis</p>
+<p class="line l0 step" data-g="2"><b>Quellenvergleich</b>: drei gefundene Seiten mit dem Bewertungsraster prüfen — Urheber, Belege, Aktualität, Absicht</p>
+<p class="line l0 step" data-g="3"><b>Auswertung im Plenum</b>: Welche Quelle hat gewonnen — und warum?</p>
+<p class="line l0 step" data-g="4">Zum Schluss: <b>Aufgaben (20)</b> auf der Planseite — Lösung pro Aufgabe zum Aufklappen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script>
+// time-aware greeting - the browser knows the real clock, a .pptx never does
+(function(){
+  var h = new Date().getHours();
+  var t = h < 5 ? 'Good night!' : h < 12 ? 'Good morning!' :
+          h < 18 ? 'Good afternoon!' : h < 22 ? 'Good evening!' : 'Good night!';
+  var el = document.getElementById('greet-text');
+  if (el) el.textContent = t;
+})();
+
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  // links (lab bar, picture credits) open - they do not turn the page as well
+  if (e.target.closest('#hud') || e.target.closest('a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+}
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>

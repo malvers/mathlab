@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fehler erkennen</title>
+<meta name="description" content="Paritätsbit, Hamming-Distanz und die Prüfziffern auf Buch, Barcode und Konto">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8; --codemuted:#7E8FB5;
+  --greetbg:#000028;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:24px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+/* with a picture: text on the left, picture + licence line on the right */
+.slide.chapter.has-pic h2{width:420px;font-size:28px}
+.slide.chapter.has-pic .sub{width:420px}
+.slide.chapter.has-pic .hair{width:448px;top:372px}   /* room for a two-line sub */
+.chap-pic{position:absolute;left:560px;top:150px;width:328px;height:230px;margin:0;
+  display:block;overflow:hidden;background:var(--card);
+  border:.75px solid rgba(14,36,78,.12)}
+.chap-pic img{width:100%;height:100%;object-fit:contain;display:block}   /* never cropped */
+.chap-credit{position:absolute;left:560px;top:388px;width:328px;font-size:9px;line-height:1.3;
+  color:var(--muted);text-decoration:none;letter-spacing:.2px}
+a.chap-credit:hover{color:var(--red);text-decoration:underline}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:grid;place-items:center}
+.pic img{max-width:100%;max-height:100%}
+
+/* --- table_top ---------------------------------------------------------- */
+.dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
+  font-family:Raleway,system-ui,sans-serif}
+.dtable th,.dtable td{padding:0 6px;text-align:left;overflow:hidden;white-space:nowrap;
+  border:.75px solid var(--stroke);line-height:1.85}
+.dtable th{background:var(--ink);color:#fff;font-family:Orbitron,Raleway,sans-serif;
+  font-weight:700;font-size:.75em;border-color:var(--ink)}
+.dtable td{background:#fff;color:var(--body)}
+.dtable td.b{font-weight:700;color:var(--ink)}
+.dtable td.m{font-family:Menlo,monospace}
+.dtable .ac{text-align:center}
+.dtable .ar{text-align:right}
+
+/* --- greeting (Auftaktfolie) --------------------------------------------- */
+.slide.greet{background-image:none;background-color:var(--greetbg)}
+.slide.greet::before{left:336px;width:552px;background:rgba(230,236,248,.14)}
+.slide.greet .foot{left:336px;color:var(--codemuted)}
+.slide.greet .pageno{color:var(--codemuted)}
+.greet-ground{position:absolute;inset:0;background:var(--greetbg)}
+.greet-pic{position:absolute;left:0;top:0;width:312px;height:540px;
+  object-fit:cover;display:block}
+.greet-credit{position:absolute;left:10px;bottom:8px;font-size:9px;
+  font-family:Raleway,sans-serif;color:rgba(255,255,255,.5);text-decoration:none;
+  letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.greet-credit:hover{color:rgba(255,255,255,.9);text-decoration:underline}
+.greet-lead{position:absolute;left:433px;top:168px;width:455px;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:46px;color:var(--orange);
+  line-height:1.05;letter-spacing:-.5px}
+.greet-quote{position:absolute;left:486px;top:368px;width:402px;text-align:center;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:17px;color:var(--orange);
+  line-height:1.2}
+.greet-author{position:absolute;left:596px;top:404px;width:292px;text-align:center;
+  font-size:11px;color:var(--codemuted);letter-spacing:.3px}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-a3f74cd2eb4f.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/sunrise-5183917/" target="_blank" rel="noopener">Sarahhax2210</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 11</p>
+      <h1>Fehler erkennen</h1>
+      <p class="sub">Paritätsbit, Hamming-Distanz und die Prüfziffern auf Buch, Barcode und Konto</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Das Prüfbit</h2>
+      <p class="sub">Parität und ihre Grenzen</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/pruefziffern-lochstreifen.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:PaperTapes-5and8Hole.jpg" target="_blank" rel="noopener">Lochstreifen mit 5 und 8 Spuren — Foto: TedColes, gemeinfrei, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wo wir stehen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Letzte Woche: Redundanz <b>entfernen</b> — Lauflänge, Huffman, JPEG</p>
+<p class="line l0 step" data-g="1">Heute umgekehrt: Redundanz gezielt <b>hinzufügen</b></p>
+<p class="line l0 step" data-g="2">Unterwegs kippen Bits, beim Abtippen passieren Dreher</p>
+<p class="line l0 step" data-g="3">Leitfrage: Wie merkt der Empfänger einen Fehler — <b>ohne</b> das Original zu kennen?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Das Prüfbit</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ein <b>Prüfbit</b> ist ein zusätzliches Bit ohne Nutzinformation</p>
+<p class="line l0 step" data-g="1">Es macht bestimmte Übertragungsfehler <b>erkennbar</b></p>
+<p class="line l0 step" data-g="2"><b>Gerade Parität</b>: Das Prüfbit wird so gesetzt, dass die Anzahl der Einsen — Prüfbit mitgezählt — gerade ist</p>
+<p class="line l0 step" data-g="3">Bei <b>ungerader</b> Parität ist es umgekehrt — beide sind gleich leistungsfähig</p>
+<p class="line l0 step" data-g="4">Erkennen ist nicht Korrigieren: Man weiß, <b>dass</b> ein Fehler da ist, nicht <b>wo</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Prüfbit bei gerader Parität</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:230px"><col style="width:220px"><col style="width:130px"><col style="width:236px"></colgroup><tr><th>Datenbits</th><th>Anzahl Einsen</th><th>Prüfbit</th><th>gesendet</th></tr><tr><td class="b">1011</td><td>3 — ungerade</td><td style="background:#FBEBBF">1</td><td>10111</td></tr><tr><td class="b">1100</td><td>2 — gerade</td><td>0</td><td>11000</td></tr><tr><td class="b">1000001 (ASCII A)</td><td>2 — gerade</td><td>0</td><td>10000010</td></tr><tr><td class="b">0111</td><td>3 — ungerade</td><td style="background:#FBEBBF">1</td><td>01111</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Der Empfänger zählt die Einsen: <b>ungerade</b> Anzahl heißt Fehler</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was die Parität übersieht</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:270px"><col style="width:160px"><col style="width:150px"><col style="width:236px"></colgroup><tr><th>gesendet 10111, empfangen</th><th>Anzahl Einsen</th><th>Parität</th><th>Ergebnis</th></tr><tr><td class="b">10111</td><td>4</td><td>gerade</td><td>in Ordnung</td></tr><tr><td class="b">10011 (1 Bit gekippt)</td><td>3</td><td>ungerade</td><td style="background:#DDE8C6">Fehler erkannt</td></tr><tr><td class="b">11011 (2 Bits gekippt)</td><td>4</td><td>gerade</td><td style="background:#F2CFCB">Fehler NICHT erkannt</td></tr><tr><td class="b">01011 (3 Bits gekippt)</td><td>3</td><td>ungerade</td><td style="background:#DDE8C6">Fehler erkannt</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Eine <b>gerade Anzahl</b> gekippter Bits bleibt unentdeckt — ein einzelner Fehler wird immer erkannt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Kartentrick</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Jemand legt 5 × 5 Karten zufällig, schwarz oder weiß nach oben</p>
+<p class="line l0 step" data-g="1">Ihr ergänzt eine Zeile und eine Spalte, sodass <b>jede</b> Zeile und Spalte gerade viele schwarze Karten hat</p>
+<p class="line l0 step" data-g="2">Ihr dreht euch um — jemand wendet <b>eine</b> Karte</p>
+<p class="line l0 step" data-g="3">Genau eine Zeile und eine Spalte sind jetzt ungerade: Sie <b>kreuzen sich</b> an der gewendeten Karte</p>
+<p class="line l0 step" data-g="4">Aus Erkennen wird <b>Korrigieren</b> — mit mehr Prüfbits</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Abstand und Korrektur</h2>
+      <p class="sub">Hamming-Distanz, Bündelfehler, CD</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/pruefziffern-cd.jpg" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:CD-R_with_surface_damage_and_chipped_side.jpg" target="_blank" rel="noopener">Beschädigte CD-R — Foto: Jes from Melbourne, CC BY-SA 2.0, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Erkennen oder korrigieren?</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Erkennung</b> meldet den Fehler — <b>Korrektur</b> stellt die richtigen Daten wieder her</p>
+<p class="line l0 step" data-g="1">Korrektur braucht deutlich <b>mehr Redundanz</b></p>
+<p class="line l0 step" data-g="2">Erkennen genügt, wenn neu gesendet werden kann — wie im Netz</p>
+<p class="line l0 step" data-g="3">Bei einer CD geht das nicht: Sie muss sich <b>selbst</b> helfen</p>
+<p class="line l0 step" data-g="4">Der Preis jedes Schutzes: zusätzliche Bits ohne Nutzinformation — je mehr Schutz, desto mehr</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Hamming-Distanz</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:190px"><col style="width:190px"><col style="width:280px"><col style="width:156px"></colgroup><tr><th>Codewort 1</th><th>Codewort 2</th><th>verschieden an Stelle</th><th>Distanz</th></tr><tr><td class="b">1011</td><td>1001</td><td>3</td><td>1</td></tr><tr><td class="b">1100</td><td>1010</td><td>2 und 3</td><td style="background:#FBEBBF">2</td></tr><tr><td class="b">10111</td><td>11011</td><td>2 und 3</td><td>2</td></tr><tr><td class="b">0000</td><td>1111</td><td>1, 2, 3 und 4</td><td>4</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0"><b>Hamming-Distanz</b>: Anzahl der Stellen, in denen sich zwei gleich lange Codewörter unterscheiden</p>
+<p class="line l0 step" data-g="1">Die <b>kleinste</b> Distanz im Code bestimmt, was er leisten kann</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was die Mindestdistanz verrät</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Bei Mindestdistanz <span class="tex" data-tex="d"></span> erkennt ein Code bis zu <span class="tex" data-tex="d-1"></span> Fehler</p>
+<p class="line l0 step" data-g="1">Korrigieren kann er bis zu <span class="tex" data-tex="\frac{d-1}{2}"></span> Fehler (abgerundet)</p>
+<p class="line l0 step" data-g="2">Paritätsbit: <span class="tex" data-tex="d = 2"></span> — einen Fehler erkennen, keinen korrigieren</p>
+<p class="line l0 step" data-g="3"><span class="tex" data-tex="d = 3"></span>: <b>zwei</b> Fehler erkennen, <b>einen</b> korrigieren</p>
+<p class="line l0 step" data-g="4">Beispiel: Aus 0 wird 000, aus 1 wird 111 — empfangen 010, am nächsten liegt <b>000</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Bündelfehler und CRC</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Bündelfehler</b>: mehrere aufeinanderfolgende Bits gestört — durch Kratzer oder Störimpulse</p>
+<p class="line l0 step" data-g="1">Ein einfaches Paritätsbit versagt dabei</p>
+<p class="line l0 step" data-g="2"><b>CRC</b> (zyklische Redundanzprüfung): eine Prüfsumme über eine Bitfolge, berechnet durch <b>Polynomdivision</b></p>
+<p class="line l0 step" data-g="3">CRC erkennt auch Bündelfehler zuverlässig — Standard in Netzwerken und auf Speichermedien</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wie die CD Kratzer übersteht</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die CD speichert <b>fehlerkorrigierende Codes</b> zusätzlich zur Musik</p>
+<p class="line l0 step" data-g="1">Die Daten eines Blocks werden über die Oberfläche <b>verteilt</b> — das heißt Interleaving</p>
+<p class="line l0 step" data-g="2">Ein Kratzer trifft dann nur <b>kleine Teile vieler Blöcke</b> statt eines Blocks ganz</p>
+<p class="line l0 step" data-g="3">Diese kleinen Lücken kann die Korrektur rekonstruieren — die Musik spielt weiter</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter has-pic">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Prüfziffern</h2>
+      <p class="sub">Buch, Barcode, Konto</p>
+      <div class="hair"></div><figure class="chap-pic"><img src="img/pruefziffern-isbn.png" alt=""></figure><a class="chap-credit" href="https://commons.wikimedia.org/wiki/File:EAN-13-ISBN-13.svg" target="_blank" rel="noopener">ISBN als EAN-13-Strichcode — gemeinfrei, Wikimedia Commons</a><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wozu eine Prüfziffer?</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Eine <b>Prüfziffer</b> wird aus den übrigen Ziffern berechnet und hinten angehängt</p>
+<p class="line l0 step" data-g="1">Passt sie nicht, war die Eingabe <b>fehlerhaft</b> — Tippfehler fallen sofort auf</p>
+<p class="line l0 step" data-g="2">Der häufigste Tippfehler ist der <b>Zahlendreher</b>: 81 statt 18</p>
+<p class="line l0 step" data-g="3">Mit gleicher Gewichtung, etwa der Quersumme, fiele ein Tausch nie auf</p>
+<p class="line l0 step" data-g="4">Deshalb gehen die Ziffern mit <b>unterschiedlichen Gewichten</b> in die Rechnung ein</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>EAN-13 nachrechnen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:120px"><col style="width:58px"><col style="width:58px"><col style="width:58px"><col style="width:58px"><col style="width:58px"><col style="width:58px"><col style="width:58px"><col style="width:58px"><col style="width:58px"><col style="width:58px"><col style="width:58px"><col style="width:58px"></colgroup><tr><th>Stelle</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th></tr><tr><td class="b">Ziffer</td><td>4</td><td>0</td><td>0</td><td>6</td><td>3</td><td>8</td><td>1</td><td>3</td><td>3</td><td>3</td><td>9</td><td>3</td></tr><tr><td class="b">Gewicht</td><td>1</td><td style="background:#FBEBBF">3</td><td>1</td><td style="background:#FBEBBF">3</td><td>1</td><td style="background:#FBEBBF">3</td><td>1</td><td style="background:#FBEBBF">3</td><td>1</td><td style="background:#FBEBBF">3</td><td>1</td><td style="background:#FBEBBF">3</td></tr><tr><td class="b">Produkt</td><td>4</td><td>0</td><td>0</td><td>18</td><td>3</td><td>24</td><td>1</td><td>9</td><td>3</td><td>9</td><td>9</td><td>9</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Summe: 89 — bis zur nächsten Zehnerzahl 90 fehlt <b>1</b>: Die Prüfziffer ist 1, die EAN lautet 400638133393<b>1</b></p>
+<p class="line l0 step" data-g="1">Die ISBN-13 rechnet genauso: 978-3-16-148410-<b>0</b> hat die Summe 100 — schon durch 10 teilbar</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum der Zahlendreher auffällt</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Gewichte abwechselnd <b>1 und 3</b> — die Summe aller 13 Ziffern muss durch 10 teilbar sein</p>
+<p class="line l0 step" data-g="1">Vertauscht man zwei Nachbarn <span class="tex" data-tex="a"></span> und <span class="tex" data-tex="b"></span>, ändert sich die Summe um <span class="tex" data-tex="2 \cdot (a-b)"></span></p>
+<p class="line l0 step" data-g="2">Beispiel: 4006381333931 wird zu 4006318333931 — Summe 76 statt 90, <b>erkannt</b></p>
+<p class="line l0 step" data-g="3">Lücke: Nachbarn, die sich um <b>5</b> unterscheiden (etwa 1 und 6), ändern die Summe um 10 — unentdeckt</p>
+<p class="line l0 step" data-g="4">Der Scanner an der Kasse prüft sofort — passt die Ziffer nicht, piept er nicht</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die IBAN prüfen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:330px"><col style="width:486px"></colgroup><tr><th>Schritt</th><th>am Beispiel DE89 3704 0044 0532 0130 00</th></tr><tr><td class="b">1. Land und Prüfziffern nach hinten</td><td>370400440532013000 DE89</td></tr><tr><td class="b">2. Buchstaben in Zahlen: A = 10, B = 11</td><td>D = 13, E = 14: 370400440532013000131489</td></tr><tr><td class="b">3. durch 97 teilen</td><td style="background:#DDE8C6">Rest 1 — die IBAN ist gültig</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Die zwei Prüfziffern machen Fehler in <b>Land, Bankleitzahl und Kontonummer</b> erkennbar</p>
+<p class="line l0 step" data-g="1">Beim Modulo-97-Verfahren fallen fast alle Tippfehler und Dreher auf</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Schutz gegen Versehen, nicht gegen Absicht</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Der <b>Luhn-Algorithmus</b> prüft Kreditkarten- und ähnliche Nummern auf Eingabefehler</p>
+<p class="line l0 step" data-g="1">Über Echtheit oder Deckung sagt er <b>nichts</b></p>
+<p class="line l0 step" data-g="2">Jedes Prüfziffernverfahren ist öffentlich — jeder kann eine passende Nummer erzeugen</p>
+<p class="line l0 step" data-g="3">Gegen <b>Fälschung</b> braucht es digitale Signaturen</p>
+<p class="line l0 step" data-g="4">Reihenfolge beim Empfang: <b>erst</b> Prüfsumme vergleichen, <b>dann</b> die Daten verwenden</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Prüfbits und Prüfziffern sind gezielte Redundanz: Sie machen Fehler erkennbar, mit genug Abstand zwischen den Codewörtern sogar korrigierbar — aber sie schützen vor Versehen, nicht vor Fälschung.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Richard Hamming</b> ärgerte sich, dass sein Relaisrechner bei Fehlern nur abbrach — 1950 veröffentlichte er die Hamming-Codes</p>
+<p class="line l0 step" data-g="1">Die Luhn-Formel stammt von <b>Hans Peter Luhn</b> aus Barmen, heute Wuppertal — er arbeitete bei IBM</p>
+<p class="line l0 step" data-g="2">Die alte ISBN-10 kannte als Prüfziffer auch ein <b>X</b> — es steht für 10</p>
+<p class="line l0 step" data-g="3">Ein <b>QR-Code</b> bleibt auf der höchsten Stufe lesbar, selbst wenn rund 30 Prozent fehlen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Barcode-Detektive</b>: drei EANs von Verpackungen oder Büchern mit dem Taschenrechner nachrechnen</p>
+<p class="line l0 step" data-g="1"><b>Partnerübung</b>: Eine schreibt eine EAN mit Tippfehler oder Dreher ab, der andere findet ihn per Prüfziffer</p>
+<p class="line l0 step" data-g="2"><b>Fehlersuche-Spiel</b>: 4-Bit-Nachrichten mit Paritätsbit senden — der Sender kippt heimlich ein oder zwei Bits</p>
+<p class="line l0 step" data-g="3"><b>Kartentrick</b>: 5 × 5 Karten mit Paritätszeile und -spalte — findet die gewendete Karte</p>
+<p class="line l0 step" data-g="4">Zum Schluss: <b>Aufgaben (20)</b> auf der Planseite — Lösung pro Aufgabe zum Aufklappen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script>
+// time-aware greeting - the browser knows the real clock, a .pptx never does
+(function(){
+  var h = new Date().getHours();
+  var t = h < 5 ? 'Good night!' : h < 12 ? 'Good morning!' :
+          h < 18 ? 'Good afternoon!' : h < 22 ? 'Good evening!' : 'Good night!';
+  var el = document.getElementById('greet-text');
+  if (el) el.textContent = t;
+})();
+
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  // links (lab bar, picture credits) open - they do not turn the page as well
+  if (e.target.closest('#hud') || e.target.closest('a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+}
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>
