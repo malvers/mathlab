@@ -22,6 +22,9 @@
     const KEY_NAMES = 'svp-vortraege-namen:' + PLAN + KLASSE;
     const KEY_TOPICS = 'svp-vortraege-themen:' + PLAN;
 
+    /* two talks on the same day: every date twice, in place order */
+    const twice = (days) => days.flatMap((d) => [d, d]);
+
     /* one entry per plan: ten talk topics + the badge label/colour of each Lernbereich */
     const PLANS = {
         /* Oberschule 9 — lb1 "Informationen und Daten", wb "Informatik und Automatisierung" */
@@ -60,6 +63,12 @@
             sub: 'Lernbereich 1 \u201eInformatik als Wissenschaft\u201c, Lernbereich 2 \u201ePers\u00f6nliches Informationsmanagement\u201c, Lernbereich 3 \u201eIT-Sicherheit und \u00d6kologie\u201c + Wahlbereich \u201eDatenkomprimierung\u201c',
             switchLabel: 'Kurs wechseln',
             klassen: [['a', 'BGY26-1'], ['b', 'BGY26-2']],
+            /* Talk dates by PLACE: BGY26-1 and BGY26-2 share one double lesson on
+               Tuesday (coupled in Untis), one talk per double lesson and page,
+               starting in week 40 (Doc, 15.09.2026). Doc's date on the page wins. */
+            dates: ['2026-09-29', '2026-10-06', '2026-10-27', '2026-11-03', '2026-11-10',
+                    '2026-11-17', '2026-11-24', '2026-12-01', '2026-12-08', '2026-12-15',
+                    '2026-12-22', '2027-01-05'],
             labels: { lb1: ['LB 1', 'b-orange'], lb2: ['LB 2', 'b-cyan'], lb3: ['LB 3', 'b-violet'], lb4: ['LB 4', 'b-teal'], wb: ['Wahlbereich', 'b-green'] },
             topics: [
                 { lb: 'lb1', title: 'Meilensteine der Rechentechnik', sub: 'Von Schickard und Zuse bis zum Rechenzentrum: Welche Idee war jeweils der eigentliche Sprung?' },
@@ -83,6 +92,11 @@
             sub: 'Lernbereich 1 \u201eInformatische Modellierung\u201c, Lernbereich 2 \u201eModellierung von Datenbanken\u201c, Lernbereich 3 \u201eAlgorithmen und Programme\u201c + Wahlbereich \u201eK\u00fcnstliche Intelligenz\u201c',
             switchLabel: 'Kurs wechseln',
             klassen: [['a', 'BGY25']],
+            /* Talk dates by PLACE: one lesson on Tuesday, one talk per lesson,
+               starting in week 40 (Doc, 15.09.2026). Doc's date on the page wins. */
+            dates: ['2026-09-29', '2026-10-06', '2026-10-27', '2026-11-03', '2026-11-10',
+                    '2026-11-17', '2026-11-24', '2026-12-01', '2026-12-08', '2026-12-15',
+                    '2026-12-22', '2027-01-05'],
             labels: { lb1: ['LB 1', 'b-orange'], lb2: ['LB 2', 'b-cyan'], lb3: ['LB 3', 'b-violet'], wb: ['Wahlbereich', 'b-green'] },
             topics: [
                 { lb: 'lb1', title: 'Was ein Modell weglässt', sub: 'Wetter, Verkehr, Epidemie: dieselbe Wirklichkeit in drei Modellen — und die Entscheidung, die jeweils daran hängt.' },
@@ -125,6 +139,18 @@
             sub: 'Lernbereich 1 \u201eDatenbanken\u201c, Lernbereich 2 \u201eAlgorithmen und Programme\u201c, Lernbereich 3A \u201eWebtechnologie\u201c + Wahlbereich \u201eOOP\u201c',
             switchLabel: 'Klasse wechseln',
             klassen: [['a', 'FOS25-1'], ['b', 'FOS25-2']],
+            /* Talk dates by PLACE, one list per Lerngruppe (key = the group key in
+               ?g=): every group comes fortnightly for four lessons on its own day,
+               two talks per such day - one per double lesson - starting in week 40
+               (Doc, 15.09.2026). Taken from Untis; holidays and Buss- und Bettag
+               are already left out. Doc's date on the page still wins (META_PAGE). */
+            dates: {
+                'FOG25-1': twice(['2026-09-28', '2026-10-26', '2026-11-09', '2026-11-23', '2026-12-07']),
+                'FOG25-2_FOW25-2': twice(['2026-10-05', '2026-11-02', '2026-11-16', '2026-11-30', '2026-12-14']),
+                'FOS25-1': twice(['2026-10-07', '2026-11-04', '2026-12-02', '2026-12-16', '2027-01-13']),
+                'FOS25-2': twice(['2026-09-30', '2026-10-28', '2026-11-11', '2026-11-25', '2026-12-09']),
+                'FOW25-1': twice(['2026-09-29', '2026-10-27', '2026-11-10', '2026-11-24', '2026-12-08'])
+            },
             labels: { lb1: ['LB 1', 'b-orange'], lb2: ['LB 2', 'b-cyan'], lb3: ['LB 3A', 'b-violet'], wb: ['Wahlbereich', 'b-green'] },
             topics: [
                 { lb: 'lb1', title: 'Datenbanken hinter den Kulissen', sub: 'Was passiert bei einer Bestellung, einer Fahrkarte, einem Arzttermin? Datenbasis und DBMS an einem echten System.' },
@@ -1704,7 +1730,10 @@
        falling back to the built-in one. */
     function dateOf(pos) {
         if (Object.prototype.hasOwnProperty.call(meta.dates, pos)) return meta.dates[pos] || '';
-        return (PLAN_DEF.dates && PLAN_DEF.dates[pos]) || '';
+        /* one list for the whole plan (9a/9b share their Fridays) or one per Lerngruppe */
+        const d = PLAN_DEF.dates;
+        const own = Array.isArray(d) ? d : (d && d[KLASSE]);
+        return (own && own[pos]) || '';
     }
 
     const WEEKDAY = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
