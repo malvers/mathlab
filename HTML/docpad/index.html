@@ -32,15 +32,16 @@
 <form id="f" autocomplete="on">
   <h1>DOCPAD</h1>
   <p class="sub">Doc Alvers Mathe-Labor</p>
+  <input id="user" name="username" autocomplete="username" value="docpad" hidden>   <!-- for the password manager -->
   <label for="pw">Passwort</label>
-  <input id="pw" type="password" autocomplete="current-password" required autofocus>
+  <input id="pw" name="password" type="password" autocomplete="current-password" required autofocus>
   <button id="go" type="submit">ÖFFNEN</button>
   <div id="msg" class="msg"></div>
 </form>
 <script>
 (function () {
   'use strict';
-  const VERSION = 'df4446976423', CACHE = 'docpad-' + VERSION, ITER = 600000;
+  const VERSION = '320469811bb5', CACHE = 'docpad-' + VERSION, ITER = 600000;
   const $ = id => document.getElementById(id);
   const say = (t, err) => { $('msg').textContent = t; $('msg').className = 'msg' + (err ? ' err' : ''); };
   async function startSW() {                                // the worker that serves ./app/ from the cache
@@ -48,14 +49,13 @@
     const sw = reg.installing || reg.waiting || reg.active;
     if (sw.state !== 'activated') await new Promise(r => sw.addEventListener('statechange', () => { if (sw.state === 'activated') r(); }));
   }
-  async function unlock(pw) {
+  async function unlock(base) {                           // base: the PBKDF2 key made from the password
     say('Lade …');
     const res = await fetch('docpad.bin?v=' + VERSION, { cache: 'no-cache' });
     if (!res.ok) throw new Error('Paket nicht gefunden (' + res.status + ')');
     const bin = new Uint8Array(await res.arrayBuffer());
     if (String.fromCharCode(...bin.slice(0, 4)) !== 'DPK1') throw new Error('Paket beschädigt');
     say('Entschlüssele …');
-    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
     const key = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: bin.slice(4, 20), iterations: ITER, hash: 'SHA-256' }, base,
       { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
     let plain;
@@ -70,12 +70,42 @@
     await Promise.all(index.map(f => cache.put(new URL(f.p, app).href,
       new Response(data.slice(f.o, f.o + f.n), { headers: { 'Content-Type': f.t } }))));
     await startSW();
-    location.replace('app/');
+  }
+  // "Remember on this device" (Doc 15.09.: "ich möchte nicht immer dich fragen müssen"): the PBKDF2 key stays in
+  // IndexedDB - non-extractable, the password itself is never stored - so a new bundle opens without typing. The
+  // decrypted app sits in this browser's Cache Storage anyway, so this exposes nothing new.
+  function idb(mode, fn) {
+    return new Promise((res, rej) => {
+      const rq = indexedDB.open('docpad', 1);
+      rq.onupgradeneeded = () => rq.result.createObjectStore('keys');
+      rq.onerror = () => rej(rq.error);
+      rq.onsuccess = () => {
+        const db = rq.result, tx = db.transaction('keys', mode), r = fn(tx.objectStore('keys'));
+        tx.oncomplete = () => { db.close(); res(r.result); };
+        tx.onerror = tx.onabort = () => { db.close(); rej(tx.error); };
+      };
+    });
+  }
+  const loadBase = () => idb('readonly', s => s.get('base')).catch(() => null);
+  const saveBase = base => idb('readwrite', s => s.put(base, 'base')).catch(() => {});
+  const dropBase = () => idb('readwrite', s => s.delete('base')).catch(() => {});
+  // Chrome's password manager: the page moves on by script, so Chrome would not notice the login by itself
+  function rememberInChrome(pw) {
+    if (!window.PasswordCredential || !navigator.credentials) return Promise.resolve();
+    const store = navigator.credentials.store(new PasswordCredential({ id: 'docpad', name: 'DOCPAD', password: pw })).catch(() => {});
+    return Promise.race([store, new Promise(r => setTimeout(r, 1500))]);
   }
   $('f').addEventListener('submit', async ev => {
     ev.preventDefault();
     $('go').disabled = true;
-    try { await unlock($('pw').value); }
+    try {
+      const pw = $('pw').value;
+      const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+      await unlock(base);
+      await saveBase(base);
+      await rememberInChrome(pw);
+      location.replace('app/');
+    }
     catch (e) { say(e.message || 'Fehler', true); $('go').disabled = false; if (e.pw) { $('pw').select(); } }
   });
   if (!('serviceWorker' in navigator) || !window.caches || !window.DecompressionStream) {
@@ -83,7 +113,17 @@
     $('go').disabled = true;
     return;
   }
-  caches.has(CACHE).then(async ok => { if (ok) { say('Öffne …'); await startSW(); location.replace('app/'); } });   // unlocked before
+  caches.has(CACHE).then(async ok => {
+    if (ok) { say('Öffne …'); await startSW(); location.replace('app/'); return; }   // this bundle unlocked before
+    const base = await loadBase();                        // a new bundle: the key remembered on this device
+    if (!base) return;
+    $('go').disabled = true;
+    try { await unlock(base); location.replace('app/'); }
+    catch (e) {
+      if (e.pw) { await dropBase(); say('Neues Passwort - bitte eingeben', true); } else say(e.message || 'Fehler', true);
+      $('go').disabled = false;
+    }
+  });
 })();
 </script>
 </body>
