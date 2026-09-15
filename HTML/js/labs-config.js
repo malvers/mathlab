@@ -24,6 +24,17 @@
 
 const LABS_DATA = [
     {
+        "id": "docpad",
+        "href": "docpad/index.html",
+        "title": "DocPad",
+        "description": "Ein Grafik- und CAS-Rechner als Gerät im Browser: exakt rechnen mit Brüchen, Wurzeln und π, Gleichungen lösen, Funktionen zeichnen, 3D-Graphen drehen, Statistik und Stochastik — alles über Tasten und Menüs wie am echten Rechner. Unter ⚙ ▸ Demo führt Solita mit Stimme und Maus durch die ersten Themen. Zugang mit Passwort; das Gerät merkt es sich.",
+        "tagline": "Rechner / CAS / Grafik / 3D",
+        "icon": LAB_ICONS["docpad"],
+        "category": "apps neu",
+        "keywords": "docpad doc pad rechner taschenrechner grafikrechner cas computeralgebra exakt bruch wurzel gleichung ungleichung loesen solve graph funktion plot 3d statistik stochastik wertetabelle demo app",
+        "color": "blue"
+    },
+    {
         "id": "vektoren",
         "href": "vektoren.html",
         "title": "Vektoren",
