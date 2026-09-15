@@ -220,7 +220,14 @@ function berlinNow() {
 
 async function tickIfBegun(u: Untis, userData: any, ttId: number): Promise<true | string> {
   const now = berlinNow();
-  const from = new Date(Date.now() - 200 * 864e5).toISOString().slice(0, 10).replace(/-/g, '');
+  /* The range must stay inside ONE school year - WebUntis rejects anything across the boundary
+     ("startDate and endDate are not within a single school year", code -8507). Measured
+     15.09.2026: the old "200 days back" died on exactly that, so the first live writes set no
+     tick at all. Same lookup as the CLI's `anwesenheit`. */
+  const todayN = Number(now.ymd);
+  const year = ((await u.rpc('getSchoolyears', {})) || [])
+    .find((y: any) => Number(y.startDate) <= todayN && Number(y.endDate) >= todayN);
+  const from = year ? String(year.startDate) : now.ymd;
   const l = (await myLessons(u, userData, from, now.ymd)).find((x: any) => x.ttId === ttId);
   if (!l) return 'nicht unter den eigenen Stunden bis heute';
   if (l.code === 'cancelled') return 'Stunde ausgefallen';

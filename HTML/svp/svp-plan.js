@@ -3941,7 +3941,7 @@
             const cancelBtn = overlay.querySelector('#untis-cancel');
             cancelBtn.disabled = true;
             err.textContent = 'Schicke …';
-            let done = 0; const failed = [];
+            let done = 0; const failed = []; const tickMissed = [];
             for (const b of picked) {
                 const l = b.l;
                 const text = b.box.value.replace(/\s+/g, ' ').trim();
@@ -3975,9 +3975,20 @@
                         failed.push(label(l) + ': ' + msg);
                         continue;   /* kein Haken, kein Echo, kein gruener Chip */
                     }
+                    /* "Anwesenheit kontrolliert" rides along with the write (Edge Function
+                       tickIfBegun): true = set and read back, a string says why not. Until
+                       15.09.2026 this answer was ignored, so a tick that died (school-year
+                       range, code -8507) still showed as a plain "eingetragen ✓". Written
+                       ahead of time or cancelled is expected; anything else is a real miss. */
+                    const why = results.map(r => r && r.absenceChecked).filter(a => a !== true);
+                    const tickMsg = why.length ? String(why[0] || 'keine Antwort') : '';
+                    const tickExpected = /noch nicht begonnen|ausgefallen/.test(tickMsg);
+                    if (tickMsg && !tickExpected) tickMissed.push(label(l) + ': Anwesenheit NICHT gesetzt (' + tickMsg + ')');
                     if (l._state) {
-                        l._state.textContent = 'eingetragen ✓';
-                        l._state.className = 'untis-state is-ok';
+                        l._state.textContent = tickMsg
+                            ? 'eingetragen ✓ · Anwesenheit: ' + tickMsg
+                            : 'eingetragen ✓ · Anwesenheit ✓';
+                        l._state.className = 'untis-state ' + (tickMsg && !tickExpected ? 'is-bad' : 'is-ok');
                     }
                     if (b.cb) { b.cb.checked = false; b.cb.disabled = true; }
                     b.box.disabled = true;
@@ -3998,8 +4009,10 @@
             boxes = boxes.filter(b => !b.box.disabled);
             chip.className = 'untis-chip ' + untisChipClass(entries);
             chip.title = untisTitle(entries, data.generated);
-            if (failed.length) { err.textContent = failed.join(' | '); go.disabled = false; return; }
+            if (failed.length) { err.textContent = failed.concat(tickMissed).join(' | '); go.disabled = false; return; }
             err.textContent = done + ' Stunde' + (done === 1 ? '' : 'n') + ' eingetragen ✓';
+            /* a missed tick keeps the dialog open - Doc has to see it (fallback: Eintragen at 18:00) */
+            if (tickMissed.length) { err.textContent += ' | ' + tickMissed.join(' | '); return; }
             setTimeout(close, 900);   /* Erfolg kurz zeigen, dann aus dem Weg */
         }
         go.addEventListener('click', send);
