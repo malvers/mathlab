@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Das Würfelspiel</title>
+<meta name="description" content="Baumdiagramm und Pfadregeln — ganz langsam, Schritt für Schritt">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --stroke:#0E244E;
+  --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
+  --codebg:#0E244E; --codeink:#E6ECF8; --codemuted:#7E8FB5;
+  --greetbg:#000028;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0E244E;overflow:hidden}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+.slide{position:absolute;inset:0;display:none;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
+    radial-gradient(58% 62% at 84% 10%, rgba(245,194,66,.30), transparent 70%),
+    radial-gradient(52% 55% at 4% 96%, rgba(121,158,49,.20), transparent 70%),
+    linear-gradient(122deg,#fff 0%, #b0c4e2 100%);
+  background-size:24px 24px, auto, auto, auto;
+}
+.slide.on{display:block}
+
+/* footer, shared by every slide */
+.slide::before{content:"";position:absolute;left:72px;top:504px;
+  width:816px;height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:72px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+.pageno{position:absolute;right:24px;top:512px;font-size:10px;letter-spacing:1.2px;
+  color:var(--muted)}
+
+h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
+b{font-weight:600;color:var(--ink)}
+.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+
+/* --- content ------------------------------------------------------------ */
+.slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
+  color:var(--ink);letter-spacing:-.2px;line-height:1.05}
+.rules{position:absolute;left:72px;top:116px;width:64px;height:3px}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.body{position:absolute;left:72px;top:146px;width:816px;height:330px}
+
+p.line{position:relative;line-height:1.25}
+p.line.l0{font-size:20px;color:var(--body);margin-top:12px;padding-left:20px}
+p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padding-left:20px;
+  line-height:1.2}
+p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
+p.line:first-child{margin-top:0}
+p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+p.line.l0::before{background:var(--red)}
+p.line.l1::before{background:var(--green);width:6px;height:6px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+
+/* --- two columns -------------------------------------------------------- */
+.colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
+  display:grid;grid-template-columns:396px 396px;gap:24px}
+.card{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:26px;
+  position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px}
+.card.left::before{background:var(--orange)}
+.card.right::before{background:var(--green)}
+p.col{position:relative;line-height:1.25}
+p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
+  text-transform:uppercase;line-height:1.2}
+p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
+p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
+.card.left p.col.l1::before{background:var(--red)}
+.card.right p.col.l1::before{background:var(--green)}
+
+/* --- title -------------------------------------------------------------- */
+.slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
+  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+.slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
+  border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
+.slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
+  border-radius:50%;background:var(--orange)}
+.slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
+  background:var(--orange)}
+.slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
+  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+.slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
+  color:var(--muted);line-height:1.3}
+
+/* --- chapter ------------------------------------------------------------ */
+.slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;
+  background:var(--orange)}
+.slide.chapter .kicker{position:absolute;left:100px;top:188px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+.slide.chapter h2{position:absolute;left:100px;top:216px;width:700px;font-size:34px;
+  font-weight:700;color:var(--ink);line-height:1.1;letter-spacing:-.3px}
+.slide.chapter .sub{position:absolute;left:100px;top:312px;width:640px;font-size:17px;
+  color:var(--muted);line-height:1.3}
+.slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
+  background:rgba(14,36,78,.14)}
+/* with a picture: text on the left, picture + licence line on the right */
+.slide.chapter.has-pic h2{width:420px;font-size:28px}
+.slide.chapter.has-pic .sub{width:420px}
+.slide.chapter.has-pic .hair{width:448px;top:372px}   /* room for a two-line sub */
+.chap-pic{position:absolute;left:560px;top:150px;width:328px;height:230px;margin:0;
+  display:block;overflow:hidden;background:var(--card);
+  border:.75px solid rgba(14,36,78,.12)}
+.chap-pic img{width:100%;height:100%;object-fit:contain;display:block}   /* never cropped */
+.chap-credit{position:absolute;left:560px;top:388px;width:328px;font-size:9px;line-height:1.3;
+  color:var(--muted);text-decoration:none;letter-spacing:.2px}
+a.chap-credit:hover{color:var(--red);text-decoration:underline}
+
+/* --- merksatz ----------------------------------------------------------- */
+.slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
+  background:var(--orange)}
+.slide.merksatz .satz{position:absolute;left:104px;top:186px;width:760px;font-size:30px;
+  font-weight:700;color:var(--ink);line-height:1.28}
+.slide.merksatz .label{position:absolute;left:104px;top:362px;font-size:12px;font-weight:700;
+  color:var(--red);letter-spacing:2.4px;text-transform:uppercase}
+
+/* --- code --------------------------------------------------------------- */
+.codepanel{position:absolute;left:72px;top:146px;width:816px;height:300px;
+  background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
+.codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
+.pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
+  display:flex;align-items:center;justify-content:center}
+/* flex, not grid: in a grid the % heights resolve against an auto track and a tall picture
+   runs out of the box; here they resolve against the box - shrink to fit, never upscale */
+.pic img{max-width:100%;max-height:100%;object-fit:contain}
+/* small picture bottom right next to a table (table_top corner=) - text keeps clear of it */
+.corner-pic{position:absolute;right:72px;bottom:44px;max-width:200px;max-height:190px}
+.slide.has-corner .body{width:580px}
+
+/* --- table_top ---------------------------------------------------------- */
+.dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
+  font-family:Raleway,system-ui,sans-serif}
+.dtable th,.dtable td{padding:0 6px;text-align:left;overflow:hidden;white-space:nowrap;
+  border:.75px solid var(--stroke);line-height:1.85}
+.dtable th{background:var(--ink);color:#fff;font-family:Orbitron,Raleway,sans-serif;
+  font-weight:700;font-size:.75em;border-color:var(--ink)}
+.dtable td{background:#fff;color:var(--body)}
+.dtable td.b{font-weight:700;color:var(--ink)}
+.dtable td.m{font-family:Menlo,monospace}
+.dtable .ac{text-align:center}
+.dtable .ar{text-align:right}
+
+/* --- greeting (Auftaktfolie) --------------------------------------------- */
+.slide.greet{background-image:none;background-color:var(--greetbg)}
+.slide.greet::before{left:336px;width:552px;background:rgba(230,236,248,.14)}
+.slide.greet .foot{left:336px;color:var(--codemuted)}
+.slide.greet .pageno{color:var(--codemuted)}
+.greet-ground{position:absolute;inset:0;background:var(--greetbg)}
+.greet-pic{position:absolute;left:0;top:0;width:312px;height:540px;
+  object-fit:cover;display:block}
+.greet-credit{position:absolute;left:10px;bottom:8px;font-size:9px;
+  font-family:Raleway,sans-serif;color:rgba(255,255,255,.5);text-decoration:none;
+  letter-spacing:.2px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.greet-credit:hover{color:rgba(255,255,255,.9);text-decoration:underline}
+.greet-lead{position:absolute;left:433px;top:168px;width:455px;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:46px;color:var(--orange);
+  line-height:1.05;letter-spacing:-.5px}
+.greet-quote{position:absolute;left:486px;top:368px;width:402px;text-align:center;
+  font-family:Raleway,sans-serif;font-weight:300;font-size:17px;color:var(--orange);
+  line-height:1.2}
+.greet-author{position:absolute;left:596px;top:404px;width:292px;text-align:center;
+  font-size:11px;color:var(--codemuted);letter-spacing:.3px}
+
+/* --- lab in a slide ------------------------------------------------------ */
+.labnote{position:absolute;left:72px;width:816px;font-size:15px;color:var(--muted)}
+.labframe{position:absolute;left:72px;width:816px;overflow:hidden;
+  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
+.labframe iframe{border:0;transform-origin:0 0;display:block}
+.labbar{position:absolute;right:72px;top:60px;display:flex;gap:10px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+.labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
+.labbar a:hover{color:var(--red)}
+.labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+.labbar button:hover{border-color:var(--red);color:var(--red)}
+
+/* --- click build -------------------------------------------------------- */
+.step{opacity:0;transition:opacity .4s ease}
+.step.on{opacity:1}
+
+/* --- HUD ---------------------------------------------------------------- */
+#hud{position:fixed;right:10px;bottom:8px;z-index:9}
+#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
+  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud button:hover{opacity:1}
+#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
+  transition:width .25s ease;z-index:9}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #hud,#bar{display:none}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:auto;height:auto}
+  .slide{display:block!important;position:relative;width:960px;height:540px;
+    page-break-after:always;break-after:page}
+  .step{opacity:1!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-2b50cc368526.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/fog-7228638/" target="_blank" rel="noopener">adege</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Mathematik — Berufliches Gymnasium 11</p>
+      <h1>Das Würfelspiel</h1>
+      <p class="sub">Baumdiagramm und Pfadregeln — ganz langsam, Schritt für Schritt</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Worum geht es?</h2>
+      <p class="sub">Ein Spiel mit zwei besonderen Würfeln</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Das Spiel in drei Sätzen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Lena und Mia würfeln mit <b>zwei verschiedenen</b>, selbst beschrifteten Würfeln</p>
+<p class="line l0 step" data-g="1">Zuerst würfelt <b>Lena</b> einmal, danach <b>Mia</b> einmal</p>
+<p class="line l0 step" data-g="2">Wer die <b>größere Zahl</b> oben hat, gewinnt die Runde</p>
+<p class="line l0 step" data-g="3">Unsere Fragen: Wie sieht das <b>Baumdiagramm</b> aus — und wie wahrscheinlich gewinnt <b>Lena</b>?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die beiden Würfel — ausgeklappt als Netz</h3><div class="rules"></div><div class="pic"><img src="img/wuerfelspiel-netze.svg" alt=""></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was heißt zweistufig?</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Es wird <b>zweimal nacheinander</b> gewürfelt — das sind zwei <b>Stufen</b></p>
+<p class="line l0 step" data-g="1">Stufe 1 ist Lenas Wurf, Stufe 2 ist Mias Wurf</p>
+<p class="line l0 step" data-g="2">Im Baum heißt das: <b>zwei Ebenen</b> von Ästen, von links nach rechts</p>
+<p class="line l0 step" data-g="3">Jeder Weg von ganz links nach ganz rechts ist <b>ein möglicher Ausgang</b> des Spiels</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Die Würfel lesen</h2>
+      <p class="sub">Zählen statt raten</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content has-corner"><h3>Lenas Würfel: sechs Flächen, drei Zahlen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:13px"><colgroup><col style="width:160px"><col style="width:380px"><col style="width:276px"></colgroup><tr><th>Zahl</th><th>steht wie oft auf dem Würfel?</th><th>Wahrscheinlichkeit</th></tr><tr><td class="b" style="background:#FBEBBF">3</td><td>2-mal von 6</td><td>2/6 = 1/3</td></tr><tr><td class="b" style="background:#DDE8C6">5</td><td>2-mal von 6</td><td>2/6 = 1/3</td></tr><tr><td class="b" style="background:#E6ECF8">7</td><td>2-mal von 6</td><td>2/6 = 1/3</td></tr></table><div class="body" style="top:256.2px;height:239.8px"><p class="line l0 step" data-g="0">Jede Fläche ist gleich wahrscheinlich — also einfach <b>zählen</b>: wie oft steht die Zahl drauf?</p>
+<p class="line l0 step" data-g="1">Kontrolle: <span class="tex" data-tex="\frac{1}{3} + \frac{1}{3} + \frac{1}{3} = 1"></span></p></div><img class="corner-pic" src="img/wuerfelspiel-netz-lena.svg" alt=""><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content has-corner"><h3>Mias Würfel: sechs Flächen, zwei Zahlen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:13px"><colgroup><col style="width:160px"><col style="width:380px"><col style="width:276px"></colgroup><tr><th>Zahl</th><th>steht wie oft auf dem Würfel?</th><th>Wahrscheinlichkeit</th></tr><tr><td class="b" style="background:#E6ECF8">4</td><td>4-mal von 6</td><td>4/6 = 2/3</td></tr><tr><td class="b" style="background:#F2CFCB">6</td><td>2-mal von 6</td><td>2/6 = 1/3</td></tr></table><div class="body" style="top:232.15px;height:263.85px"><p class="line l0 step" data-g="0">Achtung: Die <b>4 steht viermal</b> auf dem Würfel — nicht zweimal!</p>
+<p class="line l0 step" data-g="1">Kontrolle: <span class="tex" data-tex="\frac{2}{3} + \frac{1}{3} = 1"></span></p></div><img class="corner-pic" src="img/wuerfelspiel-netz-mia.svg" alt=""><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der wichtigste Trick: gleiche Zahlen zusammenfassen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Man <b>könnte</b> sechs Äste mit je <span class="tex" data-tex="\frac{1}{6}"></span> zeichnen — das ist nicht falsch, aber unübersichtlich</p>
+<p class="line l0 step" data-g="1">Einfacher: <b>gleiche Zahlen zu einem Ast</b> zusammenfassen</p>
+<p class="line l0 step" data-g="2">Lena bekommt dann <b>3 Äste</b> (3, 5, 7), Mia <b>2 Äste</b> (4, 6)</p>
+<p class="line l0 step" data-g="3">Merke: Die Äste, die an <b>einem Punkt</b> starten, ergeben zusammen immer <b>1</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Den Baum zeichnen</h2>
+      <p class="sub">Erst Lena, dann Mia</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Stufe 1: Lenas Wurf — drei Äste mit je 1/3</h3><div class="rules"></div><div class="pic"><img src="img/wuerfelspiel-stufe1.svg" alt=""></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Stufe 2: an jedes Ende kommt Mias Wurf</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">An <b>jedes</b> der drei Enden hängen wir Mias zwei Äste: 4 und 6</p>
+<p class="line l0 step" data-g="1">Mia würfelt immer mit <b>demselben</b> Würfel — also steht überall <span class="tex" data-tex="\frac{2}{3}"></span> bei der 4 und <span class="tex" data-tex="\frac{1}{3}"></span> bei der 6</p>
+<p class="line l0 step" data-g="2">Lenas Ergebnis ändert nichts an Mias Würfel — die Würfe sind <b>unabhängig</b></p>
+<p class="line l0 step" data-g="3">Am Ende gibt es <span class="tex" data-tex="3 \cdot 2 = 6"></span> Wege durch den Baum</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der fertige Baum</h3><div class="rules"></div><div class="pic"><img src="img/wuerfelspiel-baum.svg" alt=""></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Pfadregel: entlang eines Weges multiplizieren</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die Wahrscheinlichkeit eines Weges: alle Äste auf dem Weg <b>malnehmen</b></p>
+<p class="line l0 step" data-g="1">Weg (3 | 4): <span class="tex" data-tex="\frac{1}{3} \cdot \frac{2}{3} = \frac{2}{9}"></span></p>
+<p class="line l0 step" data-g="2">Weg (3 | 6): <span class="tex" data-tex="\frac{1}{3} \cdot \frac{1}{3} = \frac{1}{9}"></span></p>
+<p class="line l0 step" data-g="3">Kontrolle: alle sechs Wege zusammen <span class="tex" data-tex="= 3 \cdot \frac{2}{9} + 3 \cdot \frac{1}{9} = 1"></span></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>Wer gewinnt?</h2>
+      <p class="sub">Alle sechs Ausgänge durchgehen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Jeder Ausgang einzeln</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:13px"><colgroup><col style="width:150px"><col style="width:110px"><col style="width:110px"><col style="width:220px"><col style="width:226px"></colgroup><tr><th>Weg</th><th>Lena</th><th>Mia</th><th>Wer gewinnt?</th><th>Wahrscheinlichkeit</th></tr><tr><td class="b">(3 | 4)</td><td>3</td><td>4</td><td>Mia</td><td>2/9</td></tr><tr><td class="b">(3 | 6)</td><td>3</td><td>6</td><td>Mia</td><td>1/9</td></tr><tr><td class="b">(5 | 4)</td><td>5</td><td>4</td><td style="background:#DDE8C6">Lena</td><td>2/9</td></tr><tr><td class="b">(5 | 6)</td><td>5</td><td>6</td><td>Mia</td><td>1/9</td></tr><tr><td class="b">(7 | 4)</td><td>7</td><td>4</td><td style="background:#DDE8C6">Lena</td><td>2/9</td></tr><tr><td class="b">(7 | 6)</td><td>7</td><td>6</td><td style="background:#DDE8C6">Lena</td><td>1/9</td></tr></table><div class="body" style="top:328.35px;height:167.65px"><p class="line l0 step" data-g="0">Lena gewinnt auf <b>drei</b> Wegen — auch die <b>7 schlägt die 6</b>!</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Summenregel: passende Wege addieren</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Alle Wege, bei denen Lena gewinnt, werden <b>addiert</b></p>
+<p class="line l0 step" data-g="1"><span class="tex" data-tex="P(\text{Lena gewinnt}) = \frac{2}{9} + \frac{2}{9} + \frac{1}{9} = \frac{5}{9} \approx 55{,}6\,\%"></span></p>
+<p class="line l0 step" data-g="2">Gegenprobe Mia: <span class="tex" data-tex="\frac{2}{9} + \frac{1}{9} + \frac{1}{9} = \frac{4}{9}"></span> — und <span class="tex" data-tex="\frac{5}{9} + \frac{4}{9} = 1"></span></p>
+<p class="line l0 step" data-g="3">Unentschieden gibt es nicht: Die beiden Würfel haben <b>keine gemeinsame Zahl</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die typischen Fehler</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Mias 4 mit <span class="tex" data-tex="\frac{1}{2}"></span> statt <span class="tex" data-tex="\frac{2}{3}"></span> — die 4 steht <b>viermal</b> auf dem Würfel</p>
+<p class="line l0 step" data-g="1">Entlang eines Weges <b>addiert</b> statt multipliziert</p>
+<p class="line l0 step" data-g="2">Den Weg <b>(7 | 6)</b> vergessen — die 7 ist größer als die 6</p>
+<p class="line l0 step" data-g="3">Die Wege für Lenas Sieg <b>multipliziert</b> statt addiert</p>
+<p class="line l0 step" data-g="4">Nur einen Weg genommen statt <b>alle drei</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Entlang eines Pfades wird multipliziert — verschiedene Pfade zum selben Ereignis werden addiert.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Das Rezept in fünf Schritten</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>1.</b> Würfelnetze zählen: Wie oft steht jede Zahl drauf?</p>
+<p class="line l0 step" data-g="1"><b>2.</b> Wahrscheinlichkeit je Zahl: Anzahl durch 6, dann kürzen</p>
+<p class="line l0 step" data-g="2"><b>3.</b> Baum zeichnen: erst Stufe 1, dann an <b>jedes</b> Ende Stufe 2</p>
+<p class="line l0 step" data-g="3"><b>4.</b> Pfadregel: entlang eines Weges <b>malnehmen</b></p>
+<p class="line l0 step" data-g="4"><b>5.</b> Summenregel: alle passenden Wege <b>addieren</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Würfel gibt es seit mindestens <b>5000 Jahren</b> — schon im alten Orient wurde gewürfelt</p>
+<p class="line l0 step" data-g="1">Der Statistiker <b>Bradley Efron</b> erfand Würfel, bei denen A gegen B, B gegen C — und C wieder gegen A gewinnt</p>
+<p class="line l0 step" data-g="2">Solche Würfel heißen <b>nicht-transitiv</b>: Wer zuerst wählen muss, verliert auf Dauer</p>
+<p class="line l0 step" data-g="3">Unser Spiel ist harmloser: Mit <span class="tex" data-tex="\frac{5}{9}"></span> ist Lena nur <b>knapp</b> im Vorteil</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Jetzt ihr: die Zwillingsaufgabe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Pauls Würfel: <b>1, 1, 5, 5, 6, 6</b></p>
+<p class="line l0 step" data-g="1">Jonas' Würfel: <b>2, 2, 2, 4, 4, 4</b></p>
+<p class="line l0 step" data-g="2">a) Zeichnet das Baumdiagramm und schreibt an jeden Ast die Wahrscheinlichkeit</p>
+<p class="line l0 step" data-g="3">b) Wie groß ist die Wahrscheinlichkeit, dass Paul gewinnt?</p>
+<p class="line l0 step" data-g="4">Tipp: Geht genau das Rezept durch — Schritt für Schritt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Lösung der Zwillingsaufgabe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Paul: 1, 5 und 6 je <span class="tex" data-tex="\frac{2}{6} = \frac{1}{3}"></span> — Jonas: 2 und 4 je <span class="tex" data-tex="\frac{3}{6} = \frac{1}{2}"></span></p>
+<p class="line l0 step" data-g="1">Jeder Weg: <span class="tex" data-tex="\frac{1}{3} \cdot \frac{1}{2} = \frac{1}{6}"></span> — sechs Wege, zusammen 1</p>
+<p class="line l0 step" data-g="2">Paul gewinnt bei (5 | 2), (5 | 4), (6 | 2), (6 | 4) — die 1 gewinnt nie</p>
+<p class="line l0 step" data-g="3"><span class="tex" data-tex="P(\text{Paul gewinnt}) = 4 \cdot \frac{1}{6} = \frac{2}{3} \approx 66{,}7\,\%"></span></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script>
+// time-aware greeting - the browser knows the real clock, a .pptx never does
+(function(){
+  var h = new Date().getHours();
+  var t = h < 5 ? 'Good night!' : h < 12 ? 'Good morning!' :
+          h < 18 ? 'Good afternoon!' : h < 22 ? 'Good evening!' : 'Good night!';
+  var el = document.getElementById('greet-text');
+  if (el) el.textContent = t;
+})();
+
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+let si = 0, step = 0;
+slides.forEach((s, i) => {
+  const p = s.querySelector('.pageno');
+  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
+});
+
+// keep the 960x540 stage as large as the window allows - phone, beamer, print
+function fit(){
+  const s = Math.min(innerWidth / 960, innerHeight / 540);
+  deck.style.transform = 'scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function groups(sl){
+  return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
+}
+function paint(){
+  slides.forEach((s, i) => s.classList.toggle('on', i === si));
+  const sl = slides[si];
+  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+}
+function next(){
+  if (step < groups(slides[si])) { step++; }
+  else if (si < slides.length - 1) { si++; step = 0; }
+  paint();
+}
+function prev(){
+  if (step > 0) { step--; }
+  else if (si > 0) { si--; step = groups(slides[si]); }
+  paint();
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
+  const k = e.key;
+  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
+  else if (k === 'Home') { si = 0; step = 0; paint(); }
+  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'f' || k === 'F') { full(); }
+});
+addEventListener('click', e => {
+  // links (lab bar, picture credits) open - they do not turn the page as well
+  if (e.target.closest('#hud') || e.target.closest('a')) return;
+  if (e.target.closest('.labbar button')) { next(); return; }
+  next();
+});   // clicks inside a lab stay in the lab - they never reach this document
+// fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
+const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
+  + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
+const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
+  + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
+const fullBtn = document.getElementById('full');
+const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function paintFull(){
+  fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+}
+function full(){
+  const el = document.documentElement;
+  if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else {
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(el)).catch(() => {});
+  }
+}
+fullBtn.onclick = full;
+document.addEventListener('fullscreenchange', paintFull);
+document.addEventListener('webkitfullscreenchange', paintFull);
+if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
+else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
+
+// #7 in the URL opens slide 7 fully built - handy for linking a single slide
+function fromHash(){
+  const n = parseInt(location.hash.slice(1), 10);
+  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+}
+addEventListener('hashchange', fromHash);
+
+// formulas: KaTeX renders every $...$ the build script wrote
+addEventListener('load', () => {
+  if (!window.katex) return;
+  document.querySelectorAll('.tex').forEach(el => {
+    try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: false }); }
+    catch (err) { el.textContent = el.dataset.tex; }
+  });
+});
+paint();
+fromHash();
+</script>
+</body>
+</html>

@@ -308,10 +308,12 @@ class HtmlDeck:
                 % (left, top, sum(col_w), font_size, cols, "".join(out)))
 
     def table_top(self, title, rows, col_w, lines, marks=None, font_size=12, row_h=None,
-                  bold_cols=(), mono_cols=(), align=None, x=None):
+                  bold_cols=(), mono_cols=(), align=None, x=None, corner=None):
         """Full-width table on top, bullets underneath - the HTML twin of
         slides.Deck.table_top. Same numbers, same look: the .pptx draws a native
-        table, here it becomes a <table> with the authored column widths."""
+        table, here it becomes a <table> with the authored column widths.
+        `corner` puts a small picture bottom right (the thing the table talks about,
+        e.g. the die net next to its counting table); the bullets narrow around it."""
         row_h = row_h or font_size * 1.85
         table = self._table(rows, col_w, MARGIN if x is None else x, BODY_Y, marks,
                             font_size, bold_cols, mono_cols, align)
@@ -320,8 +322,11 @@ class HtmlDeck:
             top = BODY_Y + row_h * len(rows) + 14
             body = ('<div class="body" style="top:%gpx;height:%gpx">%s</div>'
                     % (top, FOOT_Y - top - 8, bullet_list(lines)[0]))
-        self._slide("content", '<h3>%s</h3><div class="rules"></div>%s%s'
-                    % (markup(title), table, body))
+        pic = ('<img class="corner-pic" src="%s" alt="">' % _html.escape(asset(corner), quote=True)
+               if corner else "")
+        self._slide("content has-corner" if corner else "content",
+                    '<h3>%s</h3><div class="rules"></div>%s%s%s'
+                    % (markup(title), table, body, pic))
 
     def table_bullets(self, title, lines, rows, col_w, marks=None, font_size=11,
                       bold_cols=(), mono_cols=(), align=None, body_w=404, y=None,
@@ -521,8 +526,13 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
   background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
 .codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
 .pic{position:absolute;left:__M__px;top:__BY__px;width:__CW__px;height:__BH__px;
-  display:grid;place-items:center}
-.pic img{max-width:100%;max-height:100%}
+  display:flex;align-items:center;justify-content:center}
+/* flex, not grid: in a grid the % heights resolve against an auto track and a tall picture
+   runs out of the box; here they resolve against the box - shrink to fit, never upscale */
+.pic img{max-width:100%;max-height:100%;object-fit:contain}
+/* small picture bottom right next to a table (table_top corner=) - text keeps clear of it */
+.corner-pic{position:absolute;right:72px;bottom:44px;max-width:200px;max-height:190px}
+.slide.has-corner .body{width:580px}
 
 /* --- table_top ---------------------------------------------------------- */
 .dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
