@@ -355,12 +355,14 @@ class Deck:
         lines.append(("**docalvers.de/" + src + "**", 0))
         return self.bullets(title, lines)
 
-    def picture(self, title, path, lines=None, width=CONTENT_W, gap=6):
-        """Picture across the top (scaled to width), bullets underneath."""
+    def picture(self, title, path, lines=None, width=CONTENT_W, gap=6, align="center"):
+        """Picture across the top (scaled to width), bullets underneath.
+        align="left" starts it at the left margin - same option as html_deck."""
         s, body = self._content("Inhalt", title, lines)
         iw, ih = Image.open(path).size
         h = width * ih / iw
-        s.shapes.add_picture(path, emu(MARGIN + (CONTENT_W - width) / 2), emu(BODY_Y),
+        x0 = MARGIN if align == "left" else MARGIN + (CONTENT_W - width) / 2
+        s.shapes.add_picture(path, emu(x0), emu(BODY_Y),
                              emu(width), emu(h))
         if body is not None:
             top = BODY_Y + h + gap
@@ -408,6 +410,12 @@ class Deck:
         self._check_body(lines, CONTENT_W, FOOT_Y - top - 8, title)
         add_click_build(s, [(body, lines)])
         return s
+
+    def say(self, *parts, hold=False):
+        """Narration for the slide just added - kept as speaker notes here; the HTML twin
+        (html_deck.say) plays it with Solita's voice."""
+        s = self.prs.slides[len(self.prs.slides._sldIdLst) - 1]
+        s.notes_slide.notes_text_frame.text = "\n\n".join(p.strip() for p in parts if p and p.strip())
 
     def save(self):
         save_deck(self.prs, self.out)

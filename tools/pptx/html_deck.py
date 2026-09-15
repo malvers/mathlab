@@ -175,6 +175,8 @@ class HtmlDeck:
         self.slides = []
         self.doc_title = self.name
         self.subtitle = ""
+        self.narration = {}   # slide index -> spoken parts, see say()
+        self.holds = set()    # slides after which Solita waits for a click, see say(hold=)
         if greeting:
             img = greet_image or web_morning_image(os.path.basename(out_name))
             self.greeting(greet_text, greet_quote, greet_author, img)
@@ -378,12 +380,26 @@ class HtmlDeck:
                    _html.escape(title, quote=True), lab_w, LAB_MIN_H, scale,
                    _html.escape(src, quote=True)))
 
-    def picture(self, title, path, lines=None, **kw):
+    def picture(self, title, path, lines=None, align="center", **kw):
+        """align="left" puts the picture at the left margin instead of the middle -
+        a tree diagram reads from the left, and centred it floats in the slide."""
         src = asset(path)
+        cls = "pic left" if align == "left" else "pic"
         self._slide("content", '<h3>%s</h3><div class="rules"></div>'
-                    '<div class="pic"><img src="%s" alt=""></div>%s'
-                    % (markup(title), _html.escape(src, quote=True),
+                    '<div class="%s"><img src="%s" alt=""></div>%s'
+                    % (markup(title), cls, _html.escape(src, quote=True),
                        '<div class="body">%s</div>' % bullet_list(lines)[0] if lines else ""))
+
+    def say(self, *parts, hold=False):
+        """Narration for the slide just added (Doc, 15.09.2026: Solita reads the deck -
+        "NIEMALS Browserstimme! So wie beim DocPad!"). parts[0] is spoken when the slide
+        appears, parts[k] while click group k comes in. The clips are made separately by
+        tools/pptx/deck_audio.mjs with Solita's DocPad voice; the page only plays them.
+        hold=True: after this slide Solita does not turn on by herself - the next slide (a
+        solution) comes only on a click, and she goes on talking there."""
+        self.narration[len(self.slides) - 1] = [p.strip() for p in parts if p and p.strip()]
+        if hold:
+            self.holds.add(len(self.slides) - 1)
 
     # ------------------------------------------------------------- output ---
     def save(self, path=None):
@@ -395,11 +411,17 @@ class HtmlDeck:
         return path
 
     def render(self):
+        # the spoken parts travel inside the page - deck_audio.mjs reads them from here too
+        narr = (json.dumps({"deck": self.name,
+                            "slides": {str(k): v for k, v in sorted(self.narration.items())},
+                            "hold": sorted(self.holds)},
+                           ensure_ascii=False).replace("</", "<\\/") if self.narration else "")
         return (PAGE.replace("__TITLE__", _html.escape(self.doc_title, quote=False))
                     .replace("__SUB__", _html.escape(self.subtitle, quote=False))
                     .replace("__KATEX__", KATEX)
                     .replace("__CSS__", CSS)
                     .replace("__SLIDES__", "\n".join(self.slides))
+                    .replace("__NARR__", narr)
                     .replace("__JS__", JS))
 
 
@@ -431,7 +453,7 @@ body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
   width:__CW__px;height:1px;background:rgba(14,36,78,.16)}
 .foot{position:absolute;left:__M__px;top:__FOOTT__px;font-size:10px;letter-spacing:1.2px;
   color:var(--muted)}
-.pageno{position:absolute;right:24px;top:__FOOTT__px;font-size:10px;letter-spacing:1.2px;
+.pageno{position:absolute;right:72px;top:__FOOTT__px;font-size:10px;letter-spacing:1.2px;
   color:var(--muted)}
 
 h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
@@ -530,6 +552,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 /* flex, not grid: in a grid the % heights resolve against an auto track and a tall picture
    runs out of the box; here they resolve against the box - shrink to fit, never upscale */
 .pic img{max-width:100%;max-height:100%;object-fit:contain}
+.pic.left{justify-content:flex-start}
 /* small picture bottom right next to a table (table_top corner=) - text keeps clear of it */
 .corner-pic{position:absolute;right:72px;bottom:44px;max-width:200px;max-height:190px}
 .slide.has-corner .body{width:580px}
@@ -586,17 +609,51 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 .step.on{opacity:1}
 
 /* --- HUD ---------------------------------------------------------------- */
-#hud{position:fixed;right:10px;bottom:8px;z-index:9}
-#hud button{display:block;width:28px;height:28px;padding:0;border:0;background:transparent;
-  color:var(--body);opacity:.7;cursor:pointer;transition:opacity .2s}
+#hud{position:fixed;right:10px;bottom:8px;z-index:9;display:flex;gap:6px}
+#hud button{display:flex;align-items:center;justify-content:center;width:22px;height:22px;padding:0;border:0;border-radius:5px;
+  background:#7E8FB5;box-shadow:0 1px 1px rgba(0,0,0,.12);   /* Dostojewski's colour on the greeting slide */
+  color:#fff;opacity:.85;cursor:pointer;transition:opacity .2s}
 #hud button:hover{opacity:1}
-#hud button svg{display:block;width:18px;height:18px;margin:auto}
+#hud button svg{display:block;width:13px;height:13px;margin:0;stroke-width:1.4;flex:none}
+#hud button[hidden]{display:none}   /* flex would otherwise show a hidden button */
+/* Solita reads the deck (say() + deck_audio.mjs): play button on the title slide, in the middle
+   of the orbit ring (Doc, 15.09.2026: "kleiner, alles gruen, weiter nach rechts, 2. Folie") */
+.play-big{position:absolute;left:838px;top:244px;width:44px;height:44px;border-radius:50%;
+  border:0;background:var(--green);color:#fff;cursor:pointer;z-index:2;
+  box-shadow:0 2px 8px rgba(0,0,0,.25);display:grid;place-items:center}
+.play-big svg{width:20px;height:20px}
+.play-big:hover{filter:brightness(1.08)}
+.play-big-label{position:absolute;left:760px;width:200px;top:298px;text-align:center;
+  font-family:Orbitron,sans-serif;font-size:10px;letter-spacing:1.5px;color:var(--green);
+  text-transform:uppercase}
+/* slide number typed for a jump (1 7 Enter) */
+#jump{position:fixed;right:10px;bottom:42px;z-index:9;padding:4px 10px;border-radius:7px;
+  background:rgba(255,255,255,.85);box-shadow:0 1px 4px rgba(0,0,0,.28);color:#0E244E;
+  font:600 14px Raleway,system-ui,sans-serif}
+/* overview of all slides (o, grid button in the HUD bottom right) */
+#hud{display:flex;gap:4px}          /* overview, play and fullscreen side by side */
+#hud #ovbtn svg{width:14px;height:14px}
+#overview{position:fixed;inset:0;z-index:20;background:rgba(14,36,78,.94);overflow:auto;padding:28px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:18px;align-content:start;
+  grid-auto-rows:max-content}   /* the tiles' overflow:hidden would let the rows shrink to the window */
+#overview[hidden]{display:none}
+.ov-cell{position:relative;cursor:pointer;border-radius:6px;overflow:hidden;
+  outline:3px solid transparent;box-shadow:0 2px 10px rgba(0,0,0,.35)}
+.ov-cell:hover{outline-color:#799E31}
+.ov-cell.cur{outline-color:#F5C242}
+.ov-thumb{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#fff}
+.ov-thumb > .slide{display:block!important;position:absolute;left:0;top:0;width:960px;height:540px;
+  transform-origin:0 0;pointer-events:none}
+.ov-thumb .step{opacity:1!important}
+.ov-num{position:absolute;left:8px;bottom:6px;padding:2px 7px;border-radius:5px;
+  background:rgba(14,36,78,.78);color:#fff;font:600 12px Raleway,system-ui,sans-serif}
+@media print{#ovbtn,#overview,#jump{display:none!important}}
 #bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
   transition:width .25s ease;z-index:9}
 
 @media print{
   html,body{overflow:visible;background:#fff}
-  #hud,#bar{display:none}
+  #hud,#bar,.play-big,.play-big-label{display:none}
   #stage{position:static;display:block}
   #deck{transform:none!important;width:auto;height:auto}
   .slide{display:block!important;position:relative;width:__W__px;height:__H__px;
@@ -652,6 +709,7 @@ function prev(){
 addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
   const k = e.key;
+  if (/^(Arrow|Page|Home|End| )/.test(k)) narr.stop();   // turning pages by hand pauses Solita
   if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
   else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
   else if (k === 'Home') { si = 0; step = 0; paint(); }
@@ -660,10 +718,110 @@ addEventListener('keydown', e => {
 });
 addEventListener('click', e => {
   // links (lab bar, picture credits) open - they do not turn the page as well
-  if (e.target.closest('#hud') || e.target.closest('a')) return;
+  if (e.target.closest('#hud') || e.target.closest('a') || e.target.closest('.play-big')) return;
+  narr.stop();                                       // a click turns the page by hand
   if (e.target.closest('.labbar button')) { next(); return; }
   next();
 });   // clicks inside a lab stay in the lab - they never reach this document
+// type the slide number, then Enter: 1 7 Enter jumps to slide 17 (Doc, 15.09.2026) - like
+// PowerPoint the slide starts unbuilt; Esc or a 2.5 s pause drops the typed number
+(function () {
+  let buf = '', timer = 0;
+  const box = document.createElement('div');
+  box.id = 'jump';
+  box.hidden = true;
+  document.body.appendChild(box);
+  const clear = function () { buf = ''; box.hidden = true; };
+  addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (/^[0-9]$/.test(e.key)) {
+      buf = (buf + e.key).replace(/^0+/, '').slice(-3);
+      box.textContent = 'Folie ' + (buf || '0');
+      box.hidden = false;
+      clearTimeout(timer); timer = setTimeout(clear, 2500);
+      e.preventDefault();
+    } else if (e.key === 'Enter' && buf) {
+      const n = parseInt(buf, 10);
+      clear();
+      if (n >= 1 && n <= slides.length) {
+        if (typeof narr !== 'undefined') narr.stop();   // a jump pauses Solita like turning by hand
+        si = n - 1; step = 0; paint();
+      }
+      e.preventDefault();
+    } else if (e.key === 'Escape' && buf) { clear(); }
+  });
+})();
+// overview of all slides: o (or the grid button bottom right) opens it, a click jumps there,
+// Esc, o or a click beside the tiles closes it (Doc, 15.09.2026: "Uebersicht ueber alle Folien")
+(function () {
+  const ov = document.createElement('div');
+  ov.id = 'overview';
+  ov.hidden = true;
+  document.body.appendChild(ov);
+  const btn = document.createElement('button');
+  btn.id = 'ovbtn';
+  btn.type = 'button';
+  btn.title = 'Übersicht aller Folien (o)';
+  btn.setAttribute('aria-label', 'Übersicht aller Folien');
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">'
+    + '<rect x="2.5" y="2.5" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="2.5" width="8.5" height="8.5" rx="1.2"/>'
+    + '<rect x="2.5" y="13" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="13" width="8.5" height="8.5" rx="1.2"/></svg>';
+  const hudBox = document.getElementById('hud');   // bottom right, next to play and fullscreen
+  if (hudBox) hudBox.insertBefore(btn, hudBox.firstChild); else document.body.appendChild(btn);
+  let built = false;
+  function close() { ov.hidden = true; }
+  function build() {
+    slides.forEach(function (s, i) {
+      const cell = document.createElement('div');
+      cell.className = 'ov-cell';
+      const thumb = document.createElement('div');
+      thumb.className = 'ov-thumb';
+      const c = s.cloneNode(true);                     // a copy, fully built, without ids
+      c.querySelectorAll('[id]').forEach(function (e) { e.removeAttribute('id'); });
+      c.classList.add('on');
+      thumb.appendChild(c);
+      const num = document.createElement('span');
+      num.className = 'ov-num';
+      num.textContent = i + 1;
+      cell.appendChild(thumb);
+      cell.appendChild(num);
+      cell.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (typeof narr !== 'undefined') narr.stop();
+        si = i; step = 0; paint(); close();
+      });
+      ov.appendChild(cell);
+    });
+    built = true;
+  }
+  function scale() {
+    ov.querySelectorAll('.ov-thumb').forEach(function (t) {
+      t.firstChild.style.transform = 'scale(' + (t.clientWidth / 960) + ')';
+    });
+  }
+  function open() {
+    if (typeof narr !== 'undefined') narr.stop();
+    if (!built) build();
+    ov.hidden = false;
+    [].forEach.call(ov.children, function (c, i) { c.classList.toggle('cur', i === si); });
+    scale();
+    if (ov.children[si]) ov.children[si].scrollIntoView({ block: 'center' });
+  }
+  btn.addEventListener('click', function (e) { e.stopPropagation(); if (ov.hidden) open(); else close(); });
+  ov.addEventListener('click', function (e) { e.stopPropagation(); close(); });
+  addEventListener('resize', function () { if (!ov.hidden) scale(); });
+  addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'o' || e.key === 'O') {
+      if (ov.hidden) open(); else close();
+      e.preventDefault(); e.stopImmediatePropagation(); return;
+    }
+    if (!ov.hidden) {                                  // nothing underneath moves meanwhile
+      if (e.key === 'Escape') close();
+      e.preventDefault(); e.stopImmediatePropagation();
+    }
+  }, true);
+})();
 // fullscreen toggle - the same corner-bracket icon as the SVP pill, in and out
 const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>'
   + '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>';
@@ -706,6 +864,87 @@ addEventListener('load', () => {
     catch (err) { el.textContent = el.dataset.tex; }
   });
 });
+// Solita reads the deck (Doc, 15.09.2026: "NIEMALS Browserstimme! So wie beim DocPad!") - the
+// clips come from tools/pptx/deck_audio.mjs with her DocPad voice, nothing is synthesised here.
+// Part 0 of a slide is spoken when it appears, part k while click group k comes in, then on.
+const narr = (function () {
+  const api = { playing: false, stop: function () {} };
+  let data = null;
+  try { data = JSON.parse(document.getElementById('narration').textContent || 'null'); } catch (e) { }
+  if (!data || !data.slides) return api;
+  const btn = document.getElementById('play');
+  const PLAY = '<path d="M6.5 5v14l11-7z" fill="currentColor"/>';
+  const PAUSE = '<path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/>';
+  const pad = n => String(n).padStart(2, '0');
+  const parts = s => (data.slides[s] || []).length;
+  let audio = null, aSlide = -1, part = 0;
+  const holds = data.hold || [];
+  let held = -1;                                      // slide where Solita waits for a click
+  const big = document.createElement('button');
+  big.type = 'button';
+  big.className = 'play-big';
+  const label = document.createElement('div');
+  label.className = 'play-big-label';
+  label.textContent = 'Solita erklärt';
+  const home = document.querySelector('.slide.title') || slides[0];   // title slide, in the orbit ring
+  home.appendChild(big);
+  home.appendChild(label);
+  btn.hidden = false;
+  function show() {
+    const icon = '<svg viewBox="0 0 24 24" aria-hidden="true">' + (api.playing ? PAUSE : PLAY) + '</svg>';
+    const t = api.playing ? 'Pause (p)' : held >= 0 ? 'Weiter mit Klick (p)' : 'Solita erklärt (p)';
+    [btn, big].forEach(b => { b.innerHTML = icon; b.title = t; b.setAttribute('aria-label', t); });
+  }
+  function run() {
+    if (!api.playing) return;
+    if (part >= parts(si)) {                          // slide done: everything in, then on
+      step = groups(slides[si]); paint();
+      if (si >= slides.length - 1) { api.playing = false; audio = null; show(); return; }
+      // say(hold=True): e.g. before a solution - the next slide comes only on a click
+      if (holds.indexOf(si) >= 0) { api.playing = false; audio = null; held = si; show(); return; }
+      setTimeout(function () { if (!api.playing) return; si++; step = 0; part = 0; paint(); run(); }, 700);
+      return;
+    }
+    if (part > 0) { step = Math.min(part, groups(slides[si])); paint(); }
+    aSlide = si;
+    audio = new Audio('audio/' + data.deck + '/s' + pad(si) + '-' + pad(part) + '.mp3');
+    audio.onended = function () { part++; run(); };
+    audio.onerror = function () { part++; run(); };   // a missing clip must not hang the talk
+    audio.play().catch(function () { api.playing = false; show(); });
+  }
+  function resume(n) {                                // go on talking from the top of slide n
+    held = -1; api.playing = true; si = n; step = 0; part = 0; audio = null; show(); paint(); run();
+  }
+  function toggle() {
+    if (!api.playing && held >= 0 && si === held && si < slides.length - 1) { resume(si + 1); return; }
+    held = -1;
+    if (api.playing) { api.playing = false; if (audio) audio.pause(); show(); return; }
+    api.playing = true; show();
+    if (audio && aSlide === si && audio.paused && !audio.ended && audio.currentTime > 0) { audio.play(); return; }
+    part = step; audio = null; run();                 // start where the page stands
+  }
+  api.stop = function () {
+    if (held >= 0) {
+      // waiting at a hold: the click that turns to the next slide lets Solita go on there
+      // (stop runs before the page handler's next(), so look once that has happened)
+      const h = held; held = -1; show();
+      setTimeout(function () { if (!api.playing && si === h + 1) resume(si); }, 0);
+      return;
+    }
+    if (!api.playing) return;
+    api.playing = false; if (audio) audio.pause(); audio = null; show();
+  };
+  // stop the click here: toggle redraws the icon, and the page's click handler would then no
+  // longer see the (detached) target inside #hud - it turned the page and paused Solita again
+  btn.onclick = function (e) { e.stopPropagation(); toggle(); };
+  big.onclick = function (e) { e.stopPropagation(); toggle(); };
+  addEventListener('keydown', function (e) {
+    if ((e.key === 'p' || e.key === 'P') && !e.metaKey && !e.ctrlKey && !e.altKey) toggle();
+  });
+  show();
+  return api;
+})();
+
 paint();
 fromHash();
 """
@@ -729,7 +968,8 @@ PAGE = """<!DOCTYPE html>
 __SLIDES__
 </div></div>
 <div id="bar"></div>
-<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<script id="narration" type="application/json">__NARR__</script>
 <script>__JS__</script>
 </body>
 </html>
