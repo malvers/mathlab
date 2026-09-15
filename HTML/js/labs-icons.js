@@ -654,5 +654,24 @@ const LAB_ICONS = {
             <!-- the PNG carries its own margin inside the rounded square, so it needs more of the
                  box than the drawn icons to look the same size (Doc: "'n tick größer") -->
             <image href="pinkerfinder/icon.png" x="4" y="4" width="92" height="92" />
+        </svg>`,
+    "docpad": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- the calculator case with its stripe on top -->
+            <rect x="24" y="8" width="52" height="84" rx="8" fill="rgba(0, 210, 255, 0.08)" stroke="#00D2FF" stroke-width="2" />
+            <line x1="31" y1="14.5" x2="69" y2="14.5" stroke="#00D2FF" stroke-width="1.6" stroke-linecap="round" opacity="0.7" />
+            <!-- the display: axes and a parabola -->
+            <rect x="31" y="20" width="38" height="32" rx="3" fill="rgba(0, 210, 255, 0.12)" stroke="#00D2FF" stroke-width="1.4" />
+            <g stroke="rgba(0, 210, 255, 0.55)" stroke-width="1">
+                <line x1="33" y1="40" x2="67" y2="40" /><line x1="50" y1="22" x2="50" y2="50" />
+            </g>
+            <path d="M 36 24 Q 50 60 64 24" fill="none" stroke="#F5C242" stroke-width="2.2" stroke-linecap="round" />
+            <!-- the keys, EXE in green -->
+            <g fill="rgba(0, 210, 255, 0.35)">
+                <rect x="31" y="58" width="8" height="5" rx="1.5" /><rect x="41" y="58" width="8" height="5" rx="1.5" /><rect x="51" y="58" width="8" height="5" rx="1.5" /><rect x="61" y="58" width="8" height="5" rx="1.5" />
+                <rect x="31" y="66" width="8" height="5" rx="1.5" /><rect x="41" y="66" width="8" height="5" rx="1.5" /><rect x="51" y="66" width="8" height="5" rx="1.5" /><rect x="61" y="66" width="8" height="5" rx="1.5" />
+                <rect x="31" y="74" width="8" height="5" rx="1.5" /><rect x="41" y="74" width="8" height="5" rx="1.5" /><rect x="51" y="74" width="8" height="5" rx="1.5" /><rect x="61" y="74" width="8" height="5" rx="1.5" />
+                <rect x="31" y="82" width="8" height="5" rx="1.5" /><rect x="41" y="82" width="8" height="5" rx="1.5" /><rect x="51" y="82" width="8" height="5" rx="1.5" />
+            </g>
+            <rect x="61" y="82" width="8" height="5" rx="1.5" fill="rgb(121, 158, 49)" />
         </svg>`
 };
