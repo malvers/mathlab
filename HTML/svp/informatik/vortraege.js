@@ -62,13 +62,15 @@
             page: 'inf11.html', back: 'Informatik BGY 11',
             sub: 'Lernbereich 1 \u201eInformatik als Wissenschaft\u201c, Lernbereich 2 \u201ePers\u00f6nliches Informationsmanagement\u201c, Lernbereich 3 \u201eIT-Sicherheit und \u00d6kologie\u201c + Wahlbereich \u201eDatenkomprimierung\u201c',
             switchLabel: 'Kurs wechseln',
-            klassen: [['a', 'BGY26-1'], ['b', 'BGY26-2']],
-            /* Talk dates by PLACE: BGY26-1 and BGY26-2 share one double lesson on
-               Tuesday (coupled in Untis), one talk per double lesson and page,
-               starting in week 40 (Doc, 15.09.2026). Doc's date on the page wins. */
-            dates: ['2026-09-29', '2026-10-06', '2026-10-27', '2026-11-03', '2026-11-10',
-                    '2026-11-17', '2026-11-24', '2026-12-01', '2026-12-08', '2026-12-15',
-                    '2026-12-22', '2027-01-05'],
+            /* BGY26-1 and BGY26-2 are ONE coupled group in Untis (Info and Mathe),
+               so one joint list since 15.09.2026 (Doc: "zusammen"). The old b rows
+               stay in the database untouched; inf11b-vortraege.html shows this
+               joint list as well. */
+            klassen: [['a', 'BGY26-1 + BGY26-2']],
+            /* Talk dates by PLACE: two talks per Tuesday double lesson (one per
+               lesson), starting in week 40 (Doc, 15.09.2026). Doc's date wins. */
+            dates: twice(['2026-09-29', '2026-10-06', '2026-10-27', '2026-11-03', '2026-11-10',
+                          '2026-11-17', '2026-11-24']),
             labels: { lb1: ['LB 1', 'b-orange'], lb2: ['LB 2', 'b-cyan'], lb3: ['LB 3', 'b-violet'], lb4: ['LB 4', 'b-teal'], wb: ['Wahlbereich', 'b-green'] },
             topics: [
                 { lb: 'lb1', title: 'Meilensteine der Rechentechnik', sub: 'Von Schickard und Zuse bis zum Rechenzentrum: Welche Idee war jeweils der eigentliche Sprung?' },
