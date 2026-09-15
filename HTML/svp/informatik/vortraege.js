@@ -111,6 +111,33 @@
                 { lb: 'wb', title: 'Wie ein neuronales Netz lernt — und wo es irrt', sub: 'Trainingsdaten, Muster, Fehler: ein selbst trainiertes Beispiel, dazu Bias und Halluzination als Grenze.' }
             ]
         },
+        /* BGY 13 (Grundkurs, Abiturjahrgang) — lb3 "Algorithmen und Programme"
+           (Fortsetzung), lb4 "Projekt Webtechnologie" (4A), wb "Quanteninformatik".
+           One Lerngruppe (BGY24) from svp-map.json, like inf12. */
+        inf13: {
+            page: 'inf13.html', back: 'Informatik BGY 13',
+            sub: 'Lernbereich 3 „Algorithmen und Programme“, Lernbereich 4A „Projekt Webtechnologie“ + Wahlbereich „Quanteninformatik“',
+            switchLabel: 'Kurs wechseln',
+            klassen: [['a', 'BGY24']],
+            /* Talk dates by PLACE: one lesson on Monday afternoon, one talk per
+               lesson, starting in week 40 (Doc, 15.09.2026). Doc's date wins. */
+            dates: ['2026-09-28', '2026-10-05', '2026-10-26', '2026-11-02', '2026-11-09',
+                    '2026-11-16', '2026-11-23', '2026-11-30', '2026-12-07', '2026-12-14',
+                    '2026-12-21', '2027-01-04'],
+            labels: { lb3: ['LB 3', 'b-violet'], lb4: ['LB 4A', 'b-teal'], wb: ['Wahlbereich', 'b-green'] },
+            topics: [
+                { lb: 'lb3', title: 'Vom ggT zum RSA-Schlüssel', sub: 'Der euklidische Algorithmus ist über 2300 Jahre alt — und steckt heute im Herzen jeder sicheren Verbindung. Wie hängt beides zusammen?' },
+                { lb: 'lb3', title: 'Suchen in Milliarden Datensätzen', sub: 'Lineare Suche, binäre Suche, Hashing, Suchindex: Warum eine Suchmaschine in Millisekunden antwortet.' },
+                { lb: 'lb3', title: 'Rekursion: Wenn sich ein Problem selbst aufruft', sub: 'Türme von Hanoi, Fraktale, Ordnerbäume — elegant gelöst, und wann die Rekursion den Speicher sprengt.' },
+                { lb: 'lb3', title: 'Objektorientierung in echten Programmen', sub: 'Klassen, Vererbung, Oberflächen: Wie ein großes Programm in handliche Teile zerfällt — an einem Open-Source-Projekt gezeigt.' },
+                { lb: 'lb3', title: 'Was kein Computer kann', sub: 'Endlichkeit, Laufzeit, Halteproblem: Warum es Fragen gibt, die kein Programm je beantworten wird.' },
+                { lb: 'lb3', title: 'Wenn Algorithmen entscheiden', sub: 'Kredit, Bewerbung, Strafjustiz: Wer trägt die Verantwortung, wenn ein System diskriminiert — und wie prüft man es?' },
+                { lb: 'lb4', title: 'Eine Seite für alle Geräte', sub: 'Media Queries, flexible Raster, mobile first: Wie eine Webseite auf Handy, Tablet und Beamer gleich gut aussieht.' },
+                { lb: 'lb4', title: 'Wie die Seite in den Browser kommt', sub: 'DNS, TCP/IP, HTTP: Der Weg einer Anfrage vom Namen bis zum fertigen Bild — live mitverfolgt.' },
+                { lb: 'lb4', title: 'Sicherheitslücken im eigenen Webprojekt', sub: 'SQL-Injection, XSS, Passwort-Hashing, HTTPS: die typischen Lücken finden und schließen.' },
+                { lb: 'wb', title: 'Quantencomputer: Hype oder Revolution?', sub: 'Qubit, Überlagerung, Verschränkung — was ein Quantencomputer heute wirklich kann und was er für die Verschlüsselung bedeutet.' }
+            ]
+        },
         /* FOS 11 — lb1 "Persönliches Informationsmanagement", lb2 "IT-Sicherheit und Ökologie",
            wb "Kryptografie in der Informatik" */
         fos11: {

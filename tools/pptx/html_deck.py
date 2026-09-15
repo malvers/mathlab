@@ -224,13 +224,27 @@ class HtmlDeck:
       <h1>%s</h1>
       <p class="sub">%s</p>""" % (markup(kicker), markup(title), markup(sub)))
 
-    def chapter(self, num, title, sub):
-        self._slide("chapter", """
+    def chapter(self, num, title, sub, image=None, credit=None, credit_url=None):
+        """Chapter divider. With `image` a picture sits on the right and the text
+        narrows to the left; `credit` (linked to `credit_url`) names the source
+        under it - the decks are public, so every foreign picture carries its
+        licence line. Same geometry as slides.Deck.chapter."""
+        cls, pic = "chapter", ""
+        if image:
+            cls = "chapter has-pic"
+            pic = ('<figure class="chap-pic"><img src="%s" alt=""></figure>'
+                   % _html.escape(asset(image), quote=True))
+            if credit and credit_url:
+                pic += ('<a class="chap-credit" href="%s" target="_blank" rel="noopener">%s</a>'
+                        % (_html.escape(credit_url, quote=True), _html.escape(credit, quote=False)))
+            elif credit:
+                pic += '<p class="chap-credit">%s</p>' % _html.escape(credit, quote=False)
+        self._slide(cls, """
       <div class="chapter-bar"></div>
       <p class="kicker">Kapitel %02d</p>
       <h2>%s</h2>
       <p class="sub">%s</p>
-      <div class="hair"></div>""" % (num, markup(title), markup(sub)))
+      <div class="hair"></div>%s""" % (num, markup(title), markup(sub), pic))
 
     def bullets(self, title, lines):
         body, _ = bullet_list(lines)
@@ -482,6 +496,17 @@ p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:
   color:var(--muted);line-height:1.3}
 .slide.chapter .hair{position:absolute;left:__M__px;top:356px;width:__CW__px;height:1px;
   background:rgba(14,36,78,.14)}
+/* with a picture: text on the left, picture + licence line on the right */
+.slide.chapter.has-pic h2{width:420px;font-size:28px}
+.slide.chapter.has-pic .sub{width:420px}
+.slide.chapter.has-pic .hair{width:448px;top:372px}   /* room for a two-line sub */
+.chap-pic{position:absolute;left:560px;top:150px;width:328px;height:230px;margin:0;
+  display:grid;place-items:center;overflow:hidden;background:var(--card);
+  border:.75px solid rgba(14,36,78,.12)}
+.chap-pic img{max-width:100%;max-height:100%;display:block}
+.chap-credit{position:absolute;left:560px;top:388px;width:328px;font-size:9px;line-height:1.3;
+  color:var(--muted);text-decoration:none;letter-spacing:.2px}
+a.chap-credit:hover{color:var(--red);text-decoration:underline}
 
 /* --- merksatz ----------------------------------------------------------- */
 .slide.merksatz .quote-bar{position:absolute;left:__M__px;top:190px;width:4px;height:150px;
@@ -624,7 +649,8 @@ addEventListener('keydown', e => {
   else if (k === 'f' || k === 'F') { full(); }
 });
 addEventListener('click', e => {
-  if (e.target.closest('#hud') || e.target.closest('.labbar a')) return;
+  // links (lab bar, picture credits) open - they do not turn the page as well
+  if (e.target.closest('#hud') || e.target.closest('a')) return;
   if (e.target.closest('.labbar button')) { next(); return; }
   next();
 });   // clicks inside a lab stay in the lab - they never reach this document

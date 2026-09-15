@@ -17,7 +17,10 @@ d.title("Informatik — Grundkurs 11", "Historische Meilensteine",
         "Von Abakus und Rechenuhr über Zuse bis zum Mikroprozessor")
 
 # ---------------------------------------------------------------- Kapitel 01
-d.chapter(1, "Rechnen mit Kugeln und Zahnrädern", "Rechenhilfsmittel und mechanische Rechenmaschinen")
+d.chapter(1, "Rechnen mit Kugeln und Zahnrädern", "Rechenhilfsmittel und mechanische Rechenmaschinen",
+          image="img/meilensteine-pascaline.jpg",
+          credit="Pascaline, Musée des Arts et Métiers — Foto: David Monniaux, CC BY-SA 3.0",
+          credit_url="https://commons.wikimedia.org/wiki/File:Arts_et_Metiers_Pascaline_dsc03869.jpg")
 
 d.bullets("Wo wir stehen", [
     ("Letzte Woche: Informatik als **Medium anderer Wissenschaften**", 0),
@@ -60,7 +63,10 @@ d.table_top("Die ersten Rechenmaschinen", [
 ], font_size=11, bold_cols=(1,))
 
 # ---------------------------------------------------------------- Kapitel 02
-d.chapter(2, "Programme auf Papier", "Lochkarte, Babbage, Lovelace, Hollerith")
+d.chapter(2, "Programme auf Papier", "Lochkarte, Babbage, Lovelace, Hollerith",
+          image="img/meilensteine-lochkarte.jpg",
+          credit="Hollerith-Lochkarte — gemeinfrei, Wikimedia Commons",
+          credit_url="https://commons.wikimedia.org/wiki/File:Hollerith_Punched_Card.jpg")
 
 d.bullets("Die Lochkarte: Steuerung zum Anfassen", [
     ("1805: Der **Jacquard-Webstuhl** liest Lochkarten, die das Muster Reihe für Reihe vorgeben", 0),
@@ -86,7 +92,10 @@ d.bullets("Hermann Hollerith: Daten in Massen", [
 ])
 
 # ---------------------------------------------------------------- Kapitel 03
-d.chapter(3, "Die ersten Computer", "Zuse, Turing, von Neumann")
+d.chapter(3, "Die ersten Computer", "Zuse, Turing, von Neumann",
+          image="img/meilensteine-z3.jpg",
+          credit="Nachbau der Z3, Deutsches Museum — Foto: Venusianer, CC BY-SA 3.0",
+          credit_url="https://commons.wikimedia.org/wiki/File:Z3_Deutsches_Museum.JPG")
 
 d.bullets("Konrad Zuse und die Z3", [
     ("1941 in Berlin: die **Z3** — der erste funktionsfähige, programmgesteuerte Rechner", 0),
@@ -110,7 +119,10 @@ d.bullets("Das Von-Neumann-Prinzip", [
 ])
 
 # ---------------------------------------------------------------- Kapitel 04
-d.chapter(4, "Vom Rechensaal auf den Schreibtisch", "Röhre, Transistor, Chip")
+d.chapter(4, "Vom Rechensaal auf den Schreibtisch", "Röhre, Transistor, Chip",
+          image="img/meilensteine-eniac.jpg",
+          credit="Glen Beck und Betty Snyder programmieren den ENIAC — U.S. Army, gemeinfrei",
+          credit_url="https://commons.wikimedia.org/wiki/File:Glen_Beck_and_Betty_Snyder_program_the_ENIAC_in_building_328_at_the_Ballistic_Research_Laboratory.jpg")
 
 d.table_top("Rechnergenerationen", [
     ["Schaltelement", "grob ab", "Beispiel", "Folge"],
