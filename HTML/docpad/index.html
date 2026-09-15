@@ -41,7 +41,7 @@
 <script>
 (function () {
   'use strict';
-  const VERSION = '320469811bb5', CACHE = 'docpad-' + VERSION, ITER = 600000;
+  const VERSION = '012ef1a35ec0', CACHE = 'docpad-' + VERSION, ITER = 600000;
   const $ = id => document.getElementById(id);
   const say = (t, err) => { $('msg').textContent = t; $('msg').className = 'msg' + (err ? ' err' : ''); };
   async function startSW() {                                // the worker that serves ./app/ from the cache
@@ -116,7 +116,7 @@
   caches.has(CACHE).then(async ok => {
     if (ok) { say('Öffne …'); await startSW(); location.replace('app/'); return; }   // this bundle unlocked before
     const base = await loadBase();                        // a new bundle: the key remembered on this device
-    if (!base) return;
+    if (!base) { if (/[?&]v=/.test(location.search)) say('Neue DOCPAD-Version - bitte Passwort eingeben'); return; }   // sent here by sw.js
     $('go').disabled = true;
     try { await unlock(base); location.replace('app/'); }
     catch (e) {
