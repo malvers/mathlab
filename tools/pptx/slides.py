@@ -319,8 +319,9 @@ class Deck:
         return s
 
     def table_top(self, title, rows, col_w, lines, marks=None, font_size=12, row_h=None,
-                  bold_cols=(), mono_cols=(), align=None, x=None):
-        """Full-width table on top, bullets underneath."""
+                  bold_cols=(), mono_cols=(), align=None, x=None, corner=None):
+        """Full-width table on top, bullets underneath. `corner`: small picture bottom
+        right (max 200 x 190 pt), bullets narrowed around it - same as html_deck."""
         s, body = self._content("Inhalt", title, lines)
         bad = check_fit(rows, col_w, font_size, bold_cols, mono_cols)
         assert not bad, (title, bad)
@@ -329,10 +330,19 @@ class Deck:
         add_table(s, rows, x, BODY_Y, col_w, font_size=font_size, row_h=row_h, marks=marks,
                   bold_cols=bold_cols, mono_cols=mono_cols, align=align)
         top = BODY_Y + row_h * len(rows) + 14
+        body_w = CONTENT_W - 236 if corner else CONTENT_W
         if body is not None:
-            self.place(body, MARGIN, top, CONTENT_W, FOOT_Y - top - 8)
-            self._check_body(lines, CONTENT_W, FOOT_Y - top - 8, title)
+            self.place(body, MARGIN, top, body_w, FOOT_Y - top - 8)
+            self._check_body(lines, body_w, FOOT_Y - top - 8, title)
             add_click_build(s, [(body, lines)])
+        if corner:
+            path = corner if os.path.isabs(corner) else os.path.normpath(os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), "..", "..", "HTML", "decks", corner))
+            iw, ih = Image.open(path).size
+            w, h = 200, 200 * ih / iw
+            if h > 190:
+                w, h = 190 * iw / ih, 190
+            s.shapes.add_picture(path, emu(MARGIN + CONTENT_W - w), emu(FOOT_Y - 8 - h), emu(w), emu(h))
         return s
 
     def lab(self, title, src, lines=None, note="", **kw):
