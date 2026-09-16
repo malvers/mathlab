@@ -1901,6 +1901,12 @@ td.num { color: var(--muted); font-variant-numeric: tabular-nums; white-space: n
    orangen Balken). Zweite Zelle, nicht erste: davor steht die im Normalfall
    ausgeblendete Pfeil-Spalte des Verschieben-Modus. */
 #plan-table tbody td:nth-child(2) { padding-left: 16px; }
+/* Doc, 16.09.2026: "alle gleich" - every plan row, weeks and holidays, gets the
+   same height. A KaTeX exponent in the topic made single weeks 1-2 px taller,
+   the holiday rows with their smaller font were 7 px lower. On a table cell the
+   height is a minimum: a topic that wraps (narrow screens) still grows its row.
+   44 px first, then Doc: "mach mal 46". */
+#plan-table tbody tr:not(.detail-row) > td { height: 46px; }
 /* Doc, 09.09.2026: "die Buchstaben SW 3px nach rechts", dann zweimal "noch
    1px" - nur die Ueberschrift, die Zahlen darunter bleiben, wo sie sind. */
 #plan-table thead th:nth-child(2) { padding-left: 21px; }
@@ -2048,6 +2054,19 @@ tr.kw-now-sub {
         rgba(245, 194, 66, 0.12) 0%,
         rgba(245, 194, 66, 0.01) 50%,
         rgba(245, 194, 66, 0.12) 100%);
+}
+/* Weeks that are over (svp-plan.js markPastWeeks) - Doc, 16.09.2026: "mach die,
+   die schon gelaufen sind gaaaaaanz leicht grau". Neutral grey with little alpha,
+   so it reads as a faint grey on the white card and on the dark blue one. */
+/* 0.06 first: 247 against 254 on the white card, Doc: "nicht sichtbar". */
+/* Then "auch Verlauf wie Ferien & Co": same symmetric shape as the current week
+   and the holidays - the grey at both edges, almost nothing in the middle.
+   On the row, not the cells, so it runs once across the whole week. */
+tr.kw-past {
+    background-image: linear-gradient(90deg,
+        rgba(128, 128, 128, 0.13) 0%,
+        rgba(128, 128, 128, 0.06) 50%,   /* 0.02 first, Doc: "in der Mitte weniger weiss" */
+        rgba(128, 128, 128, 0.13) 100%);
 }
 
 /* Abgabe-Knopf in der Wochenzeile: sieht bewusst nach Knopf aus, nicht nach
@@ -2796,6 +2815,7 @@ tr.ferien td {
     font-size: 0.8rem;
     letter-spacing: 0.08em;
     text-align: center;
+    vertical-align: middle;   /* the row is taller than the small holiday text */
     padding: 9px 12px;
 }
 /* Dark scheme: the middle is now the dark row ground, dark blue would vanish. */

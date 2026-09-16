@@ -4276,6 +4276,29 @@
            alle zwei Wochen. Dann bekommt der naechste Termin die Marke - ohne
            sie stuende der Plan einer Gruppe ganz ohne "hier sind wir" da. */
         if (!runNowMark()) markNextTermin();
+        markPastWeeks();
+    }
+
+    /* Weeks that are over get a very faint grey (Doc, 16.09.2026: "mach die, die
+       schon gelaufen sind gaaaaaanz leicht grau"). Over means the last day of
+       the week - in termin mode the group's appointment - lies before today.
+       The marked current week stays orange, also on its weekend; holiday rows
+       have no dateTd and keep their green. By date, not by position above the
+       orange row: in the holidays there is no orange row. */
+    function markPastWeeks() {
+        const n = new Date();
+        const today = String(n.getFullYear()) +
+            String(n.getMonth() + 1).padStart(2, '0') + String(n.getDate()).padStart(2, '0');
+        for (const r of rendered) {
+            const tr = r.dateTd && r.dateTd.closest('tr');
+            if (!tr) continue;
+            let end = r.gkw != null && r.terminYmd ? r.terminYmd : '';
+            if (!end) {
+                const m = datumLang(r.dateTd.dataset.src || '').match(/(\d{1,2})\.(\d{1,2})\.(\d{2})$/);
+                if (m) end = '20' + m[3] + m[2].padStart(2, '0') + m[1].padStart(2, '0');
+            }
+            tr.classList.toggle('kw-past', !!end && end < today && !tr.classList.contains('kw-now'));
+        }
     }
 
     function markNextTermin() {
@@ -4691,7 +4714,8 @@
             return true;
         };
         runNowMark = go;
-        if (!go()) setTimeout(go, 400);
+        if (!go()) setTimeout(() => { go(); markPastWeeks(); }, 400);
+        markPastWeeks();
     })();
 
     // Toolbar helper: expand/collapse all detail rows at once.
