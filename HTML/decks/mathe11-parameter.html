@@ -9,6 +9,7 @@
 <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
 <link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
 <script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -110,6 +111,17 @@ p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:
   color:var(--muted);line-height:1.3}
 .slide.chapter .hair{position:absolute;left:72px;top:356px;width:816px;height:1px;
   background:rgba(14,36,78,.14)}
+/* with a picture: text on the left, picture + licence line on the right */
+.slide.chapter.has-pic h2{width:420px;font-size:28px}
+.slide.chapter.has-pic .sub{width:420px}
+.slide.chapter.has-pic .hair{width:448px;top:372px}   /* room for a two-line sub */
+.chap-pic{position:absolute;left:560px;top:150px;width:328px;height:230px;margin:0;
+  display:block;overflow:hidden;background:var(--card);
+  border:.75px solid rgba(14,36,78,.12)}
+.chap-pic img{width:100%;height:100%;object-fit:contain;display:block}   /* never cropped */
+.chap-credit{position:absolute;left:560px;top:388px;width:328px;font-size:9px;line-height:1.3;
+  color:var(--muted);text-decoration:none;letter-spacing:.2px}
+a.chap-credit:hover{color:var(--red);text-decoration:underline}
 
 /* --- merksatz ----------------------------------------------------------- */
 .slide.merksatz .quote-bar{position:absolute;left:72px;top:190px;width:4px;height:150px;
@@ -124,8 +136,27 @@ p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:
   background:var(--codebg);border-left:3px solid var(--green);padding:40px 28px}
 .codepanel pre{font-family:Menlo,monospace;font-size:13.5px;line-height:1.3;color:var(--codeink)}
 .pic{position:absolute;left:72px;top:146px;width:816px;height:330px;
-  display:grid;place-items:center}
-.pic img{max-width:100%;max-height:100%}
+  display:flex;align-items:center;justify-content:center}
+/* flex, not grid: in a grid the % heights resolve against an auto track and a tall picture
+   runs out of the box; here they resolve against the box - shrink to fit, never upscale */
+.pic img{max-width:100%;max-height:100%;object-fit:contain}
+.pic.left{justify-content:flex-start}
+/* small picture bottom right next to a table (table_top corner=) - text keeps clear of it */
+.corner-pic{position:absolute;right:72px;bottom:44px;max-width:200px;max-height:190px}
+.slide.has-corner .body{width:580px}
+
+/* --- table_top ---------------------------------------------------------- */
+.dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
+  font-family:Raleway,system-ui,sans-serif}
+.dtable th,.dtable td{padding:0 6px;text-align:left;overflow:hidden;white-space:nowrap;
+  border:.75px solid var(--stroke);line-height:1.85}
+.dtable th{background:var(--ink);color:#fff;font-family:Orbitron,Raleway,sans-serif;
+  font-weight:700;font-size:.75em;border-color:var(--ink)}
+.dtable td{background:#fff;color:var(--body)}
+.dtable td.b{font-weight:700;color:var(--ink)}
+.dtable td.m{font-family:Menlo,monospace}
+.dtable .ac{text-align:center}
+.dtable .ar{text-align:right}
 
 /* --- greeting (Auftaktfolie) --------------------------------------------- */
 .slide.greet{background-image:none;background-color:var(--greetbg)}
@@ -166,13 +197,23 @@ p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:
 .step.on{opacity:1}
 
 /* --- HUD ---------------------------------------------------------------- */
-#hud{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:8px;z-index:9}
+#hud{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:8px;z-index:9;display:flex;gap:6px}
 #hud button{display:flex;align-items:center;justify-content:center;width:22px;height:22px;padding:0;border:0;border-radius:5px;
   background:#7E8FB5;box-shadow:0 1px 1px rgba(0,0,0,.12);   /* Dostojewski's colour on the greeting slide */
   color:#fff;opacity:.85;cursor:pointer;transition:opacity .2s}
 #hud button:hover{opacity:1}
 #hud button svg{display:block;width:13px;height:13px;margin:0;stroke-width:1.4;flex:none}
 #hud button[hidden]{display:none}   /* flex would otherwise show a hidden button */
+/* Solita reads the deck (say() + deck_audio.mjs): play button on the title slide, in the middle
+   of the orbit ring (Doc, 15.09.2026: "kleiner, alles gruen, weiter nach rechts, 2. Folie") */
+.play-big{position:absolute;left:838px;top:244px;width:44px;height:44px;border-radius:50%;
+  border:0;background:var(--green);color:#fff;cursor:pointer;z-index:2;
+  box-shadow:0 2px 8px rgba(0,0,0,.25);display:grid;place-items:center}
+.play-big svg{width:20px;height:20px}
+.play-big:hover{filter:brightness(1.08)}
+.play-big-label{position:absolute;left:760px;width:200px;top:298px;text-align:center;
+  font-family:Orbitron,sans-serif;font-size:10px;letter-spacing:1.5px;color:var(--green);
+  text-transform:uppercase}
 /* slide number typed for a jump (1 7 Enter) */
 #jump{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:42px;z-index:9;padding:4px 10px;border-radius:7px;
   background:rgba(255,255,255,.85);box-shadow:0 1px 4px rgba(0,0,0,.28);color:#0E244E;
@@ -194,13 +235,78 @@ p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:
 .ov-thumb .step{opacity:1!important}
 .ov-num{position:absolute;left:8px;bottom:6px;padding:2px 7px;border-radius:5px;
   background:rgba(14,36,78,.78);color:#fff;font:600 12px Raleway,system-ui,sans-serif}
+/* --- ask Solita (avatar bottom right, Claude Haiku + her DocPad voice) ---- */
+#ask{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:38px;z-index:11;
+  font-family:Raleway,system-ui,sans-serif;--askbg:#EAF0FA}
+/* the photo stands free - no ring, no white edge (Doc, 16.09.2026: "sieht frei besser aus") */
+#ask-btn{display:block;width:46px;height:46px;padding:0;border:0;border-radius:50%;cursor:pointer;
+  background:transparent;box-shadow:0 2px 8px rgba(0,0,0,.3);
+  overflow:hidden;opacity:.92;transition:opacity .2s,transform .2s}
+#ask-btn:hover{opacity:1;transform:scale(1.06)}
+#ask-btn img{width:100%;height:100%;object-fit:cover;display:block}
+#ask-panel{position:absolute;right:0;bottom:56px;width:min(360px,calc(100vw - 24px));
+  background:var(--askbg);border-radius:10px;box-shadow:0 6px 24px rgba(14,36,78,.4);
+  padding:12px 12px 10px;color:var(--ink)}
+#ask-panel[hidden]{display:none}
+/* a light blue tint (Doc, 16.09.2026: "leicht bläulich"); the field and the round buttons stay white */
+/* the header sits on its own strip with a soft shadow, so answers scroll away UNDER it
+   (Doc, 16.09.2026: "setz den Header besser ab") - z-index lifts the shadow above the text */
+#ask-head{font-family:Orbitron,sans-serif;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;
+  color:#7E8FB5;display:flex;justify-content:space-between;align-items:center;
+  position:relative;z-index:1;margin:-12px -12px 0;padding:11px 12px 9px;background:var(--askbg);
+  border-radius:10px 10px 0 0;box-shadow:0 4px 8px -4px rgba(14,36,78,.35)}
+#ask-close{border:0;background:none;color:#7E8FB5;font-size:16px;line-height:1;cursor:pointer;padding:0 2px}
+#ask-close:hover{color:var(--red)}
+#ask-out{font-size:14px;line-height:1.45;color:var(--body);max-height:230px;overflow:auto;
+  margin-bottom:9px;padding-top:9px;white-space:pre-wrap}
+#ask-out:empty{display:none}
+#ask-out:empty + label{margin-top:10px}
+#ask-out .ask-q{color:var(--ink);font-weight:600}
+#ask-out .ask-err{color:var(--red)}
+/* karaoke: the word Solita is saying right now */
+#ask-out .ask-w{border-radius:3px;transition:background-color .12s,box-shadow .12s}
+#ask-out .ask-w.on{background:color-mix(in srgb,var(--orange) 55%,transparent);
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--orange) 55%,transparent)}
+/* Solita is thinking: a travelling wave of bars, until her voice is ready to play */
+#ask-out .ask-wave{display:flex;align-items:center;gap:3px;height:22px;padding:2px 0}
+#ask-out .ask-wave i{display:block;width:3px;height:100%;border-radius:2px;background:var(--ink);
+  transform:scaleY(.2);animation:askwave 1.1s ease-in-out infinite}
+#ask-out .ask-wave i:nth-child(2){animation-delay:.1s}
+#ask-out .ask-wave i:nth-child(3){animation-delay:.2s}
+#ask-out .ask-wave i:nth-child(4){animation-delay:.3s}
+#ask-out .ask-wave i:nth-child(5){animation-delay:.4s}
+#ask-out .ask-wave i:nth-child(6){animation-delay:.5s}
+#ask-out .ask-wave i:nth-child(7){animation-delay:.6s}
+@keyframes askwave{0%,100%{transform:scaleY(.2)}50%{transform:scaleY(1)}}
+@media (prefers-reduced-motion:reduce){#ask-out .ask-wave i{animation-duration:2.4s}}
+#ask-out::-webkit-scrollbar{width:8px}
+#ask-out::-webkit-scrollbar-thumb{background:#b8c6df;border-radius:4px}
+#ask-out{scrollbar-width:thin;scrollbar-color:#b8c6df transparent}
+#ask label{display:block;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:1.3px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+#ask-row{display:flex;gap:6px}
+#ask-cost{margin-left:9px;font-weight:400;color:var(--muted);cursor:pointer}
+#ask-mic,#ask-tts{flex:none;width:34px;display:grid;place-items:center;cursor:pointer;color:var(--ink);
+  background:#fff;border:1px solid var(--stroke);border-radius:7px}
+#ask-mic svg,#ask-tts svg{width:16px;height:16px}
+#ask-mic.on{background:var(--red);border-color:var(--red);color:#fff}   /* listening */
+#ask-tts.off{color:var(--muted);border-color:var(--stroke);opacity:.75}   /* no reading aloud, no voice cost */
+#ask-mic[hidden],#ask-tts[hidden]{display:none}
+#ask input{flex:1;min-width:0;padding:7px 9px;border:1px solid var(--stroke);border-radius:7px;
+  font:400 14px Raleway,system-ui,sans-serif;color:var(--ink);background:#fff}
+#ask input:focus{outline:2px solid var(--ink);outline-offset:-1px;border-color:transparent}
+#ask-send{border:0;border-radius:7px;padding:0 13px;cursor:pointer;background:var(--green);color:#fff;
+  font-family:Orbitron,sans-serif;font-size:11px;letter-spacing:1px}
+#ask-send:hover{filter:brightness(1.08)}
+#ask-send:disabled{opacity:.5;cursor:default}
+@media print{#ask{display:none!important}}
 @media print{#ovbtn,#overview,#jump{display:none!important}}
 #bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
   transition:width .25s ease;z-index:9}
 
 @media print{
   html,body{overflow:visible;background:#fff}
-  #hud,#bar{display:none}
+  #hud,#bar,.play-big,.play-big-label{display:none}
   #stage{position:static;display:block}
   #deck{transform:none!important;width:auto;height:auto;position:static}
   .slide{display:block!important;position:relative;width:960px;height:540px;
@@ -300,7 +406,18 @@ p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:
 <p class="line l0 step" data-g="3"><b>docalvers.de/mathetest11-parameter.html</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
 </div></div>
 <div id="bar"></div>
-<div id="hud"><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in">Deine Frage zur Folie</label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?"><button id="ask-send" type="button">Los</button></div>
+  </div>
+  <button id="ask-btn" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
 <script>
 // time-aware greeting - the browser knows the real clock, a .pptx never does
 (function(){
@@ -348,6 +465,7 @@ function prev(){
 addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
   const k = e.key;
+  if (/^(Arrow|Page|Home|End| )/.test(k)) narr.stop();   // turning pages by hand pauses Solita
   if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
   else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
   else if (k === 'Home') { si = 0; step = 0; paint(); }
@@ -355,7 +473,9 @@ addEventListener('keydown', e => {
   else if (k === 'f' || k === 'F') { full(); }
 });
 addEventListener('click', e => {
-  if (e.target.closest('#hud') || e.target.closest('.labbar a')) return;
+  // links (lab bar, picture credits) open - they do not turn the page as well
+  if (e.target.closest('#hud') || e.target.closest('a') || e.target.closest('.play-big')) return;
+  narr.stop();                                       // a click turns the page by hand
   if (e.target.closest('.labbar button')) { next(); return; }
   next();
 });   // clicks inside a lab stay in the lab - they never reach this document
@@ -448,6 +568,9 @@ addEventListener('click', e => {
   addEventListener('resize', function () { if (!ov.hidden) scale(); });
   addEventListener('keydown', function (e) {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
+    // this one listens in the capture phase, so a question typed to Solita would reach it first:
+    // 'o' would open the overview mid-sentence. Nothing from inside #ask belongs to the deck.
+    if (e.target && e.target.closest && e.target.closest('#ask')) return;
     if (e.key === 'o' || e.key === 'O') {
       if (ov.hidden) open(); else close();
       e.preventDefault(); e.stopImmediatePropagation(); return;
@@ -500,8 +623,518 @@ addEventListener('load', () => {
     catch (err) { el.textContent = el.dataset.tex; }
   });
 });
+// Solita reads the deck (Doc, 15.09.2026: "NIEMALS Browserstimme! So wie beim DocPad!") - the
+// clips come from tools/pptx/deck_audio.mjs with her DocPad voice, nothing is synthesised here.
+// Part 0 of a slide is spoken when it appears, part k while click group k comes in, then on.
+const narr = (function () {
+  const api = { playing: false, stop: function () {} };
+  let data = null;
+  try { data = JSON.parse(document.getElementById('narration').textContent || 'null'); } catch (e) { }
+  if (!data || !data.slides) return api;
+  const btn = document.getElementById('play');
+  const PLAY = '<path d="M6.5 5v14l11-7z" fill="currentColor"/>';
+  const PAUSE = '<path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/>';
+  const pad = n => String(n).padStart(2, '0');
+  const parts = s => (data.slides[s] || []).length;
+  let audio = null, aSlide = -1, part = 0;
+  let wait = 0;                                       // pending pause after a clip or before the next slide
+  const holds = data.hold || [];
+  let held = -1;                                      // slide where Solita waits for a click
+  const big = document.createElement('button');
+  big.type = 'button';
+  big.className = 'play-big';
+  const label = document.createElement('div');
+  label.className = 'play-big-label';
+  label.textContent = 'Solita erklärt';
+  const home = document.querySelector('.slide.title') || slides[0];   // title slide, in the orbit ring
+  home.appendChild(big);
+  home.appendChild(label);
+  btn.hidden = false;
+  function show() {
+    const icon = '<svg viewBox="0 0 24 24" aria-hidden="true">' + (api.playing ? PAUSE : PLAY) + '</svg>';
+    const t = api.playing ? 'Pause (p)' : held >= 0 ? 'Weiter mit Klick (p)' : 'Solita erklärt (p)';
+    [btn, big].forEach(b => { b.innerHTML = icon; b.title = t; b.setAttribute('aria-label', t); });
+  }
+  function run() {
+    if (!api.playing) return;
+    if (part >= parts(si)) {                          // slide done: everything in, then on
+      step = groups(slides[si]); paint();
+      if (si >= slides.length - 1) { api.playing = false; audio = null; show(); return; }
+      // say(hold=True): e.g. before a solution - the next slide comes only on a click
+      if (holds.indexOf(si) >= 0) { api.playing = false; audio = null; held = si; show(); return; }
+      // Doc 16.09.2026 "zu schnell, ein wenig mehr Pausen": the finished slide stands a moment longer
+      wait = setTimeout(function () { if (!api.playing) return; si++; step = 0; part = 0; paint(); run(); }, 1600);
+      return;
+    }
+    if (part > 0) { step = Math.min(part, groups(slides[si])); paint(); }
+    aSlide = si;
+    audio = new Audio('audio/' + data.deck + '/s' + pad(si) + '-' + pad(part) + '.mp3');
+    audio.onended = function () { part++; wait = setTimeout(run, part < parts(si) ? 900 : 0); };
+    audio.onerror = function () { part++; run(); };   // a missing clip must not hang the talk
+    audio.play().catch(function () { api.playing = false; show(); });
+  }
+  function resume(n) {                                // go on talking from the top of slide n
+    clearTimeout(wait);
+    held = -1; api.playing = true; si = n; step = 0; part = 0; audio = null; show(); paint(); run();
+  }
+  function toggle() {
+    clearTimeout(wait);
+    if (!api.playing && held >= 0 && si === held && si < slides.length - 1) { resume(si + 1); return; }
+    held = -1;
+    if (api.playing) { api.playing = false; if (audio) audio.pause(); show(); return; }
+    api.playing = true; show();
+    if (audio && aSlide === si && audio.paused && !audio.ended && audio.currentTime > 0) { audio.play(); return; }
+    part = step; audio = null; run();                 // start where the page stands
+  }
+  api.stop = function () {
+    clearTimeout(wait);
+    if (held >= 0) {
+      // waiting at a hold: the click that turns to the next slide lets Solita go on there
+      // (stop runs before the page handler's next(), so look once that has happened)
+      const h = held; held = -1; show();
+      setTimeout(function () { if (!api.playing && si === h + 1) resume(si); }, 0);
+      return;
+    }
+    if (!api.playing) return;
+    api.playing = false; if (audio) audio.pause(); audio = null; show();
+  };
+  // stop the click here: toggle redraws the icon, and the page's click handler would then no
+  // longer see the (detached) target inside #hud - it turned the page and paused Solita again
+  btn.onclick = function (e) { e.stopPropagation(); toggle(); };
+  big.onclick = function (e) { e.stopPropagation(); toggle(); };
+  addEventListener('keydown', function (e) {
+    if ((e.key === 'p' || e.key === 'P') && !e.metaKey && !e.ctrlKey && !e.altKey) toggle();
+  });
+  show();
+  return api;
+})();
+
 paint();
 fromHash();
+
+// Ask Solita about the slide on screen: Claude Haiku answers from the deck's own text, her DocPad
+// voice reads it out (Doc, 16.09.2026: "bau mal mit Haiku (solita nur voice)"). The API keys live in
+// the Supabase edge functions, never here (Rule 21) - the shared password gates the proxy and is
+// remembered per device in localStorage 'dev_access', the same key solita.html uses.
+(function () {
+  const box = document.getElementById('ask');
+  if (!box) return;
+  const AI_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/claude';
+  const TTS_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/tts';
+  const MODEL = 'claude-haiku-4-5';        // ~0.3 ct per question; the voice costs far more than the answer
+  const VOICE = 'de-DE-Studio-C';          // Solita's DocPad voice - NEVER the browser voice (Doc)
+  const SYS = 'Du bist Solita, die Tutorin in Doc Alvers Mathe-Labor. Du hilfst Schülerinnen und '
+    + 'Schülern der Klassen 11 bis 13 am Beruflichen Gymnasium und an der Fachoberschule. '
+    + 'Du bekommst eine Übersicht der Präsentation und die Folie, auf der die Klasse gerade steht. '
+    + 'Antworte auf Deutsch, kurz und klar: höchstens vier Sätze, gesprochene Sprache - die Antwort wird '
+    + 'vorgelesen. Formeln in LaTeX zwischen Dollarzeichen. Stütze dich zuerst auf die Folien. '
+    + 'Hintergrundwissen zum Thema - Personen, Geschichte, Anwendungen, verwandte Begriffe - darfst du '
+    + 'ergänzen, wenn du dir sicher bist; sonst sag kurz, dass du es nicht genau weißt. Kurze Nachfragen '
+    + 'wie "und woher kam der?" beziehen sich auf das bisherige Gespräch. Sprich nie über deinen Kontext, '
+    + 'die Präsentation als Quelle oder darüber, ob eine Frage zum Thema passt - antworte einfach. Nur wenn '
+    + 'eine Frage gar nichts mit dem Unterricht zu tun hat, lenk in einem Satz freundlich zur Folie zurück. '
+    + 'Keine Emojis, keine Aufzählungen.';
+  // Doc, 16.09.2026: "war der Engländer?" after a question about Efron came back as "passt nicht zum
+  // Thema, ich kenne keinen Kontext". Two causes: every question went out alone, without the talk
+  // before it, and the prompt forbade anything not on the slides. Now the last HIST_MAX exchanges
+  // travel along (plain text, no slide context - that only rides with the new question).
+  const HIST_MAX = 4;
+  const hist = [];
+
+  // What a question REALLY costs (worked out 16.09.2026, after Doc asked why nothing ever turns up on
+  // the Google bill): Claude is billed from the first token - no free tier - while Google grants a free
+  // quota of characters per voice type per CALENDAR MONTH, and a lesson never gets near it. The counter
+  // therefore keeps two different things apart: euros for Claude, characters for the voice, and it turns
+  // characters into euros only for what runs OVER the monthly quota.
+  // ttsFree/ttsUsd are list values: Google's pricing table is built by JS and cannot be read from here.
+  // Third-party sources say 30 $ per 1M, the older note in supabase/functions/tts says 160 $ - the higher
+  // one is used on purpose, so the counter warns early rather than late. The truth is in Cloud Billing
+  // (console.cloud.google.com/billing/reports, Service = Cloud Text-to-Speech API). Doc's account carries
+  // a 10 EUR/month budget alert - a mail, not a tap that closes.
+  const RATE = { in: 1, out: 5, cacheRead: 0.1, cacheWrite: 1.25, eur: 0.92,
+                 ttsUsd: 160, ttsFree: 1e6 };
+
+  const panel = document.getElementById('ask-panel');
+  const out = document.getElementById('ask-out');
+  const input = document.getElementById('ask-in');
+  const send = document.getElementById('ask-send');
+  const label = box.querySelector('label');
+  const micBtn = document.getElementById('ask-mic');
+  const ttsBtn = document.getElementById('ask-tts');
+  const costEl = document.getElementById('ask-cost');
+  let audio = null, busy = false, ear = null;
+
+  // What THIS question cost - not a running total (Doc, 16.09.2026: the sum belongs in the 08:00
+  // mail, where it covers every device). Claude is real money from the first token; the voice is
+  // characters against Google's monthly free quota, so it shows as characters, with the list price
+  // it WOULD cost only in the tooltip.
+  let last = null;
+  function money(eur) {
+    if (eur >= 1) return eur.toFixed(2).replace('.', ',') + ' \u20ac';
+    const ct = eur * 100;
+    return (ct < 1 ? ct.toFixed(2) : ct.toFixed(1)).replace('.', ',') + ' ct';
+  }
+  function showCost() {
+    if (!last) { costEl.textContent = ''; costEl.title = 'Kosten der letzten Frage'; return; }
+    costEl.textContent = money(last.claude);         // voice characters only in the tooltip (Doc, 16.09.2026)
+    costEl.title = 'Diese Frage\n'
+      + 'Claude (Haiku): ' + money(last.claude) + ' - ' + last.tin + ' Token rein, '
+      + last.tout + ' raus, wird ab dem ersten Token berechnet\n'
+      + (last.chars
+          ? 'Stimme: ' + last.chars + ' Zeichen - frei im Monatskontingent, zum Listenpreis waere es '
+            + money(last.chars / 1e6 * RATE.ttsUsd * RATE.eur)
+          : 'Stimme: aus')
+      + '\nWartezeit: Claude ' + secs(last.msAi) + (last.msVoice ? ' + Stimme ' + secs(last.msVoice) : '');
+  }
+  function secs(ms) { return ms ? (ms / 1000).toFixed(1).replace('.', ',') + ' s' : '-'; }
+  function addClaude(usage, ms) {
+    const u = usage || {};
+    last = {
+      claude: ((u.input_tokens || 0) * RATE.in
+             + (u.cache_read_input_tokens || 0) * RATE.in * RATE.cacheRead
+             + (u.cache_creation_input_tokens || 0) * RATE.in * RATE.cacheWrite
+             + (u.output_tokens || 0) * RATE.out) / 1e6 * RATE.eur,
+      tin: (u.input_tokens || 0) + (u.cache_read_input_tokens || 0),
+      tout: u.output_tokens || 0,
+      chars: 0,
+      msAi: ms, msVoice: 0,
+    };
+    showCost();
+  }
+  function addVoice(chars, ms) { if (last) { last.chars = chars; last.msVoice = ms; showCost(); } }
+  // Reading aloud on/off. Same localStorage key as solita.html, so switching her quiet holds here
+  // too - and with it off, no TTS request goes out at all (the voice is 97 % of what a question costs).
+  const TTS_KEY = 'solita_tts';
+  let ttsOn = true;
+  try { ttsOn = localStorage.getItem(TTS_KEY) !== '0'; } catch (e) { }
+  const SPK_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
+    + 'stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/>'
+    + '<path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+  const SPK_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
+    + 'stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/>'
+    + '<path d="m16 9 5 6"/><path d="m21 9-5 6"/></svg>';
+  function showTts() {
+    ttsBtn.innerHTML = ttsOn ? SPK_ON : SPK_OFF;
+    ttsBtn.classList.toggle('off', !ttsOn);
+    const t = ttsOn ? 'Solita liest vor' : 'Solita liest NICHT vor (keine Stimm-Kosten)';
+    ttsBtn.title = t; ttsBtn.setAttribute('aria-label', t);
+  }
+  ttsBtn.onclick = function () {
+    ttsOn = !ttsOn;
+    try { localStorage.setItem(TTS_KEY, ttsOn ? '1' : '0'); } catch (e) { }
+    if (!ttsOn) stopAudio();
+    showTts();
+  };
+  showTts();
+
+  costEl.onclick = function () { last = null; showCost(); };
+  showCost();
+
+  // Keys and clicks inside the panel stay there: typing a question must not turn pages, open the
+  // overview ('o') or pause Solita ('p'). Measured 16.09.2026: a capture listener on window is the
+  // wrong tool - it kills the event before the button's own handler sees it, yet window's own bubble
+  // listeners (page keys, slide jump, overview) still fire. Stopping on the way up from #ask does
+  // both right: handlers inside #ask run, nothing reaches the deck.
+  box.addEventListener('keydown', function (e) { e.stopPropagation(); });
+  box.addEventListener('click', function (e) { e.stopPropagation(); });
+
+  function pwd() { try { return localStorage.getItem('dev_access') || ''; } catch (e) { return ''; } }
+  // Every call goes out as a CORS "simple request": no custom headers, the body is plain text (both
+  // functions read it with req.json() anyway) and the password rides in the body, which the claude
+  // function accepts as well as x-app-pass. Custom headers (apikey, Authorization, x-app-pass) made
+  // the browser send an OPTIONS preflight before EVERY call - measured in the Supabase logs on
+  // 16.09.2026, those preflights took 4.6-13.3 s from Doc's Chrome, 62 % of the whole wait. The
+  // gateway does not need the anon key: both functions run with --no-verify-jwt, and the tts guard
+  // accepts the browser's Origin header instead.
+  function post(url, body, signal) {
+    return fetch(url, { method: 'POST', body: JSON.stringify(body), signal: signal });
+  }
+  // Wake both functions while the question is still being typed, at no cost: an empty tts call is
+  // refused before Google is asked, a ping only checks the password. At most once a minute.
+  let warmAt = 0;
+  function warm() {
+    if (Date.now() - warmAt < 60000) return;
+    warmAt = Date.now();
+    post(TTS_URL, {}).catch(function () { });
+    if (pwd()) post(AI_URL, { ping: true, pass: pwd() }).catch(function () { });
+  }
+  function askPassword() {          // no password yet: the same field asks for it once, then remembers
+    label.textContent = 'Passwort — wird auf diesem Gerät gemerkt';
+    input.type = 'password'; input.value = ''; input.placeholder = '';
+    input.setAttribute('autocomplete', 'current-password');
+    send.textContent = 'OK';
+    micBtn.hidden = true; ttsBtn.hidden = true;
+  }
+  function askQuestion() {
+    label.textContent = 'Deine Frage zur Folie';
+    input.type = 'text'; input.value = ''; input.placeholder = 'Warum zwei Drittel?';
+    input.setAttribute('autocomplete', 'off');
+    send.textContent = 'Los';
+    micBtn.hidden = !(window.SpeechRecognition || window.webkitSpeechRecognition);
+    ttsBtn.hidden = false;
+  }
+  function say(html, cls) {
+    const p = document.createElement('div');
+    if (cls) p.className = cls;
+    p.innerHTML = html;
+    out.appendChild(p); out.scrollTop = out.scrollHeight;
+    return p;
+  }
+
+  // the deck is its own source: slide text with the TeX put back in - minus the footer and page
+  // number, which every slide repeats (13 % of the old context was "Nicht verzagen, ..." 24 times)
+  function slideText(s) {
+    const c = s.cloneNode(true);
+    c.querySelectorAll('.foot, .pageno').forEach(function (e) { e.remove(); });
+    c.querySelectorAll('[data-tex]').forEach(function (e) { e.textContent = '$' + e.dataset.tex + '$'; });
+    return (c.textContent || '').replace(/\s+/g, ' ').trim();
+  }
+  let SUMMARY = {}, NARR = null;
+  try { SUMMARY = JSON.parse(document.getElementById('summary').textContent || '{}') || {}; } catch (e) { }
+  try { NARR = JSON.parse(document.getElementById('narration').textContent || 'null'); } catch (e) { }
+  function overviewLine(i) {                        // a deck built without summaries still gets a line
+    if (SUMMARY[String(i)]) return SUMMARY[String(i)];
+    const h = slides[i].querySelector('h1, h2, h3');
+    return h ? h.textContent.replace(/\s+/g, ' ').trim() : slideText(slides[i]).slice(0, 90);
+  }
+
+  // Compact context (Doc, 16.09.2026): one summary line per slide, the slide on screen in full, and
+  // any slide the question names ("Folie 15", "F15", "Seite 15") in full too. Measured before: the
+  // whole deck in full was ~3,500 tokens a question.
+  // Slides behind a hold - a solution - stay OUT until the class has reached them, and Claude is told
+  // not to work the task out: otherwise it hands over the answer while the class is still on it.
+  function context(q) {
+    const ahead = ((NARR && NARR.hold) || []).filter(function (h) { return h >= si; });
+    const last = ahead.length ? Math.min.apply(null, ahead) : slides.length - 1;
+    const lines = ['Deck: ' + document.title, 'Übersicht, eine Zeile je Folie:'];
+    for (let i = 0; i <= last; i++) lines.push('F' + (i + 1) + ': ' + overviewLine(i));
+    const full = [si];
+    String(q).replace(/\b(?:folie|seite|slide|f)\s*(\d{1,3})\b/gi, function (m, n) {
+      const i = +n - 1;
+      if (i >= 0 && i <= last && full.indexOf(i) < 0) full.push(i);
+      return m;
+    });
+    full.forEach(function (i) {
+      lines.push('', (i === si ? 'Die Klasse steht auf Folie ' + (i + 1)
+                               : 'Folie ' + (i + 1) + ', nach der gefragt wird') + ' - voller Inhalt:');
+      lines.push(slideText(slides[i]));
+      const spoken = NARR && NARR.slides && NARR.slides[String(i)];
+      if (spoken && spoken.length) lines.push('Solita erklärt dazu: ' + spoken.join(' '));
+    });
+    if (ahead.length) {
+      lines.push('', 'Wichtig: Die Lösung zu Folie ' + (last + 1) + ' hat die Klasse noch nicht gesehen. '
+        + 'Rechne diese Aufgabe nicht vor und nenne kein Ergebnis - gib höchstens einen Tipp.');
+    }
+    return lines.join('\n');
+  }
+  window.askSolitaContext = context;   // debug: askSolitaContext('F15?') shows exactly what goes out
+
+  function render(el, text) {       // formulas the model wrote in $...$ come out as real maths
+    el.textContent = '';
+    String(text).split(/(\$[^$\n]+\$)/).forEach(function (part) {
+      if (/^\$[^$\n]+\$$/.test(part)) {
+        const span = document.createElement('span');
+        try { katex.render(part.slice(1, -1), span, { throwOnError: false, displayMode: false }); }
+        catch (e) { span.textContent = part; }
+        el.appendChild(span);
+      } else if (part) {                          // one span per word, so her voice can light it up
+        part.split(/(\s+)/).forEach(function (tok) {
+          if (!tok) return;
+          if (/^\s+$/.test(tok)) { el.appendChild(document.createTextNode(tok)); return; }
+          const w = document.createElement('span');
+          w.className = 'ask-w'; w.textContent = tok;
+          el.appendChild(w);
+        });
+      }
+    });
+  }
+
+  // Karaoke (Doc, 16.09.2026): the word Solita is saying lights up. Google returns no word timestamps
+  // for Studio voices - they do not support SSML <mark> - so the times are ESTIMATED: syllables per
+  // word, a pause after commas and sentence ends, spread over the length of the audio. Measured on
+  // 16.09.2026 against Studio-C syntheses of the answer cut off after every word: mean error 0.13 s,
+  // worst 0.24 s, on an answer the weights were NOT tuned on. Letters instead of syllables were twice
+  // as far off, and anchoring on the pauses found in the audio made it worse, not better.
+  // lead/tail: the silence Google puts before and after the speech (measured 0.10 s and 0.09 s).
+  const KARA = { lead: 0.10, tail: 0.09, base: 0.3, sentence: 1.5, comma: 0.6 };
+  function syllables(w) {
+    const v = w.toLowerCase().match(/[aeiouyäöü]+/g);
+    if (v) return v.length;
+    const d = w.replace(/\D/g, '');
+    return d.length * 1.5;                           // a bare number: roughly one and a half per digit
+  }
+  function karaoke(el, a) {
+    const items = [];
+    let pos = 0;
+    el.querySelectorAll('.ask-w').forEach(function (sp) {
+      const w = sp.textContent.replace(/[*_`#>]/g, '');   // what speak() strips is not spoken either
+      const n = syllables(w);
+      if (n) { items.push({ sp: sp, s: pos }); pos += n + KARA.base; }
+      if (/[.!?]["')\]]*$/.test(w)) pos += KARA.sentence;
+      else if (/[,;:]["')\]]*$/.test(w)) pos += KARA.comma;
+    });
+    if (!items.length) return;
+    const last = items[items.length - 1];
+    const total = last.s + syllables(last.sp.textContent) + KARA.base;
+    let on = null;
+    function mark(sp) {
+      if (sp === on) return;
+      if (on) on.classList.remove('on');
+      on = sp;
+      if (!sp) return;
+      sp.classList.add('on');
+      const r = sp.getBoundingClientRect(), o = out.getBoundingClientRect();   // keep her word in view
+      if (r.bottom > o.bottom - 4) out.scrollTop += r.bottom - o.bottom + 24;
+      else if (r.top < o.top + 4) out.scrollTop -= o.top - r.top + 24;
+    }
+    function frame() {
+      if (audio !== a || a.paused) { mark(null); return; }   // stopped, closed or finished
+      if (isFinite(a.duration) && a.duration > 0) {
+        const u = (a.currentTime - KARA.lead) / Math.max(0.1, a.duration - KARA.lead - KARA.tail) * total;
+        let i = -1;
+        while (i + 1 < items.length && items[i + 1].s <= u) i++;
+        mark(i >= 0 ? items[i].sp : null);
+      }
+      requestAnimationFrame(frame);
+    }
+    a.addEventListener('playing', function () { requestAnimationFrame(frame); });
+  }
+
+  // Solita's own voice via the tts edge function. NO browser-voice fallback (Doc: "NIEMALS
+  // Browserstimme") - if the cloud voice fails, the answer just stays on screen.
+  // show() puts the answer on screen only once her voice has arrived (Doc, 16.09.2026: "den Text erst
+  // zeigen, wenn die audiodaten da sind"), so reading and hearing start together. Speaker off, nothing
+  // to say, no voice or a voice that hangs: the answer shows anyway.
+  const TTS_WAIT = 20000;                            // ms - a hanging voice must not hide the answer
+  function speak(text, show) {
+    let shown = false, el = null;
+    function once() { if (!shown) { shown = true; el = show(); } }
+    const clean = String(text)
+      .replace(/\$\$[\s\S]*?\$\$/g, ' ').replace(/\$[^$\n]*?\$/g, ' ')   // maths is shown, not read
+      .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}️‍]/gu, '')
+      .replace(/[*_`#>]/g, '')
+      .replace(/\s+/g, ' ').trim();
+    if (!ttsOn || !clean) { once(); return; }        // speaker off: no request, no cost
+    const ctl = window.AbortController ? new AbortController() : null;
+    const timer = setTimeout(function () { if (ctl) ctl.abort(); }, TTS_WAIT);
+    const t0 = Date.now();
+    // no password here: the tts function has no password gate - never send it where it is not needed
+    post(TTS_URL, { text: clean.slice(0, 4800), voice: VOICE, languageCode: 'de-DE', speakingRate: 1.0 },
+         ctl ? ctl.signal : undefined)
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        clearTimeout(timer);
+        if (!j || !j.audioContent) throw new Error('keine Stimme');
+        addVoice(clean.length, Date.now() - t0);     // Google bills it even if it is not played
+        once();
+        if (!ttsOn || panel.hidden) return;          // switched off or closed while she was fetching
+        stopAudio();
+        audio = new Audio('data:audio/mp3;base64,' + j.audioContent);
+        if (el) karaoke(el, audio);
+        audio.play().catch(function () { });
+      })
+      .catch(function () {
+        clearTimeout(timer);
+        once();
+        say('Solitas Stimme war gerade nicht erreichbar.', 'ask-err');
+      });
+  }
+  function stopAudio() { if (audio) { try { audio.pause(); } catch (e) { } audio = null; } }
+
+  function submit() {
+    const v = input.value.trim();
+    if (!v || busy) return;
+    if (!pwd()) {                                   // first use on this device: verify and remember
+      busy = true; send.disabled = true;
+      post(AI_URL, { ping: true, pass: v })
+        .then(function (r) {
+          busy = false; send.disabled = false;
+          if (!r.ok) { say('Passwort stimmt nicht.', 'ask-err'); input.value = ''; return; }
+          try { localStorage.setItem('dev_access', v); } catch (e) { }
+          askQuestion(); input.focus();
+        })
+        .catch(function () { busy = false; send.disabled = false; say('Kein Netz.', 'ask-err'); });
+      return;
+    }
+    busy = true; send.disabled = true;
+    if (ear && ear.active) ear.stop();               // nothing may land in the field behind the answer
+    input.value = '';
+    say('<span class="ask-q">' + v.replace(/[<&]/g, function (c) { return c === '<' ? '&lt;' : '&amp;'; }) + '</span>');
+    // the wave runs while Claude thinks AND while her voice is fetched - it gives way to the answer
+    const wait = say('<span class="ask-wave" role="status" aria-label="Solita denkt nach">'
+      + '<i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>');
+    const t0 = Date.now();
+    post(AI_URL, { pass: pwd(), model: MODEL, max_tokens: 600,
+      messages: [{ role: 'system', content: SYS }]
+        .concat(hist.reduce(function (m, h) {
+          return m.concat({ role: 'user', content: 'Frage der Klasse: ' + h.q },
+                          { role: 'assistant', content: h.a });
+        }, []))
+        .concat({ role: 'user', content: context(v) + '\n\nFrage der Klasse: ' + v }) })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        const text = res.ok && res.j && res.j.choices && res.j.choices[0]
+          && res.j.choices[0].message && res.j.choices[0].message.content;
+        if (!text) {
+          busy = false; send.disabled = false;
+          wait.className = 'ask-err';
+          wait.textContent = (res.j && res.j.error) ? String(res.j.error) : 'Das hat nicht geklappt.';
+          return;
+        }
+        addClaude(res.j.usage, Date.now() - t0);
+        hist.push({ q: v, a: text });
+        if (hist.length > HIST_MAX) hist.shift();
+        speak(text, function () {
+          busy = false; send.disabled = false;
+          render(wait, text);
+          out.scrollTop = out.scrollHeight;
+          input.value = ''; input.focus();           // done - empty line for the next question
+          return wait;                               // karaoke lights up the words in here
+        });
+      })
+      .catch(function () {
+        busy = false; send.disabled = false;
+        wait.className = 'ask-err'; wait.textContent = 'Kein Netz.';
+      });
+  }
+
+  // Speaking the question: the shared engine from js/solita-listen.js (it survives mid-sentence
+  // pauses and Android's cumulative results). Recognised text lands in the field - sending stays a
+  // deliberate press, so a misheard question never costs money on its own.
+  micBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
+    + 'stroke-linecap="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/>'
+    + '<path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>';
+  if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) micBtn.hidden = true;
+  micBtn.onclick = function () {
+    if (ear && ear.active) { ear.stop(); return; }
+    if (!window.SolitaListen) { say('Spracheingabe ist hier nicht geladen.', 'ask-err'); return; }
+    stopAudio();                                    // otherwise the mic hears Solita herself
+    if (!ear) ear = window.SolitaListen({
+      lang: 'de-DE',
+      onState: function (st) { micBtn.classList.toggle('on', st === 'listening'); },
+      onPartial: function (t) { input.value = t; },
+      onFinal: function (t) { input.value = t; micBtn.classList.remove('on'); input.focus(); }
+    });
+    ear.start();
+  };
+
+  function open() {
+    if (typeof narr !== 'undefined') narr.stop();   // asking pauses the talk, like turning a page
+    panel.hidden = false;
+    if (!pwd()) askPassword(); else askQuestion();
+    input.focus();
+    warm();
+  }
+  function close() { panel.hidden = true; stopAudio(); }
+
+  document.getElementById('ask-btn').onclick = function () { if (panel.hidden) open(); else close(); };
+  document.getElementById('ask-close').onclick = close;
+  send.onclick = submit;
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); submit(); }
+    else if (e.key === 'Escape') { e.preventDefault(); close(); }
+  });
+})();
 </script>
 </body>
 </html>

@@ -237,7 +237,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
   background:rgba(14,36,78,.78);color:#fff;font:600 12px Raleway,system-ui,sans-serif}
 /* --- ask Solita (avatar bottom right, Claude Haiku + her DocPad voice) ---- */
 #ask{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:38px;z-index:11;
-  font-family:Raleway,system-ui,sans-serif}
+  font-family:Raleway,system-ui,sans-serif;--askbg:#EAF0FA}
 /* the photo stands free - no ring, no white edge (Doc, 16.09.2026: "sieht frei besser aus") */
 #ask-btn{display:block;width:46px;height:46px;padding:0;border:0;border-radius:50%;cursor:pointer;
   background:transparent;box-shadow:0 2px 8px rgba(0,0,0,.3);
@@ -245,14 +245,15 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 #ask-btn:hover{opacity:1;transform:scale(1.06)}
 #ask-btn img{width:100%;height:100%;object-fit:cover;display:block}
 #ask-panel{position:absolute;right:0;bottom:56px;width:min(360px,calc(100vw - 24px));
-  background:#fff;border-radius:10px;box-shadow:0 6px 24px rgba(14,36,78,.4);
+  background:var(--askbg);border-radius:10px;box-shadow:0 6px 24px rgba(14,36,78,.4);
   padding:12px 12px 10px;color:var(--ink)}
 #ask-panel[hidden]{display:none}
-/* the header sits on its own white strip with a soft shadow, so answers scroll away UNDER it
+/* a light blue tint (Doc, 16.09.2026: "leicht bläulich"); the field and the round buttons stay white */
+/* the header sits on its own strip with a soft shadow, so answers scroll away UNDER it
    (Doc, 16.09.2026: "setz den Header besser ab") - z-index lifts the shadow above the text */
 #ask-head{font-family:Orbitron,sans-serif;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;
   color:#7E8FB5;display:flex;justify-content:space-between;align-items:center;
-  position:relative;z-index:1;margin:-12px -12px 0;padding:11px 12px 9px;background:#fff;
+  position:relative;z-index:1;margin:-12px -12px 0;padding:11px 12px 9px;background:var(--askbg);
   border-radius:10px 10px 0 0;box-shadow:0 4px 8px -4px rgba(14,36,78,.35)}
 #ask-close{border:0;background:none;color:#7E8FB5;font-size:16px;line-height:1;cursor:pointer;padding:0 2px}
 #ask-close:hover{color:var(--red)}
@@ -279,8 +280,8 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 @keyframes askwave{0%,100%{transform:scaleY(.2)}50%{transform:scaleY(1)}}
 @media (prefers-reduced-motion:reduce){#ask-out .ask-wave i{animation-duration:2.4s}}
 #ask-out::-webkit-scrollbar{width:8px}
-#ask-out::-webkit-scrollbar-thumb{background:#c9d3e6;border-radius:4px}
-#ask-out{scrollbar-width:thin;scrollbar-color:#c9d3e6 transparent}
+#ask-out::-webkit-scrollbar-thumb{background:#b8c6df;border-radius:4px}
+#ask-out{scrollbar-width:thin;scrollbar-color:#b8c6df transparent}
 #ask label{display:block;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:1.3px;
   text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 #ask-row{display:flex;gap:6px}
@@ -641,6 +642,7 @@ const narr = (function () {
   const pad = n => String(n).padStart(2, '0');
   const parts = s => (data.slides[s] || []).length;
   let audio = null, aSlide = -1, part = 0;
+  let wait = 0;                                       // pending pause after a clip or before the next slide
   const holds = data.hold || [];
   let held = -1;                                      // slide where Solita waits for a click
   const big = document.createElement('button');
@@ -665,20 +667,23 @@ const narr = (function () {
       if (si >= slides.length - 1) { api.playing = false; audio = null; show(); return; }
       // say(hold=True): e.g. before a solution - the next slide comes only on a click
       if (holds.indexOf(si) >= 0) { api.playing = false; audio = null; held = si; show(); return; }
-      setTimeout(function () { if (!api.playing) return; si++; step = 0; part = 0; paint(); run(); }, 700);
+      // Doc 16.09.2026 "zu schnell, ein wenig mehr Pausen": the finished slide stands a moment longer
+      wait = setTimeout(function () { if (!api.playing) return; si++; step = 0; part = 0; paint(); run(); }, 1600);
       return;
     }
     if (part > 0) { step = Math.min(part, groups(slides[si])); paint(); }
     aSlide = si;
     audio = new Audio('audio/' + data.deck + '/s' + pad(si) + '-' + pad(part) + '.mp3');
-    audio.onended = function () { part++; run(); };
+    audio.onended = function () { part++; wait = setTimeout(run, part < parts(si) ? 900 : 0); };
     audio.onerror = function () { part++; run(); };   // a missing clip must not hang the talk
     audio.play().catch(function () { api.playing = false; show(); });
   }
   function resume(n) {                                // go on talking from the top of slide n
+    clearTimeout(wait);
     held = -1; api.playing = true; si = n; step = 0; part = 0; audio = null; show(); paint(); run();
   }
   function toggle() {
+    clearTimeout(wait);
     if (!api.playing && held >= 0 && si === held && si < slides.length - 1) { resume(si + 1); return; }
     held = -1;
     if (api.playing) { api.playing = false; if (audio) audio.pause(); show(); return; }
@@ -687,6 +692,7 @@ const narr = (function () {
     part = step; audio = null; run();                 // start where the page stands
   }
   api.stop = function () {
+    clearTimeout(wait);
     if (held >= 0) {
       // waiting at a hold: the click that turns to the next slide lets Solita go on there
       // (stop runs before the page handler's next(), so look once that has happened)
@@ -724,10 +730,21 @@ fromHash();
   const VOICE = 'de-DE-Studio-C';          // Solita's DocPad voice - NEVER the browser voice (Doc)
   const SYS = 'Du bist Solita, die Tutorin in Doc Alvers Mathe-Labor. Du hilfst Schülerinnen und '
     + 'Schülern der Klassen 11 bis 13 am Beruflichen Gymnasium und an der Fachoberschule. '
-    + 'Du bekommst den Inhalt der Praesentation als Kontext und die Folie, auf der die Klasse gerade steht. '
+    + 'Du bekommst eine Übersicht der Präsentation und die Folie, auf der die Klasse gerade steht. '
     + 'Antworte auf Deutsch, kurz und klar: höchstens vier Sätze, gesprochene Sprache - die Antwort wird '
-    + 'vorgelesen. Formeln in LaTeX zwischen Dollarzeichen. Erfinde nichts dazu, was nicht im Deck steht; '
-    + 'passt die Frage nicht zum Thema, sag das freundlich in einem Satz. Keine Emojis, keine Aufzählungen.';
+    + 'vorgelesen. Formeln in LaTeX zwischen Dollarzeichen. Stütze dich zuerst auf die Folien. '
+    + 'Hintergrundwissen zum Thema - Personen, Geschichte, Anwendungen, verwandte Begriffe - darfst du '
+    + 'ergänzen, wenn du dir sicher bist; sonst sag kurz, dass du es nicht genau weißt. Kurze Nachfragen '
+    + 'wie "und woher kam der?" beziehen sich auf das bisherige Gespräch. Sprich nie über deinen Kontext, '
+    + 'die Präsentation als Quelle oder darüber, ob eine Frage zum Thema passt - antworte einfach. Nur wenn '
+    + 'eine Frage gar nichts mit dem Unterricht zu tun hat, lenk in einem Satz freundlich zur Folie zurück. '
+    + 'Keine Emojis, keine Aufzählungen.';
+  // Doc, 16.09.2026: "war der Engländer?" after a question about Efron came back as "passt nicht zum
+  // Thema, ich kenne keinen Kontext". Two causes: every question went out alone, without the talk
+  // before it, and the prompt forbade anything not on the slides. Now the last HIST_MAX exchanges
+  // travel along (plain text, no slide context - that only rides with the new question).
+  const HIST_MAX = 4;
+  const hist = [];
 
   // What a question REALLY costs (worked out 16.09.2026, after Doc asked why nothing ever turns up on
   // the Google bill): Claude is billed from the first token - no free tier - while Google grants a free
@@ -1053,8 +1070,12 @@ fromHash();
       + '<i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>');
     const t0 = Date.now();
     post(AI_URL, { pass: pwd(), model: MODEL, max_tokens: 600,
-      messages: [{ role: 'system', content: SYS },
-                 { role: 'user', content: context(v) + '\n\nFrage der Klasse: ' + v }] })
+      messages: [{ role: 'system', content: SYS }]
+        .concat(hist.reduce(function (m, h) {
+          return m.concat({ role: 'user', content: 'Frage der Klasse: ' + h.q },
+                          { role: 'assistant', content: h.a });
+        }, []))
+        .concat({ role: 'user', content: context(v) + '\n\nFrage der Klasse: ' + v }) })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
         const text = res.ok && res.j && res.j.choices && res.j.choices[0]
@@ -1066,6 +1087,8 @@ fromHash();
           return;
         }
         addClaude(res.j.usage, Date.now() - t0);
+        hist.push({ q: v, a: text });
+        if (hist.length > HIST_MAX) hist.shift();
         speak(text, function () {
           busy = false; send.disabled = false;
           render(wait, text);
