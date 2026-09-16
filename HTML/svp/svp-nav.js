@@ -375,6 +375,21 @@
     /* Stundenplan alone in the centred middle group; "Mehr" is not a Schulart,
        so it leaves the left block and joins the tools next to the gear. */
     navMid.appendChild(pills[PLAN_HREF]);
+
+    /* Doc, 16.09.2026: "mach ein U (!) rechts neben Stundenplan das auf die
+       Website fuehrt" - ein Buchstabe, kein Wort, im Kaestchen der Icon-Pillen.
+       Es steht mit im zentrierten Mittelblock, also sitzt das PAAR dort, wo
+       vorher die Stundenplan-Pille allein sass. Neuer Tab: WebUntis ist die
+       Arbeitsseite daneben, nicht ein Ersatz fuer diese hier. */
+    const untisPill = document.createElement('a');
+    untisPill.className = 'badge b-grey nav-untis';
+    untisPill.href = 'https://ibb-ggmbh.webuntis.com/WebUntis/?school=ibb-ggmbh';
+    untisPill.target = '_blank';
+    untisPill.rel = 'noopener';
+    untisPill.textContent = 'U';
+    untisPill.title = 'WebUntis oeffnen';
+    untisPill.setAttribute('aria-label', 'WebUntis oeffnen');
+    navMid.appendChild(untisPill);
     const moreWrap = navSchul.querySelector('.nav-drop-wrap[data-drop="Mehr"]');
     if (moreWrap) navMore.appendChild(moreWrap);
 

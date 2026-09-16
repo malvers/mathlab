@@ -1080,6 +1080,18 @@ nav.quick-nav a.badge.nav-auth {
     text-align: center;
 }
 
+/* Logged out is the state worth seeing at a glance (Doc, 16.09.2026): the auth
+   pill then drops the uniform blue wash of the nav row and carries a filled phi
+   green. svp-nav.js already puts .b-green on it when there is no session - but
+   .b-green only tints, and the row rule above it repaints every pill blue, so
+   the fill is spelled out here. Logged in the pill stays grey like its
+   neighbours; only the phi token differs between dark and light. */
+nav.quick-nav a.badge.nav-auth.b-green {
+    background: var(--phi);
+    border-color: var(--phi);
+    color: rgb(255, 255, 255);
+}
+
 /* Doc, 09.09.2026: "| weg und bissl meh Platz" - der Trennstrich ist raus, der
    Abstand haelt die Gruppen jetzt allein. Er sitzt vor dem Farbschema, denn
    dort endet seit der Umsortierung der Werkzeug-Block (Zahnrad, Vollbild, QR)
@@ -1269,6 +1281,21 @@ nav.quick-nav a.nav-edit svg,
 nav.quick-nav a.nav-fs svg,
 nav.quick-nav a.nav-qr svg { display: block; }
 nav.quick-nav a.nav-edit { cursor: pointer; }
+
+/* Das U neben Stundenplan (svp-nav.js) traegt dasselbe Kaestchen wie Zahnrad,
+   Vollbild und QR - sonst saehe ein einzelner Buchstabe in einer Textpille
+   verloren aus. Die Laufweite der Badges faellt hier weg: bei EINEM Zeichen
+   schiebt sie nur den Buchstaben aus der Mitte (Doc, 16.09.2026). */
+nav.quick-nav a.badge.nav-untis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 31px;
+    height: 22px;
+    padding: 0;
+    letter-spacing: 0;
+}
 
 .nav-edit-panel {
     display: none;
@@ -2026,7 +2053,9 @@ tr.wk-edit .untis-chip {
        "bleibt noch die groesserwerdende Box"). 16 + 2 + 2 + 2 = 22, das
        Zeichen bleibt dabei unveraendert gross. */
     height: 22px;
-    padding: 2px 8px;
+    /* 8 px waren die Polsterung des breiten Logos; mit dem blanken U wirkt der
+       Chip damit leer, also 6 px (Doc, 16.09.2026). */
+    padding: 2px 6px;
     border-radius: 6px;
     border: 1px solid var(--line);
     background: transparent;
@@ -2042,11 +2071,13 @@ tr.wk-edit .untis-chip {
 }
 
 .untis-chip:hover { opacity: 1; }
-/* Untis-Logo (SVG, per svp-plan.js): U und Strahlen in currentColor, die
-   orange Kachel ist der Chip. Die Strichstaerken stehen in viewBox-Einheiten
-   (Original-Raster, Rahmen 272x114) und sind am Original gemessen. */
+/* Untis-Logo (SVG, per svp-plan.js): das U in currentColor, die orange Kachel
+   ist der Chip. Die Strichstaerke steht in viewBox-Einheiten (Original-Raster)
+   und ist am Original gemessen. Breite = 16 px * 91.2/113.6, also genau das
+   Seitenverhaeltnis des Ausschnitts - der Buchstabe behaelt seine Groesse und
+   fuellt den Kasten ohne Rand (Doc, 16.09.2026: nur noch das U, schmaler). */
 .untis-chip .u-mark {
-    width: 38px;
+    width: 13px;
     height: 16px;
     flex: none;
     display: block;
@@ -2055,8 +2086,6 @@ tr.wk-edit .untis-chip {
     stroke-linecap: butt;
 }
 
-.untis-chip .u-mark .u-rays-major { stroke-width: 7.8; }
-.untis-chip .u-mark .u-rays-minor { stroke-width: 5; }
 .untis-chip .u-mark .u-letter { stroke-width: 19.5; }
 
 tr.wk-edit .untis-chip { cursor: pointer; }
