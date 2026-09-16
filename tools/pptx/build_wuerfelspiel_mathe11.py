@@ -64,42 +64,70 @@ one = S.Canvas(200, 252)
 net(one, 19, 34, MIA, "Mias Würfel")
 FIG_MIA = write("netz-mia", one)
 
-# same canvas and columns as the full tree, so both tables sit at the same spot
-st = S.Diagram(700, 440)
+def die_table(c, x, y, die, rows):
+    """The table of slide 8, narrow: number | how often | probability, the number tinted like the die net.
+    rows: (number, how often, num, den, short num, short den) - e.g. (3, 2, 2, 6, 1, 3)."""
+    cw, hh, rh = (58, 146, 152), 34, 48
+    xs = [x, x + cw[0], x + cw[0] + cw[1]]
+    for i, head in enumerate(("Zahl", "wie oft drauf?", "Wahrscheinlichkeit")):
+        c.rect(xs[i], y, cw[i], hh, fill=S.INK, stroke=S.INK, width=0.75)
+        c.text(xs[i] + 9, y + hh / 2.0 + 4.5, head, 13, "#FFFFFF", anchor="start", weight=700)
+    for r, (n, k, a, b, a2, b2) in enumerate(rows):
+        ry, cy = y + hh + r * rh, y + hh + r * rh + rh / 2.0
+        for i in range(3):
+            c.rect(xs[i], ry, cw[i], rh, fill=die["fill"][n] if i == 0 else S.PAPER, stroke=S.INK, width=0.75)
+        c.text(xs[0] + cw[0] / 2.0, cy + 18 * 0.32, str(n), 18, S.INK, weight=700, tex=True)
+        c.text(xs[1] + 10, cy + 15 * 0.32, "$%d$-mal von $6$" % k, 15, S.BODY, anchor="start", tex=True)
+        w = c.frac(xs[2] + 10, cy, a, b, 15, S.BODY, anchor="start")
+        c.text(xs[2] + 10 + w + 12, cy + 15 * 0.32, "=", 15, S.BODY, tex=True)
+        c.frac(xs[2] + 10 + w + 24, cy, a2, b2, 15, S.BODY, anchor="start")
+
+
+# Slides 12 and 14 share one canvas: the tree on the left, the dice tables stacked on the right (Lena above,
+# Mia below), the whole group centred on the slide (Doc, 16.09.2026: "tree + Table mittig x", "beide Tabellen
+# ... übereinander"). Same canvas = the tree and Lena's table stay put when you turn from 12 to 14.
+FIG_W, TAB_X = 924, 560
+LENA_ROWS = [(3, 2, 2, 6, 1, 3), (5, 2, 2, 6, 1, 3), (7, 2, 2, 6, 1, 3)]
+MIA_ROWS = [(4, 4, 4, 6, 2, 3), (6, 2, 2, 6, 1, 3)]
+
+
+def dice_tables(c, mia=True):
+    """Lena's table (and Mia's underneath) - the tables of slides 8 and 9, narrow."""
+    c.text(TAB_X, 47, "Lenas Würfel", 15, S.INK, anchor="start")
+    die_table(c, TAB_X, 55, LENA, LENA_ROWS)
+    if mia:
+        c.text(TAB_X, 271, "Mias Würfel", 15, S.INK, anchor="start")
+        die_table(c, TAB_X, 279, MIA, MIA_ROWS)
+
+
+# stage 1: where each 1/3 comes from stays in sight while the branches are drawn
+# (Doc, 16.09.2026: "da steht ganz klar wie man auf die 1/3s kommt")
+st = S.Diagram(FIG_W, 440)
 root = (30, 220)
 st.node(*root)
 st.text(250, 18, "1. Stufe: Lena", 15, S.INK)
-st.text(600, 18, "Wahrsch.", 15, S.INK)
-st.text(660, 18, "in %", 15, S.INK)
 for ya, n in [(90, "3"), (220, "5"), (350, "7")]:
     st.branch(root, (250, ya), "1/3", size=14, tex=True)
     st.node(250, ya, n, "above", size=18, tex=True)
-    st.texlabel(600, ya, "1/3", 15, S.BODY)
-    st.texlabel(660, ya, "33,3 %", 15, S.BODY)
+dice_tables(st, mia=False)
 FIG_STUFE1 = write("stufe1", st)
 
-PROZ = {"1/9": "11,1 %", "2/9": "22,2 %"}
-
-t = S.Diagram(700, 440)
+# the full tree: both dice tables beside it; each path's probability is on slide 17 ("Jeder Ausgang einzeln")
+t = S.Diagram(FIG_W, 440)
 root = (30, 220)
 t.node(*root)
 t.text(250, 18, "1. Stufe: Lena", 15, S.INK)
 t.text(462, 18, "2. Stufe: Mia", 15, S.INK)
-t.text(540, 18, "Pfad", 15, S.INK)
-t.text(600, 18, "Wahrsch.", 15, S.INK)
-t.text(660, 18, "in %", 15, S.INK)
 for ya, a in [(90, 3), (220, 5), (350, 7)]:
     t.branch(root, (250, ya), "1/3", size=14, tex=True)
     t.node(250, ya, str(a), "above", size=18, tex=True)
-    for dy, b, pb, p in [(-42, 4, "2/3", "2/9"), (42, 6, "1/3", "1/9")]:
+    for dy, b, pb in [(-42, 4, "2/3"), (42, 6, "1/3")]:
         win = a > b
         col = S.GREEN if win else S.MUTED
         t.branch((250, ya), (480, ya + dy), pb, color=col, width=2.4 if win else 1.3, size=14, tex=True)
         t.node(480, ya + dy, str(b), "right", color=col, size=17, tex=True)
-        t.texlabel(540, ya + dy, "(%d | %d)" % (a, b), 14, S.GREEN if win else S.BODY)
-        t.texlabel(600, ya + dy, p, 15, S.GREEN if win else S.BODY)
-        t.texlabel(660, ya + dy, PROZ[p], 15, S.GREEN if win else S.BODY)
-t.text(350, 432, "grün: Lena gewinnt", 14, S.GREEN)
+t.text(255, 432, "grün: Lena gewinnt", 14, S.GREEN)
+dice_tables(t)
 FIG_BAUM = write("baum", t)
 
 # ------------------------------------------------------------------- slides ---
@@ -210,10 +238,10 @@ d.chapter(3, "Den Baum zeichnen", "Erst Lena, dann Mia")
 d.summary("Kapitel 3: Den Baum zeichnen - erst Lena, dann Mia")
 d.say("Kapitel drei: Den Baum zeichnen. Erst Lena, dann Mia.")
 
-d.picture("Stufe 1: Lenas Wurf — drei Äste mit je 1/3", FIG_STUFE1, align="left")
+d.picture("Stufe 1: Lenas Wurf — drei Äste mit je 1/3", FIG_STUFE1)   # tree + table centred (Doc, 16.09.2026)
 
-d.summary("Baum Stufe 1: vom Start drei Äste zu Lenas 3, 5, 7 mit je 1/3 (rund 33 %)")
-d.say("Das ist die erste Stufe: Lenas Wurf. Vom Startpunkt gehen drei Äste ab — zur Drei, zur Fünf und zur Sieben. An jedem Ast steht ein Drittel. Rechts stehen dieselben Werte in einer kleinen Tabelle, auch in Prozent: jeweils rund dreiunddreißig Prozent.")
+d.summary("Baum Stufe 1: vom Start drei Äste zu Lenas 3, 5, 7 mit je 1/3; rechts Lenas Tabelle: jede Zahl steht 2-mal von 6 drauf, 2/6 = 1/3")
+d.say("Das ist die erste Stufe: Lenas Wurf. Vom Startpunkt gehen drei Äste ab — zur Drei, zur Fünf und zur Sieben. An jedem Ast steht ein Drittel. Rechts seht ihr noch einmal, woher das kommt: Jede Zahl steht zweimal auf Lenas Würfel. Zwei von sechs — also ein Drittel.")
 
 d.bullets("Stufe 2: an jedes Ende kommt Mias Wurf", [
     ("An **jedes** der drei Enden hängen wir Mias zwei Äste: $4$ und $6$", 0),
@@ -229,10 +257,10 @@ d.say("Jetzt kommt Mia dazu.",
       "Was Lena würfelt, ändert nichts an Mias Würfel. Man sagt: Die beiden Würfe sind unabhängig.",
       "Drei Äste mal zwei Äste — am Ende gibt es sechs Wege durch den Baum.")
 
-d.picture("Der fertige Baum", FIG_BAUM, align="left")
+d.picture("Der fertige Baum", FIG_BAUM)   # tree + both tables centred (Doc, 16.09.2026)
 
-d.summary("Fertiger Baum: alle 6 Wege mit Wahrscheinlichkeit als Bruch und Prozent; grün markiert die Wege, auf denen Lena gewinnt")
-d.say("Hier ist der fertige Baum. Rechts steht für jeden der sechs Wege seine Wahrscheinlichkeit, als Bruch und in Prozent. Grün sind die Wege, auf denen Lena gewinnt.")
+d.summary("Fertiger Baum: Lenas Äste 3, 5, 7 je 1/3, an jedem Ende Mias Äste 4 (2/3) und 6 (1/3); grün die Wege, auf denen Lena gewinnt; rechts übereinander Lenas und Mias Tabelle: 3, 5, 7 je 2-mal von 6 = 1/3, die 4 4-mal von 6 = 2/3, die 6 2-mal von 6 = 1/3")
+d.say("Hier ist der fertige Baum. Rechts stehen beide Würfel noch einmal als Tabelle: oben Lenas, unten Mias. Daraus kommen alle Wahrscheinlichkeiten an den Ästen. Grün sind die Wege, auf denen Lena gewinnt.")
 
 d.bullets("Die Pfadregel: entlang eines Weges multiplizieren", [
     ("Die Wahrscheinlichkeit eines Weges: alle Äste auf dem Weg **malnehmen**", 0),

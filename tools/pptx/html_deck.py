@@ -3,6 +3,12 @@
 
     python3 tools/pptx/html_deck.py build_nichtlinear_mathe11.py
     python3 tools/pptx/html_deck.py --prefix fos12- build_datenbanken_fos12.py
+    python3 tools/pptx/html_deck.py --shell      # CSS/JS changed: rewrite HTML/decks/deck.css + deck.js
+    python3 tools/pptx/html_deck.py --reshell    # PAGE changed: put it around every deck's own slides
+    python3 tools/pptx/html_deck.py --inline DIR build_x.py   # one self-contained file, e.g. for offline
+
+Every deck links the shared shell (deck.css, deck.js) instead of carrying a copy: one change reaches
+all decks at once, without rebuilding them.
 
 The build scripts describe every slide semantically (title, bullets, chapter,
 merksatz, two columns). This module offers a stand-in for `omml.MathDeck` that
@@ -32,6 +38,7 @@ from design_lib import (INK, BODY, MUTED, STROKE, CARD, CODE_BG, CODE_INK, CODE_
 OUT_DIR = os.path.join(HERE, "..", "..", "HTML", "decks")
 PREFIX = ""               # set by --prefix on the command line, see __main__
 LAB_MIN_H = 640.0         # labs warn below 980x620 - give them a window that clears it
+FRAME_ZOOM = 2.0          # live frames render twice as large and shrink back: sharp on a big screen
 KATEX = "../morpheus/vendor/katex"
 
 # Begruessungsfolie geometry - mirrors build_design.py's layout "Begrüßung" (the
@@ -42,6 +49,23 @@ GREET_AUTHOR = "Fjodor Dostojewski"
 GREET_IMG_W = 312.0
 GREET_X = GREET_IMG_W + 24
 GREET_W = W - GREET_X - MARGIN
+
+
+# ------------------------------------------------------------- live frames ---
+def live_frames(frames):
+    """Small live pages laid over a slide at design coordinates - Doc, 16.09.2026: real 3D dice
+    (wuerfel3d.html) next to the die nets. Each frame is dict(src=path under HTML/, x, y, w, h,
+    title). Inline styles only, no CSS rule: decks without frames stay byte-identical. A click
+    inside a frame stays there (the slide does not turn); the page passes keys back up."""
+    out = []
+    for f in frames or ():
+        out.append('<iframe class="live-frame" src="../%s" title="%s" loading="lazy" '
+                   'allowtransparency="true" style="position:absolute;left:%gpx;top:%gpx;'
+                   'width:%gpx;height:%gpx;border:0;background:transparent;'
+                   'transform:scale(%g);transform-origin:0 0"></iframe>'
+                   % (_html.escape(f["src"], quote=True), _html.escape(f.get("title", ""), quote=True),
+                      f["x"], f["y"], f["w"] * FRAME_ZOOM, f["h"] * FRAME_ZOOM, 1 / FRAME_ZOOM))
+    return "".join(out)
 
 
 # ------------------------------------------------------------------ markup ---
@@ -311,7 +335,7 @@ class HtmlDeck:
                 % (left, top, sum(col_w), font_size, cols, "".join(out)))
 
     def table_top(self, title, rows, col_w, lines, marks=None, font_size=12, row_h=None,
-                  bold_cols=(), mono_cols=(), align=None, x=None, corner=None):
+                  bold_cols=(), mono_cols=(), align=None, x=None, corner=None, frames=None):
         """Full-width table on top, bullets underneath - the HTML twin of
         slides.Deck.table_top. Same numbers, same look: the .pptx draws a native
         table, here it becomes a <table> with the authored column widths.
@@ -328,8 +352,8 @@ class HtmlDeck:
         pic = ('<img class="corner-pic" src="%s" alt="">' % _html.escape(asset(corner), quote=True)
                if corner else "")
         self._slide("content has-corner" if corner else "content",
-                    '<h3>%s</h3><div class="rules"></div>%s%s%s'
-                    % (markup(title), table, body, pic))
+                    '<h3>%s</h3><div class="rules"></div>%s%s%s%s'
+                    % (markup(title), table, body, pic, live_frames(frames)))
 
     def table_bullets(self, title, lines, rows, col_w, marks=None, font_size=11,
                       bold_cols=(), mono_cols=(), align=None, body_w=404, y=None,
@@ -366,7 +390,7 @@ class HtmlDeck:
         # the lab gets a landscape window of its own, then rides a scale into the
         # content column - below 980x620 the labs put a warning over themselves
         scale = (bottom - top) / LAB_MIN_H
-        lab_w = CONTENT_W / scale
+        lab_w = -(-CONTENT_W / scale * 100 // 1) / 100.0   # up to 0.01 px: %g cut it to 815.99 px, a hairline showed
         cap = ('<p class="labnote" style="top:%gpx">%s</p>' % (BODY_Y, markup(note))
                if note else "")
         self._slide("content lab", """
@@ -375,21 +399,22 @@ class HtmlDeck:
         <iframe src="../%s" title="%s" style="width:%gpx;height:%gpx;transform:scale(%g)"></iframe>
       </div>
       <div class="labbar">
-        <a href="../%s" target="_blank" rel="noopener">Neuer Tab</a>
+        <a href="../%s" target="_blank" rel="noopener">Öffne das Lab in neuem Tab</a>
         <button class="labnext">Weiter &#9656;</button>
       </div>""" % (markup(title), cap, top, bottom - top, _html.escape(src, quote=True),
                    _html.escape(title, quote=True), lab_w, LAB_MIN_H, scale,
                    _html.escape(src, quote=True)))
 
-    def picture(self, title, path, lines=None, align="center", **kw):
+    def picture(self, title, path, lines=None, align="center", frames=None, **kw):
         """align="left" puts the picture at the left margin instead of the middle -
         a tree diagram reads from the left, and centred it floats in the slide."""
         src = asset(path)
         cls = "pic left" if align == "left" else "pic"
         self._slide("content", '<h3>%s</h3><div class="rules"></div>'
-                    '<div class="%s"><img src="%s" alt=""></div>%s'
+                    '<div class="%s"><img src="%s" alt=""></div>%s%s'
                     % (markup(title), cls, _html.escape(src, quote=True),
-                       '<div class="body">%s</div>' % bullet_list(lines)[0] if lines else ""))
+                       '<div class="body">%s</div>' % bullet_list(lines)[0] if lines else "",
+                       live_frames(frames)))
 
     def say(self, *parts, hold=False):
         """Narration for the slide just added (Doc, 15.09.2026: Solita reads the deck -
@@ -413,6 +438,11 @@ class HtmlDeck:
     # ------------------------------------------------------------- output ---
     def save(self, path=None):
         os.makedirs(OUT_DIR, exist_ok=True)
+        if INLINE_DIR:                                   # self-contained copy, the public deck stays untouched
+            os.makedirs(INLINE_DIR, exist_ok=True)
+            path = path or os.path.join(INLINE_DIR, self.name + ".html")
+        else:
+            write_shell()
         path = path or os.path.join(OUT_DIR, self.name + ".html")
         with open(path, "w", encoding="utf-8") as f:
             f.write(self.render())
@@ -427,14 +457,8 @@ class HtmlDeck:
                            ensure_ascii=False).replace("</", "<\\/") if self.narration else "")
         summ = json.dumps({str(k): v for k, v in sorted(self.summaries.items())},
                           ensure_ascii=False).replace("</", "<\\/")
-        return (PAGE.replace("__TITLE__", _html.escape(self.doc_title, quote=False))
-                    .replace("__SUB__", _html.escape(self.subtitle, quote=False))
-                    .replace("__KATEX__", KATEX)
-                    .replace("__CSS__", CSS)
-                    .replace("__SLIDES__", "\n".join(self.slides))
-                    .replace("__NARR__", narr)
-                    .replace("__SUMMARY__", summ)
-                    .replace("__JS__", JS))
+        return page(_html.escape(self.doc_title, quote=False), _html.escape(self.subtitle, quote=False),
+                    "\n".join(self.slides), narr, summ)
 
 
 # --------------------------------------------------------------- template ----
@@ -464,11 +488,12 @@ body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
 .slide.on{display:block}
 
 /* footer, shared by every slide */
-.slide::before{content:"";position:absolute;left:__M__px;top:__FOOT__px;
-  width:__CW__px;height:1px;background:rgba(14,36,78,.16)}
-.foot{position:absolute;left:__M__px;top:__FOOTT__px;font-size:10px;letter-spacing:1.2px;
+/* the footer line runs almost to the slide edges (Doc, 16.09.2026: "bis kurz vor Ränder") */
+.slide::before{content:"";position:absolute;left:16px;top:__FOOT__px;
+  width:calc(__W__px - 32px);height:1px;background:rgba(14,36,78,.16)}
+.foot{position:absolute;left:0;right:0;text-align:center;top:__FOOTT__px;font-size:10px;letter-spacing:1.2px;   /* centred (Doc, 16.09.2026) */
   color:var(--muted)}
-.pageno{position:absolute;right:72px;top:__FOOTT__px;font-size:10px;letter-spacing:1.2px;
+.pageno{position:absolute;right:var(--pnright,72px);top:__FOOTT__px;font-size:10px;letter-spacing:1.2px;
   color:var(--muted)}
 
 h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
@@ -588,7 +613,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 /* --- greeting (Auftaktfolie) --------------------------------------------- */
 .slide.greet{background-image:none;background-color:var(--greetbg)}
 .slide.greet::before{left:__GFX__px;width:__GFW__px;background:rgba(230,236,248,.14)}
-.slide.greet .foot{left:__GFX__px;color:var(--codemuted)}
+.slide.greet .foot{left:__GFX__px;right:__M__px;color:var(--codemuted)}   /* centred in the text area next to the picture */
 .slide.greet .pageno{color:var(--codemuted)}
 .greet-ground{position:absolute;inset:0;background:var(--greetbg)}
 .greet-pic{position:absolute;left:0;top:0;width:__GIMGW__px;height:__H__px;
@@ -608,9 +633,12 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 
 /* --- lab in a slide ------------------------------------------------------ */
 .labnote{position:absolute;left:__M__px;width:__CW__px;font-size:15px;color:var(--muted)}
+/* round corners with the scaled lab clipped to them (Doc, 16.09.2026). No border: it pushed the lab 2 px in
+   and left a light step along the top and left edge ("da gibt es eine leichte Stufe") - a soft shadow sets
+   the frame off without taking any room, and the lab sits flush at 0,0 */
 .labframe{position:absolute;left:__M__px;width:__CW__px;overflow:hidden;
-  background:var(--card);border:.75px solid rgba(14,36,78,.12)}
-.labframe iframe{border:0;transform-origin:0 0;display:block}
+  background:var(--card);border-radius:10px;isolation:isolate;box-shadow:0 1px 5px rgba(14,36,78,.28)}
+.labframe iframe{border:0;transform-origin:0 0;display:block;position:absolute;left:0;top:0}
 .labbar{position:absolute;right:__M__px;top:__LABBAR__px;display:flex;gap:10px;
   align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
 .labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
@@ -618,6 +646,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 .labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
   border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
 .labbar button:hover{border-color:var(--red);color:var(--red)}
+#deck > .slide:last-child .labnext{display:none}   /* a lab on the last slide: nothing to go on to (Doc, 16.09.2026) */
 
 /* --- click build -------------------------------------------------------- */
 .step{opacity:0;transition:opacity .4s ease}
@@ -625,11 +654,11 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 
 /* --- HUD ---------------------------------------------------------------- */
 #hud{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:8px;z-index:9;display:flex;gap:6px}
-#hud button{display:flex;align-items:center;justify-content:center;width:22px;height:22px;padding:0;border:0;border-radius:5px;
+#hud button{display:flex;align-items:center;justify-content:center;width:var(--hudbtn,22px);height:var(--hudbtn,22px);padding:0;border:0;border-radius:5px;
   background:#7E8FB5;box-shadow:0 1px 1px rgba(0,0,0,.12);   /* Dostojewski's colour on the greeting slide */
   color:#fff;opacity:.85;cursor:pointer;transition:opacity .2s}
 #hud button:hover{opacity:1}
-#hud button svg{display:block;width:13px;height:13px;margin:0;stroke-width:1.4;flex:none}
+#hud button svg{display:block;width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6);margin:0;stroke-width:1.4;flex:none}
 #hud button[hidden]{display:none}   /* flex would otherwise show a hidden button */
 /* Solita reads the deck (say() + deck_audio.mjs): play button on the title slide, in the middle
    of the orbit ring (Doc, 15.09.2026: "kleiner, alles gruen, weiter nach rechts, 2. Folie") */
@@ -647,7 +676,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
   font:600 14px Raleway,system-ui,sans-serif}
 /* overview of all slides (o, grid button in the HUD bottom right) */
 #hud{display:flex;gap:4px}          /* overview, play and fullscreen side by side */
-#hud #ovbtn svg{width:14px;height:14px}
+#hud #ovbtn svg{width:calc(var(--hudbtn,22px) * .64);height:calc(var(--hudbtn,22px) * .64)}
 #overview{position:fixed;inset:0;z-index:20;background:rgba(14,36,78,.94);overflow:auto;padding:28px;
   display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:18px;align-content:start;
   grid-auto-rows:max-content}   /* the tiles' overflow:hidden would let the rows shrink to the window */
@@ -664,21 +693,26 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
   background:rgba(14,36,78,.78);color:#fff;font:600 12px Raleway,system-ui,sans-serif}
 /* --- ask Solita (avatar bottom right, Claude Haiku + her DocPad voice) ---- */
 #ask{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:38px;z-index:11;
-  font-family:Raleway,system-ui,sans-serif;--askbg:#EAF0FA}
+  font-family:Raleway,system-ui,sans-serif;--askbg:#EAF0FA;--askfield:#D8E2F3;
+  --askline:#A3B2CF}   /* lighter edges on field and buttons (Doc, 16.09.2026: "die Ränder leichter") */
 /* the photo stands free - no ring, no white edge (Doc, 16.09.2026: "sieht frei besser aus") */
-#ask-btn{display:block;width:46px;height:46px;padding:0;border:0;border-radius:50%;cursor:pointer;
+#ask-btn{display:block;width:var(--askav,46px);height:var(--askav,46px);padding:0;border:0;border-radius:50%;cursor:pointer;
   background:transparent;box-shadow:0 2px 8px rgba(0,0,0,.3);
   overflow:hidden;opacity:.92;transition:opacity .2s,transform .2s}
 #ask-btn:hover{opacity:1;transform:scale(1.06)}
+/* not clicked yet on this page: the picture itself grows and shrinks, no halo (Doc, 16.09.2026) */
+#ask-btn.invite{opacity:1;animation:askinvite 2.2s ease-in-out infinite}
+@keyframes askinvite{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+@media (prefers-reduced-motion:reduce){#ask-btn.invite{animation-duration:4.4s}}
 #ask-btn img{width:100%;height:100%;object-fit:cover;display:block}
-#ask-panel{position:absolute;right:0;bottom:56px;width:min(360px,calc(100vw - 24px));
+#ask-panel{position:absolute;right:0;bottom:calc(var(--askav,46px) + 10px);width:min(360px,calc(100vw - 24px));
   background:var(--askbg);border-radius:10px;box-shadow:0 6px 24px rgba(14,36,78,.4);
   padding:12px 12px 10px;color:var(--ink)}
 #ask-panel[hidden]{display:none}
-/* a light blue tint (Doc, 16.09.2026: "leicht bläulich"); the field and the round buttons stay white */
+/* a light blue tint (Doc, 16.09.2026: "leicht bläulich"); field and buttons a shade darker blue ("etwas dunkelblauer als der HG") */
 /* the header sits on its own strip with a soft shadow, so answers scroll away UNDER it
    (Doc, 16.09.2026: "setz den Header besser ab") - z-index lifts the shadow above the text */
-#ask-head{font-family:Orbitron,sans-serif;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;
+#ask-head{font-family:Orbitron,sans-serif;font-size:10px;letter-spacing:1.1px;text-transform:uppercase;
   color:#7E8FB5;display:flex;justify-content:space-between;align-items:center;
   position:relative;z-index:1;margin:-12px -12px 0;padding:11px 12px 9px;background:var(--askbg);
   border-radius:10px 10px 0 0;box-shadow:0 4px 8px -4px rgba(14,36,78,.35)}
@@ -692,8 +726,8 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 #ask-out .ask-err{color:var(--red)}
 /* karaoke: the word Solita is saying right now */
 #ask-out .ask-w{border-radius:3px;transition:background-color .12s,box-shadow .12s}
-#ask-out .ask-w.on{background:color-mix(in srgb,var(--orange) 55%,transparent);
-  box-shadow:0 0 0 2px color-mix(in srgb,var(--orange) 55%,transparent)}
+#ask-out .ask-w.on{background:color-mix(in srgb,#7E8FB5 30%,transparent);   /* Dostojewski blue, light (Doc: "hellblauer") */
+  box-shadow:0 0 0 2px color-mix(in srgb,#7E8FB5 30%,transparent)}
 /* Solita is thinking: a travelling wave of bars, until her voice is ready to play */
 #ask-out .ask-wave{display:flex;align-items:center;gap:3px;height:22px;padding:2px 0}
 #ask-out .ask-wave i{display:block;width:3px;height:100%;border-radius:2px;background:var(--ink);
@@ -711,23 +745,32 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 #ask-out{scrollbar-width:thin;scrollbar-color:#b8c6df transparent}
 #ask label{display:block;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:1.3px;
   text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+/* the label only shows for the password; a question needs none (Doc, 16.09.2026: "weg") */
+#ask label[hidden]{display:none}
+#ask-out:empty + label[hidden] + #ask-row{margin-top:10px}
 #ask-row{display:flex;gap:6px}
-#ask-cost{margin-left:9px;font-weight:400;color:var(--muted);cursor:pointer}
+#ask-cost{margin-left:9px;font-weight:400;color:var(--muted);cursor:pointer;white-space:nowrap}
 #ask-mic,#ask-tts{flex:none;width:34px;display:grid;place-items:center;cursor:pointer;color:var(--ink);
-  background:#fff;border:1px solid var(--stroke);border-radius:7px}
+  background:var(--askfield);border:1px solid var(--askline);border-radius:7px}
 #ask-mic svg,#ask-tts svg{width:16px;height:16px}
 #ask-mic.on{background:var(--red);border-color:var(--red);color:#fff}   /* listening */
-#ask-tts.off{color:var(--muted);border-color:var(--stroke);opacity:.75}   /* no reading aloud, no voice cost */
+#ask-tts.off{color:var(--muted);border-color:var(--askline);opacity:.75}   /* no reading aloud, no voice cost */
 #ask-mic[hidden],#ask-tts[hidden]{display:none}
-#ask input{flex:1;min-width:0;padding:7px 9px;border:1px solid var(--stroke);border-radius:7px;
-  font:400 14px Raleway,system-ui,sans-serif;color:var(--ink);background:#fff}
-#ask input:focus{outline:2px solid var(--ink);outline-offset:-1px;border-color:transparent}
-#ask-send{border:0;border-radius:7px;padding:0 13px;cursor:pointer;background:var(--green);color:#fff;
-  font-family:Orbitron,sans-serif;font-size:11px;letter-spacing:1px}
+#ask input{flex:1;min-width:0;padding:7px 9px;border:1px solid var(--askline);border-radius:7px;
+  font:400 14px Raleway,system-ui,sans-serif;color:var(--ink);background:var(--askfield)}
+#ask input:focus{outline:none;border-color:#7E8FB5}   /* thin and light, also when selected (Doc, 16.09.2026) */
+#ask-send{border:0;border-radius:7px;padding:0 12px;min-width:44px;cursor:pointer;background:var(--green);
+  color:#fff;font-family:Orbitron,sans-serif;font-size:17px;font-weight:700;line-height:1}
 #ask-send:hover{filter:brightness(1.08)}
 #ask-send:disabled{opacity:.5;cursor:default}
+/* a question in the field: the "?" breathes gently until it is sent - by click or Enter (Doc, 16.09.2026) */
+#ask-send.ready{animation:askwaber 1.6s ease-in-out infinite}
+@keyframes askwaber{0%,100%{transform:scale(1);box-shadow:0 0 0 0 color-mix(in srgb,var(--green) 0%,transparent)}
+  50%{transform:scale(1.07);box-shadow:0 0 0 4px color-mix(in srgb,var(--green) 35%,transparent)}}
+@media (prefers-reduced-motion:reduce){#ask-send.ready{animation-duration:3.2s}}
 @media print{#ask{display:none!important}}
 @media print{#ovbtn,#overview,#jump{display:none!important}}
+@media print{.pageno{right:72px!important}}   /* no HUD on paper - the page number goes back to its margin */
 #bar{position:fixed;left:0;bottom:0;height:3px;background:var(--orange);width:0;
   transition:width .25s ease;z-index:9}
 
@@ -764,8 +807,34 @@ slides.forEach((s, i) => {
 function fit(){
   const s = Math.min(innerWidth / __W__, innerHeight / __H__);
   deck.style.transform = 'scale(' + s + ')';
+  dock();
+}
+// HUD buttons and Solita sit in the footer row, right behind the page number, flush with the end of the
+// footer line (Doc, 16.09.2026: "mach die butts und Solita hinter / 24"). They keep a size a finger can
+// hit, in screen pixels, so the page number moves left to make room for them - never off screen.
+function dock(){
+  const hud = document.getElementById('hud'), ask = document.getElementById('ask');
+  if (!hud) return;
+  const s = Math.min(innerWidth / __W__, innerHeight / __H__);
+  const r = deck.getBoundingClientRect();           // the scaled slide on screen
+  const btn = Math.round(Math.min(26, Math.max(18, 12 * s)));
+  const av = Math.round(Math.min(46, Math.max(26, 24 * s)));
+  document.documentElement.style.setProperty('--hudbtn', btn + 'px');
+  document.documentElement.style.setProperty('--askav', av + 'px');
+  const cy = r.top + __FOOTC__ * s;                  // middle of the footer text
+  let right = Math.max(8, Math.round(innerWidth - (r.right - 16 * s)));
+  if (ask) {
+    ask.style.right = right + 'px'; ask.style.bottom = 'auto'; ask.style.top = Math.round(cy - av / 2) + 'px';
+    right += av + 8;
+  }
+  hud.style.right = right + 'px'; hud.style.bottom = 'auto'; hud.style.top = Math.round(cy - btn / 2) + 'px';
+  const left = hud.getBoundingClientRect().left;
+  deck.style.setProperty('--pnright', Math.max(16, (r.right - left + 12) / s) + 'px');
+  const jump = document.getElementById('jump');     // the typed slide number floats above the dock
+  if (jump) { jump.style.right = right + 'px'; jump.style.bottom = Math.round(innerHeight - cy + av / 2 + 8) + 'px'; }
 }
 addEventListener('resize', fit); fit();
+addEventListener('load', dock);                      // the overview and play buttons join the HUD later
 
 function groups(sl){
   return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
@@ -1061,7 +1130,8 @@ ASK_JS = r"""
     + 'wie "und woher kam der?" beziehen sich auf das bisherige Gespräch. Sprich nie über deinen Kontext, '
     + 'die Präsentation als Quelle oder darüber, ob eine Frage zum Thema passt - antworte einfach. Nur wenn '
     + 'eine Frage gar nichts mit dem Unterricht zu tun hat, lenk in einem Satz freundlich zur Folie zurück. '
-    + 'Keine Emojis, keine Aufzählungen.';
+    + 'Lob die Frage nicht ("Das ist eine gute Frage!" und Ähnliches) - nur wenn sie wirklich '
+    + 'außergewöhnlich klug ist, darfst du das einmal kurz sagen. Keine Emojis, keine Aufzählungen.';
   // Doc, 16.09.2026: "war der Engländer?" after a question about Efron came back as "passt nicht zum
   // Thema, ich kenne keinen Kontext". Two causes: every question went out alone, without the talk
   // before it, and the prompt forbade anything not on the slides. Now the last HIST_MAX exchanges
@@ -1188,16 +1258,19 @@ ASK_JS = r"""
   }
   function askPassword() {          // no password yet: the same field asks for it once, then remembers
     label.textContent = 'Passwort — wird auf diesem Gerät gemerkt';
+    label.hidden = false;
+    input.setAttribute('aria-label', 'Passwort');
     input.type = 'password'; input.value = ''; input.placeholder = '';
     input.setAttribute('autocomplete', 'current-password');
     send.textContent = 'OK';
     micBtn.hidden = true; ttsBtn.hidden = true;
   }
   function askQuestion() {
-    label.textContent = 'Deine Frage zur Folie';
+    label.hidden = true;                            // a question needs no label (Doc, 16.09.2026: "weg")
+    input.setAttribute('aria-label', 'Deine Frage an Solita');   // the field still has a name (Doc's label rule)
     input.type = 'text'; input.value = ''; input.placeholder = 'Warum zwei Drittel?';
     input.setAttribute('autocomplete', 'off');
-    send.textContent = 'Los';
+    send.textContent = '?';
     micBtn.hidden = !(window.SpeechRecognition || window.webkitSpeechRecognition);
     ttsBtn.hidden = false;
   }
@@ -1387,6 +1460,7 @@ ASK_JS = r"""
     busy = true; send.disabled = true;
     if (ear && ear.active) ear.stop();               // nothing may land in the field behind the answer
     input.value = '';
+    ready();
     say('<span class="ask-q">' + v.replace(/[<&]/g, function (c) { return c === '<' ? '&lt;' : '&amp;'; }) + '</span>');
     // the wave runs while Claude thinks AND while her voice is fetched - it gives way to the answer
     const wait = say('<span class="ask-wave" role="status" aria-label="Solita denkt nach">'
@@ -1440,8 +1514,8 @@ ASK_JS = r"""
     if (!ear) ear = window.SolitaListen({
       lang: 'de-DE',
       onState: function (st) { micBtn.classList.toggle('on', st === 'listening'); },
-      onPartial: function (t) { input.value = t; },
-      onFinal: function (t) { input.value = t; micBtn.classList.remove('on'); input.focus(); }
+      onPartial: function (t) { input.value = t; ready(); },
+      onFinal: function (t) { input.value = t; micBtn.classList.remove('on'); input.focus(); ready(); }
     });
     ear.start();
   };
@@ -1455,9 +1529,15 @@ ASK_JS = r"""
   }
   function close() { panel.hidden = true; stopAudio(); }
 
-  document.getElementById('ask-btn').onclick = function () { if (panel.hidden) open(); else close(); };
+  document.getElementById('ask-btn').onclick = function () {
+    this.classList.remove('invite');                 // found her - no more inviting on this page
+    if (panel.hidden) open(); else close();
+  };
   document.getElementById('ask-close').onclick = close;
   send.onclick = submit;
+  // a question in the field makes the button breathe (not while Solita is busy, not for the password)
+  function ready() { send.classList.toggle('ready', !busy && input.type === 'text' && input.value.trim() !== ''); }
+  input.addEventListener('input', ready);
   input.addEventListener('keydown', function (e) {
     if (e.key === 'Enter') { e.preventDefault(); submit(); }
     else if (e.key === 'Escape') { e.preventDefault(); close(); }
@@ -1480,7 +1560,7 @@ PAGE = """<!DOCTYPE html>
 <script defer src="__KATEX__/katex.min.js"></script>
 <script defer src="../js/solita-listen.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
-<style>__CSS__</style>
+__SHELL_CSS__
 </head>
 <body>
 <div id="stage"><div id="deck">
@@ -1490,16 +1570,16 @@ __SLIDES__
 <div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
 <div id="ask">
   <div id="ask-panel" hidden>
-    <div id="ask-head"><span>Frag Solita<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
     <div id="ask-out" aria-live="polite"></div>
-    <label for="ask-in">Deine Frage zur Folie</label>
-    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?"><button id="ask-send" type="button">Los</button></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
   </div>
-  <button id="ask-btn" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
 </div>
 <script id="narration" type="application/json">__NARR__</script>
 <script id="summary" type="application/json">__SUMMARY__</script>
-<script>__JS__</script>
+__SHELL_JS__
 </body>
 </html>
 """
@@ -1510,9 +1590,10 @@ for _k, _v in {"__INK__": INK, "__BODY__": BODY, "__MUTED__": MUTED, "__STROKE__
                "__CODEBG__": CODE_BG, "__CODEINK__": CODE_INK,
                "__W__": W, "__H__": H, "__M__": MARGIN, "__CW__": CONTENT_W,
                "__TY__": TITLE_Y, "__RY__": RULE_Y, "__BY__": BODY_Y, "__BH__": BODY_H,
-               "__FOOT__": FOOT_Y, "__FOOTT__": FOOT_Y + 8,
+               "__FOOT__": FOOT_Y, "__FOOTT__": FOOT_Y + 8, "__FOOTC__": FOOT_Y + 14,
                "__MC__": MARGIN + 28, "__MQ__": MARGIN + 32,
-               "__LABBAR__": TITLE_Y + 4, "__CODEMUTED__": CODE_MUTED, "__GREETBG__": GREET_BG,
+               "__LABBAR__": RULE_Y - 12,   # lab bar on the rules line, clear of long titles (16.09.2026)
+               "__CODEMUTED__": CODE_MUTED, "__GREETBG__": GREET_BG,
                "__GIMGW__": GREET_IMG_W, "__GFX__": GREET_X, "__GFW__": GREET_W,
                "__GLX__": GREET_X + 97, "__GLW__": GREET_W - 97,
                "__GQX__": GREET_X + 150, "__GQW__": GREET_W - 150,
@@ -1520,6 +1601,79 @@ for _k, _v in {"__INK__": INK, "__BODY__": BODY, "__MUTED__": MUTED, "__STROKE__
     _s = ("%g" % _v) if isinstance(_v, float) else str(_v)
     CSS = CSS.replace(_k, _s)
     JS = JS.replace(_k, _s)
+
+
+# ------------------------------------------------------------ shared shell ---
+# The shell every deck shares lives in two files next to the decks instead of a copy inside each of
+# them (Doc, 16.09.2026: "Was auslagerbar ist, auch wenn es nur dreimal gebraucht wird, auslagern").
+# Both are GENERATED from CSS and JS above, so design_lib stays the single source for palette and
+# geometry: edit here, then `--shell`. No cache-busting query on purpose - it would put the shell's
+# version back into every deck; GitHub Pages caches for 10 minutes and Doc reloads with Cmd-Shift-R.
+SHELL_CSS, SHELL_JS = "deck.css", "deck.js"
+GENERATED = "generated by tools/pptx/html_deck.py - edit there, then: python3 tools/pptx/html_deck.py --shell"
+INLINE_DIR = ""           # --inline DIR: embed the shell and write there - a PRIVATE single-file variant
+# (e.g. the Wuerfelspiel with the real test numbers on OneDrive). What cannot be packed - pictures, Solita's
+# audio, labs, the 3D dice, KaTeX - resolves against the live site through <base> (Doc, 16.09.2026).
+SITE = "https://docalvers.de/decks/"
+_DECK_START = '<div id="stage"><div id="deck">\n'
+_DECK_END = '\n</div></div>\n<div id="bar"></div>'
+
+
+def write_shell():
+    """Write HTML/decks/deck.css and deck.js - a file is only touched when its content changed."""
+    os.makedirs(OUT_DIR, exist_ok=True)
+    for name, text in ((SHELL_CSS, "/* %s */\n%s" % (GENERATED, CSS)),
+                       (SHELL_JS, "// %s\n%s" % (GENERATED, JS))):
+        path = os.path.join(OUT_DIR, name)
+        old = open(path, encoding="utf-8").read() if os.path.exists(path) else None
+        if old != text:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(text)
+            print(os.path.normpath(path))
+
+
+def page_inline_base(tpl):
+    """Every relative URL of a single-file copy points to the live decks folder - one line, no rewriting."""
+    return tpl.replace('<meta charset="utf-8">\n', '<meta charset="utf-8">\n<base href="%s">\n' % SITE, 1)
+
+
+def page(title, sub, slides_html, narr, summ):
+    """The whole deck page. title and sub arrive HTML-escaped."""
+    if INLINE_DIR:
+        css, js = "<style>%s</style>" % CSS, "<script>%s</script>" % JS
+        return (page_inline_base(PAGE).replace("__TITLE__", title).replace("__SUB__", sub)
+                    .replace("__KATEX__", KATEX).replace("__SHELL_CSS__", css).replace("__SLIDES__", slides_html)
+                    .replace("__NARR__", narr).replace("__SUMMARY__", summ).replace("__SHELL_JS__", js))
+    else:
+        css = '<link rel="stylesheet" href="%s">' % SHELL_CSS
+        js = '<script src="%s"></script>' % SHELL_JS
+    return (PAGE.replace("__TITLE__", title).replace("__SUB__", sub).replace("__KATEX__", KATEX)
+                .replace("__SHELL_CSS__", css).replace("__SLIDES__", slides_html)
+                .replace("__NARR__", narr).replace("__SUMMARY__", summ).replace("__SHELL_JS__", js))
+
+
+def reshell():
+    """Put the current PAGE around every deck in HTML/decks - slides, narration and summaries stay
+    byte for byte what they are. Only needed when PAGE itself changes; CSS/JS need just --shell."""
+    import glob
+    changed = total = 0
+    for path in sorted(glob.glob(os.path.join(OUT_DIR, "*.html"))):
+        s = open(path, encoding="utf-8").read()
+        if _DECK_START not in s:
+            continue
+        total += 1
+        a = s.index(_DECK_START) + len(_DECK_START)
+        slides_html = s[a:s.index(_DECK_END, a)]
+        title = re.search(r"<title>(.*?)</title>", s, re.S).group(1)
+        sub = re.search(r'<meta name="description" content="(.*?)">', s, re.S).group(1)
+        narr = re.search(r'<script id="narration" type="application/json">(.*?)</script>', s, re.S)
+        summ = re.search(r'<script id="summary" type="application/json">(.*?)</script>', s, re.S)
+        t = page(title, sub, slides_html, narr.group(1) if narr else "", summ.group(1) if summ else "{}")
+        if t != s:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(t)
+            changed += 1
+    print("reshell: %d of %d decks rewritten" % (changed, total))
 
 
 # ------------------------------------------------------------------ runner ---
@@ -1535,6 +1689,15 @@ def build(script):
 
 if __name__ == "__main__":
     args = sys.argv[1:]
+    if args == ["--shell"]:
+        write_shell()
+        sys.exit()
+    if args == ["--reshell"]:
+        write_shell()
+        reshell()
+        sys.exit()
+    if args[:1] == ["--inline"] and len(args) >= 3:
+        INLINE_DIR, args = os.path.abspath(args[1]), args[2:]
     if args[:1] == ["--prefix"] and len(args) >= 3:
         PREFIX, args = args[1], args[2:]
     if len(args) < 1:
