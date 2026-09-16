@@ -123,6 +123,15 @@
 
         .note-body:focus { outline: none; }
 
+        /* Listen in der Notiz: der Browser rueckt von Haus aus 40 px ein, damit
+           steht der Text weit vom linken Kartenrand weg. 22 px reichen fuer
+           Punkt und Zahl (Doc, 16.09.2026). */
+        .note-body ul,
+        .note-body ol {
+            margin: 4px 0;
+            padding-left: 22px;
+        }
+
         /* Slim dark scrollbar — webkit here, Firefox via the @supports guard below */
         .note-body::-webkit-scrollbar { width: 8px; }
         .note-body::-webkit-scrollbar-track { background: transparent; }
@@ -879,6 +888,13 @@
             bar.appendChild(mk('<i>I</i>', 'Kursiv (Cmd+I)', cmd('italic')));
             bar.appendChild(mk('<u>U</u>', 'Unterstrichen (Cmd+U)', cmd('underline')));
             bar.appendChild(mk('<s>S</s>', 'Durchgestrichen', cmd('strikeThrough')));
+
+            /* Doc, 16.09.2026: "gib mir hier bitte auch bullets Zahlen und bul" -
+               Aufzaehlung und nummerierte Liste. Ein zweiter Klick auf denselben
+               Knopf macht die Liste wieder zu Absaetzen, das kann execCommand
+               von Haus aus. */
+            bar.appendChild(mk('&bull;', 'Aufzählung', cmd('insertUnorderedList')));
+            bar.appendChild(mk('1.', 'Nummerierte Liste', cmd('insertOrderedList')));
 
             const colors = [
                 ['rgb(245, 194, 66)', 'Orange (λ)'],
