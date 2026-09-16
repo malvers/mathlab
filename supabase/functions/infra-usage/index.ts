@@ -132,11 +132,44 @@ function priceFor(model: string): [number, number] {
   return k ? PRICES[k] : [3, 15];
 }
 function rowEur(provider: string, model: string, inTok: number, outTok: number, cr: number, cw: number): number {
+  // Google TTS logs CHARACTERS in in_tok and runs against a monthly free quota, so a per-row price
+  // would be nonsense and would inflate the AI total. It gets its own line in the mail instead.
+  if (provider === 'google-tts') return 0;
   const p = priceFor(model || '');
   const isDS = /^deepseek/.test(provider) || /^deepseek/.test(model || '');
   const readMul = isDS ? 0.26 : 0.1, writeMul = isDS ? 1 : 1.25;
   return (inTok * p[0] + cr * p[0] * readMul + cw * p[0] * writeMul + outTok * p[1]) / 1e6 * USD_EUR;
 }
+// Google's free Text-to-Speech quota per voice type and CALENDAR MONTH. The pricing table is built by
+// JS and cannot be read from a function, so this is the documented value for the premium voices; what is
+// really billed stands in Cloud Billing (Service = Cloud Text-to-Speech API). Doc's billing account also
+// carries a 10 EUR/month budget alert - which mails, it does not switch anything off.
+const TTS_FREE_CHARS = 1_000_000;
+
+// Characters synthesised since `sinceISO` (provider 'google-tts', characters live in in_tok). Paginated
+// and best-effort, exactly like aiTotalSinceEur - the watchdog mail must never fail over this.
+async function ttsCharsSince(sinceISO: string): Promise<number> {
+  try {
+    const url = Deno.env.get('SUPABASE_URL'); const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!url || !key) return 0;
+    const supa = createClient(url, key, { auth: { persistSession: false } });
+    let total = 0, from = 0; const page = 1000;
+    for (;;) {
+      const { data, error } = await supa.from('ai_cost_log')
+        .select('in_tok')
+        .eq('provider', 'google-tts')
+        .gte('created_at', sinceISO)
+        .order('id', { ascending: true })
+        .range(from, from + page - 1);
+      if (error || !Array.isArray(data)) break;
+      for (const r of data as Array<Record<string, unknown>>) total += Number(r.in_tok) || 0;
+      if (data.length < page) break;
+      from += page;
+    }
+    return total;
+  } catch (_) { return 0; }
+}
+
 // Sum the last 24 h of ai_cost_log per provider (via the SECURITY-DEFINER RPC). Fully best-effort — a
 // missing table / RPC error must NEVER break the infra mail, so it returns empty on any problem.
 async function aiCostToday(): Promise<{ byProvider: Record<string, number>; total: number; calls: number }> {
@@ -249,12 +282,15 @@ Deno.serve(async (req) => {
     const nowD = new Date();
     const monthStart = new Date(Date.UTC(nowD.getUTCFullYear(), nowD.getUTCMonth(), 1));
     const monthLabel = monthStart.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', timeZone: 'UTC' });
-    const [r2, db, ai, searches, ghBytes, monthTotal] = await Promise.all([r2BytesUsed(), dbBytesUsed(), aiCostToday(), geminiSearchCount(), ghPagesBytesUsed(), aiTotalSinceEur(monthStart.toISOString())]);
+    const [r2, db, ai, searches, ghBytes, monthTotal, ttsChars] = await Promise.all([r2BytesUsed(), dbBytesUsed(), aiCostToday(), geminiSearchCount(), ghPagesBytesUsed(), aiTotalSinceEur(monthStart.toISOString()), ttsCharsSince(monthStart.toISOString())]);
     const r2pctN = pctN(r2, R2_QUOTA_GB), dbpctN = pctN(db, DB_QUOTA_GB);
     const r2pct = de(r2pctN, 2), dbpct = de(dbpctN, 2);   // 2 Nachkommastellen, deutsche Komma-Schreibweise
     const ghPctN = ghBytes != null ? pctN(ghBytes, GH_PAGES_QUOTA_GB) : null;   // null → GitHub unreachable, skip the row
     const ghpct = ghPctN != null ? de(ghPctN, 2) : '';
-    const warn = r2pctN >= 80 || dbpctN >= 80 || (ghPctN != null && ghPctN >= 80);
+    const ttsPctN = ttsChars / TTS_FREE_CHARS * 100;          // monthly, resets with the quota on the 1st
+    const ttsPct = de(ttsPctN, 2);
+    const ttsDe = ttsChars.toLocaleString('de-DE');
+    const warn = r2pctN >= 80 || dbpctN >= 80 || (ghPctN != null && ghPctN >= 80) || ttsPctN >= 80;
     // Always list all three providers — Doc wants Gemini/DeepSeek visible even at 0 (2026-07-04). Any
     // provider that actually billed but isn't in this fixed order gets appended so nothing is ever hidden.
     const FIXED_PROVS = ['claude', 'gemini', 'deepseek'];
@@ -274,11 +310,13 @@ Deno.serve(async (req) => {
       `• R2-Storage:  ${r2pct}% von ${R2_QUOTA_GB} GB  (${gbDe(r2)} GB)\n` +
       `• Supabase-DB: ${dbpct}% von ${de(DB_QUOTA_GB, 1)} GB  (${gbDe(db)} GB)\n` +
       (ghPctN != null ? `• GitHub Pages: ${ghpct}% von ${GH_PAGES_QUOTA_GB} GB  (${gbDe(ghBytes!)} GB)\n` : '') +
+      `• Solitas Stimme: ${ttsPct}% von 1 Mio Zeichen/Monat  (${ttsDe} Zeichen seit ${monthLabel})\n` +
       aiText +
       (searches > 0 ? `\nGemini-Suchen (24 h): ${searches} / 1500 gratis\n` : '') + `\n` +
       `Verbrauch beim Anbieter:\n` +
       `• Cloudflare R2: https://dash.cloudflare.com/?to=/:account/r2/overview\n` +
-      `• Supabase:      https://supabase.com/dashboard/project/fyfhxzyymmurlaenmzse/reports/database\n\n` +
+      `• Supabase:      https://supabase.com/dashboard/project/fyfhxzyymmurlaenmzse/reports/database\n` +
+      `• Google TTS:    https://console.cloud.google.com/billing/reports?project=mra-learn-languages\n\n` +
       `Exakte Kosten beim Anbieter:\n` +
       `• Claude:   https://console.anthropic.com/settings/cost\n` +
       `• Gemini:   https://aistudio.google.com/spend\n` +
@@ -293,11 +331,11 @@ Deno.serve(async (req) => {
       `<div style="background:${C.line};border-radius:3px;height:6px;width:130px;margin-top:5px;">`
       + `<div style="background:${col(n)};height:6px;border-radius:3px;width:${Math.max(2, Math.min(100, n)).toFixed(1)}%;"></div></div>`;
     const cell = (x: string) => `padding:10px 12px;border-bottom:1px solid ${C.line};${x}`;
-    const usageRow = (icon: string, name: string, n: number, pctStr: string, used: string, quota: string, shade: boolean) =>
+    const usageRow = (icon: string, name: string, n: number, pctStr: string, used: string, quota: string, shade: boolean, unit = 'GB') =>
       `<tr style="background:${shade ? C.shade : '#ffffff'};">`
       + `<td style="${cell('')}">${icon}&nbsp; ${name}</td>`
       + `<td style="${cell('text-align:right;white-space:nowrap;')}"><span style="font-weight:bold;color:${col(n)};font-size:15px;">${pctStr}&nbsp;%</span>${bar(n)}</td>`
-      + `<td style="${cell('text-align:right;white-space:nowrap;color:' + C.ink + ';')}">${used}&nbsp;GB</td>`
+      + `<td style="${cell('text-align:right;white-space:nowrap;color:' + C.ink + ';')}">${used}&nbsp;${unit}</td>`
       + `<td style="${cell('text-align:right;white-space:nowrap;color:' + C.muted + ';')}">${quota}</td></tr>`;
     const aiHtml = provs.length
       ? `<h3 style="color:${C.navy};font-size:15px;margin:24px 0 8px;">KI-Kosten · letzte 24 h</h3>`
@@ -324,6 +362,8 @@ Deno.serve(async (req) => {
       + usageRow('☁️', 'Cloudflare R2', r2pctN, r2pct, gbDe(r2), `${R2_QUOTA_GB} GB`, false)
       + usageRow('🗄️', 'Supabase DB', dbpctN, dbpct, gbDe(db), `${de(DB_QUOTA_GB, 1)} GB`, true)
       + (ghPctN != null ? usageRow('🐙', 'GitHub Pages', ghPctN, ghpct, gbDe(ghBytes!), `${GH_PAGES_QUOTA_GB} GB`, false) : '')
+      + usageRow('🔊', `Solitas Stimme <span style="color:${C.muted};font-size:12px;">seit ${monthLabel}</span>`,
+                 ttsPctN, ttsPct, ttsDe, '1 Mio Zeichen', ghPctN != null, 'Zeichen')
       + `</tbody></table>`
       + aiHtml
       + `<div style="margin:22px 0 0;padding:12px 14px;border-radius:8px;font-size:14px;font-weight:bold;`
@@ -331,7 +371,8 @@ Deno.serve(async (req) => {
       + `${warn ? '⚠️ Achtung: ein Wert über 80 % — Zeit, aufzuräumen.' : '✓ Alles im grünen Bereich.'}</div>`
       + `<p style="color:${C.muted};font-size:12px;margin:18px 0 0;line-height:1.8;">Verbrauch beim Anbieter:<br>`
       + `Cloudflare R2 · <a href="https://dash.cloudflare.com/?to=/:account/r2/overview" style="color:${C.navy};">dash.cloudflare.com</a> &nbsp;|&nbsp; `
-      + `Supabase · <a href="https://supabase.com/dashboard/project/fyfhxzyymmurlaenmzse/reports/database" style="color:${C.navy};">supabase.com</a></p>`
+      + `Supabase · <a href="https://supabase.com/dashboard/project/fyfhxzyymmurlaenmzse/reports/database" style="color:${C.navy};">supabase.com</a> &nbsp;|&nbsp; `
+      + `Google TTS · <a href="https://console.cloud.google.com/billing/reports?project=mra-learn-languages" style="color:${C.navy};">console.cloud.google.com</a></p>`
       + `<p style="color:${C.muted};font-size:12px;margin:10px 0 0;line-height:1.8;">Exakte Kosten beim Anbieter:<br>`
       + `Claude · <a href="https://console.anthropic.com/settings/cost" style="color:${C.navy};">console.anthropic.com</a> &nbsp;|&nbsp; `
       + `Gemini · <a href="https://aistudio.google.com/spend" style="color:${C.navy};">aistudio.google.com</a> &nbsp;|&nbsp; `

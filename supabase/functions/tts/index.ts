@@ -10,6 +10,23 @@
 
 import { guard, budgetExceeded } from '../_shared/guard.ts';
 
+// Fire-and-forget: one row per synthesis into ai_cost_log, so the daily 08:00 mail can show how much
+// of Google's monthly free character quota is gone (Doc, 16.09.2026: "volle Kontrolle"). Characters go
+// into in_tok - the column is a counter, and infra-usage prices this provider at 0 because characters
+// are not tokens and the quota is monthly, not per call. Never let logging affect the audio response.
+async function logTtsChars(voice: string, chars: number) {
+  try {
+    const url = Deno.env.get('SUPABASE_URL');
+    const svc = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!url || !svc || !chars) return;
+    await fetch(url + '/rest/v1/ai_cost_log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': svc, 'Authorization': 'Bearer ' + svc, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ provider: 'google-tts', model: voice, in_tok: chars, out_tok: 0, cache_read: 0, cache_write: 0, label: 'tts' }),
+    });
+  } catch (_) { /* logging must never break the voice */ }
+}
+
 const GOOGLE_TTS = 'https://texttospeech.googleapis.com/v1/text:synthesize';
 
 const CORS = {
@@ -68,6 +85,13 @@ Deno.serve(async (req) => {
       body: JSON.stringify(body),
     });
     const data = await r.json().catch(() => ({}));
+    if (r.ok) {                                    // only count what Google actually synthesised (and billed)
+      try {
+        const er = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+        const p = logTtsChars(voiceName, chars);
+        if (er?.waitUntil) er.waitUntil(p);
+      } catch (_) { /* never affect the response */ }
+    }
     return json(data, r.ok ? 200 : (r.status || 502)); // pass Google's { audioContent } (or its error) through
   } catch (e) {
     return json({ error: String((e && (e as Error).message) || e) }, 502);
