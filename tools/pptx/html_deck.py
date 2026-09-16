@@ -691,6 +691,86 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 .ov-thumb .step{opacity:1!important}
 .ov-num{position:absolute;left:8px;bottom:6px;padding:2px 7px;border-radius:5px;
   background:rgba(14,36,78,.78);color:#fff;font:600 12px Raleway,system-ui,sans-serif}
+/* --- presenter view (?presenter - the fullscreen button opens it when a beamer is attached) ------------- */
+html.presenter #stage,html.presenter #hud,html.presenter #ask,html.presenter #bar{display:none!important}
+html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(64px,13vh,124px) + 30px)!important}
+#pres{position:fixed;inset:0;z-index:8;background:var(--ink);color:#E6ECF8;font-family:Orbitron,system-ui,sans-serif;
+  display:grid;gap:12px 26px;padding:12px 22px 10px;
+  grid-template-columns:minmax(0,2fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) clamp(64px,13vh,124px);
+  grid-template-areas:"bar side" "cur side" "strip strip"}
+#pres button{display:grid;place-items:center;border:0;background:none;color:inherit;cursor:pointer;
+  padding:4px;border-radius:6px;opacity:.85}
+#pres button:hover{opacity:1;color:var(--orange)}
+.p-bar{grid-area:bar;display:flex;align-items:center;gap:8px;font-size:clamp(18px,2.2vw,30px);letter-spacing:1px}
+.p-bar button svg{width:clamp(18px,1.7vw,26px);height:clamp(18px,1.7vw,26px)}
+.p-timer{margin-right:4px}
+.p-clock{margin-left:auto}
+.p-cur{grid-area:cur;display:flex;flex-direction:column;min-height:0}
+.p-fit{display:flex;justify-content:center;min-width:0}   /* JS sizes the frame inside */
+.p-cur .p-fit{cursor:pointer}
+.p-frame{position:relative;flex:none;overflow:hidden;background:#fff;border-radius:6px;
+  box-shadow:0 2px 12px rgba(0,0,0,.35)}
+.p-frame:empty{visibility:hidden}
+.p-frame > .slide,.p-thumb > .slide{display:block!important;position:absolute;left:0;top:0;width:960px;height:540px;
+  transform-origin:0 0;pointer-events:none}
+.p-end{position:absolute;inset:0;display:grid;place-items:center;background:#1B3566;color:#7E8FB5;
+  font-size:14px;letter-spacing:3px;text-transform:uppercase}
+/* stand-ins for labs and 3D dice in the previews and the strip - visible, never live (WebGL budget) */
+.p-live{background:rgba(14,36,78,.10);border:1.5px dashed rgba(14,36,78,.35);border-radius:10px;display:grid;
+  place-items:center;color:var(--muted);font:700 14px Orbitron,sans-serif;letter-spacing:3px;text-transform:uppercase}
+.p-live.dice{font-size:30px}
+.labframe > .p-live{position:absolute;inset:0}
+/* the current slide is live: its labs and dice take the pointer (the slide itself does not, a click turns on) */
+.p-frame > .slide.live iframe{pointer-events:auto}
+.p-nav{display:flex;align-items:center;justify-content:center;gap:14px;padding-top:8px}
+.p-nav button svg{width:30px;height:30px}
+.p-pos{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:9em;
+  font-family:Raleway,system-ui,sans-serif;font-size:clamp(14px,1.4vw,19px)}
+.p-prog{width:100%;max-width:130px;height:4px;border-radius:2px;background:rgba(230,236,248,.18);overflow:hidden}
+.p-prog i{display:block;height:100%;width:0;background:var(--orange);transition:width .25s}
+.p-side{grid-area:side;display:flex;flex-direction:column;gap:14px;min-height:0}
+.p-slot{display:flex;flex-direction:column;min-width:0}
+/* caption under a preview (Doc, 16.09.2026: "Nächste Folie: ##" / "Übernächste Folie: ##"), like the count under the slide */
+.p-cap{min-height:1.5em;margin:6px 0 0;text-align:center;color:#B8C6DF;
+  font-family:Raleway,system-ui,sans-serif;font-size:clamp(13px,1.2vw,17px)}
+.p-strip{grid-area:strip;display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;padding:4px 4px 8px;
+  position:relative;z-index:1;align-items:flex-end;   /* JS lends it room above for the dock magnification */
+  scrollbar-width:thin;scrollbar-color:#7E8FB5 transparent}
+.p-strip::-webkit-scrollbar{height:8px}
+.p-strip::-webkit-scrollbar-thumb{background:#7E8FB5;border-radius:4px}
+.p-strip::-webkit-scrollbar-track{background:transparent}
+#pres .p-cell{display:block;position:relative;flex:none;height:100%;aspect-ratio:16/9;padding:0;opacity:1;
+  border-radius:5px;outline:3px solid transparent;box-shadow:0 2px 8px rgba(0,0,0,.35);
+  transform-origin:50% 100%;transition:transform .12s ease-out;will-change:transform}   /* grows upward, like the Dock */
+@media (prefers-reduced-motion:reduce){#pres .p-cell{transition:none}}
+#pres .p-cell:hover{outline-color:var(--green)}
+#pres .p-cell.cur{outline-color:var(--orange)}
+.p-thumb{position:absolute;inset:0;overflow:hidden;background:#fff;border-radius:5px}
+.p-num{position:absolute;left:5px;bottom:4px;padding:1px 6px;border-radius:4px;
+  background:rgba(14,36,78,.78);color:#fff;font:600 11px Raleway,system-ui,sans-serif}
+/* upright screen (a tablet as presenter): slide on top, both previews side by side below */
+@media (max-aspect-ratio:1/1){
+  #pres{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1.4fr) minmax(0,1fr) clamp(64px,13vh,124px);
+    grid-template-areas:"bar" "cur" "side" "strip"}
+  .p-side{flex-direction:row}
+  .p-slot{flex:1 1 0}
+}
+#linkmsg{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:40;padding:8px 14px;border-radius:8px;
+  background:rgba(255,255,255,.94);box-shadow:0 2px 10px rgba(0,0,0,.3);color:#0E244E;
+  font:600 14px Raleway,system-ui,sans-serif}
+#linkmsg[hidden]{display:none}
+/* start card after Chrome's one-time question "Fenster verwalten" - that question ate the first click */
+#linkgo{position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:rgba(14,36,78,.55)}
+#linkgo[hidden]{display:none}
+#linkgo .lg-box{width:min(380px,calc(100vw - 32px));padding:24px 24px 18px;border-radius:12px;text-align:center;
+  background:#EAF0FA;box-shadow:0 10px 36px rgba(14,36,78,.5);color:var(--ink);font-family:Raleway,system-ui,sans-serif}
+#linkgo .lg-title{font:700 15px Orbitron,sans-serif;letter-spacing:2px;text-transform:uppercase;color:var(--ink)}
+#linkgo p{margin:10px 0 18px;font-size:15px;color:var(--body)}
+#linkgo button{display:block;width:100%;border:0;border-radius:8px;cursor:pointer}
+#linkgo .lg-go{padding:12px;background:var(--green);color:#fff;font:700 15px Orbitron,sans-serif;letter-spacing:1px}
+#linkgo .lg-go:hover,#linkgo .lg-go:focus-visible{filter:brightness(1.08);outline:2px solid var(--ink);outline-offset:2px}
+#linkgo .lg-no{margin-top:8px;padding:6px;background:none;color:var(--muted);font:400 13px Raleway,sans-serif}
+#linkgo .lg-no:hover{color:var(--red)}
 /* --- ask Solita (avatar bottom right, Claude Haiku + her DocPad voice) ---- */
 #ask{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:38px;z-index:11;
   font-family:Raleway,system-ui,sans-serif;--askbg:#EAF0FA;--askfield:#D8E2F3;
@@ -798,6 +878,10 @@ JS = """
 const deck = document.getElementById('deck');
 const slides = [...document.querySelectorAll('.slide')];
 let si = 0, step = 0;
+// ?presenter: this window is the presenter view on the laptop (see PRES_JS at the end)
+const PRESENTER = /[?&]presenter(&|=|$)/.test(location.search);
+if (PRESENTER) document.documentElement.classList.add('presenter');
+const painted = [];                                  // run after every paint - the presenter link hooks in
 slides.forEach((s, i) => {
   const p = s.querySelector('.pageno');
   if (p) p.textContent = (i + 1) + ' / ' + slides.length;
@@ -844,6 +928,7 @@ function paint(){
   const sl = slides[si];
   sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
   document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+  painted.forEach(f => f());
 }
 function next(){
   if (step < groups(slides[si])) { step++; }
@@ -868,6 +953,7 @@ addEventListener('keydown', e => {
 addEventListener('click', e => {
   // links (lab bar, picture credits) open - they do not turn the page as well
   if (e.target.closest('#hud') || e.target.closest('a') || e.target.closest('.play-big')) return;
+  if (e.target.closest('#pres')) return;             // the presenter view handles its own clicks
   narr.stop();                                       // a click turns the page by hand
   if (e.target.closest('.labbar button')) { next(); return; }
   next();
@@ -963,7 +1049,7 @@ addEventListener('click', e => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     // this one listens in the capture phase, so a question typed to Solita would reach it first:
     // 'o' would open the overview mid-sentence. Nothing from inside #ask belongs to the deck.
-    if (e.target && e.target.closest && e.target.closest('#ask')) return;
+    if (e.target && e.target.closest && e.target.closest('#ask, #linkgo')) return;   // the start card too
     if (e.key === 'o' || e.key === 'O') {
       if (ov.hidden) open(); else close();
       e.preventDefault(); e.stopImmediatePropagation(); return;
@@ -985,11 +1071,14 @@ function paintFull(){
   fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
     + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
     + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
-  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)' : 'Vollbild (f)';
+  fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)'
+    : !PRESENTER && screen.isExtended ? 'Präsentieren: Beamer + Referentenansicht (f)' : 'Vollbild (f)';
 }
 function full(){
   const el = document.documentElement;
   if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  // a second screen (Chrome knows): fullscreen goes to the beamer, the presenter view to the laptop
+  else if (!PRESENTER && screen.isExtended && window.getScreenDetails) link.present();
   else {
     const req = el.requestFullscreen || el.webkitRequestFullscreen;
     if (req) Promise.resolve(req.call(el)).catch(() => {});
@@ -998,6 +1087,7 @@ function full(){
 fullBtn.onclick = full;
 document.addEventListener('fullscreenchange', paintFull);
 document.addEventListener('webkitfullscreenchange', paintFull);
+if (screen.addEventListener) screen.addEventListener('change', paintFull);   // beamer plugged in or out
 if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) paintFull();
 else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to press
 
@@ -1071,6 +1161,7 @@ const narr = (function () {
     held = -1; api.playing = true; si = n; step = 0; part = 0; audio = null; show(); paint(); run();
   }
   function toggle() {
+    if (PRESENTER) { link.send({ t: 'play' }); return; }   // her voice comes from the beamer window
     clearTimeout(wait);
     if (!api.playing && held >= 0 && si === held && si < slides.length - 1) { resume(si + 1); return; }
     held = -1;
@@ -1091,6 +1182,7 @@ const narr = (function () {
     if (!api.playing) return;
     api.playing = false; if (audio) audio.pause(); audio = null; show();
   };
+  api.toggle = toggle;                                // 'p' pressed in the presenter window
   // stop the click here: toggle redraws the icon, and the page's click handler would then no
   // longer see the (detached) target inside #hud - it turned the page and paused Solita again
   btn.onclick = function (e) { e.stopPropagation(); toggle(); };
@@ -1544,7 +1636,562 @@ ASK_JS = r"""
   });
 })();
 """
-JS = JS + ASK_JS
+
+# Presenter view. Own raw string like ASK_JS.
+PRES_JS = r"""
+// Presenter view (Doc, 16.09.2026: "im Präsimode (full screen) auf einen ggf. ersten Monitor ... Vorschau
+// der kommenden Slides", then "der Fullscreen butt ist schon der Start"). With a second screen the
+// fullscreen button puts the deck on the beamer and opens the same deck again as ?presenter on the laptop:
+// the slide the class sees, what the next click brings, the click after that (centred, a bit smaller),
+// timer, clock and the slide strip. No notes for now (Doc: "lass erstmal leer").
+// The windows talk over a BroadcastChannel; opener and popup also by postMessage, which works where a
+// channel may not (a deck opened as a file). Only a window that has heard from a presenter follows, so two
+// ordinary tabs of the same deck never steer each other. Without a second screen r opens the presenter
+// window by hand - to try it out next to the deck.
+const link = (function () {
+  const me = Math.random().toString(36).slice(2);
+  const seen = new Set();                            // a message may arrive twice: channel and postMessage
+  let chan = null, peer = null, seq = 0, tt = 0;
+  let linked = PRESENTER, applying = false, sentSi = -1, sentStep = -1;
+  let mine = false;                                  // this window opened the presenter
+  let showing = false, showAt = 0;                   // this window is on the beamer for a show, since when
+  let presFull = false;                              // presenter: has been fullscreen in this show
+  let best = -1;                                     // presenter: rank of the best answer to its hello
+  try { chan = new BroadcastChannel('deck:' + location.pathname); } catch (e) { }
+
+  function send(m) {
+    m.from = me; m.id = me + '.' + (++seq); m.p = PRESENTER;
+    if (chan) try { chan.postMessage(m); } catch (e) { }
+    const to = location.origin === 'null' ? '*' : location.origin;
+    (PRESENTER ? [window.opener, peer] : [peer]).forEach(function (w) {
+      if (w && w !== window && !w.closed) try { w.postMessage({ deckLink: m }, to); } catch (e) { }
+    });
+  }
+  function apply(m) {
+    const n = Math.max(0, Math.min(slides.length - 1, m.si | 0));
+    const st = Math.max(0, Math.min(groups(slides[n]), m.step | 0));
+    if (n === si && st === step) return;
+    if (!PRESENTER) narr.stop();                     // turned on the laptop = turned by hand
+    applying = true; sentSi = n; sentStep = st;
+    si = n; step = st; paint();
+    applying = false;
+  }
+  function receive(m, src) {
+    if (!m || m.from === me || seen.has(m.id)) return;
+    if (seen.size > 4000) seen.clear();              // mirrored pointer moves are many
+    seen.add(m.id);
+    if (src) peer = src;
+    if (PRESENTER) {
+      if (m.p) return;                               // another presenter window: not ours to follow
+      if (m.t === 'end') { window.close(); return; }   // Esc on the beamer ended the show
+      if (m.t === 'here') send({ t: 'go', si: si, step: step, to: m.from });   // the beamer window reloaded
+      else if (m.t === 'go') {
+        // answers to our hello: the window that opened us beats a fullscreen one beats any other tab
+        if (m.rank !== undefined) { if (m.rank < best) return; best = m.rank; }
+        apply(m);
+      }
+      return;
+    }
+    if (!m.p) return;                                // ordinary tabs never steer each other
+    if (m.t === 'hello') {                           // a presenter (re)opened: tell it where we stand
+      if (!mine && document.visibilityState !== 'visible') return;   // a tab in the background stays out
+      linked = true;
+      send({ t: 'go', si: si, step: step, rank: (mine ? 2 : 0) + (fsOn() ? 1 : 0) });
+      return;
+    }
+    if (m.t === 'go' && m.to === me) linked = true;  // the presenter answered our 'here'
+    if (!linked) return;
+    if (m.t === 'bye') { if (!mine) linked = false; }
+    else if (m.t === 'end') {                        // Esc in the presenter window ended the show
+      showing = false; linked = false; mine = false;
+      if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    }
+    else if (m.t === 'play') { if (narr.toggle) narr.toggle(); }
+    else if (m.t === 'go') apply(m);
+    else if (m.t === 'ev') mirror.replay(m);
+  }
+  if (chan) chan.onmessage = function (e) { receive(e.data, null); };
+  addEventListener('message', function (e) {
+    if (!e.data || !e.data.deckLink || e.origin !== location.origin) return;
+    receive(e.data.deckLink, e.source);
+  });
+
+  // Labs and 3D dice mirrored (Doc, 16.09.2026: "ideal wäre ich bediene die und LG auch ... same for Lab").
+  // The same lab runs in both windows; everything done in the presenter's live slide - pointer, mouse, wheel,
+  // keys, sliders, text, scrolling - is played again in the beamer's copy, on the element at the same place
+  // in the same DOM. Chance stays in step: every press re-seeds Math.random in both copies with one number,
+  // so a roll shows the same pips on both screens. Limits: a lab that runs on its own clock can drift, and
+  // nothing done on the beamer before the show is carried over.
+  const mirror = (function () {
+    const TYPES = ['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'mousedown', 'mousemove', 'mouseup',
+                   'click', 'dblclick', 'wheel', 'keydown', 'keyup', 'input', 'change', 'scroll'];
+    function prng(seed) {                             // mulberry32: small, fast, the same on both sides
+      let a = seed >>> 0;
+      return function () {
+        a = (a + 0x6D2B79F5) >>> 0;
+        let t = a;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    function pathOf(el, doc) {                        // child indices from <html> down to the element
+      const path = [];
+      if (!el || el.nodeType !== 1) return null;
+      while (el && el !== doc.documentElement) {
+        const up = el.parentElement;
+        if (!up) return null;
+        path.unshift([].indexOf.call(up.children, el));
+        el = up;
+      }
+      return el ? path : null;
+    }
+    function byPath(doc, path) {
+      let el = doc.documentElement;
+      for (let i = 0; el && i < path.length; i++) el = el.children[path[i]];
+      return el || null;
+    }
+    // presenter: listen to one live iframe of the current slide (capture phase, before the lab itself)
+    function watch(f, slide, k, gesture) {
+      let w;
+      try { w = f.contentWindow; if (!w.document) return; } catch (e) { return; }   // another origin: no mirror
+      TYPES.forEach(function (type) {
+        w.addEventListener(type, function (e) {
+          if (!e.isTrusted) return;
+          const doc = w.document;
+          const m = { t: 'ev', si: slide, k: k, type: type, ts: e.timeStamp,
+                      mods: [e.altKey, e.ctrlKey, e.metaKey, e.shiftKey] };
+          let tgt = e.target;
+          if (type === 'scroll' && tgt && tgt.nodeType === 9) tgt = doc.scrollingElement;
+          m.path = pathOf(tgt, doc);
+          if (tgt && tgt.nodeType === 1) { m.tag = tgt.tagName; m.eid = tgt.id || ''; }
+          if (type === 'pointerdown' || type === 'keydown') {
+            m.seed = Math.floor(Math.random() * 4294967296);
+            w.Math.random = prng(m.seed);
+            gesture();                                // a press in a lab counts for the presenter's fullscreen too
+          }
+          if (e.clientX !== undefined) {
+            m.x = e.clientX; m.y = e.clientY; m.b = e.button; m.bs = e.buttons;
+            m.mx = e.movementX; m.my = e.movementY; m.det = e.detail;
+          }
+          if (e.pointerId !== undefined) {
+            m.pid = e.pointerId; m.pt = e.pointerType; m.prim = e.isPrimary; m.pr = e.pressure; m.pw = e.width; m.ph = e.height;
+          }
+          if (type === 'wheel') { m.dx = e.deltaX; m.dy = e.deltaY; m.dz = e.deltaZ; m.dm = e.deltaMode; }
+          if (e.key !== undefined) { m.key = e.key; m.code = e.code; m.rep = e.repeat; m.kc = e.keyCode; }
+          if (type === 'input' || type === 'change') { m.val = tgt && tgt.value; m.chk = tgt && tgt.checked; }
+          if (type === 'scroll' && tgt) { m.st = tgt.scrollTop; m.sl = tgt.scrollLeft; }
+          send(m);
+        }, true);
+      });
+    }
+    // beamer: the same event, on the same element of its copy
+    function guard(w) {
+      // a replayed pointer has no real pointer behind it: capturing it throws and would stop the lab's handler
+      if (w.__deckMirror) return;
+      w.__deckMirror = true;
+      ['setPointerCapture', 'releasePointerCapture'].forEach(function (n) {
+        const orig = w.Element.prototype[n];
+        if (orig) w.Element.prototype[n] = function () { try { return orig.apply(this, arguments); } catch (e) { } };
+      });
+    }
+    function replay(m) {
+      const slide = slides[m.si];
+      const f = slide && slide.querySelectorAll('iframe')[m.k];
+      if (!f) return;
+      let w, doc;
+      try { w = f.contentWindow; doc = w.document; } catch (e) { return; }
+      if (!doc || !doc.documentElement) return;
+      guard(w);
+      if (m.seed !== undefined) w.Math.random = prng(m.seed);
+      // Which element: for a pointer what lies at that spot (the beamer's copy has the same size, so the same
+      // layout) - measured on Doc's two screens 16.09.2026, the DOM path alone missed: the two copies had
+      // grown their injected extras in a different order. A press remembers its element for the moves and the
+      // release that follow, like a real pointer does. Keys, inputs and scrolling go by id, then by path.
+      const byId = m.eid ? doc.getElementById(m.eid) : null;
+      const byP = m.path ? byPath(doc, m.path) : null;
+      const onPath = byP && (!m.tag || byP.tagName === m.tag) ? byP : null;
+      let t = null;
+      if (m.x !== undefined) {
+        const here = doc.elementFromPoint(m.x, m.y);
+        if (m.type === 'pointerdown' || m.type === 'mousedown') w.__deckDown = here;
+        const up = m.type === 'pointerup' || m.type === 'pointercancel' || m.type === 'mouseup';
+        t = ((m.bs || up) && w.__deckDown) || here || byId || onPath;
+        if (m.type === 'mouseup') w.__deckDown = null;
+      } else {
+        t = byId || onPath || doc.activeElement || doc.body;
+      }
+      if (!t) return;
+      if (m.type === 'scroll') { t.scrollTop = m.st; t.scrollLeft = m.sl; return; }
+      const mods = m.mods || [];
+      const base = { bubbles: true, cancelable: true, composed: true, view: w,
+                     altKey: !!mods[0], ctrlKey: !!mods[1], metaKey: !!mods[2], shiftKey: !!mods[3] };
+      let ev;
+      if (m.type === 'input' || m.type === 'change') {
+        if (t.type === 'checkbox' || t.type === 'radio') t.checked = !!m.chk;
+        else if ('value' in t && t.value !== m.val) t.value = m.val;
+        ev = new w.Event(m.type, { bubbles: true });
+      } else if (m.key !== undefined) {
+        ev = new w.KeyboardEvent(m.type, Object.assign(base, { key: m.key, code: m.code, repeat: !!m.rep }));
+        Object.defineProperty(ev, 'keyCode', { get: function () { return m.kc; } });
+        Object.defineProperty(ev, 'which', { get: function () { return m.kc; } });
+      } else {
+        const mouse = Object.assign(base, { clientX: m.x, clientY: m.y, screenX: m.x, screenY: m.y, button: m.b,
+                                            buttons: m.bs, detail: m.det, movementX: m.mx, movementY: m.my });
+        if (m.type === 'wheel') {
+          ev = new w.WheelEvent('wheel', Object.assign(mouse, { deltaX: m.dx, deltaY: m.dy, deltaZ: m.dz, deltaMode: m.dm }));
+        } else if (m.pid !== undefined) {
+          ev = new w.PointerEvent(m.type, Object.assign(mouse, { pointerId: m.pid, pointerType: m.pt, isPrimary: m.prim,
+                                                                pressure: m.pr, width: m.pw, height: m.ph }));
+        } else {
+          ev = new w.MouseEvent(m.type, mouse);
+        }
+      }
+      // The lab sees the presenter's clock, shifted once per press: a trackball throw takes its speed from the
+      // times of the last moves, and those arrive here with a jitter that made the die land elsewhere.
+      if (m.seed !== undefined || w.__deckOff === undefined) w.__deckOff = w.performance.now() - m.ts;
+      const at = m.ts + w.__deckOff;
+      let shifted = false;
+      try { w.performance.now = function () { return at; }; shifted = true; } catch (e) { }
+      try { t.dispatchEvent(ev); } catch (e) { }
+      if (shifted) delete w.performance.now;
+    }
+    return { watch: watch, replay: replay };
+  })();
+
+  function toast(t) {
+    let b = document.getElementById('linkmsg');
+    if (!b) {
+      b = document.createElement('div'); b.id = 'linkmsg'; b.setAttribute('role', 'status');
+      document.body.appendChild(b);
+    }
+    b.textContent = t; b.hidden = false;
+    clearTimeout(tt); tt = setTimeout(function () { b.hidden = true; }, 4500);
+  }
+  function openPresenter(scr) {
+    const url = location.href.split('#')[0].split('?')[0] + '?presenter';
+    const where = scr ? ',left=' + scr.availLeft + ',top=' + scr.availTop
+                        + ',width=' + scr.availWidth + ',height=' + scr.availHeight
+                      : ',width=1280,height=800';
+    const w = window.open(url, 'deck-presenter', 'popup' + where);
+    if (!w) { toast('Referentenansicht blockiert – bitte Pop-ups für diese Seite erlauben'); return; }
+    peer = w; linked = true; mine = true;
+  }
+  // One click, two windows: Chrome lets a page that may place windows ("Fenster verwalten", asked once)
+  // go fullscreen on one screen and open a popup on another from the same click - fullscreen first.
+  async function present() {
+    const el = document.documentElement;
+    let sd = null;
+    try { sd = await window.getScreenDetails(); } catch (e) { }   // refused: plain fullscreen as before
+    const screens = sd ? sd.screens : [];
+    const lap = screens.filter(function (s) { return s.isInternal; })[0] || (sd && sd.currentScreen);
+    const beamer = screens.filter(function (s) { return s !== lap; })[0];
+    try { await el.requestFullscreen(beamer ? { screen: beamer } : undefined); }
+    catch (e) { offer(!!beamer); return; }
+    if (beamer) { showing = true; showAt = Date.now(); openPresenter(lap); }
+  }
+  // Chrome's question "Fenster verwalten" uses up the click that asked it (measured 16.09.2026 on Doc's two
+  // screens: after "Allow" no fullscreen, no popup). The answer is remembered per site, so this happens
+  // once - and then a big button in the middle takes the fresh click that starting needs.
+  function offer(two) {
+    let card = document.getElementById('linkgo');
+    if (!card) {
+      card = document.createElement('div');
+      card.id = 'linkgo';
+      card.setAttribute('role', 'dialog');
+      card.setAttribute('aria-label', 'Präsentation starten');
+      card.innerHTML = '<div class="lg-box"><div class="lg-title">Präsentieren</div>'
+        + '<p></p>'
+        + '<button type="button" class="lg-go">Präsentation starten</button>'
+        + '<button type="button" class="lg-no">Abbrechen</button></div>';
+      document.body.appendChild(card);
+      card.addEventListener('keydown', function (e) {  // Enter and Esc belong to the card, not to the deck
+        e.stopPropagation();
+        if (e.key === 'Escape') card.hidden = true;
+      });
+      card.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (e.target.closest('.lg-go')) { card.hidden = true; present(); }
+        else if (e.target.closest('.lg-no') || e.target === card) card.hidden = true;
+      });
+    }
+    card.querySelector('p').textContent = two ? 'Beamer und Laptop sind bereit.' : 'Das Vollbild ist bereit.';
+    card.hidden = false;
+    card.querySelector('.lg-go').focus();
+  }
+  addEventListener('keydown', function (e) {
+    if (PRESENTER || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'r' || e.key === 'R') openPresenter(null);
+  });
+
+  const view = PRESENTER ? presenterView() : null;
+  painted.push(function () {
+    if (view) view.render();
+    if (applying || !linked || (si === sentSi && step === sentStep)) return;
+    sentSi = si; sentStep = step;
+    send({ t: 'go', si: si, step: step });
+  });
+  send({ t: PRESENTER ? 'hello' : 'here' });
+  addEventListener('pagehide', function () { if (PRESENTER) send({ t: 'bye' }); });
+  // Esc ends the show from either window (Doc, 16.09.2026: "ESC beendet Show" - "einfach nur auch schließen"):
+  // on the beamer the browser leaves fullscreen itself and the presenter window closes; in the presenter
+  // window the beamer leaves fullscreen and the presenter window closes.
+  // In fullscreen the browser keeps Esc for itself, so leaving fullscreen IS the Esc. A drop right at the
+  // start (a browser leaving fullscreen as the popup opens) is not Doc's Esc and ends nothing.
+  document.addEventListener('fullscreenchange', function () {
+    if (PRESENTER) {
+      if (fsOn()) { presFull = true; return; }
+      if (!presFull) return;
+      presFull = false;
+      send({ t: 'end' });
+      setTimeout(function () { window.close(); }, 80);
+      return;
+    }
+    if (fsOn() || !showing || Date.now() - showAt < 1500) return;
+    showing = false;
+    send({ t: 'end' });
+    linked = false; mine = false; peer = null;
+  });
+  if (PRESENTER) addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' || e.metaKey || e.ctrlKey || e.altKey) return;
+    const j = document.getElementById('jump');
+    if (j && !j.hidden) return;                      // Esc first drops a typed slide number
+    send({ t: 'end' });
+    setTimeout(function () { window.close(); }, 80);   // let the message leave first
+  }, true);   // capture: before the slide-number handler clears its box; an open overview still gets Esc first
+
+  function presenterView() {
+    const svg = function (d) {
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
+        + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
+    };
+    const PAUSE = '<path d="M9 5v14M15 5v14"/>', PLAY = '<path d="M7 5v14l12-7z"/>';
+    const RESET = '<path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/>';
+    const root = document.createElement('div');
+    root.id = 'pres';
+    root.innerHTML =
+        '<div class="p-bar"><span class="p-timer" title="Laufzeit"></span>'
+      + '<button type="button" class="p-pause"></button>'
+      + '<button type="button" class="p-reset" title="Timer neu starten" aria-label="Timer neu starten">' + svg(RESET) + '</button>'
+      + '<span class="p-clock" title="Uhrzeit"></span></div>'
+      + '<div class="p-cur"><div class="p-fit" title="Klick: weiter"><div class="p-frame"></div></div>'
+      + '<div class="p-nav"><button type="button" class="p-prev" title="Zurück" aria-label="Zurück">' + svg('<path d="m15 5-7 7 7 7"/>') + '</button>'
+      + '<div class="p-pos"><span class="p-count"></span><div class="p-prog"><i></i></div></div>'
+      + '<button type="button" class="p-next" title="Weiter" aria-label="Weiter">' + svg('<path d="m9 5 7 7-7 7"/>') + '</button></div></div>'
+      + '<div class="p-side">'
+      + '<div class="p-slot"><div class="p-fit"><div class="p-frame"></div></div><div class="p-cap"></div></div>'
+      + '<div class="p-slot p-after"><div class="p-fit"><div class="p-frame"></div></div><div class="p-cap"></div></div>'
+      + '</div>'
+      + '<div class="p-strip" role="list" aria-label="Alle Folien"></div>';
+    document.body.appendChild(root);
+    document.title = 'Referent · ' + document.title;
+    const q = function (s) { return root.querySelector(s); };
+    const fits = [].slice.call(root.querySelectorAll('.p-fit'));
+    const frames = fits.map(function (f) { return f.firstChild; });   // now, next click, the click after
+    const AFTER = 0.8;                               // the click after: centred, a bit smaller (Doc)
+    const cur = q('.p-cur'), side = q('.p-side'), nav = q('.p-nav');
+    const caps = root.querySelectorAll('.p-cap');
+    const strip = q('.p-strip'), count = q('.p-count'), prog = q('.p-prog i');
+    const timerEl = q('.p-timer'), clockEl = q('.p-clock'), pauseBtn = q('.p-pause');
+    let ready = document.readyState === 'complete', cells = [];
+    let liveSi = -1, liveNode = null;                // the current slide, kept alive across its steps
+
+    function scaleIn(box) {
+      const s = box.firstChild;
+      if (s && s.classList && s.classList.contains('slide')) s.style.transform = 'scale(' + box.clientWidth / __W__ + ')';
+    }
+    function size(i, w) {
+      w = Math.max(0, w);
+      frames[i].style.width = w + 'px'; frames[i].style.height = w * __H__ / __W__ + 'px';
+      scaleIn(frames[i]);
+    }
+    // the largest slides the places allow, stacked without holes: page turner right under the slide,
+    // the two previews stacked beside it (upright screen: side by side under it)
+    function fitAll() {
+      const r = __H__ / __W__;
+      size(0, Math.min(cur.clientWidth, (cur.clientHeight - nav.offsetHeight) / r));
+      const lab = caps[0].offsetHeight + 6;           // a caption with its margin
+      const gap = parseFloat(getComputedStyle(side).rowGap) || 0;
+      const row = getComputedStyle(side).flexDirection === 'row';
+      const slots = side.children;
+      slots[0].style.marginTop = slots[1].style.marginTop = '';
+      // side by side (Doc, 16.09.2026: "Vorschaubild top aligned mit links, das bottom down aligned"): the next
+      // preview starts level with the current slide, the one after ends level with it; the first caption sits
+      // between them, the second one on the line of the page turner
+      const w1 = row
+        ? Math.min((side.clientWidth - gap) / 2, (side.clientHeight - lab) / r)
+        : Math.min(side.clientWidth, (frames[0].offsetHeight - lab - gap) / (r * (1 + AFTER)));
+      size(1, w1); size(2, w1 * AFTER);
+      if (!row) {
+        const now = frames[0].getBoundingClientRect();
+        slots[0].style.marginTop = now.top - frames[1].getBoundingClientRect().top + 'px';
+        slots[1].style.marginTop = now.bottom - frames[2].getBoundingClientRect().bottom + 'px';
+      }
+      cells.forEach(function (c) { scaleIn(c.firstChild); });
+      roomForDock();
+    }
+    function shot(i, st, live) {                     // slide i as it stands after st clicks
+      const c = slides[i].cloneNode(true);
+      c.querySelectorAll('[id]').forEach(function (e) { e.removeAttribute('id'); });
+      c.querySelectorAll('.play-big, .play-big-label').forEach(function (e) { e.remove(); });
+      if (live) {                                    // the current slide: real labs and dice, mirrored to the beamer
+        c.classList.add('live');
+        c.querySelectorAll('iframe').forEach(function (f, k) {
+          f.addEventListener('load', function () { mirror.watch(f, i, k, goFull); });
+        });
+      } else {
+        // previews and strip: every live lab or die would be one more WebGL context - a stand-in keeps the place
+        c.querySelectorAll('iframe').forEach(function (f) {
+          const d = document.createElement('div');
+          d.className = 'p-live';
+          if (f.classList.contains('live-frame')) { d.classList.add('dice'); d.style.cssText = f.style.cssText; d.textContent = '3D-Würfel'; }
+          else d.textContent = 'Labor';
+          f.replaceWith(d);
+        });
+      }
+      c.classList.add('on');
+      c.querySelectorAll('.step').forEach(function (e) { e.classList.toggle('on', +e.dataset.g < st); });
+      return c;
+    }
+    function put(box, node) { if (node) box.replaceChildren(node); else box.replaceChildren(); scaleIn(box); }
+    function theEnd() { const d = document.createElement('div'); d.className = 'p-end'; d.textContent = 'Ende'; return d; }
+    function ahead(p) {
+      if (!p) return null;
+      if (p.step < groups(slides[p.si])) return { si: p.si, step: p.step + 1 };
+      return p.si < slides.length - 1 ? { si: p.si + 1, step: 0 } : null;
+    }
+    // Dock magnification on the strip (Doc, 16.09.2026: "Dock in Mac macht die icons größer über der die Maus
+    // ist ... mach das mit den slides unten so"). The slides near the mouse grow upward and push their
+    // neighbours aside, like the macOS Dock. Sizes and shifts come from the UNMAGNIFIED places, so nothing
+    // wobbles under the mouse: scale s(u) = 1 + k cos²(πu/2R) within R of the mouse, and each slide moves by
+    // k·F(u), F being the integral of that bump - the space the bigger slides between it and the mouse need.
+    // The room to grow into is the free space above the strip, lent by a negative margin: the current slide
+    // keeps its size.
+    const DOCK_MAX = 3.2;                            // the slide under the mouse, at most (Doc: "krasser, wir haben Platz")
+    let dockX = null, dockK = 0, dockRaf = 0;
+    function roomForDock() {
+      strip.style.marginTop = strip.style.paddingTop = '';
+      const cellH = cells.length ? cells[0].offsetHeight : 0;
+      if (!cellH) { dockK = 0; return; }
+      let lowest = nav.getBoundingClientRect().bottom;
+      [].forEach.call(caps, function (c) { lowest = Math.max(lowest, c.getBoundingClientRect().bottom); });
+      const free = strip.getBoundingClientRect().top - lowest - 6;
+      const head = Math.max(0, Math.min(free, (DOCK_MAX - 1) * cellH));
+      strip.style.marginTop = -head + 'px';
+      strip.style.paddingTop = 4 + head + 'px';
+      dockK = head / cellH;
+      magnify();
+    }
+    function magnify() {
+      dockRaf = 0;
+      if (dockX === null || dockK < 0.02) {
+        cells.forEach(function (c) { c.style.transform = ''; c.style.zIndex = ''; });
+        return;
+      }
+      const r = strip.getBoundingClientRect();
+      const mx = dockX - r.left - strip.clientLeft + strip.scrollLeft;
+      const R = 2.6 * cells[0].offsetWidth;
+      cells.forEach(function (c) {
+        const u = c.offsetLeft + c.offsetWidth / 2 - mx;
+        const near = Math.abs(u) < R;
+        const bump = near ? Math.pow(Math.cos(Math.PI * u / (2 * R)), 2) : 0;
+        const F = near ? u / 2 + R / (2 * Math.PI) * Math.sin(Math.PI * u / R) : Math.sign(u) * R / 2;
+        c.style.transform = 'translateX(' + (dockK * F).toFixed(1) + 'px) scale(' + (1 + dockK * bump).toFixed(3) + ')';
+        c.style.zIndex = near ? String(1 + Math.round(bump * 100)) : '';
+      });
+    }
+    function dockSoon() { if (!dockRaf) dockRaf = requestAnimationFrame(magnify); }
+    strip.addEventListener('mousemove', function (e) { dockX = e.clientX; dockSoon(); });
+    strip.addEventListener('mouseleave', function () { dockX = null; dockSoon(); });
+    strip.addEventListener('scroll', dockSoon, { passive: true });
+    function buildStrip() {
+      cells = slides.map(function (s, i) {
+        const cell = document.createElement('button');
+        cell.type = 'button'; cell.className = 'p-cell'; cell.setAttribute('role', 'listitem');
+        cell.title = 'Folie ' + (i + 1); cell.setAttribute('aria-label', 'Folie ' + (i + 1));
+        const box = document.createElement('div');
+        box.className = 'p-thumb';
+        box.appendChild(shot(i, groups(s)));
+        const num = document.createElement('span');
+        num.className = 'p-num'; num.textContent = i + 1;
+        cell.appendChild(box); cell.appendChild(num);
+        cell.addEventListener('click', function () { si = i; step = 0; paint(); });
+        strip.appendChild(cell);
+        return cell;
+      });
+    }
+    function render() {
+      if (!ready) return;
+      if (!cells.length) buildStrip();
+      const n1 = ahead({ si: si, step: step }), n2 = ahead(n1);
+      if (si !== liveSi || !liveNode) { liveSi = si; liveNode = shot(si, step, true); put(frames[0], liveNode); }
+      else liveNode.querySelectorAll('.step').forEach(function (e) { e.classList.toggle('on', +e.dataset.g < step); });
+      put(frames[1], n1 ? shot(n1.si, n1.step) : theEnd());
+      put(frames[2], n2 ? shot(n2.si, n2.step) : n1 ? theEnd() : null);
+      caps[0].textContent = n1 ? 'Nächste Folie: ' + (n1.si + 1) : '';
+      caps[1].textContent = n2 ? 'Übernächste Folie: ' + (n2.si + 1) : '';
+      fitAll();
+      count.textContent = 'Folie ' + (si + 1) + ' von ' + slides.length;
+      prog.style.width = (si + 1) / slides.length * 100 + '%';
+      cells.forEach(function (c, i) { c.classList.toggle('cur', i === si); });
+      const c = cells[si];
+      if (c) strip.scrollTo({ left: c.offsetLeft - (strip.clientWidth - c.offsetWidth) / 2, behavior: 'smooth' });
+    }
+
+    let t0 = Date.now(), acc = 0, running = true;
+    const two = function (n) { return String(n).padStart(2, '0'); };
+    function tick() {
+      const s = Math.floor((running ? acc + Date.now() - t0 : acc) / 1000);
+      timerEl.textContent = (s >= 3600 ? Math.floor(s / 3600) + ':' : '') + two(Math.floor(s / 60) % 60) + ':' + two(s % 60);
+      const d = new Date();
+      clockEl.textContent = two(d.getHours()) + ':' + two(d.getMinutes());
+    }
+    function showPause() {
+      pauseBtn.innerHTML = svg(running ? PAUSE : PLAY);
+      const t = running ? 'Timer anhalten' : 'Timer weiter';
+      pauseBtn.title = t; pauseBtn.setAttribute('aria-label', t);
+    }
+    pauseBtn.onclick = function () {
+      if (running) { acc += Date.now() - t0; running = false; } else { t0 = Date.now(); running = true; }
+      showPause(); tick();
+    };
+    q('.p-reset').onclick = function () { acc = 0; t0 = Date.now(); tick(); };
+    q('.p-prev').onclick = function () { prev(); };
+    q('.p-next').onclick = function () { next(); };
+    fits[0].addEventListener('click', function () { next(); });   // a click on the slide goes on, as on the beamer
+    // a clicked button must not keep the focus: the space bar would press it again on top of turning the page
+    root.addEventListener('mousedown', function (e) { if (e.target.closest('button')) e.preventDefault(); });
+    setInterval(tick, 500); tick(); showPause();
+    // Fullscreen here too (Doc, 16.09.2026: "kannst Du das auch Fullscreen machen?"). Chrome allows it only
+    // after a click or key IN this window - handing the right over from the beamer window is not shipped
+    // (chromestatus: Fullscreen Capability Delegation, proposed) and gesture-free fullscreen needs an admin
+    // policy. So the first click or key in the presenter window takes it fullscreen, and does its job as well.
+    // Measured on Doc's Mac (16.09.2026): the very first click into the presenter window only activates it and
+    // never reaches the page, the second one goes fullscreen - the beamer window stays fullscreen meanwhile.
+    // Handing the focus over by script (popup.focus()) makes Chrome drop the beamer's fullscreen - never do that.
+    let wentFull = false;
+    function goFull(e) {
+      if (wentFull || fsOn() || (e && e.key === 'Escape')) return;
+      wentFull = true;
+      const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+      // a refusal is shown, not swallowed - Chrome's reason is the only clue on a real two-screen setup
+      if (req) Promise.resolve(req.call(el)).catch(function (err) {
+        wentFull = false;
+        toast('Vollbild abgelehnt: ' + (err && err.message ? err.message : err));
+      });
+    }
+    addEventListener('pointerdown', goFull, true);
+    addEventListener('keydown', goFull, true);
+    if (window.ResizeObserver) new ResizeObserver(fitAll).observe(root);
+    else addEventListener('resize', fitAll);
+    addEventListener('load', function () { ready = true; render(); });   // after KaTeX has set the formulas
+    if (ready) render();
+    return { render: render };
+  }
+  return { present: present, send: send };
+})();
+"""
+JS = JS + ASK_JS + PRES_JS
 
 
 PAGE = """<!DOCTYPE html>

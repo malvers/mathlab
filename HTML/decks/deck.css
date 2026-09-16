@@ -228,6 +228,86 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 .ov-thumb .step{opacity:1!important}
 .ov-num{position:absolute;left:8px;bottom:6px;padding:2px 7px;border-radius:5px;
   background:rgba(14,36,78,.78);color:#fff;font:600 12px Raleway,system-ui,sans-serif}
+/* --- presenter view (?presenter - the fullscreen button opens it when a beamer is attached) ------------- */
+html.presenter #stage,html.presenter #hud,html.presenter #ask,html.presenter #bar{display:none!important}
+html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(64px,13vh,124px) + 30px)!important}
+#pres{position:fixed;inset:0;z-index:8;background:var(--ink);color:#E6ECF8;font-family:Orbitron,system-ui,sans-serif;
+  display:grid;gap:12px 26px;padding:12px 22px 10px;
+  grid-template-columns:minmax(0,2fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) clamp(64px,13vh,124px);
+  grid-template-areas:"bar side" "cur side" "strip strip"}
+#pres button{display:grid;place-items:center;border:0;background:none;color:inherit;cursor:pointer;
+  padding:4px;border-radius:6px;opacity:.85}
+#pres button:hover{opacity:1;color:var(--orange)}
+.p-bar{grid-area:bar;display:flex;align-items:center;gap:8px;font-size:clamp(18px,2.2vw,30px);letter-spacing:1px}
+.p-bar button svg{width:clamp(18px,1.7vw,26px);height:clamp(18px,1.7vw,26px)}
+.p-timer{margin-right:4px}
+.p-clock{margin-left:auto}
+.p-cur{grid-area:cur;display:flex;flex-direction:column;min-height:0}
+.p-fit{display:flex;justify-content:center;min-width:0}   /* JS sizes the frame inside */
+.p-cur .p-fit{cursor:pointer}
+.p-frame{position:relative;flex:none;overflow:hidden;background:#fff;border-radius:6px;
+  box-shadow:0 2px 12px rgba(0,0,0,.35)}
+.p-frame:empty{visibility:hidden}
+.p-frame > .slide,.p-thumb > .slide{display:block!important;position:absolute;left:0;top:0;width:960px;height:540px;
+  transform-origin:0 0;pointer-events:none}
+.p-end{position:absolute;inset:0;display:grid;place-items:center;background:#1B3566;color:#7E8FB5;
+  font-size:14px;letter-spacing:3px;text-transform:uppercase}
+/* stand-ins for labs and 3D dice in the previews and the strip - visible, never live (WebGL budget) */
+.p-live{background:rgba(14,36,78,.10);border:1.5px dashed rgba(14,36,78,.35);border-radius:10px;display:grid;
+  place-items:center;color:var(--muted);font:700 14px Orbitron,sans-serif;letter-spacing:3px;text-transform:uppercase}
+.p-live.dice{font-size:30px}
+.labframe > .p-live{position:absolute;inset:0}
+/* the current slide is live: its labs and dice take the pointer (the slide itself does not, a click turns on) */
+.p-frame > .slide.live iframe{pointer-events:auto}
+.p-nav{display:flex;align-items:center;justify-content:center;gap:14px;padding-top:8px}
+.p-nav button svg{width:30px;height:30px}
+.p-pos{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:9em;
+  font-family:Raleway,system-ui,sans-serif;font-size:clamp(14px,1.4vw,19px)}
+.p-prog{width:100%;max-width:130px;height:4px;border-radius:2px;background:rgba(230,236,248,.18);overflow:hidden}
+.p-prog i{display:block;height:100%;width:0;background:var(--orange);transition:width .25s}
+.p-side{grid-area:side;display:flex;flex-direction:column;gap:14px;min-height:0}
+.p-slot{display:flex;flex-direction:column;min-width:0}
+/* caption under a preview (Doc, 16.09.2026: "Nächste Folie: ##" / "Übernächste Folie: ##"), like the count under the slide */
+.p-cap{min-height:1.5em;margin:6px 0 0;text-align:center;color:#B8C6DF;
+  font-family:Raleway,system-ui,sans-serif;font-size:clamp(13px,1.2vw,17px)}
+.p-strip{grid-area:strip;display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;padding:4px 4px 8px;
+  position:relative;z-index:1;align-items:flex-end;   /* JS lends it room above for the dock magnification */
+  scrollbar-width:thin;scrollbar-color:#7E8FB5 transparent}
+.p-strip::-webkit-scrollbar{height:8px}
+.p-strip::-webkit-scrollbar-thumb{background:#7E8FB5;border-radius:4px}
+.p-strip::-webkit-scrollbar-track{background:transparent}
+#pres .p-cell{display:block;position:relative;flex:none;height:100%;aspect-ratio:16/9;padding:0;opacity:1;
+  border-radius:5px;outline:3px solid transparent;box-shadow:0 2px 8px rgba(0,0,0,.35);
+  transform-origin:50% 100%;transition:transform .12s ease-out;will-change:transform}   /* grows upward, like the Dock */
+@media (prefers-reduced-motion:reduce){#pres .p-cell{transition:none}}
+#pres .p-cell:hover{outline-color:var(--green)}
+#pres .p-cell.cur{outline-color:var(--orange)}
+.p-thumb{position:absolute;inset:0;overflow:hidden;background:#fff;border-radius:5px}
+.p-num{position:absolute;left:5px;bottom:4px;padding:1px 6px;border-radius:4px;
+  background:rgba(14,36,78,.78);color:#fff;font:600 11px Raleway,system-ui,sans-serif}
+/* upright screen (a tablet as presenter): slide on top, both previews side by side below */
+@media (max-aspect-ratio:1/1){
+  #pres{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1.4fr) minmax(0,1fr) clamp(64px,13vh,124px);
+    grid-template-areas:"bar" "cur" "side" "strip"}
+  .p-side{flex-direction:row}
+  .p-slot{flex:1 1 0}
+}
+#linkmsg{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:40;padding:8px 14px;border-radius:8px;
+  background:rgba(255,255,255,.94);box-shadow:0 2px 10px rgba(0,0,0,.3);color:#0E244E;
+  font:600 14px Raleway,system-ui,sans-serif}
+#linkmsg[hidden]{display:none}
+/* start card after Chrome's one-time question "Fenster verwalten" - that question ate the first click */
+#linkgo{position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:rgba(14,36,78,.55)}
+#linkgo[hidden]{display:none}
+#linkgo .lg-box{width:min(380px,calc(100vw - 32px));padding:24px 24px 18px;border-radius:12px;text-align:center;
+  background:#EAF0FA;box-shadow:0 10px 36px rgba(14,36,78,.5);color:var(--ink);font-family:Raleway,system-ui,sans-serif}
+#linkgo .lg-title{font:700 15px Orbitron,sans-serif;letter-spacing:2px;text-transform:uppercase;color:var(--ink)}
+#linkgo p{margin:10px 0 18px;font-size:15px;color:var(--body)}
+#linkgo button{display:block;width:100%;border:0;border-radius:8px;cursor:pointer}
+#linkgo .lg-go{padding:12px;background:var(--green);color:#fff;font:700 15px Orbitron,sans-serif;letter-spacing:1px}
+#linkgo .lg-go:hover,#linkgo .lg-go:focus-visible{filter:brightness(1.08);outline:2px solid var(--ink);outline-offset:2px}
+#linkgo .lg-no{margin-top:8px;padding:6px;background:none;color:var(--muted);font:400 13px Raleway,sans-serif}
+#linkgo .lg-no:hover{color:var(--red)}
 /* --- ask Solita (avatar bottom right, Claude Haiku + her DocPad voice) ---- */
 #ask{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:38px;z-index:11;
   font-family:Raleway,system-ui,sans-serif;--askbg:#EAF0FA;--askfield:#D8E2F3;
