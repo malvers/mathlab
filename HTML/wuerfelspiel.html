@@ -1,0 +1,2673 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Das Würfelspiel</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <!-- Local KaTeX, same copy the decks use: works in class without the CDN -->
+    <link rel="stylesheet" href="morpheus/vendor/katex/katex.min.css">
+    <script defer src="morpheus/vendor/katex/katex.min.js"></script>
+    <style>
+        /* Readouts, hint boxes and the face picker - everything else comes from the central layout */
+
+        /* The shared box carries no offsets - every lab places it itself. */
+        #math-coach-box {
+            left: 24px;
+            top: 24px;
+            max-width: calc(100% - 48px);
+            box-sizing: border-box;
+        }
+
+        #coach-content .katex { font-size: 1.08em; }
+
+        [hidden] { display: none !important; }
+
+        .ws-note {
+            margin-top: 9px;
+            font-size: 0.76rem;
+            line-height: 1.45;
+            color: #cfe0f5;
+            border-left: 2px solid rgba(245, 194, 66, 0.65);
+            padding-left: 9px;
+        }
+
+        .ws-note .katex { font-size: 1.05em; }
+
+        .ws-btns { display: flex; flex-wrap: wrap; gap: 7px; }
+
+        .ws-btns .cyber-btn {
+            flex: 1 1 auto;
+            width: auto;
+            min-height: 40px;
+            padding: 8px 12px !important;
+            font-size: 0.66rem !important;
+            letter-spacing: 0.5px !important;
+        }
+
+        .ws-btns .cyber-btn.ws-on {
+            border-color: rgb(245, 194, 66) !important;
+            color: rgb(245, 194, 66) !important;
+            box-shadow: 0 0 12px rgba(245, 194, 66, 0.35);
+        }
+
+        .ws-res {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.95rem;
+            color: #dbe8f7;
+        }
+
+        .ws-res .ws-a { color: rgb(160, 212, 70); }
+        .ws-res .ws-b { color: #e06a5e; }
+        .ws-res .ws-d { color: #9fb4d6; }
+
+        .ws-dice { display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem; color: #cfe0f5; }
+
+        #canvas { touch-action: none; }
+
+        /* Face picker: tap a face of a die net in the lab, choose its new number */
+        #ws-pick {
+            position: absolute;
+            z-index: 30;
+            display: grid;
+            grid-template-columns: repeat(5, 42px);
+            gap: 6px;
+            padding: 10px;
+            background: rgba(8, 18, 38, 0.94);
+            border: 1px solid rgba(0, 210, 255, 0.4);
+            border-radius: 14px;
+            box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
+        }
+
+        #ws-pick button {
+            height: 42px;
+            border-radius: 9px;
+            border: 1px solid rgba(157, 232, 255, 0.35);
+            background: rgba(20, 40, 72, 0.9);
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        #ws-pick button:hover { border-color: #9de8ff; background: rgba(0, 110, 160, 0.55); }
+
+        #ws-pick button.on { border-color: rgb(245, 194, 66); color: rgb(245, 194, 66); }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+            <div id="ws-pick" hidden></div>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/coach-box.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        // CyberI18n.get() returns the key itself when it is missing - only getOr() gives a fallback.
+        // Placeholders like {a} are filled in the translation and in the German fallback alike.
+        const T = (k, fb, rep) => {
+            let s = (typeof CyberI18n !== 'undefined' && CyberI18n.getOr)
+                ? CyberI18n.getOr('wuerfel.' + k, fb) : fb;
+            if (rep) Object.keys(rep).forEach(p => { s = s.split('{' + p + '}').join(rep[p]); });
+            return s;
+        };
+
+        function dbg(m) { try { if (window.DebugWindow) DebugWindow.log('🎲 ' + m); } catch (e) { } }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: T('subtitle', 'Das Würfelspiel'),
+        });
+        CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        /* ------------------------------------------------------------ Colours */
+        // House palette: lambda orange, upsilon red, phi green
+        const C = {
+            orange: 'rgb(245, 194, 66)',
+            red: 'rgb(176, 36, 24)',
+            green: 'rgb(121, 158, 49)',
+            greenHi: 'rgb(160, 212, 70)',
+            redHi: '#e06a5e',
+            cyan: '#9de8ff',
+            neon: '#00d2ff',
+            text: '#dbe8f7',
+            soft: '#9fb4d6',
+            branch: 'rgba(157, 232, 255, 0.8)',
+            mutedLine: 'rgba(159, 180, 214, 0.3)',
+            plate: 'rgba(8, 18, 38, 0.72)',
+            plateEdge: 'rgba(0, 210, 255, 0.22)',
+            labelBg: 'rgba(6, 14, 30, 0.9)'
+        };
+
+        // Equal numbers share a colour. Same order as the deck figures:
+        // Lena 3 orange, 5 green, 7 blue - Mia 4 blue, 6 red.
+        const TINTS = {
+            A: ['245, 194, 66', '121, 158, 49', '90, 150, 255', '180, 120, 255', '0, 210, 255', '255, 120, 170'],
+            B: ['90, 150, 255', '224, 106, 94', '180, 120, 255', '0, 210, 255', '245, 194, 66', '121, 158, 49']
+        };
+
+        /* ------------------------------------------------------------- Dice */
+        // Faces in net order: three on top, then the column below the middle one.
+        // Opposite faces: top0-top2, top1-col1, col0-col2.
+        const OPP = [2, 4, 0, 5, 1, 3];
+
+        const PRESETS = {
+            deck: { label: 'Deck: Lena gegen Mia', a: { name: 'Lena', faces: [3, 5, 3, 7, 5, 7] }, b: { name: 'Mia', faces: [4, 6, 4, 4, 6, 4] } },
+            zwilling: { label: 'Zwillingsaufgabe: Paul gegen Jonas', a: { name: 'Paul', faces: [1, 5, 1, 6, 5, 6] }, b: { name: 'Jonas', faces: [2, 4, 2, 4, 2, 4] } },
+            normal: { label: 'Zwei normale Spielwürfel', a: { name: 'Anna', faces: [2, 1, 5, 3, 6, 4] }, b: { name: 'Ben', faces: [2, 1, 5, 3, 6, 4] } },
+            efronAB: { label: 'Efron: A gegen B', efron: 'AB' },
+            efronBC: { label: 'Efron: B gegen C', efron: 'BC' },
+            efronCD: { label: 'Efron: C gegen D', efron: 'CD' },
+            efronDA: { label: 'Efron: D gegen A', efron: 'DA' }
+        };
+
+        // Bradley Efron's four non-transitive dice: A beats B, B beats C, C beats D, D beats A - each with 2/3
+        const EFRON = { A: [4, 0, 4, 4, 0, 4], B: [3, 3, 3, 3, 3, 3], C: [2, 6, 2, 2, 6, 2], D: [5, 1, 5, 1, 5, 1] };
+
+        function presetDice(id) {
+            const p = PRESETS[id];
+            if (p.efron) {
+                const x = p.efron[0], y = p.efron[1];
+                return { a: { name: 'Würfel ' + x, faces: EFRON[x].slice() }, b: { name: 'Würfel ' + y, faces: EFRON[y].slice() } };
+            }
+            return { a: { name: p.a.name, faces: p.a.faces.slice() }, b: { name: p.b.name, faces: p.b.faces.slice() } };
+        }
+
+        // German genitive for the die titles: Lenas, Jonas', but "Würfel A" stays as it is
+        const isDieName = n => /^Würfel /.test(n);
+        const gen = n => isDieName(n) ? n : (/[sxzß]$/.test(n) ? n + '’' : n + 's');
+        const dieTitle = n => isDieName(n) ? n : gen(n) + ' Würfel';
+        const WORDS = ['null', 'eine', 'zwei', 'drei', 'vier', 'fünf', 'sechs'];
+        const WORDS_M = ['kein', 'ein', 'zwei', 'drei', 'vier', 'fünf', 'sechs'];
+
+        /* ------------------------------------------------------------ Fractions */
+        const gcd = (a, b) => b ? gcd(b, a % b) : Math.abs(a);
+        const F = (p, q) => { if (p === 0) return { p: 0, q: 1 }; const g = gcd(p, q) || 1; return { p: p / g, q: q / g }; };
+        const addF = (x, y) => F(x.p * y.q + y.p * x.q, x.q * y.q);
+        const mulF = (x, y) => F(x.p * y.p, x.q * y.q);
+        const valF = f => f.p / f.q;
+        const eqF = (x, y) => x.p === y.p && x.q === y.q;
+
+        // TeX of a fraction: 1 stays 1, 2/9 becomes \frac{2}{9}
+        const fr = f => f.q === 1 ? String(f.p) : '\\frac{' + f.p + '}{' + f.q + '}';
+
+        // German decimals in TeX: 55{,}6
+        function decTex(x, digits) {
+            return x.toFixed(digits).replace('.', '{,}');
+        }
+
+        // "\approx 55{,}6\,\%" or "= 50\,\%" when one decimal is exact
+        function pctEq(f) {
+            const exact = (f.p * 1000) % f.q === 0;
+            let s = decTex(100 * valF(f), 1);
+            if (exact) s = s.replace(/\{,\}0$/, '');
+            return (exact ? '= ' : '\\approx ') + s + '\\,\\%';
+        }
+
+        function pctTex(f) {
+            return pctEq(f).replace(/^(= |\\approx )/, '');
+        }
+
+        // Big counts get a thin space every three digits: 12\,345
+        function intTex(n) {
+            const s = String(n);
+            return s.length <= 4 ? s : s.replace(/\B(?=(\d{3})+(?!\d))/g, '\\,');
+        }
+
+        /* ---------------------------------------------------------------- Model */
+        function groups(faces) {
+            const m = new Map();
+            faces.forEach(v => m.set(v, (m.get(v) || 0) + 1));
+            return [...m.entries()].sort((x, y) => x[0] - y[0]).map(([v, c], i) => ({ v, c, i, f: F(c, 6) }));
+        }
+
+        let modelCache = { key: '', m: null };
+
+        function buildModel(dice) {
+            const key = JSON.stringify(dice);
+            if (modelCache.key === key) return modelCache.m;
+            const GA = groups(dice.a.faces), GB = groups(dice.b.faces);
+            const paths = [];
+            GA.forEach((ga, i) => GB.forEach((gb, j) => {
+                const w = ga.v > gb.v ? 'A' : (ga.v < gb.v ? 'B' : 'D');
+                paths.push({ i, j, k: paths.length, a: ga.v, b: gb.v, ca: ga.c, cb: gb.c, n36: ga.c * gb.c, f: F(ga.c * gb.c, 36), w });
+            }));
+            const n36 = w => paths.filter(p => p.w === w).reduce((s, p) => s + p.n36, 0);
+            const m = {
+                key, A: dice.a, B: dice.b, GA, GB, paths,
+                winA: paths.filter(p => p.w === 'A'),
+                winB: paths.filter(p => p.w === 'B'),
+                draws: paths.filter(p => p.w === 'D'),
+                nA: n36('A'), nB: n36('B'), nD: n36('D')
+            };
+            m.pA = F(m.nA, 36);
+            m.pB = F(m.nB, 36);
+            m.pD = F(m.nD, 36);
+            modelCache = { key, m };
+            return m;
+        }
+
+        // A sum of path probabilities as TeX pieces, one piece per term so long sums can wrap.
+        // Up to three terms are written out (2/9 + 2/9 + 1/9), longer sums are grouped (4 · 1/6).
+        function sumPieces(fracs) {
+            if (!fracs.length) return ['0'];
+            if (fracs.length <= 3) return fracs.map(fr);
+            const order = [], count = new Map();
+            fracs.forEach(f => {
+                const k = f.p + '/' + f.q;
+                if (!count.has(k)) { count.set(k, 0); order.push(f); }
+                count.set(k, count.get(k) + 1);
+            });
+            return order.map(f => {
+                const c = count.get(f.p + '/' + f.q);
+                return c === 1 ? fr(f) : c + ' \\cdot ' + fr(f);
+            });
+        }
+
+        const sumF = fracs => fracs.reduce((s, f) => addF(s, f), F(0, 1));
+
+        // "$\frac29 +$ $\frac29 +$ $\frac19 =$ $\frac59$" - operators trail their term so a line
+        // break never leaves a lonely "+" at the start of a line
+        function sumUnits(fracs, opts = {}) {
+            const pieces = sumPieces(fracs);
+            const res = opts.result || sumF(fracs);
+            const out = pieces.map((p, i) => '$' + p + (i < pieces.length - 1 ? ' +' : '') + '$');
+            const single = fracs.length === 1 && pieces[0] === fr(res);
+            if (!single) {
+                out[out.length - 1] = out[out.length - 1].replace(/\$$/, ' =$');
+                out.push('$' + fr(res) + '$');
+            }
+            if (opts.pct) out[out.length - 1] = out[out.length - 1].replace(/\$$/, ' ' + pctEq(res) + '$');
+            return out.join(' ');
+        }
+
+        /* ----------------------------------------------------------- Canvas TeX */
+        // A small TeX subset drawn with KaTeX's own fonts, so every number on the stage looks
+        // exactly like the KaTeX in the coach box: digits, italic letters, \frac, \cdot,
+        // \approx, \mid, \text{}, \mathbf{}, {,} and the usual spaces.
+        const SYM = {
+            cdot: '⋅', approx: '≈', mid: '∣', neq: '≠', le: '≤', ge: '≥', times: '×', to: '→',
+            ldots: '…', lt: '<', gt: '>', pm: '±', Rightarrow: '⇒'
+        };
+        const REL = new Set(['=', '≈', '≠', '≤', '≥', '<', '>', '→', '⇒', '∣']);
+        const BIN = new Set(['+', '−', '⋅', '×', '±']);
+
+        function texParse(src) {
+            const out = [];
+            let i = 0;
+            const readGroup = () => {
+                while (src[i] === ' ') i++;
+                if (src[i] !== '{') return src[i++] || '';
+                let depth = 0;
+                const start = i + 1;
+                for (; i < src.length; i++) {
+                    if (src[i] === '{') depth++;
+                    else if (src[i] === '}' && --depth === 0) { i++; return src.slice(start, i - 1); }
+                }
+                return src.slice(start);
+            };
+            const ch = (s, font, cls) => out.push({ k: 'ch', s, font, cls });
+            while (i < src.length) {
+                const c = src[i];
+                if (c === ' ') { i++; continue; }
+                if (c === '\\') {
+                    const mm = /^\\([a-zA-Z]+|.)/.exec(src.slice(i));
+                    const name = mm ? mm[1] : '';
+                    i += mm ? mm[0].length : 1;
+                    if (name === 'frac' || name === 'tfrac' || name === 'dfrac') {
+                        const n = readGroup(), d = readGroup();
+                        out.push({ k: 'frac', num: texParse(n), den: texParse(d) });
+                    } else if (name === 'text') {
+                        out.push({ k: 'text', s: readGroup(), cls: 'ord' });
+                    } else if (name === 'mathbf') {
+                        const mark = list => list.forEach(a => { a.bold = true; if (a.k === 'frac') { mark(a.num); mark(a.den); } });
+                        const inner = texParse(readGroup());
+                        mark(inner);
+                        inner.forEach(a => out.push(a));
+                    } else if (name === ',') out.push({ k: 'space', em: 0.167 });
+                    else if (name === ':') out.push({ k: 'space', em: 0.222 });
+                    else if (name === ';') out.push({ k: 'space', em: 0.278 });
+                    else if (name === 'quad') out.push({ k: 'space', em: 1 });
+                    else if (name === '%') ch('%', 'main', 'ord');
+                    else if (SYM[name]) {
+                        const s = SYM[name];
+                        ch(s, 'main', REL.has(s) ? 'rel' : (BIN.has(s) ? 'bin' : 'ord'));
+                    } else ch(name, 'main', 'ord');
+                    continue;
+                }
+                if (c === '{') {
+                    // plain group - {,} is a decimal comma without the space after punctuation
+                    texParse(readGroup()).forEach(a => { if (a.cls === 'punct') a.cls = 'ord'; out.push(a); });
+                    continue;
+                }
+                i++;
+                if (/[0-9.]/.test(c)) ch(c, 'main', 'ord');
+                else if (/[A-Za-z]/.test(c)) ch(c, 'math', 'ord');
+                else if (c === '-') ch('−', 'main', 'bin');
+                else if (c === '+') ch('+', 'main', 'bin');
+                else if (c === '=' || c === '<' || c === '>') ch(c, 'main', 'rel');
+                else if (c === ',' || c === ';') ch(c, 'main', 'punct');
+                else if (c === '(' || c === '[') ch(c, 'main', 'open');
+                else if (c === ')' || c === ']') ch(c, 'main', 'close');
+                else ch(c, 'main', REL.has(c) ? 'rel' : (BIN.has(c) ? 'bin' : 'ord'));
+            }
+            return out;
+        }
+
+        function texFont(a, size) {
+            const w = a.bold ? 'bold ' : '';
+            if (a.k === 'ch' && a.font === 'math') return w + 'italic ' + size + 'px KaTeX_Math, "Times New Roman", serif';
+            return w + size + 'px KaTeX_Main, "Times New Roman", serif';
+        }
+
+        function layoutAtoms(atoms, size) {
+            const items = [];
+            let x = 0, asc = 0.7 * size, desc = 0.05 * size, prev = null;
+            atoms.forEach(a => {
+                if (a.k === 'space') { x += a.em * size; return; }
+                let cls = a.k === 'frac' ? 'ord' : (a.cls || 'ord');
+                if (cls === 'bin' && (!prev || prev === 'bin' || prev === 'rel' || prev === 'open' || prev === 'punct')) cls = 'ord';
+                if (prev) {
+                    if ((cls === 'rel' && prev !== 'open') || (prev === 'rel' && cls !== 'close')) x += 0.278 * size;
+                    else if (cls === 'bin' || prev === 'bin') x += 0.222 * size;
+                    else if (prev === 'punct') x += 0.167 * size;
+                }
+                if (a.k === 'frac') {
+                    const fs = size * 0.8;
+                    const N = layoutAtoms(a.num, fs), D = layoutAtoms(a.den, fs);
+                    const pad = 0.12 * size, t = Math.max(1, 0.055 * size), gap = 0.14 * size, axis = -0.25 * size;
+                    const w = Math.max(N.w, D.w) + 2 * pad;
+                    const nb = axis - t / 2 - gap - N.desc;
+                    const db = axis + t / 2 + gap + D.asc;
+                    items.push({ kind: 'frac', x, w, N, D, nb, db, t, axis, pad });
+                    asc = Math.max(asc, -(nb - N.asc));
+                    desc = Math.max(desc, db + D.desc);
+                    x += w;
+                } else {
+                    const font = texFont(a, size);
+                    ctx.font = font;
+                    const w = ctx.measureText(a.s).width;
+                    items.push({ kind: 'ch', x, s: a.s, font });
+                    if (/[()\[\]∣|gjpqy,;]/.test(a.s)) desc = Math.max(desc, 0.25 * size);
+                    if (/[()\[\]∣|]/.test(a.s)) asc = Math.max(asc, 0.75 * size);
+                    x += w;
+                }
+                prev = cls;
+            });
+            return { items, w: x, asc, desc };
+        }
+
+        const texCache = new Map();
+
+        function texLayout(src, size) {
+            const key = size + '|' + src;
+            let L = texCache.get(key);
+            if (!L) {
+                L = layoutAtoms(texParse(src), size);
+                if (texCache.size > 4000) texCache.clear();
+                texCache.set(key, L);
+            }
+            return L;
+        }
+
+        function drawLayout(L, x0, base, color) {
+            ctx.textBaseline = 'alphabetic';
+            ctx.textAlign = 'left';
+            L.items.forEach(it => {
+                if (it.kind === 'ch') {
+                    ctx.font = it.font;
+                    ctx.fillStyle = color;
+                    ctx.fillText(it.s, x0 + it.x, base);
+                } else {
+                    drawLayout(it.N, x0 + it.x + (it.w - it.N.w) / 2, base + it.nb, color);
+                    drawLayout(it.D, x0 + it.x + (it.w - it.D.w) / 2, base + it.db, color);
+                    ctx.fillStyle = color;
+                    ctx.fillRect(x0 + it.x + it.pad * 0.5, base + it.axis - it.t / 2, it.w - it.pad, it.t);
+                }
+            });
+        }
+
+        // Draw TeX at (x, y). align: left | center | right, valign: baseline | middle | top
+        function tex(src, x, y, size, color, o = {}) {
+            const L = texLayout(String(src), size);
+            let x0 = x;
+            if (o.align === 'center') x0 = x - L.w / 2;
+            else if (o.align === 'right') x0 = x - L.w;
+            let base = y;
+            if (o.valign === 'middle') base = y + (L.asc - L.desc) / 2;
+            else if (o.valign === 'top') base = y + L.asc;
+            if (o.bg) {
+                const px = 0.28 * size, py = 0.16 * size;
+                roundRect(x0 - px, base - L.asc - py, L.w + 2 * px, L.asc + L.desc + 2 * py, 0.3 * size);
+                ctx.fillStyle = o.bg;
+                ctx.fill();
+                if (o.edge) { ctx.strokeStyle = o.edge; ctx.lineWidth = 1.2; ctx.stroke(); }
+            }
+            drawLayout(L, x0, base, color);
+            return { x: x0, w: L.w, top: base - L.asc, bottom: base + L.desc, base };
+        }
+
+        /* ------------------------------------------------------------ Rich text */
+        // Outfit words with $math$ inside and **bold**, wrapped at a width. A "unit" is
+        // everything between two spaces, so "$4$-mal" never breaks apart.
+        function richUnits(str) {
+            const segs = [];
+            let bold = false, buf = '';
+            const flush = () => { if (buf) { segs.push({ t: 'text', s: buf, bold }); buf = ''; } };
+            for (let i = 0; i < str.length;) {
+                if (str[i] === '$') {
+                    flush();
+                    const j = str.indexOf('$', i + 1);
+                    segs.push({ t: 'math', s: str.slice(i + 1, j < 0 ? str.length : j), bold });
+                    i = j < 0 ? str.length : j + 1;
+                } else if (str.startsWith('**', i)) {
+                    flush(); bold = !bold; i += 2;
+                } else buf += str[i++];
+            }
+            flush();
+            const units = [];
+            let cur = [];
+            const push = () => { if (cur.length) { units.push(cur); cur = []; } };
+            segs.forEach(sg => {
+                if (sg.t === 'math') { cur.push(sg); return; }
+                sg.s.split(/(\s+)/).forEach(p => {
+                    if (!p) return;
+                    if (/^\s+$/.test(p)) { push(); if (p.indexOf('\n') >= 0) units.push('BR'); }
+                    else cur.push({ t: 'text', s: p, bold: sg.bold });
+                });
+            });
+            push();
+            return units;
+        }
+
+        function richLayout(str, size, maxW = 1e9, o = {}) {
+            const wordFont = b => (b ? '600 ' : '400 ') + size + 'px Outfit, sans-serif';
+            ctx.font = wordFont(false);
+            const sp = ctx.measureText(' ').width;
+            const lines = [];
+            const fresh = () => ({ parts: [], w: 0, asc: 0.78 * size, desc: 0.24 * size });
+            let cur = fresh();
+            richUnits(String(str)).forEach(u => {
+                if (u === 'BR') { lines.push(cur); cur = fresh(); return; }
+                const parts = u.map(p => {
+                    if (p.t === 'math') {
+                        const L = texLayout(p.bold ? '\\mathbf{' + p.s + '}' : p.s, size * (o.mathScale || 1.12));
+                        return { t: 'm', L, w: L.w };
+                    }
+                    ctx.font = wordFont(p.bold);
+                    return { t: 'w', s: p.s, font: wordFont(p.bold), w: ctx.measureText(p.s).width };
+                });
+                const uw = parts.reduce((s, p) => s + p.w, 0);
+                if (cur.parts.length && cur.w + sp + uw > maxW) { lines.push(cur); cur = fresh(); }
+                if (cur.parts.length) cur.w += sp;
+                parts.forEach(p => {
+                    p.x = cur.w;
+                    cur.parts.push(p);
+                    cur.w += p.w;
+                    if (p.t === 'm') { cur.asc = Math.max(cur.asc, p.L.asc); cur.desc = Math.max(cur.desc, p.L.desc); }
+                });
+            });
+            lines.push(cur);
+            const gap = (o.lineGap != null ? o.lineGap : 0.32) * size;
+            let h = 0, w = 0;
+            lines.forEach((l, i) => { h += l.asc + l.desc + (i ? gap : 0); w = Math.max(w, l.w); });
+            return { lines, w, h, gap };
+        }
+
+        // y is the top of the block; returns its height
+        function rich(str, x, y, size, color, o = {}) {
+            const R = richLayout(str, size, o.maxW, o);
+            let top = y;
+            R.lines.forEach(l => {
+                const base = top + l.asc;
+                const x0 = o.align === 'center' ? x - l.w / 2 : (o.align === 'right' ? x - l.w : x);
+                l.parts.forEach(p => {
+                    if (p.t === 'm') drawLayout(p.L, x0 + p.x, base, color);
+                    else {
+                        ctx.font = p.font;
+                        ctx.fillStyle = color;
+                        ctx.textAlign = 'left';
+                        ctx.textBaseline = 'alphabetic';
+                        ctx.fillText(p.s, x0 + p.x, base);
+                    }
+                });
+                top = base + l.desc + R.gap;
+            });
+            return R.h;
+        }
+
+        const richH = (str, size, maxW, o = {}) => richLayout(str, size, maxW, o).h;
+
+        /* ----------------------------------------------------------- Primitives */
+        function roundRect(x, y, w, h, r) {
+            r = Math.max(0, Math.min(r, w / 2, h / 2));
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.arcTo(x + w, y, x + w, y + h, r);
+            ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r);
+            ctx.arcTo(x, y, x + w, y, r);
+            ctx.closePath();
+        }
+
+        function plate(x, y, w, h, edge) {
+            roundRect(x, y, w, h, 16);
+            ctx.fillStyle = C.plate;
+            ctx.fill();
+            ctx.strokeStyle = edge || C.plateEdge;
+            ctx.lineWidth = edge ? 1.8 : 1.2;
+            ctx.stroke();
+        }
+
+        // Orbitron for headers and labels - never for numbers in the content
+        function label(text, x, y, size, color, align = 'left', weight = 700) {
+            ctx.font = weight + ' ' + size + 'px Orbitron, sans-serif';
+            ctx.fillStyle = color;
+            ctx.textAlign = align;
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y);
+        }
+
+        function line(x1, y1, x2, y2, color, width, dash) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.lineCap = 'round';
+            if (dash) ctx.setLineDash(dash);
+            ctx.stroke();
+            if (dash) ctx.setLineDash([]);
+        }
+
+        function dot(x, y, r, fill, edge) {
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = fill;
+            ctx.fill();
+            if (edge) { ctx.strokeStyle = edge; ctx.lineWidth = 1.4; ctx.stroke(); }
+        }
+
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const ease = u => u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+
+        /* ----------------------------------------------------------------- Hits */
+        // Every view registers its tap targets while drawing, in design coordinates.
+        // An offset stack keeps sub-drawings (a tree inside a view) simple.
+        const hits = [];
+        const offs = [{ x: 0, y: 0 }];
+
+        function addHit(x, y, w, h, fn, cursor = 'pointer') {
+            const o = offs[offs.length - 1];
+            hits.push({ x: x + o.x, y: y + o.y, w, h, fn, cursor });
+        }
+
+        function withOffset(x, y, fn) {
+            const o = offs[offs.length - 1];
+            offs.push({ x: o.x + x, y: o.y + y });
+            ctx.save();
+            ctx.translate(x, y);
+            try { fn(); } finally { ctx.restore(); offs.pop(); }
+        }
+
+        /* ---------------------------------------------------------------- State */
+        const S = {
+            mode: 'rundgang',          // rundgang (the deck, station by station) | labor (own dice)
+            step: 0,                   // rundgang: current station
+            view: 'spiel',             // labor: current view
+            lab: presetDice('deck'),   // labor: the dice being edited
+            labPreset: 'deck',
+            anim: null,                // running roll
+            last: null,                // last finished roll { ia, ib, key }
+            score: { key: '', n: 0, A: 0, B: 0, D: 0 },
+            sel: 0,                    // selected path (path rule, table)
+            err: 0,                    // typical errors: which one
+            merge: { die: 'B', grouped: true, u: 1, t0: 0, from: 1 },
+            countHi: { A: null, B: null },
+            focus: null,               // 'A' | 'B' - Solita points at one die
+            recipeHi: -1,
+            rulesHi: -1,
+            sim: { key: '', n: 0, a: 0, b: 0, d: 0, hx: [], ha: [], hb: [], running: false, until: 0 },
+            efron: 'AB',
+            showSolution: false
+        };
+
+        function diceNow() {
+            if (S.mode === 'labor') return S.lab;
+            const st = STATIONS[S.step];
+            return presetDice(st.dice || 'deck');
+        }
+
+        const model = () => buildModel(diceNow());
+
+        function tintOf(key, m, v) {
+            const G = key === 'A' ? m.GA : m.GB;
+            const i = Math.max(0, G.findIndex(g => g.v === v));
+            return TINTS[key][i % TINTS[key].length];
+        }
+
+        /* ----------------------------------------------------------------- Roll */
+        // Lena rolls first, then Mia - the two stages, one after the other
+        const ROLL = { A: [0, 650], B: [760, 1410], total: 1520 };
+
+        function rollDice() {
+            const m = model();
+            S.anim = {
+                t0: performance.now(),
+                ia: Math.floor(Math.random() * 6),
+                ib: Math.floor(Math.random() * 6),
+                seed: Math.floor(Math.random() * 997),
+                key: m.key
+            };
+            closePicker();
+            kick();
+        }
+
+        function finishRoll() {
+            const an = S.anim;
+            S.anim = null;
+            const m = model();
+            if (!an || an.key !== m.key) return;
+            S.last = { ia: an.ia, ib: an.ib, key: an.key };
+            if (S.score.key !== m.key) S.score = { key: m.key, n: 0, A: 0, B: 0, D: 0 };
+            const a = m.A.faces[an.ia], b = m.B.faces[an.ib];
+            S.score.n++;
+            S.score[a > b ? 'A' : (a < b ? 'B' : 'D')]++;
+            dbg('Wurf ' + S.score.n + ': ' + m.A.name + ' ' + a + ' - ' + m.B.name + ' ' + b);
+            refreshPanelLive();
+        }
+
+        // What a die shows right now: waiting, tumbling (random faces) or landed
+        function dieShown(key, m, now) {
+            const lastOk = S.last && S.last.key === m.key;
+            const idle = lastOk ? (key === 'A' ? S.last.ia : S.last.ib) : 1;
+            const an = S.anim;
+            if (!an || an.key !== m.key) return { idx: idle, phase: lastOk ? 'done' : 'idle', p: 1 };
+            const t = now - an.t0;
+            const [s0, s1] = ROLL[key];
+            const fin = key === 'A' ? an.ia : an.ib;
+            if (t < s0) return { idx: idle, phase: 'wait', p: 0 };
+            if (t >= s1) return { idx: fin, phase: 'done', p: 1 };
+            const flick = Math.floor(t / 85) * 7 + an.seed + (key === 'A' ? 0 : 3);
+            return { idx: (flick * 2654435761 >>> 0) % 6, phase: 'roll', p: (t - s0) / (s1 - s0) };
+        }
+
+        function rollOutcome(m) {
+            if (!S.last || S.last.key !== m.key || S.anim) return null;
+            const a = m.A.faces[S.last.ia], b = m.B.faces[S.last.ib];
+            const i = m.GA.findIndex(g => g.v === a), j = m.GB.findIndex(g => g.v === b);
+            return { a, b, i, j, k: i * m.GB.length + j, w: a > b ? 'A' : (a < b ? 'B' : 'D') };
+        }
+
+        /* --------------------------------------------------------------- Cube */
+        // An isometric die: top face = the face that lies on top, the two visible sides are
+        // real neighbours of it on the net (never its opposite face).
+        function drawCube(cx, cy, s, key, m, idx, o = {}) {
+            const die = key === 'A' ? m.A : m.B;
+            const k = 0.866;
+            const T0 = [cx, cy - s / 2], T1 = [cx + k * s, cy], T2 = [cx, cy + s / 2], T3 = [cx - k * s, cy];
+            const down = p => [p[0], p[1] + s];
+            const all = [0, 1, 2, 3, 4, 5];
+            const fl = all.find(j => j !== idx && j !== OPP[idx]);
+            const fri = all.find(j => j !== idx && j !== OPP[idx] && j !== fl && j !== OPP[fl]);
+            const vec = (a, b) => [b[0] - a[0], b[1] - a[1]];
+            const faces = [
+                { pts: [T0, T1, T2, T3], idx, shade: 0, O: T0, u: vec(T0, T1), v: vec(T0, T3) },
+                { pts: [T3, T2, down(T2), down(T3)], idx: fl, shade: 0.3, O: T3, u: vec(T3, T2), v: [0, s] },
+                { pts: [T2, T1, down(T1), down(T2)], idx: fri, shade: 0.5, O: T2, u: vec(T2, T1), v: [0, s] }
+            ];
+            faces.forEach(f => {
+                const val = die.faces[f.idx];
+                const tint = tintOf(key, m, val);
+                ctx.beginPath();
+                f.pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+                ctx.closePath();
+                ctx.fillStyle = '#0d1b33';
+                ctx.fill();
+                ctx.fillStyle = 'rgba(' + tint + ', ' + (0.66 - f.shade * 0.4).toFixed(2) + ')';
+                ctx.fill();
+                ctx.fillStyle = 'rgba(0, 0, 0, ' + f.shade * 0.55 + ')';
+                ctx.fill();
+                ctx.strokeStyle = o.glow ? C.orange : 'rgba(225, 240, 255, 0.92)';
+                ctx.lineWidth = o.glow ? 3 : 2.2;
+                ctx.lineJoin = 'round';
+                ctx.stroke();
+                ctx.save();
+                ctx.transform(f.u[0] / 100, f.u[1] / 100, f.v[0] / 100, f.v[1] / 100, f.O[0], f.O[1]);
+                tex(String(val), 50, 50, 54, f.shade ? 'rgba(255, 255, 255, 0.78)' : '#ffffff', { align: 'center', valign: 'middle' });
+                ctx.restore();
+            });
+        }
+
+        // Cube with tumble: bounces and wobbles while rolling, a soft shadow below
+        function drawRollingCube(cx, cy, s, key, m, now, o = {}) {
+            const st = dieShown(key, m, now);
+            const p = st.p;
+            const lift = st.phase === 'roll' ? Math.abs(Math.sin(p * Math.PI * 2.5)) * (1 - p) * 0.55 * s : 0;
+            const rot = st.phase === 'roll' ? Math.sin(p * 17) * (1 - p) * 0.3 : 0;
+            const baseY = cy + 1.5 * s + 0.12 * s;
+            ctx.beginPath();
+            ctx.ellipse(cx, baseY, 0.95 * s * (1 - lift / (2 * s)), 0.14 * s, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 0, 0, ' + (0.35 - lift / (4 * s)).toFixed(3) + ')';
+            ctx.fill();
+            ctx.save();
+            ctx.translate(cx, cy + s);
+            ctx.rotate(rot);
+            ctx.translate(-cx, -(cy + s));
+            drawCube(cx, cy - lift, s, key, m, st.idx, { glow: o.glow && st.phase === 'done' });
+            ctx.restore();
+            return st;
+        }
+
+        /* ---------------------------------------------------------------- Nets */
+        function netCells(x, y, s) {
+            return [[x, y], [x + s, y], [x + 2 * s, y], [x + s, y + s], [x + s, y + 2 * s], [x + s, y + 3 * s]];
+        }
+
+        // T-shaped net: three faces on top, three below the middle one (like the deck)
+        function drawNet(x, y, s, key, m, o = {}) {
+            const die = key === 'A' ? m.A : m.B;
+            netCells(x, y, s).forEach(([cx, cy], idx) => {
+                const v = die.faces[idx], tint = tintOf(key, m, v);
+                const g = Math.max(1.5, s * 0.045);
+                const lit = o.lit === idx, hl = o.hl != null && o.hl === v;
+                roundRect(cx + g, cy + g, s - 2 * g, s - 2 * g, s * 0.14);
+                ctx.fillStyle = '#0c1a31';
+                ctx.fill();
+                ctx.fillStyle = 'rgba(' + tint + ', ' + (lit || hl ? 0.75 : 0.42) + ')';
+                ctx.fill();
+                if (lit) {
+                    ctx.save();
+                    ctx.shadowColor = C.orange;
+                    ctx.shadowBlur = 18;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = Math.max(2.5, s * 0.06);
+                    ctx.stroke();
+                    ctx.restore();
+                } else {
+                    ctx.strokeStyle = hl ? 'rgb(' + tint + ')' : 'rgba(200, 225, 255, 0.6)';
+                    ctx.lineWidth = hl ? Math.max(2.5, s * 0.06) : 1.3;
+                    ctx.stroke();
+                }
+                tex(String(v), cx + s / 2, cy + s / 2, s * 0.46, '#ffffff', { align: 'center', valign: 'middle' });
+                if (o.edit) addHit(cx, cy, s, s, h => openPicker(key, idx, h));
+            });
+        }
+
+        // "$3$, $5$ und $7$ je $2$-mal" or "$4$ steht $4$-mal drauf, $6$ steht $2$-mal drauf"
+        function countSentence(G) {
+            const join = list => list.length === 1 ? list[0]
+                : list.slice(0, -1).join(', ') + ' und ' + list[list.length - 1];
+            if (G.length === 1) return '$' + G[0].v + '$ auf allen $6$ Flächen';
+            if (G.every(g => g.c === G[0].c)) return join(G.map(g => '$' + g.v + '$')) + ' je $' + G[0].c + '$-mal';
+            return join(G.map(g => '$' + g.v + '$: $' + g.c + '$-mal'));
+        }
+
+        /* ---------------------------------------------------------------- Tree */
+        function treeGeom(m, o) {
+            const nA = m.GA.length, nB = m.GB.length;
+            const st1 = o.stage === 1;
+            const X0 = 24, X1 = 220, X2 = st1 ? 220 : 430;
+            const head = o.head != null ? o.head : 44;
+            const L = st1 ? nA : nA * nB;
+            const gap = st1 ? clamp(340 / nA, 52, 110) : (L <= 6 ? 58 : L <= 9 ? 48 : L <= 16 ? 38 : L <= 25 ? 31 : 26);
+            const gapG = st1 ? 0 : (L <= 9 ? 16 : 8);
+            const nodes1 = [], leaves = [];
+            let y = head + gap / 2;
+            m.GA.forEach((ga, i) => {
+                if (st1) { nodes1.push({ i, y }); y += gap; return; }
+                const y0 = y;
+                m.GB.forEach((gb, j) => { leaves.push({ i, j, k: i * nB + j, y }); y += gap; });
+                nodes1.push({ i, y: (y0 + y - gap) / 2 });
+                y += gapG;
+            });
+            const bottom = (st1 ? y : y - gapG) - gap / 2;
+            const rootY = (nodes1[0].y + nodes1[nodes1.length - 1].y) / 2;
+            const fs = gap >= 50 ? 18 : gap >= 40 ? 16 : gap >= 32 ? 14 : 12;
+            const k = fs / 18;
+            const colW = { path: 112 * k + 10, p: 78 * k + 6, pct: 104 * k + 6 };
+            let cx = X2 + (st1 ? 84 : 72);
+            const colX = {};
+            (o.cols || []).forEach(c => { colX[c] = cx + colW[c] / 2; cx += colW[c]; });
+            const tagX = cx + 4;
+            const w = Math.max(cx + 6, X2 + 80) + (o.tagRoom ? 100 : 0);
+            const h = bottom + (o.legend ? 42 : 10);
+            return { X0, X1, X2, head, nodes1, leaves, rootY, gap, fs, colX, colW, tagX, w, h, st1, bottom };
+        }
+
+        // Fraction on a branch: above the line when it climbs, below when it falls
+        function branchLabel(x1, y1, x2, y2, src, size, color, t) {
+            const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1;
+            const px = x1 + dx * t, py = y1 + dy * t;
+            const L = texLayout(src, size);
+            let nx, ny;
+            if (Math.abs(dy) < 0.5) { nx = 0; ny = -1; }
+            else if (dy < 0) { nx = dy / len; ny = -dx / len; }
+            else { nx = -dy / len; ny = dx / len; }
+            const hw = L.w / 2 + 0.28 * size, hh = (L.asc + L.desc) / 2 + 0.16 * size;
+            const dist = hh * Math.abs(ny) + hw * Math.abs(nx) + 3;
+            tex(src, px + nx * dist, py + ny * dist, size, color, { align: 'center', valign: 'middle', bg: C.labelBg });
+        }
+
+        function drawTree(m, g, o = {}) {
+            const H = Object.assign({
+                s1: '1. Stufe: ' + m.A.name, s2: '2. Stufe: ' + m.B.name,
+                path: 'Pfad', p: 'Wahrsch.', pct: 'in %'
+            }, o.headers || {});
+            const sel = (o.sel != null && o.sel >= 0 && !g.st1) ? m.paths[o.sel] : null;
+            const rows = g.st1
+                ? g.nodes1.map(n => ({ y: n.y, f: m.GA[n.i].f, p: null, k: -1 }))
+                : g.leaves.map(l => ({ y: l.y, f: m.paths[l.k].f, p: m.paths[l.k], k: l.k }));
+
+            if (o.bands) {
+                roundRect(g.X0 - 14, 4, g.X1 - g.X0 + 24, g.bottom + 4, 14);
+                ctx.fillStyle = 'rgba(245, 194, 66, 0.07)';
+                ctx.fill();
+                roundRect(g.X1 + 16, 4, g.X2 - g.X1 + 40, g.bottom + 4, 14);
+                ctx.fillStyle = 'rgba(0, 210, 255, 0.07)';
+                ctx.fill();
+            }
+
+            label(H.s1, g.st1 ? g.X1 : (g.X0 + g.X1) / 2 + 20, 20, 12, C.orange, 'center');
+            if (!g.st1) label(H.s2, (g.X1 + g.X2) / 2 + 30, 20, 12, C.cyan, 'center');
+            Object.keys(g.colX).forEach(c => label(H[c], g.colX[c], 20, 11, C.soft, 'center', 400));
+
+            // row highlights: the selected path and the path of the last roll
+            const band = (r, fill, edge) => {
+                roundRect(g.X2 - 22, r.y - g.gap / 2 + 3, g.w - g.X2 + 18 - (o.tagRoom ? 100 : 0), g.gap - 6, 10);
+                ctx.fillStyle = fill;
+                ctx.fill();
+                ctx.strokeStyle = edge;
+                ctx.lineWidth = 1.2;
+                ctx.stroke();
+            };
+            if (sel) band(rows.find(r => r.k === sel.k), 'rgba(245, 194, 66, 0.10)', 'rgba(245, 194, 66, 0.5)');
+            if (o.glowK != null && o.glowK >= 0) {
+                const r = rows.find(q => q.k === o.glowK);
+                if (r) band(r, 'rgba(0, 210, 255, 0.10)', 'rgba(157, 232, 255, 0.55)');
+            }
+
+            g.nodes1.forEach(n => {
+                const on = (sel && sel.i === n.i) || (o.selI === n.i);
+                line(g.X0, g.rootY, g.X1, n.y, on ? C.orange : C.branch, on ? 3.6 : 2);
+            });
+            if (!g.st1) {
+                g.leaves.forEach(l => {
+                    const p = m.paths[l.k], n = g.nodes1[l.i];
+                    let col = C.branch, w = 1.7, dash = null;
+                    if (o.win) {
+                        if (p.w === 'A') { col = C.green; w = 2.8; } else { col = C.mutedLine; w = 1.4; }
+                    }
+                    const d = o.decor ? o.decor(p) : null;
+                    if (d && d.line) { col = d.line; w = d.width || 2.6; dash = d.dash || null; }
+                    if (sel && sel.k === l.k) { col = C.orange; w = 3.6; dash = null; }
+                    line(g.X1, n.y, g.X2, l.y, col, w, dash);
+                });
+            }
+
+            if (o.walk) {
+                const n = g.nodes1[o.walk.i];
+                const t1 = clamp(o.walk.t, 0, 1);
+                const ex = g.X0 + (g.X1 - g.X0) * t1, ey = g.rootY + (n.y - g.rootY) * t1;
+                line(g.X0, g.rootY, ex, ey, C.orange, 4);
+                let px = ex, py = ey;
+                if (!g.st1 && o.walk.t > 1) {
+                    const leaf = g.leaves.find(l => l.i === o.walk.i && l.j === o.walk.j);
+                    const t2 = clamp(o.walk.t - 1, 0, 1);
+                    px = g.X1 + (g.X2 - g.X1) * t2;
+                    py = n.y + (leaf.y - n.y) * t2;
+                    line(g.X1, n.y, px, py, C.orange, 4);
+                }
+                ctx.save();
+                ctx.shadowColor = C.orange;
+                ctx.shadowBlur = 16;
+                dot(px, py, 8, C.orange, '#ffffff');
+                ctx.restore();
+            }
+
+            if (o.probs !== false) {
+                g.nodes1.forEach(n => {
+                    branchLabel(g.X0, g.rootY, g.X1, n.y, fr(m.GA[n.i].f), g.fs + 3, C.text, 0.5);
+                });
+                if (!g.st1) {
+                    g.leaves.forEach(l => {
+                        const gb = m.GB[l.j], n = g.nodes1[l.i];
+                        const ov = o.labelB ? o.labelB(gb) : null;
+                        branchLabel(g.X1, n.y, g.X2, l.y, ov ? ov.tex : fr(gb.f), g.fs + 1, ov ? ov.color : C.text, 0.58);
+                    });
+                }
+            }
+
+            dot(g.X0, g.rootY, 5.5, C.neon, '#ffffff');
+            g.nodes1.forEach(n => {
+                const ga = m.GA[n.i];
+                dot(g.X1, n.y, 6.5, 'rgb(' + TINTS.A[n.i % 6] + ')', '#ffffff');
+                if (g.st1) tex(String(ga.v), g.X1 + 14, n.y, g.fs + 3, '#ffffff', { valign: 'middle' });
+                else tex(String(ga.v), g.X1 - 4, n.y - 14, g.fs + 2, '#ffffff', { align: 'right', bg: C.labelBg });
+            });
+            g.leaves.forEach(l => {
+                const p = m.paths[l.k], gb = m.GB[l.j];
+                dot(g.X2, l.y, 5.5, 'rgb(' + TINTS.B[l.j % 6] + ')', '#ffffff');
+                tex(String(gb.v), g.X2 + 13, l.y, g.fs + 1, o.win && p.w === 'A' ? C.greenHi : '#ffffff', { valign: 'middle' });
+            });
+
+            rows.forEach(r => {
+                const d = r.p && o.decor ? o.decor(r.p) : null;
+                const col = (d && d.text) ? d.text : (o.win && r.p && r.p.w === 'A' ? C.greenHi : C.text);
+                const mid = { align: 'center', valign: 'middle' };
+                if (g.colX.path && r.p) tex('(' + r.p.a + ' \\mid ' + r.p.b + ')', g.colX.path, r.y, g.fs - 1, col, mid);
+                if (g.colX.p) {
+                    const ov = (r.p && o.pTex) ? o.pTex(r.p) : null;
+                    tex(ov ? ov.tex : fr(r.f), g.colX.p, r.y, g.fs + 3, ov ? ov.color : col, mid);
+                }
+                if (g.colX.pct) tex(pctTex(r.f), g.colX.pct, r.y, g.fs - 2, col, mid);
+                if (d && d.tag) {
+                    ctx.font = '600 ' + (g.fs - 2) + 'px Outfit, sans-serif';
+                    ctx.fillStyle = d.line || C.redHi;
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(d.tag, g.tagX, r.y);
+                }
+                if (o.onRow && r.k >= 0) addHit(g.X1 + 40, r.y - g.gap / 2, g.w - g.X1 - 40, g.gap, () => o.onRow(r.k));
+            });
+
+            if (o.legend && m.winA.length) {
+                rich('grün: **' + m.A.name + '** gewinnt', g.X0, g.bottom + 14, 15, C.greenHi);
+            }
+        }
+
+        /* ============================================================== VIEWS */
+        // Every view has a design size (landscape and, where it helps, portrait) and draws in
+        // design coordinates. render() scales it into the free part of the stage.
+
+        /* ------------------------------------------------------- Das Spiel */
+        function sizeSpiel(m, tall) { return tall ? { w: 520, h: 900 } : { w: 940, h: 570 }; }
+
+        function drawChips(items, cx, y, maxW, hiIdx) {
+            const size = 16, padX = 14, h = 36, arrow = 30;
+            ctx.font = '600 ' + size + 'px Outfit, sans-serif';
+            const ws = items.map(t => ctx.measureText(t).width + 2 * padX);
+            const total = ws.reduce((s, w) => s + w, 0) + arrow * (items.length - 1);
+            const row = total <= maxW;
+            let x = cx - total / 2, yy = y;
+            items.forEach((t, i) => {
+                const w = ws[i];
+                const x0 = row ? x : cx - w / 2;
+                roundRect(x0, yy, w, h, h / 2);
+                const on = i === hiIdx;
+                ctx.fillStyle = on ? 'rgba(245, 194, 66, 0.22)' : 'rgba(10, 24, 48, 0.8)';
+                ctx.fill();
+                ctx.strokeStyle = on ? C.orange : 'rgba(157, 232, 255, 0.35)';
+                ctx.lineWidth = on ? 2 : 1.2;
+                ctx.stroke();
+                ctx.font = '600 ' + size + 'px Outfit, sans-serif';
+                ctx.fillStyle = on ? C.orange : C.text;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(t, x0 + w / 2, yy + h / 2 + 1);
+                if (i < items.length - 1) {
+                    ctx.fillStyle = C.soft;
+                    if (row) ctx.fillText('→', x0 + w + arrow / 2, yy + h / 2 + 1);
+                    else ctx.fillText('↓', cx, yy + h + 11);
+                }
+                if (row) x += w + arrow; else yy += h + 22;
+            });
+            return row ? h : yy - y - 22;
+        }
+
+        function drawSpiel(m, W, H, tall, now) {
+            addHit(0, 0, W, H, () => rollDice());
+            const s = 108;
+            const pA = tall ? [W / 2, 140] : [240, 180];
+            const pB = tall ? [W / 2, 500] : [700, 180];
+            const out = rollOutcome(m);
+            label(m.A.name.toUpperCase(), pA[0], pA[1] - s / 2 - 42, 20, C.orange, 'center');
+            label(m.B.name.toUpperCase(), pB[0], pB[1] - s / 2 - 42, 20, C.cyan, 'center');
+            drawRollingCube(pA[0], pA[1], s, 'A', m, now, { glow: out && out.w === 'A' });
+            drawRollingCube(pB[0], pB[1], s, 'B', m, now, { glow: out && out.w === 'B' });
+
+            const symY = tall ? 360 : pA[1] + s / 2 + 10;
+            if (out) {
+                tex(out.w === 'A' ? '>' : (out.w === 'B' ? '<' : '='), W / 2, symY, 76,
+                    out.w === 'A' ? C.greenHi : (out.w === 'B' ? C.redHi : C.soft), { align: 'center', valign: 'middle' });
+            } else {
+                tex('?', W / 2, symY, 64, 'rgba(157, 180, 214, 0.5)', { align: 'center', valign: 'middle' });
+            }
+
+            let msg, col = C.text, phase = -1;
+            const an = S.anim && S.anim.key === m.key ? S.anim : null;
+            if (an) {
+                const t = now - an.t0;
+                phase = t < ROLL.B[0] ? 0 : 1;
+                msg = (phase === 0 ? m.A.name : m.B.name) + ' würfelt ...';
+                col = C.soft;
+            } else if (out) {
+                phase = 2;
+                msg = out.w === 'D' ? 'Unentschieden!' : (out.w === 'A' ? m.A.name : m.B.name) + ' gewinnt!';
+                col = out.w === 'A' ? C.greenHi : (out.w === 'B' ? C.redHi : C.soft);
+            } else {
+                msg = 'Tippen zum Würfeln';
+                col = C.soft;
+            }
+            const yRes = tall ? 740 : 410;
+            label(msg.toUpperCase(), W / 2, yRes, 22, col, 'center');
+
+            const hi = S.rulesHi >= 0 ? S.rulesHi : phase;
+            const chipsY = yRes + 34;
+            const ch = drawChips([m.A.name + ' würfelt', 'dann ' + m.B.name, 'größere Zahl gewinnt'], W / 2, chipsY, W - 40, hi);
+
+            const sc = S.score;
+            if (sc.key === m.key && sc.n > 0) {
+                let str = 'Runden: $' + intTex(sc.n) + '$ · **' + m.A.name + '**: $' + intTex(sc.A) + '$ · **' + m.B.name + '**: $' + intTex(sc.B) + '$';
+                if (sc.D) str += ' · unentschieden: $' + intTex(sc.D) + '$';
+                rich(str, W / 2, chipsY + ch + 20, 16, C.soft, { align: 'center', maxW: W - 40 });
+            }
+        }
+
+        /* ---------------------------------------------------- Die Würfelnetze */
+        function sizeNetze(m, tall) { return tall ? { w: 420, h: 880 } : { w: 800, h: 480 }; }
+
+        function drawNetze(m, W, H, tall, now) {
+            addHit(0, 0, W, H, () => rollDice());
+            const s = 64;
+            const nets = tall
+                ? [['A', W / 2 - 1.5 * s, 62], ['B', W / 2 - 1.5 * s, 472]]
+                : [['A', 40, 62], ['B', W - 40 - 3 * s, 62]];
+            nets.forEach(([key, x, y]) => {
+                const die = key === 'A' ? m.A : m.B, G = key === 'A' ? m.GA : m.GB;
+                label(dieTitle(die.name).toUpperCase(), x + 1.5 * s, y - 28, 14, key === 'A' ? C.orange : C.cyan, 'center');
+                const st = dieShown(key, m, now);
+                drawNet(x, y, s, key, m, {
+                    lit: (st.phase === 'done' || st.phase === 'roll') ? st.idx : null,
+                    hl: S.countHi[key],
+                    edit: S.mode === 'labor'
+                });
+                rich(countSentence(G), x + 1.5 * s, y + 4 * s + 18, 16, C.text, { align: 'center', maxW: 3.8 * s });
+            });
+            if (!tall) {
+                drawRollingCube(W / 2, 108, 42, 'A', m, now, {});
+                drawRollingCube(W / 2, 262, 42, 'B', m, now, {});
+                label(m.A.name.toUpperCase(), W / 2, 50, 11, C.orange, 'center');
+                label(m.B.name.toUpperCase(), W / 2, 206, 11, C.cyan, 'center');
+            }
+            const note = S.mode === 'labor'
+                ? 'Gleiche Zahlen, gleiche Farbe. **Fläche antippen:** neue Zahl wählen.'
+                : 'Gleiche Zahlen, gleiche Farbe. **Tippen:** würfeln, die obere Fläche leuchtet.';
+            rich(note, W / 2, H - 36, 15, C.soft, { align: 'center', maxW: W - 30 });
+        }
+
+        /* ------------------------------------------------------- Zweistufig */
+        const TREE_Z = m => ({
+            stage: 2, cols: ['path'], head: 112, bands: true, probs: false,
+            headers: { s1: 'Stufe 1: ' + gen(m.A.name) + ' Wurf', s2: 'Stufe 2: ' + gen(m.B.name) + ' Wurf', path: 'Ausgang' }
+        });
+
+        function sizeZweistufig(m) {
+            const g = treeGeom(m, TREE_Z(m));
+            return { w: g.w + 10, h: g.h + 60 };
+        }
+
+        function drawZweistufig(m, W, H, tall, now) {
+            addHit(0, 0, W, H, () => rollDice());
+            const o = TREE_Z(m);
+            const g = treeGeom(m, o);
+            const an = S.anim && S.anim.key === m.key ? S.anim : null;
+            if (an) {
+                const t = now - an.t0;
+                const tw = t < ROLL.A[1] ? t / ROLL.A[1] : (t < ROLL.B[0] ? 1 : 1 + (t - ROLL.B[0]) / (ROLL.B[1] - ROLL.B[0]));
+                const a = m.A.faces[an.ia], b = m.B.faces[an.ib];
+                o.walk = { i: m.GA.findIndex(x => x.v === a), j: m.GB.findIndex(x => x.v === b), t: clamp(tw, 0, 2) };
+            }
+            const out = rollOutcome(m);
+            if (out) { o.sel = out.k; }
+            drawTree(m, g, o);
+            drawRollingCube((g.X0 + g.X1) / 2 + 20, 58, 22, 'A', m, now, {});
+            drawRollingCube((g.X1 + g.X2) / 2 + 30, 58, 22, 'B', m, now, {});
+            let str;
+            if (out) {
+                str = 'Ausgang $(' + out.a + ' \\mid ' + out.b + ')$: ' +
+                    (out.w === 'D' ? '**unentschieden**' : '**' + (out.w === 'A' ? m.A.name : m.B.name) + '** gewinnt');
+            } else {
+                str = an ? 'Der Weg entsteht Stufe für Stufe ...' : '**Tippen:** würfeln und den Weg verfolgen';
+            }
+            rich(str, 24, g.h + 12, 17, out ? (out.w === 'A' ? C.greenHi : (out.w === 'B' ? C.redHi : C.soft)) : C.soft, { maxW: W - 40 });
+        }
+
+        /* ----------------------------------------------------- Die Würfel lesen */
+        function countWarn(G) {
+            if (G.length < 2 || G.every(g => g.c === G[0].c)) return null;
+            const big = G.reduce((x, g) => g.c > x.c ? g : x, G[0]);
+            const naive = F(1, G.length);
+            if (eqF(big.f, naive)) return null;
+            return '**Achtung:** Die $' + big.v + '$ steht **$' + big.c + '$-mal** drauf, also $' + fr(big.f) +
+                '$ und nicht $' + fr(naive) + '$!';
+        }
+
+        const COUNT_W = 450;
+
+        function countBlockH(m, key) {
+            const G = key === 'A' ? m.GA : m.GB;
+            return 62 + 26 + 46 * G.length + 14 + 34 + (countWarn(G) ? 58 : 0);
+        }
+
+        function drawCountBlock(m, key, x, y) {
+            const w = COUNT_W;
+            const die = key === 'A' ? m.A : m.B, G = key === 'A' ? m.GA : m.GB;
+            const colr = key === 'A' ? C.orange : C.cyan;
+            const hB = countBlockH(m, key);
+            if (S.focus === key) {
+                roundRect(x - 14, y - 12, w + 28, hB + 12, 16);
+                ctx.strokeStyle = 'rgba(245, 194, 66, 0.75)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+            label(dieTitle(die.name).toUpperCase(), x, y + 10, 14, colr, 'left');
+            rich('sechs Flächen, ' + (G.length === 1 ? 'eine Zahl' : WORDS[G.length] + ' Zahlen'), x, y + 26, 15, C.soft);
+            const s = 24;
+            drawNet(x + w - 3 * s, y, s, key, m, { hl: S.countHi[key], edit: S.mode === 'labor' });
+
+            const cw = [72, 138, w - 3 * s - 20 - 210];
+            const ty = y + 62;
+            label('Zahl', x + cw[0] / 2, ty + 10, 10, C.soft, 'center', 400);
+            label('wie oft?', x + cw[0] + 8, ty + 10, 10, C.soft, 'left', 400);
+            label('Wahrscheinlichkeit', x + cw[0] + cw[1], ty + 10, 10, C.soft, 'left', 400);
+            line(x, ty + 24, x + cw[0] + cw[1] + cw[2], ty + 24, 'rgba(157, 232, 255, 0.3)', 1);
+            G.forEach((gg, r) => {
+                const ry = ty + 26 + r * 46, cy = ry + 23;
+                const tint = TINTS[key][r % 6];
+                const hi = S.countHi[key] === gg.v;
+                if (hi) {
+                    roundRect(x - 6, ry + 2, cw[0] + cw[1] + cw[2] + 12, 42, 9);
+                    ctx.fillStyle = 'rgba(' + tint + ', 0.18)';
+                    ctx.fill();
+                }
+                roundRect(x + 12, ry + 7, 48, 32, 7);
+                ctx.fillStyle = 'rgba(' + tint + ', 0.45)';
+                ctx.fill();
+                ctx.strokeStyle = 'rgb(' + tint + ')';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                tex(String(gg.v), x + 36, cy, 20, '#ffffff', { align: 'center', valign: 'middle' });
+                const str = '$' + gg.c + '$-mal von $6$';
+                rich(str, x + cw[0] + 8, cy - richH(str, 16) / 2, 16, C.text);
+                const raw = '\\frac{' + gg.c + '}{6}';
+                tex(eqF(gg.f, { p: gg.c, q: 6 }) ? raw : raw + ' = ' + fr(gg.f), x + cw[0] + cw[1], cy, 18, C.text, { valign: 'middle' });
+                addHit(x - 6, ry, w + 12, 46, () => { S.countHi[key] = hi ? null : gg.v; render(); });
+            });
+            let yy = ty + 26 + 46 * G.length + 14;
+            rich('Kontrolle: ' + sumUnits(G.map(g => g.f)), x, yy, 16, C.greenHi, { maxW: w });
+            yy += 34;
+            const warn = countWarn(G);
+            if (warn) rich(warn, x, yy, 16, C.redHi, { maxW: w });
+        }
+
+        function sizeZaehlen(m, tall) {
+            const hA = countBlockH(m, 'A'), hB = countBlockH(m, 'B');
+            return tall ? { w: COUNT_W + 30, h: hA + hB + 70 } : { w: 2 * COUNT_W + 80, h: Math.max(hA, hB) + 30 };
+        }
+
+        function drawZaehlen(m, W, H, tall) {
+            if (tall) {
+                drawCountBlock(m, 'A', 15, 20);
+                drawCountBlock(m, 'B', 15, 20 + countBlockH(m, 'A') + 40);
+            } else {
+                drawCountBlock(m, 'A', 20, 20);
+                drawCountBlock(m, 'B', W - COUNT_W - 20, 20);
+            }
+        }
+
+        /* ----------------------------------------------- Äste zusammenfassen */
+        const MERGE_MS = 650;
+
+        function mergeU(now) {
+            const mg = S.merge, target = mg.grouped ? 1 : 0;
+            if (!mg.t0) return target;
+            const p = (now - mg.t0) / MERGE_MS;
+            if (p >= 1) { mg.t0 = 0; return target; }
+            return mg.from + (target - mg.from) * ease(p);
+        }
+
+        function toggleMerge(grouped) {
+            const now = performance.now();
+            const cur = mergeU(now);
+            S.merge.grouped = grouped != null ? grouped : !S.merge.grouped;
+            S.merge.from = cur;
+            S.merge.t0 = now;
+            kick();
+            refreshPanelLive();
+        }
+
+        function sizeMerge(m, tall) { return tall ? { w: 470, h: 900 } : { w: 920, h: 480 }; }
+
+        function drawMerge(m, W, H, tall, now) {
+            addHit(0, 0, W, H, () => toggleMerge());
+            const key = S.merge.die;
+            const die = key === 'A' ? m.A : m.B, G = key === 'A' ? m.GA : m.GB;
+            const u = mergeU(now);
+            const top = 84, span = 360, X0 = 36, X1 = 300, rootY = top + span / 2;
+            const sorted = die.faces.slice().sort((a, b) => a - b);
+            const y6 = i => top + (i + 0.5) * span / 6;
+            const yG = gi => top + (gi + 0.5) * span / G.length;
+            const words = G.length === 1 ? 'EIN AST' : WORDS[G.length].toUpperCase() + ' ÄSTE';
+            label(dieTitle(die.name).toUpperCase(), 20, 22, 14, key === 'A' ? C.orange : C.cyan, 'left');
+            label(u < 0.5 ? 'SECHS ÄSTE, JE EIN SECHSTEL' : words + ', GLEICHE ZAHLEN ZUSAMMEN', 20, 50, 12, C.soft, 'left', 400);
+
+            const ys = sorted.map((v, i) => {
+                const gi = G.findIndex(g => g.v === v);
+                return { v, gi, y: y6(i) + (yG(gi) - y6(i)) * u };
+            });
+            ys.forEach(b => line(X0, rootY, X1, b.y, 'rgba(' + TINTS[key][b.gi % 6] + ', 0.95)', 2.2 + 1.4 * u));
+            dot(X0, rootY, 5.5, C.neon, '#ffffff');
+            if (u === 0) {
+                ys.forEach(b => branchLabel(X0, rootY, X1, b.y, '\\frac{1}{6}', 15, C.text, 0.66));
+            } else if (u === 1) {
+                G.forEach((g, gi) => branchLabel(X0, rootY, X1, yG(gi), fr(g.f), 18, C.text, 0.55));
+            }
+            const drawn = new Set();
+            ys.forEach(b => {
+                const k = u === 1 ? 'g' + b.gi : 'f' + b.y.toFixed(1);
+                if (drawn.has(k)) return;
+                drawn.add(k);
+                dot(X1, b.y, 6, 'rgb(' + TINTS[key][b.gi % 6] + ')', '#ffffff');
+                tex(String(b.v), X1 + 14, b.y, 19, '#ffffff', { valign: 'middle' });
+            });
+
+            const px = tall ? 20 : 420, py = tall ? top + span + 40 : 70, pw = tall ? W - 40 : W - 440;
+            plate(px, py, pw, tall ? H - py - 20 : 380);
+            label('SECHSTEL ADDIEREN', px + 20, py + 26, 12, C.orange, 'left');
+            let yy = py + 50;
+            G.forEach((g, gi) => {
+                let s;
+                if (g.c === 1) s = '$' + g.v + '$: $\\frac{1}{6}$';
+                else {
+                    s = '$' + g.v + '$: $' + Array(g.c).fill('\\frac{1}{6}').join(' + ') + ' = \\frac{' + g.c + '}{6}' +
+                        (eqF(g.f, { p: g.c, q: 6 }) ? '' : ' = ' + fr(g.f)) + '$';
+                }
+                yy += rich(s, px + 20, yy, 18, 'rgb(' + TINTS[key][gi % 6] + ')', { maxW: pw - 40 }) + 12;
+            });
+            yy += 6;
+            yy += rich('zusammen: ' + sumUnits(G.map(g => g.f)), px + 20, yy, 18, C.greenHi, { maxW: pw - 40 }) + 14;
+            rich('Die Äste, die an **einem Punkt** starten, ergeben zusammen immer $1$.', px + 20, yy, 16, C.soft, { maxW: pw - 40 });
+        }
+
+        /* ------------------------------------------------------ Stufe 1 und 2 */
+        const TREE_1 = { stage: 1, cols: ['p', 'pct'] };
+
+        function sizeStufe1(m) {
+            const g = treeGeom(m, TREE_1);
+            return { w: g.w + 10, h: g.h + 50 };
+        }
+
+        function drawStufe1(m, W, H) {
+            const g = treeGeom(m, TREE_1);
+            drawTree(m, g, TREE_1);
+            rich('Kontrolle: ' + sumUnits(m.GA.map(x => x.f)), 24, g.h + 8, 17, C.greenHi, { maxW: W - 40 });
+        }
+
+        const TREE_2 = { stage: 2, cols: [] };
+
+        function stufe2Lines(m) {
+            const nA = m.GA.length, nB = m.GB.length;
+            const list = m.GB.map(x => '$' + fr(x.f) + '$ bei der $' + x.v + '$');
+            return [
+                'An **jedes** Ende von Stufe $1$ kommen ' + gen(m.B.name) + ' Äste.',
+                'Überall dieselben: ' + list.join(', ') + '.',
+                'Die Würfe sind **unabhängig**: ' + gen(m.A.name) + ' Ergebnis ändert nichts an ' + gen(m.B.name) + ' Würfel.',
+                '$' + nA + ' \\cdot ' + nB + ' = ' + nA * nB + '$ **Wege** durch den Baum'
+            ];
+        }
+
+        function sizeStufe2(m, tall) {
+            const g = treeGeom(m, TREE_2);
+            return tall ? { w: Math.max(g.w, 440) + 20, h: g.h + 330 } : { w: g.w + 400, h: Math.max(g.h, 360) + 10 };
+        }
+
+        function drawStufe2(m, W, H, tall) {
+            const g = treeGeom(m, TREE_2);
+            drawTree(m, g, TREE_2);
+            const px = tall ? 16 : g.w + 30, py = tall ? g.h + 10 : 30;
+            const pw = tall ? W - 32 : W - g.w - 40;
+            plate(px, py, pw, tall ? H - py - 10 : 330);
+            label('STUFE 2', px + 20, py + 26, 12, C.cyan, 'left');
+            let yy = py + 50;
+            stufe2Lines(m).forEach((s, i) => {
+                yy += rich(s, px + 20, yy, i === 3 ? 22 : 17, i === 3 ? C.orange : C.text, { maxW: pw - 40 }) + 16;
+            });
+        }
+
+        /* -------------------------------------------------------- Pfadregel */
+        const TREE_P = { stage: 2, cols: ['path', 'p', 'pct'], legend: true };
+
+        function sizePfad(m, tall) {
+            const g = treeGeom(m, TREE_P);
+            return tall ? { w: g.w + 20, h: g.h + 330 } : { w: g.w + 390, h: Math.max(g.h, 360) + 10 };
+        }
+
+        function allPathsLine(m) {
+            return 'alle Wege: ' + sumUnits(m.paths.map(p => p.f));
+        }
+
+        function drawPfad(m, W, H, tall) {
+            if (S.sel == null || S.sel < 0 || S.sel >= m.paths.length) S.sel = 0;
+            const g = treeGeom(m, TREE_P);
+            drawTree(m, g, Object.assign({ win: true, sel: S.sel, onRow: k => { S.sel = k; render(); } }, TREE_P));
+            const p = m.paths[S.sel];
+            const px = tall ? 16 : g.w + 24, py = tall ? g.h + 10 : 30;
+            const pw = tall ? W - 32 : W - g.w - 34;
+            plate(px, py, pw, tall ? H - py - 10 : 340, 'rgba(245, 194, 66, 0.55)');
+            label('PFADREGEL', px + 20, py + 26, 12, C.orange, 'left');
+            rich('Weg $(' + p.a + ' \\mid ' + p.b + ')$: alle Äste **malnehmen**', px + 20, py + 46, 16, C.soft, { maxW: pw - 40 });
+            tex(fr(F(p.ca, 6)) + ' \\cdot ' + fr(F(p.cb, 6)) + ' = ' + fr(p.f), px + 20, py + 120, 32, '#ffffff');
+            tex(pctEq(p.f), px + 20, py + 170, 22, C.text);
+            const who = p.w === 'D' ? 'unentschieden' : '**' + (p.w === 'A' ? m.A.name : m.B.name) + '** gewinnt';
+            rich('Auf diesem Weg: ' + who, px + 20, py + 190, 16, p.w === 'A' ? C.greenHi : (p.w === 'B' ? C.redHi : C.soft), { maxW: pw - 40 });
+            label('KONTROLLE', px + 20, py + 246, 11, C.soft, 'left', 400);
+            rich(allPathsLine(m), px + 20, py + 262, 17, C.greenHi, { maxW: pw - 40 });
+        }
+
+        /* ------------------------------------------------------ Wer gewinnt? */
+        function tableGeom(m) {
+            const L = m.paths.length;
+            const rh = L <= 9 ? 46 : L <= 16 ? 36 : 28;
+            const fs = rh >= 46 ? 18 : rh >= 36 ? 15 : 13;
+            const cols = [
+                { h: 'Weg', w: 130 }, { h: m.A.name, w: 100 }, { h: m.B.name, w: 100 },
+                { h: 'Wer gewinnt?', w: 180 }, { h: 'Wahrsch.', w: 120 }
+            ];
+            const w = cols.reduce((s, c) => s + c.w, 0);
+            return { rh, fs, cols, w, h: 50 + L * rh + 80 };
+        }
+
+        function sizeTabelle(m) {
+            const t = tableGeom(m);
+            return { w: t.w + 40, h: t.h + 20 };
+        }
+
+        function drawTabelle(m, W) {
+            const t = tableGeom(m);
+            const x0 = 20, y0 = 16;
+            let cx = x0;
+            t.cols.forEach(c => { label(c.h.toUpperCase(), cx + c.w / 2, y0 + 18, 11, C.soft, 'center', 400); cx += c.w; });
+            line(x0, y0 + 40, x0 + t.w, y0 + 40, 'rgba(157, 232, 255, 0.4)', 1.2);
+            m.paths.forEach((p, r) => {
+                const ry = y0 + 44 + r * t.rh, cy = ry + t.rh / 2;
+                if (r % 2) { ctx.fillStyle = 'rgba(157, 232, 255, 0.04)'; ctx.fillRect(x0, ry, t.w, t.rh); }
+                let x = x0;
+                const cell = i => { const c = t.cols[i]; const cxm = x + c.w / 2; x += c.w; return cxm; };
+                const winCol = p.w === 'A' ? C.greenHi : (p.w === 'B' ? C.redHi : C.soft);
+                tex('\\mathbf{(' + p.a + ' \\mid ' + p.b + ')}', cell(0), cy, t.fs, '#ffffff', { align: 'center', valign: 'middle' });
+                tex(String(p.a), cell(1), cy, t.fs, C.text, { align: 'center', valign: 'middle' });
+                tex(String(p.b), cell(2), cy, t.fs, C.text, { align: 'center', valign: 'middle' });
+                const wx = x, ww = t.cols[3].w;
+                roundRect(wx + 12, ry + 5, ww - 24, t.rh - 10, 8);
+                ctx.fillStyle = p.w === 'A' ? 'rgba(121, 158, 49, 0.30)' : (p.w === 'B' ? 'rgba(176, 36, 24, 0.28)' : 'rgba(159, 180, 214, 0.14)');
+                ctx.fill();
+                ctx.font = '600 ' + (t.fs - 1) + 'px Outfit, sans-serif';
+                ctx.fillStyle = winCol;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(p.w === 'D' ? 'unentschieden' : (p.w === 'A' ? m.A.name : m.B.name), cell(3), cy + 1);
+                tex(fr(p.f), cell(4), cy, t.fs, C.text, { align: 'center', valign: 'middle' });
+                if (S.sel === p.k) {
+                    roundRect(x0 - 4, ry + 1, t.w + 8, t.rh - 2, 9);
+                    ctx.strokeStyle = C.orange;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+                addHit(x0, ry, t.w, t.rh, () => { S.sel = p.k; render(); });
+            });
+            const yb = y0 + 44 + m.paths.length * t.rh + 16;
+            const list = m.winA.map(p => '$(' + p.a + ' \\mid ' + p.b + ')$').join(', ');
+            const str = m.winA.length
+                ? '**' + m.A.name + '** gewinnt auf $' + m.winA.length + '$ ' + (m.winA.length === 1 ? 'Weg' : 'Wegen') + ': ' + list
+                : '**' + m.A.name + '** gewinnt auf keinem Weg.';
+            rich(str, x0, yb, 17, C.greenHi, { maxW: t.w });
+        }
+
+        /* ----------------------------------------------------- Summenregel */
+        const TREE_S = { stage: 2, cols: ['path', 'p'], legend: true };
+
+        function sizeSumme(m, tall) {
+            const g = treeGeom(m, TREE_S);
+            return tall ? { w: Math.max(g.w, 460) + 20, h: g.h + 470 } : { w: g.w + 470, h: Math.max(g.h, 470) + 10 };
+        }
+
+        // The whole result, cut into equal parts: 5 green and 4 red cells of 9
+        function drawBar(m, x, y, w) {
+            const q = 36 / gcd(gcd(gcd(m.nA, m.nB), m.nD), 36);
+            const parts = [[m.nA * q / 36, 'rgba(121, 158, 49, 0.9)'], [m.nB * q / 36, 'rgba(224, 106, 94, 0.85)'], [m.nD * q / 36, 'rgba(159, 180, 214, 0.5)']];
+            const cells = [];
+            parts.forEach(([n, col]) => { for (let i = 0; i < n; i++) cells.push(col); });
+            const gap = q <= 12 ? 4 : (q <= 36 ? 2 : 0);
+            const cw = (w - gap * (q - 1)) / q;
+            cells.forEach((col, i) => {
+                roundRect(x + i * (cw + gap), y, cw, 26, Math.min(5, cw / 3));
+                ctx.fillStyle = col;
+                ctx.fill();
+            });
+            return q;
+        }
+
+        function summeLines(m) {
+            const L = [];
+            const eq = (who, list, res) => '$P(\\text{' + who + '}) =$ ' + sumUnits(list.map(p => p.f), { result: res, pct: true });
+            L.push({ s: eq(m.A.name + ' gewinnt', m.winA, m.pA), c: C.greenHi, size: 19 });
+            L.push({ s: 'Gegenprobe: ' + eq(m.B.name + ' gewinnt', m.winB, m.pB), c: C.redHi, size: 17 });
+            if (m.draws.length) L.push({ s: eq('unentschieden', m.draws, m.pD), c: C.soft, size: 17 });
+            const tot = [m.pA, m.pB].concat(m.draws.length ? [m.pD] : []);
+            L.push({ s: 'Kontrolle: $' + tot.map(fr).join(' + ') + ' = 1$', c: C.text, size: 17 });
+            L.push({
+                s: m.draws.length
+                    ? 'Gleiche Zahlen auf beiden Würfeln: **Unentschieden** ist möglich.'
+                    : 'Kein Unentschieden: Die Würfel haben **keine gemeinsame Zahl**.',
+                c: C.soft, size: 15
+            });
+            return L;
+        }
+
+        function drawSumme(m, W, H, tall) {
+            const g = treeGeom(m, TREE_S);
+            drawTree(m, g, Object.assign({ win: true }, TREE_S));
+            const px = tall ? 16 : g.w + 24, py = tall ? g.h + 10 : 20;
+            const pw = tall ? W - 32 : W - g.w - 34;
+            plate(px, py, pw, tall ? H - py - 10 : 450, 'rgba(121, 158, 49, 0.55)');
+            label('SUMMENREGEL', px + 20, py + 26, 12, C.greenHi, 'left');
+            rich('Alle Wege zum selben Ereignis **addieren**', px + 20, py + 44, 16, C.soft, { maxW: pw - 40 });
+            let yy = py + 84;
+            summeLines(m).forEach(l => { yy += rich(l.s, px + 20, yy, l.size, l.c, { maxW: pw - 40 }) + 16; });
+            const q = drawBar(m, px + 20, yy + 4, pw - 40);
+            if (q <= 36) {
+                rich('$' + m.nA * q / 36 + '$ von $' + q + '$ gleich großen Teilen für **' + m.A.name + '**', px + 20, yy + 40, 15, C.soft, { maxW: pw - 40 });
+            }
+        }
+
+        /* --------------------------------------------------- Typische Fehler */
+        const ERR_KEYS = ['gleich', 'addiert', 'vergessen', 'multipliziert', 'einweg'];
+        const ERR_LABELS = ['FALSCHE AST-WAHRSCHEINLICHKEIT', 'ENTLANG ADDIERT', 'WEG VERGESSEN', 'WEGE MULTIPLIZIERT', 'NUR EIN WEG'];
+
+        // Every error is computed on the dice at hand, so the lab shows the same mistakes
+        // on any pair - for Lena and Mia it reproduces the deck slide word for word.
+        function errorCase(m, e) {
+            const A = m.A.name, B = m.B.name;
+            const P = who => '$P(\\text{' + who + ' gewinnt}) =$ ';
+            const right = P(A) + sumUnits(m.winA.map(p => p.f), { result: m.pA });
+            const noWin = !m.winA.length;
+            switch (ERR_KEYS[e]) {
+                case 'gleich': {
+                    const nB = m.GB.length;
+                    const naive = F(1, nB);
+                    const big = m.GB.reduce((x, g) => g.c > x.c ? g : x, m.GB[0]);
+                    const wrongP = p => mulF(F(p.ca, 6), naive);
+                    const wrongWin = m.winA.map(wrongP);
+                    return {
+                        title: gen(B) + ' $' + big.v + '$ mit $' + fr(naive) + '$ statt $' + fr(big.f) + '$',
+                        applies: !eqF(big.f, naive),
+                        labelB: () => ({ tex: fr(naive), color: C.redHi }),
+                        pTex: p => ({ tex: fr(wrongP(p)), color: C.redHi }),
+                        wrong: [P(A) + sumUnits(wrongWin)],
+                        right: [right],
+                        why: 'Nicht die verschiedenen Zahlen zählen, sondern die **Flächen**: Die $' + big.v + '$ steht auf $' + big.c + '$ von $6$ Flächen.'
+                    };
+                }
+                case 'addiert': {
+                    const p0 = m.paths[0];
+                    const add = p => addF(F(p.ca, 6), F(p.cb, 6));
+                    const all = sumF(m.paths.map(add));
+                    return {
+                        title: 'Entlang eines Weges **addiert** statt multipliziert',
+                        applies: true,
+                        pTex: p => ({ tex: fr(add(p)), color: C.redHi }),
+                        wrong: ['Weg $(' + p0.a + ' \\mid ' + p0.b + ')$: $' + fr(F(p0.ca, 6)) + ' + ' + fr(F(p0.cb, 6)) + ' = ' + fr(add(p0)) + '$',
+                            'alle Wege zusammen: $' + fr(all) + '$'],
+                        right: ['Weg $(' + p0.a + ' \\mid ' + p0.b + ')$: $' + fr(F(p0.ca, 6)) + ' \\cdot ' + fr(F(p0.cb, 6)) + ' = ' + fr(p0.f) + '$',
+                            'alle Wege zusammen: $1$'],
+                        why: 'Alle Wege zusammen müssen $1$ ergeben. Entlang eines Weges wird **multipliziert**.'
+                    };
+                }
+                case 'vergessen': {
+                    const f = m.winA.slice().sort((x, y) => (x.b - y.b) || (x.a - y.a)).pop();
+                    const rest = m.winA.filter(p => p !== f);
+                    return {
+                        title: f ? 'Den Weg $\\mathbf{(' + f.a + ' \\mid ' + f.b + ')}$ vergessen' : 'Einen Weg vergessen',
+                        applies: m.winA.length >= 2,
+                        decor: p => (f && p.k === f.k) ? { line: C.redHi, dash: [7, 6], width: 2.6, text: C.redHi, tag: 'vergessen' } : null,
+                        wrong: [P(A) + sumUnits(rest.map(p => p.f))],
+                        right: [right],
+                        why: f ? 'Die $' + f.a + '$ ist größer als die $' + f.b + '$, also gehört auch dieser Weg dazu.' : ''
+                    };
+                }
+                case 'multipliziert': {
+                    const prod = m.winA.reduce((s, p) => mulF(s, p.f), F(1, 1));
+                    const big = prod.q > 1e9;
+                    return {
+                        title: 'Die Wege für ' + gen(A) + ' Sieg **multipliziert** statt addiert',
+                        applies: m.winA.length >= 2,
+                        decor: p => p.w === 'A' ? { line: C.redHi, width: 2.6, text: C.redHi } : null,
+                        wrong: [P(A) + '$' + m.winA.map(p => fr(p.f)).join(' \\cdot ') + (big ? ' \\approx 0' : ' = ' + fr(prod) + ' ' + pctEq(prod)) + '$'],
+                        right: [right],
+                        why: 'Verschiedene Wege schließen sich aus: Sie werden **addiert**. Malnehmen macht das Ergebnis nur kleiner.'
+                    };
+                }
+                default: {
+                    const one = m.winA[0];
+                    return {
+                        title: 'Nur **einen** Weg genommen statt alle',
+                        applies: m.winA.length >= 2,
+                        decor: p => (p.w === 'A' && one && p.k !== one.k) ? { line: C.redHi, dash: [7, 6], width: 2.6, text: C.redHi, tag: 'fehlt' } : null,
+                        wrong: one ? [P(A) + '$' + fr(one.f) + ' ' + pctEq(one.f) + '$'] : [],
+                        right: [right],
+                        why: '**' + A + '** gewinnt auf $' + m.winA.length + '$ Wegen, und alle gehören in die Summe.'
+                    };
+                }
+            }
+        }
+
+        const TREE_F = { stage: 2, cols: ['path', 'p'], tagRoom: true };
+
+        function sizeFehler(m, tall) {
+            const g = treeGeom(m, TREE_F);
+            return tall ? { w: Math.max(g.w, 470) + 20, h: g.h + 440 } : { w: g.w + 470, h: Math.max(g.h, 440) + 10 };
+        }
+
+        function drawFehler(m, W, H, tall) {
+            const E = errorCase(m, S.err);
+            const g = treeGeom(m, TREE_F);
+            drawTree(m, g, Object.assign({ win: true, labelB: E.labelB, pTex: E.pTex, decor: E.decor }, TREE_F));
+            const px = tall ? 16 : g.w + 24, py = tall ? g.h + 10 : 20;
+            const pw = tall ? W - 32 : W - g.w - 34;
+            plate(px, py, pw, tall ? H - py - 10 : 420, 'rgba(224, 106, 94, 0.55)');
+            label('FEHLER ' + (S.err + 1) + ' VON 5', px + 20, py + 26, 12, C.redHi, 'left');
+            let yy = py + 46;
+            yy += rich(E.title, px + 20, yy, 19, '#ffffff', { maxW: pw - 40 }) + 18;
+            if (!E.applies) {
+                rich('Bei diesen Würfeln fällt der Fehler nicht auf. Probiere die Würfel aus dem Deck.', px + 20, yy, 16, C.soft, { maxW: pw - 40 });
+                return;
+            }
+            label('FALSCH', px + 20, yy + 8, 11, C.redHi, 'left');
+            yy += 22;
+            E.wrong.forEach(s => { yy += rich(s, px + 20, yy, 17, C.redHi, { maxW: pw - 40 }) + 10; });
+            yy += 8;
+            label('RICHTIG', px + 20, yy + 8, 11, C.greenHi, 'left');
+            yy += 22;
+            E.right.forEach(s => { yy += rich(s, px + 20, yy, 17, C.greenHi, { maxW: pw - 40 }) + 10; });
+            yy += 8;
+            rich(E.why, px + 20, yy, 16, C.text, { maxW: pw - 40 });
+        }
+
+        /* ------------------------------------------------ Merksatz & Rezept */
+        const MERKSATZ = 'Entlang eines Pfades wird **multipliziert** — verschiedene Pfade zum selben Ereignis werden **addiert**.';
+        const RECIPE = [
+            { s: '**1.** Würfelnetze zählen: Wie oft steht jede Zahl drauf?', go: 'zaehlen' },
+            { s: '**2.** Wahrscheinlichkeit je Zahl: Anzahl durch $6$, dann kürzen', go: 'zaehlen' },
+            { s: '**3.** Baum zeichnen: erst Stufe $1$, dann an **jedes** Ende Stufe $2$', go: 'stufe2' },
+            { s: '**4.** Pfadregel: entlang eines Weges **malnehmen**', go: 'pfad' },
+            { s: '**5.** Summenregel: alle passenden Wege **addieren**', go: 'summe' }
+        ];
+
+        function sizeRezept(m, tall) { return tall ? { w: 520, h: 900 } : { w: 860, h: 600 }; }
+
+        function drawRezept(m, W) {
+            const mw = W - 68;
+            const mh = 58 + richH(MERKSATZ, 24, mw) + 22;
+            plate(10, 10, W - 20, mh, 'rgba(245, 194, 66, 0.7)');
+            label('MERKSATZ', 34, 38, 13, C.orange, 'left');
+            rich(MERKSATZ, 34, 60, 24, '#ffffff', { maxW: mw });
+            let y = mh + 40;
+            label('DAS REZEPT IN FÜNF SCHRITTEN', 20, y, 13, C.cyan, 'left');
+            y += 20;
+            RECIPE.forEach((r, i) => {
+                const hi = S.recipeHi === i;
+                const th = richH(r.s, 19, W - 130);
+                const rowH = Math.max(58, th + 26);
+                roundRect(10, y, W - 20, rowH, 12);
+                ctx.fillStyle = hi ? 'rgba(245, 194, 66, 0.16)' : 'rgba(10, 24, 48, 0.72)';
+                ctx.fill();
+                ctx.strokeStyle = hi ? C.orange : 'rgba(0, 210, 255, 0.22)';
+                ctx.lineWidth = hi ? 2 : 1.2;
+                ctx.stroke();
+                rich(r.s, 30, y + (rowH - th) / 2, 19, hi ? '#ffffff' : C.text, { maxW: W - 130 });
+                ctx.font = '600 22px Outfit, sans-serif';
+                ctx.fillStyle = C.cyan;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('→', W - 44, y + rowH / 2);
+                addHit(10, y, W - 20, rowH, () => jumpToView(r.go));
+                y += rowH + 12;
+            });
+        }
+
+        /* ------------------------------------------------------- Simulation */
+        function simReset(m) {
+            S.sim = { key: m.key, n: 0, a: 0, b: 0, d: 0, hx: [], ha: [], hb: [], running: false, until: 0 };
+        }
+
+        function simRun(count) {
+            const m = model();
+            if (S.sim.key !== m.key) simReset(m);
+            const sm = S.sim, fa = m.A.faces, fb = m.B.faces;
+            for (let i = 0; i < count && sm.n < 1e7; i++) {
+                const a = fa[Math.floor(Math.random() * 6)], b = fb[Math.floor(Math.random() * 6)];
+                sm.n++;
+                if (a > b) sm.a++; else if (a < b) sm.b++; else sm.d++;
+                const lastX = sm.hx.length ? sm.hx[sm.hx.length - 1] : 0;
+                if (sm.n <= 200 || sm.n >= lastX * 1.01) {
+                    sm.hx.push(sm.n);
+                    sm.ha.push(sm.a / sm.n);
+                    sm.hb.push(sm.b / sm.n);
+                }
+            }
+        }
+
+        function simToggle(on) {
+            const m = model();
+            if (S.sim.key !== m.key) simReset(m);
+            S.sim.running = on != null ? on : !S.sim.running;
+            if (S.sim.running) kick();
+            refreshPanelLive();
+        }
+
+        function sizeSim(m, tall) { return tall ? { w: 540, h: 900 } : { w: 980, h: 480 }; }
+
+        function drawChart(m, x, y, w, h) {
+            plate(x, y, w, h);
+            const L = x + 62, R = x + w - 64, T = y + 30, B = y + h - 58;
+            const sm = S.sim.key === m.key ? S.sim : null;
+            [0, 0.25, 0.5, 0.75, 1].forEach(v => {
+                const yy = B - v * (B - T);
+                line(L, yy, R, yy, 'rgba(157, 232, 255, 0.12)', 1);
+                tex(v === 0 ? '0' : (v === 1 ? '1' : decTex(v, 2)), L - 10, yy, 14, C.soft, { align: 'right', valign: 'middle' });
+            });
+            const nMax = Math.max(10, Math.pow(10, Math.ceil(Math.log10(Math.max(10, sm ? sm.n : 10)))));
+            const X = n => L + Math.log10(n) / Math.log10(nMax) * (R - L);
+            for (let p = 1; p <= nMax; p *= 10) {
+                const xx = X(p);
+                line(xx, T, xx, B, 'rgba(157, 232, 255, 0.12)', 1);
+                tex(intTex(p), xx, B + 20, 14, C.soft, { align: 'center', valign: 'middle' });
+            }
+            label('RUNDEN', (L + R) / 2, B + 44, 10, C.soft, 'center', 400);
+            const yP = v => B - v * (B - T);
+            const yA = yP(valF(m.pA)), yB = yP(valF(m.pB));
+            line(L, yA, R, yA, 'rgba(160, 212, 70, 0.75)', 1.6, [8, 6]);
+            line(L, yB, R, yB, 'rgba(224, 106, 94, 0.75)', 1.6, [8, 6]);
+            const sep = Math.abs(yA - yB) < 34 ? (yA <= yB ? -1 : 1) * (17 - Math.abs(yA - yB) / 2) : 0;
+            tex(fr(m.pA), R + 10, yA + sep, 16, C.greenHi, { valign: 'middle' });
+            tex(fr(m.pB), R + 10, yB - sep, 16, C.redHi, { valign: 'middle' });
+            if (!sm || !sm.hx.length) return;
+            [[sm.ha, C.greenHi], [sm.hb, C.redHi]].forEach(([ys, col]) => {
+                ctx.beginPath();
+                sm.hx.forEach((n, i) => {
+                    const px = X(n), py = yP(ys[i]);
+                    if (i) ctx.lineTo(px, py); else ctx.moveTo(px, py);
+                });
+                ctx.strokeStyle = col;
+                ctx.lineWidth = 2.2;
+                ctx.lineJoin = 'round';
+                ctx.stroke();
+            });
+        }
+
+        function drawSim(m, W, H, tall) {
+            addHit(0, 0, W, H, () => simToggle());
+            const sm = S.sim.key === m.key ? S.sim : { n: 0, a: 0, b: 0, d: 0 };
+            const pw = tall ? W - 20 : 330, ph = tall ? 390 : H - 20;
+            plate(10, 10, pw, ph);
+            label('SIMULATION', 30, 36, 12, C.orange, 'left');
+            let yy = 56;
+            const row = (s, col, size = 18) => { yy += rich(s, 30, yy, size, col, { maxW: pw - 40 }) + 12; };
+            row('Runden: $' + intTex(sm.n) + '$', '#ffffff');
+            row('**' + m.A.name + '** gewinnt: $' + intTex(sm.a) + '$', C.greenHi);
+            row('**' + m.B.name + '** gewinnt: $' + intTex(sm.b) + '$', C.redHi);
+            if (m.draws.length) row('unentschieden: $' + intTex(sm.d) + '$', C.soft);
+            yy += 6;
+            label('RELATIVE HÄUFIGKEIT', 30, yy + 6, 10, C.soft, 'left', 400);
+            yy += 20;
+            const rel = sm.n ? sm.a / sm.n : 0;
+            row(sm.n ? '$\\frac{' + intTex(sm.a) + '}{' + intTex(sm.n) + '} \\approx ' + decTex(rel, 3) + '$' : '$-$', C.greenHi, 20);
+            label('WAHRSCHEINLICHKEIT', 30, yy + 6, 10, C.soft, 'left', 400);
+            yy += 20;
+            row('$' + fr(m.pA) + ' \\approx ' + decTex(valF(m.pA), 3) + '$', C.greenHi, 20);
+            if (sm.n) row('Abweichung: $' + decTex(Math.abs(rel - valF(m.pA)), 3) + '$', C.soft, 16);
+            if (tall) drawChart(m, 10, ph + 30, W - 20, H - ph - 40);
+            else drawChart(m, pw + 30, 10, W - pw - 40, H - 20);
+        }
+
+        /* ------------------------------------------------------ Efron-Würfel */
+        const EFRON_POS = { A: [0, 0], B: [1, 0], C: [1, 1], D: [0, 1] };
+        const EFRON_ARROWS = ['AB', 'BC', 'CD', 'DA'];
+
+        function efronModel(pair) {
+            return buildModel({ a: { name: 'Würfel ' + pair[0], faces: EFRON[pair[0]] }, b: { name: 'Würfel ' + pair[1], faces: EFRON[pair[1]] } });
+        }
+
+        function sizeEfron(m, tall) { return tall ? { w: 540, h: 960 } : { w: 920, h: 560 }; }
+
+        function drawEfron(m, W, H, tall) {
+            const s = 30, netW = 3 * s, netH = 4 * s;
+            const pos = k => {
+                const [c, r] = EFRON_POS[k];
+                return { x: 30 + c * 380, y: 56 + r * 330 };
+            };
+            const models = {};
+            EFRON_ARROWS.forEach(p => { models[p] = efronModel(p); });
+            ['A', 'B', 'C', 'D'].forEach(k => {
+                const p = pos(k);
+                const pm = efronModel(k + 'A');
+                label('WÜRFEL ' + k, p.x + netW / 2, p.y - 22, 13, S.efron.indexOf(k) >= 0 ? C.orange : C.cyan, 'center');
+                drawNet(p.x, p.y, s, 'A', pm, {});
+            });
+            EFRON_ARROWS.forEach(pair => {
+                const a = pos(pair[0]), b = pos(pair[1]);
+                const ax = a.x + netW / 2, ay = a.y + netH / 2, bx = b.x + netW / 2, by = b.y + netH / 2;
+                const dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy);
+                const ux = dx / len, uy = dy / len, cut = Math.abs(ux) > 0.5 ? 92 : 104;
+                const x1 = ax + ux * cut, y1 = ay + uy * cut, x2 = bx - ux * cut, y2 = by - uy * cut;
+                const on = S.efron === pair;
+                const col = on ? C.orange : 'rgba(157, 232, 255, 0.75)';
+                line(x1, y1, x2, y2, col, on ? 3.4 : 2);
+                ctx.beginPath();
+                ctx.moveTo(x2, y2);
+                ctx.lineTo(x2 - ux * 16 - uy * 9, y2 - uy * 16 + ux * 9);
+                ctx.lineTo(x2 - ux * 16 + uy * 9, y2 - uy * 16 - ux * 9);
+                ctx.closePath();
+                ctx.fillStyle = col;
+                ctx.fill();
+                const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+                tex(fr(models[pair].pA), mx, my, 22, on ? C.orange : '#ffffff', { align: 'center', valign: 'middle', bg: C.labelBg, edge: col });
+                addHit(mx - 50, my - 40, 100, 80, () => pickEfron(pair));
+            });
+            ctx.font = '600 17px Outfit, sans-serif';
+            ctx.fillStyle = C.orange;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('Wer zuerst wählt, verliert!', 30 + 190 + netW / 2, 56 + 165 + netH / 2);
+
+            const px = tall ? 10 : 560, py = tall ? 560 : 10, pw = tall ? W - 20 : W - 570, ph = tall ? H - 570 : H - 20;
+            plate(px, py, pw, ph);
+            label('FUN FACTS', px + 20, py + 26, 12, C.orange, 'left');
+            let yy = py + 48;
+            const row = (str, col, size = 16) => { yy += rich(str, px + 20, yy, size, col, { maxW: pw - 40 }) + 14; };
+            row('Würfel gibt es seit mindestens $5000$ Jahren, schon im alten Orient wurde gewürfelt.', C.text);
+            row('Der Statistiker **Bradley Efron** erfand vier Würfel: A schlägt B, B schlägt C, C schlägt D und D wieder A, jedes Mal mit $\\frac{2}{3}$.', C.text);
+            row('Solche Würfel heißen **nicht-transitiv**: Zu jedem Würfel gibt es einen besseren.', C.text);
+            const pm = models[S.efron];
+            yy += 4;
+            label('WÜRFEL ' + S.efron[0] + ' GEGEN WÜRFEL ' + S.efron[1], px + 20, yy + 6, 11, C.orange, 'left');
+            yy += 22;
+            row('$P(' + S.efron[0] + '\\text{ schlägt }' + S.efron[1] + ') =$ ' + sumUnits(pm.winA.map(p => p.f), { result: pm.pA }), C.greenHi, 18);
+            if (S.mode === 'rundgang') {
+                const deck = buildModel(presetDice('deck'));
+                row('Unser Spiel ist harmloser: Mit $' + fr(deck.pA) + '$ ist **Lena** nur knapp im Vorteil.', C.soft, 15);
+            } else {
+                row('Pfeil antippen: Das Paar wird in das Labor geladen.', C.soft, 15);
+            }
+        }
+
+        /* -------------------------------------------------- Zwillingsaufgabe */
+        function sizeZwilling(m, tall) {
+            if (S.showSolution) {
+                const g = treeGeom(m, TREE_P);
+                return { w: g.w + 20, h: g.h + 80 };
+            }
+            return tall ? { w: 460, h: 880 } : { w: 820, h: 470 };
+        }
+
+        function drawZwilling(m, W, H, tall) {
+            if (S.showSolution) {
+                const g = treeGeom(m, TREE_P);
+                drawTree(m, g, Object.assign({ win: true }, TREE_P));
+                rich('$P(\\text{' + m.A.name + ' gewinnt}) =$ ' + sumUnits(m.winA.map(p => p.f), { result: m.pA, pct: true }),
+                    24, g.h + 16, 22, C.greenHi, { maxW: W - 40 });
+                return;
+            }
+            const s = 62;
+            const nets = tall ? [['A', W / 2 - 1.5 * s, 50], ['B', W / 2 - 1.5 * s, 420]] : [['A', 60, 50], ['B', W - 60 - 3 * s, 50]];
+            nets.forEach(([key, x, y]) => {
+                const die = key === 'A' ? m.A : m.B;
+                label(dieTitle(die.name).toUpperCase(), x + 1.5 * s, y - 24, 14, key === 'A' ? C.orange : C.cyan, 'center');
+                drawNet(x, y, s, key, m, {});
+            });
+            const tx = tall ? 20 : 300, ty = tall ? 700 : 70, tw = tall ? W - 40 : W - 600;
+            let yy = ty;
+            [['**a)** Baumdiagramm zeichnen, an jeden Ast die Wahrscheinlichkeit', C.text],
+            ['**b)** $P(\\text{' + m.A.name + ' gewinnt}) = \\;?$', C.text],
+            ['Erst selbst rechnen, dann **Lösung zeigen**.', C.soft]].forEach(([str, col]) => {
+                yy += rich(str, tx, yy, 18, col, { maxW: tw }) + 22;
+            });
+        }
+
+        /* ---------------------------------------------------------- Registry */
+        const VIEWS = {
+            spiel: { name: 'Das Spiel', size: sizeSpiel, draw: drawSpiel },
+            netze: { name: 'Würfelnetze', size: sizeNetze, draw: drawNetze },
+            zweistufig: { name: 'Zweistufig', size: sizeZweistufig, draw: drawZweistufig },
+            zaehlen: { name: 'Würfel lesen', size: sizeZaehlen, draw: drawZaehlen },
+            merge: { name: 'Äste zusammenfassen', size: sizeMerge, draw: drawMerge },
+            stufe1: { name: 'Baum: Stufe 1', size: sizeStufe1, draw: drawStufe1 },
+            stufe2: { name: 'Baum: Stufe 2', size: sizeStufe2, draw: drawStufe2 },
+            pfad: { name: 'Pfadregel', size: sizePfad, draw: drawPfad },
+            tabelle: { name: 'Wer gewinnt?', size: sizeTabelle, draw: drawTabelle },
+            summe: { name: 'Summenregel', size: sizeSumme, draw: drawSumme },
+            fehler: { name: 'Typische Fehler', size: sizeFehler, draw: drawFehler },
+            rezept: { name: 'Merksatz & Rezept', size: sizeRezept, draw: drawRezept },
+            sim: { name: 'Simulation', size: sizeSim, draw: drawSim },
+            efron: { name: 'Efron-Würfel', size: sizeEfron, draw: drawEfron },
+            zwilling: { name: 'Zwillingsaufgabe', size: sizeZwilling, draw: drawZwilling }
+        };
+
+        const viewName = k => T('view_' + k, VIEWS[k].name);
+
+        const LAB_VIEWS = ['spiel', 'netze', 'zweistufig', 'zaehlen', 'merge', 'stufe1', 'stufe2', 'pfad', 'tabelle', 'summe', 'fehler', 'sim', 'efron'];
+
+        /* ========================================================= RUNDGANG */
+        // One station per aspect of the deck mathe11-wuerfelspiel. clips = Solita's narration of
+        // the matching slides (same MP3s as the deck), slide = deck slide for "Deck öffnen".
+        const seq = (s, n) => Array.from({ length: n }, (_, i) => s + '-' + String(i).padStart(2, '0'));
+
+        const STATIONS = [
+            {
+                id: 'spiel', view: 'spiel', short: 'DAS SPIEL', slide: 3,
+                clips: ['s01-00', 's02-00'].concat(seq('s03', 5)),
+                onClip: c => { S.rulesHi = c === 's03-02' ? 0 : (c === 's03-03' ? 2 : -1); },
+                title: 'Das Würfelspiel',
+                body: 'Lena und Mia würfeln mit <b>zwei verschiedenen</b>, selbst beschrifteten Würfeln. Zuerst würfelt <b>Lena</b>, danach <b>Mia</b>. Wer die <b>größere Zahl</b> oben hat, gewinnt die Runde.<br><br>Unsere Fragen: Wie sieht das <b>Baumdiagramm</b> aus, und wie wahrscheinlich gewinnt Lena?<br><br>Tippe auf die Würfel und spiel ein paar Runden.'
+            },
+            {
+                id: 'netze', view: 'netze', short: 'WÜRFELNETZE', slide: 4,
+                clips: ['s04-00'],
+                title: 'Die beiden Würfel als Netz',
+                body: 'So sehen die Würfel aufgeklappt aus. Auf Lenas Würfel stehen $3$, $5$ und $7$, jede Zahl <b>zweimal</b>. Auf Mias Würfel steht die $4$ <b>viermal</b> und die $6$ zweimal. Gleiche Zahlen haben die gleiche Farbe.<br><br>Würfle: Die Fläche, die oben liegt, leuchtet im Netz auf.'
+            },
+            {
+                id: 'zweistufig', view: 'zweistufig', short: 'ZWEISTUFIG', slide: 5,
+                clips: seq('s05', 5),
+                title: 'Was heißt zweistufig?',
+                body: 'Es wird <b>zweimal nacheinander</b> gewürfelt, das sind zwei <b>Stufen</b>: Stufe $1$ ist Lenas Wurf, Stufe $2$ ist Mias Wurf.<br><br>Im Baum sind das zwei Ebenen von Ästen, von links nach rechts. Jeder Weg von ganz links nach ganz rechts ist <b>ein möglicher Ausgang</b>. Würfle und verfolge den Weg.'
+            },
+            {
+                id: 'zaehlen', view: 'zaehlen', short: 'WÜRFEL LESEN', slide: 7,
+                clips: ['s06-00'].concat(seq('s07', 3), seq('s08', 3)),
+                onClip: c => { S.focus = c.startsWith('s07') ? 'A' : (c.startsWith('s08') ? 'B' : null); },
+                title: 'Die Würfel lesen',
+                body: 'Jede Fläche kommt gleich oft nach oben, also einfach <b>zählen</b>: Wie oft steht die Zahl drauf? Bei Lena stehen $3$, $5$ und $7$ je $2$-mal von $6$, also $\\frac{2}{6} = \\frac{1}{3}$.<br><br><b>Achtung bei Mia:</b> Die $4$ steht <b>viermal</b> drauf, also $\\frac{4}{6} = \\frac{2}{3}$ und nicht $\\frac{1}{2}$! Zur Kontrolle ergeben die Wahrscheinlichkeiten eines Würfels immer $1$.'
+            },
+            {
+                id: 'merge', view: 'merge', short: 'ÄSTE ZUSAMMENFASSEN', slide: 9,
+                clips: seq('s09', 5),
+                onClip: c => {
+                    if (c === 's09-01') { S.merge.die = 'A'; toggleMerge(false); }
+                    else if (c === 's09-02') toggleMerge(true);
+                    else if (c === 's09-03') { S.merge.die = 'B'; toggleMerge(true); }
+                },
+                title: 'Der wichtigste Trick',
+                body: 'Man <b>könnte</b> sechs Äste mit je $\\frac{1}{6}$ zeichnen. Das ist nicht falsch, aber unübersichtlich. Einfacher: <b>gleiche Zahlen zu einem Ast</b> zusammenfassen, ihre Sechstel werden addiert.<br><br>Dann hat Lena $3$ Äste und Mia $2$. Die Äste, die an einem Punkt starten, ergeben zusammen immer $1$. Tippen schaltet um.'
+            },
+            {
+                id: 'stufe1', view: 'stufe1', short: 'BAUM: STUFE 1', slide: 11,
+                clips: ['s10-00', 's11-00'],
+                title: 'Stufe 1: Lenas Wurf',
+                body: 'Vom Startpunkt gehen drei Äste ab: zur $3$, zur $5$ und zur $7$. An jedem Ast steht $\\frac{1}{3}$.<br><br>Rechts stehen dieselben Werte in einer kleinen Tabelle, auch in Prozent: jeweils rund $33{,}3\\,\\%$.'
+            },
+            {
+                id: 'stufe2', view: 'stufe2', short: 'BAUM: STUFE 2', slide: 12,
+                clips: seq('s12', 5),
+                title: 'Stufe 2: Mias Wurf',
+                body: 'An <b>jedes</b> der drei Enden hängen wir Mias zwei Äste: $4$ und $6$. Mia würfelt immer mit <b>demselben</b> Würfel, also steht überall $\\frac{2}{3}$ bei der $4$ und $\\frac{1}{3}$ bei der $6$.<br><br>Lenas Ergebnis ändert nichts an Mias Würfel: Die Würfe sind <b>unabhängig</b>. Am Ende gibt es $3 \\cdot 2 = 6$ Wege.'
+            },
+            {
+                id: 'pfad', view: 'pfad', short: 'PFADREGEL', slide: 13,
+                clips: ['s13-00'].concat(seq('s14', 5)),
+                onClip: c => { if (c === 's14-02') S.sel = 0; else if (c === 's14-03') S.sel = 1; },
+                title: 'Die Pfadregel',
+                body: 'Die Wahrscheinlichkeit eines Weges: alle Äste auf dem Weg <b>malnehmen</b>. Weg $(3 \\mid 4)$: $\\frac{1}{3} \\cdot \\frac{2}{3} = \\frac{2}{9}$.<br><br>Tippe einen Weg an, rechts steht seine Rechnung. Grün sind die Wege, auf denen Lena gewinnt. Kontrolle: Alle sechs Wege ergeben zusammen $1$.'
+            },
+            {
+                id: 'tabelle', view: 'tabelle', short: 'WER GEWINNT?', slide: 16,
+                clips: ['s15-00'].concat(seq('s16', 2)),
+                onClip: c => { if (c === 's16-01') S.sel = 5; },
+                title: 'Wer gewinnt?',
+                body: 'Jeder Ausgang einzeln: welcher Weg, welche Zahlen, wer gewinnt und wie wahrscheinlich das ist.<br><br>Lena gewinnt auf <b>drei</b> Wegen: $(5 \\mid 4)$, $(7 \\mid 4)$ und auch $(7 \\mid 6)$, denn die $7$ schlägt die $6$!'
+            },
+            {
+                id: 'summe', view: 'summe', short: 'SUMMENREGEL', slide: 17,
+                clips: seq('s17', 5),
+                title: 'Die Summenregel',
+                body: 'Alle Wege, auf denen Lena gewinnt, werden <b>addiert</b>:<br>$P(\\text{Lena gewinnt}) = \\frac{2}{9} + \\frac{2}{9} + \\frac{1}{9} = \\frac{5}{9} \\approx 55{,}6\\,\\%$<br><br>Gegenprobe Mia: $\\frac{4}{9}$, und $\\frac{5}{9} + \\frac{4}{9} = 1$. Unentschieden gibt es nicht: Die Würfel haben <b>keine gemeinsame Zahl</b>.'
+            },
+            {
+                id: 'fehler', view: 'fehler', short: 'TYPISCHE FEHLER', slide: 18,
+                clips: seq('s18', 6),
+                onClip: c => { const n = parseInt(c.slice(4), 10); if (c.startsWith('s18') && n >= 1) { S.err = n - 1; refreshErrRadio(); } },
+                title: 'Die typischen Fehler',
+                body: 'Fünf Fehler, die immer wieder passieren. Wähle links einen aus: Der Baum zeigt, <b>wo</b> es schiefgeht, rechts steht die falsche Rechnung über der richtigen.'
+            },
+            {
+                id: 'rezept', view: 'rezept', short: 'MERKSATZ & REZEPT', slide: 19,
+                clips: ['s19-00'].concat(seq('s20', 6)),
+                onClip: c => { const n = parseInt(c.slice(4), 10); S.recipeHi = c.startsWith('s20') && n >= 1 ? n - 1 : -1; },
+                title: 'Merksatz und Rezept',
+                body: '<b>Entlang</b> eines Pfades wird <b>multipliziert</b>, <b>verschiedene</b> Pfade zum selben Ereignis werden <b>addiert</b>.<br><br>Das Rezept in fünf Schritten steht rechts. Tippe einen Schritt an, um direkt zur passenden Station zu springen.'
+            },
+            {
+                id: 'sim', view: 'sim', short: 'SIMULATION', slide: -1,
+                clips: [],
+                title: 'Stimmt das wirklich?',
+                body: 'Lass den Computer würfeln: Je mehr Runden, desto näher rückt Lenas <b>relative Häufigkeit</b> an die Wahrscheinlichkeit $\\frac{5}{9} \\approx 0{,}556$ heran. Das ist das <b>Gesetz der großen Zahlen</b>.<br><br>Tippen: Dauerlauf an oder aus.'
+            },
+            {
+                id: 'efron', view: 'efron', short: 'FUN FACTS', slide: 21,
+                clips: seq('s21', 5),
+                onClip: c => { if (c === 's21-02') S.efron = 'AB'; else if (c === 's21-03') S.efron = 'DA'; },
+                title: 'Fun Facts',
+                body: 'Würfel gibt es seit mindestens $5000$ Jahren. Der Statistiker <b>Bradley Efron</b> erfand Würfel, die sich im Kreis schlagen: A schlägt B, B schlägt C, C schlägt D und D wieder A. Wer zuerst wählen muss, verliert auf Dauer.<br><br>Tippe einen Pfeil an und sieh nach, warum.'
+            },
+            {
+                id: 'zwilling', view: 'zwilling', short: 'ZWILLINGSAUFGABE', slide: 22, dice: 'zwilling',
+                clips: seq('s22', 6), solution: seq('s23', 5),
+                title: 'Jetzt ihr: die Zwillingsaufgabe',
+                body: 'Pauls Würfel: $1, 1, 5, 5, 6, 6$<br>Jonas’ Würfel: $2, 2, 2, 4, 4, 4$<br><br><b>a)</b> Zeichnet das Baumdiagramm und schreibt an jeden Ast die Wahrscheinlichkeit.<br><b>b)</b> Wie groß ist die Wahrscheinlichkeit, dass Paul gewinnt?<br><br>Tipp: Geht das Rezept Schritt für Schritt durch. Dann links <b>Lösung zeigen</b>.',
+                solutionBody: 'Paul: $1$, $5$ und $6$ je $\\frac{2}{6} = \\frac{1}{3}$. Jonas: $2$ und $4$ je $\\frac{3}{6} = \\frac{1}{2}$. Jeder Weg: $\\frac{1}{3} \\cdot \\frac{1}{2} = \\frac{1}{6}$.<br><br>Paul gewinnt bei $(5 \\mid 2)$, $(5 \\mid 4)$, $(6 \\mid 2)$ und $(6 \\mid 4)$, mit der $1$ nie:<br>$P(\\text{Paul gewinnt}) = 4 \\cdot \\frac{1}{6} = \\frac{2}{3} \\approx 66{,}7\\,\\%$'
+            }
+        ];
+
+        /* ------------------------------------------------ Texts in the lab */
+        // {a} {b} = player names, {gA} {gB} = their genitive, {pA} = TeX of P(a wins)
+        const LAB_TEXT = {
+            spiel: '{a} würfelt zuerst, dann {b}. Wer die <b>größere Zahl</b> oben hat, gewinnt. Tippen oder Leertaste: würfeln.',
+            netze: 'Im Labor gehören die Würfel dir: <b>Fläche antippen</b> und eine neue Zahl wählen. Alle Ansichten rechnen sofort mit.',
+            zweistufig: 'Zwei Würfe nacheinander sind zwei <b>Stufen</b>: erst {gA} Wurf, dann {gB} Wurf. Jeder Weg durch den Baum ist ein Ausgang.',
+            zaehlen: 'Wahrscheinlichkeit einer Zahl: <b>Anzahl ihrer Flächen durch $6$</b>, dann kürzen. Zeile antippen: Ihre Flächen leuchten im Netz.',
+            merge: 'Gleiche Zahlen zu <b>einem Ast</b> zusammenfassen: Ihre Sechstel werden addiert. Tippen schaltet um.',
+            stufe1: 'Stufe $1$: ein Ast für jede Zahl auf {gA} Würfel. Zusammen ergeben die Äste $1$.',
+            stufe2: 'An <b>jedes</b> Ende hängen {gB} Äste, überall dieselben: Die Würfe sind unabhängig.',
+            pfad: '<b>Pfadregel:</b> Entlang eines Weges werden die Wahrscheinlichkeiten <b>multipliziert</b>. Weg antippen.',
+            tabelle: 'Jeder Ausgang einzeln: Weg, Zahlen, Sieger und Wahrscheinlichkeit. Zeile antippen.',
+            summe: '<b>Summenregel:</b> Alle Wege zum selben Ereignis werden <b>addiert</b>.',
+            fehler: 'Fünf typische Fehler, gerechnet mit <b>deinen</b> Würfeln: falsch über richtig.',
+            sim: 'Der Computer würfelt: Die <b>relative Häufigkeit</b> nähert sich der Wahrscheinlichkeit ${pA}$. Tippen: Dauerlauf an oder aus.',
+            efron: 'Bradley Efrons nicht-transitive Würfel. <b>Pfeil antippen</b>: Das Paar wird ins Labor geladen.'
+        };
+
+        /* ------------------------------------------------------ Solita erklärt */
+        // Her DocPad voice from the deck clips - never a browser voice
+        const AUDIO_DIR = 'decks/audio/mathe11-wuerfelspiel/';
+        const Solita = { on: false, held: false, queue: [], pos: 0, timer: 0 };
+        // Doc: "zu schnell" - breathing room after every sentence and before the next station
+        const PAUSE_CLIP = 1400, PAUSE_STATION = 3200;
+        const solitaAudio = new Audio();
+        solitaAudio.preload = 'auto';
+
+        solitaAudio.addEventListener('ended', () => {
+            if (!Solita.on) return;
+            Solita.pos++;
+            clearTimeout(Solita.timer);
+            Solita.timer = setTimeout(playClip, Solita.pos < Solita.queue.length ? PAUSE_CLIP : 0);
+        });
+        solitaAudio.addEventListener('error', () => {
+            if (!Solita.on) return;
+            dbg('Solita: Clip fehlt ' + solitaAudio.src);
+            Solita.pos++;
+            playClip();
+        });
+
+        function stationClips(st) {
+            return (st.id === 'zwilling' && S.showSolution) ? st.solution : st.clips;
+        }
+
+        function solitaStart() {
+            if (S.mode !== 'rundgang') return;
+            Solita.on = true;
+            Solita.held = false;
+            playStation();
+        }
+
+        function solitaStop() {
+            Solita.on = false;
+            Solita.held = false;
+            clearTimeout(Solita.timer);
+            try { solitaAudio.pause(); } catch (e) { }
+            refreshPanelLive();
+        }
+
+        function playStation() {
+            clearTimeout(Solita.timer);
+            try { solitaAudio.pause(); } catch (e) { }
+            const st = STATIONS[S.step];
+            Solita.queue = stationClips(st);
+            Solita.pos = 0;
+            refreshPanelLive();
+            if (!Solita.queue.length) {
+                // no narration here (simulation): let the dice run for a moment, then go on
+                simToggle(true);
+                Solita.timer = setTimeout(() => {
+                    simToggle(false);
+                    if (Solita.on) gotoStep(S.step + 1);
+                }, 5000);
+                return;
+            }
+            playClip();
+        }
+
+        function playClip() {
+            if (!Solita.on) return;
+            const st = STATIONS[S.step];
+            if (Solita.pos >= Solita.queue.length) {
+                if (st.id === 'zwilling' && !S.showSolution) {
+                    // the deck holds here: the class works first, the solution comes on a click
+                    Solita.on = false;
+                    Solita.held = true;
+                    refreshPanelLive();
+                    return;
+                }
+                if (S.step >= STATIONS.length - 1) { solitaStop(); return; }
+                // let the last picture stand for a moment before the page turns
+                clearTimeout(Solita.timer);
+                Solita.timer = setTimeout(() => { if (Solita.on) gotoStep(S.step + 1); }, PAUSE_STATION);
+                return;
+            }
+            const clip = Solita.queue[Solita.pos];
+            if (st.onClip) st.onClip(clip);
+            render();
+            solitaAudio.src = AUDIO_DIR + clip + '.mp3';
+            solitaAudio.play().catch(err => {
+                dbg('Solita: Wiedergabe blockiert (' + err.message + ')');
+                solitaStop();
+            });
+        }
+
+        /* ========================================================== NAVIGATION */
+        const viewKey = () => S.mode === 'labor' ? S.view : STATIONS[S.step].view;
+
+        function resetStationState() {
+            S.rulesHi = -1;
+            S.focus = null;
+            S.recipeHi = -1;
+            S.sel = 0;
+            S.countHi = { A: null, B: null };
+            S.merge = { die: 'B', grouped: true, u: 1, t0: 0, from: 1 };
+            S.showSolution = false;
+            if (S.sim.running) S.sim.running = false;
+            closePicker();
+        }
+
+        function gotoStep(i) {
+            const next = clamp(i, 0, STATIONS.length - 1);
+            if (next === S.step && S.mode === 'rundgang') return;
+            clearTimeout(Solita.timer);
+            S.step = next;
+            resetStationState();
+            buildUI();
+            render();
+            if (Solita.on) playStation();
+            else if (Solita.held) { Solita.held = false; refreshPanelLive(); }
+            dbg('Station ' + (S.step + 1) + ': ' + STATIONS[S.step].short);
+        }
+
+        function setView(k) {
+            if (!VIEWS[k]) return;
+            S.view = k;
+            resetStationState();
+            buildUI();
+            render();
+        }
+
+        function stepBy(d) {
+            if (S.mode === 'rundgang') { gotoStep(S.step + d); return; }
+            const i = LAB_VIEWS.indexOf(S.view);
+            setView(LAB_VIEWS[(i + d + LAB_VIEWS.length) % LAB_VIEWS.length]);
+        }
+
+        function jumpToView(k) {
+            if (S.mode === 'rundgang') {
+                const i = STATIONS.findIndex(s => s.view === k);
+                if (i >= 0) gotoStep(i);
+            } else if (LAB_VIEWS.indexOf(k) >= 0) setView(k);
+        }
+
+        function setMode(mode) {
+            if (mode === S.mode) return;
+            solitaStop();
+            S.mode = mode;
+            resetStationState();
+            buildUI();
+            render();
+        }
+
+        function setSolution(v) {
+            S.showSolution = v;
+            buildUI();
+            render();
+            if (v && Solita.held) solitaStart();
+            else if (!v && Solita.on) solitaStop();
+        }
+
+        function onDiceChanged() {
+            S.last = null;
+            S.anim = null;
+            S.sel = 0;
+            S.countHi = { A: null, B: null };
+            S.sim.running = false;
+            buildUI();
+            render();
+            dbg('Würfel: ' + S.lab.a.name + ' [' + S.lab.a.faces.join(',') + '] gegen ' + S.lab.b.name + ' [' + S.lab.b.faces.join(',') + ']');
+        }
+
+        function setPreset(id) {
+            if (!PRESETS[id]) return;
+            S.lab = presetDice(id);
+            S.labPreset = id;
+            onDiceChanged();
+        }
+
+        function randomDice() {
+            const one = () => {
+                const pool = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5);
+                const vals = pool.slice(0, 2 + Math.floor(Math.random() * 2));
+                const faces = vals.slice();
+                while (faces.length < 6) faces.push(vals[Math.floor(Math.random() * vals.length)]);
+                return faces.sort(() => Math.random() - 0.5);
+            };
+            S.lab = { a: { name: S.lab.a.name, faces: one() }, b: { name: S.lab.b.name, faces: one() } };
+            S.labPreset = 'eigene';
+            onDiceChanged();
+        }
+
+        function swapDice() {
+            S.lab = { a: S.lab.b, b: S.lab.a };
+            S.labPreset = 'eigene';
+            onDiceChanged();
+        }
+
+        function pickEfron(pair) {
+            S.efron = pair;
+            if (S.mode === 'labor') {
+                S.lab = presetDice('efron' + pair);
+                S.labPreset = 'efron' + pair;
+                onDiceChanged();
+            } else render();
+        }
+
+        /* --------------------------------------------------------- Face picker */
+        function openPicker(key, idx, h) {
+            if (S.mode !== 'labor') return;
+            const pk = document.getElementById('ws-pick');
+            const die = key === 'A' ? S.lab.a : S.lab.b;
+            pk.innerHTML = '';
+            for (let v = 0; v <= 9; v++) {
+                const b = document.createElement('button');
+                b.type = 'button';
+                if (v === die.faces[idx]) b.className = 'on';
+                b.innerHTML = katexStr(String(v));
+                b.addEventListener('click', e => {
+                    e.stopPropagation();
+                    die.faces[idx] = v;
+                    S.labPreset = 'eigene';
+                    closePicker();
+                    onDiceChanged();
+                });
+                pk.appendChild(b);
+            }
+            pk.hidden = false;
+            const cw = container.clientWidth, chh = container.clientHeight;
+            const pw = pk.offsetWidth, ph = pk.offsetHeight;
+            let x = VIEW.ox + (h.x + h.w) * VIEW.sc + 8;
+            if (x + pw > cw - 8) x = VIEW.ox + h.x * VIEW.sc - pw - 8;
+            const y = VIEW.oy + h.y * VIEW.sc;
+            pk.style.left = clamp(x, 8, Math.max(8, cw - pw - 8)) + 'px';
+            pk.style.top = clamp(y, 8, Math.max(8, chh - ph - 8)) + 'px';
+        }
+
+        function closePicker() {
+            const pk = document.getElementById('ws-pick');
+            if (pk) pk.hidden = true;
+        }
+
+        document.addEventListener('pointerdown', ev => {
+            const pk = document.getElementById('ws-pick');
+            if (pk && !pk.hidden && !pk.contains(ev.target) && ev.target !== canvas) closePicker();
+        });
+
+        /* ================================================================= UI */
+        function katexStr(src, display) {
+            if (!window.katex) return src;
+            try { return katex.renderToString(src, { throwOnError: false, displayMode: !!display }); }
+            catch (e) { return src; }
+        }
+
+        // $...$ inside HTML becomes KaTeX
+        function texHTML(html) {
+            if (!window.katex) return html;
+            return html.replace(/\$([^$]+)\$/g, (_, src) => katexStr(src));
+        }
+
+        const on = (id, ev, fn) => { const el = document.getElementById(id); if (el) el.addEventListener(ev, fn); };
+
+        function showResult() {
+            if (S.mode === 'labor') return true;
+            const st = STATIONS[S.step];
+            if (st.id === 'zwilling') return S.showSolution;
+            return S.step >= STATIONS.findIndex(s => s.id === 'summe');
+        }
+
+        function contextCard(vk) {
+            const roll = '<div class="ws-btns"><button class="cyber-btn" id="ws-roll">' + T('btn_roll', 'WÜRFELN') + '</button>' +
+                '<button class="cyber-btn" id="ws-score0">' + T('btn_score0', 'PUNKTE LÖSCHEN') + '</button></div>' +
+                '<div class="ws-note">' + T('hint_roll', 'Leertaste oder Tippen auf die Bühne würfelt.') + '</div>';
+            switch (vk) {
+                case 'spiel': case 'netze': case 'zweistufig': return roll;
+                case 'zaehlen': return '<div class="ws-note">' + T('hint_count', 'Zeile antippen: Die Flächen dieser Zahl leuchten im Netz.') + '</div>';
+                case 'merge': return '<div id="ws-mdie"></div><div class="ws-btns" style="margin-top:10px"><button class="cyber-btn" id="ws-mtoggle"></button></div>';
+                case 'pfad': case 'tabelle': return '<div class="ws-note">' + T('hint_path', 'Einen Weg antippen: Seine Rechnung erscheint.') + '</div>';
+                case 'fehler': return '<div id="ws-errs"></div>';
+                case 'rezept': return '<div class="ws-note">' + T('hint_recipe', 'Schritt antippen: Sprung zur passenden Station.') + '</div>';
+                case 'sim': return '<div class="ws-btns">' +
+                    '<button class="cyber-btn" id="ws-sim1">' + T('btn_sim1', 'EINE RUNDE') + '</button>' +
+                    '<button class="cyber-btn" id="ws-sim100">' + T('btn_sim100', 'HUNDERT') + '</button>' +
+                    '<button class="cyber-btn" id="ws-sim1000">' + T('btn_sim1000', 'TAUSEND') + '</button>' +
+                    '<button class="cyber-btn" id="ws-simrun"></button>' +
+                    '<button class="cyber-btn" id="ws-simreset">' + T('btn_simreset', 'NEU STARTEN') + '</button></div>';
+                case 'zwilling': return '<div id="ws-sol"></div>';
+                case 'efron': return '<div class="ws-note">' + T('hint_efron', 'Pfeil antippen: Rechnung für dieses Paar.') + '</div>';
+                default: return '';
+            }
+        }
+
+        function refreshErrRadio() {
+            const slot = document.getElementById('ws-errs');
+            if (!slot) return;
+            slot.innerHTML = '';
+            CyberUI.createRadioGroup('ws-errs', null, ERR_LABELS.map((l, i) => ({ label: (i + 1) + '  ' + T('err_' + i, l), value: String(i) })),
+                String(S.err), v => { S.err = parseInt(v, 10); render(); });
+        }
+
+        function buildUI() {
+            document.getElementById('ui-container').innerHTML = '';
+
+            CyberUI.createCard('ui-container', T('card_mode', 'Modus'),
+                '<div id="ws-mode-slot"></div><div class="ws-note">' + T('hint_mode', 'Taste <b>m</b> wechselt zwischen Rundgang und Labor.') + '</div>');
+            CyberUI.createRadioGroup('ws-mode-slot', null, [
+                { label: T('mode_tour', 'RUNDGANG (WIE IM DECK)'), value: 'rundgang' },
+                { label: T('mode_lab', 'LABOR (EIGENE WÜRFEL)'), value: 'labor' }
+            ], S.mode, setMode);
+
+            if (S.mode === 'rundgang') {
+                CyberUI.createCard('ui-container', T('card_tour', 'Rundgang'), `
+                    <div class="step-nav">
+                        <button class="cyber-btn" id="ws-prev" title="${T('prev', 'Zurück')}">◀</button>
+                        <div class="step-count" id="ws-count"></div>
+                        <button class="cyber-btn" id="ws-next" title="${T('next', 'Weiter')}">▶</button>
+                    </div>
+                    <div id="ws-jump" style="margin-top:12px"></div>
+                    <div class="ws-btns" style="margin-top:12px">
+                        <button class="cyber-btn" id="ws-solita"></button>
+                        <button class="cyber-btn" id="ws-deck">${T('btn_deck', 'DECK ÖFFNEN')}</button>
+                    </div>
+                    <div class="ws-note" id="ws-solita-note"></div>`, 'rgb(245, 194, 66)');
+                CyberUI.createDropdown('ws-jump', STATIONS.map((s, i) => ({ id: String(i), label: (i + 1) + ' • ' + T('st_' + s.id + '_short', s.short) })),
+                    id => gotoStep(parseInt(id, 10)), String(S.step));
+                on('ws-prev', 'click', () => stepBy(-1));
+                on('ws-next', 'click', () => stepBy(1));
+                on('ws-solita', 'click', () => { if (Solita.on) solitaStop(); else if (Solita.held) setSolution(true); else solitaStart(); });
+                on('ws-deck', 'click', () => {
+                    const sl = STATIONS[S.step].slide;
+                    window.open('decks/mathe11-wuerfelspiel.html' + (sl >= 0 ? '#' + (sl + 1) : ''), '_blank');
+                });
+            } else {
+                const presetOpts = Object.keys(PRESETS).map(k => ({ id: k, label: PRESETS[k].label.toUpperCase() }));
+                if (S.labPreset === 'eigene') presetOpts.unshift({ id: 'eigene', label: T('preset_own', 'EIGENE WÜRFEL') });
+                CyberUI.createCard('ui-container', T('card_dice', 'Würfel'), `
+                    <div id="ws-preset"></div>
+                    <div class="ws-btns" style="margin-top:10px">
+                        <button class="cyber-btn" id="ws-random">${T('btn_random', 'ZUFÄLLIG')}</button>
+                        <button class="cyber-btn" id="ws-swap">${T('btn_swap', 'TAUSCHEN')}</button>
+                    </div>
+                    <div class="ws-dice" id="ws-dice" style="margin-top:10px"></div>
+                    <div class="ws-note">${T('hint_faces', 'In den Ansichten <b>Würfelnetze</b> und <b>Würfel lesen</b> eine Fläche antippen und eine neue Zahl wählen.')}</div>`);
+                CyberUI.createDropdown('ws-preset', presetOpts, id => { if (id !== 'eigene') setPreset(id); }, S.labPreset);
+                on('ws-random', 'click', randomDice);
+                on('ws-swap', 'click', swapDice);
+
+                CyberUI.createCard('ui-container', T('card_view', 'Ansicht'), `
+                    <div class="step-nav">
+                        <button class="cyber-btn" id="ws-prev">◀</button>
+                        <div class="step-count" id="ws-count"></div>
+                        <button class="cyber-btn" id="ws-next">▶</button>
+                    </div>
+                    <div id="ws-view" style="margin-top:12px"></div>`);
+                CyberUI.createDropdown('ws-view', LAB_VIEWS.map(k => ({ id: k, label: viewName(k).toUpperCase() })), setView, S.view);
+                on('ws-prev', 'click', () => stepBy(-1));
+                on('ws-next', 'click', () => stepBy(1));
+            }
+
+            const vk = viewKey();
+            const ctxHTML = contextCard(vk);
+            if (ctxHTML) CyberUI.createCard('ui-container', viewName(vk), ctxHTML, 'rgb(121, 158, 49)');
+            on('ws-roll', 'click', rollDice);
+            on('ws-score0', 'click', () => { S.score = { key: '', n: 0, A: 0, B: 0, D: 0 }; S.last = null; render(); });
+            if (document.getElementById('ws-mdie')) {
+                const m = model();
+                CyberUI.createRadioGroup('ws-mdie', null, [
+                    { label: dieTitle(m.A.name).toUpperCase(), value: 'A' },
+                    { label: dieTitle(m.B.name).toUpperCase(), value: 'B' }
+                ], S.merge.die, v => { S.merge.die = v; render(); });
+                on('ws-mtoggle', 'click', () => toggleMerge());
+            }
+            refreshErrRadio();
+            on('ws-sim1', 'click', () => { simRun(1); render(); });
+            on('ws-sim100', 'click', () => { simRun(100); render(); });
+            on('ws-sim1000', 'click', () => { simRun(1000); render(); });
+            on('ws-simrun', 'click', () => simToggle());
+            on('ws-simreset', 'click', () => { simReset(model()); render(); refreshPanelLive(); });
+            if (document.getElementById('ws-sol')) {
+                CyberUI.createCheckbox('ws-sol', T('show_solution', 'LÖSUNG ZEIGEN'), S.showSolution, setSolution, 'rgb(121, 158, 49)');
+            }
+
+            if (showResult()) {
+                CyberUI.createCard('ui-container', T('card_result', 'Ergebnis'), '<div class="ws-res" id="ws-result"></div>', 'rgb(160, 212, 70)');
+            }
+
+            CyberUI.createCard('ui-container', T('card_keys', 'Tasten'), '<div class="ws-note" style="margin-top:0">' + (S.mode === 'rundgang'
+                ? T('keys_tour', '<b>◀ ▶</b> Station, <b>Leertaste</b> würfeln, <b>s</b> Solita, <b>m</b> Labor, <b>z</b> zusammenfassen, <b>d</b> Dauerlauf, <b>l</b> Lösung, Ziffern wählen den Fehler.')
+                : T('keys_lab', '<b>◀ ▶</b> Ansicht, <b>Leertaste</b> würfeln, <b>m</b> Rundgang, <b>z</b> zusammenfassen, <b>d</b> Dauerlauf, Ziffern wählen den Fehler.')) + '</div>');
+
+            refreshPanelLive();
+            renderCoach();
+        }
+
+        // Cheap updates that do not rebuild the panel
+        function refreshPanelLive() {
+            const m = model();
+            const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+            if (S.mode === 'rundgang') {
+                set('ws-count', (S.step + 1) + ' / ' + STATIONS.length);
+                const btn = document.getElementById('ws-solita');
+                if (btn) {
+                    btn.textContent = Solita.on ? T('btn_solita_stop', '■ SOLITA STOPP')
+                        : (Solita.held ? T('btn_solita_solution', '▶ ZUR LÖSUNG') : T('btn_solita', '▶ SOLITA ERKLÄRT'));
+                    btn.classList.toggle('ws-on', Solita.on || Solita.held);
+                }
+                set('ws-solita-note', Solita.on
+                    ? T('solita_on', 'Solita erklärt und blättert selbst weiter. Taste <b>s</b> hält sie an.')
+                    : (Solita.held ? T('solita_held', 'Solita wartet: Erst rechnen, dann weiter zur Lösung.')
+                        : T('solita_off', 'Solita liest den Rundgang mit ihrer Stimme aus dem Deck vor.')));
+            } else {
+                set('ws-count', (LAB_VIEWS.indexOf(S.view) + 1) + ' / ' + LAB_VIEWS.length);
+                const line1 = d => '<div><b>' + d.name + ':</b> ' + katexStr(d.faces.slice().sort((a, b) => a - b).join(',\\;')) + '</div>';
+                set('ws-dice', line1(m.A) + line1(m.B));
+            }
+            const mt = document.getElementById('ws-mtoggle');
+            if (mt) mt.textContent = S.merge.grouped ? T('btn_unmerge', 'SECHS ÄSTE ZEIGEN') : T('btn_merge', 'ZUSAMMENFASSEN');
+            const sr = document.getElementById('ws-simrun');
+            if (sr) {
+                sr.textContent = S.sim.running ? T('btn_simstop', 'ANHALTEN') : T('btn_simrun', 'DAUERLAUF');
+                sr.classList.toggle('ws-on', S.sim.running);
+            }
+            const res = document.getElementById('ws-result');
+            if (res) {
+                const row = (cls, who, f) => '<div class="' + cls + '">' +
+                    katexStr('P(\\text{' + who + '}) = ' + fr(f) + ' ' + pctEq(f)) + '</div>';
+                let html = row('ws-a', m.A.name + ' gewinnt', m.pA) + row('ws-b', m.B.name + ' gewinnt', m.pB);
+                if (m.nD) html += row('ws-d', 'unentschieden', m.pD);
+                res.innerHTML = html;
+            }
+        }
+
+        function renderCoach() {
+            const box = document.getElementById('math-coach-box');
+            if (box) box.classList.add('visible');
+            const titleEl = document.getElementById('coach-title-slot');
+            const body = document.getElementById('coach-content');
+            let title, html;
+            const m = model();
+            if (S.mode === 'rundgang') {
+                const st = STATIONS[S.step];
+                title = T('st_' + st.id + '_title', st.title);
+                html = (st.id === 'zwilling' && S.showSolution)
+                    ? T('st_zwilling_solution', st.solutionBody)
+                    : T('st_' + st.id + '_body', st.body);
+            } else {
+                title = viewName(S.view);
+                html = LAB_TEXT[S.view] ? T('lab_' + S.view, LAB_TEXT[S.view], {
+                    a: m.A.name, b: m.B.name, gA: gen(m.A.name), gB: gen(m.B.name), pA: fr(m.pA)
+                }) : '';
+            }
+            // Keep the collapse button of coach-box.js: only the text span changes
+            if (titleEl) {
+                let span = titleEl.querySelector('.ws-ct');
+                if (!span) {
+                    span = document.createElement('span');
+                    span.className = 'ws-ct';
+                    titleEl.insertBefore(span, titleEl.firstChild);
+                }
+                span.textContent = title.toUpperCase();
+            }
+            if (body) body.innerHTML = texHTML(html);
+        }
+
+        /* ============================================================= RENDER */
+        let VIEW = { ox: 0, oy: 0, sc: 1 };
+
+        // The coach box floats top left over the stage - the view goes right of it or
+        // below it, whichever lets it grow bigger. Measured on every frame.
+        function stageRegions(rect) {
+            // top: room for the canvas branding in the top right corner
+            const pad = 14, top = 60;
+            const full = { x: pad, y: top, w: rect.width - 2 * pad, h: rect.height - top - pad };
+            const box = document.getElementById('math-coach-box');
+            if (!box || !box.classList.contains('visible')) return [full];
+            const b = box.getBoundingClientRect();
+            const bx = b.right - rect.left, by = b.bottom - rect.top;
+            const out = [];
+            const right = { x: bx + pad, y: top, w: rect.width - bx - 2 * pad, h: rect.height - top - pad };
+            const below = { x: pad, y: by + pad, w: rect.width - 2 * pad, h: rect.height - by - 2 * pad };
+            [right, below].forEach(r => { if (r.w > 160 && r.h > 160) out.push(r); });
+            return out.length ? out : [full];
+        }
+
+        function render() {
+            const rect = container.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            if (rect.width < 20 || rect.height < 20) return;
+            const m = model();
+            const V = VIEWS[viewKey()];
+            let best = null;
+            stageRegions(rect).forEach(r => [false, true].forEach(tall => {
+                const sz = V.size(m, tall);
+                const sc = Math.min(r.w / sz.w, r.h / sz.h, 1.6);
+                if (!best || sc > best.sc + 0.001) best = { r, tall, sz, sc };
+            }));
+            const ox = best.r.x + (best.r.w - best.sz.w * best.sc) / 2;
+            const oy = best.r.y + Math.max(0, (best.r.h - best.sz.h * best.sc) / 2);
+            VIEW = { ox, oy, sc: best.sc };
+            hits.length = 0;
+            ctx.setTransform(dpr * best.sc, 0, 0, dpr * best.sc, dpr * ox, dpr * oy);
+            try {
+                V.draw(m, best.sz.w, best.sz.h, best.tall, performance.now());
+            } catch (err) {
+                dbg('Zeichenfehler in ' + viewKey() + ': ' + err.message);
+            }
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        let rafId = 0;
+
+        function kick() {
+            if (!rafId) rafId = requestAnimationFrame(tick);
+        }
+
+        function tick(now) {
+            rafId = 0;
+            let more = false;
+            if (S.anim) {
+                if (now - S.anim.t0 >= ROLL.total) finishRoll();
+                else more = true;
+            }
+            if (S.merge.t0) {
+                if (now - S.merge.t0 > MERGE_MS) S.merge.t0 = 0;
+                more = true;   // one more frame draws the final state
+            }
+            if (S.sim.running) {
+                simRun(clamp(Math.round(S.sim.n * 0.03), 1, 20000));
+                if (S.sim.n >= 1e7) { S.sim.running = false; refreshPanelLive(); } else more = true;
+            }
+            render();
+            if (more) kick();
+        }
+
+        /* -------------------------------------------------------------- Input */
+        function hitAt(ev) {
+            const r = canvas.getBoundingClientRect();
+            const x = (ev.clientX - r.left - VIEW.ox) / VIEW.sc;
+            const y = (ev.clientY - r.top - VIEW.oy) / VIEW.sc;
+            for (let i = hits.length - 1; i >= 0; i--) {
+                const h = hits[i];
+                if (x >= h.x && x <= h.x + h.w && y >= h.y && y <= h.y + h.h) return h;
+            }
+            return null;
+        }
+
+        canvas.addEventListener('pointerdown', ev => {
+            const pk = document.getElementById('ws-pick');
+            if (!pk.hidden) { closePicker(); return; }
+            const h = hitAt(ev);
+            if (h) { ev.preventDefault(); h.fn(h); }
+        });
+
+        canvas.addEventListener('pointermove', ev => {
+            const h = hitAt(ev);
+            canvas.style.cursor = h ? h.cursor : 'default';
+        });
+
+        window.addEventListener('keydown', ev => {
+            if (ev.metaKey || ev.ctrlKey || ev.altKey) return;   // Cmd-Shift-R belongs to the browser
+            const t = ev.target;
+            if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+            const k = ev.key, vk = viewKey();
+            let done = true;
+            if (k === 'ArrowRight') stepBy(1);
+            else if (k === 'ArrowLeft') stepBy(-1);
+            else if (k === ' ') {
+                if (vk === 'spiel' || vk === 'netze' || vk === 'zweistufig') rollDice();
+                else if (vk === 'sim') { simRun(1); render(); }
+                else if (vk === 'merge') toggleMerge();
+                else done = false;
+            }
+            else if (k === 'm') setMode(S.mode === 'labor' ? 'rundgang' : 'labor');
+            else if (k === 's' && S.mode === 'rundgang') { if (Solita.on) solitaStop(); else if (Solita.held) setSolution(true); else solitaStart(); }
+            else if (k === 'l' && vk === 'zwilling') setSolution(!S.showSolution);
+            else if (k === 'z' && vk === 'merge') toggleMerge();
+            else if (k === 'd' && vk === 'sim') simToggle();
+            else if (/^[1-5]$/.test(k) && vk === 'fehler') { S.err = parseInt(k, 10) - 1; refreshErrRadio(); render(); }
+            else if (k === 'Escape') closePicker();
+            else done = false;
+            if (done) ev.preventDefault();
+        });
+
+        /* -------------------------------------------------------------- Setup */
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            const w = Math.max(1, rect.width);
+            const h = Math.max(1, rect.height);
+            canvas.width = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+            canvas.style.width = w + 'px';
+            canvas.style.height = h + 'px';
+        }
+
+        function init() {
+            resizeCanvasToContainer();
+            render();
+        }
+
+        // Canvas text needs the fonts loaded - measured with a fallback font the TeX would sit wrong
+        function fontsChanged() {
+            texCache.clear();
+            init();
+        }
+
+        buildUI();
+        window.addEventListener('resize', init);
+        if (window.ResizeObserver) {
+            new ResizeObserver(() => init()).observe(container);
+            new ResizeObserver(() => render()).observe(document.getElementById('math-coach-box'));
+        }
+        Promise.all(['20px KaTeX_Main', 'bold 20px KaTeX_Main', 'italic 20px KaTeX_Math', '400 20px Outfit',
+            '600 20px Outfit', '700 20px Orbitron', '400 20px Orbitron'].map(f => document.fonts.load(f).catch(() => null)))
+            .then(fontsChanged);
+        document.fonts.ready.then(fontsChanged);
+        // KaTeX arrives with defer: panel and coach box get their formulas then
+        document.addEventListener('DOMContentLoaded', () => { buildUI(); render(); });
+        window.addEventListener('load', () => { buildUI(); fontsChanged(); });
+        init();
+        dbg('Würfelspiel-Labor bereit');
+    </script>
+</body>
+
+</html>

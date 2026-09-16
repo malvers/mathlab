@@ -4,6 +4,31 @@
  */
 
 const LAB_ICONS = {
+    "wuerfelspiel": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- tree diagram: Lena's three branches, Mia's two on every end, green = Lena wins -->
+            <g stroke="rgba(157, 232, 255, 0.85)" stroke-width="2" stroke-linecap="round">
+                <line x1="10" y1="52" x2="38" y2="24" /><line x1="10" y1="52" x2="38" y2="52" /><line x1="10" y1="52" x2="38" y2="80" />
+            </g>
+            <g stroke="rgba(157, 232, 255, 0.35)" stroke-width="1.4" stroke-linecap="round">
+                <line x1="38" y1="24" x2="62" y2="15" /><line x1="38" y1="24" x2="62" y2="33" /><line x1="38" y1="52" x2="62" y2="61" />
+            </g>
+            <g stroke="#799E31" stroke-width="2.6" stroke-linecap="round">
+                <line x1="38" y1="52" x2="62" y2="43" /><line x1="38" y1="80" x2="62" y2="71" /><line x1="38" y1="80" x2="62" y2="89" />
+            </g>
+            <circle cx="10" cy="52" r="3" fill="#00D2FF" />
+            <circle cx="38" cy="24" r="3.2" fill="#F5C242" /><circle cx="38" cy="52" r="3.2" fill="#799E31" /><circle cx="38" cy="80" r="3.2" fill="#5A96FF" />
+            <g fill="#DBE8F7"><circle cx="62" cy="15" r="2" /><circle cx="62" cy="33" r="2" /><circle cx="62" cy="43" r="2" />
+                <circle cx="62" cy="61" r="2" /><circle cx="62" cy="71" r="2" /><circle cx="62" cy="89" r="2" /></g>
+            <!-- Lena's die (3, 5, 7) and Mia's die (4, 6), isometric -->
+            <g stroke="rgba(225, 240, 255, 0.9)" stroke-width="1.3" stroke-linejoin="round">
+                <polygon points="84,10 94.4,16 84,22 73.6,16" fill="#F5C242" />
+                <polygon points="73.6,16 84,22 84,34 73.6,28" fill="#799E31" />
+                <polygon points="84,22 94.4,16 94.4,28 84,34" fill="#3B5FA8" />
+                <polygon points="84,56 94.4,62 84,68 73.6,62" fill="#E06A5E" />
+                <polygon points="73.6,62 84,68 84,80 73.6,74" fill="#5A96FF" />
+                <polygon points="84,68 94.4,62 94.4,74 84,80" fill="#8E3A33" />
+            </g>
+        </svg>`,
     "vektoren": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- the parallelogram of the sum, dashed like a construction line -->
             <path d="M16 84 L58 72 L82 32 L40 44 Z" fill="rgba(121, 158, 49, 0.13)"

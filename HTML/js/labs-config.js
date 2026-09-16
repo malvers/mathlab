@@ -24,6 +24,17 @@
 
 const LABS_DATA = [
     {
+        "id": "wuerfelspiel",
+        "href": "wuerfelspiel.html",
+        "title": "Das W\u00fcrfelspiel",
+        "description": "Zwei selbst beschriftete W\u00fcrfel und eine Frage: Wie wahrscheinlich gewinnt Lena? Der Rundgang folgt dem Unterrichts-Deck Station f\u00fcr Station \u2014 W\u00fcrfelnetze lesen, gleiche Zahlen zu einem Ast zusammenfassen, den Baum Stufe f\u00fcr Stufe zeichnen, Pfadregel und Summenregel, die f\u00fcnf typischen Fehler und eine Zwillingsaufgabe mit L\u00f6sung; Solita erkl\u00e4rt mit ihrer Stimme. Im Labor beschriftet man die W\u00fcrfel selbst, und Baum, Tabelle, Fehler und Ergebnis rechnen sofort mit. Dazu eine Simulation, in der die relative H\u00e4ufigkeit an die Wahrscheinlichkeit heranr\u00fcckt, und Efrons nicht-transitive W\u00fcrfel, die sich im Kreis schlagen.",
+        "tagline": "Stochastik / Baumdiagramm / Pfadregeln",
+        "icon": LAB_ICONS["wuerfelspiel"],
+        "category": "stochastik neu hot highlight grade10 grade11",
+        "keywords": "wuerfel wuerfelspiel dice spiel baumdiagramm baum pfadregel produktregel summenregel wahrscheinlichkeit stochastik zweistufig mehrstufig zufallsexperiment wuerfelnetz netz aeste zusammenfassen unabhaengig pfad weg ereignis relative haeufigkeit gesetz der grossen zahlen simulation efron nicht-transitiv intransitiv zwillingsaufgabe typische fehler lena mia solita",
+        "color": "green"
+    },
+    {
         "id": "docpad",
         "href": "docpad/index.html",
         "title": "DocPad",
