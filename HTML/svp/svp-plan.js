@@ -48,19 +48,9 @@
            Ueberschrift bleibt sie unangetastet - dann ist sie kein Kopf
            dieser Bauart. */
         const h1 = document.querySelector('.page-head h1');
-        if (h1 && h1.textContent.indexOf('\u00b7') > 0) {
-            h1.textContent = h1.textContent.split('\u00b7')[0] + '\u00b7 ';
-            GROUP.split('_').forEach(function (klasse, i) {
-                if (i) h1.appendChild(document.createTextNode(' + '));
-                const m = klasse.match(/^FO([GSW])(.*)$/);
-                if (!m) { h1.appendChild(document.createTextNode(klasse)); return; }
-                const zw = document.createElement('span');
-                zw.className = 'zw zw-' + m[1].toLowerCase();
-                zw.textContent = m[1];
-                h1.appendChild(document.createTextNode('FO'));
-                h1.appendChild(zw);
-                h1.appendChild(document.createTextNode(m[2]));
-            });
+        if (h1 && h1.textContent.indexOf('\u00b7') > 0 && window.svpZweig) {
+            svpZweig(h1, h1.textContent.split('\u00b7')[0] + '\u00b7 ' +
+                GROUP.split('_').join(' + '));
         }
         document.title = document.title.replace(/\s*\|/, ' \u00b7 ' + GROUP_LABEL + ' |');
     }
@@ -2903,7 +2893,11 @@
             toggle.title = 'Den Plan auf eine Lerngruppe einstellen';
             toggle.setAttribute('aria-haspopup', 'true');
             toggle.setAttribute('aria-expanded', 'false');
-            toggle.innerHTML = (GROUP ? GROUP_LABEL : 'Alle Gruppen') +
+            /* "Gruppen", nicht "Alle Gruppen": der Kopf steht sonst auf zwei
+               Zeilen (Doc, 16.09.2026: "bitte auf eine Zeile"). Gemessen bei
+               1200 px Inhaltsbreite - der Titel mit allen drei Zuegen braucht
+               679 px, und mit dem laengeren Wort fehlten 41 px. */
+            toggle.innerHTML = (GROUP ? GROUP_LABEL : 'Gruppen') +
                 ' <span class="export-caret">\u25be</span>';
 
             const menu = document.createElement('div');

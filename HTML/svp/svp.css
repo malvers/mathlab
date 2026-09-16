@@ -200,7 +200,13 @@ header.page-head { max-width: 1200px; margin: 0 auto 22px; position: relative; }
    (gemessen mit _measure.html?page=...&sel=...). 126 px ist die breitere der
    beiden - nur diese zwei Knoepfe stehen in der Titelzeile. */
 .page-head .head-row .title-group button.action {
-    min-width: 126px;
+    /* Doc, 16.09.2026: "bitte auf eine Zeile" - mit 126 px und 16 px Polster
+       brauchte die Kopfzeile 1210 px, die Seite gibt 1200 (gemessen). Also
+       12 px Polster und beide Knoepfe auf die neue gemeinsame Breite; gleich
+       breit bleiben sie, das war die Bedingung vom 09.09.2026. */
+    min-width: 118px;
+    padding-left: 12px;
+    padding-right: 12px;
     justify-content: center;
 }
 
@@ -3799,12 +3805,16 @@ html.svp-light .mat-ico-movie path { fill: rgb(20, 44, 92); }
    Only the one letter that tells the branches apart is coloured, the rest of
    the code stays in the heading colour. Tokens, so both themes are covered. */
 .zw { font-weight: inherit; }
-/* House palette straight from CLAUDE.md (Doc, 03.09.2026): G = lambda orange,
-   S = phi gruen, W = ypsilon rot. The tokens carry their own light/dark
-   shades, so no per-theme overrides here. */
-.zw-g { color: var(--lambda); }
-.zw-s { color: var(--phi); }
-.zw-w { color: var(--ypsilon); }
+/* Doc, 16.09.2026, in dieser Reihenfolge: "deutlicher Orange Gruen
+   Dunkelblau" -> "bitte unser Farben" -> "in Dunkel fast, aber nimm da CYAN
+   fuer W" -> "nimm in Hell exakt die Farben von Dunkel". Also EIN Satz Werte
+   fuer beide Schemata, pur aus der Hauspalette, ohne Deckungs- oder
+   Helligkeitstricks.
+   Zum Wissen, falls es je jemand nachmisst: auf Weiss traegt lambda nur
+   1,6:1 und cyan 2,0:1 - das ist gewollt hell, nicht durchsichtig. */
+.zw-g { color: rgb(245, 194, 66); }   /* lambda */
+.zw-s { color: rgb(121, 158, 49); }   /* phi */
+.zw-w { color: rgb(90, 190, 230); }   /* cyan */
 
 /* ---- Shared search field (toolbars, sidebars) --------------------------
    One look for every "Suchen ..." box on the svp pages. */

@@ -1504,7 +1504,13 @@
         document.addEventListener('click', (e) => { if (!drop.contains(e.target)) open(false); });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') open(false); });
         const h1 = document.querySelector('.title-group h1');
-        if (h1) h1.textContent = h1.textContent.replace(/[^·]*$/, ' ' + here.label);
+        /* Der Zweig-Buchstabe traegt hier dieselbe Farbe wie im Kopf des Plans
+           (Doc, 16.09.2026: "auch bei den Vorträgen bitte") - svpZweig aus
+           svp-gate.js macht aus dem Kuerzel die eingefaerbte Fassung. */
+        if (h1) {
+            const text = h1.textContent.replace(/[^·]*$/, ' ' + here.label);
+            if (window.svpZweig) svpZweig(h1, text); else h1.textContent = text;
+        }
         document.title = 'Vortragsthemen Informatik ' + here.label + ' | SJ 2026/27';
         const confirmBox = document.getElementById('confirm');
         if (confirmBox && confirmBox.firstChild) {

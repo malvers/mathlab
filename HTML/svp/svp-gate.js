@@ -196,3 +196,29 @@
         input.focus();
     });
 })();
+
+/* --- Zweig-Buchstabe einfaerben ----------------------------------------
+   In einem Klassenkuerzel wie "FOS25-1" sagt der dritte Buchstabe den Zweig:
+   G Gesundheit, S Sozial, W Wirtschaft. Nur er traegt Farbe (.zw in svp.css,
+   Hauspalette), der Rest bleibt in der Schriftfarbe des Kopfes.
+   Hier und nicht in svp-plan.js, weil die Planseite UND die Vortragsseite es
+   brauchen (Doc, 16.09.2026: "auch bei den Vorträgen bitte") - svp-gate.js ist
+   das einzige Skript, das beide im <head> laden.
+   svpZweig(el, text) schreibt text in el und faerbt dabei jedes FO?-Kuerzel
+   darin ein; alles andere bleibt schlichter Text. */
+window.svpZweig = function (el, text) {
+    if (!el) return;
+    el.textContent = '';
+    const re = /FO([GSW])/g;
+    let last = 0, m;
+    while ((m = re.exec(text))) {
+        if (m.index > last) el.appendChild(document.createTextNode(text.slice(last, m.index)));
+        el.appendChild(document.createTextNode('FO'));
+        const zw = document.createElement('span');
+        zw.className = 'zw zw-' + m[1].toLowerCase();
+        zw.textContent = m[1];
+        el.appendChild(zw);
+        last = m.index + m[0].length;
+    }
+    if (last < text.length) el.appendChild(document.createTextNode(text.slice(last)));
+};
