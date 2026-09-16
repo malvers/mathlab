@@ -2067,7 +2067,7 @@ const link = (function () {
     // k·F(u), F being the integral of that bump - the space the bigger slides between it and the mouse need.
     // The room to grow into is the free space above the strip, lent by a negative margin: the current slide
     // keeps its size.
-    const DOCK_MAX = 3.2;                            // the slide under the mouse, at most (Doc: "krasser, wir haben Platz")
+    const DOCK_MAX = 2.6;                            // the slide under the mouse, at most (Doc: "krasser", then "'n Tick zuviel")
     let dockX = null, dockK = 0, dockRaf = 0;
     function roomForDock() {
       strip.style.marginTop = strip.style.paddingTop = '';
