@@ -28,21 +28,18 @@
            localStorage and synced through the shared svp_plan_edits table like
            the plan pages - so every device shows the same bogen. The filled-in
            scores and names stay local only (personal data). */
+        /* Head band, totals row and edges in the blue of the plan tables
+           (Doc, 16.09.2026: "blauisch wie beim SP") - the shared tokens of
+           svp.css, so both schemes follow on their own. The big verdict is
+           plain lambda: orange in dark, pill blue in light (no ochre). */
         :root {
             --bm-accent: rgb(245, 194, 66);
             --bm-ink: rgb(8, 20, 42);
-            --bm-band: rgba(245, 194, 66, 0.19);
-            --bm-band-line: rgba(245, 194, 66, 0.42);
-            --bm-edge: rgba(245, 194, 66, 0.22);
-            --bm-bonus: var(--phi);
+            --bm-band: var(--panel);
+            --bm-band-line: var(--line);
+            --bm-edge: var(--line);
+            --bm-bonus: var(--ypsilon);
             --bm-big: var(--lambda);
-        }
-
-        html.svp-light {
-            --bm-band: rgb(250, 231, 189);
-            --bm-band-line: rgb(226, 190, 116);
-            --bm-edge: rgba(198, 140, 20, 0.28);
-            --bm-big: rgb(198, 140, 20);
         }
 
         .bm-wrap {
@@ -95,7 +92,7 @@
 
         .bm-verdict {
             display: flex;
-            align-items: baseline;
+            align-items: center;
             gap: 12px;
             flex-wrap: wrap;
         }
@@ -119,18 +116,20 @@
 
         .bm-sum b { font-weight: 600; color: var(--bm-big); }
 
-        /* Send row (Publikum) / unlock row (Coach) under the verdict. */
+        /* Send row (Publikum) / unlock row (Coach): right in the totals row,
+           in the Kommentare cell. */
         .bm-send {
             display: flex;
             align-items: center;
+            justify-content: flex-end;
             flex-wrap: wrap;
             gap: 10px 14px;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--line);
         }
 
-        .bm-status { font-size: 0.85rem; color: var(--muted); }
+        /* Messages of the send row: under the table, right-aligned, so the
+           totals row keeps its height. */
+        .bm-status { display: block; margin-top: 8px; text-align: right; font-size: 0.85rem; color: var(--muted); }
+        .bm-status:empty { display: none; }
         .bm-status.err { color: var(--ypsilon); }
         .bm-status.ok { color: var(--phi); }
         @media print { .bm-send { display: none !important; } }
@@ -185,12 +184,22 @@
             background: transparent;
         }
 
+        /* Table title with the verdict right behind it. */
+        .bm-titlerow {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px 18px;
+            margin: 0 0 10px 2px;
+        }
+
+        .bm-titlerow .bm-verdict { flex: 1 1 14rem; }
+
         .bm-title {
             font-family: 'Orbitron', sans-serif;
             font-size: 0.95rem;
             letter-spacing: 0.03em;
             color: var(--head);
-            margin: 0 0 10px 2px;
         }
 
         /* The sheet itself. svp.css gives every table min-width: 760px for the
@@ -446,7 +455,7 @@
             table.bm td.txt, table.bm td.pts { padding-top: 5px; line-height: 1.3; }
             table.bm th.pts, table.bm td.pts, table.bm th.got, table.bm td.got { width: 4.6rem; }
             table.bm th.cmt, table.bm td.cmt { width: 27%; }
-            table.bm td.pts .bonus, table.bm tfoot td .bonus { color: #4a6a10; }
+            table.bm td.pts .bonus, table.bm tfoot td .bonus { color: rgb(176, 36, 24); }
             table.bm td.got input { width: 3.2rem; padding: 0 2px; }
             table.bm td.cmt textarea { display: none; }
             table.bm td.cmt .cmt-print {
@@ -485,41 +494,46 @@
     </header>
 
     <div class="bm-wrap">
+        <!-- Doc, 16.09.2026: the control card is gone - the verdict sits behind
+             the table title, the send row under the table. The language switch
+             is commented out as a whole (Deutsch too); the script copes with a
+             missing #bmSeg and then stays on the German sheet.
         <section class="bm-card">
             <div class="bm-ctrl">
                 <div class="bm-seg" id="bmSeg" role="group" aria-label="Sprache">
                     <button type="button" data-lang="de" class="on">Deutsch</button>
-                    <!-- Doc, 08.09.2026: English vorerst stillgelegt. Nur der Knopf ist
-                         auskommentiert - der englische Bogen selbst (SHEETS.en) bleibt
-                         stehen, und der Umschalter drumherum auch: die Auswertung haengt
-                         an #bmSeg, ohne das Element wirft die Seite beim Laden.
+                    Doc, 08.09.2026: English vorerst stillgelegt. Nur der Knopf ist
+                    auskommentiert - der englische Bogen selbst (SHEETS.en) bleibt stehen.
                     <button type="button" data-lang="en">English</button>
-                    -->
                 </div>
-                <div class="bm-verdict">
-                    <span class="bm-big" id="bmBig">&ndash;</span>
-                    <span class="bm-note" id="bmNote"></span>
-                    <span class="bm-sum" id="bmSummary" hidden></span>
-                </div>
-            </div>
-            <div class="bm-send" id="bmSend" hidden>
-                <button class="action" type="button" id="bmSendBtn">Bewertung senden</button>
-                <button class="action secondary" type="button" id="bmKeyBtn" hidden>Entschl&uuml;sseln</button>
-                <span class="bm-status" id="bmStatus"></span>
             </div>
         </section>
+        -->
 
         <section class="bm-card">
             <div class="bm-fields" id="bmFields"></div>
         </section>
 
         <section class="bm-card bare">
-            <div class="bm-title" id="bmTitle">Bewertungskriterien Vortrag</div>
+            <div class="bm-titlerow">
+                <div class="bm-title" id="bmTitle">Bewertungskriterien</div>
+                <div class="bm-verdict">
+                    <span class="bm-big" id="bmBig">&ndash;</span>
+                    <span class="bm-note" id="bmNote"></span>
+                    <span class="bm-sum" id="bmSummary" hidden></span>
+                </div>
+            </div>
             <div class="bm-frame">
                 <table class="bm" id="bmTable"></table>
             </div>
+            <div class="bm-status bm-noprint" id="bmStatus"></div>
             <button class="action bm-addrow bm-noprint" type="button" id="bmAdd" hidden
                 title="Ein weiteres Kriterium anh&auml;ngen">+ Kriterium</button>
+            <!-- moved into the totals row of the table by drawTable() -->
+            <div class="bm-send" id="bmSend" hidden>
+                <button class="action secondary" type="button" id="bmKeyBtn" hidden>Entschl&uuml;sseln</button>
+                <button class="action green" type="button" id="bmSendBtn">Bewertung senden</button>
+            </div>
         </section>
 
     </div>
@@ -537,7 +551,7 @@
                entered values survive a language switch. */
             const SHEETS = {
                 de: {
-                    title: 'Bewertungskriterien Vortrag',
+                    title: 'Bewertungskriterien',
                     subtitle: 'Bewertungskriterien Vortrag · Deutsch',
                     cols: { nr: '#', txt: 'Kriterium', pts: 'Mögliche Punkte', got: 'Erreichte Punkte', cmt: 'Kommentare' },
                     fields: [
@@ -652,6 +666,9 @@
             /* One state for both languages: lang, the four head fields, the
                SoS name, and per criterion the points and the comment. */
             let state = load();
+            /* No switch on the page for the stored language (English is shut
+               down, the switch is commented out): back to the German sheet. */
+            if (!document.querySelector('#bmSeg button[data-lang="' + state.lang + '"]')) state.lang = 'de';
             /* { de: {title, cols, total, rows}, en: {...} } - a language is
                either fully overridden or not at all. */
             let overrides = loadJSON(EDIT_KEY);
@@ -805,6 +822,11 @@
                     '<td class="cmt"></td>' +
                     '</tr></tfoot>';
                 elTable.innerHTML = h;
+                /* The send row sits in the totals row (Doc, 16.09.2026). The
+                   table is rebuilt on every draw, so the row - one element with
+                   its listeners - is put back in each time. */
+                const sendCell = elTable.querySelector('tfoot td.cmt');
+                if (sendCell) sendCell.appendChild(elSend);
                 for (const ta of elTable.querySelectorAll('textarea')) grow(ta);
             }
 
@@ -882,14 +904,16 @@
                 if (sum) sum.textContent = t.any ? fmt(t.got) : '–';
                 if (!t.any) {
                     elBig.textContent = '–';
-                    elNote.textContent = sh.empty;
+                    elNote.textContent = '(' + sh.empty + ')';
                     drawSummary();
                     return;
                 }
                 elBig.textContent = fmt(t.got) + ' / ' + t.max;
-                elNote.textContent = fmt(t.got) + ' ' + sh.of + ' ' + t.max +
-                    (t.bonus ? ' (+ ' + t.bonus + ' ' + sh.bonus + ')' : '') +
-                    ' · ' + fmt(t.got / t.max * 100) + ' %';
+                /* In parentheses behind the table title - the bonus without
+                   its own pair, no brackets inside brackets. */
+                elNote.textContent = '(' + fmt(t.got) + ' ' + sh.of + ' ' + t.max +
+                    (t.bonus ? ' + ' + t.bonus + ' ' + sh.bonus : '') +
+                    ' · ' + fmt(t.got / t.max * 100) + ' %)';
                 drawSummary();
             }
 
@@ -1250,15 +1274,17 @@
             }
 
             /* Language switch keeps every entered value. */
-            elSeg.addEventListener('click', function (e) {
-                const b = e.target.closest('button[data-lang]');
-                if (!b || !SHEETS[b.dataset.lang] || editing) return;
-                state.lang = b.dataset.lang;
-                for (const other of elSeg.querySelectorAll('button')) other.classList.toggle('on', other === b);
-                save();
-                drawAll();
-            });
-            for (const b of elSeg.querySelectorAll('button')) b.classList.toggle('on', b.dataset.lang === state.lang);
+            if (elSeg) {
+                elSeg.addEventListener('click', function (e) {
+                    const b = e.target.closest('button[data-lang]');
+                    if (!b || !SHEETS[b.dataset.lang] || editing) return;
+                    state.lang = b.dataset.lang;
+                    for (const other of elSeg.querySelectorAll('button')) other.classList.toggle('on', other === b);
+                    save();
+                    drawAll();
+                });
+                for (const b of elSeg.querySelectorAll('button')) b.classList.toggle('on', b.dataset.lang === state.lang);
+            }
 
             elFields.addEventListener('input', function (e) {
                 const inp = e.target.closest('input[data-field]');
@@ -1316,7 +1342,7 @@
                 for (const ta of elTable.querySelectorAll('textarea')) grow(ta);
             });
 
-            /* The row under the verdict: the audience sends, Doc unlocks. */
+            /* The row under the table: the audience sends, Doc unlocks. */
             (function wireSend() {
                 if (!talk || !role) { elSend.hidden = true; return; }
                 elSend.hidden = false;
