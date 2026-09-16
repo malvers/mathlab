@@ -244,7 +244,7 @@ CyberI18n.translations.tr = {
                 btn_solita_stop: "■ SOLITA’YI DURDUR",
                 btn_solita_solution: "▶ ÇÖZÜME GEÇ",
                 btn_solita: "▶ SOLITA ANLATIYOR",
-                solita_on: "Solita anlatıyor ve sayfaları kendisi çeviriyor. <b>s</b> tuşu onu durdurur.",
+                solita_on: "Solita anlatıyor ve sayfaları kendisi çeviriyor. <b>Boşluk</b> ya da <b>s</b> tuşu onu durdurur.",
                 solita_held: "Solita bekliyor: önce hesapla, sonra çözüme geç.",
                 solita_off: "Solita turu sunumdaki sesiyle okur (Almanca).",
                 btn_unmerge: "ALTI DALI GÖSTER",

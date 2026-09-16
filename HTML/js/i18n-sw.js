@@ -245,7 +245,7 @@ CyberI18n.translations.sw = {
                 btn_solita_stop: "■ SIMAMISHA SOLITA",
                 btn_solita_solution: "▶ KWENDA KWENYE JIBU",
                 btn_solita: "▶ SOLITA ANAELEZA",
-                solita_on: "Solita anaeleza na kugeuza kurasa mwenyewe. Kitufe <b>s</b> kinamsimamisha.",
+                solita_on: "Solita anaeleza na kugeuza kurasa mwenyewe. Kitufe cha <b>nafasi</b> au <b>s</b> kinamsimamisha.",
                 solita_held: "Solita anasubiri: kwanza hesabu, kisha endelea kwenye jibu.",
                 solita_off: "Solita anasoma ziara kwa sauti yake kutoka kwenye slaidi (kwa Kijerumani).",
                 btn_unmerge: "ONYESHA MATAWI SITA",

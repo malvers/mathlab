@@ -244,7 +244,7 @@ CyberI18n.translations.fr = {
                 btn_solita_stop: "■ ARRÊTER SOLITA",
                 btn_solita_solution: "▶ VERS LA SOLUTION",
                 btn_solita: "▶ SOLITA EXPLIQUE",
-                solita_on: "Solita explique et tourne les pages toute seule. La touche <b>s</b> l’arrête.",
+                solita_on: "Solita explique et tourne les pages toute seule. La <b>barre d’espace</b> ou la touche <b>s</b> l’arrête.",
                 solita_held: "Solita attend : d’abord calculer, ensuite la solution.",
                 solita_off: "Solita lit le parcours à voix haute avec sa voix du diaporama (en allemand).",
                 btn_unmerge: "AFFICHER SIX BRANCHES",

@@ -18,6 +18,15 @@
     <!-- Local KaTeX, same copy the decks use: works in class without the CDN -->
     <link rel="stylesheet" href="morpheus/vendor/katex/katex.min.css">
     <script defer src="morpheus/vendor/katex/katex.min.js"></script>
+    <!-- three.js 0.160 like every 3D lab; the dice are real rounded 3D dice on the SGI trackball -->
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+    </script>
     <style>
         /* Readouts, hint boxes and the face picker - everything else comes from the central layout */
 
@@ -76,6 +85,16 @@
         .ws-dice { display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem; color: #cfe0f5; }
 
         #canvas { touch-action: none; }
+
+        /* One WebGL stage per die, laid over the canvas where the view wants the die */
+        .ws-die3d {
+            position: absolute;
+            z-index: 5;
+            touch-action: none;
+            cursor: grab;
+        }
+
+        .ws-die3d:active { cursor: grabbing; }
 
         /* Face picker: tap a face of a die net in the lab, choose its new number */
         #ws-pick {
@@ -143,6 +162,7 @@
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/coach-box.js"></script>
+    <script src="js/cyber-trackball.js"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -804,9 +824,16 @@
             });
         }
 
-        // Cube with tumble: bounces and wobbles while rolling, a soft shadow below
+        // Cube with tumble: bounces and wobbles while rolling, a soft shadow below.
+        // With WebGL the die is the real 3D one (Dice3D below) - the flat cube is only the fallback.
         function drawRollingCube(cx, cy, s, key, m, now, o = {}) {
             const st = dieShown(key, m, now);
+            if (window.Dice3D && Dice3D.ok) {
+                const off = offs[offs.length - 1];
+                const bx = cx + off.x, by = cy + s / 2 + off.y;     // centre of the flat cube's box
+                Dice3D.place(key, VIEW.ox + bx * VIEW.sc, VIEW.oy + by * VIEW.sc, 2.3 * s * VIEW.sc, { glow: !!o.glow });
+                return st;
+            }
             const p = st.p;
             const lift = st.phase === 'roll' ? Math.abs(Math.sin(p * Math.PI * 2.5)) * (1 - p) * 0.55 * s : 0;
             const rot = st.phase === 'roll' ? Math.sin(p * 17) * (1 - p) * 0.3 : 0;
@@ -2451,7 +2478,7 @@
                     btn.classList.toggle('ws-on', Solita.on || Solita.held);
                 }
                 set('ws-solita-note', Solita.on
-                    ? T('solita_on', 'Solita erklärt und blättert selbst weiter. Taste <b>s</b> hält sie an.')
+                    ? T('solita_on', 'Solita erklärt und blättert selbst weiter. <b>Leertaste</b> oder <b>s</b> hält sie an.')
                     : (Solita.held ? T('solita_held', 'Solita wartet: Erst rechnen, dann weiter zur Lösung.')
                         : T('solita_off', 'Solita liest den Rundgang mit ihrer Stimme aus dem Deck vor.')));
             } else {
@@ -2546,12 +2573,14 @@
             const oy = best.r.y + Math.max(0, (best.r.h - best.sz.h * best.sc) / 2);
             VIEW = { ox, oy, sc: best.sc };
             hits.length = 0;
+            if (window.Dice3D && Dice3D.ok) Dice3D.beginFrame();
             ctx.setTransform(dpr * best.sc, 0, 0, dpr * best.sc, dpr * ox, dpr * oy);
             try {
                 V.draw(m, best.sz.w, best.sz.h, best.tall, performance.now());
             } catch (err) {
                 dbg('Zeichenfehler in ' + viewKey() + ': ' + err.message);
             }
+            if (window.Dice3D && Dice3D.ok) Dice3D.endFrame();
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         }
 
@@ -2612,6 +2641,7 @@
             let done = true;
             if (k === 'ArrowRight') stepBy(1);
             else if (k === 'ArrowLeft') stepBy(-1);
+            else if (k === ' ' && Solita.on) solitaStop();   // like the deck: space stops Solita
             else if (k === ' ') {
                 if (vk === 'spiel' || vk === 'netze' || vk === 'zweistufig') rollDice();
                 else if (vk === 'sim') { simRun(1); render(); }
@@ -2628,6 +2658,30 @@
             else done = false;
             if (done) ev.preventDefault();
         });
+
+        /* ------------------------------------------------------------ 3D dice */
+        // What the 3D die of player A or B has to show right now - read by Dice3D every frame
+        window.DICE3D_SOURCE = key => {
+            const m = model();
+            const die = key === 'A' ? m.A : m.B;
+            const st = dieShown(key, m, performance.now());
+            const an = S.anim && S.anim.key === m.key ? S.anim : null;
+            return {
+                faces: die.faces,
+                tints: die.faces.map(v => 'rgb(' + tintOf(key, m, v) + ')'),
+                idx: (st.phase === 'roll' && an) ? (key === 'A' ? an.ia : an.ib) : st.idx,
+                fin: an ? (key === 'A' ? an.ia : an.ib) : st.idx,
+                rolling: st.phase === 'roll',
+                p: st.p,
+                anim: an ? an.t0 : 0
+            };
+        };
+
+        // A tap on a die (not a drag) rolls, like a tap anywhere else on those stages
+        window.DICE3D_TAP = () => {
+            const vk = viewKey();
+            if (vk === 'spiel' || vk === 'netze' || vk === 'zweistufig') rollDice();
+        };
 
         /* -------------------------------------------------------------- Setup */
         function resizeCanvasToContainer() {
@@ -2649,6 +2703,7 @@
         // Canvas text needs the fonts loaded - measured with a fallback font the TeX would sit wrong
         function fontsChanged() {
             texCache.clear();
+            if (window.Dice3D && Dice3D.ok) Dice3D.refreshFaces();   // face numbers use KaTeX_Main too
             init();
         }
 
@@ -2667,6 +2722,34 @@
         window.addEventListener('load', () => { buildUI(); fontsChanged(); });
         init();
         dbg('Würfelspiel-Labor bereit');
+    </script>
+    <script type="module">
+        /* The 3D dice come from js/dice3d.js (shared with wuerfel3d.html in the deck).
+           Here: one die per player, placed by the 2D views through window.Dice3D. */
+        import { DieView, refreshAllFaces } from './js/dice3d.js';
+
+        const stage = document.getElementById('canvas-container');
+        let views = null;
+        try {
+            const make = key => new DieView(stage, {
+                style: 'dark',
+                source: () => window.DICE3D_SOURCE(key),
+                onTap: () => { if (window.DICE3D_TAP) window.DICE3D_TAP(key); }
+            });
+            views = { A: make('A'), B: make('B') };
+        } catch (err) {
+            try { if (window.DebugWindow) DebugWindow.log('🎲 kein WebGL, flache Würfel bleiben: ' + err.message); } catch (e) { }
+        }
+        if (views) {
+            window.Dice3D = {
+                ok: true,
+                beginFrame() { views.A.used = false; views.B.used = false; },
+                place(key, x, y, size, opts = {}) { if (views[key]) views[key].place(x, y, size, opts); },
+                endFrame() { Object.values(views).forEach(v => { if (!v.used) v.dom.hidden = true; }); },
+                refreshFaces() { refreshAllFaces(); }
+            };
+            if (typeof render === 'function') render();
+        }
     </script>
 </body>
 

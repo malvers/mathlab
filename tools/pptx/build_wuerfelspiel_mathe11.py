@@ -38,6 +38,15 @@ def net(c, x0, y0, die, title):
         c.text(x + s / 2, y + s / 2, str(v), 22, S.INK, baseline="middle", tex=True)
 
 
+def die3d(die, x, y, w=160, h=180):
+    """A real 3D die (HTML/wuerfel3d.html) laid over the slide next to its net - same numbers in
+    the same net order, same pastel per number. Tap rolls, drag turns (Doc, 16.09.2026)."""
+    faces = list(die["top"]) + list(die["col"])            # top0 top1 top2, then the column
+    colors = ",".join("%d:%s" % (v, die["fill"][v].lstrip("#")) for v in sorted(die["fill"]))
+    return dict(src="wuerfel3d.html?flaechen=%s&farben=%s&stil=hell" % (",".join(map(str, faces)), colors),
+                x=x, y=y, w=w, h=h, title="Würfel in 3D: antippen würfelt, ziehen dreht")
+
+
 def write(name, canvas):
     with open(os.path.join(IMG, "wuerfelspiel-%s.svg" % name), "w", encoding="utf-8") as f:
         f.write(canvas.svg())
@@ -124,7 +133,8 @@ d.say("Zuerst das Spiel selbst, in drei Sätzen.",
       "Wer die größere Zahl oben hat, gewinnt die Runde.",
       "Und unsere Fragen: Wie sieht das Baumdiagramm aus? Und wie wahrscheinlich gewinnt Lena?")
 
-d.picture("Die beiden Würfel — ausgeklappt als Netz", FIG_NETZE)
+d.picture("Die beiden Würfel — ausgeklappt als Netz", FIG_NETZE,
+          frames=[die3d(LENA, 74, 225), die3d(MIA, 694, 225)])
 
 d.summary("Würfelnetze: Lena hat 3, 5, 7 je zweimal; Mia hat die 4 viermal und die 6 zweimal")
 d.say("So sehen die beiden Würfel aus, wenn man sie aufklappt. Links Lenas Würfel mit den Zahlen drei, fünf und sieben — jede Zahl steht zweimal drauf. Rechts Mias Würfel: Die Vier steht viermal drauf, die Sechs zweimal. Gleiche Zahlen haben die gleiche Farbe.")
@@ -157,7 +167,7 @@ d.table_top("Lenas Würfel: sechs Flächen, drei Zahlen", [
 ], [160, 380, 276], [
     ("Jede Fläche ist gleich wahrscheinlich — also einfach **zählen**: wie oft steht die Zahl drauf?", 0),
     ("Kontrolle: $\\frac{1}{3} + \\frac{1}{3} + \\frac{1}{3} = 1$", 0),
-], font_size=13, bold_cols=(0,), corner=FIG_LENA,
+], font_size=13, bold_cols=(0,), corner=FIG_LENA, frames=[die3d(LENA, 565, 320, 165, 170)],
    marks={(1, 0): TINT_ORANGE, (2, 0): TINT_GREEN, (3, 0): TINT_BLUE})
 
 d.summary("Lenas Würfel: 3, 5 und 7 stehen je 2 von 6 Mal drauf = je 1/3. Kontrolle 1/3 + 1/3 + 1/3 = 1")
@@ -172,7 +182,7 @@ d.table_top("Mias Würfel: sechs Flächen, zwei Zahlen", [
 ], [160, 380, 276], [
     ("Achtung: Die $\\mathbf{4}$ **steht viermal** auf dem Würfel — nicht zweimal!", 0),
     ("Kontrolle: $\\frac{2}{3} + \\frac{1}{3} = 1$", 0),
-], font_size=13, bold_cols=(0,), corner=FIG_MIA,
+], font_size=13, bold_cols=(0,), corner=FIG_MIA, frames=[die3d(MIA, 565, 320, 165, 170)],
    marks={(1, 0): TINT_BLUE, (2, 0): TINT_RED})
 
 d.summary("Mias Würfel: die 4 steht 4-mal drauf = 4/6 = 2/3 (nicht 1/2!), die 6 steht 2-mal = 1/3. Kontrolle 2/3 + 1/3 = 1")
@@ -357,5 +367,11 @@ d.say("Und hier ist die Lösung.",
       "Jeder Weg hat damit ein Drittel mal ein halb, also ein Sechstel. Sechs Wege, zusammen eins.",
       "Paul gewinnt bei fünf gegen zwei, fünf gegen vier, sechs gegen zwei und sechs gegen vier. Mit der Eins gewinnt er nie.",
       "Also: Vier mal ein Sechstel ergibt zwei Drittel, rund sechsundsechzig Komma sieben Prozent. Super gemacht!")
+
+# the new lab as the last slide (Doc, 16.09.2026: "bau mal das neue Lab in das Deck ein ans Ende")
+d.lab("Das Würfelspiel im Labor", "wuerfelspiel.html",
+      note="Eure Würfel: Fläche antippen, neue Zahl wählen — alles rechnet sofort mit.")
+
+d.summary("Labor zum Schluss: das Würfelspiel zum Anfassen mit Würfelnetzen, Würfel lesen, Baumdiagramm Stufe für Stufe, Summe der Gewinnwege und Efron-Würfeln; eigene Zahlen auf die Flächen tippen, alle Ansichten rechnen sofort mit")
 
 d.save()

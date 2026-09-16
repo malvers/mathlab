@@ -319,7 +319,7 @@ class Deck:
         return s
 
     def table_top(self, title, rows, col_w, lines, marks=None, font_size=12, row_h=None,
-                  bold_cols=(), mono_cols=(), align=None, x=None, corner=None):
+                  bold_cols=(), mono_cols=(), align=None, x=None, corner=None, frames=None):
         """Full-width table on top, bullets underneath. `corner`: small picture bottom
         right (max 200 x 190 pt), bullets narrowed around it - same as html_deck."""
         s, body = self._content("Inhalt", title, lines)
@@ -355,7 +355,7 @@ class Deck:
         lines.append(("**docalvers.de/" + src + "**", 0))
         return self.bullets(title, lines)
 
-    def picture(self, title, path, lines=None, width=CONTENT_W, gap=6, align="center"):
+    def picture(self, title, path, lines=None, width=CONTENT_W, gap=6, align="center", frames=None):
         """Picture across the top (scaled to width), bullets underneath.
         align="left" starts it at the left margin - same option as html_deck."""
         s, body = self._content("Inhalt", title, lines)

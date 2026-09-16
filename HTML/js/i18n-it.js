@@ -244,7 +244,7 @@ CyberI18n.translations.it = {
                 btn_solita_stop: "■ FERMA SOLITA",
                 btn_solita_solution: "▶ ALLA SOLUZIONE",
                 btn_solita: "▶ SOLITA SPIEGA",
-                solita_on: "Solita spiega e sfoglia da sola. Il tasto <b>s</b> la ferma.",
+                solita_on: "Solita spiega e sfoglia da sola. La <b>barra spaziatrice</b> o il tasto <b>s</b> la ferma.",
                 solita_held: "Solita aspetta: prima calcolare, poi avanti alla soluzione.",
                 solita_off: "Solita legge il percorso con la sua voce delle slide (in tedesco).",
                 btn_unmerge: "MOSTRA SEI RAMI",

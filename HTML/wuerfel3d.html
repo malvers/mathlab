@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOC ALVERS MATHE-LABORE | Würfel 3D</title>
+    <!--
+        One real 3D die, for an <iframe> in a deck slide (tools/pptx/html_deck.py, frames=...).
+        Transparent page: the slide shows through. Tap = roll, drag = turn (SGI trackball).
+        URL:  wuerfel3d.html?flaechen=3,5,3,7,5,7&farben=3:FBEBBF,5:DDE8C6,7:E6ECF8&stil=hell
+          flaechen  six numbers in net order (three on top, then the column under the middle one)
+          farben    colour per number, hex without #  (default light blue)
+          stil      hell (pastel faces, ink numbers - the deck) or dunkel (the lab look)
+    -->
+    <link rel="stylesheet" href="morpheus/vendor/katex/katex.min.css">
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+    </script>
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        #stage {
+            position: fixed;
+            inset: 0;
+            touch-action: none;
+            cursor: grab;
+        }
+
+        #stage:active { cursor: grabbing; }
+
+        /* the local dev server pins a LOCAL tag on every page - not inside a slide */
+        #local-badge { display: none !important; }
+
+        /* KaTeX_Main has to be in use once, or the browser never loads it for the canvas */
+        #font-probe {
+            position: absolute;
+            left: -999px;
+            font-family: KaTeX_Main, serif;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="stage"></div>
+    <span id="font-probe">0123456789</span>
+    <script src="js/cyber-trackball.js"></script>
+    <script type="module">
+        import { DieView, refreshAllFaces } from './js/dice3d.js';
+
+        const q = new URLSearchParams(location.search);
+        const faces = (q.get('flaechen') || '1,2,3,4,5,6').split(',').map(Number).slice(0, 6);
+        while (faces.length < 6) faces.push(1);
+        const colors = {};
+        (q.get('farben') || '').split(',').forEach(pair => {
+            const [v, hex] = pair.split(':');
+            if (hex && /^[0-9a-fA-F]{6}$/.test(hex)) colors[+v] = '#' + hex;
+        });
+        const style = q.get('stil') === 'dunkel' ? 'dark' : 'light';
+        const tints = faces.map(v => colors[v] || (style === 'light' ? '#E6ECF8' : '#5A96FF'));
+
+        // a roll: tumble for ROLL_MS, land on a random face
+        const ROLL_MS = 900;
+        const st = { idx: 1, fin: 1, t0: 0 };
+        function roll() {
+            st.fin = Math.floor(Math.random() * 6);
+            st.t0 = performance.now();
+        }
+        function source() {
+            const now = performance.now();
+            const rolling = st.t0 > 0 && now - st.t0 < ROLL_MS;
+            if (!rolling && st.t0 > 0) { st.idx = st.fin; st.t0 = 0; }
+            return {
+                faces, tints,
+                idx: rolling ? st.fin : st.idx,
+                fin: st.fin,
+                rolling,
+                p: rolling ? (now - st.t0) / ROLL_MS : 1,
+                anim: st.t0
+            };
+        }
+
+        try {
+            new DieView(document.getElementById('stage'), { style, fill: true, source, onTap: roll });
+        } catch (err) {
+            try { if (window.DebugWindow) DebugWindow.log('🎲 kein WebGL: ' + err.message); } catch (e) { }
+        }
+        document.fonts.load('300px KaTeX_Main').then(refreshAllFaces).catch(() => { });
+
+        // Inside a deck the keys belong to the deck: pass them up, so arrows, space, p, o
+        // still work after a tap on the die
+        if (window.parent !== window) {
+            addEventListener('keydown', e => {
+                if (e.metaKey || e.ctrlKey || e.altKey) return;   // Cmd-Shift-R stays with the browser
+                try {
+                    window.parent.dispatchEvent(new KeyboardEvent('keydown', { key: e.key, code: e.code, shiftKey: e.shiftKey, bubbles: true }));
+                    e.preventDefault();
+                } catch (err) { }
+            });
+        }
+    </script>
+</body>
+
+</html>

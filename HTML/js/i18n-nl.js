@@ -278,7 +278,7 @@ Object.assign(CyberI18n.translations.nl.fractal, {
             btn_solita_stop: "■ SOLITA STOPPEN",
             btn_solita_solution: "▶ NAAR DE OPLOSSING",
             btn_solita: "▶ SOLITA LEGT UIT",
-            solita_on: "Solita legt uit en bladert zelf verder. Toets <b>s</b> stopt haar.",
+            solita_on: "Solita legt uit en bladert zelf verder. De <b>spatiebalk</b> of toets <b>s</b> stopt haar.",
             solita_held: "Solita wacht: eerst rekenen, dan verder naar de oplossing.",
             solita_off: "Solita leest de rondleiding voor met haar stem uit de presentatie (in het Duits).",
             btn_unmerge: "ZES TAKKEN TONEN",

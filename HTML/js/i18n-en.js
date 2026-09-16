@@ -244,7 +244,7 @@ CyberI18n.translations.en = {
                 btn_solita_stop: "■ STOP SOLITA",
                 btn_solita_solution: "▶ TO THE SOLUTION",
                 btn_solita: "▶ SOLITA EXPLAINS",
-                solita_on: "Solita explains and turns the pages herself. Key <b>s</b> stops her.",
+                solita_on: "Solita explains and turns the pages herself. <b>Space</b> or <b>s</b> stops her.",
                 solita_held: "Solita is waiting: work it out first, then on to the solution.",
                 solita_off: "Solita reads the tour aloud with her voice from the deck (in German).",
                 btn_unmerge: "SHOW SIX BRANCHES",

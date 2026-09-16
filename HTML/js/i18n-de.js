@@ -244,7 +244,7 @@ CyberI18n.translations.de = {
                 btn_solita_stop: "■ SOLITA STOPP",
                 btn_solita_solution: "▶ ZUR LÖSUNG",
                 btn_solita: "▶ SOLITA ERKLÄRT",
-                solita_on: "Solita erklärt und blättert selbst weiter. Taste <b>s</b> hält sie an.",
+                solita_on: "Solita erklärt und blättert selbst weiter. <b>Leertaste</b> oder <b>s</b> hält sie an.",
                 solita_held: "Solita wartet: Erst rechnen, dann weiter zur Lösung.",
                 solita_off: "Solita liest den Rundgang mit ihrer Stimme aus dem Deck vor.",
                 btn_unmerge: "SECHS ÄSTE ZEIGEN",

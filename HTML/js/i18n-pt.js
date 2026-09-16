@@ -244,7 +244,7 @@ CyberI18n.translations.pt = {
                 btn_solita_stop: "■ PARAR SOLITA",
                 btn_solita_solution: "▶ PARA A SOLUÇÃO",
                 btn_solita: "▶ SOLITA EXPLICA",
-                solita_on: "A Solita explica e avança sozinha. A tecla <b>s</b> para-a.",
+                solita_on: "A Solita explica e avança sozinha. A <b>barra de espaço</b> ou a tecla <b>s</b> para-a.",
                 solita_held: "A Solita espera: primeiro calcular, depois seguir para a solução.",
                 solita_off: "A Solita lê a visita em voz alta com a sua voz dos diapositivos (em alemão).",
                 btn_unmerge: "MOSTRAR SEIS RAMOS",
