@@ -417,6 +417,10 @@ class Deck:
         s = self.prs.slides[len(self.prs.slides._sldIdLst) - 1]
         s.notes_slide.notes_text_frame.text = "\n\n".join(p.strip() for p in parts if p and p.strip())
 
+    def summary(self, text):
+        """Compact line for "Frag Solita" in the HTML twin (html_deck.summary) - a .pptx has no use
+        for it, so the same build script runs on both backends."""
+
     def save(self):
         save_deck(self.prs, self.out)
         print("deck:", self.out, len(self.prs.slides._sldIdLst), "Folien")

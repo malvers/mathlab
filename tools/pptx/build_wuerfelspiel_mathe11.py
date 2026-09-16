@@ -102,10 +102,12 @@ d.title("Mathematik — Berufliches Gymnasium 11", "Das Würfelspiel",
         "Baumdiagramm und Pfadregeln — ganz langsam, Schritt für Schritt")
 
 # ---------------------------------------------------------------- Kapitel 01
+d.summary("Titel: Das Würfelspiel - Baumdiagramm und Pfadregeln, Mathematik BGY 11")
 d.say("Hallo, ich bin Solita. Heute geht es um ein Würfelspiel — und wir nehmen uns Zeit: ganz langsam, Schritt für Schritt. Wir lernen dabei zwei Dinge: wie man ein Baumdiagramm zeichnet — und wie man mit den Pfadregeln Wahrscheinlichkeiten ausrechnet.")
 
 d.chapter(1, "Worum geht es?", "Ein Spiel mit zwei besonderen Würfeln")
 
+d.summary("Kapitel 1: Worum geht es? Ein Spiel mit zwei besonderen Würfeln")
 d.say("Kapitel eins: Worum geht es? Ein Spiel mit zwei besonderen Würfeln.")
 
 d.bullets("Das Spiel in drei Sätzen", [
@@ -115,6 +117,7 @@ d.bullets("Das Spiel in drei Sätzen", [
     ("Unsere Fragen: Wie sieht das **Baumdiagramm** aus — und wie wahrscheinlich gewinnt **Lena**?", 0),
 ])
 
+d.summary("Spielregeln: Lena und Mia haben verschiedene, selbst beschriftete Würfel. Erst würfelt Lena, dann Mia, die größere Zahl gewinnt. Gefragt: Baumdiagramm und P(Lena gewinnt)")
 d.say("Zuerst das Spiel selbst, in drei Sätzen.",
       "Lena und Mia haben zwei verschiedene Würfel, die sie selbst beschriftet haben.",
       "Zuerst würfelt Lena einmal, danach würfelt Mia einmal.",
@@ -123,6 +126,7 @@ d.say("Zuerst das Spiel selbst, in drei Sätzen.",
 
 d.picture("Die beiden Würfel — ausgeklappt als Netz", FIG_NETZE)
 
+d.summary("Würfelnetze: Lena hat 3, 5, 7 je zweimal; Mia hat die 4 viermal und die 6 zweimal")
 d.say("So sehen die beiden Würfel aus, wenn man sie aufklappt. Links Lenas Würfel mit den Zahlen drei, fünf und sieben — jede Zahl steht zweimal drauf. Rechts Mias Würfel: Die Vier steht viermal drauf, die Sechs zweimal. Gleiche Zahlen haben die gleiche Farbe.")
 
 d.bullets("Was heißt zweistufig?", [
@@ -133,6 +137,7 @@ d.bullets("Was heißt zweistufig?", [
 ])
 
 # ---------------------------------------------------------------- Kapitel 02
+d.summary("Zweistufig: zweimal nacheinander gewürfelt = 2 Stufen (Stufe 1 Lena, Stufe 2 Mia); jeder Weg von links nach rechts ist ein Ausgang")
 d.say("Warum nennt man so etwas zweistufig?",
       "Weil zweimal nacheinander gewürfelt wird. Jeder Wurf ist eine Stufe.",
       "Die erste Stufe ist Lenas Wurf, die zweite Stufe ist Mias Wurf.",
@@ -141,6 +146,7 @@ d.say("Warum nennt man so etwas zweistufig?",
 
 d.chapter(2, "Die Würfel lesen", "Zählen statt raten")
 
+d.summary("Kapitel 2: Die Würfel lesen - zählen statt raten")
 d.say("Kapitel zwei: Die Würfel lesen. Hier gilt: zählen statt raten.")
 
 d.table_top("Lenas Würfel: sechs Flächen, drei Zahlen", [
@@ -154,6 +160,7 @@ d.table_top("Lenas Würfel: sechs Flächen, drei Zahlen", [
 ], font_size=13, bold_cols=(0,), corner=FIG_LENA,
    marks={(1, 0): TINT_ORANGE, (2, 0): TINT_GREEN, (3, 0): TINT_BLUE})
 
+d.summary("Lenas Würfel: 3, 5 und 7 stehen je 2 von 6 Mal drauf = je 1/3. Kontrolle 1/3 + 1/3 + 1/3 = 1")
 d.say("Fangen wir mit Lenas Würfel an. Er hat sechs Flächen, aber nur drei verschiedene Zahlen: drei, fünf und sieben. Jede davon steht zweimal auf dem Würfel. Zwei von sechs — das ist gekürzt ein Drittel.",
       "Jede Fläche kommt gleich oft nach oben. Deshalb müssen wir nur zählen, wie oft eine Zahl auf dem Würfel steht.",
       "Zur Kontrolle: Ein Drittel plus ein Drittel plus ein Drittel ergibt eins. Das muss so sein — irgendeine Zahl liegt ja immer oben.")
@@ -168,6 +175,7 @@ d.table_top("Mias Würfel: sechs Flächen, zwei Zahlen", [
 ], font_size=13, bold_cols=(0,), corner=FIG_MIA,
    marks={(1, 0): TINT_BLUE, (2, 0): TINT_RED})
 
+d.summary("Mias Würfel: die 4 steht 4-mal drauf = 4/6 = 2/3 (nicht 1/2!), die 6 steht 2-mal = 1/3. Kontrolle 2/3 + 1/3 = 1")
 d.say("Jetzt Mias Würfel. Die Vier steht viermal drauf — vier von sechs, also zwei Drittel. Die Sechs steht zweimal drauf — zwei von sechs, also ein Drittel.",
       "Achtung, hier passieren die meisten Fehler: Die Vier steht viermal auf dem Würfel, nicht zweimal. Ihre Wahrscheinlichkeit ist zwei Drittel, nicht ein halb.",
       "Kontrolle: Zwei Drittel plus ein Drittel ergibt wieder eins.")
@@ -180,6 +188,7 @@ d.bullets("Der wichtigste Trick: gleiche Zahlen zusammenfassen", [
 ])
 
 # ---------------------------------------------------------------- Kapitel 03
+d.summary("Trick: gleiche Zahlen zu einem Ast zusammenfassen statt 6 Äste mit je 1/6. Lena 3 Äste (3, 5, 7), Mia 2 Äste (4, 6). Äste ab einem Punkt ergeben zusammen 1")
 d.say("Und jetzt der wichtigste Trick.",
       "Man könnte für jede der sechs Flächen einen eigenen Ast zeichnen, jeden mit einem Sechstel. Das ist nicht falsch — aber unübersichtlich.",
       "Einfacher ist es, gleiche Zahlen zu einem einzigen Ast zusammenzufassen.",
@@ -188,10 +197,12 @@ d.say("Und jetzt der wichtigste Trick.",
 
 d.chapter(3, "Den Baum zeichnen", "Erst Lena, dann Mia")
 
+d.summary("Kapitel 3: Den Baum zeichnen - erst Lena, dann Mia")
 d.say("Kapitel drei: Den Baum zeichnen. Erst Lena, dann Mia.")
 
 d.picture("Stufe 1: Lenas Wurf — drei Äste mit je 1/3", FIG_STUFE1, align="left")
 
+d.summary("Baum Stufe 1: vom Start drei Äste zu Lenas 3, 5, 7 mit je 1/3 (rund 33 %)")
 d.say("Das ist die erste Stufe: Lenas Wurf. Vom Startpunkt gehen drei Äste ab — zur Drei, zur Fünf und zur Sieben. An jedem Ast steht ein Drittel. Rechts stehen dieselben Werte in einer kleinen Tabelle, auch in Prozent: jeweils rund dreiunddreißig Prozent.")
 
 d.bullets("Stufe 2: an jedes Ende kommt Mias Wurf", [
@@ -201,6 +212,7 @@ d.bullets("Stufe 2: an jedes Ende kommt Mias Wurf", [
     ("Am Ende gibt es $3 \\cdot 2 = 6$ Wege durch den Baum", 0),
 ])
 
+d.summary("Baum Stufe 2: an jedes der 3 Enden Mias Äste 4 (2/3) und 6 (1/3); die Würfe sind unabhängig; 3 mal 2 = 6 Wege")
 d.say("Jetzt kommt Mia dazu.",
       "An jedes der drei Enden hängen wir Mias zwei Äste: einen zur Vier und einen zur Sechs.",
       "Mia würfelt immer mit demselben Würfel. Deshalb steht überall zwei Drittel bei der Vier und ein Drittel bei der Sechs.",
@@ -209,6 +221,7 @@ d.say("Jetzt kommt Mia dazu.",
 
 d.picture("Der fertige Baum", FIG_BAUM, align="left")
 
+d.summary("Fertiger Baum: alle 6 Wege mit Wahrscheinlichkeit als Bruch und Prozent; grün markiert die Wege, auf denen Lena gewinnt")
 d.say("Hier ist der fertige Baum. Rechts steht für jeden der sechs Wege seine Wahrscheinlichkeit, als Bruch und in Prozent. Grün sind die Wege, auf denen Lena gewinnt.")
 
 d.bullets("Die Pfadregel: entlang eines Weges multiplizieren", [
@@ -219,6 +232,7 @@ d.bullets("Die Pfadregel: entlang eines Weges multiplizieren", [
 ])
 
 # ---------------------------------------------------------------- Kapitel 04
+d.summary("Pfadregel: entlang eines Weges multiplizieren. Weg (3|4) = 1/3 mal 2/3 = 2/9, Weg (3|6) = 1/3 mal 1/3 = 1/9. Alle 6 Wege: 3 mal 2/9 + 3 mal 1/9 = 1")
 d.say("Wie kommen die Zahlen rechts zustande? Mit der Pfadregel.",
       "Die Wahrscheinlichkeit eines Weges bekommt man, indem man alle Äste auf diesem Weg miteinander malnimmt.",
       "Zum Beispiel der Weg drei gegen vier: Ein Drittel mal zwei Drittel ergibt zwei Neuntel.",
@@ -227,6 +241,7 @@ d.say("Wie kommen die Zahlen rechts zustande? Mit der Pfadregel.",
 
 d.chapter(4, "Wer gewinnt?", "Alle sechs Ausgänge durchgehen")
 
+d.summary("Kapitel 4: Wer gewinnt? Alle sechs Ausgänge durchgehen")
 d.say("Kapitel vier: Wer gewinnt? Dafür gehen wir alle sechs Ausgänge durch.")
 
 d.table_top("Jeder Ausgang einzeln", [
@@ -242,6 +257,7 @@ d.table_top("Jeder Ausgang einzeln", [
 ], font_size=13, bold_cols=(0,),
    marks={(3, 3): TINT_GREEN, (5, 3): TINT_GREEN, (6, 3): TINT_GREEN})
 
+d.summary("Alle Ausgänge: (3|4) Mia 2/9, (3|6) Mia 1/9, (5|4) Lena 2/9, (5|6) Mia 1/9, (7|4) Lena 2/9, (7|6) Lena 1/9. Lena gewinnt auf 3 Wegen, auch 7 schlägt 6")
 d.say("In dieser Tabelle steht jeder Ausgang einzeln: welcher Weg, welche Zahlen, wer gewinnt — und wie wahrscheinlich das ist.",
       "Lena gewinnt auf drei Wegen: fünf gegen vier, sieben gegen vier — und auch sieben gegen sechs, denn die Sieben schlägt die Sechs.")
 
@@ -252,6 +268,7 @@ d.bullets("Die Summenregel: passende Wege addieren", [
     ("Unentschieden gibt es nicht: Die beiden Würfel haben **keine gemeinsame Zahl**", 0),
 ])
 
+d.summary("Summenregel: Lenas Gewinnwege addieren: 2/9 + 2/9 + 1/9 = 5/9, rund 55,6 %. Gegenprobe Mia 4/9, zusammen 1. Kein Unentschieden, die Würfel haben keine gemeinsame Zahl")
 d.say("Jetzt brauchen wir die zweite Regel: die Summenregel.",
       "Alle Wege, auf denen Lena gewinnt, werden zusammengezählt.",
       "Zwei Neuntel plus zwei Neuntel plus ein Neuntel ergibt fünf Neuntel. Das sind rund fünfundfünfzig Komma sechs Prozent.",
@@ -266,6 +283,7 @@ d.bullets("Die typischen Fehler", [
     ("Nur einen Weg genommen statt **alle drei**", 0),
 ])
 
+d.summary("Typische Fehler: Mias 4 mit 1/2 statt 2/3; entlang eines Weges addiert statt multipliziert; Weg (7|6) vergessen; Gewinnwege multipliziert statt addiert; nur einen Weg statt aller drei")
 d.say("Schauen wir uns noch die typischen Fehler an.",
       "Erstens: Mias Vier bekommt ein halb statt zwei Drittel. Dabei steht die Vier viermal auf dem Würfel.",
       "Zweitens: Entlang eines Weges wird addiert statt malgenommen.",
@@ -276,6 +294,7 @@ d.say("Schauen wir uns noch die typischen Fehler an.",
 d.merksatz("Entlang eines Pfades wird multipliziert — verschiedene Pfade zum selben Ereignis "
            "werden addiert.")
 
+d.summary("Merksatz: entlang eines Pfades multiplizieren, verschiedene Pfade zum selben Ereignis addieren")
 d.say("Das Wichtigste in einem Satz: Entlang eines Pfades wird malgenommen. Verschiedene Pfade zum selben Ereignis werden addiert.")
 
 d.bullets("Das Rezept in fünf Schritten", [
@@ -286,6 +305,7 @@ d.bullets("Das Rezept in fünf Schritten", [
     ("**5.** Summenregel: alle passenden Wege **addieren**", 0),
 ])
 
+d.summary("Rezept: 1. Netze zählen, 2. Anzahl durch 6 und kürzen, 3. Baum erst Stufe 1 dann Stufe 2, 4. Pfadregel malnehmen, 5. Summenregel addieren")
 d.say("Hier ist das ganze Rezept in fünf Schritten.",
       "Erstens: die Würfelnetze zählen — wie oft steht jede Zahl drauf?",
       "Zweitens: die Wahrscheinlichkeit für jede Zahl — Anzahl durch sechs, dann kürzen.",
@@ -300,6 +320,7 @@ d.bullets("Fun Facts", [
     ("Unser Spiel ist harmloser: Mit $\\frac{5}{9}$ ist Lena nur **knapp** im Vorteil", 0),
 ])
 
+d.summary("Fun Facts: Würfel gibt es seit mindestens 5000 Jahren; Bradley Efron erfand nicht-transitive Würfel (A schlägt B, B schlägt C, C schlägt A); Lena ist mit 5/9 nur knapp vorn")
 d.say("Zum Schluss noch ein paar Fun Facts.",
       "Würfel gibt es seit mindestens fünftausend Jahren — schon im alten Orient wurde gewürfelt.",
       "Der Statistiker Bradley Efron hat Würfel erfunden, bei denen A gegen B gewinnt, B gegen C — und C wieder gegen A.",
@@ -314,6 +335,7 @@ d.bullets("Jetzt ihr: die Zwillingsaufgabe", [
     ("Tipp: Geht genau das Rezept durch — Schritt für Schritt", 0),
 ])
 
+d.summary("Zwillingsaufgabe für die Klasse: Paul hat 1, 1, 5, 5, 6, 6, Jonas hat 2, 2, 2, 4, 4, 4. a) Baumdiagramm zeichnen, b) Wahrscheinlichkeit, dass Paul gewinnt. Tipp: das Rezept Schritt für Schritt")
 d.say("Jetzt seid ihr dran, mit einer Zwillingsaufgabe.",
       "Pauls Würfel trägt die Zahlen eins, eins, fünf, fünf, sechs, sechs.",
       "Jonas' Würfel trägt die Zahlen zwei, zwei, zwei, vier, vier, vier.",
@@ -329,6 +351,7 @@ d.bullets("Lösung der Zwillingsaufgabe", [
     ("$P(\\text{Paul gewinnt}) = 4 \\cdot \\frac{1}{6} = \\frac{2}{3} \\approx 66{,}7\\,\\%$", 0),
 ])
 
+d.summary("Lösung Zwillingsaufgabe: Paul 1, 5, 6 je 1/3, Jonas 2, 4 je 1/2; jeder Weg 1/6. Paul gewinnt bei (5|2), (5|4), (6|2), (6|4), mit der 1 nie. P(Paul gewinnt) = 4 mal 1/6 = 2/3, rund 66,7 %")
 d.say("Und hier ist die Lösung.",
       "Bei Paul stehen eins, fünf und sechs je zweimal drauf — also je ein Drittel. Bei Jonas stehen zwei und vier je dreimal drauf — also je ein halb.",
       "Jeder Weg hat damit ein Drittel mal ein halb, also ein Sechstel. Sechs Wege, zusammen eins.",

@@ -176,6 +176,7 @@ class HtmlDeck:
         self.doc_title = self.name
         self.subtitle = ""
         self.narration = {}   # slide index -> spoken parts, see say()
+        self.summaries = {}   # slide index -> one compact line for "Frag Solita", see summary()
         self.holds = set()    # slides after which Solita waits for a click, see say(hold=)
         if greeting:
             img = greet_image or web_morning_image(os.path.basename(out_name))
@@ -401,6 +402,14 @@ class HtmlDeck:
         if hold:
             self.holds.add(len(self.slides) - 1)
 
+    def summary(self, text):
+        """One compact line for the slide just added - what "Frag Solita" sends for every slide
+        that is NOT on screen (Doc, 16.09.2026: sending the whole deck cost ~3,500 tokens a
+        question). Plain text, no LaTeX, but keep the key numbers ("4 steht 4-mal = 2/3"):
+        pupils ask about earlier slides without naming them, and without the numbers Claude
+        guesses. Lives right next to the slide so a change to one reminds you of the other."""
+        self.summaries[len(self.slides) - 1] = " ".join(text.split())
+
     # ------------------------------------------------------------- output ---
     def save(self, path=None):
         os.makedirs(OUT_DIR, exist_ok=True)
@@ -416,12 +425,15 @@ class HtmlDeck:
                             "slides": {str(k): v for k, v in sorted(self.narration.items())},
                             "hold": sorted(self.holds)},
                            ensure_ascii=False).replace("</", "<\\/") if self.narration else "")
+        summ = json.dumps({str(k): v for k, v in sorted(self.summaries.items())},
+                          ensure_ascii=False).replace("</", "<\\/")
         return (PAGE.replace("__TITLE__", _html.escape(self.doc_title, quote=False))
                     .replace("__SUB__", _html.escape(self.subtitle, quote=False))
                     .replace("__KATEX__", KATEX)
                     .replace("__CSS__", CSS)
                     .replace("__SLIDES__", "\n".join(self.slides))
                     .replace("__NARR__", narr)
+                    .replace("__SUMMARY__", summ)
                     .replace("__JS__", JS))
 
 
@@ -1141,26 +1153,53 @@ ASK_JS = r"""
     return p;
   }
 
-  // the deck is its own source: slide text with the TeX put back in, plus what Solita says there
+  // the deck is its own source: slide text with the TeX put back in - minus the footer and page
+  // number, which every slide repeats (13 % of the old context was "Nicht verzagen, ..." 24 times)
   function slideText(s) {
     const c = s.cloneNode(true);
+    c.querySelectorAll('.foot, .pageno').forEach(function (e) { e.remove(); });
     c.querySelectorAll('[data-tex]').forEach(function (e) { e.textContent = '$' + e.dataset.tex + '$'; });
     return (c.textContent || '').replace(/\s+/g, ' ').trim();
   }
-  function context() {
-    const lines = ['Deck: ' + document.title];
-    slides.forEach(function (s, i) {
-      const t = slideText(s);
-      if (t) lines.push('Folie ' + (i + 1) + (i === si ? ' [DIE KLASSE STEHT HIER]' : '') + ': ' + t);
-    });
-    try {
-      const d = JSON.parse(document.getElementById('narration').textContent || 'null');
-      const spoken = d && d.slides && d.slides[String(si)];
-      if (spoken && spoken.length) lines.push('Was Solita zu Folie ' + (si + 1) + ' sagt: ' + spoken.join(' '));
-    } catch (e) { }
-    const txt = lines.join('\n');
-    return txt.length > 12000 ? txt.slice(0, 12000) + ' ...' : txt;
+  let SUMMARY = {}, NARR = null;
+  try { SUMMARY = JSON.parse(document.getElementById('summary').textContent || '{}') || {}; } catch (e) { }
+  try { NARR = JSON.parse(document.getElementById('narration').textContent || 'null'); } catch (e) { }
+  function overviewLine(i) {                        // a deck built without summaries still gets a line
+    if (SUMMARY[String(i)]) return SUMMARY[String(i)];
+    const h = slides[i].querySelector('h1, h2, h3');
+    return h ? h.textContent.replace(/\s+/g, ' ').trim() : slideText(slides[i]).slice(0, 90);
   }
+
+  // Compact context (Doc, 16.09.2026): one summary line per slide, the slide on screen in full, and
+  // any slide the question names ("Folie 15", "F15", "Seite 15") in full too. Measured before: the
+  // whole deck in full was ~3,500 tokens a question.
+  // Slides behind a hold - a solution - stay OUT until the class has reached them, and Claude is told
+  // not to work the task out: otherwise it hands over the answer while the class is still on it.
+  function context(q) {
+    const ahead = ((NARR && NARR.hold) || []).filter(function (h) { return h >= si; });
+    const last = ahead.length ? Math.min.apply(null, ahead) : slides.length - 1;
+    const lines = ['Deck: ' + document.title, 'Übersicht, eine Zeile je Folie:'];
+    for (let i = 0; i <= last; i++) lines.push('F' + (i + 1) + ': ' + overviewLine(i));
+    const full = [si];
+    String(q).replace(/\b(?:folie|seite|slide|f)\s*(\d{1,3})\b/gi, function (m, n) {
+      const i = +n - 1;
+      if (i >= 0 && i <= last && full.indexOf(i) < 0) full.push(i);
+      return m;
+    });
+    full.forEach(function (i) {
+      lines.push('', (i === si ? 'Die Klasse steht auf Folie ' + (i + 1)
+                               : 'Folie ' + (i + 1) + ', nach der gefragt wird') + ' - voller Inhalt:');
+      lines.push(slideText(slides[i]));
+      const spoken = NARR && NARR.slides && NARR.slides[String(i)];
+      if (spoken && spoken.length) lines.push('Solita erklärt dazu: ' + spoken.join(' '));
+    });
+    if (ahead.length) {
+      lines.push('', 'Wichtig: Die Lösung zu Folie ' + (last + 1) + ' hat die Klasse noch nicht gesehen. '
+        + 'Rechne diese Aufgabe nicht vor und nenne kein Ergebnis - gib höchstens einen Tipp.');
+    }
+    return lines.join('\n');
+  }
+  window.askSolitaContext = context;   // debug: askSolitaContext('F15?') shows exactly what goes out
 
   function render(el, text) {       // formulas the model wrote in $...$ come out as real maths
     el.textContent = '';
@@ -1229,7 +1268,7 @@ ASK_JS = r"""
     fetch(AI_URL, { method: 'POST', headers: headers(), body: JSON.stringify({
       model: MODEL, max_tokens: 600,
       messages: [{ role: 'system', content: SYS },
-                 { role: 'user', content: context() + '\n\nFrage der Klasse: ' + v }] }) })
+                 { role: 'user', content: context(v) + '\n\nFrage der Klasse: ' + v }] }) })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
         busy = false; send.disabled = false;
@@ -1323,6 +1362,7 @@ __SLIDES__
   <button id="ask-btn" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
 </div>
 <script id="narration" type="application/json">__NARR__</script>
+<script id="summary" type="application/json">__SUMMARY__</script>
 <script>__JS__</script>
 </body>
 </html>

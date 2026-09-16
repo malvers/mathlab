@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Das Würfelspiel</title>
 <meta name="description" content="Baumdiagramm und Pfadregeln — ganz langsam, Schritt für Schritt">
 <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
@@ -21,8 +21,11 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:#0E244E;overflow:hidden}
 body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
-#stage{position:fixed;inset:0;display:grid;place-items:center}
-#deck{width:960px;height:540px;position:relative;transform-origin:center center}
+/* centred by offsets, not by a grid: on a phone the grid track grows to the unscaled
+   deck size and pushes the scaled deck off-centre, half out of the screen */
+#stage{position:fixed;inset:0;overflow:hidden}
+#deck{width:960px;height:540px;position:absolute;left:calc(50% - 960px / 2);top:calc(50% - 540px / 2);
+  transform-origin:center center}
 .slide{position:absolute;inset:0;display:none;overflow:hidden;
   background-image:
     radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
@@ -194,7 +197,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 .step.on{opacity:1}
 
 /* --- HUD ---------------------------------------------------------------- */
-#hud{position:fixed;right:10px;bottom:8px;z-index:9;display:flex;gap:6px}
+#hud{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:8px;z-index:9;display:flex;gap:6px}
 #hud button{display:flex;align-items:center;justify-content:center;width:22px;height:22px;padding:0;border:0;border-radius:5px;
   background:#7E8FB5;box-shadow:0 1px 1px rgba(0,0,0,.12);   /* Dostojewski's colour on the greeting slide */
   color:#fff;opacity:.85;cursor:pointer;transition:opacity .2s}
@@ -212,7 +215,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
   font-family:Orbitron,sans-serif;font-size:10px;letter-spacing:1.5px;color:var(--green);
   text-transform:uppercase}
 /* slide number typed for a jump (1 7 Enter) */
-#jump{position:fixed;right:10px;bottom:42px;z-index:9;padding:4px 10px;border-radius:7px;
+#jump{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:42px;z-index:9;padding:4px 10px;border-radius:7px;
   background:rgba(255,255,255,.85);box-shadow:0 1px 4px rgba(0,0,0,.28);color:#0E244E;
   font:600 14px Raleway,system-ui,sans-serif}
 /* overview of all slides (o, grid button in the HUD bottom right) */
@@ -233,7 +236,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 .ov-num{position:absolute;left:8px;bottom:6px;padding:2px 7px;border-radius:5px;
   background:rgba(14,36,78,.78);color:#fff;font:600 12px Raleway,system-ui,sans-serif}
 /* --- ask Solita (avatar bottom right, Claude Haiku + her DocPad voice) ---- */
-#ask{position:fixed;right:10px;bottom:38px;z-index:11;
+#ask{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:38px;z-index:11;
   font-family:Raleway,system-ui,sans-serif}
 #ask-btn{display:block;width:46px;height:46px;padding:0;border:0;border-radius:50%;cursor:pointer;
   background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.3);outline:1px solid var(--ink);outline-offset:1px;
@@ -282,7 +285,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
   html,body{overflow:visible;background:#fff}
   #hud,#bar,.play-big,.play-big-label{display:none}
   #stage{position:static;display:block}
-  #deck{transform:none!important;width:auto;height:auto}
+  #deck{transform:none!important;width:auto;height:auto;position:static}
   .slide{display:block!important;position:relative;width:960px;height:540px;
     page-break-after:always;break-after:page}
   .step{opacity:1!important}
@@ -396,6 +399,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
   <button id="ask-btn" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
 </div>
 <script id="narration" type="application/json">{"deck": "mathe11-wuerfelspiel", "slides": {"1": ["Hallo, ich bin Solita. Heute geht es um ein Würfelspiel — und wir nehmen uns Zeit: ganz langsam, Schritt für Schritt. Wir lernen dabei zwei Dinge: wie man ein Baumdiagramm zeichnet — und wie man mit den Pfadregeln Wahrscheinlichkeiten ausrechnet."], "2": ["Kapitel eins: Worum geht es? Ein Spiel mit zwei besonderen Würfeln."], "3": ["Zuerst das Spiel selbst, in drei Sätzen.", "Lena und Mia haben zwei verschiedene Würfel, die sie selbst beschriftet haben.", "Zuerst würfelt Lena einmal, danach würfelt Mia einmal.", "Wer die größere Zahl oben hat, gewinnt die Runde.", "Und unsere Fragen: Wie sieht das Baumdiagramm aus? Und wie wahrscheinlich gewinnt Lena?"], "4": ["So sehen die beiden Würfel aus, wenn man sie aufklappt. Links Lenas Würfel mit den Zahlen drei, fünf und sieben — jede Zahl steht zweimal drauf. Rechts Mias Würfel: Die Vier steht viermal drauf, die Sechs zweimal. Gleiche Zahlen haben die gleiche Farbe."], "5": ["Warum nennt man so etwas zweistufig?", "Weil zweimal nacheinander gewürfelt wird. Jeder Wurf ist eine Stufe.", "Die erste Stufe ist Lenas Wurf, die zweite Stufe ist Mias Wurf.", "Im Baum sieht man das als zwei Ebenen von Ästen, von links nach rechts.", "Und jeder Weg von ganz links nach ganz rechts ist ein möglicher Ausgang des Spiels."], "6": ["Kapitel zwei: Die Würfel lesen. Hier gilt: zählen statt raten."], "7": ["Fangen wir mit Lenas Würfel an. Er hat sechs Flächen, aber nur drei verschiedene Zahlen: drei, fünf und sieben. Jede davon steht zweimal auf dem Würfel. Zwei von sechs — das ist gekürzt ein Drittel.", "Jede Fläche kommt gleich oft nach oben. Deshalb müssen wir nur zählen, wie oft eine Zahl auf dem Würfel steht.", "Zur Kontrolle: Ein Drittel plus ein Drittel plus ein Drittel ergibt eins. Das muss so sein — irgendeine Zahl liegt ja immer oben."], "8": ["Jetzt Mias Würfel. Die Vier steht viermal drauf — vier von sechs, also zwei Drittel. Die Sechs steht zweimal drauf — zwei von sechs, also ein Drittel.", "Achtung, hier passieren die meisten Fehler: Die Vier steht viermal auf dem Würfel, nicht zweimal. Ihre Wahrscheinlichkeit ist zwei Drittel, nicht ein halb.", "Kontrolle: Zwei Drittel plus ein Drittel ergibt wieder eins."], "9": ["Und jetzt der wichtigste Trick.", "Man könnte für jede der sechs Flächen einen eigenen Ast zeichnen, jeden mit einem Sechstel. Das ist nicht falsch — aber unübersichtlich.", "Einfacher ist es, gleiche Zahlen zu einem einzigen Ast zusammenzufassen.", "Dann bekommt Lena drei Äste, für drei, fünf und sieben — und Mia zwei Äste, für vier und sechs.", "Und merkt euch: Die Äste, die an einem Punkt beginnen, ergeben zusammen immer eins."], "10": ["Kapitel drei: Den Baum zeichnen. Erst Lena, dann Mia."], "11": ["Das ist die erste Stufe: Lenas Wurf. Vom Startpunkt gehen drei Äste ab — zur Drei, zur Fünf und zur Sieben. An jedem Ast steht ein Drittel. Rechts stehen dieselben Werte in einer kleinen Tabelle, auch in Prozent: jeweils rund dreiunddreißig Prozent."], "12": ["Jetzt kommt Mia dazu.", "An jedes der drei Enden hängen wir Mias zwei Äste: einen zur Vier und einen zur Sechs.", "Mia würfelt immer mit demselben Würfel. Deshalb steht überall zwei Drittel bei der Vier und ein Drittel bei der Sechs.", "Was Lena würfelt, ändert nichts an Mias Würfel. Man sagt: Die beiden Würfe sind unabhängig.", "Drei Äste mal zwei Äste — am Ende gibt es sechs Wege durch den Baum."], "13": ["Hier ist der fertige Baum. Rechts steht für jeden der sechs Wege seine Wahrscheinlichkeit, als Bruch und in Prozent. Grün sind die Wege, auf denen Lena gewinnt."], "14": ["Wie kommen die Zahlen rechts zustande? Mit der Pfadregel.", "Die Wahrscheinlichkeit eines Weges bekommt man, indem man alle Äste auf diesem Weg miteinander malnimmt.", "Zum Beispiel der Weg drei gegen vier: Ein Drittel mal zwei Drittel ergibt zwei Neuntel.", "Der Weg drei gegen sechs: Ein Drittel mal ein Drittel ergibt ein Neuntel.", "Und zur Kontrolle: Alle sechs Wege zusammen ergeben wieder genau eins."], "15": ["Kapitel vier: Wer gewinnt? Dafür gehen wir alle sechs Ausgänge durch."], "16": ["In dieser Tabelle steht jeder Ausgang einzeln: welcher Weg, welche Zahlen, wer gewinnt — und wie wahrscheinlich das ist.", "Lena gewinnt auf drei Wegen: fünf gegen vier, sieben gegen vier — und auch sieben gegen sechs, denn die Sieben schlägt die Sechs."], "17": ["Jetzt brauchen wir die zweite Regel: die Summenregel.", "Alle Wege, auf denen Lena gewinnt, werden zusammengezählt.", "Zwei Neuntel plus zwei Neuntel plus ein Neuntel ergibt fünf Neuntel. Das sind rund fünfundfünfzig Komma sechs Prozent.", "Zur Gegenprobe Mia: Zwei Neuntel plus ein Neuntel plus ein Neuntel ergibt vier Neuntel. Und fünf Neuntel plus vier Neuntel ergibt wieder eins.", "Unentschieden kann es übrigens nicht geben — die beiden Würfel haben keine gemeinsame Zahl."], "18": ["Schauen wir uns noch die typischen Fehler an.", "Erstens: Mias Vier bekommt ein halb statt zwei Drittel. Dabei steht die Vier viermal auf dem Würfel.", "Zweitens: Entlang eines Weges wird addiert statt malgenommen.", "Drittens: Der Weg sieben gegen sechs wird vergessen — dabei ist die Sieben größer als die Sechs.", "Viertens: Die Wege für Lenas Sieg werden malgenommen statt addiert.", "Und fünftens: Man nimmt nur einen Weg, statt alle drei."], "19": ["Das Wichtigste in einem Satz: Entlang eines Pfades wird malgenommen. Verschiedene Pfade zum selben Ereignis werden addiert."], "20": ["Hier ist das ganze Rezept in fünf Schritten.", "Erstens: die Würfelnetze zählen — wie oft steht jede Zahl drauf?", "Zweitens: die Wahrscheinlichkeit für jede Zahl — Anzahl durch sechs, dann kürzen.", "Drittens: den Baum zeichnen — erst die erste Stufe, dann an jedes Ende die zweite.", "Viertens: die Pfadregel — entlang eines Weges malnehmen.", "Und fünftens: die Summenregel — alle passenden Wege addieren."], "21": ["Zum Schluss noch ein paar Fun Facts.", "Würfel gibt es seit mindestens fünftausend Jahren — schon im alten Orient wurde gewürfelt.", "Der Statistiker Bradley Efron hat Würfel erfunden, bei denen A gegen B gewinnt, B gegen C — und C wieder gegen A.", "Solche Würfel nennt man nicht-transitiv. Wer zuerst einen Würfel wählen muss, verliert auf Dauer.", "Unser Spiel ist harmloser: Mit fünf Neunteln ist Lena nur knapp im Vorteil."], "22": ["Jetzt seid ihr dran, mit einer Zwillingsaufgabe.", "Pauls Würfel trägt die Zahlen eins, eins, fünf, fünf, sechs, sechs.", "Jonas' Würfel trägt die Zahlen zwei, zwei, zwei, vier, vier, vier.", "Aufgabe a: Zeichnet das Baumdiagramm und schreibt an jeden Ast seine Wahrscheinlichkeit.", "Aufgabe b: Wie groß ist die Wahrscheinlichkeit, dass Paul gewinnt?", "Mein Tipp: Geht genau das Rezept durch, Schritt für Schritt. Wenn ihr fertig seid, geht es zur Lösung."], "23": ["Und hier ist die Lösung.", "Bei Paul stehen eins, fünf und sechs je zweimal drauf — also je ein Drittel. Bei Jonas stehen zwei und vier je dreimal drauf — also je ein halb.", "Jeder Weg hat damit ein Drittel mal ein halb, also ein Sechstel. Sechs Wege, zusammen eins.", "Paul gewinnt bei fünf gegen zwei, fünf gegen vier, sechs gegen zwei und sechs gegen vier. Mit der Eins gewinnt er nie.", "Also: Vier mal ein Sechstel ergibt zwei Drittel, rund sechsundsechzig Komma sieben Prozent. Super gemacht!"]}, "hold": [22]}</script>
+<script id="summary" type="application/json">{"1": "Titel: Das Würfelspiel - Baumdiagramm und Pfadregeln, Mathematik BGY 11", "2": "Kapitel 1: Worum geht es? Ein Spiel mit zwei besonderen Würfeln", "3": "Spielregeln: Lena und Mia haben verschiedene, selbst beschriftete Würfel. Erst würfelt Lena, dann Mia, die größere Zahl gewinnt. Gefragt: Baumdiagramm und P(Lena gewinnt)", "4": "Würfelnetze: Lena hat 3, 5, 7 je zweimal; Mia hat die 4 viermal und die 6 zweimal", "5": "Zweistufig: zweimal nacheinander gewürfelt = 2 Stufen (Stufe 1 Lena, Stufe 2 Mia); jeder Weg von links nach rechts ist ein Ausgang", "6": "Kapitel 2: Die Würfel lesen - zählen statt raten", "7": "Lenas Würfel: 3, 5 und 7 stehen je 2 von 6 Mal drauf = je 1/3. Kontrolle 1/3 + 1/3 + 1/3 = 1", "8": "Mias Würfel: die 4 steht 4-mal drauf = 4/6 = 2/3 (nicht 1/2!), die 6 steht 2-mal = 1/3. Kontrolle 2/3 + 1/3 = 1", "9": "Trick: gleiche Zahlen zu einem Ast zusammenfassen statt 6 Äste mit je 1/6. Lena 3 Äste (3, 5, 7), Mia 2 Äste (4, 6). Äste ab einem Punkt ergeben zusammen 1", "10": "Kapitel 3: Den Baum zeichnen - erst Lena, dann Mia", "11": "Baum Stufe 1: vom Start drei Äste zu Lenas 3, 5, 7 mit je 1/3 (rund 33 %)", "12": "Baum Stufe 2: an jedes der 3 Enden Mias Äste 4 (2/3) und 6 (1/3); die Würfe sind unabhängig; 3 mal 2 = 6 Wege", "13": "Fertiger Baum: alle 6 Wege mit Wahrscheinlichkeit als Bruch und Prozent; grün markiert die Wege, auf denen Lena gewinnt", "14": "Pfadregel: entlang eines Weges multiplizieren. Weg (3|4) = 1/3 mal 2/3 = 2/9, Weg (3|6) = 1/3 mal 1/3 = 1/9. Alle 6 Wege: 3 mal 2/9 + 3 mal 1/9 = 1", "15": "Kapitel 4: Wer gewinnt? Alle sechs Ausgänge durchgehen", "16": "Alle Ausgänge: (3|4) Mia 2/9, (3|6) Mia 1/9, (5|4) Lena 2/9, (5|6) Mia 1/9, (7|4) Lena 2/9, (7|6) Lena 1/9. Lena gewinnt auf 3 Wegen, auch 7 schlägt 6", "17": "Summenregel: Lenas Gewinnwege addieren: 2/9 + 2/9 + 1/9 = 5/9, rund 55,6 %. Gegenprobe Mia 4/9, zusammen 1. Kein Unentschieden, die Würfel haben keine gemeinsame Zahl", "18": "Typische Fehler: Mias 4 mit 1/2 statt 2/3; entlang eines Weges addiert statt multipliziert; Weg (7|6) vergessen; Gewinnwege multipliziert statt addiert; nur einen Weg statt aller drei", "19": "Merksatz: entlang eines Pfades multiplizieren, verschiedene Pfade zum selben Ereignis addieren", "20": "Rezept: 1. Netze zählen, 2. Anzahl durch 6 und kürzen, 3. Baum erst Stufe 1 dann Stufe 2, 4. Pfadregel malnehmen, 5. Summenregel addieren", "21": "Fun Facts: Würfel gibt es seit mindestens 5000 Jahren; Bradley Efron erfand nicht-transitive Würfel (A schlägt B, B schlägt C, C schlägt A); Lena ist mit 5/9 nur knapp vorn", "22": "Zwillingsaufgabe für die Klasse: Paul hat 1, 1, 5, 5, 6, 6, Jonas hat 2, 2, 2, 4, 4, 4. a) Baumdiagramm zeichnen, b) Wahrscheinlichkeit, dass Paul gewinnt. Tipp: das Rezept Schritt für Schritt", "23": "Lösung Zwillingsaufgabe: Paul 1, 5, 6 je 1/3, Jonas 2, 4 je 1/2; jeder Weg 1/6. Paul gewinnt bei (5|2), (5|4), (6|2), (6|4), mit der 1 nie. P(Paul gewinnt) = 4 mal 1/6 = 2/3, rund 66,7 %"}</script>
 <script>
 // time-aware greeting - the browser knows the real clock, a .pptx never does
 (function(){
@@ -826,26 +830,53 @@ fromHash();
     return p;
   }
 
-  // the deck is its own source: slide text with the TeX put back in, plus what Solita says there
+  // the deck is its own source: slide text with the TeX put back in - minus the footer and page
+  // number, which every slide repeats (13 % of the old context was "Nicht verzagen, ..." 24 times)
   function slideText(s) {
     const c = s.cloneNode(true);
+    c.querySelectorAll('.foot, .pageno').forEach(function (e) { e.remove(); });
     c.querySelectorAll('[data-tex]').forEach(function (e) { e.textContent = '$' + e.dataset.tex + '$'; });
     return (c.textContent || '').replace(/\s+/g, ' ').trim();
   }
-  function context() {
-    const lines = ['Deck: ' + document.title];
-    slides.forEach(function (s, i) {
-      const t = slideText(s);
-      if (t) lines.push('Folie ' + (i + 1) + (i === si ? ' [DIE KLASSE STEHT HIER]' : '') + ': ' + t);
-    });
-    try {
-      const d = JSON.parse(document.getElementById('narration').textContent || 'null');
-      const spoken = d && d.slides && d.slides[String(si)];
-      if (spoken && spoken.length) lines.push('Was Solita zu Folie ' + (si + 1) + ' sagt: ' + spoken.join(' '));
-    } catch (e) { }
-    const txt = lines.join('\n');
-    return txt.length > 12000 ? txt.slice(0, 12000) + ' ...' : txt;
+  let SUMMARY = {}, NARR = null;
+  try { SUMMARY = JSON.parse(document.getElementById('summary').textContent || '{}') || {}; } catch (e) { }
+  try { NARR = JSON.parse(document.getElementById('narration').textContent || 'null'); } catch (e) { }
+  function overviewLine(i) {                        // a deck built without summaries still gets a line
+    if (SUMMARY[String(i)]) return SUMMARY[String(i)];
+    const h = slides[i].querySelector('h1, h2, h3');
+    return h ? h.textContent.replace(/\s+/g, ' ').trim() : slideText(slides[i]).slice(0, 90);
   }
+
+  // Compact context (Doc, 16.09.2026): one summary line per slide, the slide on screen in full, and
+  // any slide the question names ("Folie 15", "F15", "Seite 15") in full too. Measured before: the
+  // whole deck in full was ~3,500 tokens a question.
+  // Slides behind a hold - a solution - stay OUT until the class has reached them, and Claude is told
+  // not to work the task out: otherwise it hands over the answer while the class is still on it.
+  function context(q) {
+    const ahead = ((NARR && NARR.hold) || []).filter(function (h) { return h >= si; });
+    const last = ahead.length ? Math.min.apply(null, ahead) : slides.length - 1;
+    const lines = ['Deck: ' + document.title, 'Übersicht, eine Zeile je Folie:'];
+    for (let i = 0; i <= last; i++) lines.push('F' + (i + 1) + ': ' + overviewLine(i));
+    const full = [si];
+    String(q).replace(/\b(?:folie|seite|slide|f)\s*(\d{1,3})\b/gi, function (m, n) {
+      const i = +n - 1;
+      if (i >= 0 && i <= last && full.indexOf(i) < 0) full.push(i);
+      return m;
+    });
+    full.forEach(function (i) {
+      lines.push('', (i === si ? 'Die Klasse steht auf Folie ' + (i + 1)
+                               : 'Folie ' + (i + 1) + ', nach der gefragt wird') + ' - voller Inhalt:');
+      lines.push(slideText(slides[i]));
+      const spoken = NARR && NARR.slides && NARR.slides[String(i)];
+      if (spoken && spoken.length) lines.push('Solita erklärt dazu: ' + spoken.join(' '));
+    });
+    if (ahead.length) {
+      lines.push('', 'Wichtig: Die Lösung zu Folie ' + (last + 1) + ' hat die Klasse noch nicht gesehen. '
+        + 'Rechne diese Aufgabe nicht vor und nenne kein Ergebnis - gib höchstens einen Tipp.');
+    }
+    return lines.join('\n');
+  }
+  window.askSolitaContext = context;   // debug: askSolitaContext('F15?') shows exactly what goes out
 
   function render(el, text) {       // formulas the model wrote in $...$ come out as real maths
     el.textContent = '';
@@ -914,7 +945,7 @@ fromHash();
     fetch(AI_URL, { method: 'POST', headers: headers(), body: JSON.stringify({
       model: MODEL, max_tokens: 600,
       messages: [{ role: 'system', content: SYS },
-                 { role: 'user', content: context() + '\n\nFrage der Klasse: ' + v }] }) })
+                 { role: 'user', content: context(v) + '\n\nFrage der Klasse: ' + v }] }) })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
         busy = false; send.disabled = false;
