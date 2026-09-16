@@ -2026,11 +2026,15 @@ tr.kw-jump > td { animation: kw-jump-pulse 1.3s ease-in-out 2; }
    dunkle Zeilengrund - eine Regel fuer beide. */
 /* Der Verlauf liegt auf der ZEILE, nicht auf den Zellen: pro Zelle finge er
    sonst jedes Mal von vorn an und die Woche bekaeme sieben kleine Verlaeufe. */
+/* Doc, 16.09.2026: "der fade out darf nicht zu sooo hell gehen" - the gradient
+   no longer runs out to transparent but keeps a visible tint on the right. */
+/* Doc, 16.09.2026: "mach das rechts so wie links und in der Mitte fast weiss" -
+   symmetric: full tint and bar at both edges, almost transparent in the middle. */
 tr.kw-now {
     background-image: linear-gradient(90deg,
         rgba(245, 194, 66, 0.30) 0%,
-        rgba(245, 194, 66, 0.10) 45%,
-        rgba(245, 194, 66, 0) 100%);
+        rgba(245, 194, 66, 0.03) 50%,
+        rgba(245, 194, 66, 0.30) 100%);
 }
 /* Doc, 09.09.2026: "mach den senkrecht mal orange (unser) und 1px duenner",
    dann "orange satter" - 3 px werden 2 px, und der Balken traegt nicht
@@ -2038,11 +2042,12 @@ tr.kw-now {
    Ocker), sondern ein satteres Lambda: gleicher Farbton, mehr Tiefe -
    auf 2 px Breite traegt das helle rgb(245,194,66) zu wenig. */
 tr.kw-now > td:nth-child(2) { box-shadow: inset 2px 0 0 rgb(240, 160, 24); }
+tr.kw-now > td:last-child { box-shadow: inset -2px 0 0 rgb(240, 160, 24); }
 tr.kw-now-sub {
     background-image: linear-gradient(90deg,
         rgba(245, 194, 66, 0.12) 0%,
-        rgba(245, 194, 66, 0.04) 45%,
-        rgba(245, 194, 66, 0) 100%);
+        rgba(245, 194, 66, 0.01) 50%,
+        rgba(245, 194, 66, 0.12) 100%);
 }
 
 /* Abgabe-Knopf in der Wochenzeile: sieht bewusst nach Knopf aus, nicht nach
