@@ -226,7 +226,14 @@
     const dropRows = [];
     const dropWraps = [];
     const subBoxes = [];
+    /* Plan-Pille -> die Pillen ihrer Lerngruppen (siehe groupPills weiter unten).
+       Sie stehen nicht einzeln im Zahnrad: sie gehen mit ihrem Plan. */
+    const groupSets = [];
     function syncDropRows() {
+        groupSets.forEach(function (g) {
+            const weg = g.plan.classList.contains('nav-hidden');
+            g.gruppen.forEach(a => a.classList.toggle('nav-hidden', weg));
+        });
         dropRows.forEach(function (r) {
             const leer = r.items.every(a => a.classList.contains('nav-hidden'));
             r.line.classList.toggle('nd-empty', leer);
@@ -371,6 +378,62 @@
 
     DROPS.forEach(d => makeDrop(d[0], d[1], d[2], d[3]));
     syncDropRows();
+
+    /* Lerngruppen ins Menue (Doc, 16.09.2026: "bring die auch da hin", dann
+       "mach die direkt bitte ohne Zwischenmenu"): teilen sich mehrere Gruppen
+       einen Plan - FO 12 laeuft in fuenf -, stehen sie als eigene Pillen direkt
+       hinter ihm und oeffnen ihn gleich in ihrer Ansicht (?g=).
+       Die Liste kommt aus svp-map.json, derselben Quelle wie die Gruppenwahl
+       auf der Planseite - eine zweite von Hand gepflegte Liste waere still
+       veraltet, sobald ein Jahrgang wechselt. Nachgereicht, sobald die Datei
+       da ist: ohne sie bleibt das Menue genau wie bisher. */
+    (function groupPills() {
+        const slug = (v) => String(v).replace(/[^A-Za-z0-9-]+/g, '_');
+        const here = norm(location.pathname);
+        let jetzt = '';
+        try { jetzt = new URLSearchParams(location.search).get('g') || ''; } catch (e) { }
+
+        fetch(base + 'svp-map.json')
+            .then(res => (res.ok ? res.json() : null))
+            .then(map => {
+                if (!map || !map.pages) return;
+                let gebaut = false;
+                for (const [href] of LINKS) {
+                    const pill = pills[href];
+                    if (!pill) continue;
+                    const line = pill.parentElement;
+                    if (!line || !line.classList.contains('nd-row')) continue;   /* nur im Menue */
+                    const seite = new URL(base + href).pathname;
+                    const eintrag = map.pages.find(p => seite.endsWith(p.page));
+                    const groups = eintrag && eintrag.groups ? [...new Set(eintrag.groups)].sort() : [];
+                    if (groups.length < 2) continue;
+
+                    const farbe = pill.className.replace(/\s*(active|nav-hidden)\b/g, '');
+                    const nachher = pill.nextSibling;
+                    const gruppen = [];
+                    for (const g of groups) {
+                        const a = document.createElement('a');
+                        a.className = farbe + ' nav-gruppe';
+                        a.href = base + href + '?g=' + encodeURIComponent(slug(g));
+                        a.textContent = g.replace(/,/g, ' + ');
+                        a.title = 'Stoffverteilungsplan der Lerngruppe ' + a.textContent;
+                        if (norm(new URL(a.href).pathname) === here && slug(g) === jetzt) {
+                            a.classList.add('active');
+                            /* Dann ist NICHT zugleich der ganze Plan die aktuelle
+                               Seite - sonst leuchteten zwei Pillen. */
+                            pill.classList.remove('active');
+                        }
+                        gruppen.push(a);
+                        line.insertBefore(a, nachher);
+                    }
+                    /* Ein- und ausgeschaltet werden sie mit ihrem Plan, nicht einzeln. */
+                    groupSets.push({ plan: pill, gruppen: gruppen });
+                    gebaut = true;
+                }
+                if (gebaut) syncDropRows();
+            })
+            .catch(() => { /* offline: das Menue bleibt, wie es ist */ });
+    })();
 
     /* Stundenplan alone in the centred middle group; "Mehr" is not a Schulart,
        so it leaves the left block and joins the tools next to the gear. */

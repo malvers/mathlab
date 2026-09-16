@@ -8,6 +8,63 @@
     const tbody = document.querySelector('#plan-table tbody');
     if (!tbody || !window.PLAN || !window.BADGE) return;
 
+    /* --- Gruppen-Ansicht: eine Planseite, mehrere Lerngruppen (?g=) --------
+       FOS 12 laeuft in fuenf Lerngruppen durch denselben Stoff, aber jede an
+       ihren eigenen Terminen. Vier einzelne Dateien haetten vier getrennte
+       Speicher (die Bearbeitungen haengen am PFAD der Seite), und derselbe
+       Stoff muesste viermal gepflegt werden. Darum waehlt ?g= die Gruppe aus
+       (Doc, 16.09.2026: "eher nein, KISS"): der Stoff bleibt EINER - alle
+       Ansichten teilen sich Pfad und damit Speicher -, und pro Gruppe
+       unterscheiden sich nur Termine, Klassenbuch-Ziel und Vortragsliste.
+       Ohne ?g= bleibt die Seite genau wie bisher: alle Gruppen zusammen. */
+    const groupSlug = (v) => String(v).replace(/[^A-Za-z0-9-]+/g, '_');
+    const GROUP = (function () {
+        try { return new URLSearchParams(location.search).get('g') || ''; }
+        catch (e) { return ''; }
+    })();
+    /* Vom Slug zurueck auf den Anzeigenamen: "FOG25-2_FOW25-2" -> "FOG25-2 + FOW25-2" */
+    const GROUP_LABEL = GROUP.replace(/_/g, ' + ');
+    /* Gehoert eine Untis-Stunde zur gewaehlten Gruppe? Gekoppelte Klassen stehen
+       dort als "FOG25-2,FOW25-2", im Slug als "FOG25-2_FOW25-2" und im Live-Abruf
+       als Array - auf dieselbe REIHENFOLGE kann man sich nirgends verlassen,
+       also werden beide Seiten sortiert verglichen. */
+    function groupKey(v) {
+        return (Array.isArray(v) ? v : String(v || '').split(/[,_]/))
+            .map(x => x.trim()).filter(Boolean).sort().join('_');
+    }
+    const GROUP_KEY = groupKey(GROUP);
+    function inGroup(klasse) { return !GROUP || groupKey(klasse) === GROUP_KEY; }
+
+    /* Die Gruppe gehoert sichtbar in den Kopf - auch in den Ausdruck, wo die
+       Auswahl (sie steht in .head-mid) wegfaellt. */
+    if (GROUP) {
+        document.body.classList.add('group-view');
+        /* Die Ueberschrift nennt sonst alle Zuege des Plans ("Informatik ·
+           FOG25 + FOS25 + FOW25") - in der Gruppen-Ansicht nennt sie die
+           Gruppe (Doc, 16.09.2026: "den Header noch jeweils anpassen").
+           Was vor dem Mittelpunkt steht, bleibt; dahinter stehen die Klassen
+           DIESER Gruppe, und der Zug-Buchstabe behaelt seine Farbe (.zw in
+           svp.css: G orange, S gruen, W rot). Ohne Mittelpunkt in der
+           Ueberschrift bleibt sie unangetastet - dann ist sie kein Kopf
+           dieser Bauart. */
+        const h1 = document.querySelector('.page-head h1');
+        if (h1 && h1.textContent.indexOf('\u00b7') > 0) {
+            h1.textContent = h1.textContent.split('\u00b7')[0] + '\u00b7 ';
+            GROUP.split('_').forEach(function (klasse, i) {
+                if (i) h1.appendChild(document.createTextNode(' + '));
+                const m = klasse.match(/^FO([GSW])(.*)$/);
+                if (!m) { h1.appendChild(document.createTextNode(klasse)); return; }
+                const zw = document.createElement('span');
+                zw.className = 'zw zw-' + m[1].toLowerCase();
+                zw.textContent = m[1];
+                h1.appendChild(document.createTextNode('FO'));
+                h1.appendChild(zw);
+                h1.appendChild(document.createTextNode(m[2]));
+            });
+        }
+        document.title = document.title.replace(/\s*\|/, ' \u00b7 ' + GROUP_LABEL + ' |');
+    }
+
     // Badge pills deep-link into the Lehrplan PDF (#page=N) when the page
     // provides LB_INFO with a page number for that type (rows + legend).
     function lbPdfLink(key) {
@@ -2733,22 +2790,42 @@
        Auswahl (Doc, 01.09.2026). Die Gruppen kommen aus svp-map.json, damit
        es keine zweite, von Hand gepflegte Liste gibt. Aussehen und Verhalten
        teilt er sich mit dem Export-Menue. */
+    /* svp-map.json wird von zwei Menues gelesen (Vortraege und Gruppenwahl) -
+       geholt wird sie trotzdem nur einmal. */
+    let svpMapPromise = null;
+    function planMapEntry(planPage) {
+        if (!svpMapPromise) {
+            svpMapPromise = fetch(SVP_DIR + 'svp-map.json', { cache: 'no-store' })
+                .then(res => (res.ok ? res.json() : null))
+                .catch(() => null);
+        }
+        return svpMapPromise.then(map =>
+            (map && (map.pages || []).find(p => planPage.endsWith(p.page))) || null);
+    }
+
     (function buildVortraegeMenu() {
         const btn = document.querySelector('button[data-groups]');
         if (!btn) return;
         const src = btn.dataset.groups;
         const target = btn.dataset.href;
         if (!src || !target) return;
-        const slug = (v) => String(v).replace(/[^A-Za-z0-9-]+/g, '_');
+        const slug = groupSlug;
         /* data-groups nennt den Plan ("fos12.untis.json"); die Gruppen selbst stehen
            seit dem 10.09.2026 in svp-map.json - nur Klassenkuerzel, deshalb weiter
            oeffentlich. Termine und Stundeninhalte liegen in Supabase hinter dem Login. */
         const planPage = new URL(src.replace(/\.untis\.json$/, '.html'), location.href).pathname;
 
-        fetch(SVP_DIR + 'svp-map.json', { cache: 'no-store' })
-            .then(res => (res.ok ? res.json() : null))
-            .then(map => {
-                const entry = map && (map.pages || []).find(p => planPage.endsWith(p.page));
+        /* In der Gruppen-Ansicht braucht es kein Menue mehr: der Knopf geht
+           direkt auf die Vortragsliste DIESER Gruppe. */
+        if (GROUP) {
+            btn.title = 'Vortragsthemen und Namen der Gruppe ' + GROUP_LABEL;
+            btn.setAttribute('onclick', '');
+            btn.onclick = () => { location.href = target + '?g=' + encodeURIComponent(GROUP); };
+            return;
+        }
+
+        planMapEntry(planPage)
+            .then(entry => {
                 if (!entry || !entry.groups) return;              /* keine Gruppen: Knopf bleibt Knopf */
                 const seen = new Set(entry.groups);
                 if (seen.size < 2) return;                        /* eine Gruppe braucht kein Menue */
@@ -2794,6 +2871,71 @@
                 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') open(false); });
             })
             .catch(() => { /* offline: der einfache Knopf bleibt stehen */ });
+    })();
+
+    /* Die Gruppenwahl: derselbe Knopf mit Auswahl wie das Export- und das
+       Vortragsmenue, damit die Seite eine Sprache spricht. Sie erscheint von
+       allein auf jedem Plan, den mehr als eine Lerngruppe teilt - die Liste
+       kommt aus svp-map.json, es gibt also keine zweite von Hand gepflegte.
+       "Alle Gruppen" ist die Seite wie bisher. */
+    (function buildGroupMenu() {
+        const mid = document.querySelector('.page-head .head-row .head-mid');
+        if (!mid) return;
+
+        const urlFor = (g) => {
+            const u = new URL(location.href);
+            if (g) u.searchParams.set('g', groupSlug(g)); else u.searchParams.delete('g');
+            /* Ein ?kw= aus dem Stundenplan zeigt auf EINE Woche - beim Wechsel
+               der Gruppe waere es ein Sprung an die falsche Stelle. */
+            u.searchParams.delete('kw');
+            return u.pathname + (u.search || '') + u.hash;
+        };
+
+        planMapEntry(location.pathname).then(entry => {
+            const groups = entry && entry.groups ? [...new Set(entry.groups)].sort() : [];
+            if (groups.length < 2) return;               /* eine Gruppe braucht keine Wahl */
+
+            const drop = document.createElement('div');
+            drop.className = 'export-drop group-drop';
+            const toggle = document.createElement('button');
+            toggle.type = 'button';
+            toggle.className = 'action export-toggle' + (GROUP ? ' on-group' : '');
+            toggle.title = 'Den Plan auf eine Lerngruppe einstellen';
+            toggle.setAttribute('aria-haspopup', 'true');
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.innerHTML = (GROUP ? GROUP_LABEL : 'Alle Gruppen') +
+                ' <span class="export-caret">\u25be</span>';
+
+            const menu = document.createElement('div');
+            menu.className = 'export-menu';
+            menu.hidden = true;
+
+            const add = (label, g) => {
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'action secondary export-item';
+                item.textContent = label;
+                if (groupSlug(g || '') === GROUP) item.classList.add('is-current');
+                item.addEventListener('click', () => { location.href = urlFor(g); });
+                menu.appendChild(item);
+            };
+            add('Alle Gruppen', '');
+            for (const g of groups) add(g.replace(/,/g, ' + '), g);
+
+            mid.insertBefore(drop, mid.firstChild);
+            drop.appendChild(toggle);
+            drop.appendChild(menu);
+
+            function open(on) {
+                menu.hidden = !on;
+                toggle.setAttribute('aria-expanded', on ? 'true' : 'false');
+                toggle.classList.toggle('on', !!on);
+            }
+            toggle.addEventListener('click', (e) => { e.stopPropagation(); open(menu.hidden); });
+            menu.addEventListener('click', () => open(false));
+            document.addEventListener('click', (e) => { if (!drop.contains(e.target)) open(false); });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') open(false); });
+        });
     })();
 
     // ?map — on-screen preview of the form (also what headless print uses).
@@ -3696,6 +3838,12 @@
         const byClass = new Map();
         for (const kw of Object.keys((data && data.weeks) || {})) {
             for (const e of data.weeks[kw]) {
+                /* Ein Feiertag loescht den Termin in WebUntis ganz, er taucht hier
+                   also gar nicht erst auf - die Zaehlung rutscht von allein und nur
+                   fuer die betroffene Gruppe. Ein AUSFALL steht dagegen weiter da,
+                   nur mit code "cancelled": auch der ist kein Termin, sonst bekaeme
+                   die Gruppe den Stoff dieses Tages nie (Doc, 16.09.2026). */
+                if (e.code === 'cancelled') continue;
                 const k = e.klasse || '';
                 if (!byClass.has(k)) byClass.set(k, new Map());
                 const days = byClass.get(k);
@@ -4067,6 +4215,91 @@
         if (dirty) { try { localStorage.setItem(UNTIS_ECHO_KEY, JSON.stringify(map)); } catch (e) { } }
     }
 
+    /* In der Gruppen-Ansicht sieht der Plan nur die Stunden DIESER Gruppe:
+       Chips, Terminzaehlung und der Klassenbuch-Dialog folgen damit von
+       allein - und der Knopf schreibt nur noch in eine Gruppe statt in fuenf. */
+    function untisOnlyGroup(data) {
+        if (!GROUP || !data || !data.weeks) return data;
+        const weeks = {};
+        for (const kw of Object.keys(data.weeks)) {
+            const list = data.weeks[kw].filter(e => inGroup(e.klasse));
+            if (list.length) weeks[kw] = list;
+        }
+        const klassen = GROUP_KEY.split('_');
+        const classes = (data.classes || []).filter(c => klassen.includes(c));
+        return Object.assign({}, data, {
+            weeks: weeks,
+            classes: classes.length ? classes : data.classes
+        });
+    }
+
+    /* Die Wochenspalte zeigt in der Gruppen-Ansicht den ECHTEN Termin dieser
+       Gruppe (14-taegig, vier Stunden am Stueck) statt der Kalenderwoche des
+       Plans - erst damit ist es der Plan einer Gruppe und nicht mehr der
+       gemeinsame. Geaendert wird nur die ANZEIGE: data-src bleibt der Text aus
+       der Plandatei, damit Speichern und "Verschieben" weiter mit dem
+       Schuljahr rechnen und nicht mit dem Stundenplan einer Gruppe.
+       Die Termine kommen aus WebUntis (svp_untis) und damit nur fuer
+       angemeldete Augen - ohne Anmeldung bleibt die Woche stehen. */
+    let terminePainted = null;
+
+    function paintTerminDates(termine) {
+        if (!GROUP || !TERMIN_MODE) return;
+        if (termine) terminePainted = termine;
+        if (!terminePainted) return;
+        const list = [...terminePainted.values()][0] || [];
+        for (const r of rendered) {
+            if (!r.dateTd) continue;                       /* Ferienzeile */
+            const s = untisSlotOf(r.i);
+            const day = list[s.block];
+            r.gkw = null;
+            if (!day || !day.length) continue;
+            const ymd = day[0].date;
+            const d = new Date(+ymd.slice(0, 4), +ymd.slice(4, 6) - 1, +ymd.slice(6, 8));
+            r.gkw = isoWeek(d);
+            r.terminYmd = ymd;
+            r.dateTd.classList.add('termin-date');
+            r.dateTd.title = 'Termin ' + (s.block + 1) + ' \u00b7 ' +
+                (s.half ? '2.' : '1.') + ' Doppelstunde \u00b7 ' + untisDay(ymd) + ymd.slice(0, 4);
+            r.dateTd.textContent = '';
+            r.dateTd.appendChild(document.createTextNode(untisDay(ymd)));
+            /* Zweite Zeile ohne <br>: td.date br ist seit dem 07.09.2026
+               ausgeblendet (einzeiliges Datum), ein small mit display:block
+               kommt dem nicht in die Quere. */
+            const ds = document.createElement('small');
+            ds.className = 'ds';
+            ds.textContent = (s.half ? '2.' : '1.') + ' DS';
+            r.dateTd.appendChild(ds);
+            /* die KW-Spalte gleich mit: sonst stuende die Plan-Woche neben
+               einem Datum aus einer anderen */
+            const kwTd = r.dateTd.previousElementSibling;
+            if (kwTd) kwTd.textContent = r.gkw;
+        }
+        /* Sprungziel und "laufende Woche" richten sich jetzt nach den Terminen
+           der Gruppe - beide noch einmal laufen lassen. */
+        runKwJump();
+        /* Die laufende Woche trifft hier meistens nichts: die Gruppe kommt nur
+           alle zwei Wochen. Dann bekommt der naechste Termin die Marke - ohne
+           sie stuende der Plan einer Gruppe ganz ohne "hier sind wir" da. */
+        if (!runNowMark()) markNextTermin();
+    }
+
+    function markNextTermin() {
+        const n = new Date();
+        const heute = String(n.getFullYear()) +
+            String(n.getMonth() + 1).padStart(2, '0') + String(n.getDate()).padStart(2, '0');
+        for (const r of rendered) {
+            if (!r.terminYmd || r.terminYmd < heute) continue;
+            const tr = r.dateTd && r.dateTd.closest('tr');
+            if (!tr) return;
+            tr.classList.add('kw-now');
+            tr.title = 'n\u00e4chster Termin dieser Lerngruppe';
+            const sub = tr.nextElementSibling;
+            if (sub && sub.classList.contains('detail-row')) sub.classList.add('kw-now-sub');
+            return;
+        }
+    }
+
     function decorateUntis(data) {
         untisEchoMerge(data);
         const weeks = (data && data.weeks) || {};
@@ -4096,6 +4329,7 @@
             if (r.matTools) r.matTools.insertBefore(chip, r.matTools.firstChild);
             else (r.lbCell || r.lbTd).appendChild(chip);
         }
+        paintTerminDates(termine);
         /* Die Chips kommen erst nach dem Rendern dazu und koennen eine Zelle
            breiter machen - also nochmal ausgleichen. */
         equalizeLbCells();
@@ -4110,7 +4344,7 @@
         if (!window.svpAuth || !svpAuth.hasSession()) return;
         svpAuth.api('svp_untis?page=eq.' + encodeURIComponent(location.pathname) + '&select=data')
             .then(res => (res.ok ? res.json() : null))
-            .then(rows => { if (rows && rows.length && rows[0].data) decorateUntis(rows[0].data); })
+            .then(rows => { if (rows && rows.length && rows[0].data) decorateUntis(untisOnlyGroup(rows[0].data)); })
             .catch(() => { /* kein Stand oder offline: Plan bleibt unverändert */ });
     })();
 
@@ -4394,24 +4628,42 @@
     /* Aus dem Stundenplan kommend: ?kw=36 klappt diese Woche auf, scrollt sie
        in die Mitte und laesst sie kurz aufleuchten (Doc, 01.09.2026 - Klick auf
        eine Stunde soll beim richtigen Stoff landen, nicht am Seitenanfang). */
+    /* Welche Woche traegt eine Zeile? In der Gruppen-Ansicht die des Termins
+       dieser Gruppe (gkw, von paintTerminDates gesetzt), sonst die des Plans. */
+    function weekOf(r) { return String(r.gkw != null ? r.gkw : r.kw); }
+
+    /* Beide Marken laufen noch einmal, sobald die Termine der Gruppe stehen -
+       paintTerminDates ruft sie. */
+    let runKwJump = () => false;
+    let runNowMark = () => false;
+
     (function jumpToWeekFromUrl() {
         let kw = null;
         try { kw = new URLSearchParams(location.search).get('kw'); } catch (e) { return; }
         if (!kw) return;
         const want = String(Number(kw));
+        let done = false;
         const go = () => {
-            const hit = rendered.find(r => String(r.kw) === want);
+            if (done) return true;
+            const hit = rendered.find(r => weekOf(r) === want);
             /* ref traegt kein tr - die Zeile haengt an der Datumszelle. */
             const tr = hit && hit.dateTd && hit.dateTd.closest('tr');
             if (!tr) return false;
+            done = true;
             if (hit.openSubRow) hit.openSubRow();
             tr.scrollIntoView({ block: 'center', behavior: 'smooth' });
             tr.classList.add('kw-jump');
             setTimeout(() => tr.classList.remove('kw-jump'), 2600);
             return true;
         };
-        /* Die Zeilen entstehen erst beim Rendern - einmal jetzt, sonst nachfassen. */
-        if (!go()) setTimeout(go, 400);
+        runKwJump = go;
+        /* Die Zeilen entstehen erst beim Rendern - einmal jetzt, sonst nachfassen.
+           In der Gruppen-Ansicht zaehlt die Woche des TERMINS, und die steht erst,
+           wenn die Untis-Daten da sind (paintTerminDates ruft dann nach). Kommen
+           sie nicht - abgemeldet, offline -, springt der Plan nach 1,5 s eben
+           nach seiner eigenen Woche. */
+        if (GROUP) setTimeout(go, 1500);
+        else if (!go()) setTimeout(go, 400);
     })();
 
     /* Die laufende Kalenderwoche bleibt dauerhaft markiert (Doc, 08.09.2026).
@@ -4429,7 +4681,13 @@
     (function markCurrentWeek() {
         const now = String(isoWeek(new Date()));
         const go = () => {
-            const hit = rendered.find(r => String(r.kw) === now);
+            /* Eine frueher gesetzte Marke muss weg: nach dem Umstellen auf die
+               Termine der Gruppe sitzt sie in einer anderen Zeile. */
+            for (const el of document.querySelectorAll('tr.kw-now, tr.kw-now-sub')) {
+                el.classList.remove('kw-now', 'kw-now-sub');
+                if (/^(laufende Kalenderwoche|n\u00e4chster Termin)/.test(el.title || '')) el.removeAttribute('title');
+            }
+            const hit = rendered.find(r => weekOf(r) === now);
             const tr = hit && hit.dateTd && hit.dateTd.closest('tr');
             if (!tr) return false;
             tr.classList.add('kw-now');
@@ -4438,6 +4696,7 @@
             if (sub && sub.classList.contains('detail-row')) sub.classList.add('kw-now-sub');
             return true;
         };
+        runNowMark = go;
         if (!go()) setTimeout(go, 400);
     })();
 
@@ -5291,6 +5550,9 @@
             if (r.ul) buildDetailList(r.ul, ov.details || row.details || []);
             if (r.refreshExpandable) r.refreshExpandable();
         }
+        /* setDateText hat die Wochenspalte neu gesetzt - in der Gruppen-Ansicht
+           gehoert der Termin der Gruppe wieder darueber. */
+        paintTerminDates(null);
         /* The rows carry new text now - a running search has to judge them again. */
         planSearchRun();
     }

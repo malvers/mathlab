@@ -82,13 +82,31 @@
             .then(m => { SVP_MAP = m; if (CURRENT && cache.has(CURRENT)) render(cache.get(CURRENT)); })
             .catch(() => { });
 
-        function svpPageFor(l) {
+        function svpEntryFor(l) {
             if (!SVP_MAP || !SVP_MAP.pages) return null;
             const subject = String(l.subject || '');
-            const hit = SVP_MAP.pages.find(p =>
+            return SVP_MAP.pages.find(p =>
                 (!p.subjects || !p.subjects.length || p.subjects.includes(subject)) &&
-                (l.classes || []).some(c => (p.classes || []).includes(c)));
+                (l.classes || []).some(c => (p.classes || []).includes(c))) || null;
+        }
+        function svpPageFor(l) {
+            const hit = svpEntryFor(l);
             return hit ? hit.page : null;
+        }
+
+        /* Teilen sich mehrere Lerngruppen einen Plan (FOS 12), oeffnet der Link
+           ihn gleich in der Ansicht DIESER Gruppe (?g=). Gekoppelte Klassen
+           stehen in svp-map.json als "FOG25-2,FOW25-2" - verglichen wird
+           sortiert, auf die Reihenfolge ist kein Verlass. */
+        function svpGroupFor(l) {
+            const hit = svpEntryFor(l);
+            const groups = (hit && hit.groups) || [];
+            if (groups.length < 2) return '';
+            const key = (v) => (Array.isArray(v) ? v : String(v).split(','))
+                .map(x => x.trim()).filter(Boolean).sort().join('|');
+            const want = key(l.classes || []);
+            const g = groups.find(x => key(x) === want);
+            return g ? '&g=' + encodeURIComponent(g.replace(/[^A-Za-z0-9-]+/g, '_')) : '';
         }
 
         /* ISO calendar week of a YYYYMMDD date - the plan pages open at ?kw= */
@@ -164,7 +182,7 @@
             const page = svpPageFor(l);
             const open = page
                 ? '<a class="mp-lesson has-plan' + (off ? ' is-off' : '') + '" href="' +
-                  esc(page) + '?kw=' + isoWeek(l.date) + '" target="_blank" rel="noopener"' +
+                  esc(page) + '?kw=' + isoWeek(l.date) + svpGroupFor(l) + '" target="_blank" rel="noopener"' +
                   ' title="Stoffverteilungsplan dieser Woche">'
                 : '<div class="mp-lesson' + (off ? ' is-off' : '') + '">';
             return open +

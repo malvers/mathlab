@@ -892,6 +892,14 @@ body.shifting #plan-table .shift-col { display: table-cell; }
 }
 .export-menu[hidden] { display: none; }
 .export-menu button.action.export-item { width: 100%; text-align: center; }
+/* Die gerade eingestellte Lerngruppe steht im Menue hervorgehoben - sonst
+   muesste man sie am Knopf ablesen, waehrend das Menue offen ist. */
+.export-menu button.action.export-item.is-current {
+    border-color: var(--cyan);
+    color: var(--cyan);
+}
+/* Der Knopf der Gruppenwahl sagt schon zu, welche Gruppe eingestellt ist. */
+.group-drop > button.export-toggle.on-group { border-color: var(--cyan); }
 
 /* "Zurücksetzen" wirft alles weg — es gehört zum Bearbeiten und ist
    ausserhalb dieses Modus gar nicht erst zu sehen. */
@@ -1890,6 +1898,16 @@ td.date.date-wrap { white-space: normal; }
    so bleibt textContent unveraendert und das Speichern der Zelle wie gehabt. */
 td.date br { display: none; }
 #plan-table td.date, #plan-table th.date-col { width: 1%; }
+/* Gruppen-Ansicht (?g=): in der Wochenspalte steht nicht die Kalenderwoche des
+   Plans, sondern der echte Termin dieser Lerngruppe. Welche der beiden
+   Doppelstunden es ist, steht gedaempft darunter - so bleibt die Spalte so
+   schmal wie bisher. */
+td.date.termin-date .ds {
+    display: block;
+    font-size: 0.78em;
+    opacity: 0.7;
+    letter-spacing: 0.04em;
+}
 /* Bemerkungen sind Randnotizen — sie dürfen umbrechen, damit die
    Thema-Spalte den Platz bekommt */
 #plan-table td.remark, #plan-table th.remark-col { width: 200px; }
