@@ -811,6 +811,7 @@ const link = (function () {
     if (PRESENTER) {
       if (m.p) return;                               // another presenter window: not ours to follow
       if (m.t === 'end') { window.close(); return; }   // Esc on the beamer ended the show
+      if (m.t === 'laser-on') { toast(m.on ? 'Laser an (l)' : 'Laser aus (l)'); return; }
       if (m.t === 'here') send({ t: 'go', si: si, step: step, to: m.from });   // the beamer window reloaded
       else if (m.t === 'go') {
         // answers to our hello: the window that opened us beats a fullscreen one beats any other tab
@@ -828,14 +829,16 @@ const link = (function () {
     }
     if (m.t === 'go' && m.to === me) linked = true;  // the presenter answered our 'here'
     if (!linked) return;
-    if (m.t === 'bye') { if (!mine) linked = false; }
+    if (m.t === 'bye') { if (!mine) linked = false; laser.show(m); }
     else if (m.t === 'end') {                        // Esc in the presenter window ended the show
-      showing = false; linked = false; mine = false;
+      showing = false; linked = false; mine = false; laser.show(m);
       if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
     }
     else if (m.t === 'play') { if (narr.toggle) narr.toggle(); }
     else if (m.t === 'go') apply(m);
     else if (m.t === 'ev') mirror.replay(m);
+    else if (m.t === 'laser') laser.show(m);
+    else if (m.t === 'laser-toggle') laser.toggle();
   }
   if (chan) chan.onmessage = function (e) { receive(e.data, null); };
   addEventListener('message', function (e) {
@@ -911,6 +914,11 @@ const link = (function () {
           send(m);
         }, true);
       });
+      // the laser follows the mouse over a lab as well - its moves never reach this document
+      w.addEventListener('pointermove', function (e) {
+        const r = f.getBoundingClientRect(), k = r.width / (f.offsetWidth || 1);
+        laser.move(r.left + (f.clientLeft + e.clientX) * k, r.top + (f.clientTop + e.clientY) * k);
+      }, true);
     }
     // beamer: the same event, on the same element of its copy
     function guard(w) {
@@ -984,6 +992,101 @@ const link = (function () {
       if (shifted) delete w.performance.now;
     }
     return { watch: watch, replay: replay };
+  })();
+
+  // Laser pointer (Doc, 16.09.2026: "wenn ich die Maus auf presenter bewege, könnte da ein Laser im Show sein?",
+  // then "lass mal immer kommen" and "l schalten ihn!"). The mouse over the presenter's current slide shows as a
+  // red dot at the same place on the beamer, over labs and dice too. It goes out when the mouse leaves the slide
+  // or rests for LASER_REST. On at the start; l in either window switches it - the beamer keeps the switch
+  // (the presenter only reports the mouse) and the presenter window says which way it went.
+  const laser = (function () {
+    const LASER_REST = 2000;                         // ms without a move, then the dot fades (as agreed with Doc)
+    const SIZE = 19;                                 // edge of the square pattern in slide pixels
+    let on = true, dot = null, rest = 0;             // beamer
+    // The dot as a laser through a crossed grating - a subtle grid of points around the beam (Doc, 16.09.2026:
+    // "in der Mitte zu weiß", then "eher so wie ein grid. Wenn man Doppelspalt in 2D macht ... so punkte aber
+    // sehr subtil"). Far field of a 2D grating in a beam: one beam spot per order (m, n), weighted by the single
+    // slit, I = sinc²(π m a/d) · sinc²(π n a/d), with a/d = 1/8 (so the 8th orders are missing). The side orders
+    // are dimmed by SIDE to stay subtle, and the light is exposed like a photo, α = 1 − e^(−E·I): the centre
+    // saturates into the dot, the faint orders stay small points. Doc's photo of a real grid laser (16.09.2026,
+    // "in this dir"): crisp points, the centre with a GLOW. Then "viel zu groß und Kreis": half the size, and no
+    // haze with a round edge - the sinc² envelope alone lets the grid fade out, square as in the photo.
+    // "Viel enger und heller" showed nothing on Doc's screens; back to that look, 50 % smaller, and full red
+    // ("last 4 today 50% kleiner", "und volles rot"). Then "doppelt so dicht": the grating period doubled - half
+    // the pitch, a/d halved so the envelope keeps its width, twice the orders - out to the 7th, the 8th is missing.
+    function grating() {
+      const N = 240, K = 7, PITCH = 1.125, SIGMA = 0.3, AD = 0.125, SIDE = 0.2, E = 5; // lengths in slide pixels
+      const GLOW = [0.3, 0.75];                      // [intensity, radius] around the centre
+      const px2 = N / SIZE;                          // canvas pixels per slide pixel
+      const sinc2 = function (m) { const u = Math.PI * m * AD; return m ? Math.pow(Math.sin(u) / u, 2) : 1; };
+      const spots = [];
+      for (let m = -K; m <= K; m++) for (let n = -K; n <= K; n++) {
+        spots.push([N / 2 + m * PITCH * px2, N / 2 + n * PITCH * px2, (m || n ? SIDE : 1) * sinc2(m) * sinc2(n)]);
+      }
+      const s2 = 2 * Math.pow(SIGMA * px2, 2);
+      const c = document.createElement('canvas');
+      c.width = c.height = N;
+      const g = c.getContext('2d'), img = g.createImageData(N, N), px = img.data;
+      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+        const r2 = Math.pow(x + 0.5 - N / 2, 2) + Math.pow(y + 0.5 - N / 2, 2);
+        let I = GLOW[0] * Math.exp(-r2 / (2 * Math.pow(GLOW[1] * px2, 2)));
+        for (let k = 0; k < spots.length; k++) {
+          const dx = x + 0.5 - spots[k][0], dy = y + 0.5 - spots[k][1];
+          I += spots[k][2] * Math.exp(-(dx * dx + dy * dy) / s2);
+        }
+        const v = 1 - Math.exp(-E * I), o = 4 * (y * N + x);
+        px[o] = 255; px[o + 1] = 0; px[o + 2] = 0; px[o + 3] = 255 * v;
+      }
+      g.putImageData(img, 0, 0);
+      return 'url(' + c.toDataURL() + ')';
+    }
+    let want = null, sent = null, raf = 0;           // presenter
+    // presenter: a mouse position in this window - on the current slide it goes out as a fraction of the slide
+    function move(x, y) {
+      const f = document.querySelector('#pres .p-cur .p-frame');
+      const r = f && f.getBoundingClientRect();
+      want = r && r.width && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom
+        ? { x: (x - r.left) / r.width, y: (y - r.top) / r.height } : null;
+      if (!raf) raf = requestAnimationFrame(flush);   // one message per frame at most
+    }
+    function flush() {
+      raf = 0;
+      if (!want && !sent) return;                    // off, and the beamer knows
+      sent = want;
+      send(want ? { t: 'laser', x: +want.x.toFixed(4), y: +want.y.toFixed(4) } : { t: 'laser' });
+    }
+    // beamer: a position shows the dot, a message without one puts it out
+    function show(m) {
+      clearTimeout(rest);
+      if (!on || m.x === undefined) { if (dot) dot.classList.remove('on'); return; }
+      if (!dot) {
+        dot = document.createElement('div');
+        dot.id = 'laser'; dot.setAttribute('aria-hidden', 'true');
+        dot.style.backgroundImage = grating();
+        document.body.appendChild(dot);
+      }
+      const r = deck.getBoundingClientRect();        // the scaled slide on screen
+      dot.style.setProperty('--lz', (SIZE * r.width / 960).toFixed(1) + 'px');
+      dot.style.transform = 'translate(' + (r.left + m.x * r.width).toFixed(1) + 'px,'
+                                         + (r.top + m.y * r.height).toFixed(1) + 'px)';
+      dot.classList.add('on');
+      rest = setTimeout(function () { dot.classList.remove('on'); }, LASER_REST);
+    }
+    function toggle() {
+      on = !on;
+      if (!on) show({});
+      send({ t: 'laser-on', on: on });
+    }
+    if (PRESENTER) {
+      addEventListener('pointermove', function (e) { move(e.clientX, e.clientY); });
+      document.documentElement.addEventListener('mouseleave', function () { move(-1, -1); });
+    }
+    addEventListener('keydown', function (e) {
+      if ((e.key !== 'l' && e.key !== 'L') || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (PRESENTER) send({ t: 'laser-toggle' });
+      else if (linked) toggle();
+    });
+    return { move: move, show: show, toggle: toggle };
   })();
 
   function toast(t) {

@@ -292,6 +292,13 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
   .p-side{flex-direction:row}
   .p-slot{flex:1 1 0}
 }
+/* laser pointer on the beamer: the mouse over the presenter's current slide (JS sets place, --lz and the
+   diffraction pattern as background) */
+#laser{position:fixed;left:0;top:0;z-index:30;width:var(--lz,19px);height:var(--lz,19px);
+  margin:calc(var(--lz,19px) / -2) 0 0 calc(var(--lz,19px) / -2);pointer-events:none;
+  background:center / 100% 100% no-repeat;
+  opacity:0;transition:opacity .25s ease;will-change:transform}
+#laser.on{opacity:1;transition-duration:.06s}
 #linkmsg{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:40;padding:8px 14px;border-radius:8px;
   background:rgba(255,255,255,.94);box-shadow:0 2px 10px rgba(0,0,0,.3);color:#0E244E;
   font:600 14px Raleway,system-ui,sans-serif}
