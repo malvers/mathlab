@@ -238,8 +238,9 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 /* --- ask Solita (avatar bottom right, Claude Haiku + her DocPad voice) ---- */
 #ask{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:38px;z-index:11;
   font-family:Raleway,system-ui,sans-serif}
+/* the photo stands free - no ring, no white edge (Doc, 16.09.2026: "sieht frei besser aus") */
 #ask-btn{display:block;width:46px;height:46px;padding:0;border:0;border-radius:50%;cursor:pointer;
-  background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.3);outline:1px solid var(--ink);outline-offset:1px;
+  background:transparent;box-shadow:0 2px 8px rgba(0,0,0,.3);
   overflow:hidden;opacity:.92;transition:opacity .2s,transform .2s}
 #ask-btn:hover{opacity:1;transform:scale(1.06)}
 #ask-btn img{width:100%;height:100%;object-fit:cover;display:block}
@@ -247,22 +248,43 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
   background:#fff;border-radius:10px;box-shadow:0 6px 24px rgba(14,36,78,.4);
   padding:12px 12px 10px;color:var(--ink)}
 #ask-panel[hidden]{display:none}
+/* the header sits on its own white strip with a soft shadow, so answers scroll away UNDER it
+   (Doc, 16.09.2026: "setz den Header besser ab") - z-index lifts the shadow above the text */
 #ask-head{font-family:Orbitron,sans-serif;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;
-  color:#7E8FB5;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+  color:#7E8FB5;display:flex;justify-content:space-between;align-items:center;
+  position:relative;z-index:1;margin:-12px -12px 0;padding:11px 12px 9px;background:#fff;
+  border-radius:10px 10px 0 0;box-shadow:0 4px 8px -4px rgba(14,36,78,.35)}
 #ask-close{border:0;background:none;color:#7E8FB5;font-size:16px;line-height:1;cursor:pointer;padding:0 2px}
 #ask-close:hover{color:var(--red)}
 #ask-out{font-size:14px;line-height:1.45;color:var(--body);max-height:230px;overflow:auto;
-  margin-bottom:9px;white-space:pre-wrap}
+  margin-bottom:9px;padding-top:9px;white-space:pre-wrap}
 #ask-out:empty{display:none}
+#ask-out:empty + label{margin-top:10px}
 #ask-out .ask-q{color:var(--ink);font-weight:600}
 #ask-out .ask-err{color:var(--red)}
+/* karaoke: the word Solita is saying right now */
+#ask-out .ask-w{border-radius:3px;transition:background-color .12s,box-shadow .12s}
+#ask-out .ask-w.on{background:color-mix(in srgb,var(--orange) 55%,transparent);
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--orange) 55%,transparent)}
+/* Solita is thinking: a travelling wave of bars, until her voice is ready to play */
+#ask-out .ask-wave{display:flex;align-items:center;gap:3px;height:22px;padding:2px 0}
+#ask-out .ask-wave i{display:block;width:3px;height:100%;border-radius:2px;background:var(--ink);
+  transform:scaleY(.2);animation:askwave 1.1s ease-in-out infinite}
+#ask-out .ask-wave i:nth-child(2){animation-delay:.1s}
+#ask-out .ask-wave i:nth-child(3){animation-delay:.2s}
+#ask-out .ask-wave i:nth-child(4){animation-delay:.3s}
+#ask-out .ask-wave i:nth-child(5){animation-delay:.4s}
+#ask-out .ask-wave i:nth-child(6){animation-delay:.5s}
+#ask-out .ask-wave i:nth-child(7){animation-delay:.6s}
+@keyframes askwave{0%,100%{transform:scaleY(.2)}50%{transform:scaleY(1)}}
+@media (prefers-reduced-motion:reduce){#ask-out .ask-wave i{animation-duration:2.4s}}
 #ask-out::-webkit-scrollbar{width:8px}
 #ask-out::-webkit-scrollbar-thumb{background:#c9d3e6;border-radius:4px}
 #ask-out{scrollbar-width:thin;scrollbar-color:#c9d3e6 transparent}
 #ask label{display:block;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:1.3px;
   text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 #ask-row{display:flex;gap:6px}
-#ask-cost{margin-left:9px;font-weight:400;color:var(--orange);cursor:pointer}
+#ask-cost{margin-left:9px;font-weight:400;color:var(--muted);cursor:pointer}
 #ask-mic,#ask-tts{flex:none;width:34px;display:grid;place-items:center;cursor:pointer;color:var(--ink);
   background:#fff;border:1px solid var(--stroke);border-radius:7px}
 #ask-mic svg,#ask-tts svg{width:16px;height:16px}
@@ -698,7 +720,6 @@ fromHash();
   if (!box) return;
   const AI_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/claude';
   const TTS_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/tts';
-  const SB_ANON = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';   // publishable anon key - client-safe
   const MODEL = 'claude-haiku-4-5';        // ~0.3 ct per question; the voice costs far more than the answer
   const VOICE = 'de-DE-Studio-C';          // Solita's DocPad voice - NEVER the browser voice (Doc)
   const SYS = 'Du bist Solita, die Tutorin in Doc Alvers Mathe-Labor. Du hilfst Schülerinnen und '
@@ -743,16 +764,18 @@ fromHash();
   }
   function showCost() {
     if (!last) { costEl.textContent = ''; costEl.title = 'Kosten der letzten Frage'; return; }
-    costEl.textContent = money(last.claude) + (last.chars ? ' \u2013 ' + last.chars + ' Z' : '');
+    costEl.textContent = money(last.claude);         // voice characters only in the tooltip (Doc, 16.09.2026)
     costEl.title = 'Diese Frage\n'
       + 'Claude (Haiku): ' + money(last.claude) + ' - ' + last.tin + ' Token rein, '
       + last.tout + ' raus, wird ab dem ersten Token berechnet\n'
       + (last.chars
           ? 'Stimme: ' + last.chars + ' Zeichen - frei im Monatskontingent, zum Listenpreis waere es '
             + money(last.chars / 1e6 * RATE.ttsUsd * RATE.eur)
-          : 'Stimme: aus');
+          : 'Stimme: aus')
+      + '\nWartezeit: Claude ' + secs(last.msAi) + (last.msVoice ? ' + Stimme ' + secs(last.msVoice) : '');
   }
-  function addClaude(usage) {
+  function secs(ms) { return ms ? (ms / 1000).toFixed(1).replace('.', ',') + ' s' : '-'; }
+  function addClaude(usage, ms) {
     const u = usage || {};
     last = {
       claude: ((u.input_tokens || 0) * RATE.in
@@ -762,10 +785,11 @@ fromHash();
       tin: (u.input_tokens || 0) + (u.cache_read_input_tokens || 0),
       tout: u.output_tokens || 0,
       chars: 0,
+      msAi: ms, msVoice: 0,
     };
     showCost();
   }
-  function addVoice(chars) { if (last) { last.chars = chars; showCost(); } }
+  function addVoice(chars, ms) { if (last) { last.chars = chars; last.msVoice = ms; showCost(); } }
   // Reading aloud on/off. Same localStorage key as solita.html, so switching her quiet holds here
   // too - and with it off, no TTS request goes out at all (the voice is 97 % of what a question costs).
   const TTS_KEY = 'solita_tts';
@@ -803,9 +827,24 @@ fromHash();
   box.addEventListener('click', function (e) { e.stopPropagation(); });
 
   function pwd() { try { return localStorage.getItem('dev_access') || ''; } catch (e) { return ''; } }
-  function headers() {
-    return { 'Content-Type': 'application/json', 'apikey': SB_ANON,
-             'Authorization': 'Bearer ' + SB_ANON, 'x-app-pass': pwd() };
+  // Every call goes out as a CORS "simple request": no custom headers, the body is plain text (both
+  // functions read it with req.json() anyway) and the password rides in the body, which the claude
+  // function accepts as well as x-app-pass. Custom headers (apikey, Authorization, x-app-pass) made
+  // the browser send an OPTIONS preflight before EVERY call - measured in the Supabase logs on
+  // 16.09.2026, those preflights took 4.6-13.3 s from Doc's Chrome, 62 % of the whole wait. The
+  // gateway does not need the anon key: both functions run with --no-verify-jwt, and the tts guard
+  // accepts the browser's Origin header instead.
+  function post(url, body, signal) {
+    return fetch(url, { method: 'POST', body: JSON.stringify(body), signal: signal });
+  }
+  // Wake both functions while the question is still being typed, at no cost: an empty tts call is
+  // refused before Google is asked, a ping only checks the password. At most once a minute.
+  let warmAt = 0;
+  function warm() {
+    if (Date.now() - warmAt < 60000) return;
+    warmAt = Date.now();
+    post(TTS_URL, {}).catch(function () { });
+    if (pwd()) post(AI_URL, { ping: true, pass: pwd() }).catch(function () { });
   }
   function askPassword() {          // no password yet: the same field asks for it once, then remembers
     label.textContent = 'Passwort — wird auf diesem Gerät gemerkt';
@@ -886,36 +925,107 @@ fromHash();
         try { katex.render(part.slice(1, -1), span, { throwOnError: false, displayMode: false }); }
         catch (e) { span.textContent = part; }
         el.appendChild(span);
-      } else if (part) {
-        el.appendChild(document.createTextNode(part));
+      } else if (part) {                          // one span per word, so her voice can light it up
+        part.split(/(\s+)/).forEach(function (tok) {
+          if (!tok) return;
+          if (/^\s+$/.test(tok)) { el.appendChild(document.createTextNode(tok)); return; }
+          const w = document.createElement('span');
+          w.className = 'ask-w'; w.textContent = tok;
+          el.appendChild(w);
+        });
       }
     });
   }
 
+  // Karaoke (Doc, 16.09.2026): the word Solita is saying lights up. Google returns no word timestamps
+  // for Studio voices - they do not support SSML <mark> - so the times are ESTIMATED: syllables per
+  // word, a pause after commas and sentence ends, spread over the length of the audio. Measured on
+  // 16.09.2026 against Studio-C syntheses of the answer cut off after every word: mean error 0.13 s,
+  // worst 0.24 s, on an answer the weights were NOT tuned on. Letters instead of syllables were twice
+  // as far off, and anchoring on the pauses found in the audio made it worse, not better.
+  // lead/tail: the silence Google puts before and after the speech (measured 0.10 s and 0.09 s).
+  const KARA = { lead: 0.10, tail: 0.09, base: 0.3, sentence: 1.5, comma: 0.6 };
+  function syllables(w) {
+    const v = w.toLowerCase().match(/[aeiouyäöü]+/g);
+    if (v) return v.length;
+    const d = w.replace(/\D/g, '');
+    return d.length * 1.5;                           // a bare number: roughly one and a half per digit
+  }
+  function karaoke(el, a) {
+    const items = [];
+    let pos = 0;
+    el.querySelectorAll('.ask-w').forEach(function (sp) {
+      const w = sp.textContent.replace(/[*_`#>]/g, '');   // what speak() strips is not spoken either
+      const n = syllables(w);
+      if (n) { items.push({ sp: sp, s: pos }); pos += n + KARA.base; }
+      if (/[.!?]["')\]]*$/.test(w)) pos += KARA.sentence;
+      else if (/[,;:]["')\]]*$/.test(w)) pos += KARA.comma;
+    });
+    if (!items.length) return;
+    const last = items[items.length - 1];
+    const total = last.s + syllables(last.sp.textContent) + KARA.base;
+    let on = null;
+    function mark(sp) {
+      if (sp === on) return;
+      if (on) on.classList.remove('on');
+      on = sp;
+      if (!sp) return;
+      sp.classList.add('on');
+      const r = sp.getBoundingClientRect(), o = out.getBoundingClientRect();   // keep her word in view
+      if (r.bottom > o.bottom - 4) out.scrollTop += r.bottom - o.bottom + 24;
+      else if (r.top < o.top + 4) out.scrollTop -= o.top - r.top + 24;
+    }
+    function frame() {
+      if (audio !== a || a.paused) { mark(null); return; }   // stopped, closed or finished
+      if (isFinite(a.duration) && a.duration > 0) {
+        const u = (a.currentTime - KARA.lead) / Math.max(0.1, a.duration - KARA.lead - KARA.tail) * total;
+        let i = -1;
+        while (i + 1 < items.length && items[i + 1].s <= u) i++;
+        mark(i >= 0 ? items[i].sp : null);
+      }
+      requestAnimationFrame(frame);
+    }
+    a.addEventListener('playing', function () { requestAnimationFrame(frame); });
+  }
+
   // Solita's own voice via the tts edge function. NO browser-voice fallback (Doc: "NIEMALS
   // Browserstimme") - if the cloud voice fails, the answer just stays on screen.
-  function speak(text) {
-    if (!ttsOn) return;                             // speaker off: no request, no cost
+  // show() puts the answer on screen only once her voice has arrived (Doc, 16.09.2026: "den Text erst
+  // zeigen, wenn die audiodaten da sind"), so reading and hearing start together. Speaker off, nothing
+  // to say, no voice or a voice that hangs: the answer shows anyway.
+  const TTS_WAIT = 20000;                            // ms - a hanging voice must not hide the answer
+  function speak(text, show) {
+    let shown = false, el = null;
+    function once() { if (!shown) { shown = true; el = show(); } }
     const clean = String(text)
       .replace(/\$\$[\s\S]*?\$\$/g, ' ').replace(/\$[^$\n]*?\$/g, ' ')   // maths is shown, not read
       .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}️‍]/gu, '')
       .replace(/[*_`#>]/g, '')
       .replace(/\s+/g, ' ').trim();
-    if (!clean) return;
-    // NOT headers(): the tts function has no password gate, and its CORS preflight does not allow
-    // the x-app-pass header - sending it would make the browser block the whole request.
-    fetch(TTS_URL, { method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON, 'Authorization': 'Bearer ' + SB_ANON },
-      body: JSON.stringify({ text: clean.slice(0, 4800), voice: VOICE, languageCode: 'de-DE', speakingRate: 1.0 }) })
+    if (!ttsOn || !clean) { once(); return; }        // speaker off: no request, no cost
+    const ctl = window.AbortController ? new AbortController() : null;
+    const timer = setTimeout(function () { if (ctl) ctl.abort(); }, TTS_WAIT);
+    const t0 = Date.now();
+    // no password here: the tts function has no password gate - never send it where it is not needed
+    post(TTS_URL, { text: clean.slice(0, 4800), voice: VOICE, languageCode: 'de-DE', speakingRate: 1.0 },
+         ctl ? ctl.signal : undefined)
       .then(function (r) { return r.json(); })
       .then(function (j) {
+        clearTimeout(timer);
         if (!j || !j.audioContent) throw new Error('keine Stimme');
-        addVoice(clean.length);
+        addVoice(clean.length, Date.now() - t0);     // Google bills it even if it is not played
+        once();
+        if (!ttsOn || panel.hidden) return;          // switched off or closed while she was fetching
         stopAudio();
         audio = new Audio('data:audio/mp3;base64,' + j.audioContent);
+        if (el) karaoke(el, audio);
         audio.play().catch(function () { });
       })
-      .catch(function () { say('Solitas Stimme war gerade nicht erreichbar.', 'ask-err'); });
+      .catch(function () {
+        clearTimeout(timer);
+        once();
+        say('Solitas Stimme war gerade nicht erreichbar.', 'ask-err');
+      });
   }
   function stopAudio() { if (audio) { try { audio.pause(); } catch (e) { } audio = null; } }
 
@@ -924,10 +1034,7 @@ fromHash();
     if (!v || busy) return;
     if (!pwd()) {                                   // first use on this device: verify and remember
       busy = true; send.disabled = true;
-      fetch(AI_URL, { method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': SB_ANON,
-                   'Authorization': 'Bearer ' + SB_ANON, 'x-app-pass': v },
-        body: JSON.stringify({ ping: true }) })
+      post(AI_URL, { ping: true, pass: v })
         .then(function (r) {
           busy = false; send.disabled = false;
           if (!r.ok) { say('Passwort stimmt nicht.', 'ask-err'); input.value = ''; return; }
@@ -941,26 +1048,31 @@ fromHash();
     if (ear && ear.active) ear.stop();               // nothing may land in the field behind the answer
     input.value = '';
     say('<span class="ask-q">' + v.replace(/[<&]/g, function (c) { return c === '<' ? '&lt;' : '&amp;'; }) + '</span>');
-    const wait = say('Solita denkt nach ...');
-    fetch(AI_URL, { method: 'POST', headers: headers(), body: JSON.stringify({
-      model: MODEL, max_tokens: 600,
+    // the wave runs while Claude thinks AND while her voice is fetched - it gives way to the answer
+    const wait = say('<span class="ask-wave" role="status" aria-label="Solita denkt nach">'
+      + '<i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>');
+    const t0 = Date.now();
+    post(AI_URL, { pass: pwd(), model: MODEL, max_tokens: 600,
       messages: [{ role: 'system', content: SYS },
-                 { role: 'user', content: context(v) + '\n\nFrage der Klasse: ' + v }] }) })
+                 { role: 'user', content: context(v) + '\n\nFrage der Klasse: ' + v }] })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
-        busy = false; send.disabled = false;
         const text = res.ok && res.j && res.j.choices && res.j.choices[0]
           && res.j.choices[0].message && res.j.choices[0].message.content;
         if (!text) {
+          busy = false; send.disabled = false;
           wait.className = 'ask-err';
           wait.textContent = (res.j && res.j.error) ? String(res.j.error) : 'Das hat nicht geklappt.';
           return;
         }
-        addClaude(res.j.usage);
-        render(wait, text);
-        out.scrollTop = out.scrollHeight;
-        input.value = ''; input.focus();             // done - empty line for the next question
-        speak(text);
+        addClaude(res.j.usage, Date.now() - t0);
+        speak(text, function () {
+          busy = false; send.disabled = false;
+          render(wait, text);
+          out.scrollTop = out.scrollHeight;
+          input.value = ''; input.focus();           // done - empty line for the next question
+          return wait;                               // karaoke lights up the words in here
+        });
       })
       .catch(function () {
         busy = false; send.disabled = false;
@@ -993,6 +1105,7 @@ fromHash();
     panel.hidden = false;
     if (!pwd()) askPassword(); else askQuestion();
     input.focus();
+    warm();
   }
   function close() { panel.hidden = true; stopAudio(); }
 
