@@ -436,8 +436,11 @@ CSS = """
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:#0E244E;overflow:hidden}
 body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
-#stage{position:fixed;inset:0;display:grid;place-items:center}
-#deck{width:__W__px;height:__H__px;position:relative;transform-origin:center center}
+/* centred by offsets, not by a grid: on a phone the grid track grows to the unscaled
+   deck size and pushes the scaled deck off-centre, half out of the screen */
+#stage{position:fixed;inset:0;overflow:hidden}
+#deck{width:__W__px;height:__H__px;position:absolute;left:calc(50% - __W__px / 2);top:calc(50% - __H__px / 2);
+  transform-origin:center center}
 .slide{position:absolute;inset:0;display:none;overflow:hidden;
   background-image:
     radial-gradient(rgba(14,36,78,.10) 1px, transparent 1px),
@@ -609,7 +612,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 .step.on{opacity:1}
 
 /* --- HUD ---------------------------------------------------------------- */
-#hud{position:fixed;right:10px;bottom:8px;z-index:9;display:flex;gap:6px}
+#hud{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:8px;z-index:9;display:flex;gap:6px}
 #hud button{display:flex;align-items:center;justify-content:center;width:22px;height:22px;padding:0;border:0;border-radius:5px;
   background:#7E8FB5;box-shadow:0 1px 1px rgba(0,0,0,.12);   /* Dostojewski's colour on the greeting slide */
   color:#fff;opacity:.85;cursor:pointer;transition:opacity .2s}
@@ -627,7 +630,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
   font-family:Orbitron,sans-serif;font-size:10px;letter-spacing:1.5px;color:var(--green);
   text-transform:uppercase}
 /* slide number typed for a jump (1 7 Enter) */
-#jump{position:fixed;right:10px;bottom:42px;z-index:9;padding:4px 10px;border-radius:7px;
+#jump{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:42px;z-index:9;padding:4px 10px;border-radius:7px;
   background:rgba(255,255,255,.85);box-shadow:0 1px 4px rgba(0,0,0,.28);color:#0E244E;
   font:600 14px Raleway,system-ui,sans-serif}
 /* overview of all slides (o, grid button in the HUD bottom right) */
@@ -648,7 +651,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 .ov-num{position:absolute;left:8px;bottom:6px;padding:2px 7px;border-radius:5px;
   background:rgba(14,36,78,.78);color:#fff;font:600 12px Raleway,system-ui,sans-serif}
 /* --- ask Solita (avatar bottom right, Claude Haiku + her DocPad voice) ---- */
-#ask{position:fixed;right:10px;bottom:38px;z-index:11;
+#ask{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:38px;z-index:11;
   font-family:Raleway,system-ui,sans-serif}
 #ask-btn{display:block;width:46px;height:46px;padding:0;border:0;border-radius:50%;cursor:pointer;
   background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.3);outline:1px solid var(--ink);outline-offset:1px;
@@ -697,7 +700,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
   html,body{overflow:visible;background:#fff}
   #hud,#bar,.play-big,.play-big-label{display:none}
   #stage{position:static;display:block}
-  #deck{transform:none!important;width:auto;height:auto}
+  #deck{transform:none!important;width:auto;height:auto;position:static}
   .slide{display:block!important;position:relative;width:__W__px;height:__H__px;
     page-break-after:always;break-after:page}
   .step{opacity:1!important}
@@ -1293,7 +1296,7 @@ PAGE = """<!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>__TITLE__</title>
 <meta name="description" content="__SUB__">
 <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
