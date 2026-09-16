@@ -2780,9 +2780,17 @@ tr.wk-edit .sub-tabs:not(.on-notizen) .sub-tools { display: inline-flex; }
    groesser (0.68 -> 0.8 rem). */
 /* Doc, 15.09.2026: "Ferien alle immer gruen" -> phi green at 60 % opacity,
    then "schrift dunkelblau". Previous values kept below. */
+/* Doc, 16.09.2026: "hier genauso" - same look as the current week row:
+   green tint and bar at both edges, almost transparent in the middle.
+   The row is one colspan cell, so the gradient can sit on the td. */
 tr.ferien td {
     /* background: rgba(120, 160, 220, 0.07); color: var(--muted); */
-    background: rgba(121, 158, 49, 0.6);
+    /* background: rgba(121, 158, 49, 0.6); */
+    background-image: linear-gradient(90deg,
+        rgba(121, 158, 49, 0.6) 0%,
+        rgba(121, 158, 49, 0.05) 50%,
+        rgba(121, 158, 49, 0.6) 100%);
+    box-shadow: inset 2px 0 0 rgb(121, 158, 49), inset -2px 0 0 rgb(121, 158, 49);
     color: rgb(20, 44, 92);   /* same dark blue as .mat-ico-movie in light mode */
     font-family: 'Orbitron', sans-serif;
     font-size: 0.8rem;
@@ -2790,6 +2798,8 @@ tr.ferien td {
     text-align: center;
     padding: 9px 12px;
 }
+/* Dark scheme: the middle is now the dark row ground, dark blue would vanish. */
+html:not(.svp-light) tr.ferien td { color: var(--text); }
 
 footer.page-foot {
     max-width: 1200px;
