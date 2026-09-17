@@ -195,7 +195,11 @@ class HtmlDeck:
         # own prefix; the Informatik series do not (their OneDrive folder was the prefix),
         # so "normalisierung" or "wiederholung-lb1" would collide between FOS 12 and
         # Inf 11/13. --prefix puts the series in front of the file name, nothing else.
-        self.name = PREFIX + os.path.splitext(os.path.basename(out_name))[0]
+        base = os.path.splitext(os.path.basename(out_name))[0]
+        tag = PREFIX.rstrip("-")
+        if tag and base.endswith("-" + tag):   # "datenschutz-info9" -> "info9-datenschutz", not twice
+            base = base[:-len(tag) - 1]
+        self.name = PREFIX + base
         self.slides = []
         self.doc_title = self.name
         self.subtitle = ""
@@ -696,7 +700,13 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 #help td:first-child{padding-right:16px;white-space:nowrap}
 #help kbd{display:inline-block;min-width:22px;padding:1px 6px;margin-right:4px;border-radius:5px;text-align:center;
   background:#D8E2F3;border:1px solid #A3B2CF;font:600 12px Raleway,system-ui,sans-serif;color:#0E244E}
-#help .or{color:#7E8FB5;margin-right:4px}
+#help .or{display:inline-block;width:8px;margin-right:4px}
+#help kbd.ico svg{display:inline-block;width:11px;height:11px;vertical-align:-1.5px}
+#help .hint{font:400 11px Raleway,system-ui,sans-serif;color:#7E8FB5;vertical-align:middle;margin-left:2px}
+#help .navbtn{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-left:3px;border-radius:4px;
+  background:#7E8FB5;color:#fff;vertical-align:middle;position:relative;top:-1.5px}   /* mini copies of the footer triangles, centred on the cap height (measured) */
+#help .navbtn svg{display:block;width:11px;height:11px}
+#help tr.sep td{height:13px;padding:0;background:linear-gradient(#C3CFE4,#C3CFE4) center/100% 1px no-repeat}
 /* Solita reads the deck (say() + deck_audio.mjs): play button on the title slide, in the middle
    of the orbit ring (Doc, 15.09.2026: "kleiner, alles gruen, weiter nach rechts, 2. Folie") */
 .play-big{position:absolute;left:838px;top:244px;width:44px;height:44px;border-radius:50%;
@@ -1024,8 +1034,9 @@ addEventListener('click', e => {
   const prevB = document.getElementById('nav-prev'), nextB = document.getElementById('nav-next');
   if (!prevB || !nextB) return;
   const tri = d => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + d + '" fill="currentColor" stroke="none"/></svg>';
-  prevB.innerHTML = tri('M16 5L7 12L16 19Z');
-  nextB.innerHTML = tri('M8 5L17 12L8 19Z');
+  const PREV = 'M16 5L7 12L16 19Z', NEXT = 'M8 5L17 12L8 19Z';
+  prevB.innerHTML = tri(PREV);
+  nextB.innerHTML = tri(NEXT);
   prevB.onclick = () => jump(-1);
   nextB.onclick = () => jump(1);
   painted.push(() => { prevB.disabled = si === 0; nextB.disabled = si === slides.length - 1; });
@@ -1037,23 +1048,39 @@ addEventListener('click', e => {
   const help = document.createElement('div');
   help.id = 'help'; help.hidden = true;
   help.setAttribute('role', 'dialog'); help.setAttribute('aria-label', 'Tastenkürzel');
-  const K = keys => keys.map(k => k === '/' ? '<span class="or">/</span>' : '<kbd>' + k + '</kbd>').join('');
+  // Cmd and Win as the symbols printed on the keys, not as words (Doc, 17.09.2026)
+  const ICON = {
+    Cmd: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">'
+       + '<path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"/></svg>',
+    Win: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 2h8.5v8.5H2zM13.5 2H22v8.5h-8.5zM2 13.5h8.5V22H2zM13.5 13.5H22V22h-8.5z"/></svg>'
+  };
+  const K = keys => keys.map(k => k === '/' ? '<span class="or"></span>'   // '/' = a wider gap between alternatives, no slash drawn
+    : ICON[k] ? '<kbd class="ico" title="' + k + '" aria-label="' + k + '">' + ICON[k] + '</kbd>'
+    : '<kbd>' + k + '</kbd>').join('');
+  const hint = word => '<span class="hint">' + word + '</span>';   // what the letter stands for
+  // null = a thin line between the groups: navigate | present | Solita | help (Doc, 17.09.2026)
   const rows = [
     [K(['→', '/', 'Leertaste']), 'nächster Schritt – auch ein Klick auf die Folie'],
     [K(['←']), 'einen Schritt zurück'],
-    [K(['Shift', '→', '/', 'Shift', '←']), 'ganze Folie vor / zurück, fertig aufgebaut – wie ◀ ▶'],
+    [K(['Shift', '→', '/', 'Shift', '←']), 'ganze Folie vor / zurück – wie '
+      + '<span class="navbtn">' + tri(PREV) + '</span><span class="navbtn">' + tri(NEXT) + '</span>'],
     [K(['Home', '/', 'End']), 'erste / letzte Folie'],
     [K(['1', '7', 'Enter']), 'zu Folie 17 springen'],
-    [K(['O']), 'Übersicht aller Folien'],
-    [K(['F']), 'Vollbild – mit Beamer: Präsentation + Referentenansicht'],
+    [K(['O']) + hint('Overview'), 'Übersicht aller Folien'],
+    null,
+    [K(['F']) + hint('Fullscreen'), 'Vollbild – mit Beamer: Präsentation + Referentenansicht'],
     [K(['R']), 'Referentenansicht von Hand öffnen'],
-    [K(['L']), 'Laserpunkt an / aus (in der Präsentation)'],
+    [K(['Cmd', 'F1', '/', 'Win', 'P']), 'Bildschirm erweitern statt spiegeln – falls keine Referentenansicht kommt'],
+    [K(['L']), 'Pointer an / aus (in der Präsentation)'],
+    null,
     [K(['P']), 'Solita erklärt – Start / Pause'],
+    null,
     [K(['Esc']), 'schließen – beendet auch die Präsentation'],
     [K(['H', '/', '?']), 'diese Hilfe']
   ];
   help.innerHTML = '<h4>Tastenkürzel</h4><table>'
-    + rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') + '</table>';
+    + rows.map(r => r ? '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>'
+                      : '<tr class="sep"><td colspan="2"></td></tr>').join('') + '</table>';
   nextB.after(helpB);
   helpB.after(help);
   helpB.onclick = () => { help.hidden = !help.hidden; };
