@@ -6,6 +6,8 @@
 //   • Supabase DB   — % of the 0.5 GB Free-Plan database-size limit
 //   • GitHub Pages  — % of the 1 GB published-site limit (a Pages deploy timed out at ~209 MB on 2026-06-30;
 //                     public repo → no token needed, and Actions minutes/bandwidth aren't a concern here)
+//   • GitHub Repo   — % of 1 GB for the whole repository WITH history (GitHub warns above 1 GB) - Pages alone hid
+//                     379 MB of old DOCPAD bundles in the history (17.09.2026)
 //
 // REUSES existing infra only — NO new tokens/secrets (Rule 18/21):
 //   • R2_*            — same S3 creds the media-sign function already uses (list bucket → sum object sizes)
@@ -36,6 +38,7 @@ const GB = 1024 ** 3;
 const R2_QUOTA_GB = 10;    // Cloudflare R2 free storage
 const DB_QUOTA_GB = 0.5;   // Supabase Free-Plan database size limit
 const GH_PAGES_QUOTA_GB = 1;          // GitHub Pages published-site soft limit
+const GH_REPO_QUOTA_GB = 1;           // GitHub: repositories should stay below 1 GB (warning), 5 GB is the hard advice
 const GH_REPO = 'malvers/mathlab';    // public repo → no token needed for the Git Trees API
 
 // Sum every object's <Size> in the R2 bucket via S3 ListObjectsV2 (paginated). Same creds as media-sign.
@@ -99,6 +102,21 @@ async function ghPagesBytesUsed(): Promise<number | null> {
       }
     }
     return total;
+  } catch (_) { return null; }
+}
+
+// The whole repository WITH its history, as GitHub counts it - a different number from Pages: Pages is only what is
+// published now, the repo keeps every version of every file ever pushed (Doc, 17.09.2026: 12 encrypted DOCPAD bundles
+// = 379 MB of history while Pages showed 27 %). The repo API gives `size` in KB, public repo → no token. null on any
+// problem, like Pages, so it never breaks the mail.
+async function ghRepoBytes(): Promise<number | null> {
+  try {
+    const r = await fetch(`https://api.github.com/repos/${GH_REPO}`, {
+      headers: { 'User-Agent': 'infra-usage-watchdog', 'Accept': 'application/vnd.github+json' },
+    });
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j && typeof j.size === 'number' ? j.size * 1024 : null;
   } catch (_) { return null; }
 }
 
@@ -282,7 +300,9 @@ Deno.serve(async (req) => {
     const nowD = new Date();
     const monthStart = new Date(Date.UTC(nowD.getUTCFullYear(), nowD.getUTCMonth(), 1));
     const monthLabel = monthStart.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', timeZone: 'UTC' });
-    const [r2, db, ai, searches, ghBytes, monthTotal, ttsChars] = await Promise.all([r2BytesUsed(), dbBytesUsed(), aiCostToday(), geminiSearchCount(), ghPagesBytesUsed(), aiTotalSinceEur(monthStart.toISOString()), ttsCharsSince(monthStart.toISOString())]);
+    const [r2, db, ai, searches, ghBytes, monthTotal, ttsChars, repoBytes] = await Promise.all([r2BytesUsed(), dbBytesUsed(), aiCostToday(), geminiSearchCount(), ghPagesBytesUsed(), aiTotalSinceEur(monthStart.toISOString()), ttsCharsSince(monthStart.toISOString()), ghRepoBytes()]);
+    const repoPctN = repoBytes != null ? pctN(repoBytes, GH_REPO_QUOTA_GB) : null;
+    const repoPct = repoPctN != null ? de(repoPctN, 2) : '';
     const r2pctN = pctN(r2, R2_QUOTA_GB), dbpctN = pctN(db, DB_QUOTA_GB);
     const r2pct = de(r2pctN, 2), dbpct = de(dbpctN, 2);   // 2 Nachkommastellen, deutsche Komma-Schreibweise
     const ghPctN = ghBytes != null ? pctN(ghBytes, GH_PAGES_QUOTA_GB) : null;   // null → GitHub unreachable, skip the row
@@ -290,7 +310,7 @@ Deno.serve(async (req) => {
     const ttsPctN = ttsChars / TTS_FREE_CHARS * 100;          // monthly, resets with the quota on the 1st
     const ttsPct = de(ttsPctN, 2);
     const ttsDe = ttsChars.toLocaleString('de-DE');
-    const warn = r2pctN >= 80 || dbpctN >= 80 || (ghPctN != null && ghPctN >= 80) || ttsPctN >= 80;
+    const warn = r2pctN >= 80 || dbpctN >= 80 || (ghPctN != null && ghPctN >= 80) || (repoPctN != null && repoPctN >= 80) || ttsPctN >= 80;
     // Always list all three providers — Doc wants Gemini/DeepSeek visible even at 0 (2026-07-04). Any
     // provider that actually billed but isn't in this fixed order gets appended so nothing is ever hidden.
     const FIXED_PROVS = ['claude', 'gemini', 'deepseek'];
@@ -310,6 +330,7 @@ Deno.serve(async (req) => {
       `• R2-Storage:  ${r2pct}% von ${R2_QUOTA_GB} GB  (${gbDe(r2)} GB)\n` +
       `• Supabase-DB: ${dbpct}% von ${de(DB_QUOTA_GB, 1)} GB  (${gbDe(db)} GB)\n` +
       (ghPctN != null ? `• GitHub Pages: ${ghpct}% von ${GH_PAGES_QUOTA_GB} GB  (${gbDe(ghBytes!)} GB)\n` : '') +
+      (repoPctN != null ? `• GitHub Repo mit Historie: ${repoPct}% von ${GH_REPO_QUOTA_GB} GB  (${gbDe(repoBytes!)} GB)\n` : '') +
       `• Solitas Stimme: ${ttsPct}% von 1 Mio Zeichen/Monat  (${ttsDe} Zeichen seit ${monthLabel})\n` +
       aiText +
       (searches > 0 ? `\nGemini-Suchen (24 h): ${searches} / 1500 gratis\n` : '') + `\n` +
@@ -362,8 +383,10 @@ Deno.serve(async (req) => {
       + usageRow('☁️', 'Cloudflare R2', r2pctN, r2pct, gbDe(r2), `${R2_QUOTA_GB} GB`, false)
       + usageRow('🗄️', 'Supabase DB', dbpctN, dbpct, gbDe(db), `${de(DB_QUOTA_GB, 1)} GB`, true)
       + (ghPctN != null ? usageRow('🐙', 'GitHub Pages', ghPctN, ghpct, gbDe(ghBytes!), `${GH_PAGES_QUOTA_GB} GB`, false) : '')
+      + (repoPctN != null ? usageRow('🐙', `GitHub Repo <span style="color:${C.muted};font-size:12px;">mit Historie</span>`,
+                                     repoPctN, repoPct, gbDe(repoBytes!), `${GH_REPO_QUOTA_GB} GB`, ghPctN != null) : '')
       + usageRow('🔊', `Solitas Stimme <span style="color:${C.muted};font-size:12px;">seit ${monthLabel}</span>`,
-                 ttsPctN, ttsPct, ttsDe, '1 Mio Zeichen', ghPctN != null, 'Zeichen')
+                 ttsPctN, ttsPct, ttsDe, '1 Mio Zeichen', (ghPctN != null) !== (repoPctN != null), 'Zeichen')
       + `</tbody></table>`
       + aiHtml
       + `<div style="margin:22px 0 0;padding:12px 14px;border-radius:8px;font-size:14px;font-weight:bold;`
@@ -383,12 +406,14 @@ Deno.serve(async (req) => {
     const spoken =
       `Unsere Infra-Auslastung: R2-Speicher ${Math.round(r2pctN)} Prozent, Datenbank ${Math.round(dbpctN)} Prozent`
       + (ghPctN != null ? `, GitHub Pages ${Math.round(ghPctN)} Prozent` : '')
+      + (repoPctN != null ? `, GitHub-Repo mit Historie ${Math.round(repoPctN)} Prozent` : '')
       + (ai.total > 0 ? `. KI-Kosten der letzten 24 Stunden ${eurSpoken(ai.total)}` : '')
       + (monthTotal > 0 ? `, seit ${monthLabel} zusammen ${eurSpoken(monthTotal)}` : '')
       + (searches > 0 ? `, davon ${searches} von 1500 gratis Suchen` : '')
       + `. ${warn ? 'Achtung, ein Wert liegt über 80 Prozent.' : 'Alles im grünen Bereich.'}`;
     if (!b.dry) await sendMail(subject, body, html, pass);
-    return json({ ok: true, r2pct, dbpct, ghpct: ghPctN != null ? ghpct : null, r2bytes: r2, dbbytes: db, ghbytes: ghBytes, searches, ai: { byProvider: ai.byProvider, total: ai.total, calls: ai.calls, monthTotal, monthLabel }, body, html, spoken, mailed: !b.dry });
+    return json({ ok: true, r2pct, dbpct, ghpct: ghPctN != null ? ghpct : null, r2bytes: r2, dbbytes: db, ghbytes: ghBytes,
+                  repopct: repoPctN != null ? repoPct : null, repobytes: repoBytes, searches, ai: { byProvider: ai.byProvider, total: ai.total, calls: ai.calls, monthTotal, monthLabel }, body, html, spoken, mailed: !b.dry });
   } catch (e) {
     return json({ error: String((e && (e as Error).message) || e) }, 502);
   }
