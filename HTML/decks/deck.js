@@ -132,17 +132,19 @@ addEventListener('click', e => {
        + '<path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"/></svg>',
     Win: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 2h8.5v8.5H2zM13.5 2H22v8.5h-8.5zM2 13.5h8.5V22H2zM13.5 13.5H22V22h-8.5z"/></svg>'
   };
-  const K = keys => keys.map(k => k === '/' ? '<span class="or"></span>'   // '/' = a wider gap between alternatives, no slash drawn
+  // '/' = a wider gap between alternatives, no slash drawn; '|' = a narrower one between two single keys
+  const K = keys => keys.map(k => k === '/' ? '<span class="or"></span>' : k === '|' ? '<span class="or near"></span>'
     : ICON[k] ? '<kbd class="ico" title="' + k + '" aria-label="' + k + '">' + ICON[k] + '</kbd>'
     : '<kbd>' + k + '</kbd>').join('');
   const hint = word => '<span class="hint">' + word + '</span>';   // what the letter stands for
+  const avatar = document.querySelector('#ask-btn img');   // her photo bottom right, shown small in the Solita row
   // null = a thin line between the groups: navigate | present | Solita | help (Doc, 17.09.2026)
   const rows = [
-    [K(['→', '/', 'Leertaste']), 'nächster Schritt – auch ein Klick auf die Folie'],
+    [K(['→', '|', 'Leertaste']), 'nächster Schritt – auch ein Klick auf die Folie'],
     [K(['←']), 'einen Schritt zurück'],
     [K(['Shift', '→', '/', 'Shift', '←']), 'ganze Folie vor / zurück – wie '
       + '<span class="navbtn">' + tri(PREV) + '</span><span class="navbtn">' + tri(NEXT) + '</span>'],
-    [K(['Home', '/', 'End']), 'erste / letzte Folie'],
+    [K(['Home', '|', 'End']), 'erste / letzte Folie'],
     [K(['1', '7', 'Enter']), 'zu Folie 17 springen'],
     [K(['O']) + hint('Overview'), 'Übersicht aller Folien'],
     null,
@@ -151,10 +153,10 @@ addEventListener('click', e => {
     [K(['Cmd', 'F1', '/', 'Win', 'P']), 'Bildschirm erweitern statt spiegeln – falls keine Referentenansicht kommt'],
     [K(['L']), 'Pointer an / aus (in der Präsentation)'],
     null,
-    [K(['P']), 'Solita erklärt – Start / Pause'],
+    [K(['P']), 'Solita erklärt – Start / Pause' + (avatar ? ' – rechts unten Solita fragen <img class="navpic" src="' + avatar.src + '" alt="">' : '')],
     null,
     [K(['Esc']), 'schließen – beendet auch die Präsentation'],
-    [K(['H', '/', '?']), 'diese Hilfe']
+    [K(['H', '|', '?']), 'diese Hilfe']
   ];
   help.innerHTML = '<h4>Tastenkürzel</h4><table>'
     + rows.map(r => r ? '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>'
@@ -187,9 +189,9 @@ addEventListener('click', e => {
       clearTimeout(timer); timer = setTimeout(clear, 2500);
       e.preventDefault();
     } else if (e.key === 'Enter' && buf) {
-      const n = parseInt(buf, 10);
+      const n = Math.min(parseInt(buf, 10), slides.length);   // past the end: the last slide (Doc, 17.09.2026)
       clear();
-      if (n >= 1 && n <= slides.length) {
+      if (n >= 1) {
         if (typeof narr !== 'undefined') narr.stop();   // a jump pauses Solita like turning by hand
         si = n - 1; step = 0; paint();
       }
