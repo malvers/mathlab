@@ -35,7 +35,7 @@
       <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
 <section class="slide content"><h3>Die Ausleihdatenbank der Stadtbibliothek</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:180px"><col style="width:150px"><col style="width:486px"></colgroup><tr><th>Tabelle</th><th>Zeilen</th><th>Inhalt</th></tr><tr><td class="b">Medium</td><td>ca. 4 000</td><td>Signatur, Titel, Autor, Jahr, Kategorie</td></tr><tr><td class="b">Leser</td><td>ca. 900</td><td>Lesernummer, Ort, Altersgruppe</td></tr><tr><td class="b">Ausleihe</td><td style="background:#FBEBBF">ca. 25 000</td><td>Signatur, Lesernummer, von, bis, zurück</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Bei dieser Größe merkt man <b>Denkfehler an der Zeilenzahl</b>, nicht mehr am Augenschein</p>
 <p class="line l0 step" data-g="1">Und ein JOIN ohne Bedingung liefert hier <b>über 20 Millionen</b> Zeilen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
-<section class="slide content"><h3>Arbeitsweise bei großen Datensätzen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Erst **COUNT(*)** je Tabelle — kennt man die Größenordnung, erkennt man Unsinn</p>
+<section class="slide content"><h3>Arbeitsweise bei großen Datensätzen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Erst <b>COUNT(*)</b> je Tabelle — kennt man die Größenordnung, erkennt man Unsinn</p>
 <p class="line l0 step" data-g="1">Abfragen <b>schrittweise</b> aufbauen: erst der JOIN, dann der Filter, dann die Gruppierung</p>
 <p class="line l0 step" data-g="2">Zwischendurch <b>LIMIT 20</b> anhängen, um schnell zu sehen, ob die Form stimmt</p>
 <p class="line l0 step" data-g="3">Erst am Ende die Aggregate — sonst sieht man die Zwischenergebnisse nie</p>
@@ -75,7 +75,7 @@ WHERE (SELECT COUNT(*) FROM Ausleihe a
 <p class="line l0 step" data-g="2">Deshalb nehmen Profis dort <b>NOT EXISTS</b> oder einen LEFT JOIN</p>
 <p class="line l0 step" data-g="3"><b>LIMIT</b> heißt in manchen Systemen <b>TOP</b> oder <b>FETCH FIRST</b> — der Standard kam spät</p>
 <p class="line l0 step" data-g="4">Eine Abfrage über Millionen Zeilen läuft mit passendem Index oft in <b>Millisekunden</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
-<section class="slide content"><h3>Eure Aufgabe heute</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Verschafft euch mit **COUNT(*)** einen Überblick über die drei Tabellen</p>
+<section class="slide content"><h3>Eure Aufgabe heute</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Verschafft euch mit <b>COUNT(*)</b> einen Überblick über die drei Tabellen</p>
 <p class="line l0 step" data-g="1">Bearbeitet die <b>sechs Aufgaben</b>, jede mit vorher notierter Erwartung</p>
 <p class="line l0 step" data-g="2">Schreibt <b>eine</b> Aufgabe sowohl mit Unterabfrage als auch mit JOIN</p>
 <p class="line l0 step" data-g="3">Vergleicht beide: welche ist <b>lesbarer</b>, welche vermutlich schneller?</p>
