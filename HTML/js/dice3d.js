@@ -115,6 +115,7 @@ function faceTexture(value, color, style) {
 }
 
 const HOME = new THREE.Vector3(2.3, 3.2, 3.9).normalize().multiplyScalar(4.5);
+const SHADOW_FADE = 20 * Math.PI / 180;                  // turned this far from home, the floor shadow is gone
 
 export class DieView {
     /**
@@ -295,7 +296,13 @@ export class DieView {
             this.mesh.quaternion.copy(this.restQ);
             this.mesh.position.y = 0;
         }
-        this.shadow.material.opacity = 1 - this.mesh.position.y;
+        // The contact shadow is a floor, and a floor only belongs to the resting view: turned freely by hand it showed as
+        // a dark patch beside or behind the die (Doc, 17.09.2026: "der Würfel hat einen Schattenboden ... das ist bei
+        // freien Drehen nicht so gut"). It fades out within SHADOW_FADE of the home view and comes back when a roll
+        // glides the camera home.
+        const off = Math.max(this.camera.position.angleTo(HOME), this.camera.up.angleTo(Y));
+        const near = Math.max(0, 1 - off / SHADOW_FADE);
+        this.shadow.material.opacity = (1 - this.mesh.position.y) * near * near * (3 - 2 * near);
         this.materials.forEach(mat => { mat.emissiveIntensity = this.glow ? 0.16 : 0; });
 
         this.controls.update();
