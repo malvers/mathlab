@@ -69,31 +69,8 @@ def live_frames(frames):
 
 
 # ------------------------------------------------------------------ markup ---
-def _tex_spans(text):
-    """$...$ becomes a KaTeX placeholder, everything else is escaped text."""
-    out = []
-    for i, part in enumerate(re.split(r"\$([^$]*)\$", text)):
-        if i % 2:
-            out.append('<span class="tex" data-tex="%s"></span>'
-                       % _html.escape(part, quote=True))
-        else:
-            out.append(_bold(part))
-    return "".join(out)
-
-
-def _bold(part):
-    """**word** becomes bold; <b>, <i> and the <c2>/<c3> colour tags survive."""
-    esc = _html.escape(part, quote=False)
-    esc = re.sub(r"\*\*([^*]+)\*\*", r"<b>\1</b>", esc)
-    esc = esc.replace("&lt;b&gt;", "<b>").replace("&lt;/b&gt;", "</b>")
-    esc = esc.replace("&lt;i&gt;", "<i>").replace("&lt;/i&gt;", "</i>")
-    esc = re.sub(r"&lt;c([123])&gt;", r'<span class="c\1">', esc)
-    return esc.replace("&lt;/c1&gt;", "</span>").replace("&lt;/c2&gt;", "</span>") \
-              .replace("&lt;/c3&gt;", "</span>")
-
-
-def markup(text):
-    return _tex_spans(text) if "$" in text else _bold(text)
+# the formatter lives in deck_markup.py - the browser editor (deck_edit.py) writes texts with the same one
+from deck_markup import markup, _tex_spans, _bold, _DECK_START, _DECK_END   # noqa: F401
 
 
 _CREDITS_CACHE = None
@@ -461,6 +438,12 @@ class HtmlDeck:
         else:
             write_shell()
         path = path or os.path.join(OUT_DIR, self.name + ".html")
+        # a deck edited in the browser is the master now (Doc, 17.09.2026) - its script would undo the edits
+        from deck_edit import EDITED_MARK
+        if not INLINE_DIR and os.path.exists(path) and EDITED_MARK in open(path, encoding="utf-8").read():
+            print("%s  NICHT überschrieben: im Browser bearbeitet (Marke deck-master in der Datei)"
+                  % os.path.normpath(path))
+            return path
         with open(path, "w", encoding="utf-8") as f:
             f.write(self.render())
         print("%s  (%d Folien)" % (os.path.normpath(path), len(self.slides)))
@@ -1198,7 +1181,8 @@ addEventListener('click', e => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     // this one listens in the capture phase, so a question typed to Solita would reach it first:
     // 'o' would open the overview mid-sentence. Nothing from inside #ask belongs to the deck.
-    if (e.target && e.target.closest && e.target.closest('#ask, #linkgo')) return;   // the start card too
+    // the start card too, and a text being edited on Doc's machine (decks/deck-edit.js)
+    if (e.target && e.target.closest && e.target.closest('#ask, #linkgo, [contenteditable]')) return;
     if (e.key === 'o' || e.key === 'O') {
       if (ov.hidden) open(); else close();
       e.preventDefault(); e.stopImmediatePropagation(); return;
@@ -2521,8 +2505,6 @@ INLINE_DIR = ""           # --inline DIR: embed the shell and write there - a PR
 # (e.g. the Wuerfelspiel with the real test numbers on OneDrive). What cannot be packed - pictures, Solita's
 # audio, labs, the 3D dice, KaTeX - resolves against the live site through <base> (Doc, 16.09.2026).
 SITE = "https://docalvers.de/decks/"
-_DECK_START = '<div id="stage"><div id="deck">\n'
-_DECK_END = '\n</div></div>\n<div id="bar"></div>'
 
 
 def write_shell():

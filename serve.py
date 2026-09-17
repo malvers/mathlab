@@ -6,15 +6,22 @@ so a local tab can never be mistaken for docalvers.de again. Nothing in the
 repo is touched: the badge is injected on the way out, only by this server.
 Other local servers (pinker2) import inject() from here, so the badge lives once.
 
+Decks (HTML/decks/*.html) also get the text editor (decks/deck-edit.js) and its two endpoints
+/__deck/source and /__deck/save (tools/pptx/deck_edit.py) - editing exists only on this machine.
+
     python3 serve.py            # 127.0.0.1:8765, serves the HTML/ folder
     python3 serve.py 8080       # other port
 """
 import http.server
+import importlib
+import json
 import os
 import re
 import sys
 
 HTML_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'HTML')
+TOOLS_PPTX = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tools', 'pptx')
+DECK_EDITOR = b'<script src="/decks/deck-edit.js"></script>\n'
 PORT = 8765
 BIND = '127.0.0.1'
 
@@ -37,13 +44,13 @@ LOCAL_ICONS = {
 }
 
 
-def inject(html):
-    """Put the badge right before the last </body>; pages without one get it appended."""
+def inject(html, extra=b''):
+    """Put the badge (and `extra`) right before the last </body>; pages without one get it appended."""
     hits = list(BODY_END.finditer(html))
     if not hits:
-        return html + BADGE
+        return html + BADGE + extra
     i = hits[-1].start()
-    return html[:i] + BADGE + html[i:]
+    return html[:i] + BADGE + extra + html[i:]
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
@@ -63,7 +70,35 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Cache-Control', 'no-store, max-age=0')
         super().end_headers()
 
+    def deck_api(self):
+        """The deck editor's endpoints - the module is reloaded per call, so no restart after a change."""
+        n = int(self.headers.get('Content-Length') or 0)
+        if n > 1024 * 1024:
+            return self.send_error(413, 'too large')
+        data = self.rfile.read(n) if n else b''
+        try:
+            if TOOLS_PPTX not in sys.path:
+                sys.path.insert(0, TOOLS_PPTX)
+            import deck_edit
+            deck_edit = importlib.reload(deck_edit)
+            status, reply = deck_edit.handle(self.command, self.path, self.headers, data)
+        except Exception as err:                       # the page shows this instead of an empty reply
+            status, reply = 500, {'error': 'serve.py: %s: %s' % (type(err).__name__, err)}
+        body = json.dumps(reply, ensure_ascii=False).encode('utf-8')
+        self.send_response(status)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_POST(self):
+        if self.path.startswith('/__deck/'):
+            return self.deck_api()
+        self.send_error(405, 'read-only server')
+
     def do_GET(self):
+        if self.path.startswith('/__deck/'):
+            return self.deck_api()
         swap = LOCAL_ICONS.get(self.path.split('?', 1)[0])
         if swap and os.path.isfile(os.path.join(HTML_DIR, swap)):
             self.path = '/' + swap                # served as usual, just the red file
@@ -74,9 +109,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             path = os.path.join(path, 'index.html')
         if not (path.lower().endswith(('.html', '.htm')) and os.path.isfile(path)):
             return super().do_GET()              # css, js, images, json ... untouched
+        deck = os.path.dirname(os.path.abspath(path)) == os.path.join(HTML_DIR, 'decks')
         try:
             with open(path, 'rb') as f:
-                body = inject(f.read())
+                body = inject(f.read(), DECK_EDITOR if deck else b'')
         except OSError:
             return self.send_error(404, 'File not found')
         self.send_response(200)
