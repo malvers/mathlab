@@ -1,41 +1,88 @@
 // Deck editor - only on Doc's machine: serve.py puts this file into /decks/*.html, docalvers.de never loads it.
-// E (or the pencil top left) turns editing on: every text of the deck gets a dashed frame, a click shows its
+// E (or the pencil in the footer, right of "?") turns editing on: every text of the deck gets a dashed frame, a click shows its
 // source ($...$ formulas, **bold**), Enter or a click elsewhere writes it straight into the deck file, Esc drops
 // the change (Doc, 17.09.2026: "Deck ist Master"). What counts as a text and how it is written back lives in
 // tools/pptx/deck_edit.py - this page only asks it.
+// In an open bullet line Cmd-D puts a copy right below it (open for typing), Cmd-Backspace removes the line.
+// The pencil is yellow while editing. As soon as the deck differs from what is live, a green cloud button shows up
+// next to it - a click puts the deck live (commit + push of this one deck, Doc's standing go-ahead). Both sit in the
+// footer next to the slide triangles; top left stays free (Doc, 17.09.2026: "mach hier ein Stift ... oben links weg").
 (function () {
   if (typeof slides === 'undefined' || document.documentElement.classList.contains('presenter')) return;
   const root = document.documentElement;
   const DECK = decodeURIComponent(location.pathname.split('/').pop());
   const SRC = new WeakMap();                          // element -> its source text, as the file holds it
-  let on = false, cur = null, busy = false, tt = 0, selector = '';
+  let on = false, cur = null, busy = false, tt = 0, selector = '', pending = false, publishing = false, dirty = false;
   let known = Math.floor(Date.parse(document.lastModified) / 1000) || 0;   // file time this page was loaded with
+  const MAC = /Mac|iP(hone|ad|od)/.test(navigator.platform);
+  const cmd = e => MAC ? e.metaKey : e.ctrlKey;       // Ctrl-D on a Mac stays "delete forward" while typing
+  const K = MAC ? '⌘' : 'Strg+';
 
   const css = document.createElement('style');
   css.textContent = [
-    '#ed-btn{position:fixed;top:calc(8px + env(safe-area-inset-top, 0px));left:calc(8px + env(safe-area-inset-left, 0px));',
-    '  z-index:2147483646;display:flex;align-items:center;gap:7px;padding:6px 11px;border-radius:8px;cursor:pointer;',
-    '  border:1px solid rgba(126,143,181,.6);background:#0E244E;color:#E8EEF9;',
-    '  font:700 11px/1 Orbitron,sans-serif;letter-spacing:.12em;text-transform:uppercase}',
-    '#ed-btn svg{display:block;width:14px;height:14px;flex:none}',
-    'html.deck-edit #ed-btn{background:rgb(245,194,66);border-color:rgb(245,194,66);color:#0E244E}',
+    'html.deck-edit #nav #nav-edit{background:rgb(245,194,66);color:#0E244E;opacity:1}',
+    '#nav #nav-live{background:rgb(121,158,49);color:#fff}',
+    '#nav #nav-live[hidden]{display:none}',
+    '#nav #nav-live:disabled{opacity:.55;cursor:progress}',
     'html.deck-edit .slide .step{opacity:1!important}',
     'html.deck-edit [data-ed]{cursor:text;outline:1px dashed rgba(245,194,66,.75);outline-offset:3px}',
     'html.deck-edit [data-ed]:hover{outline:2px dashed rgb(245,194,66)}',
     'html.deck-edit [data-ed].ed-on{outline:2px solid rgb(245,194,66);background:rgba(245,194,66,.16);',
     '  white-space:pre-wrap;caret-color:rgb(176,36,24)}',
     'html.deck-edit [data-ed].ed-busy{opacity:.5}',
-    '@media print{#ed-btn{display:none}}'
+    '@media print{#nav-edit,#nav-live{display:none}}'
   ].join('\n');
   document.head.appendChild(css);
 
-  const btn = document.createElement('button');
-  btn.id = 'ed-btn'; btn.type = 'button'; btn.title = 'Texte bearbeiten (E)';
-  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
-    + 'stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>'
-    + '<span>Bearbeiten</span>';
-  btn.addEventListener('click', function (e) { e.stopPropagation(); toggle(); });
-  document.body.appendChild(btn);
+  const ICON = d => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+    + 'stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
+  function navButton(id, icon, after) {
+    const b = document.createElement('button');
+    b.id = id; b.type = 'button'; b.innerHTML = ICON(icon);
+    // mousedown would take the focus from the text being typed and save it on its own - the click does both steps
+    b.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    after.after(b);
+    return b;
+  }
+  const nav = document.getElementById('nav');
+  const anchor = document.getElementById('nav-help') || document.getElementById('nav-next') || nav;
+  if (!nav) return;                                   // a deck without the footer: no editor controls
+  const btn = navButton('nav-edit', '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>', anchor);
+  const live = navButton('nav-live', '<path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 17.6 8.6 4 4 0 0 1 17 18"/>'
+    + '<path d="M12 12v9"/><path d="M9 15l3-3 3 3"/>', btn);
+  btn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (publishing || busy) return;                  // a text is still being written
+    toggle();
+  });
+  live.addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (publishing || busy) return;
+    // write the open text first, then put the deck live
+    (cur ? end(true) : Promise.resolve(true)).then(function (ok) { if (ok && pending) publish(); });
+  });
+
+  function label() {
+    btn.title = on ? 'Bearbeiten beenden (E)' : 'Texte bearbeiten (E)';
+    btn.setAttribute('aria-label', btn.title);
+    live.hidden = !(pending || dirty || publishing);
+    live.disabled = publishing;
+    live.title = publishing ? 'Wird live gestellt …' : 'Änderungen speichern und live stellen (docalvers.de)';
+    live.setAttribute('aria-label', live.title);
+  }
+  label();
+
+  function publish() {
+    publishing = true; label();
+    fetch('/__deck/publish', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ deck: DECK }) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status); return j; }); })
+      .then(function (j) {
+        pending = j.pending;
+        msg(j.files.length ? 'Live gestellt (' + j.commit + ') – auf docalvers.de in 1–2 Minuten' : 'Schon live – nichts zu tun');
+      })
+      .catch(function (err) { msg(/fetch/i.test(err.message) ? 'Nicht live gestellt: serve.py antwortet nicht' : err.message); })
+      .finally(function () { publishing = false; label(); });
+  }
 
   // the deck's own message box (#linkmsg in deck.css), so the editor speaks in the same voice
   function msg(t) {
@@ -62,7 +109,7 @@
       .then(function (m) {
         if (m.mtime > known + 1) throw new Error('Die Datei ist neuer als diese Seite – bitte neu laden (Cmd-Shift-R).');
         if (m.slides.length !== slides.length) throw new Error('Folienzahl passt nicht zur Datei – bitte neu laden.');
-        selector = m.selector;
+        selector = m.selector; pending = m.pending;
         document.querySelectorAll('[data-ed]').forEach(function (el) { el.removeAttribute('data-ed'); });
         let skipped = 0;
         slides.forEach(function (sl, i) {
@@ -81,65 +128,144 @@
   function toggle() {
     if (on) {
       if (cur) end(true);
-      on = false; root.classList.remove('deck-edit');
+      on = false; root.classList.remove('deck-edit'); label();
+      document.dispatchEvent(new Event('deck-edit-off'));
       return;
     }
     load().then(function (skipped) {
-      on = true; root.classList.add('deck-edit');
+      on = true; root.classList.add('deck-edit'); label();
+      document.dispatchEvent(new Event('deck-edit-on'));
       msg(skipped ? skipped + ' Folie(n) lassen sich nicht bearbeiten – der Rest schon.'
-                  : 'Text anklicken · Enter speichert · Esc verwirft · E beendet');
+                  : 'Text anklicken · Enter speichert · Esc verwirft · ' + K + 'D kopiert · ' + K + '⌫ löscht · E beendet');
     }).catch(function (err) {
       msg('Bearbeiten geht nicht: ' + (/fetch/i.test(err.message) ? 'serve.py antwortet nicht' : err.message));
     });
   }
 
+  // one step back (or forward) on the server, then the page shows the file as it is now - back in edit mode, same slide
+  function undo(redo) {
+    if (busy || publishing) return;
+    busy = true;
+    fetch('/__deck/undo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ deck: DECK, redo: !!redo }) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status); return j; }); })
+      .then(function (j) {
+        try { sessionStorage.setItem('deck-edit-resume', (redo ? 'Wiederhergestellt: ' : 'Rückgängig: ') + (j.what || 'Änderung')); } catch (e) { }
+        location.reload();
+      })
+      .catch(function (err) { msg(/fetch/i.test(err.message) ? 'serve.py antwortet nicht' : err.message); })
+      .finally(function () { busy = false; });
+  }
+
+  const typed = el => el.textContent.replace(/\s*\n\s*/g, ' ').trim();
+  // our own write is no reason for live reload (tools/live_reload.py) to reload the page
+  const rebase = () => { try { if (window.__liveReload) window.__liveReload.rebase(); } catch (e) { } };
+
   function begin(el) {
-    cur = { el: el, html: el.innerHTML, src: SRC.get(el), blur: null };
+    cur = { el: el, html: el.innerHTML, src: SRC.get(el), blur: null, input: null };
     el.classList.add('ed-on');
     el.textContent = cur.src;
     el.setAttribute('contenteditable', 'plaintext-only');
     if (el.contentEditable !== 'plaintext-only') el.setAttribute('contenteditable', 'true');
     cur.blur = function () { if (cur && cur.el === el && document.hasFocus()) end(true); };   // not when Doc only switches apps
+    // the button turns to "Änderungen speichern" with the first typed letter, not only after Enter (Doc, 17.09.2026)
+    cur.input = function () { dirty = !!cur && typed(el) !== cur.src; label(); };
     el.addEventListener('blur', cur.blur);
+    el.addEventListener('input', cur.input);
     el.focus();
     const r = document.createRange(); r.selectNodeContents(el); r.collapse(false);
     const s = getSelection(); s.removeAllRanges(); s.addRange(r);
   }
 
-  // keep: write what was typed; otherwise put the rendered text back as it was
+  // keep: write what was typed; otherwise put the rendered text back as it was.
+  // Resolves true once the text is written (or had nothing to write), false when it was dropped or failed.
   function end(keep) {
-    if (!cur || busy) return;
+    if (!cur || busy) return Promise.resolve(false);
     const c = cur, el = c.el;
-    const text = el.textContent.replace(/\s*\n\s*/g, ' ').trim();
+    const text = typed(el);
     el.removeEventListener('blur', c.blur);
+    el.removeEventListener('input', c.input);
     el.removeAttribute('contenteditable');
     if (!keep || text === c.src) {
-      el.innerHTML = c.html; el.classList.remove('ed-on'); cur = null;
-      return;
+      el.innerHTML = c.html; el.classList.remove('ed-on'); cur = null; dirty = false; label();
+      return Promise.resolve(keep);
     }
     const at = el.dataset.ed.split(':').map(Number);
     busy = true; el.classList.add('ed-busy');
-    fetch('/__deck/save', {
+    return fetch('/__deck/save', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ deck: DECK, slide: at[0], n: at[1], old: c.src, new: text })
     })
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status); return j; }); })
       .then(function (j) {
-        el.innerHTML = j.html; tex(el); SRC.set(el, j.src); known = j.mtime;
+        el.innerHTML = j.html; tex(el); SRC.set(el, j.src); known = j.mtime; pending = j.pending; rebase();
         const tile = document.querySelectorAll('#overview .ov-thumb')[at[0]];   // the overview keeps copies
         const copy = tile && tile.querySelectorAll(selector)[at[1]];
         if (copy) { copy.innerHTML = j.html; tex(copy); }
-        el.classList.remove('ed-on'); cur = null;
-        msg('Gespeichert');
+        el.classList.remove('ed-on'); cur = null; dirty = false;
+        msg('Gespeichert – live erst mit „Änderungen speichern“'); label();
+        return true;
       })
       .catch(function (err) {                          // the typed text stays in the box - nothing is lost, Esc drops it
         el.textContent = text;
         el.setAttribute('contenteditable', 'plaintext-only');
         if (el.contentEditable !== 'plaintext-only') el.setAttribute('contenteditable', 'true');
         el.addEventListener('blur', c.blur);
+        el.addEventListener('input', c.input);
         msg('Nicht gespeichert: ' + (/fetch/i.test(err.message) ? 'serve.py antwortet nicht' : err.message));
+        return false;
       })
       .finally(function () { busy = false; el.classList.remove('ed-busy'); });
+  }
+
+  // the change deck_edit.line made in the file, once more on a slide or its overview copy; returns the copy
+  function restructure(box, n, op, own, g) {
+    const el = box.querySelectorAll(selector)[n];
+    if (!el) return null;
+    if (own) box.querySelectorAll('.step').forEach(function (s) {
+      if (+s.dataset.g > g) s.dataset.g = +s.dataset.g + (op === 'dup' ? 1 : -1);
+    });
+    if (op === 'del') { el.remove(); return null; }
+    const copy = el.cloneNode(true);
+    copy.classList.remove('ed-on', 'ed-busy');
+    copy.removeAttribute('data-ed');
+    if (own) copy.dataset.g = g + 1;
+    el.after(copy);
+    return copy;
+  }
+
+  // Cmd-D: the open line once more right below it, ready to type over; Cmd-Backspace: the open line is gone.
+  // A copy is silent in Solita's reading (Doc, 17.09.2026: "erst mal nix").
+  function line(op) {
+    if (!cur || busy) return;
+    const el = cur.el;
+    if (!el.matches('p.line, p.col')) { msg('Kopieren und Löschen geht nur bei Aufzählungszeilen.'); return; }
+    // copy: what was typed is saved first; remove: what was typed goes with the line
+    end(op === 'dup').then(function (ok) {
+      if (op === 'dup' && !ok) return;               // not saved - the message says why, nothing is copied
+      const at = el.dataset.ed.split(':').map(Number);
+      busy = true; el.classList.add('ed-busy');
+      return fetch('/__deck/line', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deck: DECK, slide: at[0], n: at[1], old: SRC.get(el), op: op })
+      })
+        .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status); return j; }); })
+        .then(function (j) {
+          known = j.mtime; pending = j.pending; rebase();
+          const copy = restructure(slides[at[0]], at[1], op, j.own, j.g);
+          const tile = document.querySelectorAll('#overview .ov-thumb')[at[0]];
+          if (tile) restructure(tile, at[1], op, j.own, j.g);
+          return load().then(function () {
+            label();
+            if (copy && !copy.dataset.ed) { msg('Neu laden (Cmd-Shift-R), dann geht es weiter.'); return; }
+            if (copy) { el.classList.remove('ed-busy'); busy = false; begin(copy); }
+            msg((op === 'dup' ? 'Zeile kopiert' : 'Zeile gelöscht') + (j.narration ? ' – für Solita einmal neu laden' : ''));
+          });
+        })
+        .catch(function (err) {
+          msg((op === 'dup' ? 'Nicht kopiert: ' : 'Nicht gelöscht: ') + (/fetch/i.test(err.message) ? 'serve.py antwortet nicht' : err.message));
+        })
+        .finally(function () { busy = false; el.classList.remove('ed-busy'); });
+    });
   }
 
   // capture phase: in edit mode a click on the slide edits and never turns the page
@@ -158,9 +284,22 @@
     if (cur && cur.el.contains(e.target)) {
       e.stopPropagation();
       if (e.isComposing) return;
-      if (e.key === 'Enter') { e.preventDefault(); end(true); }
+      if (cmd(e) && (e.key === 'd' || e.key === 'D')) { e.preventDefault(); line('dup'); }
+      else if (cmd(e) && e.key === 'Backspace') { e.preventDefault(); line('del'); }
+      else if (e.key === 'Enter') { e.preventDefault(); end(true); }
       else if (e.key === 'Escape') { e.preventDefault(); end(false); }
       else if ((e.metaKey || e.ctrlKey) && (e.key === 's' || e.key === 'S')) { e.preventDefault(); end(true); }
+      return;
+    }
+    // Cmd-Z / Cmd-Shift-Z with no text open: one step of the deck back or forward (deck_undo.py) - texts, lines, pictures
+    if (on && !cur && cmd(e) && (e.key === 'z' || e.key === 'Z')) {
+      e.stopPropagation(); e.preventDefault();
+      undo(e.shiftKey);
+      return;
+    }
+    if (on && cmd(e) && (e.key === 'd' || e.key === 'D' || e.key === 'Backspace')) {
+      e.stopPropagation(); e.preventDefault();       // no bookmark dialog in edit mode
+      msg('Erst eine Zeile anklicken – dann ' + K + 'D kopiert, ' + K + '⌫ löscht');
       return;
     }
     if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -171,4 +310,34 @@
 
   // turning the page with a text still open saves it first
   painted.push(function () { if (cur && !cur.el.closest('.slide.on')) end(true); });
+
+  // DocPoint pictures (HTML/decks/deck-image.js, built by a second agent on 17.09.2026) plug in here, so the file time,
+  // the "not live yet" flag and the pencil/cloud stay in this one place. deck-image.js writes through
+  // /__deck/image/... and hands each reply ({mtime, pending}) to changed().
+  window.DeckEdit = {
+    deck: DECK,
+    on: function () { return on; },
+    changed: function (reply) {
+      rebase();
+      if (reply && reply.mtime) known = reply.mtime;
+      if (reply && typeof reply.pending === 'boolean') pending = reply.pending;
+      label();
+    },
+    msg: msg
+  };
+  const pics = document.createElement('script');
+  pics.src = '/decks/deck-image.js';
+  pics.onerror = function () { pics.remove(); };      // not there yet: the text editor works without it
+  document.head.appendChild(pics);
+
+  // after an undo the page came back: edit mode on again, and say what was undone
+  try {
+    const note = sessionStorage.getItem('deck-edit-resume');
+    if (note !== null) {
+      sessionStorage.removeItem('deck-edit-resume');
+      load().then(function () { on = true; root.classList.add('deck-edit'); label(); document.dispatchEvent(new Event('deck-edit-on')); msg(note); })
+        .catch(function (err) { msg(err.message); });
+    }
+  } catch (e) { }
+
 })();

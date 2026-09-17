@@ -8,6 +8,8 @@ Other local servers (pinker2) import inject() from here, so the badge lives once
 
 Decks (HTML/decks/*.html) also get the text editor (decks/deck-edit.js) and its two endpoints
 /__deck/source and /__deck/save (tools/pptx/deck_edit.py) - editing exists only on this machine.
+Every page also gets live reload (/__live/reload.js, tools/live_reload.py): it reloads itself when its file or
+the scripts and styles it loads change (Doc, 17.09.2026).
 
     python3 serve.py            # 127.0.0.1:8765, serves the HTML/ folder
     python3 serve.py 8080       # other port
@@ -21,7 +23,9 @@ import sys
 
 HTML_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'HTML')
 TOOLS_PPTX = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tools', 'pptx')
+TOOLS = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tools')
 DECK_EDITOR = b'<script src="/decks/deck-edit.js"></script>\n'
+LIVE_RELOAD = b'<script src="/__live/reload.js"></script>\n'
 PORT = 8765
 BIND = '127.0.0.1'
 
@@ -91,6 +95,21 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def live_api(self):
+        """Live reload (tools/live_reload.py) - reloaded per call, so a change there needs no restart."""
+        try:
+            if TOOLS not in sys.path:
+                sys.path.insert(0, TOOLS)
+            import live_reload
+            status, ctype, body = importlib.reload(live_reload).handle(self.path)
+        except Exception as err:
+            status, ctype, body = 500, 'application/json', json.dumps({'error': str(err)}).encode('utf-8')
+        self.send_response(status)
+        self.send_header('Content-Type', ctype)
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_POST(self):
         if self.path.startswith('/__deck/'):
             return self.deck_api()
@@ -99,6 +118,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith('/__deck/'):
             return self.deck_api()
+        if self.path.startswith('/__live/'):
+            return self.live_api()
         swap = LOCAL_ICONS.get(self.path.split('?', 1)[0])
         if swap and os.path.isfile(os.path.join(HTML_DIR, swap)):
             self.path = '/' + swap                # served as usual, just the red file
@@ -112,7 +133,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         deck = os.path.dirname(os.path.abspath(path)) == os.path.join(HTML_DIR, 'decks')
         try:
             with open(path, 'rb') as f:
-                body = inject(f.read(), DECK_EDITOR if deck else b'')
+                body = inject(f.read(), LIVE_RELOAD + (DECK_EDITOR if deck else b''))
         except OSError:
             return self.send_error(404, 'File not found')
         self.send_response(200)

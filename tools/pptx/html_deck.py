@@ -405,7 +405,6 @@ class HtmlDeck:
       </div>
       <div class="labbar">
         <a href="../%s" target="_blank" rel="noopener">Öffne das Lab in neuem Tab</a>
-        <button class="labnext">Weiter &#9656;</button>
       </div>""" % (markup(title), cap, top, bottom - top, _html.escape(src, quote=True),
                    _html.escape(title, quote=True), lab_w, LAB_MIN_H, scale,
                    _html.escape(src, quote=True)))
@@ -520,9 +519,10 @@ CSS = """
   --card:#__CARD__; --orange:#__ORANGE__; --red:#__RED__; --green:#__GREEN__;
   --codebg:#__CODEBG__; --codeink:#__CODEINK__; --codemuted:#__CODEMUTED__;
   --greetbg:#__GREETBG__;
+  --night:#071630;   /* the big backgrounds around the slides: page, presenter, overview (Doc, 17.09.2026: "das Blau ist gut") */
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:#0E244E;overflow:hidden}
+html,body{height:100%;background:var(--night);overflow:hidden}
 body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
 /* centred by offsets, not by a grid: on a phone the grid track grows to the unscaled
    deck size and pushes the scaled deck off-centre, half out of the screen */
@@ -543,9 +543,11 @@ body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
 /* the footer line runs almost to the slide edges (Doc, 16.09.2026: "bis kurz vor Ränder") */
 .slide::before{content:"";position:absolute;left:16px;top:__FOOT__px;
   width:calc(__W__px - 32px);height:1px;background:rgba(14,36,78,.16)}
-.foot{position:absolute;left:0;right:0;text-align:center;top:__FOOTT__px;font-size:10px;letter-spacing:1.2px;   /* centred (Doc, 16.09.2026) */
+/* footer text, buttons and Solita share one middle: halfway between the footer line and the slide's bottom edge
+   (Doc, 17.09.2026: "die ganze footer y zentriert") - a fixed line height, so the text's middle is where it should be */
+.foot{position:absolute;left:0;right:0;text-align:center;top:__FOOTT__px;line-height:12px;font-size:10px;letter-spacing:1.2px;   /* centred (Doc, 16.09.2026) */
   color:var(--muted)}
-.pageno{position:absolute;right:var(--pnright,72px);top:__FOOTT__px;font-size:10px;letter-spacing:1.2px;
+.pageno{position:absolute;right:var(--pnright,72px);top:__FOOTT__px;line-height:12px;font-size:10px;letter-spacing:1.2px;
   color:var(--muted)}
 
 h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
@@ -698,12 +700,14 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 .labframe{position:absolute;left:__M__px;width:__CW__px;overflow:hidden;
   background:var(--card);border-radius:10px;isolation:isolate;box-shadow:0 1px 5px rgba(14,36,78,.28)}
 .labframe iframe{border:0;transform-origin:0 0;display:block;position:absolute;left:0;top:0}
-.labbar{position:absolute;right:__M__px;top:__LABBAR__px;display:flex;gap:10px;
-  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+/* small, right above its lab (Doc, 17.09.2026: "deutlich kleiner und rechts übers Lab dichter"); JS moves it down to
+   the lab's own top edge - __LABBAR__ only holds while that has not run */
+.labbar{position:absolute;right:__M__px;top:__LABBAR__px;display:flex;gap:8px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:8px}
 .labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
 .labbar a:hover{color:var(--red)}
 .labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
-  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:3px 7px;letter-spacing:1px}
 .labbar button:hover{border-color:var(--red);color:var(--red)}
 #deck > .slide:last-child .labnext{display:none}   /* a lab on the last slide: nothing to go on to (Doc, 16.09.2026) */
 /* the lab's fullscreen icon grows the lab to the whole slide, over title, note and lab bar (Doc, 17.09.2026) */
@@ -716,9 +720,9 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 /* --- HUD ---------------------------------------------------------------- */
 #hud{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:8px;z-index:9;display:flex;gap:6px}
 #hud button,#nav button{display:flex;align-items:center;justify-content:center;width:var(--hudbtn,22px);height:var(--hudbtn,22px);padding:0;border:0;border-radius:5px;
-  background:#7E8FB5;box-shadow:0 1px 1px rgba(0,0,0,.12);   /* Dostojewski's colour on the greeting slide */
-  color:#fff;opacity:.85;cursor:pointer;transition:opacity .2s}
-#hud button:hover,#nav button:hover{opacity:1}
+  background:rgba(126,143,181,.32);box-shadow:0 1px 1px rgba(0,0,0,.08);   /* Dostojewski's colour, light (Doc, 17.09.2026: "HG der butts leichter") */
+  color:#3E4F7A;opacity:.9;cursor:pointer;transition:opacity .2s,background-color .2s}
+#hud button:hover,#nav button:hover{opacity:1;background:rgba(126,143,181,.5)}
 #hud button svg,#nav button svg{display:block;width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6);margin:0;stroke-width:1.4;flex:none}
 #hud button[hidden]{display:none}   /* flex would otherwise show a hidden button */
 /* footer left: two triangles that jump a whole slide, fully built (Doc, 17.09.2026: "zwei Dreiecke, die von
@@ -763,11 +767,12 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 /* overview of all slides (o, grid button in the HUD bottom right) */
 #hud{display:flex;gap:4px}          /* overview, play and fullscreen side by side */
 #hud #ovbtn svg{width:calc(var(--hudbtn,22px) * .64);height:calc(var(--hudbtn,22px) * .64)}
-#overview{position:fixed;inset:0;z-index:20;background:rgba(14,36,78,.94);overflow:auto;padding:28px;
+#overview{position:fixed;inset:0;z-index:20;background:rgba(7,22,48,.94);overflow:auto;padding:28px;
   display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:18px;
   align-content:safe center;justify-content:safe center;   /* layout() sets the columns; "safe": a taller grid scrolls from the top */
   grid-auto-rows:max-content}   /* the tiles' overflow:hidden would let the rows shrink to the window */
 #overview[hidden]{display:none}
+html.presenter #overview{background:var(--night)}   /* opaque over the presenter view (Doc, 17.09.2026) */
 .ov-cell{position:relative;cursor:pointer;border-radius:6px;overflow:hidden;
   outline:3px solid transparent;box-shadow:0 2px 10px rgba(0,0,0,.35)}
 .ov-cell:hover{outline-color:#799E31}
@@ -781,7 +786,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 /* --- presenter view (?presenter - the fullscreen button opens it when a beamer is attached) ------------- */
 html.presenter #stage,html.presenter #hud,html.presenter #nav,html.presenter #ask,html.presenter #bar{display:none!important}
 html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(64px,13vh,124px) + 30px)!important}
-#pres{position:fixed;inset:0;z-index:8;background:var(--ink);color:#E6ECF8;font-family:Orbitron,system-ui,sans-serif;
+#pres{position:fixed;inset:0;z-index:8;background:var(--night);color:#E6ECF8;font-family:Orbitron,system-ui,sans-serif;
   display:grid;gap:12px 26px;padding:12px 22px 10px;
   grid-template-columns:minmax(0,2fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) clamp(64px,13vh,124px);
   grid-template-areas:"bar side" "cur side" "strip strip"}
@@ -791,6 +796,8 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 .p-bar{grid-area:bar;display:flex;align-items:center;gap:8px;font-size:clamp(18px,2.2vw,30px);letter-spacing:1px}
 .p-bar button svg{width:clamp(18px,1.7vw,26px);height:clamp(18px,1.7vw,26px)}
 .p-timer{margin-right:4px}
+/* CyberClock.digits: fixed slots, the bar's size, weight and colour - widest Orbitron digit 0.834em (measured 17.09.2026) */
+#pres .p-timer,#pres .p-clock{--cc-size:1em;--cc-dw:.86em;--cc-sw:.4em;--cc-weight:400;--cc-digit:currentColor;gap:0}
 .p-clock{margin-left:auto}
 .p-cur{grid-area:cur;display:flex;flex-direction:column;min-height:0}
 .p-fit{display:flex;justify-content:center;min-width:0}   /* JS sizes the frame inside */
@@ -800,12 +807,20 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 .p-frame:empty{visibility:hidden}
 .p-frame > .slide,.p-thumb > .slide{display:block!important;position:absolute;left:0;top:0;width:960px;height:540px;
   transform-origin:0 0;pointer-events:none}
+/* a slide in the presenter view inherits the page's text defaults, exactly as on the beamer - #pres sets Orbitron and
+   a strip cell is a <button> (UA font, centred text); both leaked into the slides (Doc, 17.09.2026: "warum sehen die
+   thumbs unten anders aus als die Folie?") */
+#pres .slide{font:400 16px/normal Raleway,system-ui,sans-serif;color:var(--body);text-align:start;
+  letter-spacing:normal;word-spacing:normal;text-transform:none;text-indent:0;text-shadow:none;white-space:normal}
 .p-end{position:absolute;inset:0;display:grid;place-items:center;background:#1B3566;color:#7E8FB5;
   font-size:14px;letter-spacing:3px;text-transform:uppercase}
 /* stand-ins for labs and 3D dice in the previews and the strip - visible, never live (WebGL budget) */
 .p-live{background:rgba(14,36,78,.10);border:1.5px dashed rgba(14,36,78,.35);border-radius:10px;display:grid;
   place-items:center;color:var(--muted);font:700 14px Orbitron,sans-serif;letter-spacing:3px;text-transform:uppercase}
 .p-live.dice{font-size:30px}
+/* ... wearing a screenshot of the lab once there is one (tools/pptx/deck_shots.mjs) */
+.p-live.shot{background-color:transparent;background-size:cover;background-position:center;background-repeat:no-repeat;
+  border:0;border-radius:0;color:transparent}
 .labframe > .p-live{position:absolute;inset:0}
 /* the current slide is live: its labs and dice take the pointer (the slide itself does not, a click turns on) */
 .p-frame > .slide.live iframe{pointer-events:auto}
@@ -898,6 +913,9 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 #ask-out:empty + label{margin-top:10px}
 #ask-out .ask-q{color:var(--ink);font-weight:600}
 #ask-out .ask-err{color:var(--red)}
+/* DeepSeek's answer to the same question, silent, for comparison (Doc, 17.09.2026: "mach den Text von DS rot (China ;-)") */
+#ask-out .ask-ds{color:var(--red);margin-top:6px}
+#ask-out .ask-ds b{color:inherit;font:700 9px/1 Orbitron,sans-serif;letter-spacing:1px;text-transform:uppercase;margin-right:6px}
 /* karaoke: the word Solita is saying right now */
 #ask-out .ask-w{border-radius:3px;transition:background-color .12s,box-shadow .12s}
 #ask-out .ask-w.on{background:color-mix(in srgb,#7E8FB5 30%,transparent);   /* Dostojewski blue, light (Doc: "hellblauer") */
@@ -925,6 +943,37 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 #ask-out:empty + label[hidden] + #ask-row{margin-top:10px}
 #ask-row{display:flex;gap:6px}
 #ask-cost{margin-left:9px;font-weight:400;color:var(--muted);cursor:pointer;white-space:nowrap}
+/* DeepSeek switched on by a right click on the field: the field itself gets a red edge (in the header it broke the line) */
+#ask input.ds,#ask input.ds:focus{border-color:var(--red)}
+/* right click in the panel: who answers - Solita, DeepSeek or both. "#ask #ask-menu": the panel's own label and
+   input rules (Orbitron caps, a wide field) must not reach the checks */
+#ask #ask-menu{position:fixed;min-width:210px;padding:5px;border-radius:9px;background:var(--askbg);color:var(--ink);
+  box-shadow:0 6px 24px rgba(14,36,78,.4);z-index:2}
+#ask #ask-menu[hidden]{display:none}
+#ask #ask-menu .ask-mhead{font:700 9px/1 Orbitron,sans-serif;letter-spacing:1.1px;text-transform:uppercase;color:#7E8FB5;
+  padding:7px 8px 6px}
+#ask #ask-menu label{display:flex;align-items:center;gap:9px;margin:0;padding:7px 8px;border-radius:6px;cursor:pointer;
+  font:400 13px/1.2 Raleway,system-ui,sans-serif;letter-spacing:normal;text-transform:none;color:var(--ink)}
+#ask #ask-menu label:hover{background:var(--askfield)}
+#ask #ask-menu input{appearance:none;-webkit-appearance:none;flex:none;width:15px;height:15px;min-width:0;margin:0;padding:0;
+  cursor:pointer;border:1px solid var(--askline);border-radius:4px;background:#fff center/11px 11px no-repeat}
+#ask #ask-menu input:checked{background-color:#0E244E;border-color:#0E244E;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.3 2.3 4.7-5' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+#ask #ask-menu .ds input:checked{background-color:var(--red);border-color:var(--red)}
+#ask #ask-menu input:disabled{cursor:default;opacity:.6}
+#ask #ask-menu .ds span{color:var(--red)}
+#ask #ask-menu i{font-style:normal;font-size:11px;color:var(--muted);margin-left:6px}
+#ask #ask-menu .ask-msep{height:1px;margin:4px 6px;background:var(--askline);opacity:.6}
+#ask #ask-menu button{display:block;width:100%;margin:0;padding:7px 8px 7px 32px;border:0;border-radius:6px;
+  background:none;text-align:left;cursor:pointer;font:400 13px/1.2 Raleway,system-ui,sans-serif;color:var(--ink)}
+#ask #ask-menu button:hover:not(:disabled){background:var(--askfield)}
+#ask #ask-menu button:disabled{cursor:default;opacity:.45}
+/* the header is the handle: drag it up and the answers get more room (Doc, 17.09.2026), the grip shows where.
+   --askrest is what the rest of the panel and the screen edge need, measured in JS - the panel never leaves the top */
+#ask-head{cursor:ns-resize;touch-action:none;user-select:none;-webkit-user-select:none}
+#ask-head::before{content:'';position:absolute;left:50%;top:4px;width:30px;height:3px;margin-left:-15px;
+  border-radius:2px;background:#7E8FB5;opacity:.45}
+#ask-panel.sized #ask-out{height:min(var(--askh),calc(100vh - var(--askrest,200px)));max-height:none}
+#ask-panel.sized #ask-out:empty{display:block}   /* a panel pulled taller keeps its size before the first answer too */
 #ask-mic,#ask-tts{flex:none;width:34px;display:grid;place-items:center;cursor:pointer;color:var(--ink);
   background:var(--askfield);border:1px solid var(--askline);border-radius:7px}
 #ask-mic svg,#ask-tts svg{width:16px;height:16px}
@@ -973,6 +1022,36 @@ JS = """
 const deck = document.getElementById('deck');
 const slides = [...document.querySelectorAll('.slide')];
 let si = 0, step = 0;
+// the screenshot of a lab or 3D die for the presenter's previews and strip (tools/pptx/deck_shots.mjs takes them):
+// named by what the frame shows and its size, not by its place - a moved lab or reordered slides keep their picture
+function shotKey(f) {
+  const s = f.getAttribute('src') + '|' + f.style.width + 'x' + f.style.height;
+  let h = 0x811c9dc5;                                // FNV-1a, 32 bit
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return 'img/shots/shot-' + (h >>> 0).toString(16).padStart(8, '0') + '.webp';
+}
+// labs and dice that must not run live (the presenter's previews, strip and overview: every one would be one more
+// WebGL context): a stand-in keeps the place and wears the screenshot if there is one - asked once per picture,
+// a missing one keeps the label
+const shotHas = {};
+function standIns(node) {
+  node.querySelectorAll('iframe').forEach(function (f) {
+    const d = document.createElement('div');
+    d.className = 'p-live';
+    if (f.classList.contains('live-frame')) { d.classList.add('dice'); d.style.cssText = f.style.cssText; d.textContent = '3D-Würfel'; }
+    else d.textContent = 'Labor';
+    const url = shotKey(f);
+    if (!shotHas[url]) shotHas[url] = new Promise(function (ok) {
+      const img = new Image();
+      img.onload = function () { ok(true); }; img.onerror = function () { ok(false); };
+      img.src = url;
+    });
+    shotHas[url].then(function (has) {
+      if (has) { d.style.backgroundImage = 'url("' + url + '")'; d.classList.add('shot'); }
+    });
+    f.replaceWith(d);
+  });
+}
 // ?presenter: this window is the presenter view on the laptop (see PRES_JS at the end)
 const PRESENTER = /[?&]presenter(&|=|$)/.test(location.search);
 if (PRESENTER) document.documentElement.classList.add('presenter');
@@ -999,11 +1078,11 @@ function dock(){
   if (!hud) return;
   const s = Math.min(innerWidth / __W__, innerHeight / __H__);
   const r = deck.getBoundingClientRect();           // the scaled slide on screen
-  const btn = Math.round(Math.min(26, Math.max(18, 12 * s)));
+  const btn = Math.round(Math.min(34, Math.max(22, 16 * s)));   // a third bigger (Doc, 17.09.2026: "mach die butts größer")
   const av = Math.round(Math.min(46, Math.max(26, 24 * s)));
   document.documentElement.style.setProperty('--hudbtn', btn + 'px');
   document.documentElement.style.setProperty('--askav', av + 'px');
-  const cy = r.top + __FOOTC__ * s;                  // middle of the footer text
+  const cy = r.top + __FOOTC__ * s;                  // middle of the footer band = middle of the footer text
   let right = Math.max(8, Math.round(innerWidth - (r.right - 16 * s)));
   if (ask) {
     ask.style.right = right + 'px'; ask.style.bottom = 'auto'; ask.style.top = Math.round(cy - av / 2) + 'px';
@@ -1029,7 +1108,7 @@ function paint(){
   const sl = slides[si];
   sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
   document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
-  try { sessionStorage.setItem(KEEP, si + ':' + step); } catch (e) { }
+  try { sessionStorage.setItem(KEEP, si + ':' + step + ':' + groups(sl)); } catch (e) { }
   painted.forEach(f => f());
 }
 function next(){
@@ -1056,6 +1135,7 @@ addEventListener('keydown', e => {
   else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
   else if (k === 'Home') { si = 0; step = 0; paint(); }
   else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'a' || k === 'A') { narr.stop(); step = groups(slides[si]); paint(); }   // everything on this slide in (Doc, 17.09.2026)
   else if (k === 'f' || k === 'F') { full(); }
 });
 addEventListener('click', e => {
@@ -1068,6 +1148,23 @@ addEventListener('click', e => {
   if (e.target.closest('.labbar button')) { next(); return; }
   next();
 });   // clicks inside a lab stay in the lab - they never reach this document
+// the lab bar sits right on top of its lab: each slide places its lab frame itself, so read that frame's top.
+// A note that runs under the bar (a long one, mathe11-nichtlinear) pushes it up above the note instead.
+function placeLabBar(s) {
+  const bar = s && s.querySelector('.labbar'), frame = s && s.querySelector('.labframe');
+  const top = frame ? parseFloat(frame.style.top) : NaN;
+  if (!bar || !(top > 0)) return;
+  bar.style.top = 'auto';
+  bar.style.bottom = (__H__ - top + 3) + 'px';
+  const note = s.querySelector('.labnote');
+  if (!note || !note.textContent.trim()) return;
+  const r = document.createRange();
+  r.selectNodeContents(note);
+  const t = r.getBoundingClientRect(), b = bar.getBoundingClientRect();
+  if (t.right > b.left - 8 && t.bottom > b.top && t.top < b.bottom) bar.style.bottom = (__H__ - note.offsetTop + 3) + 'px';
+}
+painted.push(() => placeLabBar(slides[si]));
+addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the note are wider once KaTeX has drawn them
 // the footer triangles: one whole slide back or forth, shown fully built - no click steps
 (function () {
   const prevB = document.getElementById('nav-prev'), nextB = document.getElementById('nav-next');
@@ -1129,6 +1226,7 @@ addEventListener('click', e => {
   const rows = [
     [K(['→', '|', 'Leertaste']), 'nächster Schritt – auch ein Klick auf die Folie'],
     [K(['←']), 'einen Schritt zurück'],
+    [K(['A']) + hint('Alles'), 'alles auf der Folie zeigen'],
     [K(['Shift', '→', '/', 'Shift', '←']), 'ganze Folie vor / zurück – wie '
       + '<span class="navbtn">' + tri(PREV) + '</span><span class="navbtn">' + tri(NEXT) + '</span>'],
     [K(['Home', '|', 'End']), 'erste / letzte Folie'],
@@ -1213,6 +1311,7 @@ addEventListener('click', e => {
       thumb.className = 'ov-thumb';
       const c = s.cloneNode(true);                     // a copy, fully built, without ids
       c.querySelectorAll('[id]').forEach(function (e) { e.removeAttribute('id'); });
+      if (PRESENTER) standIns(c);                      // the presenter runs its current slide live already
       c.classList.add('on');
       thumb.appendChild(c);
       const num = document.createElement('span');
@@ -1367,6 +1466,8 @@ const narr = (function () {
       return;
     }
     if (part > 0) { step = Math.min(part, groups(slides[si])); paint(); }
+    // a line copied in the deck editor has an empty part (Doc, 17.09.2026: "erst mal nix"): it comes in, a pause, on
+    if (!String(data.slides[si][part] || '').trim()) { wait = setTimeout(function () { part++; run(); }, 1200); return; }
     aSlide = si;
     audio = new Audio('audio/' + data.deck + '/s' + pad(si) + '-' + pad(part) + '.mp3');
     audio.onended = function () { part++; wait = setTimeout(run, part < parts(si) ? 900 : 0); };
@@ -1414,8 +1515,13 @@ const narr = (function () {
 if (!location.hash) {
   let kept = '';
   try { kept = sessionStorage.getItem(KEEP) || ''; } catch (e) { }
-  const m = /^([0-9]+):([0-9]+)$/.exec(kept);
-  if (m && +m[1] < slides.length) { si = +m[1]; step = Math.min(+m[2], groups(slides[si])); }
+  // slide:step:groups - a slide that was fully in stays fully in, even when a line was added meanwhile
+  // (Doc, 17.09.2026: the copied line was missing after a reload, the page kept click 4 of now 5)
+  const m = /^([0-9]+):([0-9]+)(?::([0-9]+))?$/.exec(kept);
+  if (m && +m[1] < slides.length) {
+    si = +m[1];
+    step = m[3] !== undefined && +m[2] >= +m[3] ? groups(slides[si]) : Math.min(+m[2], groups(slides[si]));
+  }
 }
 paint();
 fromHash();
@@ -1453,6 +1559,11 @@ ASK_JS = r"""
   // travel along (plain text, no slide context - that only rides with the new question).
   const HIST_MAX = 4;
   const hist = [];
+  // DeepSeek answers the same question below her, in red and silent - Doc's comparison (17.09.2026: "ich möchte DS
+  // und EINE Solita"). Its proxy opens only for Doc's own password: with the students' password it says 401 before
+  // DeepSeek is ever called - no cost, and nothing shows.
+  const DS_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/deepseek';
+  const DS_MODEL = 'deepseek-chat';
 
   // What a question REALLY costs (worked out 16.09.2026, after Doc asked why nothing ever turns up on
   // the Google bill): Claude is billed from the first token - no free tier - while Google grants a free
@@ -1542,6 +1653,132 @@ ASK_JS = r"""
 
   costEl.onclick = function () { last = null; showCost(); };
   showCost();
+
+  // Who answers - Solita (Claude Haiku), DeepSeek or both: a right click anywhere in the panel opens a small menu with
+  // a check for each (Doc, 17.09.2026: "mach ein popup mit check für beide"), remembered on this device. One always
+  // stays on. Both: DeepSeek's answer comes red and silent below hers. DeepSeek alone: her voice reads its answer, the
+  // text stays red. DeepSeek's proxy opens only for Doc's own password.
+  const WHO_KEY = 'solita_ai';
+  const who = { claude: true, ds: false };
+  try {
+    const kept = JSON.parse(localStorage.getItem(WHO_KEY) || 'null');
+    if (kept) { who.claude = kept.claude !== false; who.ds = kept.ds === true; }
+    else if (localStorage.getItem('solita_ds') === '1') who.ds = true;   // the plain switch before the menu
+  } catch (e) { }
+  if (!who.claude && !who.ds) who.claude = true;
+  const menu = document.createElement('div');
+  menu.id = 'ask-menu';
+  menu.hidden = true;
+  menu.setAttribute('role', 'menu');
+  menu.innerHTML = '<div class="ask-mhead">Wer antwortet?</div>'
+    + '<label><input type="checkbox" data-who="claude"><span>Solita<i>Claude Haiku</i></span></label>'
+    + '<label class="ds"><input type="checkbox" data-who="ds"><span>DeepSeek</span></label>'
+    + '<div class="ask-msep"></div>'
+    + '<button type="button" data-act="copy">Kopieren</button>'
+    + '<button type="button" data-act="clear">Leeren</button>';
+  box.appendChild(menu);
+  const checks = menu.querySelectorAll('input');
+  function showWho() {
+    checks.forEach(function (c) {
+      c.checked = who[c.dataset.who];
+      c.disabled = c.checked && !(who.claude && who.ds);   // the last one on cannot be switched off
+    });
+    input.classList.toggle('ds', who.ds);
+  }
+  checks.forEach(function (c) {
+    c.addEventListener('change', function () {
+      who[c.dataset.who] = c.checked;
+      try { localStorage.setItem(WHO_KEY, JSON.stringify(who)); } catch (e) { }
+      showWho();
+    });
+  });
+  // Kopieren: the marked text if there is some in the answers, otherwise the whole talk; Leeren: talk and memory gone
+  // (Doc, 17.09.2026: "bau da noch copy und clear ein also Deutsch" - the browser's own menu is gone here)
+  const copyBtn = menu.querySelector('[data-act="copy"]'), clearBtn = menu.querySelector('[data-act="clear"]');
+  let marked = '';
+  function transcript() {
+    const lines = [];
+    [].forEach.call(out.children, function (d) {
+      if (d.hidden || d.querySelector('.ask-wave')) return;
+      const q = d.querySelector('.ask-q');
+      const src = d.dataset.src !== undefined ? d : d.querySelector('[data-src]');
+      if (q) lines.push('Frage: ' + q.textContent);
+      else if (src) lines.push((d.classList.contains('ask-ds') ? 'DeepSeek: ' : 'Solita: ') + src.dataset.src);
+      else if (d.textContent.trim()) lines.push(d.textContent.trim());
+    });
+    return lines.join('\n\n');
+  }
+  copyBtn.addEventListener('click', function () {
+    const text = marked || transcript();
+    const done = function (label) { copyBtn.textContent = label; setTimeout(function () { menu.hidden = true; }, 700); };
+    (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject())
+      .then(function () { done('Kopiert ✓'); }, function () { done('Kopieren ging nicht'); });
+  });
+  clearBtn.addEventListener('click', function () {
+    stopAudio();
+    out.textContent = '';
+    hist.length = 0;                                  // she forgets the talk too, a fresh start
+    last = null; showCost();
+    menu.hidden = true;
+    input.focus();
+  });
+  panel.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+    showWho();
+    const sel = getSelection();
+    marked = sel && !sel.isCollapsed && out.contains(sel.anchorNode) ? String(sel).trim() : '';
+    copyBtn.textContent = marked ? 'Markierung kopieren' : 'Gespräch kopieren';
+    copyBtn.disabled = !marked && !out.children.length;
+    clearBtn.disabled = !out.children.length;
+    menu.hidden = false;
+    const w = menu.offsetWidth, h = menu.offsetHeight;
+    menu.style.left = Math.max(8, Math.min(e.clientX, innerWidth - w - 8)) + 'px';
+    menu.style.top = Math.max(8, Math.min(e.clientY, innerHeight - h - 8)) + 'px';
+  });
+  // a click elsewhere or Esc only closes the menu - no page turn, the panel stays open
+  addEventListener('click', function (e) {
+    if (menu.hidden || menu.contains(e.target)) return;
+    menu.hidden = true; e.stopPropagation(); e.preventDefault();
+  }, true);
+  addEventListener('keydown', function (e) {
+    if (menu.hidden || e.key !== 'Escape') return;
+    menu.hidden = true; e.stopPropagation(); e.preventDefault();
+  }, true);
+  showWho();
+
+  // Drag the header up and the answers get more room; the height stays on this device (Doc, 17.09.2026: "lass mich
+  // das Fenster nach oben größer ziehen ... persist"). The panel hangs from its bottom edge, so it grows upwards.
+  const H_KEY = 'solita_ask_h', H_MIN = 90, TOP_GAP = 48;   // 48: clear of the edit pencil and the LOCAL badge
+  const head = document.getElementById('ask-head');
+  function rest() {                                  // everything but the answers, plus the gap to the screen top
+    const r = panel.getBoundingClientRect();
+    const gap = out.offsetHeight ? 0 : parseFloat(getComputedStyle(out).marginBottom) || 0;   // hidden: its margin comes along
+    const px = r.height - out.offsetHeight + gap + (innerHeight - r.bottom) + TOP_GAP;
+    panel.style.setProperty('--askrest', Math.round(px) + 'px');
+    return px;
+  }
+  function setHeight(h) {
+    panel.style.setProperty('--askh', Math.round(h) + 'px');
+    panel.classList.add('sized');
+  }
+  try { const h = +localStorage.getItem(H_KEY); if (h >= H_MIN) setHeight(h); } catch (e) { }
+  head.addEventListener('pointerdown', function (e) {
+    if (e.button !== 0 || e.target.closest('button')) return;   // no answer yet is fine: the empty panel grows too (Doc, 17.09.2026)
+    e.preventDefault();
+    const y0 = e.clientY, h0 = out.offsetHeight, max = innerHeight - rest();
+    head.setPointerCapture(e.pointerId);
+    function move(ev) { setHeight(Math.max(H_MIN, Math.min(max, h0 + y0 - ev.clientY))); }
+    function up() {
+      head.removeEventListener('pointermove', move);
+      head.removeEventListener('pointerup', up);
+      head.removeEventListener('pointercancel', up);
+      try { localStorage.setItem(H_KEY, String(out.offsetHeight)); } catch (err) { }
+    }
+    head.addEventListener('pointermove', move);
+    head.addEventListener('pointerup', up);
+    head.addEventListener('pointercancel', up);
+  });
+  addEventListener('resize', function () { if (!panel.hidden) rest(); });
 
   // Keys and clicks inside the panel stay there: typing a question must not turn pages, open the
   // overview ('o') or pause Solita ('p'). Measured 16.09.2026: a capture listener on window is the
@@ -1634,6 +1871,14 @@ ASK_JS = r"""
       lines.push('', (i === si ? 'Die Klasse steht auf Folie ' + (i + 1)
                                : 'Folie ' + (i + 1) + ', nach der gefragt wird') + ' - voller Inhalt:');
       lines.push(slideText(slides[i]));
+      // a lab on the slide describes itself (<meta name="solita-about"> in the lab) - the slide's short note alone
+      // made her tell the class to tap the 3D die for a new number (Doc, 17.09.2026)
+      slides[i].querySelectorAll('.labframe iframe').forEach(function (f) {
+        try {
+          const about = f.contentDocument && f.contentDocument.querySelector('meta[name="solita-about"]');
+          if (about && about.content) lines.push('So funktioniert das Lab auf dieser Folie: ' + about.content);
+        } catch (e) { }                               // a lab from elsewhere: nothing to read
+      });
       const spoken = NARR && NARR.slides && NARR.slides[String(i)];
       if (spoken && spoken.length) lines.push('Solita erklärt dazu: ' + spoken.join(' '));
     });
@@ -1647,6 +1892,7 @@ ASK_JS = r"""
 
   function render(el, text) {       // formulas the model wrote in $...$ come out as real maths
     el.textContent = '';
+    el.dataset.src = text;                          // "Kopieren" takes the text as written, $...$ and all
     String(text).split(/(\$[^$\n]+\$)/).forEach(function (part) {
       if (/^\$[^$\n]+\$$/.test(part)) {
         const span = document.createElement('span');
@@ -1781,38 +2027,74 @@ ASK_JS = r"""
     const wait = say('<span class="ask-wave" role="status" aria-label="Solita denkt nach">'
       + '<i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>');
     const t0 = Date.now();
-    post(AI_URL, { pass: pwd(), model: MODEL, max_tokens: 600,
-      messages: [{ role: 'system', content: SYS }]
-        .concat(hist.reduce(function (m, h) {
-          return m.concat({ role: 'user', content: 'Frage der Klasse: ' + h.q },
-                          { role: 'assistant', content: h.a });
-        }, []))
-        .concat({ role: 'user', content: context(v) + '\n\nFrage der Klasse: ' + v }) })
-      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-      .then(function (res) {
-        const text = res.ok && res.j && res.j.choices && res.j.choices[0]
-          && res.j.choices[0].message && res.j.choices[0].message.content;
-        if (!text) {
-          busy = false; send.disabled = false;
-          wait.className = 'ask-err';
-          wait.textContent = (res.j && res.j.error) ? String(res.j.error) : 'Das hat nicht geklappt.';
-          return;
-        }
-        addClaude(res.j.usage, Date.now() - t0);
-        hist.push({ q: v, a: text });
-        if (hist.length > HIST_MAX) hist.shift();
-        speak(text, function () {
-          busy = false; send.disabled = false;
-          render(wait, text);
-          out.scrollTop = out.scrollHeight;
-          input.value = ''; input.focus();           // done - empty line for the next question
-          return wait;                               // karaoke lights up the words in here
+    const messages = [{ role: 'system', content: SYS }]
+      .concat(hist.reduce(function (m, h) {
+        return m.concat({ role: 'user', content: 'Frage der Klasse: ' + h.q },
+                        { role: 'assistant', content: h.a });
+      }, []))
+      .concat({ role: 'user', content: context(v) + '\n\nFrage der Klasse: ' + v });
+    // Solita (Claude) and/or DeepSeek get the very same messages - who answers is set in the right-click menu
+    const withClaude = who.claude || !who.ds, withDs = who.ds;
+    function ask(url, model) {
+      return post(url, { pass: pwd(), model: model, max_tokens: 600, messages: messages })
+        .then(function (r) {
+          return r.json().catch(function () { return {}; }).then(function (j) {
+            const text = r.ok && j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+            return { text: text || '', status: r.status, j: j,
+                     error: text ? '' : r.status === 401 && url === DS_URL ? 'DeepSeek gibt es nur mit Docs Passwort.'
+                          : String((j && j.error && (j.error.message || j.error)) || 'Das hat nicht geklappt.') };
+          });
         });
-      })
-      .catch(function () {
+    }
+    function red(el, text) {                          // DeepSeek's answer: red, its name in front
+      el.className = 'ask-ds';
+      el.innerHTML = '<b>DeepSeek</b>';
+      const body = document.createElement('span');
+      el.appendChild(body);
+      render(body, text);
+    }
+    function fail(msg) { busy = false; send.disabled = false; wait.className = 'ask-err'; wait.textContent = msg; }
+    function answer(text, show) {                     // the answer she speaks: history, voice, then on screen
+      hist.push({ q: v, a: text });
+      if (hist.length > HIST_MAX) hist.shift();
+      speak(text, function () {
         busy = false; send.disabled = false;
-        wait.className = 'ask-err'; wait.textContent = 'Kein Netz.';
+        show();
+        out.scrollTop = out.scrollHeight;
+        input.value = ''; input.focus();             // done - empty line for the next question
+        return wait;                                 // karaoke lights up the words in here
       });
+    }
+    // DeepSeek beside her: silent, below, and only once her answer is on screen, so she is read first
+    const ds = withClaude && withDs ? say('', 'ask-ds') : null;
+    if (ds) ds.hidden = true;
+    let dsRes = null, herTurn = false;
+    function dsShow() {
+      if (!ds || !dsRes || !herTurn) return;
+      if (dsRes.text) red(ds, dsRes.text);
+      else if (dsRes.status !== 401) { ds.className = 'ask-err'; ds.textContent = 'DeepSeek: ' + dsRes.error; }
+      else return;                                    // the students' password: no DeepSeek, not a word about it
+      ds.hidden = false;
+      out.scrollTop = out.scrollHeight;
+    }
+    if (ds) ask(DS_URL, DS_MODEL).then(function (res) { dsRes = res; dsShow(); }).catch(function () { });
+    if (!withClaude) {                                // DeepSeek alone: her voice reads its answer
+      ask(DS_URL, DS_MODEL)
+        .then(function (res) {
+          last = null; showCost();
+          if (!res.text) { fail(res.error); return; }
+          answer(res.text, function () { red(wait, res.text); });
+        })
+        .catch(function () { fail('Kein Netz.'); });
+      return;
+    }
+    ask(AI_URL, MODEL)
+      .then(function (res) {
+        if (!res.text) { fail(res.error); herTurn = true; dsShow(); return; }
+        addClaude(res.j.usage, Date.now() - t0);
+        answer(res.text, function () { render(wait, res.text); herTurn = true; dsShow(); });
+      })
+      .catch(function () { fail('Kein Netz.'); herTurn = true; dsShow(); });
   }
 
   // Speaking the question: the shared engine from js/solita-listen.js (it survives mid-sentence
@@ -1839,6 +2121,7 @@ ASK_JS = r"""
     if (typeof narr !== 'undefined') narr.stop();   // asking pauses the talk, like turning a page
     panel.hidden = false;
     if (!pwd()) askPassword(); else askQuestion();
+    rest();                                           // the stored height never pushes the panel off the top
     input.focus();
     warm();
   }
@@ -2299,6 +2582,7 @@ const link = (function () {
         '<div class="p-bar"><span class="p-timer" title="Laufzeit"></span>'
       + '<button type="button" class="p-pause"></button>'
       + '<button type="button" class="p-reset" title="Timer neu starten" aria-label="Timer neu starten">' + svg(RESET) + '</button>'
+      + '<button type="button" class="p-ov" title="Übersicht aller Folien (o)" aria-label="Übersicht aller Folien"></button>'
       + '<span class="p-clock" title="Uhrzeit"></span></div>'
       + '<div class="p-cur"><div class="p-fit" title="Klick: weiter"><div class="p-frame"></div></div>'
       + '<div class="p-nav"><button type="button" class="p-prev" title="Zurück" aria-label="Zurück">' + svg('<path d="m15 5-7 7 7 7"/>') + '</button>'
@@ -2365,16 +2649,7 @@ const link = (function () {
         c.querySelectorAll('iframe').forEach(function (f, k) {
           f.addEventListener('load', function () { mirror.watch(f, i, k, goFull); });
         });
-      } else {
-        // previews and strip: every live lab or die would be one more WebGL context - a stand-in keeps the place
-        c.querySelectorAll('iframe').forEach(function (f) {
-          const d = document.createElement('div');
-          d.className = 'p-live';
-          if (f.classList.contains('live-frame')) { d.classList.add('dice'); d.style.cssText = f.style.cssText; d.textContent = '3D-Würfel'; }
-          else d.textContent = 'Labor';
-          f.replaceWith(d);
-        });
-      }
+      } else standIns(c);                            // previews and strip: pictures, not live labs
       c.classList.add('on');
       c.querySelectorAll('.step').forEach(function (e) { e.classList.toggle('on', +e.dataset.g < st); });
       return c;
@@ -2402,10 +2677,14 @@ const link = (function () {
       let lowest = nav.getBoundingClientRect().bottom;
       [].forEach.call(caps, function (c) { lowest = Math.max(lowest, c.getBoundingClientRect().bottom); });
       const free = strip.getBoundingClientRect().top - lowest - 6;
-      const head = Math.max(0, Math.min(free, (DOCK_MAX - 1) * cellH));
-      strip.style.marginTop = -head + 'px';
-      strip.style.paddingTop = 4 + head + 'px';
+      // the ring around a cell grows with it: 3px outline × 2.6 did not fit the 4px padding and the strip cut it
+      // off at the top (Doc, 17.09.2026: "manchmal ist der grüne Rand oben abgeschnitten") - lend that room too
+      const ring = parseFloat(getComputedStyle(cells[0]).outlineWidth) || 0;
+      const head = Math.max(0, Math.min(free - ring * DOCK_MAX, (DOCK_MAX - 1) * cellH));
       dockK = head / cellH;
+      const extra = Math.ceil(ring * dockK);
+      strip.style.marginTop = -(head + extra) + 'px';
+      strip.style.paddingTop = 4 + head + extra + 'px';
       magnify();
     }
     function magnify() {
@@ -2466,11 +2745,25 @@ const link = (function () {
 
     let t0 = Date.now(), acc = 0, running = true;
     const two = function (n) { return String(n).padStart(2, '0'); };
+    // timer and clock in THE digits widget (Doc, 17.09.2026: "die Zahlen springen -> Zahlenwidget bitte verwenden"):
+    // Orbitron's 1 is half as wide as its 0. Loaded here only, the decks' pages stay as they are; until it is
+    // there the plain text stands in.
+    ['../js/cyber-clock.css', '../js/cyber-clock.js'].forEach(function (src) {
+      const css = /\.css$/.test(src), el = document.createElement(css ? 'link' : 'script');
+      if (css) { el.rel = 'stylesheet'; el.href = src; } else { el.src = src; el.onload = tick; }
+      document.head.appendChild(el);
+    });
+    function show(el, text) {
+      const key = (window.CyberClock ? 'w' : 't') + text;   // once the widget is there, redraw even the same text
+      if (el.dataset.shown === key) return;
+      el.dataset.shown = key;
+      if (window.CyberClock) CyberClock.digits(el, text); else el.textContent = text;
+    }
     function tick() {
       const s = Math.floor((running ? acc + Date.now() - t0 : acc) / 1000);
-      timerEl.textContent = (s >= 3600 ? Math.floor(s / 3600) + ':' : '') + two(Math.floor(s / 60) % 60) + ':' + two(s % 60);
+      show(timerEl, (s >= 3600 ? Math.floor(s / 3600) + ':' : '') + two(Math.floor(s / 60) % 60) + ':' + two(s % 60));
       const d = new Date();
-      clockEl.textContent = two(d.getHours()) + ':' + two(d.getMinutes());
+      show(clockEl, two(d.getHours()) + ':' + two(d.getMinutes()));
     }
     function showPause() {
       pauseBtn.innerHTML = svg(running ? PAUSE : PLAY);
@@ -2482,6 +2775,11 @@ const link = (function () {
       showPause(); tick();
     };
     q('.p-reset').onclick = function () { acc = 0; t0 = Date.now(); tick(); };
+    // the overview over everything, here too (Doc, 17.09.2026: "auch im Presenter den Overview possible") - the
+    // deck's own grid button sits in the hidden HUD, this one borrows its icon and its click
+    const ovBtn = document.getElementById('ovbtn');
+    if (ovBtn) { q('.p-ov').innerHTML = ovBtn.innerHTML; q('.p-ov').onclick = function () { ovBtn.click(); }; }
+    else q('.p-ov').remove();
     q('.p-prev').onclick = function () { prev(); };
     q('.p-next').onclick = function () { next(); };
     fits[0].addEventListener('click', function () { next(); });   // a click on the slide goes on, as on the beamer
@@ -2564,7 +2862,7 @@ for _k, _v in {"__INK__": INK, "__BODY__": BODY, "__MUTED__": MUTED, "__STROKE__
                "__CODEBG__": CODE_BG, "__CODEINK__": CODE_INK,
                "__W__": W, "__H__": H, "__M__": MARGIN, "__CW__": CONTENT_W,
                "__TY__": TITLE_Y, "__RY__": RULE_Y, "__BY__": BODY_Y, "__BH__": BODY_H,
-               "__FOOT__": FOOT_Y, "__FOOTT__": FOOT_Y + 8, "__FOOTC__": FOOT_Y + 14,
+               "__FOOT__": FOOT_Y, "__FOOTT__": (FOOT_Y + H) / 2 - 6, "__FOOTC__": (FOOT_Y + H) / 2,
                "__MC__": MARGIN + 28, "__MQ__": MARGIN + 32,
                "__LABBAR__": RULE_Y - 12,   # lab bar on the rules line, clear of long titles (16.09.2026)
                "__CODEMUTED__": CODE_MUTED, "__GREETBG__": GREET_BG,

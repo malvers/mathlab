@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOC ALVERS MATHE-LABORE | Formeln vorlesen</title>
+<link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+<meta name="solita-about" content="Diese Seite zeigt, wie Solita Formeln vorliest: 30 Formeln aus den Mathe-Decks, zum Schluss als schwerer Fall die Navier-Stokes-Gleichung der Strömungsmechanik. Jede Formel hat einen grünen Knopf, der sie vorliest, darunter steht der gesprochene Text. Der Knopf Alle nacheinander spielt alle ab. Die Formeln werden automatisch in gesprochenes Deutsch übersetzt, zum Beispiel wird aus einem Bruch zwei Drittel und aus einem senkrechten Strich in einer Wahrscheinlichkeit unter der Bedingung.">
+<!--
+    Solita reads formulas aloud (Doc, 17.09.2026: "Latex vorlesen ist ein Projekt" - this listening test became a page).
+    TeX -> KaTeX MathML -> Speech Rule Engine (German, ClearSpeak) -> a short tidy-up list (HTML/js/latex-speech.js)
+    -> Solita's Studio-C voice. The clips are recorded once (audio/formeln-vorlesen/fNN.mp3), nothing is synthesised here.
+    Works on its own and in an <iframe> on a deck slide.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="morpheus/vendor/katex/katex.min.css">
+<script defer src="morpheus/vendor/katex/katex.min.js"></script>
+<style>
+:root{--bg:#0E244E;--card:#15305F;--ink:#E8EEF9;--muted:#9FB0D0;--orange:rgb(245,194,66);--green:rgb(121,158,49)}
+*{box-sizing:border-box}
+html{scrollbar-width:none}
+html::-webkit-scrollbar{display:none}   /* no scrollbars (Doc, 17.09.2026: "die scrolls weg") - wheel and touch still scroll */
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 Raleway,system-ui,sans-serif}
+main{max-width:860px;margin:0 auto;padding:28px 16px 60px}
+h1{font:800 22px/1.2 Orbitron,sans-serif;letter-spacing:.06em;margin:0 0 6px}
+p.lead{color:var(--muted);margin:0 0 18px}
+ol{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.row{display:flex;gap:14px;align-items:flex-start;background:var(--card);border-radius:10px;padding:12px 14px}
+.play{flex:none;width:40px;height:40px;border-radius:50%;border:0;background:var(--green);color:#fff;cursor:pointer;display:grid;place-items:center}
+.play svg{width:18px;height:18px;fill:currentColor}
+.play.on{background:var(--orange);color:var(--bg)}
+.body{min-width:0;flex:1}
+.tex{font-size:19px;overflow-x:auto;padding:2px 0;scrollbar-width:none}
+.tex::-webkit-scrollbar{display:none}
+.say{margin-top:4px}
+.tex .ft{transition:color .12s}
+.tex .ft.on{color:var(--orange)}   /* the term Solita is saying right now */
+.all{margin:0 0 18px;font:600 12px/1 Orbitron,sans-serif;letter-spacing:.08em;text-transform:uppercase;border:0;border-radius:8px;padding:10px 14px;background:var(--orange);color:var(--bg);cursor:pointer}
+</style>
+</head>
+<body>
+<main>
+<h1>Formeln vorlesen</h1>
+<p class="lead">Solita liest Formeln vor, so wie man sie spricht. Grüner Knopf: eine Formel – oder alle nacheinander.</p>
+<button class="all" type="button">Alle nacheinander</button>
+<ol>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f00.mp3" aria-label="Formel 1 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="\frac{2}{6} = \frac{1}{3}" data-terms="[{&quot;tex&quot;: &quot;\\frac{2}{6}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;zwei sechstel&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;\\frac{1}{3}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;ein drittel&quot;}]"></div>
+    <div class="say">zwei sechstel ist gleich ein drittel</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f01.mp3" aria-label="Formel 2 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="P(A \cap B) = P(A) \cdot P(B)" data-terms="[{&quot;tex&quot;: &quot;P(A \\cap B)&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;P von A geschnitten B&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;P(A)&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;P von A&quot;}, {&quot;tex&quot;: &quot;\\cdot&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;P(B)&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;P von B&quot;}]"></div>
+    <div class="say">P von A geschnitten B ist gleich P von A mal P von B</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f02.mp3" aria-label="Formel 3 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="P(\text{krank} \mid \text{positiv}) = \dfrac{99}{594} \approx 17\,\%" data-terms="[{&quot;tex&quot;: &quot;P(\\text{krank} \\mid \\text{positiv})&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;P von krank unter der Bedingung positiv&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;\\dfrac{99}{594}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;99 geteilt durch 594&quot;}, {&quot;tex&quot;: &quot;\\approx&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;17\\,\\%&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;17 Prozent&quot;}]"></div>
+    <div class="say">P von krank unter der Bedingung positiv ist gleich 99 geteilt durch 594 ungefähr 17 Prozent</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f03.mp3" aria-label="Formel 4 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="f(x) = 2^x" data-terms="[{&quot;tex&quot;: &quot;f(x)&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;f von x&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;2^x&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;2 hoch x&quot;}]"></div>
+    <div class="say">f von x ist gleich 2 hoch x</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f04.mp3" aria-label="Formel 5 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="\sqrt{x}" data-terms="[{&quot;tex&quot;: &quot;\\sqrt{x}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;Quadratwurzel aus x&quot;}]"></div>
+    <div class="say">Quadratwurzel aus x</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f05.mp3" aria-label="Formel 6 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="x_{1,2} = -\dfrac{p}{2} \pm \sqrt{\left(\dfrac{p}{2}\right)^2 - q}" data-terms="[{&quot;tex&quot;: &quot;x_{1,2}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;x Index eins Komma zwei&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;-\\dfrac{p}{2}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;minus p geteilt durch 2&quot;}, {&quot;tex&quot;: &quot;\\pm&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;\\sqrt{\\left(\\dfrac{p}{2}\\right)^2 - q}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;Quadratwurzel aus Klammer auf p geteilt durch 2 Klammer zu Quadrat minus q&quot;}]"></div>
+    <div class="say">x Index eins Komma zwei ist gleich minus p geteilt durch 2 plus minus Quadratwurzel aus Klammer auf p geteilt durch 2 Klammer zu Quadrat minus q</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f06.mp3" aria-label="Formel 7 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="\log_2 8 = 3" data-terms="[{&quot;tex&quot;: &quot;\\log_2 8&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;der Logarithmus Basis 2 von 8&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;3&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;3&quot;}]"></div>
+    <div class="say">der Logarithmus Basis 2 von 8 ist gleich 3</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f07.mp3" aria-label="Formel 8 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="x = \cos x" data-terms="[{&quot;tex&quot;: &quot;x&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;x&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;\\cos x&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;Kosinus x&quot;}]"></div>
+    <div class="say">x ist gleich Kosinus x</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f08.mp3" aria-label="Formel 9 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="\mathbf{(\textbf{Start} \to 7 \to 6)}" data-terms="[{&quot;tex&quot;: &quot;\\mathbf{(\\textbf{Start} \\to 7 \\to 6)}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;Start nach 7 nach 6&quot;}]"></div>
+    <div class="say">Start nach 7 nach 6</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f09.mp3" aria-label="Formel 10 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="\mathbf{(\textbf{Start} \to 3 \to 4)}" data-terms="[{&quot;tex&quot;: &quot;\\mathbf{(\\textbf{Start} \\to 3 \\to 4)}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;Start nach 3 nach 4&quot;}]"></div>
+    <div class="say">Start nach 3 nach 4</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f10.mp3" aria-label="Formel 11 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="m = \dfrac{y_2 - y_1}{x_2 - x_1}" data-terms="[{&quot;tex&quot;: &quot;m&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;m&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;\\dfrac{y_2 - y_1}{x_2 - x_1}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;Bruch mit Zähler y Index zwei minus y Index eins und Nenner x Index zwei minus x Index eins&quot;}]"></div>
+    <div class="say">m ist gleich Bruch mit Zähler y Index zwei minus y Index eins und Nenner x Index zwei minus x Index eins</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f11.mp3" aria-label="Formel 12 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="x \geq 0" data-terms="[{&quot;tex&quot;: &quot;x&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;x&quot;}, {&quot;tex&quot;: &quot;\\geq&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;0&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;0&quot;}]"></div>
+    <div class="say">x größer oder gleich 0</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f12.mp3" aria-label="Formel 13 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="\dfrac{\pi}{2}" data-terms="[{&quot;tex&quot;: &quot;\\dfrac{\\pi}{2}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;pi geteilt durch 2&quot;}]"></div>
+    <div class="say">pi geteilt durch 2</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f13.mp3" aria-label="Formel 14 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="3 \cdot \begin{pmatrix} 1 &amp; -2 \end{pmatrix} = \begin{pmatrix} 3 &amp; -6 \end{pmatrix}" data-terms="[{&quot;tex&quot;: &quot;3&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;3&quot;}, {&quot;tex&quot;: &quot;\\cdot&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;\\begin{pmatrix} 1 &amp; -2 \\end{pmatrix}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;die Matrix mit eins und minus 2&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;\\begin{pmatrix} 3 &amp; -6 \\end{pmatrix}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;die Matrix mit 3 und minus 6&quot;}]"></div>
+    <div class="say">3 mal die Matrix mit eins und minus 2, ist gleich die Matrix mit 3 und minus 6</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f14.mp3" aria-label="Formel 15 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="[1; 1{,}5]" data-terms="[{&quot;tex&quot;: &quot;[1; 1{,}5]&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;Intervall von eins bis eins Komma 5&quot;}]"></div>
+    <div class="say">Intervall von eins bis eins Komma 5</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f15.mp3" aria-label="Formel 16 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="\sqrt{x^2} = |x|" data-terms="[{&quot;tex&quot;: &quot;\\sqrt{x^2}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;Quadratwurzel aus x Quadrat&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;|x|&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;der Betrag von x&quot;}]"></div>
+    <div class="say">Quadratwurzel aus x Quadrat ist gleich der Betrag von x</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f16.mp3" aria-label="Formel 17 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="H = -\sum_i p_i \log_2 p_i" data-terms="[{&quot;tex&quot;: &quot;H&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;H&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;-\\sum_i p_i \\log_2 p_i&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;minus Summe über i über p Index i der Logarithmus Basis 2 von p Index i&quot;}]"></div>
+    <div class="say">H ist gleich minus Summe über i über p Index i der Logarithmus Basis 2 von p Index i</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f17.mp3" aria-label="Formel 18 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="90^\circ" data-terms="[{&quot;tex&quot;: &quot;90^\\circ&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;90 Grad&quot;}]"></div>
+    <div class="say">90 Grad</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f18.mp3" aria-label="Formel 19 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="3 \times 4" data-terms="[{&quot;tex&quot;: &quot;3&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;3&quot;}, {&quot;tex&quot;: &quot;\\times&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;4&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;4&quot;}]"></div>
+    <div class="say">3 mal 4</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f19.mp3" aria-label="Formel 20 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="P(B \mid A)" data-terms="[{&quot;tex&quot;: &quot;P(B \\mid A)&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;P von B unter der Bedingung A&quot;}]"></div>
+    <div class="say">P von B unter der Bedingung A</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f20.mp3" aria-label="Formel 21 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="A \cdot \vec{x} = \vec{b}" data-terms="[{&quot;tex&quot;: &quot;A&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;A&quot;}, {&quot;tex&quot;: &quot;\\cdot&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;\\vec{x}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;Vektor x&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;\\vec{b}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;Vektor b&quot;}]"></div>
+    <div class="say">A mal Vektor x ist gleich Vektor b</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f21.mp3" aria-label="Formel 22 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="\mathbb{R}" data-terms="[{&quot;tex&quot;: &quot;\\mathbb{R}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;die reellen Zahlen&quot;}]"></div>
+    <div class="say">die reellen Zahlen</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f22.mp3" aria-label="Formel 23 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="P(\text{Jonas verliert}) = 4 \cdot \frac{1}{6} = \frac{2}{3} \approx 66{,}7\,\%" data-terms="[{&quot;tex&quot;: &quot;P(\\text{Jonas verliert})&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;P von Jonas verliert&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;4&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;4&quot;}, {&quot;tex&quot;: &quot;\\cdot&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;\\frac{1}{6}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;ein sechstel&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;\\frac{2}{3}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;zwei drittel&quot;}, {&quot;tex&quot;: &quot;\\approx&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;66{,}7\\,\\%&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;66 Komma 7 Prozent&quot;}]"></div>
+    <div class="say">P von Jonas verliert ist gleich 4 mal ein sechstel ist gleich zwei drittel ungefähr 66 Komma 7 Prozent</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f23.mp3" aria-label="Formel 24 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="f(x) = 2 \cdot e^{0{,}5x}" data-terms="[{&quot;tex&quot;: &quot;f(x)&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;f von x&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;2&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;2&quot;}, {&quot;tex&quot;: &quot;\\cdot&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;e^{0{,}5x}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;e hoch 0 Komma 5 x&quot;}]"></div>
+    <div class="say">f von x ist gleich 2 mal e hoch 0 Komma 5 x</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f24.mp3" aria-label="Formel 25 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="f(x) = a \cdot (x - d)^2 + e" data-terms="[{&quot;tex&quot;: &quot;f(x)&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;f von x&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;a&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;a&quot;}, {&quot;tex&quot;: &quot;\\cdot&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;(x - d)^2&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;Klammer auf x minus d Klammer zu Quadrat&quot;}, {&quot;tex&quot;: &quot;+&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;e&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;e&quot;}]"></div>
+    <div class="say">f von x ist gleich a mal Klammer auf x minus d Klammer zu Quadrat plus e</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f25.mp3" aria-label="Formel 26 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="\sin(\alpha) = \frac{a}{c}" data-terms="[{&quot;tex&quot;: &quot;\\sin(\\alpha)&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;Sinus alpha&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;\\frac{a}{c}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;a geteilt durch c&quot;}]"></div>
+    <div class="say">Sinus alpha ist gleich a geteilt durch c</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f26.mp3" aria-label="Formel 27 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="x^2 + 3x - 4 = 0" data-terms="[{&quot;tex&quot;: &quot;x^2&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;x Quadrat&quot;}, {&quot;tex&quot;: &quot;+&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;3x&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;3 x&quot;}, {&quot;tex&quot;: &quot;-&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;4&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;4&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;0&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;0&quot;}]"></div>
+    <div class="say">x Quadrat plus 3 x minus 4 ist gleich 0</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f27.mp3" aria-label="Formel 28 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="A = \begin{pmatrix} 1 &amp; 2 \\ 3 &amp; 4 \end{pmatrix}" data-terms="[{&quot;tex&quot;: &quot;A&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;A&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;\\begin{pmatrix} 1 &amp; 2 \\\\ 3 &amp; 4 \\end{pmatrix}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;die 2 mal 2 Matrix, Zeile eins, eins und 2, Zeile 2, 3 und 4&quot;}]"></div>
+    <div class="say">A ist gleich die 2 mal 2 Matrix, Zeile eins, eins und 2, Zeile 2, 3 und 4</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f28.mp3" aria-label="Formel 29 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="\vec{v} = \begin{pmatrix} 2 \\ -1 \\ \frac{1}{2} \end{pmatrix}" data-terms="[{&quot;tex&quot;: &quot;\\vec{v}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;Vektor v&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;\\begin{pmatrix} 2 \\\\ -1 \\\\ \\frac{1}{2} \\end{pmatrix}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;die Matrix mit 2, minus eins und ein halb&quot;}]"></div>
+    <div class="say">Vektor v ist gleich die Matrix mit 2, minus eins und ein halb</div>
+  </div>
+</li>
+<li class="row">
+  <button class="play" type="button" data-src="audio/formeln-vorlesen/f29.mp3" aria-label="Formel 30 vorlesen" title="Vorlesen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg></button>
+  <div class="body">
+    <div class="tex" data-tex="\rho \left( \frac{\partial \vec{v}}{\partial t} + (\vec{v} \cdot \nabla) \vec{v} \right) = -\nabla p + \mu \, \Delta \vec{v} + \vec{f}" data-terms="[{&quot;tex&quot;: &quot;\\rho \\left( \\frac{\\partial \\vec{v}}{\\partial t} + (\\vec{v} \\cdot \\nabla) \\vec{v} \\right)&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;rho mal Klammer auf die partielle Ableitung von Vektor v nach t plus Klammer auf Vektor v mal Nabla Klammer zu mal Vektor v Klammer zu&quot;}, {&quot;tex&quot;: &quot;=&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;-\\nabla p&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;minus Nabla p&quot;}, {&quot;tex&quot;: &quot;+&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;\\mu \\, \\Delta \\vec{v}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;mü Delta Vektor v&quot;}, {&quot;tex&quot;: &quot;+&quot;, &quot;op&quot;: true}, {&quot;tex&quot;: &quot;\\vec{f}&quot;, &quot;op&quot;: false, &quot;say&quot;: &quot;Vektor f&quot;}]"></div>
+    <div class="say">rho mal Klammer auf die partielle Ableitung von Vektor v nach t plus Klammer auf Vektor v mal Nabla Klammer zu mal Vektor v Klammer zu ist gleich minus Nabla p plus mü Delta Vektor v plus Vektor f</div>
+  </div>
+</li>
+</ol>
+</main>
+<script>
+// each term and each sign (=, +, −, ·, ≈) becomes its own span (\htmlClass - measured: the spacing stays), so it can
+// light up while Solita says it (Doc, 17.09.2026: "auch = +/- rund")
+addEventListener('load', function () {
+  document.querySelectorAll('.tex').forEach(function (el) {
+    const terms = JSON.parse(el.dataset.terms || '[]');
+    const tex = terms.length ? terms.map(function (t, i) { return '\\htmlClass{ft ft' + i + '}{' + t.tex + '}'; }).join(' ')
+                             : el.dataset.tex;
+    try { katex.render(tex, el, { throwOnError: true, trust: function (c) { return c.command === '\\htmlClass'; } }); }
+    catch (e) { try { katex.render(el.dataset.tex, el, { throwOnError: false }); } catch (e2) { el.textContent = el.dataset.tex; } }
+  });
+});
+// When is which term spoken? Google gives no word times, so they are estimated like the deck's karaoke: syllables per
+// word, pauses after commas, spread over the clip (measured there: about 0.13 s off). Each term's own words are looked
+// up in order in the spoken text; a term not found gets the gap between its neighbours.
+const KARA = { lead: 0.10, tail: 0.09, base: 0.3, comma: 0.6 };
+function syllables(w) {
+  const v = w.toLowerCase().match(/[aeiouyäöü]+/g);
+  return v ? v.length : (w.replace(/\D/g, '').length * 1.5 || 1);
+}
+function timeline(row) {
+  const el = row.querySelector('.tex'), terms = JSON.parse(el.dataset.terms || '[]');
+  const words = row.querySelector('.say').textContent.split(/\s+/).filter(Boolean);
+  const norm = function (w) { return w.toLowerCase().replace(/[.,;:!?]/g, ''); };
+  const W = words.map(norm), starts = [];
+  let pos = 0;
+  words.forEach(function (w) { starts.push(pos); pos += syllables(w) + KARA.base; if (/[,;:]$/.test(w)) pos += KARA.comma; });
+  const ranges = [];
+  let at = 0;
+  terms.forEach(function (t, i) {
+    if (t.op) return;
+    const s = String(t.say || '').split(/\s+/).map(norm).filter(Boolean);
+    let f = -1;
+    for (let k = at; s.length && k + s.length <= W.length; k++) if (s.every(function (x, j) { return W[k + j] === x; })) { f = k; break; }
+    ranges.push({ i: i, a: f, b: f < 0 ? -1 : f + s.length });
+    if (f >= 0) at = f + s.length;
+  });
+  ranges.forEach(function (r, k) {
+    if (r.a >= 0) return;
+    const prev = ranges.slice(0, k).reverse().find(function (x) { return x.a >= 0; });
+    const next = ranges.slice(k + 1).find(function (x) { return x.a >= 0; });
+    r.a = prev ? prev.b : 0; r.b = next ? next.a : W.length;
+  });
+  // a sign is spoken between its two terms: it gets the words in that gap ("ist gleich", "plus", "ungefähr")
+  terms.forEach(function (t, i) {
+    if (!t.op) return;
+    const prev = ranges.filter(function (r) { return r.i < i; }).pop(), next = ranges.find(function (r) { return r.i > i; });
+    const a = prev ? prev.b : 0, b = next ? next.a : W.length;
+    if (b > a) ranges.push({ i: i, a: a, b: b });
+  });
+  return { total: pos, parts: ranges.map(function (r) {
+    return { els: el.querySelectorAll('.ft' + r.i), from: r.a < W.length ? starts[r.a] : pos, to: r.b < W.length ? starts[r.b] : pos };
+  }) };
+}
+function follow(row, a) {
+  const tl = timeline(row);
+  let lit = null;
+  function light(part) {
+    if (part === lit) return;
+    if (lit) lit.els.forEach(function (e) { e.classList.remove('on'); });
+    lit = part;
+    if (lit) lit.els.forEach(function (e) { e.classList.add('on'); });
+  }
+  (function frame() {
+    if (a !== audio || a.ended) { light(null); return; }
+    if (isFinite(a.duration) && a.duration > 0) {
+      const u = (a.currentTime - KARA.lead) / Math.max(0.1, a.duration - KARA.lead - KARA.tail) * tl.total;
+      light(tl.parts.find(function (p) { return u >= p.from && u < p.to; }) || null);
+    }
+    requestAnimationFrame(frame);
+  })();
+}
+let audio = null, btn = null, queue = [];
+function stop() { if (audio) audio.pause(); if (btn) btn.classList.remove('on'); audio = null; btn = null; }
+function play(b, then) {
+  stop(); btn = b; b.classList.add('on');
+  audio = new Audio(b.dataset.src);
+  follow(b.closest('.row'), audio);
+  audio.onended = function () { b.classList.remove('on'); audio = null; btn = null; if (then) setTimeout(then, 700); };
+  audio.play().catch(function () { b.classList.remove('on'); });
+}
+document.querySelectorAll('.play').forEach(function (b) {
+  b.addEventListener('click', function () { queue = []; if (btn === b) stop(); else play(b); });
+});
+document.querySelector('.all').addEventListener('click', function () {
+  queue = [].slice.call(document.querySelectorAll('.play'));
+  (function next() { const b = queue.shift(); if (b) { b.scrollIntoView({ block: 'center', behavior: 'smooth' }); play(b, next); } })();
+});
+</script>
+</body>
+</html>

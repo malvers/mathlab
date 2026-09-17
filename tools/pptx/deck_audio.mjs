@@ -31,6 +31,7 @@ let n = 0, sent = 0;
 for (const [s, parts] of Object.entries(N.slides)) {
   for (let k = 0; k < parts.length; k++) {
     const name = 's' + pad(+s) + '-' + pad(k) + '.mp3';
+    if (!parts[k].trim()) continue;                   // a line copied in the deck editor: Solita stays quiet there
     const text = fix(parts[k]);
     n++;
     if (done[name] === text && existsSync(dir + name)) continue;

@@ -3,6 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
+    <!-- what the lab does, read by "Frag Solita" when a deck slide embeds this lab (Doc, 17.09.2026) -->
+    <meta name="solita-about" content="Das Lab hat zwei Modi, die Taste M schaltet um. Rundgang: 15 Stationen wie im Deck, Solita liest vor, die Pfeiltasten blättern. Labor: eigene Würfel, die Pfeiltasten wechseln die Ansicht. Tippen auf einen 3D-Würfel lässt beide Würfel rollen, das ist eine neue Runde, und das Lab zählt mit, wer gewinnt; Ziehen dreht den Würfel. Eigene Zahlen gibt es nur im Labor: in den Ansichten Würfelnetze oder Würfel lesen im aufgeklappten Netz auf ein Feld tippen und eine neue Zahl wählen – ein Tipp auf den 3D-Würfel ändert keine Zahl. Danach rechnen alle Ansichten mit: Baum in zwei Stufen, Pfadregel, Wer gewinnt, Summenregel, typische Fehler, Simulation mit hundert oder tausend Runden und Efron-Würfel.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DOC ALVERS MATHE-LABORE | Das Würfelspiel</title>
     <link
@@ -1183,7 +1185,7 @@
                 label(m.B.name.toUpperCase(), W / 2, 206, 11, C.cyan, 'center');
             }
             const note = S.mode === 'labor'
-                ? 'Gleiche Zahlen, gleiche Farbe. **Fläche antippen:** neue Zahl wählen.'
+                ? 'Gleiche Zahlen, gleiche Farbe. **Feld im Netz antippen:** neue Zahl wählen.'
                 : 'Gleiche Zahlen, gleiche Farbe. **Tippen:** würfeln, die obere Fläche leuchtet.';
             rich(note, W / 2, H - 36, 15, C.soft, { align: 'center', maxW: W - 30 });
         }
@@ -2065,7 +2067,7 @@
         // {a} {b} = player names, {gA} {gB} = their genitive, {pA} = TeX of P(a wins)
         const LAB_TEXT = {
             spiel: '{a} würfelt zuerst, dann {b}. Wer die <b>größere Zahl</b> oben hat, gewinnt. Tippen oder Leertaste: würfeln.',
-            netze: 'Im Labor gehören die Würfel dir: <b>Fläche antippen</b> und eine neue Zahl wählen. Alle Ansichten rechnen sofort mit.',
+            netze: 'Im Labor gehören die Würfel dir: im Netz auf ein <b>Feld</b> tippen und eine neue Zahl wählen. Alle Ansichten rechnen sofort mit. Tippen auf einen Würfel lässt beide rollen, ziehen dreht ihn.',
             zweistufig: 'Zwei Würfe nacheinander sind zwei <b>Stufen</b>: erst {gA} Wurf, dann {gB} Wurf. Jeder Weg durch den Baum ist ein Ausgang.',
             zaehlen: 'Wahrscheinlichkeit einer Zahl: <b>Anzahl ihrer Flächen durch $6$</b>, dann kürzen. Zeile antippen: Ihre Flächen leuchten im Netz.',
             merge: 'Gleiche Zahlen zu <b>einem Ast</b> zusammenfassen: Ihre Sechstel werden addiert. Tippen schaltet um.',
@@ -2413,7 +2415,7 @@
                         <button class="cyber-btn" id="ws-swap">${T('btn_swap', 'TAUSCHEN')}</button>
                     </div>
                     <div class="ws-dice" id="ws-dice" style="margin-top:10px"></div>
-                    <div class="ws-note">${T('hint_faces', 'In den Ansichten <b>Würfelnetze</b> und <b>Würfel lesen</b> eine Fläche antippen und eine neue Zahl wählen.')}</div>`);
+                    <div class="ws-note">${T('hint_faces', 'In den Ansichten <b>Würfelnetze</b> und <b>Würfel lesen</b> im aufgeklappten Netz auf ein <b>Feld</b> tippen und eine neue Zahl wählen – nicht auf den 3D-Würfel, der würfelt nur.')}</div>`);
                 CyberUI.createDropdown('ws-preset', presetOpts, id => { if (id !== 'eigene') setPreset(id); }, S.labPreset);
                 on('ws-random', 'click', randomDice);
                 on('ws-swap', 'click', swapDice);

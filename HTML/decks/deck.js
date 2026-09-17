@@ -12,6 +12,36 @@
 const deck = document.getElementById('deck');
 const slides = [...document.querySelectorAll('.slide')];
 let si = 0, step = 0;
+// the screenshot of a lab or 3D die for the presenter's previews and strip (tools/pptx/deck_shots.mjs takes them):
+// named by what the frame shows and its size, not by its place - a moved lab or reordered slides keep their picture
+function shotKey(f) {
+  const s = f.getAttribute('src') + '|' + f.style.width + 'x' + f.style.height;
+  let h = 0x811c9dc5;                                // FNV-1a, 32 bit
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return 'img/shots/shot-' + (h >>> 0).toString(16).padStart(8, '0') + '.webp';
+}
+// labs and dice that must not run live (the presenter's previews, strip and overview: every one would be one more
+// WebGL context): a stand-in keeps the place and wears the screenshot if there is one - asked once per picture,
+// a missing one keeps the label
+const shotHas = {};
+function standIns(node) {
+  node.querySelectorAll('iframe').forEach(function (f) {
+    const d = document.createElement('div');
+    d.className = 'p-live';
+    if (f.classList.contains('live-frame')) { d.classList.add('dice'); d.style.cssText = f.style.cssText; d.textContent = '3D-Würfel'; }
+    else d.textContent = 'Labor';
+    const url = shotKey(f);
+    if (!shotHas[url]) shotHas[url] = new Promise(function (ok) {
+      const img = new Image();
+      img.onload = function () { ok(true); }; img.onerror = function () { ok(false); };
+      img.src = url;
+    });
+    shotHas[url].then(function (has) {
+      if (has) { d.style.backgroundImage = 'url("' + url + '")'; d.classList.add('shot'); }
+    });
+    f.replaceWith(d);
+  });
+}
 // ?presenter: this window is the presenter view on the laptop (see PRES_JS at the end)
 const PRESENTER = /[?&]presenter(&|=|$)/.test(location.search);
 if (PRESENTER) document.documentElement.classList.add('presenter');
@@ -38,11 +68,11 @@ function dock(){
   if (!hud) return;
   const s = Math.min(innerWidth / 960, innerHeight / 540);
   const r = deck.getBoundingClientRect();           // the scaled slide on screen
-  const btn = Math.round(Math.min(26, Math.max(18, 12 * s)));
+  const btn = Math.round(Math.min(34, Math.max(22, 16 * s)));   // a third bigger (Doc, 17.09.2026: "mach die butts größer")
   const av = Math.round(Math.min(46, Math.max(26, 24 * s)));
   document.documentElement.style.setProperty('--hudbtn', btn + 'px');
   document.documentElement.style.setProperty('--askav', av + 'px');
-  const cy = r.top + 518 * s;                  // middle of the footer text
+  const cy = r.top + 522 * s;                  // middle of the footer band = middle of the footer text
   let right = Math.max(8, Math.round(innerWidth - (r.right - 16 * s)));
   if (ask) {
     ask.style.right = right + 'px'; ask.style.bottom = 'auto'; ask.style.top = Math.round(cy - av / 2) + 'px';
@@ -68,7 +98,7 @@ function paint(){
   const sl = slides[si];
   sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
   document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
-  try { sessionStorage.setItem(KEEP, si + ':' + step); } catch (e) { }
+  try { sessionStorage.setItem(KEEP, si + ':' + step + ':' + groups(sl)); } catch (e) { }
   painted.forEach(f => f());
 }
 function next(){
@@ -95,6 +125,7 @@ addEventListener('keydown', e => {
   else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
   else if (k === 'Home') { si = 0; step = 0; paint(); }
   else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'a' || k === 'A') { narr.stop(); step = groups(slides[si]); paint(); }   // everything on this slide in (Doc, 17.09.2026)
   else if (k === 'f' || k === 'F') { full(); }
 });
 addEventListener('click', e => {
@@ -107,6 +138,23 @@ addEventListener('click', e => {
   if (e.target.closest('.labbar button')) { next(); return; }
   next();
 });   // clicks inside a lab stay in the lab - they never reach this document
+// the lab bar sits right on top of its lab: each slide places its lab frame itself, so read that frame's top.
+// A note that runs under the bar (a long one, mathe11-nichtlinear) pushes it up above the note instead.
+function placeLabBar(s) {
+  const bar = s && s.querySelector('.labbar'), frame = s && s.querySelector('.labframe');
+  const top = frame ? parseFloat(frame.style.top) : NaN;
+  if (!bar || !(top > 0)) return;
+  bar.style.top = 'auto';
+  bar.style.bottom = (540 - top + 3) + 'px';
+  const note = s.querySelector('.labnote');
+  if (!note || !note.textContent.trim()) return;
+  const r = document.createRange();
+  r.selectNodeContents(note);
+  const t = r.getBoundingClientRect(), b = bar.getBoundingClientRect();
+  if (t.right > b.left - 8 && t.bottom > b.top && t.top < b.bottom) bar.style.bottom = (540 - note.offsetTop + 3) + 'px';
+}
+painted.push(() => placeLabBar(slides[si]));
+addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the note are wider once KaTeX has drawn them
 // the footer triangles: one whole slide back or forth, shown fully built - no click steps
 (function () {
   const prevB = document.getElementById('nav-prev'), nextB = document.getElementById('nav-next');
@@ -168,6 +216,7 @@ addEventListener('click', e => {
   const rows = [
     [K(['→', '|', 'Leertaste']), 'nächster Schritt – auch ein Klick auf die Folie'],
     [K(['←']), 'einen Schritt zurück'],
+    [K(['A']) + hint('Alles'), 'alles auf der Folie zeigen'],
     [K(['Shift', '→', '/', 'Shift', '←']), 'ganze Folie vor / zurück – wie '
       + '<span class="navbtn">' + tri(PREV) + '</span><span class="navbtn">' + tri(NEXT) + '</span>'],
     [K(['Home', '|', 'End']), 'erste / letzte Folie'],
@@ -252,6 +301,7 @@ addEventListener('click', e => {
       thumb.className = 'ov-thumb';
       const c = s.cloneNode(true);                     // a copy, fully built, without ids
       c.querySelectorAll('[id]').forEach(function (e) { e.removeAttribute('id'); });
+      if (PRESENTER) standIns(c);                      // the presenter runs its current slide live already
       c.classList.add('on');
       thumb.appendChild(c);
       const num = document.createElement('span');
@@ -406,6 +456,8 @@ const narr = (function () {
       return;
     }
     if (part > 0) { step = Math.min(part, groups(slides[si])); paint(); }
+    // a line copied in the deck editor has an empty part (Doc, 17.09.2026: "erst mal nix"): it comes in, a pause, on
+    if (!String(data.slides[si][part] || '').trim()) { wait = setTimeout(function () { part++; run(); }, 1200); return; }
     aSlide = si;
     audio = new Audio('audio/' + data.deck + '/s' + pad(si) + '-' + pad(part) + '.mp3');
     audio.onended = function () { part++; wait = setTimeout(run, part < parts(si) ? 900 : 0); };
@@ -453,8 +505,13 @@ const narr = (function () {
 if (!location.hash) {
   let kept = '';
   try { kept = sessionStorage.getItem(KEEP) || ''; } catch (e) { }
-  const m = /^([0-9]+):([0-9]+)$/.exec(kept);
-  if (m && +m[1] < slides.length) { si = +m[1]; step = Math.min(+m[2], groups(slides[si])); }
+  // slide:step:groups - a slide that was fully in stays fully in, even when a line was added meanwhile
+  // (Doc, 17.09.2026: the copied line was missing after a reload, the page kept click 4 of now 5)
+  const m = /^([0-9]+):([0-9]+)(?::([0-9]+))?$/.exec(kept);
+  if (m && +m[1] < slides.length) {
+    si = +m[1];
+    step = m[3] !== undefined && +m[2] >= +m[3] ? groups(slides[si]) : Math.min(+m[2], groups(slides[si]));
+  }
 }
 paint();
 fromHash();
@@ -488,6 +545,11 @@ fromHash();
   // travel along (plain text, no slide context - that only rides with the new question).
   const HIST_MAX = 4;
   const hist = [];
+  // DeepSeek answers the same question below her, in red and silent - Doc's comparison (17.09.2026: "ich möchte DS
+  // und EINE Solita"). Its proxy opens only for Doc's own password: with the students' password it says 401 before
+  // DeepSeek is ever called - no cost, and nothing shows.
+  const DS_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/deepseek';
+  const DS_MODEL = 'deepseek-chat';
 
   // What a question REALLY costs (worked out 16.09.2026, after Doc asked why nothing ever turns up on
   // the Google bill): Claude is billed from the first token - no free tier - while Google grants a free
@@ -577,6 +639,132 @@ fromHash();
 
   costEl.onclick = function () { last = null; showCost(); };
   showCost();
+
+  // Who answers - Solita (Claude Haiku), DeepSeek or both: a right click anywhere in the panel opens a small menu with
+  // a check for each (Doc, 17.09.2026: "mach ein popup mit check für beide"), remembered on this device. One always
+  // stays on. Both: DeepSeek's answer comes red and silent below hers. DeepSeek alone: her voice reads its answer, the
+  // text stays red. DeepSeek's proxy opens only for Doc's own password.
+  const WHO_KEY = 'solita_ai';
+  const who = { claude: true, ds: false };
+  try {
+    const kept = JSON.parse(localStorage.getItem(WHO_KEY) || 'null');
+    if (kept) { who.claude = kept.claude !== false; who.ds = kept.ds === true; }
+    else if (localStorage.getItem('solita_ds') === '1') who.ds = true;   // the plain switch before the menu
+  } catch (e) { }
+  if (!who.claude && !who.ds) who.claude = true;
+  const menu = document.createElement('div');
+  menu.id = 'ask-menu';
+  menu.hidden = true;
+  menu.setAttribute('role', 'menu');
+  menu.innerHTML = '<div class="ask-mhead">Wer antwortet?</div>'
+    + '<label><input type="checkbox" data-who="claude"><span>Solita<i>Claude Haiku</i></span></label>'
+    + '<label class="ds"><input type="checkbox" data-who="ds"><span>DeepSeek</span></label>'
+    + '<div class="ask-msep"></div>'
+    + '<button type="button" data-act="copy">Kopieren</button>'
+    + '<button type="button" data-act="clear">Leeren</button>';
+  box.appendChild(menu);
+  const checks = menu.querySelectorAll('input');
+  function showWho() {
+    checks.forEach(function (c) {
+      c.checked = who[c.dataset.who];
+      c.disabled = c.checked && !(who.claude && who.ds);   // the last one on cannot be switched off
+    });
+    input.classList.toggle('ds', who.ds);
+  }
+  checks.forEach(function (c) {
+    c.addEventListener('change', function () {
+      who[c.dataset.who] = c.checked;
+      try { localStorage.setItem(WHO_KEY, JSON.stringify(who)); } catch (e) { }
+      showWho();
+    });
+  });
+  // Kopieren: the marked text if there is some in the answers, otherwise the whole talk; Leeren: talk and memory gone
+  // (Doc, 17.09.2026: "bau da noch copy und clear ein also Deutsch" - the browser's own menu is gone here)
+  const copyBtn = menu.querySelector('[data-act="copy"]'), clearBtn = menu.querySelector('[data-act="clear"]');
+  let marked = '';
+  function transcript() {
+    const lines = [];
+    [].forEach.call(out.children, function (d) {
+      if (d.hidden || d.querySelector('.ask-wave')) return;
+      const q = d.querySelector('.ask-q');
+      const src = d.dataset.src !== undefined ? d : d.querySelector('[data-src]');
+      if (q) lines.push('Frage: ' + q.textContent);
+      else if (src) lines.push((d.classList.contains('ask-ds') ? 'DeepSeek: ' : 'Solita: ') + src.dataset.src);
+      else if (d.textContent.trim()) lines.push(d.textContent.trim());
+    });
+    return lines.join('\n\n');
+  }
+  copyBtn.addEventListener('click', function () {
+    const text = marked || transcript();
+    const done = function (label) { copyBtn.textContent = label; setTimeout(function () { menu.hidden = true; }, 700); };
+    (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject())
+      .then(function () { done('Kopiert ✓'); }, function () { done('Kopieren ging nicht'); });
+  });
+  clearBtn.addEventListener('click', function () {
+    stopAudio();
+    out.textContent = '';
+    hist.length = 0;                                  // she forgets the talk too, a fresh start
+    last = null; showCost();
+    menu.hidden = true;
+    input.focus();
+  });
+  panel.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+    showWho();
+    const sel = getSelection();
+    marked = sel && !sel.isCollapsed && out.contains(sel.anchorNode) ? String(sel).trim() : '';
+    copyBtn.textContent = marked ? 'Markierung kopieren' : 'Gespräch kopieren';
+    copyBtn.disabled = !marked && !out.children.length;
+    clearBtn.disabled = !out.children.length;
+    menu.hidden = false;
+    const w = menu.offsetWidth, h = menu.offsetHeight;
+    menu.style.left = Math.max(8, Math.min(e.clientX, innerWidth - w - 8)) + 'px';
+    menu.style.top = Math.max(8, Math.min(e.clientY, innerHeight - h - 8)) + 'px';
+  });
+  // a click elsewhere or Esc only closes the menu - no page turn, the panel stays open
+  addEventListener('click', function (e) {
+    if (menu.hidden || menu.contains(e.target)) return;
+    menu.hidden = true; e.stopPropagation(); e.preventDefault();
+  }, true);
+  addEventListener('keydown', function (e) {
+    if (menu.hidden || e.key !== 'Escape') return;
+    menu.hidden = true; e.stopPropagation(); e.preventDefault();
+  }, true);
+  showWho();
+
+  // Drag the header up and the answers get more room; the height stays on this device (Doc, 17.09.2026: "lass mich
+  // das Fenster nach oben größer ziehen ... persist"). The panel hangs from its bottom edge, so it grows upwards.
+  const H_KEY = 'solita_ask_h', H_MIN = 90, TOP_GAP = 48;   // 48: clear of the edit pencil and the LOCAL badge
+  const head = document.getElementById('ask-head');
+  function rest() {                                  // everything but the answers, plus the gap to the screen top
+    const r = panel.getBoundingClientRect();
+    const gap = out.offsetHeight ? 0 : parseFloat(getComputedStyle(out).marginBottom) || 0;   // hidden: its margin comes along
+    const px = r.height - out.offsetHeight + gap + (innerHeight - r.bottom) + TOP_GAP;
+    panel.style.setProperty('--askrest', Math.round(px) + 'px');
+    return px;
+  }
+  function setHeight(h) {
+    panel.style.setProperty('--askh', Math.round(h) + 'px');
+    panel.classList.add('sized');
+  }
+  try { const h = +localStorage.getItem(H_KEY); if (h >= H_MIN) setHeight(h); } catch (e) { }
+  head.addEventListener('pointerdown', function (e) {
+    if (e.button !== 0 || e.target.closest('button')) return;   // no answer yet is fine: the empty panel grows too (Doc, 17.09.2026)
+    e.preventDefault();
+    const y0 = e.clientY, h0 = out.offsetHeight, max = innerHeight - rest();
+    head.setPointerCapture(e.pointerId);
+    function move(ev) { setHeight(Math.max(H_MIN, Math.min(max, h0 + y0 - ev.clientY))); }
+    function up() {
+      head.removeEventListener('pointermove', move);
+      head.removeEventListener('pointerup', up);
+      head.removeEventListener('pointercancel', up);
+      try { localStorage.setItem(H_KEY, String(out.offsetHeight)); } catch (err) { }
+    }
+    head.addEventListener('pointermove', move);
+    head.addEventListener('pointerup', up);
+    head.addEventListener('pointercancel', up);
+  });
+  addEventListener('resize', function () { if (!panel.hidden) rest(); });
 
   // Keys and clicks inside the panel stay there: typing a question must not turn pages, open the
   // overview ('o') or pause Solita ('p'). Measured 16.09.2026: a capture listener on window is the
@@ -669,6 +857,14 @@ fromHash();
       lines.push('', (i === si ? 'Die Klasse steht auf Folie ' + (i + 1)
                                : 'Folie ' + (i + 1) + ', nach der gefragt wird') + ' - voller Inhalt:');
       lines.push(slideText(slides[i]));
+      // a lab on the slide describes itself (<meta name="solita-about"> in the lab) - the slide's short note alone
+      // made her tell the class to tap the 3D die for a new number (Doc, 17.09.2026)
+      slides[i].querySelectorAll('.labframe iframe').forEach(function (f) {
+        try {
+          const about = f.contentDocument && f.contentDocument.querySelector('meta[name="solita-about"]');
+          if (about && about.content) lines.push('So funktioniert das Lab auf dieser Folie: ' + about.content);
+        } catch (e) { }                               // a lab from elsewhere: nothing to read
+      });
       const spoken = NARR && NARR.slides && NARR.slides[String(i)];
       if (spoken && spoken.length) lines.push('Solita erklärt dazu: ' + spoken.join(' '));
     });
@@ -682,6 +878,7 @@ fromHash();
 
   function render(el, text) {       // formulas the model wrote in $...$ come out as real maths
     el.textContent = '';
+    el.dataset.src = text;                          // "Kopieren" takes the text as written, $...$ and all
     String(text).split(/(\$[^$\n]+\$)/).forEach(function (part) {
       if (/^\$[^$\n]+\$$/.test(part)) {
         const span = document.createElement('span');
@@ -816,38 +1013,74 @@ fromHash();
     const wait = say('<span class="ask-wave" role="status" aria-label="Solita denkt nach">'
       + '<i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>');
     const t0 = Date.now();
-    post(AI_URL, { pass: pwd(), model: MODEL, max_tokens: 600,
-      messages: [{ role: 'system', content: SYS }]
-        .concat(hist.reduce(function (m, h) {
-          return m.concat({ role: 'user', content: 'Frage der Klasse: ' + h.q },
-                          { role: 'assistant', content: h.a });
-        }, []))
-        .concat({ role: 'user', content: context(v) + '\n\nFrage der Klasse: ' + v }) })
-      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-      .then(function (res) {
-        const text = res.ok && res.j && res.j.choices && res.j.choices[0]
-          && res.j.choices[0].message && res.j.choices[0].message.content;
-        if (!text) {
-          busy = false; send.disabled = false;
-          wait.className = 'ask-err';
-          wait.textContent = (res.j && res.j.error) ? String(res.j.error) : 'Das hat nicht geklappt.';
-          return;
-        }
-        addClaude(res.j.usage, Date.now() - t0);
-        hist.push({ q: v, a: text });
-        if (hist.length > HIST_MAX) hist.shift();
-        speak(text, function () {
-          busy = false; send.disabled = false;
-          render(wait, text);
-          out.scrollTop = out.scrollHeight;
-          input.value = ''; input.focus();           // done - empty line for the next question
-          return wait;                               // karaoke lights up the words in here
+    const messages = [{ role: 'system', content: SYS }]
+      .concat(hist.reduce(function (m, h) {
+        return m.concat({ role: 'user', content: 'Frage der Klasse: ' + h.q },
+                        { role: 'assistant', content: h.a });
+      }, []))
+      .concat({ role: 'user', content: context(v) + '\n\nFrage der Klasse: ' + v });
+    // Solita (Claude) and/or DeepSeek get the very same messages - who answers is set in the right-click menu
+    const withClaude = who.claude || !who.ds, withDs = who.ds;
+    function ask(url, model) {
+      return post(url, { pass: pwd(), model: model, max_tokens: 600, messages: messages })
+        .then(function (r) {
+          return r.json().catch(function () { return {}; }).then(function (j) {
+            const text = r.ok && j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+            return { text: text || '', status: r.status, j: j,
+                     error: text ? '' : r.status === 401 && url === DS_URL ? 'DeepSeek gibt es nur mit Docs Passwort.'
+                          : String((j && j.error && (j.error.message || j.error)) || 'Das hat nicht geklappt.') };
+          });
         });
-      })
-      .catch(function () {
+    }
+    function red(el, text) {                          // DeepSeek's answer: red, its name in front
+      el.className = 'ask-ds';
+      el.innerHTML = '<b>DeepSeek</b>';
+      const body = document.createElement('span');
+      el.appendChild(body);
+      render(body, text);
+    }
+    function fail(msg) { busy = false; send.disabled = false; wait.className = 'ask-err'; wait.textContent = msg; }
+    function answer(text, show) {                     // the answer she speaks: history, voice, then on screen
+      hist.push({ q: v, a: text });
+      if (hist.length > HIST_MAX) hist.shift();
+      speak(text, function () {
         busy = false; send.disabled = false;
-        wait.className = 'ask-err'; wait.textContent = 'Kein Netz.';
+        show();
+        out.scrollTop = out.scrollHeight;
+        input.value = ''; input.focus();             // done - empty line for the next question
+        return wait;                                 // karaoke lights up the words in here
       });
+    }
+    // DeepSeek beside her: silent, below, and only once her answer is on screen, so she is read first
+    const ds = withClaude && withDs ? say('', 'ask-ds') : null;
+    if (ds) ds.hidden = true;
+    let dsRes = null, herTurn = false;
+    function dsShow() {
+      if (!ds || !dsRes || !herTurn) return;
+      if (dsRes.text) red(ds, dsRes.text);
+      else if (dsRes.status !== 401) { ds.className = 'ask-err'; ds.textContent = 'DeepSeek: ' + dsRes.error; }
+      else return;                                    // the students' password: no DeepSeek, not a word about it
+      ds.hidden = false;
+      out.scrollTop = out.scrollHeight;
+    }
+    if (ds) ask(DS_URL, DS_MODEL).then(function (res) { dsRes = res; dsShow(); }).catch(function () { });
+    if (!withClaude) {                                // DeepSeek alone: her voice reads its answer
+      ask(DS_URL, DS_MODEL)
+        .then(function (res) {
+          last = null; showCost();
+          if (!res.text) { fail(res.error); return; }
+          answer(res.text, function () { red(wait, res.text); });
+        })
+        .catch(function () { fail('Kein Netz.'); });
+      return;
+    }
+    ask(AI_URL, MODEL)
+      .then(function (res) {
+        if (!res.text) { fail(res.error); herTurn = true; dsShow(); return; }
+        addClaude(res.j.usage, Date.now() - t0);
+        answer(res.text, function () { render(wait, res.text); herTurn = true; dsShow(); });
+      })
+      .catch(function () { fail('Kein Netz.'); herTurn = true; dsShow(); });
   }
 
   // Speaking the question: the shared engine from js/solita-listen.js (it survives mid-sentence
@@ -874,6 +1107,7 @@ fromHash();
     if (typeof narr !== 'undefined') narr.stop();   // asking pauses the talk, like turning a page
     panel.hidden = false;
     if (!pwd()) askPassword(); else askQuestion();
+    rest();                                           // the stored height never pushes the panel off the top
     input.focus();
     warm();
   }
@@ -1331,6 +1565,7 @@ const link = (function () {
         '<div class="p-bar"><span class="p-timer" title="Laufzeit"></span>'
       + '<button type="button" class="p-pause"></button>'
       + '<button type="button" class="p-reset" title="Timer neu starten" aria-label="Timer neu starten">' + svg(RESET) + '</button>'
+      + '<button type="button" class="p-ov" title="Übersicht aller Folien (o)" aria-label="Übersicht aller Folien"></button>'
       + '<span class="p-clock" title="Uhrzeit"></span></div>'
       + '<div class="p-cur"><div class="p-fit" title="Klick: weiter"><div class="p-frame"></div></div>'
       + '<div class="p-nav"><button type="button" class="p-prev" title="Zurück" aria-label="Zurück">' + svg('<path d="m15 5-7 7 7 7"/>') + '</button>'
@@ -1397,16 +1632,7 @@ const link = (function () {
         c.querySelectorAll('iframe').forEach(function (f, k) {
           f.addEventListener('load', function () { mirror.watch(f, i, k, goFull); });
         });
-      } else {
-        // previews and strip: every live lab or die would be one more WebGL context - a stand-in keeps the place
-        c.querySelectorAll('iframe').forEach(function (f) {
-          const d = document.createElement('div');
-          d.className = 'p-live';
-          if (f.classList.contains('live-frame')) { d.classList.add('dice'); d.style.cssText = f.style.cssText; d.textContent = '3D-Würfel'; }
-          else d.textContent = 'Labor';
-          f.replaceWith(d);
-        });
-      }
+      } else standIns(c);                            // previews and strip: pictures, not live labs
       c.classList.add('on');
       c.querySelectorAll('.step').forEach(function (e) { e.classList.toggle('on', +e.dataset.g < st); });
       return c;
@@ -1434,10 +1660,14 @@ const link = (function () {
       let lowest = nav.getBoundingClientRect().bottom;
       [].forEach.call(caps, function (c) { lowest = Math.max(lowest, c.getBoundingClientRect().bottom); });
       const free = strip.getBoundingClientRect().top - lowest - 6;
-      const head = Math.max(0, Math.min(free, (DOCK_MAX - 1) * cellH));
-      strip.style.marginTop = -head + 'px';
-      strip.style.paddingTop = 4 + head + 'px';
+      // the ring around a cell grows with it: 3px outline × 2.6 did not fit the 4px padding and the strip cut it
+      // off at the top (Doc, 17.09.2026: "manchmal ist der grüne Rand oben abgeschnitten") - lend that room too
+      const ring = parseFloat(getComputedStyle(cells[0]).outlineWidth) || 0;
+      const head = Math.max(0, Math.min(free - ring * DOCK_MAX, (DOCK_MAX - 1) * cellH));
       dockK = head / cellH;
+      const extra = Math.ceil(ring * dockK);
+      strip.style.marginTop = -(head + extra) + 'px';
+      strip.style.paddingTop = 4 + head + extra + 'px';
       magnify();
     }
     function magnify() {
@@ -1498,11 +1728,25 @@ const link = (function () {
 
     let t0 = Date.now(), acc = 0, running = true;
     const two = function (n) { return String(n).padStart(2, '0'); };
+    // timer and clock in THE digits widget (Doc, 17.09.2026: "die Zahlen springen -> Zahlenwidget bitte verwenden"):
+    // Orbitron's 1 is half as wide as its 0. Loaded here only, the decks' pages stay as they are; until it is
+    // there the plain text stands in.
+    ['../js/cyber-clock.css', '../js/cyber-clock.js'].forEach(function (src) {
+      const css = /\.css$/.test(src), el = document.createElement(css ? 'link' : 'script');
+      if (css) { el.rel = 'stylesheet'; el.href = src; } else { el.src = src; el.onload = tick; }
+      document.head.appendChild(el);
+    });
+    function show(el, text) {
+      const key = (window.CyberClock ? 'w' : 't') + text;   // once the widget is there, redraw even the same text
+      if (el.dataset.shown === key) return;
+      el.dataset.shown = key;
+      if (window.CyberClock) CyberClock.digits(el, text); else el.textContent = text;
+    }
     function tick() {
       const s = Math.floor((running ? acc + Date.now() - t0 : acc) / 1000);
-      timerEl.textContent = (s >= 3600 ? Math.floor(s / 3600) + ':' : '') + two(Math.floor(s / 60) % 60) + ':' + two(s % 60);
+      show(timerEl, (s >= 3600 ? Math.floor(s / 3600) + ':' : '') + two(Math.floor(s / 60) % 60) + ':' + two(s % 60));
       const d = new Date();
-      clockEl.textContent = two(d.getHours()) + ':' + two(d.getMinutes());
+      show(clockEl, two(d.getHours()) + ':' + two(d.getMinutes()));
     }
     function showPause() {
       pauseBtn.innerHTML = svg(running ? PAUSE : PLAY);
@@ -1514,6 +1758,11 @@ const link = (function () {
       showPause(); tick();
     };
     q('.p-reset').onclick = function () { acc = 0; t0 = Date.now(); tick(); };
+    // the overview over everything, here too (Doc, 17.09.2026: "auch im Presenter den Overview possible") - the
+    // deck's own grid button sits in the hidden HUD, this one borrows its icon and its click
+    const ovBtn = document.getElementById('ovbtn');
+    if (ovBtn) { q('.p-ov').innerHTML = ovBtn.innerHTML; q('.p-ov').onclick = function () { ovBtn.click(); }; }
+    else q('.p-ov').remove();
     q('.p-prev').onclick = function () { prev(); };
     q('.p-next').onclick = function () { next(); };
     fits[0].addEventListener('click', function () { next(); });   // a click on the slide goes on, as on the beamer

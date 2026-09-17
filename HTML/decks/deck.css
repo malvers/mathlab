@@ -5,9 +5,10 @@
   --card:#FFFFFF; --orange:#F5C242; --red:#B02418; --green:#799E31;
   --codebg:#0E244E; --codeink:#E6ECF8; --codemuted:#7E8FB5;
   --greetbg:#000028;
+  --night:#071630;   /* the big backgrounds around the slides: page, presenter, overview (Doc, 17.09.2026: "das Blau ist gut") */
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:#0E244E;overflow:hidden}
+html,body{height:100%;background:var(--night);overflow:hidden}
 body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
 /* centred by offsets, not by a grid: on a phone the grid track grows to the unscaled
    deck size and pushes the scaled deck off-centre, half out of the screen */
@@ -28,9 +29,11 @@ body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
 /* the footer line runs almost to the slide edges (Doc, 16.09.2026: "bis kurz vor Ränder") */
 .slide::before{content:"";position:absolute;left:16px;top:504px;
   width:calc(960px - 32px);height:1px;background:rgba(14,36,78,.16)}
-.foot{position:absolute;left:0;right:0;text-align:center;top:512px;font-size:10px;letter-spacing:1.2px;   /* centred (Doc, 16.09.2026) */
+/* footer text, buttons and Solita share one middle: halfway between the footer line and the slide's bottom edge
+   (Doc, 17.09.2026: "die ganze footer y zentriert") - a fixed line height, so the text's middle is where it should be */
+.foot{position:absolute;left:0;right:0;text-align:center;top:516px;line-height:12px;font-size:10px;letter-spacing:1.2px;   /* centred (Doc, 16.09.2026) */
   color:var(--muted)}
-.pageno{position:absolute;right:var(--pnright,72px);top:512px;font-size:10px;letter-spacing:1.2px;
+.pageno{position:absolute;right:var(--pnright,72px);top:516px;line-height:12px;font-size:10px;letter-spacing:1.2px;
   color:var(--muted)}
 
 h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
@@ -183,12 +186,14 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 .labframe{position:absolute;left:72px;width:816px;overflow:hidden;
   background:var(--card);border-radius:10px;isolation:isolate;box-shadow:0 1px 5px rgba(14,36,78,.28)}
 .labframe iframe{border:0;transform-origin:0 0;display:block;position:absolute;left:0;top:0}
-.labbar{position:absolute;right:72px;top:104px;display:flex;gap:10px;
-  align-items:center;font-family:Orbitron,sans-serif;font-size:11px}
+/* small, right above its lab (Doc, 17.09.2026: "deutlich kleiner und rechts übers Lab dichter"); JS moves it down to
+   the lab's own top edge - 104 only holds while that has not run */
+.labbar{position:absolute;right:72px;top:104px;display:flex;gap:8px;
+  align-items:center;font-family:Orbitron,sans-serif;font-size:8px}
 .labbar a{color:var(--muted);text-decoration:none;letter-spacing:1px}
 .labbar a:hover{color:var(--red)}
 .labbar button{font:inherit;color:var(--ink);background:var(--card);cursor:pointer;
-  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:5px 10px;letter-spacing:1px}
+  border:.75px solid rgba(14,36,78,.20);border-radius:4px;padding:3px 7px;letter-spacing:1px}
 .labbar button:hover{border-color:var(--red);color:var(--red)}
 #deck > .slide:last-child .labnext{display:none}   /* a lab on the last slide: nothing to go on to (Doc, 16.09.2026) */
 /* the lab's fullscreen icon grows the lab to the whole slide, over title, note and lab bar (Doc, 17.09.2026) */
@@ -201,9 +206,9 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 /* --- HUD ---------------------------------------------------------------- */
 #hud{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:8px;z-index:9;display:flex;gap:6px}
 #hud button,#nav button{display:flex;align-items:center;justify-content:center;width:var(--hudbtn,22px);height:var(--hudbtn,22px);padding:0;border:0;border-radius:5px;
-  background:#7E8FB5;box-shadow:0 1px 1px rgba(0,0,0,.12);   /* Dostojewski's colour on the greeting slide */
-  color:#fff;opacity:.85;cursor:pointer;transition:opacity .2s}
-#hud button:hover,#nav button:hover{opacity:1}
+  background:rgba(126,143,181,.32);box-shadow:0 1px 1px rgba(0,0,0,.08);   /* Dostojewski's colour, light (Doc, 17.09.2026: "HG der butts leichter") */
+  color:#3E4F7A;opacity:.9;cursor:pointer;transition:opacity .2s,background-color .2s}
+#hud button:hover,#nav button:hover{opacity:1;background:rgba(126,143,181,.5)}
 #hud button svg,#nav button svg{display:block;width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6);margin:0;stroke-width:1.4;flex:none}
 #hud button[hidden]{display:none}   /* flex would otherwise show a hidden button */
 /* footer left: two triangles that jump a whole slide, fully built (Doc, 17.09.2026: "zwei Dreiecke, die von
@@ -248,11 +253,12 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 /* overview of all slides (o, grid button in the HUD bottom right) */
 #hud{display:flex;gap:4px}          /* overview, play and fullscreen side by side */
 #hud #ovbtn svg{width:calc(var(--hudbtn,22px) * .64);height:calc(var(--hudbtn,22px) * .64)}
-#overview{position:fixed;inset:0;z-index:20;background:rgba(14,36,78,.94);overflow:auto;padding:28px;
+#overview{position:fixed;inset:0;z-index:20;background:rgba(7,22,48,.94);overflow:auto;padding:28px;
   display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:18px;
   align-content:safe center;justify-content:safe center;   /* layout() sets the columns; "safe": a taller grid scrolls from the top */
   grid-auto-rows:max-content}   /* the tiles' overflow:hidden would let the rows shrink to the window */
 #overview[hidden]{display:none}
+html.presenter #overview{background:var(--night)}   /* opaque over the presenter view (Doc, 17.09.2026) */
 .ov-cell{position:relative;cursor:pointer;border-radius:6px;overflow:hidden;
   outline:3px solid transparent;box-shadow:0 2px 10px rgba(0,0,0,.35)}
 .ov-cell:hover{outline-color:#799E31}
@@ -266,7 +272,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 /* --- presenter view (?presenter - the fullscreen button opens it when a beamer is attached) ------------- */
 html.presenter #stage,html.presenter #hud,html.presenter #nav,html.presenter #ask,html.presenter #bar{display:none!important}
 html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(64px,13vh,124px) + 30px)!important}
-#pres{position:fixed;inset:0;z-index:8;background:var(--ink);color:#E6ECF8;font-family:Orbitron,system-ui,sans-serif;
+#pres{position:fixed;inset:0;z-index:8;background:var(--night);color:#E6ECF8;font-family:Orbitron,system-ui,sans-serif;
   display:grid;gap:12px 26px;padding:12px 22px 10px;
   grid-template-columns:minmax(0,2fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) clamp(64px,13vh,124px);
   grid-template-areas:"bar side" "cur side" "strip strip"}
@@ -276,6 +282,8 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 .p-bar{grid-area:bar;display:flex;align-items:center;gap:8px;font-size:clamp(18px,2.2vw,30px);letter-spacing:1px}
 .p-bar button svg{width:clamp(18px,1.7vw,26px);height:clamp(18px,1.7vw,26px)}
 .p-timer{margin-right:4px}
+/* CyberClock.digits: fixed slots, the bar's size, weight and colour - widest Orbitron digit 0.834em (measured 17.09.2026) */
+#pres .p-timer,#pres .p-clock{--cc-size:1em;--cc-dw:.86em;--cc-sw:.4em;--cc-weight:400;--cc-digit:currentColor;gap:0}
 .p-clock{margin-left:auto}
 .p-cur{grid-area:cur;display:flex;flex-direction:column;min-height:0}
 .p-fit{display:flex;justify-content:center;min-width:0}   /* JS sizes the frame inside */
@@ -285,12 +293,20 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 .p-frame:empty{visibility:hidden}
 .p-frame > .slide,.p-thumb > .slide{display:block!important;position:absolute;left:0;top:0;width:960px;height:540px;
   transform-origin:0 0;pointer-events:none}
+/* a slide in the presenter view inherits the page's text defaults, exactly as on the beamer - #pres sets Orbitron and
+   a strip cell is a <button> (UA font, centred text); both leaked into the slides (Doc, 17.09.2026: "warum sehen die
+   thumbs unten anders aus als die Folie?") */
+#pres .slide{font:400 16px/normal Raleway,system-ui,sans-serif;color:var(--body);text-align:start;
+  letter-spacing:normal;word-spacing:normal;text-transform:none;text-indent:0;text-shadow:none;white-space:normal}
 .p-end{position:absolute;inset:0;display:grid;place-items:center;background:#1B3566;color:#7E8FB5;
   font-size:14px;letter-spacing:3px;text-transform:uppercase}
 /* stand-ins for labs and 3D dice in the previews and the strip - visible, never live (WebGL budget) */
 .p-live{background:rgba(14,36,78,.10);border:1.5px dashed rgba(14,36,78,.35);border-radius:10px;display:grid;
   place-items:center;color:var(--muted);font:700 14px Orbitron,sans-serif;letter-spacing:3px;text-transform:uppercase}
 .p-live.dice{font-size:30px}
+/* ... wearing a screenshot of the lab once there is one (tools/pptx/deck_shots.mjs) */
+.p-live.shot{background-color:transparent;background-size:cover;background-position:center;background-repeat:no-repeat;
+  border:0;border-radius:0;color:transparent}
 .labframe > .p-live{position:absolute;inset:0}
 /* the current slide is live: its labs and dice take the pointer (the slide itself does not, a click turns on) */
 .p-frame > .slide.live iframe{pointer-events:auto}
@@ -383,6 +399,9 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 #ask-out:empty + label{margin-top:10px}
 #ask-out .ask-q{color:var(--ink);font-weight:600}
 #ask-out .ask-err{color:var(--red)}
+/* DeepSeek's answer to the same question, silent, for comparison (Doc, 17.09.2026: "mach den Text von DS rot (China ;-)") */
+#ask-out .ask-ds{color:var(--red);margin-top:6px}
+#ask-out .ask-ds b{color:inherit;font:700 9px/1 Orbitron,sans-serif;letter-spacing:1px;text-transform:uppercase;margin-right:6px}
 /* karaoke: the word Solita is saying right now */
 #ask-out .ask-w{border-radius:3px;transition:background-color .12s,box-shadow .12s}
 #ask-out .ask-w.on{background:color-mix(in srgb,#7E8FB5 30%,transparent);   /* Dostojewski blue, light (Doc: "hellblauer") */
@@ -410,6 +429,37 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 #ask-out:empty + label[hidden] + #ask-row{margin-top:10px}
 #ask-row{display:flex;gap:6px}
 #ask-cost{margin-left:9px;font-weight:400;color:var(--muted);cursor:pointer;white-space:nowrap}
+/* DeepSeek switched on by a right click on the field: the field itself gets a red edge (in the header it broke the line) */
+#ask input.ds,#ask input.ds:focus{border-color:var(--red)}
+/* right click in the panel: who answers - Solita, DeepSeek or both. "#ask #ask-menu": the panel's own label and
+   input rules (Orbitron caps, a wide field) must not reach the checks */
+#ask #ask-menu{position:fixed;min-width:210px;padding:5px;border-radius:9px;background:var(--askbg);color:var(--ink);
+  box-shadow:0 6px 24px rgba(14,36,78,.4);z-index:2}
+#ask #ask-menu[hidden]{display:none}
+#ask #ask-menu .ask-mhead{font:700 9px/1 Orbitron,sans-serif;letter-spacing:1.1px;text-transform:uppercase;color:#7E8FB5;
+  padding:7px 8px 6px}
+#ask #ask-menu label{display:flex;align-items:center;gap:9px;margin:0;padding:7px 8px;border-radius:6px;cursor:pointer;
+  font:400 13px/1.2 Raleway,system-ui,sans-serif;letter-spacing:normal;text-transform:none;color:var(--ink)}
+#ask #ask-menu label:hover{background:var(--askfield)}
+#ask #ask-menu input{appearance:none;-webkit-appearance:none;flex:none;width:15px;height:15px;min-width:0;margin:0;padding:0;
+  cursor:pointer;border:1px solid var(--askline);border-radius:4px;background:#fff center/11px 11px no-repeat}
+#ask #ask-menu input:checked{background-color:#0E244E;border-color:#0E244E;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.3 2.3 4.7-5' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+#ask #ask-menu .ds input:checked{background-color:var(--red);border-color:var(--red)}
+#ask #ask-menu input:disabled{cursor:default;opacity:.6}
+#ask #ask-menu .ds span{color:var(--red)}
+#ask #ask-menu i{font-style:normal;font-size:11px;color:var(--muted);margin-left:6px}
+#ask #ask-menu .ask-msep{height:1px;margin:4px 6px;background:var(--askline);opacity:.6}
+#ask #ask-menu button{display:block;width:100%;margin:0;padding:7px 8px 7px 32px;border:0;border-radius:6px;
+  background:none;text-align:left;cursor:pointer;font:400 13px/1.2 Raleway,system-ui,sans-serif;color:var(--ink)}
+#ask #ask-menu button:hover:not(:disabled){background:var(--askfield)}
+#ask #ask-menu button:disabled{cursor:default;opacity:.45}
+/* the header is the handle: drag it up and the answers get more room (Doc, 17.09.2026), the grip shows where.
+   --askrest is what the rest of the panel and the screen edge need, measured in JS - the panel never leaves the top */
+#ask-head{cursor:ns-resize;touch-action:none;user-select:none;-webkit-user-select:none}
+#ask-head::before{content:'';position:absolute;left:50%;top:4px;width:30px;height:3px;margin-left:-15px;
+  border-radius:2px;background:#7E8FB5;opacity:.45}
+#ask-panel.sized #ask-out{height:min(var(--askh),calc(100vh - var(--askrest,200px)));max-height:none}
+#ask-panel.sized #ask-out:empty{display:block}   /* a panel pulled taller keeps its size before the first answer too */
 #ask-mic,#ask-tts{flex:none;width:34px;display:grid;place-items:center;cursor:pointer;color:var(--ink);
   background:var(--askfield);border:1px solid var(--askline);border-radius:7px}
 #ask-mic svg,#ask-tts svg{width:16px;height:16px}
