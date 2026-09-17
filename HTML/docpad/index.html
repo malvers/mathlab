@@ -41,7 +41,7 @@
 <script>
 (function () {
   'use strict';
-  const VERSION = '012ef1a35ec0', CACHE = 'docpad-' + VERSION, ITER = 600000;
+  const VERSION = 'de92f63c4701', CACHE = 'docpad-' + VERSION, KEY_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/docpad-key';
   const $ = id => document.getElementById(id);
   const say = (t, err) => { $('msg').textContent = t; $('msg').className = 'msg' + (err ? ' err' : ''); };
   async function startSW() {                                // the worker that serves ./app/ from the cache
@@ -49,18 +49,29 @@
     const sw = reg.installing || reg.waiting || reg.active;
     if (sw.state !== 'activated') await new Promise(r => sw.addEventListener('statechange', () => { if (sw.state === 'activated') r(); }));
   }
-  async function unlock(base) {                           // base: the PBKDF2 key made from the password
+  // The doorman: the Supabase function "docpad-key" checks the password and hands out the bundle key
+  async function fetchKey(pw) {
+    say('Prüfe Passwort …');
+    let res;
+    try { res = await fetch(KEY_URL, { method: 'POST', body: JSON.stringify({ pass: pw }) }); }   // simple request, no preflight
+    catch (e) { throw new Error('Kein Netz - zum Entsperren bitte online sein'); }
+    if (res.status === 401) { const x = new Error('Passwort falsch'); x.pw = true; throw x; }
+    if (res.status === 429) throw new Error('Zu viele Versuche - bitte in ein paar Minuten noch einmal');
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok || !j.key) throw new Error(j.error || 'Schlüssel nicht erhalten (' + res.status + ')');
+    const raw = Uint8Array.from(atob(j.key), c => c.charCodeAt(0));
+    return crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);   // non-extractable
+  }
+  async function unlock(key) {                            // key: the bundle's AES-GCM key
     say('Lade …');
     const res = await fetch('docpad.bin?v=' + VERSION, { cache: 'no-cache' });
     if (!res.ok) throw new Error('Paket nicht gefunden (' + res.status + ')');
     const bin = new Uint8Array(await res.arrayBuffer());
-    if (String.fromCharCode(...bin.slice(0, 4)) !== 'DPK1') throw new Error('Paket beschädigt');
+    if (String.fromCharCode(...bin.slice(0, 4)) !== 'DPK2') throw new Error('Paket beschädigt');
     say('Entschlüssele …');
-    const key = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: bin.slice(4, 20), iterations: ITER, hash: 'SHA-256' }, base,
-      { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
     let plain;
-    try { plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bin.slice(20, 32) }, key, bin.slice(32)); }
-    catch (e) { const x = new Error('Passwort falsch'); x.pw = true; throw x; }
+    try { plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bin.slice(4, 16) }, key, bin.slice(16)); }
+    catch (e) { const x = new Error('Schlüssel passt nicht'); x.key = true; throw x; }
     const raw = new Uint8Array(await new Response(new Blob([plain]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
     const n = new DataView(raw.buffer, raw.byteOffset, 4).getUint32(0, true);
     const index = JSON.parse(new TextDecoder().decode(raw.subarray(4, 4 + n))), data = raw.subarray(4 + n);
@@ -71,9 +82,9 @@
       new Response(data.slice(f.o, f.o + f.n), { headers: { 'Content-Type': f.t } }))));
     await startSW();
   }
-  // "Remember on this device" (Doc 15.09.: "ich möchte nicht immer dich fragen müssen"): the PBKDF2 key stays in
-  // IndexedDB - non-extractable, the password itself is never stored - so a new bundle opens without typing. The
-  // decrypted app sits in this browser's Cache Storage anyway, so this exposes nothing new.
+  // "Remember on this device" (Doc 15.09.: "ich möchte nicht immer dich fragen müssen"): the bundle key stays in
+  // IndexedDB - non-extractable, the password itself is never stored - so a new bundle opens without typing and
+  // without the doorman. The decrypted app sits in this browser's Cache Storage anyway, so this exposes nothing new.
   function idb(mode, fn) {
     return new Promise((res, rej) => {
       const rq = indexedDB.open('docpad', 1);
@@ -86,9 +97,9 @@
       };
     });
   }
-  const loadBase = () => idb('readonly', s => s.get('base')).catch(() => null);
-  const saveBase = base => idb('readwrite', s => s.put(base, 'base')).catch(() => {});
-  const dropBase = () => idb('readwrite', s => s.delete('base')).catch(() => {});
+  const loadKey = name => idb('readonly', s => s.get(name)).catch(() => null);
+  const saveKey = key => idb('readwrite', s => s.put(key, 'data')).catch(() => {});
+  const dropKey = name => idb('readwrite', s => s.delete(name)).catch(() => {});   // 'data'; 'base' = PBKDF2 key before 17.09.
   // Chrome's password manager: the page moves on by script, so Chrome would not notice the login by itself
   function rememberInChrome(pw) {
     if (!window.PasswordCredential || !navigator.credentials) return Promise.resolve();
@@ -100,9 +111,10 @@
     $('go').disabled = true;
     try {
       const pw = $('pw').value;
-      const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
-      await unlock(base);
-      await saveBase(base);
+      const key = await fetchKey(pw);
+      await unlock(key);
+      await saveKey(key);
+      await dropKey('base');
       await rememberInChrome(pw);
       location.replace('app/');
     }
@@ -115,12 +127,16 @@
   }
   caches.has(CACHE).then(async ok => {
     if (ok) { say('Öffne …'); await startSW(); location.replace('app/'); return; }   // this bundle unlocked before
-    const base = await loadBase();                        // a new bundle: the key remembered on this device
-    if (!base) { if (/[?&]v=/.test(location.search)) say('Neue DOCPAD-Version - bitte Passwort eingeben'); return; }   // sent here by sw.js
+    const key = await loadKey('data');                     // a new bundle: the key remembered on this device
+    if (!key) {
+      if (await loadKey('base')) say('DOCPAD hat ein neues Schloss - bitte einmal das Passwort eingeben');   // remembered before 17.09.
+      else if (/[?&]v=/.test(location.search)) say('Neue DOCPAD-Version - bitte Passwort eingeben');   // sent here by sw.js
+      return;
+    }
     $('go').disabled = true;
-    try { await unlock(base); location.replace('app/'); }
+    try { await unlock(key); location.replace('app/'); }
     catch (e) {
-      if (e.pw) { await dropBase(); say('Neues Passwort - bitte eingeben', true); } else say(e.message || 'Fehler', true);
+      if (e.key) { await dropKey('data'); say('Neuer Schlüssel - bitte Passwort eingeben', true); } else say(e.message || 'Fehler', true);
       $('go').disabled = false;
     }
   });

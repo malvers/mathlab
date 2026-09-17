@@ -25,6 +25,8 @@ const DEFAULT_MODEL = 'claude-sonnet-4-6'; // balanced/fast for a voice assistan
 // the requested output: a buggy/abusive client could otherwise set max_tokens huge and run one request to
 // ~$1.60. 4096 is plenty for a spoken answer; the normal client value (3000) passes through unchanged.
 const MAX_OUTPUT_TOKENS = 4096;
+const SUS_MODEL = 'claude-haiku-4-5';          // students: the deck's model, whatever a client asks for
+const SUS_MAX_OUTPUT = 600;                    // the deck asks for 600 - a spoken answer of four sentences
 function pickModel(m: unknown): string {
   if (typeof m !== 'string' || !m) return DEFAULT_MODEL;
   if (/opus/i.test(m)) return DEFAULT_MODEL; // clamp Opus → Sonnet
@@ -47,7 +49,7 @@ function json(obj: unknown, status = 200): Response {
 // Fire-and-forget: append ONE token-usage row to ai_cost_log for the daily infra cost mail. A logging
 // hiccup must NEVER affect the chat response (best-effort, try/catch). SUPABASE_URL + service-role key are
 // auto-injected by the Edge runtime. Pricing happens later in infra-usage — here we only record raw tokens.
-async function logAiCost(provider: string, model: string, u: Record<string, number> | undefined) {
+async function logAiCost(provider: string, model: string, u: Record<string, number> | undefined, label = 'chat') {
   try {
     const url = Deno.env.get('SUPABASE_URL');
     const svc = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -61,7 +63,7 @@ async function logAiCost(provider: string, model: string, u: Record<string, numb
         out_tok: u.output_tokens || 0,
         cache_read: u.cache_read_input_tokens || 0,
         cache_write: u.cache_creation_input_tokens || 0,
-        label: 'chat',
+        label,
       }),
     });
   } catch (_) { /* logging must never break the chat */ }
@@ -77,7 +79,13 @@ Deno.serve(async (req) => {
 
   const b = await req.json().catch(() => ({}));
   const given = req.headers.get('x-app-pass') || (typeof b.pass === 'string' ? b.pass : '');
-  if (given !== pass) return json({ error: 'unauthorized' }, 401);
+  // Student password for a class test (Doc, 17.09.2026: "ich gebe das den Kids heute frei zum Test"): a second
+  // secret SUS_PASSWORD, valid until SUS_UNTIL (ISO time). Doc's own LABAI_PASSWORD stays private and untouched.
+  // A student request is held to what the deck needs - Haiku, short answers, no tools - and every hop is logged
+  // with label 'sus' (failures as 'sus-err'), so the class's spend can be measured on its own.
+  const susPass = Deno.env.get('SUS_PASSWORD') || '';
+  const sus = !!susPass && given === susPass && given !== pass && Date.now() < Date.parse(Deno.env.get('SUS_UNTIL') || '');
+  if (given !== pass && !sus) return json({ error: 'unauthorized' }, 401);
 
   // Password-only check (used by the login overlay) — no Claude call, no cost.
   if (b.ping) return json({ ok: true });
@@ -103,8 +111,8 @@ Deno.serve(async (req) => {
   if (!chat.length) return json({ error: 'keine user-Nachricht' }, 400);
 
   const body: Record<string, unknown> = {
-    model: pickModel(b.model),
-    max_tokens: Math.min(Math.max((typeof b.max_tokens === 'number') ? b.max_tokens : 3000, 1), MAX_OUTPUT_TOKENS),
+    model: sus ? SUS_MODEL : pickModel(b.model),
+    max_tokens: Math.min(Math.max((typeof b.max_tokens === 'number') ? b.max_tokens : 3000, 1), sus ? SUS_MAX_OUTPUT : MAX_OUTPUT_TOKENS),
     messages: chat,
   };
   // NOTE: `temperature` is deprecated on Claude 4.x models (they reject it with HTTP 400) → don't forward it.
@@ -123,7 +131,7 @@ Deno.serve(async (req) => {
   }
   // Optional Claude tool-use: forward a `tools` schema so Solita can take actions. The CLIENT runs the loop
   // (executes tool_use blocks, sends tool_result back). No tools field → behaves exactly as before.
-  if (Array.isArray(b.tools) && b.tools.length) {
+  if (!sus && Array.isArray(b.tools) && b.tools.length) {
     const tools = b.tools.map((t: Record<string, unknown>) => ({ ...t }));
     tools[tools.length - 1] = { ...tools[tools.length - 1], cache_control: { type: 'ephemeral' } };
     body.tools = tools;
@@ -159,6 +167,13 @@ Deno.serve(async (req) => {
     if (!r.ok) {
       // Pass Anthropic's error through (status + message) so the client can show something useful.
       const msg = (data && data.error && data.error.message) ? data.error.message : 'Claude-Fehler';
+      if (sus) {                                   // count a refused student request too (rate limit, overload)
+        try {
+          const er = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+          const p = logAiCost('claude', String(body.model), { input_tokens: 0, output_tokens: 0 }, 'sus-err');
+          if (er?.waitUntil) er.waitUntil(p);
+        } catch (_) { /* never affect the response */ }
+      }
       return json({ error: msg }, r.status || 502);
     }
     // Back-compat: the existing chat reads choices[0].message.content (joined text).
@@ -171,7 +186,7 @@ Deno.serve(async (req) => {
     // or affected by the logging POST (waitUntil keeps the worker alive past the response on Supabase Edge).
     try {
       const er = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
-      const p = logAiCost('claude', String(body.model), data.usage);
+      const p = logAiCost('claude', String(body.model), data.usage, sus ? 'sus' : 'chat');
       if (er?.waitUntil) er.waitUntil(p);
     } catch (_) { /* logging must never affect the chat */ }
     return json({
