@@ -490,7 +490,12 @@
            document types land on. So it keeps its own window. Only a real
            video FILE gets the in-page player. */
         if (url.indexOf('/:v:/') >= 0) return false;
-        return /\/:[pwxb]:\//.test(url) || /sharepoint\.com|officeapps\.live\.com/i.test(url);
+        /* A PDF share link (/:b:/) refuses as well — measured 17.09.2026 on an
+           "anyone" link: it redirects to onedrive.aspx, which sends
+           X-Frame-Options: SAMEORIGIN and frame-ancestors 'self' teams…, so the
+           viewer showed "refused to connect". Own window, like /:v:/. */
+        if (url.indexOf('/:b:/') >= 0) return false;
+        return /\/:[pwx]:\//.test(url) || /sharepoint\.com|officeapps\.live\.com/i.test(url);
     }
 
     let matView = null;
