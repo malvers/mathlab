@@ -64,7 +64,7 @@
   }
   async function unlock(key) {                            // key: the bundle's AES-GCM key
     say('Lade …');
-    const res = await fetch('docpad.bin?v=' + VERSION, { cache: 'no-cache' });
+    const res = await fetch('https://fyfhxzyymmurlaenmzse.supabase.co/storage/v1/object/public/docpad/docpad-' + VERSION + '.bin');   // Supabase Storage - one file per version, never changes
     if (!res.ok) throw new Error('Paket nicht gefunden (' + res.status + ')');
     const bin = new Uint8Array(await res.arrayBuffer());
     if (String.fromCharCode(...bin.slice(0, 4)) !== 'DPK2') throw new Error('Paket beschädigt');
