@@ -29,6 +29,7 @@ FOLDERS = [
     (r"^mathe11-", "MATH BGY 11"),
     (r"^inf11-", "INFO BGY 11"),
     (r"^fos12-", "INFO FO 12"),
+    (r"^info9-", "INFO OS 09"),
     (r"^(modellbildung-|informatik-als-medium)", "INFO BGY 12"),
 ]
 
