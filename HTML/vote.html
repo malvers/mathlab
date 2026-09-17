@@ -987,7 +987,9 @@
         <div class="help-card" role="dialog" aria-label="Anleitung">
             <h2>So geht's</h2>
             <ol>
-                <li><b>Fach / Klasse</b> wählen (Feld neben dem Code) und <b>Frage tippen</b> — direkt in die orange Zeile.</li>
+                <li><b>Frage tippen</b> — direkt in die orange Zeile. <b>Fach / Klasse</b> (Feld neben dem Code) stellt sich
+                    beim Publish selbst aus dem Stundenplan ein; läuft keine Stunde, heißt es <b>Allgemeine Frage</b>.
+                    Von Hand umstellen geht vorher — das gilt dann für diese Runde.</li>
                 <li><b>Publish</b> — die Frage geht live, die Bühne zeigt <b>0</b>.</li>
                 <li><b>QR</b> zeigen (Button oben rechts) — alle scannen oder tippen
                     <span class="mono">docalvers.de/vote.html</span> und den 4-stelligen Code.</li>
@@ -1133,7 +1135,10 @@
                 }
             } catch (_) { /* ignore */ }
             // Doc's courses this school year, in his own naming (27.08.).
+            // "Allgemeine Frage" = no class behind it - what Publish picks when no lesson is running (Doc, 17.09.2026).
+            const GENERAL = 'Allgemeine Frage';
             const COURSES = [
+                GENERAL,
                 'OS 9',
                 'FOS 11', 'FOS 12',
                 'MA BGY 11',
@@ -1142,6 +1147,7 @@
             const subjIn = (function () {
                 const wrap = $('subject-pick'), btn = $('subject-btn'), menu = $('subject-menu'), label = $('subject-label');
                 let value = '';
+                let manual = false;   // picked by hand since the last Publish - then the timetable stays out of it
                 const paint = () => {
                     label.textContent = value || 'Fach / Klasse …';
                     label.classList.toggle('dim', !value);
@@ -1160,7 +1166,7 @@
                     b.setAttribute('role', 'option');
                     b.dataset.v = v;
                     b.textContent = text;
-                    b.addEventListener('click', () => { set(v, true); close(); });
+                    b.addEventListener('click', () => { manual = true; set(v, true); close(); });
                     menu.appendChild(b);
                 };
                 COURSES.forEach(c => opt(c, c));
@@ -1175,7 +1181,10 @@
                 let stored = '';
                 try { stored = localStorage.getItem('vote-host-subject') || ''; } catch (_) { /* ignore */ }
                 set(stored, false);
-                return { get value() { return value; }, set value(v) { set(v, false); } };
+                return {
+                    get value() { return value; }, set value(v) { set(v, false); },
+                    get manual() { return manual; }, resetManual() { manual = false; }
+                };
             })();
 
             // "Pretty" random codes: 1212, 4321, 7777, 1221, 2468 … easy to say and to type.
@@ -1341,7 +1350,7 @@
 
             /* The lesson that was running - or, for a vote taken just after the bell, the one
                that has only now ended: a "wie wars?" at the end of the hour still belongs to it. */
-            async function classAt(when) {
+            async function lessonAt(when) {
                 const day = ymdOf(when);
                 const now = when.getHours() * 60 + when.getMinutes();
                 const lessons = (await lessonsOfWeek(mondayKey(when)))
@@ -1354,10 +1363,45 @@
                     .sort((a, b) => (toMin(a.endTime) - toMin(a.startTime)) - (toMin(b.endTime) - toMin(b.startTime)))[0];
                 const over = lessons.filter(l => toMin(l.endTime) <= now)
                     .sort((a, b) => b.endTime - a.endTime)[0];
-                const l = live || (over && now - toMin(over.endTime) <= 20 ? over : null);
+                return live || (over && now - toMin(over.endTime) <= 20 ? over : null);
+            }
+
+            async function classAt(when) {
+                const l = await lessonAt(when);
                 if (!l) return '';
                 const who = (l.classes || []).join(', ');
                 return [who, l.subject || l.lstext].filter(Boolean).join(' · ');
+            }
+
+            /* Untis class + subject → one of COURSES, in Doc's own names. Class codes are <branch><entry year>-<group>;
+               the year of school is 11 + (start of the school year - entry year), Oberschule classes carry it (9a).
+               '' when the lesson is none of his courses (a cover lesson, say). */
+            function courseOf(l, when) {
+                const start = (when.getMonth() >= 7 ? when.getFullYear() : when.getFullYear() - 1) % 100;
+                const subj = String(l.subject || l.lstext || '');
+                const math = /mat/i.test(subj), inf = /inf/i.test(subj);
+                for (const c of (l.classes || [])) {
+                    let m = /^(BGY|FOS|FOG|FOW)(\d{2})/.exec(c), name = '';
+                    if (m) {
+                        const year = 11 + start - Number(m[2]);
+                        if (m[1] === 'BGY') name = math ? 'MA BGY ' + year : inf ? 'INFO BGY ' + year : '';
+                        else if (inf) name = 'FOS ' + year;   // FOS, FOG and FOW are all "FOS" in Doc's list
+                    } else if ((m = /^(\d{1,2})[a-z]$/i.exec(c)) && inf) {
+                        name = 'OS ' + m[1];
+                    }
+                    if (COURSES.includes(name)) return name;
+                }
+                return '';
+            }
+
+            /* Fach / Klasse sets itself from the timetable (Doc, 17.09.2026: "automatisch"): the running lesson's course,
+               otherwise "Allgemeine Frage". A pick by hand wins until the next Publish. */
+            async function autoSubject() {
+                if (subjIn.manual) return;
+                const now = new Date();
+                const l = await lessonAt(now);
+                if (subjIn.manual) return;   // picked while the plan was loading
+                subjIn.value = (l && courseOf(l, now)) || GENERAL;
             }
 
             function renderClassLine() {
@@ -1553,6 +1597,7 @@
                 if (!/^[0-9]{4}$/.test(code)) { toast('Code: genau 4 Ziffern'); codeIn.focus(); return; }
                 btnPublish.disabled = true;
                 const owner_hash = await sha256hex(owner);
+                await autoSubject();
                 const subject = subjIn.value || null;
                 let { data, error } = await sb.from('vote_polls').insert({ code, title, owner_hash, subject }).select('id,created_at').single();
                 if (error && /subject/i.test(error.message || '')) {
@@ -1563,6 +1608,7 @@
                 btnPublish.disabled = false;
                 if (error) { toast('Supabase: ' + error.message); return; }
                 poll = { id: data.id, code, title, subject, created_at: data.created_at };
+                subjIn.resetManual();   // the next round asks the timetable again
                 history.push(poll);
                 values = []; votes = new Map();
                 showing = false;
@@ -1659,6 +1705,7 @@
                 setPresenting(false);
                 save();
                 mount();
+                autoSubject();
                 titleEl.focus();
             });
             titleEl.addEventListener('input', () => {
@@ -1715,6 +1762,7 @@
             });
 
             mount();
+            autoSubject();
             const wanted = (params.get('code') || '').trim();
             if (/^[0-9]{4}$/.test(wanted)) { codeIn.value = wanted; pickUpCode(wanted); }
             else if (poll || restoredCode) pickUpCode(poll ? poll.code : codeIn.value, true);
