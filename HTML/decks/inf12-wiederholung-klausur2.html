@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>LB 2 im Überblick</title>
+<meta name="description" content="Wiederholung und Klausur 2: SQL, ER-Modell und Normalisierung">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-2b50cc368526.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/fog-7228638/" target="_blank" rel="noopener">adege</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 12</p>
+      <h1>LB 2 im Überblick</h1>
+      <p class="sub">Wiederholung und Klausur 2: SQL, ER-Modell und Normalisierung</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Der Weg durch LB 2</h2>
+      <p class="sub">Vom Text bis zur Auswertung</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Kette</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:180px"><col style="width:340px"><col style="width:296px"></colgroup><tr><th>Stufe</th><th>Ergebnis</th><th>Prüfstein</th></tr><tr><td class="b">Miniwelt beschreiben</td><td>Zweck und Fragen</td><td>Sind die Fragen konkret?</td></tr><tr><td class="b">ER-Modell</td><td>Entitäten, Beziehungen, Kardinalitäten</td><td>Beide Fragen je Beziehung gestellt?</td></tr><tr><td class="b">Relationenschema</td><td>Tabellen mit Schlüsseln</td><td>n:m als eigene Tabelle?</td></tr><tr><td class="b">Normalisierung</td><td>3NF</td><td>Partiell und transitiv geprüft?</td></tr><tr><td class="b">Implementierung</td><td>CREATE TABLE mit Constraints</td><td>Reihenfolge der Verweise?</td></tr><tr><td class="b">Auswertung</td><td>SELECT mit JOIN und GROUP BY</td><td>Beantwortet es die Fragen?</td></tr></table><div class="body" style="top:295.975px;height:200.025px"><p class="line l0 step" data-g="0">In der Klausur kommt die Kette <b>von beiden Enden</b>: Text zu Modell und Modell zu SQL</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>SQL</h2>
+      <p class="sub">Die Bausteine, die geprüft werden</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was wozu dient</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:150px"><col style="width:330px"><col style="width:336px"></colgroup><tr><th>Klausel</th><th>Aufgabe</th><th>Falle</th></tr><tr><td class="b">SELECT</td><td>Projektion, Spalten wählen</td><td>Aggregat ohne GROUP BY</td></tr><tr><td class="b">WHERE</td><td>Selektion, Zeilen wählen</td><td>= NULL statt IS NULL</td></tr><tr><td class="b">JOIN … ON</td><td>Tabellen verbinden</td><td>ON vergessen: kartesisches Produkt</td></tr><tr><td class="b">GROUP BY</td><td>Gruppen bilden</td><td>Spalte fehlt in der Gruppierung</td></tr><tr><td class="b">HAVING</td><td>Gruppen filtern</td><td style="background:#F2CFCB">mit WHERE verwechselt</td></tr><tr><td class="b">ORDER BY</td><td>sortieren</td><td>Zahl im Textfeld</td></tr></table><div class="body" style="top:295.975px;height:200.025px"><p class="line l0 step" data-g="0">Für <b>n</b> Tabellen braucht ein JOIN <b>n − 1</b> Bedingungen — das wird gern vergessen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Eine Musteraufgabe</h3><div class="rules"></div><div class="codepanel"><pre>-- Wie viele Schueler je Kurs, nur Kurse mit mindestens 3,
+-- absteigend nach Anzahl:
+SELECT k.bezeichnung, COUNT(*) AS anzahl
+FROM Kurs k
+JOIN Belegung b ON k.knr = b.knr
+GROUP BY k.bezeichnung
+HAVING COUNT(*) &gt;= 3
+ORDER BY anzahl DESC;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Modell und Normalformen</h2>
+      <p class="sub">Der zweite Klausurteil</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Regeln in Kurzform</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:130px"><col style="width:686px"></colgroup><tr><th>Thema</th><th>Regel</th></tr><tr><td class="b">1:n</td><td>Fremdschlüssel auf der n-Seite</td></tr><tr><td class="b">n:m</td><td>eigene Tabelle mit beiden Schlüsseln</td></tr><tr><td class="b">1NF</td><td>atomare Werte, keine Wiederholungsgruppen</td></tr><tr><td class="b">2NF</td><td>keine partielle Abhängigkeit vom Schlüssel</td></tr><tr><td class="b">3NF</td><td>keine transitive Abhängigkeit</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Zu jeder Normalform gehört in der Klausur die <b>Begründung</b>, nicht nur das Ergebnis</p>
+<p class="line l0 step" data-g="1">Also: <b>welche</b> Abhängigkeit war partiell, <b>welche</b> transitiv?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Fremdschlüssel auf der n-Seite, n:m als eigene Tabelle. Und jede Normalform wird begründet, nicht behauptet.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>So läuft die Klausur</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Teil A: <b>Begriffe</b> — Redundanz, Konsistenz, Integrität, ACID</p>
+<p class="line l0 step" data-g="1">Teil B: <b>Modellieren</b> — vom Text zum ER-Modell und Relationenschema</p>
+<p class="line l0 step" data-g="2">Teil C: <b>Normalisieren</b> — mit Begründung je Schritt</p>
+<p class="line l0 step" data-g="3">Teil D: <b>SQL</b> — Abfragen schreiben und fremde Abfragen lesen</p>
+<p class="line l0 step" data-g="4">Erlaubt ist ein Taschenrechner. Zwischenschritte zählen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Vorbereitung heute</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Normalisiert <b>eine</b> Sammeltabelle vollständig und begründet jeden Schritt</p>
+<p class="line l0 step" data-g="1">Schreibt <b>drei Abfragen</b> mit JOIN, GROUP BY und HAVING</p>
+<p class="line l0 step" data-g="2">Lest <b>eine fremde Abfrage</b> und beschreibt in Worten, was sie liefert</p>
+<p class="line l0 step" data-g="3">Überführt <b>ein</b> ER-Modell in ein Relationenschema</p>
+<p class="line l0 step" data-g="4">Stellt eure letzten offenen Fragen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

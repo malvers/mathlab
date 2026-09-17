@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Üben nach Bedarf</title>
+<meta name="description" content="Vier Stationen zu SQL und Modellierung — jeder da, wo es hakt">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-cce75491cf44.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/morning-7190996/" target="_blank" rel="noopener">AysegulAytoeren</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 12</p>
+      <h1>Üben nach Bedarf</h1>
+      <p class="sub">Vier Stationen zu SQL und Modellierung — jeder da, wo es hakt</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Selbsteinschätzung</h2>
+      <p class="sub">Erst prüfen, dann üben</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fünf Fragen an euch selbst</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:560px"><col style="width:256px"></colgroup><tr><th>Kann ich …</th><th>wenn nein, Station</th></tr><tr><td class="b">… zu einem Text ein ER-Modell mit begründeten Kardinalitäten zeichnen?</td><td>A</td></tr><tr><td class="b">… ein ER-Modell in ein Relationenschema überführen?</td><td>A</td></tr><tr><td class="b">… eine Sammeltabelle bis zur 3NF normalisieren und begründen?</td><td>B</td></tr><tr><td class="b">… eine Abfrage über drei Tabellen mit Gruppierung schreiben?</td><td>C</td></tr><tr><td class="b">… eine fremde Abfrage in Worten beschreiben?</td><td>D</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Seid ehrlich — die Station, die weh tut, ist die richtige</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Die Stationen</h2>
+      <p class="sub">Mit Lösungsblatt zur Selbstkontrolle</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was wo liegt</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:180px"><col style="width:430px"><col style="width:206px"></colgroup><tr><th>Station</th><th>Inhalt</th><th>Umfang</th></tr><tr><td class="b">A — Modellieren</td><td>drei Texte, je ER-Modell und Relationenschema</td><td>40 min</td></tr><tr><td class="b">B — Normalisieren</td><td>zwei Sammeltabellen bis 3NF, mit Begründung</td><td>30 min</td></tr><tr><td class="b">C — SQL schreiben</td><td>sechs Aufgaben, davon zwei mit GROUP BY</td><td>40 min</td></tr><tr><td class="b" style="background:#FBEBBF">D — SQL lesen</td><td>fünf fremde Abfragen beschreiben</td><td>20 min</td></tr></table><div class="body" style="top:257.125px;height:238.875px"><p class="line l0 step" data-g="0"><b>D</b> ist die unterschätzte Station: Abfragen lesen kommt in jeder Klausur vor</p>
+<p class="line l0 step" data-g="1">Und es ist die einzige Station, die man ohne Rechner bearbeiten kann</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Eine Aufgabe aus Station D</h3><div class="rules"></div><div class="codepanel"><pre>SELECT s.klasse, COUNT(DISTINCT b.knr) AS kurse
+FROM Schueler s
+JOIN Belegung b ON s.snr = b.snr
+WHERE b.note IS NOT NULL
+GROUP BY s.klasse
+HAVING COUNT(DISTINCT b.knr) &gt; 2
+ORDER BY kurse DESC;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>So beschreibt man eine fremde Abfrage</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Von innen nach außen</b> lesen: erst FROM und JOIN, dann WHERE, dann GROUP BY</p>
+<p class="line l0 step" data-g="1">Zuerst sagen, <b>welche Zeilen</b> überhaupt betrachtet werden</p>
+<p class="line l0 step" data-g="2">Dann, <b>wonach gruppiert</b> wird — das bestimmt die Zeilen des Ergebnisses</p>
+<p class="line l0 step" data-g="3">Dann, <b>was gerechnet</b> wird und welche Gruppen übrig bleiben</p>
+<p class="line l0 step" data-g="4">Zum Schluss ein Satz: <b>„Die Abfrage liefert je Klasse …“</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Selbstkontrolle</h2>
+      <p class="sub">Woran ihr merkt, dass es stimmt</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Proben</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:200px"><col style="width:616px"></colgroup><tr><th>Bereich</th><th>Probe</th></tr><tr><td class="b">ER-Modell</td><td>Lassen sich alle Fragen der Miniwelt beantworten?</td></tr><tr><td class="b">Relationenschema</td><td>Hat jede Tabelle einen Schlüssel, jede n:m eine eigene Tabelle?</td></tr><tr><td class="b">Normalisierung</td><td>Steht jede Angabe genau einmal?</td></tr><tr><td class="b">SQL</td><td>Stimmt die Zeilenzahl mit der Erwartung?</td></tr><tr><td class="b">SQL lesen</td><td>Passt die Beschreibung auch auf ein anderes Beispiel?</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Wer bei jeder Aufgabe <b>vorher</b> eine Erwartung notiert, findet Fehler von allein</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Übt an der Station, die weh tut. Die leichte Aufgabe bestätigt nur, was ihr schon könnt.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: gezielt üben</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Deliberate Practice</b>: gezielt an der Schwachstelle üben schlägt Wiederholen des Ganzen</p>
+<p class="line l0 step" data-g="1">Wichtig dabei ist die <b>sofortige Rückmeldung</b> — deshalb die Lösungsblätter</p>
+<p class="line l0 step" data-g="2">Wer eine Aufgabe <b>erklären</b> kann, hat sie sicher verstanden</p>
+<p class="line l0 step" data-g="3"><b>Verteiltes Üben</b> schlägt Pauken: zwanzig Minuten täglich statt drei Stunden am Vorabend</p>
+<p class="line l0 step" data-g="4">Und: Aufgaben <b>mischen</b> ist wirksamer als thematisch sortiert zu üben</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe heute</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Selbsteinschätzung</b> ausfüllen — fünf Fragen, ehrlich</p>
+<p class="line l0 step" data-g="1">Mindestens <b>zwei Stationen</b> bearbeiten, davon eine aus dem Bereich mit „nein“</p>
+<p class="line l0 step" data-g="2">Zu jeder Aufgabe <b>vorher</b> die Erwartung notieren</p>
+<p class="line l0 step" data-g="3">Selbst kontrollieren und bei Fehlern die <b>verletzte Regel</b> aufschreiben</p>
+<p class="line l0 step" data-g="4">Station D machen alle — Abfragen lesen kommt in jeder Klausur</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

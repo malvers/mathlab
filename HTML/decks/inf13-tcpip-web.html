@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vom Namen zur Seite</title>
+<meta name="description" content="DNS, TCP/IP und HTTP — was zwischen Eingabe und Anzeige passiert">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-315354e2703f.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/mountain-7866362/" target="_blank" rel="noopener">yoshitaka2</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 13</p>
+      <h1>Vom Namen zur Seite</h1>
+      <p class="sub">DNS, TCP/IP und HTTP — was zwischen Eingabe und Anzeige passiert</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Die Reise einer Anfrage</h2>
+      <p class="sub">Sieben Schritte</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Vom Tippen bis zur Antwort</h3><div class="rules"></div><div class="pic"><img src="img/pap-webrequest-inf13.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Danach zerlegt der Browser die Antwort und lädt <b>CSS, Bilder und Skripte</b> nach</p>
+<p class="line l0 step" data-g="1">Jede dieser Nachladungen ist wieder eine <b>eigene Anfrage</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Schritte im Einzelnen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:70px"><col style="width:480px"><col style="width:266px"></colgroup><tr><th>Nr</th><th>Schritt</th><th>Protokoll</th></tr><tr><td class="b">1</td><td>URL zerlegen: Schema, Host, Pfad</td><td>—</td></tr><tr><td class="b">2</td><td>Namen in IP-Adresse auflösen</td><td>DNS</td></tr><tr><td class="b">3</td><td>Verbindung zum Server aufbauen</td><td>TCP</td></tr><tr><td class="b">4</td><td>Verschlüsselung aushandeln</td><td>TLS</td></tr><tr><td class="b">5</td><td>Seite anfordern</td><td>HTTP-Request</td></tr><tr><td class="b">6</td><td>Antwort mit Statuscode und Inhalt</td><td>HTTP-Response</td></tr><tr><td class="b">7</td><td>Darstellen und Nachladen</td><td>—</td></tr></table><div class="body" style="top:315.4px;height:180.6px"><p class="line l0 step" data-g="0">Schritt 2 bis 4 merkt der Nutzer nicht — sie kosten aber die meiste <b>Zeit bis zum ersten Byte</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>HTTP</h2>
+      <p class="sub">Anfrage und Antwort im Klartext</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Ein Request und seine Antwort</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:400px"><col style="width:416px"></colgroup><tr><th>Request</th><th>Response</th></tr><tr><td class="b m">GET /liste.html HTTP/1.1</td><td class="m">HTTP/1.1 200 OK</td></tr><tr><td class="b m">Host: vereine.example</td><td class="m">Content-Type: text/html; charset=UTF-8</td></tr><tr><td class="b m">Accept: text/html</td><td class="m">Content-Length: 4711</td></tr><tr><td class="b m"></td><td class="m">(Leerzeile, dann der HTML-Inhalt)</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">HTTP ist <b>zustandslos</b>: der Server erinnert sich nicht an die vorige Anfrage</p>
+<p class="line l0 step" data-g="1">Deshalb gibt es <b>Cookies</b> und Sitzungen — sie tragen den Zustand mit</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Statuscodes, die ihr kennen müsst</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:130px"><col style="width:250px"><col style="width:436px"></colgroup><tr><th>Code</th><th>heißt</th><th>typisch bei</th></tr><tr><td class="b">200</td><td>OK</td><td>alles in Ordnung</td></tr><tr><td class="b">301 / 302</td><td>Weiterleitung</td><td>Adresse hat sich geändert</td></tr><tr><td class="b">404</td><td>nicht gefunden</td><td>Tippfehler im Pfad</td></tr><tr><td class="b" style="background:#FBEBBF">403</td><td>verboten</td><td>keine Berechtigung</td></tr><tr><td class="b">500</td><td>Serverfehler</td><td>Fehler im Serverprogramm</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0"><b>4xx</b> ist ein Fehler der <b>Anfrage</b>, <b>5xx</b> ein Fehler des <b>Servers</b></p>
+<p class="line l0 step" data-g="1">Das ist die nützlichste Faustregel bei der Fehlersuche im Webprojekt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>DNS und URL</h2>
+      <p class="sub">Vom Namen zur Adresse</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eine URL zerlegt</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:130px"><col style="width:250px"><col style="width:436px"></colgroup><tr><th>Teil</th><th>Beispiel</th><th>sagt</th></tr><tr><td class="b">Schema</td><td class="m">https</td><td>welches Protokoll</td></tr><tr><td class="b">Host</td><td class="m">vereine.example</td><td>welcher Rechner</td></tr><tr><td class="b">Port</td><td class="m">(443)</td><td>welcher Dienst dort</td></tr><tr><td class="b">Pfad</td><td class="m">/liste.html</td><td>welche Ressource</td></tr><tr><td class="b">Query</td><td class="m">?ort=Dresden</td><td>welche Parameter</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0"><b>DNS</b> ist ein weltweit verteiltes Verzeichnis — es beantwortet nur die Frage Name zu IP</p>
+<p class="line l0 step" data-g="1">Antworten werden <b>zwischengespeichert</b>, deshalb wirken Änderungen verzögert</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">HTTP ist zustandslos: Jede Anfrage steht für sich. 4xx ist euer Fehler, 5xx der des Servers.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Web und Netz</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>HTTP/1.1</b> stammt von 1997 und wird noch überall gesprochen — HTTP/2 und /3 kamen 2015 und 2022</p>
+<p class="line l0 step" data-g="1">Der Statuscode <b>418 I'm a teapot</b> stammt aus einem Aprilscherz von 1998 und existiert wirklich</p>
+<p class="line l0 step" data-g="2"><b>DNS</b> heißt oft „das Telefonbuch des Internets“ — es ist eher ein verteiltes Verzeichnis</p>
+<p class="line l0 step" data-g="3">Der größte Teil der <b>Ladezeit</b> entsteht meist beim Nachladen von Bildern und Skripten</p>
+<p class="line l0 step" data-g="4">Mit <b>F12</b> im Browser seht ihr jede einzelne Anfrage mit Statuscode und Dauer</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe am Rechner</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Öffnet die <b>Entwicklerwerkzeuge</b> (F12) und ladet eure Seite neu</p>
+<p class="line l0 step" data-g="1">Notiert für <b>fünf</b> Anfragen: Pfad, Statuscode, Größe, Dauer</p>
+<p class="line l0 step" data-g="2">Provoziert einen <b>404</b> und einen <b>403</b> und lest die Antworten</p>
+<p class="line l0 step" data-g="3">Zerlegt drei URLs in <b>Schema, Host, Pfad und Query</b></p>
+<p class="line l0 step" data-g="4">Erklärt in fünf Sätzen, was zwischen <b>Eingabe und Anzeige</b> passiert</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

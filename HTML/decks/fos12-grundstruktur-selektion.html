@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Grundstruktur II: die Auswahl</title>
+<meta name="description" content="Entscheidungen treffen: if, elif, else — und die Bedingung dahinter">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-4fd405149624.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/cobweb-4445324/" target="_blank" rel="noopener">tjuusitalo</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — FOS 12</p>
+      <h1>Grundstruktur II: die Auswahl</h1>
+      <p class="sub">Entscheidungen treffen: if, elif, else — und die Bedingung dahinter</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Die Verzweigung</h2>
+      <p class="sub">Genau ein Weg wird gegangen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was eine Auswahl ausmacht</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Eine <b>Bedingung</b> wird geprüft — sie ist entweder <b>wahr</b> oder <b>falsch</b>, nie „vielleicht“</p>
+<p class="line l0 step" data-g="1">Je nach Antwort läuft der <b>eine</b> oder der <b>andere</b> Zweig — nie beide</p>
+<p class="line l0 step" data-g="2">Nach der Auswahl geht es für alle wieder <b>gemeinsam</b> weiter</p>
+<p class="line l0 step" data-g="3"><b>Einseitig</b>: nur ein Zweig hat Inhalt (if ohne else)</p>
+<p class="line l0 step" data-g="4"><b>Zweiseitig</b>: beide Zweige tun etwas (if … else)</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Zweiseitige Auswahl</h3><div class="rules"></div><div class="body" style="left:72px;width:392px"><p class="line l0 step" data-g="0">Das Dreieck teilt: links <b>ja</b>, rechts <b>nein</b></p>
+<p class="line l0 step" data-g="1">Beide Zweige sind gleich breit — sie sind <b>gleichwertig</b></p>
+<p class="line l0 step" data-g="2">Der Kasten darunter läuft <b>immer</b>, egal welcher Zweig gewählt wurde</p>
+<p class="line l0 step" data-g="3">In Python entspricht die Breite der <b>Einrückung</b></p></div><img src="img/sg-if.png" alt="" style="position:absolute;left:488px;top:150px;width:400px;height:130.222px"><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Und so sieht es in Python aus</h3><div class="rules"></div><div class="codepanel"><pre>punkte = int(input('Punkte: '))
+
+if punkte &gt;= 50:
+    print('bestanden')
+else:
+    print('nicht bestanden')
+
+print('Auswertung fertig')   # laeuft immer - keine Einrueckung
+
+# Einseitig - else darf fehlen:
+if punkte == 60:
+    print('Volle Punktzahl!')</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Bedingungen</h2>
+      <p class="sub">Woraus eine Ja/Nein-Frage gebaut wird</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Vergleichsoperatoren</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:130px"><col style="width:220px"><col style="width:250px"><col style="width:216px"></colgroup><tr><th>Zeichen</th><th>bedeutet</th><th>Beispiel</th><th>Ergebnis</th></tr><tr><td class="b m">==</td><td>ist gleich</td><td class="m">note == 1</td><td>True / False</td></tr><tr><td class="b m">!=</td><td>ist ungleich</td><td class="m">name != 'Lena'</td><td>True / False</td></tr><tr><td class="b m">&lt;   &gt;</td><td>kleiner, größer</td><td class="m">punkte &gt; 50</td><td>True / False</td></tr><tr><td class="b m">&lt;=  &gt;=</td><td>kleiner/größer gleich</td><td class="m">punkte &gt;= 50</td><td>True / False</td></tr><tr><td class="b m">in</td><td>ist enthalten in</td><td class="m">'a' in 'Lena'</td><td>True</td></tr></table><div class="body" style="top:287.65px;height:208.35px"><p class="line l0 step" data-g="0"><b>Ein</b> Gleichheitszeichen weist zu, <b>zwei</b> vergleichen — der häufigste Anfängerfehler</p>
+<p class="line l0 step" data-g="1">Das Ergebnis eines Vergleichs ist ein <b>bool</b>: True oder False</p>
+<p class="line l0 step" data-g="2">Vorsicht bei float: <b>0.1 + 0.2 == 0.3</b> ist False — lieber auf kleine Abweichung prüfen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Verknüpfen: and, or, not</h3><div class="rules"></div><table class="dtable" style="left:110px;top:146px;width:740px;font-size:11.5px"><colgroup><col style="width:130px"><col style="width:130px"><col style="width:160px"><col style="width:160px"><col style="width:160px"></colgroup><tr><th class="ac">A</th><th class="ac">B</th><th class="ac">A and B</th><th class="ac">A or B</th><th class="ac">not A</th></tr><tr><td class="b ac">True</td><td class="b ac">True</td><td class="ac" style="background:#DDE8C6">True</td><td class="ac" style="background:#DDE8C6">True</td><td class="ac">False</td></tr><tr><td class="b ac">True</td><td class="b ac">False</td><td class="ac">False</td><td class="ac" style="background:#DDE8C6">True</td><td class="ac">False</td></tr><tr><td class="b ac">False</td><td class="b ac">True</td><td class="ac">False</td><td class="ac" style="background:#DDE8C6">True</td><td class="ac" style="background:#FBEBBF">True</td></tr><tr><td class="b ac">False</td><td class="b ac">False</td><td class="ac">False</td><td class="ac">False</td><td class="ac" style="background:#FBEBBF">True</td></tr></table><div class="body" style="top:266.375px;height:229.625px"><p class="line l0 step" data-g="0"><b>and</b> ist nur wahr, wenn <b>beides</b> stimmt — <b>or</b> schon, wenn <b>eines</b> stimmt</p>
+<p class="line l0 step" data-g="1">„zwischen 50 und 60“ heißt: <b>punkte &gt;= 50 and punkte &lt;= 60</b></p>
+<p class="line l0 step" data-g="2">In Python geht auch die Kurzform <b>50 &lt;= punkte &lt;= 60</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Bedingungen zusammenbauen</h3><div class="rules"></div><div class="codepanel"><pre>alter = int(input('Alter: '))
+mitglied = input('Mitglied (j/n): ') == 'j'
+
+if alter &lt; 18 and mitglied:
+    print('ermaessigt und Mitgliederrabatt')
+elif alter &lt; 18 or alter &gt;= 65:
+    print('ermaessigt')
+else:
+    print('voller Preis')
+
+if not mitglied:
+    print('Hinweis: als Mitglied waere es guenstiger.')</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Mehrfachauswahl</h2>
+      <p class="sub">Wenn es mehr als zwei Wege gibt</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Der Notenschlüssel mit elif</h3><div class="rules"></div><div class="codepanel" style="padding-top:39.5px;padding-bottom:39.5px"><pre style="font-size:10px">punkte = int(input('Punkte von 60: '))
+prozent = punkte / 60 * 100
+
+if prozent &gt;= 92:
+    note = 1
+elif prozent &gt;= 81:
+    note = 2
+elif prozent &gt;= 67:
+    note = 3
+elif prozent &gt;= 50:
+    note = 4
+elif prozent &gt;= 30:
+    note = 5
+else:
+    note = 6
+
+print(f'{prozent:.1f} % - Note {note}')</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Reihenfolge entscheidet</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Python prüft <b>von oben nach unten</b> und nimmt den <b>ersten</b> Zweig, der passt</p>
+<p class="line l0 step" data-g="1">Danach wird der Rest <b>übersprungen</b> — nicht mehr geprüft</p>
+<p class="line l0 step" data-g="2">Deshalb <b>vom Strengsten zum Lockersten</b> ordnen: erst 92, dann 81, dann 67 …</p>
+<p class="line l0 step" data-g="3">Umgedreht wäre jede Punktzahl über 30 sofort eine <b>5</b> — der Klassiker unter den Logikfehlern</p>
+<p class="line l0 step" data-g="4">Ein <b>else</b> am Ende fängt alles ab, was übrig bleibt — es braucht keine Bedingung</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Verschachtelt oder mit elif?</h3><div class="rules"></div><div class="pic"><img src="img/sg-elif.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Beides ist richtig — <b>elif</b> ist die flachere und meist lesbarere Form</p>
+<p class="line l0 step" data-g="1">Verschachteln lohnt, wenn die innere Frage nur im <b>einen</b> Zweig überhaupt sinnvoll ist</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>Testen an den Rändern</h2>
+      <p class="sub">Fehler sitzen fast immer an der Grenze</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Grenzwerte für den Notenschlüssel</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:750px;font-size:11.5px"><colgroup><col style="width:150px"><col style="width:200px"><col style="width:400px"></colgroup><tr><th>Prozent</th><th>erwartete Note</th><th>warum dieser Wert?</th></tr><tr><td class="b">91.9</td><td>2</td><td>knapp unter der Grenze</td></tr><tr><td class="b" style="background:#FBEBBF">92.0</td><td style="background:#FBEBBF">1</td><td style="background:#FBEBBF">genau auf der Grenze — &gt;= oder &gt; ?</td></tr><tr><td class="b">92.1</td><td>1</td><td>knapp darüber</td></tr><tr><td class="b">49.9</td><td>5</td><td>letzte Fünf</td></tr><tr><td class="b" style="background:#FBEBBF">50.0</td><td style="background:#FBEBBF">4</td><td style="background:#FBEBBF">die wichtigste Grenze überhaupt</td></tr><tr><td class="b">0 / 100</td><td>6 / 1</td><td>die beiden Extremwerte</td></tr></table><div class="body" style="top:308.925px;height:187.075px"><p class="line l0 step" data-g="0">Testet <b>immer</b> direkt unter, genau auf und direkt über jeder Grenze</p>
+<p class="line l0 step" data-g="1">Der häufigste Logikfehler heißt <b>Zaunpfahlfehler</b>: &gt; statt &gt;= (oder umgekehrt)</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Genau ein Zweig wird ausgeführt — und Python nimmt den ersten, der passt. Die Reihenfolge der Bedingungen ist Teil der Lösung.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Entscheidungen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Der <b>Zaunpfahlfehler</b> (off-by-one) hat einen eigenen Namen, weil er so oft passiert: 10 Meter Zaun, alle 2 Meter ein Pfahl — <b>sechs</b> Pfähle, nicht fünf</p>
+<p class="line l0 step" data-g="1"><b>and</b> und <b>or</b> rechnen faul (<b>short-circuit</b>): steht links schon das Ergebnis fest, wird rechts gar nicht mehr geprüft</p>
+<p class="line l0 step" data-g="2">Der <b>Therac-25</b> (1985–87) bestrahlte Patienten wegen eines fehlerhaften Zustandsvergleichs tödlich — bis heute Pflichtlektüre</p>
+<p class="line l0 step" data-g="3">Python hat <b>kein switch/case</b> — bis Version 3.10, seitdem gibt es <b>match</b></p>
+<p class="line l0 step" data-g="4">Fast alle Sprachen schreiben <b>==</b> für den Vergleich, weil <b>=</b> schon zum Zuweisen vergeben war</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: entscheiden lassen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Notenrechner</b>: Punkte einlesen, Prozent berechnen, Note nach dem Schlüssel oben ausgeben</p>
+<p class="line l0 step" data-g="1">Erweitert um eine Meldung: unter 50 % zusätzlich „<b>Nachprüfung möglich</b>“</p>
+<p class="line l0 step" data-g="2"><b>Schaltjahr</b>: Jahr einlesen und prüfen (teilbar durch 4, aber nicht durch 100, außer durch 400)</p>
+<p class="line l0 step" data-g="3"><b>Dreieck</b>: drei Seitenlängen einlesen und ausgeben, ob gleichseitig, gleichschenklig oder ungleichseitig — und ob es überhaupt ein Dreieck ist</p>
+<p class="line l0 step" data-g="4">Zu jeder Aufgabe: Struktogramm <b>und</b> eine Tabelle mit Grenzwert-Testfällen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

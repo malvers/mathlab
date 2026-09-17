@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Funktionen und Parameter</title>
+<meta name="description" content="Ein Programm in Teile zerlegen, die man einzeln verstehen und prüfen kann">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-a3f74cd2eb4f.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/sunrise-5183917/" target="_blank" rel="noopener">Sarahhax2210</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 13</p>
+      <h1>Funktionen und Parameter</h1>
+      <p class="sub">Ein Programm in Teile zerlegen, die man einzeln verstehen und prüfen kann</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Warum zerlegen?</h2>
+      <p class="sub">Ein langes Programm ist kein gutes Programm</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fünf Gründe für Funktionen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Nicht wiederholen</b>: dieselbe Rechnung steht einmal da, nicht viermal</p>
+<p class="line l0 step" data-g="1"><b>Benennen</b>: `flaeche_kreis(r)` sagt, was passiert — drei Zeilen Formel sagen es nicht</p>
+<p class="line l0 step" data-g="2"><b>Prüfen</b>: eine Funktion lässt sich einzeln testen, ein Programmblock nicht</p>
+<p class="line l0 step" data-g="3"><b>Ändern</b>: eine Korrektur an einer Stelle wirkt überall</p>
+<p class="line l0 step" data-g="4"><b>Teilen</b>: zwei Leute können an zwei Funktionen gleichzeitig arbeiten</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Vorher: dieselbe Rechnung dreimal</h3><div class="rules"></div><div class="codepanel"><pre>r1 = 3
+print('Flaeche:', 3.14159 * r1 * r1)
+
+r2 = 5
+print('Flaeche:', 3.14159 * r2 * r2)
+
+r3 = 7
+print('Flaeche:', 3.1459 * r3 * r3)      # &lt;- Tippfehler, faellt nicht auf</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Nachher: einmal beschrieben, dreimal benutzt</h3><div class="rules"></div><div class="codepanel"><pre>import math
+
+def flaeche_kreis(radius):
+    return math.pi * radius ** 2
+
+for r in [3, 5, 7]:
+    print('Flaeche:', round(flaeche_kreis(r), 2))</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Die Bauteile</h2>
+      <p class="sub">def, Parameter, Rückgabewert, Aufruf</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die vier Begriffe, die man auseinanderhalten muss</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:180px"><col style="width:320px"><col style="width:316px"></colgroup><tr><th>Begriff</th><th>was es ist</th><th>im Beispiel</th></tr><tr><td class="b">Definition</td><td>die Beschreibung der Funktion</td><td class="m">def flaeche_kreis(radius):</td></tr><tr><td class="b">Parameter</td><td>der Platzhalter in der Definition</td><td class="m">radius</td></tr><tr><td class="b">Argument</td><td>der Wert beim Aufruf</td><td class="m">die 5 in flaeche_kreis(5)</td></tr><tr><td class="b">Rückgabewert</td><td>was die Funktion herausgibt</td><td class="m">das Ergebnis hinter return</td></tr></table><div class="body" style="top:266.375px;height:229.625px"><p class="line l0 step" data-g="0"><b>Parameter</b> steht in der Definition, <b>Argument</b> steht im Aufruf — der Unterschied wird geprüft</p>
+<p class="line l0 step" data-g="1">Die Definition tut <b>nichts</b>, solange niemand die Funktion aufruft</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Mehrere Parameter, ein Rückgabewert</h3><div class="rules"></div><div class="codepanel"><pre>def note_aus_punkten(punkte, maximum):
+    prozent = punkte / maximum * 100
+    if prozent &gt;= 85:
+        return 1
+    elif prozent &gt;= 70:
+        return 2
+    elif prozent &gt;= 55:
+        return 3
+    return 4
+
+print(note_aus_punkten(48, 60))     # Argumente in der Reihenfolge der Parameter
+print(note_aus_punkten(maximum=60, punkte=48))   # oder benannt, dann egal</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>return beendet die Funktion — sofort</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ist <b>return</b> erreicht, springt die Funktion zurück; alles danach läuft nicht mehr</p>
+<p class="line l0 step" data-g="1">Deshalb braucht das Beispiel oben kein <b>else</b> — jeder Treffer verlässt die Funktion</p>
+<p class="line l0 step" data-g="2">Eine Funktion <b>ohne</b> return gibt in Python <b>None</b> zurück</p>
+<p class="line l0 step" data-g="3">Mehrere Werte gehen auch: <b>return kleinster, groesster</b> liefert ein Wertepaar</p>
+<p class="line l0 step" data-g="4">Aufteilen des Paars beim Aufruf: <b>a, b = grenzen(zahlen)</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Die Verwechslung</h2>
+      <p class="sub">return oder print — das ist nicht dasselbe</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Zwei Funktionen, die verschieden viel können</h3><div class="rules"></div><div class="codepanel"><pre>def flaeche_zeigen(r):
+    print(3.14159 * r * r)        # zeigt es an, gibt nichts heraus
+
+def flaeche(r):
+    return 3.14159 * r * r        # gibt es heraus, zeigt nichts an
+
+a = flaeche_zeigen(3)             # a ist None - nicht weiterrechenbar
+b = flaeche(3)                    # b ist 28.27 - weiterrechenbar
+print('Zwei Kreise:', b * 2)</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Faustregel</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Rechnen und Ausgeben trennen</b>: die Funktion rechnet, das Hauptprogramm zeigt an</p>
+<p class="line l0 step" data-g="1">Nur so lässt sich die Funktion <b>testen</b> — man vergleicht ihren Rückgabewert mit dem Sollwert</p>
+<p class="line l0 step" data-g="2">Und nur so lässt sie sich <b>wiederverwenden</b>, etwa in einer Schleife oder Datei</p>
+<p class="line l0 step" data-g="3"><b>print</b> in einer Rechenfunktion ist fast immer ein Zeichen für unfertiges Zerlegen</p>
+<p class="line l0 step" data-g="4">Ausnahme: Funktionen, deren <b>Zweck</b> die Ausgabe ist — die heißen dann auch so</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>Sichtbarkeit</h2>
+      <p class="sub">Was in der Funktion bleibt, bleibt in der Funktion</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Lokal und global</h3><div class="rules"></div><div class="codepanel"><pre>zaehler = 0                  # global
+
+def erhoehen(wert):
+    zaehler = wert + 1       # LOKAL - eine eigene, neue Variable
+    return zaehler
+
+print(erhoehen(5))           # 6
+print(zaehler)               # 0  - das globale zaehler blieb unberuehrt</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum das gut so ist</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Alles in einer Funktion Angelegte ist <b>lokal</b> und verschwindet beim Verlassen</p>
+<p class="line l0 step" data-g="1">Damit kann eine Funktion nichts kaputt machen, was sie nichts angeht</p>
+<p class="line l0 step" data-g="2">Was sie braucht, kommt als <b>Parameter</b> herein; was sie liefert, geht als <b>return</b> hinaus</p>
+<p class="line l0 step" data-g="3"><b>global</b> gibt es, ist aber fast immer die falsche Antwort — es hebt genau diesen Schutz auf</p>
+<p class="line l0 step" data-g="4">Diese Trennung heißt <b>Kapselung</b> und ist der Kern jeder Modularisierung</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 05</p>
+      <h2>Refactoring</h2>
+      <p class="sub">Ein fertiges Programm in Module zerlegen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Vorher: ein Block, der alles macht</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:11.5px">noten = []
+eingabe = int(input('Note (0 = Ende): '))
+while eingabe != 0:
+    noten.append(eingabe)
+    eingabe = int(input('Note (0 = Ende): '))
+
+summe = 0
+beste = noten[0]
+for n in noten:
+    summe = summe + n
+    if n &lt; beste:
+        beste = n
+print(round(summe / len(noten), 2), beste)</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Nachher I: die Eingabe wird eine Funktion</h3><div class="rules"></div><div class="codepanel"><pre>def noten_einlesen():
+    werte = []
+    eingabe = int(input('Note (0 = Ende): '))
+    while eingabe != 0:
+        werte.append(eingabe)
+        eingabe = int(input('Note (0 = Ende): '))
+    return werte</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Nachher II: rechnen und Hauptprogramm</h3><div class="rules"></div><div class="codepanel"><pre>def mittelwert(werte):
+    return sum(werte) / len(werte)
+
+def beste_note(werte):
+    return min(werte)
+
+noten = noten_einlesen()
+print(round(mittelwert(noten), 2), beste_note(noten))</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was der Umbau gebracht hat</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:380px"><col style="width:436px"></colgroup><tr><th>vorher</th><th>nachher</th></tr><tr><td class="b">13 Zeilen am Stück lesen</td><td>drei Namen lesen, Details bei Bedarf</td></tr><tr><td class="b">nur als Ganzes testbar</td><td>jede Funktion einzeln prüfbar</td></tr><tr><td class="b">Eingabe und Rechnung verflochten</td><td>Eingabe austauschbar, etwa gegen eine Datei</td></tr><tr><td class="b">Wiederverwendung unmöglich</td><td>mittelwert passt auf jede Zahlenliste</td></tr></table><div class="body" style="top:266.375px;height:229.625px"><p class="line l0 step" data-g="0">Der Umbau ändert <b>kein</b> Verhalten — nur die Struktur. Das nennt man <b>Refactoring</b></p>
+<p class="line l0 step" data-g="1">Probe: dieselben Eingaben müssen <b>dieselbe</b> Ausgabe liefern wie vorher</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Eine Funktion, die man in einem Satz beschreiben kann, ist richtig geschnitten. Braucht die Beschreibung ein „und“, sind es zwei Funktionen.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Modularisierung</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>David Parnas</b> formulierte 1972 das Prinzip: ein Modul verbirgt eine Entwurfsentscheidung</p>
+<p class="line l0 step" data-g="1"><b>DRY</b> — „Don't repeat yourself“ — stammt aus „The Pragmatic Programmer“ (1999)</p>
+<p class="line l0 step" data-g="2">Eine Python-Funktion ohne return liefert <b>None</b> — der häufigste Grund für „warum ist das leer?“</p>
+<p class="line l0 step" data-g="3">Eine <b>veränderliche</b> Vorgabe wie def f(liste=[]) merkt sich Änderungen über Aufrufe hinweg — eine der bekanntesten Python-Fallen</p>
+<p class="line l0 step" data-g="4">Funktionen sind in Python <b>Werte</b>: man kann sie in Variablen legen und weitergeben</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: zerlegen und prüfen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Nehmt euer <b>Programm aus der letzten Stunde</b> (Notenauswertung) als Ausgangspunkt</p>
+<p class="line l0 step" data-g="1"><b>Drei Funktionen</b> herausschneiden: einlesen, rechnen, ausgeben — jede mit einem Satz beschrieben</p>
+<p class="line l0 step" data-g="2">Jede Rechenfunktion mit <b>return</b>, kein print darin</p>
+<p class="line l0 step" data-g="3"><b>Probe</b>: dieselben Eingaben müssen dieselben Ergebnisse liefern wie vorher</p>
+<p class="line l0 step" data-g="4">Zum Schluss eine Funktion <b>testen</b>, indem ihr Rückgabewert und Sollwert vergleicht</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

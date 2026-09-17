@@ -291,9 +291,20 @@ class HtmlDeck:
         for line in lines:
             rows.append(_html.escape(line if isinstance(line, str)
                                      else "".join(t for t, _ in line), quote=False))
+        # the panel is 300 px high including 40 px padding top and bottom (border-box), so 12 lines
+        # of 13.5 px (line-height 1.3, see CSS) fit. A longer listing takes the .pptx size steps and
+        # a thinner padding, and shrinks further only if that is not enough - otherwise its last
+        # lines run out of the dark panel. Up to 12 lines the markup stays as it was.
+        n, box, pre = max(len(rows), 1), "", ""
+        if n * 13.5 * 1.3 > 220:
+            size = 11.5 if n <= 14 else 10.5 if n <= 16 else 10
+            pad = min(40.0, max(14.0, (300 - n * size * 1.3) / 2))
+            size = min(size, (300 - 2 * pad) / (n * 1.3) // 0.5 * 0.5)
+            box = ' style="padding-top:%gpx;padding-bottom:%gpx"' % (pad, pad)
+            pre = ' style="font-size:%gpx"' % size
         self._slide("content code", '<h3>%s</h3><div class="rules"></div>'
-                    '<div class="codepanel"><pre>%s</pre></div>'
-                    % (markup(title), "\n".join(rows) or " "))
+                    '<div class="codepanel"%s><pre%s>%s</pre></div>'
+                    % (markup(title), box, pre, "\n".join(rows) or " "))
 
     @staticmethod
     def _table(rows, col_w, left, top, marks=None, font_size=12, bold_cols=(),
@@ -409,6 +420,47 @@ class HtmlDeck:
                     % (markup(title), cls, _html.escape(src, quote=True),
                        '<div class="body">%s</div>' % bullet_list(lines)[0] if lines else "",
                        live_frames(frames)))
+
+    @staticmethod
+    def fit(path, box_w, box_h):
+        """Size of a picture scaled into box_w x box_h - up or down, like the .pptx does."""
+        from PIL import Image
+        iw, ih = Image.open(path).size
+        k = min(box_w / iw, box_h / ih)
+        return iw * k, ih * k
+
+    @staticmethod
+    def placed_img(path, x, y, w, h):
+        """A picture at design coordinates - for layouts that place it by hand, as the .pptx does."""
+        return ('<img src="%s" alt="" style="position:absolute;left:%gpx;top:%gpx;width:%gpx;height:%gpx">'
+                % (_html.escape(asset(path), quote=True), x, y, w, h))
+
+    def picture_bullets(self, title, path, lines, pic_w=380, pic_h=None, side="right"):
+        """Bullets on one side, picture on the other - the twin of slides.Deck.picture_bullets,
+        same numbers: the picture fits pic_w x pic_h, centred in its column 4 px under the rule."""
+        w, h = self.fit(path, pic_w, pic_h or BODY_H)
+        body_w = CONTENT_W - pic_w - 24
+        if side == "right":
+            body_x, col_x = MARGIN, W - MARGIN - pic_w
+        else:
+            body_x, col_x = W - MARGIN - body_w, MARGIN
+        self._slide("content", '<h3>%s</h3><div class="rules"></div>'
+                    '<div class="body" style="left:%gpx;width:%gpx">%s</div>%s'
+                    % (markup(title), body_x, body_w, bullet_list(lines)[0],
+                       self.placed_img(path, col_x + (pic_w - w) / 2, BODY_Y + 4, w, h)))
+
+    def picture_table(self, title, path, rows, col_w, lines, pic_w=380, font_size=11,
+                      bold_cols=(), marks=None, align=None, mono_cols=()):
+        """Picture left, table right, bullets underneath both - the twin of
+        slides.Deck.picture_table, same numbers."""
+        w, h = self.fit(path, pic_w, 210)
+        table = self._table(rows, col_w, W - MARGIN - sum(col_w), BODY_Y + 4, marks, font_size,
+                            bold_cols, mono_cols, align)
+        top = BODY_Y + max(h, font_size * 1.9 * len(rows)) + 14
+        self._slide("content", '<h3>%s</h3><div class="rules"></div>%s%s'
+                    '<div class="body" style="top:%gpx;height:%gpx">%s</div>'
+                    % (markup(title), self.placed_img(path, MARGIN, BODY_Y, w, h), table,
+                       top, FOOT_Y - top - 8, bullet_list(lines)[0]))
 
     def say(self, *parts, hold=False):
         """Narration for the slide just added (Doc, 15.09.2026: Solita reads the deck -

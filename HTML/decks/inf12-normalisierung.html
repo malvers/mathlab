@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Normalisierung</title>
+<meta name="description" content="Von der Sammeltabelle zur dritten Normalform — Schritt für Schritt">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-6cf33ed36294.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/lighthouse-2707528/" target="_blank" rel="noopener">Pixabay</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 12</p>
+      <h1>Normalisierung</h1>
+      <p class="sub">Von der Sammeltabelle zur dritten Normalform — Schritt für Schritt</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Das Problem</h2>
+      <p class="sub">Redundanz und ihre Anomalien</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eine Sammeltabelle, wie sie oft entsteht</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10px"><colgroup><col style="width:70px"><col style="width:110px"><col style="width:110px"><col style="width:70px"><col style="width:150px"><col style="width:130px"><col style="width:96px"><col style="width:80px"></colgroup><tr><th>SNr</th><th>Name</th><th>Klasse</th><th>KNr</th><th>Kursname</th><th>Lehrkraft</th><th>Raum</th><th>Note</th></tr><tr><td class="b">1</td><td>Meier</td><td>BGY25</td><td>10</td><td style="background:#FBEBBF">Informatik</td><td style="background:#FBEBBF">Alvers</td><td style="background:#FBEBBF">K413</td><td>2</td></tr><tr><td class="b">1</td><td>Meier</td><td>BGY25</td><td>20</td><td>Mathe</td><td>Berg</td><td>K221</td><td>1</td></tr><tr><td class="b">2</td><td>Schulz</td><td>BGY25</td><td>10</td><td style="background:#FBEBBF">Informatik</td><td style="background:#FBEBBF">Alvers</td><td style="background:#FBEBBF">K413</td><td>3</td></tr><tr><td class="b">3</td><td>Krause</td><td>BGY24</td><td>10</td><td style="background:#FBEBBF">Informatik</td><td style="background:#FBEBBF">Alvers</td><td style="background:#FBEBBF">K413</td><td>2</td></tr></table><div class="body" style="top:252.5px;height:243.5px"><p class="line l0 step" data-g="0">„Informatik“, „Alvers“ und „K413“ stehen <b>dreimal</b> — das ist <b>Redundanz</b></p>
+<p class="line l0 step" data-g="1">Der Primärschlüssel ist <b>(SNr, KNr)</b> — erst beide zusammen sind eindeutig</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die drei Anomalien</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:150px"><col style="width:330px"><col style="width:336px"></colgroup><tr><th>Anomalie</th><th>tritt auf</th><th>Beispiel</th></tr><tr><td class="b" style="background:#F2CFCB">Änderung</td><td>beim Ändern eines redundanten Werts</td><td>Alvers zieht um: drei Zeilen ändern</td></tr><tr><td class="b" style="background:#F2CFCB">Einfüge</td><td>wenn ein Ding ohne Partner nicht speicherbar ist</td><td>neuer Kurs ohne Schüler</td></tr><tr><td class="b" style="background:#F2CFCB">Lösch</td><td>wenn mit einer Zeile mehr verschwindet als gewollt</td><td>letzter Schüler weg, Kurs weg</td></tr></table><div class="body" style="top:237.7px;height:258.3px"><p class="line l0 step" data-g="0">Wird beim Ändern <b>eine</b> Zeile vergessen, ist der Bestand <b>inkonsistent</b></p>
+<p class="line l0 step" data-g="1">Die Normalisierung beseitigt die Ursache: die <b>Redundanz</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Erste und zweite Normalform</h2>
+      <p class="sub">Atomar und voll abhängig</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>1NF und 2NF</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:90px"><col style="width:420px"><col style="width:306px"></colgroup><tr><th>Form</th><th>Bedingung</th><th>in unserem Beispiel</th></tr><tr><td class="b">1NF</td><td>alle Werte sind atomar, keine Wiederholungsgruppen</td><td>erfüllt</td></tr><tr><td class="b">2NF</td><td>1NF und jedes Nichtschlüsselattribut hängt vom <b>ganzen</b> Schlüssel ab</td><td style="background:#F2CFCB">verletzt</td></tr></table><div class="body" style="top:218.275px;height:277.725px"><p class="line l0 step" data-g="0"><b>Name</b> und <b>Klasse</b> hängen nur von <b>SNr</b> ab — das ist eine <b>partielle</b> Abhängigkeit</p>
+<p class="line l0 step" data-g="1"><b>Kursname</b>, <b>Lehrkraft</b> und <b>Raum</b> hängen nur von <b>KNr</b> ab — ebenfalls partiell</p>
+<p class="line l0 step" data-g="2">Partielle Abhängigkeiten kann es nur bei <b>zusammengesetzten</b> Schlüsseln geben</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Nach der Zerlegung in 2NF</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:200px"><col style="width:616px"></colgroup><tr><th>Relation</th><th>Schema</th></tr><tr><td class="b">Schueler</td><td class="m">Schueler(SNr, Name, Klasse)</td></tr><tr><td class="b">Kurs</td><td class="m">Kurs(KNr, Kursname, Lehrkraft, Raum)</td></tr><tr><td class="b">Belegung</td><td class="m" style="background:#DDE8C6">Belegung(SNr, KNr, Note)</td></tr></table><div class="body" style="top:245.1px;height:250.9px"><p class="line l0 step" data-g="0">Jede Angabe steht jetzt <b>einmal</b> — bis auf die Fremdschlüssel, die dort hingehören</p>
+<p class="line l0 step" data-g="1"><b>Note</b> bleibt in Belegung: sie hängt tatsächlich von <b>beiden</b> Schlüsseln ab</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Dritte Normalform</h2>
+      <p class="sub">Keine transitiven Abhängigkeiten</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was in Kurs noch stört</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>KNr</b> bestimmt die <b>Lehrkraft</b> — das ist richtig so</p>
+<p class="line l0 step" data-g="1">Aber die <b>Lehrkraft</b> bestimmt den <b>Raum</b> — jede Lehrkraft hat ein Stammzimmer</p>
+<p class="line l0 step" data-g="2">Also bestimmt KNr den Raum nur <b>über die Lehrkraft</b> — das ist <b>transitiv</b></p>
+<p class="line l0 step" data-g="3">Folge: zieht eine Lehrkraft um, sind wieder mehrere Zeilen betroffen</p>
+<p class="line l0 step" data-g="4"><b>3NF</b>: kein Nichtschlüsselattribut hängt von einem anderen Nichtschlüsselattribut ab</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Das Ergebnis in dritter Normalform</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:150px"><col style="width:400px"><col style="width:266px"></colgroup><tr><th>Relation</th><th>Schema</th><th>Bemerkung</th></tr><tr><td class="b">Schueler</td><td class="m">Schueler(SNr, Name, Klasse)</td><td>unverändert</td></tr><tr><td class="b">Kurs</td><td class="m">Kurs(KNr, Kursname, Lehrkraft)</td><td>Raum ausgelagert</td></tr><tr><td class="b">Lehrkraft</td><td class="m">Lehrkraft(Lehrkraft, Raum)</td><td style="background:#DDE8C6">neu</td></tr><tr><td class="b">Belegung</td><td class="m">Belegung(SNr, KNr, Note)</td><td>unverändert</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Vier Tabellen statt einer — dafür steht <b>jede Angabe genau einmal</b></p>
+<p class="line l0 step" data-g="1">Der Preis: für eine lesbare Liste braucht es jetzt <b>JOINs</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">1NF: atomare Werte. 2NF: vom ganzen Schlüssel abhängig. 3NF: nicht von einem anderen Nichtschlüsselattribut abhängig.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Normalformen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die ersten drei Normalformen stammen von <b>Codd</b> (1970 bis 1971)</p>
+<p class="line l0 step" data-g="1">Die <b>Boyce-Codd-Normalform</b> verschärft die 3NF und kam 1974 dazu</p>
+<p class="line l0 step" data-g="2">Es gibt Normalformen bis zur <b>sechsten</b> — in der Praxis endet man meist bei 3NF</p>
+<p class="line l0 step" data-g="3">Der Merkspruch: <b>„the key, the whole key, and nothing but the key“</b></p>
+<p class="line l0 step" data-g="4">In Data Warehouses wird bewusst <b>denormalisiert</b> — dort zählt Lesegeschwindigkeit mehr</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: normalisieren</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Nehmt die Sammeltabelle <b>Ausleihe</b> vom Arbeitsblatt (Buch, Leser, Ausleihe, Verlag)</p>
+<p class="line l0 step" data-g="1">Bestimmt den <b>Primärschlüssel</b> und alle funktionalen Abhängigkeiten</p>
+<p class="line l0 step" data-g="2">Zerlegt in <b>2NF</b> und begründet jede partielle Abhängigkeit</p>
+<p class="line l0 step" data-g="3">Zerlegt in <b>3NF</b> und benennt die transitive Abhängigkeit</p>
+<p class="line l0 step" data-g="4">Setzt das Ergebnis als <b>CREATE TABLE</b> um und füllt es mit Beispieldaten</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

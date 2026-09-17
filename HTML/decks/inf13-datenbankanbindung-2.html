@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Inhalte aus der Datenbank</title>
+<meta name="description" content="Dynamisch anzeigen, filtern, ausgeben — und der Team-Review">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-036c2f3a8ea9.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/sunrise-9631245/" target="_blank" rel="noopener">ChiemSeherin</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 13</p>
+      <h1>Inhalte aus der Datenbank</h1>
+      <p class="sub">Dynamisch anzeigen, filtern, ausgeben — und der Team-Review</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Auslesen und anzeigen</h2>
+      <p class="sub">Die Gegenrichtung zum Speichern</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Alle Vereine ausgeben</h3><div class="rules"></div><div class="codepanel"><pre>&lt;?php
+$stmt = $pdo-&gt;query('SELECT name, ort FROM Verein ORDER BY name');
+$vereine = $stmt-&gt;fetchAll(PDO::FETCH_ASSOC);
+?&gt;
+&lt;ul&gt;
+&lt;?php foreach ($vereine as $v): ?&gt;
+  &lt;li&gt;&lt;?= htmlspecialchars($v['name']) ?&gt; (&lt;?= htmlspecialchars($v['ort']) ?&gt;)&lt;/li&gt;
+&lt;?php endforeach; ?&gt;
+&lt;/ul&gt;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was in diesen neun Zeilen steckt</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>query</b> genügt hier, weil keine Nutzereingabe im SQL steht</p>
+<p class="line l0 step" data-g="1"><b>fetchAll</b> holt alle Zeilen als Liste von Datensätzen</p>
+<p class="line l0 step" data-g="2">Die <b>Schleife</b> erzeugt je Datensatz ein Listenelement</p>
+<p class="line l0 step" data-g="3"><b>htmlspecialchars</b> wandelt Sonderzeichen um — das verhindert <b>Cross-Site-Scripting</b></p>
+<p class="line l0 step" data-g="4">Ohne diese Funktion könnte ein Vereinsname ein Skript in eure Seite schmuggeln</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die zwei Angriffe, die man kennen muss</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:200px"><col style="width:350px"><col style="width:266px"></colgroup><tr><th>Angriff</th><th>Idee</th><th>Gegenmittel</th></tr><tr><td class="b">SQL-Injection</td><td>Eingabe wird zu SQL-Befehl</td><td style="background:#DDE8C6">prepare mit Platzhaltern</td></tr><tr><td class="b">Cross-Site-Scripting</td><td>Eingabe wird zu HTML oder JavaScript</td><td style="background:#DDE8C6">beim Ausgeben maskieren</td></tr></table><div class="body" style="top:221.05px;height:274.95px"><p class="line l0 step" data-g="0">Merksatz: <b>beim Hineinschreiben vorbereiten, beim Herausgeben maskieren</b></p>
+<p class="line l0 step" data-g="1">Beides ist Pflicht — eines allein genügt nicht</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Filtern</h2>
+      <p class="sub">Parameter aus der URL</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Eine Liste mit Filter</h3><div class="rules"></div><div class="codepanel"><pre>&lt;?php
+$ort = $_GET['ort'] ?? '';
+
+if ($ort !== '') {
+    $stmt = $pdo-&gt;prepare('SELECT name, ort FROM Verein WHERE ort = ? ORDER BY name');
+    $stmt-&gt;execute([$ort]);
+} else {
+    $stmt = $pdo-&gt;query('SELECT name, ort FROM Verein ORDER BY name');
+}
+$vereine = $stmt-&gt;fetchAll(PDO::FETCH_ASSOC);
+?&gt;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum hier prepare zwingend ist</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>$_GET['ort']</b> kommt vom Nutzer — es steht in der URL und ist frei änderbar</p>
+<p class="line l0 step" data-g="1">Zusammengeklebt wäre das eine offene Tür für <b>SQL-Injection</b></p>
+<p class="line l0 step" data-g="2">Mit Platzhalter bleibt der Wert ein <b>Wert</b> und wird nie zum Befehl</p>
+<p class="line l0 step" data-g="3">Zusätzlich: prüfen, ob der Wert überhaupt <b>plausibel</b> ist</p>
+<p class="line l0 step" data-g="4">Und den Filter im Formular als <b>Auswahlliste</b> anbieten statt als freies Feld</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Der Team-Review</h2>
+      <p class="sub">Zwischenstand ansehen lassen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Prüfliste für den Review</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:200px"><col style="width:616px"></colgroup><tr><th>Bereich</th><th>Frage</th></tr><tr><td class="b">Funktion</td><td>Läuft Speichern und Anzeigen auf einem fremden Rechner?</td></tr><tr><td class="b">Sicherheit</td><td>Steht überall prepare und htmlspecialchars?</td></tr><tr><td class="b" style="background:#F2CFCB">Zugangsdaten</td><td>Liegen sie außerhalb des Webordners?</td></tr><tr><td class="b">Datenmodell</td><td>Passt es noch zu dem, was die Seite tatsächlich braucht?</td></tr><tr><td class="b">Barrierefreiheit</td><td>Haben alle Felder ein Label, alle Bilder ein alt?</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Der Review passiert <b>zwischen</b> den Teams, nicht innerhalb</p>
+<p class="line l0 step" data-g="1">Fremde Augen finden die Stellen, an denen man selbst blind geworden ist</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Beim Hineinschreiben vorbereiten, beim Herausgeben maskieren. Zwei Handgriffe, die die häufigsten Angriffe unmöglich machen.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: dynamische Seiten</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>PHP</b> entstand 1994 als Sammlung von Skripten für eine private Homepage</p>
+<p class="line l0 step" data-g="1"><b>XSS</b> steht seit Jahren neben SQL-Injection in den Top-Risiken der OWASP-Liste</p>
+<p class="line l0 step" data-g="2">Ein einziges vergessenes <b>htmlspecialchars</b> genügt für eine Lücke</p>
+<p class="line l0 step" data-g="3">Deshalb maskieren moderne Vorlagensysteme <b>automatisch</b> beim Ausgeben</p>
+<p class="line l0 step" data-g="4">Der Merksatz der Praxis lautet: <b>Traue niemals Eingaben</b> — auch nicht der eigenen Datenbank</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe am Rechner</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Zeigt eure Daten <b>dynamisch</b> an — als Liste oder Tabelle</p>
+<p class="line l0 step" data-g="1">Baut einen <b>Filter</b> über einen GET-Parameter ein, mit prepare</p>
+<p class="line l0 step" data-g="2">Prüft jede Ausgabe auf <b>htmlspecialchars</b></p>
+<p class="line l0 step" data-g="3"><b>Team-Review</b> mit dem Nachbarteam nach der Prüfliste</p>
+<p class="line l0 step" data-g="4">Notiert die Funde und arbeitet mindestens <b>drei</b> davon ab</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

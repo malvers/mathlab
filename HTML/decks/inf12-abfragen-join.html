@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tabellen verbinden</title>
+<meta name="description" content="JOIN über Fremdschlüssel — und ein Ausblick auf die Aggregatfunktionen">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-2b50cc368526.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/fog-7228638/" target="_blank" rel="noopener">adege</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 12</p>
+      <h1>Tabellen verbinden</h1>
+      <p class="sub">JOIN über Fremdschlüssel — und ein Ausblick auf die Aggregatfunktionen</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Warum überhaupt verbinden?</h2>
+      <p class="sub">Weil Daten getrennt liegen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Grund für die Aufteilung</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die Tabelle <b>Belegung</b> enthält nur <b>snr</b> und <b>knr</b> — keine Namen</p>
+<p class="line l0 step" data-g="1">Der Name steht <b>einmal</b> in Schueler, die Kursbezeichnung <b>einmal</b> in Kurs</p>
+<p class="line l0 step" data-g="2">Das vermeidet <b>Redundanz</b>: der Name wird nicht bei jeder Belegung wiederholt</p>
+<p class="line l0 step" data-g="3">Der Preis: für eine lesbare Liste müssen die Tabellen <b>verbunden</b> werden</p>
+<p class="line l0 step" data-g="4">Die Verbindung läuft über den <b>Fremdschlüssel</b> — hier snr und knr</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Primär- und Fremdschlüssel</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:230px"><col style="width:300px"><col style="width:286px"></colgroup><tr><th>Begriff</th><th>ist</th><th>Beispiel</th></tr><tr><td class="b">Primärschlüssel</td><td>macht eine Zeile eindeutig</td><td>Schueler.snr</td></tr><tr><td class="b">Fremdschlüssel</td><td>verweist auf einen Primärschlüssel</td><td>Belegung.snr</td></tr><tr><td class="b" style="background:#FBEBBF">referentielle Integrität</td><td>kein Verweis ins Leere</td><td>keine Belegung ohne Schüler</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Das DBMS kann die <b>referentielle Integrität</b> erzwingen — dann scheitert ein falscher Verweis</p>
+<p class="line l0 step" data-g="1">Genau darüber läuft später auch das Löschen: was passiert mit den Belegungen?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Der JOIN</h2>
+      <p class="sub">Zwei und drei Tabellen verbinden</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Zwei Tabellen verbinden</h3><div class="rules"></div><div class="codepanel"><pre>SELECT s.name, s.vorname, b.note
+FROM Schueler s
+JOIN Belegung b ON s.snr = b.snr;
+
+-- gleichbedeutend, aeltere Schreibweise:
+SELECT s.name, s.vorname, b.note
+FROM Schueler s, Belegung b
+WHERE s.snr = b.snr;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Drei Tabellen verbinden</h3><div class="rules"></div><div class="codepanel"><pre>SELECT s.name, s.vorname, k.bezeichnung, b.note
+FROM Schueler s
+JOIN Belegung b ON s.snr = b.snr
+JOIN Kurs     k ON b.knr = k.knr
+WHERE k.bezeichnung = 'Informatik'
+ORDER BY s.name;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Worauf es beim JOIN ankommt</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die <b>ON-Bedingung</b> sagt, welche Zeilen zusammengehören — sie ist nicht optional</p>
+<p class="line l0 step" data-g="1">Fehlt sie, entsteht das <b>kartesische Produkt</b>: jede Zeile mit jeder</p>
+<p class="line l0 step" data-g="2">Bei 200 Schülern und 300 Belegungen sind das <b>60 000</b> Zeilen Unsinn</p>
+<p class="line l0 step" data-g="3"><b>Aliasnamen</b> (s, b, k) machen die Abfrage lesbar und sind bei gleichen Spaltennamen nötig</p>
+<p class="line l0 step" data-g="4">Für <b>n</b> Tabellen braucht man <b>n − 1</b> Verbindungsbedingungen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>JOIN-Arten und Ausblick</h2>
+      <p class="sub">INNER, LEFT — und das Zählen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die beiden Arten, die ihr braucht</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:200px"><col style="width:350px"><col style="width:266px"></colgroup><tr><th>Art</th><th>liefert</th><th>typischer Einsatz</th></tr><tr><td class="b">INNER JOIN</td><td>nur Zeilen mit Partner in beiden Tabellen</td><td>alle belegten Kurse</td></tr><tr><td class="b" style="background:#E6ECF8">LEFT JOIN</td><td>alle Zeilen links, rechts ggf. NULL</td><td>auch Schüler ohne Belegung</td></tr></table><div class="body" style="top:221.05px;height:274.95px"><p class="line l0 step" data-g="0"><b>JOIN</b> allein bedeutet <b>INNER JOIN</b> — die Voreinstellung</p>
+<p class="line l0 step" data-g="1">Ein <b>LEFT JOIN</b> mit <b>WHERE rechts IS NULL</b> findet genau die Zeilen <b>ohne</b> Partner</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Ausblick: Aggregatfunktionen</h3><div class="rules"></div><div class="codepanel"><pre>SELECT COUNT(*) FROM Schueler;
+SELECT COUNT(*) FROM Belegung WHERE note IS NOT NULL;
+SELECT AVG(note) FROM Belegung WHERE knr = 1;
+
+SELECT k.bezeichnung, COUNT(*) AS anzahl
+FROM Kurs k JOIN Belegung b ON k.knr = b.knr
+GROUP BY k.bezeichnung;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Ein JOIN ohne ON-Bedingung ist kein Fehler für das DBMS — es liefert klaglos jede Zeile mit jeder. Deshalb immer die Zeilenzahl prüfen.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: JOIN</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Der <b>Verbund</b> ist eine Operation der Relationenalgebra von <b>Codd</b> (1970)</p>
+<p class="line l0 step" data-g="1">Das <b>kartesische Produkt</b> heißt nach Descartes — es ist der JOIN ohne Bedingung</p>
+<p class="line l0 step" data-g="2">**COUNT(*)<b> zählt Zeilen, </b>COUNT(spalte)** zählt nur Zeilen mit Wert — NULL fällt heraus</p>
+<p class="line l0 step" data-g="3">Deshalb liefern die beiden bei Spalten mit Lücken <b>verschiedene</b> Zahlen</p>
+<p class="line l0 step" data-g="4">Ein <b>JOIN über fünf Tabellen</b> ist in echten Anwendungen völlig normal</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe am Rechner</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Verbindet <b>Schueler und Belegung</b> und gebt Name und Note aus</p>
+<p class="line l0 step" data-g="1">Verbindet <b>alle drei Tabellen</b> und filtert auf einen Kurs</p>
+<p class="line l0 step" data-g="2">Lasst einen JOIN <b>ohne ON</b> laufen und zählt die Zeilen — erklärt die Zahl</p>
+<p class="line l0 step" data-g="3">Findet mit <b>LEFT JOIN</b> alle Schüler <b>ohne</b> Belegung</p>
+<p class="line l0 step" data-g="4">Zählt mit <b>COUNT</b> die Belegungen je Kurs — das brauchen wir in vier Wochen wieder</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

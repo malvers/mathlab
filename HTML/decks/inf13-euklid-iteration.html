@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Der euklidische Algorithmus</title>
+<meta name="description" content="Der älteste Algorithmus der Welt — und wie man iterativ denkt">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-2b50cc368526.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/fog-7228638/" target="_blank" rel="noopener">adege</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 13</p>
+      <h1>Der euklidische Algorithmus</h1>
+      <p class="sub">Der älteste Algorithmus der Welt — und wie man iterativ denkt</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Die Idee</h2>
+      <p class="sub">Größter gemeinsamer Teiler ohne Probieren</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Einfall</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Gesucht ist der <b>größte gemeinsame Teiler</b> zweier Zahlen, kurz ggT</p>
+<p class="line l0 step" data-g="1">Naiv: alle Zahlen von 1 bis zur kleineren durchprobieren — das dauert</p>
+<p class="line l0 step" data-g="2">Euklid: <b>jeder gemeinsame Teiler von a und b teilt auch a − b</b></p>
+<p class="line l0 step" data-g="3">Also darf man die größere Zahl durch die Differenz ersetzen, ohne den ggT zu ändern</p>
+<p class="line l0 step" data-g="4">Moderne Fassung: statt zu subtrahieren nimmt man den <b>Rest der Division</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>ggT(48, 18) von Hand</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:140px"><col style="width:150px"><col style="width:150px"><col style="width:376px"></colgroup><tr><th>Schritt</th><th>a</th><th>b</th><th>a mod b</th></tr><tr><td class="b">1</td><td>48</td><td>18</td><td>12</td></tr><tr><td class="b">2</td><td>18</td><td>12</td><td>6</td></tr><tr><td class="b">3</td><td>12</td><td>6</td><td>0</td></tr><tr><td class="b">Ergebnis</td><td></td><td style="background:#DDE8C6">6</td><td>der letzte Rest ungleich null</td></tr></table><div class="body" style="top:266.375px;height:229.625px"><p class="line l0 step" data-g="0">Man ersetzt <b>a durch b</b> und <b>b durch den Rest</b> — bis der Rest null ist</p>
+<p class="line l0 step" data-g="1">Dann steht der ggT in <b>b</b>. Drei Schritte statt achtzehn Versuche</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Der Algorithmus in Python</h3><div class="rules"></div><div class="codepanel"><pre>def ggt(a, b):
+    while b != 0:
+        a, b = b, a % b     # gleichzeitige Zuweisung
+    return a
+
+print(ggt(48, 18))          # 6
+print(ggt(1071, 462))       # 21</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Iterativ denken</h2>
+      <p class="sub">Vom Einzelfall zur Schleife</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Algorithmus als Struktogramm</h3><div class="rules"></div><div class="body" style="left:72px;width:392px"><p class="line l0 step" data-g="0">Der <b>Rumpf</b> verändert a und b — deshalb endet die Schleife</p>
+<p class="line l0 step" data-g="1">Der Rest wird bei jedem Durchlauf <b>kleiner</b> und ist nie negativ</p>
+<p class="line l0 step" data-g="2">Damit ist bewiesen: der Algorithmus <b>terminiert</b> immer</p>
+<p class="line l0 step" data-g="3">Genau diese Begründung verlangt eine Klausuraufgabe</p></div><img src="img/sg-euklid-inf13.png" alt="" style="position:absolute;left:488px;top:150px;width:400px;height:204.737px"><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Iterative Lösungen systematisch entwickeln</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:180px"><col style="width:636px"></colgroup><tr><th>Schritt</th><th>Frage</th></tr><tr><td class="b">1. Zustand</td><td>Welche Variablen beschreiben den Zwischenstand?</td></tr><tr><td class="b">2. Startwert</td><td>Womit beginnen sie?</td></tr><tr><td class="b">3. Schritt</td><td>Wie kommt man vom Zustand zum nächsten?</td></tr><tr><td class="b" style="background:#FBEBBF">4. Abbruch</td><td>Wann ist man fertig?</td></tr><tr><td class="b">5. Ergebnis</td><td>Wo steht die Antwort am Ende?</td></tr></table><div class="body" style="top:287.65px;height:208.35px"><p class="line l0 step" data-g="0">Beim Euklid: Zustand (a, b), Start die Eingaben, Schritt der Rest, Abbruch b = 0, Ergebnis a</p>
+<p class="line l0 step" data-g="1">Diese fünf Fragen tragen <b>jede</b> iterative Aufgabe</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Üben</h2>
+      <p class="sub">Drei iterative Klassiker</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Drei Aufgaben zum Selbstbauen</h3><div class="rules"></div><div class="codepanel"><pre># 1. Fakultaet iterativ
+def fakultaet(n):
+    ergebnis = 1
+    for i in range(2, n + 1):
+        ergebnis = ergebnis * i
+    return ergebnis
+
+# 2. Quersumme  -&gt; selbst schreiben
+# 3. kgV mit Hilfe des ggT: a * b // ggt(a, b)</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Beim Euklid wird der Rest bei jedem Schritt kleiner und nie negativ. Deshalb endet er — das ist die Begründung, nicht das Gefühl.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Euklid</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Der Algorithmus steht in <b>Euklids Elementen</b>, um 300 v. Chr. — er ist über 2300 Jahre alt</p>
+<p class="line l0 step" data-g="1">Er gilt als der <b>älteste noch benutzte</b> Algorithmus der Welt</p>
+<p class="line l0 step" data-g="2">Der schlechteste Fall sind <b>aufeinanderfolgende Fibonacci-Zahlen</b></p>
+<p class="line l0 step" data-g="3">Die Anzahl der Schritte wächst nur <b>logarithmisch</b> mit der Größe der Zahlen</p>
+<p class="line l0 step" data-g="4">Deshalb rechnet er auch mit tausendstelligen Zahlen in Sekundenbruchteilen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Rechnet <b>ggT(1071, 462)</b> von Hand in einer Tabelle nach</p>
+<p class="line l0 step" data-g="1">Setzt den Algorithmus in Python um und prüft ihn an fünf Paaren</p>
+<p class="line l0 step" data-g="2">Schreibt die <b>Quersumme</b> iterativ — mit den fünf Fragen aus Kapitel 2</p>
+<p class="line l0 step" data-g="3">Berechnet das <b>kgV</b> mit Hilfe eures ggT</p>
+<p class="line l0 step" data-g="4">Begründet in zwei Sätzen, <b>warum</b> der Euklid immer endet</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

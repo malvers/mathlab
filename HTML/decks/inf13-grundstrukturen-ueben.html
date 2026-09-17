@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Verzweigungen und Schleifen im Griff</title>
+<meta name="description" content="Üben in Stufen, von Hand nachrechnen — und die Fallen, in die alle tappen">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-63dd3f10eabe.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/grass-8420611/" target="_blank" rel="noopener">IndigoBunting</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 13</p>
+      <h1>Verzweigungen und Schleifen im Griff</h1>
+      <p class="sub">Üben in Stufen, von Hand nachrechnen — und die Fallen, in die alle tappen</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Kurz aufgefrischt</h2>
+      <p class="sub">Drei Bauformen, mehr gibt es nicht</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Auswahl und Wiederholung auf einen Blick</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:190px"><col style="width:200px"><col style="width:200px"><col style="width:226px"></colgroup><tr><th>Bauform</th><th>Python</th><th>läuft</th><th>typisch für</th></tr><tr><td class="b">einseitige Auswahl</td><td class="m">if Bedingung:</td><td>0- oder 1-mal</td><td>Sonderfall abfangen</td></tr><tr><td class="b">zweiseitige Auswahl</td><td class="m">if … else:</td><td>genau einer der Zweige</td><td>Entweder-oder</td></tr><tr><td class="b">mehrseitige Auswahl</td><td class="m">if … elif … else:</td><td>der erste passende Zweig</td><td>Notenstufen</td></tr><tr><td class="b">Zählschleife</td><td class="m">for i in range(…):</td><td>so oft wie gezählt</td><td>Anzahl steht fest</td></tr><tr><td class="b">bedingte Schleife</td><td class="m">while Bedingung:</td><td>solange sie gilt</td><td>Anzahl steht nicht fest</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Bei <b>elif</b> gewinnt der <b>erste</b> passende Zweig — die Reihenfolge ist Teil der Logik</p>
+<p class="line l0 step" data-g="1">Beide Schleifen sind <b>kopfgesteuert</b>: erst prüfen, dann ausführen, also eventuell <b>null</b> Durchläufe</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Auswahl: der erste passende Zweig gewinnt</h3><div class="rules"></div><div class="codepanel"><pre>punkte = int(input('Punkte (0-60): '))
+
+if punkte &lt; 0 or punkte &gt; 60:      # Sonderfall zuerst abfangen
+    print('Ungueltige Eingabe')
+elif punkte &gt;= 50:                 # ab hier: der erste Treffer gewinnt
+    print('Note 1')
+elif punkte &gt;= 40:
+    print('Note 2')
+elif punkte &gt;= 30:
+    print('Note 3')
+else:                              # alles, was uebrig bleibt
+    print('Note 4')</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Wiederholung: gezählt oder bedingt</h3><div class="rules"></div><div class="codepanel"><pre>for i in range(1, 4):          # Anzahl steht fest: drei Durchlaeufe
+    print('Durchlauf', i)
+
+eingabe = -1                   # vorbereiten, sonst gibt es die Variable nicht
+while eingabe &lt; 0:             # Anzahl steht nicht fest
+    eingabe = int(input('Zahl &gt;= 0: '))
+
+print('Danke:', eingabe)</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Der Schreibtischtest</h2>
+      <p class="sub">Der Kopf ist der schnellste Debugger</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was ein Schreibtischtest ist</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Das Programm <b>von Hand</b> durchlaufen und jede Variable nach jedem Schritt notieren</p>
+<p class="line l0 step" data-g="1">Werkzeug: eine <b>Wertetabelle</b> — eine Spalte je Variable, eine Zeile je Durchlauf</p>
+<p class="line l0 step" data-g="2">Er findet genau die Fehler, die der Rechner <b>ohne Fehlermeldung</b> durchlaufen lässt</p>
+<p class="line l0 step" data-g="3">Und er beantwortet die wichtigste Frage bei jeder Schleife: <b>Warum hört sie auf?</b></p>
+<p class="line l0 step" data-g="4">Wer nicht von Hand nachrechnen kann, hat das Programm <b>nicht verstanden</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Testkandidat: die Summe von 1 bis n</h3><div class="rules"></div><div class="codepanel"><pre>n = 5
+summe = 0
+i = 1
+
+while i &lt;= n:
+    summe = summe + i
+    i = i + 1
+
+print(summe)</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Wertetabelle dazu</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:140px"><col style="width:150px"><col style="width:150px"><col style="width:200px"><col style="width:176px"></colgroup><tr><th>Durchlauf</th><th>i vorher</th><th>i &lt;= 5 ?</th><th>summe nachher</th><th>i nachher</th></tr><tr><td class="b">1</td><td>1</td><td>wahr</td><td>1</td><td>2</td></tr><tr><td class="b">2</td><td>2</td><td>wahr</td><td>3</td><td>3</td></tr><tr><td class="b">3</td><td>3</td><td>wahr</td><td>6</td><td>4</td></tr><tr><td class="b">4</td><td>4</td><td>wahr</td><td>10</td><td>5</td></tr><tr><td class="b">5</td><td>5</td><td>wahr</td><td>15</td><td>6</td></tr><tr><td class="b" style="background:#DDE8C6">—</td><td style="background:#DDE8C6">6</td><td style="background:#DDE8C6">falsch</td><td style="background:#DDE8C6">15</td><td style="background:#DDE8C6">6</td></tr></table><div class="body" style="top:308.925px;height:187.075px"><p class="line l0 step" data-g="0">Die letzte Zeile ist die wichtigste: hier wird die Bedingung <b>falsch</b>, die Schleife endet</p>
+<p class="line l0 step" data-g="1">Ausgabe: <b>15</b>. Und 1+2+3+4+5 ist tatsächlich 15 — der Test bestätigt das Programm</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Dasselbe als Struktogramm</h3><div class="rules"></div><div class="body" style="left:72px;width:392px"><p class="line l0 step" data-g="0">Der <b>Rahmen</b> umschließt genau das, was wiederholt wird</p>
+<p class="line l0 step" data-g="1"><b>i = i + 1</b> steht im Rumpf — nimmt man es heraus, läuft die Schleife ewig</p>
+<p class="line l0 step" data-g="2">Der Zähler wird <b>vor</b> der Schleife gesetzt, das Ergebnis <b>danach</b> ausgegeben</p>
+<p class="line l0 step" data-g="3">Struktogramm und Wertetabelle prüfen dasselbe von zwei Seiten</p></div><img src="img/sg-summe-inf13.png" alt="" style="position:absolute;left:488px;top:150px;width:400px;height:189.143px"><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Die Übungskaskade</h2>
+      <p class="sub">Drei Stufen: nachvollziehen, ergänzen, bauen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wie wir heute üben</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:220px"><col style="width:350px"><col style="width:246px"></colgroup><tr><th>Stufe</th><th>Aufgabe</th><th>was ihr abgebt</th></tr><tr><td class="b">A — nachvollziehen</td><td>fertiges Programm von Hand durchlaufen</td><td>die Wertetabelle</td></tr><tr><td class="b">B — ergänzen</td><td>Lückenprogramm vervollständigen und testen</td><td>die fehlenden Zeilen</td></tr><tr><td class="b">C — bauen</td><td>aus der Beschreibung selbst entwickeln</td><td>Struktogramm und Code</td></tr></table><div class="body" style="top:245.1px;height:250.9px"><p class="line l0 step" data-g="0">Jede Stufe wird <b>erst abgehakt</b>, wenn das Ergebnis stimmt — Stufe C ohne A ist Raten</p>
+<p class="line l0 step" data-g="1"><b>Partnerprogrammierung</b>: einer tippt, einer denkt mit und liest laut. Nach jeder Aufgabe tauschen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Stufe A — was gibt dieses Programm aus?</h3><div class="rules"></div><div class="codepanel"><pre>zahlen = [4, 7, 2, 9, 5]
+groesster = zahlen[0]
+anzahl = 0
+
+for z in zahlen:
+    if z &gt; groesster:
+        groesster = z
+    if z % 2 == 1:
+        anzahl = anzahl + 1
+
+print(groesster, anzahl)</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Stufe B — drei Lücken, drei Entscheidungen</h3><div class="rules"></div><div class="codepanel"><pre># Gesucht: die kleinste Zahl und wie viele Zahlen unter 5 liegen.
+zahlen = [8, 3, 6, 1, 9, 4]
+kleinster = ____
+unter5 = 0
+
+for z in zahlen:
+    if z ____ kleinster:
+        kleinster = z
+    if z &lt; 5:
+        ____
+
+print(kleinster, unter5)</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Stufe C — selbst entwickeln</h3><div class="rules"></div><div class="codepanel"><pre># Eingabe: beliebig viele Noten, Abbruch mit 0.
+# Ausgabe: Anzahl, Mittelwert und beste Note.
+#
+# 1. Welche Schleifenart? Steht die Anzahl vorher fest?
+# 2. Welche Variablen muessen VOR der Schleife existieren?
+# 3. Womit startet die beste Note - und warum nicht mit 0?
+# 4. Was passiert, wenn die erste Eingabe schon 0 ist?</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>Die üblichen Fallen</h2>
+      <p class="sub">Fünf Fehler, die jeder einmal macht</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Symptom, Ursache, Gegenmittel</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:230px"><col style="width:320px"><col style="width:266px"></colgroup><tr><th>Symptom</th><th>Ursache</th><th>Gegenmittel</th></tr><tr><td class="b" style="background:#F2CFCB">Schleife läuft ewig</td><td>im Rumpf ändert sich die Bedingung nie</td><td>Zählerzeile suchen</td></tr><tr><td class="b" style="background:#FBEBBF">einmal zu oft oder zu wenig</td><td>Zaunpfahlfehler bei range oder &lt;=</td><td>Wertetabelle für 1 und n</td></tr><tr><td class="b" style="background:#FBEBBF">falscher Zweig</td><td>elif-Reihenfolge falsch herum</td><td>Grenzfälle einzeln prüfen</td></tr><tr><td class="b">Syntaxfehler bei if</td><td>= statt == geschrieben</td><td>= zuweisen, == vergleichen</td></tr><tr><td class="b" style="background:#FBEBBF">Zeile läuft nie mit</td><td>Einrückung außerhalb des Blocks</td><td>Einrückung mitlesen</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Alle fünf findet ein Schreibtischtest — der Rechner meldet nur die vierte</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Falle 1 und 2 im Original</h3><div class="rules"></div><div class="codepanel"><pre># Endlosschleife: i wird nie groesser
+i = 1
+while i &lt;= 10:
+    print(i)
+
+# Zaunpfahlfehler: laeuft nur bis 9, nicht bis 10
+for i in range(1, 10):
+    print(i)
+
+# richtig:
+for i in range(1, 11):
+    print(i)</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Wer ein Programm nicht von Hand nachrechnen kann, hat es nicht verstanden. Der Schreibtischtest ist billiger als jede Fehlersuche im laufenden Code.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Auswahl und Wiederholung</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Böhm und Jacopini</b> bewiesen 1966: Folge, Auswahl und Wiederholung genügen für <b>jeden</b> Algorithmus</p>
+<p class="line l0 step" data-g="1"><b>Dijkstra</b> schrieb 1968 „Go To Statement Considered Harmful“ — der Anfang vom Ende des Sprungbefehls</p>
+<p class="line l0 step" data-g="2">Der erste dokumentierte <b>Bug</b> war 1947 eine echte Motte im Relais des Harvard Mark II, eingeklebt ins Logbuch</p>
+<p class="line l0 step" data-g="3">Python kennt <b>kein do-while</b> — die fußgesteuerte Schleife baut man mit while True und break</p>
+<p class="line l0 step" data-g="4">Python-Schleifen dürfen ein <b>else</b> haben: es läuft, wenn die Schleife <b>ohne break</b> endet</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: die Kaskade durchlaufen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Stufe A</b>: das Programm aus Kapitel 3 von Hand durchlaufen, Wertetabelle abgeben</p>
+<p class="line l0 step" data-g="1"><b>Stufe B</b>: die drei Lücken füllen, in Thonny testen, Ergebnis mit der Tabelle vergleichen</p>
+<p class="line l0 step" data-g="2"><b>Stufe C</b>: die Notenauswertung selbst bauen — erst Struktogramm, dann Code</p>
+<p class="line l0 step" data-g="3">Zu jeder Schleife den Satz aufschreiben: <b>Diese Schleife hört auf, weil …</b></p>
+<p class="line l0 step" data-g="4"><b>Partnerprogrammierung</b>: nach jeder Aufgabe Rollen tauschen, beide geben ab</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

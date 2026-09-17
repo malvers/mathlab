@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fragen statt suchen</title>
+<meta name="description" content="SQL als deklarative Sprache: Selektion, Projektion und zusammengesetzte Bedingungen">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-038f4b571b96.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/coffee-4597416/" target="_blank" rel="noopener">fotografierende</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 12</p>
+      <h1>Fragen statt suchen</h1>
+      <p class="sub">SQL als deklarative Sprache: Selektion, Projektion und zusammengesetzte Bedingungen</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Deklarativ</h2>
+      <p class="sub">Was, nicht wie</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Zwei Arten, dasselbe zu verlangen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:400px"><col style="width:416px"></colgroup><tr><th>imperativ</th><th>deklarativ</th></tr><tr><td class="b">Öffne die Tabelle</td><td style="background:#DDE8C6">SELECT name</td></tr><tr><td class="b">Gehe Zeile für Zeile durch</td><td style="background:#DDE8C6">FROM Schueler</td></tr><tr><td class="b">Prüfe, ob klasse = BGY25</td><td style="background:#DDE8C6">WHERE klasse = 'BGY25'</td></tr><tr><td class="b">Merke dir den Namen</td><td></td></tr><tr><td class="b">Wiederhole bis zum Ende</td><td></td></tr></table><div class="body" style="top:287.65px;height:208.35px"><p class="line l0 step" data-g="0">Bei SQL beschreibt man <b>das Ergebnis</b>, nicht den Weg dorthin</p>
+<p class="line l0 step" data-g="1">Den Weg sucht der <b>Abfrageoptimierer</b> — und er kennt Indexe und Statistiken</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was das praktisch heißt</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Dieselbe Abfrage läuft auf <b>100 und auf 100 Millionen</b> Zeilen — der Text bleibt gleich</p>
+<p class="line l0 step" data-g="1">Wird ein <b>Index</b> angelegt, wird sie schneller, ohne dass jemand sie ändert</p>
+<p class="line l0 step" data-g="2">Man kann nicht steuern, in welcher Reihenfolge das DBMS prüft — und muss es auch nicht</p>
+<p class="line l0 step" data-g="3">Aber: eine schlecht formulierte Bedingung kann den Index <b>unbrauchbar</b> machen</p>
+<p class="line l0 step" data-g="4">Deshalb lohnt es sich, die Abfrage <b>einfach</b> zu halten</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Bedingungen</h2>
+      <p class="sub">WHERE in allen Varianten</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Vergleiche und Bereiche</h3><div class="rules"></div><div class="codepanel"><pre>SELECT * FROM Kurs WHERE stunden &gt; 2;
+SELECT * FROM Kurs WHERE stunden BETWEEN 2 AND 4;
+SELECT * FROM Schueler WHERE klasse &lt;&gt; 'BGY25';
+SELECT * FROM Schueler WHERE klasse IN ('BGY24', 'BGY25');
+SELECT * FROM Kurs WHERE bezeichnung LIKE 'Info%';
+SELECT * FROM Belegung WHERE note IS NULL;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Operatoren im Überblick</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:180px"><col style="width:300px"><col style="width:336px"></colgroup><tr><th>Operator</th><th>bedeutet</th><th>Beispiel</th></tr><tr><td class="b m">= &lt;&gt; &lt; &gt; &lt;= &gt;=</td><td>Vergleiche</td><td class="m">stunden &gt;= 3</td></tr><tr><td class="b m">BETWEEN … AND</td><td>Bereich, Grenzen eingeschlossen</td><td class="m">note BETWEEN 1 AND 3</td></tr><tr><td class="b m">IN (…)</td><td>einer aus einer Liste</td><td class="m">klasse IN ('BGY24','BGY25')</td></tr><tr><td class="b m">LIKE</td><td>Textmuster, % und _</td><td class="m">name LIKE 'M%'</td></tr><tr><td class="b m" style="background:#FBEBBF">IS NULL</td><td>kein Wert vorhanden</td><td class="m">note IS NULL</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0"><b>%</b> steht für beliebig viele Zeichen, <b>_</b> für genau eines</p>
+<p class="line l0 step" data-g="1"><b>BETWEEN</b> schließt beide Grenzen ein — das wird oft falsch erinnert</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Bedingungen verknüpfen</h3><div class="rules"></div><div class="codepanel"><pre>SELECT name, vorname FROM Schueler
+WHERE klasse = 'BGY25' AND geburt &lt; '2010-01-01';
+
+SELECT * FROM Kurs
+WHERE stunden &gt; 3 OR lehrkraft = 'Alvers';
+
+-- Klammern setzen, sobald AND und OR gemischt werden:
+SELECT * FROM Kurs
+WHERE (stunden &gt; 3 OR lehrkraft = 'Alvers') AND knr &lt; 100;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Die Fallen</h2>
+      <p class="sub">AND, OR und die leere Menge</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum AND und OR verwechselt werden</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Umgangssprachlich: „alle Schüler aus <b>BGY24 und BGY25</b>“</p>
+<p class="line l0 step" data-g="1">In SQL heißt das <b>OR</b> — kein Schüler ist in beiden Klassen gleichzeitig</p>
+<p class="line l0 step" data-g="2"><b>AND</b> verkleinert die Treffermenge, <b>OR</b> vergrößert sie</p>
+<p class="line l0 step" data-g="3">Null Zeilen zurück? Meist ein <b>AND</b> zu viel oder ein Tippfehler im Text</p>
+<p class="line l0 step" data-g="4">Alle Zeilen zurück? Meist ein <b>OR</b> zu viel oder eine immer wahre Bedingung</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Ohne Klammern rechnet SQL so</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:330px"><col style="width:486px"></colgroup><tr><th>Geschrieben</th><th>gemeint vom DBMS</th></tr><tr><td class="b m">A OR B AND C</td><td>A OR (B AND C) — AND bindet stärker</td></tr><tr><td class="b m">NOT A AND B</td><td>(NOT A) AND B</td></tr></table><div class="body" style="top:223.825px;height:272.175px"><p class="line l0 step" data-g="0">Das ist wie <b>Punkt vor Strich</b> — und genauso leicht zu übersehen</p>
+<p class="line l0 step" data-g="1">Faustregel: sobald <b>AND und OR</b> gemeinsam vorkommen, <b>Klammern setzen</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">AND verkleinert, OR vergrößert. Und wenn beide vorkommen, gehören Klammern hin — auch dann, wenn es ohne stimmt.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Abfragen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">SQL ist <b>deklarativ</b> — dieselbe Idee steckt in HTML, CSS und Prolog</p>
+<p class="line l0 step" data-g="1">Der <b>Abfrageoptimierer</b> wählt aus oft Millionen möglicher Ausführungspläne</p>
+<p class="line l0 step" data-g="2">Mit <b>EXPLAIN</b> vor der Abfrage zeigt das DBMS den gewählten Plan</p>
+<p class="line l0 step" data-g="3"><b>LIKE '%text%'</b> kann keinen Index nutzen — es muss jede Zeile lesen</p>
+<p class="line l0 step" data-g="4">Deshalb gibt es für die Textsuche eigene Verfahren, etwa Volltextindexe</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe am Rechner</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Formuliert <b>acht Abfragen</b> auf der Beispieldatenbank, je eine je Operator</p>
+<p class="line l0 step" data-g="1">Schreibt zu jeder <b>vorher</b> hin, wie viele Zeilen ihr erwartet</p>
+<p class="line l0 step" data-g="2">Baut eine Abfrage mit <b>AND und OR</b> und setzt die Klammern bewusst</p>
+<p class="line l0 step" data-g="3">Lasst dieselbe Abfrage <b>ohne</b> Klammern laufen und erklärt den Unterschied</p>
+<p class="line l0 step" data-g="4">Findet eine Abfrage, die <b>null</b> Zeilen liefert, und erklärt warum</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

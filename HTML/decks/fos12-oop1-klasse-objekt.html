@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Objektorientierte Programmierung I</title>
+<meta name="description" content="Wahlbereich 2: Klasse, Objekt, Attribut, Methode">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-036c2f3a8ea9.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/sunrise-9631245/" target="_blank" rel="noopener">ChiemSeherin</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — FOS 12</p>
+      <h1>Objektorientierte Programmierung I</h1>
+      <p class="sub">Wahlbereich 2: Klasse, Objekt, Attribut, Methode</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Ein neuer Blick</h2>
+      <p class="sub">Daten und Verhalten gehören zusammen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wo die bisherige Art an Grenzen stößt</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Bisher: <b>Daten</b> liegen in Variablen, <b>Verhalten</b> steckt in Funktionen — getrennt</p>
+<p class="line l0 step" data-g="1">Ein Auto braucht marke, tempo, tueren … und beschleunigen(), bremsen(), hupen()</p>
+<p class="line l0 step" data-g="2">Für <b>drei</b> Autos bräuchte man neun Variablen und Funktionen mit vielen Parametern</p>
+<p class="line l0 step" data-g="3">Die <b>Objektorientierung</b> packt beides zusammen: ein Objekt <b>weiß</b> etwas und <b>kann</b> etwas</p>
+<p class="line l0 step" data-g="4">Damit modelliert man die Wirklichkeit, statt sie in Einzelteile zu zerlegen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Zwei Denkweisen im Vergleich</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:160px"><col style="width:320px"><col style="width:336px"></colgroup><tr><th></th><th>prozedural (LB 2)</th><th>objektorientiert</th></tr><tr><td class="b">Bausteine</td><td class="m">Variablen und Funktionen</td><td class="m">Klassen und Objekte</td></tr><tr><td class="b">Zusammenhalt</td><td class="m">der Programmierer merkt ihn sich</td><td class="m">die Klasse hält ihn fest</td></tr><tr><td class="b">Aufruf</td><td class="m">beschleunigen(tempo, wert)</td><td class="m">auto.beschleunigen(wert)</td></tr><tr><td class="b">Erweitern</td><td class="m">neue Funktion schreiben</td><td class="m">neue Klasse ableiten</td></tr><tr><td class="b">gut für</td><td class="m">kurze, klare Abläufe</td><td class="m">viele gleichartige Dinge</td></tr></table><div class="body" style="top:287.65px;height:208.35px"><p class="line l0 step" data-g="0">Beides ist richtig — die Frage ist <b>was passt zum Problem</b></p>
+<p class="line l0 step" data-g="1">OOP lohnt sich, sobald es <b>viele gleichartige Dinge</b> mit eigenem Zustand gibt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Klasse und Objekt</h2>
+      <p class="sub">Der Bauplan und das gebaute Ding</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die vier Grundbegriffe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Klasse</b> = der Bauplan. Sie beschreibt, was alle Dinge dieser Art haben und können</p>
+<p class="line l0 step" data-g="1"><b>Objekt</b> (Instanz) = ein konkretes Ding nach diesem Bauplan — mit eigenen Werten</p>
+<p class="line l0 step" data-g="2"><b>Attribut</b> = eine Eigenschaft des Objekts, seine Daten (marke, tempo)</p>
+<p class="line l0 step" data-g="3"><b>Methode</b> = eine Fähigkeit des Objekts, seine Funktion (beschleunigen())</p>
+<p class="line l0 step" data-g="4">Bild dazu: der <b>Bauplan eines Hauses</b> ist die Klasse, die gebauten Häuser sind Objekte</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eine Klasse im UML-Diagramm</h3><div class="rules"></div><div class="pic"><img src="img/uml-auto.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Drei Fächer: <b>Name</b> oben, <b>Attribute</b> in der Mitte, <b>Methoden</b> unten</p>
+<p class="line l0 step" data-g="1">Das Diagramm ist <b>sprachunabhängig</b> — daraus wird Python, Java oder C++</p>
+<p class="line l0 step" data-g="2">Es beschreibt <b>eine</b> Klasse und damit <b>beliebig viele</b> Objekte</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Dieselbe Klasse in Python</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:11.5px">class Auto:
+    def __init__(self, marke, tueren):   # Konstruktor
+        self.marke = marke               # Attribute anlegen
+        self.tempo = 0
+        self.tueren = tueren
+
+    def beschleunigen(self, wert):
+        self.tempo = self.tempo + wert
+
+    def bremsen(self):
+        self.tempo = 0
+
+    def zeige(self):
+        print(f'{self.marke}: {self.tempo} km/h, {self.tueren} Tueren')</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Objekte erzeugen und benutzen</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:11.5px">a1 = Auto('Fiat', 3)        # Objekt 1 - der Konstruktor laeuft
+a2 = Auto('Volvo', 5)       # Objekt 2 - voellig eigene Attribute
+
+a1.beschleunigen(50)
+a1.beschleunigen(30)
+a2.beschleunigen(120)
+
+a1.zeige()                  # Fiat: 80 km/h, 3 Tueren
+a2.zeige()                  # Volvo: 120 km/h, 5 Tueren
+
+a1.bremsen()
+a1.zeige()                  # Fiat: 0 km/h, 3 Tueren
+print(a2.tempo)             # 120 - Attribut direkt lesen</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was in dem Code steckt</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:220px"><col style="width:200px"><col style="width:396px"></colgroup><tr><th>Schreibweise</th><th>heißt</th><th>Bedeutung</th></tr><tr><td class="b m">class Auto:</td><td>Klassendefinition</td><td>der Bauplan wird bekannt gemacht</td></tr><tr><td class="b m">__init__</td><td>Konstruktor</td><td>läuft automatisch beim Erzeugen</td></tr><tr><td class="b m">self</td><td>das eigene Objekt</td><td>unterscheidet a1 von a2</td></tr><tr><td class="b m">self.marke = marke</td><td>Attribut setzen</td><td>der Wert gehört ab jetzt zum Objekt</td></tr><tr><td class="b m">a1 = Auto('Fiat', 3)</td><td>Instanziierung</td><td>ein neues Objekt entsteht</td></tr><tr><td class="b m">a1.beschleunigen(50)</td><td>Botschaft senden</td><td>das Objekt führt seine Methode aus</td></tr></table><div class="body" style="top:302.45px;height:193.55px"><p class="line l0 step" data-g="0"><b>self</b> ist kein Zauberwort, sondern der <b>erste Parameter</b> jeder Methode — Python setzt ihn beim Aufruf selbst ein</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Modellieren</h2>
+      <p class="sub">Vom Text zur Klasse</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Rezept: Substantive und Verben unterstreichen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:220px"><col style="width:200px"><col style="width:396px"></colgroup><tr><th>im Aufgabentext</th><th>wird zu</th><th>Beispiel Bibliothek</th></tr><tr><td class="b">Substantiv (Ding)</td><td>Klasse</td><td>Buch, Leser, Ausleihe</td></tr><tr><td class="b">Eigenschaft davon</td><td>Attribut</td><td>titel, isbn, ausgeliehen</td></tr><tr><td class="b">Verb (Tätigkeit)</td><td>Methode</td><td>ausleihen(), zurueckgeben()</td></tr><tr><td class="b">konkretes Exemplar</td><td>Objekt</td><td>das Buch mit ISBN 978-3-…</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Erst <b>Substantive</b> markieren, dann prüfen: ist das ein eigenständiges Ding oder nur eine Eigenschaft?</p>
+<p class="line l0 step" data-g="1">„Der Leser <b>leiht</b> ein Buch <b>aus</b>“ → Methode ausleihen() bei Buch <b>oder</b> bei Leser — beides begründbar</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Ein kleines Modell</h3><div class="rules"></div><div class="pic"><img src="img/uml-bibliothek.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Die <b>Linie</b> zwischen den Klassen ist eine <b>Assoziation</b> — hier: ein Leser leiht Bücher aus</p>
+<p class="line l0 step" data-g="1">Das erinnert nicht zufällig an das <b>ER-Modell</b> aus Lernbereich 1: Entität und Klasse sind verwandt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Und in Python</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:10.5px">class Buch:
+    def __init__(self, titel, isbn):
+        self.titel = titel
+        self.isbn = isbn
+        self.ausgeliehen = False
+
+    def ausleihen(self):
+        if self.ausgeliehen:
+            print('Schon ausgeliehen.')
+            return False
+        self.ausgeliehen = True
+        return True
+
+b = Buch('Der Prozess', '978-3-15-000001')
+print(b.ausleihen())    # True
+print(b.ausleihen())    # Schon ausgeliehen. / False</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Die Klasse ist der Bauplan, das Objekt ist das gebaute Ding. Attribute sind, was es weiß — Methoden sind, was es kann.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: OOP</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Simula 67</b> aus Oslo war die erste objektorientierte Sprache — gebaut, um Warteschlangen zu simulieren</p>
+<p class="line l0 step" data-g="1"><b>Alan Kay</b> prägte den Begriff „object-oriented“ und meinte damit vor allem das <b>Senden von Botschaften</b></p>
+<p class="line l0 step" data-g="2"><b>Smalltalk</b> (1972) machte alles zum Objekt — sogar die Zahl 3 und die Klasse selbst</p>
+<p class="line l0 step" data-g="3">In Python ist wirklich <b>alles</b> ein Objekt: probiert einmal (3).bit_length() aus</p>
+<p class="line l0 step" data-g="4"><b>self</b> heißt in Java und C++ <b>this</b> — dieselbe Idee, anderes Wort</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: die erste eigene Klasse</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Schreibt eine Klasse <b>Schueler</b> mit den Attributen name, klasse und einer Liste noten</p>
+<p class="line l0 step" data-g="1">Methoden: <b>note_hinzufuegen(note)</b>, <b>schnitt()</b> und <b>zeige()</b></p>
+<p class="line l0 step" data-g="2">Erzeugt drei Objekte, tragt Noten ein und lasst euch alle Schnitte ausgeben</p>
+<p class="line l0 step" data-g="3">Zeichnet vorher das <b>UML-Klassendiagramm</b> — Name, Attribute, Methoden</p>
+<p class="line l0 step" data-g="4">Zusatz: eine Klasse <b>Konto</b> mit einzahlen(), abheben() — und Abheben nur, wenn Deckung da ist</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

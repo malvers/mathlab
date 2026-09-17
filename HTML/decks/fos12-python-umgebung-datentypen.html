@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Werkstatt und Werkstoff</title>
+<meta name="description" content="Programmierumgebung, Variablen und Datentypen in Python">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-6cf33ed36294.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/lighthouse-2707528/" target="_blank" rel="noopener">Pixabay</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — FOS 12</p>
+      <h1>Werkstatt und Werkstoff</h1>
+      <p class="sub">Programmierumgebung, Variablen und Datentypen in Python</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Die Werkstatt</h2>
+      <p class="sub">Vier Werkzeuge, und wozu jedes gut ist</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was in einer Programmierumgebung steckt</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:160px"><col style="width:240px"><col style="width:416px"></colgroup><tr><th>Werkzeug</th><th>Aufgabe</th><th>was ihr davon habt</th></tr><tr><td class="b">Editor</td><td>Programmtext schreiben</td><td>Farben, Einrückhilfe, Fehler schon beim Tippen</td></tr><tr><td class="b">Interpreter</td><td>Zeile für Zeile ausführen</td><td>das Programm läuft</td></tr><tr><td class="b">Konsole (REPL)</td><td>einzelne Zeilen sofort testen</td><td>ausprobieren ohne Datei</td></tr><tr><td class="b">Debugger</td><td>Schritt für Schritt anhalten</td><td>sehen, was die Variablen gerade enthalten</td></tr></table><div class="body" style="top:266.375px;height:229.625px"><p class="line l0 step" data-g="0">Wir arbeiten mit <b>Thonny</b> (schlank, mit sichtbaren Variablen) oder <b>VS Code</b></p>
+<p class="line l0 step" data-g="1">Eine Programmdatei endet auf <b>.py</b> und ist reiner <b>Text</b> — kein Word-Dokument</p>
+<p class="line l0 step" data-g="2">Der <b>Debugger</b> ist das unterschätzteste Werkzeug: er beantwortet „warum tut es das?“</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Das erste Programm</h3><div class="rules"></div><div class="codepanel"><pre># hallo.py - ausfuehren mit F5
+print('Hallo FOS 12!')
+
+name = input('Wie heisst du? ')
+print('Guten Morgen,', name)
+
+# Die Konsole zeigt:
+#   Hallo FOS 12!
+#   Wie heisst du? Lena
+#   Guten Morgen, Lena</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Drei Regeln, die Python ernst meint</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Einrückung</b> ist Syntax: vier Leerzeichen, immer gleich viele — nicht Geschmack, sondern Struktur</p>
+<p class="line l0 step" data-g="1"><b>Groß- und Kleinschreibung</b> zählt: <b>Name</b> und <b>name</b> sind zwei verschiedene Variablen</p>
+<p class="line l0 step" data-g="2">Ein <b>Doppelpunkt</b> kündigt einen eingerückten Block an: nach if, else, for, while, def</p>
+<p class="line l0 step" data-g="3">Kommentare beginnen mit <b>#</b> — sie sind für Menschen, der Interpreter überliest sie</p>
+<p class="line l0 step" data-g="4">Fehlermeldungen <b>von unten nach oben</b> lesen: die letzte Zeile sagt, was los ist</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Variablen</h2>
+      <p class="sub">Ein Name für einen Platz im Speicher</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Zuweisung ist keine Gleichung</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0"><b>In der Mathematik</b></p>
+<p class="col l1 step" data-g="0">x = x + 1 ist eine falsche Aussage</p>
+<p class="col l1 step" data-g="0">Das Gleichheitszeichen behauptet etwas</p>
+<p class="col l1 step" data-g="0">x steht für einen festen Wert</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1"><b>Im Programm</b></p>
+<p class="col l1 step" data-g="1">x = x + 1 ist ein Befehl</p>
+<p class="col l1 step" data-g="1">Rechte Seite ausrechnen, links hineinlegen</p>
+<p class="col l1 step" data-g="1">x ist ein Behälter, sein Inhalt ändert sich</p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Was beim Zuweisen passiert</h3><div class="rules"></div><div class="codepanel"><pre>punkte = 40        # in punkte liegt jetzt 40
+punkte = punkte + 12   # rechts 52 ausrechnen, links hineinlegen
+print(punkte)      # 52
+
+a = 3
+b = a              # b bekommt eine Kopie des Wertes
+a = 99             # b bleibt 3 !
+print(a, b)        # 99 3</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Namen vergeben — Regeln und guter Stil</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:190px"><col style="width:290px"><col style="width:336px"></colgroup><tr><th>Regel</th><th>erlaubt</th><th>verboten / schlecht</th></tr><tr><td class="b">Zeichen</td><td>Buchstaben, Ziffern, _</td><td style="background:#F2CFCB">Leerzeichen, Umlaute, Bindestrich</td></tr><tr><td class="b">Anfang</td><td>Buchstabe oder _</td><td style="background:#F2CFCB">Ziffer: 2note</td></tr><tr><td class="b">Schlüsselwörter</td><td>note, summe, anzahl</td><td style="background:#F2CFCB">if, for, class, print</td></tr><tr><td class="b">Stil</td><td>sprechend: mittelwert</td><td style="background:#F2CFCB">nichtssagend: x1, aaa, wert2</td></tr></table><div class="body" style="top:266.375px;height:229.625px"><p class="line l0 step" data-g="0">Ein guter Name spart einen Kommentar: <b>anzahl_schueler</b> statt <b>n</b></p>
+<p class="line l0 step" data-g="1">Python-Konvention: <b>klein_mit_unterstrich</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Einfache Datentypen</h2>
+      <p class="sub">Vier Sorten Werte — und ihre Fallen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die vier Grundtypen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:90px"><col style="width:190px"><col style="width:240px"><col style="width:296px"></colgroup><tr><th>Typ</th><th>wofür</th><th>Beispiel</th><th>typische Falle</th></tr><tr><td class="b">int</td><td>ganze Zahlen</td><td class="m">punkte = 47</td><td style="background:#FBEBBF">7 / 2 ergibt 3.5, nicht 3</td></tr><tr><td class="b">float</td><td>Kommazahlen</td><td class="m">note = 2.3</td><td style="background:#FBEBBF">0.1 + 0.2 ist nicht genau 0.3</td></tr><tr><td class="b">str</td><td>Text</td><td class="m">name = 'Lena'</td><td style="background:#FBEBBF">'2' + '3' ergibt '23'</td></tr><tr><td class="b">bool</td><td>wahr / falsch</td><td class="m">bestanden = True</td><td style="background:#FBEBBF">True und true sind nicht dasselbe</td></tr></table><div class="body" style="top:266.375px;height:229.625px"><p class="line l0 step" data-g="0">Python kennt den Typ <b>automatisch</b> — abfragen mit <b>type(x)</b></p>
+<p class="line l0 step" data-g="1">Umwandeln nennt man <b>Typkonvertierung</b>: int('42'), str(7), float('2.5')</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Die Falle bei jeder Eingabe</h3><div class="rules"></div><div class="codepanel"><pre>alter = input('Wie alt bist du? ')   # input liefert IMMER Text!
+print(alter + 1)                     # TypeError: can only concatenate str
+
+alter = int(input('Wie alt bist du? '))   # so ist es richtig
+print(alter + 1)                     # 18
+
+print(7 / 2)    # 3.5   normale Division, immer float
+print(7 // 2)   # 3     ganzzahlige Division
+print(7 % 2)    # 1     Rest - erkennt gerade/ungerade
+print(2 ** 10)  # 1024  Potenz</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">input() liefert immer Text. Wer damit rechnen will, muss ihn erst mit int() oder float() umwandeln.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>Strukturierte Typen</h2>
+      <p class="sub">Wenn ein Wert nicht mehr reicht</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Vier Behälter für viele Werte</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:120px"><col style="width:210px"><col style="width:220px"><col style="width:266px"></colgroup><tr><th>Typ</th><th>Schreibweise</th><th>Eigenschaft</th><th>wofür in unseren Aufgaben</th></tr><tr><td class="b">Liste</td><td class="m">noten = [2, 1, 3]</td><td>geordnet, änderbar</td><td>Messreihen, Namen, Punkte</td></tr><tr><td class="b">Tupel</td><td class="m">punkt = (3, 7)</td><td>geordnet, unveränderlich</td><td>Koordinaten, feste Paare</td></tr><tr><td class="b">Dictionary</td><td class="m">d = {'Lena': 2}</td><td>Schlüssel → Wert</td><td>Zuordnungen wie Name → Note</td></tr><tr><td class="b">Menge</td><td class="m">m = {1, 2, 3}</td><td>ohne Reihenfolge, ohne Doppelte</td><td>Doppelte entfernen</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0"><b>Index ab 0</b>: noten[0] ist die erste Note, noten[-1] die letzte</p>
+<p class="line l0 step" data-g="1">Länge mit <b>len()</b>, anhängen mit <b>.append()</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Listen in Aktion</h3><div class="rules"></div><div class="codepanel"><pre>noten = [2, 1, 3, 2, 4]
+print(len(noten))        # 5
+print(noten[0], noten[-1])   # 2 4
+
+noten.append(1)          # ans Ende anhaengen
+print(sum(noten) / len(noten))   # Mittelwert: 2.1666...
+print(round(sum(noten) / len(noten), 2))   # 2.17
+
+print(min(noten), max(noten), sorted(noten))
+# 1 4 [1, 1, 2, 2, 3, 4]</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Datentypen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>0.1 + 0.2 == 0.3</b> ist in fast jeder Sprache <b>False</b> — Kommazahlen werden binär gespeichert und passen nicht genau</p>
+<p class="line l0 step" data-g="1">Deshalb rechnen Banken mit <b>Ganzzahlen in Cent</b>, nicht mit float</p>
+<p class="line l0 step" data-g="2">Der <b>Ariane-5</b>-Absturz 1996 (370 Mio. $) entstand, weil eine 64-Bit-Kommazahl in 16 Bit gequetscht wurde</p>
+<p class="line l0 step" data-g="3">Python-Ganzzahlen haben <b>keine Obergrenze</b> — 2**1000 rechnet es klaglos aus</p>
+<p class="line l0 step" data-g="4">Das Wort <b>Bug</b> für Programmfehler ist älter als der Computer: Edison benutzte es 1878 für Störungen in Geräten</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: Notenrechner, Stufe 1</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Programm <b>noten.py</b>: fragt fünf Punktzahlen ab und speichert sie in einer <b>Liste</b></p>
+<p class="line l0 step" data-g="1">Gebt <b>Summe</b>, <b>Mittelwert</b> (auf 2 Stellen gerundet), <b>Minimum</b> und <b>Maximum</b> aus</p>
+<p class="line l0 step" data-g="2">Achtet auf die <b>Typkonvertierung</b> bei jeder Eingabe</p>
+<p class="line l0 step" data-g="3">Testet mit 0, 0, 0, 0, 0 und mit 100, 100, 100, 100, 100 — kommt Sinnvolles heraus?</p>
+<p class="line l0 step" data-g="4">Zusatz: Lasst euch mit <b>type()</b> zu jedem Wert den Typ ausgeben und erklärt das Ergebnis</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

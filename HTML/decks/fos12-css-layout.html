@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CSS</title>
+<meta name="description" content="Statische Webseiten II: Inhalt und Layout sauber trennen">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-6560a60ba0d7.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/breakfast-6526807/" target="_blank" rel="noopener">blandinejoannic</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — FOS 12</p>
+      <h1>CSS</h1>
+      <p class="sub">Statische Webseiten II: Inhalt und Layout sauber trennen</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Trennung</h2>
+      <p class="sub">HTML sagt was, CSS sagt wie</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum Gestaltung nicht ins HTML gehört</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Ein</b> Stylesheet gestaltet <b>alle</b> Seiten — eine Änderung, überall sichtbar</p>
+<p class="line l0 step" data-g="1">Der Quelltext bleibt lesbar: Struktur hier, Aussehen dort</p>
+<p class="line l0 step" data-g="2">Dieselbe Seite kann <b>anders aussehen</b> je nach Gerät — Handy, Bildschirm, Druck</p>
+<p class="line l0 step" data-g="3">Barrierefreiheit: wer eine eigene Darstellung braucht, ersetzt einfach das CSS</p>
+<p class="line l0 step" data-g="4">Fachwort: <b>Separation of Concerns</b> — jedes Werkzeug für seine Aufgabe</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Drei Wege, CSS einzubinden</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:110px"><col style="width:330px"><col style="width:376px"></colgroup><tr><th>Weg</th><th>Schreibweise</th><th>Bewertung</th></tr><tr><td class="b">inline</td><td class="m">&lt;p style="color: red"&gt;</td><td style="background:#F2CFCB">nur im Notfall — Gestaltung klebt am Inhalt</td></tr><tr><td class="b">intern</td><td class="m">&lt;style&gt; … &lt;/style&gt; im head</td><td style="background:#FBEBBF">für eine einzelne Testseite</td></tr><tr><td class="b">extern</td><td class="m">&lt;link rel="stylesheet" href="stil.css"&gt;</td><td style="background:#DDE8C6">so machen wir es — eine Datei für alles</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Im Projekt gilt: <b>eine</b> Datei stil.css, in <b>jeder</b> Seite verlinkt</p>
+<p class="line l0 step" data-g="1">Das ist auch die Antwort auf „warum sieht Seite 3 anders aus?“ — sie tut es dann nämlich nicht</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Selektoren</h2>
+      <p class="sub">Wen soll die Regel treffen?</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Der Aufbau einer Regel</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:10.5px">/* Selektor { Eigenschaft: Wert; } */
+
+h1 {
+    color: #0e244e;
+    font-size: 2rem;
+}
+
+.karte {
+    background: #ffffff;
+    border: 1px solid #b0c4e2;
+    padding: 16px;
+}
+
+nav a:hover {
+    color: #b02418;
+}</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die wichtigsten Selektoren</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:140px"><col style="width:330px"><col style="width:346px"></colgroup><tr><th>Selektor</th><th>trifft</th><th>im HTML</th></tr><tr><td class="b m">p</td><td>alle Absätze</td><td class="m">&lt;p&gt;…&lt;/p&gt;</td></tr><tr><td class="b m">.karte</td><td>alles mit dieser Klasse</td><td class="m">&lt;div class="karte"&gt;</td></tr><tr><td class="b m">#kopf</td><td>das eine Element mit dieser id</td><td class="m">&lt;header id="kopf"&gt;</td></tr><tr><td class="b m">nav a</td><td>alle Links innerhalb der Navigation</td><td class="m">&lt;nav&gt;&lt;a&gt;…&lt;/a&gt;&lt;/nav&gt;</td></tr><tr><td class="b m">a:hover</td><td>Link, während die Maus darauf liegt</td><td class="m">—</td></tr><tr><td class="b m">h1, h2</td><td>beide zugleich</td><td class="m">—</td></tr></table><div class="body" style="top:302.45px;height:193.55px"><p class="line l0 step" data-g="0"><b>class</b> darf beliebig oft vorkommen, <b>id</b> genau einmal pro Seite</p>
+<p class="line l0 step" data-g="1">Faustregel im Projekt: <b>Klassen</b> benutzen, ids nur für Sprungziele</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wenn zwei Regeln streiten: die Kaskade</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>C</b> in CSS heißt <b>Cascading</b> — es gibt eine feste Rangfolge</p>
+<p class="line l0 step" data-g="1"><b>Spezifität</b>: id schlägt Klasse, Klasse schlägt Element (100 : 10 : 1)</p>
+<p class="line l0 step" data-g="2">Bei gleicher Spezifität gewinnt die <b>später</b> notierte Regel</p>
+<p class="line l0 step" data-g="3">Eigenschaften wie Schriftart und Farbe <b>vererben</b> sich an die Kindelemente</p>
+<p class="line l0 step" data-g="4"><b>!important</b> löst jeden Streit — und schafft beim nächsten Mal einen neuen. Finger weg</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Das Box-Modell</h2>
+      <p class="sub">Jedes Element ist ein Kasten</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Vier Ringe um jeden Inhalt</h3><div class="rules"></div><div class="body" style="left:72px;width:362px"><p class="line l0 step" data-g="0"><b>content</b> — der Inhalt selbst, Text oder Bild</p>
+<p class="line l0 step" data-g="1"><b>padding</b> — Innenabstand, innerhalb des Rahmens, mit Hintergrundfarbe</p>
+<p class="line l0 step" data-g="2"><b>border</b> — der Rahmen</p>
+<p class="line l0 step" data-g="3"><b>margin</b> — Außenabstand zum Nachbarn, immer durchsichtig</p>
+<p class="line l0 step" data-g="4">Mit <b>box-sizing: border-box</b> zählt width die ganze Kiste</p></div><img src="img/boxmodell.png" alt="" style="position:absolute;left:458px;top:150px;width:430px;height:189.492px"><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Farben, Schrift, Abstände</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:11.5px">* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: 'Outfit', Arial, sans-serif;
+    line-height: 1.6;
+    color: #2c3c60;
+    background: #f4f7fc;
+}
+
+h1 { font-family: 'Orbitron', sans-serif; letter-spacing: 0.04em; }
+
+img { max-width: 100%; height: auto; }</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Einheiten und Farben</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:200px"><col style="width:300px"><col style="width:316px"></colgroup><tr><th>Angabe</th><th>bedeutet</th><th>wofür</th></tr><tr><td class="b m">px</td><td>feste Bildpunkte</td><td>Rahmen, feine Abstände</td></tr><tr><td class="b m">rem</td><td>Vielfaches der Grundschriftgröße</td><td>Schrift und Abstände — skaliert mit</td></tr><tr><td class="b m">%</td><td>Anteil des Elternelements</td><td>Breiten im Layout</td></tr><tr><td class="b m">#0e244e</td><td>Farbe als Hexcode (RGB)</td><td>unsere Palette</td></tr><tr><td class="b m">rgb(245,194,66)</td><td>Farbe als Zahlentripel</td><td>gleichwertig, besser lesbar</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Legt eure <b>Farbpalette</b> einmal fest — höchstens drei Farben plus Grau</p>
+<p class="line l0 step" data-g="1">Mindestens <b>4,5 : 1</b> Kontrast zwischen Text und Hintergrund, sonst ist es nicht barrierefrei</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>Layout</h2>
+      <p class="sub">Nebeneinander — und auf dem Handy untereinander</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Flexbox: die Navigation und die Kartenreihe</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:11.5px">nav {
+    display: flex;
+    gap: 24px;
+    padding: 12px 20px;
+    background: #0e244e;
+}
+
+.karten {
+    display: flex;
+    flex-wrap: wrap;      /* umbrechen statt quetschen */
+    gap: 20px;
+}
+
+.karte { flex: 1 1 280px; }   /* waechst, schrumpft, mind. 280px */</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Responsiv: eine Regel für kleine Bildschirme</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:11.5px">@media (max-width: 700px) {
+
+    nav {
+        flex-direction: column;   /* Links untereinander */
+        gap: 8px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+}
+
+/* Testen: Entwicklertools (F12), Geraeteansicht einschalten */</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Gestaltungsregeln, die immer gelten</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Wenige Schriften</b>: höchstens zwei — eine für Überschriften, eine für Fließtext</p>
+<p class="line l0 step" data-g="1"><b>Wenige Farben</b>: eine Hauptfarbe, eine Signalfarbe, ein Grau — mehr wirkt unruhig</p>
+<p class="line l0 step" data-g="2"><b>Luft lassen</b>: großzügige Abstände wirken hochwertiger als volle Seiten</p>
+<p class="line l0 step" data-g="3"><b>Ausrichtung</b>: alles an einer gemeinsamen Kante, keine zufälligen Einrückungen</p>
+<p class="line l0 step" data-g="4"><b>Konsistenz</b>: gleiche Dinge sehen gleich aus — auf jeder Seite</p>
+<p class="line l0 step" data-g="5"><b>Zuerst schmal denken</b>: was auf dem Handy funktioniert, geht auf dem Bildschirm sowieso</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: CSS</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Håkon Wium Lie</b> schlug CSS 1994 vor — im selben Haus wie das Web, am CERN</p>
+<p class="line l0 step" data-g="1">Vor CSS gestaltete man mit &lt;font&gt;-Tags und unsichtbaren Tabellen — Seiten waren unwartbar</p>
+<p class="line l0 step" data-g="2">Die <b>Zen Garden</b>-Galerie zeigte 2003, wie <b>dasselbe HTML</b> mit anderem CSS völlig anders aussieht</p>
+<p class="line l0 step" data-g="3">Das Zentrieren eines Kastens war jahrelang ein Running Gag — mit Flexbox sind es heute zwei Zeilen</p>
+<p class="line l0 step" data-g="4"><b>Dark Mode</b> ist in CSS eine einzige Medienabfrage: prefers-color-scheme</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: dem Projekt ein Gesicht geben</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Legt <b>stil.css</b> an und verlinkt sie in <b>allen</b> Seiten — kein style-Attribut mehr im HTML</p>
+<p class="line l0 step" data-g="1">Definiert <b>Farbpalette</b> und <b>zwei Schriften</b>; schreibt die Hexcodes ins Projekttagebuch</p>
+<p class="line l0 step" data-g="2">Gestaltet <b>Navigation</b> und <b>Karten</b> mit Flexbox</p>
+<p class="line l0 step" data-g="3">Ergänzt eine <b>Medienabfrage</b> für max-width: 700px und testet mit F12 in der Geräteansicht</p>
+<p class="line l0 step" data-g="4">Prüft den <b>Kontrast</b> eures Textes und haltet das Ergebnis fest</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

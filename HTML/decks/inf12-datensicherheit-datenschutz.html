@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sicherheit, Schutz und große Datenmengen</title>
+<meta name="description" content="Zwei Wörter, die verwechselt werden — und eine Positionierung zum Schluss">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-6cf33ed36294.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/lighthouse-2707528/" target="_blank" rel="noopener">Pixabay</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 12</p>
+      <h1>Sicherheit, Schutz und große Datenmengen</h1>
+      <p class="sub">Zwei Wörter, die verwechselt werden — und eine Positionierung zum Schluss</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Zwei verschiedene Dinge</h2>
+      <p class="sub">Datensicherheit und Datenschutz</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Unterschied</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:140px"><col style="width:340px"><col style="width:336px"></colgroup><tr><th></th><th>Datensicherheit</th><th>Datenschutz</th></tr><tr><td class="b">schützt</td><td style="background:#E6ECF8">die Daten</td><td style="background:#FBEBBF">die Personen hinter den Daten</td></tr><tr><td class="b">Frage</td><td>Sind die Daten vor Verlust und Zugriff sicher?</td><td>Dürfen wir sie überhaupt haben?</td></tr><tr><td class="b">Mittel</td><td>Rechte, Sicherung, Verschlüsselung</td><td>Zweckbindung, Sparsamkeit, Fristen</td></tr><tr><td class="b">Grundlage</td><td>Technik und Organisation</td><td>DSGVO, BDSG, SächsDSG</td></tr></table><div class="body" style="top:257.125px;height:238.875px"><p class="line l0 step" data-g="0">Man kann Daten <b>sicher</b> speichern, die man gar nicht speichern <b>darf</b></p>
+<p class="line l0 step" data-g="1">Und man kann erlaubte Daten <b>unsicher</b> speichern. Beides sind verschiedene Fehler</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Datensicherheit im DBMS: Rechte vergeben</h3><div class="rules"></div><div class="codepanel"><pre>CREATE USER sekretariat IDENTIFIED BY '...';
+
+GRANT SELECT ON Schueler TO sekretariat;
+GRANT SELECT, INSERT, UPDATE ON Belegung TO lehrkraft;
+REVOKE UPDATE ON Schueler FROM lehrkraft;
+
+-- Sicht: nur die erlaubten Spalten
+CREATE VIEW Kursliste AS
+  SELECT k.bezeichnung, s.name FROM Kurs k
+  JOIN Belegung b ON k.knr = b.knr
+  JOIN Schueler s ON b.snr = s.snr;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Der rechtliche Rahmen</h2>
+      <p class="sub">DSGVO, BDSG und das sächsische Gesetz</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Welches Gesetz wofür</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:160px"><col style="width:320px"><col style="width:336px"></colgroup><tr><th>Regelwerk</th><th>gilt für</th><th>Beispiel</th></tr><tr><td class="b">DSGVO</td><td>die ganze EU, Grundregeln</td><td>Zweckbindung, Auskunftsrecht</td></tr><tr><td class="b">BDSG</td><td>Ergänzungen für Deutschland</td><td>Beschäftigtendatenschutz</td></tr><tr><td class="b">SächsDSG</td><td>sächsische Behörden und Schulen</td><td>Verarbeitung an Schulen</td></tr><tr><td class="b">Schulordnungen</td><td>was die Schule konkret speichern darf</td><td>Noten, Fehlzeiten</td></tr></table><div class="body" style="top:257.125px;height:238.875px"><p class="line l0 step" data-g="0">Für <b>eure</b> Schuldatenbank gilt: DSGVO als Rahmen, dazu das sächsische Recht</p>
+<p class="line l0 step" data-g="1">Die Grundregeln sind überall dieselben: <b>Zweckbindung, Sparsamkeit, Fristen, Rechte</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was das für einen Datenbankentwurf heißt</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Datensparsamkeit</b> ist eine Entwurfsregel, keine Bitte: jedes Feld braucht einen Zweck</p>
+<p class="line l0 step" data-g="1"><b>Löschfristen</b> gehören ins Modell — etwa ein Feld „gespeichert bis“</p>
+<p class="line l0 step" data-g="2"><b>Rechte</b> je Rolle festlegen, nicht je Person</p>
+<p class="line l0 step" data-g="3"><b>Pseudonymisieren</b>, wo Auswertungen keine Namen brauchen</p>
+<p class="line l0 step" data-g="4">Das nennt man <b>Datenschutz durch Technikgestaltung</b> — Artikel 25 DSGVO</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Große Datenmengen</h2>
+      <p class="sub">Sich begründet positionieren</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Argumente in der Debatte</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:400px"><col style="width:416px"></colgroup><tr><th>dafür</th><th>dagegen</th></tr><tr><td class="b">Erkenntnisse, die anders nicht möglich sind</td><td>Rückschlüsse auf Einzelne trotz Anonymisierung</td></tr><tr><td class="b">bessere Vorhersagen, etwa in der Medizin</td><td>Schieflagen in den Daten werden verstärkt</td></tr><tr><td class="b">effizientere Abläufe und weniger Verbrauch</td><td>Machtgefälle: wer Daten hat, entscheidet</td></tr><tr><td class="b">Grundlage moderner Verfahren</td><td>einmal erhoben, ist schwer zu löschen</td></tr></table><div class="body" style="top:257.125px;height:238.875px"><p class="line l0 step" data-g="0">Beide Spalten sind ernst zu nehmen — eine Positionierung braucht <b>beide</b></p>
+<p class="line l0 step" data-g="1">Die Frage ist selten <b>ob</b>, sondern <b>wofür</b>, <b>von wem</b> und <b>mit welcher Kontrolle</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wie eine begründete Positionierung aussieht</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>These</b> in einem Satz — klar, nicht schwammig</p>
+<p class="line l0 step" data-g="1"><b>Zwei Argumente</b> dafür, jeweils mit Beispiel</p>
+<p class="line l0 step" data-g="2"><b>Ein Gegenargument</b> benennen und ernsthaft entkräften</p>
+<p class="line l0 step" data-g="3"><b>Bedingungen</b> nennen, unter denen ihr eure Position ändern würdet</p>
+<p class="line l0 step" data-g="4">Der letzte Punkt unterscheidet eine Position von einer Meinung</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Datensicherheit fragt: Sind die Daten geschützt? Datenschutz fragt: Dürfen wir sie überhaupt haben? Die zweite Frage kommt zuerst.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Datenschutz und Datenbanken</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Vier Orts- und Zeitangaben genügen, um <b>95 %</b> der Menschen in einem Mobilfunkdatensatz zu erkennen</p>
+<p class="line l0 step" data-g="1">Die <b>Netflix-Preisdaten</b> von 2006 galten als anonym — Forscher deanonymisierten sie 2008</p>
+<p class="line l0 step" data-g="2">Deshalb gilt Anonymisierung heute als <b>schwierig</b>, nicht als gelöst</p>
+<p class="line l0 step" data-g="3">Die DSGVO kennt das <b>Recht auf Auskunft</b> — jede Datenbank muss es beantworten können</p>
+<p class="line l0 step" data-g="4">Wer eine Datenbank entwirft, entscheidet damit, welche Auskunft später <b>möglich</b> ist</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: Abschluss LB 2</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Setzt an eurer Datenbank <b>Rechte</b> für zwei Rollen und eine <b>Sicht</b></p>
+<p class="line l0 step" data-g="1">Prüft euer Modell auf <b>Datensparsamkeit</b>: welches Feld könnte entfallen?</p>
+<p class="line l0 step" data-g="2">Ergänzt eine <b>Löschfrist</b> und beschreibt, wie sie umgesetzt würde</p>
+<p class="line l0 step" data-g="3">Schreibt eine <b>Positionierung</b> zu großen Datenmengen nach dem Muster oben</p>
+<p class="line l0 step" data-g="4">Damit ist LB 2 abgeschlossen — nach den Ferien beginnt LB 3</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

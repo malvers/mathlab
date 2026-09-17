@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Modularisierung</title>
+<meta name="description" content="Große Probleme zerlegen: Funktionen mit Parametern und Rückgabewerten">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-e4747d778946.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/hot-air-balloons-1807521/" target="_blank" rel="noopener">sasint</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — FOS 12</p>
+      <h1>Modularisierung</h1>
+      <p class="sub">Große Probleme zerlegen: Funktionen mit Parametern und Rückgabewerten</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Teile und herrsche</h2>
+      <p class="sub">Ein großes Problem ist eine Menge kleiner Probleme</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum ein Programm zerlegt wird</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ein 300-Zeilen-Block ist <b>nicht prüfbar</b>: niemand hat ihn im Kopf</p>
+<p class="line l0 step" data-g="1"><b>Zerlegen</b> heißt: jedes Teilproblem einzeln lösen, einzeln testen, einzeln benennen</p>
+<p class="line l0 step" data-g="2">Ein Teil, das funktioniert, kann man <b>wiederverwenden</b> — auch im nächsten Projekt</p>
+<p class="line l0 step" data-g="3">Im Team arbeitet jeder an einem Teil, ohne dem anderen ins Programm zu greifen</p>
+<p class="line l0 step" data-g="4">Und beim Suchen: ein Fehler steckt in <b>einer</b> Funktion, nicht irgendwo in 300 Zeilen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Vier Gründe, vier Wirkungen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:170px"><col style="width:290px"><col style="width:356px"></colgroup><tr><th>Grund</th><th>ohne Zerlegung</th><th>mit Zerlegung</th></tr><tr><td class="b">Verständlichkeit</td><td style="background:#F2CFCB">300 Zeilen am Stück lesen</td><td style="background:#DDE8C6">acht Namen lesen, dann gezielt nachsehen</td></tr><tr><td class="b">Testbarkeit</td><td style="background:#F2CFCB">nur das Ganze testbar</td><td style="background:#DDE8C6">jede Funktion einzeln prüfbar</td></tr><tr><td class="b">Wiederverwendung</td><td style="background:#F2CFCB">Code kopieren (und Fehler mit)</td><td style="background:#DDE8C6">einmal schreiben, überall aufrufen</td></tr><tr><td class="b">Änderung</td><td style="background:#F2CFCB">an fünf Stellen nachziehen</td><td style="background:#DDE8C6">an einer Stelle ändern</td></tr></table><div class="body" style="top:266.375px;height:229.625px"><p class="line l0 step" data-g="0">Das Prinzip heißt <b>Teile und herrsche</b> (divide et impera) und ist älter als der Computer</p>
+<p class="line l0 step" data-g="1">Kernidee: <b>eine Funktion, eine Aufgabe</b> — der Name sagt, welche</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Funktionen</h2>
+      <p class="sub">Definieren, aufrufen, zurückgeben</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Die erste eigene Funktion</h3><div class="rules"></div><div class="codepanel"><pre>def mittelwert(werte):          # Definition, laeuft noch nicht
+    summe = 0
+    for w in werte:
+        summe = summe + w
+    return summe / len(werte)   # Ergebnis zurueckgeben
+
+
+noten = [2, 1, 3, 2]
+m = mittelwert(noten)           # Aufruf - jetzt laeuft sie
+print(f'Mittelwert: {m:.2f}')   # Mittelwert: 2.00
+
+print(mittelwert([1, 5]))       # dieselbe Funktion, andere Daten: 3.0</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Fachbegriffe dazu</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:150px"><col style="width:280px"><col style="width:386px"></colgroup><tr><th>Begriff</th><th>im Beispiel</th><th>bedeutet</th></tr><tr><td class="b">Definition</td><td class="m">def mittelwert(werte):</td><td>die Funktion wird bekannt gemacht</td></tr><tr><td class="b">Parameter</td><td class="m">werte</td><td>Platzhalter in der Definition</td></tr><tr><td class="b">Argument</td><td class="m">noten</td><td>der echte Wert beim Aufruf</td></tr><tr><td class="b">Rückgabewert</td><td class="m">return summe / len(werte)</td><td>das Ergebnis, das zurückkommt</td></tr><tr><td class="b">Aufruf</td><td class="m">mittelwert(noten)</td><td>hier wird sie ausgeführt</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0"><b>Parameter</b> steht in der Definition, <b>Argument</b> beim Aufruf — der Klassiker in der Klausur</p>
+<p class="line l0 step" data-g="1">Ohne <b>return</b> gibt eine Funktion <b>None</b> zurück: sie tut etwas, liefert aber nichts</p>
+<p class="line l0 step" data-g="2"><b>return</b> beendet die Funktion sofort — alles danach läuft nicht mehr</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Aufrufe im Struktogramm</h3><div class="rules"></div><div class="body" style="left:72px;width:392px"><p class="line l0 step" data-g="0">Der Kasten mit den <b>doppelten Seitenstrichen</b> ist ein <b>Unterprogrammaufruf</b></p>
+<p class="line l0 step" data-g="1">Was darin passiert, steht in einem <b>eigenen</b> Struktogramm</p>
+<p class="line l0 step" data-g="2">Das Hauptstruktogramm bleibt dadurch kurz und lesbar</p>
+<p class="line l0 step" data-g="3">Genau so entsteht ein <b>Modul</b>: außen der Name, innen die Lösung</p></div><img src="img/sg-modul.png" alt="" style="position:absolute;left:488px;top:150px;width:400px;height:141.778px"><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Parameter, Standardwerte, mehrere Rückgaben</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:10.5px">def note(punkte, maximum=60):        # maximum hat einen Standardwert
+    prozent = punkte / maximum * 100
+    if prozent &gt;= 92: return 1
+    if prozent &gt;= 81: return 2
+    if prozent &gt;= 67: return 3
+    if prozent &gt;= 50: return 4
+    if prozent &gt;= 30: return 5
+    return 6
+
+def spanne(werte):                   # zwei Werte auf einmal zurueckgeben
+    return min(werte), max(werte)
+
+print(note(47))          # 2   - maximum bleibt 60
+print(note(47, 50))      # 1   - jetzt von 50 Punkten
+kleinste, groesste = spanne([3, 1, 4])</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Sichtbarkeit</h2>
+      <p class="sub">Was in der Funktion passiert, bleibt in der Funktion</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Lokal und global</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:10.5px">def rechne():
+    ergebnis = 42        # lokal - lebt nur waehrend des Aufrufs
+    print(ergebnis)
+
+rechne()                 # 42
+print(ergebnis)          # NameError: name 'ergebnis' is not defined
+
+
+zaehler = 0              # global - im ganzen Programm sichtbar
+
+def zeige():
+    print(zaehler)       # lesen: geht
+
+def erhoehe():
+    zaehler = zaehler + 1   # schreiben: UnboundLocalError</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Regel dahinter</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Eine Variable, die <b>in</b> einer Funktion entsteht, ist <b>lokal</b> — draußen kennt sie niemand</p>
+<p class="line l0 step" data-g="1">Das ist ein <b>Vorteil</b>: zwei Funktionen dürfen dieselben Namen benutzen, ohne sich zu stören</p>
+<p class="line l0 step" data-g="2">Globale Variablen kann man <b>lesen</b>, aber nicht ohne Weiteres <b>beschreiben</b></p>
+<p class="line l0 step" data-g="3">Guter Stil: Werte <b>über Parameter hinein</b>, Ergebnisse <b>über return heraus</b> — keine globalen Variablen</p>
+<p class="line l0 step" data-g="4">Damit ist eine Funktion eine <b>Black Box</b>: Eingabe rein, Ergebnis raus, keine Nebenwirkungen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Werte gehen über Parameter hinein und über return wieder hinaus. Alles andere macht aus einer Funktion eine Falle.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>In der Praxis</h2>
+      <p class="sub">Ein Programm sauber aufteilen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Das Notenprogramm, modular</h3><div class="rules"></div><div class="codepanel" style="padding-top:33px;padding-bottom:33px"><pre style="font-size:9.5px">def einlesen(anzahl):
+    werte = []
+    for i in range(anzahl):
+        werte.append(int(input(f'Punkte {i+1}: ')))
+    return werte
+
+def mittelwert(werte):
+    return sum(werte) / len(werte)
+
+def note(punkte, maximum=60):
+    return 6 - min(5, int(punkte / maximum * 100 // 20))
+
+def bericht(werte):
+    print(f'{len(werte)} Arbeiten, Schnitt {mittelwert(werte):.1f} Punkte')
+    print(f'beste {max(werte)}, schlechteste {min(werte)}')
+
+punkte = einlesen(5)
+bericht(punkte)</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Woran man eine gute Funktion erkennt</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:190px"><col style="width:300px"><col style="width:326px"></colgroup><tr><th>Regel</th><th>gut</th><th>schlecht</th></tr><tr><td class="b">Eine Aufgabe</td><td class="m" style="background:#DDE8C6">mittelwert(werte)</td><td class="m" style="background:#F2CFCB">alles_machen(daten)</td></tr><tr><td class="b">Sprechender Name</td><td class="m" style="background:#DDE8C6">beste_note(liste)</td><td class="m" style="background:#F2CFCB">f2(x)</td></tr><tr><td class="b">Kurz</td><td class="m" style="background:#DDE8C6">unter 20 Zeilen</td><td class="m" style="background:#F2CFCB">80 Zeilen mit vier Themen</td></tr><tr><td class="b">Keine Nebenwirkungen</td><td class="m" style="background:#DDE8C6">gibt zurück</td><td class="m" style="background:#F2CFCB">verändert heimlich Globales</td></tr><tr><td class="b">Testbar</td><td class="m" style="background:#DDE8C6">gleiche Eingabe, gleiches Ergebnis</td><td class="m" style="background:#F2CFCB">hängt von der Tageszeit ab</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Faustregel: Wenn der Name ein <b>und</b> enthält, sind es zwei Funktionen</p>
+<p class="line l0 step" data-g="1">Ein guter Name macht den Kommentar überflüssig</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Funktionen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>David Wheeler</b> erfand 1951 den Unterprogrammaufruf — der <b>Wheeler Jump</b> war die erste „Bibliothek“ der Welt</p>
+<p class="line l0 step" data-g="1">Von ihm stammt auch der Satz: „Jedes Problem der Informatik löst man mit <b>einer weiteren Indirektionsebene</b>“</p>
+<p class="line l0 step" data-g="2">Die <b>NASA</b>-Programmierrichtlinien begrenzen Funktionen auf <b>60 Zeilen</b> — eine Druckseite</p>
+<p class="line l0 step" data-g="3"><b>Copy &amp; Paste</b> ist der häufigste Weg, wie sich ein Fehler in einem Programm vermehrt</p>
+<p class="line l0 step" data-g="4">Das Wort <b>Bibliothek</b> für Codesammlungen ist älter als der Personal Computer — Lochkartenstapel lagen wirklich in Schränken</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: zerlegen und wiederverwenden</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Nehmt euer <b>Notenstatistik</b>-Programm aus Woche 16 und zerlegt es in Funktionen</p>
+<p class="line l0 step" data-g="1">Mindestens: <b>einlesen()</b>, <b>mittelwert()</b>, <b>beste()</b>, <b>ausgabe()</b></p>
+<p class="line l0 step" data-g="2">Schreibt eine Funktion <b>ist_prim(zahl)</b>, die True oder False zurückgibt — und nutzt sie in einer Schleife von 1 bis 100</p>
+<p class="line l0 step" data-g="3">Testet jede Funktion <b>einzeln</b> in der Konsole, bevor ihr sie zusammenschaltet</p>
+<p class="line l0 step" data-g="4">Zeichnet das Hauptprogramm als Struktogramm mit <b>Aufruf-Kästen</b> — jede Funktion bekommt ihr eigenes</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Das Datenbanksystem</title>
+<meta name="description" content="DBMS und Datenbasis, die Drei-Ebenen-Architektur und die ersten Befehle">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-850b0eabcc52.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/fog-6594102/" target="_blank" rel="noopener">fietzfotos</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 12</p>
+      <h1>Das Datenbanksystem</h1>
+      <p class="sub">DBMS und Datenbasis, die Drei-Ebenen-Architektur und die ersten Befehle</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Aufbau</h2>
+      <p class="sub">Zwei Teile, klar getrennt</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Aufbau eines Datenbanksystems</h3><div class="rules"></div><div class="pic"><img src="img/pap-dbs-inf12.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Keine Anwendung greift <b>direkt</b> auf die Dateien zu — nur über das DBMS</p>
+<p class="line l0 step" data-g="1">Genau das löst die fünf Probleme der Dateiverwaltung von letzter Woche</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Aufgaben des DBMS</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:200px"><col style="width:616px"></colgroup><tr><th>Aufgabe</th><th>heißt konkret</th></tr><tr><td class="b">Datendefinition</td><td>Strukturen anlegen und ändern (DDL)</td></tr><tr><td class="b">Datenmanipulation</td><td>einfügen, ändern, löschen, abfragen (DML)</td></tr><tr><td class="b">Datenintegrität</td><td>Regeln durchsetzen: Typen, Schlüssel, Beziehungen</td></tr><tr><td class="b">Datenschutz</td><td>Rechte je Nutzer und je Tabelle (DCL)</td></tr><tr><td class="b">Transaktionen</td><td>mehrere Schritte ganz oder gar nicht ausführen</td></tr><tr><td class="b">Mehrbenutzerbetrieb</td><td>gleichzeitige Zugriffe ordnen</td></tr><tr><td class="b">Datensicherung</td><td>Sicherungskopien und Wiederherstellung</td></tr></table><div class="body" style="top:322.8px;height:173.2px"><p class="line l0 step" data-g="0"><b>DDL, DML, DCL</b> sind die drei Sprachteile von SQL — sie kommen in den nächsten Wochen dran</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Drei Ebenen</h2>
+      <p class="sub">Warum Programme Änderungen nicht merken</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die ANSI-SPARC-Architektur</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:230px"><col style="width:350px"><col style="width:236px"></colgroup><tr><th>Ebene</th><th>beschreibt</th><th>wer sieht sie</th></tr><tr><td class="b">externe Ebene</td><td>Sichten je Anwendung</td><td>Programme und Nutzer</td></tr><tr><td class="b">konzeptionelle Ebene</td><td>das Gesamtschema aller Daten</td><td>Datenbankentwurf</td></tr><tr><td class="b" style="background:#E6ECF8">interne Ebene</td><td>Speicherung, Dateien, Indexe</td><td>das DBMS</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0"><b>Datenunabhängigkeit</b>: ändert sich die interne Ebene, merken die Programme nichts</p>
+<p class="line l0 step" data-g="1">Das ist der eigentliche Grund für die Trennung — und der größte Unterschied zur Datei</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was das praktisch bedeutet</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ein <b>Index</b> wird angelegt: Abfragen werden schneller, kein Programm ändert sich</p>
+<p class="line l0 step" data-g="1">Die Datenbank zieht auf einen anderen Server um: die Anwendungen merken nichts</p>
+<p class="line l0 step" data-g="2">Eine <b>Sicht</b> zeigt dem Sekretariat andere Spalten als der Schulleitung</p>
+<p class="line l0 step" data-g="3">Bei Dateien müsste dafür <b>jedes Programm</b> angefasst werden</p>
+<p class="line l0 step" data-g="4">Deshalb ist die Trennung keine Theorie, sondern die Grundlage der Wartbarkeit</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Erste Schritte</h2>
+      <p class="sub">Eine Datenbank anlegen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Eine Datenbank und eine Tabelle anlegen</h3><div class="rules"></div><div class="codepanel"><pre>-- SQLite: die Datenbank ist eine Datei
+-- MySQL:  CREATE DATABASE schule;  USE schule;
+
+CREATE TABLE Schueler (
+    snr      INTEGER PRIMARY KEY,
+    name     TEXT NOT NULL,
+    vorname  TEXT NOT NULL,
+    klasse   TEXT,
+    geburt   DATE
+);</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was in diesen Zeilen alles steckt</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>CREATE TABLE</b> gehört zur DDL — es beschreibt die Struktur, nicht die Daten</p>
+<p class="line l0 step" data-g="1"><b>PRIMARY KEY</b> macht snr eindeutig und legt automatisch einen Index an</p>
+<p class="line l0 step" data-g="2"><b>NOT NULL</b> ist eine Integritätsregel: das Feld darf nicht leer bleiben</p>
+<p class="line l0 step" data-g="3">Die <b>Datentypen</b> entscheiden über Sortierung, Rechnen und Speicherbedarf</p>
+<p class="line l0 step" data-g="4">Nach diesem Befehl ist die Tabelle <b>leer, aber fertig definiert</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Datenbasis plus DBMS ergibt das Datenbanksystem. Und die drei Ebenen sorgen dafür, dass Änderungen unten oben nicht ankommen.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: DBMS</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Das erste kommerzielle relationale DBMS war <b>Oracle V2</b> von 1979 — eine V1 gab es nie</p>
+<p class="line l0 step" data-g="1"><b>IBM System R</b> war der Forschungsprototyp, in dem SQL entstand</p>
+<p class="line l0 step" data-g="2"><b>SQLite</b> ist das am weitesten verbreitete DBMS der Welt — es steckt in jedem Smartphone</p>
+<p class="line l0 step" data-g="3">Die <b>ANSI-SPARC-Architektur</b> wurde 1975 vorgeschlagen und gilt bis heute</p>
+<p class="line l0 step" data-g="4">Ein DBMS ist eines der komplexesten Programme überhaupt — Millionen Zeilen Code</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe am Rechner</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Legt eine Datenbank <b>schule</b> an (SQLite-Datei oder MySQL)</p>
+<p class="line l0 step" data-g="1">Erstellt die Tabelle <b>Schueler</b> wie oben</p>
+<p class="line l0 step" data-g="2">Erstellt eine zweite Tabelle <b>Kurs</b> mit knr, bezeichnung und lehrkraft</p>
+<p class="line l0 step" data-g="3">Probiert aus, was bei einem <b>doppelten Primärschlüssel</b> passiert</p>
+<p class="line l0 step" data-g="4">Notiert zu jeder Aufgabe des DBMS aus Kapitel 1 <b>ein</b> Beispiel aus eurer Datenbank</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

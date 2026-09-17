@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Die Daten hinter der Seite</title>
+<meta name="description" content="Datenbankanbindung planen — das ER-Modell aus Lernbereich 1 kommt zurück">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-77d712193313.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/fog-7440132/" target="_blank" rel="noopener">Nordseher</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — FOS 12</p>
+      <h1>Die Daten hinter der Seite</h1>
+      <p class="sub">Datenbankanbindung planen — das ER-Modell aus Lernbereich 1 kommt zurück</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Erst das Modell</h2>
+      <p class="sub">Eine Webseite ist nur die Oberfläche</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum wir jetzt nicht programmieren</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ohne Datenmodell entstehen Seiten, die <b>später nicht zusammenpassen</b></p>
+<p class="line l0 step" data-g="1">Die Fragen sind dieselben wie in <b>Lernbereich 1</b>: Welche Dinge? Welche Beziehungen?</p>
+<p class="line l0 step" data-g="2">Ihr habt das Werkzeug schon: <b>ER-Modell</b>, <b>Überführung</b>, <b>Normalformen</b></p>
+<p class="line l0 step" data-g="3">Ein Fehler im Modell kostet in der Umsetzung das Zehnfache — jetzt ist er billig</p>
+<p class="line l0 step" data-g="4">Am Ende dieser Woche steht ein <b>Schema</b>, gegen das ihr zwei Wochen lang programmieren könnt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Vom Projektthema zum Modell — in vier Schritten</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:160px"><col style="width:350px"><col style="width:306px"></colgroup><tr><th>Schritt</th><th>Frage</th><th>Ergebnis</th></tr><tr><td class="b">1 Substantive</td><td>Über welche Dinge speichern wir etwas?</td><td>Liste der Entitätstypen</td></tr><tr><td class="b">2 Eigenschaften</td><td>Was wissen wir über jedes Ding?</td><td>Attribute, Schlüssel markiert</td></tr><tr><td class="b">3 Beziehungen</td><td>Wie hängen die Dinge zusammen?</td><td>Beziehungstypen mit Kardinalität</td></tr><tr><td class="b">4 Überführung</td><td>Welche Tabellen entstehen daraus?</td><td>Schema mit PK und FK</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Jeder <b>n:m</b>-Beziehungstyp wird zu einer <b>eigenen Tabelle</b> — das ist die häufigste Falle</p>
+<p class="line l0 step" data-g="1">Danach mit den <b>Normalformen</b> gegenprüfen: steht jede Information genau einmal?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Beispielmodell: Ernährungstagebuch</h3><div class="rules"></div><div class="pic"><img src="img/er-tagebuch.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0"><b>1:n</b> zwischen Nutzer und Mahlzeit — ein Nutzer führt viele Mahlzeiten</p>
+<p class="line l0 step" data-g="1"><b>n:m</b> zwischen Mahlzeit und Lebensmittel, mit dem Beziehungsattribut <b>Menge</b></p>
+<p class="line l0 step" data-g="2">Genau dieses n:m wird gleich zur dritten Tabelle</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Das Schema</h2>
+      <p class="sub">Aus dem Modell werden Tabellen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Das Schema dazu</h3><div class="rules"></div><div class="pic"><img src="img/schema-tagebuch.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Die <b>1:n</b>-Beziehung wandert als <b>Fremdschlüssel NNr</b> in die Tabelle MAHLZEIT</p>
+<p class="line l0 step" data-g="1">Die <b>n:m</b>-Beziehung wird zur Tabelle <b>POSITION</b> mit zusammengesetztem Schlüssel</p>
+<p class="line l0 step" data-g="2">Das <b>Beziehungsattribut Menge</b> hat nur dort Platz — nirgends sonst</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Die Tabellen anlegen (SQLite)</h3><div class="rules"></div><div class="codepanel" style="padding-top:39.5px;padding-bottom:39.5px"><pre style="font-size:10px">CREATE TABLE nutzer (
+    nnr INTEGER PRIMARY KEY,
+    anzeigename TEXT NOT NULL,
+    tagesziel INTEGER
+);
+CREATE TABLE mahlzeit (
+    mnr INTEGER PRIMARY KEY,
+    datum TEXT NOT NULL,
+    art TEXT,
+    nnr INTEGER REFERENCES nutzer(nnr)
+);
+CREATE TABLE position (
+    mnr INTEGER REFERENCES mahlzeit(mnr),
+    lnr INTEGER REFERENCES lebensmittel(lnr),
+    menge REAL,
+    PRIMARY KEY (mnr, lnr)
+);</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Anbindung planen</h2>
+      <p class="sub">Welche Seite braucht welche Abfrage?</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Anbindungsplan — für jede Seite eine Zeile</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:130px"><col style="width:240px"><col style="width:260px"><col style="width:186px"></colgroup><tr><th>Seite</th><th>zeigt / tut</th><th>Tabellen</th><th>Abfrage (grob)</th></tr><tr><td class="b">index.html</td><td>Begrüßung, Tagesziel</td><td>nutzer</td><td class="m">SELECT ... WHERE nnr = ?</td></tr><tr><td class="b">tag.php</td><td>Mahlzeiten eines Tages</td><td>mahlzeit, position, lebensmittel</td><td class="m">JOIN über drei Tabellen</td></tr><tr><td class="b">neu.php</td><td>Mahlzeit eintragen</td><td>mahlzeit, position</td><td class="m">INSERT INTO ...</td></tr><tr><td class="b">liste.php</td><td>alle Lebensmittel, sortiert</td><td>lebensmittel</td><td class="m">SELECT ... ORDER BY name</td></tr><tr><td class="b">suche.php</td><td>Lebensmittel suchen</td><td>lebensmittel</td><td class="m">WHERE name LIKE ?</td></tr></table><div class="body" style="top:276.55px;height:219.45px"><p class="line l0 step" data-g="0">Diese Tabelle ist <b>das</b> Planungsergebnis der Woche — sie sagt, was zu programmieren ist</p>
+<p class="line l0 step" data-g="1">Fällt eine Seite auf, die <b>keine</b> Datenbank braucht: gut, die ist schnell fertig</p>
+<p class="line l0 step" data-g="2">Fehlt einer Abfrage eine Tabelle: dann fehlt dem Modell etwas — jetzt nachbessern</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Die typische Abfrage — mit Verbund</h3><div class="rules"></div><div class="codepanel"><pre>SELECT m.datum, m.art, l.name, p.menge, l.kcal * p.menge / 100 AS kcal_gesamt
+FROM mahlzeit m
+JOIN position p ON p.mnr = m.mnr
+JOIN lebensmittel l ON l.lnr = p.lnr
+WHERE m.nnr = ? AND m.datum = ?
+ORDER BY m.mnr;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was ihr aus Lernbereich 1 wiedererkennt</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Der <b>Verbund (JOIN)</b> setzt zusammen, was die Normalisierung getrennt hat</p>
+<p class="line l0 step" data-g="1">Die <b>Fremdschlüssel</b> sind genau die Spalten, über die verbunden wird</p>
+<p class="line l0 step" data-g="2">Das <b>Fragezeichen</b> ist ein Platzhalter — nie Nutzereingaben in den SQL-Text kleben</p>
+<p class="line l0 step" data-g="3"><b>AS</b> benennt eine berechnete Spalte, damit die Ausgabe lesbar bleibt</p>
+<p class="line l0 step" data-g="4">Testet jede Abfrage <b>zuerst im DBMS</b>, erst danach im Programm</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>Dokumentieren</h2>
+      <p class="sub">Problemanalyse und Lösungsentwurf schriftlich</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was diese Woche ins Projekttagebuch kommt</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:170px"><col style="width:400px"><col style="width:246px"></colgroup><tr><th>Abschnitt</th><th>Inhalt</th><th>Umfang</th></tr><tr><td class="b">Problemanalyse</td><td>Was soll die Anwendung leisten? Für wen? Welche Daten?</td><td>½ Seite</td></tr><tr><td class="b">Datenmodell</td><td>ER-Modell als Zeichnung, mit Kardinalitäten</td><td>1 Bild</td></tr><tr><td class="b">Schema</td><td>Tabellen mit Primär- und Fremdschlüsseln, CREATE-Anweisungen</td><td>1 Seite</td></tr><tr><td class="b">Anbindungsplan</td><td>die Tabelle „Seite — zeigt — Tabellen — Abfrage“</td><td>1 Tabelle</td></tr><tr><td class="b">Offene Fragen</td><td>was noch geklärt werden muss und von wem</td><td>Stichpunkte</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Diese fünf Punkte sind zugleich der <b>Bewertungsteil „Prozess“</b> — sie werden gelesen</p>
+<p class="line l0 step" data-g="1">Schreibt in <b>Fachsprache</b>: Entitätstyp, Kardinalität, Fremdschlüssel, Verbund</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Häufige Planungsfehler — jetzt vermeiden</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Alles in eine Tabelle</b>: erzeugt genau die Anomalien aus Woche 3</p>
+<p class="line l0 step" data-g="1"><b>n:m ohne eigene Tabelle</b>: geht nicht, egal wie sehr man es sich wünscht</p>
+<p class="line l0 step" data-g="2"><b>Kein Primärschlüssel</b>: dann lässt sich kein Datensatz eindeutig ansprechen</p>
+<p class="line l0 step" data-g="3"><b>Berechnetes gespeichert</b>: Kalorien pro Mahlzeit gehören berechnet, nicht abgelegt</p>
+<p class="line l0 step" data-g="4"><b>Zu groß geplant</b>: lieber vier Tabellen, die laufen, als zehn, die nie fertig werden</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Erst das Modell, dann das Schema, dann der Anbindungsplan. Wer in dieser Reihenfolge arbeitet, programmiert nur einmal.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Daten im Web</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Fast jede Website, die mehr als Text zeigt, ist eine <b>Datenbankanwendung</b> mit Oberfläche</p>
+<p class="line l0 step" data-g="1"><b>WordPress</b> betreibt über 40 % aller Websites — mit einem Schema aus rund zwölf Tabellen</p>
+<p class="line l0 step" data-g="2"><b>SQLite</b> steckt in jedem Smartphone, in Browsern und Flugzeugen — die meistverbreitete Datenbank der Welt</p>
+<p class="line l0 step" data-g="3">Die größte Schwachstelle von Webanwendungen war jahrelang die <b>SQL-Injection</b> — Thema in Woche 30</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: das Modell für euer Projekt</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Zeichnet das <b>ER-Modell</b> eures Themas mit mindestens drei Entitätstypen und Kardinalitäten</p>
+<p class="line l0 step" data-g="1"><b>Überführt</b> es in ein Schema und schreibt die <b>CREATE TABLE</b>-Anweisungen auf</p>
+<p class="line l0 step" data-g="2">Prüft mit den <b>Normalformen</b> gegen — dokumentiert, was ihr geändert habt</p>
+<p class="line l0 step" data-g="3">Füllt den <b>Anbindungsplan</b> für alle geplanten Seiten aus</p>
+<p class="line l0 step" data-g="4">Legt <b>Testdaten</b> an: drei bis fünf Zeilen je Tabelle, frei erfunden, keine echten Personen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Die Seite bekommt ein Gedächtnis</title>
+<meta name="description" content="Datenmodell, Anbindung und Formulare — vom Browser bis in die Tabelle">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-f55e4d02d16b.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/mountains-6118187/" target="_blank" rel="noopener">RyanK14</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 13</p>
+      <h1>Die Seite bekommt ein Gedächtnis</h1>
+      <p class="sub">Datenmodell, Anbindung und Formulare — vom Browser bis in die Tabelle</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Das Konzept</h2>
+      <p class="sub">Wer macht was</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die drei Schichten</h3><div class="rules"></div><div class="pic"><img src="img/pap-webstack-inf13.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Der Browser spricht <b>nie</b> direkt mit der Datenbank — immer über das Serverskript</p>
+<p class="line l0 step" data-g="1">Das ist derselbe Gedanke wie beim DBMS: <b>eine Stelle, die aufpasst</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wer wofür zuständig ist</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:200px"><col style="width:350px"><col style="width:266px"></colgroup><tr><th>Schicht</th><th>Aufgabe</th><th>Sprache</th></tr><tr><td class="b">Browser (Client)</td><td>Anzeige, Eingabe entgegennehmen</td><td>HTML, CSS, JS</td></tr><tr><td class="b" style="background:#DDE8C6">Server</td><td>prüfen, rechnen, Datenbank befragen</td><td>PHP, Python, Java</td></tr><tr><td class="b">Datenbank</td><td>speichern, suchen, Integrität sichern</td><td>SQL</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Prüfungen im Browser sind <b>Bequemlichkeit</b> — die verbindliche Prüfung passiert auf dem Server</p>
+<p class="line l0 step" data-g="1">Denn wer den Browser umgeht, umgeht auch dessen Prüfung</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Das Formular</h2>
+      <p class="sub">Daten vom Nutzer zum Server</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Ein Formular, das speichert</h3><div class="rules"></div><div class="codepanel"><pre>&lt;form action="speichern.php" method="post"&gt;
+  &lt;label for="name"&gt;Vereinsname&lt;/label&gt;
+  &lt;input id="name" name="name" type="text" required maxlength="80"&gt;
+
+  &lt;label for="ort"&gt;Ort&lt;/label&gt;
+  &lt;input id="ort" name="ort" type="text" required&gt;
+
+  &lt;button type="submit"&gt;Speichern&lt;/button&gt;
+&lt;/form&gt;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>GET oder POST?</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:180px"><col style="width:320px"><col style="width:316px"></colgroup><tr><th></th><th>GET</th><th>POST</th></tr><tr><td class="b">Daten stehen</td><td>in der URL</td><td>im Nachrichtenkörper</td></tr><tr><td class="b">sichtbar</td><td>ja, auch im Verlauf</td><td>nein</td></tr><tr><td class="b">Länge</td><td>begrenzt</td><td>praktisch unbegrenzt</td></tr><tr><td class="b">geeignet für</td><td>Suchen und Filtern</td><td style="background:#DDE8C6">Speichern und Ändern</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Faustregel: <b>GET liest, POST verändert</b></p>
+<p class="line l0 step" data-g="1">Ein Löschlink per GET ist ein Klassiker unter den Fehlern — Suchmaschinen klicken ihn</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Die Anbindung</h2>
+      <p class="sub">Vorbereitete Anweisungen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Speichern - richtig gemacht</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:11.5px">&lt;?php
+$pdo = new PDO('mysql:host=localhost;dbname=vereine;charset=utf8mb4',
+               $benutzer, $passwort);
+
+$name = trim($_POST['name'] ?? '');
+$ort  = trim($_POST['ort']  ?? '');
+
+if ($name === '' || $ort === '') {
+    die('Bitte alle Felder ausfuellen.');
+}
+
+$stmt = $pdo-&gt;prepare('INSERT INTO Verein (name, ort) VALUES (?, ?)');
+$stmt-&gt;execute([$name, $ort]);
+?&gt;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum prepare und execute?</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Zusammengeklebtes SQL erlaubt <b>SQL-Injection</b>: Eingaben werden zu Befehlen</p>
+<p class="line l0 step" data-g="1"><b>prepare</b> schickt die Anweisung <b>ohne</b> die Werte an die Datenbank</p>
+<p class="line l0 step" data-g="2">Die Werte kommen <b>getrennt</b> hinterher und können nie als Befehl gelesen werden</p>
+<p class="line l0 step" data-g="3">Das ist keine Stilfrage, sondern die <b>Grundregel</b> jeder Datenbankanbindung</p>
+<p class="line l0 step" data-g="4">Und die Zugangsdaten stehen <b>nicht</b> im Quelltext, sondern in einer Konfigurationsdatei außerhalb</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Nie Nutzereingaben in einen SQL-Text kleben. Immer vorbereitete Anweisungen mit Platzhaltern — sonst schreibt der Nutzer eure Befehle.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Anbindung</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>SQL-Injection</b> steht seit Jahren in den Top-Risiken der OWASP-Liste</p>
+<p class="line l0 step" data-g="1">Der Klassiker ist der Comic mit dem Schüler <b>„Robert'); DROP TABLE Students;--“</b></p>
+<p class="line l0 step" data-g="2"><b>PDO</b> ist eine einheitliche Schnittstelle: derselbe Code spricht mit MySQL, SQLite, PostgreSQL</p>
+<p class="line l0 step" data-g="3"><b>utf8mb4</b> statt utf8 — nur damit funktionieren Emojis und seltene Zeichen zuverlässig</p>
+<p class="line l0 step" data-g="4">Zugangsdaten im öffentlichen Repository sind der häufigste Anfängerfehler überhaupt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe am Rechner</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Legt eure <b>Datenbank</b> nach dem ER-Modell aus KW 48 an</p>
+<p class="line l0 step" data-g="1">Baut ein <b>Formular</b> mit mindestens drei Feldern und passenden Labels</p>
+<p class="line l0 step" data-g="2">Speichert die Daten mit <b>prepare und execute</b></p>
+<p class="line l0 step" data-g="3">Prüft die Eingaben <b>auf dem Server</b>, nicht nur im Browser</p>
+<p class="line l0 step" data-g="4">Legt die <b>Zugangsdaten</b> in eine eigene Datei, die nicht im Projektordner der Webseite liegt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

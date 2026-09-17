@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>HTTP und dynamische Seiten</title>
+<meta name="description" content="Wer fragt, wer antwortet — und wo die Arbeit tatsächlich passiert">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-b31404c65560.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/sunrise-1582669/" target="_blank" rel="noopener">Kapa65</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — FOS 12</p>
+      <h1>HTTP und dynamische Seiten</h1>
+      <p class="sub">Wer fragt, wer antwortet — und wo die Arbeit tatsächlich passiert</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Frage und Antwort</h2>
+      <p class="sub">Das Web ist ein Gespräch mit festen Regeln</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Ablauf jedes Seitenaufrufs</h3><div class="rules"></div><div class="pic"><img src="img/http-request.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Der <b>Client</b> fragt, der <b>Server</b> antwortet — nie umgekehrt</p>
+<p class="line l0 step" data-g="1"><b>HTTP</b> ist das Protokoll: die Regeln, wie Frage und Antwort aussehen müssen</p>
+<p class="line l0 step" data-g="2">Der Server holt sich, was er braucht, aus der <b>Datenbank</b> — für den Client unsichtbar</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Begriffe dazu</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:170px"><col style="width:646px"></colgroup><tr><th>Begriff</th><th>bedeutet</th></tr><tr><td class="b">Client</td><td>das Programm, das fragt — hier: der Browser</td></tr><tr><td class="b">Server</td><td>das Programm, das antwortet — läuft rund um die Uhr</td></tr><tr><td class="b">HTTP</td><td>Hypertext Transfer Protocol: die vereinbarten Regeln</td></tr><tr><td class="b">HTTPS</td><td>dasselbe, aber verschlüsselt — heute Pflicht</td></tr><tr><td class="b">URL</td><td>die Adresse: Protokoll, Servername, Pfad, ggf. Parameter</td></tr><tr><td class="b" style="background:#FBEBBF">zustandslos</td><td style="background:#FBEBBF">der Server erinnert sich nicht an die letzte Anfrage</td></tr></table><div class="body" style="top:302.45px;height:193.55px"><p class="line l0 step" data-g="0"><b>Zustandslos</b> ist der wichtigste und überraschendste Punkt: jede Anfrage steht für sich</p>
+<p class="line l0 step" data-g="1">Damit ein Warenkorb trotzdem funktioniert, braucht es <b>Sitzungen</b> (Sessions) und <b>Cookies</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>HTTP im Klartext</h2>
+      <p class="sub">Das Protokoll ist lesbarer Text</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Eine echte Anfrage und die Antwort</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:11.5px">GET /rezepte.html HTTP/1.1
+Host: projekt.fos12.de
+User-Agent: Mozilla/5.0 ...
+Accept: text/html
+
+----------------------------------------------------
+
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=UTF-8
+Content-Length: 1842
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang="de"&gt; ...</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Methoden und Statuscodes</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:110px"><col style="width:300px"><col style="width:140px"><col style="width:266px"></colgroup><tr><th>Methode</th><th>wofür</th><th>Statuscode</th><th>bedeutet</th></tr><tr><td class="b">GET</td><td>etwas abholen, Parameter in der URL</td><td class="b">200</td><td style="background:#DDE8C6">OK — alles gut</td></tr><tr><td class="b">POST</td><td>etwas senden, Daten im Rumpf</td><td class="b">301 / 302</td><td>umgeleitet</td></tr><tr><td class="b">PUT</td><td>etwas ersetzen</td><td class="b">404</td><td style="background:#FBEBBF">nicht gefunden</td></tr><tr><td class="b">DELETE</td><td>etwas löschen</td><td class="b">403</td><td style="background:#FBEBBF">verboten</td></tr><tr><td class="b"></td><td></td><td class="b">500</td><td style="background:#F2CFCB">Serverfehler — der Code ist schuld</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Merkregel: <b>GET holt, POST schickt.</b> Passwörter niemals per GET — sie stünden in der URL</p>
+<p class="line l0 step" data-g="1">Die erste Ziffer verrät alles: <b>2xx</b> gut, <b>3xx</b> woanders, <b>4xx</b> Client-Fehler, <b>5xx</b> Server-Fehler</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Wo läuft was?</h2>
+      <p class="sub">Client- und serverseitige Technologien</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die beiden Seiten im Vergleich</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:150px"><col style="width:330px"><col style="width:336px"></colgroup><tr><th></th><th>clientseitig</th><th>serverseitig</th></tr><tr><td class="b">läuft auf</td><td>dem Gerät des Nutzers</td><td>dem Server im Rechenzentrum</td></tr><tr><td class="b">Sprache</td><td>JavaScript</td><td>PHP, Python, Java, Node.js</td></tr><tr><td class="b">sieht der Nutzer</td><td>den ganzen Quelltext</td><td>nur das Ergebnis</td></tr><tr><td class="b">kann</td><td>Seite sofort verändern, ohne Neuladen</td><td style="background:#DDE8C6">Datenbank lesen, Dateien speichern</td></tr><tr><td class="b">kann nicht</td><td style="background:#F2CFCB">Geheimnisse hüten, Daten sicher prüfen</td><td>auf Mausbewegungen reagieren</td></tr><tr><td class="b">Beispiel</td><td>Eingabe rot färben, Menü aufklappen</td><td>Rezept aus der Datenbank holen</td></tr></table><div class="body" style="top:295.975px;height:200.025px"><p class="line l0 step" data-g="0"><b>Sicherheitsregel</b>: Jede Prüfung im Browser ist nur Komfort — die <b>echte</b> Prüfung passiert auf dem Server</p>
+<p class="line l0 step" data-g="1">Alles, was der Client sieht, kann der Client auch <b>ändern</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Clientseitig: JavaScript reagiert sofort</h3><div class="rules"></div><div class="codepanel"><pre>// laeuft im Browser, ohne den Server zu fragen
+const feld = document.getElementById('kalorien');
+const hinweis = document.getElementById('hinweis');
+
+feld.addEventListener('input', function () {
+    const wert = parseInt(feld.value);
+    if (wert &gt; 2500) {
+        hinweis.textContent = 'Das ist viel fuer einen Tag.';
+    } else {
+        hinweis.textContent = '';
+    }
+});</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Serverseitig: PHP baut die Seite</h3><div class="rules"></div><div class="codepanel"><pre>&lt;?php
+// laeuft auf dem Server - der Browser sieht nur das Ergebnis
+$db = new PDO('sqlite:tagebuch.db');
+
+$stmt = $db-&gt;prepare('SELECT name, kcal FROM lebensmittel WHERE kcal &gt; ?');
+$stmt-&gt;execute([200]);
+
+foreach ($stmt-&gt;fetchAll() as $zeile) {
+    echo '&lt;li&gt;' . htmlspecialchars($zeile['name']) . '&lt;/li&gt;';
+}
+?&gt;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was daran wichtig ist</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Der Browser bekommt <b>fertiges HTML</b> — von PHP sieht er keine Zeile</p>
+<p class="line l0 step" data-g="1"><b>prepare</b> mit Platzhalter statt zusammengesetztem SQL: das ist der Schutz gegen <b>SQL-Injection</b></p>
+<p class="line l0 step" data-g="2"><b>htmlspecialchars</b> entschärft Nutzertext, bevor er in die Seite geschrieben wird</p>
+<p class="line l0 step" data-g="3">Beides kommt in Woche 30 (Datensicherheit) noch einmal ausführlich</p>
+<p class="line l0 step" data-g="4">Für unser Projekt reicht <b>eine</b> serverseitige Technik — wir bleiben bei einer Sprache</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>Selbst nachsehen</h2>
+      <p class="sub">Die Entwicklertools sind das beste Lehrmittel</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was ihr mit F12 seht</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:150px"><col style="width:300px"><col style="width:366px"></colgroup><tr><th>Reiter</th><th>zeigt</th><th>typische Frage, die es beantwortet</th></tr><tr><td class="b">Elemente</td><td>den fertigen DOM-Baum</td><td>Warum ist der Abstand so groß?</td></tr><tr><td class="b">Konsole</td><td>JavaScript-Fehler und -Ausgaben</td><td>Warum passiert nichts beim Klick?</td></tr><tr><td class="b">Netzwerk</td><td>jede einzelne Anfrage mit Status und Größe</td><td>Warum lädt die Seite so langsam?</td></tr><tr><td class="b">Anwendung</td><td>Cookies und lokalen Speicher</td><td>Was speichert die Seite über mich?</td></tr><tr><td class="b">Geräteansicht</td><td>die Seite in Handygröße</td><td>Bricht mein Layout um?</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Öffnen mit <b>F12</b> — im Netzwerk-Reiter die Seite mit <b>Strg+Shift+R</b> neu laden</p>
+<p class="line l0 step" data-g="1">Klickt eine Anfrage an: <b>Methode</b>, <b>Statuscode</b>, <b>Header</b> und Antwort stehen alle da</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: HTTP</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>HTTP/0.9</b> von 1991 kannte genau einen Befehl: <b>GET</b>. Statuscodes gab es nicht</p>
+<p class="line l0 step" data-g="1">Der Statuscode <b>418 I'm a teapot</b> stammt aus einem Aprilscherz von 1998 — und lebt bis heute weiter</p>
+<p class="line l0 step" data-g="2"><b>404</b> ist so berühmt, dass Firmen eigene Fehlerseiten gestalten — manche mit Spielen darin</p>
+<p class="line l0 step" data-g="3"><b>HTTP/2</b> und <b>HTTP/3</b> sind nicht mehr lesbarer Text, sondern binär — dafür deutlich schneller</p>
+<p class="line l0 step" data-g="4">Das Wort <b>Cookie</b> kommt von „magic cookie“, einem alten Fachbegriff für ein weitergereichtes Datenpäckchen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: den Verkehr beobachten</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Öffnet eure Projektseite und den <b>Netzwerk</b>-Reiter; notiert für drei Anfragen Methode, Status und Größe</p>
+<p class="line l0 step" data-g="1">Findet eine Seite im Netz, die einen <b>404</b> liefert, und haltet die Antwort fest</p>
+<p class="line l0 step" data-g="2">Ordnet in eurer Projektidee jede geplante Funktion ein: <b>clientseitig</b> oder <b>serverseitig</b>?</p>
+<p class="line l0 step" data-g="3">Begründet für <b>eine</b> davon, warum sie <b>nicht</b> im Browser geprüft werden darf</p>
+<p class="line l0 step" data-g="4">Ergebnis kommt als Tabelle ins Projekttagebuch — nächste Woche planen wir die Datenbank</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

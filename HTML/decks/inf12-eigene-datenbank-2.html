@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vom Schema zur laufenden Datenbank</title>
+<meta name="description" content="Implementieren, füllen, auswerten — und die Ergebnisse vorstellen">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-a3f74cd2eb4f.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/sunrise-5183917/" target="_blank" rel="noopener">Sarahhax2210</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 12</p>
+      <h1>Vom Schema zur laufenden Datenbank</h1>
+      <p class="sub">Implementieren, füllen, auswerten — und die Ergebnisse vorstellen</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Implementieren</h2>
+      <p class="sub">In der richtigen Reihenfolge</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum die Reihenfolge zählt</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Tabellen mit <b>Fremdschlüsseln</b> brauchen die verwiesene Tabelle <b>vorher</b></p>
+<p class="line l0 step" data-g="1">Also: erst die Tabellen <b>ohne</b> Verweise, dann die abhängigen</p>
+<p class="line l0 step" data-g="2">Beim <b>Löschen</b> genau umgekehrt — sonst greift die referentielle Integrität</p>
+<p class="line l0 step" data-g="3">Beim <b>Einfügen</b> ebenso: erst der Kurs, dann die Belegung</p>
+<p class="line l0 step" data-g="4">Ein Skript, das in falscher Reihenfolge läuft, bricht mit Constraint-Fehlern ab</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Anlege-Skript, Teil 1: die unabhängigen Tabellen</h3><div class="rules"></div><div class="codepanel"><pre>CREATE TABLE Lehrkraft (
+    kuerzel TEXT PRIMARY KEY, name TEXT, raum TEXT);
+
+CREATE TABLE Schueler (
+    snr INTEGER PRIMARY KEY, name TEXT NOT NULL, klasse TEXT);</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Teil 2: erst Verweise, dann Beziehungstabellen</h3><div class="rules"></div><div class="codepanel"><pre>CREATE TABLE Kurs (
+    knr INTEGER PRIMARY KEY, bezeichnung TEXT NOT NULL,
+    lehrkraft TEXT REFERENCES Lehrkraft(kuerzel));
+
+CREATE TABLE Belegung (
+    snr  INTEGER REFERENCES Schueler(snr),
+    knr  INTEGER REFERENCES Kurs(knr),
+    note INTEGER CHECK (note BETWEEN 1 AND 6),
+    PRIMARY KEY (snr, knr));</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Beispieldaten</h2>
+      <p class="sub">Genug, damit Auswertungen etwas zeigen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wie viele Zeilen wovon</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:280px"><col style="width:150px"><col style="width:386px"></colgroup><tr><th>Tabelle</th><th>Anzahl</th><th>warum</th></tr><tr><td class="b">Stammdaten (Lehrkraft, Kurs)</td><td>5 bis 8</td><td>genug für Gruppierungen</td></tr><tr><td class="b">Hauptentität (Schueler)</td><td>15 bis 25</td><td>genug für Durchschnitte</td></tr><tr><td class="b">Beziehungstabelle</td><td>40 bis 60</td><td>mehrere je Hauptentität</td></tr><tr><td class="b" style="background:#FBEBBF">Sonderfälle</td><td>3 bis 5</td><td>NULL-Werte, Randwerte, leere Gruppen</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Die letzte Zeile ist die wichtigste: <b>ohne Sonderfälle</b> merkt ihr Fehler nicht</p>
+<p class="line l0 step" data-g="1">Ein Kurs <b>ohne Belegung</b> und eine Belegung <b>ohne Note</b> gehören unbedingt hinein</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Daten sinnvoll erzeugen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Plausibel</b> statt zufällig: Namen, Daten und Werte sollen zueinander passen</p>
+<p class="line l0 step" data-g="1"><b>Keine echten personenbezogenen Daten</b> — erfundene Namen genügen</p>
+<p class="line l0 step" data-g="2">Mit <b>INSERT … VALUES (…), (…), (…)</b> lassen sich viele Zeilen auf einmal einfügen</p>
+<p class="line l0 step" data-g="3">Oder: eine <b>CSV-Datei</b> importieren, das Werkzeug kann das</p>
+<p class="line l0 step" data-g="4">Nach dem Füllen: **SELECT COUNT(*)** je Tabelle — stimmen die Zahlen?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Auswerten</h2>
+      <p class="sub">Die fünf Fragen beantworten</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Auswertungsabfragen, die etwas zeigen</h3><div class="rules"></div><div class="codepanel"><pre>-- 1. Wie viele Schueler belegen welchen Kurs?
+SELECT k.bezeichnung, COUNT(*) AS anzahl
+FROM Kurs k JOIN Belegung b ON k.knr = b.knr
+GROUP BY k.bezeichnung ORDER BY anzahl DESC;
+
+-- 2. Durchschnittsnote je Kurs, nur wo es Noten gibt
+SELECT k.bezeichnung, ROUND(AVG(b.note), 2) AS schnitt
+FROM Kurs k JOIN Belegung b ON k.knr = b.knr
+WHERE b.note IS NOT NULL
+GROUP BY k.bezeichnung HAVING COUNT(*) &gt;= 3;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Bausteine einer Auswertung</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:150px"><col style="width:350px"><col style="width:316px"></colgroup><tr><th>Klausel</th><th>Aufgabe</th><th>wirkt</th></tr><tr><td class="b">WHERE</td><td>Zeilen auswählen</td><td>vor der Gruppierung</td></tr><tr><td class="b">GROUP BY</td><td>Zeilen zu Gruppen zusammenfassen</td><td>in der Mitte</td></tr><tr><td class="b" style="background:#FBEBBF">HAVING</td><td>Gruppen auswählen</td><td>nach der Gruppierung</td></tr><tr><td class="b">ORDER BY</td><td>Ergebnis sortieren</td><td>zuletzt</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0"><b>WHERE filtert Zeilen, HAVING filtert Gruppen</b> — das ist der Unterschied</p>
+<p class="line l0 step" data-g="1">Eine Bedingung über COUNT oder AVG gehört immer in <b>HAVING</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">WHERE filtert Zeilen, HAVING filtert Gruppen. Und ohne Sonderfälle in den Testdaten findet man keine Fehler.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Implementierung</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ein <b>Anlege-Skript</b> ist wertvoller als die fertige Datei — es lässt sich wiederholen</p>
+<p class="line l0 step" data-g="1">Profis versionieren Schema-Änderungen als <b>Migrationen</b>, nummeriert und nachvollziehbar</p>
+<p class="line l0 step" data-g="2"><b>ROUND(AVG(x), 2)</b> rundet erst am Ende — vorher gerundet wird das Ergebnis falsch</p>
+<p class="line l0 step" data-g="3"><b>HAVING ohne GROUP BY</b> ist erlaubt: es filtert dann die eine Gesamtgruppe</p>
+<p class="line l0 step" data-g="4">Testdaten mit Sonderfällen heißen in der Praxis <b>Edge Cases</b> — sie finden die meisten Fehler</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe heute</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Schema implementieren</b> — in der richtigen Reihenfolge, mit Constraints</p>
+<p class="line l0 step" data-g="1"><b>Beispieldaten</b> einpflegen, inklusive drei bis fünf Sonderfällen</p>
+<p class="line l0 step" data-g="2">Eure <b>fünf Fragen</b> aus der letzten Stunde als Abfragen umsetzen</p>
+<p class="line l0 step" data-g="3">Mindestens <b>eine Abfrage mit GROUP BY</b> und <b>eine mit JOIN über drei Tabellen</b></p>
+<p class="line l0 step" data-g="4">Zum Schluss: <b>drei Minuten Vorstellung</b> — Thema, Modell, eine überraschende Auswertung</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

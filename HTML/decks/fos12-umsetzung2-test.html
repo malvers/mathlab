@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Umsetzung II und Test</title>
+<meta name="description" content="Fertigstellen, systematisch prüfen und sich Rückmeldung holen">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-6560a60ba0d7.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/breakfast-6526807/" target="_blank" rel="noopener">blandinejoannic</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — FOS 12</p>
+      <h1>Umsetzung II und Test</h1>
+      <p class="sub">Fertigstellen, systematisch prüfen und sich Rückmeldung holen</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Restarbeiten</h2>
+      <p class="sub">Was jetzt noch dazukommt</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die typische Restliste</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:716px;font-size:11px"><colgroup><col style="width:220px"><col style="width:380px"><col style="width:116px"></colgroup><tr><th class="al">Aufgabe</th><th class="al">warum sie oft übrig bleibt</th><th class="ac">Aufwand</th></tr><tr><td class="b al">restliche Seiten anbinden</td><td class="al">die erste war spannend, der Rest ist Fleiß</td><td class="ac">je 20 Min.</td></tr><tr><td class="b al">Formular prüfen</td><td class="al">„geht ja auch so“ — bis jemand Unsinn eingibt</td><td class="ac">30 Min.</td></tr><tr><td class="b al">Fehlermeldungen</td><td class="al">man sieht sie beim eigenen Testen nie</td><td class="ac">20 Min.</td></tr><tr><td class="b al">leere Ergebnisliste</td><td class="al">kein Datensatz gefunden → leere Seite</td><td class="ac">10 Min.</td></tr><tr><td class="b al">Rechtschreibung</td><td class="al">wird immer unterschätzt und immer bemerkt</td><td class="ac">20 Min.</td></tr><tr><td class="b al">Bilder und Lizenzen</td><td class="al">Quelle nicht notiert, Bild zu groß</td><td class="ac">30 Min.</td></tr></table><div class="body" style="top:302.45px;height:193.55px"><p class="line l0 step" data-g="0">Schreibt die Restliste <b>auf</b> und verteilt sie — sonst macht sie am Ende einer allein</p>
+<p class="line l0 step" data-g="1">Alles, was nach dieser Woche noch offen ist, wird in Woche 31 knapp</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Zwei kleine Dinge, die sofort professionell wirken</h3><div class="rules"></div><div class="codepanel" style="padding-top:39.5px;padding-bottom:39.5px"><pre style="font-size:10px">&lt;?php
+// 1) Leere Ergebnisliste abfangen
+$zeilen = $stmt-&gt;fetchAll();
+if (count($zeilen) === 0) {
+    echo '&lt;p&gt;Noch keine Eintraege vorhanden.&lt;/p&gt;';
+} else {
+    foreach ($zeilen as $z) { /* Tabelle ausgeben */ }
+}
+
+// 2) Eingaben auf dem Server pruefen - nicht nur im Browser
+$kcal = (int)($_POST['kcal'] ?? -1);
+if ($kcal &lt; 0 || $kcal &gt; 900) {
+    echo '&lt;p class="fehler"&gt;Bitte einen Wert zwischen 0 und 900 angeben.&lt;/p&gt;';
+} else {
+    // erst jetzt speichern
+}
+?&gt;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Systematisch testen</h2>
+      <p class="sub">Nicht klicken, bis es zufällig klappt</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Sechs Testarten — jede findet andere Fehler</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:180px"><col style="width:290px"><col style="width:346px"></colgroup><tr><th>Testart</th><th>Frage</th><th>Beispiel in eurem Projekt</th></tr><tr><td class="b">Funktionstest</td><td>Tut jede Funktion, was sie soll?</td><td>Formular speichert, Liste zeigt es</td></tr><tr><td class="b">Grenzwerttest</td><td>Was passiert an den Rändern?</td><td>0 kcal, 900 kcal, 901 kcal</td></tr><tr><td class="b">Fehleingabetest</td><td>Was bei Unsinn?</td><td>Text im Zahlenfeld, leeres Feld</td></tr><tr><td class="b">Navigationstest</td><td>Führt jeder Link irgendwohin?</td><td>alle Menüpunkte anklicken</td></tr><tr><td class="b">Darstellungstest</td><td>Sieht es überall gut aus?</td><td>zwei Browser, Handybreite</td></tr><tr><td class="b">Datentest</td><td>Bleiben die Daten korrekt?</td><td>Datensatz anlegen, neu laden, prüfen</td></tr></table><div class="body" style="top:295.975px;height:200.025px"><p class="line l0 step" data-g="0">Der <b>Grenzwerttest</b> findet die meisten Fehler — genau wie in der Klausur zu LB 2</p>
+<p class="line l0 step" data-g="1">Testet <b>fremde</b> Bereiche: wer den Code geschrieben hat, sieht seine Lücken nicht</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Das Testprotokoll — so wird es geführt</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:50px"><col style="width:290px"><col style="width:200px"><col style="width:180px"><col style="width:96px"></colgroup><tr><th>Nr</th><th>Testfall</th><th>erwartet</th><th>beobachtet</th><th>Status</th></tr><tr><td class="b">1</td><td>Lebensmittel „Apfel“, 52 kcal speichern</td><td>erscheint in der Liste</td><td>erscheint</td><td style="background:#DDE8C6">ok</td></tr><tr><td class="b">2</td><td>kcal = 901 speichern</td><td>Meldung, kein Eintrag</td><td>wird gespeichert</td><td style="background:#F2CFCB">Fehler</td></tr><tr><td class="b">3</td><td>Feld Name leer lassen</td><td>Meldung, kein Eintrag</td><td>Meldung</td><td style="background:#DDE8C6">ok</td></tr><tr><td class="b">4</td><td>Liste bei leerer Tabelle</td><td>Hinweistext</td><td>leere Seite</td><td style="background:#F2CFCB">Fehler</td></tr><tr><td class="b">5</td><td>Menü auf 360 px Breite</td><td>Links untereinander</td><td>Links untereinander</td><td style="background:#DDE8C6">ok</td></tr></table><div class="body" style="top:276.55px;height:219.45px"><p class="line l0 step" data-g="0">Fünf Spalten genügen — aber sie werden <b>beim Testen</b> ausgefüllt, nicht danach aus dem Kopf</p>
+<p class="line l0 step" data-g="1">Zu jedem <b>Fehler</b> gehört ein Eintrag in der Aufgabenliste mit Name und Termin</p>
+<p class="line l0 step" data-g="2">Nach der Korrektur wird der Testfall <b>erneut</b> ausgeführt und der Status geändert</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wie ihr auf gute Testfälle kommt</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Geht den <b>Anbindungsplan</b> durch: jede Seite, jede Funktion mindestens ein Testfall</p>
+<p class="line l0 step" data-g="1">Zu jedem Eingabefeld: <b>gültig</b>, <b>Grenze</b>, <b>ungültig</b>, <b>leer</b></p>
+<p class="line l0 step" data-g="2">Denkt an den <b>ersten Besuch</b>: leere Datenbank, noch keine Daten</p>
+<p class="line l0 step" data-g="3">Denkt an den <b>bösen Fall</b>: jemand tippt Anführungszeichen, spitze Klammern, 300 Zeichen</p>
+<p class="line l0 step" data-g="4">Und an den <b>doppelten Klick</b>: wird der Datensatz zweimal gespeichert?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Fehler beheben</h2>
+      <p class="sub">Erst verstehen, dann ändern</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Vorgehen bei einem gemeldeten Fehler</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:180px"><col style="width:636px"></colgroup><tr><th>Schritt</th><th>was ihr tut</th></tr><tr><td class="b">1 Nachstellen</td><td>den Fehler selbst auslösen — sonst ist er nicht bewiesen</td></tr><tr><td class="b">2 Eingrenzen</td><td>welche Datei, welche Zeile? Zwischenausgaben oder Entwicklertools</td></tr><tr><td class="b">3 Ursache benennen</td><td>in einem Satz aufschreiben, <b>warum</b> es schiefgeht</td></tr><tr><td class="b">4 Ändern</td><td>eine Sache auf einmal ändern, nicht drei</td></tr><tr><td class="b">5 Nachtesten</td><td>denselben Testfall wiederholen — und die Nachbarfälle gleich mit</td></tr><tr><td class="b">6 Notieren</td><td>Testprotokoll aktualisieren, Tagebucheintrag schreiben</td></tr></table><div class="body" style="top:302.45px;height:193.55px"><p class="line l0 step" data-g="0">Schritt 3 ist der, der am häufigsten übersprungen wird — und ohne ihn wird nur geraten</p>
+<p class="line l0 step" data-g="1">Wenn nach der Änderung etwas <b>anderes</b> kaputt ist: eine Änderung zu viel auf einmal</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fehler, die in fast jedem Projekt auftauchen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Pfad stimmt lokal, aber nicht auf dem Server</b> — Groß-/Kleinschreibung beachten</p>
+<p class="line l0 step" data-g="1"><b>Formular speichert doppelt</b> beim Neuladen — nach dem Speichern umleiten hilft</p>
+<p class="line l0 step" data-g="2"><b>Umlaute</b> kaputt an genau einer Stelle — meist die Datenbankverbindung</p>
+<p class="line l0 step" data-g="3"><b>Layout bricht</b> bei langen Wörtern oder großen Bildern — max-width nicht vergessen</p>
+<p class="line l0 step" data-g="4"><b>Zahl als Text</b> verglichen — '10' &lt; '9' ist wahr, wenn es Text ist</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>Feedbackrunde</h2>
+      <p class="sub">Fremde Augen sehen mehr</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Ablauf der Runde (45 Minuten)</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:110px"><col style="width:706px"></colgroup><tr><th>Zeit</th><th>was passiert</th></tr><tr><td class="b">5 Min.</td><td>Team A zeigt kurz: Thema, was läuft, wo es hakt</td></tr><tr><td class="b">10 Min.</td><td>Team B benutzt die Seite selbst — ohne Erklärung, nur beobachtet</td></tr><tr><td class="b">10 Min.</td><td>Team B nennt: drei Dinge, die gut sind, drei, die stören, eine Frage</td></tr><tr><td class="b">5 Min.</td><td>Team A notiert alles — ohne zu widersprechen</td></tr><tr><td class="b">15 Min.</td><td>Rollen tauschen</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Die zehn Minuten <b>stilles Benutzen</b> sind das Wertvollste: dabei zeigt sich, was unklar ist</p>
+<p class="line l0 step" data-g="1">Team A darf in dieser Zeit <b>nicht helfen</b> — genau das kann später auch niemand</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Feedbackregeln</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Beschreiben statt bewerten</b>: „Ich habe den Speichern-Knopf nicht gefunden“ statt „unübersichtlich“</p>
+<p class="line l0 step" data-g="1"><b>Konkret</b>: Seite, Klick, Erwartung, Beobachtung</p>
+<p class="line l0 step" data-g="2"><b>Zuerst das Gute</b> — und zwar ernst gemeint, nicht als Pflichtübung</p>
+<p class="line l0 step" data-g="3">Als Empfänger: <b>nur zuhören und mitschreiben</b>, nicht erklären, nicht rechtfertigen</p>
+<p class="line l0 step" data-g="4">Danach im Team entscheiden, <b>was</b> ihr übernehmt — und das im Tagebuch begründen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Ein Fehler, den ihr selbst findet, kostet Minuten. Einer, den die Präsentation findet, kostet Punkte.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Testen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Der erste dokumentierte <b>Bug</b> war 1947 eine echte Motte im Relais des Harvard Mark II — eingeklebt ins Logbuch</p>
+<p class="line l0 step" data-g="1"><b>Testen kann die Anwesenheit von Fehlern zeigen, nie ihre Abwesenheit</b> — Dijkstra, 1969</p>
+<p class="line l0 step" data-g="2">Der <b>Knight-Capital</b>-Fehler 2012 kostete 440 Mio. $ in 45 Minuten — alter Code, der nie getestet wurde</p>
+<p class="line l0 step" data-g="3">Beim <b>Hallway Testing</b> fragt man einfach jemanden vom Flur — fünf Personen finden 80 % der Bedienprobleme</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe bis nächste Woche</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Alle</b> Funktionen aus dem Anbindungsplan laufen — oder sind begründet gestrichen</p>
+<p class="line l0 step" data-g="1">Ein <b>ausgefülltes Testprotokoll</b> mit mindestens zwölf Testfällen</p>
+<p class="line l0 step" data-g="2">Alle beim Test gefundenen Fehler sind <b>behoben oder in der Aufgabenliste</b> mit Termin</p>
+<p class="line l0 step" data-g="3">Das <b>Feedback</b> des Partnerteams ist notiert, mit eurer Entscheidung dazu</p>
+<p class="line l0 step" data-g="4">Nächste Woche: <b>Datensicherheit und Datenschutz</b> — schaut euch schon einmal eure Formulare an</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

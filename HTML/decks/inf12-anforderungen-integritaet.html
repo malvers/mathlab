@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Was eine Datenbank leisten muss</title>
+<meta name="description" content="Redundanz, Konsistenz, Integrität — und wie man sie im DBMS erzwingt">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-315354e2703f.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/mountain-7866362/" target="_blank" rel="noopener">yoshitaka2</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 12</p>
+      <h1>Was eine Datenbank leisten muss</h1>
+      <p class="sub">Redundanz, Konsistenz, Integrität — und wie man sie im DBMS erzwingt</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Die Begriffe</h2>
+      <p class="sub">Drei Wörter, die oft verwechselt werden</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Redundanz, Konsistenz, Integrität</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:180px"><col style="width:330px"><col style="width:306px"></colgroup><tr><th>Begriff</th><th>bedeutet</th><th>Gegenbeispiel</th></tr><tr><td class="b" style="background:#FBEBBF">Redundanz</td><td>dieselbe Angabe mehrfach gespeichert</td><td>Adresse in drei Tabellen</td></tr><tr><td class="b" style="background:#F2CFCB">Konsistenz</td><td>die Daten widersprechen sich nicht</td><td>zwei verschiedene Adressen</td></tr><tr><td class="b">Integrität</td><td>die Daten erfüllen alle festgelegten Regeln</td><td>Note 7, Kurs ohne Lehrkraft</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0"><b>Redundanz</b> ist die Ursache, <b>Inkonsistenz</b> die Folge — nicht umgekehrt</p>
+<p class="line l0 step" data-g="1"><b>Integrität</b> ist der Oberbegriff für alle Regeln, die das DBMS durchsetzt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Kontrollierte Redundanz</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Nicht jede Redundanz ist ein Fehler — manche ist <b>beabsichtigt</b></p>
+<p class="line l0 step" data-g="1">Ein <b>Index</b> ist Redundanz: dieselben Werte noch einmal, sortiert</p>
+<p class="line l0 step" data-g="2">Eine <b>Sicherungskopie</b> ist Redundanz — und lebensrettend</p>
+<p class="line l0 step" data-g="3">Entscheidend ist, dass das <b>DBMS</b> sie pflegt, nicht der Mensch</p>
+<p class="line l0 step" data-g="4">Gefährlich ist nur die <b>unkontrollierte</b> Redundanz in den Nutzdaten</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Die Integritätsarten</h2>
+      <p class="sub">Vier Ebenen, vier Regeln</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Welche Integrität wovor schützt</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:220px"><col style="width:350px"><col style="width:246px"></colgroup><tr><th>Art</th><th>Regel</th><th>im SQL</th></tr><tr><td class="b">Domänenintegrität</td><td>der Wert passt zum Datentyp und Wertebereich</td><td>Datentyp, CHECK</td></tr><tr><td class="b">Entitätsintegrität</td><td>jede Zeile ist eindeutig, Schlüssel nicht NULL</td><td>PRIMARY KEY</td></tr><tr><td class="b">Referentielle Integrität</td><td>jeder Verweis zeigt auf eine vorhandene Zeile</td><td>FOREIGN KEY</td></tr><tr><td class="b" style="background:#E6ECF8">Semantische Integrität</td><td>fachliche Regeln der Miniwelt</td><td>CHECK, Trigger</td></tr></table><div class="body" style="top:257.125px;height:238.875px"><p class="line l0 step" data-g="0">Die ersten drei kann jedes DBMS <b>automatisch</b> durchsetzen</p>
+<p class="line l0 step" data-g="1">Die vierte muss man <b>formulieren</b> — sie steht in keinem Standard</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Constraints im DBMS setzen</h3><div class="rules"></div><div class="codepanel"><pre>CREATE TABLE Belegung (
+    snr  INTEGER NOT NULL REFERENCES Schueler(snr),
+    knr  INTEGER NOT NULL REFERENCES Kurs(knr),
+    note INTEGER CHECK (note BETWEEN 1 AND 6),
+    PRIMARY KEY (snr, knr)
+);
+
+ALTER TABLE Kurs
+  ADD CONSTRAINT stunden_positiv CHECK (stunden &gt; 0);</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Regeln gehören in die Datenbank</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Auf dieselbe Datenbank greifen <b>mehrere</b> Programme zu</p>
+<p class="line l0 step" data-g="1">Eine Regel im Programm gilt nur für <b>dieses</b> Programm</p>
+<p class="line l0 step" data-g="2">Eine Regel im DBMS gilt für <b>jeden</b> Zugriff, auch für den von Hand</p>
+<p class="line l0 step" data-g="3">Und sie überlebt den Austausch der Anwendung</p>
+<p class="line l0 step" data-g="4">Faustregel: <b>fachliche Regeln so nah wie möglich an den Daten</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Transaktionen</h2>
+      <p class="sub">Konsistenz über mehrere Schritte</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die ACID-Eigenschaften</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:130px"><col style="width:250px"><col style="width:436px"></colgroup><tr><th>Buchstabe</th><th>steht für</th><th>heißt</th></tr><tr><td class="b">A</td><td>Atomarität</td><td>ganz oder gar nicht</td></tr><tr><td class="b">C</td><td>Konsistenz</td><td>vorher gültig, nachher gültig</td></tr><tr><td class="b">I</td><td>Isolation</td><td>gleichzeitige Transaktionen stören sich nicht</td></tr><tr><td class="b">D</td><td>Dauerhaftigkeit</td><td>bestätigte Änderungen überleben einen Absturz</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Klassisches Beispiel: <b>Umbuchen</b> — abbuchen und gutschreiben gehören zusammen</p>
+<p class="line l0 step" data-g="1">Bricht der Rechner dazwischen ab, macht <b>COMMIT/ROLLBACK</b> die Sache ganz oder gar nicht</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fallbeispiele zur Analyse</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Eine Note 7 steht in der Datenbank — <b>welche</b> Integrität fehlt?</p>
+<p class="line l0 step" data-g="1">Ein Kurs verweist auf eine gelöschte Lehrkraft — <b>welche</b>?</p>
+<p class="line l0 step" data-g="2">Zwei Schüler haben dieselbe SNr — <b>welche</b>?</p>
+<p class="line l0 step" data-g="3">Ein Schüler ist in Klasse „BGY99“, die es nicht gibt — <b>welche</b>?</p>
+<p class="line l0 step" data-g="4">Zu jedem Fall: <b>welches Constraint</b> hätte es verhindert?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Redundanz ist die Ursache, Inkonsistenz die Folge. Und jede fachliche Regel gehört so nah wie möglich an die Daten.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Integrität</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>ACID</b> wurde 1983 von Härder und Reuter geprägt — beide aus Deutschland</p>
+<p class="line l0 step" data-g="1">Manche verteilten Systeme geben Konsistenz bewusst auf: das nennt man <b>BASE</b></p>
+<p class="line l0 step" data-g="2">Der <b>CAP-Satz</b> sagt: von Konsistenz, Verfügbarkeit und Partitionstoleranz gibt es nur zwei</p>
+<p class="line l0 step" data-g="3">Ein <b>Trigger</b> ist Programmcode, den das DBMS bei bestimmten Änderungen selbst ausführt</p>
+<p class="line l0 step" data-g="4">Trigger sind mächtig und gefürchtet: sie wirken unsichtbar, wenn niemand sie dokumentiert</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe am Rechner</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Setzt an eurer Datenbank <b>PRIMARY KEY</b>, <b>FOREIGN KEY</b> und mindestens zwei <b>CHECK</b></p>
+<p class="line l0 step" data-g="1">Versucht, jede Regel zu <b>verletzen</b>, und notiert die Fehlermeldung</p>
+<p class="line l0 step" data-g="2">Analysiert die <b>vier Fallbeispiele</b> aus Kapitel 3</p>
+<p class="line l0 step" data-g="3">Findet in eurer Datenbank eine <b>kontrollierte</b> und eine <b>unkontrollierte</b> Redundanz</p>
+<p class="line l0 step" data-g="4">Formuliert eine fachliche Regel eurer Miniwelt als <b>CHECK</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Entity-Relationship-Modell I</title>
+<meta name="description" content="Die Welt beschreiben, bevor man Tabellen baut">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-8d9b7990b606.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/road-6790127/" target="_blank" rel="noopener">shogun</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — FOS 12</p>
+      <h1>Entity-Relationship-Modell I</h1>
+      <p class="sub">Die Welt beschreiben, bevor man Tabellen baut</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Wirklichkeit wird Modell</h2>
+      <p class="sub">Erst verstehen, was es gibt — dann entscheiden, wie man es speichert</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum modellieren?</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die Kursliste aus Woche 3 war ein Modell — ein <b>schlechtes</b>: alles in eine Tabelle</p>
+<p class="line l0 step" data-g="1">Vor der ersten Tabelle drei Fragen: <b>Welche Dinge?</b> <b>Welche Eigenschaften?</b> <b>Welche Beziehungen?</b></p>
+<p class="line l0 step" data-g="2">Das <b>ER-Modell</b> (Peter Chen, 1976) beantwortet sie als <b>Bild</b> — ohne eine Zeile SQL</p>
+<p class="line l0 step" data-g="3">Ein Bild, das Auftraggeber <b>und</b> Entwickler verstehen: die gemeinsame Sprache</p>
+<p class="line l0 step" data-g="4">Danach ist der Weg zu den Tabellen <b>mechanisch</b> — nächste Woche</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die drei Bausteine (Chen-Notation)</h3><div class="rules"></div><div class="pic"><img src="img/er-legende.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0"><b>Entitätstyp</b>: Schüler, Kurs, Lehrkraft — die <b>Dinge</b>, die es gibt</p>
+<p class="line l0 step" data-g="1"><b>Attribut</b>: Name, SNr, Raum — die <b>Eigenschaften</b> eines Dings</p>
+<p class="line l0 step" data-g="2"><b>Beziehungstyp</b>: belegt, leitet — was die Dinge <b>miteinander</b> zu tun haben</p>
+<p class="line l0 step" data-g="3">Linien verbinden — mehr Zeichen braucht das Modell nicht</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Entitäten und Attribute</h2>
+      <p class="sub">Was ist ein Ding, was ist nur eine Eigenschaft?</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Entität oder Attribut?</h3><div class="rules"></div><div class="body" style="width:404px"><p class="line l0 step" data-g="0"><b>Entitätstyp</b> = die Klasse (Schüler), <b>Entität</b> = ein konkretes Exemplar (Lena Krause)</p>
+<p class="line l0 step" data-g="1">Test: Hat es <b>eigene Eigenschaften</b>? Dann ist es eine Entität</p>
+<p class="line l0 step" data-g="2">Test: Ist es nur <b>ein Wert</b>? Dann ist es ein Attribut</p>
+<p class="line l0 step" data-g="3">Jeder Entitätstyp braucht ein <b>Schlüsselattribut</b>: eindeutig, nie leer</p>
+<p class="line l0 step" data-g="4">Hat er keins, erfindet man eins: <b>SNr</b>, KNr, LNr</p></div><table class="dtable" style="left:478px;top:150px;width:410px;font-size:10px"><colgroup><col style="width:110px"><col style="width:100px"><col style="width:200px"></colgroup><tr><th>Kandidat</th><th>Entität?</th><th>Warum</th></tr><tr><td class="b">Schüler</td><td style="background:#DDE8C6">ja</td><td>hat Name, Klasse, Datum</td></tr><tr><td class="b">Klasse 'FO12a'</td><td style="background:#F2CFCB">eher nein</td><td>nur ein Wert</td></tr><tr><td class="b">Lehrkraft</td><td style="background:#DDE8C6">ja</td><td>hat Name, Durchwahl</td></tr><tr><td class="b">Raum</td><td style="background:#FBEBBF">kommt drauf an</td><td>nur Nummer → Attribut</td></tr><tr><td class="b"></td><td></td><td>mit Größe, Ausstattung → Entität</td></tr></table><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Vom Text zum Modell: der Auftrag lesen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:376px"><col style="width:180px"><col style="width:260px"></colgroup><tr><th>Satz aus dem Auftrag</th><th>Baustein</th><th>Im Modell</th></tr><tr><td>„Jeder Schüler hat eine Nummer, einen Namen und eine Klasse.“</td><td>Entität + Attribute</td><td>SCHÜLER (SNr, Name, Klasse)</td></tr><tr><td>„Ein Kurs hat ein Fach und einen Raum.“</td><td>Entität + Attribute</td><td>KURS (KNr, Fach, Raum)</td></tr><tr><td>„Schüler belegen Kurse.“</td><td>Beziehung</td><td>SCHÜLER — belegt — KURS</td></tr><tr><td>„Jeden Kurs leitet genau eine Lehrkraft.“</td><td>Beziehung + Kardinalität</td><td>LEHRKRAFT — leitet — KURS, 1:n</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0"><b>Hauptwörter</b> werden Entitätstypen — wenn sie eigene Eigenschaften haben</p>
+<p class="line l0 step" data-g="1"><b>Eigenschaften</b> („hat eine Nummer“) werden Attribute</p>
+<p class="line l0 step" data-g="2"><b>Verben</b> zwischen zwei Hauptwörtern („belegen“, „leitet“) werden Beziehungstypen</p>
+<p class="line l0 step" data-g="3"><b>Zahlwörter</b> („genau eine“, „mehrere“) verraten die Kardinalität</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Beziehungen und Kardinalitäten</h2>
+      <p class="sub">Wie viele auf jeder Seite? 1:1, 1:n oder n:m</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Kardinalitäten: 1:1, 1:n, n:m</h3><div class="rules"></div><div class="pic"><img src="img/er-kardinalitaeten.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0"><b>1:1</b> — eine Klasse hat <b>eine</b> Klassenleitung, eine Klassenleitung <b>eine</b> Klasse</p>
+<p class="line l0 step" data-g="1"><b>1:n</b> — <b>eine</b> Lehrkraft leitet <b>viele</b> Kurse, jeder Kurs hat <b>eine</b> Lehrkraft</p>
+<p class="line l0 step" data-g="2"><b>n:m</b> — ein Schüler belegt <b>viele</b> Kurse, ein Kurs hat <b>viele</b> Schüler</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Kardinalität bestimmen: zwei Fragen stellen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Frage 1: <b>Ein</b> Schüler — wie viele Kurse kann er belegen? → <b>viele</b> (n)</p>
+<p class="line l0 step" data-g="1">Frage 2: <b>Ein</b> Kurs — wie viele Schüler kann er haben? → <b>viele</b> (m)</p>
+<p class="line l0 step" data-g="2">Beide Antworten zusammen: <b>n:m</b></p>
+<p class="line l0 step" data-g="3">Die Zahl steht immer <b>am anderen Ende</b>: „eine Lehrkraft leitet <b>n</b> Kurse“ — das n steht beim Kurs</p>
+<p class="line l0 step" data-g="4">Genauer geht es mit <b>Min-Max</b>: (0,n) = kann auch keinen haben — (1,1) = genau einen, Pflicht</p>
+<p class="line l0 step" data-g="5">Im Zweifel: den <b>Auftraggeber fragen</b>, nicht raten</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Das ER-Modell unserer Schul-Datenbank</h3><div class="rules"></div><div class="pic"><img src="img/er-schule.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Drei Entitätstypen, zwei Beziehungstypen — das <b>ganze</b> Modell von schule.db</p>
+<p class="line l0 step" data-g="1">Belegung ist <b>keine</b> Entität, sondern die n:m-Beziehung „belegt“ — ihre Tabelle entsteht erst bei der Überführung</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fallbeispiel: das Praktikum</h3><div class="rules"></div><div class="pic"><img src="img/er-praktikum.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">„Schüler absolvieren Praktika in Betrieben. Ein Betrieb hat Name, Ort, Branche.“</p>
+<p class="line l0 step" data-g="1">„Jedes Praktikum hat Beginn und Ende.“ → <b>Attribute an der Beziehung</b></p>
+<p class="line l0 step" data-g="2">Ein Schüler macht <b>mehrere</b> Praktika, ein Betrieb nimmt <b>mehrere</b> Schüler: <b>n:m</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: ER-Modell</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Peter Chen</b>, 1976: sein Aufsatz zum ER-Modell gehört zu den <b>meistzitierten</b> der Informatik</p>
+<p class="line l0 step" data-g="1">Chen wollte eine Notation, die <b>Kaufleute und Programmierer</b> gleichermaßen lesen können</p>
+<p class="line l0 step" data-g="2">Die <b>Krähenfuß</b>-Notation (crow's foot) zeichnet „viele“ als Vogelfuß — in Werkzeugen heute häufiger als Chens Rauten</p>
+<p class="line l0 step" data-g="3"><b>Werkzeuge</b> wie draw.io oder dbdiagram.io machen aus dem Diagramm direkt die CREATE-TABLE-Befehle</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Dinge werden Entitäten, Eigenschaften werden Attribute, Verben werden Beziehungen.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: euer eigenes Modell</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Beschreibt einen Ausschnitt in <b>fünf Sätzen</b>: Praktikumsbetrieb, Verein, Nebenjob, Bibliothek …</p>
+<p class="line l0 step" data-g="1">Mindestens <b>drei Entitätstypen</b>, jeder mit <b>Schlüssel</b> und zwei weiteren Attributen</p>
+<p class="line l0 step" data-g="2">Alle <b>Beziehungstypen</b> mit Kardinalität — begründet jede mit den zwei Fragen</p>
+<p class="line l0 step" data-g="3">Mindestens <b>eine n:m-Beziehung</b>, gern mit eigenem Attribut</p>
+<p class="line l0 step" data-g="4">Auf Papier zeichnen — nächste Woche wird daraus die Datenbank</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Umsetzung I</title>
+<meta name="description" content="Vom Plan zum laufenden Projekt: Seitenstruktur und Datenbankanbindung">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-77d712193313.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/fog-7440132/" target="_blank" rel="noopener">Nordseher</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — FOS 12</p>
+      <h1>Umsetzung I</h1>
+      <p class="sub">Vom Plan zum laufenden Projekt: Seitenstruktur und Datenbankanbindung</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Reihenfolge</h2>
+      <p class="sub">In welcher Ordnung ein Projekt entsteht</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Sieben Schritte — in dieser Reihenfolge</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:150px"><col style="width:300px"><col style="width:366px"></colgroup><tr><th>Schritt</th><th>was entsteht</th><th>fertig, wenn …</th></tr><tr><td class="b">1 Gerüst</td><td>Ordnerstruktur, index, stil.css</td><td>die Startseite lädt mit Layout</td></tr><tr><td class="b">2 Navigation</td><td>Kopf, Menü, Fuß auf allen Seiten</td><td>jede Seite ist von jeder erreichbar</td></tr><tr><td class="b">3 Statische Inhalte</td><td>Texte und Bilder zum Thema</td><td>die Seite ist ohne Daten schon lesbar</td></tr><tr><td class="b">4 Datenbank</td><td>Tabellen + Testdaten angelegt</td><td>Abfragen laufen im DBMS</td></tr><tr><td class="b" style="background:#DDE8C6">5 Verbindung</td><td style="background:#DDE8C6">eine Seite zeigt echte Datensätze</td><td style="background:#DDE8C6">die Liste kommt aus der Datenbank</td></tr><tr><td class="b">6 Eingabe</td><td>ein Formular schreibt in die Datenbank</td><td>der neue Datensatz erscheint in der Liste</td></tr><tr><td class="b">7 Rest</td><td>weitere Seiten nach demselben Muster</td><td>der Anbindungsplan ist abgearbeitet</td></tr></table><div class="body" style="top:315.4px;height:180.6px"><p class="line l0 step" data-g="0">Schritt 5 ist der <b>Meilenstein</b> dieser Woche: <b>eine</b> Seite mit echten Daten</p>
+<p class="line l0 step" data-g="1">Nie zwei Baustellen gleichzeitig — erst wenn ein Schritt läuft, beginnt der nächste</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Ordnung im Projektordner</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>index.html</b> ganz oben — der Einstiegspunkt heißt immer so</p>
+<p class="line l0 step" data-g="1"><b>css/</b> für Stylesheets, <b>bilder/</b> für Bilder, <b>daten/</b> für die Datenbankdatei</p>
+<p class="line l0 step" data-g="2">Dateinamen <b>klein</b>, ohne Leerzeichen und ohne Umlaute — Server sind da strenger als Windows</p>
+<p class="line l0 step" data-g="3"><b>Relative Pfade</b> benutzen (bilder/apfel.jpg), keine Laufwerksbuchstaben</p>
+<p class="line l0 step" data-g="4">Eine <b>Sicherungskopie</b> je Arbeitstag — im Teamordner, mit Datum im Namen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Seitenstruktur</h2>
+      <p class="sub">Kopf und Fuß nur einmal schreiben</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Wiederholtes auslagern</h3><div class="rules"></div><div class="codepanel"><pre>&lt;?php include 'teile/kopf.php'; ?&gt;
+
+&lt;main&gt;
+    &lt;h1&gt;Mein Tag&lt;/h1&gt;
+    &lt;p&gt;Hier stehen die Mahlzeiten von heute.&lt;/p&gt;
+&lt;/main&gt;
+
+&lt;?php include 'teile/fuss.php'; ?&gt;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum das der wichtigste Handgriff der Woche ist</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Navigation und Fußzeile stehen <b>einmal</b> da — Änderung wirkt auf allen Seiten</p>
+<p class="line l0 step" data-g="1">Genau dasselbe Prinzip wie <b>eine</b> CSS-Datei für alle Seiten</p>
+<p class="line l0 step" data-g="2">Ohne Serverumgebung geht <b>include</b> nicht — dann kopiert ihr den Block und pflegt ihn bewusst</p>
+<p class="line l0 step" data-g="3">Vergesst nicht: Seiten mit PHP-Code müssen auf <b>.php</b> enden</p>
+<p class="line l0 step" data-g="4">Testet nach dem Umbau <b>jede</b> Seite einmal — ein fehlender Pfad fällt sonst erst spät auf</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Daten holen</h2>
+      <p class="sub">Die erste Seite mit echten Datensätzen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Verbindung und Abfrage</h3><div class="rules"></div><div class="codepanel" style="padding-top:39.5px;padding-bottom:39.5px"><pre style="font-size:10px">&lt;?php
+// teile/db.php - wird von jeder Seite eingebunden
+$db = new PDO('sqlite:daten/tagebuch.db');
+$db-&gt;setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+?&gt;
+
+&lt;?php include 'teile/db.php'; ?&gt;
+&lt;table&gt;
+    &lt;tr&gt;&lt;th&gt;Lebensmittel&lt;/th&gt;&lt;th&gt;kcal je 100 g&lt;/th&gt;&lt;/tr&gt;
+&lt;?php
+$stmt = $db-&gt;query('SELECT name, kcal FROM lebensmittel ORDER BY name');
+foreach ($stmt as $zeile) {
+    echo '&lt;tr&gt;&lt;td&gt;' . htmlspecialchars($zeile['name']) . '&lt;/td&gt;';
+    echo '&lt;td&gt;' . (int)$zeile['kcal'] . '&lt;/td&gt;&lt;/tr&gt;';
+}
+?&gt;
+&lt;/table&gt;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Ein Formular, das speichert</h3><div class="rules"></div><div class="codepanel" style="padding-top:39.5px;padding-bottom:39.5px"><pre style="font-size:10px">&lt;form method="post" action="neu.php"&gt;
+    &lt;label for="name"&gt;Lebensmittel&lt;/label&gt;
+    &lt;input type="text" id="name" name="name" required&gt;
+
+    &lt;label for="kcal"&gt;kcal je 100 g&lt;/label&gt;
+    &lt;input type="number" id="kcal" name="kcal" min="0" max="900" required&gt;
+
+    &lt;button type="submit"&gt;Speichern&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;?php
+if (isset($_POST['name'])) {
+    $stmt = $db-&gt;prepare('INSERT INTO lebensmittel (name, kcal) VALUES (?, ?)');
+    $stmt-&gt;execute([$_POST['name'], (int)$_POST['kcal']]);
+    echo '&lt;p&gt;Gespeichert.&lt;/p&gt;';
+}
+?&gt;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Drei Regeln, die ab jetzt immer gelten</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>method="post"</b> für alles, was speichert — GET nur zum Abholen</p>
+<p class="line l0 step" data-g="1"><b>prepare</b> mit Platzhaltern, nie Nutzertext in den SQL-Text kleben</p>
+<p class="line l0 step" data-g="2"><b>htmlspecialchars</b> um jede Ausgabe, die aus der Datenbank oder vom Nutzer kommt</p>
+<p class="line l0 step" data-g="3">Jedes Eingabefeld braucht ein <b>label</b> — Pflicht für Barrierefreiheit und Bedienung</p>
+<p class="line l0 step" data-g="4">Warum das mehr als Stil ist, klären wir in <b>Woche 30</b>: SQL-Injection und XSS</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wenn nichts erscheint — die Checkliste</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:180px"><col style="width:280px"><col style="width:356px"></colgroup><tr><th>Symptom</th><th>häufige Ursache</th><th>Prüfung</th></tr><tr><td class="b" style="background:#F2CFCB">weiße Seite</td><td>PHP-Fehler wird nicht angezeigt</td><td>Fehlermeldungen einschalten, Log ansehen</td></tr><tr><td class="b" style="background:#F2CFCB">PHP-Code steht im Browser</td><td>Datei heißt .html statt .php</td><td>umbenennen, über den Server aufrufen</td></tr><tr><td class="b" style="background:#F2CFCB">Tabelle bleibt leer</td><td>Abfrage liefert nichts</td><td>dieselbe Abfrage im DBMS ausführen</td></tr><tr><td class="b" style="background:#F2CFCB">„no such table“</td><td>falscher Pfad zur Datenbankdatei</td><td>Pfad relativ zur aufrufenden Datei prüfen</td></tr><tr><td class="b" style="background:#F2CFCB">Umlaute kaputt</td><td>Zeichensatz</td><td>UTF-8 in HTML, Datei und Datenbank</td></tr><tr><td class="b" style="background:#F2CFCB">Formular tut nichts</td><td>name-Attribut fehlt</td><td>jedes Feld braucht name="…"</td></tr></table><div class="body" style="top:295.975px;height:200.025px"><p class="line l0 step" data-g="0"><b>Immer zuerst</b> die Abfrage im DBMS testen — dann weiß man, wo der Fehler nicht liegt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>Arbeitsstand</h2>
+      <p class="sub">Dokumentieren, während es passiert</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wann eine Aufgabe wirklich fertig ist</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:200px"><col style="width:616px"></colgroup><tr><th>Kriterium</th><th>erfüllt, wenn …</th></tr><tr><td class="b">Es läuft</td><td>die Seite lädt ohne Fehlermeldung</td></tr><tr><td class="b">Es stimmt</td><td>mindestens ein Testfall wurde durchgespielt und notiert</td></tr><tr><td class="b">Es ist sauber</td><td>HTML validiert, CSS getrennt, sprechende Namen</td></tr><tr><td class="b">Es ist im Ordner</td><td>die Datei liegt im Teamordner, nicht nur lokal</td></tr><tr><td class="b">Es steht im Tagebuch</td><td>Datum, wer, was, welches Problem</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Diese fünf Punkte sind die <b>Definition of Done</b> — ohne sie gilt eine Aufgabe als offen</p>
+<p class="line l0 step" data-g="1">„Bei mir lief es“ ist keine Abgabe: es muss im <b>gemeinsamen</b> Ordner laufen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Das Projekttagebuch dieser Woche</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Pro Stunde <b>ein Absatz</b>: Datum, Anwesende, Ziel, Ergebnis, Probleme, nächster Schritt</p>
+<p class="line l0 step" data-g="1"><b>Screenshots</b> vom Zwischenstand — sie sind später der Beleg für den Fortschritt</p>
+<p class="line l0 step" data-g="2"><b>Entscheidungen begründen</b>: warum diese Struktur, warum dieses Feld?</p>
+<p class="line l0 step" data-g="3"><b>Quellen</b> sofort notieren: Bilder, Codeschnipsel, Tutorials — mit Datum und Lizenz</p>
+<p class="line l0 step" data-g="4">Wer <b>KI-Werkzeuge</b> nutzt, schreibt hinein, wofür und was davon geändert wurde</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Umsetzung</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die <b>90-90-Regel</b>: Die ersten 90 % des Codes brauchen 90 % der Zeit. Die letzten 10 % brauchen die anderen 90 %</p>
+<p class="line l0 step" data-g="1"><b>PHP</b> hieß ursprünglich „Personal Home Page Tools“ und war 1994 ein Bastelprojekt von Rasmus Lerdorf</p>
+<p class="line l0 step" data-g="2">Der Fachbegriff für „erst das Gerüst, dann die Details“ ist <b>Walking Skeleton</b> — ein Programm, das von Anfang an durchläuft</p>
+<p class="line l0 step" data-g="3"><b>Ctrl+S</b> ist die meistgedrückte Tastenkombination in jeder Projektwoche — Sicherungskopien nicht vergessen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: der Meilenstein dieser Woche</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Alle</b> geplanten Seiten existieren mit Kopf, Navigation und Fuß</p>
+<p class="line l0 step" data-g="1">Die <b>Datenbank</b> ist angelegt und mit Testdaten gefüllt</p>
+<p class="line l0 step" data-g="2"><b>Mindestens eine</b> Seite zeigt echte Datensätze aus der Datenbank</p>
+<p class="line l0 step" data-g="3"><b>Ein</b> Formular schreibt einen Datensatz — mit prepare und htmlspecialchars</p>
+<p class="line l0 step" data-g="4">Der <b>Arbeitsstand</b> ist im Tagebuch dokumentiert, inklusive Screenshot und offener Punkte</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

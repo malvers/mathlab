@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Prüfungsvorbereitung II</title>
+<meta name="description" content="Grundstrukturen, Algorithmen und die Grenzen — unter Zeitvorgabe">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-c5cf3003643f.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/mist-1989298/" target="_blank" rel="noopener">MemoryCatcher</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 13</p>
+      <h1>Prüfungsvorbereitung II</h1>
+      <p class="sub">Grundstrukturen, Algorithmen und die Grenzen — unter Zeitvorgabe</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Der Überblick</h2>
+      <p class="sub">Was aus LB 3 geprüft wird</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Themen und Kernsätze</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:9.5px"><colgroup><col style="width:180px"><col style="width:636px"></colgroup><tr><th>Thema</th><th>Kernsatz</th></tr><tr><td class="b">Grundstrukturen</td><td>Folge, Auswahl, Wiederholung genügen für jeden Algorithmus</td></tr><tr><td class="b">Schleifenwahl</td><td>for wenn die Anzahl feststeht, sonst while</td></tr><tr><td class="b">Schreibtischtest</td><td>Wertetabelle: eine Spalte je Variable, eine Zeile je Durchlauf</td></tr><tr><td class="b">Modularisierung</td><td>Parameter hinein, return hinaus</td></tr><tr><td class="b">Euklid</td><td>a, b durch b, a mod b — endet, weil der Rest kleiner wird</td></tr><tr><td class="b">Suche</td><td>sequenziell O(n), binär O(log n), sortiert nötig</td></tr><tr><td class="b">Sortieren</td><td>Selectionsort O(n²), n(n−1)/2 Vergleiche</td></tr><tr><td class="b">Rekursion</td><td>Basisfall und kleiner werdendes Problem</td></tr><tr><td class="b">Grenzen</td><td>prinzipiell, zeitlich, numerisch</td></tr></table><div class="body" style="top:335.75px;height:160.25px"><p class="line l0 step" data-g="0">Zu jedem Algorithmus gehört: <b>warum endet er</b> und <b>wie viele Schritte</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Der Schreibtischtest</h2>
+      <p class="sub">Der sicherste Punktelieferant</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Was gibt dieses Programm aus?</h3><div class="rules"></div><div class="codepanel"><pre>zahlen = [4, 7, 2, 9, 5]
+max_wert = zahlen[0]
+summe = 0
+
+for z in zahlen:
+    summe = summe + z
+    if z &gt; max_wert:
+        max_wert = z
+
+print(summe, max_wert, summe / len(zahlen))</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Wertetabelle</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:150px"><col style="width:130px"><col style="width:280px"><col style="width:256px"></colgroup><tr><th>Durchlauf</th><th>z</th><th>summe nachher</th><th>max_wert nachher</th></tr><tr><td class="b">1</td><td>4</td><td>4</td><td>4</td></tr><tr><td class="b">2</td><td>7</td><td>11</td><td>7</td></tr><tr><td class="b">3</td><td>2</td><td>13</td><td>7</td></tr><tr><td class="b">4</td><td>9</td><td>22</td><td>9</td></tr><tr><td class="b">5</td><td>5</td><td>27</td><td>9</td></tr><tr><td class="b">Ausgabe</td><td>—</td><td style="background:#DDE8C6">27</td><td style="background:#DDE8C6">9, Mittelwert 5.4</td></tr></table><div class="body" style="top:295.975px;height:200.025px"><p class="line l0 step" data-g="0">Punkte gibt es <b>je korrekt geführter Zeile</b> — auch wenn das Ende nicht stimmt</p>
+<p class="line l0 step" data-g="1">Deshalb die Tabelle <b>immer vollständig</b> ausfüllen, nie im Kopf rechnen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Programmieren unter Zeitvorgabe</h2>
+      <p class="sub">Fünf Aufgaben, 45 Minuten</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Aufgaben</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:70px"><col style="width:570px"><col style="width:176px"></colgroup><tr><th>Nr</th><th>Aufgabe</th><th>Zeit</th></tr><tr><td class="b">1</td><td>Schreibtischtest zu einem gegebenen Programm</td><td>10 min</td></tr><tr><td class="b">2</td><td>Struktogramm zu einer Beschreibung</td><td>10 min</td></tr><tr><td class="b">3</td><td>Funktion schreiben: Quersumme einer Zahl</td><td>8 min</td></tr><tr><td class="b">4</td><td>Binäre Suche ergänzen (drei Lücken)</td><td>10 min</td></tr><tr><td class="b">5</td><td style="background:#FBEBBF">Begründen, warum ein Algorithmus endet</td><td>7 min</td></tr></table><div class="body" style="top:276.55px;height:219.45px"><p class="line l0 step" data-g="0">Aufgabe <b>5</b> wird am häufigsten weggelassen — dabei ist sie die kürzeste</p>
+<p class="line l0 step" data-g="1">Zwei Sätze genügen: <b>was wird kleiner</b> und <b>wo ist die Grenze</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Auf Papier programmieren</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Einrückung</b> sauber zeichnen — sie ist in Python die Struktur</p>
+<p class="line l0 step" data-g="1"><b>Variablennamen</b> sprechend wählen, das spart Kommentare</p>
+<p class="line l0 step" data-g="2">Syntaxfehler kosten <b>keine</b> Punkte, Denkfehler schon</p>
+<p class="line l0 step" data-g="3">Bei Unsicherheit: <b>Kommentar</b> dazuschreiben, was gemeint ist</p>
+<p class="line l0 step" data-g="4">Und am Ende <b>einmal von Hand durchlaufen</b> — das findet die meisten Fehler</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Zu jedem Algorithmus gehören zwei Sätze: warum er endet und wie viele Schritte er im schlechtesten Fall braucht.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Programmieren in Prüfungen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Auf Papier fällt auf, was die Entwicklungsumgebung sonst verdeckt</p>
+<p class="line l0 step" data-g="1">Der häufigste Fehler beim Schreibtischtest: die <b>erste Zeile</b> vergessen</p>
+<p class="line l0 step" data-g="2">Der zweithäufigste: bei while die <b>Bedingung nach dem letzten Durchlauf</b> nicht prüfen</p>
+<p class="line l0 step" data-g="3"><b>O-Notation</b> verlangt keine Rechnung, nur die Größenordnung</p>
+<p class="line l0 step" data-g="4">Und: eine Wertetabelle mit fünf Spalten schlägt jede Erklärung in Prosa</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe heute</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die <b>fünf Aufgaben</b> unter Zeitvorgabe bearbeiten</p>
+<p class="line l0 step" data-g="1">Selbst korrigieren und <b>Punkte vergeben</b></p>
+<p class="line l0 step" data-g="2">Zu jedem Fehler die <b>Ursache</b> notieren, nicht nur die Korrektur</p>
+<p class="line l0 step" data-g="3">Das <b>Merkblatt</b> von letzter Woche ergänzen</p>
+<p class="line l0 step" data-g="4">Nächstes Mal: Komplexaufgaben und mündliches Prüfen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

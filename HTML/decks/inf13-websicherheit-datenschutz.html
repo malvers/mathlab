@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sicher und sparsam</title>
+<meta name="description" content="Passwörter, Eingabevalidierung, HTTPS — und welche Daten die Seite wirklich braucht">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-63dd3f10eabe.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/grass-8420611/" target="_blank" rel="noopener">IndigoBunting</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 13</p>
+      <h1>Sicher und sparsam</h1>
+      <p class="sub">Passwörter, Eingabevalidierung, HTTPS — und welche Daten die Seite wirklich braucht</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Passwörter</h2>
+      <p class="sub">Niemals im Klartext</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wie ein Passwort gespeichert wird</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:280px"><col style="width:200px"><col style="width:336px"></colgroup><tr><th>Verfahren</th><th>Bewertung</th><th>warum</th></tr><tr><td class="b">Klartext</td><td style="background:#F2CFCB">grob fahrlässig</td><td>ein Datenleck gibt alles preis</td></tr><tr><td class="b">verschlüsselt</td><td style="background:#F2CFCB">falsch</td><td>wer den Schlüssel hat, liest alles</td></tr><tr><td class="b">gehasht (MD5, SHA1)</td><td style="background:#FBEBBF">veraltet</td><td>zu schnell, per Wörterbuch knackbar</td></tr><tr><td class="b">gehasht mit Salt und langsamem Verfahren</td><td style="background:#DDE8C6">richtig</td><td>bcrypt, Argon2</td></tr></table><div class="body" style="top:257.125px;height:238.875px"><p class="line l0 step" data-g="0">Ein <b>Hash</b> ist eine Einbahnstraße: aus dem Passwort wird ein Wert, zurück geht es nicht</p>
+<p class="line l0 step" data-g="1">Das <b>Salt</b> ist ein Zufallswert je Nutzer — es verhindert vorberechnete Tabellen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Passwörter richtig behandeln</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:11.5px">&lt;?php
+// beim Registrieren
+$hash = password_hash($passwort, PASSWORD_DEFAULT);
+$stmt = $pdo-&gt;prepare('INSERT INTO Nutzer (name, pwhash) VALUES (?, ?)');
+$stmt-&gt;execute([$name, $hash]);
+
+// beim Anmelden
+$stmt = $pdo-&gt;prepare('SELECT pwhash FROM Nutzer WHERE name = ?');
+$stmt-&gt;execute([$name]);
+$zeile = $stmt-&gt;fetch();
+
+if ($zeile &amp;&amp; password_verify($passwort, $zeile['pwhash'])) {
+    // angemeldet
+}</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Eingaben prüfen</h2>
+      <p class="sub">Auf dem Server, immer</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die drei Schritte bei jeder Eingabe</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:150px"><col style="width:330px"><col style="width:336px"></colgroup><tr><th>Schritt</th><th>heißt</th><th>Beispiel</th></tr><tr><td class="b">1. Prüfen</td><td>ist der Wert überhaupt zulässig?</td><td>Länge, Format, Wertebereich</td></tr><tr><td class="b">2. Normalisieren</td><td>in eine einheitliche Form bringen</td><td>trim, Kleinschreibung</td></tr><tr><td class="b" style="background:#DDE8C6">3. Sicher verwenden</td><td>prepare beim Speichern, maskieren beim Ausgeben</td><td>PDO, htmlspecialchars</td></tr></table><div class="body" style="top:237.7px;height:258.3px"><p class="line l0 step" data-g="0">Prüfungen im Browser sind <b>Komfort</b> — wer den Browser umgeht, umgeht sie</p>
+<p class="line l0 step" data-g="1">Verbindlich ist immer die Prüfung <b>auf dem Server</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was geprüft wird</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Pflichtfelder</b>: ist überhaupt etwas angekommen?</p>
+<p class="line l0 step" data-g="1"><b>Länge</b>: eine Ortsangabe mit 5000 Zeichen ist keine</p>
+<p class="line l0 step" data-g="2"><b>Format</b>: Datum, E-Mail, Postleitzahl — mit passendem Prüfmuster</p>
+<p class="line l0 step" data-g="3"><b>Wertebereich</b>: eine Jahreszahl 1200 oder 3000 ergibt keinen Sinn</p>
+<p class="line l0 step" data-g="4"><b>Zugehörigkeit</b>: darf dieser Nutzer diesen Datensatz überhaupt ändern?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>HTTPS und Datensparsamkeit</h2>
+      <p class="sub">Übertragung und Erhebung</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was HTTPS leistet — und was nicht</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:400px"><col style="width:416px"></colgroup><tr><th>leistet</th><th>leistet nicht</th></tr><tr><td class="b">verschlüsselt die Übertragung</td><td style="background:#FBEBBF">schützt nicht vor SQL-Injection</td></tr><tr><td class="b">prüft die Identität des Servers</td><td style="background:#FBEBBF">sagt nichts über die Seriosität</td></tr><tr><td class="b">verhindert Mitlesen im WLAN</td><td style="background:#FBEBBF">schützt die Daten nicht auf dem Server</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Das Schloss im Browser bedeutet: <b>die Leitung ist dicht</b>, nicht: <b>die Seite ist gut</b></p>
+<p class="line l0 step" data-g="1">Ohne HTTPS gehen Passwörter im offenen WLAN im Klartext über die Leitung</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Welche Daten braucht eure Seite wirklich?</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Zu jedem Feld die Frage: <b>wofür</b> wird es gebraucht? Keine Antwort heißt: weglassen</p>
+<p class="line l0 step" data-g="1"><b>Keine</b> Klarnamen, wo eine Nummer genügt</p>
+<p class="line l0 step" data-g="2"><b>Keine</b> Geburtsdaten, wenn nur das Alter zählt — und oft zählt nicht mal das</p>
+<p class="line l0 step" data-g="3"><b>Löschfrist</b> je Datenart festlegen und aufschreiben</p>
+<p class="line l0 step" data-g="4">Und eine <b>Datenschutzerklärung</b>, die in verständlichen Sätzen sagt, was passiert</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Das Schloss im Browser sagt nur: die Leitung ist dicht. Was auf dem Server passiert, sagt es nicht.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Websicherheit</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>password_hash</b> in PHP wählt automatisch ein sicheres Verfahren und erzeugt das Salt selbst</p>
+<p class="line l0 step" data-g="1"><b>Rainbow Tables</b> sind vorberechnete Hashtabellen — genau dagegen hilft das Salt</p>
+<p class="line l0 step" data-g="2"><b>Let's Encrypt</b> stellt seit 2016 kostenlose Zertifikate aus — seither ist HTTPS Standard</p>
+<p class="line l0 step" data-g="3">Die <b>OWASP Top Ten</b> listen die häufigsten Webrisiken — sie sind seit Jahren ähnlich</p>
+<p class="line l0 step" data-g="4">Der häufigste Fund bei Schulprojekten: <b>Zugangsdaten im Quelltext</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe am Rechner</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Falls ihr eine <b>Anmeldung</b> habt: password_hash und password_verify einbauen</p>
+<p class="line l0 step" data-g="1"><b>Jede</b> Eingabe auf dem Server prüfen — Pflicht, Länge, Format, Bereich</p>
+<p class="line l0 step" data-g="2">Prüft, ob <b>Zugangsdaten</b> irgendwo im Webordner oder Repository liegen</p>
+<p class="line l0 step" data-g="3">Geht euer <b>Datenmodell</b> durch: welches Feld könnt ihr streichen?</p>
+<p class="line l0 step" data-g="4">Schreibt eine kurze <b>Datenschutzerklärung</b> in verständlichen Sätzen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

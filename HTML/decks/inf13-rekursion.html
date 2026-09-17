@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Rekursion</title>
+<meta name="description" content="Eine Funktion, die sich selbst aufruft — und wo das an Grenzen stößt">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-036c2f3a8ea9.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/sunrise-9631245/" target="_blank" rel="noopener">ChiemSeherin</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 13</p>
+      <h1>Rekursion</h1>
+      <p class="sub">Eine Funktion, die sich selbst aufruft — und wo das an Grenzen stößt</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Die Idee</h2>
+      <p class="sub">Zwei Teile, mehr braucht es nicht</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Jede Rekursion besteht aus zwei Teilen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Basisfall</b>: der Fall, der ohne weiteren Aufruf beantwortet wird</p>
+<p class="line l0 step" data-g="1"><b>Rekursionsschritt</b>: das Problem wird auf ein <b>kleineres</b> zurückgeführt</p>
+<p class="line l0 step" data-g="2">Fehlt der Basisfall, läuft es bis zum Absturz</p>
+<p class="line l0 step" data-g="3">Wird das Problem nicht kleiner, ebenso</p>
+<p class="line l0 step" data-g="4">Die Prüffrage lautet immer: <b>Kommt jeder Aufruf beim Basisfall an?</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Fakultät rekursiv und iterativ</h3><div class="rules"></div><div class="codepanel"><pre>def fak_rek(n):
+    if n &lt;= 1:               # Basisfall
+        return 1
+    return n * fak_rek(n - 1)   # Rekursionsschritt
+
+def fak_it(n):
+    e = 1
+    for i in range(2, n + 1):
+        e = e * i
+    return e</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>fak_rek(4) Schritt für Schritt</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:200px"><col style="width:300px"><col style="width:316px"></colgroup><tr><th>Aufruf</th><th>wird zu</th><th>wartet auf</th></tr><tr><td class="b">fak_rek(4)</td><td>4 * fak_rek(3)</td><td>fak_rek(3)</td></tr><tr><td class="b">fak_rek(3)</td><td>3 * fak_rek(2)</td><td>fak_rek(2)</td></tr><tr><td class="b">fak_rek(2)</td><td>2 * fak_rek(1)</td><td>fak_rek(1)</td></tr><tr><td class="b">fak_rek(1)</td><td>1</td><td style="background:#DDE8C6">nichts — Basisfall</td></tr></table><div class="body" style="top:266.375px;height:229.625px"><p class="line l0 step" data-g="0">Jetzt wird <b>rückwärts</b> gerechnet: 1, dann 2, dann 6, dann <b>24</b></p>
+<p class="line l0 step" data-g="1">Jeder wartende Aufruf liegt so lange auf dem <b>Stack</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Fibonacci</h2>
+      <p class="sub">Wo Rekursion teuer wird</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Fibonacci naiv rekursiv</h3><div class="rules"></div><div class="codepanel"><pre>def fib(n):
+    if n &lt;= 1:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+# fib(5) ruft fib(3) zweimal auf,
+# fib(2) dreimal, fib(1) fuenfmal.</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Anzahl der Aufrufe</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:130px"><col style="width:350px"><col style="width:336px"></colgroup><tr><th>n</th><th>Aufrufe von fib</th><th>Dauer</th></tr><tr><td class="b">10</td><td>177</td><td>unmerklich</td></tr><tr><td class="b">20</td><td>21 891</td><td>unmerklich</td></tr><tr><td class="b">30</td><td>2 692 537</td><td>spürbar</td></tr><tr><td class="b">40</td><td style="background:#F2CFCB">331 160 281</td><td style="background:#F2CFCB">Minuten</td></tr></table><div class="body" style="top:266.375px;height:229.625px"><p class="line l0 step" data-g="0">Der Aufwand wächst <b>exponentiell</b> — jede Erhöhung um 1 kostet etwa das 1,6-fache</p>
+<p class="line l0 step" data-g="1">Iterativ braucht dieselbe Rechnung <b>n</b> Schritte statt Millionen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Fibonacci iterativ — und mit Zwischenspeicher</h3><div class="rules"></div><div class="codepanel"><pre>def fib_it(n):
+    a, b = 0, 1
+    for _ in range(n):
+        a, b = b, a + b
+    return a
+
+from functools import lru_cache
+
+@lru_cache(maxsize=None)      # merkt sich berechnete Werte
+def fib_cache(n):
+    return n if n &lt;= 1 else fib_cache(n-1) + fib_cache(n-2)</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Grenzen</h2>
+      <p class="sub">Stack, Laufzeit und die Wahl</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Rekursion oder Iteration?</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:180px"><col style="width:350px"><col style="width:286px"></colgroup><tr><th>Kriterium</th><th>Rekursion</th><th>Iteration</th></tr><tr><td class="b">Lesbarkeit</td><td>nah an der mathematischen Definition</td><td>oft umständlicher</td></tr><tr><td class="b">Speicher</td><td>jeder Aufruf belegt Stack</td><td>konstant</td></tr><tr><td class="b">Gefahr</td><td style="background:#FBEBBF">Stapelüberlauf bei großer Tiefe</td><td>Endlosschleife</td></tr><tr><td class="b">typisch für</td><td>Bäume, Teile-und-herrsche</td><td>Durchlaufen von Listen</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Python bricht standardmäßig bei etwa <b>1000</b> Aufrufen Tiefe ab — <b>RecursionError</b></p>
+<p class="line l0 step" data-g="1">Faustregel: <b>rekursiv, wenn das Problem selbst rekursiv ist</b> — sonst iterativ</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Jede Rekursion braucht einen Basisfall und ein kleiner werdendes Problem. Fehlt eines von beiden, endet sie im Stapelüberlauf.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Rekursion</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Türme von Hanoi</b> mit n Scheiben brauchen <b>2ⁿ − 1</b> Züge — bei 64 Scheiben länger als das Universum alt ist</p>
+<p class="line l0 step" data-g="1">Der <b>Stack</b> heißt so, weil die wartenden Aufrufe wie ein Stapel liegen: zuletzt hinein, zuerst heraus</p>
+<p class="line l0 step" data-g="2">Manche Sprachen optimieren <b>endständige Rekursion</b> zu einer Schleife — Python nicht</p>
+<p class="line l0 step" data-g="3"><b>Quicksort</b> und <b>Mergesort</b> sind rekursiv und trotzdem schnell: sie halbieren</p>
+<p class="line l0 step" data-g="4">Das Wörterbuch scherzt: <b>„Rekursion: siehe Rekursion“</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Schreibt <b>Fakultät</b> und <b>Fibonacci</b> rekursiv und iterativ</p>
+<p class="line l0 step" data-g="1">Baut einen <b>Aufrufzähler</b> in fib ein und messt für n = 10, 20, 25</p>
+<p class="line l0 step" data-g="2">Vergleicht die Zahlen mit der Tabelle aus Kapitel 2</p>
+<p class="line l0 step" data-g="3">Findet heraus, ab welchem n Python mit <b>RecursionError</b> abbricht</p>
+<p class="line l0 step" data-g="4">Löst die <b>Türme von Hanoi</b> rekursiv für drei und vier Scheiben</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

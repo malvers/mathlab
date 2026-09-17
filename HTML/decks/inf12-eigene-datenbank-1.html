@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Die eigene Datenbank</title>
+<meta name="description" content="Thema wählen, Miniwelt abgrenzen, ER-Modell entwerfen und normalisieren">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-971156f40735.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/trees-7544451/" target="_blank" rel="noopener">yoshitaka2</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 12</p>
+      <h1>Die eigene Datenbank</h1>
+      <p class="sub">Thema wählen, Miniwelt abgrenzen, ER-Modell entwerfen und normalisieren</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Das Thema</h2>
+      <p class="sub">Fachbezogen oder gesellschaftlich relevant</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Themenvorschläge</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:140px"><col style="width:330px"><col style="width:346px"></colgroup><tr><th>Richtung</th><th>Beispiel</th><th>reizvoll, weil</th></tr><tr><td class="b">Schule</td><td>Ausleihe der Fachbibliothek</td><td>die Daten gibt es wirklich</td></tr><tr><td class="b">Verein</td><td>Mitglieder, Beiträge, Mannschaften</td><td>n:m-Beziehungen liegen nahe</td></tr><tr><td class="b">Umwelt</td><td>Messstationen und Messwerte</td><td>Zeitreihen und Auswertungen</td></tr><tr><td class="b">Mobilität</td><td>Fahrzeuge, Fahrten, Ladepunkte</td><td>aktuelles Thema, klare Entitäten</td></tr><tr><td class="b">Kultur</td><td>Konzerte, Bands, Spielstätten</td><td>mehrere n:m-Beziehungen</td></tr></table><div class="body" style="top:276.55px;height:219.45px"><p class="line l0 step" data-g="0">Eigene Vorschläge sind willkommen — sie müssen nur <b>drei bis fünf Entitätstypen</b> hergeben</p>
+<p class="line l0 step" data-g="1">Mindestens eine <b>n:m-Beziehung</b> und eine <b>1:n-Beziehung</b> sollen vorkommen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Miniwelt abgrenzen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Zweck in einem Satz</b>: Welche Fragen soll die Datenbank beantworten?</p>
+<p class="line l0 step" data-g="1"><b>Fünf konkrete Fragen</b> aufschreiben — sie sind später eure Testabfragen</p>
+<p class="line l0 step" data-g="2">Was <b>nicht</b> dazugehört, ebenfalls aufschreiben</p>
+<p class="line l0 step" data-g="3">Alles, was ihr nie abfragen werdet, kommt <b>nicht</b> ins Modell</p>
+<p class="line l0 step" data-g="4">Das ist derselbe Schritt wie im LB 1: <b>abgrenzen vor abstrahieren</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Der Entwurf</h2>
+      <p class="sub">ER-Modell und Normalisierung</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Ablauf heute</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:190px"><col style="width:300px"><col style="width:326px"></colgroup><tr><th>Schritt</th><th>Ergebnis</th><th>Prüffrage</th></tr><tr><td class="b">1. Zweck und Fragen</td><td>ein Satz, fünf Fragen</td><td>Sind die Fragen konkret?</td></tr><tr><td class="b">2. Entitätstypen</td><td>3 bis 5 Rechtecke</td><td>Eigene Merkmale, mehrere Exemplare?</td></tr><tr><td class="b">3. Attribute und Schlüssel</td><td>Ellipsen, unterstrichen</td><td>Ist jeder Schlüssel eindeutig?</td></tr><tr><td class="b">4. Beziehungen</td><td>Rauten mit Verben</td><td>Mit beiden Fragen begründet?</td></tr><tr><td class="b">5. Relationenschema</td><td>Tabellen mit Schlüsseln</td><td>n:m als eigene Tabelle?</td></tr><tr><td class="b" style="background:#DDE8C6">6. Normalisierung</td><td>3NF</td><td>Steht jede Angabe genau einmal?</td></tr></table><div class="body" style="top:295.975px;height:200.025px"><p class="line l0 step" data-g="0">Prüft nach Schritt 6, ob eure <b>fünf Fragen</b> noch beantwortbar sind</p>
+<p class="line l0 step" data-g="1">Wenn nicht, fehlt ein Attribut — oder ihr habt zu viel wegnormalisiert</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die typischen Entwurfsfehler</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Zu viele Entitätstypen</b>: alles wird ein Rechteck, auch reine Attribute</p>
+<p class="line l0 step" data-g="1"><b>Kein zusammengesetzter Schlüssel</b> bei n:m — dann sind Doppelbelegungen möglich</p>
+<p class="line l0 step" data-g="2"><b>Listen in einer Spalte</b>: „Mitglieder: Anna, Ben, Chiara“ verletzt die 1NF</p>
+<p class="line l0 step" data-g="3"><b>Berechenbares gespeichert</b>: Alter statt Geburtsdatum — veraltet sofort</p>
+<p class="line l0 step" data-g="4"><b>Kein Zeitbezug</b>: „aktueller Trainer“ — was ist mit dem vorigen?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Nachhaltig entwerfen</h2>
+      <p class="sub">Was über die Technik hinausgeht</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fragen, die zum Entwurf gehören</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Welche personenbezogenen Daten</b> braucht ihr wirklich? Alles andere weglassen</p>
+<p class="line l0 step" data-g="1"><b>Wie lange</b> sollen die Daten gespeichert bleiben? Löschfristen mitdenken</p>
+<p class="line l0 step" data-g="2"><b>Wer</b> darf lesen, wer ändern? Rechte gehören in den Entwurf</p>
+<p class="line l0 step" data-g="3"><b>Was passiert bei Fehleingaben?</b> Constraints statt Hoffnung</p>
+<p class="line l0 step" data-g="4">Diese vier Fragen sind kein Beiwerk — sie sind Teil der <b>Qualität</b> des Entwurfs</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Abgabe am Ende dieser Doppelstunde</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:280px"><col style="width:536px"></colgroup><tr><th>Teil</th><th>Umfang</th></tr><tr><td class="b">Zweck und fünf Fragen</td><td>eine halbe Seite</td></tr><tr><td class="b">ER-Diagramm</td><td>3 bis 5 Entitätstypen, Kardinalitäten begründet</td></tr><tr><td class="b">Relationenschema</td><td>in Klausurschreibweise, Schlüssel markiert</td></tr><tr><td class="b">Normalisierungsnachweis</td><td>je Schritt eine Zeile Begründung</td></tr></table><div class="body" style="top:266.375px;height:229.625px"><p class="line l0 step" data-g="0">Nächste Woche wird <b>implementiert</b> — mit dem, was heute entsteht</p>
+<p class="line l0 step" data-g="1">Wer heute schludert, baut nächste Woche eine Datenbank, die die Fragen nicht beantwortet</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Erst die Fragen, dann das Modell. Eine Datenbank, deren Zweck niemand aufgeschrieben hat, ist am Ende für nichts zu gebrauchen.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Datenbankentwurf</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Der Entwurf gilt als der Teil, an dem später am <b>teuersten</b> nachgebessert wird</p>
+<p class="line l0 step" data-g="1">Ein Fehler im Schema wandert durch <b>jede</b> Anwendung, die darauf zugreift</p>
+<p class="line l0 step" data-g="2">Deshalb gibt es den Beruf <b>Datenbankarchitekt</b> — mit eigener Ausbildung</p>
+<p class="line l0 step" data-g="3"><b>Datenmodelle großer Firmen</b> haben oft mehrere hundert Tabellen</p>
+<p class="line l0 step" data-g="4">Und sie werden trotzdem alle nach denselben drei Normalformen geprüft</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe heute</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Thema wählen</b> und den Zweck in einem Satz aufschreiben</p>
+<p class="line l0 step" data-g="1"><b>Fünf Fragen</b> formulieren, die die Datenbank beantworten soll</p>
+<p class="line l0 step" data-g="2"><b>ER-Modell</b> entwerfen, Kardinalitäten schriftlich begründen</p>
+<p class="line l0 step" data-g="3">In ein <b>Relationenschema</b> überführen und bis <b>3NF</b> normalisieren</p>
+<p class="line l0 step" data-g="4">Prüfen: Sind <b>alle fünf Fragen</b> mit dem Schema beantwortbar?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

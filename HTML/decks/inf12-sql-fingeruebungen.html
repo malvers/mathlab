@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SQL-Fingerübungen</title>
+<meta name="description" content="Wiederholen, was sitzt — und die Beispieldatenbank kennenlernen">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-c5cf3003643f.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/mist-1989298/" target="_blank" rel="noopener">MemoryCatcher</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 12</p>
+      <h1>SQL-Fingerübungen</h1>
+      <p class="sub">Wiederholen, was sitzt — und die Beispieldatenbank kennenlernen</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Die Beispieldatenbank</h2>
+      <p class="sub">Drei Tabellen, mit denen wir weiterarbeiten</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Das Schema</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:180px"><col style="width:430px"><col style="width:206px"></colgroup><tr><th>Tabelle</th><th>Spalten</th><th>Schlüssel</th></tr><tr><td class="b">Schueler</td><td>snr, name, vorname, klasse, geburt</td><td>snr</td></tr><tr><td class="b">Kurs</td><td>knr, bezeichnung, lehrkraft, stunden</td><td>knr</td></tr><tr><td class="b">Belegung</td><td>snr, knr, note</td><td style="background:#FBEBBF">snr + knr</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0"><b>Belegung</b> verbindet die beiden anderen Tabellen — jede Zeile ist ein belegter Kurs</p>
+<p class="line l0 step" data-g="1">Ihr Schlüssel ist <b>zusammengesetzt</b>: erst beide Spalten zusammen sind eindeutig</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Die Tabellen anlegen</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:11.5px">CREATE TABLE Kurs (
+    knr         INTEGER PRIMARY KEY,
+    bezeichnung TEXT NOT NULL,
+    lehrkraft   TEXT,
+    stunden     INTEGER
+);
+
+CREATE TABLE Belegung (
+    snr  INTEGER,
+    knr  INTEGER,
+    note INTEGER,
+    PRIMARY KEY (snr, knr)
+);</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Die Fingerübungen</h2>
+      <p class="sub">Zehn Abfragen, steigend im Anspruch</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Aufgaben 1 bis 5</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:70px"><col style="width:480px"><col style="width:266px"></colgroup><tr><th>Nr</th><th>Gesucht</th><th>braucht</th></tr><tr><td class="b">1</td><td>Alle Schüler mit allen Spalten</td><td>SELECT *</td></tr><tr><td class="b">2</td><td>Nur Name und Vorname aller Schüler</td><td>Projektion</td></tr><tr><td class="b">3</td><td>Alle Schüler der Klasse BGY25</td><td>Selektion</td></tr><tr><td class="b">4</td><td>Alle Kurse mit mehr als 2 Wochenstunden</td><td>Vergleich</td></tr><tr><td class="b">5</td><td>Alle Schüler, alphabetisch nach Name</td><td>ORDER BY</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Schreibt jede Abfrage <b>erst auf Papier</b>, dann in das Werkzeug</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Aufgaben 6 bis 10</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:70px"><col style="width:480px"><col style="width:266px"></colgroup><tr><th>Nr</th><th>Gesucht</th><th>braucht</th></tr><tr><td class="b">6</td><td>Schüler der BGY25, sortiert nach Geburtsdatum</td><td>WHERE + ORDER BY</td></tr><tr><td class="b">7</td><td>Alle Kurse, deren Bezeichnung „Info“ enthält</td><td>LIKE</td></tr><tr><td class="b">8</td><td>Schüler, die 2009 geboren sind</td><td>Bereich oder LIKE</td></tr><tr><td class="b">9</td><td>Alle Noten der Belegung, absteigend</td><td>ORDER BY DESC</td></tr><tr><td class="b">10</td><td>Alle Belegungen ohne eingetragene Note</td><td style="background:#FBEBBF">IS NULL</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0"><b>LIKE 'Info%'</b> findet alles, was mit Info beginnt. <b>%</b> ist der Platzhalter</p>
+<p class="line l0 step" data-g="1"><b>IS NULL</b> statt <b>= NULL</b> — NULL ist kein Wert, sondern die Abwesenheit eines Werts</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Die Fallen</h2>
+      <p class="sub">Woran es meistens hakt</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Vier Fehler und ihre Korrektur</h3><div class="rules"></div><div class="codepanel"><pre>-- falsch: Zeichenketten ohne Hochkommata
+SELECT * FROM Schueler WHERE klasse = BGY25;
+SELECT * FROM Schueler WHERE klasse = 'BGY25';   -- richtig
+
+-- falsch: NULL mit = vergleichen
+SELECT * FROM Belegung WHERE note = NULL;
+SELECT * FROM Belegung WHERE note IS NULL;       -- richtig
+
+-- falsch: Spaltenname im falschen Teil
+SELECT name WHERE klasse = 'BGY25' FROM Schueler;
+SELECT name FROM Schueler WHERE klasse = 'BGY25';  -- richtig</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Reihenfolge der Klauseln</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>SELECT</b> — welche Spalten?</p>
+<p class="line l0 step" data-g="1"><b>FROM</b> — aus welcher Tabelle?</p>
+<p class="line l0 step" data-g="2"><b>WHERE</b> — welche Zeilen?</p>
+<p class="line l0 step" data-g="3"><b>ORDER BY</b> — in welcher Reihenfolge?</p>
+<p class="line l0 step" data-g="4">Diese Reihenfolge ist <b>fest</b>. Gelesen wird die Abfrage aber von FROM her</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">NULL ist kein Wert, sondern die Abwesenheit eines Werts. Deshalb prüft man mit IS NULL, nie mit = NULL.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: SQL üben</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>SQL-Island</b> und <b>SQLZoo</b> sind kostenlose Übungsumgebungen im Browser</p>
+<p class="line l0 step" data-g="1">Der häufigste Anfängerfehler ist das <b>fehlende Hochkomma</b> bei Texten</p>
+<p class="line l0 step" data-g="2">Der zweithäufigste ist <b>= NULL</b> — es liefert nie ein Ergebnis, aber auch keinen Fehler</p>
+<p class="line l0 step" data-g="3">Groß- und Kleinschreibung ist bei <b>Schlüsselwörtern</b> egal, bei <b>Daten</b> nicht</p>
+<p class="line l0 step" data-g="4">Üblich ist trotzdem: Schlüsselwörter groß, Namen klein — der Lesbarkeit wegen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe heute</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Legt die <b>drei Tabellen</b> an und füllt sie mit je fünf bis zehn Zeilen</p>
+<p class="line l0 step" data-g="1">Bearbeitet die <b>zehn Aufgaben</b> — erst auf Papier, dann am Rechner</p>
+<p class="line l0 step" data-g="2">Vergleicht bei jeder Aufgabe die <b>erwartete</b> mit der <b>gelieferten</b> Zeilenzahl</p>
+<p class="line l0 step" data-g="3">Baut absichtlich die <b>vier Fehler</b> ein und lest die Fehlermeldungen</p>
+<p class="line l0 step" data-g="4">Notiert zwei Fragen für nächste Woche — dann kommen die Abfragen über mehrere Tabellen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

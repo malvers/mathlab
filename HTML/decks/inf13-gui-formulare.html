@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Programme mit Oberfläche</title>
+<meta name="description" content="Formular-Komponenten und Ereignisbehandlung — der Wechsel im Denken">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-4fd405149624.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/cobweb-4445324/" target="_blank" rel="noopener">tjuusitalo</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 13</p>
+      <h1>Programme mit Oberfläche</h1>
+      <p class="sub">Formular-Komponenten und Ereignisbehandlung — der Wechsel im Denken</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Der Unterschied</h2>
+      <p class="sub">Vom Ablauf zum Ereignis</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Zwei Arten, ein Programm zu bauen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:140px"><col style="width:320px"><col style="width:356px"></colgroup><tr><th></th><th>Konsolenprogramm</th><th>Programm mit Oberfläche</th></tr><tr><td class="b">Ablauf</td><td>von oben nach unten</td><td style="background:#FBEBBF">wartet auf Ereignisse</td></tr><tr><td class="b">Eingabe</td><td>input() hält an</td><td>der Nutzer tippt, wann er will</td></tr><tr><td class="b">Steuerung</td><td>das Programm bestimmt</td><td>der Nutzer bestimmt</td></tr><tr><td class="b">Struktur</td><td>eine Folge</td><td>viele kleine Reaktionen</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Der Kern des Umdenkens: <b>das Programm wartet</b>, statt zu fragen</p>
+<p class="line l0 step" data-g="1">Diese Bauweise heißt <b>ereignisgesteuert</b> — event driven</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Ereignisschleife</h3><div class="rules"></div><div class="pic"><img src="img/pap-events-inf13.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Zwischen den Ereignissen tut das Programm <b>nichts</b> — es wartet</p>
+<p class="line l0 step" data-g="1">Eine lange Rechnung in der Behandlung <b>friert die Oberfläche ein</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Die Bausteine</h2>
+      <p class="sub">Widgets und ihre Aufgaben</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Komponenten, die ihr braucht</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:180px"><col style="width:350px"><col style="width:286px"></colgroup><tr><th>Komponente</th><th>Aufgabe</th><th>in tkinter</th></tr><tr><td class="b">Fenster</td><td>trägt alles</td><td>Tk()</td></tr><tr><td class="b">Beschriftung</td><td>Text anzeigen</td><td>Label</td></tr><tr><td class="b">Eingabefeld</td><td>Text entgegennehmen</td><td>Entry</td></tr><tr><td class="b">Schaltfläche</td><td>Aktion auslösen</td><td>Button</td></tr><tr><td class="b">Auswahl</td><td>eine Option aus mehreren</td><td>Radiobutton, Combobox</td></tr><tr><td class="b">Ausgabe</td><td>Ergebnis zeigen</td><td>Label oder Text</td></tr></table><div class="body" style="top:302.45px;height:193.55px"><p class="line l0 step" data-g="0">Jede Komponente ist ein <b>Objekt</b> — mit Attributen und Methoden, wie in Jgst. 12 modelliert</p>
+<p class="line l0 step" data-g="1">Das <b>Layout</b> legt fest, wo sie liegen: pack, grid oder place</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Ein vollständiges kleines Formular</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:10.5px">import tkinter as tk
+
+def berechnen():                      # Ereignisbehandlung
+    try:
+        n = int(feld.get())
+        ausgabe.config(text=f'Quadrat: {n * n}')
+    except ValueError:
+        ausgabe.config(text='Bitte eine ganze Zahl eingeben')
+
+fenster = tk.Tk()
+tk.Label(fenster, text='Zahl:').grid(row=0, column=0)
+feld = tk.Entry(fenster);  feld.grid(row=0, column=1)
+tk.Button(fenster, text='Rechne', command=berechnen).grid(row=1, column=0)
+ausgabe = tk.Label(fenster, text='');  ausgabe.grid(row=2, column=0, columnspan=2)
+fenster.mainloop()                    # Ereignisschleife starten</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Sauber bauen</h2>
+      <p class="sub">Drei Regeln, die Ärger ersparen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was in der Praxis zählt</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Rechnen und Anzeigen trennen</b>: die Berechnung in eine eigene Funktion</p>
+<p class="line l0 step" data-g="1">So lässt sie sich <b>testen</b>, ohne das Fenster zu öffnen</p>
+<p class="line l0 step" data-g="2"><b>Eingaben prüfen</b>: alles aus einem Entry ist <b>Text</b>, auch „12“</p>
+<p class="line l0 step" data-g="3">Ein fehlgeschlagenes <b>int()</b> darf das Programm nicht abstürzen lassen</p>
+<p class="line l0 step" data-g="4"><b>mainloop() steht zuletzt</b> — danach läuft nur noch die Ereignisschleife</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Typische Fehler beim Einstieg</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:330px"><col style="width:486px"></colgroup><tr><th>Symptom</th><th>Ursache</th></tr><tr><td class="b">Fenster erscheint nicht</td><td>mainloop() fehlt</td></tr><tr><td class="b" style="background:#F2CFCB">Button reagiert sofort beim Start</td><td>command=berechnen() statt command=berechnen</td></tr><tr><td class="b">Ergebnis ist Text statt Zahl</td><td>Entry liefert immer Text</td></tr><tr><td class="b">Oberfläche friert ein</td><td>lange Rechnung in der Ereignisbehandlung</td></tr><tr><td class="b">Widget unsichtbar</td><td>pack oder grid vergessen</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Der zweite Fehler ist der häufigste: die <b>Klammern</b> rufen die Funktion sofort auf</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Ein Programm mit Oberfläche wartet auf Ereignisse. Und alles, was aus einem Eingabefeld kommt, ist zuerst einmal Text.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Oberflächen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die erste <b>grafische Oberfläche</b> entstand ab 1973 am Xerox PARC — mit Fenstern und Maus</p>
+<p class="line l0 step" data-g="1"><b>tkinter</b> gehört seit den 1990er Jahren zur Python-Standardbibliothek</p>
+<p class="line l0 step" data-g="2">Die Ereignisschleife heißt in fast jedem System gleich: <b>event loop</b></p>
+<p class="line l0 step" data-g="3">Auch der Browser arbeitet so — JavaScript ist ereignisgesteuert</p>
+<p class="line l0 step" data-g="4">Faustregel aus der Praxis: <b>die Oberfläche darf nie rechnen</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe am Rechner</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Baut ein Formular: <b>Eingabefeld, Button, Ausgabe</b> — Quadratzahl berechnen</p>
+<p class="line l0 step" data-g="1">Trennt <b>Berechnung</b> und <b>Anzeige</b> in zwei Funktionen</p>
+<p class="line l0 step" data-g="2">Fangt eine <b>fehlerhafte Eingabe</b> ab und gebt eine verständliche Meldung</p>
+<p class="line l0 step" data-g="3">Erweitert um eine <b>Auswahl</b>: Quadrat, Wurzel oder Kehrwert</p>
+<p class="line l0 step" data-g="4">Provoziert drei der fünf <b>typischen Fehler</b> und lest die Meldungen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Daten hinein, sortiert heraus</title>
+<meta name="description" content="INSERT, SELECT und ORDER BY — die ersten Abfragen">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-77d712193313.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/fog-7440132/" target="_blank" rel="noopener">Nordseher</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 12</p>
+      <h1>Daten hinein, sortiert heraus</h1>
+      <p class="sub">INSERT, SELECT und ORDER BY — die ersten Abfragen</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Daten einfügen</h2>
+      <p class="sub">INSERT und die Integritätsregeln</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Datensätze einfügen</h3><div class="rules"></div><div class="codepanel"><pre>INSERT INTO Schueler (snr, name, vorname, klasse, geburt)
+VALUES (1, 'Meier', 'Anna', 'BGY25', '2009-04-17');
+
+-- mehrere auf einmal
+INSERT INTO Schueler (snr, name, vorname, klasse, geburt) VALUES
+  (2, 'Schulz', 'Ben',    'BGY25', '2009-11-02'),
+  (3, 'Krause', 'Chiara', 'BGY25', '2010-01-25');</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was das DBMS beim Einfügen prüft</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:230px"><col style="width:250px"><col style="width:336px"></colgroup><tr><th>Regel</th><th>wird verletzt durch</th><th>Reaktion</th></tr><tr><td class="b">Primärschlüssel eindeutig</td><td>snr 1 ein zweites Mal</td><td style="background:#F2CFCB">Fehler, nichts wird gespeichert</td></tr><tr><td class="b">NOT NULL</td><td>name weggelassen</td><td style="background:#F2CFCB">Fehler</td></tr><tr><td class="b">Datentyp</td><td>geburt = 'morgen'</td><td style="background:#F2CFCB">Fehler oder Umwandlung</td></tr><tr><td class="b">Fremdschlüssel</td><td>Kurs, den es nicht gibt</td><td style="background:#F2CFCB">Fehler (später)</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Diese Prüfungen heißen <b>Integritätsbedingungen</b> — sie stehen in der Tabellendefinition</p>
+<p class="line l0 step" data-g="1">Sie greifen bei <b>jedem</b> Zugriff, egal welches Programm einfügt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Ändern und Löschen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>UPDATE Schueler SET klasse = 'BGY24' WHERE snr = 2;</b></p>
+<p class="line l0 step" data-g="1"><b>DELETE FROM Schueler WHERE snr = 3;</b></p>
+<p class="line l0 step" data-g="2">Die <b>WHERE-Klausel</b> ist der wichtigste Teil: ohne sie trifft es <b>alle</b> Zeilen</p>
+<p class="line l0 step" data-g="3">Ein vergessenes WHERE bei UPDATE ist der Klassiker unter den teuren Fehlern</p>
+<p class="line l0 step" data-g="4">Deshalb: erst als <b>SELECT</b> schreiben, prüfen, dann in UPDATE umwandeln</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Daten ausgeben</h2>
+      <p class="sub">SELECT in seiner Grundform</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Die Grundform der Abfrage</h3><div class="rules"></div><div class="codepanel"><pre>SELECT *                       -- alle Spalten
+FROM Schueler;                 -- aus dieser Tabelle
+
+SELECT name, vorname           -- Projektion: nur diese Spalten
+FROM Schueler;
+
+SELECT name, vorname
+FROM Schueler
+WHERE klasse = 'BGY25';        -- Selektion: nur diese Zeilen</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die beiden Grundoperationen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:200px"><col style="width:300px"><col style="width:316px"></colgroup><tr><th>Operation</th><th>wählt aus</th><th>im SQL</th></tr><tr><td class="b" style="background:#E6ECF8">Projektion</td><td>Spalten</td><td>die Liste hinter SELECT</td></tr><tr><td class="b" style="background:#FBEBBF">Selektion</td><td>Zeilen</td><td>die Bedingung hinter WHERE</td></tr></table><div class="body" style="top:223.825px;height:272.175px"><p class="line l0 step" data-g="0">Die Begriffe stammen aus der <b>Relationenalgebra</b> und werden in der Klausur verlangt</p>
+<p class="line l0 step" data-g="1">Beides zusammen ergibt einen <b>Ausschnitt</b> der Tabelle — waagerecht und senkrecht</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Sortieren</h2>
+      <p class="sub">ORDER BY und seine Tücken</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Sortiert ausgeben</h3><div class="rules"></div><div class="codepanel"><pre>SELECT name, vorname, klasse
+FROM Schueler
+ORDER BY name;                      -- aufsteigend ist Standard
+
+SELECT name, vorname, geburt
+FROM Schueler
+ORDER BY geburt DESC;               -- juengste zuerst
+
+SELECT klasse, name, vorname
+FROM Schueler
+ORDER BY klasse ASC, name ASC;      -- zwei Kriterien</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Worauf man beim Sortieren achtet</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>ASC</b> ist die Voreinstellung, <b>DESC</b> kehrt die Reihenfolge um</p>
+<p class="line l0 step" data-g="1">Bei zwei Kriterien entscheidet das zweite nur bei <b>Gleichstand</b> im ersten</p>
+<p class="line l0 step" data-g="2">Eine Zahl im <b>Textfeld</b> sortiert als Text: „10“ steht vor „2“</p>
+<p class="line l0 step" data-g="3"><b>NULL-Werte</b> landen je nach DBMS am Anfang oder am Ende — nachsehen lohnt</p>
+<p class="line l0 step" data-g="4">Sortiert wird nur die <b>Ausgabe</b> — die gespeicherte Reihenfolge ist ohnehin nicht garantiert</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Ohne WHERE trifft UPDATE und DELETE jede Zeile. Deshalb jede Änderung zuerst als SELECT schreiben und ansehen.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: SQL</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">SQL entstand ab <b>1974</b> bei IBM und hieß zuerst <b>SEQUEL</b> — der Name war markenrechtlich belegt</p>
+<p class="line l0 step" data-g="1">Deshalb sprechen viele bis heute „Sequel“ statt „Es-Ku-El“</p>
+<p class="line l0 step" data-g="2">SQL ist eine <b>deklarative</b> Sprache: man sagt <b>was</b>, nicht <b>wie</b></p>
+<p class="line l0 step" data-g="3">Den <b>wie</b>-Teil bestimmt der Abfrageoptimierer des DBMS — oft besser als ein Mensch</p>
+<p class="line l0 step" data-g="4">Ein vergessenes WHERE bei UPDATE hat schon ganze Kundendatenbanken gleichgemacht</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe am Rechner</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Fügt <b>zehn Schüler</b> und <b>drei Kurse</b> ein</p>
+<p class="line l0 step" data-g="1">Provoziert absichtlich einen Fehler bei <b>Primärschlüssel</b> und bei <b>NOT NULL</b></p>
+<p class="line l0 step" data-g="2">Gebt alle Schüler einer Klasse aus, <b>sortiert nach Name</b></p>
+<p class="line l0 step" data-g="3">Sortiert nach <b>Geburtsdatum absteigend</b> und erklärt die Reihenfolge</p>
+<p class="line l0 step" data-g="4">Schreibt ein <b>UPDATE</b> zuerst als SELECT, prüft es und führt es dann aus</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

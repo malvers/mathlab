@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Objektorientierte Programmierung II</title>
+<meta name="description" content="Vererbung, Kapselung, Polymorphie — und wann sich das alles lohnt">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-038f4b571b96.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/coffee-4597416/" target="_blank" rel="noopener">fotografierende</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — FOS 12</p>
+      <h1>Objektorientierte Programmierung II</h1>
+      <p class="sub">Vererbung, Kapselung, Polymorphie — und wann sich das alles lohnt</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Vererbung</h2>
+      <p class="sub">Das Gemeinsame nur einmal aufschreiben</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Das Problem, das die Vererbung löst</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Schüler und Lehrkräfte haben <b>beide</b> name, vorname, geburtsdatum und eine Methode zeige()</p>
+<p class="line l0 step" data-g="1">Zweimal dieselbe Klasse schreiben heißt: jede Änderung <b>zweimal</b> nachziehen</p>
+<p class="line l0 step" data-g="2"><b>Vererbung</b>: das Gemeinsame kommt in eine <b>Oberklasse</b>, das Besondere in die <b>Unterklassen</b></p>
+<p class="line l0 step" data-g="3">Die Unterklasse <b>erbt</b> alle Attribute und Methoden und darf <b>ergänzen</b> oder <b>überschreiben</b></p>
+<p class="line l0 step" data-g="4">Der Test dafür heißt <b>ist-ein</b>: Ein Schüler <b>ist eine</b> Person. Ein Auto ist <b>kein</b> Motor</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Ein Klassenbaum</h3><div class="rules"></div><div class="pic"><img src="img/uml-person.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0"><b>zeige()</b> steht dreimal da: die Unterklassen <b>überschreiben</b> die geerbte Methode</p>
+<p class="line l0 step" data-g="1">Alles andere aus Person gilt in beiden Unterklassen, ohne dass es dort steht</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Vererbung in Python</h3><div class="rules"></div><div class="codepanel" style="padding-top:39.5px;padding-bottom:39.5px"><pre style="font-size:10px">class Person:
+    def __init__(self, name, vorname):
+        self.name = name
+        self.vorname = vorname
+
+    def zeige(self):
+        print(f'{self.vorname} {self.name}')
+
+
+class Schueler(Person):              # Schueler erbt von Person
+    def __init__(self, name, vorname, klasse):
+        super().__init__(name, vorname)   # Konstruktor der Oberklasse
+        self.klasse = klasse
+        self.noten = []
+
+    def zeige(self):                 # ueberschreibt die geerbte Methode
+        print(f'{self.vorname} {self.name} ({self.klasse})')</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Fachbegriffe der Vererbung</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:230px"><col style="width:270px"><col style="width:316px"></colgroup><tr><th>Begriff</th><th>im Beispiel</th><th>bedeutet</th></tr><tr><td class="b">Oberklasse (Basisklasse)</td><td class="m">Person</td><td>das Allgemeine, wird vererbt</td></tr><tr><td class="b">Unterklasse (abgeleitet)</td><td class="m">Schueler(Person)</td><td>erbt alles und ergänzt</td></tr><tr><td class="b">Erben</td><td class="m">self.name ist da, ohne dass es dasteht</td><td>Attribute und Methoden gelten weiter</td></tr><tr><td class="b">Überschreiben</td><td class="m">zeige() erneut definieren</td><td>die eigene Fassung gewinnt</td></tr><tr><td class="b">super()</td><td class="m">super().__init__(...)</td><td>ruft die Oberklasse auf</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Beim Aufruf sucht Python die Methode <b>erst in der Unterklasse</b>, dann in der Oberklasse</p>
+<p class="line l0 step" data-g="1">Vererbung erst einsetzen, wenn der <b>ist-ein</b>-Test wirklich stimmt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Kapselung</h2>
+      <p class="sub">Das Objekt bewacht seine eigenen Daten</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum Attribute nicht offen herumliegen sollten</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Von außen <b>direkt</b> schreiben heißt: jede Regel lässt sich umgehen</p>
+<p class="line l0 step" data-g="1">konto.kontostand = 1000000 — und die Prüfung im abheben() war umsonst</p>
+<p class="line l0 step" data-g="2"><b>Kapselung</b>: Daten nach innen, Zugriff nur über <b>Methoden</b>, die die Regeln kennen</p>
+<p class="line l0 step" data-g="3">Python markiert Nichtöffentliches mit einem <b>Unterstrich</b>: self._kontostand</p>
+<p class="line l0 step" data-g="4">Das ist eine <b>Vereinbarung</b>, kein Schloss — in Java gäbe es dafür <b>private</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Ein Konto, das sich wehrt</h3><div class="rules"></div><div class="codepanel" style="padding-top:33px;padding-bottom:33px"><pre style="font-size:9.5px">class Konto:
+    def __init__(self, inhaber, start=0):
+        self.inhaber = inhaber
+        self._stand = start          # nicht oeffentlich
+
+    def einzahlen(self, betrag):
+        if betrag &gt; 0:
+            self._stand = self._stand + betrag
+
+    def abheben(self, betrag):
+        if betrag &gt; self._stand:
+            print('Nicht gedeckt')
+            return False
+        self._stand = self._stand - betrag
+        return True
+
+    def stand(self):                 # lesender Zugriff (Getter)
+        return self._stand</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was die Kapselung bringt</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:390px"><col style="width:426px"></colgroup><tr><th>Ohne Kapselung</th><th>Mit Kapselung</th></tr><tr><td style="background:#F2CFCB">konto.stand = -500 ist möglich</td><td style="background:#DDE8C6">abheben() lehnt ab, der Stand bleibt gültig</td></tr><tr><td style="background:#F2CFCB">jede Stelle im Programm darf ändern</td><td style="background:#DDE8C6">eine Stelle im Programm ändert</td></tr><tr><td style="background:#F2CFCB">Regeländerung an 20 Stellen nachziehen</td><td style="background:#DDE8C6">Regeländerung in einer Methode</td></tr><tr><td style="background:#F2CFCB">Fehlersuche überall</td><td style="background:#DDE8C6">Fehlersuche in der Klasse</td></tr></table><div class="body" style="top:266.375px;height:229.625px"><p class="line l0 step" data-g="0">Fachwort: die Klasse hat eine <b>Schnittstelle</b> (die öffentlichen Methoden) und eine <b>Implementierung</b> (das Innere)</p>
+<p class="line l0 step" data-g="1">Von außen zählt nur die Schnittstelle — das Innere darf sich jederzeit ändern</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Polymorphie</h2>
+      <p class="sub">Ein Aufruf, viele Antworten</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Derselbe Aufruf, verschiedenes Verhalten</h3><div class="rules"></div><div class="codepanel"><pre>leute = [
+    Schueler('Krause', 'Lena', 'FO12a'),
+    Lehrkraft('Alvers', 'Michael', 'INF'),
+    Person('Vogel', 'Tim'),
+]
+
+for p in leute:
+    p.zeige()          # jedes Objekt antwortet auf seine Art
+
+# Lena Krause (FO12a)
+# Michael Alvers [INF]
+# Tim Vogel</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was daran bemerkenswert ist</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die Schleife kennt die <b>Klassen gar nicht</b> — sie sendet nur die Botschaft <b>zeige()</b></p>
+<p class="line l0 step" data-g="1">Jedes Objekt entscheidet <b>selbst</b>, welche Methode das ist: <b>Polymorphie</b> (Vielgestaltigkeit)</p>
+<p class="line l0 step" data-g="2">Eine neue Klasse <b>Hausmeister(Person)</b> läuft mit, <b>ohne</b> dass die Schleife geändert wird</p>
+<p class="line l0 step" data-g="3">Das ist der eigentliche Gewinn der OOP: <b>Erweitern ohne Ändern</b></p>
+<p class="line l0 step" data-g="4">Voraussetzung: alle Klassen bieten dieselbe <b>Schnittstelle</b> an — hier die Methode zeige()</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die vier Säulen im Überblick</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:150px"><col style="width:200px"><col style="width:210px"><col style="width:256px"></colgroup><tr><th>Säule</th><th>Frage</th><th>Werkzeug</th><th>Beispiel</th></tr><tr><td class="b">Abstraktion</td><td>Was ist wesentlich?</td><td class="m">Klasse entwerfen</td><td>Person hat name, nicht Schuhgröße</td></tr><tr><td class="b">Kapselung</td><td>Wer darf ändern?</td><td class="m">_attribut + Methoden</td><td>abheben() prüft die Deckung</td></tr><tr><td class="b">Vererbung</td><td>Was ist gemeinsam?</td><td class="m">class B(A)</td><td>Schueler ist eine Person</td></tr><tr><td class="b">Polymorphie</td><td>Wer antwortet wie?</td><td class="m">Methode überschreiben</td><td>jedes zeige() ist anders</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">In der Klausur: Begriff <b>nennen</b>, in eigenen Worten <b>erklären</b>, am Beispiel <b>zeigen</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>Wann lohnt es sich?</h2>
+      <p class="sub">Modularisierung und OOP im Vergleich</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Zwei Wege, ein Programm zu ordnen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:190px"><col style="width:300px"><col style="width:326px"></colgroup><tr><th></th><th>Modularisierung (LB 2)</th><th>Objektorientierung</th></tr><tr><td class="b">ordnet</td><td>Abläufe in Funktionen</td><td>Dinge in Klassen</td></tr><tr><td class="b">Zustand</td><td>in Variablen des Hauptprogramms</td><td>im Objekt selbst</td></tr><tr><td class="b">Erweitern</td><td>Funktion ergänzen</td><td>Klasse ableiten</td></tr><tr><td class="b">Aufwand am Anfang</td><td style="background:#DDE8C6">gering</td><td style="background:#FBEBBF">höher — man muss modellieren</td></tr><tr><td class="b">Gewinn</td><td>bei mittleren Programmen</td><td style="background:#DDE8C6">bei vielen gleichartigen Dingen</td></tr></table><div class="body" style="top:287.65px;height:208.35px"><p class="line l0 step" data-g="0">Faustregel: <b>ein Ablauf</b> → Funktionen. <b>Viele Dinge mit eigenem Zustand</b> → Klassen</p>
+<p class="line l0 step" data-g="1">Für ein 30-Zeilen-Programm ist eine Klasse <b>Ballast</b> — Ehrlichkeit gehört zur Bewertung</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Positioniert euch — mit Begründung</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Wie würdet ihr <b>eine</b> Berechnung des Bremswegs schreiben — Funktion oder Klasse?</p>
+<p class="line l0 step" data-g="1">Und eine <b>Schulverwaltung</b> mit 600 Personen, Kursen und Noten?</p>
+<p class="line l0 step" data-g="2">Ein <b>Spiel</b> mit 30 Gegnern, die alle etwas anderes können?</p>
+<p class="line l0 step" data-g="3">Argumentiert mit <b>Zustand</b>, <b>Anzahl</b> und <b>Erweiterbarkeit</b> — nicht mit „ist moderner“</p>
+<p class="line l0 step" data-g="4">Das ist genau die Art Frage, die in der Klausur als <b>Bewertung</b> gestellt wird</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Vererbung spart Schreibarbeit, Kapselung schützt die Daten, Polymorphie macht Erweitern möglich, ohne Bestehendes anzufassen.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: die drei Prinzipien</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Barbara Liskov</b> formulierte 1987, wann eine Unterklasse ihre Oberklasse wirklich ersetzen darf — das <b>Liskovsche Substitutionsprinzip</b></p>
+<p class="line l0 step" data-g="1">Ein berühmtes Gegenbeispiel: <b>Quadrat erbt von Rechteck</b> — klingt richtig, geht schief, sobald man die Breite ändert</p>
+<p class="line l0 step" data-g="2"><b>Mehrfachvererbung</b> kann Python, Java nicht — wegen des <b>Diamantproblems</b>: von wem erbt man dann?</p>
+<p class="line l0 step" data-g="3">Polymorphie heißt auf Griechisch schlicht <b>Vielgestaltigkeit</b> und stammt aus der Biologie</p>
+<p class="line l0 step" data-g="4">Alan Kay sagte später, er habe bei OOP „<b>an Botschaften gedacht, nicht an Klassen</b>“</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: der Klassenbaum</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Baut die Klassen <b>Person</b>, <b>Schueler</b> und <b>Lehrkraft</b> wie im UML-Diagramm oben</p>
+<p class="line l0 step" data-g="1"><b>Schueler</b> bekommt noten und schnitt(), <b>Lehrkraft</b> eine Liste faecher</p>
+<p class="line l0 step" data-g="2">Beide überschreiben <b>zeige()</b> — testet die Polymorphie mit einer gemischten Liste</p>
+<p class="line l0 step" data-g="3">Kapselt die Noten: Eintragen nur über <b>note_hinzufuegen()</b>, das Werte außerhalb 1–6 abweist</p>
+<p class="line l0 step" data-g="4">Schreibt drei Sätze: <b>Wann</b> würdet ihr in diesem Programm ohne OOP arbeiten — und warum?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

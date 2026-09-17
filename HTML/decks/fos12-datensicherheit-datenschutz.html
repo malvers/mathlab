@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Datensicherheit und Datenschutz</title>
+<meta name="description" content="Warum es nötig ist — und was ihr im Projekt konkret tut">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-5b727befa819.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/09-55-47-721/" target="_blank" rel="noopener">Wolfgang_Hasselmann</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — FOS 12</p>
+      <h1>Datensicherheit und Datenschutz</h1>
+      <p class="sub">Warum es nötig ist — und was ihr im Projekt konkret tut</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Zwei Begriffe</h2>
+      <p class="sub">Sie klingen ähnlich und meinen Verschiedenes</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Datenschutz und Datensicherheit</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:130px"><col style="width:340px"><col style="width:346px"></colgroup><tr><th></th><th>Datenschutz</th><th>Datensicherheit</th></tr><tr><td class="b">schützt</td><td style="background:#FBEBBF">die Person</td><td style="background:#E6ECF8">die Daten</td></tr><tr><td class="b">Frage</td><td style="background:#FBEBBF">Darf ich diese Daten überhaupt haben?</td><td style="background:#E6ECF8">Sind meine Daten vor Verlust und Zugriff geschützt?</td></tr><tr><td class="b">Grundlage</td><td style="background:#FBEBBF">DSGVO, BDSG — Recht</td><td style="background:#E6ECF8">Technik und Organisation</td></tr><tr><td class="b">Beispiel</td><td style="background:#FBEBBF">Nur die E-Mail speichern, die wirklich gebraucht wird</td><td style="background:#E6ECF8">Passwörter gehasht, Verbindung verschlüsselt</td></tr><tr><td class="b">Verstoß</td><td style="background:#FBEBBF">Bußgeld, Abmahnung</td><td style="background:#E6ECF8">Datenleck, Ausfall, Manipulation</td></tr></table><div class="body" style="top:276.55px;height:219.45px"><p class="line l0 step" data-g="0">Man kann Daten <b>sicher</b> speichern, die man <b>gar nicht speichern dürfte</b> — und umgekehrt</p>
+<p class="line l0 step" data-g="1">Im Projekt braucht ihr <b>beides</b> und dokumentiert <b>beides</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die DSGVO-Grundsätze, die euer Projekt betreffen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Datenminimierung</b>: nur erheben, was für den Zweck wirklich nötig ist</p>
+<p class="line l0 step" data-g="1"><b>Zweckbindung</b>: die Daten nur für das benutzen, wofür sie erhoben wurden</p>
+<p class="line l0 step" data-g="2"><b>Transparenz</b>: der Nutzer erfährt, was gespeichert wird — Datenschutzhinweis auf der Seite</p>
+<p class="line l0 step" data-g="3"><b>Speicherbegrenzung</b>: löschen, was nicht mehr gebraucht wird</p>
+<p class="line l0 step" data-g="4"><b>Integrität und Vertraulichkeit</b>: technische Maßnahmen sind gesetzlich vorgeschrieben</p>
+<p class="line l0 step" data-g="5">Im Schulprojekt am einfachsten erfüllt durch: <b>erfundene Testdaten</b>, keine echten Personen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Angriffe</h2>
+      <p class="sub">Zwei Lücken, die fast jedes Anfängerprojekt hat</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>SQL-Injection — so entsteht die Lücke</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:11.5px">&lt;?php
+// FALSCH: Nutzereingabe wird in den SQL-Text geklebt
+$name = $_POST['name'];
+$sql = "SELECT * FROM nutzer WHERE name = '$name'";
+$db-&gt;query($sql);
+
+// Eingabe:   x' OR '1'='1
+// Ergebnis:  SELECT * FROM nutzer WHERE name = 'x' OR '1'='1'
+//            -&gt; liefert ALLE Datensaetze
+
+// Eingabe:   x'; DROP TABLE nutzer; --
+//            -&gt; im schlimmsten Fall ist die Tabelle weg
+?&gt;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>SQL-Injection — so wird sie verhindert</h3><div class="rules"></div><div class="codepanel"><pre>&lt;?php
+// RICHTIG: Platzhalter, der Wert wird nie Teil des Befehls
+$stmt = $db-&gt;prepare('SELECT * FROM nutzer WHERE name = ?');
+$stmt-&gt;execute([$_POST['name']]);
+$treffer = $stmt-&gt;fetchAll();
+
+// Die Datenbank kennt den Befehl BEVOR sie den Wert sieht.
+// Aus x' OR '1'='1 wird dann einfach ein Name, den es nicht gibt.
+?&gt;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Cross-Site-Scripting (XSS) — Ausgabe entschärfen</h3><div class="rules"></div><div class="codepanel"><pre>&lt;?php
+// FALSCH: fremder Text landet ungeprueft in der Seite
+echo '&lt;p&gt;' . $_POST['kommentar'] . '&lt;/p&gt;';
+// Eingabe: &lt;script&gt;alert('gehackt')&lt;/script&gt;  -&gt; wird ausgefuehrt
+
+// RICHTIG: Sonderzeichen unschaedlich machen
+echo '&lt;p&gt;' . htmlspecialchars($_POST['kommentar']) . '&lt;/p&gt;';
+// aus &lt; wird &amp;lt; - der Browser zeigt es an, statt es auszufuehren
+?&gt;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Schwachstellen und Gegenmaßnahmen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:220px"><col style="width:300px"><col style="width:296px"></colgroup><tr><th>Schwachstelle</th><th>was passiert</th><th>Gegenmaßnahme</th></tr><tr><td class="b" style="background:#F2CFCB">SQL-Injection</td><td>fremder SQL-Code wird ausgeführt</td><td>prepare mit Platzhaltern</td></tr><tr><td class="b" style="background:#F2CFCB">XSS</td><td>fremdes JavaScript läuft im Browser</td><td>htmlspecialchars bei jeder Ausgabe</td></tr><tr><td class="b">fehlende Serverprüfung</td><td>Browserprüfung wird umgangen</td><td>alles auf dem Server erneut prüfen</td></tr><tr><td class="b">Klartext-Passwörter</td><td>ein Leck betrifft alle Nutzer</td><td>password_hash statt Klartext</td></tr><tr><td class="b">unverschlüsselte Übertragung</td><td>Mitlesen im WLAN</td><td>HTTPS erzwingen</td></tr><tr><td class="b">zu viele Rechte</td><td>ein Fehler betrifft alles</td><td>nur die nötigen Rechte vergeben</td></tr></table><div class="body" style="top:295.975px;height:200.025px"><p class="line l0 step" data-g="0">Die ersten beiden Zeilen decken den größten Teil aller Angriffe auf kleine Webprojekte ab</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Passwörter</h2>
+      <p class="sub">Niemals im Klartext, niemals selbst gebaut</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>So werden Passwörter behandelt</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:10.5px">&lt;?php
+// Registrierung: nur den Hash speichern, nie das Passwort
+$hash = password_hash($_POST['passwort'], PASSWORD_DEFAULT);
+$stmt = $db-&gt;prepare('INSERT INTO nutzer (name, pwhash) VALUES (?, ?)');
+$stmt-&gt;execute([$_POST['name'], $hash]);
+
+// Anmeldung: vergleichen, nicht entschluesseln
+$stmt = $db-&gt;prepare('SELECT pwhash FROM nutzer WHERE name = ?');
+$stmt-&gt;execute([$_POST['name']]);
+$zeile = $stmt-&gt;fetch();
+
+if ($zeile &amp;&amp; password_verify($_POST['passwort'], $zeile['pwhash'])) {
+    session_start();
+    $_SESSION['nutzer'] = $_POST['name'];
+}
+?&gt;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was daran wichtig ist</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ein <b>Hash</b> lässt sich nicht zurückrechnen — man kann nur <b>vergleichen</b></p>
+<p class="line l0 step" data-g="1"><b>password_hash</b> würzt jedes Passwort mit einem Zufallswert (<b>Salt</b>) — gleiche Passwörter, verschiedene Hashes</p>
+<p class="line l0 step" data-g="2">Niemals eine <b>eigene</b> Verschlüsselung erfinden: dafür gibt es geprüfte Funktionen</p>
+<p class="line l0 step" data-g="3"><b>Niemals</b> ein Passwort im Quelltext, in einem Kommentar oder in einer Beispieldatei</p>
+<p class="line l0 step" data-g="4">Und im Schulprojekt: Passwörter nur für <b>erfundene</b> Testkonten</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Übertragung und Speicherung</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:270px"><col style="width:290px"><col style="width:256px"></colgroup><tr><th>Maßnahme</th><th>schützt gegen</th><th>Aufwand im Projekt</th></tr><tr><td class="b">HTTPS statt HTTP</td><td>Mitlesen und Verändern unterwegs</td><td>Servereinstellung</td></tr><tr><td class="b">Sitzungen (Sessions)</td><td>fremdes Weiterbenutzen eines Logins</td><td>session_start und Abmelden</td></tr><tr><td class="b">Datenbank außerhalb des Webordners</td><td>direkter Download der Datei</td><td>Ordner umlegen</td></tr><tr><td class="b">Sicherungskopien</td><td>Verlust durch Fehler oder Defekt</td><td>täglich, im Teamordner</td></tr><tr><td class="b">Rechte einschränken</td><td>Schaden bei einem Einbruch</td><td>eigener Datenbanknutzer</td></tr></table><div class="body" style="top:276.55px;height:219.45px"><p class="line l0 step" data-g="0">Bei <b>SQLite</b> ist die Datenbank eine Datei — sie darf <b>nicht</b> über die URL erreichbar sein</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>Im Projekt</h2>
+      <p class="sub">Maßnahmen umsetzen und dokumentieren</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Sicherheitscheckliste</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:50px"><col style="width:610px"><col style="width:156px"></colgroup><tr><th class="ac">Nr</th><th class="al">Prüfpunkt</th><th class="al">erledigt</th></tr><tr><td class="b ac">1</td><td class="al">Jede Datenbankabfrage mit Nutzereingabe benutzt prepare</td><td class="al">____</td></tr><tr><td class="b ac">2</td><td class="al">Jede Ausgabe fremder Daten geht durch htmlspecialchars</td><td class="al">____</td></tr><tr><td class="b ac">3</td><td class="al">Jede Eingabe wird auf dem Server geprüft (Typ, Bereich, Länge)</td><td class="al">____</td></tr><tr><td class="b ac">4</td><td class="al">Passwörter nur als Hash, kein Klartext im Code oder in der DB</td><td class="al">____</td></tr><tr><td class="b ac">5</td><td class="al">Keine echten personenbezogenen Daten im Projekt</td><td class="al">____</td></tr><tr><td class="b ac">6</td><td class="al">Datenschutzhinweis auf der Seite: was wird gespeichert, wozu</td><td class="al">____</td></tr><tr><td class="b ac">7</td><td class="al">Datenbankdatei nicht über die URL erreichbar</td><td class="al">____</td></tr><tr><td class="b ac">8</td><td class="al">Sicherungskopie vorhanden und wiederherstellbar</td><td class="al">____</td></tr></table><div class="body" style="top:334.825px;height:161.175px"><p class="line l0 step" data-g="0">Diese acht Punkte gehören <b>ausgefüllt</b> in die Projektdokumentation</p>
+<p class="line l0 step" data-g="1">Zu jedem Punkt: <b>eine Zeile</b>, wie ihr ihn umgesetzt habt — nicht nur ein Häkchen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Anschluss an Klasse 11</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">In <b>Klasse 11, LB 2</b> ging es um Gefahren im Netz und um Schutz der eigenen Daten</p>
+<p class="line l0 step" data-g="1">Jetzt seid ihr auf der <b>anderen Seite</b>: ihr baut das System, das Daten anderer verwaltet</p>
+<p class="line l0 step" data-g="2">Damit übernehmt ihr <b>Verantwortung</b> — auch in einem Schulprojekt</p>
+<p class="line l0 step" data-g="3">Die Frage „<b>Brauche ich dieses Feld wirklich?</b>“ ist die wirksamste Sicherheitsmaßnahme</p>
+<p class="line l0 step" data-g="4">Was nicht gespeichert wird, kann nicht gestohlen werden</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Was nicht gespeichert wird, kann nicht verloren gehen. Datenminimierung ist die stärkste Sicherheitsmaßnahme.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Sicherheit</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Little Bobby Tables</b> ist der berühmteste Comic der Informatik — ein Kind namens Robert'); DROP TABLE Students; --</p>
+<p class="line l0 step" data-g="1">Die <b>OWASP Top 10</b> listen seit 2003 die häufigsten Web-Schwachstellen; Injection war fast immer auf Platz 1</p>
+<p class="line l0 step" data-g="2">Beim <b>Adobe-Leck 2013</b> waren 153 Mio. Passwörter schlecht verschlüsselt — die Hinweise standen im Klartext daneben</p>
+<p class="line l0 step" data-g="3">Das meistgenutzte Passwort der Welt ist seit Jahren <b>123456</b> — dicht gefolgt von <b>password</b></p>
+<p class="line l0 step" data-g="4">Die <b>DSGVO</b> gilt seit Mai 2018 und kann bis zu 4 % des weltweiten Jahresumsatzes kosten</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: absichern und aufschreiben</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Geht euren gesamten Code durch und setzt die <b>Punkte 1 bis 3</b> der Checkliste um</p>
+<p class="line l0 step" data-g="1">Testet die <b>SQL-Injection</b> an eurer eigenen Seite mit x' OR '1'='1 — vorher und nachher</p>
+<p class="line l0 step" data-g="2">Testet <b>XSS</b> mit einem harmlosen script-Tag im Formular — vorher und nachher</p>
+<p class="line l0 step" data-g="3">Schreibt den <b>Datenschutzhinweis</b> für eure Seite: welche Daten, wozu, wie lange</p>
+<p class="line l0 step" data-g="4">Dokumentiert alle acht Punkte mit je einer Zeile <b>Begründung</b> — das wird bewertet</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Die ganze Kette</title>
+<meta name="description" content="Problem → Entwurf → Programm → Test: Komplexübung und Codereview">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-c5cf3003643f.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/mist-1989298/" target="_blank" rel="noopener">MemoryCatcher</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — FOS 12</p>
+      <h1>Die ganze Kette</h1>
+      <p class="sub">Problem → Entwurf → Programm → Test: Komplexübung und Codereview</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Problemlösen</h2>
+      <p class="sub">Sechs Phasen, und keine davon heißt „drauflostippen“</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Problemlösungskette</h3><div class="rules"></div><div class="pic"><img src="img/chain-loesung.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Jede Phase hat ein <b>sichtbares Ergebnis</b>: Aufgabentext, Datenliste, Struktogramm, Code, Testtabelle, Beschreibung</p>
+<p class="line l0 step" data-g="1">Wer eine Phase überspringt, holt sie später <b>teurer</b> nach — meist in der Fehlersuche</p>
+<p class="line l0 step" data-g="2">Rückschritte sind erlaubt: ein Testfehler schickt euch zurück in den <b>Entwurf</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was in jeder Phase zu tun ist</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:170px"><col style="width:290px"><col style="width:356px"></colgroup><tr><th>Phase</th><th>Leitfrage</th><th>Ergebnis</th></tr><tr><td class="b">Problem verstehen</td><td>Was genau soll herauskommen?</td><td>Aufgabe in eigenen Worten, 3 Sätze</td></tr><tr><td class="b">Analyse</td><td>Welche Daten rein, welche raus?</td><td>Liste der Eingaben, Ausgaben, Regeln</td></tr><tr><td class="b">Entwurf</td><td>In welchen Schritten?</td><td>Struktogramm, Funktionsnamen</td></tr><tr><td class="b">Implementierung</td><td>Wie heißt das in Python?</td><td>lauffähiges Programm</td></tr><tr><td class="b">Test</td><td>Stimmt es auch?</td><td>Testtabelle mit Soll und Ist</td></tr><tr><td class="b">Dokumentation</td><td>Versteht es ein anderer?</td><td>Kommentare, kurze Beschreibung</td></tr></table><div class="body" style="top:302.45px;height:193.55px"><p class="line l0 step" data-g="0">Die <b>Analyse</b> ist die Phase, die am häufigsten übersprungen wird — und am meisten Zeit spart</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Die Aufgabe</h2>
+      <p class="sub">Ein Getränkeautomat, der wirklich rechnet</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Aufgabenstellung</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ein <b>Automat</b> verkauft drei Getränke: Wasser 1,20 € · Saft 1,80 € · Kaffee 2,50 €</p>
+<p class="line l0 step" data-g="1">Der Kunde <b>wählt</b> ein Getränk und wirft nacheinander Münzen ein</p>
+<p class="line l0 step" data-g="2">Der Automat zeigt nach jeder Münze den <b>Restbetrag</b> an</p>
+<p class="line l0 step" data-g="3">Ist genug bezahlt, gibt er das Getränk aus und <b>berechnet das Wechselgeld</b></p>
+<p class="line l0 step" data-g="4">Das Wechselgeld wird in <b>möglichst wenigen Münzen</b> ausgegeben (2 €, 1 €, 50 ct, 20 ct, 10 ct)</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Analyse: Eingaben, Ausgaben, Regeln</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:130px"><col style="width:300px"><col style="width:386px"></colgroup><tr><th></th><th>was</th><th>Typ / Wertebereich</th></tr><tr><td class="b">Eingabe</td><td>Getränkewahl</td><td>1, 2 oder 3 — alles andere abweisen</td></tr><tr><td class="b">Eingabe</td><td>Münzwert in Cent</td><td>10, 20, 50, 100, 200</td></tr><tr><td class="b">Ausgabe</td><td>Restbetrag nach jeder Münze</td><td>Cent, nie negativ angezeigt</td></tr><tr><td class="b">Ausgabe</td><td>Getränk + Wechselgeldstückelung</td><td>Anzahl je Münzsorte</td></tr><tr><td class="b" style="background:#FBEBBF">Regel</td><td style="background:#FBEBBF">Preise in <b>Cent</b> rechnen</td><td style="background:#FBEBBF">int statt float — keine Rundungsfehler</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Der wichtigste Entwurfsentscheid steht in der letzten Zeile: <b>alles in Cent</b></p>
+<p class="line l0 step" data-g="1">Damit ist 0.1 + 0.2 kein Thema mehr — die Kasse stimmt auf den Cent</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Entwurf: das Hauptprogramm</h3><div class="rules"></div><div class="body" style="left:72px;width:372px"><p class="line l0 step" data-g="0">Eine <b>while</b>-Schleife, die endet, sobald genug Geld drin ist</p>
+<p class="line l0 step" data-g="1">Das Wechselgeld ist ein <b>eigenes Teilproblem</b> — Aufruf-Kasten</p>
+<p class="line l0 step" data-g="2">Die Auswahl des Getränks lohnt sich als <b>eigene Funktion</b> mit Prüfung der Eingabe</p></div><img src="img/sg-automat.png" alt="" style="position:absolute;left:468px;top:150px;width:420px;height:244.44px"><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Umsetzung</h2>
+      <p class="sub">Vom Entwurf zum Gerüst</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Das Gerüst — die Funktionen zuerst</h3><div class="rules"></div><div class="codepanel" style="padding-top:33px;padding-bottom:33px"><pre style="font-size:9.5px">PREISE = {1: 120, 2: 180, 3: 250}       # alles in Cent
+MUENZEN = [200, 100, 50, 20, 10]
+
+def waehle_getraenk():
+    wahl = 0
+    while wahl not in PREISE:
+        wahl = int(input('1 Wasser, 2 Saft, 3 Kaffee: '))
+    return wahl
+
+def kassiere(preis):
+    bezahlt = 0
+    while bezahlt &lt; preis:
+        muenze = int(input(f'noch {preis - bezahlt} ct - Muenze: '))
+        if muenze in MUENZEN:
+            bezahlt = bezahlt + muenze
+        else:
+            print('Muenze wird nicht angenommen')
+    return bezahlt</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Das Wechselgeld — das eigentliche Problem</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:11.5px">def wechselgeld(rest):
+    for muenze in MUENZEN:          # gross nach klein: gieriges Verfahren
+        anzahl = rest // muenze
+        if anzahl &gt; 0:
+            print(f'{anzahl} x {muenze} ct')
+        rest = rest % muenze
+
+
+wahl = waehle_getraenk()
+preis = PREISE[wahl]
+bezahlt = kassiere(preis)
+print('Getraenk wird ausgegeben.')
+wechselgeld(bezahlt - preis)</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum das Verfahren funktioniert</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Immer die <b>größte passende</b> Münze nehmen — das heißt <b>gieriges Verfahren</b> (greedy)</p>
+<p class="line l0 step" data-g="1"><b>//</b> liefert die Anzahl, <b>%</b> den verbleibenden Rest — genau die beiden Operatoren aus Woche 13</p>
+<p class="line l0 step" data-g="2">Beim Euro <b>klappt</b> das immer mit der kleinsten Münzzahl — das ist nicht bei jedem Münzsystem so</p>
+<p class="line l0 step" data-g="3">Gegenbeispiel: mit Münzen 1, 3, 4 wären für 6 zweimal 3 optimal — gierig nimmt 4 + 1 + 1</p>
+<p class="line l0 step" data-g="4">Merke: Ein Verfahren, das oft stimmt, ist noch <b>kein Beweis</b>, dass es immer stimmt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>Codereview</h2>
+      <p class="sub">Fremden Code lesen ist die halbe Ausbildung</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Review-Checkliste für die Partnerarbeit</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:140px"><col style="width:400px"><col style="width:276px"></colgroup><tr><th>Bereich</th><th>Frage an den Code</th><th>Befund</th></tr><tr><td class="b">Verständlich</td><td>Sagen die Namen, was sie enthalten?</td><td>________________</td></tr><tr><td class="b">Struktur</td><td>Hat jede Funktion genau eine Aufgabe?</td><td>________________</td></tr><tr><td class="b">Korrekt</td><td>Stimmen die Grenzfälle (0, genau passend, zu viel)?</td><td>________________</td></tr><tr><td class="b">Robust</td><td>Was passiert bei einer falschen Eingabe?</td><td>________________</td></tr><tr><td class="b">Test</td><td>Gibt es eine Testtabelle mit Soll und Ist?</td><td>________________</td></tr><tr><td class="b">Doku</td><td>Versteht man in 2 Minuten, was das Programm tut?</td><td>________________</td></tr></table><div class="body" style="top:302.45px;height:193.55px"><p class="line l0 step" data-g="0">Reviewt in <b>Partnerarbeit</b>: einer erklärt, einer fragt — dann tauschen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wie man Rückmeldung gibt</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Über den Code reden, nicht über die Person</b>: „diese Funktion macht zwei Dinge“ statt „du machst das falsch“</p>
+<p class="line l0 step" data-g="1"><b>Fragen statt Urteilen</b>: „Was passiert hier bei einer Eingabe von 0?“</p>
+<p class="line l0 step" data-g="2"><b>Konkret werden</b>: Zeile nennen, Beispiel nennen, Vorschlag machen</p>
+<p class="line l0 step" data-g="3">Auch <b>loben</b>, was gut ist — gute Namen und gute Testfälle sind nicht selbstverständlich</p>
+<p class="line l0 step" data-g="4">Und als Autor: <b>zuhören, nicht verteidigen</b>. Der Code muss ohne euch verständlich sein</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Ein Programm wird einmal geschrieben und hundertmal gelesen. Schreibt für die Leser.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Problemlösen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>George Pólya</b> beschrieb 1945 in „<b>How to Solve It</b>“ dieselben vier Schritte — für Mathematik, nicht für Computer</p>
+<p class="line l0 step" data-g="1">Beim <b>Rubber Duck Debugging</b> erklärt man seinen Code einer Gummiente — und findet den Fehler beim Reden</p>
+<p class="line l0 step" data-g="2">Studien zeigen: <b>Codereviews</b> finden mehr Fehler als Testen — und die teuersten zuerst</p>
+<p class="line l0 step" data-g="3">Das <b>Münzwechselproblem</b> ist ein Klassiker der Optimierung; gierig ist schnell, aber nicht immer optimal</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Abgabe zum Abschluss von LB 2</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ein <b>lauffähiger</b> Getränkeautomat mit mindestens vier Funktionen</p>
+<p class="line l0 step" data-g="1">Das <b>Struktogramm</b> des Hauptprogramms und je eines für zwei Funktionen</p>
+<p class="line l0 step" data-g="2">Eine <b>Testtabelle</b> mit mindestens sechs Fällen, darunter Randfälle</p>
+<p class="line l0 step" data-g="3">Ein ausgefülltes <b>Reviewblatt</b> von eurem Partner — mit einem Punkt, den ihr danach geändert habt</p>
+<p class="line l0 step" data-g="4">In Woche 22 kommt die <b>Klausur</b> über LB 2 und OOP — dieses Projekt ist die beste Vorbereitung</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

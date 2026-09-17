@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Wo Algorithmen aufhören</title>
+<meta name="description" content="Nicht berechenbar, nicht in vernünftiger Zeit, nicht genau genug">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-5b727befa819.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/09-55-47-721/" target="_blank" rel="noopener">Wolfgang_Hasselmann</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 13</p>
+      <h1>Wo Algorithmen aufhören</h1>
+      <p class="sub">Nicht berechenbar, nicht in vernünftiger Zeit, nicht genau genug</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Drei Arten von Grenzen</h2>
+      <p class="sub">Prinzipiell, zeitlich, numerisch</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die drei Grenzen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:160px"><col style="width:350px"><col style="width:306px"></colgroup><tr><th>Grenze</th><th>heißt</th><th>Beispiel</th></tr><tr><td class="b" style="background:#F2CFCB">prinzipiell</td><td>es gibt beweisbar keinen Algorithmus</td><td>Halteproblem</td></tr><tr><td class="b" style="background:#FBEBBF">zeitlich</td><td>es gibt einen, aber er dauert zu lange</td><td>alle Rundreisen prüfen</td></tr><tr><td class="b" style="background:#E6ECF8">numerisch</td><td>der Rechner kann die Zahl nicht genau darstellen</td><td>0.1 + 0.2</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Nur die erste ist <b>endgültig</b> — die zweite verschiebt sich mit schnelleren Rechnern</p>
+<p class="line l0 step" data-g="1">Die dritte ist die, die im Alltag am häufigsten zuschlägt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Das Halteproblem</h2>
+      <p class="sub">Anschaulich, ohne Beweisformalismus</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Frage</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Gibt es ein Programm <b>H</b>, das für jedes Programm P und jede Eingabe E entscheidet, ob P mit E jemals anhält?</p>
+<p class="line l0 step" data-g="1">Das wäre nützlich: kein Endlosschleifen-Absturz mehr</p>
+<p class="line l0 step" data-g="2"><b>Alan Turing</b> bewies 1936: ein solches H kann es <b>nicht</b> geben</p>
+<p class="line l0 step" data-g="3">Der Beweis führt die Annahme zum Widerspruch — mit einem Selbstbezug</p>
+<p class="line l0 step" data-g="4">Es ist also keine Frage der Rechenleistung, sondern eine <b>prinzipielle Grenze</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Der Widerspruch, in Pseudocode</h3><div class="rules"></div><div class="codepanel"><pre># Annahme: haelt_an(P, E) existiert und ist immer richtig
+
+def gemein(P):
+    if haelt_an(P, P):
+        while True:        # dann laufe ewig
+            pass
+    else:
+        return             # sonst halte an
+
+# Und nun: was macht gemein(gemein)?</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Widerspruch aufgelöst</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Hält <b>gemein(gemein)</b> an, dann läuft es laut Definition ewig</p>
+<p class="line l0 step" data-g="1">Läuft es ewig, dann hält es laut Definition an</p>
+<p class="line l0 step" data-g="2">Beides ist unmöglich — also war die <b>Annahme</b> falsch</p>
+<p class="line l0 step" data-g="3">Es kann <b>haelt_an</b> nicht geben. Punkt</p>
+<p class="line l0 step" data-g="4">Praktische Folge: kein Werkzeug kann alle Endlosschleifen im Voraus finden</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Numerische Grenzen</h2>
+      <p class="sub">Die Grenze, die täglich zuschlägt</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Zwei Zeilen, die jeden überraschen</h3><div class="rules"></div><div class="codepanel"><pre>print(0.1 + 0.2)          # 0.30000000000000004
+print(0.1 + 0.2 == 0.3)   # False
+
+# Grund: 0.1 ist im Binaersystem eine unendliche Zahl,
+# genau wie 1/3 im Dezimalsystem.
+
+# richtig vergleichen:
+print(abs((0.1 + 0.2) - 0.3) &lt; 1e-9)   # True</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Numerische Fallen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:180px"><col style="width:350px"><col style="width:286px"></colgroup><tr><th>Falle</th><th>was passiert</th><th>Gegenmittel</th></tr><tr><td class="b">Rundungsfehler</td><td>Nachkommastellen sind ungenau</td><td>mit Toleranz vergleichen</td></tr><tr><td class="b">Auslöschung</td><td>Differenz fast gleicher Zahlen verliert Stellen</td><td>Formel umstellen</td></tr><tr><td class="b">Überlauf</td><td>das Ergebnis passt nicht in den Datentyp</td><td>größeren Typ wählen</td></tr><tr><td class="b" style="background:#FBEBBF">Geld in float</td><td>Cent-Beträge werden ungenau</td><td>in Cent als Ganzzahl rechnen</td></tr></table><div class="body" style="top:257.125px;height:238.875px"><p class="line l0 step" data-g="0">Python hat <b>beliebig große Ganzzahlen</b> — der Überlauf trifft dort nur Gleitkommazahlen</p>
+<p class="line l0 step" data-g="1">In C, Java und auf Mikrocontrollern ist der <b>Integer-Überlauf</b> ein echtes Problem</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Nicht jede Frage hat einen Algorithmus. Und nicht jeder Algorithmus liefert in vernünftiger Zeit ein genaues Ergebnis.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Grenzen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Turing</b> war 24, als er 1936 das Halteproblem löste — vor dem ersten gebauten Computer</p>
+<p class="line l0 step" data-g="1">Die <b>Ariane 5</b> explodierte 1996 nach 37 Sekunden wegen eines Zahlenüberlaufs</p>
+<p class="line l0 step" data-g="2">Ein <b>Patriot-Flugabwehrsystem</b> verfehlte 1991 sein Ziel wegen aufsummierter Rundungsfehler</p>
+<p class="line l0 step" data-g="3">Das <b>Problem des Handlungsreisenden</b> mit 20 Städten hat über 60 Billiarden Rundreisen</p>
+<p class="line l0 step" data-g="4">Deshalb sucht man dort <b>gute</b> Lösungen statt der besten — das nennt man Heuristik</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Probiert <b>0.1 + 0.2</b> aus und erklärt das Ergebnis in drei Sätzen</p>
+<p class="line l0 step" data-g="1">Schreibt einen <b>richtigen</b> Gleitkommavergleich mit Toleranz</p>
+<p class="line l0 step" data-g="2">Rechnet aus, wie viele Rundreisen es bei <b>10</b> Städten gibt</p>
+<p class="line l0 step" data-g="3">Erklärt in eigenen Worten, warum es <b>haelt_an</b> nicht geben kann</p>
+<p class="line l0 step" data-g="4">Ordnet fünf Beispiele vom Arbeitsblatt einer der <b>drei Grenzen</b> zu</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

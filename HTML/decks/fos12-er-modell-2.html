@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Entity-Relationship-Modell II</title>
+<meta name="description" content="Vom Diagramm zur Datenbank: drei Überführungsregeln">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-971156f40735.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/trees-7544451/" target="_blank" rel="noopener">yoshitaka2</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — FOS 12</p>
+      <h1>Entity-Relationship-Modell II</h1>
+      <p class="sub">Vom Diagramm zur Datenbank: drei Überführungsregeln</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Drei Regeln</h2>
+      <p class="sub">Aus jedem ER-Modell wird mechanisch ein Satz Tabellen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Überführungsregeln im Überblick</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:60px"><col style="width:240px"><col style="width:516px"></colgroup><tr><th class="ac">Regel</th><th class="al">Im ER-Modell</th><th class="al">In der Datenbank</th></tr><tr><td class="b ac">1</td><td class="al">Entitätstyp mit Attributen</td><td class="al">eine Tabelle, Attribute = Spalten, Schlüssel = PRIMARY KEY</td></tr><tr><td class="b ac">2</td><td class="al">Beziehung 1:n</td><td class="al">Fremdschlüssel auf der n-Seite</td></tr><tr><td class="b ac">3</td><td class="al">Beziehung n:m</td><td class="al">eigene Tabelle mit zwei Fremdschlüsseln (+ Beziehungsattribute)</td></tr><tr><td class="b ac">3a</td><td class="al">Beziehung 1:1</td><td class="al">Fremdschlüssel auf einer Seite — oder beide Tabellen zusammenlegen</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Die Regeln sind so <b>mechanisch</b>, dass Werkzeuge sie automatisch anwenden</p>
+<p class="line l0 step" data-g="1">Trotzdem von Hand können: in der <b>Klausur</b> gibt es kein Werkzeug</p>
+<p class="line l0 step" data-g="2">Danach prüfen: kommt jede Information <b>genau einmal</b> vor?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Regel 1: Entitätstyp wird Tabelle</h2>
+      <p class="sub">Attribute werden Spalten, das Schlüsselattribut wird Primärschlüssel</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Regel 1: SCHÜLER wird zur Tabelle Schueler</h3><div class="rules"></div><img src="img/er-regel1.png" alt="" style="position:absolute;left:72px;top:146px;width:320px;height:176.842px"><table class="dtable" style="left:546px;top:150px;width:342px;font-size:11px"><colgroup><col style="width:56px"><col style="width:110px"><col style="width:66px"><col style="width:110px"></colgroup><tr><th>SNr</th><th>Name</th><th>Klasse</th><th>Geburtsdatum</th></tr><tr><td class="b">1001</td><td>Lena Krause</td><td>FO12a</td><td>2008-04-17</td></tr><tr><td class="b">1002</td><td>Tim Vogel</td><td>FO12a</td><td>2007-11-02</td></tr><tr><td class="b">1003</td><td>Mia Hahn</td><td>FO12b</td><td>2008-09-30</td></tr></table><div class="body" style="top:336.842px;height:159.158px"><p class="line l0 step" data-g="0">Rechteck → <b>Tabelle</b>, jede Ellipse → <b>Spalte</b>, unterstrichen → <b>PRIMARY KEY</b></p>
+<p class="line l0 step" data-g="1">Für jede Spalte einen <b>Datentyp</b> wählen: INTEGER, TEXT, ISO-Datum als TEXT</p>
+<p class="line l0 step" data-g="2">Zusammengesetzte Attribute (Adresse) → <b>mehrere</b> Spalten: Straße, PLZ, Ort</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Regel 1 in SQL</h3><div class="rules"></div><div class="codepanel"><pre>CREATE TABLE Schueler (
+  SNr           INTEGER PRIMARY KEY,   -- das unterstrichene Attribut
+  Name          TEXT    NOT NULL,
+  Klasse        TEXT    NOT NULL,
+  Geburtsdatum  TEXT                   -- 'JJJJ-MM-TT'
+);
+
+CREATE TABLE Lehrkraft (
+  LNr        INTEGER PRIMARY KEY,
+  Name       TEXT    NOT NULL,
+  Durchwahl  INTEGER
+);</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Regel 2: 1:n wird Fremdschlüssel</h2>
+      <p class="sub">Der Schlüssel der 1-Seite wandert als Spalte auf die n-Seite</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Regel 2: LEHRKRAFT leitet KURS (1:n)</h3><div class="rules"></div><img src="img/er-regel2.png" alt="" style="position:absolute;left:180px;top:146px;width:600px;height:120px"><div class="body" style="top:276px;width:542px;height:220px"><p class="line l0 step" data-g="0">Ein Kurs hat <b>genau eine</b> Lehrkraft → er merkt sich ihre Nummer: <b>LNr in Kurs</b></p>
+<p class="line l0 step" data-g="1">Die Lehrkraft merkt sich <b>nichts</b>: viele Kurse passen nicht in eine Zelle</p>
+<p class="line l0 step" data-g="2">Regel: der Fremdschlüssel steht <b>immer auf der n-Seite</b></p></div><table class="dtable" style="left:684px;top:280px;width:204px;font-size:10px"><colgroup><col style="width:44px"><col style="width:80px"><col style="width:80px"></colgroup><tr><th class="ar">LNr</th><th class="al">Name</th><th class="ar">Durchwahl</th></tr><tr><td class="b ar">1</td><td class="al">Alvers</td><td class="ar">31</td></tr><tr><td class="b ar">2</td><td class="al">Schulze</td><td class="ar">42</td></tr></table><table class="dtable" style="left:638px;top:351px;width:250px;font-size:10px"><colgroup><col style="width:44px"><col style="width:90px"><col style="width:52px"><col style="width:64px"></colgroup><tr><th class="ar">KNr</th><th class="al">Fach</th><th class="ar">Raum</th><th class="ar">LNr</th></tr><tr><td class="b ar">3</td><td class="al">Informatik</td><td class="ar">204</td><td class="ar" style="background:#F2CFCB">1</td></tr><tr><td class="b ar">4</td><td class="al">Physik</td><td class="ar">305</td><td class="ar" style="background:#F2CFCB">2</td></tr><tr><td class="b ar">5</td><td class="al">Mathematik</td><td class="ar">118</td><td class="ar" style="background:#F2CFCB">1</td></tr></table><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Regel 2 in SQL: REFERENCES</h3><div class="rules"></div><div class="codepanel"><pre>CREATE TABLE Kurs (
+  KNr   INTEGER PRIMARY KEY,
+  Fach  TEXT    NOT NULL,
+  Raum  TEXT,
+  LNr   INTEGER NOT NULL REFERENCES Lehrkraft(LNr)   -- der Fremdschlüssel
+);
+
+-- NOT NULL: jeder Kurs MUSS eine Lehrkraft haben  -&gt; Min-Max (1,1)
+-- ohne NOT NULL: Kurs darf (noch) ohne Lehrkraft sein -&gt; (0,1)
+
+-- Reihenfolge: Lehrkraft VOR Kurs anlegen - der Verweis braucht sein Ziel
+PRAGMA foreign_keys = ON;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>Regel 3: n:m wird eigene Tabelle</h2>
+      <p class="sub">Die Beziehung bekommt eine Tabelle mit zwei Fremdschlüsseln</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Regel 3: SCHÜLER belegt KURS (n:m)</h3><div class="rules"></div><img src="img/er-regel3.png" alt="" style="position:absolute;left:180px;top:146px;width:600px;height:120px"><div class="body" style="top:276px;width:672px;height:220px"><p class="line l0 step" data-g="0">Auf <b>keiner</b> Seite passt der Fremdschlüssel: beide hätten viele Werte</p>
+<p class="line l0 step" data-g="1">Also bekommt die <b>Raute</b> eine eigene Tabelle: <b>Belegung (SNr, KNr)</b></p>
+<p class="line l0 step" data-g="2">Beide Spalten zusammen sind der <b>Primärschlüssel</b>: jedes Paar nur einmal</p>
+<p class="line l0 step" data-g="3">Jede Spalte ist zugleich <b>Fremdschlüssel</b> auf ihre Tabelle</p></div><table class="dtable" style="left:768px;top:280px;width:120px;font-size:10px"><colgroup><col style="width:60px"><col style="width:60px"></colgroup><tr><th class="ar">SNr</th><th class="ar">KNr</th></tr><tr><td class="b ar" style="background:#FBEBBF">1001</td><td class="b ar">3</td></tr><tr><td class="b ar" style="background:#FBEBBF">1001</td><td class="b ar">4</td></tr><tr><td class="b ar">1002</td><td class="b ar">3</td></tr><tr><td class="b ar">1003</td><td class="b ar">3</td></tr></table><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Regel 3 in SQL: zusammengesetzter Schlüssel</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:11.5px">CREATE TABLE Belegung (
+  SNr  INTEGER NOT NULL REFERENCES Schueler(SNr),
+  KNr  INTEGER NOT NULL REFERENCES Kurs(KNr),
+  PRIMARY KEY (SNr, KNr)         -- das Paar ist der Schlüssel
+);
+
+-- Beziehungsattribute wandern mit in die Beziehungstabelle:
+CREATE TABLE Praktikum (
+  SNr     INTEGER NOT NULL REFERENCES Schueler(SNr),
+  BNr     INTEGER NOT NULL REFERENCES Betrieb(BNr),
+  Beginn  TEXT NOT NULL,
+  Ende    TEXT,
+  PRIMARY KEY (SNr, BNr, Beginn) -- derselbe Betrieb zweimal? dann gehört Beginn dazu
+);</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Das Praktikums-Modell nach der Überführung</h3><div class="rules"></div><div class="pic"><img src="img/schema-praktikum.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Regel 1 zweimal: <b>Schüler</b>, <b>Betrieb</b></p>
+<p class="line l0 step" data-g="1">Regel 3 einmal: <b>absolviert</b> → Tabelle <b>Praktikum</b> mit Beginn und Ende</p>
+<p class="line l0 step" data-g="2">Probe: Betrieb „Müller GmbH, Dresden, Handwerk“ steht <b>genau einmal</b> — egal wie viele Praktika</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Fallen bei der Überführung</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0">Typische Fehler</p>
+<p class="col l1 step" data-g="0">Fremdschlüssel auf der <b>1-Seite</b>: „Kurse: 3, 4, 5“ in einer Zelle</p>
+<p class="col l1 step" data-g="0">n:m als <b>zwei</b> Fremdschlüssel statt eigener Tabelle</p>
+<p class="col l1 step" data-g="0">Schlüssel <b>vergessen</b> — Tabelle ohne PRIMARY KEY</p>
+<p class="col l1 step" data-g="0">Tabellen in <b>falscher Reihenfolge</b> angelegt</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1">So geht es richtig</p>
+<p class="col l1 step" data-g="1">Fremdschlüssel steht dort, wo <b>ein</b> Wert reicht</p>
+<p class="col l1 step" data-g="1">Jede n:m-Raute wird <b>eine</b> Tabelle</p>
+<p class="col l1 step" data-g="1">Jede Tabelle hat <b>einen</b> Primärschlüssel — notfalls zusammengesetzt</p>
+<p class="col l1 step" data-g="1">Erst Tabellen <b>ohne</b>, dann <b>mit</b> Fremdschlüsseln — und PRAGMA an</p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Entität wird Tabelle, 1:n wird Fremdschlüssel, n:m wird eigene Tabelle.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: euer ER-Modell wird Datenbank</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Nehmt euer <b>Modell von letzter Woche</b> — Praktikum, Verein, Nebenjob …</p>
+<p class="line l0 step" data-g="1">Wendet die <b>drei Regeln</b> an: schreibt zuerst alle Tabellen mit Spalten auf Papier, markiert PK und FK</p>
+<p class="line l0 step" data-g="2">Legt die Tabellen in <b>SQLite</b> an — richtige Reihenfolge, PRAGMA foreign_keys = ON</p>
+<p class="line l0 step" data-g="3"><b>Drei Datensätze</b> je Tabelle, dann eine <b>JOIN-Abfrage</b> über zwei Tabellen</p>
+<p class="line l0 step" data-g="4">Provoziert einen <b>Fremdschlüssel-Fehler</b> und erklärt, welche Regel gegriffen hat</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

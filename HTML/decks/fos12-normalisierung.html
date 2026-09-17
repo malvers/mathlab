@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Normalisierung</title>
+<meta name="description" content="Redundanz systematisch loswerden: 1., 2. und 3. Normalform">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-f55e4d02d16b.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/mountains-6118187/" target="_blank" rel="noopener">RyanK14</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — FOS 12</p>
+      <h1>Normalisierung</h1>
+      <p class="sub">Redundanz systematisch loswerden: 1., 2. und 3. Normalform</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Warum Normalformen?</h2>
+      <p class="sub">Ein Prüfverfahren, das die Anomalien aus Woche 3 verhindert</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Vom Bauchgefühl zur Regel</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Woche 3: die Kursliste war <b>schlecht</b> — wir haben es gesehen, aber nicht bewiesen</p>
+<p class="line l0 step" data-g="1"><b>Normalformen</b> sind Tests: besteht eine Tabelle den Test, ist diese Art Redundanz weg</p>
+<p class="line l0 step" data-g="2">Drei Stufen, immer in dieser Reihenfolge: <b>1NF → 2NF → 3NF</b></p>
+<p class="line l0 step" data-g="3">Ein sauberes <b>ER-Modell</b> liefert meist schon 3NF — Normalisierung ist das Sicherheitsnetz</p>
+<p class="line l0 step" data-g="4">Das Werkzeug dahinter: <b>Abhängigkeit</b> — welcher Wert legt welchen anderen fest?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Ausgangspunkt: noch schlimmer als die Kursliste</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:50px"><col style="width:110px"><col style="width:66px"><col style="width:170px"><col style="width:150px"><col style="width:100px"><col style="width:170px"></colgroup><tr><th>SNr</th><th>Name</th><th>Klasse</th><th>Kurse</th><th>Lehrkräfte</th><th>Räume</th><th>Durchwahl</th></tr><tr><td>1001</td><td class="b">Lena Krause</td><td>FO12a</td><td style="background:#F2CFCB">Informatik, Physik</td><td style="background:#F2CFCB">Alvers, Schulze</td><td style="background:#F2CFCB">204, 305</td><td style="background:#F2CFCB">31, 42</td></tr><tr><td>1002</td><td class="b">Tim Vogel</td><td>FO12a</td><td style="background:#F2CFCB">Informatik, Physik</td><td style="background:#F2CFCB">Alvers, Schulze</td><td style="background:#F2CFCB">204, 305</td><td style="background:#F2CFCB">31, 42</td></tr><tr><td>1003</td><td class="b">Mia Hahn</td><td>FO12b</td><td>Informatik</td><td>Alvers</td><td>204</td><td>31</td></tr><tr><td>1004</td><td class="b">Ben Roth</td><td>FO12b</td><td>Mathematik</td><td>Berger</td><td>118</td><td>27</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Eine Zeile pro Schüler — bequem zum Tippen, <b>unbrauchbar</b> zum Fragen</p>
+<p class="line l0 step" data-g="1">„Wer ist in Physik?“ → das DBMS müsste <b>Listen in Zellen</b> durchsuchen</p>
+<p class="line l0 step" data-g="2">Welche Durchwahl gehört zu welcher Lehrkraft? Nur die <b>Reihenfolge</b> verrät es</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>1. Normalform</h2>
+      <p class="sub">Jede Zelle enthält genau einen Wert</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>1NF: Listen auflösen — eine Zeile pro Wert</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:60px"><col style="width:130px"><col style="width:70px"><col style="width:150px"><col style="width:130px"><col style="width:100px"><col style="width:176px"></colgroup><tr><th>SNr</th><th>Name</th><th>Klasse</th><th>Kurs</th><th>Lehrkraft</th><th>Raum</th><th>Durchwahl</th></tr><tr><td style="background:#FBEBBF">1001</td><td class="b">Lena Krause</td><td>FO12a</td><td style="background:#FBEBBF">Informatik</td><td>Alvers</td><td>204</td><td>31</td></tr><tr><td style="background:#FBEBBF">1001</td><td class="b">Lena Krause</td><td>FO12a</td><td style="background:#FBEBBF">Physik</td><td>Schulze</td><td>305</td><td>42</td></tr><tr><td style="background:#FBEBBF">1002</td><td class="b">Tim Vogel</td><td>FO12a</td><td style="background:#FBEBBF">Informatik</td><td>Alvers</td><td>204</td><td>31</td></tr><tr><td style="background:#FBEBBF">1002</td><td class="b">Tim Vogel</td><td>FO12a</td><td style="background:#FBEBBF">Physik</td><td>Schulze</td><td>305</td><td>42</td></tr><tr><td style="background:#FBEBBF">1003</td><td class="b">Mia Hahn</td><td>FO12b</td><td style="background:#FBEBBF">Informatik</td><td>Alvers</td><td>204</td><td>31</td></tr><tr><td style="background:#FBEBBF">1004</td><td class="b">Ben Roth</td><td>FO12b</td><td style="background:#FBEBBF">Mathematik</td><td>Berger</td><td>118</td><td>27</td></tr></table><div class="body" style="top:302.45px;height:193.55px"><p class="line l0 step" data-g="0"><b>1NF</b>: jede Zelle <b>ein</b> Wert — keine Listen, keine Wiederholungsgruppen</p>
+<p class="line l0 step" data-g="1">Dafür wiederholen sich Zeilen: das ist die <b>Kursliste</b> aus Woche 3</p>
+<p class="line l0 step" data-g="2">Jetzt braucht die Tabelle einen <b>Schlüssel</b>: SNr allein reicht nicht mehr → <b>(SNr, Kurs)</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>2. Normalform</h2>
+      <p class="sub">Jedes Attribut hängt vom ganzen Schlüssel ab — nicht von einem Teil</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>2NF: Wovon hängt jede Spalte ab?</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:110px"><col style="width:190px"><col style="width:300px"><col style="width:216px"></colgroup><tr><th>Spalte</th><th>hängt ab von</th><th>vom ganzen Schlüssel (SNr, Kurs)?</th><th>gehört in Tabelle</th></tr><tr><td class="b">Name</td><td>SNr</td><td>nein — nur von SNr</td><td style="background:#FBEBBF">Schüler</td></tr><tr><td class="b">Klasse</td><td>SNr</td><td>nein — nur von SNr</td><td style="background:#FBEBBF">Schüler</td></tr><tr><td class="b">Lehrkraft</td><td>Kurs</td><td>nein — nur von Kurs</td><td style="background:#DDE8C6">Kurs</td></tr><tr><td class="b">Raum</td><td>Kurs</td><td>nein — nur von Kurs</td><td style="background:#DDE8C6">Kurs</td></tr><tr><td class="b">Durchwahl</td><td>Kurs (über Lehrkraft)</td><td>nein — nur von Kurs</td><td style="background:#DDE8C6">Kurs (vorerst)</td></tr><tr><td class="b">—</td><td>(SNr, Kurs)</td><td>das Paar selbst</td><td style="background:#F2CFCB">Belegung</td></tr></table><div class="body" style="top:302.45px;height:193.55px"><p class="line l0 step" data-g="0">Frage je Spalte: Brauche ich <b>beide</b> Schlüsselteile, um den Wert zu kennen?</p>
+<p class="line l0 step" data-g="1"><b>Nein</b> → <b>Teilabhängigkeit</b> → die Spalte wandert zu ihrem Schlüsselteil in eine eigene Tabelle</p>
+<p class="line l0 step" data-g="2">Übrig bleibt die reine Zuordnung <b>Belegung(SNr, Kurs)</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Nach der 2. Normalform</h3><div class="rules"></div><div class="pic"><img src="img/schema-2nf.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Name und Klasse stehen jetzt <b>einmal</b> pro Schüler, Lehrkraft und Raum <b>einmal</b> pro Kurs</p>
+<p class="line l0 step" data-g="1">Die Änderungsanomalie „Raum 210“ ist damit <b>erledigt</b></p>
+<p class="line l0 step" data-g="2">Aber: <b>Durchwahl</b> wiederholt sich, wenn Alvers mehrere Kurse hat — warum?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 04</p>
+      <h2>3. Normalform</h2>
+      <p class="sub">Kein Attribut hängt von einem anderen Nicht-Schlüssel-Attribut ab</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>3NF: die versteckte Abhängigkeit</h3><div class="rules"></div><div class="body" style="width:404px"><p class="line l0 step" data-g="0">Durchwahl hängt von <b>Lehrkraft</b> ab — und Lehrkraft vom Kurs: eine <b>Kette</b></p>
+<p class="line l0 step" data-g="1">Fachwort: <b>transitive Abhängigkeit</b> (Kurs → Lehrkraft → Durchwahl)</p>
+<p class="line l0 step" data-g="2">Lösung: Lehrkraft bekommt eine <b>eigene Tabelle</b>, Kurs behält nur den <b>Fremdschlüssel</b></p>
+<p class="line l0 step" data-g="3">Test: „Hängt eine Spalte von einer <b>anderen Nicht-Schlüssel-Spalte</b> ab?“ → raus damit</p></div><table class="dtable" style="left:592px;top:150px;width:296px;font-size:11px"><colgroup><col style="width:90px"><col style="width:80px"><col style="width:50px"><col style="width:76px"></colgroup><tr><th>Kurs</th><th>Lehrkraft</th><th>Raum</th><th>Durchwahl</th></tr><tr><td class="b">Informatik</td><td style="background:#FBEBBF">Alvers</td><td>204</td><td style="background:#FBEBBF">31</td></tr><tr><td class="b">Physik</td><td>Schulze</td><td>305</td><td>42</td></tr><tr><td class="b">Mathematik</td><td>Berger</td><td>118</td><td>27</td></tr><tr><td class="b">Chemie</td><td style="background:#FBEBBF">Alvers</td><td>118</td><td style="background:#FBEBBF">31</td></tr></table><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Nach der 3. Normalform: bekannt?</h3><div class="rules"></div><div class="pic"><img src="img/schema-3nf.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Vier Tabellen — <b>dieselben</b> wie aus dem ER-Modell in Woche 7</p>
+<p class="line l0 step" data-g="1">Zwei Wege, ein Ziel: <b>modellieren</b> (ER) oder <b>zerlegen</b> (Normalisierung)</p>
+<p class="line l0 step" data-g="2">In der Praxis beides: erst modellieren, dann mit den Normalformen <b>prüfen</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die drei Normalformen im Überblick</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:90px"><col style="width:230px"><col style="width:250px"><col style="width:246px"></colgroup><tr><th>Normalform</th><th>Regel</th><th>Testfrage</th><th>Verstoß sieht so aus</th></tr><tr><td class="b">1NF</td><td>jede Zelle genau ein Wert</td><td>Steht irgendwo eine Liste?</td><td>„Informatik, Physik“ in einer Zelle</td></tr><tr><td class="b">2NF</td><td>alles hängt vom ganzen Schlüssel ab</td><td>Reicht ein Teil des Schlüssels?</td><td>Name hängt nur von SNr ab</td></tr><tr><td class="b">3NF</td><td>nichts hängt von Nicht-Schlüsseln ab</td><td>Hängt eine Spalte von einer anderen ab?</td><td>Durchwahl hängt von Lehrkraft ab</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Jede Stufe <b>setzt die vorige voraus</b>: erst 1NF, dann 2NF, dann 3NF</p>
+<p class="line l0 step" data-g="1">Merkhilfe von Bill Kent: <b>„der Schlüssel, der ganze Schlüssel und nichts als der Schlüssel“</b></p>
+<p class="line l0 step" data-g="2">2NF ist nur ein Thema bei <b>zusammengesetzten</b> Schlüsseln</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Prüfrezept in fünf Schritten</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Listen in Zellen?</b> Auflösen, eine Zeile pro Wert → 1NF</p>
+<p class="line l0 step" data-g="1"><b>Schlüssel</b> bestimmen: welche Spalten machen eine Zeile eindeutig?</p>
+<p class="line l0 step" data-g="2"><b>Teilabhängigkeit?</b> Spalten, die nur an einem Schlüsselteil hängen, auslagern → 2NF</p>
+<p class="line l0 step" data-g="3"><b>Kette?</b> Spalten, die an einer anderen Nicht-Schlüssel-Spalte hängen, auslagern → 3NF</p>
+<p class="line l0 step" data-g="4"><b>Probe:</b> steht jede Information genau einmal? Fremdschlüssel eintragen, fertig</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Normalformen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Edgar F. Codd</b> definierte 1NF bis 3NF 1970/71 — im selben Aufsatz wie das relationale Modell</p>
+<p class="line l0 step" data-g="1">Es gibt weiter: <b>BCNF</b>, 4NF, 5NF, 6NF — im Alltag reicht die 3NF fast immer</p>
+<p class="line l0 step" data-g="2"><b>Bill Kents</b> Merkspruch endet mit „… so help me Codd“ — ein Wortspiel auf den Eid</p>
+<p class="line l0 step" data-g="3"><b>Denormalisierung</b>: Data Warehouses brechen die Regeln absichtlich, für Geschwindigkeit</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Der Schlüssel, der ganze Schlüssel und nichts als der Schlüssel.</p><p class="label">Bill Kent, 1983</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: die Pizzeria-Tabelle normalisieren</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Tabelle <b>Bestellungen</b>: BestNr, Datum, Kunde, Adresse, Pizzen, Preise, Fahrer, Fahrer-Handy</p>
+<p class="line l0 step" data-g="1"><b>1NF</b> herstellen: eine Zeile pro Pizza — und den Schlüssel bestimmen</p>
+<p class="line l0 step" data-g="2"><b>2NF</b>: Welche Spalten hängen nur an BestNr, welche nur an der Pizza?</p>
+<p class="line l0 step" data-g="3"><b>3NF</b>: Wovon hängt das Fahrer-Handy ab? Wovon der Preis?</p>
+<p class="line l0 step" data-g="4">Vergleicht das Ergebnis mit eurem <b>ER-Modell</b> — stimmen die Tabellen überein?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

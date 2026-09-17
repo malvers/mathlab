@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Größere Abfragen</title>
+<meta name="description" content="Unterabfragen, Mengenoperationen und Auswertungen auf echten Datensätzen">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-b31404c65560.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/sunrise-1582669/" target="_blank" rel="noopener">Kapa65</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 12</p>
+      <h1>Größere Abfragen</h1>
+      <p class="sub">Unterabfragen, Mengenoperationen und Auswertungen auf echten Datensätzen</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Der Datensatz</h2>
+      <p class="sub">Größer als das Übungsbeispiel</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Ausleihdatenbank der Stadtbibliothek</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:180px"><col style="width:150px"><col style="width:486px"></colgroup><tr><th>Tabelle</th><th>Zeilen</th><th>Inhalt</th></tr><tr><td class="b">Medium</td><td>ca. 4 000</td><td>Signatur, Titel, Autor, Jahr, Kategorie</td></tr><tr><td class="b">Leser</td><td>ca. 900</td><td>Lesernummer, Ort, Altersgruppe</td></tr><tr><td class="b">Ausleihe</td><td style="background:#FBEBBF">ca. 25 000</td><td>Signatur, Lesernummer, von, bis, zurück</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Bei dieser Größe merkt man <b>Denkfehler an der Zeilenzahl</b>, nicht mehr am Augenschein</p>
+<p class="line l0 step" data-g="1">Und ein JOIN ohne Bedingung liefert hier <b>über 20 Millionen</b> Zeilen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Arbeitsweise bei großen Datensätzen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Erst **COUNT(*)** je Tabelle — kennt man die Größenordnung, erkennt man Unsinn</p>
+<p class="line l0 step" data-g="1">Abfragen <b>schrittweise</b> aufbauen: erst der JOIN, dann der Filter, dann die Gruppierung</p>
+<p class="line l0 step" data-g="2">Zwischendurch <b>LIMIT 20</b> anhängen, um schnell zu sehen, ob die Form stimmt</p>
+<p class="line l0 step" data-g="3">Erst am Ende die Aggregate — sonst sieht man die Zwischenergebnisse nie</p>
+<p class="line l0 step" data-g="4">Und <b>immer</b> vorher aufschreiben, was herauskommen soll</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Unterabfragen</h2>
+      <p class="sub">Eine Abfrage in der Abfrage</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Drei Bauformen der Unterabfrage</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:11.5px">-- 1. skalar: liefert genau einen Wert
+SELECT titel FROM Medium
+WHERE jahr &gt; (SELECT AVG(jahr) FROM Medium);
+
+-- 2. Mengenvergleich mit IN
+SELECT name FROM Leser
+WHERE lesernummer IN (SELECT lesernummer FROM Ausleihe
+                      WHERE zurueck IS NULL);
+
+-- 3. korreliert: bezieht sich auf die aeussere Zeile
+SELECT m.titel FROM Medium m
+WHERE (SELECT COUNT(*) FROM Ausleihe a
+       WHERE a.signatur = m.signatur) &gt; 10;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wann welche Bauform</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:150px"><col style="width:300px"><col style="width:366px"></colgroup><tr><th>Bauform</th><th>liefert</th><th>Achtung</th></tr><tr><td class="b">skalar</td><td>einen einzelnen Wert</td><td>muss wirklich einen liefern</td></tr><tr><td class="b">mit IN</td><td>eine Wertemenge</td><td style="background:#F2CFCB">NULL in der Menge macht NOT IN unbrauchbar</td></tr><tr><td class="b">korreliert</td><td>je äußerer Zeile ein Ergebnis</td><td>kann langsam werden</td></tr></table><div class="body" style="top:237.7px;height:258.3px"><p class="line l0 step" data-g="0">Vieles davon geht auch mit <b>JOIN und GROUP BY</b> — oft lesbarer und schneller</p>
+<p class="line l0 step" data-g="1">Die Unterabfrage lohnt, wenn sie die Absicht <b>klarer</b> ausdrückt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Komplexübungen</h2>
+      <p class="sub">Sechs Aufgaben, steigend</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Aufgaben</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:70px"><col style="width:480px"><col style="width:266px"></colgroup><tr><th>Nr</th><th>Gesucht</th><th>braucht</th></tr><tr><td class="b">1</td><td>Anzahl Medien je Kategorie</td><td>GROUP BY</td></tr><tr><td class="b">2</td><td>Kategorien mit mehr als 200 Medien</td><td>HAVING</td></tr><tr><td class="b">3</td><td>Leser mit noch nicht zurückgegebenen Medien</td><td>JOIN oder IN</td></tr><tr><td class="b">4</td><td>Das am häufigsten ausgeliehene Medium</td><td>GROUP BY + ORDER BY + LIMIT</td></tr><tr><td class="b">5</td><td>Medien, die nie ausgeliehen wurden</td><td style="background:#DDE8C6">LEFT JOIN + IS NULL</td></tr><tr><td class="b">6</td><td>Durchschnittliche Ausleihdauer je Kategorie</td><td>Datumsdifferenz + GROUP BY</td></tr></table><div class="body" style="top:295.975px;height:200.025px"><p class="line l0 step" data-g="0">Aufgabe <b>5</b> ist die lehrreichste: das Fehlen von etwas findet man nur mit LEFT JOIN</p>
+<p class="line l0 step" data-g="1">Aufgabe <b>6</b> braucht Datumsrechnung — die Schreibweise unterscheidet sich je DBMS</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Bei großen Datensätzen prüft nicht mehr das Auge, sondern die Zeilenzahl. Deshalb vor jeder Abfrage die Erwartung notieren.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: große Abfragen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>NOT IN</b> mit einer Unterabfrage, die NULL enthält, liefert <b>nie</b> ein Ergebnis</p>
+<p class="line l0 step" data-g="1">Grund: der Vergleich mit NULL ist weder wahr noch falsch, sondern <b>unbekannt</b></p>
+<p class="line l0 step" data-g="2">Deshalb nehmen Profis dort <b>NOT EXISTS</b> oder einen LEFT JOIN</p>
+<p class="line l0 step" data-g="3"><b>LIMIT</b> heißt in manchen Systemen <b>TOP</b> oder <b>FETCH FIRST</b> — der Standard kam spät</p>
+<p class="line l0 step" data-g="4">Eine Abfrage über Millionen Zeilen läuft mit passendem Index oft in <b>Millisekunden</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe heute</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Verschafft euch mit **COUNT(*)** einen Überblick über die drei Tabellen</p>
+<p class="line l0 step" data-g="1">Bearbeitet die <b>sechs Aufgaben</b>, jede mit vorher notierter Erwartung</p>
+<p class="line l0 step" data-g="2">Schreibt <b>eine</b> Aufgabe sowohl mit Unterabfrage als auch mit JOIN</p>
+<p class="line l0 step" data-g="3">Vergleicht beide: welche ist <b>lesbarer</b>, welche vermutlich schneller?</p>
+<p class="line l0 step" data-g="4">Formuliert <b>zwei eigene</b> Fragen an den Datensatz und beantwortet sie</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

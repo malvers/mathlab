@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Von Bit bis Datenbank</title>
+<meta name="description" content="Die Datenhierarchie — und wie ein Rechner strukturierte Daten speichert">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-6560a60ba0d7.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/breakfast-6526807/" target="_blank" rel="noopener">blandinejoannic</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 12</p>
+      <h1>Von Bit bis Datenbank</h1>
+      <p class="sub">Die Datenhierarchie — und wie ein Rechner strukturierte Daten speichert</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Die Hierarchie</h2>
+      <p class="sub">Sechs Stufen, aufeinander aufgebaut</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Datenhierarchie</h3><div class="rules"></div><div class="pic"><img src="img/pap-datenhierarchie-inf12.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Jede Stufe <b>besteht aus</b> der vorigen — und bekommt dabei eine <b>Bedeutung</b> dazu</p>
+<p class="line l0 step" data-g="1">Über der Datei steht die <b>Datenbank</b>: mehrere Tabellen mit Beziehungen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Stufen im Einzelnen</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:180px"><col style="width:350px"><col style="width:286px"></colgroup><tr><th>Stufe</th><th>ist</th><th>Beispiel</th></tr><tr><td class="b">Bit</td><td>kleinste Einheit, 0 oder 1</td><td>1</td></tr><tr><td class="b">Byte</td><td>8 Bit, meist ein Zeichen</td><td>01001101 = M</td></tr><tr><td class="b" style="background:#FBEBBF">Datenfeld</td><td>eine zusammengehörige Angabe</td><td>Nachname</td></tr><tr><td class="b">Datensatz</td><td>alle Felder zu einem Objekt</td><td>eine Schülerzeile</td></tr><tr><td class="b">Datei / Tabelle</td><td>alle gleichartigen Datensätze</td><td>die Schülerliste</td></tr><tr><td class="b">Datenbank</td><td>mehrere Tabellen mit Beziehungen</td><td>Schulverwaltung</td></tr></table><div class="body" style="top:302.45px;height:193.55px"><p class="line l0 step" data-g="0">Der Sprung von <b>Byte zu Datenfeld</b> ist der entscheidende: dort kommt die <b>Bedeutung</b> dazu</p>
+<p class="line l0 step" data-g="1">Ein Byte allein sagt nichts. Erst das Feld sagt: <b>das ist ein Nachname</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Vom Feld zum Byte</h2>
+      <p class="sub">Wie eine Angabe wirklich im Speicher liegt</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Dieselbe Angabe, verschiedene Speicherung</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:150px"><col style="width:220px"><col style="width:220px"><col style="width:226px"></colgroup><tr><th>Angabe</th><th>als Text</th><th>als Zahl</th><th>Bemerkung</th></tr><tr><td class="b">2026</td><td>4 Byte (Zeichen)</td><td>2 Byte (Ganzzahl)</td><td>Zahl ist kompakter</td></tr><tr><td class="b">01067</td><td>5 Byte</td><td>geht nicht ohne Verlust</td><td>führende Null</td></tr><tr><td class="b">true</td><td>4 Byte</td><td>1 Bit</td><td>Wahrheitswert</td></tr><tr><td class="b">Meier</td><td>5 Byte</td><td>nicht möglich</td><td>reiner Text</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Der <b>Datentyp</b> entscheidet über Speicherbedarf, Sortierung und mögliche Operationen</p>
+<p class="line l0 step" data-g="1">Bei <b>Unicode/UTF-8</b> braucht ein Umlaut <b>zwei</b> Byte — Textlängen sind nicht Zeichenzahlen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wie eine Datei strukturierte Daten hält</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Feste Satzlänge</b>: jedes Feld hat eine feste Größe, Datensätze folgen lückenlos</p>
+<p class="line l0 step" data-g="1">Vorteil: der <b>n-te</b> Datensatz lässt sich direkt berechnen — schneller Zugriff</p>
+<p class="line l0 step" data-g="2">Nachteil: <b>verschwendeter Platz</b> und starre Struktur</p>
+<p class="line l0 step" data-g="3"><b>Trennzeichen</b> (CSV): Felder durch Komma, Sätze durch Zeilenumbruch</p>
+<p class="line l0 step" data-g="4">Vorteil: sparsam und lesbar. Nachteil: <b>Suchen heißt Lesen</b> — von vorn bis hinten</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Warum das nicht reicht</h2>
+      <p class="sub">Der Weg zur Datenbank</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Grenzen der Dateiverwaltung</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:200px"><col style="width:616px"></colgroup><tr><th>Problem</th><th>was passiert</th></tr><tr><td class="b" style="background:#F2CFCB">Redundanz</td><td>dieselbe Adresse steht in drei Dateien</td></tr><tr><td class="b" style="background:#F2CFCB">Inkonsistenz</td><td>sie wird nur in einer davon geändert</td></tr><tr><td class="b" style="background:#F2CFCB">Abhängigkeit</td><td>jedes Programm muss das Dateiformat kennen</td></tr><tr><td class="b" style="background:#F2CFCB">Mehrbenutzerbetrieb</td><td>zwei schreiben gleichzeitig, einer verliert</td></tr><tr><td class="b" style="background:#F2CFCB">Zugriffsschutz</td><td>wer die Datei hat, sieht alles</td></tr></table><div class="body" style="top:287.65px;height:208.35px"><p class="line l0 step" data-g="0">Genau diese fünf Probleme löst ein <b>Datenbankmanagementsystem</b></p>
+<p class="line l0 step" data-g="1">Deshalb ist die Datenbank keine bessere Datei, sondern eine <b>andere Architektur</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Bit, Byte, Datenfeld, Datensatz, Datei, Datenbank. Die Bedeutung kommt erst auf der Stufe des Datenfelds dazu.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Daten und Speicher</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Das Wort <b>Byte</b> wurde 1956 bei IBM geprägt — bewusst anders geschrieben als „bite“</p>
+<p class="line l0 step" data-g="1">Dass ein Byte <b>8 Bit</b> hat, ist keine Naturkonstante: frühe Rechner nutzten 6, 7 oder 9</p>
+<p class="line l0 step" data-g="2"><b>ASCII</b> von 1963 kam mit 7 Bit aus — für Umlaute reichte das nicht</p>
+<p class="line l0 step" data-g="3"><b>UTF-8</b> von 1992 ist rückwärtskompatibel und braucht für Umlaute zwei Byte</p>
+<p class="line l0 step" data-g="4">Ein <b>Kibibyte</b> sind 1024 Byte, ein <b>Kilobyte</b> 1000 — Festplattenhersteller rechnen gern in Kilo</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Öffnet eine <b>CSV-Datei</b> im Texteditor und benennt Datenfeld, Datensatz und Datei</p>
+<p class="line l0 step" data-g="1">Rechnet aus: wie viele <b>Byte</b> braucht ein Datensatz eurer Tabelle als Text?</p>
+<p class="line l0 step" data-g="2">Vergleicht das mit derselben Tabelle bei <b>fester Satzlänge</b></p>
+<p class="line l0 step" data-g="3">Findet in einer Beispieldatei eine <b>Redundanz</b> und beschreibt die mögliche Inkonsistenz</p>
+<p class="line l0 step" data-g="4">Formuliert drei Sätze: <b>Warum genügt eine Datei für die Schulverwaltung nicht?</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

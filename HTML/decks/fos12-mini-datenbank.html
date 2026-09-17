@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Die eigene Mini-Datenbank</title>
+<meta name="description" content="Abschluss Lernbereich 1: vom Realweltausschnitt zur Auswertung — in einer Woche">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-cce75491cf44.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/morning-7190996/" target="_blank" rel="noopener">AysegulAytoeren</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — FOS 12</p>
+      <h1>Die eigene Mini-Datenbank</h1>
+      <p class="sub">Abschluss Lernbereich 1: vom Realweltausschnitt zur Auswertung — in einer Woche</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Der Auftrag</h2>
+      <p class="sub">Alles aus sieben Wochen in einem Projekt</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was ihr baut</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Einen <b>Realweltausschnitt</b> eurer Wahl: Praktikum, Verein, Nebenjob, Sammlung, Turnier …</p>
+<p class="line l0 step" data-g="1">Mindestens <b>drei Entitätstypen</b>, eine <b>n:m-Beziehung</b>, je Tabelle <b>fünf Datensätze</b></p>
+<p class="line l0 step" data-g="2">Die komplette Kette: <b>Beschreibung → ER-Modell → Tabellen → SQLite → Abfragen</b></p>
+<p class="line l0 step" data-g="3">Am Ende: <b>Peer-Review</b> — ihr prüft das Modell eines anderen Teams</p>
+<p class="line l0 step" data-g="4">Teams zu <b>zweit</b>, Abgabe als schule-ähnliche <b>.db-Datei</b> plus ein Blatt Doku</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die fünf Schritte und ihre Ergebnisse</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:130px"><col style="width:300px"><col style="width:250px"><col style="width:136px"></colgroup><tr><th>Schritt</th><th>Was ihr tut</th><th>Ergebnis</th><th>Aus Woche</th></tr><tr><td class="b">1 Beschreiben</td><td>Ausschnitt in fünf bis acht Sätzen</td><td>Auftragstext</td><td>6</td></tr><tr><td class="b">2 Modellieren</td><td>Entitäten, Attribute, Beziehungen, Kardinalitäten</td><td>ER-Diagramm (Papier/Tool)</td><td>6</td></tr><tr><td class="b">3 Überführen</td><td>drei Regeln anwenden, Schlüssel markieren</td><td>Tabellenschema mit PK/FK</td><td>7</td></tr><tr><td class="b">4 Prüfen</td><td>1NF, 2NF, 3NF durchgehen</td><td>Häkchen je Normalform</td><td>8</td></tr><tr><td class="b">5 Bauen + Fragen</td><td>CREATE TABLE, INSERT, fünf SELECTs</td><td>projekt.db + Abfrageblatt</td><td>4, 5</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0">Reihenfolge einhalten: wer bei <b>Schritt 5</b> anfängt, baut die Kursliste von Woche 3</p>
+<p class="line l0 step" data-g="1">Jeder Schritt hat ein <b>Artefakt</b> — das ist eure Doku, nichts extra schreiben</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Anforderungen</h2>
+      <p class="sub">Woran die Datenbank gemessen wird</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content twocols">
+      <h3>Pflicht und Kür</h3><div class="rules"></div>
+      <div class="colgrid">
+        <div class="card left"><p class="col l0 step" data-g="0">Pflicht</p>
+<p class="col l1 step" data-g="0"><b>ER-Diagramm</b> mit Kardinalitäten und Schlüsseln</p>
+<p class="col l1 step" data-g="0">Tabellen in <b>3NF</b>, Fremdschlüssel mit REFERENCES</p>
+<p class="col l1 step" data-g="0"><b>PRAGMA foreign_keys = ON</b> und ein provozierter Fehler</p>
+<p class="col l1 step" data-g="0"><b>Fünf Abfragen</b>: WHERE, ORDER BY, COUNT/GROUP BY, ein JOIN, eine freie</p></div>
+        <div class="card right"><p class="col l0 step" data-g="1">Kür</p>
+<p class="col l1 step" data-g="1"><b>Beziehungsattribut</b> an einer n:m-Beziehung</p>
+<p class="col l1 step" data-g="1"><b>CHECK</b>-Regeln für Wertebereiche</p>
+<p class="col l1 step" data-g="1">Abfrage über <b>drei Tabellen</b></p>
+<p class="col l1 step" data-g="1">Ein <b>Diagramm</b> aus einer GROUP-BY-Abfrage</p></div>
+      </div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Beispiel: fünf Abfragen an ein Turnier-Modell</h3><div class="rules"></div><div class="codepanel" style="padding-top:40px;padding-bottom:40px"><pre style="font-size:11.5px">-- 1 WHERE:     alle Spieler eines Vereins
+SELECT Name FROM Spieler WHERE Verein = 'SV Blau-Weiß';
+-- 2 ORDER BY:  Spiele nach Datum, neueste zuerst
+SELECT * FROM Spiel ORDER BY Datum DESC;
+-- 3 GROUP BY:  wie viele Spiele pro Ort?
+SELECT Ort, COUNT(*) AS Anzahl FROM Spiel GROUP BY Ort;
+-- 4 JOIN:      wer hat in welchem Spiel gespielt?
+SELECT s.Name, p.Datum FROM Spieler s
+JOIN   Einsatz e ON e.SNr = s.SNr
+JOIN   Spiel   p ON p.PNr = e.PNr;
+-- 5 frei:      Spieler mit den meisten Einsätzen
+SELECT s.Name, COUNT(*) AS Einsaetze FROM Spieler s JOIN Einsatz e ON e.SNr = s.SNr
+GROUP BY s.SNr ORDER BY Einsaetze DESC LIMIT 3;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>So könnte ein fertiges Schema aussehen</h3><div class="rules"></div><div class="pic"><img src="img/schema-turnier.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Drei Tabellen reichen für die <b>Pflicht</b> — die Kür steckt in Tore und CHECK (Tore &gt;= 0)</p>
+<p class="line l0 step" data-g="1">Euer Thema darf <b>anders</b> sein: Hauptsache drei Entitäten und eine echte n:m-Beziehung</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Peer-Review</h2>
+      <p class="sub">Ein fremdes Modell prüfen — mit Checkliste, nicht mit Gefühl</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Checkliste für das Review</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:40px"><col style="width:480px"><col style="width:70px"><col style="width:226px"></colgroup><tr><th class="ac">Nr.</th><th class="al">Prüfpunkt</th><th class="ac">ja/nein</th><th class="al">Bemerkung</th></tr><tr><td class="b ac">1</td><td class="al">Jeder Entitätstyp hat einen Primärschlüssel</td><td class="ac"></td><td class="al"></td></tr><tr><td class="b ac">2</td><td class="al">Jede Beziehung hat eine begründete Kardinalität</td><td class="ac"></td><td class="al"></td></tr><tr><td class="b ac">3</td><td class="al">n:m-Beziehungen sind eigene Tabellen mit zwei Fremdschlüsseln</td><td class="ac"></td><td class="al"></td></tr><tr><td class="b ac">4</td><td class="al">Keine Liste in einer Zelle (1NF), keine Teil- oder Kettenabhängigkeit (2NF/3NF)</td><td class="ac"></td><td class="al"></td></tr><tr><td class="b ac">5</td><td class="al">Die fünf Abfragen laufen und liefern das, was die Frage verlangt</td><td class="ac"></td><td class="al"></td></tr><tr><td class="b ac">6</td><td class="al">Ein Fremdschlüssel-Fehler wird vom DBMS abgewiesen</td><td class="ac"></td><td class="al"></td></tr></table><div class="body" style="top:302.45px;height:193.55px"><p class="line l0 step" data-g="0"><b>Zwei Teams</b> tauschen .db-Datei und Diagramm — 20 Minuten prüfen, 5 Minuten Rückmeldung</p>
+<p class="line l0 step" data-g="1">Rückmeldung nach dem Muster: <b>Was ist gut? Was fehlt? Ein konkreter Vorschlag.</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Zeitplan der Woche</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Stunde 1</b>: Thema wählen, Auftragstext schreiben, ER-Diagramm zeichnen (Schritte 1 und 2)</p>
+<p class="line l0 step" data-g="1"><b>Hausaufgabe</b>: Überführung und Normalform-Check auf Papier (Schritte 3 und 4)</p>
+<p class="line l0 step" data-g="2"><b>Stunde 2</b>: Tabellen in SQLite anlegen, Daten eintragen, fünf Abfragen (Schritt 5)</p>
+<p class="line l0 step" data-g="3"><b>Letzte 25 Minuten</b>: Peer-Review und Rückmeldung</p>
+<p class="line l0 step" data-g="4"><b>Abgabe</b>: projekt.db, ER-Diagramm als Foto, Abfrageblatt — bis Freitag im Teams-Kanal</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Beschreiben, modellieren, überführen, prüfen, bauen — in dieser Reihenfolge, nie andersherum.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Ausblick: Klausur 1 in zwei Wochen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Themen: <b>DBMS-Bedienung</b> (SQL), <b>ER-Modell</b>, <b>Normalisierung</b> — genau die fünf Schritte</p>
+<p class="line l0 step" data-g="1">Typische Aufgabe: Text → ER-Diagramm → Tabellen → zwei SQL-Abfragen</p>
+<p class="line l0 step" data-g="2">Übungsmaterial: eure eigene Mini-Datenbank und die Pizzeria-Aufgaben</p>
+<p class="line l0 step" data-g="3">Fragen sammeln — Wiederholungsstunde vor der Klausur</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

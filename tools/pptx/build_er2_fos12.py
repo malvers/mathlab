@@ -16,6 +16,8 @@ d.title("Informatik — FOS 12", "Entity-Relationship-Modell II",
 
 def rule_slide(title, pic, lines, tables, pic_w=600):
     """Picture centred on top, bullets bottom-left, result tables stacked bottom-right."""
+    if not hasattr(d, "prs"):                      # HTML twin (html_deck.py): same numbers
+        return rule_slide_html(title, pic, lines, tables, pic_w)
     from deck_util import add_click_build
     from PIL import Image
     from design_lib import emu, CONTENT_W, FOOT_Y
@@ -33,6 +35,24 @@ def rule_slide(title, pic, lines, tables, pic_w=600):
         y += kw.get("font_size", 10) * 1.9 * len(rows) + 14
     add_click_build(s, [(body, lines)])
     return s
+
+
+def rule_slide_html(title, pic, lines, tables, pic_w):
+    from html_deck import bullet_list, markup
+    from design_lib import CONTENT_W, FOOT_Y
+    _, ph = d.fit(pic, pic_w, 10 ** 6)             # scaled to the width, as above
+    top = BODY_Y + ph + 10
+    body_w = CONTENT_W - max(sum(cw) for _, cw, _ in tables) - 24
+    out = [d.placed_img(pic, MARGIN + (CONTENT_W - pic_w) / 2, BODY_Y, pic_w, ph),
+           '<div class="body" style="top:%gpx;width:%gpx;height:%gpx">%s</div>'
+           % (top, body_w, FOOT_Y - top - 8, bullet_list(lines)[0])]
+    y = top + 4
+    for rows, col_w, kw in tables:
+        out.append(d._table(rows, col_w, W - MARGIN - sum(col_w), y, kw.get("marks"),
+                            kw.get("font_size", 12), kw.get("bold_cols", ()),
+                            kw.get("mono_cols", ()), kw.get("align")))
+        y += kw.get("font_size", 10) * 1.9 * len(rows) + 14
+    d._slide("content", '<h3>%s</h3><div class="rules"></div>%s' % (markup(title), "".join(out)))
 
 # ---------------------------------------------------------------- Kapitel 01
 d.chapter(1, "Drei Regeln", "Aus jedem ER-Modell wird mechanisch ein Satz Tabellen")

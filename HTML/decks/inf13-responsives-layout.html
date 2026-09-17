@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Eine Seite für alle Geräte</title>
+<meta name="description" content="Flexbox, Grid und Media Queries — und Barrierefreiheit von Anfang an">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-038f4b571b96.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/coffee-4597416/" target="_blank" rel="noopener">fotografierende</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 13</p>
+      <h1>Eine Seite für alle Geräte</h1>
+      <p class="sub">Flexbox, Grid und Media Queries — und Barrierefreiheit von Anfang an</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Der Ansatz</h2>
+      <p class="sub">Mobile first</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum man klein anfängt</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Über die Hälfte aller Zugriffe kommt vom <b>Telefon</b></p>
+<p class="line l0 step" data-g="1">Ein Layout <b>vom kleinen zum großen</b> Bildschirm zu erweitern ist einfacher als umgekehrt</p>
+<p class="line l0 step" data-g="2">Auf dem kleinen Schirm muss man sich auf das <b>Wesentliche</b> beschränken</p>
+<p class="line l0 step" data-g="3">Was dort nicht gebraucht wird, wird auch auf dem großen selten gebraucht</p>
+<p class="line l0 step" data-g="4">Voraussetzung ist das <b>viewport</b>-Meta-Tag im head — ohne das hilft kein CSS</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Flexbox: eine Reihe, die umbricht</h3><div class="rules"></div><div class="codepanel"><pre>.karten {
+    display: flex;
+    flex-wrap: wrap;        /* umbrechen statt quetschen */
+    gap: 1rem;
+}
+.karte {
+    flex: 1 1 260px;        /* wachsen, schrumpfen, Grundbreite */
+}</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Grid: eine Fläche mit Spalten</h3><div class="rules"></div><div class="codepanel"><pre>.liste {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+/* auto-fit + minmax passt die Spaltenzahl selbst an -
+   oft braucht man dafuer gar keine Media Query. */</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Media Queries</h2>
+      <p class="sub">Wenn es doch eine Grenze braucht</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Ab einer Breite anders</h3><div class="rules"></div><div class="codepanel"><pre>/* Grundgestaltung: mobil, eine Spalte */
+nav { display: block; }
+
+@media (min-width: 700px) {
+    nav { display: flex; gap: 2rem; }
+    main { max-width: 70ch; margin: 0 auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; }
+}</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Wo man Grenzen setzt</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:180px"><col style="width:350px"><col style="width:286px"></colgroup><tr><th>Ansatz</th><th>Idee</th><th>Bewertung</th></tr><tr><td class="b">an Gerätegrößen</td><td>Breakpoints für Handy, Tablet, Desktop</td><td>veraltet: zu viele Geräte</td></tr><tr><td class="b">am Inhalt</td><td>Grenze dort, wo das Layout bricht</td><td style="background:#DDE8C6">empfohlen</td></tr><tr><td class="b">gar nicht</td><td>auto-fit und minmax regeln es selbst</td><td>oft ausreichend</td></tr></table><div class="body" style="top:241.4px;height:254.6px"><p class="line l0 step" data-g="0">Der Test ist einfach: <b>Fenster langsam schmaler ziehen</b> — wo sieht es schlecht aus?</p>
+<p class="line l0 step" data-g="1">Genau dort gehört die Grenze hin, nicht bei einer runden Gerätezahl</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Barrierefreiheit</h2>
+      <p class="sub">Vier Punkte, die immer gelten</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was ihr umsetzen sollt</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:180px"><col style="width:350px"><col style="width:286px"></colgroup><tr><th>Punkt</th><th>konkret</th><th>prüfbar mit</th></tr><tr><td class="b">Alternativtexte</td><td>jedes inhaltstragende Bild bekommt alt</td><td>Bilder abschalten</td></tr><tr><td class="b">Kontrast</td><td>Text zu Hintergrund mindestens 4,5:1</td><td>Kontrastrechner</td></tr><tr><td class="b" style="background:#E6ECF8">Tastatur</td><td>alles ohne Maus erreichbar</td><td>nur mit Tab bedienen</td></tr><tr><td class="b">Struktur</td><td>Überschriften in richtiger Reihenfolge</td><td>Gliederungsansicht</td></tr></table><div class="body" style="top:257.125px;height:238.875px"><p class="line l0 step" data-g="0"><b>alt=""</b> ist richtig für rein dekorative Bilder — nicht weglassen, sondern leer lassen</p>
+<p class="line l0 step" data-g="1">Barrierefreiheit hilft allen: bei Sonnenlicht, mit einer Hand, mit langsamem Netz</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Inhalte barrierefrei auszeichnen</h3><div class="rules"></div><div class="codepanel"><pre>&lt;img src="halle.jpg" alt="Sporthalle von außen"&gt;
+&lt;img src="linie.svg" alt=""&gt;              &lt;!-- rein dekorativ --&gt;
+
+&lt;label for="suche"&gt;Verein suchen&lt;/label&gt;
+&lt;input id="suche" name="suche" type="search"&gt;
+
+&lt;a href="liste.html"&gt;Zur Vereinsliste&lt;/a&gt;   &lt;!-- nicht: hier klicken --&gt;</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Der beste Test für ein responsives Layout ist das langsame Schmalerziehen des Fensters — und die Bedienung nur mit der Tastatur.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Responsive Design</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Den Begriff <b>Responsive Web Design</b> prägte Ethan Marcotte 2010</p>
+<p class="line l0 step" data-g="1"><b>Flexbox</b> ist für eine Richtung gedacht, <b>Grid</b> für zwei — deshalb ergänzen sie sich</p>
+<p class="line l0 step" data-g="2">Die Einheit <b>ch</b> entspricht der Breite der Ziffer Null — praktisch für Textbreiten</p>
+<p class="line l0 step" data-g="3"><b>70 Zeichen</b> je Zeile gelten als gut lesbar, deshalb max-width: 70ch</p>
+<p class="line l0 step" data-g="4">Die <b>BITV</b> verpflichtet öffentliche Stellen in Deutschland zur Barrierefreiheit</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe am Rechner</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Macht euer Layout <b>responsiv</b> — mit Flexbox oder Grid</p>
+<p class="line l0 step" data-g="1">Setzt höchstens <b>zwei</b> Media Queries, und zwar dort, wo es bricht</p>
+<p class="line l0 step" data-g="2">Pflegt eure <b>Inhalte</b> ein: echte Texte, keine Platzhalter</p>
+<p class="line l0 step" data-g="3">Arbeitet die <b>vier Barrierefreiheitspunkte</b> ab und haltet fest, was ihr geändert habt</p>
+<p class="line l0 step" data-g="4">Testet einmal <b>nur mit der Tastatur</b> — kommt ihr überall hin?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

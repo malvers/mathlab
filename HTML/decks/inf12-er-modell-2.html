@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vom Diagramm zu den Tabellen</title>
+<meta name="description" content="Die Überführungsregeln — und warum n:m eine eigene Tabelle braucht">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-b31404c65560.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/sunrise-1582669/" target="_blank" rel="noopener">Kapa65</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 12</p>
+      <h1>Vom Diagramm zu den Tabellen</h1>
+      <p class="sub">Die Überführungsregeln — und warum n:m eine eigene Tabelle braucht</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Die Überführungsregeln</h2>
+      <p class="sub">Vier Regeln, mehr braucht es nicht</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Vom ER-Modell zum Relationenschema</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:230px"><col style="width:586px"></colgroup><tr><th>Im ER-Modell</th><th>wird zu</th></tr><tr><td class="b">Entitätstyp</td><td>eine Tabelle, Attribute werden Spalten</td></tr><tr><td class="b">Schlüsselattribut</td><td>Primärschlüssel der Tabelle</td></tr><tr><td class="b" style="background:#DDE8C6">1:n-Beziehung</td><td>Fremdschlüssel auf der n-Seite</td></tr><tr><td class="b" style="background:#FBEBBF">n:m-Beziehung</td><td>eigene Tabelle mit beiden Schlüsseln</td></tr><tr><td class="b">1:1-Beziehung</td><td>Fremdschlüssel auf einer der beiden Seiten</td></tr><tr><td class="b">Beziehungsattribut</td><td>Spalte in der Beziehungstabelle</td></tr></table><div class="body" style="top:308.925px;height:187.075px"><p class="line l0 step" data-g="0">Die dritte und vierte Zeile sind die Kernregeln — sie werden in jeder Klausur geprüft</p>
+<p class="line l0 step" data-g="1">Merksatz: <b>der Fremdschlüssel steht immer auf der n-Seite</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum der Fremdschlüssel auf der n-Seite steht</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Eine Klasse hat <b>viele</b> Schüler, ein Schüler hat <b>eine</b> Klasse</p>
+<p class="line l0 step" data-g="1">In der Tabelle <b>Schueler</b> passt genau <b>ein</b> Klassenverweis in eine Zeile</p>
+<p class="line l0 step" data-g="2">Umgekehrt müsste in Klasse eine <b>Liste</b> von Schülern stehen — das geht in einer Spalte nicht</p>
+<p class="line l0 step" data-g="3">Eine Spalte enthält <b>einen</b> Wert. Das ist die erste Normalform, kommt in drei Wochen</p>
+<p class="line l0 step" data-g="4">Deshalb: <b>eins steht bei viele</b>, nicht viele bei eins</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Der n:m-Fall</h2>
+      <p class="sub">Die Beziehungstabelle</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Warum n:m nicht direkt geht</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ein Schüler belegt <b>viele</b> Kurse, ein Kurs hat <b>viele</b> Schüler</p>
+<p class="line l0 step" data-g="1">In Schueler passt keine Kursliste, in Kurs keine Schülerliste</p>
+<p class="line l0 step" data-g="2">Also entsteht eine <b>dritte</b> Tabelle: <b>Belegung</b></p>
+<p class="line l0 step" data-g="3">Sie enthält <b>beide</b> Fremdschlüssel — und beide zusammen sind der Primärschlüssel</p>
+<p class="line l0 step" data-g="4">Attribute der Beziehung — die <b>Note</b> — gehören genau dorthin</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Das Relationenschema als SQL</h3><div class="rules"></div><div class="codepanel"><pre>CREATE TABLE Schueler (
+    snr INTEGER PRIMARY KEY, name TEXT, vorname TEXT, klasse TEXT);
+
+CREATE TABLE Kurs (
+    knr INTEGER PRIMARY KEY, bezeichnung TEXT, stunden INTEGER);
+
+CREATE TABLE Belegung (
+    snr  INTEGER REFERENCES Schueler(snr),
+    knr  INTEGER REFERENCES Kurs(knr),
+    note INTEGER,
+    PRIMARY KEY (snr, knr)
+);</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die Schreibweise für die Klausur</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:200px"><col style="width:616px"></colgroup><tr><th>Relation</th><th>Schema</th></tr><tr><td class="b">Schueler</td><td class="m">Schueler(snr, name, vorname, klasse)</td></tr><tr><td class="b">Kurs</td><td class="m">Kurs(knr, bezeichnung, stunden)</td></tr><tr><td class="b">Belegung</td><td class="m" style="background:#FBEBBF">Belegung(snr, knr, note)</td></tr></table><div class="body" style="top:245.1px;height:250.9px"><p class="line l0 step" data-g="0">Primärschlüssel werden <b>unterstrichen</b>, Fremdschlüssel <b>kursiv</b> oder mit Pfeil markiert</p>
+<p class="line l0 step" data-g="1">In Belegung ist <b>snr, knr</b> zusammen Primärschlüssel <b>und</b> je einzeln Fremdschlüssel</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Referentielle Integrität</h2>
+      <p class="sub">Verweise, die nicht ins Leere gehen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Was beim Löschen passieren kann</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:230px"><col style="width:586px"></colgroup><tr><th>Regel</th><th>Verhalten beim Löschen eines Schülers</th></tr><tr><td class="b">RESTRICT / NO ACTION</td><td>Löschen wird abgelehnt, solange Belegungen bestehen</td></tr><tr><td class="b" style="background:#F2CFCB">CASCADE</td><td>die Belegungen werden mitgelöscht</td></tr><tr><td class="b">SET NULL</td><td>der Verweis wird auf NULL gesetzt</td></tr></table><div class="body" style="top:245.1px;height:250.9px"><p class="line l0 step" data-g="0">Die Voreinstellung ist meist <b>RESTRICT</b> — sicher, aber unbequem</p>
+<p class="line l0 step" data-g="1"><b>CASCADE</b> ist bequem und gefährlich: ein Löschbefehl räumt halbe Datenbestände ab</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Weg im Überblick</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Text</b> — die Anforderungen der Miniwelt</p>
+<p class="line l0 step" data-g="1"><b>ER-Modell</b> — semantisch, systemunabhängig</p>
+<p class="line l0 step" data-g="2"><b>Relationenschema</b> — logisch, für relationale Datenbanken</p>
+<p class="line l0 step" data-g="3"><b>CREATE TABLE</b> — physisch, im konkreten DBMS</p>
+<p class="line l0 step" data-g="4">Jede Stufe ist überprüfbar. Wer direkt von Text zu CREATE TABLE springt, rät</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Der Fremdschlüssel steht auf der n-Seite. Und eine n:m-Beziehung wird immer zu einer eigenen Tabelle.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Relationenmodell</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Edgar F. Codd</b> veröffentlichte das Relationenmodell 1970 bei IBM</p>
+<p class="line l0 step" data-g="1">Der Titel des Aufsatzes: „A Relational Model of Data for Large Shared Data Banks“</p>
+<p class="line l0 step" data-g="2">Codd formulierte später <b>zwölf Regeln</b> dafür, wann ein DBMS relational heißen darf</p>
+<p class="line l0 step" data-g="3">Kaum ein DBMS erfüllt alle zwölf — auch heute nicht</p>
+<p class="line l0 step" data-g="4">Der Begriff <b>Relation</b> meint die Tabelle, nicht die Beziehung — eine ewige Verwechslung</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe: das eigene Modell umsetzen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Überführt euer <b>ER-Modell</b> von letzter Woche in ein Relationenschema</p>
+<p class="line l0 step" data-g="1">Schreibt es in der <b>Klausurschreibweise</b> auf, mit unterstrichenen Schlüsseln</p>
+<p class="line l0 step" data-g="2">Setzt es als <b>CREATE TABLE</b> um, mit REFERENCES für die Fremdschlüssel</p>
+<p class="line l0 step" data-g="3">Füllt jede Tabelle mit <b>fünf</b> Zeilen</p>
+<p class="line l0 step" data-g="4">Probiert aus, was beim Löschen eines referenzierten Datensatzes passiert</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>

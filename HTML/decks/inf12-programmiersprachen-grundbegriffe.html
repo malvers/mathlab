@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Die Schnittstelle Mensch–Maschine</title>
+<meta name="description" content="Syntax und Semantik, Compiler und Interpreter — und ein Blick zurück">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+<div id="stage"><div id="deck">
+<section class="slide greet">
+      <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-8d9b7990b606.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/road-6790127/" target="_blank" rel="noopener">shogun</a>
+      <p class="greet-lead" id="greet-text">Good morning!</p>
+      <p class="greet-quote">Nur das Schöne wird die Welt retten!</p>
+      <p class="greet-author">Fjodor Dostojewski</p>
+      <p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide title">
+      <div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>
+      <div class="title-bar"></div>
+      <p class="kicker">Informatik — Grundkurs 12</p>
+      <h1>Die Schnittstelle Mensch–Maschine</h1>
+      <p class="sub">Syntax und Semantik, Compiler und Interpreter — und ein Blick zurück</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 01</p>
+      <h2>Zwei Begriffe</h2>
+      <p class="sub">Syntax und Semantik</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Der Unterschied</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:180px"><col style="width:320px"><col style="width:316px"></colgroup><tr><th></th><th>Syntax</th><th>Semantik</th></tr><tr><td class="b">regelt</td><td>welche Zeichenfolgen erlaubt sind</td><td>was sie bedeuten</td></tr><tr><td class="b">Vergleich</td><td>Rechtschreibung und Grammatik</td><td>der Sinn des Satzes</td></tr><tr><td class="b">Fehler heißt</td><td>Syntaxfehler</td><td>Logikfehler</td></tr><tr><td class="b">fällt auf</td><td>vor dem Start</td><td style="background:#F2CFCB">erst am falschen Ergebnis</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">„Der Hund fliegt das Fahrrad“ ist syntaktisch korrekt und semantisch Unsinn</p>
+<p class="line l0 step" data-g="1">Der Rechner tut, was <b>dasteht</b> — nicht, was gemeint war</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Die drei Fehlerarten</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Syntaxfehler</b>: das Programm startet nicht. Harmlos, weil er sofort auffällt</p>
+<p class="line l0 step" data-g="1"><b>Laufzeitfehler</b>: das Programm bricht mitten drin ab — Division durch null, fehlende Datei</p>
+<p class="line l0 step" data-g="2"><b>Logikfehler</b>: es läuft durch und liefert das <b>falsche</b> Ergebnis</p>
+<p class="line l0 step" data-g="3">Nur der dritte ist gefährlich — ihn findet kein Übersetzer, nur ein <b>Test</b></p>
+<p class="line l0 step" data-g="4">Deshalb gehört zu jedem Programm ein Testfall mit <b>bekanntem Sollwert</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 02</p>
+      <h2>Übersetzen</h2>
+      <p class="sub">Compiler, Interpreter und die Ebenen dazwischen</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Von der Hochsprache zur Maschine</h3><div class="rules"></div><div class="pic"><img src="img/pap-ebenen-inf12.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Jede Ebene nach rechts ist <b>maschinennäher</b>, jede nach links <b>menschennäher</b></p>
+<p class="line l0 step" data-g="1">Unten steht immer die <b>CPU</b> — sie kennt nur Zahlen</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Compiler und Interpreter</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:10.5px"><colgroup><col style="width:180px"><col style="width:320px"><col style="width:316px"></colgroup><tr><th></th><th>Compiler</th><th>Interpreter</th></tr><tr><td class="b">übersetzt</td><td>einmal das ganze Programm</td><td>Zeile für Zeile beim Ausführen</td></tr><tr><td class="b">Ergebnis</td><td>eine ausführbare Datei</td><td>keine Datei, direkte Ausführung</td></tr><tr><td class="b">Fehler zeigt er</td><td>vor dem Start, alle auf einmal</td><td>wenn die Zeile erreicht wird</td></tr><tr><td class="b">Geschwindigkeit</td><td>schneller beim Laufen</td><td>langsamer, dafür sofort startbar</td></tr><tr><td class="b">Beispiel</td><td>C, Java (in Bytecode)</td><td>Python, JavaScript</td></tr></table><div class="body" style="top:276.55px;height:219.45px"><p class="line l0 step" data-g="0">Die Grenze ist unscharf: <b>Java</b> übersetzt in Bytecode, den dann eine virtuelle Maschine ausführt</p>
+<p class="line l0 step" data-g="1">Moderne Systeme übersetzen zur Laufzeit nach — das heißt <b>Just-in-Time</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Ein Blick zurück</h2>
+      <p class="sub">Wie die Sprachen wurden, was sie sind</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Meilensteine</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:110px"><col style="width:200px"><col style="width:506px"></colgroup><tr><th>Jahr</th><th>Sprache</th><th>brachte</th></tr><tr><td class="b">1957</td><td>Fortran</td><td>die erste verbreitete Hochsprache</td></tr><tr><td class="b">1959</td><td>COBOL</td><td>Sprache für kaufmännische Anwendungen</td></tr><tr><td class="b">1972</td><td>C</td><td>systemnah und trotzdem portabel</td></tr><tr><td class="b">1991</td><td>Python</td><td>Lesbarkeit als Entwurfsziel</td></tr><tr><td class="b">1995</td><td>Java</td><td>einmal schreiben, überall ausführen</td></tr></table><div class="body" style="top:282.1px;height:213.9px"><p class="line l0 step" data-g="0"><b>Grace Hopper</b> entwickelte 1952 den ersten Compiler — und prägte den Gedanken der Hochsprache</p>
+<p class="line l0 step" data-g="1">Der Trend über 70 Jahre: <b>weg von der Maschine, hin zum Menschen</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content code"><h3>Dieselbe Rechnung, zwei Ebenen</h3><div class="rules"></div><div class="codepanel"><pre># Hochsprache
+summe = a + b
+
+# Assembler (sinngemaess)
+# MOV AX, a
+# ADD AX, b
+# MOV summe, AX</pre></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide merksatz"><div class="quote-bar"></div><p class="satz">Syntax ist die Form, Semantik der Sinn. Ein Syntaxfehler kostet Minuten, ein Logikfehler kostet Vertrauen.</p><p class="label">Merksatz</p><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Fun Facts: Programmiersprachen</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>Grace Hopper</b> schrieb 1952 den ersten Compiler — viele hielten die Idee für unmöglich</p>
+<p class="line l0 step" data-g="1"><b>COBOL</b> läuft bis heute in Banken — Milliarden Zeilen sind noch im Einsatz</p>
+<p class="line l0 step" data-g="2"><b>Python</b> ist nach Monty Python benannt, nicht nach der Schlange</p>
+<p class="line l0 step" data-g="3">Es gibt über <b>700</b> dokumentierte Programmiersprachen — benutzt werden ein paar Dutzend</p>
+<p class="line l0 step" data-g="4">Der <b>Hello-World</b>-Vergleich ist der älteste Sport der Informatik</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide content"><h3>Eure Aufgabe</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Ordnet fünf Fehlermeldungen den <b>drei Fehlerarten</b> zu</p>
+<p class="line l0 step" data-g="1">Findet je ein Beispiel für einen <b>syntaktisch korrekten, semantisch falschen</b> Satz</p>
+<p class="line l0 step" data-g="2">Erklärt an einem Beispiel den Unterschied <b>Compiler und Interpreter</b></p>
+<p class="line l0 step" data-g="3">Recherchiert <b>eine</b> Sprache aus der Zeitleiste: wofür wurde sie gebaut?</p>
+<p class="line l0 step" data-g="4">Schreibt drei Sätze: <b>Warum gibt es überhaupt so viele Sprachen?</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+</div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum zwei Drittel?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="deck.js"></script>
+</body>
+</html>
