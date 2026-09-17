@@ -472,8 +472,14 @@ const CyberBranding = {
 
         // Subtle fullscreen toggle icon — kept in sync with branding/core.js.
         // Two diagonal corner brackets: TR+BL for ENTER, TL+BR for EXIT.
-        const ENTER_FS_SVG = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4H20V10M4 14V20H10"/></svg>`;
-        const EXIT_FS_SVG  = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4V10H20M10 20V14H4"/></svg>`;
+        // in a deck the brackets sit closer together, cropped to the letter height (Doc, 17.09.2026: "die Ecken noch bisschen dichter", "in der Linie enger")
+        const tightFs = !!(window.CyberDeckLab && window.CyberDeckLab.frame());
+        const ENTER_FS_SVG = tightFs
+            ? `<svg class="canvas-branding-fs-icon" viewBox="6.5 6.5 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 7.5H16.5V13M7.5 11V16.5H13"/></svg>`
+            : `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4H20V10M4 14V20H10"/></svg>`;
+        const EXIT_FS_SVG = tightFs
+            ? `<svg class="canvas-branding-fs-icon" viewBox="6.5 6.5 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 7.5V11H16.5M11 16.5V13H7.5"/></svg>`
+            : `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4V10H20M10 20V14H4"/></svg>`;
         const currentIcon = () => (window.CyberDeckLab.isFull() ? EXIT_FS_SVG : ENTER_FS_SVG);
 
         // Hide the fullscreen toggle inside the native Capacitor app — already immersive there.
@@ -482,6 +488,8 @@ const CyberBranding = {
         const container = document.createElement('div');
         container.className = 'canvas-branding';
         if (!isNativeApp) container.title = window.CyberDeckLab.frame() ? "Lab auf Foliengröße umschalten" : "Vollbild umschalten";
+        // the glow of the icon keys on this class - labs without cyber-left-chrome.js get it here
+        if (window.CyberDeckLab.frame()) document.documentElement.classList.add('cyber-in-deck');
         container.innerHTML = `
             <h1 id="branding-master-title">${isNativeApp ? "" : currentIcon()}${topLine}</h1>
             <div class="canvas-subtitle" id="branding-module-title">${bottomLine}</div>

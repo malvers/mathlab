@@ -306,6 +306,42 @@
                 color: #ffffff;
             }
 
+            /* Lab on a deck slide (html.cyber-in-deck): the icon glows (colour: --deck-fs-glow, tried orange first, then cyan) and gently pulses, so Doc
+               finds "Lab auf Foliengröße" at a glance (Doc, 17.09.2026: "glühen lassen Orange waber") */
+            /* "muss auffälliger" but "zuuuu groß", "Ecken zusammen -> Schrifthöhe", "die Ecken noch bisschen dichter":
+               in a deck branding.js draws the brackets close together along their diagonal ("in der Linie enger"), viewBox
+               6.5 6.5 11 11, the drawing covers 7.5..16.5 = 9/11 of the box - 0.88em box = 0.72em Orbitron caps, its
+               lower 1/11 hangs below the baseline.
+               Bold strokes and a strong pulsing halo instead of size. */
+            html.cyber-in-deck .canvas-branding-fs-icon {
+                --deck-fs-glow: 0, 210, 255;   /* branding cyan; orange was 245, 194, 66 (Doc: "probier mal cyan") */
+                width: 0.88em;
+                height: 0.88em;
+                margin-right: 0.35em;
+                vertical-align: -0.08em;
+                stroke-width: 1.5;
+                color: rgb(var(--deck-fs-glow));
+                animation: cyber-fs-glow 2.2s ease-in-out infinite;   /* 1.6 s: "'n tick langsamer" */
+            }
+
+            @keyframes cyber-fs-glow {
+                0%, 100% {
+                    opacity: 0.55;
+                    filter: drop-shadow(0 0 1px rgba(var(--deck-fs-glow), 0.6));
+                }
+                50% {
+                    opacity: 1;
+                    filter: drop-shadow(0 0 3px rgb(var(--deck-fs-glow))) drop-shadow(0 0 9px rgba(var(--deck-fs-glow), 0.95)) drop-shadow(0 0 16px rgba(0, 110, 255, 0.7));
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                html.cyber-in-deck .canvas-branding-fs-icon {
+                    animation: none;
+                    filter: drop-shadow(0 0 3px rgba(var(--deck-fs-glow), 0.8));
+                }
+            }
+
             .canvas-branding h1 {
                 font-family: 'Orbitron', sans-serif;
                 font-size: calc((11px + 11px * var(--header-scale, 0.5)) * 0.7);
