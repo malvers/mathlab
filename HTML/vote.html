@@ -12,6 +12,9 @@
     <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
     <script src="js/vendor/supabase.min.js"></script>
     <script src="svp/qrcode.min.js"></script>
+    <!-- SVP login: only Doc's account may read the voters' feedback (vote_feedback RLS) -->
+    <script src="svp/svp-gate.js"></script>
+    <script src="svp/svp-auth.js"></script>
     <style>
         /* --- plain standalone page (like placemat.html), deliberately no lab shell CSS --- */
         * {
@@ -376,7 +379,8 @@
             min-height: 0;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: safe center;
+            overflow-y: auto;   /* the feedback field + phone keyboard may need the room */
             padding: 96px 16px 16px;
             gap: 3vh;
         }
@@ -490,6 +494,140 @@
         .done-txt {
             font-size: clamp(18px, 5vw, 32px);
             letter-spacing: 0.1em;
+        }
+
+        /* ---------- kids: feedback after the vote (Doc, 17.09.2026) ---------- */
+        .done.with-fb .done-val {
+            font-size: min(30vw, 20vh);   /* room for the text field underneath */
+        }
+
+        .fb {
+            width: 100%;
+            max-width: 570px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 2vh;
+        }
+
+        .fb label {
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            opacity: 0.6;
+            text-align: center;
+        }
+
+        #fb-in {
+            font-family: 'Outfit', sans-serif;
+            font-size: 17px;
+            line-height: 1.4;
+            color: rgba(214, 232, 255, 0.95);
+            background: rgb(14, 36, 78);
+            border: 1px solid rgba(214, 232, 255, 0.25);
+            border-radius: 10px;
+            padding: 10px 12px;
+            resize: none;
+            outline: none;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        #fb-in:focus {
+            border-color: rgb(245, 194, 66);
+        }
+
+        .fb .btn {
+            align-self: center;
+        }
+
+        .fb-sent {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(15px, 4vw, 20px);
+            opacity: 0.7;
+            margin-top: 2vh;
+            text-align: center;
+        }
+
+        /* ---------- host: feedbacks under the Show chart - the count shows, the texts only on a click ---------- */
+        .fb-toggle {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(13px, 2vmin, 21px);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(214, 232, 255, 0.75);
+            background: transparent;
+            border: 1px solid rgba(214, 232, 255, 0.3);
+            border-radius: 999px;
+            padding: 0.35em 1.1em;
+            margin-top: 1.4vmin;
+            cursor: pointer;
+        }
+
+        .fb-toggle:hover {
+            border-color: rgb(245, 194, 66);
+            color: rgb(245, 194, 66);
+        }
+
+        .fb-card {
+            position: fixed;
+            left: 50%;
+            bottom: 8vmin;
+            transform: translateX(-50%);
+            z-index: 2;
+            width: min(720px, 92vw);
+            max-height: 62vh;
+            overflow-y: auto;
+            background: rgb(14, 36, 78);
+            border: 1px solid rgba(214, 232, 255, 0.18);
+            border-radius: 16px;
+            padding: 22px 26px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+            font-family: 'Outfit', sans-serif;
+            text-align: left;
+            cursor: default;
+            -webkit-user-select: text;
+            user-select: text;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(214, 232, 255, 0.25) transparent;
+        }
+
+        .fb-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            color: rgb(245, 194, 66);
+            margin: 0 0 10px;
+        }
+
+        .fb-item {
+            font-size: clamp(16px, 2.4vmin, 22px);
+            line-height: 1.45;
+            color: rgba(214, 232, 255, 0.92);
+            padding: 10px 0;
+            border-top: 1px solid rgba(214, 232, 255, 0.12);
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .fb-item:first-of-type {
+            border-top: 0;
+        }
+
+        .fb-time {
+            font-size: 0.7em;
+            letter-spacing: 0.08em;
+            opacity: 0.5;
+            margin-right: 0.6em;
+        }
+
+        .fb-empty,
+        .fb-who {
+            opacity: 0.6;
+        }
+
+        .fb-who {
+            font-size: 13px;
+            margin-top: 8px;
         }
 
         /* ---------- host: big QR overlay ---------- */
@@ -836,6 +974,12 @@
         <div id="done" class="done hidden">
             <div id="done-val" class="done-val">7</div>
             <div class="done-txt">Danke!</div>
+            <div id="fb" class="fb">
+                <label for="fb-in">Feedback (freiwillig)</label>
+                <textarea id="fb-in" rows="3" maxlength="500" placeholder="Was war gut? Was kann besser werden?"></textarea>
+                <button id="fb-send" class="btn" type="button" disabled>Senden</button>
+            </div>
+            <div id="fb-sent" class="fb-sent hidden">Feedback ist angekommen – danke!</div>
         </div>
     </div>
 
@@ -851,6 +995,8 @@
                 <li><b>Show</b> — die Auswertung: Verteilung 1 … 10 als Balken, der Mittelwert groß
                     im Bild, darunter die Klasse aus dem Stundenplan. <b>Count</b>, Klick aufs Bild
                     oder <b>Esc</b> = zurück zum Zähler.</li>
+                <li><b>Feedbacks</b> — unter der Auswertung steht, wie viele Voter nach ihrem Vote einen Text
+                    geschrieben haben. Erst ein Klick zeigt die Texte. Lesen geht nur mit deinem SVP-Login.</li>
                 <li><b>Neue Frage</b> — Text ändern, drücken: gleicher Code, alle springen automatisch mit
                     und dürfen wieder einmal voten.</li>
                 <li><b>◀ ▶</b> — durch <em>alle</em> bisherigen Fragen blättern, quer über alle Codes
@@ -880,6 +1026,8 @@
         <div id="chart-class" class="chart-class"></div>
         <div id="chart-sub" class="big-sub"></div>
         <div id="chart-all" class="chart-all"></div>
+        <button id="fb-toggle" class="fb-toggle" type="button" title="Feedbacks der Voter zeigen">Feedbacks</button>
+        <div id="fb-card" class="fb-card hidden" role="dialog" aria-label="Feedbacks"></div>
     </div>
 
     <div id="qr-overlay" class="qr-overlay">
@@ -1224,6 +1372,64 @@
                 });
             }
 
+            // Feedbacks under the Show chart (Doc, 17.09.2026): the count shows, the texts only on a click. Free text
+            // from pupils is Doc's alone (RLS on vote_feedback), so it is read with the SVP login, not the public key.
+            const fb = { pollId: null, rows: null, ts: 0 };
+            const fbToggle = $('fb-toggle'), fbCard = $('fb-card');
+            const fbOpen = () => !fbCard.classList.contains('hidden');
+            const fbCanRead = () => !!(window.svpAuth && svpAuth.hasSession());
+            const escHtml = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+            async function fbFetch() {
+                if (!poll || !fbCanRead()) { fb.rows = null; fbRender(); return; }
+                const id = poll.id;
+                try {
+                    const res = await svpAuth.api('vote_feedback?select=body,created_at&poll_id=eq.' + id +
+                        '&order=created_at.asc', { method: 'GET' });
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const rows = await res.json();
+                    if (!poll || poll.id !== id) return;   // paged on meanwhile
+                    fb.pollId = id;
+                    fb.rows = rows;
+                } catch (_) {
+                    fb.rows = null;
+                }
+                fbRender();
+            }
+
+            // at most every 10 s while the chart is open (it redraws on every vote and every 5 s resync)
+            function fbMaybeFetch() {
+                if (poll && (fb.pollId !== poll.id || Date.now() - fb.ts > 10000)) { fb.ts = Date.now(); fbFetch(); }
+                else fbRender();
+            }
+
+            function fbRender() {
+                const n = (poll && fb.rows && fb.pollId === poll.id) ? fb.rows.length : null;
+                fbToggle.textContent = n === null ? 'Feedbacks' : 'Feedbacks (' + n + ')';
+                fbToggle.classList.toggle('hidden', !poll);
+                if (!fbOpen()) return;
+                let html = '<h3>Feedbacks</h3>';
+                if (!fbCanRead()) html += '<div class="fb-empty">Nur mit deinem SVP-Login lesbar.</div>';
+                else if (n === null) html += '<div class="fb-empty">Lade …</div>';
+                else if (!n) html += '<div class="fb-empty">Noch kein Feedback zu dieser Frage.</div>'
+                    + '<div class="fb-who">angemeldet als ' + escHtml(svpAuth.whoami()) + '</div>';
+                else html += fb.rows.map(r => {
+                    const t = new Date(r.created_at);
+                    const hhmm = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+                    return '<div class="fb-item"><span class="fb-time">' + hhmm + '</span>' + escHtml(r.body) + '</div>';
+                }).join('');
+                fbCard.innerHTML = html;
+            }
+
+            fbToggle.addEventListener('click', (e) => {
+                e.stopPropagation();   // a click on the chart would leave Show
+                if (fbOpen()) { fbCard.classList.add('hidden'); return; }
+                const openIt = () => { fbCard.classList.remove('hidden'); fb.ts = Date.now(); fbRender(); fbFetch(); };
+                if (fbCanRead()) openIt();
+                else svpAuth.loginDialog(openIt, 'Anmelden, um die Feedbacks zu lesen');
+            });
+            fbCard.addEventListener('click', (e) => e.stopPropagation());   // reading / selecting text stays in Show
+
             function renderChart() {
                 if (!$('chart-overlay').classList.contains('open')) return;
                 const counts = Array(10).fill(0);
@@ -1265,6 +1471,7 @@
                     (n ? n + (n === 1 ? ' Vote' : ' Votes') : 'Noch keine Votes');
                 renderAllTime();
                 refetchAll();
+                fbMaybeFetch();
             }
 
             /* "01.09.2026 · 14:25 · " — the stamp both foot lines start with */
@@ -1419,6 +1626,7 @@
                to hide behind its own button - now it is simply what Show shows. */
             function setShowing(on) {
                 showing = on;
+                if (!on) fbCard.classList.add('hidden');
                 btnShow.textContent = on ? 'Count' : 'Show';
                 $('chart-overlay').classList.toggle('open', on);   // before renderBig: renderChart skips a closed overlay
                 renderBig();
@@ -1478,11 +1686,15 @@
             $('qr-overlay').addEventListener('click', () => $('qr-overlay').classList.remove('open'));
             // A click on the chart goes back to the counter - never into a dead end where the
             // chart is gone but the button still says "Count".
-            $('chart-overlay').addEventListener('click', () => setShowing(false));
+            $('chart-overlay').addEventListener('click', () => {
+                if (fbOpen()) { fbCard.classList.add('hidden'); return; }   // first click only closes the feedbacks
+                setShowing(false);
+            });
             $('btn-help').addEventListener('click', () => $('help-overlay').classList.add('open'));
             $('help-overlay').addEventListener('click', () => $('help-overlay').classList.remove('open'));
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
+                    if (fbOpen()) { fbCard.classList.add('hidden'); return; }
                     ['qr-overlay', 'help-overlay'].forEach(id => $(id).classList.remove('open'));
                     if ($('chart-overlay').classList.contains('open')) setShowing(false);
                     return;
@@ -1548,6 +1760,32 @@
 
             function votedKey() { return 'vote-done:' + poll.id; }
 
+            // Feedback after the vote: one short free text per round (Doc, 17.09.2026). The voter only writes -
+            // reading is the host's alone.
+            function fbKey() { return 'vote-fb:' + poll.id; }
+            function renderFb() {
+                let sent = false;
+                try { sent = !!(poll && localStorage.getItem(fbKey())); } catch (_) { /* ignore */ }
+                $('fb').classList.toggle('hidden', sent);
+                $('fb-sent').classList.toggle('hidden', !sent);
+                $('done').classList.toggle('with-fb', !sent);
+                if (!sent) { $('fb-in').value = ''; $('fb-send').disabled = true; }
+            }
+            $('fb-in').addEventListener('input', () => { $('fb-send').disabled = !$('fb-in').value.trim(); });
+            $('fb-send').addEventListener('click', async () => {
+                const body = $('fb-in').value.trim().slice(0, 500);
+                if (!poll || !body) return;
+                $('fb-send').disabled = true;
+                const { error } = await sb.from('vote_feedback').insert({ poll_id: poll.id, device, body });
+                if (error && error.code !== '23505') {   // 23505 = already sent this round → treat as sent
+                    $('fb-send').disabled = false;
+                    toast('Fehler: ' + error.message);
+                    return;
+                }
+                try { localStorage.setItem(fbKey(), '1'); } catch (_) { /* ignore */ }
+                renderFb();
+            });
+
             function show(state) {   // 'wait' | 'grid' | 'done'
                 $('wait').classList.toggle('hidden', state !== 'wait');
                 $('grid').classList.toggle('hidden', state !== 'grid');
@@ -1583,6 +1821,7 @@
                 }
                 try { localStorage.setItem(votedKey(), String(v)); } catch (_) { /* ignore */ }
                 $('done-val').textContent = String(v);
+                renderFb();
                 show('done');
             }
 
@@ -1593,6 +1832,7 @@
                 try { done = localStorage.getItem(votedKey()); } catch (_) { /* ignore */ }
                 if (done) {
                     $('done-val').textContent = done;
+                    renderFb();
                     show('done');
                 } else {
                     $('grid').querySelectorAll('button').forEach(b => b.disabled = false);

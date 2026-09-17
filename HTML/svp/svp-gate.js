@@ -129,7 +129,9 @@
             if (window.svpGate.unlocked()) fn(); else askButtonPwd(fn);
         },
         /* always ask, even when already unlocked (svp-plan.js edit button) */
-        ask: askButtonPwd
+        ask: askButtonPwd,
+        /* the overlay rules for pages without svp.css - svpAuth.loginDialog uses the same card */
+        ensureStyles: ensureGateStyles
     };
 
     // per-page gate from the script tag's data attributes (see header comment)

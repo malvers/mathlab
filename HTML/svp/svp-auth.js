@@ -90,13 +90,15 @@
     /* Styled login dialog (never a native prompt), reusing the svp-gate overlay CSS.
        Used by the plan pages when "Bearbeiten" is clicked without a session
        (Doc, 26.08.2026). onOk runs after a successful login; backdrop click cancels. */
-    function loginDialog(onOk) {
+    function loginDialog(onOk, sub) {
+        /* pages without svp.css (vote.html) get the card's rules from svp-gate.js */
+        if (window.svpGate && window.svpGate.ensureStyles) window.svpGate.ensureStyles();
         const overlay = document.createElement('div');
         overlay.className = 'svp-gate-overlay';
         overlay.innerHTML =
             '<div class="svp-gate-card">' +
             '  <div class="svp-gate-title">Doc Alvers &middot; SVP</div>' +
-            '  <div class="svp-gate-sub">Bitte anmelden, um zu bearbeiten</div>' +
+            '  <div class="svp-gate-sub">' + (sub || 'Bitte anmelden, um zu bearbeiten') + '</div>' +
             '  <input type="email" id="svp-login-email" placeholder="E-Mail" aria-label="E-Mail" autocomplete="username">' +
             '  <input type="password" id="svp-login-pwd" placeholder="Passwort" aria-label="Passwort" autocomplete="current-password">' +
             '  <div class="svp-gate-row">' +
