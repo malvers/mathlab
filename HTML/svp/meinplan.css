@@ -1,7 +1,7 @@
 /* meinplan.html - the students' view of one teacher's week.
-   Tokens, header, buttons and both colour schemes come from svp.css; this file
-   only adds the week bar and the day cards. Mobile first: the cards are a grid
-   that folds to a single column on a phone. */
+   Tokens, header, buttons and both colour schemes come from svp.css, the week
+   grid from svp-timetable.css; this file only adds the week bar and a few
+   student-page details. */
 
 .mp-bar {
     display: flex;
@@ -59,98 +59,38 @@
     color: var(--muted);
 }
 
-.mp-days {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-    gap: 12px;
+/* The week itself is the shared time-axis grid (svp-timetable.css, same as the
+   staff view); only what the students' page adds lives here. */
+.mp-wrap {
     max-width: 1200px;
     margin: 0 auto;
-    align-items: start;
 }
 
-.mp-day {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 12px 12px 14px;
-}
-
-/* the running day gets the λ frame - the one card you look for first */
-.mp-day.is-today { border-color: var(--lambda); }
-
-.mp-day h2 {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.78rem;
-    font-weight: 400;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-}
-
-.mp-day.is-today h2 { color: var(--lambda); }
-.mp-day h2 span { font-family: 'Outfit', sans-serif; letter-spacing: 0; }
-
-.mp-lesson {
-    display: flex;
-    gap: 10px;
-    padding: 8px 0;
-    color: inherit;
+/* a lesson with a Stoffverteilungsplan is a real link - keep the tile look */
+a.tt-lesson {
     text-decoration: none;
+    cursor: pointer;
 }
 
-/* separator between lessons, not above the first - and the rule has to work
-   for a mix of <a> (lesson with a plan) and <div>, so :first-of-type is out */
-.mp-lesson + .mp-lesson { border-top: 1px solid var(--row-line); }
-
-/* a lesson that has a Stoffverteilungsplan opens it - φ-green marks the way in */
-a.mp-lesson.has-plan { cursor: pointer; border-radius: 8px; margin: 0 -6px; padding: 8px 6px; }
-a.mp-lesson.has-plan:hover { background: rgba(121, 158, 49, 0.12); }
-a.mp-lesson.has-plan:hover .mp-subject { color: var(--phi); }
-
-.mp-time {
-    flex: 0 0 auto;
-    font-variant-numeric: tabular-nums;
-    font-size: 0.82rem;
-    color: var(--muted);
-    line-height: 1.35;
+/* "fällt aus" replaces the time on a cancelled tile, in Υ-red */
+.tt-lesson .tt-time.mp-off {
+    color: var(--ypsilon);
+    opacity: 1;
 }
 
-.mp-time span { display: block; opacity: 0.65; }
+/* an empty day: the desktop column just stays empty, on a phone it says "frei" */
+.mp-free { display: none; }
 
-.mp-subject {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.85rem;
-    color: var(--text);
-}
-
-.mp-subject em { font-family: 'Outfit', sans-serif; font-style: normal; color: var(--ypsilon); }
-
-.mp-meta { font-size: 0.82rem; color: var(--muted); }
-.mp-note { font-size: 0.78rem; color: var(--lambda); margin-top: 2px; }
-
-/* a cancelled lesson stays visible - the free slot is the news */
-.mp-lesson.is-off .mp-subject,
-.mp-lesson.is-off .mp-meta { text-decoration: line-through; opacity: 0.6; }
-
-.mp-free {
-    font-size: 0.85rem;
-    color: var(--muted);
-    opacity: 0.6;
-    padding: 6px 0;
-}
-
-.mp-empty {
-    grid-column: 1 / -1;
-    text-align: center;
-    color: var(--muted);
-    padding: 40px 0;
+@media (max-width: 720px) {
+    .mp-free {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--muted);
+        opacity: 0.6;
+        padding: 0 0 6px;
+    }
 }
 
 @media print {
     .mp-bar button { display: none; }
-    .mp-days { grid-template-columns: repeat(5, 1fr); }
 }

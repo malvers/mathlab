@@ -16,6 +16,7 @@
     <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
     <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
     <link rel="stylesheet" href="svp.css">
+    <link rel="stylesheet" href="svp-timetable.css">
     <link rel="stylesheet" href="meinplan.css">
     <!-- No gate here on purpose: this page is FOR the students. It shows only
          the lessons of one teacher, published from stundenplan.html into the
@@ -50,11 +51,15 @@
             <div class="mp-stamp" id="stamp"></div>
         </div>
 
-        <div class="mp-days" id="days">
-            <div class="mp-empty">Plan wird geladen&hellip;</div>
+        <!-- same time-axis grid as the staff view (svp-timetable.css/.js) -->
+        <div class="tt-wrap mp-wrap">
+            <div class="tt-grid" id="days">
+                <div class="tt-empty">Plan wird geladen&hellip;</div>
+            </div>
         </div>
     </main>
 
+    <script src="svp-timetable.js"></script>
     <script>
         'use strict';
 
@@ -62,15 +67,15 @@
         const DB_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; /* publishable key - public by design */
 
         const $ = id => document.getElementById(id);
+        const T = SvpTimetable;
         const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
 
         let WEEKS = [];              // published week keys, ascending (YYYYMMDD of the Monday)
         let CURRENT = null;
         const cache = new Map();
 
-        const parseYmd = s => new Date(+String(s).slice(0, 4), +String(s).slice(4, 6) - 1, +String(s).slice(6, 8));
+        const { parseYmd, hhmm, toMin } = T;
         const dmy = d => String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.';
-        const hhmm = t => String(t).padStart(4, '0').replace(/(\d{2})(\d{2})/, '$1:$2');
         const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
         /* Klasse+Fach -> Stoffverteilungsplan. Same file the staff view uses,
@@ -137,38 +142,94 @@
             return WEEKS.find(w => w >= wk) || WEEKS[WEEKS.length - 1];
         }
 
+        /* The week as a timetable (Doc, 17.09.2026: "mach den doch als time table"):
+           same grid and tiles as the staff view, Monday to Friday always - an
+           empty column is information too ("da ist nichts"), a missing one is a
+           puzzle. On a phone svp-timetable.css folds it into one day after another. */
         function render(payload) {
-            const box = $('days');
-            const lessons = (payload.lessons || []).slice()
-                .sort((a, b) => a.date - b.date || a.startTime - b.startTime);
+            const grid = $('days');
 
             /* just the name, nothing beneath it (Doc, 10.09.2026: "das Wort Stundenplan weg") */
             $('who').textContent = payload.teacher || 'Mein Stundenplan';
 
-            const byDay = new Map();
-            for (const l of lessons) {
-                if (!byDay.has(l.date)) byDay.set(l.date, []);
-                byDay.get(l.date).push(l);
-            }
+            const all = payload.lessons || [];
+            const lessons = all.filter(l => !T.isBanner(l));
+            const banners = all.filter(T.isBanner);
 
-            /* Monday to Friday always, even when a day is free - an empty column
-               is information too ("da ist nichts"), a missing one is a puzzle. */
             const mon = parseYmd(payload.week);
-            const cards = [];
+            const dates = [];
             for (let i = 0; i < 5; i++) {
                 const d = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i);
-                const key = +('' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0'));
-                const day = (byDay.get(key) || []);
-                const today = key === +ymdKey(new Date());
-                cards.push(
-                    '<section class="mp-day' + (today ? ' is-today' : '') + '">' +
-                    '<h2>' + DAYS[i] + ' <span>' + dmy(d) + '</span></h2>' +
-                    (day.length
-                        ? day.map(lessonRow).join('')
-                        : '<div class="mp-free">frei</div>') +
-                    '</section>');
+                dates.push(+ymdKey(d));
             }
-            box.innerHTML = cards.join('');
+
+            /* The axis runs from this week's first lesson to its last, on half hours.
+               A week with banners only falls back to the school's timegrid. */
+            const units = (payload.timegrid && payload.timegrid[0] && payload.timegrid[0].timeUnits) || [];
+            const spanSrc = lessons.length ? lessons : units;
+            if (!spanSrc.length) {
+                grid.innerHTML = '<div class="tt-empty">In dieser Woche keine Stunden.</div>';
+                return;
+            }
+            const startMin = Math.floor(Math.min(...spanSrc.map(l => toMin(l.startTime))) / 30) * 30;
+            const endMin = Math.ceil(Math.max(...spanSrc.map(l => toMin(l.endTime))) / 30) * 30;
+
+            // banner lane: same height for every day so the axis lines up
+            const BANNER_H = 30;
+            const laneRows = Math.max(0, ...dates.map(d => banners.filter(b => b.date === d).length));
+            const laneH = laneRows * BANNER_H + (laneRows ? 6 : 0);
+            const scale = T.PX_PER_MIN;
+            const height = laneH + (endMin - startMin) * scale;
+            const y = m => laneH + (m - startMin) * scale;
+
+            const html = ['<div></div>'];
+            const todayKey = +ymdKey(new Date());
+            dates.forEach((d, i) => {
+                html.push('<div class="tt-head' + (d === todayKey ? ' today' : '') + '">' +
+                    DAYS[i] + '<span>' + dmy(parseYmd(d)) + '</span></div>');
+            });
+
+            /* Axis labels at the real start and end times of this week's lessons -
+               the Oberschule's 11:35/13:20 are not in the school's timegrid. Labels
+               closer than 12 px would overprint each other; the earlier one stays. */
+            const marks = [...new Set((lessons.length ? lessons : units)
+                .flatMap(l => [toMin(l.startTime), toMin(l.endTime)]))]
+                .filter(m => m >= startMin && m <= endMin).sort((a, b) => a - b);
+            let lastY = -Infinity;
+            html.push('<div class="tt-axis" style="height:' + height + 'px">');
+            for (const m of marks) {
+                if (y(m) - lastY < 12) continue;
+                lastY = y(m);
+                html.push('<div class="tt-tick" style="top:' + y(m) + 'px">' +
+                    String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0') + '</div>');
+            }
+            html.push('</div>');
+
+            dates.forEach((d, i) => {
+                const dayLessons = lessons.filter(l => l.date === d);
+                const dayBanners = banners.filter(b => b.date === d);
+                html.push('<div class="tt-col" style="height:' + height + 'px" data-day="' +
+                    DAYS[i] + ', ' + dmy(parseYmd(d)) + '">');
+                // a line at every full and half hour, like the staff view
+                for (let m = Math.ceil(startMin / 30) * 30; m <= endMin; m += 30) {
+                    html.push('<div class="tt-hline' + (m % 60 ? ' half' : '') + '" style="top:' + y(m) + 'px"></div>');
+                }
+                dayBanners.forEach((b, bi) => {
+                    const label = b.lstext || b.substText || b.subject || 'Termin';
+                    html.push('<div class="tt-banner" style="top:' + (bi * BANNER_H) + 'px;height:' + (BANNER_H - 4) + 'px"' +
+                        ' title="' + esc(label) + '"><span class="tt-bl">' + esc(label) + '</span>' +
+                        '<span class="tt-br">' + esc((b.classes || []).join(', ')) + '</span></div>');
+                });
+                // phones only: a day without lessons says so (the desktop column just stays empty)
+                if (!dayLessons.length && !dayBanners.length) html.push('<div class="mp-free">frei</div>');
+                for (const it of T.layoutColumns(dayLessons.map(l => ({ l })))) {
+                    html.push(lessonTile(it, y, scale));
+                }
+                html.push('</div>');
+            });
+
+            grid.style.setProperty('--days', dates.length);
+            grid.innerHTML = html.join('');
         }
 
         /* plain YYYYMMDD of a date - used to highlight today's column */
@@ -176,23 +237,42 @@
             return '' + now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
         }
 
-        function lessonRow(l) {
+        /* One lesson as a staff-view tile. A lesson with a Stoffverteilungsplan is a
+           link that opens it at this week; a cancelled one stays on the grid - the
+           free slot is the news. */
+        function lessonTile(it, y, scale) {
+            const l = it.l;
             const off = l.code === 'cancelled';
             const note = l.substText || l.info || l.lstext || '';
+            const a = toMin(l.startTime), b = toMin(l.endTime);
             const page = svpPageFor(l);
+            const cls = 'tt-lesson' + (l.code ? ' code-' + l.code : '') + (page ? ' has-plan' : '');
+            const style = 'top:' + y(a) + 'px;height:' + Math.max(16, (b - a) * scale - 3) + 'px;' +
+                'left:calc(' + (it.col * 100 / it.of) + '% + 3px);width:calc(' + (100 / it.of) + '% - 6px);' +
+                '--hue:var(' + T.hueOf(l.subject, true) + ')';
+            const title = [l.subject, (l.classes || []).join(', '), (l.rooms || []).length ? 'Raum ' + l.rooms.join(', ') : '',
+                hhmm(l.startTime) + '–' + hhmm(l.endTime), off ? 'fällt aus' : '', note,
+                page ? 'Klick: Stoffverteilungsplan dieser Woche' : ''].filter(Boolean).join(' · ');
             const open = page
-                ? '<a class="mp-lesson has-plan' + (off ? ' is-off' : '') + '" href="' +
-                  esc(page) + '?kw=' + isoWeek(l.date) + svpGroupFor(l) + '" target="_blank" rel="noopener"' +
-                  ' title="Stoffverteilungsplan dieser Woche">'
-                : '<div class="mp-lesson' + (off ? ' is-off' : '') + '">';
-            return open +
-                '<div class="mp-time">' + hhmm(l.startTime) + '<span>' + hhmm(l.endTime) + '</span></div>' +
-                '<div class="mp-what">' +
-                '<div class="mp-subject">' + esc(l.subject || '') + (off ? ' <em>fällt aus</em>' : '') + '</div>' +
-                '<div class="mp-meta">' + esc((l.classes || []).join(', ')) +
-                ((l.rooms || []).length ? ' &middot; Raum ' + esc(l.rooms.join(', ')) : '') + '</div>' +
-                (note ? '<div class="mp-note">' + esc(note) + '</div>' : '') +
-                '</div>' + (page ? '</a>' : '</div>');
+                ? '<a class="' + cls + '" href="' + esc(page) + '?kw=' + isoWeek(l.date) + svpGroupFor(l) + '"' +
+                  ' target="_blank" rel="noopener"'
+                : '<div class="' + cls + '"';
+            const jg = T.jahrgangOf(l);
+            return open + ' style="' + style + '" title="' + esc(title) + '">' +
+                '<div class="tt-cols">' +
+                '<div class="tt-col">' +
+                '<div class="tt-subject">' + esc(l.subject || '—') + '</div>' +
+                '<div class="tt-who">' + esc((l.classes || []).join(', ')) + '</div>' +
+                '</div>' +
+                '<div class="tt-col">' +
+                ((l.rooms || []).length ? '<div class="tt-where">' + esc(l.rooms.join(', ')) + '</div>' : '') +
+                (off
+                    ? '<div class="tt-time mp-off">fällt aus</div>'
+                    : '<div class="tt-time">' + hhmm(l.startTime) + '–' + hhmm(l.endTime) + '</div>') +
+                '</div>' +
+                '</div>' +
+                (jg ? '<div class="tt-jg">' + jg + '</div>' : '') +
+                (page ? '</a>' : '</div>');
         }
 
         function showWeek(wk) {
@@ -207,7 +287,7 @@
             try { history.replaceState(null, '', '?w=' + wk); } catch (e) { }
 
             if (cache.has(wk)) { render(cache.get(wk)); return; }
-            $('days').innerHTML = '<div class="mp-empty">Woche wird geladen&hellip;</div>';
+            $('days').innerHTML = '<div class="tt-empty">Woche wird geladen&hellip;</div>';
             db('svp_public_plan?week=eq.' + encodeURIComponent(wk) + '&select=payload,updated_at')
                 .then(rows => {
                     if (!rows.length) throw new Error('nicht veröffentlicht');
@@ -217,7 +297,7 @@
                     if (CURRENT === wk) render(rows[0].payload);
                 })
                 .catch(e => {
-                    $('days').innerHTML = '<div class="mp-empty">Diese Woche steht noch nicht bereit (' + esc(e.message) + ').</div>';
+                    $('days').innerHTML = '<div class="tt-empty">Diese Woche steht noch nicht bereit (' + esc(e.message) + ').</div>';
                 });
         }
 
@@ -239,14 +319,14 @@
             .then(rows => {
                 WEEKS = rows.map(r => r.week);
                 if (!WEEKS.length) {
-                    $('days').innerHTML = '<div class="mp-empty">Es ist noch kein Plan veröffentlicht.</div>';
+                    $('days').innerHTML = '<div class="tt-empty">Es ist noch kein Plan veröffentlicht.</div>';
                     return;
                 }
                 const wanted = new URLSearchParams(location.search).get('w');
                 showWeek(WEEKS.includes(wanted) ? wanted : startWeek());
             })
             .catch(e => {
-                $('days').innerHTML = '<div class="mp-empty">Plan nicht erreichbar (' + esc(e.message) + ').</div>';
+                $('days').innerHTML = '<div class="tt-empty">Plan nicht erreichbar (' + esc(e.message) + ').</div>';
             });
     </script>
     <!-- shared nav band on top, like every other svp page (Doc, 10.09.2026) -->
