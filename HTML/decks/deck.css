@@ -52,10 +52,13 @@ p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padd
   line-height:1.2}
 p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
 p.line:first-child{margin-top:0}
-p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+/* the square rides on the first line's baseline, not at the top of the paragraph - a line with a tall
+   formula (fractions on arrows) kept it floating above the text (Doc, 17.09.2026). Net width 0: the
+   negative margin pulls it into the padding, wrapped lines keep their hanging indent. */
+p.line::before{content:"";display:inline-block;width:7px;height:7px;margin:0 13px 0 -20px;vertical-align:.05em}
 p.line.l0::before{background:var(--red)}
-p.line.l1::before{background:var(--green);width:6px;height:6px}
-p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+p.line.l1::before{background:var(--green);width:6px;height:6px;margin-right:14px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px;margin-right:14px}
 
 /* --- two columns -------------------------------------------------------- */
 .colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;
@@ -133,6 +136,10 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 /* small picture bottom right next to a table (table_top corner=) - text keeps clear of it */
 .corner-pic{position:absolute;right:72px;bottom:44px;max-width:200px;max-height:190px}
 .slide.has-corner .body{width:580px}
+/* picture under the bullets (bullets below=): the body reaches down to the footer, the picture fills what is left */
+.slide.has-below .body{height:350px;display:flex;flex-direction:column}
+.below{flex:1;min-height:0;margin-top:14px;display:flex;align-items:center;justify-content:center}
+.below img{max-width:100%;max-height:100%;object-fit:contain}
 
 /* --- table_top ---------------------------------------------------------- */
 .dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
@@ -191,12 +198,29 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 
 /* --- HUD ---------------------------------------------------------------- */
 #hud{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:8px;z-index:9;display:flex;gap:6px}
-#hud button{display:flex;align-items:center;justify-content:center;width:var(--hudbtn,22px);height:var(--hudbtn,22px);padding:0;border:0;border-radius:5px;
+#hud button,#nav button{display:flex;align-items:center;justify-content:center;width:var(--hudbtn,22px);height:var(--hudbtn,22px);padding:0;border:0;border-radius:5px;
   background:#7E8FB5;box-shadow:0 1px 1px rgba(0,0,0,.12);   /* Dostojewski's colour on the greeting slide */
   color:#fff;opacity:.85;cursor:pointer;transition:opacity .2s}
-#hud button:hover{opacity:1}
-#hud button svg{display:block;width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6);margin:0;stroke-width:1.4;flex:none}
+#hud button:hover,#nav button:hover{opacity:1}
+#hud button svg,#nav button svg{display:block;width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6);margin:0;stroke-width:1.4;flex:none}
 #hud button[hidden]{display:none}   /* flex would otherwise show a hidden button */
+/* footer left: two triangles that jump a whole slide, fully built (Doc, 17.09.2026: "zwei Dreiecke, die von
+   Folie zu Folie springen, anis rolled out") - placed by dock() on the footer line like the HUD */
+#nav{position:fixed;left:calc(10px + env(safe-area-inset-left, 0px));bottom:8px;z-index:9;display:flex;gap:4px}
+#nav button:disabled{opacity:.35;cursor:default}
+/* "?" right of the triangles: every key the deck knows, in a card like Solita's panel (Doc, 17.09.2026) */
+#nav #nav-help{font:700 calc(var(--hudbtn,22px) * .62)/1 Raleway,system-ui,sans-serif}
+#help{position:absolute;left:0;bottom:calc(100% + 10px);width:max-content;max-width:calc(100vw - 24px);
+  background:#EAF0FA;color:#0E244E;border-radius:10px;box-shadow:0 6px 24px rgba(14,36,78,.4);
+  padding:11px 16px 12px;font:400 13px/1.35 Raleway,system-ui,sans-serif;cursor:default}
+#help[hidden]{display:none}
+#help h4{margin:0 0 8px;font:400 10px Orbitron,sans-serif;letter-spacing:1.1px;text-transform:uppercase;color:#7E8FB5}
+#help table{border-collapse:collapse}
+#help td{padding:3px 0;vertical-align:middle}
+#help td:first-child{padding-right:16px;white-space:nowrap}
+#help kbd{display:inline-block;min-width:22px;padding:1px 6px;margin-right:4px;border-radius:5px;text-align:center;
+  background:#D8E2F3;border:1px solid #A3B2CF;font:600 12px Raleway,system-ui,sans-serif;color:#0E244E}
+#help .or{color:#7E8FB5;margin-right:4px}
 /* Solita reads the deck (say() + deck_audio.mjs): play button on the title slide, in the middle
    of the orbit ring (Doc, 15.09.2026: "kleiner, alles gruen, weiter nach rechts, 2. Folie") */
 .play-big{position:absolute;left:838px;top:244px;width:44px;height:44px;border-radius:50%;
@@ -215,7 +239,8 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 #hud{display:flex;gap:4px}          /* overview, play and fullscreen side by side */
 #hud #ovbtn svg{width:calc(var(--hudbtn,22px) * .64);height:calc(var(--hudbtn,22px) * .64)}
 #overview{position:fixed;inset:0;z-index:20;background:rgba(14,36,78,.94);overflow:auto;padding:28px;
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:18px;align-content:start;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:18px;
+  align-content:safe center;justify-content:safe center;   /* layout() sets the columns; "safe": a taller grid scrolls from the top */
   grid-auto-rows:max-content}   /* the tiles' overflow:hidden would let the rows shrink to the window */
 #overview[hidden]{display:none}
 .ov-cell{position:relative;cursor:pointer;border-radius:6px;overflow:hidden;
@@ -229,7 +254,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 .ov-num{position:absolute;left:8px;bottom:6px;padding:2px 7px;border-radius:5px;
   background:rgba(14,36,78,.78);color:#fff;font:600 12px Raleway,system-ui,sans-serif}
 /* --- presenter view (?presenter - the fullscreen button opens it when a beamer is attached) ------------- */
-html.presenter #stage,html.presenter #hud,html.presenter #ask,html.presenter #bar{display:none!important}
+html.presenter #stage,html.presenter #hud,html.presenter #nav,html.presenter #ask,html.presenter #bar{display:none!important}
 html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(64px,13vh,124px) + 30px)!important}
 #pres{position:fixed;inset:0;z-index:8;background:var(--ink);color:#E6ECF8;font-family:Orbitron,system-ui,sans-serif;
   display:grid;gap:12px 26px;padding:12px 22px 10px;
@@ -352,17 +377,18 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 #ask-out .ask-w{border-radius:3px;transition:background-color .12s,box-shadow .12s}
 #ask-out .ask-w.on{background:color-mix(in srgb,#7E8FB5 30%,transparent);   /* Dostojewski blue, light (Doc: "hellblauer") */
   box-shadow:0 0 0 2px color-mix(in srgb,#7E8FB5 30%,transparent)}
-/* Solita is thinking: a travelling wave of bars, until her voice is ready to play */
-#ask-out .ask-wave{display:flex;align-items:center;gap:3px;height:22px;padding:2px 0}
-#ask-out .ask-wave i{display:block;width:3px;height:100%;border-radius:2px;background:var(--ink);
-  transform:scaleY(.2);animation:askwave 1.1s ease-in-out infinite}
+/* Solita is thinking: a travelling wave of bars, until her voice is ready to play - quieter since 17.09.2026
+   (Doc: "die wave dezenter"): thinner, lower, the light Dostojewski blue of the karaoke, slower */
+#ask-out .ask-wave{display:flex;align-items:center;gap:3px;height:14px;padding:4px 0}
+#ask-out .ask-wave i{display:block;width:2px;height:100%;border-radius:1px;background:#7E8FB5;opacity:.7;
+  transform:scaleY(.25);animation:askwave 1.5s ease-in-out infinite}
 #ask-out .ask-wave i:nth-child(2){animation-delay:.1s}
 #ask-out .ask-wave i:nth-child(3){animation-delay:.2s}
 #ask-out .ask-wave i:nth-child(4){animation-delay:.3s}
 #ask-out .ask-wave i:nth-child(5){animation-delay:.4s}
 #ask-out .ask-wave i:nth-child(6){animation-delay:.5s}
 #ask-out .ask-wave i:nth-child(7){animation-delay:.6s}
-@keyframes askwave{0%,100%{transform:scaleY(.2)}50%{transform:scaleY(1)}}
+@keyframes askwave{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(.9)}}
 @media (prefers-reduced-motion:reduce){#ask-out .ask-wave i{animation-duration:2.4s}}
 #ask-out::-webkit-scrollbar{width:8px}
 #ask-out::-webkit-scrollbar-thumb{background:#b8c6df;border-radius:4px}
@@ -400,7 +426,7 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 
 @media print{
   html,body{overflow:visible;background:#fff}
-  #hud,#bar,.play-big,.play-big-label{display:none}
+  #hud,#nav,#bar,.play-big,.play-big-label{display:none}
   #stage{position:static;display:block}
   #deck{transform:none!important;width:auto;height:auto;position:static}
   .slide{display:block!important;position:relative;width:960px;height:540px;

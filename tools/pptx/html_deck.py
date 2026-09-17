@@ -273,10 +273,23 @@ class HtmlDeck:
       <p class="sub">%s</p>
       <div class="hair"></div>%s""" % (num, markup(title), markup(sub), pic))
 
-    def bullets(self, title, lines):
+    def bullets(self, title, lines, below=None, corner=None, corner_size=None):
+        """`below`: a picture under the bullets that takes the rest of the slide down to the
+        footer (Doc, 17.09.2026: the whole tree under the sum rule). It is always visible,
+        only the bullets come in on clicks.
+        `corner`: a small picture bottom right, like table_top's, but the bullets keep their full
+        width - check that the lines stay clear of it. corner_size=(w, h) overrides the
+        200x190 box (Doc, 17.09.2026: "auf 15 noch rechts unten klein den Baum")."""
         body, _ = bullet_list(lines)
-        self._slide("content", '<h3>%s</h3><div class="rules"></div><div class="body">%s</div>'
-                    % (markup(title), body))
+        if below:
+            body += '<div class="below"><img src="%s" alt=""></div>' % _html.escape(asset(below), quote=True)
+        pic = ""
+        if corner:
+            size = (' style="max-width:%gpx;max-height:%gpx"' % corner_size) if corner_size else ""
+            pic = '<img class="corner-pic" src="%s" alt=""%s>' % (_html.escape(asset(corner), quote=True), size)
+        self._slide("content has-below" if below else "content",
+                    '<h3>%s</h3><div class="rules"></div><div class="body">%s</div>%s'
+                    % (markup(title), body, pic))
 
     def two_cols(self, title, left_lines, right_lines):
         left, n = bullet_list(left_lines, "col")
@@ -515,10 +528,13 @@ p.line.l1{font-size:17px;color:var(--muted);margin-top:6px;margin-left:24px;padd
   line-height:1.2}
 p.line.l2{font-size:15px;color:var(--muted);margin-top:4px;margin-left:48px;padding-left:20px}
 p.line:first-child{margin-top:0}
-p.line::before{content:"";position:absolute;left:0;width:7px;height:7px;top:.55em}
+/* the square rides on the first line's baseline, not at the top of the paragraph - a line with a tall
+   formula (fractions on arrows) kept it floating above the text (Doc, 17.09.2026). Net width 0: the
+   negative margin pulls it into the padding, wrapped lines keep their hanging indent. */
+p.line::before{content:"";display:inline-block;width:7px;height:7px;margin:0 13px 0 -20px;vertical-align:.05em}
 p.line.l0::before{background:var(--red)}
-p.line.l1::before{background:var(--green);width:6px;height:6px}
-p.line.l2::before{background:#4A79C9;width:6px;height:6px}
+p.line.l1::before{background:var(--green);width:6px;height:6px;margin-right:14px}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px;margin-right:14px}
 
 /* --- two columns -------------------------------------------------------- */
 .colgrid{position:absolute;left:__M__px;top:__BY__px;width:__CW__px;height:304px;
@@ -596,6 +612,10 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 /* small picture bottom right next to a table (table_top corner=) - text keeps clear of it */
 .corner-pic{position:absolute;right:72px;bottom:44px;max-width:200px;max-height:190px}
 .slide.has-corner .body{width:580px}
+/* picture under the bullets (bullets below=): the body reaches down to the footer, the picture fills what is left */
+.slide.has-below .body{height:350px;display:flex;flex-direction:column}
+.below{flex:1;min-height:0;margin-top:14px;display:flex;align-items:center;justify-content:center}
+.below img{max-width:100%;max-height:100%;object-fit:contain}
 
 /* --- table_top ---------------------------------------------------------- */
 .dtable{position:absolute;border-collapse:collapse;table-layout:fixed;
@@ -654,12 +674,29 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 
 /* --- HUD ---------------------------------------------------------------- */
 #hud{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:8px;z-index:9;display:flex;gap:6px}
-#hud button{display:flex;align-items:center;justify-content:center;width:var(--hudbtn,22px);height:var(--hudbtn,22px);padding:0;border:0;border-radius:5px;
+#hud button,#nav button{display:flex;align-items:center;justify-content:center;width:var(--hudbtn,22px);height:var(--hudbtn,22px);padding:0;border:0;border-radius:5px;
   background:#7E8FB5;box-shadow:0 1px 1px rgba(0,0,0,.12);   /* Dostojewski's colour on the greeting slide */
   color:#fff;opacity:.85;cursor:pointer;transition:opacity .2s}
-#hud button:hover{opacity:1}
-#hud button svg{display:block;width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6);margin:0;stroke-width:1.4;flex:none}
+#hud button:hover,#nav button:hover{opacity:1}
+#hud button svg,#nav button svg{display:block;width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6);margin:0;stroke-width:1.4;flex:none}
 #hud button[hidden]{display:none}   /* flex would otherwise show a hidden button */
+/* footer left: two triangles that jump a whole slide, fully built (Doc, 17.09.2026: "zwei Dreiecke, die von
+   Folie zu Folie springen, anis rolled out") - placed by dock() on the footer line like the HUD */
+#nav{position:fixed;left:calc(10px + env(safe-area-inset-left, 0px));bottom:8px;z-index:9;display:flex;gap:4px}
+#nav button:disabled{opacity:.35;cursor:default}
+/* "?" right of the triangles: every key the deck knows, in a card like Solita's panel (Doc, 17.09.2026) */
+#nav #nav-help{font:700 calc(var(--hudbtn,22px) * .62)/1 Raleway,system-ui,sans-serif}
+#help{position:absolute;left:0;bottom:calc(100% + 10px);width:max-content;max-width:calc(100vw - 24px);
+  background:#EAF0FA;color:#0E244E;border-radius:10px;box-shadow:0 6px 24px rgba(14,36,78,.4);
+  padding:11px 16px 12px;font:400 13px/1.35 Raleway,system-ui,sans-serif;cursor:default}
+#help[hidden]{display:none}
+#help h4{margin:0 0 8px;font:400 10px Orbitron,sans-serif;letter-spacing:1.1px;text-transform:uppercase;color:#7E8FB5}
+#help table{border-collapse:collapse}
+#help td{padding:3px 0;vertical-align:middle}
+#help td:first-child{padding-right:16px;white-space:nowrap}
+#help kbd{display:inline-block;min-width:22px;padding:1px 6px;margin-right:4px;border-radius:5px;text-align:center;
+  background:#D8E2F3;border:1px solid #A3B2CF;font:600 12px Raleway,system-ui,sans-serif;color:#0E244E}
+#help .or{color:#7E8FB5;margin-right:4px}
 /* Solita reads the deck (say() + deck_audio.mjs): play button on the title slide, in the middle
    of the orbit ring (Doc, 15.09.2026: "kleiner, alles gruen, weiter nach rechts, 2. Folie") */
 .play-big{position:absolute;left:838px;top:244px;width:44px;height:44px;border-radius:50%;
@@ -678,7 +715,8 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 #hud{display:flex;gap:4px}          /* overview, play and fullscreen side by side */
 #hud #ovbtn svg{width:calc(var(--hudbtn,22px) * .64);height:calc(var(--hudbtn,22px) * .64)}
 #overview{position:fixed;inset:0;z-index:20;background:rgba(14,36,78,.94);overflow:auto;padding:28px;
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:18px;align-content:start;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:18px;
+  align-content:safe center;justify-content:safe center;   /* layout() sets the columns; "safe": a taller grid scrolls from the top */
   grid-auto-rows:max-content}   /* the tiles' overflow:hidden would let the rows shrink to the window */
 #overview[hidden]{display:none}
 .ov-cell{position:relative;cursor:pointer;border-radius:6px;overflow:hidden;
@@ -692,7 +730,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 .ov-num{position:absolute;left:8px;bottom:6px;padding:2px 7px;border-radius:5px;
   background:rgba(14,36,78,.78);color:#fff;font:600 12px Raleway,system-ui,sans-serif}
 /* --- presenter view (?presenter - the fullscreen button opens it when a beamer is attached) ------------- */
-html.presenter #stage,html.presenter #hud,html.presenter #ask,html.presenter #bar{display:none!important}
+html.presenter #stage,html.presenter #hud,html.presenter #nav,html.presenter #ask,html.presenter #bar{display:none!important}
 html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(64px,13vh,124px) + 30px)!important}
 #pres{position:fixed;inset:0;z-index:8;background:var(--ink);color:#E6ECF8;font-family:Orbitron,system-ui,sans-serif;
   display:grid;gap:12px 26px;padding:12px 22px 10px;
@@ -815,17 +853,18 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 #ask-out .ask-w{border-radius:3px;transition:background-color .12s,box-shadow .12s}
 #ask-out .ask-w.on{background:color-mix(in srgb,#7E8FB5 30%,transparent);   /* Dostojewski blue, light (Doc: "hellblauer") */
   box-shadow:0 0 0 2px color-mix(in srgb,#7E8FB5 30%,transparent)}
-/* Solita is thinking: a travelling wave of bars, until her voice is ready to play */
-#ask-out .ask-wave{display:flex;align-items:center;gap:3px;height:22px;padding:2px 0}
-#ask-out .ask-wave i{display:block;width:3px;height:100%;border-radius:2px;background:var(--ink);
-  transform:scaleY(.2);animation:askwave 1.1s ease-in-out infinite}
+/* Solita is thinking: a travelling wave of bars, until her voice is ready to play - quieter since 17.09.2026
+   (Doc: "die wave dezenter"): thinner, lower, the light Dostojewski blue of the karaoke, slower */
+#ask-out .ask-wave{display:flex;align-items:center;gap:3px;height:14px;padding:4px 0}
+#ask-out .ask-wave i{display:block;width:2px;height:100%;border-radius:1px;background:#7E8FB5;opacity:.7;
+  transform:scaleY(.25);animation:askwave 1.5s ease-in-out infinite}
 #ask-out .ask-wave i:nth-child(2){animation-delay:.1s}
 #ask-out .ask-wave i:nth-child(3){animation-delay:.2s}
 #ask-out .ask-wave i:nth-child(4){animation-delay:.3s}
 #ask-out .ask-wave i:nth-child(5){animation-delay:.4s}
 #ask-out .ask-wave i:nth-child(6){animation-delay:.5s}
 #ask-out .ask-wave i:nth-child(7){animation-delay:.6s}
-@keyframes askwave{0%,100%{transform:scaleY(.2)}50%{transform:scaleY(1)}}
+@keyframes askwave{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(.9)}}
 @media (prefers-reduced-motion:reduce){#ask-out .ask-wave i{animation-duration:2.4s}}
 #ask-out::-webkit-scrollbar{width:8px}
 #ask-out::-webkit-scrollbar-thumb{background:#b8c6df;border-radius:4px}
@@ -863,7 +902,7 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 
 @media print{
   html,body{overflow:visible;background:#fff}
-  #hud,#bar,.play-big,.play-big-label{display:none}
+  #hud,#nav,#bar,.play-big,.play-big-label{display:none}
   #stage{position:static;display:block}
   #deck{transform:none!important;width:auto;height:auto;position:static}
   .slide{display:block!important;position:relative;width:__W__px;height:__H__px;
@@ -888,6 +927,9 @@ let si = 0, step = 0;
 // ?presenter: this window is the presenter view on the laptop (see PRES_JS at the end)
 const PRESENTER = /[?&]presenter(&|=|$)/.test(location.search);
 if (PRESENTER) document.documentElement.classList.add('presenter');
+// slide and click survive a reload (Doc, 17.09.2026: "persist slide and click") - per tab, so a new tab still
+// starts at the beginning; a #7 in the URL wins
+const KEEP = 'deck-pos:' + location.pathname + (PRESENTER ? ':presenter' : '');
 const painted = [];                                  // run after every paint - the presenter link hooks in
 slides.forEach((s, i) => {
   const p = s.querySelector('.pageno');
@@ -919,6 +961,9 @@ function dock(){
     right += av + 8;
   }
   hud.style.right = right + 'px'; hud.style.bottom = 'auto'; hud.style.top = Math.round(cy - btn / 2) + 'px';
+  const nav = document.getElementById('nav');       // the slide triangles: left end of the footer line
+  if (nav) { nav.style.left = Math.max(8, Math.round(r.left + 16 * s)) + 'px'; nav.style.bottom = 'auto';
+             nav.style.top = Math.round(cy - btn / 2) + 'px'; }
   const left = hud.getBoundingClientRect().left;
   deck.style.setProperty('--pnright', Math.max(16, (r.right - left + 12) / s) + 'px');
   const jump = document.getElementById('jump');     // the typed slide number floats above the dock
@@ -935,6 +980,7 @@ function paint(){
   const sl = slides[si];
   sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
   document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+  try { sessionStorage.setItem(KEEP, si + ':' + step); } catch (e) { }
   painted.forEach(f => f());
 }
 function next(){
@@ -947,11 +993,17 @@ function prev(){
   else if (si > 0) { si--; step = groups(slides[si]); }
   paint();
 }
+// a whole slide back or forth, shown fully built - the footer triangles and Shift+arrows (Doc, 17.09.2026)
+function jump(d){
+  if (typeof narr !== 'undefined') narr.stop();     // turning by hand pauses Solita
+  si = Math.max(0, Math.min(slides.length - 1, si + d)); step = groups(slides[si]); paint();
+}
 addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
   const k = e.key;
   if (/^(Arrow|Page|Home|End| )/.test(k)) narr.stop();   // turning pages by hand pauses Solita
-  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  if (e.shiftKey && (k === 'ArrowRight' || k === 'ArrowLeft')) { jump(k === 'ArrowRight' ? 1 : -1); e.preventDefault(); }
+  else if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
   else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
   else if (k === 'Home') { si = 0; step = 0; paint(); }
   else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
@@ -959,12 +1011,59 @@ addEventListener('keydown', e => {
 });
 addEventListener('click', e => {
   // links (lab bar, picture credits) open - they do not turn the page as well
-  if (e.target.closest('#hud') || e.target.closest('a') || e.target.closest('.play-big')) return;
+  if (e.target.closest('#hud') || e.target.closest('#nav') || e.target.closest('a') || e.target.closest('.play-big')) return;
   if (e.target.closest('#pres')) return;             // the presenter view handles its own clicks
+  const help = document.getElementById('help');     // a click beside the open help only closes it
+  if (help && !help.hidden) { help.hidden = true; return; }
   narr.stop();                                       // a click turns the page by hand
   if (e.target.closest('.labbar button')) { next(); return; }
   next();
 });   // clicks inside a lab stay in the lab - they never reach this document
+// the footer triangles: one whole slide back or forth, shown fully built - no click steps
+(function () {
+  const prevB = document.getElementById('nav-prev'), nextB = document.getElementById('nav-next');
+  if (!prevB || !nextB) return;
+  const tri = d => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + d + '" fill="currentColor" stroke="none"/></svg>';
+  prevB.innerHTML = tri('M16 5L7 12L16 19Z');
+  nextB.innerHTML = tri('M8 5L17 12L8 19Z');
+  prevB.onclick = () => jump(-1);
+  nextB.onclick = () => jump(1);
+  painted.push(() => { prevB.disabled = si === 0; nextB.disabled = si === slides.length - 1; });
+
+  // "?" right of the triangles: all keys of the deck (Doc, 17.09.2026: "zeig darauf ein Help O - Overview etc.")
+  const helpB = document.createElement('button');
+  helpB.id = 'nav-help'; helpB.type = 'button'; helpB.textContent = '?';
+  helpB.title = 'Tastenkürzel (H)'; helpB.setAttribute('aria-label', 'Hilfe: Tastenkürzel');
+  const help = document.createElement('div');
+  help.id = 'help'; help.hidden = true;
+  help.setAttribute('role', 'dialog'); help.setAttribute('aria-label', 'Tastenkürzel');
+  const K = keys => keys.map(k => k === '/' ? '<span class="or">/</span>' : '<kbd>' + k + '</kbd>').join('');
+  const rows = [
+    [K(['→', '/', 'Leertaste']), 'nächster Schritt – auch ein Klick auf die Folie'],
+    [K(['←']), 'einen Schritt zurück'],
+    [K(['Shift', '→', '/', 'Shift', '←']), 'ganze Folie vor / zurück, fertig aufgebaut – wie ◀ ▶'],
+    [K(['Home', '/', 'End']), 'erste / letzte Folie'],
+    [K(['1', '7', 'Enter']), 'zu Folie 17 springen'],
+    [K(['O']), 'Übersicht aller Folien'],
+    [K(['F']), 'Vollbild – mit Beamer: Präsentation + Referentenansicht'],
+    [K(['R']), 'Referentenansicht von Hand öffnen'],
+    [K(['L']), 'Laserpunkt an / aus (in der Präsentation)'],
+    [K(['P']), 'Solita erklärt – Start / Pause'],
+    [K(['Esc']), 'schließen – beendet auch die Präsentation'],
+    [K(['H', '/', '?']), 'diese Hilfe']
+  ];
+  help.innerHTML = '<h4>Tastenkürzel</h4><table>'
+    + rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') + '</table>';
+  nextB.after(helpB);
+  helpB.after(help);
+  helpB.onclick = () => { help.hidden = !help.hidden; };
+  addEventListener('keydown', e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.target && e.target.closest && e.target.closest('#ask, #linkgo, input, textarea')) return;   // a "?" typed to Solita
+    if (e.key === '?' || e.key === 'h' || e.key === 'H') { help.hidden = !help.hidden; e.preventDefault(); }
+    else if (e.key === 'Escape' && !help.hidden) help.hidden = true;
+  });
+})();
 // type the slide number, then Enter: 1 7 Enter jumps to slide 17 (Doc, 15.09.2026) - like
 // PowerPoint the slide starts unbuilt; Esc or a 2.5 s pause drops the typed number
 (function () {
@@ -1036,7 +1135,23 @@ addEventListener('click', e => {
     });
     built = true;
   }
+  // the tiles as large as the window allows: try every column count, keep the one with the widest tile that
+  // still fits width AND height (Doc, 17.09.2026: "im Overview den vorhandenen Platz ausnutzen"). Below
+  // OV_MIN px a tile gets unreadable - then fixed columns of OV_MIN and the overview scrolls (phones).
+  const OV_PAD = 28, OV_GAP = 18, OV_MIN = 200;
+  function layout() {
+    const n = slides.length, W = ov.clientWidth - 2 * OV_PAD, H = ov.clientHeight - 2 * OV_PAD;
+    let c = 1, w = 0;
+    for (let k = 1; k <= n; k++) {
+      const r = Math.ceil(n / k);
+      const t = Math.min((W - OV_GAP * (k - 1)) / k, (H - OV_GAP * (r - 1)) / r * 16 / 9);
+      if (t > w) { w = t; c = k; }
+    }
+    if (w < OV_MIN) { c = Math.max(1, Math.floor((W + OV_GAP) / (OV_MIN + OV_GAP))); w = (W - OV_GAP * (c - 1)) / c; }
+    ov.style.gridTemplateColumns = 'repeat(' + c + ',' + Math.floor(w) + 'px)';
+  }
   function scale() {
+    layout();
     ov.querySelectorAll('.ov-thumb').forEach(function (t) {
       t.firstChild.style.transform = 'scale(' + (t.clientWidth / 960) + ')';
     });
@@ -1201,6 +1316,12 @@ const narr = (function () {
   return api;
 })();
 
+if (!location.hash) {
+  let kept = '';
+  try { kept = sessionStorage.getItem(KEEP) || ''; } catch (e) { }
+  const m = /^([0-9]+):([0-9]+)$/.exec(kept);
+  if (m && +m[1] < slides.length) { si = +m[1]; step = Math.min(+m[2], groups(slides[si])); }
+}
 paint();
 fromHash();
 """
@@ -2324,6 +2445,7 @@ __SHELL_CSS__
 __SLIDES__
 </div></div>
 <div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
 <div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
 <div id="ask">
   <div id="ask-panel" hidden>

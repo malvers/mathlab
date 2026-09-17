@@ -244,7 +244,8 @@ class Deck:
                     run.hyperlink.address = credit_url
         return s
 
-    def bullets(self, title, lines):
+    def bullets(self, title, lines, below=None, corner=None, corner_size=None):
+        # below= / corner= (SVG pictures) exist only in html_deck - same call surface
         s, body = self._content("Inhalt", title, lines)
         self._check_body(lines, CONTENT_W, BODY_H, title)
         add_click_build(s, [(body, lines)])

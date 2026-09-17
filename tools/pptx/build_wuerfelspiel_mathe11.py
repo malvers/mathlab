@@ -24,6 +24,28 @@ LIGHT = {k: "#" + v for k, v in
          {"orange": TINT_ORANGE, "green": TINT_GREEN, "blue": TINT_BLUE, "red": TINT_RED}.items()}
 LENA = {"top": [3, 5, 3], "col": [7, 5, 7], "fill": {3: LIGHT["orange"], 5: LIGHT["green"], 7: LIGHT["blue"]}}
 MIA = {"top": [4, 6, 4], "col": [4, 6, 4], "fill": {4: LIGHT["blue"], 6: LIGHT["red"]}}
+# the root node has a name and every path starts there (Doc, 17.09.2026: "Weg (* -> 3 -> 4), den Root-Knoten
+# könnten wir benennen") - one name for the trees, the slides and the summaries
+ROOT = "Start"
+
+
+def weg(*stops, bold=False):
+    """A path from the root as LaTeX: weg(3, 4) -> $(\\text{Start} \\to 3 \\to 4)$."""
+    inner = " \\to ".join(["\\text%s{%s}" % ("bf" if bold else "", ROOT)] + [str(x) for x in stops])
+    return "$\\mathbf{(%s)}$" % inner if bold else "$(%s)$" % inner
+
+
+def weg_pfeile(a, b, pa, pb):
+    """The path with each branch probability on its arrow, like the branches in the tree (Doc, 17.09.2026:
+    "über Start -> 3 eine Klammer mit 1/3" - braces looked "bissl grob", labelled arrows are finer).
+    pa, pb: (numerator, denominator); the fractions stay full size, muted like the tree labels."""
+    fa, fb = ("\\;\\textstyle\\color{%s}\\frac{%d}{%d}\\;" % ((S.MUTED,) + f) for f in (pa, pb))
+    return "$(\\text{%s} \\xrightarrow{%s} %d \\xrightarrow{%s} %d)$" % (ROOT, fa, a, fb, b)
+
+
+def weg_txt(*stops):
+    """The same path as plain text for the summaries: (Start→3→4)."""
+    return "(" + "→".join([ROOT] + [str(x) for x in stops]) + ")"
 
 
 # ------------------------------------------------------------------ figures ---
@@ -103,8 +125,9 @@ def dice_tables(c, mia=True):
 # stage 1: where each 1/3 comes from stays in sight while the branches are drawn
 # (Doc, 16.09.2026: "da steht ganz klar wie man auf die 1/3s kommt")
 st = S.Diagram(FIG_W, 440)
-root = (30, 220)
+root = (60, 220)
 st.node(*root)
+st.text(48, 225, ROOT, 15, S.INK, anchor="end")
 st.text(250, 18, "1. Stufe: Lena", 15, S.INK)
 for ya, n in [(90, "3"), (220, "5"), (350, "7")]:
     st.branch(root, (250, ya), "1/3", size=14, tex=True)
@@ -112,23 +135,123 @@ for ya, n in [(90, "3"), (220, "5"), (350, "7")]:
 dice_tables(st, mia=False)
 FIG_STUFE1 = write("stufe1", st)
 
+def full_tree(c):
+    """The finished tree, left to right - on slide 14 beside the dice tables, small in the corner of 15."""
+    root = (60, 220)
+    c.node(*root)
+    c.text(48, 225, ROOT, 15, S.INK, anchor="end")
+    c.text(250, 18, "1. Stufe: Lena", 15, S.INK)
+    c.text(462, 18, "2. Stufe: Mia", 15, S.INK)
+    for ya, a in [(90, 3), (220, 5), (350, 7)]:
+        c.branch(root, (250, ya), "1/3", size=14, tex=True)
+        c.node(250, ya, str(a), "above", size=18, tex=True)
+        for dy, b, pb in [(-42, 4, "2/3"), (42, 6, "1/3")]:
+            win = a > b
+            col = S.GREEN if win else S.MUTED
+            c.branch((250, ya), (480, ya + dy), pb, color=col, width=2.4 if win else 1.3, size=14, tex=True)
+            c.node(480, ya + dy, str(b), "right", color=col, size=17, tex=True)
+    c.text(255, 432, "grün: Lena gewinnt", 14, S.GREEN)
+
+
 # the full tree: both dice tables beside it; each path's probability is on slide 17 ("Jeder Ausgang einzeln")
 t = S.Diagram(FIG_W, 440)
-root = (30, 220)
-t.node(*root)
-t.text(250, 18, "1. Stufe: Lena", 15, S.INK)
-t.text(462, 18, "2. Stufe: Mia", 15, S.INK)
-for ya, a in [(90, 3), (220, 5), (350, 7)]:
-    t.branch(root, (250, ya), "1/3", size=14, tex=True)
-    t.node(250, ya, str(a), "above", size=18, tex=True)
-    for dy, b, pb in [(-42, 4, "2/3"), (42, 6, "1/3")]:
-        win = a > b
-        col = S.GREEN if win else S.MUTED
-        t.branch((250, ya), (480, ya + dy), pb, color=col, width=2.4 if win else 1.3, size=14, tex=True)
-        t.node(480, ya + dy, str(b), "right", color=col, size=17, tex=True)
-t.text(255, 432, "grün: Lena gewinnt", 14, S.GREEN)
+full_tree(t)
 dice_tables(t)
 FIG_BAUM = write("baum", t)
+# the same tree alone, small bottom right on the path rule (Doc, 17.09.2026)
+k = S.Diagram(520, 440)
+full_tree(k)
+FIG_BAUM_KLEIN = write("baum-klein", k)
+
+
+def label_off(c, p, q, text, gap=22, size=14):
+    """Branch probability beside a top-down branch, `gap` px off its middle along the normal that
+    points outwards: up-left for a branch to the left, up-right to the right, right for a straight one."""
+    (x1, y1), (x2, y2) = p, q
+    d = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5 or 1.0
+    ux, uy = (x2 - x1) / d, (y2 - y1) / d
+    nx, ny = (-uy, ux) if ux < 0 else (uy, -ux) if ux > 0 else (1.0, 0.0)
+    c.texlabel((x1 + x2) / 2.0 + nx * gap, (y1 + y2) / 2.0 + ny * gap, text, size, S.BODY)
+
+
+# the whole tree once more, flat and top-down, under the sum rule - the slide has ~190 px left
+# under its four bullets (Doc, 17.09.2026: "unten den ganzen Baum")
+fl = S.Diagram(816, 196)
+top = (480, 26)
+fl.node(*top)
+fl.text(480, 14, ROOT, 14, S.INK)
+fl.text(0, 40, "grün: Lena gewinnt", 14, S.GREEN, anchor="start")
+fl.text(0, 102, "1. Stufe: Lena", 15, S.INK, anchor="start")
+fl.text(0, 180, "2. Stufe: Mia", 15, S.INK, anchor="start")
+for cx, a, side in [(260, 3, "left"), (480, 5, "right"), (700, 7, "right")]:
+    mid = (cx, 96)
+    fl.branch(top, mid)
+    label_off(fl, top, mid, "1/3")
+    fl.node(cx, 96, str(a), side, size=18, tex=True)
+    for dx, b, pb in [(-50, 4, "2/3"), (50, 6, "1/3")]:
+        win = a > b
+        col = S.GREEN if win else S.MUTED
+        leaf = (cx + dx, 164)
+        fl.branch(mid, leaf, color=col, width=2.4 if win else 1.3)
+        label_off(fl, mid, leaf, pb)
+        fl.node(cx + dx, 164, str(b), "below", color=col, size=17, tex=True)
+FIG_BAUM_FLACH = write("baum-flach", fl)
+
+# a pupil's tree that starts with "Lena or Mia" (Doc, 17.09.2026: "eine Schülerin kam mit der Idee ... mach dazu bitte
+# eine Folie nach Fehlern") - redrawn, anonymous: left as it was drawn with the faults in red, right how it goes
+fw = S.Diagram(924, 440)
+# left: the tree as drawn - the start splits into L and M, and below each one throws her own die twice
+fw.text(250, 18, "So nicht", 16, S.RED, weight="bold")
+root = (40, 230)
+fw.node(*root)
+fw.text(40, 212, ROOT, 14, S.INK)
+wrong_path = [(140, 130), (260, 130), (360, 154)]          # Start -> L -> 5 -> 7, the path we read out
+for who, y, kids in [("L", 130, [(50, [3, 5, 7]), (130, [3, 5, 7]), (210, [3, 5, 7])]),
+                     ("M", 370, [(330, [4, 6]), (410, [4, 6])])]:
+    fw.branch(root, (140, y), color=S.RED, width=2.2)
+    fw.node(140, y, color=S.RED)
+    fw.text(140, y - 11, who, 17, S.RED, weight="bold")      # names, not variables: upright
+    for (ky, leaves), k in zip(kids, [3, 5, 7] if who == "L" else [4, 6]):
+        on = who == "L" and k == 5
+        fw.branch((140, y), (260, ky), color=S.RED if on else S.MUTED, width=2.2 if on else 1.3)
+        fw.node(260, ky, str(k), "above", size=16, tex=True)
+        step = 24 if who == "L" else 20
+        for i, leaf in enumerate(leaves):
+            ly = ky + (i - (len(leaves) - 1) / 2.0) * step
+            hot = on and leaf == 7
+            fw.branch((260, ky), (360, ly), color=S.RED if hot else S.MUTED, width=2.2 if hot else 1.1)
+            fw.node(360, ly, str(leaf), "right", color=S.RED if hot else S.INK, size=13, tex=True)
+fw.text(165, 246, "L oder M?", 14, S.RED, anchor="start", weight="bold")
+fw.text(165, 264, "Beide würfeln doch!", 13, S.RED, anchor="start")
+fw.text(392, 150, "Lena $5$, dann Lena $7$", 13, S.RED, anchor="start", tex=True)
+fw.text(392, 168, "und wo ist Mia?", 13, S.RED, anchor="start")
+fw.text(392, 372, "Mias $4$ steht $4$-mal:", 13, S.RED, anchor="start", tex=True)
+fw.text(392, 396, "also", 13, S.RED, anchor="start")
+fw.frac(426, 392, 2, 3, 13, S.RED)
+fw.text(435, 396, ", nicht", 13, S.RED, anchor="start")
+fw.frac(486, 392, 1, 2, 13, S.RED)
+fw.line(548, 20, 548, 420, color="#DCE4F0", width=1.2)
+# right: how it goes - Lena's throw is stage 1, Mia's throw hangs on every end as stage 2
+fw.text(740, 18, "So stimmt es", 16, S.GREEN, weight="bold")
+fw.text(690, 44, "1. Stufe: Lena", 12.5, S.MUTED)
+fw.text(830, 44, "2. Stufe: Mia", 12.5, S.MUTED)
+r2 = (590, 160)
+fw.node(*r2)
+fw.text(590, 142, ROOT, 14, S.INK)
+for ya, a in [(80, 3), (160, 5), (240, 7)]:
+    fw.branch(r2, (700, ya), color=S.INK, width=1.4)
+    fw.node(700, ya, str(a), "above", size=15, tex=True)
+    for dy, b in [(-22, 4), (22, 6)]:
+        fw.branch((700, ya), (810, ya + dy), color=S.GREEN if (a, b) == (5, 4) else S.MUTED,
+                  width=2.2 if (a, b) == (5, 4) else 1.1)
+        fw.node(810, ya + dy, str(b), "right", size=13, tex=True, color=S.GREEN if (a, b) == (5, 4) else S.INK)
+fw.text(836, 142, "Lena $5$, Mia $4$", 12.5, S.GREEN, anchor="start", tex=True)
+for i, line in enumerate(["Äste aus einem Punkt: entweder – oder.",
+                          "Lena würfelt und Mia würfelt:",
+                          "zwei Stufen untereinander.",
+                          "Jeder Weg ist genau eine ganze Runde."]):
+    fw.text(572, 318 + i * 26, line, 14.5, S.INK, anchor="start", weight="bold" if i in (0, 3) else None)
+FIG_BAUM_FALSCH = write("baum-falsch", fw)
 
 # ------------------------------------------------------------------- slides ---
 d = Deck("mathe11-wuerfelspiel.pptx")
@@ -264,13 +387,13 @@ d.say("Hier ist der fertige Baum. Rechts stehen beide Würfel noch einmal als Ta
 
 d.bullets("Die Pfadregel: entlang eines Weges multiplizieren", [
     ("Die Wahrscheinlichkeit eines Weges: alle Äste auf dem Weg **malnehmen**", 0),
-    ("Weg $(3 \\mid 4)$: $\\frac{1}{3} \\cdot \\frac{2}{3} = \\frac{2}{9}$", 0),
-    ("Weg $(3 \\mid 6)$: $\\frac{1}{3} \\cdot \\frac{1}{3} = \\frac{1}{9}$", 0),
+    ("Weg %s: $\\frac{1}{3} \\cdot \\frac{2}{3} = \\frac{2}{9}$" % weg_pfeile(3, 4, (1, 3), (2, 3)), 0),
+    ("Weg %s: $\\frac{1}{3} \\cdot \\frac{1}{3} = \\frac{1}{9}$" % weg_pfeile(3, 6, (1, 3), (1, 3)), 0),
     ("Kontrolle: alle sechs Wege zusammen $= 3 \\cdot \\frac{2}{9} + 3 \\cdot \\frac{1}{9} = 1$", 0),
-])
+], corner=FIG_BAUM_KLEIN, corner_size=(250, 212))
 
 # ---------------------------------------------------------------- Kapitel 04
-d.summary("Pfadregel: entlang eines Weges multiplizieren. Weg (3|4) = 1/3 mal 2/3 = 2/9, Weg (3|6) = 1/3 mal 1/3 = 1/9. Alle 6 Wege: 3 mal 2/9 + 3 mal 1/9 = 1")
+d.summary("Pfadregel: entlang eines Weges multiplizieren. Weg " + weg_txt(3, 4) + " = 1/3 mal 2/3 = 2/9, Weg " + weg_txt(3, 6) + " = 1/3 mal 1/3 = 1/9. Alle 6 Wege: 3 mal 2/9 + 3 mal 1/9 = 1")
 d.say("Wie kommen die Zahlen rechts zustande? Mit der Pfadregel.",
       "Die Wahrscheinlichkeit eines Weges bekommt man, indem man alle Äste auf diesem Weg miteinander malnimmt.",
       "Zum Beispiel der Weg drei gegen vier: Ein Drittel mal zwei Drittel ergibt zwei Neuntel.",
@@ -284,18 +407,18 @@ d.say("Kapitel vier: Wer gewinnt? Dafür gehen wir alle sechs Ausgänge durch.")
 
 d.table_top("Jeder Ausgang einzeln", [
     ["Weg", "Lena", "Mia", "Wer gewinnt?", "Wahrscheinlichkeit"],
-    ["$\\mathbf{(3 \\mid 4)}$", "$3$", "$4$", "Mia", "$\\frac{2}{9}$"],
-    ["$\\mathbf{(3 \\mid 6)}$", "$3$", "$6$", "Mia", "$\\frac{1}{9}$"],
-    ["$\\mathbf{(5 \\mid 4)}$", "$5$", "$4$", "Lena", "$\\frac{2}{9}$"],
-    ["$\\mathbf{(5 \\mid 6)}$", "$5$", "$6$", "Mia", "$\\frac{1}{9}$"],
-    ["$\\mathbf{(7 \\mid 4)}$", "$7$", "$4$", "Lena", "$\\frac{2}{9}$"],
-    ["$\\mathbf{(7 \\mid 6)}$", "$7$", "$6$", "Lena", "$\\frac{1}{9}$"],
+    [weg(3, 4, bold=True), "$3$", "$4$", "Mia", "$\\frac{2}{9}$"],
+    [weg(3, 6, bold=True), "$3$", "$6$", "Mia", "$\\frac{1}{9}$"],
+    [weg(5, 4, bold=True), "$5$", "$4$", "Lena", "$\\frac{2}{9}$"],
+    [weg(5, 6, bold=True), "$5$", "$6$", "Mia", "$\\frac{1}{9}$"],
+    [weg(7, 4, bold=True), "$7$", "$4$", "Lena", "$\\frac{2}{9}$"],
+    [weg(7, 6, bold=True), "$7$", "$6$", "Lena", "$\\frac{1}{9}$"],
 ], [150, 110, 110, 220, 226], [
     ("Lena gewinnt auf **drei** Wegen — auch die $\\mathbf{7}$ **schlägt die** $\\mathbf{6}$!", 0),
 ], font_size=13, bold_cols=(0,),
    marks={(3, 3): TINT_GREEN, (5, 3): TINT_GREEN, (6, 3): TINT_GREEN})
 
-d.summary("Alle Ausgänge: (3|4) Mia 2/9, (3|6) Mia 1/9, (5|4) Lena 2/9, (5|6) Mia 1/9, (7|4) Lena 2/9, (7|6) Lena 1/9. Lena gewinnt auf 3 Wegen, auch 7 schlägt 6")
+d.summary("Alle Ausgänge: " + ", ".join("%s %s %s" % (weg_txt(a, b), w, p) for a, b, w, p in [(3, 4, "Mia", "2/9"), (3, 6, "Mia", "1/9"), (5, 4, "Lena", "2/9"), (5, 6, "Mia", "1/9"), (7, 4, "Lena", "2/9"), (7, 6, "Lena", "1/9")]) + ". Lena gewinnt auf 3 Wegen, auch 7 schlägt 6")
 d.say("In dieser Tabelle steht jeder Ausgang einzeln: welcher Weg, welche Zahlen, wer gewinnt — und wie wahrscheinlich das ist.",
       "Lena gewinnt auf drei Wegen: fünf gegen vier, sieben gegen vier — und auch sieben gegen sechs, denn die Sieben schlägt die Sechs.")
 
@@ -304,9 +427,9 @@ d.bullets("Die Summenregel: passende Wege addieren", [
     ("$P(\\text{Lena gewinnt}) = \\frac{2}{9} + \\frac{2}{9} + \\frac{1}{9} = \\frac{5}{9} \\approx 55{,}6\\,\\%$", 0),
     ("Gegenprobe Mia: $\\frac{2}{9} + \\frac{1}{9} + \\frac{1}{9} = \\frac{4}{9}$ — und $\\frac{5}{9} + \\frac{4}{9} = 1$", 0),
     ("Unentschieden gibt es nicht: Die beiden Würfel haben **keine gemeinsame Zahl**", 0),
-])
+], below=FIG_BAUM_FLACH)
 
-d.summary("Summenregel: Lenas Gewinnwege addieren: 2/9 + 2/9 + 1/9 = 5/9, rund 55,6 %. Gegenprobe Mia 4/9, zusammen 1. Kein Unentschieden, die Würfel haben keine gemeinsame Zahl")
+d.summary("Summenregel: Lenas Gewinnwege addieren: 2/9 + 2/9 + 1/9 = 5/9, rund 55,6 %. Gegenprobe Mia 4/9, zusammen 1. Kein Unentschieden, die Würfel haben keine gemeinsame Zahl. Unten noch einmal der ganze Baum von oben nach unten, grün Lenas Gewinnwege " + ", ".join(weg_txt(a, b) for a, b in [(5, 4), (7, 4), (7, 6)]))
 d.say("Jetzt brauchen wir die zweite Regel: die Summenregel.",
       "Alle Wege, auf denen Lena gewinnt, werden zusammengezählt.",
       "Zwei Neuntel plus zwei Neuntel plus ein Neuntel ergibt fünf Neuntel. Das sind rund fünfundfünfzig Komma sechs Prozent.",
@@ -316,18 +439,27 @@ d.say("Jetzt brauchen wir die zweite Regel: die Summenregel.",
 d.bullets("Die typischen Fehler", [
     ("Mias $4$ mit $\\frac{1}{2}$ statt $\\frac{2}{3}$ — die $4$ steht **viermal** auf dem Würfel", 0),
     ("Entlang eines Weges **addiert** statt multipliziert", 0),
-    ("Den Weg $\\mathbf{(7 \\mid 6)}$ vergessen — die $7$ ist größer als die $6$", 0),
+    ("Den Weg %s vergessen — die $7$ ist größer als die $6$" % weg(7, 6, bold=True), 0),
     ("Die Wege für Lenas Sieg **multipliziert** statt addiert", 0),
     ("Nur einen Weg genommen statt **alle drei**", 0),
 ])
 
-d.summary("Typische Fehler: Mias 4 mit 1/2 statt 2/3; entlang eines Weges addiert statt multipliziert; Weg (7|6) vergessen; Gewinnwege multipliziert statt addiert; nur einen Weg statt aller drei")
+d.summary("Typische Fehler: Mias 4 mit 1/2 statt 2/3; entlang eines Weges addiert statt multipliziert; Weg " + weg_txt(7, 6) + " vergessen; Gewinnwege multipliziert statt addiert; nur einen Weg statt aller drei")
 d.say("Schauen wir uns noch die typischen Fehler an.",
       "Erstens: Mias Vier bekommt ein halb statt zwei Drittel. Dabei steht die Vier viermal auf dem Würfel.",
       "Zweitens: Entlang eines Weges wird addiert statt malgenommen.",
       "Drittens: Der Weg sieben gegen sechs wird vergessen — dabei ist die Sieben größer als die Sechs.",
       "Viertens: Die Wege für Lenas Sieg werden malgenommen statt addiert.",
       "Und fünftens: Man nimmt nur einen Weg, statt alle drei.")
+
+d.picture("Noch ein Fehler: Lena oder Mia?", FIG_BAUM_FALSCH)
+d.summary("Fehler im Aufbau des Baums: Der Start teilt sich in L und M (Lena oder Mia), darunter würfelt jede zweimal ihren eigenen Würfel. Falsch, denn Äste aus einem Punkt sind entweder-oder, Lena und Mia würfeln aber beide - das sind zwei Stufen untereinander. Probe: die Runde Lena 5, Mia 4 kommt in dem Baum gar nicht vor. Dazu Mias 4 mit 1/2 statt 2/3. Richtig: Stufe 1 Lena 3, 5, 7, Stufe 2 an jedes Ende Mia 4 und 6; jeder Weg ist genau eine ganze Runde")
+d.say("Noch ein Fehler, der beim Baum gern passiert. Links teilt sich der Baum gleich am Start in L und M, also in Lena oder Mia. Darunter würfelt Lena zweimal, und Mia würfelt zweimal. "
+      "Aber Äste, die aus einem Punkt kommen, bedeuten: entweder, oder. Genau einer davon passiert. "
+      "Lena und Mia würfeln aber beide. Das ist kein Entweder-oder. Deshalb gehören die beiden untereinander, in zwei Stufen. "
+      "Die Probe: Nehmen wir eine echte Runde. Lena würfelt eine Fünf, Mia eine Vier. Diesen Weg gibt es links gar nicht. Auf keinem Weg kann man sagen, wer gewinnt. "
+      "Und noch etwas: Mias Vier steht viermal auf dem Würfel. Sie bekommt zwei Drittel, nicht ein halb. "
+      "Rechts steht es richtig: erst Lenas Wurf, dann an jedes Ende Mias Wurf. Jeder Weg ist genau eine ganze Runde.")
 
 d.merksatz("Entlang eines Pfades wird multipliziert — verschiedene Pfade zum selben Ereignis "
            "werden addiert.")
@@ -385,11 +517,11 @@ d.say("Jetzt seid ihr dran, mit einer Zwillingsaufgabe.",
 d.bullets("Lösung der Zwillingsaufgabe", [
     ("Paul: $1$, $5$ und $6$ je $\\frac{2}{6} = \\frac{1}{3}$ — Jonas: $2$ und $4$ je $\\frac{3}{6} = \\frac{1}{2}$", 0),
     ("Jeder Weg: $\\frac{1}{3} \\cdot \\frac{1}{2} = \\frac{1}{6}$ — sechs Wege, zusammen $1$", 0),
-    ("Paul gewinnt bei $(5 \\mid 2)$, $(5 \\mid 4)$, $(6 \\mid 2)$, $(6 \\mid 4)$ — die $1$ gewinnt nie", 0),
+    ("Paul gewinnt bei %s, %s, %s, %s — die $1$ gewinnt nie" % (weg(5, 2), weg(5, 4), weg(6, 2), weg(6, 4)), 0),
     ("$P(\\text{Paul gewinnt}) = 4 \\cdot \\frac{1}{6} = \\frac{2}{3} \\approx 66{,}7\\,\\%$", 0),
 ])
 
-d.summary("Lösung Zwillingsaufgabe: Paul 1, 5, 6 je 1/3, Jonas 2, 4 je 1/2; jeder Weg 1/6. Paul gewinnt bei (5|2), (5|4), (6|2), (6|4), mit der 1 nie. P(Paul gewinnt) = 4 mal 1/6 = 2/3, rund 66,7 %")
+d.summary("Lösung Zwillingsaufgabe: Paul 1, 5, 6 je 1/3, Jonas 2, 4 je 1/2; jeder Weg 1/6. Paul gewinnt bei " + ", ".join(weg_txt(a, b) for a, b in [(5, 2), (5, 4), (6, 2), (6, 4)]) + ", mit der 1 nie. P(Paul gewinnt) = 4 mal 1/6 = 2/3, rund 66,7 %")
 d.say("Und hier ist die Lösung.",
       "Bei Paul stehen eins, fünf und sechs je zweimal drauf — also je ein Drittel. Bei Jonas stehen zwei und vier je dreimal drauf — also je ein halb.",
       "Jeder Weg hat damit ein Drittel mal ein halb, also ein Sechstel. Sechs Wege, zusammen eins.",

@@ -15,6 +15,9 @@ let si = 0, step = 0;
 // ?presenter: this window is the presenter view on the laptop (see PRES_JS at the end)
 const PRESENTER = /[?&]presenter(&|=|$)/.test(location.search);
 if (PRESENTER) document.documentElement.classList.add('presenter');
+// slide and click survive a reload (Doc, 17.09.2026: "persist slide and click") - per tab, so a new tab still
+// starts at the beginning; a #7 in the URL wins
+const KEEP = 'deck-pos:' + location.pathname + (PRESENTER ? ':presenter' : '');
 const painted = [];                                  // run after every paint - the presenter link hooks in
 slides.forEach((s, i) => {
   const p = s.querySelector('.pageno');
@@ -46,6 +49,9 @@ function dock(){
     right += av + 8;
   }
   hud.style.right = right + 'px'; hud.style.bottom = 'auto'; hud.style.top = Math.round(cy - btn / 2) + 'px';
+  const nav = document.getElementById('nav');       // the slide triangles: left end of the footer line
+  if (nav) { nav.style.left = Math.max(8, Math.round(r.left + 16 * s)) + 'px'; nav.style.bottom = 'auto';
+             nav.style.top = Math.round(cy - btn / 2) + 'px'; }
   const left = hud.getBoundingClientRect().left;
   deck.style.setProperty('--pnright', Math.max(16, (r.right - left + 12) / s) + 'px');
   const jump = document.getElementById('jump');     // the typed slide number floats above the dock
@@ -62,6 +68,7 @@ function paint(){
   const sl = slides[si];
   sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
   document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+  try { sessionStorage.setItem(KEEP, si + ':' + step); } catch (e) { }
   painted.forEach(f => f());
 }
 function next(){
@@ -74,11 +81,17 @@ function prev(){
   else if (si > 0) { si--; step = groups(slides[si]); }
   paint();
 }
+// a whole slide back or forth, shown fully built - the footer triangles and Shift+arrows (Doc, 17.09.2026)
+function jump(d){
+  if (typeof narr !== 'undefined') narr.stop();     // turning by hand pauses Solita
+  si = Math.max(0, Math.min(slides.length - 1, si + d)); step = groups(slides[si]); paint();
+}
 addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
   const k = e.key;
   if (/^(Arrow|Page|Home|End| )/.test(k)) narr.stop();   // turning pages by hand pauses Solita
-  if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  if (e.shiftKey && (k === 'ArrowRight' || k === 'ArrowLeft')) { jump(k === 'ArrowRight' ? 1 : -1); e.preventDefault(); }
+  else if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
   else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
   else if (k === 'Home') { si = 0; step = 0; paint(); }
   else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
@@ -86,12 +99,59 @@ addEventListener('keydown', e => {
 });
 addEventListener('click', e => {
   // links (lab bar, picture credits) open - they do not turn the page as well
-  if (e.target.closest('#hud') || e.target.closest('a') || e.target.closest('.play-big')) return;
+  if (e.target.closest('#hud') || e.target.closest('#nav') || e.target.closest('a') || e.target.closest('.play-big')) return;
   if (e.target.closest('#pres')) return;             // the presenter view handles its own clicks
+  const help = document.getElementById('help');     // a click beside the open help only closes it
+  if (help && !help.hidden) { help.hidden = true; return; }
   narr.stop();                                       // a click turns the page by hand
   if (e.target.closest('.labbar button')) { next(); return; }
   next();
 });   // clicks inside a lab stay in the lab - they never reach this document
+// the footer triangles: one whole slide back or forth, shown fully built - no click steps
+(function () {
+  const prevB = document.getElementById('nav-prev'), nextB = document.getElementById('nav-next');
+  if (!prevB || !nextB) return;
+  const tri = d => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + d + '" fill="currentColor" stroke="none"/></svg>';
+  prevB.innerHTML = tri('M16 5L7 12L16 19Z');
+  nextB.innerHTML = tri('M8 5L17 12L8 19Z');
+  prevB.onclick = () => jump(-1);
+  nextB.onclick = () => jump(1);
+  painted.push(() => { prevB.disabled = si === 0; nextB.disabled = si === slides.length - 1; });
+
+  // "?" right of the triangles: all keys of the deck (Doc, 17.09.2026: "zeig darauf ein Help O - Overview etc.")
+  const helpB = document.createElement('button');
+  helpB.id = 'nav-help'; helpB.type = 'button'; helpB.textContent = '?';
+  helpB.title = 'Tastenkürzel (H)'; helpB.setAttribute('aria-label', 'Hilfe: Tastenkürzel');
+  const help = document.createElement('div');
+  help.id = 'help'; help.hidden = true;
+  help.setAttribute('role', 'dialog'); help.setAttribute('aria-label', 'Tastenkürzel');
+  const K = keys => keys.map(k => k === '/' ? '<span class="or">/</span>' : '<kbd>' + k + '</kbd>').join('');
+  const rows = [
+    [K(['→', '/', 'Leertaste']), 'nächster Schritt – auch ein Klick auf die Folie'],
+    [K(['←']), 'einen Schritt zurück'],
+    [K(['Shift', '→', '/', 'Shift', '←']), 'ganze Folie vor / zurück, fertig aufgebaut – wie ◀ ▶'],
+    [K(['Home', '/', 'End']), 'erste / letzte Folie'],
+    [K(['1', '7', 'Enter']), 'zu Folie 17 springen'],
+    [K(['O']), 'Übersicht aller Folien'],
+    [K(['F']), 'Vollbild – mit Beamer: Präsentation + Referentenansicht'],
+    [K(['R']), 'Referentenansicht von Hand öffnen'],
+    [K(['L']), 'Laserpunkt an / aus (in der Präsentation)'],
+    [K(['P']), 'Solita erklärt – Start / Pause'],
+    [K(['Esc']), 'schließen – beendet auch die Präsentation'],
+    [K(['H', '/', '?']), 'diese Hilfe']
+  ];
+  help.innerHTML = '<h4>Tastenkürzel</h4><table>'
+    + rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') + '</table>';
+  nextB.after(helpB);
+  helpB.after(help);
+  helpB.onclick = () => { help.hidden = !help.hidden; };
+  addEventListener('keydown', e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.target && e.target.closest && e.target.closest('#ask, #linkgo, input, textarea')) return;   // a "?" typed to Solita
+    if (e.key === '?' || e.key === 'h' || e.key === 'H') { help.hidden = !help.hidden; e.preventDefault(); }
+    else if (e.key === 'Escape' && !help.hidden) help.hidden = true;
+  });
+})();
 // type the slide number, then Enter: 1 7 Enter jumps to slide 17 (Doc, 15.09.2026) - like
 // PowerPoint the slide starts unbuilt; Esc or a 2.5 s pause drops the typed number
 (function () {
@@ -163,7 +223,23 @@ addEventListener('click', e => {
     });
     built = true;
   }
+  // the tiles as large as the window allows: try every column count, keep the one with the widest tile that
+  // still fits width AND height (Doc, 17.09.2026: "im Overview den vorhandenen Platz ausnutzen"). Below
+  // OV_MIN px a tile gets unreadable - then fixed columns of OV_MIN and the overview scrolls (phones).
+  const OV_PAD = 28, OV_GAP = 18, OV_MIN = 200;
+  function layout() {
+    const n = slides.length, W = ov.clientWidth - 2 * OV_PAD, H = ov.clientHeight - 2 * OV_PAD;
+    let c = 1, w = 0;
+    for (let k = 1; k <= n; k++) {
+      const r = Math.ceil(n / k);
+      const t = Math.min((W - OV_GAP * (k - 1)) / k, (H - OV_GAP * (r - 1)) / r * 16 / 9);
+      if (t > w) { w = t; c = k; }
+    }
+    if (w < OV_MIN) { c = Math.max(1, Math.floor((W + OV_GAP) / (OV_MIN + OV_GAP))); w = (W - OV_GAP * (c - 1)) / c; }
+    ov.style.gridTemplateColumns = 'repeat(' + c + ',' + Math.floor(w) + 'px)';
+  }
   function scale() {
+    layout();
     ov.querySelectorAll('.ov-thumb').forEach(function (t) {
       t.firstChild.style.transform = 'scale(' + (t.clientWidth / 960) + ')';
     });
@@ -328,6 +404,12 @@ const narr = (function () {
   return api;
 })();
 
+if (!location.hash) {
+  let kept = '';
+  try { kept = sessionStorage.getItem(KEEP) || ''; } catch (e) { }
+  const m = /^([0-9]+):([0-9]+)$/.exec(kept);
+  if (m && +m[1] < slides.length) { si = +m[1]; step = Math.min(+m[2], groups(slides[si])); }
+}
 paint();
 fromHash();
 
