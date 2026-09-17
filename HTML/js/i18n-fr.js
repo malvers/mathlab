@@ -292,7 +292,7 @@ CyberI18n.translations.fr = {
                 st_sim_body: "Laisse l’ordinateur lancer : plus il y a de manches, plus la <b>fréquence relative</b> de Lena se rapproche de la probabilité $\\frac{5}{9} \\approx 0{,}556$. C’est la <b>loi des grands nombres</b>.<br><br>Toucher : lancers en continu oui ou non.",
                 st_efron_short: "LE SAVAIS-TU ?",
                 st_efron_title: "Le savais-tu ?",
-                st_efron_body: "Les dés existent depuis au moins $5000$ ans. Le statisticien <b>Bradley Efron</b> a inventé des dés qui se battent en cercle : A bat B, B bat C, C bat D et D bat de nouveau A. Celui qui doit choisir en premier perd à la longue.<br><br>Touche une flèche et regarde pourquoi.",
+                st_efron_body: "Touche une flèche et regarde pourquoi.",
                 st_zwilling_short: "EXERCICE JUMEAU",
                 st_zwilling_title: "À vous : l’exercice jumeau",
                 st_zwilling_body: "Dé de Paul : $1, 1, 5, 5, 6, 6$<br>Dé de Jonas : $2, 2, 2, 4, 4, 4$<br><br><b>a)</b> Dessinez l’arbre et écrivez la probabilité sur chaque branche.<br><b>b)</b> Quelle est la probabilité que Paul gagne ?<br><br>Conseil : suivez la recette étape par étape. Ensuite, à gauche, <b>afficher la solution</b>.",

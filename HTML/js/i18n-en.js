@@ -292,7 +292,7 @@ CyberI18n.translations.en = {
                 st_sim_body: "Let the computer roll: the more rounds, the closer Lena's <b>relative frequency</b> gets to the probability $\\frac{5}{9} \\approx 0.556$. That is the <b>law of large numbers</b>.<br><br>Tap: continuous run on or off.",
                 st_efron_short: "FUN FACTS",
                 st_efron_title: "Fun facts",
-                st_efron_body: "Dice have existed for at least $5000$ years. The statistician <b>Bradley Efron</b> invented dice that beat each other in a circle: A beats B, B beats C, C beats D and D beats A again. Whoever has to choose first loses in the long run.<br><br>Tap an arrow and see why.",
+                st_efron_body: "Tap an arrow and see why.",
                 st_zwilling_short: "TWIN TASK",
                 st_zwilling_title: "Your turn: the twin task",
                 st_zwilling_body: "Paul's die: $1, 1, 5, 5, 6, 6$<br>Jonas's die: $2, 2, 2, 4, 4, 4$<br><br><b>a)</b> Draw the tree diagram and write the probability on every branch.<br><b>b)</b> How likely is it that Paul wins?<br><br>Tip: go through the recipe step by step. Then <b>show solution</b> on the left.",

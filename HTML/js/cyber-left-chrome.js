@@ -24,6 +24,36 @@
     'use strict';
 
     /**
+     * Lab shown on a deck slide (iframe inside .labframe, also in the presenter view clones):
+     * the mini-rail is always gone there (Doc, 17.09.2026) - the deck has its own navigation.
+     * The rail column collapses to 0 and the sidebar sits flush at the left edge.
+     * The coach box rides the sidebar's scale there: its text is a fixed 16 px, and once the lab takes the
+     * whole slide the narrower frame shrinks the sidebar - the coach looked far too big (Doc, 17.09.2026).
+     */
+    var IN_DECK = (function () {
+        try {
+            var f = window.frameElement;
+            return !!(f && f.closest && f.closest('.labframe'));
+        } catch (e) {
+            return false; // cross-origin parent: not one of our decks
+        }
+    })();
+
+    function applyDeckLayout() {
+        if (!IN_DECK) return;
+        var root = document.documentElement;
+        root.classList.add('cyber-in-deck');
+        root.style.setProperty('--cyber-rail-w', '0px');
+        var rail = document.getElementById('mini-rail');
+        if (rail) rail.style.setProperty('display', 'none', 'important');
+        var panel = document.getElementById('side-panel');
+        if (panel) panel.style.setProperty('margin-left', '0', 'important'); // no rail border to overlap
+        var coach = document.getElementById('math-coach-box');
+        if (coach) coach.style.setProperty('zoom', 'var(--cyber-left-scale, 1)');
+    }
+    applyDeckLayout();
+
+    /**
      * Natural widths come from CSS custom properties defined in
      * cyber-lab-overrides.css (:root): --cyber-rail-w, --cyber-sidebar-w.
      * We read them live so resizing the sidebar centrally propagates here
@@ -34,12 +64,15 @@
         var n = parseFloat(v);
         return Number.isFinite(n) && n > 0 ? n : fallback;
     }
+    function getRailWidth() {
+        return IN_DECK ? 0 : _cssPx('--cyber-rail-w', 66);
+    }
     function getNaturalExpanded() {
-        return _cssPx('--cyber-rail-w', 66) + _cssPx('--cyber-sidebar-w', 356);
+        return getRailWidth() + _cssPx('--cyber-sidebar-w', 356);
     }
     /** Rail-only width when SB collapsed — same rail track as expanded chrome (single --cyber-left-scale applies to both). */
     function getNaturalCollapsed() {
-        return _cssPx('--cyber-rail-w', 66);
+        return getRailWidth();
     }
     /**
      * Upper bound for the auto-fit scale: ensures the inner transform-scaled
@@ -162,6 +195,7 @@
         var rail = document.getElementById('mini-rail');
         var panel = document.getElementById('side-panel');
         if (!rail || !panel || document.getElementById('cyber-left-chrome')) return false;
+        applyDeckLayout(); // script loaded before the markup: rail/panel only exist now
 
         var outer = document.createElement('div');
         outer.id = 'cyber-left-chrome';

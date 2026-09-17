@@ -292,7 +292,7 @@ CyberI18n.translations.it = {
                 st_sim_body: "Lascia lanciare il computer: più turni, più la <b>frequenza relativa</b> di Lena si avvicina alla probabilità $\\frac{5}{9} \\approx 0{,}556$. È la <b>legge dei grandi numeri</b>.<br><br>Tocco: lanci continui sì o no.",
                 st_efron_short: "CURIOSITÀ",
                 st_efron_title: "Curiosità",
-                st_efron_body: "I dadi esistono da almeno $5000$ anni. Lo statistico <b>Bradley Efron</b> ha inventato dadi che si battono in cerchio: A batte B, B batte C, C batte D e D batte di nuovo A. Chi deve scegliere per primo, alla lunga perde.<br><br>Tocca una freccia e guarda perché.",
+                st_efron_body: "Tocca una freccia e guarda perché.",
                 st_zwilling_short: "ESERCIZIO GEMELLO",
                 st_zwilling_title: "Tocca a voi: l’esercizio gemello",
                 st_zwilling_body: "Dado di Paul: $1, 1, 5, 5, 6, 6$<br>Dado di Jonas: $2, 2, 2, 4, 4, 4$<br><br><b>a)</b> Disegnate il diagramma ad albero e scrivete la probabilità su ogni ramo.<br><b>b)</b> Qual è la probabilità che vinca Paul?<br><br>Consiglio: seguite la ricetta passo dopo passo. Poi a sinistra <b>mostra soluzione</b>.",

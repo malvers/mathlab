@@ -292,7 +292,7 @@ CyberI18n.translations.tr = {
                 st_sim_body: "Bilgisayar atsın: tur sayısı arttıkça Lena’nın <b>göreli sıklığı</b> $\\frac{5}{9} \\approx 0{,}556$ olasılığına yaklaşır. Bu <b>büyük sayılar yasasıdır</b>.<br><br>Dokun: sürekli atış açık ya da kapalı.",
                 st_efron_short: "İLGİNÇ BİLGİLER",
                 st_efron_title: "İlginç bilgiler",
-                st_efron_body: "Zarlar en az $5000$ yıldır var. İstatistikçi <b>Bradley Efron</b>, birbirini döngü halinde yenen zarlar icat etti: A, B’yi yener; B, C’yi; C, D’yi ve D yine A’yı. İlk seçmek zorunda olan uzun vadede kaybeder.<br><br>Bir oka dokun ve nedenini gör.",
+                st_efron_body: "Bir oka dokun ve nedenini gör.",
                 st_zwilling_short: "İKİZ GÖREV",
                 st_zwilling_title: "Sıra sizde: ikiz görev",
                 st_zwilling_body: "Paul’ün zarı: $1, 1, 5, 5, 6, 6$<br>Jonas’ın zarı: $2, 2, 2, 4, 4, 4$<br><br><b>a)</b> Ağaç diyagramını çizin ve her dala olasılığı yazın.<br><b>b)</b> Paul’ün kazanma olasılığı nedir?<br><br>İpucu: tarifi adım adım uygulayın. Sonra solda <b>çözümü göster</b>.",

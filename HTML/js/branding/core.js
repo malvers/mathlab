@@ -76,7 +76,10 @@
             //           with their apex pointing inward (legs open outward).
             const ENTER_FS_SVG = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4H20V10M4 14V20H10"/></svg>`;
             const EXIT_FS_SVG  = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4V10H20M10 20V14H4"/></svg>`;
-            const currentIcon = () => (document.fullscreenElement ? EXIT_FS_SVG : ENTER_FS_SVG);
+            // In a deck (window.CyberDeckLab, branding.js) the icon follows the slide-size state instead
+            const deckLab = window.CyberDeckLab;
+            const isFull = () => (deckLab ? deckLab.isFull() : !!document.fullscreenElement);
+            const currentIcon = () => (isFull() ? EXIT_FS_SVG : ENTER_FS_SVG);
 
             // Hide the fullscreen toggle inside the native Capacitor app — it is already
             // full-screen/immersive there, so the button is pointless. Browser keeps it.
@@ -84,7 +87,7 @@
 
             const container = document.createElement("div");
             container.className = "canvas-branding";
-            if (!isNativeApp) container.title = "Vollbild umschalten";
+            if (!isNativeApp) container.title = deckLab && deckLab.frame() ? "Lab auf Foliengröße umschalten" : "Vollbild umschalten";
             container.innerHTML = `
             <h1 id="branding-master-title">${isNativeApp ? "" : currentIcon()}${topLine}</h1>
             <div class="canvas-subtitle" id="branding-module-title">${bottomLine}</div>
@@ -95,13 +98,15 @@
                     this.toggleFullscreen();
                 });
 
-                // Swap icon when fullscreen state changes
-                document.addEventListener("fullscreenchange", () => {
+                // Swap icon when fullscreen (or, in a deck, slide-size) state changes
+                const swapIcon = () => {
                     const h1 = container.querySelector("#branding-master-title");
                     if (!h1) return;
                     const oldIcon = h1.querySelector(".canvas-branding-fs-icon");
                     if (oldIcon) oldIcon.outerHTML = currentIcon();
-                });
+                };
+                document.addEventListener("fullscreenchange", swapIcon);
+                window.addEventListener("deck-lab-full", swapIcon);
             }
 
             const anchor =
@@ -112,6 +117,7 @@
         },
 
         toggleFullscreen() {
+            if (window.CyberDeckLab && window.CyberDeckLab.frame()) return window.CyberDeckLab.toggle();
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(err => {
                     console.warn(`Fullscreen error: ${err.message}`);

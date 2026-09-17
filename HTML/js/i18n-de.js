@@ -292,7 +292,7 @@ CyberI18n.translations.de = {
                 st_sim_body: "Lass den Computer würfeln: Je mehr Runden, desto näher rückt Lenas <b>relative Häufigkeit</b> an die Wahrscheinlichkeit $\\frac{5}{9} \\approx 0{,}556$ heran. Das ist das <b>Gesetz der großen Zahlen</b>.<br><br>Tippen: Dauerlauf an oder aus.",
                 st_efron_short: "FUN FACTS",
                 st_efron_title: "Fun Facts",
-                st_efron_body: "Würfel gibt es seit mindestens $5000$ Jahren. Der Statistiker <b>Bradley Efron</b> erfand Würfel, die sich im Kreis schlagen: A schlägt B, B schlägt C, C schlägt D und D wieder A. Wer zuerst wählen muss, verliert auf Dauer.<br><br>Tippe einen Pfeil an und sieh nach, warum.",
+                st_efron_body: "Tippe einen Pfeil an und sieh nach, warum.",
                 st_zwilling_short: "ZWILLINGSAUFGABE",
                 st_zwilling_title: "Jetzt ihr: die Zwillingsaufgabe",
                 st_zwilling_body: "Pauls Würfel: $1, 1, 5, 5, 6, 6$<br>Jonas’ Würfel: $2, 2, 2, 4, 4, 4$<br><br><b>a)</b> Zeichnet das Baumdiagramm und schreibt an jeden Ast die Wahrscheinlichkeit.<br><b>b)</b> Wie groß ist die Wahrscheinlichkeit, dass Paul gewinnt?<br><br>Tipp: Geht das Rezept Schritt für Schritt durch. Dann links <b>Lösung zeigen</b>.",

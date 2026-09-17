@@ -292,7 +292,7 @@ CyberI18n.translations.es = {
                 st_sim_body: "Deja que el ordenador tire: cuantas más rondas, más se acerca la <b>frecuencia relativa</b> de Lena a la probabilidad $\\frac{5}{9} \\approx 0{,}556$. Es la <b>ley de los grandes números</b>.<br><br>Toque: modo continuo sí o no.",
                 st_efron_short: "CURIOSIDADES",
                 st_efron_title: "Curiosidades",
-                st_efron_body: "Los dados existen desde hace al menos $5000$ años. El estadístico <b>Bradley Efron</b> inventó dados que se ganan en círculo: A gana a B, B gana a C, C gana a D y D vuelve a ganar a A. Quien tiene que elegir primero pierde a la larga.<br><br>Toca una flecha y mira por qué.",
+                st_efron_body: "Toca una flecha y mira por qué.",
                 st_zwilling_short: "TAREA GEMELA",
                 st_zwilling_title: "Ahora vosotros: la tarea gemela",
                 st_zwilling_body: "Dado de Paul: $1, 1, 5, 5, 6, 6$<br>Dado de Jonas: $2, 2, 2, 4, 4, 4$<br><br><b>a)</b> Dibujad el diagrama de árbol y escribid la probabilidad en cada rama.<br><b>b)</b> ¿Qué probabilidad hay de que gane Paul?<br><br>Consejo: seguid la receta paso a paso. Después, a la izquierda, <b>mostrar solución</b>.",

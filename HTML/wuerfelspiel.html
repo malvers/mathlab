@@ -2050,7 +2050,7 @@
                 clips: seq('s22', 5),
                 onClip: c => { if (c === 's22-02') S.efron = 'AB'; else if (c === 's22-03') S.efron = 'DA'; },
                 title: 'Fun Facts',
-                body: 'Würfel gibt es seit mindestens $5000$ Jahren. Der Statistiker <b>Bradley Efron</b> erfand Würfel, die sich im Kreis schlagen: A schlägt B, B schlägt C, C schlägt D und D wieder A. Wer zuerst wählen muss, verliert auf Dauer.<br><br>Tippe einen Pfeil an und sieh nach, warum.'
+                body: 'Tippe einen Pfeil an und sieh nach, warum.'
             },
             {
                 id: 'zwilling', view: 'zwilling', short: 'ZWILLINGSAUFGABE', slide: 23, dice: 'zwilling',
@@ -2563,11 +2563,15 @@
             if (rect.width < 20 || rect.height < 20) return;
             const m = model();
             const V = VIEWS[viewKey()];
+            // Side by side reads better: the portrait design only wins when it grows clearly bigger
+            // (a phone), not by a hair - lab on a whole deck slide: 0.629 tall vs 0.622 wide (Doc, 17.09.2026)
+            const TALL_BONUS = 1.2;
             let best = null;
             stageRegions(rect).forEach(r => [false, true].forEach(tall => {
                 const sz = V.size(m, tall);
                 const sc = Math.min(r.w / sz.w, r.h / sz.h, 1.6);
-                if (!best || sc > best.sc + 0.001) best = { r, tall, sz, sc };
+                const score = tall ? sc / TALL_BONUS : sc;
+                if (!best || score > best.score + 0.001) best = { r, tall, sz, sc, score };
             }));
             const ox = best.r.x + (best.r.w - best.sz.w * best.sc) / 2;
             const oy = best.r.y + Math.max(0, (best.r.h - best.sz.h * best.sc) / 2);

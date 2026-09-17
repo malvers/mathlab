@@ -293,7 +293,7 @@ CyberI18n.translations.sw = {
                 st_sim_body: "Acha kompyuta irushe: kadiri raundi zinavyoongezeka, ndivyo <b>marudio linganishi</b> ya Lena yanavyokaribia uwezekano $\\frac{5}{9} \\approx 0.556$. Hiyo ndiyo <b>sheria ya namba kubwa</b>.<br><br>Gusa: mfululizo washa au zima.",
                 st_efron_short: "MAMBO YA KUVUTIA",
                 st_efron_title: "Mambo ya kuvutia",
-                st_efron_body: "Kete zimekuwepo kwa angalau miaka $5000$. Mtaalamu wa takwimu <b>Bradley Efron</b> alibuni kete zinazoshindana kwa mzunguko: A inashinda B, B inashinda C, C inashinda D na D inashinda A tena. Anayelazimika kuchagua kwanza hupoteza kwa muda mrefu.<br><br>Gusa mshale uone kwa nini.",
+                st_efron_body: "Gusa mshale uone kwa nini.",
                 st_zwilling_short: "ZOEZI PACHA",
                 st_zwilling_title: "Sasa ni zamu yenu: zoezi pacha",
                 st_zwilling_body: "Kete ya Paul: $1, 1, 5, 5, 6, 6$<br>Kete ya Jonas: $2, 2, 2, 4, 4, 4$<br><br><b>a)</b> Chora mchoro wa mti na uandike uwezekano kwenye kila tawi.<br><b>b)</b> Uwezekano wa Paul kushinda ni upi?<br><br>Kidokezo: fuateni mapishi hatua kwa hatua. Kisha kushoto <b>onyesha jibu</b>.",

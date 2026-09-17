@@ -15,6 +15,35 @@ function getBrandingOverlays() {
     return window.CyberBrandingOverlays || null;
 }
 
+/**
+ * Lab on a deck slide (iframe inside the deck's .labframe): the fullscreen icon grows the lab to the
+ * whole slide instead of the screen (Doc, 17.09.2026). The deck does the resizing - the lab asks with
+ * 'lab-slide-full' on its iframe element and hears back with 'deck-lab-full' on its own window.
+ * Shared by branding.js and branding/core.js.
+ */
+window.CyberDeckLab = {
+    frame() {
+        try {
+            const f = window.frameElement;
+            return f && f.closest ? f.closest('.labframe') : null;
+        } catch (e) {
+            return null; // cross-origin parent: not one of our decks
+        }
+    },
+    isFull() {
+        const fr = this.frame();
+        return fr ? fr.classList.contains('full') : !!document.fullscreenElement;
+    },
+    toggle() {
+        const f = window.frameElement;
+        f.dispatchEvent(new f.ownerDocument.defaultView.CustomEvent('lab-slide-full', { bubbles: true }));
+    },
+};
+// After the click the keys stay in the lab's iframe - so Esc shrinks the lab back from here, too
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && window.CyberDeckLab.frame() && window.CyberDeckLab.isFull()) window.CyberDeckLab.toggle();
+});
+
 /** Basename without .html (lowercase); pathname + href fallback for file:// and edge cases */
 function getBriefingModuleKey() {
     try {
@@ -445,14 +474,14 @@ const CyberBranding = {
         // Two diagonal corner brackets: TR+BL for ENTER, TL+BR for EXIT.
         const ENTER_FS_SVG = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4H20V10M4 14V20H10"/></svg>`;
         const EXIT_FS_SVG  = `<svg class="canvas-branding-fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4V10H20M10 20V14H4"/></svg>`;
-        const currentIcon = () => (document.fullscreenElement ? EXIT_FS_SVG : ENTER_FS_SVG);
+        const currentIcon = () => (window.CyberDeckLab.isFull() ? EXIT_FS_SVG : ENTER_FS_SVG);
 
         // Hide the fullscreen toggle inside the native Capacitor app — already immersive there.
         const isNativeApp = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform());
 
         const container = document.createElement('div');
         container.className = 'canvas-branding';
-        if (!isNativeApp) container.title = "Vollbild umschalten";
+        if (!isNativeApp) container.title = window.CyberDeckLab.frame() ? "Lab auf Foliengröße umschalten" : "Vollbild umschalten";
         container.innerHTML = `
             <h1 id="branding-master-title">${isNativeApp ? "" : currentIcon()}${topLine}</h1>
             <div class="canvas-subtitle" id="branding-module-title">${bottomLine}</div>
@@ -462,12 +491,14 @@ const CyberBranding = {
             container.addEventListener('click', (e) => {
                 this.toggleFullscreen();
             });
-            document.addEventListener('fullscreenchange', () => {
+            const swapIcon = () => {
                 const h1 = container.querySelector('#branding-master-title');
                 if (!h1) return;
                 const oldIcon = h1.querySelector('.canvas-branding-fs-icon');
                 if (oldIcon) oldIcon.outerHTML = currentIcon();
-            });
+            };
+            document.addEventListener('fullscreenchange', swapIcon);
+            window.addEventListener('deck-lab-full', swapIcon);
         }
         const anchor =
             document.getElementById('main-content') ||
@@ -477,6 +508,7 @@ const CyberBranding = {
     },
 
     toggleFullscreen() {
+        if (window.CyberDeckLab.frame()) return window.CyberDeckLab.toggle();
         const brandingCore = getBrandingCore();
         if (brandingCore && typeof brandingCore.toggleFullscreen === "function") {
             return brandingCore.toggleFullscreen.call(this);

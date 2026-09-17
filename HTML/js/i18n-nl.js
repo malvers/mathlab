@@ -326,7 +326,7 @@ Object.assign(CyberI18n.translations.nl.fractal, {
             st_sim_body: "Laat de computer gooien: hoe meer rondes, hoe dichter Lena’s <b>relatieve frequentie</b> bij de kans $\\frac{5}{9} \\approx 0{,}556$ komt. Dat is de <b>wet van de grote aantallen</b>.<br><br>Tik: doorlopend aan of uit.",
             st_efron_short: "WIST JE DAT?",
             st_efron_title: "Wist je dat?",
-            st_efron_body: "Dobbelstenen bestaan al minstens $5000$ jaar. De statisticus <b>Bradley Efron</b> bedacht dobbelstenen die elkaar in een kring verslaan: A verslaat B, B verslaat C, C verslaat D en D weer A. Wie als eerste moet kiezen, verliest op den duur.<br><br>Tik op een pijl en kijk waarom.",
+            st_efron_body: "Tik op een pijl en kijk waarom.",
             st_zwilling_short: "TWEELINGOPGAVE",
             st_zwilling_title: "Nu jullie: de tweelingopgave",
             st_zwilling_body: "Pauls dobbelsteen: $1, 1, 5, 5, 6, 6$<br>Jonas’ dobbelsteen: $2, 2, 2, 4, 4, 4$<br><br><b>a)</b> Teken het boomdiagram en schrijf bij elke tak de kans.<br><b>b)</b> Hoe groot is de kans dat Paul wint?<br><br>Tip: loop het recept stap voor stap door. Dan links <b>oplossing tonen</b>.",

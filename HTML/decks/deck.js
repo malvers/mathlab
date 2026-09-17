@@ -119,6 +119,32 @@ addEventListener('click', e => {
   nextB.onclick = () => jump(1);
   painted.push(() => { prevB.disabled = si === 0; nextB.disabled = si === slides.length - 1; });
 
+  // a lab's fullscreen icon on a slide: the lab takes the whole slide, not the screen (Doc, 17.09.2026).
+  // The lab asks with 'lab-slide-full' on its iframe; the lab keeps its own height (LAB_MIN_H) and rides a
+  // new scale, then hears back with 'deck-lab-full' to swap its icon. Esc or turning the slide shrinks it again.
+  function labFull(frame, on) {
+    const f = frame.querySelector('iframe');
+    if (!f || on === frame.classList.contains('full')) return;
+    if (on) f.dataset.small = f.style.cssText;
+    frame.classList.toggle('full', on);
+    if (on) {
+      const s = frame.clientHeight / parseFloat(f.style.height);
+      f.style.width = frame.clientWidth / s + 'px';
+      f.style.transform = 'scale(' + s + ')';
+    } else f.style.cssText = f.dataset.small;
+    try { f.contentWindow.dispatchEvent(new f.contentWindow.Event('deck-lab-full')); } catch (e) { }
+  }
+  document.addEventListener('lab-slide-full', function (e) {
+    const frame = e.target.closest && e.target.closest('.labframe');
+    if (frame) labFull(frame, !frame.classList.contains('full'));
+  });
+  addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') document.querySelectorAll('.labframe.full').forEach(fr => labFull(fr, false));
+  });
+  painted.push(() => slides.forEach((s, i) => {
+    if (i !== si) s.querySelectorAll('.labframe.full').forEach(fr => labFull(fr, false));
+  }));
+
   // "?" right of the triangles: all keys of the deck (Doc, 17.09.2026: "zeig darauf ein Help O - Overview etc.")
   const helpB = document.createElement('button');
   helpB.id = 'nav-help'; helpB.type = 'button'; helpB.textContent = '?';
