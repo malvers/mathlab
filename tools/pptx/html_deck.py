@@ -38,6 +38,8 @@ from design_lib import (INK, BODY, MUTED, STROKE, CARD, CODE_BG, CODE_INK, CODE_
 OUT_DIR = os.path.join(HERE, "..", "..", "HTML", "decks")
 PREFIX = ""               # set by --prefix on the command line, see __main__
 LAB_MIN_H = 640.0         # labs warn below 980x620 - give them a window that clears it
+LAB_NOTE_Y = 126.0        # a lab's note sits right under the rules and the lab takes the room below, down to 496:
+                          # Doc raised the Würfelspiel lab to this in the editor (17.09.2026), 18.09.: "Lab höher"
 FRAME_ZOOM = 2.0          # live frames render twice as large and shrink back: sharp on a big screen
 KATEX = "../morpheus/vendor/katex"
 
@@ -383,7 +385,7 @@ class HtmlDeck:
         self._slide("content", '<h3>%s</h3><div class="rules"></div>%s%s'
                     % (markup(title), body, table))
 
-    def lab(self, title, src, lines=None, note="", bottom=486.0):
+    def lab(self, title, src, lines=None, note="", bottom=496.0):
         """A Mathe-Labor page inside the slide - the thing PowerPoint cannot do.
         `src` is relative to the site root, e.g. "binomischeslabor.html". The lab is
         laid out wide (LAB_W) and scaled into the content column, so its own
@@ -391,12 +393,12 @@ class HtmlDeck:
         if not note and lines:
             first = lines[0]
             note = first[0] if isinstance(first, tuple) else first
-        top = BODY_Y + (26.0 if note else 0.0)
+        top = LAB_NOTE_Y + (24.0 if note else 0.0)
         # the lab gets a landscape window of its own, then rides a scale into the
         # content column - below 980x620 the labs put a warning over themselves
         scale = (bottom - top) / LAB_MIN_H
         lab_w = -(-CONTENT_W / scale * 100 // 1) / 100.0   # up to 0.01 px: %g cut it to 815.99 px, a hairline showed
-        cap = ('<p class="labnote" style="top:%gpx">%s</p>' % (BODY_Y, markup(note))
+        cap = ('<p class="labnote" style="top:%gpx">%s</p>' % (LAB_NOTE_Y, markup(note))
                if note else "")
         self._slide("content lab", """
       <h3>%s</h3><div class="rules"></div>%s
@@ -520,6 +522,7 @@ CSS = """
   --codebg:#__CODEBG__; --codeink:#__CODEINK__; --codemuted:#__CODEMUTED__;
   --greetbg:#__GREETBG__;
   --night:#071630;   /* the big backgrounds around the slides: page, presenter, overview (Doc, 17.09.2026: "das Blau ist gut") */
+  --veil:linear-gradient(90deg,rgba(3,16,28,.9) 0%,rgba(3,16,28,.74) 42%,rgba(3,16,28,0) 70%);   /* title over the stream */
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:var(--night);overflow:hidden}
@@ -594,8 +597,18 @@ p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:
 .card.right p.col.l1::before{background:var(--green)}
 
 /* --- title -------------------------------------------------------------- */
+/* night: code flows through dark stone and pours down a cliff (Doc, 18.09.2026: "HG Folien first page"). Live from
+   deck-flow.js in the beamer window; everywhere else the still picture it renders (presenter, overview, offline,
+   no WebGL). The veil keeps the title readable - the same veil lies over the live canvas. */
+.slide.title{background:var(--veil),url(img/flow-title.webp) center/cover no-repeat,#03101c}
+.slide.title::before{z-index:1;background:rgba(230,236,248,.14)}
+.slide.title .foot,.slide.title .pageno{color:var(--codemuted)}
+.flow{position:absolute;inset:0}
+.flow canvas{display:block;width:100%;height:100%;opacity:0;transition:opacity .8s}
+.flow canvas.on{opacity:1}
+.flow::after{content:"";position:absolute;inset:0;background:var(--veil)}
 .slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
-  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+  border:1px solid rgba(230,236,248,.16);border-radius:50%}
 .slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
   border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
 .slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
@@ -603,11 +616,11 @@ p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:
 .slide.title .title-bar{position:absolute;left:__M__px;top:214px;width:64px;height:4px;
   background:var(--orange)}
 .slide.title .kicker{position:absolute;left:__M__px;top:232px;font-size:12px;font-weight:700;
-  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+  color:#E8604C;letter-spacing:3px;text-transform:uppercase}   /* the red, lifted for the night */
 .slide.title h1{position:absolute;left:__M__px;top:262px;width:600px;font-size:44px;
-  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+  font-weight:700;color:var(--codeink);line-height:1.08;letter-spacing:-.5px}
 .slide.title .sub{position:absolute;left:__M__px;top:392px;width:600px;font-size:19px;
-  color:var(--muted);line-height:1.3}
+  color:#AFBCD8;line-height:1.3}
 
 /* --- chapter ------------------------------------------------------------ */
 .slide.chapter .chapter-bar{position:absolute;left:__M__px;top:188px;width:4px;height:128px;
@@ -1055,6 +1068,10 @@ function standIns(node) {
 // ?presenter: this window is the presenter view on the laptop (see PRES_JS at the end)
 const PRESENTER = /[?&]presenter(&|=|$)/.test(location.search);
 if (PRESENTER) document.documentElement.classList.add('presenter');
+// the title slide's night runs live in the beamer window only (deck-flow.js, Doc 18.09.2026) - the presenter keeps
+// the still picture from deck.css: one WebGL scene is enough. Offline or without WebGL the picture simply stays.
+if (!PRESENTER && document.querySelector('.slide.title'))
+  import('./deck-flow.js').then(function (m) { m.start(document.querySelector('.slide.title')); }).catch(function () { });
 // slide and click survive a reload (Doc, 17.09.2026: "persist slide and click") - per tab, so a new tab still
 // starts at the beginning; a #7 in the URL wins
 const KEEP = 'deck-pos:' + location.pathname + (PRESENTER ? ':presenter' : '');
@@ -1311,6 +1328,7 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
       thumb.className = 'ov-thumb';
       const c = s.cloneNode(true);                     // a copy, fully built, without ids
       c.querySelectorAll('[id]').forEach(function (e) { e.removeAttribute('id'); });
+      c.querySelectorAll('.flow').forEach(function (e) { e.remove(); });   // an empty canvas: the still picture shows
       if (PRESENTER) standIns(c);                      // the presenter runs its current slide live already
       c.classList.add('on');
       thumb.appendChild(c);

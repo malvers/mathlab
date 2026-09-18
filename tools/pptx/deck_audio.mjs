@@ -26,6 +26,10 @@ const dir = ROOT + 'HTML/decks/audio/' + N.deck + '/';
 mkdirSync(dir, { recursive: true });
 const done = existsSync(dir + 'texts.json') ? JSON.parse(readFileSync(dir + 'texts.json', 'utf8')) : {};
 const pad = n => String(n).padStart(2, '0');
+// Google's per-minute limit counts the whole project: a burst from here once locked Solita's voice for everyone,
+// DocPad and live decks included (16.09.2026, HTTP 429). Serial with 5 s between requests stays clear of it.
+const GAP_MS = 5000;
+const sleep = ms => new Promise(ok => setTimeout(ok, ms));
 
 let n = 0, sent = 0;
 for (const [s, parts] of Object.entries(N.slides)) {
@@ -35,12 +39,20 @@ for (const [s, parts] of Object.entries(N.slides)) {
     const text = fix(parts[k]);
     n++;
     if (done[name] === text && existsSync(dir + name)) continue;
-    const r = await fetch(TTS, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', apikey: SB, Authorization: 'Bearer ' + SB },
-      body: JSON.stringify({ text, voice: VOICE, languageCode: CODE, speakingRate: 1.0 }),
-    });
-    const j = await r.json();
+    if (sent) await sleep(GAP_MS);
+    // a gateway hiccup answers with an HTML page instead of JSON (18.09.2026, clip 47 of 65): one more try after 20 s
+    let r, j;
+    for (let tries = 0; tries < 2; tries++) {
+      if (tries) await sleep(20000);
+      r = await fetch(TTS, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: SB, Authorization: 'Bearer ' + SB },
+        body: JSON.stringify({ text, voice: VOICE, languageCode: CODE, speakingRate: 1.0 }),
+      });
+      const body = await r.text();
+      try { j = JSON.parse(body); } catch (e) { j = { notJson: body.slice(0, 120) }; }
+      if (j.audioContent || r.status === 429) break;   // 429: stop and wait a minute, a retry would only make it worse
+    }
     if (!j.audioContent) throw new Error(name + ': HTTP ' + r.status + ' ' + JSON.stringify(j).slice(0, 200));
     writeFileSync(dir + name, Buffer.from(j.audioContent, 'base64'));
     done[name] = text;

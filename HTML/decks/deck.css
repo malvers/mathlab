@@ -6,6 +6,7 @@
   --codebg:#0E244E; --codeink:#E6ECF8; --codemuted:#7E8FB5;
   --greetbg:#000028;
   --night:#071630;   /* the big backgrounds around the slides: page, presenter, overview (Doc, 17.09.2026: "das Blau ist gut") */
+  --veil:linear-gradient(90deg,rgba(3,16,28,.9) 0%,rgba(3,16,28,.74) 42%,rgba(3,16,28,0) 70%);   /* title over the stream */
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:var(--night);overflow:hidden}
@@ -80,8 +81,18 @@ p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:
 .card.right p.col.l1::before{background:var(--green)}
 
 /* --- title -------------------------------------------------------------- */
+/* night: code flows through dark stone and pours down a cliff (Doc, 18.09.2026: "HG Folien first page"). Live from
+   deck-flow.js in the beamer window; everywhere else the still picture it renders (presenter, overview, offline,
+   no WebGL). The veil keeps the title readable - the same veil lies over the live canvas. */
+.slide.title{background:var(--veil),url(img/flow-title.webp) center/cover no-repeat,#03101c}
+.slide.title::before{z-index:1;background:rgba(230,236,248,.14)}
+.slide.title .foot,.slide.title .pageno{color:var(--codemuted)}
+.flow{position:absolute;inset:0}
+.flow canvas{display:block;width:100%;height:100%;opacity:0;transition:opacity .8s}
+.flow canvas.on{opacity:1}
+.flow::after{content:"";position:absolute;inset:0;background:var(--veil)}
 .slide.title .ring{position:absolute;left:690px;top:96px;width:340px;height:340px;
-  border:1px solid rgba(14,36,78,.14);border-radius:50%}
+  border:1px solid rgba(230,236,248,.16);border-radius:50%}
 .slide.title .ring-inner{position:absolute;left:762px;top:168px;width:196px;height:196px;
   border:1.5px solid rgba(245,194,66,.7);border-radius:50%}
 .slide.title .orbit-dot{position:absolute;left:848px;top:158px;width:20px;height:20px;
@@ -89,11 +100,11 @@ p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:
 .slide.title .title-bar{position:absolute;left:72px;top:214px;width:64px;height:4px;
   background:var(--orange)}
 .slide.title .kicker{position:absolute;left:72px;top:232px;font-size:12px;font-weight:700;
-  color:var(--red);letter-spacing:3px;text-transform:uppercase}
+  color:#E8604C;letter-spacing:3px;text-transform:uppercase}   /* the red, lifted for the night */
 .slide.title h1{position:absolute;left:72px;top:262px;width:600px;font-size:44px;
-  font-weight:700;color:var(--ink);line-height:1.08;letter-spacing:-.5px}
+  font-weight:700;color:var(--codeink);line-height:1.08;letter-spacing:-.5px}
 .slide.title .sub{position:absolute;left:72px;top:392px;width:600px;font-size:19px;
-  color:var(--muted);line-height:1.3}
+  color:#AFBCD8;line-height:1.3}
 
 /* --- chapter ------------------------------------------------------------ */
 .slide.chapter .chapter-bar{position:absolute;left:72px;top:188px;width:4px;height:128px;

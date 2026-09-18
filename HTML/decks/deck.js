@@ -45,6 +45,10 @@ function standIns(node) {
 // ?presenter: this window is the presenter view on the laptop (see PRES_JS at the end)
 const PRESENTER = /[?&]presenter(&|=|$)/.test(location.search);
 if (PRESENTER) document.documentElement.classList.add('presenter');
+// the title slide's night runs live in the beamer window only (deck-flow.js, Doc 18.09.2026) - the presenter keeps
+// the still picture from deck.css: one WebGL scene is enough. Offline or without WebGL the picture simply stays.
+if (!PRESENTER && document.querySelector('.slide.title'))
+  import('./deck-flow.js').then(function (m) { m.start(document.querySelector('.slide.title')); }).catch(function () { });
 // slide and click survive a reload (Doc, 17.09.2026: "persist slide and click") - per tab, so a new tab still
 // starts at the beginning; a #7 in the URL wins
 const KEEP = 'deck-pos:' + location.pathname + (PRESENTER ? ':presenter' : '');
@@ -301,6 +305,7 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
       thumb.className = 'ov-thumb';
       const c = s.cloneNode(true);                     // a copy, fully built, without ids
       c.querySelectorAll('[id]').forEach(function (e) { e.removeAttribute('id'); });
+      c.querySelectorAll('.flow').forEach(function (e) { e.remove(); });   // an empty canvas: the still picture shows
       if (PRESENTER) standIns(c);                      // the presenter runs its current slide live already
       c.classList.add('on');
       thumb.appendChild(c);

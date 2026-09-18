@@ -307,12 +307,14 @@ FIG_FREE = write("sechseck-31", free, "Sechseck mit einem verschobenen Punkt, 31
 
 
 # four points make exactly one crossing
-def four(c, cx, cy, R, angles, pick):
+def four(c, cx, cy, R, angles, pick, mark=False):
     arr = arrangement(angles)
     V = arr["V"]
     for i, j in arr["chords"]:
         c.line(cx + R * V[i][0], cy + R * V[i][1], cx + R * V[j][0], cy + R * V[j][1], S.MUTED, 1.0,
                opacity=0.45)
+    if mark:                              # the free hexagon's middle triangle, filled like on the 31 slide
+        c.path(face_d(arr, middle_triangle(arr), cx, cy, R), stroke=S.RED, width=1.4, fill=S.ORANGE)
     c.raw('<circle cx="%s" cy="%s" r="%s" fill="none" stroke="%s" stroke-width="1.8"/>'
           % (S.fmt(cx), S.fmt(cy), S.fmt(R), S.INK))
     a, b, p, q = sorted(pick, key=lambda i: arr["ang"][i])
@@ -333,7 +335,10 @@ def four(c, cx, cy, R, angles, pick):
 
 vier = S.Canvas(816, 330)
 four(vier, 208, 150, 118, [math.radians(d) for d in (-80, 10, 120, 200)], {0, 1, 2, 3})
-four(vier, 608, 150, 118, [math.radians(d) for d in (-95, -35, 30, 95, 160, 215)], {0, 2, 3, 5})
+# the six points are the free hexagon of the 31 slide - an almost regular one looked like a slip of the pen (Doc,
+# 18.09.2026: "sieht unregelmäßig aus"). The red chords are two of its long diagonals: their crossing is a corner
+# of the middle triangle, whose three corners belong to three different sets of four points.
+four(vier, 608, 150, 118, FREE6, {0, 1, 3, 4}, mark=True)
 vier.text(208, 305, "4 Punkte: genau 1 Kreuzung", 17, S.INK)
 vier.text(608, 305, "irgendwelche 4 von 6 Punkten: wieder 1", 17, S.INK)
 FIG_VIER = write("vier-punkte", vier, "Vier Punkte bilden ein Viereck, seine zwei Diagonalen kreuzen sich genau einmal")
@@ -360,10 +365,12 @@ d = Deck("kreisteilung.pptx")
 d.title("Informatik — Klasse 9", "1, 2, 4, 8, 16 … ?",
         "Warum fünf bestandene Tests noch nichts beweisen")
 d.summary("Titel: 1, 2, 4, 8, 16 ... ? Das Kreisteilungsproblem - warum fünf bestandene Tests noch nichts beweisen")
+d.say("Hallo, ich bin Solita. Heute geht es um ein Rätsel mit Punkten auf einem Kreis. Es sieht ganz einfach aus — aber es hat eine Falle. Am Ende wisst ihr, warum fünf bestandene Tests noch nichts beweisen.")
 
 # ---------------------------------------------------------------- Kapitel 01
 d.chapter(1, "Das Rätsel", "Punkte auf einem Kreis, alle miteinander verbunden")
 d.summary("Kapitel 1: Das Rätsel - Punkte auf einem Kreis, alle miteinander verbunden")
+d.say("Kapitel eins: Das Rätsel. Punkte auf einem Kreis, alle miteinander verbunden.")
 
 d.bullets("Die Spielregel", [
     ("Setzt **n Punkte** auf einen Kreis", 0),
@@ -373,9 +380,16 @@ d.bullets("Die Spielregel", [
     ("Ein Tipp: Nummeriert die Flächen beim Zählen, sonst zählt ihr doppelt", 0),
 ])
 d.summary("Spielregel: n Punkte auf einen Kreis, jeden mit jedem durch Sehnen verbinden, dann die Flächen zählen, in die die Kreisscheibe zerfällt")
+d.say("Zuerst die Spielregel.",
+      "Ihr setzt n Punkte auf einen Kreis.",
+      "Dann verbindet ihr jeden Punkt mit jedem. Diese Verbindungsstrecken heißen Sehnen.",
+      "Die Sehnen zerschneiden die Kreisscheibe in lauter Flächen.",
+      "Und die Frage lautet: Wie viele Flächen sind es bei n Punkten?",
+      "Ein Tipp: Nummeriert die Flächen beim Zählen. Sonst zählt ihr eine doppelt oder vergesst eine.")
 
 d.picture("Die ersten fünf Fälle", FIG_ROW)
 d.summary("Bild: n = 1 bis 5 Punkte ergeben 1, 2, 4, 8, 16 Flächen; bei n = 6 steht ein Fragezeichen")
+d.say("Hier sind die ersten fünf Fälle. Ein Punkt: noch keine Sehne, also eine Fläche. Zwei Punkte: eine Sehne, zwei Flächen. Drei Punkte: vier Flächen. Vier Punkte: acht. Und fünf Punkte: sechzehn Flächen. Bei sechs Punkten steht noch ein Fragezeichen.")
 
 d.bullets("Was kommt als Nächstes?", [
     ("1, 2, 4, 8, 16 — jedes Mal **verdoppelt**", 0),
@@ -384,16 +398,25 @@ d.bullets("Was kommt als Nächstes?", [
     ("Kleiner Hinweis: Es ist **nicht** 32", 0),
 ])
 d.summary("Die Vermutung liegt nahe: immer verdoppeln, also 32 bei 6 Punkten. Hinweis: Es ist nicht 32")
+d.say("Was kommt als Nächstes?",
+      "Eins, zwei, vier, acht, sechzehn — jedes Mal hat sich die Zahl verdoppelt.",
+      "Also kommt als Nächstes zweiunddreißig … oder?",
+      "Überlegt kurz: Würdet ihr darauf wetten? Sagt eure Zahl, bevor es weitergeht.",
+      "Ein kleiner Hinweis: Es ist nicht zweiunddreißig. Ich warte hier — klickt weiter, wenn ihr so weit seid.",
+      hold=True)   # the class bets first, the counting comes on a click
 
 # ---------------------------------------------------------------- Kapitel 02
 d.chapter(2, "Nachgezählt", "Sechs Punkte, zwei Ergebnisse")
 d.summary("Kapitel 2: Nachgezählt - sechs Punkte, zwei Ergebnisse")
+d.say("Kapitel zwei: Nachgezählt. Sechs Punkte — und zwei verschiedene Ergebnisse.")
 
 d.picture("Regelmäßiges Sechseck: 30 Flächen", FIG_SYM)
 d.summary("Regelmäßiges Sechseck: 15 Sehnen, die drei langen Diagonalen treffen sich alle im Mittelpunkt, nummeriert kommt man auf 30 Flächen - nicht 32, nicht einmal 31")
+d.say("Hier liegen sechs Punkte als regelmäßiges Sechseck, mit allen fünfzehn Sehnen. Die Flächen sind nummeriert — und man kommt auf dreißig. Nicht zweiunddreißig, nicht einmal einunddreißig. Schaut in die Mitte: Dort laufen drei Sehnen durch einen einzigen Punkt.")
 
 d.picture("Ein Punkt ein Stück verschoben: 31 Flächen", FIG_FREE)
 d.summary("Einen Punkt ein Stück verschoben: die drei langen Diagonalen treffen sich nicht mehr in einem Punkt, in der Mitte entsteht ein kleines neues Dreieck, jetzt sind es 31 Flächen")
+d.say("Jetzt verschieben wir einen einzigen Punkt ein kleines Stück. Die drei langen Diagonalen treffen sich nicht mehr in einem Punkt. In der Mitte entsteht ein winziges neues Dreieck — die Lupe zeigt es. Und damit sind es einunddreißig Flächen.")
 
 d.bullets("Was ist da passiert?", [
     ("Im regelmäßigen Sechseck laufen **drei Sehnen durch einen Punkt**", 0),
@@ -403,10 +426,17 @@ d.bullets("Was ist da passiert?", [
     ("Die Punkte liegen dann in **allgemeiner Lage**: nie drei Sehnen durch einen Punkt", 0),
 ])
 d.summary("Im regelmäßigen Sechseck gehen drei Sehnen durch einen Punkt; verschoben kreuzen sie sich an drei Stellen und bilden ein Dreieck = 31. Fläche. 31 ist das Maximum (allgemeine Lage: nie drei Sehnen durch einen Punkt), 32 wird es nie")
+d.say("Was ist da passiert?",
+      "Im regelmäßigen Sechseck laufen drei Sehnen durch einen einzigen Punkt.",
+      "Verschiebt man einen Punkt, kreuzen sich diese drei Sehnen an drei verschiedenen Stellen. Dazwischen entsteht ein kleines Dreieck.",
+      "Dieses Dreieck ist die einunddreißigste Fläche.",
+      "Mehr geht nicht: Einunddreißig ist das Maximum. Zweiunddreißig wird es nie.",
+      "Wenn nie drei Sehnen durch einen Punkt laufen, sagt man: Die Punkte liegen in allgemeiner Lage.")
 
 # ---------------------------------------------------------------- Kapitel 03
 d.chapter(3, "Warum 31?", "Zählen, ohne zu zählen")
 d.summary("Kapitel 3: Warum 31? Zählen, ohne zu zählen")
+d.say("Kapitel drei: Warum einunddreißig? Wir zählen, ohne zu zählen.")
 
 d.bullets("Jede Fläche hat einen Grund", [
     ("Der leere Kreis ist **1** Fläche", 0),
@@ -416,9 +446,16 @@ d.bullets("Jede Fläche hat einen Grund", [
     ("Bei 6 Punkten: 1 + 15 + 15 = **31**", 0),
 ])
 d.summary("Zählregel: Flächen = 1 + Sehnen + Kreuzungen, denn jede Sehne bringt 1 neue Fläche und 1 mehr pro Kreuzung. Bei 6 Punkten: 1 + 15 + 15 = 31")
+d.say("Jede Fläche hat einen Grund. Schauen wir, woher die Flächen kommen.",
+      "Der leere Kreis ist eine Fläche.",
+      "Zieht man eine Sehne, schneidet sie jede Fläche, durch die sie läuft, in zwei Teile.",
+      "Also bringt jede Sehne eine neue Fläche — und eine mehr für jede Kreuzung, durch die sie läuft.",
+      "Zusammen heißt das: Flächen gleich eins plus Sehnen plus Kreuzungen.",
+      "Bei sechs Punkten: eins plus fünfzehn plus fünfzehn — das sind einunddreißig.")
 
 d.picture("Jede Kreuzung gehört zu genau vier Punkten", FIG_VIER)
 d.summary("Bild: 4 Punkte bilden ein Viereck, seine zwei Diagonalen kreuzen sich genau einmal; aus 6 Punkten gibt jede Wahl von 4 Punkten genau eine Kreuzung, also 15 Kreuzungen")
+d.say("Und woher kommen die fünfzehn Kreuzungen? Links seht ihr: Vier Punkte auf dem Kreis bilden ein Viereck, und seine zwei Diagonalen kreuzen sich genau einmal. Rechts nehmen wir irgendwelche vier von sechs Punkten — wieder genau eine Kreuzung. Das kleine orange Dreieck in der Mitte zeigt es: Seine drei Ecken sind drei Kreuzungen, und sie gehören zu drei verschiedenen Vierergruppen. Aus sechs Punkten kann man fünfzehn Vierergruppen auswählen — also gibt es fünfzehn Kreuzungen.")
 
 rows = [["n", "Sehnen (Paare)", "Kreuzungen (Vierergruppen)", "Flächen = 1 + Sehnen + Kreuzungen"]]
 rows += [[str(n), str(comb(n, 2)), str(comb(n, 4)), str(flaechen(n))] for n in range(1, 9)]
@@ -427,10 +464,14 @@ d.table_top("Nachgerechnet", rows, [90, 190, 250, 286], [
     ("In Mathe schreibt man dafür $\\binom{n}{2}$ und $\\binom{n}{4}$ — gesprochen „n über 2“ und „n über 4“", 0),
 ], font_size=12, bold_cols=(0, 3), marks={6: TINT_ORANGE}, align=["c", "c", "c", "c"])
 d.summary("Tabelle n, Sehnen, Kreuzungen, Flächen: n=1: 0, 0, 1; n=2: 1, 0, 2; n=3: 3, 0, 4; n=4: 6, 1, 8; n=5: 10, 5, 16; n=6: 15, 15, 31; n=7: 21, 35, 57; n=8: 28, 70, 99. Sehnen = Paare = n über 2, Kreuzungen = Vierergruppen = n über 4")
+d.say("Hier ist alles nachgerechnet, von einem bis acht Punkten. Bei sechs Punkten: fünfzehn Sehnen, fünfzehn Kreuzungen, einunddreißig Flächen.",
+      "Sehnen sind Paare von Punkten. Kreuzungen sind Vierergruppen von Punkten.",
+      "In Mathe schreibt man dafür n über zwei und n über vier. Das zählt, wie viele Paare und wie viele Vierergruppen es gibt.")
 
 # ---------------------------------------------------------------- Kapitel 04
 d.chapter(4, "Und was hat das mit Informatik zu tun?", "Testen heißt: den Fehler suchen")
 d.summary("Kapitel 4: Und was hat das mit Informatik zu tun? Testen heißt: den Fehler suchen")
+d.say("Kapitel vier: Und was hat das mit Informatik zu tun? Testen heißt: den Fehler suchen.")
 
 py(d, "Zwei Programme, fünf gleiche Antworten", [
     "def verdoppeln(n):",
@@ -446,6 +487,7 @@ py(d, "Zwei Programme, fünf gleiche Antworten", [
     "    print(n, a, b, \"ok\" if a == b else \"FEHLER\")",
 ])
 d.summary("Python-Code: verdoppeln(n) = 2 hoch (n-1); flaechen(n) = 1 + n(n-1)/2 + n(n-1)(n-2)(n-3)/24; Schleife n = 1 bis 8 vergleicht beide und druckt ok oder FEHLER")
+d.say("Hier sind zwei kleine Programme. Das erste, verdoppeln, rechnet zwei hoch n minus eins — das ist die Vermutung: immer verdoppeln. Das zweite, Flächen, rechnet mit unserer Regel: eins plus Sehnen plus Kreuzungen. Die Schleife unten vergleicht beide für n von eins bis acht und schreibt jedes Mal okay oder Fehler.")
 
 rows = [["n", "verdoppeln(n)", "flaechen(n)", "Test"]]
 marks = {}
@@ -457,6 +499,8 @@ d.table_top("Die Ausgabe", rows, [120, 232, 232, 232], [
     ("Fünf Tests **grün** — und trotzdem ist „verdoppeln“ **falsch**", 0),
 ], font_size=12, bold_cols=(0,), mono_cols=(1, 2, 3), marks=marks, align=["c", "c", "c", "c"])
 d.summary("Ausgabe: n = 1 bis 5 ok (1, 2, 4, 8, 16 bei beiden), ab n = 6 FEHLER: 32 statt 31, 64 statt 57, 128 statt 99. Fünf grüne Tests, trotzdem ist verdoppeln falsch")
+d.say("Und das kommt heraus. Bei einem bis fünf Punkten liefern beide Programme dieselben Zahlen: eins, zwei, vier, acht, sechzehn. Fünfmal okay. Ab sechs Punkten aber: Fehler. Zweiunddreißig statt einunddreißig, vierundsechzig statt siebenundfünfzig, hundertachtundzwanzig statt neunundneunzig.",
+      "Fünf Tests grün — und trotzdem ist verdoppeln falsch.")
 
 d.bullets("Was lernen wir fürs Testen?", [
     ("Ein Programm, das **fünf Tests besteht**, kann beim sechsten trotzdem falsch sein", 0),
@@ -465,6 +509,11 @@ d.bullets("Was lernen wir fürs Testen?", [
     ("Und wer sicher sein will, braucht eine **Begründung** — wie die Zählregel von eben", 0),
 ])
 d.summary("Lehre fürs Testen: fünf bestandene Tests beweisen nichts; Dijkstra: Testen zeigt die Anwesenheit von Fehlern, nie ihre Abwesenheit; gute Tests suchen Grenzfälle und Sonderfälle; Sicherheit gibt nur eine Begründung")
+d.say("Was lernen wir daraus fürs Testen?",
+      "Ein Programm, das fünf Tests besteht, kann beim sechsten trotzdem falsch sein.",
+      "Der Informatiker Edsger Deikstra hat es so gesagt: Testen kann die Anwesenheit von Fehlern zeigen, aber nie ihre Abwesenheit.",
+      "Gute Tests suchen deshalb Grenzfälle und Sonderfälle. Hier wären das größere n — und symmetrische Punkte wie das regelmäßige Sechseck.",
+      "Und wer wirklich sicher sein will, braucht eine Begründung — so wie unsere Zählregel von eben.")   # Dijkstra, spelled as said
 
 d.bullets("Wie zählt das Labor die Flächen?", [
     ("Die Punkte sind **Winkel** auf dem Kreis, die Sehnen **Strecken** dazwischen", 0),
@@ -475,14 +524,22 @@ d.bullets("Wie zählt das Labor die Flächen?", [
     ("Dann läuft es um **jede Fläche einmal herum** und zählt — so stimmt auch die 30", 0),
 ])
 d.summary("So zählt das Labor: Punkte als Winkel, Sehnen als Strecken, Schnittpunkte je zweier Sehnen ausrechnen, gleiche Punkte zusammenlegen (Kommazahlen ungenau: 0.1 + 0.2 = 0.30000000000000004, gleich heißt näher als ein Milliardstel), dann um jede Fläche herumlaufen und zählen - so stimmt auch die 30")
+d.say("Wie zählt eigentlich das Labor die Flächen?",
+      "Die Punkte sind Winkel auf dem Kreis, und die Sehnen sind Strecken zwischen ihnen.",
+      "Für je zwei Sehnen rechnet es den Schnittpunkt aus.",
+      "Gleiche Punkte werden zusammengelegt. Aber Vorsicht: Kommazahlen sind im Computer nie ganz genau. Null Komma eins plus null Komma zwei ergibt nicht null Komma drei, sondern null Komma drei, dann ganz viele Nullen und am Ende eine Vier. Deshalb heißt gleich hier: näher als ein Milliardstel.",
+      "Dann läuft das Programm um jede Fläche einmal herum und zählt. So stimmt auch die Dreißig beim regelmäßigen Sechseck.")
 
 d.lab("Selbst ausprobieren", "kreisteilung.html",
       note="„Regelmäßig“ ergibt bei 6 Punkten 30. Zieht einen Punkt ein Stück — die Zahl springt auf 31.")
 d.summary("Labor Kreisteilung: n Punkte auf dem Kreis, regelmäßig oder in allgemeiner Lage, Punkte mit der Maus verschieben; das Zählwerk zeigt Sehnen, Schnittpunkte, Flächen und das Maximum")
+d.say("Jetzt seid ihr dran. Im Labor ergibt das regelmäßige Sechseck dreißig Flächen. Zieht einen Punkt ein kleines Stück zur Seite — und die Zahl springt auf einunddreißig. Probiert es aus und klickt weiter, wenn ihr fertig seid.",
+      hold=True)   # time to try the lab
 
 d.merksatz("Ein Muster, das fünfmal stimmt, ist noch kein Beweis. "
            "Tests finden Fehler — dass keine mehr da sind, zeigen sie nie.")
 d.summary("Merksatz: Ein Muster, das fünfmal stimmt, ist noch kein Beweis. Tests finden Fehler - dass keine mehr da sind, zeigen sie nie")
+d.say("Merkt euch: Ein Muster, das fünfmal stimmt, ist noch kein Beweis. Tests finden Fehler — dass keine mehr da sind, zeigen sie nie.")
 
 d.bullets("Fun Facts", [
     ("Das Rätsel heißt **Mosers Kreisproblem** — nach dem Mathematiker Leo Moser", 0),
@@ -492,6 +549,12 @@ d.bullets("Fun Facts", [
     ("Auf YouTube erklärt es der **Mathologer**: „The hardest ‚What comes next?‘“", 0),
 ])
 d.summary("Fun Facts: Mosers Kreisproblem nach Leo Moser; 1, 2, 4, 8, 16, 31, 57, 99 = Summe der ersten fünf Zahlen jeder Zeile im Pascalschen Dreieck; Formel für regelmäßige n-Ecke erst 1998 von Poonen und Rubinstein, mit Sonderfällen bis n teilbar durch 210; Quersummen-Folge 1, 2, 4, 8, 16, 23, 28, 38, 49; Mathologer-Video The hardest What comes next")
+d.say("Zum Schluss noch ein paar spannende Fakten.",
+      "Das Rätsel heißt Mosers Kreisproblem — nach dem Mathematiker Leo Moser.",
+      "Die Folge eins, zwei, vier, acht, sechzehn, einunddreißig, siebenundfünfzig, neunundneunzig steckt im Pascalschen Dreieck: Es ist die Summe der ersten fünf Zahlen jeder Zeile.",
+      "Für regelmäßige Vielecke haben Björn Punen und Michael Rubinstein erst neunzehnhundertachtundneunzig eine Formel gefunden — mit vielen Sonderfällen.",
+      "Ein anderer Anfang mit eins, zwei, vier, acht, sechzehn: Man zählt immer die Quersumme dazu. Dann geht es mit dreiundzwanzig, achtundzwanzig, achtunddreißig und neunundvierzig weiter.",
+      "Und auf YouTube erklärt es der Kanal Mäthologer — auf Englisch, mit wunderschönen Bildern.")   # Poonen, Mathologer: spelled as said
 
 d.bullets("Eure Aufgabe", [
     ("Zeichnet einen Kreis mit **5 Punkten**, verbindet alle und zählt nach: 16?", 0),
@@ -500,6 +563,12 @@ d.bullets("Eure Aufgabe", [
     ("Programmiert `flaechen(n)` und `verdoppeln(n)` bis n = 10 — ab welchem n ist der Unterschied größer als 100?", 0),
 ])
 d.summary("Aufgabe: 1. Kreis mit 5 Punkten zählen (16); 2. 6 unregelmäßige Punkte nummerieren bis 31; 3. regelmäßiges Sechseck: wo fehlt die 31. Fläche; 4. flaechen(n) und verdoppeln(n) bis n = 10 programmieren, ab welchem n ist der Unterschied größer als 100")
+d.say("Und jetzt eure Aufgabe.",
+      "Erstens: Zeichnet einen Kreis mit fünf Punkten, verbindet alle und zählt nach. Kommt ihr auf sechzehn?",
+      "Zweitens: Jetzt sechs Punkte, unregelmäßig verteilt. Nummeriert die Flächen, bis ihr bei einunddreißig seid.",
+      "Drittens: Sechs Punkte als regelmäßiges Sechseck. Wo fehlt die einunddreißigste Fläche?",
+      "Viertens: Programmiert Flächen und verdoppeln bis n gleich zehn. Ab welchem n ist der Unterschied größer als hundert? Wenn ihr fertig seid, geht es zur Lösung.",
+      hold=True)   # the solution comes only on a click
 
 d.bullets("Lösung zu Aufgabe 4", [
     ("Unterschiede: n = 6 → 1, n = 7 → 7, n = 8 → 29, n = 9 → 93, n = 10 → **256**", 0),
@@ -507,5 +576,9 @@ d.bullets("Lösung zu Aufgabe 4", [
     ("Die 256 kommt also doch — nur bei 10 Punkten statt bei 9", 0),
 ])
 d.summary("Lösung Aufgabe 4: Unterschied verdoppeln minus flaechen: n=6: 1, n=7: 7, n=8: 29, n=9: 93, n=10: 256; ab n = 10 größer als 100 (512 gegen 256)")
+d.say("Hier ist die Lösung zu Aufgabe vier.",
+      "Die Unterschiede: Bei sechs Punkten ist es eins, bei sieben sieben, bei acht neunundzwanzig, bei neun dreiundneunzig — und bei zehn Punkten zweihundertsechsundfünfzig.",
+      "Ab zehn Punkten ist der Unterschied also größer als hundert: fünfhundertzwölf gegen zweihundertsechsundfünfzig.",
+      "Die zweihundertsechsundfünfzig kommt also doch noch vor — nur bei zehn Punkten statt bei neun.")
 
 d.save()
