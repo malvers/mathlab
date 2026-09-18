@@ -34,13 +34,15 @@
             switchLabel: 'Klasse wechseln', artikel: 'der', vor: 'Klasse ',
             klassen: [['a', '9a'], ['b', '9b']],
             /* Talk dates by PLACE in the list - the Friday lessons of 9a and 9b
-               in Untis, one talk per lesson (Doc, 12.09.2026). 09.10. is
-               cancelled, then the autumn holidays; after Christmas the lessons
-               move to the morning, still on Fridays. Only the starting point:
-               Doc changes each date on the page, and his choice wins (META_PAGE). */
-            dates: ['2026-09-25', '2026-10-02', '2026-10-30', '2026-11-06', '2026-11-13',
-                    '2026-11-20', '2026-11-27', '2026-12-04', '2026-12-11', '2026-12-18',
-                    '2027-01-08', '2027-01-15'],
+               in Untis, one talk per lesson (Doc, 12.09.2026). Since 18.09.2026 all
+               talks start after the autumn holidays (Doc: "schiebe alle Vorträge auf
+               nach den Herbstferien"; 02.10. is the Leistungstest, 09.10. class trip).
+               After Christmas the lessons move to the morning, still on Fridays.
+               Only the starting point: Doc changes each date on the page, and his
+               choice wins (META_PAGE). */
+            dates: ['2026-10-30', '2026-11-06', '2026-11-13', '2026-11-20', '2026-11-27',
+                    '2026-12-04', '2026-12-11', '2026-12-18', '2027-01-08', '2027-01-15',
+                    '2027-01-22', '2027-01-29'],
             labels: { lb1: ['LB 1', 'b-green'], wb: ['Wahlbereich', 'b-teal'] },
             topics: [
                 { lb: 'lb1', title: 'Big Data im Alltag', sub: 'Welche Daten erzeugt dein Smartphone an einem einzigen Tag — und wer verdient damit Geld?' },
@@ -68,9 +70,10 @@
                joint list as well. */
             klassen: [['a', 'BGY26-1 + BGY26-2']],
             /* Talk dates by PLACE: two talks per Tuesday double lesson (one per
-               lesson), starting in week 40 (Doc, 15.09.2026). Doc's date wins. */
-            dates: twice(['2026-09-29', '2026-10-06', '2026-10-27', '2026-11-03', '2026-11-10',
-                          '2026-11-17', '2026-11-24']),
+               lesson), since 18.09.2026 starting after the autumn holidays (Doc:
+               "lass alle nach den Herbstferien beginnen"). Doc's date wins. */
+            dates: twice(['2026-10-27', '2026-11-03', '2026-11-10', '2026-11-17', '2026-11-24',
+                          '2026-12-01', '2026-12-08']),
             labels: { lb1: ['LB 1', 'b-orange'], lb2: ['LB 2', 'b-cyan'], lb3: ['LB 3', 'b-violet'], lb4: ['LB 4', 'b-teal'], wb: ['Wahlbereich', 'b-green'] },
             topics: [
                 { lb: 'lb1', title: 'Meilensteine der Rechentechnik', sub: 'Von Schickard und Zuse bis zum Rechenzentrum: Welche Idee war jeweils der eigentliche Sprung?' },
@@ -94,11 +97,11 @@
             sub: 'Lernbereich 1 \u201eInformatische Modellierung\u201c, Lernbereich 2 \u201eModellierung von Datenbanken\u201c, Lernbereich 3 \u201eAlgorithmen und Programme\u201c + Wahlbereich \u201eK\u00fcnstliche Intelligenz\u201c',
             switchLabel: 'Kurs wechseln',
             klassen: [['a', 'BGY25']],
-            /* Talk dates by PLACE: one lesson on Tuesday, one talk per lesson,
-               starting in week 40 (Doc, 15.09.2026). Doc's date on the page wins. */
-            dates: ['2026-09-29', '2026-10-06', '2026-10-27', '2026-11-03', '2026-11-10',
-                    '2026-11-17', '2026-11-24', '2026-12-01', '2026-12-08', '2026-12-15',
-                    '2026-12-22', '2027-01-05'],
+            /* Talk dates by PLACE: one lesson on Tuesday, one talk per lesson, since
+               18.09.2026 starting after the autumn holidays (Doc). Doc's date on the page wins. */
+            dates: ['2026-10-27', '2026-11-03', '2026-11-10', '2026-11-17', '2026-11-24',
+                    '2026-12-01', '2026-12-08', '2026-12-15', '2026-12-22', '2027-01-05',
+                    '2027-01-12', '2027-01-19'],
             labels: { lb1: ['LB 1', 'b-orange'], lb2: ['LB 2', 'b-cyan'], lb3: ['LB 3', 'b-violet'], wb: ['Wahlbereich', 'b-green'] },
             topics: [
                 { lb: 'lb1', title: 'Was ein Modell weglässt', sub: 'Wetter, Verkehr, Epidemie: dieselbe Wirklichkeit in drei Modellen — und die Entscheidung, die jeweils daran hängt.' },
@@ -122,10 +125,10 @@
             switchLabel: 'Kurs wechseln',
             klassen: [['a', 'BGY24']],
             /* Talk dates by PLACE: one lesson on Monday afternoon, one talk per
-               lesson, starting in week 40 (Doc, 15.09.2026). Doc's date wins. */
-            dates: ['2026-09-28', '2026-10-05', '2026-10-26', '2026-11-02', '2026-11-09',
-                    '2026-11-16', '2026-11-23', '2026-11-30', '2026-12-07', '2026-12-14',
-                    '2026-12-21', '2027-01-04'],
+               lesson, since 18.09.2026 starting after the autumn holidays (Doc). Doc's date wins. */
+            dates: ['2026-10-26', '2026-11-02', '2026-11-09', '2026-11-16', '2026-11-23',
+                    '2026-11-30', '2026-12-07', '2026-12-14', '2026-12-21', '2027-01-04',
+                    '2027-01-11', '2027-01-18'],
             labels: { lb3: ['LB 3', 'b-violet'], lb4: ['LB 4A', 'b-teal'], wb: ['Wahlbereich', 'b-green'] },
             topics: [
                 { lb: 'lb3', title: 'Vom ggT zum RSA-Schlüssel', sub: 'Der euklidische Algorithmus ist über 2300 Jahre alt — und steckt heute im Herzen jeder sicheren Verbindung. Wie hängt beides zusammen?' },
@@ -170,15 +173,18 @@
             klassen: [['a', 'FOS25-1'], ['b', 'FOS25-2']],
             /* Talk dates by PLACE, one list per Lerngruppe (key = the group key in
                ?g=): every group comes fortnightly for four lessons on its own day,
-               two talks per such day - one per double lesson - starting in week 40
-               (Doc, 15.09.2026). Taken from Untis; holidays and Buss- und Bettag
-               are already left out. Doc's date on the page still wins (META_PAGE). */
+               two talks per such day - one per double lesson (Doc, 15.09.2026).
+               Taken from Untis; holidays and Buss- und Bettag are already left out.
+               Since 18.09.2026 all talks start after the autumn holidays (Doc): each
+               group's one date before them is gone, one more at the end in the same
+               fortnight rhythm (over Christmas to the next one, as FOS25-1 already
+               had it). Doc's date on the page still wins (META_PAGE). */
             dates: {
-                'FOG25-1': twice(['2026-09-28', '2026-10-26', '2026-11-09', '2026-11-23', '2026-12-07']),
-                'FOG25-2_FOW25-2': twice(['2026-10-05', '2026-11-02', '2026-11-16', '2026-11-30', '2026-12-14']),
-                'FOS25-1': twice(['2026-10-07', '2026-11-04', '2026-12-02', '2026-12-16', '2027-01-13']),
-                'FOS25-2': twice(['2026-09-30', '2026-10-28', '2026-11-11', '2026-11-25', '2026-12-09']),
-                'FOW25-1': twice(['2026-09-29', '2026-10-27', '2026-11-10', '2026-11-24', '2026-12-08'])
+                'FOG25-1': twice(['2026-10-26', '2026-11-09', '2026-11-23', '2026-12-07', '2026-12-21']),
+                'FOG25-2_FOW25-2': twice(['2026-11-02', '2026-11-16', '2026-11-30', '2026-12-14', '2027-01-11']),
+                'FOS25-1': twice(['2026-11-04', '2026-12-02', '2026-12-16', '2027-01-13', '2027-01-27']),
+                'FOS25-2': twice(['2026-10-28', '2026-11-11', '2026-11-25', '2026-12-09', '2027-01-06']),
+                'FOW25-1': twice(['2026-10-27', '2026-11-10', '2026-11-24', '2026-12-08', '2026-12-22'])
             },
             labels: { lb1: ['LB 1', 'b-orange'], lb2: ['LB 2', 'b-cyan'], lb3: ['LB 3A', 'b-violet'], wb: ['Wahlbereich', 'b-green'] },
             topics: [
@@ -195,6 +201,19 @@
             ]
         }
     };
+    /* the built-in dates of a plan by place, for one Lerngruppe - one list for the
+       whole plan (9a/9b share their Fridays) or one per group */
+    function datesFor(def, klasse) {
+        const d = def && def.dates;
+        return (Array.isArray(d) ? d : (d && d[klasse])) || [];
+    }
+    /* Data mode (data-mode="data"): the SVP plan page loads this file only for the
+       talk dates and topics - svp-plan.js writes "Vortrag: 1 · Titel" into the week
+       of each talk (Doc, 18.09.2026). One source for both pages, no page is built. */
+    if (script && script.dataset.mode === 'data') {
+        window.SVP_VORTRAEGE = { PLANS: PLANS, arrange: arrange, datesFor: datesFor };
+        return;
+    }
     const PLAN_DEF = PLANS[PLAN] || PLANS.informatik9;
     const TOPICS = PLAN_DEF.topics;
 
@@ -1841,10 +1860,7 @@
        falling back to the built-in one. */
     function dateOf(pos) {
         if (Object.prototype.hasOwnProperty.call(meta.dates, pos)) return meta.dates[pos] || '';
-        /* one list for the whole plan (9a/9b share their Fridays) or one per Lerngruppe */
-        const d = PLAN_DEF.dates;
-        const own = Array.isArray(d) ? d : (d && d[KLASSE]);
-        return (own && own[pos]) || '';
+        return datesFor(PLAN_DEF, KLASSE)[pos] || '';
     }
 
     const WEEKDAY = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];

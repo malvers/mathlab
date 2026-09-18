@@ -514,6 +514,40 @@ tr.wk-edit .mat-block a.mat-pill:has(> .mat-ico) { padding-right: 26px; }
     min-height: 26px;
 }
 #plan-table .detail-row .sub-head-l { flex: 0 0 50%; min-width: 0; }
+/* "Vortrag: 1 · Titel" right of the tabs (svp-plan.js paintTalk) - the head then
+   becomes a row; the tabs keep their 26 px and their place on the grey line */
+#plan-table .detail-row .sub-head-l.has-talk { display: flex; align-items: center; }
+#plan-table .detail-row .sub-talk {
+    margin-left: 48px;           /* Doc, 18.09.2026: "ein Stück nach rechts", then "zu weit" at the title column */
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    color: var(--text);
+}
+#plan-table .detail-row .sub-talk b {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 400;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: rgb(235, 120, 105);
+}
+html.svp-light #plan-table .detail-row .sub-talk b { color: var(--ypsilon); }
+/* Laufband for a week with more than one talk (Doc, 18.09.2026): fills the rest of
+   the left half, runs right to left, stops under the mouse */
+#plan-table .detail-row .sub-talk.ticker { flex: 1 1 auto; text-overflow: clip; }
+#plan-table .detail-row .sub-talk-run {
+    display: inline-block;
+    animation: sub-talk-run 20s linear infinite;
+}
+#plan-table .detail-row .sub-talk-run > span { padding-right: 4em; }
+#plan-table .detail-row .sub-talk.ticker:hover .sub-talk-run { animation-play-state: paused; }
+@keyframes sub-talk-run { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+    #plan-table .detail-row .sub-talk-run { animation: none; }
+}
 /* Wie die linke Haelfte ein Flex-Kasten: sonst haengt die Beschriftung rechts
    als Inline-Element an einer Textgrundlinie, unter ihr kommt Zeilenraum dazu,
    und die graue Linie sitzt tiefer als links (Doc, 08.09.2026: "da ist die
