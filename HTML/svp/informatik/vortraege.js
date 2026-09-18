@@ -650,8 +650,9 @@
                 '<div class="vt-nr"' + (editing ? ' title="Ziehen, um die Reihenfolge zu ändern"' : '') +
                     '><span class="vt-nr-num">' + (pos + 1) + '</span></div>' +
                 '<div class="vt-topic">' +
-                    '<div class="vt-title"><span class="vt-title-text">' + esc(t.title) + '</span>' +
-                        dateHtml(i, pos) + '</div>' +
+                    /* date in front of the title (Doc, 18.09.2026: "das Datum vor die Überschrift") */
+                    '<div class="vt-title">' + dateHtml(i, pos) +
+                        '<span class="vt-title-text">' + esc(t.title) + '</span></div>' +
                     '<div class="vt-sub">' + esc(t.sub) + '</div>' +
                     '<div class="vt-grades"><span class="vt-grade-lbl">Bewerten</span>' +
                         ROLES.map(function (r) {
