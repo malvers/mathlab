@@ -80,6 +80,9 @@ RELOAD_JS = r"""// Live reload - only on Doc's machine: serve.py puts this into 
     const ask = document.getElementById('ask-panel');
     if (ask && !ask.hidden) return true;
     try { if (typeof narr !== 'undefined' && narr.playing) return true; } catch (e) { }
+    // any page can say "not now" without this file knowing it (filmkritik.html: a remark is being
+    // recorded or the film is running - a reload would lose both)
+    try { if (typeof window.__liveReloadBusy === 'function' && window.__liveReloadBusy()) return true; } catch (e) { }
     return false;
   }
   function check() {
