@@ -92,8 +92,10 @@ Nach der Online-Administration des Kompetenztests. Sitzt in der Zuordnungsliste 
 - **Kacheln | Liste** (Doc 18.09.: „gefällt mir sehr … haben wollen“): Schalter in der Leiste, Wahl pro
   Browser in `localStorage['svp-leistungstest-view']`, Standard Kacheln. Eine Kachel je Person
   (`#ltTiles`, `paintTile()`) aus denselben Daten wie die Zeilen (`control` + `tileRes`, gefüllt in
-  `paintControl` bzw. `paintResult`). Inhalt: Name oder Deckname, Deckname · Code, Zahl oder Punkte,
-  Zustand + Note + „N× verlassen“, Fortschrittsbalken. Klick öffnet dasselbe Detail wie eine Zeile
+  `paintControl` bzw. `paintResult`). Inhalt: Name oder Deckname, Deckname · Code, Zahl oder Punkte und
+  rechts daneben rot „N×“ (Tooltip „N× verlassen“), darunter Zustand + „Note n“, Fortschrittsbalken. „N×“ steht
+  bewusst NEBEN den Punkten: als drittes Element der Statuszeile brach es um und machte die Kachel höher als die
+  anderen (Doc 18.09.). Alle Kacheln sind gleich hoch (125 px gemessen). Klick öffnet dasselbe Detail wie eine Zeile
   (`pick()`/`clearSelection()`). Gedruckt wird immer die Liste.
 - **Farben** (Doc 18.09. abends): „läuft“ ist **cyan** (Kachel, Status-Spalte, Chip), damit Gelb frei ist für die
   Punktzahl. Abgegebene Kacheln (Rahmen, Punkte, Balken, per `--res`) und die Ergebnis-Spalte haben die Farbe
@@ -106,6 +108,15 @@ Nach der Online-Administration des Kompetenztests. Sitzt in der Zuordnungsliste 
   „schon abgegeben“ im Kind-Browser (`DONE_KEY`) löscht er nicht; zum Testen Inkognito-Fenster nehmen.
 - **Alle Zahlen** laufen über `CyberClock.digits` (das eine Ziffern-Widget). Im Druck: kein Blinken,
   keine Leiste.
+
+## Der Film „Die ganze Klasse im Blick“
+
+Pipeline in `videopipeline/mission-control/` (Drehbuch `HTML/drehbuch/mission-control.html`): `run1` TTS → `run2`
+EINE Bühnenseite `stage.html` mit Lehrer-Seite und Fon als iframes (beide per **zoom** verkleinert, nie transform:
+das macht Schrift weich und lässt das Fon unten ungezeichnet), eigener Cursor mit Schildern, acht Hintergrund-SuS,
+Herzschlag im Film 3 s, Abbruch per Mgmt-SQL mit Owner-JWT → `run3` Schnitt, Musik, Intro-Jubel am Ende → `run4`
+YouTube (nur auf ausdrückliches „hochladen“). `reshoot.sh` parkt GENII (Docs 21 inszenierte Abgaben) für den Dreh
+und holt sie per EXIT-Trap immer zurück. Vor dem Zeigen jeder Fassung einen 1:1-Ausschnitt prüfen.
 
 ## Grenzen (auch beim Original)
 
