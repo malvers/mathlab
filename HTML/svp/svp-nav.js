@@ -55,6 +55,9 @@
         ['punktetabelle.html?s=osgy', 'OS GY', 'b-grey', 'Notenspiegel Oberschule und Gymnasium'],
         ['bewertungsmatrix.html', 'Bewertungsmatrix', 'b-grey',
          'Bewertungsmatrix Vortrag - Coach- und Publikumsbogen'],
+        /* the live poll, host screen - same target as the bar icon on the SVP start page
+           (Doc, 18.09.2026: "wie komme ich zu den votes? … hier als vorletztes") */
+        ['../vote.html?host', 'Umfrage', 'b-grey', 'Umfrage - Live-Abstimmung 1 … 10'],
         /* Vorfuehrklasse for the Leistungstest demo (Doc, 10.09.2026) */
         ['genii.html', 'Demo GENII', 'b-grey', 'Vorführklasse GENII - Leistungstest und Sicherheitsarchitektur'],
         /* the lab lives one level up, in HTML/ - base + href resolves the '..' */
@@ -125,8 +128,10 @@
             [null, ['notes.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
                     { sub: 'Notenspiegel', hrefs: ['punktetabelle.html', 'punktetabelle.html?s=osgy'] },
                     '../fokus.html', 'bewertungsmatrix.html']],
-            /* Doc, 10.09.2026: the demo class last, below a divider */
-            [null, ['genii.html']]
+            /* Doc, 10.09.2026: the demo class last, below a divider; the poll just
+               above it as the second-to-last entry (18.09.2026) - the Bewertungsmatrix
+               keeps its place at the bottom of the tools */
+            [null, ['../vote.html?host', 'genii.html']]
         ], true, true]
     ];
 
