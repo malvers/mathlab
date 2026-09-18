@@ -739,12 +739,24 @@
     function sizeNrColumn() {
         const box = $('list');
         if (!box) return;
+        sizeDates(box);                           /* first: the date width decides where titles wrap */
         box.style.removeProperty('--vt-topic-h');
         let h = 0;
         box.querySelectorAll('.vt-topic').forEach(function (t) {
             h = Math.max(h, t.getBoundingClientRect().height);
         });
         if (h) box.style.setProperty('--vt-topic-h', Math.ceil(h) + 'px');
+    }
+
+    /* All date tags as wide as the widest on the page, so the titles after them
+       start in one column (Doc, 18.09.2026: "ja!" - weekday and digits made the
+       tags 63 to 85 px wide). Measured, not a fixed width: the pages differ. */
+    function sizeDates(box) {
+        const tags = box.querySelectorAll('.vt-date');
+        tags.forEach(function (d) { d.style.minWidth = ''; });
+        let w = 0;
+        tags.forEach(function (d) { w = Math.max(w, d.getBoundingClientRect().width); });
+        if (w) tags.forEach(function (d) { d.style.minWidth = Math.ceil(w) + 'px'; });
     }
 
     /* Orbitron may still be loading at first paint, and a badge measured in the

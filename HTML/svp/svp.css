@@ -3440,11 +3440,14 @@ body.form-preview #svp-form {
     font-size: 0.92rem;
     letter-spacing: 0.02em;
     display: flex;
-    align-items: center;
+    /* date first, title after it in its own column: a long title wraps inside
+       that column instead of dropping under the date (Doc, 18.09.2026) */
+    align-items: baseline;
     gap: 10px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
 
+.vt-title .vt-date { flex: none; }
 .vt-title-text { min-width: 4ch; }
 
 .vt-sub {
@@ -3518,6 +3521,8 @@ body.form-preview #svp-form {
     border: 1px solid var(--ypsilon);
     border-radius: 999px;
     white-space: nowrap;
+    text-align: center;          /* vortraege.js sizeDates() gives all tags the widest width */
+    box-sizing: border-box;
 }
 
 .vt-date.edit { cursor: pointer; }
