@@ -520,6 +520,13 @@ tr.wk-edit .mat-block a.mat-pill:has(> .mat-ico) { padding-right: 26px; }
 #plan-table .detail-row .sub-talk {
     margin-left: 48px;           /* Doc, 18.09.2026: "ein Stück nach rechts", then "zu weit" at the title column */
     min-width: 0;
+    /* Never let the line widen the table: a table cell grows to its content's
+       width in spite of overflow:hidden, and the ticker holds its text twice -
+       with the weeks open FOS 12 grew to 3685 px and the holiday rows sat off
+       centre (Doc, 18.09.2026: "bitte wieder zentriert"). inline-size containment
+       gives the box no width of its own; it takes the free space instead. */
+    contain: inline-size;
+    flex: 1 1 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -537,7 +544,7 @@ tr.wk-edit .mat-block a.mat-pill:has(> .mat-ico) { padding-right: 26px; }
 html.svp-light #plan-table .detail-row .sub-talk b { color: var(--ypsilon); }
 /* Laufband for a week with more than one talk (Doc, 18.09.2026): fills the rest of
    the left half, runs right to left, stops under the mouse */
-#plan-table .detail-row .sub-talk.ticker { flex: 1 1 auto; text-overflow: clip; }
+#plan-table .detail-row .sub-talk.ticker { text-overflow: clip; }
 #plan-table .detail-row .sub-talk-run {
     display: inline-block;
     animation: sub-talk-run 20s linear infinite;

@@ -3325,7 +3325,7 @@
         if (!btn) return;
         const anyOpen = !!document.querySelector('tr.detail-row.open');
         btn.textContent = anyOpen ? 'Wochen zu' : 'Wochen auf';
-        btn.title = anyOpen ? 'Alle Wochen zuklappen' : 'Alle Wochen aufklappen';
+        btn.title = anyOpen ? 'Alle Wochen zuklappen (W)' : 'Alle Wochen aufklappen (W)';
     }
 
     function syncOpenWeeks() {
@@ -5032,10 +5032,22 @@
     })();
 
     // Toolbar helper: expand/collapse all detail rows at once.
+    /* The label says what a click does (syncToggleAllLabel): one open week is
+       enough for "Wochen zu" - so one open week also means closing, not opening
+       the rest (it did the opposite of its label until 18.09.2026). */
     window.togglePlanDetails = function () {
         const rows = Array.from(document.querySelectorAll('tr.detail-row'));
-        setAllDetails(rows.some(r => !r.classList.contains('open')));
+        setAllDetails(!rows.some(r => r.classList.contains('open')));
     };
+    /* Doc, 18.09.2026: "gib mir auf W Wochen auf/zu" - the key does what the
+       toolbar button does; not while typing in a field or an edited cell */
+    document.addEventListener('keydown', function (e) {
+        if ((e.key !== 'w' && e.key !== 'W') || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+        const t = e.target;
+        if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+        e.preventDefault();
+        window.togglePlanDetails();
+    });
 
     /* Beim Laden koennen Wochen aus dem letzten Besuch offen sein - dann muss
        der Knopf gleich "Wochen zu" heissen, ohne dass jemand geklickt hat. */
