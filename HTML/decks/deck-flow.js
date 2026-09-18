@@ -337,12 +337,8 @@ function streamLights(P, uL, t) {
 }
 
 // ------------------------------------------------------------------ scene ---
-function makeWorld(canvas) {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance',
-                                             preserveDrawingBuffer: false });
-  renderer.setPixelRatio(1);
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+// the landscape itself: plain data, no WebGL - it outlives any number of contexts
+function buildScene() {
   const scene = new THREE.Scene();
   scene.background = BG;
   const R = rng(20260918);
@@ -351,6 +347,17 @@ function makeWorld(canvas) {
   const stream = buildStream(P, R);
   scene.add(blocks, stream.points);
   const camera = new THREE.PerspectiveCamera(34, 16 / 9, 0.5, 220);
+  return { scene, camera, P, blocks, stream };
+}
+
+// a WebGL context on one canvas, drawing the scene; release() hands the context back to the browser
+function attach(canvas, S) {
+  const { scene, camera, P, blocks, stream } = S;
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance',
+                                             preserveDrawingBuffer: false });
+  renderer.setPixelRatio(1);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
   const rt = new THREE.WebGLRenderTarget(16, 9, { type: THREE.HalfFloatType, samples: 2 });   // 4 cost 3 ms, the glow hides the difference
   const composer = new EffectComposer(renderer, rt);
   composer.addPass(new RenderPass(scene, camera));
@@ -380,70 +387,118 @@ function makeWorld(canvas) {
     stream.update(t);
     composer.render();
   }
-  return { renderer, size, draw };
+  function release() {
+    try { bloom.dispose(); composer.dispose(); renderer.dispose(); renderer.forceContextLoss(); } catch (e) { }
+  }
+  return { renderer, size, draw, release };
 }
 
 // ------------------------------------------------------------------- slide ---
+// Chrome keeps only about 16 WebGL contexts and takes the oldest away when a new one comes - with many decks, labs
+// and 3D dice open, that was this one: black, the still picture of the start, then the scene back ("nach 2-3 min
+// ein Break", Doc 18.09.2026). So a context exists only while the title slide is on screen and goes back 15 s
+// after it left; one taken away anyway fades to the still picture and a fresh one continues at the same moment.
+const RELEASE_MS = 15000;
+
 export function start(slide) {
   const host = document.createElement('div');
   host.className = 'flow';
   host.setAttribute('aria-hidden', 'true');
-  const canvas = document.createElement('canvas');
-  host.appendChild(canvas);
   slide.insertBefore(host, slide.firstChild);
-  let world;
-  try { world = makeWorld(canvas); } catch (e) { host.remove(); return null; }   // no WebGL: the still picture stays
+  const S = buildScene();
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let raf = 0, last = 0, t = 30, w = 0, h = 0;
+  const log = [];                       // what happened to the context, for __deckFlow.log
+  const note = what => { log.push(new Date().toLocaleTimeString('de-DE') + ' ' + what); if (log.length > 50) log.shift(); };
+  let gl = null, canvas = null, raf = 0, last = 0, t = 30, w = 0, h = 0, idle = 0, retry = 0;
+  function open() {
+    if (gl) return true;
+    const c = document.createElement('canvas');
+    c.addEventListener('webglcontextlost', lost, false);
+    host.appendChild(c);
+    try { gl = attach(c, S); } catch (e) { c.remove(); note('no WebGL: ' + e.message); return false; }   // the still picture stays
+    canvas = c; w = h = 0;
+    note('context opened');
+    return true;
+  }
+  function close() {
+    stop();
+    if (!gl) return;
+    const c = canvas;
+    gl.release(); gl = null; canvas = null;
+    c.remove();
+    note('context given back');
+  }
+  function lost(e) {
+    if (e.target !== canvas) return;    // our own release, or an old canvas
+    e.preventDefault();
+    stop();
+    const c = canvas;
+    gl = null; canvas = null;
+    c.classList.remove('on');           // fades out over the still picture instead of staying black
+    setTimeout(function () { c.remove(); }, 900);
+    note('context taken away by the browser');
+    clearTimeout(retry);
+    retry = setTimeout(wake, 1000);
+  }
+  function stop() {
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
+  }
   function fit() {
     const r = slide.getBoundingClientRect();
-    if (!r.width) return false;
+    if (!r.width || !gl) return false;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     let W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
     const k = Math.min(1, 1920 / W);   // a soft background: full HD is plenty, also on a Retina or 4K screen
     W = Math.round(W * k); H = Math.round(H * k);
-    if (W !== w || H !== h) { w = W; h = H; world.size(w, h); }
+    if (W !== w || H !== h) { w = W; h = H; gl.size(w, h); }
     return true;
   }
   function frame(now) {
     raf = requestAnimationFrame(frame);
     t += Math.min(0.05, (now - last) / 1000);
     last = now;
-    world.draw(t);
+    gl.draw(t);
     canvas.classList.add('on');
   }
   function wake() {
     const on = slide.classList.contains('on') && !document.hidden;
-    if (on && !raf) {
-      if (!fit()) return;
-      if (still) { world.draw(t); canvas.classList.add('on'); return; }
+    if (on) {
+      clearTimeout(idle); idle = 0;
+      if (raf) return;
+      if (!open() || !fit()) return;
+      if (still) { gl.draw(t); canvas.classList.add('on'); return; }
       last = performance.now();
       raf = requestAnimationFrame(frame);
-    } else if (!on && raf) {
-      cancelAnimationFrame(raf);
-      raf = 0;
+    } else {
+      stop();
+      if (gl && !idle) idle = setTimeout(function () { idle = 0; close(); }, RELEASE_MS);   // back within 15 s: still there
     }
   }
   new MutationObserver(wake).observe(slide, { attributes: true, attributeFilter: ['class'] });
   document.addEventListener('visibilitychange', wake);
-  addEventListener('resize', function () { if (raf || still) { fit(); if (still) world.draw(t); } });
+  addEventListener('resize', function () { if (raf || (still && gl)) { fit(); if (still) gl.draw(t); } });
   wake();
-  // the still picture for deck.css: __deckFlow.shot(1920, 1080) -> data URL (webp) of the scene at t
+  // debug: __deckFlow.shot(1920, 1080) -> data URL (webp) of the scene at t, the still picture for deck.css;
+  // __deckFlow.bench(n) -> ms per frame, GPU included (readPixels waits for it); __deckFlow.log -> the context's story
   window.__deckFlow = {
+    log: log,
     shot: function (W, H, at) {
-      world.size(W || 1920, H || 1080);
-      world.draw(at == null ? 30 : at);
+      if (!open()) return null;
+      gl.size(W || 1920, H || 1080);
+      gl.draw(at == null ? 30 : at);
       const url = canvas.toDataURL('image/webp', 0.86);
-      w = h = 0; fit();
+      w = h = 0;
+      if (!fit()) wake();
       return url;
     },
-    // ms per frame at the current size, GPU included (readPixels waits for it) - to see what a beamer laptop has to carry
     bench: function (n) {
-      const gl = world.renderer.getContext();
+      if (!open()) return -1;
+      const c = gl.renderer.getContext();
       const px = new Uint8Array(4);
-      n = n || 30; gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+      n = n || 30; c.readPixels(0, 0, 1, 1, c.RGBA, c.UNSIGNED_BYTE, px);
       const t0 = performance.now();
-      for (let i = 0; i < n; i++) { world.draw(t + i / 60); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); }
+      for (let i = 0; i < n; i++) { gl.draw(t + i / 60); c.readPixels(0, 0, 1, 1, c.RGBA, c.UNSIGNED_BYTE, px); }
       return +((performance.now() - t0) / n).toFixed(2);
     }
   };
