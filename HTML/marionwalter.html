@@ -46,16 +46,7 @@
 
         .mw-row.mw-miss .mw-val { color: #e06a5e; text-shadow: 0 0 10px rgba(176, 36, 24, 0.55); }
 
-        .mw-note {
-            margin-top: 9px;
-            font-size: 0.76rem;
-            line-height: 1.45;
-            color: #cfe0f5;
-            border-left: 2px solid rgba(245, 194, 66, 0.65);
-            padding-left: 9px;
-        }
-
-        .mw-note.mw-warn { border-left-color: #b02418; }
+        /* note text in cards: .lab-note / .lab-warn, central in js/cyber-lab-overrides.css */
 
         .mw-btns { display: flex; flex-wrap: wrap; gap: 7px; }
 
@@ -756,7 +747,7 @@
             const note = document.getElementById('mw-note');
             if (note) {
                 const marion = (S.n === 3 && S.k === 1);
-                note.className = 'mw-note' + (marion ? '' : ' mw-warn');
+                note.className = 'lab-note' + (marion ? '' : ' lab-warn');
                 note.innerHTML = marion
                     ? T('note_marion', 'Drittelung — der Satz von Marion Walter: das Sechseck hat <b>ein Zehntel</b> der Dreiecksfläche. Ziehe die Ecken: das Verhältnis rührt sich nicht.')
                     : T('note_other', 'Andere Teilung — der Zehntel ist weg. Zurück mit <b>1/3</b>.');
@@ -1097,7 +1088,7 @@
 
             CyberUI.createCard('ui-container', T('card_mode', 'Modus'), `
                 <div id="mw-mode-slot"></div>
-                <div class="mw-note">${T('hint_mode', 'Taste <b>p</b> schaltet zwischen Labor und Beweis um.')}</div>`);
+                <div class="lab-note">${T('hint_mode', 'Taste <b>p</b> schaltet zwischen Labor und Beweis um.')}</div>`);
             CyberUI.createRadioGroup('mw-mode-slot', null, [
                 { label: T('mode_labor', 'LABOR (AUSPROBIEREN)'), value: 'labor' },
                 { label: T('mode_beweis', 'BEWEIS (SCHRITT FÜR SCHRITT)'), value: 'beweis' }
@@ -1132,7 +1123,7 @@
                             <button class="cyber-btn" id="mw-right">${T('btn_right', 'Rechtwinklig')}</button>
                             <button class="cyber-btn" id="mw-rand">${T('btn_rand', 'Zufällig')}</button>
                         </div>
-                        <div class="mw-note">${T('hint_drag', 'Die Ecken A, B, C lassen sich mit der Maus ziehen — das Flächenverhältnis bleibt, weil affine Abbildungen Teil- und Flächenverhältnisse erhalten.')}</div>
+                        <div class="lab-note">${T('hint_drag', 'Die Ecken A, B, C lassen sich mit der Maus ziehen — das Flächenverhältnis bleibt, weil affine Abbildungen Teil- und Flächenverhältnisse erhalten.')}</div>
                     </div>`);
 
                 CyberUI.createCard('ui-container', T('card_div', 'Teilung der Seiten'), `
@@ -1156,7 +1147,7 @@
                         <div class="mw-btns">
                             <button class="cyber-btn" id="mw-third">${T('btn_third', 'Drittelung 1/3')}</button>
                         </div>
-                        <div class="mw-note">${T('hint_div', 'Jede Seite bekommt Punkte bei k/n und (n−k)/n, jeder wird mit der gegenüberliegenden Ecke verbunden. k/n = 1/3 ist Marion Walters Fall.')}</div>
+                        <div class="lab-note">${T('hint_div', 'Jede Seite bekommt Punkte bei k/n und (n−k)/n, jeder wird mit der gegenüberliegenden Ecke verbunden. k/n = 1/3 ist Marion Walters Fall.')}</div>
                     </div>`);
             }
 
@@ -1171,12 +1162,12 @@
                 </div>
                 <div class="mw-bar" id="mw-bar"></div>
                 <div class="mw-bar-note" id="mw-bar-note"></div>
-                <div class="mw-note" id="mw-note"></div>`);
+                <div class="lab-note" id="mw-note"></div>`);
 
             if (!proofOn()) {
                 CyberUI.createCard('ui-container', T('card_formula', 'Verallgemeinerung'), `
                     <div class="formula-box" id="mw-formula"></div>
-                    <div class="mw-note">${T('hint_formula', 'Auf dem rechtwinkligen Einheitsdreieck ausgerechnet — und weil Flächenverhältnisse affin invariant sind, gilt das Ergebnis für jedes Dreieck. n = 3, k = 1 liefert 2·1/(5·4) = 1/10.')}</div>`);
+                    <div class="lab-note">${T('hint_formula', 'Auf dem rechtwinkligen Einheitsdreieck ausgerechnet — und weil Flächenverhältnisse affin invariant sind, gilt das Ergebnis für jedes Dreieck. n = 3, k = 1 liefert 2·1/(5·4) = 1/10.')}</div>`);
             }
 
             CyberUI.createCard('ui-container', T('card_view', 'Anzeige'), `
@@ -1187,7 +1178,7 @@
                     <label class="cyber-checkbox-wrapper"><input type="checkbox" class="cyber-checkbox" id="mw-box-fill" checked> <span class="cyber-label">${T('v_fill', 'Sechseck füllen')}</span></label>
                     <label class="cyber-checkbox-wrapper"><input type="checkbox" class="cyber-checkbox" id="mw-box-cells"> <span class="cyber-label">${T('v_cells', 'Alle Teilflächen')}</span></label>
                 </div>
-                <div class="mw-note">${proofOn()
+                <div class="lab-note">${proofOn()
                     ? T('keys_proof', 'Tasten: <b>◀ ▶</b> blättern durch den Beweis, <b>p</b> zurück ins Labor, <b>f</b> Teilflächen, <b>h</b> Sechseck, <b>b</b> Beschriftung, <b>c</b> Cevianen.')
                     : T('keys', 'Tasten: <b>d</b> Drittelung, <b>g</b> gleichseitig, <b>w</b> rechtwinklig, <b>z</b> zufällig, <b>f</b> Teilflächen, <b>h</b> Sechseck, <b>b</b> Beschriftung, <b>c</b> Cevianen, Pfeile für n und k.')}</div>`);
 

@@ -42,16 +42,7 @@
 
         .kt-row.kt-miss .kt-val { color: #e06a5e; text-shadow: 0 0 10px rgba(176, 36, 24, 0.55); }
 
-        .kt-note {
-            margin-top: 9px;
-            font-size: 0.76rem;
-            line-height: 1.45;
-            color: #cfe0f5;
-            border-left: 2px solid rgba(245, 194, 66, 0.65);
-            padding-left: 9px;
-        }
-
-        .kt-note.kt-warn { border-left-color: #b02418; }
+        /* note text in cards: .lab-note / .lab-warn, central in js/cyber-lab-overrides.css */
 
         .kt-loss { display: flex; flex-direction: column; gap: 4px; margin: 7px 0; }
 
@@ -574,7 +565,7 @@
             if (row) row.className = 'kt-row ' + (hit ? 'kt-hit' : 'kt-miss');
             const note = document.getElementById('kt-note');
             if (note) {
-                note.className = 'kt-note' + (hit ? '' : ' kt-warn');
+                note.className = 'lab-note' + (hit ? '' : ' lab-warn');
                 if (hit) {
                     note.innerHTML = T('note_max', 'Allgemeine Lage: keine drei Sehnen durch einen Punkt — das Maximum ist erreicht.');
                 } else {
@@ -734,7 +725,7 @@
                         <button class="cyber-btn" id="kt-regular">${T('btn_regular', 'Regelmäßig')}</button>
                         <button class="cyber-btn" id="kt-jitter">${T('btn_general', 'Allgemeine Lage')}</button>
                     </div>
-                    <div class="kt-note">${T('hint_drag', 'Punkte lassen sich mit der Maus auf dem Kreis verschieben — damit sieht man den Sprung 30 → 31.')}</div>
+                    <div class="lab-note">${T('hint_drag', 'Punkte lassen sich mit der Maus auf dem Kreis verschieben — damit sieht man den Sprung 30 → 31.')}</div>
                 </div>`);
 
             CyberUI.createCard('ui-container', T('card_count', 'Zählwerk'), `
@@ -745,12 +736,12 @@
                     <div class="kt-row" id="kt-faces-row"><span class="kt-key">${T('c_faces', 'Flächen')}</span><span class="kt-val" id="kt-faces">-</span></div>
                     <div class="kt-row"><span class="kt-key">${T('c_max', 'maximal möglich')}</span><span class="kt-val" id="kt-max">-</span></div>
                 </div>
-                <div class="kt-note" id="kt-note"></div>`);
+                <div class="lab-note" id="kt-note"></div>`);
 
             CyberUI.createCard('ui-container', T('card_seq', 'Die Folge'), `
                 <div class="kt-seq" id="kt-seq"></div>
                 <div class="kt-formula" id="kt-formula"></div>
-                <div class="kt-note">${T('seq_note', '1, 2, 4, 8, 16 … und dann eben <b>31</b>, nicht 32.')}</div>`);
+                <div class="lab-note">${T('seq_note', '1, 2, 4, 8, 16 … und dann eben <b>31</b>, nicht 32.')}</div>`);
 
             CyberUI.createCard('ui-container', T('card_view', 'Anzeige'), `
                 <div style="display:flex; flex-direction:column; gap:9px;">

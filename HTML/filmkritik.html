@@ -17,22 +17,24 @@
     <link rel="stylesheet" href="js/lab-shell-minimal.css">
     <style>
         /* Only what the player needs - everything else comes from the central layout. */
-        #math-coach-box { left: 24px; top: 24px; max-width: calc(100% - 48px); }
-
         #stage-wrap {
             position: absolute;
             inset: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            /* the film sits at the top, the free space is below it (Doc, 18.09.2026: "schieb den movie hoch und
+               mach da unten Platz"); the 56px above it are the recording badge's place */
+            justify-content: flex-start;
             gap: 14px;
-            padding: 92px 24px 24px;
+            padding: 56px 24px 24px;
         }
 
         #film {
             max-width: 100%;
-            max-height: 100%;
+            /* bar (20) + text line (34) + two gaps (28) stay inside the stage - at 100% the text line fell out of
+               the window at the bottom */
+            max-height: calc(100% - 84px);
             border: 1px solid rgba(0, 210, 255, 0.35);
             border-radius: 10px;
             background: #06101f;
@@ -42,10 +44,12 @@
         /* Red frame and badge while a remark is being recorded */
         #stage-wrap.rec #film { border-color: rgb(176, 36, 24); box-shadow: 0 0 34px rgba(176, 36, 24, 0.55); }
 
+        /* Sits ABOVE the film, centred on it - never on the picture, it could hide what the remark is about
+           (Doc, 18.09.2026). placeOverlays() sets bottom/left from the film's box; these are the fallback. */
         #rec-badge {
             position: absolute;
-            top: 104px;
-            right: 36px;
+            top: 48px;
+            right: 24px;
             display: none;
             align-items: center;
             gap: 9px;
@@ -63,10 +67,62 @@
 
         @keyframes pulse { 50% { opacity: 0.25; } }
 
-        #live {
+        /* The film stands = the big microphone. Only a press on it records (Doc, 18.09.2026: "space start / stop ...
+           zeig ein großes Mic so rot wie der Rahmen wenn rec ... erst wenn ich das drücke rec"). placeOverlays() puts
+           it on the film's centre; the red is the recording frame's red. While recording it is gone again - the
+           picture stays free, the badge above the film says that the microphone is live. */
+        #k-mic {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: clamp(88px, 16vmin, 168px);
+            aspect-ratio: 1;
+            padding: 0;
+            border-radius: 50%;
+            border: 2px solid rgb(176, 36, 24);
+            background: rgba(6, 16, 31, 0.66);
+            color: rgb(176, 36, 24);
+            box-shadow: 0 0 34px rgba(176, 36, 24, 0.55);
+            cursor: pointer;
+        }
+
+        #k-mic { flex-direction: column; gap: 5%; }
+        #k-mic svg { width: 46%; height: 46%; }
+        /* the key that does the same, under the microphone (Doc, 18.09.2026) */
+        #k-mic span {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: clamp(0.62rem, 1.7vmin, 1.05rem);
+            letter-spacing: 2px;
+            margin-right: -2px;                /* the spacing after the last letter would push the word off centre */
+            line-height: 1;
+        }
+        #k-mic:hover { background: rgba(176, 36, 24, 0.24); }
+        #stage-wrap.mic #k-mic { display: flex; }
+
+        /* f puts the whole stage on the screen, not the bare video - the microphone must stay in reach */
+        #stage-wrap:fullscreen { background: #06101f; }
+
+        /* ONE line, never a second (Doc, 18.09.2026: "keine zweite Zeile sondern Text shift left"). row-reverse makes
+           the right edge the start: the line is centred while it fits (auto margins) and, once it is too long, keeps
+           its END in sight and leaves to the left - the newest words of a running remark are the ones that count. */
+        #live-box {
+            display: flex;
+            flex-direction: row-reverse;
+            flex: 0 0 auto;
+            width: min(1000px, 100%);
             min-height: 34px;
-            max-width: min(1000px, 100%);
-            text-align: center;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        #live {
+            margin: 0 auto;
+            flex: 0 0 auto;
             font-size: 1.02rem;
             line-height: 1.45;
             color: #cfe0f5;
@@ -75,9 +131,12 @@
         #live.empty { color: #7d93b4; }
 
         #bar { display: flex; align-items: center; gap: 12px; width: min(1000px, 100%); color: #9fb4d6; font-size: 0.86rem; }
-        #bar progress { flex: 1; height: 7px; accent-color: #00d2ff; }
+        #bar progress { flex: 1; height: 14px; accent-color: #00d2ff; }   /* twice as high (Doc, 18.09.2026) */
 
-        .k-list { display: flex; flex-direction: column; gap: 7px; max-height: 42vh; overflow: auto; }
+        /* The scrollbar sits half way between the remark boxes and the card's outer edge (Doc, 18.09.2026): 4px bar
+           + 10px card padding = 14px between the two lines, so 5px on either side - the list reaches 5px into the
+           card's padding and pads the boxes back by the same 5px (without a scrollbar the two cancel out). */
+        .k-list { display: flex; flex-direction: column; gap: 7px; max-height: 42vh; overflow: auto; margin-right: -5px; padding-right: 5px; }
 
         .k-item {
             display: grid;
@@ -99,14 +158,7 @@
         .k-item .txt { line-height: 1.35; }
         .k-item .txt.leer { color: #9fb4d6; font-style: italic; }
 
-        .ws-note {
-            margin-top: 9px;
-            font-size: 0.76rem;
-            line-height: 1.45;
-            color: #cfe0f5;
-            border-left: 2px solid rgba(245, 194, 66, 0.65);
-            padding-left: 9px;
-        }
+        /* note text in cards: .lab-note, central in js/cyber-lab-overrides.css */
 
         .ws-btns { display: flex; flex-wrap: wrap; gap: 7px; }
         .ws-btns .cyber-btn { flex: 1 1 auto; width: auto; min-height: 40px; padding: 8px 12px !important; font-size: 0.66rem !important; }
@@ -131,19 +183,24 @@
 
     <main id="main-content">
         <div id="canvas-container">
-            <div id="math-coach-box">
-                <div class="coach-title" id="coach-title-slot"></div>
-                <div id="coach-content" class="coach-message"></div>
-            </div>
             <div id="stage-wrap">
                 <div id="rec-badge"><i></i> AUFNAHME — LEERTASTE BEENDET</div>
                 <video id="film" src="/film.mp4" preload="metadata" playsinline></video>
+                <button id="k-mic" type="button" title="Kommentar aufnehmen" aria-label="Kommentar aufnehmen">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="2.5" width="6" height="11.5" rx="3" fill="currentColor"></rect>
+                        <path d="M5.5 11a6.5 6.5 0 0 0 13 0"></path>
+                        <line x1="12" y1="17.5" x2="12" y2="21.5"></line>
+                        <line x1="8.5" y1="21.5" x2="15.5" y2="21.5"></line>
+                    </svg>
+                    <span>ENTER</span>
+                </button>
                 <div id="bar">
                     <span id="t-now">0:00</span>
                     <progress id="t-bar" value="0" max="1"></progress>
                     <span id="t-all">–:––</span>
                 </div>
-                <div id="live" class="empty">Leertaste startet den Film. Noch einmal Leertaste: Film hält an und dein Kommentar wird aufgenommen.</div>
+                <div id="live-box"><span id="live" class="empty">Leertaste startet und stoppt den Film. Steht er, erscheint das rote Mikrofon: draufdrücken oder ENTER und sprechen.</span></div>
             </div>
         </div>
     </main>
@@ -166,7 +223,8 @@
             setTimeout(() => window.dispatchEvent(new Event('resize')), 400);
         }
 
-        CyberBranding.init({ useExternalStyles: true, title: 'Doc Alvers Mathe-Labor', subtitle: 'Filmkritik' });
+        // no masthead top right here (Doc, 18.09.2026) - the film gets the whole stage; central switch, as on index.html
+        CyberBranding.init({ useExternalStyles: true, title: 'Doc Alvers Mathe-Labor', subtitle: 'Filmkritik', skipCanvasBranding: true });
         CyberUI.init();
         if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
             CyberLeftChrome.configure({ viewportOnlyZoom: true });
@@ -264,6 +322,7 @@
             R.recording = true;
             R.t0 = performance.now();
             wrap.classList.add('rec');
+            showMic();
             speechStart();
             showLive();
             refreshPanel();
@@ -274,6 +333,7 @@
             if (!R.recording) return;
             R.recording = false;
             wrap.classList.remove('rec');
+            showMic();
             speechStop();
             const dauer = (performance.now() - R.t0) / 1000;
             const blob = await new Promise((done) => {
@@ -309,6 +369,16 @@
             live.className = 'empty';
             live.textContent = text ? '„' + text + '“ — gespeichert bei ' + mmss(R.t) : 'Ton gespeichert bei ' + mmss(R.t);
             refreshPanel();
+            revealNewest();
+        }
+
+        // The list is longer than its box after a few remarks, and the server appends: the remark just saved sits
+        // at the bottom, out of sight (Doc, 18.09.2026: "die Kommentarbox bitte mitscrollen").
+        // Not smooth: play/pause rebuild the list (refreshPanel) and a running animation would stop half way.
+        function revealNewest() {
+            const list = document.getElementById('k-list');
+            const last = list && list.querySelector('.k-item:last-of-type');
+            if (last) last.scrollIntoView({ block: 'nearest', behavior: 'auto' });
         }
 
         async function drop(n) {
@@ -320,20 +390,78 @@
             refreshPanel();
         }
 
+        /* ------------------------------------------------------- Kommentare löschen */
+        // All remarks at once (Doc, 18.09.2026) - behind a question, and the server only moves them into
+        // kritik/geloescht-<date>-<time>/: a review is spoken work, one wrong click must not cost it.
+        // The dialog is the central one (.cyber-overlay / .cyber-modal from js/ui.js).
+        function askClear() {
+            if (R.recording) { live.textContent = 'Erst den Kommentar beenden (Leertaste).'; return; }
+            if (!R.items.length) { live.className = 'empty'; live.textContent = 'Es gibt keine Kommentare zu löschen.'; return; }
+            let overlay = document.getElementById('k-clear-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'k-clear-overlay';
+                overlay.className = 'cyber-overlay';
+                overlay.innerHTML = `
+                    <div class="cyber-modal cyber-modal--neon" onclick="event.stopPropagation()">
+                        <h3 class="cyber-modal-adopt-title">Kommentare löschen?</h3>
+                        <p id="k-clear-text"></p>
+                        <div class="ws-btns">
+                            <button class="cyber-btn" id="k-clear-yes">JA, ALLE LÖSCHEN</button>
+                            <button class="cyber-btn" id="k-clear-no">ABBRECHEN</button>
+                        </div>
+                    </div>`;
+                overlay.addEventListener('click', () => overlay.classList.remove('open'));
+                document.body.appendChild(overlay);
+                document.getElementById('k-clear-no').addEventListener('click', () => overlay.classList.remove('open'));
+                document.getElementById('k-clear-yes').addEventListener('click', () => { overlay.classList.remove('open'); clearAll(); });
+            }
+            document.getElementById('k-clear-text').textContent = 'Alle ' + R.items.length + ' Kommentare verschwinden aus der Liste. '
+                + 'Sie werden nicht vernichtet, sondern in einen Unterordner „geloescht-…“ neben dem Film verschoben.';
+            overlay.classList.add('open');
+        }
+
+        async function clearAll() {
+            try {
+                const res = await fetch('/__kritik/leeren', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+                if (!res.ok) throw new Error('Server antwortet ' + res.status + ' — tools/filmkritik.py neu starten?');
+                const j = await res.json();
+                R.items = j.items || [];
+                R.submitted = false;               // the submit flag went with the remarks
+                live.className = 'empty';
+                live.textContent = 'Liste geleert. ' + (j.ordner ? 'Alles liegt in ' + j.ordner : '');
+                dbg('Kommentare verschoben nach ' + j.ordner);
+            } catch (err) {
+                live.textContent = 'Nicht gelöscht: ' + err.message;
+            }
+            refreshPanel();
+        }
+
         /* ------------------------------------------------------------------- Tasten */
-        // Space is the whole interface: play, interrupt and speak, play on.
+        // Space starts and stops the film. A remark starts only with a press on the microphone, which shows while
+        // the film stands (Doc, 18.09.2026); space then saves the remark and the film plays on.
         window.addEventListener('keydown', (ev) => {
             if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
             const t = ev.target;
             if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+            // the delete question is open: no key reaches the film behind it, Esc closes the question
+            const ask = document.getElementById('k-clear-overlay');
+            if (ask && ask.classList.contains('open')) {
+                ev.preventDefault();
+                if (ev.key === 'Escape') ask.classList.remove('open');
+                return;
+            }
             if (ev.key === ' ') {
                 ev.preventDefault();
-                // At the end the film must NOT start over: space keeps taking remarks
-                // about what was just seen (Doc, 17.09.2026).
                 if (R.recording) { stopRemark(true).then(() => { if (!film.ended) film.play(); }); }
-                else if (film.ended) startRemark();
+                // At the end the film must NOT start over (Doc, 17.09.2026): it stands, the microphone is there
+                else if (film.ended) return;
                 else if (film.paused) film.play();
-                else startRemark();
+                else film.pause();
+            } else if (ev.key === 'Enter' && wrap.classList.contains('mic')) {
+                // the microphone by key - only while it shows (Doc, 18.09.2026: "mic sichtbar enter -> rec")
+                ev.preventDefault();
+                startRemark();
             } else if (ev.key === 'Escape' && R.recording) {
                 ev.preventDefault();
                 stopRemark(false);
@@ -342,11 +470,48 @@
             } else if (ev.key === 'ArrowRight') {
                 ev.preventDefault(); film.currentTime = Math.min(film.duration || 0, film.currentTime + 10);
             } else if (ev.key === 'f') {
-                if (film.requestFullscreen) film.requestFullscreen();
+                // the whole stage, not the bare video: the microphone has to stay in reach
+                if (document.fullscreenElement) document.exitFullscreen();
+                else if (wrap.requestFullscreen) wrap.requestFullscreen();
             }
         });
 
-        film.addEventListener('click', () => { if (!R.recording) (film.paused ? film.play() : startRemark()); });
+        film.addEventListener('click', () => { if (!R.recording && !film.ended) (film.paused ? film.play() : film.pause()); });
+
+        /* ------------------------------------------------------------- Microphone button */
+        const micBtn = document.getElementById('k-mic');
+        const recBadge = document.getElementById('rec-badge');
+        function placeOverlays() {
+            // in #stage-wrap's own pixels (the chrome may scale the stage): the microphone on the film's centre,
+            // the recording badge 8px above the film, centred on it (Doc, 18.09.2026: "oben mittig")
+            const f = film.getBoundingClientRect(), w = wrap.getBoundingClientRect();
+            const k = wrap.offsetWidth ? w.width / wrap.offsetWidth : 1;
+            micBtn.style.left = ((f.left + f.width / 2 - w.left) / k) + 'px';
+            micBtn.style.top = ((f.top + f.height / 2 - w.top) / k) + 'px';
+            recBadge.style.top = 'auto';
+            recBadge.style.right = 'auto';
+            recBadge.style.bottom = ((w.bottom - f.top) / k + 8) + 'px';
+            recBadge.style.left = ((f.left + f.width / 2 - w.left) / k) + 'px';
+            recBadge.style.transform = 'translateX(-50%)';
+        }
+        function showMic() {
+            // not at 0:00 before the first start - there is nothing to remark on yet; not while recording either
+            const on = !R.recording && film.paused && (film.currentTime > 0 || film.ended);
+            wrap.classList.toggle('mic', on);
+            placeOverlays();
+        }
+        ['play', 'pause', 'ended', 'seeked', 'loadedmetadata'].forEach((e) => film.addEventListener(e, showMic));
+        window.addEventListener('resize', showMic);
+        document.addEventListener('fullscreenchange', showMic);
+        // never the focus: a focused button is one space press away from recording by key
+        micBtn.tabIndex = -1;
+        micBtn.addEventListener('mousedown', (e) => e.preventDefault());
+        micBtn.addEventListener('click', () => startRemark());
+        film.addEventListener('pause', () => {
+            if (R.recording || R.submitted || film.ended) return;
+            live.className = 'empty';
+            live.textContent = 'Angehalten. Mikrofon drücken oder Enter für einen Kommentar — Leertaste spielt weiter.';
+        });
 
         /* --------------------------------------------------------------- Anzeige */
         const tNow = document.getElementById('t-now'), tAll = document.getElementById('t-all'), tBar = document.getElementById('t-bar');
@@ -354,16 +519,30 @@
             tNow.textContent = mmss(film.currentTime);
             tBar.value = film.duration ? film.currentTime / film.duration : 0;
         });
+        // A reload (live reload after an edit, or by hand) must not throw a running review back to 0:00: the
+        // position stays in this tab, per film - the same port can serve another film tomorrow.
+        const POS_KEY = 'filmkritik.pos';
+        let posFilm = '';                          // known once /__kritik/liste has answered
+        film.addEventListener('timeupdate', () => {
+            if (!posFilm) return;
+            try { sessionStorage.setItem(POS_KEY, JSON.stringify({ film: posFilm, t: film.currentTime })); } catch (e) { }
+        });
+        function restorePosition(name) {
+            let saved = null;
+            try { saved = JSON.parse(sessionStorage.getItem(POS_KEY) || 'null'); } catch (e) { }
+            posFilm = name;
+            if (!saved || saved.film !== name || !(saved.t > 0)) return;
+            const seek = () => { film.currentTime = saved.t; dbg('Position wiederhergestellt: ' + mmss(saved.t)); };
+            if (film.readyState >= 1) seek(); else film.addEventListener('loadedmetadata', seek, { once: true });
+        }
+
         const showDuration = () => { if (film.duration) tAll.textContent = mmss(film.duration); };
         film.addEventListener('loadedmetadata', () => { showDuration(); refreshPanel(); });
         if (film.readyState >= 1) showDuration();
 
-        // The hint explains the tool once; while the film runs it would sit on the picture.
-        const coach = document.getElementById('math-coach-box');
-        film.addEventListener('play', () => coach.classList.add('collapsed'));
         film.addEventListener('ended', () => {
             live.className = 'empty';
-            live.textContent = 'Film zu Ende · ' + R.items.length + ' Kommentare gespeichert. Leertaste nimmt noch einen auf, '
+            live.textContent = 'Film zu Ende · ' + R.items.length + ' Kommentare gespeichert. Mikrofon oder Enter nimmt noch einen auf, '
                 + '„VON VORN“ startet neu, „KRITIK ABSCHICKEN“ schickt alles an die Sitzung.';
             refreshPanel();
         });
@@ -422,7 +601,7 @@
                         <b>${x.zeit}</b>
                         <span class="txt ${x.text ? '' : 'leer'}">${x.text ? x.text.replace(/</g, '&lt;') : '(nur Ton, ' + x.dauer + ' s)'}</span>
                         <span class="x" data-del="${x.n}" title="löschen">✕</span>
-                    </div>`).join('') : '<div class="ws-note" style="margin:0">Noch keine Kommentare.</div>';
+                    </div>`).join('') : '<div class="lab-note" style="margin:0">Noch keine Kommentare.</div>';
                 list.querySelectorAll('.k-item').forEach((el) => {
                     el.addEventListener('click', (ev) => {
                         if (ev.target.dataset.del) { drop(Number(ev.target.dataset.del)); return; }
@@ -438,16 +617,8 @@
         }
 
         function buildUI() {
-            const box = document.getElementById('math-coach-box');
-            if (box) box.classList.add('visible');
-            document.getElementById('coach-title-slot').textContent = 'FILMKRITIK';
-            document.getElementById('coach-content').innerHTML =
-                'Film ansehen und jederzeit mit der <b>Leertaste</b> unterbrechen: Der Film hält an, das Mikrofon läuft, ' +
-                'und du sagst, was dir auffällt. Noch einmal <b>Leertaste</b> — der Kommentar wird mit der Zeitmarke ' +
-                'gespeichert und der Film läuft weiter.<br><br>Am Ende <b>KRITIK ABSCHICKEN</b> drücken: ' +
-                'Die Sitzung bekommt das mit, liest alles aus, ändert Drehbuch und Sprechertext und dreht ' +
-                'nur die betroffenen Szenen neu.';
-
+            // No box top left any more (Doc, 18.09.2026: it lay over the menu in the video) - the film's name
+            // stands in the Film card, the how-to in the Tasten card.
             CyberUI.createCard('ui-container', 'Film', `
                 <div class="ws-btns">
                     <button class="cyber-btn" id="k-play">ABSPIELEN / ANHALTEN</button>
@@ -456,12 +627,17 @@
                 <div class="ws-btns" style="margin-top:7px">
                     <button class="cyber-btn" id="k-done">KRITIK ABSCHICKEN</button>
                 </div>
-                <div class="ws-note"><b id="k-state">angehalten</b> · <span id="k-count">0 Kommentare</span></div>`,
+                <div class="lab-note"><b id="k-state">angehalten</b> · <span id="k-count">0 Kommentare</span><br><span id="k-film"></span></div>`,
                 'rgb(245, 194, 66)');
-            CyberUI.createCard('ui-container', 'Kommentare', '<div class="k-list" id="k-list"></div>', 'rgb(121, 158, 49)');
-            CyberUI.createCard('ui-container', 'Tasten', `<div class="ws-note" style="margin-top:0">
-                <b>Leertaste</b> abspielen · unterbrechen und sprechen · weiter<br>
-                <b>Esc</b> Kommentar verwerfen · <b>◀ ▶</b> 10 s · <b>f</b> Vollbild</div>`);
+            CyberUI.createCard('ui-container', 'Kommentare', `<div class="k-list" id="k-list"></div>
+                <div class="ws-btns" style="margin-top:9px">
+                    <button class="cyber-btn" id="k-clear">KOMMENTARE LÖSCHEN</button>
+                </div>`, 'rgb(121, 158, 49)');
+            CyberUI.createCard('ui-container', 'Tasten', `<div class="lab-note" style="margin-top:0">
+                <b>Leertaste</b> Film starten · anhalten<br>
+                <b>Mikrofon</b> oder <b>Enter</b> (wenn der Film steht) Kommentar aufnehmen — <b>Leertaste</b> speichert, Film läuft weiter<br>
+                <b>Esc</b> Kommentar verwerfen · <b>◀ ▶</b> 10 s · <b>f</b> Vollbild<br>
+                Am Ende <b>KRITIK ABSCHICKEN</b> — die Sitzung liest dann alles aus und dreht nur die betroffenen Szenen neu.</div>`);
 
             document.getElementById('k-play').addEventListener('click', () => {
                 if (R.recording) stopRemark(true).then(() => { if (!film.ended) film.play(); });
@@ -470,9 +646,10 @@
             });
             document.getElementById('k-done').addEventListener('click', finish);
             document.getElementById('k-start').addEventListener('click', () => { film.currentTime = 0; film.play(); });
+            document.getElementById('k-clear').addEventListener('click', askClear);
             // a clicked button must not keep the focus: space is the whole interface here, and a focused button is
             // one key press away from being pressed again (same rule as in the deck's presenter view)
-            ['k-play', 'k-start', 'k-done'].forEach((id) => {
+            ['k-play', 'k-start', 'k-done', 'k-clear'].forEach((id) => {
                 const b = document.getElementById(id);
                 b.tabIndex = -1;
                 b.addEventListener('mousedown', (e) => e.preventDefault());
@@ -486,8 +663,12 @@
         // What is already on disk (a review can be continued after a reload)
         fetch('/__kritik/liste').then((r) => r.json()).then((j) => {
             R.items = j.items || [];
-            if (j.film) document.getElementById('coach-title-slot').textContent = 'FILMKRITIK · ' + j.film;
+            if (j.film) document.getElementById('k-film').textContent = j.film;
             refreshPanel();
+            revealNewest();
+            // the web font arrives later and makes the rows taller - what was the bottom is not the bottom any more
+            if (document.fonts && document.fonts.ready) document.fonts.ready.then(revealNewest);
+            restorePosition(j.film || '');
             dbg(R.items.length + ' Kommentare geladen aus ' + j.ordner);
         }).catch(() => dbg('Liste nicht erreichbar — läuft tools/filmkritik.py?'));
     </script>

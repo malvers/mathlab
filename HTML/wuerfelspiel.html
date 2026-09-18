@@ -44,16 +44,8 @@
 
         [hidden] { display: none !important; }
 
-        .ws-note {
-            margin-top: 9px;
-            font-size: 0.76rem;
-            line-height: 1.45;
-            color: #cfe0f5;
-            border-left: 2px solid rgba(245, 194, 66, 0.65);
-            padding-left: 9px;
-        }
+        /* note text in cards: .lab-note, central in js/cyber-lab-overrides.css */
 
-        .ws-note .katex { font-size: 1.05em; }
 
         .ws-btns { display: flex; flex-wrap: wrap; gap: 7px; }
 
@@ -2527,7 +2519,7 @@
         function contextCard(vk) {
             const roll = '<div class="ws-btns"><button class="cyber-btn" id="ws-roll">' + T('btn_roll', 'WÜRFELN') + '</button>' +
                 '<button class="cyber-btn" id="ws-score0">' + T('btn_score0', 'PUNKTE LÖSCHEN') + '</button></div>' +
-                '<div class="ws-note">' + T('hint_roll', 'Leertaste oder Tippen auf die Bühne würfelt.') + '</div>';
+                '<div class="lab-note">' + T('hint_roll', 'Leertaste oder Tippen auf die Bühne würfelt.') + '</div>';
             switch (vk) {
                 case 'spiel': case 'netze': case 'zweistufig': return roll;
                 case 'flaeche': return roll + '<div class="ws-btns" style="margin-top:10px">' +
@@ -2535,12 +2527,12 @@
                     '<button class="cyber-btn" id="ws-sim1000">' + T('btn_sim1000', 'TAUSEND') + '</button>' +
                     '<button class="cyber-btn" id="ws-simrun"></button>' +
                     '<button class="cyber-btn" id="ws-simreset">' + T('btn_simreset', 'NEU STARTEN') + '</button></div>' +
-                    '<div class="ws-note">' + T('hint_flaeche', 'Jeder Wurf setzt einen Punkt in sein Kästchen. Die Punkte teilt sich die Ansicht mit der <b>Simulation</b>.') + '</div>';
-                case 'zaehlen': return '<div class="ws-note">' + T('hint_count', 'Zeile antippen: Die Flächen dieser Zahl leuchten im Netz.') + '</div>';
+                    '<div class="lab-note">' + T('hint_flaeche', 'Jeder Wurf setzt einen Punkt in sein Kästchen. Die Punkte teilt sich die Ansicht mit der <b>Simulation</b>.') + '</div>';
+                case 'zaehlen': return '<div class="lab-note">' + T('hint_count', 'Zeile antippen: Die Flächen dieser Zahl leuchten im Netz.') + '</div>';
                 case 'merge': return '<div id="ws-mdie"></div><div class="ws-btns" style="margin-top:10px"><button class="cyber-btn" id="ws-mtoggle"></button></div>';
-                case 'pfad': case 'tabelle': return '<div class="ws-note">' + T('hint_path', 'Einen Weg antippen: Seine Rechnung erscheint.') + '</div>';
+                case 'pfad': case 'tabelle': return '<div class="lab-note">' + T('hint_path', 'Einen Weg antippen: Seine Rechnung erscheint.') + '</div>';
                 case 'fehler': return '<div id="ws-errs"></div>';
-                case 'rezept': return '<div class="ws-note">' + T('hint_recipe', 'Schritt antippen: Sprung zur passenden Station.') + '</div>';
+                case 'rezept': return '<div class="lab-note">' + T('hint_recipe', 'Schritt antippen: Sprung zur passenden Station.') + '</div>';
                 case 'sim': return '<div class="ws-btns">' +
                     '<button class="cyber-btn" id="ws-sim1">' + T('btn_sim1', 'EINE RUNDE') + '</button>' +
                     '<button class="cyber-btn" id="ws-sim100">' + T('btn_sim100', 'HUNDERT') + '</button>' +
@@ -2548,7 +2540,7 @@
                     '<button class="cyber-btn" id="ws-simrun"></button>' +
                     '<button class="cyber-btn" id="ws-simreset">' + T('btn_simreset', 'NEU STARTEN') + '</button></div>';
                 case 'zwilling': return '<div id="ws-sol"></div>';
-                case 'efron': return '<div class="ws-note">' + T('hint_efron', 'Pfeil antippen: Rechnung für dieses Paar.') + '</div>';
+                case 'efron': return '<div class="lab-note">' + T('hint_efron', 'Pfeil antippen: Rechnung für dieses Paar.') + '</div>';
                 default: return '';
             }
         }
@@ -2565,7 +2557,7 @@
             document.getElementById('ui-container').innerHTML = '';
 
             CyberUI.createCard('ui-container', T('card_mode', 'Modus'),
-                '<div id="ws-mode-slot"></div><div class="ws-note">' + T('hint_mode', 'Taste <b>m</b> wechselt zwischen Rundgang und Labor.') + '</div>');
+                '<div id="ws-mode-slot"></div><div class="lab-note">' + T('hint_mode', 'Taste <b>m</b> wechselt zwischen Rundgang und Labor.') + '</div>');
             CyberUI.createRadioGroup('ws-mode-slot', null, [
                 { label: T('mode_tour', 'RUNDGANG (WIE IM DECK)'), value: 'rundgang' },
                 { label: T('mode_lab', 'LABOR (EIGENE WÜRFEL)'), value: 'labor' }
@@ -2583,7 +2575,7 @@
                         <button class="cyber-btn" id="ws-solita"></button>
                         <button class="cyber-btn" id="ws-deck">${T('btn_deck', 'DECK ÖFFNEN')}</button>
                     </div>
-                    <div class="ws-note" id="ws-solita-note"></div>`, 'rgb(245, 194, 66)');
+                    <div class="lab-note" id="ws-solita-note"></div>`, 'rgb(245, 194, 66)');
                 CyberUI.createDropdown('ws-jump', STATIONS.map((s, i) => ({ id: String(i), label: (i + 1) + ' • ' + T('st_' + s.id + '_short', s.short) })),
                     id => gotoStep(parseInt(id, 10)), String(S.step));
                 on('ws-prev', 'click', () => stepBy(-1));
@@ -2603,7 +2595,7 @@
                         <button class="cyber-btn" id="ws-swap">${T('btn_swap', 'TAUSCHEN')}</button>
                     </div>
                     <div class="ws-dice" id="ws-dice" style="margin-top:10px"></div>
-                    <div class="ws-note">${T('hint_faces', 'In den Ansichten <b>Würfelnetze</b> und <b>Würfel lesen</b> im aufgeklappten Netz auf ein <b>Feld</b> tippen und eine neue Zahl wählen – nicht auf den 3D-Würfel, der würfelt nur.')}</div>`);
+                    <div class="lab-note">${T('hint_faces', 'In den Ansichten <b>Würfelnetze</b> und <b>Würfel lesen</b> im aufgeklappten Netz auf ein <b>Feld</b> tippen und eine neue Zahl wählen – nicht auf den 3D-Würfel, der würfelt nur.')}</div>`);
                 CyberUI.createDropdown('ws-preset', presetOpts, id => { if (id !== 'eigene') setPreset(id); }, S.labPreset);
                 on('ws-random', 'click', randomDice);
                 on('ws-swap', 'click', swapDice);
@@ -2647,7 +2639,7 @@
                 CyberUI.createCard('ui-container', T('card_result', 'Ergebnis'), '<div class="ws-res" id="ws-result"></div>', 'rgb(160, 212, 70)');
             }
 
-            CyberUI.createCard('ui-container', T('card_keys', 'Tasten'), '<div class="ws-note" style="margin-top:0">' + (S.mode === 'rundgang'
+            CyberUI.createCard('ui-container', T('card_keys', 'Tasten'), '<div class="lab-note" style="margin-top:0">' + (S.mode === 'rundgang'
                 ? T('keys_tour', '<b>◀ ▶</b> Station, <b>Leertaste</b> würfeln, <b>s</b> Solita, <b>m</b> Labor, <b>z</b> zusammenfassen, <b>d</b> Dauerlauf, <b>l</b> Lösung, Ziffern wählen den Fehler.')
                 : T('keys_lab', '<b>◀ ▶</b> Ansicht, <b>Leertaste</b> würfeln, <b>m</b> Rundgang, <b>z</b> zusammenfassen, <b>d</b> Dauerlauf, Ziffern wählen den Fehler.')) + '</div>');
 

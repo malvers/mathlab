@@ -138,7 +138,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         except ValueError as err:
             return self.reply(400, {'error': str(err)})
         items = load()
-        idx = len(items) + 1
+        # highest number + 1, not the count: after a deletion the count hands out a number that is still in use
+        # (18.09.2026: two remarks "11"), and /__kritik/loeschen deletes by number - it would take both
+        idx = max([x['n'] for x in items], default=0) + 1
         t = float(data.get('t') or 0)
         name = 'k%03d_%04d.webm' % (idx, int(t))
         audio = data.get('audio') or ''
@@ -170,15 +172,54 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         keep, gone = [], []
         for x in load():
             (gone if x['n'] == n else keep).append(x)
-        for x in gone:                       # the audio goes with the entry, no orphans
+        # The ✕ does not destroy either (Doc, 18.09.2026: "heben wir mal auf"): entry and audio move into
+        # kritik/geloescht-einzeln/ - that day two real remarks went with a test remark of the same number, for good.
+        bin_dir = os.path.join(STORE, 'geloescht-einzeln')
+        stamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+        if gone:
+            os.makedirs(bin_dir, exist_ok=True)
+            log = os.path.join(bin_dir, 'kritik.json')
             try:
-                os.remove(os.path.join(STORE, x['datei']))
-            except OSError:
-                pass
+                with open(log, encoding='utf-8') as f:
+                    old = json.load(f)
+            except (OSError, ValueError):
+                old = []
+            for x in gone:
+                moved = ''
+                src = os.path.join(STORE, x.get('datei') or '')
+                if x.get('datei') and os.path.isfile(src):
+                    moved = stamp + '_' + x['datei']          # the stamp keeps a reused number from overwriting
+                    os.replace(src, os.path.join(bin_dir, moved))
+                old.append(dict(x, geloescht=stamp, datei=moved))
+            with open(log, 'w', encoding='utf-8') as f:
+                json.dump(old, f, ensure_ascii=False, indent=1)
         save(keep)
         return self.reply(200, {'items': keep})
 
-    def finish(self):
+    def clear_all(self):
+        """KOMMENTARE LÖSCHEN: the list is empty afterwards, but nothing is destroyed - remarks, audio and the
+        submit flag move into kritik/geloescht-<date>-<time>/. A review is spoken work; one wrong click must not
+        cost it. abschicken.log stays where it is (it is never overwritten)."""
+        n = int(self.headers.get('Content-Length') or 0)
+        self.rfile.read(n)
+        stamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+        bin_dir = os.path.join(STORE, 'geloescht-' + stamp)
+        moved = 0
+        if os.path.isdir(STORE):
+            for name in sorted(os.listdir(STORE)):
+                path = os.path.join(STORE, name)
+                if not os.path.isfile(path) or name == 'abschicken.log':
+                    continue
+                os.makedirs(bin_dir, exist_ok=True)
+                os.replace(path, os.path.join(bin_dir, name))
+                moved += 1
+        print('KOMMENTARE GELÖSCHT um %s — %d Dateien → %s' % (stamp, moved, bin_dir))
+        return self.reply(200, {'items': [], 'verschoben': moved, 'ordner': bin_dir if moved else ''})
+
+    # NOT "finish": socketserver calls self.finish() after EVERY request (setup - handle - finish). Under that name
+    # this method "submitted" on every GET and POST - since live reload polls once a second, every second, and on
+    # 18.09.2026 in class right with each saved remark, which made Solita thank too early.
+    def submit(self):
         """Doc pressed ABSCHICKEN. Two files land next to the recordings:
 
         fertig.json  the flag the agent's monitor watches - that is what makes "senden" arrive
@@ -217,7 +258,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if self.path == '/__kritik/loeschen':
             return self.drop_remark()
         if self.path == '/__kritik/fertig':
-            return self.finish()
+            return self.submit()
+        if self.path == '/__kritik/leeren':
+            return self.clear_all()
         if self.path == '/__kritik/weiter':
             return self.reopen()
         self.send_error(405, 'nur /__kritik/*')
