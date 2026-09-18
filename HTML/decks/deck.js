@@ -100,6 +100,8 @@ function groups(sl){
 function paint(){
   slides.forEach((s, i) => s.classList.toggle('on', i === si));
   const sl = slides[si];
+  // dark slides (greeting, title at night): the buttons turn light (Doc, 18.09.2026: "wenn der HG dunkel ist kaum zu sehen")
+  document.documentElement.classList.toggle('dark-slide', sl.matches('.greet, .title'));
   sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
   document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
   try { sessionStorage.setItem(KEEP, si + ':' + step + ':' + groups(sl)); } catch (e) { }

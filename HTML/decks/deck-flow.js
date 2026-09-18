@@ -114,7 +114,12 @@ void main() {
   vec3 r1 = cross(dpy, N), r2 = cross(N, dpx);
   float det = dot(dpx, r1);
   vec3 grad = sign(det) * (dFdx(f0) * r1 + dFdy(f0) * r2);
-  vec3 n = normalize(abs(det) * N - 0.16 * grad);
+  // a face seen edge-on gives derivatives of 0 or infinity: 0/0 here is a NaN, and one NaN pixel turns the whole
+  // picture black once the bloom has smeared it (Doc, 18.09.2026: "nach 2-3 min ein break") - such a pixel keeps
+  // the plain face normal. The comparisons are false for NaN and infinity, so both fall through to N.
+  vec3 nb = abs(det) * N - 0.16 * grad;
+  float nl = dot(nb, nb);
+  vec3 n = (nl > 1e-12 && nl < 1e12) ? nb * inversesqrt(nl) : N;
   float alb = (0.07 + 0.13 * f0) * vTone;
   vec3 stone = vec3(alb * 0.92, alb, alb * 1.04);
   // a worn bevel along the top edges catches the light: every block stands on its own
@@ -146,8 +151,10 @@ void main() {
   }
   seam *= 0.75 + 0.25 * sin(uTime * 1.3 + vPos.x * 0.7 + vPos.z * 0.4);
   col += uGreen * seam * 1.5;
-  float fog = 1.0 - exp(-pow(vDist * uFog, 2.0));
-  gl_FragColor = vec4(mix(col, uBg, fog), 1.0);
+  float fog = 1.0 - exp(-exp2(2.0 * log2(max(vDist * uFog, 1e-6))));   // pow() of a negative is undefined
+  col = mix(col, uBg, fog);
+  if (any(isnan(col)) || any(isinf(col))) col = uBg;   // last guard: nothing but finite colours reach the bloom
+  gl_FragColor = vec4(col, 1.0);
 }`;
 
 function buildBlocks(P, R) {
@@ -237,7 +244,7 @@ void main() {
   gl_PointSize = clamp(${CHAR * 1.05} * uPx / -mv.z, 1.5, 64.0);
   vec4 b = projectionMatrix * modelViewMatrix * vec4(position + aDir * 0.1, 1.0);
   vec2 d = (b.xy / b.w - gl_Position.xy / gl_Position.w) * uView;
-  vAngle = atan(d.y, d.x);                   // the line's direction on screen: characters sit on it
+  vAngle = dot(d, d) > 1e-8 ? atan(d.y, d.x) : 0.0;   // the line's direction on screen: characters sit on it (atan(0,0) is undefined)
   vGlyph = mod(aInfo.x + floor(uTime * aInfo.z), 64.0);
   vBright = aInfo.y * aInfo.w;
 }`;
@@ -253,8 +260,9 @@ void main() {
   if (abs(q.x) > 0.5 || abs(q.y) > 0.5) discard;
   vec2 cell = vec2(mod(vGlyph, 8.0), 7.0 - floor(vGlyph / 8.0));
   float a = texture2D(uAtlas, (cell + q + 0.5) / 8.0).r;
-  vec3 col = mix(uGreen, vec3(0.85, 1.0, 0.9), clamp(vBright - 1.0, 0.0, 1.0));
-  gl_FragColor = vec4(col * a * vBright * 0.75, 1.0);
+  vec3 col = mix(uGreen, vec3(0.85, 1.0, 0.9), clamp(vBright - 1.0, 0.0, 1.0)) * a * vBright * 0.75;
+  if (any(isnan(col))) discard;              // additive blending would carry a NaN into the whole bloom
+  gl_FragColor = vec4(col, 1.0);
 }`;
 
 function buildStream(P, R) {
