@@ -119,7 +119,12 @@ export async function runScenes(scenes, { outDir, viewport = { width: 1280, heig
     fs.writeFileSync(`${frameDir}/list.txt`, lines.join('\n') + '\n');
     const W = viewport.width * dsf * upscale, H = viewport.height * dsf * upscale;
     execFileSync('ffmpeg', ['-nostdin', '-y', '-v', 'error', '-f', 'concat', '-safe', '0', '-i', `${frameDir}/list.txt`,
-      '-vf', `fps=${FPS},scale=${W}:${H}:flags=lanczos`, '-r', String(FPS),
+      // setsar=1 is not cosmetic: when Chrome delivers the screencast at a squashed size
+      // (the vektoren take came in at 1280x633 instead of 1280x720, 17.09.2026), scale fixes
+      // the geometry but leaves a compensating sample aspect ratio behind. Two takes then have
+      // different SARs, and compose() dies with "Error reinitializing filters" - after the
+      // whole shoot. The pixels are already square here, so we say so.
+      '-vf', `fps=${FPS},scale=${W}:${H}:flags=lanczos,setsar=1`, '-r', String(FPS),
       '-c:v', 'libx264', '-crf', '16', '-preset', 'medium',
       '-pix_fmt', 'yuv420p', `${outDir}/${sc.name}.mp4`], { stdio: 'inherit' });
     fs.rmSync(frameDir, { recursive: true, force: true });

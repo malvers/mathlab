@@ -1,0 +1,1057 @@
+<!doctype html>
+<!-- Drehbuch Vektoren - built like HTML/drehbuch/wuerfelspiel.html (17.09.2026).
+     Doc: "Drehbuch, ich brauch nicht freigeben" - so the narration was written straight after. -->
+
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+
+<style>
+/* minimal reset - the artifact host used to provide this */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; }
+img, canvas, svg { display: block; max-width: 100%; }
+button, input { font: inherit; }
+:focus-visible { outline: 2px solid #00d2ff; outline-offset: 2px; }
+</style>
+<title>Der Pfeil, der überall hinpasst</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@200;300;400;600&display=swap">
+
+<style>
+/* Palette and faces are the lab's own (bb84.html): Orbitron + Outfit,
+   deep blue ground, cyan = the image under A, orange/green = the two
+   principal axes. Single-theme on purpose - this is the lab's world. */
+:root {
+    --ground:      #081428;
+    --ground-deep: #050e1c;
+    --surface:     #0c1c3a;
+    --surface-2:   #0e244e;
+    --line:        #1c3565;
+    --line-soft:   #16294d;
+
+    --ink:         #e6eefa;
+    --ink-dim:     #b3c5de;
+    --ink-faint:   #8ba1c0;
+
+    --cyan:        #00d2ff;
+    --lambda:      #f5c242;
+    --phi:         #799e31;
+    --violet:      #c07fe8;
+    --red:         #b02418;
+
+    --step: clamp(0.9rem, 0.55rem + 1.1vw, 1.5rem);
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--ground);
+    background-image:
+        radial-gradient(1100px 620px at 12% -8%, #0f2a55 0%, transparent 62%),
+        radial-gradient(900px 520px at 92% 4%, #10203f 0%, transparent 58%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(1.6rem, 4vw, 4rem) clamp(1.1rem, 4vw, 2.6rem) 6rem;
+}
+
+/* ---------- shared type ---------- */
+.eyebrow {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+
+h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-wrap: balance; margin: 0; }
+
+h1 {
+    font-size: clamp(2rem, 1.2rem + 3.4vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0.5rem 0 0;
+}
+
+h2 {
+    font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.32rem);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+}
+
+p { margin: 0; }
+
+em { font-style: italic; color: #eaf2fd; }
+strong { font-weight: 600; color: #f2f7ff; }
+
+/* mathematical symbols, set apart without a formula engine */
+.m {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--cyan);
+    white-space: nowrap;
+}
+.m.l { color: var(--lambda); }
+.m.g { color: var(--phi); }
+
+/* ---------- header ---------- */
+header { margin-bottom: clamp(1.8rem, 4vw, 3rem); }
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lambda);
+    border: 1px solid #4a3a15;
+    background: #1b1607;
+    border-radius: 2px;
+    padding: 0.34rem 0.7rem;
+    margin-top: 1.1rem;
+}
+.status::before {
+    content: "";
+    width: 5px; height: 5px;
+    background: var(--lambda);
+    border-radius: 50%;
+}
+
+.lede {
+    margin-top: 1.1rem;
+    max-width: 60ch;
+    color: var(--ink-dim);
+    font-size: 1.18rem;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2rem;
+    margin-top: 1.6rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line-soft);
+}
+.meta div { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.4rem 0; }
+.meta dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.meta dd { margin: 0; font-size: 1.02rem; color: var(--ink); }
+.meta a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid #05506b; }
+.meta a:hover, .meta a:focus-visible { border-bottom-color: var(--cyan); }
+
+/* ---------- hero canvas + thesis ---------- */
+.thesis {
+    display: grid;
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    gap: clamp(1.2rem, 3vw, 2.6rem);
+    align-items: center;
+    margin: clamp(1.6rem, 4vw, 2.6rem) 0 clamp(2.4rem, 6vw, 4rem);
+    padding: clamp(1.2rem, 3vw, 2rem);
+    background: linear-gradient(160deg, var(--surface) 0%, var(--ground-deep) 100%);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+}
+@media (max-width: 700px) { .thesis { grid-template-columns: 1fr; } }
+
+#stage {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: block;
+    border-radius: 2px;
+    background: #04101f;
+}
+
+.thesis blockquote {
+    margin: 0;
+    font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem);
+    line-height: 1.42;
+    font-weight: 200;
+    color: #eef4fd;
+    text-wrap: balance;
+}
+.thesis blockquote strong { font-weight: 600; }
+.thesis .after {
+    margin-top: 1.1rem;
+    color: var(--ink-dim);
+    font-size: 1.06rem;
+    max-width: 54ch;
+}
+
+/* ---------- section frame ---------- */
+section { margin-top: clamp(2.6rem, 6vw, 4.4rem); }
+
+.head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 1.5rem;
+}
+.head .n {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--cyan);
+}
+.head .note { margin-left: auto; font-size: 0.9rem; color: var(--ink-faint); }
+
+.prose { max-width: 66ch; color: var(--ink-dim); display: grid; gap: 0.85rem; }
+.prose strong { color: #eaf2fd; }
+
+/* ---------- the arc ---------- */
+.arc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: stretch;
+    margin-bottom: 1.5rem;
+}
+.arc span {
+    flex: 1 1 auto;
+    min-width: 92px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-align: center;
+    padding: 0.85rem 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-top: 2px solid var(--stop, var(--line));
+    color: var(--ink-dim);
+    text-wrap: balance;
+    line-height: 1.4;
+}
+.arc span.key { color: #eef4fd; background: var(--surface-2); }
+
+/* ---------- timeline ---------- */
+.timeline {
+    display: flex;
+    width: 100%;
+    height: 54px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.7rem;
+}
+.timeline i {
+    position: relative;
+    display: block;
+    border-right: 1px solid var(--ground-deep);
+    background: var(--lambda);
+    font-style: normal;
+    transition: background 0.15s;
+}
+.timeline i:last-child { border-right: 0; }
+.timeline i.core { background: var(--phi); }
+.timeline i.cut  { background: var(--red); }
+.timeline i::after {
+    content: attr(data-n);
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #1a1305;
+}
+.timeline i.core::after { color: #0d1a06; }
+.timeline i.cut::after  { color: #ffdcd7; font-weight: 700; }
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.4rem;
+    font-size: 0.87rem;
+    color: var(--ink-faint);
+}
+.legend b { font-weight: 400; color: var(--ink-dim); }
+.legend span { display: inline-flex; align-items: center; gap: 0.42rem; }
+.legend s { width: 11px; height: 11px; border-radius: 2px; text-decoration: none; display: inline-block; }
+
+/* ---------- scenes ---------- */
+.scenes { display: grid; gap: 0.7rem; }
+
+.scene {
+    display: grid;
+    grid-template-columns: 3.6rem minmax(0, 1fr);
+    gap: 0 1.1rem;
+    padding: 1.4rem 1.55rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--lambda);
+    border-radius: 2px;
+}
+.scene.core { border-left-color: var(--phi); background: linear-gradient(90deg, #16240f 0%, var(--surface) 34%); }
+.scene.cut  { border-left-color: var(--red); }
+
+.scene .idx {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--lambda);
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.1rem;
+}
+.scene.core .idx { color: var(--phi); }
+.scene.cut .idx  { color: #c9503f; }
+
+.scene .top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.7rem;
+}
+.scene h3 { font-size: 1.16rem; font-weight: 700; letter-spacing: 0.01em; color: #f0f6ff; }
+
+.tag {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+    border: 1px solid;
+}
+.tag.core { color: #0d1a06; border-color: var(--phi); background: var(--phi); }
+.tag.cut  { color: #ffdcd7; border-color: var(--red); background: var(--red); }
+
+.secs {
+    margin-left: auto;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+    gap: 0.6rem 1.6rem;
+}
+@media (max-width: 720px) { .body { grid-template-columns: 1fr; gap: 1rem; } }
+
+.body > div { display: grid; gap: 0.34rem; align-content: start; }
+.body h4 {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.body p { font-size: 1.06rem; line-height: 1.66; color: var(--ink-dim); }
+.body .aha { border-left: 1px solid var(--line); padding-left: 1.6rem; }
+@media (max-width: 720px) { .body .aha { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 0.9rem; } }
+.body .aha p { color: var(--ink); }
+
+/* what Solita actually says - generated from narration.mjs, never hand-edited */
+.say {
+    margin-top: 1.1rem;
+    padding: 0.95rem 1.2rem;
+    background: #0a1830;
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--cyan);
+    border-radius: 2px;
+}
+.say h4 {
+    margin: 0 0 0.45rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.64rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+.say p {
+    margin: 0;
+    font-size: 1.06rem;
+    line-height: 1.62;
+    color: var(--ink);
+}
+.say .pause {
+    display: inline-block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 500;
+    color: var(--lambda);
+    background: #241c07;
+    border: 1px solid #4a3a15;
+    border-radius: 2px;
+    padding: 0.05rem 0.4rem;
+    margin: 0 0.22rem;
+    vertical-align: 0.08em;
+    white-space: nowrap;
+}
+.say .beat {
+    display: inline-block;
+    width: 0.5em;
+    height: 0.5em;
+    margin: 0 0.1em;
+    background: radial-gradient(circle, var(--cyan) 1.6px, transparent 1.8px);
+    vertical-align: 0.05em;
+    opacity: 0.55;
+}
+.say .spell {
+    border-bottom: 1px dotted var(--ink-faint);
+    letter-spacing: 0.12em;
+}
+
+/* ---------- rules / lists ---------- */
+.rules { display: grid; gap: 0.6rem; counter-reset: r; max-width: 74ch; }
+/* the number is positioned, not a grid cell - as a grid item the bare text
+   after the bold lead-in became its own item and fell into the 1.8rem column */
+.rules li {
+    list-style: none;
+    position: relative;
+    padding-left: 2.8rem;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+}
+.rules li::before {
+    counter-increment: r;
+    content: counter(r, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 0.28rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: var(--violet);
+}
+.rules { padding: 0; margin: 0; }
+
+.notes { display: grid; gap: 0.75rem; max-width: 74ch; padding: 0; margin: 0; }
+.notes li {
+    list-style: none;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+    padding-left: 1.1rem;
+    border-left: 1px solid var(--line);
+}
+.notes strong { color: #eaf2fd; }
+
+code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.85em;
+    color: var(--cyan);
+    background: #0a1a33;
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    padding: 0.06em 0.34em;
+}
+
+/* ---------- budget ---------- */
+.budget {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--line-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+}
+.budget div { background: var(--surface); padding: 1rem 1.1rem; display: grid; gap: 0.28rem; }
+.budget dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.budget dd {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--cyan);
+    font-variant-numeric: tabular-nums;
+}
+.budget dd small { display: block; font-family: 'Outfit', sans-serif; font-size: 0.78rem; font-weight: 300; color: var(--ink-faint); letter-spacing: 0; margin-top: 0.2rem; }
+
+.solved { color: var(--phi); }
+
+/* ---------- footer ---------- */
+footer {
+    margin-top: clamp(2.6rem, 6vw, 4.4rem);
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    align-items: baseline;
+}
+footer p { font-size: 1.05rem; color: var(--ink-dim); max-width: 58ch; }
+footer .sig { margin-left: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+}
+</style>
+<style>
+/* Wuerfelspiel additions: the lab's own meanings - orange = Lena, cyan = Mia,
+   green = Lena wins, red = Mia wins / a mistake. */
+.m.lena { color: var(--lambda); }
+.m.mia  { color: var(--cyan); }
+
+/* formulas come from KaTeX as native MathML (no stylesheet or font files needed) */
+math { font-size: 1.05em; math-style: normal; }
+
+/* the hero carries the film's picture - give it more room than the template's 300px */
+.thesis { grid-template-columns: minmax(0, 400px) minmax(0, 1fr); }
+@media (max-width: 700px) { .thesis { grid-template-columns: 1fr; } }
+
+/* phone: number above the card body, so long formulas keep their width */
+@media (max-width: 720px) {
+    .scene { grid-template-columns: minmax(0, 1fr); gap: 0.4rem; }
+    .body { grid-template-columns: minmax(0, 1fr); }
+}
+
+.alert {
+    margin-top: 1.4rem;
+    padding: 1.2rem 1.4rem;
+    background: linear-gradient(100deg, #2a0f0a 0%, var(--surface) 60%);
+    border: 1px solid #6b2318;
+    border-left: 3px solid #d4463a;
+    border-radius: 3px;
+    display: grid;
+    gap: 0.7rem;
+    max-width: 76ch;
+}
+.alert h3 { font-size: 1.02rem; letter-spacing: 0.04em; color: #ffd9d3; }
+.alert p { font-size: 1.04rem; color: #e3cfcb; }
+.alert strong { color: #fff2ef; }
+
+.alert.ask { background: linear-gradient(100deg, #241c07 0%, var(--surface) 60%); border-color: #4a3a15; border-left-color: var(--lambda); }
+.alert.ask h3 { color: #ffe9b0; }
+.alert.ask p, .alert.ask li { color: #e6dcc2; }
+.alert.ask strong { color: #fff6de; }
+.alert.ask ol { margin: 0; padding-left: 1.3rem; display: grid; gap: 0.5rem; font-size: 1.04rem; }
+
+.scene .where {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+    color: var(--ink-dim);
+    border: 1px solid var(--line);
+}
+.scene .where.lab { color: #06141f; background: var(--cyan); border-color: var(--cyan); }
+.tag.card { color: #1a1305; border-color: var(--lambda); background: var(--lambda); }
+</style>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+    <p class="eyebrow">Doc Alvers Mathe-Labor · Videopipeline</p>
+    <h1>Der Pfeil, der überall hinpasst</h1>
+    <p class="lede">Der Plot für den Film zum Vektoren-Labor: von der Frage, was ein Vektor
+        überhaupt ist, bis zum Abstand eines Punktes von einer Ebene — elf Kapitel in
+        vierzehn Szenen.</p>
+    <p class="status">Gedreht 17.09.2026 · erst nur Stimme, D-ID später</p>
+
+    <dl class="meta">
+        <div><dt>Lab</dt><dd><a href="https://docalvers.de/vektoren.html">vektoren.html</a></dd></div>
+        <div><dt>Sprecherin</dt><dd>Solita · de-DE-Studio · Tempo 0,92</dd></div>
+        <div><dt>Aufnahme</dt><dd>1440p · Playwright · 2 Takes</dd></div>
+        <div><dt>Szenen</dt><dd id="meta-scenes">14</dd></div>
+        <div><dt>Laufzeit</dt><dd id="meta-run">~7 min geplant</dd></div>
+    </dl>
+</header>
+
+<div class="thesis">
+    <canvas id="stage" width="600" height="600" role="img"
+            aria-label="Zwei Pfeile a und b in einem Gitter: b hängt an der Spitze von a, die
+                        Summe schließt das Parallelogramm. Blasse Kopien desselben Pfeils a
+                        stehen an anderen Stellen — derselbe Vektor, andere Orte."></canvas>
+    <div>
+        <blockquote>Ein Vektor ist <strong>keine Stelle</strong>, sondern eine
+            <strong>Verschiebung</strong> — und genau deshalb darf derselbe Pfeil überall
+            stehen.</blockquote>
+        <p class="after">Der ganze Film ist die Antwort auf eine einzige Frage:
+            <em>Was kann man mit Pfeilen rechnen?</em> Links steht die kürzeste Antwort:
+            zwei Pfeile, aneinandergehängt, ergeben einen dritten — und die blassen Kopien
+            zeigen, dass es auf den Ort nicht ankommt. Klick würfelt neue Pfeile.</p>
+    </div>
+</div>
+
+<section>
+    <div class="head"><span class="n">A</span><h2>Der dramaturgische Bogen</h2></div>
+    <div class="arc" id="arc"></div>
+    <div class="prose">
+        <p>Erst der Begriff: Ein Punkt ist eine Stelle, ein Vektor eine Verschiebung, und
+           $\overrightarrow{AB}$ ist Spitze minus Fuß (1–2). Dann wird gerechnet — anhängen,
+           strecken, spiegeln, messen (3–5). Szene 6 baut daraus die Linearkombination:
+           Mit zwei unabhängigen Pfeilen erreicht man <em>jeden</em> Punkt der Ebene.</p>
+        <p>Szene 7 macht genau das kaputt: Sind die beiden parallel, bleibt von der ganzen
+           Ebene eine Gerade übrig, und die Determinante fällt auf $0$. Danach geht es in den
+           Raum (8–13): Geraden in Parameterform, Skalarprodukt als Winkelmesser,
+           Kreuzprodukt als Normale, Ebenen, Lagebeziehungen und zum Schluss der Abstand —
+           immer dasselbe Werkzeug, eine Dimension höher.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">B</span><h2>Die 14 Szenen</h2>
+        <span class="note" id="tl-note">Breite = geplante Sprechzeit</span></div>
+    <div class="timeline" id="timeline"></div>
+    <div class="legend">
+        <span><s style="background:#799e31"></s><b>Kernszene — wird nicht gekürzt</b></span>
+        <span><s style="background:#b02418"></s><b>Notbremse, falls der Schnitt zäh wirkt</b></span>
+        <span><s style="background:#f5c242"></s><b>Regelszene</b></span>
+    </div>
+    <div class="scenes" id="scenes" style="margin-top:1.5rem"></div>
+</section>
+
+<section>
+    <div class="head"><span class="n">C</span><h2>Didaktische Leitplanken</h2>
+        <span class="note">bindend für den Sprechertext</span></div>
+    <ol class="rules">
+        <li><strong>Nie eine Formel ohne vorher gezeigtes Bild.</strong> Erst wandert der
+            Pfeil, dann steht die Spalte da. Der Betrag kommt aus dem gestrichelten
+            Steigungsdreieck, nicht aus der Wurzel.</li>
+        <li><strong>Ein neuer Begriff pro Szene:</strong> <em>Ortsvektor</em> (1),
+            <em>Verbindungsvektor</em> (2), <em>Parallelogramm</em> (3), <em>Vielfaches</em>
+            (4), <em>Betrag und Einheitsvektor</em> (5), <em>Linearkombination</em> (6),
+            <em>linear abhängig</em> (7), <em>Parameterform</em> (8), <em>Skalarprodukt</em>
+            (9), <em>Kreuzprodukt</em> (10), <em>Normalenvektor</em> (11).</li>
+        <li>Verboten: <em>Vektorraum, Basis, Dimension, Span, Matrix, Rang</em> — der Film
+            zeigt Pfeile, keine Struktur­theorie. Auch verboten: „einfach“, „offensichtlich“,
+            „man sieht leicht“.</li>
+        <li><strong>Der Unterschied Punkt/Vektor wird nie verwischt.</strong> Punkte heißen
+            $A$, $B$, $P$, $T$ und stehen in runden Klammern mit Schrägstrich; Vektoren
+            stehen als Spalte mit Pfeil darüber. Solita sagt „Stelle“ gegen
+            „Verschiebung“.</li>
+        <li><strong>Zahlen nur, wenn sie im Bild stehen</strong> — und dann genau so:
+            $|\vec a| = 5$, Determinante $5$, $\vec a \circ \vec b = 8$, Fläche $9$. Beim
+            Ziehen nennt Solita keine Koordinaten.</li>
+        <li><strong>Senkrecht heißt Skalarprodukt null</strong>, und das wird zweimal
+            gebraucht: beim Kreuzprodukt als Probe (10) und bei der Lage von Gerade und
+            Ebene (12). Beide Male dasselbe Wort, damit der Zusammenhang hörbar bleibt.</li>
+        <li><strong>Nichts behaupten, was das Bild nicht hergibt.</strong> Alle Werte sind
+            die des Labs, am 17.09.2026 nachgerechnet.</li>
+    </ol>
+</section>
+
+<section>
+    <div class="head"><span class="n">D</span><h2>Zeitbudget</h2>
+        <span class="note">nach der Vertonung neu zu rechnen</span></div>
+    <dl class="budget" id="budget"></dl>
+    <div class="prose">
+        <p>Der Film ist bewusst <strong>kurz gehalten</strong>: Nach dem Würfelspiel sind
+           noch <strong>52 von 400 D-ID-Credits</strong> übrig (rund dreizehn Minuten
+           Sprechzeit), und die verfallen am <strong>Montag, 21.09., 19:38</strong>. Diese
+           Fassung entsteht darum erst <strong>nur mit Stimme</strong>; die Sprechblase
+           kostet später <code>DID=1</code> und passt ins Budget.</p>
+        <p>Teil 1 von <code>Infinity_6min.m4a</code> ist nahtlos loopbar (loopStart 21,220 s,
+           loopEnd 163,998 s), das Bett wird auf die Filmlänge gerendert.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">E</span><h2>Choreografie-Notizen</h2>
+        <span class="note">für die Aufnahme</span></div>
+    <ul class="notes">
+        <li><strong>Startzustand:</strong> frischer Context, <code>?lang=de</code>, Kapitel
+            <code>grundlagen</code>. Erreichbar sind <code>switchTab</code>,
+            <code>CHAPTERS</code> und über <code>VekLab</code> die beiden Bühnen; die
+            2D-Bühne rechnet mit <code>w2s()</code> Weltkoordinaten in Bildpunkte um — so
+            werden die Griffe gezogen, statt Pixel zu raten.</li>
+        <li><strong>Die Schieberegler bekommen bei jedem Laden neue IDs</strong>
+            (<code>slider-…</code> ist zufällig). Also nie per ID, sondern über die Karte und
+            die Position ansprechen, Knöpfe über ihre Beschriftung
+            (<code>„Ziel treffen“</code>, <code>„a ∥ b machen“</code>,
+            <code>„T auf g“</code>).</li>
+        <li><strong>3D-Kapitel:</strong> Die Szene läuft in einem eigenen
+            <code>&lt;canvas&gt;</code> mit Trackball. Für die Aufnahme wird die Kamera in
+            kleinen Schritten geschwenkt, damit Tiefe entsteht — Ebenen und Normalen sind
+            sonst schwer zu lesen.</li>
+        <li><strong>Theoriespalte rechts:</strong> Sie trägt den Text, den Solita spricht.
+            Wo sie zu lang ist, wird sie an die passende Stelle gescrollt, nicht
+            weggeklappt.</li>
+        <li><strong>Szene 7 ist der Bruch</strong> und zugleich mauskritisch: Der Knopf
+            „a ∥ b machen“ ändert die Lage sprunghaft — erst proben, dann drehen.</li>
+        <li>Der lokale Server klebt ein rotes <strong>LOCAL</strong>-Schild in die Seite. Die
+            Aufnahme muss <code>#local-badge</code> vor dem ersten Bild entfernen.</li>
+    </ul>
+</section>
+
+<section>
+    <div class="head"><span class="n">F</span><h2>Bewusst weggelassen</h2>
+        <span class="note">Kandidaten für Teil 2</span></div>
+    <div class="prose">
+        <p><strong>Die Testaufgaben</strong> des Labs (jedes Kapitel nennt seine Etappe und
+           die passende Aufgabe) — das ist Unterricht, kein Film.</p>
+        <p><strong>Ebenen in Normalenform und Hessesche Normalform</strong>: Der Film zeigt
+           Koordinaten- und Parameterform und bleibt dabei; die Abstandsformel wird benutzt,
+           nicht hergeleitet.</p>
+        <p><strong>Lagebeziehungen zweier Ebenen</strong> und die windschiefen Geraden —
+           beides kann das Lab, beides bräuchte eigene Szenen.</p>
+    </div>
+</section>
+
+<footer>
+    <p><strong>Nächster Schritt:</strong> Fassung mit Stimme ansehen (Kritik-Tool), dann
+       <code>DID=1 node vektoren/run3.mjs</code> für Solitas Sprechblase.</p>
+    <p class="eyebrow sig">Doc Alvers Mathe-Labor</p>
+</footer>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script>
+/* ---------------------------------------------------------------
+   One source of truth: the scene list feeds both the timeline and
+   the cards below it.
+   --------------------------------------------------------------- */
+const SCENES = [
+    /* n = Nummer · s = geplante Sekunden (nach der Vertonung von SPOKEN ueberschrieben)
+       t = Titel · img = was im Bild passiert · aha = der Gedanke, der fallen soll
+       core: true = Kernszene · cut: true = Notbremse · at = Kapitel im Lab */
+    { n: 1, s: 30, t: 'Punkt oder Pfeil?', core: true, at: 'Kapitel 1 · Begriff',
+      img: 'Im Gitter liegt der Punkt $P(3\\mid2)$, vom Ursprung zeigt ein Pfeil auf ihn. $P$ wird gezogen, die Spalte im Kopf rechnet mit. Dann erscheinen die blassen <b>Repräsentanten</b>: derselbe Pfeil, an anderen Stellen im Bild.',
+      aha: 'Ein Punkt ist eine <b>Stelle</b>, ein Vektor eine <b>Verschiebung</b>. Deshalb schreibt man Punkte in runde Klammern mit Schrägstrich und Vektoren als Spalte — und deshalb darf derselbe Pfeil überall stehen.' },
+
+    { n: 2, s: 28, t: 'Spitze minus Fuß', at: 'Kapitel 1 · Begriff',
+      img: '$A$ und $B$ liegen im Gitter, dazwischen der Pfeil $\\overrightarrow{AB}$. $B$ wird gezogen; die Rechnung $\\overrightarrow{AB} = B - A$ läuft mit. Dann wandern beide Punkte gemeinsam — der Pfeil bleibt gleich.',
+      aha: 'Der Verbindungsvektor ist <b>Spitze minus Fuß</b>. Und er merkt sich nur den Unterschied: Verschiebt man $A$ und $B$ zusammen, ändert sich nichts.' },
+
+    { n: 3, s: 30, t: 'Spitze an Fuß', core: true, at: 'Kapitel 2 · Rechnen',
+      img: '$\\vec a$ und $\\vec b$ stehen im Bild. $\\vec b$ wird an die Spitze von $\\vec a$ gehängt, die Summe schließt das Parallelogramm. Im Kopf steht die Rechnung komponentenweise. Dann schaltet die Ansicht auf <b>Subtraktion</b>.',
+      aha: 'Anhängen und komponentenweise addieren sind dasselbe. Und $\\vec a - \\vec b$ ist der Pfeil <b>von der Spitze von $\\vec b$ zur Spitze von $\\vec a$</b> — wieder Spitze minus Fuß, wie in Szene 2.' },
+
+    { n: 4, s: 22, t: 'Strecken und spiegeln', cut: true, at: 'Kapitel 2 · Rechnen',
+      img: 'Der Regler für $r$ läuft von $2$ über $0$ bis $-1$: Der Pfeil wird länger, verschwindet zum Punkt und kippt in die Gegenrichtung.',
+      aha: 'Ein Vielfaches ändert nur die <b>Länge</b> — und bei negativem $r$ die Richtung. Die Gerade, auf der der Pfeil liegt, bleibt dieselbe.' },
+
+    { n: 5, s: 28, t: 'Wie lang ist ein Pfeil?', at: 'Kapitel 3 · Betrag',
+      img: 'Zu $\\vec a = \\binom{4}{3}$ zeichnet das Lab das gestrichelte Steigungsdreieck; oben steht $|\\vec a| = \\sqrt{4^2+3^2} = 5$. Der Einheitskreis wird eingeblendet, der grüne Einheitsvektor bleibt auf dem Kreis, während $\\vec a$ gezogen wird.',
+      aha: 'Der Betrag ist <b>eine Zahl</b>, kein Pfeil — Pythagoras im Steigungsdreieck. Teilt man durch ihn, bleibt die reine Richtung übrig: der Einheitsvektor, Länge $1$.' },
+
+    { n: 6, s: 30, t: 'Jeden Punkt erreichen', core: true, at: 'Kapitel 4 · Linearkombination',
+      img: 'Zwei Regler $r$ und $s$ bauen $r\\cdot\\vec a + s\\cdot\\vec b$ Schritt für Schritt: erst in Richtung $\\vec a$, dann in Richtung $\\vec b$. Der Knopf <b>Ziel treffen</b> setzt beide Regler so, dass der grüne Punkt genau auf $T$ landet. Daneben: Determinante $5$, linear unabhängig.',
+      aha: 'Mit zwei Pfeilen, die nicht in dieselbe Richtung zeigen, erreicht man <b>jeden</b> Punkt der Ebene — und zwar auf genau eine Art.' },
+
+    { n: 7, s: 26, t: 'Wenn beide dasselbe sagen', core: true, at: 'Kapitel 4 · Linearkombination',
+      img: 'Der Knopf <b>a ∥ b machen</b> dreht $\\vec b$ parallel zu $\\vec a$. Die Determinante fällt auf $0$, der Text springt auf <b>linear abhängig</b>, und alle erreichbaren Punkte liegen plötzlich auf einer einzigen Geraden. $T$ ist nicht mehr erreichbar.',
+      aha: 'Zwei parallele Pfeile sagen dasselbe. Dann bleibt von der ganzen Ebene eine Gerade übrig — das meint <b>linear abhängig</b>, und die Determinante $0$ zeigt es an.' },
+
+    { n: 8, s: 30, t: 'Ab in den Raum', at: 'Kapitel 5 · Geraden',
+      img: 'Der Blick wechselt in die 3D-Bühne, die Kamera schwenkt langsam. Eine Gerade $g: \\vec x = \\vec p + r\\cdot\\vec u$; der Regler für $r$ schiebt den Punkt auf ihr entlang. Dann die Punktprobe: <b>T auf g</b> und <b>T daneben</b>.',
+      aha: 'Eine Gerade ist <b>ein Startpunkt plus ein Vielfaches einer Richtung</b>. Die Punktprobe fragt nur: Gibt es ein $r$, das passt? Für alle drei Zeilen dasselbe.' },
+
+    { n: 9, s: 30, t: 'Der Winkelmesser', core: true, at: 'Kapitel 8 · Skalarprodukt',
+      img: 'Zwei Pfeile im Raum, dazwischen der Winkel. Die Rechnung $\\vec a \\circ \\vec b = 4\\cdot2 + 0\\cdot3 + 0\\cdot1 = 8$ steht im Kopf. $\\vec b$ wird gedreht, bis die Zahl durch null geht — genau dort steht der rechte Winkel.',
+      aha: 'Das Skalarprodukt macht aus zwei Pfeilen <b>eine Zahl</b>. Sie ist null genau dann, wenn die beiden senkrecht stehen — das ist der Test, der im ganzen Rest des Films gebraucht wird.' },
+
+    { n: 10, s: 28, t: 'Der Pfeil, der auf beiden steht', at: 'Kapitel 9 · Kreuzprodukt',
+      img: '$\\vec a \\times \\vec b$ wächst senkrecht aus dem von beiden aufgespannten Parallelogramm heraus. Daneben die Probe: $\\vec a \\circ (\\vec a \\times \\vec b) = 0$ und $\\vec b \\circ (\\vec a \\times \\vec b) = 0$, dazu die Fläche $9$.',
+      aha: 'Das Kreuzprodukt liefert einen <b>Vektor</b>, der auf beiden senkrecht steht — geprüft mit dem Skalarprodukt aus Szene 9. Seine Länge ist die Fläche des Parallelogramms.' },
+
+    { n: 11, s: 26, t: 'Ebenen lesen', at: 'Kapitel 6 · Ebenen',
+      img: 'Die Ebene $2x + 3y + z = 6$ liegt im Raum, ihre Spurpunkte auf den Achsen sind markiert. Der Normalenvektor $\\vec n = (2\\mid3\\mid1)$ steht senkrecht darauf; daneben dieselbe Ebene in Parameterform. Die Koeffizienten werden am Regler verändert, die Ebene kippt mit.',
+      aha: 'Die drei Zahlen vor $x$, $y$ und $z$ <b>sind</b> der Normalenvektor. Koordinatenform und Parameterform sind zwei Schreibweisen für dieselbe Ebene.' },
+
+    { n: 12, s: 26, t: 'Trifft sie oder nicht?', at: 'Kapitel 7 · Lage',
+      img: 'Eine Gerade und eine Ebene. Im Kopf steht $\\vec n \\circ \\vec u = -1$, und der Schnittpunkt leuchtet auf. Dann wird die Lage auf <b>parallel</b> geschaltet: Das Skalarprodukt wird $0$, die Gerade läuft an der Ebene vorbei.',
+      aha: 'Ein einziges Skalarprodukt entscheidet: Steht die Richtung der Geraden senkrecht auf der Normalen, läuft sie parallel — sonst gibt es genau einen Schnittpunkt.' },
+
+    { n: 13, s: 30, t: 'Wie weit ist weg?', core: true, at: 'Kapitel 10 + 11 · Abstand, Anwendung',
+      img: 'Vom Punkt $X$ fällt das Lot auf die Gerade, der Lotfußpunkt und die Strecke erscheinen. Dann dasselbe zur Ebene: $\\ell: \\vec x = X + r\\cdot\\vec n$, das Lab rechnet $r$ aus und setzt den Fußpunkt.',
+      aha: 'Abstand heißt immer <b>senkrecht messen</b>. Man schickt eine Hilfsgerade in Richtung der Normalen los und schaut, wo sie auftrifft — mehr ist es nicht.' },
+
+    { n: 14, s: 16, t: 'Abspann', card: true, at: 'zurück zu Kapitel 1 → Markenkarte',
+      img: 'Zurück in Kapitel 1, die Punkte werden noch einmal gezogen. Dann die Markenkarte mit docalvers.de — Ende auf dem Laborblau.',
+      aha: 'Elf Kapitel, ein Werkzeug: Pfeile, die man addieren, strecken und miteinander multiplizieren kann.' }
+];
+
+/* SAY:START - generated by videopipeline/vektoren/sync-drehbuch.mjs, do not edit */
+const SAY = {
+    s1: 'Was ist eigentlich ein Vektor? <span class="beat"></span> Hier liegt der Punkt P, und vom Ursprung zeigt ein Pfeil auf ihn. <span class="beat"></span> Man nennt ihn den Ortsvektor von P. <span class="pause">1,3 s</span> Ziehen wir P umher, laufen seine beiden Zahlen mit: die Schritte nach rechts und nach oben. <span class="pause">1,4 s</span> Und jetzt der wichtigste Satz des Films: Ein Punkt ist eine Stelle. <span class="beat"></span> Ein Vektor ist eine Verschiebung. <span class="beat"></span> Deshalb darf derselbe Pfeil überall im Bild stehen — die blassen hier sind alle derselbe Vektor.',
+    s2: 'Zwei Punkte, A und B. <span class="beat"></span> Der Pfeil von A nach B heißt Verbindungsvektor. <span class="pause">1,3 s</span> Seine Zahlen bekommt man, indem man die Koordinaten abzieht: B minus A. <span class="beat"></span> Spitze minus Fuß. <span class="pause">1,4 s</span> Und weil nur der Unterschied zählt, ändert sich gar nichts, wenn beide Punkte gemeinsam wandern.',
+    s3: 'Zwei Pfeile kann man addieren. <span class="beat"></span> Dazu hängt man b mit dem Fuß an die Spitze von a — der Pfeil vom Start zum Ende ist die Summe. <span class="pause">1,3 s</span> Rechnerisch ist es dasselbe: erste Zahl plus erste Zahl, zweite plus zweite. <span class="beat"></span> Zusammen spannen die beiden ein Parallelogramm auf, und die Summe ist seine Diagonale. <span class="pause">1,4 s</span> Und die Differenz? <span class="beat"></span> a minus b ist der Pfeil von der Spitze von b zur Spitze von a. <span class="beat"></span> Wieder Spitze minus Fuß, wie eben.',
+    s4: 'Ein Vektor mal einer Zahl: <span class="pause">1,3 s</span> Mit zwei wird der Pfeil doppelt so lang. <span class="pause">1,3 s</span> Mit null schrumpft er zum Punkt. <span class="pause">1,3 s</span> Und mit minus eins zeigt er genau andersherum. <span class="beat"></span> Die Länge ändert sich, die Gerade, auf der er liegt, bleibt.',
+    s5: 'Wie lang ist ein Pfeil? <span class="beat"></span> Das gestrichelte Dreieck verrät es: vier nach rechts, drei nach oben. <span class="beat"></span> Nach Pythagoras ist die Länge fünf. <span class="beat"></span> Diese Länge heißt Betrag, und sie ist eine Zahl, kein Pfeil. <span class="pause">1,4 s</span> Teilt man den Vektor durch seine Länge, bleibt die reine Richtung übrig: der Einheitsvektor. <span class="beat"></span> Er ist genau eins lang, und deshalb landet seine Spitze immer auf dem Kreis, egal wie weit ich a hinausziehe.',
+    s6: 'Jetzt zwei Pfeile gleichzeitig. <span class="beat"></span> Ich gehe r Schritte in Richtung a und dann s Schritte in Richtung b. <span class="pause">1,3 s</span> So eine Kombination aus Strecken und Addieren heißt Linearkombination. <span class="pause">1,4 s</span> Und jetzt das Erstaunliche: Mit diesen beiden Pfeilen erreiche ich jeden Punkt der Ebene. <span class="beat"></span> Auch das Ziel T — und zwar auf genau eine Art. <span class="beat"></span> Die Zahl daneben, die Determinante, ist fünf und nicht null. <span class="beat"></span> Das heißt: linear unabhängig.',
+    s7: 'Und wenn die beiden Pfeile in dieselbe Richtung zeigen? <span class="pause">1,4 s</span> Dann ist die Determinante null, und aus der ganzen Ebene wird eine einzige Gerade. <span class="beat"></span> Alles, was ich noch erreichen kann, liegt auf dieser Linie — T liegt nicht mehr darauf. <span class="beat"></span> Zwei parallele Pfeile sagen dasselbe. <span class="beat"></span> Genau das heißt linear abhängig.',
+    s8: 'Alles, was wir bisher gemacht haben, gilt genauso im Raum — nur mit drei Zahlen statt zwei. <span class="pause">1,4 s</span> Eine Gerade schreibt man dann so: ein Startpunkt, plus r mal eine Richtung. <span class="beat"></span> Das heißt Parameterform. <span class="pause">1,4 s</span> Jedes r gibt einen Punkt auf der Geraden; ich schiebe ihn einfach daran entlang. <span class="pause">1,4 s</span> Und ob ein Punkt auf der Geraden liegt, prüft man genauso: Gibt es ein r, das in allen drei Zeilen passt? <span class="beat"></span> Beim einen ja, beim anderen nein.',
+    s9: 'Zwei Pfeile kann man auch miteinander multiplizieren — auf zwei ganz verschiedene Arten. <span class="beat"></span> Die erste heißt Skalarprodukt: <span class="beat"></span> Man multipliziert zeilenweise und addiert alles. <span class="beat"></span> Hier kommt acht heraus. <span class="beat"></span> Heraus kommt eine Zahl, kein Pfeil. <span class="pause">1,4 s</span> Und diese Zahl misst, wie sehr die beiden in dieselbe Richtung zeigen. <span class="pause">1,4 s</span> Stehen sie senkrecht aufeinander, ist sie genau null. <span class="beat"></span> Diesen Test brauchen wir gleich noch zweimal.',
+    s10: 'Die zweite Art ist das Kreuzprodukt. <span class="beat"></span> Dabei kommt ein Pfeil heraus, und zwar einer, der auf beiden senkrecht steht. <span class="pause">1,4 s</span> Die Probe macht das Skalarprodukt von eben: <span class="beat"></span> beide Male null, also wirklich senkrecht. <span class="pause">1,4 s</span> Und die Länge dieses Pfeils ist genau die Fläche des Parallelogramms, das a und b aufspannen. <span class="beat"></span> Hier also neun.',
+    s11: 'Eine Ebene kann man auf zwei Arten aufschreiben. <span class="beat"></span> In der Koordinatenform steht sie als Gleichung: zwei x plus drei y plus z gleich sechs. <span class="pause">1,4 s</span> Und die drei Zahlen davor sind kein Zufall — sie bilden den Normalenvektor, der senkrecht auf der Ebene steht. <span class="pause">1,4 s</span> Ändere ich sie, kippt die ganze Ebene mit. <span class="beat"></span> Daneben steht dieselbe Ebene in Parameterform: ein Punkt und zwei Richtungen.',
+    s12: 'Trifft eine Gerade diese Ebene? <span class="pause">1,4 s</span> Dafür genügt ein Skalarprodukt: das der Normalen mit der Richtung der Geraden. <span class="beat"></span> Hier ist es nicht null, also gibt es genau einen Schnittpunkt. <span class="pause">1,4 s</span> Und wenn es null wird, steht die Richtung senkrecht auf der Normalen. <span class="beat"></span> Dann läuft die Gerade parallel an der Ebene vorbei und trifft sie nie.',
+    s13: 'Bleibt die Frage: Wie weit ist ein Punkt von etwas entfernt? <span class="beat"></span> Abstand heißt immer senkrecht messen. <span class="pause">1,4 s</span> Vom Punkt aus fällt ein Lot auf die Gerade; wo es auftrifft, liegt der Lotfußpunkt, und die Strecke dorthin ist der Abstand. <span class="pause">1,4 s</span> Bei einer Ebene ist es dasselbe in Grün: Ich schicke vom Punkt aus eine Hilfsgerade in Richtung der Normalen los und schaue, wo sie die Ebene trifft. <span class="beat"></span> Mehr steckt hinter keiner Abstandsformel.',
+    s14: 'Elf Kapitel, ein einziges Werkzeug: Pfeile, die man aneinanderhängen, strecken und miteinander multiplizieren kann. <span class="beat"></span> Probier es aus, im Doc Alvers Mathe-Labor auf doc alvers punkt <span class="spell">de</span>.'
+};
+const SPOKEN = {"s1":28.584,"s2":19.272,"s3":29.736,"s4":15.936,"s5":25.992,"s6":30.144,"s7":21.864,"s8":29.4,"s9":28.344,"s10":22.296,"s11":26.52,"s12":22.032,"s13":27.264,"s14":12.024};
+/* SAY:END */
+
+const ARC = [
+    { t: 'Begriff',                 c: '#93a8c6' },
+    { t: 'Rechnen',                 c: '#f5c242', key: true },
+    { t: 'Messen',                  c: '#00d2ff' },
+    { t: 'Jeden Punkt<br>erreichen', c: '#799e31', key: true },
+    { t: 'Parallel:<br>brechen',    c: '#b02418', key: true },
+    { t: 'In den<br>Raum',          c: '#00d2ff' },
+    { t: 'Senkrecht<br>messen',     c: '#799e31', key: true },
+    { t: 'Abstand',                 c: '#f5c242' }
+];
+
+const THINK = 0;
+
+/* --- the arc --- */
+document.getElementById('arc').innerHTML = ARC.map(a =>
+    `<span class="${a.key ? 'key' : ''}" style="--stop:${a.c}">${a.t}</span>`).join('');
+
+/* --- timeline: each scene as wide as it is long --- */
+const secs = (x) => SPOKEN['s' + x.n] ?? x.s;
+const total = SCENES.reduce((s, x) => s + secs(x), 0);
+document.getElementById('timeline').innerHTML = SCENES.map(x =>
+    `<i class="${x.core ? 'core' : x.cut ? 'cut' : ''}" data-n="${x.n}"
+        style="flex:0 0 ${(secs(x) / total * 100).toFixed(3)}%"
+        title="Szene ${x.n} · ${secs(x).toFixed(1)} s"></i>`).join('');
+
+/* --- budget, from the measured durations when they exist --- */
+(function () {
+    const spoken = Object.values(SPOKEN).reduce((a, b) => a + b, 0);
+    const planned = SCENES.reduce((a, x) => a + x.s, 0);
+    const air = SCENES.length * 1.6;
+    const film = (spoken || planned) + air + THINK;
+    const mmss = (t) => Math.floor(t / 60) + ':' + String(Math.round(t % 60)).padStart(2, '0');
+    const credits = Math.ceil(film / 15);
+    const cell = (dt, dd, sub) => `<div><dt>${dt}</dt><dd>${dd}<small>${sub}</small></dd></div>`;
+    document.getElementById('budget').innerHTML =
+        cell('Sprache', (spoken || planned).toFixed(0) + ' s', spoken ? 'gemessen' : 'geplant') +
+        cell('Luft', '~' + air.toFixed(0) + ' s', '1,6 s je Szene') +
+        cell('Film', mmss(film), spoken ? 'nach der Vertonung' : 'geschätzt') +
+        cell('D-ID später', '≈ ' + credits, 'von 52 Credits übrig') +
+        cell('Bett-Loop', '142,778 s', '64 Takte · 107,58 BPM');
+    document.getElementById('meta-run').textContent = '~' + mmss(film) + (spoken ? ' gemessen' : ' geplant');
+    document.getElementById('meta-scenes').textContent = SCENES.length + ' · 11 Kapitel';
+    if (spoken) {
+        const n = document.getElementById('tl-note');
+        if (n) n.textContent = 'Breite = gemessene Sprechzeit';
+    }
+})();
+
+/* --- scene cards --- */
+document.getElementById('scenes').innerHTML = SCENES.map(x => `
+    <article class="scene ${x.core ? 'core' : x.cut ? 'cut' : ''}">
+        <div class="idx">${String(x.n).padStart(2, '0')}</div>
+        <div>
+            <div class="top">
+                <h3>${x.t}</h3>
+                ${x.core ? '<span class="tag core">Kernszene</span>' : ''}
+                ${x.cut ? '<span class="tag cut">Notbremse</span>' : ''}
+                ${x.card ? '<span class="tag card">Karte</span>' : ''}
+                <span class="where">${x.at}</span>
+                <span class="secs">${secs(x).toFixed(1)} s</span>
+            </div>
+            <div class="body">
+                <div><h4>Was im Bild passiert</h4><p>${x.img}</p></div>
+                <div class="aha"><h4>Der Aha</h4><p>${x.aha}</p></div>
+            </div>
+            ${SAY['s' + x.n] ? `<div class="say"><h4>Solita sagt</h4><p>${SAY['s' + x.n]}</p></div>` : ''}
+        </div>
+    </article>`).join('');
+
+/* --- formulas: KaTeX as MathML, so the page needs no KaTeX stylesheet or font files --- */
+function renderFormulas() {
+    if (!window.renderMathInElement) return;
+    renderMathInElement(document.body, {
+        delimiters: [{ left: '$', right: '$', display: false }],
+        output: 'mathml',
+        throwOnError: false
+    });
+}
+if (window.renderMathInElement) renderFormulas();
+else window.addEventListener('load', renderFormulas);
+
+/* ---------------------------------------------------------------
+   Hero: the film's own subject. Two vectors in a grid, b hung on the
+   tip of a, the sum closing the parallelogram - and three pale copies
+   of a somewhere else, because a vector is a shift, not a place.
+   Everything is computed from the two pairs of numbers; a click draws
+   a new pair.
+   --------------------------------------------------------------- */
+(function () {
+    const cv = document.getElementById('stage');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let A = [4, 1], B = [1, 3], u = 0, t0 = 0, raf = 0;
+
+    const pick = () => {
+        const r = () => Math.round(Math.random() * 6) - 3;
+        do { A = [r() || 2, r() || 1]; B = [r() || 1, r() || 2]; }
+        while (Math.abs(A[0] * B[1] - A[1] * B[0]) < 2);   // never parallel, never tiny
+    };
+
+    function fit() {
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.max(1, Math.round(r.width * dpr));
+        cv.height = Math.max(1, Math.round(r.height * dpr));
+    }
+
+    const W = () => cv.width, H = () => cv.height;
+
+    function draw(now) {
+        fit();
+        const k = W() / 600;
+        const S = Math.min(W(), H());
+        const unit = S / 11;
+        const ox = W() / 2, oy = H() / 2 + unit;          // origin a little below centre
+        const s = (p) => [ox + p[0] * unit, oy - p[1] * unit];
+
+        ctx.clearRect(0, 0, W(), H());
+        ctx.fillStyle = '#04101f';
+        ctx.fillRect(0, 0, W(), H());
+
+        // grid
+        ctx.strokeStyle = 'rgba(0, 210, 255, 0.10)';
+        ctx.lineWidth = Math.max(1, k);
+        for (let i = -6; i <= 6; i++) {
+            ctx.beginPath();
+            ctx.moveTo(ox + i * unit, 0); ctx.lineTo(ox + i * unit, H());
+            ctx.moveTo(0, oy + i * unit); ctx.lineTo(W(), oy + i * unit);
+            ctx.stroke();
+        }
+        ctx.strokeStyle = 'rgba(157, 180, 214, 0.45)';
+        ctx.lineWidth = 1.4 * k;
+        ctx.beginPath();
+        ctx.moveTo(0, oy); ctx.lineTo(W(), oy);
+        ctx.moveTo(ox, 0); ctx.lineTo(ox, H());
+        ctx.stroke();
+
+        const arrow = (from, to, color, width, head = 1) => {
+            const p = s(from), q = s(to);
+            const dx = q[0] - p[0], dy = q[1] - p[1], len = Math.hypot(dx, dy) || 1;
+            const ux = dx / len, uy = dy / len, h = 13 * k * head;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width * k;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(p[0], p[1]);
+            ctx.lineTo(q[0] - ux * h * 0.8, q[1] - uy * h * 0.8);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(q[0], q[1]);
+            ctx.lineTo(q[0] - ux * h - uy * h * 0.42, q[1] - uy * h + ux * h * 0.42);
+            ctx.lineTo(q[0] - ux * h + uy * h * 0.42, q[1] - uy * h - ux * h * 0.42);
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+        };
+
+        const sum = [A[0] + B[0], A[1] + B[1]];
+
+        // the same vector a, drawn somewhere else - pale, because the place does not matter
+        [[-4, -2], [2, -3], [-3, 2]].forEach((o) => {
+            arrow(o, [o[0] + A[0], o[1] + A[1]], 'rgba(245, 194, 66, 0.28)', 3);
+        });
+
+        // the parallelogram, closed as far as the animation has come
+        ctx.setLineDash([6 * k, 6 * k]);
+        ctx.strokeStyle = 'rgba(157, 232, 255, 0.45)';
+        ctx.lineWidth = 1.4 * k;
+        ctx.beginPath();
+        const p1 = s(B), p2 = s(sum), p3 = s(A);
+        ctx.moveTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.lineTo(p3[0], p3[1]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // a, then b hung on its tip, then the sum
+        arrow([0, 0], A, 'rgb(245, 194, 66)', 4.5);
+        const bTip = [A[0] + B[0] * u, A[1] + B[1] * u];
+        if (u > 0.02) arrow(A, bTip, '#00d2ff', 4.5);
+        if (u > 0.98) arrow([0, 0], sum, 'rgb(160, 212, 70)', 5);
+        arrow([0, 0], B, 'rgba(0, 210, 255, 0.35)', 3);
+
+        // labels
+        const label = (txt, p, color, dx = 0, dy = 0) => {
+            ctx.font = '700 ' + (19 * k) + 'px Orbitron, sans-serif';
+            ctx.fillStyle = color;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const q = s(p);
+            ctx.fillText(txt, q[0] + dx * k, q[1] + dy * k);
+        };
+        label('a', [A[0] / 2, A[1] / 2], 'rgb(245, 194, 66)', 14, -14);
+        label('b', [B[0] / 2, B[1] / 2], '#00d2ff', -16, 12);
+        if (u > 0.98) label('a + b', [sum[0] / 2, sum[1] / 2], 'rgb(160, 212, 70)', 30, 16);
+
+        ctx.font = '400 ' + (17 * k) + 'px Outfit, sans-serif';
+        ctx.fillStyle = '#8ba1c0';
+        ctx.textAlign = 'left';
+        ctx.fillText('derselbe Pfeil, anderer Ort', 18 * k, H() - 22 * k);
+
+        if (!reduced && u < 1) {
+            if (!t0) t0 = now || performance.now();
+            u = Math.min(1, ((now || performance.now()) - t0) / 900);
+            raf = requestAnimationFrame(draw);
+        } else if (reduced) u = 1;
+    }
+
+    function restart() {
+        cancelAnimationFrame(raf);
+        pick();
+        u = reduced ? 1 : 0;
+        t0 = 0;
+        raf = requestAnimationFrame(draw);
+    }
+
+    draw();
+    if (!reduced) { u = 0; t0 = 0; raf = requestAnimationFrame(draw); }
+    addEventListener('resize', () => draw(), { passive: true });
+    cv.style.cursor = 'pointer';
+    cv.addEventListener('click', restart);
+    document.fonts.ready.then(() => draw());
+})();
+</script>
+</body>
+</html>

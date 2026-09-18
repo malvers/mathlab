@@ -1,0 +1,1213 @@
+<!doctype html>
+<!-- Drehbuch Wuerfelspiel - made from _template.html (17.09.2026). Runde 1: nur der Plot.
+     Solitas Wortlaut entsteht erst nach Docs Freigabe in videopipeline/wuerfelspiel/narration.mjs. -->
+
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+
+<style>
+/* minimal reset - the artifact host used to provide this */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; }
+img, canvas, svg { display: block; max-width: 100%; }
+button, input { font: inherit; }
+:focus-visible { outline: 2px solid #00d2ff; outline-offset: 2px; }
+</style>
+<title>Fünf von neun</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@200;300;400;600&display=swap">
+
+<style>
+/* Palette and faces are the lab's own (bb84.html): Orbitron + Outfit,
+   deep blue ground, cyan = the image under A, orange/green = the two
+   principal axes. Single-theme on purpose - this is the lab's world. */
+:root {
+    --ground:      #081428;
+    --ground-deep: #050e1c;
+    --surface:     #0c1c3a;
+    --surface-2:   #0e244e;
+    --line:        #1c3565;
+    --line-soft:   #16294d;
+
+    --ink:         #e6eefa;
+    --ink-dim:     #b3c5de;
+    --ink-faint:   #8ba1c0;
+
+    --cyan:        #00d2ff;
+    --lambda:      #f5c242;
+    --phi:         #799e31;
+    --violet:      #c07fe8;
+    --red:         #b02418;
+
+    --step: clamp(0.9rem, 0.55rem + 1.1vw, 1.5rem);
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--ground);
+    background-image:
+        radial-gradient(1100px 620px at 12% -8%, #0f2a55 0%, transparent 62%),
+        radial-gradient(900px 520px at 92% 4%, #10203f 0%, transparent 58%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(1.6rem, 4vw, 4rem) clamp(1.1rem, 4vw, 2.6rem) 6rem;
+}
+
+/* ---------- shared type ---------- */
+.eyebrow {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+
+h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-wrap: balance; margin: 0; }
+
+h1 {
+    font-size: clamp(2rem, 1.2rem + 3.4vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0.5rem 0 0;
+}
+
+h2 {
+    font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.32rem);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+}
+
+p { margin: 0; }
+
+em { font-style: italic; color: #eaf2fd; }
+strong { font-weight: 600; color: #f2f7ff; }
+
+/* mathematical symbols, set apart without a formula engine */
+.m {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--cyan);
+    white-space: nowrap;
+}
+.m.l { color: var(--lambda); }
+.m.g { color: var(--phi); }
+
+/* ---------- header ---------- */
+header { margin-bottom: clamp(1.8rem, 4vw, 3rem); }
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lambda);
+    border: 1px solid #4a3a15;
+    background: #1b1607;
+    border-radius: 2px;
+    padding: 0.34rem 0.7rem;
+    margin-top: 1.1rem;
+}
+.status::before {
+    content: "";
+    width: 5px; height: 5px;
+    background: var(--lambda);
+    border-radius: 50%;
+}
+
+.lede {
+    margin-top: 1.1rem;
+    max-width: 60ch;
+    color: var(--ink-dim);
+    font-size: 1.18rem;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2rem;
+    margin-top: 1.6rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line-soft);
+}
+.meta div { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.4rem 0; }
+.meta dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.meta dd { margin: 0; font-size: 1.02rem; color: var(--ink); }
+.meta a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid #05506b; }
+.meta a:hover, .meta a:focus-visible { border-bottom-color: var(--cyan); }
+
+/* ---------- hero canvas + thesis ---------- */
+.thesis {
+    display: grid;
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    gap: clamp(1.2rem, 3vw, 2.6rem);
+    align-items: center;
+    margin: clamp(1.6rem, 4vw, 2.6rem) 0 clamp(2.4rem, 6vw, 4rem);
+    padding: clamp(1.2rem, 3vw, 2rem);
+    background: linear-gradient(160deg, var(--surface) 0%, var(--ground-deep) 100%);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+}
+@media (max-width: 700px) { .thesis { grid-template-columns: 1fr; } }
+
+#stage {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: block;
+    border-radius: 2px;
+    background: #04101f;
+}
+
+.thesis blockquote {
+    margin: 0;
+    font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem);
+    line-height: 1.42;
+    font-weight: 200;
+    color: #eef4fd;
+    text-wrap: balance;
+}
+.thesis blockquote strong { font-weight: 600; }
+.thesis .after {
+    margin-top: 1.1rem;
+    color: var(--ink-dim);
+    font-size: 1.06rem;
+    max-width: 54ch;
+}
+
+/* ---------- section frame ---------- */
+section { margin-top: clamp(2.6rem, 6vw, 4.4rem); }
+
+.head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 1.5rem;
+}
+.head .n {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--cyan);
+}
+.head .note { margin-left: auto; font-size: 0.9rem; color: var(--ink-faint); }
+
+.prose { max-width: 66ch; color: var(--ink-dim); display: grid; gap: 0.85rem; }
+.prose strong { color: #eaf2fd; }
+
+/* ---------- the arc ---------- */
+.arc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: stretch;
+    margin-bottom: 1.5rem;
+}
+.arc span {
+    flex: 1 1 auto;
+    min-width: 92px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-align: center;
+    padding: 0.85rem 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-top: 2px solid var(--stop, var(--line));
+    color: var(--ink-dim);
+    text-wrap: balance;
+    line-height: 1.4;
+}
+.arc span.key { color: #eef4fd; background: var(--surface-2); }
+
+/* ---------- timeline ---------- */
+.timeline {
+    display: flex;
+    width: 100%;
+    height: 54px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.7rem;
+}
+.timeline i {
+    position: relative;
+    display: block;
+    border-right: 1px solid var(--ground-deep);
+    background: var(--lambda);
+    font-style: normal;
+    transition: background 0.15s;
+}
+.timeline i:last-child { border-right: 0; }
+.timeline i.core { background: var(--phi); }
+.timeline i.cut  { background: var(--red); }
+.timeline i::after {
+    content: attr(data-n);
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #1a1305;
+}
+.timeline i.core::after { color: #0d1a06; }
+.timeline i.cut::after  { color: #ffdcd7; font-weight: 700; }
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.4rem;
+    font-size: 0.87rem;
+    color: var(--ink-faint);
+}
+.legend b { font-weight: 400; color: var(--ink-dim); }
+.legend span { display: inline-flex; align-items: center; gap: 0.42rem; }
+.legend s { width: 11px; height: 11px; border-radius: 2px; text-decoration: none; display: inline-block; }
+
+/* ---------- scenes ---------- */
+.scenes { display: grid; gap: 0.7rem; }
+
+.scene {
+    display: grid;
+    grid-template-columns: 3.6rem minmax(0, 1fr);
+    gap: 0 1.1rem;
+    padding: 1.4rem 1.55rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--lambda);
+    border-radius: 2px;
+}
+.scene.core { border-left-color: var(--phi); background: linear-gradient(90deg, #16240f 0%, var(--surface) 34%); }
+.scene.cut  { border-left-color: var(--red); }
+
+.scene .idx {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--lambda);
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.1rem;
+}
+.scene.core .idx { color: var(--phi); }
+.scene.cut .idx  { color: #c9503f; }
+
+.scene .top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.7rem;
+}
+.scene h3 { font-size: 1.16rem; font-weight: 700; letter-spacing: 0.01em; color: #f0f6ff; }
+
+.tag {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+    border: 1px solid;
+}
+.tag.core { color: #0d1a06; border-color: var(--phi); background: var(--phi); }
+.tag.cut  { color: #ffdcd7; border-color: var(--red); background: var(--red); }
+
+.secs {
+    margin-left: auto;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+    gap: 0.6rem 1.6rem;
+}
+@media (max-width: 720px) { .body { grid-template-columns: 1fr; gap: 1rem; } }
+
+.body > div { display: grid; gap: 0.34rem; align-content: start; }
+.body h4 {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.body p { font-size: 1.06rem; line-height: 1.66; color: var(--ink-dim); }
+.body .aha { border-left: 1px solid var(--line); padding-left: 1.6rem; }
+@media (max-width: 720px) { .body .aha { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 0.9rem; } }
+.body .aha p { color: var(--ink); }
+
+/* what Solita actually says - generated from narration.mjs, never hand-edited */
+.say {
+    margin-top: 1.1rem;
+    padding: 0.95rem 1.2rem;
+    background: #0a1830;
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--cyan);
+    border-radius: 2px;
+}
+.say h4 {
+    margin: 0 0 0.45rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.64rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+.say p {
+    margin: 0;
+    font-size: 1.06rem;
+    line-height: 1.62;
+    color: var(--ink);
+}
+.say .pause {
+    display: inline-block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 500;
+    color: var(--lambda);
+    background: #241c07;
+    border: 1px solid #4a3a15;
+    border-radius: 2px;
+    padding: 0.05rem 0.4rem;
+    margin: 0 0.22rem;
+    vertical-align: 0.08em;
+    white-space: nowrap;
+}
+.say .beat {
+    display: inline-block;
+    width: 0.5em;
+    height: 0.5em;
+    margin: 0 0.1em;
+    background: radial-gradient(circle, var(--cyan) 1.6px, transparent 1.8px);
+    vertical-align: 0.05em;
+    opacity: 0.55;
+}
+.say .spell {
+    border-bottom: 1px dotted var(--ink-faint);
+    letter-spacing: 0.12em;
+}
+
+/* ---------- rules / lists ---------- */
+.rules { display: grid; gap: 0.6rem; counter-reset: r; max-width: 74ch; }
+/* the number is positioned, not a grid cell - as a grid item the bare text
+   after the bold lead-in became its own item and fell into the 1.8rem column */
+.rules li {
+    list-style: none;
+    position: relative;
+    padding-left: 2.8rem;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+}
+.rules li::before {
+    counter-increment: r;
+    content: counter(r, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 0.28rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: var(--violet);
+}
+.rules { padding: 0; margin: 0; }
+
+.notes { display: grid; gap: 0.75rem; max-width: 74ch; padding: 0; margin: 0; }
+.notes li {
+    list-style: none;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+    padding-left: 1.1rem;
+    border-left: 1px solid var(--line);
+}
+.notes strong { color: #eaf2fd; }
+
+code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.85em;
+    color: var(--cyan);
+    background: #0a1a33;
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    padding: 0.06em 0.34em;
+}
+
+/* ---------- budget ---------- */
+.budget {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--line-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+}
+.budget div { background: var(--surface); padding: 1rem 1.1rem; display: grid; gap: 0.28rem; }
+.budget dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.budget dd {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--cyan);
+    font-variant-numeric: tabular-nums;
+}
+.budget dd small { display: block; font-family: 'Outfit', sans-serif; font-size: 0.78rem; font-weight: 300; color: var(--ink-faint); letter-spacing: 0; margin-top: 0.2rem; }
+
+.solved { color: var(--phi); }
+
+/* ---------- footer ---------- */
+footer {
+    margin-top: clamp(2.6rem, 6vw, 4.4rem);
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    align-items: baseline;
+}
+footer p { font-size: 1.05rem; color: var(--ink-dim); max-width: 58ch; }
+footer .sig { margin-left: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+}
+</style>
+<style>
+/* Wuerfelspiel additions: the lab's own meanings - orange = Lena, cyan = Mia,
+   green = Lena wins, red = Mia wins / a mistake. */
+.m.lena { color: var(--lambda); }
+.m.mia  { color: var(--cyan); }
+
+/* formulas come from KaTeX as native MathML (no stylesheet or font files needed) */
+math { font-size: 1.05em; math-style: normal; }
+
+/* the hero carries the film's picture - give it more room than the template's 300px */
+.thesis { grid-template-columns: minmax(0, 400px) minmax(0, 1fr); }
+@media (max-width: 700px) { .thesis { grid-template-columns: 1fr; } }
+
+/* phone: number above the card body, so long formulas keep their width */
+@media (max-width: 720px) {
+    .scene { grid-template-columns: minmax(0, 1fr); gap: 0.4rem; }
+    .body { grid-template-columns: minmax(0, 1fr); }
+}
+
+.alert {
+    margin-top: 1.4rem;
+    padding: 1.2rem 1.4rem;
+    background: linear-gradient(100deg, #2a0f0a 0%, var(--surface) 60%);
+    border: 1px solid #6b2318;
+    border-left: 3px solid #d4463a;
+    border-radius: 3px;
+    display: grid;
+    gap: 0.7rem;
+    max-width: 76ch;
+}
+.alert h3 { font-size: 1.02rem; letter-spacing: 0.04em; color: #ffd9d3; }
+.alert p { font-size: 1.04rem; color: #e3cfcb; }
+.alert strong { color: #fff2ef; }
+
+.alert.ask { background: linear-gradient(100deg, #241c07 0%, var(--surface) 60%); border-color: #4a3a15; border-left-color: var(--lambda); }
+.alert.ask h3 { color: #ffe9b0; }
+.alert.ask p, .alert.ask li { color: #e6dcc2; }
+.alert.ask strong { color: #fff6de; }
+.alert.ask ol { margin: 0; padding-left: 1.3rem; display: grid; gap: 0.5rem; font-size: 1.04rem; }
+
+.scene .where {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+    color: var(--ink-dim);
+    border: 1px solid var(--line);
+}
+.scene .where.lab { color: #06141f; background: var(--cyan); border-color: var(--cyan); }
+.tag.card { color: #1a1305; border-color: var(--lambda); background: var(--lambda); }
+</style>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+    <p class="eyebrow">Doc Alvers Mathe-Labor · Videopipeline</p>
+    <h1>Fünf von neun</h1>
+    <p class="lede">Der Plot für den Film zum Würfelspiel-Labor: alles, was das Lab kann,
+        in einer Reihenfolge, in der man es versteht — vom ersten Wurf bis zu Würfeln,
+        von denen keiner der beste ist.</p>
+    <p class="status">Gedreht 17.09.2026 · 8:46 in 1440p · Fassung ohne D-ID</p>
+
+    <dl class="meta">
+        <div><dt>Lab</dt><dd><a href="https://docalvers.de/wuerfelspiel.html">wuerfelspiel.html</a></dd></div>
+        <div><dt>Sprecherin</dt><dd>Solita · de-DE-Studio</dd></div>
+        <div><dt>Aufnahme</dt><dd>1440p · Playwright · 4 Takes</dd></div>
+        <div><dt>Film</dt><dd><code>wuerfelspiel-voice-1440p.mp4</code></dd></div>
+        <div><dt>Szenen</dt><dd id="meta-scenes">24</dd></div>
+        <div><dt>Laufzeit</dt><dd id="meta-run">~11 min geplant</dd></div>
+    </dl>
+</header>
+
+<div class="thesis">
+    <canvas id="stage" width="600" height="600" role="img"
+            aria-label="Das Flächenmodell zum Würfelspiel: Lenas sechs Flächen nach rechts,
+                        Mias sechs Flächen nach unten, jedes der 36 Kästchen grün, wenn Lena
+                        gewinnt, rot, wenn Mia gewinnt. Grün sind fünf Neuntel der Fläche.
+                        Punkte zeigen echte Zufallswürfe."></canvas>
+    <div>
+        <blockquote>Wer öfter gewinnt, steht <strong>schon auf den Würfeln</strong> — man muss
+            nur die Flächen zählen, entlang malnehmen und quer addieren.</blockquote>
+        <p class="after">Der ganze Film ist die Antwort auf eine einzige Frage:
+            <em>Kann man einem Würfelpaar ansehen, wer gewinnt, bevor es rollt?</em>
+            Links ist das die Antwort als Bild: Grün ist genau $\frac{5}{9}$ der Fläche,
+            und die Punkte — echte Zufallswürfe — landen im Lauf der Zeit auch so.
+            Klick würfelt neu.</p>
+    </div>
+</div>
+
+<section>
+    <div class="head"><span class="n">A</span><h2>Der dramaturgische Bogen</h2></div>
+    <div class="arc" id="arc"></div>
+    <div class="prose">
+        <p>Erst wird gespielt und gezählt: Zwei Würfel, sechs Flächen, und die erste Falle —
+           Mias zwei Zahlen sind nicht je die Hälfte (1–3). Dann wächst der Baum Stufe für
+           Stufe, und aus ihm fallen Pfadregel und Summenregel heraus, bis $\frac{5}{9}$
+           dasteht (4–11). Die Simulation prüft das nach, statt es zu glauben (12).</p>
+        <p>Dann wird <strong>kaputtgerechnet</strong>: fünf typische Fehler, jeder mit einem
+           Ergebnis, das die Kontrolle sofort entlarvt — bis hin zu einer
+           Wahrscheinlichkeit von $5$ (13–16). Im Labor werden die Würfel umgebaut: Eine
+           einzige Fläche macht das Spiel fair, und gleiche Würfel sind trotzdem kein
+           Halbe-halbe (17–19). Zum Schluss bricht die Intuition selbst: Efrons vier Würfel
+           schlagen sich im Kreis, einen besten gibt es nicht (20–21). Dann sind die
+           Zuschauer dran (22–24).</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">B</span><h2>Die 24 Szenen</h2>
+        <span class="note" id="tl-note">Breite = geplante Sprechzeit</span></div>
+    <div class="timeline" id="timeline"></div>
+    <div class="legend">
+        <span><s style="background:#799e31"></s><b>Kernszene — wird nicht gekürzt</b></span>
+        <span><s style="background:#b02418"></s><b>Notbremse, falls der Schnitt zäh wirkt</b></span>
+        <span><s style="background:#f5c242"></s><b>Regelszene</b></span>
+    </div>
+    <div class="scenes" id="scenes" style="margin-top:1.5rem"></div>
+</section>
+
+<section>
+    <div class="head"><span class="n">C</span><h2>Didaktische Leitplanken</h2>
+        <span class="note">bindend für den Sprechertext</span></div>
+    <ol class="rules">
+        <li><strong>Nie eine Formel ohne vorher gezeigtes Bild.</strong> Kein Bruch, bevor
+            die Flächen im Netz geleuchtet haben (Szene 3). Pfad- und Summenregel erst, wenn
+            der Weg im Baum orange oder grün ist.</li>
+        <li><strong>Ein neuer Begriff pro Szene.</strong> Es gibt genau sieben:
+            <em>zweistufig</em> (4), <em>zusammenfassen</em> (5), <em>unabhängig</em> (7),
+            <em>Pfadregel</em> (8), <em>Summenregel</em> (10), <em>relative Häufigkeit</em>
+            (12), <em>nicht-transitiv</em> (20). Mehr Fachwörter braucht der Film nicht.</li>
+        <li>Verboten: <em>Ergebnismenge, Omega, Laplace-Experiment, bedingte
+            Wahrscheinlichkeit, Erwartungswert</em> — und „Glück“ als Erklärung. Besonders
+            <em>Laplace</em>: Über die Zahlen ist Mias Würfel gerade <strong>kein</strong>
+            Laplace-Würfel; das Wort würde die Falle aus Szene 3 zudecken.</li>
+        <li><strong>Brüche werden gesprochen</strong> („zwei Neuntel“), Prozent nur dort,
+            wo das Bild sie zeigt, und mit „rund“. Bei allem, was zufällig ist (Szenen 1, 12,
+            18), nennt Solita nur Zahlen, die run2 vorher aus dem Lab ausliest — oder
+            keine.</li>
+        <li><strong>Die Simulation trifft nie „genau“.</strong> Nach tausend Runden streut
+            Lenas Anteil noch um etwa $\pm 0{,}016$ um $\frac{5}{9}$, nach hunderttausend um
+            $\pm 0{,}0016$. Solita sagt „immer näher“, nicht „genau fünf Neuntel“.</li>
+        <li><strong>Namen wie im Lab:</strong> Lena und Mia, Paul und Jonas, Anna und Ben,
+            Würfel A bis D. Nie „Spieler 1“. Lena würfelt zuerst — immer.</li>
+        <li><strong>Nichts behaupten, was das Bild nicht hergibt.</strong> Jede Zahl in
+            Abschnitt B ist gegen die Rechnung des Labs nachgerechnet (17.09.). Mittelwerte
+            zeigt das Lab nicht, also kommen sie im Film nicht vor. Efron hat im Lab
+            <strong>vier</strong> Würfel — der Film zeigt vier, auch wenn das Deck noch
+            drei nennt.</li>
+    </ol>
+</section>
+
+<section>
+    <div class="head"><span class="n">D</span><h2>Zeitbudget</h2>
+        <span class="note">nach der Vertonung neu zu rechnen</span></div>
+    <dl class="budget" id="budget"></dl>
+    <div class="prose">
+        <p><strong>Gemessen nach der Vertonung:</strong> Solita spricht schneller als die
+           geplanten 147 Wörter je Minute, darum stehen hier 7:51 Sprache statt der geplanten
+           gut zehn Minuten — der Film landet bei knapp neun Minuten statt bei elf. Dazu
+           kommen Luft zwischen den Szenen und fünf Sekunden Denkpause vor der Lösung
+           (Szene 22). Teil 1 von
+           <code>Infinity_6min.m4a</code> ist <strong>nahtlos loopbar</strong> (loopStart
+           21,220 s, loopEnd 163,998 s) — das Bett lässt sich auf jede Länge rendern.</p>
+        <p><strong>Studio-Stimme:</strong> 24 Szenen, seriell mit mindestens fünf Sekunden
+           Abstand, sonst sperrt der Burst Solitas Stimme für alle. Rund 8 500 Zeichen;
+           nach etwa zwei Vollläufen am Stück kommt HTTP 429.</p>
+    </div>
+    <div class="alert">
+        <h3>Diese Fassung hat keine Sprechblase — die Frist gilt trotzdem</h3>
+        <p>Doc, 17.09.2026: <em>„mach den Film erstmal ohne D-ID, nur voice“</em>. Der Schnitt
+           läuft deshalb ohne Sprechblase; <code>DID=1 node wuerfelspiel/run3.mjs</code> setzt
+           Solita nachträglich dazu, ohne dass Ton oder Bild neu entstehen.</p>
+        <p><strong>Gedreht und geschnitten:</strong> 24 Szenen aus vier Takes, Hauptteil 8:37,
+           mit Abspann <strong>8:46</strong>, 2560 × 1440, Ton mit einem Mittelwert von
+           −18,1 dB, letzter Frame auf dem Laborblau (YAVG 55,6 — kein Schwarz).</p>
+        <p>Dann verfallen die Credits, und das Abo wird gekündigt. Der ganze Weg —
+           Freigabe, Sätze, Vorab-Check, Probelauf, Aufnahme, D-ID — muss <strong>bis
+           Montagabend</strong> durch sein. Ein Solita-Talk über den ganzen Film kostet
+           rund <strong id="did-cost">45</strong> der <strong>93</strong> Credits: Das
+           reicht für <strong>zwei</strong> Versuche, keinen dritten.</p>
+        <p><strong>Nicht geprüft:</strong> ob D-ID einen Talk von über zehn Minuten am
+           Stück annimmt. Das wird vor der Aufnahme gemessen; sonst gibt es zwei Talks
+           (bis Szene 12, ab Szene 13).</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">E</span><h2>Choreografie-Notizen</h2>
+        <span class="note">für die Aufnahme</span></div>
+    <ul class="notes">
+        <li><strong>Startzustand:</strong> frischer Browser-Context mit Sprache
+            <code>de-DE</code>, Lab im Rundgang auf Station 1. Das Skript liegt auf oberster
+            Ebene: <code>S</code>, <code>gotoStep</code>, <code>setMode</code>,
+            <code>setView</code>, <code>setPreset</code>, <code>simRun</code>,
+            <code>simToggle</code>, <code>toggleMerge</code>, <code>pickEfron</code> und
+            <code>setSolution</code> sind per <code>page.evaluate</code> erreichbar.
+            Szenen 1–16 laufen im Rundgang, 17–19 und 21 im Labor, 20 und 22–24 wieder im
+            Rundgang.</li>
+        <li><strong>Zufall festnageln:</strong> <code>Math.random</code> per
+            <code>addInitScript</code> durch einen Generator mit festem Startwert ersetzen.
+            Dann würfeln Probelauf und Aufnahme gleich — Würfe, 3D-Drehung, Simulation und
+            ZUFÄLLIG. Den Startwert im Probelauf wählen: In Szene 1 sollen beide einmal
+            gewinnen.</li>
+        <li><strong>Die Solita des Labs bleibt aus.</strong> Den Knopf „SOLITA ERKLÄRT“ nie
+            drücken und nicht <code>s</code> tippen: Sonst spielt der Rundgang die
+            Deck-Clips und blättert nach 3,2 s selbst weiter.</li>
+        <li><strong>3D-Würfel als Erstes prüfen:</strong> Im Probelauf muss
+            <code>Dice3D.ok</code> wahr sein. Ohne WebGL fällt das Lab still auf flache
+            Iso-Würfel zurück — das wäre ein anderer Film. three.js kommt von unpkg, also
+            nur mit Netz.</li>
+        <li><strong>Szene 17 ist mauskritisch:</strong> Die Zahlenauswahl öffnet sich nur
+            bei einem echten Tipp auf ein Netzfeld. Die Koordinaten aus <code>VIEW</code>
+            und der Netzgeometrie rechnen und <strong>als Erstes proben</strong>.</li>
+        <li><strong>Szene 12:</strong> Der Dauerlauf wächst je Frame um 3 % (höchstens
+            20 000 Runden) und hält bei zehn Millionen selbst an. An einer Marke mit
+            <code>simToggle(false)</code> stoppen; die erreichte Rundenzahl liest run2 für
+            den Text aus.</li>
+        <li><strong>Szene 19:</strong> Zwei normale Würfel ergeben 36 Wege, der Baum wird
+            klein. Im Probelauf die Lesbarkeit prüfen, notfalls die Erklärbox
+            einklappen.</li>
+        <li><strong>Solitas Bubble unten rechts</strong> kann die unteren Zeilen der Tafeln
+            (Summenregel, Fehler) und die Pfeile im Rezept verdecken — framecheck
+            laufen lassen.</li>
+        <li><strong>Szene 22:</strong> Die Denkpause ist Standbild mit Musik, kein Schwarz.
+            Szene 24 endet auf der Markenkarte.</li>
+        <li>Der lokale Server klebt ein rotes <strong>LOCAL</strong>-Schild in die Seite.
+            Die Aufnahme muss <code>#local-badge</code> vor dem ersten Bild entfernen.</li>
+    </ul>
+</section>
+
+<section>
+    <div class="head"><span class="n">F</span><h2>Bewusst weggelassen</h2>
+        <span class="note">Kandidaten für Teil 2</span></div>
+    <div class="prose">
+        <p><strong>Der neue Fehler „Lena oder Mia?“</strong> (Deck, Folie 20: Baum mit
+           Start → Lena/Mia). Den gibt es nur im Deck, nicht im Lab — und der Film zeigt
+           das Lab.</p>
+        <p><strong>Die Mittelwert-Pointe bei Efron:</strong> Würfel A hat den kleineren
+           Durchschnitt ($\frac{8}{3}$ gegen $3$) und schlägt B trotzdem. Starker Moment, aber
+           das Lab zeigt keine Mittelwerte. Ginge nur mit einer eigenen Karte.</p>
+        <p><strong>Der volle Baum mit 36 Ästen</strong> für Lena und Mia ohne
+           Zusammenfassen: Szene 5 zeigt, warum man ihn nicht braucht.</p>
+        <p><strong>Übersetzungen, Tasten-Karte, „Deck öffnen“</strong> — Handwerk des Labs,
+           kein Stoff für den Film. Der Abspann nennt nur den Rundgang mit Solita.</p>
+    </div>
+    <div class="alert ask">
+        <h3>Drei Fragen an Doc</h3>
+        <ol>
+            <li><strong>Länge:</strong> voll rund 11 Minuten, oder gleich mit den
+                Notbremsen rund 10?</li>
+            <li><strong>Efron im Deck:</strong> Soll das Deck auf vier Würfel korrigiert
+                werden, damit Film, Lab und Deck dasselbe sagen?</li>
+            <li><strong>Mittelwert-Karte</strong> bei Efron (Abschnitt F): rein oder
+                draußen?</li>
+        </ol>
+    </div>
+</section>
+
+<footer>
+    <p><strong>Nächster Schritt:</strong> Docs Freigabe des Plots. Danach Solitas Sätze in
+       <code>videopipeline/wuerfelspiel/narration.mjs</code>, Vorab-Check, Probelauf,
+       Aufnahme und D-ID — alles bis Montag, 19:38.</p>
+    <p class="eyebrow sig">Doc Alvers Mathe-Labor</p>
+</footer>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script>
+/* ---------------------------------------------------------------
+   One source of truth: the scene list feeds both the timeline and
+   the cards below it.
+   --------------------------------------------------------------- */
+const SCENES = [
+    /* n = Nummer · s = geplante Sekunden (nach der Vertonung von SPOKEN ueberschrieben)
+       t = Titel · img = was im Bild passiert · aha = der Gedanke, der fallen soll
+       core: true = Kernszene · cut: true = Notbremse · card: true = eigene Karte
+       at = wo im Lab (Station im Rundgang oder Ansicht im Labor) */
+    { n: 1, s: 26, t: 'Zwei Würfel, eine Frage', at: 'Rundgang 1 · Das Spiel',
+      img: 'Zwei runde 3D-Würfel, links LENA in Orange, rechts MIA in Cyan. Drei Runden hintereinander: Lena rollt, dann Mia, der Würfel mit der größeren Zahl leuchtet, dazwischen springt $>$ oder $<$. Die Leiste „Lena würfelt → dann Mia → größere Zahl gewinnt“ läuft mit, darunter zählt der Rundenzähler.',
+      aha: 'Zwei selbst beschriftete Würfel: Lena hat $3$, $5$ und $7$, Mia $4$ und $6$. Wer ist im Vorteil? Ein paar Runden sagen es nicht — mal gewinnt die eine, mal die andere. Die Frage des Films: Kann man es ausrechnen, bevor gewürfelt wird?' },
+
+    { n: 2, s: 22, t: 'Sechs Flächen, nicht drei Zahlen', at: 'Rundgang 2 · Würfelnetze',
+      img: 'Beide Würfel aufgeklappt als Netz, gleiche Zahlen in gleicher Farbe. Ein Wurf: Die kleinen Würfel in der Mitte rollen, und die Fläche, die oben liegt, leuchtet im Netz weiß auf.',
+      aha: 'Ein Würfel ist nicht „drei Zahlen“, sondern sechs Flächen. Bei Lena steht jede Zahl zweimal, bei Mia die $4$ viermal und die $6$ zweimal. Das sieht man erst im Netz.' },
+
+    { n: 3, s: 30, t: 'Zählen statt raten', core: true, at: 'Rundgang 4 · Würfel lesen',
+      img: 'Zwei Tabellen „Zahl · wie oft? · Wahrscheinlichkeit“. Erst ist Lenas Block gerahmt: dreimal $\\frac{2}{6} = \\frac{1}{3}$. Dann Mias: $\\frac{4}{6} = \\frac{2}{3}$ und $\\frac{2}{6} = \\frac{1}{3}$, darunter in Rot „Achtung: Die $4$ steht $4$-mal drauf, also $\\frac{2}{3}$ und nicht $\\frac{1}{2}$!“ Eine Zeile wird angetippt, ihre vier Flächen leuchten im Netz. Grün die Kontrolle: zusammen $1$.',
+      aha: 'Die Wahrscheinlichkeit einer Zahl ist die Anzahl ihrer Flächen durch $6$. Die Falle: Mia hat zwei verschiedene Zahlen — aber nicht jede kommt in der Hälfte der Würfe.' },
+
+    { n: 4, s: 24, t: 'Zwei Stufen', at: 'Rundgang 3 · Zweistufig',
+      img: 'Ein Baum ohne Brüche, zwei farbige Bänder: „Stufe 1: Lenas Wurf“ und „Stufe 2: Mias Wurf“. Ein Wurf: Ein orangefarbener Punkt läuft erst durch Stufe 1, dann durch Stufe 2, und sein Ausgang, etwa $(5 \\mid 4)$, leuchtet auf. Noch ein Wurf, ein anderer Weg.',
+      aha: 'Zweimal nacheinander würfeln heißt: zwei Stufen. Jeder Weg von links nach rechts ist genau ein möglicher Ausgang einer Runde.' },
+
+    { n: 5, s: 28, t: 'Der wichtigste Trick', at: 'Rundgang 5 · Äste zusammenfassen',
+      img: 'Mias Würfel als sechs Äste, an jedem $\\frac{1}{6}$. Ein Tipp: Die vier Äste zur $4$ gleiten zu einem zusammen, die Tafel rechnet $\\frac{1}{6} + \\frac{1}{6} + \\frac{1}{6} + \\frac{1}{6} =$ $\\frac{4}{6} = \\frac{2}{3}$. Dann dasselbe bei Lena: Aus sechs Ästen werden drei.',
+      aha: 'Sechs Äste sind nicht falsch, nur unübersichtlich. Gleiche Zahlen kommen auf <em>einen</em> Ast, ihre Sechstel werden addiert. Die Äste aus einem Punkt ergeben zusammen immer $1$.' },
+
+    { n: 6, s: 14, t: 'Stufe 1', cut: true, at: 'Rundgang 6 · Baum: Stufe 1',
+      img: 'Vom Startpunkt drei Äste zur $3$, $5$ und $7$, an jedem $\\frac{1}{3}$; daneben die kleine Tabelle mit je rund $33{,}3\\,\\%$.',
+      aha: 'Der Baum beginnt mit dem, was schon gezählt ist — nur hingezeichnet. Kürzbar, weil Szene 7 Stufe 1 mitzeigt.' },
+
+    { n: 7, s: 24, t: 'An jedes Ende', at: 'Rundgang 7 · Baum: Stufe 2',
+      img: 'An alle drei Enden hängen Mias zwei Äste, überall $\\frac{2}{3}$ zur $4$ und $\\frac{1}{3}$ zur $6$. Auf der Tafel groß in Orange: $3 \\cdot 2 = 6$ Wege durch den Baum.',
+      aha: 'Mia würfelt immer mit demselben Würfel, egal was Lena hat — deshalb hängen überall dieselben Äste. Das Wort dafür: <strong>unabhängig</strong>.' },
+
+    { n: 8, s: 32, t: 'Die Pfadregel', core: true, at: 'Rundgang 8 · Pfadregel',
+      img: 'Der Weg $(3 \\mid 4)$ leuchtet orange, rechts steht groß $\\frac{1}{3} \\cdot \\frac{2}{3} = \\frac{2}{9} \\approx 22{,}2\\,\\%$. Dann der Weg $(3 \\mid 6)$: $\\frac{1}{9}$. Die Spalte mit allen sechs Wegen ist voll; unten die Kontrolle: Alle Wege ergeben $1$.',
+      aha: 'Warum malnehmen? In einem Drittel der Runden hat Lena die $3$ — und davon hat Mia in zwei Dritteln die $4$. Zwei Drittel von einem Drittel sind $\\frac{2}{9}$. „Von“ heißt „mal“.' },
+
+    { n: 9, s: 22, t: 'Die Sieben schlägt die Sechs', at: 'Rundgang 9 · Wer gewinnt?',
+      img: 'Die Tabelle aller sechs Ausgänge: Weg, Lenas Zahl, Mias Zahl, der Sieger als grünes oder rotes Feld, die Wahrscheinlichkeit. Die Zeile $(7 \\mid 6)$ bekommt den orangefarbenen Rahmen.',
+      aha: 'Lena gewinnt auf drei Wegen: $(5 \\mid 4)$, $(7 \\mid 4)$ — und $(7 \\mid 6)$. Genau den dritten übersieht man gern, weil die $6$ nach „groß“ aussieht.' },
+
+    { n: 10, s: 30, t: 'Die Summenregel', core: true, at: 'Rundgang 10 · Summenregel',
+      img: 'Lenas drei Wege sind grün. Auf der Tafel: $P(\\text{Lena gewinnt}) =$ $\\frac{2}{9} + \\frac{2}{9} + \\frac{1}{9} =$ $\\frac{5}{9} \\approx 55{,}6\\,\\%$, Gegenprobe Mia $\\frac{4}{9}$, Kontrolle $\\frac{5}{9} + \\frac{4}{9} = 1$. Darunter der Balken: $5$ grüne von $9$ gleich großen Teilen.',
+      aha: 'Verschiedene Wege zum selben Ziel werden addiert. Lena gewinnt fünf von neun Runden — knapp, aber auf Dauer. Unentschieden gibt es nicht: Die Würfel haben keine gemeinsame Zahl.' },
+
+    { n: 11, s: 20, t: 'Das Rezept', at: 'Rundgang 12 · Merksatz & Rezept',
+      img: 'Oben der Merksatz: „Entlang eines Pfades wird multipliziert — verschiedene Pfade zum selben Ereignis werden addiert.“ Darunter die fünf Schritte, einer nach dem anderen orange gerahmt.',
+      aha: 'Alles bis hierher passt in fünf Schritte: zählen, teilen, Baum, malnehmen, addieren. Mit diesem Rezept rechnen wir gleich jedes Würfelpaar.' },
+
+    { n: 12, s: 36, t: 'Stimmt das wirklich?', core: true, at: 'Rundgang 13 · Simulation',
+      img: 'EINE RUNDE, dann HUNDERT, dann TAUSEND: Eine grüne und eine rote Kurve zittern über der Rundenachse. DAUERLAUF: Die Kurven legen sich an die gestrichelten Linien bei $\\frac{5}{9}$ und $\\frac{4}{9}$. Links läuft die relative Häufigkeit gegen $\\frac{5}{9} \\approx 0{,}556$, darunter schrumpft die Abweichung.',
+      aha: 'Bei wenigen Runden kann alles passieren. Je mehr Runden, desto näher rückt Lenas Anteil an $\\frac{5}{9}$ heran — das ist die <strong>relative Häufigkeit</strong>. Nie genau, aber immer näher.' },
+
+    { n: 13, s: 26, t: 'Fehler 1: die halbe Wahrheit', at: 'Rundgang 11 · Typische Fehler, 1',
+      img: 'Im Baum stehen an Mias Ästen rote $\\frac{1}{2}$. Rechts unter FALSCH: $\\frac{1}{6} + \\frac{1}{6} + \\frac{1}{6} = \\frac{1}{2}$, darunter unter RICHTIG: $\\frac{5}{9}$.',
+      aha: '$\\frac{1}{2}$ klingt vernünftig — genau das macht den Fehler gefährlich. Die Simulation eben hat aber $0{,}556$ gezeigt, nicht $0{,}5$. Flächen zählen, nicht Zahlen.' },
+
+    { n: 14, s: 24, t: 'Fehler 2: Wahrscheinlichkeit fünf', core: true, at: 'Rundgang 11 · Typische Fehler, 2',
+      img: 'Entlang addiert statt malgenommen: Der Weg $(3 \\mid 4)$ bekommt $\\frac{1}{3} + \\frac{2}{3} = 1$, und alle Wege zusammen ergeben $5$. In der Spalte der Wege steht rot $1$ oder $\\frac{2}{3}$.',
+      aha: 'Eine Wahrscheinlichkeit von $5$ gibt es nicht — mehr als $1$ geht nie. Die Kontrolle „alle Wege ergeben $1$“ entlarvt den Fehler auf einen Blick.' },
+
+    { n: 15, s: 18, t: 'Fehler 3: der vergessene Weg', at: 'Rundgang 11 · Typische Fehler, 3',
+      img: 'Der Ast $(7 \\mid 6)$ ist rot gestrichelt, daneben das Schild „vergessen“. FALSCH: $\\frac{2}{9} + \\frac{2}{9} = \\frac{4}{9}$.',
+      aha: 'Das ist der Weg aus Szene 9. Ohne ihn hätten Lena und Mia beide $\\frac{4}{9}$ — und $\\frac{4}{9} + \\frac{4}{9}$ ist nicht $1$. Die Gegenprobe findet den Fehler.' },
+
+    { n: 16, s: 26, t: 'Fehler 4 und 5: malnehmen, nur einer', cut: true, at: 'Rundgang 11 · Typische Fehler, 4 und 5',
+      img: 'Fehler 4: Lenas drei Wege sind rot, $\\frac{2}{9} \\cdot \\frac{2}{9} \\cdot \\frac{1}{9} =$ $\\frac{4}{729} \\approx 0{,}5\\,\\%$. Fehler 5: Nur $(5 \\mid 4)$ zählt, die beiden anderen Wege tragen das Schild „fehlt“, FALSCH $\\frac{2}{9} \\approx 22{,}2\\,\\%$.',
+      aha: 'Malnehmen macht das Ergebnis kleiner als jeden einzelnen Weg — dabei gewinnt Lena auf jedem davon. Und ein Weg allein ist nur ein Teil des Ganzen.' },
+
+    { n: 17, s: 34, t: 'Eine Fläche, und das Spiel ist fair', core: true, at: 'Labor · Würfelnetze → Summenregel', lab: true,
+      img: 'Taste m: das Labor. Ansicht Würfelnetze, Mias Netz: Ein Tipp auf eine $4$ öffnet die Zahlenauswahl $0$ bis $9$, gewählt wird die $6$. Mias Würfel ist jetzt $4, 4, 4, 6, 6, 6$. Sprung zur Summenregel: Alle Brüche sind neu gerechnet, $P(\\text{Lena gewinnt}) =$ $\\frac{1}{6} + \\frac{1}{6} + \\frac{1}{6} =$ $\\frac{1}{2}$, der Balken zeigt $1$ grünes von $2$ Teilen.',
+      aha: 'Eine einzige Fläche geändert — und aus $\\frac{5}{9}$ wird genau $\\frac{1}{2}$. Im Labor rechnet jede Ansicht mit eigenen Würfeln mit: Netze, Baum, Pfadregel, Fehler, Simulation.' },
+
+    { n: 18, s: 16, t: 'Tauschen und Zufall', cut: true, at: 'Labor · Summenregel', lab: true,
+      img: 'ZUFÄLLIG: ein neues Würfelpaar mit Zahlen zwischen $1$ und $9$, alle Brüche springen um. TAUSCHEN: Der zweite Würfel rollt jetzt zuerst, der Baum steht andersherum.',
+      aha: 'Wer zuerst würfelt, gewinnt nicht öfter: Die Wahrscheinlichkeiten tauschen nur die Plätze.' },
+
+    { n: 19, s: 28, t: 'Gleiche Würfel, trotzdem kein Halbe-halbe', at: 'Labor · Zwei normale Spielwürfel', lab: true,
+      img: 'Voreinstellung „Zwei normale Spielwürfel“: Anna gegen Ben, beide $1$ bis $6$. Summenregel: $P(\\text{Anna gewinnt}) = \\frac{5}{12}$, $P(\\text{Ben gewinnt}) = \\frac{5}{12}$, dazu grau $P(\\text{unentschieden}) = \\frac{1}{6}$. Der Balken hat zum ersten Mal graue Teile: $5$ grün, $5$ rot, $2$ grau von $12$.',
+      aha: 'Fair heißt hier nicht fünfzig zu fünfzig: Haben beide Würfel gemeinsame Zahlen, gibt es Unentschieden — hier in einem Sechstel der Runden. Kontrolle: $\\frac{5}{12} + \\frac{5}{12} + \\frac{1}{6} = 1$.' },
+
+    { n: 20, s: 34, t: 'Der Würfel-Kreis', core: true, at: 'Rundgang 14 · Fun Facts',
+      img: 'Vier Würfelnetze im Quadrat — A: $4, 4, 4, 4, 0, 0$ · B: sechsmal $3$ · C: $2, 2, 2, 2, 6, 6$ · D: $5, 5, 5, 1, 1, 1$. Pfeile im Kreis A → B → C → D → A, an jedem $\\frac{2}{3}$. In der Mitte: „Wer zuerst wählt, verliert!“ Nacheinander leuchten die Pfeile A → B und D → A orange.',
+      aha: 'A schlägt B, B schlägt C, C schlägt D — und D schlägt wieder A, jedes Mal mit $\\frac{2}{3}$. Einen besten Würfel gibt es nicht; solche Würfel heißen <strong>nicht-transitiv</strong>. Wer als Zweiter wählt, nimmt den, der den ersten schlägt.' },
+
+    { n: 21, s: 26, t: 'Das Paradox nachgerechnet', at: 'Labor · Efron → Pfadregel, Summenregel', lab: true,
+      img: 'Im Labor wird der Pfeil D → A angetippt, das Paar landet in allen Ansichten. Pfadregel: Weg $(5 \\mid 4)$ ist $\\frac{1}{2} \\cdot \\frac{2}{3} = \\frac{1}{3}$. Summenregel: $P(\\text{Würfel D gewinnt}) =$ $\\frac{1}{6} + \\frac{1}{6} + \\frac{1}{3} =$ $\\frac{2}{3}$.',
+      aha: 'Kein Trick: dasselbe Rezept wie bei Lena und Mia. Das Überraschende steckt allein in den Zahlen auf den Flächen. (Notbremse: nur die Summenregel zeigen.)' },
+
+    { n: 22, s: 24, t: 'Jetzt ihr', at: 'Rundgang 15 · Zwillingsaufgabe',
+      img: 'Pauls Netz $1, 1, 5, 5, 6, 6$ und Jonas’ Netz $2, 2, 2, 4, 4, 4$, daneben die Aufgabe: a) Baumdiagramm mit allen Ast-Wahrscheinlichkeiten, b) $P(\\text{Paul gewinnt}) = \\;?$ Danach steht das Bild fünf Sekunden still, nur Musik.',
+      aha: 'Die Zwillingsaufgabe zum Selberrechnen — mit dem Rezept aus Szene 11. Solita bittet ausdrücklich darum, das Video jetzt anzuhalten.' },
+
+    { n: 23, s: 26, t: 'Die Lösung', core: true, at: 'Rundgang 15 · Lösung zeigen',
+      img: 'Taste l: Der Baum erscheint, an den Ästen $\\frac{1}{3}$ und $\\frac{1}{2}$, an jedem Weg $\\frac{1}{6}$, Pauls Wege sind grün. Darunter: $P(\\text{Paul gewinnt}) =$ $4 \\cdot \\frac{1}{6} = \\frac{2}{3} \\approx 66{,}7\\,\\%$.',
+      aha: 'Mit der $1$ verliert Paul immer, mit der $5$ und der $6$ gewinnt er immer — zwei von drei Ästen, also $\\frac{2}{3}$. Wer das hatte: Das Rezept sitzt.' },
+
+    { n: 24, s: 20, t: 'Abspann', card: true, at: 'Rundgang → Markenkarte',
+      img: 'Zurück zum Rundgang: Im Panel stehen „▶ SOLITA ERKLÄRT“ und „DECK ÖFFNEN“. Dann die Markenkarte Doc Alvers Mathe-Labor mit docalvers.de — Ende auf Dunkelblau, nie auf Schwarz.',
+      aha: 'Im Lab erklärt Solita alle fünfzehn Stationen selbst, und das Labor wartet auf eigene Würfel. Probiert es aus.' }
+];
+
+/* SAY:START - generated by videopipeline/wuerfelspiel/sync-drehbuch.mjs, do not edit */
+const SAY = {
+    s1: 'Zwei Würfel, zwei Spielerinnen. <span class="beat"></span> Lena würfelt zuerst, dann Mia, und wer die größere Zahl oben hat, gewinnt die Runde. <span class="pause">1,3 s</span> Die Würfel sind allerdings selbst beschriftet: <span class="beat"></span> Auf Lenas Würfel stehen nur Drei, Fünf und Sieben, auf Mias Würfel nur Vier und Sechs. <span class="pause">1,3 s</span> Wer ist im Vorteil? <span class="beat"></span> Ein paar Runden verraten es nicht. <span class="beat"></span> Mal gewinnt die eine, mal die andere. <span class="beat"></span> Kann man es ausrechnen, bevor überhaupt gewürfelt wird?',
+    s2: 'Klappen wir die Würfel einmal auf. <span class="beat"></span> Ein Würfel ist nicht drei Zahlen, er ist sechs Flächen. <span class="beat"></span> Bei Lena steht jede Zahl zweimal. <span class="beat"></span> Bei Mia steht die Vier viermal und die Sechs nur zweimal. <span class="beat"></span> Gleiche Zahlen haben die gleiche Farbe. <span class="pause">1,3 s</span> Und bei jedem Wurf leuchtet im Netz die Fläche auf, die gerade oben liegt.',
+    s3: 'Weil jede Fläche gleich oft nach oben kommt, müssen wir nur zählen. <span class="beat"></span> Lenas Drei steht auf zwei von sechs Flächen: <span class="beat"></span> zwei Sechstel, also ein Drittel. <span class="beat"></span> Für die Fünf und die Sieben genauso. <span class="pause">1,3 s</span> Jetzt Mia, und hier steckt die erste Falle. <span class="beat"></span> Mia hat zwar nur zwei verschiedene Zahlen, aber nicht jede kommt in der Hälfte der Würfe. <span class="beat"></span> Die Vier steht auf vier Flächen: <span class="beat"></span> vier Sechstel, also zwei Drittel. <span class="beat"></span> Die Sechs bekommt ein Drittel. <span class="beat"></span> Zur Kontrolle ergibt jeder Würfel zusammen genau eins.',
+    s4: 'Eine Runde besteht aus zwei Würfen nacheinander, erst Lena, dann Mia. <span class="beat"></span> Das heißt zweistufig, und im Baum sind das zwei Ebenen von Ästen. <span class="pause">1,3 s</span> Schau dem Punkt zu: Er läuft erst durch Lenas Stufe, dann durch Mias. <span class="pause">1,7 s</span> Jeder Weg von links nach rechts ist genau ein möglicher Ausgang einer Runde.',
+    s5: 'Jetzt der wichtigste Trick. <span class="beat"></span> Man könnte für Mias Würfel sechs Äste zeichnen, an jedem ein Sechstel. <span class="beat"></span> Falsch ist das nicht, nur unübersichtlich. <span class="pause">1,4 s</span> Gleiche Zahlen kommen auf einen Ast: <span class="beat"></span> Die vier Sechstel der Vier werden zu zwei Dritteln, die zwei Sechstel der Sechs zu einem Drittel. <span class="pause">1,4 s</span> Bei Lena werden aus sechs Ästen drei. <span class="beat"></span> Und immer gilt: Die Äste, die an einem Punkt starten, ergeben zusammen eins.',
+    s6: 'Damit beginnt der Baum. <span class="beat"></span> Vom Startpunkt gehen drei Äste ab, zur Drei, zur Fünf und zur Sieben, an jedem ein Drittel. <span class="beat"></span> Das sind jeweils rund dreiunddreißig Prozent.',
+    s7: 'An jedes dieser drei Enden hängen wir Mias zwei Äste: <span class="beat"></span> zwei Drittel zur Vier, ein Drittel zur Sechs. <span class="beat"></span> Überall dieselben. <span class="beat"></span> Denn Mia würfelt immer mit demselben Würfel, ganz egal, was Lena gerade hat. <span class="beat"></span> Die beiden Würfe sind unabhängig. <span class="beat"></span> Drei mal zwei: Es gibt sechs Wege durch den Baum.',
+    s8: 'Wie wahrscheinlich ist ein einzelner Weg? <span class="beat"></span> Nehmen wir Drei, Vier: Lena würfelt die Drei, Mia die Vier. <span class="beat"></span> In einem Drittel aller Runden hat Lena die Drei. <span class="beat"></span> Und davon hat Mia in zwei Dritteln die Vier. <span class="beat"></span> Zwei Drittel von einem Drittel sind zwei Neuntel. <span class="beat"></span> Von heißt hier mal: Entlang eines Weges wird malgenommen. <span class="beat"></span> Das ist die Pfadregel. <span class="pause">1,4 s</span> Der Weg Drei, Sechs: ein Drittel mal ein Drittel, ein Neuntel. <span class="beat"></span> Und alle sechs Wege zusammen ergeben wieder eins.',
+    s9: 'Wer gewinnt auf welchem Weg? <span class="beat"></span> Die Tabelle geht alle sechs Ausgänge durch. <span class="pause">1,3 s</span> Lena gewinnt mit Fünf gegen Vier und mit Sieben gegen Vier. <span class="pause">1,3 s</span> Und mit Sieben gegen Sechs! <span class="beat"></span> Genau diesen dritten Weg übersieht man gern, weil die Sechs so groß aussieht.',
+    s10: 'Jetzt kommen die drei grünen Wege zusammen. <span class="beat"></span> Verschiedene Wege zum selben Ziel werden addiert: Das ist die Summenregel. <span class="beat"></span> Zwei Neuntel plus zwei Neuntel plus ein Neuntel: <span class="beat"></span> Lena gewinnt mit fünf Neunteln, rund fünfundfünfzig Komma sechs Prozent. <span class="beat"></span> Die Gegenprobe: Mia bekommt vier Neuntel, und zusammen ist das eins. <span class="beat"></span> Unentschieden gibt es nicht, denn die beiden Würfel haben keine gemeinsame Zahl. <span class="beat"></span> Im Balken sind das fünf von neun gleich großen Teilen. <span class="beat"></span> Knapp, aber auf Dauer.',
+    s11: 'Alles bisher passt in einen Satz: <span class="beat"></span> Entlang eines Pfades wird multipliziert, verschiedene Pfade zum selben Ereignis werden addiert. <span class="pause">1,4 s</span> Und in fünf Schritte: <span class="beat"></span> zählen, teilen, Baum zeichnen, malnehmen, addieren.',
+    s12: 'Aber stimmt das wirklich? <span class="beat"></span> Lassen wir den Computer würfeln. <span class="pause">1,3 s</span> Eine Runde sagt gar nichts. <span class="pause">1,3 s</span> Hundert Runden: Die Kurven zittern noch. <span class="pause">1,3 s</span> Tausend Runden: schon ruhiger. <span class="pause">1,3 s</span> Und jetzt im Dauerlauf. <span class="beat"></span> Lenas Anteil an allen Runden, die relative Häufigkeit, legt sich immer enger an die gestrichelte Linie bei fünf Neunteln. <span class="beat"></span> Nach über zweihunderttausend Runden ist die Abweichung kleiner als ein Hundertstel. <span class="beat"></span> Nie genau, aber immer näher.',
+    s13: 'Zeit für Fehler. <span class="beat"></span> Der häufigste zuerst: Mia hat zwei Zahlen, also bekommt jede die Hälfte. <span class="beat"></span> Dann steht an Mias Ästen überall ein Halb, und für Lena kommt genau ein Halb heraus. <span class="beat"></span> Klingt vernünftig, und genau das macht den Fehler gefährlich. <span class="beat"></span> Die Simulation eben hat aber nicht ein Halb gezeigt, sondern fünf Neuntel. <span class="beat"></span> Flächen zählen, nicht Zahlen.',
+    s14: 'Fehler zwei: Entlang eines Weges wird addiert statt malgenommen. <span class="beat"></span> Dann hat der Weg Drei, Vier ein Drittel plus zwei Drittel, also eins. <span class="beat"></span> Und alle Wege zusammen ergeben fünf. <span class="pause">0,7 s</span> Eine Wahrscheinlichkeit von fünf gibt es nicht. <span class="beat"></span> Mehr als eins geht nie, und die Kontrolle entlarvt den Fehler auf einen Blick.',
+    s15: 'Fehler drei: ein Weg vergessen. <span class="beat"></span> Rot gestrichelt ist Sieben gegen Sechs, genau der Weg von eben. <span class="beat"></span> Ohne ihn hätte Lena nur vier Neuntel, genau wie Mia. <span class="beat"></span> Und vier Neuntel plus vier Neuntel ist nicht eins.',
+    s16: 'Fehler vier: Die drei Wege werden malgenommen statt addiert. <span class="beat"></span> Heraus kommen vier Siebenhundertneunundzwanzigstel, ein halbes Prozent. <span class="beat"></span> Das ist kleiner als jeder einzelne Weg, obwohl Lena auf jedem davon gewinnt. <span class="pause">1,4 s</span> Und Fehler fünf: nur ein einziger Weg, zwei Neuntel. <span class="beat"></span> Das ist bloß ein Teil des Ganzen.',
+    s17: 'Bis hierher waren die Würfel vorgegeben. <span class="beat"></span> Mit der Taste M geht es ins Labor, und dort gehören sie dir. <span class="pause">1,4 s</span> Ein Tipp auf ein Feld in Mias Netz, und aus einer Vier wird eine Sechs. <span class="pause">1,7 s</span> Mias Würfel hat jetzt dreimal die Vier und dreimal die Sechs, und alle Ansichten rechnen sofort mit. <span class="pause">1,4 s</span> Die Summenregel sagt jetzt: Für Lena steht genau ein Halb. <span class="beat"></span> Eine einzige Fläche geändert, und das Spiel ist fair.',
+    s18: 'Der Knopf Zufällig baut ein ganz neues Würfelpaar, und alle Brüche springen um. <span class="pause">1,4 s</span> Tauschen lässt den anderen Würfel zuerst rollen. <span class="beat"></span> Die Wahrscheinlichkeiten tauschen dabei nur die Plätze.',
+    s19: 'Und zwei ganz normale Spielwürfel? <span class="beat"></span> Anna gegen Ben, beide mit Eins bis Sechs. <span class="beat"></span> Man würde fünfzig zu fünfzig erwarten. <span class="beat"></span> Aber Anna gewinnt nur mit fünf Zwölfteln, und Ben ebenso. <span class="beat"></span> Der Rest ist grau: Weil beide Würfel dieselben Zahlen tragen, endet ein Sechstel aller Runden unentschieden. <span class="beat"></span> Fünf Zwölftel plus fünf Zwölftel plus ein Sechstel, das ist wieder eins.',
+    s20: 'Zum Schluss vier Würfel, die sich der Statistiker Bradley Efron ausgedacht hat. <span class="pause">1,3 s</span> Würfel A schlägt Würfel B mit zwei Dritteln. <span class="beat"></span> B schlägt C, und C schlägt D, jedes Mal mit zwei Dritteln. <span class="pause">1,3 s</span> Und D? <span class="beat"></span> D schlägt wieder A, auch mit zwei Dritteln. <span class="beat"></span> Einen besten Würfel gibt es hier nicht: Zu jedem gibt es einen, der ihn schlägt. <span class="beat"></span> Solche Würfel heißen nicht transitiv. <span class="beat"></span> Deshalb verliert, wer zuerst wählt. <span class="beat"></span> Und woher weiß der Zweite, welchen er nehmen muss? <span class="beat"></span> Der Kreis sagt es ihm: Auf jeden Würfel zeigt genau ein Pfeil, und der kommt von dem Würfel, der ihn schlägt. <span class="beat"></span> Wählst du C, nehme ich B.',
+    s21: 'Ist das ein Trick? <span class="beat"></span> Rechnen wir D gegen A im Labor nach. <span class="pause">1,3 s</span> Würfel D zeigt Eins oder Fünf, jeweils zur Hälfte. <span class="beat"></span> Würfel A zeigt Null oder Vier. <span class="beat"></span> Der Weg Fünf, Vier: ein Halb mal zwei Drittel, ein Drittel. <span class="pause">1,4 s</span> Alle Wege, auf denen D gewinnt, addiert: ein Sechstel plus ein Sechstel plus ein Drittel, zwei Drittel. <span class="beat"></span> Dasselbe Rezept wie bei Lena und Mia. <span class="beat"></span> Das Überraschende steckt allein in den Zahlen auf den Flächen.',
+    s22: 'Und jetzt ihr. <span class="beat"></span> Paul hat einen Würfel mit zweimal Eins, zweimal Fünf und zweimal Sechs. <span class="beat"></span> Jonas hat dreimal die Zwei und dreimal die Vier. <span class="pause">0,7 s</span> Erstens: Zeichnet das Baumdiagramm und schreibt an jeden Ast die Wahrscheinlichkeit. <span class="beat"></span> Zweitens: Wie wahrscheinlich gewinnt Paul? <span class="pause">0,7 s</span> Das Rezept habt ihr. <span class="beat"></span> Haltet das Video jetzt an.',
+    s23: 'Hier ist die Lösung. <span class="beat"></span> Paul hat drei Zahlen, jede mit einem Drittel. <span class="beat"></span> Jonas hat zwei Zahlen, jede bekommt ein Halb. <span class="beat"></span> Jeder Weg ist also ein Sechstel. <span class="pause">0,7 s</span> Mit der Eins verliert Paul immer. <span class="beat"></span> Mit der Fünf und der Sechs gewinnt er immer, gegen die Zwei und gegen die Vier. <span class="beat"></span> Das sind vier Wege: vier Sechstel, also zwei Drittel, rund sechsundsechzig Komma sieben Prozent. <span class="beat"></span> Wer das hatte: Das Rezept sitzt.',
+    s24: 'Im <phoneme alphabet="ipa" ph="læb">Lab</phoneme> erklärt Solita alle fünfzehn Stationen des Rundgangs selbst, und im Labor warten die Würfel auf eure eigenen Zahlen. <span class="pause">0,7 s</span> Probiert es aus, im Doc Alvers Mathe-Labor auf doc alvers punkt <span class="spell">de</span>.'
+};
+const SPOKEN = {"s1":28.632,"s2":20.304,"s3":32.28,"s4":19.68,"s5":27.336,"s6":10.008,"s7":19.632,"s8":30.384,"s9":17.256,"s10":31.368,"s11":14.832,"s12":33.144,"s13":23.112,"s14":19.2,"s15":13.368,"s16":20.496,"s17":28.224,"s18":12.648,"s19":23.76,"s20":38.88,"s21":29.04,"s22":20.736,"s23":25.944,"s24":12.984};
+/* SAY:END */
+
+const ARC = [
+    { t: 'Spielen',                 c: '#93a8c6' },
+    { t: 'Flächen<br>zählen',       c: '#f5c242', key: true },
+    { t: 'Baum<br>bauen',           c: '#00d2ff' },
+    { t: 'Malnehmen,<br>addieren',  c: '#799e31', key: true },
+    { t: 'Nach&shy;prüfen',         c: '#00d2ff' },
+    { t: 'Falsch<br>rechnen',       c: '#b02418', key: true },
+    { t: 'Würfel<br>umbauen',       c: '#f5c242' },
+    { t: 'Intuition<br>brechen',    c: '#b02418', key: true },
+    { t: 'Jetzt ihr',               c: '#799e31' }
+];
+
+// seconds of silence that are not in any scene: the think pause before the solution
+const THINK = 5;
+
+/* --- the arc --- */
+document.getElementById('arc').innerHTML = ARC.map(a =>
+    `<span class="${a.key ? 'key' : ''}" style="--stop:${a.c}">${a.t}</span>`).join('');
+
+/* --- timeline: each scene as wide as it is long --- */
+const secs = (x) => SPOKEN['s' + x.n] ?? x.s;
+const total = SCENES.reduce((s, x) => s + secs(x), 0);
+document.getElementById('timeline').innerHTML = SCENES.map(x =>
+    `<i class="${x.core ? 'core' : x.cut ? 'cut' : ''}" data-n="${x.n}"
+        style="flex:0 0 ${(secs(x) / total * 100).toFixed(3)}%"
+        title="Szene ${x.n} · ${secs(x).toFixed(1)} s"></i>`).join('');
+
+/* --- budget, from the measured durations when they exist --- */
+(function () {
+    const spoken = Object.values(SPOKEN).reduce((a, b) => a + b, 0);
+    const planned = SCENES.reduce((a, x) => a + x.s, 0);
+    const cutS = SCENES.filter(x => x.cut).reduce((a, x) => a + secs(x), 0) + 13;   // + half of scene 21
+    const air = SCENES.length * 1.6;
+    const film = (spoken || planned) + air + THINK;
+    const mmss = (t) => Math.floor(t / 60) + ':' + String(Math.round(t % 60)).padStart(2, '0');
+    const credits = Math.ceil(film / 15);
+    const cell = (dt, dd, sub) => `<div><dt>${dt}</dt><dd>${dd}<small>${sub}</small></dd></div>`;
+    document.getElementById('budget').innerHTML =
+        cell('Sprache', (spoken || planned).toFixed(0) + ' s', spoken ? 'gemessen' : 'geplant') +
+        cell('Luft', '~' + (air + THINK).toFixed(0) + ' s', '1,6 s je Szene + 5 s Denkpause') +
+        cell('Film', mmss(film), spoken ? 'nach der Vertonung' : 'geschätzt') +
+        cell('Mit Notbremsen', mmss(film - cutS - 3 * 1.6), 'Szenen 6, 16, 18 raus, 21 halb') +
+        cell('D-ID', '≈ ' + credits, 'Credits · 1 je 15 s Talk') +
+        cell('Bett-Loop', '142,778 s', '64 Takte · 107,58 BPM');
+    document.getElementById('did-cost').textContent = credits;
+    document.getElementById('meta-run').textContent = '~' + mmss(film) + (spoken ? ' gemessen' : ' geplant');
+    document.getElementById('meta-scenes').textContent = SCENES.length + ' · davon ' +
+        SCENES.filter(x => x.lab).length + ' im Labor';
+    if (spoken) {
+        const n = document.getElementById('tl-note');
+        if (n) n.textContent = 'Breite = gemessene Sprechzeit';
+    }
+})();
+
+/* --- scene cards --- */
+document.getElementById('scenes').innerHTML = SCENES.map(x => `
+    <article class="scene ${x.core ? 'core' : x.cut ? 'cut' : ''}">
+        <div class="idx">${String(x.n).padStart(2, '0')}</div>
+        <div>
+            <div class="top">
+                <h3>${x.t}</h3>
+                ${x.core ? '<span class="tag core">Kernszene</span>' : ''}
+                ${x.cut ? '<span class="tag cut">Notbremse</span>' : ''}
+                ${x.card ? '<span class="tag card">Karte</span>' : ''}
+                <span class="where ${x.lab ? 'lab' : ''}">${x.at}</span>
+                <span class="secs">${secs(x).toFixed(1)} s</span>
+            </div>
+            <div class="body">
+                <div><h4>Was im Bild passiert</h4><p>${x.img}</p></div>
+                <div class="aha"><h4>Der Aha</h4><p>${x.aha}</p></div>
+            </div>
+            ${SAY['s' + x.n] ? `<div class="say"><h4>Solita sagt</h4><p>${SAY['s' + x.n]}</p></div>` : ''}
+        </div>
+    </article>`).join('');
+
+/* --- formulas: KaTeX as MathML, so the page needs no KaTeX stylesheet or font files --- */
+function renderFormulas() {
+    if (!window.renderMathInElement) return;
+    renderMathInElement(document.body, {
+        delimiters: [{ left: '$', right: '$', display: false }],
+        output: 'mathml',
+        throwOnError: false
+    });
+}
+if (window.renderMathInElement) renderFormulas();
+else window.addEventListener('load', renderFormulas);
+
+/* ---------------------------------------------------------------
+   Hero: the game as an area. Lena's six faces run to the right,
+   Mia's six faces run down; each of the 36 equally likely face pairs
+   is a cell, green where Lena's number is bigger, red where Mia's is.
+   Everything is computed from the two face lists. The dots are real
+   random rounds dropped into their cell - a click starts afresh.
+   --------------------------------------------------------------- */
+(function () {
+    const cv = document.getElementById('stage');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+
+    const LENA = [3, 3, 5, 5, 7, 7];
+    const MIA = [4, 4, 4, 4, 6, 6];
+    const TINT_A = { 3: '245, 194, 66', 5: '121, 158, 49', 7: '90, 150, 255' };
+    const TINT_B = { 4: '90, 150, 255', 6: '224, 106, 94' };
+    const MAX_ROLLS = 540;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const gcd = (a, b) => b ? gcd(b, a % b) : a;
+    const groups = faces => {
+        const out = [];
+        faces.forEach((v, i) => {
+            const g = out.find(x => x.v === v);
+            if (g) g.n++; else out.push({ v, from: i, n: 1 });
+        });
+        return out;
+    };
+    const GA = groups(LENA), GB = groups(MIA);
+    let winCells = 0;
+    LENA.forEach(a => MIA.forEach(b => { if (a > b) winCells++; }));
+    const g0 = gcd(winCells, 36);
+    const WIN = { p: winCells / g0, q: 36 / g0 };
+
+    let rolls = [];
+    let timer = 0;
+
+    function fit() {
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.max(1, Math.round(r.width * dpr));
+        cv.height = Math.max(1, Math.round(r.height * dpr));
+    }
+
+    const MATH_FONT = '"STIX Two Math", "Cambria Math", "Times New Roman", serif';
+
+    // a stacked fraction centred on (x, y); returns its width
+    function frac(p, q, x, y, size, color, plate) {
+        ctx.font = size + 'px ' + MATH_FONT;
+        const w = Math.max(ctx.measureText(String(p)).width, ctx.measureText(String(q)).width) + size * 0.3;
+        if (plate) {
+            ctx.fillStyle = 'rgba(6, 14, 30, 0.82)';
+            ctx.fillRect(x - w / 2 - size * 0.25, y - size * 1.12, w + size * 0.5, size * 2.24);
+        }
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText(String(p), x, y - size * 0.2);
+        ctx.fillText(String(q), x, y + size * 0.86);
+        ctx.fillRect(x - w / 2, y - size * 0.06, w, Math.max(1, size * 0.07));
+        return w;
+    }
+
+    function draw() {
+        fit();
+        const W = cv.width, H = cv.height, k = W / 600;
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = '#04101f';
+        ctx.fillRect(0, 0, W, H);
+
+        const X0 = 112 * k, Y0 = 112 * k, S = 408 * k, c = S / 6;
+
+        // 36 cells, one per face pair
+        LENA.forEach((a, i) => MIA.forEach((b, j) => {
+            ctx.fillStyle = a > b ? 'rgba(121, 158, 49, 0.46)' : 'rgba(176, 36, 24, 0.46)';
+            ctx.fillRect(X0 + i * c, Y0 + j * c, c, c);
+        }));
+
+        // thin lines: single faces - thick lines: equal numbers grouped
+        ctx.strokeStyle = 'rgba(157, 232, 255, 0.14)';
+        ctx.lineWidth = Math.max(1, k);
+        for (let t = 1; t < 6; t++) {
+            ctx.beginPath();
+            ctx.moveTo(X0 + t * c, Y0); ctx.lineTo(X0 + t * c, Y0 + S);
+            ctx.moveTo(X0, Y0 + t * c); ctx.lineTo(X0 + S, Y0 + t * c);
+            ctx.stroke();
+        }
+        ctx.strokeStyle = 'rgba(225, 240, 255, 0.75)';
+        ctx.lineWidth = 2 * k;
+        ctx.strokeRect(X0, Y0, S, S);
+        GA.slice(1).forEach(g => { ctx.beginPath(); ctx.moveTo(X0 + g.from * c, Y0); ctx.lineTo(X0 + g.from * c, Y0 + S); ctx.stroke(); });
+        GB.slice(1).forEach(g => { ctx.beginPath(); ctx.moveTo(X0, Y0 + g.from * c); ctx.lineTo(X0 + S, Y0 + g.from * c); ctx.stroke(); });
+
+        // the rolls
+        rolls.forEach(r => {
+            ctx.beginPath();
+            ctx.arc(X0 + r.u * S, Y0 + r.v * S, 2.3 * k, 0, Math.PI * 2);
+            ctx.fillStyle = r.win ? 'rgba(200, 240, 130, 0.85)' : 'rgba(255, 150, 135, 0.85)';
+            ctx.fill();
+        });
+
+        // probability of each grouped block, e.g. 1/3 * 2/3 = 2/9
+        GA.forEach(ga => GB.forEach(gb => {
+            const n = ga.n * gb.n, g = gcd(n, 36);
+            frac(n / g, 36 / g, X0 + (ga.from + ga.n / 2) * c, Y0 + (gb.from + gb.n / 2) * c, 30 * k, '#ffffff', true);
+        }));
+
+        // face numbers along the edges, tinted like the lab
+        const tile = (v, tint, x, y) => {
+            const s = 44 * k;
+            ctx.fillStyle = 'rgba(' + tint + ', 0.5)';
+            ctx.fillRect(x - s / 2, y - s / 2, s, s);
+            ctx.strokeStyle = 'rgb(' + tint + ')';
+            ctx.lineWidth = 1.5 * k;
+            ctx.strokeRect(x - s / 2, y - s / 2, s, s);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = (30 * k) + 'px ' + MATH_FONT;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(String(v), x, y + k);
+        };
+        LENA.forEach((v, i) => tile(v, TINT_A[v], X0 + (i + 0.5) * c, Y0 - 32 * k));
+        MIA.forEach((v, j) => tile(v, TINT_B[v], X0 - 32 * k, Y0 + (j + 0.5) * c));
+
+        ctx.font = '700 ' + (22 * k) + 'px Orbitron, sans-serif';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'rgb(245, 194, 66)';
+        ctx.textAlign = 'left';
+        ctx.fillText('LENA  →', X0, 34 * k);
+        ctx.save();
+        ctx.translate(26 * k, Y0);
+        ctx.rotate(Math.PI / 2);
+        ctx.fillStyle = '#00d2ff';
+        ctx.fillText('MIA  →', 0, 0);
+        ctx.restore();
+
+        // caption: the exact share against what the dice did
+        const yC = Y0 + S + 46 * k;
+        ctx.font = '400 ' + (23 * k) + 'px Outfit, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#b3c5de';
+        const lead = 'grün:';
+        ctx.fillText(lead, X0, yC);
+        const fx = X0 + ctx.measureText(lead).width + 20 * k;
+        frac(WIN.p, WIN.q, fx, yC + 2 * k, 24 * k, 'rgb(160, 212, 70)', false);
+        ctx.font = '400 ' + (23 * k) + 'px Outfit, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#b3c5de';
+        const wins = rolls.filter(r => r.win).length;
+        const rel = rolls.length ? (wins / rolls.length).toFixed(3).replace('.', ',') : '–';
+        ctx.font = '400 ' + (21 * k) + 'px Outfit, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#e6eefa';
+        ctx.fillText('gewürfelt: ' + wins + ' von ' + rolls.length + ' ≈ ' + rel, X0 + S, yC);
+    }
+
+    function roll() {
+        const i = Math.floor(Math.random() * 6), j = Math.floor(Math.random() * 6);
+        rolls.push({ u: (i + 0.12 + 0.76 * Math.random()) / 6, v: (j + 0.12 + 0.76 * Math.random()) / 6, win: LENA[i] > MIA[j] });
+    }
+
+    function start() {
+        clearInterval(timer);
+        rolls = [];
+        if (reduced) {
+            for (let t = 0; t < MAX_ROLLS; t++) roll();
+            draw();
+            return;
+        }
+        timer = setInterval(() => {
+            roll();
+            draw();
+            if (rolls.length >= MAX_ROLLS) clearInterval(timer);
+        }, 90);
+        draw();
+    }
+
+    start();
+    addEventListener('resize', draw, { passive: true });
+    cv.style.cursor = 'pointer';
+    cv.addEventListener('click', start);
+    document.fonts.ready.then(draw);
+})();
+</script>
+</body>
+</html>
