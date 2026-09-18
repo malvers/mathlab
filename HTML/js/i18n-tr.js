@@ -376,6 +376,8 @@ CyberI18n.translations.tr = {
                 points: "Sayı n",
                 btn_regular: "Düzgün",
                 btn_general: "Genel konum",
+                btn_play: "Oynat",
+                btn_stop: "Durdur",
                 hint_drag: "Noktalar fareyle çember üzerinde sürüklenebilir — 30 → 31 sıçraması böyle görülür.",
                 card_count: "Sayaç",
                 c_points: "Nokta n",

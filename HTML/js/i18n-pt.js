@@ -376,6 +376,8 @@ CyberI18n.translations.pt = {
                 points: "Quantidade n",
                 btn_regular: "Regular",
                 btn_general: "Posição geral",
+                btn_play: "Reproduzir",
+                btn_stop: "Parar",
                 hint_drag: "Os pontos podem ser arrastados pela circunferência — é assim que se vê o salto 30 → 31.",
                 card_count: "Contador",
                 c_points: "Pontos n",

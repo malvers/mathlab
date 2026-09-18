@@ -376,6 +376,8 @@ CyberI18n.translations.de = {
                 points: "Anzahl n",
                 btn_regular: "Regelmäßig",
                 btn_general: "Allgemeine Lage",
+                btn_play: "Abspielen",
+                btn_stop: "Anhalten",
                 hint_drag: "Punkte lassen sich mit der Maus auf dem Kreis verschieben — damit sieht man den Sprung 30 → 31.",
                 card_count: "Zählwerk",
                 c_points: "Punkte n",

@@ -87,6 +87,10 @@
 
         .kt-btns { display: flex; flex-wrap: wrap; gap: 7px; }
 
+        #kt-play.running {
+            box-shadow: 0 0 16px rgba(0, 210, 255, 0.55), inset 0 0 10px rgba(0, 210, 255, 0.2);
+        }
+
         #canvas { touch-action: none; }
     </style>
 </head>
@@ -110,6 +114,7 @@
     <main id="main-content">
         <div id="canvas-container">
             <div class="cyber-grid"></div>
+            <div id="n-telemetry"></div>
             <div id="math-coach-box">
                 <div class="coach-title" id="coach-title-slot"></div>
                 <div id="coach-content" class="coach-message"></div>
@@ -177,6 +182,8 @@
             cuts: true,
             numbers: false,
             drag: -1,
+            general: false,    // "Allgemeine Lage" chosen: every new point set is jittered too
+            play: null,        // interval of the play button
             g: null            // zuletzt gebauter Graph
         };
 
@@ -205,10 +212,22 @@
             S.angles = S.angles.map(a => ((a % TAU) + TAU) % TAU).sort((x, y) => x - y);
         }
 
+        // n survives a reload (this browser only); private mode or blocked storage just starts at 6
+        const N_KEY = 'kreisteilung:n';
+
+        function loadN() {
+            try {
+                const v = parseInt(localStorage.getItem(N_KEY), 10);
+                return v >= 1 && v <= MAX_N ? v : null;
+            } catch (e) { return null; }
+        }
+
         function setN(n) {
             S.n = Math.max(1, Math.min(MAX_N, n));
+            try { localStorage.setItem(N_KEY, String(S.n)); } catch (e) { }
             S.angles = regular(S.n);
             normalizeAngles();
+            if (S.general) jitter();
         }
 
         /* -------------------------------------------------------------------- Graph */
@@ -392,39 +411,59 @@
         // Distance from a point to a rectangle (0 inside)
         const rectDist = (x, y, c) => Math.hypot(Math.max(c.l - x, 0, x - c.r), Math.max(c.t - y, 0, y - c.b));
 
+        // The big region count right of the circle - central #n-telemetry, the same number as in Fourier
+        const bigNum = document.getElementById('n-telemetry');
+        let bigGap = 0;
+
         function layout() {
             const rect = container.getBoundingClientRect();
             const w = rect.width, h = rect.height;
-            cx = w / 2;
-            cy = h / 2;
-            R = Math.min(w, h) * 0.40;
+            const PAD = 28, EDGE = 26;                 // room for the point numbers at R + 18
+
+            // Circle and number are centred together; the circle gets the width the number leaves
+            const nb = bigNum ? bigNum.getBoundingClientRect() : null;
+            bigGap = nb && nb.width ? Math.max(24, nb.height * 0.3) : 0;
+            const NW = nb && nb.width ? nb.width + bigGap : 0;
+            const tx = (w - NW) / 2, ty = h / 2;
+            cx = tx;
+            cy = ty;
+            R = Math.max(10, Math.min(Math.min(w, h) * 0.40, (w - NW) / 2 - EDGE));
 
             // The coach box floats over the stage and used to hide a point of the
             // hexagon. Find the largest circle beside it, as close to the centre as
             // possible; if it would get too small (phone), stay centred.
             const c = coachRect(rect);
-            const PAD = 28, EDGE = 26;                 // room for the point numbers at R + 18
-            if (!c || rectDist(cx, cy, c) >= R + PAD) return;
-            const spot = r => {
-                const x0 = EDGE + r, x1 = w - EDGE - r, y0 = EDGE + r, y1 = h - EDGE - r;
-                if (x0 > x1 || y0 > y1) return null;
-                const STEPS = 40;
-                let best = null, bd = Infinity;
-                for (let i = 0; i <= STEPS; i++)
-                    for (let j = 0; j <= STEPS; j++) {
-                        const x = x0 + (x1 - x0) * i / STEPS, y = y0 + (y1 - y0) * j / STEPS;
-                        if (rectDist(x, y, c) < r + PAD) continue;
-                        const d = Math.hypot(x - w / 2, y - h / 2);
-                        if (d < bd) { bd = d; best = { x, y }; }
-                    }
-                return best;
-            };
-            let lo = 0, hi = R, fit = null;
-            for (let it = 0; it < 14; it++) {
-                const mid = (lo + hi) / 2, p = spot(mid);
-                if (p) { lo = mid; fit = { x: p.x, y: p.y, r: mid }; } else hi = mid;
+            if (c && rectDist(cx, cy, c) < R + PAD) {
+                const spot = r => {
+                    const x0 = EDGE + r, x1 = w - EDGE - NW - r, y0 = EDGE + r, y1 = h - EDGE - r;
+                    if (x0 > x1 || y0 > y1) return null;
+                    const STEPS = 40;
+                    let best = null, bd = Infinity;
+                    for (let i = 0; i <= STEPS; i++)
+                        for (let j = 0; j <= STEPS; j++) {
+                            const x = x0 + (x1 - x0) * i / STEPS, y = y0 + (y1 - y0) * j / STEPS;
+                            if (rectDist(x, y, c) < r + PAD) continue;
+                            const d = Math.hypot(x - tx, y - ty);
+                            if (d < bd) { bd = d; best = { x, y }; }
+                        }
+                    return best;
+                };
+                let lo = 0, hi = R, fit = null;
+                for (let it = 0; it < 14; it++) {
+                    const mid = (lo + hi) / 2, p = spot(mid);
+                    if (p) { lo = mid; fit = { x: p.x, y: p.y, r: mid }; } else hi = mid;
+                }
+                if (fit && fit.r >= R * 0.5) { cx = fit.x; cy = fit.y; R = fit.r; }
             }
-            if (fit && fit.r >= R * 0.5) { cx = fit.x; cy = fit.y; R = fit.r; }
+            placeBigNum();
+        }
+
+        // Pin the number to the circle: right of it, vertically on its centre
+        function placeBigNum() {
+            if (!bigNum) return;
+            bigNum.style.right = 'auto';
+            bigNum.style.left = (cx + R + bigGap) + 'px';
+            bigNum.style.top = cy + 'px';
         }
 
         const sx = x => cx + R * x;
@@ -528,6 +567,8 @@
             set('kt-chords', comb(n, 2));
             set('kt-cuts', g.cutCount + (g.cutCount === comb(n, 4) ? '' : ' / ' + comb(n, 4)));
             set('kt-faces', g.regions);
+            // only on a real change: a new width relayouts the circle (ResizeObserver below)
+            if (bigNum && bigNum.textContent !== String(g.regions)) bigNum.textContent = g.regions;
             set('kt-max', max);
             const row = document.getElementById('kt-faces-row');
             if (row) row.className = 'kt-row ' + (hit ? 'kt-hit' : 'kt-miss');
@@ -586,6 +627,7 @@
         canvas.addEventListener('pointerdown', ev => {
             const i = nearestPoint(ev);
             if (i < 0) return;
+            stopPlay();
             S.drag = i;
             canvas.setPointerCapture(ev.pointerId);
             draw();
@@ -618,13 +660,45 @@
         window.addEventListener('keydown', ev => {
             if (ev.metaKey || ev.ctrlKey || ev.altKey) return;   // Cmd-Shift-R nicht schlucken
             const k = ev.key.toLowerCase();
-            if (k === 'arrowup' || k === '+') { setNAndSync(S.n + 1); ev.preventDefault(); }
-            else if (k === 'arrowdown' || k === '-') { setNAndSync(S.n - 1); ev.preventDefault(); }
+            // preventDefault also keeps a focused slider from taking a second step of its own
+            if (k === 'arrowup' || k === 'arrowright' || k === '+') { stopPlay(); setNAndSync(S.n + 1); ev.preventDefault(); }
+            else if (k === 'arrowdown' || k === 'arrowleft' || k === '-') { stopPlay(); setNAndSync(S.n - 1); ev.preventDefault(); }
             else if (k === 'f') { S.fill = !S.fill; syncBoxes(); draw(); }
             else if (k === 'i') { S.numbers = !S.numbers; syncBoxes(); draw(); }
-            else if (k === 'g') { S.angles = regular(S.n); rebuild(); }
-            else if (k === 'z') { jitter(); rebuild(); }
+            else if (k === 'g') { chooseRegular(); }
+            else if (k === 'z') { chooseGeneral(); }
         });
+
+        /* --------------------------------------------------------------------- Play */
+        // Steps n up once per PLAY_MS until MAX_N - the sequence 1, 2, 4, 8, 16 ... builds itself.
+        // It keeps the chosen layout: "Regelmäßig" shows 30 at n = 6, "Allgemeine Lage" 31.
+        const PLAY_MS = 1400;
+
+        function playLabel() {
+            const b = document.getElementById('kt-play');
+            if (!b) return;
+            b.textContent = S.play ? T('btn_stop', 'Anhalten') : T('btn_play', 'Abspielen');
+            b.classList.toggle('running', !!S.play);
+        }
+
+        function stopPlay() {
+            if (!S.play) return;
+            clearInterval(S.play);
+            S.play = null;
+            playLabel();
+        }
+
+        function startPlay() {
+            if (S.n >= MAX_N) setNAndSync(1);
+            S.play = setInterval(() => {
+                setNAndSync(S.n + 1);
+                if (S.n >= MAX_N) stopPlay();
+            }, PLAY_MS);
+            playLabel();
+        }
+
+        function chooseRegular() { stopPlay(); S.general = false; S.angles = regular(S.n); rebuild(); }
+        function chooseGeneral() { stopPlay(); S.general = true; S.angles = regular(S.n); normalizeAngles(); jitter(); rebuild(); }
 
         /* ----------------------------------------------------------------------- UI */
         function setNAndSync(n) {
@@ -655,6 +729,7 @@
                         </div>
                         <input type="range" id="kt-slider" min="1" max="${MAX_N}" step="1" value="${S.n}">
                     </div>
+                    <button class="cyber-btn" id="kt-play">${T('btn_play', 'Abspielen')}</button>
                     <div class="kt-btns">
                         <button class="cyber-btn" id="kt-regular">${T('btn_regular', 'Regelmäßig')}</button>
                         <button class="cyber-btn" id="kt-jitter">${T('btn_general', 'Allgemeine Lage')}</button>
@@ -686,12 +761,14 @@
                 </div>`);
 
             document.getElementById('kt-slider').addEventListener('input', e => {
+                stopPlay();
                 document.getElementById('kt-slider-label').textContent = e.target.value;
                 setN(parseInt(e.target.value, 10));
                 rebuild();
             });
-            document.getElementById('kt-regular').addEventListener('click', () => { S.angles = regular(S.n); rebuild(); });
-            document.getElementById('kt-jitter').addEventListener('click', () => { jitter(); rebuild(); });
+            document.getElementById('kt-regular').addEventListener('click', chooseRegular);
+            document.getElementById('kt-jitter').addEventListener('click', chooseGeneral);
+            document.getElementById('kt-play').addEventListener('click', () => { if (S.play) stopPlay(); else startPlay(); });
             [['kt-fill', 'fill'], ['kt-chords-box', 'chords'], ['kt-cuts-box', 'cuts'],
             ['kt-numbers', 'numbers']].forEach(([id, key]) => {
                 document.getElementById(id).addEventListener('change', e => { S[key] = e.target.checked; draw(); });
@@ -733,7 +810,7 @@
             if (el) el.innerHTML = tex('\\binom{n}{4}+\\binom{n}{2}+1', 'C(n,4) + C(n,2) + 1', true);
         }
 
-        setN(S.n);
+        setN(loadN() || S.n);
         buildUI();
         renderFormula();
         document.addEventListener('DOMContentLoaded', () => { renderFormula(); if (S.g) readouts(); });
@@ -741,6 +818,13 @@
         // Collapsing or expanding the coach box frees or covers stage space
         if (coachBox && window.ResizeObserver)
             new ResizeObserver(() => { layout(); draw(); }).observe(coachBox);
+        // More digits (or Orbitron arriving late) make the number wider - the circle makes room
+        if (bigNum && window.ResizeObserver)
+            new ResizeObserver(() => { layout(); draw(); }).observe(bigNum);
+        // The stage widens after load without a window resize (the left chrome scales itself
+        // down) - measured 1018 -> 1117 px; a canvas sized before that is drawn stretched
+        if (window.ResizeObserver)
+            new ResizeObserver(() => init()).observe(container);
         document.fonts.ready.then(() => { init(); rebuild(); });
         init();
         rebuild();

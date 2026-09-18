@@ -376,6 +376,8 @@ CyberI18n.translations.en = {
                 points: "Number n",
                 btn_regular: "Regular",
                 btn_general: "General position",
+                btn_play: "Play",
+                btn_stop: "Stop",
                 hint_drag: "Points can be dragged around the circle — that is how you see the jump 30 → 31.",
                 card_count: "Counter",
                 c_points: "Points n",

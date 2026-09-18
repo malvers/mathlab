@@ -377,6 +377,8 @@ CyberI18n.translations.sw = {
                 points: "Idadi n",
                 btn_regular: "Ya kawaida",
                 btn_general: "Mpangilio wa jumla",
+                btn_play: "Cheza",
+                btn_stop: "Simamisha",
                 hint_drag: "Nukta zinaweza kuburutwa kuzunguka duara — hivyo ndivyo unavyoona mruko 30 → 31.",
                 card_count: "Kihesabu",
                 c_points: "Nukta n",

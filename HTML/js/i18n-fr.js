@@ -376,6 +376,8 @@ CyberI18n.translations.fr = {
                 points: "Nombre n",
                 btn_regular: "Régulier",
                 btn_general: "Position générale",
+                btn_play: "Lecture",
+                btn_stop: "Arrêt",
                 hint_drag: "Les points se déplacent à la souris sur le cercle — c’est ainsi qu’on voit le saut 30 → 31.",
                 card_count: "Compteur",
                 c_points: "Points n",

@@ -39,6 +39,11 @@ body {
 
 #math-coach-box {
     position: absolute;
+    /* off the stage edges instead of glued into the corner (Doc, 18.09.2026: "nicht geklatscht") -
+       the offset filmkritik and marionwalter already set by hand */
+    top: 24px;
+    left: 24px;
+    max-width: calc(100% - 48px);
     width: 380px;
     background: rgba(10, 20, 40, 0.4);
     backdrop-filter: blur(25px);
@@ -111,8 +116,9 @@ body {
 
 #math-coach-box.collapsed {
     width: auto;
-    max-width: 340px;
+    max-width: min(340px, calc(100% - 48px));
     padding: 12px 16px;
+    border-radius: 8px;        /* a handle, not a pill (Doc, 18.09.2026: "weniger rund") */
 }
 
 #math-coach-box.collapsed .coach-title {

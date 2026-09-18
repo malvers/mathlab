@@ -410,6 +410,8 @@ Object.assign(CyberI18n.translations.nl.fractal, {
             points: "Aantal n",
             btn_regular: "Regelmatig",
             btn_general: "Algemene ligging",
+            btn_play: "Afspelen",
+            btn_stop: "Stoppen",
             hint_drag: "Punten kun je met de muis over de cirkel slepen — zo zie je de sprong 30 → 31.",
             card_count: "Teller",
             c_points: "Punten n",
