@@ -29,7 +29,10 @@
     '.card.folded .qtoggle svg { transform: rotate(-90deg); }',
     '.card.folded .qtext { margin-bottom: 0; }',
     '.card.folded .opts, .card.folded .solbtn, .card.folded .solution { display: none; }',
-    '.qbar { display: flex; justify-content: flex-end; gap: 8px; margin: 0 0 10px; }',
+    /* wrap: on a phone the pills (QR-Codes, Auswertung, Alle Lösungen, Alle einklappen) are wider
+       than the screen, and a right-aligned row that cannot wrap spills out on the LEFT (Doc saw
+       "QR-Codes" cut off in the Mission Control film, 18.09.2026) */
+    '.qbar { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin: 0 0 10px; }',
     '.qbar .btn-fold {',
     '  font-family: "Orbitron", sans-serif; font-size: 0.68rem; letter-spacing: 0.06em;',
     '  background: transparent; color: rgb(96, 128, 36);',

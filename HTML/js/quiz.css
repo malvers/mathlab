@@ -309,3 +309,56 @@
     font-size: 0.82rem;
     line-height: 1.35;
 }
+
+/* Test guard (quiz-engine.js, Doc 18.09.2026): the start screen hides the
+   questions until the pupil starts; the red lock screen covers the test after
+   a leave (other tab/app, lost focus, out of full screen) until "Weiter". */
+html.guard-open, html.guard-open body { overflow: hidden; }
+.guard {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: var(--bg);
+    color: var(--blue);
+}
+.guard[hidden] { display: none; }
+/* 'abort' = ended by the teacher in Mission Control: red like the lock, no button */
+.guard-lock, .guard-abort { background: var(--red); color: #fff; }
+.guard-box { max-width: 520px; text-align: center; }
+.guard-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.3rem, 6vw, 2.2rem);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+.guard-text { font-size: 1.05rem; line-height: 1.5; margin-bottom: 10px; }
+.guard-note {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    opacity: 0.75;
+    margin-bottom: 24px;
+}
+.guard-btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    padding: 13px 34px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    background: var(--green);
+    color: #fff;
+}
+.guard-btn:hover { background: var(--green-dark); }
+.guard-lock .guard-btn { background: #fff; color: var(--red); }
+.guard-lock .guard-btn:hover { background: rgba(255, 255, 255, 0.85); }
+.guard-btn:focus { outline: none; }
+.guard-btn:focus-visible { box-shadow: 0 0 0 3px rgba(14, 36, 78, 0.3); }
+.guard-lock .guard-btn:focus-visible { box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.55); }

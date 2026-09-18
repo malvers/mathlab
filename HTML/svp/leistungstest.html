@@ -204,6 +204,98 @@
         .lt-tab td.grade.good { color: var(--phi); }
         .lt-tab td.grade.low { color: var(--lt-red); }
         .lt-tab td.grade.none { color: var(--muted); }
+        /* --- Mission Control: live state of the running test -------------- */
+        .lt-mc { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0 0 12px; }
+        .lt-mc[hidden] { display: none; }
+        .lt-mc-title { font-family: Orbitron, system-ui, sans-serif; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; }
+        .lt-mc-live { font-family: Orbitron, system-ui, sans-serif; font-size: 0.66rem; letter-spacing: 0.08em; color: var(--muted); }
+        .lt-mc-live::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+            margin-right: 6px; vertical-align: 1px; background: var(--muted); }
+        .lt-mc-live.on::before { background: var(--phi); animation: lt-pulse 2s ease-in-out infinite; }
+        .lt-mc-live.err::before { background: var(--lt-red); }
+        @keyframes lt-pulse { 50% { opacity: 0.25; } }
+        .lt-mc-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .lt-mc-chip { font-family: Orbitron, system-ui, sans-serif; font-size: 0.68rem; letter-spacing: 0.06em;
+            padding: 4px 9px; border: 1px solid var(--line); border-radius: 999px; white-space: nowrap; color: var(--muted); }
+        .lt-mc-chip .cyber-digits { --cc-size: 1em; --cc-digit: currentColor; --cc-dw: 0.85em; --cc-sw: 0.9em;
+            --cc-weight: 400; gap: 1px; vertical-align: -1px; margin-left: 6px; }
+        .lt-mc-chip.run.n { color: var(--cyan); border-color: var(--cyan); }
+        .lt-mc-chip.done.n { color: var(--phi); border-color: var(--phi); }
+        .lt-mc-chip.away.n, .lt-mc-chip.abort.n { color: var(--lt-red); border-color: var(--lt-red); }
+        .lt-mc-chip.off.n { color: inherit; border-color: var(--muted); }
+        /* Neubeginn: demo class only, pushed to the right end of the bar */
+        .lt-mc-reset { margin-left: auto; display: inline-flex; align-items: center; gap: 10px; }
+        .lt-mc-reset .lt-btn { padding: 5px 12px; font-size: 0.68rem; }
+        .lt-mc-reset .ab-msg { font-size: 0.8rem; opacity: 0.8; }
+        /* Status: not started / working x of n / away (blinks) / offline / submitted / aborted */
+        .lt-tab td.status { font-family: Orbitron, system-ui, sans-serif; font-size: 0.8rem; letter-spacing: 0.05em; white-space: nowrap; color: var(--muted); }
+        /* fixed label width: the counts of all rows stand digit under digit */
+        .lt-tab td.status .st-label { display: inline-block; min-width: 4.2em; padding: 1px 0; margin-right: 6px; }
+        .lt-tab td.status .cyber-digits { --cc-size: 1.1em; --cc-digit: currentColor; --cc-dw: 0.85em;
+            --cc-sw: 0.9em; --cc-weight: 400; gap: 1px; vertical-align: middle; }
+        .lt-tab td.status.run { color: var(--cyan); }
+        .lt-tab td.status.done { color: var(--phi); }
+        .lt-tab td.status.abort { color: var(--lt-red); }
+        .lt-tab td.status.off { color: inherit; opacity: 0.7; }
+        /* away: only the label is a red pill with a slow, soft pulse - no blinking cell (Doc: "sehr aggressiv") */
+        .lt-tab td.status.away { color: var(--lt-red); }
+        .lt-tab td.status.away .st-label { background: var(--ypsilon); color: #fff; border-radius: 999px;
+            text-align: center; animation: lt-away 2.4s ease-in-out infinite; }
+        @keyframes lt-away { 50% { opacity: 0.5; } }
+        /* in the same cell (Doc, 18.09.2026: one column): how often and how long the pupil left the test */
+        .lt-tab td.status .st-leave { color: var(--lt-red); margin-left: 10px; }
+        .lt-tab td.status .st-leave .cyber-digits { margin-right: 6px; }
+        .lt-tab td.status.away .st-leave { color: inherit; }
+        /* the teacher's red button in a pupil's detail (second click confirms, like "Alles löschen") */
+        .lt-abort { margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+        .lt-abort .lt-btn.stop { border-color: var(--ypsilon); color: #fff; background: var(--ypsilon); }
+        .lt-abort .lt-btn.stop:hover { background: rgb(150, 28, 18); color: #fff; }
+        .lt-abort .lt-btn.stop.armed { background: transparent; color: var(--lt-red); border-color: var(--lt-red); }
+        .lt-abort .ab-msg { font-size: 0.85rem; opacity: 0.8; }
+        /* view switch in the bar: Kacheln | Liste */
+        .lt-mc-view { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+        .lt-mc-view button { font-family: Orbitron, system-ui, sans-serif; font-size: 0.66rem; letter-spacing: 0.06em;
+            padding: 4px 11px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+        .lt-mc-view button[aria-pressed="true"] { background: rgba(120, 160, 220, 0.3); color: inherit; }
+        /* --- Kacheln (Doc, 18.09.2026: "gefällt mir sehr ... haben wollen"): one tile per
+           pupil, the same states as the Status column, drawn like the hero of the film plot */
+        .lt-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+        .lt-tile { display: flex; flex-direction: column; gap: 3px; min-width: 0; text-align: left; font: inherit; color: inherit;
+            padding: 10px 12px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--row-line); cursor: pointer; }
+        .lt-tile:hover { border-color: var(--muted); }
+        .lt-tile.sel { box-shadow: 0 0 0 2px rgba(120, 160, 220, 0.7); }
+        .lt-tile .tl-name { font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lt-tile .tl-sub { font-family: Orbitron, system-ui, sans-serif; font-size: 0.62rem; letter-spacing: 0.08em; color: var(--muted);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lt-tile .tl-main { font-family: Orbitron, system-ui, sans-serif; font-size: 1.2rem; margin-top: 6px; min-height: 1.5em; white-space: nowrap; }
+        .lt-tile .tl-main .cyber-digits { --cc-size: 1em; --cc-digit: currentColor; --cc-dw: 0.85em; --cc-sw: 0.9em;
+            --cc-weight: 400; gap: 1px; }
+        .lt-tile .tl-main { display: flex; align-items: center; gap: 8px; }
+        .lt-tile .tl-grade { white-space: nowrap; }
+        .lt-tile .tl-state { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; min-height: 1.4em;
+            font-family: Orbitron, system-ui, sans-serif; font-size: 0.64rem; letter-spacing: 0.06em; color: var(--muted); }
+        /* "1×" beside the points; the tooltip says "1× verlassen" */
+        .lt-tile .tl-leave { margin-left: auto; color: var(--lt-red); white-space: nowrap; font-size: 0.72em; letter-spacing: 0.04em; }
+        .lt-tile .tl-bar { height: 5px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 4px; }
+        .lt-tile .tl-bar i { display: block; height: 100%; width: 0; background: var(--muted); }
+        .lt-tile.none .tl-main { color: var(--muted); }
+        /* running is cyan: yellow belongs to the score ramp now (Doc, 18.09.2026: "Max Planck ist gelb,
+           was bedeutet es läuft - da müsste man sich noch mal Gedanken machen") */
+        .lt-tile.run { border: 2px solid var(--cyan); padding: 9px 11px 11px; }
+        .lt-tile.run .tl-state { color: var(--cyan); }
+        .lt-tile.run .tl-bar i { background: var(--cyan); }
+        .lt-tile.away { border: 2px solid var(--ypsilon); padding: 9px 11px 11px; }
+        .lt-tile.away .tl-bar i { background: var(--ypsilon); }
+        .lt-tile.away .tl-pill { background: var(--ypsilon); color: #fff; border-radius: 999px; padding: 1px 9px;
+            animation: lt-away 2.4s ease-in-out infinite; }
+        .lt-tile.off { border-style: dashed; }
+        /* submitted: border, points and bar in the colour of the score - red, over yellow, to green */
+        .lt-tile.done { border: 2px solid var(--res, var(--phi)); padding: 9px 11px 11px; }
+        .lt-tile.done .tl-main, .lt-tile.done .tl-state { color: var(--res, var(--phi)); }
+        .lt-tile.done .tl-bar i { background: var(--res, var(--phi)); }
+        .lt-tile.abort { border: 2px solid var(--ypsilon); padding: 9px 11px 11px; opacity: 0.75; }
+        .lt-tile.abort .tl-main { color: var(--lt-red); font-size: 0.8rem; letter-spacing: 0.06em; }
+        .lt-tile.abort .tl-bar { visibility: hidden; }
         .lt-tab tr[data-code] { cursor: pointer; }
         .lt-tab tr[data-code]:hover > td, .lt-tab tr.sel > td { background: var(--row-line); }
         /* one pupil's answers, question by question (click on a row) */
@@ -328,7 +420,13 @@
             body.print-slips .lt-slip .s-code { color: #000; }
 
             .lt-tab th, .lt-tab td { border-color: #666; }
-            .lt-tab td.code, .lt-tab td.alias, .lt-tab td.result, .lt-tab td.grade { color: #000; }
+            .lt-tab td.code, .lt-tab td.alias, .lt-tab td.result, .lt-tab td.grade, .lt-tab td.status,
+            .lt-tab td.status .st-leave { color: #000; }
+            .lt-tab td.status.away .st-label { animation: none; background: none; color: #000; }
+            /* paper always gets the list, whichever view is on screen */
+            .lt-tiles { display: none !important; }
+            .lt-scroll[hidden] { display: block !important; }
+            .lt-mc { display: none !important; }
             .lt-detail { display: none !important; }
         }
     </style>
@@ -353,7 +451,7 @@
                 <b>Die Zuordnungsliste bleibt auf diesem Rechner.</b>
                 Klarnamen werden nirgends hochgeladen &mdash; weder zu Supabase noch sonstwohin.
                 Sie stehen nur im Speicher dieses Browsers und auf dem Blatt, das gedruckt werden muss.
-                Wer dieses Blatt und den Browser nicht hat, kann einen Code keinem Kind zuordnen.
+                Wer dieses Blatt und den Browser nicht hat, kann einen Code niemandem zuordnen.
                 <div class="lt-legal" id="ltLegal">
                     Das ist <b>Pseudonymisierung</b> nach Art.&nbsp;4 Nr.&nbsp;5 DSGVO und eine geeignete
                     technische Ma&szlig;nahme nach Art.&nbsp;32 Abs.&nbsp;1 lit.&nbsp;a DSGVO, dazu
@@ -400,9 +498,23 @@
 
         <section class="lt-card lt-listcard" id="ltListCard" hidden>
             <div class="lt-title">Zuordnungsliste &mdash; nur f&uuml;r dich</div>
+            <div class="lt-mc" id="ltMc" hidden>
+                <span class="lt-mc-title">Mission Control</span>
+                <span class="lt-mc-view" role="group" aria-label="Ansicht">
+                    <button type="button" id="ltViewTiles" data-view="tiles" aria-pressed="true">Kacheln</button>
+                    <button type="button" id="ltViewList" data-view="list" aria-pressed="false">Liste</button>
+                </span>
+                <span class="lt-mc-live" id="ltMcLive">live</span>
+                <span class="lt-mc-chips" id="ltMcChips"></span>
+                <span class="lt-mc-reset">
+                    <span class="ab-msg" id="ltMcResetMsg"></span>
+                    <button type="button" class="lt-btn danger" id="ltMcReset" hidden>Neubeginn</button>
+                </span>
+            </div>
             <div class="lt-scroll">
                 <table class="lt-tab" id="ltTable"></table>
             </div>
+            <div class="lt-tiles" id="ltTiles" hidden></div>
             <div class="lt-detail" id="ltDetail" hidden></div>
             <div class="lt-btns">
                 <button type="button" class="lt-btn" id="ltResults">Ergebnisse abrufen</button>
@@ -650,16 +762,27 @@
                 document.getElementById('ltSlipTitle').textContent = groupKey();
                 elState.textContent = entries.length + ' SuS in ' + groupKey() + ' · gespeichert nur in diesem Browser.';
 
-                let html = '<tr><th>Klarname</th><th>Deckname</th><th>Code</th><th>Ergebnis</th><th>Note</th></tr>';
+                let html = '<tr><th>Klarname</th><th>Deckname</th><th>Code</th><th>Status</th><th>Ergebnis</th><th>Note</th></tr>';
                 entries.forEach(function (e) {
                     html += '<tr data-code="' + esc(e.code) + '"><td>' + (e.name ? esc(e.name) : LOCKED) +
                         '</td><td class="alias">' + esc(e.alias) + '</td><td class="code">' + esc(e.code) +
-                        '</td><td class="result" data-code="' + esc(e.code) + '">\u2026</td>' +
+                        '</td><td class="status" data-code="' + esc(e.code) + '">\u2026</td>' +
+                        '<td class="result" data-code="' + esc(e.code) + '">\u2026</td>' +
                         '<td class="grade" data-code="' + esc(e.code) + '">\u2026</td></tr>';
                 });
                 elTable.innerHTML = html;
+                elTiles.innerHTML = entries.map(function (e) {
+                    return '<button type="button" class="lt-tile none" data-code="' + esc(e.code) + '">' +
+                        '<span class="tl-name">' + (e.name ? esc(e.name) : esc(e.alias)) + '</span>' +
+                        '<span class="tl-sub">' + (e.name ? esc(e.alias) + ' \u00b7 ' : '') + esc(e.code) + '</span>' +
+                        '<span class="tl-main">\u2014</span><span class="tl-state"></span>' +
+                        '<span class="tl-bar"><i></i></span></button>';
+                }).join('');
+                tileRes = {};
+                applyView();
                 elDetail.hidden = true;
                 fillResults(false);
+                watchControl();
 
                 const url = testUrl();
                 elSlips.innerHTML = '';
@@ -763,10 +886,25 @@
                 return step ? step[1] : '';
             }
             function paintResult(code, res, meta) {
+                tileRes[code] = res ? { score: res.score, total: res.total, grade: gradeOf(meta, res) } : res;
+                paintTile(code);
+                paintResultRow(code, res, meta);
+            }
+            /* The score ramp of the test page (quiz-engine.js barColor): palette red at 0 %,
+               orange at 50 %, green at 100 % (Doc, 18.09.2026: "nach unserem Schema von rot
+               bis grün über gelb"). */
+            function scoreColor(pct) {
+                const red = [176, 36, 24], orange = [245, 194, 66], green = [121, 158, 49];
+                const a = pct <= 50 ? red : orange, b = pct <= 50 ? orange : green;
+                const t = (pct <= 50 ? pct : pct - 50) / 50;
+                return 'rgb(' + a.map(function (v, i) { return Math.round(v + (b[i] - v) * t); }).join(',') + ')';
+            }
+            function paintResultRow(code, res, meta) {
                 const td = elTable.querySelector('td.result[data-code="' + code + '"]');
                 const tg = elTable.querySelector('td.grade[data-code="' + code + '"]');
                 if (!td || !tg) return;
                 td.classList.remove('low', 'none');
+                td.style.color = '';
                 tg.classList.remove('good', 'low', 'none');
                 if (res === undefined) {
                     td.textContent = tg.textContent = '?';
@@ -785,24 +923,399 @@
                 /* pad to the longest possible value: 4 digits for "33/33" */
                 CyberClock.digits(slots, res.score + '/' + res.total, { minDigits: 2 * String(res.total).length });
                 td.title = Math.round(res.score / res.total * 100) + ' %';
-                if (res.score < res.total / 2) td.classList.add('low');
+                td.style.color = scoreColor(res.score / res.total * 100);
                 const g = gradeOf(meta, res);
                 tg.textContent = g;
                 tg.title = td.title;
                 if (g && g <= 2) tg.classList.add('good');
                 else if (g >= 5) tg.classList.add('low');
             }
+            /* --- Mission Control (Doc, 18.09.2026) ----------------------------
+               Live view of the running test, after the teacher view of the Saxon
+               Kompetenztest. quiz-engine.js pings the progress every 15 s and
+               reports every leave (other tab/app, lost focus, out of full screen);
+               rpc quiz_control answers for the codes of this list only and is
+               asked every 5 s while the page is visible. Status per pupil: not
+               started / working x of n / away (blinks) / offline / submitted /
+               aborted. The red button in a pupil's detail ends that test
+               (rpc quiz_abort, only with Doc's svp session) and can be taken back. */
+            const OFFLINE_SECS = 45;   /* three missed heartbeats */
+            const AWAY_DEAD_SECS = 90; /* hidden tabs beat about once a minute (browser throttling) */
+            let control = {};          /* code -> row of quiz_control */
+            let controlTimer = null;
+            function watchControl() {
+                clearInterval(controlTimer);
+                control = {};
+                fillControl();
+                controlTimer = setInterval(function () { if (!document.hidden) fillControl(); }, 5000);
+            }
+            function fillControl() {
+                const url = testUrl();
+                if (!url || !entries.length || !window.svpAuth) return;
+                const codes = entries.map(function (e) { return e.code; });
+                quizMeta(url).then(function (meta) {
+                    const pool = poolOf(meta, url);
+                    return fetch(svpAuth.DB_URL + '/rest/v1/rpc/quiz_control', {
+                        method: 'POST',
+                        headers: { apikey: svpAuth.DB_KEY, Authorization: 'Bearer ' + svpAuth.DB_KEY,
+                                   'Content-Type': 'application/json' },
+                        body: JSON.stringify({ p_quiz: pool, p_codes: codes })
+                    }).then(function (r) {
+                        if (!r.ok) throw new Error('HTTP ' + r.status);
+                        return r.json();
+                    }).then(function (rows) {
+                        if (testUrl() !== url) return;   /* the teacher switched tests meanwhile */
+                        control = {};
+                        rows.forEach(function (row) { control[row.code] = row; });
+                        let fresh = false;
+                        codes.forEach(function (c) {
+                            paintControl(c, control[c] || null);
+                            /* just submitted: fetch the points right away, not on the button */
+                            const key = pool + '|' + c;
+                            if (control[c] && control[c].submitted && !results[key]) {
+                                delete results[key];
+                                fresh = true;
+                            }
+                        });
+                        if (fresh) fillResults(false);
+                        paintSummary(codes, true);
+                        const sel = elTable.querySelector('tr.sel') || elTiles.querySelector('.lt-tile.sel');
+                        if (sel) paintAbort(sel.dataset.code);
+                    });
+                }).catch(function () {
+                    codes.forEach(function (c) { paintControl(c, undefined); });
+                    paintSummary(codes, false);
+                });
+            }
+            function mmss(secs) {
+                return Math.floor(secs / 60) + ':' + String(secs % 60).padStart(2, '0');
+            }
+            function statusOf(row) {
+                if (!row || (!row.started && !row.submitted && !row.aborted)) {
+                    return { key: 'none', label: '—', tip: 'noch nicht gestartet' };
+                }
+                if (row.aborted) return { key: 'abort', label: 'abgebrochen', tip: 'von dir beendet — wird nicht gewertet' };
+                if (row.submitted) return { key: 'done', label: 'abgegeben', tip: 'abgegeben' };
+                /* Away only while the page still beats: a hidden tab keeps pinging, if
+                   throttled to about once a minute. Without a beat for 90 s the page is
+                   closed or asleep - then it is "offline", not a pulse forever (Doc, 18.09.2026). */
+                if (row.away_since && row.seen_secs <= AWAY_DEAD_SECS) {
+                    return { key: 'away', label: 'weg', progress: true,
+                             tip: 'gerade weg seit ' + new Date(row.away_since).toLocaleTimeString('de-DE') };
+                }
+                if (row.away_since) {
+                    return { key: 'off', label: 'offline', progress: true,
+                             tip: 'weg seit ' + new Date(row.away_since).toLocaleTimeString('de-DE') +
+                                  ', seit ' + mmss(row.seen_secs) + ' min kein Lebenszeichen — Seite geschlossen?' };
+                }
+                if (row.seen_secs > OFFLINE_SECS) {
+                    return { key: 'off', label: 'offline', progress: true,
+                             tip: 'seit ' + mmss(row.seen_secs) + ' min kein Lebenszeichen (Seite zu, Akku, WLAN?)' };
+                }
+                return { key: 'run', label: 'läuft', progress: true, tip: 'arbeitet gerade' };
+            }
+            function paintControl(code, row) {
+                paintRow(code, row);
+                paintTile(code);
+            }
+            function paintRow(code, row) {
+                const ts = elTable.querySelector('td.status[data-code="' + code + '"]');
+                if (!ts) return;
+                ts.className = 'status';
+                if (row === undefined) {
+                    ts.textContent = '?';
+                    ts.title = 'Server gerade nicht erreichbar';
+                    return;
+                }
+                const st = statusOf(row);
+                ts.classList.add(st.key);
+                let tip = st.tip + (st.progress && row.total ? ' \u00b7 ' + row.answered + ' von ' + row.total + ' beantwortet' : '');
+                ts.textContent = '';
+                const lab = document.createElement('span');
+                lab.className = 'st-label';
+                lab.textContent = st.label;
+                ts.appendChild(lab);
+                if (st.progress && row.total) {
+                    const p = document.createElement('span');
+                    ts.appendChild(p);
+                    CyberClock.digits(p, row.answered + '/' + row.total, { minDigits: 2 * String(row.total).length });
+                }
+                /* how often the pupil left, in the same cell (Doc: one column). Only the
+                   count - "2× 12:58" read like twice 13 minutes (Doc, 18.09.2026); the
+                   total time away sits in the tooltip. */
+                if (row && row.leaves) {
+                    const lv = document.createElement('span');
+                    lv.className = 'st-leave';
+                    const n = document.createElement('span');
+                    lv.appendChild(n);
+                    lv.appendChild(document.createTextNode('verlassen'));
+                    ts.appendChild(lv);
+                    CyberClock.digits(n, row.leaves + '\u00d7', { minDigits: 2 });
+                    tip += ' \u00b7 ' + row.leaves + '\u00d7 verlassen, zusammen ' + mmss(row.away_secs) + ' min weg';
+                }
+                ts.title = tip;
+            }
+            /* the bar above the table: how many pupils are where right now */
+            const MC_CHIPS = [['run', 'Läuft'], ['away', 'Weg'], ['off', 'Offline'],
+                              ['done', 'Abgegeben'], ['abort', 'Abgebrochen']];
+            function paintSummary(codes, ok) {
+                const bar = document.getElementById('ltMc');
+                bar.hidden = !codes || !codes.length;
+                if (bar.hidden) return;
+                document.getElementById('ltMcReset').hidden = !isDemo(testUrl());
+                const live = document.getElementById('ltMcLive');
+                live.className = 'lt-mc-live ' + (ok ? 'on' : 'err');
+                live.textContent = ok ? 'live · ' + new Date().toLocaleTimeString('de-DE') : 'Server nicht erreichbar';
+                if (!ok) return;
+                const count = { run: 0, away: 0, off: 0, done: 0, abort: 0, none: 0 };
+                codes.forEach(function (c) { count[statusOf(control[c] || null).key]++; });
+                const chips = document.getElementById('ltMcChips');
+                chips.textContent = '';
+                const all = [['started', 'Gestartet', (codes.length - count.none) + '/' + codes.length]]
+                    .concat(MC_CHIPS.map(function (m) { return [m[0], m[1], String(count[m[0]])]; }));
+                all.forEach(function (m) {
+                    const chip = document.createElement('span');
+                    chip.className = 'lt-mc-chip ' + m[0] + (m[0] !== 'started' && m[2] !== '0' ? ' n' : '');
+                    chip.textContent = m[1];
+                    const num = document.createElement('span');
+                    chip.appendChild(num);
+                    CyberClock.digits(num, m[2]);
+                    chips.appendChild(chip);
+                });
+            }
+            /* The red button, in the detail of the clicked pupil. Ending a test is
+               undoable, but still asks for a second click like "Alles löschen". */
+            let abortShown = '';
+            function paintAbort(code) {
+                const box = document.getElementById('ltAbort');
+                if (!box) return;
+                const row = control[code] || null;
+                const state = !row || (!row.started && !row.aborted) ? 'idle'
+                            : row.aborted ? 'aborted' : row.submitted ? 'done' : 'running';
+                if (abortShown === code + '|' + state) return;   /* keeps a pending second click */
+                abortShown = code + '|' + state;
+                box.textContent = '';
+                const msg = document.createElement('span');
+                msg.className = 'ab-msg';
+                if (state === 'idle' || state === 'done') {
+                    msg.textContent = state === 'idle' ? 'Noch nicht gestartet.' : 'Abgegeben — hier gibt es nichts mehr abzubrechen.';
+                    box.appendChild(msg);
+                    return;
+                }
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                if (state === 'aborted') {
+                    btn.className = 'lt-btn';
+                    btn.textContent = 'Abbruch zurücknehmen';
+                    msg.textContent = 'Die Schülerin oder der Schüler sieht „Test beendet“. Zurücknehmen gibt den Test wieder frei.';
+                    btn.addEventListener('click', function () { abortRun(code, false, msg); });
+                } else {
+                    btn.className = 'lt-btn stop';
+                    btn.textContent = 'Test abbrechen';
+                    msg.textContent = 'Beendet den Test für diese Schülerin oder diesen Schüler; er wird nicht gewertet.';
+                    let armed = 0;
+                    btn.addEventListener('click', function () {
+                        if (!armed) {
+                            armed = window.setTimeout(function () {
+                                armed = 0;
+                                btn.textContent = 'Test abbrechen';
+                                btn.classList.remove('armed');
+                            }, 4000);
+                            btn.textContent = 'Wirklich? Nochmal klicken';
+                            btn.classList.add('armed');
+                            return;
+                        }
+                        window.clearTimeout(armed);
+                        armed = 0;
+                        abortRun(code, true, msg);
+                    });
+                }
+                box.appendChild(btn);
+                box.appendChild(msg);
+            }
+            /* --- Kacheln ------------------------------------------------------
+               One tile per pupil from the same data as the rows (control + results):
+               name, alias · code, the count or the points, the state and how often
+               the test was left, with a progress bar. */
+            const elTiles = document.getElementById('ltTiles');
+            let tileRes = {};   /* code -> { score, total, grade } | null (no submission) */
+            function paintTile(code) {
+                const t = elTiles.querySelector('.lt-tile[data-code="' + code + '"]');
+                if (!t) return;
+                const row = control[code] || null;
+                const st = statusOf(row);
+                const res = tileRes[code];
+                t.classList.remove('none', 'run', 'away', 'off', 'done', 'abort');
+                t.classList.add(st.key);
+                const main = t.querySelector('.tl-main');
+                const state = t.querySelector('.tl-state');
+                const bar = t.querySelector('.tl-bar i');
+                main.textContent = '';
+                state.textContent = '';
+                let frac = 0;
+                if (st.key === 'abort') {
+                    main.textContent = 'abgebrochen';
+                } else if (res) {
+                    const d = document.createElement('span');
+                    main.appendChild(d);
+                    CyberClock.digits(d, res.score + '/' + res.total, { minDigits: 2 * String(res.total).length });
+                    frac = 1;
+                } else if (row && row.total && st.key !== 'none') {
+                    const d = document.createElement('span');
+                    main.appendChild(d);
+                    CyberClock.digits(d, row.answered + '/' + row.total, { minDigits: 2 * String(row.total).length });
+                    frac = row.answered / row.total;
+                } else {
+                    main.textContent = '\u2014';
+                }
+                if (st.key !== 'none') {
+                    const lab = document.createElement('span');
+                    lab.className = 'tl-pill';
+                    lab.textContent = st.label;
+                    state.appendChild(lab);
+                }
+                /* the grade in the state line, next to "abgegeben" */
+                if (res && res.grade && st.key !== 'abort') {
+                    const g = document.createElement('span');
+                    g.className = 'tl-grade';
+                    g.textContent = 'Note ' + res.grade;
+                    state.appendChild(g);
+                }
+                /* how often the test was left: next to the points, not as a third item in the state line - there
+                   it wrapped and made that one tile taller than the rest (Doc, 18.09.2026: "1× verlassen macht
+                   die Kacheln anders als die anderen ... das meinte ich hoch") */
+                if (row && row.leaves && main.firstChild && main.firstChild.nodeType === 1) {
+                    const lv = document.createElement('span');
+                    lv.className = 'tl-leave';
+                    lv.textContent = row.leaves + '\u00d7';
+                    lv.title = row.leaves + '\u00d7 verlassen';
+                    main.appendChild(lv);
+                }
+                bar.style.width = Math.round(frac * 100) + '%';
+                if (res) t.style.setProperty('--res', scoreColor(res.score / res.total * 100));
+                else t.style.removeProperty('--res');
+                t.title = st.tip + (row && row.leaves ? ' \u00b7 ' + row.leaves + '\u00d7 verlassen, zusammen ' +
+                    mmss(row.away_secs) + ' min weg' : '');
+            }
+            /* Kacheln | Liste - remembered per browser; the list stays the one for
+               printing and CSV */
+            const VIEW_KEY = 'svp-leistungstest-view';
+            let view = 'tiles';
+            try { view = localStorage.getItem(VIEW_KEY) === 'list' ? 'list' : 'tiles'; } catch (e) { /* default */ }
+            function applyView() {
+                const tiles = view === 'tiles';
+                elTiles.hidden = !tiles;
+                elTable.parentNode.hidden = tiles;
+                document.getElementById('ltViewTiles').setAttribute('aria-pressed', tiles ? 'true' : 'false');
+                document.getElementById('ltViewList').setAttribute('aria-pressed', tiles ? 'false' : 'true');
+            }
+            ['ltViewTiles', 'ltViewList'].forEach(function (id) {
+                document.getElementById(id).addEventListener('click', function () {
+                    view = this.dataset.view;
+                    try { localStorage.setItem(VIEW_KEY, view); } catch (e) { /* this session only */ }
+                    clearSelection();
+                    elDetail.hidden = true;
+                    applyView();
+                });
+            });
+
+            /* Neubeginn (Doc, 18.09.2026): for testing, the demo class only. Wipes the
+               codes of this list on the server - submissions, status, leaves - and the
+               server rebuilds the per-question counters from what is left (rpc
+               quiz_reset, Doc's session only). Other codes of the pool, e.g. the staged
+               demo run on docalvers.de, keep theirs. */
+            function isDemo(url) { return /[?&]klasse=GENII(&|$)/i.test(url || ''); }
+            const resetBtn = document.getElementById('ltMcReset');
+            const resetMsg = document.getElementById('ltMcResetMsg');
+            let resetArmed = 0;
+            resetBtn.addEventListener('click', function () {
+                if (!resetArmed) {
+                    resetArmed = window.setTimeout(function () {
+                        resetArmed = 0;
+                        resetBtn.textContent = 'Neubeginn';
+                        resetBtn.classList.remove('primary');
+                    }, 4000);
+                    resetBtn.textContent = 'Wirklich? Nochmal klicken';
+                    resetBtn.classList.add('primary');
+                    return;
+                }
+                window.clearTimeout(resetArmed);
+                resetArmed = 0;
+                resetBtn.textContent = 'Neubeginn';
+                resetBtn.classList.remove('primary');
+                resetRun();
+            });
+            function resetRun() {
+                const url = testUrl();
+                if (!url || !entries.length || !isDemo(url) || !window.svpAuth) return;
+                if (!svpAuth.hasSession()) {
+                    svpAuth.loginDialog(resetRun, 'Neubeginn');
+                    return;
+                }
+                const codes = entries.map(function (e) { return e.code; });
+                resetMsg.textContent = '';
+                quizMeta(url).then(function (meta) {
+                    const pool = poolOf(meta, url);
+                    return svpAuth.api('rpc/quiz_reset', {
+                        method: 'POST',
+                        body: JSON.stringify({ p_quiz: pool, p_codes: codes })
+                    }).then(function (r) {
+                        if (!r.ok) throw new Error(r.status === 400 || r.status === 403 ? 'nur mit Docs Konto' : 'HTTP ' + r.status);
+                        codes.forEach(function (c) { delete results[pool + '|' + c]; });
+                        elDetail.hidden = true;
+                        clearSelection();
+                        fillResults(true);
+                        fillControl();
+                        resetMsg.textContent = 'Alles auf null.';
+                        window.setTimeout(function () { resetMsg.textContent = ''; }, 4000);
+                    });
+                }).catch(function (e) {
+                    resetMsg.textContent = 'Ging nicht (' + (svpAuth.whoami() || 'nicht angemeldet') + '): ' + e.message;
+                });
+            }
+            function abortRun(code, on, msg) {
+                const url = testUrl();
+                if (!url || !window.svpAuth) return;
+                if (!svpAuth.hasSession()) {
+                    svpAuth.loginDialog(function () { abortRun(code, on, msg); }, 'Test abbrechen');
+                    return;
+                }
+                quizMeta(url).then(function (meta) {
+                    return svpAuth.api('rpc/quiz_abort', {
+                        method: 'POST',
+                        body: JSON.stringify({ p_quiz: poolOf(meta, url), p_code: code, p_on: on })
+                    });
+                }).then(function (r) {
+                    if (!r.ok) throw new Error(r.status === 400 || r.status === 403 ? 'nur mit Docs Konto' : 'HTTP ' + r.status);
+                    fillControl();
+                }).catch(function (e) {
+                    abortShown = '';
+                    msg.textContent = 'Ging nicht (' + (svpAuth.whoami() || 'nicht angemeldet') + '): ' + e.message;
+                });
+            }
+
             /* Click on a row: that pupil's answers as green/red tiles, the
                question itself in the tooltip. Click again closes. */
             elTable.addEventListener('click', function (ev) {
                 const tr = ev.target.closest('tr[data-code]');
-                if (!tr) return;
-                const again = tr.classList.contains('sel');
-                elTable.querySelectorAll('tr.sel').forEach(function (t) { t.classList.remove('sel'); });
-                if (again) { elDetail.hidden = true; return; }
-                tr.classList.add('sel');
-                showDetail(tr.dataset.code);
+                if (tr) pick(tr);
             });
+            elTiles.addEventListener('click', function (ev) {
+                const tile = ev.target.closest('.lt-tile');
+                if (tile) pick(tile);
+            });
+            /* one selection for rows and tiles; a second click closes the detail */
+            function pick(el) {
+                const again = el.classList.contains('sel');
+                clearSelection();
+                if (again) { elDetail.hidden = true; return; }
+                el.classList.add('sel');
+                showDetail(el.dataset.code);
+            }
+            function clearSelection() {
+                elTable.querySelectorAll('tr.sel').forEach(function (t) { t.classList.remove('sel'); });
+                elTiles.querySelectorAll('.lt-tile.sel').forEach(function (t) { t.classList.remove('sel'); });
+            }
             function showDetail(code) {
                 const e = entries.find(function (x) { return x.code === code; });
                 const url = testUrl();
@@ -826,6 +1339,12 @@
                             ' (' + Math.round(res.score / res.total * 100) + ' %) \u00b7 Note ' + gradeOf(meta, res) +
                             '</div><div class="lt-qgrid">' + tiles + '</div>';
                     }
+                    const ab = document.createElement('div');
+                    ab.className = 'lt-abort';
+                    ab.id = 'ltAbort';
+                    elDetail.appendChild(ab);
+                    abortShown = '';
+                    paintAbort(code);
                     elDetail.hidden = false;
                 });
             }
@@ -1133,7 +1652,7 @@
                    "verborgen", open it explains how to fill it - example names in
                    a placeholder only look like real data that got lost. */
                 elNames.placeholder = on
-                    ? 'ein Kind pro Zeile \u2014 oder aus der Klassenliste einf\u00fcgen'
+                    ? 'ein Name pro Zeile \u2014 oder aus der Klassenliste einf\u00fcgen'
                     : '\u2022\u2022\u2022 Namen verborgen \u2014 gesperrt';
             }
             unlockBtn.addEventListener('click', function () {
@@ -1178,7 +1697,7 @@
             document.getElementById('ltPrintList').addEventListener('click', function () { printAs('print-list'); });
             document.getElementById('ltPrintSlips').addEventListener('click', function () { printAs('print-slips'); });
             document.getElementById('ltCsv').addEventListener('click', csv);
-            document.getElementById('ltResults').addEventListener('click', function () { fillResults(true); });
+            document.getElementById('ltResults').addEventListener('click', function () { fillResults(true); fillControl(); });
             /* Choosing a Lerngruppe names the group, so the stored list and the
                printed sheet carry the Untis code instead of an empty field. */
             /* Switching the Lerngruppe switches the whole sheet: its stored

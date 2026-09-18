@@ -303,17 +303,19 @@
 
   /* Single choice: picking an option always clears the previous one. */
   function pick(qi, oi, card) {
-    if (locked) return;
+    if (locked || guardAborted) return;
     answers[qi] = oi;
     card.querySelectorAll('.opt').forEach(function (b) {
       b.classList.toggle('sel', Number(b.dataset.o) === oi);
     });
     updateSubmitState();
+    guardProgress();
   }
 
   function submit() {
-    if (locked || !codeOk()) return;
+    if (locked || guardAborted || !codeOk()) return;
     locked = true;
+    guardStop();
     if (submitBtn) submitBtn.disabled = true;
     const codeInput = document.getElementById('codeInput');
     if (codeInput) codeInput.disabled = true;
@@ -575,6 +577,7 @@
       tagFooter();
       tagContext();
       updateSubmitState();
+      guardOffer();
     });
     paintCode(input);
     const sub = document.querySelector('.wrap .sub');
@@ -759,6 +762,206 @@
       : subBase;
   }
 
+  /* --- Test guard (Doc, 18.09.2026) ----------------------------------------
+     As in the Saxon Kompetenztest (onlinetest.schule): with a slip code the
+     test starts in full screen, and leaving it - another tab or app, the
+     window losing focus, Esc out of full screen - covers the test with a red
+     lock screen. The pupil goes on by themselves, as in the original, but
+     every leave is reported (rpc quiz_leave) and shows up next to the name in
+     svp/leistungstest.html. A web page cannot lock the device: this locks the
+     test, not the screen. Anonymous tests and exercise sheets stay untouched;
+     QUIZ.guard = false switches it off for a single test. */
+  const GUARD_ON = CFG.guard !== false && CFG.submit !== false;
+  let guardEl = null;
+  let guardArmed = false;     /* from "Test starten" until the submission */
+  let guardAway = false;      /* lock screen showing */
+  let guardAborted = false;   /* the teacher ended this test (Mission Control) */
+  let guardLeaves = 0;
+  let guardQuietUntil = 0;    /* going full screen may blur the window for a moment */
+  let pingTimer = null;
+  let pingSoon = null;
+
+  function fsElement() {
+    return document.fullscreenElement || document.webkitFullscreenElement || null;
+  }
+  function enterFullscreen() {
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!req || fsElement()) return;
+    try {
+      const p = req.call(el);
+      if (p && p.catch) p.catch(function () {});
+    } catch (e) { /* iPhone: no full screen for pages - the other triggers still work */ }
+  }
+  function exitFullscreen() {
+    const ex = document.exitFullscreen || document.webkitExitFullscreen;
+    if (!ex || !fsElement()) return;
+    try {
+      const p = ex.call(document);
+      if (p && p.catch) p.catch(function () {});
+    } catch (e) { /* nothing to undo */ }
+  }
+
+  /* keepalive: a leave by closing or reloading the tab still gets through.
+     Durations come from the server clock ('back' closes the open leave). */
+  function reportGuard(kind) {
+    fetch(DB_URL + '/rest/v1/rpc/quiz_leave', {
+      method: 'POST',
+      keepalive: true,
+      headers: {
+        apikey: DB_KEY,
+        Authorization: 'Bearer ' + DB_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ p_quiz: QUIZ_ID, p_code: code, p_kind: kind })
+    }).catch(function () {});
+  }
+
+  /* Mission Control (svp/leistungstest.html): a heartbeat every 15 s plus one
+     shortly after each answer tells the teacher "working, 12 of 20"; the reply
+     carries the run state, so an abort by the teacher arrives here within one
+     beat - and so does taking it back. */
+  function guardPing() {
+    fetch(DB_URL + '/rest/v1/rpc/quiz_ping', {
+      method: 'POST',
+      headers: {
+        apikey: DB_KEY,
+        Authorization: 'Bearer ' + DB_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        p_quiz: QUIZ_ID,
+        p_code: code,
+        p_answered: answers.filter(function (a) { return a >= 0; }).length,
+        p_total: QUESTIONS.length
+      })
+    }).then(function (res) {
+      return res.ok ? res.json() : null;
+    }).then(function (state) {
+      if (!guardArmed) return;
+      if (state === 'aborted' && !guardAborted) {
+        guardAborted = true;
+        guardAway = false;
+        showGuard('abort', 'Test beendet',
+          'Deine Lehrkraft hat deinen Test beendet. Er wird nicht gewertet.',
+          'Bitte melde dich bei ihr.', '');
+      } else if (state === 'running' && guardAborted) {
+        guardAborted = false;
+        showGuard('start', 'Es geht weiter',
+          'Deine Lehrkraft hat deinen Test wieder freigegeben.',
+          'Zettel-Code ' + code, 'Weiter mit dem Test');
+      }
+    }).catch(function () { /* next beat */ });
+  }
+  function guardProgress() {
+    if (!guardArmed) return;
+    clearTimeout(pingSoon);
+    pingSoon = setTimeout(guardPing, 1500);
+  }
+
+  /* One screen, three faces: 'start' (light, before the test), 'lock' (red,
+     after a leave) and 'abort' (red, ended by the teacher - no button). */
+  function showGuard(mode, title, text, note, label) {
+    if (!guardEl) {
+      guardEl = document.createElement('div');
+      guardEl.setAttribute('role', 'dialog');
+      guardEl.setAttribute('aria-modal', 'true');
+      guardEl.innerHTML =
+        '<div class="guard-box">' +
+          '<div class="guard-title"></div>' +
+          '<p class="guard-text"></p>' +
+          '<p class="guard-note"></p>' +
+          '<button type="button" class="guard-btn"></button>' +
+        '</div>';
+      guardEl.querySelector('.guard-btn').addEventListener('click', guardGo);
+      document.body.appendChild(guardEl);
+    }
+    guardEl.className = 'guard guard-' + mode;
+    guardEl.querySelector('.guard-title').textContent = title;
+    guardEl.querySelector('.guard-text').textContent = text;
+    guardEl.querySelector('.guard-note').textContent = note;
+    const btn = guardEl.querySelector('.guard-btn');
+    btn.textContent = label;
+    btn.hidden = !label;
+    guardEl.hidden = false;
+    document.documentElement.classList.add('guard-open');
+    if (label) btn.focus();
+  }
+  function hideGuard() {
+    if (guardEl) guardEl.hidden = true;
+    document.documentElement.classList.remove('guard-open');
+  }
+
+  /* Start screen: hides the questions until the pupil starts - the click is
+     also the user gesture full screen needs. Offered as soon as a valid code
+     is there (QR at load, or typed by hand). */
+  function guardOffer() {
+    if (!GUARD_ON || guardArmed || locked || !CODE_RE.test(code)) return;
+    try { if (!TEST_MODE && localStorage.getItem(DONE_KEY) === '1') return; } catch (e) { /* no storage */ }
+    showGuard('start', 'Leistungstest',
+      'Der Test läuft im Vollbild. Verlässt du ihn (anderer Tab, andere App, Esc), ' +
+      'wird er unterbrochen, und deine Lehrkraft sieht das.',
+      'Zettel-Code ' + code,
+      'Test starten');
+  }
+
+  /* "Test starten" and "Weiter mit dem Test". 'back' also closes a leave the
+     server still holds open, e.g. from a reload in the middle of the test. */
+  function guardGo() {
+    if (guardAborted) return;
+    guardQuietUntil = Date.now() + 1500;
+    enterFullscreen();
+    if (!guardArmed) {
+      guardArmed = true;
+      /* the code the leaves are filed under must not change mid-test */
+      const codeInput = document.getElementById('codeInput');
+      if (codeInput) codeInput.disabled = true;
+      guardPing();
+      pingTimer = setInterval(guardPing, 15000);
+    }
+    reportGuard('back');
+    guardAway = false;
+    hideGuard();
+  }
+
+  function guardLeave(kind) {
+    if (!guardArmed || guardAway || guardAborted || locked || Date.now() < guardQuietUntil) return;
+    guardAway = true;
+    guardLeaves++;
+    reportGuard(kind);
+    const t = new Date();
+    const hhmm = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+    showGuard('lock', 'Test unterbrochen',
+      'Du hast den Test um ' + hhmm + ' Uhr verlassen. Deine Lehrkraft sieht das.',
+      guardLeaves + '. Unterbrechung',
+      'Weiter mit dem Test');
+  }
+
+  /* After the submission there is nothing left to guard. */
+  function guardStop() {
+    if (!guardArmed) return;
+    guardArmed = false;
+    guardAway = false;
+    clearInterval(pingTimer);
+    clearTimeout(pingSoon);
+    hideGuard();
+    exitFullscreen();
+  }
+
+  function guardWatch() {
+    if (!GUARD_ON) return;
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) guardLeave('tab');
+    });
+    /* a real switch keeps the focus away; a flicker is back within a moment */
+    window.addEventListener('blur', function () {
+      setTimeout(function () { if (!document.hasFocus()) guardLeave('focus'); }, 250);
+    });
+    ['fullscreenchange', 'webkitfullscreenchange'].forEach(function (ev) {
+      document.addEventListener(ev, function () { if (!fsElement()) guardLeave('fullscreen'); });
+    });
+  }
+
   /* KaTeX is deferred: if it arrives after the first paint, redraw the math.
      Every element rendered by renderMath() keeps its source in data-src. */
   window.addEventListener('load', function () {
@@ -791,6 +994,8 @@
     updateSubmitState();
     tagSubline();
     tagContext();
+    guardWatch();
+    guardOffer();
     /* Demo helper (?test): key r fills a random answer set, ~95% correct. */
     if (TEST_MODE) {
       document.addEventListener('keydown', function (e) {
