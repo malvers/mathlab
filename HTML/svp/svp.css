@@ -2536,26 +2536,45 @@ a.link-card .card-sub {
 
 a.link-card .card-desc { font-size: 0.86rem; font-weight: 400; }
 
-/* Accent-colored link-cards (Notizen, Konzepte) — title, background + border tint */
-a.link-card.c-cyan .card-title { color: var(--cyan); }
-a.link-card.c-cyan {
-    background: rgba(90, 190, 230, 0.17);
-    border-color: rgba(90, 190, 230, 0.42);
-}
-a.link-card.c-cyan:hover { border-color: rgba(90, 190, 230, 0.7); }
-a.link-card.c-violet .card-title { color: var(--violet); }
-a.link-card.c-violet {
-    background: rgba(155, 130, 225, 0.17);
-    border-color: rgba(155, 130, 225, 0.42);
-}
-a.link-card.c-violet:hover { border-color: rgba(155, 130, 225, 0.7); }
-a.link-card.c-red .card-title { color: rgb(235, 120, 105); }
+/* Accent-colored link-cards — each class only hands in its hue as --acc, the
+   look is shared below. The tints are mixed from the scheme's own colour
+   variable: the old fixed rgba() values were the dark-scheme hues and washed
+   out to pale pastel on the light page (Doc, 18.09.2026: "schöne Farben").
+   Gradient fill, fat left rule like .c-featured, soft glow on hover. */
+a.link-card.c-teal { --acc: var(--teal); }
+a.link-card.c-cyan { --acc: var(--cyan); }
+a.link-card.c-violet { --acc: var(--violet); }
+a.link-card.c-pink { --acc: var(--pink); }
+a.link-card.c-red { --acc: rgb(235, 120, 105); }
+html.svp-light a.link-card.c-red { --acc: var(--ypsilon); }
+
+a.link-card.c-teal,
+a.link-card.c-cyan,
+a.link-card.c-violet,
+a.link-card.c-pink,
 a.link-card.c-red {
-    background: rgba(176, 36, 24, 0.17);
-    border-color: rgba(176, 36, 24, 0.42);
+    background: linear-gradient(135deg,
+        color-mix(in srgb, var(--acc) 26%, transparent),
+        color-mix(in srgb, var(--acc) 7%, transparent) 75%);
+    border-color: color-mix(in srgb, var(--acc) 45%, transparent);
+    border-left: 4px solid var(--acc);
+    padding-left: 17px;
+    transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
 }
-a.link-card.c-red:hover { border-color: rgba(176, 36, 24, 0.7); }
-html.svp-light a.link-card.c-red .card-title { color: var(--ypsilon); }
+a.link-card.c-teal:hover,
+a.link-card.c-cyan:hover,
+a.link-card.c-violet:hover,
+a.link-card.c-pink:hover,
+a.link-card.c-red:hover {
+    border-color: color-mix(in srgb, var(--acc) 80%, transparent);
+    border-left-color: var(--acc);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--acc) 24%, transparent);
+}
+a.link-card.c-teal .card-title,
+a.link-card.c-cyan .card-title,
+a.link-card.c-violet .card-title,
+a.link-card.c-pink .card-title,
+a.link-card.c-red .card-title { color: var(--acc); }
 
 /* Werkzeug cards: one quiet grey for all of them — cyan, violet and red side by
    side made the block read like a paint box (Doc, 08.09.2026). Same greys as the
@@ -2638,6 +2657,13 @@ body:has(.card-grid) .svp-section { max-width: var(--card-col); margin: 0 auto 2
     grid-template-columns: 1fr;
     gap: 14px;
 }
+
+/* All link-cards of one grid are as tall as its tallest (Doc, 18.09.2026: "mach
+   die cards alle gleich hoch") — a second line in one description no longer
+   makes that card stick out. Only grids that hold link-cards directly:
+   genii-prolog.html uses .card-grid as a mere column wrapper around whole
+   sections, and 1fr rows would blow every one of them up to the longest. */
+.card-grid:has(> a.link-card) { grid-auto-rows: 1fr; }
 
 /* Only the landing pages — the plan pages keep their wide 1200 px track for the
    tables. :has() scopes it without touching a single HTML file. */
