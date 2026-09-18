@@ -1,0 +1,968 @@
+<!doctype html>
+<!-- Drehbuch "Die ganze Klasse im Blick" - Demofilm zu Test-Sperre + Mission Control
+     (svp/leistungstest.html + quiz-engine.js). Made from _template.html (see the
+     instructions there). Round 1: plot only - Solita's words come after Doc's release
+     via videopipeline/mission-control/narration.mjs + sync-drehbuch.mjs. -->
+
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+
+<style>
+/* minimal reset - the artifact host used to provide this */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; }
+img, canvas, svg { display: block; max-width: 100%; }
+button, input { font: inherit; }
+:focus-visible { outline: 2px solid #00d2ff; outline-offset: 2px; }
+</style>
+<title>Die ganze Klasse im Blick — Drehbuch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@200;300;400;600&display=swap">
+
+<style>
+/* Palette and faces are the lab's own (bb84.html): Orbitron + Outfit,
+   deep blue ground, cyan = the image under A, orange/green = the two
+   principal axes. Single-theme on purpose - this is the lab's world. */
+:root {
+    --ground:      #081428;
+    --ground-deep: #050e1c;
+    --surface:     #0c1c3a;
+    --surface-2:   #0e244e;
+    --line:        #1c3565;
+    --line-soft:   #16294d;
+
+    --ink:         #e6eefa;
+    --ink-dim:     #b3c5de;
+    --ink-faint:   #8ba1c0;
+
+    --cyan:        #00d2ff;
+    --lambda:      #f5c242;
+    --phi:         #799e31;
+    --violet:      #c07fe8;
+    --red:         #b02418;
+
+    --step: clamp(0.9rem, 0.55rem + 1.1vw, 1.5rem);
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--ground);
+    background-image:
+        radial-gradient(1100px 620px at 12% -8%, #0f2a55 0%, transparent 62%),
+        radial-gradient(900px 520px at 92% 4%, #10203f 0%, transparent 58%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(1.6rem, 4vw, 4rem) clamp(1.1rem, 4vw, 2.6rem) 6rem;
+}
+
+/* ---------- shared type ---------- */
+.eyebrow {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+
+h1, h2, h3 { font-family: 'Orbitron', sans-serif; text-wrap: balance; margin: 0; }
+
+h1 {
+    font-size: clamp(2rem, 1.2rem + 3.4vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0.5rem 0 0;
+}
+
+h2 {
+    font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.32rem);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+}
+
+p { margin: 0; }
+
+em { font-style: italic; color: #eaf2fd; }
+strong { font-weight: 600; color: #f2f7ff; }
+
+/* mathematical symbols, set apart without a formula engine */
+.m {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--cyan);
+    white-space: nowrap;
+}
+.m.l { color: var(--lambda); }
+.m.g { color: var(--phi); }
+
+/* ---------- header ---------- */
+header { margin-bottom: clamp(1.8rem, 4vw, 3rem); }
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lambda);
+    border: 1px solid #4a3a15;
+    background: #1b1607;
+    border-radius: 2px;
+    padding: 0.34rem 0.7rem;
+    margin-top: 1.1rem;
+}
+.status::before {
+    content: "";
+    width: 5px; height: 5px;
+    background: var(--lambda);
+    border-radius: 50%;
+}
+
+.lede {
+    margin-top: 1.1rem;
+    max-width: 60ch;
+    color: var(--ink-dim);
+    font-size: 1.18rem;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2rem;
+    margin-top: 1.6rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line-soft);
+}
+.meta div { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.4rem 0; }
+.meta dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.meta dd { margin: 0; font-size: 1.02rem; color: var(--ink); }
+.meta a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid #05506b; }
+.meta a:hover, .meta a:focus-visible { border-bottom-color: var(--cyan); }
+
+/* ---------- hero canvas + thesis ---------- */
+.thesis {
+    display: grid;
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    gap: clamp(1.2rem, 3vw, 2.6rem);
+    align-items: center;
+    margin: clamp(1.6rem, 4vw, 2.6rem) 0 clamp(2.4rem, 6vw, 4rem);
+    padding: clamp(1.2rem, 3vw, 2rem);
+    background: linear-gradient(160deg, var(--surface) 0%, var(--ground-deep) 100%);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+}
+@media (max-width: 700px) { .thesis { grid-template-columns: 1fr; } }
+
+#stage {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: block;
+    border-radius: 2px;
+    background: #04101f;
+}
+
+.thesis blockquote {
+    margin: 0;
+    font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem);
+    line-height: 1.42;
+    font-weight: 200;
+    color: #eef4fd;
+    text-wrap: balance;
+}
+.thesis blockquote strong { font-weight: 600; }
+.thesis .after {
+    margin-top: 1.1rem;
+    color: var(--ink-dim);
+    font-size: 1.06rem;
+    max-width: 54ch;
+}
+
+/* ---------- section frame ---------- */
+section { margin-top: clamp(2.6rem, 6vw, 4.4rem); }
+
+.head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 1.5rem;
+}
+.head .n {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--cyan);
+}
+.head .note { margin-left: auto; font-size: 0.9rem; color: var(--ink-faint); }
+
+.prose { max-width: 66ch; color: var(--ink-dim); display: grid; gap: 0.85rem; }
+.prose strong { color: #eaf2fd; }
+
+/* ---------- the arc ---------- */
+.arc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: stretch;
+    margin-bottom: 1.5rem;
+}
+.arc span {
+    flex: 1 1 auto;
+    min-width: 92px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-align: center;
+    padding: 0.85rem 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-top: 2px solid var(--stop, var(--line));
+    color: var(--ink-dim);
+    text-wrap: balance;
+    line-height: 1.4;
+}
+.arc span.key { color: #eef4fd; background: var(--surface-2); }
+
+/* ---------- timeline ---------- */
+.timeline {
+    display: flex;
+    width: 100%;
+    height: 54px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.7rem;
+}
+.timeline i {
+    position: relative;
+    display: block;
+    border-right: 1px solid var(--ground-deep);
+    background: var(--lambda);
+    font-style: normal;
+    transition: background 0.15s;
+}
+.timeline i:last-child { border-right: 0; }
+.timeline i.core { background: var(--phi); }
+.timeline i.cut  { background: var(--red); }
+.timeline i::after {
+    content: attr(data-n);
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #1a1305;
+}
+.timeline i.core::after { color: #0d1a06; }
+.timeline i.cut::after  { color: #ffdcd7; font-weight: 700; }
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.4rem;
+    font-size: 0.87rem;
+    color: var(--ink-faint);
+}
+.legend b { font-weight: 400; color: var(--ink-dim); }
+.legend span { display: inline-flex; align-items: center; gap: 0.42rem; }
+.legend s { width: 11px; height: 11px; border-radius: 2px; text-decoration: none; display: inline-block; }
+
+/* ---------- scenes ---------- */
+.scenes { display: grid; gap: 0.7rem; }
+
+.scene {
+    display: grid;
+    grid-template-columns: 3.6rem minmax(0, 1fr);
+    gap: 0 1.1rem;
+    padding: 1.4rem 1.55rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--lambda);
+    border-radius: 2px;
+}
+.scene.core { border-left-color: var(--phi); background: linear-gradient(90deg, #16240f 0%, var(--surface) 34%); }
+.scene.cut  { border-left-color: var(--red); }
+
+.scene .idx {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--lambda);
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.1rem;
+}
+.scene.core .idx { color: var(--phi); }
+.scene.cut .idx  { color: #c9503f; }
+
+.scene .top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.7rem;
+}
+.scene h3 { font-size: 1.16rem; font-weight: 700; letter-spacing: 0.01em; color: #f0f6ff; }
+
+.tag {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+    border: 1px solid;
+}
+.tag.core { color: #0d1a06; border-color: var(--phi); background: var(--phi); }
+.tag.cut  { color: #ffdcd7; border-color: var(--red); background: var(--red); }
+
+.secs {
+    margin-left: auto;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+    gap: 0.6rem 1.6rem;
+}
+@media (max-width: 720px) { .body { grid-template-columns: 1fr; gap: 1rem; } }
+
+.body > div { display: grid; gap: 0.34rem; align-content: start; }
+.body h4 {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.body p { font-size: 1.06rem; line-height: 1.66; color: var(--ink-dim); }
+.body .aha { border-left: 1px solid var(--line); padding-left: 1.6rem; }
+@media (max-width: 720px) { .body .aha { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 0.9rem; } }
+.body .aha p { color: var(--ink); }
+
+/* what Solita actually says - generated from narration.mjs, never hand-edited */
+.say {
+    margin-top: 1.1rem;
+    padding: 0.95rem 1.2rem;
+    background: #0a1830;
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--cyan);
+    border-radius: 2px;
+}
+.say h4 {
+    margin: 0 0 0.45rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.64rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+.say p {
+    margin: 0;
+    font-size: 1.06rem;
+    line-height: 1.62;
+    color: var(--ink);
+}
+.say .pause {
+    display: inline-block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 500;
+    color: var(--lambda);
+    background: #241c07;
+    border: 1px solid #4a3a15;
+    border-radius: 2px;
+    padding: 0.05rem 0.4rem;
+    margin: 0 0.22rem;
+    vertical-align: 0.08em;
+    white-space: nowrap;
+}
+.say .beat {
+    display: inline-block;
+    width: 0.5em;
+    height: 0.5em;
+    margin: 0 0.1em;
+    background: radial-gradient(circle, var(--cyan) 1.6px, transparent 1.8px);
+    vertical-align: 0.05em;
+    opacity: 0.55;
+}
+.say .spell {
+    border-bottom: 1px dotted var(--ink-faint);
+    letter-spacing: 0.12em;
+}
+
+/* ---------- rules / lists ---------- */
+.rules { display: grid; gap: 0.6rem; counter-reset: r; max-width: 74ch; }
+/* the number is positioned, not a grid cell - as a grid item the bare text
+   after the bold lead-in became its own item and fell into the 1.8rem column */
+.rules li {
+    list-style: none;
+    position: relative;
+    padding-left: 2.8rem;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+}
+.rules li::before {
+    counter-increment: r;
+    content: counter(r, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 0.28rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: var(--violet);
+}
+.rules { padding: 0; margin: 0; }
+
+.notes { display: grid; gap: 0.75rem; max-width: 74ch; padding: 0; margin: 0; }
+.notes li {
+    list-style: none;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+    padding-left: 1.1rem;
+    border-left: 1px solid var(--line);
+}
+.notes strong { color: #eaf2fd; }
+
+code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.85em;
+    color: var(--cyan);
+    background: #0a1a33;
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    padding: 0.06em 0.34em;
+}
+
+/* ---------- budget ---------- */
+.budget {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--line-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+}
+.budget div { background: var(--surface); padding: 1rem 1.1rem; display: grid; gap: 0.28rem; }
+.budget dt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+}
+.budget dd {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--cyan);
+    font-variant-numeric: tabular-nums;
+}
+.budget dd small { display: block; font-family: 'Outfit', sans-serif; font-size: 0.78rem; font-weight: 300; color: var(--ink-faint); letter-spacing: 0; margin-top: 0.2rem; }
+
+.solved { color: var(--phi); }
+
+/* ---------- footer ---------- */
+footer {
+    margin-top: clamp(2.6rem, 6vw, 4.4rem);
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    align-items: baseline;
+}
+footer p { font-size: 1.05rem; color: var(--ink-dim); max-width: 58ch; }
+footer .sig { margin-left: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+}
+</style>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+    <p class="eyebrow">Doc Alvers Mathe-Labor · Videopipeline</p>
+    <h1>Die ganze Klasse im Blick</h1>
+    <p class="lede">Der Plot für den Demofilm zur Test-Sperre und zu Mission Control. Links sitzt
+        die Lehrkraft, rechts schreibt eine Schülerin oder ein Schüler den Test auf dem Fon, beides gleichzeitig. Man
+        sieht, was ein Klick auf der einen Seite auf der anderen auslöst.</p>
+    <p class="status">Plot + erster Sprechertext · wartet auf Freigabe</p>
+
+    <dl class="meta">
+        <div><dt>Seiten</dt><dd><a href="https://docalvers.de/svp/leistungstest.html">svp/leistungstest.html</a> +
+            <a href="https://docalvers.de/infotestfos12.html">infotestfos12.html</a></dd></div>
+        <div><dt>Sprecherin</dt><dd>Solita · de-DE-Studio (offen: oder nur Untertitel)</dd></div>
+        <div><dt>Aufnahme</dt><dd>1440p · zwei Browser headless nebeneinander</dd></div>
+        <div><dt>Szenen</dt><dd>12</dd></div>
+        <div><dt>Laufzeit</dt><dd>~3:30, geschätzt</dd></div>
+    </dl>
+</header>
+
+<div class="thesis">
+    <canvas id="stage" width="600" height="600" role="img"
+            aria-label="Simulation: 24 Schülerinnen und Schüler schreiben einen Online-Test. Jede Kachel ist eine Person:
+            grau nicht gestartet, orange mit Fortschrittsbalken am Arbeiten, rot kurz weg, grün abgegeben.
+            Oben zählt die Leiste mit."></canvas>
+    <div>
+        <blockquote>Ein Online-Test, bei dem die Lehrkraft live sieht, <strong>wer arbeitet, wer
+            weg ist und wer fertig ist</strong>, ohne dass ein einziger Name auf dem Server liegt.</blockquote>
+        <p class="after">Der ganze Film ist die Antwort auf eine einzige Frage:
+            <em>Was sieht die Lehrkraft, während die Klasse online einen Test schreibt?</em></p>
+    </div>
+</div>
+
+<section>
+    <div class="head"><span class="n">A</span><h2>Der dramaturgische Bogen</h2></div>
+    <div class="arc" id="arc"></div>
+    <div class="prose">
+        <p>Die ersten vier Szenen bauen auf: Zettel, Start, die Klasse legt los, und links wächst
+           die Übersicht mit. Dann dreht es um. Die Schülerin oder der Schüler geht weg, der Test wird rot, und links
+           pulsiert „weg“. Den Bruch bringt der rote Knopf: Die Lehrkraft beendet einen Test und
+           nimmt es wieder zurück. <strong>Das ist die lehrreichste Stelle</strong>, denn hier sieht
+           man, wie Lehrkraft und Schülerin oder Schüler über den Server miteinander verbunden sind.</p>
+        <p>Danach löst sich alles auf: Abgabe, Punkte, Frage für Frage, und am Ende die Klasse als
+           Ganzes, ohne einen Namen.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">B</span><h2>Die zwölf Szenen</h2>
+        <span class="note" id="tl-note">Breite = Sprechzeit</span></div>
+    <div class="timeline" id="timeline"></div>
+    <div class="legend">
+        <span><s style="background:#799e31"></s><b>Kernszene — wird nicht gekürzt</b></span>
+        <span><s style="background:#b02418"></s><b>Notbremse, falls der Schnitt zäh wirkt</b></span>
+        <span><s style="background:#f5c242"></s><b>Regelszene</b></span>
+    </div>
+    <div class="scenes" id="scenes" style="margin-top:1.5rem"></div>
+</section>
+
+<section>
+    <div class="head"><span class="n">C</span><h2>Didaktische Leitplanken</h2>
+        <span class="note">bindend für den Sprechertext</span></div>
+    <ol class="rules">
+        <li><strong>Erst sieht man es, dann heißt es so.</strong> Jede Funktion wird im selben
+            Moment gezeigt, in dem sie genannt wird, links und rechts gleichzeitig.</li>
+        <li><strong>Ein neuer Begriff pro Szene.</strong> Zettel-Code, Startschirm, „weg“,
+            Abbruch, Auswertung, jeder bekommt seine eigene Szene.</li>
+        <li><strong>Verbotene Vokabeln:</strong> „Überwachung“, „Spionage“, „Bildschirm sperren“
+            und „anonym“ für die Codes. Gesperrt wird der <em>Test</em>, nicht das Gerät, und die
+            Codes sind <em>pseudonym</em>. Der Film soll genau sein und keine Angst machen.</li>
+        <li><strong>Zahlen nur vorlesen, wenn sie im Bild stehen:</strong> „sieben von
+            dreiunddreißig“, „einmal verlassen“. Keine Zahl, die man nicht sieht.</li>
+        <li><strong>Nichts versprechen, was ein Browser nicht kann.</strong> Kein „Schummeln
+            unmöglich“: Den Wechsel kann man nicht verhindern, nur bemerken, und ein zweites Gerät
+            sieht niemand. Szene 5 sagt das ehrlich.</li>
+        <li><strong>Keine echten Schülerinnen und Schüler.</strong> Im Bild ist nur die Vorführklasse GENII mit
+            Wissenschaftlerinnen und Wissenschaftlern als Namen.</li>
+    </ol>
+</section>
+
+<section>
+    <div class="head"><span class="n">D</span><h2>Zeitbudget</h2>
+        <span class="note">geplant</span></div>
+    <dl class="budget" id="budget"></dl>
+    <div class="prose">
+        <p>Zwölf Szenen, zusammen rund 190 Sekunden Sprache, dazu etwa 19 Sekunden Luft: gut
+           dreieinhalb Minuten. Das Musikbett <code>Infinity_6min.m4a</code> ist nahtlos loopbar
+           (loopStart 21,220 s, loopEnd 163,998 s), die Länge ist also kein Problem.</p>
+        <p>Wenn es zäh wirkt, spart die <strong>Notbremse</strong> in Szene 7 („offline“) zehn
+            Sekunden. Die Wartezeiten beim Abbruch, bis zu 15 Sekunden bis zum nächsten Herzschlag,
+            werden im Schnitt gekürzt und nicht mitgesprochen.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">E</span><h2>Choreografie-Notizen</h2>
+        <span class="note">für die Aufnahme</span></div>
+    <ul class="notes">
+        <li><strong>So wurde gedreht (18.09.):</strong> <em>eine</em> Bühnenseite
+            (<code>videopipeline/mission-control/stage.html</code>) mit der Lehrer-Seite links und dem
+            Fon rechts als iframes, aufgenommen als <em>ein</em> Take, damit beide Hälften dieselbe Uhr
+            haben. Das Fon ist per CSS-Zoom verkleinert, nicht per transform: Das hätte nach dem Scrollen
+            nicht mehr gezeichnet, und Playwright klickt daneben. Der Herzschlag läuft im Film alle 3 s
+            statt 15 s, damit der Abbruch ohne Wartezeit ankommt. „Offline“ entsteht durch abgeschaltetes
+            Netz, wie beim WLAN-Ausfall. Deine 21 GENII-Abgaben sind für den Dreh geparkt.</li>
+        <li><strong>Zwei Browser, ein Bild (Plan):</strong> Lehrer-Seite links, etwa drei Viertel der
+            Breite, die Schüler-Seite rechts im Fon-Format (390×844) mit Rahmen. Beide werden mit
+            <code>lib/record-cdp.mjs</code> und <code>{ dsf: 2, upscale: 1 }</code> aufgenommen
+            und per ffmpeg zu 2560×1440 zusammengesetzt. Oben läuft eine Untertitel-Leiste mit
+            dem Schritt, in Orbitron.</li>
+        <li><strong>Startzustand:</strong> frische Browser-Kontexte ohne <code>localStorage</code>.
+            <code>svp/leistungstest.html?test</code> erzeugt dann eine neue GENII-Liste mit neuen
+            Codes. Die 21 inszenierten Abgaben auf docalvers.de bleiben unberührt, weil sie
+            andere Codes haben. Nach dem Dreh werden alle Filmdaten gelöscht (Neubeginn bzw.
+            Mgmt-SQL).</li>
+        <li><strong>Zettel ohne Klarname (Szene 2):</strong> In der Vorführklasse steht der Klarname
+            standardmäßig auf der Karte. Die Aufnahme schaltet vorher auf „Zettel ohne Klarname“, sonst
+            zeigt das Bild etwas anderes, als Solita sagt.</li>
+        <li><strong>Weitere Schülerinnen und Schüler im Hintergrund:</strong> Acht weitere Testseiten laufen unsichtbar mit,
+            jede im eigenen Tempo. Eine schließt früh (Szene 7 „offline“), eine geht kurz weg,
+            alle anderen geben ab. So füllt sich die Leiste echt.</li>
+        <li><strong>Vollbild</strong> ist headless unsichtbar, weil das Bild ohnehin keine
+            Browserleiste hat. Das sagt der Untertitel bzw. Solita.</li>
+        <li><strong>Der rote Knopf (Szene 8):</strong> Der zweite Klick braucht Docs
+            svp-Anmeldung, die hat die Aufnahme nicht. Die Aufnahme zeigt den ersten Klick
+            („Wirklich? Nochmal klicken“) und den zweiten; den Abbruch selbst löst sie über die
+            gleiche Server-Funktion aus. Den Login-Dialog blendet sie aus. <strong>Doc
+            entscheidet</strong>, ob das so in Ordnung ist.</li>
+        <li><strong>Nachlauf:</strong> Die Lehrer-Seite fragt alle 5 s nach. Nach jeder Aktion
+            rechts deshalb 5–6 s stehen lassen, bevor der Text weitergeht. Der Abbruch erreicht das
+            die Schüler-Seite erst mit dem nächsten Herzschlag (≤ 15 s), das wird im Schnitt gekürzt.</li>
+        <li><strong>Timing-kritisch, als Erstes proben:</strong> Szene 5 (Tab-Wechsel headless
+            nachstellen) und Szene 8 (Abbruch und Rücknahme mit den Herzschlägen).</li>
+        <li><strong>Offen, vor dem Dreh klären (Hinweis forloop-9c):</strong> Die Live-Auswertung
+            zeigt <em>alle</em> Abgaben des Pools GENII, also auch die 21 inszenierten vom 10.09. Im Film
+            stünden dann mehr Abgaben als die 24 der Klasse. Für den Dreh braucht es einen eigenen,
+            leeren Pool.</li>
+        <li><strong>Mission Control im Film als Kacheln</strong> (Doc: „gefällt mir sehr“). Das Detail
+            mit dem roten Knopf öffnet sich per Klick auf eine Kachel.</li>
+        <li><strong>Live-Auswertung (Szene 11)</strong> liegt hinter dem SVP-Passwort. Die Aufnahme
+            setzt den Hash, der ohnehin im Seitencode steht, und braucht kein Passwort.</li>
+        <li>Der lokale Server klebt ein rotes <strong>LOCAL</strong>-Schild in die Seite. Die
+            Aufnahme entfernt <code>#local-badge</code> vor dem ersten Bild. Während des Drehs
+            nichts an den Dateien ändern, sonst lädt Live-Reload mitten in der Szene neu.</li>
+        <li><strong>Vor der Stimme:</strong> Zuerst ein stummer Durchlauf ins Kritik-Tool (eigener
+            Port 8768). Doc kritisiert zuerst die Seiten, erst danach werden Solita und der
+            Schnitt eingebaut.</li>
+    </ul>
+</section>
+
+<section>
+    <div class="head"><span class="n">F</span><h2>Bewusst weggelassen</h2>
+        <span class="note">Kandidaten für Teil 2</span></div>
+    <div class="prose">
+        <p><strong>Wie die Namen geschützt werden</strong>: Deckname, Versiegelung der Klarnamen
+           im Browser, Passphrase. Das ist ein eigener Film (GENII-Sicherheitsarchitektur). Hier
+           reicht der Satz am Ende: Auf dem Server liegen nur Codes.</p>
+        <p><strong>Papier-Variante mit Schablonen</strong>, <strong>Neubeginn-Knopf</strong> (ein
+           reines Testwerkzeug) und <strong>Zeitverlängerung</strong>, die unsere Tests nicht
+           brauchen, weil sie kein Zeitlimit haben. Alles drei würde den Bogen verwässern.</p>
+        <p><strong>Offen:</strong> Im Bild stehen echte Fragen des FOS-12-Eingangstests. Sie sind
+           schon öffentlich im Repo, aber ein Film zeigt sie noch deutlicher. Die Alternative wäre
+           ein eigener Vorführtest mit harmlosen Fragen.</p>
+    </div>
+</section>
+
+<footer>
+    <p><strong>Nächster Schritt:</strong> Doc liest Plot und Sprechertext (Entwurf, noch nicht
+        vertont). Dann kommt der stumme Durchlauf ins Kritik-Tool und danach die Vertonung.</p>
+    <p class="eyebrow sig">Doc Alvers Mathe-Labor</p>
+</footer>
+
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   One source of truth: the scene list feeds both the timeline and
+   the cards below it.
+   --------------------------------------------------------------- */
+const SCENES = [
+    /* n = Nummer · s = geplante Sekunden (nach der Vertonung von SPOKEN ueberschrieben)
+       t = Titel · img = was im Bild passiert · aha = der Gedanke, der fallen soll
+       core: true = Kernszene · cut: true = Notbremse · card: true = eigene Karte */
+    { n: 1, s: 12, t: 'Die ganze Klasse im Blick', card: true,
+      img: 'Titel über einem Standbild aus Szene 4: links Mission Control als Kacheln mitten im Test (Gestartet 9/24 · Läuft 6 · Weg 1), rechts ein Fon mit einer Frage.',
+      aha: 'Ein Online-Test, und die Lehrkraft sieht live, was zählt: wer arbeitet, wer weg ist, wer fertig ist.' },
+
+    { n: 2, s: 20, t: 'Die Zettel', core: true,
+      img: 'Links leistungstest.html mit der Vorführklasse: Klarname · Deckname · Code. Der Schalter springt auf „Zettel ohne Klarname“, das Bild fährt zu den QR-Karten, und eine Karte (Deckname · Code · QR) wird groß. Rechts ist das Fon noch dunkel.',
+      aha: 'Der Klarname bleibt auf dem Rechner der Lehrkraft. Auf den Zettel kommen nur ein Deckname, ein Code und ein QR.' },
+
+    { n: 3, s: 14, t: 'QR scannen',
+      img: 'Rechts öffnet sich der Test mit genau diesem Code, als Startschirm: „Leistungstest · Zettel-Code … · Test starten“. Die Fragen dahinter sind verdeckt.',
+      aha: 'Vor dem Start ist keine einzige Frage zu sehen. Und der Test läuft im Vollbild.' },
+
+    { n: 4, s: 20, t: 'Die Klasse legt los', core: true,
+      img: 'Rechts: „Test starten“, dann die ersten Antworten. Links springt die Kachel auf „läuft“, und die Zahl zählt „1/33 … 6/33“, und die Leiste zählt hoch (Gestartet 1/24 … 9/24), weil im Hintergrund acht weitere Schülerinnen und Schüler starten.',
+      aha: 'Die Lehrkraft sieht den Fortschritt, nicht die Antworten.' },
+
+    { n: 5, s: 20, t: 'Kurz mal weg', core: true,
+      img: 'Rechts wird in ein anderes Fenster gewechselt: Der Test wird rot, „Test unterbrochen · 1. Unterbrechung“. Links pulsiert auf dieser Kachel die rote Pille „weg“, der Rahmen wird rot, die Leiste zeigt „Weg 1“.',
+      aha: 'Wegschauen lässt sich nicht verhindern, aber es fällt auf. Gesperrt wird der Test, nicht das Gerät.' },
+
+    { n: 6, s: 12, t: 'Weiter',
+      img: '„Weiter mit dem Test“: Rechts sind die Fragen wieder da, auf der Kachel steht „läuft“ und „1× verlassen“.',
+      aha: 'Weiter geht es ohne die Lehrkraft, wie beim sächsischen Kompetenztest. Die Unterbrechung bleibt vermerkt.' },
+
+    { n: 7, s: 10, t: 'Funkstille', cut: true,
+      img: 'Links springt eine Kachel aus dem Hintergrund, deren Seite schon länger zu ist, auf „offline“: gestrichelter Rahmen, ruhig, ohne Pulsieren.',
+      aha: 'Seite zu, Akku leer, WLAN weg: Nach drei verpassten Herzschlägen steht „offline“ da.' },
+
+    { n: 8, s: 22, t: 'Der rote Knopf', core: true,
+      img: 'Links Klick auf die Kachel, dann „Test abbrechen“, „Wirklich? Nochmal klicken“ und der zweite Klick. Rechts erscheint „Test beendet · wird nicht gewertet“, links „abgebrochen“. Dann „Abbruch zurücknehmen“, und rechts steht „Es geht weiter“.',
+      aha: 'Die Lehrkraft hat den roten Knopf, wie beim Kompetenztest, und kann ihn zurücknehmen.' },
+
+    { n: 9, s: 16, t: 'Abgabe',
+      img: 'Rechts werden die letzten Fragen beantwortet, dann kommt die Abgabe. Rechts steht „Dein Ergebnis … · Note …“, links wenige Sekunden später eine grüne Kachel „abgegeben“ mit Punkten und Note. Die anderen im Hintergrund geben nach und nach ab, und die Leiste zählt mit.',
+      aha: 'Kein Einsammeln, kein Nachfragen: Die Punkte stehen da, sobald abgegeben ist.' },
+
+    { n: 10, s: 14, t: 'Frage für Frage',
+      img: 'Klick auf eine Kachel: darunter 33 kleine Fragen-Kacheln, grün und rot, und der Tooltip zeigt die Frage.',
+      aha: 'Nicht nur die Note, sondern die Stelle, an der es gehakt hat.' },
+
+    { n: 11, s: 18, t: 'Die Klasse als Ganzes', core: true,
+      img: 'Die Live-Auswertung der Testseite: anonyme Einzelscores als Balken, darunter die Gruppenleistung pro Frage.',
+      aha: 'Für den Beamer: welche Frage die ganze Klasse ins Schleudern gebracht hat, ohne einen Namen zu zeigen.' },
+
+    { n: 12, s: 12, t: 'Kein Name auf dem Server', card: true,
+      img: 'Zurück zu den Kacheln mit dem Endstand. Abblende auf den Titel, Schluss auf Dunkelblau, nie auf Schwarz.',
+      aha: 'Auf dem Server liegen nur Codes. Wer dahinter steckt, weiß nur der Rechner der Lehrkraft.' }
+];
+
+/* SAY:START - generated by videopipeline/mission-control/sync-drehbuch.mjs, do not edit */
+const SAY = {
+    s1: 'Vierundzwanzig Schülerinnen und Schüler schreiben einen Test, alle auf dem eigenen Gerät. <span class="beat"></span> Und die Lehrkraft sieht dabei, was zählt: <span class="beat"></span> wer arbeitet, wer gerade nicht im Test ist, und wer schon fertig ist.',
+    s2: 'Alles beginnt mit Zetteln. <span class="beat"></span> Links steht die Liste der Klasse: der echte Name, ein Deckname und ein Zettel-Code aus vier Zeichen. <span class="pause">1,3 s</span> Auf den Zettel für die Schülerin oder den Schüler kommen nur der Deckname, der Code und ein <span class="spell">QR</span>-Code. <span class="beat"></span> Die Liste mit den echten Namen verlässt den Rechner der Lehrkraft nie.',
+    s3: 'Wer den Zettel scannt, landet direkt im eigenen Test. <span class="beat"></span> Die Fragen sind noch verdeckt. <span class="beat"></span> Erst mit dem Knopf <span class="beat"></span> Test starten <span class="beat"></span> geht es los, und wo das Gerät es kann, im Vollbild.',
+    s4: 'Ein Tipp, und es geht los. <span class="pause">1,3 s</span> Links zeigt die Kachel jetzt: <span class="beat"></span> läuft, <span class="beat"></span> und die Zahl daneben zählt jede beantwortete Frage mit. <span class="beat"></span> Dafür schickt der Test regelmäßig ein kurzes Lebenszeichen. <span class="pause">1,3 s</span> Auch die anderen legen los, die Leiste oben zählt sie mit. <span class="beat"></span> Die Lehrkraft sieht, wie weit alle sind. <span class="beat"></span> Was geantwortet wird, sieht sie erst nach der Abgabe.',
+    s5: 'Und dann schaut jemand kurz weg, in ein anderes Fenster. <span class="pause">1,3 s</span> Sofort wird der Test rot: Test unterbrochen. <span class="beat"></span> Links erscheint auf dieser Kachel eine rote Marke: weg. <span class="pause">1,3 s</span> Verhindern lässt sich so ein Wechsel nicht, aber er fällt auf. <span class="beat"></span> Ein zweites Gerät unter dem Tisch sieht allerdings niemand. <span class="beat"></span> Und unterbrochen ist nur der Test, nicht das Gerät.',
+    s6: 'Der Knopf <span class="beat"></span> Weiter <span class="beat"></span> führt zurück in den Test, wie beim sächsischen Kompetenztest. <span class="pause">1,3 s</span> Die Unterbrechung bleibt aber stehen: einmal verlassen.',
+    s7: 'Und wenn eine Seite ganz verschwindet, weil der Akku leer ist oder das WLAN ausfällt? <span class="beat"></span> Dann bleiben die Lebenszeichen aus, und links steht: offline.',
+    s8: 'Manchmal muss ein Test abgebrochen werden. <span class="beat"></span> Dafür hat die Lehrkraft einen roten Knopf, mit einer Rückfrage, damit nichts aus Versehen passiert. <span class="pause">1,3 s</span> Beim nächsten Lebenszeichen erfährt der Test davon: Test beendet, er wird nicht gewertet. <span class="pause">1,3 s</span> War es ein Irrtum, klickt die Lehrkraft auf <span class="beat"></span> Abbruch zurücknehmen. <span class="pause">1,3 s</span> Beim nächsten Lebenszeichen ist der Test wieder frei, und die Schülerin oder der Schüler kann weitermachen.',
+    s9: 'Jetzt noch die letzten Fragen, dann die Abgabe. <span class="pause">1,3 s</span> Das Ergebnis erscheint sofort, und wenige Sekunden später stehen links Punkte und Note. <span class="beat"></span> Einsammeln und Korrigieren entfallen.',
+    s10: 'Ein Klick zeigt jede Frage einzeln, <span class="pause">1,3 s</span> grün für richtig, rot für falsch. <span class="beat"></span> So sieht man nicht nur die Note, sondern die Stelle, an der es gehakt hat.',
+    s11: 'Für die ganze Klasse gibt es die Live-Auswertung. <span class="pause">1,3 s</span> Oben die Punkte aller, ohne Namen und ohne Codes. <span class="beat"></span> Darunter jede Frage mit dem Anteil richtiger Antworten. <span class="beat"></span> Welche Frage die ganze Klasse ins Schleudern gebracht hat, sieht man auf einen Blick, auch groß an der Wand.',
+    s12: 'Und auf dem Server? <span class="beat"></span> Dort stehen nur Codes, keine Namen. <span class="beat"></span> Wer hinter einem Code steckt, weiß allein der Rechner der Lehrkraft. <span class="pause">1,3 s</span> Die ganze Klasse im Blick, im Doc Alvers Mathe-Labor.'
+};
+const SPOKEN = {"s1":12.384,"s2":19.512,"s3":11.088,"s4":23.952,"s5":22.56,"s6":9.864,"s7":8.688,"s8":28.272,"s9":12.48,"s10":9.984,"s11":17.88,"s12":12.456};
+/* SAY:END */
+
+const ARC = [
+    { t: 'Zettel',          c: '#93a8c6' },
+    { t: 'Start',           c: '#93a8c6' },
+    { t: 'Arbeiten',        c: '#f5c242' },
+    { t: 'Weg',             c: '#b02418', key: true },
+    { t: 'Roter<br>Knopf',  c: '#b02418', key: true },
+    { t: 'Abgabe',          c: '#799e31' },
+    { t: 'Auswertung',      c: '#799e31', key: true }
+];
+
+/* --- the arc --- */
+document.getElementById('arc').innerHTML = ARC.map(a =>
+    `<span class="${a.key ? 'key' : ''}" style="--stop:${a.c}">${a.t}</span>`).join('');
+
+/* --- timeline: each scene as wide as it is long --- */
+const secs = (x) => SPOKEN['s' + x.n] ?? x.s;
+const total = SCENES.reduce((s, x) => s + secs(x), 0);
+document.getElementById('timeline').innerHTML = SCENES.map(x =>
+    `<i class="${x.core ? 'core' : x.cut ? 'cut' : ''}" data-n="${x.n}"
+        style="flex:0 0 ${(secs(x) / total * 100).toFixed(3)}%"
+        title="Szene ${x.n} · ${secs(x).toFixed(1)} s"></i>`).join('');
+
+/* --- budget, from the measured durations when they exist --- */
+(function () {
+    const spoken = Object.values(SPOKEN).reduce((a, b) => a + b, 0);
+    const planned = SCENES.reduce((a, x) => a + x.s, 0);
+    const air = SCENES.length * 1.6;
+    const film = (spoken || planned) + air;
+    const mmss = (t) => Math.floor(t / 60) + ':' + String(Math.round(t % 60)).padStart(2, '0');
+    const cell = (dt, dd, sub) => `<div><dt>${dt}</dt><dd>${dd}<small>${sub}</small></dd></div>`;
+    document.getElementById('budget').innerHTML =
+        cell('Sprache', (spoken || planned).toFixed(0) + ' s',
+             spoken ? 'gemessen' : 'geplant') +
+        cell('Luft', '~' + air.toFixed(0) + ' s', '1,6 s je Szene') +
+        cell('Film', mmss(film), spoken ? 'nach der Vertonung' : 'geschätzt') +
+        cell('Bett-Loop', '142,778 s', '64 Takte · 107,58 BPM');
+    if (spoken) {
+        const n = document.getElementById('tl-note');
+        if (n) n.textContent = 'Breite = gemessene Sprechzeit';
+    }
+})();
+
+/* --- scene cards --- */
+document.getElementById('scenes').innerHTML = SCENES.map(x => `
+    <article class="scene ${x.core ? 'core' : x.cut ? 'cut' : ''}">
+        <div class="idx">${String(x.n).padStart(2, '0')}</div>
+        <div>
+            <div class="top">
+                <h3>${x.t}</h3>
+                ${x.core ? '<span class="tag core">Kernszene</span>' : ''}
+                ${x.cut ? '<span class="tag cut">Notbremse</span>' : ''}
+                <span class="secs">${secs(x).toFixed(1)} s</span>
+            </div>
+            <div class="body">
+                <div><h4>Was im Bild passiert</h4><p>${x.img}</p></div>
+                <div class="aha"><h4>Der Aha</h4><p>${x.aha}</p></div>
+            </div>
+            ${SAY['s' + x.n] ? `<div class="say"><h4>Solita sagt</h4><p>${SAY['s' + x.n]}</p></div>` : ''}
+        </div>
+    </article>`).join('');
+
+/* ---------------------------------------------------------------
+   Hero: the class itself, simulated - 24 pupils with their own pace,
+   start delay and the odd leave, drawn the way Mission Control shows
+   them: grey = not started, orange + progress bar = working, red pill
+   = away, green = submitted; the bar on top counts along. A click
+   runs a new class. Calm on purpose: it sits next to the thesis.
+   --------------------------------------------------------------- */
+(function () {
+    const cv = document.getElementById('stage');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const N = 24, Q = 33, LOOP = 26;           /* pupils, questions, seconds per run */
+    const COL = { none: '#3a5078', run: '#f5c242', away: '#b02418', done: '#799e31', ink: '#e6eefa', dim: '#8ba1c0' };
+    let kids = [], t0 = 0;
+
+    /* small seeded generator, so one click = one reproducible class */
+    function rng(seed) {
+        return function () {
+            seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+            let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+            t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        };
+    }
+    function newClass() {
+        const r = rng((Math.random() * 1e9) | 0);
+        kids = [];
+        for (let i = 0; i < N; i++) {
+            const start = 0.5 + r() * 4;                 /* seconds until "Test starten" */
+            const per = 0.42 + r() * 0.2;                /* seconds per question */
+            const leaves = [];
+            if (r() < 0.3) {                              /* about every third pupil leaves once */
+                const at = start + 2 + r() * 10;
+                leaves.push([at, at + 1 + r() * 2.5]);
+            }
+            kids.push({ start: start, per: per, leaves: leaves });
+        }
+        t0 = performance.now();
+    }
+    function stateAt(k, t) {
+        if (t < k.start) return { s: 'none', a: 0 };
+        let paused = 0, away = false;
+        k.leaves.forEach(function (l) {
+            if (t >= l[1]) paused += l[1] - l[0];
+            else if (t >= l[0]) { paused += t - l[0]; away = true; }
+        });
+        const a = Math.min(Q, Math.floor((t - k.start - paused) / k.per));
+        if (a >= Q) return { s: 'done', a: Q };
+        return { s: away ? 'away' : 'run', a: a };
+    }
+    function fit() {
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.max(1, Math.round(r.width * dpr));
+        cv.height = Math.max(1, Math.round(r.height * dpr));
+    }
+    function draw(now) {
+        const W = cv.width, H = cv.height, px = W / 600;
+        const t = ((now - t0) / 1000) % LOOP;
+        ctx.fillStyle = '#04101f';
+        ctx.fillRect(0, 0, W, H);
+        const st = kids.map(function (k) { return stateAt(k, t); });
+        const count = { none: 0, run: 0, away: 0, done: 0 };
+        st.forEach(function (s) { count[s.s]++; });
+        /* the bar on top, as in Mission Control */
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'left';
+        ctx.font = 500 + ' ' + (13 * px) + 'px Orbitron, sans-serif';
+        const chips = [['Gestartet ' + (N - count.none) + '/' + N, COL.dim], ['Läuft ' + count.run, COL.run],
+                       ['Weg ' + count.away, '#eb7869']   /* lighter red: the palette red drowns in navy */, ['Abgegeben ' + count.done, COL.done]];
+        let x = 30 * px;
+        chips.forEach(function (c) {
+            const w = ctx.measureText(c[0]).width + 22 * px;
+            ctx.strokeStyle = c[1]; ctx.lineWidth = 1.2 * px;
+            ctx.beginPath(); ctx.roundRect(x, 26 * px, w, 30 * px, 15 * px); ctx.stroke();
+            ctx.fillStyle = c[1]; ctx.fillText(c[0], x + 11 * px, 41 * px);
+            x += w + 8 * px;
+        });
+        /* the class: 6 x 4 tiles */
+        const cols = 6, gx = 30 * px, gy = 90 * px, cw = (W - 2 * gx) / cols, ch = (H - gy - 30 * px) / 4;
+        st.forEach(function (s, i) {
+            const cx = gx + (i % cols) * cw + 5 * px, cy = gy + Math.floor(i / cols) * ch + 5 * px;
+            const w = cw - 10 * px, h = ch - 10 * px;
+            ctx.fillStyle = '#0c1c3a';
+            ctx.beginPath(); ctx.roundRect(cx, cy, w, h, 6 * px); ctx.fill();
+            ctx.strokeStyle = s.s === 'none' ? COL.none : COL[s.s];
+            ctx.lineWidth = (s.s === 'none' ? 1 : 2) * px;
+            ctx.stroke();
+            /* progress bar */
+            const bw = w - 16 * px, bx = cx + 8 * px, by = cy + h - 18 * px;
+            ctx.fillStyle = '#16294d';
+            ctx.fillRect(bx, by, bw, 6 * px);
+            ctx.fillStyle = s.s === 'done' ? COL.done : s.s === 'away' ? COL.away : COL.run;
+            ctx.fillRect(bx, by, bw * s.a / Q, 6 * px);
+            /* label: count, or the red pill while away */
+            ctx.textAlign = 'center';
+            if (s.s === 'away') {
+                const pulse = 0.6 + 0.4 * Math.cos(now / 380);
+                ctx.globalAlpha = pulse;
+                ctx.fillStyle = COL.away;
+                ctx.beginPath(); ctx.roundRect(cx + w / 2 - 26 * px, cy + h * 0.38 - 11 * px, 52 * px, 22 * px, 11 * px); ctx.fill();
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = '#fff';
+                ctx.font = 500 + ' ' + (11 * px) + 'px Orbitron, sans-serif';
+                ctx.fillText('weg', cx + w / 2, cy + h * 0.38);
+            } else {
+                ctx.fillStyle = s.s === 'none' ? COL.none : s.s === 'done' ? COL.done : COL.ink;
+                ctx.font = 500 + ' ' + (15 * px) + 'px Orbitron, sans-serif';
+                ctx.fillText(s.s === 'none' ? '—' : s.a + '/' + Q, cx + w / 2, cy + h * 0.38);
+            }
+        });
+        requestAnimationFrame(draw);
+    }
+
+    fit();
+    newClass();
+    addEventListener('resize', fit, { passive: true });
+    cv.style.cursor = 'pointer';
+    cv.addEventListener('click', newClass);
+    document.fonts.ready.then(function () { requestAnimationFrame(draw); });
+})();
+</script>
+</body>
+</html>

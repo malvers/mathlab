@@ -1,0 +1,193 @@
+<!doctype html>
+<!-- Stage of the film "Die ganze Klasse im Blick": one page, recorded as ONE take, so
+     teacher and pupil stay in sync without any cutting. Left the teacher's
+     svp/leistungstest.html, right the pupil's test in a phone frame, a chapter line on top,
+     a title card, and a cursor of its own - the recorder's cursor cannot follow the mouse
+     into the iframes. run2.mjs serves this page on 127.0.0.1 and drives everything. -->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Mission Control — Bühne</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Outfit:wght@300;400&display=swap">
+<style>
+:root {
+    --ground: #081428;
+    --ink: #e6eefa;
+    --dim: #8ba1c0;
+    --lambda: #f5c242;
+    --phi: #799e31;
+    --red: #b02418;
+    --line: rgba(120, 160, 220, 0.25);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1280px; height: 720px; overflow: hidden; background: var(--ground); color: var(--ink); }
+body {
+    font-family: Outfit, system-ui, sans-serif;
+    background-image: radial-gradient(900px 500px at 15% -10%, #0f2a55 0%, transparent 60%),
+                      radial-gradient(700px 420px at 95% 0%, #10203f 0%, transparent 58%);
+}
+
+/* chapter line */
+#cap { position: absolute; left: 16px; right: 16px; top: 0; height: 48px; display: flex; align-items: center; gap: 14px;
+    font-family: Orbitron, sans-serif; }
+#cap .n { font-size: 20px; font-weight: 700; color: var(--lambda); min-width: 30px; }
+#cap .t { font-size: 17px; font-weight: 700; letter-spacing: 0.04em; }
+#cap .sig { margin-left: auto; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim); }
+#cap .n, #cap .t { transition: opacity 0.35s; }
+#cap.swap .n, #cap.swap .t { opacity: 0; }
+
+/* pane labels */
+.lab { position: absolute; top: 50px; font-family: Orbitron, sans-serif; font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--dim); }
+#labT { left: 18px; }
+#labP { left: 954px; }
+
+/* teacher pane */
+.pane { position: absolute; left: 16px; top: 68px; width: 912px; height: 630px; border: 1px solid var(--line);
+    border-radius: 10px; overflow: hidden; background: #0a1a36; }
+/* the page inside is ZOOMED to 0.8 by run2 (a 1140 px layout on 912 px) - never transform: a transform scales
+   the finished picture and every small letter goes soft (Doc, 18.09.2026: "schon wieder so unscharf") */
+.pane iframe { width: 912px; height: 630px; border: 0; display: block;
+    position: absolute; left: 0; top: 0; background: #081428; }
+#teacher2 { opacity: 0; transition: opacity 0.6s; pointer-events: none; }
+#teacher2.on { opacity: 1; pointer-events: auto; }
+
+/* pupil: a phone. The page inside is zoomed to 0.7487 (a 390 px wide phone layout on 292 px),
+   set by run2 - a transform scale here left the lower part of the frame unpainted once it
+   had scrolled (measured 18.09.2026 with dsf 2). */
+#phone { position: absolute; left: 952px; top: 68px; width: 312px; height: 640px; border-radius: 34px;
+    background: #02060e; border: 2px solid #2a3f66; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45); padding: 10px; }
+#screen { position: relative; width: 292px; height: 620px; border-radius: 24px; overflow: hidden; background: #0a1a36; }
+#screen iframe { position: relative; z-index: 1; width: 292px; height: 620px; border: 0; display: block;
+    background: #f6f7fb; opacity: 0; transition: opacity 0.5s; }
+#screen iframe.on { opacity: 1; }
+#screen .off { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: var(--dim);
+    font-family: Orbitron, sans-serif; font-size: 12px; letter-spacing: 0.12em; line-height: 1.9; }
+
+/* title card */
+#title { position: absolute; inset: 0; z-index: 20; display: grid; place-items: center; text-align: center;
+    background: radial-gradient(900px 520px at 50% 40%, #0f2a55 0%, #081428 70%); transition: opacity 0.8s; }
+#title.hide { opacity: 0; pointer-events: none; }
+#title h1 { margin: 0; font-family: Orbitron, sans-serif; font-weight: 700; font-size: 58px; letter-spacing: 0.01em; }
+#title p { margin: 18px 0 0; font-size: 20px; color: var(--dim); font-weight: 300; }
+#title .sig { margin-top: 34px; font-family: Orbitron, sans-serif; font-size: 13px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--lambda); }
+
+/* the end card (Doc's review, 18.09.2026, 3:28): the title block moves up and the class from the intro
+   (resources/kids.jpeg) comes in below it, with the intro's cheer (run3 mixes kids.wav in) */
+#title .blk { transition: transform 1.1s cubic-bezier(.3,.1,.2,1); }
+#title.end .blk { transform: translateY(-180px); }
+/* 80 % of the first size (Doc, 18.09.2026: "auf 80% Größe bitte, beide") */
+#kids { position: absolute; left: 50%; top: 290px; width: 640px; height: 336px; object-fit: cover; object-position: 50% 38%;
+    border-radius: 16px; box-shadow: 0 16px 50px rgba(0, 0, 0, 0.55); border: 2px solid rgba(120, 160, 220, 0.35);
+    opacity: 0; transform: translateX(-50%) translateY(30px) scale(0.96); transition: opacity 1s ease 0.35s, transform 1.1s cubic-bezier(.3,.1,.2,1) 0.35s; }
+#title.end #kids { opacity: 1; transform: translateX(-50%); }
+
+/* a label next to the cursor: which button is being pressed (Doc's review, 18.09.2026, 2:28) */
+#callout { position: absolute; z-index: 31; padding: 8px 15px; border-radius: 10px; background: rgba(8, 20, 42, 0.94);
+    border: 2px solid #ffd93d; color: #fff; font-family: Orbitron, sans-serif; font-size: 18px; letter-spacing: 0.04em;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.55); white-space: nowrap; pointer-events: none;
+    opacity: 0; transform: translateY(8px); transition: opacity 0.3s, transform 0.3s; }
+#callout.on { opacity: 1; transform: none; }
+
+/* cursor + click ripple, glides between targets */
+#cur { position: absolute; left: 640px; top: 360px; z-index: 30; width: 26px; height: 38px; pointer-events: none;
+    transform: translate(-4px, -2px); transition: left 0.55s cubic-bezier(.4,.1,.2,1), top 0.55s cubic-bezier(.4,.1,.2,1), opacity 0.4s; opacity: 0; }
+#cur.on { opacity: 1; }
+.rip { position: absolute; z-index: 29; width: 58px; height: 58px; border-radius: 50%; pointer-events: none;
+    border: 4px solid #ffd93d; box-shadow: 0 0 18px rgba(255, 217, 61, 0.8); transform: translate(-50%, -50%) scale(0.25);
+    animation: rip 0.6s ease-out forwards; }
+@keyframes rip { to { transform: translate(-50%, -50%) scale(1.8); opacity: 0; } }
+</style>
+</head>
+<body>
+<div id="cap"><span class="n"></span><span class="t"></span><span class="sig">Doc Alvers Mathe-Labor</span></div>
+<div class="lab" id="labT">Lehrkraft · Mission Control</div>
+<div class="lab" id="labP">Schülerin oder Schüler</div>
+
+<div class="pane">
+    <iframe id="teacher" name="teacher" title="Lehrer-Seite"></iframe>
+    <iframe id="teacher2" name="teacher2" title="Live-Auswertung"></iframe>
+</div>
+
+<div id="phone"><div id="screen">
+    <div class="off">Zettel<br>scannen …</div>
+    <iframe id="pupil" name="pupil" title="Test"></iframe>
+</div></div>
+
+<div id="title">
+    <div class="blk">
+        <h1>Die ganze Klasse im Blick</h1>
+        <p>Test-Sperre und Mission Control</p>
+        <div class="sig">Doc Alvers Mathe-Labor</div>
+    </div>
+    <img id="kids" src="http://localhost:8765/resources/kids.jpeg" alt="">
+</div>
+<div id="callout"></div>
+
+<svg id="cur" viewBox="0 0 26 38" width="26" height="38"><path d="M2 2 L2 30 L9.5 23.5 L14 34 L18.5 32 L14 21.5 L24 21 Z" fill="#fff" stroke="#000" stroke-width="2.2" stroke-linejoin="round"/></svg>
+
+<script>
+window.stage = {
+    caption(n, t) {
+        const cap = document.getElementById('cap');
+        cap.classList.add('swap');
+        setTimeout(() => {
+            cap.querySelector('.n').textContent = n;
+            cap.querySelector('.t').textContent = t;
+            cap.classList.remove('swap');
+        }, 350);
+    },
+    title(on) { document.getElementById('title').classList.toggle('hide', !on); },
+    /* the opening card shows the class from the start - no motion, no cheer (Doc, 18.09.2026: "das Bild vom
+       Ende auch am Anfang ohne Ton"); after it has faded out it goes back to the plain card, so the end can
+       play its slide-in again */
+    openCard() {
+        const t = document.getElementById('title');
+        t.querySelectorAll('.blk, #kids').forEach((e) => { e.style.transition = 'none'; });
+        t.classList.add('end');
+        void t.offsetWidth;
+        t.querySelectorAll('.blk, #kids').forEach((e) => { e.style.transition = ''; });
+    },
+    resetCard() {
+        const t = document.getElementById('title');
+        t.querySelectorAll('.blk, #kids').forEach((e) => { e.style.transition = 'none'; });
+        t.classList.remove('end');
+        void t.offsetWidth;
+        t.querySelectorAll('.blk, #kids').forEach((e) => { e.style.transition = ''; });
+    },
+    load(name, url) {
+        const f = document.getElementById(name);
+        f.src = url;
+        if (name === 'pupil') f.classList.add('on');
+    },
+    show(name, on) { document.getElementById(name).classList.toggle('on', on); },
+    cursor(x, y) {
+        const c = document.getElementById('cur');
+        c.classList.add('on');
+        c.style.left = x + 'px';
+        c.style.top = y + 'px';
+    },
+    ripple(x, y) {
+        const r = document.createElement('div');
+        r.className = 'rip';
+        r.style.left = x + 'px';
+        r.style.top = y + 'px';
+        document.body.appendChild(r);
+        setTimeout(() => r.remove(), 700);
+    },
+    hideCursor() { document.getElementById('cur').classList.remove('on'); },
+    endCard() { document.getElementById('title').classList.add('end'); },
+    callout(text, x, y) {
+        const c = document.getElementById('callout');
+        if (!text) { c.classList.remove('on'); return; }
+        c.textContent = text;
+        const w = c.offsetWidth || 260;
+        c.style.left = Math.max(8, Math.min(1272 - w, x + 26)) + 'px';
+        c.style.top = Math.max(52, y - 62) + 'px';
+        c.classList.add('on');
+    }
+};
+</script>
+</body>
+</html>
