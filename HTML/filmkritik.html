@@ -69,7 +69,7 @@
 
         /* The film stands = the big microphone. Only a press on it records (Doc, 18.09.2026: "space start / stop ...
            zeig ein großes Mic so rot wie der Rahmen wenn rec ... erst wenn ich das drücke rec"). placeOverlays() puts
-           it on the film's centre; the red is the recording frame's red. While recording it is gone again - the
+           it on the film's top edge (since 18.09.2026 evening); the red is the recording frame's red. While recording it is gone again - the
            picture stays free, the badge above the film says that the microphone is live. */
         #k-mic {
             position: absolute;
@@ -107,6 +107,10 @@
         /* f puts the whole stage on the screen, not the bare video - the microphone must stay in reach */
         #stage-wrap:fullscreen { background: #06101f; }
 
+        /* no selecting (Doc, 18.09.2026: "schalt selectability aus") - drags on the slider and double clicks
+           painted blue selections over the page */
+        body { -webkit-user-select: none; user-select: none; }
+
         /* ONE line, never a second (Doc, 18.09.2026: "keine zweite Zeile sondern Text shift left"). row-reverse makes
            the right edge the start: the line is centred while it fits (auto margins) and, once it is too long, keeps
            its END in sight and leaves to the left - the newest words of a running remark are the ones that count. */
@@ -132,6 +136,8 @@
 
         #bar { display: flex; align-items: center; gap: 12px; width: min(1000px, 100%); color: #9fb4d6; font-size: 0.86rem; }
         #bar progress { flex: 1; height: 14px; accent-color: #00d2ff; }   /* twice as high (Doc, 18.09.2026) */
+        /* ... and a slider: press or drag to jump (Doc, 18.09.2026: "gleiche Optik wie jetzt") */
+        #bar progress { cursor: pointer; touch-action: none; }
 
         /* The scrollbar sits half way between the remark boxes and the card's outer edge (Doc, 18.09.2026): 4px bar
            + 10px card padding = 14px between the two lines, so 5px on either side - the list reaches 5px into the
@@ -454,8 +460,9 @@
             if (ev.key === ' ') {
                 ev.preventDefault();
                 if (R.recording) { stopRemark(true).then(() => { if (!film.ended) film.play(); }); }
-                // At the end the film must NOT start over (Doc, 17.09.2026): it stands, the microphone is there
-                else if (film.ended) return;
+                // At the end the film must NOT start over (Doc, 17.09.2026): it stands, the microphone is there.
+                // After KRITIK ABSCHICKEN the microphone is gone - space takes the submit back (forloop-9c, 18.09.)
+                else if (film.ended) { takeBackAtEnd(); return; }
                 else if (film.paused) film.play();
                 else film.pause();
             } else if (ev.key === 'Enter' && wrap.classList.contains('mic')) {
@@ -487,7 +494,14 @@
             const f = film.getBoundingClientRect(), w = wrap.getBoundingClientRect();
             const k = wrap.offsetWidth ? w.width / wrap.offsetWidth : 1;
             micBtn.style.left = ((f.left + f.width / 2 - w.left) / k) + 'px';
-            micBtn.style.top = ((f.top + f.height / 2 - w.top) / k) + 'px';
+            // up, not on the film's centre (Doc, 18.09.2026: "mach das Mic da hoch" - it covered the picture;
+            // then "wieder rund, der Kreis y-Mitte über der Linie", "muss dann kleiner"): the disc's centre sits on
+            // the film's top edge, and it is only as big as the room above that edge allows - never cut off
+            const above = (f.top - w.top) / k;
+            const d = Math.max(56, Math.min(168, 2 * (above - 6)));
+            micBtn.style.width = d + 'px';
+            micBtn.querySelector('span').style.fontSize = Math.max(9, Math.round(d * 0.1)) + 'px';
+            micBtn.style.top = above + 'px';
             recBadge.style.top = 'auto';
             recBadge.style.right = 'auto';
             recBadge.style.bottom = ((w.bottom - f.top) / k + 8) + 'px';
@@ -495,8 +509,10 @@
             recBadge.style.transform = 'translateX(-50%)';
         }
         function showMic() {
-            // not at 0:00 before the first start - there is nothing to remark on yet; not while recording either
-            const on = !R.recording && film.paused && (film.currentTime > 0 || film.ended);
+            // not at 0:00 before the first start - there is nothing to remark on yet; not while recording either;
+            // and not after KRITIK ABSCHICKEN: the review is over (Doc, 18.09.2026: "das Mic ist sichtbar, obwohl
+            // alles fertig ist") - space takes the submit back and the microphone returns with the next stop
+            const on = !R.recording && !R.submitted && film.paused && (film.currentTime > 0 || film.ended);
             wrap.classList.toggle('mic', on);
             placeOverlays();
         }
@@ -515,6 +531,24 @@
 
         /* --------------------------------------------------------------- Anzeige */
         const tNow = document.getElementById('t-now'), tAll = document.getElementById('t-all'), tBar = document.getElementById('t-bar');
+        /* The bar is a slider (Doc, 18.09.2026: "Progress ein Slider, gleiche Optik wie jetzt"): press and drag
+           seeks. Not while a remark is recording - its time stamp belongs to the place where it was started. */
+        let barDrag = false;
+        function seekFromBar(ev) {
+            const r = tBar.getBoundingClientRect();
+            const f = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
+            if (!film.duration) return;
+            film.currentTime = f * film.duration;
+            tBar.value = f;
+        }
+        tBar.addEventListener('pointerdown', (ev) => {
+            if (R.recording || !film.duration) return;
+            barDrag = true;
+            tBar.setPointerCapture(ev.pointerId);
+            seekFromBar(ev);
+        });
+        tBar.addEventListener('pointermove', (ev) => { if (barDrag) seekFromBar(ev); });
+        ['pointerup', 'pointercancel'].forEach((e) => tBar.addEventListener(e, () => { barDrag = false; }));
         film.addEventListener('timeupdate', () => {
             tNow.textContent = mmss(film.currentTime);
             tBar.value = film.duration ? film.currentTime / film.duration : 0;
@@ -525,14 +559,20 @@
         let posFilm = '';                          // known once /__kritik/liste has answered
         film.addEventListener('timeupdate', () => {
             if (!posFilm) return;
-            try { sessionStorage.setItem(POS_KEY, JSON.stringify({ film: posFilm, t: film.currentTime })); } catch (e) { }
+            try { sessionStorage.setItem(POS_KEY, JSON.stringify({ film: posFilm, t: film.currentTime, dur: film.duration })); } catch (e) { }
         });
         function restorePosition(name) {
             let saved = null;
             try { saved = JSON.parse(sessionStorage.getItem(POS_KEY) || 'null'); } catch (e) { }
             posFilm = name;
             if (!saved || saved.film !== name || !(saved.t > 0)) return;
-            const seek = () => { film.currentTime = saved.t; dbg('Position wiederhergestellt: ' + mmss(saved.t)); };
+            // a new cut keeps its file name (v2 -> v3, 18.09.2026): only the same film, measured by its length,
+            // gets its old position back - otherwise the review of the new cut starts at 0:00
+            const seek = () => {
+                if (saved.dur && Math.abs(saved.dur - film.duration) > 0.05) { dbg('Neue Fassung — Position nicht übernommen'); return; }
+                film.currentTime = saved.t;
+                dbg('Position wiederhergestellt: ' + mmss(saved.t));
+            };
             if (film.readyState >= 1) seek(); else film.addEventListener('loadedmetadata', seek, { once: true });
         }
 
@@ -565,6 +605,14 @@
             dbg('Weiter nach dem Abschicken — das war noch nicht das Ende');
         }
         film.addEventListener('play', reopen);
+        // At the end there is no play event, so the submit is taken back here - without restarting the film.
+        function takeBackAtEnd() {
+            if (!R.submitted) return;
+            reopen();
+            showMic();
+            live.className = 'empty';
+            live.textContent = 'Abschicken zurückgenommen. Mikrofon oder Enter nimmt noch einen Kommentar auf.';
+        }
 
         async function finish(ev) {
             const sinceSave = R.savedAt ? Math.round(performance.now() - R.savedAt) : null;
@@ -585,6 +633,7 @@
                 // the end is the end: the film stops. On 18.09. Doc submitted while it ran on and the next remark
                 // came 27 s later - only a stopped film makes "it goes on" an act (space) the page can see
                 film.pause();
+                showMic();                         // an ended or paused film fires no pause event - hide it here
                 live.className = 'empty';
                 live.textContent = 'Abgeschickt · ' + (j.items || R.items).length
                     + ' Kommentare sind bei der Sitzung. Doch noch nicht fertig? Leertaste — das nimmt das Abschicken zurück.';
@@ -641,7 +690,7 @@
 
             document.getElementById('k-play').addEventListener('click', () => {
                 if (R.recording) stopRemark(true).then(() => { if (!film.ended) film.play(); });
-                else if (film.ended) return;            // the end stays the end
+                else if (film.ended) { takeBackAtEnd(); return; }   // the end stays the end
                 else if (film.paused) film.play(); else film.pause();
             });
             document.getElementById('k-done').addEventListener('click', finish);
