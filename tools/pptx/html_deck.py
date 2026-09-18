@@ -743,6 +743,13 @@ html.dark-slide #hud button,html.dark-slide #nav button{background:rgba(7,22,48,
 html.dark-slide #hud button:hover,html.dark-slide #nav button:hover{background:rgba(7,22,48,.82)}
 #hud button svg,#nav button svg{display:block;width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6);margin:0;stroke-width:1.4;flex:none}
 #hud button[hidden]{display:none}   /* flex would otherwise show a hidden button */
+/* orange dot on the fullscreen button = one screen only, i.e. mirrored (or no beamer) - the warning before
+   presenting (Doc, 18.09.2026: "nur zeigen, wenn ein zweiter Schirm dran ist und nicht erweitert"). A mirrored
+   screen is invisible to the browser, so "mirrored" and "laptop alone" look the same; extended = no dot.
+   Only where the browser can tell (screen.isExtended, Chrome). */
+#hud #full{position:relative}
+#hud #full .scr-dot{position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;box-shadow:0 0 0 1.5px #EAF0FA}
+#hud #full .scr-dot.one{background:#F5C242}
 /* footer left: two triangles that jump a whole slide, fully built (Doc, 17.09.2026: "zwei Dreiecke, die von
    Folie zu Folie springen, anis rolled out") - placed by dock() on the footer line like the HUD */
 #nav{position:fixed;left:calc(10px + env(safe-area-inset-left, 0px));bottom:8px;z-index:9;display:flex;gap:4px}
@@ -757,6 +764,8 @@ html.dark-slide #hud button:hover,html.dark-slide #nav button:hover{background:r
 #help table{border-collapse:collapse}
 #help td{padding:3px 0;vertical-align:middle}
 #help td:first-child{padding-right:16px;white-space:nowrap}
+#help .help-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+#help .help-dot.one{background:#F5C242}
 #help kbd{display:inline-block;min-width:22px;padding:1px 6px;margin-right:4px;border-radius:5px;text-align:center;
   background:#D8E2F3;border:1px solid #A3B2CF;font:600 12px Raleway,system-ui,sans-serif;color:#0E244E}
 #help .or{display:inline-block;width:8px;margin-right:4px}
@@ -1248,24 +1257,26 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
   const avatar = document.querySelector('#ask-btn img');   // her photo bottom right, shown small in the Solita row
   // null = a thin line between the groups: navigate | present | Solita | help (Doc, 17.09.2026)
   const rows = [
-    [K(['→', '|', 'Leertaste']), 'nächster Schritt – auch ein Klick auf die Folie'],
-    [K(['←']), 'einen Schritt zurück'],
-    [K(['A']) + hint('Alles'), 'alles auf der Folie zeigen'],
-    [K(['Shift', '→', '/', 'Shift', '←']), 'ganze Folie vor / zurück – wie '
+    [K(['→', '|', 'Leertaste']), 'Nächster Schritt – auch ein Klick auf die Folie'],
+    [K(['←']), 'Einen Schritt zurück'],
+    [K(['A']) + hint('Alles'), 'Alles auf der Folie zeigen'],
+    [K(['Shift', '→', '/', 'Shift', '←']), 'Ganze Folie vor / zurück – wie '
       + '<span class="navbtn">' + tri(PREV) + '</span><span class="navbtn">' + tri(NEXT) + '</span>'],
-    [K(['Home', '|', 'End']), 'erste / letzte Folie'],
-    [K(['1', '7', 'Enter']), 'zu Folie 17 springen'],
+    [K(['Home', '|', 'End']), 'Erste / letzte Folie'],
+    [K(['1', '7', 'Enter']), 'Zu Folie 17 springen'],
     [K(['O']) + hint('Overview'), 'Übersicht aller Folien'],
     null,
     [K(['F']) + hint('Fullscreen'), 'Vollbild – mit Beamer: Präsentation + Referentenansicht'],
     [K(['R']), 'Referentenansicht von Hand öffnen'],
-    [K(['Cmd', 'F1', '/', 'Win', 'P']), 'Bildschirm erweitern statt spiegeln – falls keine Referentenansicht kommt'],
+    [K(['Cmd', 'F1', '/', 'Win', 'P']), 'Keine Referentenansicht? Bildschirm erweitern statt spiegeln – <b>erst dann</b> das Deck neu laden und starten'],
+    ...('isExtended' in screen ? [['<span class="help-dot one"></span>',
+      'Oranger Punkt am Vollbild-Knopf: nur ein Bildschirm – am Board heißt das gespiegelt']] : []),
     [K(['L']), 'Pointer an / aus (in der Präsentation)'],
     null,
     [K(['P']), 'Solita erklärt – Start / Pause' + (avatar ? ' – rechts unten Solita fragen <img class="navpic" src="' + avatar.src + '" alt="">' : '')],
     null,
-    [K(['Esc']), 'schließen – beendet auch die Präsentation'],
-    [K(['H', '|', '?']), 'diese Hilfe']
+    [K(['Esc']), 'Schließen – beendet auch die Präsentation'],
+    [K(['H', '|', '?']), 'Diese Hilfe']
   ];
   help.innerHTML = '<h4>Tastenkürzel</h4><table>'
     + rows.map(r => r ? '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>'
@@ -1408,12 +1419,27 @@ const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1
   + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
 const fullBtn = document.getElementById('full');
 const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+// screen.isExtended only exists where the browser can tell (Chrome). Not extended = an orange dot on the
+// button: at the board that means mirrored -> Cmd F1 / Win P. Mirroring and "no beamer" look the same to the
+// browser, so the dot also shows on the laptop alone; extended shows nothing (Doc, 18.09.2026).
+const SCREEN_KNOWN = 'isExtended' in screen;
 function paintFull(){
+  const ext = !!screen.isExtended;
   fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
     + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
-    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>';
+    + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>'
+    + (SCREEN_KNOWN && !PRESENTER && !ext ? '<span class="scr-dot one"></span>' : '');
   fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)'
-    : !PRESENTER && screen.isExtended ? 'Präsentieren: Beamer + Referentenansicht (f)' : 'Vollbild (f)';
+    : !PRESENTER && ext ? 'Bildschirm erweitert – Präsentieren: Beamer + Referentenansicht (f)'
+    : SCREEN_KNOWN ? 'Nur ein Bildschirm – gespiegelt? Cmd F1 / Win P erweitert – Vollbild (f)' : 'Vollbild (f)';
+}
+// Cmd F1 flips isExtended while the page is open: repaint at once ('change' on screen), with a slow poll
+// as a net where the event does not fire
+if (SCREEN_KNOWN) {
+  let lastExt = !!screen.isExtended;
+  const recheck = () => { if (!!screen.isExtended !== lastExt) { lastExt = !!screen.isExtended; paintFull(); } };
+  if (screen.addEventListener) screen.addEventListener('change', recheck);
+  setInterval(recheck, 2000);
 }
 function full(){
   const el = document.documentElement;
