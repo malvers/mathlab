@@ -672,6 +672,119 @@ html.svp-light #plan-table .detail-row .sub-side .mat-block a.mat-pill {
 }
 
 #plan-table a.quiz-btn:hover { background: rgba(120, 160, 220, 0.3); }
+
+/* Red button left of the Aufgaben pill (svp-plan.js, row.redBtn):
+   same geometry as a.quiz-btn, Upsilon red with white text. */
+#plan-table .red-btn {
+    display: inline-grid;
+    justify-items: center;      /* label centered in x */
+    vertical-align: middle;
+    margin-right: 8px;
+    padding: 1px 10px;
+    border-radius: 6px;
+    border: 1px solid rgb(176, 36, 24);
+    background: rgb(176, 36, 24);
+    color: #fff;
+    font: inherit;
+    letter-spacing: inherit;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    white-space: nowrap;
+    cursor: pointer;
+}
+/* label and invisible pill text share one cell: width = the wider one */
+#plan-table .red-btn > span { grid-area: 1 / 1; }
+#plan-table .red-btn > .red-btn-ghost { visibility: hidden; }
+/* centered between topic text and Aufgaben pill; svp-plan.js sets left */
+#plan-table td.mat { position: relative; }
+#plan-table .red-btn.floating {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
+}
+/* the script aligns it to the pill's middle - then without the shift */
+#plan-table .red-btn.floating[style*="top"] { transform: none; }
+
+/* List under the red button (svp-plan.js buildRedList): panel look of the
+   drop menus, red head with ✕, numbered items; scrolls inside when long. */
+.red-list {
+    position: fixed;
+    z-index: 80;
+    display: flex;
+    flex-direction: column;
+    width: min(540px, calc(100vw - 32px));
+    box-sizing: border-box;
+    background: var(--panel);
+    border: 1px solid var(--ypsilon);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px var(--shadow);
+    color: var(--text);
+    text-align: left;
+    white-space: normal;
+}
+.red-list[hidden] { display: none; }
+.red-list-head {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 6px 6px 14px;
+    background: var(--ypsilon);
+    color: #fff;
+    border-radius: 9px 9px 0 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+}
+.red-list-x {
+    border: 0;
+    background: none;
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.red-list-x:hover { background: rgba(255, 255, 255, 0.18); }
+.red-list ol {
+    min-height: 0;
+    overflow-y: auto;
+    margin: 0;
+    padding: 10px 16px 12px 42px;
+    font-size: 0.86rem;
+    line-height: 1.45;
+}
+.red-list li { margin: 0 0 6px; }
+/* a formula stays in one piece - KaTeX would break it after the = sign */
+.red-list .katex { white-space: nowrap; }
+/* folding solution under each question: green like a correct answer */
+.red-list-sol { margin-top: 2px; }
+.red-list-sol > summary {
+    display: inline-block;
+    list-style: none;                 /* Firefox marker */
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.78rem;
+    color: var(--phi);
+}
+.red-list-sol > summary::-webkit-details-marker { display: none; }   /* Safari */
+.red-list-sol > summary::before { content: '\25B8\00A0'; }
+.red-list-sol[open] > summary::before { content: '\25BE\00A0'; }
+.red-list-sol > summary:hover { text-decoration: underline; }
+.red-list-sol > div {
+    margin: 3px 0 2px;
+    padding: 5px 10px;
+    border-left: 2px solid var(--phi);
+    border-radius: 0 6px 6px 0;
+    background: rgba(121, 158, 49, 0.1);
+}
+.red-list li::marker { color: rgb(235, 120, 105); font-variant-numeric: tabular-nums; }
+html.svp-light .red-list li::marker { color: var(--ypsilon); }
+@media print { .red-list { display: none; } }
+#plan-table .red-btn:hover { background: rgb(200, 48, 34); }
 #plan-table .quiz-note { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
 
 /* narrow screens: the button stays, its caption would break the row */
@@ -3398,15 +3511,20 @@ body.form-preview #svp-form {
     letter-spacing: 0.06em;
     line-height: 14px;
     padding: 3px 9px;
-    color: var(--lambda);
-    border: 1px solid var(--line);
+    /* Doc, 18.09.2026: "alle Vortragsdates auch rot" - Upsilon red, white text,
+       like the red button in the plan rows */
+    color: #fff;
+    background: var(--ypsilon);
+    border: 1px solid var(--ypsilon);
     border-radius: 999px;
     white-space: nowrap;
 }
 
 .vt-date.edit { cursor: pointer; }
-.vt-date.edit:hover { border-color: var(--lambda); }
-.vt-date.empty { color: var(--muted); border-style: dashed; }
+.vt-date.edit:hover { background: rgb(200, 48, 34); border-color: rgb(200, 48, 34); }
+/* no date yet: stays a quiet dashed placeholder, not a red tag */
+.vt-date.empty,
+.vt-date.edit.empty:hover { color: var(--muted); background: none; border: 1px dashed var(--line); }
 
 /* covers the whole tag, so a click anywhere lands on the picker; the
    calendar follows the page's scheme */

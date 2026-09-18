@@ -930,6 +930,143 @@
         return cell;
     }
 
+    /* Doc, 18.09.2026: "zwischen Text und Aufgaben zentriert in x" - the red
+       button (row.redBtn) floats out of the flow, centered in the gap between
+       the end of the topic text and the Aufgaben pill. If the gap is too narrow
+       (phone), it falls back into the flow, left of the pill. Re-placed when a
+       column changes width, on resize and once the fonts have loaded. */
+    const redBtnRefs = new Set();
+    let redBtnRO = null;
+    function placeRedBtns() {
+        redBtnRefs.forEach(function (ref) {
+            const rb = ref.redBtnEl;
+            if (!rb || !rb.isConnected) { redBtnRefs.delete(ref); return; }
+            /* measure with the button out of the flow: the pill then sits where
+               it stays once the button floats */
+            rb.classList.add('floating');
+            const td = ref.matTd.getBoundingClientRect();
+            /* .topic-text is a block as wide as the cell (line clamp) - the
+               text itself ends where its Range ends, clipped to the cell */
+            const rg = document.createRange();
+            rg.selectNodeContents(ref.topicSpan);
+            const textR = Math.min(rg.getBoundingClientRect().right,
+                                   ref.topicSpan.getBoundingClientRect().right);
+            const next = rb.nextElementSibling;
+            const endL = next ? next.getBoundingClientRect().left
+                              : td.right - parseFloat(getComputedStyle(ref.matTd).paddingRight);
+            const w = rb.offsetWidth;
+            if (!td.width || endL - textR < w + 24) {
+                rb.classList.remove('floating');
+                rb.style.left = '';
+                rb.style.top = '';
+                return;
+            }
+            rb.style.left = Math.round((textR + endL) / 2 - w / 2 - td.left - ref.matTd.clientLeft) + 'px';
+            /* same vertical middle as the pill (the cell's 50% sat 1.2 px lower) */
+            if (next) {
+                const nb = next.getBoundingClientRect();
+                rb.style.top = (nb.top + nb.height / 2 - rb.offsetHeight / 2 - td.top - ref.matTd.clientTop) + 'px';
+            }
+        });
+    }
+    function watchRedBtn(ref) {
+        if (!redBtnRO) {
+            redBtnRO = new ResizeObserver(placeRedBtns);
+            window.addEventListener('resize', placeRedBtns);
+            if (document.fonts) document.fonts.ready.then(placeRedBtns);
+        }
+        redBtnRefs.add(ref);
+        /* the topic cell changes width whenever the columns rebalance */
+        redBtnRO.observe(ref.topicSpan.parentNode);
+        requestAnimationFrame(placeRedBtns);
+    }
+
+    /* Doc, 18.09.2026: "eine Liste von 30 Punkten unter den butt ... gib mir
+       ein x" - row.redBtn = { label, title, items } opens a numbered list under
+       the button, closed by its ✕, Escape or a click outside. The panel hangs
+       on <body> with position:fixed (the table-wrap scrolls sideways and would
+       clip it) and follows the button while the page scrolls. Items may carry
+       $...$ formulas (KaTeX via setMathText). */
+    let redListOpen = null;          /* { panel, btn } of the open list */
+    let redListWired = false;
+    function closeRedList() {
+        if (!redListOpen) return;
+        redListOpen.panel.hidden = true;
+        redListOpen.btn.setAttribute('aria-expanded', 'false');
+        redListOpen = null;
+    }
+    function placeRedList() {
+        if (!redListOpen) return;
+        const p = redListOpen.panel, btn = redListOpen.btn;
+        if (!btn.isConnected) { closeRedList(); return; }   /* row was re-rendered */
+        const r = btn.getBoundingClientRect();
+        const vw = document.documentElement.clientWidth, vh = window.innerHeight;
+        const w = p.offsetWidth;
+        p.style.left = Math.round(Math.max(16, Math.min(r.left + r.width / 2 - w / 2, vw - w - 16))) + 'px';
+        /* under the button; only when there is clearly more room above, over it */
+        const below = vh - r.bottom - 22, above = r.top - 22;
+        if (below >= 280 || below >= above) {
+            p.style.top = Math.round(r.bottom + 6) + 'px';
+            p.style.bottom = 'auto';
+            p.style.maxHeight = Math.round(Math.max(160, below)) + 'px';
+        } else {
+            p.style.top = 'auto';
+            p.style.bottom = Math.round(vh - r.top + 6) + 'px';
+            p.style.maxHeight = Math.round(above) + 'px';
+        }
+    }
+    function buildRedList(title, items) {
+        if (!redListWired) {
+            redListWired = true;
+            document.addEventListener('click', closeRedList);
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeRedList(); });
+            window.addEventListener('scroll', placeRedList, true);
+            window.addEventListener('resize', placeRedList);
+        }
+        const panel = document.createElement('div');
+        panel.className = 'red-list';
+        panel.hidden = true;
+        panel.setAttribute('role', 'dialog');
+        panel.setAttribute('aria-label', title);
+        const head = document.createElement('div');
+        head.className = 'red-list-head';
+        const h = document.createElement('span');
+        h.textContent = title;
+        const x = document.createElement('button');
+        x.type = 'button';
+        x.className = 'red-list-x';
+        x.textContent = '\u2715';
+        x.title = 'Schließen';
+        x.setAttribute('aria-label', 'Schließen');
+        x.addEventListener('click', closeRedList);
+        head.append(h, x);
+        /* an item is a string or { q, a }: the answer folds out under the
+           question (Doc, 18.09.2026: "aufklappbar drunter die Loesungen") */
+        const ol = document.createElement('ol');
+        items.forEach(function (it) {
+            const li = document.createElement('li');
+            const q = document.createElement('div');
+            setMathText(q, typeof it === 'string' ? it : it.q);
+            li.appendChild(q);
+            if (it && it.a) {
+                const sol = document.createElement('details');
+                sol.className = 'red-list-sol';
+                const sum = document.createElement('summary');
+                sum.textContent = 'Lösung';
+                const ans = document.createElement('div');
+                setMathText(ans, it.a);
+                sol.append(sum, ans);
+                li.appendChild(sol);
+            }
+            ol.appendChild(li);
+        });
+        panel.append(head, ol);
+        /* clicks inside must not reach the document (closes) or the row (folds) */
+        panel.addEventListener('click', function (e) { e.stopPropagation(); });
+        document.body.appendChild(panel);
+        return panel;
+    }
+
     // Renders a ref's material state: pills into the sub-row block, a compact
     // Material lives in the expandable sub-row; the week row itself stays
     // clean (the ▸ chevron already shows there is something to unfold).
@@ -955,6 +1092,46 @@
         const n = alle.length - ex.length;
         /* Doc, 07.09.2026: die Aufgaben-Pille steht wieder in der Wochenzeile - dort
            ist sie erreichbar, ohne die Woche aufzuklappen. */
+        /* Red button between topic and Aufgaben pill, data driven (row.redBtn).
+           As wide as the Aufgaben pill: an invisible copy of the pill's text
+           sits in the same grid cell as the label, so the button sizes to the
+           wider of the two - no measuring, independent of when fonts load. */
+        if (ref.redBtn) {
+            const rb = document.createElement('button');
+            rb.type = 'button';
+            rb.className = 'red-btn';
+            const cfg = typeof ref.redBtn === 'string' ? { label: ref.redBtn } : ref.redBtn;
+            const lbl = document.createElement('span');
+            lbl.textContent = cfg.label;
+            rb.appendChild(lbl);
+            const pill = aufg && aufg.querySelector('.aufg-drop > a.quiz-btn');
+            if (pill) {
+                const ghost = document.createElement('span');
+                ghost.className = 'red-btn-ghost';
+                ghost.setAttribute('aria-hidden', 'true');
+                ghost.textContent = pill.textContent;
+                rb.appendChild(ghost);
+            }
+            rb.addEventListener('click', function (e) { e.stopPropagation(); });
+            if (cfg.items && cfg.items.length) {
+                rb.setAttribute('aria-haspopup', 'dialog');
+                rb.setAttribute('aria-expanded', 'false');
+                rb.addEventListener('click', function () {
+                    const wasOpen = redListOpen && redListOpen.btn === rb;
+                    closeRedList();
+                    if (wasOpen) return;
+                    /* built once per week, reused across re-renders of the row */
+                    if (!ref.redList) ref.redList = buildRedList(cfg.title || cfg.label, cfg.items);
+                    ref.redList.hidden = false;
+                    redListOpen = { panel: ref.redList, btn: rb };
+                    rb.setAttribute('aria-expanded', 'true');
+                    placeRedList();
+                });
+            }
+            ref.matTd.appendChild(rb);
+            ref.redBtnEl = rb;
+            watchRedBtn(ref);
+        }
         if (aufg) ref.matTd.appendChild(aufg);
         const hasMat = !!text && (n > 0 || !alle.length || matTail(text));
         /* Doc, 08.09.2026: "da gabs frueher ein paperclip wenn Material da" - seit
@@ -3142,7 +3319,10 @@
             /* structural fields: never edited by hand, but carried through every
                save so a shifted plan keeps its Bereich, Nummer and KW */
             type: rowType, nr: ov.nr != null ? ov.nr : row.nr, kw: ov.kw != null ? ov.kw : row.kw,
-            upBtn: upBtn
+            upBtn: upBtn,
+            /* optional red button left of the Aufgaben pill: row.redBtn = 'Label'
+               or { label, title, items } - items open as a list under it */
+            redBtn: row.redBtn || null
         };
 
         // Expandable sub-row, created on demand: bullets under the topic
