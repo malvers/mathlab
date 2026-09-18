@@ -8,6 +8,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
     <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
@@ -50,6 +52,14 @@
         }
 
         .kt-note.kt-warn { border-left-color: #b02418; }
+
+        .kt-loss { display: flex; flex-direction: column; gap: 4px; margin: 7px 0; }
+
+        .kt-formula {
+            margin-top: 10px;
+            text-align: center;
+            color: #f5c242;
+        }
 
         .kt-seq {
             display: flex;
@@ -137,6 +147,10 @@
             ? CyberI18n.getOr('kreis.' + k, fb) : fb;
 
         function dbg(m) { try { if (window.DebugWindow) DebugWindow.log('○ ' + m); } catch (e) { } }
+
+        // KaTeX loads deferred: until then the plain fallback shows, DOMContentLoaded renders again
+        const tex = (src, plain, display) => (typeof katex !== 'undefined')
+            ? katex.renderToString(src, { throwOnError: false, displayMode: !!display }) : plain;
 
         CyberBranding.init({
             useExternalStyles: true,
@@ -252,6 +266,18 @@
             }
 
             const cutCount = V.length - n;
+
+            // How many chords pass through each crossing: a point with k chords
+            // replaces C(k,2) simple crossings and costs (k-1)(k-2)/2 regions.
+            const through = new Map();
+            chords.forEach((c, ci) => c.on.forEach(p => {
+                if (p.v < n) return;
+                if (!through.has(p.v)) through.set(p.v, new Set());
+                through.get(p.v).add(ci);
+            }));
+            const mult = {};                           // k -> number of points with k chords
+            through.forEach(s => { mult[s.size] = (mult[s.size] || 0) + 1; });
+
             const edges = [];
             const order = Array.from({ length: n }, (_, i) => i).sort((i, j) => V[i].a - V[j].a);
             if (n >= 2)
@@ -305,7 +331,7 @@
                 faces.push(face);
             }
 
-            const g = { n, V, edges, darts, faces, cutCount, outer: -1, areas: [] };
+            const g = { n, V, edges, darts, faces, cutCount, mult, outer: -1, areas: [] };
             let best = -1, bestA = -1;
             faces.forEach((f, i) => {
                 const poly = facePolyline(g, f);
@@ -353,11 +379,52 @@
         /* ------------------------------------------------------------------ Zeichnen */
         let cx = 0, cy = 0, R = 1;
 
+        const coachBox = document.getElementById('math-coach-box');
+
+        // Coach box in stage coordinates, or null when it is not shown
+        function coachRect(stage) {
+            if (!coachBox || !coachBox.classList.contains('visible')) return null;
+            const b = coachBox.getBoundingClientRect();
+            if (b.width < 1 || b.height < 1) return null;
+            return { l: b.left - stage.left, t: b.top - stage.top, r: b.right - stage.left, b: b.bottom - stage.top };
+        }
+
+        // Distance from a point to a rectangle (0 inside)
+        const rectDist = (x, y, c) => Math.hypot(Math.max(c.l - x, 0, x - c.r), Math.max(c.t - y, 0, y - c.b));
+
         function layout() {
             const rect = container.getBoundingClientRect();
-            cx = rect.width / 2;
-            cy = rect.height / 2;
-            R = Math.min(rect.width, rect.height) * 0.40;
+            const w = rect.width, h = rect.height;
+            cx = w / 2;
+            cy = h / 2;
+            R = Math.min(w, h) * 0.40;
+
+            // The coach box floats over the stage and used to hide a point of the
+            // hexagon. Find the largest circle beside it, as close to the centre as
+            // possible; if it would get too small (phone), stay centred.
+            const c = coachRect(rect);
+            const PAD = 28, EDGE = 26;                 // room for the point numbers at R + 18
+            if (!c || rectDist(cx, cy, c) >= R + PAD) return;
+            const spot = r => {
+                const x0 = EDGE + r, x1 = w - EDGE - r, y0 = EDGE + r, y1 = h - EDGE - r;
+                if (x0 > x1 || y0 > y1) return null;
+                const STEPS = 40;
+                let best = null, bd = Infinity;
+                for (let i = 0; i <= STEPS; i++)
+                    for (let j = 0; j <= STEPS; j++) {
+                        const x = x0 + (x1 - x0) * i / STEPS, y = y0 + (y1 - y0) * j / STEPS;
+                        if (rectDist(x, y, c) < r + PAD) continue;
+                        const d = Math.hypot(x - w / 2, y - h / 2);
+                        if (d < bd) { bd = d; best = { x, y }; }
+                    }
+                return best;
+            };
+            let lo = 0, hi = R, fit = null;
+            for (let it = 0; it < 14; it++) {
+                const mid = (lo + hi) / 2, p = spot(mid);
+                if (p) { lo = mid; fit = { x: p.x, y: p.y, r: mid }; } else hi = mid;
+            }
+            if (fit && fit.r >= R * 0.5) { cx = fit.x; cy = fit.y; R = fit.r; }
         }
 
         const sx = x => cx + R * x;
@@ -467,10 +534,24 @@
             const note = document.getElementById('kt-note');
             if (note) {
                 note.className = 'kt-note' + (hit ? '' : ' kt-warn');
-                note.innerHTML = hit
-                    ? T('note_max', 'Allgemeine Lage: keine drei Sehnen durch einen Punkt — das Maximum ist erreicht.')
-                    : T('note_deg', 'Entartet: hier treffen sich drei oder mehr Sehnen in einem Punkt. Jeder solche Treffpunkt kostet genau eine Fläche.') +
-                    ' <b>' + (max - g.regions) + '</b> ' + T('note_lost', 'weniger als möglich.');
+                if (hit) {
+                    note.innerHTML = T('note_max', 'Allgemeine Lage: keine drei Sehnen durch einen Punkt — das Maximum ist erreicht.');
+                } else {
+                    // One row per multiplicity: "points with 4 chords   1 × 3"
+                    const ks = Object.keys(g.mult).map(Number).filter(k => k >= 3).sort((a, b) => a - b);
+                    const rows = ks.map(k =>
+                        '<div class="kt-row"><span class="kt-key">' +
+                        T('row_pts', 'Punkte mit {m} Sehnen').split('{m}').join(k) +
+                        '</span><span class="kt-val">' + g.mult[k] + ' × ' + (k - 1) * (k - 2) / 2 + '</span></div>').join('');
+                    const lost = ks.reduce((s, k) => s + g.mult[k] * (k - 1) * (k - 2) / 2, 0);
+                    if (lost !== max - g.regions) dbg('loss mismatch: ' + lost + ' vs ' + (max - g.regions));
+                    note.innerHTML =
+                        T('note_deg', 'Entartet: hier gehen drei oder mehr Sehnen durch einen Punkt. Ein Punkt mit {k} Sehnen kostet {f} Flächen.')
+                            .split('{k}').join(tex('k', '<i>k</i>'))
+                            .split('{f}').join(tex('\\dfrac{(k-1)(k-2)}{2}', '(k−1)(k−2)/2')) +
+                        '<div class="kt-loss">' + rows + '</div>' +
+                        '<b>' + (max - g.regions) + '</b> ' + T('note_lost', 'weniger als möglich.');
+                }
             }
             const seq = document.getElementById('kt-seq');
             if (seq)
@@ -593,7 +674,8 @@
 
             CyberUI.createCard('ui-container', T('card_seq', 'Die Folge'), `
                 <div class="kt-seq" id="kt-seq"></div>
-                <div class="kt-note">${T('seq_note', 'C(n,4) + C(n,2) + 1 — 1, 2, 4, 8, 16 … und dann eben <b>31</b>, nicht 32.')}</div>`);
+                <div class="kt-formula" id="kt-formula"></div>
+                <div class="kt-note">${T('seq_note', '1, 2, 4, 8, 16 … und dann eben <b>31</b>, nicht 32.')}</div>`);
 
             CyberUI.createCard('ui-container', T('card_view', 'Anzeige'), `
                 <div style="display:flex; flex-direction:column; gap:9px;">
@@ -646,9 +728,19 @@
             if (!S.g) rebuild(); else draw();
         }
 
+        function renderFormula() {
+            const el = document.getElementById('kt-formula');
+            if (el) el.innerHTML = tex('\\binom{n}{4}+\\binom{n}{2}+1', 'C(n,4) + C(n,2) + 1', true);
+        }
+
         setN(S.n);
         buildUI();
+        renderFormula();
+        document.addEventListener('DOMContentLoaded', () => { renderFormula(); if (S.g) readouts(); });
         window.addEventListener('resize', init);
+        // Collapsing or expanding the coach box frees or covers stage space
+        if (coachBox && window.ResizeObserver)
+            new ResizeObserver(() => { layout(); draw(); }).observe(coachBox);
         document.fonts.ready.then(() => { init(); rebuild(); });
         init();
         rebuild();
