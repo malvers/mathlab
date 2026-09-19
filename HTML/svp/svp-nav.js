@@ -782,7 +782,8 @@
             [['S'], 'Ins Suchfeld springen', () => !!pageSearch()],
             [['V'], 'Vollbild ein- oder ausschalten', () => canFs],
             [['D'], 'Farbschema wechseln: Hell, Dunkel, Grau'],
-            [['⇧', 'C'], 'Farbwähler öffnen: Farben live im Plan ausprobieren'],
+            // local only (Doc: "lass ihn ganz raus, ich mach das nur lokal")
+            [['⇧', 'C'], 'Farbwähler öffnen: Farben live im Plan ausprobieren', () => LOCAL],
             [['Q'], 'QR-Code dieser Seite zeigen'],
             [['?', 'H'], 'Diese Übersicht ein- oder ausblenden'],
             [['Esc'], 'Menüs, Dialoge und Vollbild schließen']
@@ -845,7 +846,7 @@
             toggleFs();
         } else if (key === 'd') {
             applyTheme(THEME_NEXT[theme]);
-        } else if (key === 'c' && e.shiftKey) {
+        } else if (key === 'c' && e.shiftKey && LOCAL) {   /* online: no picker */
             /* Doc, 19.09.2026: "gib mir Shift C für color picker" - the Tailwind
                palette in its own slim popup, live-linked over "svp-colors" (see
                the colour trial above). One named window: pressing again only
