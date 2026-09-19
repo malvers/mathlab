@@ -398,9 +398,13 @@
         if (fast || Math.abs(y1 - y0) < 2) return 0;
         se.scrollTop = y0;
         const ms = Math.min(2000, Math.max(900, 700 + Math.abs(y1 - y0) * 0.6));
-        const token = (w.__tourGlide || 0) + 1, t0 = performance.now(), sb = se.style.scrollBehavior;
+        // the steps get the FRAME's rAF time, so the start is taken on the frame's clock too: the tour page's clock
+        // runs ahead by the time between the two page loads (seconds online while the voice loads from R2, minutes
+        // after a jump), and the glide held the page at its start until that was made up (Doc, 19.09.2026: "dass das
+        // Zoomen auf eine Karte nicht richtig ist" - the card grew over the page's head, not over the slips)
+        const token = (w.__tourGlide || 0) + 1, t0 = w.performance.now(), sb = se.style.scrollBehavior;
         w.__tourGlide = token;
-        w.__tourGlideEnd = t0 + ms;
+        w.__tourGlideEnd = performance.now() + ms;          // read by point() on the tour's clock
         se.style.scrollBehavior = 'auto';                // a page's own scroll-behavior would fight every step
         const step = (now) => {
             if (w.__tourGlide !== token) return;         // a newer glide took over
