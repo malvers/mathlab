@@ -2345,8 +2345,10 @@
     function lbMeta() {
         const out = {};
         document.querySelectorAll('.meta-card[data-lb]').forEach(card => {
+            const k = card.querySelector('.k');
             out[card.dataset.lb] = {
-                k: card.querySelector('.k') ? card.querySelector('.k').textContent : '',
+                /* long name ("Lernbereich 2"); the head itself shows "LB 2" + pill */
+                k: k ? (k.dataset.full || k.textContent) : '',
                 v: card.querySelector('.v') ? card.querySelector('.v').textContent : '',
                 vu: card.querySelector('.vu') ? card.querySelector('.vu').textContent : ''
             };
@@ -4919,6 +4921,14 @@
             const [cls, label] = window.BADGE[key];
             const alts = window.ALT_BADGES && window.ALT_BADGES[key];
 
+            /* Doc, 19.09.2026: "schreib LB 2 und in die Pille PDF" - the card
+               head shows the short name (the badge label), the pill says what it
+               opens. The long name stays in data-full for the exports (lbMeta). */
+            if (head !== card) {
+                head.dataset.full = head.textContent.trim();
+                head.textContent = label;
+            }
+
             // Bereich with variants (window.ALT_BADGES[key] = [[label, pdfPage],
             // ...]): one pill with a caret that opens a dropdown - chosen
             // variant first, then the alternatives, each deep-linking into the
@@ -4929,7 +4939,7 @@
 
                 const pill = document.createElement('span');
                 pill.className = 'badge ' + cls;
-                pill.textContent = label + ' \u25be';
+                pill.textContent = 'PDF \u25be';
                 pill.title = 'Varianten anzeigen';
                 pill.addEventListener('click', function (e) {
                     e.stopPropagation();            /* nicht die Karte aufklappen */
@@ -4961,9 +4971,10 @@
                 continue;
             }
 
+            if (!lbPdfLink(key)) continue;          /* no PDF page known: no pill */
             const pill = document.createElement('span');
             pill.className = 'badge ' + cls;
-            pill.textContent = label;
+            pill.textContent = 'PDF';
             linkBadge(pill, key);                   /* stoppt den Klick selbst */
             head.appendChild(pill);
         }
