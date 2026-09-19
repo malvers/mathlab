@@ -274,8 +274,14 @@
                das Letzte, was Wochenzeilen noch mehrzeilig machte. Der Text bleibt in
                PLAN bzw. in den Overrides stehen, er wird nur nicht mehr angezeigt. */
             if (t === 'Bemerkungen') { th.remove(); return; }
-            /* spelled out, with a soft hyphen: two lines keep the column narrow */
-            if (/^Ustd/.test(t)) { th.classList.add('ustd-col'); th.textContent = 'Unterrichts­stunden'; }
+            /* Spelled out first ("Unterrichts-stunden" over two lines), then Doc,
+               19.09.2026: "hier doch Ustd." - the short form in the head, the
+               long one in the tooltip. */
+            if (/^Ustd/.test(t)) {
+                th.classList.add('ustd-col');
+                th.textContent = 'Ustd.';
+                th.title = 'Unterrichtsstunden';
+            }
             if (/^Thema/.test(t)) th.classList.add('topic-col');
         });
     }

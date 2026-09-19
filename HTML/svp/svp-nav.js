@@ -586,6 +586,59 @@
     applyTheme(theme);
     themeWrap.appendChild(themeBtn);
 
+    // Live colour trial (Doc, 19.09.2026: "gib mir die col table als Extra
+    // Fenster connected, so dass ich probieren kann"). The palette window
+    // HTML/tailwind-palette.html shares the origin and talks over this channel.
+    // Trial values go into one <style> scoped to html.svp-grey - NOT inline on
+    // <html>, where they had leaked into Hell and Dunkel (Doc: "Die Farben
+    // gelten in allen Farbschemata? Nee das geht ni!"). Nothing is stored here;
+    // the palette keeps its list and re-sends it after a reload ("hello").
+    // Only a real click in the palette (live) switches the plan to grey.
+    try {
+        const TRIAL_PROP = /^--(g-[a-z]+|text|head|bg|card|muted|tint-text)$/;
+        const TRIAL_VALUE = /^[\d\s.,rgba()]+$/;
+        const trialCh = new BroadcastChannel('svp-colors');
+        const trial = {};
+        let trialStyle = null;
+        const paintTrial = function () {
+            const props = Object.keys(trial);
+            if (!props.length) { if (trialStyle) { trialStyle.remove(); trialStyle = null; } return; }
+            if (!trialStyle) {
+                trialStyle = document.createElement('style');
+                trialStyle.id = 'svp-color-trial';
+            }
+            document.head.appendChild(trialStyle);   /* last in <head>: beats svp.css */
+            trialStyle.textContent = 'html.svp-grey {' +
+                props.map(function (p) { return p + ': ' + trial[p] + ';'; }).join(' ') + '}';
+        };
+        trialCh.onmessage = function (e) {
+            const d = e.data || {};
+            /* the palette asks for the whole set it can change - its "Kopieren"
+               lists every colour, trial or not (Doc: "ALLE Farben en bloc") */
+            if (d.type === 'get') {
+                const cs = getComputedStyle(document.documentElement);
+                const values = {};
+                (d.props || []).forEach(function (p) {
+                    if (TRIAL_PROP.test(p)) values[p] = cs.getPropertyValue(p).trim();
+                });
+                trialCh.postMessage({ type: 'values', values: values });
+                return;
+            }
+            if (d.type === 'reset') {
+                Object.keys(trial).forEach(function (p) { delete trial[p]; });
+                paintTrial();
+                return;
+            }
+            if (d.type !== 'set' || !TRIAL_PROP.test(d.prop) ||
+                typeof d.value !== 'string' || !TRIAL_VALUE.test(d.value)) return;
+            if (d.live && theme !== 'grey') applyTheme('grey');
+            trial[d.prop] = d.value;
+            paintTrial();
+        };
+        // after a reload: an open palette re-sends the running trial
+        trialCh.postMessage({ type: 'hello' });
+    } catch (e) { /* no BroadcastChannel: the palette simply has no effect */ }
+
     editWrap.appendChild(panel);
     navRight.appendChild(editWrap);
 
@@ -718,6 +771,7 @@
             [['S'], 'Ins Suchfeld springen', () => !!pageSearch()],
             [['V'], 'Vollbild ein- oder ausschalten', () => canFs],
             [['D'], 'Farbschema wechseln: Hell, Dunkel, Grau'],
+            [['⇧', 'C'], 'Farbwähler öffnen: Farben live im Plan ausprobieren'],
             [['Q'], 'QR-Code dieser Seite zeigen'],
             [['?', 'H'], 'Diese Übersicht ein- oder ausblenden'],
             [['Esc'], 'Menüs, Dialoge und Vollbild schließen']
@@ -780,6 +834,13 @@
             toggleFs();
         } else if (key === 'd') {
             applyTheme(THEME_NEXT[theme]);
+        } else if (key === 'c' && e.shiftKey) {
+            /* Doc, 19.09.2026: "gib mir Shift C für color picker" - the Tailwind
+               palette in its own slim popup, live-linked over "svp-colors" (see
+               the colour trial above). One named window: pressing again only
+               brings it back to the front. */
+            const pal = window.open('/tailwind-palette.html', 'svp-palette', 'popup,width=560,height=900');
+            if (pal) pal.focus();
         } else if (key === 'q') {
             if (qrOverlay && qrOverlay.classList.contains('open')) qrOverlay.classList.remove('open');
             else showQr();

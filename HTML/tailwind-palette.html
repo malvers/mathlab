@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Tailwind palette picker (Doc, 19.09.2026: "unglaublich gut das Tool nicht wegwerfen!").
+     Also published as https://claude.ai/artifact/L53Kd9NtgFGgFjeLZrCrYY -->
+<title>Tailwind-Palette</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap">
+<style>
+    /* Deliberately one look: the SVP grey scheme, so every swatch is judged
+       on the ground it will actually sit on. */
+    :root {
+        --bg: rgb(26, 26, 28);
+        --card: rgb(37, 37, 40);
+        --line: rgba(205, 210, 220, 0.14);
+        --text: rgba(238, 240, 244, 0.92);
+        --muted: rgba(200, 204, 212, 0.62);
+        --pick: 244, 114, 182;
+        color-scheme: dark;
+    }
+    body {
+        background: var(--bg);
+        color: var(--text);
+        font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    .wrap { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 48px; }
+    h1, h2, .mono-label {
+        font-family: "Orbitron", system-ui, sans-serif;
+        letter-spacing: 0.06em;
+        text-wrap: balance;
+    }
+    h1 { font-size: 1.35rem; font-weight: 700; margin: 0 0 4px; }
+    .lead { color: var(--muted); margin: 0 0 20px; max-width: 65ch; }
+
+    /* ---- preview of the picked colour ---- */
+    .preview {
+        position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2;
+        background: var(--bg);
+        padding-block: 10px 14px;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 18px;
+        display: grid; gap: 10px;
+    }
+    .pv-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+    .pv-name { font-family: "Orbitron", sans-serif; font-size: 0.95rem; letter-spacing: 0.06em; color: rgb(var(--pick)); }
+    .pv-val { font-variant-numeric: tabular-nums; color: var(--muted); }
+    .copy {
+        font: inherit; font-size: 0.8rem; color: var(--text);
+        background: rgba(205, 210, 220, 0.08); border: 1px solid var(--line);
+        border-radius: 8px; padding: 4px 10px; cursor: pointer;
+    }
+    .copy:hover, .copy:focus-visible { border-color: rgba(205, 210, 220, 0.5); outline: none; }
+    .copied { color: rgb(74, 222, 128); font-size: 0.8rem; }
+    .pv-rows { display: grid; gap: 6px; }
+    .row {
+        display: flex; align-items: center; gap: 14px;
+        background: var(--card); border-radius: 6px;
+        padding: 8px 14px; min-height: 22px;
+        overflow: hidden;
+    }
+    .row .nr { color: var(--muted); font-variant-numeric: tabular-nums; }
+    .row .topic { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .row.now {
+        background-image: linear-gradient(90deg, rgba(var(--pick), 0.26), rgba(var(--pick), 0.06) 50%, rgba(var(--pick), 0.26));
+        box-shadow: inset 2px 0 0 rgb(var(--pick)), inset -2px 0 0 rgb(var(--pick)),
+            inset 6px 0 10px -6px rgba(var(--pick), 0.5), inset -6px 0 10px -6px rgba(var(--pick), 0.5);
+    }
+    .row.band {
+        justify-content: center;
+        font-family: "Orbitron", sans-serif; font-size: 0.78rem; letter-spacing: 0.08em;
+        background-image: linear-gradient(90deg, rgba(var(--pick), 0.22), rgba(var(--pick), 0.05) 50%, rgba(var(--pick), 0.22));
+        box-shadow: inset 2px 0 0 rgb(var(--pick)), inset -2px 0 0 rgb(var(--pick));
+        text-shadow: 0 0 10px rgba(var(--pick), 0.25);
+    }
+    .pill {
+        font-family: "Orbitron", sans-serif; font-size: 0.66rem; letter-spacing: 0.04em;
+        color: rgb(var(--pick));
+        border: 1px solid rgba(var(--pick), 0.5);
+        background: rgba(var(--pick), 0.08);
+        box-shadow: 0 0 6px rgba(var(--pick), 0.2);
+        border-radius: 6px; padding: 2px 9px; white-space: nowrap;
+    }
+
+    /* ---- the palette grid ---- */
+    .scroll { overflow-x: auto; }
+    table { border-collapse: separate; border-spacing: 3px; min-width: 420px; width: 100%; }
+
+    /* ---- live link to an open plan (same origin, BroadcastChannel) ---- */
+    .targets { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tgt {
+        font: inherit; font-size: 0.76rem; color: var(--muted);
+        background: transparent; border: 1px solid var(--line);
+        border-radius: 999px; padding: 3px 10px; cursor: pointer;
+    }
+    .tgt:hover { color: var(--text); }
+    /* each chip wears its current colour (Doc: "mach die in den aktuellen
+       Farben"): a tinted rim, the chosen one filled - the dot went again
+       (Doc: "den Punkt vor den Farben weg") */
+    .tgt { display: inline-flex; align-items: center; gap: 6px; border-color: rgba(var(--c, 205, 210, 220), 0.55); }
+    .tgt.on { color: rgb(26, 26, 28); background: rgb(var(--c, 205, 210, 220)); border-color: rgb(var(--c, 205, 210, 220)); }
+    .tgt.on.dark-c { color: rgb(238, 240, 244); }
+    .tgt:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+    .tgt.reset { margin-left: auto; }
+    .summary { color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; min-height: 1.2em; }
+    .summary b { color: var(--text); font-weight: 600; }
+    th { font-weight: 500; color: var(--muted); font-size: 0.72rem; }
+    thead th { font-variant-numeric: tabular-nums; padding-bottom: 2px; }
+    tbody th {
+        text-align: left; padding-right: 8px; white-space: nowrap;
+        font-family: "Orbitron", sans-serif; letter-spacing: 0.05em; font-size: 0.66rem; text-transform: uppercase;
+    }
+    td { padding: 0; }
+    .sw {
+        display: block; width: 100%; height: 34px; border: 0; border-radius: 5px;
+        cursor: pointer; position: relative; padding: 0;
+    }
+    .sw:hover { transform: scale(1.08); z-index: 1; }
+    .sw:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+    .sw.sel { outline: 3px solid var(--text); outline-offset: 2px; transform: scale(1.1); z-index: 1; }
+    /* shades already in use in the SVP grey scheme */
+    .sw.used::after {
+        content: attr(data-use);
+        position: absolute; inset: auto 3px 3px auto;
+        font-size: 9px; line-height: 1; font-weight: 700;
+        color: rgb(26, 26, 28); background: rgba(255, 255, 255, 0.85);
+        border-radius: 3px; padding: 2px 3px;
+    }
+    .legend { color: var(--muted); font-size: 0.8rem; margin-top: 12px; max-width: 75ch; }
+    @media (prefers-reduced-motion: reduce) { .sw:hover { transform: none; } }
+</style>
+
+<div class="wrap">
+    <h1>Tailwind-Palette</h1>
+    <p class="lead">Alle 22 Tailwind-Farben in 11 Stufen, auf dem Grau des SVP-Plans. Feld anklicken: oben erscheint die Farbe als aktuelle Woche, Ferienband und Bereich-Pille. „Kopieren“ legt den Wert so in die Zwischenablage, wie er in svp.css steht.</p>
+
+    <div class="preview" aria-live="polite">
+        <div class="pv-head">
+            <!-- Doc: "die eine Farbe davor weg" - "Kopieren" takes the whole set now,
+                 the single picked colour stays only as data for it -->
+            <span class="pv-name" id="pv-name" hidden>pink-400</span>
+            <span class="pv-val" id="pv-val" hidden>rgb(244, 114, 182) · #f472b6</span>
+            <button class="copy" id="copy" type="button">Kopieren</button>
+            <span class="copied" id="copied" hidden>kopiert</span>
+        </div>
+        <div class="pv-rows">
+            <div class="row now"><span class="nr">5 · 38</span><span class="pill">LB 1</span><span class="topic">Tabelle, Datensatz, Datenfeld</span></div>
+            <div class="row band">Herbstferien · 12.–24.10.2026 (KW 42–43)</div>
+        </div>
+        <!-- Live link: each click also goes to every open SVP plan on this
+             origin (localhost:8765) - the plan switches to grey and repaints. -->
+        <div class="targets" id="targets" role="radiogroup" aria-label="Was im Plan umgefärbt wird">
+            <button type="button" class="tgt on" data-prop="--g-week" data-mark="W">Aktuelle Woche</button>
+            <button type="button" class="tgt" data-prop="--g-ferien" data-mark="F">Ferien</button>
+            <button type="button" class="tgt" data-prop="--g-orange">LB Orange</button>
+            <button type="button" class="tgt" data-prop="--g-green">Grün</button>
+            <button type="button" class="tgt" data-prop="--g-cyan">Cyan</button>
+            <button type="button" class="tgt" data-prop="--g-violet">Violett</button>
+            <button type="button" class="tgt" data-prop="--g-teal">Türkis</button>
+            <button type="button" class="tgt" data-prop="--g-pink">Pink</button>
+            <button type="button" class="tgt" data-prop="--g-mat">Zusatzmaterial-Rand</button>
+            <button type="button" class="tgt" data-prop="--text">Schrift</button>
+            <button type="button" class="tgt" data-prop="--head">Überschriften</button>
+            <button type="button" class="tgt" data-prop="--bg">Grund</button>
+            <button type="button" class="tgt" data-prop="--card">Karten</button>
+            <button type="button" class="tgt reset" id="reset">Zurücksetzen</button>
+        </div>
+        <div class="summary" id="summary">Ziel wählen, dann Farbe anklicken: der offene Plan färbt sich sofort um.</div>
+    </div>
+
+    <div class="scroll">
+        <table id="grid">
+            <thead><tr><th></th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <p class="legend">Markiert sind die Stufen, die das Grau-Schema gerade nutzt: <b>W</b> aktuelle Woche, <b>F</b> Ferien, <b>P</b> Bereich-Pillen. Tailwind v3, Stufe 400 ist die übliche Akzentstufe auf dunklem Grund.</p>
+</div>
+
+<script>
+(function () {
+    const SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
+    const P = {
+        slate: 'f8fafc f1f5f9 e2e8f0 cbd5e1 94a3b8 64748b 475569 334155 1e293b 0f172a 020617',
+        gray: 'f9fafb f3f4f6 e5e7eb d1d5db 9ca3af 6b7280 4b5563 374151 1f2937 111827 030712',
+        zinc: 'fafafa f4f4f5 e4e4e7 d4d4d8 a1a1aa 71717a 52525b 3f3f46 27272a 18181b 09090b',
+        neutral: 'fafafa f5f5f5 e5e5e5 d4d4d4 a3a3a3 737373 525252 404040 262626 171717 0a0a0a',
+        stone: 'fafaf9 f5f5f4 e7e5e4 d6d3d1 a8a29e 78716c 57534e 44403c 292524 1c1917 0c0a09',
+        red: 'fef2f2 fee2e2 fecaca fca5a5 f87171 ef4444 dc2626 b91c1c 991b1b 7f1d1d 450a0a',
+        orange: 'fff7ed ffedd5 fed7aa fdba74 fb923c f97316 ea580c c2410c 9a3412 7c2d12 431407',
+        amber: 'fffbeb fef3c7 fde68a fcd34d fbbf24 f59e0b d97706 b45309 92400e 78350f 451a03',
+        yellow: 'fefce8 fef9c3 fef08a fde047 facc15 eab308 ca8a04 a16207 854d0e 713f12 422006',
+        lime: 'f7fee7 ecfccb d9f99d bef264 a3e635 84cc16 65a30d 4d7c0f 3f6212 365314 1a2e05',
+        green: 'f0fdf4 dcfce7 bbf7d0 86efac 4ade80 22c55e 16a34a 15803d 166534 14532d 052e16',
+        emerald: 'ecfdf5 d1fae5 a7f3d0 6ee7b7 34d399 10b981 059669 047857 065f46 064e3b 022c22',
+        teal: 'f0fdfa ccfbf1 99f6e4 5eead4 2dd4bf 14b8a6 0d9488 0f766e 115e59 134e4a 042f2e',
+        cyan: 'ecfeff cffafe a5f3fc 67e8f9 22d3ee 06b6d4 0891b2 0e7490 155e75 164e63 083344',
+        sky: 'f0f9ff e0f2fe bae6fd 7dd3fc 38bdf8 0ea5e9 0284c7 0369a1 075985 0c4a6e 082f49',
+        blue: 'eff6ff dbeafe bfdbfe 93c5fd 60a5fa 3b82f6 2563eb 1d4ed8 1e40af 1e3a8a 172554',
+        indigo: 'eef2ff e0e7ff c7d2fe a5b4fc 818cf8 6366f1 4f46e5 4338ca 3730a3 312e81 1e1b4b',
+        violet: 'f5f3ff ede9fe ddd6fe c4b5fd a78bfa 8b5cf6 7c3aed 6d28d9 5b21b6 4c1d95 2e1065',
+        purple: 'faf5ff f3e8ff e9d5ff d8b4fe c084fc a855f7 9333ea 7e22ce 6b21a8 581c87 3b0764',
+        fuchsia: 'fdf4ff fae8ff f5d0fe f0abfc e879f9 d946ef c026d3 a21caf 86198f 701a75 4a044e',
+        pink: 'fdf2f8 fce7f3 fbcfe8 f9a8d4 f472b6 ec4899 db2777 be185d 9d174d 831843 500724',
+        rose: 'fff1f2 ffe4e6 fecdd3 fda4af fb7185 f43f5e e11d48 be123c 9f1239 881337 4c0519'
+    };
+    // what the SVP grey scheme uses right now
+    const USED = { 'yellow-200': 'W', 'lime-50': 'F', 'amber-500': 'P', 'green-500': 'P', 'sky-500': 'P', 'violet-400': 'P', 'teal-400': 'P', 'pink-400': 'P' };
+
+    const rgbOf = (hex) => [0, 2, 4].map(i => parseInt(hex.substr(i, 2), 16));
+    const table = document.getElementById('grid');
+    const headRow = table.tHead.rows[0];
+    SHADES.forEach(s => { const th = document.createElement('th'); th.textContent = s; headRow.appendChild(th); });
+
+    const root = document.documentElement.style;
+    const nameEl = document.getElementById('pv-name');
+    const valEl = document.getElementById('pv-val');
+    let current = 'rgb(244, 114, 182)';
+    let selBtn = null;
+
+    function pick(btn) {
+        const [r, g, b] = btn.dataset.rgb.split(',').map(Number);
+        root.setProperty('--pick', r + ', ' + g + ', ' + b);
+        current = 'rgb(' + r + ', ' + g + ', ' + b + ')';
+        nameEl.textContent = btn.dataset.name;
+        valEl.textContent = current + ' · #' + btn.dataset.hex;
+        if (selBtn) selBtn.classList.remove('sel');
+        selBtn = btn; btn.classList.add('sel');
+        document.getElementById('copied').hidden = true;
+    }
+
+    const tbody = table.tBodies[0];
+    Object.keys(P).forEach(fam => {
+        const tr = document.createElement('tr');
+        const th = document.createElement('th');
+        th.scope = 'row'; th.textContent = fam;
+        tr.appendChild(th);
+        P[fam].split(' ').forEach((hex, i) => {
+            const name = fam + '-' + SHADES[i];
+            const rgb = rgbOf(hex);
+            const td = document.createElement('td');
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'sw' + (USED[name] ? ' used' : '');
+            btn.style.background = '#' + hex;
+            btn.dataset.rgb = rgb.join(',');
+            btn.dataset.hex = hex;
+            btn.dataset.name = name;
+            if (USED[name]) btn.dataset.use = USED[name];
+            btn.title = name + ' · rgb(' + rgb.join(', ') + ')';
+            btn.setAttribute('aria-label', btn.title);
+            btn.addEventListener('click', () => { pick(btn); send(btn); });
+            td.appendChild(btn);
+            tr.appendChild(td);
+            if (name === 'pink-400') selBtn = btn;
+        });
+        tbody.appendChild(tr);
+    });
+    if (selBtn) pick(selBtn);
+
+    // ---- live link to open plans (Doc, 19.09.2026: "gib mir die col table als
+    // Extra Fenster connected, so dass ich probieren kann"). Same origin only:
+    // on localhost:8765 the plan's svp-nav.js listens on "svp-colors" and sets
+    // the variable on its <html>; elsewhere (the artifact copy) nothing listens.
+    let channel = null;
+    try { channel = new BroadcastChannel('svp-colors'); } catch (e) { }
+    const targets = [...document.querySelectorAll('#targets .tgt[data-prop]')];
+    let target = targets[0];
+    /* label -> { name, rgb, mark, msgs: [[prop, value], ...] }. Kept in
+       localStorage (Doc pasted a lone "pink-400" - a reload had emptied the
+       list), and re-sent whenever a plan (re)loads and says "hello". */
+    const STORE = 'svp-color-trial';
+    let chosen = {};
+    try { chosen = JSON.parse(localStorage.getItem(STORE)) || {}; } catch (e) { chosen = {}; }
+    const summary = document.getElementById('summary');
+
+    targets.forEach(t => t.addEventListener('click', () => {
+        target.classList.remove('on');
+        target = t; t.classList.add('on');
+        markCurrent();
+    }));
+
+    /* Doc: "unten hervorheben" - the grid rings the swatch the chosen target
+       has right now, so one sees where it sits before picking another. */
+    function markCurrent() {
+        const c = currentTriple(target);
+        const sw = c && document.querySelector('.sw[data-rgb="' + c.join(',') + '"]');
+        if (selBtn) selBtn.classList.remove('sel');
+        selBtn = sw || null;
+        if (sw) sw.classList.add('sel');
+    }
+
+    function moveMark(mark, btn) {
+        document.querySelectorAll('.sw[data-use="' + mark + '"]').forEach(s => {
+            s.classList.remove('used'); delete s.dataset.use;
+        });
+        btn.classList.add('used'); btn.dataset.use = mark;
+    }
+
+    // live: a real click here - only that may switch the plan to grey
+    function post(msgs, live) {
+        if (channel) msgs.forEach(m => channel.postMessage({ type: 'set', prop: m[0], value: m[1], live: !!live }));
+    }
+
+    function render() {
+        const keys = Object.keys(chosen);
+        if (!keys.length) {
+            summary.textContent = 'Ziel wählen, dann Farbe anklicken: der offene Plan färbt sich sofort um.';
+            return;
+        }
+        summary.innerHTML = keys.map(k => k + ': <b>' + chosen[k].name + '</b>').join(' · ');
+        keys.forEach(k => {
+            const c = chosen[k];
+            const sw = c.mark && document.querySelector('.sw[data-name="' + c.name + '"]');
+            if (sw) moveMark(c.mark, sw);
+        });
+    }
+
+    function save() {
+        try { localStorage.setItem(STORE, JSON.stringify(chosen)); } catch (e) { }
+    }
+
+    function send(btn) {
+        const prop = target.dataset.prop;
+        const triple = btn.dataset.rgb.split(',').join(', ');
+        // the --g-* accents are r, g, b triples; the page tokens are full colours
+        const msgs = [[prop, prop.indexOf('--g-') === 0 ? triple : 'rgb(' + triple + ')']];
+        /* Doc: "alle Schrift wird bei Schrift nicht geändert" - body text is
+           three tokens in the plan: --text, the dimmed --muted (SW, KW,
+           dates, Ustd.) and --tint-text (bullets, material pills). */
+        if (prop === '--text') {
+            msgs.push(['--muted', 'rgba(' + triple + ', 0.62)'], ['--tint-text', triple]);
+        }
+        post(msgs, true);
+        chosen[target.textContent] = { name: btn.dataset.name, rgb: 'rgb(' + triple + ')',
+            mark: target.dataset.mark || '', msgs: msgs };
+        save();
+        render();
+        paintChips();
+    }
+
+    // a plan that (re)loads asks for the current trial
+    /* the whole set as the open plan shows it (asked for on load and on every
+       "hello"), so "Kopieren" can list every colour, not only the trials */
+    let planValues = null;
+    const askPlan = () => {
+        if (channel) channel.postMessage({ type: 'get', props: targets.map(t => t.dataset.prop) });
+    };
+    if (channel) channel.onmessage = e => {
+        const d = e.data || {};
+        if (d.type === 'hello') { Object.keys(chosen).forEach(k => post(chosen[k].msgs)); askPlan(); }
+        if (d.type === 'values') { planValues = d.values; paintChips(); }
+    };
+    askPlan();
+
+    // current colour of a target: the running trial, else what the plan shows
+    function currentTriple(t) {
+        const c = chosen[t.textContent];
+        let v = c ? c.rgb : (planValues && planValues[t.dataset.prop]) || '';
+        const m = v.match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+        return m ? [+m[1], +m[2], +m[3]] : null;
+    }
+    function paintChips() {
+        targets.forEach(t => {
+            const c = currentTriple(t);
+            if (!c) { t.style.removeProperty('--c'); t.classList.remove('dark-c'); return; }
+            t.style.setProperty('--c', c.join(', '));
+            // light text on a dark fill (Grund, Karten)
+            t.classList.toggle('dark-c', 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2] < 110);
+        });
+        markCurrent();
+    }
+    render();
+    Object.keys(chosen).forEach(k => post(chosen[k].msgs));
+
+    document.getElementById('reset').addEventListener('click', () => {
+        if (channel) channel.postMessage({ type: 'reset' });
+        chosen = {};
+        save();
+        askPlan();                            // the plan is back on svp.css - repaint from it
+        summary.textContent = 'Zurückgesetzt: der Plan zeigt wieder die Farben aus svp.css.';
+    });
+
+    document.getElementById('copy').addEventListener('click', () => {
+        const done = () => { document.getElementById('copied').hidden = false; };
+        /* Doc: "Lass den Kopier-Button alles kopieren, so dass ich es Dir
+           reichen kann" - every trial choice with name and value, one per
+           line; without any choice yet, the picked colour alone. */
+        // Tailwind name for a value, if it is one exactly
+        const byRgb = {};
+        document.querySelectorAll('.sw').forEach(s => { byRgb[s.dataset.rgb.replace(/\s/g, '')] = s.dataset.name; });
+        const lines = targets.map(t => {
+            const label = t.textContent;
+            if (chosen[label]) return label + ': ' + chosen[label].name + ' = ' + chosen[label].rgb + '  (Probe)';
+            let v = planValues && planValues[t.dataset.prop];
+            if (!v) return label + ': ?';
+            if (!/^rgb/.test(v)) v = 'rgb(' + v + ')';
+            const key = (v.match(/\d+\s*,\s*\d+\s*,\s*\d+/) || [''])[0].replace(/\s/g, '');
+            return label + ': ' + (byRgb[key] || 'eigener Wert') + ' = ' + v;
+        });
+        const text = 'Farbwähler, Grau-Schema' + (planValues ? '' : ' (kein Plan verbunden - nur Proben sicher)') +
+            ':\n' + lines.join('\n');
+        try {
+            navigator.clipboard.writeText(text).then(done, () => {});
+        } catch (e) { }
+    });
+})();
+</script>
+
+</html>
