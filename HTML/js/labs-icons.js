@@ -550,6 +550,7 @@ const LAB_ICONS = {
             <text x="73" y="30" font-family="'Orbitron',sans-serif" font-size="13" fill="var(--neon-blue)" opacity="0.95">i</text>
         </svg>`,
     "solita": "✨",
+    "tour-mission-control": "👀",
     "gameoflife": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <rect x="14" y="14" width="72" height="72" rx="10" fill="rgba(121, 158, 49, 0.08)" stroke="#799E31" stroke-width="2" />
             <g fill="#799E31">

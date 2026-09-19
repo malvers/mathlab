@@ -819,6 +819,29 @@ const LABS_DATA = [
         "keywords": "mathtrainer schooltrainer mathe training üben aufgaben serien kopfrechnen schule app",
         "color": "blue"
     },
+    /* Live tours (js/cyber-tour.js): hub tile "Touren" on index.html. A new tour gets its card here. */
+    {
+        "id": "tour-wuerfelspiel",
+        "href": "tours/wuerfelspiel.html",
+        "title": "Tour: F\u00fcnf von neun",
+        "description": "Live-Tour durch das W\u00fcrfelspiel-Lab: Solita f\u00fchrt mit Stimme, Cursor und Untertiteln vom ersten Wurf \u00fcber Baumdiagramm, Pfad- und Summenregel bis zu Efrons nicht-transitiven W\u00fcrfeln \u2014 das echte Lab l\u00e4uft dabei live im Browser. 24 Szenen, etwa 10 Minuten, jederzeit anhalten und selbst ausprobieren.",
+        "tagline": "Live-Tour / Stochastik / Baumdiagramm",
+        "icon": LAB_ICONS["wuerfelspiel"],
+        "category": "touren",
+        "keywords": "tour touren live-tour rundgang fuehrung solita stimme untertitel wuerfelspiel wuerfel baumdiagramm pfadregel summenregel efron fuenf von neun",
+        "color": "green"
+    },
+    {
+        "id": "tour-mission-control",
+        "href": "tours/mission-control.html",
+        "title": "Tour: Die ganze Klasse im Blick",
+        "description": "Live-Tour durch Mission Control: einen Online-Test live begleiten \u2014 vom Zettel mit QR-Code \u00fcber Status, Verlassen und den roten Knopf bis zur Abgabe und Auswertung. Solita erkl\u00e4rt mit Stimme und Untertiteln; gespielt wird mit einer Vorf\u00fchr-Klasse im Browser, ganz ohne echte Daten. Etwa 3 Minuten.",
+        "tagline": "Live-Tour / Online-Test / Mission Control",
+        "icon": LAB_ICONS["tour-mission-control"],
+        "category": "touren",
+        "keywords": "tour touren live-tour rundgang fuehrung solita stimme untertitel mission control online-test leistungstest klasse qr zettel roter knopf abgabe auswertung lehrer",
+        "color": "blue"
+    },
     {
         "id": "costablanca",
         "href": "tracker/costablanca.html",
