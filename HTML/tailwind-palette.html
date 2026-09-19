@@ -88,7 +88,21 @@
     table { border-collapse: separate; border-spacing: 3px; min-width: 420px; width: 100%; }
 
     /* ---- live link to an open plan (same origin, BroadcastChannel) ---- */
-    .targets { display: flex; flex-wrap: wrap; gap: 6px; }
+    /* one line per group: label column, then its chips */
+    .targets { display: grid; grid-template-columns: max-content 1fr; align-items: center; gap: 8px 14px; }
+    .grp {
+        font-family: "Orbitron", sans-serif; font-size: 0.62rem; letter-spacing: 0.08em;
+        text-transform: uppercase; color: var(--muted);
+    }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    /* Doc: "Slider untereinander, Kopieren/Zurück eine Zeile tiefer rechts" */
+    .tools { display: grid; gap: 10px; }
+    .tools .alphas { display: grid; grid-template-columns: max-content 1fr max-content; }
+    .acts { display: flex; gap: 6px; justify-self: end; }
+    @media (max-width: 420px) {
+        .targets { grid-template-columns: 1fr; gap: 4px; }
+        .grp { margin-top: 6px; }
+    }
     .tgt {
         font: inherit; font-size: 0.76rem; color: var(--muted);
         background: transparent; border: 1px solid var(--line);
@@ -98,12 +112,16 @@
     /* each chip wears its current colour (Doc: "mach die in den aktuellen
        Farben"): a tinted rim, the chosen one filled - the dot went again
        (Doc: "den Punkt vor den Farben weg") */
-    .tgt { display: inline-flex; align-items: center; gap: 6px; border-color: rgba(var(--c, 205, 210, 220), 0.55); }
-    .tgt.on { color: rgb(26, 26, 28); background: rgb(var(--c, 205, 210, 220)); border-color: rgb(var(--c, 205, 210, 220)); }
-    .tgt.on.dark-c { color: rgb(238, 240, 244); }
+    /* Doc: "den der selektiert ist mit einem roten Rand, alle anderen den HG
+       in der Randfarbe" - every chip is filled with its colour, the chosen
+       one wears our red (Ypsilon) rim */
+    .tgt { display: inline-flex; align-items: center; gap: 6px; }
+    .tgt[data-prop] { color: rgb(26, 26, 28); background: rgb(var(--c, 205, 210, 220)); border-color: rgb(var(--c, 205, 210, 220)); }
+    .tgt[data-prop]:hover { color: rgb(26, 26, 28); filter: brightness(1.12); }
     /* Grund and Karten are nearly the page ground - a rim in their own colour
        vanished (Doc: "Grund Karte keine Pille?"), so dark ones get a light rim */
-    .tgt.dark-c, .tgt.on.dark-c { border-color: rgba(205, 210, 220, 0.45); }
+    .tgt[data-prop].dark-c, .tgt[data-prop].dark-c:hover { color: rgb(238, 240, 244); border-color: rgba(205, 210, 220, 0.45); }
+    .tgt[data-prop].on, .tgt[data-prop].on.dark-c { border-color: rgb(176, 36, 24); box-shadow: 0 0 0 2px rgb(176, 36, 24); }   /* Doc: "roter Rand 1px dicker" - 3 px */
     .tgt:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
     /* Doc: "Kopieren grün, Zurück rot", then "bitte UNSER grün/rot" - the
        project palette (CLAUDE.md): phi green and Ypsilon red, filled */
@@ -146,41 +164,69 @@
             <span class="pv-val" id="pv-val" hidden>rgb(244, 114, 182) · #f472b6</span>
             <span class="copied" id="copied" hidden>kopiert</span>
         </div>
-        <div class="pv-rows">
-            <div class="row now"><span class="nr">5 · 38</span><span class="pill">LB 1</span><span class="topic">Tabelle, Datensatz, Datenfeld</span></div>
-            <div class="row band">Herbstferien · 12.–24.10.2026 (KW 42–43)</div>
-        </div>
+        <!-- Doc: "picker nimm das raus - die beiden Leisten" - the week row and
+             holiday band preview are gone, the live plan is the preview -->
         <!-- Live link: each click also goes to every open SVP plan on this
              origin (localhost:8765) - the plan switches to grey and repaints. -->
+        <!-- Doc: "das sieht sehr durcheinander aus" - the chips come in labelled
+             groups, one line each. A short chip text keeps its old full name in
+             data-label: that is the key of the stored trials and of "Kopieren". -->
         <div class="targets" id="targets" role="radiogroup" aria-label="Was im Plan umgefärbt wird">
-            <button type="button" class="tgt on" data-prop="--g-week" data-mark="W" data-alpha="week">Aktuelle Woche</button>
-            <button type="button" class="tgt" data-prop="--g-ferien" data-mark="F" data-alpha="ferien">Ferien</button>
-            <button type="button" class="tgt" data-prop="--g-orange">LB Orange</button>
-            <button type="button" class="tgt" data-prop="--g-green">Grün</button>
-            <button type="button" class="tgt" data-prop="--g-cyan">Cyan</button>
-            <button type="button" class="tgt" data-prop="--g-violet">Violett</button>
-            <button type="button" class="tgt" data-prop="--g-teal">Türkis</button>
-            <button type="button" class="tgt" data-prop="--g-pink">Pink</button>
-            <button type="button" class="tgt" data-prop="--g-mat">Zusatzmaterial-Rand</button>
-            <button type="button" class="tgt" data-prop="--g-btn">Knopf-HG</button>
-            <!-- Doc: "sieht nicht gut aus ... auf den HG für Zusatz-Pillen" - own target -->
-            <button type="button" class="tgt" data-prop="--g-matbg">Zusatzmaterial-HG</button>
-            <button type="button" class="tgt" data-prop="--text">Schrift</button>
-            <button type="button" class="tgt" data-prop="--head">Überschriften</button>
-            <button type="button" class="tgt" data-prop="--bg">Grund</button>
-            <!-- Doc: "Kopieren links neben Zurück-Pille" -->
-            <button type="button" class="tgt copy-btn" id="copy">Kopieren</button>
-            <button type="button" class="tgt reset" id="reset">Zurücksetzen</button>
+            <span class="grp">Bänder</span>
+            <div class="chips">
+                <button type="button" class="tgt on" data-prop="--g-week" data-mark="W" data-alpha="week">Aktuelle Woche</button>
+                <button type="button" class="tgt" data-prop="--g-ferien" data-mark="F" data-alpha="ferien">Ferien</button>
+            </div>
+            <span class="grp">Akzente</span>
+            <div class="chips">
+                <button type="button" class="tgt" data-prop="--g-orange" data-label="LB Orange" title="LB-Pillen">Orange</button>
+                <button type="button" class="tgt" data-prop="--g-green">Grün</button>
+                <button type="button" class="tgt" data-prop="--g-cyan">Cyan</button>
+                <button type="button" class="tgt" data-prop="--g-violet">Violett</button>
+                <button type="button" class="tgt" data-prop="--g-teal">Türkis</button>
+                <button type="button" class="tgt" data-prop="--g-pink">Pink</button>
+            </div>
+            <span class="grp">Material</span>
+            <div class="chips">
+                <button type="button" class="tgt" data-prop="--g-mat" data-label="Zusatzmaterial-Rand" title="Zusatzmaterial-Rand">Rand</button>
+                <!-- Doc: "sieht nicht gut aus ... auf den HG für Zusatz-Pillen" - own target -->
+                <button type="button" class="tgt" data-prop="--g-matbg" data-label="Zusatzmaterial-HG" title="Zusatzmaterial-Hintergrund">Hintergrund</button>
+            </div>
+            <span class="grp">Grundfarben</span>
+            <div class="chips">
+                <button type="button" class="tgt" data-prop="--text">Schrift</button>
+                <button type="button" class="tgt" data-prop="--head">Überschriften</button>
+                <button type="button" class="tgt" data-prop="--bg">Grund</button>
+                <button type="button" class="tgt" data-prop="--g-btn" data-label="Knopf-HG" title="Knopf-Hintergrund">Knopf</button>
+            </div>
+            <!-- Doc: "wo kommen die Farben her?" - the timetable kept its own
+                 subject colours (--tt-* in svp.css), now pickable too -->
+            <span class="grp">Stundenplan</span>
+            <div class="chips">
+                <button type="button" class="tgt" data-prop="--tt-inf" data-label="Stundenplan Inf">Inf</button>
+                <button type="button" class="tgt" data-prop="--tt-mat" data-label="Stundenplan Mat">Mat</button>
+                <button type="button" class="tgt" data-prop="--tt-gk" data-label="Stundenplan GK Inf">GK Inf</button>
+                <button type="button" class="tgt" data-prop="--tt-violet" data-label="Stundenplan Violett" title="andere Fächer, z. B. IA">Violett</button>
+                <button type="button" class="tgt" data-prop="--tt-teal" data-label="Stundenplan Türkis" title="andere Fächer">Türkis</button>
+                <button type="button" class="tgt" data-prop="--tt-pink" data-label="Stundenplan Pink" title="andere Fächer">Pink</button>
+            </div>
         </div>
-        <!-- Doc: "gib mir noch einen Slider für die 2 Transp" - edge and middle
-             alpha of the week row / holiday band, shown for those two targets -->
-        <div class="alphas off" id="alphas">
-            <label for="a-edge">Rand</label>
-            <input type="range" id="a-edge" min="0" max="1" step="0.01" value="0.4">
-            <output id="a-edge-v" for="a-edge">0.40</output>
-            <label for="a-mid">Mitte</label>
-            <input type="range" id="a-mid" min="0" max="1" step="0.01" value="0.2">
-            <output id="a-mid-v" for="a-mid">0.20</output>
+        <div class="tools">
+            <!-- Doc: "gib mir noch einen Slider für die 2 Transp" - edge and middle
+                 alpha of the week row / holiday band, shown for those two targets -->
+            <div class="alphas off" id="alphas">
+                <label for="a-edge">Rand</label>
+                <input type="range" id="a-edge" min="0" max="1" step="0.01" value="0.4">
+                <output id="a-edge-v" for="a-edge">0.40</output>
+                <label for="a-mid">Mitte</label>
+                <input type="range" id="a-mid" min="0" max="1" step="0.01" value="0.2">
+                <output id="a-mid-v" for="a-mid">0.20</output>
+            </div>
+            <!-- Doc: "Kopieren links neben Zurück-Pille" -->
+            <div class="acts">
+                <button type="button" class="tgt copy-btn" id="copy">Kopieren</button>
+                <button type="button" class="tgt reset" id="reset">Zurücksetzen</button>
+            </div>
         </div>
         <!-- Doc: "weg" - the chips carry the colours, "Kopieren" the list -->
         <div class="summary" id="summary" hidden>Ziel wählen, dann Farbe anklicken: der offene Plan färbt sich sofort um.</div>
@@ -283,6 +329,8 @@
     let channel = null;
     try { channel = new BroadcastChannel('svp-colors'); } catch (e) { }
     const targets = [...document.querySelectorAll('#targets .tgt[data-prop]')];
+    // the stored name of a chip: its old full label where the text got shorter
+    const labelOf = t => t.dataset.label || t.textContent;
     let target = targets[0];
     /* label -> { name, rgb, mark, msgs: [[prop, value], ...] }. Kept in
        localStorage (Doc pasted a lone "pink-400" - a reload had emptied the
@@ -352,8 +400,8 @@
     function send(btn) {
         const prop = target.dataset.prop;
         const triple = btn.dataset.rgb.split(',').join(', ');
-        // the --g-* accents are r, g, b triples; the page tokens are full colours
-        const msgs = [[prop, prop.indexOf('--g-') === 0 ? triple : 'rgb(' + triple + ')']];
+        // the --g-* / --tt-* accents are r, g, b triples; the page tokens are full colours
+        const msgs = [[prop, /^--(g|tt)-/.test(prop) ? triple : 'rgb(' + triple + ')']];
         /* Doc: "alle Schrift wird bei Schrift nicht geändert" - body text is
            three tokens in the plan: --text, the dimmed --muted (SW, KW,
            dates, Ustd.) and --tint-text (bullets, material pills). */
@@ -363,7 +411,7 @@
             msgs.push(['--muted', 'rgba(' + triple + ', 0.62)'], ['--tint-text', triple]);
         }
         post(msgs);
-        chosen[target.textContent] = { name: btn.dataset.name, rgb: 'rgb(' + triple + ')',
+        chosen[labelOf(target)] = { name: btn.dataset.name, rgb: 'rgb(' + triple + ')',
             mark: target.dataset.mark || '', msgs: msgs };
         save();
         render();
@@ -386,7 +434,7 @@
     // ---- the two alphas of the week row / holiday band ----
     const alphas = document.getElementById('alphas');
     const KIND = { edge: 'Rand', mid: 'Mitte' };
-    const alphaLabel = (t, kind) => t.textContent + ' · ' + KIND[kind];
+    const alphaLabel = (t, kind) => labelOf(t) + ' · ' + KIND[kind];
     function alphaOf(t, kind) {
         const c = chosen[alphaLabel(t, kind)];
         const v = c ? c.rgb : planValues && planValues['--a-' + t.dataset.alpha + '-' + kind];
@@ -440,7 +488,7 @@
 
     // current colour of a target: the running trial, else what the plan shows
     function currentTriple(t) {
-        const c = chosen[t.textContent];
+        const c = chosen[labelOf(t)];
         let v = c ? c.rgb : (planValues && planValues[t.dataset.prop]) || '';
         const m = v.match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
         return m ? [+m[1], +m[2], +m[3]] : null;
@@ -478,7 +526,7 @@
         const byRgb = {};
         document.querySelectorAll('.sw').forEach(s => { byRgb[s.dataset.rgb.replace(/\s/g, '')] = s.dataset.name; });
         const lines = targets.map(t => {
-            const label = t.textContent;
+            const label = labelOf(t);
             if (chosen[label]) return label + ': ' + chosen[label].name + ' = ' + chosen[label].rgb + '  (Probe)';
             let v = planValues && planValues[t.dataset.prop];
             if (!v) return label + ': Standard';   // e.g. Zusatzmaterial-HG: mixed from the pill's text colour

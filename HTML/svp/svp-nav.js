@@ -594,7 +594,7 @@
     // leaked into Hell and Dunkel (Doc: "Nee das geht ni!"). Nothing is stored
     // here; the palette keeps its lists and re-sends them after a reload.
     try {
-        const TRIAL_PROP = /^--(g-[a-z]+|a-[a-z]+-(?:edge|mid)|text|head|bg|card|muted|tint-text|mat-hg)$/;
+        const TRIAL_PROP = /^--(g-[a-z]+|tt-[a-z]+|a-[a-z]+-(?:edge|mid)|text|head|bg|card|muted|tint-text|mat-hg)$/;
         const TRIAL_VALUE = /^[\d\s.,rgba()]+$/;
         const TRIAL_SCOPE = {
             grey: 'html.svp-grey',
@@ -850,8 +850,15 @@
                palette in its own slim popup, live-linked over "svp-colors" (see
                the colour trial above). One named window: pressing again only
                brings it back to the front. */
-            const pal = window.open('/tailwind-palette.html', 'svp-palette', 'popup,width=560,height=900');
-            if (pal) pal.focus();
+            /* Locally the launcher ~/Applications/tailwind-palette.app takes the
+               svp-palette:// link and opens a Chrome app window without address
+               bar (Doc: "ohne header lokal"); online stays the popup. */
+            if (location.origin === 'http://localhost:8765') {
+                location.href = 'svp-palette://open';
+            } else {
+                const pal = window.open('/tailwind-palette.html', 'svp-palette', 'popup,width=560,height=900');
+                if (pal) pal.focus();
+            }
         } else if (key === 'q') {
             if (qrOverlay && qrOverlay.classList.contains('open')) qrOverlay.classList.remove('open');
             else showQr();
