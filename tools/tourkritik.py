@@ -24,6 +24,7 @@ What this server does, and why it is its own:
                            teardown() disarms - an armed tour is torn down when the page has not been seen
                            for IDLE seconds (tab closed) and when this server stops.
   - /__tour/alive          the page's pulse (every 5 s, with its state), answers whether the hooks are armed
+  - /__tour/text           the subtitles: texts.json of the tour's folder (what run1 really synthesised)
 
 serve.py stays read-only on purpose; filmkritik.py stays the film tool. This file only adds what a tour needs.
 """
@@ -107,7 +108,7 @@ def watchdog():
 
 class Handler(fk.Handler):
     def log_message(self, fmt, *args):
-        line = args[0] if args else ''
+        line = str(args[0]) if args else ''          # send_error logs an HTTPStatus here, not a request line
         if '__kritik' in line or '/__tour/hook' in line:
             super(fk.Handler, self).log_message(fmt, *args)
 
@@ -171,6 +172,7 @@ class Handler(fk.Handler):
             'szene_nr': nr,
             'szene_titel': data.get('szene_titel') or '',
             'szene_t': round(st, 2),
+            'sagt': (data.get('sagt') or '').strip(),        # Solita's line at that moment (the subtitle)
         }
         items.append(item)
         fk.save(items)
@@ -217,6 +219,13 @@ class Handler(fk.Handler):
         path = self.path.split('?')[0]
         if path.startswith('/__tour/audio/'):
             return self.send_audio(path[len('/__tour/audio/'):])
+        if path == '/__tour/text':
+            # the subtitles: exactly what was synthesised (run1 keeps it in texts.json), not what narration.mjs says now
+            try:
+                with open(os.path.join(WORK, 'texts.json'), encoding='utf-8') as f:
+                    return self.reply(200, json.load(f))
+            except (OSError, ValueError):
+                return self.reply(200, {})
         if path == '/__tour/info':
             return self.reply(200, {'tour': TOUR, 'ordner': fk.STORE, 'hooks': os.path.isfile(HOOKS),
                                     'armed': STATE['armed']})

@@ -82,6 +82,8 @@
     CyberTour.define({
         id: 'mission-control',
         title: 'Die ganze Klasse im Blick',
+        // it parks GENII's real rows through the tour server's hooks: online (docalvers.de) it only explains that
+        local: true,
         // Doc, 19.09.2026: "Test-Sperre und Mission Control ... irgendwas Beschreibenderes bitte"
         card: { title: 'Die ganze Klasse im Blick', sub: 'Einen Online-Test live begleiten – vom Zettel bis zur Auswertung', img: '../resources/kids.jpeg' },
 

@@ -15,10 +15,17 @@
  *     scenes: [{ id: 's4', n: '04', title: 'Die Klasse legt los', async run(t) { ... } }, ...],
  *   });
  *
+ * A scene may also carry
+ *   air: ms             room after its voice (default AIR) - e.g. a pause for the class to think
+ *   async enter(t)      it can build its own stage: a jump to it starts from prepare() + enter() instead of
+ *                       replaying every scene before it (see JUMPING)
+ *
  * The scene API is run2.mjs's, so a film's choreography moves over almost line by line:
  *   t.at(sec) t.rest() t.wait(ms) t.cue(i, fallback) t.cueEnd(i, fallback) t.until(fn, timeout)
  *   t.load(frame, url) t.eval(frame, fn, arg) t.$(frame, sel) t.scroll(frame, sel, block) t.show(frame, on)
- *   t.point(frame, sel) t.tap(frame, sel) t.callout(text, xy) t.hideCursor() t.caption(n, title)
+ *   t.point(frame, sel) t.tap(frame, sel) t.pointAt(frame, x, y) t.tapAt(frame, x, y) (a place on a canvas)
+ *   t.line(k, fallback) (second where Solita's k-th subtitle line starts) t.dur t.hold(text) (the tour pauses itself)
+ *   t.callout(text, xy) t.hideCursor() t.caption(n, title)
  *   t.card(on) t.cardImage(on, animate) t.sound(url, vol) t.hook(name, args) t.every(ms, fn) t.later(ms, fn)
  *   t.addFrame(name, url, opts) t.leave(frame, on) t.offline(frame) t.data (shared by all scenes of one run)
  *
@@ -29,9 +36,15 @@
  *
  * JUMPING: the pages' state is the sum of everything before (answers, server rows), so a scene cannot be
  * entered in the middle. A jump runs setup() and replays the scenes before it at FAST speed, silent, behind
- * a veil, then plays the scene. A reload (live reload after a fix) starts over from the beginning, SPACE plays,
- * as in filmkritik.html (Doc, 19.09.2026: "nach reload ganz vom Anfang" - first it spooled back by itself, which
+ * a veil, then plays the scene. Where a page's state is cheap to set (a lab: station, view, dice), a scene's
+ * enter() builds it directly - the replay then starts at the nearest such scene, not at the first. A reload
+ * (live reload after a fix) starts over from the beginning, SPACE plays, as in filmkritik.html (Doc, 19.09.2026: "nach reload ganz vom Anfang" - first it spooled back by itself, which
  * every edit of mine set off again, then it offered the old scene, which left a half-filled bar behind).
+ *
+ * ONLINE (docalvers.de, Doc 19.09.2026: "ja, das zuerst ... R2"): without tools/tourkritik.py behind the page (no
+ * /__tour/info) Solita's voice and the subtitles come from the R2 bucket "tours" (MEDIA_BASE + <id>/tour.json and
+ * <id>/sN.mp3, put there by tools/tour_publish.mjs), there is no pulse and no review - remarks are stored by the tour
+ * server only. A tour whose Drehbuch needs server hooks says `local: true` and only explains itself online.
  *
  * REVIEW ONLY WITH ?critics (Doc, 19.09.2026: "andere sollen ja nicht bedienen können, wenn ich das rausgebe"):
  * microphone, remarks list and ABSCHICKEN exist only when the address carries ?critics - without it the page
@@ -49,7 +62,9 @@
     const AIR = 1500;            // room after every scene's voice
     const PULSE = 5000;          // the page's pulse to the server (it tears an armed tour down without one)
     const SUBMIT_GUARD_MS = 3000;
-    const CRITICS = new URLSearchParams(location.search).has('critics');
+    let CRITICS = new URLSearchParams(location.search).has('critics');     // and only with the tour server (define)
+    // the R2 bucket "tours", public: Solita's voice and texts per tour for the pages online (tools/tour_publish.mjs)
+    const MEDIA_BASE = 'https://pub-025e3faab48145a9ac22aaabe307d722.r2.dev/';
 
     const CANCEL = new Error('tour-cancel');
     CANCEL.tourCancel = true;
@@ -104,7 +119,10 @@
     const E = {
         def: null,
         scenes: [],
-        voices: {},              // scene id -> { url, audio, dur, cues }
+        voices: {},              // scene id -> { url, audio, dur, cues, lines }
+        texts: Promise.resolve({}),   // scene id -> the SSML Solita spoke (for the subtitles)
+        local: false,            // tools/tourkritik.py serves this page (voice, hooks, review); otherwise online mode
+        manifest: null,          // online: promise of <id>/tour.json { version, texts }
         ready: null,             // promise: all voices decoded
         cur: -1,                 // scene on stage
         scene: null,             // { i, t0, voiceAt, deadline }
@@ -144,11 +162,68 @@
         return out;
     }
 
+    /* SUBTITLES (Doc, 19.09.2026: "die Untertitel mit einblenden ... so dass möglichst nichts überdeckt"): what Solita
+       says, from the text that was really synthesised (tourkritik.py /__tour/text = texts.json of the tour's folder),
+       one line per <break>. Where a line starts is found in her own MP3: the pauses of 0.3 s or more, each break
+       matched to the pause nearest to where the text says it should be. def.spelled turns what is spelled for her
+       voice back into writing ({ 'Läbb': 'Lab' }). */
+    function ssmlLines(ssml) {
+        if (!ssml) return [];
+        const spelled = E.def.spelled || {};
+        return String(ssml).replace(/<\/?speak>/g, '').split(/<break\b[^>]*>/)
+            .map((s) => s.replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+                .replace(/&apos;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim())
+            .map((s) => Object.keys(spelled).reduce((a, k) => a.split(k).join(spelled[k]), s))
+            .filter(Boolean);
+    }
+
+    function timeLines(texts, buf) {
+        if (!texts.length) return [];
+        const gaps = silences(buf, 0.3), dur = buf.duration;
+        let s0 = 0, s1 = dur;
+        if (gaps.length && gaps[0].start < 0.05) s0 = gaps.shift().end;
+        if (gaps.length && gaps[gaps.length - 1].end > dur - 0.05) s1 = gaps.pop().start;
+        const cuts = [];
+        let cur = s0, from = 0, rest = texts.reduce((a, x) => a + x.length, 0);
+        for (let k = 0; k < texts.length - 1; k++) {
+            // where the break should be: this line's share of the words still to come
+            const want = cur + (s1 - cur) * texts[k].length / Math.max(1, rest);
+            rest -= texts[k].length;
+            const left = texts.length - 2 - k;             // breaks still to place after this one
+            let best = -1, bd = Infinity;
+            for (let j = from; j < gaps.length - left; j++) {
+                const d = Math.abs((gaps[j].start + gaps[j].end) / 2 - want);
+                if (d < bd) { bd = d; best = j; }
+            }
+            const g = best >= 0 ? gaps[best] : { start: want, end: want };
+            if (best >= 0) from = best + 1;
+            cuts.push(g);
+            cur = g.end;
+        }
+        return texts.map((text, k) => ({ text, start: k ? cuts[k - 1].end : s0, end: k < cuts.length ? cuts[k].start : s1 }));
+    }
+
+    /* the line on screen at `pos` seconds into the voice: from its start until the next one, gone 1.5 s after it ends */
+    function lineAt(v, pos) {
+        const L = (v && v.lines) || [];
+        let x = null;
+        for (const l of L) if (l.start - 0.1 <= pos) x = l;
+        return x && pos <= x.end + 1.5 ? x : null;
+    }
+
+    async function voiceUrl(sc) {
+        if (E.def.audio) return E.def.audio(sc);
+        if (E.local) return '/__tour/audio/' + sc.id + '.mp3';
+        const m = await E.manifest;
+        return MEDIA_BASE + E.def.id + '/' + sc.id + '.mp3?v=' + encodeURIComponent(m.version || '');
+    }
+
     async function loadVoice(sc) {
-        const url = E.def.audio ? E.def.audio(sc) : '/__tour/audio/' + sc.id + '.mp3';
-        const v = { url, audio: null, dur: sc.dur || 8, cues: [] };
+        // registered at once: the progress bar reads every scene's length while the voices still load
+        const v = { url: '', audio: null, dur: sc.dur || 8, cues: [], lines: [] };
         E.voices[sc.id] = v;
-        if (sc.voice === false) return v;
+        const url = v.url = await voiceUrl(sc).catch(() => '');
+        if (sc.voice === false || !url) return v;          // online without a published voice: the scene runs silent
         try {
             const res = await fetch(url);
             if (!res.ok) throw new Error(res.status);
@@ -157,6 +232,7 @@
             const buf = await ctx.decodeAudioData(bytes.slice(0));
             v.dur = buf.duration;
             v.cues = silences(buf);
+            v.lines = timeLines(ssmlLines((await E.texts)[sc.id]), buf);
             v.audio = new Audio(URL.createObjectURL(new Blob([bytes], { type: res.headers.get('Content-Type') || 'audio/mpeg' })));
             v.audio.preload = 'auto';
             dbg(sc.id + ': ' + v.dur.toFixed(1) + ' s, Regiepausen ' + v.cues.map((c) => c.start.toFixed(1)).join('/'));
@@ -166,7 +242,7 @@
         return v;
     }
 
-    const sceneLen = (sc) => LEAD + E.voices[sc.id].dur * 1000 + AIR;    // ms at speed 1
+    const sceneLen = (sc) => LEAD + E.voices[sc.id].dur * 1000 + (sc.air ?? AIR);    // ms at speed 1
 
     function voiceStart(run, v, at) {
         if (!v.audio || run.fast) return;
@@ -357,6 +433,15 @@
             rest() { return waitUntil(run, t.deadline); },
             cue(n, fb) { const c = sc && E.voices[sc.id].cues[n]; return c ? c.start : fb; },
             cueEnd(n, fb) { const c = sc && E.voices[sc.id].cues[n]; return c ? c.end : fb; },
+            /* where Solita starts her k-th line (as in the subtitles; negative counts from the end), and her length */
+            line(k, fb) { const L = (sc && E.voices[sc.id].lines) || []; const x = L[k < 0 ? L.length + k : k]; return x ? x.start : fb; },
+            get dur() { return sc ? E.voices[sc.id].dur : 0; },
+            /* the tour stops by itself - a pause to think, as if SPACE was pressed; SPACE plays on */
+            hold(text) {
+                if (run.fast) return;
+                pause();
+                if (text) live(text, true);
+            },
             async until(fn, timeout = 20000, every = 200) {
                 const end = clock.now() + timeout;
                 for (;;) {
@@ -454,6 +539,33 @@
                 await t.wait(250);
                 return [x, y];
             },
+            /* a place instead of an element - a face of a net, an arrow drawn on a canvas. x, y are the page's own
+               client coordinates (what its getBoundingClientRect gives and its pointer events carry) */
+            async pointAt(name, x, y) {
+                check(run);
+                const f = frameEl(name), k = coordScale(f);
+                const R = f.getBoundingClientRect(), s = f.offsetWidth ? R.width / f.offsetWidth : 1;
+                const X = R.left + x * k * s, Y = R.top + y * k * s;
+                cursorTo(X, Y);
+                await t.wait(620);
+                return [X, Y];
+            },
+            /* ... and a tap there: the pointer and mouse events a real finger sends, to whatever lies on top */
+            async tapAt(name, x, y) {
+                const xy = await t.pointAt(name, x, y);
+                check(run);
+                ripple(xy[0], xy[1]);
+                const w = t.win(name), el = w.document.elementFromPoint(x, y) || w.document.body;
+                const o = { bubbles: true, cancelable: true, composed: true, view: w, clientX: x, clientY: y,
+                    button: 0, buttons: 1, pointerId: 1, pointerType: 'mouse', isPrimary: true };
+                el.dispatchEvent(new w.PointerEvent('pointerdown', o));
+                el.dispatchEvent(new w.MouseEvent('mousedown', o));
+                el.dispatchEvent(new w.PointerEvent('pointerup', { ...o, buttons: 0 }));
+                el.dispatchEvent(new w.MouseEvent('mouseup', { ...o, buttons: 0 }));
+                el.dispatchEvent(new w.MouseEvent('click', { ...o, buttons: 0 }));
+                await t.wait(250);
+                return xy;
+            },
             /* a simulated device looks away (another window) and back - the page's own visibility path */
             leave(name, on) {
                 check(run);
@@ -525,6 +637,7 @@
 
     /* from: the scene to play - everything before it is replayed fast */
     async function play(from = 0) {
+        if (!E.local && E.def.local) { live(LOCAL_ONLY, true); return; }
         // the stage built while the page loaded (prepareStage) is taken over when the tour starts at the beginning
         const prep = E.prep;
         E.prep = null;
@@ -553,12 +666,16 @@
             $id('tour-cursor').classList.remove('on');
             callout(null);
             document.body.classList.toggle('fast', run.fast);
-            veil(from > 0 ? from : -1, 0);
+            // the nearest scene at or before the target that builds its own stage: the replay starts there
+            let first = 0;
+            for (let j = from; j > 0; j--) if (typeof E.scenes[j].enter === 'function') { first = j; break; }
+            veil(from > 0 ? from : -1, 0, first === from);
             const t = ctx(run, null, -1);
             if (!staged && E.def.prepare) await E.def.prepare(t);
             if (E.def.setup) await E.def.setup(t);
-            for (let i = 0; i < from; i++) {
-                veil(from, i / from);
+            if (first > 0) await E.scenes[first].enter(ctx(run, E.scenes[first], first));
+            for (let i = first; i < from; i++) {
+                veil(from, (i - first) / (from - first));
                 await runScene(i, run);
             }
             run.fast = false;
@@ -659,7 +776,10 @@
         if (E.scene && E.scene.i === i) st = Math.max(0, (clock.now() - E.scene.voiceAt) / 1000);
         let off = 0;
         for (let j = 0; j < i; j++) off += sceneLen(E.scenes[j]) / 1000;
-        return { t: off + LEAD / 1000 + st, szene: sc.id, szene_nr: sc.n || String(i + 1).padStart(2, '0'), szene_titel: sc.title || '', szene_t: st };
+        // what Solita said at that moment goes along: the remark can be read against her words
+        const said = lineAt(E.voices[sc.id], st) || [...(E.voices[sc.id].lines || [])].reverse().find((l) => l.start <= st);
+        return { t: off + LEAD / 1000 + st, szene: sc.id, szene_nr: sc.n || String(i + 1).padStart(2, '0'), szene_titel: sc.title || '', szene_t: st,
+                 sagt: said ? said.text : '' };
     }
 
     let pendingMeta = null;
@@ -718,7 +838,9 @@
         const how = { via: ev ? ev.type : 'code', detail: ev ? ev.detail : null, trusted: ev ? ev.isTrusted : false, sinceSave, szene: label(E.cur) };
         if (E.rec.recording) { live('Erst den Kommentar beenden (Enter) — dann ABSCHICKEN.', true); return; }
         if (ev && ev.detail === 0) { live('ABSCHICKEN geht nur per Klick, nicht per Taste.', true); return; }
-        if (sinceSave !== null && sinceSave < SUBMIT_GUARD_MS) { live('Kommentar gespeichert. ABSCHICKEN erst ganz am Ende drücken.', true); return; }
+        // a click right after saving is often the second half of a double press - it only counts once more. The old line
+        // ("ABSCHICKEN erst ganz am Ende drücken") confused at the very end (Doc, 19.09.2026: "aber ich bin am Ende")
+        if (sinceSave !== null && sinceSave < SUBMIT_GUARD_MS) { live('Kommentar gespeichert. Zum Abschicken bitte noch einmal auf ABSCHICKEN klicken.', true); return; }
         try {
             const j = await E.rec.submit(how);
             E.submitted = true;
@@ -735,6 +857,7 @@
         document.body.classList.toggle('submitted', E.submitted);
         const b = $id('tour-send');
         if (b) b.textContent = E.submitted ? 'ABGESCHICKT ✓' : 'ABSCHICKEN';
+        fitHud();
     }
 
     async function drop(n) {
@@ -781,8 +904,50 @@
             if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {});
         } else if (k === 'k' && CRITICS) {
             $id('tour-drawer').classList.toggle('on');
+        } else if (k === 'u') {
+            subsOn = !subsOn;
+            try { localStorage.setItem(SUBS_KEY, subsOn ? '1' : '0'); } catch (e) { /* no storage */ }
+            showSubs();
         }
     }
+
+    /* ============================================================== subtitles */
+    const SUBS_KEY = 'cyber-tour-subs';
+    let subsOn = true;
+    try { subsOn = localStorage.getItem(SUBS_KEY) !== '0'; } catch (e) { /* no storage: on */ }
+    // the row only exists for a tour with text, and only while it is switched on (u)
+    function showSubs() {
+        const any = E.scenes.some((sc) => E.voices[sc.id] && E.voices[sc.id].lines.length);
+        document.body.classList.toggle('subs', subsOn && any);
+    }
+    function subtitle() {
+        const box = $id('tour-sub');
+        if (!box) return;
+        let text = '';
+        if (E.scene && !(E.run && E.run.fast) && (E.state === 'running' || E.state === 'paused')) {
+            const sc = E.scenes[E.scene.i], x = lineAt(E.voices[sc.id], (clock.now() - E.scene.voiceAt) / 1000);
+            if (x) text = x.text;
+        }
+        const span = box.querySelector('span');
+        if (span.textContent !== text) span.textContent = text;
+    }
+
+    /* the bar's outer columns are at least as wide as the buttons on the right: they overflowed to the left and hid the
+       total time in a narrower window (Doc, 19.09.2026: "im Kritiktool unten die Zeit nicht zu sehen - doch, man muss es
+       breit [ziehen]"). Both sides get the same minimum, so the bar stays in the middle. */
+    function fitHud() {
+        const hud = $id('tour-hud');
+        if (!hud) return;
+        const r = hud.querySelector('.hud-r'), gap = parseFloat(getComputedStyle(r).columnGap) || 0;
+        const right = [...r.children].reduce((a, c) => a + c.offsetWidth, 0) + Math.max(0, r.children.length - 1) * gap;
+        const side = Math.ceil(Math.max(right, 180));
+        hud.style.setProperty('--side', side + 'px');
+        // too narrow for three columns (the bar with its times needs ~260 px): the bar gets a row of its own on top
+        const cs = getComputedStyle(hud);
+        const inner = hud.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+        hud.classList.toggle('stack', 2 * side + 2 * (parseFloat(cs.columnGap) || 0) + 260 > inner);
+    }
+    window.addEventListener('resize', fitHud);
 
     /* ==================================================================== ui */
     function el(tag, attrs, html) {
@@ -827,6 +992,8 @@
         body.appendChild(el('div', { id: 'tour-offstage', 'aria-hidden': 'true' }));
         body.appendChild(el('div', { id: 'tour-callout' }));
         body.insertAdjacentHTML('beforeend', '<svg id="tour-cursor" viewBox="0 0 26 38" width="26" height="38"><path d="M2 2 L2 30 L9.5 23.5 L14 34 L18.5 32 L14 21.5 L24 21 Z" fill="#fff" stroke="#000" stroke-width="2.2" stroke-linejoin="round"/></svg>');
+        // subtitles in a row of their own between stage and hints: they cover nothing of the lab
+        body.appendChild(el('div', { id: 'tour-sub', 'aria-live': 'off' }, '<span></span>'));
         body.appendChild(el('div', { id: 'tour-live', class: 'empty' }, '<span></span>'));
         // three columns, the outer two equally wide: the bar with its times sits in the window's middle
         // (Doc, 19.09.2026: "Balken x-sym ... zentriert")
@@ -907,14 +1074,18 @@
         });
         $id('tour-list').textContent = E.items.length + (E.items.length === 1 ? ' KOMMENTAR' : ' KOMMENTARE');
         markers();
+        fitHud();
     }
 
-    function veil(target, p) {
+    function veil(target, p, direct) {
         const v = $id('tour-veil');
         if (target < 0) { v.classList.remove('on'); return; }
         v.classList.add('on');
-        v.querySelector('b').textContent = 'Spule vor zu Szene ' + label(target);
-        v.querySelector('span').textContent = 'alles davor läuft im Schnelldurchlauf, ohne Ton';
+        v.querySelector('b').textContent = (direct ? 'Springe zu Szene ' : 'Spule vor zu Szene ') + label(target);
+        if (direct !== undefined) {
+            v.querySelector('span').textContent = direct ? 'die Seite wird für diese Szene aufgebaut'
+                                                         : 'alles davor läuft im Schnelldurchlauf, ohne Ton';
+        }
         v.querySelector('i').style.setProperty('--p', Math.round((p || 0) * 100) + '%');
     }
 
@@ -952,6 +1123,7 @@
 
     // progress: the running scene's segment fills, the ones before are done
     setInterval(() => {
+        subtitle();
         const segs = $id('tour-segs');
         if (!segs || !E.scenes.length) return;
         [...segs.children].forEach((s, i) => {
@@ -986,7 +1158,7 @@
     // round, a tour whose server is gone or has torn it down stops at once: its pupils would go on writing into
     // data the server has put back (19.09.2026, a test submission landed in GENII's restored pool)
     setInterval(() => {
-        if (!E.def || document.hidden && E.state === 'idle') return;
+        if (!E.def || !E.local || document.hidden && E.state === 'idle') return;
         // the state goes along: a page that only waits (idle after a reload) does not keep a parked tour alive
         fetch('/__tour/alive', { method: 'POST', body: JSON.stringify({ state: E.state }) }).then((r) => r.json()).then((j) => {
             if (E.armed && !j.armed && (E.state === 'running' || E.state === 'paused' || E.state === 'forward')) {
@@ -1005,20 +1177,35 @@
     // live reload (tools/live_reload.py) asks before reloading: never mid-scene, never mid-remark
     window.__liveReloadBusy = () => E.state === 'running' || E.state === 'forward' || !!(E.rec && E.rec.recording);
 
+    const LOCAL_ONLY = 'Diese Tour spielt echte Server-Daten nach und läuft nur auf Docs Rechner (tools/tourkritik.py).';
+
     /* ================================================================ define */
     function define(def) {
         E.def = def;
         E.scenes = def.scenes || [];
         const start = async () => {
+            E.local = await fetch('/__tour/info', { cache: 'no-store' })
+                .then((r) => r.ok && (r.headers.get('Content-Type') || '').includes('json')).catch(() => false);
+            if (!E.local) {
+                CRITICS = false;                    // nowhere to store a remark
+                E.manifest = fetch(MEDIA_BASE + def.id + '/tour.json', { cache: 'no-store' })
+                    .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
+                E.manifest.catch((e) => dbg('Stimme online nicht gefunden (' + e.message + ') — tools/tour_publish.mjs ' + def.id));
+            }
             buildChrome();
             ui();                                   // body.idle: the big play shows from the first paint
+            fitHud();
+            document.fonts.ready.then(fitHud);      // Orbitron makes the buttons wider once it is there
             card(true);
             if (def.card && def.card.img) cardImage(true, false);
             E.rec = CRITICS && window.KritikRecorder ? KritikRecorder.create({ log: dbg, onLive: (s) => live(s || 'Ich höre zu …', !s) }) : null;
             live('Lade Solitas Stimme …', true);
+            E.texts = E.local ? fetch('/__tour/text').then((r) => (r.ok ? r.json() : {})).catch(() => ({}))
+                              : E.manifest.then((m) => m.texts || {}).catch(() => ({}));
             E.ready = Promise.all(E.scenes.map(loadVoice));
             await E.ready;
             segments();
+            showSubs();
             if (E.rec) {
                 try {
                     const j = await E.rec.list();
@@ -1026,8 +1213,9 @@
                 } catch (e) { dbg('Kommentarliste nicht erreichbar — läuft tools/tourkritik.py?'); }
                 renderList();
             }
-            live(CRITICS ? 'Leertaste startet und stoppt · Enter hält sofort an und nimmt auf, Enter nochmal speichert und spielt weiter · ◀ ▶ Szenen · k Kommentare · f Vollbild'
-                         : 'Leertaste startet und stoppt · ◀ ▶ Szenen · f Vollbild', true);
+            live(CRITICS ? 'Leertaste startet und stoppt · Enter hält sofort an und nimmt auf, Enter nochmal speichert und spielt weiter · ◀ ▶ Szenen · k Kommentare · u Untertitel · f Vollbild'
+                         : 'Leertaste startet und stoppt · ◀ ▶ Szenen · u Untertitel · f Vollbild', true);
+            if (!E.local && def.local) { live(LOCAL_ONLY, true); return; }
             prepareStage();
         };
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();

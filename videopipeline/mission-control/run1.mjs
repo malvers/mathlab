@@ -21,7 +21,8 @@ const GAP = Number(process.env.GAP || 5) * 1000;
 // 400 ms sentence breaks in narration.mjs. In the live tour, 19.09.2026, the other way round:
 // "irgendwie merkt man das ... ist bissl unnatürlich" -> normal pace again, the breaks stay.
 // (A changed RATE does not count as a changed text: re-speak everything with FORCE=1.)
-const RATE = Number(process.env.RATE || 1);
+// Doc, 19.09.2026: "Mission mit neuer 96ziger" - the tempo the Würfelspiel got in its live tour; the 1.0 takes are in rate100/
+const RATE = Number(process.env.RATE || 0.96);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const read = (f, fallback) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch (e) { return fallback; } };
 

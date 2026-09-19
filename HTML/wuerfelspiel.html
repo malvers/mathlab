@@ -32,11 +32,9 @@
     <style>
         /* Readouts, hint boxes and the face picker - everything else comes from the central layout */
 
-        /* The shared box carries no offsets - every lab places it itself. */
+        /* Place and width come from the central layout (js/lab-shell-minimal.css): a copy here kept the box 14px below
+           the side panel's top after the centre had moved it (Doc, 19.09.2026: "nicht bündig mit dem Top") */
         #math-coach-box {
-            left: 24px;
-            top: 24px;
-            max-width: calc(100% - 48px);
             box-sizing: border-box;
         }
 
@@ -899,7 +897,10 @@
         function treeGeom(m, o) {
             const nA = m.GA.length, nB = m.GB.length;
             const st1 = o.stage === 1;
-            const X0 = 24, X1 = 220, X2 = st1 ? 220 : 430;
+            // SX: room left of the root for its name, as in the deck (Doc, 19.09.2026: "im Lab steht links nicht Start
+            // an dem Startknoten, in der Präsentation schon")
+            const SX = 50;
+            const X0 = 24 + SX, X1 = 220 + SX, X2 = (st1 ? 220 : 430) + SX;
             const head = o.head != null ? o.head : 44;
             const L = st1 ? nA : nA * nB;
             const gap = st1 ? clamp(340 / nA, 52, 110) : (L <= 6 ? 58 : L <= 9 ? 48 : L <= 16 ? 38 : L <= 25 ? 31 : 26);
@@ -1035,6 +1036,7 @@
             }
 
             dot(g.X0, g.rootY, 5.5, C.neon, '#ffffff');
+            tex('\\text{Start}', g.X0 - 20, g.rootY, valSize(g) - 2, '#ffffff', { align: 'right', valign: 'middle' });
             g.nodes1.forEach(n => {
                 const ga = m.GA[n.i];
                 dot(g.X1, n.y, 6.5, 'rgb(' + TINTS.A[n.i % 6] + ')', '#ffffff');
@@ -1149,7 +1151,9 @@
             label(msg.toUpperCase(), W / 2, yRes, 22, col, 'center');
 
             const hi = S.rulesHi >= 0 ? S.rulesHi : phase;
-            const chipsY = yRes + 34;
+            // chips and the score line keep their distance from the result (Doc, 19.09.2026: "die drei Buttons und
+            // Runde ... nach unten") - still inside the view's 570 / 900 units
+            const chipsY = yRes + 64;
             const ch = drawChips([m.A.name + ' würfelt', 'dann ' + m.B.name, 'größere Zahl gewinnt'], W / 2, chipsY, W - 40, hi);
 
             const sc = S.score;
@@ -2714,7 +2718,18 @@
                 }
                 span.textContent = title.toUpperCase();
             }
-            if (body) body.innerHTML = texHTML(html);
+            if (body) body.innerHTML = texHTML(keepLastFormula(html));
+        }
+
+        // A paragraph that ends in a formula keeps it on one line with the word before it: a lone "1." or
+        // "2/6 = 1/3." on the last line looked lost (Doc, 19.09.2026: "die 1 Punkt auf der nächsten Zeile, das ist nicht
+        // so schön"). text-wrap: pretty (central) evens out plain words, but it does not move KaTeX. And a formula keeps
+        // its punctuation: Chrome breaks between KaTeX and a comma, a line then started with ", also".
+        function keepLastFormula(html) {
+            const NOBR = '<span style="white-space:nowrap">';
+            return String(html || '')
+                .replace(/([^\s<>]+) (\$[^$]+\$[.!?:]?)(?=<br>|$)/g, NOBR + '$1 $2</span>')
+                .replace(/(\$[^$]+\$)([.,;:!?)]+)/g, NOBR + '$1$2</span>');
         }
 
         /* ============================================================= RENDER */

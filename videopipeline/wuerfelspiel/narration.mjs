@@ -15,6 +15,11 @@
 //           still heard a German "Laaab". The only thing that works is spelling the word the
 //           way German reads it: "Läbb" (Doc picked it by ear from three samples).
 //
+// DOC'S REVIEW OF THE LIVE TOUR (19.09.2026, tour-kritik-r1):
+//   02 · 0:02 "die Stimme ist wieder langsam, das ist 92 %, man sollte mal 96 % probieren" -> run1 RATE 0.96
+//   22 · 0:26 "Haltet das Video jetzt an" -> "Haltet hier an" ("dann passt es für Film und hier", the tour holds there)
+//   24        Solita IS Solita (18.09.): "erkläre ich" instead of "erklärt Solita"; "Läbb" was never spoken so far
+//
 // CUES: a break of 1200 ms or more is a stage direction - run2 finds it with
 // silencedetect (d = 1.0) and performs the action inside it. The 400 ms sentence pauses
 // stay well below that threshold, even with the slower rate.
@@ -210,7 +215,7 @@ export const NARRATION = {
        'und zweimal Sechs. <break time="500ms"/> Jonas hat dreimal die Zwei und dreimal die Vier. ' +
        '<break time="700ms"/> Erstens: Zeichnet das Baumdiagramm und schreibt an jeden Ast die ' +
        'Wahrscheinlichkeit. <break time="600ms"/> Zweitens: Wie wahrscheinlich gewinnt Paul? ' +
-       '<break time="700ms"/> Das Rezept habt ihr. <break time="500ms"/> Haltet das Video jetzt an.</speak>',
+       '<break time="700ms"/> Das Rezept habt ihr. <break time="500ms"/> Haltet hier an.</speak>',
 
   // Key l at the start: the solution tree.
   s23: '<speak>Hier ist die Lösung. <break time="500ms"/> Paul hat drei Zahlen, jede mit einem Drittel. ' +
@@ -221,7 +226,7 @@ export const NARRATION = {
        'sechsundsechzig Komma sieben Prozent. <break time="600ms"/> Wer das hatte: Das Rezept sitzt.</speak>',
 
   // Back to station 1, one last roll, then the outro cards. "Lab" in English (Doc, 8:25).
-  s24: '<speak>Im Läbb erklärt Solita alle fünfzehn Stationen des ' +
+  s24: '<speak>Im Läbb erkläre ich alle fünfzehn Stationen des ' +
        'Rundgangs selbst, und im Labor warten die Würfel auf eure eigenen Zahlen. <break time="700ms"/> ' +
        'Probiert es aus, im Doc Alvers Mathe-Labor auf doc alvers punkt ' +
        '<say-as interpret-as="characters">de</say-as>.</speak>',

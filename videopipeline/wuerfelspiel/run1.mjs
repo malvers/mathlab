@@ -19,7 +19,9 @@ const OUT = workDir('wuerfelspiel');
 const GAP = Number(process.env.GAP || 5) * 1000;
 // Doc, 17.09.2026: "zu schnell, wir reden über Schülerinnen und Schüler" - 0.92 plus the
 // 400 ms sentence breaks in narration.mjs. RATE=1 would give the first cut's tempo back.
-const RATE = Number(process.env.RATE || 0.92);
+// Doc, 19.09.2026, in the live tour: "wieder langsam ... 96 % probieren" - the 0.92 takes are in rate092/.
+// A new rate needs FORCE=1 (the text did not change, only the tempo).
+const RATE = Number(process.env.RATE || 0.96);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const read = (f, fallback) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch (e) { return fallback; } };
 
