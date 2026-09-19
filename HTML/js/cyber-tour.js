@@ -33,6 +33,10 @@
  * as in filmkritik.html (Doc, 19.09.2026: "nach reload ganz vom Anfang" - first it spooled back by itself, which
  * every edit of mine set off again, then it offered the old scene, which left a half-filled bar behind).
  *
+ * REVIEW ONLY WITH ?critics (Doc, 19.09.2026: "andere sollen ja nicht bedienen können, wenn ich das rausgebe"):
+ * microphone, remarks list and ABSCHICKEN exist only when the address carries ?critics - without it the page
+ * is a plain player (space, scenes, full screen), Enter records nothing.
+ *
  * SIMULATED DEVICES (data-device on an iframe, or t.addFrame): visibility, focus and full screen of that
  * page belong to the tour - the viewer switching windows must not count as a pupil leaving; t.leave() is the
  * pupil doing it, through the page's real code path.
@@ -45,6 +49,7 @@
     const AIR = 1500;            // room after every scene's voice
     const PULSE = 5000;          // the page's pulse to the server (it tears an armed tour down without one)
     const SUBMIT_GUARD_MS = 3000;
+    const CRITICS = new URLSearchParams(location.search).has('critics');
 
     const CANCEL = new Error('tour-cancel');
     CANCEL.tourCancel = true;
@@ -570,7 +575,8 @@
             run.stopped = true;
             $id('tour-offstage').innerHTML = '';
             setState('ended');
-            live('Tour zu Ende · ' + E.items.length + ' Kommentare. Enter nimmt noch einen auf, ABSCHICKEN schickt alles an die Sitzung.', true);
+            live(CRITICS ? 'Tour zu Ende · ' + E.items.length + ' Kommentare. Enter nimmt noch einen auf, ABSCHICKEN schickt alles an die Sitzung.'
+                         : 'Tour zu Ende. Home spielt sie noch einmal, ◀ ▶ wählen eine Szene.', true);
             if (E.def.teardown) await E.def.teardown(ctx(run, null, -1));
         } catch (err) {
             if (isCancel(err)) return;
@@ -582,7 +588,7 @@
             clock.pause();
             voicePause();
             setState('paused');
-            live('Die Tour hängt in Szene ' + label(E.cur) + ': ' + err.message + ' — Kommentar mit Enter, ◀ spielt die Szene neu.', true);
+            live('Die Tour hängt in Szene ' + label(E.cur) + ': ' + err.message + (CRITICS ? ' — Kommentar mit Enter, ◀ spielt die Szene neu.' : ' — ◀ spielt die Szene neu.'), true);
         }
     }
 
@@ -622,7 +628,7 @@
         voicePause();
         if (E.run) E.run.sounds.forEach((a) => a.pause());
         setState('paused');
-        live('Angehalten. Enter nimmt einen Kommentar auf — Leertaste spielt weiter.', true);
+        live(CRITICS ? 'Angehalten. Enter nimmt einen Kommentar auf — Leertaste spielt weiter.' : 'Angehalten — Leertaste spielt weiter.', true);
     }
 
     function resume() {
@@ -757,7 +763,7 @@
             ev.stopPropagation();
             if (recording) saveAndGoOn(); else startRemark();
         } else if (k === 'Escape') {
-            if (!recording) { $id('tour-drawer').classList.remove('on'); return; }
+            if (!recording) { const d = $id('tour-drawer'); if (d) d.classList.remove('on'); return; }
             ev.preventDefault();
             stopRemark(false);
         } else if (k === 'ArrowLeft' && !recording) {
@@ -773,7 +779,7 @@
             goto(0);
         } else if (k === 'f') {
             if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {});
-        } else if (k === 'k') {
+        } else if (k === 'k' && CRITICS) {
             $id('tour-drawer').classList.toggle('on');
         }
     }
@@ -817,21 +823,30 @@
         cardEl.appendChild(media);
         view.appendChild(cardEl);
         view.appendChild(el('div', { id: 'tour-veil' }, '<div><b></b><span></span><i></i></div>'));
-        view.appendChild(el('div', { id: 'tour-rec' }, '<i></i> AUFNAHME — ENTER SPEICHERT UND SPIELT WEITER, ESC VERWIRFT'));
+        if (CRITICS) view.appendChild(el('div', { id: 'tour-rec' }, '<i></i> AUFNAHME — ENTER SPEICHERT UND SPIELT WEITER, ESC VERWIRFT'));
         body.appendChild(el('div', { id: 'tour-offstage', 'aria-hidden': 'true' }));
         body.appendChild(el('div', { id: 'tour-callout' }));
         body.insertAdjacentHTML('beforeend', '<svg id="tour-cursor" viewBox="0 0 26 38" width="26" height="38"><path d="M2 2 L2 30 L9.5 23.5 L14 34 L18.5 32 L14 21.5 L24 21 Z" fill="#fff" stroke="#000" stroke-width="2.2" stroke-linejoin="round"/></svg>');
         body.appendChild(el('div', { id: 'tour-live', class: 'empty' }, '<span></span>'));
+        // three columns, the outer two equally wide: the bar with its times sits in the window's middle
+        // (Doc, 19.09.2026: "Balken x-sym ... zentriert")
         const hud = el('div', { id: 'tour-hud' }, `
-            <button class="tour-btn" id="tour-play" title="Leertaste">${PLAY_SVG}</button>
-            <div class="tour-now" id="tour-now"><b>–</b>bereit</div>
-            <div id="tour-segs"></div>
-            <span class="tour-time" id="tour-time">0:00</span>
-            <button class="tour-btn" id="tour-mic" title="Enter">${MIC_SVG}ENTER</button>
-            <button class="tour-btn" id="tour-list" title="k">0 KOMMENTARE</button>
-            <button class="tour-btn" id="tour-send">ABSCHICKEN</button>`);
+            <div class="hud-l">
+                <button class="tour-btn" id="tour-play" title="Leertaste">${PLAY_SVG}</button>
+                <div class="tour-now" id="tour-now"><b>–</b>bereit</div>
+            </div>
+            <div class="hud-c">
+                <span class="tour-time run" id="tour-run">0:00</span>
+                <div id="tour-segs"></div>
+                <span class="tour-time" id="tour-time">0:00</span>
+            </div>
+            <div class="hud-r">` + (CRITICS ? `
+                <button class="tour-btn" id="tour-mic" title="Enter">${MIC_SVG}ENTER</button>
+                <button class="tour-btn" id="tour-list" title="k">0 KOMMENTARE</button>
+                <button class="tour-btn" id="tour-send">ABSCHICKEN</button>` : '') + `
+            </div>`);
         body.appendChild(hud);
-        body.appendChild(el('div', { id: 'tour-drawer' }, '<h3>KOMMENTARE</h3><div class="list"></div>'));
+        if (CRITICS) body.appendChild(el('div', { id: 'tour-drawer' }, '<h3>KOMMENTARE</h3><div class="list"></div>'));
 
         // a clicked button must not keep the focus: space is the whole interface (as in filmkritik.html)
         hud.querySelectorAll('.tour-btn').forEach((b) => { b.tabIndex = -1; b.addEventListener('mousedown', (e) => e.preventDefault()); });
@@ -839,10 +854,12 @@
             if (E.rec && E.rec.recording) { saveAndGoOn(); return; }
             if (E.state === 'idle') play(0); else if (E.state === 'running') pause(); else if (E.state === 'paused') resume();
         });
-        // the microphone is Enter by mouse: stops and records, a second press saves and plays on
-        $id('tour-mic').addEventListener('click', () => { if (E.rec && E.rec.recording) saveAndGoOn(); else startRemark(); });
-        $id('tour-list').addEventListener('click', () => $id('tour-drawer').classList.toggle('on'));
-        $id('tour-send').addEventListener('click', submit);
+        if (CRITICS) {
+            // the microphone is Enter by mouse: stops and records, a second press saves and plays on
+            $id('tour-mic').addEventListener('click', () => { if (E.rec && E.rec.recording) saveAndGoOn(); else startRemark(); });
+            $id('tour-list').addEventListener('click', () => $id('tour-drawer').classList.toggle('on'));
+            $id('tour-send').addEventListener('click', submit);
+        }
         window.addEventListener('keydown', onKey, true);
         document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
     }
@@ -946,10 +963,22 @@
             const p = E.scene && E.scene.i === i ? (clock.now() - E.scene.t0) / (E.scene.deadline - E.scene.t0) : 0;
             fill.style.width = Math.max(0, Math.min(100, p * 100)) + '%';
         });
-        const tm = $id('tour-time');
-        if (tm) {
-            const sc = E.scenes[E.cur];
-            tm.textContent = E.scene && sc ? mmss((clock.now() - E.scene.voiceAt) / 1000) + ' / ' + mmss(E.voices[sc.id].dur + AIR / 1000) : '0:00';
+        // the whole tour as in filmkritik.html: running time left of the bar, total right of it (Doc, 19.09.2026: "hier
+        // Gesamtzeit, links runtime"). Measured in scene lengths, so a fast replay counts as the time it stands for.
+        const tm = $id('tour-time'), tr = $id('tour-run');
+        if (tm && tr && E.ready) {
+            const total = E.scenes.reduce((a, sc) => a + sceneLen(sc), 0) / 1000;
+            let run = 0;
+            if (E.state === 'ended') run = total;
+            else if (E.cur >= 0) {
+                for (let j = 0; j < E.cur && j < E.scenes.length; j++) run += sceneLen(E.scenes[j]) / 1000;
+                if (E.scene && E.scene.i === E.cur) {
+                    const p = (clock.now() - E.scene.t0) / (E.scene.deadline - E.scene.t0);
+                    run += Math.max(0, Math.min(1, p)) * sceneLen(E.scenes[E.cur]) / 1000;
+                }
+            }
+            tr.textContent = mmss(run);
+            tm.textContent = mmss(total);
         }
     }, 100);
 
@@ -985,7 +1014,7 @@
             ui();                                   // body.idle: the big play shows from the first paint
             card(true);
             if (def.card && def.card.img) cardImage(true, false);
-            E.rec = window.KritikRecorder ? KritikRecorder.create({ log: dbg, onLive: (s) => live(s || 'Ich höre zu …', !s) }) : null;
+            E.rec = CRITICS && window.KritikRecorder ? KritikRecorder.create({ log: dbg, onLive: (s) => live(s || 'Ich höre zu …', !s) }) : null;
             live('Lade Solitas Stimme …', true);
             E.ready = Promise.all(E.scenes.map(loadVoice));
             await E.ready;
@@ -997,7 +1026,8 @@
                 } catch (e) { dbg('Kommentarliste nicht erreichbar — läuft tools/tourkritik.py?'); }
                 renderList();
             }
-            live('Leertaste startet und stoppt · Enter hält sofort an und nimmt auf, Enter nochmal speichert und spielt weiter · ◀ ▶ Szenen · k Kommentare · f Vollbild', true);
+            live(CRITICS ? 'Leertaste startet und stoppt · Enter hält sofort an und nimmt auf, Enter nochmal speichert und spielt weiter · ◀ ▶ Szenen · k Kommentare · f Vollbild'
+                         : 'Leertaste startet und stoppt · ◀ ▶ Szenen · f Vollbild', true);
             prepareStage();
         };
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
