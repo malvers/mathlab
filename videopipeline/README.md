@@ -131,6 +131,20 @@ Nach jeder Textänderung neu laufen lassen.
 8. **Solita-Bubble** (`lib/did.mjs` → `makeTalks`): Portrait + Szenen-MP3s → sprechende
    Clips; `compose` legt sie als runden Bubble unten rechts mit Ein-/Ausblendung
    über das Video (typisch: Intro, Highlight, Outro — 1 Credit ≈ 15 s Talk).
+9. **Vorschaubild + Upload** (`<projekt>/run4.mjs` → `lib/youtube.mjs` + `lib/thumbnail.mjs`): **jeder
+   Film geht mit eigenem Vorschaubild hoch** — `uploadVideo()` rendert es VOR dem Upload (auch bei
+   `DRY=1`, dann ansehen) und setzt es danach per `thumbnails.set`. Layout zentral in
+   `lib/thumbnail.html` (1280×720, Marke, Titel in Orbitron, letzte Zeile orange, Untertitel); der Film
+   sagt in `run4.mjs` nur, **welches Standbild** (`at`, Sekunden) und optional, **was daraus
+   ausgeschnitten wird** (`pieces`, `erase` für den Mauszeiger — Vorlage: `mission-control/run4.mjs`).
+   Ohne Angaben: ganzes Standbild bei ⅓ der Laufzeit unter dem Titel, Titel/Untertitel aus dem
+   YouTube-Titel (`Titel — Untertitel | …`). Das Bild liegt neben dem Film (`…-thumbnail.png`).
+   - **Bild nachbessern ohne neuen Upload:** `THUMB_ONLY=<videoId> node <projekt>/run4.mjs`.
+   - **Link erst posten, wenn das Bild draußen ist:** YouTube braucht ~5–10 min, und Link-Karten
+     (Teams, WhatsApp) frieren ein, was sie beim Posten bekommen. Prüfen:
+     `curl -s -o t.jpg "https://i.ytimg.com/vi/<id>/maxresdefault.jpg?cb=$(date +%s)"` und ansehen.
+   - **Falle Farben:** ffmpeg schreibt bt709-Tags ins PNG, Chrome rechnet dann um (Rot kippt) —
+     `thumbnail.mjs` greift das Standbild deshalb ohne Farb-Tags.
 
 ## Musikbett
 `HTML/resources/Infinity_6min.m4a` besteht aus zwei Teilen mit verschiedenem Stil;

@@ -4,13 +4,16 @@
 // The Google API audit was passed on 27.08.2026, so YouTube no longer forces new API
 // uploads to private. PRIVACY=private|unlisted still overrides per run.
 // One limitation worth knowing before promising anything: the cached token carries only
-// the youtube.upload scope, which covers videos.insert and nothing else. Privacy can be
-// SET at upload time but not CHANGED afterwards — videos.update needs the full youtube
-// scope and therefore a fresh consent round.
+// the youtube.upload scope, which covers videos.insert and thumbnails.set - nothing else.
+// Privacy can be SET at upload time but not CHANGED afterwards — videos.update needs the
+// full youtube scope and therefore a fresh consent round.
+// Every upload gets its own thumbnail (lib/thumbnail.mjs) — link cards in Teams/WhatsApp freeze
+// whatever picture YouTube serves at posting time, so the right one has to be there from the start.
 import fs from 'fs';
 import os from 'os';
 import http from 'http';
 import { execFileSync } from 'child_process';
+import { makeThumbnail } from './thumbnail.mjs';
 
 const CFG = os.homedir() + '/.config/docalvers-videos';
 const { installed } = JSON.parse(fs.readFileSync(`${CFG}/client_secret.json`, 'utf8'));
@@ -61,12 +64,32 @@ async function accessToken() {
   return r.access_token;
 }
 
-export async function uploadVideo(file, { title, description = '', tags = [], privacy = 'public', dryRun = false }) {
+// Custom thumbnail for an uploaded video (thumbnails.set, 50 quota units). Works with the upload scope.
+// YouTube needs ~5-10 min until i.ytimg.com serves the new picture (measured 19.09.2026).
+export async function setThumbnail(videoId, file) {
+  const at = await accessToken();
+  const r = await fetch('https://www.googleapis.com/upload/youtube/v3/thumbnails/set?uploadType=media&videoId=' + encodeURIComponent(videoId), {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${at}`, 'Content-Type': /\.jpe?g$/i.test(file) ? 'image/jpeg' : 'image/png' },
+    body: fs.readFileSync(file),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error('Thumbnail refused (HTTP ' + r.status + '): ' + JSON.stringify(j).slice(0, 300));
+  console.log(`  ✓ thumbnail set on https://youtu.be/${videoId}`);
+  return j;
+}
+
+// thumbnail: a finished image file | a makeThumbnail() config | undefined = hero from the film | false = none
+export async function uploadVideo(file, { title, description = '', tags = [], privacy = 'public', dryRun = false, thumbnail }) {
   const size = fs.statSync(file).size;
   console.log(`→ Uploading: ${file}`);
   console.log(`  Title:      ${title}`);
   console.log(`  Tags:       ${tags.join(', ')}`);
   console.log(`  Size:       ${(size / 1e6).toFixed(1)} MB · visibility: ${privacy}`);
+  /* rendered BEFORE the upload, also in a dry run: a broken thumbnail stops the run while nothing is public yet */
+  const thumb = thumbnail === false ? null
+    : typeof thumbnail === 'string' ? thumbnail
+    : await makeThumbnail({ film: file, ytTitle: title, ...thumbnail });
   if (dryRun) { console.log('  [dry run] nothing was sent.'); return null; }
   const at = await accessToken();
   // Explicit video language: without it YouTube auto-shows ASR captions / auto-translation for many viewers.
@@ -88,5 +111,10 @@ export async function uploadVideo(file, { title, description = '', tags = [], pr
     throw new Error('Upload failed (HTTP ' + put.status + '): ' + JSON.stringify(j).slice(0, 300));
   }
   console.log(`  ✓ uploaded: https://youtu.be/${j.id}`);
+  if (thumb) {
+    /* the film is out - a refused thumbnail must not look like a failed upload */
+    try { await setThumbnail(j.id, thumb); }
+    catch (e) { console.log(`  ✗ THUMBNAIL NOT SET: ${e.message}\n    by hand: https://studio.youtube.com/video/${j.id}/edit ← ${thumb}`); }
+  }
   return j.id;
 }
