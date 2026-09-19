@@ -22,6 +22,16 @@
     // as the slip's QR since 19.09.2026: code AND deck name (the start screen shows "NEPHRIT · Zettel-Code Q37M")
     const TEST = (code, alias) => '../infotestfos12.html?klasse=GENII&code=' + code + (alias ? '&alias=' + encodeURIComponent(alias) : '');
     const tile = (code) => '.lt-tile[data-code="' + code + '"]';
+    const POOL = 'infotestfos12-eingang-v1-GENII';            // as tour_hooks.py
+
+    /* ONLINE (docalvers.de, Doc 19.09.2026: "bitte Mission! Gaaanz wichtig"): no tour server, no real database - the
+       pages talk to a pretend class in this browser (js/quiz-demo-backend.js via js/tour-hook.js), fresh every run.
+       Locally (tools/tourkritik.py) everything stays as it was: real GENII, parked by the hooks. */
+    const online = (t) => !t.local;
+    function abortRun(t, code, on) {
+        if (online(t)) { window.__tourBackend.abort(POOL, code, on); return Promise.resolve(); }
+        return t.hook('abort', { code, on });
+    }
 
     /* the dashboard's gate hash, read from the gate itself (public by design, never the passphrase) */
     async function gateHash() {
@@ -82,14 +92,15 @@
     CyberTour.define({
         id: 'mission-control',
         title: 'Die ganze Klasse im Blick',
-        // it parks GENII's real rows through the tour server's hooks: online (docalvers.de) it only explains that
-        local: true,
         // Doc, 19.09.2026: "Test-Sperre und Mission Control ... irgendwas Beschreibenderes bitte"
         card: { title: 'Die ganze Klasse im Blick', sub: 'Einen Online-Test live begleiten – vom Zettel bis zur Auswertung', img: '../resources/kids.jpeg' },
 
         /* the stage, while the page loads - nothing here touches the server's data (Doc, 19.09.2026: "beim 1. space
            dauert es 'ne Weile"): pages, codes, deck names, the class off stage waiting on its start screens */
         async prepare(t) {
+            // before the first page loads: its first script (js/tour-hook.js) looks for it
+            if (online(t)) window.__tourBackend = QuizDemoBackend.create({ log: t.log });
+            else delete window.__tourBackend;
             t.card(true);
             t.cardImage(true, false);                            // the class from the start, still (Doc, 18.09.)
             t.caption('', '');
@@ -135,12 +146,13 @@
             t.card(true);
             t.cardImage(true, false);
             t.caption('', '');
-            t.data.parked = t.hook('setup');                     // park GENII (or clear an earlier tour's rows)
+            // park GENII (or clear an earlier tour's rows); online the pretend class is empty from the start
+            t.data.parked = online(t) ? Promise.resolve() : t.hook('setup');
             t.data.parked.catch(() => { /* surfaces in scene 3 */ });
         },
 
         async teardown(t) {
-            await t.hook('teardown');                            // GENII's 21 staged submissions come back
+            if (!online(t)) await t.hook('teardown');            // GENII's 21 staged submissions come back
         },
 
         scenes: [
@@ -319,14 +331,14 @@
                     await t.wait(500);
                     await t.tap('teacher', '#ltAbort .lt-btn');  // -> "Wirklich? Nochmal klicken"
                     await t.at(t.cue(0, 8.7) - 0.9);
-                    await t.hook('abort', { code: A, on: true });
+                    await abortRun(t, A, true);
                     await t.tap('teacher', '#ltAbort .lt-btn');  // the second click
                     await t.wait(400);
                     t.scroll('teacher', '#ltMc');
                     await t.at(t.cue(1, 15.4) + 0.2);
                     await t.point('teacher', '#ltAbort .lt-btn');   // "Abbruch zurücknehmen", while Solita names it
                     await t.at(t.cue(2, 20.7) - 0.4);
-                    await t.hook('abort', { code: A, on: false });
+                    await abortRun(t, A, false);
                     await t.tap('teacher', '#ltAbort .lt-btn');
                     await t.wait(1200);
                     await t.until(() => t.$('pupil', '.guard-start:not([hidden]) .guard-btn'), 6000).catch((e) => { if (e.tourCancel) throw e; });

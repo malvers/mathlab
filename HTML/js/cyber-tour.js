@@ -436,6 +436,8 @@
             /* where Solita starts her k-th line (as in the subtitles; negative counts from the end), and her length */
             line(k, fb) { const L = (sc && E.voices[sc.id].lines) || []; const x = L[k < 0 ? L.length + k : k]; return x ? x.start : fb; },
             get dur() { return sc ? E.voices[sc.id].dur : 0; },
+            /* with tools/tourkritik.py behind the page (hooks, review) - or online */
+            get local() { return E.local; },
             /* the tour stops by itself - a pause to think, as if SPACE was pressed; SPACE plays on */
             hold(text) {
                 if (run.fast) return;
