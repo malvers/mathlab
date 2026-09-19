@@ -94,6 +94,15 @@
     return String(s).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
   }
   let code = normCode(PARAMS.get('code') || '');
+  /* ?alias = the slip's deck name (the QR carries it since 19.09.2026): the start
+     screen shows it next to the code, as on the slip (Doc: "ich würde da auch den
+     Nickname sagen"). Only for the pupil's eyes, never sent. Shown only while the
+     code is still the one the QR brought - older slips have no alias at all. */
+  const ALIAS = (PARAMS.get('alias') || '').replace(/[^A-Za-zÄÖÜäöüß-]/g, '').slice(0, 20).toUpperCase();
+  const ALIAS_CODE = code;
+  function slipLabel() {
+    return (ALIAS && code === ALIAS_CODE ? ALIAS + ' \u00b7 ' : '') + 'Zettel-Code ' + code;
+  }
   /* Slips for this very test and group exist in this browser: leistungstest.html
      keeps them under 'svp-leistungstest-v1' on the same origin. Then the teacher
      is looking at a Leistungstest even without a code in the address - above
@@ -842,14 +851,15 @@
       if (state === 'aborted' && !guardAborted) {
         guardAborted = true;
         guardAway = false;
+        /* "Er" stays with its sentence (no-break space) - on a phone it stood alone at the line's end (Doc, 19.09.2026) */
         showGuard('abort', 'Test beendet',
-          'Deine Lehrkraft hat deinen Test beendet. Er wird nicht gewertet.',
-          'Bitte melde dich bei ihr.', '');
+          'Deine Lehrkraft hat deinen Test beendet. Er wird nicht gewertet.',
+          'Bitte melde dich bei deiner Lehrkraft.', '');
       } else if (state === 'running' && guardAborted) {
         guardAborted = false;
         showGuard('start', 'Es geht weiter',
           'Deine Lehrkraft hat deinen Test wieder freigegeben.',
-          'Zettel-Code ' + code, 'Weiter mit dem Test');
+          slipLabel(), 'Weiter mit dem Test');
       }
     }).catch(function () { /* next beat */ });
   }
@@ -901,7 +911,7 @@
     showGuard('start', 'Leistungstest',
       'Der Test läuft im Vollbild. Verlässt du ihn (anderer Tab, andere App, Esc), ' +
       'wird er unterbrochen, und deine Lehrkraft sieht das.',
-      'Zettel-Code ' + code,
+      slipLabel(),
       'Test starten');
   }
 

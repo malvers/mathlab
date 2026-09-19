@@ -1,0 +1,55 @@
+<!doctype html>
+<!-- Live tour "Die ganze Klasse im Blick": the film's story, played in the real pages - pause with space,
+     comment with Enter (js/cyber-tour.js). Left the teacher's svp/leistungstest.html, right the pupil's
+     test in a phone; eight more pupils work unseen (t.addFrame). Needs its server:
+         python3 tools/tourkritik.py mission-control   ->   http://127.0.0.1:8769/tours/mission-control.html
+     The Drehbuch is mission-control.js next to this page. -->
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Die ganze Klasse im Blick — Live-Tour</title>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Outfit:wght@300;400&display=swap">
+    <link rel="stylesheet" href="../js/cyber-tour.css">
+</head>
+<body>
+    <div class="tour-stage">
+        <div class="tour-col grow">
+            <div class="tour-label">Lehrkraft · Mission Control</div>
+            <div class="tour-pane">
+                <iframe name="teacher" title="Lehrer-Seite" data-width="1140" src="about:blank"></iframe>
+                <iframe name="teacher2" class="tour-over" title="Live-Auswertung" data-width="1140" src="about:blank"></iframe>
+            </div>
+        </div>
+        <div class="tour-col phone">
+            <div class="tour-label">Schülerin oder Schüler</div>
+            <div class="tour-phone">
+                <div class="tour-screen">
+                    <div class="off tour-scan">
+                        <!-- whose test it is, before the camera sees the slip (Doc, 19.09.2026: "oben drüber das Logo
+                             von der IBB ... oben drüber Leistungstest 9a Informatik"). No white plate ("auf weißem Grund
+                             ist Mist"): mission-control.js puts the logo in as inline SVG, the CSS lights its grey letters. -->
+                        <div class="head" data-svg="../svp/ibb-logo.svg" role="img" aria-label="IBB Berufliche Schulen"></div>
+                        <div class="what"><b>Leistungstest</b><span>Informatik · Klasse GENII</span></div>
+                        <div class="finder">
+                            <i></i><i></i><i></i><i></i>
+                            <svg viewBox="0 0 21 21" fill="#8ba1c0" aria-hidden="true">
+                                <path d="M0 0h7v7H0zM1 1v5h5V1zM2 2h3v3H2zM14 0h7v7h-7zm1 1v5h5V1zm1 1h3v3h-3zM0 14h7v7H0zm1 1v5h5v-5zm1 1h3v3H2z" fill-rule="evenodd"/>
+                                <path d="M9 0h2v2H9zM9 3h1v3H9zM11 4h2v1h-2zM8 8h3v1H8zM12 8h2v2h-2zM16 9h3v1h-3zM0 9h2v1H0zM3 8h1v3H3zM9 11h1v2H9zM11 12h3v1h-3zM15 11h1v3h-1zM18 12h3v2h-3zM9 15h2v2H9zM12 15h1v3h-1zM14 17h3v1h-3zM18 16h1v2h-1zM16 19h5v2h-5zM9 19h3v2H9zM19 8h2v2h-2z"/>
+                            </svg>
+                            <b></b>
+                        </div>
+                        <div class="lbl">QR-Code scannen</div>
+                    </div>
+                    <iframe name="pupil" title="Test" data-width="390" data-device data-timers="15000:3000" src="about:blank"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/kritik-recorder.js"></script>
+    <script src="../js/cyber-tour.js"></script>
+    <script src="mission-control.js"></script>
+</body>
+</html>

@@ -250,7 +250,14 @@
         .lt-abort { margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
         .lt-abort .lt-btn.stop { border-color: var(--ypsilon); color: #fff; background: var(--ypsilon); }
         .lt-abort .lt-btn.stop:hover { background: rgb(150, 28, 18); color: #fff; }
-        .lt-abort .lt-btn.stop.armed { background: transparent; color: var(--lt-red); border-color: var(--lt-red); }
+        /* the second click is the one that really ends the test - so it is the loudest, not the faintest (Doc,
+           19.09.2026: "der ist irgendwie zu fein ... der ist ja der, wo du es wirklich auslöst"); taking it back is
+           green - the semantic difference at a glance */
+        .lt-abort .lt-btn.stop.armed { background: rgb(214, 45, 30); border-color: #fff; color: #fff; font-weight: 700;
+            animation: lt-armed 0.9s ease-in-out infinite; }
+        @keyframes lt-armed { 50% { box-shadow: 0 0 0 4px rgba(214, 45, 30, 0.35), 0 0 22px rgba(214, 45, 30, 0.75); } }
+        .lt-abort .lt-btn.undo { border-color: var(--phi); background: var(--phi); color: #fff; }
+        .lt-abort .lt-btn.undo:hover { background: rgb(100, 135, 38); color: #fff; }
         .lt-abort .ab-msg { font-size: 0.85rem; opacity: 0.8; }
         /* view switch in the bar: Kacheln | Liste */
         .lt-mc-view { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
@@ -288,13 +295,19 @@
         .lt-tile.away .tl-bar i { background: var(--ypsilon); }
         .lt-tile.away .tl-pill { background: var(--ypsilon); color: #fff; border-radius: 999px; padding: 1px 9px;
             animation: lt-away 2.4s ease-in-out infinite; }
-        .lt-tile.off { border-style: dashed; }
+        /* offline was grey on grey (Doc, 19.09.2026: "das Offline ist grau") - a pill like "weg", in a neutral slate:
+           red means "gone on purpose", offline is a device that fell silent */
+        .lt-tile.off { border: 2px dashed rgba(170, 190, 220, 0.75); padding: 9px 11px 11px; }
+        .lt-tile.off .tl-pill { background: rgb(110, 125, 150); color: #fff; border-radius: 999px; padding: 1px 9px; }
         /* submitted: border, points and bar in the colour of the score - red, over yellow, to green */
         .lt-tile.done { border: 2px solid var(--res, var(--phi)); padding: 9px 11px 11px; }
         .lt-tile.done .tl-main, .lt-tile.done .tl-state { color: var(--res, var(--phi)); }
         .lt-tile.done .tl-bar i { background: var(--res, var(--phi)); }
         .lt-tile.abort { border: 2px solid var(--ypsilon); padding: 9px 11px 11px; opacity: 0.75; }
-        .lt-tile.abort .tl-main { color: var(--lt-red); font-size: 0.8rem; letter-spacing: 0.06em; }
+        /* "abgebrochen" once, as the red pill below; the big line keeps the count reached (Doc, 19.09.2026: "zweimal
+           abgebrochen in rot und dann noch mal klein abgebrochen drunter") */
+        .lt-tile.abort .tl-main { color: var(--lt-red); }
+        .lt-tile.abort .tl-pill { background: var(--ypsilon); color: #fff; border-radius: 999px; padding: 1px 9px; }
         .lt-tile.abort .tl-bar { visibility: hidden; }
         .lt-tab tr[data-code] { cursor: pointer; }
         .lt-tab tr[data-code]:hover > td, .lt-tab tr.sel > td { background: var(--row-line); }
@@ -615,11 +628,14 @@
             }
 
             /* Live address even while testing locally, so the printed QR works
-               on the pupils' phones and not only on this machine. */
-            function absoluteUrl(rel, code) {
+               on the pupils' phones and not only on this machine. The deck name
+               rides along (Doc, 19.09.2026): the test's start screen greets with
+               the name printed on the slip - never the real name. */
+            function absoluteUrl(rel, code, alias) {
                 const here = location.pathname.replace(/[^/]*$/, '');
                 const u = new URL(rel, location.origin + here);
                 u.searchParams.set('code', code);
+                if (alias) u.searchParams.set('alias', alias);
                 const q = u.searchParams.toString().replace(/=(?=&|$)/g, '');
                 return 'https://www.docalvers.de' + u.pathname.replace(/^\/HTML\//, '/') + '?' + q;
             }
@@ -801,7 +817,7 @@
                         'Deinen Namen nirgends eingeben.</div>';
                     const box = document.createElement('div');
                     box.className = 's-qr';
-                    box.innerHTML = qrSvg(absoluteUrl(url, e.code));
+                    box.innerHTML = qrSvg(absoluteUrl(url, e.code, e.alias));
                     slip.appendChild(left);
                     slip.appendChild(box);
                     ['tl', 'tr', 'bl', 'br'].forEach(function (c) {
@@ -1006,11 +1022,11 @@
                 if (row.away_since) {
                     return { key: 'off', label: 'offline', progress: true,
                              tip: 'weg seit ' + new Date(row.away_since).toLocaleTimeString('de-DE') +
-                                  ', seit ' + mmss(row.seen_secs) + ' min kein Lebenszeichen — Seite geschlossen?' };
+                                  ', seit ' + mmss(row.seen_secs) + ' min keine Meldung — Seite geschlossen?' };
                 }
                 if (row.seen_secs > OFFLINE_SECS) {
                     return { key: 'off', label: 'offline', progress: true,
-                             tip: 'seit ' + mmss(row.seen_secs) + ' min kein Lebenszeichen (Seite zu, Akku, WLAN?)' };
+                             tip: 'seit ' + mmss(row.seen_secs) + ' min keine Meldung (Seite zu, Akku, WLAN?)' };
                 }
                 return { key: 'run', label: 'läuft', progress: true, tip: 'arbeitet gerade' };
             }
@@ -1056,7 +1072,8 @@
                 ts.title = tip;
             }
             /* the bar above the table: how many pupils are where right now */
-            const MC_CHIPS = [['run', 'Läuft'], ['away', 'Weg'], ['off', 'Offline'],
+            /* "Test läuft", not a bare "Läuft" (Doc, 19.09.2026) */
+            const MC_CHIPS = [['run', 'Test läuft'], ['away', 'Weg'], ['off', 'Offline'],
                               ['done', 'Abgegeben'], ['abort', 'Abgebrochen']];
             function paintSummary(codes, ok) {
                 const bar = document.getElementById('ltMc');
@@ -1105,7 +1122,7 @@
                 const btn = document.createElement('button');
                 btn.type = 'button';
                 if (state === 'aborted') {
-                    btn.className = 'lt-btn';
+                    btn.className = 'lt-btn undo';
                     btn.textContent = 'Abbruch zurücknehmen';
                     msg.textContent = 'Die Schülerin oder der Schüler sieht „Test beendet“. Zurücknehmen gibt den Test wieder frei.';
                     btn.addEventListener('click', function () { abortRun(code, false, msg); });
@@ -1153,9 +1170,7 @@
                 main.textContent = '';
                 state.textContent = '';
                 let frac = 0;
-                if (st.key === 'abort') {
-                    main.textContent = 'abgebrochen';
-                } else if (res) {
+                if (res && st.key !== 'abort') {
                     const d = document.createElement('span');
                     main.appendChild(d);
                     CyberClock.digits(d, res.score + '/' + res.total, { minDigits: 2 * String(res.total).length });

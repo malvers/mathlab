@@ -16,7 +16,9 @@
 // THE GUARDRAILS from the plot's section C are binding here:
 //   - forbidden: Überwachung, Spionage, "Bildschirm sperren", "anonym" for the slip codes
 //     (they are pseudonymous) - the live dashboard itself is really without names or codes
-//   - one new term per scene: Zettel-Code (s2, said once, then "der Code"), Lebenszeichen (s4),
+//   - NO "Lebenszeichen" (Doc's review of the live tour, 19.09.2026: "bitte rausnehmen, das ist irgendwie fatal") -
+//     the test "meldet sich", and what follows an abort comes "wenige Sekunden später"
+//   - one new term per scene: Zettel-Code (s2, said once, then "der Code"),
 //     weg (s5), offline (s7), Abbruch (s8), Live-Auswertung (s11). "weg" is a term from s5 on,
 //     so no everyday "weg" anywhere else (s7 "ausfällt", s9 "entfallen")
 //   - button names are set off by short breaks, never run into the sentence
@@ -58,7 +60,7 @@ export const NARRATION = {
   // Gap 1: "Test starten" + first answers. Gap 2: the background pupils start.
   s4: '<speak>Ein Tipp, und es geht los. <break time="1300ms"/> Links zeigt die Kachel jetzt: ' +
       '<break time="200ms"/> läuft, <break time="200ms"/> und die Zahl daneben zählt jede beantwortete ' +
-      'Frage mit. <break time="400ms"/> Dafür schickt der Test regelmäßig ein kurzes Lebenszeichen. ' +
+      'Frage mit. <break time="400ms"/> Dafür meldet sich der Test regelmäßig kurz beim Server. ' +
       '<break time="1300ms"/> Auch die anderen legen los, die Leiste oben zählt sie mit. ' +
       '<break time="400ms"/> Die Lehrkraft sieht, wie weit alle sind. <break time="400ms"/> ' +
       'Was geantwortet wird, sieht sie erst nach der Abgabe.</speak>',
@@ -68,8 +70,7 @@ export const NARRATION = {
   s5: '<speak>Und dann schaut jemand kurz weg, in ein anderes Fenster. <break time="1300ms"/> ' +
       'Sofort wird der Test rot: Test unterbrochen. <break time="400ms"/> Links erscheint auf dieser ' +
       'Kachel eine rote Marke: weg. <break time="1300ms"/> Verhindern lässt sich so ein Wechsel nicht, ' +
-      'aber er fällt auf. <break time="400ms"/> Ein zweites Gerät unter dem Tisch sieht allerdings ' +
-      'niemand. <break time="400ms"/> Und unterbrochen ist nur der Test, nicht das Gerät.</speak>',
+      'aber er fällt auf. <break time="400ms"/> Und unterbrochen ist nur der Test, nicht das Gerät.</speak>',
 
   // Gap: "Weiter mit dem Test".
   s6: '<speak>Der Knopf <break time="200ms"/> Weiter <break time="200ms"/> führt zurück in den Test, ' +
@@ -78,16 +79,16 @@ export const NARRATION = {
 
   // A background pupil whose page closed in scene 4 turns "offline".
   s7: '<speak>Und wenn eine Seite ganz verschwindet, weil der Akku leer ist oder das WLAN ausfällt? ' +
-      '<break time="400ms"/> Dann bleiben die Lebenszeichen aus, und links steht: offline.</speak>',
+      '<break time="400ms"/> Dann meldet sich der Test nicht mehr, und links steht: offline.</speak>',
 
   // --- brechen ------------------------------------------------------------------------------
   // Gap 1: click on the tile, "Test abbrechen", second click. Gap 2: the pupil sees it.
   // Gap 3: "Abbruch zurücknehmen".
   s8: '<speak>Manchmal muss ein Test abgebrochen werden. <break time="400ms"/> Dafür hat die ' +
       'Lehrkraft einen roten Knopf, mit einer Rückfrage, damit nichts aus Versehen passiert. ' +
-      '<break time="1300ms"/> Beim nächsten Lebenszeichen erfährt der Test davon: Test beendet, er wird ' +
+      '<break time="1300ms"/> Wenige Sekunden später erfährt der Test davon: Test beendet, er wird ' +
       'nicht gewertet. <break time="1300ms"/> War es ein Irrtum, klickt die Lehrkraft auf ' +
-      '<break time="200ms"/> Abbruch zurücknehmen. <break time="1300ms"/> Beim nächsten Lebenszeichen ' +
+      '<break time="200ms"/> Abbruch zurücknehmen. <break time="1300ms"/> Wenige Sekunden später ' +
       'ist der Test wieder frei, und die Schülerin oder der Schüler kann weitermachen.</speak>',
 
   // --- auflösen -----------------------------------------------------------------------------
@@ -108,7 +109,8 @@ export const NARRATION = {
        'Schleudern gebracht hat, sieht man auf einen Blick, auch groß an der Wand.</speak>',
 
   // Back to the tiles, fade to the title on dark blue.
+  // Doc's review of the live tour (19.09.2026, 12 · 0:08): "weiß allein die Lehrkraft" - a tick more natural
   s12: '<speak>Und auf dem Server? <break time="400ms"/> Dort stehen nur Codes, keine Namen. ' +
-       '<break time="400ms"/> Wer hinter einem Code steckt, weiß allein der Rechner der Lehrkraft. ' +
+       '<break time="400ms"/> Wer hinter einem Code steckt, weiß allein die Lehrkraft. ' +
        '<break time="1300ms"/> Die ganze Klasse im Blick, im Doc Alvers Mathe-Labor.</speak>'
 };
