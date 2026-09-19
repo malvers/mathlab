@@ -359,7 +359,8 @@ function extractFunction(src, name) {
   return null;
 }
 
-// The browser's own text builders, evaluated straight out of svp-plan.js.
+// The browser's own text builders, evaluated straight out of the plan renderer
+// (HTML/svp/svp-plan-*.js, see planSource()).
 // markPlain   - strips the inline marks (<b>, <i>, <c1> ...) that untisPlain drops first
 // untisPlain  - LaTeX to readable plain text (WebUntis cannot render $...$)
 // untisFit    - fit to 250 chars in three stages (full / abbreviated / drop whole steps)
@@ -368,23 +369,26 @@ function extractFunction(src, name) {
 let browserFns = null;
 function browser() {
   if (browserFns) return browserFns;
-  const src = fs.readFileSync(ABBREV_SRC, 'utf8');
+  const src = planSource();
   const names = ['markPlain', 'untisAbbrev', 'untisPlain', 'untisFit', 'untisSpread', 'untisBlocks'];
   const parts = names.map(n => {
     const f = extractFunction(src, n);
-    if (!f) throw new Error(`${n}() nicht in ${path.relative(REPO, ABBREV_SRC)} gefunden - Namen geaendert?`);
+    if (!f) throw new Error(`${n}() nicht in ${PLAN_SRC_LABEL} gefunden - Namen geaendert?`);
     return f;
   });
   const table = extractLiteral(src, 'SVP_ABBREV', '[', ']') || [];
   // markPlain() reads the tag regex next to it; lifted verbatim so the CLI recognises exactly
   // the tags the browser does (without it every plan call died: "markPlain is not defined").
   const markRe = (src.match(/const MARK_RE = (\/[^\n]*?\/[a-z]*);/) || [])[1];
-  if (!markRe) throw new Error(`MARK_RE nicht in ${path.relative(REPO, ABBREV_SRC)} gefunden - Namen geaendert?`);
+  if (!markRe) throw new Error(`MARK_RE nicht in ${PLAN_SRC_LABEL} gefunden - Namen geaendert?`);
+  // The renderer lives in parts; a function of one part calls another part's
+  // as P.name (untisPlain -> P.markPlain) - P holds the lifted ones here.
   browserFns = new Function('SVP_ABBREV', 'UNTIS_MAX', `
     const window = { SVP_ABBREV };
     let abbrevRules = null;
     const MARK_RE = ${markRe};
     ${parts.join('\n')}
+    const P = { ${names.join(', ')} };
     return { untisPlain, untisFit, untisSpread, untisBlocks };
   `)(table, TOPIC_MAX);
   return browserFns;
@@ -424,18 +428,31 @@ async function loadPlan(pageRel) {
 //   2. abbreviations (Wiederholung -> Wdh.) - costs readability, not content
 //   3. drop WHOLE steps from the end, a trailing " ..." says more would follow
 // A plain slice(250) used to cut mid-word.
-// Must stay character-identical to untisTopicText()/untisFit() in
-// HTML/svp/svp-plan.js - otherwise each side thinks the other's text is a hand
-// correction and the overwrite protection fires for nothing. That is also why
-// the abbreviation table is NOT duplicated here but read out of svp-plan.js:
+// Must stay character-identical to untisTopicText()/untisFit() in the plan
+// renderer - otherwise each side thinks the other's text is a hand correction
+// and the overwrite protection fires for nothing. That is also why the
+// abbreviation table is NOT duplicated here but read out of the renderer:
 // one list, one behaviour.
 const TOPIC_MAX = 250;
-const ABBREV_SRC = path.join(REPO, 'HTML/svp/svp-plan.js');
+// The renderer is split into parts since 19.09.2026: HTML/svp/svp-plan.js only
+// loads HTML/svp/svp-plan-<part>.js. All parts together are the source the
+// functions and SVP_ABBREV are lifted from - it does not matter which part
+// holds them.
+const PLAN_DIR = path.join(REPO, 'HTML/svp');
+const PLAN_SRC_LABEL = 'HTML/svp/svp-plan-*.js';
+let planSrc = null;
+function planSource() {
+  if (planSrc === null) {
+    planSrc = fs.readdirSync(PLAN_DIR).filter(f => /^svp-plan(-[a-z-]+)?\.js$/.test(f)).sort()
+      .map(f => fs.readFileSync(path.join(PLAN_DIR, f), 'utf8')).join('\n');
+  }
+  return planSrc;
+}
 
 let abbrevRules = null;
 function abbrevate(t) {
   if (!abbrevRules) {
-    const table = extractLiteral(fs.readFileSync(ABBREV_SRC, 'utf8'), 'SVP_ABBREV', '[', ']') || [];
+    const table = extractLiteral(planSource(), 'SVP_ABBREV', '[', ']') || [];
     abbrevRules = table
       .slice()
       .sort((a, b) => b[0].length - a[0].length)
