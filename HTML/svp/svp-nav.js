@@ -550,11 +550,18 @@
     // is on: "wenn hell is on -> dunkel" (Doc).
     const themeWrap = document.createElement('span');
     themeWrap.className = 'nav-theme-wrap';
-    const THEME_LABEL = { dark: 'Dunkel', light: 'Hell' };
+    // Doc, 19.09.2026: a third scheme, "ein Loop Hell Dunkel Grey" - the pill
+    // steps light -> dark -> grey -> light and still names the next one.
+    const THEME_LABEL = { dark: 'Dunkel', light: 'Hell', grey: 'Grau' };
+    const THEME_NEXT = { light: 'dark', dark: 'grey', grey: 'light' };
     let theme = 'dark';
-    try { if (localStorage.getItem('svp-theme') === 'light') theme = 'light'; } catch (e) { }
+    try {
+        const t = localStorage.getItem('svp-theme');
+        if (THEME_NEXT[t]) theme = t;
+    } catch (e) { }
     // uebung.html has no svp-gate.js, so apply the class here as well.
     document.documentElement.classList.toggle('svp-light', theme === 'light');
+    document.documentElement.classList.toggle('svp-grey', theme === 'grey');
 
     const themeBtn = document.createElement('a');
     themeBtn.className = 'badge b-grey nav-theme';
@@ -563,8 +570,9 @@
 
     function applyTheme(next) {
         theme = next;
-        const other = next === 'light' ? 'dark' : 'light';
+        const other = THEME_NEXT[next];
         document.documentElement.classList.toggle('svp-light', next === 'light');
+        document.documentElement.classList.toggle('svp-grey', next === 'grey');
         themeBtn.textContent = THEME_LABEL[other];
         themeBtn.title = 'Farbschema ' + THEME_LABEL[other] + ' einschalten';
         themeBtn.setAttribute('aria-label', themeBtn.title);
@@ -573,7 +581,7 @@
     }
     themeBtn.addEventListener('click', function (e) {
         e.preventDefault();
-        applyTheme(theme === 'light' ? 'dark' : 'light');
+        applyTheme(THEME_NEXT[theme]);
     });
     applyTheme(theme);
     themeWrap.appendChild(themeBtn);
@@ -709,7 +717,7 @@
         const rows = (window.svpKeys || []).concat([
             [['S'], 'Ins Suchfeld springen', () => !!pageSearch()],
             [['V'], 'Vollbild ein- oder ausschalten', () => canFs],
-            [['D'], 'Zwischen Hell und Dunkel wechseln'],
+            [['D'], 'Farbschema wechseln: Hell, Dunkel, Grau'],
             [['Q'], 'QR-Code dieser Seite zeigen'],
             [['?', 'H'], 'Diese Übersicht ein- oder ausblenden'],
             [['Esc'], 'Menüs, Dialoge und Vollbild schließen']
@@ -771,7 +779,7 @@
         } else if (key === 'v' && canFs) {
             toggleFs();
         } else if (key === 'd') {
-            applyTheme(theme === 'light' ? 'dark' : 'light');
+            applyTheme(THEME_NEXT[theme]);
         } else if (key === 'q') {
             if (qrOverlay && qrOverlay.classList.contains('open')) qrOverlay.classList.remove('open');
             else showQr();

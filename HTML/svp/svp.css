@@ -1,10 +1,15 @@
 /* Shared styles for the Stoffverteilungsplan pages (informatik9/11/12.html) */
 
 :root {
+    /* the blue of lines, button rims and hovers in the dark scheme, as an r, g, b
+       triple so it can carry any alpha - the grey scheme swaps it for a grey */
+    --tint: 120, 160, 220;
+    /* the lighter blue of the bullets, material pills and the Aufgaben pill */
+    --tint-text: 150, 186, 236;
     --bg: rgb(8, 20, 42);
     --card: rgb(14, 36, 78);
     --card-soft: rgba(14, 36, 78, 0.55);
-    --line: rgba(120, 160, 220, 0.22);
+    --line: rgba(var(--tint), 0.22);
     --text: rgba(225, 235, 250, 0.92);
     --muted: rgba(170, 190, 220, 0.65);
     /* Ueberschriften: eigener Ton, damit sie sich aendern lassen, ohne den
@@ -27,9 +32,9 @@
     --sunken: rgba(8, 20, 42, 0.45);
     --input-bg: rgba(8, 20, 42, 0.7);
     --trough: rgba(8, 20, 42, 0.9);
-    --thumb: rgba(120, 160, 220, 0.35);
+    --thumb: rgba(var(--tint), 0.35);
     --shadow: rgba(0, 0, 0, 0.45);
-    --row-line: rgba(120, 160, 220, 0.12);
+    --row-line: rgba(var(--tint), 0.12);
     --panel-soft: rgba(14, 36, 78, 0.35);
     --scrim: rgba(4, 10, 24, 0.75);
     --edit-line: rgba(245, 194, 66, 0.4);
@@ -75,6 +80,38 @@ html.svp-light {
     /* Pale amber on white is nearly invisible — stronger line plus a fill */
     --edit-line: rgba(150, 108, 8, 0.85);
     --edit-fill: rgba(245, 194, 66, 0.16);
+}
+
+/* Grey scheme (Doc, 19.09.2026: "versuch mal einen grey look ... Loop Hell
+   Dunkel Grey"). A variant of the dark one: html keeps no .svp-light, so every
+   dark rule still applies - only the blue grounds turn neutral grey. The
+   accents stay as in the dark scheme. */
+/* Then "dunkler so wie bei Euch" - the dark grey of the editor Doc works in:
+   ground 38,40,44 -> 26,26,28, cards 54,57,62 -> 37,37,40. */
+html.svp-grey {
+    /* "da sind blaue Ränder Tasten und oben LP" - rims and hovers go grey too */
+    --tint: 190, 194, 202;
+    /* then "Schrift ... bullets": the bullet blue and its pills go grey as well */
+    --tint-text: 200, 204, 212;
+    --bg: rgb(26, 26, 28);
+    --card: rgb(37, 37, 40);
+    --card-soft: rgba(37, 37, 40, 0.55);
+    --line: rgba(205, 210, 220, 0.18);
+    --text: rgba(238, 240, 244, 0.92);
+    --muted: rgba(200, 204, 212, 0.62);
+    --head: rgb(248, 249, 251);
+    --panel: rgb(31, 31, 34);
+    --sunken: rgba(18, 18, 20, 0.45);
+    --input-bg: rgba(18, 18, 20, 0.7);
+    --trough: rgba(18, 18, 20, 0.9);
+    --thumb: rgba(205, 210, 220, 0.3);
+    --shadow: rgba(0, 0, 0, 0.4);
+    --row-line: rgba(205, 210, 220, 0.1);
+    --panel-soft: rgba(37, 37, 40, 0.35);
+    --scrim: rgba(12, 12, 14, 0.75);
+}
+html.svp-grey button.action.secondary {
+    background: linear-gradient(180deg, rgba(90, 92, 98, 0.6), rgba(64, 66, 72, 0.6));
 }
 
 /* Light-scheme fixes for the few places where a variable swap isn't enough:
@@ -310,7 +347,7 @@ nav.quick-nav .badge { text-decoration: none; line-height: 14px; }
     padding: 5px 20px;
     border: 1px solid var(--line);
     border-radius: 8px;
-    background: rgba(120, 160, 220, 0.08);
+    background: rgba(var(--tint), 0.08);
 }
 
 /* Doc, 19.09.2026: "probier mal dunkler" - the year line is much smaller than
@@ -356,7 +393,7 @@ html.svp-light .nav-year { color: rgb(56, 80, 124); }
    kommt vom outline in currentColor. */
 nav.quick-nav a.badge {
     border-color: var(--line);
-    background: rgba(120, 160, 220, 0.08);
+    background: rgba(var(--tint), 0.08);
 }
 
 nav.quick-nav a.badge:hover { filter: brightness(1.35); }
@@ -367,7 +404,7 @@ nav.quick-nav a.badge:hover { filter: brightness(1.35); }
    helleren Fuellung. */
 nav.quick-nav a.badge.active {
     outline: none;
-    border-color: rgba(120, 160, 220, 0.55);
+    border-color: rgba(var(--tint), 0.55);
     filter: brightness(1.25);
 }
 
@@ -398,15 +435,15 @@ nav.quick-nav a.badge.nav-hidden { display: none; }
     margin-left: 8px;
     padding: 1px 8px;
     border-radius: 6px;
-    border: 1px solid rgba(120, 160, 220, 0.5);
-    background: rgba(120, 160, 220, 0.16);
-    color: rgb(150, 186, 236);
+    border: 1px solid rgba(var(--tint), 0.5);
+    background: rgba(var(--tint), 0.16);
+    color: rgb(var(--tint-text));
     font-size: 0.72rem;
     line-height: 1.5;
     cursor: pointer;
 }
 
-#plan-table td.mat .mat-flag:hover { background: rgba(120, 160, 220, 0.3); }
+#plan-table td.mat .mat-flag:hover { background: rgba(var(--tint), 0.3); }
 
 /* Helles Schema: derselbe Blauton wie die Materialpillen dort. */
 html.svp-light #plan-table td.mat .mat-flag,
@@ -602,8 +639,8 @@ html.svp-light #plan-table .detail-row .sub-talk b { color: var(--ypsilon); }
        darueber per color-mix aus currentColor gemischt, der Rand haengt hier
        daneben. .b-green selbst bleibt unangetastet - es faerbt auch die
        Navigationspillen, die gruen bleiben sollen. */
-    color: rgb(150, 186, 236);
-    border-color: rgba(120, 160, 220, 0.5);
+    color: rgb(var(--tint-text));
+    border-color: rgba(var(--tint), 0.5);
 }
 html.svp-light #plan-table .detail-row .sub-side .mat-block a.mat-pill {
     color: rgb(30, 60, 120);
@@ -708,16 +745,16 @@ html.svp-light #plan-table .detail-row .sub-side .mat-block a.mat-pill {
        Aufgaben-Knopf und Clip tragen jetzt das Blau der Materialpillen aus der
        Aufklappzeile darunter statt Lambda-Gelb. Farben stehen hier nur einmal:
        .mat-flag weiter oben erbt sie ueber die gemeinsame Regel. */
-    border: 1px solid rgba(120, 160, 220, 0.5);
-    background: rgba(120, 160, 220, 0.16);
-    color: rgb(150, 186, 236);
+    border: 1px solid rgba(var(--tint), 0.5);
+    background: rgba(var(--tint), 0.16);
+    color: rgb(var(--tint-text));
     font-size: 0.72rem;
     line-height: 1.5;
     text-decoration: none;
     white-space: nowrap;
 }
 
-#plan-table a.quiz-btn:hover { background: rgba(120, 160, 220, 0.3); }
+#plan-table a.quiz-btn:hover { background: rgba(var(--tint), 0.3); }
 
 /* Red button left of the Aufgaben pill (svp-plan.js, row.redBtn):
    same geometry as a.quiz-btn, Upsilon red with white text. */
@@ -1507,7 +1544,7 @@ nav.quick-nav a.nav-keys svg { display: block; }
     padding: 0 6px;
     border: 1px solid var(--line);
     border-radius: 6px;
-    background: rgba(120, 160, 220, 0.08);
+    background: rgba(var(--tint), 0.08);
     color: var(--head);
     /* Not Orbitron: its J has no top bar and reads as a hook (Doc, 19.09.2026:
        "welche Taste?"). A key cap has to be read at a glance. */
@@ -1850,16 +1887,16 @@ button.action {
     /* Blau statt Gruen (Doc, 08.09.2026: "die auch so") - derselbe Ton wie die
        Materialpillen, damit Werkzeugleiste und Plan zusammengehoeren. Der
        orange und der graue Knopf weiter unten bleiben, was sie sind. */
-    background: rgba(120, 160, 220, 0.16);
-    border: 1px solid rgba(120, 160, 220, 0.5);
+    background: rgba(var(--tint), 0.16);
+    border: 1px solid rgba(var(--tint), 0.5);
     border-radius: 8px;
     padding: 9px 16px;
     cursor: pointer;
 }
 
 button.action:hover {
-    background: rgba(120, 160, 220, 0.3);
-    border-color: rgb(120, 160, 220);
+    background: rgba(var(--tint), 0.3);
+    border-color: rgb(var(--tint));
     filter: none;
 }
 
@@ -1887,7 +1924,7 @@ button.action.green:hover { filter: brightness(1.12); }
 
 button.action.secondary {
     background: linear-gradient(180deg, rgba(60, 90, 150, 0.6), rgba(40, 64, 110, 0.6));
-    border-color: rgba(120, 160, 220, 0.4);
+    border-color: rgba(var(--tint), 0.4);
     color: var(--text);
 }
 
@@ -1929,7 +1966,7 @@ button.action.secondary {
 .meta-card.expandable.open > .chev { transform: rotate(90deg); }
 
 .meta-card[data-lb] { cursor: pointer; transition: border-color 0.15s; }
-.meta-card[data-lb]:hover { border-color: rgba(120, 160, 220, 0.55); }
+.meta-card[data-lb]:hover { border-color: rgba(var(--tint), 0.55); }
 .meta-card.open { border-color: var(--cyan); }
 
 .lb-panel {
@@ -1937,7 +1974,7 @@ button.action.secondary {
     margin: 0 auto 18px;
     padding: 14px 18px;
     background: var(--panel-soft);
-    border: 1px solid rgba(120, 160, 220, 0.3);
+    border: 1px solid rgba(var(--tint), 0.3);
     border-radius: 12px;
 }
 
@@ -2316,6 +2353,20 @@ tr.kw-now-sub {
     background-image: linear-gradient(90deg,
         rgba(245, 194, 66, 0.12) 0%,
         rgba(245, 194, 66, 0.01) 50%,
+        rgba(245, 194, 66, 0.12) 100%);
+}
+/* Doc, 19.09.2026: "hier bitte auch wie Ferien nicht ganz so trans" - in the
+   dark the middle keeps a tint, a third of the edges like the holiday rows. */
+html:not(.svp-light) tr.kw-now {
+    background-image: linear-gradient(90deg,
+        rgba(245, 194, 66, 0.30) 0%,
+        rgba(245, 194, 66, 0.10) 50%,
+        rgba(245, 194, 66, 0.30) 100%);
+}
+html:not(.svp-light) tr.kw-now-sub {
+    background-image: linear-gradient(90deg,
+        rgba(245, 194, 66, 0.12) 0%,
+        rgba(245, 194, 66, 0.04) 50%,
         rgba(245, 194, 66, 0.12) 100%);
 }
 /* Weeks that are over (svp-plan.js markPastWeeks) - Doc, 16.09.2026: "mach die,
@@ -2714,7 +2765,7 @@ a.link-card.c-featured:hover { border-color: rgba(245, 194, 66, 0.85); border-le
 a.link-card.c-featured .card-title { font-size: 1.18rem; }
 html.svp-light a.link-card.c-featured {
     /* light scheme: the pill blue, no ochre anywhere (Doc, 10.09.2026) */
-    background: rgba(120, 160, 220, 0.16);
+    background: rgba(var(--tint), 0.16);
     border-color: rgba(30, 60, 120, 0.5);
     border-left-color: var(--lambda);
 }
@@ -2827,7 +2878,7 @@ tr.detail-row li {
 /* Blau wie die Materialpillen und die Werkzeugknoepfe (Doc, 08.09.2026:
    "bullets blau"). Nur die Punkte der Aufklappzeile - die Liste im
    LB-Panel behaelt ihr Orange. */
-tr.detail-row li::marker { color: rgb(150, 186, 236); }
+tr.detail-row li::marker { color: rgb(var(--tint-text)); }
 html.svp-light tr.detail-row li::marker { color: rgb(30, 60, 120); }
 
 /* --- sub-row tabs: "Inhalt" (bullets) and "Notizen" (free text) ----------
@@ -2961,15 +3012,15 @@ tr.wk-edit .sub-done { display: inline-flex; }
    Fuellung zeigt den Weg nach vorn, ohne dass eine zweite Farbe noetig waere. */
 .sub-save {
     color: var(--text);
-    background: rgba(120, 160, 220, 0.16);
-    border-color: rgba(120, 160, 220, 0.5);
+    background: rgba(var(--tint), 0.16);
+    border-color: rgba(var(--tint), 0.5);
 }
 .sub-save:hover {
-    background: rgba(120, 160, 220, 0.3);
-    border-color: rgb(120, 160, 220);
+    background: rgba(var(--tint), 0.3);
+    border-color: rgb(var(--tint));
 }
-.sub-cancel { color: var(--muted); border-color: rgba(120, 160, 220, 0.35); }
-.sub-cancel:hover { color: var(--text); border-color: rgba(120, 160, 220, 0.7); }
+.sub-cancel { color: var(--muted); border-color: rgba(var(--tint), 0.35); }
+.sub-cancel:hover { color: var(--text); border-color: rgba(var(--tint), 0.7); }
 .sub-done-btn:focus { outline: none; }
 .sub-done-btn:focus-visible { outline: 2px solid var(--head); outline-offset: 2px; }
 
@@ -3092,7 +3143,7 @@ tr.wk-edit .sub-tabs:not(.on-notizen) .sub-tools { display: inline-flex; }
    green tint and bar at both edges, almost transparent in the middle.
    The row is one colspan cell, so the gradient can sit on the td. */
 tr.ferien td {
-    /* background: rgba(120, 160, 220, 0.07); color: var(--muted); */
+    /* background: rgba(var(--tint), 0.07); color: var(--muted); */
     /* background: rgba(121, 158, 49, 0.6); */
     background-image: linear-gradient(90deg,
         rgba(121, 158, 49, 0.6) 0%,
@@ -4188,11 +4239,13 @@ html.svp-light .vt-date input { color-scheme: light; }
    "das Link icon ist zu klein"). Ohne Innenabstand trifft er die 16,2 px der
    anderen gezeichneten Zeichen genau. */
 .mat-ico-link { padding: 0.125em; }   /* 14,6 px Tinte - ohne Abstand waren 16,2 einen Tick zu viel */
+/* svp-plan.js paints it rgb(120,160,220) as an attribute; CSS wins over that */
+html.svp-grey .mat-ico-link path { fill: rgb(var(--tint)); }
 /* Die Kamera fuer Videodateien traegt kein Markenrot und kein Programmlogo,
    also muss sie sich dem Thema beugen: dunkelblau auf hellem Grund (Doc,
    08.09.2026: "und dunkelblau pls"), aufgehellt auf dunklem - sonst ist sie
    in einem der beiden Themen kaum zu sehen. */
-.mat-ico-movie path { fill: rgb(150, 186, 236); }
+.mat-ico-movie path { fill: rgb(var(--tint-text)); }
 html.svp-light .mat-ico-movie path { fill: rgb(20, 44, 92); }
 /* A flex row instead of a text line: every material pill is then exactly as
    high as its icon plus the padding — an app icon and a drawn one give the
@@ -4233,7 +4286,7 @@ html.svp-light .mat-ico-movie path { fill: rgb(20, 44, 92); }
        button.action statt des weissen Eingabefeldes, damit die Suchzeile mit
        den Knoepfen daneben eine Leiste ergibt. Ein Wert fuer beide Schemata,
        genau wie bei den Knoepfen. */
-    background: rgba(120, 160, 220, 0.16);
+    background: rgba(var(--tint), 0.16);
     border: 1px solid var(--line);
     border-radius: 7px;
     padding: 7px 9px;
@@ -4328,4 +4381,54 @@ html.svp-light .mat-ico-movie path { fill: rgb(20, 44, 92); }
 ::highlight(plan-find) {
     background: rgba(245, 194, 66, 0.42);
     color: var(--text);
+}
+
+/* ---- Grey scheme, neon accents ---------------------------------------------
+   Doc, 19.09.2026: "versuch mal 'die modernen neon like cols'". Only in the
+   grey scheme and only on screen: the accent hues turn to saturated neon, the
+   Bereich pills get a soft glow, the holiday bands and the current week follow.
+   Last in the file on purpose - the holiday rule it overrides has the same
+   specificity (html:not(.svp-light) tr.ferien td). */
+@media screen {
+    html.svp-grey {
+        --lambda: rgb(255, 170, 0);
+        --phi: rgb(110, 255, 60);
+        --cyan: rgb(0, 229, 255);
+        --violet: rgb(178, 102, 255);
+        --teal: rgb(0, 255, 170);
+        --pink: rgb(255, 60, 172);
+    }
+    html.svp-grey .b-orange { border-color: rgba(255, 170, 0, 0.75); background: rgba(255, 170, 0, 0.08); box-shadow: 0 0 8px rgba(255, 170, 0, 0.35); }
+    html.svp-grey .b-cyan   { border-color: rgba(0, 229, 255, 0.75); background: rgba(0, 229, 255, 0.08); box-shadow: 0 0 8px rgba(0, 229, 255, 0.35); }
+    html.svp-grey .b-violet { border-color: rgba(178, 102, 255, 0.75); background: rgba(178, 102, 255, 0.1); box-shadow: 0 0 8px rgba(178, 102, 255, 0.35); }
+    html.svp-grey .b-teal   { border-color: rgba(0, 255, 170, 0.75); background: rgba(0, 255, 170, 0.08); box-shadow: 0 0 8px rgba(0, 255, 170, 0.35); }
+    html.svp-grey .b-pink   { border-color: rgba(255, 60, 172, 0.75); background: rgba(255, 60, 172, 0.09); box-shadow: 0 0 8px rgba(255, 60, 172, 0.35); }
+
+    /* holiday bands: neon green edges fading into the grey, glowing side bars */
+    html.svp-grey tr.ferien td {
+        background-image: linear-gradient(90deg,
+            rgba(110, 255, 60, 0.32) 0%,
+            rgba(110, 255, 60, 0.05) 50%,
+            rgba(110, 255, 60, 0.32) 100%);
+        --ferien-bars: inset 2px 0 0 rgb(110, 255, 60), inset -2px 0 0 rgb(110, 255, 60),
+            inset 6px 0 10px -6px rgba(110, 255, 60, 0.8), inset -6px 0 10px -6px rgba(110, 255, 60, 0.8),
+            inset 0 -1px 0 rgba(110, 255, 60, 0.35);
+        text-shadow: 0 0 10px rgba(110, 255, 60, 0.45);
+    }
+
+    /* current week: neon amber */
+    html.svp-grey tr.kw-now {
+        background-image: linear-gradient(90deg,
+            rgba(255, 170, 0, 0.26) 0%,
+            rgba(255, 170, 0, 0.06) 50%,
+            rgba(255, 170, 0, 0.26) 100%);
+    }
+    html.svp-grey tr.kw-now-sub {
+        background-image: linear-gradient(90deg,
+            rgba(255, 170, 0, 0.1) 0%,
+            rgba(255, 170, 0, 0.02) 50%,
+            rgba(255, 170, 0, 0.1) 100%);
+    }
+    html.svp-grey tr.kw-now > td:nth-child(2) { box-shadow: inset 2px 0 0 rgb(255, 170, 0), inset 6px 0 10px -6px rgba(255, 170, 0, 0.8); }
+    html.svp-grey tr.kw-now > td:last-child { box-shadow: inset -2px 0 0 rgb(255, 170, 0), inset -6px 0 10px -6px rgba(255, 170, 0, 0.8); }
 }

@@ -15,9 +15,9 @@
 // setting the class before first paint avoids a dark flash on light pages.
 (function () {
     try {
-        if (localStorage.getItem('svp-theme') === 'light') {
-            document.documentElement.classList.add('svp-light');
-        }
+        const t = localStorage.getItem('svp-theme');
+        if (t === 'light') document.documentElement.classList.add('svp-light');
+        if (t === 'grey') document.documentElement.classList.add('svp-grey');
     } catch (e) { }
 })();
 
