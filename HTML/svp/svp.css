@@ -741,16 +741,18 @@ html.svp-light #plan-table .detail-row .sub-side .mat-block a.mat-pill {
 /* label and invisible pill text share one cell: width = the wider one */
 #plan-table .red-btn > span { grid-area: 1 / 1; }
 #plan-table .red-btn > .red-btn-ghost { visibility: hidden; }
-/* centered between topic text and Aufgaben pill; svp-plan.js sets left */
-#plan-table td.mat { position: relative; }
+/* Centered between topic text and Aufgaben pill. The cell must NOT be
+   positioned (Doc, 19.09.2026: "im dunkel nicht perfekt"): Chrome paints the
+   row gradient (current / past week) only up to the edge of a positioned
+   cell, so the row line under the Material column lost its tint and almost
+   vanished. The button therefore stays at its static position - left/top
+   auto - and svp-plan.js moves it from there with a transform. The table is
+   its containing block, so it scrolls along when the table-wrap scrolls. */
+#plan-table { position: relative; }
 #plan-table .red-btn.floating {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
     margin: 0;
 }
-/* the script aligns it to the pill's middle - then without the shift */
-#plan-table .red-btn.floating[style*="top"] { transform: none; }
 
 /* List under the red button (svp-plan.js buildRedList): panel look of the
    drop menus, red head with ✕, numbered items; scrolls inside when long. */
@@ -1470,6 +1472,50 @@ nav.quick-nav a.badge.nav-untis {
     letter-spacing: 0;
 }
 
+/* The "?" pill right of the QR (Doc, 19.09.2026) wears the same box; one
+   character, so no letter spacing - as for the U above. Its panel lists the
+   keys of the page: key caps left, what they do right. */
+nav.quick-nav a.badge.nav-keys {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 31px;
+    height: 22px;
+    padding: 0;
+    cursor: pointer;
+}
+/* a drawing like its neighbours, no glyph: Doc, 19.09.2026 "das ? wirkt zu hart" */
+nav.quick-nav a.nav-keys svg { display: block; }
+.nav-keys-panel { width: max-content; max-width: min(340px, calc(100vw - 24px)); }
+.nav-keys-panel .keys-list {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 7px 12px;
+    align-items: center;
+    margin: 0;
+}
+.nav-keys-panel dt { display: flex; gap: 4px; margin: 0; }
+.nav-keys-panel dd { margin: 0; font-size: 0.9rem; color: var(--text); }
+.nav-keys-panel kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 24px;
+    height: 22px;
+    padding: 0 6px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: rgba(120, 160, 220, 0.08);
+    color: var(--head);
+    /* Not Orbitron: its J has no top bar and reads as a hook (Doc, 19.09.2026:
+       "welche Taste?"). A key cap has to be read at a glance. */
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
 .nav-edit-panel {
     display: none;
     position: absolute;
@@ -1631,6 +1677,58 @@ h1 {
     padding: 10px 14px;
 }
 
+/* Lehrplan drop (svp-plan.js lehrplanDrop, Doc 19.09.2026): the Lernbereich
+   cards and their panels sit in the head under the subtitle and only show
+   while "Lehrplan ▾" is open. */
+.lp-fold { display: none; margin-top: 12px; }
+body.lp-open .lp-fold { display: block; }
+.lp-fold .meta-cards { margin-bottom: 0; }
+.lp-fold .lb-panel { margin: 10px auto 0; }
+/* Open: the caret points up. The ▾ glyph sits 0.17em below the middle of
+   its box, so a plain rotation lifted it 4.4 px (measured, Doc: "y zentriert
+   bitte") - the shift puts its ink back where the closed caret has it. */
+body.lp-open .lp-btn .export-caret { display: inline-block; transform: translateY(0.33em) rotate(180deg); }
+/* first card: the whole Lehrplan, with the cover of its page 1 */
+.meta-card.lp-card {
+    display: flex;
+    /* Doc, 19.09.2026: "y aligned wie die LBs" - text and cover start at the
+       top like in the other cards, not centred in the card */
+    align-items: flex-start;
+    gap: 12px;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+.meta-card.lp-card:hover { border-color: var(--cyan); }
+.lp-card .lp-cover {
+    flex: none;
+    width: 62px;   /* Doc, 19.09.2026: "SS Titel kann größer" - was 46 px */
+    height: auto;
+    border-radius: 3px;
+    border: 1px solid var(--line);
+    background: #fff;
+    box-shadow: 0 2px 6px var(--shadow);
+}
+.lp-card .lp-text { min-width: 0; }
+/* the LB kickers are 22 px high (their pill) - same line box here */
+.meta-card.lp-card .k { min-height: 22px; }
+/* With the Lehrplan card a row holds one card more: "LERNBEREICH 1" plus
+   its pill need about 208 px, six cards on 1200 px leave 192. Narrow cards
+   set the kicker tighter instead of breaking it after "LERNBEREICH". */
+.lp-fold .meta-card { container-type: inline-size; }
+/* six cards or more: a little less padding around the chevron */
+.lp-fold .meta-cards:has(> .meta-card:nth-child(6)) > .meta-card.expandable { padding-left: 26px; padding-right: 10px; }
+.lp-fold .meta-cards:has(> .meta-card:nth-child(6)) > .meta-card.expandable > .chev { left: 9px; }
+@container (max-width: 180px) {
+    .meta-card .k { font-size: 0.54rem; letter-spacing: 0.04em; gap: 5px; white-space: nowrap; }
+    .meta-card .k > .badge,
+    .meta-card .k > .badge-drop > .badge { letter-spacing: 0; padding-left: 5px; padding-right: 5px; }
+}
+@media print {
+    .lp-fold { display: block !important; }
+    .lp-card { display: none !important; }
+}
+
 .meta-card .k {
     font-family: 'Orbitron', sans-serif;
     font-size: 0.62rem;
@@ -1696,6 +1794,9 @@ h1 {
 
 /* Die Eigenabstaende der beiden Bloecke wandern in die Polsterung der Huelle */
 .plan-sticky header.page-head { margin-bottom: 16px; }
+/* Doc, 19.09.2026: the subtitle "ein Stück höher" - on the plan pages it
+   follows the title without the 6 px of the other pages. */
+.plan-sticky header.page-head .head-row { margin-bottom: 0; }
 .plan-sticky .toolbar { margin-bottom: 0; }
 
 @media print {
@@ -2105,6 +2206,9 @@ td.date.termin-date .ds {
 }
 /* die Kopfzeile ist hier der Engpass, nicht der Inhalt ("1/13") */
 #plan-table th.ustd-col { letter-spacing: 0; }
+/* Doc, 19.09.2026: "Ustd. -> immer Unterrichtsstunden" - in one line the
+   column took 160 px from the topic; the soft hyphen breaks it in two. */
+#plan-table thead th.ustd-col { white-space: normal; hyphens: manual; line-height: 1.25; }
 td.topic { font-weight: 400; min-width: 220px; }
 /* Eine Zeile je Woche (Doc, 07.09.2026): der Rest wird abgeschnitten, der volle
    Titel steht in der aufgeklappten Zeile. Kein nowrap - das wuerde die Spalte
@@ -2994,7 +3098,14 @@ tr.ferien td {
         rgba(121, 158, 49, 0.6) 0%,
         rgba(121, 158, 49, 0.05) 50%,
         rgba(121, 158, 49, 0.6) 100%);
-    box-shadow: inset 2px 0 0 rgb(121, 158, 49), inset -2px 0 0 rgb(121, 158, 49);
+    /* Doc, 19.09.2026: "da ist ein micro Spalt" - the cell ground does not
+       reach under the collapsed table border, so the 1 px row line showed the
+       white card and cut the side bars. No border here; the row line is an
+       inset green hairline instead, lying UNDER the two bars. */
+    border-bottom: 0;
+    --ferien-bars: inset 2px 0 0 rgb(121, 158, 49), inset -2px 0 0 rgb(121, 158, 49),
+        inset 0 -1px 0 rgba(121, 158, 49, 0.35);
+    box-shadow: var(--ferien-bars);
     color: rgb(20, 44, 92);   /* same dark blue as .mat-ico-movie in light mode */
     font-family: 'Orbitron', sans-serif;
     font-size: 0.8rem;
@@ -3003,8 +3114,60 @@ tr.ferien td {
     vertical-align: middle;   /* the row is taller than the small holiday text */
     padding: 9px 12px;
 }
-/* Dark scheme: the middle is now the dark row ground, dark blue would vanish. */
+/* Dark scheme: the middle is now the dark row ground, dark blue would vanish.
+   (Doc, 19.09.2026: tried the fade over white here - "nee, zurück") */
 html:not(.svp-light) tr.ferien td { color: var(--text); }
+/* Doc, 19.09.2026: "mach mal in der mitte weniger trans" - in the dark the
+   middle keeps a green tint: 0.2 instead of 0.05. */
+html:not(.svp-light) tr.ferien td {
+    background-image: linear-gradient(90deg,
+        rgba(121, 158, 49, 0.6) 0%,
+        rgba(121, 158, 49, 0.2) 50%,
+        rgba(121, 158, 49, 0.6) 100%);
+}
+
+/* Cursor of the arrow keys (svp-plan.js, Doc 19.09.2026): a line above and
+   below the row. Box shadows, because an outline on a tr is not drawn
+   everywhere - and the rows that already carry edge bars keep them. */
+#plan-table tr.kb-cursor {
+    --kb-lines: inset 0 2px 0 var(--cyan), inset 0 -2px 0 var(--cyan);
+}
+#plan-table tr.kb-cursor > td { box-shadow: var(--kb-lines); }
+#plan-table tr.kw-now.kb-cursor > td:nth-child(2) { box-shadow: var(--kb-lines), inset 2px 0 0 rgb(240, 160, 24); }
+#plan-table tr.kw-now.kb-cursor > td:last-child { box-shadow: var(--kb-lines), inset -2px 0 0 rgb(240, 160, 24); }
+#plan-table tr.ferien.kb-cursor > td { box-shadow: var(--kb-lines), var(--ferien-bars); }
+@media print { #plan-table tr.kb-cursor > td { box-shadow: none; } }
+
+/* Doc, 19.09.2026: a holiday row folds the weeks behind it (svp-plan.js, key F
+   folds all). The chevron stands where the week chevrons stand, absolute so
+   the holiday text stays centred. It points down while the weeks show. */
+tr.ferien.foldable { cursor: pointer; }
+tr.ferien.foldable td { position: relative; }
+tr.ferien .chev {
+    position: absolute;
+    left: 16px;   /* = padding-left of the first week cell, measured 19.09.2026 */
+    top: 50%;
+    width: 12px;
+    text-align: center;
+    font-family: 'Outfit', sans-serif;   /* same glyph as the week chevrons, not Orbitron */
+    font-size: 0.95rem;
+    letter-spacing: 0;
+    line-height: 1;
+    opacity: 0.75;
+    transform: translateY(-50%) rotate(90deg);
+    transition: transform 0.15s;
+}
+tr.ferien.folded .chev { transform: translateY(-50%); }
+/* The Sommerferien before the school year sit in the thead, above the column
+   heads (svp-plan.js). A td, so it is not sticky and scrolls away; the height
+   is the one the plan rows get from the tbody rules. */
+#plan-table thead tr.ferien > td { height: 46px; }
+/* Folded weeks are gone completely. The id beats tr.detail-row.open. A running
+   search and the shift mode look at the whole plan, so both lift the fold. */
+body:not(.plan-searching):not(.shifting) #plan-table tr.ferien-folded,
+body:not(.plan-searching):not(.shifting) #plan-table tr.ferien-folded.open { display: none; }
+/* Every block folded: only holiday rows are left, the column heads go too. */
+body:not(.plan-searching):not(.shifting) #plan-table.all-folded thead tr:not(.ferien) { display: none; }
 
 footer.page-foot {
     max-width: 1200px;
@@ -3149,6 +3312,11 @@ footer.page-foot a:hover { text-decoration: underline; }
     body { background: #fff; color: #111; padding: 8mm; }
     .toolbar { display: none; }
     tr.detail-row { display: table-row !important; }
+    /* paper shows the whole year: folded holiday blocks print like all others */
+    #plan-table tr.ferien-folded:not(.detail-row):not(.plan-miss) { display: table-row !important; }
+    /* a thead repeats on every printed page - the Sommerferien row must not */
+    #plan-table thead tr.ferien { display: none; }
+    #plan-table.all-folded thead tr:not(.ferien) { display: table-row !important; }
     tr.detail-row td { background: #fff; }
     tr.detail-row li { color: #444; }
     .sub-tabs, .sub-pane[data-pane="notizen"] { display: none !important; }

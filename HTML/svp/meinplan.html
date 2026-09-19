@@ -309,10 +309,17 @@
         $('prev').addEventListener('click', () => step(-1));
         $('next').addEventListener('click', () => step(1));
         $('today').addEventListener('click', () => showWeek(startWeek()));
+        /* listed in the "?" panel of the nav row (svp-nav.js) */
+        window.svpKeys = (window.svpKeys || []).concat([
+            [['←', '→'], 'Eine Woche zurück oder vor'],
+            [['J'], 'Zur aktuellen Woche springen (jetzt)']
+        ]);
         document.addEventListener('keydown', e => {
             if (e.metaKey || e.ctrlKey || e.altKey) return;   // never swallow Cmd-Shift-R
             if (e.key === 'ArrowLeft') step(-1);
             if (e.key === 'ArrowRight') step(1);
+            /* J like on the plan pages - H is the help menu of the nav row */
+            if (e.key === 'j' || e.key === 'J') showWeek(startWeek());
         });
 
         db('svp_public_plan?select=week&order=week.asc')

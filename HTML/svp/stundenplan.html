@@ -1528,10 +1528,19 @@
         document.getElementById('prev').addEventListener('click', () => step(-1));
         document.getElementById('next').addEventListener('click', () => step(1));
         document.getElementById('today').addEventListener('click', () => showWeek(weekForToday()));
+        /* listed in the "?" panel of the nav row (svp-nav.js) */
+        window.svpKeys = (window.svpKeys || []).concat([
+            [['←', '→'], 'Eine Woche zurück oder vor'],
+            [['J'], 'Zur aktuellen Woche springen (jetzt)']
+        ]);
         document.addEventListener('keydown', e => {
             if (e.target.tagName === 'INPUT') return;
             if (e.key === 'ArrowLeft') step(-1);
             if (e.key === 'ArrowRight') step(1);
+            /* J like on the plan pages - H is the help menu of the nav row */
+            if ((e.key === 'j' || e.key === 'J') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+                showWeek(weekForToday());
+            }
         });
 
         // Rescale when the window changes size.

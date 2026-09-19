@@ -610,8 +610,7 @@
     }
     paintFs();
 
-    fsPill.addEventListener('click', function (e) {
-        e.preventDefault();
+    function toggleFs() {
         const el = document.documentElement;
         if (fsOn()) {
             (document.exitFullscreen || document.webkitExitFullscreen).call(document);
@@ -619,13 +618,13 @@
             const req = el.requestFullscreen || el.webkitRequestFullscreen;
             if (req) Promise.resolve(req.call(el)).catch(function () { /* refused - leave it */ });
         }
-    });
+    }
+    fsPill.addEventListener('click', function (e) { e.preventDefault(); toggleFs(); });
     document.addEventListener('fullscreenchange', paintFs);
     document.addEventListener('webkitfullscreenchange', paintFs);
 
-    if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) {
-        navRight.appendChild(fsPill);
-    }
+    const canFs = !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen);
+    if (canFs) navRight.appendChild(fsPill);
 
     // Separated auth pill at the right end of the row: "Login" links to the
     // notes page (shared svp-session login for all svp pages), "Logout"
@@ -673,6 +672,113 @@
        logout/in ganz rechts"): Zahnrad, Vollbild, QR als Werkzeug-Block,
        danach mit Abstand das Farbschema und ganz aussen Login/Logout. */
     navRight.appendChild(qrPill);
+
+    /* Doc, 19.09.2026: "mach rechts einen kleinen mit ? und zeig dort alle key
+       shorts" - a fourth icon pill, right of the QR. The list belongs to the
+       page: every script that listens for a key registers it in window.svpKeys
+       as [caps, text] (caps = array of key caps). It is read when the panel
+       opens, so the load order of the scripts does not matter. */
+    const keysWrap = document.createElement('div');
+    keysWrap.className = 'nav-edit-wrap nav-keys-wrap';
+    const keysPill = document.createElement('a');
+    keysPill.className = 'badge b-grey nav-keys';
+    keysPill.href = '#';
+    /* Doc, 19.09.2026: "das ? wirkt zu hart" - an Orbitron glyph next to three
+       line icons. Drawn now, same stroke as they have: the hook of the Lucide
+       help icon, scaled 1.5 so it stands as tall as its neighbours, and a dot. */
+    keysPill.innerHTML = svgWrap('<path d="M7.64 7.5a4.5 4.5 0 0 1 8.74 1.5c0 3-4.5 4.5-4.5 4.5"/>'
+        + '<circle cx="12" cy="19" r="1.1" fill="currentColor" stroke="none"/>');
+    keysPill.title = 'Tastenkürzel (?)';
+    keysPill.setAttribute('aria-label', 'Tastenkürzel anzeigen');
+    keysPill.setAttribute('aria-expanded', 'false');
+    const keysPanel = document.createElement('div');
+    keysPanel.className = 'nav-edit-panel nav-keys-panel';
+    keysWrap.appendChild(keysPill);
+    keysWrap.appendChild(keysPanel);
+    navRight.appendChild(keysWrap);
+
+    /* The search field of the page, if it has one and it is showing (the one in
+       the Notizen only exists with a session). */
+    function pageSearch() {
+        const el = document.querySelector('input.svp-search');
+        return el && el.offsetParent !== null ? el : null;
+    }
+    /* A row is [caps, text] or [caps, text, when] - `when` decides at opening
+       time whether the key works right now (session, search field, ...). */
+    function paintKeys() {
+        const rows = (window.svpKeys || []).concat([
+            [['S'], 'Ins Suchfeld springen', () => !!pageSearch()],
+            [['V'], 'Vollbild ein- oder ausschalten', () => canFs],
+            [['D'], 'Zwischen Hell und Dunkel wechseln'],
+            [['Q'], 'QR-Code dieser Seite zeigen'],
+            [['?', 'H'], 'Diese Übersicht ein- oder ausblenden'],
+            [['Esc'], 'Menüs, Dialoge und Vollbild schließen']
+        ]).filter(row => !row[2] || row[2]());
+        keysPanel.textContent = '';
+        const title = document.createElement('div');
+        title.className = 'ep-title';
+        title.textContent = 'Tastenkürzel';
+        keysPanel.appendChild(title);
+        const list = document.createElement('dl');
+        list.className = 'keys-list';
+        rows.forEach(function (row) {
+            const dt = document.createElement('dt');
+            row[0].forEach(function (cap) {
+                const kbd = document.createElement('kbd');
+                kbd.textContent = cap;
+                dt.appendChild(kbd);
+            });
+            const dd = document.createElement('dd');
+            dd.textContent = row[1];
+            list.appendChild(dt);
+            list.appendChild(dd);
+        });
+        keysPanel.appendChild(list);
+    }
+    function setKeysOpen(on) {
+        if (on) { paintKeys(); closePanel(); }
+        keysWrap.classList.toggle('open', on);
+        keysPill.setAttribute('aria-expanded', on ? 'true' : 'false');
+    }
+    keysPill.addEventListener('click', function (e) {
+        e.preventDefault();
+        setKeysOpen(!keysWrap.classList.contains('open'));
+    });
+    document.addEventListener('click', function (e) {
+        if (!keysWrap.contains(e.target)) setKeysOpen(false);
+    });
+    /* Doc, 19.09.2026: "gute Ideen: go" and "? H zeigen das Menü" - the keys
+       every SVP page has. The pages add their own (W, F, J, arrows ...) and
+       list them in window.svpKeys. Never while typing, never with a modifier
+       (Cmd-Shift-R and friends stay with the browser). */
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            setKeysOpen(false);
+            if (qrOverlay) qrOverlay.classList.remove('open');
+            return;
+        }
+        if (e.metaKey || e.ctrlKey || e.altKey || e.repeat || e.defaultPrevented) return;
+        const t = e.target;
+        if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+        const key = (e.key || '').toLowerCase();
+        if (key === '?' || key === 'h') {
+            setKeysOpen(!keysWrap.classList.contains('open'));
+        } else if (key === 's' || key === '/') {
+            const field = pageSearch();
+            if (!field) return;
+            field.focus();
+            field.select();
+        } else if (key === 'v' && canFs) {
+            toggleFs();
+        } else if (key === 'd') {
+            applyTheme(theme === 'light' ? 'dark' : 'light');
+        } else if (key === 'q') {
+            if (qrOverlay && qrOverlay.classList.contains('open')) qrOverlay.classList.remove('open');
+            else showQr();
+        } else return;
+        e.preventDefault();
+    });
+
     navRight.appendChild(themeWrap);
     navRight.appendChild(authPill);
 

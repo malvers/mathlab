@@ -115,7 +115,7 @@
         const terms = (bisOstern ? FERIEN_2026_27.slice(0, 4) : FERIEN_2026_27)
             .concat(FERIEN_BUSSTAG);
         const ferien = 'Ferientermine Sachsen 2026/27 (SMK): ' + terms.join(' \u00b7 ') + '.';
-        const own = foot.innerHTML.trim();
+        const own = ustdLang(foot.innerHTML.trim());
         foot.innerHTML = FOOT_USAGE + (own ? ' ' + own : '') + ' ' + ferien;
     })();
 
@@ -145,6 +145,112 @@
         window.addEventListener('scroll', mark, { passive: true });
     })();
 
+    /* Doc, 19.09.2026: "SVP weg und Eine Unterrichtsstunde pro Woche" - the
+       subtitle no longer starts with "Stoffverteilungsplan" (the export head
+       names it anyway) and spells the hours out. Central, like SW for "Nr.",
+       so none of the 17 plan pages has to be touched. */
+    /* Doc, 19.09.2026: "Ustd. -> immer Unterrichtsstunden" - the pages keep
+       their short source text, what is shown is spelled out: cards, table
+       head, footer and subtitle all run through here. */
+    function ustdLang(s) {
+        return String(s)
+            .replace(/(\d+)\s*Ustd\.\/Woche/g, function (all, d) {
+                return d + (d === '1' ? ' Unterrichtsstunde' : ' Unterrichtsstunden') + ' pro Woche';
+            })
+            .replace(/(\d+)(\s*)Ustd\./g, function (all, d, gap) {
+                return d + (gap || ' ') + (d === '1' ? 'Unterrichtsstunde' : 'Unterrichtsstunden');
+            })
+            .replace(/Ustd\./g, 'Unterrichtsstunden');
+    }
+    function ustdLangIn(root) {
+        const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+        for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+            if (n.data.indexOf('Ustd') !== -1) n.data = ustdLang(n.data);
+        }
+    }
+    (function tidySubtitle() {
+        const sub = document.querySelector('header.page-head .subtitle');
+        if (!sub) return;
+        const WORDS = ['', 'Eine', 'Zwei', 'Drei', 'Vier', 'Fünf', 'Sechs', 'Sieben', 'Acht'];
+        const walk = document.createTreeWalker(sub, NodeFilter.SHOW_TEXT);
+        for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+            n.data = n.data
+                .replace(/^\s*Stoffverteilungsplan\s*·\s*/, '')
+                .replace(/(\d+)\s*Ustd\.\/Woche/, function (all, d) {
+                    const k = Number(d);
+                    return (WORDS[k] || d) + (k === 1 ? ' Unterrichtsstunde' : ' Unterrichtsstunden') + ' pro Woche';
+                });
+        }
+        ustdLangIn(sub);
+        document.querySelectorAll('.meta-card .vu').forEach(ustdLangIn);
+    })();
+
+    /* Doc, 19.09.2026: "oben steht Lehrplan. Mach daraus ein drop. wenn offen
+       blende diese Zeile ein und zwar direkt unter Stoffverteilungsplan ... mach
+       eine zusätzliche Kachel vor die LBs mit gesamter Lehrplan, idealer Weise
+       mit Screenshot vom Cover". The Lernbereich cards move into the head, under
+       the subtitle, and only show while "Lehrplan ▾" is open (key L). The PDF
+       itself becomes the first card, with the cover of page 1 - rendered once
+       into lehrplaene/covers/<same name>.jpg (pdftoppm, 180 px wide). The LB
+       and bridge panels are inserted right after the grid further down, so
+       they land in the same fold. Open or closed is remembered per page. */
+    (function lehrplanDrop() {
+        const head = document.querySelector('.plan-sticky header.page-head');
+        const grid = document.querySelector('.meta-cards');
+        const btn = head && [...head.querySelectorAll('.head-row button.action')]
+            .find(function (b) { return /Lehrplan/i.test(b.textContent); });
+        if (!head || !grid || !btn) return;
+        const m = (btn.getAttribute('onclick') || '').match(/open\(\s*'([^']+\.pdf)'/);
+        const pdf = m ? m[1] : ((window.LB_INFO && window.LB_INFO.pdf) || '');
+
+        const fold = document.createElement('div');
+        fold.className = 'lp-fold';
+        fold.id = 'lp-fold';
+        head.appendChild(fold);          /* the subtitle is the head's last line */
+        fold.appendChild(grid);
+
+        if (pdf) {
+            const card = document.createElement('a');
+            card.className = 'meta-card lp-card';
+            card.href = pdf;
+            card.target = '_blank';
+            card.rel = 'noopener';
+            card.title = 'Den ganzen Lehrplan (PDF) öffnen';
+            const img = document.createElement('img');
+            img.className = 'lp-cover';
+            img.alt = '';
+            img.src = pdf.replace(/([^/]+)\.pdf$/, 'covers/$1.jpg');
+            img.addEventListener('error', function () { img.remove(); });
+            const text = document.createElement('div');
+            text.className = 'lp-text';
+            text.innerHTML = '<div class="k c-bright">Lehrplan</div>'
+                + '<div class="v">Gesamter Lehrplan</div><div class="vu">PDF</div>';
+            card.appendChild(img);
+            card.appendChild(text);
+            grid.insertBefore(card, grid.firstChild);
+        }
+
+        btn.removeAttribute('onclick');
+        btn.classList.add('lp-btn');
+        btn.innerHTML = 'Lehrplan <span class="export-caret">▾</span>';
+        btn.title = 'Lernbereiche und Lehrplan ein- oder ausblenden (L)';
+        btn.setAttribute('aria-controls', 'lp-fold');
+
+        const KEY = 'svp-lp-open:' + location.pathname;
+        function setOpen(on) {
+            document.body.classList.toggle('lp-open', on);
+            btn.setAttribute('aria-expanded', on ? 'true' : 'false');
+            try { localStorage.setItem(KEY, on ? '1' : '0'); } catch (e) { }
+        }
+        let open0 = false;
+        try { open0 = localStorage.getItem(KEY) === '1'; } catch (e) { }
+        setOpen(open0);
+        btn.addEventListener('click', function () {
+            setOpen(!document.body.classList.contains('lp-open'));
+        });
+        window.toggleLehrplan = function () { btn.click(); };
+    })();
+
     const headRow = document.querySelector('#plan-table thead tr');
     if (headRow) {
         const matTh = document.createElement('th');
@@ -168,7 +274,8 @@
                das Letzte, was Wochenzeilen noch mehrzeilig machte. Der Text bleibt in
                PLAN bzw. in den Overrides stehen, er wird nur nicht mehr angezeigt. */
             if (t === 'Bemerkungen') { th.remove(); return; }
-            if (/^Ustd/.test(t)) th.classList.add('ustd-col');
+            /* spelled out, with a soft hyphen: two lines keep the column narrow */
+            if (/^Ustd/.test(t)) { th.classList.add('ustd-col'); th.textContent = 'Unterrichts­stunden'; }
             if (/^Thema/.test(t)) th.classList.add('topic-col');
         });
     }
@@ -944,6 +1051,7 @@
             /* measure with the button out of the flow: the pill then sits where
                it stays once the button floats */
             rb.classList.add('floating');
+            rb.style.transform = '';   /* measure the plain static position */
             const td = ref.matTd.getBoundingClientRect();
             /* .topic-text is a block as wide as the cell (line clamp) - the
                text itself ends where its Range ends, clipped to the cell */
@@ -957,16 +1065,20 @@
             const w = rb.offsetWidth;
             if (!td.width || endL - textR < w + 24) {
                 rb.classList.remove('floating');
-                rb.style.left = '';
-                rb.style.top = '';
                 return;
             }
-            rb.style.left = Math.round((textR + endL) / 2 - w / 2 - td.left - ref.matTd.clientLeft) + 'px';
-            /* same vertical middle as the pill (the cell's 50% sat 1.2 px lower) */
+            /* The cell is not positioned (see svp.css), so the button keeps its
+               static position and the transform carries it from there - it
+               follows its row whenever a week above opens or closes. */
+            const at = rb.getBoundingClientRect();
+            const dx = Math.round((textR + endL) / 2 - w / 2 - at.left);
+            /* same vertical middle as the pill */
+            let dy = 0;
             if (next) {
                 const nb = next.getBoundingClientRect();
-                rb.style.top = (nb.top + nb.height / 2 - rb.offsetHeight / 2 - td.top - ref.matTd.clientTop) + 'px';
+                dy = nb.top + nb.height / 2 - at.height / 2 - at.top;
             }
+            rb.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
         });
     }
     function watchRedBtn(ref) {
@@ -2910,7 +3022,7 @@
             if (utxt) {
                 const u = document.createElement('div');
                 u.className = 'f-u';
-                u.textContent = utxt + ' Ustd.';
+                u.textContent = utxt + ' Unterrichtsstunden';
                 lbc.appendChild(u);
             }
             tr.appendChild(lbc);
@@ -3342,6 +3454,116 @@
     // the DOM, which is still incomplete while the table is being built.
     const initialOpen = new Set(openWeeks);
 
+    /* Doc, 19.09.2026: "mach an die Ferien auch ein Dreieck so dass die Wochen
+       danach eingeklappt werden können. Key F alle ... also alle Wochen nicht
+       sichtbar" - a holiday row folds the weeks behind it, up to the next
+       holiday row: those weeks vanish completely, not just their sub-rows.
+       Remembered per page and browser, like the open weeks. The set holds the
+       row index of every folded holiday row. */
+    const FOLD_KEY = 'svp-ferien-fold:' + location.pathname;
+    let foldedFerien;
+    try { foldedFerien = new Set(JSON.parse(localStorage.getItem(FOLD_KEY) || '[]')); }
+    catch (e) { foldedFerien = new Set(); }
+    const foldableFerien = [];   /* row index of every holiday row with weeks behind it */
+
+    /* One pass over the table: every row takes the state of the holiday row
+       above it. Cheap enough to run on each toggle, and it also catches
+       sub-rows that were built after the fold. */
+    /* Doc, 19.09.2026: "mach ganz oben über den Header SW KW Woche noch
+       Sommerferien ... die sollen weg scrollen" - the holidays BEFORE the school
+       year head the table, so the first block of weeks folds like the others.
+       It is the first row of the thead, but a td: only the th cells are sticky,
+       so this row scrolls away and the column heads stay. Central here, no plan
+       page carries it; PRE_I is its place in the fold set. */
+    /* Doc, 19.09.2026: "schreib nur Sommerferien 2026" - no dates, no KW */
+    const PRE_FERIEN = 'Sommerferien 2026';
+    const PRE_I = -1;
+    let preFerien = null;   /* { ferienTd } - the search walks it like a plan row */
+
+    /* Cell of a holiday row: chevron (only where weeks follow) + text. The text
+       lives in its own span: it is what edit mode makes editable and what is
+       saved - the chevron stays out of both. */
+    function buildFerienCell(tr, label, i) {
+        const td = document.createElement('td');
+        td.colSpan = 7;
+        const text = document.createElement('span');
+        text.className = 'ferien-text';
+        text.textContent = label;
+        /* the Sommerferien at the end of the plan have nothing to fold */
+        const next = planRows[i + 1];
+        if (next && !next.ferien) {
+            foldableFerien.push(i);
+            tr.classList.add('foldable');
+            const chev = document.createElement('span');
+            chev.className = 'chev';
+            chev.textContent = '▸';
+            chev.title = 'Wochen bis zu den nächsten Ferien ein- oder ausklappen (F: alle)';
+            td.appendChild(chev);
+            /* While editing a click into the text sets the cursor, then only
+               the chevron folds - same rule as for the week rows. */
+            tr.addEventListener('click', function (e) {
+                if (text.isContentEditable && e.target !== chev) return;
+                toggleFerienFold(i);
+            });
+        }
+        td.appendChild(text);
+        tr.appendChild(td);
+        return { td, text };
+    }
+
+    (function buildPreFerien() {
+        const thead = document.querySelector('#plan-table thead');
+        if (!thead || !planRows.length || planRows[0].ferien) return;
+        const tr = document.createElement('tr');
+        tr.className = 'ferien';
+        tr.dataset.i = PRE_I;
+        preFerien = { ferienTd: buildFerienCell(tr, PRE_FERIEN, PRE_I).td };
+        thead.insertBefore(tr, thead.firstChild);
+    })();
+
+    function applyFerienFolds() {
+        let folded = !!preFerien && foldedFerien.has(PRE_I);
+        if (preFerien) preFerien.ferienTd.parentElement.classList.toggle('folded', folded);
+        for (const tr of tbody.children) {
+            if (tr.classList.contains('ferien')) {
+                folded = foldedFerien.has(Number(tr.dataset.i));
+                tr.classList.toggle('folded', folded);
+                continue;
+            }
+            tr.classList.toggle('ferien-folded', folded);
+        }
+        /* Doc, 19.09.2026: "wenn alle zu auch den Header weg" - with every
+           block folded only holiday rows are left, and column heads over
+           nothing but holidays say nothing (svp.css hides them). */
+        const table = document.getElementById('plan-table');
+        if (table) table.classList.toggle('all-folded', foldableFerien.length > 0
+            && foldableFerien.every(i => foldedFerien.has(i)));
+    }
+    function setFerienFolds(set) {
+        foldedFerien = set;
+        applyFerienFolds();
+        try { localStorage.setItem(FOLD_KEY, JSON.stringify([...foldedFerien])); } catch (e) { }
+    }
+    function toggleFerienFold(i) {
+        const next = new Set(foldedFerien);
+        if (!next.delete(i)) next.add(i);
+        setFerienFolds(next);
+    }
+    /* A jump to a week (?kw=) must not land on an invisible row. */
+    function unfoldFerienFor(tr) {
+        if (!tr.classList.contains('ferien-folded')) return;
+        let head = tr.previousElementSibling;
+        while (head && !head.classList.contains('ferien')) head = head.previousElementSibling;
+        /* no holiday row above it in the tbody: the block under the thead row */
+        toggleFerienFold(head ? Number(head.dataset.i) : PRE_I);
+    }
+    /* Key F - same logic as W for the weeks: as long as one block is still
+       showing, the next act is folding them all. */
+    window.toggleFerienFolds = function () {
+        const anyShowing = foldableFerien.some(i => !foldedFerien.has(i));
+        setFerienFolds(new Set(anyShowing ? foldableFerien : []));
+    };
+
     planRows.forEach((row, i) => {
         const ov = saved[i] || {};
         const tr = document.createElement('tr');
@@ -3349,12 +3571,9 @@
 
         if (row.ferien) {
             tr.className = 'ferien';
-            const td = document.createElement('td');
-            td.colSpan = 7;
-            td.textContent = ov.ferien || row.ferien;
-            tr.appendChild(td);
+            const cell = buildFerienCell(tr, ov.ferien || row.ferien, i);
             tbody.appendChild(tr);
-            rendered.push({ i, ferienTd: td });
+            rendered.push({ i, ferienTd: cell.td, ferienText: cell.text });
             return;
         }
 
@@ -3686,6 +3905,8 @@
             subMain.appendChild(subBody);
             detailTr.appendChild(subMain);
             tr.after(detailTr);
+            /* built late (edit mode, first note) inside a folded holiday block */
+            if (tr.classList.contains('ferien-folded')) detailTr.classList.add('ferien-folded');
             tr.classList.add('expandable');
             chev = document.createElement('span');
             chev.className = 'chev';
@@ -3761,6 +3982,7 @@
         if (initialOpen.has(i)) ref.openSubRow(); /* restore remembered state */
         rendered.push(ref);
     });
+    applyFerienFolds();   /* restore the remembered holiday folds */
     loadTalks();
 
     /* Alle Bereich-Pillen gleich breit. Ohne das misst jede Zeile ihre eigene
@@ -4835,11 +5057,15 @@
             if (s && s.classList.contains('detail-row')) s.classList.remove('open');
         });
         searchOpened = [];
+        /* A running search looks into folded holiday blocks too (svp.css lifts
+           the fold while this class is set); the fold returns with the clear. */
+        document.body.classList.toggle('plan-searching', terms.length > 0);
         if (window.CSS && CSS.highlights) CSS.highlights.delete('plan-find');
         const ranges = [];
         let hits = 0, total = 0;
 
-        for (const r of rendered) {
+        /* the Sommerferien row in the thead is searched like any plan row */
+        for (const r of (preFerien ? [preFerien].concat(rendered) : rendered)) {
             const tr = r.ferienTd ? r.ferienTd.parentElement
                 : (r.dateTd ? r.dateTd.parentElement : null);
             if (!tr) continue;
@@ -4980,6 +5206,7 @@
             const tr = hit && hit.dateTd && hit.dateTd.closest('tr');
             if (!tr) return false;
             done = true;
+            unfoldFerienFor(tr);
             if (hit.openSubRow) hit.openSubRow();
             tr.scrollIntoView({ block: 'center', behavior: 'smooth' });
             tr.classList.add('kw-jump');
@@ -5041,12 +5268,104 @@
     };
     /* Doc, 18.09.2026: "gib mir auf W Wochen auf/zu" - the key does what the
        toolbar button does; not while typing in a field or an edited cell */
+    /* Doc, 19.09.2026: "Key F alle" - F folds or unfolds all holiday blocks.
+       Both keys are listed in the "?" panel of the nav row (svp-nav.js). */
+    /* Doc, 19.09.2026: "gute Ideen: go" - J jumps to the current week (H is
+       the help menu: "? H zeigen das Menü"), the arrows walk the visible rows
+       with a cursor and Enter opens what it marks, E toggles the edit mode. */
+    const editBtn = () => document.querySelector('.toolbar button[onclick*="togglePlanEdit"]');
+    const canEdit = function () {
+        const btn = editBtn();
+        return !!(btn && btn.offsetParent !== null && window.svpAuth && svpAuth.hasSession());
+    };
+    window.svpKeys = (window.svpKeys || []).concat([
+        [['W'], 'Alle Wochen auf- oder zuklappen'],
+        [['F'], 'Alle Ferienblöcke ein- oder ausklappen'],
+        [['J'], 'Zur aktuellen Woche springen (jetzt)'],
+        [['↑', '↓'], 'Zeile für Zeile durch den Plan gehen'],
+        [['Enter'], 'Mit ↑ ↓ markierte Zeile öffnen/schließen'],
+        [['E'], 'Bearbeiten ein- oder ausschalten', canEdit],
+        [['L'], 'Lernbereiche und Lehrplan ein- oder ausblenden', () => !!window.toggleLehrplan]
+    ]);
+
+    /* The cursor of the arrow keys: week rows and the holiday rows that fold,
+       as far as they are showing (folds and a running search hide rows). */
+    let kbRow = null;
+    function kbRows() {
+        return [...document.querySelectorAll(
+            '#plan-table thead tr.ferien.foldable, #plan-table tbody tr:not(.detail-row)')]
+            .filter(tr => tr.offsetParent !== null
+                && (!tr.classList.contains('ferien') || tr.classList.contains('foldable')));
+    }
+    function kbMark(tr) {
+        if (kbRow) kbRow.classList.remove('kb-cursor');
+        kbRow = tr;
+        if (tr) tr.classList.add('kb-cursor');
+    }
+    /* Keep the cursor clear of the sticky head: scrollIntoView knows nothing
+       about it and would park the row underneath. */
+    function kbReveal(tr) {
+        const box = tr.getBoundingClientRect();
+        let top = 0;
+        for (const el of document.querySelectorAll('.plan-sticky, #plan-table thead th:not(.shift-col)')) {
+            if (el.offsetParent !== null || el.classList.contains('plan-sticky')) {
+                top = Math.max(top, el.getBoundingClientRect().bottom);
+            }
+        }
+        top = Math.min(top, window.innerHeight / 2);   /* not stuck: the head is far down the page */
+        if (box.top < top + 6) window.scrollBy(0, box.top - top - 6);
+        else if (box.bottom > window.innerHeight - 6) window.scrollBy(0, box.bottom - window.innerHeight + 6);
+    }
+    function kbStep(dir) {
+        const rows = kbRows();
+        if (!rows.length) return;
+        let at = rows.indexOf(kbRow);
+        if (at === -1) {
+            /* first press: start at the current week, else at the top */
+            const now = rows.find(tr => tr.classList.contains('kw-now'));
+            at = now ? rows.indexOf(now) : 0;
+        } else {
+            at = Math.max(0, Math.min(rows.length - 1, at + dir));
+        }
+        kbMark(rows[at]);
+        kbReveal(rows[at]);
+    }
+    function jumpToNow() {
+        const weeks = [...document.querySelectorAll('#plan-table tbody tr:not(.detail-row):not(.ferien)')];
+        /* in the holidays no week is marked - then the next one to come */
+        const tr = weeks.find(w => w.classList.contains('kw-now'))
+            || weeks.find(w => !w.classList.contains('kw-past'));
+        if (!tr) return;
+        unfoldFerienFor(tr);
+        if (tr.offsetParent === null) return;   /* filtered out by a running search */
+        kbMark(tr);
+        tr.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+
     document.addEventListener('keydown', function (e) {
-        if ((e.key !== 'w' && e.key !== 'W') || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+        if (e.metaKey || e.ctrlKey || e.altKey || e.defaultPrevented) return;
         const t = e.target;
         if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+        const key = (e.key || '').toLowerCase();
+        if (key === 'arrowdown' || key === 'arrowup') {
+            e.preventDefault();               /* repeats welcome: hold the key to run */
+            kbStep(key === 'arrowdown' ? 1 : -1);
+            return;
+        }
+        if (e.repeat) return;
+        if (key === 'w') window.togglePlanDetails();
+        else if (key === 'f') window.toggleFerienFolds();
+        else if (key === 'j') jumpToNow();
+        else if (key === 'escape') { kbMark(null); return; }
+        else if (key === 'enter') {
+            /* a focused button or link keeps its Enter */
+            if (!kbRow || kbRow.offsetParent === null || (t && /^(BUTTON|A|SUMMARY)$/.test(t.tagName))) return;
+            kbRow.click();
+        }
+        else if (key === 'e') { if (!canEdit()) return; editBtn().click(); }
+        else if (key === 'l') { if (!window.toggleLehrplan) return; window.toggleLehrplan(); }
+        else return;
         e.preventDefault();
-        window.togglePlanDetails();
     });
 
     /* Beim Laden koennen Wochen aus dem letzten Besuch offen sein - dann muss
@@ -5089,7 +5408,7 @@
                kann man mal generell raus nehmen") - es kommt aus dem Schuljahr
                und wird ueber "Verschieben" bewegt, nicht von Hand getippt. Ein
                vertipptes Datum haette lautlos die ganze Wochenfolge verbogen. */
-            for (const el of [r.ferienTd, r.uTd, r.topicSpan, r.remarkTd, r.ul]) {
+            for (const el of [r.ferienText, r.uTd, r.topicSpan, r.remarkTd, r.ul]) {
                 if (el) el.setAttribute('contenteditable', flag);
             }
             /* Eine frueher gesetzte Markierung muss wieder weg, sonst bliebe das
@@ -5151,7 +5470,7 @@
         const out = {};
         for (const r of rendered) {
             if (r.ferienTd) {
-                out[r.i] = { ferien: r.ferienTd.textContent.trim() };
+                out[r.i] = { ferien: r.ferienText.textContent.trim() };
             } else {
                 const entry = {
                     nr: r.nr,
@@ -5877,7 +6196,7 @@
             const ov = map[r.i] || {};
             const row = planRows[r.i] || {};
             if (r.ferienTd) {
-                r.ferienTd.textContent = ov.ferien || row.ferien;
+                r.ferienText.textContent = ov.ferien || row.ferien;
                 continue;
             }
             setDateText(r.dateTd, ov.date != null ? ov.date : row.date);
