@@ -807,7 +807,14 @@
         const cardEl = el('div', { id: 'tour-card' }, '<div class="blk"><h1></h1><p></p><div class="sig">Doc Alvers Mathe-Labor</div></div>');
         cardEl.querySelector('h1').textContent = c.title || E.def.title || '';
         cardEl.querySelector('p').textContent = c.sub || '';
-        if (c.img) { const img = el('img', { alt: '' }); img.src = c.img; cardEl.appendChild(img); }
+        const media = el('div', { class: 'media' });
+        if (c.img) { const img = el('img', { alt: '' }); img.src = c.img; media.appendChild(img); }
+        const go = el('button', { id: 'tour-start', type: 'button', title: 'Tour starten (Leertaste)', 'aria-label': 'Tour starten' }, PLAY_SVG);
+        go.tabIndex = -1;
+        go.addEventListener('mousedown', (e) => e.preventDefault());
+        go.addEventListener('click', () => { if (E.state === 'idle') play(0); });
+        media.appendChild(go);
+        cardEl.appendChild(media);
         view.appendChild(cardEl);
         view.appendChild(el('div', { id: 'tour-veil' }, '<div><b></b><span></span><i></i></div>'));
         view.appendChild(el('div', { id: 'tour-rec' }, '<i></i> AUFNAHME — ENTER SPEICHERT UND SPIELT WEITER, ESC VERWIRFT'));
@@ -909,6 +916,7 @@
     function ui() {
         const b = document.body, recording = E.rec && E.rec.recording;
         b.classList.toggle('running', E.state === 'running' || E.state === 'forward');
+        b.classList.toggle('idle', E.state === 'idle');
         b.classList.toggle('can-rec', !recording && (E.state === 'running' || E.state === 'paused' || E.state === 'ended'));
         const play = $id('tour-play');
         if (play) play.innerHTML = E.state === 'running' ? PAUSE_SVG : PLAY_SVG;
@@ -974,6 +982,7 @@
         E.scenes = def.scenes || [];
         const start = async () => {
             buildChrome();
+            ui();                                   // body.idle: the big play shows from the first paint
             card(true);
             if (def.card && def.card.img) cardImage(true, false);
             E.rec = window.KritikRecorder ? KritikRecorder.create({ log: dbg, onLive: (s) => live(s || 'Ich höre zu …', !s) }) : null;
