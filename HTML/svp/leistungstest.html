@@ -86,8 +86,14 @@
         /* The big paragraph sign sits in the title line, far right, as a circle. */
         .lt-warn[hidden] { display: none; }
         .lt-para-big {
-            width: 42px;
-            height: 42px;
+            /* Doc: "mach das § so hoch wie L" - the circle is as tall as the
+               title's capital L: Orbitron's cap height is 0.72 em (read from
+               the font file) times the h1 size of svp.css; the sign shrinks
+               along so it still fits inside. Then "sieht mickrig aus - 15 %
+               größer" twice, same centre (align-self: center below). */
+            --lt-d: calc(1.15 * 1.15 * 0.72 * clamp(1.15rem, 3.2vw, 1.9rem));
+            width: var(--lt-d);
+            height: var(--lt-d);
             /* Arial's § reads better at this size than Orbitron's. The 1px
                bottom padding is eyeballed against measurement: ink centroid
                says lower, Doc's eye said higher - the eye won. */
@@ -96,7 +102,7 @@
             margin-left: 0;
             border-radius: 50%;
             border: 1px solid var(--ypsilon);   /* thin rim after all */
-            font-size: 1.4rem;
+            font-size: calc(var(--lt-d) * 0.64);
             display: grid;
             place-items: center;
             align-self: center;     /* dead centre of the title line */

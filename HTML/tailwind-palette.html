@@ -115,12 +115,14 @@
     /* Doc: "den der selektiert ist mit einem roten Rand, alle anderen den HG
        in der Randfarbe" - every chip is filled with its colour, the chosen
        one wears our red (Ypsilon) rim */
+    /* ... then "bitte doch nur den Rand bunt": no fill, the rim in the colour,
+       the chosen one keeps the red rim */
     .tgt { display: inline-flex; align-items: center; gap: 6px; }
-    .tgt[data-prop] { color: rgb(26, 26, 28); background: rgb(var(--c, 205, 210, 220)); border-color: rgb(var(--c, 205, 210, 220)); }
-    .tgt[data-prop]:hover { color: rgb(26, 26, 28); filter: brightness(1.12); }
+    .tgt[data-prop] { color: var(--text); background: transparent; border-color: rgb(var(--c, 205, 210, 220)); }
+    .tgt[data-prop]:hover { color: var(--text); background: rgba(var(--c, 205, 210, 220), 0.12); }
     /* Grund and Karten are nearly the page ground - a rim in their own colour
        vanished (Doc: "Grund Karte keine Pille?"), so dark ones get a light rim */
-    .tgt[data-prop].dark-c, .tgt[data-prop].dark-c:hover { color: rgb(238, 240, 244); border-color: rgba(205, 210, 220, 0.45); }
+    .tgt[data-prop].dark-c { border-color: rgba(205, 210, 220, 0.45); }
     .tgt[data-prop].on, .tgt[data-prop].on.dark-c { border-color: rgb(176, 36, 24); box-shadow: 0 0 0 2px rgb(176, 36, 24); }   /* Doc: "roter Rand 1px dicker" - 3 px */
     .tgt:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
     /* Doc: "Kopieren grün, Zurück rot", then "bitte UNSER grün/rot" - the
