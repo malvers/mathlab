@@ -25,7 +25,7 @@
         color: var(--text);
         font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
     }
-    .wrap { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 48px; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 8px 48px; }   /* was 24px on top - Doc: "alles ein Stück höher" */
     h1, h2, .mono-label {
         font-family: "Orbitron", system-ui, sans-serif;
         letter-spacing: 0.06em;
@@ -63,14 +63,14 @@
     .row .nr { color: var(--muted); font-variant-numeric: tabular-nums; }
     .row .topic { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .row.now {
-        background-image: linear-gradient(90deg, rgba(var(--pick), 0.26), rgba(var(--pick), 0.06) 50%, rgba(var(--pick), 0.26));
+        background-image: linear-gradient(90deg, rgba(var(--pick), var(--pe, 0.26)), rgba(var(--pick), var(--pm, 0.06)) 50%, rgba(var(--pick), var(--pe, 0.26)));
         box-shadow: inset 2px 0 0 rgb(var(--pick)), inset -2px 0 0 rgb(var(--pick)),
             inset 6px 0 10px -6px rgba(var(--pick), 0.5), inset -6px 0 10px -6px rgba(var(--pick), 0.5);
     }
     .row.band {
         justify-content: center;
         font-family: "Orbitron", sans-serif; font-size: 0.78rem; letter-spacing: 0.08em;
-        background-image: linear-gradient(90deg, rgba(var(--pick), 0.22), rgba(var(--pick), 0.05) 50%, rgba(var(--pick), 0.22));
+        background-image: linear-gradient(90deg, rgba(var(--pick), var(--pe, 0.22)), rgba(var(--pick), var(--pm, 0.05)) 50%, rgba(var(--pick), var(--pe, 0.22)));
         box-shadow: inset 2px 0 0 rgb(var(--pick)), inset -2px 0 0 rgb(var(--pick));
         text-shadow: 0 0 10px rgba(var(--pick), 0.25);
     }
@@ -101,8 +101,21 @@
     .tgt { display: inline-flex; align-items: center; gap: 6px; border-color: rgba(var(--c, 205, 210, 220), 0.55); }
     .tgt.on { color: rgb(26, 26, 28); background: rgb(var(--c, 205, 210, 220)); border-color: rgb(var(--c, 205, 210, 220)); }
     .tgt.on.dark-c { color: rgb(238, 240, 244); }
+    /* Grund and Karten are nearly the page ground - a rim in their own colour
+       vanished (Doc: "Grund Karte keine Pille?"), so dark ones get a light rim */
+    .tgt.dark-c, .tgt.on.dark-c { border-color: rgba(205, 210, 220, 0.45); }
     .tgt:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
-    .tgt.reset { margin-left: auto; }
+    /* Doc: "Kopieren grün, Zurück rot", then "bitte UNSER grün/rot" - the
+       project palette (CLAUDE.md): phi green and Ypsilon red, filled */
+    .tgt.copy-btn { margin-left: auto; color: rgb(255, 255, 255); background: rgb(121, 158, 49); border-color: rgb(121, 158, 49); }
+    .tgt.reset { color: rgb(255, 255, 255); background: rgb(176, 36, 24); border-color: rgb(176, 36, 24); }
+    .tgt.copy-btn:hover, .tgt.reset:hover { color: rgb(255, 255, 255); filter: brightness(1.12); }
+    /* Doc: "bitte nur greyed wenn nicht relevant" - always there, dimmed and
+       locked for targets without an alpha pair */
+    .alphas.off { opacity: 0.35; }
+    .alphas { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 0.8rem; color: var(--muted); }
+    .alphas input[type="range"] { flex: 1 1 120px; min-width: 0; accent-color: rgb(var(--pick)); }
+    .alphas output { color: var(--text); font-variant-numeric: tabular-nums; min-width: 3.2ch; }
     .summary { color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; min-height: 1.2em; }
     .summary b { color: var(--text); font-weight: 600; }
     th { font-weight: 500; color: var(--muted); font-size: 0.72rem; }
@@ -119,29 +132,18 @@
     .sw:hover { transform: scale(1.08); z-index: 1; }
     .sw:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
     .sw.sel { outline: 3px solid var(--text); outline-offset: 2px; transform: scale(1.1); z-index: 1; }
-    /* shades already in use in the SVP grey scheme */
-    .sw.used::after {
-        content: attr(data-use);
-        position: absolute; inset: auto 3px 3px auto;
-        font-size: 9px; line-height: 1; font-weight: 700;
-        color: rgb(26, 26, 28); background: rgba(255, 255, 255, 0.85);
-        border-radius: 3px; padding: 2px 3px;
-    }
     .legend { color: var(--muted); font-size: 0.8rem; margin-top: 12px; max-width: 75ch; }
     @media (prefers-reduced-motion: reduce) { .sw:hover { transform: none; } }
 </style>
 
 <div class="wrap">
     <h1>Tailwind-Palette</h1>
-    <p class="lead">Alle 22 Tailwind-Farben in 11 Stufen, auf dem Grau des SVP-Plans. Feld anklicken: oben erscheint die Farbe als aktuelle Woche, Ferienband und Bereich-Pille. „Kopieren“ legt den Wert so in die Zwischenablage, wie er in svp.css steht.</p>
-
     <div class="preview" aria-live="polite">
-        <div class="pv-head">
+        <div class="pv-head" hidden>
             <!-- Doc: "die eine Farbe davor weg" - "Kopieren" takes the whole set now,
                  the single picked colour stays only as data for it -->
             <span class="pv-name" id="pv-name" hidden>pink-400</span>
             <span class="pv-val" id="pv-val" hidden>rgb(244, 114, 182) · #f472b6</span>
-            <button class="copy" id="copy" type="button">Kopieren</button>
             <span class="copied" id="copied" hidden>kopiert</span>
         </div>
         <div class="pv-rows">
@@ -151,8 +153,8 @@
         <!-- Live link: each click also goes to every open SVP plan on this
              origin (localhost:8765) - the plan switches to grey and repaints. -->
         <div class="targets" id="targets" role="radiogroup" aria-label="Was im Plan umgefärbt wird">
-            <button type="button" class="tgt on" data-prop="--g-week" data-mark="W">Aktuelle Woche</button>
-            <button type="button" class="tgt" data-prop="--g-ferien" data-mark="F">Ferien</button>
+            <button type="button" class="tgt on" data-prop="--g-week" data-mark="W" data-alpha="week">Aktuelle Woche</button>
+            <button type="button" class="tgt" data-prop="--g-ferien" data-mark="F" data-alpha="ferien">Ferien</button>
             <button type="button" class="tgt" data-prop="--g-orange">LB Orange</button>
             <button type="button" class="tgt" data-prop="--g-green">Grün</button>
             <button type="button" class="tgt" data-prop="--g-cyan">Cyan</button>
@@ -160,13 +162,28 @@
             <button type="button" class="tgt" data-prop="--g-teal">Türkis</button>
             <button type="button" class="tgt" data-prop="--g-pink">Pink</button>
             <button type="button" class="tgt" data-prop="--g-mat">Zusatzmaterial-Rand</button>
+            <button type="button" class="tgt" data-prop="--g-btn">Knopf-HG</button>
+            <!-- Doc: "sieht nicht gut aus ... auf den HG für Zusatz-Pillen" - own target -->
+            <button type="button" class="tgt" data-prop="--g-matbg">Zusatzmaterial-HG</button>
             <button type="button" class="tgt" data-prop="--text">Schrift</button>
             <button type="button" class="tgt" data-prop="--head">Überschriften</button>
             <button type="button" class="tgt" data-prop="--bg">Grund</button>
-            <button type="button" class="tgt" data-prop="--card">Karten</button>
+            <!-- Doc: "Kopieren links neben Zurück-Pille" -->
+            <button type="button" class="tgt copy-btn" id="copy">Kopieren</button>
             <button type="button" class="tgt reset" id="reset">Zurücksetzen</button>
         </div>
-        <div class="summary" id="summary">Ziel wählen, dann Farbe anklicken: der offene Plan färbt sich sofort um.</div>
+        <!-- Doc: "gib mir noch einen Slider für die 2 Transp" - edge and middle
+             alpha of the week row / holiday band, shown for those two targets -->
+        <div class="alphas off" id="alphas">
+            <label for="a-edge">Rand</label>
+            <input type="range" id="a-edge" min="0" max="1" step="0.01" value="0.4">
+            <output id="a-edge-v" for="a-edge">0.40</output>
+            <label for="a-mid">Mitte</label>
+            <input type="range" id="a-mid" min="0" max="1" step="0.01" value="0.2">
+            <output id="a-mid-v" for="a-mid">0.20</output>
+        </div>
+        <!-- Doc: "weg" - the chips carry the colours, "Kopieren" the list -->
+        <div class="summary" id="summary" hidden>Ziel wählen, dann Farbe anklicken: der offene Plan färbt sich sofort um.</div>
     </div>
 
     <div class="scroll">
@@ -175,7 +192,6 @@
             <tbody></tbody>
         </table>
     </div>
-    <p class="legend">Markiert sind die Stufen, die das Grau-Schema gerade nutzt: <b>W</b> aktuelle Woche, <b>F</b> Ferien, <b>P</b> Bereich-Pillen. Tailwind v3, Stufe 400 ist die übliche Akzentstufe auf dunklem Grund.</p>
 </div>
 
 <script>
@@ -206,7 +222,8 @@
         rose: 'fff1f2 ffe4e6 fecdd3 fda4af fb7185 f43f5e e11d48 be123c 9f1239 881337 4c0519'
     };
     // what the SVP grey scheme uses right now
-    const USED = { 'yellow-200': 'W', 'lime-50': 'F', 'amber-500': 'P', 'green-500': 'P', 'sky-500': 'P', 'violet-400': 'P', 'teal-400': 'P', 'pink-400': 'P' };
+    // no W / F / P marks any more (Doc: "P & Co raus") - the target chips show the colours
+    const USED = {};
 
     const rgbOf = (hex) => [0, 2, 4].map(i => parseInt(hex.substr(i, 2), 16));
     const table = document.getElementById('grid');
@@ -271,14 +288,21 @@
        localStorage (Doc pasted a lone "pink-400" - a reload had emptied the
        list), and re-sent whenever a plan (re)loads and says "hello". */
     const STORE = 'svp-color-trial';
-    let chosen = {};
-    try { chosen = JSON.parse(localStorage.getItem(STORE)) || {}; } catch (e) { chosen = {}; }
+    /* one list per scheme of the plan (Doc: "link pick zum Schema") */
+    const SCHEME_NAME = { grey: 'Grau', light: 'Hell', dark: 'Dunkel' };
+    let scheme = 'grey';
+    let chosenAll = {};
+    try { chosenAll = JSON.parse(localStorage.getItem(STORE)) || {}; } catch (e) { chosenAll = {}; }
+    if (!chosenAll.grey && !chosenAll.light && !chosenAll.dark) chosenAll = { grey: chosenAll };  // old flat list
+    ['grey', 'light', 'dark'].forEach(k => { chosenAll[k] = chosenAll[k] || {}; });
+    let chosen = chosenAll[scheme];
     const summary = document.getElementById('summary');
 
     targets.forEach(t => t.addEventListener('click', () => {
         target.classList.remove('on');
         target = t; t.classList.add('on');
         markCurrent();
+        showAlpha();
     }));
 
     /* Doc: "unten hervorheben" - the grid rings the swatch the chosen target
@@ -286,9 +310,12 @@
     function markCurrent() {
         const c = currentTriple(target);
         const sw = c && document.querySelector('.sw[data-rgb="' + c.join(',') + '"]');
+        if (sw) { pick(sw); return; }
+        /* Doc: "die immer in der sel col" - the preview rows show the chosen
+           target's colour, also when it is no Tailwind shade (Grund, Karten) */
         if (selBtn) selBtn.classList.remove('sel');
-        selBtn = sw || null;
-        if (sw) sw.classList.add('sel');
+        selBtn = null;
+        if (c) root.setProperty('--pick', c.join(', '));
     }
 
     function moveMark(mark, btn) {
@@ -299,8 +326,8 @@
     }
 
     // live: a real click here - only that may switch the plan to grey
-    function post(msgs, live) {
-        if (channel) msgs.forEach(m => channel.postMessage({ type: 'set', prop: m[0], value: m[1], live: !!live }));
+    function post(msgs) {
+        if (channel) msgs.forEach(m => channel.postMessage({ type: 'set', scheme: scheme, prop: m[0], value: m[1] }));
     }
 
     function render() {
@@ -318,7 +345,8 @@
     }
 
     function save() {
-        try { localStorage.setItem(STORE, JSON.stringify(chosen)); } catch (e) { }
+        chosenAll[scheme] = chosen;
+        try { localStorage.setItem(STORE, JSON.stringify(chosenAll)); } catch (e) { }
     }
 
     function send(btn) {
@@ -329,10 +357,12 @@
         /* Doc: "alle Schrift wird bei Schrift nicht geändert" - body text is
            three tokens in the plan: --text, the dimmed --muted (SW, KW,
            dates, Ustd.) and --tint-text (bullets, material pills). */
+        // grey paints the pill ground solid (--g-matbg); Hell/Dunkel mix 7 % of --mat-hg
+        if (prop === '--g-matbg') msgs.push(['--mat-hg', 'rgb(' + triple + ')']);
         if (prop === '--text') {
             msgs.push(['--muted', 'rgba(' + triple + ', 0.62)'], ['--tint-text', triple]);
         }
-        post(msgs, true);
+        post(msgs);
         chosen[target.textContent] = { name: btn.dataset.name, rgb: 'rgb(' + triple + ')',
             mark: target.dataset.mark || '', msgs: msgs };
         save();
@@ -345,12 +375,66 @@
        "hello"), so "Kopieren" can list every colour, not only the trials */
     let planValues = null;
     const askPlan = () => {
-        if (channel) channel.postMessage({ type: 'get', props: targets.map(t => t.dataset.prop) });
+        if (channel) channel.postMessage({ type: 'get', props: targets.map(t => t.dataset.prop).concat(['--muted', '--card', '--a-week-edge', '--a-week-mid', '--a-ferien-edge', '--a-ferien-mid']) });
     };
+    function useScheme(sc) {
+        if (!SCHEME_NAME[sc] || sc === scheme) return;
+        scheme = sc;
+        chosen = chosenAll[scheme];
+        render();
+    }
+    // ---- the two alphas of the week row / holiday band ----
+    const alphas = document.getElementById('alphas');
+    const KIND = { edge: 'Rand', mid: 'Mitte' };
+    const alphaLabel = (t, kind) => t.textContent + ' · ' + KIND[kind];
+    function alphaOf(t, kind) {
+        const c = chosen[alphaLabel(t, kind)];
+        const v = c ? c.rgb : planValues && planValues['--a-' + t.dataset.alpha + '-' + kind];
+        const n = parseFloat(v);
+        return isNaN(n) ? null : n;
+    }
+    function showAlpha() {
+        const w = target.dataset.alpha;
+        alphas.classList.toggle('off', !w);
+        alphas.querySelectorAll('input').forEach(i => { i.disabled = !w; });
+        if (!w) { root.removeProperty('--pe'); root.removeProperty('--pm'); return; }
+        ['edge', 'mid'].forEach(kind => {
+            const v = alphaOf(target, kind);
+            if (v === null) return;
+            document.getElementById('a-' + kind).value = v;
+            document.getElementById('a-' + kind + '-v').textContent = v.toFixed(2);
+            root.setProperty(kind === 'edge' ? '--pe' : '--pm', v);
+        });
+    }
+    ['edge', 'mid'].forEach(kind => {
+        document.getElementById('a-' + kind).addEventListener('input', e => {
+            const w = target.dataset.alpha;
+            if (!w) return;
+            const v = (+e.target.value).toFixed(2);
+            const msgs = [['--a-' + w + '-' + kind, v]];
+            post(msgs);
+            chosen[alphaLabel(target, kind)] = { name: 'Deckkraft', rgb: v, mark: '', msgs: msgs };
+            save();
+            document.getElementById('a-' + kind + '-v').textContent = v;
+            root.setProperty(kind === 'edge' ? '--pe' : '--pm', v);
+        });
+    });
+
+    // the picker takes the plan's ground, card and text, so a Hell plan gets a light picker
+    function wearPlan(v) {
+        ['--bg', '--card', '--text', '--muted'].forEach(p => { if (v[p]) root.setProperty(p, v[p]); });
+        document.documentElement.style.colorScheme = scheme === 'light' ? 'light' : 'dark';
+    }
     if (channel) channel.onmessage = e => {
         const d = e.data || {};
-        if (d.type === 'hello') { Object.keys(chosen).forEach(k => post(chosen[k].msgs)); askPlan(); }
-        if (d.type === 'values') { planValues = d.values; paintChips(); }
+        if (d.type === 'hello') {
+            ['grey', 'light', 'dark'].forEach(sc => Object.keys(chosenAll[sc]).forEach(k =>
+                chosenAll[sc][k].msgs.forEach(m => channel.postMessage({ type: 'set', scheme: sc, prop: m[0], value: m[1] }))));
+            useScheme(d.scheme);
+            askPlan();
+        }
+        if (d.type === 'scheme') { useScheme(d.scheme); askPlan(); }
+        if (d.type === 'values') { useScheme(d.scheme); planValues = d.values; wearPlan(d.values); paintChips(); showAlpha(); }
     };
     askPlan();
 
@@ -372,10 +456,11 @@
         markCurrent();
     }
     render();
-    Object.keys(chosen).forEach(k => post(chosen[k].msgs));
+    if (channel) ['grey', 'light', 'dark'].forEach(sc => Object.keys(chosenAll[sc]).forEach(k =>
+        chosenAll[sc][k].msgs.forEach(m => channel.postMessage({ type: 'set', scheme: sc, prop: m[0], value: m[1] }))));
 
     document.getElementById('reset').addEventListener('click', () => {
-        if (channel) channel.postMessage({ type: 'reset' });
+        if (channel) channel.postMessage({ type: 'reset', scheme: scheme });
         chosen = {};
         save();
         askPlan();                            // the plan is back on svp.css - repaint from it
@@ -383,7 +468,9 @@
     });
 
     document.getElementById('copy').addEventListener('click', () => {
-        const done = () => { document.getElementById('copied').hidden = false; };
+        // the pill itself confirms - the old "kopiert" label sat in the header
+        const btn = document.getElementById('copy');
+        const done = () => { btn.textContent = 'Kopiert ✓'; setTimeout(() => { btn.textContent = 'Kopieren'; }, 1500); };
         /* Doc: "Lass den Kopier-Button alles kopieren, so dass ich es Dir
            reichen kann" - every trial choice with name and value, one per
            line; without any choice yet, the picked colour alone. */
@@ -394,12 +481,17 @@
             const label = t.textContent;
             if (chosen[label]) return label + ': ' + chosen[label].name + ' = ' + chosen[label].rgb + '  (Probe)';
             let v = planValues && planValues[t.dataset.prop];
-            if (!v) return label + ': ?';
+            if (!v) return label + ': Standard';   // e.g. Zusatzmaterial-HG: mixed from the pill's text colour
             if (!/^rgb/.test(v)) v = 'rgb(' + v + ')';
             const key = (v.match(/\d+\s*,\s*\d+\s*,\s*\d+/) || [''])[0].replace(/\s/g, '');
             return label + ': ' + (byRgb[key] || 'eigener Wert') + ' = ' + v;
         });
-        const text = 'Farbwähler, Grau-Schema' + (planValues ? '' : ' (kein Plan verbunden - nur Proben sicher)') +
+        targets.filter(t => t.dataset.alpha).forEach(t => ['edge', 'mid'].forEach(kind => {
+            const v = alphaOf(t, kind);
+            lines.push(alphaLabel(t, kind) + ': Deckkraft ' + (v === null ? '?' : v.toFixed(2)) +
+                (chosen[alphaLabel(t, kind)] ? '  (Probe)' : ''));
+        }));
+        const text = 'Farbwähler, ' + SCHEME_NAME[scheme] + '-Schema' + (planValues ? '' : ' (kein Plan verbunden - nur Proben sicher)') +
             ':\n' + lines.join('\n');
         try {
             navigator.clipboard.writeText(text).then(done, () => {});

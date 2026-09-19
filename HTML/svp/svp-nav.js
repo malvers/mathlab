@@ -587,56 +587,67 @@
     themeWrap.appendChild(themeBtn);
 
     // Live colour trial (Doc, 19.09.2026: "gib mir die col table als Extra
-    // Fenster connected, so dass ich probieren kann"). The palette window
-    // HTML/tailwind-palette.html shares the origin and talks over this channel.
-    // Trial values go into one <style> scoped to html.svp-grey - NOT inline on
-    // <html>, where they had leaked into Hell and Dunkel (Doc: "Die Farben
-    // gelten in allen Farbschemata? Nee das geht ni!"). Nothing is stored here;
-    // the palette keeps its list and re-sends it after a reload ("hello").
-    // Only a real click in the palette (live) switches the plan to grey.
+    // Fenster connected, so dass ich probieren kann", then "link pick zum
+    // Schema"). The palette window HTML/tailwind-palette.html shares the origin
+    // and talks over this channel. A trial belongs to the scheme it was made in:
+    // one <style> holds a rule per scheme - never inline on <html>, where it had
+    // leaked into Hell and Dunkel (Doc: "Nee das geht ni!"). Nothing is stored
+    // here; the palette keeps its lists and re-sends them after a reload.
     try {
-        const TRIAL_PROP = /^--(g-[a-z]+|text|head|bg|card|muted|tint-text)$/;
+        const TRIAL_PROP = /^--(g-[a-z]+|a-[a-z]+-(?:edge|mid)|text|head|bg|card|muted|tint-text|mat-hg)$/;
         const TRIAL_VALUE = /^[\d\s.,rgba()]+$/;
+        const TRIAL_SCOPE = {
+            grey: 'html.svp-grey',
+            light: 'html.svp-light',
+            dark: 'html:not(.svp-light):not(.svp-grey)'
+        };
         const trialCh = new BroadcastChannel('svp-colors');
-        const trial = {};
+        const trial = { grey: {}, light: {}, dark: {} };
         let trialStyle = null;
         const paintTrial = function () {
-            const props = Object.keys(trial);
-            if (!props.length) { if (trialStyle) { trialStyle.remove(); trialStyle = null; } return; }
+            const css = Object.keys(trial).map(function (sc) {
+                const props = Object.keys(trial[sc]);
+                return props.length ? TRIAL_SCOPE[sc] + ' {' +
+                    props.map(function (p) { return p + ': ' + trial[sc][p] + ';'; }).join(' ') + '}' : '';
+            }).join('\n').trim();
+            if (!css) { if (trialStyle) { trialStyle.remove(); trialStyle = null; } return; }
             if (!trialStyle) {
                 trialStyle = document.createElement('style');
                 trialStyle.id = 'svp-color-trial';
             }
             document.head.appendChild(trialStyle);   /* last in <head>: beats svp.css */
-            trialStyle.textContent = 'html.svp-grey {' +
-                props.map(function (p) { return p + ': ' + trial[p] + ';'; }).join(' ') + '}';
+            trialStyle.textContent = css;
         };
         trialCh.onmessage = function (e) {
             const d = e.data || {};
-            /* the palette asks for the whole set it can change - its "Kopieren"
-               lists every colour, trial or not (Doc: "ALLE Farben en bloc") */
+            const sc = TRIAL_SCOPE[d.scheme] ? d.scheme : theme;
+            /* the palette asks for the whole set of the scheme on screen - its
+               "Kopieren" lists every colour (Doc: "ALLE Farben en bloc") */
             if (d.type === 'get') {
                 const cs = getComputedStyle(document.documentElement);
                 const values = {};
                 (d.props || []).forEach(function (p) {
                     if (TRIAL_PROP.test(p)) values[p] = cs.getPropertyValue(p).trim();
                 });
-                trialCh.postMessage({ type: 'values', values: values });
+                trialCh.postMessage({ type: 'values', scheme: theme, values: values });
                 return;
             }
             if (d.type === 'reset') {
-                Object.keys(trial).forEach(function (p) { delete trial[p]; });
+                trial[sc] = {};
                 paintTrial();
                 return;
             }
             if (d.type !== 'set' || !TRIAL_PROP.test(d.prop) ||
                 typeof d.value !== 'string' || !TRIAL_VALUE.test(d.value)) return;
-            if (d.live && theme !== 'grey') applyTheme('grey');
-            trial[d.prop] = d.value;
+            trial[sc][d.prop] = d.value;
             paintTrial();
         };
-        // after a reload: an open palette re-sends the running trial
-        trialCh.postMessage({ type: 'hello' });
+        // Hell / Dunkel / Grau switched here (pill or D) -> the palette follows
+        new MutationObserver(function () {
+            trialCh.postMessage({ type: 'scheme', scheme: theme });
+        }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        // after a reload: an open palette re-sends the running trials
+        trialCh.postMessage({ type: 'hello', scheme: theme });
     } catch (e) { /* no BroadcastChannel: the palette simply has no effect */ }
 
     editWrap.appendChild(panel);

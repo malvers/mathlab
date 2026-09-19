@@ -1,6 +1,27 @@
 /* Shared styles for the Stoffverteilungsplan pages (informatik9/11/12.html) */
 
 :root {
+    /* Every accent as an r, g, b triple, so the colour picker (Shift+C,
+       HTML/tailwind-palette.html) can try it live in each scheme - Doc,
+       19.09.2026: "link pick zum Schema". The light scheme keeps its own
+       darker text accents; the grey scheme sets its own triples. */
+    --g-week: 245, 194, 66;
+    --g-ferien: 121, 158, 49;
+    --g-orange: 245, 194, 66;
+    --g-green: 121, 158, 49;
+    --g-cyan: 90, 190, 230;
+    --g-violet: 155, 130, 225;
+    --g-teal: 80, 200, 170;
+    --g-pink: 225, 130, 190;
+    --g-mat: var(--tint);
+    /* ground of the buttons and material pills (Doc: "nee HG!") */
+    --g-btn: var(--tint);
+    /* alpha of the week row and the holiday band: edge and middle (Doc: "gib mir
+       noch einen Slider für die 2 Transp"); the sub-row takes 0.4 of the week's */
+    --a-week-edge: 0.3;
+    --a-week-mid: 0.03;
+    --a-ferien-edge: 0.6;
+    --a-ferien-mid: 0.05;
     /* the blue of lines, button rims and hovers in the dark scheme, as an r, g, b
        triple so it can carry any alpha - the grey scheme swaps it for a grey */
     --tint: 120, 160, 220;
@@ -16,15 +37,15 @@
        Fliesstext mitzunehmen (Doc, 01.09.2026 - erst weg vom Orange, dann
        zweimal heller). Auf dem dunklen Grund praktisch weiss. */
     --head: rgb(248, 251, 255);
-    --lambda: rgb(245, 194, 66);
+    --lambda: rgb(var(--g-orange));
     /* Width of the link-card column on the landing pages (see .card-grid) */
     --card-col: 720px;
     --ypsilon: rgb(176, 36, 24);
-    --phi: rgb(121, 158, 49);
-    --cyan: rgb(90, 190, 230);
-    --violet: rgb(155, 130, 225);
-    --teal: rgb(80, 200, 170);
-    --pink: rgb(225, 130, 190);
+    --phi: rgb(var(--g-green));
+    --cyan: rgb(var(--g-cyan));
+    --violet: rgb(var(--g-violet));
+    --teal: rgb(var(--g-teal));
+    --pink: rgb(var(--g-pink));
 
     /* Surfaces that sit above the page: nav band, dropdowns, sticky heads */
     --panel: rgb(12, 30, 64);
@@ -45,6 +66,7 @@
    class on <html> and stores the choice in localStorage). Only variables
    change; the accent hues are darkened for contrast on white. */
 html.svp-light {
+    --g-mat: 40, 70, 120;
     --bg: rgb(246, 248, 252);
     --card: rgb(255, 255, 255);
     --card-soft: rgba(255, 255, 255, 0.85);
@@ -111,7 +133,10 @@ html.svp-grey {
     --scrim: rgba(12, 12, 14, 0.75);
 }
 html.svp-grey button.action.secondary {
-    background: linear-gradient(180deg, rgba(90, 92, 98, 0.6), rgba(64, 66, 72, 0.6));
+    /* from the Knopf-HG triple, so the picker reaches Lehrplan and Eingangstest
+       too (Doc: "Knopf wirkt nicht auf alle") - 0.23 / 0.14 of zinc-grey on the
+       grey ground is the old 90,92,98 / 64,66,72 at 0.6 */
+    background: linear-gradient(180deg, rgba(var(--g-btn), 0.23), rgba(var(--g-btn), 0.14));
 }
 /* ORGA pills: their bluish white turns zinc grey as well */
 html.svp-grey .b-grey { color: rgb(212, 212, 216); border-color: rgba(212, 212, 216, 0.4); background: rgba(212, 212, 216, 0.08); }
@@ -635,18 +660,19 @@ html.svp-light #plan-table .detail-row .sub-talk b { color: var(--ypsilon); }
     padding-bottom: 1px;
     /* eine Spur Farbe bleibt - ganz durchsichtig war zu wenig. currentColor
        heisst: jede Pille toent in ihrer eigenen Farbe, in hell wie in dunkel. */
-    background: color-mix(in srgb, currentColor 7%, transparent);
+    /* --mat-hg only exists during a colour-picker trial (Knopf-HG) */
+    background: color-mix(in srgb, var(--mat-hg, currentColor) 7%, transparent);
     /* Blau statt Gruen (Doc, 08.09.2026, als Versuch: "die Farbe blueish auch
        die Schrift"). EINE Farbe genuegt: der Hintergrund wird eine Zeile
        darueber per color-mix aus currentColor gemischt, der Rand haengt hier
        daneben. .b-green selbst bleibt unangetastet - es faerbt auch die
        Navigationspillen, die gruen bleiben sollen. */
     color: rgb(var(--tint-text));
-    border-color: rgba(var(--tint), 0.5);
+    border-color: rgba(var(--g-mat), 0.5);
 }
 html.svp-light #plan-table .detail-row .sub-side .mat-block a.mat-pill {
     color: rgb(30, 60, 120);
-    border-color: rgba(40, 70, 120, 0.45);
+    border-color: rgba(var(--g-mat), 0.45);
 }
 .sub-label {
     display: inline-block;
@@ -1889,7 +1915,7 @@ button.action {
     /* Blau statt Gruen (Doc, 08.09.2026: "die auch so") - derselbe Ton wie die
        Materialpillen, damit Werkzeugleiste und Plan zusammengehoeren. Der
        orange und der graue Knopf weiter unten bleiben, was sie sind. */
-    background: rgba(var(--tint), 0.16);
+    background: rgba(var(--g-btn), 0.16);
     border: 1px solid rgba(var(--tint), 0.5);
     border-radius: 8px;
     padding: 9px 16px;
@@ -1897,7 +1923,7 @@ button.action {
 }
 
 button.action:hover {
-    background: rgba(var(--tint), 0.3);
+    background: rgba(var(--g-btn), 0.3);
     border-color: rgb(var(--tint));
     filter: none;
 }
@@ -2206,6 +2232,13 @@ td.num { color: var(--muted); font-variant-numeric: tabular-nums; white-space: n
    height is a minimum: a topic that wraps (narrow screens) still grows its row.
    44 px first, then Doc: "mach mal 46". */
 #plan-table tbody tr:not(.detail-row) > td { height: 46px; }
+/* Doc, 19.09.2026: "das ist nicht mehr alles y zentriert" - with the date on
+   one line (DS beside it) the cells sat at the top: text centre 19.5 px in a
+   46 px row, pills 21.5, Aufgaben 22.3 (measured). All on the middle now. */
+#plan-table tbody tr:not(.detail-row) > td { vertical-align: middle; }
+/* the shift arrows needed 2.2 px extra on top only while the cells hung from the
+   top (see td.shift-col); centred, equal padding lines them up with the digits */
+#plan-table tbody tr:not(.detail-row) > td.shift-col { padding-top: 9px; }
 /* Doc, 09.09.2026: "die Buchstaben SW 3px nach rechts", dann zweimal "noch
    1px" - nur die Ueberschrift, die Zahlen darunter bleiben, wo sie sind. */
 #plan-table thead th:nth-child(2) { padding-left: 21px; }
@@ -2224,8 +2257,13 @@ td.date br { display: none; }
    Plans, sondern der echte Termin dieser Lerngruppe. Welche der beiden
    Doppelstunden es ist, steht gedaempft darunter - so bleibt die Spalte so
    schmal wie bisher. */
+/* Doc, 19.09.2026: "nimm 2. DS mal da hin" - on the date's line, right of
+   it, instead of below: one-line rows like the week plans. */
 td.date.termin-date .ds {
-    display: block;
+    display: inline;
+    margin-left: 0.6em;
+    white-space: nowrap;
+    vertical-align: 0.12em;   /* small type on the baseline sat 1.5 px low */
     font-size: 0.78em;
     opacity: 0.7;
     letter-spacing: 0.04em;
@@ -2340,9 +2378,9 @@ tr.kw-jump > td { animation: kw-jump-pulse 1.3s ease-in-out 2; }
    symmetric: full tint and bar at both edges, almost transparent in the middle. */
 tr.kw-now {
     background-image: linear-gradient(90deg,
-        rgba(245, 194, 66, 0.30) 0%,
-        rgba(245, 194, 66, 0.03) 50%,
-        rgba(245, 194, 66, 0.30) 100%);
+        rgba(var(--g-week), var(--a-week-edge)) 0%,
+        rgba(var(--g-week), var(--a-week-mid)) 50%,
+        rgba(var(--g-week), var(--a-week-edge)) 100%);
 }
 /* Doc, 09.09.2026: "mach den senkrecht mal orange (unser) und 1px duenner",
    dann "orange satter" - 3 px werden 2 px, und der Balken traegt nicht
@@ -2353,23 +2391,24 @@ tr.kw-now > td:nth-child(2) { box-shadow: inset 2px 0 0 rgb(240, 160, 24); }
 tr.kw-now > td:last-child { box-shadow: inset -2px 0 0 rgb(240, 160, 24); }
 tr.kw-now-sub {
     background-image: linear-gradient(90deg,
-        rgba(245, 194, 66, 0.12) 0%,
-        rgba(245, 194, 66, 0.01) 50%,
-        rgba(245, 194, 66, 0.12) 100%);
+        rgba(var(--g-week), calc(var(--a-week-edge) * 0.4)) 0%,
+        rgba(var(--g-week), calc(var(--a-week-mid) * 0.4)) 50%,
+        rgba(var(--g-week), calc(var(--a-week-edge) * 0.4)) 100%);
 }
 /* Doc, 19.09.2026: "hier bitte auch wie Ferien nicht ganz so trans" - in the
    dark the middle keeps a tint, a third of the edges like the holiday rows. */
+html:not(.svp-light) { --a-week-mid: 0.1; --a-ferien-mid: 0.2; }   /* the dark scheme's middles */
 html:not(.svp-light) tr.kw-now {
     background-image: linear-gradient(90deg,
-        rgba(245, 194, 66, 0.30) 0%,
-        rgba(245, 194, 66, 0.10) 50%,
-        rgba(245, 194, 66, 0.30) 100%);
+        rgba(var(--g-week), var(--a-week-edge)) 0%,
+        rgba(var(--g-week), var(--a-week-mid)) 50%,
+        rgba(var(--g-week), var(--a-week-edge)) 100%);
 }
 html:not(.svp-light) tr.kw-now-sub {
     background-image: linear-gradient(90deg,
-        rgba(245, 194, 66, 0.12) 0%,
-        rgba(245, 194, 66, 0.04) 50%,
-        rgba(245, 194, 66, 0.12) 100%);
+        rgba(var(--g-week), calc(var(--a-week-edge) * 0.4)) 0%,
+        rgba(var(--g-week), calc(var(--a-week-mid) * 0.4)) 50%,
+        rgba(var(--g-week), calc(var(--a-week-edge) * 0.4)) 100%);
 }
 /* Weeks that are over (svp-plan.js markPastWeeks) - Doc, 16.09.2026: "mach die,
    die schon gelaufen sind gaaaaaanz leicht grau". Neutral grey with little alpha,
@@ -2653,12 +2692,12 @@ tr.wk-edit .untis-chip { cursor: pointer; }
 .drop-menu .badge { text-align: center; }
 .drop-menu .badge.chosen { outline: 1px solid currentColor; }
 
-.b-orange { color: var(--lambda); border-color: rgba(245, 194, 66, 0.45); background: rgba(245, 194, 66, 0.08); }
-.b-cyan   { color: var(--cyan); border-color: rgba(90, 190, 230, 0.45); background: rgba(90, 190, 230, 0.08); }
-.b-violet { color: var(--violet); border-color: rgba(155, 130, 225, 0.5); background: rgba(155, 130, 225, 0.1); }
-.b-teal   { color: var(--teal); border-color: rgba(80, 200, 170, 0.5); background: rgba(80, 200, 170, 0.09); }
-.b-pink   { color: var(--pink); border-color: rgba(225, 130, 190, 0.5); background: rgba(225, 130, 190, 0.09); }
-.b-green  { color: var(--phi); border-color: rgba(121, 158, 49, 0.55); background: rgba(121, 158, 49, 0.1); }
+.b-orange { color: var(--lambda); border-color: rgba(var(--g-orange), 0.45); background: rgba(var(--g-orange), 0.08); }
+.b-cyan   { color: var(--cyan); border-color: rgba(var(--g-cyan), 0.45); background: rgba(var(--g-cyan), 0.08); }
+.b-violet { color: var(--violet); border-color: rgba(var(--g-violet), 0.5); background: rgba(var(--g-violet), 0.1); }
+.b-teal   { color: var(--teal); border-color: rgba(var(--g-teal), 0.5); background: rgba(var(--g-teal), 0.09); }
+.b-pink   { color: var(--pink); border-color: rgba(var(--g-pink), 0.5); background: rgba(var(--g-pink), 0.09); }
+.b-green  { color: var(--phi); border-color: rgba(var(--g-green), 0.55); background: rgba(var(--g-green), 0.1); }
 .b-red    { color: rgb(235, 120, 105); border-color: rgba(176, 36, 24, 0.6); background: rgba(176, 36, 24, 0.12); }
 /* All nav pills are grey since 02.09.2026 (Doc), a notch darker than the old
    muted badge - it now carries the whole row, not just Home. */
@@ -3146,18 +3185,18 @@ tr.wk-edit .sub-tabs:not(.on-notizen) .sub-tools { display: inline-flex; }
    The row is one colspan cell, so the gradient can sit on the td. */
 tr.ferien td {
     /* background: rgba(var(--tint), 0.07); color: var(--muted); */
-    /* background: rgba(121, 158, 49, 0.6); */
+    /* background: rgba(var(--g-ferien), 0.6); */
     background-image: linear-gradient(90deg,
-        rgba(121, 158, 49, 0.6) 0%,
-        rgba(121, 158, 49, 0.05) 50%,
-        rgba(121, 158, 49, 0.6) 100%);
+        rgba(var(--g-ferien), var(--a-ferien-edge)) 0%,
+        rgba(var(--g-ferien), var(--a-ferien-mid)) 50%,
+        rgba(var(--g-ferien), var(--a-ferien-edge)) 100%);
     /* Doc, 19.09.2026: "da ist ein micro Spalt" - the cell ground does not
        reach under the collapsed table border, so the 1 px row line showed the
        white card and cut the side bars. No border here; the row line is an
        inset green hairline instead, lying UNDER the two bars. */
     border-bottom: 0;
-    --ferien-bars: inset 2px 0 0 rgb(121, 158, 49), inset -2px 0 0 rgb(121, 158, 49),
-        inset 0 -1px 0 rgba(121, 158, 49, 0.35);
+    --ferien-bars: inset 2px 0 0 rgb(var(--g-ferien)), inset -2px 0 0 rgb(var(--g-ferien)),
+        inset 0 -1px 0 rgba(var(--g-ferien), 0.35);
     box-shadow: var(--ferien-bars);
     color: rgb(20, 44, 92);   /* same dark blue as .mat-ico-movie in light mode */
     font-family: 'Orbitron', sans-serif;
@@ -3174,9 +3213,9 @@ html:not(.svp-light) tr.ferien td { color: var(--text); }
    middle keeps a green tint: 0.2 instead of 0.05. */
 html:not(.svp-light) tr.ferien td {
     background-image: linear-gradient(90deg,
-        rgba(121, 158, 49, 0.6) 0%,
-        rgba(121, 158, 49, 0.2) 50%,
-        rgba(121, 158, 49, 0.6) 100%);
+        rgba(var(--g-ferien), var(--a-ferien-edge)) 0%,
+        rgba(var(--g-ferien), var(--a-ferien-mid)) 50%,
+        rgba(var(--g-ferien), var(--a-ferien-edge)) 100%);
 }
 
 /* Cursor of the arrow keys (svp-plan.js, Doc 19.09.2026): a line above and
@@ -4405,15 +4444,23 @@ html.svp-light .mat-ico-movie path { fill: rgb(20, 44, 92); }
        the palette window (HTML/tailwind-palette.html) can set it live on <html>
        through the BroadcastChannel "svp-colors" (listener in svp-nav.js). */
     html.svp-grey {
-        --g-week: 254, 240, 138;     /* yellow-200 (Farbwähler, Doc 19.09.2026; before amber-100, yellow-300) */
+        --g-week: 38, 38, 38;   /* neutral-800 (Farbwähler 19.09.2026) */
         --g-ferien: 247, 254, 231;   /* lime-50 (Farbwähler; before lime-100, lime-300) */
-        --g-orange: 245, 158, 11;    /* amber-500 (Farbwähler; was amber-400) */
-        --g-green: 34, 197, 94;      /* green-500 (Farbwähler; was green-400) */
-        --g-cyan: 14, 165, 233;      /* sky-500 (Farbwähler; was sky-400) */
-        --g-violet: 167, 139, 250;   /* violet-400 */
+        --g-orange: 254, 215, 170;   /* orange-200 */
+        --g-green: 217, 249, 157;   /* lime-200 */
+        --g-cyan: 6, 182, 212;   /* cyan-500 */
+        --g-violet: 139, 92, 246;   /* violet-500 */
         --g-teal: 45, 212, 191;      /* teal-400 */
         --g-pink: 244, 114, 182;     /* pink-400 */
+        /* Zusatzmaterial pills: solid ground in grey (Doc: "HG Zusatz nicht
+           transp (im Grey!)") - zinc-800, what the 7 % mix looked like */
+        --g-btn: 87, 83, 78;       /* stone-600 - Knopf-HG */
+        --g-matbg: 41, 37, 36;   /* stone-800 */
         --g-mat: 190, 194, 202;      /* rim of the Zusatzmaterial pills, = --tint (Doc: "gib mir noch die Outlines von Zusatzmat") */
+        --a-week-edge: 0.59;
+        --a-week-mid: 0.39;
+        --a-ferien-edge: 0.4;
+        --a-ferien-mid: 0.22;
         --lambda: rgb(var(--g-orange));
         --phi: rgb(var(--g-green));
         --cyan: rgb(var(--g-cyan));
@@ -4426,16 +4473,18 @@ html.svp-light .mat-ico-movie path { fill: rgb(20, 44, 92); }
     html.svp-grey .b-violet { border-color: rgba(var(--g-violet), 0.5); background: rgba(var(--g-violet), 0.1); box-shadow: 0 0 6px rgba(var(--g-violet), 0.2); }
     html.svp-grey .b-teal   { border-color: rgba(var(--g-teal), 0.5); background: rgba(var(--g-teal), 0.08); box-shadow: 0 0 6px rgba(var(--g-teal), 0.2); }
     html.svp-grey .b-pink   { border-color: rgba(var(--g-pink), 0.5); background: rgba(var(--g-pink), 0.09); box-shadow: 0 0 6px rgba(var(--g-pink), 0.2); }
-    html.svp-grey #plan-table .detail-row .sub-side .mat-block a.mat-pill { border-color: rgba(var(--g-mat), 0.5); }
+    html.svp-grey #plan-table .detail-row .sub-side .mat-block a.mat-pill { border-color: rgba(var(--g-mat), 0.5); background: rgb(var(--g-matbg)); }
+    /* the chosen group (FOS25-1 ...) wore --cyan = sky-500 - Doc: "noch blau in grey" */
+    html.svp-grey .group-drop > button.export-toggle.on-group { border-color: rgb(var(--tint)); }
 
     /* Holiday bands with glowing side bars. Doc, 19.09.2026: "nimm in der Mitte
        trans zurück", then "am Rand weniger trans" - edges 0.4, middle 0.22;
        "ferien und aktuelle W. tauschen" - holidays lime-300, week yellow-300. */
     html.svp-grey tr.ferien td {
         background-image: linear-gradient(90deg,
-            rgba(var(--g-ferien), 0.4) 0%,
-            rgba(var(--g-ferien), 0.22) 50%,
-            rgba(var(--g-ferien), 0.4) 100%);
+            rgba(var(--g-ferien), var(--a-ferien-edge)) 0%,
+            rgba(var(--g-ferien), var(--a-ferien-mid)) 50%,
+            rgba(var(--g-ferien), var(--a-ferien-edge)) 100%);
         --ferien-bars: inset 2px 0 0 rgb(var(--g-ferien)), inset -2px 0 0 rgb(var(--g-ferien)),
             inset 6px 0 10px -6px rgba(var(--g-ferien), 0.5), inset -6px 0 10px -6px rgba(var(--g-ferien), 0.5),
             inset 0 -1px 0 rgba(var(--g-ferien), 0.35);
@@ -4445,15 +4494,15 @@ html.svp-light .mat-ico-movie path { fill: rgb(20, 44, 92); }
     /* current week (first "mal pink", then yellow/lime, then swapped) */
     html.svp-grey tr.kw-now {
         background-image: linear-gradient(90deg,
-            rgba(var(--g-week), 0.45) 0%,
-            rgba(var(--g-week), 0.26) 50%,
-            rgba(var(--g-week), 0.45) 100%);
+            rgba(var(--g-week), var(--a-week-edge)) 0%,
+            rgba(var(--g-week), var(--a-week-mid)) 50%,
+            rgba(var(--g-week), var(--a-week-edge)) 100%);
     }
     html.svp-grey tr.kw-now-sub {
         background-image: linear-gradient(90deg,
-            rgba(var(--g-week), 0.18) 0%,
-            rgba(var(--g-week), 0.1) 50%,
-            rgba(var(--g-week), 0.18) 100%);
+            rgba(var(--g-week), calc(var(--a-week-edge) * 0.4)) 0%,
+            rgba(var(--g-week), calc(var(--a-week-mid) * 0.4)) 50%,
+            rgba(var(--g-week), calc(var(--a-week-edge) * 0.4)) 100%);
     }
     html.svp-grey tr.kw-now > td:nth-child(2) { box-shadow: inset 2px 0 0 rgb(var(--g-week)), inset 6px 0 10px -6px rgba(var(--g-week), 0.5); }
     html.svp-grey tr.kw-now > td:last-child { box-shadow: inset -2px 0 0 rgb(var(--g-week)), inset -6px 0 10px -6px rgba(var(--g-week), 0.5); }
