@@ -54,13 +54,8 @@
        Doc, 20.09.2026: "bei 5 steht nur noch multiplizieren ... bau in alle
        Klassen interessante Inhalte ein". Der Fundus steht in svp-wissen.json,
        je Eintrag ein Fach und eine Spanne von Klassenstufen. Gezeigt wird
-       eine kleine Auswahl, die jeden Tag weiterrueckt - so laeuft nicht das
-       ganze Jahr dasselbe durch. */
-    function tagImJahr() {
-        const d = new Date();
-        return Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
-    }
-
+       eine kleine, gewuerfelte Auswahl - so laeuft nicht das ganze Jahr
+       dasselbe durch. */
     function wissenWaehlen(daten) {
         const k = klasse();
         const f = fach();
@@ -81,7 +76,10 @@
         const wieviel = daten.anzahl || 4;
         const liste = fachlich.length ? fachlich : allgemein;
         const raus = [];
-        const start = tagImJahr() % liste.length;
+        /* Doc, 20.09.2026: "bring unser Dinge random" - der Einstieg in den
+           Fundus wird gewuerfelt; vorher rueckte er taeglich um eins weiter
+           und war damit den ganzen Tag derselbe. */
+        const start = Math.floor(Math.random() * liste.length);
         for (let i = 0; i < Math.min(wieviel, liste.length); i++) {
             raus.push(liste[(start + i) % liste.length]);
         }
@@ -167,10 +165,29 @@
         setTimeout(setzen, Math.max(0, dauer - (jetzt % dauer)) + 80);
     }
 
+    /* Welche unserer Rubriken zuerst laeuft, wird gewuerfelt (Doc, 20.09.2026:
+       "bring unser Dinge random") - sonst macht jeden Tag "Stoff der Woche"
+       den Anfang. Der Wurf faellt je Rubrik EINMAL und bleibt, solange die
+       Seite offen ist: sonst springt die Reihenfolge, sobald die Vortraege
+       aus der Cloud nachkommen. Die Schlagzeilen bleiben hinten, sie kommen
+       ohnehin erst nach dem ersten Durchlauf dazu. */
+    const wurf = new Map();
+
+    function wuerfeln(items) {
+        const gruppen = new Map();
+        items.forEach(function (it) {
+            const r = it.quelle || 'News';
+            if (!wurf.has(r)) wurf.set(r, Math.random());
+            if (!gruppen.has(r)) gruppen.set(r, []);
+            gruppen.get(r).push(it);
+        });
+        return Array.from(gruppen.keys())
+            .sort(function (a, b) { return wurf.get(a) - wurf.get(b); })
+            .reduce(function (alle, r) { return alle.concat(gruppen.get(r)); }, []);
+    }
+
     function zeichnen() {
-        /* Reihenfolge: erst der eigene Unterricht, dann das Haeppchen zum
-           Fach, dann die Weltlage. */
-        const alle = lokal.concat(eigene, wissen, feed);
+        const alle = wuerfeln(lokal.concat(eigene, wissen)).concat(feed);
         if (alle.length) zeigen(alle);
     }
 
