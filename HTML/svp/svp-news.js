@@ -336,12 +336,29 @@
             }
             mathText(item, it.text);
             line.appendChild(item);
-            const dot = document.createElement('span');
-            dot.className = 'nav-news-dot';
-            dot.textContent = '•';
-            line.appendChild(dot);
+            /* Zwischen zwei Eintraegen derselben Rubrik steht ein Punkt,
+               zwischen zwei Rubriken eine Luecke von einer Fensterbreite
+               (Doc, 20.09.2026: "erst die Rub durchlaeuft bevor Wechsel" -
+               im Screenshot standen "Schon gewusst" und tagesschau
+               nebeneinander im Fenster). So ist immer nur eine Rubrik zu
+               sehen, und das Etikett links passt jederzeit zu dem, was laeuft.
+               Die Breite setzt lueckenSetzen, sobald das Fenster gemessen ist. */
+            const naechste = eintraege[eintraege.indexOf(it) + 1];
+            const wechsel = !naechste || (naechste.quelle || 'News') !== (it.quelle || 'News');
+            const trenner = document.createElement('span');
+            trenner.className = wechsel ? 'nav-news-luecke' : 'nav-news-dot';
+            if (!wechsel) trenner.textContent = '•';
+            line.appendChild(trenner);
         });
         return line;
+    }
+
+    /* Eine Luecke ist so breit wie das Fenster: dann ist das Band zwischen
+       zwei Rubriken einmal leer, statt zwei Rubriken gleichzeitig zu zeigen. */
+    function lueckenSetzen(wurzel, breite) {
+        wurzel.querySelectorAll('.nav-news-luecke').forEach(function (l) {
+            l.style.width = Math.max(120, Math.round(breite)) + 'px';
+        });
     }
 
     function zeigen(eintraege) {
@@ -373,9 +390,14 @@
                erst im Dokument steht, ist das der verlaessliche Wert. */
             const breite = function (el) { return Math.round(el.getBoundingClientRect().width); };
             const platz = view.clientWidth || 600;
+            /* Zuerst die Luecken, dann messen - sonst zaehlt die Breite der
+               Zeile ohne sie, und die Dauer waere zu kurz. */
+            lueckenSetzen(line, platz);
             let schutz = 0;
             while (breite(line) > 0 && breite(line) < platz && schutz++ < 12) {
-                Array.from(zeile(eintraege).childNodes).forEach(function (n) { line.appendChild(n); });
+                const mehr = zeile(eintraege);
+                lueckenSetzen(mehr, platz);
+                Array.from(mehr.childNodes).forEach(function (n) { line.appendChild(n); });
             }
             run.appendChild(line.cloneNode(true));
             /* Misst der Browser (noch) nichts, laeuft das Band mit einer
@@ -485,12 +507,12 @@
         function schauen() {
             /* Im Hintergrund laeuft die Animation ohnehin nicht weiter. */
             if (document.hidden || !box.isConnected) return;
-            /* Erst 14 px hinter dem Rand zaehlt ein Eintrag noch als der, den
-               man liest (Doc, 20.09.2026: "Vortraege nur bei Vortraegen") -
-               sonst haelt ein Eintrag, von dem nur noch der letzte Buchstabe
-               zu sehen ist, das Etikett fest, waehrend man schon die naechste
-               Zeile liest. */
-            const rand = view.getBoundingClientRect().left + 14;
+            /* Das Etikett haelt seine Rubrik, solange von ihr noch etwas im
+               Fenster steht (Doc, 20.09.2026: "bei allen Rubriken so machen,
+               dass erst die Rubrik durchlaeuft bevor Wechsel") - gewechselt
+               wird erst, wenn der letzte ihrer Eintraege links hinaus ist.
+               Die 2 px sind nur der Rundungsrand, keine Toleranz. */
+            const rand = view.getBoundingClientRect().left + 2;
             const items = run.querySelectorAll('.nav-news-item');
             for (const it of items) {
                 if (it.getBoundingClientRect().right > rand) {
