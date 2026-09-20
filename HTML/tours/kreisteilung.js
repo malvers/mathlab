@@ -67,14 +67,28 @@
         },
 
         scenes: [
+            /* The seconds below are NOT guessed at the picture any more: each one is where the sentence says the
+               thing, taken as (characters before that word / characters in the whole text) x the MEASURED length
+               of the track (afinfo, 20.09.2026: s1 5.0 · s2 6.0 · s3 5.6 · s4 8.9 · s5 7.4 · s6 5.9 · s7 5.4 ·
+               s8 7.2 s), plus cyber-tour's LEAD of 0.5 s before the voice starts. Word-exact it is not - that
+               needs the cue list a film take brings along. */
+            /* Doc, 20.09.2026: "Ein Intro Motivation brauchen wir auch 1 2 4 8 16 ... was kommt dann?" - the
+               question first, on the empty circle: the lab stays untouched while she asks, so the class answers
+               32 out loud before anything on screen can give it away. */
+            {
+                id: 's0', n: '00', title: 'Was kommt dann?',
+                async enter(t) { await start(t, 1); },
+                async run(t) {
+                    begin(t, '00', 'Was kommt dann?');
+                    await t.rest();
+                },
+            },
             {
                 id: 's1', n: '01', title: 'Zwei Punkte, eine Sehne',
-                async enter(t) { await start(t, 2); },
+                async enter(t) { await start(t, 1); },
                 async run(t) {
                     begin(t, '01', 'Zwei Punkte, eine Sehne');
-                    await t.at(3.0);
-                    await setN(t, 1);
-                    await t.at(6.0);
+                    await t.at(1.1);         /* "zwei Punkte" */
                     await setN(t, 2);
                     await t.rest();
                 },
@@ -84,12 +98,12 @@
                 async enter(t) { await start(t, 2); },
                 async run(t) {
                     begin(t, '02', 'Jedes Mal das Doppelte');
-                    /* 1, 2, 4, 8, 16 - the lie builds itself while you watch */
-                    await t.at(2.5);
+                    /* 1, 2, 4, 8, 16 - the lie builds itself while she counts */
+                    await t.at(0.9);         /* "Drei Punkte, vier Stücke" */
                     await setN(t, 3);
-                    await t.at(6.0);
+                    await t.at(2.1);         /* "Vier Punkte, acht" */
                     await setN(t, 4);
-                    await t.at(10.0);
+                    await t.at(3.1);         /* "Fünf Punkte, sechzehn" */
                     await setN(t, 5);
                     await t.rest();
                 },
@@ -99,8 +113,8 @@
                 async enter(t) { await start(t, 5); },
                 async run(t) {
                     begin(t, '03', 'Und dann 31');
-                    await t.at(3.0);
-                    await setN(t, 6);        /* 32 would be the guess - it is 31 */
+                    await t.at(1.0);         /* "Sechs Punkte" - the picture first, the number follows */
+                    await setN(t, 6);
                     await t.rest();
                 },
             },
@@ -109,9 +123,10 @@
                 async enter(t) { await start(t, 6); },
                 async run(t) {
                     begin(t, '04', 'Regelmäßig oder allgemein');
-                    /* regular: three chords meet in the centre, one face less. Nudged apart: the full 31 */
-                    await tapOn(t, 3.5, '#kt-jitter');
-                    await tapOn(t, 9.0, '#kt-regular');
+                    /* the order follows the sentence: regular first (three chords in the centre, one face
+                       short), and only at "Schiebe sie in allgemeine Lage" the points are nudged apart */
+                    await tapOn(t, 1.2, '#kt-regular');
+                    await tapOn(t, 6.0, '#kt-jitter');
                     await t.rest();
                 },
             },
@@ -120,10 +135,10 @@
                 async enter(t) { await start(t, 6); },
                 async run(t) {
                     begin(t, '05', 'Was man sieht');
-                    await tapOn(t, 2.5, '#kt-fill');          /* faces off: only the chords are left */
-                    await tapOn(t, 6.0, '#kt-cuts-box');      /* and the crossings go too */
-                    await tapOn(t, 9.5, '#kt-cuts-box');
-                    await tapOn(t, 12.0, '#kt-fill');
+                    await tapOn(t, 1.0, '#kt-fill');          /* "Nimm die Farbe weg" */
+                    await tapOn(t, 2.4, '#kt-cuts-box');      /* "dann die Schnittpunkte" */
+                    await tapOn(t, 5.6, '#kt-cuts-box');      /* "Punkte, Sehnen, Kreuzungen" - all back */
+                    await tapOn(t, 6.6, '#kt-fill');
                     await t.rest();
                 },
             },
@@ -132,8 +147,8 @@
                 async enter(t) { await start(t, 6); },
                 async run(t) {
                     begin(t, '06', 'Nummern');
-                    await tapOn(t, 2.5, '#kt-numbers');       /* count them yourself - that is the point */
-                    await t.at(9.0);
+                    await tapOn(t, 0.9, '#kt-numbers');       /* "Mit Nummern kannst du selbst nachzählen" */
+                    await t.at(3.0);                          /* "Bei sieben Punkten" */
                     await setN(t, 7);
                     await t.rest();
                 },
@@ -146,7 +161,7 @@
                 },
                 async run(t) {
                     begin(t, '07', 'Abspielen');
-                    await tapOn(t, 2.0, '#kt-play');
+                    await tapOn(t, 1.0, '#kt-play');          /* "Einmal von vorn" */
                     await t.rest();
                 },
             },
@@ -155,9 +170,9 @@
                 async enter(t) { await start(t, 8); },
                 async run(t) {
                     begin(t, '08', 'Die Formel');
-                    await t.at(3.0);
+                    await t.at(2.6);         /* "Sie beginnt wie die Zweierpotenzen" */
                     await setN(t, 10);
-                    await t.at(8.0);
+                    await t.at(4.6);         /* "und läuft ihnen dann davon" */
                     await setN(t, 12);
                     await t.rest();
                     t.hideCursor();
