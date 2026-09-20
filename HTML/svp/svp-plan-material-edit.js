@@ -105,6 +105,9 @@ window.svpPlanParts.push(function (P) {
             });
             ref.matTd.appendChild(flag);
         }
+        /* "Gedanke der Woche" of this week - the cell was emptied above, so it goes back
+           on every rebuild (svp-plan-gdw.js adds it only once per cell). */
+        P.gdwThumb(ref);
         const vids = alle.filter(P.isVideoEntry).length;
         if (hasMat) {
             const sub = ref.ensureSubRow();

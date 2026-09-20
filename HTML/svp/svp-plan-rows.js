@@ -276,7 +276,11 @@ window.svpPlanParts.push(function (P) {
                title stands here - and the whole row width is used: the old layout kept
                an empty 370 px block under Nr/KW/Woche and squeezed the materials into
                a 298 px side cell, where five pills stacked into five lines. */
-            subMain.colSpan = 7;
+            /* Doc, 20.09.2026: "MAt rechtsbuendig bitte" - die Zeile deckte sieben der
+               acht Spalten ab und endete damit VOR der Bilderspalte; Material und
+               Reiter hoerten 8 px vor den Vorschaubildern auf. Ueber alle acht
+               Spalten endet sie genau auf deren Kante, beide Zellen polstern 6 px. */
+            subMain.colSpan = 8;
             /* Doc, 07.09.2026: Text links auf 60 % der Breite, das Material wieder
                rechts daneben statt darunter - der Platz rechts der Stichpunkte lag
                sonst brach. Die Aufgaben-Pille bleibt direktes Kind der Zelle, sie

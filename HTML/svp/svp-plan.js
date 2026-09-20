@@ -17,6 +17,7 @@
         'core',             // group view (?g=), page head and foot, Lehrplan menu, table head
         'material',         // material pills: icons, labels, viewer, tooltip
         'aufgaben',         // week quiz, "Aufgaben" menu, red test button and its list
+        'gdw',              // "Gedanke der Woche": preview in the week row, full page on click
         'talks',            // the "Vortrag: Nr · Titel" line of a week
         'material-edit',    // editing material: dialog, clipboard, pill menu, drag and drop
         'state',            // stored edits and notes (localStorage), the merged plan rows

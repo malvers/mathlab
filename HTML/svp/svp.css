@@ -637,7 +637,29 @@ html.svp-light #plan-table .detail-row .sub-talk b { color: var(--ypsilon); }
    als Inline-Element an einer Textgrundlinie, unter ihr kommt Zeilenraum dazu,
    und die graue Linie sitzt tiefer als links (Doc, 08.09.2026: "da ist die
    graue auch runter"). Links steht .sub-tabs, das ist selbst schon flex. */
-#plan-table .detail-row .sub-head-r { flex: 1 1 auto; min-width: 0; display: flex; }
+/* Doc, 20.09.2026: "macht die Tabs rechtsbuendig bitte" - die Reiter der
+   rechten Haelfte sitzen am rechten Rand, nicht mehr am Gap in der Mitte. */
+#plan-table .detail-row .sub-head-r {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    justify-content: flex-end;
+}
+/* Stift und Bearbeiten-Knoepfe schoben sich selbst mit margin-left:auto nach
+   rechts. Dieser Auto-Rand frisst den freien Platz, und angemeldet blieben die
+   Reiter dadurch links stehen (Doc, 20.09.2026: "bitte auch die TABS rechts vor
+   den Stift wenn angemeldet"). Rechtsbuendig macht jetzt allein justify-content,
+   der Rand ist nur noch der Abstand zu den Reitern. */
+#plan-table .detail-row .sub-head-r .sub-edit,
+#plan-table .detail-row .sub-head-r .sub-done { margin-left: 10px; }
+/* Doc, 20.09.2026: "stift zentriert unter die thumbs". Seit die Aufklappzeile
+   ueber alle acht Spalten geht, endet sie auf derselben Kante wie die
+   Vorschaubilder - der Stift braucht nur deren Breite, dann liegt seine Mitte
+   von selbst auf ihrer. */
+#plan-table .detail-row .sub-head-r .sub-edit {
+    width: 27px;
+    justify-content: center;
+}
 /* Gemalte Beschriftung der beiden Haelften - sieht aus wie ein Reiter, laesst
    sich aber nicht anklicken. Farbe wie die grosse Tabellenkopfzeile (Doc,
    07.09.2026), damit es als Spaltenueberschrift gelesen wird. */
@@ -2912,7 +2934,11 @@ tr.detail-row td {
 
 /* Die Aufklappzeile nutzt die ganze Breite (Doc, 07.09.2026: „links ist soviel
    Platz!") - eine Zelle ueber alle Spalten, Inhalt am linken Tabellenrand. */
-tr.detail-row td { padding-left: 14px; padding-right: 14px; }
+/* Doc, 20.09.2026: "MAt rechtsbuendig bitte". Rechts nur 6 px wie in jeder
+   anderen Zelle - dann endet die Aufklappzeile auf derselben Kante wie die
+   Vorschaubilder der Wochenzeile (gemessen: Zelle 144-1342, Bild bis 1336).
+   Links bleiben die 14 px, davon lebt die Einrueckung der Stichpunkte. */
+tr.detail-row td { padding-left: 14px; padding-right: 6px; }
 
 tr.detail-row ul {
     margin: 6px 0 2px 0;
@@ -4523,3 +4549,73 @@ html.svp-light .mat-ico-movie path { fill: rgb(20, 44, 92); }
     html.svp-grey tr.kw-now > td:nth-child(2) { box-shadow: inset 2px 0 0 rgb(var(--g-week)), inset 6px 0 10px -6px rgba(var(--g-week), 0.5); }
     html.svp-grey tr.kw-now > td:last-child { box-shadow: inset -2px 0 0 rgb(var(--g-week)), inset -6px 0 10px -6px rgba(var(--g-week), 0.5); }
 }
+
+/* --- Gedanke der Woche ---------------------------------------------------
+   Das Vorschaubild der Woche steht rechts in der Wochenzeile, seit dem
+   20.09.2026 allein dort (Doc: "macht den clip weg bitte und das thumb ohne
+   Rahmen fast y fuellend"). Ohne Rahmen, und so hoch wie die Zeile es zulaesst:
+   die Zeile ist 46 px hoch, ihre Zellen polstern 9 px oben und unten - hier
+   bleiben 2 px. 42 px Bild trieben die Zeile auf 47 px (die Zeile eines Inline-
+   Elements bringt ihre eigene Hoehe mit) - mit 38 px plus Rahmen bleibt es bei 46. */
+#plan-table tbody tr:not(.detail-row) > td.mat { padding-top: 2px; padding-bottom: 2px; }
+#plan-table td.mat .gdw-thumb {
+    display: inline-flex;
+    vertical-align: middle;
+    margin-left: 8px;
+    padding: 0;
+    /* Doc, 20.09.2026: "ok, doch einen duennen Rahmen, not rounded", dann
+       "etws duenner? Heller?" - ein halber Pixel, auf dem Retina-Schirm sauber. */
+    border: 0.5px solid rgba(var(--tint), 0.3);
+    border-radius: 0;
+    background: transparent;
+    cursor: pointer;
+    overflow: hidden;
+    line-height: 0;
+}
+#plan-table td.mat .gdw-thumb img {
+    display: block;
+    height: 38px;                /* hochkant wie die Folie: 1 : 1.445 */
+    width: 26px;
+    object-fit: cover;
+}
+#plan-table td.mat .gdw-thumb:hover { border-color: rgb(var(--tint-text)); }
+/* Die sechs Weisheiten vor den Ferien tragen denselben Rahmen in Docs Orange. */
+#plan-table td.mat .gdw-thumb.gdw-gross { border-color: rgba(245, 194, 66, 0.75); }
+html.svp-light #plan-table td.mat .gdw-thumb { border-color: rgba(40, 70, 120, 0.28); }
+html.svp-light #plan-table td.mat .gdw-thumb.gdw-gross { border-color: rgba(245, 194, 66, 0.75); }
+
+.gdw-box {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    background: rgba(10, 20, 40, 0.82);
+}
+.gdw-box[hidden] { display: none; }
+.gdw-box img {
+    max-width: min(560px, 100%);
+    max-height: calc(100vh - 120px);
+    object-fit: contain;
+    border-radius: 6px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+}
+.gdw-close {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.gdw-close:hover { background: rgba(255, 255, 255, 0.26); }
