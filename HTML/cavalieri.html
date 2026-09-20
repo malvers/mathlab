@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Cavalieri</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        /* Readouts: same row grammar as the other labs (key left, value right). */
+        .cav-rows { display: flex; flex-direction: column; gap: 7px; }
+        .cav-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+        .cav-key { font-size: .78rem; opacity: .78; }
+        .cav-val {
+            font-family: Orbitron, system-ui, sans-serif; font-size: .82rem;
+            color: #9de8ff; text-shadow: 0 0 8px rgba(0, 210, 255, .45);
+        }
+        /* One per row: side by side the labels ran out of the panel (Doc,
+           20.09.2026, SS) - the buttons keep their own minimum width. */
+        .cav-btns { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .cav-formula {
+            font-family: Orbitron, system-ui, sans-serif; font-size: .8rem;
+            text-align: center; padding: 8px 4px; color: #d8ecff; letter-spacing: .5px;
+        }
+        /* The equals sign carries the whole point, so it gets the accent. */
+        .cav-eq { color: #7dd87d; }
+
+        /* Flatter buttons, THIS lab only (Doc, 20.09.2026: "mach mal nur hier").
+           The shared rule in buttons-ultra.css sets min-height 58px and an
+           !important padding for every .cyber-btn, so undoing it locally needs
+           !important as well. Scoped to #ui-container so nothing outside the
+           panel is touched - and deliberately NOT changed centrally, because
+           that would reshape every other lab at once. */
+        #ui-container .cyber-btn {
+            min-height: 38px;
+            padding: 7px 12px !important;
+            letter-spacing: 1.6px !important;
+        }
+
+        /* The invariant as the big number, from the shared widget in
+           cyber-lab-overrides.css - moved to the top left and a size down from
+           Fouriers (Doc, 20.09.2026: "nicht ganz so gross vlt"), because here it
+           has to share the picture with a figure that leans right across it. */
+        #n-telemetry {
+            right: auto; left: 30px; top: 22px;
+            transform: none; text-align: left;
+            font-size: clamp(1.9rem, min(11vmin, 7vw), 4.6rem);
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div class="cyber-grid"></div>
+            <div id="n-telemetry"></div>
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+            <!-- the 3D stage sits on top of the 2D canvas and only one is ever
+                 visible; the trackball needs a real element to listen on -->
+            <div id="stage3d" style="position:absolute; inset:0; display:none;"></div>
+        </div>
+    </main>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+    </script>
+    <script type="module">
+        import * as THREE_MOD from "three";
+        import { TrackballControls } from "three/addons/controls/TrackballControls.js";
+        window.THREE = { ...THREE_MOD, TrackballControls };
+        window.dispatchEvent(new Event('three-ready'));
+    </script>
+    <script src="js/cyber-trackball.js"></script>
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        // CyberI18n.get() returns the key when it is missing - only getOr() falls back.
+        const T = (k, fb) => (typeof CyberI18n !== 'undefined' && CyberI18n.getOr)
+            ? CyberI18n.getOr('cav.' + k, fb) : fb;
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Cavalieri',
+        });
+        CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        /* Docs Farbpalette (CLAUDE.md): lambda orange, Ypsilon rot, phi gruen. */
+        const ORANGE = 'rgb(245,194,66)';
+        const RED = 'rgb(176,36,24)';
+        const GREEN = 'rgb(121,158,49)';
+
+        /* ---------------------------------------------------------------- state --
+           shear is the only thing the user really changes: in 2D it slides the
+           apex, in 3D the top of the stack. Everything else is presentation.
+           The slice count is what turns the picture into an argument - each slice
+           keeps its width (2D) or its area (3D) while the body leans over. */
+        const MAX_SLICES = 1000;  // Doc, 20.09.2026
+        const MAX_SHEAR = 2;      // base widths the apex may wander
+
+        const S = {
+            mode: '2d',          // '2d' | '3d'
+            shape: 'zylinder',   // 3D only: 'zylinder' | 'kegel'
+            shear: 0,            // -1 .. 1, relative to the base width
+            slices: 14,          // number of strips / discs
+            sliced: true,        // show the decomposition at all
+            ghost: true,         // outline of the upright body for comparison
+            spin: false,         // slow automatic shear, for the beamer
+            /* One offset per layer, in units of the base width - EVERY strip can
+               be pushed on its own (Doc, 20.09.2026: "warum nicht einzelne
+               Schichten? Alle"). The array is resampled when the count changes,
+               so a shape survives a turn of the slice slider. */
+            off: [],
+            linked: false,     // 2nd mode: dragging one layer takes the others along
+            /* Layers the hand has already placed. In linked mode they hold still
+               and a new drag only bends the stretch between its two neighbours,
+               so kinks add up instead of replacing each other (Doc, 20.09.2026:
+               "soll die da bleiben und ich kann noch eine andere verschieben"). */
+            anchors: []
+        };
+
+        /* ------------------------------------------------------------ persist --
+           Everything the hand has set survives a reload - including the layer
+           offsets, so a shape built in front of the class is still there after
+           Cmd-Shift-R (Doc, 20.09.2026). Wrapped: a locked-down browser throws
+           on localStorage, and the lab has to run anyway. */
+        const STORE_KEY = 'cav-state';
+        let saveTimer = 0;
+        function saveState() {
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(function () {
+                try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (e) { }
+            }, 400);
+        }
+        function loadState() {
+            let raw = null;
+            try { raw = localStorage.getItem(STORE_KEY); } catch (e) { }
+            if (!raw) return;
+            try {
+                const v = JSON.parse(raw);
+                if (!v || typeof v !== 'object') return;
+                /* copy key by key, so a state written by an older version cannot
+                   drag stale fields in - and clamp what the sliders depend on */
+                if (v.mode === '2d' || v.mode === '3d') S.mode = v.mode;
+                if (v.shape === 'zylinder' || v.shape === 'kegel') S.shape = v.shape;
+                if (typeof v.shear === 'number') S.shear = Math.max(-MAX_SHEAR, Math.min(MAX_SHEAR, v.shear));
+                if (typeof v.slices === 'number') {
+                    S.slices = Math.max(1, Math.min(MAX_SLICES, Math.round(v.slices)));
+                }
+                ['sliced', 'ghost', 'linked'].forEach(k => {
+                    if (typeof v[k] === 'boolean') S[k] = v[k];
+                });
+                if (Array.isArray(v.off)) S.off = v.off.filter(x => typeof x === 'number');
+                if (Array.isArray(v.anchors)) S.anchors = v.anchors.filter(x => typeof x === 'number');
+            } catch (e) { }
+            S.spin = false;          // never start the beamer pendulum by itself
+        }
+
+        /* ------------------------------------------------------------ geometry --
+           One world for both modes: base width g, height h, in pixels, derived
+           from the canvas so the lab stays responsive (rule 16). */
+        function world() {
+            const rect = container.getBoundingClientRect();
+            const w = rect.width, hgt = rect.height;
+            const g = Math.min(w * 0.42, 520);
+            const h = Math.min(hgt * 0.56, 430);
+            return { w, hgt, g, h, cx: w / 2, baseY: hgt * 0.5 + h / 2 };
+        }
+
+        function shearPx(W) { return S.shear * W.g * 0.9; }
+
+        /* Layer offsets. The shear slider tilts the whole body (a term linear in
+           t); off[i] is what THAT layer was pushed by on top of it. Both add up,
+           so the slider still works after single layers have been moved. */
+        function ensureOff(n) {
+            const old = S.off;
+            if (old.length === n) return;
+            const next = new Array(n);
+            for (let i = 0; i < n; i++) {
+                // resample the old profile, so the shape keeps its look
+                next[i] = old.length ? old[Math.min(old.length - 1,
+                    Math.round((i + 0.5) / n * old.length - 0.5))] : 0;
+            }
+            S.off = next;
+        }
+
+        function tMid(i) { return (i + 0.5) / Math.max(1, S.slices); }
+
+        // centre line of layer i, in pixels
+        function centreOf(i, W) { return W.cx + shearPx(W) * tMid(i) + (S.off[i] || 0) * W.g; }
+
+        /* Smooth profile for the undecomposed view: linear between layer centres. */
+        function offsetAt(t, W) {
+            const n = Math.max(1, S.slices);
+            if (!S.off.length) return shearPx(W) * t;
+            const u = t * n - 0.5;
+            const i = Math.max(0, Math.min(n - 1, Math.floor(u)));
+            const j = Math.max(0, Math.min(n - 1, i + 1));
+            const f = Math.max(0, Math.min(1, u - i));
+            const dx = (S.off[i] * (1 - f) + S.off[j] * f) * W.g;
+            return shearPx(W) * t + dx;
+        }
+
+        // left and right edge of the horizontal cut at height t (smooth view)
+        function cutAt(t, W) {
+            const wid = W.g * (1 - t), c = W.cx + offsetAt(t, W);
+            return [c - wid / 2, c + wid / 2];
+        }
+
+        /* ------------------------------------------------------------------ 2D --
+           A triangle between two parallel lines. Dragging the apex shears it:
+           every horizontal cut keeps its length, so the area cannot change.
+           This is the Java original (DemoPrograms/cavalieri) as a lab. */
+        function draw2D(W) {
+            const x0 = W.cx - W.g / 2, y1 = W.baseY, y0 = W.baseY - W.h;
+            const apexX = W.cx + shearPx(W);
+
+            // the two guide lines the triangle lives between
+            ctx.strokeStyle = 'rgba(157,232,255,.30)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([6, 6]);
+            line(0, y0, W.w, y0); line(0, y1, W.w, y1);
+            ctx.setLineDash([]);
+
+            if (S.ghost) {
+                ctx.strokeStyle = 'rgba(157,232,255,.22)';
+                poly([[x0, y1], [x0 + W.g, y1], [W.cx, y0]], null, true);
+            }
+
+            ensureOff(S.slices);
+            const yOf = (t) => y1 - t * W.h;
+
+            if (S.sliced) {
+                /* Every strip is its own slab: a trapezoid of the width the body
+                   has there, centred wherever that layer has been pushed. The
+                   width never depends on the push - so the sum of the strips, and
+                   with it the area, cannot move however wild the stack looks. */
+                for (let i = 0; i < S.slices; i++) {
+                    const t0 = i / S.slices, t1 = (i + 1) / S.slices;
+                    const yA = yOf(t0), yB = yOf(t1);
+                    const c = centreOf(i, W);
+                    const wA = W.g * (1 - t0) / 2, wB = W.g * (1 - t1) / 2;
+                    const quad = [[c - wA, yA], [c + wA, yA], [c + wB, yB], [c - wB, yB]];
+                    ctx.fillStyle = i % 2 ? 'rgba(245,194,66,.62)' : 'rgba(121,158,49,.62)';
+                    poly(quad, ctx.fillStyle, false);
+                    ctx.strokeStyle = 'rgba(10,20,40,.55)'; ctx.lineWidth = 1;
+                    poly(quad, null, true);
+                }
+                /* Grips sit ON the dividing lines, at both ends (Doc, 20.09.2026) -
+                   that is where the Java original had p4 … p7, and where the eye
+                   looks when the outline kinks. Only while they are far enough
+                   apart to aim at; denser than that the strip itself is the target. */
+                if (S.slices <= 26) {
+                    for (let i = 0; i < S.slices - 1; i++) {
+                        const tB = (i + 1) / S.slices;
+                        const c = centreOf(i, W), half = W.g * (1 - tB) / 2, y = yOf(tB);
+                        handle(c - half, y, 6);
+                        handle(c + half, y, 6);
+                    }
+                }
+            } else {
+                const ts = [];
+                for (let k = 0; k <= 40; k++) ts.push(k / 40);
+                const shape = ts.map(t => [cutAt(t, W)[0], yOf(t)])
+                    .concat(ts.slice().reverse().map(t => [cutAt(t, W)[1], yOf(t)]));
+                ctx.fillStyle = 'rgba(245,194,66,.55)';
+                poly(shape, ctx.fillStyle, false);
+                ctx.strokeStyle = ORANGE; ctx.lineWidth = 2;
+                poly(shape, null, true);
+            }
+
+            handle(apexX, y0);
+
+            // the base is the invariant, so it gets a label
+            ctx.strokeStyle = RED; ctx.lineWidth = 3;
+            line(x0, y1, x0 + W.g, y1);
+            label('g', (x0 + W.g / 2), y1 + 22, RED);
+            ctx.strokeStyle = 'rgba(157,232,255,.55)'; ctx.lineWidth = 1.5;
+            line(x0 - 26, y0, x0 - 26, y1);
+            label('h', x0 - 40, (y0 + y1) / 2, 'rgba(157,232,255,.9)');
+        }
+
+        /* ------------------------------------------------------------------ 3D --
+           The coin-stack picture: discs of equal area stacked upright, then the
+           stack pushed over. Same discs, same height, same volume. Real WebGL
+           with our own trackball (cyber-trackball.js), so the stack can be looked
+           at from below - which is where "the slices really do stay congruent"
+           stops being a claim and becomes visible (Doc, 20.09.2026: "unseren TB!"). */
+        const D3 = { ready: false, scene: null, camera: null, renderer: null,
+                     controls: null, stack: null, ghost: null };
+        const stage = document.getElementById('stage3d');
+
+        // relative radius at height t: constant for the cylinder, linear for the cone
+        function radiusAt(t) { return S.shape === 'kegel' ? (1 - t) : 1; }
+
+        function setup3D() {
+            if (D3.ready || !window.THREE) return;
+            const T3 = window.THREE;
+            D3.scene = new T3.Scene();
+            D3.camera = new T3.PerspectiveCamera(45, 1, 0.1, 200);
+            D3.camera.position.set(0, 2.2, 9);
+            D3.renderer = new T3.WebGLRenderer({ antialias: true, alpha: true });
+            D3.renderer.setPixelRatio(window.devicePixelRatio || 1);
+            stage.appendChild(D3.renderer.domElement);
+
+            D3.controls = CyberTrackball.make(T3.TrackballControls, D3.camera,
+                D3.renderer.domElement, { minDistance: 3, maxDistance: 40 });
+
+            D3.scene.add(new T3.AmbientLight(0xffffff, 0.62));
+            const key = new T3.DirectionalLight(0xfff4e0, 1.25); key.position.set(4, 6, 5);
+            D3.scene.add(key);
+            const fill = new T3.DirectionalLight(0x4466ff, 0.45); fill.position.set(-4, -2, -4);
+            D3.scene.add(fill);
+
+            // ground plane, so "same two parallels" has something to stand on
+            const grid = new T3.GridHelper(14, 14, 0x2a6e8a, 0x173c4d);
+            grid.position.y = -2.0;
+            D3.scene.add(grid);
+
+            D3.stack = new T3.Group(); D3.scene.add(D3.stack);
+            D3.ghost = new T3.Group(); D3.scene.add(D3.ghost);
+            D3.ready = true;
+            attachSlabDrag(D3.renderer.domElement);
+            build3D();
+            resize3D();
+        }
+
+        /* Grab a coloured slice and the stack leans (Doc, 20.09.2026: "wenn man die
+           gruenen gelben Schichten schiebt auch"). Empty space still belongs to the
+           trackball, so both gestures live on the same canvas without a modifier:
+           a ray decides which one the pointer meant. */
+        function attachSlabDrag(el) {
+            const T3 = window.THREE;
+            const ray = new T3.Raycaster(), ndc = new T3.Vector2();
+            let drag = null;
+
+            const hitLayer = (e) => {
+                const r = el.getBoundingClientRect();
+                ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+                ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+                ray.setFromCamera(ndc, D3.camera);
+                const hit = ray.intersectObjects(D3.stack.children, false)[0];
+                return hit ? hit.object.userData.layer : null;
+            };
+
+            /* How far one screen pixel carries along the world X axis, as the
+               camera currently sees it. Without this the drag runs the wrong way
+               as soon as the trackball has turned the stack around - measured,
+               not assumed: project the axis and read off its screen direction. */
+            function axisOnScreen() {
+                const T = window.THREE, r = el.getBoundingClientRect();
+                const p0 = new T.Vector3(0, 0, 0).project(D3.camera);
+                const p1 = new T.Vector3(1, 0, 0).project(D3.camera);
+                const sx = (p1.x - p0.x) * r.width / 2;
+                const sy = -(p1.y - p0.y) * r.height / 2;
+                return { sx, sy, len2: sx * sx + sy * sy };
+            }
+
+            el.addEventListener('pointerdown', e => {
+                const layer = hitLayer(e);
+                if (layer === null) return;               // empty space: the trackball
+                const ax = axisOnScreen();
+                // axis nearly end-on? then a sideways drag means nothing - let it rotate
+                if (ax.len2 < 4) return;
+                ensureOff(S.slices);
+                drag = {
+                    x: e.clientX, y: e.clientY, layer: layer, ax: ax,
+                    u0: 0.9 * S.shear * tMid(layer) + (S.off[layer] || 0),
+                    scale: 1.6 * 2.444                    // SCALE3D, in world units
+                };
+                D3.controls.enabled = false;
+                S.spin = false;
+                el.setPointerCapture(e.pointerId);
+            }, true);
+
+            el.addEventListener('pointermove', e => {
+                if (!drag) return;
+                /* least squares: how much world X explains this screen movement */
+                const mx = e.clientX - drag.x, my = e.clientY - drag.y;
+                const world = (mx * drag.ax.sx + my * drag.ax.sy) / drag.ax.len2;
+                applyLayerDrag(drag.layer, drag.u0 + world / drag.scale);
+                syncControls();
+                draw();
+            }, true);
+
+            const stop = () => { drag = null; D3.controls.enabled = true; };
+            el.addEventListener('pointerup', stop, true);
+            el.addEventListener('pointercancel', stop, true);
+        }
+
+        /* The stack is rebuilt whenever shear, count or shape change - a few dozen
+           short cylinders, cheap enough to throw away and make again. */
+        function build3D() {
+            if (!D3.ready) return;
+            const T3 = window.THREE;
+            const dispose = (g) => {
+                while (g.children.length) {
+                    const m = g.children.pop();
+                    if (m.geometry) m.geometry.dispose();
+                    if (m.material) m.material.dispose();
+                }
+            };
+            dispose(D3.stack); dispose(D3.ghost);
+
+            const H = 4, R = 1.6, n = Math.max(1, S.slices);
+            const dh = H / n;
+            ensureOff(n);
+            /* Same offsets as 2D, only scaled into world units: a normalised 1.0
+               is one base width, and SCALE3D is picked so a full shear leans as
+               far as it did before the layers became individual. */
+            const SCALE3D = R * 2.444;
+            const offOf = (i) => (0.9 * S.shear * tMid(i) + (S.off[i] || 0)) * SCALE3D;
+
+            for (let i = 0; i < n; i++) {
+                const t = (i + 0.5) / n;
+                const r = R * radiusAt(t);
+                if (r <= 1e-4) continue;
+                /* A slice of the CONE keeps straight walls here on purpose: it is a
+                   thin frustum, and Cavalieri compares the flat cuts, not the hull. */
+                const geo = new T3.CylinderGeometry(R * radiusAt((i + 1) / n), R * radiusAt(i / n),
+                    dh * (S.sliced ? 0.86 : 1.0), n > 400 ? 12 : n > 120 ? 20 : 48, 1, false);
+                const mat = new T3.MeshStandardMaterial({
+                    color: i % 2 ? 0xF5C242 : 0x799E31,
+                    roughness: 0.55, metalness: 0.08,
+                    transparent: true, opacity: 0.93
+                });
+                const mesh = new T3.Mesh(geo, mat);
+                mesh.position.set(offOf(i), -H / 2 + (i + 0.5) * dh, 0);
+                mesh.userData.layer = i;       // the raycast needs to know which one
+                D3.stack.add(mesh);
+            }
+
+            if (S.ghost) {
+                // wireframe of the upright body, as the reference to compare against
+                const g = new T3.CylinderGeometry(R * radiusAt(1), R, H, 40, 1, true);
+                const m = new T3.MeshBasicMaterial({
+                    color: 0x9de8ff, wireframe: true, transparent: true, opacity: 0.12
+                });
+                D3.ghost.add(new T3.Mesh(g, m));
+            }
+        }
+
+        function resize3D() {
+            if (!D3.ready) return;
+            const rect = container.getBoundingClientRect();
+            D3.renderer.setSize(rect.width, rect.height, false);
+            D3.camera.aspect = Math.max(rect.width, 1) / Math.max(rect.height, 1);
+            D3.camera.updateProjectionMatrix();
+            if (D3.controls && D3.controls.handleResize) D3.controls.handleResize();
+        }
+
+        /* ------------------------------------------------------------- helpers -- */
+        function line(x1, y1, x2, y2) {
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        }
+        function poly(pts, fill, stroke) {
+            ctx.beginPath();
+            pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y));
+            ctx.closePath();
+            if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+            if (stroke) ctx.stroke();
+        }
+        function ellipse(cx, cy, rx, ry, stroke, fill) {
+            if (rx <= 0) return;
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, rx, Math.max(ry, 0.5), 0, 0, Math.PI * 2);
+            if (fill) ctx.fill();
+            if (stroke) ctx.stroke();
+        }
+        function handle(x, y, r) {
+            ctx.beginPath(); ctx.arc(x, y, r || 8, 0, Math.PI * 2);
+            ctx.fillStyle = '#9de8ff'; ctx.fill();
+            ctx.strokeStyle = '#06263a'; ctx.lineWidth = 2; ctx.stroke();
+        }
+        function label(txt, x, y, col) {
+            ctx.fillStyle = col; ctx.font = '600 15px Orbitron, system-ui, sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(txt, x, y);
+        }
+
+        /* -------------------------------------------------------------- readout --
+           The numbers are the argument: the slanted body reports the same area or
+           volume as the upright one, whatever the shear does. */
+        function readout() {
+            const W = world();
+            const unit = W.g / 6;                     // 1 unit on screen
+            const g = W.g / unit, h = W.h / unit, r = (W.g / 2) / unit;
+            const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+            /* the formula carries a <span> for the equals sign, so it needs innerHTML -
+               textContent printed the markup on screen (Doc, 20.09.2026, SS) */
+            const html = (id, v) => { const e = document.getElementById(id); if (e) e.innerHTML = v; };
+            const fmt = (x) => x.toFixed(2).replace('.', ',');
+
+            if (S.mode === '2d') {
+                set('cav-m1', fmt(g) + ' LE');
+                set('cav-m2', fmt(h) + ' LE');
+                set('cav-m3', fmt(0.5 * g * h) + ' FE');
+                set('cav-k1', T('m_base', 'Grundseite g'));
+                set('cav-k2', T('m_height', 'Höhe h'));
+                set('cav-k3', T('m_area', 'Fläche A'));
+                html('cav-formula',
+                    'A = ½ · g · h <span class="cav-eq">=</span> ' + fmt(0.5 * g * h) + ' FE');
+                set('n-telemetry', fmt(0.5 * g * h) + ' FE');
+            } else {
+                const V = (S.shape === 'kegel' ? 1 / 3 : 1) * Math.PI * r * r * h;
+                set('cav-m1', fmt(r) + ' LE');
+                set('cav-m2', fmt(h) + ' LE');
+                set('cav-m3', fmt(V) + ' VE');
+                set('cav-k1', T('m_radius', 'Radius r'));
+                set('cav-k2', T('m_height', 'Höhe h'));
+                set('cav-k3', T('m_vol', 'Volumen V'));
+                html('cav-formula', (S.shape === 'kegel' ? 'V = ⅓ · π · r² · h' : 'V = π · r² · h') +
+                    ' <span class="cav-eq">=</span> ' + fmt(V) + ' VE');
+                set('n-telemetry', fmt(V) + ' VE');
+            }
+            set('cav-shear', (S.shear >= 0 ? '+' : '') + S.shear.toFixed(2).replace('.', ','));
+            set('cav-slices', S.slices);
+        }
+
+        function draw() {
+            const W = world();
+            if (S.mode === '2d') {
+                ctx.clearRect(0, 0, W.w, W.hgt);
+                draw2D(W);
+            } else {
+                build3D();          // the stack is geometry, so a change rebuilds it
+            }
+            readout();
+            saveState();
+        }
+
+        /* ---------------------------------------------------------------- input --
+           Drag anywhere horizontally to shear - the handle is the target, but a
+           grab on the body works too, which is what fingers do on a tablet. */
+        /* grab = null | 'apex' | index of a layer handle. A grab near a handle takes
+           that layer; anywhere else moves the apex, which is the old behaviour. */
+        let grab = null;
+        /* Which layer is under the pointer? By height, so the whole strip is the
+           target and not just its dot - that is what fingers need on a tablet. */
+        function pick(clientX, clientY) {
+            const rect = container.getBoundingClientRect();
+            const W = world();
+            const x = clientX - rect.left, y = clientY - rect.top;
+            if (Math.hypot(x - (W.cx + shearPx(W)), y - (W.baseY - W.h)) < 20) return 'apex';
+            /* A grip on a dividing line first - it belongs to the strip below it. */
+            for (let i = 0; i < S.slices - 1; i++) {
+                const tB = (i + 1) / S.slices;
+                const c = centreOf(i, W), half = W.g * (1 - tB) / 2, hy = W.baseY - tB * W.h;
+                if (Math.hypot(x - (c - half), y - hy) < 16 ||
+                    Math.hypot(x - (c + half), y - hy) < 16) return i;
+            }
+            const t = (W.baseY - y) / W.h;
+            if (t < 0 || t > 1) return 'apex';
+            const i = Math.max(0, Math.min(S.slices - 1, Math.floor(t * S.slices)));
+            return i;
+        }
+        /* Pushing a layer, in units of the base width - the single place where
+           free mode, linked mode and the anchors are decided. 2D and 3D both call
+           it, so the two views can never drift apart (rule: extract what is used
+           more than once). u is where the grabbed layer should end up. */
+        function applyLayerDrag(idx, u) {
+            ensureOff(S.slices);
+            const tilt = 0.9 * S.shear;                  // apex offset, normalised
+            const total = (j) => tilt * tMid(j) + (S.off[j] || 0);
+            const clamp = (v) => Math.max(-3, Math.min(3, v));
+
+            if (!S.linked) {
+                S.off[idx] = clamp(u - tilt * tMid(idx));
+                return;
+            }
+            /* Nearest layer the hand has already placed, below and above. Base and
+               apex are the outermost anchors and never move, so only the run
+               between the two neighbours is straightened - the kinks add up. */
+            let lo = null, hi = null;
+            S.anchors.forEach(j => {
+                if (j === idx || j >= S.slices) return;
+                if (j < idx && (lo === null || j > lo)) lo = j;
+                if (j > idx && (hi === null || j < hi)) hi = j;
+            });
+            const tLo = lo === null ? 0 : tMid(lo), xLo = lo === null ? 0 : total(lo);
+            const tHi = hi === null ? 1 : tMid(hi), xHi = hi === null ? tilt : total(hi);
+            const tg = Math.max(tLo + 1e-6, Math.min(tHi - 1e-6, tMid(idx)));
+
+            for (let j = 0; j < S.slices; j++) {
+                const t = tMid(j);
+                if (t <= tLo || t >= tHi) continue;      // outside: untouched
+                const want = (t <= tg)
+                    ? xLo + (u - xLo) * (t - tLo) / (tg - tLo)
+                    : u + (xHi - u) * (t - tg) / (tHi - tg);
+                S.off[j] = clamp(want - tilt * t);
+            }
+            if (!S.anchors.includes(idx)) S.anchors.push(idx);
+        }
+
+        function dragTo(clientX) {
+            const rect = container.getBoundingClientRect();
+            const W = world();
+            const dx = (clientX - rect.left) - W.cx;
+            if (grab === 'apex') {
+                S.shear = Math.max(-MAX_SHEAR, Math.min(MAX_SHEAR, dx / (W.g * 0.9)));
+            } else if (typeof grab === 'number') {
+                applyLayerDrag(grab, dx / W.g);
+            }
+            syncControls();
+            draw();
+        }
+        canvas.addEventListener('pointerdown', e => {
+            grab = pick(e.clientX, e.clientY);
+            S.spin = false;
+            canvas.setPointerCapture(e.pointerId);
+            dragTo(e.clientX);
+        });
+        canvas.addEventListener('pointermove', e => { if (grab !== null) dragTo(e.clientX); });
+        canvas.addEventListener('pointerup', () => { grab = null; });
+        canvas.addEventListener('pointercancel', () => { grab = null; });
+
+        /* Keys from the Java original: arrows shear, R resets, I toggles the
+           decomposition; 3 switches dimensions (Doc, 20.09.2026). */
+        window.addEventListener('keydown', e => {
+            if (e.target && /input|textarea/i.test(e.target.tagName)) return;
+            const step = e.shiftKey ? 0.08 : 0.02;
+            let hit = true;
+            switch (e.key) {
+                case 'ArrowLeft': S.shear = Math.max(-MAX_SHEAR, S.shear - step); break;
+                case 'ArrowRight': S.shear = Math.min(MAX_SHEAR, S.shear + step); break;
+                case 'ArrowUp': S.slices = Math.min(MAX_SLICES, S.slices + 1); break;
+                case 'ArrowDown': S.slices = Math.max(1, S.slices - 1); break;
+                case 'r': case 'R': S.shear = 0; S.off = []; S.anchors = []; break;
+                case 'i': case 'I': S.sliced = !S.sliced; break;
+                case 'l': case 'L': S.linked = !S.linked; break;
+                case '2': setMode('2d'); break;
+                case '3': setMode('3d'); break;
+                case ' ': S.spin = !S.spin; break;
+                default: hit = false;
+            }
+            if (hit) { e.preventDefault(); syncControls(); draw(); }
+        });
+
+        /* ------------------------------------------------------------------ UI -- */
+        function setMode(m) {
+            S.mode = m;
+            document.getElementById('cav-2d').classList.toggle('active', m === '2d');
+            document.getElementById('cav-3d').classList.toggle('active', m === '3d');
+            const box = document.getElementById('cav-shape-row');
+            if (box) box.style.display = (m === '3d') ? '' : 'none';
+            stage.style.display = (m === '3d') ? '' : 'none';
+            canvas.style.visibility = (m === '3d') ? 'hidden' : '';
+            if (m === '3d') { setup3D(); resize3D(); }
+            coach();
+            draw();
+        }
+
+        function syncControls() {
+            const sl = document.getElementById('cav-shear-slider');
+            if (sl) sl.value = String(Math.round(S.shear * 100));
+            const sc = document.getElementById('cav-slice-slider');
+            if (sc) sc.value = String(S.slices);
+            const sb = document.getElementById('cav-sliced');
+            if (sb) sb.checked = S.sliced;
+            const lk = document.getElementById('cav-linked');
+            if (lk) lk.checked = S.linked;
+            const gh = document.getElementById('cav-ghost');
+            if (gh) gh.checked = S.ghost;
+            const zy = document.getElementById('cav-zyl'), ke = document.getElementById('cav-keg');
+            if (zy && ke) {
+                zy.classList.toggle('active', S.shape === 'zylinder');
+                ke.classList.toggle('active', S.shape === 'kegel');
+            }
+        }
+
+        function coach() {
+            const el = document.getElementById('coach-content');
+            if (!el) return;
+            el.innerHTML = S.mode === '2d'
+                ? T('coach2d', 'Schiebe die Spitze zur Seite. Jeder waagerechte Schnitt behält seine Länge — also bleibt die Fläche gleich. Das ist der Satz von Cavalieri.')
+                : T('coach3d', 'Schiebe den Stapel schief. Jede Scheibe behält ihre Fläche, die Höhe bleibt — also bleibt das Volumen gleich. Ein schiefer Zylinder fasst genauso viel wie ein gerader.');
+        }
+
+        function buildUI() {
+            CyberUI.createCard('ui-container', T('card_view', 'Ansicht'), `
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div class="cav-btns">
+                        <button class="cyber-btn active" id="cav-2d">${T('btn_2d', '2D Dreieck')}</button>
+                        <button class="cyber-btn" id="cav-3d">${T('btn_3d', '3D Stapel')}</button>
+                    </div>
+                    <div id="cav-shape-row" style="display:none;">
+                        <div class="cav-btns">
+                            <button class="cyber-btn active" id="cav-zyl">${T('btn_cyl', 'Zylinder')}</button>
+                            <button class="cyber-btn" id="cav-keg">${T('btn_cone', 'Kegel')}</button>
+                        </div>
+                    </div>
+                </div>`);
+
+            CyberUI.createCard('ui-container', T('card_shear', 'Scherung'), `
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                    <div>
+                        <div class="label-row">
+                            <span>${T('shear', 'Versatz')}</span>
+                            <span id="cav-shear" class="cav-val">0,00</span>
+                        </div>
+                        <input type="range" id="cav-shear-slider" min="-200" max="200" step="1" value="0">
+                    </div>
+                    <div>
+                        <div class="label-row">
+                            <span>${T('slices', 'Streifen / Scheiben')}</span>
+                            <span id="cav-slices" class="cav-val">14</span>
+                        </div>
+                        <input type="range" id="cav-slice-slider" min="1" max="1000" step="1" value="14">
+                    </div>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cav-sliced" checked>
+                        <span>${T('v_sliced', 'zerlegen')}</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cav-ghost" checked>
+                        <span>${T('v_ghost', 'gerade Form als Umriss')}</span></label>
+                    <label class="cyber-checkbox-wrapper"><input type="checkbox" id="cav-linked">
+                        <span>${T('v_linked', 'Schichten mitnehmen')}</span></label>
+                    <div class="cav-btns">
+                        <button class="cyber-btn" id="cav-reset">${T('btn_reset', 'Zurücksetzen')}</button>
+                        <button class="cyber-btn" id="cav-play">${T('btn_play', 'Pendeln')}</button>
+                    </div>
+                    <div class="lab-note">${T('hint_drag', 'Jede Schicht lässt sich einzeln ziehen. Mit „Schichten mitnehmen\u201c (Taste L) kippt stattdessen der ganze Körper mit. Die Fläche rührt sich in beiden Fällen nicht. Tasten: ← → scheren, ↑ ↓ Scheiben, I zerlegen, R zurück, 2 / 3 Ansicht.')}</div>
+                </div>`);
+
+            CyberUI.createCard('ui-container', T('card_measure', 'Messwerte'), `
+                <div class="cav-rows">
+                    <div class="cav-row"><span class="cav-key" id="cav-k1">Grundseite g</span><span class="cav-val" id="cav-m1">-</span></div>
+                    <div class="cav-row"><span class="cav-key" id="cav-k2">Höhe h</span><span class="cav-val" id="cav-m2">-</span></div>
+                    <div class="cav-row"><span class="cav-key" id="cav-k3">Fläche A</span><span class="cav-val" id="cav-m3">-</span></div>
+                </div>
+                <div class="cav-formula" id="cav-formula"></div>
+                <div class="lab-note">${T('note_invariant', 'Der Wert rührt sich nicht, egal wie schief die Figur steht — genau das ist die Aussage.')}</div>`);
+
+            const on = (id, ev, fn) => {
+                const e = document.getElementById(id);
+                if (e) e.addEventListener(ev, fn);
+            };
+            on('cav-2d', 'click', () => setMode('2d'));
+            on('cav-3d', 'click', () => setMode('3d'));
+            on('cav-zyl', 'click', () => {
+                S.shape = 'zylinder';
+                document.getElementById('cav-zyl').classList.add('active');
+                document.getElementById('cav-keg').classList.remove('active');
+                draw();
+            });
+            on('cav-keg', 'click', () => {
+                S.shape = 'kegel';
+                document.getElementById('cav-keg').classList.add('active');
+                document.getElementById('cav-zyl').classList.remove('active');
+                draw();
+            });
+            on('cav-shear-slider', 'input', e => { S.shear = parseInt(e.target.value, 10) / 100; draw(); });
+            on('cav-slice-slider', 'input', e => { S.slices = parseInt(e.target.value, 10); draw(); });
+            on('cav-sliced', 'change', e => { S.sliced = e.target.checked; draw(); });
+            on('cav-ghost', 'change', e => { S.ghost = e.target.checked; draw(); });
+            on('cav-linked', 'change', e => { S.linked = e.target.checked; draw(); });
+            on('cav-reset', 'click', () => {
+                S.shear = 0; S.spin = false; S.off = []; S.anchors = []; S.anchors = [];
+                syncControls(); draw();
+            });
+            on('cav-play', 'click', () => { S.spin = !S.spin; });
+        }
+
+        /* Slow pendulum for the beamer - one full swing takes about eight seconds,
+           slow enough that the readout is readable while the figure leans. */
+        let t0 = 0;
+        function tick(ts) {
+            if (S.spin) {
+                if (!t0) t0 = ts;
+                S.shear = Math.sin((ts - t0) / 1300) * MAX_SHEAR * 0.85;
+                syncControls();
+                draw();
+            } else t0 = 0;
+            if (S.mode === '3d' && D3.ready) {
+                D3.controls.update();          // the trackball has inertia, so every frame
+                D3.renderer.render(D3.scene, D3.camera);
+            }
+            requestAnimationFrame(tick);
+        }
+
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            canvas.width = Math.floor(Math.max(1, rect.width) * dpr);
+            canvas.height = Math.floor(Math.max(1, rect.height) * dpr);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
+
+        function init() {
+            resizeCanvasToContainer();
+            resize3D();
+            draw();
+        }
+
+        /* three arrives as a module, so it is late - if 3D is already on screen
+           when it lands, build the stage then. */
+        window.addEventListener('three-ready', () => {
+            if (S.mode === '3d') { setup3D(); resize3D(); draw(); }
+        });
+
+        (function setCoachTitleFromI18n() {
+            const el = document.getElementById('coach-title-slot');
+            if (el) el.textContent = T('title', 'Satz von Cavalieri');
+        })();
+
+        loadState();
+        buildUI();
+        syncControls();
+        setMode(S.mode);
+        coach();
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(init);
+        requestAnimationFrame(tick);
+    </script>
+</body>
+
+</html>

@@ -63,6 +63,22 @@ const LAB_ICONS = {
                 <circle cx="14" cy="84" r="3.2" /><circle cx="86" cy="84" r="3.2" /><circle cx="50" cy="15" r="3.2" />
             </g>
         </svg>`,
+    "cavalieri": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- a sheared triangle between two parallels, cut into strips of
+                 unchanged length - the theorem in one picture -->
+            <g stroke="rgba(0, 210, 255, 0.45)" stroke-width="1.6" stroke-dasharray="4 4">
+                <line x1="8" y1="22" x2="92" y2="22" /><line x1="8" y1="82" x2="92" y2="82" />
+            </g>
+            <g stroke="rgba(10, 20, 40, 0.55)" stroke-width="0.8">
+                <polygon points="18,82 82,82 71,67 24,67" fill="rgba(245, 194, 66, 0.75)" />
+                <polygon points="24,67 71,67 60,52 30,52" fill="rgba(121, 158, 49, 0.75)" />
+                <polygon points="30,52 60,52 49,37 36,37" fill="rgba(245, 194, 66, 0.75)" />
+                <polygon points="36,37 49,37 38,22" fill="rgba(121, 158, 49, 0.75)" />
+            </g>
+            <polygon points="18,82 82,82 38,22" fill="none" stroke="#00D2FF" stroke-width="2.2" />
+            <line x1="18" y1="82" x2="82" y2="82" stroke="rgb(176, 36, 24)" stroke-width="3" />
+        </svg>`,
+
     "kreisteilung": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <circle cx="50" cy="50" r="34" fill="rgba(0, 210, 255, 0.06)" stroke="#00D2FF" stroke-width="2.2" />
             <!-- all fifteen chords of the regular hexagon -->

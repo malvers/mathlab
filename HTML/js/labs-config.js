@@ -79,6 +79,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "cavalieri",
+        "href": "cavalieri.html",
+        "title": "Satz von Cavalieri",
+        "description": "Zwei Körper zwischen denselben zwei Parallelen: Liefert jeder waagerechte Schnitt beidemal denselben Inhalt, dann sind die Körper gleich groß. In 2D steht ein Dreieck zwischen zwei Geraden — die Spitze lässt sich beliebig weit zur Seite schieben, und weil jeder waagerechte Schnitt seine Länge behält, rührt sich die Fläche ½·g·h nicht. In 3D kippt ein Stapel gleicher Scheiben zur Seite: ein schiefer Zylinder fasst genauso viel wie ein gerader, πr²h, und der Kegel zeigt dasselbe mit kleiner werdenden Scheiben. Das Lab behauptet nichts, es misst mit — Grundseite, Höhe und Inhalt stehen während des Scherens daneben und bleiben stehen. Nach einem Java-Programm von Doc Alvers.",
+        "tagline": "Geometrie / Fläche und Volumen / schief ist nicht kleiner",
+        "icon": LAB_ICONS["cavalieri"],
+        "category": "geometrie neu hot koerper grade7 grade8 grade9 grade10 grade11",
+        "keywords": "cavalieri bonaventura prinzip satz scherung schaeren schief schiefer zylinder prisma kegel pyramide dreieck flaeche flaecheninhalt volumen rauminhalt scheiben streifen muenzstapel parallelen grundflaeche hoehe integral zerlegung querschnitt schnittflaeche invariant gleichmaechtig",
+        "color": "gold"
+    },
+    {
         "id": "brahmagupta",
         "href": "brahmagupta.html",
         "title": "Satz von Brahmagupta",
