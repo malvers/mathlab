@@ -92,7 +92,10 @@
            "brain auch seitlich und bunt", dann "hol das Gehirn als Bild") -
            das Zeichen aus Twemoji, siehe icons/readme.md. */
         return raus.map(function (e) {
-            return { quelle: 'Schon gewusst', text: e.text, logo: 'icons/gehirn.svg' };
+            return {
+                quelle: 'Schon gewusst', text: e.text,
+                logo: 'icons/gehirn.svg', logoKlasse: 'gehirn'
+            };
         });
     }
 
@@ -150,6 +153,20 @@
         }
     };
 
+    /* Haengt die Schlagzeilen an, sobald der laufende Durchgang zu Ende ist -
+       mitten im Satz zu wechseln waere unruhig, und das Band faengt beim
+       Neuzeichnen ohnehin von vorn an. */
+    function spaeter(items) {
+        const run = box.querySelector('.nav-news-run');
+        const anim = run && run.getAnimations ? run.getAnimations()[0] : null;
+        const setzen = function () { feed = items; zeichnen(); };
+        if (!anim || !anim.effect) { setzen(); return; }
+        const dauer = Number(anim.effect.getTiming().duration) || 0;
+        const jetzt = Number(anim.currentTime) || 0;
+        if (!dauer) { setzen(); return; }
+        setTimeout(setzen, Math.max(0, dauer - (jetzt % dauer)) + 80);
+    }
+
     function zeichnen() {
         /* Reihenfolge: erst der eigene Unterricht, dann das Haeppchen zum
            Fach, dann die Weltlage. */
@@ -181,14 +198,14 @@
        faellt, sind zurueckgeschoben (gemessen im Feld: links 1.01 zu rechts
        1.68, oben 1.89 zu unten 0.99). */
     const MEGAFON = '<g class="mega">'
-        + '<g transform="rotate(-20 12 12) translate(0.5 -0.7)">'
-        + '<path class="horn" d="M6 9.5h1.6L19 5v14L7.6 14.5H6A2.5 2.5 0 0 1 6 9.5Z"/>'
-        /* Doc, 20.09.2026: "den Griff noch bissl sichtbarer", dann "nicht so
-           einen U griff nur Pistol shaft" - ein gerader, leicht geneigter
-           Stiel unter dem Trichter statt des Buegels. Als geschlossene Form,
-           damit er im Lauf mit dem Trichter gefuellt wird und im Ruhezustand
-           als Umriss steht. */
-        + '<rect class="grip" x="9.3" y="13.4" width="2.4" height="7" rx="1.2" transform="rotate(18 10.5 16.9)"/>'
+        + '<g transform="rotate(-10 12 12)">'
+        /* Trichter mit gerundeter Oeffnung; das schmale Ende links traegt das
+           Mundstueck. Doc, 20.09.2026: "das Mega sieht aus wie Weihnachtsbaum
+           wenn es klein ist" - schuld war der Stiel MITTIG unter einem spitzen
+           Dreieck. Jetzt sitzt er hinten am schmalen Ende, und die Zeichnung
+           steht flacher: bei 15 px liest sie sich als Megafon. */
+        + '<path class="horn" d="M8 9.2h1L18.4 4.6c.9-.4 1.6.1 1.6 1v12.8c0 .9-.7 1.4-1.6 1L9 14.8H8A2.8 2.8 0 0 1 8 9.2Z"/>'
+        + '<rect class="grip" x="6.2" y="14.2" width="2.3" height="5.8" rx="1.15" transform="rotate(18 7.35 17.1)"/>'
         + '</g></g>';
     const ICON_AN = MEGAFON;
     const ICON_AUS = MEGAFON + '<path d="M4 4 20 20"/>';
@@ -305,11 +322,12 @@
             item.dataset.rubrik = it.quelle || 'News';
             if (it.logo) {
                 item.dataset.logo = it.logo;
+                if (it.logoKlasse) item.dataset.logoklasse = it.logoKlasse;
                 /* Doc, 20.09.2026: "in den Topic Field TS auch" - das Zeichen
                    der Quelle steht auch an der Schlagzeile selbst, nicht nur
                    links im Etikett. Nur das Bild, nicht noch einmal das Wort. */
                 const img = document.createElement('img');
-                img.className = 'nav-news-logo';
+                img.className = 'nav-news-logo' + (it.logoKlasse ? ' nav-news-logo-' + it.logoKlasse : '');
                 img.src = new URL(it.logo, base).href;
                 img.alt = it.quelle || '';
                 img.onerror = function () { img.remove(); };
@@ -443,13 +461,13 @@
         if (max) label.style.width = Math.ceil(max) + 'px';
     }
 
-    function labelSetzen(label, rubrik, logo) {
+    function labelSetzen(label, rubrik, logo, logoKlasse) {
         if (label.dataset.jetzt === rubrik) return;
         label.dataset.jetzt = rubrik;
         label.textContent = '';
         if (logo) {
             const img = document.createElement('img');
-            img.className = 'nav-news-logo';
+            img.className = 'nav-news-logo' + (logoKlasse ? ' nav-news-logo-' + logoKlasse : '');
             img.src = new URL(logo, base).href;
             img.alt = '';
             /* Laedt das Bild nicht, bleibt das Wort allein stehen - die Quelle
@@ -476,7 +494,8 @@
             const items = run.querySelectorAll('.nav-news-item');
             for (const it of items) {
                 if (it.getBoundingClientRect().right > rand) {
-                    labelSetzen(label, it.dataset.rubrik || 'News', it.dataset.logo || '');
+                    labelSetzen(label, it.dataset.rubrik || 'News', it.dataset.logo || '',
+                        it.dataset.logoklasse || '');
                     return;
                 }
             }
@@ -521,11 +540,14 @@
         /* Erst zeigen, was schon da ist: eigene Meldungen und die Schlagzeilen
            vom letzten Mal. Das Band laeuft damit sofort, statt auf das Netz zu
            warten; kommen die frischen an, wird es neu gesetzt. */
+        /* Erst laufen Plan und Wissen - die Schlagzeilen kommen dazu, wenn
+           diese Runde einmal durch ist (Doc, 20.09.2026: "lass zB Brains erst
+           leerlaufen und dann erst TS kommen"). */
+        zeichnen();
+
         const cache = feeds.length ? cacheLesen() : null;
         const frisch = cache && (Date.now() - cache.ts) < CACHE_MS;
-        if (cache) feed = cache.items;
-        zeichnen();
-        if (frisch) return;
+        if (frisch) { spaeter(cache.items); return; }
 
         const geholt = await Promise.all(feeds.map(function (f) {
             return ladeFeed(f, jeFeed).catch(function (e) {
@@ -540,13 +562,13 @@
         for (let i = 0; i < jeFeed; i++) {
             geholt.forEach(function (liste) { if (liste[i]) gemischt.push(liste[i]); });
         }
-        if (!gemischt.length) return;
+        /* Nichts geholt - dann laufen wenigstens die Schlagzeilen von vorhin. */
+        if (!gemischt.length) { if (cache) spaeter(cache.items); return; }
 
         try {
             localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), items: gemischt }));
         } catch (e) { /* kein Platz oder gesperrt - der Ticker laeuft trotzdem */ }
-        feed = gemischt;
-        zeichnen();
+        spaeter(gemischt);
     }
 
     los().catch(function (e) { console.warn('svp news:', e); });
