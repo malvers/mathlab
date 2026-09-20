@@ -197,6 +197,11 @@ window.svpPlanParts.push(function (P) {
         return box;
     }
 
+    /* Auch ausserhalb des Plans steht Mathematik im Text - das Neuigkeiten-Band
+       setzt seine Formeln damit genauso wie eine Planzeile (Doc, 20.09.2026:
+       "alles was Math ist bitte LaTeX"). Eine Quelle fuer beide. */
+    window.svpMath = { append: appendText, ensure: ensureKatex };
+
     function ensureKatex() {
         if (window.katex || document.getElementById('katex-js')) return;
         const link = document.createElement('link');

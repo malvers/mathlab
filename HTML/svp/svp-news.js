@@ -32,11 +32,63 @@
        Klassenstufe und behaelt die Schlagzeilen. */
     const AB_KLASSE = 9;
 
-    function klasseZuJung() {
+    function klasse() {
         const datei = location.pathname.replace(/^.*\//, '');
         const zahlen = datei.match(/\d{1,2}/g);
-        if (!zahlen) return false;
-        return Number(zahlen[zahlen.length - 1]) < AB_KLASSE;
+        return zahlen ? Number(zahlen[zahlen.length - 1]) : null;
+    }
+
+    function klasseZuJung() {
+        const k = klasse();
+        return k != null && k < AB_KLASSE;
+    }
+
+    /* Das Fach steht im Ordner: svp/mathe/, svp/informatik/, svp/physik/,
+       svp/wr/. Eine Seite ausserhalb dieser Ordner hat keins. */
+    function fach() {
+        const m = location.pathname.match(/\/svp\/(mathe|informatik|physik|wr)\//);
+        return m ? m[1] : null;
+    }
+
+    /* ---- Wissen: ein Haeppchen zum Fach der Seite ----------------------
+       Doc, 20.09.2026: "bei 5 steht nur noch multiplizieren ... bau in alle
+       Klassen interessante Inhalte ein". Der Fundus steht in svp-wissen.json,
+       je Eintrag ein Fach und eine Spanne von Klassenstufen. Gezeigt wird
+       eine kleine Auswahl, die jeden Tag weiterrueckt - so laeuft nicht das
+       ganze Jahr dasselbe durch. */
+    function tagImJahr() {
+        const d = new Date();
+        return Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
+    }
+
+    function wissenWaehlen(daten) {
+        const k = klasse();
+        const f = fach();
+        const passend = (daten.eintraege || []).filter(function (e) {
+            if (!e || !e.text) return false;
+            if (e.fach && e.fach !== 'alle' && e.fach !== f) return false;
+            /* Ohne Klasse im Dateinamen (Startseite, Notizen) zaehlt nur das
+               Fach - dort steht niemand vor einer bestimmten Stufe. */
+            if (k != null && (k < (e.von || 0) || k > (e.bis || 13))) return false;
+            return true;
+        });
+        /* Das Fach geht vor: die Saetze fuer "alle" (Tastenhilfe, Gedanke der
+           Woche) fuellen nur auf, was der Fundus des Faches nicht hergibt -
+           sonst nehmen sie in Physik und W/R, wo wenige Saetze stehen, die
+           halbe Zeile weg. */
+        const fachlich = passend.filter(function (e) { return e.fach && e.fach !== 'alle'; });
+        const allgemein = passend.filter(function (e) { return !e.fach || e.fach === 'alle'; });
+        const wieviel = daten.anzahl || 4;
+        const liste = fachlich.length ? fachlich : allgemein;
+        const raus = [];
+        const start = tagImJahr() % liste.length;
+        for (let i = 0; i < Math.min(wieviel, liste.length); i++) {
+            raus.push(liste[(start + i) % liste.length]);
+        }
+        for (let i = 0; raus.length < wieviel && i < allgemein.length; i++) {
+            if (raus.indexOf(allgemein[i]) < 0) raus.push(allgemein[i]);
+        }
+        return raus.map(function (e) { return { quelle: 'Schon gewusst', text: e.text }; });
     }
 
     function heute() {
@@ -80,6 +132,7 @@
        meldet sie) und die Schlagzeilen. In dieser Reihenfolge laufen sie auch:
        was aus dem eigenen Unterricht kommt, steht vor der Weltlage. */
     let eigene = [];
+    let wissen = [];
     let lokal = Array.isArray(window.svpNewsLokal) ? window.svpNewsLokal : [];
     let feed = [];
 
@@ -93,7 +146,9 @@
     };
 
     function zeichnen() {
-        const alle = lokal.concat(eigene, feed);
+        /* Reihenfolge: erst der eigene Unterricht, dann das Haeppchen zum
+           Fach, dann die Weltlage. */
+        const alle = lokal.concat(eigene, wissen, feed);
         if (alle.length) zeigen(alle);
     }
 
@@ -248,7 +303,7 @@
                 item.appendChild(img);
                 item.appendChild(document.createTextNode(' '));
             }
-            item.appendChild(document.createTextNode(it.text));
+            mathText(item, it.text);
             line.appendChild(item);
             const dot = document.createElement('span');
             dot.className = 'nav-news-dot';
@@ -302,6 +357,51 @@
             pill.classList.add('spricht');
             labelBreite(label, eintraege);
             labelFolgen(label, view, run);
+        });
+    }
+
+    /* ---- Formeln -------------------------------------------------------
+       Mathematik im Text steht in $...$ und wird als Formel gesetzt (Doc,
+       20.09.2026: "alles was Math ist bitte LaTeX (e und Pi zB)"). Auf einer
+       Planseite macht das svpMath - dieselbe Funktion, die auch die Planzeilen
+       setzt. Ohne Plan (Startseite, Notizen) springt der kurze Weg hier ein. */
+    const KATEX = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min';
+
+    function mathText(ziel, text) {
+        if (!text.includes('$')) { ziel.appendChild(document.createTextNode(text)); return; }
+        if (window.svpMath) { window.svpMath.append(ziel, text); return; }
+        text.split(/\$([^$]+)\$/).forEach(function (teil, i) {
+            if (!teil) return;
+            if (i % 2 === 0 || !window.katex) {
+                ziel.appendChild(document.createTextNode(teil));
+                return;
+            }
+            const span = document.createElement('span');
+            try { katex.render(teil, span, { throwOnError: false }); }
+            catch (e) { span.textContent = teil; }
+            ziel.appendChild(span);
+        });
+    }
+
+    /* KaTeX kommt nur, wenn im Band wirklich eine Formel steht - eine Seite
+       ohne Mathematik laedt deswegen nichts nach. */
+    function katexBereit(eintraege) {
+        if (window.katex) return Promise.resolve();
+        if (!eintraege.some(function (e) { return e.text && e.text.includes('$'); })) return Promise.resolve();
+        if (window.svpMath) { window.svpMath.ensure(); }
+        return new Promise(function (fertig) {
+            const da = document.getElementById('katex-js');
+            if (da) { da.addEventListener('load', function () { fertig(); }); setTimeout(fertig, 4000); return; }
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = KATEX + '.css';
+            document.head.appendChild(link);
+            const sc = document.createElement('script');
+            sc.id = 'katex-js';
+            sc.src = KATEX + '.js';
+            sc.onload = function () { fertig(); };
+            sc.onerror = function () { fertig(); };
+            document.head.appendChild(sc);
         });
     }
 
@@ -393,6 +493,13 @@
         eigene = (conf.items || []).filter(eigenAktuell).map(function (it) {
             return { text: it.text, href: it.href || '', quelle: it.quelle || '' };
         });
+
+        try {
+            const rw = await fetch(base + 'svp-wissen.json', { cache: 'no-cache' });
+            if (rw.ok) wissen = wissenWaehlen(await rw.json());
+        } catch (e) { /* nicht da - dann eben ohne Haeppchen */ }
+
+        await katexBereit(lokal.concat(eigene, wissen));
 
         const feeds = klasseZuJung() ? []
             : (conf.feeds || ['tagesschau']).map(feedAufloesen).filter(Boolean);
