@@ -643,6 +643,12 @@ window.svpPlanParts.push(function (P) {
             tr.appendChild(td);
         }
         if (tr.children[2]) tr.children[2].textContent = String(P.isoWeek(mon));
+        /* Das Ende dieser Woche, damit markPastWeeks sie als gelaufen erkennt:
+           eine Woche ohne Unterricht ist genauso vorbei wie eine mit (Doc,
+           20.09.2026: "bitte auch die so, in denen ich da keinen UR hatte"). */
+        const so = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6);
+        tr.dataset.ymd = String(so.getFullYear()) +
+            String(so.getMonth() + 1).padStart(2, '0') + String(so.getDate()).padStart(2, '0');
         /* leerer Platzhalter fuer das Chevron, damit die SW-Zahlen aller
            Wochen untereinander stehen (siehe tr.leerwoche .chev in svp.css) */
         if (tr.children[1]) {
@@ -782,6 +788,13 @@ window.svpPlanParts.push(function (P) {
                 if (m) end = '20' + m[3] + m[2].padStart(2, '0') + m[1].padStart(2, '0');
             }
             tr.classList.toggle('kw-past', !!end && end < today && !tr.classList.contains('kw-now'));
+        }
+        /* Die Leerwochen der Gruppen-Ansicht stehen nicht in P.rendered - sie
+           haben keine Planzeile. Sie tragen ihr Wochenende selbst (leerRow). */
+        if (!P.tbody) return;
+        for (const tr of P.tbody.querySelectorAll('tr.leerwoche[data-ymd]')) {
+            tr.classList.toggle('kw-past',
+                tr.dataset.ymd < today && !tr.classList.contains('kw-now'));
         }
     }
 
