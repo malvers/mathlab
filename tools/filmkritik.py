@@ -34,9 +34,9 @@ TOOLS = os.path.dirname(os.path.abspath(__file__))
 for _p in (REPO, TOOLS):
     if _p not in sys.path:
         sys.path.insert(0, _p)
-# Live reload and the LOCAL badge come from serve.py, exactly as on :8765 - one implementation,
-# every local server (Doc, 18.09.2026: "bitte immer überall").
-from serve import inject, LIVE_RELOAD  # noqa: E402
+# Live reload, the LOCAL badge and the red tab icon come from serve.py, exactly as on :8765 -
+# one implementation, every local server (Doc, 18.09.2026: "bitte immer überall").
+from serve import inject, LIVE_RELOAD, local_icon  # noqa: E402
 import live_reload  # noqa: E402
 HTML_DIR = os.path.join(REPO, 'HTML')
 DEFAULT_FILM = os.path.expanduser('~/Movies/videopipeline/wuerfelspiel/wuerfelspiel-voice-1440p.mp4')
@@ -301,6 +301,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self.reply(200, {'items': load(), 'film': os.path.basename(FILM), 'ordner': STORE})
         if self.path.startswith('/__live/'):
             return self.live_api()
+        self.path = local_icon(self.path) or self.path   # red lambda, like on :8765
         path = self.translate_path(self.path)
         if path.lower().endswith(('.html', '.htm')) and os.path.isfile(path):
             with open(path, 'rb') as f:

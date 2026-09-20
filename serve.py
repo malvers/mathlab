@@ -48,6 +48,19 @@ LOCAL_ICONS = {
 }
 
 
+def local_icon(path):
+    """The red twin to serve instead of `path`, or None when it is not an icon request.
+
+    Every local server imports this, not just :8765 - the review servers (filmkritik,
+    tourkritik) served the yellow lambda for months, so their tabs looked live
+    (Doc, 20.09.2026: "alle lokalen sollen rot sein").
+    """
+    swap = LOCAL_ICONS.get(path.split('?', 1)[0])
+    if swap and os.path.isfile(os.path.join(HTML_DIR, swap)):
+        return '/' + swap
+    return None
+
+
 def inject(html, extra=b''):
     """Put the badge (and `extra`) right before the last </body>; pages without one get it appended."""
     hits = list(BODY_END.finditer(html))
@@ -120,9 +133,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self.deck_api()
         if self.path.startswith('/__live/'):
             return self.live_api()
-        swap = LOCAL_ICONS.get(self.path.split('?', 1)[0])
-        if swap and os.path.isfile(os.path.join(HTML_DIR, swap)):
-            self.path = '/' + swap                # served as usual, just the red file
+        self.path = local_icon(self.path) or self.path   # served as usual, just the red file
         path = self.translate_path(self.path)
         if os.path.isdir(path):
             if not self.path.split('?', 1)[0].endswith('/'):
