@@ -789,15 +789,25 @@ window.svpPlanParts.push(function (P) {
         const n = new Date();
         const heute = String(n.getFullYear()) +
             String(n.getMonth() + 1).padStart(2, '0') + String(n.getDate()).padStart(2, '0');
+        /* Die Marke gilt der WOCHE, nicht der einzelnen Zeile (Doc, 20.09.2026:
+           "die muessen beide gelb!", "gleiche KW!"): ein Termin sind zwei
+           Planzeilen, die erste und die zweite Doppelstunde desselben Montags -
+           beide stehen in derselben Kalenderwoche und leuchten zusammen. */
+        let kw = null;
         for (const r of P.rendered) {
             if (!r.terminYmd || r.terminYmd < heute) continue;
+            kw = r.gkw;
+            break;
+        }
+        if (kw == null) return;
+        for (const r of P.rendered) {
+            if (r.gkw !== kw) continue;
             const tr = r.dateTd && r.dateTd.closest('tr');
-            if (!tr) return;
+            if (!tr) continue;
             tr.classList.add('kw-now');
             tr.title = 'n\u00e4chster Termin dieser Lerngruppe';
             const sub = tr.nextElementSibling;
             if (sub && sub.classList.contains('detail-row')) sub.classList.add('kw-now-sub');
-            return;
         }
     }
 
