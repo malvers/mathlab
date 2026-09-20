@@ -2928,9 +2928,16 @@ tr.expandable { cursor: pointer; }
 /* Der Pfeil steht ganz vorn, vor der Wochennummer (Doc, 07.09.2026). Inline statt
    absolut: die Zeile ist einzeilig, er kann also nicht mehr umbrechen, und die
    Nr-Spalte waechst einfach um seine Breite mit. */
-tr.expandable td.num:first-of-type { white-space: nowrap; }
+/* Eine Leerwoche hat nichts aufzuklappen, braucht den Platz des Pfeils aber
+   trotzdem - sonst stuende ihre Nummer weiter links als die der Wochen
+   darueber und darunter (Doc, 20.09.2026: "zahlen untereinander pls"). Sie
+   bekommt darum ein leeres .chev und faellt unter dieselbe Regel; eine zweite
+   Stelle mit denselben 12 px waere die zweite Wahrheit. */
+tr.expandable td.num:first-of-type,
+tr.leerwoche td.num:first-of-type { white-space: nowrap; }
 
-tr.expandable .chev {
+tr.expandable .chev,
+tr.leerwoche .chev {
     display: inline-block;
     width: 12px;
     margin-right: 4px;
@@ -3313,6 +3320,14 @@ body:not(.plan-searching):not(.shifting) #plan-table tr.ferien-folded,
 body:not(.plan-searching):not(.shifting) #plan-table tr.ferien-folded.open { display: none; }
 /* Every block folded: only holiday rows are left, the column heads go too. */
 body:not(.plan-searching):not(.shifting) #plan-table.all-folded thead tr:not(.ferien) { display: none; }
+
+/* A week without a date for this group (Doc, 20.09.2026: "wenn ich die in der
+   Woche nicht habe lass die Woche leer"). It carries SW and KW and nothing
+   else, and it stands as tall as a real week with digits of the same size -
+   Doc, 20.09.2026: "mach die Leerwochen genauso hoch wie die anderen und die
+   Zahl (KW) auch SW auch". Only the very faint ground says that nothing
+   happens here. */
+#plan-table tbody tr.leerwoche > td { background: rgba(var(--tint), 0.03); }
 
 footer.page-foot {
     max-width: 1200px;

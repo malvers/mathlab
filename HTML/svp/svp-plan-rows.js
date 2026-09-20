@@ -3,7 +3,10 @@
 window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
-        syncToggleAllLabel, syncOpenWeeks, unfoldFerienFor, equalizeLbCells
+        syncToggleAllLabel, syncOpenWeeks, unfoldFerienFor, equalizeLbCells,
+        /* the termin view moves the holiday rows to where the group's dates
+           put them - the fold cascade has to run again afterwards */
+        applyFerienFolds
     });
 
     // Open/closed state of the week sub-rows is remembered per page and
@@ -188,6 +191,13 @@ window.svpPlanParts.push(function (P) {
         /* type belongs to the edits too — a shift moves the Bereich along with
            the topic, otherwise the badges stay behind on the old week. */
         const rowType = ov.type || row.type || 'org';
+        /* row.leer: a week that stays in the plan but has nothing in it. It
+           keeps its SW, KW, date and its Gedanke der Woche - those hang on the
+           row - and shows nothing else, not even a Bereich pill (Doc,
+           20.09.2026: "nimm da alles raus ... GDW drin lassen"). It looks like
+           the empty weeks of the group view, so it wears their class. */
+        const leer = !!(ov.leer != null ? ov.leer : row.leer);
+        if (leer) tr.classList.add('leerwoche');
         const [badgeClass, badgeLabel] = window.BADGE[rowType] || window.BADGE.org;
         const tds = [];
         const values = [
@@ -204,15 +214,19 @@ window.svpPlanParts.push(function (P) {
             if (cls) td.className = cls;
             if (idx === 3) {
                 td.classList.add('lb');
-                const span = document.createElement('span');
-                span.className = 'badge ' + badgeClass;
-                span.textContent = badgeLabel;
-                P.linkBadge(span, rowType);
                 /* Pille und WebUntis-Chip stehen nebeneinander in einer Zeile
-                   (Doc, 07.09.2026) - siehe .lb-cell in svp.css. */
+                   (Doc, 07.09.2026) - siehe .lb-cell in svp.css. Die Zelle gibt
+                   es auch in einer leeren Woche, nur ohne Pille: der Chip und
+                   equalizeLbCells rechnen mit ihr. */
                 const cell = document.createElement('div');
                 cell.className = 'lb-cell';
-                cell.appendChild(span);
+                if (!leer) {
+                    const span = document.createElement('span');
+                    span.className = 'badge ' + badgeClass;
+                    span.textContent = badgeLabel;
+                    P.linkBadge(span, rowType);
+                    cell.appendChild(span);
+                }
                 td.appendChild(cell);
                 P.lbCells[i] = cell;
             } else if (idx === 2) {
@@ -227,6 +241,17 @@ window.svpPlanParts.push(function (P) {
             if (idx !== 6) tr.appendChild(td);   /* 6 = Bemerkungen, nicht mehr sichtbar */
         });
         P.setMathText(tds[6], values[6][1]);
+        /* Eine leere Woche hat nichts aufzuklappen und bekaeme deshalb kein
+           Chevron - ihre Nummer stuende dann weiter links als die der Wochen
+           darum herum (Doc, 20.09.2026: "zahlen untereinander pls"). Also ein
+           leerer Platzhalter, wie ihn die Leerwochen der Gruppen-Ansicht auch
+           haben (siehe tr.leerwoche .chev in svp.css). */
+        if (leer) {
+            const spacer = document.createElement('span');
+            spacer.className = 'chev';
+            spacer.setAttribute('aria-hidden', 'true');
+            tds[0].insertBefore(spacer, tds[0].firstChild);
+        }
 
         // Material cell (week row): only a compact 📎 marker + quick-add;
         // the pills themselves live in the expandable sub-row (more room).

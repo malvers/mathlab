@@ -431,6 +431,14 @@
                         gruppen.push(a);
                         line.insertBefore(a, nachher);
                     }
+                    /* Der Plan selbst wird nicht mehr gezeigt: jede Gruppenpille
+                       oeffnet ihn, und seit dem 20.09.2026 gibt es keine
+                       gemischte Ansicht mehr, auf die er zeigen koennte (Doc:
+                       "nimm den FO 12 dort raus ... will ich zu z.B. FOG25-2
+                       habe ich ja einen direkten Button"). Nur versteckt, nicht
+                       entfernt - die Gruppenpillen haengen als Geschwister an
+                       ihm, und der Zahnrad-Schalter schaltet sie mit ihm. */
+                    pill.style.display = 'none';
                     /* Ein- und ausgeschaltet werden sie mit ihrem Plan, nicht einzeln. */
                     groupSets.push({ plan: pill, gruppen: gruppen });
                     gebaut = true;

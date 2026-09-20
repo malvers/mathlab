@@ -166,7 +166,8 @@ window.svpPlanParts.push(function (P) {
        Vortragsmenue, damit die Seite eine Sprache spricht. Sie erscheint von
        allein auf jedem Plan, den mehr als eine Lerngruppe teilt - die Liste
        kommt aus svp-map.json, es gibt also keine zweite von Hand gepflegte.
-       "Alle Gruppen" ist die Seite wie bisher. */
+       Eine gemischte Ansicht gibt es seit dem 20.09.2026 nicht mehr - die
+       Seite zeigt immer genau eine Gruppe. */
     (function buildGroupMenu() {
         const mid = document.querySelector('.page-head .head-row .head-mid');
         if (!mid) return;
@@ -183,6 +184,26 @@ window.svpPlanParts.push(function (P) {
         planMapEntry(location.pathname).then(entry => {
             const groups = entry && entry.groups ? [...new Set(entry.groups)].sort() : [];
             if (groups.length < 2) return;               /* eine Gruppe braucht keine Wahl */
+
+            /* Die gemischte Ansicht gibt es nicht mehr (Doc, 20.09.2026: "nimm
+               die gemischte Gruppe ganz raus generell"). Sie warf die Termine
+               aller fuenf Lerngruppen in eine Spalte, und jede Gruppe kommt an
+               ihrem eigenen Tag - der gemeinsame Plan war ein Plan von
+               niemandem. Ohne ?g= springt die Seite deshalb auf die zuletzt
+               gewaehlte Gruppe, sonst auf die erste. Ein ?kw= aus dem
+               Stundenplan bleibt dabei stehen: es zeigt auf eine Woche, nicht
+               auf eine Gruppe. */
+            const LAST_KEY = 'svp-group:' + location.pathname;
+            if (!P.GROUP) {
+                let last = '';
+                try { last = localStorage.getItem(LAST_KEY) || ''; } catch (e) { }
+                const pick = groups.find(g => P.groupSlug(g) === last) || groups[0];
+                const u = new URL(location.href);
+                u.searchParams.set('g', P.groupSlug(pick));
+                location.replace(u.pathname + (u.search || '') + u.hash);
+                return;
+            }
+            try { localStorage.setItem(LAST_KEY, P.GROUP); } catch (e) { }
 
             const drop = document.createElement('div');
             drop.className = 'export-drop group-drop';
@@ -212,9 +233,14 @@ window.svpPlanParts.push(function (P) {
                 item.addEventListener('click', () => { location.href = urlFor(g); });
                 menu.appendChild(item);
             };
-            add('Alle Gruppen', '');
             for (const g of groups) add(g.replace(/,/g, ' + '), g);
 
+            /* Die Gruppenwahl steht nicht mehr im Kopf (Doc, 20.09.2026: "das
+               bitte auch raus (nicht zeigen)"): man kommt ueber die
+               Gruppenpillen der Quick-Nav ohnehin direkt in die richtige
+               Ansicht. Gebaut wird sie trotzdem - sie traegt die Umleitung auf
+               die zuletzt gewaehlte Gruppe und den gemerkten Stand. */
+            drop.style.display = 'none';
             mid.insertBefore(drop, mid.firstChild);
             drop.appendChild(toggle);
             drop.appendChild(menu);

@@ -552,10 +552,12 @@ window.svpPlanParts.push(function (P) {
             ds.textContent = (s.half ? '2.' : '1.') + ' DS';
             r.dateTd.appendChild(ds);
             /* die KW-Spalte gleich mit: sonst stuende die Plan-Woche neben
-               einem Datum aus einer anderen */
+               einem Datum aus einer anderen - und die SW daneben, die parallel
+               zur KW laeuft (siehe swForKw) */
             const kwTd = r.dateTd.previousElementSibling;
             if (kwTd) kwTd.textContent = r.gkw;
         }
+        layoutTerminWeeks();
         /* Sprungziel und "laufende Woche" richten sich jetzt nach den Terminen
            der Gruppe - beide noch einmal laufen lassen. */
         P.runKwJump();
@@ -564,6 +566,201 @@ window.svpPlanParts.push(function (P) {
            sie stuende der Plan einer Gruppe ganz ohne "hier sind wir" da. */
         if (!P.runNowMark()) markNextTermin();
         markPastWeeks();
+    }
+
+    /* ---- Leerwochen und der Platz der Ferien ------------------------------
+       Eine Gruppe kommt 14-taegig: die zwei Planzeilen eines Termins liegen auf
+       EINEM Montag, die Woche dazwischen hat sie gar nicht. Die Tabelle zeigt
+       diese Woche trotzdem - als leere Zeile mit ihrer Kalenderwoche (Doc,
+       20.09.2026: "die haben alle immer zwei Doppelstunden fuer die eine Woche.
+       Wenn ich die in der Woche nicht habe lass die Woche leer").
+       Damit laeuft die KW-Spalte wieder lueckenlos, und das gruene Ferienband
+       landet an der richtigen Stelle: in der Plandatei steht es an der Position
+       des WOCHEN-Rhythmus, die Termine einer Gruppe liegen aber anders. Die
+       Herbstferien standen deshalb HINTER dem 26.10. statt davor (Doc,
+       20.09.2026: "44 steht aber vor den HF"). */
+    const DAY_MS = 86400000;
+
+    function ymdToDate(ymd) {
+        return new Date(+ymd.slice(0, 4), +ymd.slice(4, 6) - 1, +ymd.slice(6, 8));
+    }
+    function mondayOf(d) {
+        const m = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        m.setDate(m.getDate() - ((m.getDay() + 6) % 7));
+        return m;
+    }
+
+    /* Der Zeitraum einer Ferienzeile, aus ihrem eigenen Text - eine zweite,
+       von Hand gepflegte Liste waere die zweite Wahrheit. Alle Schreibweisen
+       der Plandateien: "12.-24.10.2026 (KW 42-43)", "23.12.2026-02.01.2027",
+       "26.03.-02.04.2027", "ab 10.07.2027". Tag, Monat und Jahr duerfen vorn
+       fehlen - sie kommen dann vom Enddatum. Ein einzelnes Datum ("ab ...")
+       heisst offenes Ende. */
+    function ferienRange(text) {
+        const s = String(text || '').split('(')[0];
+        const re = /(\d{1,2})\.(?:\s*(\d{1,2})\.)?(?:\s*(\d{4}))?/g;
+        const hits = [];
+        let m;
+        while ((m = re.exec(s))) hits.push([+m[1], m[2] ? +m[2] : null, m[3] ? +m[3] : null]);
+        if (!hits.length) return null;
+        const last = hits[hits.length - 1];
+        if (last[1] == null || last[2] == null) return null;   /* ohne Monat und Jahr nicht zu verorten */
+        const end = new Date(last[2], last[1] - 1, last[0]);
+        if (hits.length === 1) return { start: end, end: new Date(8640000000000000) };
+        const f = hits[0];
+        return {
+            start: new Date(f[2] != null ? f[2] : last[2], (f[1] != null ? f[1] : last[1]) - 1, f[0]),
+            end: end
+        };
+    }
+
+    /* Welche Kalenderwochen ueberhaupt Unterrichtswochen sind, sagt die
+       Plandatei: eine Zeile je Woche mit ihrer kw. Gebraucht wird das, um eine
+       halbe Woche von einer Ferienwoche zu unterscheiden - KW 12/2027 steht im
+       Plan (Mo-Do Unterricht, ab Fr Osterferien) und ist deshalb eine eigene
+       Zeile, KW 13 steht nicht drin und gehoert den Ferien. */
+    let planKws = null;
+    function isPlanKw(kw) {
+        if (!planKws) {
+            planKws = new Set();
+            for (const row of P.planRows || []) {
+                if (!row.ferien && row.kw != null) planKws.add(Number(row.kw));
+            }
+        }
+        return planKws.has(Number(kw));
+    }
+
+    /* Eine leere Woche: dieselben Zellen wie eine Planzeile (sonst wandern die
+       Spaltenbreiten), darin SW und KW und sonst nichts. Die SW traegt der
+       Durchlauf am Ende nach. */
+    function leerRow(ref, mon) {
+        const tr = document.createElement('tr');
+        tr.className = 'leerwoche';
+        tr.title = 'kein Termin dieser Lerngruppe';
+        for (const c of ref.children) {
+            const td = document.createElement('td');
+            td.className = c.className;
+            tr.appendChild(td);
+        }
+        if (tr.children[2]) tr.children[2].textContent = String(P.isoWeek(mon));
+        /* leerer Platzhalter fuer das Chevron, damit die SW-Zahlen aller
+           Wochen untereinander stehen (siehe tr.leerwoche .chev in svp.css) */
+        if (tr.children[1]) {
+            const chev = document.createElement('span');
+            chev.className = 'chev';
+            chev.setAttribute('aria-hidden', 'true');
+            tr.children[1].appendChild(chev);
+        }
+        return tr;
+    }
+
+    /* SW = die wievielte Woche dieser Lerngruppe. Sie laeuft parallel zur KW
+       (Doc, 20.09.2026: "die SW laufen parallel zur KW", "38 -> 3, 39 -> 4"):
+       die erste Woche mit Unterricht ist SW 1, jede weitere Kalenderwoche
+       zaehlt eins hoch - auch die leeren -, Ferienwochen zaehlen nicht mit.
+       Beide Doppelstunden eines Termins tragen dieselbe Nummer, denn sie sind
+       dieselbe Woche. Wie bei der KW aendert sich nur die ANZEIGE: gespeichert
+       und verschoben wird weiter mit row.nr aus der Plandatei. */
+    /* In der SW-Zelle steht links das Chevron der Woche (svp-plan-rows.js
+       haengt es in tds[0]) - ein textContent wuerde es mitloeschen (Doc,
+       20.09.2026: "chevis weg?"). Also nur den Textknoten anfassen. */
+    function setNumText(td, value) {
+        for (const n of td.childNodes) {
+            if (n.nodeType === 3) { n.nodeValue = String(value); return; }
+        }
+        td.appendChild(document.createTextNode(String(value)));
+    }
+
+    function paintSw(tbody) {
+        let sw = 0, lastKw = null;
+        for (const tr of tbody.children) {
+            if (tr.classList.contains('ferien') || tr.classList.contains('detail-row')) continue;
+            const swTd = tr.children[1], kwTd = tr.children[2];
+            if (!swTd || !kwTd) continue;
+            if (kwTd.textContent !== lastKw) { sw++; lastKw = kwTd.textContent; }
+            setNumText(swTd, sw);
+        }
+    }
+
+    let leerRows = [];
+
+    function layoutTerminWeeks() {
+        if (!P.GROUP || !TERMIN_MODE || !P.tbody) return;
+        const tbody = P.tbody;
+        /* paintTerminDates laeuft zweimal (Zwischenstand, dann live) - die
+           Leerwochen des ersten Laufs zuerst weg */
+        for (const tr of leerRows) tr.remove();
+        leerRows = [];
+
+        /* Ferienzeilen herausnehmen; sie werden gleich neu einsortiert */
+        const ferien = [];
+        for (const tr of [...tbody.children]) {
+            if (!tr.classList.contains('ferien')) continue;
+            const txt = tr.querySelector('.ferien-text');
+            ferien.push({ tr, range: ferienRange(txt && txt.textContent), used: false });
+            tr.remove();
+        }
+
+        /* die Planzeilen in ihrer Reihenfolge, jede mit dem Montag ihres Termins */
+        const weeks = [];
+        for (const r of P.rendered) {
+            if (!r.terminYmd || !r.tr || !r.tr.parentElement) continue;
+            weeks.push({ tr: r.tr, mon: mondayOf(ymdToDate(r.terminYmd)) });
+        }
+
+        const covers = (f, mon, sun) => f.range && f.range.start <= sun && f.range.end >= mon;
+
+        /* Ein Ferienband, dessen Zeit vorbei ist, gehoert vor diese Woche -
+           sonst bliebe es liegen, wenn seine Wochen alle schon vergeben sind. */
+        const flush = (mon, before) => {
+            for (const f of ferien) {
+                if (f.used || !f.range || !(f.range.end < mon)) continue;
+                f.used = true;
+                tbody.insertBefore(f.tr, before);
+            }
+        };
+
+        let prev = null;
+        for (const w of weeks) {
+            if (prev) {
+                const cur = new Date(prev.getFullYear(), prev.getMonth(), prev.getDate());
+                cur.setDate(cur.getDate() + 7);
+                while (cur < w.mon) {
+                    const mon = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate());
+                    const sun = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + 6);
+                    flush(mon, w.tr);
+                    /* Welche Woche Unterrichtswoche ist, sagt die Plandatei:
+                       steht ihre KW dort, hat sie eine SW und bleibt eine
+                       eigene Zeile - auch wenn die Ferien mitten in ihr
+                       anfangen (KW 12/2027: Mo-Do Unterricht, ab Fr
+                       Osterferien). Nur Wochen, die in der Plandatei gar nicht
+                       vorkommen, gehoeren den Ferien. */
+                    const planWeek = isPlanKw(P.isoWeek(mon));
+                    const f = planWeek ? null : ferien.find(x => !x.used && covers(x, mon, sun));
+                    if (f) {
+                        f.used = true;
+                        tbody.insertBefore(f.tr, w.tr);
+                    } else if (planWeek || !ferien.some(x => x.used && covers(x, mon, sun))) {
+                        /* nicht schon von einem gesetzten Ferienband abgedeckt */
+                        const tr = leerRow(w.tr, mon);
+                        tbody.insertBefore(tr, w.tr);
+                        leerRows.push(tr);
+                    }
+                    cur.setDate(cur.getDate() + 7);
+                }
+            }
+            flush(w.mon, w.tr);
+            prev = w.mon;
+        }
+        /* was keine Luecke gefunden hat (die Sommerferien am Ende) haengt
+           wieder hinten an, in der Reihenfolge der Plandatei */
+        for (const f of ferien) if (!f.used) tbody.appendChild(f.tr);
+
+        paintSw(tbody);
+
+        /* Die Ferien stehen jetzt woanders - die Klapp-Bloecke richten sich
+           nach dem Ferienband ueber ihnen und muessen neu durchlaufen. */
+        if (P.applyFerienFolds) P.applyFerienFolds();
     }
 
     /* Weeks that are over get a very faint grey (Doc, 16.09.2026: "mach die, die
