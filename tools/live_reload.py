@@ -100,6 +100,17 @@ RELOAD_JS = r"""// Live reload - only on Doc's machine: serve.py puts this into 
     }
     for (const s of document.scripts) add(s.src);
     for (const l of document.querySelectorAll('link[rel=stylesheet]')) add(l.href);
+    // Same trap on the CSS side: svp.css pulls its parts in with @import, and an imported sheet hangs in no
+    // <link>. Without this, editing one of the parts would never reload the page. Same-origin sheets hand out
+    // their rules; a foreign one throws and is skipped.
+    function imports(sheet) {
+      let rules = null;
+      try { rules = sheet.cssRules; } catch (e) { return; }
+      for (const r of rules || []) {
+        if (r.styleSheet) { add(r.styleSheet.href); imports(r.styleSheet); }
+      }
+    }
+    for (const sheet of document.styleSheets) imports(sheet);
     return out.sort().join(',');
   }
   function busy() {
