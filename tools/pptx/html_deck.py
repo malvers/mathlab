@@ -413,14 +413,21 @@ class HtmlDeck:
 
     def picture(self, title, path, lines=None, align="center", frames=None, **kw):
         """align="left" puts the picture at the left margin instead of the middle -
-        a tree diagram reads from the left, and centred it floats in the slide."""
-        src = asset(path)
-        cls = "pic left" if align == "left" else "pic"
-        self._slide("content", '<h3>%s</h3><div class="rules"></div>'
-                    '<div class="%s"><img src="%s" alt=""></div>%s%s'
-                    % (markup(title), cls, _html.escape(src, quote=True),
-                       '<div class="body">%s</div>' % bullet_list(lines)[0] if lines else "",
-                       live_frames(frames)))
+        a tree diagram reads from the left, and centred it floats in the slide.
+        With `lines` the picture goes under the bullets (has-below, like bullets(below=)):
+        .pic and .body share the same absolute box, so as siblings the text ran straight
+        over the picture (Doc, 20.09.2026: "das ist durcheinander")."""
+        img = '<img src="%s" alt="">' % _html.escape(asset(path), quote=True)
+        if lines:
+            self._slide("content has-below", '<h3>%s</h3><div class="rules"></div>'
+                        '<div class="body">%s<div class="below%s">%s</div></div>%s'
+                        % (markup(title), bullet_list(lines)[0],
+                           " left" if align == "left" else "", img, live_frames(frames)))
+        else:
+            self._slide("content", '<h3>%s</h3><div class="rules"></div>'
+                        '<div class="%s">%s</div>%s'
+                        % (markup(title), "pic left" if align == "left" else "pic",
+                           img, live_frames(frames)))
 
     @staticmethod
     def fit(path, box_w, box_h):
@@ -669,6 +676,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 /* picture under the bullets (bullets below=): the body reaches down to the footer, the picture fills what is left */
 .slide.has-below .body{height:350px;display:flex;flex-direction:column}
 .below{flex:1;min-height:0;margin-top:14px;display:flex;align-items:center;justify-content:center}
+.below.left{justify-content:flex-start}
 .below img{max-width:100%;max-height:100%;object-fit:contain}
 
 /* --- table_top ---------------------------------------------------------- */

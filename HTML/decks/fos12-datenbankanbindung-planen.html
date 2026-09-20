@@ -40,18 +40,18 @@
 <p class="line l0 step" data-g="4">Am Ende dieser Woche steht ein <b>Schema</b>, gegen das ihr zwei Wochen lang programmieren könnt</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
 <section class="slide content"><h3>Vom Projektthema zum Modell — in vier Schritten</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11px"><colgroup><col style="width:160px"><col style="width:350px"><col style="width:306px"></colgroup><tr><th>Schritt</th><th>Frage</th><th>Ergebnis</th></tr><tr><td class="b">1 Substantive</td><td>Über welche Dinge speichern wir etwas?</td><td>Liste der Entitätstypen</td></tr><tr><td class="b">2 Eigenschaften</td><td>Was wissen wir über jedes Ding?</td><td>Attribute, Schlüssel markiert</td></tr><tr><td class="b">3 Beziehungen</td><td>Wie hängen die Dinge zusammen?</td><td>Beziehungstypen mit Kardinalität</td></tr><tr><td class="b">4 Überführung</td><td>Welche Tabellen entstehen daraus?</td><td>Schema mit PK und FK</td></tr></table><div class="body" style="top:261.75px;height:234.25px"><p class="line l0 step" data-g="0">Jeder <b>n:m</b>-Beziehungstyp wird zu einer <b>eigenen Tabelle</b> — das ist die häufigste Falle</p>
 <p class="line l0 step" data-g="1">Danach mit den <b>Normalformen</b> gegenprüfen: steht jede Information genau einmal?</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
-<section class="slide content"><h3>Beispielmodell: Ernährungstagebuch</h3><div class="rules"></div><div class="pic"><img src="img/er-tagebuch.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0"><b>1:n</b> zwischen Nutzer und Mahlzeit — ein Nutzer führt viele Mahlzeiten</p>
+<section class="slide content has-below"><h3>Beispielmodell: Ernährungstagebuch</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0"><b>1:n</b> zwischen Nutzer und Mahlzeit — ein Nutzer führt viele Mahlzeiten</p>
 <p class="line l0 step" data-g="1"><b>n:m</b> zwischen Mahlzeit und Lebensmittel, mit dem Beziehungsattribut <b>Menge</b></p>
-<p class="line l0 step" data-g="2">Genau dieses n:m wird gleich zur dritten Tabelle</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<p class="line l0 step" data-g="2">Genau dieses n:m wird gleich zur dritten Tabelle</p><div class="below"><img src="img/er-tagebuch.png" alt=""></div></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
 <section class="slide chapter">
       <div class="chapter-bar"></div>
       <p class="kicker">Kapitel 02</p>
       <h2>Das Schema</h2>
       <p class="sub">Aus dem Modell werden Tabellen</p>
       <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
-<section class="slide content"><h3>Das Schema dazu</h3><div class="rules"></div><div class="pic"><img src="img/schema-tagebuch.png" alt=""></div><div class="body"><p class="line l0 step" data-g="0">Die <b>1:n</b>-Beziehung wandert als <b>Fremdschlüssel NNr</b> in die Tabelle MAHLZEIT</p>
+<section class="slide content has-below"><h3>Das Schema dazu</h3><div class="rules"></div><div class="body"><p class="line l0 step" data-g="0">Die <b>1:n</b>-Beziehung wandert als <b>Fremdschlüssel NNr</b> in die Tabelle MAHLZEIT</p>
 <p class="line l0 step" data-g="1">Die <b>n:m</b>-Beziehung wird zur Tabelle <b>POSITION</b> mit zusammengesetztem Schlüssel</p>
-<p class="line l0 step" data-g="2">Das <b>Beziehungsattribut Menge</b> hat nur dort Platz — nirgends sonst</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<p class="line l0 step" data-g="2">Das <b>Beziehungsattribut Menge</b> hat nur dort Platz — nirgends sonst</p><div class="below"><img src="img/schema-tagebuch.png" alt=""></div></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
 <section class="slide content code"><h3>Die Tabellen anlegen (SQLite)</h3><div class="rules"></div><div class="codepanel" style="padding-top:39.5px;padding-bottom:39.5px"><pre style="font-size:10px">CREATE TABLE nutzer (
     nnr INTEGER PRIMARY KEY,
     anzeigename TEXT NOT NULL,
