@@ -406,6 +406,10 @@ nav.quick-nav .badge { text-decoration: none; line-height: 14px; }
        seine Fassung, eine handgeschriebene haette nur eine. Das opacity faellt
        damit weg, die Daempfung steckt im Alpha. */
     color: var(--muted);
+    /* Doc, 20.09.2026: "die Daten 1 px runter y" - relativ verschoben, damit
+       das Band nicht um den Pixel mitwaechst. */
+    position: relative;
+    top: 1px;
 }
 .nav-year {
     /* Doc, 09.09.2026: "die Farbe wie main header" - dasselbe Token wie h1,
@@ -420,9 +424,15 @@ nav.quick-nav .badge { text-decoration: none; line-height: 14px; }
     margin: 0 auto;
     box-sizing: border-box;
     padding: 5px 20px;
+    /* Doc, 20.09.2026: "mach die Optik so wie die SZ identisch ... box! colors" -
+       der Kasten traegt jetzt genau die Werte der Suchzeile (.svp-search):
+       0.16 statt 0.08 Fuellung, 7 statt 8 px Ecken, derselbe var(--line)-Rand.
+       Mit 0.08 war er heller als seine Umgebung (Doc: "oben Rahmen heller").
+       Das Band dahinter bleibt --panel, sonst laegen zwei Toenungen
+       uebereinander und der Kasten wuerde dunkler als die Suchzeile. */
     border: 1px solid var(--line);
-    border-radius: 8px;
-    background: rgba(var(--tint), 0.08);
+    border-radius: 7px;
+    background: rgba(var(--tint), 0.16);
 }
 
 /* Doc, 19.09.2026: "probier mal dunkler" - the year line is much smaller than
@@ -433,6 +443,9 @@ html.svp-light .nav-year { color: rgb(56, 80, 124); }
 /* Full-width blue band at the page top holding year + pills, both centered
    vertically via symmetric padding (negative margins undo the body padding) */
 .nav-band {
+    /* Das SZ-Blau gehoert in die Box, nicht hinter sie (Doc, 20.09.2026:
+       "box!") - laegen beide Toenungen uebereinander, waere die Box dunkler
+       als die Suchzeile und damit gerade nicht identisch. */
     background: var(--panel);
     border-bottom: 1px solid var(--line);
     /* Pulls the band over the body padding so it runs edge to edge. A page
