@@ -168,6 +168,16 @@ html.svp-light button.action.secondary {
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Doc, 20.09.2026: "da ist oft (auch andere items) so ein haesslicher blauer
+   Rand. Kann der bitte ueberall weg?" - das ist der Fokus-Ring des Browsers,
+   der nach einem Mausklick an Pillen, Knoepfen und Links haengen bleibt. Eine
+   Regel fuer die ganze Seite statt einer pro Element: nach dem Klick kein Ring
+   mehr, und wer mit der Tastatur navigiert, bekommt ihn weiter - dann aber in
+   der Hausfarbe statt im Browser-Blau. Ohne Sichtbarkeit fuer die Tastatur
+   waere die Seite nur noch mit der Maus bedienbar. */
+:focus:not(:focus-visible) { outline: none; }
+:focus-visible { outline: 2px solid var(--head); outline-offset: 2px; }
+
 /* Password gate (svp-gate.js): while locked, nothing but the overlay shows */
 html.svp-locked body > *:not(.svp-gate-overlay) { display: none !important; }
 

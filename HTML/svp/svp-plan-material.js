@@ -214,7 +214,7 @@ window.svpPlanParts.push(function (P) {
     /* Zeigt oder versteckt den Videos-Reiter einer Woche. Wird an zwei Stellen
        gebraucht: beim Bauen der Reiter (die Zeile kann laengst Material haben)
        und bei jeder Materialaenderung. */
-    function setVideoReiter(ref, anzahl, zusatz) {
+    function setVideoReiter(ref, anzahl, zusatz, aufgaben) {
         const p = ref && ref.rPanes;
         if (!p || !p.videos) return;
         /* Doc, 15.09.2026: "schreib immer noch klein dahinter wieviel" - the count
@@ -229,6 +229,13 @@ window.svpPlanParts.push(function (P) {
            Woche. Jetzt steht er immer da und ist nur gesperrt. */
         p.videos.btn.disabled = !anzahl;
         if (!anzahl && p.videos.btn.classList.contains('on') && ref.showRechts) ref.showRechts('zusatz');
+        /* Der Aufgaben-Reiter folgt genau derselben Regel wie Videos: er steht
+           immer da, ist aber gesperrt, wenn die Woche keine Aufgaben hat. */
+        if (p.aufgaben) {
+            zahl(p.aufgaben, aufgaben);
+            p.aufgaben.btn.disabled = !aufgaben;
+            if (!aufgaben && p.aufgaben.btn.classList.contains('on') && ref.showRechts) ref.showRechts('zusatz');
+        }
     }
 
     function isVideoEntry(en) {

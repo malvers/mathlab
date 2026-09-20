@@ -3,8 +3,8 @@
 window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
-        quizSource, buildQuizBtn, buildAufgabenCell, watchRedBtn, closeRedList, placeRedList,
-        buildRedList
+        quizSource, buildQuizBtn, buildAufgabenCell, fillAufgabenPane, watchRedBtn,
+        closeRedList, placeRedList, buildRedList
     });
 
     // --- Material quick-add (per week row, owner only) -------------------
@@ -174,11 +174,61 @@ window.svpPlanParts.push(function (P) {
         return cell;
     }
 
+    // --- "Aufgaben" tab in the unfolded week -----------------------------
+    // Doc, 20.09.2026: the same exercises the pill offers also live in their
+    // own tab next to Zusatzmaterial and Videos. Same source, one place: the
+    // week quiz (row.quiz) plus every exercise sheet from the material line.
+    // Returns how many there are - that is the count behind the tab name.
+    function quizPill(q) {
+        /* Inside the pane the quiz stands next to the material pills, so it
+           wears the same pill - a quiz-btn there would look like a second
+           kind of thing. */
+        const a = document.createElement('a');
+        a.className = 'badge b-green mat-pill';
+        a.href = q.getAttribute('href');
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.title = q.title || 'Aufgaben zum Thema dieser Woche';
+        a.appendChild(P.matIconEl(a.href, q.textContent));
+        a.appendChild(P.matLabelEl(q.textContent));
+        /* the week row toggles on click - the pill must not fold it */
+        a.addEventListener('click', function (e) { e.stopPropagation(); });
+        return a;
+    }
+    function fillAufgabenPane(ref, text, ex) {
+        const q = ref && ref.quizBtn ? ref.quizBtn.querySelector('a.quiz-btn') : null;
+        const n = (ex ? ex.length : 0) + (q ? 1 : 0);
+        const panes = ref && ref.rPanes;
+        if (!panes || !panes.aufgaben) return n;   /* week not unfolded yet */
+        if (!ref.aufgBlock) {
+            /* built here, not in the row part: the sub-row can come into
+               being before or after updateMaterial, and both ways lead here */
+            ref.aufgBlock = document.createElement('div');
+            ref.aufgBlock.className = 'mat-block';
+        }
+        /* renderMaterial drops the raw line into the block when nothing
+           parses - in this pane that would print the whole material text of
+           the week, so a week without sheets is emptied by hand. */
+        if (ex && ex.length) {
+            P.renderMaterial(ref.aufgBlock, text, ref, function (en) { return !P.isExerciseEntry(en); });
+        } else {
+            ref.aufgBlock.textContent = '';
+            ref.aufgBlock.dataset.src = text == null ? '' : String(text).trim();
+        }
+        /* the week's own exercise set first, the sheets behind it - the same
+           order the pill menu uses */
+        if (q) ref.aufgBlock.insertBefore(quizPill(q), ref.aufgBlock.firstChild);
+        if (!ref.aufgBlock.parentNode) panes.aufgaben.pane.appendChild(ref.aufgBlock);
+        return n;
+    }
+
     /* Doc, 18.09.2026: "zwischen Text und Aufgaben zentriert in x" - the red
        button (row.redBtn) floats out of the flow, centered in the gap between
-       the end of the topic text and the Aufgaben pill. If the gap is too narrow
-       (phone), it falls back into the flow, left of the pill. Re-placed when a
-       column changes width, on resize and once the fonts have loaded. */
+       the end of the topic text and whatever follows it in the cell: since the
+       Aufgaben pill left the row (20.09.2026) that is the material clip, or the
+       right edge of the cell in a week without material. If the gap is too
+       narrow (phone), it falls back into the flow. Re-placed when a column
+       changes width, on resize and once the fonts have loaded. */
     const redBtnRefs = new Set();
     let redBtnRO = null;
     function placeRedBtns() {

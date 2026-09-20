@@ -20,22 +20,15 @@ window.svpPlanParts.push(function (P) {
         P.renderMaterial(ref.matBlock, text, ref, en => P.isExerciseEntry(en) || P.isVideoEntry(en));
         P.renderMaterial(ref.vidBlock, text, ref, en => !P.isVideoEntry(en));
         ref.matTd.textContent = '';
-        /* Doc, 07.09.2026: "die nach unten ziehen" - Aufgaben-Pille und Material
-           stehen zusammen im Streifen der Aufklappzeile, die Wochenzeile bleibt
-           frei. Der Pfeil links zeigt weiter an, dass es dort etwas gibt. */
-        /* updateMaterial laeuft mehrfach (Rendern, danach der Abgleich mit der
-           Datenbank) - die alte Pille muss weg, sonst sammeln sie sich im
-           Streifen (gemessen: 76 statt 39). */
-        if (ref.aufgCell) ref.aufgCell.remove();
-        const aufg = P.buildAufgabenCell(ref, ex);
-        ref.aufgCell = aufg;
+        /* Doc, 20.09.2026: "weg bitte ... wir brauchen Platz" - die Aufgaben-Pille
+           ist aus der Wochenzeile raus. Die Aufgaben der Woche stehen jetzt im
+           eigenen Reiter der Aufklappzeile (fillAufgabenPane), zusammen mit
+           Zusatzmaterial und Videos. In der Zeile bleiben der rote Knopf und die
+           Klammer mit der Material-Anzahl. */
         const n = alle.length - ex.length;
-        /* Doc, 07.09.2026: die Aufgaben-Pille steht wieder in der Wochenzeile - dort
-           ist sie erreichbar, ohne die Woche aufzuklappen. */
-        /* Red button between topic and Aufgaben pill, data driven (row.redBtn).
-           As wide as the Aufgaben pill: an invisible copy of the pill's text
-           sits in the same grid cell as the label, so the button sizes to the
-           wider of the two - no measuring, independent of when fonts load. */
+        /* Red button in the week row, data driven (row.redBtn). It sizes to its
+           own label; the invisible copy of the Aufgaben pill that used to widen
+           it went out with the pill. */
         if (ref.redBtn) {
             const rb = document.createElement('button');
             rb.type = 'button';
@@ -44,14 +37,6 @@ window.svpPlanParts.push(function (P) {
             const lbl = document.createElement('span');
             lbl.textContent = cfg.label;
             rb.appendChild(lbl);
-            const pill = aufg && aufg.querySelector('.aufg-drop > a.quiz-btn');
-            if (pill) {
-                const ghost = document.createElement('span');
-                ghost.className = 'red-btn-ghost';
-                ghost.setAttribute('aria-hidden', 'true');
-                ghost.textContent = pill.textContent;
-                rb.appendChild(ghost);
-            }
             rb.addEventListener('click', function (e) { e.stopPropagation(); });
             if (cfg.items && cfg.items.length) {
                 rb.setAttribute('aria-haspopup', 'dialog');
@@ -72,39 +57,11 @@ window.svpPlanParts.push(function (P) {
             ref.redBtnEl = rb;
             P.watchRedBtn(ref);
         }
-        if (aufg) ref.matTd.appendChild(aufg);
         const hasMat = !!text && (n > 0 || !alle.length || matTail(text));
-        /* Doc, 08.09.2026: "da gabs frueher ein paperclip wenn Material da" - seit
-           die Pillen in den Streifen der Aufklappzeile gewandert sind, sieht man der
-           Wochenzeile sonst nicht an, dass dort etwas liegt. Der Marker steht rechts
-           neben der Aufgaben-Pille und klappt die Zeile auf. */
-        if (hasMat) {
-            const flag = document.createElement('span');
-            flag.className = 'mat-flag';
-            /* Gezeichnete Klammer statt Emoji: die nimmt die Textfarbe an und
-               passt sich dem Theme an - ein Emoji bleibt immer bunt. */
-            flag.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
-                + '<path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19'
-                + 'a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>';
-            /* Doc, 08.09.2026: auch die 1 wird geschrieben - eine Klammer ohne
-               Zahl sah aus wie "Anzahl unbekannt". Der Zaehler n kennt nur die
-               geparsten Eintraege; steht das Material als freier Text oder als
-               Rest hinter dem letzten Eintrag, ist n gleich 0, obwohl da genau
-               eine Sache liegt. Deshalb nie unter 1 - die Klammer erscheint
-               ohnehin nur, wenn hasMat gilt. */
-            const shown = n > 0 ? n : 1;
-            const cnt = document.createElement('span');
-            cnt.className = 'mat-flag-n';
-            cnt.textContent = shown;
-            flag.appendChild(cnt);
-            flag.title = shown > 1 ? shown + ' Materialien \u2014 Zeile aufklappen'
-                                   : 'ein Material \u2014 Zeile aufklappen';
-            flag.addEventListener('click', function (e) {
-                e.stopPropagation();      /* sonst schliesst der Zeilenklick gleich wieder */
-                ref.openSubRow();
-            });
-            ref.matTd.appendChild(flag);
-        }
+        /* Doc, 20.09.2026: "macht den clip weg bitte" - die Bueroklammer mit der
+           Material-Anzahl ist aus der Wochenzeile raus; rechts steht dort jetzt
+           das Vorschaubild der Woche. Dass die Zeile etwas zu zeigen hat,
+           verraet weiter der Pfeil links. */
         /* "Gedanke der Woche" of this week - the cell was emptied above, so it goes back
            on every rebuild (svp-plan-gdw.js adds it only once per cell). */
         P.gdwThumb(ref);
@@ -128,7 +85,7 @@ window.svpPlanParts.push(function (P) {
            still counts as one, like the paperclip */
         const zusatz = alle.filter(en => !P.isExerciseEntry(en) && !P.isVideoEntry(en)).length
             || (matTail(text) ? 1 : 0);
-        P.setVideoReiter(ref, vids, zusatz);
+        P.setVideoReiter(ref, vids, zusatz, P.fillAufgabenPane(ref, text, ex));
         decorateMatCell(ref);
         /* renderMaterial builds every pill from scratch, so the width measured
            earlier is gone by now. Without this the pills are equally wide only

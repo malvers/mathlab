@@ -408,7 +408,13 @@ window.svpPlanParts.push(function (P) {
                 }
                 P.equalizeMatPills();
             };
-            [['zusatz', 'Zusatzmaterial'], ['videos', 'Videos']].forEach(function (t, k) {
+            /* Doc, 20.09.2026: "bring SVP Aufgaben da als Tab" - die Aufgaben
+               der Woche stehen als dritter Reiter neben Zusatzmaterial und
+               Videos. Er fuellt sich aus derselben Quelle wie die Pille in der
+               Wochenzeile (Wochenquiz + Aufgabenblaetter) und ist wie Videos
+               gesperrt, solange die Woche keine hat. */
+            [['zusatz', 'Zusatzmaterial'], ['videos', 'Videos'],
+             ['aufgaben', 'Aufgaben']].forEach(function (t, k) {
                 const b = document.createElement('button');
                 b.type = 'button';
                 b.className = 'sub-tab' + (k ? '' : ' on');
@@ -488,7 +494,11 @@ window.svpPlanParts.push(function (P) {
             const src0 = ref.matTd ? (ref.matTd.dataset.src || '') : '';
             const alle0 = P.parseMat(src0);
             P.setVideoReiter(ref, alle0.filter(P.isVideoEntry).length,
-                alle0.filter(en => !P.isExerciseEntry(en) && !P.isVideoEntry(en)).length || (P.matTail(src0) ? 1 : 0));
+                alle0.filter(en => !P.isExerciseEntry(en) && !P.isVideoEntry(en)).length || (P.matTail(src0) ? 1 : 0),
+                /* fuellt den Aufgaben-Reiter und liefert die Zahl dahinter -
+                   die Aufklappzeile kann auch spaeter entstehen (Notiz,
+                   Bearbeiten), dann lief updateMaterial laengst. */
+                P.fillAufgabenPane(ref, src0, alle0.filter(P.isExerciseEntry)));
             subBody.appendChild(subSide);
             subMain.appendChild(subBody);
             detailTr.appendChild(subMain);
