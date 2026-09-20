@@ -53,6 +53,11 @@ window.svpPlanParts.push(function (P) {
         const kw = P.weekOf(ref);
         woche = [{
             quelle: treffer ? 'Stoff der Woche' : 'Stoff demnächst',
+            /* Doc, 20.09.2026: "Stoff der Woche braucht noch ein Icon ... Dr.
+               Hut?", dann "oder nee ... das koennte Pruefung sein" - also der
+               Buecherstapel. Der Doktorhut bliebe fuer Pruefungen frei, und er
+               ist ausserdem dunkel auf dunklem Grund (nachgesehen). */
+            logo: 'icons/buecher.svg',
             text: thema(ref),
             klick: function (e) { e.preventDefault(); P.gotoWeek(kw); }
         }];
