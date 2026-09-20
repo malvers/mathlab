@@ -99,11 +99,14 @@ window.svpPlanParts.push(function (P) {
         if (!cat.length) cat = (def.topics || []).map(function (t, i) { return { id: i, title: t.title }; });
         /* kw -> Lerngruppe label -> ["1 · Titel", ...] */
         const byKw = {};
+        /* Gruppe -> die Themen-Ids, die sie zu vergeben hat (siehe markTalksDone) */
+        const themen = {};
         klassen.forEach(function (k) {
             const m = edits(metaPage(k));
             const fundus = new Set((Array.isArray(m.fundus) ? m.fundus : []).map(Number));
             const order = Array.isArray(m.order) ? m.order.map(Number) : null;
             const list = V.arrange(cat, order).filter(function (e) { return !fundus.has(e.id); });
+            themen[k[0]] = list.map(function (e) { return e.id; });
             const own = V.datesFor(def, k[0]);
             const md = m.dates && typeof m.dates === 'object' ? m.dates : {};
             list.forEach(function (e, pos) {
@@ -129,5 +132,34 @@ window.svpPlanParts.push(function (P) {
             ref.ensureSubRow();
             paintTalk(ref);
         });
+        markTalksDone(key, themen).catch(function (e) { console.warn('svp talks done:', e); });
+    }
+
+    /* Der Vortraege-Knopf wird gruen, sobald jedes Thema dieser Lerngruppe
+       vergeben ist (Doc, 20.09.2026: "wenn alle Vortraege vergeben sind mach
+       den so gruen wie die Vortraege"). Vergeben heisst: an dem Thema steht
+       MINDESTENS ein Name - "die duerfen auch alleine", zwei Plaetze sind die
+       Regel, keine Bedingung.
+       Gelesen wird nur das Flag taken; die Namen selbst sind gegen Docs
+       oeffentlichen Schluessel versiegelt und kommen hier gar nicht erst an
+       (svp/informatik/vortraege.js, Tabelle svp_vortrag_namen). */
+    async function markTalksDone(plan, themen) {
+        const btn = document.querySelector('button[data-groups]');
+        const klasse = P.GROUP || Object.keys(themen)[0];
+        const ids = themen[klasse];
+        if (!btn || !klasse || !ids || !ids.length || !window.svpAuth) return;
+        const res = await fetch(svpAuth.DB_URL + '/rest/v1/svp_vortrag_namen' +
+            '?plan=eq.' + encodeURIComponent(plan) +
+            '&klasse=eq.' + encodeURIComponent(klasse) +
+            '&taken=is.true&select=idx',
+            { headers: { apikey: svpAuth.DB_KEY, Authorization: 'Bearer ' + svpAuth.DB_KEY } });
+        if (!res.ok) return;
+        const belegt = new Set((await res.json()).map(function (r) { return r.idx; }));
+        const offen = ids.filter(function (id) { return !belegt.has(id); }).length;
+        btn.classList.toggle('vortraege-voll', !offen);
+        /* Der Titel sagt, warum der Knopf gruen ist - oder wie viel noch fehlt. */
+        btn.title = btn.title.replace(/\s—\s(alle vergeben|noch\s\d+.*)$/, '') +
+            (offen ? ' — noch ' + offen + (offen === 1 ? ' Thema' : ' Themen') + ' ohne Namen'
+                   : ' — alle vergeben');
     }
 });

@@ -1525,6 +1525,12 @@
         }
         drop.appendChild(toggle);
         drop.appendChild(menu);
+        /* Nicht mehr zeigen (Doc, 20.09.2026: "brauchen wir nicht mehr"): man
+           kommt ueber den Vortraege-Knopf des Plans schon in der richtigen
+           Gruppe an, und der Plan selbst laeuft seit dem 20.09. immer in EINER
+           Gruppe. Gebaut bleibt es - daran haengen die Umlenkung ohne ?g, das
+           Label im Kopf und der Zweig-Buchstabe. */
+        drop.style.display = 'none';
         box.appendChild(drop);
         const open = (on) => {
             menu.hidden = !on;
