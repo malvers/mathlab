@@ -636,6 +636,11 @@
             ctx.stroke();
         }
 
+        // Column captions ("Zahl", "wie oft?", "Wahrscheinlichkeit", ...). One constant, so
+        // they cannot drift apart. Doc, 18.09.2026, on the film at 1:01: the old 10 px sat
+        // next to 16 px content and was unreadable on the screen in class.
+        const CAP = 13;
+
         // Orbitron for headers and labels - never for numbers in the content
         function label(text, x, y, size, color, align = 'left', weight = 700) {
             ctx.font = weight + ' ' + size + 'px Orbitron, sans-serif';
@@ -1268,9 +1273,9 @@
 
             const cw = [72, 138, w - 3 * s - 20 - 210];
             const ty = y + 62;
-            label('Zahl', x + cw[0] / 2, ty + 10, 10, C.soft, 'center', 400);
-            label('wie oft?', x + cw[0] + 8, ty + 10, 10, C.soft, 'left', 400);
-            label('Wahrscheinlichkeit', x + cw[0] + cw[1], ty + 10, 10, C.soft, 'left', 400);
+            label('Zahl', x + cw[0] / 2, ty + 10, CAP, C.soft, 'center', 400);
+            label('wie oft?', x + cw[0] + 8, ty + 10, CAP, C.soft, 'left', 400);
+            label('Wahrscheinlichkeit', x + cw[0] + cw[1], ty + 10, CAP, C.soft, 'left', 400);
             line(x, ty + 24, x + cw[0] + cw[1] + cw[2], ty + 24, 'rgba(157, 232, 255, 0.3)', 1);
             G.forEach((gg, r) => {
                 const ry = ty + 26 + r * 46, cy = ry + 23;
@@ -1954,7 +1959,7 @@
                 line(xx, T, xx, B, 'rgba(157, 232, 255, 0.12)', 1);
                 tex(intTex(p), xx, B + 20, 14, C.soft, { align: 'center', valign: 'middle' });
             }
-            label('RUNDEN', (L + R) / 2, B + 44, 10, C.soft, 'center', 400);
+            label('RUNDEN', (L + R) / 2, B + 44, CAP, C.soft, 'center', 400);
             const yP = v => B - v * (B - T);
             const yA = yP(valF(m.pA)), yB = yP(valF(m.pB));
             line(L, yA, R, yA, 'rgba(160, 212, 70, 0.75)', 1.6, [8, 6]);
@@ -1989,11 +1994,11 @@
             row('**' + m.B.name + '** gewinnt: $' + intTex(sm.b) + '$', C.redHi);
             if (m.draws.length) row('unentschieden: $' + intTex(sm.d) + '$', C.soft);
             yy += 6;
-            label('RELATIVE HÄUFIGKEIT', 30, yy + 6, 10, C.soft, 'left', 400);
+            label('RELATIVE HÄUFIGKEIT', 30, yy + 6, CAP, C.soft, 'left', 400);
             yy += 20;
             const rel = sm.n ? sm.a / sm.n : 0;
             row(sm.n ? '$\\frac{' + intTex(sm.a) + '}{' + intTex(sm.n) + '} \\approx ' + decTex(rel, 3) + '$' : '$-$', C.greenHi, 20);
-            label('WAHRSCHEINLICHKEIT', 30, yy + 6, 10, C.soft, 'left', 400);
+            label('WAHRSCHEINLICHKEIT', 30, yy + 6, CAP, C.soft, 'left', 400);
             yy += 20;
             row('$' + fr(m.pA) + ' \\approx ' + decTex(valF(m.pA), 3) + '$', C.greenHi, 20);
             if (sm.n) row('Abweichung: $' + decTex(Math.abs(rel - valF(m.pA)), 3) + '$', C.soft, 16);

@@ -229,6 +229,11 @@ const CyberBranding = {
         'irisvis.html': 'https://youtu.be/XFCK0uRRUU4',
         'galtonboard.html': 'https://youtu.be/L8XKYIEx8Ig',
         'brahmagupta.html': 'https://youtu.be/K-QYfEjO4Ms',
+        // These three were uploaded but never wired up here, so their labs showed no video
+        // button (found 20.09.2026 by matching youtube-metadaten.md against this list).
+        'shell.html': 'https://youtu.be/3g11GkJQA7s',
+        'reaction-diffusion.html': 'https://youtu.be/ptJzIGsFFvg',
+        'wuerfelspiel.html': 'https://youtu.be/KJeMc9lVz-g',
     },
 
     injectLabVideo() {

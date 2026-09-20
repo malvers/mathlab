@@ -95,7 +95,11 @@ let bubbles = [];
 if (process.env.DID) {
   const { makeTalks } = await import('../lib/did.mjs');
   const { PORTRAIT } = await import('../lib/paths.mjs');
-  const MAX_TALK = 300;
+  // D-ID's /audios upload answers 413 "Request Too Long" above roughly 4.7 MB. At 300 s a
+  // group reached 4.76 MB and was refused (20.09.2026), while the 17.09. run's 4.61 MB still
+  // went through. 200 s keeps every group near 3 MB - well inside, and the credits are billed
+  // per 15 s of talk, so splitting finer costs at most one rounded-up credit per group.
+  const MAX_TALK = 200;
   const groups = [];
   let cur = [], curLen = 0, walk = 0;
   const starts = [];
@@ -122,4 +126,6 @@ const outros = await recordOutros({ outDir: OUT, qrUrl: 'https://docalvers.de/wu
 const total = scenes.reduce((a, s) => a + s.len, 0) + outros.reduce((a, f) => a + dur(f), 0);
 const out = `${OUT}/wuerfelspiel-${process.env.DID ? 'demo' : 'voice'}-1440p.mp4`;
 compose(scenes.map((s) => s.name), bubbles,
-  { outDir: OUT, out, size: 380, outros, music: { file: makeBed(total), gain: 0.06 } });
+  // 0.10 -> 0.06 after the first cut, 0.06 -> 0.05 after the second (Doc at 9:34, 18.09.2026:
+  // "Hintergrundmusik im Nachhinein noch einen Tick leiser") - about 1.6 dB down.
+  { outDir: OUT, out, size: 380, outros, music: { file: makeBed(total), gain: 0.05 } });
