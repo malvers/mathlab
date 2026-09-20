@@ -273,6 +273,14 @@ window.svpPlanParts.push(function (P) {
             redBtnRO = new ResizeObserver(placeRedBtns);
             window.addEventListener('resize', placeRedBtns);
             if (document.fonts) document.fonts.ready.then(placeRedBtns);
+            /* Doc, 20.09.2026: "Info neun der sitzt nicht mehr" - the button is
+               placed by MEASURING, and the first measurement can run before the
+               last stylesheet is there: since svp.css only @imports its parts,
+               they arrive one round trip later than the file itself. Measured
+               too early there is no room for the button and it stays in the
+               flow, sitting in the material cell. 'load' is after every sheet,
+               font and image, so one more pass there settles it. */
+            if (document.readyState !== 'complete') window.addEventListener('load', placeRedBtns);
         }
         redBtnRefs.add(ref);
         /* the topic cell changes width whenever the columns rebalance */
