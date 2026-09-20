@@ -88,7 +88,12 @@
         for (let i = 0; raus.length < wieviel && i < allgemein.length; i++) {
             if (raus.indexOf(allgemein[i]) < 0) raus.push(allgemein[i]);
         }
-        return raus.map(function (e) { return { quelle: 'Schon gewusst', text: e.text }; });
+        /* Das Gehirn ist ein Bild und keine eigene Zeichnung (Doc, 20.09.2026:
+           "brain auch seitlich und bunt", dann "hol das Gehirn als Bild") -
+           das Zeichen aus Twemoji, siehe icons/readme.md. */
+        return raus.map(function (e) {
+            return { quelle: 'Schon gewusst', text: e.text, logo: 'icons/gehirn.svg' };
+        });
     }
 
     function heute() {
@@ -178,10 +183,12 @@
     const MEGAFON = '<g class="mega">'
         + '<g transform="rotate(-20 12 12) translate(0.5 -0.7)">'
         + '<path class="horn" d="M6 9.5h1.6L19 5v14L7.6 14.5H6A2.5 2.5 0 0 1 6 9.5Z"/>'
-        /* Doc, 20.09.2026: "den Griff noch bissl sichtbarer" - er haengt
-           tiefer, ist breiter und traegt einen kraeftigeren Strich als der
-           Trichter, sonst verschwindet er bei 15 px unter ihm. */
-        + '<path class="grip" d="M8.1 15v2.4a2.6 2.6 0 0 0 5.2 0V16.2" stroke-width="1.8"/>'
+        /* Doc, 20.09.2026: "den Griff noch bissl sichtbarer", dann "nicht so
+           einen U griff nur Pistol shaft" - ein gerader, leicht geneigter
+           Stiel unter dem Trichter statt des Buegels. Als geschlossene Form,
+           damit er im Lauf mit dem Trichter gefuellt wird und im Ruhezustand
+           als Umriss steht. */
+        + '<rect class="grip" x="9.3" y="13.4" width="2.4" height="7" rx="1.2" transform="rotate(18 10.5 16.9)"/>'
         + '</g></g>';
     const ICON_AN = MEGAFON;
     const ICON_AUS = MEGAFON + '<path d="M4 4 20 20"/>';

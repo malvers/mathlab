@@ -102,7 +102,9 @@ html.svp-light .nav-news-item b { color: var(--ypsilon); }
 /* Logo der Quelle statt ihres Namens: so hoch wie die Schrift, nicht hoeher -
    die Zeile soll davon nicht wachsen. */
 .nav-news-logo {
-    height: 14px;
+    /* Eine Spur hoeher als die Schrift: das Gehirn aus Twemoji ist eine
+       gezeichnete Figur, keine Wortmarke - bei 14 px bliebe davon ein Fleck. */
+    height: 16px;
     width: auto;
     vertical-align: -3px;
     border-radius: 3px;
@@ -159,9 +161,12 @@ nav.quick-nav a.nav-news-btn.spricht .mega .horn {
     animation: mega-leuchten 1.2s ease-in-out infinite;
 }
 
-/* Der Griff traegt dieselbe Farbe - sonst haengt ein grauer Buegel unter
-   einem leuchtenden Trichter. */
-nav.quick-nav a.nav-news-btn.spricht .mega .grip { stroke: var(--news-neon); }
+/* Der Griff leuchtet mit - sonst haengt ein grauer Stiel unter einem
+   leuchtenden Trichter. Gefuellt wie der Trichter, also auch ohne Kontur. */
+nav.quick-nav a.nav-news-btn.spricht .mega .grip {
+    fill: var(--news-neon);
+    stroke: none;
+}
 
 /* Im hellen Schema sitzt das Icon auf Weiss: dort leuchtet nichts, dort
    traegt das satte Gruen der Palette. */
@@ -169,7 +174,7 @@ html.svp-light nav.quick-nav a.nav-news-btn.spricht .mega .horn {
     fill: var(--phi);
     filter: none;
 }
-html.svp-light nav.quick-nav a.nav-news-btn.spricht .mega .grip { stroke: var(--phi); }
+html.svp-light nav.quick-nav a.nav-news-btn.spricht .mega .grip { fill: var(--phi); stroke: none; }
 
 @keyframes mega-leuchten {
     0%, 100% { opacity: 0.82; }
