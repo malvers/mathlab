@@ -14,7 +14,7 @@
     const GDW_BASE = 'https://pub-3679488924b04b6e9118c6684b8c23e1.r2.dev/';
 
     window.svpPlanParts.push(function (P) {
-        Object.assign(P, { gdwThumb });
+        Object.assign(P, { gdwThumb, gdwEntry, gdwThumbSrc, gdwOpen: open });
 
         /* every key the page listens for belongs in the central help (svp-nav.js) */
         window.svpKeys = (window.svpKeys || []).concat([
@@ -27,7 +27,13 @@
         let byKw = null;
         let weeks = [];          /* die Schulwochen der Reihe nach - fuer die Pfeiltasten */
         const waiting = [];
-        fetch(DIR + 'gdw.json')
+        /* Eine Planseite darf einen eigenen Satz Gedanken waehlen: window.GDW_SATZ = 'weisheiten'
+           liest gdw-weisheiten.json statt gdw.json. Doc, 20.09.2026: Die Klasse 11 hat bei ihm
+           Informatik UND Mathe - saehe sie in beiden Plaenen denselben Gedanken, saesse sie in
+           derselben Woche zweimal davor. Eigene Datei statt Faechern in einer: nichts am
+           bestehenden Format aendert sich, und jede Seite laedt nur den Satz, den sie zeigt. */
+        const SATZ = (window.GDW_SATZ || '').replace(/[^a-z0-9-]/g, '');
+        fetch(DIR + (SATZ ? 'gdw-' + SATZ + '.json' : 'gdw.json'))
             .then(function (r) { return r.ok ? r.json() : null; })
             .then(function (j) {
                 byKw = {};
@@ -77,6 +83,13 @@
             });
             td.appendChild(btn);    /* alone at the right end of the week row since 20.09.2026 */
         }
+
+        /* Was andere Teile brauchen: der Gedanke einer Woche, sein Vorschaubild und
+           das Oeffnen der grossen Seite - der Fahrplan zeigt ihn in seiner Ecke. */
+        function gdwEntry(ref) {
+            return (byKw && ref && ref.kw) ? (byKw[ref.kw] || null) : null;
+        }
+        function gdwThumbSrc(e) { return DIR + 'gdw/' + e.bild + '.webp'; }
 
         function caption(e) {
             /* gdw.json carries the whole word ("Weihnachtsferien") - gluing "ferien" onto
