@@ -50,9 +50,22 @@ def files_for(page):
     return out
 
 
-def stamp(page):
+def stamp(page, refs=()):
+    """Newest mtime of everything the page hangs on.
+
+    files_for() only sees what stands in the HTML. Scripts that another script loads at runtime are invisible to it -
+    HTML/svp/svp-plan.js writes its twenty parts with document.write and builds their names by string concat, so
+    editing svp-plan-untis.js changed nothing and the plan pages did not reload (Doc, 20.09.2026: "wieso laedt das
+    nicht automatisch?"). The page therefore reports what it ACTUALLY loaded (RELOAD_JS: document.scripts and the
+    stylesheet links); only files under HTML/ count, like everywhere else here.
+    """
+    paths = files_for(page)
+    for ref in refs:
+        p = _local(ref, HTML_DIR)
+        if p and p.endswith(WATCHED) and p not in paths:
+            paths.append(p)
     newest = 0
-    for p in files_for(page):
+    for p in paths:
         try:
             newest = max(newest, os.stat(p).st_mtime_ns)
         except OSError:
@@ -70,7 +83,25 @@ RELOAD_JS = r"""// Live reload - only on Doc's machine: serve.py puts this into 
   const page = location.pathname;
   const TYPING = 'input:not([type]),input[type=text],input[type=search],input[type=number],input[type=password],'
     + 'input[type=email],input[type=url],textarea,[contenteditable]';
-  let first = null;
+  let first = null, firstRefs = '';
+  // What the page really loaded - including the scripts another script pulled in (svp-plan.js writes its parts with
+  // document.write; nothing in the HTML names them). Same origin and only .js/.mjs/.css: the server watches nothing
+  // else anyway.
+  function refs() {
+    const out = [];
+    function add(u) {
+      if (!u) return;
+      try {
+        const x = new URL(u, location.href);
+        if (x.origin !== location.origin) return;
+        if (!/\.(m?js|css)$/i.test(x.pathname)) return;
+        if (out.indexOf(x.pathname) < 0) out.push(x.pathname);
+      } catch (e) { }
+    }
+    for (const s of document.scripts) add(s.src);
+    for (const l of document.querySelectorAll('link[rel=stylesheet]')) add(l.href);
+    return out.sort().join(',');
+  }
   function busy() {
     const a = document.activeElement;
     if (a && a.matches && (a.isContentEditable || a.matches(TYPING))) return true;
@@ -87,10 +118,14 @@ RELOAD_JS = r"""// Live reload - only on Doc's machine: serve.py puts this into 
   }
   function check() {
     if (document.visibilityState !== 'visible') return;
-    fetch('/__live/stamp?page=' + encodeURIComponent(page), { cache: 'no-store' })
+    const now = refs();
+    fetch('/__live/stamp?page=' + encodeURIComponent(page) + '&refs=' + encodeURIComponent(now), { cache: 'no-store' })
       .then(function (r) { return r.json(); })
       .then(function (j) {
-        if (first === null) { first = j.stamp; return; }
+        // A page that loads more scripts later watches more files than a moment ago - that is a longer list, not a
+        // change on disk. Taking it for one would reload, and after the reload again: a loop. So: take the new
+        // ground and wait for a REAL change.
+        if (first === null || now !== firstRefs) { first = j.stamp; firstRefs = now; return; }
         if (j.stamp === first || busy()) return;
         location.reload();
       })
@@ -99,8 +134,10 @@ RELOAD_JS = r"""// Live reload - only on Doc's machine: serve.py puts this into 
   // the page wrote a file itself (deck editor): what is on disk now is what it shows
   window.__liveReload = {
     rebase: function () {
-      fetch('/__live/stamp?page=' + encodeURIComponent(page), { cache: 'no-store' })
-        .then(function (r) { return r.json(); }).then(function (j) { first = j.stamp; }).catch(function () { });
+      const now = refs();
+      fetch('/__live/stamp?page=' + encodeURIComponent(page) + '&refs=' + encodeURIComponent(now), { cache: 'no-store' })
+        .then(function (r) { return r.json(); })
+        .then(function (j) { first = j.stamp; firstRefs = now; }).catch(function () { });
     }
   };
   setInterval(check, window.top === window ? 1000 : 3000);
@@ -116,6 +153,8 @@ def handle(path):
     if url.path == "/__live/reload.js":
         return 200, "application/javascript; charset=utf-8", RELOAD_JS.encode("utf-8")
     if url.path == "/__live/stamp":
-        page = parse_qs(url.query).get("page", ["/"])[0]
-        return 200, "application/json", json.dumps({"stamp": stamp(page)}).encode("utf-8")
+        q = parse_qs(url.query)
+        page = q.get("page", ["/"])[0]
+        refs = [r for r in q.get("refs", [""])[0].split(",") if r]
+        return 200, "application/json", json.dumps({"stamp": stamp(page, refs)}).encode("utf-8")
     return 404, "application/json", b'{"error": "unknown"}'
