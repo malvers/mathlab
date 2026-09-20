@@ -194,6 +194,29 @@ window.svpPlanParts.push(function (P) {
                 .find(function (el) { return el !== lehrplan && el.tagName !== 'H1'; });
             titleGroup.insertBefore(lehrplan, firstBtn || null);
         }
+
+        /* Doc, 20.09.2026: "rechts neben Eingangstest, rechtsbuendig" - the one
+           formula sheet allowed in the Abitur, straight from the IQB server so it
+           is always the current edition. Built here and not in each page's markup
+           because the link is the same everywhere; the pages listed below are the
+           ones where it belongs. .head-row is space-between, so this second child
+           lands at the right edge by itself - no CSS needed. */
+        const FORMELN_URL = 'https://www.iqb.hu-berlin.de/media/documents/' +
+            'N_Mathematisch-naturwissenschaftliche_Formelsammlung.pdf';
+        const FORMELN_ON = ['mathe11', 'mathe12', 'mathe13'];
+        const headRow = document.querySelector('.page-head .head-row');
+        const page = location.pathname.replace(/.*\//, '').replace(/\.html$/, '');
+        if (headRow && FORMELN_ON.includes(page)) {
+            const b = document.createElement('button');
+            b.className = 'action secondary';
+            b.textContent = 'Formelsammlung';
+            b.title = 'Mathematisch-Naturwissenschaftliche Formelsammlung (IQB/KMK) - ' +
+                'das einzige zugelassene Hilfsmittel der Abiturpruefung';
+            b.addEventListener('click', function () {
+                window.open(FORMELN_URL, '_blank', 'noopener');
+            });
+            headRow.appendChild(b);
+        }
         searchInput.addEventListener('input', planSearchRun);
         searchInput.addEventListener('search', planSearchRun);   /* the native ✕ */
         searchInput.addEventListener('keydown', function (e) {
