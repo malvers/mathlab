@@ -190,13 +190,19 @@
     pill.className = 'badge b-grey nav-news-btn';
     pill.href = '#';
 
-    function pillMalen() {
-        const an = !aus();
-        /* Dieselbe Zeichnung wie die anderen Icon-Pillen: 15 px, Strich 1.5
-           (svp-nav.js, Doc am 09.09.2026). */
-        pill.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" ' +
+    /* Dieselbe Zeichnung wie die anderen Icon-Pillen: 15 px, Strich 1.5
+       (svp-nav.js, Doc am 09.09.2026). Nach aussen gereicht, damit die
+       Schauseite _megafon.html genau DIESES Bild zeigt und keine Abschrift. */
+    window.svpNewsIcon = function (an, px) {
+        const gross = px || 15;
+        return '<svg width="' + gross + '" height="' + gross + '" viewBox="0 0 24 24" fill="none" ' +
             'stroke="currentColor" stroke-width="1.5" stroke-linecap="round" ' +
             'stroke-linejoin="round" aria-hidden="true">' + (an ? ICON_AN : ICON_AUS) + '</svg>';
+    };
+
+    function pillMalen() {
+        const an = !aus();
+        pill.innerHTML = window.svpNewsIcon(an);
         const text = an ? 'Neuigkeiten ausblenden' : 'Neuigkeiten einblenden';
         pill.title = text;
         pill.setAttribute('aria-label', text);

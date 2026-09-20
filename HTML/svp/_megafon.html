@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="de">
+<!-- Schauseite fuer das Megafon der Neuigkeiten-Zeile (Doc, 20.09.2026: "zeig
+     mal das SVG in Gross"). Das Bild kommt aus svp-news.js (window.svpNewsIcon)
+     - hier steht keine Abschrift, sondern genau das Icon aus der Navileiste.
+     Wie _measure.html und _pilltest.html eine Werkstattseite, kein Unterricht. -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Megafon &middot; Neuigkeiten-Zeile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="svp.css">
+    <style>
+        body { font-family: 'Outfit', sans-serif; color: var(--text); background: var(--bg); padding: 24px; }
+        h1 { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; letter-spacing: 0.1em; margin: 0 0 18px; }
+        .reihe { display: flex; align-items: flex-end; gap: 28px; flex-wrap: wrap; margin-bottom: 26px; }
+        .fall { text-align: center; }
+        .fall span { display: block; margin-top: 8px; font-size: 0.72rem; color: var(--muted); }
+        /* Die Kaestchen der Pille wachsen mit - die Zeichnung selbst kommt aus
+           dem Icon, die Regeln aus svp-pillrow.css und svp-news.css. */
+        nav.quick-nav a.nav-news-btn.gross { width: auto; height: auto; padding: 14px; border-radius: 16px; }
+    </style>
+</head>
+
+<body>
+    <h1>Megafon der Neuigkeiten-Zeile</h1>
+    <nav class="quick-nav"><div class="nav-group nav-right" id="schau"></div></nav>
+    <p style="font-size:0.85rem;color:var(--muted);max-width:60ch">
+        Links das Mass aus der Navileiste (15&nbsp;px), daneben dieselbe Zeichnung gross.
+        &bdquo;Laeuft&ldquo; ist der Zustand, in dem das Band gerade zieht: neon gefuellt, ohne Kontur, mit Schein.
+    </p>
+
+    <script src="svp-nav.js"></script>
+    <script>
+        /* svp-nav.js laedt svp-news.js nach - erst wenn das da ist, gibt es das Icon. */
+        (function warten() {
+            if (!window.svpNewsIcon) return setTimeout(warten, 60);
+            const schau = document.getElementById('schau');
+            [[15, true, 'laeuft, 15 px'], [64, true, 'laeuft'], [160, true, 'laeuft, gross'],
+             [64, false, 'ausgeblendet'], [160, false, 'ausgeblendet, gross']]
+                .forEach(function ([px, an, text]) {
+                    const kasten = document.createElement('div');
+                    kasten.className = 'fall';
+                    const pille = document.createElement('a');
+                    pille.className = 'badge b-grey nav-news-btn' + (px > 20 ? ' gross' : '');
+                    if (an) pille.classList.add('spricht');
+                    pille.href = '#';
+                    pille.innerHTML = window.svpNewsIcon(an, px);
+                    const label = document.createElement('span');
+                    label.textContent = text;
+                    kasten.appendChild(pille);
+                    kasten.appendChild(label);
+                    schau.appendChild(kasten);
+                });
+            schau.className = 'nav-group nav-right reihe';
+        })();
+    </script>
+</body>
+</html>

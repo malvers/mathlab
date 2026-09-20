@@ -4,6 +4,13 @@
    aus dem gemeinsamen Leisten-Block in svp-search.css - hier steht nur, was
    das Laufband selbst braucht. Gebaut wird die Zeile in svp-nav.js, die
    Texte stehen in svp-news.json. */
+:root {
+    /* Neon-Gruen fuer das laufende Megafon (Doc, 20.09.2026: "neon"). Ein
+       eigener Ton, kein Palettenwert: phi ist ein Unterrichtsgruen und soll
+       es bleiben - hier geht es um ein Laempchen. */
+    --news-neon: rgb(64, 255, 122);
+}
+
 .nav-news {
     display: flex;
     align-items: center;
@@ -139,11 +146,34 @@ nav.quick-nav a.nav-news-btn.spricht .mega {
 }
 
 nav.quick-nav a.nav-news-btn.spricht .mega .horn {
-    animation: mega-puls 1.2s ease-in-out infinite;
-    /* Doc, 20.09.2026: "das Mega gruen gefuellt wenn" - laeuft das Band, ist
-       der Trichter gefuellt; steht es oder ist die Zeile aus, bleibt er
-       offen. Das Gruen der Palette (phi), also in jedem Schema seine Fassung. */
+    /* Doc, 20.09.2026: "das Mega gruen gefuellt wenn", dann "helleres Gruen",
+       "noch greener", "neon", "ggf ohne Rahmen?" - der Trichter ist beim
+       Laufen eine leuchtende Flaeche OHNE Kontur; der Schein kommt aus einem
+       Schlagschatten in derselben Farbe und atmet im Takt. Das satte phi der
+       Palette sass auf dem dunklen Blau zu nah am Grund, und eine Mischung mit
+       Weiss zog es ins Oliv (gemessen: 177,199,136) - deshalb ein eigener
+       Neon-Ton statt eines aufgehellten. */
+    fill: var(--news-neon);
+    stroke: none;
+    filter: drop-shadow(0 0 2.5px color-mix(in srgb, var(--news-neon) 65%, transparent));
+    animation: mega-leuchten 1.2s ease-in-out infinite;
+}
+
+/* Der Griff traegt dieselbe Farbe - sonst haengt ein grauer Buegel unter
+   einem leuchtenden Trichter. */
+nav.quick-nav a.nav-news-btn.spricht .mega .grip { stroke: var(--news-neon); }
+
+/* Im hellen Schema sitzt das Icon auf Weiss: dort leuchtet nichts, dort
+   traegt das satte Gruen der Palette. */
+html.svp-light nav.quick-nav a.nav-news-btn.spricht .mega .horn {
     fill: var(--phi);
+    filter: none;
+}
+html.svp-light nav.quick-nav a.nav-news-btn.spricht .mega .grip { stroke: var(--phi); }
+
+@keyframes mega-leuchten {
+    0%, 100% { opacity: 0.82; }
+    50% { opacity: 1; }
 }
 
 @keyframes mega-wabern {
@@ -151,11 +181,6 @@ nav.quick-nav a.nav-news-btn.spricht .mega .horn {
     22% { transform: rotate(-5deg) scale(1.07); }
     48% { transform: rotate(3deg) scale(1.01); }
     74% { transform: rotate(-2deg) scale(1.04); }
-}
-
-@keyframes mega-puls {
-    0%, 100% { stroke-width: 1.5; }
-    50% { stroke-width: 1.95; }
 }
 
 @media (prefers-reduced-motion: reduce) {
