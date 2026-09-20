@@ -36,6 +36,7 @@
         'shift',            // moving the content by a week ("Verschieben")
         'sync',             // cloud sync of edits and notes
         'panels',           // Lernbereich panels and the bridge panel of the cards
+        'news',             // diese Woche und die naechsten Vortraege ins Neuigkeiten-Band
         'run'
     ];
     const me = document.currentScript;

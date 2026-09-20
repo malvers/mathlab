@@ -99,6 +99,10 @@ window.svpPlanParts.push(function (P) {
         if (!cat.length) cat = (def.topics || []).map(function (t, i) { return { id: i, title: t.title }; });
         /* kw -> Lerngruppe label -> ["1 · Titel", ...] */
         const byKw = {};
+        /* dieselben Vortraege noch einmal flach, mit Datum: daraus macht
+           svp-plan-news.js die naechsten Termine fuer das Neuigkeiten-Band
+           (Doc, 20.09.2026: "welche Vortraege wann sind") */
+        const termine = [];
         /* Gruppe -> die Themen-Ids, die sie zu vergeben hat (siehe markTalksDone) */
         const themen = {};
         klassen.forEach(function (k) {
@@ -115,6 +119,7 @@ window.svpPlanParts.push(function (P) {
                 const w = P.isoWeek(new Date(iso + 'T12:00:00'));   /* the one markCurrentWeek uses */
                 const g = (byKw[w] = byKw[w] || {});
                 (g[k[1]] = g[k[1]] || []).push((pos + 1) + ' · ' + e.title);
+                termine.push({ iso: iso, label: k[1] || '', text: (pos + 1) + ' · ' + e.title });
             });
         });
         P.rendered.forEach(function (ref) {
@@ -132,6 +137,7 @@ window.svpPlanParts.push(function (P) {
             ref.ensureSubRow();
             paintTalk(ref);
         });
+        if (P.newsTalks) P.newsTalks(termine);
         markTalksDone(key, themen).catch(function (e) { console.warn('svp talks done:', e); });
     }
 

@@ -1,0 +1,119 @@
+/* ---- Neuigkeiten-Laufband zwischen Navileiste und Seitenkopf -----------
+   Doc, 20.09.2026: "mach dazwischen eine kleine Zeile so wie die Suchzeile
+   und bring da einen News ticker". Grund, Rand, Radius und Schrift kommen
+   aus dem gemeinsamen Leisten-Block in svp-search.css - hier steht nur, was
+   das Laufband selbst braucht. Gebaut wird die Zeile in svp-nav.js, die
+   Texte stehen in svp-news.json. */
+.nav-news {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    /* Dieselbe Spur wie Navileiste, Werkzeugleiste und Seitenkopf. */
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto 20px;
+    overflow: hidden;
+}
+
+.nav-news[hidden] { display: none; }
+
+/* Ausgeblendet per Knopf in der Navileiste (svp-news.js): weg ist weg - die
+   Zeile nimmt dann auch keinen Platz mehr ein. */
+.nav-news.zu { display: none; }
+
+/* Ohne die Zeile haelt die Navileiste 20 px zum Seitenkopf; mit ihr teilt
+   sich derselbe Abstand auf ihre beiden Seiten auf, statt sich zu verdoppeln. */
+.nav-band:has(+ .nav-news:not([hidden]):not(.zu)) { margin-bottom: 12px; }
+
+/* Etikett links, gedaempft wie der Platzhalter der Suchzeile: ohne das Wort
+   sieht die Zeile aus wie ein Eingabefeld, in das man tippen koennte. */
+.nav-news-label {
+    flex: 0 0 auto;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--text) 68%, transparent);
+}
+
+/* Das Fenster, in dem der Text laeuft. min-width:0 ist Pflicht: ein Flex-Kind
+   waere sonst so breit wie sein Inhalt, und der Inhalt steht im Laufband
+   zweimal da - die Zeile wuerde die Seite seitlich aufziehen. */
+.nav-news-view {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+/* Laufband nach dem Muster der Vortragszeile (svp-material.css): der Text
+   steht zweimal hintereinander, die Animation schiebt um genau eine Kopie
+   (-50 %) nach links und beginnt von vorn - nahtlos. Gelaufen wird immer
+   (Doc, 20.09.2026: "da laeuft nix"); svp-news.js fuellt die Haelfte dafuer
+   notfalls mit Wiederholungen auf. */
+.nav-news-run { display: inline-block; }
+
+/* Beide Haelften sind inline-BLOCK: ein blosses <span> ist eine Inline-Box,
+   die hat keine eigene Breite - scrollWidth und clientWidth kommen dann als 0
+   zurueck, und das Laufband bekaeme die Dauer 0s (gemessen, 20.09.2026). */
+.nav-news-line {
+    display: inline-block;
+    white-space: nowrap;
+}
+.nav-news.runs .nav-news-run { animation: nav-news-run 40s linear infinite; }
+
+/* Unter der Maus haelt das Band an - zum Lesen und zum Klicken. */
+.nav-news:hover .nav-news-run { animation-play-state: paused; }
+
+/* Ein Eintrag mit "href" ist ein Link, faellt aber im Band nicht aus der
+   Reihe - die Unterstreichung kommt erst unter der Maus, wo das Band ohnehin
+   anhaelt. */
+a.nav-news-item {
+    color: inherit;
+    text-decoration: none;
+}
+a.nav-news-item:hover { text-decoration: underline; }
+
+/* Quelle vor der Schlagzeile - klein, in Orbitron und in der Farbe, die
+   schon die Vortragszeile im Plan traegt (svp-material.css). */
+.nav-news-item b {
+    font-size: 0.6rem;
+    font-weight: 400;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: rgb(235, 120, 105);
+}
+html.svp-light .nav-news-item b { color: var(--ypsilon); }
+
+/* Logo der Quelle statt ihres Namens: so hoch wie die Schrift, nicht hoeher -
+   die Zeile soll davon nicht wachsen. */
+.nav-news-logo {
+    height: 14px;
+    width: auto;
+    vertical-align: -3px;
+    border-radius: 3px;
+}
+
+/* Eintraege aus dem Plan springen zur Woche, statt eine Seite zu oeffnen. */
+.nav-news-item.klickbar { cursor: pointer; }
+.nav-news-item.klickbar:hover { text-decoration: underline; }
+
+.nav-news-dot {
+    padding: 0 1.4em;
+    color: var(--muted);
+}
+
+@keyframes nav-news-run {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nav-news.runs .nav-news-run { animation: none; }
+}
+
+/* Phone: das Etikett frisst zu viel von der kurzen Zeile. */
+@media (max-width: 520px) {
+    .nav-news-label { display: none; }
+}
+
+@media print { .nav-news { display: none !important; } }

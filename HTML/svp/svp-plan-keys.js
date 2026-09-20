@@ -3,7 +3,7 @@
 window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
-        setAllDetails, isoWeek
+        setAllDetails, isoWeek, gotoWeek, weekOf
     });
 
     function setAllDetails(open) {
@@ -21,6 +21,24 @@ window.svpPlanParts.push(function (P) {
        dieser Gruppe (gkw, von paintTerminDates gesetzt), sonst die des Plans. */
     function weekOf(r) { return String(r.gkw != null ? r.gkw : r.kw); }
 
+    /* Zu einer Woche springen: Ferien aufklappen, die Woche oeffnen, in die
+       Mitte scrollen, kurz aufleuchten lassen. ?kw= geht so, und seit dem
+       20.09.2026 auch ein Klick im Neuigkeiten-Band (svp-plan-news.js) -
+       deshalb steht es als eigene Funktion und nicht mehr im URL-Sprung. */
+    function gotoWeek(kw) {
+        const want = String(Number(kw));
+        const hit = P.rendered.find(r => weekOf(r) === want);
+        /* ref traegt kein tr - die Zeile haengt an der Datumszelle. */
+        const tr = hit && hit.dateTd && hit.dateTd.closest('tr');
+        if (!tr) return false;
+        P.unfoldFerienFor(tr);
+        if (hit.openSubRow) hit.openSubRow();
+        tr.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        tr.classList.add('kw-jump');
+        setTimeout(() => tr.classList.remove('kw-jump'), 2600);
+        return true;
+    }
+
     /* Beide Marken laufen noch einmal, sobald die Termine der Gruppe stehen -
        paintTerminDates ruft sie. */
     P.runKwJump = () => false;
@@ -30,21 +48,11 @@ window.svpPlanParts.push(function (P) {
         let kw = null;
         try { kw = new URLSearchParams(location.search).get('kw'); } catch (e) { return; }
         if (!kw) return;
-        const want = String(Number(kw));
         let done = false;
         const go = () => {
             if (done) return true;
-            const hit = P.rendered.find(r => weekOf(r) === want);
-            /* ref traegt kein tr - die Zeile haengt an der Datumszelle. */
-            const tr = hit && hit.dateTd && hit.dateTd.closest('tr');
-            if (!tr) return false;
-            done = true;
-            P.unfoldFerienFor(tr);
-            if (hit.openSubRow) hit.openSubRow();
-            tr.scrollIntoView({ block: 'center', behavior: 'smooth' });
-            tr.classList.add('kw-jump');
-            setTimeout(() => tr.classList.remove('kw-jump'), 2600);
-            return true;
+            done = gotoWeek(kw);
+            return done;
         };
         P.runKwJump = go;
         /* Die Zeilen entstehen erst beim Rendern - einmal jetzt, sonst nachfassen.

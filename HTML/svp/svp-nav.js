@@ -1106,6 +1106,21 @@
     band.appendChild(year);
     band.appendChild(nav);
     document.body.insertBefore(band, document.body.firstChild);
+
+    /* Neuigkeiten-Laufband zwischen Navileiste und Seitenkopf (Doc,
+       20.09.2026: "mach dazwischen eine kleine Zeile so wie die Suchzeile und
+       bring da einen News ticker"). Die Zeile wird hier nur aufgehaengt -
+       gefuellt wird sie von svp-news.js, damit die Navileiste nicht auch noch
+       Nachrichten holen und Feeds lesen muss. */
+    const news = document.createElement('div');
+    news.className = 'nav-news';
+    news.hidden = true;
+    band.insertAdjacentElement('afterend', news);
+
+    const newsScript = document.createElement('script');
+    newsScript.src = base + 'svp-news.js';
+    newsScript.dataset.base = base;
+    document.head.appendChild(newsScript);
 })();
 
 
