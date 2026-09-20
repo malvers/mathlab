@@ -1,0 +1,87 @@
+/* Header row: h1 and the Lehrplan (PDF) button share one line,
+   button aligned to the heading baseline; wraps on narrow screens */
+.page-head .head-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+}
+
+.page-head .head-row h1 { margin-bottom: 0; }
+
+/* Buttons that belong to the heading itself (e.g. "Test") sit right behind it,
+   while the head-row keeps pushing the primary action to the far right. */
+.page-head .head-row .title-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Doc, 09.09.2026: "gleich breit? font?" - Schrift, Hoehe und Polster waren
+   schon gleich (Orbitron 11.52px, 34.4 px hoch, 9/16 px), nur die Breite hing
+   an der Beschriftung: "Lehrplan" 96.9 px gegen "Eingangstest" 125.8 px
+   (gemessen mit _measure.html?page=...&sel=...). 126 px ist die breitere der
+   beiden - nur diese zwei Knoepfe stehen in der Titelzeile. */
+.page-head .head-row .title-group button.action {
+    /* Doc, 16.09.2026: "bitte auf eine Zeile" - mit 126 px und 16 px Polster
+       brauchte die Kopfzeile 1210 px, die Seite gibt 1200 (gemessen). Also
+       12 px Polster und beide Knoepfe auf die neue gemeinsame Breite; gleich
+       breit bleiben sie, das war die Bedingung vom 09.09.2026. */
+    min-width: 118px;
+    padding-left: 12px;
+    padding-right: 12px;
+    justify-content: center;
+}
+
+/* Middle group of the head row: with space-between and a group on the left
+   (title) and right (primary action), this one sits in the centre. */
+.page-head .head-row .head-mid {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+@media print { .page-head .head-row .head-mid { display: none; } }
+
+/* Group of buttons at the right end of a head row (e.g. "Zurück" + "Drucken") */
+.page-head .head-row .head-btns {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* YouTube-Icon am rechten Ende der Kopfzeile (Video zum Schuljahr) —
+   nackt, ohne Pille: das Logo trägt sich selbst. */
+.page-head .head-video {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    line-height: 0;
+    opacity: 0.92;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.page-head .head-video:hover { opacity: 1; transform: scale(1.06); }
+.page-head .head-video svg { width: 42px; height: 30px; display: block; }
+@media print { .page-head .head-video { display: none; } }
+
+/* Survey icon (vote.html host) left of the YouTube icon — same naked style, palette bars */
+.page-head .head-survey {
+    flex: 0 0 auto;
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    line-height: 0;
+    opacity: 0.92;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.page-head .head-survey:hover { opacity: 1; transform: scale(1.06); }
+.page-head .head-survey svg { width: 30px; height: 30px; display: block; }
+@media print { .page-head .head-survey { display: none; } }
+
+/* No action buttons on paper - the toolbar has its own print rule. */
+@media print { .page-head button.action { display: none; } }

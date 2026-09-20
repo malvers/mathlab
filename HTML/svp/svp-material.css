@@ -1,0 +1,340 @@
+/* Material: compact 📎 marker in the week row, link pills down in the
+   expanded sub-row where there is room */
+#plan-table td.mat { white-space: nowrap; }
+
+/* Material-Marker rechts neben der Aufgaben-Pille (Doc, 08.09.2026: "schoen
+   bitte", dann "clip auch gelbisch"): Geometrie UND Farben wie a.quiz-btn,
+   die beiden Knoepfe gehoeren sichtbar zusammen. Seit dem 09.09.2026 ist das
+   Gelb bei beiden durch das Blau der Materialpillen ersetzt (Doc: "probier mal
+   das gelb durch das Blau zu ersetzen"). */
+#plan-table td.mat .mat-flag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* Doc, 09.09.2026: "clip und zahl x zent" - der Abstand steht als Rand an
+       der Zahl, nicht als gap: die nulldichte Stuetze ::before ist ein Flex-
+       Kind und bekam vom gap sonst 5 px ab - Klammer und Zahl sassen damit
+       5 px zu weit rechts in der Pille. */
+    vertical-align: middle;
+    margin-left: 8px;
+    padding: 1px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(var(--tint), 0.5);
+    background: rgba(var(--tint), 0.16);
+    color: rgb(var(--tint-text));
+    font-size: 0.72rem;
+    line-height: 1.5;
+    cursor: pointer;
+}
+
+#plan-table td.mat .mat-flag:hover { background: rgba(var(--tint), 0.3); }
+
+/* Helles Schema: derselbe Blauton wie die Materialpillen dort. */
+html.svp-light #plan-table td.mat .mat-flag,
+html.svp-light #plan-table a.quiz-btn {
+    border-color: rgba(40, 70, 120, 0.45);
+    background: rgba(40, 70, 120, 0.09);
+    color: rgb(30, 60, 120);
+}
+html.svp-light #plan-table td.mat .mat-flag:hover,
+html.svp-light #plan-table a.quiz-btn:hover { background: rgba(40, 70, 120, 0.16); }
+
+#plan-table td.mat .mat-flag svg {
+    display: block;
+    width: 13px;
+    height: 13px;
+    fill: none;
+    stroke: currentColor;
+    /* Doc, 09.09.2026: "die Klammer leichter" - 1.5 statt 2, dieselbe Strich-
+       staerke wie die Icons in der Navileiste. */
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+#plan-table td.mat .mat-flag-n { font-variant-numeric: tabular-nums; margin-left: 5px; }
+
+/* Doc, 08.09.2026: "die clips ohne zahl sind zu flach" - ohne die Zahl fehlte
+   die Textzeile, die die Hoehe macht, und der Knopf fiel um gut 2 px in sich
+   zusammen. Eine nulldichte Stuetze in Zeilenhoehe haelt ihn auf, egal ob eine
+   Zahl daneben steht. */
+#plan-table td.mat .mat-flag::before {
+    content: "";
+    width: 0;
+    height: 1.5em;
+}
+.mat-block { margin: 8px 0 2px; text-align: right; }
+.mat-block a.mat-pill {
+    display: inline-block;
+    margin: 2px 0 2px 6px;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    text-decoration: none;
+    cursor: pointer;
+}
+.mat-block .mat-note { font-size: 0.85em; color: var(--muted); }
+
+/* Per-pill delete: the ✕ sits INSIDE the pill at its right edge and only
+   shows up while the plan is in edit mode. */
+.mat-pill-wrap { position: relative; display: inline-block; vertical-align: middle; }
+.mat-pill-wrap .mat-x {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: none;
+    width: 16px;
+    height: 16px;
+    line-height: 14px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: currentColor;
+    opacity: 0.65;
+    font-size: 10px;
+    cursor: pointer;
+}
+tr.wk-edit .mat-pill-wrap .mat-x { display: block; }
+/* Room for the ✕ so it never sits on the label. Careful with the selector:
+   the icon-pill rule further down writes `padding` as a shorthand, which
+   resets padding-right at the SAME specificity and wins on source order —
+   so name .mat-block and the a here to outrank it. */
+tr.wk-edit .mat-pill-wrap .mat-pill,
+tr.wk-edit .mat-block a.mat-pill:has(> .mat-ico) { padding-right: 26px; }
+.mat-pill-wrap .mat-x:hover,
+.mat-pill-wrap .mat-x:focus-visible {
+    opacity: 1;
+    color: rgb(176, 36, 24);
+    border-color: rgb(176, 36, 24);
+    background: #fff;
+}
+/* touch: bigger target */
+@media (hover: none) {
+    tr.wk-edit .mat-pill-wrap .mat-x { width: 22px; height: 22px; line-height: 20px; font-size: 12px; }
+    tr.wk-edit .mat-pill-wrap .mat-pill,
+    tr.wk-edit .mat-block a.mat-pill:has(> .mat-ico) { padding-right: 32px; }
+}
+@media print { .mat-pill-wrap .mat-x { display: none; } }
+
+/* Sub-row side zone (under Bemerkungen/Material) + section label */
+/* Material als ein Streifen unter den Stichpunkten (Doc, 07.09.2026): in der
+   alten schmalen Seitenzelle stapelten sich fuenf Pillen auf fuenf Zeilen,
+   ueber Thema + Bemerkungen + Zusatzmaterial passen sie auf eine. */
+/* Zwei Spalten in der Aufklappzeile (Doc, 07.09.2026): Stichpunkte links,
+   Material rechts daneben, je zur Haelfte. */
+#plan-table .detail-row .sub-head,
+#plan-table .detail-row .sub-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+}
+/* Jede Haelfte der Kopfzeile hat ihre eigene Linie - dazwischen der Abstand
+   der Spalten (Doc, 07.09.2026: "da kann ruhig ein Gap sein"). */
+#plan-table .detail-row .sub-head-l,
+#plan-table .detail-row .sub-head-r {
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 6px;
+    min-height: 26px;
+}
+/* Doc, 20.09.2026: "davor bitte" - der Fahrplan-Stapel soll NEBEN "Inhalt"
+   stehen, nicht darueber. Ohne Flex war die Haelfte ein Block, und der Stapel
+   bekam eine eigene Zeile ueber den Reitern. */
+#plan-table .detail-row .sub-head-l {
+    flex: 0 0 50%;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+}
+/* "Vortrag: 1 · Titel" right of the tabs (svp-plan.js paintTalk) - the head then
+   becomes a row; the tabs keep their 26 px and their place on the grey line */
+#plan-table .detail-row .sub-head-l.has-talk { display: flex; align-items: center; }
+#plan-table .detail-row .sub-talk {
+    margin-left: 48px;           /* Doc, 18.09.2026: "ein Stück nach rechts", then "zu weit" at the title column */
+    min-width: 0;
+    /* Never let the line widen the table: a table cell grows to its content's
+       width in spite of overflow:hidden, and the ticker holds its text twice -
+       with the weeks open FOS 12 grew to 3685 px and the holiday rows sat off
+       centre (Doc, 18.09.2026: "bitte wieder zentriert"). inline-size containment
+       gives the box no width of its own; it takes the free space instead. */
+    contain: inline-size;
+    flex: 1 1 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    color: var(--text);
+}
+#plan-table .detail-row .sub-talk b {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 400;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: rgb(235, 120, 105);
+}
+html.svp-light #plan-table .detail-row .sub-talk b { color: var(--ypsilon); }
+/* Laufband for a week with more than one talk (Doc, 18.09.2026): fills the rest of
+   the left half, runs right to left, stops under the mouse */
+#plan-table .detail-row .sub-talk.ticker { text-overflow: clip; }
+#plan-table .detail-row .sub-talk-run {
+    display: inline-block;
+    animation: sub-talk-run 20s linear infinite;
+}
+#plan-table .detail-row .sub-talk-run > span { padding-right: 4em; }
+#plan-table .detail-row .sub-talk.ticker:hover .sub-talk-run { animation-play-state: paused; }
+@keyframes sub-talk-run { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+    #plan-table .detail-row .sub-talk-run { animation: none; }
+}
+/* Wie die linke Haelfte ein Flex-Kasten: sonst haengt die Beschriftung rechts
+   als Inline-Element an einer Textgrundlinie, unter ihr kommt Zeilenraum dazu,
+   und die graue Linie sitzt tiefer als links (Doc, 08.09.2026: "da ist die
+   graue auch runter"). Links steht .sub-tabs, das ist selbst schon flex. */
+/* Doc, 20.09.2026: "macht die Tabs rechtsbuendig bitte" - die Reiter der
+   rechten Haelfte sitzen am rechten Rand, nicht mehr am Gap in der Mitte. */
+#plan-table .detail-row .sub-head-r {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    justify-content: flex-end;
+}
+/* Stift und Bearbeiten-Knoepfe schoben sich selbst mit margin-left:auto nach
+   rechts. Dieser Auto-Rand frisst den freien Platz, und angemeldet blieben die
+   Reiter dadurch links stehen (Doc, 20.09.2026: "bitte auch die TABS rechts vor
+   den Stift wenn angemeldet"). Rechtsbuendig macht jetzt allein justify-content,
+   der Rand ist nur noch der Abstand zu den Reitern. */
+#plan-table .detail-row .sub-head-r .sub-edit,
+#plan-table .detail-row .sub-head-r .sub-done { margin-left: 10px; }
+/* Doc, 20.09.2026: "stift zentriert unter die thumbs". Seit die Aufklappzeile
+   ueber alle acht Spalten geht, endet sie auf derselben Kante wie die
+   Vorschaubilder - der Stift braucht nur deren Breite, dann liegt seine Mitte
+   von selbst auf ihrer. */
+#plan-table .detail-row .sub-head-r .sub-edit {
+    width: 27px;
+    justify-content: center;
+}
+/* Gemalte Beschriftung der beiden Haelften - sieht aus wie ein Reiter, laesst
+   sich aber nicht anklicken. Farbe wie die grosse Tabellenkopfzeile (Doc,
+   07.09.2026), damit es als Spaltenueberschrift gelesen wird. */
+/* .sub-tab kommt weiter unten in der Datei und wuerde sonst gewinnen - deshalb
+   beide Klassen zusammen. */
+/* inline-flex, nicht inline-block: als Flex-Kind wird daraus ein flex-Kasten,
+   und erst dann zentriert das align-items aus .sub-tab die Beschriftung in den
+   26 px senkrecht - sonst klebte sie oben. */
+.sub-tab.sub-tab-mat { display: inline-flex; cursor: default; color: var(--head); }
+.sub-tab.sub-tab-mat:hover { color: var(--head); }
+#plan-table .detail-row .sub-left { flex: 0 0 50%; min-width: 0; }
+#plan-table .detail-row .sub-side { flex: 1 1 auto; min-width: 0; padding-top: 2px; }
+#plan-table .detail-row .sub-side .mat-block {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    /* Rechtsbuendig (Doc, 08.09.2026) - die Pillen haengen damit an derselben
+       Kante wie der rechte Rand der Aufklappzeile. */
+    justify-content: flex-end;
+    gap: 6px 8px;
+    text-align: left;
+}
+/* Material-Pillen flacher und durchscheinend (Doc, 07.09.2026) - sie sind eine
+   Liste, keine Knoepfe; Rand und Symbol reichen als Kontur. */
+#plan-table .detail-row .sub-side .mat-block a.mat-pill {
+    margin: 0;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    /* eine Spur Farbe bleibt - ganz durchsichtig war zu wenig. currentColor
+       heisst: jede Pille toent in ihrer eigenen Farbe, in hell wie in dunkel. */
+    /* --mat-hg only exists during a colour-picker trial (Knopf-HG) */
+    background: color-mix(in srgb, var(--mat-hg, currentColor) 7%, transparent);
+    /* Blau statt Gruen (Doc, 08.09.2026, als Versuch: "die Farbe blueish auch
+       die Schrift"). EINE Farbe genuegt: der Hintergrund wird eine Zeile
+       darueber per color-mix aus currentColor gemischt, der Rand haengt hier
+       daneben. .b-green selbst bleibt unangetastet - es faerbt auch die
+       Navigationspillen, die gruen bleiben sollen. */
+    color: rgb(var(--tint-text));
+    border-color: rgba(var(--g-mat), 0.5);
+}
+html.svp-light #plan-table .detail-row .sub-side .mat-block a.mat-pill {
+    color: rgb(30, 60, 120);
+    border-color: rgba(var(--g-mat), 0.45);
+}
+.sub-label {
+    display: inline-block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Material quick-add: per-week + button, inline input and drop highlight */
+#plan-table td.mat { text-align: right; }
+/* ⧉, ⇩ und + stehen in der Zusatzmaterial-Zeile der Aufklappzeile, nicht mehr
+   in der Wochenzeile (Doc, 09.09.2026: "runter damit"). Oben nahmen sie der
+   Themenspalte 60 px weg - zusammen mit dem Untis-Chip 116 px -, lange Titel
+   brachen dadurch um und die Zeile wurde beim Umschalten 17 px hoeher. */
+.sub-mat-tools { display: inline-flex; align-items: center; gap: 0; }
+/* Der Untis-Chip steht als Erstes in der Leiste, mit etwas Luft zu den drei
+   Werkzeugen - er ist eine Anzeige, sie sind Knoepfe. */
+.sub-mat-tools .untis-chip { margin-right: 10px; }
+.sub-mat-tools .mat-add {
+    width: 24px;
+    height: 22px;
+    line-height: 22px;
+    text-align: center;
+    border: none;
+    color: var(--muted);
+    font-size: 21px;
+    margin: 0 6px 0 0;
+    cursor: pointer;
+    user-select: none;
+}
+.sub-mat-tools .mat-add:hover { color: inherit; }
+
+/* Material clipboard: copy a week, paste it into another Jahrgangsstufe.
+   Same look as the + button, so the cell stays calm. */
+.sub-mat-tools .mat-act {
+    width: 24px;
+    height: 22px;
+    line-height: 22px;
+    text-align: center;
+    border: none;
+    color: var(--muted);
+    font-size: 18px;
+    margin: 0 6px 0 0;
+    cursor: pointer;
+    user-select: none;
+}
+/* Sichtbar sind sie mit der ganzen Leiste, also nur in der Woche im Bearbeiten
+   (.sub-done traegt die Regel). Ausgeblendet wird weiterhin einzeln: nichts zu
+   kopieren oder leere Zwischenablage setzt hidden. */
+.sub-mat-tools .mat-act,
+.sub-mat-tools .mat-add { display: inline-block; }
+.sub-mat-tools .mat-act[hidden] { display: none; }
+.sub-mat-tools .mat-act.mat-copy { font-size: 22px; }
+.sub-mat-tools .mat-act:hover { color: inherit; }
+
+/* Marker on the week row: a collapsed week must still show that it carries
+   material (the pills themselves live in the unfolded sub-row) */
+#plan-table td.mat .mat-mark {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--panel-soft);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.72rem;
+    line-height: 1.5;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+#plan-table td.mat .mat-mark:hover { color: var(--text); }
+#plan-table tr.open td.mat .mat-mark { opacity: 0.45; }
+.sub-mat-tools .mat-act.done { color: rgb(121, 158, 49); }

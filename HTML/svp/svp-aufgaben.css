@@ -1,0 +1,340 @@
+/* Aufgaben-Knopf: steht seit 07.09.2026 im Streifen der Aufklappzeile, nicht
+   mehr in der Wochenzeile (Doc: "die nach unten ziehen"). Die Regeln gelten
+   deshalb fuer die ganze Tabelle, nicht nur fuer die Material-Spalte. */
+/* Die Aufgaben-Pille steht wieder in der Wochenzeile (Doc, 07.09.2026). */
+#plan-table .quiz-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    vertical-align: middle;
+}
+
+#plan-table a.quiz-btn {
+    display: inline-block;
+    padding: 1px 10px;
+    /* 6px statt 999px: Knopf, keine Pille - wie in den Nav-Dropdowns
+       (Doc, 07.09.2026: "nicht so pillig"). */
+    border-radius: 6px;
+    /* Doc, 09.09.2026: "probier mal das gelb durch das Blau zu ersetzen" -
+       Aufgaben-Knopf und Clip tragen jetzt das Blau der Materialpillen aus der
+       Aufklappzeile darunter statt Lambda-Gelb. Farben stehen hier nur einmal:
+       .mat-flag weiter oben erbt sie ueber die gemeinsame Regel. */
+    border: 1px solid rgba(var(--tint), 0.5);
+    background: rgba(var(--tint), 0.16);
+    color: rgb(var(--tint-text));
+    font-size: 0.72rem;
+    line-height: 1.5;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+#plan-table a.quiz-btn:hover { background: rgba(var(--tint), 0.3); }
+
+/* Red button left of the Aufgaben pill (svp-plan.js, row.redBtn):
+   same geometry as a.quiz-btn, Upsilon red with white text. */
+#plan-table .red-btn {
+    display: inline-grid;
+    justify-items: center;      /* label centered in x */
+    vertical-align: middle;
+    margin-right: 8px;
+    padding: 1px 10px;
+    border-radius: 6px;
+    border: 1px solid rgb(176, 36, 24);
+    background: rgb(176, 36, 24);
+    color: #fff;
+    font: inherit;
+    letter-spacing: inherit;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    white-space: nowrap;
+    cursor: pointer;
+}
+/* label and invisible pill text share one cell: width = the wider one */
+#plan-table .red-btn > span { grid-area: 1 / 1; }
+#plan-table .red-btn > .red-btn-ghost { visibility: hidden; }
+/* Centered between topic text and Aufgaben pill. The cell must NOT be
+   positioned (Doc, 19.09.2026: "im dunkel nicht perfekt"): Chrome paints the
+   row gradient (current / past week) only up to the edge of a positioned
+   cell, so the row line under the Material column lost its tint and almost
+   vanished. The button therefore stays at its static position - left/top
+   auto - and svp-plan.js moves it from there with a transform. The table is
+   its containing block, so it scrolls along when the table-wrap scrolls. */
+#plan-table { position: relative; }
+#plan-table .red-btn.floating {
+    position: absolute;
+    margin: 0;
+}
+
+/* List under the red button (svp-plan.js buildRedList): panel look of the
+   drop menus, red head with ✕, numbered items; scrolls inside when long. */
+.red-list {
+    position: fixed;
+    z-index: 80;
+    display: flex;
+    flex-direction: column;
+    width: min(540px, calc(100vw - 32px));
+    box-sizing: border-box;
+    background: var(--panel);
+    border: 1px solid var(--ypsilon);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px var(--shadow);
+    color: var(--text);
+    text-align: left;
+    white-space: normal;
+}
+.red-list[hidden] { display: none; }
+.red-list-head {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 6px 6px 14px;
+    background: var(--ypsilon);
+    color: #fff;
+    border-radius: 9px 9px 0 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+}
+.red-list-x {
+    border: 0;
+    background: none;
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.red-list-x:hover { background: rgba(255, 255, 255, 0.18); }
+.red-list ol {
+    min-height: 0;
+    overflow-y: auto;
+    margin: 0;
+    padding: 10px 16px 12px 42px;
+    font-size: 0.86rem;
+    line-height: 1.45;
+}
+.red-list li { margin: 0 0 6px; }
+/* a formula stays in one piece - KaTeX would break it after the = sign */
+.red-list .katex { white-space: nowrap; }
+/* folding solution under each question: green like a correct answer */
+.red-list-sol { margin-top: 2px; }
+.red-list-sol > summary {
+    display: inline-block;
+    list-style: none;                 /* Firefox marker */
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.78rem;
+    color: var(--phi);
+}
+.red-list-sol > summary::-webkit-details-marker { display: none; }   /* Safari */
+.red-list-sol > summary::before { content: '\25B8\00A0'; }
+.red-list-sol[open] > summary::before { content: '\25BE\00A0'; }
+.red-list-sol > summary:hover { text-decoration: underline; }
+.red-list-sol > div {
+    margin: 3px 0 2px;
+    padding: 5px 10px;
+    border-left: 2px solid var(--phi);
+    border-radius: 0 6px 6px 0;
+    background: rgba(121, 158, 49, 0.1);
+}
+.red-list li::marker { color: rgb(235, 120, 105); font-variant-numeric: tabular-nums; }
+html.svp-light .red-list li::marker { color: var(--ypsilon); }
+@media print { .red-list { display: none; } }
+#plan-table .red-btn:hover { background: rgb(200, 48, 34); }
+#plan-table .quiz-note { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+
+/* narrow screens: the button stays, its caption would break the row */
+@media (max-width: 1100px) { #plan-table .quiz-note { display: none; } }
+@media print { #plan-table .quiz-cell { display: none; } }
+
+/* "Aufgaben" pill (svp-plan.js buildAufgabenCell): quiz set and Textaufgaben
+   sheet in one dropdown, same pill look as the button, menu in the panel style
+   of .badge-drop. position:fixed - the table-wrap scrolls sideways and would
+   clip an absolute menu on the last rows; the script places it under the pill. */
+#plan-table .aufg-drop { position: relative; display: inline-block; }
+#plan-table .aufg-drop > a.quiz-btn { cursor: pointer; }
+#plan-table .aufg-drop .drop-menu { position: fixed; top: auto; left: auto; gap: 5px; }
+/* Menue-Eintraege lesen sich als Zeilen: volle Breite, etwas mehr Hoehe.
+   Die 6px-Ecken kommen schon von a.quiz-btn oben. */
+#plan-table .aufg-drop .drop-menu a.quiz-btn {
+    display: block;
+    text-align: center;
+    padding: 3px 10px;
+}
+#plan-table .aufg-drop .drop-menu .mat-pill-wrap { display: flex; align-items: center; gap: 4px; }
+/* Alle Einträge gleich breit, so breit wie der breiteste (Doc, 07.09.2026).
+   Die Spalte misst sich am längsten Label (white-space: nowrap), die Pillen
+   füllen sie aus - auch die, die im Besitzer-Modus noch ein ✕ danebenhaben. */
+#plan-table .aufg-drop .drop-menu > a.quiz-btn,
+#plan-table .aufg-drop .drop-menu > .mat-pill-wrap { width: 100%; box-sizing: border-box; }
+#plan-table .aufg-drop .drop-menu .mat-pill-wrap a.quiz-btn { flex: 1; }
+
+/* short explanation line above the pill list in the paste dialog */
+.mat-modal .mm-info {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+    line-height: 1.45;
+}
+#plan-table td.mat.drop { outline: 2px dashed rgb(121, 158, 49); outline-offset: -2px; }
+
+/* Verschiebe-Modus: schmale Pfeilspalte vor der Nr. Sie steckt immer in der
+   Tabelle und wird nur ein-/ausgeblendet — die colSpans der Ferien- und
+   Detailzeilen zieht setShiftMode() nach. */
+#plan-table .shift-col { display: none; width: 1%; white-space: nowrap; }
+body.shifting #plan-table .shift-col { display: table-cell; }
+#plan-table td.shift-col {
+    /* 9px wie jede Zelle + 2.2px, damit die Dreiecksmitte auf der Mitte der
+       Ziffern sitzt: die Pfeil-Zeilenbox ist niedriger als die der Nr.
+       (gemessen: 15.17px gegen 19.5px, Versatz 2.16px). */
+    padding-top: 11.2px;
+    padding-right: 2px;
+    text-align: center;
+    vertical-align: top; /* wie der Rest der Zeile */
+}
+.shift-btn {
+    display: block;
+    margin: 0 auto;
+    background: none;
+    border: none;
+    color: inherit;
+    opacity: 0.5;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.8em;
+    line-height: 1.05;
+    padding: 1px 2px;
+}
+.shift-btn:hover { opacity: 1; color: var(--phi); }
+/* Button-Icon: dieselben Dreiecke, klein und gestapelt */
+.shift-ico {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.55em;
+    line-height: 0.95;
+    margin-right: 7px;
+    vertical-align: middle;
+}
+.shift-ico i { font-style: normal; }
+.shift-btn[hidden] { display: none; }
+.toolbar button.action.plan-shift.on {
+    border-color: var(--phi);
+    color: var(--phi);
+}
+.shift-msg {
+    color: var(--ypsilon);
+    font-size: 0.85em;
+    align-self: center;
+}
+.shift-msg[hidden] { display: none; }
+
+/* Kontextmenü einer einzelnen Material-Pill (Rechtsklick / langes Drücken
+   im Bearbeiten-Modus) — Optik wie die Nav-Dropdowns. */
+.mat-tip {
+    position: fixed;
+    z-index: 121;
+    max-width: min(420px, calc(100vw - 16px));
+    padding: 10px 14px;
+    font-size: 1rem;
+    line-height: 1.4;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px var(--shadow);
+    pointer-events: none;
+    white-space: pre-wrap;
+}
+@media print { .mat-tip { display: none; } }
+
+.mat-ctx {
+    position: fixed;
+    z-index: 120;
+    min-width: 210px;
+    padding: 8px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.mat-ctx-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 2px 4px 6px;
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/* ⧉ wirkt bei gleicher Schriftgröße kleiner als ↗ und ✕ — daher extra */
+.mat-ctx-item .ctx-ico.ctx-ico-gross { font-size: 22px; }
+/* Gezeichnetes Strichsymbol im Kontextmenue: nimmt die Textfarbe an und bleibt
+   so gross wie die getippten Zeichen daneben. */
+/* Ladeanzeige im Material-Viewer: liegt hinter dem Rahmen auf der Buehne und
+   wird entfernt, sobald der Rahmen geladen hat. */
+.mv-laedt {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6em;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    color: #8fa6c8;
+    pointer-events: none;
+}
+.mv-laedt::before {
+    content: "";
+    width: 18px;
+    height: 18px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: mv-dreht 0.9s linear infinite;
+}
+@keyframes mv-dreht { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+    .mv-laedt::before { animation: none; }
+}
+
+.mat-ctx-item .ctx-ico .ctx-ico-svg {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    display: block;
+    padding: 0;
+}
+.mat-ctx-item .ctx-ico {
+    display: inline-block;
+    width: 22px;
+    font-size: 18px;
+    line-height: 1;
+    text-align: center;
+    vertical-align: -2px;
+}
+.mat-ctx-item {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    color: inherit;
+    font: inherit;
+    font-size: 0.9rem;
+    text-align: left;
+    padding: 6px 8px;
+    cursor: pointer;
+}
+.mat-ctx-item:hover {
+    border-color: var(--phi);
+    background: rgba(121, 158, 49, 0.16);
+}

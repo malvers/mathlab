@@ -1,0 +1,183 @@
+/* Shared styles for the Stoffverteilungsplan pages (informatik9/11/12.html) */
+
+:root {
+    /* Every accent as an r, g, b triple, so the colour picker (Shift+C,
+       HTML/tailwind-palette.html) can try it live in each scheme - Doc,
+       19.09.2026: "link pick zum Schema". The light scheme keeps its own
+       darker text accents; the grey scheme sets its own triples. */
+    --g-week: 245, 194, 66;
+    --g-ferien: 121, 158, 49;
+    --g-orange: 245, 194, 66;
+    --g-green: 121, 158, 49;
+    --g-cyan: 90, 190, 230;
+    --g-violet: 155, 130, 225;
+    --g-teal: 80, 200, 170;
+    --g-pink: 225, 130, 190;
+    /* the timetable's subject colours in the grey scheme (svp-timetable.css):
+       own triples, so the picker's "Stundenplan" group leaves the plan's
+       accents alone. Defaults = the dark originals. */
+    --tt-inf: 245, 194, 66;
+    --tt-mat: 90, 190, 230;
+    --tt-gk: 121, 158, 49;
+    --tt-violet: 155, 130, 225;
+    --tt-teal: 80, 200, 170;
+    --tt-pink: 225, 130, 190;
+    --g-mat: var(--tint);
+    /* ground of the buttons and material pills (Doc: "nee HG!") */
+    --g-btn: var(--tint);
+    /* alpha of the week row and the holiday band: edge and middle (Doc: "gib mir
+       noch einen Slider für die 2 Transp"); the sub-row takes 0.4 of the week's */
+    --a-week-edge: 0.3;
+    --a-week-mid: 0.03;
+    --a-ferien-edge: 0.6;
+    --a-ferien-mid: 0.05;
+    /* the blue of lines, button rims and hovers in the dark scheme, as an r, g, b
+       triple so it can carry any alpha - the grey scheme swaps it for a grey */
+    --tint: 120, 160, 220;
+    /* the lighter blue of the bullets, material pills and the Aufgaben pill */
+    --tint-text: 150, 186, 236;
+    --bg: rgb(8, 20, 42);
+    --card: rgb(14, 36, 78);
+    --card-soft: rgba(14, 36, 78, 0.55);
+    --line: rgba(var(--tint), 0.22);
+    --text: rgba(225, 235, 250, 0.92);
+    --muted: rgba(170, 190, 220, 0.65);
+    /* Ueberschriften: eigener Ton, damit sie sich aendern lassen, ohne den
+       Fliesstext mitzunehmen (Doc, 01.09.2026 - erst weg vom Orange, dann
+       zweimal heller). Auf dem dunklen Grund praktisch weiss. */
+    --head: rgb(248, 251, 255);
+    --lambda: rgb(var(--g-orange));
+    /* Width of the link-card column on the landing pages (see .card-grid) */
+    --card-col: 720px;
+    --ypsilon: rgb(176, 36, 24);
+    --phi: rgb(var(--g-green));
+    --cyan: rgb(var(--g-cyan));
+    --violet: rgb(var(--g-violet));
+    --teal: rgb(var(--g-teal));
+    --pink: rgb(var(--g-pink));
+
+    /* Surfaces that sit above the page: nav band, dropdowns, sticky heads */
+    --panel: rgb(12, 30, 64);
+    /* Surfaces that sit below it: detail rows, inputs, scrollbar troughs */
+    --sunken: rgba(8, 20, 42, 0.45);
+    --input-bg: rgba(8, 20, 42, 0.7);
+    --trough: rgba(8, 20, 42, 0.9);
+    --thumb: rgba(var(--tint), 0.35);
+    --shadow: rgba(0, 0, 0, 0.45);
+    --row-line: rgba(var(--tint), 0.12);
+    --panel-soft: rgba(14, 36, 78, 0.35);
+    --scrim: rgba(4, 10, 24, 0.75);
+    --edit-line: rgba(245, 194, 66, 0.4);
+    --edit-fill: transparent;
+}
+
+/* Light scheme — toggled in the quick-nav pencil panel (svp-nav.js sets the
+   class on <html> and stores the choice in localStorage). Only variables
+   change; the accent hues are darkened for contrast on white. */
+html.svp-light {
+    --g-mat: 40, 70, 120;
+    --bg: rgb(246, 248, 252);
+    --card: rgb(255, 255, 255);
+    --card-soft: rgba(255, 255, 255, 0.85);
+    --line: rgba(40, 70, 120, 0.22);
+    --text: rgb(24, 34, 52);
+    --muted: rgb(96, 112, 140);
+    /* So hell, wie es lesbar bleibt: 4.0:1 gegen den Seitengrund. Fuer eine
+       Ueberschrift dieser Groesse reichen 3:1, fuer Fliesstext waere das schon
+       zu wenig - deshalb ein eigenes Token und nicht --text. Weiter aufhellen
+       geht nicht mehr ohne echten Lesbarkeitsverlust (rgb(124,148,190) waere
+       2.7:1). */
+    --head: rgb(96, 120, 160);
+    /* The accent in the light scheme is the blue of the material pills and
+       bullets, not an ochre stand-in for the orange: that ochre "haunted every
+       page" (Doc, 10.09.2026: "machs blauisch"). Dark keeps the real lambda. */
+    --lambda: rgb(30, 60, 120);
+    --ypsilon: rgb(176, 36, 24);
+    --phi: rgb(92, 122, 32);
+    --cyan: rgb(28, 118, 158);
+    --violet: rgb(104, 78, 178);
+    --teal: rgb(26, 130, 108);
+    --pink: rgb(178, 74, 136);
+
+    --panel: rgb(232, 238, 248);
+    --sunken: rgba(232, 238, 248, 0.75);
+    --input-bg: rgb(255, 255, 255);
+    --trough: rgba(220, 228, 240, 0.9);
+    --thumb: rgba(60, 100, 160, 0.35);
+    --shadow: rgba(30, 50, 90, 0.18);
+    --row-line: rgba(40, 70, 120, 0.14);
+    --panel-soft: rgba(255, 255, 255, 0.8);
+    --scrim: rgba(30, 45, 75, 0.4);
+    /* Pale amber on white is nearly invisible — stronger line plus a fill */
+    --edit-line: rgba(150, 108, 8, 0.85);
+    --edit-fill: rgba(245, 194, 66, 0.16);
+}
+
+/* Grey scheme (Doc, 19.09.2026: "versuch mal einen grey look ... Loop Hell
+   Dunkel Grey"). A variant of the dark one: html keeps no .svp-light, so every
+   dark rule still applies - only the blue grounds turn neutral grey. The
+   accents stay as in the dark scheme. */
+/* Then "dunkler so wie bei Euch" - the dark grey of the editor Doc works in:
+   ground 38,40,44 -> 26,26,28, cards 54,57,62 -> 37,37,40. */
+html.svp-grey {
+    /* "da sind blaue Ränder Tasten und oben LP" - rims and hovers go grey too */
+    --tint: 190, 194, 202;
+    /* then "Schrift ... bullets": the bullet blue and its pills go grey as well */
+    --tint-text: 212, 212, 216;   /* zinc-300 (Farbwähler; was 200,204,212) */
+    --bg: rgb(26, 26, 28);
+    --card: rgb(37, 37, 40);
+    --card-soft: rgba(37, 37, 40, 0.55);
+    --line: rgba(205, 210, 220, 0.18);
+    --text: rgb(212, 212, 216);   /* zinc-300 - Doc: "alles weiß Schrift greyer" (was 238,240,244 at 0.92) */
+    --muted: rgba(212, 212, 216, 0.62);   /* zinc-300 like the text (Farbwähler; was 200,204,212) */
+    --head: rgb(161, 161, 170);   /* zinc-400 - "ist noch weiße Schrift" (was 248,249,251, then zinc-200) */
+    --panel: rgb(31, 31, 34);
+    --sunken: rgba(18, 18, 20, 0.45);
+    --input-bg: rgba(18, 18, 20, 0.7);
+    --trough: rgba(18, 18, 20, 0.9);
+    --thumb: rgba(205, 210, 220, 0.3);
+    --shadow: rgba(0, 0, 0, 0.4);
+    --row-line: rgba(205, 210, 220, 0.1);
+    --panel-soft: rgba(37, 37, 40, 0.35);
+    --scrim: rgba(12, 12, 14, 0.75);
+}
+html.svp-grey button.action.secondary {
+    /* from the Knopf-HG triple, so the picker reaches Lehrplan and Eingangstest
+       too (Doc: "Knopf wirkt nicht auf alle") - 0.23 / 0.14 of zinc-grey on the
+       grey ground is the old 90,92,98 / 64,66,72 at 0.6 */
+    background: linear-gradient(180deg, rgba(var(--g-btn), 0.23), rgba(var(--g-btn), 0.14));
+}
+/* ORGA pills: their bluish white turns zinc grey as well */
+html.svp-grey .b-grey { color: rgb(212, 212, 216); border-color: rgba(212, 212, 216, 0.4); background: rgba(212, 212, 216, 0.08); }
+
+/* Light-scheme fixes for the few places where a variable swap isn't enough:
+   brightening filters and the dark secondary button read wrong on white. */
+html.svp-light nav.quick-nav a.badge:hover { filter: brightness(0.92); }
+html.svp-light nav.quick-nav a.badge.active {
+    filter: none;
+    background: rgba(40, 70, 120, 0.08);
+    border-color: rgba(40, 70, 120, 0.5);
+}
+html.svp-light .badge-link:hover { filter: brightness(0.92); }
+
+html.svp-light button.action.secondary {
+    background: linear-gradient(180deg, rgb(255, 255, 255), rgb(232, 238, 248));
+    border-color: rgba(40, 70, 120, 0.3);
+    color: var(--text);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Doc, 20.09.2026: "da ist oft (auch andere items) so ein haesslicher blauer
+   Rand. Kann der bitte ueberall weg?" - das ist der Fokus-Ring des Browsers,
+   der nach einem Mausklick an Pillen, Knoepfen und Links haengen bleibt. Eine
+   Regel fuer die ganze Seite statt einer pro Element: nach dem Klick kein Ring
+   mehr, und wer mit der Tastatur navigiert, bekommt ihn weiter - dann aber in
+   der Hausfarbe statt im Browser-Blau. Ohne Sichtbarkeit fuer die Tastatur
+   waere die Seite nur noch mit der Maus bedienbar. */
+:focus:not(:focus-visible) { outline: none; }
+/* Doc, 20.09.2026: "kann man diesen Rand generell verbannen", dann "duennen
+   weissen Rand pls" - also nicht weg, sondern duenn. 2 px sahen nach einer
+   Auswahl aus, 1 px ist ein Hinweis. Ganz weg darf er nicht: ohne ihn sieht
+   man bei der Tastaturbedienung nicht mehr, wo man gerade steht. */
+:focus-visible { outline: 1px solid var(--head); outline-offset: 2px; }

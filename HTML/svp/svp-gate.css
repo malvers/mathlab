@@ -1,0 +1,76 @@
+/* Password gate (svp-gate.js): while locked, nothing but the overlay shows */
+html.svp-locked body > *:not(.svp-gate-overlay) { display: none !important; }
+
+.svp-gate-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+}
+
+.svp-gate-card {
+    background: var(--card-soft);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 30px 34px;
+    text-align: center;
+    width: min(90vw, 360px);
+}
+
+.svp-gate-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.06em;
+    color: var(--head);
+    margin-bottom: 6px;
+}
+
+.svp-gate-sub {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 18px;
+}
+
+.svp-gate-card input {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.svp-gate-card input:focus { outline: 1px solid var(--cyan); }
+
+.svp-gate-card button { width: 100%; }
+
+/* login dialog (svp-auth.js loginDialog): Abbrechen | Login side by side */
+.svp-gate-card .svp-gate-row { display: flex; gap: 10px; }
+.svp-gate-card .svp-gate-row button { flex: 1; width: auto; }
+
+.svp-gate-err {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: rgb(235, 120, 105);
+    min-height: 1em;
+}
+
+html { scrollbar-color: var(--thumb) var(--trough); }
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    padding: clamp(12px, 3vw, 40px);
+}
+
+header.page-head { max-width: 1200px; margin: 0 auto 22px; position: relative; }

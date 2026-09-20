@@ -1,0 +1,489 @@
+/* ============================================================
+   Vortragsthemen-Seiten (informatik/informatik9a-vortraege.html, …b…):
+   one row per talk — number, editable topic, two name fields.
+   Logic lives in informatik/vortraege.js.
+   ============================================================ */
+.vt-list {
+    max-width: 1200px; /* same track as header.page-head (Doc, 04.09.2026) */
+    margin: 0 auto;
+    display: grid;
+    gap: 10px;
+}
+
+.vt-row {
+    /* One height for the name fields and the +/- next to them - the toggle was
+       a 22px stub beside a 40px input (Doc, 04.09.2026). Both read it from
+       here, so they cannot drift apart again. */
+    --vt-field-h: 40px;
+    display: grid;
+    /* letzte Spalte: die +/- Knoepfe. auto statt fester Breite, weil bei zwei
+       Feldern beide nebeneinander stehen (Doc, 08.09.2026). */
+    grid-template-columns: 52px 1fr minmax(150px, 220px) minmax(150px, 220px) auto;
+    gap: 12px 14px;
+    align-items: center;
+    background: var(--card-soft);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 16px;
+    transition: border-color 0.15s, background 0.15s;
+    /* anchor for the Lernbereich badge in the top left corner */
+    position: relative;
+}
+
+/* a third pupil joined this talk: three narrower name fields instead of two */
+.vt-row.three { grid-template-columns: 52px 1fr repeat(3, minmax(110px, 190px)) auto; }
+/* Allein vortragen: ein Feld, dafuer breiter (Doc, 08.09.2026). */
+.vt-row.one { grid-template-columns: 52px 1fr minmax(150px, 300px) auto; }
+
+/* The button group at the right edge of the row: - and + are always both
+   there (Doc, 12.09.2026); the one that cannot act right now is dimmed. */
+.vt-more-box { display: flex; gap: 6px; }
+
+/* the toggle itself: a quiet +/- at the right edge, never in print.
+   Same box as a name field, so the row ends on one line instead of a stub. */
+.vt-more {
+    width: var(--vt-field-h);
+    height: var(--vt-field-h);
+    padding: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    line-height: 1;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.vt-more:hover { color: var(--phi); border-color: var(--phi); }
+/* shown, but out of play: last field taken (-) or three fields already (+) */
+.vt-more:disabled,
+.vt-more:disabled:hover { opacity: 0.4; color: var(--muted); border-color: var(--line); cursor: default; }
+
+/* a claimed topic gets the φ-green tint */
+.vt-row.taken {
+    border-color: rgba(121, 158, 49, 0.55);
+    background: rgba(121, 158, 49, 0.08);
+}
+
+.vt-nr {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.15rem;
+    color: var(--lambda);
+    text-align: center;
+    /* Lernbereich badge on top, the number under it (Doc, 04.09.2026).
+       The block hangs from the TOP of the row, not its middle, so the badge
+       rides on the same line as the heading next to it - centred, it floated
+       above the title whenever the topic ran to several lines. */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    align-self: stretch;
+    position: relative;
+}
+
+.vt-row > .badge {
+    font-size: 0.6rem;
+    position: absolute;
+    /* Corner tag: smaller than a normal badge, but still readable, and set off
+       the edge rather than jammed against it (Doc, 04.09.2026). */
+    top: 7px;
+    left: 9px;
+    transform: scale(0.72);
+    transform-origin: top left;
+}
+
+.vt-nr .vt-nr-num {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.vt-row.taken .vt-nr { color: var(--phi); }
+
+.vt-topic {
+    min-width: 0;
+    /* All cards the same height without a hole above the pills: vortraege.js
+       measures the tallest topic block once and parks it in --vt-topic-h.
+       Putting the reserve on the paragraph pushed "Bewerten" down instead. */
+    min-height: var(--vt-topic-h, auto);
+}
+
+.vt-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.92rem;
+    letter-spacing: 0.02em;
+    display: flex;
+    /* date first, title after it in its own column: a long title wraps inside
+       that column instead of dropping under the date (Doc, 18.09.2026) */
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: nowrap;
+}
+
+.vt-title .vt-date { flex: none; }
+.vt-title-text { min-width: 4ch; }
+
+.vt-sub {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.86rem;
+    color: var(--muted);
+    margin-top: 4px;
+    line-height: 1.45;
+    min-height: 1.2em;
+}
+
+/* Per-talk links to the Bewertungsmatrix - they sit in the title line next to
+   the Lernbereich badge, so they need no column of their own and follow the row
+   when it wraps on a phone (Doc, 04.09.2026: "der muss pro Vortrag sein").
+   Two of them: the Coach grades the talk, the audience grades it too. */
+/* Third block of the topic cell, under the description (Doc, 04.09.2026:
+   "Bewerten ganz unten"). Label and both pills travel together. */
+.vt-grades {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.vt-grade-lbl {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.vt-grade {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    line-height: 14px;
+    padding: 3px 9px;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.vt-grade:hover { color: var(--lambda); border-color: var(--lambda); }
+
+/* a sheet already exists for this talk */
+.vt-grade.done { color: var(--phi); border-color: rgba(121, 158, 49, 0.6); }
+
+/* all three grading places for this talk are taken */
+.vt-grade.full { color: var(--phi); border-color: rgba(121, 158, 49, 0.6); }
+
+/* Date of the talk, in the title line (Doc, 12.09.2026). Pupils see a quiet
+   tag; logged in, the tag sits over an invisible native date picker. */
+.vt-date {
+    position: relative;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    line-height: 14px;
+    padding: 3px 9px;
+    /* Doc, 18.09.2026: "alle Vortragsdates auch rot" - Upsilon red, white text,
+       like the red button in the plan rows */
+    color: #fff;
+    background: var(--ypsilon);
+    border: 1px solid var(--ypsilon);
+    border-radius: 999px;
+    white-space: nowrap;
+    text-align: center;          /* vortraege.js sizeDates() gives all tags the widest width */
+    box-sizing: border-box;
+}
+
+.vt-date.edit { cursor: pointer; }
+.vt-date.edit:hover { background: rgb(200, 48, 34); border-color: rgb(200, 48, 34); }
+/* no date yet: stays a quiet dashed placeholder, not a red tag */
+.vt-date.empty,
+.vt-date.edit.empty:hover { color: var(--muted); background: none; border: 1px dashed var(--line); }
+
+/* covers the whole tag, so a click anywhere lands on the picker; the
+   calendar follows the page's scheme */
+.vt-date input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    cursor: pointer;
+    color-scheme: dark;
+}
+
+html.svp-light .vt-date input { color-scheme: light; }
+
+/* Doc's mark for the talk. Logged in and unlocked: grey placeholder =
+   computed from the sheets, typed value = his override. Everybody else
+   gets the locked field: –, or *** once a mark is given. */
+.vt-note-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 8px;
+}
+
+.vt-note {
+    width: 3.4em;
+    box-sizing: border-box;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    text-align: center;
+    line-height: 14px;
+    padding: 3px 4px;
+    color: var(--text);
+    background: var(--input-bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    outline: none;
+}
+
+.vt-note::placeholder { color: var(--muted); opacity: 1; }
+.vt-note:focus { border-color: var(--lambda); }
+/* typed over by hand: in the accent, so it never passes for the computed one */
+.vt-note.over { color: var(--lambda); border-color: var(--lambda); }
+/* locked: a plain box of the input's size, nothing to click or type */
+.vt-note.locked {
+    display: inline-block;
+    height: 22px;            /* = the input: 14px line + 2 x 3px padding + 2 x 1px border */
+    cursor: default;
+    user-select: none;
+}
+/* no mark yet: the dash in grey, like the placeholder in Doc's field */
+.vt-note.locked.none { color: var(--muted); }
+
+.vt-note-pct {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.72rem;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+/* edit mode: dashed outlines come from .editing [contenteditable] above */
+.vt-list.editing [contenteditable="true"] { padding: 1px 4px; border-radius: 4px; }
+
+/* Bearbeiten-Modus: die Nummer ist der Anfasser. Gezogen wird an ihr und nicht
+   an der Karte - sonst waere jede Textauswahl im Thema ein Umsortieren. */
+.vt-list.editing .vt-nr { cursor: grab; }
+.vt-list.editing .vt-nr:active { cursor: grabbing; }
+.vt-row.vt-drag { opacity: 0.4; }
+
+/* Wohin die Karte faellt: eine λ-Linie ueber oder unter der Zielkarte. Als
+   Schatten, damit die Zeile dabei nicht um eine Randbreite springt. */
+.vt-row.drop-before { box-shadow: 0 -3px 0 0 var(--lambda); }
+.vt-row.drop-after { box-shadow: 0 3px 0 0 var(--lambda); }
+
+/* Rechte Maustaste auf eine Karte: dieselbe Optik wie das Export-Menue, nur an
+   der Maus statt unter einem Knopf. */
+.vt-menu {
+    position: fixed;
+    z-index: 120;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding: 10px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px var(--shadow);
+    white-space: nowrap;
+}
+
+.vt-menu button.action { width: 100%; text-align: left; }
+.vt-menu button.action[disabled] { opacity: 0.35; cursor: default; }
+.vt-menu button.action[disabled]:hover { color: inherit; border-color: var(--line); background: transparent; }
+
+.vt-name input {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    color: var(--text);
+    background: var(--input-bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 12px;
+    /* min-, not height: the box may grow with the text, never clip it */
+    min-height: var(--vt-field-h);
+    outline: none;
+}
+
+.vt-name input::placeholder { color: var(--muted); }
+
+.vt-name input:focus {
+    border-color: var(--phi);
+    box-shadow: 0 0 0 3px rgba(121, 158, 49, 0.18);
+}
+
+/* toolbar under the header: counter left, buttons right */
+/* "+ Vortrag hinzufuegen" - eine eigene Zeile unter der letzten Karte, auf
+   derselben Spur wie die Liste, damit der Knopf nicht in der Gegend steht. */
+.vt-add {
+    max-width: 1200px;
+    margin: 12px auto 0;
+    display: flex;
+    justify-content: center;
+}
+
+.vt-add .action { min-width: 220px; }
+
+/* Fundus - topics this Lerngruppe has put aside (Doc only), under "+ Vortrag" */
+.vt-fundus {
+    max-width: 1200px;
+    margin: 18px auto 0;
+    padding: 12px 16px;
+    border: 1px dashed var(--muted);
+    border-radius: 8px;
+}
+
+.vt-fundus-head {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+}
+
+.vt-fundus-n { margin-left: 6px; }
+
+.vt-fundus-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    flex-wrap: wrap;
+}
+
+.vt-bar {
+    max-width: 1200px;
+    margin: 0 auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.vt-count {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+}
+
+.vt-count b { color: var(--phi); font-weight: 400; }
+
+/* cloud/crypto status next to the counter: quiet on success, red on failure */
+.vt-status {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    flex: 1 1 100%;
+    order: 3;
+    min-height: 0.9em;
+}
+
+.vt-status.bad { color: var(--ypsilon); }
+
+/* a name that did NOT reach the cloud: it must never sit there looking done */
+.vt-name input.unsaved {
+    border-color: var(--ypsilon);
+    box-shadow: 0 0 0 3px rgba(176, 36, 24, 0.16);
+}
+
+/* a taken slot: shown as "vergeben", not editable and never a name */
+.vt-name input.locked {
+    color: var(--muted);
+    font-style: italic;
+    border-style: dashed;
+    cursor: not-allowed;
+}
+
+/* except the entry this browser made itself — a click takes it back */
+.vt-name input.locked.mine {
+    color: var(--phi);
+    border-color: var(--phi);
+    cursor: pointer;
+}
+
+.vt-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* inline two-step reset instead of a native confirm() */
+.vt-confirm {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    color: var(--lambda);
+}
+
+.vt-confirm.open { display: flex; }
+
+/* class switch (9a | 9b) next to the title — the title group aligns its
+   children to the bottom edge, so this one centres itself against the h1 */
+.vt-switch {
+    display: inline-flex;
+    align-items: center;
+    align-self: center;
+    gap: 6px;
+    margin-left: 6px;
+}
+.vt-switch .badge { text-decoration: none; opacity: 0.55; }
+.vt-switch .badge.on { opacity: 1; box-shadow: 0 0 0 1px currentColor inset; }
+
+.vt-hint {
+    max-width: 1200px;
+    margin: 16px auto 0;
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+/* narrow screens: both name fields drop under the topic */
+@media (max-width: 760px) {
+    .vt-row, .vt-row.three, .vt-row.one { grid-template-columns: 40px 1fr 1fr auto; }
+    .vt-topic { grid-column: 2 / 5; }
+    .vt-name.n1 { grid-column: 2; }
+    .vt-name.n2 { grid-column: 3; }
+    /* the third name gets its own line rather than a squeezed third column */
+    .vt-name.n3 { grid-column: 2 / 4; }
+    .vt-more-box { grid-column: 4; grid-row: 2; align-self: center; flex-direction: column; }
+
+    /* No reserved height down here: the cards sit one under the other, so
+       nothing has to line up - the reserve only left a hole under "Bewerten"
+       (measured 04.09.2026: up to 39 px). */
+    .vt-topic { min-height: 0; }
+}
+
+@media print {
+    .vt-actions, .vt-hint, .vt-confirm, .vt-switch, .vt-more, .vt-more-box, .vt-status,
+    .vt-menu, .vt-grade, .vt-grade-lbl, .vt-grades, .vt-add, .vt-fundus, .vt-date.empty { display: none !important; }
+
+    .vt-row {
+        break-inside: avoid;
+        border-color: rgba(14, 36, 78, 0.35);
+        background: transparent;
+    }
+
+    .vt-name input {
+        border: 1px solid rgba(14, 36, 78, 0.45);
+        background: transparent;
+        color: rgb(14, 36, 78);
+    }
+}

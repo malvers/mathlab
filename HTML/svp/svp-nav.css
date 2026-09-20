@@ -1,0 +1,154 @@
+/* Quick-nav: pill shortcuts to all svp pages (injected by svp-nav.js) —
+   top row of the header, right-aligned; wraps without overlapping anything */
+nav.quick-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    /* Same track as .toolbar and header.page-head: the row must not reach past
+       the content below it. The nav is a flex ITEM of the full-bleed .nav-band,
+       so it needs width:100% first — on its own max-width would only cap a
+       shrink-to-fit box and the row would sit narrower than the content. */
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto 12px;
+}
+
+/* Bridge panel: the edit/save hint sits top right inside the box */
+.lb-panel-foot.bridge-hint {
+    text-align: right;
+    margin-bottom: 6px;
+}
+
+/* Fixed line box so every pill is exactly the same height — with 'normal',
+   Orbitron gives taller boxes to labels with umlauts/descenders */
+nav.quick-nav .badge { text-decoration: none; line-height: 14px; }
+
+/* Central school-year line above the pill row (injected by svp-nav.js).
+   Doc, 09.09.2026: "bissl groesser und luftiger" - eine Stufe groesser, mehr
+   Laufweite und mehr Luft zur Pillenreihe (siehe .nav-band). */
+.nav-year {
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(0.86rem, 1.7vw, 1.05rem);
+    letter-spacing: 0.15em;
+    line-height: 1.5;
+    text-transform: uppercase;
+    /* Zwei Zeilen (Doc, 20.09.2026: "schreib so gross DAS Schuljahr 2026 - 2027
+       und sehr klein darunter die Daten"): das Jahr traegt den Kopf, die Spanne
+       steht als Fussnote darunter. Erst Raleway, dann "daten arial und etwas
+       groesser" - Arial ist der einzige Ort im SVP, wo nicht Orbitron steht. */
+}
+.nav-year .ny-jahr {
+    font-size: clamp(1.1rem, 2.6vw, 1.6rem);
+    line-height: 1.25;
+}
+.nav-year .ny-spanne {
+    font-family: Arial, Helvetica, sans-serif;
+    /* Doc, 20.09.2026: "date 1pt kleiner" - 1 pt sind 1.333 px, bei 16 px
+       Grundgroesse also 0.083rem weniger an beiden Enden. */
+    font-size: clamp(0.637rem, 1.3vw, 0.797rem);
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    line-height: 1.4;
+    text-transform: none;
+    /* Doc, 20.09.2026: "Hell Blau Grau" - das ist --muted, rgba(170,190,220,.65).
+       Das Token statt einer eigenen Farbe: es hat fuer jedes Schema schon
+       seine Fassung, eine handgeschriebene haette nur eine. Das opacity faellt
+       damit weg, die Daempfung steckt im Alpha. */
+    color: var(--muted);
+    /* Doc, 20.09.2026: "die Daten 1 px runter y" - relativ verschoben, damit
+       das Band nicht um den Pixel mitwaechst. */
+    position: relative;
+    top: 1px;
+}
+.nav-year {
+    /* Doc, 09.09.2026: "die Farbe wie main header" - dasselbe Token wie h1,
+       nicht mehr das gedaempfte --muted. */
+    color: var(--head);
+    /* ... und "mach mal eine Pille drum dezent", dann "ueber die ganze breite
+       und Ecken wie Export" (Doc, 09.09.2026): ein leiser Kasten auf derselben
+       Spur wie Pillenreihe und Werkzeugleiste (1200 px), mit den 8 px Ecken der
+       Knoepfe statt der runden Pillenform. */
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    padding: 5px 20px;
+    /* Doc, 20.09.2026: "mach die Optik so wie die SZ identisch ... box! colors" -
+       der Kasten traegt jetzt genau die Werte der Suchzeile (.svp-search):
+       0.16 statt 0.08 Fuellung, 7 statt 8 px Ecken, derselbe var(--line)-Rand.
+       Mit 0.08 war er heller als seine Umgebung (Doc: "oben Rahmen heller").
+       Das Band dahinter bleibt --panel, sonst laegen zwei Toenungen
+       uebereinander und der Kasten wuerde dunkler als die Suchzeile. */
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: rgba(var(--tint), 0.16);
+}
+
+/* Doc, 19.09.2026: "probier mal dunkler" - the year line is much smaller than
+   the h1, so in the light scheme --head (4.0:1) reads pale here. Same hue,
+   darker: about 6.5:1 against the box. The dark scheme stays as it is. */
+html.svp-light .nav-year { color: rgb(56, 80, 124); }
+
+/* Full-width blue band at the page top holding year + pills, both centered
+   vertically via symmetric padding (negative margins undo the body padding) */
+.nav-band {
+    /* Das SZ-Blau gehoert in die Box, nicht hinter sie (Doc, 20.09.2026:
+       "box!") - laegen beide Toenungen uebereinander, waere die Box dunkler
+       als die Suchzeile und damit gerade nicht identisch. */
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+    /* Pulls the band over the body padding so it runs edge to edge. A page
+       with its own body padding sets --band-pull-top / --band-pull-x to the
+       same values (stundenplan.css does, Doc 10.09.2026) - otherwise the band
+       overhangs and the page scrolls sideways. */
+    margin: calc(-1 * var(--band-pull-top, clamp(12px, 3vw, 40px)))
+            calc(-1 * var(--band-pull-x, clamp(12px, 3vw, 40px))) 20px;
+    /* Doc, 09.09.2026: "y zentriert zwischen den Linien", danach "2px runter" -
+       unter dem Jahres-Kasten stand die Pillenreihe erst 12 px hoch und 17 px
+       tief (gemessen mit _measure.html), mittig waeren 14.5/14.5. Sie steht
+       jetzt 2 px tiefer als mittig: 16.5 oben, 12.5 unten. Die Bandhoehe bleibt
+       dieselbe, die Summe ist unveraendert 29 px. */
+    padding: 17px clamp(12px, 3vw, 40px) 12.5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16.5px;
+}
+
+.nav-band nav.quick-nav { margin-bottom: 0; }
+
+@media print {
+    .nav-band { background: none; border: none; margin: 0; padding: 0; }
+    .nav-year { color: #444; }
+}
+
+/* Doc, 09.09.2026: "mach mal die Raender der elemente so duenn wie oben", dann
+   "auch die HG Farbe wie oben" - die Pillen der Reihe tragen Rand UND Fuellung
+   des Jahres-Kastens darueber: var(--line) statt der 0.42 aus .b-grey, und
+   dieselben 8 % Blau als Grund. Betrifft nur die Navileiste; die grauen Pillen
+   im Plan bleiben, wie sie sind. Die aktive Pille behaelt ihre Kontur, die
+   kommt vom outline in currentColor. */
+nav.quick-nav a.badge {
+    border-color: var(--line);
+    background: rgba(var(--tint), 0.08);
+}
+
+nav.quick-nav a.badge:hover { filter: brightness(1.35); }
+
+/* Doc, 09.09.2026: "hier auch bitte duenner" - der aktive Eintrag trug Rand UND
+   outline, zusammen ein 2 px dicker dunkler Ring. Jetzt nur der Rand, eine Spur
+   kraeftiger als bei den anderen Pillen; erkennbar bleibt er ausserdem an der
+   helleren Fuellung. */
+nav.quick-nav a.badge.active {
+    outline: none;
+    border-color: rgba(var(--tint), 0.55);
+    filter: brightness(1.25);
+}
+
+@media print { nav.quick-nav { display: none; } }
+
+/* Pill-visibility editor: pencil at the right end of the pill row opens a
+   panel of toggle pills (off = dimmed); choice persists in localStorage */
+nav.quick-nav a.badge.nav-hidden { display: none; }

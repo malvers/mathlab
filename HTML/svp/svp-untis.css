@@ -1,0 +1,239 @@
+/* Abgabe-Knopf in der Wochenzeile: sieht bewusst nach Knopf aus, nicht nach
+   Material-Pille - er fuehrt weg von der Seite in den Upload-Ordner. Orange,
+   weil er zum Handeln auffordert (Doc, 31.08.2026). */
+.badge.mat-upload {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--lambda);
+    border-color: var(--lambda);
+    color: rgb(20, 30, 50);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.badge.mat-upload:hover { filter: brightness(1.08); }
+
+.mat-upload-ico {
+    font-size: 1.05em;
+    line-height: 1;
+    font-weight: 700;
+}
+
+/* Immer sichtbar (Doc, 06.09.2026 - vorher nur im Bearbeiten-Modus, weil der Chip als reines
+   Eintrage-Werkzeug gedacht war). Er sagt jetzt auch im Lesemodus, ob der Stoff im Klassenbuch
+   steht; geklickt und geschrieben wird weiterhin nur beim Bearbeiten. */
+/* Der Chip sieht aus wie eine Bereich-Pille (Doc, 07.09.2026: "mach den Untis-
+   Button so wie Leistung und die LB-Pillen auch") - gleiche Hoehe, gleiche Ecke,
+   gleiche Polsterung. Die Breite setzt equalizeLbCells() fuer alle gemeinsam. */
+.untis-chip { display: none; }
+tr.wk-edit .untis-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: auto;
+    /* GENAU so hoch wie die Bereich-Pille daneben, nicht nur mindestens: das
+       Untis-Zeichen ist 16 px hoch, mit 3 px Polsterung und Rand kam der Chip
+       auf 24 px. Weil er nur im Bearbeiten steht, blieb davon nach dem Fix an
+       +/⧉/⇩ noch 1 px Sprung in der Wochenzeile uebrig (Doc, 09.09.2026:
+       "bleibt noch die groesserwerdende Box"). 16 + 2 + 2 + 2 = 22, das
+       Zeichen bleibt dabei unveraendert gross. */
+    height: 22px;
+    /* 8 px waren die Polsterung des breiten Logos; mit dem blanken U wirkt der
+       Chip damit leer, also 6 px (Doc, 16.09.2026). */
+    padding: 2px 6px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: default;
+    opacity: 1;
+    transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+
+.untis-chip:hover { opacity: 1; }
+/* Untis-Logo (SVG, per svp-plan.js): das U in currentColor, die orange Kachel
+   ist der Chip. Die Strichstaerke steht in viewBox-Einheiten (Original-Raster)
+   und ist am Original gemessen. Breite = 16 px * 91.2/113.6, also genau das
+   Seitenverhaeltnis des Ausschnitts - der Buchstabe behaelt seine Groesse und
+   fuellt den Kasten ohne Rand (Doc, 16.09.2026: nur noch das U, schmaler). */
+.untis-chip .u-mark {
+    width: 13px;
+    height: 16px;
+    flex: none;
+    display: block;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: butt;
+}
+
+.untis-chip .u-mark .u-letter { stroke-width: 19.5; }
+
+tr.wk-edit .untis-chip { cursor: pointer; }
+
+/* Vollstaendig eingetragen: satt gefuellt. */
+.untis-chip.is-full {
+    color: #fff;
+    background: var(--untis);
+    border-color: var(--untis);
+    opacity: 1;
+}
+
+/* Teilweise eingetragen MUSS anders aussehen als fertig (Doc, 06.09.2026): eine Zeile im
+   Termin-Modus buendelt bis zu fuenf Lerngruppen, und mit gleicher Optik sah "1 von 10"
+   aus wie "10 von 10" - genau daran sind drei Gruppen leer geblieben. Also nur der Rand in
+   Untis-Orange und ein diagonal gestreifter Grund: von weitem als "angefangen" lesbar,
+   ohne den Chip lauter zu machen als die Pille darueber. Die Zahl steht im Tooltip. */
+.untis-chip.is-part {
+    color: var(--untis);
+    border-color: var(--untis);
+    opacity: 1;
+    background: repeating-linear-gradient(-45deg,
+        color-mix(in srgb, var(--untis) 26%, transparent) 0 4px,
+        transparent 4px 8px);
+}
+
+/* Auch aus dem Bearbeiten-Modus heraus gedruckt bleibt er weg - sonst
+   gewaenne body.editing die Spezifitaet gegen diese Regel. */
+/* Gedruckt gehoert er nicht aufs Blatt - der Plan geht an Kolleg:innen, der Klassenbuchstand
+   ist Docs eigene Arbeitsanzeige. */
+@media print { .untis-chip, tr.wk-edit .untis-chip { display: none; } }
+
+/* WebUntis-Schreibdialog (svp-plan.js untisDialog). Breiter als die
+   Login-Karte, weil links der Stundeninhalt und darunter die Stunden der
+   Woche stehen; sonst dieselbe Karte wie ueberall im SVP. */
+.svp-gate-card.untis-card {
+    width: min(94vw, 620px);
+    text-align: left;
+    max-height: 88vh;
+    overflow-y: auto;
+}
+
+.untis-card .svp-gate-title,
+.untis-card .svp-gate-sub { text-align: center; }
+
+.untis-text {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    padding: 10px 12px;
+    resize: vertical;
+}
+
+.untis-text:focus { outline: 1px solid var(--cyan); }
+
+.untis-count {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-align: right;
+    margin: 4px 0 12px;
+}
+
+/* Darunter steht nur, wohin es geht - und Ankreuzbares nur dort, wo schon
+   etwas anderes im Klassenbuch steht. */
+.untis-targets {
+    font-size: 0.82rem;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+    margin-bottom: 16px;
+}
+
+.untis-go-line {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--phi);
+    padding: 2px 0;
+}
+
+.untis-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: baseline;
+    gap: 10px;
+    padding: 5px 0;
+    cursor: pointer;
+}
+
+.untis-row.is-locked { cursor: default; opacity: 0.5; }
+.untis-row input { width: auto; margin: 0; }
+
+/* Der vorhandene Text kann lang sein - abschneiden statt die Karte sprengen. */
+.untis-state {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.untis-state.is-set { color: var(--lambda); }
+.untis-state.is-ok { color: var(--phi); }
+.untis-state.is-bad { color: rgb(235, 120, 105); }
+
+/* Eine Karte je Stunde: Kopfzeile mit Klasse/Tag/Zeit und Zaehler, darunter
+   die Box mit dem Schritt fuer genau diese Stunde (Doc, 31.08.2026 - vorher
+   ging ein einziger Text in alle fuenf Stunden der Woche). */
+.untis-slot {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px 10px;
+    margin-bottom: 8px;
+}
+
+.untis-slot.is-locked { opacity: 0.5; }
+
+.untis-slot-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+/* Arial, nicht Orbitron (Doc, 31.08.2026): in der Kopfzeile stehen Uhrzeiten,
+   und Orbitrons geschlitzte Null macht aus 08:00 ein schwer lesbares Ø8:ØØ. */
+.untis-slot-when {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.74rem;
+    letter-spacing: 0.02em;
+    color: var(--phi);
+    font-variant-numeric: tabular-nums;
+}
+
+.untis-slot-note {
+    font-size: 0.72rem;
+    color: var(--muted);
+}
+
+.untis-slot-count {
+    margin-left: auto;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.untis-slot-count.is-full { color: var(--lambda); }
+
+/* Die Boxen stehen dicht untereinander - der Abstand kommt von der Karte. */
+.untis-slot .untis-text { font-size: 0.86rem; padding: 7px 10px; }
+.untis-slot .untis-row { padding: 6px 0 0; font-size: 0.76rem; }
+
+/* Abbrechen bleibt klein, "Send now" ist der Knopf des Dialogs. */
+.untis-card .svp-gate-row { gap: 12px; }
+.untis-card #untis-cancel { flex: 0 0 auto; }
+.untis-card #untis-go { flex: 1; }
+
+/* Badges that deep-link into the Lehrplan PDF (set by svp-plan.js) */

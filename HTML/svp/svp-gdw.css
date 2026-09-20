@@ -1,0 +1,79 @@
+/* --- Gedanke der Woche ---------------------------------------------------
+   Das Vorschaubild der Woche steht rechts in der Wochenzeile, seit dem
+   20.09.2026 allein dort (Doc: "macht den clip weg bitte und das thumb ohne
+   Rahmen fast y fuellend"). Ohne Rahmen, und so hoch wie die Zeile es zulaesst:
+   die Zeile ist 46 px hoch, ihre Zellen polstern 9 px oben und unten - hier
+   bleiben 2 px. 42 px Bild trieben die Zeile auf 47 px (die Zeile eines Inline-
+   Elements bringt ihre eigene Hoehe mit) - mit 38 px plus Rahmen bleibt es bei 46. */
+#plan-table tbody tr:not(.detail-row) > td.mat { padding-top: 2px; padding-bottom: 2px; }
+#plan-table td.mat .gdw-thumb {
+    display: inline-flex;
+    vertical-align: middle;
+    margin-left: 8px;
+    padding: 0;
+    /* Doc, 20.09.2026: "ok, doch einen duennen Rahmen, not rounded", dann
+       "etws duenner? Heller?" - ein halber Pixel, auf dem Retina-Schirm sauber. */
+    border: 0.5px solid rgba(var(--tint), 0.3);
+    border-radius: 0;
+    background: transparent;
+    cursor: pointer;
+    overflow: hidden;
+    line-height: 0;
+}
+#plan-table td.mat .gdw-thumb img {
+    display: block;
+    height: 38px;                /* hochkant wie die Folie: 1 : 1.445 */
+    width: 26px;
+    object-fit: cover;
+}
+#plan-table td.mat .gdw-thumb:hover { border-color: rgb(var(--tint-text)); }
+/* Doc, 20.09.2026: "bitte diesen blauen select weg" - die globale Regel fuer
+   :focus-visible legte einen blauen Rahmen um das Bild, sobald der Knopf als
+   tastaturfokussiert galt (nach dem Blaettern mit den Pfeiltasten). Wie bei
+   .sub-tab und .sub-edit wird er hier abgeschaltet; dass der Knopf dran ist,
+   zeigt statt des Rings sein eigener Rahmen. */
+#plan-table td.mat .gdw-thumb:focus { outline: none; }
+#plan-table td.mat .gdw-thumb:focus-visible {
+    outline: none;
+    border-color: rgb(var(--tint-text));
+}
+/* Die sechs Weisheiten vor den Ferien tragen denselben Rahmen in Docs Orange. */
+#plan-table td.mat .gdw-thumb.gdw-gross { border-color: rgba(245, 194, 66, 0.75); }
+html.svp-light #plan-table td.mat .gdw-thumb { border-color: rgba(40, 70, 120, 0.28); }
+html.svp-light #plan-table td.mat .gdw-thumb.gdw-gross { border-color: rgba(245, 194, 66, 0.75); }
+
+.gdw-box {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    background: rgba(10, 20, 40, 0.82);
+}
+.gdw-box[hidden] { display: none; }
+.gdw-box img {
+    max-width: min(560px, 100%);
+    max-height: calc(100vh - 120px);
+    object-fit: contain;
+    border-radius: 6px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+}
+.gdw-close {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.gdw-close:hover { background: rgba(255, 255, 255, 0.26); }

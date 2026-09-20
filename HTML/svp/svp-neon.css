@@ -1,0 +1,90 @@
+/* ---- Grey scheme, neon accents ---------------------------------------------
+   Doc, 19.09.2026: "versuch mal 'die modernen neon like cols'". Only in the
+   grey scheme and only on screen: the accent hues turn to saturated neon, the
+   Bereich pills get a soft glow, the holiday bands and the current week follow.
+   Last in the file on purpose - the holiday rule it overrides has the same
+   specificity (html:not(.svp-light) tr.ferien td).
+   Then "das grün und orange passt im gray mode gar nicht ... probier mal was
+   die anderen so nehmen": the Tailwind 400 shades (green, amber, sky, violet,
+   teal, pink) - the usual accent set on a zinc-grey ground - with softer
+   glows and rims. Neon values were 110,255,60 / 255,170,0 / 0,229,255 /
+   178,102,255 / 0,255,170 / 255,60,172.
+   Picked in the Tailwind palette tool (HTML/tailwind-palette.html):
+   "yellow lime 300" = holidays yellow-300, current week lime-300;
+   the Bereich pills stay (amber-400, green-400). */
+@media screen {
+    /* Doc, 19.09.2026: "gib mir die col table als Extra Fenster connected, so
+       dass ich probieren kann" - every grey accent is an r, g, b triple now, so
+       the palette window (HTML/tailwind-palette.html) can set it live on <html>
+       through the BroadcastChannel "svp-colors" (listener in svp-nav.js). */
+    html.svp-grey {
+        --g-week: 255, 247, 237;   /* orange-50 (Farbwähler 19.09.2026; before neutral-800) */
+        --g-ferien: 236, 252, 203;   /* lime-100 (Farbwähler; before lime-50, lime-100, lime-300) */
+        --g-orange: 254, 215, 170;   /* orange-200 */
+        --g-green: 217, 249, 157;   /* lime-200 */
+        --g-cyan: 6, 182, 212;   /* cyan-500 */
+        --g-violet: 139, 92, 246;   /* violet-500 */
+        --g-teal: 45, 212, 191;      /* teal-400 */
+        --g-pink: 244, 114, 182;     /* pink-400 */
+        /* Zusatzmaterial pills: solid ground in grey (Doc: "HG Zusatz nicht
+           transp (im Grey!)") - zinc-800, what the 7 % mix looked like */
+        --g-btn: 87, 83, 78;       /* stone-600 - Knopf-HG */
+        --g-matbg: 68, 64, 60;   /* stone-700 (before stone-800) */
+        --g-mat: 190, 194, 202;      /* rim of the Zusatzmaterial pills, = --tint (Doc: "gib mir noch die Outlines von Zusatzmat") */
+        /* timetable subject colours (svp-timetable.css), picked 19.09.2026 */
+        --tt-inf: 254, 243, 199;     /* amber-100 */
+        --tt-mat: 125, 211, 252;     /* sky-300 */
+        --tt-gk: 217, 249, 157;      /* lime-200 */
+        --tt-violet: 196, 181, 253;  /* violet-300 */
+        --tt-teal: 236, 252, 203;    /* lime-100 */
+        --tt-pink: 225, 130, 190;    /* unchanged */
+        --a-week-edge: 0.59;
+        --a-week-mid: 0.39;
+        --a-ferien-edge: 0.67;
+        --a-ferien-mid: 0.32;
+        --lambda: rgb(var(--g-orange));
+        --phi: rgb(var(--g-green));
+        --cyan: rgb(var(--g-cyan));
+        --violet: rgb(var(--g-violet));
+        --teal: rgb(var(--g-teal));
+        --pink: rgb(var(--g-pink));
+    }
+    html.svp-grey .b-orange { border-color: rgba(var(--g-orange), 0.5); background: rgba(var(--g-orange), 0.08); box-shadow: 0 0 6px rgba(var(--g-orange), 0.2); }
+    html.svp-grey .b-cyan   { border-color: rgba(var(--g-cyan), 0.5); background: rgba(var(--g-cyan), 0.08); box-shadow: 0 0 6px rgba(var(--g-cyan), 0.2); }
+    html.svp-grey .b-violet { border-color: rgba(var(--g-violet), 0.5); background: rgba(var(--g-violet), 0.1); box-shadow: 0 0 6px rgba(var(--g-violet), 0.2); }
+    html.svp-grey .b-teal   { border-color: rgba(var(--g-teal), 0.5); background: rgba(var(--g-teal), 0.08); box-shadow: 0 0 6px rgba(var(--g-teal), 0.2); }
+    html.svp-grey .b-pink   { border-color: rgba(var(--g-pink), 0.5); background: rgba(var(--g-pink), 0.09); box-shadow: 0 0 6px rgba(var(--g-pink), 0.2); }
+    html.svp-grey #plan-table .detail-row .sub-side .mat-block a.mat-pill { border-color: rgba(var(--g-mat), 0.5); background: rgb(var(--g-matbg)); }
+    /* the chosen group (FOS25-1 ...) wore --cyan = sky-500 - Doc: "noch blau in grey" */
+    html.svp-grey .group-drop > button.export-toggle.on-group { border-color: rgb(var(--tint)); }
+
+    /* Holiday bands with glowing side bars. Doc, 19.09.2026: "nimm in der Mitte
+       trans zurück", then "am Rand weniger trans" - edges 0.4, middle 0.22;
+       "ferien und aktuelle W. tauschen" - holidays lime-300, week yellow-300. */
+    html.svp-grey tr.ferien td {
+        background-image: linear-gradient(90deg,
+            rgba(var(--g-ferien), var(--a-ferien-edge)) 0%,
+            rgba(var(--g-ferien), var(--a-ferien-mid)) 50%,
+            rgba(var(--g-ferien), var(--a-ferien-edge)) 100%);
+        --ferien-bars: inset 2px 0 0 rgb(var(--g-ferien)), inset -2px 0 0 rgb(var(--g-ferien)),
+            inset 6px 0 10px -6px rgba(var(--g-ferien), 0.5), inset -6px 0 10px -6px rgba(var(--g-ferien), 0.5),
+            inset 0 -1px 0 rgba(var(--g-ferien), 0.35);
+        text-shadow: 0 0 10px rgba(var(--g-ferien), 0.25);
+    }
+
+    /* current week (first "mal pink", then yellow/lime, then swapped) */
+    html.svp-grey tr.kw-now {
+        background-image: linear-gradient(90deg,
+            rgba(var(--g-week), var(--a-week-edge)) 0%,
+            rgba(var(--g-week), var(--a-week-mid)) 50%,
+            rgba(var(--g-week), var(--a-week-edge)) 100%);
+    }
+    html.svp-grey tr.kw-now-sub {
+        background-image: linear-gradient(90deg,
+            rgba(var(--g-week), calc(var(--a-week-edge) * 0.4)) 0%,
+            rgba(var(--g-week), calc(var(--a-week-mid) * 0.4)) 50%,
+            rgba(var(--g-week), calc(var(--a-week-edge) * 0.4)) 100%);
+    }
+    html.svp-grey tr.kw-now > td:nth-child(2) { box-shadow: inset 2px 0 0 rgb(var(--g-week)), inset 6px 0 10px -6px rgba(var(--g-week), 0.5); }
+    html.svp-grey tr.kw-now > td:last-child { box-shadow: inset -2px 0 0 rgb(var(--g-week)), inset -6px 0 10px -6px rgba(var(--g-week), 0.5); }
+}

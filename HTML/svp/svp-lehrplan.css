@@ -1,0 +1,139 @@
+/* Ruhiges Blauweiss statt Orange (Doc, 01.09.2026). Orbitron und die Groesse
+   tragen die Ueberschrift schon - das Orange bleibt den Dingen vorbehalten,
+   die etwas WOLLEN: Lernbereich-Pillen, Abgabe-Knopf, Untis-Chip. */
+h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.15rem, 3.2vw, 1.9rem);
+    color: var(--head);
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+}
+
+.subtitle {
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    color: var(--muted);
+}
+
+/* Start page: the line under the headline is a label, not a sentence */
+.subtitle.caps {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(0.62rem, 1.3vw, 0.75rem);
+    letter-spacing: 0.14em;
+}
+
+.subtitle a { color: var(--cyan); text-decoration: none; }
+.subtitle a:hover { text-decoration: underline; }
+
+.meta-cards {
+    max-width: 1200px;
+    margin: 0 auto 18px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+}
+
+.meta-card {
+    background: var(--card-soft);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+
+/* Lehrplan drop (svp-plan.js lehrplanDrop, Doc 19.09.2026): the Lernbereich
+   cards and their panels sit in the head under the subtitle and only show
+   while "Lehrplan ▾" is open. */
+.lp-fold { display: none; margin-top: 12px; }
+body.lp-open .lp-fold { display: block; }
+.lp-fold .meta-cards { margin-bottom: 0; }
+.lp-fold .lb-panel { margin: 10px auto 0; }
+/* Open: the caret points up. The ▾ glyph sits 0.17em below the middle of
+   its box, so a plain rotation lifted it 4.4 px (measured, Doc: "y zentriert
+   bitte") - the shift puts its ink back where the closed caret has it. */
+body.lp-open .lp-btn .export-caret { display: inline-block; transform: translateY(0.33em) rotate(180deg); }
+/* first card: the whole Lehrplan, with the cover of its page 1 */
+.meta-card.lp-card {
+    display: flex;
+    /* Doc, 19.09.2026: "y aligned wie die LBs" - text and cover start at the
+       top like in the other cards, not centred in the card */
+    align-items: flex-start;
+    gap: 12px;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+.meta-card.lp-card:hover { border-color: var(--cyan); }
+.lp-card .lp-cover {
+    flex: none;
+    width: 62px;   /* Doc, 19.09.2026: "SS Titel kann größer" - was 46 px */
+    height: auto;
+    border-radius: 3px;
+    border: 1px solid var(--line);
+    background: #fff;
+    box-shadow: 0 2px 6px var(--shadow);
+}
+.lp-card .lp-text { min-width: 0; }
+/* the LB kickers are 22 px high (their pill) - same line box here */
+.meta-card.lp-card .k { min-height: 22px; }
+/* With the Lehrplan card a row holds one card more: "LERNBEREICH 1" plus
+   its pill need about 208 px, six cards on 1200 px leave 192. Narrow cards
+   set the kicker tighter instead of breaking it after "LERNBEREICH". */
+.lp-fold .meta-card { container-type: inline-size; }
+/* six cards or more: a little less padding around the chevron */
+.lp-fold .meta-cards:has(> .meta-card:nth-child(6)) > .meta-card.expandable { padding-left: 26px; padding-right: 10px; }
+.lp-fold .meta-cards:has(> .meta-card:nth-child(6)) > .meta-card.expandable > .chev { left: 9px; }
+@container (max-width: 180px) {
+    .meta-card .k { font-size: 0.54rem; letter-spacing: 0.04em; gap: 5px; white-space: nowrap; }
+    .meta-card .k > .badge,
+    .meta-card .k > .badge-drop > .badge { letter-spacing: 0; padding-left: 5px; padding-right: 5px; }
+}
+@media print {
+    .lp-fold { display: block !important; }
+    .lp-card { display: none !important; }
+}
+
+.meta-card .k {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    /* Doc, 09.09.2026: die Bereich-Pille steht in ihrer Karte, rechts in der
+       Kopfzeile - deshalb ist die Zeile eine Flexbox. */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 20px;
+}
+
+/* Die Pille (auch die mit Varianten-Menue) rechtsbuendig, ohne zu schrumpfen */
+.meta-card .k > .badge,
+.meta-card .k > .badge-drop {
+    margin-left: auto;
+    flex: none;
+    letter-spacing: 0.05em;
+}
+
+.meta-card .k > .badge,
+.meta-card .k > .badge-drop > .badge {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    height: 22px;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* Das Varianten-Menue oeffnet nach innen, sonst haengt es ueber dem Kartenrand */
+.meta-card .k .badge-drop .drop-menu { left: auto; right: 0; }
+
+.meta-card .v { font-size: 0.92rem; font-weight: 400; }
+
+/* Colored meta-card headers, matching the legend/badge palette */
+.meta-card .k.c-orange { color: var(--lambda); }
+.meta-card .k.c-cyan { color: var(--cyan); }
+.meta-card .k.c-violet { color: var(--violet); }
+.meta-card .k.c-teal { color: var(--teal); }
+.meta-card .k.c-pink { color: var(--pink); }
+.meta-card .k.c-green { color: var(--phi); }
+.meta-card .k.c-bright { color: var(--text); }

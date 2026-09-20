@@ -1,0 +1,104 @@
+/* ---- Shared search field (toolbars, sidebars) --------------------------
+   One look for every "Suchen ..." box on the svp pages. */
+.svp-search {
+    box-sizing: border-box;
+    /* Doc, 09.09.2026: "den HG von der SZ wie die butts" - dasselbe Blau wie
+       button.action statt des weissen Eingabefeldes, damit die Suchzeile mit
+       den Knoepfen daneben eine Leiste ergibt. Ein Wert fuer beide Schemata,
+       genau wie bei den Knoepfen. */
+    background: rgba(var(--tint), 0.16);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 7px 9px;
+    color: var(--text);
+    /* Doc, 09.09.2026: "nimm orbi" - dieselbe Schrift wie die Knoepfe daneben,
+       damit die Werkzeugleiste in einer Schrift steht. */
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+}
+
+/* Doc, 09.09.2026: "suche font gleich" - Schriftart, -groesse und Laufweite
+   waren schon dieselben wie bei den Knoepfen (Orbitron 11.52px/0.69px,
+   gemessen); unterschiedlich war nur die Farbe: der Platzhalter kam im
+   ausgegrauten Browser-Ton. Jetzt in der Schriftfarbe der Knopfbeschriftung,
+   aber eine Spur zurueckgenommen - Doc: "bisssl grauer, hat ja semantisch
+   anders": ein Platzhalter ist eben kein Knopfetikett. opacity:1 muss dabei
+   sein, sonst blasst Firefox ihn ein zweites Mal ab. */
+.svp-search::placeholder {
+    color: color-mix(in srgb, var(--text) 68%, transparent);
+    opacity: 1;
+}
+
+.svp-search:focus {
+    outline: none;
+    border-color: var(--phi);
+}
+
+/* Count of hits shown next to the field; muted until something is typed */
+.svp-search-count {
+    font-size: 0.72rem;
+    color: var(--muted);
+    align-self: center;
+    white-space: nowrap;
+}
+
+.svp-search-count[hidden] { display: none; }
+
+@media print { .svp-search, .svp-search-count { display: none !important; } }
+
+/* ---- Plan search (built into the toolbar by svp-plan.js) ---------------
+   The field sits between the buttons and the legend: .legend keeps its
+   margin-left:auto and the field gets one too, so the free space is split
+   between them and the box lands in the gap. */
+/* Doc, 08.09.2026: "so hoch wie die butts und ueber den ganzen Platz" - the
+   field takes the whole rest of the toolbar line, and align-self: stretch
+   makes it exactly as tall as the buttons beside it (no hard-coded height). */
+.toolbar .plan-search {
+    flex: 1 1 220px;
+    width: auto;
+    min-width: 120px;
+    align-self: stretch;
+    padding-right: 62px;   /* Platz fuer den Zaehler, der im Feld sitzt */
+}
+
+/* Doc, 08.09.2026: "rechts buendig" - der Zaehler stand rechts NEBEN dem Feld
+   und hielt es 64 px vom Rand weg (gemessen). Jetzt zieht ihn ein negativer
+   Abstand in das rechte Polster des Feldes hinein: der Zaehler steht im Feld,
+   und das Feld endet buendig mit Leiste und Tabelle.
+   -62px = 52px Zaehlerbreite + 10px gap der Leiste. */
+.toolbar .svp-search-count {
+    margin-left: -62px;
+    min-width: 52px;
+    padding-right: 10px;
+    text-align: right;
+    pointer-events: none;
+}
+
+/* Phone: always a line of its own, never squeezed in beside a button. */
+@media (max-width: 760px) {
+    .toolbar .plan-search { flex-basis: 100%; }
+}
+
+/* Nothing found - say so in red instead of a silent "0 von 38" */
+.svp-search-count.none { color: var(--ypsilon); }
+
+/* Weeks the search filtered out. The id beats tr.detail-row.open, which is
+   what makes an open sub-row visible - without it a hit-less week whose
+   sub-row was open would stay on screen. */
+#plan-table tr.plan-miss,
+#plan-table tr.plan-miss.open { display: none; }
+
+/* Print what is on screen: a filtered plan prints filtered. The !important
+   is needed against the print rule that forces every sub-row open. */
+@media print {
+    #plan-table tr.plan-miss,
+    #plan-table tr.plan-miss.open { display: none !important; }
+}
+
+/* Hits, painted by the CSS Custom Highlight API (see planSearchRun) - the
+   same look as the note search in notes.html. */
+::highlight(plan-find) {
+    background: rgba(245, 194, 66, 0.42);
+    color: var(--text);
+}

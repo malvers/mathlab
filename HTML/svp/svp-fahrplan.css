@@ -1,0 +1,111 @@
+/* --- Fahrplan der Stunde -------------------------------------------------
+   Ein Stapel aus drei Strichen vor "Inhalt", ohne Rahmen, und dahinter ein
+   rahmenloses Blatt zum Hineinschreiben (Doc, 20.09.2026: "gib mir vor Inhalt
+   eine Hamburger stack ohne Rahmen ... so wie GDW nur mit Edit Capa"). */
+#plan-table .detail-row .sub-head-l .fahr-btn {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    height: 26px;                /* = Hoehe der Reiter daneben */
+    padding: 0 10px 0 0;
+    border: 0;
+    background: none;
+    /* Doc, 20.09.2026: "HH bitte Farbe wie Inhalt" - derselbe Ton wie der offene
+       Reiter daneben, nicht das Grau der schlafenden. */
+    color: var(--head);
+    cursor: pointer;
+    outline: none;
+}
+#plan-table .detail-row .sub-head-l .fahr-btn svg {
+    display: block;
+    width: 16px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+}
+#plan-table .detail-row .sub-head-l .fahr-btn:hover { color: var(--head); }
+/* Steht ein Fahrplan drin, faerbt sich der Stapel gruen - wie der Reiter
+   "Notizen" es tut (Doc, 07.09.2026). */
+#plan-table .detail-row .sub-head-l .fahr-btn.has-fahr { color: var(--phi); }
+
+.fahr-box {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(10, 20, 40, 0.82);
+}
+.fahr-box[hidden] { display: none; }
+/* Rahmenlos: kein Rand, keine Leiste, nur das Blatt. Die Schrift ist vier Mal so
+   gross wie zuvor (Doc, 20.09.2026: "Font 4 x so gross bullets") - der Fahrplan
+   wird im Unterricht gelesen, nicht studiert; dann auf 80 % davon, dann noch einmal
+   auf 90 % (Doc, 20.09.2026: "schrift auf 80%", "Schrift 90%") - macht 46 px. Auf dem
+   Telefon deckelt 6.5vw, sonst stuenden zwei Woerter in der Zeile. */
+.fahr-sheet {
+    width: min(900px, 100%);
+    max-height: calc(100vh - 120px);
+    overflow: auto;
+    box-sizing: border-box;
+    margin: 0;
+    position: relative;             /* das Bild der Woche haengt in der Ecke */
+    padding: 32px 186px 36px 40px;  /* rechts Platz fuer das Bild */
+    border: 0;
+    border-radius: 14px;   /* Doc, 20.09.2026: "die Ecken etwas rounder" */
+    /* Papier, in JEDEM Schema: var(--card)/var(--ink) sind im dunklen Schema beide
+       dunkelblau, das Blatt war damit unlesbar. Leicht blaeuliches Papier mit
+       dunkelblauer Schrift (Doc, 20.09.2026: "Mach den HG leich blauisch und die
+       Schrift dunkel blau") - dasselbe Navy wie in Docs Decks. */
+    background: #d8e6f8;
+    color: #002060;
+    font-size: min(2.88rem, 6.5vw);
+    line-height: 1.25;
+}
+/* Die feste Ueberschrift - etwas ruhiger als die Punkte darunter. */
+.fahr-title {
+    margin: 0 0 0.5em;
+    font-size: 0.86em;
+    font-weight: 600;
+    color: #002060;
+}
+/* Der Gedanke der Woche, oben rechts auf dem Blatt - Klick oeffnet ihn gross. */
+.fahr-gdw {
+    position: absolute;
+    top: 30px;
+    right: 32px;
+    padding: 0;
+    border: 0.5px solid rgba(0, 32, 96, 0.3);
+    border-radius: 3px;
+    background: #fff;
+    line-height: 0;
+    cursor: pointer;
+    overflow: hidden;
+}
+.fahr-gdw[hidden] { display: none; }
+.fahr-gdw img {
+    display: block;
+    width: 124px;                   /* hochkant wie die Folie: 1 : 1.445 */
+    height: 179px;
+    object-fit: cover;
+}
+.fahr-gdw:hover { border-color: rgba(0, 32, 96, 0.7); }
+.fahr-gdw:focus { outline: none; }
+
+.fahr-list {
+    margin: 0;
+    padding-left: 1.1em;            /* Platz fuer die Punkte */
+    list-style: disc;
+    outline: none;
+}
+/* JEDES direkte Kind ist ein Punkt, nicht nur <li>: beim Tippen setzt der Browser
+   in ein contenteditable gern ein <div> statt eines Listenpunkts, und dann fehlte
+   dieser Zeile der Punkt (Doc, 20.09.2026: "meine Eingaben als Bullet list"). */
+.fahr-list > * {
+    display: list-item;
+    margin: 0 0 0.35em;
+}
+.fahr-list > *:last-child { margin-bottom: 0; }

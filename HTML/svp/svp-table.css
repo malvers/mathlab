@@ -1,0 +1,259 @@
+/* Slim dark scrollbar — webkit on the scroll container, Firefox via @supports guard */
+.table-wrap::-webkit-scrollbar { height: 8px; }
+.table-wrap::-webkit-scrollbar-track { background: var(--trough); }
+.table-wrap::-webkit-scrollbar-thumb { background: var(--thumb); border-radius: 4px; }
+@supports (-moz-appearance: none) {
+    .table-wrap { scrollbar-width: thin; scrollbar-color: var(--thumb) var(--trough); }
+}
+
+table { width: 100%; border-collapse: collapse; min-width: 760px; }
+
+thead th {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--head);
+    text-align: left;
+    padding: 12px 6px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+    position: sticky;
+    /* 0, not the head-bar height: .table-wrap is its own scroll container
+       (overflow-x: auto), so this top counts from the wrap, not the window -
+       anything else pushes the header down into the rows (Doc, 27.08.).
+       Auf breiten Schirmen faellt der Scroll-Container weg, siehe unten. */
+    top: 0;
+    z-index: 3;
+    background: var(--panel);
+}
+
+/* Tabellenkopf bleibt beim Scrollen stehen (Doc, 07.09.2026). Er kann das nur,
+   wenn .table-wrap KEIN Scroll-Container ist - "overflow-x: auto" macht die
+   Huelle sonst auch vertikal scrollbar, und dann klebt der Kopf an ihr statt am
+   Fenster. "clip" schneidet genauso ab, oeffnet aber keinen Scrollport.
+   Ab 900px passt die Tabelle (min-width 760px) ohnehin ohne Querscrollen; auf
+   schmalen Schirmen bleibt "auto" und damit das seitliche Wischen. */
+@media (min-width: 900px) {
+    /* clip auf BEIDEN Achsen: nur dann folgt der Beschnitt dem border-radius.
+       Mit "overflow-x: clip; overflow-y: visible" schneidet der Browser bloss
+       senkrecht ab - die eckige Kopfzeile stand dann ueber die runde Ecke der
+       Huelle hinaus (Doc, 07.09.2026: "die Ecke ist nicht perfekt"). */
+    .table-wrap { overflow: clip; }
+    /* --sticky-h ist die Hoehe der Kopfleiste, gesetzt von svp-plan.js */
+    #plan-table thead th { top: var(--sticky-h, 0px); }
+}
+
+tbody td {
+    padding: 9px 6px;
+    border-bottom: 1px solid var(--row-line);
+    font-size: 0.98rem;
+    vertical-align: top;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+
+td.num { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Doc, 09.09.2026: "SW weiter rechts" - die SW-Spalte bekommt links Luft, damit
+   die Nummer nicht am Tabellenrand klebt (und in der laufenden Woche nicht am
+   orangen Balken). Zweite Zelle, nicht erste: davor steht die im Normalfall
+   ausgeblendete Pfeil-Spalte des Verschieben-Modus. */
+#plan-table tbody td:nth-child(2) { padding-left: 16px; }
+/* Doc, 16.09.2026: "alle gleich" - every plan row, weeks and holidays, gets the
+   same height. A KaTeX exponent in the topic made single weeks 1-2 px taller,
+   the holiday rows with their smaller font were 7 px lower. On a table cell the
+   height is a minimum: a topic that wraps (narrow screens) still grows its row.
+   44 px first, then Doc: "mach mal 46". */
+#plan-table tbody tr:not(.detail-row) > td { height: 46px; }
+/* Doc, 19.09.2026: "das ist nicht mehr alles y zentriert" - with the date on
+   one line (DS beside it) the cells sat at the top: text centre 19.5 px in a
+   46 px row, pills 21.5, Aufgaben 22.3 (measured). All on the middle now. */
+#plan-table tbody tr:not(.detail-row) > td { vertical-align: middle; }
+/* the shift arrows needed 2.2 px extra on top only while the cells hung from the
+   top (see td.shift-col); centred, equal padding lines them up with the digits */
+#plan-table tbody tr:not(.detail-row) > td.shift-col { padding-top: 9px; }
+/* Doc, 09.09.2026: "die Buchstaben SW 3px nach rechts", dann zweimal "noch
+   1px" - nur die Ueberschrift, die Zahlen darunter bleiben, wo sie sind. */
+#plan-table thead th:nth-child(2) { padding-left: 21px; }
+/* zweizeilig (siehe setDateText) und so schmal wie ihr Inhalt —
+   der gewonnene Platz geht an die Thema-Spalte */
+td.date { white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
+/* … außer bei Nicht-Datumstexten wie „→ nächstes Schuljahr": die dürfen
+   umbrechen, damit sie die Spalte nicht für alle Wochen aufblähen. */
+td.date.date-wrap { white-space: normal; }
+/* Seit die Thema-Spalte einzeilig ist, ist Platz fuer das Datum am Stueck
+   (Doc, 07.09.2026). setDateText setzt den Umbruch weiter, CSS hebt ihn auf -
+   so bleibt textContent unveraendert und das Speichern der Zelle wie gehabt. */
+td.date br { display: none; }
+#plan-table td.date, #plan-table th.date-col { width: 1%; }
+/* Gruppen-Ansicht (?g=): in der Wochenspalte steht nicht die Kalenderwoche des
+   Plans, sondern der echte Termin dieser Lerngruppe. Welche der beiden
+   Doppelstunden es ist, steht gedaempft darunter - so bleibt die Spalte so
+   schmal wie bisher. */
+/* Doc, 19.09.2026: "nimm 2. DS mal da hin" - on the date's line, right of
+   it, instead of below: one-line rows like the week plans. */
+td.date.termin-date .ds {
+    display: inline;
+    margin-left: 0.6em;
+    white-space: nowrap;
+    vertical-align: 0.12em;   /* small type on the baseline sat 1.5 px low */
+    font-size: 0.78em;
+    opacity: 0.7;
+    letter-spacing: 0.04em;
+}
+/* Bemerkungen sind Randnotizen — sie dürfen umbrechen, damit die
+   Thema-Spalte den Platz bekommt */
+#plan-table td.remark, #plan-table th.remark-col { width: 200px; }
+/* Thema/Inhalte hat Vorrang: es nimmt den gesamten Rest, alle anderen
+   Spalten bleiben bei ihrer Inhaltsbreite */
+#plan-table td.topic, #plan-table th.topic-col { width: 100%; }
+#plan-table td.num, #plan-table th.num-col { width: 1%; }
+/* Ustd. trägt nur "1/13" bzw. "KA 1" — enger setzen, den Rest kriegt Thema */
+#plan-table td.ustd, #plan-table th.ustd-col {
+    width: 1%;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+/* die Kopfzeile ist hier der Engpass, nicht der Inhalt ("1/13") */
+#plan-table th.ustd-col { letter-spacing: 0; }
+/* Doc, 19.09.2026: "Ustd. -> immer Unterrichtsstunden" - in one line the
+   column took 160 px from the topic; the soft hyphen breaks it in two. */
+#plan-table thead th.ustd-col { white-space: normal; hyphens: manual; line-height: 1.25; }
+td.topic { font-weight: 400; min-width: 220px; }
+/* Eine Zeile je Woche (Doc, 07.09.2026): der Rest wird abgeschnitten, der volle
+   Titel steht in der aufgeklappten Zeile. Kein nowrap - das wuerde die Spalte
+   aufblaehen; die Klammer schneidet ohne Einfluss auf die Spaltenbreite. */
+#plan-table td.topic .topic-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+/* beim Bearbeiten muss der ganze Text sichtbar bleiben */
+#plan-table tr.wk-edit td.topic .topic-text {
+    display: block;
+    overflow: visible;
+}
+td.remark { color: var(--muted); font-size: 0.88rem; min-width: 160px; }
+
+.badge {
+    display: inline-block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.05em;
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid;
+    white-space: nowrap;
+}
+
+/* Bereich-Spalte: Pille und WebUntis-Chip NEBENEINANDER (Doc, 07.09.2026:
+   „alles in einer Zeile"). Vorher lagen sie per inline-grid untereinander und
+   gleich breit - das kostete jede Woche mit Chip eine zweite Zeile. */
+#plan-table td.lb { text-align: left; white-space: nowrap; }
+
+.lb-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.lb-cell .badge {
+    /* gleiche Hoehe wie der Chip daneben, Inhalt mittig */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 22px;
+    width: auto;
+}
+
+/* Untis-Orange, aus dem Logo abgegriffen - nicht die Laborfarbe --lambda,
+   das Zeichen soll seine eigene Marke behalten. */
+:root { --untis: rgb(246, 93, 49); }
+
+/* WebUntis-Status: zeigt, ob der Stundeninhalt der Woche im Klassenbuch steht.
+   Gespeist aus <plan>.untis.json, erzeugt von tools/webuntis.js status.
+   Nur im Bearbeiten sichtbar (Doc, 07.09.2026) - fuer Besucher ist er ohne Sinn,
+   und die Wochenzeile bleibt ruhig.
+   Alle Grundregeln bewusst einklassig, damit .is-full/.is-part die Farbe
+   sicher ueberschreiben. */
+/* Kurzes Aufleuchten der Woche, die aus dem Stundenplan angesprungen wurde
+   (?kw=36). Nur ein weicher Rahmenpuls - die Zeile soll auffallen, nicht
+   blinken. */
+@keyframes kw-jump-pulse {
+    0%, 100% { background: transparent; }
+    18% { background: rgba(245, 194, 66, 0.22); }
+}
+
+tr.kw-jump > td { animation: kw-jump-pulse 1.3s ease-in-out 2; }
+
+@media (prefers-reduced-motion: reduce) {
+    tr.kw-jump > td { animation: none; background: rgba(245, 194, 66, 0.16); }
+}
+
+/* Laufende Kalenderwoche: leiser Anstrich plus ein Balken in Lambda an der
+   linken Kante, damit die Zeile beim Ueberfliegen sofort auffaellt, ohne die
+   Lernbereich-Farben zu uebertoenen (Doc, 08.09.2026).
+   Der Balken sitzt auf der zweiten Zelle, nicht der ersten: die erste ist die
+   Pfeil-Spalte des Verschieben-Modus und normalerweise display:none.
+   Balken und Anstrich beide in Lambda-Orange: kurz auf Header-Farbe und Blau
+   umgestellt, dann zurueck - Doc, 08.09.2026: "geh zu Deiner Loesung zurueck". */
+/* Doc, 09.09.2026: "mach mal einen Verlauf, nach rechts fast weiss" - der
+   Anstrich der laufenden Woche liegt nicht mehr flach ueber der ganzen Zeile,
+   sondern laeuft vom Balken nach rechts aus. Ziel ist transparent, nicht Weiss:
+   dann ist es im hellen Schema der fast weisse Seitengrund und im dunklen der
+   dunkle Zeilengrund - eine Regel fuer beide. */
+/* Der Verlauf liegt auf der ZEILE, nicht auf den Zellen: pro Zelle finge er
+   sonst jedes Mal von vorn an und die Woche bekaeme sieben kleine Verlaeufe. */
+/* Doc, 16.09.2026: "der fade out darf nicht zu sooo hell gehen" - the gradient
+   no longer runs out to transparent but keeps a visible tint on the right. */
+/* Doc, 16.09.2026: "mach das rechts so wie links und in der Mitte fast weiss" -
+   symmetric: full tint and bar at both edges, almost transparent in the middle. */
+tr.kw-now {
+    background-image: linear-gradient(90deg,
+        rgba(var(--g-week), var(--a-week-edge)) 0%,
+        rgba(var(--g-week), var(--a-week-mid)) 50%,
+        rgba(var(--g-week), var(--a-week-edge)) 100%);
+}
+/* Doc, 09.09.2026: "mach den senkrecht mal orange (unser) und 1px duenner",
+   dann "orange satter" - 3 px werden 2 px, und der Balken traegt nicht
+   var(--lambda) (im hellen Schema seit 10.09.2026 das Pillen-Blau, davor ein
+   Ocker), sondern ein satteres Lambda: gleicher Farbton, mehr Tiefe -
+   auf 2 px Breite traegt das helle rgb(245,194,66) zu wenig. */
+tr.kw-now > td:nth-child(2) { box-shadow: inset 2px 0 0 rgb(240, 160, 24); }
+tr.kw-now > td:last-child { box-shadow: inset -2px 0 0 rgb(240, 160, 24); }
+tr.kw-now-sub {
+    background-image: linear-gradient(90deg,
+        rgba(var(--g-week), calc(var(--a-week-edge) * 0.4)) 0%,
+        rgba(var(--g-week), calc(var(--a-week-mid) * 0.4)) 50%,
+        rgba(var(--g-week), calc(var(--a-week-edge) * 0.4)) 100%);
+}
+/* Doc, 19.09.2026: "hier bitte auch wie Ferien nicht ganz so trans" - in the
+   dark the middle keeps a tint, a third of the edges like the holiday rows. */
+html:not(.svp-light) { --a-week-mid: 0.1; --a-ferien-mid: 0.2; }   /* the dark scheme's middles */
+html:not(.svp-light) tr.kw-now {
+    background-image: linear-gradient(90deg,
+        rgba(var(--g-week), var(--a-week-edge)) 0%,
+        rgba(var(--g-week), var(--a-week-mid)) 50%,
+        rgba(var(--g-week), var(--a-week-edge)) 100%);
+}
+html:not(.svp-light) tr.kw-now-sub {
+    background-image: linear-gradient(90deg,
+        rgba(var(--g-week), calc(var(--a-week-edge) * 0.4)) 0%,
+        rgba(var(--g-week), calc(var(--a-week-mid) * 0.4)) 50%,
+        rgba(var(--g-week), calc(var(--a-week-edge) * 0.4)) 100%);
+}
+/* Weeks that are over (svp-plan.js markPastWeeks) - Doc, 16.09.2026: "mach die,
+   die schon gelaufen sind gaaaaaanz leicht grau". Neutral grey with little alpha,
+   so it reads as a faint grey on the white card and on the dark blue one. */
+/* 0.06 first: 247 against 254 on the white card, Doc: "nicht sichtbar". */
+/* Then "auch Verlauf wie Ferien & Co": same symmetric shape as the current week
+   and the holidays - the grey at both edges, almost nothing in the middle.
+   On the row, not the cells, so it runs once across the whole week. */
+tr.kw-past {
+    background-image: linear-gradient(90deg,
+        rgba(128, 128, 128, 0.13) 0%,
+        rgba(128, 128, 128, 0.06) 50%,   /* 0.02 first, Doc: "in der Mitte weniger weiss" */
+        rgba(128, 128, 128, 0.13) 100%);
+}

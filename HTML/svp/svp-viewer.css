@@ -1,0 +1,174 @@
+/* ------------------------------------------------------------------
+   Material viewer: Office/SharePoint links open framed inside the page.
+   A browser popup always keeps its address bar, so this is the only way
+   to a clean, sanely sized presentation window.
+   ------------------------------------------------------------------ */
+.mat-view-wrap {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    background: rgba(8, 20, 42, 0.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+.mat-view {
+    /* 16:9 without letterboxing: the box follows the deck, not the other way
+       round. --mv-bar is the viewer's own toolbar (inside the frame), --mv-head
+       our title row — both sit on top of the 16:9 slide area. */
+    --mv-head: 46px;
+    --mv-bar: 30px;   /* measured: the player's own bottom bar, 31.08.2026 */
+    --mv-crop: 3px;
+    --mv-w: min(1280px, 96vw, calc((88vh - var(--mv-head) - var(--mv-bar)) * 16 / 9));
+    display: flex;
+    flex-direction: column;
+    width: var(--mv-w);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 18px 60px rgba(8, 20, 42, 0.55);
+    overflow: hidden;
+}
+.mat-view .mv-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 10px 8px 14px;
+    border-bottom: 1px solid var(--line);
+}
+.mat-view .mv-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.mat-view .mv-tools { display: flex; gap: 6px; flex: none; }
+.mat-view .mv-btn {
+    font: inherit;
+    font-size: 0.95rem;
+    line-height: 1;
+    padding: 6px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+.mat-view .mv-btn:hover { background: rgba(121, 158, 49, 0.18); }
+/* The player centres the slide in its own black stage, so every pixel our box
+   is taller than deck + bar comes back as a black band above AND below (that
+   was the 34px guess for the bar: 2px each). --mv-bar now carries the measured
+   height; --mv-crop only swallows sub-pixel rounding - it grows the frame and
+   hides the same amount again, so it costs no slide. */
+.mat-view .mv-stage {
+    flex: none;
+    position: relative;   /* Bezug fuer die Ladeanzeige darin */
+    width: 100%;
+    height: calc(var(--mv-w) * 9 / 16 + var(--mv-bar));
+    overflow: hidden;
+    background: rgb(14, 36, 78);
+}
+.mat-view .mv-frame {
+    /* a real height, not insets: an absolutely positioned iframe is a replaced
+       element and would fall back to its 150px intrinsic height */
+    display: block;
+    width: 100%;
+    height: calc(100% + 2 * var(--mv-crop));
+    margin-top: calc(-1 * var(--mv-crop));
+    border: 0;
+    background: rgb(14, 36, 78);
+}
+
+/* Der eingebaute Abspieler braucht keinen der Kniffe, die der Office-Rahmen
+   verlangt: keine Werkzeugleiste, die abgeschnitten werden muesste, und keine
+   schwarze Buehne, aus der ein Haarstrich stehen bleibt. Also volle 16:9 und
+   kein Versatz - object-fit haelt ein abweichendes Seitenverhaeltnis heil,
+   statt das Bild zu verzerren. */
+.mat-view .mv-stage-video { height: calc(var(--mv-w) * 9 / 16); }
+.mat-view .mv-video {
+    height: 100%;
+    margin-top: 0;
+    object-fit: contain;
+    background: rgb(14, 36, 78);
+}
+
+/* phones: use the whole screen, the deck needs the room */
+@media (max-width: 760px) {
+    .mat-view-wrap { padding: 0; }
+    .mat-view { width: 100vw; height: 100dvh; border-radius: 0; border: 0; }
+    .mat-view .mv-stage { height: calc(100dvh - var(--mv-head)); }
+}
+
+/* Auf dem Handy fuellt ein Office-Blatt zu Recht den ganzen Schirm. Ein Film
+   soll dagegen nur so hoch sein wie sein Bild: sonst spannt die Buehne ueber
+   die volle Hoehe, das Bild sitzt per object-fit in der Mitte, und die
+   Bedienknoepfe des Abspielers kleben ganz unten in einer leeren blauen
+   Flaeche (gemessen 08.09.2026: Bild 390x219 in einem Kasten von 390x798). */
+@media (max-width: 760px) {
+    .mat-view:has(.mv-stage-video) { height: auto; }
+    .mat-view .mv-stage-video { height: calc(100vw * 9 / 16); }
+}
+
+@media print { .mat-view-wrap { display: none !important; } }
+
+/* Material pills: the macOS app icons instead of emoji — the kids recognise
+   them from their own Dock. They carry their own transparent margin, so they
+   are set a touch larger than a drawn glyph would be. */
+.mat-ico {
+    /* deliberately bigger than the label: the icon is what the kids aim at */
+    width: 2.53em;
+    height: 2.53em;
+    margin-left: -2px;   /* optical: a hair to the left sits better in the pill */
+    flex: none;
+}
+/* Drawn glyphs (YouTube, plain link) need the transparent frame the macOS app
+   icons bring along, otherwise they tower over them. */
+.mat-ico-drawn { padding: 0.42em; box-sizing: border-box; }
+/* Der Pfeil zeichnet nur 16 der 24 Einheiten seines Kastens aus, YouTube und
+   die Kamera fuellen ihn ganz. Mit demselben Innenabstand kam er deshalb nur
+   mit 10,8 px Tinte an statt mit 16,2 und sah verloren aus (Doc, 08.09.2026:
+   "das Link icon ist zu klein"). Ohne Innenabstand trifft er die 16,2 px der
+   anderen gezeichneten Zeichen genau. */
+.mat-ico-link { padding: 0.125em; }   /* 14,6 px Tinte - ohne Abstand waren 16,2 einen Tick zu viel */
+/* svp-plan.js paints it rgb(120,160,220) as an attribute; CSS wins over that */
+html.svp-grey .mat-ico-link path { fill: rgb(var(--tint)); }
+/* Die Kamera fuer Videodateien traegt kein Markenrot und kein Programmlogo,
+   also muss sie sich dem Thema beugen: dunkelblau auf hellem Grund (Doc,
+   08.09.2026: "und dunkelblau pls"), aufgehellt auf dunklem - sonst ist sie
+   in einem der beiden Themen kaum zu sehen. */
+.mat-ico-movie path { fill: rgb(var(--tint-text)); }
+html.svp-light .mat-ico-movie path { fill: rgb(20, 44, 92); }
+/* A flex row instead of a text line: every material pill is then exactly as
+   high as its icon plus the padding — an app icon and a drawn one give the
+   same height, and both sit centred next to the label. The padding is for the
+   text; the icon may sit close to the left edge. */
+.badge:has(> .mat-ico),
+.mat-block a.mat-pill:has(> .mat-ico) {   /* beats the inline-block set above */
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2em;
+    padding: 2px 8px 2px 4px;
+    vertical-align: middle;
+}
+.mat-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mat-view .mv-title { display: inline-flex; align-items: center; gap: 0.3em; }
+.mat-view .mv-title .mat-ico { width: 2.31em; height: 2.31em; }
+
+/* Zweig letter inside a class code: G = Gesundheit, S = Sozial, W = Wirtschaft.
+   Only the one letter that tells the branches apart is coloured, the rest of
+   the code stays in the heading colour. Tokens, so both themes are covered. */
+.zw { font-weight: inherit; }
+/* Doc, 16.09.2026, in dieser Reihenfolge: "deutlicher Orange Gruen
+   Dunkelblau" -> "bitte unser Farben" -> "in Dunkel fast, aber nimm da CYAN
+   fuer W" -> "nimm in Hell exakt die Farben von Dunkel". Also EIN Satz Werte
+   fuer beide Schemata, pur aus der Hauspalette, ohne Deckungs- oder
+   Helligkeitstricks.
+   Zum Wissen, falls es je jemand nachmisst: auf Weiss traegt lambda nur
+   1,6:1 und cyan 2,0:1 - das ist gewollt hell, nicht durchsichtig. */
+.zw-g { color: rgb(245, 194, 66); }   /* lambda */
+.zw-s { color: rgb(121, 158, 49); }   /* phi */
+.zw-w { color: rgb(90, 190, 230); }   /* cyan */

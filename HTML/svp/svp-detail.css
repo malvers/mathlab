@@ -1,0 +1,427 @@
+tr.expandable { cursor: pointer; }
+
+/* Der Pfeil steht ganz vorn, vor der Wochennummer (Doc, 07.09.2026). Inline statt
+   absolut: die Zeile ist einzeilig, er kann also nicht mehr umbrechen, und die
+   Nr-Spalte waechst einfach um seine Breite mit. */
+/* Eine Leerwoche hat nichts aufzuklappen, braucht den Platz des Pfeils aber
+   trotzdem - sonst stuende ihre Nummer weiter links als die der Wochen
+   darueber und darunter (Doc, 20.09.2026: "zahlen untereinander pls"). Sie
+   bekommt darum ein leeres .chev und faellt unter dieselbe Regel; eine zweite
+   Stelle mit denselben 12 px waere die zweite Wahrheit. */
+tr.expandable td.num:first-of-type,
+tr.leerwoche td.num:first-of-type { white-space: nowrap; }
+
+tr.expandable .chev,
+tr.leerwoche .chev {
+    display: inline-block;
+    width: 12px;
+    margin-right: 4px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.95rem;
+    transition: transform 0.15s;
+}
+
+tr.expandable.open .chev { transform: rotate(90deg); }
+
+tr.detail-row { display: none; }
+tr.detail-row.open { display: table-row; }
+
+tr.detail-row td {
+    background: var(--sunken);
+    padding: 4px 6px 12px 6px;
+}
+
+/* Die Aufklappzeile nutzt die ganze Breite (Doc, 07.09.2026: „links ist soviel
+   Platz!") - eine Zelle ueber alle Spalten, Inhalt am linken Tabellenrand. */
+/* Doc, 20.09.2026: "MAt rechtsbuendig bitte". Rechts nur 6 px wie in jeder
+   anderen Zelle - dann endet die Aufklappzeile auf derselben Kante wie die
+   Vorschaubilder der Wochenzeile (gemessen: Zelle 144-1342, Bild bis 1336).
+   Links bleiben die 14 px, davon lebt die Einrueckung der Stichpunkte. */
+tr.detail-row td { padding-left: 14px; padding-right: 6px; }
+
+tr.detail-row ul {
+    margin: 6px 0 2px 0;
+    padding-left: 34px;
+}
+
+tr.detail-row li {
+    font-size: 0.92rem;
+    color: var(--muted);
+    padding: 2px 0;
+}
+
+/* Blau wie die Materialpillen und die Werkzeugknoepfe (Doc, 08.09.2026:
+   "bullets blau"). Nur die Punkte der Aufklappzeile - die Liste im
+   LB-Panel behaelt ihr Orange. */
+tr.detail-row li::marker { color: rgb(var(--tint-text)); }
+html.svp-light tr.detail-row li::marker { color: rgb(30, 60, 120); }
+
+/* --- sub-row tabs: "Inhalt" (bullets) and "Notizen" (free text) ----------
+   Same 34px indent as the bullet list, so tabs, bullets and the topic text
+   above all stand on one line. */
+.sub-tabs {
+    display: flex;
+    gap: 2px;
+    margin: 0;
+}
+
+.sub-tab {
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    /* Der Unterstrich des aktiven Reiters soll auf der grauen Querlinie der
+       Kopfhaelfte liegen, auf deren UNTERkante (Doc, 08.09.2026).
+       NICHT ueber den Innenabstand loesen - das war der erste Versuch und es
+       konvergiert nicht: sobald der Reiter hoeher wird als die 26 px
+       Mindesthoehe der Haelfte, waechst die Haelfte mit, die graue Linie
+       wandert nach unten und der Strich laeuft ihr ewig hinterher.
+       Stattdessen bekommt der Reiter GENAU die Hoehe der Haelfte, damit sie
+       nie durch ihn waechst, und wird um die Staerke der Linie nach unten
+       geschoben, sodass sein 2 px starker Rand die 1 px starke Linie
+       ueberdeckt und mit ihr unten abschliesst. */
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    height: 26px;             /* = min-height von .sub-head-l/.sub-head-r */
+    position: relative;
+    top: 1px;                 /* = Staerke der grauen Linie */
+    padding: 0 10px;
+    cursor: pointer;
+}
+
+.sub-tab:hover { color: var(--text); }
+/* Woche ohne Film: der Reiter steht da, ist aber grau und tot - so springt
+   die Kopfzeile nicht, je nachdem ob eine Woche einen Film hat. */
+.sub-tab:disabled { opacity: 0.4; cursor: default; }
+.sub-tab:disabled:hover { color: var(--muted); }
+/* count after the tab name (Doc, 15.09.2026: "klein dahinter", then "Arial oder Hel") -
+   small and plain, it must not shout like the Orbitron caps of the tab itself */
+.sub-tab .sub-count {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    margin-left: 0.35em;
+}
+/* Nach einem Mausklick blieb ein blauer Rahmen um den Reiter stehen - der
+   Fokusring des Browsers (Doc, 08.09.2026: "wo kommt der blaue Rahmen her?").
+   Fuer die Maus weg, fuer die Tastatur bleibt er: ohne ihn waere nicht mehr
+   zu sehen, wo man beim Durchtabben steht. */
+.sub-tab:focus { outline: none; }
+.sub-tab:focus-visible { outline: 2px solid var(--head); outline-offset: 2px; border-radius: 4px; }
+/* Aktiver Reiter in der Farbe der Tabellenkopfzeile, Unterstrich ebenso
+   (Doc, 07.09.2026) - er ist 2 px stark und hebt sich dadurch von der
+   1-px-Linie der Kopfhaelfte ab. */
+.sub-tab.on { color: var(--head); border-bottom-color: var(--head); }
+/* Traegt die Woche eine Notiz, steht der Reiter gruen - auch wenn gerade
+   INHALT offen ist (Doc, 07.09.2026). Steht nach .on, gewinnt also. */
+.sub-tab.has-notes { color: var(--phi); }
+
+/* Stift am rechten Ende der Materialzeile (Doc, 09.09.2026): schaltet die
+   ganze Wochenzeile ins Bearbeiten. margin-left:auto schiebt ihn ans Ende der
+   Haelfte, die 26 px sind dieselben wie beim Reiter - sonst waechst die
+   Kopfhaelfte durch ihn und die graue Linie wandert nach unten. */
+.sub-edit {
+    margin-left: auto;
+    background: none;
+    border: 0;
+    color: var(--muted);
+    /* Eine Spur groesser als die Reiter daneben (Doc, 09.09.2026: "'n tick
+       groesser") - das Zeichen ist zierlicher als Grossbuchstaben. */
+    font-size: 0.95rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    height: 26px;
+    padding: 0 6px;
+    /* An der x-Achse gespiegelt (Doc, 09.09.2026: "spiegel x"): die Spitze des
+       Stifts zeigt dann nach rechts unten statt nach links unten. Nur gemalt,
+       die Zeile misst weiter unveraendert. */
+    transform: scaleX(-1);
+    cursor: pointer;
+}
+.sub-edit:hover { color: var(--head); }
+/* Wie bei den Reitern: kein Ring nach dem Mausklick, aber einer beim Tabben. */
+.sub-edit:focus { outline: none; }
+.sub-edit:focus-visible { outline: 2px solid var(--head); outline-offset: 2px; border-radius: 4px; }
+/* Nur in der Woche, die gerade bearbeitet wird, weicht er Speichern|Abbrechen.
+   Alle anderen Wochen behalten ihren Stift (Doc, 09.09.2026: "der Stift soll
+   immer in allen Wochen sein") - ein Klick dort holt das Bearbeiten herueber,
+   Getipptes bleibt dabei erhalten und wird beim Speichern mitgeschrieben. */
+tr.wk-edit .sub-edit { display: none; }
+@media print { .sub-edit { display: none; } }
+
+/* Speichern | Abbrechen am rechten Ende derselben Zeile, nur in der Woche, die
+   gerade bearbeitet wird (Doc, 09.09.2026: "zwei kleine"). Beschriftung wie die
+   Reiter daneben - klein, Orbitron, Grossbuchstaben -, aber mit Rand, damit sie
+   als Knoepfe und nicht als weitere Reiter gelesen werden. */
+.sub-done { display: none; margin-left: auto; align-items: center; gap: 6px; height: 26px; }
+/* Ein Haarstrich trennt die Werkzeuge von den beiden Knoepfen - sonst liest
+   sich die Leiste wie eine einzige Knopfreihe. */
+.sub-mat-tools { padding-right: 8px; margin-right: 2px; border-right: 1px solid var(--line); }
+tr.wk-edit .sub-done { display: inline-flex; }
+@media print { .sub-done { display: none !important; } }
+
+.sub-done-btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    background: none;
+    cursor: pointer;
+}
+/* Unser Blau (Doc, 09.09.2026: "nimm unser blau") - derselbe Ton wie die
+   Werkzeugknoepfe und die Materialpillen, damit die Zeile nicht mit einer
+   dritten Farbe anfaengt. Speichern ist gefuellt, Abbrechen nur umrandet: die
+   Fuellung zeigt den Weg nach vorn, ohne dass eine zweite Farbe noetig waere. */
+.sub-save {
+    color: var(--text);
+    background: rgba(var(--tint), 0.16);
+    border-color: rgba(var(--tint), 0.5);
+}
+.sub-save:hover {
+    background: rgba(var(--tint), 0.3);
+    border-color: rgb(var(--tint));
+}
+.sub-cancel { color: var(--muted); border-color: rgba(var(--tint), 0.35); }
+.sub-cancel:hover { color: var(--text); border-color: rgba(var(--tint), 0.7); }
+.sub-done-btn:focus { outline: none; }
+.sub-done-btn:focus-visible { outline: 2px solid var(--head); outline-offset: 2px; }
+
+/* --- Hervorhebungen in den Inhalt-Stichpunkten ---------------------------
+   Set with the little strip right of the tabs; stored as <b>/<i>/<c1..3> in
+   the bullet source, so they survive a save and reach the exports. The hues
+   are the theme tokens, so they follow light/dark like everything else. */
+.hl-l { color: var(--lambda); }
+.hl-y { color: var(--ypsilon); }
+.hl-p { color: var(--phi); }
+
+/* Only in edit mode, and only while the Inhalt tab is open — the Notizen are
+   plain text and would drop the markup again on the next save. */
+.sub-tools {
+    display: none;
+    align-items: center;
+    gap: 1px;
+    margin-left: 8px;
+    padding-left: 8px;
+    border-left: 1px solid var(--line);
+}
+
+tr.wk-edit .sub-tabs:not(.on-notizen) .sub-tools { display: inline-flex; }
+
+.sub-tool {
+    background: none;
+    border: 0;
+    border-radius: 4px;
+    color: var(--muted);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.62rem;
+    line-height: 1;
+    padding: 3px 6px;
+    cursor: pointer;
+    opacity: 0.75;
+    transition: opacity 0.12s, background 0.12s;
+}
+
+.sub-tool:hover { opacity: 1; background: var(--sunken); }
+.sub-tool:active { transform: translateY(1px); }
+.sub-tool.tool-b { font-weight: 800; }
+.sub-tool.tool-i { font-style: italic; }
+
+/* Orbitron has no dot and no cross — those two buttons take a system face. */
+.sub-tool.tool-c1, .sub-tool.tool-c2, .sub-tool.tool-c3, .sub-tool.tool-off {
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.sub-tool.tool-c1, .sub-tool.tool-c2, .sub-tool.tool-c3 {
+    font-size: 0.8rem;
+    padding: 2px 4px;
+    opacity: 0.9;
+}
+
+.sub-tool.tool-c1 { color: var(--lambda); }
+.sub-tool.tool-c2 { color: var(--ypsilon); }
+.sub-tool.tool-c3 { color: var(--phi); }
+/* the cross sits low on its own baseline — lift it back onto the row */
+.sub-tool.tool-off { font-size: 0.7rem; position: relative; top: -2px; }
+
+.notes-body {
+    /* linksbuendig mit den Reitern darueber (Doc, 07.09.2026) - die frueheren
+       34 px richteten sich nach dem Chevron, der jetzt ganz vorn steht. */
+    margin-left: 0;
+    padding: 4px 6px;
+    min-height: 1.6em;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: var(--muted);
+    white-space: pre-wrap;
+    outline: none;
+}
+
+/* Placeholder while the field is empty - :empty only holds as long as the
+   browser has not put a stray <br> in, which is why editing gets a frame too. */
+.notes-body:empty::before {
+    content: attr(data-ph);
+    opacity: 0.45;
+}
+
+/* The field is live whenever Doc is logged in, so it always looks writable -
+   a quiet frame that only wakes up on hover and focus. */
+.notes-body[contenteditable="true"] {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    min-height: 3.4em;
+    color: var(--text);
+    cursor: text;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.notes-body[contenteditable="true"]:hover { border-color: var(--muted); }
+
+.notes-body[contenteditable="true"]:focus {
+    border-color: var(--lambda);
+    background: var(--sunken);
+}
+
+/* Das Notizfeld ist immer beschreibbar - es speichert fuer sich, unabhaengig
+   vom Bearbeiten. Den gestrichelten Bearbeiten-Rahmen soll es aber nur in der
+   Woche tragen, die wirklich bearbeitet wird: sonst saehe beim Stift die halbe
+   Seite nach Bearbeiten aus. */
+.editing tr.detail-row:not(.wk-edit) .notes-body[contenteditable="true"] {
+    outline: none;
+}
+
+/* KaTeX inline math: tone the default 1.21em down so formulas sit flush with
+   the surrounding cell text instead of blowing up the line height. */
+#plan-table .katex { font-size: 1.05em; }
+
+/* Ferienzeile (Doc, 09.09.2026: "die Farbe passt ni ... schrift groesser"):
+   Cyan gehoert seit den Bereich-Pillen zu Lernbereich 2 - die Ferien haben
+   damit ausgerechnet die Farbe eines Stoffgebiets getragen. Jetzt neutral in
+   der gedaempften Schriftfarbe auf einem blaugrauen Band, und eine Stufe
+   groesser (0.68 -> 0.8 rem). */
+/* Doc, 15.09.2026: "Ferien alle immer gruen" -> phi green at 60 % opacity,
+   then "schrift dunkelblau". Previous values kept below. */
+/* Doc, 16.09.2026: "hier genauso" - same look as the current week row:
+   green tint and bar at both edges, almost transparent in the middle.
+   The row is one colspan cell, so the gradient can sit on the td. */
+tr.ferien td {
+    /* background: rgba(var(--tint), 0.07); color: var(--muted); */
+    /* background: rgba(var(--g-ferien), 0.6); */
+    background-image: linear-gradient(90deg,
+        rgba(var(--g-ferien), var(--a-ferien-edge)) 0%,
+        rgba(var(--g-ferien), var(--a-ferien-mid)) 50%,
+        rgba(var(--g-ferien), var(--a-ferien-edge)) 100%);
+    /* Doc, 19.09.2026: "da ist ein micro Spalt" - the cell ground does not
+       reach under the collapsed table border, so the 1 px row line showed the
+       white card and cut the side bars. No border here; the row line is an
+       inset green hairline instead, lying UNDER the two bars. */
+    border-bottom: 0;
+    --ferien-bars: inset 2px 0 0 rgb(var(--g-ferien)), inset -2px 0 0 rgb(var(--g-ferien)),
+        inset 0 -1px 0 rgba(var(--g-ferien), 0.35);
+    box-shadow: var(--ferien-bars);
+    color: rgb(20, 44, 92);   /* same dark blue as .mat-ico-movie in light mode */
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-align: center;
+    vertical-align: middle;   /* the row is taller than the small holiday text */
+    padding: 9px 12px;
+}
+/* Dark scheme: the middle is now the dark row ground, dark blue would vanish.
+   (Doc, 19.09.2026: tried the fade over white here - "nee, zurück") */
+html:not(.svp-light) tr.ferien td { color: var(--text); }
+/* Doc, 19.09.2026: "mach mal in der mitte weniger trans" - in the dark the
+   middle keeps a green tint: 0.2 instead of 0.05. */
+html:not(.svp-light) tr.ferien td {
+    background-image: linear-gradient(90deg,
+        rgba(var(--g-ferien), var(--a-ferien-edge)) 0%,
+        rgba(var(--g-ferien), var(--a-ferien-mid)) 50%,
+        rgba(var(--g-ferien), var(--a-ferien-edge)) 100%);
+}
+
+/* Cursor of the arrow keys (svp-plan.js, Doc 19.09.2026): a line above and
+   below the row. Box shadows, because an outline on a tr is not drawn
+   everywhere - and the rows that already carry edge bars keep them. */
+#plan-table tr.kb-cursor {
+    --kb-lines: inset 0 2px 0 var(--cyan), inset 0 -2px 0 var(--cyan);
+}
+#plan-table tr.kb-cursor > td { box-shadow: var(--kb-lines); }
+#plan-table tr.kw-now.kb-cursor > td:nth-child(2) { box-shadow: var(--kb-lines), inset 2px 0 0 rgb(240, 160, 24); }
+#plan-table tr.kw-now.kb-cursor > td:last-child { box-shadow: var(--kb-lines), inset -2px 0 0 rgb(240, 160, 24); }
+#plan-table tr.ferien.kb-cursor > td { box-shadow: var(--kb-lines), var(--ferien-bars); }
+@media print { #plan-table tr.kb-cursor > td { box-shadow: none; } }
+
+/* Doc, 19.09.2026: a holiday row folds the weeks behind it (svp-plan.js, key F
+   folds all). The chevron stands where the week chevrons stand, absolute so
+   the holiday text stays centred. It points down while the weeks show. */
+tr.ferien.foldable { cursor: pointer; }
+tr.ferien.foldable td { position: relative; }
+tr.ferien .chev {
+    position: absolute;
+    left: 16px;   /* = padding-left of the first week cell, measured 19.09.2026 */
+    top: 50%;
+    width: 12px;
+    text-align: center;
+    font-family: 'Outfit', sans-serif;   /* same glyph as the week chevrons, not Orbitron */
+    font-size: 0.95rem;
+    letter-spacing: 0;
+    line-height: 1;
+    opacity: 0.75;
+    transform: translateY(-50%) rotate(90deg);
+    transition: transform 0.15s;
+}
+tr.ferien.folded .chev { transform: translateY(-50%); }
+/* The Sommerferien before the school year sit in the thead, above the column
+   heads (svp-plan.js). A td, so it is not sticky and scrolls away; the height
+   is the one the plan rows get from the tbody rules. */
+#plan-table thead tr.ferien > td { height: 46px; }
+/* Folded weeks are gone completely. The id beats tr.detail-row.open. A running
+   search and the shift mode look at the whole plan, so both lift the fold. */
+body:not(.plan-searching):not(.shifting) #plan-table tr.ferien-folded,
+body:not(.plan-searching):not(.shifting) #plan-table tr.ferien-folded.open { display: none; }
+/* Alle Vortraege vergeben: der Knopf im Kopf traegt dann das Gruen der
+   Vortraege selbst (Doc, 20.09.2026: "mach den so gruen wie die Vortraege").
+   --phi ist dasselbe Gruen, das die Vortragszeile und die WB-Pille benutzen -
+   eine eigene Farbe waere die zweite Wahrheit. */
+.action.vortraege-voll {
+    color: var(--phi);
+    border-color: rgba(var(--g-green), 0.55);
+    background: rgba(var(--g-green), 0.1);
+}
+
+/* Every block folded: only holiday rows are left, the column heads go too. */
+body:not(.plan-searching):not(.shifting) #plan-table.all-folded thead tr:not(.ferien) { display: none; }
+
+/* A week without a date for this group (Doc, 20.09.2026: "wenn ich die in der
+   Woche nicht habe lass die Woche leer"). It carries SW and KW and nothing
+   else, and it stands as tall as a real week with digits of the same size -
+   Doc, 20.09.2026: "mach die Leerwochen genauso hoch wie die anderen und die
+   Zahl (KW) auch SW auch". Only the very faint ground says that nothing
+   happens here. */
+#plan-table tbody tr.leerwoche > td { background: rgba(var(--tint), 0.03); }
+
+footer.page-foot {
+    max-width: 1200px;
+    margin: 18px auto 0;
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+
+footer.page-foot a { color: var(--cyan); text-decoration: none; }
+footer.page-foot a:hover { text-decoration: underline; }
+
+/* ---- Print export (svp-plan.js builds #svp-export on beforeprint) ------ */

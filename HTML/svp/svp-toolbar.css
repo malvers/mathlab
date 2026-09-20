@@ -1,0 +1,322 @@
+/* Kopf + Werkzeugleiste bleiben beim Scrollen oben stehen, der Plan zieht
+   darunter durch. Full-bleed ueber die Body-Polsterung wie die Nav-Leiste,
+   damit nichts seitlich daneben durchscheint. --sticky-h wird von
+   svp-plan.js gesetzt (Hoehe der Leiste) und richtet den Tabellenkopf aus. */
+.plan-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--bg);
+    margin: -10px calc(-1 * clamp(12px, 3vw, 40px)) 0;
+    padding: 10px clamp(12px, 3vw, 40px) 14px;
+    transition: box-shadow 0.15s ease;
+}
+
+.plan-sticky.stuck { box-shadow: 0 12px 18px -14px var(--shadow); }
+
+/* Die Eigenabstaende der beiden Bloecke wandern in die Polsterung der Huelle */
+.plan-sticky header.page-head { margin-bottom: 16px; }
+/* Doc, 19.09.2026: the subtitle "ein Stück höher" - on the plan pages it
+   follows the title without the 6 px of the other pages. */
+.plan-sticky header.page-head .head-row { margin-bottom: 0; }
+.plan-sticky .toolbar { margin-bottom: 0; }
+
+@media print {
+    .plan-sticky { position: static; margin: 0; padding: 0; box-shadow: none; }
+}
+
+.toolbar {
+    max-width: 1200px;
+    margin: 0 auto 14px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    /* Doc, 09.09.2026: "linie raus (test)" - die dezente Trennlinie ueber der
+       Leiste ist weg, der Abstand zum Kopf bleibt. Zum Zurueckholen genuegt es,
+       die vier Hintergrund-Zeilen wieder einzuschalten:
+         background-image: linear-gradient(90deg, transparent, var(--line), transparent);
+         background-size: 100% 1px;
+         background-repeat: no-repeat;
+         background-position: top center;                                      */
+    /* Doc, 09.09.2026: "6px hoch" - ohne die Linie war das Polster darueber zu
+       viel Luft, die Leiste (und alles darunter) rueckt 6 px nach oben. */
+    padding-top: 10px;
+}
+
+/* Doc, 09.09.2026: "gleiche Breite fix" - die drei staendig sichtbaren Knoepfe
+   der Werkzeugleiste sind gleich breit und bleiben es: ihre Beschriftungen
+   wechseln ("Wochen auf"/"Wochen zu", "Bearbeiten"/"Speichern"), und ohne feste
+   Breite ruckelte die Leiste bei jedem Klick. 120 px ist die breiteste der
+   Beschriftungen ("Wochen auf" 117.4 px, gemessen mit _measure.html).
+   Die nur im Bearbeiten-Modus sichtbaren Knoepfe (Zuruecksetzen, Verschieben,
+   Abbrechen) tragen laengere Woerter und behalten ihre Inhaltsbreite. */
+.toolbar > .export-drop > button.export-toggle,
+.toolbar > button[onclick*="togglePlanDetails"],
+.toolbar > button[onclick*="togglePlanEdit"] {
+    width: 120px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+/* Aktionsfarbe bleibt Grün, aber dezent: flach statt Verlauf, Text in der
+   normalen Schriftfarbe. Kräftig wird erst der Hover. */
+button.action {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    /* fixed line box: an emoji (🔒, 🔑) carries much taller font metrics than
+       Orbitron and would otherwise make its button higher than its neighbours */
+    line-height: 1.25;
+    letter-spacing: 0.06em;
+    color: var(--text);
+    /* Blau statt Gruen (Doc, 08.09.2026: "die auch so") - derselbe Ton wie die
+       Materialpillen, damit Werkzeugleiste und Plan zusammengehoeren. Der
+       orange und der graue Knopf weiter unten bleiben, was sie sind. */
+    background: rgba(var(--g-btn), 0.16);
+    border: 1px solid rgba(var(--tint), 0.5);
+    border-radius: 8px;
+    padding: 9px 16px;
+    cursor: pointer;
+}
+
+button.action:hover {
+    background: rgba(var(--g-btn), 0.3);
+    border-color: rgb(var(--tint));
+    filter: none;
+}
+
+/* wie button.action, nur in λ-Orange statt Grün */
+button.action.orange {
+    color: var(--text);
+    background: rgba(245, 194, 66, 0.16);
+    border-color: rgba(245, 194, 66, 0.55);
+}
+button.action.orange:hover {
+    background: rgba(245, 194, 66, 0.3);
+    border-color: rgb(245, 194, 66);
+}
+
+/* Filled phi green with white text - the one button that sends something off
+   (Doc, 16.09.2026: Bewertung senden). The true phi in BOTH schemes, spelled
+   out: the --phi token is darker in the light scheme, not wanted here. */
+button.action.green,
+button.action.green:hover {
+    color: rgb(255, 255, 255);
+    background: rgb(121, 158, 49);
+    border-color: rgb(121, 158, 49);
+}
+button.action.green:hover { filter: brightness(1.12); }
+
+button.action.secondary {
+    background: linear-gradient(180deg, rgba(60, 90, 150, 0.6), rgba(40, 64, 110, 0.6));
+    border-color: rgba(var(--tint), 0.4);
+    color: var(--text);
+}
+
+/* Edit mode: dashed outlines on editable cells */
+.editing [contenteditable="true"] {
+    outline: 1px dashed var(--edit-line);
+    outline-offset: -1px;
+    background: var(--edit-fill);
+    cursor: text;
+    border-radius: 3px;
+}
+
+/* The focused box is the one you are typing in — make that unmistakable */
+.editing [contenteditable="true"]:focus {
+    outline: 2px solid var(--lambda);
+    background: var(--edit-fill);
+}
+
+/* Lernbereich tiles: Ustd. value on its own line */
+.meta-card .vu {
+    margin-top: 3px;
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+/* Clickable Lernbereich tiles + shared summary panel */
+/* Expandable meta cards carry the same chevron as the expandable plan rows */
+.meta-card.expandable { position: relative; padding-left: 32px; }
+
+.meta-card.expandable > .chev {
+    position: absolute;
+    left: 12px;
+    top: 9px;
+    color: var(--muted);
+    font-size: 0.95rem;
+    transition: transform 0.15s;
+}
+
+.meta-card.expandable.open > .chev { transform: rotate(90deg); }
+
+.meta-card[data-lb] { cursor: pointer; transition: border-color 0.15s; }
+.meta-card[data-lb]:hover { border-color: rgba(var(--tint), 0.55); }
+.meta-card.open { border-color: var(--cyan); }
+
+.lb-panel {
+    max-width: 1200px;
+    margin: 0 auto 18px;
+    padding: 14px 18px;
+    background: var(--panel-soft);
+    border: 1px solid rgba(var(--tint), 0.3);
+    border-radius: 12px;
+}
+
+.lb-panel-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 8px;
+}
+
+.lb-panel ul { margin: 0 0 10px 18px; }
+.lb-panel li { margin: 3px 0; }
+.lb-panel li::marker { color: var(--lambda); }
+
+.lb-panel-foot { font-size: 0.8rem; color: var(--muted); }
+.lb-panel-foot a { color: var(--lambda); }
+
+/* Bridge card: always-editable rich-text panel */
+.bridge-card {
+    cursor: pointer;
+    transition: border-color 0.15s;
+    background: rgba(121, 158, 49, 0.14);
+    border-color: rgba(121, 158, 49, 0.4);
+}
+
+.bridge-card:hover { border-color: rgba(160, 200, 80, 0.65); }
+.bridge-card.open { border-color: var(--phi); }
+
+/* body styled like the notes page (.note-body): same font, roomy, resizable */
+.bridge-panel { padding: 18px 22px; }
+
+.bridge-body {
+    outline: none;
+    min-height: 180px;
+    resize: vertical;
+    overflow-y: auto;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 300;
+    font-size: 0.98rem;
+    line-height: 1.55;
+    padding: 6px 4px;
+    margin-bottom: 8px;
+}
+
+.bridge-body p { margin: 0 0 10px; }
+.bridge-body ul { margin: 0 0 12px 18px; }
+.bridge-body li { margin: 5px 0; }
+.bridge-body:focus { box-shadow: inset 0 0 0 1px var(--edit-line); border-radius: 6px; }
+
+@media print { .lb-panel { display: none; } }
+
+/* Cloud sync state (plan pages) — sits next to Logout in the quick-nav,
+   toolbar fallback on pages without a nav */
+.toolbar .cloud,
+nav.quick-nav .cloud {
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    text-decoration: none;
+    align-self: center;
+}
+
+.toolbar .cloud.on,
+nav.quick-nav .cloud.on { color: var(--phi); }
+
+.toolbar a.cloud:hover,
+nav.quick-nav a.cloud:hover { color: var(--text); }
+
+/* Banner for a failed cloud read/write - only shown when something went wrong */
+#svp-cloud-err {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 3000;
+    max-width: 320px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: #fff;
+    background: rgb(176, 36, 24);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px rgba(8, 20, 42, 0.35);
+}
+#svp-cloud-err a { color: #fff; text-decoration: underline; }
+@media print { #svp-cloud-err { display: none; } }
+
+.legend {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-left: auto;
+}
+
+/* Last line of the head, right above the toolbar's divider: the pill legend,
+   lifted out of the toolbar by svp-plan.js and pushed to the right. */
+.page-head .head-legend-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px 16px;
+    flex-wrap: wrap;
+    /* 70% of a pill height (pills are 24px) higher than before (Doc,
+       09.09.2026): 10px - 12px - 4.8px. The toolbar's divider line follows on
+       its own, because the head gets exactly those 16.8px flatter. */
+    margin-top: -6.8px;
+}
+
+/* ... and the head keeps only a hair of air below it, so the pills sit just
+   above the line instead of floating in the middle of the gap. */
+header.page-head.with-legend,
+.plan-sticky header.page-head.with-legend { margin-bottom: 6px; }
+
+/* The legend stayed out of the printout while it lived in the (hidden)
+   toolbar - it keeps doing so up here. */
+@media print { .page-head .head-legend-row .legend { display: none; } }
+
+/* One line box for the whole row: the PDF button, the plain pills and the
+   ▾ variant pills all carry different font metrics - without a fixed height
+   every one measures its own. Menu items inside .drop-menu stay untouched. */
+.legend > .badge,
+.legend .badge-drop > .badge,
+.legend button.action.legend-lehrplan {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    height: 24px;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* Lehrplan (PDF), moved down into the legend row by svp-plan.js: compact, so
+   it sits with the pills instead of competing with them */
+.legend button.action.legend-lehrplan {
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 6px;
+    align-self: center;
+}
+
+.legend .dot {
+    display: inline-block;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.table-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: var(--card-soft);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow-x: auto;
+}

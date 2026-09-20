@@ -1,0 +1,347 @@
+/* Separated Login/Logout pill at the right end of the pill row: extra gap
+   plus a thin divider line set it apart from the nav pills */
+/* Three groups in the pill row. Left and right both take flex:1, so the middle
+   group lands on the bar's true centre however wide the two sides are — the
+   Schularten stay centred even though the right side carries far more pills. */
+.nav-group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+/* Every group keeps its natural width; the last three each take
+   margin-left:auto. Flex divides the free space equally among those margins,
+   so the gaps Home|Schularten|Stundenplan|Werkzeuge come out identical — and
+   equal gaps mean each block is centred between its two neighbours. Costs no
+   extra room, which the full row does not have anyway (3px slack, measured). */
+.nav-left { flex: 0 1 auto; }
+.nav-schul { flex: 0 1 auto; margin-left: auto; }
+.nav-mid { flex: 0 0 auto; margin-left: auto; }
+.nav-more { flex: 0 0 auto; margin-left: auto; }
+/* No auto margin here, so on a wide row the tools stay 6px behind "Mehr" and
+   read as one block with it. When the row fills up they wrap as a unit — the
+   second row therefore starts at the gear, never mid-group. */
+.nav-right { flex: 0 0 auto; flex-wrap: nowrap; }
+
+/* Wrapping order as asked: the tools leave first (second row starts at the
+   gear), then "Mehr", then Stundenplan. That holds down to 600px. At 580px and
+   below Home ends up alone on the first row — from there the groups are
+   dissolved instead and every pill becomes a direct child again, so the row
+   just wraps, centred and compact. Thresholds measured 03.09.2026. */
+@media (max-width: 599px) {
+    .nav-group { display: contents; }
+}
+
+/* Doc, 09.09.2026: "so breit wie logout" - Home links und der Auth-Knopf
+   rechts sind gleich breit. 59 px ist die breitere der beiden Beschriftungen
+   ("Logout" 58.3 px, "Login" 49.6 px, gemessen mit _measure.html); damit
+   springt die Reihe beim An- und Abmelden auch nicht mehr. */
+nav.quick-nav a.badge.nav-home,
+nav.quick-nav a.badge.nav-auth {
+    min-width: 59px;
+    text-align: center;
+}
+
+/* Logged out is the state worth seeing at a glance (Doc, 16.09.2026): the auth
+   pill then drops the uniform blue wash of the nav row and carries a filled phi
+   green. svp-nav.js already puts .b-green on it when there is no session - but
+   .b-green only tints, and the row rule above it repaints every pill blue, so
+   the fill is spelled out here. Logged in the pill stays grey like its
+   neighbours; only the phi token differs between dark and light. */
+nav.quick-nav a.badge.nav-auth.b-green {
+    background: var(--phi);
+    border-color: var(--phi);
+    color: rgb(255, 255, 255);
+}
+
+/* Doc, 09.09.2026: "| weg und bissl meh Platz" - der Trennstrich ist raus, der
+   Abstand haelt die Gruppen jetzt allein. Er sitzt vor dem Farbschema, denn
+   dort endet seit der Umsortierung der Werkzeug-Block (Zahnrad, Vollbild, QR)
+   und Login/Logout steht ganz aussen. */
+.nav-theme-wrap { margin-left: 26px; }
+
+/* QR-Overlay (svp-nav.js): weisse Karte, damit jeder Scanner sie liest; ein
+   Klick irgendwohin schliesst sie. Die Pillen von QR, Vollbild und Zahnrad
+   stehen zusammen weiter unten. */
+/* Ein einziger Umschalter statt des Paares "Dunkel | Hell" (Doc, 09.09.2026).
+   Feste Mindestbreite, damit die Navileiste beim Umschalten nicht springt:
+   "Dunkel" ist breiter als "Hell". */
+.nav-theme-wrap { display: inline-flex; }
+nav.quick-nav a.badge.nav-theme {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 62px;
+}
+/* Doc, 10.09.2026: the pill wears the scheme it switches to - "Hell" is a light
+   pill on the dark page, "Dunkel" a dark-blue pill on the light page. */
+nav.quick-nav a.badge.nav-theme {
+    color: rgb(24, 34, 52);
+    background: rgb(246, 248, 252);
+    border-color: rgb(246, 248, 252);
+}
+nav.quick-nav a.badge.nav-theme:hover { filter: brightness(0.9); }
+/* Im dunklen Schema heisst die Pille "Grau" - und trug bisher trotzdem das
+   Weiss der Hell-Pille (Doc, 20.09.2026: "Grau butt grau mit weiss"). Sie
+   traegt jetzt das Schema, in das sie fuehrt: das Kartengrau von html.svp-grey
+   mit dessen Schriftweiss. Die Werte stehen hier ausgeschrieben, weil die
+   Tokens von svp-grey erst GELTEN, wenn das Schema laeuft - hier ist es noch
+   das dunkle. */
+html:not(.svp-light):not(.svp-grey) nav.quick-nav a.badge.nav-theme {
+    color: rgb(212, 212, 216);          /* --text von html.svp-grey (zinc-300) */
+    background: rgb(63, 63, 70);        /* zinc-700 - hell genug gegen --bg 26,26,28 */
+    border-color: rgb(63, 63, 70);
+}
+html:not(.svp-light):not(.svp-grey) nav.quick-nav a.badge.nav-theme:hover {
+    filter: brightness(1.25);
+}
+html.svp-light nav.quick-nav a.badge.nav-theme {
+    color: rgba(225, 235, 250, 0.92);
+    background: rgb(12, 30, 64);
+    border-color: rgb(12, 30, 64);
+}
+html.svp-light nav.quick-nav a.badge.nav-theme:hover { filter: brightness(1.35); }
+
+.qr-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--panel);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.qr-overlay.open { display: flex; }
+
+.qr-card {
+    background: #fff;
+    padding: 22px 22px 14px;
+    border-radius: 14px;
+    text-align: center;
+}
+
+.qr-card .qr-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    color: #222;
+    margin-top: 12px;
+    max-width: min(70vw, 300px);
+}
+
+.qr-card .qr-box svg {
+    display: block;
+    width: min(70vw, 300px);
+    height: auto;
+}
+
+@media print { .qr-overlay { display: none !important; } }
+
+/* Overview cards follow the pill choice — hidden pill, hidden card */
+a.link-card.nav-hidden { display: none; }
+
+/* inline-flex kills the wrapper's own 16px text strut, which made the div
+   taller than the pill inside (pill looked flatter than its neighbors) */
+.nav-edit-wrap { position: relative; display: inline-flex; }
+
+/* One dropdown per Schulart (plus "Mehr"): the pill row stays short, the
+   plans live one click below it. */
+.nav-drop-wrap { position: relative; display: inline-flex; }
+nav.quick-nav a.nav-drop { cursor: pointer; }
+.nav-drop-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 80;
+    padding: 10px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px var(--shadow);
+    white-space: nowrap;
+}
+.nav-drop-wrap.open .nav-drop-panel { display: block; }
+.nav-drop-panel .nd-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 10px 0 5px;
+}
+.nav-drop-panel .nd-title:first-child { margin-top: 0; }
+/* one entry per line, like the Einstellungen panel */
+.nav-drop-panel .nd-row { display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
+.nav-drop-panel .nd-row .badge { text-align: center; }
+/* A caption-less row right after another row sits below a quiet divider -
+   "Mehr" ends with the demo class that way (Doc, 10.09.2026: "nicht so
+   wichtig der Trenner", hence the faint row-line colour). */
+.nav-drop-panel .nd-row + .nd-row { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--row-line); }
+/* a subject whose pills are all switched off in ⚙ hides its caption too */
+.nav-drop-panel .nd-title.nd-empty, .nav-drop-panel .nd-row.nd-empty { display: none; }
+/* Sub-menu inside a dropdown (Doc, 12.09.2026: "ein Dreieck nach rechts und
+   ein Submenu zeigen" - Notenschluessel): the head pill carries a ▸ at its
+   right end, its entries sit in a small panel beside it, in the dropdown's
+   own look. */
+.nav-drop-panel .nd-sub { position: relative; display: flex; flex-direction: column; }
+.nav-drop-panel .nd-sub-head { position: relative; }
+.nav-drop-panel .nd-caret {
+    position: absolute;
+    right: 7px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.85em;
+}
+.nav-drop-panel .nd-sub-panel {
+    display: none;
+    position: absolute;
+    /* padding + border of this panel: its first entry sits level with the head */
+    top: -11px;
+    /* past the dropdown's own padding and border, plus a small gap */
+    left: calc(100% + 15px);
+    z-index: 81;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px var(--shadow);
+}
+/* invisible bridge over the gap, so the mouse can travel from head to panel */
+.nav-drop-panel .nd-sub-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 100%;
+    width: 17px;
+}
+.nav-drop-panel .nd-sub.nd-left .nd-sub-panel { left: auto; right: calc(100% + 15px); }
+.nav-drop-panel .nd-sub.nd-left .nd-sub-panel::before { right: auto; left: 100%; }
+.nav-drop-panel .nd-sub.open .nd-sub-panel { display: flex; }
+@media (hover: hover) {
+    .nav-drop-panel .nd-sub:hover .nd-sub-panel { display: flex; }
+}
+.nav-drop-panel .nd-sub-panel .badge { text-align: center; }
+.nav-drop-panel .nd-sub.nd-empty { display: none; }
+/* every pill inside switched off in ⚙: the dropdown greys out instead of
+   opening an empty panel (Doc, 31.08.2026) */
+/* Empty Schulart: hide the pill entirely (Doc, 03.09.2026 - was greyed out
+   before, but a pill with nothing behind it earns no space in the row). */
+.nav-drop-wrap.nd-off { display: none; }
+
+/* the rightmost dropdown would overflow the window, so it opens leftwards */
+.nav-drop-wrap.nd-right .nav-drop-panel { left: auto; right: 0; }
+@media print { .nav-drop-wrap { display: none; } }
+
+/* Die drei Icon-Pillen - Zahnrad, Vollbild, QR - sind EIN Mass (Doc,
+   09.09.2026: "sind die alle gleich gross ... die icons"): gleiches Kaestchen,
+   gleich grosse Zeichnung, in beiden Achsen mittig. 22 px hoch wie die
+   Textpillen daneben; gemessen mit _measure.html. */
+nav.quick-nav a.nav-edit,
+nav.quick-nav a.nav-fs,
+nav.quick-nav a.nav-qr {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 31px;
+    height: 22px;
+    padding: 0;
+}
+nav.quick-nav a.nav-edit svg,
+nav.quick-nav a.nav-fs svg,
+nav.quick-nav a.nav-qr svg { display: block; }
+nav.quick-nav a.nav-edit { cursor: pointer; }
+
+/* Das U neben Stundenplan (svp-nav.js) traegt dasselbe Kaestchen wie Zahnrad,
+   Vollbild und QR - sonst saehe ein einzelner Buchstabe in einer Textpille
+   verloren aus. Die Laufweite der Badges faellt hier weg: bei EINEM Zeichen
+   schiebt sie nur den Buchstaben aus der Mitte (Doc, 16.09.2026). */
+nav.quick-nav a.badge.nav-untis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 31px;
+    height: 22px;
+    padding: 0;
+    letter-spacing: 0;
+}
+
+/* The "?" pill right of the QR (Doc, 19.09.2026) wears the same box; one
+   character, so no letter spacing - as for the U above. Its panel lists the
+   keys of the page: key caps left, what they do right. */
+nav.quick-nav a.badge.nav-keys {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 31px;
+    height: 22px;
+    padding: 0;
+    cursor: pointer;
+}
+/* a drawing like its neighbours, no glyph: Doc, 19.09.2026 "das ? wirkt zu hart" */
+nav.quick-nav a.nav-keys svg { display: block; }
+.nav-keys-panel { width: max-content; max-width: min(340px, calc(100vw - 24px)); }
+.nav-keys-panel .keys-list {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 7px 12px;
+    align-items: center;
+    margin: 0;
+}
+.nav-keys-panel dt { display: flex; gap: 4px; margin: 0; }
+.nav-keys-panel dd { margin: 0; font-size: 0.9rem; color: var(--text); }
+.nav-keys-panel kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 24px;
+    height: 22px;
+    padding: 0 6px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: rgba(var(--tint), 0.08);
+    color: var(--head);
+    /* Not Orbitron: its J has no top bar and reads as a hook (Doc, 19.09.2026:
+       "welche Taste?"). A key cap has to be read at a glance. */
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+.nav-edit-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 80;
+    padding: 10px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px var(--shadow);
+}
+
+.nav-edit-wrap.open .nav-edit-panel { display: block; }
+
+.nav-edit-panel .ep-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    white-space: nowrap;
+}
+
+.nav-edit-panel .ep-title-2 { margin-top: 12px; }
+
+.nav-edit-panel .ep-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: min(340px, 86vw);
+}

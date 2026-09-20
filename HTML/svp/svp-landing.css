@@ -1,0 +1,169 @@
+a.link-card {
+    display: block;
+    background: var(--card-soft);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 20px;
+    text-decoration: none;
+    color: var(--text);
+    transition: border-color 0.15s, transform 0.15s;
+}
+
+a.link-card:hover {
+    border-color: rgba(245, 194, 66, 0.5);
+    transform: translateY(-2px);
+}
+
+a.link-card .card-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    color: var(--lambda);
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+}
+
+a.link-card .card-sub {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+}
+
+a.link-card .card-desc { font-size: 0.86rem; font-weight: 400; }
+
+/* Accent-colored link-cards — each class only hands in its hue as --acc, the
+   look is shared below. The tints are mixed from the scheme's own colour
+   variable: the old fixed rgba() values were the dark-scheme hues and washed
+   out to pale pastel on the light page (Doc, 18.09.2026: "schöne Farben").
+   Gradient fill, fat left rule like .c-featured, soft glow on hover. */
+a.link-card.c-teal { --acc: var(--teal); }
+a.link-card.c-cyan { --acc: var(--cyan); }
+a.link-card.c-violet { --acc: var(--violet); }
+a.link-card.c-pink { --acc: var(--pink); }
+a.link-card.c-red { --acc: rgb(235, 120, 105); }
+html.svp-light a.link-card.c-red { --acc: var(--ypsilon); }
+
+a.link-card.c-teal,
+a.link-card.c-cyan,
+a.link-card.c-violet,
+a.link-card.c-pink,
+a.link-card.c-red {
+    background: linear-gradient(135deg,
+        color-mix(in srgb, var(--acc) 26%, transparent),
+        color-mix(in srgb, var(--acc) 7%, transparent) 75%);
+    border-color: color-mix(in srgb, var(--acc) 45%, transparent);
+    border-left: 4px solid var(--acc);
+    padding-left: 17px;
+    transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+a.link-card.c-teal:hover,
+a.link-card.c-cyan:hover,
+a.link-card.c-violet:hover,
+a.link-card.c-pink:hover,
+a.link-card.c-red:hover {
+    border-color: color-mix(in srgb, var(--acc) 80%, transparent);
+    border-left-color: var(--acc);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--acc) 24%, transparent);
+}
+a.link-card.c-teal .card-title,
+a.link-card.c-cyan .card-title,
+a.link-card.c-violet .card-title,
+a.link-card.c-pink .card-title,
+a.link-card.c-red .card-title { color: var(--acc); }
+
+/* Werkzeug cards: one quiet grey for all of them — cyan, violet and red side by
+   side made the block read like a paint box (Doc, 08.09.2026). Same greys as the
+   .b-grey badge, so dark and light stay in step. */
+a.link-card.c-grey {
+    background: rgba(170, 190, 220, 0.11);
+    border-color: rgba(170, 190, 220, 0.42);
+}
+a.link-card.c-grey:hover { border-color: rgba(170, 190, 220, 0.7); }
+a.link-card.c-grey .card-title { color: rgba(200, 214, 236, 0.9); }
+html.svp-light a.link-card.c-grey {
+    background: rgba(40, 70, 120, 0.09);
+    border-color: rgba(40, 70, 120, 0.42);
+}
+html.svp-light a.link-card.c-grey .card-title { color: rgb(72, 86, 112); }
+
+/* One card per section may stand out — Doc, 08.09.2026: "deutlicher als die
+   anderen". Lambda orange, a fat left rule and a bigger title; everything else
+   about the card stays as it is, so it still lines up in the column. Use it
+   sparingly: two featured cards in one section and neither one is featured. */
+a.link-card.c-featured {
+    background: rgba(245, 194, 66, 0.14);
+    border-color: rgba(245, 194, 66, 0.5);
+    border-left: 4px solid var(--lambda);
+    padding-left: 17px;
+}
+a.link-card.c-featured:hover { border-color: rgba(245, 194, 66, 0.85); border-left-color: var(--lambda); }
+a.link-card.c-featured .card-title { font-size: 1.18rem; }
+html.svp-light a.link-card.c-featured {
+    /* light scheme: the pill blue, no ochre anywhere (Doc, 10.09.2026) */
+    background: rgba(var(--tint), 0.16);
+    border-color: rgba(30, 60, 120, 0.5);
+    border-left-color: var(--lambda);
+}
+
+/* Forces a card into column 1 → starts a new grid row (separates the
+   Fach cards from the personal cards, works with any responsive column count) */
+a.link-card.row-break { grid-column: 1; }
+
+/* Start page grouped by Schulart: one section per Schulart, its cards below.
+   A section whose cards are all switched off in ⚙ hides its heading too. */
+/* The section rides the same centred card column as everything else, so the
+   rubric heading and its rule are exactly as wide as the cards below it.
+   Scoped to pages that HAVE cards: stundenplan.html and meinplan.html wrap
+   their whole page in the same class name, and the bare rule squeezed the
+   timetable into 720 px (Doc, 09.09.2026: "der SP ist neuerdings so schmal ...
+   da wird wohl was doppelt benutzt"). Same :has() as header/footer below. */
+body:has(.card-grid) .svp-section { max-width: var(--card-col); margin: 0 auto 26px; }
+.svp-section.nav-hidden { display: none; }
+.svp-section .section-title {
+    max-width: var(--card-col);
+    margin: 0 0 10px;
+    font-family: 'Orbitron', sans-serif;
+    /* The Schulart is the only rubric on the start page since the subtitle went
+       (Doc, 08.09.2026) — it carries that weight now, so it reads bigger. */
+    font-size: 0.95rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+.svp-section .section-title::after {
+    content: '';
+    display: block;
+    margin-top: 6px;
+    border-bottom: 1px solid var(--line);
+}
+
+/* One card per row, like the notes list on notes.html, on a narrow column that
+   sits centred on the page (Doc, 08.09.2026). The old auto-fit grid gave a
+   section with one card the full width and a section with four a quarter each,
+   so nothing lined up; stretched over the whole 1200 px track the cards then
+   read far too wide. --card-col is the one number to tune.
+   Header and footer join the same track below, so the whole page is one
+   centred column. */
+.card-grid {
+    max-width: var(--card-col);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+}
+
+/* All link-cards of one grid are as tall as its tallest (Doc, 18.09.2026: "mach
+   die cards alle gleich hoch") — a second line in one description no longer
+   makes that card stick out. Only grids that hold link-cards directly:
+   genii-prolog.html uses .card-grid as a mere column wrapper around whole
+   sections, and 1fr rows would blow every one of them up to the longest. */
+.card-grid:has(> a.link-card) { grid-auto-rows: 1fr; }
+
+/* Only the landing pages — the plan pages keep their wide 1200 px track for the
+   tables. :has() scopes it without touching a single HTML file. */
+body:has(.card-grid) header.page-head,
+body:has(.card-grid) footer.page-foot {
+    max-width: var(--card-col);
+}
+
+/* Expandable week rows with detail bullet lists */
