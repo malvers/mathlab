@@ -21,10 +21,10 @@
     const CACHE_KEY = 'svp-news-cache';
     const CACHE_MS = 15 * 60 * 1000;
 
-    /* Tempo des Bandes in Pixeln je Sekunde. 70 px/s liest sich mit, ohne dass
-       eine lange Schlagzeile ewig braucht (gemessen an der Zeile, nicht geraten:
-       die Dauer rechnet sich aus der tatsaechlichen Breite). */
-    const SPEED = 70;
+    /* Tempo des Bandes in Pixeln je Sekunde (Doc, 20.09.2026: "lass es
+       langsamer laufen"). Die Dauer rechnet sich daraus und aus der wirklich
+       gemessenen Breite der Zeile - nicht aus einer geratenen Zeichenzahl. */
+    const SPEED = 42;
 
     function heute() {
         /* Ortszeit, nicht UTC: toISOString() schiebt Berlin abends auf den
@@ -99,14 +99,20 @@
     }
 
     /* Megafon (Doc, 20.09.2026: "nimm ein Megafon bitte SVG schoen zentriert",
-       dann "einfach leicht schraeg nach oben und KISS"). Zwei Striche: der
-       Trichter und das Mundstueck, um 18 Grad angehoben, mittig im 24er-Feld.
-       Mehr braucht das Bild nicht - alles Weitere wird bei 15 px zu Matsch. */
-    /* Der halbe Pixel, den die gedrehte Form nach links oben aus der Mitte
-       faellt, ist zurueckgeschoben (gemessen: links 1.0 zu rechts 1.8). */
-    const MEGAFON = '<g transform="rotate(-18 12 12) translate(0.6 -0.2)">'
-        + '<path d="M19.5 5.5v13L8 14.5v-5l11.5-4Z"/>'
-        + '<path d="M8 9.5H5.75a2.5 2.5 0 0 0 0 5H8"/>'
+       dann "einfach leicht schraeg nach oben und KISS", dann "noch nicht
+       perfekt"). Aus fuenf gezeichneten Fassungen die klarste: EIN Zug fuer
+       Trichter und Mundstueck, darunter der Griff, das Ganze 20 Grad
+       angehoben. Schallbogen und Knick im Koerper fallen bei 15 px zu Matsch
+       zusammen - deshalb sind sie nicht drin. */
+    /* Die halben Pixel, die die gedrehte Form nach links unten aus der Mitte
+       faellt, sind zurueckgeschoben (gemessen im Feld: links 1.01 zu rechts
+       1.68, oben 1.89 zu unten 0.99). */
+    const MEGAFON = '<g transform="rotate(-20 12 12) translate(0.5 -0.7)">'
+        + '<path d="M6 9.5h1.6L19 5v14L7.6 14.5H6A2.5 2.5 0 0 1 6 9.5Z"/>'
+        /* Doc, 20.09.2026: "den Griff noch bissl sichtbarer" - er haengt
+           tiefer, ist breiter und traegt einen etwas kraeftigeren Strich als
+           der Trichter, sonst verschwindet er bei 15 px unter ihm. */
+        + '<path d="M8.1 15v2.4a2.6 2.6 0 0 0 5.2 0V16.2" stroke-width="1.8"/>'
         + '</g>';
     const ICON_AN = MEGAFON;
     const ICON_AUS = MEGAFON + '<path d="M4 4 20 20"/>';
