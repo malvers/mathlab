@@ -1083,7 +1083,19 @@
     // no longer repeat it).
     const year = document.createElement('div');
     year.className = 'nav-year';
-    year.textContent = 'Schuljahr 2026/27 · Mo 17.08.2026 – Fr 09.07.2027';
+    /* Zwei Zeilen statt einer (Doc, 20.09.2026): gross das Schuljahr, klein
+       darunter die Spanne. Der Wortlaut oben ist derselbe wie die Ueberschrift
+       von svp/index.html - Grossbuchstaben macht das CSS daraus. */
+    const jahr = document.createElement('div');
+    jahr.className = 'ny-jahr';
+    jahr.textContent = 'Das Schuljahr 2026 – 2027';
+    const spanne = document.createElement('div');
+    spanne.className = 'ny-spanne';
+    spanne.textContent = 'Mo 17.08.2026 – Fr 09.07.2027';
+    year.appendChild(jahr);
+    year.appendChild(spanne);
+    /* Die kleine Zeile steht in Arial (Doc, 20.09.2026) - ein Systemfont,
+       also kein Nachladen und kein Google-Fonts-Link je Planseite. */
 
     // Full-width blue band across the page top; year + pills are centered in it.
     const band = document.createElement('div');
