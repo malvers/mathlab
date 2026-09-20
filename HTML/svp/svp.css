@@ -176,7 +176,11 @@ html.svp-light button.action.secondary {
    der Hausfarbe statt im Browser-Blau. Ohne Sichtbarkeit fuer die Tastatur
    waere die Seite nur noch mit der Maus bedienbar. */
 :focus:not(:focus-visible) { outline: none; }
-:focus-visible { outline: 2px solid var(--head); outline-offset: 2px; }
+/* Doc, 20.09.2026: "kann man diesen Rand generell verbannen", dann "duennen
+   weissen Rand pls" - also nicht weg, sondern duenn. 2 px sahen nach einer
+   Auswahl aus, 1 px ist ein Hinweis. Ganz weg darf er nicht: ohne ihn sieht
+   man bei der Tastaturbedienung nicht mehr, wo man gerade steht. */
+:focus-visible { outline: 1px solid var(--head); outline-offset: 2px; }
 
 /* Password gate (svp-gate.js): while locked, nothing but the overlay shows */
 html.svp-locked body > *:not(.svp-gate-overlay) { display: none !important; }
@@ -397,7 +401,11 @@ nav.quick-nav .badge { text-decoration: none; line-height: 14px; }
     letter-spacing: 0.06em;
     line-height: 1.4;
     text-transform: none;
-    opacity: 0.7;
+    /* Doc, 20.09.2026: "Hell Blau Grau" - das ist --muted, rgba(170,190,220,.65).
+       Das Token statt einer eigenen Farbe: es hat fuer jedes Schema schon
+       seine Fassung, eine handgeschriebene haette nur eine. Das opacity faellt
+       damit weg, die Daempfung steckt im Alpha. */
+    color: var(--muted);
 }
 .nav-year {
     /* Doc, 09.09.2026: "die Farbe wie main header" - dasselbe Token wie h1,
@@ -1429,6 +1437,20 @@ nav.quick-nav a.badge.nav-theme {
     border-color: rgb(246, 248, 252);
 }
 nav.quick-nav a.badge.nav-theme:hover { filter: brightness(0.9); }
+/* Im dunklen Schema heisst die Pille "Grau" - und trug bisher trotzdem das
+   Weiss der Hell-Pille (Doc, 20.09.2026: "Grau butt grau mit weiss"). Sie
+   traegt jetzt das Schema, in das sie fuehrt: das Kartengrau von html.svp-grey
+   mit dessen Schriftweiss. Die Werte stehen hier ausgeschrieben, weil die
+   Tokens von svp-grey erst GELTEN, wenn das Schema laeuft - hier ist es noch
+   das dunkle. */
+html:not(.svp-light):not(.svp-grey) nav.quick-nav a.badge.nav-theme {
+    color: rgb(212, 212, 216);          /* --text von html.svp-grey (zinc-300) */
+    background: rgb(63, 63, 70);        /* zinc-700 - hell genug gegen --bg 26,26,28 */
+    border-color: rgb(63, 63, 70);
+}
+html:not(.svp-light):not(.svp-grey) nav.quick-nav a.badge.nav-theme:hover {
+    filter: brightness(1.25);
+}
 html.svp-light nav.quick-nav a.badge.nav-theme {
     color: rgba(225, 235, 250, 0.92);
     background: rgb(12, 30, 64);

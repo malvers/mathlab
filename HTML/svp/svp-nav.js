@@ -560,7 +560,10 @@
     themeWrap.className = 'nav-theme-wrap';
     // Doc, 19.09.2026: a third scheme, "ein Loop Hell Dunkel Grey" - the pill
     // steps light -> dark -> grey -> light and still names the next one.
-    const THEME_LABEL = { dark: 'Dunkel', light: 'Hell', grey: 'Grau' };
+    /* "Dunkel" hiess es, solange es nur zwei Schemata gab. Neben "Grau" sagt
+       das nichts mehr - grau ist genauso dunkel. Es heisst nach seiner Farbe
+       (Doc, 20.09.2026: "Dunkel -> Blau"). */
+    const THEME_LABEL = { dark: 'Blau', light: 'Hell', grey: 'Grau' };
     const THEME_NEXT = { light: 'dark', dark: 'grey', grey: 'light' };
     let theme = 'dark';
     try {
@@ -789,7 +792,7 @@
         const rows = (window.svpKeys || []).concat([
             [['S'], 'Ins Suchfeld springen', () => !!pageSearch()],
             [['V'], 'Vollbild ein- oder ausschalten', () => canFs],
-            [['D'], 'Farbschema wechseln: Hell, Dunkel, Grau'],
+            [['D'], 'Farbschema wechseln: Hell, Blau, Grau'],
             // local only (Doc: "lass ihn ganz raus, ich mach das nur lokal")
             [['⇧', 'C'], 'Farbwähler öffnen: Farben live im Plan ausprobieren', () => LOCAL],
             [['Q'], 'QR-Code dieser Seite zeigen'],
