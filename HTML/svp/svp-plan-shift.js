@@ -51,6 +51,7 @@ window.svpPlanParts.push(function (P) {
             remark: effVal(i, 'remark') || '',
             details: (ov.details || row.details || []).slice(),
             notes: P.noteOf(i),
+            fahrplan: P.fahrplanOf(i),
             material: (ov.material != null ? ov.material : row.material) || '',
             /* The exercise set belongs to the topic, not to the calendar week:
                without this a shifted plan showed the tasks of the week before
@@ -69,7 +70,7 @@ window.svpPlanParts.push(function (P) {
        PLAN (a missing key would mean "not overridden"). */
     function emptyContent() {
         return {
-            type: 'org', u: '', topic: '', remark: '', details: [], notes: '', material: '',
+            type: 'org', u: '', topic: '', remark: '', details: [], notes: '', fahrplan: '', material: '',
             quiz: null,
             ziel: '', mth: '', med: '', lnw: ''
         };
@@ -89,7 +90,7 @@ window.svpPlanParts.push(function (P) {
 
     function isEmptyContent(c) {
         if (!c) return true;
-        return !(c.details || []).length && !c.notes && !c.material && !c.u && remarkIsFree(c.remark) &&
+        return !(c.details || []).length && !c.notes && !c.fahrplan && !c.material && !c.u && remarkIsFree(c.remark) &&
             (!c.topic || c.topic === '—' || c.topic === '-');
     }
 
@@ -142,6 +143,7 @@ window.svpPlanParts.push(function (P) {
 
         let nr = 0;
         const nextNotes = {};
+        const nextFahr = {};
         slots.forEach(function (i, k) {
             const c = next[k] || emptyContent();
             const remark = [stay[k] || '', c.remark || ''].filter(Boolean).join(' · ');
@@ -156,6 +158,7 @@ window.svpPlanParts.push(function (P) {
                 details: c.details
             };
             nextNotes[i] = c.notes || '';
+            nextFahr[i] = c.fahrplan || '';
             entry.material = c.material || '';
             entry.quiz = c.quiz || null;   /* null = this week has no exercises */
             /* always written, even empty — see emptyContent() */
@@ -170,10 +173,13 @@ window.svpPlanParts.push(function (P) {
             if (isEmptyContent(P.saved[i])) delete P.saved[i]; else break;
         }
 
+        P.replaceFahrplaene(nextFahr);
         P.planNotes = {};
         for (const k in nextNotes) if (nextNotes[k]) P.planNotes[k] = nextNotes[k];
         P.persistNotes();
         if (P.notesAllowed()) P.pushNotes();
+        /* der Fahrplan ist mitgewandert, die Cloud muss die neue Zuordnung sehen */
+        if (P.notesAllowed() && P.pushFahrplan) P.pushFahrplan();
         localStorage.setItem(P.KEY, JSON.stringify(P.saved));
         localStorage.setItem(P.TS_KEY, new Date().toISOString());
         P.skipUnloadSave = true; /* the reload must not resurrect the old table */

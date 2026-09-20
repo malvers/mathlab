@@ -298,6 +298,9 @@ window.svpPlanParts.push(function (P) {
             subHead.appendChild(subHeadR);
             subMain.appendChild(subHead);
             ref.subHeadL = subHeadL;
+            /* Der Fahrplan-Stapel steht vor allem anderen in dieser Haelfte, also
+               vor "Inhalt" (Doc, 20.09.2026). Die Reiter kommen erst danach dazu. */
+            P.fahrplanBtn(ref, subHeadL);
             const subBody = document.createElement('div');
             subBody.className = 'sub-body';
             const subLeft = document.createElement('div');

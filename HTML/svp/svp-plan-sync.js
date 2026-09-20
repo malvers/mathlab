@@ -3,7 +3,7 @@
 window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
-        cloudErr, setCloud, pushRemote, pushNotes, fetchPublicEdits
+        cloudErr, setCloud, pushRemote, pushNotes, pushFahrplan, fetchPublicEdits
     });
 
     // Safety net: persist pending edits when the tab closes mid-edit.
@@ -174,6 +174,46 @@ window.svpPlanParts.push(function (P) {
         } catch (e) { /* offline: the local copy stays */ }
     }
 
+    /* --- Fahrplan sync (own table svp_plan_fahrplan, RLS owner-only) -----
+       Doc, 20.09.2026: "so behandeln wie Notizen". Dieselbe Bauart wie oben, nur
+       eine eigene Tabelle: der Fahrplan einer Stunde geht niemanden ausser Doc
+       etwas an, und die Notizen sollen davon unberuehrt bleiben. Solange die
+       Tabelle fehlt, bleibt der Fahrplan einfach lokal - nichts bricht. */
+    const FAHR_TS_KEY = P.FAHR_TS_KEY = 'svp-plan-fahrplan-ts:' + location.pathname;
+    let fahrTableMissing = false;
+
+    function pushFahrplan() {
+        if (!P.notesAllowed() || fahrTableMissing) return null;
+        const ts = new Date().toISOString();
+        localStorage.setItem(FAHR_TS_KEY, ts);
+        return svpAuth.api('svp_plan_fahrplan', {
+            method: 'POST',
+            headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+            body: JSON.stringify([{ page: location.pathname, fahrplan: P.fahrplaene(), ts: ts }])
+        }).then(function (res) {
+            if (res.status === 404) { fahrTableMissing = true; return; }
+            if (!res.ok) setCloud('\u2601 Fahrplan nicht gespeichert \u2014 HTTP ' + res.status, false);
+        }).catch(function () { /* offline: the local copy stays */ });
+    }
+
+    async function pullFahrplan() {
+        if (!P.notesAllowed()) return;
+        try {
+            const res = await svpAuth.api('svp_plan_fahrplan?page=eq.' +
+                encodeURIComponent(location.pathname) + '&select=fahrplan,ts');
+            if (res.status === 404) { fahrTableMissing = true; return; }
+            if (!res.ok) return;
+            const rows = await res.json();
+            const localTs = Date.parse(localStorage.getItem(FAHR_TS_KEY) || '') || 0;
+            if (!rows.length) { if (Object.keys(P.fahrplaene()).length) pushFahrplan(); return; }
+            const remoteTs = Date.parse(rows[0].ts) || 0;
+            if (remoteTs <= localTs) { if (localTs > remoteTs) pushFahrplan(); return; }
+            P.replaceFahrplaene(rows[0].fahrplan || {});
+            localStorage.setItem(FAHR_TS_KEY, rows[0].ts);
+            P.markFahrplaene();
+        } catch (e) { /* offline: the local copy stays */ }
+    }
+
     /* Paint the current planNotes into the table (after a cloud pull). */
     function applyNotes() {
         for (const r of P.rendered) {
@@ -285,7 +325,7 @@ window.svpPlanParts.push(function (P) {
                     }
                 }
             } catch (e) { /* offline: local state stays */ }
-            if (svpAuth.hasSession()) { syncFromRemote(); pullNotes(); }
+            if (svpAuth.hasSession()) { syncFromRemote(); pullNotes(); pullFahrplan(); }
         })();
     }
 });
