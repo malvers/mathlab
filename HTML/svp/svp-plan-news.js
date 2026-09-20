@@ -72,6 +72,10 @@ window.svpPlanParts.push(function (P) {
                 const kw = P.isoWeek(d);
                 return {
                     quelle: 'Vorträge',
+                    /* Doc, 20.09.2026: "bei Vortraegen ein IBB logo" - die
+                       Bildmarke aus ibb-logo.svg, ohne den Schriftzug: der
+                       wird bei 14 px zu Matsch (icons/ibb.svg). */
+                    logo: 'icons/ibb.svg',
                     /* Intl schreibt "Mo., 05.10." - der Punkt hinter dem Tag
                        ist im Band nur Rauschen. */
                     text: tag.format(d).replace('.,', '') + ' · ' +

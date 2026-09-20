@@ -26,6 +26,19 @@
        gemessenen Breite der Zeile - nicht aus einer geratenen Zeichenzahl. */
     const SPEED = 42;
 
+    /* Doc, 20.09.2026: "Tagesschau nur ab Klasse 9". Die Klasse steht im
+       Dateinamen des Plans (mathe5, mathegy9, fos11 ...) - die letzte Zahl
+       darin. Eine Seite ohne Zahl (Startseite, Notizen, Operatoren) ist keine
+       Klassenstufe und behaelt die Schlagzeilen. */
+    const AB_KLASSE = 9;
+
+    function klasseZuJung() {
+        const datei = location.pathname.replace(/^.*\//, '');
+        const zahlen = datei.match(/\d{1,2}/g);
+        if (!zahlen) return false;
+        return Number(zahlen[zahlen.length - 1]) < AB_KLASSE;
+    }
+
     function heute() {
         /* Ortszeit, nicht UTC: toISOString() schiebt Berlin abends auf den
            naechsten Tag, ein "bis heute" waere abends schon abgelaufen. */
@@ -107,13 +120,14 @@
     /* Die halben Pixel, die die gedrehte Form nach links unten aus der Mitte
        faellt, sind zurueckgeschoben (gemessen im Feld: links 1.01 zu rechts
        1.68, oben 1.89 zu unten 0.99). */
-    const MEGAFON = '<g transform="rotate(-20 12 12) translate(0.5 -0.7)">'
-        + '<path d="M6 9.5h1.6L19 5v14L7.6 14.5H6A2.5 2.5 0 0 1 6 9.5Z"/>'
+    const MEGAFON = '<g class="mega">'
+        + '<g transform="rotate(-20 12 12) translate(0.5 -0.7)">'
+        + '<path class="horn" d="M6 9.5h1.6L19 5v14L7.6 14.5H6A2.5 2.5 0 0 1 6 9.5Z"/>'
         /* Doc, 20.09.2026: "den Griff noch bissl sichtbarer" - er haengt
-           tiefer, ist breiter und traegt einen etwas kraeftigeren Strich als
-           der Trichter, sonst verschwindet er bei 15 px unter ihm. */
-        + '<path d="M8.1 15v2.4a2.6 2.6 0 0 0 5.2 0V16.2" stroke-width="1.8"/>'
-        + '</g>';
+           tiefer, ist breiter und traegt einen kraeftigeren Strich als der
+           Trichter, sonst verschwindet er bei 15 px unter ihm. */
+        + '<path class="grip" d="M8.1 15v2.4a2.6 2.6 0 0 0 5.2 0V16.2" stroke-width="1.8"/>'
+        + '</g></g>';
     const ICON_AN = MEGAFON;
     const ICON_AUS = MEGAFON + '<path d="M4 4 20 20"/>';
 
@@ -133,6 +147,8 @@
         pill.setAttribute('aria-label', text);
         pill.setAttribute('aria-pressed', an ? 'true' : 'false');
         box.classList.toggle('zu', !an);
+        /* Ausgeblendet laeuft nichts mehr - dann schweigt auch das Megafon. */
+        pill.classList.toggle('spricht', an && box.classList.contains('runs'));
     }
 
     pill.addEventListener('click', function (e) {
@@ -219,7 +235,19 @@
                Vortraege oder Tagesschau oder Stoff der Woche"). Der Eintrag
                traegt es nur noch als Merkmal mit sich. */
             item.dataset.rubrik = it.quelle || 'News';
-            if (it.logo) item.dataset.logo = it.logo;
+            if (it.logo) {
+                item.dataset.logo = it.logo;
+                /* Doc, 20.09.2026: "in den Topic Field TS auch" - das Zeichen
+                   der Quelle steht auch an der Schlagzeile selbst, nicht nur
+                   links im Etikett. Nur das Bild, nicht noch einmal das Wort. */
+                const img = document.createElement('img');
+                img.className = 'nav-news-logo';
+                img.src = new URL(it.logo, base).href;
+                img.alt = it.quelle || '';
+                img.onerror = function () { img.remove(); };
+                item.appendChild(img);
+                item.appendChild(document.createTextNode(' '));
+            }
             item.appendChild(document.createTextNode(it.text));
             line.appendChild(item);
             const dot = document.createElement('span');
@@ -269,6 +297,9 @@
             const dauer = breite(line) ? Math.round(breite(line) / SPEED) : 40;
             run.style.animationDuration = Math.max(20, dauer) + 's';
             box.classList.add('runs');
+            /* Doc, 20.09.2026: "wenn es laeuft lass das Megafon sprechen und
+               wabern" - die Pille bewegt sich genau so lange wie das Band. */
+            pill.classList.add('spricht');
             labelBreite(label, eintraege);
             labelFolgen(label, view, run);
         });
@@ -323,11 +354,14 @@
         function schauen() {
             /* Im Hintergrund laeuft die Animation ohnehin nicht weiter. */
             if (document.hidden || !box.isConnected) return;
-            const rand = view.getBoundingClientRect().left + 2;
+            /* Erst 14 px hinter dem Rand zaehlt ein Eintrag noch als der, den
+               man liest (Doc, 20.09.2026: "Vortraege nur bei Vortraegen") -
+               sonst haelt ein Eintrag, von dem nur noch der letzte Buchstabe
+               zu sehen ist, das Etikett fest, waehrend man schon die naechste
+               Zeile liest. */
+            const rand = view.getBoundingClientRect().left + 14;
             const items = run.querySelectorAll('.nav-news-item');
             for (const it of items) {
-                /* Der erste Eintrag, der rechts vom linken Rand noch etwas
-                   zeigt - das ist der, den man gerade liest. */
                 if (it.getBoundingClientRect().right > rand) {
                     labelSetzen(label, it.dataset.rubrik || 'News', it.dataset.logo || '');
                     return;
@@ -360,13 +394,14 @@
             return { text: it.text, href: it.href || '', quelle: it.quelle || '' };
         });
 
-        const feeds = (conf.feeds || ['tagesschau']).map(feedAufloesen).filter(Boolean);
+        const feeds = klasseZuJung() ? []
+            : (conf.feeds || ['tagesschau']).map(feedAufloesen).filter(Boolean);
         const jeFeed = conf.anzahl || 8;
 
         /* Erst zeigen, was schon da ist: eigene Meldungen und die Schlagzeilen
            vom letzten Mal. Das Band laeuft damit sofort, statt auf das Netz zu
            warten; kommen die frischen an, wird es neu gesetzt. */
-        const cache = cacheLesen();
+        const cache = feeds.length ? cacheLesen() : null;
         const frisch = cache && (Date.now() - cache.ts) < CACHE_MS;
         if (cache) feed = cache.items;
         zeichnen();

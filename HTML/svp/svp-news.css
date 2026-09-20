@@ -29,6 +29,14 @@
    sieht die Zeile aus wie ein Eingabefeld, in das man tippen koennte. */
 .nav-news-label {
     flex: 0 0 auto;
+    /* Rechtsbuendig (Doc, 20.09.2026: "rechts aligned"): das Etikett hat eine
+       feste Breite, damit das Band beim Rubrikwechsel nicht springt - links
+       gesetzt risse eine kurze Rubrik wie "Vortraege" eine Luecke zum Text. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    text-align: right;
     font-size: 0.6rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -114,6 +122,41 @@ html.svp-light .nav-news-item b { color: var(--ypsilon); }
 /* Phone: das Etikett frisst zu viel von der kurzen Zeile. */
 @media (max-width: 520px) {
     .nav-news-label { display: none; }
+}
+
+/* ---- Das Megafon spricht, solange das Band laeuft --------------------
+   Doc, 20.09.2026: "wenn es laeuft lass das Megafon sprechen und wabern ;-)".
+   Zwei Bewegungen: der ganze Trichter wabert (kippen und atmen), und sein
+   Strich pulsiert dazu - bei 15 px ist das deutlicher als jede Schallwelle,
+   fuer die neben dem Trichter ohnehin kein Platz waere. */
+nav.quick-nav a.nav-news-btn .mega {
+    transform-box: view-box;
+    transform-origin: 12px 12px;
+}
+
+nav.quick-nav a.nav-news-btn.spricht .mega {
+    animation: mega-wabern 2.4s ease-in-out infinite;
+}
+
+nav.quick-nav a.nav-news-btn.spricht .mega .horn {
+    animation: mega-puls 1.2s ease-in-out infinite;
+}
+
+@keyframes mega-wabern {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    22% { transform: rotate(-5deg) scale(1.07); }
+    48% { transform: rotate(3deg) scale(1.01); }
+    74% { transform: rotate(-2deg) scale(1.04); }
+}
+
+@keyframes mega-puls {
+    0%, 100% { stroke-width: 1.5; }
+    50% { stroke-width: 1.95; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    nav.quick-nav a.nav-news-btn.spricht .mega,
+    nav.quick-nav a.nav-news-btn.spricht .mega .horn { animation: none; }
 }
 
 @media print { .nav-news { display: none !important; } }
