@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Infektionssimulation</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({ useExternalStyles: true, title: 'Infektionssimulation', subtitle: 'Lab' });
+        CyberUI.init();
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        /* SIR on a grid: every cell is a person, contacts are the four neighbours. One step = one day.
+           The point of the lab is not the model, it is the CURVE at the bottom: the same disease runs through
+           the same population either as a spike or as a long flat hill - only the contact chance changes. */
+        const SUS = 0, INF = 1, REC = 2, IMM = 3;
+        const COL = {
+            0: 'rgb(120, 150, 190)',    // susceptible - our quiet blue
+            1: 'rgb(176, 36, 24)',      // infected - Ypsilon red
+            2: 'rgb(121, 158, 49)',     // recovered - phi green
+            3: 'rgb(245, 194, 66)',     // vaccinated from the start - lambda orange
+        };
+
+        const S = {
+            n: 90,          // cells per side
+            p: 22,          // chance in % that an infected neighbour passes it on, per day
+            days: 8,        // how many days someone stays infectious
+            vacc: 0,        // share of the population immune before day 1, in %
+            running: false,
+            day: 0,
+            grid: null,
+            timer: null,    // days since infection, per cell
+            hist: [],       // share of infected per day - the curve
+        };
+
+        function reset() {
+            const n = S.n, N = n * n;
+            S.grid = new Uint8Array(N);
+            S.timer = new Uint16Array(N);
+            S.day = 0;
+            S.hist = [];
+            for (let i = 0; i < N; i++) if (Math.random() * 100 < S.vacc) S.grid[i] = IMM;
+            const mid = Math.floor(n / 2) * n + Math.floor(n / 2);   // patient zero in the middle
+            S.grid[mid] = INF;
+            S.timer[mid] = 0;
+            draw();
+        }
+
+        function step() {
+            const n = S.n, g = S.grid, t = S.timer, next = g.slice(), p = S.p / 100;
+            for (let y = 0; y < n; y++) {
+                for (let x = 0; x < n; x++) {
+                    const i = y * n + x;
+                    if (g[i] === INF) {
+                        if (++t[i] >= S.days) { next[i] = REC; continue; }
+                        /* four neighbours, each one an independent chance */
+                        if (x > 0 && g[i - 1] === SUS && Math.random() < p) { next[i - 1] = INF; t[i - 1] = 0; }
+                        if (x < n - 1 && g[i + 1] === SUS && Math.random() < p) { next[i + 1] = INF; t[i + 1] = 0; }
+                        if (y > 0 && g[i - n] === SUS && Math.random() < p) { next[i - n] = INF; t[i - n] = 0; }
+                        if (y < n - 1 && g[i + n] === SUS && Math.random() < p) { next[i + n] = INF; t[i + n] = 0; }
+                    }
+                }
+            }
+            S.grid = next;
+            S.day++;
+            let inf = 0;
+            for (let i = 0; i < next.length; i++) if (next[i] === INF) inf++;
+            S.hist.push(inf / next.length);
+            if (!inf) stop();                       // nobody left to pass it on - the wave is over
+            draw();
+        }
+
+        function draw() {
+            const rect = container.getBoundingClientRect();
+            const W = rect.width, H = rect.height;
+            ctx.clearRect(0, 0, W, H);
+            const curveH = Math.min(140, H * 0.22);
+            const side = Math.min(W, H - curveH - 24);
+            const ox = (W - side) / 2, oy = 0, cell = side / S.n;
+
+            for (let y = 0; y < S.n; y++) {
+                for (let x = 0; x < S.n; x++) {
+                    ctx.fillStyle = COL[S.grid[y * S.n + x]];
+                    ctx.fillRect(ox + x * cell, oy + y * cell, Math.ceil(cell), Math.ceil(cell));
+                }
+            }
+
+            /* the curve: share of infected per day, the peak marked - "flatten the curve", drawn from our own run */
+            const cy = oy + side + 16, cw = side, top = cy;
+            ctx.strokeStyle = 'rgba(120, 150, 190, 0.45)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(ox, top, cw, curveH);
+            if (S.hist.length > 1) {
+                const peak = Math.max(0.02, Math.max.apply(null, S.hist));
+                ctx.beginPath();
+                S.hist.forEach((v, i) => {
+                    const px = ox + (i / Math.max(1, S.hist.length - 1)) * cw;
+                    const py = top + curveH - (v / peak) * (curveH - 8) - 4;
+                    i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+                });
+                ctx.strokeStyle = COL[INF];
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.fillStyle = 'rgba(160, 185, 215, 0.9)';
+                ctx.font = '12px Outfit, sans-serif';
+                ctx.fillText('Höhepunkt: ' + (peak * 100).toFixed(1) + ' % krank gleichzeitig', ox + 8, top + 16);
+            }
+
+            const box = document.getElementById('coach-content');
+            if (box) {
+                let s = 0, r = 0, inf = 0;
+                for (let i = 0; i < S.grid.length; i++) {
+                    if (S.grid[i] === SUS) s++; else if (S.grid[i] === REC) r++; else if (S.grid[i] === INF) inf++;
+                }
+                const N = S.grid.length;
+                box.textContent = 'Tag ' + S.day + ' · krank ' + (inf / N * 100).toFixed(1) + ' % · '
+                    + 'durch ' + (r / N * 100).toFixed(1) + ' % · nie erwischt ' + (s / N * 100).toFixed(1) + ' %';
+            }
+        }
+
+        function start() { if (!S.running) { S.running = true; S.loop = setInterval(step, 60); } }
+        function stop() { S.running = false; clearInterval(S.loop); }
+
+        function buildUI() {
+            const host = document.getElementById('ui-container');
+            if (!host) return;
+            const row = (id, label, min, max, val, unit) =>
+                '<div class="control-group"><label for="' + id + '">' + label +
+                ' <span id="' + id + '-out" class="cyber-number">' + val + unit + '</span></label>' +
+                '<input type="range" id="' + id + '" min="' + min + '" max="' + max + '" step="1" value="' + val + '"></div>';
+            host.innerHTML =
+                row('is-p', 'Ansteckung je Kontakt', 1, 60, S.p, ' %') +
+                row('is-days', 'Ansteckend für', 2, 20, S.days, ' Tage') +
+                row('is-vacc', 'Vorher immun', 0, 90, S.vacc, ' %') +
+                row('is-n', 'Bevölkerung', 40, 160, S.n, ' je Seite') +
+                '<div class="control-group">' +
+                '<button class="cyber-btn" id="is-run">Start</button>' +
+                '<button class="cyber-btn" id="is-reset">Zurücksetzen</button>' +
+                '</div>';
+
+            const bind = (id, key, unit, hard) => {
+                const el = document.getElementById(id), out = document.getElementById(id + '-out');
+                el.addEventListener('input', () => {
+                    S[key] = +el.value;
+                    if (out) out.textContent = el.value + unit;
+                    hard ? reset() : draw();
+                });
+            };
+            bind('is-p', 'p', ' %', false);
+            bind('is-days', 'days', ' Tage', false);
+            bind('is-vacc', 'vacc', ' %', true);
+            bind('is-n', 'n', ' je Seite', true);
+            document.getElementById('is-run').addEventListener('click', (e) => {
+                S.running ? stop() : start();
+                e.target.textContent = S.running ? 'Pause' : 'Start';
+            });
+            document.getElementById('is-reset').addEventListener('click', () => { stop(); document.getElementById('is-run').textContent = 'Start'; reset(); });
+        }
+
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            canvas.width = Math.floor(Math.max(1, rect.width) * dpr);
+            canvas.height = Math.floor(Math.max(1, rect.height) * dpr);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
+
+        function init() { resizeCanvasToContainer(); draw(); }
+
+        buildUI();
+        reset();
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(init);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Falling Pi</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({ useExternalStyles: true, title: 'Falling Pi', subtitle: 'Lab' });
+        CyberUI.init();
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        /* Monte Carlo pi, as ThrowingDarts.java did it: darts rain into the unit square, the quarter circle
+           catches a share of them. Area of the quarter circle / area of the square = pi/4, so 4 * hits/all is
+           an estimate of pi. The lab shows BOTH sides of that: the picture fills up fast, the accuracy crawls -
+           the error shrinks with 1/sqrt(n), so every further decimal costs a hundred times the darts. */
+        const S = {
+            hits: 0,
+            all: 0,
+            rate: 200,        // darts per frame
+            running: false,
+            pts: [],          // kept for redrawing on resize, capped
+            err: [],          // |estimate - pi| per 100 darts, for the curve
+        };
+        const MAXPTS = 60000;
+
+        function estimate() { return S.all ? 4 * S.hits / S.all : 0; }
+
+        function reset() {
+            S.hits = S.all = 0;
+            S.pts = [];
+            S.err = [];
+            paint();
+        }
+
+        function throwDarts(k) {
+            for (let i = 0; i < k; i++) {
+                const x = Math.random(), y = Math.random();
+                const inside = x * x + y * y <= 1;
+                if (inside) S.hits++;
+                S.all++;
+                if (S.pts.length < MAXPTS) S.pts.push(x, y, inside ? 1 : 0);
+                if (S.all % 100 === 0) S.err.push(Math.abs(estimate() - Math.PI));
+            }
+            paint();
+        }
+
+        function paint() {
+            const rect = container.getBoundingClientRect();
+            const W = rect.width, H = rect.height;
+            ctx.clearRect(0, 0, W, H);
+            const curveH = Math.min(130, H * 0.2);
+            const side = Math.min(W, H - curveH - 24);
+            const ox = (W - side) / 2, oy = 0;
+
+            /* the square and the quarter circle it contains */
+            ctx.fillStyle = 'rgba(120, 150, 190, 0.07)';
+            ctx.fillRect(ox, oy, side, side);
+            ctx.strokeStyle = 'rgba(120, 150, 190, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(ox, oy, side, side);
+            ctx.beginPath();
+            ctx.arc(ox, oy + side, side, -Math.PI / 2, 0);
+            ctx.strokeStyle = 'rgb(245, 194, 66)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            for (let i = 0; i < S.pts.length; i += 3) {
+                const px = ox + S.pts[i] * side, py = oy + side - S.pts[i + 1] * side;
+                ctx.fillStyle = S.pts[i + 2] ? 'rgb(121, 158, 49)' : 'rgb(176, 36, 24)';
+                ctx.fillRect(px, py, 2, 2);
+            }
+
+            /* the error curve: it falls like 1/sqrt(n) and gets visibly stubborn */
+            const top = oy + side + 16;
+            ctx.strokeStyle = 'rgba(120, 150, 190, 0.45)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(ox, top, side, curveH);
+            if (S.err.length > 1) {
+                const peak = Math.max(0.05, Math.max.apply(null, S.err));
+                ctx.beginPath();
+                S.err.forEach((v, i) => {
+                    const px = ox + (i / Math.max(1, S.err.length - 1)) * side;
+                    const py = top + curveH - (v / peak) * (curveH - 8) - 4;
+                    i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+                });
+                ctx.strokeStyle = 'rgb(176, 36, 24)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.fillStyle = 'rgba(160, 185, 215, 0.9)';
+                ctx.font = '12px Outfit, sans-serif';
+                ctx.fillText('Abstand zu π – fällt wie 1/√n', ox + 8, top + 16);
+            }
+
+            const box = document.getElementById('coach-content');
+            if (box) {
+                const e = estimate();
+                box.textContent = S.all
+                    ? 'π ≈ ' + e.toFixed(5) + '  ·  ' + S.hits.toLocaleString('de-DE') + ' von '
+                      + S.all.toLocaleString('de-DE') + ' Darts im Viertelkreis  ·  Fehler '
+                      + Math.abs(e - Math.PI).toFixed(5)
+                    : 'Start drücken – die Darts fallen ins Quadrat, der Viertelkreis fängt π/4 davon.';
+            }
+        }
+
+        function tick() { if (S.running) { throwDarts(S.rate); requestAnimationFrame(tick); } }
+
+        function buildUI() {
+            const host = document.getElementById('ui-container');
+            if (!host) return;
+            host.innerHTML =
+                '<div class="control-group"><label for="fp-rate">Darts je Bild ' +
+                '<span id="fp-rate-out" class="cyber-number">' + S.rate + '</span></label>' +
+                '<input type="range" id="fp-rate" min="10" max="2000" step="10" value="' + S.rate + '"></div>' +
+                '<div class="control-group">' +
+                '<button class="cyber-btn" id="fp-run">Start</button>' +
+                '<button class="cyber-btn" id="fp-one">100 Darts</button>' +
+                '<button class="cyber-btn" id="fp-reset">Zurücksetzen</button>' +
+                '</div>';
+            const el = document.getElementById('fp-rate'), out = document.getElementById('fp-rate-out');
+            el.addEventListener('input', () => { S.rate = +el.value; out.textContent = el.value; });
+            document.getElementById('fp-run').addEventListener('click', (e) => {
+                S.running = !S.running;
+                e.target.textContent = S.running ? 'Pause' : 'Start';
+                if (S.running) tick();
+            });
+            document.getElementById('fp-one').addEventListener('click', () => throwDarts(100));
+            document.getElementById('fp-reset').addEventListener('click', () => {
+                S.running = false;
+                document.getElementById('fp-run').textContent = 'Start';
+                reset();
+            });
+        }
+
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            canvas.width = Math.floor(Math.max(1, rect.width) * dpr);
+            canvas.height = Math.floor(Math.max(1, rect.height) * dpr);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
+
+        function init() { resizeCanvasToContainer(); paint(); }
+
+        buildUI();
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(init);
+    </script>
+</body>
+
+</html>

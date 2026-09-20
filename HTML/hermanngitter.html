@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Hermanngitter</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: 'Hermanngitter',
+            subtitle: 'Lab',
+        });
+        CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        /* The state of the grid. tile = the black square, street = the light gap between two of them; the grey
+           blobs of the illusion appear in the crossings of the streets, and only in the ones you are NOT looking
+           at - the fovea has the finest receptive fields, the periphery the coarsest. */
+        const S = {
+            tile: 60,
+            street: 14,
+            dark: 0,          // brightness of the squares, 0 = black
+            light: 255,       // brightness of the streets
+            dots: false,      // scintillating grid: a disc in every crossing
+            invert: false,    // light squares, dark streets - the effect nearly dies, that IS the lesson
+        };
+
+        function draw() {
+            const rect = container.getBoundingClientRect();
+            const W = rect.width, H = rect.height;
+            const tile = S.tile, street = S.street, step = tile + street;
+            const bg = S.invert ? S.dark : S.light;
+            const fg = S.invert ? S.light : S.dark;
+
+            ctx.fillStyle = 'rgb(' + bg + ',' + bg + ',' + bg + ')';
+            ctx.fillRect(0, 0, W, H);
+
+            /* centre the pattern, so the crossings do not sit half outside the canvas */
+            const cols = Math.floor((W - street) / step), rows = Math.floor((H - street) / step);
+            const ox = (W - (cols * step + street)) / 2, oy = (H - (rows * step + street)) / 2;
+
+            ctx.fillStyle = 'rgb(' + fg + ',' + fg + ',' + fg + ')';
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    ctx.fillRect(ox + street + c * step, oy + street + r * step, tile, tile);
+                }
+            }
+
+            /* Scintillating grid (Lingelbach 1994): a disc in every crossing. The blobs then flash black - much
+               louder than in the plain Hermann grid, and they vanish the moment a crossing is fixated. */
+            if (S.dots) {
+                const R = Math.max(2, street * 0.42);
+                ctx.fillStyle = 'rgb(' + bg + ',' + bg + ',' + bg + ')';
+                for (let r = 0; r <= rows; r++) {
+                    for (let c = 0; c <= cols; c++) {
+                        ctx.beginPath();
+                        ctx.arc(ox + street / 2 + c * step, oy + street / 2 + r * step, R, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            const box = document.getElementById('coach-content');
+            if (box) {
+                box.textContent = S.dots
+                    ? 'Schau auf EINE Kreuzung. Die anderen flackern schwarz – die, auf die du schaust, nie.'
+                    : 'Sieh in die Mitte. In den Kreuzungen ringsum sitzen graue Flecken – schau hin, und sie sind weg.';
+            }
+        }
+
+        /* the panel: three sliders and two switches, in the markup the other labs use */
+        function buildUI() {
+            const host = document.getElementById('ui-container');
+            if (!host) return;
+            const row = (id, label, min, max, val, unit) =>
+                '<div class="control-group">' +
+                '<label for="' + id + '">' + label + ' <span id="' + id + '-out" class="cyber-number">' + val + unit + '</span></label>' +
+                '<input type="range" id="' + id + '" min="' + min + '" max="' + max + '" step="1" value="' + val + '">' +
+                '</div>';
+            host.innerHTML =
+                row('hg-tile', 'Kachelgröße', 20, 140, S.tile, ' px') +
+                row('hg-street', 'Gassenbreite', 4, 40, S.street, ' px') +
+                row('hg-light', 'Helligkeit der Gassen', 120, 255, S.light, '') +
+                '<div class="control-group">' +
+                '<label class="cyber-checkbox-wrapper"><input type="checkbox" id="hg-dots"> <span>Punkte (Scintillating Grid)</span></label>' +
+                '<label class="cyber-checkbox-wrapper"><input type="checkbox" id="hg-invert"> <span>Umgekehrt (hell auf dunkel)</span></label>' +
+                '</div>';
+
+            const bind = (id, key, unit) => {
+                const el = document.getElementById(id), out = document.getElementById(id + '-out');
+                el.addEventListener('input', () => {
+                    S[key] = +el.value;
+                    if (out) out.textContent = el.value + unit;
+                    draw();
+                });
+            };
+            bind('hg-tile', 'tile', ' px');
+            bind('hg-street', 'street', ' px');
+            bind('hg-light', 'light', '');
+            document.getElementById('hg-dots').addEventListener('change', (e) => { S.dots = e.target.checked; draw(); });
+            document.getElementById('hg-invert').addEventListener('change', (e) => { S.invert = e.target.checked; draw(); });
+        }
+
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            canvas.width = Math.floor(Math.max(1, rect.width) * dpr);
+            canvas.height = Math.floor(Math.max(1, rect.height) * dpr);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
+
+        function init() {
+            resizeCanvasToContainer();
+            draw();
+        }
+
+        buildUI();
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(init);
+    </script>
+</body>
+
+</html>

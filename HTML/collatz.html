@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Collatz</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({ useExternalStyles: true, title: 'Collatz', subtitle: 'Lab' });
+        CyberUI.init();
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        /* 3n+1: even -> n/2, odd -> 3n+1. Every start ever tried lands on 1, nobody can prove it must.
+           Two pictures, because one alone hides the point:
+           TOP    the path of ONE number - hailstone, it climbs far higher than it started;
+           BOTTOM how many steps each start from 1..N needs - a cloud with hard lower edges (the powers of two
+                  sit on the bottom line), and no pattern anybody can pin down. */
+        const S = { n: 27, upto: 1000, steps: [], path: [], anim: 0, running: false };
+
+        function path(n) {
+            const out = [n];
+            let x = n, guard = 0;
+            while (x !== 1 && guard++ < 10000) { x = x % 2 ? 3 * x + 1 : x / 2; out.push(x); }
+            return out;
+        }
+
+        function lengths(upto) {
+            const out = new Uint16Array(upto + 1);
+            for (let i = 1; i <= upto; i++) {
+                let x = i, k = 0;
+                while (x !== 1 && k < 10000) { x = x % 2 ? 3 * x + 1 : x / 2; k++; }
+                out[i] = k;
+            }
+            return out;
+        }
+
+        function recompute() {
+            S.path = path(S.n);
+            S.steps = lengths(S.upto);
+            S.anim = S.path.length;
+            paint();
+        }
+
+        function paint() {
+            const rect = container.getBoundingClientRect();
+            const W = rect.width, H = rect.height, pad = 28;
+            ctx.clearRect(0, 0, W, H);
+            const half = (H - 3 * pad) / 2;
+
+            /* --- the path of one number, on a log scale: without it the peak eats the whole picture */
+            const shown = S.path.slice(0, Math.max(2, Math.round(S.anim)));
+            const peak = Math.max.apply(null, S.path);
+            const lg = (v) => Math.log(v) / Math.log(peak || 2);
+            ctx.strokeStyle = 'rgba(120, 150, 190, 0.45)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(pad, pad, W - 2 * pad, half);
+            ctx.beginPath();
+            shown.forEach((v, i) => {
+                const x = pad + (i / Math.max(1, S.path.length - 1)) * (W - 2 * pad);
+                const y = pad + half - lg(v) * (half - 10) - 5;
+                i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+            });
+            ctx.strokeStyle = 'rgb(245, 194, 66)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            shown.forEach((v, i) => {
+                const x = pad + (i / Math.max(1, S.path.length - 1)) * (W - 2 * pad);
+                const y = pad + half - lg(v) * (half - 10) - 5;
+                ctx.fillStyle = v % 2 ? 'rgb(176, 36, 24)' : 'rgb(121, 158, 49)';   // odd red, even green
+                ctx.beginPath();
+                ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.fillStyle = 'rgba(160, 185, 215, 0.9)';
+            ctx.font = '12px Outfit, sans-serif';
+            ctx.fillText('Weg von ' + S.n + ' · Höhepunkt ' + peak.toLocaleString('de-DE')
+                + ' · ' + (S.path.length - 1) + ' Schritte', pad + 8, pad + 16);
+
+            /* --- how long every start from 1..N takes */
+            const top2 = pad * 2 + half;
+            ctx.strokeStyle = 'rgba(120, 150, 190, 0.45)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(pad, top2, W - 2 * pad, half);
+            let maxK = 1;
+            for (let i = 1; i <= S.upto; i++) if (S.steps[i] > maxK) maxK = S.steps[i];
+            for (let i = 1; i <= S.upto; i++) {
+                const x = pad + (i / S.upto) * (W - 2 * pad);
+                const y = top2 + half - (S.steps[i] / maxK) * (half - 10) - 5;
+                ctx.fillStyle = i === S.n ? 'rgb(245, 194, 66)' : 'rgba(121, 158, 49, 0.5)';
+                ctx.fillRect(x, y, i === S.n ? 3 : 1.5, i === S.n ? 5 : 1.5);
+            }
+            ctx.fillStyle = 'rgba(160, 185, 215, 0.9)';
+            ctx.fillText('Schritte bis zur 1, für jeden Start bis ' + S.upto.toLocaleString('de-DE')
+                + ' · am längsten braucht ' + maxK, pad + 8, top2 + 16);
+
+            const box = document.getElementById('coach-content');
+            if (box) {
+                box.textContent = 'Gerade halbieren, ungerade mal 3 plus 1. Jede je geprüfte Zahl landet bei 1 – '
+                    + 'beweisen kann es niemand. Rot ist ungerade, grün gerade.';
+            }
+        }
+
+        function animate() {
+            if (!S.running) return;
+            S.anim += 0.5;
+            if (S.anim >= S.path.length) { S.anim = S.path.length; S.running = false; }
+            paint();
+            if (S.running) requestAnimationFrame(animate);
+        }
+
+        function buildUI() {
+            const host = document.getElementById('ui-container');
+            if (!host) return;
+            host.innerHTML =
+                '<div class="control-group"><label for="cz-n">Startzahl ' +
+                '<span id="cz-n-out" class="cyber-number">' + S.n + '</span></label>' +
+                '<input type="range" id="cz-n" min="2" max="10000" step="1" value="' + S.n + '"></div>' +
+                '<div class="control-group"><label for="cz-upto">Alle Starts bis ' +
+                '<span id="cz-upto-out" class="cyber-number">' + S.upto + '</span></label>' +
+                '<input type="range" id="cz-upto" min="100" max="10000" step="100" value="' + S.upto + '"></div>' +
+                '<div class="control-group">' +
+                '<button class="cyber-btn" id="cz-play">Weg ablaufen</button>' +
+                '<button class="cyber-btn" id="cz-worst">Härtester Start</button>' +
+                '</div>';
+            const n = document.getElementById('cz-n'), nOut = document.getElementById('cz-n-out');
+            n.addEventListener('input', () => { S.n = +n.value; nOut.textContent = n.value; S.path = path(S.n); S.anim = S.path.length; paint(); });
+            const u = document.getElementById('cz-upto'), uOut = document.getElementById('cz-upto-out');
+            u.addEventListener('input', () => { S.upto = +u.value; uOut.textContent = u.value; S.steps = lengths(S.upto); paint(); });
+            document.getElementById('cz-play').addEventListener('click', () => { S.anim = 1; S.running = true; animate(); });
+            document.getElementById('cz-worst').addEventListener('click', () => {
+                let best = 2, k = 0;
+                for (let i = 2; i <= S.upto; i++) if (S.steps[i] > k) { k = S.steps[i]; best = i; }
+                S.n = best;
+                n.value = best;
+                nOut.textContent = best;
+                S.path = path(best);
+                S.anim = 1;
+                S.running = true;
+                animate();
+            });
+        }
+
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            canvas.width = Math.floor(Math.max(1, rect.width) * dpr);
+            canvas.height = Math.floor(Math.max(1, rect.height) * dpr);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
+
+        function init() { resizeCanvasToContainer(); paint(); }
+
+        buildUI();
+        recompute();
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(init);
+    </script>
+</body>
+
+</html>

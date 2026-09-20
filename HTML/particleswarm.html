@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Particle Swarm</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({ useExternalStyles: true, title: 'Particle Swarm', subtitle: 'Lab' });
+        CyberUI.init();
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        /* Particle Swarm Optimisation (Kennedy/Eberhart 1995). Every particle remembers its own best spot and
+           knows the best spot of the whole swarm; its velocity is pulled towards both. Three numbers decide
+           everything, and the lab is built to let them fail:
+             w  (Trägheit)   too high - the swarm shoots past and never settles
+             c1 (Eigensinn)  alone - everyone digs their own hole, nobody shares
+             c2 (Herdentrieb) too high - all land in the FIRST decent valley and miss the real one
+           That last one is the lesson: a swarm can be confidently wrong together. */
+        const FUNCS = {
+            rastrigin: { name: 'Rastrigin (viele Täler)', r: 5.12, f: (x, y) => 20 + x * x - 10 * Math.cos(2 * Math.PI * x) + y * y - 10 * Math.cos(2 * Math.PI * y) },
+            himmelblau: { name: 'Himmelblau (vier Minima)', r: 5, f: (x, y) => Math.pow(x * x + y - 11, 2) + Math.pow(x + y * y - 7, 2) },
+            sphere: { name: 'Parabel (ein Tal)', r: 5, f: (x, y) => x * x + y * y },
+        };
+
+        const S = { key: 'rastrigin', n: 40, w: 72, c1: 150, c2: 150, it: 0, running: false, p: [], best: null, bestF: Infinity, field: null };
+
+        function fn(x, y) { return FUNCS[S.key].f(x, y); }
+
+        function reset() {
+            const R = FUNCS[S.key].r;
+            S.p = [];
+            S.it = 0;
+            S.bestF = Infinity;
+            S.best = null;
+            for (let i = 0; i < S.n; i++) {
+                const x = (Math.random() * 2 - 1) * R, y = (Math.random() * 2 - 1) * R;
+                const f = fn(x, y);
+                S.p.push({ x, y, vx: (Math.random() - 0.5) * R * 0.2, vy: (Math.random() - 0.5) * R * 0.2, bx: x, by: y, bf: f });
+                if (f < S.bestF) { S.bestF = f; S.best = { x, y }; }
+            }
+            S.field = null;
+            paint();
+        }
+
+        function step() {
+            const R = FUNCS[S.key].r, w = S.w / 100, c1 = S.c1 / 100, c2 = S.c2 / 100;
+            for (const q of S.p) {
+                q.vx = w * q.vx + c1 * Math.random() * (q.bx - q.x) + c2 * Math.random() * (S.best.x - q.x);
+                q.vy = w * q.vy + c1 * Math.random() * (q.by - q.y) + c2 * Math.random() * (S.best.y - q.y);
+                const cap = R * 0.3;
+                q.vx = Math.max(-cap, Math.min(cap, q.vx));
+                q.vy = Math.max(-cap, Math.min(cap, q.vy));
+                q.x = Math.max(-R, Math.min(R, q.x + q.vx));
+                q.y = Math.max(-R, Math.min(R, q.y + q.vy));
+                const f = fn(q.x, q.y);
+                if (f < q.bf) { q.bf = f; q.bx = q.x; q.by = q.y; }
+                if (f < S.bestF) { S.bestF = f; S.best = { x: q.x, y: q.y }; }
+            }
+            S.it++;
+            paint();
+        }
+
+        function paint() {
+            const rect = container.getBoundingClientRect();
+            const W = rect.width, H = rect.height;
+            const side = Math.min(W, H) - 20, ox = (W - side) / 2, oy = (H - side) / 2;
+            const R = FUNCS[S.key].r;
+            ctx.clearRect(0, 0, W, H);
+
+            /* the landscape, painted once per function into an offscreen canvas - redrawing it every frame
+               would cost more than the whole swarm */
+            if (!S.field) {
+                const G = 160;
+                const off = document.createElement('canvas');
+                off.width = off.height = G;
+                const o = off.getContext('2d'), img = o.createImageData(G, G);
+                let lo = Infinity, hi = -Infinity;
+                const vals = new Float64Array(G * G);
+                for (let j = 0; j < G; j++) {
+                    for (let i = 0; i < G; i++) {
+                        const v = fn(-R + (2 * R * i) / (G - 1), R - (2 * R * j) / (G - 1));
+                        vals[j * G + i] = v;
+                        if (v < lo) lo = v;
+                        if (v > hi) hi = v;
+                    }
+                }
+                for (let k = 0; k < G * G; k++) {
+                    const t = Math.sqrt((vals[k] - lo) / (hi - lo || 1));   // sqrt: the valleys stay readable
+                    img.data[k * 4] = 18 + t * 40;
+                    img.data[k * 4 + 1] = 32 + t * 70;
+                    img.data[k * 4 + 2] = 58 + t * 120;
+                    img.data[k * 4 + 3] = 255;
+                }
+                o.putImageData(img, 0, 0);
+                S.field = off;
+            }
+            ctx.imageSmoothingEnabled = true;
+            ctx.drawImage(S.field, ox, oy, side, side);
+            ctx.strokeStyle = 'rgba(120, 150, 190, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(ox, oy, side, side);
+
+            const px = (x) => ox + ((x + R) / (2 * R)) * side;
+            const py = (y) => oy + ((R - y) / (2 * R)) * side;
+
+            for (const q of S.p) {
+                ctx.strokeStyle = 'rgba(245, 194, 66, 0.35)';       // where it is heading
+                ctx.beginPath();
+                ctx.moveTo(px(q.x), py(q.y));
+                ctx.lineTo(px(q.x + q.vx), py(q.y + q.vy));
+                ctx.stroke();
+                ctx.fillStyle = 'rgb(245, 194, 66)';
+                ctx.beginPath();
+                ctx.arc(px(q.x), py(q.y), 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            if (S.best) {
+                ctx.strokeStyle = 'rgb(176, 36, 24)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(px(S.best.x), py(S.best.y), 8, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            const box = document.getElementById('coach-content');
+            if (box) {
+                box.textContent = 'Runde ' + S.it + ' · bester Wert ' + (S.bestF === Infinity ? '—' : S.bestF.toFixed(5))
+                    + (S.best ? ' bei (' + S.best.x.toFixed(2) + ' | ' + S.best.y.toFixed(2) + ')' : '')
+                    + ' · Minimum ist 0';
+            }
+        }
+
+        function tick() { if (S.running) { step(); requestAnimationFrame(tick); } }
+
+        function buildUI() {
+            const host = document.getElementById('ui-container');
+            if (!host) return;
+            const row = (id, label, min, max, val) =>
+                '<div class="control-group"><label for="' + id + '">' + label +
+                ' <span id="' + id + '-out" class="cyber-number">' + (val / 100).toFixed(2) + '</span></label>' +
+                '<input type="range" id="' + id + '" min="' + min + '" max="' + max + '" step="1" value="' + val + '"></div>';
+            host.innerHTML =
+                '<div class="control-group"><label for="ps-f">Landschaft</label>' +
+                '<select id="ps-f" class="cyber-select">' +
+                Object.keys(FUNCS).map((k) => '<option value="' + k + '"' + (k === S.key ? ' selected' : '') + '>' + FUNCS[k].name + '</option>').join('') +
+                '</select></div>' +
+                row('ps-w', 'Trägheit w', 0, 120, S.w) +
+                row('ps-c1', 'Eigensinn c₁', 0, 300, S.c1) +
+                row('ps-c2', 'Herdentrieb c₂', 0, 300, S.c2) +
+                '<div class="control-group"><label for="ps-n">Schwarmgröße ' +
+                '<span id="ps-n-out" class="cyber-number">' + S.n + '</span></label>' +
+                '<input type="range" id="ps-n" min="5" max="200" step="5" value="' + S.n + '"></div>' +
+                '<div class="control-group">' +
+                '<button class="cyber-btn" id="ps-run">Start</button>' +
+                '<button class="cyber-btn" id="ps-step">Eine Runde</button>' +
+                '<button class="cyber-btn" id="ps-reset">Neu streuen</button>' +
+                '</div>';
+            const bind = (id, key) => {
+                const el = document.getElementById(id), out = document.getElementById(id + '-out');
+                el.addEventListener('input', () => { S[key] = +el.value; out.textContent = (el.value / 100).toFixed(2); });
+            };
+            bind('ps-w', 'w');
+            bind('ps-c1', 'c1');
+            bind('ps-c2', 'c2');
+            const n = document.getElementById('ps-n'), nOut = document.getElementById('ps-n-out');
+            n.addEventListener('input', () => { S.n = +n.value; nOut.textContent = n.value; reset(); });
+            document.getElementById('ps-f').addEventListener('change', (e) => { S.key = e.target.value; reset(); });
+            document.getElementById('ps-run').addEventListener('click', (e) => {
+                S.running = !S.running;
+                e.target.textContent = S.running ? 'Pause' : 'Start';
+                if (S.running) tick();
+            });
+            document.getElementById('ps-step').addEventListener('click', () => step());
+            document.getElementById('ps-reset').addEventListener('click', () => reset());
+        }
+
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            canvas.width = Math.floor(Math.max(1, rect.width) * dpr);
+            canvas.height = Math.floor(Math.max(1, rect.height) * dpr);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
+
+        function init() { resizeCanvasToContainer(); paint(); }
+
+        buildUI();
+        reset();
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(init);
+    </script>
+</body>
+
+</html>
