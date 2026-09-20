@@ -111,7 +111,11 @@ body.side-hidden .tt-side { display: none; }
 /* Sieht aus wie die Wochen-Pfeile daneben (Doc, 01.09.2026) - gleiche Groesse,
    gleicher Rahmen, gleiches Hover. Flex zentriert das Zeichen exakt; ohne das
    sitzt ☰ durch seine eigene Zeilenhoehe leicht daneben. Der aktive Zustand
-   faerbt wie das Hover der Nachbarn, nicht orange. */
+   faerbt wie das Hover der Nachbarn, nicht orange.
+   The three bars are an inline SVG (Doc, 20.09.2026: "immer SVG bitte"). The
+   ☰ glyph they replace rendered bars of unequal thickness and sat half a pixel
+   low ("skewed", "nicht x zentriert"): a glyph carries its own side bearings
+   and baseline, so it never sits truly centred in a 30px box. */
 .tt-side-toggle {
     flex: 0 0 auto;
     display: inline-flex;
@@ -124,10 +128,25 @@ body.side-hidden .tt-side { display: none; }
     border: 1px solid var(--line);
     background: var(--panel);
     color: var(--text);
-    font-size: 1.1rem;
+    font-size: 0;
     line-height: 1;
     cursor: pointer;
     transition: border-color 0.12s ease, color 0.12s ease;
+}
+
+/* The SVG fills the whole 28px inner box and carries its margins INSIDE the
+   viewBox (bars 14 wide at x=7, 2 thick at y=8/13/18). That is what makes it
+   survive a browser zoom: centring a small icon leaves an odd number of pixels
+   to split, and the browser gave the extra one to the left - at Doc's 90% that
+   was 7px left against 6px right, plus bar gaps of 2 and 3 (measured 20.09.).
+   Margins that scale with the drawing round the same way on both sides. No
+   shape-rendering: crispEdges snaps each bar on its own and reopens the same
+   gap. The bars follow the button's colour (hover, .off) through currentColor. */
+.tt-side-toggle svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
 }
 
 .tt-side-toggle:hover { border-color: var(--muted); color: var(--muted); }

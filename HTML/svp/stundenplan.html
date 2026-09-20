@@ -42,7 +42,9 @@
         <div class="tt-bar">
             <button class="tt-side-toggle" id="sidetoggle" type="button"
                 aria-controls="side" aria-expanded="true"
-                title="Liste der Lehrkräfte ein- oder ausblenden">&#9776;</button>
+                title="Liste der Lehrkräfte ein- oder ausblenden"><svg viewBox="0 0 28 28"
+                    aria-hidden="true" focusable="false"><rect x="7" y="8" width="14" height="2"
+                    /><rect x="7" y="13" width="14" height="2" /><rect x="7" y="18" width="14" height="2" /></svg></button>
             <button class="tt-nav" id="prev" type="button" aria-label="Vorige Woche">&lsaquo;</button>
             <div class="tt-week" id="week">&nbsp;</div>
             <button class="tt-nav" id="next" type="button" aria-label="Nächste Woche">&rsaquo;</button>
@@ -458,8 +460,20 @@
             const y = m => laneH + (m - startMin) * scale;
             LAYOUT = { startMin, endMin, scale, laneH, y };
 
-            // header row
-            grid.appendChild(document.createElement('div'));
+            // header row - the corner carries the lessons of this week (Doc,
+            // 20.09.2026), counted like the staff box: no banners, person and
+            // branch filter applied, ghosts of the proposal view left out
+            const corner = document.createElement('div');
+            corner.className = 'tt-corner';
+            const weekCount = planForBox.filter(l => !isBanner(l)
+                && (!selected || l.teachers.includes(selected))
+                && (!DEPT_OFF.size || deptVisible(l))).length;
+            const pill = document.createElement('span');
+            pill.className = 'tt-corner-pill';
+            pill.textContent = weekCount;
+            pill.title = weekCount + (weekCount === 1 ? ' Stunde' : ' Stunden') + ' in dieser Woche';
+            corner.appendChild(pill);
+            grid.appendChild(corner);
             const todayYmd = Number(new Date().toISOString().slice(0, 10).replace(/-/g, ''));
             for (const d of dates) {
                 const h = document.createElement('div');
