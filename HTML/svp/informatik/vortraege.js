@@ -180,11 +180,16 @@
                fortnight rhythm (over Christmas to the next one, as FOS25-1 already
                had it). Doc's date on the page still wins (META_PAGE). */
             dates: {
-                'FOG25-1': twice(['2026-10-26', '2026-11-09', '2026-11-23', '2026-12-07', '2026-12-21']),
-                'FOG25-2_FOW25-2': twice(['2026-11-02', '2026-11-16', '2026-11-30', '2026-12-14', '2027-01-11']),
-                'FOS25-1': twice(['2026-11-04', '2026-12-02', '2026-12-16', '2027-01-13', '2027-01-27']),
-                'FOS25-2': twice(['2026-10-28', '2026-11-11', '2026-11-25', '2026-12-09', '2027-01-06']),
-                'FOW25-1': twice(['2026-10-27', '2026-11-10', '2026-11-24', '2026-12-08', '2026-12-22'])
+                'FOG25-1': twice(['2026-10-26', '2026-11-09', '2026-11-23', '2026-12-07', '2026-12-21',
+                    '2027-01-04', '2027-01-18']),
+                'FOG25-2_FOW25-2': twice(['2026-11-02', '2026-11-16', '2026-11-30', '2026-12-14', '2027-01-11',
+                    '2027-01-25', '2027-02-22']),
+                'FOS25-1': twice(['2026-11-04', '2026-12-02', '2026-12-16', '2027-01-13', '2027-01-27',
+                    '2027-02-24', '2027-03-10']),
+                'FOS25-2': twice(['2026-10-28', '2026-11-11', '2026-11-25', '2026-12-09', '2027-01-06',
+                    '2027-01-20', '2027-02-03']),
+                'FOW25-1': twice(['2026-10-27', '2026-11-10', '2026-11-24', '2026-12-08', '2026-12-22',
+                    '2027-01-05', '2027-01-19'])
             },
             labels: { lb1: ['LB 1', 'b-orange'], lb2: ['LB 2', 'b-cyan'], lb3: ['LB 3A', 'b-violet'], wb: ['Wahlbereich', 'b-green'] },
             topics: [
@@ -207,6 +212,27 @@
         const d = def && def.dates;
         return (Array.isArray(d) ? d : (d && d[klasse])) || [];
     }
+
+    /* ---------- Abgabe-Ordner in OneDrive ----------
+       Seit dem 21.09.2026 hat JEDE Lerngruppe ihren eigenen UPLOAD-Ordner
+       (UNTERRICHT/INFO FO 12/FOG25-1/UPLOAD und so fort), damit nicht die
+       Dateien aller Gruppen in einem Topf landen.
+
+       Die Adresse steht NICHT hier, sondern in Supabase (svp_plan_edits,
+       META_PAGE dieser Lerngruppe, Feld `upload`) - genau wie bei den
+       Abgabe-Knoepfen der Wochenzeilen. Grund: ein Freigabelink endet auf
+       "?e=TOKEN", und dieses Token IST die Schreibberechtigung fuer den
+       Ordner. Dieses Repo ist public und die Historie vergisst nichts, also
+       gehoert so ein Link in die Datenbank und nie in den Quelltext
+       (Doc, 21.09.2026).
+
+       Es muss der Link aus "Copy Link" sein (.../:f:/g/...): der Link aus
+       Docs eigener Ordneransicht (.../_layouts/15/onedrive.aspx) antwortet
+       anonym mit 403 (gemessen 31.08.2026). Erzeugen kann ihn nur Doc von
+       Hand - die IBB-IT laesst die Graph-App nicht zu (AADSTS65002).
+       Solange nichts hinterlegt ist, sagt der Knopf genau das, statt ins
+       Leere zu fuehren. */
+    function uploadFor() { return meta.upload || ''; }
     /* Data mode (data-mode="data"): the SVP plan page loads this file only for the
        talk dates and topics - svp-plan.js writes "Vortrag: 1 · Titel" into the week
        of each talk (Doc, 18.09.2026). One source for both pages, no page is built. */
@@ -322,10 +348,19 @@
        "wenn man alleine arbeiten moechte soll das auch gehen"). Nur im Browser,
        nichts davon steht in der Datenbank. Belegte Plaetze bleiben immer
        sichtbar, egal was hier steht: minFields setzt die Untergrenze. */
-    const fields = new Map();     /* id -> gewuenschte Feldzahl 1..3 */
+    const fields = new Map();     /* id -> gewuenschte Feldzahl 1..3, nur in diesem Browser */
     const minFields = (i) => { const s = S(i); return s[2].taken ? 3 : s[1].taken ? 2 : 1; };
-    const fieldCount = (i) => Math.max(minFields(i), fields.get(i) || 2);
-    const allThree = () => list.length > 0 && list.every((e) => fieldCount(e.id) >= 3);
+    /* Die gewuenschte Feldzahl steht seit dem 21.09.2026 auch in der Cloud
+       (meta.fields, je Lerngruppe) - vorher lebte sie nur im Arbeitsspeicher
+       und war nach jedem Neuladen wieder zwei (Doc: "man kann loeschen, nach
+       reload ist er wieder da"). Was dieser Browser gerade eingestellt hat,
+       gewinnt; darunter liegt der Cloud-Wert, darunter die Vorgabe zwei.
+       Belegte Plaetze setzen ueber minFields() ohnehin die Untergrenze - ein
+       Feld mit Namen laesst sich nie wegklappen. */
+    const fieldCount = (i) => {
+        const want = fields.has(i) ? fields.get(i) : (+(meta.fields || {})[i] || 2);
+        return Math.max(minFields(i), want);
+    };
     const mine = new Set(Object.keys(loadJSON(MINE_KEY)));
     const markMine = (i, j) => { mine.add(i + '-' + j); const o = {}; mine.forEach((k) => { o[k] = 1; }); saveJSON(MINE_KEY, o); };
 
@@ -509,6 +544,8 @@
     }
 
     let editing = false;
+    /* das "Aktionen"-Menue der Kopfleiste, gebaut in buildPage (svp-drop.js) */
+    let vtMenu = null;
 
     /* A taken slot is read-only for everybody but Doc: without the key the page
        cannot show a name, and a writable field would only ever overwrite one.
@@ -623,6 +660,23 @@
             : 'Ein Namensfeld weniger';
     }
 
+    /* Redezeit hinter der Ueberschrift (Doc, 21.09.2026). Acht Minuten je
+       Person, dazu acht Minuten Fragezeit fuer den Vortrag - beides getrennt
+       ausgewiesen, damit niemand die Fragezeit fuer Redezeit haelt. Die Zahl
+       haengt an der Zahl der Namensfelder, waechst also mit, sobald ein
+       dritter Name dazukommt. */
+    const MIN_PRO_PERSON = 8;
+    const MIN_FRAGEN = 8;
+    function timeHtml(n) {
+        const rede = n * MIN_PRO_PERSON;
+        return '<span class="vt-time" title="' +
+            n + (n === 1 ? ' Vortragende/r' : ' Vortragende') + ' × ' + MIN_PRO_PERSON +
+            ' Minuten Redezeit, dazu ' + MIN_FRAGEN + ' Minuten für Fragen">' +
+            '<span class="vt-time-rede">' + rede + ' min Rede</span>' +
+            '<span class="vt-time-frage">' + MIN_FRAGEN + ' min Fragen</span>' +
+            '</span>';
+    }
+
     function render() {
         const box = $('list');
         const draft = grabDrafts();
@@ -671,7 +725,8 @@
                 '<div class="vt-topic">' +
                     /* date in front of the title (Doc, 18.09.2026: "das Datum vor die Überschrift") */
                     '<div class="vt-title">' + dateHtml(i, pos) +
-                        '<span class="vt-title-text">' + esc(t.title) + '</span></div>' +
+                        '<span class="vt-title-text">' + esc(t.title) + '</span>' +
+                        timeHtml(n) + '</div>' +
                     '<div class="vt-sub">' + esc(t.sub) + '</div>' +
                     '<div class="vt-grades"><span class="vt-grade-lbl">Bewerten</span>' +
                         ROLES.map(function (r) {
@@ -682,9 +737,16 @@
                                 '" id="grade-' + r[0] + '-' + i + '" title="' +
                                 (sent ? 'Bewertung ' + r[1] + ' ist abgegeben'
                                       : 'Bewertungsbogen ' + r[1] + ' für diesen Vortrag') +
-                                '">' + r[1] + (sent ? ' ✓' : '') + '</button>';
-                        }).join('') + noteHtml(i, pos) + '</div>' +
-                '</div>' + inp(0) + (n > 1 ? inp(1) : '') + (n > 2 ? inp(2) : '') + more +
+                                '">' + r[1] + (sent ? ' ✓' : '') + '</button>' + ptsHtml(i, r);
+                        }).join('') + noteHtml(i, pos) + uploadHtml() + '</div>' +
+                /* Die Namensfelder stehen in EINEM Block, nicht als eigene
+                   Grid-Zeilen: sonst dehnen sie sich mit dem Themenblock mit
+                   und zwei Namen stehen weiter auseinander als drei
+                   (Doc, 21.09.2026: "Abstand zweier wie dreier"). */
+                '</div>' +
+                '<div class="vt-names">' +
+                    inp(0) + (n > 1 ? inp(1) : '') + (n > 2 ? inp(2) : '') +
+                '</div>' + more +
                 '</div>';
         }).join('');
 
@@ -707,6 +769,7 @@
             if (addBtn) addBtn.addEventListener('click', () => {
                 const next = Math.min(3, fieldCount(i) + 1);
                 fields.set(i, next);
+                saveFields(i, next);
                 render();
                 const el = $('name-' + i + '-' + (next - 1));
                 if (el && !el.readOnly) el.focus();
@@ -715,7 +778,9 @@
             if (lessBtn) lessBtn.addEventListener('click', async () => {
                 /* folding a field away must not swallow a half-typed name */
                 await flushSave(i, fieldCount(i) - 1);
-                fields.set(i, Math.max(1, fieldCount(i) - 1));
+                const next = Math.max(1, fieldCount(i) - 1);
+                fields.set(i, next);
+                saveFields(i, next);
                 render();
             });
             [0, 1, 2].forEach((j) => {
@@ -745,7 +810,6 @@
         sizeNrColumn();
         setEditing(editing);
         updateCount();
-        updateAllBtn();
         updateKeyBtn();
         updateEditBtns();
         renderFundus();
@@ -917,6 +981,22 @@
         }
     }
 
+    /* Die Feldzahl in die Cloud schreiben, damit sie einen Neustart ueberlebt.
+       Nur angemeldet - svp_plan_edits gehoert Doc. Eine Schuelerin, die sich
+       ein drittes Feld aufmacht, behaelt es trotzdem: sobald ein Name darin
+       steht, haelt minFields() das Feld offen, ganz ohne gespeicherte Zahl.
+       Zwei ist die Vorgabe und wird deshalb nicht gespeichert, sondern
+       ausgetragen - so bleibt die Zeile klein und sagt nur das Besondere. */
+    function saveFields(i, n) {
+        if (!logged()) return;
+        setMeta((m) => {
+            m.fields = m.fields || {};
+            if (n === 2) delete m.fields[i]; else m.fields[i] = n;
+        }).then(
+            () => setStatus('☁ Namensfelder gespeichert'),
+            (e) => setStatus('☁ Zahl der Namensfelder NICHT gespeichert: ' + e.message, true));
+    }
+
     const rowTaken = (i) => S(i).some((s) => s.taken);
 
     function updateCount() {
@@ -924,66 +1004,18 @@
         $('count').innerHTML = '<b>' + taken + '</b> von ' + list.length + ' Themen vergeben';
     }
 
-    /* ---------- toolbar: third column for ALL topics at once ---------- */
-    function allBtn() {
-        let b = $('btn-all3');
-        if (b) return b;
-        const bar = document.querySelector('.vt-actions');
-        if (!bar) return null;
-        b = document.createElement('button');
-        b.id = 'btn-all3';
-        b.className = 'action secondary';
-        b.addEventListener('click', toggleAllThird);
-        bar.insertBefore(b, bar.firstChild);
-        return b;
-    }
-
-    /* open on every topic, or fold every free one away again */
-    async function toggleAllThird() {
-        if (allThree()) {
-            for (const e of list) await flushSave(e.id, 2);
-            list.forEach((e) => fields.set(e.id, 2));
-        } else {
-            list.forEach((e) => fields.set(e.id, 3));
-        }
-        render();
-    }
-
-    function updateAllBtn() {
-        const b = allBtn();
-        if (!b) return;
-        const on = allThree();
-        b.textContent = on ? '− Dritter Name' : '+ Dritter Name';
-        b.title = on
-            ? 'Das dritte Namensfeld überall wieder ausblenden (belegte bleiben)'
-            : 'Bei allen Themen ein drittes Namensfeld einblenden';
-        b.classList.toggle('orange', on);
-    }
-
-    /* ---------- key button: only ever visible to a logged-in user ---------- */
-    function keyBtn() {
-        let b = $('btn-key');
-        if (b) return b;
-        const bar = document.querySelector('.vt-actions');
-        if (!bar) return null;
-        b = document.createElement('button');
-        b.id = 'btn-key';
-        b.className = 'action secondary';
-        b.addEventListener('click', onKeyBtn);
-        bar.insertBefore(b, bar.firstChild);
-        return b;
-    }
-
+    /* ---------- key entry of the Aktionen menu: only ever for a logged-in user ---------- */
     let keyExists = false;
     function updateKeyBtn() {
-        const b = keyBtn();
+        const b = $('btn-key');
         if (!b) return;
         const logged = !!(A() && A().hasSession());
         b.hidden = !logged || !window.svpCrypto || !svpCrypto.available;
-        if (b.hidden) return;
+        if (b.hidden) { if (vtMenu) vtMenu.sync(); return; }
         if (!keyExists) { b.textContent = '🔑 Schlüssel einrichten'; b.title = 'Einmalig: Schlüsselpaar für die Vortragsnamen anlegen'; }
         else if (unlocked()) { b.textContent = '🔒 Namen verbergen'; b.title = 'Schlüssel wieder sperren'; }
         else { b.textContent = '🔓 Namen anzeigen'; b.title = 'Schlüssel-Passwort eingeben, um die Namen zu entschlüsseln'; }
+        if (vtMenu) vtMenu.sync();
     }
 
     async function onKeyBtn() {
@@ -1022,6 +1054,10 @@
         $('btn-edit').textContent = on ? '✔ Fertig' : '✎ Bearbeiten';
         $('btn-edit').classList.toggle('orange', on);
         $('btn-orig').hidden = !on;
+        /* zeigt oder versteckt auch "+ Vortrag hinzufuegen" - der haengt am
+           Bearbeiten-Modus, nicht nur an der Anmeldung */
+        updateEditBtns();
+        if (vtMenu) vtMenu.sync();
     }
 
     /* whatever stands in the editable cells right now, lifted into the list */
@@ -1424,6 +1460,7 @@
     window.vtToggleConfirm = function (open) {
         $('confirm').classList.toggle('open', open);
         $('btn-reset').hidden = open;
+        if (vtMenu) vtMenu.sync();
     };
 
     /* Names of THIS class — behind the SVP password (svp-gate.js) AND a login,
@@ -1714,7 +1751,7 @@
        stored as ciphertext only. */
     const TOPICS_PAGE = '/svp/vortraege/' + PLAN;
     const META_PAGE = TOPICS_PAGE + '/' + KLASSE;
-    let meta = { order: null, dates: {}, noten: {}, fundus: [] };
+    let meta = { order: null, dates: {}, noten: {}, fundus: [], upload: '', fields: {} };
     /* the Fundus of this Lerngruppe - ids put aside, see toFundus() */
     function uniqIds(a) {
         return [...new Set((Array.isArray(a) ? a : []).map(Number).filter((n) => Number.isFinite(n) && n >= 0))];
@@ -1770,7 +1807,11 @@
                 order: Array.isArray(o.order) ? o.order.map(Number) : null,
                 dates: o.dates && typeof o.dates === 'object' ? o.dates : {},
                 noten: o.noten && typeof o.noten === 'object' ? o.noten : {},
-                fundus: uniqIds(o.fundus)
+                fundus: uniqIds(o.fundus),
+                /* Freigabelink des UPLOAD-Ordners dieser Lerngruppe */
+                upload: typeof o.upload === 'string' ? o.upload : '',
+                /* gewuenschte Zahl der Namensfelder je Thema */
+                fields: o.fields && typeof o.fields === 'object' ? o.fields : {}
             };
             const cl = cat && cat.edits ? cleanList(cat.edits.list) : [];
             cloudCat = cl.length ? { list: cl, ts: Date.parse(cat.ts) || 0 } : null;
@@ -1858,7 +1899,16 @@
        in - gets the buttons for it. */
     function updateEditBtns() {
         const on = logged();
-        ['btn-edit', 'btn-add'].forEach((id) => { const b = $(id); if (b) b.hidden = !on; });
+        const e = $('btn-edit');
+        if (e) e.hidden = !on;
+        /* "+ Vortrag hinzufuegen" haengt seit dem 21.09.2026 am Bearbeiten-Modus
+           (Doc: "nur im Bearbeiten bitte"). Vorher stand er unter der Liste,
+           sobald jemand angemeldet war - ein Knopf, der die gemeinsame
+           Themenliste aendert, gehoert aber dorthin, wo man sie ohnehin
+           bearbeitet. */
+        const a = $('btn-add');
+        if (a) a.hidden = !(on && editing);
+        if (vtMenu) vtMenu.sync();
     }
 
     /* The date belongs to the PLACE: place 1 is the first Friday, whoever
@@ -1935,6 +1985,23 @@
 
     const pctTxt = (p) => Math.round(p * 100) + ' %';
 
+    /* Die Punkte des Bogens direkt hinter seinem Knopf (Doc, 21.09.2026).
+       Der Platz steht IMMER da, auch leer - genau wie das Feld Note, das mit
+       einem Gedankenstrich anfaengt (Doc: "zeig Pkt auch leer wie Note").
+       Sonst huepfte die Zeile in dem Moment um, in dem der erste Bogen
+       eintrifft. Zahlen gibt es nur angemeldet UND entsperrt: sheetPts wird
+       von loadNoten() sonst gar nicht erst gefuellt. */
+    function ptsHtml(i, role) {
+        const p = (sheetPts[i] || {})[role[0]];
+        const has = p && typeof p.got === 'number';
+        const txt = has ? p.got + (typeof p.max === 'number' ? '/' + p.max : '') : '–';
+        const t = has
+            ? role[1] + ': ' + p.got + ' von ' + (p.max != null ? p.max : '?') + ' Punkten'
+            : 'Noch keine Punkte aus dem Bogen ' + role[1];
+        return '<span class="vt-pts' + (has ? '' : ' none') + '" title="' + esc(t) + '">' +
+            esc(txt) + '</span>';
+    }
+
     function noteCalc(i) {
         const N = window.svpNoten;
         const s = sheetPts[i] || {};
@@ -1984,6 +2051,25 @@
             ' aria-label="Note für Thema ' + (pos + 1) + '">' +
             (c ? '<span class="vt-note-pct">' + pctTxt(c.pct) + '</span>' : '') +
             '</span>';
+    }
+
+    /* Abgabe-Knopf an jeder Karte: er fuehrt in den UPLOAD-Ordner DIESER
+       Lerngruppe (Doc, 21.09.2026: "jetzt ueberall den upload button").
+       Gleiche Optik wie der Abgabe-Knopf in den Wochenzeilen des Plans -
+       .badge.mat-upload steht zentral in svp-untis.css, hier wird nichts
+       nachgebaut. Der Name der Schuelerin gehoert in den DATEInamen: der
+       Ordner ist fuer die ganze Gruppe freigegeben, hochladende Personen
+       sind in OneDrive anonym. */
+    function uploadHtml() {
+        const href = uploadFor();
+        const ico = '<span class="mat-upload-ico" aria-hidden="true">&uarr;</span>Abgabe';
+        if (!href) {
+            return '<span class="badge mat-upload vt-up off" ' +
+                'title="Der Abgabe-Ordner ist noch nicht freigegeben">' + ico + '</span>';
+        }
+        return '<a class="badge mat-upload vt-up" href="' + esc(href) + '" target="_blank" rel="noopener" ' +
+            'title="Vortrag hochladen &mdash; &ouml;ffnet den Abgabe-Ordner in OneDrive. ' +
+            'Bitte den eigenen Namen in den Dateinamen schreiben.">' + ico + '</a>';
     }
 
     function wireMeta(i, pos) {
@@ -2048,8 +2134,7 @@
         'Die <b>Namen</b> liegen dagegen verschl&uuml;sselt in der Cloud: eintragen kann sie jeder, lesen kann sie ' +
         'nur Doc Alvers &mdash; angemeldet und mit dem Schl&uuml;ssel-Passwort. Ohne Schl&uuml;ssel zeigt die Liste ' +
         'nur, welche Themen schon vergeben sind. Zwei Namen sind die Regel: <b>+</b> und <b>&minus;</b> am rechten ' +
-        'Zeilenrand machen daraus ein Trio oder einen einzelnen Vortrag &mdash; <b>+ Dritter Name</b> oben ' +
-        'schaltet das dritte Feld f&uuml;r alle Themen auf einmal ein. Ein Feld, in dem schon ein Name steht, ' +
+        'Zeilenrand machen daraus ein Trio oder einen einzelnen Vortrag. Ein Feld, in dem schon ein Name steht, ' +
         'l&auml;sst sich nicht wegklappen; erst den Eintrag l&ouml;schen. ' +
         'Beim Drucken erscheinen die Namen nur im entsperrten Zustand. ' +
         'Das <b>Datum</b> neben dem Titel setzt Doc Alvers angemeldet per Klick. Das Feld <b>Note</b> steht bei jedem ' +
@@ -2091,24 +2176,38 @@
                     '<button class="action orange" id="btn-print">Drucken</button>' +
                 '</div>' +
             '</div>' +
-            '<div class="subtitle">' + PLAN_DEF.sub + ' &middot; zwei Namen pro Thema (dritter per + zuschaltbar)</div>';
+            /* Der Zusatz "zwei Namen pro Thema (dritter per + zuschaltbar)" ist
+               am 21.09.2026 raus (Doc): die Feldzahl haengt inzwischen am Thema
+               und wird gespeichert, "zwei" stimmte also gar nicht mehr. */
+            '<div class="subtitle">' + PLAN_DEF.sub + '</div>';
 
         const bar = document.createElement('div');
         bar.className = 'vt-bar';
         /* #confirm keeps a TEXT node as its first child - buildSwitch rewrites
            exactly that when the Lerngruppe turns out to be called differently */
+        /* Ein Knopf statt einer Reihe: alle Aktionen liegen in EINEM Menue
+           (Doc, 21.09.2026). Das Dropdown selbst kommt aus svp-drop.js, damit
+           es aussieht und sich verhaelt wie jedes andere Menue der Seite. */
         bar.innerHTML =
             '<div class="vt-count" id="count"></div>' +
             '<div class="vt-actions">' +
-                '<button class="action secondary" id="btn-orig" hidden ' +
-                    'title="Themen auf die eingebaute Liste zur&uuml;cksetzen (Namen bleiben)">Themen: Original</button>' +
-                '<button class="action" id="btn-edit">&#9998; Bearbeiten</button>' +
+                /* #confirm bleibt NEBEN dem Menue: die Rueckfrage soll stehen
+                   bleiben, nachdem der Klick das Menue zugeklappt hat */
                 '<div class="vt-confirm" id="confirm">Alle Namen ' + (PLAN_DEF.artikel || 'von') + ' ' + esc(label) + ' l&ouml;schen? ' +
                     '<button class="action" id="btn-wipe-yes">Ja</button>' +
                     '<button class="action secondary" id="btn-wipe-no">Nein</button>' +
                 '</div>' +
-                '<button class="action secondary" id="btn-reset">Namen zur&uuml;cksetzen</button>' +
             '</div>';
+
+        const menu = window.svpDrop({ label: 'Aktionen', title: 'Bearbeiten, Namen anzeigen, Namen zurücksetzen' });
+        menu.item({ id: 'btn-edit', html: '&#9998; Bearbeiten', title: 'Thema und Leitfrage editierbar machen' });
+        menu.item({ id: 'btn-orig', className: 'secondary', hidden: true,
+            text: 'Themen: Original', title: 'Themen auf die eingebaute Liste zurücksetzen (Namen bleiben)' });
+        /* btn-key wird von updateKeyBtn beschriftet und ein- oder ausgeblendet */
+        menu.item({ id: 'btn-key', className: 'secondary', hidden: true, text: '' });
+        menu.item({ id: 'btn-reset', className: 'secondary', text: 'Namen zurücksetzen' });
+        bar.querySelector('.vt-actions').appendChild(menu.el);
+        vtMenu = menu;
 
         const box = document.createElement('div');
         box.className = 'vt-list';
@@ -2141,6 +2240,11 @@
         go('btn-print', () => window.print());
         go('btn-edit', () => window.vtToggleEdit());
         go('btn-orig', () => window.vtOriginal());
+        /* Der Schluessel-Knopf haengte seinen Handler frueher selbst an, weil er
+           sich auch selbst gebaut hat. Seit er im Aktionen-Menue steht, wird er
+           hier gebaut - und der Handler muss hier mit dran (Doc, 21.09.2026:
+           "Namen anzeigen geht nicht?"). */
+        go('btn-key', () => onKeyBtn());
         go('btn-add', () => window.vtAddTopic());
         go('btn-reset', () => window.vtToggleConfirm(true));
         go('btn-wipe-yes', () => window.vtResetNames());

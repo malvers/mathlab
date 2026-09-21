@@ -13,13 +13,30 @@
 .vt-row {
     /* One height for the name fields and the +/- next to them - the toggle was
        a 22px stub beside a 40px input (Doc, 04.09.2026). Both read it from
-       here, so they cannot drift apart again. */
-    --vt-field-h: 40px;
+       here, so they cannot drift apart again.
+       Eine Dreier-Karte soll GENAUSO hoch sein wie eine Zweier (Doc,
+       21.09.2026). Das ist reine Arithmetik: die Karte misst 102px, davon
+       24px Polster, bleiben 78px. Drei Felder plus zwei Luecken muessen da
+       hinein. Seit "alle cards ein Stueck hoch" (Doc, 21.09.2026) geben nicht
+       mehr die 76px des Themenblocks die Hoehe vor, sondern die Namen: drei
+       Felder a 28px plus zwei Luecken a 3px sind 90px Inhalt, macht 116px
+       Karte (90 + 24 Polster + 2 Rahmen). Damit eine Karte mit einem oder
+       zwei Namen nicht niedriger ausfaellt, setzt --vt-card-h dieselbe Hoehe
+       als Untergrenze - so sind ALLE Karten gleich hoch.
+       Die Feldhoehe kommt dabei NICHT aus min-height allein, sondern aus
+       Schriftgroesse plus Polster; line-height und padding unten sind
+       entsprechend gesetzt. */
+    --vt-field-h: 28px;
+    --vt-field-gap: 3px;
+    --vt-card-h: 116px;
+    min-height: var(--vt-card-h);
+    box-sizing: border-box;
     display: grid;
-    /* letzte Spalte: die +/- Knoepfe. auto statt fester Breite, weil bei zwei
-       Feldern beide nebeneinander stehen (Doc, 08.09.2026). */
-    grid-template-columns: 52px 1fr minmax(150px, 220px) minmax(150px, 220px) auto;
-    gap: 12px 14px;
+    /* Namensfelder UNTEREINANDER, nicht nebeneinander (Doc, 21.09.2026): eine
+       einzige Namensspalte, je ein Feld pro Zeile. Nummer, Thema und die
+       +/- Knoepfe stehen daneben und ueberspannen alle Zeilen. */
+    grid-template-columns: 52px 1fr minmax(150px, 220px) auto;
+    gap: 6px 14px;
     align-items: center;
     background: var(--card-soft);
     border: 1px solid var(--line);
@@ -30,14 +47,32 @@
     position: relative;
 }
 
-/* a third pupil joined this talk: three narrower name fields instead of two */
-.vt-row.three { grid-template-columns: 52px 1fr repeat(3, minmax(110px, 190px)) auto; }
-/* Allein vortragen: ein Feld, dafuer breiter (Doc, 08.09.2026). */
-.vt-row.one { grid-template-columns: 52px 1fr minmax(150px, 300px) auto; }
+/* Wer wo in der Karte steht. Die Namen sind EIN Block in der dritten Spalte,
+   darin eine feste Luecke - so ist der Abstand bei zwei Namen derselbe wie bei
+   drei (Doc, 21.09.2026). Als eigene Grid-Zeilen dehnten sie sich mit dem
+   Themenblock mit und standen bei zweien doppelt so weit auseinander. */
+.vt-nr { grid-column: 1; }
+.vt-topic { grid-column: 2; }
+
+.vt-names {
+    grid-column: 3;
+    display: flex;
+    flex-direction: column;
+    gap: var(--vt-field-gap);
+    align-self: center;
+}
 
 /* The button group at the right edge of the row: - and + are always both
-   there (Doc, 12.09.2026); the one that cannot act right now is dimmed. */
-.vt-more-box { display: flex; gap: 6px; }
+   there (Doc, 12.09.2026); the one that cannot act right now is dimmed.
+   Sie stehen wie die Namensfelder uebereinander und sitzen mittig auf der
+   Hoehe der Karte (Doc, 21.09.2026). */
+.vt-more-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    grid-column: 4;
+    align-self: center;
+}
 
 /* the toggle itself: a quiet +/- at the right edge, never in print.
    Same box as a name field, so the row ends on one line instead of a stub. */
@@ -126,6 +161,28 @@
 .vt-title .vt-date { flex: none; }
 .vt-title-text { min-width: 4ch; }
 
+/* Redezeit hinter der Ueberschrift (Doc, 21.09.2026): duenn und grau, damit
+   sie Auskunft gibt und nicht mit dem Titel konkurriert. Rede und Fragen
+   stehen getrennt, durch einen Mittelpunkt geschieden ("trenne Rede und
+   Frage"). */
+.vt-time {
+    flex: none;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 7px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 300;
+    font-size: 0.76rem;
+    letter-spacing: 0.01em;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.vt-time-frage::before {
+    content: '\00b7';
+    margin-right: 7px;
+}
+
 .vt-sub {
     font-family: 'Outfit', sans-serif;
     font-size: 0.86rem;
@@ -165,10 +222,22 @@
     text-transform: uppercase;
     line-height: 14px;
     padding: 3px 9px;
-    color: var(--muted);
-    background: transparent;
+    /* Nicht mehr --muted: die beiden Knoepfe waren blasser als alles um sie
+       herum und kaum zu lesen (Doc, 21.09.2026: "etwas dunkler"). Jetzt die
+       normale Textfarbe, wie im Kaestchen der Note daneben - UND eine leichte
+       Fuellung statt durchsichtig, denn die dunklere Schrift allein war
+       "kaum/gar nicht zu sehen". Der Rahmen bleibt wie er war (Doc:
+       "den HG, Rahmen so lassen").
+       color-mix statt fester Farbe, damit es in jedem Schema stimmt: im
+       hellen zieht --text die Flaeche dunkler, im dunklen heller - in beiden
+       Faellen hebt sie sich von der Karte ab, ohne ein eigener Knopf zu
+       werden. */
+    color: var(--text);
+    background: color-mix(in srgb, var(--text) 10%, transparent);
     border: 1px solid var(--line);
-    border-radius: 999px;
+    /* 8px wie Note, Abgabe und die Export-Knoepfe, nicht mehr als Pille
+       (Doc, 21.09.2026: "Coach und Pub so round wie die andern") */
+    border-radius: 8px;
     cursor: pointer;
     white-space: nowrap;
 }
@@ -180,6 +249,28 @@
 
 /* all three grading places for this talk are taken */
 .vt-grade.full { color: var(--phi); border-color: rgba(121, 158, 49, 0.6); }
+
+/* Punkte des Bogens, direkt hinter seinem Knopf (Doc, 21.09.2026). Ruhig wie
+   die Prozentzahl neben der Note - der Knopf bleibt das Auffaellige, die Zahl
+   ist die Auskunft daneben. */
+/* Abgabe-Knopf am Ende der Bewerten-Zeile. Die Optik kommt aus svp-untis.css
+   (.badge.mat-upload), hier steht nur, was die Karte anders braucht: etwas
+   Abstand zur Note und der stumme Zustand, solange kein Freigabelink da ist
+   (Doc, 21.09.2026). */
+.vt-up { margin-left: 8px; }
+/* Noch kein Freigabelink: NICHT blass schalten - mit 45 % Deckkraft war der
+   Knopf im hellen Schema nicht mehr zu lesen (Doc, 21.09.2026). Stattdessen
+   ein stiller Knopf mit durchgezogenem Rahmen (Doc: "no dashed") und voller
+   Schriftdeckkraft. */
+.vt-up.off,
+.vt-up.off:hover {
+    background: none;
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-weight: 400;
+    filter: none;
+    cursor: default;
+}
 
 /* Date of the talk, in the title line (Doc, 12.09.2026). Pupils see a quiet
    tag; logged in, the tag sits over an invisible native date picker. */
@@ -234,7 +325,12 @@ html.svp-light .vt-date input { color-scheme: light; }
     margin-left: 8px;
 }
 
-.vt-note {
+/* Ein Kaestchen, zwei Verwendungen: die Note und die Punkte der beiden Boegen
+   (Doc, 21.09.2026: "bitte genau so wie Note"). Deshalb EINE Regel statt
+   zweier, die auseinanderlaufen - nur die Breite unterscheidet sich, weil in
+   den Punkten "24/30" steht und in der Note eine einzelne Ziffer. */
+.vt-note,
+.vt-pts {
     width: 3.4em;
     box-sizing: border-box;
     font-family: 'Orbitron', sans-serif;
@@ -249,19 +345,24 @@ html.svp-light .vt-date input { color-scheme: light; }
     outline: none;
 }
 
+.vt-pts { width: 4.2em; }
+
 .vt-note::placeholder { color: var(--muted); opacity: 1; }
 .vt-note:focus { border-color: var(--lambda); }
 /* typed over by hand: in the accent, so it never passes for the computed one */
 .vt-note.over { color: var(--lambda); border-color: var(--lambda); }
-/* locked: a plain box of the input's size, nothing to click or type */
-.vt-note.locked {
+/* locked: a plain box of the input's size, nothing to click or type.
+   Die Punkte sind immer so ein Kaestchen - getippt wird darin nie. */
+.vt-note.locked,
+.vt-pts {
     display: inline-block;
     height: 22px;            /* = the input: 14px line + 2 x 3px padding + 2 x 1px border */
     cursor: default;
     user-select: none;
 }
 /* no mark yet: the dash in grey, like the placeholder in Doc's field */
-.vt-note.locked.none { color: var(--muted); }
+.vt-note.locked.none,
+.vt-pts.none { color: var(--muted); }
 
 .vt-note-pct {
     font-family: 'Outfit', sans-serif;
@@ -309,12 +410,20 @@ html.svp-light .vt-date input { color-scheme: light; }
     width: 100%;
     box-sizing: border-box;
     font-family: 'Outfit', sans-serif;
-    font-size: 1rem;
+    /* Namen mittig im Feld (Doc, 21.09.2026) - untereinander stehende Kaesten
+       lesen sich als Spalte, wenn die Namen auf einer Achse sitzen. */
+    text-align: center;
     color: var(--text);
     background: var(--input-bg);
     border: 1px solid var(--line);
     border-radius: 8px;
-    padding: 9px 12px;
+    /* Polster und Zeile senkrecht knapp, damit drei Felder in die Kartenhoehe
+       passen; waagerecht bleibt es luftig (Doc, 21.09.2026). Ohne das flache
+       line-height nuetzt die kleine --vt-field-h nichts: die Hoehe kam aus
+       Schriftgroesse plus Polster, nicht aus min-height. */
+    font-size: 0.95rem;
+    line-height: 1.15;
+    padding: 4px 12px;
     /* min-, not height: the box may grow with the text, never clip it */
     min-height: var(--vt-field-h);
     outline: none;
@@ -368,9 +477,16 @@ html.svp-light .vt-date input { color-scheme: light; }
     flex-wrap: wrap;
 }
 
+/* Die Karten sollen als Block weiter nach oben ruecken (Doc, 21.09.2026) -
+   sie sind seit "alle cards ein Stueck hoch" laenger geworden, da soll oben
+   nichts verschenkt werden. Beides nur auf den Vortragsseiten: der Kopf
+   gehoert allen SVP-Seiten, deshalb haengt seine engere Fassung an :has(),
+   nicht an .page-head selbst. */
+body:has(.vt-list) header.page-head { margin-bottom: 10px; }
+
 .vt-bar {
     max-width: 1200px;
-    margin: 0 auto 14px;
+    margin: 0 auto 6px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -455,15 +571,13 @@ html.svp-light .vt-date input { color-scheme: light; }
     line-height: 1.5;
 }
 
-/* narrow screens: both name fields drop under the topic */
+/* narrow screens: the name fields drop UNDER the topic, still one per line */
 @media (max-width: 760px) {
-    .vt-row, .vt-row.three, .vt-row.one { grid-template-columns: 40px 1fr 1fr auto; }
-    .vt-topic { grid-column: 2 / 5; }
-    .vt-name.n1 { grid-column: 2; }
-    .vt-name.n2 { grid-column: 3; }
-    /* the third name gets its own line rather than a squeezed third column */
-    .vt-name.n3 { grid-column: 2 / 4; }
-    .vt-more-box { grid-column: 4; grid-row: 2; align-self: center; flex-direction: column; }
+    .vt-row { grid-template-columns: 40px 1fr auto; }
+    .vt-nr { grid-column: 1; grid-row: 1 / -1; }
+    .vt-topic { grid-column: 2 / 4; grid-row: 1; }
+    .vt-names { grid-column: 2; grid-row: 2; }
+    .vt-more-box { grid-column: 3; grid-row: 2; align-self: center; flex-direction: column; }
 
     /* No reserved height down here: the cards sit one under the other, so
        nothing has to line up - the reserve only left a hole under "Bewerten"
@@ -473,7 +587,8 @@ html.svp-light .vt-date input { color-scheme: light; }
 
 @media print {
     .vt-actions, .vt-hint, .vt-confirm, .vt-switch, .vt-more, .vt-more-box, .vt-status,
-    .vt-menu, .vt-grade, .vt-grade-lbl, .vt-grades, .vt-add, .vt-fundus, .vt-date.empty { display: none !important; }
+    .vt-menu, .vt-grade, .vt-grade-lbl, .vt-grades, .vt-add, .vt-fundus, .vt-date.empty,
+    .vt-up { display: none !important; }
 
     .vt-row {
         break-inside: avoid;
