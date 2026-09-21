@@ -15,6 +15,7 @@
 </head>
 <body>
 <div id="stage"><div id="deck">
+<!-- deck-master: edited in the browser (tools/pptx/deck_edit.py) - html_deck.py does not overwrite this deck -->
 <section class="slide greet">
       <div class="greet-ground"></div><img class="greet-pic" src="morning/morning-2b50cc368526.jpg" alt=""><a class="greet-credit" href="https://pixabay.com/photos/fog-7228638/" target="_blank" rel="noopener">adege</a>
       <p class="greet-lead" id="greet-text">Good morning!</p>
@@ -40,6 +41,12 @@
 <p class="line l0 step" data-g="4">Moderne Fassung: statt zu subtrahieren nimmt man den <b>Rest der Division</b></p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
 <section class="slide content"><h3>ggT(48, 18) von Hand</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:140px"><col style="width:150px"><col style="width:150px"><col style="width:376px"></colgroup><tr><th>Schritt</th><th>a</th><th>b</th><th>a mod b</th></tr><tr><td class="b">1</td><td>48</td><td>18</td><td>12</td></tr><tr><td class="b">2</td><td>18</td><td>12</td><td>6</td></tr><tr><td class="b">3</td><td>12</td><td>6</td><td>0</td></tr><tr><td class="b">Ergebnis</td><td></td><td style="background:#DDE8C6">6</td><td>der letzte Rest ungleich null</td></tr></table><div class="body" style="top:266.375px;height:229.625px"><p class="line l0 step" data-g="0">Man ersetzt <b>a durch b</b> und <b>b durch den Rest</b> — bis der Rest null ist</p>
 <p class="line l0 step" data-g="1">Dann steht der ggT in <b>b</b>. Drei Schritte statt achtzehn Versuche</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
+<section class="slide chapter">
+      <div class="chapter-bar"></div>
+      <p class="kicker">Kapitel 03</p>
+      <h2>Üben</h2>
+      <p class="sub">Drei iterative Klassiker</p>
+      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
 <section class="slide content code"><h3>Der Algorithmus in Python</h3><div class="rules"></div><div class="codepanel"><pre>def ggt(a, b):
     while b != 0:
         a, b = b, a % b     # gleichzeitige Zuweisung
@@ -53,18 +60,12 @@ print(ggt(1071, 462))       # 21</pre></div><p class="foot">Nicht verzagen, Doc 
       <h2>Iterativ denken</h2>
       <p class="sub">Vom Einzelfall zur Schleife</p>
       <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
-<section class="slide content"><h3>Der Algorithmus als Struktogramm</h3><div class="rules"></div><div class="body" style="left:72px;width:392px"><p class="line l0 step" data-g="0">Der <b>Rumpf</b> verändert a und b — deshalb endet die Schleife</p>
+<section class="slide content skip"><h3>Der Algorithmus als Struktogramm</h3><div class="rules"></div><div class="body" style="left:72px;width:392px"><p class="line l0 step" data-g="0">Der <b>Rumpf</b> verändert a und b — deshalb endet die Schleife</p>
 <p class="line l0 step" data-g="1">Der Rest wird bei jedem Durchlauf <b>kleiner</b> und ist nie negativ</p>
 <p class="line l0 step" data-g="2">Damit ist bewiesen: der Algorithmus <b>terminiert</b> immer</p>
 <p class="line l0 step" data-g="3">Genau diese Begründung verlangt eine Klausuraufgabe</p></div><img src="img/sg-euklid-inf13.png" alt="" style="position:absolute;left:488px;top:150px;width:400px;height:204.737px"><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
 <section class="slide content"><h3>Iterative Lösungen systematisch entwickeln</h3><div class="rules"></div><table class="dtable" style="left:72px;top:146px;width:816px;font-size:11.5px"><colgroup><col style="width:180px"><col style="width:636px"></colgroup><tr><th>Schritt</th><th>Frage</th></tr><tr><td class="b">1. Zustand</td><td>Welche Variablen beschreiben den Zwischenstand?</td></tr><tr><td class="b">2. Startwert</td><td>Womit beginnen sie?</td></tr><tr><td class="b">3. Schritt</td><td>Wie kommt man vom Zustand zum nächsten?</td></tr><tr><td class="b" style="background:#FBEBBF">4. Abbruch</td><td>Wann ist man fertig?</td></tr><tr><td class="b">5. Ergebnis</td><td>Wo steht die Antwort am Ende?</td></tr></table><div class="body" style="top:287.65px;height:208.35px"><p class="line l0 step" data-g="0">Beim Euklid: Zustand (a, b), Start die Eingaben, Schritt der Rest, Abbruch b = 0, Ergebnis a</p>
 <p class="line l0 step" data-g="1">Diese fünf Fragen tragen <b>jede</b> iterative Aufgabe</p></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
-<section class="slide chapter">
-      <div class="chapter-bar"></div>
-      <p class="kicker">Kapitel 03</p>
-      <h2>Üben</h2>
-      <p class="sub">Drei iterative Klassiker</p>
-      <div class="hair"></div><p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p></section>
 <section class="slide content code"><h3>Drei Aufgaben zum Selbstbauen</h3><div class="rules"></div><div class="codepanel"><pre># 1. Fakultaet iterativ
 def fakultaet(n):
     ergebnis = 1
