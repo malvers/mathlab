@@ -67,7 +67,7 @@ window.svpPlanParts.push(function (P) {
     function markiere(b, text) { b.classList.toggle('has-fahr', !!text.trim()); }
 
     // --- the sheet -------------------------------------------------------
-    let box = null, feld = null, bild = null, offen = null, timer = null;
+    let box = null, feld = null, bild = null, mat = null, offen = null, timer = null;
 
     function ensureBox() {
         if (box) return box;
@@ -102,6 +102,16 @@ window.svpPlanParts.push(function (P) {
             if (e) P.gdwOpen(e);
         });
         blatt.appendChild(bild);
+        /* Das Zusatzmaterial der Woche unter dem Gedanken, am unteren Blattrand
+           (Doc, 21.09.2026: "bring mir da bitte die Zusatzmat unter den GDW
+           unten buendig"): im Unterricht steht der Fahrplan offen, und das
+           Material ist der naechste Griff - es soll nicht hinter dem Blatt
+           liegen. Gebaut wird es mit demselben renderMaterial wie die Spalte
+           im Plan, nur in ein anderes Kaestchen. */
+        mat = document.createElement('div');
+        mat.className = 'fahr-mat mat-block';
+        mat.hidden = true;
+        blatt.appendChild(mat);
         box.appendChild(blatt);
         document.body.appendChild(box);
 
@@ -157,6 +167,16 @@ window.svpPlanParts.push(function (P) {
             im.alt = '';
             bild.appendChild(im);
             bild.title = 'Gedanke der Woche \u2014 anklicken';
+        }
+        /* Der Quelltext des Materials steht in der Spalte des Plans (dataset.src
+           setzt renderMaterial dort) - damit zeigt das Blatt auch, was Doc
+           gerade erst eingetragen hat, und nicht den Stand aus der HTML-Datei.
+           Die Aufgaben-Pille bleibt draussen, die hat ihren eigenen Knopf. */
+        const matSrc = ref.matBlock ? (ref.matBlock.dataset.src || '') : '';
+        mat.textContent = '';
+        mat.hidden = !matSrc;
+        if (matSrc) {
+            P.renderMaterial(mat, matSrc, ref, function (en) { return P.isExerciseEntry(en); });
         }
         b.hidden = false;
         feld.focus();

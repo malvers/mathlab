@@ -95,6 +95,46 @@
 .fahr-gdw:hover { border-color: rgba(0, 32, 96, 0.7); }
 .fahr-gdw:focus { outline: none; }
 
+/* Zusatzmaterial der Woche: rechte Spalte unter dem Gedanken, am unteren Rand
+   des Blattes (Doc, 21.09.2026: "unten buendig"). Dieselbe Breite wie das Bild
+   darueber, damit die Spalte eine Kante hat. Die Pillen kommen aus dem Plan,
+   also muss hier nur ihre Groesse zurueckgenommen werden: das Blatt schreibt
+   46 px, und die Pillen rechnen in em. */
+.fahr-mat {
+    position: absolute;
+    right: 32px;
+    bottom: 36px;
+    /* Nicht auf die Bildbreite zwingen: "Koerperberechnungen" ist laenger als
+       124 px und ragte damit ueber die Blattkante (Docs Bild, 21.09.2026). Die
+       Pillen nehmen ihre eigene Breite, hoechstens aber den Platz, den das
+       Blatt rechts freihaelt (186 px Polster minus die 32 px hier), und sie
+       haengen an der rechten Kante wie das Bild darueber. */
+    width: max-content;
+    max-width: 154px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    font-size: 13px;
+    line-height: 1.3;
+}
+.fahr-mat[hidden] { display: none; }
+
+/* Eine Pille je Zeile, in der Papierfarbe des Blattes: die Pillen mischen
+   Grund und Rand aus currentColor, und currentColor ist hier das Navy der
+   Schrift - sie passen sich also von selbst an. */
+.fahr-mat a.mat-pill,
+.fahr-mat .mat-pill-wrap {
+    display: block;
+    margin: 0;
+    /* Ein sehr langer Name wird gekuerzt, statt die Spalte aufzureissen. */
+    max-width: 154px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+.fahr-mat .mat-note { font-size: 12px; }
+
 .fahr-list {
     margin: 0;
     padding-left: 1.1em;            /* Platz fuer die Punkte */
