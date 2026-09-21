@@ -314,6 +314,7 @@
       try {
         sessionStorage.setItem('deck-edit-resume', note + (j.narration ? ' – Solitas Aufnahmen sind mitgewandert' : ''));
         sessionStorage.setItem('deck-edit-overview', String(typeof j.at === 'number' ? j.at : where));
+        sessionStorage.setItem('deck-edit-was', on ? '1' : '0');
       } catch (e) { }
       location.reload();
     });
@@ -359,8 +360,9 @@
   addEventListener('click', function (e) { if (!e.target.closest || !e.target.closest('#ov-menu')) closeMenu(); }, true);
   addEventListener('scroll', closeMenu, true);
 
+  // the menu hangs on the overview, not on edit mode: a right-click there is never meant for the browser
   addEventListener('contextmenu', function (e) {
-    const cell = on && e.target.closest && e.target.closest('#overview .ov-cell');
+    const cell = e.target.closest && e.target.closest('#overview .ov-cell');
     if (!cell) return;
     e.preventDefault(); e.stopPropagation();
     openMenu(e.clientX, e.clientY, cellIndex(cell));
@@ -371,7 +373,7 @@
   const clearMarks = () => document.querySelectorAll('.ov-before,.ov-after,.ov-drag')
     .forEach(function (c) { c.classList.remove('ov-before', 'ov-after', 'ov-drag'); });
   addEventListener('dragstart', function (e) {
-    const cell = on && e.target.closest && e.target.closest('#overview .ov-cell');
+    const cell = e.target.closest && e.target.closest('#overview .ov-cell');
     if (!cell) return;
     from = cellIndex(cell);
     cell.classList.add('ov-drag');
@@ -470,10 +472,16 @@
     if (note !== null) {
       sessionStorage.removeItem('deck-edit-resume');
       const back = sessionStorage.getItem('deck-edit-overview');   // a moved slide: stand on it, overview open
+      const was = sessionStorage.getItem('deck-edit-was') !== '0';   // it only comes back on if it was on
       sessionStorage.removeItem('deck-edit-overview');
-      load().then(function () {
-        on = true; root.classList.add('deck-edit'); label(); document.dispatchEvent(new Event('deck-edit-on')); msg(note);
+      sessionStorage.removeItem('deck-edit-was');
+      const show = function () {
+        msg(note);
         if (back !== null && window.DeckOverview) { si = Math.max(0, Math.min(slides.length - 1, +back)); step = 0; paint(); DeckOverview.open(); }
+      };
+      if (!was) { show(); }
+      else load().then(function () {
+        on = true; root.classList.add('deck-edit'); label(); document.dispatchEvent(new Event('deck-edit-on')); show();
       }).catch(function (err) { msg(err.message); });
     }
   } catch (e) { }

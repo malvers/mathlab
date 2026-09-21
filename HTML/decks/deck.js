@@ -368,7 +368,9 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
       // a hidden slide keeps its tile, in and out of edit mode (Doc, 21.09.2026: "nee lass bitte drin") -
       // the red frame and AUS say that the class does not see it, and a click still jumps there
       cell.hidden = false;
-      cell.draggable = EDITING();
+      // dragging and the right-click menu belong to the overview itself, not to edit mode - the editor that
+      // wires them exists only on Doc's machine anyway (Doc, 21.09.2026: "das menu raus und unseres rein")
+      cell.draggable = !!window.DeckEdit;
       const num = cell.querySelector('.ov-num');
       if (num) num.textContent = off ? 'aus' : (++k) + ' / ' + total;
     });
