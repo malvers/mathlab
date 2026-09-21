@@ -69,6 +69,11 @@ window.svpPlanParts.push(function (P) {
     // --- the sheet -------------------------------------------------------
     let box = null, feld = null, bild = null, mat = null, offen = null, timer = null;
 
+    /* Plaene, in denen das Cavalieri-Lab dazugehoert: Flaechen und Volumen
+       stehen in der Einfuehrungsphase (Doc, 21.09.2026 - dort lief es heute).
+       Kommt es in einer anderen Klasse dran, gehoert die Seite hier dazu. */
+    const LAB_ON = ['mathe11'];
+
     function ensureBox() {
         if (box) return box;
         box = document.createElement('div');
@@ -174,10 +179,40 @@ window.svpPlanParts.push(function (P) {
            Die Aufgaben-Pille bleibt draussen, die hat ihren eigenen Knopf. */
         const matSrc = ref.matBlock ? (ref.matBlock.dataset.src || '') : '';
         mat.textContent = '';
-        mat.hidden = !matSrc;
         if (matSrc) {
             P.renderMaterial(mat, matSrc, ref, function (en) { return P.isExerciseEntry(en); });
         }
+        /* Was in jeder Stunde dieses Fachs gebraucht wird, haengt fest unter
+           dem Material der Woche (Doc, 21.09.2026: "bau den auch in Mathe
+           heute ein bitte" und "noch einen Link auf das Lab Cavalierie").
+           Die Formelsammlung kommt aus P - dieselbe Adresse wie der Knopf in
+           der Kopfzeile, nicht zweimal hingeschrieben. */
+        const seite = location.pathname.replace(/.*\//, '').replace(/\.html$/, '');
+        const fest = [];
+        if (P.FORMELN_URL && (P.FORMELN_ON || []).indexOf(seite) >= 0) {
+            fest.push({
+                label: 'Formelsammlung', url: P.FORMELN_URL, extern: true,
+                titel: 'Mathematisch-Naturwissenschaftliche Formelsammlung (IQB/KMK)'
+            });
+        }
+        if (LAB_ON.indexOf(seite) >= 0) {
+            /* Das Lab liegt eine Ebene ueber dem svp-Ordner (HTML/). */
+            fest.push({
+                label: 'Lab Cavalieri', url: '../cavalieri.html', extern: false,
+                titel: 'Der Satz von Cavalieri - das Lab in 2D und 3D'
+            });
+        }
+        fest.forEach(function (e) {
+            const a = document.createElement('a');
+            a.className = 'badge mat-pill fahr-fest';
+            a.href = e.url;
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.textContent = e.label;
+            a.title = e.titel;
+            mat.appendChild(a);
+        });
+        mat.hidden = !mat.childNodes.length;
         b.hidden = false;
         feld.focus();
         /* Doc, 20.09.2026: "setz den cursor eine Zeile tiefer hinter den ersten bullet" -
