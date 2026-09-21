@@ -230,7 +230,15 @@ async function refreshChecked(session, lessons) {
   catch (e) { console.log(`Anwesenheits-Haken nicht gelesen (${e.message}) - kein neues A.`); return; }
   const outW = untisCacheFile(WRITTEN_ROW);
   let cache;
-  try { cache = JSON.parse(fs.readFileSync(outW, 'utf8')); }
+  /* Erst den STAND IN SUPABASE holen, nicht den lokalen Abzug: seit dem 21.09.2026 traegt auch
+     die Edge Function dort ein, wenn Doc im Plan auf den Klassenbuch-Knopf drueckt. Der lokale
+     Abzug weiss davon nichts - wer ihn als Grundlage nimmt, schriebe dessen frische L wieder
+     weg. Antwortet Supabase nicht, ist der Abzug die zweitbeste Wahrheit. */
+  try {
+    const rows = await supaQuery(`select data from public.svp_untis where page = '${WRITTEN_ROW}'`);
+    if (rows.length && rows[0].data) cache = rows[0].data;
+  } catch (e) { /* offline oder kein Token - unten kommt der lokale Abzug */ }
+  try { if (!cache) cache = JSON.parse(fs.readFileSync(outW, 'utf8')); }
   catch (e) { console.log(`${WRITTEN_ROW} fehlt - die Haken kommen mit dem naechsten status-Lauf.`); return; }
   const set = new Set(cache.checked || []);
   const vorher = set.size;
