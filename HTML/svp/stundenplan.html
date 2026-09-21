@@ -233,6 +233,9 @@
         /* Stunden, die im WebUntis-Klassenbuch schon Stoff tragen (svp_untis, weiter
            unten geladen). Hier oben deklariert, damit render() sie in jedem Fall kennt. */
         const UNTIS_WRITTEN = new Set();
+        /* Und die mit gesetztem Haken "Anwesenheit kontrolliert" - die tragen neben dem U
+           ein A (Doc, 21.09.2026). Gleiche Schluessel, gleiche Quelle. */
+        const UNTIS_CHECKED = new Set();
         const untisKey = (l) => l.date + '|' + hhmm(l.startTime) + '|' + (l.classes || []).join(',');
 
         // The conflict chip next to "Optimieren" - fed by render() and live by the optimizer run
@@ -566,8 +569,10 @@
                     if (l.ghost) parts.push('<div class="tt-tag">alt</div>');
                     else if (l.moved) parts.push('<div class="tt-tag">neu</div>');
                     el.innerHTML = parts.join('');
-                    /* Orange U, sobald im Klassenbuch Stoff steht. */
+                    /* Orange U, sobald im Klassenbuch Stoff steht - A daneben, sobald die
+                       Anwesenheit kontrolliert ist. */
                     if (!l.ghost && UNTIS_WRITTEN.has(untisKey(l))) markUntis(el);
+                    if (!l.ghost && UNTIS_CHECKED.has(untisKey(l))) markAbsence(el);
                     if (clash.has(it.i)) {
                         const flag = document.createElement('div');
                         // big warning sign when the tile has room for it, small on slim tiles
@@ -1424,11 +1429,17 @@
             .then(m => {
                 if (!m || !m.written) return;
                 for (const k of m.written) UNTIS_WRITTEN.add(k);
+                /* Seit 21.09.2026 steht in derselben Zeile auch, wo der Haken
+                   "Anwesenheit kontrolliert" sitzt. Aeltere Daten haben das Feld nicht -
+                   dann bleibt es beim U, wie bisher. */
+                for (const k of (m.checked || [])) UNTIS_CHECKED.add(k);
                 /* Die Datei kommt meist NACH dem ersten Zeichnen an - dann die schon
                    gebauten Kacheln nachtraeglich markieren, statt alles neu zu rendern. */
                 for (const tile of document.querySelectorAll('.tt-lesson[data-idx]')) {
                     const l = PLAN && PLAN.lessons[+tile.dataset.idx];
-                    if (l && UNTIS_WRITTEN.has(untisKey(l))) markUntis(tile);
+                    if (!l) continue;
+                    if (UNTIS_WRITTEN.has(untisKey(l))) markUntis(tile);
+                    if (UNTIS_CHECKED.has(untisKey(l))) markAbsence(tile);
                 }
             })
             .catch(() => { });
@@ -1440,24 +1451,50 @@
            viewBox schneidet den Bogen ab, und uebrig bleiben zwei Striche (06.09.2026). Diese
            Geometrie ist so gewaehlt, dass alles in 0..100 liegt: Senkrechte bei x 23 und 77,
            Bogen r=27 um y 57, also unten 84 - plus die halbe Strichstaerke 9 macht 93. */
-        function markUntis(tile) {
-            if (tile.querySelector('.tt-untis')) return;
+        /* Die Zeile ganz oben auf der Kachel, in der die Marken nebeneinander stehen. Als
+           ERSTES Kind: der Text darunter bleibt unveraendert (Doc, 06.09.2026). Seit dem
+           21.09.2026 sind es zwei Marken, darum eine Zeile statt einer Marke mit
+           flex-basis 100% - sonst raecht sich das A in eine zweite Zeile. */
+        function markRow(tile) {
+            let row = tile.querySelector('.tt-marks');
+            if (!row) {
+                row = document.createElement('div');
+                row.className = 'tt-marks';
+                tile.insertBefore(row, tile.firstChild);
+            }
+            return row;
+        }
+
+        /* Zeichen im Kasten 0..100, Strichstaerke 18 - beides gilt fuer U und A, damit die
+           beiden gleich schwer aussehen. */
+        function markSvg(tile, klasse, d, titel) {
+            if (tile.querySelector('.' + klasse)) return null;
             const NS = 'http://www.w3.org/2000/svg';
             const svg = document.createElementNS(NS, 'svg');
-            svg.setAttribute('class', 'tt-untis');
+            svg.setAttribute('class', 'tt-mark ' + klasse);
             svg.setAttribute('viewBox', '0 0 100 100');
-            /* Der Kasten fuellt die ganze Zeile (flex-basis 100%), das Zeichen soll aber links
-               kleben - sonst zentriert es die Vorgabe xMidYMid mitten auf der Kachel. */
-            svg.setAttribute('preserveAspectRatio', 'xMinYMid meet');
             svg.setAttribute('aria-hidden', 'true');
             const path = document.createElementNS(NS, 'path');
-            path.setAttribute('d', 'M23 20V57a27 27 0 0 0 54 0V20');
+            path.setAttribute('d', d);
             svg.appendChild(path);
-            svg.appendChild(document.createElementNS(NS, 'title')).textContent
-                = 'Stundeninhalt steht im WebUntis-Klassenbuch';
-            /* Als ERSTES Kind: die Marke bekommt eine eigene Zeile GANZ OBEN, der Text darunter
-               bleibt unveraendert (Doc, 06.09.2026). */
-            tile.insertBefore(svg, tile.firstChild);
+            svg.appendChild(document.createElementNS(NS, 'title')).textContent = titel;
+            markRow(tile).appendChild(svg);
+            return svg;
+        }
+
+        function markUntis(tile) {
+            /* ACHTUNG Ausschnitt: der Bogen des U reicht deutlich tiefer als der Ansatz der
+               Senkrechten, die Strichstaerke ragt nochmal ueber beide hinaus. */
+            markSvg(tile, 'tt-untis', 'M23 20V57a27 27 0 0 0 54 0V20',
+                'Stundeninhalt steht im WebUntis-Klassenbuch');
+        }
+
+        /* A wie Anwesenheit (Doc, 21.09.2026: "mach bitte neben das U noch ain A wenn
+           Anwesenheit kontrolliert steht"). Zwei Schenkel und ein Querstrich; die Spitze
+           bleibt in 0..100, weil die halbe Strichstaerke oben noch 9 braucht. */
+        function markAbsence(tile) {
+            markSvg(tile, 'tt-abs', 'M22 93 50 22 78 93M34 68H66',
+                'Anwesenheit ist kontrolliert');
         }
 
         function svpEntryFor(l) {

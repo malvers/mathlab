@@ -1213,14 +1213,24 @@ body.is-dragging .tt-lesson { cursor: grabbing; }
    Nur der Buchstabe in Untis-Orange, ohne Strahlenkranz - bei dieser Groesse waere der
    Kranz nur Schmutz. Es sitzt in der Ecke ueber dem Text, aber unter dem Konflikt-Zeichen,
    und faengt keine Klicks ab: der Klick auf die Kachel gehoert dem Stoffverteilungsplan. */
-/* Es bekommt eine EIGENE Zeile ganz oben (Doc, 06.09.2026) - der Text darunter bleibt so,
-   wie er war. Die Kachel ist eine Flex-Zeile (Spalten + Jahrgang); flex-basis 100% zwingt die
-   Marke deshalb in eine erste Zeile fuer sich, alles andere umbricht darunter. */
-.tt-lesson .tt-untis {
+/* Die Marken bekommen eine EIGENE Zeile ganz oben (Doc, 06.09.2026) - der Text darunter
+   bleibt so, wie er war. Die Kachel ist eine Flex-Zeile (Spalten + Jahrgang); flex-basis 100%
+   zwingt die Zeile deshalb nach ganz oben, alles andere umbricht darunter. Seit dem
+   21.09.2026 stehen zwei Marken darin: U und A (Doc: "neben das U noch ain A"). */
+.tt-lesson .tt-marks {
     flex: 0 0 100%;
+    display: flex;
+    align-items: center;
+    gap: 3px;
     height: 12px;
     margin: 0 0 1px;
     pointer-events: none;
+}
+
+.tt-lesson .tt-mark {
+    flex: 0 0 auto;
+    width: 12px;
+    height: 12px;
     fill: none;
     stroke: rgb(246, 93, 49);
     stroke-width: 18;
@@ -1228,4 +1238,8 @@ body.is-dragging .tt-lesson { cursor: grabbing; }
     opacity: 0.95;
 }
 
-@media print { .tt-lesson .tt-untis { stroke: rgb(120, 120, 120); } }
+/* Die Spitze des A ist eine Ecke, kein Stumpf - ohne das steht oben ein abgeschnittener
+   Balken statt eines Dachs. */
+.tt-lesson .tt-abs { stroke-linejoin: round; }
+
+@media print { .tt-lesson .tt-mark { stroke: rgb(120, 120, 120); } }

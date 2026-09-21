@@ -173,16 +173,39 @@ async function markAbsencesChecked(session, lessons) {
   if (stuck.length) throw new Error(`WebUntis hat den Haken nicht uebernommen (${stuck.length} von ${lessons.length} weiter offen)`);
 }
 
-// Own lessons (from myLessons) that have begun - attendance is taken at the start - were not
-// cancelled, and that WebUntis itself still lists as "Abwesenheit offen".
-async function ticksOpen(session, lessons) {
+// Lessons attendance can have been taken in at all: they have begun - it is taken at the start -
+// and were not cancelled. Everything that asks about the tick starts here, so the answer cannot
+// drift between the two callers.
+function begunLessons(lessons) {
   const now = new Date(), today = ymd(now);
   const hm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-  const begun = lessons.filter(l => l.code !== 'cancelled' && (l.date < today || (l.date === today && l.start <= hm)));
+  return lessons.filter(l => l.code !== 'cancelled' && (l.date < today || (l.date === today && l.start <= hm)));
+}
+
+// Own lessons (from myLessons) that have begun, were not cancelled, and that WebUntis itself
+// still lists as "Abwesenheit offen".
+async function ticksOpen(session, lessons) {
+  const begun = begunLessons(lessons);
   if (!begun.length) return [];
   const dates = begun.map(l => l.date).sort();
   const open = await openAbsencePeriods(session, dates[0], dates[dates.length - 1]);
   return begun.filter(l => open.has(String(l.ttId)));
+}
+
+// The other side of the same question, for the A on the Stundenplan tiles (Doc, 21.09.2026:
+// "mach bitte neben das U noch ain A wenn Anwesenheit kontrolliert steht"). WebUntis answers only
+// what is still OPEN, so "kontrolliert" is: has begun, was not cancelled, and is not on that list
+// any more. ACHTUNG, die Unschaerfe: eine Stunde, die gar keine Kontrolle verlangt
+// (absCheckNeeded false, z. B. ein ausgefallener Block, den Untis anders fuehrt), steht ebenfalls
+// nicht auf der Liste und bekaeme damit ein A. Wer das trennen will, braucht die Liste mit einem
+// anderen filter als ABSENCE_OPEN - am 21.09.2026 nicht gemessen, weil dafuer Docs Sitzung noetig
+// ist (WebUntis fasst nur er selbst an).
+async function ticksDone(session, lessons) {
+  const begun = begunLessons(lessons);
+  if (!begun.length) return new Set();
+  const dates = begun.map(l => l.date).sort();
+  const open = await openAbsencePeriods(session, dates[0], dates[dates.length - 1]);
+  return new Set(begun.filter(l => !open.has(String(l.ttId))).map(l => String(l.ttId)));
 }
 
 // Read the stored classbook text of one period - WITHOUT any student data.
@@ -672,8 +695,19 @@ async function runStatus(session) {
       }
     }
     written.sort();
-    untisRows.push({ page: WRITTEN_ROW, data: { generated, written } });
-    console.log(`${WRITTEN_ROW}: ${written.length} Stunden mit Stoff`);
+    /* Daneben, seit 21.09.2026: wo sitzt der Haken "Anwesenheit kontrolliert". Der Stundenplan
+       macht daraus ein A neben dem U. Gleicher Schluessel, ein Abruf mehr - die Stunden selbst
+       sind schon gelesen. Faellt der Abruf aus, bleibt das A weg und das U steht wie bisher. */
+    let checked = [];
+    try {
+      const done = await ticksDone(session, lessons);
+      checked = lessons.filter(l => done.has(String(l.ttId)))
+        .map(l => `${l.date}|${l.start}|${l.klassen.join(',')}`).sort();
+    } catch (e) {
+      console.log(`Anwesenheits-Haken nicht gelesen (${e.message}) - kein A im Stundenplan.`);
+    }
+    untisRows.push({ page: WRITTEN_ROW, data: { generated, written, checked } });
+    console.log(`${WRITTEN_ROW}: ${written.length} Stunden mit Stoff, ${checked.length} mit Anwesenheits-Haken`);
   }
   await saveUntis(untisRows);
 
@@ -707,7 +741,10 @@ async function runStatus(session) {
 // lesson that is not in it (moved since the last full run) - hands over to runStatus(), so the
 // files are never left half-right. WebUntis mirrors a topic across gapless periods; a mirrored
 // neighbour that was not itself written stays as it was until the next full run.
-async function patchStatus(session, entries) {
+// `ticked` = die Stunden, bei denen der Haken "Anwesenheit kontrolliert" gerade gesetzt wurde;
+// sie wandern in dieselbe kurze Liste, damit das A sofort steht und nicht erst nach dem
+// naechsten status-Lauf (Doc, 21.09.2026).
+async function patchStatus(session, entries, ticked = []) {
   const byPage = {};
   for (const e of entries) (byPage[e.page] ||= []).push(e);
   let stale = null;
@@ -738,16 +775,32 @@ async function patchStatus(session, entries) {
   }
   // The short list stundenplan.html reads: add what now carries text, drop what lost it.
   const outW = untisCacheFile(WRITTEN_ROW);
-  let written = [];
-  try { written = JSON.parse(fs.readFileSync(outW, 'utf8')).written || []; } catch (e) { /* starts empty */ }
+  let written = [], checked = [], hadCache = false;
+  try {
+    const cache = JSON.parse(fs.readFileSync(outW, 'utf8'));
+    written = cache.written || [];
+    checked = cache.checked || [];
+    hadCache = true;
+  } catch (e) { /* starts empty */ }
+  /* Nur Haken gesetzt und keine Liste da? Dann NICHT schreiben - eine frisch gebaute Zeile
+     haette kein `written` mehr, und alle U waeren weg. Das A kommt dann beim naechsten
+     status-Lauf (06:00/12:30). */
+  if (!entries.length && !hadCache) {
+    console.log(`${WRITTEN_ROW} fehlt - das A kommt beim naechsten status-Lauf.`);
+    if (rows.length) await saveUntis(rows);
+    return;
+  }
   const set = new Set(written);
   for (const e of entries) {
     const key = `${e.l.date}|${e.l.start}|${e.l.klassen.join(',')}`;
     if ((e.text || '').trim()) set.add(key); else set.delete(key);
   }
   written = [...set].sort();
-  rows.push({ page: WRITTEN_ROW, data: { generated: new Date().toISOString(), written } });
-  console.log(`${WRITTEN_ROW}: ${written.length} Stunden mit Stoff`);
+  const cset = new Set(checked);
+  for (const l of ticked) cset.add(`${l.date}|${l.start}|${l.klassen.join(',')}`);
+  checked = [...cset].sort();
+  rows.push({ page: WRITTEN_ROW, data: { generated: new Date().toISOString(), written, checked } });
+  console.log(`${WRITTEN_ROW}: ${written.length} Stunden mit Stoff, ${checked.length} mit Anwesenheits-Haken`);
   await saveUntis(rows);
 }
 
@@ -1279,17 +1332,18 @@ async function main() {
       patched.push({ page: p.page, l: p.l, text: back });
       say(`${label}: ${ok ? 'eingetragen' : 'FEHLER, Rueckgelesenes weicht ab'} -> ${back}`);
     }
+    let getickt = [];        // wirklich gesetzt - das gibt dem Stundenplan sein A
     if (tickable.length) {
       const ids = tickable.map(l => l.ttId);
       if (dry) say(`WUERDE "Anwesenheit kontrolliert" setzen: ${ids.length} Stunde${ids.length === 1 ? '' : 'n'} (--nur-stoff laesst es)`);
       else {
-        try { await markAbsencesChecked(session, tickable); say(`"Anwesenheit kontrolliert" gesetzt: ${ids.length} Stunde${ids.length === 1 ? '' : 'n'}`); }
+        try { await markAbsencesChecked(session, tickable); getickt = tickable; say(`"Anwesenheit kontrolliert" gesetzt: ${ids.length} Stunde${ids.length === 1 ? '' : 'n'}`); }
         catch (e) { say(`"Anwesenheit kontrolliert" FEHLGESCHLAGEN: ${e.message}`); }
       }
     }
     if (!open.length) say('Nichts offen - alles steht schon im Klassenbuch.');
     if (unmapped.size) say(`Ohne Planseite (in ${path.basename(MAP_FILE)} nachtragen): ${[...unmapped].join(', ')}`);
-    if (patched.length) { say('Badge-Daten aktualisieren:'); await patchStatus(session, patched); }
+    if (patched.length || getickt.length) { say('Badge-Daten aktualisieren:'); await patchStatus(session, patched, getickt); }
     return;
   }
 
@@ -1307,6 +1361,9 @@ async function main() {
     if (dry) { console.log(`WUERDE "Anwesenheit kontrolliert" setzen: ${open.length} Stunden`); return; }
     await markAbsencesChecked(session, open);
     console.log(`"Anwesenheit kontrolliert" gesetzt: ${open.length} Stunden`);
+    /* Damit der Stundenplan sein A sofort zeigt und nicht erst nach dem naechsten
+       status-Lauf (Doc, 21.09.2026). Ohne Badge-Cache passiert hier nichts. */
+    await patchStatus(session, [], open);
     return;
   }
 
