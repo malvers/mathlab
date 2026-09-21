@@ -187,11 +187,15 @@ window.svpPlanParts.push(function (P) {
        hat (dataset.src wird in renderMaterial vor dem Sortieren gesetzt).
        Sortiert wird stabil: innerhalb einer Gruppe bleibt die eingetragene
        Reihenfolge stehen. Alles mit Programmsymbol (ppt/doc/xls/pdf) zaehlt
-       zur ersten Gruppe - es ist eine Datei, die aufgemacht wird, kein Link. */
-    const MAT_RANG = { ppt: 0, doc: 0, xls: 0, pdf: 0, lab: 1 };
+       zur ersten Gruppe - es ist eine Datei, die aufgemacht wird, kein Link.
+       Die Filme stehen zwischen den Labs und den Links (Doc, 21.09.2026: "die
+       hier auch sortieren" - gezeigt auf die Materialspalte im Fahrplan, wo
+       alle Sorten nebeneinander haengen): sie gehoeren zum Stoff, fuehren aber
+       wie ein Link aus dem Haus. */
+    const MAT_RANG = { ppt: 0, doc: 0, xls: 0, pdf: 0, lab: 1, yt: 2, video: 2 };
     function matRang(en) {
         const rang = MAT_RANG[matKind(en.url || '', en.label || '')];
-        return rang == null ? 2 : rang;
+        return rang == null ? 3 : rang;   /* alles Uebrige ist ein blosser Link */
     }
 
 
