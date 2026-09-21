@@ -228,13 +228,14 @@ html.dark-slide #hud button,html.dark-slide #nav button{background:rgba(7,22,48,
 html.dark-slide #hud button:hover,html.dark-slide #nav button:hover{background:rgba(7,22,48,.82)}
 #hud button svg,#nav button svg{display:block;width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6);margin:0;stroke-width:1.4;flex:none}
 #hud button[hidden]{display:none}   /* flex would otherwise show a hidden button */
-/* orange dot on the fullscreen button = one screen only, i.e. mirrored (or no beamer) - the warning before
-   presenting (Doc, 18.09.2026: "nur zeigen, wenn ein zweiter Schirm dran ist und nicht erweitert"). A mirrored
-   screen is invisible to the browser, so "mirrored" and "laptop alone" look the same; extended = no dot.
-   Only where the browser can tell (screen.isExtended, Chrome). */
+/* dot on the fullscreen button = the screen state before presenting: orange = one screen only, i.e. mirrored
+   (or no beamer); green = extended, ready to present (Doc, 21.09.2026: "ohne Linie und gruen wenn er auf
+   erweitern ist"). A mirrored screen is invisible to the browser, so "mirrored" and "laptop alone" look the
+   same. Only where the browser can tell (screen.isExtended, Chrome). */
 #hud #full{position:relative}
-#hud #full .scr-dot{position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;box-shadow:0 0 0 1.5px #EAF0FA}
+#hud #full .scr-dot{position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%}
 #hud #full .scr-dot.one{background:#F5C242}
+#hud #full .scr-dot.ext{background:#799E31}
 /* footer left: two triangles that jump a whole slide, fully built (Doc, 17.09.2026: "zwei Dreiecke, die von
    Folie zu Folie springen, anis rolled out") - placed by dock() on the footer line like the HUD */
 #nav{position:fixed;left:calc(10px + env(safe-area-inset-left, 0px));bottom:8px;z-index:9;display:flex;gap:4px}
@@ -251,6 +252,7 @@ html.dark-slide #hud button:hover,html.dark-slide #nav button:hover{background:r
 #help td:first-child{padding-right:16px;white-space:nowrap}
 #help .help-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px}
 #help .help-dot.one{background:#F5C242}
+#help .help-dot.ext{background:#799E31}
 #help kbd{display:inline-block;min-width:22px;padding:1px 6px;margin-right:4px;border-radius:5px;text-align:center;
   background:#D8E2F3;border:1px solid #A3B2CF;font:600 12px Raleway,system-ui,sans-serif;color:#0E244E}
 #help .or{display:inline-block;width:8px;margin-right:4px}

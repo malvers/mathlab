@@ -261,7 +261,8 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
     [K(['R']), 'Referentenansicht von Hand öffnen'],
     [K(['Cmd', 'F1', '/', 'Win', 'P']), 'Keine Referentenansicht? Bildschirm erweitern statt spiegeln – <b>erst dann</b> das Deck neu laden und starten'],
     ...('isExtended' in screen ? [['<span class="help-dot one"></span>',
-      'Oranger Punkt am Vollbild-Knopf: nur ein Bildschirm – am Board heißt das gespiegelt']] : []),
+      'Oranger Punkt am Vollbild-Knopf: nur ein Bildschirm – am Board heißt das gespiegelt'],
+      ['<span class="help-dot ext"></span>', 'Grüner Punkt: Bildschirm erweitert – Präsentation kann starten']] : []),
     [K(['L']), 'Pointer an / aus (in der Präsentation)'],
     null,
     [K(['P']), 'Solita erklärt – Start / Pause' + (avatar ? ' – rechts unten Solita fragen <img class="navpic" src="' + avatar.src + '" alt="">' : '')],
@@ -442,16 +443,17 @@ const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1
   + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
 const fullBtn = document.getElementById('full');
 const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
-// screen.isExtended only exists where the browser can tell (Chrome). Not extended = an orange dot on the
-// button: at the board that means mirrored -> Cmd F1 / Win P. Mirroring and "no beamer" look the same to the
-// browser, so the dot also shows on the laptop alone; extended shows nothing (Doc, 18.09.2026).
+// screen.isExtended only exists where the browser can tell (Chrome). The dot on the button says what the
+// screen is doing: orange = not extended, at the board that means mirrored -> Cmd F1 / Win P (mirroring and
+// "no beamer" look the same to the browser, so it also shows on the laptop alone), green = extended and ready
+// to present (Doc, 21.09.2026).
 const SCREEN_KNOWN = 'isExtended' in screen;
 function paintFull(){
   const ext = !!screen.isExtended;
   fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
     + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
     + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>'
-    + (SCREEN_KNOWN && !PRESENTER && !ext ? '<span class="scr-dot one"></span>' : '');
+    + (SCREEN_KNOWN && !PRESENTER ? '<span class="scr-dot ' + (ext ? 'ext' : 'one') + '"></span>' : '');
   fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)'
     : !PRESENTER && ext ? 'Bildschirm erweitert – Präsentieren: Beamer + Referentenansicht (f)'
     : SCREEN_KNOWN ? 'Nur ein Bildschirm – gespiegelt? Cmd F1 / Win P erweitert – Vollbild (f)' : 'Vollbild (f)';
