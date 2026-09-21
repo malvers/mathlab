@@ -218,17 +218,25 @@ function berlinNow() {
   return { ymd: `${p.year}${p.month}${p.day}`, hm: `${p.hour}:${p.minute}` };
 }
 
-async function tickIfBegun(u: Untis, userData: any, ttId: number): Promise<true | string> {
+/* Die eine Stunde unter Docs eigenen heraussuchen. Eigene Funktion, seit der Schreibweg sie
+   zweimal braucht - einmal fuer den Haken, einmal fuer die Marke auf der Stundenplan-Kachel;
+   zwei Abrufe des ganzen Schuljahres je Klick waeren Verschwendung.
+   The range must stay inside ONE school year - WebUntis rejects anything across the boundary
+   ("startDate and endDate are not within a single school year", code -8507). Measured
+   15.09.2026: the old "200 days back" died on exactly that, so the first live writes set no
+   tick at all. Same lookup as the CLI's `anwesenheit`. */
+async function ownLesson(u: Untis, userData: any, ttId: number) {
   const now = berlinNow();
-  /* The range must stay inside ONE school year - WebUntis rejects anything across the boundary
-     ("startDate and endDate are not within a single school year", code -8507). Measured
-     15.09.2026: the old "200 days back" died on exactly that, so the first live writes set no
-     tick at all. Same lookup as the CLI's `anwesenheit`. */
   const todayN = Number(now.ymd);
   const year = ((await u.rpc('getSchoolyears', {})) || [])
     .find((y: any) => Number(y.startDate) <= todayN && Number(y.endDate) >= todayN);
   const from = year ? String(year.startDate) : now.ymd;
-  const l = (await myLessons(u, userData, from, now.ymd)).find((x: any) => x.ttId === ttId);
+  return (await myLessons(u, userData, from, now.ymd)).find((x: any) => x.ttId === ttId) || null;
+}
+
+async function tickIfBegun(u: Untis, userData: any, ttId: number, known?: any): Promise<true | string> {
+  const now = berlinNow();
+  const l = known ?? await ownLesson(u, userData, ttId);
   if (!l) return 'nicht unter den eigenen Stunden bis heute';
   if (l.code === 'cancelled') return 'Stunde ausgefallen';
   if (l.date === now.ymd && l.start > now.hm) return 'Stunde hat noch nicht begonnen';
@@ -259,6 +267,45 @@ async function tickIfBegun(u: Untis, userData: any, ttId: number): Promise<true 
   }).then(r => r.json());
   const still = (op.periods || []).some((p: any) => p.period?.id === ttId && p.absCheckNeeded && !p.absChecked);
   return still ? 'WebUntis hat den Haken nicht uebernommen' : true;
+}
+
+/* Die Marken der Stundenplan-Kacheln nachtragen (Doc, 21.09.2026: "wenn ich den heute druecke,
+   wird dann A auch gesetzt? Bitte!"). stundenplan.html zeichnet sein L (Lehrstoff steht im
+   Klassenbuch) und sein A (Anwesenheit kontrolliert) aus der Zeile `_written` in svp_untis. Die
+   schrieb bisher NUR tools/webuntis.js - nach einem Klick im Plan blieb die Kachel darum bis zum
+   naechsten Abgleich (06:00/12:30 oder "WebUntis holen") ohne Marke stehen, obwohl in WebUntis
+   laengst beides stand. Also traegt diese Funktion ihren eigenen Schreibvorgang gleich dort ein.
+   Nur HINZUFUEGEN, nie streichen: sie sieht immer nur die eine Stunde, die sie gerade schreibt -
+   aufraeumen bleibt Sache des vollen status-Laufs, der alle Stunden kennt.
+   Und: das hier darf NIE den Schreibweg kippen. Faellt es aus, fehlt hoechstens eine Marke bis
+   zum naechsten Abgleich; der Eintrag in WebUntis steht so oder so. */
+async function noteMark(lesson: any, hasTopic: boolean, ticked: boolean) {
+  const url = Deno.env.get('SUPABASE_URL') ?? '';
+  const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+  if (!url || !key || !lesson) return;
+  if (!hasTopic && !ticked) return;
+  const mark = `${lesson.date}|${lesson.start}|${(lesson.klassen || []).join(',')}`;
+  const head = { apikey: key, Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' };
+  const res = await fetch(`${url}/rest/v1/svp_untis?page=eq._written&select=data`, { headers: head });
+  if (!res.ok) return;
+  const rows = await res.json().catch(() => []);
+  if (!Array.isArray(rows) || !rows.length) return;   /* noch nie gebaut - der status-Lauf legt sie an */
+  const data = rows[0].data || {};
+  const written = new Set<string>(data.written || []);
+  const checked = new Set<string>(data.checked || []);
+  const vorher = written.size + checked.size;
+  if (hasTopic) written.add(mark);
+  if (ticked) checked.add(mark);
+  if (written.size + checked.size === vorher) return;   /* stand beides schon drin */
+  const generated = new Date().toISOString();
+  data.written = [...written].sort();
+  data.checked = [...checked].sort();
+  data.generated = generated;
+  await fetch(`${url}/rest/v1/svp_untis?page=eq._written`, {
+    method: 'PATCH',
+    headers: { ...head, Prefer: 'return=minimal' },
+    body: JSON.stringify({ data, generated }),
+  });
 }
 
 // ---------- handler ----------
@@ -332,8 +379,12 @@ Deno.serve(async (req) => {
         return json({ ok: false, conflict: true, ttId, topic, stored: before,
           error: 'In WebUntis steht bereits ein anderer Text.' });
       }
+      /* Einmal heraussuchen, zweimal gebraucht: fuer den Haken und fuer die Marke. */
+      const lesson = await ownLesson(u, userData, ttId).catch(() => null);
+
       if (before !== null && before.trim() === topic) {
-        const absenceChecked = await tickIfBegun(u, userData, ttId).catch(e => (e as Error).message);
+        const absenceChecked = await tickIfBegun(u, userData, ttId, lesson).catch(e => (e as Error).message);
+        await noteMark(lesson, true, absenceChecked === true).catch(() => { });
         return json({ ok: true, ttId, topic, stored: before, unchanged: true, absenceChecked });
       }
 
@@ -345,7 +396,10 @@ Deno.serve(async (req) => {
       const after = await readTopic(u, ttId);
       const stored = after ?? '';
       /* the lesson was held either way - the tick does not depend on the read-back */
-      const absenceChecked = await tickIfBegun(u, userData, ttId).catch(e => (e as Error).message);
+      const absenceChecked = await tickIfBegun(u, userData, ttId, lesson).catch(e => (e as Error).message);
+      /* L nur, wenn wirklich etwas drinsteht - sonst leuchtete die Kachel fuer ein leeres
+         Klassenbuch, genau wie der Chip im Plan es vermeidet. */
+      await noteMark(lesson, !!stored.trim(), absenceChecked === true).catch(() => { });
       return json({ ok: stored.trim() === topic.trim(), ttId, topic, stored, absenceChecked });
     }
 
