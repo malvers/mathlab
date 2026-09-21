@@ -208,6 +208,33 @@ async function ticksDone(session, lessons) {
   return new Set(begun.filter(l => !open.has(String(l.ttId))).map(l => String(l.ttId)));
 }
 
+// Die Haken holen und in die kurze Liste eintragen, aus der stundenplan.html sein A zeichnet
+// (Doc, 21.09.2026: "Bau das Abfragen der A ueberall ein"). Jeder Weg, der ohnehin mit WebUntis
+// spricht und seine Stunden kennt, ruft das hier - dann bringt auch "WebUntis holen" die A mit
+// und nicht erst der naechste status-Lauf.
+// VEREINIGUNG, kein Abzug: dieser Aufruf sieht immer nur einen Ausschnitt der Stunden, ein
+// fehlender Haken darin heisst also nicht "abgehakt und wieder zurueckgenommen". Die Liste
+// aufzuraeumen ist Sache von runStatus, das alle Stunden des Schuljahres kennt.
+async function refreshChecked(session, lessons) {
+  let done;
+  try { done = await ticksDone(session, lessons); }
+  catch (e) { console.log(`Anwesenheits-Haken nicht gelesen (${e.message}) - kein neues A.`); return; }
+  const outW = untisCacheFile(WRITTEN_ROW);
+  let cache;
+  try { cache = JSON.parse(fs.readFileSync(outW, 'utf8')); }
+  catch (e) { console.log(`${WRITTEN_ROW} fehlt - die Haken kommen mit dem naechsten status-Lauf.`); return; }
+  const set = new Set(cache.checked || []);
+  const vorher = set.size;
+  for (const l of lessons) {
+    if (done.has(String(l.ttId))) set.add(`${l.date}|${l.start}|${l.klassen.join(',')}`);
+  }
+  if (set.size === vorher) { console.log(`Anwesenheits-Haken: ${vorher}, nichts Neues.`); return; }
+  cache.checked = [...set].sort();
+  cache.generated = new Date().toISOString();
+  await saveUntis([{ page: WRITTEN_ROW, data: cache }]);
+  console.log(`Anwesenheits-Haken: ${cache.checked.length} (${set.size - vorher} neu)`);
+}
+
 // Read the stored classbook text of one period - WITHOUT any student data.
 // History: this used to be getPeriodData2017, switched off on 02.09.2026 on Doc's call
 // ("Schuelernamen? Neeee") because that answer also carries `referencedStudents` with full names
@@ -531,6 +558,13 @@ async function myLessons(from, to, session) {
     element: { id, type }, startDate: Number(from), endDate: Number(to),
     klasseFields: ['id', 'name'], subjectFields: ['id', 'name'], roomFields: ['id', 'name'],
   } });
+  return normLessons(tt);
+}
+
+// Die Stundenform, mit der hier ueberall gerechnet wird. Eigene Funktion, seit `year` dieselben
+// Stunden fuer die Anwesenheits-Haken braucht: zwei Abschriften waeren zwei Wahrheiten, und der
+// Schluessel Datum|Beginn|Klassen haengt an genau diesen Feldern.
+function normLessons(tt) {
   return (tt || [])
     .filter(l => (l.kl || []).length && l.su?.[0])
     .map(l => ({ ttId: l.id, date: String(l.date), start: hhmm(l.startTime), end: hhmm(l.endTime),
@@ -1073,6 +1107,7 @@ async function main() {
     // haengt an --alle: EIN Schalter zurueck, falls der Optimierer den ganzen
     // Schulplan wieder braucht. Ohne den Schalter kommen nur Docs Stunden.
     const ALLE = process.argv.includes('--alle');
+    let meine = [];          // eigene Stunden mit ttId, fuer die Anwesenheits-Haken
     if (ALLE) {
       console.log('--alle: holt den GANZEN Schulplan inkl. fremder Lehrkraft-Kuerzel.');
       const classes = await rpc('getKlassen');
@@ -1112,6 +1147,10 @@ async function main() {
         byWeek.get(wk).push(norm(l));
         total++;
       }
+      /* Dieselben Stunden noch einmal in der Form mit ttId - daraus holt refreshChecked die
+         Anwesenheits-Haken. Kein zusaetzlicher Abruf beim Stundenplan, nur der eine bei
+         open-periods. Mit --alle bleibt es aus: dort stecken auch fremde Stunden in `tt`. */
+      meine = normLessons(tt);
     }
     process.stderr.write('\r' + ' '.repeat(44) + '\r');
 
@@ -1144,6 +1183,9 @@ async function main() {
 
     const mb = weeks.reduce((s, w) => s + fs.statSync(path.join(outDir, `w${w}.json`)).size, 0) / 1048576;
     console.log(`${total} Stunden, ${weeks.length} Wochen, ${Object.keys(teachers).length} Lehrkräfte -> ${outDir} (${mb.toFixed(1)} MB)`);
+    /* Die Haken "Anwesenheit kontrolliert" gleich mitnehmen (Doc, 21.09.2026) - so bringt
+       "WebUntis holen" das A mit, statt bis zum naechsten status-Lauf zu warten. */
+    if (meine.length) await refreshChecked(session, meine);
     // Keep the students' page (meinplan.html) in step with every fetch - morning job and evening app.
     await publishPlan(outDir);
     return;
