@@ -70,9 +70,9 @@
     grid-template-rows: auto 1fr auto;
     column-gap: 32px;
     padding: 32px 32px 36px 40px;
-    /* So hoch wie die rechte Spalte mindestens ist (30 + Bild 179 + 36): ein
+    /* So hoch wie die rechte Spalte mindestens ist (30 + Bild 222 + 36): ein
        Blatt mit einer einzigen Zeile sieht damit aus wie jedes andere. */
-    min-height: 245px;
+    min-height: 288px;
     border: 0;
     border-radius: 14px;   /* Doc, 20.09.2026: "die Ecken etwas rounder" */
     /* Papier, in JEDEM Schema: var(--card)/var(--ink) sind im dunklen Schema beide
@@ -106,9 +106,19 @@
     grid-row: 1 / span 2;
     justify-self: end;
     align-self: start;
+    /* Doc, 21.09.2026: "mach den GDW so breit (aspect!) wie die Pillen unten" -
+       das Bild war 124 px breit, die Pillen 154 px, die Spalte hatte zwei
+       Kanten. Jetzt dieselbe Breite wie die Pillen, die Hoehe rechnet
+       aspect-ratio aus (154 x 1,445 = 222). box-sizing, damit der halbe
+       Pixel Rahmen die Kante nicht verschiebt. */
+    box-sizing: border-box;
+    width: 154px;
     padding: 0;
     border: 0.5px solid rgba(0, 32, 96, 0.3);
-    border-radius: 3px;
+    /* Doc, 21.09.2026: "mach die Ecken hier so rund wie Pillen" - 6 px,
+       derselbe Radius wie .badge in svp-table.css, aus dem die Pillen
+       darunter ihre Ecken beziehen. */
+    border-radius: 6px;
     background: #fff;
     line-height: 0;
     cursor: pointer;
@@ -117,8 +127,9 @@
 .fahr-gdw[hidden] { display: none; }
 .fahr-gdw img {
     display: block;
-    width: 124px;                   /* hochkant wie die Folie: 1 : 1.445 */
-    height: 179px;
+    width: 100%;
+    aspect-ratio: 1 / 1.445;        /* hochkant wie die Folie */
+    height: auto;
     object-fit: cover;
 }
 .fahr-gdw:hover { border-color: rgba(0, 32, 96, 0.7); }
@@ -137,10 +148,9 @@
     /* Luft zum Bild darueber - vorher hielt der Abstand zur Blattkante sie
        auseinander, jetzt stehen beide in derselben Spalte. */
     margin-top: 16px;
-    /* 154 px, nicht die 124 px des Bildes: auf Bildbreite gezwungen ragte
-       "Koerperberechnungen" ueber die Blattkante (Docs Bild, 21.09.2026).
-       Dasselbe Mass steht oben als Breite der Rasterspalte. Alle Pillen sind
-       so breit wie die Spalte. */
+    /* 154 px: die Breite der Rasterspalte, dieselbe wie die des Bildes
+       darueber. Schmaler ragte "Koerperberechnungen" ueber die Blattkante
+       (Docs Bild, 21.09.2026). Alle Pillen sind so breit wie die Spalte. */
     width: 154px;
     display: flex;
     flex-direction: column;
