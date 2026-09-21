@@ -5,8 +5,76 @@ window.svpPlanParts.push(function (P) {
     Object.assign(P, {
         drawnIcon, matLabelEl, matIconEl, siteHref, keinMausfokus, equalizeMatPills,
         equalizeRefPills, setVideoReiter, isVideoEntry, isExerciseEntry, officeEdit,
-        matDefaultLabel, openMat, renderMaterial, hideMatTip, showMatTip
+        matDefaultLabel, openMat, renderMaterial, hideMatTip, showMatTip,
+        festeLinks, festePillen
     });
+
+    /* ---- Was in JEDER Stunde dieses Fachs gebraucht wird -----------------
+       Formelsammlung und Lab haengen nicht an einer Woche, sondern am Fach
+       (Doc, 21.09.2026: "bau den auch in Mathe heute ein", "noch einen Link
+       auf das Lab Cavalierie", "hier bitte auch!" - gezeigt auf die
+       Zusatzmaterial-Zeile). Die Liste steht HIER, weil zwei Stellen sie
+       brauchen: die Zeile im Plan und das Fahrplan-Blatt. */
+    const FORMELN_URL = P.FORMELN_URL = 'https://www.iqb.hu-berlin.de/media/documents/' +
+        'N_Mathematisch-naturwissenschaftliche_Formelsammlung.pdf';
+    const FORMELN_ON = P.FORMELN_ON = ['mathe11', 'mathe12', 'mathe13'];
+    /* Flaechen und Volumen stehen in der Einfuehrungsphase - dort lief das Lab
+       am 21.09.2026. Kommt es in einer anderen Klasse dran, gehoert die Seite
+       in diese Zeile. */
+    const LAB_ON = ['mathe11'];
+    /* Das Lab liegt neben dem svp-Ordner (HTML/cavalieri.html). Die Adresse
+       wird aus der Adresse DIESER Datei gebildet und nicht aus der der Seite:
+       die Plaene liegen in Unterordnern (svp/mathe/, svp/informatik/), und ein
+       handgeschriebenes "../.." stimmt dann nur zufaellig. */
+    const LAB_URL = (function () {
+        const me = document.querySelector('script[src*="svp-plan-material.js"]');
+        const dir = me ? me.src.replace(/[^/]*$/, '') : location.href;
+        return new URL('../cavalieri.html', dir).href;
+    })();
+
+    /* Das Lambda des Labors als Zeichen, kein Buchstabe: dieselben zwei Striche
+       wie in resources/favicon.svg, nur in der Farbe der Pille (currentColor). */
+    /* Mass als Attribut, nicht nur in der CSS-Datei: ein Inline-SVG ohne
+       width/height hat keine eigene Groesse, und die Pille hat es damit auf
+       0 x 0 px gerechnet (gemessen, 21.09.2026). */
+    const LAMBDA = '<svg class="mat-lambda" viewBox="0 0 64 64" width="11" height="11" aria-hidden="true">' +
+        '<path d="M22 11 L46 53"/><path d="M34.5 32.5 L18 53"/></svg>';
+
+    function festeLinks() {
+        const seite = location.pathname.replace(/.*\//, '').replace(/\.html$/, '');
+        const raus = [];
+        if (FORMELN_ON.indexOf(seite) >= 0) {
+            raus.push({
+                label: 'Formelsammlung', url: FORMELN_URL,
+                titel: 'Mathematisch-Naturwissenschaftliche Formelsammlung (IQB/KMK) - ' +
+                    'das einzige zugelassene Hilfsmittel der Abiturpruefung'
+            });
+        }
+        if (LAB_ON.indexOf(seite) >= 0) {
+            raus.push({
+                label: 'Lab Cavalieri', url: LAB_URL,
+                titel: 'Der Satz von Cavalieri - das Lab in 2D und 3D'
+            });
+        }
+        return raus;
+    }
+
+    /* Haengt die festen Pillen an ein Kaestchen. renderMaterial leert seinen
+       Kasten bei jedem Lauf, deshalb wird das hier danach aufgerufen und nicht
+       einmalig beim Bauen der Zeile. */
+    function festePillen(ziel) {
+        festeLinks().forEach(function (e) {
+            const a = document.createElement('a');
+            a.className = 'badge mat-pill mat-fest';
+            a.href = e.url;
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.title = e.titel;
+            a.insertAdjacentHTML('beforeend', LAMBDA);
+            a.appendChild(document.createTextNode(' ' + e.label));
+            ziel.appendChild(a);
+        });
+    }
 
     // Renders the raw material text ("Label https://... Label2 https://...")
     // as compact link pills; text without any URL shows as a plain note.

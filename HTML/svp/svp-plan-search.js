@@ -201,12 +201,11 @@ window.svpPlanParts.push(function (P) {
            because the link is the same everywhere; the pages listed below are the
            ones where it belongs. .head-row is space-between, so this second child
            lands at the right edge by itself - no CSS needed. */
-        /* Ueber P, damit auch das Fahrplan-Blatt dieselbe Adresse nimmt
-           (Doc, 21.09.2026: "bau den auch in Mathe heute ein") - EINE Quelle
-           fuer den Knopf oben und die Pille im Blatt. */
-        const FORMELN_URL = P.FORMELN_URL = 'https://www.iqb.hu-berlin.de/media/documents/' +
-            'N_Mathematisch-naturwissenschaftliche_Formelsammlung.pdf';
-        const FORMELN_ON = P.FORMELN_ON = ['mathe11', 'mathe12', 'mathe13'];
+        /* Adresse und Seitenliste stehen bei den festen Material-Links
+           (svp-plan-material.js): dieselbe Quelle fuer diesen Knopf, die
+           Pille in der Zusatzmaterial-Zeile und die im Fahrplan-Blatt. */
+        const FORMELN_URL = P.FORMELN_URL;
+        const FORMELN_ON = P.FORMELN_ON;
         const headRow = document.querySelector('.page-head .head-row');
         const page = location.pathname.replace(/.*\//, '').replace(/\.html$/, '');
         if (headRow && FORMELN_ON.includes(page)) {

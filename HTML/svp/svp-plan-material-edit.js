@@ -18,6 +18,12 @@ window.svpPlanParts.push(function (P) {
         /* Beide Reiter lesen DIESELBE Zeile, nur mit umgekehrtem Filter -
            dadurch gibt es nichts doppelt zu pflegen. */
         P.renderMaterial(ref.matBlock, text, ref, en => P.isExerciseEntry(en) || P.isVideoEntry(en));
+        /* Doc, 21.09.2026 ("hier bitte auch!", gezeigt auf die Zusatzmaterial-
+           Zeile): hinter dem Material der Woche stehen die Links, die zum Fach
+           gehoeren - Formelsammlung, Lab. Danach, weil renderMaterial seinen
+           Kasten jedes Mal leert. Sie zaehlen nicht in den Reiter: der Zaehler
+           unten rechnet mit den Eintraegen der Woche, nicht mit diesen. */
+        P.festePillen(ref.matBlock);
         P.renderMaterial(ref.vidBlock, text, ref, en => !P.isVideoEntry(en));
         ref.matTd.textContent = '';
         /* Doc, 20.09.2026: "weg bitte ... wir brauchen Platz" - die Aufgaben-Pille
