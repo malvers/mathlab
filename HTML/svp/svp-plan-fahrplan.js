@@ -67,7 +67,7 @@ window.svpPlanParts.push(function (P) {
     function markiere(b, text) { b.classList.toggle('has-fahr', !!text.trim()); }
 
     // --- the sheet -------------------------------------------------------
-    let box = null, feld = null, bild = null, mat = null, offen = null, timer = null;
+    let box = null, blatt = null, feld = null, bild = null, mat = null, offen = null, timer = null;
 
 
     function ensureBox() {
@@ -75,7 +75,7 @@ window.svpPlanParts.push(function (P) {
         box = document.createElement('div');
         box.className = 'fahr-box';
         box.hidden = true;
-        const blatt = document.createElement('div');
+        blatt = document.createElement('div');
         blatt.className = 'fahr-sheet';
         /* Feste Ueberschrift, nicht editierbar - sie steht auf jedem Fahrplan und gehoert
            nicht in den Text (Doc, 20.09.2026: "Schreib Du als Ueberschrift immer Inhalte"). */
@@ -119,6 +119,7 @@ window.svpPlanParts.push(function (P) {
         feld.addEventListener('input', function () {
             clearTimeout(timer);
             timer = setTimeout(save, 600);      /* typing saves itself, like the notes field */
+            fitFont();                          /* mehr Text -> kleinere Schrift */
         });
         /* typing must not reach the plan: it walks its rows with the arrow keys and folds
            weeks on Enter */
@@ -127,7 +128,43 @@ window.svpPlanParts.push(function (P) {
             ev.stopPropagation();
         });
         box.addEventListener('click', function (ev) { if (ev.target === box) hide(); });
+        window.addEventListener('resize', fitFont);
         return box;
+    }
+
+    /* ---- Die Schrift passt sich dem Text an ------------------------------
+       Das Blatt waechst mit dem Text, aber nur bis zu seiner max-height; was
+       dann noch dazukommt, wird nicht weggescrollt, sondern kleiner
+       geschrieben (Doc, 21.09.2026: "mach das max size und die Schrift
+       kleiner, wenn ich mehr schreibe", "nur wenn es so gebraucht wird
+       kleiner geht").
+       Gemessen wird am Blatt selbst (overflow: auto): solange es unter seiner
+       max-height bleibt, waechst es einfach mit und hier ist nichts zu tun.
+       Erst wenn es anstoesst und ueberlaeuft, wird der Grad zurueckgenommen -
+       per Halbierung statt in Ein-Pixel-Schritten, das sind sieben Messungen
+       statt dreissig. Beim Loeschen laeuft es andersherum: der Grad geht auf
+       das Mass aus dem CSS zurueck, das bleibt die Obergrenze.
+       Gerechnet wird direkt im Tastendruck, ohne requestAnimationFrame: dessen
+       Nummer diente als Sperre, und blieb ein Bild aus (Hintergrund-Reiter),
+       blieb die Sperre stehen und die Schrift fuer immer, wie sie war -
+       gemessen am 21.09.2026 im kopflosen Chrome. Die eine Messung im
+       Normalfall ("passt") kostet nichts. */
+    const MIN_PX = 14;
+
+    function passt() { return blatt.scrollHeight <= blatt.clientHeight + 1; }
+
+    function fitFont() {
+        if (!blatt || !box || box.hidden) return;
+        blatt.style.fontSize = '';                      /* erst zurueck auf das CSS-Mass */
+        const basis = parseFloat(getComputedStyle(blatt).fontSize) || 46;
+        if (passt()) return;                            /* alles da, nichts zu tun */
+        let klein = MIN_PX, gross = basis, best = MIN_PX;
+        for (let n = 0; n < 7 && gross - klein > 0.5; n++) {
+            const mitte = (klein + gross) / 2;
+            blatt.style.fontSize = mitte + 'px';
+            if (passt()) { best = mitte; klein = mitte; } else gross = mitte;
+        }
+        blatt.style.fontSize = best.toFixed(1) + 'px';
     }
 
     /* One line per bullet - that is what is stored, the list is only how it is shown. */
@@ -185,6 +222,7 @@ window.svpPlanParts.push(function (P) {
         P.festePillen(mat, ref);
         mat.hidden = !mat.childNodes.length;
         b.hidden = false;
+        fitFont();                  /* sofort, nicht erst im naechsten Bild */
         feld.focus();
         /* Doc, 20.09.2026: "setz den cursor eine Zeile tiefer hinter den ersten bullet" -
            er steht also im ERSTEN Punkt, hinter dem, was dort schon steht. */
