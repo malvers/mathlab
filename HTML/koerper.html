@@ -350,7 +350,7 @@
                 const label = GENERIC[tab].shapes[id].name;
                 SEARCH.push({ label, tab, run: () => { S.shape[tab].kind = id; shapeState(tab); syncTabDropdown(tab, label); buildGenericParams(tab); } });
             }
-            SEARCH.forEach(e => e.key = (e.label + ' ' + TAB_LABEL[e.tab]).toLowerCase());
+            SEARCH.forEach(e => { e.lab = e.label.toLowerCase(); e.key = e.lab + ' ' + TAB_LABEL[e.tab].toLowerCase(); });
             document.querySelectorAll('.k-ov-btn').forEach(b => { b.textContent = 'Übersicht · ' + SEARCH.length + ' Objekte'; });
         }
 
@@ -409,6 +409,15 @@
             box.style.marginRight = gap + 'px';
             box.style.display = (sr.width - gap < 240) ? 'none' : '';
         }
+        /** Rank one entry against one search word: a whole word up front beats a word start,
+            and an entry that only matches through its tab label comes last. */
+        function wordRank(e, w) {
+            const esc = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            if (new RegExp('\\b' + esc + '\\b').test(e.lab)) return e.lab.startsWith(w) ? 0 : 1;
+            if (e.lab.startsWith(w)) return 2;
+            if (new RegExp('\\b' + esc).test(e.lab)) return 3;
+            return e.lab.includes(w) ? 4 : 5;
+        }
         function wireSearch() {
             indexLab();
             const inp = document.getElementById('k-search-input'), res = document.getElementById('k-search-res');
@@ -417,7 +426,9 @@
                 const q = inp.value.trim().toLowerCase();
                 if (q.length < 2) return close();
                 const words = q.split(/\s+/);
-                const hits = SEARCH.filter(e => words.every(w => e.key.includes(w))).slice(0, 14);
+                const hits = SEARCH.filter(e => words.every(w => e.key.includes(w)))
+                    .map(e => ({ e, r: words.reduce((sum, w) => sum + wordRank(e, w), 0) }))
+                    .sort((a, b) => a.r - b.r).slice(0, 14).map(x => x.e);
                 if (!hits.length) { res.innerHTML = '<div style="color:rgba(255,255,255,0.4)">nichts gefunden</div>'; res.style.display = 'block'; return; }
                 res.innerHTML = hits.map((h, i) => `<div data-i="${i}">${h.label}<span class="k-cat">${TAB_LABEL[h.tab]}</span></div>`).join('');
                 res.style.display = 'block';
