@@ -1,7 +1,9 @@
-/* ---- Neuigkeiten-Laufband ganz oben, ueber dem blauen Band -------------
+/* ---- Neuigkeiten-Laufband ueber dem Seitenkopf, klebend ----------------
    Doc, 20.09.2026: "mach dazwischen eine kleine Zeile so wie die Suchzeile
-   und bring da einen News ticker", dann 21.09.2026: "mach den Ticker ganz
-   oben hin". Grund, Rand, Radius und Schrift kommen
+   und bring da einen News ticker", dann 21.09.2026: "etwas flacher",
+   "nicht wegscrollen" und "es gehoert ja zur Klasse Stunde" - die Zeile steht
+   deshalb direkt ueber der Ueberschrift der Klasse und bleibt beim Scrollen
+   mit ihr oben. Grund, Rand, Radius und Schrift kommen
    aus dem gemeinsamen Leisten-Block in svp-search.css - hier steht nur, was
    das Laufband selbst braucht. Gebaut wird die Zeile in svp-nav.js, die
    Texte stehen in svp-news.json. */
@@ -12,6 +14,34 @@
     --news-neon: rgb(64, 255, 122);
 }
 
+/* Auf einer Planseite steckt die Huelle im klebenden Kopf (.plan-sticky) und
+   klebt mit ihm - hier braucht sie nur Abstand nach unten zur Ueberschrift.
+   Den Grund gibt die Huelle darum her, sie traegt ihn schon. */
+.plan-sticky .nav-news-dock {
+    position: static;
+    background: none;
+    margin: 0 0 8px;
+    padding: 0;
+}
+
+/* Jede andere Seite hat keinen klebenden Kopf: dort haengt die Zeile unter dem
+   blauen Band und bleibt fuer sich oben stehen (Doc, 21.09.2026: "nicht
+   wegscrollen"). Sie geht dafuer von Kante zu Kante und traegt den
+   Seitengrund - der Inhalt verschwindet sauber dahinter, statt neben der
+   1200 px breiten Zeile vorbeizuziehen. */
+.nav-news-dock {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    background: var(--bg);
+    margin: 0 calc(-1 * var(--band-pull-x, clamp(12px, 3vw, 40px))) 12px;
+    padding: 0 var(--band-pull-x, clamp(12px, 3vw, 40px)) 8px;
+}
+
+/* Ohne sichtbare Zeile keine Huelle - sonst bliebe ein Streifen Grund stehen
+   und schoebe die Seite nach unten. */
+.nav-news-dock:not(:has(.nav-news:not([hidden]):not(.zu))) { display: none; }
+
 .nav-news {
     display: flex;
     align-items: center;
@@ -19,12 +49,13 @@
     /* Dieselbe Spur wie Navileiste, Werkzeugleiste und Seitenkopf. */
     width: 100%;
     max-width: 1200px;
-    /* Der obere Seitenrand gehoert jetzt dem Laufband: es zieht sich um
-       dieselbe Strecke hoch, die das blaue Band vorher fuer sich genommen hat
-       (--band-pull-top, siehe .nav-band in svp-nav.css), und laesst 10 px
-       stehen. So sitzt die Zeile auf jeder Seite gleich hoch - auch auf dem
-       Stundenplan, der einen schmaleren Seitenrand setzt. */
-    margin: calc(10px - var(--band-pull-top, clamp(12px, 3vw, 40px))) auto 12px;
+    margin: 0 auto;
+    /* Flacher als die Suchzeile, aus der die Optik kommt (Doc, 21.09.2026:
+       "etwas flacher"): 3 px statt 7 px oben und unten - gemessen 26.7 px hoch
+       statt 32.7 px. Tiefer geht nicht ohne das Quellenlogo, das mit 16 px und
+       seiner Unterlaenge die Zeilenhoehe setzt. */
+    padding-top: 3px;
+    padding-bottom: 3px;
     overflow: hidden;
 }
 
@@ -34,10 +65,12 @@
    Zeile nimmt dann auch keinen Platz mehr ein. */
 .nav-news.zu { display: none; }
 
-/* Steht die Zeile davor, darf sich das blaue Band nicht mehr nach oben aus
-   dem Seitenrand ziehen - sonst laege es ueber dem Laufband. Seitlich bleibt
-   der Zug, das Band geht weiter von Kante zu Kante. */
-.nav-news:not([hidden]):not(.zu) + .nav-band { margin-top: 0; }
+/* Ohne die Zeile haelt die Navileiste 20 px zum Seitenkopf; mit ihr teilt
+   sich derselbe Abstand auf ihre beiden Seiten auf, statt sich zu verdoppeln
+   (Doc, 21.09.2026: "dichter zusammen"). Auf einer Planseite steckt die Zeile
+   im klebenden Kopf, der dem Band folgt - daher die zweite Zeile. */
+.nav-band:has(+ .nav-news-dock),
+.nav-band:has(+ .plan-sticky > .nav-news-dock) { margin-bottom: 12px; }
 
 /* Etikett links, gedaempft wie der Platzhalter der Suchzeile: ohne das Wort
    sieht die Zeile aus wie ein Eingabefeld, in das man tippen koennte. */
@@ -51,6 +84,10 @@
     justify-content: flex-end;
     gap: 4px;
     text-align: right;
+    /* Sonst bricht eine lange Rubrik in der festen Breite um und macht die
+       ganze Zeile eine Zeile hoeher: gemessen am 21.09.2026 sprang das Band
+       zwischen 27 px ("SCHON GEWUSST") und 32 px ("VORTRAEGE"). */
+    white-space: nowrap;
     font-size: 0.6rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -216,4 +253,4 @@ html.svp-light nav.quick-nav a.nav-news-btn.spricht .mega .grip { fill: var(--ph
     nav.quick-nav a.nav-news-btn.spricht .mega .horn { animation: none; }
 }
 
-@media print { .nav-news { display: none !important; } }
+@media print { .nav-news, .nav-news-dock { display: none !important; } }

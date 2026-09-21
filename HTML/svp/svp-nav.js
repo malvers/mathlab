@@ -1113,16 +1113,30 @@
     band.appendChild(nav);
     document.body.insertBefore(band, document.body.firstChild);
 
-    /* Neuigkeiten-Laufband ganz oben, ueber dem blauen Band (Doc, 21.09.2026:
-       "mach den Ticker ganz oben hin"; vorher stand die Zeile zwischen
-       Navileiste und Seitenkopf). Die Zeile wird hier nur aufgehaengt -
-       gefuellt wird sie von svp-news.js, damit die Navileiste nicht auch noch
-       Nachrichten holen und Feeds lesen muss. Den oberen Seitenrand holt sich
-       jetzt das Laufband statt des Bandes, siehe svp-news.css. */
+    /* Neuigkeiten-Laufband direkt ueber dem Seitenkopf (Doc, 21.09.2026:
+       "es gehoert ja zur Klasse Stunde") und mit ihm zusammen klebend, also
+       beim Scrollen nicht weg ("Nicht wegscrollen"). Auf einer Planseite hat
+       svp-plan.js Kopf und Werkzeugleiste schon in .plan-sticky verpackt -
+       dort wandert die Zeile als erstes Kind hinein und klebt mit. Der Plan
+       laeuft ganz durch, bevor dieses Skript an der Reihe ist (document.write
+       in svp-plan.js), die Huelle steht also bereits. Jede andere Seite
+       (Startseite, Notizen, Operatoren) hat keinen solchen Kopf - dort haengt
+       die Zeile unter dem blauen Band und klebt fuer sich (svp-news.css).
+
+       Die Zeile wird hier nur aufgehaengt - gefuellt wird sie von svp-news.js,
+       damit die Navileiste nicht auch noch Nachrichten holen und Feeds lesen
+       muss. Klebend ist die Huelle, nicht die Zeile selbst: die Zeile ist
+       1200 px breit und mittig, an ihr zoege der Seiteninhalt links und rechts
+       vorbei. */
+    const dock = document.createElement('div');
+    dock.className = 'nav-news-dock';
     const news = document.createElement('div');
     news.className = 'nav-news';
     news.hidden = true;
-    document.body.insertBefore(news, band);
+    dock.appendChild(news);
+    const planHead = document.querySelector('.plan-sticky');
+    if (planHead) planHead.insertBefore(dock, planHead.firstChild);
+    else band.insertAdjacentElement('afterend', dock);
 
     const newsScript = document.createElement('script');
     newsScript.src = base + 'svp-news.js';
