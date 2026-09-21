@@ -79,6 +79,36 @@
             max-height: 48%; overflow-y: auto; scrollbar-width: none;
         }
         #k-formpanel::-webkit-scrollbar { display: none; }
+        /* the formulas sit top left, right under the name of the body (Doc, 21.09.2026) */
+        #k-exactpanel {
+            position: absolute; top: 76px; left: 12px; width: max-content; min-width: 240px; max-width: min(42vw, 520px); z-index: 5;
+            max-height: calc(100% - 92px); overflow-y: auto; scrollbar-width: none;
+        }
+        #k-exactpanel::-webkit-scrollbar { display: none; }
+        #k-exactpanel .instrument-card { margin-bottom: 0; }
+        /* overview button at the top of every sidebar + its dialog (.qr-overlay is the shared look) */
+        .k-ov-btn { margin-bottom: 15px; background: rgba(2, 100, 123, 0.25); border: 1px solid rgb(2, 100, 123); color: #cfe9ff;
+            font-family: 'Orbitron', sans-serif; cursor: pointer; transition: background 0.2s, color 0.2s; }
+        .k-ov-btn:hover { background: rgba(3, 145, 178, 0.45); color: #fff; }
+        #k-ovl .ov-box { width: min(1180px, 92vw); max-height: 86vh; overflow-y: auto; text-align: left; padding: 24px 28px 28px; position: relative; }
+        #k-ovl .qr-close { position: absolute; top: 14px; right: 20px; font-size: 1.6rem; color: #9fb3c8; cursor: pointer; line-height: 1; }
+        #k-ovl .qr-close:hover { color: #fff; }
+        .ov-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 18px; }
+        .ov-head .qr-title { margin: 0; }
+        .ov-total { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 700; color: rgb(245, 194, 66); }
+        /* one block per tab; a big group (Johnson) spans the full width and columns inside */
+        .ov-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 4px 24px; align-items: start; }
+        .ov-group { margin-bottom: 14px; }
+        .ov-group.wide { grid-column: 1 / -1; }
+        .ov-group.wide .ov-items { columns: 5 200px; column-gap: 24px; }
+        .ov-group h4 { font-family: 'Orbitron', sans-serif; font-size: 0.66rem; letter-spacing: 2px; text-transform: uppercase;
+            color: rgb(0, 210, 255); margin: 0 0 6px; display: flex; align-items: baseline; gap: 7px; }
+        .ov-group h4 span { color: rgb(245, 194, 66); font-size: 0.8rem; }
+        .ov-group h4 em { font-style: normal; color: rgba(255, 255, 255, 0.3); letter-spacing: 1px; font-size: 0.6rem; }
+        .ov-item { break-inside: avoid; }
+        .ov-item { font-family: Arial, Helvetica, sans-serif; font-size: 0.82rem; color: rgba(255, 255, 255, 0.82);
+            padding: 3px 7px; border-radius: 6px; cursor: pointer; }
+        .ov-item:hover { background: rgba(3, 145, 178, 0.35); color: #fff; }
         /* dimension switch: outside #tab-bar, whose overflow-x would clip the open panel */
         #dim-dd { width: 64px; flex: 0 0 auto; align-self: center; margin: 0 10px 0 8px; transform: translateY(4px); }
         #dim-dd .dropdown-trigger { padding: 6px 8px !important; border-width: 0.5px !important; border-color: rgb(2, 100, 123) !important; background: rgb(7, 14, 31) !important; border-radius: 6px !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 0.8rem !important; line-height: 1.1 !important; }
@@ -110,6 +140,7 @@
         @media (max-width: 768px) {
             #k-right { width: 170px; top: 8px; right: 8px; }
             #k-formpanel { max-width: 60vw; bottom: 8px; right: 8px; max-height: 40%; }
+            #k-exactpanel { max-width: 60vw; top: 68px; left: 8px; max-height: 34%; }
         }
     </style>
 </head>
@@ -169,6 +200,7 @@
                 <div id="k-hud"><b id="k-hud-name"></b><span id="k-hud-sub"></span></div>
             </div>
             <div id="k-right"></div>
+            <div id="k-exactpanel"></div>
             <div id="k-formpanel"></div>
         </div>
     </main>
@@ -319,7 +351,53 @@
                 SEARCH.push({ label, tab, run: () => { S.shape[tab].kind = id; shapeState(tab); syncTabDropdown(tab, label); buildGenericParams(tab); } });
             }
             SEARCH.forEach(e => e.key = (e.label + ' ' + TAB_LABEL[e.tab]).toLowerCase());
+            document.querySelectorAll('.k-ov-btn').forEach(b => { b.textContent = 'Übersicht · ' + SEARCH.length + ' Objekte'; });
         }
+
+        // ---- overview of everything in the lab ---------------------------
+        /** One list of all figures, grouped by tab, each one a jump. */
+        function showOverview() {
+            let ovl = document.getElementById('k-ovl');
+            if (!ovl) {
+                ovl = document.createElement('div');
+                ovl.id = 'k-ovl';
+                ovl.className = 'qr-overlay';                 // central overlay look (branding css)
+                ovl.addEventListener('click', e => { if (e.target === ovl) closeOverview(); });
+                document.body.appendChild(ovl);
+            }
+            // tab order = the order of the tab bar, so 1D → 2D → 3D like the strip
+            const order = [...document.querySelectorAll('#tab-bar .tab-btn')].map(b => b.dataset.tab);
+            const dimOf = {};
+            document.querySelectorAll('#tab-bar .tab-btn').forEach(b => { dimOf[b.dataset.tab] = b.dataset.dim; });
+            const groups = order.map(tab => ({ tab, items: SEARCH.filter(e => e.tab === tab) })).filter(g => g.items.length);
+            ovl.innerHTML = `
+                <div class="qr-container ov-box">
+                    <div class="qr-close" id="k-ovl-x">×</div>
+                    <div class="ov-head">
+                        <div class="qr-title">Alle Objekte im Labor</div>
+                        <div class="ov-total">${SEARCH.length}</div>
+                    </div>
+                    <div class="ov-grid">${groups.map(g => `
+                        <div class="ov-group${g.items.length > 20 ? ' wide' : ''}">
+                            <h4>${TAB_LABEL[g.tab]} <span>${g.items.length}</span> <em>${dimOf[g.tab]}D</em></h4>
+                            <div class="ov-items">${g.items.map(it => `<div class="ov-item" data-i="${SEARCH.indexOf(it)}">${it.label}</div>`).join('')}</div>
+                        </div>`).join('')}
+                    </div>
+                </div>`;
+            ovl.querySelector('#k-ovl-x').addEventListener('click', closeOverview);
+            ovl.querySelectorAll('.ov-item').forEach(el => el.addEventListener('click', () => {
+                const h = SEARCH[+el.dataset.i];
+                h.run(); persist(); switchTab(h.tab); resetView(); closeOverview();
+            }));
+            document.addEventListener('keydown', overviewKey, true);
+            setTimeout(() => ovl.classList.add('visible'), 10);
+        }
+        function closeOverview() {
+            const ovl = document.getElementById('k-ovl');
+            if (ovl) ovl.classList.remove('visible');
+            document.removeEventListener('keydown', overviewKey, true);
+        }
+        function overviewKey(e) { if (e.key === 'Escape') { e.stopPropagation(); closeOverview(); } }
         /** Keep the search box clear of the branding overlay — its width is not fixed. */
         function layoutSearch() {
             const box = document.getElementById('k-search'), strip = document.getElementById('tab-strip');
@@ -370,6 +448,16 @@
 
         function buildCommonCards(tab, opts) {
             const sb = 'sb-' + tab;
+            /* Same button at the top of every sidebar (Doc, 21.09.2026): it carries the
+               total and opens the list of everything the lab knows. The count only
+               exists after indexLab(), so the label is filled in there. */
+            const ov = document.createElement('button');
+            ov.type = 'button';
+            ov.className = 'cyber-btn k-ov-btn';
+            ov.textContent = 'Übersicht';
+            ov.addEventListener('click', showOverview);
+            document.getElementById(sb).appendChild(ov);
+
             CyberUI.createCard(sb, opts.title, `<div id="dd-${tab}"></div>`, COL.orange);
             CyberUI.createDropdown(`dd-${tab}`, opts.options, id => { opts.onSelect(id); }, opts.selected);
 
@@ -777,7 +865,13 @@
                 { label: 'Kantenkugel', value: 'mid' }, { label: 'Umkugel', value: 'circ' },
             ], S.sphere, val => { S.sphere = val; persist(); applyVisibility(); });
         })();
-        CyberUI.createCard('k-formpanel', 'Formeln', `<div id="k-form" class="k-formulas"></div>`, COL.blue);
+        /* Two cards (Doc, 21.09.2026): "Werte" keeps the old spot bottom right and
+           holds the numbers this body actually has, "Formeln" sits top left under the
+           name and holds the exact formulas behind them — the old single card was
+           headed "Formeln" but showed numeric coefficients. */
+        CyberUI.createCard('k-formpanel', 'Werte', `<div id="k-form" class="k-formulas"></div>`, COL.blue);
+        CyberUI.createCard('k-exactpanel', 'Formeln', `<div id="k-exact" class="k-formulas"></div>`, COL.orange);
+        const formCard = id => document.getElementById(id).closest('.instrument-card');
         function updateRightPanel() {
             const poly = S.dim === '3' && S.tab !== 'rund';
             const spheres = ['platonisch', 'archimedisch', 'catalanisch'].includes(S.tab);
@@ -798,7 +892,17 @@
         }
 
         // ------------------------------------------------------------------
-        // Exact formulas (KaTeX) — Platonic solids, prisms, round shapes
+        // Exact formulas (KaTeX) — every tab shows real formulas, not numbers
+        //
+        // Sources of the three kinds of entry:
+        //   EXACT / EXACT_ARCH / EXACT_CAT  hand-written closed forms, each one
+        //       checked against the value the lab computes itself (tools check:
+        //       node scratch, |formula − measured| < 1e-9 for edge a = 1).
+        //   ngonAreaTex()  builds A exactly for every solid with regular faces
+        //       (Platonic, Archimedean, Johnson) out of the face-type counts —
+        //       that is why even J1–J92 show a real surface formula.
+        //   the general fallbacks V = ⅓·r_I·A (bodies with an insphere) and
+        //       V = ⅓·Σ dᵢAᵢ (pyramids over the faces) for the rest.
         // ------------------------------------------------------------------
         const EXACT = {
             tetraeder: ['A = \\sqrt{3}\\,a^2', 'V = \\tfrac{\\sqrt{2}}{12}\\,a^3', 'r_U = \\tfrac{\\sqrt{6}}{4}\\,a', 'r_K = \\tfrac{\\sqrt{2}}{4}\\,a', 'r_I = \\tfrac{\\sqrt{6}}{12}\\,a'],
@@ -807,6 +911,69 @@
             dodekaeder: ['A = 3\\sqrt{25+10\\sqrt{5}}\\,a^2', 'V = \\tfrac{15+7\\sqrt{5}}{4}\\,a^3', 'r_U = \\tfrac{\\sqrt{3}\\,(1+\\sqrt{5})}{4}\\,a', 'r_K = \\tfrac{3+\\sqrt{5}}{4}\\,a', 'r_I = \\tfrac{a}{2}\\sqrt{\\tfrac{25+11\\sqrt{5}}{10}}'],
             ikosaeder: ['A = 5\\sqrt{3}\\,a^2', 'V = \\tfrac{5\\,(3+\\sqrt{5})}{12}\\,a^3', 'r_U = \\tfrac{a}{4}\\sqrt{10+2\\sqrt{5}}', 'r_K = \\tfrac{1+\\sqrt{5}}{4}\\,a', 'r_I = \\tfrac{\\sqrt{3}\\,(3+\\sqrt{5})}{12}\\,a'],
         };
+        /* Archimedean solids: A comes from ngonAreaTex (all faces regular), the rest
+           by hand. Both snub bodies need the root of a cubic — the snub cube has a
+           closed form in the tribonacci constant t, the snub dodecahedron has none. */
+        const EXACT_ARCH = {
+            tetraederstumpf: ['V = \\tfrac{23}{12}\\sqrt{2}\\,a^3', 'r_U = \\tfrac{\\sqrt{22}}{4}\\,a', 'r_K = \\tfrac{3\\sqrt{2}}{4}\\,a'],
+            kuboktaeder: ['V = \\tfrac{5}{3}\\sqrt{2}\\,a^3', 'r_U = a', 'r_K = \\tfrac{\\sqrt{3}}{2}\\,a'],
+            hexaederstumpf: ['V = \\tfrac{7}{3}\\left(3+2\\sqrt{2}\\right)a^3', 'r_U = \\tfrac{a}{2}\\sqrt{7+4\\sqrt{2}}', 'r_K = \\tfrac{2+\\sqrt{2}}{2}\\,a'],
+            oktaederstumpf: ['V = 8\\sqrt{2}\\,a^3', 'r_U = \\tfrac{\\sqrt{10}}{2}\\,a', 'r_K = \\tfrac{3}{2}\\,a'],
+            rhombenkuboktaeder: ['V = \\tfrac{2}{3}\\left(6+5\\sqrt{2}\\right)a^3', 'r_U = \\tfrac{a}{2}\\sqrt{5+2\\sqrt{2}}', 'r_K = \\tfrac{a}{2}\\sqrt{4+2\\sqrt{2}}'],
+            kuboktaederstumpf: ['V = 2\\left(11+7\\sqrt{2}\\right)a^3', 'r_U = \\tfrac{a}{2}\\sqrt{13+6\\sqrt{2}}', 'r_K = \\tfrac{a}{2}\\sqrt{12+6\\sqrt{2}}'],
+            abgeschraegtes_hexaeder: ['V = \\tfrac{3\\sqrt{t-1}+4\\sqrt{t+1}}{3\\sqrt{2-t}}\\,a^3', 'r_U = a\\sqrt{\\tfrac{3-t}{4\\,(2-t)}}', 'r_K = \\tfrac{a}{2\\sqrt{2-t}}'],
+            ikosidodekaeder: ['V = \\tfrac{45+17\\sqrt{5}}{6}\\,a^3', 'r_U = \\tfrac{1+\\sqrt{5}}{2}\\,a', 'r_K = \\tfrac{a}{2}\\sqrt{5+2\\sqrt{5}}'],
+            dodekaederstumpf: ['V = \\tfrac{5}{12}\\left(99+47\\sqrt{5}\\right)a^3', 'r_U = \\tfrac{a}{4}\\sqrt{74+30\\sqrt{5}}', 'r_K = \\tfrac{5+3\\sqrt{5}}{4}\\,a'],
+            ikosaederstumpf: ['V = \\tfrac{125+43\\sqrt{5}}{4}\\,a^3', 'r_U = \\tfrac{a}{4}\\sqrt{58+18\\sqrt{5}}', 'r_K = \\tfrac{3\\,(1+\\sqrt{5})}{4}\\,a'],
+            rhombenikosidodekaeder: ['V = \\tfrac{60+29\\sqrt{5}}{3}\\,a^3', 'r_U = \\tfrac{a}{2}\\sqrt{11+4\\sqrt{5}}', 'r_K = \\tfrac{a}{2}\\sqrt{10+4\\sqrt{5}}'],
+            ikosidodekaederstumpf: ['V = \\left(95+50\\sqrt{5}\\right)a^3', 'r_U = \\tfrac{a}{2}\\sqrt{31+12\\sqrt{5}}', 'r_K = \\tfrac{a}{2}\\sqrt{30+12\\sqrt{5}}'],
+            abgeschraegtes_dodekaeder: [],
+        };
+        const ARCH_NOTE = {
+            abgeschraegtes_hexaeder: 't ist die Tribonacci-Konstante: die reelle Lösung von t³ = t² + t + 1, also t ≈ 1,839287.',
+            abgeschraegtes_dodekaeder: 'Volumen und Radien sind Nullstellen eines kubischen Polynoms (ξ³ − 2ξ = φ) und haben keine Wurzelform aus ganzen Zahlen — die Werte oben sind exakt berechnet, nur nicht elementar schreibbar.',
+        };
+        /* Catalan solids: faces are congruent but not regular, so A needs its own
+           formula. a = längste Kante (wie im Lab). Alle Einträge sind gegen die
+           berechneten Werte geprüft; wo keine kurze Wurzelform bekannt ist, bleibt
+           es bei den allgemeinen Formeln A = F·A_Fläche und V = ⅓·r_I·A. */
+        const EXACT_CAT = {
+            triakistetraeder: ['A = \\tfrac{3}{5}\\sqrt{11}\\,a^2', 'V = \\tfrac{3}{20}\\sqrt{2}\\,a^3', 'r_I = \\tfrac{3}{44}\\sqrt{22}\\,a', 'b = \\tfrac{3}{5}\\,a'],
+            rhombendodekaeder: ['A = 8\\sqrt{2}\\,a^2', 'V = \\tfrac{16}{9}\\sqrt{3}\\,a^3', 'r_I = \\tfrac{\\sqrt{6}}{3}\\,a'],
+            triakisoktaeder: ['A = 6\\sqrt{23-16\\sqrt{2}}\\,a^2', 'V = \\left(2-\\sqrt{2}\\right)a^3', 'r_I = a\\sqrt{\\tfrac{5+2\\sqrt{2}}{34}}', 'b = \\left(2-\\sqrt{2}\\right)a'],
+            tetrakishexaeder: ['A = 3\\sqrt{5}\\,a^2', 'V = \\tfrac{3}{2}\\,a^3', 'r_I = \\tfrac{3}{10}\\sqrt{5}\\,a', 'b = \\tfrac{3}{4}\\,a'],
+            deltoidalikositetraeder: ['A = \\tfrac{6}{7}\\sqrt{244+152\\sqrt{2}}\\,a^2', 'V = \\tfrac{1}{7}\\sqrt{1168+824\\sqrt{2}}\\,a^3', 'r_I = a\\sqrt{\\tfrac{22+15\\sqrt{2}}{34}}'],
+            rhombentriakontaeder: ['A = 12\\sqrt{5}\\,a^2', 'V = 4\\sqrt{5+2\\sqrt{5}}\\,a^3', 'r_I = a\\sqrt{\\tfrac{5+2\\sqrt{5}}{5}}'],
+            triakisikosaeder: ['A = \\tfrac{15}{11}\\sqrt{109-30\\sqrt{5}}\\,a^2', 'V = \\tfrac{5}{44}\\left(5+7\\sqrt{5}\\right)a^3', 'b = \\tfrac{15-\\sqrt{5}}{22}\\,a'],
+            pentakisdodekaeder: ['A = \\tfrac{15}{19}\\sqrt{413+162\\sqrt{5}}\\,a^2', 'V = \\left(\\tfrac{15+7\\sqrt{5}}{4} + \\tfrac{1}{19}\\sqrt{545+240\\sqrt{5}}\\right)a^3', 'b = \\tfrac{3\\,(9+\\sqrt{5})}{38}\\,a'],
+            hexakisoktaeder: ['A = \\tfrac{6}{7}\\sqrt{783+436\\sqrt{2}}\\,b^2', 'V = \\tfrac{1}{7}\\sqrt{3\\left(2194+1513\\sqrt{2}\\right)}\\,b^3', 'b = \\tfrac{10-\\sqrt{2}}{14}\\,a'],
+        };
+        const FACE_TEX = { 3: 'Dreieck', 4: 'Viereck', 5: 'Fünfeck', 6: 'Sechseck', 8: 'Achteck', 10: 'Zehneck', 12: 'Zwölfeck' };
+        /* Exact area of the regular n-gon with edge a, as (num/den)·surd. */
+        const NGON_AREA = {
+            3: [1, 4, '\\sqrt{3}'], 4: [1, 1, ''], 5: [1, 4, '\\sqrt{25+10\\sqrt{5}}'],
+            6: [3, 2, '\\sqrt{3}'], 8: [2, 1, '\\left(1+\\sqrt{2}\\right)'],
+            10: [5, 2, '\\sqrt{5+2\\sqrt{5}}'], 12: [3, 1, '\\left(2+\\sqrt{3}\\right)'],
+        };
+        const gcdInt = (a, b) => b ? gcdInt(b, a % b) : a;
+        /** A = Σ (count · area of that regular face) — exact, terms with the same surd folded together. */
+        function ngonAreaTex(faceTypes) {
+            const terms = new Map();                       // surd → [numerator, denominator]
+            for (const n of Object.keys(faceTypes)) {
+                const e = NGON_AREA[n];
+                if (!e) return null;                       // an irregular face has no generic formula
+                const [p, q] = [e[0] * faceTypes[n], e[1]];
+                const [cp, cq] = terms.get(e[2]) || [0, 1];
+                const num = cp * q + p * cq, den = cq * q, g = gcdInt(num, den) || 1;
+                terms.set(e[2], [num / g, den / g]);
+            }
+            const parts = [...terms.entries()].map(([surd, [p, q]]) => {
+                const coeff = q === 1 ? (p === 1 && surd ? '' : String(p)) : `\\tfrac{${p}}{${q}}`;
+                return coeff + surd;
+            });
+            return parts.length === 1 ? `A = ${parts[0]}\\,a^2`
+                : `A = \\left(${parts.join(' + ')}\\right)a^2`;
+        }
         const PRISM_TEX = {
             prisma: ['G = \\tfrac{n\\,a^2}{4\\tan(\\pi/n)}', 'A = 2G + n\\,a\\,h', 'V = G\\,h'],
             antiprisma: ['G = \\tfrac{n\\,a^2}{4\\tan(\\pi/n)}', 'A = 2G + 2n\\cdot\\tfrac{a\\,h_\\triangle}{2}', 'V = \\tfrac{h}{3}\\left(2G + \\tfrac{n a^2}{4 \\sin(\\pi/n)\\tan(\\pi/2n)}\\right)', 'h_{gleichk.} = a\\sqrt{1-\\tfrac{1}{4\\cos^2(\\pi/2n)}}'],
@@ -1112,23 +1279,68 @@
         // ------------------------------------------------------------------
         // Numbers, formulas, HUD
         // ------------------------------------------------------------------
-        function refreshNumbers() {
-            const tab = S.tab;
-            const statsId = 'stats-' + tab, formId = 'k-form', legendId = 'legend-' + tab;
-            const legend = document.getElementById(legendId);
-            const form = document.getElementById(formId);
-            form.innerHTML = '';
-            let texBuf = [];
-            const addTex = t => texBuf.push(t);
-            const flushTex = () => {
-                if (!texBuf.length) return;
+        /**
+         * Fills the "Formeln" card for one polyhedron.
+         * Order of preference: hand-written closed form → surface built from the
+         * face types → the general volume formulas that hold for every convex body.
+         */
+        function exactFormulas(tab, key, m, add, note) {
+            if (tab === 'prismen') { (PRISM_TEX[key] || []).forEach(add); return; }
+            if (EXACT[key]) { EXACT[key].forEach(add); return; }        // the five Platonic ones
+            const hasInsphere = m.rI.length === 1;                      // one distance to all faces
+            const pyramids = () => {
+                add(hasInsphere ? 'V = \\tfrac{1}{3}\\,r_I\\,A' : 'V = \\tfrac{1}{3}\\sum_i d_i\\,A_i');
+                note(hasInsphere
+                    ? 'Jede Fläche berührt die Inkugel: der Körper zerfällt in F Pyramiden der Höhe r_I über den Flächen.'
+                    : 'Ohne Inkugel bleibt die allgemeine Zerlegung: d_i ist der Abstand des Mittelpunkts zur i-ten Fläche, A_i deren Flächeninhalt.');
+            };
+            if (tab === 'catalanisch') {
+                const known = EXACT_CAT[key] || [];
+                known.forEach(add);
+                if (!known.some(s => s.startsWith('A ='))) add('A = ' + m.F + '\\,A_{\\text{Fläche}}');
+                if (!known.some(s => s.startsWith('V ='))) pyramids();
+                note('a ist die längste Kante, b die kurze; alle F Flächen sind kongruent.');
+                return;
+            }
+            const area = ngonAreaTex(m.faceTypes);                      // all faces regular
+            if (area) add(area);
+            const closed = EXACT_ARCH[key];
+            if (closed && closed.length) closed.forEach(add); else pyramids();
+            if (ARCH_NOTE[key]) note(ARCH_NOTE[key]);
+            if (area && Object.keys(m.faceTypes).length > 1) {
+                note('Die Oberfläche ist die Summe der regelmäßigen Flächen: '
+                    + Object.keys(m.faceTypes).map(n => `${m.faceTypes[n]} × ${FACE_TEX[n] || n + '-Eck'}`).join(', ') + '.');
+            }
+        }
+
+        /** One of the two stacked cards: collects TeX lines, renders them aligned on '='. */
+        function boxWriter(id) {
+            const el = document.getElementById(id);
+            el.innerHTML = '';
+            let buf = [], used = false;
+            const flush = () => {
+                if (!buf.length) return;
                 // align on the first '=' of each line; lines without one are left-aligned
-                const body = texBuf.map(t => { const i = t.indexOf('='); return i > 0 ? t.slice(0, i) + '&=' + t.slice(i + 1) : '&' + t; }).join(' \\\\ ');
+                const body = buf.map(t => { const i = t.indexOf('='); return i > 0 ? t.slice(0, i) + '&=' + t.slice(i + 1) : '&' + t; }).join(' \\\\ ');
                 const row = document.createElement('div'); row.className = 'k-row';
                 tex(row, '\\begin{aligned}' + body + '\\end{aligned}');
-                form.appendChild(row); texBuf = [];
+                el.appendChild(row); buf = [];
             };
-            const note = txt => { flushTex(); const d = document.createElement('div'); d.className = 'k-note'; d.textContent = txt; form.appendChild(d); };
+            return {
+                add: t => { used = true; buf.push(t); },
+                note: txt => { used = true; flush(); const d = document.createElement('div'); d.className = 'k-note'; d.textContent = txt; el.appendChild(d); },
+                /** An empty card would be a headline over nothing — hide it instead. */
+                done: () => { flush(); formCard(id).style.display = used ? '' : 'none'; },
+            };
+        }
+        function refreshNumbers() {
+            const tab = S.tab;
+            const statsId = 'stats-' + tab, legendId = 'legend-' + tab;
+            const legend = document.getElementById(legendId);
+            const vals = boxWriter('k-form'), forms = boxWriter('k-exact');
+            const addTex = vals.add, note = vals.note;              // "Werte": numbers of this body
+            const addForm = forms.add, formNote = forms.note;       // "Formeln": the exact ones behind them
+            const flushTex = () => { vals.done(); forms.done(); };
 
             if (current && current.kind === 'generic') {
                 const { res, name } = current;
@@ -1141,8 +1353,10 @@
                 }));
                 statsGrid(statsId, stats);
                 legend.innerHTML = '';
-                (res.tex || []).forEach(t => addTex(t));
-                if (res.note) note(res.note);
+                // 2D figures and curves carry their formulas with them; the numbers
+                // stand in the sidebar, so the "Werte" card stays empty and hidden.
+                (res.tex || []).forEach(t => addForm(t));
+                if (res.note) formNote(res.note);
                 flushTex();
                 document.getElementById('k-hud-name').textContent = name;
                 document.getElementById('k-hud-sub').textContent = '';
@@ -1172,10 +1386,12 @@
                 legend.innerHTML = Object.keys(m.faceTypes).map(n =>
                     `<span style="--c:${faceColor(+n)}">${m.faceTypes[n]} × ${FACE_NAME[n] || n + '-Eck'}</span>`).join('');
 
-                // formulas: exact where known, numeric coefficients always
+                // "Formeln": exact for every body — closed forms where they exist,
+                // the surface always built from the face types, and a general
+                // volume formula where no short root expression is known.
                 const key = tab === 'prismen' ? S.prism.kind : S.solid[tab];
-                if (EXACT[key]) { EXACT[key].forEach(s => addTex(s)); note('exakt — darunter die numerischen Koeffizienten:'); }
-                if (PRISM_TEX[key]) PRISM_TEX[key].forEach(s => addTex(s));
+                exactFormulas(tab, key, m, addForm, formNote);
+                // "Werte": the numeric coefficients of exactly this body
                 addTex('A = ' + texNum(m.area) + '\\,a^2', fmt(m.area * a * a) + U2());
                 addTex('V = ' + texNum(m.volume) + '\\,a^3', fmt(m.volume * a ** 3) + U3());
                 if (tab !== 'prismen') {
@@ -1212,8 +1428,8 @@
                 extra.forEach(([l, v]) => stats.push({ label: l, value: fmt(v) + U(), color: COL.orange }));
                 statsGrid(statsId, stats);
                 legend.innerHTML = '';
-                ROUND_TEX[k].forEach(s => addTex(s));
-                if (k === 'ellipsoid') note('Die Oberfläche des allgemeinen Ellipsoids hat keine elementare Formel; Näherung nach Knud Thomsen (Fehler < 1,1 %).');
+                ROUND_TEX[k].forEach(s => addForm(s));
+                if (k === 'ellipsoid') formNote('Die Oberfläche des allgemeinen Ellipsoids hat keine elementare Formel; Näherung nach Knud Thomsen (Fehler < 1,1 %).');
                 const nm = { kugel: 'Kugel', halbkugel: 'Halbkugel', zylinder: 'Zylinder', kegel: 'Kegel', kegelstumpf: 'Kegelstumpf', torus: 'Torus', ellipsoid: 'Ellipsoid' }[k];
                 flushTex();
                 document.getElementById('k-hud-name').textContent = nm;
