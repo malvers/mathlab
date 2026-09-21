@@ -180,6 +180,20 @@ window.svpPlanParts.push(function (P) {
         return !/test/i.test(pfad) && !/^\/index\.html$/i.test(pfad);
     }
 
+    /* Die Reihenfolge der Pillen in einer Zeile: erst die Foliensaetze und
+       Dateien, dann die Labs, dann alles, was nur ein Link ist (Doc,
+       21.09.2026: "bitte alle immer ordnen PPT labs links"). Das betrifft nur
+       die ANZEIGE - gespeichert bleibt die Zeile so, wie Doc sie eingetragen
+       hat (dataset.src wird in renderMaterial vor dem Sortieren gesetzt).
+       Sortiert wird stabil: innerhalb einer Gruppe bleibt die eingetragene
+       Reihenfolge stehen. Alles mit Programmsymbol (ppt/doc/xls/pdf) zaehlt
+       zur ersten Gruppe - es ist eine Datei, die aufgemacht wird, kein Link. */
+    const MAT_RANG = { ppt: 0, doc: 0, xls: 0, pdf: 0, lab: 1 };
+    function matRang(en) {
+        const rang = MAT_RANG[matKind(en.url || '', en.label || '')];
+        return rang == null ? 2 : rang;
+    }
+
 
     // App icons instead of emoji: emoji look different on every device and
     // grey out inside the pill. These are the macOS app icons the kids see on
@@ -614,6 +628,7 @@ window.svpPlanParts.push(function (P) {
         el.textContent = '';
         const entries = P.parseMat(text);
         if (!entries.length) { el.textContent = text; return; }
+        entries.sort(function (a, b) { return matRang(a) - matRang(b); });
         entries.forEach(function (en) {
             if (skip && skip(en)) return;   /* drawn elsewhere (Aufgaben-Pille) */
             const label = en.label;
