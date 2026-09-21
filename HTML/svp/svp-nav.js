@@ -1113,15 +1113,16 @@
     band.appendChild(nav);
     document.body.insertBefore(band, document.body.firstChild);
 
-    /* Neuigkeiten-Laufband zwischen Navileiste und Seitenkopf (Doc,
-       20.09.2026: "mach dazwischen eine kleine Zeile so wie die Suchzeile und
-       bring da einen News ticker"). Die Zeile wird hier nur aufgehaengt -
+    /* Neuigkeiten-Laufband ganz oben, ueber dem blauen Band (Doc, 21.09.2026:
+       "mach den Ticker ganz oben hin"; vorher stand die Zeile zwischen
+       Navileiste und Seitenkopf). Die Zeile wird hier nur aufgehaengt -
        gefuellt wird sie von svp-news.js, damit die Navileiste nicht auch noch
-       Nachrichten holen und Feeds lesen muss. */
+       Nachrichten holen und Feeds lesen muss. Den oberen Seitenrand holt sich
+       jetzt das Laufband statt des Bandes, siehe svp-news.css. */
     const news = document.createElement('div');
     news.className = 'nav-news';
     news.hidden = true;
-    band.insertAdjacentElement('afterend', news);
+    document.body.insertBefore(news, band);
 
     const newsScript = document.createElement('script');
     newsScript.src = base + 'svp-news.js';
