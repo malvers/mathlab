@@ -1127,21 +1127,29 @@
        damit die Navileiste nicht auch noch Nachrichten holen und Feeds lesen
        muss. Klebend ist die Huelle, nicht die Zeile selbst: die Zeile ist
        1200 px breit und mittig, an ihr zoege der Seiteninhalt links und rechts
-       vorbei. */
-    const dock = document.createElement('div');
-    dock.className = 'nav-news-dock';
-    const news = document.createElement('div');
-    news.className = 'nav-news';
-    news.hidden = true;
-    dock.appendChild(news);
-    const planHead = document.querySelector('.plan-sticky');
-    if (planHead) planHead.insertBefore(dock, planHead.firstChild);
-    else band.insertAdjacentElement('afterend', dock);
+       vorbei.
 
-    const newsScript = document.createElement('script');
-    newsScript.src = base + 'svp-news.js';
-    newsScript.dataset.base = base;
-    document.head.appendChild(newsScript);
+       Nicht auf dem Stundenplan (Doc, 21.09.2026: "im SP den ticker nicht
+       zeigen"): das Wochenraster will die Hoehe, und Neuigkeiten gehoeren zur
+       Unterrichtsstunde, nicht zum Raster. Die Zeile wird dort gar nicht erst
+       gebaut und svp-news.js nicht geladen - so faellt auch der Megafon-Knopf
+       in der Navileiste weg, statt tot dazustehen. */
+    if (!/\/stundenplan\.html$/.test(location.pathname)) {
+        const dock = document.createElement('div');
+        dock.className = 'nav-news-dock';
+        const news = document.createElement('div');
+        news.className = 'nav-news';
+        news.hidden = true;
+        dock.appendChild(news);
+        const planHead = document.querySelector('.plan-sticky');
+        if (planHead) planHead.insertBefore(dock, planHead.firstChild);
+        else band.insertAdjacentElement('afterend', dock);
+
+        const newsScript = document.createElement('script');
+        newsScript.src = base + 'svp-news.js';
+        newsScript.dataset.base = base;
+        document.head.appendChild(newsScript);
+    }
 })();
 
 
