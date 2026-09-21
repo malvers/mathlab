@@ -36,6 +36,7 @@
     '  color:#eaf1ff;font:500 14px Raleway,system-ui,sans-serif;text-align:left;cursor:pointer}',
     '#ov-menu button:hover:not(:disabled){background:rgba(245,194,66,.22)}',
     '#ov-menu button:disabled{opacity:.35;cursor:default}',
+    '#ov-menu hr{border:0;border-top:1px solid rgba(255,255,255,.14);margin:5px 8px}',
     '@media print{#nav-edit,#nav-live{display:none}}'
   ].join('\n');
   document.head.appendChild(css);
@@ -306,17 +307,19 @@
     });
   }
 
-  // the whole page comes back from the file: the slide order, the page numbers and Solita's parts all moved
-  function moveSlide(from, to) {
-    if (from === to) return;
-    slideOp({ index: from, op: 'move', to: to }).then(function (j) {
+  // the whole page comes back from the file: order, page numbers and Solita's parts all moved with it
+  function structure(body, note, where) {
+    slideOp(body).then(function (j) {
       if (!j) return;
       try {
-        sessionStorage.setItem('deck-edit-resume', 'Folie verschoben' + (j.narration ? ' – Solitas Aufnahmen sind mitgewandert' : ''));
-        sessionStorage.setItem('deck-edit-overview', String(to));
+        sessionStorage.setItem('deck-edit-resume', note + (j.narration ? ' – Solitas Aufnahmen sind mitgewandert' : ''));
+        sessionStorage.setItem('deck-edit-overview', String(typeof j.at === 'number' ? j.at : where));
       } catch (e) { }
       location.reload();
     });
+  }
+  function moveSlide(from, to) {
+    if (from !== to) structure({ index: from, op: 'move', to: to }, 'Folie verschoben', to);
   }
 
   // right-click menu on a tile - the deck's own look, Esc or a click beside it closes
@@ -327,6 +330,10 @@
     const last = slides.length - 1;
     const items = [
       [hiddenSlide(i) ? 'Einblenden' : 'Ausblenden', function () { hideSlide(i, !hiddenSlide(i)); }],
+      ['Folie einfügen', function () { structure({ index: i, op: 'insert' }, 'Folie eingefügt – Text anklicken', i + 1); }],
+      ['Folie kopieren', function () { structure({ index: i, op: 'dup' }, 'Folie kopiert', i + 1); }],
+      ['Folie löschen', last > 0 ? function () { structure({ index: i, op: 'del' }, 'Folie gelöscht – ' + K + 'Z holt sie zurück', Math.max(0, i - 1)); } : null],
+      null,
       ['Eine nach vorn', i > 0 ? function () { moveSlide(i, i - 1); } : null],
       ['Eine nach hinten', i < last ? function () { moveSlide(i, i + 1); } : null],
       ['An den Anfang', i > 0 ? function () { moveSlide(i, 0); } : null],
@@ -335,6 +342,7 @@
     menu = document.createElement('div');
     menu.id = 'ov-menu';
     items.forEach(function (it) {
+      if (!it) { menu.appendChild(document.createElement('hr')); return; }
       const b = document.createElement('button');
       b.type = 'button';
       b.textContent = it[0];

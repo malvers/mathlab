@@ -5,7 +5,7 @@ Only the local dev server (serve.py, 127.0.0.1:8765) talks to this module; the l
     GET  /__deck/source?deck=<name>.html  -> {selector, slides: [[source or null, ...], ...]}
     POST /__deck/save  {deck, slide, n, old, new}  -> {html, src}   one element rewritten in the file
     POST /__deck/line  {deck, slide, n, old, op}  -> {own, g}   Cmd-D copies a line below itself, Cmd-Backspace removes it
-    POST /__deck/slide {deck, index, op, to}  -> {order|hidden}   drag or right-click in the overview: move, hide, show
+    POST /__deck/slide {deck, index, op, to}  -> {order|hidden|at}   the overview: move, hide, show, insert, dup, del
     POST /__deck/publish  {deck}  -> {commit, files}   the deck (and pictures it needs) onto origin/main
     POST /__deck/undo  {deck, redo}  -> {what, mtime, pending}   one step back or forward (deck_undo.py)
     *    /__deck/image/...   pictures on slides - handled by deck_image.py
@@ -283,7 +283,8 @@ SLIDE_CLIP = re.compile(r"^s(\d{2})-(\d{2})\.mp3$")
 
 
 def slide_op(deck, index, op, to=None):
-    """Move a slide inside the deck, or hide / show it (the overview in edit mode). Returns (status, reply).
+    """Move a slide inside the deck, hide / show it, or put one in and take one out (the overview in edit
+    mode, Doc 21.09.2026). Returns (status, reply).
 
     Moving rewrites the order of the <section class="slide"> blocks and takes Solita with it: her parts, her
     hold list and her clips are keyed by slide number, so they are renumbered in the same step. Hiding only
@@ -311,6 +312,23 @@ def slide_op(deck, index, op, to=None):
             page = page[:m.start()] + tag + page[m.end():]
             _write(deck, page, gen, what="Folie ausgeblendet" if op == "hide" else "Folie eingeblendet")
             return 200, {"hidden": op == "hide", "mtime": _mtime(deck), "pending": pending(deck)}
+        if op in ("insert", "dup", "del"):
+            blocks = [page[a:b] for a, b in bounds]
+            if op == "del" and n == 1:
+                return 422, {"error": "Die letzte Folie bleibt – sonst wäre das Deck leer."}
+            if op == "del":
+                del blocks[index]
+                mapping = {k: (None if k == index else k - (k > index)) for k in range(n)}
+                at = min(index, n - 2)                # where the deck stands afterwards
+            else:
+                blocks.insert(index + 1, _new_slide(blocks[index]) if op == "insert" else _copy_slide(blocks[index]))
+                mapping = {k: k + (k > index) for k in range(n)}
+                at = index + 1
+            page = page[:bounds[0][0]] + "".join(blocks) + page[bounds[-1][1]:]
+            page, spoken = _reorder(page, deck, mapping)
+            what = {"insert": "Folie eingefügt", "dup": "Folie kopiert", "del": "Folie gelöscht"}[op]
+            _write(deck, page, gen, what=what, stuck=spoken)
+            return 200, {"at": at, "narration": spoken, "mtime": _mtime(deck), "pending": pending(deck)}
         if op != "move":
             return 400, {"error": "unknown op"}
         if to is None or not (0 <= int(to) < n):
@@ -327,6 +345,27 @@ def slide_op(deck, index, op, to=None):
     return 200, {"order": order, "narration": spoken, "mtime": _mtime(deck), "pending": pending(deck)}
 
 
+FOOT = re.compile(r'<p class="foot">.*?</p>', re.S)
+PAGENO = '<p class="pageno"></p>'
+
+
+def _new_slide(near):
+    """An empty content slide, ready to be typed over - the footer line comes from its neighbour, so the new
+    slide wears the same one as the rest of the deck."""
+    foot = FOOT.search(near)
+    tail = (foot.group(0) if foot else '<p class="foot"></p>') + PAGENO
+    end = "\n" if near.endswith("\n") else ""
+    return ('<section class="slide content"><h3>Neue Folie</h3><div class="rules"></div>'
+            '<div class="body"><p class="line l0 step" data-g="0">Erster Punkt</p></div>'
+            + tail + "</section>" + end)
+
+
+def _copy_slide(block):
+    """The same slide once more - it keeps its clicks, only the marks the editor sets are dropped."""
+    return re.sub(r'\sclass="([^"]*)\bskip\b([^"]*)"', lambda m: ' class="%s"' % " ".join(
+        (m.group(1) + m.group(2)).split()), block, count=1)
+
+
 def _reorder(page, deck, mapping):
     """The slides changed places: Solita's parts, her hold list and her clips (audio/<deck>/sNN-KK.mp3 with
     texts.json) follow, so no clip is spoken on the wrong slide. Returns (page, whether anything spoken moved)."""
@@ -336,11 +375,12 @@ def _reorder(page, deck, mapping):
     data = json.loads(m.group(2).replace("<\\/", "</"))
     parts = data.get("slides") or {}
     spoken = False
+    where = lambda k: mapping[k] if k in mapping else k       # None: that slide is gone
     if parts:
-        data["slides"] = {str(mapping.get(int(k), int(k))): v for k, v in parts.items()}
-        spoken = any(mapping.get(int(k), int(k)) != int(k) for k in parts)
+        data["slides"] = {str(where(int(k))): v for k, v in parts.items() if where(int(k)) is not None}
+        spoken = any(where(int(k)) != int(k) for k in parts)
     if isinstance(data.get("hold"), list):
-        data["hold"] = sorted(mapping.get(h, h) for h in data["hold"])
+        data["hold"] = sorted(where(h) for h in data["hold"] if where(h) is not None)
     text = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     page = page[:m.start(2)] + text + page[m.end(2):]
     folder = os.path.join(DECKS, "audio", data.get("deck") or deck[:-5])
@@ -351,20 +391,23 @@ def _reorder(page, deck, mapping):
             if not c:
                 continue
             old = int(c.group(1))
-            new = mapping.get(old, old)
+            new = where(old)
             if new != old:
-                renames.append((fn, "s%02d-%02d.mp3" % (new, int(c.group(2)))))
+                renames.append((fn, None if new is None else "s%02d-%02d.mp3" % (new, int(c.group(2)))))
         if renames:                                   # two passes: a straight rename would overwrite a clip
             spoken = True
             for fn, _ in renames:
                 os.replace(os.path.join(folder, fn), os.path.join(folder, fn + ".moving"))
             for fn, dst in renames:
-                os.replace(os.path.join(folder, fn + ".moving"), os.path.join(folder, dst))
+                if dst is None:
+                    os.remove(os.path.join(folder, fn + ".moving"))   # the deleted slide's clip - git still has it
+                else:
+                    os.replace(os.path.join(folder, fn + ".moving"), os.path.join(folder, dst))
             texts_path = os.path.join(folder, "texts.json")
             if os.path.exists(texts_path):
                 texts = json.load(open(texts_path, encoding="utf-8"))
                 to = dict(renames)
-                texts = {to.get(k, k): v for k, v in texts.items()}
+                texts = {to.get(k, k): v for k, v in texts.items() if to.get(k, k) is not None}
                 with open(texts_path, "w", encoding="utf-8") as f:
                     f.write(json.dumps(texts, ensure_ascii=False, indent=1))
     return page, spoken
