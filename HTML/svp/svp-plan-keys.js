@@ -85,14 +85,23 @@ window.svpPlanParts.push(function (P) {
                 el.classList.remove('kw-now', 'kw-now-sub');
                 if (/^(laufende Kalenderwoche|n\u00e4chster Termin)/.test(el.title || '')) el.removeAttribute('title');
             }
-            const hit = P.rendered.find(r => weekOf(r) === now);
-            const tr = hit && hit.dateTd && hit.dateTd.closest('tr');
-            if (!tr) return false;
-            tr.classList.add('kw-now');
-            tr.title = 'laufende Kalenderwoche';
-            const sub = tr.nextElementSibling;
-            if (sub && sub.classList.contains('detail-row')) sub.classList.add('kw-now-sub');
-            return true;
+            /* ALLE Zeilen der Woche, nicht nur die erste (Doc, 21.09.2026:
+               "bei doppelt immer beide gelb"): wo ein Fach zwei Doppelstunden
+               in der Woche hat, stehen zwei Planzeilen mit derselben KW
+               untereinander - vorher leuchtete davon nur die obere. Fuer die
+               Termine der Gruppen-Ansicht gilt dasselbe schon seit dem
+               20.09.2026 (markNextTermin in svp-plan-untis.js). */
+            let getroffen = false;
+            for (const hit of P.rendered.filter(r => weekOf(r) === now)) {
+                const tr = hit.dateTd && hit.dateTd.closest('tr');
+                if (!tr) continue;
+                tr.classList.add('kw-now');
+                tr.title = 'laufende Kalenderwoche';
+                const sub = tr.nextElementSibling;
+                if (sub && sub.classList.contains('detail-row')) sub.classList.add('kw-now-sub');
+                getroffen = true;
+            }
+            return getroffen;
         };
         P.runNowMark = go;
         if (!go()) setTimeout(() => { go(); P.markPastWeeks(); }, 400);
