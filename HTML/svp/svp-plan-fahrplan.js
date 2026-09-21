@@ -182,7 +182,7 @@ window.svpPlanParts.push(function (P) {
            Lab - haengt darunter. Die Liste steht bei den Material-Funktionen
            (svp-plan-material.js), damit die Zeile im Plan und dieses Blatt
            dieselbe nehmen. */
-        P.festePillen(mat);
+        P.festePillen(mat, ref);
         mat.hidden = !mat.childNodes.length;
         b.hidden = false;
         feld.focus();

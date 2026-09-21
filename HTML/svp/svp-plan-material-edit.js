@@ -23,7 +23,7 @@ window.svpPlanParts.push(function (P) {
            gehoeren - Formelsammlung, Lab. Danach, weil renderMaterial seinen
            Kasten jedes Mal leert. Sie zaehlen nicht in den Reiter: der Zaehler
            unten rechnet mit den Eintraegen der Woche, nicht mit diesen. */
-        P.festePillen(ref.matBlock);
+        P.festePillen(ref.matBlock, ref);
         P.renderMaterial(ref.vidBlock, text, ref, en => !P.isVideoEntry(en));
         ref.matTd.textContent = '';
         /* Doc, 20.09.2026: "weg bitte ... wir brauchen Platz" - die Aufgaben-Pille

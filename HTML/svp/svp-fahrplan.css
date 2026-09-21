@@ -52,8 +52,27 @@
     overflow: auto;
     box-sizing: border-box;
     margin: 0;
-    position: relative;             /* das Bild der Woche haengt in der Ecke */
-    padding: 32px 186px 36px 40px;  /* rechts Platz fuer das Bild */
+    position: relative;
+    /* Zwei echte Spalten statt zweier freischwebender Kaesten (Doc, 21.09.2026:
+       "mach die generell alle schon so gross, dass es nicht uebermalt"): Bild und
+       Materialspalte hingen absolut in den Ecken, das Blatt wusste nichts von
+       ihnen und war bei kurzem Text niedriger als die beiden zusammen - die
+       Pillen liefen ueber den Gedanken der Woche. Als Rasterzellen zaehlen sie
+       mit: das Blatt ist von selbst so hoch wie die hoehere der beiden Spalten,
+       bei zwei Pillen wie bei neun. Darum steht hier auch kein 186-px-Polster
+       mehr - die Spalte selbst haelt den Platz frei. */
+    display: grid;
+    /* Das Blatt ist ein Flex-Kind der Huelle und wuerde sonst nicht unter seine
+       Mindestbreite schrumpfen: auf dem Telefon schob das Raster (Text +
+       154-px-Spalte) es ueber den rechten Bildschirmrand hinaus. */
+    min-width: 0;
+    grid-template-columns: minmax(0, 1fr) 154px;
+    grid-template-rows: auto 1fr auto;
+    column-gap: 32px;
+    padding: 32px 32px 36px 40px;
+    /* So hoch wie die rechte Spalte mindestens ist (30 + Bild 179 + 36): ein
+       Blatt mit einer einzigen Zeile sieht damit aus wie jedes andere. */
+    min-height: 245px;
     border: 0;
     border-radius: 14px;   /* Doc, 20.09.2026: "die Ecken etwas rounder" */
     /* Papier, in JEDEM Schema: var(--card)/var(--ink) sind im dunklen Schema beide
@@ -67,16 +86,21 @@
 }
 /* Die feste Ueberschrift - etwas ruhiger als die Punkte darunter. */
 .fahr-title {
+    grid-column: 1;
+    grid-row: 1;
     margin: 0 0 0.5em;
     font-size: 0.86em;
     font-weight: 600;
     color: #002060;
 }
-/* Der Gedanke der Woche, oben rechts auf dem Blatt - Klick oeffnet ihn gross. */
+/* Der Gedanke der Woche, oben rechts auf dem Blatt - Klick oeffnet ihn gross.
+   Sitzt in der rechten Rasterspalte, ganz oben; das Blatt rechnet seine Hoehe
+   mit ein (siehe .fahr-sheet). */
 .fahr-gdw {
-    position: absolute;
-    top: 30px;
-    right: 32px;
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    justify-self: end;
+    align-self: start;
     padding: 0;
     border: 0.5px solid rgba(0, 32, 96, 0.3);
     border-radius: 3px;
@@ -101,13 +125,17 @@
    also muss hier nur ihre Groesse zurueckgenommen werden: das Blatt schreibt
    46 px, und die Pillen rechnen in em. */
 .fahr-mat {
-    position: absolute;
-    right: 32px;
-    bottom: 36px;
-    /* Die Spalte nimmt den Platz, den das Blatt rechts freihaelt (186 px
-       Polster minus die 32 px hier) - nicht die Bildbreite: auf 124 px
-       gezwungen ragte "Koerperberechnungen" ueber die Blattkante (Docs Bild,
-       21.09.2026). Alle Pillen sind so breit wie die Spalte. */
+    grid-column: 2;
+    grid-row: 3;
+    justify-self: end;
+    align-self: end;
+    /* Luft zum Bild darueber - vorher hielt der Abstand zur Blattkante sie
+       auseinander, jetzt stehen beide in derselben Spalte. */
+    margin-top: 16px;
+    /* 154 px, nicht die 124 px des Bildes: auf Bildbreite gezwungen ragte
+       "Koerperberechnungen" ueber die Blattkante (Docs Bild, 21.09.2026).
+       Dasselbe Mass steht oben als Breite der Rasterspalte. Alle Pillen sind
+       so breit wie die Spalte. */
     width: 154px;
     display: flex;
     flex-direction: column;
@@ -146,6 +174,10 @@
 .fahr-mat .mat-note { font-size: 12px; }
 
 .fahr-list {
+    /* Die linke Spalte, ueber die ganze Resthoehe: der Text soll das Blatt
+       fuellen, auch wenn die rechte Spalte hoeher ist. */
+    grid-column: 1;
+    grid-row: 2 / span 2;
     margin: 0;
     padding-left: 1.1em;            /* Platz fuer die Punkte */
     list-style: disc;
@@ -159,3 +191,18 @@
     margin: 0 0 0.35em;
 }
 .fahr-list > *:last-child { margin-bottom: 0; }
+
+/* Telefon: nebeneinander ist hier nichts mehr - 154 px Material neben 46-px-
+   Schrift lassen dem Text keine Zeile. Alles untereinander, Reihenfolge wie
+   auf dem Blatt: Inhalte, Gedanke, Material. */
+@media (max-width: 560px) {
+    .fahr-sheet {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto auto auto auto;
+        padding: 24px 24px 28px 28px;
+        row-gap: 16px;
+    }
+    .fahr-list { grid-column: 1; grid-row: 2; }
+    .fahr-gdw { grid-column: 1; grid-row: 3; justify-self: start; }
+    .fahr-mat { grid-column: 1; grid-row: 4; justify-self: start; margin-top: 0; }
+}

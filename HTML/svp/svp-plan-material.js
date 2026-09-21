@@ -9,51 +9,88 @@ window.svpPlanParts.push(function (P) {
         festeLinks, festePillen
     });
 
+    /* Adressen neben dem svp-Ordner: gerechnet wird gegen die Adresse DIESER
+       Datei und nicht gegen die der Seite - die Plaene liegen in Unterordnern
+       (svp/mathe/, svp/informatik/), und ein handgeschriebenes "../.." stimmt
+       dann nur zufaellig. */
+    function neben(pfad) {
+        const me = document.querySelector('script[src*="svp-plan-material.js"]');
+        const dir = me ? me.src.replace(/[^/]*$/, '') : location.href;
+        return new URL(pfad, dir).href;
+    }
+
     /* ---- Was in JEDER Stunde dieses Fachs gebraucht wird -----------------
-       Formelsammlung und Lab haengen nicht an einer Woche, sondern am Fach
-       (Doc, 21.09.2026: "bau den auch in Mathe heute ein", "noch einen Link
-       auf das Lab Cavalierie", "hier bitte auch!" - gezeigt auf die
-       Zusatzmaterial-Zeile). Die Liste steht HIER, weil zwei Stellen sie
-       brauchen: die Zeile im Plan und das Fahrplan-Blatt. */
+       Die Formelsammlung haengt nicht an einer Woche, sondern am Fach (Doc,
+       21.09.2026: "bau den auch in Mathe heute ein", "hier bitte auch!" -
+       gezeigt auf die Zusatzmaterial-Zeile). Sie ist das einzige zugelassene
+       Hilfsmittel im Abitur und gilt damit wirklich fuer jede Stunde.
+       ALLES ANDERE gehoert in die Woche, in der es drankommt, und wird dort
+       wie jedes Material eingetragen - Lab und Film standen kurz hier und sind
+       wieder raus (Doc: "doch nicht ueberall! KW 39", "das Lab auch nicht!",
+       "nur KW 39").
+       Die Liste steht HIER, weil zwei Stellen sie brauchen: die Zeile im Plan
+       und das Fahrplan-Blatt. */
     const FORMELN_URL = P.FORMELN_URL = 'https://www.iqb.hu-berlin.de/media/documents/' +
         'N_Mathematisch-naturwissenschaftliche_Formelsammlung.pdf';
     const FORMELN_ON = P.FORMELN_ON = ['mathe11', 'mathe12', 'mathe13'];
-    /* Flaechen und Volumen stehen in der Einfuehrungsphase - dort lief das Lab
-       am 21.09.2026. Kommt es in einer anderen Klasse dran, gehoert die Seite
-       in diese Zeile. */
-    const LAB_ON = ['mathe11'];
-    /* Das Lab liegt neben dem svp-Ordner (HTML/cavalieri.html). Die Adresse
-       wird aus der Adresse DIESER Datei gebildet und nicht aus der der Seite:
-       die Plaene liegen in Unterordnern (svp/mathe/, svp/informatik/), und ein
-       handgeschriebenes "../.." stimmt dann nur zufaellig. */
-    const LAB_URL = (function () {
-        const me = document.querySelector('script[src*="svp-plan-material.js"]');
-        const dir = me ? me.src.replace(/[^/]*$/, '') : location.href;
-        return new URL('../cavalieri.html', dir).href;
-    })();
 
-    /* Das Lambda des Labors als Zeichen, kein Buchstabe: dieselben zwei Striche
-       wie in resources/favicon.svg, nur in der Farbe der Pille (currentColor). */
-    /* Mass als Attribut, nicht nur in der CSS-Datei: ein Inline-SVG ohne
-       width/height hat keine eigene Groesse, und die Pille hat es damit auf
-       0 x 0 px gerechnet (gemessen, 21.09.2026). */
-    const LAMBDA = '<svg class="mat-lambda" viewBox="0 0 64 64" width="11" height="11" aria-hidden="true">' +
-        '<path d="M22 11 L46 53"/><path d="M34.5 32.5 L18 53"/></svg>';
+    /* Das Zeichen des Labors vor dem Lab-Link: das gelbe Kaestchen mit dem
+       dunkelblauen Lambda aus resources/favicon.svg - GEZEICHNET, nicht als
+       Bild geladen. serve.py tauscht /resources/favicon.svg lokal gegen das
+       rote favicon-local.svg (das Reiter-Zeichen soll lokal von live zu
+       unterscheiden sein), und genau dieses Rot kam in der Pille an (Doc,
+       21.09.2026: "GELBES Lambda bitte"). Hier geht es nicht um den Reiter,
+       sondern um das Zeichen des Labors - das ist immer gelb.
+       Es traegt .mat-ico wie jedes andere Symbol: an dieser Klasse haengt die
+       Geometrie der Pille (:has(> .mat-ico) in svp-viewer.css). Ohne sie fiel
+       die Pille niedriger und schmaler aus als die der Woche (Doc: "beide
+       Pillen unten so wie die anderen").
+       Es steht an JEDEM Link ins eigene Labor, egal in welcher Woche er haengt
+       (siehe istLab) - so ist ein Lab in der Materialzeile auf einen Blick von
+       einem Foliensatz oder einem fremden Link zu unterscheiden. */
+    function lambdaIcon() {
+        const ns = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(ns, 'svg');
+        svg.setAttribute('class', 'mat-ico mat-ico-drawn mat-lambda');
+        svg.setAttribute('viewBox', '0 0 64 64');
+        svg.setAttribute('aria-hidden', 'true');
+        const kasten = document.createElementNS(ns, 'rect');
+        kasten.setAttribute('width', '64');
+        kasten.setAttribute('height', '64');
+        kasten.setAttribute('rx', '14');
+        kasten.setAttribute('fill', 'rgb(245, 194, 66)');
+        svg.appendChild(kasten);
+        const g = document.createElementNS(ns, 'g');
+        g.setAttribute('fill', 'none');
+        g.setAttribute('stroke', 'rgb(14, 36, 78)');
+        g.setAttribute('stroke-width', '9');
+        g.setAttribute('stroke-linecap', 'round');
+        ['M22 11 L46 53', 'M34.5 32.5 L18 53'].forEach(function (d) {
+            const pfad = document.createElementNS(ns, 'path');
+            pfad.setAttribute('d', d);
+            g.appendChild(pfad);
+        });
+        svg.appendChild(g);
+        return svg;
+    }
+
+    /* Das Symbol einer festen Pille. Die Formelsammlung ist ein Link ins Netz
+       und bekommt den Pfeil der anderen Links (Doc, 21.09.2026: "bitte
+       Formelsammlung mit Link Icon") - ihre Adresse endet auf .pdf, von allein
+       haette matKind ihr das PDF-Programmsymbol gegeben. */
+    function festesIcon(e) {
+        if (e.icon === 'link') return drawnIcon('mat-ico-drawn mat-ico-link', LINK_PATH, 'rgb(120, 160, 220)');
+        return null;   /* ohne icon: das Zeichen, das matKind gewaehlt hat */
+    }
 
     function festeLinks() {
         const seite = location.pathname.replace(/.*\//, '').replace(/\.html$/, '');
         const raus = [];
         if (FORMELN_ON.indexOf(seite) >= 0) {
             raus.push({
-                label: 'Formelsammlung', url: FORMELN_URL,
+                label: 'Formelsammlung', url: FORMELN_URL, icon: 'link',
                 titel: 'Mathematisch-Naturwissenschaftliche Formelsammlung (IQB/KMK) - ' +
                     'das einzige zugelassene Hilfsmittel der Abiturpruefung'
-            });
-        }
-        if (LAB_ON.indexOf(seite) >= 0) {
-            raus.push({
-                label: 'Lab Cavalieri', url: LAB_URL,
-                titel: 'Der Satz von Cavalieri - das Lab in 2D und 3D'
             });
         }
         return raus;
@@ -61,18 +98,44 @@ window.svpPlanParts.push(function (P) {
 
     /* Haengt die festen Pillen an ein Kaestchen. renderMaterial leert seinen
        Kasten bei jedem Lauf, deshalb wird das hier danach aufgerufen und nicht
-       einmalig beim Bauen der Zeile. */
-    function festePillen(ziel) {
-        festeLinks().forEach(function (e) {
-            const a = document.createElement('a');
-            a.className = 'badge mat-pill mat-fest';
-            a.href = e.url;
-            a.target = '_blank';
-            a.rel = 'noopener';
-            a.title = e.titel;
-            a.insertAdjacentHTML('beforeend', LAMBDA);
-            a.appendChild(document.createTextNode(' ' + e.label));
-            ziel.appendChild(a);
+       einmalig beim Bauen der Zeile.
+
+       Gebaut werden sie von renderMaterial selbst - derselbe Weg wie fuer das
+       Material der Woche (Doc, 21.09.2026: "nein! alle Pillen gleich,
+       Formelsammlung ist ein Link"). Handgemachte Pillen waren schmaler und
+       niedriger als die echten und fielen aus der Reihe, die equalizeMatPills
+       ausmisst. Gerendert wird in einen Behelfskasten und dann umgehaengt:
+       renderMaterial schreibt seinen Quelltext in dataset.src, und der von
+       ref.matBlock ist das, was gespeichert wird - dort darf nichts Fremdes
+       hinein. */
+    function festePillen(ziel, ref) {
+        const links = festeLinks();
+        if (!links.length) return;
+        const behelf = document.createElement('div');
+        behelf.className = 'mat-block';
+        renderMaterial(behelf, links.map(function (e) { return e.label + ' ' + e.url; }).join(' '), ref);
+        const nach = {};
+        links.forEach(function (e) { nach[e.label] = e; });
+        Array.from(behelf.children).forEach(function (kind) {
+            const a = kind.matches('a.mat-pill') ? kind : kind.querySelector('a.mat-pill');
+            if (a) {
+                a.classList.add('mat-fest');
+                /* Zugeordnet wird ueber die Beschriftung, nicht ueber die
+                   Reihenfolge: renderMaterial darf einen Eintrag auslassen. */
+                const lbl = a.querySelector('.mat-label');
+                const e = nach[((lbl || a).textContent || '').trim()];
+                if (e) {
+                    /* Das Symbol des festen Links statt des Dateityp-Zeichens
+                       (Pfeil fuer die Formelsammlung, Lambda fuers Lab; der
+                       Film behaelt sein YouTube-Zeichen). */
+                    const zeichen = festesIcon(e);
+                    const ico = zeichen && a.querySelector('.mat-ico, img, svg');
+                    if (zeichen && ico) ico.replaceWith(zeichen);
+                    else if (zeichen) a.insertBefore(zeichen, a.firstChild);
+                    a.title = e.titel;
+                }
+            }
+            ziel.appendChild(kind);
         });
     }
 
@@ -98,7 +161,23 @@ window.svpPlanParts.push(function (P) {
         /* SharePoint files a video share under /:v:/, the same way it uses
            /:p:/ for a deck; a plain file link is recognised by its ending. */
         if (url.indexOf('/:v:/') >= 0 || VIDEO_EXT.test(url)) return 'video';
+        if (istLab(url)) return 'lab';
         return 'link';
+    }
+
+    /* Eine Seite aus dem eigenen Labor: docalvers.de/<name>.html, direkt unter
+       der Wurzel - dort liegen die Labs. Aufgaben- und Testseiten liegen auch
+       dort, tragen aber "test" im Namen; Foliensaetze liegen in /decks/,
+       Aufgabenblaetter in /aufgaben/. Ein Lab-Link bekommt damit das Lambda
+       statt des allgemeinen Pfeils. */
+    function istLab(url) {
+        url = String(url || '');
+        if (!/^\//.test(url) && !/^https?:\/\/(?:www\.)?docalvers\.de\//i.test(url) &&
+            !/^https?:\/\/localhost[:/]/i.test(url)) return false;
+        let pfad;
+        try { pfad = new URL(url, location.href).pathname; } catch (e) { return false; }
+        if (!/^\/[\w-]+\.html$/i.test(pfad)) return false;
+        return !/test/i.test(pfad) && !/^\/index\.html$/i.test(pfad);
     }
 
 
@@ -182,6 +261,7 @@ window.svpPlanParts.push(function (P) {
         /* no Mac app to take these from — brand/plain glyphs instead */
         if (kind === 'yt') return drawnIcon('mat-ico-drawn', YT_PATH, 'rgb(255, 0, 0)');
         if (kind === 'link') return drawnIcon('mat-ico-drawn mat-ico-link', LINK_PATH, 'rgb(120, 160, 220)');
+        if (kind === 'lab') return lambdaIcon();
         /* Farbe kommt aus svp.css, nicht von hier: dunkelblau im hellen Thema
            (Doc, 08.09.2026), hell im dunklen - eine feste Farbe waere in einem
            der beiden Themen kaum zu sehen. */
