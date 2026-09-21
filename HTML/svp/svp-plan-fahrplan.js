@@ -150,8 +150,24 @@ window.svpPlanParts.push(function (P) {
        gemessen am 21.09.2026 im kopflosen Chrome. Die eine Messung im
        Normalfall ("passt") kostet nichts. */
     const MIN_PX = 14;
+    /* Das Blatt soll nicht bis an seine Grenze wachsen - darueber und darunter
+       bleibt Luft (Doc, 21.09.2026: "schau den Abstand oben und unten: die
+       Schrift muss schon hier kleiner"). Deshalb wird NICHT gegen die aktuelle
+       Hoehe des Blattes gemessen: solange es mitwaechst, laeuft dort nie etwas
+       ueber, und der Grad bliebe stehen, bis es randvoll ist. Gemessen wird
+       gegen seine max-height abzueglich dieses Polsters. */
+    const LUFT = 64;
 
-    function passt() { return blatt.scrollHeight <= blatt.clientHeight + 1; }
+    function grenze() {
+        const m = parseFloat(getComputedStyle(blatt).maxHeight);
+        return (isFinite(m) ? m : window.innerHeight) - LUFT;
+    }
+
+    /* Zu gross ist die Schrift auch, wenn ein Wort seitlich hinauslaeuft. */
+    function passt() {
+        return blatt.scrollHeight <= grenze() &&
+            blatt.scrollWidth <= blatt.clientWidth + 1;
+    }
 
     function fitFont() {
         if (!blatt || !box || box.hidden) return;
