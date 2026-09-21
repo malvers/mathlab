@@ -295,6 +295,15 @@ html.presenter #overview{background:var(--night)}   /* opaque over the presenter
 .ov-thumb .step{opacity:1!important}
 .ov-num{position:absolute;left:8px;bottom:6px;padding:2px 7px;border-radius:5px;
   background:rgba(14,36,78,.78);color:#fff;font:600 12px Raleway,system-ui,sans-serif}
+/* a hidden slide (class "skip"): the class never sees it, while editing it sits greyed out in the overview */
+.ov-cell[hidden]{display:none}
+.ov-cell.off .ov-thumb{filter:grayscale(1) brightness(.62)}
+.ov-cell.off{outline-color:rgba(255,255,255,.18)}
+.ov-cell.off .ov-num{background:rgba(176,36,24,.9);letter-spacing:.5px;text-transform:uppercase}
+/* dragging a slide to a new place (only in edit mode, deck-edit.js sets draggable) */
+.ov-cell.ov-drag{opacity:.35}
+.ov-cell.ov-before{box-shadow:-5px 0 0 #F5C242,0 2px 10px rgba(0,0,0,.35)}
+.ov-cell.ov-after{box-shadow:5px 0 0 #F5C242,0 2px 10px rgba(0,0,0,.35)}
 /* --- presenter view (?presenter - the fullscreen button opens it when a beamer is attached) ------------- */
 html.presenter #stage,html.presenter #hud,html.presenter #nav,html.presenter #ask,html.presenter #bar{display:none!important}
 html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(64px,13vh,124px) + 30px)!important}

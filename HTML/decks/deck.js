@@ -53,10 +53,34 @@ if (!PRESENTER && document.querySelector('.slide.title'))
 // starts at the beginning; a #7 in the URL wins
 const KEEP = 'deck-pos:' + location.pathname + (PRESENTER ? ':presenter' : '');
 const painted = [];                                  // run after every paint - the presenter link hooks in
-slides.forEach((s, i) => {
-  const p = s.querySelector('.pageno');
-  if (p) p.textContent = (i + 1) + ' / ' + slides.length;
-});
+// A slide can be hidden (class "skip", set by right-click in the overview while editing, Doc 21.09.2026).
+// It stays in the file and keeps its number there - narration, clips and pictures stay where they are -
+// but nothing navigates onto it. While editing every slide is shown, otherwise the deck skips it.
+const EDITING = () => document.documentElement.classList.contains('deck-edit');
+const skipped = i => slides[i].classList.contains('skip') && !EDITING();
+/** The first slide from `from` in direction d that is shown, or -1. */
+function seek(from, d) {
+  for (let i = from; i >= 0 && i < slides.length; i += d) if (!skipped(i)) return i;
+  return -1;
+}
+const hiddenSlide = i => slides[i].classList.contains('skip');
+/** The n-th slide the class sees (1-based, clamped) - typed numbers and #7 links count those, not the file. */
+function nth(n) {
+  const list = slides.map((s, i) => i).filter(i => !skipped(i));
+  return list.length ? list[Math.max(0, Math.min(list.length - 1, n - 1))] : 0;
+}
+/** Page numbers count what the class sees: a hidden slide says so instead of carrying a number. */
+function renumber() {
+  const total = slides.filter((s, i) => !hiddenSlide(i)).length;
+  let k = 0;
+  slides.forEach((s, i) => {
+    const p = s.querySelector('.pageno');
+    if (!p) return;
+    if (hiddenSlide(i)) { p.textContent = 'ausgeblendet'; return; }   // only ever seen while editing
+    p.textContent = (++k) + ' / ' + total;
+  });
+}
+renumber();
 
 // keep the 960x540 stage as large as the window allows - phone, beamer, print
 function fit(){
@@ -103,24 +127,28 @@ function paint(){
   // dark slides (greeting, title at night): the buttons turn light (Doc, 18.09.2026: "wenn der HG dunkel ist kaum zu sehen")
   document.documentElement.classList.toggle('dark-slide', sl.matches('.greet, .title'));
   sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
-  document.getElementById('bar').style.width = ((si + 1) / slides.length * 100) + '%';
+  const shown = slides.filter((s, i) => !skipped(i)).length;          // the bar counts what the class sees
+  const at = slides.filter((s, i) => i <= si && !skipped(i)).length;
+  document.getElementById('bar').style.width = (at / (shown || 1) * 100) + '%';
   try { sessionStorage.setItem(KEEP, si + ':' + step + ':' + groups(sl)); } catch (e) { }
   painted.forEach(f => f());
 }
 function next(){
   if (step < groups(slides[si])) { step++; }
-  else if (si < slides.length - 1) { si++; step = 0; }
+  else { const j = seek(si + 1, 1); if (j >= 0) { si = j; step = 0; } }
   paint();
 }
 function prev(){
   if (step > 0) { step--; }
-  else if (si > 0) { si--; step = groups(slides[si]); }
+  else { const j = seek(si - 1, -1); if (j >= 0) { si = j; step = groups(slides[si]); } }
   paint();
 }
 // a whole slide back or forth, shown fully built - the footer triangles and Shift+arrows (Doc, 17.09.2026)
 function jump(d){
   if (typeof narr !== 'undefined') narr.stop();     // turning by hand pauses Solita
-  si = Math.max(0, Math.min(slides.length - 1, si + d)); step = groups(slides[si]); paint();
+  const j = seek(si + d, d > 0 ? 1 : -1);
+  if (j >= 0) si = j;
+  step = groups(slides[si]); paint();
 }
 addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
@@ -129,8 +157,8 @@ addEventListener('keydown', e => {
   if (e.shiftKey && (k === 'ArrowRight' || k === 'ArrowLeft')) { jump(k === 'ArrowRight' ? 1 : -1); e.preventDefault(); }
   else if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
   else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
-  else if (k === 'Home') { si = 0; step = 0; paint(); }
-  else if (k === 'End') { si = slides.length - 1; step = groups(slides[si]); paint(); }
+  else if (k === 'Home') { si = Math.max(0, seek(0, 1)); step = 0; paint(); }
+  else if (k === 'End') { si = Math.max(0, seek(slides.length - 1, -1)); step = groups(slides[si]); paint(); }
   else if (k === 'a' || k === 'A') { narr.stop(); step = groups(slides[si]); paint(); }   // everything on this slide in (Doc, 17.09.2026)
   else if (k === 'f' || k === 'F') { full(); }
 });
@@ -272,11 +300,11 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
       clearTimeout(timer); timer = setTimeout(clear, 2500);
       e.preventDefault();
     } else if (e.key === 'Enter' && buf) {
-      const n = Math.min(parseInt(buf, 10), slides.length);   // past the end: the last slide (Doc, 17.09.2026)
+      const n = parseInt(buf, 10);                 // past the end: the last slide (Doc, 17.09.2026)
       clear();
       if (n >= 1) {
         if (typeof narr !== 'undefined') narr.stop();   // a jump pauses Solita like turning by hand
-        si = n - 1; step = 0; paint();
+        si = nth(n); step = 0; paint();
       }
       e.preventDefault();
     } else if (e.key === 'Escape' && buf) { clear(); }
@@ -315,9 +343,9 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
       thumb.appendChild(c);
       const num = document.createElement('span');
       num.className = 'ov-num';
-      num.textContent = i + 1;
       cell.appendChild(thumb);
       cell.appendChild(num);
+      cell.dataset.i = i;
       cell.addEventListener('click', function (e) {
         e.stopPropagation();
         if (typeof narr !== 'undefined') narr.stop();
@@ -326,13 +354,29 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
       ov.appendChild(cell);
     });
     built = true;
+    marks();
+  }
+  // hidden slides: dimmed and labelled while editing, gone from the overview for the class. Dragging is the
+  // editor's business (decks/deck-edit.js) - it only ever gets the tiles when edit mode is on.
+  function marks() {
+    // the count is what the class sees, also while editing - there the hidden tiles are simply shown as well
+    let k = 0, total = slides.filter(function (s, i) { return !hiddenSlide(i); }).length;
+    [].forEach.call(ov.children, function (cell, i) {
+      const off = hiddenSlide(i);                                   // the class attribute, not the edit mode
+      cell.classList.toggle('off', off);
+      cell.hidden = off && !EDITING();
+      cell.draggable = EDITING();
+      const num = cell.querySelector('.ov-num');
+      if (num) num.textContent = off ? 'aus' : (++k) + ' / ' + total;
+    });
   }
   // the tiles as large as the window allows: try every column count, keep the one with the widest tile that
   // still fits width AND height (Doc, 17.09.2026: "im Overview den vorhandenen Platz ausnutzen"). Below
   // OV_MIN px a tile gets unreadable - then fixed columns of OV_MIN and the overview scrolls (phones).
   const OV_PAD = 28, OV_GAP = 18, OV_MIN = 200;
   function layout() {
-    const n = slides.length, W = ov.clientWidth - 2 * OV_PAD, H = ov.clientHeight - 2 * OV_PAD;
+    const n = [].filter.call(ov.children, function (c) { return !c.hidden; }).length || slides.length;
+    const W = ov.clientWidth - 2 * OV_PAD, H = ov.clientHeight - 2 * OV_PAD;
     let c = 1, w = 0;
     for (let k = 1; k <= n; k++) {
       const r = Math.ceil(n / k);
@@ -352,10 +396,23 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
     if (typeof narr !== 'undefined') narr.stop();
     if (!built) build();
     ov.hidden = false;
+    marks();
     [].forEach.call(ov.children, function (c, i) { c.classList.toggle('cur', i === si); });
     scale();
     if (ov.children[si]) ov.children[si].scrollIntoView({ block: 'center' });
   }
+  // the editor (decks/deck-edit.js) opens and refreshes the overview through this
+  window.DeckOverview = {
+    open: open, close: close, isOpen: function () { return !ov.hidden; }, el: ov,
+    refresh: function () { renumber(); if (built) { marks(); if (!ov.hidden) scale(); } paint(); },
+  };
+  // edit mode shows the hidden slides and takes them away again - and never leaves the deck standing on one
+  ['deck-edit-on', 'deck-edit-off'].forEach(function (ev) {
+    document.addEventListener(ev, function () {
+      if (skipped(si)) { const j = seek(si, 1); si = j >= 0 ? j : Math.max(0, seek(si, -1)); step = 0; }
+      window.DeckOverview.refresh();
+    });
+  });
   btn.addEventListener('click', function (e) { e.stopPropagation(); if (ov.hidden) open(); else close(); });
   ov.addEventListener('click', function (e) { e.stopPropagation(); close(); });
   addEventListener('resize', function () { if (!ov.hidden) scale(); });
@@ -424,7 +481,7 @@ else fullBtn.hidden = true;   // no fullscreen API (iPhone Safari) - nothing to 
 // #7 in the URL opens slide 7 fully built - handy for linking a single slide
 function fromHash(){
   const n = parseInt(location.hash.slice(1), 10);
-  if (n >= 1 && n <= slides.length) { si = n - 1; step = groups(slides[si]); paint(); }
+  if (n >= 1 && n <= slides.length) { si = nth(n); step = groups(slides[si]); paint(); }
 }
 addEventListener('hashchange', fromHash);
 
@@ -537,6 +594,8 @@ if (!location.hash) {
     step = m[3] !== undefined && +m[2] >= +m[3] ? groups(slides[si]) : Math.min(+m[2], groups(slides[si]));
   }
 }
+// the slide that was kept (or slide 1) may have been hidden meanwhile: start on the next one that is shown
+if (skipped(si)) { const j = seek(si, 1); si = j >= 0 ? j : Math.max(0, seek(si, -1)); step = 0; }
 paint();
 fromHash();
 
@@ -1666,7 +1725,8 @@ const link = (function () {
     function ahead(p) {
       if (!p) return null;
       if (p.step < groups(slides[p.si])) return { si: p.si, step: p.step + 1 };
-      return p.si < slides.length - 1 ? { si: p.si + 1, step: 0 } : null;
+      const j = seek(p.si + 1, 1);
+      return j >= 0 ? { si: j, step: 0 } : null;
     }
     // Dock magnification on the strip (Doc, 16.09.2026: "Dock in Mac macht die icons größer über der die Maus
     // ist ... mach das mit den slides unten so"). The slides near the mouse grow upward and push their
@@ -1716,16 +1776,19 @@ const link = (function () {
     strip.addEventListener('mousemove', function (e) { dockX = e.clientX; dockSoon(); });
     strip.addEventListener('mouseleave', function () { dockX = null; dockSoon(); });
     strip.addEventListener('scroll', dockSoon, { passive: true });
+    // the strip, the previews and the counter leave out hidden slides - the presenter shows what the class sees
+    const rank = i => slides.filter(function (s, k) { return k <= i && !skipped(k); }).length;
     function buildStrip() {
       cells = slides.map(function (s, i) {
         const cell = document.createElement('button');
         cell.type = 'button'; cell.className = 'p-cell'; cell.setAttribute('role', 'listitem');
-        cell.title = 'Folie ' + (i + 1); cell.setAttribute('aria-label', 'Folie ' + (i + 1));
+        cell.hidden = skipped(i);
+        cell.title = 'Folie ' + rank(i); cell.setAttribute('aria-label', 'Folie ' + rank(i));
         const box = document.createElement('div');
         box.className = 'p-thumb';
         box.appendChild(shot(i, groups(s)));
         const num = document.createElement('span');
-        num.className = 'p-num'; num.textContent = i + 1;
+        num.className = 'p-num'; num.textContent = rank(i);
         cell.appendChild(box); cell.appendChild(num);
         cell.addEventListener('click', function () { si = i; step = 0; paint(); });
         strip.appendChild(cell);
@@ -1740,11 +1803,12 @@ const link = (function () {
       else liveNode.querySelectorAll('.step').forEach(function (e) { e.classList.toggle('on', +e.dataset.g < step); });
       put(frames[1], n1 ? shot(n1.si, n1.step) : theEnd());
       put(frames[2], n2 ? shot(n2.si, n2.step) : n1 ? theEnd() : null);
-      caps[0].textContent = n1 ? 'Nächste Folie: ' + (n1.si + 1) : '';
-      caps[1].textContent = n2 ? 'Übernächste Folie: ' + (n2.si + 1) : '';
+      caps[0].textContent = n1 ? 'Nächste Folie: ' + rank(n1.si) : '';
+      caps[1].textContent = n2 ? 'Übernächste Folie: ' + rank(n2.si) : '';
       fitAll();
-      count.textContent = 'Folie ' + (si + 1) + ' von ' + slides.length;
-      prog.style.width = (si + 1) / slides.length * 100 + '%';
+      const shown = slides.filter(function (s, i) { return !skipped(i); }).length;
+      count.textContent = 'Folie ' + rank(si) + ' von ' + shown;
+      prog.style.width = rank(si) / (shown || 1) * 100 + '%';
       cells.forEach(function (c, i) { c.classList.toggle('cur', i === si); });
       const c = cells[si];
       if (c) strip.scrollTo({ left: c.offsetLeft - (strip.clientWidth - c.offsetWidth) / 2, behavior: 'smooth' });

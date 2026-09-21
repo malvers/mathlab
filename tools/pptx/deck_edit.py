@@ -5,6 +5,7 @@ Only the local dev server (serve.py, 127.0.0.1:8765) talks to this module; the l
     GET  /__deck/source?deck=<name>.html  -> {selector, slides: [[source or null, ...], ...]}
     POST /__deck/save  {deck, slide, n, old, new}  -> {html, src}   one element rewritten in the file
     POST /__deck/line  {deck, slide, n, old, op}  -> {own, g}   Cmd-D copies a line below itself, Cmd-Backspace removes it
+    POST /__deck/slide {deck, index, op, to}  -> {order|hidden}   drag or right-click in the overview: move, hide, show
     POST /__deck/publish  {deck}  -> {commit, files}   the deck (and pictures it needs) onto origin/main
     POST /__deck/undo  {deck, redo}  -> {what, mtime, pending}   one step back or forward (deck_undo.py)
     *    /__deck/image/...   pictures on slides - handled by deck_image.py
@@ -274,6 +275,101 @@ def line(deck, slide, n, old, op):
     return 200, {"own": own, "g": g, "narration": spoken, "mtime": _mtime(deck), "pending": pending(deck)}
 
 
+# ------------------------------------------------------------- whole slides ---
+SECTION_TAG = re.compile(r"<section\b[^>]*>")
+CLASS_ATTR = re.compile(r'\bclass="([^"]*)"')
+SKIP = "skip"                                         # a hidden slide: stays in the file, no navigation lands on it
+SLIDE_CLIP = re.compile(r"^s(\d{2})-(\d{2})\.mp3$")
+
+
+def slide_op(deck, index, op, to=None):
+    """Move a slide inside the deck, or hide / show it (the overview in edit mode). Returns (status, reply).
+
+    Moving rewrites the order of the <section class="slide"> blocks and takes Solita with it: her parts, her
+    hold list and her clips are keyed by slide number, so they are renumbered in the same step. Hiding only
+    sets a class - numbering and narration stay exactly as they are, which is why it is the safe one.
+    """
+    gen = _gen()
+    with _lock:
+        page = _read(deck)
+        _, bounds = elements(page, gen)
+        n = len(bounds)
+        if not (0 <= index < n):
+            return 409, {"error": "Diese Folie gibt es in der Datei nicht mehr – bitte neu laden."}
+        if op in ("hide", "show"):
+            a = bounds[index][0]
+            m = SECTION_TAG.match(page, a)
+            cls = CLASS_ATTR.search(m.group(0)) if m else None
+            if not cls:
+                return 500, {"error": "Folienanfang nicht gefunden – bitte neu laden."}
+            names = cls.group(1).split()
+            if op == "hide" and SKIP not in names:
+                names.append(SKIP)
+            elif op == "show":
+                names = [c for c in names if c != SKIP]
+            tag = m.group(0)[:cls.start(1)] + " ".join(names) + m.group(0)[cls.end(1):]
+            page = page[:m.start()] + tag + page[m.end():]
+            _write(deck, page, gen, what="Folie ausgeblendet" if op == "hide" else "Folie eingeblendet")
+            return 200, {"hidden": op == "hide", "mtime": _mtime(deck), "pending": pending(deck)}
+        if op != "move":
+            return 400, {"error": "unknown op"}
+        if to is None or not (0 <= int(to) < n):
+            return 409, {"error": "Dorthin lässt sich die Folie nicht schieben."}
+        to = int(to)
+        if to == index:
+            return 200, {"order": list(range(n)), "mtime": _mtime(deck), "pending": pending(deck), "narration": False}
+        blocks = [page[a:b] for a, b in bounds]
+        order = list(range(n))
+        order.insert(to, order.pop(index))            # the same move the overview shows
+        page = page[:bounds[0][0]] + "".join(blocks[k] for k in order) + page[bounds[-1][1]:]
+        page, spoken = _reorder(page, deck, {old: new for new, old in enumerate(order)})
+        _write(deck, page, gen, what="Folie verschoben", stuck=spoken)
+    return 200, {"order": order, "narration": spoken, "mtime": _mtime(deck), "pending": pending(deck)}
+
+
+def _reorder(page, deck, mapping):
+    """The slides changed places: Solita's parts, her hold list and her clips (audio/<deck>/sNN-KK.mp3 with
+    texts.json) follow, so no clip is spoken on the wrong slide. Returns (page, whether anything spoken moved)."""
+    m = NARRATION.search(page)
+    if not m or not m.group(2).strip():
+        return page, False
+    data = json.loads(m.group(2).replace("<\\/", "</"))
+    parts = data.get("slides") or {}
+    spoken = False
+    if parts:
+        data["slides"] = {str(mapping.get(int(k), int(k))): v for k, v in parts.items()}
+        spoken = any(mapping.get(int(k), int(k)) != int(k) for k in parts)
+    if isinstance(data.get("hold"), list):
+        data["hold"] = sorted(mapping.get(h, h) for h in data["hold"])
+    text = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+    page = page[:m.start(2)] + text + page[m.end(2):]
+    folder = os.path.join(DECKS, "audio", data.get("deck") or deck[:-5])
+    if os.path.isdir(folder):
+        renames = []
+        for fn in sorted(os.listdir(folder)):
+            c = SLIDE_CLIP.match(fn)
+            if not c:
+                continue
+            old = int(c.group(1))
+            new = mapping.get(old, old)
+            if new != old:
+                renames.append((fn, "s%02d-%02d.mp3" % (new, int(c.group(2)))))
+        if renames:                                   # two passes: a straight rename would overwrite a clip
+            spoken = True
+            for fn, _ in renames:
+                os.replace(os.path.join(folder, fn), os.path.join(folder, fn + ".moving"))
+            for fn, dst in renames:
+                os.replace(os.path.join(folder, fn + ".moving"), os.path.join(folder, dst))
+            texts_path = os.path.join(folder, "texts.json")
+            if os.path.exists(texts_path):
+                texts = json.load(open(texts_path, encoding="utf-8"))
+                to = dict(renames)
+                texts = {to.get(k, k): v for k, v in texts.items()}
+                with open(texts_path, "w", encoding="utf-8") as f:
+                    f.write(json.dumps(texts, ensure_ascii=False, indent=1))
+    return page, spoken
+
+
 def _narration(page, deck, slide, part, by):
     """Solita's parts for `slide`: by +1 puts an empty part after `part`, by -1 removes `part` - and her clips
     (audio/<deck>/sNN-KK.mp3 with texts.json) move along, so no clip is spoken at the wrong line or recorded again.
@@ -507,6 +603,11 @@ def handle(method, path, headers, body):
                 return 415, {"error": "json only"}
             q = json.loads(body.decode("utf-8"))
             return line(q["deck"], int(q["slide"]), int(q["n"]), q["old"], q["op"])
+        if method == "POST" and url.path == "/__deck/slide":
+            if not (headers.get("Content-Type") or "").startswith("application/json"):
+                return 415, {"error": "json only"}
+            q = json.loads(body.decode("utf-8"))
+            return slide_op(q["deck"], int(q["index"]), q["op"], q.get("to"))
         if method == "POST" and url.path == "/__deck/undo":
             if not (headers.get("Content-Type") or "").startswith("application/json"):
                 return 415, {"error": "json only"}

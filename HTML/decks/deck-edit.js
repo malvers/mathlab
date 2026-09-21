@@ -30,6 +30,12 @@
     'html.deck-edit [data-ed].ed-on{outline:2px solid rgb(245,194,66);background:rgba(245,194,66,.16);',
     '  white-space:pre-wrap;caret-color:rgb(176,36,24)}',
     'html.deck-edit [data-ed].ed-busy{opacity:.5}',
+    '#ov-menu{position:fixed;z-index:30;min-width:190px;padding:6px;border-radius:10px;',
+    '  background:rgba(7,22,48,.98);border:1px solid rgba(245,194,66,.55);box-shadow:0 10px 30px rgba(0,0,0,.45)}',
+    '#ov-menu button{display:block;width:100%;padding:8px 12px;border:0;border-radius:7px;background:none;',
+    '  color:#eaf1ff;font:500 14px Raleway,system-ui,sans-serif;text-align:left;cursor:pointer}',
+    '#ov-menu button:hover:not(:disabled){background:rgba(245,194,66,.22)}',
+    '#ov-menu button:disabled{opacity:.35;cursor:default}',
     '@media print{#nav-edit,#nav-live{display:none}}'
   ].join('\n');
   document.head.appendChild(css);
@@ -268,6 +274,126 @@
     });
   }
 
+  // ---------------------------------------------------------------- slides ---
+  // In edit mode the overview (o) is the place where slides are ordered: drag a tile to its new place, or
+  // right-click one for hide / show and one step left or right (Doc, 21.09.2026: "in Overview Folien
+  // verschieben und ausblenden (rechte Maus)"). Hiding only sets a class, so it happens right here on the
+  // page; moving renumbers Solita as well, so the page comes back from the file afterwards.
+  const OV = () => window.DeckOverview;
+  const cellIndex = c => +c.dataset.i;
+
+  function slideOp(body) {
+    if (busy || publishing) return Promise.resolve(false);
+    busy = true;
+    return fetch('/__deck/slide', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({ deck: DECK }, body))
+    })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status); return j; }); })
+      .then(function (j) { known = j.mtime; pending = j.pending; rebase(); label(); return j; })
+      .catch(function (err) { msg('Ging nicht: ' + (/fetch/i.test(err.message) ? 'serve.py antwortet nicht' : err.message)); return false; })
+      .finally(function () { busy = false; });
+  }
+
+  function hideSlide(i, hide) {
+    slideOp({ index: i, op: hide ? 'hide' : 'show' }).then(function (j) {
+      if (!j) return;
+      slides[i].classList.toggle('skip', hide);
+      const cell = OV() && OV().el.children[i];
+      if (cell) { const c = cell.querySelector('.ov-thumb > .slide'); if (c) c.classList.toggle('skip', hide); }
+      if (OV()) OV().refresh();
+      msg(hide ? 'Folie ausgeblendet – die Klasse sieht sie nicht mehr' : 'Folie wieder eingeblendet');
+    });
+  }
+
+  // the whole page comes back from the file: the slide order, the page numbers and Solita's parts all moved
+  function moveSlide(from, to) {
+    if (from === to) return;
+    slideOp({ index: from, op: 'move', to: to }).then(function (j) {
+      if (!j) return;
+      try {
+        sessionStorage.setItem('deck-edit-resume', 'Folie verschoben' + (j.narration ? ' – Solitas Aufnahmen sind mitgewandert' : ''));
+        sessionStorage.setItem('deck-edit-overview', String(to));
+      } catch (e) { }
+      location.reload();
+    });
+  }
+
+  // right-click menu on a tile - the deck's own look, Esc or a click beside it closes
+  let menu = null;
+  function closeMenu() { if (menu) { menu.remove(); menu = null; } }
+  function openMenu(x, y, i) {
+    closeMenu();
+    const last = slides.length - 1;
+    const items = [
+      [hiddenSlide(i) ? 'Einblenden' : 'Ausblenden', function () { hideSlide(i, !hiddenSlide(i)); }],
+      ['Eine nach vorn', i > 0 ? function () { moveSlide(i, i - 1); } : null],
+      ['Eine nach hinten', i < last ? function () { moveSlide(i, i + 1); } : null],
+      ['An den Anfang', i > 0 ? function () { moveSlide(i, 0); } : null],
+      ['Ans Ende', i < last ? function () { moveSlide(i, last); } : null],
+    ];
+    menu = document.createElement('div');
+    menu.id = 'ov-menu';
+    items.forEach(function (it) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = it[0];
+      b.disabled = !it[1];
+      b.addEventListener('click', function (e) { e.stopPropagation(); closeMenu(); it[1](); });
+      menu.appendChild(b);
+    });
+    document.body.appendChild(menu);
+    const r = menu.getBoundingClientRect();          // never off screen
+    menu.style.left = Math.min(x, innerWidth - r.width - 8) + 'px';
+    menu.style.top = Math.min(y, innerHeight - r.height - 8) + 'px';
+  }
+  // capture: a click anywhere closes the menu - except inside it, where the entry still has to fire
+  addEventListener('click', function (e) { if (!e.target.closest || !e.target.closest('#ov-menu')) closeMenu(); }, true);
+  addEventListener('scroll', closeMenu, true);
+
+  addEventListener('contextmenu', function (e) {
+    const cell = on && e.target.closest && e.target.closest('#overview .ov-cell');
+    if (!cell) return;
+    e.preventDefault(); e.stopPropagation();
+    openMenu(e.clientX, e.clientY, cellIndex(cell));
+  }, true);
+
+  // drag and drop inside the overview: the yellow edge shows where the slide lands
+  let from = -1;
+  const clearMarks = () => document.querySelectorAll('.ov-before,.ov-after,.ov-drag')
+    .forEach(function (c) { c.classList.remove('ov-before', 'ov-after', 'ov-drag'); });
+  addEventListener('dragstart', function (e) {
+    const cell = on && e.target.closest && e.target.closest('#overview .ov-cell');
+    if (!cell) return;
+    from = cellIndex(cell);
+    cell.classList.add('ov-drag');
+    try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(from)); } catch (err) { }
+  }, true);
+  addEventListener('dragover', function (e) {
+    if (from < 0) return;
+    const cell = e.target.closest && e.target.closest('#overview .ov-cell');
+    e.preventDefault();
+    try { e.dataTransfer.dropEffect = 'move'; } catch (err) { }
+    document.querySelectorAll('.ov-before,.ov-after').forEach(function (c) { c.classList.remove('ov-before', 'ov-after'); });
+    if (!cell || cellIndex(cell) === from) return;
+    const r = cell.getBoundingClientRect();
+    cell.classList.add(e.clientX < r.left + r.width / 2 ? 'ov-before' : 'ov-after');
+  }, true);
+  addEventListener('drop', function (e) {
+    if (from < 0) return;
+    const cell = e.target.closest && e.target.closest('#overview .ov-cell');
+    e.preventDefault();
+    const start = from;
+    const before = cell && cell.classList.contains('ov-before');
+    clearMarks(); from = -1;
+    if (!cell) return;
+    const j = cellIndex(cell);
+    if (j === start) return;
+    // where it lands among the others: before the tile, or right after it
+    moveSlide(start, before ? (j > start ? j - 1 : j) : (j > start ? j : j + 1));
+  }, true);
+  addEventListener('dragend', function () { clearMarks(); from = -1; }, true);
+
   // capture phase: in edit mode a click on the slide edits and never turns the page
   addEventListener('click', function (e) {
     if (!on || !e.target.closest || !e.target.closest('#deck')) return;
@@ -335,8 +461,12 @@
     const note = sessionStorage.getItem('deck-edit-resume');
     if (note !== null) {
       sessionStorage.removeItem('deck-edit-resume');
-      load().then(function () { on = true; root.classList.add('deck-edit'); label(); document.dispatchEvent(new Event('deck-edit-on')); msg(note); })
-        .catch(function (err) { msg(err.message); });
+      const back = sessionStorage.getItem('deck-edit-overview');   // a moved slide: stand on it, overview open
+      sessionStorage.removeItem('deck-edit-overview');
+      load().then(function () {
+        on = true; root.classList.add('deck-edit'); label(); document.dispatchEvent(new Event('deck-edit-on')); msg(note);
+        if (back !== null && window.DeckOverview) { si = Math.max(0, Math.min(slides.length - 1, +back)); step = 0; paint(); DeckOverview.open(); }
+      }).catch(function (err) { msg(err.message); });
     }
   } catch (e) { }
 
