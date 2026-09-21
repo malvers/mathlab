@@ -365,7 +365,9 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
     [].forEach.call(ov.children, function (cell, i) {
       const off = hiddenSlide(i);                                   // the class attribute, not the edit mode
       cell.classList.toggle('off', off);
-      cell.hidden = off && !EDITING();
+      // a hidden slide keeps its tile, in and out of edit mode (Doc, 21.09.2026: "nee lass bitte drin") -
+      // the red frame and AUS say that the class does not see it, and a click still jumps there
+      cell.hidden = false;
       cell.draggable = EDITING();
       const num = cell.querySelector('.ov-num');
       if (num) num.textContent = off ? 'aus' : (++k) + ' / ' + total;
