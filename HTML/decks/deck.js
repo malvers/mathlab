@@ -428,6 +428,9 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
     }
     if (!ov.hidden) {                                  // nothing underneath moves meanwhile
       if (e.key === 'Escape') close();
+      // E is the one key that still gets through: edit mode switches on with the overview open, which is
+      // exactly where slides are moved and hidden (Doc, 21.09.2026: "kann ich E auch im OV drücken?")
+      if (e.key === 'e' || e.key === 'E') return;
       e.preventDefault(); e.stopImmediatePropagation();
     }
   }, true);
