@@ -194,12 +194,21 @@ async function ticksOpen(session, lessons) {
 
 // The other side of the same question, for the A on the Stundenplan tiles (Doc, 21.09.2026:
 // "mach bitte neben das U noch ain A wenn Anwesenheit kontrolliert steht"). WebUntis answers only
-// what is still OPEN, so "kontrolliert" is: has begun, was not cancelled, and is not on that list
-// any more. ACHTUNG, die Unschaerfe: eine Stunde, die gar keine Kontrolle verlangt
-// (absCheckNeeded false, z. B. ein ausgefallener Block, den Untis anders fuehrt), steht ebenfalls
-// nicht auf der Liste und bekaeme damit ein A. Wer das trennen will, braucht die Liste mit einem
-// anderen filter als ABSENCE_OPEN - am 21.09.2026 nicht gemessen, weil dafuer Docs Sitzung noetig
-// ist (WebUntis fasst nur er selbst an).
+// what is still OPEN, so "kontrolliert" is what is not on that list.
+//
+// GEMESSEN am 21.09.2026 (`anwesenheit --filter`, der Messknopf steht weiter unten):
+//   - open-periods nimmt NUR filter "ABSENCE_OPEN" - ALL, ABSENCE_CHECKED, LESSONTOPIC_OPEN und
+//     ein fehlender Filter enden in HTTP 400. Ein "zeig mir die abgehakten" gibt es also nicht.
+//   - Die Liste enthaelt auch Stunden, die noch gar nicht begonnen haben: am 21.09. um 10:10
+//     standen die Stunden von 13:45, 14:30 und 15:30 darin, und die des 28.09. alle sieben.
+//     "Nicht auf der Liste" heisst darum wirklich "Haken gesetzt" und nicht "ist noch nicht dran".
+// Der Haken kaeme also auch fuer spaetere Stunden schon an: Doc setzt ihn immer fuer den ganzen
+// Block ("Ich kann aber nur fuer den ganzen Block setzen"), die 10:30-Stunde war am 21.09. um
+// 10:10 laengst abgehakt. ENTSCHIEDEN (Doc, 21.09.2026): trotzdem erst ab Stundenbeginn -
+// "macht Sinn, wenn sie noch nicht angefangen hat ... lassen wir so". Ein A an einer Stunde, die
+// noch gar nicht lief, behauptet mehr, als der Tag hergibt. Darum steht der Begonnen-Filter hier
+// mit Absicht und nicht aus Unwissen. Ausgefallene Stunden bleiben ohnehin draussen: fuer sie
+// wird keine Anwesenheit gefuehrt.
 async function ticksDone(session, lessons) {
   const begun = begunLessons(lessons);
   if (!begun.length) return new Set();
@@ -1386,6 +1395,50 @@ async function main() {
     if (!open.length) say('Nichts offen - alles steht schon im Klassenbuch.');
     if (unmapped.size) say(`Ohne Planseite (in ${path.basename(MAP_FILE)} nachtragen): ${[...unmapped].join(', ')}`);
     if (patched.length || getickt.length) { say('Badge-Daten aktualisieren:'); await patchStatus(session, patched, getickt); }
+    return;
+  }
+
+  if (cmd === 'anwesenheit' && process.argv.includes('--filter')) {
+    /* Messknopf, bleibt drin: WELCHE Filter kennt open-periods, und liefert einer davon auch
+       die schon kontrollierten Stunden? Gemessen wird mit dem heutigen Tag, ausgegeben werden
+       nur Zahlen und die beiden Flaggen - keine Stunden-, schon gar keine Schuelerdaten.
+       Hintergrund (Doc, 21.09.2026): "Ich kann aber nur fuer den ganzen Block setzen" - solange
+       wir nur die offene Liste kennen, muss "kontrolliert" aus ihrem Fehlen geraten werden. */
+    const tag = process.argv[process.argv.indexOf('--filter') + 1] || ymd(new Date());
+    const iso = d => `${String(d).slice(0, 4)}-${String(d).slice(4, 6)}-${String(d).slice(6, 8)}`;
+    const jwt = (await (await fetch(`${BASE}/WebUntis/api/token/new`, { headers: { Cookie: cookies } })).text()).trim();
+    for (const filter of ['ABSENCE_OPEN', 'ALL', 'ABSENCE_CHECKED', 'LESSONTOPIC_OPEN', '']) {
+      const body = { teacherId: session.user?.elemId, dateRange: { start: iso(tag), end: iso(tag) } };
+      if (filter) body.filter = filter;
+      let res, text;
+      try {
+        res = await fetch(`${BASE}/WebUntis/api/rest/view/v1/classreg/open-periods`, {
+          method: 'POST',
+          headers: { Cookie: cookies, Authorization: 'Bearer ' + jwt, 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(body),
+        });
+        text = await res.text();
+      } catch (e) { console.log(`${filter || '(ohne)'}: FEHLER ${e.message}`); continue; }
+      if (/"(referencedStudents|students|studentIds|stAbsences)"/.test(text)) {
+        console.log(`${filter || '(ohne)'}: SCHUELERDATEN in der Antwort - abgebrochen.`); continue;
+      }
+      if (!res.ok) { console.log(`${(filter || '(ohne)').padEnd(16)} HTTP ${res.status}`); continue; }
+      let periods = [];
+      try { periods = JSON.parse(text).periods || []; } catch (e) { /* keine Liste */ }
+      const zahl = (f) => periods.filter(f).length;
+      console.log(`${(filter || '(ohne)').padEnd(16)} ${String(periods.length).padStart(3)} Stunden`
+        + ` | absCheckNeeded ${zahl(p => p.absCheckNeeded)}`
+        + ` | absChecked ${zahl(p => p.absChecked)}`);
+      if (!periods.length) continue;
+      /* Gegenprobe: welche Stunde des Tages ist offen, welche nicht. Nur so laesst sich
+         sagen, ob "nicht offen" wirklich "kontrolliert" heisst - und ob eine Stunde, die
+         noch gar nicht begonnen hat, ueberhaupt in der Liste steht. */
+      const offen = new Set(periods.map(p => String(p.period?.id ?? p.id)));
+      for (const l of await myLessons(tag, tag, session)) {
+        console.log(`    ${l.start}  ${(l.subject || '').padEnd(8)} ${l.klassen.join(',').padEnd(18)}`
+          + (offen.has(String(l.ttId)) ? 'OFFEN' : 'nicht offen') + (l.code ? `  [${l.code}]` : ''));
+      }
+    }
     return;
   }
 
