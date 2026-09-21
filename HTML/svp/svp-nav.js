@@ -197,8 +197,10 @@
     const navMid = document.createElement('div');
     navMid.className = 'nav-group nav-mid';
     /* "Mehr" and the tools are two groups on purpose: the tools then wrap to a
-       second row as one block when the first row runs out of space, starting
-       at the gear. They sit 6px apart, so on a wide row it reads as one. */
+       second row as one block when the first row runs out of space. They sit
+       6px apart, so on a wide row it reads as one. (The gear moved to the
+       Schularten group on 21.09.2026, so the block now starts at the
+       megaphone.) */
     const navMore = document.createElement('div');
     navMore.className = 'nav-group nav-more';
     const navRight = document.createElement('div');
@@ -662,7 +664,11 @@
     } catch (e) { /* no BroadcastChannel: the palette simply has no effect */ }
 
     editWrap.appendChild(panel);
-    navRight.appendChild(editWrap);
+    /* Doc, 21.09.2026: "bring das rechts neben Schularten" - das Zahnrad steht
+       jetzt am Ende der Schularten-Gruppe und nicht mehr bei den Werkzeugen
+       rechts. Es gehoert zur Navileiste selbst (welche Pillen sichtbar sind),
+       also zu den Schularten, ueber die es entscheidet. */
+    navSchul.appendChild(editWrap);
 
     // Fullscreen pill, directly right of the gear (Doc, 07.09.2026): the plan tables
     // are wide, and the browser chrome costs two rows of lessons. Icon-only like the
