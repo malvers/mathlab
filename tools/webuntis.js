@@ -206,9 +206,11 @@ async function ticksOpen(session, lessons) {
 // Block ("Ich kann aber nur fuer den ganzen Block setzen"), die 10:30-Stunde war am 21.09. um
 // 10:10 laengst abgehakt. ENTSCHIEDEN (Doc, 21.09.2026): trotzdem erst ab Stundenbeginn -
 // "macht Sinn, wenn sie noch nicht angefangen hat ... lassen wir so". Ein A an einer Stunde, die
-// noch gar nicht lief, behauptet mehr, als der Tag hergibt. Darum steht der Begonnen-Filter hier
-// mit Absicht und nicht aus Unwissen. Ausgefallene Stunden bleiben ohnehin draussen: fuer sie
-// wird keine Anwesenheit gefuehrt.
+// noch gar nicht lief, behauptet mehr, als der Tag hergibt.
+// Und es passt zu WebUntis selbst (Doc, 21.09.2026): "man kann in Untis erst eintragen, wenn die
+// Stunde begonnen hat". Der Filter bildet also die Regel des Klassenbuchs ab und ist keine
+// Notloesung. Ausgefallene Stunden bleiben ohnehin draussen: fuer sie wird keine Anwesenheit
+// gefuehrt.
 async function ticksDone(session, lessons) {
   const begun = begunLessons(lessons);
   if (!begun.length) return new Set();
