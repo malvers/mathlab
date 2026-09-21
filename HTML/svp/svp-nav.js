@@ -1115,35 +1115,33 @@
 
     /* Neuigkeiten-Laufband direkt ueber dem Seitenkopf (Doc, 21.09.2026:
        "es gehoert ja zur Klasse Stunde") und mit ihm zusammen klebend, also
-       beim Scrollen nicht weg ("Nicht wegscrollen"). Auf einer Planseite hat
-       svp-plan.js Kopf und Werkzeugleiste schon in .plan-sticky verpackt -
-       dort wandert die Zeile als erstes Kind hinein und klebt mit. Der Plan
-       laeuft ganz durch, bevor dieses Skript an der Reihe ist (document.write
-       in svp-plan.js), die Huelle steht also bereits. Jede andere Seite
-       (Startseite, Notizen, Operatoren) hat keinen solchen Kopf - dort haengt
-       die Zeile unter dem blauen Band und klebt fuer sich (svp-news.css).
+       beim Scrollen nicht weg ("Nicht wegscrollen").
 
-       Die Zeile wird hier nur aufgehaengt - gefuellt wird sie von svp-news.js,
-       damit die Navileiste nicht auch noch Nachrichten holen und Feeds lesen
-       muss. Klebend ist die Huelle, nicht die Zeile selbst: die Zeile ist
-       1200 px breit und mittig, an ihr zoege der Seiteninhalt links und rechts
-       vorbei.
+       Und NUR dort (Doc, 21.09.2026: "im SP den ticker nicht zeigen", dann
+       "Den Ticker wirklich nur beim SVP anzeigen ... war grad auch bei der
+       Tour"). Merkmal ist der klebende Kopf, den svp-plan.js ausschliesslich
+       auf einer Planseite baut: Stundenplan, Leistungstest (den zeigt die Tour
+       in ihrem Rahmen), GENII, Notizen, Operatoren und die Startseite haben
+       keinen und bekommen damit auch keine Zeile. Der Plan laeuft ganz durch,
+       bevor dieses Skript an der Reihe ist (document.write in svp-plan.js) -
+       ist hier kein Kopf zu finden, ist die Seite wirklich keine Planseite.
 
-       Nicht auf dem Stundenplan (Doc, 21.09.2026: "im SP den ticker nicht
-       zeigen"): das Wochenraster will die Hoehe, und Neuigkeiten gehoeren zur
-       Unterrichtsstunde, nicht zum Raster. Die Zeile wird dort gar nicht erst
-       gebaut und svp-news.js nicht geladen - so faellt auch der Megafon-Knopf
-       in der Navileiste weg, statt tot dazustehen. */
-    if (!/\/stundenplan\.html$/.test(location.pathname)) {
+       Ohne Zeile wird svp-news.js nicht geladen, also faellt auch der
+       Megafon-Knopf in der Navileiste weg, statt tot dazustehen. Die Zeile
+       wird hier nur aufgehaengt - gefuellt wird sie von svp-news.js, damit die
+       Navileiste nicht auch noch Nachrichten holen und Feeds lesen muss.
+       Klebend ist der Kopf, nicht die Zeile selbst: die Zeile ist 1200 px
+       breit und mittig, an ihr zoege der Seiteninhalt links und rechts
+       vorbei. */
+    const planHead = document.querySelector('.plan-sticky');
+    if (planHead) {
         const dock = document.createElement('div');
         dock.className = 'nav-news-dock';
         const news = document.createElement('div');
         news.className = 'nav-news';
         news.hidden = true;
         dock.appendChild(news);
-        const planHead = document.querySelector('.plan-sticky');
-        if (planHead) planHead.insertBefore(dock, planHead.firstChild);
-        else band.insertAdjacentElement('afterend', dock);
+        planHead.insertBefore(dock, planHead.firstChild);
 
         const newsScript = document.createElement('script');
         newsScript.src = base + 'svp-news.js';

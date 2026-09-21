@@ -1,9 +1,10 @@
 /* ---- Neuigkeiten-Laufband ueber dem Seitenkopf, klebend ----------------
    Doc, 20.09.2026: "mach dazwischen eine kleine Zeile so wie die Suchzeile
    und bring da einen News ticker", dann 21.09.2026: "etwas flacher",
-   "nicht wegscrollen" und "es gehoert ja zur Klasse Stunde" - die Zeile steht
-   deshalb direkt ueber der Ueberschrift der Klasse und bleibt beim Scrollen
-   mit ihr oben. Grund, Rand, Radius und Schrift kommen
+   "nicht wegscrollen", "es gehoert ja zur Klasse Stunde" und "wirklich nur
+   beim SVP" - die Zeile steht deshalb direkt ueber der Ueberschrift der
+   Klasse, bleibt beim Scrollen mit ihr oben und gibt es nur auf einer
+   Planseite. Grund, Rand, Radius und Schrift kommen
    aus dem gemeinsamen Leisten-Block in svp-search.css - hier steht nur, was
    das Laufband selbst braucht. Gebaut wird die Zeile in svp-nav.js, die
    Texte stehen in svp-news.json. */
@@ -14,32 +15,14 @@
     --news-neon: rgb(64, 255, 122);
 }
 
-/* Auf einer Planseite steckt die Huelle im klebenden Kopf (.plan-sticky) und
-   klebt mit ihm - hier braucht sie nur Abstand nach unten zur Ueberschrift.
-   Den Grund gibt die Huelle darum her, sie traegt ihn schon. */
-.plan-sticky .nav-news-dock {
-    position: static;
-    background: none;
-    margin: 0 0 8px;
-    padding: 0;
-}
+/* Die Huelle steckt im klebenden Kopf der Planseite (.plan-sticky) und klebt
+   mit ihm - eine andere Stelle gibt es nicht mehr, svp-nav.js baut die Zeile
+   nur dort. Sie braucht darum nur Abstand nach unten zur Ueberschrift; Grund
+   und Breite kommen vom Kopf. */
+.nav-news-dock { margin: 0 0 8px; }
 
-/* Jede andere Seite hat keinen klebenden Kopf: dort haengt die Zeile unter dem
-   blauen Band und bleibt fuer sich oben stehen (Doc, 21.09.2026: "nicht
-   wegscrollen"). Sie geht dafuer von Kante zu Kante und traegt den
-   Seitengrund - der Inhalt verschwindet sauber dahinter, statt neben der
-   1200 px breiten Zeile vorbeizuziehen. */
-.nav-news-dock {
-    position: sticky;
-    top: 0;
-    z-index: 60;
-    background: var(--bg);
-    margin: 0 calc(-1 * var(--band-pull-x, clamp(12px, 3vw, 40px))) 12px;
-    padding: 0 var(--band-pull-x, clamp(12px, 3vw, 40px)) 8px;
-}
-
-/* Ohne sichtbare Zeile keine Huelle - sonst bliebe ein Streifen Grund stehen
-   und schoebe die Seite nach unten. */
+/* Ohne sichtbare Zeile keine Huelle - sonst bliebe der Abstand stehen und
+   schoebe die Ueberschrift nach unten. */
 .nav-news-dock:not(:has(.nav-news:not([hidden]):not(.zu))) { display: none; }
 
 .nav-news {
@@ -67,9 +50,8 @@
 
 /* Ohne die Zeile haelt die Navileiste 20 px zum Seitenkopf; mit ihr teilt
    sich derselbe Abstand auf ihre beiden Seiten auf, statt sich zu verdoppeln
-   (Doc, 21.09.2026: "dichter zusammen"). Auf einer Planseite steckt die Zeile
-   im klebenden Kopf, der dem Band folgt - daher die zweite Zeile. */
-.nav-band:has(+ .nav-news-dock),
+   (Doc, 21.09.2026: "dichter zusammen"). Die Zeile steckt im klebenden Kopf,
+   und der folgt dem Band. */
 .nav-band:has(+ .plan-sticky > .nav-news-dock) { margin-bottom: 12px; }
 
 /* Etikett links, gedaempft wie der Platzhalter der Suchzeile: ohne das Wort
