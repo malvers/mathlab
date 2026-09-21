@@ -23,8 +23,32 @@
 
     /* Tempo des Bandes in Pixeln je Sekunde (Doc, 20.09.2026: "lass es
        langsamer laufen"). Die Dauer rechnet sich daraus und aus der wirklich
-       gemessenen Breite der Zeile - nicht aus einer geratenen Zeichenzahl. */
-    const SPEED = 42;
+       gemessenen Breite der Zeile - nicht aus einer geratenen Zeichenzahl.
+       Seit dem 21.09.2026 sind es drei Stufen im Menue (Doc: "speed 1 2 3"),
+       Stufe 2 ist das bisherige Tempo. */
+    const TEMPI = { 1: 26, 2: 42, 3: 66 };
+    const TEMPO_KEY = 'svp-news-tempo';
+    const RUBRIK_KEY = 'svp-news-rubriken';
+
+    function merken(key, wert) {
+        try { localStorage.setItem(key, wert); } catch (e) { /* privates Fenster */ }
+    }
+
+    function gemerkt(key) {
+        try { return localStorage.getItem(key); } catch (e) { return null; }
+    }
+
+    let tempo = Number(gemerkt(TEMPO_KEY)) || 2;
+    if (!TEMPI[tempo]) tempo = 2;
+
+    /* Gemerkt werden die ABGEWAEHLTEN Rubriken, nicht die gewaehlten: so
+       laeuft eine Rubrik, die spaeter dazukommt, von allein mit - eine Liste
+       der gewaehlten muesste man dafuer jedesmal nachpflegen. */
+    let ausRubriken = new Set();
+    try {
+        const roh = JSON.parse(gemerkt(RUBRIK_KEY) || '[]');
+        if (Array.isArray(roh)) ausRubriken = new Set(roh);
+    } catch (e) { /* kaputt - dann laeuft eben alles */ }
 
     /* Doc, 20.09.2026: "Tagesschau nur ab Klasse 9". Die Klasse steht im
        Dateinamen des Plans (mathe5, mathegy9, fos11 ...) - die letzte Zahl
@@ -186,9 +210,158 @@
             .reduce(function (alle, r) { return alle.concat(gruppen.get(r)); }, []);
     }
 
+    function rubrikVon(it) { return it.quelle || 'News'; }
+
+    /* ---- Menue am Etikett ----------------------------------------------
+       Doc, 21.09.2026: "gib da mal ein drop (Ticker) wo man waehlen kann, was
+       gezeigt wird und speed 1 2 3 (radio)". Traeger ist das Etikett links -
+       es nennt ohnehin die laufende Rubrik. Das Blatt selbst haengt am <body>
+       und steht fest: die Zeile hat overflow:hidden, drinnen waere das Menue
+       abgeschnitten. Aufklappen, Klick daneben und Escape stehen hier statt in
+       svpDrop, weil dessen Menue aus Knoepfen besteht und sich bei jedem Klick
+       schliesst - hier werden mehrere Haken nacheinander gesetzt. */
+    const menu = document.createElement('div');
+    menu.className = 'nav-news-menu';
+    menu.hidden = true;
+
+    const label = document.createElement('button');
+    label.type = 'button';
+    label.className = 'nav-news-label';
+    label.title = 'Rubriken und Tempo';
+    label.setAttribute('aria-haspopup', 'true');
+    label.setAttribute('aria-expanded', 'false');
+    const labelText = document.createElement('span');
+    labelText.className = 'nav-news-labeltext';
+    const caret = document.createElement('span');
+    caret.className = 'nav-news-caret';
+    caret.textContent = '\u25be';
+    label.appendChild(labelText);
+    label.appendChild(caret);
+
+    function menuAuf(an) {
+        if (an && !menu.isConnected) document.body.appendChild(menu);
+        menu.hidden = !an;
+        label.classList.toggle('offen', !!an);
+        label.setAttribute('aria-expanded', an ? 'true' : 'false');
+        if (!an) return;
+        /* Unter das Etikett, aber nie ueber den rechten Rand hinaus - auf dem
+           Fon steht das Etikett dicht am Rand. */
+        const r = label.getBoundingClientRect();
+        const breite = menu.getBoundingClientRect().width;
+        menu.style.top = Math.round(r.bottom + 6) + 'px';
+        menu.style.left = Math.round(Math.max(8, Math.min(r.left, window.innerWidth - breite - 8))) + 'px';
+    }
+
+    label.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        menuAuf(menu.hidden);
+    });
+    document.addEventListener('click', function (e) {
+        if (!menu.hidden && !menu.contains(e.target) && !label.contains(e.target)) menuAuf(false);
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') menuAuf(false);
+    });
+
+    function menuKopf(text, spaeter) {
+        const h = document.createElement('div');
+        h.className = 'nav-news-kopf' + (spaeter ? ' spaeter' : '');
+        h.textContent = text;
+        return h;
+    }
+
+    function rubrikZeile(r, vorbild) {
+        const zeileEl = document.createElement('label');
+        zeileEl.className = 'nav-news-opt';
+        const haken = document.createElement('input');
+        haken.type = 'checkbox';
+        haken.checked = !ausRubriken.has(r);
+        haken.addEventListener('change', function () {
+            const an = menuRubriken.filter(function (x) { return !ausRubriken.has(x); });
+            /* Die letzte Rubrik bleibt an: ein leeres Band verschwindet samt
+               Etikett - und mit ihm dieses Menue. */
+            if (!haken.checked && an.length <= 1) { haken.checked = true; return; }
+            if (haken.checked) ausRubriken.delete(r); else ausRubriken.add(r);
+            merken(RUBRIK_KEY, JSON.stringify(Array.from(ausRubriken)));
+            zeichnen();
+        });
+        zeileEl.appendChild(haken);
+        if (vorbild && vorbild.logo) {
+            const img = document.createElement('img');
+            img.className = 'nav-news-logo' + (vorbild.logoKlasse ? ' nav-news-logo-' + vorbild.logoKlasse : '');
+            img.src = new URL(vorbild.logo, base).href;
+            img.alt = '';
+            img.onerror = function () { img.remove(); };
+            zeileEl.appendChild(img);
+        }
+        zeileEl.appendChild(document.createTextNode(r));
+        return zeileEl;
+    }
+
+    function tempoZeile() {
+        const reihe = document.createElement('div');
+        reihe.className = 'nav-news-tempo';
+        [1, 2, 3].forEach(function (n) {
+            const stufe = document.createElement('label');
+            stufe.className = 'nav-news-stufe';
+            stufe.title = n === 1 ? 'langsam' : (n === 2 ? 'normal' : 'schnell');
+            const knopf = document.createElement('input');
+            knopf.type = 'radio';
+            knopf.name = 'nav-news-tempo';
+            knopf.checked = (n === tempo);
+            knopf.addEventListener('change', function () {
+                if (!knopf.checked) return;
+                tempo = n;
+                merken(TEMPO_KEY, String(n));
+                tempoAnwenden();
+            });
+            stufe.appendChild(knopf);
+            stufe.appendChild(document.createTextNode(String(n)));
+            reihe.appendChild(stufe);
+        });
+        return reihe;
+    }
+
+    /* Das Tempo wirkt sofort, ohne das Band neu zu setzen: die Dauer ist nur
+       Breite durch Geschwindigkeit, die gemessene Breite steht schon da. */
+    function tempoAnwenden() {
+        const run = box.querySelector('.nav-news-run');
+        const line = run && run.querySelector('.nav-news-line');
+        if (!line) return;
+        const breite = Math.round(line.getBoundingClientRect().width);
+        run.style.animationDuration =
+            Math.max(20, breite ? Math.round(breite / TEMPI[tempo]) : 40) + 's';
+    }
+
+    let menuRubriken = [];
+
+    /* Neu gebaut wird das Menue nur, wenn wirklich eine Rubrik dazukommt oder
+       wegfaellt - sonst spraenge es waehrend des Haken-Setzens zusammen. */
+    function menuFuellen(alle) {
+        const rubriken = [];
+        alle.forEach(function (it) {
+            const r = rubrikVon(it);
+            if (rubriken.indexOf(r) < 0) rubriken.push(r);
+        });
+        if (rubriken.join('|') === menuRubriken.join('|')) return;
+        menuRubriken = rubriken;
+        menu.textContent = '';
+        menu.appendChild(menuKopf('Was läuft'));
+        rubriken.forEach(function (r) {
+            const vorbild = alle.find(function (x) { return rubrikVon(x) === r && x.logo; });
+            menu.appendChild(rubrikZeile(r, vorbild));
+        });
+        menu.appendChild(menuKopf('Tempo', true));
+        menu.appendChild(tempoZeile());
+    }
+
     function zeichnen() {
         const alle = wuerfeln(lokal.concat(eigene, wissen)).concat(feed);
-        if (alle.length) zeigen(alle);
+        if (!alle.length) return;
+        menuFuellen(alle);
+        const gewaehlt = alle.filter(function (it) { return !ausRubriken.has(rubrikVon(it)); });
+        if (gewaehlt.length) zeigen(gewaehlt);
     }
 
     /* ---- Knopf in der Navileiste --------------------------------------
@@ -256,6 +429,9 @@
     pill.addEventListener('click', function (e) {
         e.preventDefault();
         ausSetzen(!aus());
+        /* Ist die Zeile weg, ist auch ihr Etikett weg - ein offenes Menue
+           haengte sonst allein in der Seite. */
+        if (aus()) menuAuf(false);
         pillMalen();
     });
 
@@ -382,9 +558,6 @@
         if (!eintraege.length) return;
         box.textContent = '';
 
-        const label = document.createElement('span');
-        label.className = 'nav-news-label';
-
         const view = document.createElement('span');
         view.className = 'nav-news-view';
         const run = document.createElement('span');
@@ -419,14 +592,14 @@
             run.appendChild(line.cloneNode(true));
             /* Misst der Browser (noch) nichts, laeuft das Band mit einer
                ruhigen Standarddauer, statt mit 0s stillzustehen. */
-            const dauer = breite(line) ? Math.round(breite(line) / SPEED) : 40;
+            const dauer = breite(line) ? Math.round(breite(line) / TEMPI[tempo]) : 40;
             run.style.animationDuration = Math.max(20, dauer) + 's';
             box.classList.add('runs');
             /* Doc, 20.09.2026: "wenn es laeuft lass das Megafon sprechen und
                wabern" - die Pille bewegt sich genau so lange wie das Band. */
             pill.classList.add('spricht');
-            labelBreite(label, eintraege);
-            labelFolgen(label, view, run);
+            labelBreite(eintraege);
+            labelFolgen(view, run);
         });
     }
 
@@ -481,9 +654,9 @@
        "Stoff der Woche", "Vortraege" oder tagesschau, je nachdem, was laeuft.
        Feste Breite: sonst schoebe jeder Wechsel das Fenster auf oder zu, und
        das Band ruckelte bei jedem Rubrikwechsel. */
-    function labelBreite(label, eintraege) {
+    function labelBreite(eintraege) {
         const mess = document.createElement('span');
-        mess.className = 'nav-news-label';
+        mess.className = 'nav-news-labeltext';
         mess.style.cssText = 'position:absolute;visibility:hidden;width:auto;white-space:nowrap';
         box.appendChild(mess);
         let max = 0;
@@ -497,13 +670,13 @@
             max = Math.max(max, mess.getBoundingClientRect().width + (it.logo ? 20 : 0));
         });
         mess.remove();
-        if (max) label.style.width = Math.ceil(max) + 'px';
+        if (max) labelText.style.width = Math.ceil(max) + 'px';
     }
 
-    function labelSetzen(label, rubrik, logo, logoKlasse) {
-        if (label.dataset.jetzt === rubrik) return;
-        label.dataset.jetzt = rubrik;
-        label.textContent = '';
+    function labelSetzen(rubrik, logo, logoKlasse) {
+        if (labelText.dataset.jetzt === rubrik) return;
+        labelText.dataset.jetzt = rubrik;
+        labelText.textContent = '';
         if (logo) {
             const img = document.createElement('img');
             img.className = 'nav-news-logo' + (logoKlasse ? ' nav-news-logo-' + logoKlasse : '');
@@ -512,14 +685,14 @@
             /* Laedt das Bild nicht, bleibt das Wort allein stehen - die Quelle
                geht also nie verloren. */
             img.onerror = function () { img.remove(); };
-            label.appendChild(img);
-            label.appendChild(document.createTextNode(' '));
+            labelText.appendChild(img);
+            labelText.appendChild(document.createTextNode(' '));
         }
-        label.appendChild(document.createTextNode(rubrik));
+        labelText.appendChild(document.createTextNode(rubrik));
     }
 
     let uhr = null;
-    function labelFolgen(label, view, run) {
+    function labelFolgen(view, run) {
         if (uhr) clearInterval(uhr);
         function schauen() {
             /* Im Hintergrund laeuft die Animation ohnehin nicht weiter. */
@@ -533,7 +706,7 @@
             const items = run.querySelectorAll('.nav-news-item');
             for (const it of items) {
                 if (it.getBoundingClientRect().right > rand) {
-                    labelSetzen(label, it.dataset.rubrik || 'News', it.dataset.logo || '',
+                    labelSetzen(it.dataset.rubrik || 'News', it.dataset.logo || '',
                         it.dataset.logoklasse || '');
                     return;
                 }

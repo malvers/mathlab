@@ -55,12 +55,40 @@
 .nav-band:has(+ .plan-sticky > .nav-news-dock) { margin-bottom: 12px; }
 
 /* Etikett links, gedaempft wie der Platzhalter der Suchzeile: ohne das Wort
-   sieht die Zeile aus wie ein Eingabefeld, in das man tippen koennte. */
+   sieht die Zeile aus wie ein Eingabefeld, in das man tippen koennte. Seit
+   dem 21.09.2026 ist es zugleich der Knopf fuers Menue (Doc: "gib da mal ein
+   drop ... was gezeigt wird und speed 1 2 3") - darum ein <button>, der sich
+   als Etikett gibt: kein Grund, kein Rahmen, dieselbe Schrift wie bisher. */
 .nav-news-label {
     flex: 0 0 auto;
-    /* Rechtsbuendig (Doc, 20.09.2026: "rechts aligned"): das Etikett hat eine
-       feste Breite, damit das Band beim Rubrikwechsel nicht springt - links
-       gesetzt risse eine kurze Rubrik wie "Vortraege" eine Luecke zum Text. */
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font: inherit;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--text) 68%, transparent);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+}
+
+.nav-news-label:hover,
+.nav-news-label.offen { color: var(--text); }
+
+.nav-news-label:focus-visible {
+    outline: 2px solid var(--lambda);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Der Name der laufenden Rubrik, rechtsbuendig (Doc, 20.09.2026: "rechts
+   aligned"): er hat eine feste Breite, damit das Band beim Rubrikwechsel
+   nicht springt - links gesetzt risse eine kurze Rubrik wie "Vortraege" eine
+   Luecke zum Text. Die Breite misst svp-news.js an der laengsten Rubrik. */
+.nav-news-labeltext {
     display: inline-flex;
     align-items: center;
     justify-content: flex-end;
@@ -70,10 +98,149 @@
        ganze Zeile eine Zeile hoeher: gemessen am 21.09.2026 sprang das Band
        zwischen 27 px ("SCHON GEWUSST") und 32 px ("VORTRAEGE"). */
     white-space: nowrap;
-    font-size: 0.6rem;
+}
+
+.nav-news-caret {
+    font-size: 1.15em;
+    /* line-height:0 haelt die Zeilenbox flach - sonst waere das Band mit dem
+       Pfeil hoeher als vorher (dasselbe Muster wie .export-caret). */
+    line-height: 0;
+    opacity: 0.75;
+    transition: transform 0.15s;
+}
+
+.nav-news-label.offen .nav-news-caret { transform: rotate(180deg); }
+
+/* ---- Das Menue am Etikett -------------------------------------------
+   Doc, 21.09.2026: "gib da mal ein drop (Ticker) wo man waehlen kann, was
+   gezeigt wird und speed 1 2 3 (radio)". Das Blatt haengt am <body> und steht
+   fest, nicht in der Zeile: die hat overflow:hidden, drinnen waere es
+   abgeschnitten. Links und oben setzt svp-news.js beim Aufklappen. */
+.nav-news-menu {
+    position: fixed;
+    z-index: 120;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 200px;
+    padding: 10px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34);
+    font-size: 0.78rem;
+    color: var(--text);
+}
+
+.nav-news-menu[hidden] { display: none; }
+
+.nav-news-kopf {
+    font-size: 0.58rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: color-mix(in srgb, var(--text) 68%, transparent);
+    color: var(--muted);
+    padding: 0 4px 4px;
+}
+
+/* Der zweite Kopf ("Tempo") trennt sich mit einem Strich vom ersten Block. */
+.nav-news-kopf.spaeter {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+}
+
+.nav-news-opt {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 5px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.nav-news-opt:hover { background: rgba(170, 190, 220, 0.09); }
+
+/* Im Menue steht das Zeichen der Rubrik neben ihrem Namen, eine Spur kleiner
+   als im Band - dort setzt es die Zeilenhoehe, hier nicht. */
+.nav-news-opt .nav-news-logo {
+    height: 14px;
+    vertical-align: 0;
+}
+
+/* Eigene Kaestchen und Knoepfe statt der des Betriebssystems (dasselbe Muster
+   wie im Pillen-Blatt, svp-pillpanel.css): ein graues Systemhaekchen faellt
+   optisch aus der Seite. */
+.nav-news-opt input,
+.nav-news-stufe input {
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    flex: none;
+    margin: 0;
+    background: transparent;
+    border: 1.5px solid color-mix(in srgb, var(--text) 45%, transparent);
+    cursor: pointer;
+}
+
+.nav-news-opt input {
+    width: 16px;
+    height: 16px;
+    border-radius: 5px;
+}
+
+.nav-news-opt input:checked {
+    background: var(--lambda);
+    border-color: var(--lambda);
+}
+
+.nav-news-opt input:checked::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 4px;
+    height: 8px;
+    border: solid var(--panel);
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -58%) rotate(43deg);
+}
+
+/* Tempo: drei Stufen nebeneinander, 1 langsam bis 3 schnell. */
+.nav-news-tempo {
+    display: flex;
+    gap: 4px;
+    padding: 0 2px;
+}
+
+.nav-news-stufe {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 9px 4px 7px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.nav-news-stufe:hover { background: rgba(170, 190, 220, 0.09); }
+
+.nav-news-stufe input {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+}
+
+.nav-news-stufe input:checked { border-color: var(--lambda); }
+
+.nav-news-stufe input:checked::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--lambda);
+    transform: translate(-50%, -50%);
 }
 
 /* Das Fenster, in dem der Text laeuft. min-width:0 ist Pflicht: ein Flex-Kind
@@ -170,9 +337,21 @@ html.svp-light .nav-news-item b { color: var(--ypsilon); }
     .nav-news.runs .nav-news-run { animation: none; }
 }
 
-/* Phone: das Etikett frisst zu viel von der kurzen Zeile. */
+/* Phone: der Rubrikname frisst zu viel von der kurzen Zeile - der Knopf mit
+   dem Pfeil bleibt aber stehen, sonst waere das Menue dort nicht erreichbar.
+   Ohne den Namen traegt nur noch der Pfeil, und der hat line-height:0: der
+   Knopf waere 8 x 0 px und damit nicht zu treffen (gemessen am 21.09.2026) -
+   deshalb hier eine eigene Flaeche zum Tippen. */
 @media (max-width: 520px) {
-    .nav-news-label { display: none; }
+    .nav-news-labeltext { display: none; }
+    .nav-news-label {
+        justify-content: center;
+        min-width: 22px;
+        /* Nicht min-height: das zoege die Zeile auf 30 px auf. Gestreckt ist
+           der Knopf so hoch, wie die Zeile ohnehin ist. */
+        align-self: stretch;
+    }
+    .nav-news-caret { line-height: 1; }
 }
 
 /* ---- Das Megafon spricht, solange das Band laeuft --------------------
@@ -235,4 +414,4 @@ html.svp-light nav.quick-nav a.nav-news-btn.spricht .mega .grip { fill: var(--ph
     nav.quick-nav a.nav-news-btn.spricht .mega .horn { animation: none; }
 }
 
-@media print { .nav-news, .nav-news-dock { display: none !important; } }
+@media print { .nav-news, .nav-news-dock, .nav-news-menu { display: none !important; } }
