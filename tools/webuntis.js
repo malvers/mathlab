@@ -326,7 +326,7 @@ const REPO = path.join(__dirname, '..');
 // what patchStatus() patches and what `untis-push` resends. It sits in plandaten/, which is
 // gitignored - the status data (dates, lesson topics) must never be in the public repo again.
 const UNTIS_CACHE = path.join(REPO, 'HTML', 'svp', 'plandaten', 'untis');
-const WRITTEN_ROW = '_written';   // svp_untis row that stundenplan.html reads for its orange U
+const WRITTEN_ROW = '_written';   // svp_untis row stundenplan.html reads for its orange L and A
 
 function loadMap() {
   if (!fs.existsSync(MAP_FILE)) return [];
