@@ -1118,6 +1118,27 @@
     band.appendChild(nav);
     document.body.insertBefore(band, document.body.firstChild);
 
+    /* Doc, 22.09.2026: "das nicht scrollen bitte", dann "das auch nicht" - auf
+       den Seiten mit klebendem Kopf (body.head-sticky) bleibt nicht nur die
+       Ueberschrift stehen, sondern der ganze Block darueber: Band, Kopf und
+       was die Seite selbst mit data-stick markiert (die Bedienzeile der
+       Punktetabelle).
+
+       Eine gemeinsame Huelle statt dreier einzelner Anschlaege: so muss
+       niemand Hoehen messen und nachfuehren, wenn das Band auf einem schmalen
+       Schirm umbricht. Die Planseiten haben dafuer ihre eigene Huelle
+       (.plan-sticky), die auch das Laufband traegt - sie bauen diese hier
+       nicht. */
+    if (document.body.classList.contains('head-sticky')) {
+        const top = document.createElement('div');
+        top.className = 'svp-sticktop';
+        document.body.insertBefore(top, band);
+        top.appendChild(band);
+        const kopf = document.querySelector('header.page-head');
+        if (kopf) top.appendChild(kopf);
+        document.querySelectorAll('[data-stick]').forEach(el => top.appendChild(el));
+    }
+
     /* Neuigkeiten-Laufband direkt ueber dem Seitenkopf (Doc, 21.09.2026:
        "es gehoert ja zur Klasse Stunde") und mit ihm zusammen klebend, also
        beim Scrollen nicht weg ("Nicht wegscrollen").

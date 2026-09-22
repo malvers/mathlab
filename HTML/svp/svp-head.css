@@ -87,37 +87,48 @@
 @media print { .page-head button.action { display: none; } }
 
 /* Der Kopf bleibt beim Scrollen oben stehen (Doc, 22.09.2026: "Bewertungen SP
-   und hier bitte die Ueberschrift nicht wegscrollen" - Bewertungen, Stundenplan
-   und Punktetabelle). Eine Seite schaltet es mit <body class="head-sticky">
-   frei; die Planseiten haben dafuer ihre eigene Huelle (.plan-sticky in
+   und hier bitte die Ueberschrift nicht wegscrollen", dann "das nicht scrollen
+   bitte" fuer das Navi-Band und die Bedienzeile darunter). Eine Seite schaltet
+   es mit <body class="head-sticky"> frei; svp-nav.js legt dann die Huelle
+   .svp-sticktop um Band, Kopf und alles, was die Seite mit data-stick
+   markiert. Die Planseiten haben dafuer ihre eigene Huelle (.plan-sticky in
    svp-toolbar.css), die ausser dem Kopf auch Werkzeugleiste und Laufband
    traegt.
 
-   Der Grund liegt in einem ::before und nicht im Kopf selbst: der Kopf steht in
-   einer 1200px-Spalte, ein Hintergrund an ihm wuerde die Zeilen neben ihm
-   durchscheinen lassen. Das Pseudo-Element zieht ueber die Body-Polsterung
-   hinaus - dieselben --band-pull-* wie das Navi-Band, damit eine Seite mit
-   eigener Polsterung (stundenplan.css) nicht seitlich ueberhaengt. */
-body.head-sticky header.page-head {
+   Warum eine Huelle und nicht drei sticky-Elemente: gestapelte Anschlaege
+   braeuchten je die Hoehe des Vorgaengers als top-Wert, und die aendert sich,
+   sobald das Band umbricht - das waere eine Messung, die bei jeder
+   Fensteraenderung nachgefuehrt werden muss. */
+.svp-sticktop {
     position: sticky;
     top: 0;
-    /* ueber dem Blatt, aber unter den Menues des Navi-Bands (dort 50+) */
-    z-index: 30;
-    padding-top: 6px;
-    padding-bottom: 8px;
+    /* ueber dem Blatt und ueber den klebenden Tabellenkoepfen darunter */
+    z-index: 45;
+    background: var(--bg);
+    /* Ohne flow-root faellt der untere Abstand des Kopfes aus der Huelle heraus
+       (Margin Collapsing) - die Zeilen schoeben sich dann durch diesen Spalt. */
+    display: flow-root;
+    /* Das Band zieht sich sonst mit seinem negativen Rand ueber die Oberkante
+       der Huelle hinaus und verlaere geklebt seine ersten Pixel. Der Zug
+       gehoert an die Huelle, nicht an das Band. */
+    margin-top: calc(-1 * var(--band-pull-top, clamp(12px, 3vw, 40px)));
 }
 
-body.head-sticky header.page-head::before {
+.svp-sticktop > .nav-band { margin-top: 0; }
+
+/* Die Huelle steht in der 1200px-Spalte, das Blatt darunter auch - neben ihr
+   bleibt nur die Body-Polsterung. Die deckt dieses Pseudo-Element ab, mit
+   denselben --band-pull-*, die auch das Band benutzt: eine Seite mit eigener
+   Polsterung (stundenplan.css) haengt so nicht seitlich ueber. */
+.svp-sticktop::before {
     content: '';
     position: absolute;
     inset: 0 calc(-1 * var(--band-pull-x, clamp(12px, 3vw, 40px)));
     background: var(--bg);
-    /* hinter Ueberschrift und Knoepfen, aber - der Kopf ist ein eigener
-       Stapelkontext - weiter vor allem, was darunter durchzieht */
     z-index: -1;
 }
 
 @media print {
-    body.head-sticky header.page-head { position: static; }
-    body.head-sticky header.page-head::before { display: none; }
+    .svp-sticktop { position: static; margin-top: 0; }
+    .svp-sticktop::before { display: none; }
 }
