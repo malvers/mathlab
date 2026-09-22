@@ -20,6 +20,20 @@ INF12 = {
     "back": "svp/informatik/inf12.html",
     "gen": GEN, "balance": True,
 }
+FOS11 = {
+    "qid": "fos11", "file": "infotest11",
+    "subtitle": "Fachoberschule · Klasse 11",
+    "dash": "FOS · Klasse 11",
+    "back": "svp/informatik/fos11.html",
+    "gen": GEN, "balance": True,
+}
+FOS12 = {
+    "qid": "fos12", "file": "infotest12",
+    "subtitle": "Fachoberschule · Klasse 12",
+    "dash": "FOS · Klasse 12",
+    "back": "svp/informatik/fos12.html",
+    "gen": GEN, "balance": True,
+}
 INF13 = {
     "qid": "inf13", "file": "inf13test",
     "subtitle": "Berufliches Gymnasium · Jahrgangsstufe 13",
@@ -4417,6 +4431,8 @@ QUIZZES = [
     "Das Vorgehen nicht."]),
  ]),
  (INF12, "ai-begriffe", 6, 39, "Die Begriffe der künstlichen Intelligenz", AI_BEGRIFFE),
+ (FOS11, "ai-begriffe", 6, 39, "Die Begriffe der künstlichen Intelligenz", AI_BEGRIFFE),
+ (FOS12, "ai-begriffe", 6, 39, "Die Begriffe der künstlichen Intelligenz", AI_BEGRIFFE),
 ]
 
 
