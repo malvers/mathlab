@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Wortvorhersage</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&family=Raleway:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        .wv-rows { display: flex; flex-direction: column; gap: 7px; }
+        .wv-row { display: flex; justify-content: space-between; gap: 10px; font-size: .82rem; }
+        .wv-key { color: #9fb2c8; }
+        .wv-val { color: #9de8ff; font-family: Orbitron, sans-serif; }
+        .wv-btns { display: flex; gap: 8px; }
+        .wv-btns .cyber-btn { flex: 1; }
+        /* the sentence, open for typing - same rectangle, same type as the drawn box */
+        #wv-edit {
+            position: fixed; z-index: 40; resize: none; border-radius: 12px;
+            background: #FFFFFF; color: #3A4150; caret-color: rgb(176, 36, 24);
+            border: 1px solid rgba(58, 65, 80, .45);
+            font-family: "IBM Plex Mono", Menlo, monospace; font-weight: 400;
+            outline: none; box-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+        }
+        #wv-edit[hidden] { display: none; }
+        /* ?widget - the sheet alone, no rail and no cards: what the deck's frame shows */
+        body.wv-widget { grid-template-columns: 0 minmax(0, 1fr) !important; }
+        body.wv-widget #cyber-left-chrome, body.wv-widget #cyber-left-chrome-inner, body.wv-widget #mini-rail,
+        body.wv-widget #side-panel, body.wv-widget #cyber-screen-warning { display: none !important; }
+        body.wv-widget #main-content { grid-column: 1 / -1 !important; }
+        /* the working area reads like paper - the cards on the left keep the dark house style */
+        #canvas-container { background: #F7F2E7; }
+        /* no wordmark over the sheet in THIS lab (Doc, 22.09.2026: "Branding rechts oben raus (hier)") */
+        .canvas-branding { display: none; }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Wortvorhersage',
+        });
+        CyberUI.init();
+
+        (function setCoachTitleFromI18n() {
+            const el = document.getElementById('coach-title-slot');
+            if (el && typeof CyberI18n !== 'undefined' && typeof CyberI18n.get === 'function') {
+                el.textContent = CyberI18n.get('ui.description');
+            }
+        })();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+        const log = (m) => { if (typeof dbg === 'function') dbg(m); };
+        const T = (k, fb) => (window.CyberI18n && CyberI18n.getOr) ? CyberI18n.getOr('wv.' + k, fb) : fb;
+
+        // ---------------------------------------------------------------- the text ---
+        // The training sentence stands above, the prediction grows below it. Any text works - it is only
+        // ever read as a list of words, and the window slides over that list.
+        const SOURCE = ('Ein neuronales Netz lernt nicht wie ein Mensch und schlägt auch nichts nach. '
+            + 'Es bekommt sehr viel Text zu lesen und soll dabei immer nur eines tun: '
+            + 'aus den Wörtern davor das nächste Wort erraten. '
+            + 'Am Anfang sind alle Gewichte zufällig, also fällt lauter Unsinn heraus. '
+            + 'Jeder Fehler wird gemessen und rückwärts durch die Schichten verteilt, '
+            + 'und alle Gewichte rücken ein winziges Stück in die bessere Richtung. '
+            + 'Nach vielen Durchläufen trifft die Vorhersage immer häufiger das richtige Wort, '
+            + 'und aus dem Rauschen wird lesbare Sprache.');
+        // more sentences follow on Space, one after the other, the learned share growing with each
+        // (Doc, 22.09.2026: "SPACE startet, wenn der 1. Satz durch ist kommt der nächste wenn space etc")
+        const TEXTS = [SOURCE,
+            'Ein Sprachmodell hat kein Wissen im Sinne von Fakten in einer Tabelle. Es hat Gewichte, viele '
+            + 'Milliarden Zahlen, und in ihnen steckt, welche Wörter in welcher Umgebung wahrscheinlich sind. '
+            + 'Fragt man es etwas, rechnet es aus dem Gesagten das wahrscheinlichste nächste Wort aus, hängt es '
+            + 'an und rechnet weiter. Dass dabei so oft Sinnvolles herauskommt, liegt allein daran, dass es '
+            + 'unvorstellbar viel Text gesehen hat.',
+            'Beim Training bekommt das Netz einen Satz ohne das letzte Wort und soll es erraten. Liegt es '
+            + 'daneben, wird der Abstand zum richtigen Wort gemessen. Dieser Fehler wandert rückwärts durch alle '
+            + 'Schichten, und jedes Gewicht erfährt, in welche Richtung es sich ein wenig bewegen muss. Das '
+            + 'geschieht Milliarden Male, mit immer neuen Sätzen, bis der Fehler klein geworden ist.',
+            'Was ein Netz nie gesehen hat, kann es nicht wissen. Es kann aber Muster fortsetzen, die es aus '
+            + 'ähnlichen Texten kennt, und das klingt dann oft überzeugend, auch wenn es falsch ist. Darum lohnt '
+            + 'es sich, eine Antwort zu prüfen, statt sie zu glauben. Ein Netz weiß nicht, was wahr ist. Es weiß '
+            + 'nur, was wahrscheinlich als Nächstes kommt.',
+            'Ein Netz liest keine Wörter, sondern Stücke davon, die Tokens. Ein häufiges Wort ist ein einziges '
+            + 'Token, ein seltenes wird in mehrere zerlegt. Was das Netz auf einmal überblicken kann, heißt '
+            + 'Kontextfenster, und alles davor ist für den nächsten Schritt einfach nicht mehr da. Darum kann es '
+            + 'mitten in einem langen Gespräch vergessen, was am Anfang stand.',
+            'Ob dieselbe Frage zweimal dieselbe Antwort bekommt, hängt davon ab, wie das nächste Wort gezogen '
+            + 'wird. Nimmt das Netz immer das wahrscheinlichste, wiederholt es sich und klingt hölzern. Lässt man '
+            + 'dem Zufall etwas Raum, wird die Sprache lebendiger, aber auch weniger verlässlich. Diesen Regler '
+            + 'nennt man Temperatur.'];
+        let textIx = 0;
+        let TEXT = TEXTS[0].split(/\s+/);
+        let startGiven = 0.6;                         // where the first sentence's border opens - set below
+        let startLevel = 0.6;                         // the corpus share at the start
+        let startSpeed = 900;
+        const STORE = 'wv-sliders';
+        function saved() {
+            try { return JSON.parse(localStorage.getItem(STORE) || '{}') || {}; } catch (e) { return {}; }
+        }
+        function remember() {
+            try { localStorage.setItem(STORE, JSON.stringify({ given: S.given, level: S.level, speed: S.speed })); }
+            catch (e) { }
+        }
+
+        // ------------------------------------------------------------------ the state ---
+        const S = {
+            speed: 900,           // ms until one word has settled - each sentence halves it
+            given: 0.6,           // the share of each sentence that is handed over - fixed, the rest is produced
+            level: 0.6,           // what the net has learned from the corpus - grows with every sentence
+            mode: 'still',        // 'still' = the picture it opens with, 'run' = the rest settling word by word
+            running: false,
+            pos: 0,               // the word settling right now
+            stopAt: -1,           // "Ein Wort": pause once pos reaches this
+            epoch: 0,             // runs finished
+            nr: 1,                // which sentence this is - the heading says so
+            ok: [],               // per position: does the net get this word right? (the opening picture)
+            known: [],            // per position: a word behind the border the net already has - seen before
+            noise: [],            // per position: the gibberish standing in for the word before it settles
+            cur: '',              // the settling word as it looks this instant
+            flick: 0,             // when the loose letters were last rolled
+            frac: 0,              // how far the settling word has locked, 0..1
+            t0: 0                 // when the current word started settling
+        };
+
+        // gibberish, the way an untrained net babbles: letters with no word behind them
+        const LETTERS = 'abcdefghijklmnopqrstuvwxyz';
+        function babble(n) {
+            let s = '';
+            for (let i = 0; i < n; i++) s += LETTERS[(Math.random() * LETTERS.length) | 0];
+            return s;
+        }
+
+        // The learned part is a PIECE, not a sprinkle: everything up to the border sits, everything after it
+        // does not (Doc, 22.09.2026: "den ersten Teil bis winziges grün der Rest rot"). That is how it reads
+        // in class - the border walks to the right while the net trains.
+        const border = () => Math.round(TEXT.length * S.given);
+
+        const SEEN = new Set();
+        const norm = w => w.toLowerCase().replace(/[^a-zäöüß]/g, '');
+        function rollLevel() {
+            const green = border();
+            S.ok = TEXT.map((w, i) => i < green);
+        }
+        function rollKnown() {
+            const green = border();
+            S.known = TEXT.map((w, i) => i >= green && SEEN.has(norm(w)) && Math.random() < S.level);
+        }
+        const knownAhead = from => S.known.reduce((n, k, i) => n + (k && i >= from ? 1 : 0), 0);
+
+        function playLabel() {
+            const b = document.getElementById('wv-play');
+            if (b) b.textContent = S.running ? T('btn_stop', 'Pause') : T('btn_play', 'Start');
+        }
+
+        // the picture it opens with: the whole sentence, grey where the net has it, red where it has not
+        function still() {
+            S.mode = 'still'; S.running = false; S.stopAt = -1;
+            rollLevel(); rollKnown();
+            S.pos = border();
+            playLabel();
+            showStats();
+        }
+        function resetAll() {
+            S.epoch = 0;
+            textIx = 0; TEXT = TEXTS[0].split(/\s+/); S.nr = 1;
+            SEEN.clear();
+            S.given = startGiven; S.level = startLevel;
+            const gv = document.getElementById('wv-given'), gvl = document.getElementById('wv-given-l');
+            if (gv) gv.value = Math.round(S.given * 100);
+            if (gvl) gvl.textContent = Math.round(S.given * 100) + ' %';
+            S.speed = startSpeed;
+            const sp = document.getElementById('wv-speed'), spl = document.getElementById('wv-speed-l');
+            if (sp) sp.value = S.speed;
+            if (spl) spl.textContent = S.speed + ' ms';
+            const sl = document.getElementById('wv-level'), lb = document.getElementById('wv-level-l');
+            if (sl) sl.value = Math.round(S.level * 100);
+            if (lb) lb.textContent = Math.round(S.level * 100) + ' %';
+            still(); draw();
+        }
+
+        // The next sentence, opened as its picture first - the gaps show what the net already has, and
+        // that is worth a look before the next Space runs it (Doc, 22.09.2026: "Space muss erst den Satz
+        // zeigen und das nächste run"). Faster each time: training is not something one watches for long.
+        function nextText() {
+            textIx = (textIx + 1) % TEXTS.length;
+            TEXT = TEXTS[textIx].split(/\s+/);
+            S.nr++;
+            still();                                  // the share already grew when the last sentence finished
+            S.speed = Math.max(80, Math.round(S.speed * 0.55));
+            const sl = document.getElementById('wv-speed'), lb = document.getElementById('wv-speed-l');
+            if (sl) sl.value = S.speed;
+            if (lb) lb.textContent = S.speed + ' ms';
+        }
+
+        // After Start the whole rest behind the border stands there as gibberish, and from left to right one
+        // word after the other settles into the real one - letters rattling until they lock, like a lock
+        // finding its combination - through to the end of the text (Doc, 22.09.2026: "hinter winziges aus
+        // jiberish Stück entstehen ... der ganze Junk bis zum Ende - DAS hatte ich im Kopf").
+        function startRun() {
+            S.mode = 'run'; S.running = true; S.stopAt = -1;
+            rollLevel();
+            if (S.known.length !== TEXT.length) rollKnown();
+            S.pos = border();
+            S.noise = TEXT.map((w, i) => (i < S.pos || S.known[i]) ? w : babble(w.length));   // same length: the line keeps still
+            S.cur = S.noise[S.pos] || '';
+            S.t0 = performance.now(); S.flick = 0; S.frac = 0;
+            playLabel();
+            showStats();
+        }
+
+        // the settling word at this instant: the first letters locked, the rest still rolling
+        function settle(now) {
+            if (S.pos >= TEXT.length) return;
+            const word = TEXT[S.pos];
+            const had = !!S.known[S.pos];
+            const f = Math.min(1, (now - S.t0) / (had ? S.speed * 0.15 : S.speed));
+            S.frac = f;
+            const locked = had ? word.length : Math.floor(f * word.length);
+            if (now - S.flick > 70 || S.cur.length !== word.length) {   // roll the loose letters ~14 times a second
+                S.flick = now;
+                let out = word.slice(0, locked);
+                for (let k = locked; k < word.length; k++) {
+                    const c = word[k];
+                    out += /[a-zA-Z]/.test(c) ? LETTERS[(Math.random() * LETTERS.length) | 0] : c;
+                }
+                S.cur = out;
+            } else {
+                S.cur = word.slice(0, locked) + S.cur.slice(locked);
+            }
+            if (f >= 1) {                                 // locked - on to the next word
+                S.pos++;
+                S.cur = S.noise[S.pos] || '';
+                S.t0 = now; S.frac = 0;
+                showStats();
+                if (S.pos >= TEXT.length) {               // the end: the sentence is through, the net has grown
+                    S.running = false;
+                    TEXT.forEach(w => SEEN.add(norm(w)));
+                    grow();
+                    playLabel(); showStats();
+                    log('Durchlauf ' + S.epoch);
+                } else if (S.stopAt >= 0 && S.pos >= S.stopAt) {
+                    S.running = false; S.stopAt = -1;
+                    playLabel();
+                }
+            }
+        }
+
+        // the learned share grows, quickly at first and ever more slowly - like real training
+        function grow() {
+            S.epoch++;
+            S.level = Math.min(0.99, S.level + (1 - S.level) * 0.3);
+            const sl = document.getElementById('wv-level');
+            const lb = document.getElementById('wv-level-l');
+            if (sl) sl.value = Math.round(S.level * 100);
+            if (lb) lb.textContent = Math.round(S.level * 100) + ' %';
+        }
+        // one training run by button: the share grows and the picture opens afresh
+        function train() { grow(); still(); }
+
+        // ------------------------------------------------------------------ drawing ---
+        const SAND = '#F7F2E7';                       // the working area, a shade of paper (Doc, 22.09.2026)
+        const PAPER = '#EFE7D4';                      // the box, a shade deeper than the ground around it
+        const INK = '#3A4150';                        // dark grey, the ordinary word
+        const FAR = 'rgba(58,65,80,.34)';             // far from the window - there, but out of play
+        const WIN = '#14304F';                        // a word inside the context window
+        const RIGHT = INK, WRONG = 'rgb(176,36,24)', WARM = 'rgb(245,194,66)';
+        const GREEN = 'rgb(84,116,28)';               // the house green, a shade deeper - it read faint on sand (Doc, 22.09.2026)
+
+        function metrics() {
+            const cr = canvas.getBoundingClientRect();
+            const room = (window.innerWidth || cr.right) - cr.left;
+            const w = Math.max(240, Math.min(cr.width, room));
+            const base = Math.max(10, Math.min(17, w / 58));
+            return { w: w, h: cr.height, fs: base, lh: base * 1.85, pad: base * 1.1 };
+        }
+
+        // the box the text sits in - one rounded panel, same language as the cards on the left
+        function panel(x, y, w, h, m) {
+            const r = Math.min(12, m.fs * 0.7);
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.arcTo(x + w, y, x + w, y + h, r);
+            ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r);
+            ctx.arcTo(x, y, x + w, y, r);
+            ctx.closePath();
+            ctx.fillStyle = PAPER;
+            ctx.fill();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'rgba(58,65,80,.30)';
+            ctx.stroke();
+        }
+
+        // lay words out in lines, left to right, wrapping at the edge
+        function layout(words, m, x0, y0, maxW) {
+            ctx.font = m.fs + 'px "IBM Plex Mono", Menlo, monospace';
+            const out = [];
+            let x = x0, y = y0;
+            words.forEach((w, i) => {
+                const t = w == null ? '·' : w;
+                const width = ctx.measureText(t).width;
+                if (x + width > x0 + maxW) { x = x0; y += m.lh; }
+                out.push({ t: t, x: x, y: y, w: width, i: i });
+                x += width + m.fs * 0.42;
+            });
+            return { boxes: out, bottom: y + m.lh };
+        }
+
+        // ONE box per line behind the produced words, not one per word - stacked alpha showed every seam
+        // (Doc, 22.09.2026: "EINE Box nicht viele"). It ends where the settling word has locked so far.
+        function grown(boxes, from, to, m) {
+            const rows = new Map();                       // baseline -> [left, right]
+            boxes.forEach(b => {
+                if (b.i < from || b.i >= to) return;
+                const right = b.i < S.pos ? b.x + b.w : b.x + b.w * S.frac;
+                const r = rows.get(b.y);
+                if (!r) rows.set(b.y, [b.x, right]); else r[1] = Math.max(r[1], right);
+            });
+            ctx.fillStyle = 'rgba(185,166,124,.40)';       // dark sand, as the line was
+            rows.forEach((r, y) => { if (r[1] > r[0]) ctx.fillRect(r[0] - 3, y - m.fs, r[1] - r[0] + 6, m.fs * 1.38); });
+        }
+
+        // ONE type size for every sentence: the biggest at which each of the six fits its box (Doc,
+        // 22.09.2026: "du änderst unterwegs die Fontsize? Nee! dann kürzer, wenn es nicht passt"). It only
+        // changes with the window. A typed sentence longer than the longest of the six runs out of the box -
+        // that is the sign to shorten it. Cached: the search costs a few layouts.
+        const ORIG = TEXTS.map(t => t.split(/\s+/));
+        function fit(m, boxH, maxW) {
+            const key = Math.round(maxW) + '|' + Math.round(boxH);
+            if (S.fit && S.fit.key === key) return S.fit;
+            let t = null;
+            for (let fs = Math.min(30, m.fs * 1.8); fs >= 8; fs -= 0.5) {
+                t = { fs: fs, lh: fs * 1.85, inner: fs * 1.15, top: fs * 2.6, key: key };
+                const fits = ORIG.every(words => {
+                    const probe = layout(words, t, 0, 0, maxW);
+                    const lines = Math.max(1, Math.round(probe.bottom / t.lh));
+                    return (lines - 1) * t.lh + fs + t.top + t.inner <= boxH;
+                });
+                if (fits) break;
+            }
+            S.fit = t;
+            return t;
+        }
+
+        function title(text, x, y, m) {
+            ctx.font = '700 ' + (m.fs * 0.9) + 'px Orbitron, sans-serif';
+            ctx.fillStyle = 'rgba(58,65,80,.62)';
+            ctx.textAlign = 'center';
+            ctx.fillText(text.toUpperCase(), x, y);
+            ctx.textAlign = 'left';
+        }
+
+        function draw() {
+            const m = metrics();
+            const cr = canvas.getBoundingClientRect();
+            ctx.clearRect(0, 0, cr.width, cr.height);
+            ctx.fillStyle = SAND;
+            ctx.fillRect(0, 0, cr.width, cr.height);
+            ctx.textBaseline = 'alphabetic';
+            const boxX = m.pad, boxW = m.w - 2 * m.pad;
+            const x0 = boxX + m.pad, maxW = boxW - 2 * m.pad;   // the text keeps clear of the box edges
+            S.box = null;
+            const run = S.mode === 'run';
+            // the line in the sentence above follows the words produced so far: from the border to the one
+            // settling now (Doc, 22.09.2026: "warum geht die am Ende nicht von Stück") - none while at rest
+            const to = run ? Math.min(S.pos + 1, TEXT.length) : -1, from = run ? border() : -1;
+
+            // --- the sheet: two boxes of the same height, at the same place for every sentence -----------
+            const gap = m.fs * 1.8;                    // room for a heading over a box
+            const ytop = m.pad + m.fs * 0.4;
+            const mid = m.fs * 1.3 + gap;              // between the boxes: the heading
+            const foot = m.fs * 2.6;                   // under the second box: the learned share as a bar
+            const boxH = Math.max(m.fs * 4, (m.h - ytop - gap - mid - foot - m.pad * 1.2) / 2);
+            const t = fit(m, boxH, maxW);              // the type that fills them
+            const font = t.fs + 'px "IBM Plex Mono", Menlo, monospace';
+            const baseline = t.top + t.fs * 0.86;      // first line, measured from the box top
+
+            // --- the training sentence ---------------------------------------------------
+            title(S.nr + '. ' + T('t_training', 'Trainingssatz'), boxX + boxW / 2, ytop + m.fs, m);
+            let y = ytop + gap;
+            const top = layout(TEXT, t, x0, y + baseline, maxW);
+            S.box = { x: boxX, y: y, w: boxW, h: boxH, fs: t.fs, lh: t.lh, pad: t.inner };
+            panel(boxX, y, boxW, boxH, m);
+            if (run) grown(top.boxes, from, to, t);
+            top.boxes.forEach(b => {
+                ctx.font = font;
+                ctx.fillStyle = S.ok[b.i] ? RIGHT : WRONG;   // the sentence keeps its colours throughout
+                ctx.fillText(b.t, b.x, b.y);
+            });
+
+            // --- what the net says ------------------------------------------------------
+            y = S.box.y + boxH + m.fs * 1.3;
+            title(T('t_said', 'Vorhersage'), boxX + boxW / 2, y + m.fs, m);   // the same distance to its box as above
+            y += gap;
+            // the same box, the same height: at rest only the learned part, the red part is simply not
+            // there; running, the rest stands as gibberish and settles word by word. The words are laid out
+            // as the REAL text, so nothing shifts while the letters roll.
+            const low = layout(TEXT, t, x0, y + baseline, maxW);
+            panel(boxX, y, boxW, boxH, m);
+            // in the lower box, above its text: how much of this sentence the net has - learned plus
+            // produced, 100 at the end (Doc, 22.09.2026: "pack die % Pille über den unteren Text")
+            const have = Math.min(TEXT.length, run ? S.pos + S.frac + knownAhead(S.pos + 1) : border() + knownAhead(border()));
+            const pct = Math.round(100 * have / Math.max(1, TEXT.length)) + ' %';
+            ctx.font = '700 ' + (m.fs * 0.9) + 'px Orbitron, sans-serif';
+            const pw = ctx.measureText(pct).width + m.fs * 1.6, ph = m.fs * 1.5;
+            const pcy = y + t.top * 0.5;               // the middle of the air above the text
+            ctx.beginPath();
+            ctx.roundRect(boxX + boxW / 2 - pw / 2, pcy - ph / 2, pw, ph, ph / 2);
+            ctx.fillStyle = 'rgba(185,166,124,.55)';
+            ctx.fill();
+            ctx.fillStyle = INK;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(pct, boxX + boxW / 2, pcy + m.fs * 0.04);
+            ctx.textBaseline = 'alphabetic';
+            ctx.textAlign = 'left';
+            if (run) grown(low.boxes, from, to, t);
+            low.boxes.forEach(b => {
+                ctx.font = font;
+                let txt = b.t, col = INK;
+                const behind = b.i >= border();
+                if (!run) {
+                    if (behind) col = S.known[b.i] ? GREEN : WRONG;   // has it from before, or not yet (Doc, 22.09.2026: "rot auch zeigen")
+                } else if (b.i > S.pos) { txt = S.noise[b.i]; col = S.known[b.i] ? GREEN : WRONG; }
+                else if (b.i === S.pos) { txt = S.cur || b.t; col = S.known[b.i] ? GREEN : WRONG; }
+                else if (behind) col = GREEN;                 // settled: the words the net made (Doc, 22.09.2026: "unser grün")
+                ctx.fillStyle = col;
+                // gibberish never grows past the word it stands for - wide letters would run into the neighbour
+                if (txt === b.t) ctx.fillText(txt, b.x, b.y); else ctx.fillText(txt, b.x, b.y, b.w);
+            });
+
+            // --- under the second box: the learned share, the net's overall quality (Doc, 22.09.2026:
+            // "die muss unter die zweite Box: das ist ja die gesamt Quali") - and the run counter beside it
+            const by = y + boxH + m.fs * 1.9;          // baseline of that line
+            ctx.font = '700 ' + (m.fs * 0.9) + 'px Orbitron, sans-serif';
+            ctx.fillStyle = 'rgba(58,65,80,.62)';
+            ctx.textAlign = 'left';
+            const lab = T('t_level', 'Vom Korpus gelernt').toUpperCase();
+            ctx.fillText(lab, boxX, by);
+            const lw = ctx.measureText(lab).width;
+            ctx.textAlign = 'right';
+            const epochTxt = T('t_epoch', 'Durchlauf') + ' ' + S.epoch;
+            ctx.fillStyle = 'rgba(58,65,80,.55)';
+            ctx.fillText(epochTxt, boxX + boxW, by);
+            const ew = ctx.measureText(epochTxt).width;
+            const valTxt = Math.round(S.level * 100) + ' %';
+            ctx.fillStyle = INK;
+            const vx = boxX + boxW - ew - m.fs * 2.2;
+            ctx.fillText(valTxt, vx, by);
+            const vw = ctx.measureText(valTxt).width;
+            ctx.textAlign = 'left';
+            // the bar itself, between the label and the value
+            const bx0 = boxX + lw + m.fs * 0.9, bx1 = vx - vw - m.fs * 0.9, bh = m.fs * 0.62;
+            if (bx1 > bx0 + m.fs) {
+                ctx.beginPath(); ctx.roundRect(bx0, by - bh * 0.95, bx1 - bx0, bh, bh / 2);
+                ctx.fillStyle = 'rgba(58,65,80,.10)'; ctx.fill();
+                ctx.beginPath(); ctx.roundRect(bx0, by - bh * 0.95, (bx1 - bx0) * S.level, bh, bh / 2);
+                ctx.fillStyle = GREEN; ctx.fill();
+            }
+        }
+
+        // --------------------------------------------------------- editing the text ---
+        // A click into the box turns it into a plain text field over exactly the same rectangle: Doc types
+        // his own sentence, Enter takes it, Esc drops it (Doc, 22.09.2026: "editierbar"). The learned share
+        // stays where it is, so the border sits at the same fraction of whatever text is there now.
+        const editor = document.createElement('textarea');
+        editor.id = 'wv-edit';
+        editor.hidden = true;
+        editor.spellcheck = false;
+        document.body.appendChild(editor);
+
+        const inBox = (x, y) => S.box && x >= S.box.x && x <= S.box.x + S.box.w
+            && y >= S.box.y && y <= S.box.y + S.box.h;
+
+        function openEditor() {
+            if (!S.box || !editor.hidden) return;
+            S.running = false; playLabel();           // a running animation would keep changing under the field
+            const cr = canvas.getBoundingClientRect(), b = S.box;
+            editor.style.left = (cr.left + b.x) + 'px';
+            editor.style.top = (cr.top + b.y) + 'px';
+            editor.style.width = b.w + 'px';
+            editor.style.height = Math.max(b.h, b.fs * 5) + 'px';
+            editor.style.padding = (S.fit ? S.fit.top : b.pad) + 'px ' + (b.pad * 0.96) + 'px ' + b.pad + 'px';
+            editor.style.fontSize = b.fs + 'px';
+            editor.style.lineHeight = b.lh + 'px';
+            editor.value = TEXT.join(' ');
+            editor.hidden = false;
+            editor.focus();
+            editor.setSelectionRange(editor.value.length, editor.value.length);
+        }
+
+        function closeEditor(keep) {
+            if (editor.hidden) return;
+            const text = editor.value.replace(/\s+/g, ' ').trim();
+            editor.hidden = true;
+            if (!keep || !text) return;
+            TEXT = text.split(/\s+/);
+            TEXTS[textIx] = text;
+            still();                                  // same learned share, new text under it
+            draw();
+        }
+
+        editor.addEventListener('keydown', e => {
+            e.stopPropagation();
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); closeEditor(true); }
+            else if (e.key === 'Escape') { e.preventDefault(); closeEditor(false); }
+        });
+        editor.addEventListener('blur', () => closeEditor(true));
+
+        addEventListener('keydown', e => {
+            if (e.key !== ' ' || e.metaKey || e.ctrlKey || e.altKey) return;
+            if (e.target.closest && e.target.closest('input, textarea, select, button, [contenteditable]')) return;
+            e.preventDefault();
+            if (S.mode !== 'run') startRun();
+            else if (S.pos >= TEXT.length) nextText();
+            else { S.running = !S.running; S.stopAt = -1; if (S.running) S.t0 = performance.now(); playLabel(); }
+        });
+
+        canvas.addEventListener('click', e => {
+            const cr = canvas.getBoundingClientRect();
+            if (inBox(e.clientX - cr.left, e.clientY - cr.top)) openEditor();
+        });
+        canvas.addEventListener('mousemove', e => {   // the caret only where there is something to type in
+            const cr = canvas.getBoundingClientRect();
+            canvas.style.cursor = inBox(e.clientX - cr.left, e.clientY - cr.top) ? 'text' : 'default';
+        });
+
+        // ------------------------------------------------------------------- the loop ---
+        function frame() {
+            if (S.running && S.mode === 'run') settle(performance.now());
+            resizeCanvasToContainer();            // the layout may settle long after load
+            draw();
+            requestAnimationFrame(frame);
+        }
+
+        function showStats() {
+            const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+            const have = Math.min(TEXT.length, (S.mode === 'run' ? Math.min(S.pos, TEXT.length) + knownAhead(S.pos) : border() + knownAhead(border())));   // words the net has
+            set('wv-epoch', S.epoch);
+            set('wv-hit', TEXT.length ? Math.round(100 * have / TEXT.length) + ' %' : '–');
+            set('wv-red', (TEXT.length - have) + ' / ' + TEXT.length);
+            set('wv-pos', S.mode === 'run' ? Math.min(S.pos + 1, TEXT.length) + ' / ' + TEXT.length : '–');
+        }
+
+        // ----------------------------------------------------------------------- UI ---
+        // open on exactly the picture Doc named: green up to and including "winziges", red from there on
+        (function startBorder() {
+            const k = TEXT.findIndex(w => /^winziges/i.test(w));
+            if (k >= 0) S.given = (k + 1) / TEXT.length;
+            const sv = saved();                       // what Doc set last time wins over the factory numbers
+            if (sv.given >= 0 && sv.given <= 1) S.given = sv.given;
+            if (sv.level >= 0 && sv.level <= 1) S.level = sv.level;
+            if (sv.speed >= 80 && sv.speed <= 2000) S.speed = sv.speed;
+            startGiven = S.given; startLevel = S.level; startSpeed = S.speed;
+        })();
+
+        function buildUI() {
+            CyberUI.createCard('ui-container', T('card_run', 'Ablauf'), `
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                    <div class="wv-btns">
+                        <button class="cyber-btn" id="wv-play">${T('btn_play', 'Start')}</button>
+                        <button class="cyber-btn" id="wv-step">${T('btn_step', 'Ein Wort')}</button>
+                    </div>
+                    <div class="wv-btns">
+                        <button class="cyber-btn" id="wv-train">${T('btn_train', 'Ein Durchlauf')}</button>
+                        <button class="cyber-btn" id="wv-reset">${T('btn_reset', 'Von vorn')}</button>
+                    </div>
+                    <div class="lab-note">${T('hint', 'Leertaste startet: der Rest hinter der Vorgabe steht als Buchstabensalat da und rastet Wort für Wort ein. Ist der Satz durch, holt die Leertaste den nächsten — mit Lücken dort, wo das Netz noch nichts hat. Noch eine Leertaste, und er läuft, jedes Mal schneller. In den oberen Kasten klicken, um einen eigenen Satz zu schreiben; Enter übernimmt, Esc verwirft.')}</div>
+                </div>`);
+
+            CyberUI.createCard('ui-container', T('card_size', 'Lernen'), `
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                    <div>
+                        <div class="label-row"><span>${T('l_given', 'Vorgabe im Satz')}</span>
+                            <span id="wv-given-l" class="cyber-number" style="font-size:.8rem; color:#9de8ff;">${Math.round(S.given * 100)} %</span></div>
+                        <input type="range" id="wv-given" min="0" max="100" step="1" value="${Math.round(S.given * 100)}">
+                    </div>
+                    <div>
+                        <div class="label-row"><span>${T('l_level', 'Vom Korpus gelernt')}</span>
+                            <span id="wv-level-l" class="cyber-number" style="font-size:.8rem; color:#9de8ff;">${Math.round(S.level * 100)} %</span></div>
+                        <input type="range" id="wv-level" min="0" max="100" step="1" value="${Math.round(S.level * 100)}">
+                    </div>
+                    <div>
+                        <div class="label-row"><span>${T('l_speed', 'Tempo')}</span>
+                            <span id="wv-speed-l" class="cyber-number" style="font-size:.8rem; color:#9de8ff;">${S.speed} ms</span></div>
+                        <input type="range" id="wv-speed" min="120" max="2000" step="20" value="${S.speed}">
+                    </div>
+                </div>`);
+
+            CyberUI.createCard('ui-container', T('card_stats', 'Stand'), `
+                <div class="wv-rows">
+                    <div class="wv-row"><span class="wv-key">${T('s_epoch', 'Durchlauf')}</span><span class="wv-val" id="wv-epoch">0</span></div>
+                    <div class="wv-row"><span class="wv-key">${T('s_hit', 'Dieser Satz')}</span><span class="wv-val" id="wv-hit">–</span></div>
+                    <div class="wv-row"><span class="wv-key">${T('s_red', 'noch offen')}</span><span class="wv-val" id="wv-red">–</span></div>
+                    <div class="wv-row"><span class="wv-key">${T('s_pos', 'Wort')}</span><span class="wv-val" id="wv-pos">–</span></div>
+                </div>
+                <div class="lab-note">${T('s_note', 'Die Treffer steigen mit jedem Durchlauf — das ist das Training. Trifft es am Ende alles, hat es den Satz auswendig gelernt; interessant wird es erst bei einem Satz, den es nie gesehen hat.')}</div>`);
+
+            const on = (id, ev, fn) => { const e = document.getElementById(id); if (e) e.addEventListener(ev, fn); };
+            on('wv-play', 'click', () => {
+                if (S.mode !== 'run' || S.pos >= TEXT.length) { startRun(); return; }   // from the picture, or once more after the end
+                S.running = !S.running; S.stopAt = -1;
+                if (S.running) S.t0 = performance.now();
+                playLabel();
+            });
+            on('wv-step', 'click', () => {                 // one word settles, then it waits
+                if (S.mode !== 'run' || S.pos >= TEXT.length) startRun();
+                S.stopAt = S.pos + 1; S.running = true; S.t0 = performance.now();
+                playLabel();
+            });
+            on('wv-train', 'click', train);
+            on('wv-reset', 'click', resetAll);
+            on('wv-given', 'input', e => {
+                S.given = startGiven = parseInt(e.target.value, 10) / 100;
+                document.getElementById('wv-given-l').textContent = Math.round(S.given * 100) + ' %';
+                still(); remember();
+            });
+            on('wv-level', 'input', e => {
+                S.level = startLevel = parseInt(e.target.value, 10) / 100;
+                document.getElementById('wv-level-l').textContent = Math.round(S.level * 100) + ' %';
+                remember();
+            });
+            on('wv-speed', 'input', e => {
+                S.speed = startSpeed = parseInt(e.target.value, 10);
+                document.getElementById('wv-speed-l').textContent = S.speed + ' ms';
+                remember();
+            });
+        }
+
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            const w = Math.floor(Math.max(1, rect.width) * dpr);
+            const h = Math.floor(Math.max(1, rect.height) * dpr);
+            if (canvas.width === w && canvas.height === h) return false;
+            canvas.width = w;
+            canvas.height = h;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+            return true;
+        }
+
+        function init() {
+            resizeCanvasToContainer();
+            draw();
+        }
+
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(function () { S.fit = null; init(); });   // measure again with the real font
+        if (window.ResizeObserver) new ResizeObserver(init).observe(container);
+
+        buildUI();
+        resetAll();
+        init();
+        requestAnimationFrame(frame);
+        // ?satz=3 opens at the third sentence, the ones before it counted as seen - for the deck, and for
+        // checking; ?start runs on its own, for the deck where nobody clicks inside the frame
+        (function fromUrl() {
+            const q = new URLSearchParams(location.search);
+            if (q.has('widget')) document.body.classList.add('wv-widget');
+            // ?vorgabe=60&korpus=0&tempo=280 - the deck sets the sliders, the stored ones stay untouched
+            const num = (k, lo, hi, f) => { const v = parseFloat(q.get(k)); return isFinite(v) && v >= lo && v <= hi ? v * f : null; };
+            const g = num('vorgabe', 0, 100, 0.01), l = num('korpus', 0, 100, 0.01), sp = num('tempo', 80, 2000, 1);
+            if (g !== null) startGiven = g;
+            if (l !== null) startLevel = l;
+            if (sp !== null) startSpeed = sp;
+            if (g !== null || l !== null || sp !== null) resetAll();
+            const n = parseInt(q.get('satz') || '1', 10);
+            for (let k = 1; k < n && k < 60; k++) {
+                TEXT.forEach(w => SEEN.add(norm(w)));
+                grow();
+                textIx = (textIx + 1) % TEXTS.length; TEXT = TEXTS[textIx].split(/\s+/); S.nr++;
+                S.speed = Math.max(80, Math.round(S.speed * 0.55));
+            }
+            if (n > 1) { still(); draw(); }
+            if (q.has('start')) setTimeout(startRun, 600);
+        })();
+        log('Wortvorhersage: ' + TEXT.length + ' Wörter');
+    </script>
+</body>
+
+</html>
