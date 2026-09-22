@@ -678,7 +678,9 @@ window.svpPlanParts.push(function (P) {
                 el.appendChild(a);
                 return;
             }
-            a.className = 'badge b-green mat-pill';
+            /* Wichtiges wird orange (Doc, 22.09.2026) - die Marke [[wichtig]]
+               steht im Materialtext, die Farbe kommt aus svp-material.css. */
+            a.className = 'badge b-green mat-pill' + (en.wichtig ? ' mat-wichtig' : '');
             a.href = siteHref(en.url);
             a.target = '_blank';
             a.rel = 'noopener';

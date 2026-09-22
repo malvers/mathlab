@@ -270,6 +270,35 @@ html.svp-light #plan-table .detail-row .sub-side .mat-block a.mat-pill {
     color: rgb(30, 60, 120);
     border-color: rgba(var(--g-mat), 0.45);
 }
+/* Wichtiges Material: volle orange Flaeche mit dunkelblauer Schrift (Doc,
+   22.09.2026: "unser Orange bitte nicht transp. Dunkelblaue Schrift / icon").
+   Ausgezeichnet wird es im Materialtext mit [[wichtig]] hinter dem Link, wie
+   [[datei:…]] - der Renderer setzt daraufhin .mat-wichtig. Anders als die
+   uebrigen Pillen mischt sich hier nichts aus currentColor: der Grund ist
+   gesetzt, damit er in jedem Schema derselbe ist. Alle drei Reiter der
+   Aufklappzeile (Zusatzmaterial, Videos, Aufgaben) nutzen .mat-block, die
+   Regel gilt also fuer alle. Die Schema-Zweige stehen mit, weil ihre eigenen
+   Regeln sonst staerker waeren als diese hier. */
+#plan-table .detail-row .sub-side .mat-block a.mat-pill.mat-wichtig,
+html.svp-light #plan-table .detail-row .sub-side .mat-block a.mat-pill.mat-wichtig,
+html.svp-grey #plan-table .detail-row .sub-side .mat-block a.mat-pill.mat-wichtig {
+    background: rgb(var(--g-wichtig));
+    /* Schrift, Symbol und Rand in Navy (Doc: "Dunkelblaue Schrift / icon",
+       dann "bitte auch rand") - die Pille ist dadurch ringsum eingefasst. */
+    color: rgb(var(--g-wichtig-ink));
+    border-color: rgb(var(--g-wichtig-ink));
+}
+/* Die gezeichneten Symbole tragen ihre Farbe als SVG-Attribut - jede CSS-Regel
+   schlaegt das. Strich-Symbole erkennt man am stroke-Attribut; bei ihnen darf
+   `fill` nicht gesetzt werden, sonst laeuft die Form voll. App-Symbole sind
+   <img> und bleiben, wie sie sind - die tragen ohnehin ihr eigenes Logo. */
+#plan-table .detail-row .sub-side .mat-block a.mat-pill.mat-wichtig .mat-ico path {
+    fill: rgb(var(--g-wichtig-ink));
+}
+#plan-table .detail-row .sub-side .mat-block a.mat-pill.mat-wichtig .mat-ico path[stroke] {
+    fill: none;
+    stroke: rgb(var(--g-wichtig-ink));
+}
 .sub-label {
     display: inline-block;
     font-family: 'Orbitron', sans-serif;

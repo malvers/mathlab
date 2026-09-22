@@ -291,15 +291,22 @@ window.svpPlanParts.push(function (P) {
        Pille. Damit kann das Kontextmenue die Datei in der Desktop-App oeffnen;
        ein Freigabelink taugt dafuer nicht, den kann Office nicht aufloesen. */
     const DATEI_RE = /^\s*\[\[datei:([^\]]*)\]\]\s*/;
+    /* Markiert eine Pille als wichtig - sie wird dann orange gezeichnet
+       (Doc, 22.09.2026). Steht wie [[datei:…]] hinter dem Link und ist
+       unsichtbar; alte Zeilen ohne die Marke bleiben, wie sie sind. */
+    const WICHTIG_RE = /^\s*\[\[wichtig\]\]\s*/;
 
-    /* Frisst fuehrende «Beschreibung» und [[datei:…]] in beliebiger Reihenfolge. */
+    /* Frisst fuehrende «Beschreibung», [[datei:…]] und [[wichtig]] in beliebiger
+       Reihenfolge - deshalb so viele Durchgaenge wie es Anhaenge gibt. */
     function nimmAnhang(text) {
-        const a = { desc: '', datei: '', rest: text };
-        for (let i = 0; i < 2; i++) {
+        const a = { desc: '', datei: '', wichtig: false, rest: text };
+        for (let i = 0; i < 3; i++) {
             let m = a.rest.match(DESC_RE);
             if (m) { a.desc = m[1].trim(); a.rest = a.rest.slice(m[0].length); continue; }
             m = a.rest.match(DATEI_RE);
             if (m) { a.datei = m[1].trim(); a.rest = a.rest.slice(m[0].length); continue; }
+            m = a.rest.match(WICHTIG_RE);
+            if (m) { a.wichtig = true; a.rest = a.rest.slice(m[0].length); continue; }
             break;
         }
         return a;
@@ -314,13 +321,15 @@ window.svpPlanParts.push(function (P) {
                 const vor = out[out.length - 1];
                 if (a.desc) vor.desc = a.desc;
                 if (a.datei) vor.datei = a.datei;
+                if (a.wichtig) vor.wichtig = true;
                 pre = a.rest;
             }
             out.push({
                 label: pre.replace(/[\s|:,;·–-]+$/, '').trim(),
                 url: parts[k],
                 desc: '',
-                datei: ''
+                datei: '',
+                wichtig: false
             });
         }
         if (parts.length > 1 && out.length) {
@@ -328,6 +337,7 @@ window.svpPlanParts.push(function (P) {
             const letzt = out[out.length - 1];
             if (a.desc) letzt.desc = a.desc;
             if (a.datei) letzt.datei = a.datei;
+            if (a.wichtig) letzt.wichtig = true;
         }
         return out;
     }
@@ -342,7 +352,8 @@ window.svpPlanParts.push(function (P) {
     function matToSrc(entries) {
         return entries.map(en => (en.label ? en.label + ' ' : '') + en.url +
             (en.desc ? ' «' + en.desc.replace(/[«»]/g, '') + '»' : '') +
-            (en.datei ? ' [[datei:' + en.datei.replace(/[\[\]]/g, '') + ']]' : '')).join(' ');
+            (en.datei ? ' [[datei:' + en.datei.replace(/[\[\]]/g, '') + ']]' : '') +
+            (en.wichtig ? ' [[wichtig]]' : '')).join(' ');
     }
 
     function readClip() {
