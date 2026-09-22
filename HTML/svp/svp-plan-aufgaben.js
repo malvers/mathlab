@@ -4,7 +4,7 @@ window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
         quizSource, buildQuizBtn, buildAufgabenCell, fillAufgabenPane, watchRedBtn,
-        closeRedList, placeRedList, buildRedList
+        closeRedList, placeRedList, buildRedList, pruefArt
     });
 
     // --- Material quick-add (per week row, owner only) -------------------
@@ -322,7 +322,24 @@ window.svpPlanParts.push(function (P) {
             p.style.maxHeight = Math.round(above) + 'px';
         }
     }
-    function buildRedList(title, items) {
+    /* ---- Welche Farbe traegt der Pruefungsknopf? ------------------------
+       Doc, 22.09.2026: "leistungsnachweis bitte -> immer so,
+       Klassenarbeiten/Klausuren machen wir rot". Rot ist damit den grossen
+       Arbeiten vorbehalten; ein Leistungsnachweis traegt Orange mit Navy -
+       derselbe Ton wie das wichtige Material (--g-wichtig, svp-tokens.css).
+       Entschieden wird am Wort, damit eine neue Planzeile nichts zusaetzlich
+       angeben muss: rot nur, wo "Klausur", "Klassenarbeit" oder
+       "Schulaufgabe" steht. Wer es anders braucht, schreibt es hin -
+       redBtn.art = 'klausur' oder 'nachweis' sticht die Regel. */
+    const ROT_WORT = /klausur|klassenarbeit|schulaufgabe/i;
+
+    function pruefArt(cfg) {
+        if (cfg && (cfg.art === 'klausur' || cfg.art === 'nachweis')) return cfg.art;
+        const wort = (cfg && (cfg.title || cfg.label)) || '';
+        return ROT_WORT.test(wort) ? 'klausur' : 'nachweis';
+    }
+
+    function buildRedList(title, items, art) {
         if (!redListWired) {
             redListWired = true;
             document.addEventListener('click', closeRedList);
@@ -331,7 +348,9 @@ window.svpPlanParts.push(function (P) {
             window.addEventListener('resize', placeRedList);
         }
         const panel = document.createElement('div');
-        panel.className = 'red-list';
+        /* Die Liste traegt die Farbe ihres Knopfes - ein oranger Knopf mit
+           rotem Kopf darunter sieht aus wie ein Fehler. */
+        panel.className = 'red-list' + (art === 'klausur' ? '' : ' nachweis');
         panel.hidden = true;
         panel.setAttribute('role', 'dialog');
         panel.setAttribute('aria-label', title);

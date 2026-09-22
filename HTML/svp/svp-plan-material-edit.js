@@ -38,8 +38,11 @@ window.svpPlanParts.push(function (P) {
         if (ref.redBtn) {
             const rb = document.createElement('button');
             rb.type = 'button';
-            rb.className = 'red-btn';
             const cfg = typeof ref.redBtn === 'string' ? { label: ref.redBtn } : ref.redBtn;
+            /* Rot nur fuer Klassenarbeit und Klausur, sonst Orange mit Navy -
+               die Regel steht an einer Stelle (P.pruefArt). */
+            const art = P.pruefArt(cfg);
+            rb.className = 'red-btn' + (art === 'klausur' ? '' : ' nachweis');
             const lbl = document.createElement('span');
             lbl.textContent = cfg.label;
             rb.appendChild(lbl);
@@ -52,7 +55,7 @@ window.svpPlanParts.push(function (P) {
                     P.closeRedList();
                     if (wasOpen) return;
                     /* built once per week, reused across re-renders of the row */
-                    if (!ref.redList) ref.redList = P.buildRedList(cfg.title || cfg.label, cfg.items);
+                    if (!ref.redList) ref.redList = P.buildRedList(cfg.title || cfg.label, cfg.items, art);
                     ref.redList.hidden = false;
                     P.redListOpen = { panel: ref.redList, btn: rb };
                     rb.setAttribute('aria-expanded', 'true');

@@ -49,6 +49,23 @@
     white-space: nowrap;
     cursor: pointer;
 }
+/* Leistungsnachweise tragen Orange mit Navy, rot bleibt den Klassenarbeiten
+   und Klausuren (Doc, 22.09.2026: "Mach den Orange und dunkelblau
+   (leistungsnachweis bitte -> immer so, Klassenarbeiten/Klausuren machen wir
+   rot)"). Kein eigener Ton: es sind dieselben Werte wie bei der wichtigen
+   Material-Pille (--g-wichtig / --g-wichtig-ink in svp-tokens.css), und wie
+   dort steht Navy AUF dem Orange, nicht auf dem Seitengrund - in jedem
+   Schema derselbe Kontrast. Welcher Knopf welche Art ist, entscheidet
+   P.pruefArt in svp-plan-aufgaben.js. */
+#plan-table .red-btn.nachweis {
+    background: rgb(var(--g-wichtig));
+    border-color: rgb(var(--g-wichtig-ink));
+    color: rgb(var(--g-wichtig-ink));
+}
+#plan-table .red-btn.nachweis:hover {
+    background: color-mix(in srgb, rgb(var(--g-wichtig)) 86%, #fff);
+}
+
 /* label and invisible pill text share one cell: width = the wider one */
 #plan-table .red-btn > span { grid-area: 1 / 1; }
 #plan-table .red-btn > .red-btn-ghost { visibility: hidden; }
@@ -142,6 +159,19 @@
 }
 .red-list li::marker { color: rgb(235, 120, 105); font-variant-numeric: tabular-nums; }
 html.svp-light .red-list li::marker { color: var(--ypsilon); }
+
+/* Die Liste eines Leistungsnachweises traegt die Farbe seines Knopfes. Die
+   Ziffern stehen hier auf dem Panelgrund, nicht auf dem Orange: im dunklen
+   Schema leuchtet Orange dort gut, im hellen traegt Navy. */
+.red-list.nachweis { border-color: rgb(var(--g-wichtig-ink)); }
+.red-list.nachweis .red-list-head {
+    background: rgb(var(--g-wichtig));
+    color: rgb(var(--g-wichtig-ink));
+}
+.red-list.nachweis .red-list-x { color: rgb(var(--g-wichtig-ink)); }
+.red-list.nachweis .red-list-x:hover { background: rgba(14, 36, 78, 0.16); }
+.red-list.nachweis li::marker { color: rgb(var(--g-wichtig)); }
+html.svp-light .red-list.nachweis li::marker { color: rgb(var(--g-wichtig-ink)); }
 @media print { .red-list { display: none; } }
 #plan-table .red-btn:hover { background: rgb(200, 48, 34); }
 #plan-table .quiz-note { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
