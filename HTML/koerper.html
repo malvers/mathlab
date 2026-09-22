@@ -62,11 +62,15 @@
         #k-hud b { display: block; font-size: 1.5rem; color: #fff; margin-bottom: 4px; }
         /* View controls live in a floating panel on the right of the stage — the sidebar keeps the numbers */
         #k-right {
-            position: absolute; top: 12px; right: 12px; width: 220px; z-index: 5;
+            position: absolute; top: 12px; right: 12px; width: 260px; z-index: 5;   /* same width as the Werte card below */
             max-height: calc(100% - 24px); overflow-y: auto; scrollbar-width: none;
         }
         #k-right::-webkit-scrollbar { display: none; }
         #k-right .instrument-card { margin-bottom: 0; }
+        /* "Netz auffalten" is the only slider up here, so it gets its air back (Doc, 22.09.2026) */
+        #k-right .k-tight.k-tight .cyber-control-group { margin-top: 2px !important; margin-bottom: 14px !important; }
+        #k-right .k-tight.k-tight .cyber-control-group input[type="range"] { min-height: 26px !important; padding: 6px 0 !important; }
+        #k-right .k-tight .control-header { margin-bottom: 5px; }
         /* compact slider groups (cards with many parameters) */
         /* buttons-ultra.css forces margin-top:15px on groups and 52px/16px on range inputs — override with higher specificity */
         .k-tight.k-tight .cyber-control-group { margin-top: 4px !important; margin-bottom: 0 !important; }
@@ -86,10 +90,13 @@
         }
         #k-exactpanel::-webkit-scrollbar { display: none; }
         #k-exactpanel .instrument-card { margin-bottom: 0; }
-        /* overview button at the top of every sidebar + its dialog (.qr-overlay is the shared look) */
-        .k-ov-btn { margin-bottom: 15px; background: rgba(2, 100, 123, 0.25); border: 1px solid rgb(2, 100, 123); color: #cfe9ff;
+        /* overview card at the top of every sidebar + its dialog (.qr-overlay is the shared look) */
+        .k-ov-row { display: flex; flex-direction: column; gap: 8px; }
+        .k-ov-btn { background: rgba(2, 100, 123, 0.25); border: 1px solid rgb(2, 100, 123); color: #cfe9ff;
             font-family: 'Orbitron', sans-serif; cursor: pointer; transition: background 0.2s, color 0.2s; }
         .k-ov-btn:hover { background: rgba(3, 145, 178, 0.45); color: #fff; }
+        .k-ov-btn.k-ov-core { background: rgba(245, 194, 66, 0.16); border-color: rgba(245, 194, 66, 0.7); color: rgb(245, 194, 66); }
+        .k-ov-btn.k-ov-core:hover { background: rgba(245, 194, 66, 0.32); color: #fff; }
         #k-ovl .ov-box { width: min(1180px, 92vw); max-height: 86vh; overflow-y: auto; text-align: left; padding: 24px 28px 28px; position: relative; }
         #k-ovl .qr-close { position: absolute; top: 14px; right: 20px; font-size: 1.6rem; color: #9fb3c8; cursor: pointer; line-height: 1; }
         #k-ovl .qr-close:hover { color: #fff; }
@@ -341,22 +348,42 @@
         }
         function indexLab() {
             for (const [tab, cat] of [['platonisch', G.PLATONIC], ['archimedisch', G.ARCHIMEDEAN], ['catalanisch', G.CATALAN], ['johnson', G.JOHNSON]])
-                for (const id of Object.keys(cat)) SEARCH.push({ label: cat[id].name, tab, run: () => { S.solid[tab] = id; syncTabDropdown(tab, cat[id].name); } });
+                for (const id of Object.keys(cat)) SEARCH.push({ id, label: cat[id].name, tab, run: () => { S.solid[tab] = id; syncTabDropdown(tab, cat[id].name); } });
             for (const [id, label] of [['prisma', 'Prisma'], ['antiprisma', 'Antiprisma'], ['pyramide', 'Pyramide'], ['doppelpyramide', 'Doppelpyramide']])
-                SEARCH.push({ label, tab: 'prismen', run: () => { S.prism.kind = id; syncTabDropdown('prismen', label); } });
+                SEARCH.push({ id, label, tab: 'prismen', run: () => { S.prism.kind = id; syncTabDropdown('prismen', label); } });
             for (const [id, label] of [['kugel', 'Kugel'], ['halbkugel', 'Halbkugel'], ['zylinder', 'Zylinder'], ['kegel', 'Kegel'], ['kegelstumpf', 'Kegelstumpf'], ['torus', 'Torus'], ['ellipsoid', 'Ellipsoid']])
-                SEARCH.push({ label, tab: 'rund', run: () => { S.round.kind = id; syncTabDropdown('rund', label); showRoundParams(); } });
+                SEARCH.push({ id, label, tab: 'rund', run: () => { S.round.kind = id; syncTabDropdown('rund', label); showRoundParams(); } });
             for (const tab of Object.keys(GENERIC)) for (const id of Object.keys(GENERIC[tab].shapes)) {
                 const label = GENERIC[tab].shapes[id].name;
-                SEARCH.push({ label, tab, run: () => { S.shape[tab].kind = id; shapeState(tab); syncTabDropdown(tab, label); buildGenericParams(tab); } });
+                SEARCH.push({ id, label, tab, run: () => { S.shape[tab].kind = id; shapeState(tab); syncTabDropdown(tab, label); buildGenericParams(tab); } });
             }
             SEARCH.forEach(e => { e.lab = e.label.toLowerCase(); e.key = e.lab + ' ' + TAB_LABEL[e.tab].toLowerCase(); });
-            document.querySelectorAll('.k-ov-btn').forEach(b => { b.textContent = 'Übersicht · ' + SEARCH.length + ' Objekte'; });
+            document.querySelectorAll('.k-ov-btn[data-ov="all"]').forEach(b => { b.textContent = 'Alle ' + SEARCH.length; });
+            /* The second button leads to formelsammlung.html, so it counts the tiles of that
+               sheet (15 figures + 15 solids), not the lab's core set — some of them, like the
+               Quader or the Kugelkappe, the lab does not have. tools/koerper-formeln-check.js
+               compares this number with the sheet. */
+            document.querySelectorAll('.k-ov-btn[data-ov="core"]').forEach(b => { b.textContent = 'Die wichtigsten ' + FS_TILES; });
         }
 
         // ---- overview of everything in the lab ---------------------------
-        /** One list of all figures, grouped by tab, each one a jump. */
-        function showOverview() {
+        /* The school set behind the second button: the figures of the Formelsammlung
+           plus the five Platonic solids. Keyed tab:id — this list alone decides what
+           "die wichtigsten" means (Doc, 22.09.2026). */
+        const CORE = new Set([
+            'polygone:regelmaessig',
+            'dreieck:sss', 'dreieck:rechtwinklig', 'dreieck:gleichseitig',
+            'vierecke:quadrat', 'vierecke:rechteck', 'vierecke:parallelogramm', 'vierecke:raute', 'vierecke:trapez', 'vierecke:drachen',
+            'kreisformen:kreis', 'kreisformen:kreisring', 'kreisformen:sektor', 'kreisformen:segment', 'kreisformen:ellipse',
+            'platonisch:tetraeder', 'platonisch:wuerfel', 'platonisch:oktaeder', 'platonisch:dodekaeder', 'platonisch:ikosaeder',
+            'prismen:prisma', 'prismen:pyramide',
+            'rund:zylinder', 'rund:kegel', 'rund:kegelstumpf', 'rund:kugel', 'rund:halbkugel', 'rund:torus',
+        ]);
+        const isCore = e => CORE.has(e.tab + ':' + e.id);
+        const FS_TILES = 30;                              // tiles on formelsammlung.html
+
+        /** One list of figures, grouped by tab, each one a jump. mode 'core' = the school set. */
+        function showOverview(mode) {
             let ovl = document.getElementById('k-ovl');
             if (!ovl) {
                 ovl = document.createElement('div');
@@ -369,13 +396,14 @@
             const order = [...document.querySelectorAll('#tab-bar .tab-btn')].map(b => b.dataset.tab);
             const dimOf = {};
             document.querySelectorAll('#tab-bar .tab-btn').forEach(b => { dimOf[b.dataset.tab] = b.dataset.dim; });
-            const groups = order.map(tab => ({ tab, items: SEARCH.filter(e => e.tab === tab) })).filter(g => g.items.length);
+            const list = mode === 'core' ? SEARCH.filter(isCore) : SEARCH;
+            const groups = order.map(tab => ({ tab, items: list.filter(e => e.tab === tab) })).filter(g => g.items.length);
             ovl.innerHTML = `
                 <div class="qr-container ov-box">
                     <div class="qr-close" id="k-ovl-x">×</div>
                     <div class="ov-head">
-                        <div class="qr-title">Alle Objekte im Labor</div>
-                        <div class="ov-total">${SEARCH.length}</div>
+                        <div class="qr-title">${mode === 'core' ? 'Die wichtigsten Formen und Körper' : 'Alle Objekte im Labor'}</div>
+                        <div class="ov-total">${list.length}</div>
                     </div>
                     <div class="ov-grid">${groups.map(g => `
                         <div class="ov-group${g.items.length > 20 ? ' wide' : ''}">
@@ -459,15 +487,18 @@
 
         function buildCommonCards(tab, opts) {
             const sb = 'sb-' + tab;
-            /* Same button at the top of every sidebar (Doc, 21.09.2026): it carries the
-               total and opens the list of everything the lab knows. The count only
-               exists after indexLab(), so the label is filled in there. */
-            const ov = document.createElement('button');
-            ov.type = 'button';
-            ov.className = 'cyber-btn k-ov-btn';
-            ov.textContent = 'Übersicht';
-            ov.addEventListener('click', showOverview);
-            document.getElementById(sb).appendChild(ov);
+            /* Same card at the top of every sidebar (Doc, 22.09.2026): one button for
+               everything the lab knows, one for the school set. Both counts only exist
+               after indexLab(), so the labels are filled in there. */
+            CyberUI.createCard(sb, 'Übersicht', '<div class="k-ov-row">'
+                + '<button type="button" class="cyber-btn k-ov-btn" data-ov="all">Alle</button>'
+                + '<button type="button" class="cyber-btn k-ov-btn k-ov-core" data-ov="core">Die wichtigsten</button></div>', COL.blue);
+            /* "Die wichtigsten" opens the Formelsammlung: the same school set, but with the
+               sketches and the A/U/V/M/O formulas. Its tiles link back into this lab (Doc, 22.09.2026). */
+            document.querySelectorAll('#' + sb + ' .k-ov-btn').forEach(b => b.addEventListener('click', () => {
+                if (b.dataset.ov === 'core') { persist(); location.href = 'formelsammlung.html'; }
+                else showOverview(b.dataset.ov);
+            }));
 
             CyberUI.createCard(sb, opts.title, `<div id="dd-${tab}"></div>`, COL.orange);
             CyberUI.createDropdown(`dd-${tab}`, opts.options, id => { opts.onSelect(id); }, opts.selected);

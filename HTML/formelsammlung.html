@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOC ALVERS MATHE-LABORE | Formelsammlung</title>
+    <meta name="description" content="Flächen und Körper auf einen Blick — Formeln für Umfang U, Flächeninhalt A, Mantel M, Oberfläche O und Volumen V, jede Figur ein Klick ins Körper-Labor.">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <style>
+        :root {
+            --ink: #0d3a5e;            /* headings and formulas */
+            --ink-soft: #3d6f96;       /* secondary text */
+            --sheet-1: #ffffff;        /* paper, centre */
+            --sheet-2: #dcedf8;        /* paper, edges */
+            --line: rgba(13, 58, 94, 0.16);
+            --lambda: rgb(245, 194, 66);
+        }
+
+        /* This page carries its own header — no second floating title. */
+        body.cyber-hub .canvas-branding { display: none !important; }
+
+        html { background: var(--sheet-2); }
+        body {
+            margin: 0; color: var(--ink);
+            font-family: 'Outfit', system-ui, sans-serif;
+            padding: 78px clamp(10px, 2.4vw, 26px) 40px;
+            /* no cross hatch behind the sheet, it showed through the tiles (Doc, 22.09.2026) */
+            background: radial-gradient(125% 95% at 50% 10%, var(--sheet-1) 0%, #f3fafd 45%, var(--sheet-2) 100%);
+            background-attachment: fixed;
+        }
+        /* the poster's rounded frame around everything */
+        .sheet {
+            max-width: 1680px; margin: 0 auto; border: 1px solid rgba(255, 255, 255, 0.85);
+            border-radius: 26px; padding: 26px clamp(12px, 2.2vw, 30px) 22px;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 18px 50px rgba(13, 58, 94, 0.12);
+        }
+
+        /* ---- page head ---------------------------------------------- */
+        .fs-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-bottom: 18px; }
+        .fs-head h1 {
+            font-family: 'Orbitron', sans-serif; font-size: clamp(1.05rem, 2.4vw, 1.6rem); font-weight: 700;
+            letter-spacing: 2.5px; text-transform: uppercase; margin: 0; color: var(--ink);
+        }
+        .fs-head h1 em { font-style: normal; color: #1878b8; }
+        .fs-sub { font-size: 0.92rem; color: var(--ink-soft); margin-top: 6px; }
+        .fs-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .fs-btn {
+            font-family: 'Orbitron', sans-serif; font-size: 0.64rem; letter-spacing: 2px; text-transform: uppercase;
+            padding: 9px 15px; border-radius: 9px; cursor: pointer; text-decoration: none;
+            background: rgba(255, 255, 255, 0.75); border: 1px solid rgba(13, 58, 94, 0.25); color: var(--ink);
+            display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s, border-color 0.2s;
+        }
+        .fs-btn:hover { background: #fff; border-color: #1878b8; }
+        .fs-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+
+        /* ---- the three rules that carry everything else --------------- */
+        .fs-rules { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-bottom: 20px; }
+        .fs-rule {
+            background: rgba(255, 255, 255, 0.8); border: 1px solid var(--line); border-radius: 12px;
+            padding: 9px 15px; display: flex; align-items: baseline; gap: 12px;
+        }
+        .fs-rule b {
+            font-family: 'Orbitron', sans-serif; font-size: 0.58rem; letter-spacing: 1.5px; text-transform: uppercase;
+            color: var(--ink-soft); flex: 0 0 auto;
+        }
+        .fs-rule .katex { font-size: 1.2em; color: var(--ink); }
+
+        /* ---- sections and tiles: name on top, figure, formulas below --- */
+        .fs-sec { margin-bottom: 26px; }
+        .fs-sec > h2 {
+            font-family: 'Orbitron', sans-serif; font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase;
+            color: #1878b8; margin: 0 0 14px; display: flex; align-items: baseline; gap: 10px;
+            border-bottom: 1px solid var(--line); padding-bottom: 8px;
+        }
+        .fs-sec > h2 span { color: var(--ink); font-size: 0.9rem; }
+        .fs-sec > h2 em { font-style: normal; color: var(--ink-soft); letter-spacing: 1.4px; font-size: 0.62rem; }
+        .fs-grid { display: grid; gap: 6px; grid-template-columns: repeat(3, 1fr); }
+
+        .fs-tile {
+            border-radius: 16px; padding: 12px 14px 14px; text-align: center;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+        }
+        a.fs-tile { text-decoration: none; color: inherit; }
+        a.fs-tile:hover { background: rgba(255, 255, 255, 0.78); box-shadow: 0 10px 26px rgba(13, 58, 94, 0.14); transform: translateY(-2px); }
+        .fs-tile h3 {
+            font-family: 'Orbitron', sans-serif; font-size: 0.72rem; letter-spacing: 1.6px; text-transform: uppercase;
+            margin: 0; color: var(--ink); font-weight: 700;
+        }
+        .fs-tile figure { margin: 0; }
+        .fs-tile svg.sketch { width: 260px; height: 168px; overflow: visible; display: block; }
+        .sketch .fig { filter: drop-shadow(0 6px 7px rgba(13, 58, 94, 0.22)); }
+        .sketch .edge { fill: none; stroke: rgba(255, 255, 255, 0.55); stroke-width: 0.9; vector-effect: non-scaling-stroke; }
+        .sketch .hi { fill: none; stroke: #fff; stroke-width: 1.2; stroke-dasharray: 5 4; vector-effect: non-scaling-stroke; }
+        .sketch .ho { fill: none; stroke: rgba(13, 58, 94, 0.5); stroke-width: 0.6; stroke-dasharray: 2.5 2.5; vector-effect: non-scaling-stroke; }
+        /* hidden edges of a solid: they lie ON the body, so white and as thin as it gets */
+        .sketch .hd { fill: none; stroke: rgba(255, 255, 255, 0.8); stroke-width: 0.6; stroke-dasharray: 2.5 2.5; vector-effect: non-scaling-stroke; }
+        .sketch .lbl {
+            font-family: 'KaTeX_Math', Georgia, serif; font-style: italic; font-size: 4.4px;
+            text-anchor: middle; dominant-baseline: middle; fill: var(--ink);
+            paint-order: stroke; stroke: rgba(255, 255, 255, 0.95); stroke-width: 2.2px; stroke-linejoin: round;
+            vector-effect: non-scaling-stroke;
+        }
+        .sketch .lbl.on { fill: #fff; stroke: rgba(7, 42, 74, 0.5); stroke-width: 1.6px; }
+        .sketch .lbl .sub { font-size: 3px; stroke-width: 1.1px; }
+        .fs-f { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+        .fs-f .katex { font-size: 1.28em; color: var(--ink); }
+        .fs-note { font-size: 0.74rem; color: var(--ink-soft); line-height: 1.35; max-width: 34ch; }
+
+        /* ---- legend ---------------------------------------------------- */
+        .fs-legend {
+            display: flex; flex-wrap: wrap; gap: 6px 26px; justify-content: center;
+            font-size: 0.95rem; color: var(--ink-soft); border-top: 1px solid var(--line); padding-top: 14px;
+        }
+        .fs-legend span { display: inline-flex; align-items: baseline; gap: 7px; }
+        .fs-legend .katex { color: var(--ink); font-size: 1.1em; }
+
+        @media (max-width: 1100px) { .fs-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 700px) {
+            body { padding-top: 70px; }
+            .sheet { padding: 16px 10px; border-radius: 18px; }
+            .fs-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ---- print: the same sheet, on paper --------------------------- */
+        @media print {
+            @page { size: A4 portrait; margin: 8mm; }
+            html, body { background: #fff !important; }
+            body { padding: 0 !important; font-size: 10pt; }
+            /* .fs-sub names the lab link - nobody clicks on paper */
+            .canvas-branding, #branding-master-title, .fs-actions, .fs-note, .fs-sub,
+            nav, #mini-rail, .cyber-nav, .nav-btn, [data-cyber-branding-nav], .qr-overlay { display: none !important; }
+            .sheet { border: none; box-shadow: none; padding: 0; max-width: none; }
+            /* no section headings on paper: both groups merge into one aligned grid */
+            .fs-sec > h2 { display: none; }
+            .fs-sec, .fs-grid { display: contents; }
+            #fs-sections {
+                display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 1fr;
+                gap: 3mm 4mm; align-items: stretch;
+            }
+            /* heading on top, formulas on the baseline, the figure centred in what is left */
+            .fs-tile { break-inside: avoid; padding: 2px 5px 4px; gap: 3px; justify-content: space-between; }
+            .fs-tile figure { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; }
+            .fs-tile h3 { font-size: 7pt; letter-spacing: 1.3px; }
+            .fs-tile svg.sketch { width: 132px; height: 68px; }
+            .sketch .lbl { font-size: 5px; }
+            .sketch .lbl .sub { font-size: 3.4px; }
+            .fs-f { gap: 3px; }
+            .fs-f .katex { font-size: 0.95em; }
+            /* the head has to stay slim, otherwise the first page loses a whole row */
+            .fs-head { margin-bottom: 3mm; }
+            .fs-head h1 { font-size: 15pt; letter-spacing: 1.8px; }
+            .fs-sub { font-size: 8.4pt; margin-top: 3px; }
+            /* one line, each rule as wide as its own text - equal columns break the last one */
+            .fs-rules { display: flex; margin-bottom: 2.5mm; gap: 3mm; }
+            .fs-rule { flex: 1 1 auto; white-space: nowrap; justify-content: center; }
+            .fs-rule { padding: 3px 9px; gap: 8px; }
+            .fs-rule b { font-size: 0.5rem; letter-spacing: 1px; }
+            .fs-rule .katex { font-size: 1.05em; }
+            /* the legend is one block - never let a single entry fall onto its own page */
+            .fs-legend { break-inside: avoid; page-break-inside: avoid; padding-top: 8px; margin-top: 3mm; font-size: 8pt; gap: 4px 18px; }
+        }
+    </style>
+</head>
+
+<body class="cyber-hub">
+    <!-- gloss for the solids: one set of gradients for every figure on the page -->
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs>
+        <linearGradient id="gTop" x1="0.1" y1="0" x2="0.8" y2="1">
+            <stop offset="0" stop-color="#d6f2fc"/><stop offset="0.55" stop-color="#7fcdef"/><stop offset="1" stop-color="#4da8de"/>
+        </linearGradient>
+        <linearGradient id="gFront" x1="0" y1="0" x2="1" y2="0.6">
+            <stop offset="0" stop-color="#74c9ef"/><stop offset="0.5" stop-color="#3a9ad3"/><stop offset="1" stop-color="#2079b3"/>
+        </linearGradient>
+        <linearGradient id="gLeft" x1="0" y1="0" x2="1" y2="0.7">
+            <stop offset="0" stop-color="#5ab2e3"/><stop offset="1" stop-color="#2072a9"/>
+        </linearGradient>
+        <linearGradient id="gRight" x1="0" y1="0" x2="1" y2="0.8">
+            <stop offset="0" stop-color="#2f88bf"/><stop offset="1" stop-color="#175888"/>
+        </linearGradient>
+        <linearGradient id="gCyl" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#1f6da2"/><stop offset="0.17" stop-color="#58b2e1"/>
+            <stop offset="0.34" stop-color="#dbf4fd"/><stop offset="0.62" stop-color="#46a2d8"/><stop offset="1" stop-color="#1e6b9f"/>
+        </linearGradient>
+        <radialGradient id="gSph" cx="0.34" cy="0.26" r="0.82">
+            <stop offset="0" stop-color="#f0fbfe"/><stop offset="0.24" stop-color="#a3e0f6"/>
+            <stop offset="0.62" stop-color="#3699d3"/><stop offset="1" stop-color="#185c8e"/>
+        </radialGradient>
+        <linearGradient id="gFlat" x1="0" y1="0" x2="0.9" y2="1">
+            <stop offset="0" stop-color="#a6e2f7"/><stop offset="0.52" stop-color="#4ea9dd"/><stop offset="1" stop-color="#2a80b8"/>
+        </linearGradient>
+    </defs></svg>
+
+    <div class="sheet">
+        <div class="fs-head">
+            <div>
+                <h1>Flächen &amp; Körper — <em>Formeln auf einen Blick</em></h1>
+                <div class="fs-sub">Umfang <b>U</b>, Flächeninhalt <b>A</b>, Mantel <b>M</b>, Oberfläche <b>O</b>, Volumen <b>V</b> — ein Klick öffnet die Figur im Körper-Labor.</div>
+            </div>
+            <div class="fs-actions">
+                <a class="fs-btn" href="koerper.html">
+                    <svg viewBox="0 0 24 24"><path d="M12 2 3 7v10l9 5 9-5V7l-9-5Z"/><path d="m3 7 9 5 9-5"/><path d="M12 12v10"/></svg>
+                    Körper-Labor
+                </a>
+                <button class="fs-btn" id="fs-print">
+                    <svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+                    Drucken
+                </button>
+            </div>
+        </div>
+
+        <div class="fs-rules" id="fs-rules"></div>
+        <div id="fs-sections"></div>
+        <div class="fs-legend" id="fs-legend"></div>
+    </div>
+
+    <script>
+        // ------------------------------------------------------------------
+        // Figures: solid bodies with gloss, drawn in a 0..60 x 0..54 field.
+        // Each sketch gets its own viewBox from its bounding box (fitSketches).
+        // ------------------------------------------------------------------
+        const L = (x, y, t, on) => `<text class="lbl${on ? ' on' : ''}" x="${x}" y="${y}">${t}</text>`;
+        const S = (b, i) => `${b}<tspan class="sub" dy="1.4">${i}</tspan>`;
+        const P = (pts, g) => `<polygon points="${pts}" fill="url(#${g})"/>`;
+        const flat = pts => `<polygon points="${pts}" fill="url(#gFlat)"/>`;
+        const fig = inner => `<g class="fig">${inner}</g>`;
+
+        const SK = {
+            // ---- plane figures: one glossy face, labels around it
+            quadrat: fig(flat('12,8 48,8 48,44 12,44') + '<line class="hi" x1="12" y1="44" x2="48" y2="8"/>')
+                + L(30, 50, 'a') + L(6, 26, 'a') + L(33, 18, 'd', 1),
+            rechteck: fig(flat('6,13 54,13 54,41 6,41') + '<line class="hi" x1="6" y1="41" x2="54" y2="13"/>')
+                + L(30, 47, 'a') + L(59, 27, 'b') + L(31, 22, 'd', 1),
+            parallelogramm: fig(flat('4,42 40,42 56,12 20,12') + '<line class="hi" x1="40" y1="42" x2="40" y2="12"/>')
+                + L(22, 48, 'a') + L(52, 28, 'b') + L(35, 27, 'h', 1) + L(13, 38, 'α', 1),
+            raute: fig(flat('30,6 54,27 30,48 6,27') + '<line class="hi" x1="6" y1="27" x2="54" y2="27"/><line class="hi" x1="30" y1="6" x2="30" y2="48"/>')
+                + L(46, 12, 'a') + L(17, 23, S('d', 1), 1) + L(35, 35, S('d', 2), 1),
+            trapez: fig(flat('4,42 56,42 44,12 16,12') + '<line class="hi" x1="16" y1="42" x2="16" y2="12"/>'
+                + '<line class="hi" x1="10" y1="27" x2="50" y2="27"/>')
+                + L(30, 48, 'a') + L(30, 8, 'c') + L(19, 35, 'h', 1) + L(36, 24, 'm', 1),
+            drachen: fig(flat('30,4 52,22 30,50 8,22') + '<line class="hi" x1="8" y1="22" x2="52" y2="22"/><line class="hi" x1="30" y1="4" x2="30" y2="50"/>')
+                + L(44, 11, 'a') + L(45, 38, 'b') + L(17, 19, S('d', 1), 1) + L(35, 33, S('d', 2), 1),
+            dreieck: fig(flat('5,44 55,44 38,9') + '<line class="hi" x1="38" y1="44" x2="38" y2="9"/>')
+                + L(30, 50, 'c') + L(51, 25, 'a') + L(17, 25, 'b') + L(42, 32, S('h', 'c'), 1),
+            rechtwinklig: fig(flat('8,44 52,44 8,10') + '<polyline class="hi" points="8,38 14,38 14,44"/><line class="hi" x1="8" y1="44" x2="24.5" y2="22.7"/>')
+                + L(30, 50, 'b') + L(3, 27, 'a') + L(37, 22, 'c') + L(21.5, 31, S('h', 'c'), 1),
+            gleichseitig: fig(flat('6,45 54,45 30,4') + '<line class="hi" x1="30" y1="45" x2="30" y2="4"/>')
+                + L(30, 51, 'a') + L(34, 29, 'h', 1),
+            ngon: fig(flat('30,4 52,17 52,39 30,52 8,39 8,17') + '<line class="hi" x1="30" y1="28" x2="52" y2="39"/>')
+                + L(55, 28, 'a') + L(43, 31, S('r', 'u'), 1),
+            kreis: fig('<circle cx="30" cy="27" r="22" fill="url(#gFlat)"/><line class="hi" x1="30" y1="27" x2="52" y2="27"/>')
+                + L(41, 23, 'r', 1),
+            kreisring: fig('<path fill="url(#gFlat)" fill-rule="evenodd" d="M30 5a22 22 0 1 1 0 44 22 22 0 0 1 0-44Zm0 10a12 12 0 1 0 0 24 12 12 0 0 0 0-24Z"/>'
+                + '<line class="hi" x1="30" y1="27" x2="52" y2="27"/><line class="ho" x1="30" y1="27" x2="30" y2="15"/>')
+                + L(44, 23, 'R', 1) + L(35, 20, 'r'),
+            sektor: fig('<path fill="url(#gFlat)" d="M30 27 52 27A22 22 0 0 1 12.4 40.2Z"/><circle class="ho" cx="30" cy="27" r="22"/>')
+                + L(43, 31, 'r', 1) + L(35, 34, 'α', 1) + L(35, 53, 'b'),
+            segment: fig('<path fill="url(#gFlat)" d="M10.95 16A22 22 0 0 1 49.05 16Z"/><circle class="ho" cx="30" cy="27" r="22"/><line class="ho" x1="30" y1="27" x2="10.95" y2="16"/><line class="ho" x1="30" y1="27" x2="49.05" y2="16"/>')
+                + L(30, 14, 's', 1) + L(42, 23, 'r') + L(30, 22.5, 'α'),
+            ellipse: fig('<ellipse cx="30" cy="27" rx="27" ry="15" fill="url(#gFlat)"/><line class="hi" x1="30" y1="27" x2="57" y2="27"/><line class="hi" x1="30" y1="27" x2="30" y2="12"/>')
+                + L(45, 23, 'a', 1) + L(34, 18, 'b', 1),
+
+            // ---- solids: visible faces, each with its own gloss
+            wuerfel: fig(P('8,18 22,6 50,6 36,18', 'gTop') + P('8,18 36,18 36,46 8,46', 'gFront') + P('36,18 50,6 50,34 36,46', 'gRight')
+                + '<polyline class="edge" points="8,18 36,18 36,46"/><line class="edge" x1="36" y1="18" x2="50" y2="6"/>'
+                + '<polyline class="hd" points="22,6 22,34 50,34"/><line class="hd" x1="22" y1="34" x2="8" y2="46"/>'
+                + '<line class="hd" x1="8" y1="46" x2="50" y2="6"/>')
+                + L(22, 52, 'a') + L(23, 29, 'd', 1),
+            quader: fig(P('6,22 20,8 54,8 40,22', 'gTop') + P('6,22 40,22 40,46 6,46', 'gFront') + P('40,22 54,8 54,32 40,46', 'gRight')
+                + '<polyline class="edge" points="6,22 40,22 40,46"/><line class="edge" x1="40" y1="22" x2="54" y2="8"/>'
+                + '<polyline class="hd" points="20,8 20,32 54,32"/><line class="hd" x1="20" y1="32" x2="6" y2="46"/>'
+                + '<line class="hd" x1="6" y1="46" x2="54" y2="8"/>')
+                + L(23, 52, 'a') + L(1, 34, 'c') + L(52, 43, 'b') + L(24, 30, 'd', 1),
+            prisma: fig(P('46,15 38,21 22,21 14,15 22,9 38,9', 'gTop')
+                + P('14,15 22,21 22,45 14,39', 'gLeft') + P('22,21 38,21 38,45 22,45', 'gFront') + P('38,21 46,15 46,39 38,45', 'gRight')
+                + '<polyline class="edge" points="14,15 22,21 38,21 46,15"/><line class="edge" x1="22" y1="21" x2="22" y2="45"/><line class="edge" x1="38" y1="21" x2="38" y2="45"/>'
+                + '<polyline class="hd" points="14,39 22,33 38,33 46,39"/><line class="hd" x1="22" y1="9" x2="22" y2="33"/><line class="hd" x1="38" y1="9" x2="38" y2="33"/>'
+                + '<line class="ho" x1="51" y1="15" x2="51" y2="39"/>')
+                + L(30, 15, 'G') + L(55, 27, 'h'),
+            zylinder: fig('<path fill="url(#gCyl)" d="M10 13h40v28a20 7 0 0 1-40 0Z"/><ellipse cx="30" cy="13" rx="20" ry="7" fill="url(#gTop)"/>'
+                + '<path class="hd" d="M10 41a20 7 0 0 1 40 0"/>'
+                + '<line class="hi" x1="30" y1="13" x2="50" y2="13"/><line class="hi" x1="30" y1="13" x2="30" y2="41"/>')
+                + L(40, 10, 'r') + L(34, 29, 'h'),
+            pyramide: fig(P('8,42 30,50 52,42 30,34', 'gTop') + P('8,42 30,50 30,6', 'gLeft') + P('30,50 52,42 30,6', 'gRight')
+                + '<polyline class="hd" points="8,42 30,34 52,42"/><line class="hd" x1="30" y1="34" x2="30" y2="6"/>'
+                + '<line class="hi" x1="30" y1="42" x2="30" y2="6"/>')
+                + L(34, 26, 'h', 1) + L(30, 55, 'G'),
+            pyramide4: fig(P('8,42 30,50 52,42 30,34', 'gTop') + P('8,42 30,50 30,6', 'gLeft') + P('30,50 52,42 30,6', 'gRight')
+                + '<polyline class="hd" points="8,42 30,34 52,42"/><line class="hd" x1="30" y1="34" x2="30" y2="6"/>'
+                + '<line class="hi" x1="30" y1="42" x2="30" y2="6"/><line class="hi" x1="30" y1="6" x2="41" y2="46"/>')
+                + L(33, 27, 'h', 1) + L(17, 52, 'a') + L(43, 38, S('h', 's'), 1),
+            kegel: fig('<ellipse cx="30" cy="41" rx="20" ry="7" fill="url(#gTop)"/><path fill="url(#gCyl)" d="M30 6 50 41a20 7 0 0 1-40 0Z"/>'
+                + '<path class="hd" d="M10 41a20 7 0 0 1 40 0"/>'
+                + '<line class="hi" x1="30" y1="41" x2="30" y2="6"/><line class="hi" x1="30" y1="41" x2="50" y2="41"/>')
+                + L(26, 25, 'h') + L(40, 45, 'r') + L(42, 20, 's'),
+            kegelstumpf: fig('<ellipse cx="30" cy="41" rx="20" ry="7" fill="url(#gTop)"/><path fill="url(#gCyl)" d="M19 14h22l9 27a20 7 0 0 1-40 0Z"/>'
+                + '<ellipse cx="30" cy="14" rx="11" ry="4" fill="url(#gTop)"/>'
+                + '<path class="hd" d="M10 41a20 7 0 0 1 40 0"/>'
+                + '<line class="hi" x1="30" y1="14" x2="41" y2="14"/><line class="hi" x1="30" y1="41" x2="50" y2="41"/><line class="hi" x1="30" y1="14" x2="30" y2="41"/>')
+                + L(37, 10, 'r') + L(41, 37, 'R', 1) + L(26, 28, 'h'),
+            pyramidenstumpf: fig(P('8,40 30,48 52,40 30,32', 'gTop') + P('16,15 30,20 30,48 8,40', 'gLeft') + P('30,20 44,15 52,40 30,48', 'gRight')
+                + P('30,10 44,15 30,20 16,15', 'gTop')
+                + '<polyline class="hd" points="8,40 30,32 52,40"/><line class="hd" x1="30" y1="32" x2="30" y2="10"/>'
+                + '<line class="hi" x1="30" y1="15" x2="30" y2="40"/>')
+                + L(30, 15, S('G', 2)) + L(30, 53, S('G', 1)) + L(35, 28, 'h', 1),
+            kugel: fig('<circle cx="30" cy="27" r="22" fill="url(#gSph)"/>'
+                + '<ellipse class="hi" cx="30" cy="27" rx="22" ry="8"/><ellipse class="hi" cx="30" cy="27" rx="8" ry="22"/>'
+                + '<line class="hi" x1="30" y1="27" x2="52" y2="27"/>')
+                + L(41, 23, 'r', 1),
+            ellipsoid: fig('<ellipse cx="30" cy="28" rx="26" ry="17" fill="url(#gSph)"/>'
+                + '<ellipse class="hi" cx="30" cy="28" rx="26" ry="8"/><ellipse class="hi" cx="30" cy="28" rx="9" ry="17"/>'
+                + '<line class="hi" x1="30" y1="28" x2="56" y2="28"/><line class="hi" x1="30" y1="28" x2="30" y2="11"/>'
+                + '<line class="hi" x1="30" y1="28" x2="19" y2="35"/>')
+                + L(45, 24, 'a', 1) + L(22, 35, 'b', 1) + L(33, 18, 'c', 1),
+            halbkugel: fig('<path fill="url(#gSph)" d="M8 27a22 22 0 0 1 44 0Z"/><ellipse cx="30" cy="27" rx="22" ry="7.5" fill="url(#gTop)"/>'
+                + '<line class="hi" x1="30" y1="27" x2="52" y2="27"/>')
+                + L(41, 23, 'r', 1),
+            kappe: fig('<circle class="ho" cx="30" cy="30" r="21"/><path fill="url(#gSph)" d="M12.1 19a21 21 0 0 1 35.8 0Z"/>'
+                + '<ellipse cx="30" cy="19" rx="17.9" ry="4.6" fill="url(#gTop)"/>'
+                + '<line class="ho" x1="30" y1="19" x2="30" y2="9"/><line class="ho" x1="30" y1="30" x2="47.9" y2="19"/>')
+                + L(34, 13.5, 'h') + L(43, 27, 'r'),
+            torus: fig('<path fill="url(#gSph)" fill-rule="evenodd" d="M30 12a26 15 0 1 1 0 30 26 15 0 0 1 0-30Zm0 10a11 5 0 1 0 0 10 11 5 0 0 0 0-10Z"/>'
+                + '<ellipse class="hd" cx="30" cy="27" rx="18.5" ry="10"/><ellipse class="hd" cx="11.5" cy="27" rx="7.5" ry="10.5"/>'
+                + '<line class="hi" x1="11.5" y1="27" x2="4" y2="27"/><line class="hi" x1="30" y1="27" x2="48.5" y2="27"/>')
+                + L(8, 23, 'r', 1) + L(40, 23, 'R', 1),
+            // equilateral silhouette, apex centred, fourth vertex behind the middle
+            tetraeder: fig(P('6,46 30,33 54,46', 'gFront') + P('6,46 30,33 30,4.4', 'gLeft') + P('30,33 54,46 30,4.4', 'gRight')
+                + '<polyline class="hd" points="6,46 30,33 54,46"/><line class="hd" x1="30" y1="33" x2="30" y2="4.4"/>')
+                + L(30, 52, 'a'),
+        };
+
+        // ------------------------------------------------------------------
+        // The tables. link = deep link into koerper.html (null = not in the lab)
+        // ------------------------------------------------------------------
+        const RULES = [
+            ['Prisma &amp; Zylinder', 'V = G\\cdot h'],
+            ['Pyramide &amp; Kegel', 'V = \\tfrac{1}{3}\\,G\\cdot h'],
+            ['Jeder Körper', 'O = \\text{Grundflächen} + M'],
+        ];
+
+        const FLAECHEN = [
+            { n: 'Quadrat', sk: 'quadrat', link: 'form2d=vierecke&kind=quadrat',
+              f: ['A = a^2', 'U = 4\\,a', 'd = a\\sqrt{2}'] },
+            { n: 'Rechteck', sk: 'rechteck', link: 'form2d=vierecke&kind=rechteck',
+              f: ['A = a\\,b', 'U = 2\\,(a+b)', 'd = \\sqrt{a^2+b^2}'] },
+            { n: 'Parallelogramm', sk: 'parallelogramm', link: 'form2d=vierecke&kind=parallelogramm',
+              f: ['A = a\\,h_a = a\\,b\\sin\\alpha', 'U = 2\\,(a+b)'] },
+            { n: 'Raute', sk: 'raute', link: 'form2d=vierecke&kind=raute',
+              f: ['A = a\\,h = \\tfrac{1}{2}\\,d_1 d_2', 'U = 4\\,a'] },
+            { n: 'Trapez', sk: 'trapez', link: 'form2d=vierecke&kind=trapez',
+              f: ['A = \\tfrac{a+c}{2}\\cdot h = m\\,h', 'U = a+b+c+d'], note: 'm = Mittellinie = (a+c)/2' },
+            { n: 'Drachenviereck', sk: 'drachen', link: 'form2d=vierecke&kind=drachen',
+              f: ['A = \\tfrac{1}{2}\\,d_1 d_2', 'U = 2\\,(a+b)'] },
+            { n: 'Dreieck', sk: 'dreieck', link: 'form2d=dreieck&kind=sss',
+              f: ['A = \\tfrac{1}{2}\\,c\\,h_c = \\tfrac{1}{2}\\,a\\,b\\sin\\gamma', 'A = \\sqrt{s(s-a)(s-b)(s-c)}', 'U = a+b+c,\\quad s = \\tfrac{U}{2}'] },
+            { n: 'Rechtwinkliges Dreieck', sk: 'rechtwinklig', link: 'form2d=dreieck&kind=rechtwinklig',
+              f: ['A = \\tfrac{1}{2}\\,a\\,b', 'c = \\sqrt{a^2+b^2}', 'h_c = \\tfrac{a\\,b}{c}'] },
+            { n: 'Gleichseitiges Dreieck', sk: 'gleichseitig', link: 'form2d=dreieck&kind=gleichseitig',
+              f: ['A = \\tfrac{\\sqrt{3}}{4}\\,a^2', 'h = \\tfrac{\\sqrt{3}}{2}\\,a', 'U = 3\\,a'] },
+            { n: 'Regelmäßiges n-Eck', sk: 'ngon', link: 'form2d=polygone&kind=regelmaessig',
+              f: ['A = \\tfrac{n\\,a^2}{4\\tan(180^\\circ/n)}', 'U = n\\,a', 'r_u = \\tfrac{a}{2\\sin(180^\\circ/n)}'] },
+            { n: 'Kreis', sk: 'kreis', link: 'form2d=kreisformen&kind=kreis',
+              f: ['A = \\pi\\,r^2', 'U = 2\\pi\\,r = \\pi\\,d'] },
+            { n: 'Kreisring', sk: 'kreisring', link: 'form2d=kreisformen&kind=kreisring',
+              f: ['A = \\pi\\,(R^2 - r^2)', 'U = 2\\pi\\,(R + r)'] },
+            { n: 'Kreissektor', sk: 'sektor', link: 'form2d=kreisformen&kind=sektor',
+              f: ['A = \\tfrac{\\alpha}{360^\\circ}\\,\\pi r^2', 'b = \\tfrac{\\alpha}{360^\\circ}\\,2\\pi r', 'U = b + 2\\,r'] },
+            { n: 'Kreissegment', sk: 'segment', link: 'form2d=kreisformen&kind=segment',
+              f: ['A = \\tfrac{r^2}{2}\\,\\left(\\alpha_{\\mathrm{rad}} - \\sin\\alpha\\right)', 's = 2\\,r\\sin\\tfrac{\\alpha}{2}'], note: 'α<sub>rad</sub> = Winkel α im Bogenmaß' },
+            { n: 'Ellipse', sk: 'ellipse', link: 'form2d=kreisformen&kind=ellipse',
+              f: ['A = \\pi\\,a\\,b', 'U \\approx \\pi\\,(a+b)\\left(1+\\tfrac{3h}{10+\\sqrt{4-3h}}\\right)'], note: 'h = ((a−b)/(a+b))², Näherung nach Ramanujan' },
+        ];
+
+        const KOERPER = [
+            { n: 'Würfel', sk: 'wuerfel', link: 'solid=wuerfel',
+              f: ['V = a^3', 'O = 6\\,a^2,\\quad M = 4\\,a^2', 'd = a\\sqrt{3}'] },
+            { n: 'Quader', sk: 'quader', link: null,
+              f: ['V = a\\,b\\,c', 'O = 2\\,(ab + ac + bc)', 'M = 2\\,(a+b)\\,c', 'd = \\sqrt{a^2+b^2+c^2}'] },
+            { n: 'Prisma', sk: 'prisma', link: 'prisma=prisma',
+              f: ['V = G\\cdot h', 'M = u\\cdot h', 'O = 2\\,G + M'] },
+            { n: 'Zylinder', sk: 'zylinder', link: 'form=zylinder',
+              f: ['V = \\pi\\,r^2 h', 'M = 2\\pi\\,r\\,h', 'O = 2\\pi\\,r\\,(r + h)'] },
+            { n: 'Pyramide', sk: 'pyramide', link: 'prisma=pyramide',
+              f: ['V = \\tfrac{1}{3}\\,G\\cdot h', 'M = \\tfrac{1}{2}\\,u\\cdot h_s', 'O = G + M'], note: 'h<sub>s</sub> = Seitenhöhe (Dreieckshöhe der Mantelfläche)' },
+            // no deep link yet: the lab's ?prisma= has no n, so it would open a hexagonal pyramid
+            { n: 'Quadratische Pyramide', sk: 'pyramide4', link: null,
+              f: ['V = \\tfrac{1}{3}\\,a^2 h', 'h_s = \\sqrt{h^2 + \\tfrac{a^2}{4}}', 'M = 2\\,a\\,h_s,\\quad O = a^2 + M'] },
+            { n: 'Kegel', sk: 'kegel', link: 'form=kegel',
+              f: ['V = \\tfrac{1}{3}\\,\\pi r^2 h', 's = \\sqrt{r^2 + h^2}', 'M = \\pi\\,r\\,s,\\quad O = \\pi r\\,(r+s)'] },
+            { n: 'Kegelstumpf', sk: 'kegelstumpf', link: 'form=kegelstumpf',
+              f: ['V = \\tfrac{\\pi h}{3}\\,(R^2 + R\\,r + r^2)', 's = \\sqrt{(R-r)^2 + h^2}', 'M = \\pi\\,(R+r)\\,s'] },
+            { n: 'Pyramidenstumpf', sk: 'pyramidenstumpf', link: null,
+              f: ['V = \\tfrac{h}{3}\\left(G_1 + \\sqrt{G_1 G_2} + G_2\\right)'], note: 'G₁, G₂ = Grund- und Deckfläche' },
+            { n: 'Kugel', sk: 'kugel', link: 'form=kugel',
+              f: ['V = \\tfrac{4}{3}\\,\\pi r^3', 'O = 4\\pi\\,r^2'] },
+            { n: 'Halbkugel', sk: 'halbkugel', link: 'form=halbkugel',
+              f: ['V = \\tfrac{2}{3}\\,\\pi r^3', 'M = 2\\pi\\,r^2,\\quad O = 3\\pi\\,r^2'] },
+            { n: 'Kugelkappe', sk: 'kappe', link: null,
+              f: ['V = \\pi\\,h^2\\left(r - \\tfrac{h}{3}\\right)', 'M = 2\\pi\\,r\\,h'], note: 'h = Höhe der Kappe, r = Radius der Kugel' },
+            { n: 'Ellipsoid', sk: 'ellipsoid', link: 'form=ellipsoid',
+              f: ['V = \\tfrac{4}{3}\\,\\pi\\,a\\,b\\,c',
+                  'O \\approx 4\\pi\\left(\\tfrac{a^p b^p + a^p c^p + b^p c^p}{3}\\right)^{1/p}',
+                  'p = 1{,}6075'],
+              note: 'a, b, c = Halbachsen. Die Oberfläche hat keine elementare Formel; Näherung nach Knud Thomsen, Fehler < 1,1 %.' },
+            { n: 'Torus', sk: 'torus', link: 'form=torus',
+              f: ['V = 2\\pi^2 R\\,r^2', 'O = 4\\pi^2 R\\,r'] },
+            { n: 'Tetraeder', sk: 'tetraeder', link: 'solid=tetraeder',
+              f: ['V = \\tfrac{a^3}{6\\sqrt{2}}', 'O = \\sqrt{3}\\,a^2', 'h = \\sqrt{\\tfrac{2}{3}}\\,a'] },
+        ];
+
+        // ------------------------------------------------------------------
+        // Render
+        // ------------------------------------------------------------------
+        const tex = s => { try { return katex.renderToString(s, { throwOnError: false }); } catch (e) { return s; } };
+        const sketch = k => `<figure><svg class="sketch" viewBox="-9 -1 78 59">${SK[k] || ''}</svg></figure>`;
+
+        function tile(it) {
+            const body = `<h3>${it.n}</h3>${sketch(it.sk)}<div class="fs-f">${it.f.map(f => `<div>${tex(f)}</div>`).join('')}</div>`
+                + (it.note ? `<div class="fs-note">${it.note}</div>` : '');
+            return it.link
+                ? `<a class="fs-tile" href="koerper.html?${it.link}">${body}</a>`
+                : `<div class="fs-tile">${body}</div>`;
+        }
+
+        function section(title, sub, items) {
+            return `<section class="fs-sec"><h2>${title} <span>${items.length}</span> <em>${sub}</em></h2>
+                <div class="fs-grid">${items.map(tile).join('')}</div></section>`;
+        }
+
+        document.getElementById('fs-rules').innerHTML =
+            RULES.map(([t, f]) => `<div class="fs-rule"><b>${t}</b>${tex(f)}</div>`).join('');
+        document.getElementById('fs-sections').innerHTML =
+            section('Flächen', 'Umfang U · Flächeninhalt A', FLAECHEN) +
+            section('Körper', 'Mantel M · Oberfläche O · Volumen V', KOERPER);
+
+        const LEGEND = [['G', 'Grundfläche'], ['u', 'Umfang der Grundfläche'], ['h', 'Höhe (senkrecht)'],
+            ['h_s', 'Seitenhöhe (Apothem der Seitenfläche)'], ['s', 'Mantellinie'], ['r,\\,R', 'Radius'],
+            ['d', 'Diagonale bzw. Durchmesser']];
+        document.getElementById('fs-legend').innerHTML =
+            LEGEND.map(([sym, txt]) => `<span>${tex(sym)} ${txt}</span>`).join('');
+
+        /** Each figure gets its own viewBox from its measured bounding box, so a flat figure
+         *  fills a flat frame instead of floating in a square one. Needs the fonts (labels). */
+        function fitSketches() {
+            document.querySelectorAll('svg.sketch').forEach(svg => {
+                let b, f;
+                try { b = svg.getBBox(); f = (svg.querySelector('.fig') || svg).getBBox(); } catch (e) { return; }
+                if (!b || !b.width || !b.height) return;
+                const m = 1.5;
+                // centre on the body, not on the box: a label on one side must not push the figure off-centre
+                const cx = f.x + f.width / 2;
+                const half = Math.max(cx - b.x, b.x + b.width - cx) + m;
+                svg.setAttribute('viewBox', `${cx - half} ${b.y - m} ${2 * half} ${b.height + 2 * m}`);
+            });
+        }
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitSketches);
+        else window.addEventListener('load', fitSketches);
+
+        document.getElementById('fs-print').addEventListener('click', () => window.print());
+
+        CyberBranding.init({
+            title: 'DOC ALVERS MATHE-LABOR',
+            subtitle: 'Formelsammlung',
+            useExternalStyles: true,
+            skipCanvasBranding: true,
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.code !== 'Escape') return;
+            const t = e.target;
+            if (t && t.closest && t.closest('input, textarea, select, [contenteditable="true"]')) return;
+            window.location.href = 'koerper.html';
+        });
+    </script>
+</body>
+
+</html>
