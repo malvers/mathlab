@@ -261,10 +261,14 @@ window.svpPlanParts.push(function (P) {
        hier auch sortieren" - gezeigt auf die Materialspalte im Fahrplan, wo
        alle Sorten nebeneinander haengen): sie gehoeren zum Stoff, fuehren aber
        wie ein Link aus dem Haus. */
-    const MAT_RANG = { deck: 0, ppt: 0, doc: 0, xls: 0, pdf: 0, lab: 1, yt: 2, video: 2 };
+    /* Der eigene Foliensatz steht VOR den fremden Dateien (Doc, 22.09.2026:
+       "unser als erste dann PPT (immer)") - er traegt deshalb einen eigenen
+       Rang, bleibt aber in derselben Spalte wie PPT und PDF: siehe SPALTEN. */
+    const MAT_RANG = { deck: 0, ppt: 1, doc: 1, xls: 1, pdf: 1, lab: 2, yt: 3, video: 3 };
+    const RANG_LINK = 4;
     function matRang(en) {
         const rang = MAT_RANG[matKind(en.url || '', en.label || '')];
-        return rang == null ? 3 : rang;   /* alles Uebrige ist ein blosser Link */
+        return rang == null ? RANG_LINK : rang;   /* alles Uebrige ist ein blosser Link */
     }
 
     /* Drei Spalten statt einer umbrechenden Reihe (Doc, 22.09.2026: "drei
@@ -275,7 +279,7 @@ window.svpPlanParts.push(function (P) {
        renderMaterial; eine leere Spalte entsteht gar nicht erst. Die festen
        Pillen (Formelsammlung) bleiben hinten, wie ueberall - sie tragen
        .mat-fest und gehen ans Ende der letzten Spalte. */
-    const SPALTEN = [[1], [0], [2, 3]];   /* Labs | ppt/pdf | Videos und Links */
+    const SPALTEN = [[2], [0, 1], [3, 4]];   /* Labs | eigene Decks + ppt/pdf | Videos und Links */
     function matSpalten(el) {
         const kinder = Array.prototype.slice.call(el.children);
         const pille = function (k) { return k.matches('a.mat-pill') ? k : k.querySelector('a.mat-pill'); };
