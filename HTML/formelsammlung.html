@@ -8,7 +8,7 @@
     <meta name="description" content="Flächen und Körper auf einen Blick — Formeln für Umfang U, Flächeninhalt A, Mantel M, Oberfläche O und Volumen V, jede Figur ein Klick ins Körper-Labor.">
     <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
     <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&family=Raleway:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="js/i18n.js"></script>
@@ -47,14 +47,14 @@
         }
 
         /* ---- page head ---------------------------------------------- */
-        .fs-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-bottom: 18px; }
+        .fs-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-bottom: 18px; }
         .fs-head h1 {
             font-family: 'Orbitron', sans-serif; font-size: clamp(1.05rem, 2.4vw, 1.6rem); font-weight: 700;
             letter-spacing: 2.5px; text-transform: uppercase; margin: 0; color: var(--ink);
         }
         .fs-head h1 em { font-style: normal; color: #1878b8; }
         .fs-sub { font-size: 0.92rem; color: var(--ink-soft); margin-top: 6px; }
-        .fs-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .fs-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
         .fs-btn {
             font-family: 'Orbitron', sans-serif; font-size: 0.64rem; letter-spacing: 2px; text-transform: uppercase;
             padding: 9px 15px; border-radius: 9px; cursor: pointer; text-decoration: none;
@@ -63,6 +63,15 @@
         }
         .fs-btn:hover { background: #fff; border-color: #1878b8; }
         .fs-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+        .fs-btn svg { display: none; }          /* Doc: no icons in the buttons - the markup stays, so they are one line away */
+        /* the W/M/D loop: the letter carries its own colour so the mode is readable at a glance */
+        .fs-loop { gap: 7px; }
+        /* line-height pinned to the Orbitron line of the other buttons - Raleway is taller and would lift the button */
+        .fs-loop #fs-loop-label { font-family: 'Raleway', sans-serif; font-weight: 700; font-size: 0.92rem; line-height: 12px; letter-spacing: 0; min-width: 1ch; text-align: center; }
+        .fs-loop[data-m="W"] { color: #1878b8; border-color: #1878b8; background: rgba(24, 120, 184, 0.10); }
+        .fs-loop[data-m="M"] { color: #d6478f; border-color: #d6478f; background: rgba(214, 71, 143, 0.10); }
+        .fs-loop[data-m="D"] { color: #6b7f8f; border-color: #6b7f8f; background: rgba(107, 127, 143, 0.14); }
+        .fs-loop:hover { filter: brightness(0.94); }
 
         /* ---- the three rules that carry everything else --------------- */
         .fs-rules { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-bottom: 20px; }
@@ -101,6 +110,10 @@
         .fs-tile figure { margin: 0; }
         .fs-tile svg.sketch { width: 260px; height: 168px; overflow: visible; display: block; }
         .sketch .fig { filter: drop-shadow(0 6px 7px rgba(13, 58, 94, 0.22)); }
+        /* W/M/D turns every figure at once - hue first, so the shadow keeps the colour named here.
+           One rule for all seven gradients: nothing in the defs block has to be touched. */
+        html[data-mode="M"] .sketch .fig { filter: hue-rotate(127deg) drop-shadow(0 6px 7px rgba(94, 13, 58, 0.22)); }
+        html[data-mode="D"] .sketch .fig { filter: saturate(0.06) drop-shadow(0 6px 7px rgba(40, 46, 52, 0.22)); }
         .sketch .edge { fill: none; stroke: rgba(255, 255, 255, 0.55); stroke-width: 0.9; vector-effect: non-scaling-stroke; }
         .sketch .hi { fill: none; stroke: #fff; stroke-width: 1.2; stroke-dasharray: 5 4; vector-effect: non-scaling-stroke; }
         .sketch .ho { fill: none; stroke: rgba(13, 58, 94, 0.5); stroke-width: 0.6; stroke-dasharray: 2.5 2.5; vector-effect: non-scaling-stroke; }
@@ -113,7 +126,8 @@
             vector-effect: non-scaling-stroke;
         }
         .sketch .lbl.on { fill: #fff; stroke: rgba(7, 42, 74, 0.5); stroke-width: 1.6px; }
-        .sketch .lbl .sub { font-size: 3px; stroke-width: 1.1px; }
+        /* the outline has to stay well under the glyph size, or the index turns grey */
+        .sketch .lbl .sub { font-size: 3.2px; stroke-width: 0.6px; }
         .fs-f { display: flex; flex-direction: column; gap: 6px; align-items: center; }
         .fs-f .katex { font-size: 1.28em; color: var(--ink); }
         .fs-note { font-size: 0.74rem; color: var(--ink-soft); line-height: 1.35; max-width: 34ch; }
@@ -124,6 +138,7 @@
             font-size: 0.95rem; color: var(--ink-soft); border-top: 1px solid var(--line); padding-top: 14px;
         }
         .fs-legend span { display: inline-flex; align-items: baseline; gap: 7px; }
+        .fs-legend-repeat { display: none; }   /* print only - see the clone in the script */
         .fs-legend .katex { color: var(--ink); font-size: 1.1em; }
 
         @media (max-width: 1100px) { .fs-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -138,29 +153,42 @@
             @page { size: A4 portrait; margin: 8mm; }
             html, body { background: #fff !important; }
             body { padding: 0 !important; font-size: 10pt; }
-            /* .fs-sub names the lab link - nobody clicks on paper */
-            .canvas-branding, #branding-master-title, .fs-actions, .fs-note, .fs-sub,
+            /* nobody clicks on paper, but U A M O V are explained nowhere else */
+            .canvas-branding, #branding-master-title, .fs-actions, .fs-note, .fs-sub-link,
             nav, #mini-rail, .cyber-nav, .nav-btn, [data-cyber-branding-nav], .qr-overlay { display: none !important; }
             .sheet { border: none; box-shadow: none; padding: 0; max-width: none; }
             /* no section headings on paper: both groups merge into one aligned grid */
             .fs-sec > h2 { display: none; }
-            .fs-sec, .fs-grid { display: contents; }
-            #fs-sections {
-                display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 1fr;
-                gap: 3mm 4mm; align-items: stretch;
+            /* one group per page, the rows centred in it - the block must not cling to the top */
+            #fs-sections, .fs-sec { display: block; }
+            .fs-sec + .fs-sec { break-before: page; page-break-before: always; }
+            .fs-grid {
+                display: grid; grid-template-columns: repeat(3, 1fr);
+                gap: 5mm 4mm; align-items: stretch; align-content: space-evenly;   /* the spare height goes between the rows, not below them */
             }
+            /* measured: A4 portrait leaves 281mm, head+rules take 13.4mm, the legend 11.9mm.
+               100vh is the whole sheet here, not the type area - hence the measured values. */
+            .fs-sec { margin: 0; }                        /* the 26px from screen would push page 3 */
+            /* Re-measured after the symbol line came back into the head (head 11.1mm + 3mm,
+               rules 6.8mm + 2.5mm -> 257.6mm left; legend 11.9mm + 3mm -> 266.1mm left).
+               The values keep ~5mm slack so a growing head does not push a blank page. */
+            .fs-sec:first-of-type .fs-grid { min-height: 246mm; }   /* page 1 carries the legend too */
+            .fs-legend-repeat { display: flex !important; }
+            .fs-sec:last-of-type  .fs-grid { min-height: 268mm; }   /* 272.1mm free here - 4mm kept as slack */
             /* heading on top, formulas on the baseline, the figure centred in what is left */
             .fs-tile { break-inside: avoid; padding: 2px 5px 4px; gap: 3px; justify-content: space-between; }
             .fs-tile figure { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; }
             .fs-tile h3 { font-size: 7pt; letter-spacing: 1.3px; }
-            .fs-tile svg.sketch { width: 132px; height: 68px; }
+            .fs-tile svg.sketch { width: 128px; height: 61px; }   /* 7px per row freed for vertical air */
             .sketch .lbl { font-size: 5px; }
-            .sketch .lbl .sub { font-size: 3.4px; }
+            .sketch .lbl .sub { font-size: 3.6px; }
             .fs-f { gap: 3px; }
             .fs-f .katex { font-size: 0.95em; }
             /* the head has to stay slim, otherwise the first page loses a whole row */
-            .fs-head { margin-bottom: 3mm; }
+            .fs-head { margin-bottom: 3mm; justify-content: center; text-align: center; }
             .fs-head h1 { font-size: 15pt; letter-spacing: 1.8px; }
+            .fs-rules { justify-content: center; }
+            .fs-rule { flex: 0 1 auto; }
             .fs-sub { font-size: 8.4pt; margin-top: 3px; }
             /* one line, each rule as wide as its own text - equal columns break the last one */
             .fs-rules { display: flex; margin-bottom: 2.5mm; gap: 3mm; }
@@ -169,7 +197,11 @@
             .fs-rule b { font-size: 0.5rem; letter-spacing: 1px; }
             .fs-rule .katex { font-size: 1.05em; }
             /* the legend is one block - never let a single entry fall onto its own page */
-            .fs-legend { break-inside: avoid; page-break-inside: avoid; padding-top: 8px; margin-top: 3mm; font-size: 8pt; gap: 4px 18px; }
+            /* one line on paper: measured 236.3mm at 8pt/18px gap, 194mm available.
+               7pt with an 8px gap lands at ~193mm - nothing is cut, nothing wraps. */
+            .fs-legend { break-inside: avoid; page-break-inside: avoid; padding-top: 8px; margin-top: 3mm;
+                         font-size: 7pt; gap: 3px 8px; flex-wrap: nowrap; justify-content: center; }
+            .fs-legend > span { white-space: nowrap; }
         }
     </style>
 </head>
@@ -184,10 +216,10 @@
             <stop offset="0" stop-color="#74c9ef"/><stop offset="0.5" stop-color="#3a9ad3"/><stop offset="1" stop-color="#2079b3"/>
         </linearGradient>
         <linearGradient id="gLeft" x1="0" y1="0" x2="1" y2="0.7">
-            <stop offset="0" stop-color="#5ab2e3"/><stop offset="1" stop-color="#2072a9"/>
+            <stop offset="0" stop-color="#bfe9fb"/><stop offset="0.3" stop-color="#72c3ea"/><stop offset="0.66" stop-color="#3d96cf"/><stop offset="1" stop-color="#2072a9"/>
         </linearGradient>
         <linearGradient id="gRight" x1="0" y1="0" x2="1" y2="0.8">
-            <stop offset="0" stop-color="#2f88bf"/><stop offset="1" stop-color="#175888"/>
+            <stop offset="0" stop-color="#8ed2ee"/><stop offset="0.32" stop-color="#4b9fd1"/><stop offset="0.68" stop-color="#27729f"/><stop offset="1" stop-color="#175888"/>
         </linearGradient>
         <linearGradient id="gCyl" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0" stop-color="#1f6da2"/><stop offset="0.17" stop-color="#58b2e1"/>
@@ -197,6 +229,11 @@
             <stop offset="0" stop-color="#f0fbfe"/><stop offset="0.24" stop-color="#a3e0f6"/>
             <stop offset="0.62" stop-color="#3699d3"/><stop offset="1" stop-color="#185c8e"/>
         </radialGradient>
+        <!-- the torus is wide, so the sphere's white core sat on it as a hot spot -->
+        <radialGradient id="gTor" cx="0.34" cy="0.26" r="0.9">
+            <stop offset="0" stop-color="#c3e9f8"/><stop offset="0.3" stop-color="#8ed3ef"/>
+            <stop offset="0.66" stop-color="#3699d3"/><stop offset="1" stop-color="#185c8e"/>
+        </radialGradient>
         <linearGradient id="gFlat" x1="0" y1="0" x2="0.9" y2="1">
             <stop offset="0" stop-color="#a6e2f7"/><stop offset="0.52" stop-color="#4ea9dd"/><stop offset="1" stop-color="#2a80b8"/>
         </linearGradient>
@@ -205,10 +242,14 @@
     <div class="sheet">
         <div class="fs-head">
             <div>
-                <h1>Flächen &amp; Körper — <em>Formeln auf einen Blick</em></h1>
-                <div class="fs-sub">Umfang <b>U</b>, Flächeninhalt <b>A</b>, Mantel <b>M</b>, Oberfläche <b>O</b>, Volumen <b>V</b> — ein Klick öffnet die Figur im Körper-Labor.</div>
+                <h1>Flächen &amp; Körper — <em><span id="fs-count"></span> Formeln auf einen Blick</em></h1>
+                <div class="fs-sub">Umfang <b>U</b>, Flächeninhalt <b>A</b>, Mantel <b>M</b>, Oberfläche <b>O</b>, Volumen <b>V</b><span class="fs-sub-link"> — ein Klick öffnet die Figur im Körper-Labor.</span></div>
             </div>
             <div class="fs-actions">
+                <button class="fs-btn fs-loop" id="fs-loop" title="Modus wechseln: W → M → D">
+                    <svg viewBox="0 0 24 24"><path d="M17 2.1l4 4-4 4"/><path d="M3 12.2v-2a4 4 0 0 1 4-4h12.8"/><path d="M7 21.9l-4-4 4-4"/><path d="M21 11.8v2a4 4 0 0 1-4 4H4.2"/></svg>
+                    <span id="fs-loop-label">W</span>
+                </button>
                 <a class="fs-btn" href="koerper.html">
                     <svg viewBox="0 0 24 24"><path d="M12 2 3 7v10l9 5 9-5V7l-9-5Z"/><path d="m3 7 9 5 9-5"/><path d="M12 12v10"/></svg>
                     Körper-Labor
@@ -239,16 +280,16 @@
         const SK = {
             // ---- plane figures: one glossy face, labels around it
             quadrat: fig(flat('12,8 48,8 48,44 12,44') + '<line class="hi" x1="12" y1="44" x2="48" y2="8"/>')
-                + L(30, 50, 'a') + L(6, 26, 'a') + L(33, 18, 'd', 1),
+                + L(30, 50, 'a') + L(6, 26, 'a') + L(27, 23, 'd', 1),
             rechteck: fig(flat('6,13 54,13 54,41 6,41') + '<line class="hi" x1="6" y1="41" x2="54" y2="13"/>')
-                + L(30, 47, 'a') + L(59, 27, 'b') + L(31, 22, 'd', 1),
+                + L(30, 47, 'a') + L(59, 27, 'b') + L(28, 23.5, 'd', 1),
             parallelogramm: fig(flat('4,42 40,42 56,12 20,12') + '<line class="hi" x1="40" y1="42" x2="40" y2="12"/>')
                 + L(22, 48, 'a') + L(52, 28, 'b') + L(35, 27, 'h', 1) + L(13, 38, 'α', 1),
             raute: fig(flat('30,6 54,27 30,48 6,27') + '<line class="hi" x1="6" y1="27" x2="54" y2="27"/><line class="hi" x1="30" y1="6" x2="30" y2="48"/>')
                 + L(46, 12, 'a') + L(17, 23, S('d', 1), 1) + L(35, 35, S('d', 2), 1),
             trapez: fig(flat('4,42 56,42 44,12 16,12') + '<line class="hi" x1="16" y1="42" x2="16" y2="12"/>'
                 + '<line class="hi" x1="10" y1="27" x2="50" y2="27"/>')
-                + L(30, 48, 'a') + L(30, 8, 'c') + L(19, 35, 'h', 1) + L(36, 24, 'm', 1),
+                + L(30, 48, 'a') + L(30, 8, 'c') + L(19, 35, 'h', 1) + L(30, 23, 'm', 1),
             drachen: fig(flat('30,4 52,22 30,50 8,22') + '<line class="hi" x1="8" y1="22" x2="52" y2="22"/><line class="hi" x1="30" y1="4" x2="30" y2="50"/>')
                 + L(44, 11, 'a') + L(45, 38, 'b') + L(17, 19, S('d', 1), 1) + L(35, 33, S('d', 2), 1),
             dreieck: fig(flat('5,44 55,44 38,9') + '<line class="hi" x1="38" y1="44" x2="38" y2="9"/>')
@@ -276,12 +317,12 @@
                 + '<polyline class="edge" points="8,18 36,18 36,46"/><line class="edge" x1="36" y1="18" x2="50" y2="6"/>'
                 + '<polyline class="hd" points="22,6 22,34 50,34"/><line class="hd" x1="22" y1="34" x2="8" y2="46"/>'
                 + '<line class="hd" x1="8" y1="46" x2="50" y2="6"/>')
-                + L(22, 52, 'a') + L(23, 29, 'd', 1),
+                + L(22, 52, 'a') + L(26.5, 23.5, 'd', 1),
             quader: fig(P('6,22 20,8 54,8 40,22', 'gTop') + P('6,22 40,22 40,46 6,46', 'gFront') + P('40,22 54,8 54,32 40,46', 'gRight')
                 + '<polyline class="edge" points="6,22 40,22 40,46"/><line class="edge" x1="40" y1="22" x2="54" y2="8"/>'
                 + '<polyline class="hd" points="20,8 20,32 54,32"/><line class="hd" x1="20" y1="32" x2="6" y2="46"/>'
                 + '<line class="hd" x1="6" y1="46" x2="54" y2="8"/>')
-                + L(23, 52, 'a') + L(1, 34, 'c') + L(52, 43, 'b') + L(24, 30, 'd', 1),
+                + L(23, 52, 'a') + L(1, 34, 'c') + L(52, 43, 'b') + L(27.5, 24, 'd', 1),
             prisma: fig(P('46,15 38,21 22,21 14,15 22,9 38,9', 'gTop')
                 + P('14,15 22,21 22,45 14,39', 'gLeft') + P('22,21 38,21 38,45 22,45', 'gFront') + P('38,21 46,15 46,39 38,45', 'gRight')
                 + '<polyline class="edge" points="14,15 22,21 38,21 46,15"/><line class="edge" x1="22" y1="21" x2="22" y2="45"/><line class="edge" x1="38" y1="21" x2="38" y2="45"/>'
@@ -322,7 +363,7 @@
                 + '<ellipse class="hi" cx="30" cy="28" rx="26" ry="8"/><ellipse class="hi" cx="30" cy="28" rx="9" ry="17"/>'
                 + '<line class="hi" x1="30" y1="28" x2="56" y2="28"/><line class="hi" x1="30" y1="28" x2="30" y2="11"/>'
                 + '<line class="hi" x1="30" y1="28" x2="19" y2="35"/>')
-                + L(45, 24, 'a', 1) + L(22, 35, 'b', 1) + L(33, 18, 'c', 1),
+                + L(45, 25.5, 'a', 1) + L(24, 29.5, 'b', 1) + L(32, 18, 'c', 1),
             halbkugel: fig('<path fill="url(#gSph)" d="M8 27a22 22 0 0 1 44 0Z"/><ellipse cx="30" cy="27" rx="22" ry="7.5" fill="url(#gTop)"/>'
                 + '<line class="hi" x1="30" y1="27" x2="52" y2="27"/>')
                 + L(41, 23, 'r', 1),
@@ -330,8 +371,8 @@
                 + '<ellipse cx="30" cy="19" rx="17.9" ry="4.6" fill="url(#gTop)"/>'
                 + '<line class="ho" x1="30" y1="19" x2="30" y2="9"/><line class="ho" x1="30" y1="30" x2="47.9" y2="19"/>')
                 + L(34, 13.5, 'h') + L(43, 27, 'r'),
-            torus: fig('<path fill="url(#gSph)" fill-rule="evenodd" d="M30 12a26 15 0 1 1 0 30 26 15 0 0 1 0-30Zm0 10a11 5 0 1 0 0 10 11 5 0 0 0 0-10Z"/>'
-                + '<ellipse class="hd" cx="30" cy="27" rx="18.5" ry="10"/><ellipse class="hd" cx="11.5" cy="27" rx="7.5" ry="10.5"/>'
+            torus: fig('<path fill="url(#gTor)" fill-rule="evenodd" d="M30 12a26 15 0 1 1 0 30 26 15 0 0 1 0-30Zm0 10a11 5 0 1 0 0 10 11 5 0 0 0 0-10Z"/>'
+                + '<ellipse class="hd" cx="30" cy="27" rx="18.5" ry="10"/>'
                 + '<line class="hi" x1="11.5" y1="27" x2="4" y2="27"/><line class="hi" x1="30" y1="27" x2="48.5" y2="27"/>')
                 + L(8, 23, 'r', 1) + L(40, 23, 'R', 1),
             // equilateral silhouette, apex centred, fourth vertex behind the middle
@@ -385,7 +426,7 @@
         const KOERPER = [
             { n: 'Würfel', sk: 'wuerfel', link: 'solid=wuerfel',
               f: ['V = a^3', 'O = 6\\,a^2,\\quad M = 4\\,a^2', 'd = a\\sqrt{3}'] },
-            { n: 'Quader', sk: 'quader', link: null,
+            { n: 'Quader', sk: 'quader', link: 'prisma=quader',
               f: ['V = a\\,b\\,c', 'O = 2\\,(ab + ac + bc)', 'M = 2\\,(a+b)\\,c', 'd = \\sqrt{a^2+b^2+c^2}'] },
             { n: 'Prisma', sk: 'prisma', link: 'prisma=prisma',
               f: ['V = G\\cdot h', 'M = u\\cdot h', 'O = 2\\,G + M'] },
@@ -394,19 +435,19 @@
             { n: 'Pyramide', sk: 'pyramide', link: 'prisma=pyramide',
               f: ['V = \\tfrac{1}{3}\\,G\\cdot h', 'M = \\tfrac{1}{2}\\,u\\cdot h_s', 'O = G + M'], note: 'h<sub>s</sub> = Seitenhöhe (Dreieckshöhe der Mantelfläche)' },
             // no deep link yet: the lab's ?prisma= has no n, so it would open a hexagonal pyramid
-            { n: 'Quadratische Pyramide', sk: 'pyramide4', link: null,
+            { n: 'Quadratische Pyramide', sk: 'pyramide4', link: 'prisma=pyramide&n=4',
               f: ['V = \\tfrac{1}{3}\\,a^2 h', 'h_s = \\sqrt{h^2 + \\tfrac{a^2}{4}}', 'M = 2\\,a\\,h_s,\\quad O = a^2 + M'] },
             { n: 'Kegel', sk: 'kegel', link: 'form=kegel',
               f: ['V = \\tfrac{1}{3}\\,\\pi r^2 h', 's = \\sqrt{r^2 + h^2}', 'M = \\pi\\,r\\,s,\\quad O = \\pi r\\,(r+s)'] },
             { n: 'Kegelstumpf', sk: 'kegelstumpf', link: 'form=kegelstumpf',
               f: ['V = \\tfrac{\\pi h}{3}\\,(R^2 + R\\,r + r^2)', 's = \\sqrt{(R-r)^2 + h^2}', 'M = \\pi\\,(R+r)\\,s'] },
-            { n: 'Pyramidenstumpf', sk: 'pyramidenstumpf', link: null,
+            { n: 'Pyramidenstumpf', sk: 'pyramidenstumpf', link: 'prisma=pyramidenstumpf',
               f: ['V = \\tfrac{h}{3}\\left(G_1 + \\sqrt{G_1 G_2} + G_2\\right)'], note: 'G₁, G₂ = Grund- und Deckfläche' },
             { n: 'Kugel', sk: 'kugel', link: 'form=kugel',
               f: ['V = \\tfrac{4}{3}\\,\\pi r^3', 'O = 4\\pi\\,r^2'] },
             { n: 'Halbkugel', sk: 'halbkugel', link: 'form=halbkugel',
               f: ['V = \\tfrac{2}{3}\\,\\pi r^3', 'M = 2\\pi\\,r^2,\\quad O = 3\\pi\\,r^2'] },
-            { n: 'Kugelkappe', sk: 'kappe', link: null,
+            { n: 'Kugelkappe', sk: 'kappe', link: 'form=kappe',
               f: ['V = \\pi\\,h^2\\left(r - \\tfrac{h}{3}\\right)', 'M = 2\\pi\\,r\\,h'], note: 'h = Höhe der Kappe, r = Radius der Kugel' },
             { n: 'Ellipsoid', sk: 'ellipsoid', link: 'form=ellipsoid',
               f: ['V = \\tfrac{4}{3}\\,\\pi\\,a\\,b\\,c',
@@ -434,7 +475,7 @@
         }
 
         function section(title, sub, items) {
-            return `<section class="fs-sec"><h2>${title} <span>${items.length}</span> <em>${sub}</em></h2>
+            return `<section class="fs-sec"><h2><span>${items.length}</span> ${title} <em>${sub}</em></h2>
                 <div class="fs-grid">${items.map(tile).join('')}</div></section>`;
         }
 
@@ -447,8 +488,17 @@
         const LEGEND = [['G', 'Grundfläche'], ['u', 'Umfang der Grundfläche'], ['h', 'Höhe (senkrecht)'],
             ['h_s', 'Seitenhöhe (Apothem der Seitenfläche)'], ['s', 'Mantellinie'], ['r,\\,R', 'Radius'],
             ['d', 'Diagonale bzw. Durchmesser']];
+        document.getElementById('fs-count').textContent = FLAECHEN.length + KOERPER.length;
         document.getElementById('fs-legend').innerHTML =
             LEGEND.map(([sym, txt]) => `<span>${tex(sym)} ${txt}</span>`).join('');
+
+        // On paper the legend repeats at the foot of the first page - page 2 is a sheet of its
+        // own and nobody should have to turn over to look a symbol up. Screen shows one legend.
+        const legendRepeat = document.getElementById('fs-legend').cloneNode(true);
+        legendRepeat.removeAttribute('id');
+        legendRepeat.classList.add('fs-legend-repeat');
+        legendRepeat.setAttribute('aria-hidden', 'true');
+        document.querySelector('#fs-sections .fs-sec')?.appendChild(legendRepeat);
 
         /** Each figure gets its own viewBox from its measured bounding box, so a flat figure
          *  fills a flat frame instead of floating in a square one. Needs the fonts (labels). */
@@ -468,6 +518,24 @@
         else window.addEventListener('load', fitSketches);
 
         document.getElementById('fs-print').addEventListener('click', () => window.print());
+
+        // ---- W / M / D loop -------------------------------------------------
+        // One click moves to the next mode. The choice survives a reload and lands
+        // on <html data-mode>, so anything that should react hangs off that.
+        const MODES = ['W', 'M', 'D'];
+        const loopBtn = document.getElementById('fs-loop');
+        const loopLabel = document.getElementById('fs-loop-label');
+        function setMode(m) {
+            document.documentElement.dataset.mode = m;
+            loopBtn.dataset.m = m;
+            loopLabel.textContent = m;
+            try { localStorage.setItem('fs-mode', m); } catch (e) { /* private window */ }
+        }
+        let start = 'W';
+        try { const kept = localStorage.getItem('fs-mode'); if (MODES.includes(kept)) start = kept; } catch (e) { }
+        setMode(start);
+        loopBtn.addEventListener('click', () =>
+            setMode(MODES[(MODES.indexOf(document.documentElement.dataset.mode) + 1) % MODES.length]));
 
         CyberBranding.init({
             title: 'DOC ALVERS MATHE-LABOR',
