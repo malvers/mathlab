@@ -75,6 +75,133 @@ window.svpPlanParts.push(function (P) {
         return out;
     }
 
+    /* ---- Volltext im verlinkten Material ---------------------------------
+       Doc, 22.09.2026: "also werden unsere Decks (HTML) nicht durchsucht?" -
+       bis dahin nicht. Die Suche sah nur, was im DOM steht, also die
+       BESCHRIFTUNG der Pille; ein Wort von Folie 14 fand nichts.
+
+       Gemessen am 22.09.2026: 216 Decks, 3,05 MB HTML zusammen, ~1,2 MB reiner
+       Text, im Schnitt 14 KB je Deck. Deshalb KEIN gebauter Index, sondern faul
+       nachgeladen: die Seite holt genau die Seiten, auf die ihre eigenen Pillen
+       zeigen, faltet sie EINMAL und behaelt sie; jeder weitere Tastendruck ist
+       dann ein includes() ueber den gefalteten Text. Ein Index (wie
+       js/labs-terms.js fuer die Labs) waere nach jedem Speichern im
+       Deck-Editor veraltet - so ist der Text immer der von jetzt.
+
+       Geholt wird erst ab VT_MIN Zeichen: auf dem Fon sind das einmalig ein
+       paar hundert KB, und die ersten zwei Buchstaben treffen ohnehin alles. */
+    const VT_MIN = 3;
+    const vtText = new Map();   /* Adresse -> gefalteter Text; '' = laeuft noch, leer oder unerreichbar */
+    const vtNeed = new Set();   /* in diesem Lauf gebraucht, noch nicht geholt */
+    let vtOffen = 0;            /* laufende Ladungen - der Zaehler sagt es mit " …" */
+    let vtPainted = [];         /* markierte Pillen - beim naechsten Lauf abgeraeumt */
+
+    /* Adresse einer Material-Pille, wenn wir ihren Text lesen duerfen und
+       sollen - sonst ''. Gelesen wird nur die EIGENE Seite (fetch kommt an
+       einen fremden Host gar nicht heran) und dort nur, was Inhalt TRAEGT:
+       Foliensaetze in /decks/, Aufgabenblaetter in /aufgaben/ und die
+       Aufgaben-/Testseiten. Die Labs bleiben draussen: ihr sichtbarer Text
+       sind Bedienknoepfe ("Start", "Zufall"), die in jedem Lab stehen und
+       jede Woche mit einem Lab-Link zum Treffer machen wuerden - dieselbe
+       Ueberlegung, mit der tools/build-labs-terms.mjs die gemeinsamen Module
+       aus dem Lab-Index haelt. */
+    /* Der eigene Host - mit und ohne "www" und lokal. Das ist kein Luxus:
+       parseMat erkennt nur ABSOLUTE Links, und in der Materialzeile stehen sie
+       mal als docalvers.de, mal als www.docalvers.de. Verglichen mit
+       location.origin waere die eine Schreibweise auf der Seite der anderen ein
+       fremder Host - fetch kaeme nicht heran, und der Volltext waere je nach
+       Schreibweise mal da und mal nicht. Geholt wird darum IMMER ueber den Host
+       dieser Seite (lokal liefert serve.py HTML/ als Wurzel, live docalvers.de
+       dasselbe - der Pfad passt auf beiden Seiten). */
+    const VT_EIGEN = /^(?:(?:www\.)?docalvers\.de|localhost|127\.0\.0\.1)$/i;
+    function vtAdresse(url) {
+        let u;
+        try { u = new URL(String(url == null ? '' : url), location.href); }
+        catch (e) { return ''; }
+        if (u.origin !== location.origin && !VT_EIGEN.test(u.hostname)) return '';
+        if (!/\.html?$/i.test(u.pathname)) return '';
+        const ok = /^\/decks\//i.test(u.pathname)
+            || /^\/aufgaben\//i.test(u.pathname)
+            || /test[\w-]*\.html$/i.test(u.pathname);
+        return ok ? location.origin + u.pathname + u.search : '';
+    }
+
+    /* Die lesbaren Seiten einer Woche - aus derselben Materialzeile, aus der
+       die Pillen gebaut werden (matTd.dataset.src), nicht aus dem DOM: so
+       zaehlt auch, was in einem zugeklappten Reiter haengt. */
+    function vtQuellen(r) {
+        const src = r.matTd ? (r.matTd.dataset.src || '') : '';
+        if (!src || !P.parseMat) return [];
+        const out = [];
+        P.parseMat(src).forEach(function (en) {
+            const u = vtAdresse(en.url);
+            if (u && out.indexOf(u) < 0) out.push(u);
+        });
+        return out;
+    }
+
+    /* Sichtbarer Text einer geholten Seite, schon gefaltet. Geparst wird mit
+       dem DOMParser statt mit einer Regex: das Dokument ist untaetig (kein
+       Skript laeuft, kein Bild wird geladen), und &auml; kommt als Umlaut
+       heraus - eine Regex ueber die Entities wuerde genau die Woerter
+       verstuemmeln, die Doc sucht. */
+    function vtFalten(html) {
+        let doc = null;
+        try { doc = new DOMParser().parseFromString(html, 'text/html'); } catch (e) { return ''; }
+        if (!doc || !doc.body) return '';
+        doc.body.querySelectorAll('script, style').forEach(function (el) { el.remove(); });
+        const titel = doc.querySelector('title');
+        return planFold(((titel ? titel.textContent + ' ' : '') + doc.body.textContent)
+            .replace(/\s+/g, ' '));
+    }
+
+    /* Was dieser Lauf gebraucht haette, holen - einmal je Adresse. Ist alles
+       da, laeuft die Suche noch einmal, jetzt mit dem Volltext. */
+    function vtLade() {
+        if (!vtNeed.size) return;
+        const urls = [...vtNeed];
+        vtNeed.clear();
+        urls.forEach(function (u) {
+            if (vtText.has(u)) return;
+            vtText.set(u, '');   /* Platzhalter: keine zweite Ladung derselben Seite */
+            vtOffen++;
+            fetch(u, { credentials: 'same-origin' })
+                .then(function (res) { return res.ok ? res.text() : ''; })
+                .then(function (html) { if (html) vtText.set(u, vtFalten(html)); })
+                .catch(function () { /* nicht erreichbar - bleibt leer */ })
+                .then(function () {
+                    vtOffen--;
+                    if (!vtOffen) planSearchRun();
+                });
+        });
+    }
+
+    /* Die Seiten einer Woche, die JEDES Suchwort hergeben - ein Wort darf aus
+       der Zeile kommen, der Rest aus DERSELBEN Seite. Zwei Woerter aus zwei
+       verschiedenen Decks sind kein Treffer: das waere genau die
+       Zufalls-Kombination, die das UND innerhalb der Zeile vermeidet. */
+    function vtTreffer(r, terms, hay) {
+        const out = [];
+        for (const u of vtQuellen(r)) {
+            if (!vtText.has(u)) { vtNeed.add(u); continue; }
+            const txt = vtText.get(u);
+            if (!txt) continue;
+            if (terms.every(function (t) { return txt.includes(t) || hay.includes(t); })) out.push(u);
+        }
+        return out;
+    }
+
+    /* Die Pille, die auf diese Seite zeigt. Verglichen wird die aufgeloeste
+       Adresse, nicht der rohe href: lokal schneidet siteHref den eigenen Host
+       ab, live nicht. */
+    function vtPille(detail, u) {
+        if (!detail) return null;
+        for (const a of detail.querySelectorAll('a.badge')) {
+            if (vtAdresse(a.getAttribute('href') || '') === u) return a;
+        }
+        return null;
+    }
+
     let searchInput = null;
     let searchCount = null;
     let searchOpened = [];   /* sub-rows this search opened - closed again on clear */
@@ -88,6 +215,12 @@ window.svpPlanParts.push(function (P) {
             if (s && s.classList.contains('detail-row')) s.classList.remove('open');
         });
         searchOpened = [];
+        vtPainted.forEach(function (pill) { pill.classList.remove('vt-hit'); });
+        vtPainted = [];
+        vtNeed.clear();
+        /* Der Volltext kommt erst ab VT_MIN Zeichen dazu (Leerzeichen zaehlen
+           nicht mit, die Umlaute sind hier schon gefaltet). */
+        const tief = terms.join('').length >= VT_MIN;
         /* A running search looks into folded holiday blocks too (svp.css lifts
            the fold while this class is set); the fold returns with the clear. */
         document.body.classList.toggle('plan-searching', terms.length > 0);
@@ -112,13 +245,18 @@ window.svpPlanParts.push(function (P) {
                are joined with a line break so nothing matches across two cells. */
             const parts = planSearchParts(tr).concat(planSearchParts(detail));
             const hay = parts.map(function (p) { return p.folded; }).join('\n');
-            const ok = terms.every(function (t) { return hay.includes(t); });
+            const vtHits = tief ? vtTreffer(r, terms, hay) : [];
+            const ok = terms.every(function (t) { return hay.includes(t); }) || vtHits.length > 0;
             tr.classList.toggle('plan-miss', !ok);
             if (detail) detail.classList.toggle('plan-miss', !ok);
             if (!ok) continue;
             hits++;
 
             let deep = false, inNotes = false;
+            /* Welcher rechte Reiter den Treffer traegt: liegt er in einem
+               zugeklappten (Videos, Aufgaben), holt die Suche ihn nach vorn -
+               sonst zaehlt der Treffer, und vorne steht Zusatzmaterial. */
+            let rechtsZu = null, rechtsOffen = false;
             for (const p of parts) {
                 for (const t of terms) {
                     for (let k = p.folded.indexOf(t); k !== -1; k = p.folded.indexOf(t, k + t.length)) {
@@ -129,9 +267,24 @@ window.svpPlanParts.push(function (P) {
                         if (!detail || !detail.contains(p.node)) continue;
                         deep = true;
                         if (p.node.parentElement.closest('[data-pane="notizen"]')) inNotes = true;
+                        const rp = p.node.parentElement.closest('.sub-side [data-pane]');
+                        if (rp && rp.hidden) rechtsZu = rechtsZu || rp.dataset.pane;
+                        else if (rp) rechtsOffen = true;
                     }
                 }
             }
+            /* Im Deck selbst kann die Suche nichts anmalen - also traegt die
+               Pille den Treffer, die dorthin fuehrt. */
+            vtHits.forEach(function (u) {
+                const pill = vtPille(detail, u);
+                if (!pill) return;
+                pill.classList.add('vt-hit');
+                vtPainted.push(pill);
+                deep = true;
+                const rp = pill.closest('.sub-side [data-pane]');
+                if (rp && rp.hidden) rechtsZu = rechtsZu || rp.dataset.pane;
+                else if (rp) rechtsOffen = true;
+            });
             /* A hit in the bullets or in the Notizen is invisible while the week
                is folded up, so the search opens it - and folds it back when the
                query goes away. openWeeks stays untouched on purpose: this is the
@@ -142,11 +295,16 @@ window.svpPlanParts.push(function (P) {
                 searchOpened.push(tr);
             }
             if (inNotes && r.showPane) r.showPane('notizen');
+            if (!rechtsOffen && rechtsZu && r.showRechts) r.showRechts(rechtsZu);
         }
 
         /* The counter keeps its slot even while empty - otherwise the field
            would jump narrower the moment the first letter is typed. */
-        searchCount.textContent = terms.length ? hits + ' von ' + total : '';
+        vtLade();
+        /* Das " …" ist keine Zierde: solange Seiten unterwegs sind, ist die
+           Zahl vorlaeufig und springt gleich noch. */
+        searchCount.textContent = terms.length
+            ? hits + ' von ' + total + (vtOffen ? ' …' : '') : '';
         searchCount.classList.toggle('none', terms.length > 0 && hits === 0);
         if (ranges.length && window.CSS && CSS.highlights && window.Highlight) {
             CSS.highlights.set('plan-find', new Highlight(...ranges));
@@ -169,7 +327,7 @@ window.svpPlanParts.push(function (P) {
         searchInput.placeholder = 'Suchen …';
         searchInput.autocomplete = 'off';
         searchInput.setAttribute('aria-label', 'Im Plan suchen');
-        searchInput.title = 'Sucht in Woche, Bereich, Thema, Stichpunkten, Notizen und Material';
+        searchInput.title = 'Sucht in Woche, Bereich, Thema, Stichpunkten, Notizen und Material - ab drei Zeichen auch IM verlinkten Material (Decks, Aufgabenblaetter)';
         searchCount = document.createElement('span');
         searchCount.className = 'svp-search-count';
         /* At the right end of the toolbar: the pill legend that used to sit
