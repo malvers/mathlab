@@ -67,6 +67,11 @@ html.svp-light #plan-table a.quiz-btn:hover { background: rgba(40, 70, 120, 0.16
 .mat-block a.mat-pill {
     display: inline-block;
     margin: 2px 0 2px 6px;
+    /* Thinner outline than the 1px every .badge carries (Doc, 22.09.2026:
+       "mach mal den rand duenner") - on a hi-dpi screen this is one physical
+       pixel instead of two, so the orange "wichtig" pill stops looking framed.
+       Here, not in one tab: all material pills share this rule. */
+    border-width: 0.5px;
     max-width: 220px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -276,11 +281,13 @@ html.svp-light #plan-table .detail-row .sub-talk b { color: var(--ypsilon); }
        daneben. .b-green selbst bleibt unangetastet - es faerbt auch die
        Navigationspillen, die gruen bleiben sollen. */
     color: rgb(var(--tint-text));
-    border-color: rgba(var(--g-mat), 0.5);
+    /* Blasser Rand wie bei der wichtigen Pille (Doc, 22.09.2026) - die
+       Pillenreihe soll ruhig wirken, nicht wie eine Reihe Kaesten. */
+    border-color: rgba(var(--g-mat), 0.32);
 }
 html.svp-light #plan-table .detail-row .sub-side .mat-block a.mat-pill {
     color: rgb(30, 60, 120);
-    border-color: rgba(var(--g-mat), 0.45);
+    border-color: rgba(var(--g-mat), 0.3);
 }
 /* Wichtiges Material: volle orange Flaeche mit dunkelblauer Schrift (Doc,
    22.09.2026: "unser Orange bitte nicht transp. Dunkelblaue Schrift / icon").
@@ -296,9 +303,11 @@ html.svp-light #plan-table .detail-row .sub-side .mat-block a.mat-pill.mat-wicht
 html.svp-grey #plan-table .detail-row .sub-side .mat-block a.mat-pill.mat-wichtig {
     background: rgb(var(--g-wichtig));
     /* Schrift, Symbol und Rand in Navy (Doc: "Dunkelblaue Schrift / icon",
-       dann "bitte auch rand") - die Pille ist dadurch ringsum eingefasst. */
+       dann "bitte auch rand") - die Pille ist dadurch ringsum eingefasst.
+       Der Rand traegt das Navy aber nur noch blass (Doc, 22.09.2026: "mach mal
+       blasser"): er soll die Flaeche begrenzen, nicht sie einrahmen. */
     color: rgb(var(--g-wichtig-ink));
-    border-color: rgb(var(--g-wichtig-ink));
+    border-color: rgba(var(--g-wichtig-ink), 0.3);
 }
 /* Die gezeichneten Symbole tragen ihre Farbe als SVG-Attribut - jede CSS-Regel
    schlaegt das. Strich-Symbole erkennt man am stroke-Attribut; bei ihnen darf
