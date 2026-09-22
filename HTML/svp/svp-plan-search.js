@@ -19,6 +19,9 @@ window.svpPlanParts.push(function (P) {
            second time, every hit would be found and painted twice;
          - the fixed captions of the sub-row (Inhalt/Notizen/Zusatzmaterial):
            they stand in every week and would match all of them at once.
+       Was NICHT im DOM steht, aber trotzdem gesucht wird: Dateiname und
+       Beschreibung einer Material-Pille und der Text der verlinkten Seite -
+       siehe den Volltext-Block weiter unten.
 
        Hits are painted with the CSS Custom Highlight API, exactly like the
        search in notes.html: it draws over the text without writing into the
@@ -126,18 +129,40 @@ window.svpPlanParts.push(function (P) {
         return ok ? location.origin + u.pathname + u.search : '';
     }
 
-    /* Die lesbaren Seiten einer Woche - aus derselben Materialzeile, aus der
-       die Pillen gebaut werden (matTd.dataset.src), nicht aus dem DOM: so
-       zaehlt auch, was in einem zugeklappten Reiter haengt. */
-    function vtQuellen(r) {
+    /* Das Material einer Woche - aus derselben Zeile, aus der auch die Pillen
+       gebaut werden (matTd.dataset.src), nicht aus dem DOM: so zaehlt auch,
+       was in einem zugeklappten Reiter haengt.
+       Jeder Eintrag bringt zweierlei mit: seine "meta" - Beschreibung und
+       Dateiname, beides steht nirgends im Text der Seite - und, wenn wir sie
+       lesen duerfen, seine Adresse fuer den Volltext. */
+    function vtEintraege(r) {
         const src = r.matTd ? (r.matTd.dataset.src || '') : '';
         if (!src || !P.parseMat) return [];
-        const out = [];
-        P.parseMat(src).forEach(function (en) {
-            const u = vtAdresse(en.url);
-            if (u && out.indexOf(u) < 0) out.push(u);
+        return P.parseMat(src).map(function (en) {
+            return { url: en.url, adresse: vtAdresse(en.url), meta: vtMeta(en) };
         });
-        return out;
+    }
+
+    /* Dateiname aus einer Adresse - und nur dann, wenn es wirklich einer ist.
+       Ein SharePoint-Freigabelink endet auf einem Zufalls-Token ohne Punkt
+       ("ETc4xLk9..."); der waere im Heuhaufen reines Rauschen, weil er jede
+       Buchstabenfolge treffen kann. Punkt, Strich und Unterstrich werden zu
+       Leerzeichen, sonst findet "begriffe" das ai-begriffe.html nicht. */
+    function vtDateiname(pfad) {
+        let s = String(pfad == null ? '' : pfad).split(/[?#]/)[0].replace(/\/+$/, '');
+        s = s.slice(s.lastIndexOf('/') + 1);
+        try { s = decodeURIComponent(s); } catch (e) { /* kaputt kodiert - nimm es roh */ }
+        if (!/\.[a-z0-9]{2,5}$/i.test(s) || s.length > 80) return '';
+        return s.replace(/[._-]+/g, ' ');
+    }
+
+    /* Was an einer Pille haengt, aber nirgends geschrieben steht: die
+       Beschreibung (sie erscheint erst beim Darueberfahren) und der Dateiname -
+       aus [[datei:...]], wenn es ihn gibt, sonst aus der Adresse selbst
+       (Doc, 22.09.2026: "go" auf beides). */
+    function vtMeta(en) {
+        return planFold([en.desc || '', vtDateiname(en.datei || ''), vtDateiname(en.url || '')]
+            .filter(Boolean).join(' '));
     }
 
     /* Sichtbarer Text einer geholten Seite, schon gefaltet. Geparst wird mit
@@ -180,24 +205,32 @@ window.svpPlanParts.push(function (P) {
        der Zeile kommen, der Rest aus DERSELBEN Seite. Zwei Woerter aus zwei
        verschiedenen Decks sind kein Treffer: das waere genau die
        Zufalls-Kombination, die das UND innerhalb der Zeile vermeidet. */
-    function vtTreffer(r, terms, hay) {
+    function vtTreffer(r, terms, hay, tief) {
         const out = [];
-        for (const u of vtQuellen(r)) {
-            if (!vtText.has(u)) { vtNeed.add(u); continue; }
-            const txt = vtText.get(u);
+        for (const en of vtEintraege(r)) {
+            let txt = en.meta;
+            /* Der Volltext kommt nur ab VT_MIN Zeichen dazu - Beschreibung und
+               Dateiname kosten nichts und zaehlen ab dem ersten Buchstaben. */
+            if (tief && en.adresse) {
+                if (!vtText.has(en.adresse)) vtNeed.add(en.adresse);
+                else if (vtText.get(en.adresse)) txt += ' ' + vtText.get(en.adresse);
+            }
             if (!txt) continue;
-            if (terms.every(function (t) { return txt.includes(t) || hay.includes(t); })) out.push(u);
+            if (terms.every(function (t) { return txt.includes(t) || hay.includes(t); })) out.push(en);
         }
         return out;
     }
 
-    /* Die Pille, die auf diese Seite zeigt. Verglichen wird die aufgeloeste
-       Adresse, nicht der rohe href: lokal schneidet siteHref den eigenen Host
-       ab, live nicht. */
-    function vtPille(detail, u) {
+    /* Die Pille dieses Eintrags. Erst am href verglichen, den renderMaterial
+       genauso schreibt (siteHref), sonst an der aufgeloesten Adresse - lokal
+       schneidet siteHref den eigenen Host ab, live nicht. */
+    function vtPille(detail, en) {
         if (!detail) return null;
+        const href = P.siteHref(en.url || '');
         for (const a of detail.querySelectorAll('a.badge')) {
-            if (vtAdresse(a.getAttribute('href') || '') === u) return a;
+            const h = a.getAttribute('href') || '';
+            if (h === href) return a;
+            if (en.adresse && vtAdresse(h) === en.adresse) return a;
         }
         return null;
     }
@@ -245,7 +278,7 @@ window.svpPlanParts.push(function (P) {
                are joined with a line break so nothing matches across two cells. */
             const parts = planSearchParts(tr).concat(planSearchParts(detail));
             const hay = parts.map(function (p) { return p.folded; }).join('\n');
-            const vtHits = tief ? vtTreffer(r, terms, hay) : [];
+            const vtHits = vtTreffer(r, terms, hay, tief);
             const ok = terms.every(function (t) { return hay.includes(t); }) || vtHits.length > 0;
             tr.classList.toggle('plan-miss', !ok);
             if (detail) detail.classList.toggle('plan-miss', !ok);
@@ -275,8 +308,8 @@ window.svpPlanParts.push(function (P) {
             }
             /* Im Deck selbst kann die Suche nichts anmalen - also traegt die
                Pille den Treffer, die dorthin fuehrt. */
-            vtHits.forEach(function (u) {
-                const pill = vtPille(detail, u);
+            vtHits.forEach(function (en) {
+                const pill = vtPille(detail, en);
                 if (!pill) return;
                 pill.classList.add('vt-hit');
                 vtPainted.push(pill);
@@ -327,7 +360,7 @@ window.svpPlanParts.push(function (P) {
         searchInput.placeholder = 'Suchen …';
         searchInput.autocomplete = 'off';
         searchInput.setAttribute('aria-label', 'Im Plan suchen');
-        searchInput.title = 'Sucht in Woche, Bereich, Thema, Stichpunkten, Notizen und Material - ab drei Zeichen auch IM verlinkten Material (Decks, Aufgabenblaetter)';
+        searchInput.title = 'Sucht in Woche, Bereich, Thema, Stichpunkten, Notizen und Material - samt Dateiname und Beschreibung, ab drei Zeichen auch IM verlinkten Material (Decks, Aufgabenblaetter)';
         searchCount = document.createElement('span');
         searchCount.className = 'svp-search-count';
         /* At the right end of the toolbar: the pill legend that used to sit
