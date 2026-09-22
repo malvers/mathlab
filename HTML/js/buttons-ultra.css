@@ -7,7 +7,7 @@
 
 :root {
     --lock-padding-card: 10px;
-    --lock-padding-btn: 20px 25px;
+    --lock-padding-btn: 10px 16px;
     /* Heavy / tall */
     --lock-nav-size: 52px;
     /* Less pill-like than 12px (nav + primary actions share this) */
@@ -34,19 +34,25 @@
     text-align: center;
     width: 100%;
     /* Standard: full width */
-    min-height: 58px;
-    /* Large default height */
+    min-height: 40px !important;
+    /* Flat default height (Doc, 22.09.2026) — the single knob for every lab */
     border-radius: var(--lock-btn-radius) !important;
 }
 
-/* 2b. Grid-Button Exception: Prevent overcrowding in dense grids */
+/* 2b. Dense rows and grids: buttons sit side by side there, so they go tighter
+   still. Labs used to flatten these locally — every such rule now lives here. */
 div[class*="grid"] .btn,
 div[class*="grid"] .cyber-btn,
-.corner-grid .cyber-btn {
+.corner-grid .cyber-btn,
+.step-nav .cyber-btn,
+.ws-btns .cyber-btn,
+.jq-btn-row .cyber-btn,
+.fourier-n-step-row .cyber-btn,
+.digit-grid .cyber-btn,
+.cyber-btn.compact-btn {
     width: auto !important;
-    min-height: 48px !important;
-    /* Slightly tighter in grids */
-    padding: 10px 15px !important;
+    min-height: 34px !important;
+    padding: 7px 10px !important;
 }
 
 /* 3. Navigation Header Buttons: Square & Substantial */
