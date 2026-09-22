@@ -471,27 +471,47 @@ body {
     font-family: 'Outfit', sans-serif;
 }
 
-#n-telemetry {
+#n-telemetry,
+#n-telemetry-left {
     position: absolute;
-    right: 80px;
     top: 50%;
-    transform: translateY(-50%);
     font-family: 'Orbitron', sans-serif;
     /* responsive like Fourier's own override (fourier.html keeps it under body.compact-ui) */
     font-size: clamp(2.75rem, min(19vmin, 12vw), 9.5rem);
     font-weight: 700;
     display: block;
-    text-align: right;
-    background: linear-gradient(180deg, #ffffff 0%, #fff970 20%, #ffd700 60%, #ff8c00 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
-    filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.5));
     pointer-events: none;
     user-select: none;
     z-index: 9999;
     opacity: 0.9;
+}
+
+/* background-IMAGE, never the `background` shorthand: the shorthand resets
+   background-clip to border-box and would paint the whole box instead of the
+   digits (broke the gold number on 20.09.2026). */
+#n-telemetry {
+    right: 80px;
+    transform: translateY(-50%);
+    text-align: right;
+    background-image: linear-gradient(180deg, #ffffff 0%, #fff970 20%, #ffd700 60%, #ff8c00 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.5));
+}
+
+/* Second big number, mirrored to the left of the stage - grows leftwards from its anchor */
+#n-telemetry-left {
+    left: 80px;
+    transform: translate(-100%, -50%);
+    text-align: left;
+    background-image: linear-gradient(180deg, #ffffff 0%, #d8f6ff 20%, #57d8ff 60%, #0aa6d8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 0 25px rgba(0, 210, 255, 0.5));
 }
 
 .dropdown-option:hover {

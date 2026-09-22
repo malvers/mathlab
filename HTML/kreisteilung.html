@@ -105,6 +105,7 @@
     <main id="main-content">
         <div id="canvas-container">
             <div class="cyber-grid"></div>
+            <div id="n-telemetry-left"></div>
             <div id="n-telemetry"></div>
             <div id="math-coach-box">
                 <div class="coach-title" id="coach-title-slot"></div>
@@ -404,21 +405,26 @@
 
         // The big region count right of the circle - central #n-telemetry, the same number as in Fourier
         const bigNum = document.getElementById('n-telemetry');
-        let bigGap = 0;
+        // Its mirror image: the number of points left of the circle
+        const leftNum = document.getElementById('n-telemetry-left');
+        let bigGap = 0, leftGap = 0;
 
         function layout() {
             const rect = container.getBoundingClientRect();
             const w = rect.width, h = rect.height;
             const PAD = 28, EDGE = 26;                 // room for the point numbers at R + 18
 
-            // Circle and number are centred together; the circle gets the width the number leaves
+            // Both numbers and the circle are centred as one block; the circle gets what is left
             const nb = bigNum ? bigNum.getBoundingClientRect() : null;
             bigGap = nb && nb.width ? Math.max(24, nb.height * 0.3) : 0;
             const NW = nb && nb.width ? nb.width + bigGap : 0;
-            const tx = (w - NW) / 2, ty = h / 2;
+            const lbx = leftNum ? leftNum.getBoundingClientRect() : null;
+            leftGap = lbx && lbx.width ? Math.max(24, lbx.height * 0.3) : 0;
+            const LW = lbx && lbx.width ? lbx.width + leftGap : 0;
+            const tx = (w - NW + LW) / 2, ty = h / 2;
             cx = tx;
             cy = ty;
-            R = Math.max(10, Math.min(Math.min(w, h) * 0.40, (w - NW) / 2 - EDGE));
+            R = Math.max(10, Math.min(Math.min(w, h) * 0.40, (w - NW - LW) / 2 - EDGE));
 
             // The coach box floats over the stage and used to hide a point of the
             // hexagon. Find the largest circle beside it, as close to the centre as
@@ -426,7 +432,7 @@
             const c = coachRect(rect);
             if (c && rectDist(cx, cy, c) < R + PAD) {
                 const spot = r => {
-                    const x0 = EDGE + r, x1 = w - EDGE - NW - r, y0 = EDGE + r, y1 = h - EDGE - r;
+                    const x0 = EDGE + LW + r, x1 = w - EDGE - NW - r, y0 = EDGE + r, y1 = h - EDGE - r;
                     if (x0 > x1 || y0 > y1) return null;
                     const STEPS = 40;
                     let best = null, bd = Infinity;
@@ -449,12 +455,18 @@
             placeBigNum();
         }
 
-        // Pin the number to the circle: right of it, vertically on its centre
+        // Pin both numbers to the circle: beside it, vertically on its centre
         function placeBigNum() {
-            if (!bigNum) return;
-            bigNum.style.right = 'auto';
-            bigNum.style.left = (cx + R + bigGap) + 'px';
-            bigNum.style.top = cy + 'px';
+            if (bigNum) {
+                bigNum.style.right = 'auto';
+                bigNum.style.left = (cx + R + bigGap) + 'px';
+                bigNum.style.top = cy + 'px';
+            }
+            if (leftNum) {
+                // anchored at its right edge (translate(-100%) in the central CSS)
+                leftNum.style.left = (cx - R - leftGap) + 'px';
+                leftNum.style.top = cy + 'px';
+            }
         }
 
         const sx = x => cx + R * x;
@@ -560,6 +572,7 @@
             set('kt-faces', g.regions);
             // only on a real change: a new width relayouts the circle (ResizeObserver below)
             if (bigNum && bigNum.textContent !== String(g.regions)) bigNum.textContent = g.regions;
+            if (leftNum && leftNum.textContent !== String(n)) leftNum.textContent = n;
             set('kt-max', max);
             const row = document.getElementById('kt-faces-row');
             if (row) row.className = 'kt-row ' + (hit ? 'kt-hit' : 'kt-miss');
@@ -810,8 +823,11 @@
         if (coachBox && window.ResizeObserver)
             new ResizeObserver(() => { layout(); draw(); }).observe(coachBox);
         // More digits (or Orbitron arriving late) make the number wider - the circle makes room
-        if (bigNum && window.ResizeObserver)
-            new ResizeObserver(() => { layout(); draw(); }).observe(bigNum);
+        if (window.ResizeObserver) {
+            const ro = new ResizeObserver(() => { layout(); draw(); });
+            if (bigNum) ro.observe(bigNum);
+            if (leftNum) ro.observe(leftNum);
+        }
         // The stage widens after load without a window resize (the left chrome scales itself
         // down) - measured 1018 -> 1117 px; a canvas sized before that is drawn stretched
         if (window.ResizeObserver)
