@@ -257,11 +257,107 @@ BILDUNGSINHALT = [
 ]
 
 
+# ---------------------------------------------------------------------------
+# KW 39 - zum Deck decks/ai-begriffe.html ("Die Begriffe, die 2026 zaehlen").
+# Zehn Aufgaben, eine je Begriff: LLM, Token, Kontextfenster, Halluzination,
+# Prompt, Prompt/Context Engineering, RAG, Tool Use, Agent. Jede Antwort steht
+# woertlich auf einer Folie des Decks (Doc: Fragen aus dem eigenen Material).
+AI_BEGRIFFE = [
+ ("Ein großes Sprachmodell (LLM) hat im Kern genau eine Aufgabe. Welche?",
+  "Es sagt das nächste Token voraus",
+  ["Es schlägt die Antwort in einer Datenbank nach",
+   "Es sucht den passenden Satz aus seinem Trainingstext heraus",
+   "Es prüft den Text auf Rechtschreibung und Grammatik"],
+  ["Ein LLM ist generativ: es erzeugt Text, es sucht ihn nicht heraus.",
+   "Das Gelernte steckt in Milliarden Gewichten — es gibt kein Nachschlagewerk darin."]),
+
+ ("Warum kommt auf dieselbe Frage nicht jedes Mal dieselbe Antwort?",
+  "Weil die Ausgabe aus Wahrscheinlichkeiten gewürfelt wird",
+  ["Weil das Modell zwischendurch dazulernt",
+   "Weil die Frage jedes Mal anders verstanden wird",
+   "Weil jede Antwort neu aus dem Internet geholt wird"],
+  ["Das Modell berechnet für jedes nächste Token Wahrscheinlichkeiten.",
+   "Aus dieser Verteilung wird gezogen — deshalb zwei Läufe, zwei Formulierungen."]),
+
+ ("Faustregel Deutsch: 1 Wort entspricht etwa 1,5 bis 2 Token. Mit wie vielen Token rechnest du bei 100 Wörtern?",
+  "mit etwa 150 bis 200 Token",
+  ["mit genau 100 Token", "mit etwa 50 Token", "mit etwa 1 000 Token"],
+  ["Ein Token ist ein Wort, ein Wortteil oder ein Zeichen — deutsche Wörter zerfallen oft in mehrere.",
+   "100 Wörter · 1,5 bis 2 = 150 bis 200 Token. In Token wird gemessen: Eingabe, Ausgabe, Preis und Limit."]),
+
+ ("Was passiert, wenn das Kontextfenster voll ist?",
+  "Das Älteste fällt heraus — das Modell vergisst es",
+  ["Der Rest wird auf der Festplatte gespeichert",
+   "Die Antwort wird automatisch kürzer",
+   "Das Modell fragt nach, was es behalten soll"],
+  ["Das Kontextfenster ist ein Arbeitsspeicher, keine Festplatte.",
+   "Darin steckt alles: Systemanweisung, Verlauf, Anhänge und die Antwort selbst."]),
+
+ ("Du hast gestern eine Stunde mit einem Chatbot gearbeitet und öffnest heute ein neues Gespräch. Was weiß er noch?",
+  "nichts — jeder Start beginnt bei null",
+  ["alles, er hat das Gespräch gespeichert",
+   "nur die letzte Frage von gestern",
+   "so viel, wie in sein Kontextfenster passt"],
+  ["Zwischen zwei Chats bleibt nichts im Modell zurück.",
+   "Was er wissen soll, muss wieder ins Fenster — als Anhang, Verlauf oder Anweisung."]),
+
+ ("Ein Modell nennt eine Quelle, die es gar nicht gibt. Wie heißt das, und woran liegt es?",
+  "Halluzination — es sagt das wahrscheinlichste Wort voraus, nicht das wahre",
+  ["Ein Übertragungsfehler — die Quelle ging beim Senden verloren",
+   "Ein Tokenizer-Fehler — die Quelle wurde falsch zerlegt",
+   "Ein veralteter Trainingsstand — die Quelle war früher richtig"],
+  ["Eine erfundene Quelle klingt plausibel, weil plausible Wortfolgen wahrscheinlich sind.",
+   "Das Modell hat keine „weiß ich nicht“-Taste: Zuversicht ist kein Wahrheitsmaß.",
+   "Gegenmittel: Beleg mitgeben und nachprüfen — nie umgekehrt."]),
+
+ ("Wofür ist der System-Prompt da?",
+  "Er setzt Rolle und Regeln für das ganze Gespräch",
+  ["Er enthält die konkrete Aufgabe dieser einen Frage",
+   "Er meldet dem Modell den Stand der Technik",
+   "Er speichert die Antworten für das nächste Gespräch"],
+  ["System-Prompt: Rolle und Regeln. User-Prompt: die konkrete Aufgabe.",
+   "Der Prompt ist das Programm — nur in natürlicher Sprache geschrieben."]),
+
+ ("Worin unterscheiden sich Prompt Engineering und Context Engineering?",
+  "Prompt Engineering formuliert die einzelne Anweisung, Context Engineering füllt das ganze Kontextfenster",
+  ["Prompt Engineering ist für Text, Context Engineering für Bilder",
+   "Prompt Engineering macht der Mensch, Context Engineering das Modell",
+   "Prompt Engineering ist die alte Bezeichnung für dasselbe Vorgehen"],
+  ["Prompt Engineering fragt: Wie formuliere ich? — Handwerk am Satz.",
+   "Context Engineering fragt: Was weiß das Modell gerade? — und ebenso: Was muss raus?",
+   "Sobald Agenten arbeiten, reicht der schöne Satz nicht mehr."]),
+
+ ("Was geschieht bei RAG, bevor das Modell antwortet?",
+  "Es wird gesucht, und die Fundstellen wandern in den Prompt",
+  ["Das Modell wird mit den neuen Texten nachtrainiert",
+   "Die Frage wird in mehrere Teilfragen zerlegt",
+   "Das Kontextfenster wird vorübergehend vergrößert"],
+  ["RAG heißt Retrieval-Augmented Generation: erst suchen, dann antworten.",
+   "Die Antwort kommt aus mitgeliefertem Text — deshalb aktuell, prüfbar und mit Quelle.",
+   "Gesucht wird über Embeddings nach Ähnlichkeit, nicht nach genauem Wortlaut."]),
+
+ ("Ein Agent soll eine Datei lesen. Was tut das Modell selbst?",
+  "Es schreibt den Werkzeugaufruf; ausgeführt wird er vom Programm",
+  ["Es liest die Datei direkt von der Festplatte",
+   "Es schickt die Datei an den Hersteller",
+   "Es beschreibt in Worten, wie man die Datei öffnet"],
+  ["Tool Use (Function Calling): das Modell erzeugt den Aufruf, nicht die Antwort.",
+   "Das Programm führt aus, und das Ergebnis geht zurück ins Kontextfenster.",
+   "Ein Agent ist Modell + Werkzeuge + Schleife + Ziel — agentisch heißt: die Reihenfolge steht nicht vorher fest."]),
+]
+
+
 if __name__ == "__main__":
-    path, sol = build("bildungsinhalt", 4, 37, "LB 1",
-                      "Informatik als Bildungsinhalt und Medium anderer Wissenschaftszweige",
-                      "informatische Methoden in Physik, Medizin und Sprache; Zuordnung zu den "
-                      "vier Wissenschaftsbereichen",
-                      BILDUNGSINHALT)
-    print(os.path.basename(path), len(BILDUNGSINHALT), "Aufgaben, Lösungen:",
-          "".join("ABCD"[s] for s in sol))
+    for slug, nr, kw, lb, topic, blurb, qs in [
+        ("bildungsinhalt", 4, 37, "LB 1",
+         "Informatik als Bildungsinhalt und Medium anderer Wissenschaftszweige",
+         "informatische Methoden in Physik, Medizin und Sprache; Zuordnung zu den "
+         "vier Wissenschaftsbereichen", BILDUNGSINHALT),
+        ("ai-begriffe", 6, 39, "LB 2",
+         "Die Begriffe der künstlichen Intelligenz",
+         "LLM, Token, Kontextfenster, Halluzination, Prompt, Context Engineering, RAG, "
+         "Tool Use und Agent — zum Foliensatz decks/ai-begriffe.html", AI_BEGRIFFE),
+    ]:
+        path, sol = build(slug, nr, kw, lb, topic, blurb, qs)
+        print(os.path.basename(path), len(qs), "Aufgaben, Lösungen:",
+              "".join("ABCD"[x] for x in sol))
