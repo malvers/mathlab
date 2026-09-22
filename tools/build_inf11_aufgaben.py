@@ -259,9 +259,12 @@ BILDUNGSINHALT = [
 
 # ---------------------------------------------------------------------------
 # KW 39 - zum Deck decks/ai-begriffe.html ("Die Begriffe, die 2026 zaehlen").
-# Zehn Aufgaben, eine je Begriff: LLM, Token, Kontextfenster, Halluzination,
-# Prompt, Prompt/Context Engineering, RAG, Tool Use, Agent. Jede Antwort steht
-# woertlich auf einer Folie des Decks (Doc: Fragen aus dem eigenen Material).
+# Zwanzig Aufgaben (Doc 22.09.2026: "mach bitte da noch 10 Fragen dazu"):
+# 1-10 zu LLM, Token, Kontextfenster, Halluzination, Prompt, Prompt/Context
+# Engineering, RAG, Tool Use, Agent; 11-20 zum Unterbau und zum Rand des Decks -
+# Neuron, Gewichte, Schichten, Deep Learning, Training, Fenstergroesse,
+# Prompt-Technik, Embedding, MCP, Agenten-Risiko. Jede Antwort steht woertlich
+# auf einer Folie des Decks (Doc: Fragen aus dem eigenen Material).
 AI_BEGRIFFE = [
  ("Ein großes Sprachmodell (LLM) hat im Kern genau eine Aufgabe. Welche?",
   "Es sagt das nächste Token voraus",
@@ -344,6 +347,95 @@ AI_BEGRIFFE = [
   ["Tool Use (Function Calling): das Modell erzeugt den Aufruf, nicht die Antwort.",
    "Das Programm führt aus, und das Ergebnis geht zurück ins Kontextfenster.",
    "Ein Agent ist Modell + Werkzeuge + Schleife + Ziel — agentisch heißt: die Reihenfolge steht nicht vorher fest."]),
+
+ # --- Kapitel 01: was unter der Sprache rechnet -----------------------------
+ ("Was tut ein einzelnes künstliches Neuron mit seinen Eingängen?",
+  "Es multipliziert jeden Eingang mit seinem Gewicht und addiert alles",
+  ["Es vergleicht sie mit gespeicherten Beispielen",
+   "Es sucht den größten Eingang heraus und gibt ihn weiter",
+   "Es übersetzt sie in Wörter"],
+  ["Jeder Eingang ist eine Zahl, jedes Gewicht sagt, wie stark er zählt.",
+   "Multiplizieren und addieren — mehr passiert nicht; die Aktivierung entscheidet dann, wie stark es weitergibt.",
+   "Ein einzelnes Neuron kann fast nichts. Viele zusammen sehr viel."]),
+
+ ("Wo steckt nach dem Training das, was ein Netz gelernt hat?",
+  "ausschließlich in den Gewichten",
+  ["in einer Datenbank neben dem Netz",
+   "in den Trainingstexten, die gespeichert bleiben",
+   "in der Aktivierungsfunktion"],
+  ["Trainieren heißt: alle Gewichte ein kleines Stück in die bessere Richtung rücken.",
+   "Danach sind die Beispiele weg — geblieben sind Milliarden Zahlen.",
+   "Deshalb kann ein Modell nichts „nachschlagen“, was nicht im Fenster steht."]),
+
+ ("Wozu liegen zwischen Eingabe- und Ausgabeschicht die verdeckten Schichten?",
+  "Sie bauen Merkmale auf: erst Kanten, später Augen, noch später Gesichter",
+  ["Sie speichern die Trainingsdaten für später",
+   "Sie korrigieren Rechtschreibfehler in der Eingabe",
+   "Sie machen das Netz schneller"],
+  ["Die Eingabeschicht nimmt die Rohdaten, die Ausgabeschicht gibt das Ergebnis.",
+   "Dazwischen wird aus Einfachem Zusammengesetztes — Schicht für Schicht.",
+   "Jede Verbindung ist ein Gewicht, bei großen Modellen Milliarden."]),
+
+ ("Was heißt „Deep Learning“?",
+  "Lernen mit vielen Schichten hintereinander",
+  ["Lernen mit besonders vielen Beispielen",
+   "Lernen ohne menschliche Hilfe",
+   "Lernen, das tiefer geht als Auswendiglernen"],
+  ["„Deep“ meint die Tiefe des Netzes, nicht die Tiefe des Verstehens.",
+   "Mehr Schichten heißt: mehr Stufen, auf denen Merkmale entstehen."]),
+
+ ("Wie lernt ein neuronales Netz aus einem Fehler?",
+  "Es rät, misst den Fehler und rückt alle Gewichte ein kleines Stück in die bessere Richtung",
+  ["Es merkt sich das falsche Beispiel und schlägt es später nach",
+   "Es fügt eine neue Schicht hinzu, bis der Fehler verschwindet",
+   "Es fragt beim Menschen nach der richtigen Antwort"],
+  ["Dieses Rückwärtslaufen des Fehlers durchs Netz heißt Backpropagation.",
+   "Ein Schritt bringt fast nichts — millionenfach wiederholt bleibt der Fehler klein.",
+   "Programmiert wird dabei nichts: das Netz wird an Beispielen trainiert."]),
+
+ # --- Kapitel 02 bis 04: Fenster, Prompt, Werkzeuge -------------------------
+ ("Warum ist ein größeres Kontextfenster nicht automatisch besser?",
+  "Weil die Mitte schlechter beachtet wird und jedes Token neu kostet",
+  ["Weil das Modell dann langsamer dazulernt",
+   "Weil große Fenster die Antwort automatisch kürzen",
+   "Weil der Tokenizer ab einer Größe ungenau wird"],
+  ["Von 2 000 Token (2020) auf 200 000 bis 1 000 000 (2026) — Platz ist genug da.",
+   "Aber: was in der Mitte liegt, wird schlechter beachtet als Anfang und Ende.",
+   "Und jedes Token im Fenster kostet bei jeder einzelnen Anfrage neu — Ballast muss raus."]),
+
+ ("„Antworte als Tabelle“ — welche Technik des Prompt Engineering ist das?",
+  "Format vorgeben",
+  ["Rolle setzen", "Beispiele zeigen", "Schritt für Schritt"],
+  ["Format vorgeben macht die Ausgabe weiterverwertbar statt nur lesbar.",
+   "Rolle setzen wäre „Du bist Fachlehrer für Informatik“, Beispiele zeigen hieße: zwei gelöste Fälle voranstellen.",
+   "Der Prompt ist das Programm — nur in natürlicher Sprache geschrieben."]),
+
+ ("Was ist ein Embedding?",
+  "Text als Zahlenvektor, der sich mit anderem Text vergleichen lässt",
+  ["Ein Bild, das in den Prompt eingebettet wird",
+   "Ein Modell, das in ein Programm eingebaut ist",
+   "Ein Stück Text, das fest im Kontextfenster bleibt"],
+  ["RAG sucht nicht nach genauem Wortlaut, sondern nach Ähnlichkeit.",
+   "Dafür werden Texte in Vektoren übersetzt; nah beieinander heißt inhaltlich ähnlich.",
+   "Die Fundstellen wandern danach in den Prompt — das Modell liest sie dort."]),
+
+ ("Wofür steht MCP im Zusammenhang mit Werkzeugen?",
+  "für einen offenen Standard, über den Werkzeuge sich beim Modell anmelden",
+  ["für die Schleife, in der ein Agent arbeitet",
+   "für das Protokoll, mit dem Modelle untereinander reden",
+   "für die Berechtigungsstufe eines Agenten"],
+  ["Model Context Protocol, seit 2024 — ein Werkzeug meldet sich an und ist benutzbar.",
+   "Tool Use heißt: das Modell schreibt den Aufruf, das Programm führt ihn aus.",
+   "Das Ergebnis geht zurück ins Kontextfenster, dort liest das Modell es."]),
+
+ ("Worin liegt bei einem Agenten das eigentliche Risiko?",
+  "in den Berechtigungen, die er bekommt",
+  ["im Modell, das zu wenig weiß",
+   "in der Länge des System-Prompts",
+   "in der Zahl der Werkzeuge, die angemeldet sind"],
+  ["Ein Agent handelt mehrere Schritte ohne Rückfrage — Fehler multiplizieren sich dabei.",
+   "Gefährlich wird nicht das Denken, sondern das Dürfen: löschen, senden, bezahlen.",
+   "Deshalb Human in the Loop an den teuren Stellen — und prüfbar bleibt nur, was protokolliert wird."]),
 ]
 
 

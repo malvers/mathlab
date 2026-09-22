@@ -409,12 +409,15 @@ def build(slug, nr, kw, topic, qs, course=FOS12):
         opts = list(wrong)
         opts.insert(pos, right)
         questions.append({"q": q, "opts": opts, "steps": steps, "solution": pos})
-    assert len(questions) == 10, qid
+    # Ein Wochenquiz hat zehn Fragen; nur das KI-Begriffe-Blatt ist auf zwanzig
+    # gewachsen (Doc 22.09.2026: "mach bitte da noch 10 Fragen dazu"). Die Zahl
+    # steht seitdem im Untertitel, statt hier festgeschrieben zu sein.
+    assert len(questions) in (10, 20), qid
     quiz = {
         "id": qid, "version": "v1",
         "title": f"Fragen · {topic}",
-        "subtitle": f"{course['subtitle']} · Woche {nr}, KW {kw} · 10 Fragen zu den Essentials "
-                    f"der Woche · genau eine Antwort pro Frage",
+        "subtitle": f"{course['subtitle']} · Woche {nr}, KW {kw} · {len(questions)} Fragen zu den "
+                    f"Essentials der Woche · genau eine Antwort pro Frage",
         "dashSub": f"{course['dash']} · KW {kw} · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Frage",
         "back": course["back"],
         "questions": questions,
@@ -423,7 +426,7 @@ def build(slug, nr, kw, topic, qs, course=FOS12):
     with open(path, "w") as f:
         f.write(TEMPLATE % {"topic": topic, "json": json.dumps(quiz, ensure_ascii=False, indent=2),
                             "gen": course["gen"]})
-    return path, [questions[i]["solution"] for i in range(10)]
+    return path, [q["solution"] for q in questions]
 
 
 if __name__ == "__main__":
