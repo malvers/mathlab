@@ -28,11 +28,38 @@
     '#nav #nav-live[hidden]{display:none}',
     '#nav #nav-live:disabled{opacity:.55;cursor:progress}',
     'html.deck-edit .slide .step{opacity:1!important}',
-    'html.deck-edit [data-ed]{cursor:text;outline:1px dashed rgba(245,194,66,.75);outline-offset:3px}',
-    'html.deck-edit [data-ed]:hover{outline:2px dashed rgb(245,194,66)}',
-    'html.deck-edit [data-ed].ed-on{outline:2px solid rgb(245,194,66);background:rgba(245,194,66,.16);',
+    /* thin and grey: the frames say where a text is, they are not the thing to look at
+       (Doc, 22.09.2026: "alle Linien duenner und gray") - the deck's own muted blue-grey, never black */
+    'html.deck-edit [data-ed]{cursor:text;outline:.5px dashed rgba(110,126,159,.5);outline-offset:3px}',
+    'html.deck-edit [data-ed]:hover{outline:1px dashed rgba(110,126,159,.85)}',
+    'html.deck-edit [data-ed].ed-on{outline:1px solid rgba(110,126,159,.95);background:rgba(110,126,159,.10);',
     '  white-space:pre-wrap;caret-color:rgb(176,36,24)}',
     'html.deck-edit [data-ed].ed-busy{opacity:.5}',
+    '#ed-bar{position:fixed;z-index:31;transform:translateX(-50%);display:flex;align-items:center;gap:4px;',
+    '  flex-wrap:wrap;justify-content:center;max-width:min(96vw,980px);',
+    '  padding:6px;border-radius:10px;background:rgba(7,22,48,.98);border:1px solid rgba(245,194,66,.55);',
+    '  box-shadow:0 10px 30px rgba(0,0,0,.45)}',
+    '#ed-bar[hidden],#ed-menu[hidden]{display:none}',
+    '#ed-bar button{display:flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;',
+    '  border:0;border-radius:7px;background:none;color:#eaf1ff;cursor:pointer;',
+    '  font:700 16px Raleway,system-ui,sans-serif}',
+    '#ed-bar button:hover:not(:disabled){background:rgba(245,194,66,.22)}',
+    '#ed-bar button.on{background:rgba(245,194,66,.34);color:rgb(245,194,66)}',
+    '#ed-bar button:disabled{opacity:.35;cursor:default}',
+    '#ed-bar button svg{width:22px;height:22px}',
+    '#ed-bar .ed-dot{width:25px;height:25px}',
+    '#ed-bar .ed-dot svg{width:19px;height:19px}',
+    '#ed-bar .ed-kursiv{font-weight:500;font-style:italic;font-family:Georgia,serif}',
+    '#ed-bar .ed-unter{text-decoration:underline}',
+    '#ed-bar .ed-durch{text-decoration:line-through}',
+    '#ed-bar .ed-schrift{width:auto;gap:6px;padding:0 10px;font-weight:500;font-size:14px}',
+    '#ed-bar .ed-sep{width:1px;height:20px;margin:0 3px;background:rgba(255,255,255,.18)}',
+    '#ed-menu{position:fixed;z-index:32;min-width:180px;padding:6px;border-radius:10px;',
+    '  background:rgba(7,22,48,.98);border:1px solid rgba(245,194,66,.55);box-shadow:0 10px 30px rgba(0,0,0,.45)}',
+    '#ed-menu button{display:block;width:100%;padding:9px 12px;border:0;border-radius:7px;background:none;',
+    '  color:#eaf1ff;font-size:16px;text-align:left;cursor:pointer}',
+    '#ed-menu button:hover{background:rgba(245,194,66,.22)}',
+    '#ed-menu button.on{color:rgb(245,194,66)}',
     '#ov-menu{position:fixed;z-index:30;min-width:190px;padding:6px;border-radius:10px;',
     '  background:rgba(7,22,48,.98);border:1px solid rgba(245,194,66,.55);box-shadow:0 10px 30px rgba(0,0,0,.45)}',
     '#ov-menu button{display:block;width:100%;padding:8px 12px;border:0;border-radius:7px;background:none;',
@@ -40,7 +67,7 @@
     '#ov-menu button:hover:not(:disabled){background:rgba(245,194,66,.22)}',
     '#ov-menu button:disabled{opacity:.35;cursor:default}',
     '#ov-menu hr{border:0;border-top:1px solid rgba(255,255,255,.14);margin:5px 8px}',
-    '@media print{#nav-edit,#nav-live{display:none}}'
+    '@media print{#nav-edit,#nav-live,#ed-bar{display:none}}'
   ].join('\n');
   document.head.appendChild(css);
 
@@ -115,6 +142,239 @@
     });
   }
 
+  // ---------------------------------------------------------------- markup ---
+  // The browser's copy of tools/pptx/deck_markup.py, with one difference: a formula stays the text
+  // $...$ that Doc types, everything else is SHOWN instead of spelled out - bold reads as bold, not as
+  // '**bold**' (Doc, 22.09.2026: "die markups moechte ich eigentlich nicht (ausser LaTeX - logisch)").
+  // What travels back to the server is markup again, so the file keeps the shape html_deck.py writes.
+  const B0 = String.fromCharCode(2), B1 = String.fromCharCode(3);   // a **...** around a formula, kept through the split at $
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const clean = s => s.replace(/\s*\n\s*/g, ' ').trim();
+
+  function inline(part) {
+    return esc(part)
+      .replace(/\*\*((?:[^*]|\*(?!\*))+?)\*\*/g, '<b>$1</b>')   // a lone * may sit inside: **COUNT(*)**
+      .replace(/&lt;(\/?)([bius])&gt;/g, '<$1$2>')
+      .replace(/&lt;([cf])([1-9])&gt;/g, '<span class="$1$2">')
+      .replace(/&lt;\/[cf][1-9]&gt;/g, '</span>');
+  }
+
+  function srcToHtml(src) {
+    if (src.indexOf('$') < 0) return inline(src);
+    const t = src.replace(/\*\*((?:[^*$]|\*(?!\*)|\$[^$]*\$)+?)\*\*/g,
+      function (m, g) { return g.indexOf('$') >= 0 ? B0 + g + B1 : m; });
+    return t.split(/(\$[^$]*\$)/).map(function (part, i) { return i % 2 ? esc(part) : inline(part); })
+      .join('').split(B0).join('<b>').split(B1).join('</b>');
+  }
+
+  // a colour is <c1>..<c9>, a typeface <f1>..<f4> - one span each, so a word can carry both
+  function kindOf(n, k) {
+    if (n.nodeType !== 1 || !n.classList) return '';
+    for (let i = 0; i < n.classList.length; i++) {
+      const c = n.classList[i];
+      if (c.length === 2 && c[0] === k && c[1] >= '1' && c[1] <= '9') return c;
+    }
+    return '';
+  }
+
+  // The way back: <b>, <i> and <c2> are what deck_markup reads. Whatever the browser invented while
+  // typing (a stray <span style>, a <div>, a <font>) falls away and its text stays - the file only ever
+  // holds the four things the deck knows.
+  function htmlToSrc(node) {
+    let out = '';
+    node.childNodes.forEach(function (n) {
+      if (n.nodeType === 3) { out += n.nodeValue; return; }
+      if (n.nodeType !== 1) return;
+      if (n.nodeName === 'BR') { out += ' '; return; }
+      const inner = htmlToSrc(n);
+      if (!inner) return;
+      const c = kindOf(n, 'c') || kindOf(n, 'f');
+      const t = n.nodeName;
+      if (!inner.trim()) out += inner;                // nothing but blanks: no tag around it
+      else if (c) out += '<' + c + '>' + inner + '</' + c + '>';
+      else if (t === 'B' || t === 'STRONG') out += '<b>' + inner + '</b>';
+      else if (t === 'I' || t === 'EM') out += '<i>' + inner + '</i>';
+      else if (t === 'U' || t === 'INS') out += '<u>' + inner + '</u>';
+      else if (t === 'S' || t === 'STRIKE' || t === 'DEL') out += '<s>' + inner + '</s>';
+      else out += inner;
+    });
+    return out;
+  }
+
+  // ------------------------------------------------------------- Werkzeuge ---
+  // Over the slide, for as long as edit mode is on (Doc, 22.09.2026: "Werkzeuge oben ueber der Folie:
+  // Farben etc."). The three colours are the deck's own (deck.css .c1/.c2/.c3), so a coloured word on a
+  // slide looks like every other accent in the house.
+  const DOT = f => '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="' + f + '"/></svg>';
+  const CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+    + 'stroke-linejoin="round" aria-hidden="true" style="width:13px;height:13px"><path d="M6 9l6 6 6-6"/></svg>';
+  const VAR = { c1: 'orange', c2: 'red', c3: 'green', c4: 'blue', c5: 'teal',
+                c6: 'violet', c7: 'magenta', c8: 'brown', c9: 'slate' };
+  const NODOT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">'
+    + '<circle cx="12" cy="12" r="8"/><path d="M6.3 17.7L17.7 6.3"/></svg>';
+  // The nine colours are deck.css .c1-.c9, the four typefaces .f1-.f4 - one place for the look, here only
+  // the buttons. Keep both lists in step with the stylesheet, or a word would carry a class nobody draws.
+  const TONE = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9'];
+  const NAME = { c1: 'Orange', c2: 'Rot', c3: 'Gruen', c4: 'Blau', c5: 'Petrol',
+                 c6: 'Violett', c7: 'Magenta', c8: 'Braun', c9: 'Grau' };
+  const FONTS = [
+    ['f0', 'Wie die Folie', ''],
+    ['f1', 'Raleway', 'Raleway,system-ui,sans-serif'],
+    ['f2', 'Orbitron', 'Orbitron,system-ui,sans-serif'],
+    ['f3', 'Times', '"Times New Roman",Times,Georgia,serif'],
+    ['f4', 'Menlo', 'Menlo,Consolas,monospace']
+  ];
+  const TOOLS = [
+    ['bold', 'F', '', 'Fett (' + K + 'B)'],
+    ['italic', 'K', 'ed-kursiv', 'Kursiv (' + K + 'I)'],
+    ['underline', 'U', 'ed-unter', 'Unterstrichen (' + K + 'U)'],
+    ['strikeThrough', 'S', 'ed-durch', 'Durchgestrichen'],
+    null
+  ].concat(TONE.map(function (c) { return [c, '', 'ed-dot', NAME[c]]; }),
+           [['c0', '', 'ed-dot', 'Farbe weg'], null, ['schrift', 'Aa', 'ed-schrift', 'Schrift waehlen']]);
+
+  const tools = document.createElement('div');
+  tools.id = 'ed-bar';
+  tools.hidden = true;
+  function toolButton(t) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.dataset.cmd = t[0]; b.title = t[3]; b.setAttribute('aria-label', t[3]);
+    b.className = t[2] || '';
+    if (t[0] === 'schrift') b.innerHTML = '<span>Aa</span>' + CHEV;
+    else if (t[1]) b.textContent = t[1];
+    else b.innerHTML = t[0] === 'c0' ? NODOT : DOT('var(--' + VAR[t[0]] + ')');
+    // mousedown would take the caret out of the text and save it on its own - the click does the work
+    b.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    b.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (t[0] === 'schrift') fontMenu(b); else { closeFonts(); apply(t[0]); }
+    });
+    return b;
+  }
+  TOOLS.forEach(function (t) {
+    if (!t) { const sep = document.createElement('span'); sep.className = 'ed-sep'; tools.appendChild(sep); return; }
+    tools.appendChild(toolButton(t));
+  });
+  if (!PRES) document.body.appendChild(tools);
+
+  // the typefaces sit in a little list instead of the row: each entry is set in its own face, so Doc
+  // picks what he sees (Doc, 22.09.2026: "Fonts ... Raleway Times etc.")
+  let fonts = null;
+  function closeFonts() { if (fonts) { fonts.remove(); fonts = null; } }
+  function fontMenu(anchorBtn) {
+    if (fonts) { closeFonts(); return; }
+    if (!cur || busy) { msg('Erst einen Text anklicken - dann wirken die Werkzeuge'); return; }
+    fonts = document.createElement('div');
+    fonts.id = 'ed-menu';
+    const now = here('f');
+    FONTS.forEach(function (f) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = f[1];
+      if (f[2]) b.style.fontFamily = f[2];
+      if ((now || 'f0') === f[0]) b.classList.add('on');
+      b.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      b.addEventListener('click', function (e) { e.stopPropagation(); closeFonts(); apply(f[0]); });
+      fonts.appendChild(b);
+    });
+    document.body.appendChild(fonts);
+    const r = anchorBtn.getBoundingClientRect(), m = fonts.getBoundingClientRect();
+    fonts.style.left = Math.max(8, Math.min(r.left, innerWidth - m.width - 8)) + 'px';
+    fonts.style.top = Math.min(r.bottom + 6, innerHeight - m.height - 8) + 'px';
+  }
+
+  function place() {
+    const d = document.getElementById('deck');
+    if (!d || tools.hidden) return;
+    const r = d.getBoundingClientRect();
+    tools.style.left = Math.round(r.left + r.width / 2) + 'px';
+    tools.style.top = Math.max(8, Math.round(r.top - tools.offsetHeight - 12)) + 'px';
+  }
+  addEventListener('resize', place);
+
+  function unwrap(el) {
+    const p = el.parentNode;
+    while (el.firstChild) p.insertBefore(el.firstChild, el);
+    p.removeChild(el);
+  }
+  function covers(r, el) {                            // does the selection hold this element whole?
+    const a = document.createRange();
+    a.selectNodeContents(el);
+    return r.compareBoundaryPoints(Range.START_TO_START, a) <= 0
+        && r.compareBoundaryPoints(Range.END_TO_END, a) >= 0;
+  }
+
+  // what the selection already carries of this kind ('c' or 'f'), read from the caret upwards
+  function here(kind) {
+    if (!cur) return '';
+    const sel = getSelection();
+    const n = sel.rangeCount ? sel.getRangeAt(0).commonAncestorContainer : null;
+    for (let p = n; p && p !== cur.el; p = p.parentNode) { const c = kindOf(p, kind); if (c) return c; }
+    return '';
+  }
+
+  // One span of this kind around the selection, and only one: an older one inside it goes, and one that
+  // wrapped the selection from outside goes too - otherwise "Farbe weg" would leave the outer one behind.
+  // Colour and typeface are separate kinds, so setting a colour never throws the typeface away.
+  function wrap(kind, cls) {
+    const sel = getSelection();
+    if (!sel.rangeCount || sel.isCollapsed) { msg('Erst ein Stueck Text markieren'); return; }
+    const r = sel.getRangeAt(0);
+    if (!cur.el.contains(r.commonAncestorContainer)) return;
+    let outer = null;
+    for (let p = r.commonAncestorContainer; p && p !== cur.el; p = p.parentNode) {
+      if (kindOf(p, kind) && covers(r, p)) { outer = p; break; }
+    }
+    const frag = r.extractContents();
+    frag.querySelectorAll('span').forEach(function (sp) { if (kindOf(sp, kind)) unwrap(sp); });
+    let first = frag.firstChild, last = frag.lastChild;
+    if (cls) {
+      const sp = document.createElement('span');
+      sp.className = cls;
+      sp.appendChild(frag);
+      r.insertNode(sp);
+      first = last = sp;
+    } else {
+      r.insertNode(frag);
+    }
+    if (outer && outer.parentNode) unwrap(outer);
+    if (first && last && first.parentNode) {
+      const nr = document.createRange();
+      nr.setStartBefore(first); nr.setEndAfter(last);
+      sel.removeAllRanges(); sel.addRange(nr);
+    }
+  }
+
+  const MARKS = ['bold', 'italic', 'underline', 'strikeThrough'];
+
+  function apply(what) {
+    if (!cur || busy) { msg('Erst einen Text anklicken - dann wirken die Werkzeuge'); return; }
+    cur.el.focus();
+    if (MARKS.indexOf(what) >= 0) {
+      try { document.execCommand('styleWithCSS', false, false); } catch (e) { }   // <b>, not <span style>
+      document.execCommand(what);
+    } else {
+      wrap(what[0], what[1] === '0' ? '' : what);     // c0 / f0 take the colour or the typeface off again
+    }
+    if (cur.input) cur.input();
+    state();
+  }
+
+  // which tools are on right now - grey while no text is open, lit while the selection carries them
+  function state() {
+    const open = !!cur && !busy;
+    tools.querySelectorAll('button').forEach(function (b) {
+      b.disabled = !open;
+      const c = b.dataset.cmd;
+      let act = false;
+      if (open && MARKS.indexOf(c) >= 0) { try { act = document.queryCommandState(c); } catch (e) { } }
+      if (open && /^c[1-9]$/.test(c)) act = here('c') === c;
+      if (open && c === 'schrift') act = !!here('f');
+      b.classList.toggle('on', act);
+    });
+  }
+  document.addEventListener('selectionchange', function () { if (on && !PRES) state(); });
+
   function load() {
     return fetch('/__deck/source?deck=' + encodeURIComponent(DECK), { cache: 'no-store' })
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status); return j; }); })
@@ -141,11 +401,13 @@
     if (on) {
       if (cur) end(true);
       on = false; root.classList.remove('deck-edit'); label();
+      tools.hidden = true; closeFonts();
       document.dispatchEvent(new Event('deck-edit-off'));
       return;
     }
     load().then(function (skipped) {
       on = true; root.classList.add('deck-edit'); label();
+      if (!PRES) { tools.hidden = false; place(); state(); }
       document.dispatchEvent(new Event('deck-edit-on'));
       msg(skipped ? skipped + ' Folie(n) lassen sich nicht bearbeiten – der Rest schon.'
                   : 'Text anklicken · Enter speichert · Esc verwirft · ' + K + 'D kopiert · ' + K + '⌫ löscht · E beendet');
@@ -168,24 +430,32 @@
       .finally(function () { busy = false; });
   }
 
-  const typed = el => el.textContent.replace(/\s*\n\s*/g, ' ').trim();
   // our own write is no reason for live reload (tools/live_reload.py) to reload the page
   const rebase = () => { try { if (window.__liveReload) window.__liveReload.rebase(); } catch (e) { } };
 
   function begin(el) {
-    cur = { el: el, html: el.innerHTML, src: SRC.get(el), blur: null, input: null };
+    cur = { el: el, html: el.innerHTML, src: SRC.get(el), open: '', blur: null, input: null, paste: null };
     el.classList.add('ed-on');
-    el.textContent = cur.src;
-    el.setAttribute('contenteditable', 'plaintext-only');
-    if (el.contentEditable !== 'plaintext-only') el.setAttribute('contenteditable', 'true');
+    // the text as it reads, not as it is spelled: bold is bold, a colour is a colour, only $...$ stays text
+    el.innerHTML = srcToHtml(cur.src);
+    cur.open = el.innerHTML;                          // untouched means nothing to save - the file stays byte for byte
+    el.setAttribute('contenteditable', 'true');
     cur.blur = function () { if (cur && cur.el === el && document.hasFocus()) end(true); };   // not when Doc only switches apps
     // the button turns to "Änderungen speichern" with the first typed letter, not only after Enter (Doc, 17.09.2026)
-    cur.input = function () { dirty = !!cur && typed(el) !== cur.src; label(); };
+    cur.input = function () { dirty = !!cur && el.innerHTML !== cur.open; label(); };
+    // what is pasted comes in as plain text - a deck knows four kinds of markup, not a web page's worth
+    cur.paste = function (e) {
+      e.preventDefault();
+      const cb = e.clipboardData || window.clipboardData;
+      document.execCommand('insertText', false, clean(cb ? cb.getData('text/plain') || '' : ''));
+    };
     el.addEventListener('blur', cur.blur);
     el.addEventListener('input', cur.input);
+    el.addEventListener('paste', cur.paste);
     el.focus();
     const r = document.createRange(); r.selectNodeContents(el); r.collapse(false);
     const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    state();
   }
 
   // keep: write what was typed; otherwise put the rendered text back as it was.
@@ -193,12 +463,14 @@
   function end(keep) {
     if (!cur || busy) return Promise.resolve(false);
     const c = cur, el = c.el;
-    const text = typed(el);
+    // an untouched text goes back as it came: never let <b> and ** argue about the same word
+    const text = el.innerHTML === c.open ? c.src : clean(htmlToSrc(el));
     el.removeEventListener('blur', c.blur);
     el.removeEventListener('input', c.input);
+    el.removeEventListener('paste', c.paste);
     el.removeAttribute('contenteditable');
     if (!keep || text === c.src) {
-      el.innerHTML = c.html; el.classList.remove('ed-on'); cur = null; dirty = false; label();
+      el.innerHTML = c.html; el.classList.remove('ed-on'); cur = null; dirty = false; label(); state();
       return Promise.resolve(keep);
     }
     const at = el.dataset.ed.split(':').map(Number);
@@ -214,15 +486,15 @@
         const copy = tile && tile.querySelectorAll(selector)[at[1]];
         if (copy) { copy.innerHTML = j.html; tex(copy); }
         el.classList.remove('ed-on'); cur = null; dirty = false;
-        msg('Gespeichert – live erst mit „Änderungen speichern“'); label();
+        msg('Gespeichert – live erst mit „Änderungen speichern“'); label(); state();
         return true;
       })
       .catch(function (err) {                          // the typed text stays in the box - nothing is lost, Esc drops it
-        el.textContent = text;
-        el.setAttribute('contenteditable', 'plaintext-only');
-        if (el.contentEditable !== 'plaintext-only') el.setAttribute('contenteditable', 'true');
+        el.innerHTML = srcToHtml(text);
+        el.setAttribute('contenteditable', 'true');
         el.addEventListener('blur', c.blur);
         el.addEventListener('input', c.input);
+        el.addEventListener('paste', c.paste);
         msg('Nicht gespeichert: ' + (/fetch/i.test(err.message) ? 'serve.py antwortet nicht' : err.message));
         return false;
       })
@@ -361,6 +633,9 @@
   }
   // capture: a click anywhere closes the menu - except inside it, where the entry still has to fire
   addEventListener('click', function (e) { if (!e.target.closest || !e.target.closest('#ov-menu')) closeMenu(); }, true);
+  addEventListener('click', function (e) {
+    if (!e.target.closest || (!e.target.closest('#ed-menu') && !e.target.closest('#ed-bar'))) closeFonts();
+  }, true);
   addEventListener('scroll', closeMenu, true);
 
   // the menu hangs on the overview, not on edit mode: a right-click there is never meant for the browser
@@ -423,7 +698,10 @@
     if (cur && cur.el.contains(e.target)) {
       e.stopPropagation();
       if (e.isComposing) return;
-      if (cmd(e) && (e.key === 'd' || e.key === 'D')) { e.preventDefault(); line('dup'); }
+      if (cmd(e) && (e.key === 'b' || e.key === 'B')) { e.preventDefault(); apply('bold'); }
+      else if (cmd(e) && (e.key === 'i' || e.key === 'I')) { e.preventDefault(); apply('italic'); }
+      else if (cmd(e) && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); apply('underline'); }
+      else if (cmd(e) && (e.key === 'd' || e.key === 'D')) { e.preventDefault(); line('dup'); }
       else if (cmd(e) && e.key === 'Backspace') { e.preventDefault(); line('del'); }
       else if (e.key === 'Enter') { e.preventDefault(); end(true); }
       else if (e.key === 'Escape') { e.preventDefault(); end(false); }
@@ -485,7 +763,9 @@
       };
       if (!was) { show(); }
       else load().then(function () {
-        on = true; root.classList.add('deck-edit'); label(); document.dispatchEvent(new Event('deck-edit-on')); show();
+        on = true; root.classList.add('deck-edit'); label();
+        if (!PRES) { tools.hidden = false; place(); state(); }
+        document.dispatchEvent(new Event('deck-edit-on')); show();
       }).catch(function (err) { msg(err.message); });
     }
   } catch (e) { }

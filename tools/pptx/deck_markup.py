@@ -32,14 +32,17 @@ def _tex_spans(text):
 
 
 def _bold(part):
-    """**word** becomes bold; <b>, <i> and the <c2>/<c3> colour tags survive."""
+    """**word** becomes bold; <b>, <i>, <u>, <s> and the <c2>/<f3> tags survive.
+
+    Nine colours <c1>..<c9> and four typefaces <f1>..<f4> - the toolbar over the slide writes them
+    (Doc, 22.09.2026: "deutlich mehr ... Farben etc. Fonts ... Raleway Times etc."). The three colours
+    that were here first keep their numbers, so every deck built before reads exactly as before.
+    """
     esc = _html.escape(part, quote=False)
     esc = re.sub(r"\*\*((?:[^*]|\*(?!\*))+?)\*\*", r"<b>\1</b>", esc)   # a lone * may sit inside: **COUNT(*)**
-    esc = esc.replace("&lt;b&gt;", "<b>").replace("&lt;/b&gt;", "</b>")
-    esc = esc.replace("&lt;i&gt;", "<i>").replace("&lt;/i&gt;", "</i>")
-    esc = re.sub(r"&lt;c([123])&gt;", r'<span class="c\1">', esc)
-    return esc.replace("&lt;/c1&gt;", "</span>").replace("&lt;/c2&gt;", "</span>") \
-              .replace("&lt;/c3&gt;", "</span>")
+    esc = re.sub(r"&lt;(/?)([bius])&gt;", r"<\1\2>", esc)
+    esc = re.sub(r"&lt;([cf])([1-9])&gt;", r'<span class="\1\2">', esc)
+    return re.sub(r"&lt;/[cf][1-9]&gt;", "</span>", esc)
 
 
 def markup(text):

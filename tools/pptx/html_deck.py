@@ -528,6 +528,8 @@ CSS = """
   --card:#__CARD__; --orange:#__ORANGE__; --red:#__RED__; --green:#__GREEN__;
   --codebg:#__CODEBG__; --codeink:#__CODEINK__; --codemuted:#__CODEMUTED__;
   --greetbg:#__GREETBG__;
+  /* six more for the editor's colour row - dark enough to read on a light slide (Doc, 22.09.2026) */
+  --blue:#2A6FB0; --teal:#14807A; --violet:#6B3FA0; --magenta:#A8246E; --brown:#8A5A2B; --slate:#5A6B8C;
   --night:#071630;   /* the big backgrounds around the slides: page, presenter, overview (Doc, 17.09.2026: "das Blau ist gut") */
   --veil:linear-gradient(90deg,rgba(3,16,28,.9) 0%,rgba(3,16,28,.74) 42%,rgba(3,16,28,0) 70%);   /* title over the stream */
 }
@@ -561,8 +563,15 @@ body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
   color:var(--muted)}
 
 h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
-b{font-weight:600;color:var(--ink)}
-.c1{color:var(--orange)}.c2{color:var(--red)}.c3{color:var(--green)}
+b{font-weight:600;color:var(--fg,var(--ink))}   /* bold inside a colour keeps that colour (Doc, 22.09.2026) */
+.c1,.c2,.c3,.c4,.c5,.c6,.c7,.c8,.c9{color:var(--fg)}
+.c1{--fg:var(--orange)}.c2{--fg:var(--red)}.c3{--fg:var(--green)}
+.c4{--fg:var(--blue)}.c5{--fg:var(--teal)}.c6{--fg:var(--violet)}
+.c7{--fg:var(--magenta)}.c8{--fg:var(--brown)}.c9{--fg:var(--slate)}
+.f1{font-family:Raleway,system-ui,sans-serif}
+.f2{font-family:Orbitron,system-ui,sans-serif}
+.f3{font-family:"Times New Roman",Times,Georgia,serif}
+.f4{font-family:Menlo,Consolas,monospace;font-size:.92em}
 
 /* --- content ------------------------------------------------------------ */
 .slide h3{position:absolute;left:__M__px;top:__TY__px;width:__CW__px;font-size:28px;font-weight:700;

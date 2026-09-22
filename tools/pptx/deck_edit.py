@@ -132,15 +132,15 @@ class _Source(HTMLParser):
         elif tag == "span" and cls == ["tex"]:
             self.out.append("$" + (dict(attrs).get("data-tex") or "") + "$")
             self.stack.append("tex")
-        elif tag == "span" and len(cls) == 1 and cls[0] in ("c1", "c2", "c3"):
+        elif tag == "span" and len(cls) == 1 and re.fullmatch(r"[cf][1-9]", cls[0]):
             self.out.append("<%s>" % cls[0])
             self.stack.append("</%s>" % cls[0])
         elif tag == "b" and not attrs:
             self.out.append("**" if self.bold else "<b>")
             self.stack.append("**" if self.bold else "</b>")
-        elif tag == "i" and not attrs:
-            self.out.append("<i>")
-            self.stack.append("</i>")
+        elif tag in ("i", "u", "s") and not attrs:
+            self.out.append("<%s>" % tag)
+            self.stack.append("</%s>" % tag)
         else:
             self.bad = True
 
