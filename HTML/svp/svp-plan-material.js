@@ -288,7 +288,10 @@ window.svpPlanParts.push(function (P) {
            der beiden Themen kaum zu sehen. */
         if (kind === 'video') return drawnIcon('mat-ico-drawn mat-ico-movie', MOVIE_PATH, 'currentColor');
         const img = document.createElement('img');
-        img.className = 'mat-ico';
+        /* Die Sorte steht als Klasse mit am Bild: an ihr haengt in
+           svp-viewer.css der Groessenausgleich, weil die Programmsymbole
+           unterschiedlich viel ihrer eigenen Flaeche ausmalen. */
+        img.className = 'mat-ico mat-ico-' + kind;
         img.src = ICON_BASE + kind + '.png';
         img.alt = '';
         img.setAttribute('aria-hidden', 'true');

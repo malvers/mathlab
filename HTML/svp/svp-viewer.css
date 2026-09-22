@@ -120,11 +120,38 @@
    are set a touch larger than a drawn glyph would be. */
 .mat-ico {
     /* deliberately bigger than the label: the icon is what the kids aim at */
-    width: 2.53em;
-    height: 2.53em;
-    margin-left: -2px;   /* optical: a hair to the left sits better in the pill */
+    --mat-ico-box: 2.53em;
+    /* Jedes Programmsymbol malt einen anderen Anteil seiner eigenen Flaeche
+       aus. Bei EINEM Kasten fuer alle ragt das PDF-Zeichen deshalb nach
+       Groesse UND nach links aus der Reihe (Doc, 22.09.2026: "das pdf ist zu
+       gross", "und ppt 'n tick zu klein", "alignment links stimmt nicht").
+       Gemessen in den 128-px-Dateien - Anteil der Tinte an der Hoehe und
+       Abstand ihres linken Randes: pdf 0,81 / 0,086 · ppt 0,63 / 0,188 ·
+       doc 0,61 / 0,195 · xls 0,61 / 0,203. Ein gezeichnetes Zeichen liegt bei
+       0,834 / 0,166 - das ist der Innenabstand von .mat-ico-drawn und zugleich
+       das Mass, an dem sich alle ausrichten.
+       --mat-ico-scale zieht den Kasten so zurecht, dass jede Sorte dieselbe
+       Tinte zeigt; die drei Raender richten die TINTE aus, nicht den Kasten:
+       links an derselben Kante wie Lambda und YouTube, oben/unten und rechts
+       so, dass jedes Symbol GENAU denselben Platz belegt wie vorher - Pillen
+       bleiben damit gleich hoch und die Schrift beginnt an derselben Stelle.
+       Fuer ein gezeichnetes Zeichen ergeben die drei Rechnungen -2px / 0 / 0,
+       also genau das, was vorher fest dastand. */
+    --mat-ico-scale: 1;
+    --mat-ico-ink-x: 0.166;   /* linker Leerrand, Anteil an der Kastenbreite */
+    --mat-ico-size: calc(var(--mat-ico-box) * var(--mat-ico-scale));
+    width: var(--mat-ico-size);
+    height: var(--mat-ico-size);
+    /* -2px: optisch sitzt das Zeichen eine Haarbreite weiter links besser */
+    margin-left: calc(-2px + var(--mat-ico-box) * 0.166 - var(--mat-ico-size) * var(--mat-ico-ink-x));
+    margin-right: calc(var(--mat-ico-box) * 0.834 - var(--mat-ico-size) * (1 - var(--mat-ico-ink-x)));
+    margin-block: calc((var(--mat-ico-box) - var(--mat-ico-size)) / 2);
     flex: none;
 }
+.mat-ico-pdf { --mat-ico-scale: 0.82; --mat-ico-ink-x: 0.086; }
+.mat-ico-ppt { --mat-ico-scale: 1.07; --mat-ico-ink-x: 0.188; }
+.mat-ico-doc { --mat-ico-scale: 1.10; --mat-ico-ink-x: 0.195; }
+.mat-ico-xls { --mat-ico-scale: 1.10; --mat-ico-ink-x: 0.203; }
 /* Drawn glyphs (YouTube, plain link) need the transparent frame the macOS app
    icons bring along, otherwise they tower over them. */
 .mat-ico-drawn { padding: 0.42em; box-sizing: border-box; }
@@ -156,7 +183,7 @@ html.svp-light .mat-ico-movie path { fill: rgb(20, 44, 92); }
 }
 .mat-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mat-view .mv-title { display: inline-flex; align-items: center; gap: 0.3em; }
-.mat-view .mv-title .mat-ico { width: 2.31em; height: 2.31em; }
+.mat-view .mv-title .mat-ico { --mat-ico-box: 2.31em; }
 
 /* Zweig letter inside a class code: G = Gesundheit, S = Sozial, W = Wirtschaft.
    Only the one letter that tells the branches apart is coloured, the rest of
