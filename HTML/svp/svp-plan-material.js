@@ -472,6 +472,11 @@ window.svpPlanParts.push(function (P) {
            Nur die Mehrzahl zaehlt: ein einzelnes "Aufgabe"-Material bleibt in der
            Material-Zeile, wo es bisher steht. */
         if (/^\s*Aufgaben\b/i.test(en.label || '')) return true;
+        /* Doc 22.09.2026, Info 12: in vier Kursen heisst derselbe Fragensatz
+           "Fragen KI-Begriffe (10)" statt "Aufgaben ...". Der Zaehler in der
+           Klammer trennt ihn vom Foliensatz "Fragen statt suchen" - jede Pille
+           mit Zaehler ist ein Aufgabensatz, keine Material-Pille. */
+        if (/^\s*Fragen\b.*\(\d+\)\s*$/i.test(en.label || '')) return true;
         return /\/aufgaben\//i.test(en.url || '') || /(?:^|\/)[\w-]*test[\w-]*-2\.html$/i.test(en.url || '');
     }
 
