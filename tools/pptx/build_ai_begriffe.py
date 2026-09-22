@@ -1,18 +1,79 @@
 #!/usr/bin/env python3
 """KI-Begriffe 2026 - das Vokabular, mit dem heute ueber KI geredet wird:
-LLM, Token, Kontextfenster, Prompt- und Context-Engineering, RAG, Werkzeuge, Agenten."""
+neuronales Netz, LLM, Token, Kontextfenster, Prompt- und Context-Engineering,
+RAG, Werkzeuge, Agenten.
+
+Die Abbildungen baut `ai_diagrams.py` (eigene Zeichnungen, keine Fremdbilder) -
+VOR diesem Skript laufen lassen:
+
+    python3 tools/pptx/ai_diagrams.py     # -> tools/pptx/img/aibegriffe-*.png
+"""
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from slides import Deck
 from tables import TINT_ORANGE, TINT_RED, TINT_GREEN, TINT_BLUE
 
+# absolute, like every other deck: the .pptx embeds the file, html_deck.asset() copies
+# it into HTML/decks/img for the web twin. A relative "img/..." would only work for chapter().
+IMG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "img")
+
 d = Deck("ai-begriffe.pptx")
 
 d.title("Informatik — Künstliche Intelligenz", "Die Begriffe, die 2026 zählen",
-        "LLM · Token · Kontextfenster · Prompt · Context · Agent · agentisch")
+        "Neuronales Netz · LLM · Token · Kontextfenster · Prompt · RAG · Agent")
 
 # ------------------------------------------------------------- Kapitel 01 ---
-d.chapter(1, "Das Modell", "Was da eigentlich rechnet")
+# Widths are chosen so the picture fits between BODY_Y (146) and FOOT_Y (504) in the
+# .pptx - the web twin ignores them and fits the picture by CSS.
+d.chapter(1, "Was darunter rechnet", "Vom Neuron zum neuronalen Netz")
+
+d.bullets("Bevor wir über Sprache reden", [
+    ("Hinter jedem KI-Werkzeug steckt ein **künstliches neuronales Netz** (KNN)", 0),
+    ("Vorbild ist das Gehirn — aber nur als **Bild**, nicht als Nachbau", 0),
+    ("Das Netz ist reine **Rechnerei**: Zahlen hinein, Zahlen heraus", 0),
+    ("Es wird nicht programmiert, sondern an Beispielen **trainiert**", 0),
+    ("Wer das verstanden hat, versteht alle folgenden Begriffe leichter", 0),
+])
+
+d.picture("Der kleinste Baustein: das Neuron", os.path.join(IMG, "aibegriffe-neuron.png"), width=660)
+
+d.bullets("Was das Neuron tut", [
+    ("Jeder **Eingang** ist eine Zahl — Helligkeit, Lautstärke, ein Wortstück", 0),
+    ("Jeder Eingang hat ein **Gewicht**: wie stark er zählt", 0),
+    ("Das Neuron **multipliziert und addiert** — mehr passiert nicht", 0),
+    ("Die **Aktivierung** entscheidet, ob und wie stark es weitergibt", 0),
+    ("Ein einzelnes Neuron kann fast nichts. Viele zusammen sehr viel", 0),
+])
+
+d.picture("Viele Neuronen, in Schichten", os.path.join(IMG, "aibegriffe-netz.png"), width=535)
+
+d.bullets("Warum Schichten?", [
+    ("Die **Eingabeschicht** nimmt die Rohdaten, die **Ausgabeschicht** gibt das Ergebnis", 0),
+    ("Dazwischen liegen **verdeckte Schichten** — sie bauen Merkmale auf", 0),
+    ("Frühe Schichten erkennen Kanten, spätere Augen, noch spätere Gesichter", 0),
+    ("**Deep Learning** heißt nur: viele Schichten hintereinander", 0),
+    ("Jede Verbindung ist ein Gewicht — bei großen Modellen **Milliarden**", 0),
+])
+
+d.picture("So lernt ein Netz", os.path.join(IMG, "aibegriffe-training.png"), width=816)
+
+d.bullets("Training in einem Satz", [
+    ("Das Netz **rät**, vergleicht mit der Lösung und misst den **Fehler**", 0),
+    ("Dann werden alle Gewichte ein **kleines Stück** in die bessere Richtung gerückt", 0),
+    ("Das heißt **Backpropagation** — der Fehler läuft rückwärts durchs Netz", 0),
+    ("Millionenfach wiederholt, bis der Fehler klein bleibt", 0),
+    ("Das **Gelernte** steckt danach ausschließlich in den Gewichten", 0),
+])
+
+d.bullets("Vom Netz zum Sprachmodell", [
+    ("Ein **Sprachmodell** ist genau so ein Netz — nur sehr groß", 0),
+    ("Seine Eingabe ist Text, seine Ausgabe eine **Wahrscheinlichkeit je Wortstück**", 0),
+    ("Trainiert wurde es an einer Aufgabe: **was kommt als Nächstes?**", 0),
+    ("Alles, was wir gleich besprechen, sitzt auf diesem einen Prinzip", 0),
+])
+
+# ------------------------------------------------------------- Kapitel 02 ---
+d.chapter(2, "Das Modell", "Was da eigentlich rechnet")
 
 d.bullets("LLM — Large Language Model", [
     ("**LLM** = großes Sprachmodell, trainiert auf sehr viel Text", 0),
@@ -30,6 +91,8 @@ d.bullets("Token — die Währung der Modelle", [
     ("Vor der Rechnung steht immer die **Zerlegung** — der Tokenizer", 0),
 ])
 
+d.picture("Ein Satz, in Token zerlegt", os.path.join(IMG, "aibegriffe-token.png"), width=816)
+
 d.bullets("Das Kontextfenster", [
     ("**Kontextfenster** = wie viel Text das Modell **gleichzeitig** sehen kann", 0),
     ("Darin steckt alles: **Systemanweisung, Verlauf, Anhänge, Antwort**", 0),
@@ -37,6 +100,8 @@ d.bullets("Das Kontextfenster", [
     ("Zwischen zwei Chats bleibt nichts: jeder Start ist **bei null**", 0),
     ("Es ist ein **Arbeitsspeicher**, keine Festplatte", 0),
 ])
+
+d.picture("Was im Fenster liegt", os.path.join(IMG, "aibegriffe-fenster.png"), width=523)
 
 d.table_top("Wie groß Fenster geworden sind", [
     ["Jahr", "typisches Fenster", "entspricht etwa"],
@@ -57,8 +122,8 @@ d.bullets("Halluzination", [
     ("Gegenmittel: **Beleg mitgeben** und **nachprüfen** — nie umgekehrt", 0),
 ])
 
-# ------------------------------------------------------------- Kapitel 02 ---
-d.chapter(2, "Reden mit dem Modell", "Prompt und Kontext")
+# ------------------------------------------------------------- Kapitel 03 ---
+d.chapter(3, "Reden mit dem Modell", "Prompt und Kontext")
 
 d.bullets("Prompt", [
     ("**Prompt** = die Anweisung an das Modell", 0),
@@ -109,8 +174,10 @@ d.bullets("RAG — nachschlagen statt raten", [
     ("Technisch: Texte werden zu **Embeddings**, gesucht wird nach **Ähnlichkeit**", 0),
 ])
 
-# ------------------------------------------------------------- Kapitel 03 ---
-d.chapter(3, "Agenten", "Wenn das Modell handeln darf")
+d.picture("RAG von vorn bis hinten", os.path.join(IMG, "aibegriffe-rag.png"), width=816)
+
+# ------------------------------------------------------------- Kapitel 04 ---
+d.chapter(4, "Agenten", "Wenn das Modell handeln darf")
 
 d.bullets("Werkzeuge — Tool Use", [
     ("**Tool Use** (Function Calling) = das Modell darf **Werkzeuge aufrufen**", 0),
@@ -127,6 +194,8 @@ d.bullets("Agent", [
     ("Der Mensch setzt **Ziel und Grenzen**, nicht jeden einzelnen Schritt", 0),
     ("„Finde den Fehler und behebe ihn“ statt „Zeig mir Zeile 40“", 0),
 ])
+
+d.picture("Die Schleife, die einen Agenten ausmacht", os.path.join(IMG, "aibegriffe-agent.png"), width=570)
 
 d.table_top("agentisch — vier Stufen", [
     ["Stufe", "wer entscheidet den nächsten Schritt", "Beispiel"],
@@ -147,11 +216,16 @@ d.bullets("Was dabei schiefgeht", [
     ("Prüfbar bleibt nur, was **protokolliert** wird", 0),
 ])
 
-# ------------------------------------------------------------- Kapitel 04 ---
-d.chapter(4, "Zum Nachschlagen", "Alles auf einer Folie")
+# ------------------------------------------------------------- Kapitel 05 ---
+d.chapter(5, "Zum Nachschlagen", "Alles auf einer Folie")
 
 d.table_top("Glossar", [
     ["Begriff", "in einem Satz"],
+    ["Neuron", "rechnet Eingänge mal Gewichte zusammen"],
+    ["Gewicht", "eine Zahl — sie sagt, wie stark ein Eingang zählt"],
+    ["Neuronales Netz", "viele Neuronen in Schichten"],
+    ["Training", "die Gewichte aus Beispielen zurechtrücken"],
+    ["Deep Learning", "Lernen mit vielen Schichten"],
     ["LLM", "Sprachmodell, das das nächste Token vorhersagt"],
     ["Token", "Textstück, mit dem gerechnet und abgerechnet wird"],
     ["Kontextfenster", "wie viel Text gleichzeitig sichtbar ist"],
@@ -164,7 +238,7 @@ d.table_top("Glossar", [
     ["MCP", "Standard, über den Werkzeuge sich anmelden"],
     ["Agent", "Modell mit Werkzeugen, Schleife und Ziel"],
     ["agentisch", "die Reihenfolge steht nicht vorher fest"],
-], [200, 616], None, font_size=10.5, row_h=19, bold_cols=(0,))
+], [200, 616], None, font_size=9.5, row_h=16, bold_cols=(0,))
 
 d.merksatz("Ein Sprachmodell weiß nichts — es kennt nur, was gerade in seinem Fenster steht. "
            "Wer das Fenster füllt, bestimmt die Antwort.")
