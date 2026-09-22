@@ -207,6 +207,7 @@
         function rollKnown() {
             const green = border();
             S.known = TEXT.map((w, i) => i >= green && SEEN.has(norm(w)) && Math.random() < S.level);
+            S.noise = TEXT.map((w, i) => (i < green || S.known[i]) ? w : babble(w.length));   // same length: the line keeps still
         }
         const knownAhead = from => S.known.reduce((n, k, i) => n + (k && i >= from ? 1 : 0), 0);
 
@@ -262,9 +263,8 @@
         function startRun() {
             S.mode = 'run'; S.running = true; S.stopAt = -1;
             rollLevel();
-            if (S.known.length !== TEXT.length) rollKnown();
+            if (S.known.length !== TEXT.length) rollKnown();   // the picture's salad carries over into the run
             S.pos = border();
-            S.noise = TEXT.map((w, i) => (i < S.pos || S.known[i]) ? w : babble(w.length));   // same length: the line keeps still
             S.cur = S.noise[S.pos] || '';
             S.t0 = performance.now(); S.flick = 0; S.frac = 0;
             playLabel();
@@ -483,7 +483,8 @@
                 let txt = b.t, col = INK;
                 const behind = b.i >= border();
                 if (!run) {
-                    if (behind) col = S.known[b.i] ? GREEN : WRONG;   // has it from before, or not yet (Doc, 22.09.2026: "rot auch zeigen")
+                    if (behind && S.known[b.i]) col = GREEN;              // has it from before
+                    else if (behind) { txt = S.noise[b.i]; col = WRONG; }  // not yet: the salad, already here
                 } else if (b.i > S.pos) { txt = S.noise[b.i]; col = S.known[b.i] ? GREEN : WRONG; }
                 else if (b.i === S.pos) { txt = S.cur || b.t; col = S.known[b.i] ? GREEN : WRONG; }
                 else if (behind) col = GREEN;                 // settled: the words the net made (Doc, 22.09.2026: "unser grün")
