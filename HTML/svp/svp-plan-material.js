@@ -74,6 +74,51 @@ window.svpPlanParts.push(function (P) {
         return svg;
     }
 
+    /* Das Zeichen eines eigenen Foliensatzes: dasselbe gelbe Kaestchen wie beim
+       Lambda, darin ein geschweiftes D in Blau (Doc, 22.09.2026: "nimm das
+       Lambda und mach ein geschweiftes D in Blau rein. Deck -> Doc"). Das D
+       steht fuer Deck und fuer Doc: ein Foliensatz aus dem eigenen Haus ist
+       damit auf einen Blick von einer fremden PPT zu unterscheiden, so wie das
+       Lambda ein eigenes Lab auszeichnet.
+       Gezeichnet, nicht getippt (Doc, 20.09.2026: Icons immer als SVG) - und
+       gezeichnet wie das Lambda: Striche mit runden Enden im selben 64er
+       Kaestchen, im selben Dunkelblau (Doc, 22.09.2026: "dunkel wie lamb").
+       Viel duenner als das Lambda (Doc: "wesentlich feiner"): der Buchstabe
+       hat einen Bauch und braucht deshalb Luft, mit der Strichbreite 9 des
+       Lambda lief er zu. Die Schwuenge oben und unten tragen noch einmal die
+       halbe Breite - das ist der Kontrast einer Schreibfeder; bei 16 px bleibt
+       davon eine feine Verdickung, und das D bleibt lesbar. */
+    function deckIcon() {
+        const ns = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(ns, 'svg');
+        svg.setAttribute('class', 'mat-ico mat-ico-drawn mat-deck');
+        svg.setAttribute('viewBox', '0 0 64 64');
+        svg.setAttribute('aria-hidden', 'true');
+        const kasten = document.createElementNS(ns, 'rect');
+        kasten.setAttribute('width', '64');
+        kasten.setAttribute('height', '64');
+        kasten.setAttribute('rx', '14');
+        kasten.setAttribute('fill', 'rgb(245, 194, 66)');
+        svg.appendChild(kasten);
+        const g = document.createElementNS(ns, 'g');
+        g.setAttribute('fill', 'none');
+        g.setAttribute('stroke', 'rgb(14, 36, 78)');
+        g.setAttribute('stroke-linecap', 'round');
+        g.setAttribute('stroke-linejoin', 'round');
+        [['M25 15 L25 49', 4.5],                        /* Schaft */
+         ['M25 15 C43 15 50 22 50 32 C50 42 43 49 25 49', 4.5], /* Bauch */
+         ['M25 15 C20 11 15 14 17 19', 2.5],            /* Schwung oben */
+         ['M25 49 C20 53 15 50 17 45', 2.5]             /* Schwung unten */
+        ].forEach(function (z) {
+            const pfad = document.createElementNS(ns, 'path');
+            pfad.setAttribute('d', z[0]);
+            pfad.setAttribute('stroke-width', z[1]);
+            g.appendChild(pfad);
+        });
+        svg.appendChild(g);
+        return svg;
+    }
+
     /* Das Symbol einer festen Pille. Die Formelsammlung ist ein Link ins Netz
        und bekommt den Pfeil der anderen Links (Doc, 21.09.2026: "bitte
        Formelsammlung mit Link Icon") - ihre Adresse endet auf .pdf, von allein
@@ -153,6 +198,11 @@ window.svpPlanParts.push(function (P) {
 
     function matKind(url, label) {
         const l = ((label || '') + ' ' + url).toLowerCase();
+        /* Der eigene Foliensatz steht vor allen anderen Proben: er ist an
+           seinem Pfad sicher zu erkennen, waehrend die Dateipruefungen
+           darunter am Text haengen - ein Deck namens "PPT Vektoren" waere
+           sonst als fremde Datei durchgegangen. */
+        if (istDeck(url)) return 'deck';
         if (url.indexOf('/:p:/') >= 0 || l.indexOf('ppt') >= 0) return 'ppt';
         if (url.indexOf('/:w:/') >= 0 || l.indexOf('.doc') >= 0) return 'doc';
         if (url.indexOf('/:x:/') >= 0 || l.indexOf('.xls') >= 0) return 'xls';
@@ -170,13 +220,29 @@ window.svpPlanParts.push(function (P) {
        dort, tragen aber "test" im Namen; Foliensaetze liegen in /decks/,
        Aufgabenblaetter in /aufgaben/. Ein Lab-Link bekommt damit das Lambda
        statt des allgemeinen Pfeils. */
-    function istLab(url) {
+    /* Ein Foliensatz aus dem eigenen Haus: docalvers.de/decks/<name>.html.
+       Dieselbe Pruefung wie istLab, nur ein Ordner tiefer - istLab laesst
+       /decks/ ausdruecklich aus, die beiden Sorten kommen sich nicht ins
+       Gehege. */
+    function istDeck(url) {
+        return eigenerPfad(url, /^\/decks\/[\w-]+\.html$/i);
+    }
+
+    /* Beide Pruefungen fragen dasselbe: zeigt die Adresse ins eigene Haus, und
+       passt ihr Pfad auf das Muster? Nur das Muster unterscheidet Lab und Deck,
+       deshalb steht die Adressarbeit hier einmal. */
+    function eigenerPfad(url, muster) {
         url = String(url || '');
         if (!/^\//.test(url) && !/^https?:\/\/(?:www\.)?docalvers\.de\//i.test(url) &&
             !/^https?:\/\/localhost[:/]/i.test(url)) return false;
         let pfad;
         try { pfad = new URL(url, location.href).pathname; } catch (e) { return false; }
-        if (!/^\/[\w-]+\.html$/i.test(pfad)) return false;
+        return muster.test(pfad);
+    }
+
+    function istLab(url) {
+        if (!eigenerPfad(url, /^\/[\w-]+\.html$/i)) return false;
+        const pfad = new URL(String(url), location.href).pathname;
         return !/test/i.test(pfad) && !/^\/index\.html$/i.test(pfad);
     }
 
@@ -192,7 +258,7 @@ window.svpPlanParts.push(function (P) {
        hier auch sortieren" - gezeigt auf die Materialspalte im Fahrplan, wo
        alle Sorten nebeneinander haengen): sie gehoeren zum Stoff, fuehren aber
        wie ein Link aus dem Haus. */
-    const MAT_RANG = { ppt: 0, doc: 0, xls: 0, pdf: 0, lab: 1, yt: 2, video: 2 };
+    const MAT_RANG = { deck: 0, ppt: 0, doc: 0, xls: 0, pdf: 0, lab: 1, yt: 2, video: 2 };
     function matRang(en) {
         const rang = MAT_RANG[matKind(en.url || '', en.label || '')];
         return rang == null ? 3 : rang;   /* alles Uebrige ist ein blosser Link */
@@ -318,6 +384,7 @@ window.svpPlanParts.push(function (P) {
         if (kind === 'yt') return drawnIcon('mat-ico-drawn', YT_PATH, 'rgb(255, 0, 0)');
         if (kind === 'link') return drawnIcon('mat-ico-drawn mat-ico-link', LINK_PATH, 'rgb(120, 160, 220)');
         if (kind === 'lab') return lambdaIcon();
+        if (kind === 'deck') return deckIcon();
         /* Farbe kommt aus svp.css, nicht von hier: dunkelblau im hellen Thema
            (Doc, 08.09.2026), hell im dunklen - eine feste Farbe waere in einem
            der beiden Themen kaum zu sehen. */

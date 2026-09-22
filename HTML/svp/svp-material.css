@@ -89,6 +89,10 @@ html.svp-light #plan-table a.quiz-btn:hover { background: rgba(40, 70, 120, 0.16
    was es von den gezeichneten Strichzeichen unterscheidet: es ist eine
    Flaeche und faerbt sich NICHT nach der Pille ein. */
 .mat-lambda { flex: none; }
+/* Dasselbe gilt fuer das D der eigenen Foliensaetze (svp-plan-material.js,
+   deckIcon): eine Flaeche mit eigener Farbe, die sich nicht nach der Pille
+   richtet. */
+.mat-deck { flex: none; }
 
 /* Per-pill delete: the ✕ sits INSIDE the pill at its right edge and only
    shows up while the plan is in edit mode. */
@@ -313,10 +317,13 @@ html.svp-grey #plan-table .detail-row .sub-side .mat-block a.mat-pill.mat-wichti
    schlaegt das. Strich-Symbole erkennt man am stroke-Attribut; bei ihnen darf
    `fill` nicht gesetzt werden, sonst laeuft die Form voll. App-Symbole sind
    <img> und bleiben, wie sie sind - die tragen ohnehin ihr eigenes Logo. */
-#plan-table .detail-row .sub-side .mat-block a.mat-pill.mat-wichtig .mat-ico path {
+/* Ausgenommen sind die beiden Hauszeichen (Lambda und Deck-D): sie bringen
+   ihr gelbes Kaestchen und ihre eigene Farbe mit - auf Navy umgefaerbt waere
+   das blaue D in einer wichtigen Pille verschwunden. */
+#plan-table .detail-row .sub-side .mat-block a.mat-pill.mat-wichtig .mat-ico:not(.mat-lambda):not(.mat-deck) path {
     fill: rgb(var(--g-wichtig-ink));
 }
-#plan-table .detail-row .sub-side .mat-block a.mat-pill.mat-wichtig .mat-ico path[stroke] {
+#plan-table .detail-row .sub-side .mat-block a.mat-pill.mat-wichtig .mat-ico:not(.mat-lambda):not(.mat-deck) path[stroke] {
     fill: none;
     stroke: rgb(var(--g-wichtig-ink));
 }
