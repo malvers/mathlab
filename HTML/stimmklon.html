@@ -265,8 +265,18 @@
         const erwartet = s => alsText(s).length / 13;
 
         let i = 0, takes = {}, rec = null, stream = null, laeuft = false, uhrAb = 0, uhrTakt = null;
-        let klang = null;                 // keep the Audio alive: a bare new Audio().play() can be collected mid-play
+        let klang = null, falscherServer = false;                 // keep the Audio alive: a bare new Audio().play() can be collected mid-play
         const $ = id => document.getElementById(id);
+
+        /* Live reload must not pull the page out from under a running take - the recording would be
+           gone without a trace. Same hook filmkritik.html and cyber-tour.js use (tools/live_reload.py). */
+        window.__liveReloadBusy = () => laeuft;
+
+        // Anything that throws used to fail silently and look like "nothing was recorded" - say it out loud.
+        window.addEventListener('error', e => { $('tipp').textContent = 'Fehler: ' + e.message; });
+        window.addEventListener('unhandledrejection', e => {
+            $('tipp').textContent = 'Fehler: ' + ((e.reason && e.reason.message) || e.reason);
+        });
         const zuKurz = (s, t) => t && t.sekunden > 0 && t.sekunden < erwartet(s) * 0.55;
 
         function zeichne() {
@@ -297,7 +307,7 @@
             else if (gut > 0) { u.textContent = 'noch zu wenig'; u.className = 'fehlt'; }
             else { u.textContent = 'noch nichts'; u.className = 'fehlt'; }
 
-            $('warnung').innerHTML = kaputt
+            if (!falscherServer) $('warnung').innerHTML = kaputt
                 ? '<div class="warnkasten"><b>' + kaputt + ' Aufnahme' + (kaputt > 1 ? 'n sind' : ' ist') + ' abgeschnitten</b> — '
                   + 'deutlich kürzer, als der Text dauert. Unten rot markiert, bitte noch einmal aufnehmen. '
                   + 'Nach dem Stopp kurz warten, bis „Gespeichert" dasteht.</div>'
@@ -327,10 +337,20 @@
 
         async function starte() {
             if (laeuft) return;
-            if (!stream) stream = await navigator.mediaDevices.getUserMedia({
-                // no processing: the clone should hear the room and the voice, not Chrome's guesswork
-                audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 }
-            });
+            // a stream from a previous take can be dead (device switched, tab slept) - take a fresh one then
+            if (stream && !stream.getAudioTracks().some(t => t.readyState === 'live')) stream = null;
+            if (!stream) {
+                $('tipp').textContent = 'Mikrofon wird geöffnet …';
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        // no processing: the clone should hear the room and the voice, not Chrome's guesswork
+                        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 }
+                    });
+                } catch (err) {
+                    $('tipp').textContent = 'Kein Mikrofon: ' + err.name + ' — ' + err.message;
+                    return;
+                }
+            }
             const typ = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'].find(c => MediaRecorder.isTypeSupported(c)) || '';
             const r = new MediaRecorder(stream, typ ? { mimeType: typ } : undefined);
             const meine = SAETZE[i].id;      // bind the id NOW - Doc may page on while this take is still uploading
@@ -380,10 +400,13 @@
             klang.play().catch(e => { $('tipp').textContent = 'Wiedergabe abgelehnt: ' + e.message; });
         }
 
-        $('btnRec').onclick = () => laeuft ? stoppe() : starte();
-        $('btnPlay').onclick = () => hoere(SAETZE[i].id);
-        $('btnPrev').onclick = () => { if (!laeuft && i > 0) { i--; zeichne(); } };
-        $('btnNext').onclick = () => { if (!laeuft && i < SAETZE.length - 1) { i++; zeichne(); } };
+        /* blur after every press: a focused button ALSO reacts to the space bar, so the key would
+           toggle twice - start, and immediately stop again. That is what cut the first takes short. */
+        const knopf = (el, tu) => el.onclick = () => { el.blur(); tu(); };
+        knopf($('btnRec'), () => laeuft ? stoppe() : starte());
+        knopf($('btnPlay'), () => hoere(SAETZE[i].id));
+        knopf($('btnPrev'), () => { if (!laeuft && i > 0) { i--; zeichne(); } });
+        knopf($('btnNext'), () => { if (!laeuft && i < SAETZE.length - 1) { i++; zeichne(); } });
 
         $('liste').onclick = async e => {
             const h = e.target.closest('[data-hoer]'), w = e.target.closest('[data-weg]'), z = e.target.closest('[data-zu]');
@@ -400,6 +423,7 @@
 
         document.addEventListener('keydown', e => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.target.tagName === 'BUTTON') return;      // let the button's own click handle it, once
             if (e.code === 'Space' && !e.repeat) { e.preventDefault(); laeuft ? stoppe() : starte(); }
             if (e.code === 'ArrowRight') $('btnNext').click();
             if (e.code === 'ArrowLeft') $('btnPrev').click();
@@ -409,14 +433,70 @@
             if (laeuft) { e.preventDefault(); e.returnValue = ''; }   // a running take would be lost
         });
 
-        fetch('/__stimme/liste').then(r => r.json()).then(d => {
+        /* ?selbsttest=1 records three seconds into the id "selbsttest" and reports the result in the
+           page title, so the whole chain (microphone -> MediaRecorder -> POST -> ffmpeg -> WAV) can be
+           checked from a headless Chrome with --use-fake-device-for-media-stream. Deliberately left in:
+           the next time "nothing was recorded" comes up, this answers it in one command. */
+        if (location.search.includes('selbsttest')) {
+            SAETZE.push({ id: 'selbsttest', text: 'Selbsttest, drei Sekunden Ton.' });
+            setTimeout(async () => {
+                i = SAETZE.length - 1;
+                await starte();
+                if (!laeuft) { document.title = 'SELBSTTEST: Aufnahme startete nicht'; return; }
+                setTimeout(() => {
+                    stoppe();
+                    setTimeout(() => {
+                        const t = takes['selbsttest'];
+                        document.title = 'SELBSTTEST: ' + (t && t.sekunden ? t.sekunden + ' s, WAV ' + t.datei : 'NICHTS ANGEKOMMEN');
+                    }, 2500);
+                }, 3000);
+            }, 400);
+        }
+
+        /* This page lives in HTML/, so serve.py (:8765) and every filmkritik server hand it out too -
+           and there /__stimme/* does not exist. It then looked perfectly normal and saved nothing.
+           So: check first, and if we are on the wrong server, go find the right one and say so. */
+        async function stehtDerServer() {
+            try {
+                const r = await fetch('/__stimme/liste', { cache: 'no-store' });
+                if (r.ok) return await r.json();
+            } catch (e) { /* wrong server, look for the real one below */ }
+            return null;
+        }
+
+        async function sucheKabine() {
+            for (let p = 8771; p < 8783; p++) {
+                if (String(p) === location.port) continue;
+                try {
+                    const r = await fetch('http://127.0.0.1:' + p + '/__stimme/liste', { cache: 'no-store' });
+                    if (r.ok) return p;
+                } catch (e) { /* nobody there */ }
+            }
+            return null;
+        }
+
+        stehtDerServer().then(async d => {
+            if (!d) {
+                falscherServer = true;
+                const p = await sucheKabine();
+                const hin = p ? 'http://127.0.0.1:' + p + '/stimmklon.html' : null;
+                $('warnung').innerHTML = '<div class="warnkasten"><b>Falscher Server — hier wird nichts gespeichert.</b><br>'
+                    + 'Diese Seite liegt in HTML/ und wird auch von serve.py und den Filmkritik-Servern ausgeliefert, '
+                    + 'aber nur die Aufnahmekabine kann speichern.<br>'
+                    + (hin ? 'Die Kabine läuft auf Port ' + p + ': <a href="' + hin + '" style="color:rgb(245,194,66)">hier entlang</a>.'
+                           : 'Die Kabine läuft gerade nicht. Starten mit: <code>python3 tools/stimmklon.py</code>')
+                    + '</div>';
+                $('btnRec').disabled = true;
+                $('tipp').textContent = 'Aufnahme gesperrt, bis die Seite am richtigen Server hängt.';
+                return zeichne();
+            }
             takes = d.takes || {};
             if (d.ordner) $('ordner').textContent = d.ordner + '/';
             // start at the first line that is missing or truncated, so a resumed session picks up there
             const offen = SAETZE.findIndex(s => !takes[s.id] || zuKurz(s, takes[s.id]));
             i = offen < 0 ? 0 : offen;
             zeichne();
-        }).catch(() => zeichne());
+        });
     </script>
 </body>
 

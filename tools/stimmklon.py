@@ -116,6 +116,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         body = json.dumps(obj, ensure_ascii=False).encode('utf-8')
         self.send_response(status)
         self.send_header('Content-Type', 'application/json; charset=utf-8')
+        # This page also gets served by serve.py (:8765) and by every filmkritik server, because they
+        # all serve HTML/ - but only we answer /__stimme/*. There the page looked fine and saved nothing
+        # (Doc, 22.09.2026: "das ist nix aufgenommen?"). So it may ask other local ports whether the booth
+        # is there; localhost only, and the answer carries no data worth protecting.
+        self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Content-Length', str(len(body)))
         self.end_headers()
         self.wfile.write(body)
