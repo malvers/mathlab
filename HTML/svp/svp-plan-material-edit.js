@@ -24,6 +24,10 @@ window.svpPlanParts.push(function (P) {
            Kasten jedes Mal leert. Sie zaehlen nicht in den Reiter: der Zaehler
            unten rechnet mit den Eintraegen der Woche, nicht mit diesen. */
         P.festePillen(ref.matBlock, ref);
+        /* Zusatzmaterial steht in drei Spalten - Labs, ppt/pdf, Links (Doc,
+           22.09.2026). Erst jetzt, weil die festen Pillen mit einsortiert
+           werden; Videos und Aufgaben behalten ihre laufende Reihe. */
+        P.matSpalten(ref.matBlock);
         P.renderMaterial(ref.vidBlock, text, ref, en => !P.isVideoEntry(en));
         ref.matTd.textContent = '';
         /* Doc, 20.09.2026: "weg bitte ... wir brauchen Platz" - die Aufgaben-Pille

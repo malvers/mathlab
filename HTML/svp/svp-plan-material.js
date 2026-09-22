@@ -6,7 +6,7 @@ window.svpPlanParts.push(function (P) {
         drawnIcon, matLabelEl, matIconEl, siteHref, lokalHref, keinMausfokus, equalizeMatPills,
         equalizeRefPills, setVideoReiter, isVideoEntry, isExerciseEntry, officeEdit,
         matDefaultLabel, openMat, renderMaterial, hideMatTip, showMatTip,
-        festeLinks, festePillen
+        festeLinks, festePillen, matSpalten
     });
 
     /* Adressen neben dem svp-Ordner: gerechnet wird gegen die Adresse DIESER
@@ -196,6 +196,41 @@ window.svpPlanParts.push(function (P) {
     function matRang(en) {
         const rang = MAT_RANG[matKind(en.url || '', en.label || '')];
         return rang == null ? 3 : rang;   /* alles Uebrige ist ein blosser Link */
+    }
+
+    /* Drei Spalten statt einer umbrechenden Reihe (Doc, 22.09.2026: "drei
+       Spalten Labs ppt/pdf Links"): jede Sorte steht untereinander in ihrer
+       eigenen Spalte. Das passt, weil equalizeMatPills ohnehin alle Pillen
+       gleich breit macht - die Spalten stehen damit Kante auf Kante.
+       Die Rangzahl jeder Pille steht als data-rang an ihr, gesetzt in
+       renderMaterial; eine leere Spalte entsteht gar nicht erst. Die festen
+       Pillen (Formelsammlung) bleiben hinten, wie ueberall - sie tragen
+       .mat-fest und gehen ans Ende der letzten Spalte. */
+    const SPALTEN = [[1], [0], [2, 3]];   /* Labs | ppt/pdf | Videos und Links */
+    function matSpalten(el) {
+        const kinder = Array.prototype.slice.call(el.children);
+        const pille = function (k) { return k.matches('a.mat-pill') ? k : k.querySelector('a.mat-pill'); };
+        if (!kinder.some(pille)) { el.classList.remove('mat-cols'); return; }
+        const spalten = SPALTEN.map(function () { return []; });
+        const schwanz = [];                       /* .mat-note haengt hinten dran */
+        kinder.forEach(function (k) {
+            const a = pille(k);
+            if (!a) { schwanz.push(k); return; }
+            const r = +a.dataset.rang;
+            let i = a.classList.contains('mat-fest') ? spalten.length - 1
+                : SPALTEN.findIndex(function (rs) { return rs.indexOf(r) >= 0; });
+            if (i < 0) i = spalten.length - 1;
+            spalten[i].push(k);
+        });
+        el.classList.add('mat-cols');
+        spalten.forEach(function (liste) {
+            if (!liste.length) return;
+            const sp = document.createElement('div');
+            sp.className = 'mat-col';
+            liste.forEach(function (k) { sp.appendChild(k); });
+            el.appendChild(sp);
+        });
+        schwanz.forEach(function (k) { el.appendChild(k); });
     }
 
 
@@ -658,6 +693,7 @@ window.svpPlanParts.push(function (P) {
             if (skip && skip(en)) return;   /* drawn elsewhere (Aufgaben-Pille) */
             const label = en.label;
             const a = document.createElement('a');
+            a.dataset.rang = matRang(en);      /* die Spalte, in die sie gehoert */
             /* Der Abgabe-Knopf oeffnet IMMER einen echten Tab: der Upload
                braucht das volle SharePoint-Fenster, das kleine Material-
                Fenster (openMat) kann das nicht. */
