@@ -24,7 +24,7 @@
     <meta name="twitter:image" content="https://docalvers.de/resources/og/koerper.jpg">
     <!-- OG:END -->
     <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&family=Raleway:wght@600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
     <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
@@ -60,21 +60,6 @@
             font-family: 'Orbitron', sans-serif; font-size: 0.85rem; letter-spacing: 1.5px; color: #bbb;
         }
         #k-hud b { display: block; font-size: 1.5rem; color: #fff; margin-bottom: 4px; }
-        /* W / M / D - same loop as on formelsammlung.html, shared through localStorage */
-        #k-mode {
-            position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 5; cursor: pointer;
-            font-family: 'Raleway', sans-serif; font-weight: 700; font-size: 0.95rem; line-height: 1;
-            padding: 7px 12px; border-radius: 9px; background: rgba(10, 22, 40, 0.72);
-            border: 1px solid #00d2ff; color: #00d2ff; transition: background 0.2s, border-color 0.2s, color 0.2s;
-        }
-        #k-mode:hover { background: rgba(10, 22, 40, 0.92); }
-        #k-mode[data-m="M"] { border-color: #ff4fa3; color: #ff4fa3; }
-        #k-mode[data-m="D"] { border-color: #8a97ad; color: #8a97ad; }
-        /* only the rendered body turns - HUD, panels and labels keep their colours */
-        /* The lab colours faces by edge count (green, orange, red, blue...), so a plain
-           hue-rotate would only shuffle them. Flatten to grey first, then tint. */
-        html[data-mode="M"] #canvas-container canvas { filter: grayscale(1) sepia(1) hue-rotate(275deg) saturate(4.2) brightness(1.05); }
-        html[data-mode="D"] #canvas-container canvas { filter: grayscale(1); }
         /* View controls live in a floating panel on the right of the stage — the sidebar keeps the numbers */
         #k-right {
             position: absolute; top: 12px; right: 12px; width: 260px; z-index: 5;   /* same width as the Werte card below */
@@ -271,7 +256,6 @@
             <div id="canvas-container">
                 <div class="cyber-grid"></div>
                 <div id="k-hud"><b id="k-hud-name"></b><span id="k-hud-sub"></span></div>
-                <button type="button" id="k-mode" title="Modus wechseln: W → M → D">W</button>
             </div>
             <div id="k-right"></div>
             <div id="k-exactpanel"></div>
@@ -1263,23 +1247,6 @@
         let current = null;         // { P, m, kind }
 
         function initThree() {
-            // ---- W / M / D loop, shares its choice with formelsammlung.html ------
-            {
-                const MODES = ['W', 'M', 'D'];
-                const btn = document.getElementById('k-mode');
-                const set = m => {
-                    document.documentElement.dataset.mode = m;
-                    btn.dataset.m = m;
-                    btn.textContent = m;
-                    try { localStorage.setItem('fs-mode', m); } catch (e) { /* private window */ }
-                };
-                let start = 'W';
-                try { const kept = localStorage.getItem('fs-mode'); if (MODES.includes(kept)) start = kept; } catch (e) { }
-                set(start);
-                btn.addEventListener('click', () =>
-                    set(MODES[(MODES.indexOf(document.documentElement.dataset.mode) + 1) % MODES.length]));
-            }
-
             const container = document.getElementById('canvas-container');
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.05, 200);
