@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Stimmklon — Aufnahmekabine</title>
+    <meta name="description" content="Nimmt Docs Stimme satzweise auf und legt saubere WAVs für einen Stimmklon ab.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        /* Page-local only: the recording booth layout. Everything shared (buttons, colours,
+           panels, scrollbars) comes from the central sheets linked above. */
+        .booth { max-width: 900px; margin: 0 auto; padding: 0 16px 80px; }
+
+        .zaehler {
+            display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: baseline;
+            margin: 18px 0 10px; font-size: 0.82rem; letter-spacing: 0.04em;
+        }
+        .zaehler b { font-size: 1.5rem; font-weight: 900; }
+        .genug { color: rgb(121, 158, 49); }
+        .fehlt { color: rgb(245, 194, 66); }
+
+        .balken { height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+        .balken i { display: block; height: 100%; background: rgb(121, 158, 49); width: 0; transition: width .35s; }
+
+        /* the line being read: big, quiet, nothing else competing for the eye */
+        .satz {
+            margin: 22px 0 14px; padding: 26px 24px; border-radius: 14px;
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.14);
+            font-size: clamp(1.15rem, 3.4vw, 1.85rem); line-height: 1.5; font-weight: 700;
+        }
+        .satz.laeuft { border-color: rgb(176, 36, 24); box-shadow: 0 0 0 2px rgba(176, 36, 24, .35); }
+        .satz .nr { display: block; font-size: 0.7rem; opacity: .6; margin-bottom: 10px; letter-spacing: .12em; }
+
+        .regie { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 8px; }
+        .regie .cyber-btn { flex: 0 1 auto; }
+
+        .punkt { width: 11px; height: 11px; border-radius: 50%; background: rgba(255, 255, 255, .25); display: inline-block; }
+        .punkt.an { background: rgb(176, 36, 24); animation: puls 1s infinite; }
+        @keyframes puls { 50% { opacity: .25; } }
+
+        .liste { margin-top: 26px; }
+        .zeile {
+            display: flex; gap: 12px; align-items: center; padding: 9px 12px; border-radius: 9px;
+            border: 1px solid transparent; font-size: 0.82rem;
+        }
+        .zeile:nth-child(odd) { background: rgba(255, 255, 255, 0.035); }
+        .zeile.fertig { border-color: rgba(121, 158, 49, .45); }
+        .zeile .txt { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .zeile .sek { opacity: .65; font-variant-numeric: tabular-nums; }
+        .zeile button {
+            background: none; border: 1px solid rgba(255, 255, 255, .22); color: inherit;
+            border-radius: 7px; padding: 4px 7px; cursor: pointer; font: inherit; line-height: 0;
+        }
+        .zeile button:hover { border-color: rgb(245, 194, 66); }
+        .zeile svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+        .hinweis { font-size: 0.78rem; opacity: .72; line-height: 1.6; margin: 20px 0; }
+        .hinweis code { font-size: 0.9em; opacity: .9; }
+
+        @media (max-width: 560px) {
+            .regie .cyber-btn { flex: 1 1 100%; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="booth">
+        <h1 style="margin:26px 0 4px;font-size:clamp(1.3rem,4vw,2rem)">Stimmklon — Aufnahmekabine</h1>
+        <p class="hinweis" style="margin-top:0">
+            Sprich jeden Satz so, wie du ihn im Labor sagen würdest — nicht vorlesen, reden.
+            Zwischen den Sätzen kurz Luft holen, der Schnitt passiert automatisch.
+        </p>
+
+        <div class="zaehler">
+            <span><b id="minuten">0,0</b> min aufgenommen</span>
+            <span id="urteil" class="fehlt">noch nichts</span>
+            <span style="opacity:.6">Ziel: 2 min schnell · 30 min für die beste Qualität</span>
+        </div>
+        <div class="balken"><i id="fortschritt"></i></div>
+
+        <div class="satz" id="satz"><span class="nr" id="satznr">Satz 1 von 1</span><span id="satztext">…</span></div>
+
+        <div class="regie">
+            <span class="punkt" id="punkt" title="Aufnahme"></span>
+            <button class="cyber-btn" id="btnRec">Aufnehmen</button>
+            <button class="cyber-btn" id="btnPlay">Anhören</button>
+            <button class="cyber-btn" id="btnPrev">Zurück</button>
+            <button class="cyber-btn" id="btnNext">Weiter</button>
+        </div>
+        <p class="hinweis" id="tipp">Leertaste startet und stoppt die Aufnahme.</p>
+
+        <div class="liste" id="liste"></div>
+
+        <p class="hinweis">
+            Die Aufnahmen liegen als einzelne WAVs unter <code id="ordner">~/Movies/stimmklon/</code> —
+            bewusst außerhalb des Repos, das ist öffentlich.
+        </p>
+    </div>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        /* The script Doc reads. Chosen so the clone hears the whole range of his voice, not just
+           one register: his own catchphrase, lab sentences with numbers and formulas, a question,
+           something loud, something quiet. Phonetically the German umlauts, ch/sch, r and the
+           hard consonant clusters all appear at least once. */
+        const SAETZE = [
+            { id: 'einwilligung', text: 'Ich bin der Eigentümer dieser Stimme und bin damit einverstanden, dass Google diese Stimme zur Erstellung eines synthetischen Stimmmodells verwendet.', hinweis: 'Einwilligung — wortwörtlich so, das verlangt Google.' },
+            { id: 's01', text: 'Nicht verzagen, Doc Alvers fragen!' },
+            { id: 's02', text: 'Herzlich willkommen im Mathe-Labor. Schön, dass ihr da seid.' },
+            { id: 's03', text: 'Schauen wir uns das mal in Ruhe an: Was passiert eigentlich, wenn wir den Radius verdoppeln?' },
+            { id: 's04', text: 'Das Volumen einer Kugel ist vier Drittel mal Pi mal r hoch drei — und die Oberfläche vier Pi r Quadrat.' },
+            { id: 's05', text: 'Moment mal. Genau da steckt der Fehler drin, und zwar ein ziemlich hübscher.' },
+            { id: 's06', text: 'Zweiundvierzig, siebzehn, dreihundertacht, null Komma fünf, minus neunzehn.' },
+            { id: 's07', text: 'Die Ableitung von x Quadrat ist zwei x. Das klingt banal, ist aber der ganze Trick.' },
+            { id: 's08', text: 'Wahnsinn, oder? Genau deswegen liebe ich diesen Satz so sehr!' },
+            { id: 's09', text: 'Ganz ehrlich: Am Anfang habe ich das auch nicht verstanden. Überhaupt nicht.' },
+            { id: 's10', text: 'Ein Würfel, ein Tetraeder, ein Oktaeder, ein Dodekaeder, ein Ikosaeder — fünf Stück, mehr gibt es nicht.' },
+            { id: 's11', text: 'Nächste Woche schreiben wir darüber eine kurze Übung. Keine Panik, das schafft ihr.' },
+            { id: 's12', text: 'Zeichnet euch das bitte auf, das hilft ungemein. Erst skizzieren, dann rechnen.' },
+            { id: 's13', text: 'Und jetzt kommt der Teil, der mich wirklich umgehauen hat, als ich Physik studiert habe.' },
+            { id: 's14', text: 'Fragen? Immer her damit. Es gibt keine dummen Fragen, nur ungestellte.' },
+        ];
+
+        const ICON_PLAY = '<svg viewBox="0 0 24 24"><polygon points="7,4 20,12 7,20" fill="currentColor" stroke="none"/></svg>';
+        const ICON_WEG = '<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
+
+        let i = 0, takes = {}, rec = null, chunks = [], stream = null, laeuft = false;
+        const $ = id => document.getElementById(id);
+
+        function zeichne() {
+            const s = SAETZE[i];
+            $('satznr').textContent = (s.hinweis || ('Satz ' + i + ' von ' + (SAETZE.length - 1)));
+            $('satztext').textContent = s.text;
+            $('satz').classList.toggle('laeuft', laeuft);
+            $('punkt').classList.toggle('an', laeuft);
+            $('btnRec').textContent = laeuft ? 'Stopp' : (takes[s.id] ? 'Neu aufnehmen' : 'Aufnehmen');
+            $('btnPlay').disabled = !takes[s.id];
+
+            const total = Object.values(takes).reduce((a, t) => a + (t.sekunden || 0), 0);
+            $('minuten').textContent = (total / 60).toFixed(1).replace('.', ',');
+            $('fortschritt').style.width = Math.min(100, total / 120 * 100) + '%';
+            const u = $('urteil');
+            if (total >= 1800) { u.textContent = 'reicht für die beste Qualität'; u.className = 'genug'; }
+            else if (total >= 120) { u.textContent = 'reicht für einen Schnellklon'; u.className = 'genug'; }
+            else if (total > 0) { u.textContent = 'noch zu wenig'; u.className = 'fehlt'; }
+            else { u.textContent = 'noch nichts'; u.className = 'fehlt'; }
+
+            $('liste').innerHTML = SAETZE.map((x, n) => {
+                const t = takes[x.id];
+                return '<div class="zeile ' + (t ? 'fertig' : '') + '">'
+                    + '<span class="sek">' + (t ? (t.sekunden || 0).toFixed(1) + ' s' : '—') + '</span>'
+                    + '<span class="txt" style="' + (n === i ? 'font-weight:700' : '') + '">' + x.text + '</span>'
+                    + (t ? '<button data-hoer="' + x.id + '" title="Anhören">' + ICON_PLAY + '</button>'
+                         + '<button data-weg="' + x.id + '" title="Verwerfen">' + ICON_WEG + '</button>' : '')
+                    + '</div>';
+            }).join('');
+        }
+
+        async function starte() {
+            if (!stream) stream = await navigator.mediaDevices.getUserMedia({
+                // no processing: the clone should hear the room and the voice, not Chrome's guesswork
+                audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 }
+            });
+            const typ = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'].find(c => MediaRecorder.isTypeSupported(c)) || '';
+            rec = new MediaRecorder(stream, typ ? { mimeType: typ } : undefined);
+            chunks = [];
+            rec.ondataavailable = e => e.data.size && chunks.push(e.data);
+            rec.onstop = schicke;
+            rec.start();
+            laeuft = true; zeichne();
+        }
+
+        function stoppe() { if (rec && rec.state !== 'inactive') rec.stop(); laeuft = false; }
+
+        async function schicke() {
+            const blob = new Blob(chunks, { type: rec.mimeType || 'audio/webm' });
+            const b64 = await new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(blob); });
+            const s = SAETZE[i];
+            const res = await fetch('/__stimme/aufnahme', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: s.id, text: s.text, audio: b64 })
+            }).then(r => r.json()).catch(e => ({ error: String(e) }));
+            if (res.error) { $('tipp').textContent = 'Fehler: ' + res.error; }
+            else {
+                takes = res.takes || {};
+                const t = takes[s.id];
+                if (t && t.fehler) $('tipp').textContent = 'Gespeichert, aber ohne WAV: ' + t.fehler;
+                else $('tipp').textContent = 'Gespeichert. Leertaste startet und stoppt die Aufnahme.';
+                if (i < SAETZE.length - 1) i++;          // move on by itself - Doc keeps talking, not clicking
+            }
+            zeichne();
+        }
+
+        $('btnRec').onclick = () => laeuft ? stoppe() : starte();
+        $('btnPlay').onclick = () => new Audio('/__stimme/hoeren/' + SAETZE[i].id + '?t=' + Date.now()).play();
+        $('btnPrev').onclick = () => { if (i > 0) { i--; zeichne(); } };
+        $('btnNext').onclick = () => { if (i < SAETZE.length - 1) { i++; zeichne(); } };
+
+        $('liste').onclick = async e => {
+            const h = e.target.closest('[data-hoer]'), w = e.target.closest('[data-weg]');
+            if (h) new Audio('/__stimme/hoeren/' + h.dataset.hoer + '?t=' + Date.now()).play();
+            if (w) {
+                const res = await fetch('/__stimme/loeschen', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: w.dataset.weg })
+                }).then(r => r.json());
+                takes = res.takes || {}; zeichne();
+            }
+        };
+
+        document.addEventListener('keydown', e => {
+            if (e.code === 'Space' && !e.repeat && e.target.tagName !== 'INPUT') {
+                e.preventDefault(); laeuft ? stoppe() : starte();
+            }
+            if (e.code === 'ArrowRight') $('btnNext').click();
+            if (e.code === 'ArrowLeft') $('btnPrev').click();
+        });
+
+        fetch('/__stimme/liste').then(r => r.json()).then(d => {
+            takes = d.takes || {};
+            if (d.ordner) $('ordner').textContent = d.ordner + '/';
+            // start at the first line that is still missing, so a resumed session picks up where it stopped
+            const offen = SAETZE.findIndex(s => !takes[s.id]);
+            i = offen < 0 ? 0 : offen;
+            zeichne();
+        }).catch(() => zeichne());
+    </script>
+</body>
+
+</html>
