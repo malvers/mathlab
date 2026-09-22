@@ -29,7 +29,6 @@
                 homeBtn.style.background = "rgba(255, 0, 0, 0.5)";
                 homeBtn.style.borderColor = "#ff0000";
                 homeBtn.style.color = "#ff0000";
-                homeBtn.style.boxShadow = "0 0 25px rgba(255, 0, 0, 0.6)";
                 homeBtn.title = "DEV-MODE AKTIV: Auto-Reload an!";
             }
 
