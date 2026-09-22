@@ -8,7 +8,10 @@
 // next to it - a click puts the deck live (commit + push of this one deck, Doc's standing go-ahead). Both sit in the
 // footer next to the slide triangles; top left stays free (Doc, 17.09.2026: "mach hier ein Stift ... oben links weg").
 (function () {
-  if (typeof slides === 'undefined' || document.documentElement.classList.contains('presenter')) return;
+  if (typeof slides === 'undefined') return;
+  // The presenter window gets the slide menu too (Doc, 22.09.2026: right-click in the strip gave Chrome's
+  // menu) - but nothing that edits text: there is no room for a caret while the class is watching.
+  const PRES = document.documentElement.classList.contains('presenter');
   const root = document.documentElement;
   const DECK = decodeURIComponent(location.pathname.split('/').pop());
   const SRC = new WeakMap();                          // element -> its source text, as the file holds it
@@ -57,6 +60,7 @@
   const btn = navButton('nav-edit', '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>', anchor);
   const live = navButton('nav-live', '<path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 17.6 8.6 4 4 0 0 1 17 18"/>'
     + '<path d="M12 12v9"/><path d="M9 15l3-3 3 3"/>', btn);
+  if (PRES) { btn.hidden = true; live.hidden = true; }
   btn.addEventListener('click', function (e) {
     e.stopPropagation();
     if (publishing || busy) return;                  // a text is still being written
@@ -70,6 +74,7 @@
   });
 
   function label() {
+    if (PRES) return;
     btn.title = on ? 'Bearbeiten beenden (E)' : 'Texte bearbeiten (E)';
     btn.setAttribute('aria-label', btn.title);
     live.hidden = !(pending || dirty || publishing);
@@ -281,6 +286,7 @@
   // verschieben und ausblenden (rechte Maus)"). Hiding only sets a class, so it happens right here on the
   // page; moving renumbers Solita as well, so the page comes back from the file afterwards.
   const OV = () => window.DeckOverview;
+  const TILES = '#overview .ov-cell, #pres .p-cell';
   const cellIndex = c => +c.dataset.i;
 
   function slideOp(body) {
@@ -299,10 +305,7 @@
   function hideSlide(i, hide) {
     slideOp({ index: i, op: hide ? 'hide' : 'show' }).then(function (j) {
       if (!j) return;
-      slides[i].classList.toggle('skip', hide);
-      const cell = OV() && OV().el.children[i];
-      if (cell) { const c = cell.querySelector('.ov-thumb > .slide'); if (c) c.classList.toggle('skip', hide); }
-      if (OV()) OV().refresh();
+      window.DeckSlides.setHidden(i, hide);         // deck window, presenter strip and the other window
       msg(hide ? 'Folie ausgeblendet – die Klasse sieht sie nicht mehr' : 'Folie wieder eingeblendet');
     });
   }
@@ -362,8 +365,8 @@
 
   // the menu hangs on the overview, not on edit mode: a right-click there is never meant for the browser
   addEventListener('contextmenu', function (e) {
-    const cell = e.target.closest && e.target.closest('#overview .ov-cell');
-    if (!cell) return;
+    const cell = e.target.closest && e.target.closest(TILES);
+    if (!cell || cell.dataset.i === undefined) return;
     e.preventDefault(); e.stopPropagation();
     openMenu(e.clientX, e.clientY, cellIndex(cell));
   }, true);
@@ -373,15 +376,15 @@
   const clearMarks = () => document.querySelectorAll('.ov-before,.ov-after,.ov-drag')
     .forEach(function (c) { c.classList.remove('ov-before', 'ov-after', 'ov-drag'); });
   addEventListener('dragstart', function (e) {
-    const cell = e.target.closest && e.target.closest('#overview .ov-cell');
-    if (!cell) return;
+    const cell = e.target.closest && e.target.closest(TILES);
+    if (!cell || cell.dataset.i === undefined) return;
     from = cellIndex(cell);
     cell.classList.add('ov-drag');
     try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(from)); } catch (err) { }
   }, true);
   addEventListener('dragover', function (e) {
     if (from < 0) return;
-    const cell = e.target.closest && e.target.closest('#overview .ov-cell');
+    const cell = e.target.closest && e.target.closest(TILES);
     e.preventDefault();
     try { e.dataTransfer.dropEffect = 'move'; } catch (err) { }
     document.querySelectorAll('.ov-before,.ov-after').forEach(function (c) { c.classList.remove('ov-before', 'ov-after'); });
@@ -391,7 +394,7 @@
   }, true);
   addEventListener('drop', function (e) {
     if (from < 0) return;
-    const cell = e.target.closest && e.target.closest('#overview .ov-cell');
+    const cell = e.target.closest && e.target.closest(TILES);
     e.preventDefault();
     const start = from;
     const before = cell && cell.classList.contains('ov-before');
@@ -406,7 +409,7 @@
 
   // capture phase: in edit mode a click on the slide edits and never turns the page
   addEventListener('click', function (e) {
-    if (!on || !e.target.closest || !e.target.closest('#deck')) return;
+    if (PRES || !on || !e.target.closest || !e.target.closest('#deck')) return;
     e.stopPropagation();
     if (e.target.closest('a')) e.preventDefault();   // picture credits stay put while editing
     if (cur && cur.el.contains(e.target)) return;
@@ -440,6 +443,7 @@
     }
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable], #ask')) return;
+    if (PRES) return;                                // the presenter never edits text
     if (e.key === 'e' || e.key === 'E') { e.stopPropagation(); e.preventDefault(); toggle(); }
     else if (on && e.key === 'Escape' && !cur) { e.stopPropagation(); toggle(); }
   }, true);

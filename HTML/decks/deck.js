@@ -406,6 +406,21 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
     scale();
     if (ov.children[si]) ov.children[si].scrollIntoView({ block: 'center' });
   }
+  // Hiding and showing runs through here, so the deck window and the presenter stay in step
+  // (deck-slidemenu lives in decks/deck-edit.js and calls this; `quiet` = the other window told us).
+  window.DeckSlides = {
+    isHidden: hiddenSlide,
+    setHidden: function (i, off, quiet) {
+      if (!slides[i]) return;
+      slides[i].classList.toggle('skip', !!off);
+      const tile = ov.children[i] && ov.children[i].querySelector('.ov-thumb > .slide');
+      if (tile) tile.classList.toggle('skip', !!off);
+      if (skipped(si)) { const j = seek(si, 1); si = j >= 0 ? j : Math.max(0, seek(si, -1)); step = 0; }
+      window.DeckOverview.refresh();
+      if (window.DeckStrip) window.DeckStrip.refresh();
+      if (!quiet && window.DeckLink) window.DeckLink.skip(i, !!off);
+    },
+  };
   // the editor (decks/deck-edit.js) opens and refreshes the overview through this
   window.DeckOverview = {
     open: open, close: close, isOpen: function () { return !ov.hidden; }, el: ov,
@@ -1266,6 +1281,7 @@ const link = (function () {
       if (m.p) return;                               // another presenter window: not ours to follow
       if (m.t === 'end') { window.close(); return; }   // Esc on the beamer ended the show
       if (m.t === 'laser-on') { toast(m.on ? 'Laser an (l)' : 'Laser aus (l)'); return; }
+      if (m.t === 'skip') { window.DeckSlides.setHidden(m.i | 0, !!m.on, true); return; }
       if (m.t === 'here') send({ t: 'go', si: si, step: step, to: m.from });   // the beamer window reloaded
       else if (m.t === 'go') {
         // answers to our hello: the window that opened us beats a fullscreen one beats any other tab
@@ -1281,6 +1297,7 @@ const link = (function () {
       send({ t: 'go', si: si, step: step, rank: (mine ? 2 : 0) + (fsOn() ? 1 : 0) });
       return;
     }
+    if (m.t === 'skip') { window.DeckSlides.setHidden(m.i | 0, !!m.on, true); return; }   // hidden in the presenter
     if (m.t === 'go' && m.to === me) linked = true;  // the presenter answered our 'here'
     if (!linked) return;
     if (m.t === 'bye') { if (!mine) linked = false; laser.show(m); }
@@ -1791,19 +1808,30 @@ const link = (function () {
       cells = slides.map(function (s, i) {
         const cell = document.createElement('button');
         cell.type = 'button'; cell.className = 'p-cell'; cell.setAttribute('role', 'listitem');
-        cell.hidden = skipped(i);
+        cell.dataset.i = i;
+        cell.draggable = !!window.DeckEdit;          // only where the editor is loaded (Doc's machine)
+        cell.classList.toggle('off', hiddenSlide(i));
         cell.title = 'Folie ' + rank(i); cell.setAttribute('aria-label', 'Folie ' + rank(i));
         const box = document.createElement('div');
         box.className = 'p-thumb';
         box.appendChild(shot(i, groups(s)));
         const num = document.createElement('span');
-        num.className = 'p-num'; num.textContent = rank(i);
+        num.className = 'p-num'; num.textContent = hiddenSlide(i) ? 'aus' : rank(i);
         cell.appendChild(box); cell.appendChild(num);
         cell.addEventListener('click', function () { si = i; step = 0; paint(); });
         strip.appendChild(cell);
         return cell;
       });
     }
+    function stripMarks() {
+      cells.forEach(function (c, i) {
+        c.classList.toggle('off', hiddenSlide(i));
+        const n = c.querySelector('.p-num');
+        if (n) n.textContent = hiddenSlide(i) ? 'aus' : rank(i);
+        c.title = c.getAttribute('aria-label') === null ? c.title : 'Folie ' + rank(i);
+      });
+    }
+    window.DeckStrip = { refresh: function () { if (cells.length) { stripMarks(); render(); } } };
     function render() {
       if (!ready) return;
       if (!cells.length) buildStrip();
@@ -1892,5 +1920,7 @@ const link = (function () {
     if (ready) render();
     return { render: render };
   }
-  return { present: present, send: send };
+  return { present: present, send: send,
+           skip: function (i, on) { send({ t: 'skip', i: i, on: !!on }); } };
 })();
+window.DeckLink = link;
