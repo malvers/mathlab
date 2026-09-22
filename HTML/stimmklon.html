@@ -18,7 +18,7 @@
     <style>
         /* Page-local only: the recording booth layout. Everything shared (buttons, colours,
            panels, scrollbars) comes from the central sheets linked above. */
-        .booth { max-width: 900px; margin: 0 auto; padding: 0 16px 80px; }
+        .booth { max-width: 940px; margin: 0 auto; padding: 0 16px 80px; }
 
         .zaehler {
             display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: baseline;
@@ -27,21 +27,33 @@
         .zaehler b { font-size: 1.5rem; font-weight: 900; }
         .genug { color: rgb(121, 158, 49); }
         .fehlt { color: rgb(245, 194, 66); }
+        .schlecht { color: rgb(176, 36, 24); }
 
         .balken { height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
         .balken i { display: block; height: 100%; background: rgb(121, 158, 49); width: 0; transition: width .35s; }
 
-        /* the line being read: big, quiet, nothing else competing for the eye */
         .satz {
-            margin: 22px 0 14px; padding: 26px 24px; border-radius: 14px;
+            margin: 22px 0 14px; padding: 24px 26px; border-radius: 14px;
             background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.14);
-            font-size: clamp(1.15rem, 3.4vw, 1.85rem); line-height: 1.5; font-weight: 700;
         }
         .satz.laeuft { border-color: rgb(176, 36, 24); box-shadow: 0 0 0 2px rgba(176, 36, 24, .35); }
-        .satz .nr { display: block; font-size: 0.7rem; opacity: .6; margin-bottom: 10px; letter-spacing: .12em; }
+        .satz .nr { display: block; font-size: 0.7rem; opacity: .6; margin-bottom: 12px; letter-spacing: .12em; }
+
+        /* The line to read is NOT set in Orbitron: it is a display face, and reading 300 words
+           aloud from it is genuinely hard on the eye. Everything else on the page stays Orbitron. */
+        #satztext {
+            font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+            font-size: clamp(1.05rem, 2.6vw, 1.42rem); line-height: 1.72; font-weight: 400;
+            display: block; max-height: 46vh; overflow-y: auto; padding-right: 8px;
+        }
+        #satztext.kurz { font-size: clamp(1.15rem, 3.4vw, 1.8rem); font-weight: 600; line-height: 1.5; }
+        #satztext p { margin: 0 0 1em; }
+        #satztext p:last-child { margin-bottom: 0; }
 
         .regie { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 8px; }
         .regie .cyber-btn { flex: 0 1 auto; }
+        .uhr { font-variant-numeric: tabular-nums; font-size: 1.1rem; font-weight: 700; opacity: .85; min-width: 4.5em; }
+        .uhr.laeuft { color: rgb(176, 36, 24); }
 
         .punkt { width: 11px; height: 11px; border-radius: 50%; background: rgba(255, 255, 255, .25); display: inline-block; }
         .punkt.an { background: rgb(176, 36, 24); animation: puls 1s infinite; }
@@ -50,12 +62,14 @@
         .liste { margin-top: 26px; }
         .zeile {
             display: flex; gap: 12px; align-items: center; padding: 9px 12px; border-radius: 9px;
-            border: 1px solid transparent; font-size: 0.82rem;
+            border: 1px solid transparent; font-size: 0.82rem; cursor: pointer;
         }
         .zeile:nth-child(odd) { background: rgba(255, 255, 255, 0.035); }
         .zeile.fertig { border-color: rgba(121, 158, 49, .45); }
+        .zeile.angeschnitten { border-color: rgb(176, 36, 24); }
         .zeile .txt { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .zeile .sek { opacity: .65; font-variant-numeric: tabular-nums; }
+        .zeile .sek { opacity: .65; font-variant-numeric: tabular-nums; min-width: 5.2em; }
+        .zeile .sek.warn { color: rgb(176, 36, 24); opacity: 1; font-weight: 700; }
         .zeile button {
             background: none; border: 1px solid rgba(255, 255, 255, .22); color: inherit;
             border-radius: 7px; padding: 4px 7px; cursor: pointer; font: inherit; line-height: 0;
@@ -65,9 +79,14 @@
 
         .hinweis { font-size: 0.78rem; opacity: .72; line-height: 1.6; margin: 20px 0; }
         .hinweis code { font-size: 0.9em; opacity: .9; }
+        .warnkasten {
+            margin: 16px 0; padding: 12px 16px; border-radius: 10px; font-size: 0.82rem; line-height: 1.6;
+            background: rgba(176, 36, 24, .16); border: 1px solid rgba(176, 36, 24, .55);
+        }
 
         @media (max-width: 560px) {
             .regie .cyber-btn { flex: 1 1 100%; }
+            #satztext { max-height: 40vh; }
         }
     </style>
 </head>
@@ -76,27 +95,33 @@
     <div class="booth">
         <h1 style="margin:26px 0 4px;font-size:clamp(1.3rem,4vw,2rem)">Stimmklon — Aufnahmekabine</h1>
         <p class="hinweis" style="margin-top:0">
-            Sprich jeden Satz so, wie du ihn im Labor sagen würdest — nicht vorlesen, reden.
-            Zwischen den Sätzen kurz Luft holen, der Schnitt passiert automatisch.
+            Sprich so, wie du im Labor redest — nicht vorlesen, erzählen. Bei den langen Stücken ruhig
+            atmen und Fehler einfach überlesen, das stört den Klon nicht.
         </p>
 
         <div class="zaehler">
-            <span><b id="minuten">0,0</b> min aufgenommen</span>
+            <span><b id="minuten">0,0</b> min brauchbar</span>
             <span id="urteil" class="fehlt">noch nichts</span>
-            <span style="opacity:.6">Ziel: 2 min schnell · 30 min für die beste Qualität</span>
+            <span style="opacity:.6">Ziel: 2 min für den Schnellklon · 30 min für die gute Qualität</span>
         </div>
         <div class="balken"><i id="fortschritt"></i></div>
 
-        <div class="satz" id="satz"><span class="nr" id="satznr">Satz 1 von 1</span><span id="satztext">…</span></div>
+        <div id="warnung"></div>
+
+        <div class="satz" id="satz">
+            <span class="nr" id="satznr">…</span>
+            <span id="satztext">…</span>
+        </div>
 
         <div class="regie">
             <span class="punkt" id="punkt" title="Aufnahme"></span>
+            <span class="uhr" id="uhr">0:00</span>
             <button class="cyber-btn" id="btnRec">Aufnehmen</button>
             <button class="cyber-btn" id="btnPlay">Anhören</button>
             <button class="cyber-btn" id="btnPrev">Zurück</button>
             <button class="cyber-btn" id="btnNext">Weiter</button>
         </div>
-        <p class="hinweis" id="tipp">Leertaste startet und stoppt die Aufnahme.</p>
+        <p class="hinweis" id="tipp">Leertaste startet und stoppt. Pfeiltasten blättern.</p>
 
         <div class="liste" id="liste"></div>
 
@@ -113,10 +138,10 @@
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script>
-        /* The script Doc reads. Chosen so the clone hears the whole range of his voice, not just
-           one register: his own catchphrase, lab sentences with numbers and formulas, a question,
-           something loud, something quiet. Phonetically the German umlauts, ch/sch, r and the
-           hard consonant clusters all appear at least once. */
+        /* The script Doc reads. Short lines first (they carry his catchphrase and his range),
+           then long passages - a clone needs MINUTES of connected speech, not a list of snippets.
+           The ids never change: they are the file names on disk, and renaming one would orphan
+           a take Doc already recorded. */
         const SAETZE = [
             { id: 'einwilligung', text: 'Ich bin der Eigentümer dieser Stimme und bin damit einverstanden, dass Google diese Stimme zur Erstellung eines synthetischen Stimmmodells verwendet.', hinweis: 'Einwilligung — wortwörtlich so, das verlangt Google.' },
             { id: 's01', text: 'Nicht verzagen, Doc Alvers fragen!' },
@@ -133,108 +158,262 @@
             { id: 's12', text: 'Zeichnet euch das bitte auf, das hilft ungemein. Erst skizzieren, dann rechnen.' },
             { id: 's13', text: 'Und jetzt kommt der Teil, der mich wirklich umgehauen hat, als ich Physik studiert habe.' },
             { id: 's14', text: 'Fragen? Immer her damit. Es gibt keine dummen Fragen, nur ungestellte.' },
+
+            { id: 't01', titel: 'Die Kugel und der Becher', text: [
+                'Ich möchte euch etwas zeigen, das über zweitausend Jahre alt ist und mich immer noch jedes Mal umhaut. Archimedes war so stolz darauf, dass er sich eine Kugel in einem Zylinder auf den Grabstein meißeln ließ. Nicht seinen Namen, nicht seine Schlachten — eine Kugel in einem Zylinder.',
+                'Stellt euch einen Zylinder vor, in den eine Kugel exakt hineinpasst. Der Zylinder ist also genau so hoch wie die Kugel dick ist, und genau so weit. Die Frage ist: In welchem Verhältnis stehen die beiden Rauminhalte zueinander? Man könnte vermuten, das sei irgendeine krumme Zahl mit Pi und Wurzeln und allem Drum und Dran.',
+                'Ist es aber nicht. Die Kugel füllt genau zwei Drittel des Zylinders. Zwei Drittel. Eine so schlichte Zahl, dass man sie sich nach einmal Hören merkt. Und es kommt noch besser: Auch die Oberflächen stehen im Verhältnis zwei zu drei, wenn man Deckel und Boden mitzählt. Dieselbe Zahl, zweimal, an zwei völlig verschiedenen Stellen.',
+                'Warum ist das so? Archimedes hatte kein Integral, keine Infinitesimalrechnung, gar nichts von dem Werkzeug, das wir heute selbstverständlich benutzen. Er hat die Kugel in Scheiben zerlegt und gegen einen Kegel abgewogen, im Kopf, mit einer gedachten Waage. Das ist keine Rechnung, das ist eine Idee. Und die Idee ist so gut, dass sie zweitausend Jahre später immer noch die schönste Erklärung ist, die wir haben.',
+                'Wenn ihr also das nächste Mal eine Kugel in der Hand haltet — einen Ball, eine Orange, was auch immer — dann denkt kurz daran: zwei Drittel. Der Rest ist Luft.',
+            ] },
+
+            { id: 't02', titel: 'Warum es nur fünf gibt', text: [
+                'Es gibt genau fünf platonische Körper. Nicht ungefähr fünf, nicht fünf, soweit wir bisher gesucht haben — genau fünf, und mehr wird es nie geben. Das ist einer der ersten Sätze der Mathematikgeschichte, bei dem jemand nicht nur etwas gefunden, sondern bewiesen hat, dass es nichts weiter zu finden gibt.',
+                'Ein platonischer Körper muss drei Bedingungen erfüllen. Alle Flächen sind dasselbe regelmäßige Vieleck. An jeder Ecke treffen gleich viele Flächen zusammen. Und der Körper ist konvex, hat also keine Dellen. Das klingt nach wenig. Es ist aber so streng, dass fast nichts übrig bleibt.',
+                'Schauen wir mal. Nehmen wir gleichseitige Dreiecke. An einer Ecke müssen mindestens drei zusammenkommen, sonst wird es flach. Drei Dreiecke ergeben das Tetraeder, vier ergeben das Oktaeder, fünf das Ikosaeder. Und sechs? Sechs Dreiecke zu sechzig Grad ergeben dreihundertsechzig Grad — das ist eine Ebene, kein Körper. Ende der Fahnenstange.',
+                'Mit Quadraten: drei an einer Ecke ergeben den Würfel. Vier Quadrate sind wieder dreihundertsechzig Grad, also flach. Mit Fünfecken: drei ergeben das Dodekaeder, vier passen gar nicht mehr. Und mit Sechsecken? Schon drei Sechsecke ergeben dreihundertsechzig Grad. Es geht nicht einmal los.',
+                'Das war es. Fünf Stück. Tetraeder, Würfel, Oktaeder, Dodekaeder, Ikosaeder. Wir haben sie nicht gesucht und gefunden, wir haben nachgewiesen, dass die Liste vollständig ist. Kepler war davon so ergriffen, dass er das Sonnensystem daraus bauen wollte. Er lag falsch, aber ich verstehe ihn vollkommen.',
+            ] },
+
+            { id: 't03', titel: 'Der Moment mit der Ableitung', text: [
+                'Ich erinnere mich genau an den Moment, in dem ich verstanden habe, was eine Ableitung eigentlich ist. Vorher war das für mich eine Rechenregel: x hoch n wird zu n mal x hoch n minus eins. Die konnte ich anwenden, ohne die leiseste Ahnung zu haben, wovon ich da eigentlich rede.',
+                'Und dann hat jemand gesagt: Die Ableitung ist die Steigung. Nicht irgendeine Steigung, sondern die Steigung in einem einzigen Punkt. Und da habe ich zum ersten Mal gestutzt. Denn eine Steigung braucht doch zwei Punkte. Höhenunterschied geteilt durch Längenunterschied — das ist die Definition. Wie soll das mit einem Punkt gehen?',
+                'Genau das ist der Trick, und er ist frech. Man nimmt zwei Punkte, rechnet die Steigung aus, und lässt die beiden Punkte dann aufeinander zuwandern. Immer näher. Die Steigung ändert sich dabei, und man schaut, wohin sie strebt. Man setzt die Punkte niemals aufeinander — das wäre null geteilt durch null und damit sinnlos. Man schaut nur, wohin die Reise geht.',
+                'Dieser Umweg ist die ganze Differentialrechnung. Newton und Leibniz haben ihn unabhängig voneinander gefunden und sich danach jahrzehntelang darüber gestritten, wer zuerst da war. Und beide konnten nicht sauber erklären, was dieses Immer-näher eigentlich bedeutet. Es hat noch einmal hundertfünfzig Jahre gedauert, bis Weierstraß das ordentlich hingeschrieben hat.',
+                'Das finde ich tröstlich. Wenn zwei der größten Köpfe der Geschichte etwas benutzen konnten, das sie nicht vollständig durchschaut haben, dann darf es euch beim ersten Mal auch komisch vorkommen. Das ist kein Zeichen von Dummheit. Das ist das richtige Gefühl an der richtigen Stelle.',
+            ] },
+
+            { id: 't04', titel: 'Es gibt größere Unendlichkeiten', text: [
+                'Jetzt wird es kurz schwindelerregend, aber bleibt bei mir, es lohnt sich. Wir zählen: eins, zwei, drei, vier, und so weiter. Das hört nie auf, es sind unendlich viele. So weit, so bekannt.',
+                'Jetzt die geraden Zahlen: zwei, vier, sechs, acht. Davon gibt es doch offensichtlich weniger, oder? Nur jede zweite. Falsch. Ich kann jeder Zahl genau eine gerade Zahl zuordnen: der Eins die Zwei, der Zwei die Vier, der Drei die Sechs. Keine bleibt übrig, keine fehlt. Also sind es gleich viele. Das ist bei unendlichen Mengen nicht paradox, das ist einfach so.',
+                'Und die Brüche? Alle Brüche, die es gibt, zwischen allen ganzen Zahlen? Auch die kann man durchnummerieren. Cantor hat sie in ein unendliches Gitter geschrieben und ist diagonal durchgelaufen. Jeder Bruch kommt dran, jeder kriegt eine Nummer. Gleich viele wie die natürlichen Zahlen. Obwohl zwischen null und eins schon unendlich viele liegen.',
+                'Man glaubt langsam, alle Unendlichkeiten seien gleich groß. Und dann kommt Cantor und zeigt: Die reellen Zahlen kann man nicht durchnummerieren. Er nimmt an, jemand hätte eine vollständige Liste, und baut daraus eine Zahl, die garantiert nicht drin vorkommt — indem er die erste Nachkommastelle der ersten Zahl ändert, die zweite der zweiten, und so weiter. Diese neue Zahl unterscheidet sich von jeder einzelnen in der Liste an mindestens einer Stelle. Die Liste war also nie vollständig.',
+                'Es gibt größere und kleinere Unendlichkeiten. Cantor wurde dafür angefeindet, ein Kollege nannte es eine Krankheit. Heute steht es in jedem Lehrbuch. Manchmal braucht die Wahrheit einfach eine Generation.',
+            ] },
+
+            { id: 't05', titel: 'Pi und die Frage nach dem Ende', text: [
+                'Pi ist das Verhältnis von Umfang zu Durchmesser bei einem Kreis. Bei jedem Kreis. Bei einem Suppenteller, bei einem Fahrradreifen, beim Äquator. Immer dieselbe Zahl, drei Komma eins vier eins fünf neun und so weiter.',
+                'Archimedes hat sie eingesperrt. Er hat dem Kreis ein Vieleck einbeschrieben und eins umbeschrieben. Das innere ist kleiner als der Kreis, das äußere größer — also liegt Pi dazwischen. Dann hat er die Eckenzahl verdoppelt, wieder und wieder, bis zum Sechsundneunzigeck. Von Hand. Ohne Dezimalschreibweise, ohne Taschenrechner. Ergebnis: Pi liegt zwischen drei und einem Siebtel und drei und zehn Einundsiebzigsteln. Auf zwei Stellen genau, und diese Schranke hielt fast zweitausend Jahre.',
+                'Später kam die Frage: Hört das jemals auf? Wiederholt sich das Muster irgendwann? Die Antwort kam erst siebzehnhunderteinundsechzig von Lambert: Nein. Pi ist irrational, es gibt keinen Bruch, der es exakt trifft. Und achtzehnhundertzweiundachtzig hat Lindemann noch eins draufgesetzt: Pi ist transzendent. Es ist nicht Lösung irgendeiner Polynomgleichung mit ganzzahligen Koeffizienten.',
+                'Und damit war eine zweitausend Jahre alte Frage beantwortet, an der sich Generationen die Zähne ausgebissen haben: die Quadratur des Kreises. Ein Quadrat mit demselben Flächeninhalt wie ein gegebener Kreis, nur mit Zirkel und Lineal. Das geht nicht. Nicht, weil wir zu dumm waren. Es geht prinzipiell nicht, und Lindemann hat gezeigt, warum.',
+                'Ich finde es großartig, dass die Antwort auf eine geometrische Frage aus der Zahlentheorie kam. Völlig anderes Zimmer, und plötzlich steht die Lösung darin.',
+            ] },
+
+            { id: 't06', titel: 'Die schönste Formel', text: [
+                'Es gibt eine Formel, die regelmäßig zur schönsten der Mathematik gewählt wird. Sie ist kurz genug für einen Ring: e hoch i mal Pi plus eins gleich null.',
+                'Schaut euch an, wer da alles zu Besuch ist. Die Null, das Nichts, der Nullpunkt. Die Eins, der Anfang allen Zählens. Pi, aus der Geometrie des Kreises. Die eulersche Zahl e, aus dem Wachstum, aus Zinsen und Zerfall. Und i, die Wurzel aus minus eins, diese Zahl, die es eigentlich nicht geben dürfte und die man erst erfinden musste.',
+                'Fünf Konstanten, die aus fünf völlig verschiedenen Ecken der Mathematik kommen, zu verschiedenen Zeiten von verschiedenen Leuten aus verschiedenen Gründen eingeführt. Und sie stehen in einer einzigen Gleichung, die auf null aufgeht. Ohne Rest, ohne Korrekturfaktor, ohne ungefähr.',
+                'Was bedeutet das? e hoch i mal x beschreibt eine Drehung im Kreis. Setzt man für x den Wert Pi ein, dreht man um einen halben Kreis — hundertachtzig Grad. Man landet bei minus eins. Zählt man eins dazu, ist man bei null. So gesehen ist die Formel fast eine Trivialität: eine halbe Umdrehung bringt dich auf die andere Seite.',
+                'Aber dieses So-gesehen ist eben das Ergebnis von dreihundert Jahren Arbeit. Erst als klar war, dass die Exponentialfunktion im Komplexen eine Drehung ist, wurde aus einer rätselhaften Formel eine selbstverständliche. Das ist für mich der eigentliche Kern von Mathematik: Man arbeitet so lange, bis das Unfassbare selbstverständlich aussieht.',
+            ] },
+
+            { id: 't07', titel: 'Der Zufall hat kein Gedächtnis', text: [
+                'Ein Würfel ist viermal hintereinander auf der Sechs gelandet. Wie groß ist die Wahrscheinlichkeit, dass beim fünften Wurf wieder eine Sechs kommt? Ein Sechstel. Genau wie vorher. Der Würfel weiß nicht, was er vorher gemacht hat. Er hat kein Gedächtnis, kein Gewissen und keinen Ausgleichsbedarf.',
+                'Trotzdem sträubt sich alles in uns dagegen. Das nennt man den Spielerfehlschluss, und es gibt eine berühmte Nacht dazu: Achtzehnhundertdreizehn fiel in Monte Carlo sechsundzwanzigmal hintereinander Schwarz. Die Leute haben Vermögen auf Rot gesetzt, weil doch jetzt endlich Rot kommen müsse. Die Kugel hat davon nie erfahren.',
+                'Der Haken ist: Auf lange Sicht gleicht es sich tatsächlich aus, das Gesetz der großen Zahlen stimmt ja. Aber es gleicht sich nicht durch Nachholen aus, sondern durch Verdünnen. Die vier Sechsen verschwinden nicht, sie werden von zehntausend weiteren Würfen einfach unbedeutend gemacht. Kein Ausgleich, nur Verwässerung.',
+                'Und jetzt der umgekehrte Fehler, der genauso oft passiert. Wie wahrscheinlich ist es, dass in einer Klasse mit dreiundzwanzig Leuten zwei am selben Tag Geburtstag haben? Die meisten schätzen ein paar Prozent. Es sind über fünfzig. Bei fünfzig Personen sind es siebenundneunzig Prozent. Der Grund: Es kommt nicht darauf an, wie viele Personen da sind, sondern wie viele Paare — und bei dreiundzwanzig Personen sind das schon zweihundertdreiundfünfzig Paare.',
+                'Unser Bauchgefühl ist beim Zufall regelmäßig daneben. Deshalb rechnet man. Nicht weil Rechnen schöner wäre als Fühlen, sondern weil das Gefühl hier zuverlässig lügt.',
+            ] },
+
+            { id: 't08', titel: 'Der Satz, den jeder kennt', text: [
+                'a Quadrat plus b Quadrat gleich c Quadrat. Den Satz des Pythagoras kennt wirklich jeder, auch Leute, die sonst mit Mathematik nichts am Hut haben. Und fast alle erinnern sich nur an die Formel, nicht an das Bild dahinter. Dabei ist das Bild der ganze Punkt.',
+                'Es geht nämlich nicht um Buchstaben, es geht um Flächen. Setzt auf jede Seite eines rechtwinkligen Dreiecks ein echtes Quadrat. Dann ist die Fläche des großen Quadrats auf der langen Seite genau so groß wie die beiden kleinen zusammen. Man kann die beiden kleinen zerschneiden und das große damit auslegen, ohne Rest, ohne Lücke. Es gibt Beweise, die genau das tun, nur mit Schere und Papier.',
+                'Und es muss nicht einmal ein Quadrat sein. Setzt Halbkreise auf die Seiten, oder gleichseitige Dreiecke, oder kleine Elefanten, wenn sie nur alle dieselbe Form haben — die Rechnung stimmt immer noch. Die beiden kleinen ergeben zusammen das große. Das hat mich beim ersten Hören mehr beeindruckt als der Satz selbst.',
+                'Der Name ist übrigens fragwürdig. Die Babylonier kannten solche Zahlentripel tausend Jahre vor Pythagoras, es gibt eine Tontafel mit fünfzehn davon. Die Inder und die Chinesen kannten den Zusammenhang ebenfalls. Was der griechischen Schule zugeschrieben wird, ist der Beweis — die Einsicht, dass es nicht nur für die geprüften Fälle gilt, sondern für alle, auch die, die nie jemand nachmessen wird.',
+                'Dieser Sprung vom Beispiel zum Beweis ist der Moment, in dem aus Rechnen Mathematik wird. Alles andere ist Buchhaltung.',
+            ] },
+
+            { id: 't09', titel: 'Primzahlen hören nicht auf', text: [
+                'Eine Primzahl ist nur durch eins und durch sich selbst teilbar. Zwei, drei, fünf, sieben, elf, dreizehn. Sie sind die Bausteine: Jede Zahl lässt sich in Primfaktoren zerlegen, und zwar auf genau eine Weise. Das ist der Grund, warum sie überhaupt wichtig sind.',
+                'Je weiter man kommt, desto seltener werden sie. Zwischen eins und hundert liegen fünfundzwanzig, zwischen einer Million und einer Million plus hundert nur noch sechs. Da liegt die Frage nahe: Gehen sie irgendwann aus? Gibt es eine größte Primzahl, hinter der nichts mehr kommt?',
+                'Euklid hat das vor über zweitausend Jahren beantwortet, mit einem Argument, das man in drei Sätzen erzählen kann. Angenommen, es gäbe nur endlich viele. Dann multipliziert man sie alle miteinander und addiert eins. Diese neue Zahl ist durch keine der Primzahlen aus der Liste teilbar — es bleibt immer der Rest eins. Also ist sie entweder selbst prim, oder sie hat einen Primfaktor, der nicht auf der Liste stand. So oder so: Die Liste war unvollständig. Und da wir jede endliche Liste so widerlegen können, gibt es unendlich viele.',
+                'Was ich daran so mag: Der Beweis nennt keine einzige neue Primzahl. Er sagt nicht, wo die nächste liegt. Er zeigt nur, dass es sie geben muss. Man weiß, dass der Vorrat nie ausgeht, ohne ihn je gesehen zu haben.',
+                'Und ganz nebenbei sitzt genau das heute in jeder verschlüsselten Verbindung. Zwei große Primzahlen zu multiplizieren ist leicht. Das Ergebnis wieder auseinanderzunehmen ist so schwer, dass die Sicherheit Ihrer Bankgeschäfte davon abhängt. Zweitausend Jahre alte Zahlentheorie, die niemand für brauchbar hielt.',
+            ] },
+
+            { id: 't10', titel: 'Galilei und der schiefe Turm', text: [
+                'Was fällt schneller: eine schwere Kugel oder eine leichte? Zweitausend Jahre lang war die Antwort klar, Aristoteles hatte es gesagt: die schwere. Klingt vernünftig. Ist aber falsch, und man braucht nicht einmal ein Experiment, um das zu merken.',
+                'Galilei hat es so gedreht. Angenommen, Schweres fällt schneller. Jetzt binde ich eine schwere und eine leichte Kugel zusammen. Was passiert? Einerseits müsste die leichte die schwere bremsen, das Gespann wäre also langsamer als die schwere allein. Andererseits sind beide zusammen schwerer als die schwere allein, das Gespann müsste also schneller fallen. Beides zugleich geht nicht. Die Annahme war falsch.',
+                'Das ist reines Nachdenken, kein Turm, keine Kugeln, kein Messgerät. Ob er wirklich in Pisa geworfen hat, ist bis heute umstritten. Was er nachweislich getan hat, ist klüger: Er hat Kugeln schiefe Ebenen hinunterrollen lassen. Damit wird der Fall langsam genug, um ihn mit den Uhren von damals überhaupt messen zu können. Und er fand: Die zurückgelegte Strecke wächst mit dem Quadrat der Zeit. Doppelte Zeit, vierfache Strecke.',
+                'Warum fällt dann eine Feder langsamer als ein Stein? Wegen der Luft, nicht wegen des Gewichts. Die Apollo-fünfzehn-Besatzung hat das auf dem Mond vorgeführt, mit einem Hammer und einer Falkenfeder. Beide kamen gleichzeitig an. Es gibt Aufnahmen davon, und man hört den Astronauten lachen.',
+                'Für mich ist das die Geburtsstunde der Physik: nicht, dass Galilei eine bessere Antwort hatte, sondern dass er anfing, die Natur zu fragen statt die Bücher.',
+            ] },
+
+            { id: 't11', titel: 'Der goldene Schnitt, nüchtern betrachtet', text: [
+                'Der goldene Schnitt hat unter allen mathematischen Konstanten die beste Presse und die schlechteste Faktenlage. Fangen wir mit dem an, was wirklich stimmt.',
+                'Teile eine Strecke so, dass sich der größere Teil zum kleineren verhält wie die ganze Strecke zum größeren. Dieses Verhältnis ist Phi, ungefähr eins Komma sechs eins acht. Es ist die einzige Zahl, bei der Phi minus eins gleich eins durch Phi ist. Zieht man eins ab oder bildet den Kehrwert — es kommt fast dasselbe heraus. So eine Zahl gibt es kein zweites Mal.',
+                'Noch schöner wird es mit Fibonacci. Eins, eins, zwei, drei, fünf, acht, dreizehn, einundzwanzig, jede Zahl die Summe der beiden davor. Teilt man aufeinanderfolgende Glieder, nähert man sich Phi an. Und in der Natur taucht das tatsächlich auf: Sonnenblumenkerne, Tannenzapfen, die Anordnung von Blättern am Stängel. Das ist kein Mystizismus, es hat einen handfesten Grund. Phi ist in einem präzisen Sinn die am schlechtesten durch Brüche annäherbare Zahl — und deshalb ist es der beste Drehwinkel, wenn sich Blätter möglichst wenig gegenseitig beschatten sollen.',
+                'Und jetzt der Teil, den man selten dazusagt. Dass der Parthenon nach dem goldenen Schnitt gebaut sei, dass Leonardo ihn benutzt habe, dass die Mona Lisa darauf aufgebaut sei — dafür gibt es keine belastbaren Belege. Man kann in jedes hinreichend komplizierte Bauwerk irgendein Rechteck legen, das ungefähr passt. Die meisten dieser Behauptungen stammen aus dem neunzehnten Jahrhundert.',
+                'Die Wahrheit ist interessanter als der Mythos. Wir brauchen die Kunstgeschichte nicht, um Phi großartig zu finden. Die Sonnenblume reicht völlig.',
+            ] },
+
+            { id: 't12', titel: 'Warum ich das mache', text: [
+                'Ich werde oft gefragt, warum ich Mathematik unterrichte, wo ich doch eigentlich Physiker bin und jahrelang etwas ganz anderes gemacht habe. Die ehrliche Antwort ist: wegen eines bestimmten Gesichtsausdrucks.',
+                'Es gibt einen Moment, den man sieht. Jemand sitzt vor einem Problem, rechnet herum, kommt nicht weiter, wird langsam ärgerlich — und dann passiert etwas. Die Stirn glättet sich, der Kopf hebt sich, und meistens kommt ein sehr leises Ach so. Nicht laut, fast nebenbei. Das ist der Moment, in dem etwas von außen nach innen gewandert ist. Vorher war die Sache im Buch, jetzt ist sie im Kopf, und da bleibt sie auch.',
+                'Man kann diesen Moment nicht erzwingen und nicht abkürzen. Man kann niemandem etwas erklären, das er nicht selbst gerade versucht zu verstehen. Erklären ist keine Übertragung, es ist eine Einladung. Und manchmal dauert die Einladung drei Wochen, und ich habe längst aufgegeben, und dann kommt jemand in der Pause und sagt: Ich glaub, ich hab das jetzt.',
+                'Dafür lohnt sich der ganze Aufwand. Die Labore, die Filme, die Animationen — das ist alles nur Werkzeug, damit dieser Moment öfter passiert. Ein Körper, den man drehen kann, zeigt in zehn Sekunden, wofür eine Tafelzeichnung zehn Minuten braucht und dann immer noch schief ist.',
+                'Und wenn jemand danach nie wieder eine Kugel berechnet — auch gut. Dann hat er trotzdem einmal erlebt, wie es sich anfühlt, wenn etwas Kompliziertes plötzlich einfach wird. Das ist ein Gefühl, das trägt. Auch weit außerhalb der Mathematik.',
+            ] },
         ];
 
         const ICON_PLAY = '<svg viewBox="0 0 24 24"><polygon points="7,4 20,12 7,20" fill="currentColor" stroke="none"/></svg>';
         const ICON_WEG = '<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
 
-        let i = 0, takes = {}, rec = null, chunks = [], stream = null, laeuft = false;
+        const alsText = s => Array.isArray(s.text) ? s.text.join(' ') : s.text;
+        /* A rough reading pace, used only to spot a take that was cut off: German read aloud runs at
+           roughly 13 characters a second. A take under 55 % of that lost its tail and must be redone. */
+        const erwartet = s => alsText(s).length / 13;
+
+        let i = 0, takes = {}, rec = null, stream = null, laeuft = false, uhrAb = 0, uhrTakt = null;
+        let klang = null;                 // keep the Audio alive: a bare new Audio().play() can be collected mid-play
         const $ = id => document.getElementById(id);
+        const zuKurz = (s, t) => t && t.sekunden > 0 && t.sekunden < erwartet(s) * 0.55;
 
         function zeichne() {
-            const s = SAETZE[i];
-            $('satznr').textContent = (s.hinweis || ('Satz ' + i + ' von ' + (SAETZE.length - 1)));
-            $('satztext').textContent = s.text;
+            const s = SAETZE[i], lang = Array.isArray(s.text);
+            $('satznr').textContent = s.hinweis || (lang ? ('Langer Text — ' + s.titel) : ('Satz ' + i + ' von 14'));
+            $('satztext').className = lang ? '' : 'kurz';
+            $('satztext').innerHTML = lang
+                ? s.text.map(p => '<p>' + p + '</p>').join('')
+                : s.text;
             $('satz').classList.toggle('laeuft', laeuft);
             $('punkt').classList.toggle('an', laeuft);
             $('btnRec').textContent = laeuft ? 'Stopp' : (takes[s.id] ? 'Neu aufnehmen' : 'Aufnehmen');
             $('btnPlay').disabled = !takes[s.id];
 
-            const total = Object.values(takes).reduce((a, t) => a + (t.sekunden || 0), 0);
-            $('minuten').textContent = (total / 60).toFixed(1).replace('.', ',');
-            $('fortschritt').style.width = Math.min(100, total / 120 * 100) + '%';
+            // only takes that are not obviously truncated count towards the goal
+            let gut = 0, kaputt = 0;
+            SAETZE.forEach(x => {
+                const t = takes[x.id];
+                if (!t || !t.sekunden) return;
+                if (zuKurz(x, t)) kaputt++; else gut += t.sekunden;
+            });
+            $('minuten').textContent = (gut / 60).toFixed(1).replace('.', ',');
+            $('fortschritt').style.width = Math.min(100, gut / 1800 * 100) + '%';
             const u = $('urteil');
-            if (total >= 1800) { u.textContent = 'reicht für die beste Qualität'; u.className = 'genug'; }
-            else if (total >= 120) { u.textContent = 'reicht für einen Schnellklon'; u.className = 'genug'; }
-            else if (total > 0) { u.textContent = 'noch zu wenig'; u.className = 'fehlt'; }
+            if (gut >= 1800) { u.textContent = 'reicht für die beste Qualität'; u.className = 'genug'; }
+            else if (gut >= 600) { u.textContent = 'reicht für einen guten Klon'; u.className = 'genug'; }
+            else if (gut >= 120) { u.textContent = 'reicht für den Schnellklon'; u.className = 'genug'; }
+            else if (gut > 0) { u.textContent = 'noch zu wenig'; u.className = 'fehlt'; }
             else { u.textContent = 'noch nichts'; u.className = 'fehlt'; }
 
+            $('warnung').innerHTML = kaputt
+                ? '<div class="warnkasten"><b>' + kaputt + ' Aufnahme' + (kaputt > 1 ? 'n sind' : ' ist') + ' abgeschnitten</b> — '
+                  + 'deutlich kürzer, als der Text dauert. Unten rot markiert, bitte noch einmal aufnehmen. '
+                  + 'Nach dem Stopp kurz warten, bis „Gespeichert" dasteht.</div>'
+                : '';
+
             $('liste').innerHTML = SAETZE.map((x, n) => {
-                const t = takes[x.id];
-                return '<div class="zeile ' + (t ? 'fertig' : '') + '">'
-                    + '<span class="sek">' + (t ? (t.sekunden || 0).toFixed(1) + ' s' : '—') + '</span>'
-                    + '<span class="txt" style="' + (n === i ? 'font-weight:700' : '') + '">' + x.text + '</span>'
+                const t = takes[x.id], kaput = zuKurz(x, t);
+                const name = x.titel || alsText(x);
+                return '<div class="zeile ' + (t ? (kaput ? 'angeschnitten' : 'fertig') : '') + '" data-zu="' + n + '">'
+                    + '<span class="sek ' + (kaput ? 'warn' : '') + '">' + (t ? (t.sekunden || 0).toFixed(1) + ' s' : '—') + '</span>'
+                    + '<span class="txt" style="' + (n === i ? 'font-weight:700' : '') + '">' + name + '</span>'
                     + (t ? '<button data-hoer="' + x.id + '" title="Anhören">' + ICON_PLAY + '</button>'
                          + '<button data-weg="' + x.id + '" title="Verwerfen">' + ICON_WEG + '</button>' : '')
                     + '</div>';
             }).join('');
         }
 
+        function uhrAn() {
+            uhrAb = Date.now();
+            $('uhr').classList.add('laeuft');
+            uhrTakt = setInterval(() => {
+                const s = Math.floor((Date.now() - uhrAb) / 1000);
+                $('uhr').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+            }, 250);
+        }
+        function uhrAus() { clearInterval(uhrTakt); $('uhr').classList.remove('laeuft'); }
+
         async function starte() {
+            if (laeuft) return;
             if (!stream) stream = await navigator.mediaDevices.getUserMedia({
                 // no processing: the clone should hear the room and the voice, not Chrome's guesswork
                 audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 }
             });
             const typ = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'].find(c => MediaRecorder.isTypeSupported(c)) || '';
-            rec = new MediaRecorder(stream, typ ? { mimeType: typ } : undefined);
-            chunks = [];
-            rec.ondataavailable = e => e.data.size && chunks.push(e.data);
-            rec.onstop = schicke;
-            rec.start();
-            laeuft = true; zeichne();
+            const r = new MediaRecorder(stream, typ ? { mimeType: typ } : undefined);
+            const meine = SAETZE[i].id;      // bind the id NOW - Doc may page on while this take is still uploading
+            const stuecke = [];              // own array per take, so the next start cannot empty this one
+            r.ondataavailable = e => e.data.size && stuecke.push(e.data);
+            r.onstop = () => schicke(meine, stuecke, r.mimeType || 'audio/webm');
+            rec = r;
+            // a timeslice means data arrives during the take, not only at the end - a long passage
+            // is then never lost as one big missing chunk
+            r.start(1000);
+            laeuft = true; uhrAn(); zeichne();
+            $('tipp').textContent = 'Läuft. Leertaste beendet die Aufnahme.';
         }
 
-        function stoppe() { if (rec && rec.state !== 'inactive') rec.stop(); laeuft = false; }
-
-        async function schicke() {
-            const blob = new Blob(chunks, { type: rec.mimeType || 'audio/webm' });
-            const b64 = await new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(blob); });
-            const s = SAETZE[i];
-            const res = await fetch('/__stimme/aufnahme', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: s.id, text: s.text, audio: b64 })
-            }).then(r => r.json()).catch(e => ({ error: String(e) }));
-            if (res.error) { $('tipp').textContent = 'Fehler: ' + res.error; }
-            else {
-                takes = res.takes || {};
-                const t = takes[s.id];
-                if (t && t.fehler) $('tipp').textContent = 'Gespeichert, aber ohne WAV: ' + t.fehler;
-                else $('tipp').textContent = 'Gespeichert. Leertaste startet und stoppt die Aufnahme.';
-                if (i < SAETZE.length - 1) i++;          // move on by itself - Doc keeps talking, not clicking
-            }
+        function stoppe() {
+            if (!laeuft) return;
+            laeuft = false; uhrAus();
+            if (rec && rec.state !== 'inactive') rec.stop();   // fires onstop -> schicke()
+            $('tipp').textContent = 'Wird gespeichert …';
             zeichne();
         }
 
+        async function schicke(id, stuecke, typ) {
+            const blob = new Blob(stuecke, { type: typ });
+            if (!blob.size) { $('tipp').textContent = 'Nichts aufgenommen — Mikrofon prüfen.'; return; }
+            const b64 = await new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(blob); });
+            const s = SAETZE.find(x => x.id === id);
+            const res = await fetch('/__stimme/aufnahme', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, text: alsText(s), audio: b64 })
+            }).then(r => r.json()).catch(e => ({ error: String(e) }));
+            if (res.error) { $('tipp').textContent = 'Fehler: ' + res.error; return zeichne(); }
+            takes = res.takes || {};
+            const t = takes[id];
+            if (t && t.fehler) $('tipp').textContent = 'Gespeichert, aber ohne WAV: ' + t.fehler;
+            else if (zuKurz(s, t)) $('tipp').textContent = 'Gespeichert — aber nur ' + t.sekunden + ' s, das ist zu kurz. Bitte noch einmal.';
+            else $('tipp').textContent = 'Gespeichert: ' + (t ? t.sekunden : 0) + ' s. Leertaste startet die nächste.';
+            // move on only if this take was the one on screen and it looks complete
+            if (id === SAETZE[i].id && t && !zuKurz(s, t) && i < SAETZE.length - 1) i++;
+            zeichne();
+        }
+
+        function hoere(id) {
+            if (klang) { klang.pause(); }
+            klang = new Audio('/__stimme/hoeren/' + id + '?t=' + Date.now());
+            klang.onerror = () => { $('tipp').textContent = 'Konnte die Aufnahme nicht abspielen.'; };
+            klang.play().catch(e => { $('tipp').textContent = 'Wiedergabe abgelehnt: ' + e.message; });
+        }
+
         $('btnRec').onclick = () => laeuft ? stoppe() : starte();
-        $('btnPlay').onclick = () => new Audio('/__stimme/hoeren/' + SAETZE[i].id + '?t=' + Date.now()).play();
-        $('btnPrev').onclick = () => { if (i > 0) { i--; zeichne(); } };
-        $('btnNext').onclick = () => { if (i < SAETZE.length - 1) { i++; zeichne(); } };
+        $('btnPlay').onclick = () => hoere(SAETZE[i].id);
+        $('btnPrev').onclick = () => { if (!laeuft && i > 0) { i--; zeichne(); } };
+        $('btnNext').onclick = () => { if (!laeuft && i < SAETZE.length - 1) { i++; zeichne(); } };
 
         $('liste').onclick = async e => {
-            const h = e.target.closest('[data-hoer]'), w = e.target.closest('[data-weg]');
-            if (h) new Audio('/__stimme/hoeren/' + h.dataset.hoer + '?t=' + Date.now()).play();
+            const h = e.target.closest('[data-hoer]'), w = e.target.closest('[data-weg]'), z = e.target.closest('[data-zu]');
+            if (h) return hoere(h.dataset.hoer);
             if (w) {
                 const res = await fetch('/__stimme/loeschen', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: w.dataset.weg })
                 }).then(r => r.json());
-                takes = res.takes || {}; zeichne();
+                takes = res.takes || {}; return zeichne();
             }
+            if (z && !laeuft) { i = +z.dataset.zu; zeichne(); }   // click a line to jump to it
         };
 
         document.addEventListener('keydown', e => {
-            if (e.code === 'Space' && !e.repeat && e.target.tagName !== 'INPUT') {
-                e.preventDefault(); laeuft ? stoppe() : starte();
-            }
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.code === 'Space' && !e.repeat) { e.preventDefault(); laeuft ? stoppe() : starte(); }
             if (e.code === 'ArrowRight') $('btnNext').click();
             if (e.code === 'ArrowLeft') $('btnPrev').click();
+        });
+
+        window.addEventListener('beforeunload', e => {
+            if (laeuft) { e.preventDefault(); e.returnValue = ''; }   // a running take would be lost
         });
 
         fetch('/__stimme/liste').then(r => r.json()).then(d => {
             takes = d.takes || {};
             if (d.ordner) $('ordner').textContent = d.ordner + '/';
-            // start at the first line that is still missing, so a resumed session picks up where it stopped
-            const offen = SAETZE.findIndex(s => !takes[s.id]);
+            // start at the first line that is missing or truncated, so a resumed session picks up there
+            const offen = SAETZE.findIndex(s => !takes[s.id] || zuKurz(s, takes[s.id]));
             i = offen < 0 ? 0 : offen;
             zeichne();
         }).catch(() => zeichne());
