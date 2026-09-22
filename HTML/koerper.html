@@ -24,7 +24,7 @@
     <meta name="twitter:image" content="https://docalvers.de/resources/og/koerper.jpg">
     <!-- OG:END -->
     <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&family=Raleway:wght@600;700&display=swap"
         rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
     <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
@@ -60,6 +60,21 @@
             font-family: 'Orbitron', sans-serif; font-size: 0.85rem; letter-spacing: 1.5px; color: #bbb;
         }
         #k-hud b { display: block; font-size: 1.5rem; color: #fff; margin-bottom: 4px; }
+        /* W / M / D - same loop as on formelsammlung.html, shared through localStorage */
+        #k-mode {
+            position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 5; cursor: pointer;
+            font-family: 'Raleway', sans-serif; font-weight: 700; font-size: 0.95rem; line-height: 1;
+            padding: 7px 12px; border-radius: 9px; background: rgba(10, 22, 40, 0.72);
+            border: 1px solid #00d2ff; color: #00d2ff; transition: background 0.2s, border-color 0.2s, color 0.2s;
+        }
+        #k-mode:hover { background: rgba(10, 22, 40, 0.92); }
+        #k-mode[data-m="M"] { border-color: #ff4fa3; color: #ff4fa3; }
+        #k-mode[data-m="D"] { border-color: #8a97ad; color: #8a97ad; }
+        /* only the rendered body turns - HUD, panels and labels keep their colours */
+        /* The lab colours faces by edge count (green, orange, red, blue...), so a plain
+           hue-rotate would only shuffle them. Flatten to grey first, then tint. */
+        html[data-mode="M"] #canvas-container canvas { filter: grayscale(1) sepia(1) hue-rotate(275deg) saturate(4.2) brightness(1.05); }
+        html[data-mode="D"] #canvas-container canvas { filter: grayscale(1); }
         /* View controls live in a floating panel on the right of the stage — the sidebar keeps the numbers */
         #k-right {
             position: absolute; top: 12px; right: 12px; width: 260px; z-index: 5;   /* same width as the Werte card below */
@@ -104,18 +119,41 @@
         .ov-head .qr-title { margin: 0; }
         .ov-total { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 700; color: rgb(245, 194, 66); }
         /* one block per tab; a big group (Johnson) spans the full width and columns inside */
-        .ov-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 4px 24px; align-items: start; }
-        .ov-group { margin-bottom: 14px; }
+        .ov-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 4px 24px; align-items: start; }
+        .ov-group { margin-bottom: 16px; }
         .ov-group.wide { grid-column: 1 / -1; }
-        .ov-group.wide .ov-items { columns: 5 200px; column-gap: 24px; }
-        .ov-group h4 { font-family: 'Orbitron', sans-serif; font-size: 0.66rem; letter-spacing: 2px; text-transform: uppercase;
-            color: rgb(0, 210, 255); margin: 0 0 6px; display: flex; align-items: baseline; gap: 7px; }
-        .ov-group h4 span { color: rgb(245, 194, 66); font-size: 0.8rem; }
-        .ov-group h4 em { font-style: normal; color: rgba(255, 255, 255, 0.3); letter-spacing: 1px; font-size: 0.6rem; }
-        .ov-item { break-inside: avoid; }
-        .ov-item { font-family: Arial, Helvetica, sans-serif; font-size: 0.82rem; color: rgba(255, 255, 255, 0.82);
+        .ov-group.wide .ov-items { columns: 5 245px; column-gap: 24px; }
+        .ov-group h4 { font-family: 'Orbitron', sans-serif; font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase;
+            color: rgb(0, 210, 255); margin: 0 0 7px; display: flex; align-items: baseline; gap: 7px; }
+        .ov-group h4 span { color: rgb(245, 194, 66); font-size: 0.92rem; }
+        .ov-group h4 em { font-style: normal; color: rgba(255, 255, 255, 0.3); letter-spacing: 1px; font-size: 0.68rem; }
+        .ov-item { break-inside: avoid; position: relative; display: flex; align-items: center; gap: 8px; }
+        .ov-item { font-family: Arial, Helvetica, sans-serif; font-size: 0.98rem; color: rgba(255, 255, 255, 0.82);
             padding: 3px 7px; border-radius: 6px; cursor: pointer; }
         .ov-item:hover { background: rgba(3, 145, 178, 0.35); color: #fff; }
+        .ov-name { min-width: 0; }
+        /* Das Minibild des Objekts (Doc, 22.09.2026). Es wird groß gerendert und
+           klein gezeigt - beim Zeigen wächst dasselbe Bild, deshalb bleibt es
+           scharf. Es wächst nach rechts aus der Zeile heraus (transform-origin),
+           die Zeile selbst springt nicht: die Größe der Kachel bleibt. */
+        .ov-thumb { flex: 0 0 auto; width: 26px; height: 26px; position: relative; }
+        .ov-thumb img {
+            /* Der Kasten borgt sich das Aussehen von .qr-container (branding), und
+               dort traegt JEDES img den weissen Rahmen des QR-Bildes: 250 px, 10 px
+               weiss, 20 px Abstand. Fuer das Minibild wird das hier abgestellt -
+               die gemeinsame Regel bleibt, wie sie ist, sie gehoert dem QR-Code. */
+            border: 0; margin: 0; border-radius: 4px;
+            width: 100%; height: 100%; object-fit: contain; display: block;
+            opacity: 0; transition: opacity 0.25s ease, transform 0.18s ease;
+            transform-origin: left center; pointer-events: none;
+        }
+        .ov-thumb img.on { opacity: 0.95; }
+        .ov-item:hover { z-index: 20; }
+        .ov-item:hover .ov-thumb img.on {
+            transform: scale(4.2); opacity: 1;
+            /* der Schatten hebt das grosse Bild von der Liste darunter ab */
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.75));
+        }
         /* dimension switch: outside #tab-bar, whose overflow-x would clip the open panel */
         #dim-dd { width: 64px; flex: 0 0 auto; align-self: center; margin: 0 10px 0 8px; transform: translateY(4px); }
         #dim-dd .dropdown-trigger { padding: 6px 8px !important; border-width: 0.5px !important; border-color: rgb(2, 100, 123) !important; background: rgb(7, 14, 31) !important; border-radius: 6px !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 0.8rem !important; line-height: 1.1 !important; }
@@ -205,6 +243,7 @@
             <div id="canvas-container">
                 <div class="cyber-grid"></div>
                 <div id="k-hud"><b id="k-hud-name"></b><span id="k-hud-sub"></span></div>
+                <button type="button" id="k-mode" title="Modus wechseln: W → M → D">W</button>
             </div>
             <div id="k-right"></div>
             <div id="k-exactpanel"></div>
@@ -291,10 +330,14 @@
             autoRotate: true,
             solid: { platonisch: 'ikosaeder', archimedisch: 'ikosaederstumpf', catalanisch: 'rhombentriakontaeder', johnson: 'j17' },
             mirror: false,            // mirror image for the chiral snub solids
-            prism: { kind: 'prisma', n: 6, h: 1.2, uniform: true },
+            prism: { kind: 'prisma', n: 6, h: 1.2, uniform: true, b: 1.6, c: 0.8, t: 0.5 },
             round: { kind: 'kugel', r: 1, R: 2, h: 1.5, r2: 0.5, ea: 1.5, eb: 1, ec: 0.7 },
         };
         try { Object.assign(S, JSON.parse(localStorage.getItem('koerper_state') || '{}')); } catch (e) { /* ignore */ }
+        // a state stored before the box and the frustum existed replaces the whole
+        // sub-object, so the new fields have to be filled back in
+        S.prism = Object.assign({ kind: 'prisma', n: 6, h: 1.2, uniform: true, b: 1.6, c: 0.8, t: 0.5 }, S.prism);
+        S.round = Object.assign({ kind: 'kugel', r: 1, R: 2, h: 1.5, r2: 0.5, ea: 1.5, eb: 1, ec: 0.7 }, S.round);
         // Deep links: ?tab=archimedisch&solid=ikosaederstumpf&unfold=60&form=torus&prisma=antiprisma
         (function applyUrlParams() {
             const q = new URLSearchParams(location.search);
@@ -309,6 +352,7 @@
             }
             if (q.get('form')) { S.tab = 'rund'; S.round.kind = q.get('form'); }
             if (q.get('prisma')) { S.tab = 'prismen'; S.prism.kind = q.get('prisma'); }
+            if (q.get('n')) S.prism.n = Math.min(12, Math.max(3, +q.get('n') || S.prism.n));
             if (q.get('a') != null && parseFloat(q.get('a')) > 0) S.a = parseFloat(q.get('a'));
             if (q.get('unfold') != null) S.unfold = Math.max(0, Math.min(1, parseFloat(q.get('unfold')) / 100));
         })();
@@ -347,15 +391,20 @@
             if (el) el.textContent = label;
         }
         function indexLab() {
+            /* Jeder Eintrag kann zweierlei: `set` stellt NUR den Zustand ein, `run`
+               zieht die Seitenleiste nach. Die Minibilder brauchen das erste - sie
+               bauen 175 Objekte nacheinander und dürfen dabei keine Dropdowns und
+               keine Parameterkästen umschreiben. */
             for (const [tab, cat] of [['platonisch', G.PLATONIC], ['archimedisch', G.ARCHIMEDEAN], ['catalanisch', G.CATALAN], ['johnson', G.JOHNSON]])
-                for (const id of Object.keys(cat)) SEARCH.push({ id, label: cat[id].name, tab, run: () => { S.solid[tab] = id; syncTabDropdown(tab, cat[id].name); } });
-            for (const [id, label] of [['prisma', 'Prisma'], ['antiprisma', 'Antiprisma'], ['pyramide', 'Pyramide'], ['doppelpyramide', 'Doppelpyramide']])
-                SEARCH.push({ id, label, tab: 'prismen', run: () => { S.prism.kind = id; syncTabDropdown('prismen', label); } });
-            for (const [id, label] of [['kugel', 'Kugel'], ['halbkugel', 'Halbkugel'], ['zylinder', 'Zylinder'], ['kegel', 'Kegel'], ['kegelstumpf', 'Kegelstumpf'], ['torus', 'Torus'], ['ellipsoid', 'Ellipsoid']])
-                SEARCH.push({ id, label, tab: 'rund', run: () => { S.round.kind = id; syncTabDropdown('rund', label); showRoundParams(); } });
+                for (const id of Object.keys(cat)) SEARCH.push({ id, label: cat[id].name, tab, set: () => { S.solid[tab] = id; }, run: () => { S.solid[tab] = id; syncTabDropdown(tab, cat[id].name); } });
+            for (const [id, label] of [['prisma', 'Prisma'], ['antiprisma', 'Antiprisma'], ['pyramide', 'Pyramide'], ['doppelpyramide', 'Doppelpyramide'],
+                ['quader', 'Quader'], ['pyramidenstumpf', 'Pyramidenstumpf']])
+                SEARCH.push({ id, label, tab: 'prismen', set: () => { S.prism.kind = id; }, run: () => { S.prism.kind = id; syncTabDropdown('prismen', label); } });
+            for (const [id, label] of [['kugel', 'Kugel'], ['halbkugel', 'Halbkugel'], ['kappe', 'Kugelkappe'], ['zylinder', 'Zylinder'], ['kegel', 'Kegel'], ['kegelstumpf', 'Kegelstumpf'], ['torus', 'Torus'], ['ellipsoid', 'Ellipsoid']])
+                SEARCH.push({ id, label, tab: 'rund', set: () => { S.round.kind = id; }, run: () => { S.round.kind = id; syncTabDropdown('rund', label); showRoundParams(); } });
             for (const tab of Object.keys(GENERIC)) for (const id of Object.keys(GENERIC[tab].shapes)) {
                 const label = GENERIC[tab].shapes[id].name;
-                SEARCH.push({ id, label, tab, run: () => { S.shape[tab].kind = id; shapeState(tab); syncTabDropdown(tab, label); buildGenericParams(tab); } });
+                SEARCH.push({ id, label, tab, set: () => { S.shape[tab].kind = id; }, run: () => { S.shape[tab].kind = id; shapeState(tab); syncTabDropdown(tab, label); buildGenericParams(tab); } });
             }
             SEARCH.forEach(e => { e.lab = e.label.toLowerCase(); e.key = e.lab + ' ' + TAB_LABEL[e.tab].toLowerCase(); });
             document.querySelectorAll('.k-ov-btn[data-ov="all"]').forEach(b => { b.textContent = 'Alle ' + SEARCH.length; });
@@ -381,6 +430,126 @@
         ]);
         const isCore = e => CORE.has(e.tab + ':' + e.id);
         const FS_TILES = 30;                              // tiles on formelsammlung.html
+
+        /* ---- Minibilder in der Übersicht ---------------------------------
+           Doc, 22.09.2026: "ein Minibild vom Objekt, das on hover größer wird".
+           Gezeichnet wird mit dem Labor selbst statt aus einem Bildvorrat: der
+           Eintrag wird eingestellt, rebuild() baut ihn in dieselbe Szene, und ein
+           zweiter, winziger Renderer macht ein Bild davon (toDataURL). So gibt es
+           genau EINEN zusätzlichen WebGL-Kontext für alle 175 Objekte, und ein
+           neues Objekt im Labor hat sein Bild automatisch.
+           Der Zustand des Labors wird vor dem ersten Bild weggelegt und
+           zurückgegeben, sobald die Schlange leer ist. */
+        const THUMB_PX = 168;                    // gerendert; angezeigt klein, beim Zeigen groß
+        const thumbCache = new Map();            // 'tab:id' -> dataURL, hält die Sitzung über
+        let thumbR = null, thumbCam = null, thumbQueue = [], thumbBusy = false, thumbSave = null;
+        let thumbMode = false;                   // während dessen keine Zahlen und Formeln setzen
+        function thumbSetup() {
+            if (thumbR) return true;
+            if (!window.THREE || !scene) return false;
+            thumbR = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+            thumbR.setPixelRatio(1);
+            thumbR.setSize(THUMB_PX, THUMB_PX);
+            thumbCam = new THREE.PerspectiveCamera(40, 1, 0.05, 500);
+            return true;
+        }
+        /* Nur die Felder, die ein Minibild anfasst - und zurückgeschrieben wird in
+           DIESELBEN Objekte. Ein frisch kopiertes S.round würde die Regler der
+           Seitenleiste von ihrem Zustand abschneiden. */
+        function thumbStash() {
+            if (thumbSave) return;
+            const shape = {};
+            for (const t of Object.keys(GENERIC)) shape[t] = S.shape[t].kind;
+            thumbSave = {
+                tab: S.tab, solid: Object.assign({}, S.solid), shape,
+                prism: S.prism.kind, round: S.round.kind,
+                unfold: S.unfold, sphere: S.sphere,
+                faces: S.showFaces, edges: S.showEdges, verts: S.showVerts,
+                rot: root.rotation.clone(),
+            };
+        }
+        function thumbRestore() {
+            if (!thumbSave) return;
+            const v = thumbSave; thumbSave = null;
+            S.tab = v.tab;
+            Object.keys(v.solid).forEach(k => { S.solid[k] = v.solid[k]; });
+            Object.keys(v.shape).forEach(k => { S.shape[k].kind = v.shape[k]; });
+            S.prism.kind = v.prism; S.round.kind = v.round;
+            S.unfold = v.unfold; S.sphere = v.sphere;
+            S.showFaces = v.faces; S.showEdges = v.edges; S.showVerts = v.verts;
+            rebuild();
+            root.rotation.copy(v.rot);
+            lastT = -1;                          // das Auffalten im nächsten Bild neu setzen
+            applyVisibility();
+        }
+        /** One picture: set the entry, build it, frame it, snap it. */
+        function thumbDraw(e) {
+            S.tab = e.tab;
+            e.set();
+            S.unfold = 0; S.sphere = 'none';
+            S.showFaces = true; S.showEdges = true; S.showVerts = false;
+            thumbMode = true;
+            try { rebuild(); } finally { thumbMode = false; }
+            /* prepareNet misst den aufgefalteten Umriss und LAESST den Koerper
+               offen - zusammengeklappt wird er erst im naechsten Bild der Schleife.
+               Das Minibild entsteht sofort nach rebuild(), also muss es selber
+               zuklappen, sonst zeigt jedes Polyeder sein Netz. */
+            applyUnfold(0);
+            root.rotation.set(0, 0, 0);
+            applyVisibility();
+            const box = new THREE.Box3().setFromObject(root);
+            if (box.isEmpty()) return null;
+            const sph = box.getBoundingSphere(new THREE.Sphere());
+            if (!(sph.radius > 0)) return null;
+            /* Eine flache Figur wird von vorn gezeigt, ein Körper aus derselben
+               Ecke wie im Labor (resetView). Gemessen an der Tiefe der Box, nicht
+               am Reiter - der Helix sitzt in einem 2D-Reiter und ist doch räumlich. */
+            const tief = box.max.z - box.min.z;
+            const breit = Math.max(box.max.x - box.min.x, box.max.y - box.min.y);
+            const flach = tief < 0.08 * breit;   /* Eckpunkte und Umrisse tragen etwas Tiefe */
+            const dir = flach ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3(3.2, 2.4, 4.2).normalize();
+            const dist = sph.radius * 1.15 / Math.sin(thumbCam.fov * Math.PI / 360);
+            thumbCam.position.copy(dir).multiplyScalar(dist).add(sph.center);
+            thumbCam.up.set(0, 1, 0);
+            thumbCam.lookAt(sph.center);
+            thumbR.render(scene, thumbCam);
+            return thumbR.domElement.toDataURL('image/png');
+        }
+        /* Ein Zeitbudget je Bild statt aller 175 am Stück: die Übersicht bleibt
+           bedienbar, während die Bilder nach und nach auftauchen. */
+        function thumbPump() {
+            if (thumbBusy || !thumbQueue.length) return;
+            if (!thumbSetup()) { thumbQueue = []; return; }
+            thumbBusy = true;
+            thumbStash();
+            requestAnimationFrame(function step() {
+                const t0 = performance.now();
+                while (thumbQueue.length && performance.now() - t0 < 12) {
+                    const job = thumbQueue.shift();
+                    if (!job.img.isConnected) continue;      // Übersicht schon wieder zu
+                    let url = thumbCache.get(job.key);
+                    if (!url) { url = thumbDraw(job.e); if (url) thumbCache.set(job.key, url); }
+                    if (url) { job.img.src = url; job.img.classList.add('on'); }
+                }
+                if (thumbQueue.length) { requestAnimationFrame(step); return; }
+                thumbBusy = false;
+                thumbRestore();
+            });
+        }
+        /** Hangs a picture on every row of the open overview. */
+        function wireThumbs(ovl) {
+            thumbQueue = [];
+            ovl.querySelectorAll('.ov-item').forEach(el => {
+                const e = SEARCH[+el.dataset.i];
+                const img = el.querySelector('.ov-thumb img');
+                if (!e || !img) return;
+                const key = e.tab + ':' + e.id;
+                const have = thumbCache.get(key);
+                if (have) { img.src = have; img.classList.add('on'); return; }
+                thumbQueue.push({ key, e, img });
+            });
+            thumbPump();
+        }
 
         /** One list of figures, grouped by tab, each one a jump. mode 'core' = the school set. */
         function showOverview(mode) {
@@ -408,7 +577,7 @@
                     <div class="ov-grid">${groups.map(g => `
                         <div class="ov-group${g.items.length > 20 ? ' wide' : ''}">
                             <h4>${TAB_LABEL[g.tab]} <span>${g.items.length}</span> <em>${dimOf[g.tab]}D</em></h4>
-                            <div class="ov-items">${g.items.map(it => `<div class="ov-item" data-i="${SEARCH.indexOf(it)}">${it.label}</div>`).join('')}</div>
+                            <div class="ov-items">${g.items.map(it => `<div class="ov-item" data-i="${SEARCH.indexOf(it)}"><span class="ov-thumb"><img alt="" draggable="false"></span><span class="ov-name">${it.label}</span></div>`).join('')}</div>
                         </div>`).join('')}
                     </div>
                 </div>`;
@@ -419,10 +588,13 @@
             }));
             document.addEventListener('keydown', overviewKey, true);
             setTimeout(() => ovl.classList.add('visible'), 10);
+            wireThumbs(ovl);
         }
         function closeOverview() {
             const ovl = document.getElementById('k-ovl');
             if (ovl) ovl.classList.remove('visible');
+            thumbQueue = [];                      // was noch fehlt, entsteht beim nächsten Mal
+            if (!thumbBusy) thumbRestore();       // läuft gerade einer, gibt er selbst zurück
             document.removeEventListener('keydown', overviewKey, true);
         }
         function overviewKey(e) { if (e.key === 'Escape') { e.stopPropagation(); closeOverview(); } }
@@ -527,6 +699,11 @@
         function tagUnit(cid) {
             const g = document.getElementById(cid).querySelectorAll('.cyber-control-group');
             if (g.length) g[g.length - 1].classList.add('k-unit');
+        }
+        /** Tag the group of the slider created last, so showPrismParams can find it. */
+        function markGroup(cid, key) {
+            const g = document.getElementById(cid).querySelectorAll('.cyber-control-group');
+            if (g.length) g[g.length - 1].classList.add('k-pr-' + key);
         }
         function unitDropdown(cid) {
             const d = document.createElement('div'); d.id = 'unit-' + cid; d.className = 'k-prec';
@@ -852,13 +1029,17 @@
         });
         buildCommonCards('prismen', {
             title: 'Prismen & Pyramiden',
-            options: [{ id: 'prisma', label: 'Prisma' }, { id: 'antiprisma', label: 'Antiprisma' }, { id: 'pyramide', label: 'Pyramide' }, { id: 'doppelpyramide', label: 'Doppelpyramide' }],
+            options: [{ id: 'prisma', label: 'Prisma' }, { id: 'antiprisma', label: 'Antiprisma' }, { id: 'pyramide', label: 'Pyramide' }, { id: 'doppelpyramide', label: 'Doppelpyramide' },
+                { id: 'quader', label: 'Quader' }, { id: 'pyramidenstumpf', label: 'Pyramidenstumpf' }],
             selected: S.prism.kind,
             onSelect: id => { S.prism.kind = id; persist(); rebuild(); },
             params: cid => {
-                edgeParams(cid);
-                CyberUI.createSlider(cid, 'Ecken n', 3, 12, S.prism.n, 1, x => { S.prism.n = x; persist(); rebuild(); }, COL.orange);
-                CyberUI.createSlider(cid, 'Höhe h / a', 0.2, 3, S.prism.h, 0.05, x => { S.prism.h = x; S.prism.uniform = false; syncUniform(); persist(); rebuild(); }, COL.green, x => fmtShort(x));
+                edgeParams(cid); markGroup(cid, 'a');
+                CyberUI.createSlider(cid, 'Ecken n', 3, 12, S.prism.n, 1, x => { S.prism.n = x; persist(); rebuild(); }, COL.orange); markGroup(cid, 'n');
+                CyberUI.createSlider(cid, 'Höhe h / a', 0.2, 3, S.prism.h, 0.05, x => { S.prism.h = x; S.prism.uniform = false; syncUniform(); persist(); rebuild(); }, COL.green, x => fmtShort(x)); markGroup(cid, 'h');
+                CyberUI.createSlider(cid, 'Breite b / a', 0.2, 4, S.prism.b, 0.05, x => { S.prism.b = x; persist(); rebuild(); }, COL.orange, x => fmtShort(x)); markGroup(cid, 'b');
+                CyberUI.createSlider(cid, 'Höhe c / a', 0.2, 4, S.prism.c, 0.05, x => { S.prism.c = x; persist(); rebuild(); }, COL.green, x => fmtShort(x)); markGroup(cid, 'c');
+                CyberUI.createSlider(cid, 'Deckfläche t', 0.05, 0.95, S.prism.t, 0.05, x => { S.prism.t = x; persist(); rebuild(); }, COL.orange, x => fmtShort(x)); markGroup(cid, 't');
                 CyberUI.createCheckbox(cid, 'gleichkantig (h automatisch)', S.prism.uniform, c => { S.prism.uniform = c; persist(); rebuild(); });
                 unitDropdown(cid);
             },
@@ -868,6 +1049,7 @@
             title: 'Rundform',
             options: [
                 { id: 'kugel', label: 'Kugel' }, { id: 'halbkugel', label: 'Halbkugel' }, { id: 'zylinder', label: 'Zylinder' },
+                { id: 'kappe', label: 'Kugelkappe' },
                 { id: 'kegel', label: 'Kegel' }, { id: 'kegelstumpf', label: 'Kegelstumpf' }, { id: 'torus', label: 'Torus' }, { id: 'ellipsoid', label: 'Ellipsoid' },
             ],
             selected: S.round.kind,
@@ -1021,10 +1203,13 @@
             antiprisma: ['G = \\tfrac{n\\,a^2}{4\\tan(\\pi/n)}', 'A = 2G + 2n\\cdot\\tfrac{a\\,h_\\triangle}{2}', 'V = \\tfrac{h}{3}\\left(2G + \\tfrac{n a^2}{4 \\sin(\\pi/n)\\tan(\\pi/2n)}\\right)', 'h_{gleichk.} = a\\sqrt{1-\\tfrac{1}{4\\cos^2(\\pi/2n)}}'],
             pyramide: ['G = \\tfrac{n\\,a^2}{4\\tan(\\pi/n)}', 's = \\sqrt{h^2 + \\tfrac{a^2}{4\\tan^2(\\pi/n)}}', 'A = G + \\tfrac{n\\,a\\,s}{2}', 'V = \\tfrac{1}{3}\\,G\\,h'],
             doppelpyramide: ['G = \\tfrac{n\\,a^2}{4\\tan(\\pi/n)}', 's = \\sqrt{h^2 + \\tfrac{a^2}{4\\tan^2(\\pi/n)}}', 'A = n\\,a\\,s', 'V = \\tfrac{2}{3}\\,G\\,h'],
+            quader: ['V = a\\,b\\,c', 'A = 2\\,(ab + ac + bc)', 'M = 2\\,(a+b)\\,c', 'd = \\sqrt{a^2+b^2+c^2}'],
+            pyramidenstumpf: ['G_1 = \\tfrac{n\\,a^2}{4\\tan(\\pi/n)},\\quad a_2 = t\\,a', 'G_2 = t^2\\,G_1', 'V = \\tfrac{h}{3}\\left(G_1 + \\sqrt{G_1 G_2} + G_2\\right)'],
         };
         const ROUND_TEX = {
             kugel: ['A = 4\\pi r^2', 'V = \\tfrac{4}{3}\\pi r^3'],
             halbkugel: ['A = 3\\pi r^2', 'V = \\tfrac{2}{3}\\pi r^3'],
+            kappe: ['a = \\sqrt{h\\,(2r-h)}', 'M = 2\\pi r h', 'A = M + \\pi a^2 = \\pi h\\,(4r-h)', 'V = \\pi h^2\\left(r - \\tfrac{h}{3}\\right)'],
             zylinder: ['M = 2\\pi r h', 'A = 2\\pi r\\,(r+h)', 'V = \\pi r^2 h'],
             kegel: ['s = \\sqrt{r^2+h^2}', 'M = \\pi r s', 'A = \\pi r\\,(r+s)', 'V = \\tfrac{1}{3}\\pi r^2 h'],
             kegelstumpf: ['s = \\sqrt{(R-r)^2+h^2}', 'M = \\pi (R+r)\\,s', 'A = \\pi\\left(r^2+R^2+(R+r)s\\right)', 'V = \\tfrac{\\pi h}{3}\\left(R^2+Rr+r^2\\right)'],
@@ -1041,6 +1226,23 @@
         let current = null;         // { P, m, kind }
 
         function initThree() {
+            // ---- W / M / D loop, shares its choice with formelsammlung.html ------
+            {
+                const MODES = ['W', 'M', 'D'];
+                const btn = document.getElementById('k-mode');
+                const set = m => {
+                    document.documentElement.dataset.mode = m;
+                    btn.dataset.m = m;
+                    btn.textContent = m;
+                    try { localStorage.setItem('fs-mode', m); } catch (e) { /* private window */ }
+                };
+                let start = 'W';
+                try { const kept = localStorage.getItem('fs-mode'); if (MODES.includes(kept)) start = kept; } catch (e) { }
+                set(start);
+                btn.addEventListener('click', () =>
+                    set(MODES[(MODES.indexOf(document.documentElement.dataset.mode) + 1) % MODES.length]));
+            }
+
             const container = document.getElementById('canvas-container');
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.05, 200);
@@ -1233,6 +1435,13 @@
                     const cap = new THREE.CircleGeometry(R.r, 64); cap.rotateX(Math.PI / 2);
                     geo = [dome, cap]; extent = R.r; break;
                 }
+                case 'kappe': {
+                    const h = Math.min(R.h, 2 * R.r), phi = Math.acos(Math.max(-1, 1 - h / R.r)), a = Math.sqrt(h * (2 * R.r - h));
+                    const dome = new THREE.SphereGeometry(R.r, 64, 32, 0, Math.PI * 2, 0, phi);
+                    dome.translate(0, -(R.r - h), 0);                 // the rim lands on y = 0
+                    const base = new THREE.CircleGeometry(a, 64); base.rotateX(Math.PI / 2);
+                    geo = [dome, base]; extent = Math.max(a, h); break;
+                }
                 case 'zylinder': geo = new THREE.CylinderGeometry(R.r, R.r, R.h, 64); extent = Math.max(R.r, R.h / 2); break;
                 case 'kegel': geo = new THREE.CylinderGeometry(0, R.r, R.h, 64); extent = Math.max(R.r, R.h / 2); break;
                 case 'kegelstumpf': geo = new THREE.CylinderGeometry(R.r, R.R, R.h, 64); extent = Math.max(R.r, R.R, R.h / 2); break;
@@ -1253,6 +1462,11 @@
             switch (kind) {
                 case 'kugel': return new THREE.SphereGeometry(R.r, 24, 16);
                 case 'halbkugel': return new THREE.SphereGeometry(R.r, 24, 8, 0, Math.PI * 2, 0, Math.PI / 2);
+                case 'kappe': {
+                    const h = Math.min(R.h, 2 * R.r), phi = Math.acos(Math.max(-1, 1 - h / R.r));
+                    const g = new THREE.SphereGeometry(R.r, 24, 10, 0, Math.PI * 2, 0, phi);
+                    g.translate(0, -(R.r - h), 0); return g;
+                }
                 case 'zylinder': return new THREE.CylinderGeometry(R.r, R.r, R.h, 24, 4);
                 case 'kegel': return new THREE.CylinderGeometry(0, R.r, R.h, 24, 4);
                 case 'kegelstumpf': return new THREE.CylinderGeometry(R.r, R.R, R.h, 24, 4);
@@ -1285,10 +1499,16 @@
                 if (tab === 'prismen') {
                     const pr = S.prism;
                     if (pr.kind === 'antiprisma' && pr.uniform) { pr.h = G.uniformAntiprismHeight(pr.n); syncHSlider(); }
-                    const gen = { prisma: G.prismPoints, antiprisma: G.antiprismPoints, pyramide: G.pyramidPoints, doppelpyramide: G.bipyramidPoints }[pr.kind];
-                    P = G.hull(gen(pr.n, pr.h));
+                    const gen = {
+                        prisma: p => G.prismPoints(p.n, p.h), antiprisma: p => G.antiprismPoints(p.n, p.h),
+                        pyramide: p => G.pyramidPoints(p.n, p.h), doppelpyramide: p => G.bipyramidPoints(p.n, p.h),
+                        quader: p => G.boxPoints(1, p.b, p.c), pyramidenstumpf: p => G.frustumPoints(p.n, p.h, p.t),
+                    }[pr.kind];
+                    P = G.hull(gen(pr));
+                    showPrismParams();
                     // keep the base edge = 1 (the hull normalises nothing here)
-                    name = { prisma: 'Prisma', antiprisma: 'Antiprisma', pyramide: 'Pyramide', doppelpyramide: 'Doppelpyramide' }[pr.kind] + ' (n = ' + pr.n + ')';
+                    const PRNAME = { prisma: 'Prisma', antiprisma: 'Antiprisma', pyramide: 'Pyramide', doppelpyramide: 'Doppelpyramide', quader: 'Quader', pyramidenstumpf: 'Pyramidenstumpf' };
+                    name = PRNAME[pr.kind] + (pr.kind === 'quader' ? '' : ' (n = ' + pr.n + ')');
                 } else {
                     const key = S.solid[tab];
                     P = G.build(key, { mirror: S.mirror && G.isChiral(key) });
@@ -1313,9 +1533,21 @@
             // show only the sliders the chosen shape uses
             const groups = document.querySelectorAll('#par-rund .cyber-control-group');
             const need = {
-                kugel: [0], halbkugel: [0], zylinder: [0, 2], kegel: [0, 2], kegelstumpf: [0, 1, 2], torus: [0, 1], ellipsoid: [3, 4, 5],
+                kugel: [0], halbkugel: [0], kappe: [0, 2], zylinder: [0, 2], kegel: [0, 2], kegelstumpf: [0, 1, 2], torus: [0, 1], ellipsoid: [3, 4, 5],
             }[S.round.kind];
             groups.forEach((g, i) => { g.style.display = need.includes(i) ? '' : 'none'; });
+        }
+        /** Same idea for the prism tab: the box wants b and c, the frustum wants t. */
+        function showPrismParams() {
+            const need = {
+                quader: ['a', 'b', 'c'], pyramidenstumpf: ['a', 'n', 'h', 't'],
+            }[S.prism.kind] || ['a', 'n', 'h'];
+            for (const key of ['a', 'n', 'h', 'b', 'c', 't'])
+                document.querySelectorAll('#par-prismen .k-pr-' + key)
+                    .forEach(g => { g.style.display = need.includes(key) ? '' : 'none'; });
+            // "gleichkantig" only means anything for the antiprism
+            document.querySelectorAll('#par-prismen .cyber-checkbox-wrapper')
+                .forEach(el => { el.style.display = S.prism.kind === 'antiprisma' ? '' : 'none'; });
         }
 
         // ------------------------------------------------------------------
@@ -1376,6 +1608,7 @@
             };
         }
         function refreshNumbers() {
+            if (thumbMode) return;    // ein Minibild braucht weder Zahlen noch KaTeX
             const tab = S.tab;
             const statsId = 'stats-' + tab, legendId = 'legend-' + tab;
             const legend = document.getElementById(legendId);
@@ -1456,6 +1689,7 @@
                 switch (k) {
                     case 'kugel': A = 4 * pi * R.r ** 2; V = 4 / 3 * pi * R.r ** 3; break;
                     case 'halbkugel': A = 3 * pi * R.r ** 2; V = 2 / 3 * pi * R.r ** 3; break;
+                    case 'kappe': { const h = Math.min(R.h, 2 * R.r), aa = Math.sqrt(h * (2 * R.r - h)); M = 2 * pi * R.r * h; A = M + pi * aa * aa; V = pi * h * h * (R.r - h / 3); extra.push(['Grundkreisradius a', aa], ['Kappenhöhe h', h]); break; }
                     case 'zylinder': M = 2 * pi * R.r * R.h; A = 2 * pi * R.r * (R.r + R.h); V = pi * R.r ** 2 * R.h; break;
                     case 'kegel': { const s = Math.hypot(R.r, R.h); M = pi * R.r * s; A = pi * R.r * (R.r + s); V = pi * R.r ** 2 * R.h / 3; extra.push(['Mantellinie s', s]); break; }
                     case 'kegelstumpf': { const s = Math.hypot(R.R - R.r, R.h); M = pi * (R.R + R.r) * s; A = pi * (R.r ** 2 + R.R ** 2 + (R.R + R.r) * s); V = pi * R.h / 3 * (R.R ** 2 + R.R * R.r + R.r ** 2); extra.push(['Mantellinie s', s]); break; }
@@ -1472,7 +1706,7 @@
                 legend.innerHTML = '';
                 ROUND_TEX[k].forEach(s => addForm(s));
                 if (k === 'ellipsoid') formNote('Die Oberfläche des allgemeinen Ellipsoids hat keine elementare Formel; Näherung nach Knud Thomsen (Fehler < 1,1 %).');
-                const nm = { kugel: 'Kugel', halbkugel: 'Halbkugel', zylinder: 'Zylinder', kegel: 'Kegel', kegelstumpf: 'Kegelstumpf', torus: 'Torus', ellipsoid: 'Ellipsoid' }[k];
+                const nm = { kugel: 'Kugel', halbkugel: 'Halbkugel', kappe: 'Kugelkappe', zylinder: 'Zylinder', kegel: 'Kegel', kegelstumpf: 'Kegelstumpf', torus: 'Torus', ellipsoid: 'Ellipsoid' }[k];
                 flushTex();
                 document.getElementById('k-hud-name').textContent = nm;
                 document.getElementById('k-hud-sub').textContent = '';

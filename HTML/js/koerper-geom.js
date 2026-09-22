@@ -364,6 +364,24 @@
         }
         return pts;
     }
+    /** Rectangular box: a along x, b along z, c up. */
+    function boxPoints(a, b, c) {
+        const pts = [];
+        for (const sx of [-1, 1]) for (const sy of [-1, 1]) for (const sz of [-1, 1])
+            pts.push([sx * a / 2, sy * c / 2, sz * b / 2]);
+        return pts;
+    }
+    /** n-gonal frustum: base edge 1, top scaled by t, height h. */
+    function frustumPoints(n, h, t) {
+        const R = 1 / (2 * Math.sin(Math.PI / n));
+        const pts = [];
+        for (let k = 0; k < n; k++) {
+            const ang = 2 * Math.PI * k / n;
+            pts.push([R * Math.cos(ang), -h / 2, R * Math.sin(ang)]);
+            pts.push([t * R * Math.cos(ang), h / 2, t * R * Math.sin(ang)]);
+        }
+        return pts;
+    }
     function bipyramidPoints(n, h) {
         const R = 1 / (2 * Math.sin(Math.PI / n));
         const pts = [[0, h, 0], [0, -h, 0]];
@@ -411,6 +429,7 @@
         PHI, generate, hull, normalizeEdge, dualPoints, metrics, build, distinct,
         PLATONIC, ARCHIMEDEAN, CATALAN, JOHNSON, isChiral, centre,
         prismPoints, antiprismPoints, uniformAntiprismHeight, pyramidPoints, bipyramidPoints,
+        boxPoints, frustumPoints,
         vec: { sub, add, scale, dot, cross, len, norm },
     };
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
