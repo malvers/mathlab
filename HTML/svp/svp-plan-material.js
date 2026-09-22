@@ -429,18 +429,23 @@ window.svpPlanParts.push(function (P) {
             .replace(/^https?:\/\/(?:www\.)?docalvers\.de(?=\/|$)/i, '') || url;
     }
 
-    /* Das Gegenstueck: von der LIVE-Seite aus dieselbe Seite vom eigenen Rechner
-       holen (Doc, 22.09.2026: "gib mir bitte ein 'Öffne lokal' wenn ich eingeloggt
-       bin"). Leer heisst: der Punkt gehoert nicht ins Menue - weil man ohnehin
-       schon lokal ist oder weil der Link gar nicht hierher zeigt (SharePoint,
-       YouTube: dort gibt es lokal nichts zu oeffnen). */
+    /* Das Gegenstueck: dieselbe Seite vom eigenen Rechner holen, in einem ECHTEN
+       Tab (Doc, 22.09.2026: "gib mir bitte ein 'Öffne lokal' wenn ich eingeloggt
+       bin"). Von der LIVE-Seite aus ist der Gewinn die lokale Fassung; auf dem
+       eigenen Server ist es der echte Tab - "Öffnen" legt dort nur das kleine
+       Material-Fenster auf, und darin gibt es kein Hart-Neuladen und keine
+       Entwicklerwerkzeuge (Doc, 22.09.2026: "wenn lokal und ich eingeloggt bin").
+       Der Port bleibt lokal der eigene: Doc arbeitet nicht immer auf :8765.
+       Leer heisst: der Punkt gehoert nicht ins Menue - der Link zeigt gar nicht
+       hierher (SharePoint, YouTube: dort gibt es lokal nichts zu oeffnen). */
     const LOKAL_ORIGIN = 'http://localhost:8765';        /* serve.py, wie in svp-nav.js */
     function lokalHref(url) {
-        if (IST_LOKAL) return '';
         try {
             const u = new URL(String(url == null ? '' : url), location.href);
-            if (!/^(?:www\.)?docalvers\.de$/i.test(u.hostname)) return '';
-            return LOKAL_ORIGIN + u.pathname + u.search + u.hash;
+            const eigen = /^(?:www\.)?docalvers\.de$/i.test(u.hostname)
+                || (IST_LOKAL && u.hostname === location.hostname);
+            if (!eigen) return '';
+            return (IST_LOKAL ? location.origin : LOKAL_ORIGIN) + u.pathname + u.search + u.hash;
         } catch (e) { return ''; }
     }
 
