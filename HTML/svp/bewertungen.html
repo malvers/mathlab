@@ -138,6 +138,167 @@
             background: rgba(var(--g-orange), 0.16);
         }
 
+        /* ---- LK block: the handwritten note, subject by subject -------------
+           The tables above hold the school's own sheet; this is the note that
+           spells it out for Info and Mathe, per Halbjahr. Same card shell, but
+           a list instead of a table - the note is not a matrix. */
+        .bw-h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.05rem;
+            letter-spacing: 0.03em;
+            color: var(--head);
+            margin: 14px 2px 0;
+        }
+
+        .bw-h2 + .bw-sub {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin: 3px 2px 0;
+        }
+
+        .lk-head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px 18px;
+            padding: 12px 16px;
+            background: var(--bw-band);
+            border-bottom: 1px solid var(--bw-band-line);
+        }
+
+        .lk-head .lk-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            color: var(--bw-band-ink);
+        }
+
+        /* The one rule that holds for every kleine Note, whatever the subject. */
+        .lk-chip {
+            font-size: 0.82rem;
+            color: var(--lambda);
+            border: 1px solid rgba(var(--g-orange), 0.45);
+            background: rgba(var(--g-orange), 0.1);
+            border-radius: 999px;
+            padding: 3px 12px;
+        }
+
+        html.svp-light .lk-chip { color: rgb(150, 108, 8); }
+
+        .lk-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+        }
+
+        .lk-block { padding: 14px 16px; }
+
+        /* the divider between the two Klassenstufen: vertical while they sit
+           side by side, horizontal once the grid has stacked them */
+        .lk-block + .lk-block {
+            border-top: 1px solid var(--bw-grid);
+        }
+
+        @media (min-width: 720px) {
+            .lk-block + .lk-block {
+                border-top: 0;
+                border-left: 1px solid var(--bw-grid);
+            }
+        }
+
+        .lk-stufe {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+
+        /* "je HJ" was circled in the note - it governs everything under it. */
+        .lk-hj {
+            font-size: 0.76rem;
+            letter-spacing: 0.04em;
+            color: var(--cyan);
+            border: 1px solid rgba(var(--g-cyan), 0.5);
+            border-radius: 999px;
+            padding: 2px 9px;
+        }
+
+        .lk-fach {
+            display: grid;
+            grid-template-columns: 5.5rem minmax(0, 1fr);
+            gap: 4px 12px;
+            padding: 8px 0;
+            border-top: 1px solid var(--bw-grid);
+        }
+
+        .lk-fach dt {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.92rem;
+        }
+
+        .lk-fach dd { font-size: 0.92rem; line-height: 1.45; }
+
+        .lk-ratio {
+            display: inline-block;
+            margin-top: 4px;
+            font-size: 0.8rem;
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .lk-ratio b {
+            font-weight: 600;
+            color: var(--lambda);
+            font-variant-numeric: tabular-nums;
+        }
+
+        html.svp-light .lk-ratio b { color: rgb(150, 108, 8); }
+
+        /* The arrow lines of the note: what is added up, and when. */
+        .lk-arrow {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--bw-grid);
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        .lk-arrow::before {
+            content: '\2192';
+            color: var(--lambda);
+            margin-right: 6px;
+        }
+
+        .lk-hj-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .lk-hj-list span {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            color: var(--text);
+            background: var(--bw-row-b);
+            border: 1px solid var(--bw-grid);
+            border-radius: 7px;
+            padding: 3px 10px;
+        }
+
+        .lk-hint {
+            padding: 12px 16px;
+            border-top: 1px solid var(--bw-grid);
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .lk-hint b { color: var(--text); font-weight: 600; }
+
         /* The closing note sits in a plain card, without the table's teal rim. */
         .bw-card.note {
             padding: 14px 16px;
@@ -300,11 +461,68 @@
             </table>
         </section>
 
+        <h2 class="bw-h2">LK BGY</h2>
+        <div class="bw-sub">Leistungskontrollen Fach f&uuml;r Fach &middot; je Halbjahr</div>
+
+        <section class="bw-card">
+            <div class="lk-head">
+                <div class="lk-title">Leistungskontrollen</div>
+                <div class="lk-chip">f&uuml;r kleine Noten: mind. 20 BE &middot; max. 45 min</div>
+            </div>
+
+            <div class="lk-grid">
+                <div class="lk-block">
+                    <div class="lk-stufe">Klasse 11 <span class="lk-hj">je HJ</span></div>
+                    <dl class="lk-fach">
+                        <dt>Info</dt>
+                        <dd>
+                            <span class="bw-line">1 Klassenarbeit</span>
+                            <span class="bw-line">mind. 2 kleine Noten</span>
+                            <span class="lk-ratio">Verh&auml;ltnis <b>1&#8239;:&#8239;2</b></span>
+                        </dd>
+                    </dl>
+                    <dl class="lk-fach">
+                        <dt>Mathe</dt>
+                        <dd>
+                            <span class="bw-line">2 Klassenarbeiten</span>
+                            <span class="bw-line">mind. 3 kleine Noten</span>
+                            <span class="lk-ratio">Verh&auml;ltnis <b>1&#8239;:&#8239;1</b></span>
+                        </dd>
+                    </dl>
+                    <p class="lk-arrow">Am Ende der Klasse 11 werden <b>alle Noten des gesamten
+                        Schuljahres</b> zusammengerechnet.</p>
+                </div>
+
+                <div class="lk-block">
+                    <div class="lk-stufe">Klasse 12 &amp; 13 <span class="lk-hj">je HJ</span></div>
+                    <dl class="lk-fach">
+                        <dt>Info</dt>
+                        <dd>
+                            <span class="bw-line">1 Klassenarbeit <em>oder</em> 1 komplexe Leistung
+                                (praktisch &amp; m&uuml;ndlich &amp; schriftlich)</span>
+                            <span class="bw-line">mind. 2 kleine Noten</span>
+                            <span class="lk-ratio">Verh&auml;ltnis <b>1&#8239;:&#8239;2</b></span>
+                        </dd>
+                    </dl>
+                    <p class="lk-arrow">Hier wird <b>nur je Halbjahr</b> zusammengerechnet &mdash; vier
+                        getrennte Halbjahresnoten.</p>
+                    <div class="lk-hj-list">
+                        <span>12/1</span><span>12/2</span><span>13/1</span><span>13/2</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lk-hint"><b>Hinweis:</b> Die FOS hat eigene Regelungen &mdash; andere
+                Schulordnung.</div>
+        </section>
+
         <section class="bw-card note">
             <div class="bw-foot">
                 Transkript der Schul&uuml;bersicht &bdquo;Bewertungen&ldquo;. Die Drittelgewichtung steht dort als
                 33,3&nbsp;% und 66,6&nbsp;% &mdash; gemeint sind ein Drittel und zwei Drittel.
-                Die Prozentschwellen der einzelnen Note stehen im
+                Der LK-Block darunter gibt die handschriftliche Notiz wieder; seine Verh&auml;ltnisse
+                1&#8239;:&#8239;2 und 1&#8239;:&#8239;1 sind dieselbe Gewichtung wie 33,3&nbsp;%/66,6&nbsp;%
+                und 50&nbsp;%/50&nbsp;% oben. Die Prozentschwellen der einzelnen Note stehen im
                 <a href="punktetabelle.html">Notenspiegel BGY</a>.
             </div>
         </section>
