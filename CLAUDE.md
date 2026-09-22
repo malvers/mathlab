@@ -3,7 +3,7 @@
 ## General rules
 A few ground rules:
 
-1. I, Doc Alvers, always hard-reloads with Cmd–Shift–R
+1. Live-Reload läuft lokal überall — **Cmd–Shift–R nicht mehr erwähnen und nicht danach fragen** (Doc, 22.09.2026: „Nicht mehr fragen/sagen“). Stattdessen VOR einem „schau mal“ sicherstellen, dass der Server läuft: `pgrep -f "forloop/serve.py"`, sonst `cd ~/IdeaProjects/forloop && python3 serve.py &`. Wurzel ist `HTML/`, die Seiten liegen unter `/svp/…`. Auf docalvers.de gibt es kein Live-Reload — dort einfach den Pages-Lauf abwarten, ohne Tastenkombination.
 
 @Agent:
 
