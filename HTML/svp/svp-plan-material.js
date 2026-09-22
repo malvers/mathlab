@@ -3,7 +3,7 @@
 window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
-        drawnIcon, matLabelEl, matIconEl, siteHref, keinMausfokus, equalizeMatPills,
+        drawnIcon, matLabelEl, matIconEl, siteHref, lokalHref, keinMausfokus, equalizeMatPills,
         equalizeRefPills, setVideoReiter, isVideoEntry, isExerciseEntry, officeEdit,
         matDefaultLabel, openMat, renderMaterial, hideMatTip, showMatTip,
         festeLinks, festePillen
@@ -225,6 +225,9 @@ window.svpPlanParts.push(function (P) {
     // damit der Menuepunkt zu den getippten Zeichen passt statt zum bunten Logo.
     const PRESENT_PATH = P.PRESENT_PATH = 'M3.5 4.5h17v11h-17z M12 15.5v3.5 M8.7 21.5 12 19l3.3 2.5';
 
+    // Laptop = "von diesem Rechner" - das Symbol des Menuepunkts "Öffne lokal".
+    const LAPTOP_PATH = P.LAPTOP_PATH = 'M4.5 5.5h15v10h-15z M2 18.5h20 M10 18.5h4';
+
     /* Film statt QuickTime-Symbol (Doc, 08.09.2026: "nimm bitte ein movie icon
        sonst zu Mac"). Die vier Buerosymbole sind Programmsymbole, weil jedes
        Kind sie im eigenen Dock hat - fuer eine Videodatei gibt es kein solches
@@ -312,6 +315,21 @@ window.svpPlanParts.push(function (P) {
         if (!IST_LOKAL) return url;
         return String(url == null ? '' : url)
             .replace(/^https?:\/\/(?:www\.)?docalvers\.de(?=\/|$)/i, '') || url;
+    }
+
+    /* Das Gegenstueck: von der LIVE-Seite aus dieselbe Seite vom eigenen Rechner
+       holen (Doc, 22.09.2026: "gib mir bitte ein 'Öffne lokal' wenn ich eingeloggt
+       bin"). Leer heisst: der Punkt gehoert nicht ins Menue - weil man ohnehin
+       schon lokal ist oder weil der Link gar nicht hierher zeigt (SharePoint,
+       YouTube: dort gibt es lokal nichts zu oeffnen). */
+    const LOKAL_ORIGIN = 'http://localhost:8765';        /* serve.py, wie in svp-nav.js */
+    function lokalHref(url) {
+        if (IST_LOKAL) return '';
+        try {
+            const u = new URL(String(url == null ? '' : url), location.href);
+            if (!/^(?:www\.)?docalvers\.de$/i.test(u.hostname)) return '';
+            return LOKAL_ORIGIN + u.pathname + u.search + u.hash;
+        } catch (e) { return ''; }
     }
 
     /* Textaufgaben-Blatt: liegt unter /aufgaben/ und wandert nicht in die

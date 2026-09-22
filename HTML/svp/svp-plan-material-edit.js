@@ -431,6 +431,14 @@ window.svpPlanParts.push(function (P) {
         const punkte = [
             ['⧉', 'Kopieren', function () { copyOneMat(ref, url, label); }, 'ctx-ico-gross'],
             ['↗', 'Öffnen', function () { P.openMat(url, label); }, '']];
+        /* "Öffne lokal" nur fuer Angemeldete und nur fuer eigene Seiten (Doc,
+           22.09.2026). Es geht in einen ECHTEN Tab, nicht in das kleine
+           Material-Fenster: lokal wird geprueft, was gerade gebaut wurde, und
+           dazu gehoeren Hart-Neuladen und die Entwicklerwerkzeuge. */
+        const lokal = P.CAN_EDIT_MAT ? P.lokalHref(url) : '';
+        if (lokal) punkte.push([P.drawnIcon('ctx-ico-svg', P.LAPTOP_PATH, 'currentColor', 1.7),
+            'Öffne lokal',
+            function () { window.open(lokal, '_blank', 'noopener'); }, '']);
         if (desktop) punkte.push([P.drawnIcon('ctx-ico-svg', P.PRESENT_PATH, 'currentColor', 1.7),
             'Bearbeiten in ' + desktop.name,
             function () { location.href = desktop.href; }, '']);
