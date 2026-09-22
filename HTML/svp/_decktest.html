@@ -1,0 +1,63 @@
+<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck-D</title>
+<link rel="stylesheet" href="svp.css">
+<style>
+    /* Schauseite fuer die beiden Hauszeichen: sie zeichnet NICHT selbst,
+       sondern ruft deckIcon/lambdaIcon aus svp-plan-material.js - was hier
+       steht, ist damit genau das, was in den Materialpillen haengt. */
+    body { padding: 24px; font-family: 'Orbitron', sans-serif; }
+    h1 { font-size: 1rem; letter-spacing: 0.1em; margin: 0 0 6px; }
+    .hinweis { font-size: 0.7rem; color: var(--muted); margin: 0 0 22px; letter-spacing: 0.04em; }
+    .gross { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; }
+    .gross svg { width: min(300px, 66vw); height: auto; }
+    .leiter { display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; margin-top: 26px; }
+    .stufe { text-align: center; font-size: 0.58rem; letter-spacing: 0.06em; color: var(--muted); }
+    .stufe svg { display: block; margin: 0 auto 6px; }
+    .hell { margin-top: 26px; padding: 16px; border-radius: 10px; background: #fff; }
+    .hell .leiter { margin: 0; }
+    .hell .stufe { color: rgb(70, 100, 150); }
+</style></head>
+<body>
+<h1>Deck-D neben dem Lambda</h1>
+<p class="hinweis">Das D kommt aus Great Vibes, als Umriss in deckIcon() eingebaut. 16 px ist die Groesse in der Materialpille.</p>
+<div class="gross" id="gross"></div>
+<div class="leiter" id="leiter"></div>
+<div class="hell"><div class="leiter" id="leiter-hell"></div></div>
+
+<script>window.svpPlanParts = [];</script>
+<script src="svp-plan-material.js"></script>
+<script>
+    const P = {};
+    window.svpPlanParts[0](P);
+
+    const STUFEN = [96, 48, 32, 24, 16];
+    const ZEICHEN = [['D', function () { return P.deckIcon(); }],
+                     ['λ', function () { return P.lambdaIcon(); }]];
+
+    function zeichen(macher, px) {
+        const svg = macher();
+        svg.removeAttribute('class');       /* ohne Pillen-Geometrie, freie Groesse */
+        svg.setAttribute('width', px);
+        svg.setAttribute('height', px);
+        return svg;
+    }
+
+    ZEICHEN.forEach(function (e) {
+        document.getElementById('gross').appendChild(zeichen(e[1], 300));
+    });
+
+    ['leiter', 'leiter-hell'].forEach(function (id) {
+        const kasten = document.getElementById(id);
+        STUFEN.forEach(function (px) {
+            ZEICHEN.forEach(function (e) {
+                const s = document.createElement('div');
+                s.className = 'stufe';
+                s.appendChild(zeichen(e[1], px));
+                s.appendChild(document.createTextNode(e[0] + ' ' + px));
+                kasten.appendChild(s);
+            });
+        });
+    });
+</script>
+</body></html>

@@ -3,7 +3,8 @@
 window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
-        drawnIcon, matLabelEl, matIconEl, siteHref, lokalHref, keinMausfokus, equalizeMatPills,
+        drawnIcon, deckIcon, lambdaIcon, matLabelEl, matIconEl, siteHref, lokalHref,
+        keinMausfokus, equalizeMatPills,
         equalizeRefPills, setVideoReiter, isVideoEntry, isExerciseEntry, officeEdit,
         matDefaultLabel, openMat, renderMaterial, hideMatTip, showMatTip,
         festeLinks, festePillen, matSpalten
@@ -75,19 +76,29 @@ window.svpPlanParts.push(function (P) {
     }
 
     /* Das Zeichen eines eigenen Foliensatzes: dasselbe gelbe Kaestchen wie beim
-       Lambda, darin ein geschweiftes D in Blau (Doc, 22.09.2026: "nimm das
-       Lambda und mach ein geschweiftes D in Blau rein. Deck -> Doc"). Das D
-       steht fuer Deck und fuer Doc: ein Foliensatz aus dem eigenen Haus ist
-       damit auf einen Blick von einer fremden PPT zu unterscheiden, so wie das
-       Lambda ein eigenes Lab auszeichnet.
-       Gezeichnet, nicht getippt (Doc, 20.09.2026: Icons immer als SVG) - und
-       gezeichnet wie das Lambda: Striche mit runden Enden im selben 64er
-       Kaestchen, im selben Dunkelblau (Doc, 22.09.2026: "dunkel wie lamb").
-       Viel duenner als das Lambda (Doc: "wesentlich feiner"): der Buchstabe
-       hat einen Bauch und braucht deshalb Luft, mit der Strichbreite 9 des
-       Lambda lief er zu. Die Schwuenge oben und unten tragen noch einmal die
-       halbe Breite - das ist der Kontrast einer Schreibfeder; bei 16 px bleibt
-       davon eine feine Verdickung, und das D bleibt lesbar. */
+       Lambda, darin ein geschwungenes D (Doc, 22.09.2026: "nimm das Lambda und
+       mach ein geschweiftes D rein. Deck -> Doc"). Das D steht fuer Deck und
+       fuer Doc: ein Foliensatz aus dem eigenen Haus ist damit auf einen Blick
+       von einer fremden PPT zu unterscheiden, so wie das Lambda ein eigenes Lab
+       auszeichnet.
+       Der Buchstabe ist aus der Schreibschrift GREAT VIBES geschnitten (SIL
+       Open Font License, Google Fonts) - von Hand gezeichnet war er Doc nicht
+       schoen genug ("such mal bitte eine Schriftart die schoen geschwungen
+       ist"). Geschnitten heisst: hier steht der blosse Umriss als Pfad, es wird
+       keine Schrift geladen und kein Glyph getippt (Doc, 20.09.2026: Icons
+       immer als SVG). Nachschneiden, falls es je noetig ist: fontTools,
+       SVGPathPen auf den Glyph "D", dann in das 64er Kaestchen einpassen. */
+    const DECK_D = 'M196 -43Q155 -43 118.0 -31.0Q81 -19 57.5 5.0Q34 29 34 65Q34 102 66.5 132.0Q99 162 159 162Q222 162 278.5 133.5Q335 105 398 72Q451 123 492.5 190.5Q534 258 572.5 333.0Q611 408 652.0 482.5Q693 557 744 621Q753 632 762.0 643.5Q771 655 781 666Q727 698 665.0 715.5Q603 733 537 733Q455 733 385.0 712.0Q315 691 263.5 655.5Q212 620 183.0 575.5Q154 531 154 484Q154 442 171.5 414.5Q189 387 216.0 374.0Q243 361 269 361Q304 361 329.0 374.5Q354 388 370.0 408.0Q386 428 394.0 447.0Q402 466 403 478Q403 485 412 485Q426 485 423 468Q418 428 393.0 398.5Q368 369 333.0 352.5Q298 336 261 336Q217 336 181.0 352.5Q145 369 123.5 402.5Q102 436 102 485Q102 550 137.0 601.5Q172 653 233.0 689.0Q294 725 373.0 744.0Q452 763 540 763Q608 763 677.0 746.5Q746 730 808 697Q834 726 861.5 748.5Q889 771 918 783Q931 788 939 788Q945 788 945 785Q945 780 922 760Q909 748 891.0 723.5Q873 699 854 670Q914 631 960.5 575.5Q1007 520 1034.0 449.5Q1061 379 1061 293Q1061 209 1032.0 146.5Q1003 84 953.0 43.0Q903 2 838.0 -18.5Q773 -39 701 -39Q616 -39 543.5 -16.0Q471 7 409 36Q360 -3 307.5 -23.0Q255 -43 196 -43ZM786 563Q765 530 735.0 479.5Q705 429 668.0 370.0Q631 311 591.0 252.0Q551 193 510.5 141.5Q470 90 432 55Q485 29 549.0 10.0Q613 -9 694 -9Q786 -9 854.0 29.5Q922 68 960.0 134.5Q998 201 998 285Q998 394 952.0 483.5Q906 573 829 633Q816 612 805.0 593.5Q794 575 786 563ZM196 -12Q247 -15 295.5 6.5Q344 28 376 53Q316 82 265.5 106.0Q215 130 172 130Q137 130 118.0 109.5Q99 89 99 64Q99 32 124.5 11.0Q150 -10 196 -12Z';
+    /* Setzt den Umriss mittig ins Kaestchen und dreht ihn auf den Kopf: die
+       Schrift rechnet y nach oben, SVG nach unten. */
+    const DECK_D_LAGE = 'translate(7.48 48.68) scale(0.04479 -0.04479)';
+    /* Great Vibes hat nur EINEN Schnitt; fetter wird sie durch eine Kontur in
+       derselben Farbe auf der Flaeche (Doc, 22.09.2026: "gibts den noch
+       Bolder", dann "Nimm 4" - die vierte Stufe der Leiter auf _decktest.html).
+       Der Wert steht in Glypheneinheiten, weil die Lage oben ihn mitskaliert:
+       3,2 von 64 Kaestcheneinheiten sind hier 71.4. */
+    const DECK_D_FETT = 71.4;
+
     function deckIcon() {
         const ns = 'http://www.w3.org/2000/svg';
         const svg = document.createElementNS(ns, 'svg');
@@ -100,22 +111,14 @@ window.svpPlanParts.push(function (P) {
         kasten.setAttribute('rx', '14');
         kasten.setAttribute('fill', 'rgb(245, 194, 66)');
         svg.appendChild(kasten);
-        const g = document.createElementNS(ns, 'g');
-        g.setAttribute('fill', 'none');
-        g.setAttribute('stroke', 'rgb(14, 36, 78)');
-        g.setAttribute('stroke-linecap', 'round');
-        g.setAttribute('stroke-linejoin', 'round');
-        [['M25 15 L25 49', 4.5],                        /* Schaft */
-         ['M25 15 C43 15 50 22 50 32 C50 42 43 49 25 49', 4.5], /* Bauch */
-         ['M25 15 C20 11 15 14 17 19', 2.5],            /* Schwung oben */
-         ['M25 49 C20 53 15 50 17 45', 2.5]             /* Schwung unten */
-        ].forEach(function (z) {
-            const pfad = document.createElementNS(ns, 'path');
-            pfad.setAttribute('d', z[0]);
-            pfad.setAttribute('stroke-width', z[1]);
-            g.appendChild(pfad);
-        });
-        svg.appendChild(g);
+        const d = document.createElementNS(ns, 'path');
+        d.setAttribute('d', DECK_D);
+        d.setAttribute('transform', DECK_D_LAGE);
+        d.setAttribute('fill', 'rgb(14, 36, 78)');
+        d.setAttribute('stroke', 'rgb(14, 36, 78)');
+        d.setAttribute('stroke-width', DECK_D_FETT);
+        d.setAttribute('stroke-linejoin', 'round');
+        svg.appendChild(d);
         return svg;
     }
 
