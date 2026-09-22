@@ -2079,6 +2079,7 @@ ASK_JS = r"""
       post(AI_URL, { ping: true, pass: v })
         .then(function (r) {
           busy = false; send.disabled = false;
+          out.querySelectorAll('.ask-err').forEach(function (e) { e.remove(); });   // the last verdict goes, whichever way this one went (Doc, 22.09.2026)
           if (!r.ok) { say('Passwort stimmt nicht.', 'ask-err'); input.value = ''; return; }
           try { localStorage.setItem('dev_access', v); } catch (e) { }
           askQuestion(); input.focus();
