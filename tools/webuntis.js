@@ -1215,8 +1215,10 @@ async function main() {
     // mehr. Kein Fehler-Exit, damit der taegliche LaunchAgent sauber
     // durchlaeuft - er ruft `year && names` auf.
     if (!process.argv.includes('--alle')) {
-      console.log('names ist stillgelegt (Datenschutz, 02.09.2026) — es werden keine Kolleg:innen-Namen mehr gespeichert.'
-        + ' Mit --alle wieder einschalten.');
+      // Quiet since 22.09.2026 (Doc): the notice took three lines of the "WebUntis holen"
+      // dialog every single day and never says anything new. Uncomment to get it back.
+      // console.log('names ist stillgelegt (Datenschutz, 02.09.2026) — es werden keine Kolleg:innen-Namen mehr gespeichert.'
+      //   + ' Mit --alle wieder einschalten.');
       return;
     }
     // Full teacher names. getTeachers is denied for teacher accounts, but the
