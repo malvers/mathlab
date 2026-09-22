@@ -4433,6 +4433,7 @@ QUIZZES = [
  (INF12, "ai-begriffe", 6, 39, "Die Begriffe der künstlichen Intelligenz", AI_BEGRIFFE),
  (FOS11, "ai-begriffe", 6, 39, "Die Begriffe der künstlichen Intelligenz", AI_BEGRIFFE),
  (FOS12, "ai-begriffe", 6, 39, "Die Begriffe der künstlichen Intelligenz", AI_BEGRIFFE),
+ (INF13, "ai-begriffe", 6, 39, "Die Begriffe der künstlichen Intelligenz", AI_BEGRIFFE),
 ]
 
 
