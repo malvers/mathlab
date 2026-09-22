@@ -63,6 +63,7 @@
 
     /* ---- Daten ----------------------------------------------------------- */
     let daten = null;     /* { plaene, stand, cloud } - erst nach dem ersten Tippen */
+    let filme = {};       /* Film-Kennung -> { titel, kanal }, aus film-titel.json */
     let laden = null;     /* das laufende Versprechen, damit nur einmal geladen wird */
 
     /* Die Felder heissen im Index wie im Plan gelesen, in der Cloud wie im
@@ -104,6 +105,13 @@
             const res = await fetch(base + 'plan-suchindex.json');
             if (!res.ok) throw new Error('kein Index');
             const idx = await res.json();
+            /* Die Filmtitel kommen aus derselben kleinen Datei wie in der
+               Planseite (tools/build-film-titel.mjs) - fehlt sie, sucht die
+               Zeile eben ohne sie weiter. */
+            try {
+                const fr = await fetch(base + 'film-titel.json');
+                if (fr.ok) filme = (await fr.json()).filme || {};
+            } catch (e) { filme = {}; }
             idx.plaene.forEach(function (p) { p.pfad = new URL(p.href, base).pathname; });
             const cloud = await holeCloud(idx.plaene.map(function (p) { return p.pfad; }));
             idx.plaene.forEach(function (p) {
@@ -156,12 +164,26 @@
         return s.replace(/[._-]+/g, ' ');
     }
 
+    /* Ein Film traegt seinen echten Titel nicht in der Zeile - er steht bei
+       YouTube und kommt aus film-titel.json (Doc, 22.09.2026: "Game wird nur
+       einmal gefunden"). Adressen selbst bleiben draussen, nur Dateinamen und
+       Titel gehen in den Heuhaufen. */
+    function filmId(u) {
+        let m = String(u || '').match(/youtu\.be\/([\w-]{6,})/i);
+        if (m) return m[1];
+        m = String(u || '').match(/[?&]v=([\w-]{6,})/i);
+        return m ? m[1] : '';
+    }
+
     function matWorte(src) {
         return String(src == null ? '' : src)
             .replace(/\[\[datei:([^\]]*)\]\]/g, function (_, p) { return ' ' + dateiname(p) + ' '; })
             .replace(/\[\[wichtig\]\]/g, ' ')
             .replace(/«([^»]*)»/g, ' $1 ')
-            .replace(/https?:\/\/\S+/g, function (u) { return ' ' + dateiname(u) + ' '; })
+            .replace(/https?:\/\/\S+/g, function (u) {
+                const f = filme[filmId(u)];
+                return ' ' + (f ? (f.titel || '') + ' ' + (f.kanal || '') : dateiname(u)) + ' ';
+            })
             .replace(/\s+/g, ' ').trim();
     }
 

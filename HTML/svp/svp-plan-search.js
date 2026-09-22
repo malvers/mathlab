@@ -135,13 +135,49 @@ window.svpPlanParts.push(function (P) {
         return s.replace(/[._-]+/g, ' ');
     }
 
+    /* ---- Filmtitel ------------------------------------------------------
+       Ein Film ist sonst nur unter dem Etikett auffindbar, das Doc getippt hat
+       ("Enigma gebrochen") - der echte Titel steht bei YouTube ("The Most
+       Important Decryption Machine Ever Built"). Doc, 22.09.2026: "Game wird
+       nur einmal gefunden (nicht das)".
+       Die Titel holt tools/build-film-titel.mjs EINMAL beim Bauen in
+       film-titel.json; hier wird nur diese kleine Datei gelesen. Absichtlich
+       so herum: sonst spraeche jeder Schuelerbrowser bei jeder Suche mit
+       YouTube. */
+    let filmTitel = null;    /* id -> { titel, kanal } */
+    let filmLaeuft = false;
+    function filmLaden() {
+        if (filmTitel || filmLaeuft) return;
+        filmLaeuft = true;
+        const me = document.querySelector('script[src*="svp-plan-search.js"]');
+        const dir = me ? me.src.replace(/[^/]*$/, '') : '';
+        fetch(dir + 'film-titel.json')
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) { filmTitel = (d && d.filme) || {}; planSearchRun(); })
+            .catch(function () { filmTitel = {}; });
+    }
+
+    /* youtu.be/<id> und watch?v=<id> fuehren auf dasselbe Video. */
+    function filmId(u) {
+        let m = String(u || '').match(/youtu\.be\/([\w-]{6,})/i);
+        if (m) return m[1];
+        m = String(u || '').match(/[?&]v=([\w-]{6,})/i);
+        return m ? m[1] : '';
+    }
+
     /* Was an einer Pille haengt, aber nirgends geschrieben steht: die
-       Beschreibung (sie erscheint erst beim Darueberfahren) und der Dateiname -
-       aus [[datei:...]], wenn es ihn gibt, sonst aus der Adresse selbst
-       (Doc, 22.09.2026: "go" auf beides). */
+       Beschreibung (sie erscheint erst beim Darueberfahren), der Dateiname -
+       aus [[datei:...]], wenn es ihn gibt, sonst aus der Adresse selbst - und
+       bei einem Film sein echter Titel samt Kanal. */
     function vtMeta(en) {
-        return planFold([en.desc || '', vtDateiname(en.datei || ''), vtDateiname(en.url || '')]
-            .filter(Boolean).join(' '));
+        const teile = [en.desc || '', vtDateiname(en.datei || ''), vtDateiname(en.url || '')];
+        const id = filmId(en.url);
+        if (id) {
+            filmLaden();
+            const f = filmTitel && filmTitel[id];
+            if (f) teile.push(f.titel || '', f.kanal || '');
+        }
+        return planFold(teile.filter(Boolean).join(' '));
     }
 
     /* Sichtbarer Text einer geholten Seite, schon gefaltet. Geparst wird mit
