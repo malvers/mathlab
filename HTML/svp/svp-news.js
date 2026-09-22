@@ -232,11 +232,19 @@
     label.setAttribute('aria-expanded', 'false');
     const labelText = document.createElement('span');
     labelText.className = 'nav-news-labeltext';
+    /* Das Dreieck steht VOR dem Etikett, am linken Rand der Leiste (Doc,
+       22.09.2026: "das dreieck bitte auch nach links") - hinter dem Namen
+       klemmte es zwischen Rubrik und laufendem Text. Gezeichnet, nicht
+       gesetzt: das Schriftzeichen U+25BE fehlt in Orbitron und kam links
+       ueberhaupt nicht an (nachgemessen am 22.09.2026 - es belegte nicht
+       einmal Platz). */
     const caret = document.createElement('span');
     caret.className = 'nav-news-caret';
-    caret.textContent = '\u25be';
-    label.appendChild(labelText);
+    caret.setAttribute('aria-hidden', 'true');
+    caret.innerHTML = '<svg viewBox="0 0 10 10" fill="currentColor" ' +
+        'aria-hidden="true"><polygon points="0.8,2.8 9.2,2.8 5,7.6"/></svg>';
     label.appendChild(caret);
+    label.appendChild(labelText);
 
     function menuAuf(an) {
         if (an && !menu.isConnected) document.body.appendChild(menu);
@@ -705,7 +713,11 @@
         const mess = document.createElement('span');
         mess.className = 'nav-news-labeltext';
         mess.style.cssText = 'position:absolute;visibility:hidden;width:auto;white-space:nowrap';
-        box.appendChild(mess);
+        /* IM Etikett messen, nicht in der Zeile: Versalien, 9,6 px und die
+           Laufweite erbt der Messstreifen nur dort. In der Zeile stand er in
+           11,5 px Kleinschreibung - "Stoff der Woche" kam so 10 px zu schmal
+           heraus und quoll nach links ueber (gemessen am 22.09.2026). */
+        label.appendChild(mess);
         let max = 0;
         const gesehen = new Set();
         eintraege.forEach(function (it) {

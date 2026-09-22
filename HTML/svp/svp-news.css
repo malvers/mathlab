@@ -63,7 +63,10 @@
     flex: 0 0 auto;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    /* Dreieck, Logo mit Name, Trennstrich - drei Teile mit Luft dazwischen:
+       bei 4 px sass das Dreieck am Logo wie ein Krümel (Doc, 22.09.2026:
+       "grauenhaft"). */
+    gap: 10px;
     font: inherit;
     font-size: 0.6rem;
     letter-spacing: 0.12em;
@@ -78,36 +81,58 @@
 .nav-news-label:hover,
 .nav-news-label.offen { color: var(--text); }
 
+/* Feiner Strich zwischen Etikett und Lauftext. Er ist der Grund, warum der
+   Name links stehen darf: die feste Breite (siehe .nav-news-labeltext) laesst
+   hinter einer kurzen Rubrik Platz frei - vor dem Strich liest sich das als
+   Spalte, ohne ihn als Loch vor dem laufenden Text. Ein Flex-Kind, kein
+   Rahmen am Knopf: so bleibt er 14 px hoch, auch wenn der Knopf in der engen
+   Zeile auf die volle Hoehe gestreckt wird. */
+.nav-news-label::after {
+    content: '';
+    flex: none;
+    width: 1px;
+    height: 14px;
+    background: var(--line);
+}
+
 .nav-news-label:focus-visible {
     outline: 2px solid var(--lambda);
     outline-offset: 2px;
     border-radius: 4px;
 }
 
-/* Der Name der laufenden Rubrik, rechtsbuendig (Doc, 20.09.2026: "rechts
-   aligned"): er hat eine feste Breite, damit das Band beim Rubrikwechsel
-   nicht springt - links gesetzt risse eine kurze Rubrik wie "Vortraege" eine
-   Luecke zum Text. Die Breite misst svp-news.js an der laengsten Rubrik. */
+/* Der Name der laufenden Rubrik in fester Breite, damit das Band beim
+   Rubrikwechsel nicht springt; die Breite misst svp-news.js an der laengsten
+   Rubrik. Bis zum 22.09.2026 stand er darin rechtsbuendig (Doc, 20.09.2026:
+   "rechts aligned"), weil eine kurze Rubrik wie "Vortraege" sonst eine Luecke
+   zum Text riss. Seit das Dreieck vorn steht und ein Trennstrich die Spalte
+   abschliesst, steht er links: Dreieck, Logo, Name in einer Reihe, die Luft
+   bleibt vor dem Strich. */
 .nav-news-labeltext {
     display: inline-flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: flex-start;
     gap: 4px;
-    text-align: right;
+    text-align: left;
     /* Sonst bricht eine lange Rubrik in der festen Breite um und macht die
        ganze Zeile eine Zeile hoeher: gemessen am 21.09.2026 sprang das Band
        zwischen 27 px ("SCHON GEWUSST") und 32 px ("VORTRAEGE"). */
     white-space: nowrap;
 }
 
+/* Ein gezeichnetes Dreieck, kein Schriftzeichen (Doc: Icons immer als SVG) -
+   U+25BE fehlt in Orbitron. 10 px neben den 16-px-Logos, gefuellt in der
+   Farbe des Etiketts; als Bild traegt es seine eigene Hoehe, die Zeile bleibt
+   so flach wie vorher. */
 .nav-news-caret {
-    font-size: 1.15em;
-    /* line-height:0 haelt die Zeilenbox flach - sonst waere das Band mit dem
-       Pfeil hoeher als vorher (dasselbe Muster wie .export-caret). */
-    line-height: 0;
-    opacity: 0.75;
+    display: inline-flex;
+    flex: none;
+    width: 10px;
+    height: 10px;
     transition: transform 0.15s;
 }
+
+.nav-news-caret svg { width: 100%; height: 100%; display: block; }
 
 .nav-news-label.offen .nav-news-caret { transform: rotate(180deg); }
 
@@ -356,8 +381,6 @@ html.svp-light .nav-news-item b { color: var(--ypsilon); }
        der Knopf so hoch, wie die Zeile ohnehin ist. */
     align-self: stretch;
 }
-
-.nav-news.eng .nav-news-caret { line-height: 1; }
 
 /* ---- Das Megafon spricht, solange das Band laeuft --------------------
    Doc, 20.09.2026: "wenn es laeuft lass das Megafon sprechen und wabern ;-)".
