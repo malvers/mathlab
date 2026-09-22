@@ -949,9 +949,13 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
   color:#7E8FB5;display:flex;justify-content:space-between;align-items:center;
   position:relative;z-index:1;margin:-12px -12px 0;padding:11px 12px 9px;background:var(--askbg);
   border-radius:10px 10px 0 0;box-shadow:0 4px 8px -4px rgba(14,36,78,.35)}
+/* the header without its title: a slim edge with the grip, the cost figure left and the × right - the title
+   is the field's placeholder now (Doc, 22.09.2026: "nimm den Header raus und in die Zeile Frag Solita") */
+#ask-head.slim{padding:9px 8px 3px 12px;box-shadow:none;min-height:0}
+#ask-head.slim>span{font-size:9px;letter-spacing:.8px}
 #ask-close{border:0;background:none;color:#7E8FB5;font-size:16px;line-height:1;cursor:pointer;padding:0 2px}
 #ask-close:hover{color:var(--red)}
-#ask-out{font-size:14px;line-height:1.45;color:var(--body);max-height:230px;overflow:auto;
+#ask-out{font-size:14px;line-height:1.45;color:var(--body);max-height:calc(100vh - var(--askrest,200px));overflow:auto;
   margin-bottom:9px;padding-top:9px;white-space:pre-wrap}
 #ask-out:empty{display:none}
 #ask-out:empty + label{margin-top:10px}
@@ -1023,6 +1027,9 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 #ask-mic svg,#ask-tts svg{width:16px;height:16px}
 #ask-mic.on{background:var(--red);border-color:var(--red);color:#fff}   /* listening */
 #ask-tts.off{color:var(--muted);border-color:var(--askline);opacity:.75}   /* no reading aloud, no voice cost */
+#ask-tts[hidden]{display:none}   /* the speaker lives in the right-click menu now (Doc, 22.09.2026) */
+#ask #ask-menu .ask-spk{display:inline-block;width:16px;height:16px;margin:0 6px -3px 0;vertical-align:baseline}
+#ask #ask-menu .ask-spk svg{width:16px;height:16px;display:block}
 #ask-mic[hidden],#ask-tts[hidden]{display:none}
 #ask input{flex:1;min-width:0;padding:7px 9px;border:1px solid var(--askline);border-radius:7px;
   font:400 14px Raleway,system-ui,sans-serif;color:var(--ink);background:var(--askfield)}
@@ -1711,6 +1718,7 @@ ASK_JS = r"""
     const t = ttsOn ? 'Solita liest vor' : 'Solita liest NICHT vor (keine Stimm-Kosten)';
     ttsBtn.title = t; ttsBtn.setAttribute('aria-label', t);
   }
+  ttsBtn.hidden = true;                           // lives in the right-click menu now (Doc, 22.09.2026)
   ttsBtn.onclick = function () {
     ttsOn = !ttsOn;
     try { localStorage.setItem(TTS_KEY, ttsOn ? '1' : '0'); } catch (e) { }
@@ -1742,11 +1750,17 @@ ASK_JS = r"""
     + '<label><input type="checkbox" data-who="claude"><span>Solita<i>Claude Haiku</i></span></label>'
     + '<label class="ds"><input type="checkbox" data-who="ds"><span>DeepSeek</span></label>'
     + '<div class="ask-msep"></div>'
+    + '<label><input type="checkbox" data-act="tts"><span><em class="ask-spk"></em>Vorlesen<i>Solitas Stimme</i></span></label>'
+    + '<div class="ask-msep"></div>'
     + '<button type="button" data-act="copy">Kopieren</button>'
     + '<button type="button" data-act="clear">Leeren</button>';
   box.appendChild(menu);
-  const checks = menu.querySelectorAll('input');
+  const checks = menu.querySelectorAll('input[data-who]');
+  const ttsBox = menu.querySelector('input[data-act="tts"]');
+  ttsBox.addEventListener('change', function () { ttsBtn.onclick(); });
   function showWho() {
+    ttsBox.checked = ttsOn;
+    menu.querySelector('.ask-spk').innerHTML = ttsOn ? SPK_ON : SPK_OFF;
     checks.forEach(function (c) {
       c.checked = who[c.dataset.who];
       c.disabled = c.checked && !(who.claude && who.ds);   // the last one on cannot be switched off
@@ -1818,6 +1832,11 @@ ASK_JS = r"""
   // das Fenster nach oben größer ziehen ... persist"). The panel hangs from its bottom edge, so it grows upwards.
   const H_KEY = 'solita_ask_h', H_MIN = 90, TOP_GAP = 48;   // 48: clear of the edit pencil and the LOCAL badge
   const head = document.getElementById('ask-head');
+  (function slimHead() {                           // the title text goes, the cost figure and the × remain
+    const span = head.querySelector('span');
+    if (span && span.firstChild && span.firstChild.nodeType === 3) span.firstChild.remove();
+    head.classList.add('slim');
+  })();
   function rest() {                                  // everything but the answers, plus the gap to the screen top
     const r = panel.getBoundingClientRect();
     const gap = out.offsetHeight ? 0 : parseFloat(getComputedStyle(out).marginBottom) || 0;   // hidden: its margin comes along
@@ -1880,7 +1899,7 @@ ASK_JS = r"""
     label.textContent = 'Passwort — wird auf diesem Gerät gemerkt';
     label.hidden = false;
     input.setAttribute('aria-label', 'Passwort');
-    input.type = 'password'; input.value = ''; input.placeholder = '';
+    input.type = 'password'; input.value = ''; input.placeholder = 'Passwort';
     input.setAttribute('autocomplete', 'current-password');
     send.textContent = 'OK';
     micBtn.hidden = true; ttsBtn.hidden = true;
@@ -1888,7 +1907,7 @@ ASK_JS = r"""
   function askQuestion() {
     label.hidden = true;                            // a question needs no label (Doc, 16.09.2026: "weg")
     input.setAttribute('aria-label', 'Deine Frage an Solita');   // the field still has a name (Doc's label rule)
-    input.type = 'text'; input.value = ''; input.placeholder = 'Warum zwei Drittel?';
+    input.type = 'text'; input.value = ''; input.placeholder = 'Frag Solita zur Folie oder Präsi';
     input.setAttribute('autocomplete', 'off');
     send.textContent = '?';
     micBtn.hidden = !(window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -2088,7 +2107,7 @@ ASK_JS = r"""
       return;
     }
     busy = true; send.disabled = true;
-    if (ear && ear.active) ear.stop();               // nothing may land in the field behind the answer
+    if (ear && ear.active) { heardLate = true; ear.stop(); }   // its late result is dropped, see onFinal
     input.value = '';
     ready();
     say('<span class="ask-q">' + v.replace(/[<&]/g, function (c) { return c === '<' ? '&lt;' : '&amp;'; }) + '</span>');
@@ -2173,6 +2192,9 @@ ASK_JS = r"""
     + 'stroke-linecap="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/>'
     + '<path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>';
   if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) micBtn.hidden = true;
+  micBtn.addEventListener('mousedown', function (e) { e.preventDefault(); });   // the field keeps the caret
+  micBtn.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+  let heardLate = false;                             // stop() still delivers the text - not after it was sent
   micBtn.onclick = function () {
     if (ear && ear.active) { ear.stop(); return; }
     if (!window.SolitaListen) { say('Spracheingabe ist hier nicht geladen.', 'ask-err'); return; }
@@ -2180,8 +2202,12 @@ ASK_JS = r"""
     if (!ear) ear = window.SolitaListen({
       lang: 'de-DE',
       onState: function (st) { micBtn.classList.toggle('on', st === 'listening'); },
-      onPartial: function (t) { input.value = t; ready(); },
-      onFinal: function (t) { input.value = t; micBtn.classList.remove('on'); input.focus(); ready(); }
+      onPartial: function (t) { if (heardLate) return; input.value = t; ready(); },
+      onFinal: function (t) {
+        micBtn.classList.remove('on');
+        if (heardLate) { heardLate = false; return; }   // already sent from the field - nothing lands behind the answer
+        input.value = t; input.focus(); ready();
+      }
     });
     ear.start();
   };

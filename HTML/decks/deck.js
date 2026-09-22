@@ -736,6 +736,7 @@ fromHash();
     const t = ttsOn ? 'Solita liest vor' : 'Solita liest NICHT vor (keine Stimm-Kosten)';
     ttsBtn.title = t; ttsBtn.setAttribute('aria-label', t);
   }
+  ttsBtn.hidden = true;                           // lives in the right-click menu now (Doc, 22.09.2026)
   ttsBtn.onclick = function () {
     ttsOn = !ttsOn;
     try { localStorage.setItem(TTS_KEY, ttsOn ? '1' : '0'); } catch (e) { }
@@ -767,11 +768,17 @@ fromHash();
     + '<label><input type="checkbox" data-who="claude"><span>Solita<i>Claude Haiku</i></span></label>'
     + '<label class="ds"><input type="checkbox" data-who="ds"><span>DeepSeek</span></label>'
     + '<div class="ask-msep"></div>'
+    + '<label><input type="checkbox" data-act="tts"><span><em class="ask-spk"></em>Vorlesen<i>Solitas Stimme</i></span></label>'
+    + '<div class="ask-msep"></div>'
     + '<button type="button" data-act="copy">Kopieren</button>'
     + '<button type="button" data-act="clear">Leeren</button>';
   box.appendChild(menu);
-  const checks = menu.querySelectorAll('input');
+  const checks = menu.querySelectorAll('input[data-who]');
+  const ttsBox = menu.querySelector('input[data-act="tts"]');
+  ttsBox.addEventListener('change', function () { ttsBtn.onclick(); });
   function showWho() {
+    ttsBox.checked = ttsOn;
+    menu.querySelector('.ask-spk').innerHTML = ttsOn ? SPK_ON : SPK_OFF;
     checks.forEach(function (c) {
       c.checked = who[c.dataset.who];
       c.disabled = c.checked && !(who.claude && who.ds);   // the last one on cannot be switched off
@@ -843,6 +850,11 @@ fromHash();
   // das Fenster nach oben größer ziehen ... persist"). The panel hangs from its bottom edge, so it grows upwards.
   const H_KEY = 'solita_ask_h', H_MIN = 90, TOP_GAP = 48;   // 48: clear of the edit pencil and the LOCAL badge
   const head = document.getElementById('ask-head');
+  (function slimHead() {                           // the title text goes, the cost figure and the × remain
+    const span = head.querySelector('span');
+    if (span && span.firstChild && span.firstChild.nodeType === 3) span.firstChild.remove();
+    head.classList.add('slim');
+  })();
   function rest() {                                  // everything but the answers, plus the gap to the screen top
     const r = panel.getBoundingClientRect();
     const gap = out.offsetHeight ? 0 : parseFloat(getComputedStyle(out).marginBottom) || 0;   // hidden: its margin comes along
@@ -905,7 +917,7 @@ fromHash();
     label.textContent = 'Passwort — wird auf diesem Gerät gemerkt';
     label.hidden = false;
     input.setAttribute('aria-label', 'Passwort');
-    input.type = 'password'; input.value = ''; input.placeholder = '';
+    input.type = 'password'; input.value = ''; input.placeholder = 'Passwort';
     input.setAttribute('autocomplete', 'current-password');
     send.textContent = 'OK';
     micBtn.hidden = true; ttsBtn.hidden = true;
@@ -913,7 +925,7 @@ fromHash();
   function askQuestion() {
     label.hidden = true;                            // a question needs no label (Doc, 16.09.2026: "weg")
     input.setAttribute('aria-label', 'Deine Frage an Solita');   // the field still has a name (Doc's label rule)
-    input.type = 'text'; input.value = ''; input.placeholder = 'Warum zwei Drittel?';
+    input.type = 'text'; input.value = ''; input.placeholder = 'Frag Solita zur Folie oder Präsi';
     input.setAttribute('autocomplete', 'off');
     send.textContent = '?';
     micBtn.hidden = !(window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -1113,7 +1125,7 @@ fromHash();
       return;
     }
     busy = true; send.disabled = true;
-    if (ear && ear.active) ear.stop();               // nothing may land in the field behind the answer
+    if (ear && ear.active) { heardLate = true; ear.stop(); }   // its late result is dropped, see onFinal
     input.value = '';
     ready();
     say('<span class="ask-q">' + v.replace(/[<&]/g, function (c) { return c === '<' ? '&lt;' : '&amp;'; }) + '</span>');
@@ -1198,6 +1210,9 @@ fromHash();
     + 'stroke-linecap="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/>'
     + '<path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>';
   if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) micBtn.hidden = true;
+  micBtn.addEventListener('mousedown', function (e) { e.preventDefault(); });   // the field keeps the caret
+  micBtn.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+  let heardLate = false;                             // stop() still delivers the text - not after it was sent
   micBtn.onclick = function () {
     if (ear && ear.active) { ear.stop(); return; }
     if (!window.SolitaListen) { say('Spracheingabe ist hier nicht geladen.', 'ask-err'); return; }
@@ -1205,8 +1220,12 @@ fromHash();
     if (!ear) ear = window.SolitaListen({
       lang: 'de-DE',
       onState: function (st) { micBtn.classList.toggle('on', st === 'listening'); },
-      onPartial: function (t) { input.value = t; ready(); },
-      onFinal: function (t) { input.value = t; micBtn.classList.remove('on'); input.focus(); ready(); }
+      onPartial: function (t) { if (heardLate) return; input.value = t; ready(); },
+      onFinal: function (t) {
+        micBtn.classList.remove('on');
+        if (heardLate) { heardLate = false; return; }   // already sent from the field - nothing lands behind the answer
+        input.value = t; input.focus(); ready();
+      }
     });
     ear.start();
   };

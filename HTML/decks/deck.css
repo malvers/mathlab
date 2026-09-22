@@ -441,9 +441,13 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
   color:#7E8FB5;display:flex;justify-content:space-between;align-items:center;
   position:relative;z-index:1;margin:-12px -12px 0;padding:11px 12px 9px;background:var(--askbg);
   border-radius:10px 10px 0 0;box-shadow:0 4px 8px -4px rgba(14,36,78,.35)}
+/* the header without its title: a slim edge with the grip, the cost figure left and the × right - the title
+   is the field's placeholder now (Doc, 22.09.2026: "nimm den Header raus und in die Zeile Frag Solita") */
+#ask-head.slim{padding:9px 8px 3px 12px;box-shadow:none;min-height:0}
+#ask-head.slim>span{font-size:9px;letter-spacing:.8px}
 #ask-close{border:0;background:none;color:#7E8FB5;font-size:16px;line-height:1;cursor:pointer;padding:0 2px}
 #ask-close:hover{color:var(--red)}
-#ask-out{font-size:14px;line-height:1.45;color:var(--body);max-height:230px;overflow:auto;
+#ask-out{font-size:14px;line-height:1.45;color:var(--body);max-height:calc(100vh - var(--askrest,200px));overflow:auto;
   margin-bottom:9px;padding-top:9px;white-space:pre-wrap}
 #ask-out:empty{display:none}
 #ask-out:empty + label{margin-top:10px}
@@ -515,6 +519,9 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 #ask-mic svg,#ask-tts svg{width:16px;height:16px}
 #ask-mic.on{background:var(--red);border-color:var(--red);color:#fff}   /* listening */
 #ask-tts.off{color:var(--muted);border-color:var(--askline);opacity:.75}   /* no reading aloud, no voice cost */
+#ask-tts[hidden]{display:none}   /* the speaker lives in the right-click menu now (Doc, 22.09.2026) */
+#ask #ask-menu .ask-spk{display:inline-block;width:16px;height:16px;margin:0 6px -3px 0;vertical-align:baseline}
+#ask #ask-menu .ask-spk svg{width:16px;height:16px;display:block}
 #ask-mic[hidden],#ask-tts[hidden]{display:none}
 #ask input{flex:1;min-width:0;padding:7px 9px;border:1px solid var(--askline);border-radius:7px;
   font:400 14px Raleway,system-ui,sans-serif;color:var(--ink);background:var(--askfield)}
