@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bewertungen | Stoffverteilungspl&auml;ne</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+    <link rel="stylesheet" href="svp.css">
+    <script src="svp-gate.js"></script>
+    <style>
+        /* The teal band of the printed sheet, mixed from the house cyan so the
+           table stays in the palette in all three schemes (dark, grey, light).
+           Everything here derives from --g-cyan; the deviating Wiederholer row
+           is the one place that takes lambda - the original marked it magenta,
+           and orange is what this house uses for "Achtung, Ausnahme". */
+        :root {
+            --bw-band: rgba(var(--g-cyan), 0.20);
+            --bw-band-ink: var(--head);
+            --bw-band-line: rgba(var(--g-cyan), 0.45);
+            --bw-row-a: rgba(var(--g-cyan), 0.05);
+            --bw-row-b: rgba(var(--g-cyan), 0.09);
+            --bw-grid: rgba(var(--tint), 0.18);
+            --bw-edge: rgba(var(--g-cyan), 0.25);
+        }
+
+        html.svp-light {
+            --bw-band: rgb(214, 238, 244);
+            --bw-band-ink: rgb(16, 82, 110);
+            --bw-band-line: rgb(150, 200, 214);
+            --bw-row-a: rgb(255, 255, 255);
+            --bw-row-b: rgb(243, 250, 252);
+            --bw-grid: rgba(40, 70, 120, 0.18);
+            --bw-edge: rgba(28, 118, 158, 0.3);
+        }
+
+        .bw-wrap {
+            /* Doc, 22.09.2026: "ganze Breite bitte" - the cards line up with the
+               heading, which svp-gate.css caps at 1200 px. */
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            /* grid items default to min-width:auto and would refuse to shrink
+               below the table, pushing the cards past the window on a phone */
+            grid-template-columns: minmax(0, 1fr);
+            gap: 16px;
+        }
+
+        .bw-card {
+            min-width: 0;
+            background: var(--card-soft);
+            border: 1px solid var(--bw-edge);
+            border-radius: 12px;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        table.bw {
+            /* svp-table.css gives every table min-width: 760px for the plan
+               sheets - here the table has to be able to shrink instead. */
+            width: 100%;
+            min-width: 0;
+            table-layout: fixed;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        table.bw col.c1 { width: 30%; }
+
+        table.bw th,
+        table.bw td {
+            padding: 10px 14px;
+            text-align: left;
+            vertical-align: top;
+            border-right: 1px solid var(--bw-grid);
+            border-bottom: 1px solid var(--bw-grid);
+            font-size: 0.92rem;
+            line-height: 1.45;
+        }
+
+        table.bw th:last-child,
+        table.bw td:last-child { border-right: 0; }
+
+        table.bw tbody tr:last-child th,
+        table.bw tbody tr:last-child td { border-bottom: 0; }
+
+        /* Head band: Klassenstufe left, the two Fachgruppen right. */
+        table.bw thead th {
+            position: static;
+            background: var(--bw-band);
+            color: var(--bw-band-ink);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: none;
+            border-bottom: 1px solid var(--bw-band-line);
+            white-space: normal;
+        }
+
+        /* Row labels: Leistungsnachweise, Notenberechnung. */
+        table.bw tbody th {
+            font-weight: 600;
+            color: var(--text);
+            background: var(--bw-row-b);
+        }
+
+        table.bw tbody td { background: var(--bw-row-a); color: var(--text); }
+        table.bw tbody tr.alt th { background: var(--bw-row-b); }
+        table.bw tbody tr.alt td { background: var(--bw-row-b); }
+
+        /* One statement per line - the sheet sets them under each other. */
+        .bw-line { display: block; }
+        .bw-line + .bw-line { margin-top: 2px; }
+
+        .bw-pc { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+        /* The deviating rule for the BGY24 repeaters - magenta in the original. */
+        table.bw tbody tr.bw-warn th,
+        table.bw tbody tr.bw-warn td {
+            color: var(--lambda);
+            background: rgba(var(--g-orange), 0.07);
+        }
+
+        html.svp-light table.bw tbody tr.bw-warn th,
+        html.svp-light table.bw tbody tr.bw-warn td {
+            color: rgb(150, 108, 8);
+            background: rgba(var(--g-orange), 0.16);
+        }
+
+        /* The closing note sits in a plain card, without the table's teal rim. */
+        .bw-card.note {
+            padding: 14px 16px;
+            border-color: var(--line);
+        }
+
+        .bw-foot {
+            max-width: 46rem;
+            margin: 0 auto;
+            font-size: 0.8rem;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+
+        .bw-foot a { color: var(--cyan); text-decoration: none; }
+        .bw-foot a:hover { text-decoration: underline; }
+
+        /* Phones: the three columns stack. Each cell then needs the column head
+           it belongs to - it is written in by script from the thead, so the
+           heading text lives in exactly one place. */
+        @media (max-width: 680px) {
+            table.bw, table.bw thead, table.bw tbody, table.bw tr,
+            table.bw th, table.bw td { display: block; }
+            table.bw col.c1 { width: auto; }
+
+            /* The Klassenstufe stays as the card's title; the two Fachgruppen
+               move into the cells they head (data-col, see below). */
+            table.bw thead th + th { display: none; }
+
+            table.bw th,
+            table.bw td { border-right: 0; }
+
+            table.bw tbody th {
+                font-family: 'Orbitron', sans-serif;
+                font-size: 0.8rem;
+                letter-spacing: 0.03em;
+                background: var(--bw-band);
+                color: var(--bw-band-ink);
+                border-bottom: 1px solid var(--bw-band-line);
+            }
+
+            /* the heads keep their own spelling - uppercased, "ElCh" reads
+               as a word of its own */
+            table.bw tbody td::before {
+                content: attr(data-col);
+                display: block;
+                font-size: 0.74rem;
+                letter-spacing: 0.04em;
+                color: var(--muted);
+                margin-bottom: 3px;
+            }
+
+            table.bw tbody tr.bw-warn th { background: rgba(var(--g-orange), 0.18); }
+
+            /* stacked, an empty cell would still print its column head */
+            table.bw tbody td:empty { display: none; }
+        }
+
+        @media print {
+            .bw-card { break-inside: avoid; }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht</a>
+        <h1>Bewertungen</h1>
+        <div class="subtitle">Leistungsnachweise und Notenberechnung &middot; Berufliches Gymnasium (BGY)</div>
+    </header>
+
+    <div class="bw-wrap">
+        <section class="bw-card">
+            <table class="bw">
+                <colgroup>
+                    <col class="c1">
+                    <col>
+                    <col>
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th scope="col">Klasse 11 (BGY26)</th>
+                        <th scope="col">Deu, Mat, Eng, Spa,<br>GuS, VBWL, Isy</th>
+                        <th scope="col">Sonstige F&auml;cher</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">Leistungsnachweise</th>
+                        <td>
+                            <span class="bw-line">2 Klassenarbeiten</span>
+                            <span class="bw-line">3&ndash;5 sonstige Noten</span>
+                        </td>
+                        <td>
+                            <span class="bw-line">1 Klassenarbeit</span>
+                            <span class="bw-line">2&ndash;4 sonstige Noten</span>
+                        </td>
+                    </tr>
+                    <tr class="alt">
+                        <th scope="row">Notenberechnung</th>
+                        <td>
+                            <span class="bw-line">Durchschnitt Klassenarbeiten <span class="bw-pc">50 %</span></span>
+                            <span class="bw-line">Durchschnitt sonstige Noten <span class="bw-pc">50 %</span></span>
+                        </td>
+                        <td>
+                            <span class="bw-line">Klassenarbeit <span class="bw-pc">33,3 %</span></span>
+                            <span class="bw-line">Durchschnitt sonstige Noten <span class="bw-pc">66,6 %</span></span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="bw-card">
+            <table class="bw">
+                <colgroup>
+                    <col class="c1">
+                    <col>
+                    <col>
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th scope="col">Klasse 12/13 (BGY25/BGY24)</th>
+                        <th scope="col">Deu, Mat, Eng,<br>GuS, VBWL, Isy, ElCh</th>
+                        <th scope="col">Sonstige F&auml;cher</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">Leistungsnachweise</th>
+                        <td>
+                            <span class="bw-line">2 Klausuren</span>
+                            <span class="bw-line">3&ndash;5 sonstige Noten</span>
+                        </td>
+                        <td>
+                            <span class="bw-line">1 Klausur</span>
+                            <span class="bw-line">2&ndash;4 sonstige Noten</span>
+                        </td>
+                    </tr>
+                    <tr class="alt">
+                        <th scope="row">Notenberechnung</th>
+                        <td>
+                            <span class="bw-line">Durchschnitt Klausuren <span class="bw-pc">50 %</span></span>
+                            <span class="bw-line">Durchschnitt sonstige Noten <span class="bw-pc">50 %</span></span>
+                        </td>
+                        <td>
+                            <span class="bw-line">Klausur <span class="bw-pc">33,3 %</span></span>
+                            <span class="bw-line">Durchschnitt sonstige Noten <span class="bw-pc">66,6 %</span></span>
+                        </td>
+                    </tr>
+                    <tr class="bw-warn">
+                        <th scope="row">Notenberechnung Wiederholer BGY24 abweichend:</th>
+                        <td></td>
+                        <td>
+                            <span class="bw-line">Klausur <span class="bw-pc">50 %</span></span>
+                            <span class="bw-line">Durchschnitt sonstige Noten <span class="bw-pc">50 %</span></span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="bw-card note">
+            <div class="bw-foot">
+                Transkript der Schul&uuml;bersicht &bdquo;Bewertungen&ldquo;. Die Drittelgewichtung steht dort als
+                33,3&nbsp;% und 66,6&nbsp;% &mdash; gemeint sind ein Drittel und zwei Drittel.
+                Die Prozentschwellen der einzelnen Note stehen im
+                <a href="punktetabelle.html">Notenspiegel BGY</a>.
+            </div>
+        </section>
+    </div>
+
+    <script>
+        (function () {
+            'use strict';
+            /* Stacked on a phone, a cell has lost its column head - carry it
+               along in data-col, taken from the thead so nothing is written
+               twice. <br> in a heading becomes a space, not a run-on word. */
+            document.querySelectorAll('table.bw').forEach(function (table) {
+                const heads = [...table.tHead.rows[0].cells]
+                    .map(th => th.innerHTML.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]*>/g, '').trim());
+                [...table.tBodies[0].rows].forEach(function (tr) {
+                    [...tr.cells].forEach(function (cell, i) {
+                        if (cell.tagName === 'TD') cell.dataset.col = heads[i] || '';
+                    });
+                });
+            });
+        }());
+    </script>
+    <script src="svp-nav.js"></script>
+</body>
+
+</html>

@@ -53,6 +53,10 @@
            "Notenspiegel" like both sheets (Doc, same day: "oh und notenspiegel"). */
         ['punktetabelle.html', 'BGY', 'b-grey', 'Notenspiegel BGY - Klasse 11 und 12/13'],
         ['punktetabelle.html?s=osgy', 'OS GY', 'b-grey', 'Notenspiegel Oberschule und Gymnasium'],
+        /* Doc, 22.09.2026: die Schuluebersicht "Bewertungen" (Leistungsnachweise
+           und Notenberechnung) gehoert neben die beiden Notenspiegel. */
+        ['bewertungen.html', 'Bewertungen', 'b-grey',
+         'Bewertungen - Leistungsnachweise und Notenberechnung am BGY'],
         ['bewertungsmatrix.html', 'Bewertungsmatrix', 'b-grey',
          'Bewertungsmatrix Vortrag - Coach- und Publikumsbogen'],
         /* the live poll, host screen - same target as the bar icon on the SVP start page
@@ -90,7 +94,7 @@
     // The Stundenplan no longer does (Doc, 10.09.2026: "auf click SP unter dem
     // Header wie alles sonst") - it opens in place, below this nav band.
     const NEW_TAB = new Set(['notes.html', 'konzepte.html', 'operatoren.html',
-        'punktetabelle.html', 'punktetabelle.html?s=osgy', '../fokus.html']);
+        'punktetabelle.html', 'punktetabelle.html?s=osgy', 'bewertungen.html', '../fokus.html']);
 
     // The pill row only carries Home, Notizen and one dropdown per Schulart —
     // everything else lives inside those. [pill label, [[caption|null, hrefs]],
@@ -126,7 +130,8 @@
                das Menue ab, hinter dem Timer. */
             /* An entry is an href or a sub-menu { sub: label, hrefs: [...] }. */
             [null, ['notes.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
-                    { sub: 'Notenspiegel', hrefs: ['punktetabelle.html', 'punktetabelle.html?s=osgy'] },
+                    { sub: 'Notenspiegel', hrefs: ['punktetabelle.html', 'punktetabelle.html?s=osgy',
+                                                  'bewertungen.html'] },
                     '../fokus.html', 'bewertungsmatrix.html', '../vote.html?host']],
             /* Doc, 10.09.2026: the demo class last, below a divider; the poll is the
                second-to-last entry (18.09.2026) and sits ABOVE the divider, closing
