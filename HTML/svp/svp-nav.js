@@ -55,8 +55,8 @@
         ['punktetabelle.html?s=osgy', 'OS GY', 'b-grey', 'Notenspiegel Oberschule und Gymnasium'],
         /* Doc, 22.09.2026: die Schuluebersicht "Bewertungen" (Leistungsnachweise
            und Notenberechnung) gehoert neben die beiden Notenspiegel. */
-        ['bewertungen.html', 'Bewertungen', 'b-grey',
-         'Bewertungen - Leistungsnachweise und Notenberechnung am BGY'],
+        ['bewertungen.html', 'Bewertungen BGY', 'b-grey',
+         'Bewertungen BGY - Leistungsnachweise und Notenberechnung'],
         ['bewertungsmatrix.html', 'Bewertungsmatrix', 'b-grey',
          'Bewertungsmatrix Vortrag - Coach- und Publikumsbogen'],
         /* the live poll, host screen - same target as the bar icon on the SVP start page

@@ -85,3 +85,39 @@
 
 /* No action buttons on paper - the toolbar has its own print rule. */
 @media print { .page-head button.action { display: none; } }
+
+/* Der Kopf bleibt beim Scrollen oben stehen (Doc, 22.09.2026: "Bewertungen SP
+   und hier bitte die Ueberschrift nicht wegscrollen" - Bewertungen, Stundenplan
+   und Punktetabelle). Eine Seite schaltet es mit <body class="head-sticky">
+   frei; die Planseiten haben dafuer ihre eigene Huelle (.plan-sticky in
+   svp-toolbar.css), die ausser dem Kopf auch Werkzeugleiste und Laufband
+   traegt.
+
+   Der Grund liegt in einem ::before und nicht im Kopf selbst: der Kopf steht in
+   einer 1200px-Spalte, ein Hintergrund an ihm wuerde die Zeilen neben ihm
+   durchscheinen lassen. Das Pseudo-Element zieht ueber die Body-Polsterung
+   hinaus - dieselben --band-pull-* wie das Navi-Band, damit eine Seite mit
+   eigener Polsterung (stundenplan.css) nicht seitlich ueberhaengt. */
+body.head-sticky header.page-head {
+    position: sticky;
+    top: 0;
+    /* ueber dem Blatt, aber unter den Menues des Navi-Bands (dort 50+) */
+    z-index: 30;
+    padding-top: 6px;
+    padding-bottom: 8px;
+}
+
+body.head-sticky header.page-head::before {
+    content: '';
+    position: absolute;
+    inset: 0 calc(-1 * var(--band-pull-x, clamp(12px, 3vw, 40px)));
+    background: var(--bg);
+    /* hinter Ueberschrift und Knoepfen, aber - der Kopf ist ein eigener
+       Stapelkontext - weiter vor allem, was darunter durchzieht */
+    z-index: -1;
+}
+
+@media print {
+    body.head-sticky header.page-head { position: static; }
+    body.head-sticky header.page-head::before { display: none; }
+}
