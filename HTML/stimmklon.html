@@ -70,6 +70,12 @@
         #btnRec:hover { background: rgba(176, 36, 24, .18); }
         #btnRec.stopp { background: rgb(176, 36, 24); color: white; }
         .uhr { font-variant-numeric: tabular-nums; font-size: 1.1rem; font-weight: 700; opacity: .85; min-width: 4.5em; }
+        .pegelbox {
+            width: 132px; height: 9px; border-radius: 5px; overflow: hidden;
+            background: rgba(255, 255, 255, .1); flex: 0 0 auto;
+        }
+        .pegelbox i { display: block; height: 100%; width: 0; background: rgb(121, 158, 49); transition: width .07s linear; }
+        .pegelwert { font-size: 0.7rem; opacity: .6; min-width: 5em; font-variant-numeric: tabular-nums; }
         .uhr.laeuft { color: rgb(176, 36, 24); }
 
         .punkt { width: 11px; height: 11px; border-radius: 50%; background: rgba(255, 255, 255, .25); display: inline-block; }
@@ -157,6 +163,8 @@
         <div class="regie ws-btns">
             <span class="punkt" id="punkt" title="Aufnahme"></span>
             <span class="uhr" id="uhr">0:00</span>
+            <span class="pegelbox" title="Aussteuerung"><i id="pegel"></i></span>
+            <span class="pegelwert" id="pegelwert"></span>
             <button class="cyber-btn" id="btnRec">Aufnehmen</button>
             <button class="cyber-btn" id="btnPlay">Anhören</button>
             <button class="cyber-btn" id="btnPrev">Zurück</button>
@@ -332,6 +340,9 @@
             $('tipp').textContent = 'Fehler: ' + ((e.reason && e.reason.message) || e.reason);
         });
         const zuKurz = (s, t) => t && t.sekunden > 0 && t.sekunden < erwartet(s) * 0.55;
+        // the server measures every take with ffmpeg volumedetect; under -45 dB there is no voice in it
+        const zuLeise = t => t && typeof t.pegel === 'number' && t.pegel < -45;
+        const taugtNicht = (s, t) => zuKurz(s, t) || zuLeise(t);
 
         function zeichne() {
             const s = SAETZE[i], lang = Array.isArray(s.text);
@@ -351,7 +362,7 @@
             SAETZE.forEach(x => {
                 const t = takes[x.id];
                 if (!t || !t.sekunden) return;
-                if (zuKurz(x, t)) kaputt++; else gut += t.sekunden;
+                if (taugtNicht(x, t)) kaputt++; else gut += t.sekunden;
             });
             $('minuten').textContent = (gut / 60).toFixed(1).replace('.', ',');
             $('fortschritt').style.width = Math.min(100, gut / 1800 * 100) + '%';
@@ -363,17 +374,18 @@
             else { u.textContent = 'noch nichts'; u.className = 'fehlt'; }
 
             if (!falscherServer) $('warnung').innerHTML = kaputt
-                ? '<div class="warnkasten"><b>' + kaputt + ' Aufnahme' + (kaputt > 1 ? 'n sind' : ' ist') + ' abgeschnitten</b> — '
-                  + 'deutlich kürzer, als der Text dauert. Unten orange markiert, bitte noch einmal aufnehmen. '
-                  + 'Nach dem Stopp kurz warten, bis „Gespeichert" dasteht.</div>'
+                ? '<div class="warnkasten"><b>' + kaputt + ' Aufnahme' + (kaputt > 1 ? 'n taugen' : ' taugt') + ' nicht</b> — '
+                  + 'zu kurz oder zu leise. Unten orange markiert, bitte noch einmal aufnehmen. '
+                  + 'Achte beim Sprechen auf den Pegelbalken: er muss grün ausschlagen.</div>'
                 : '';
 
             $('liste').innerHTML = SAETZE.map((x, n) => {
-                const t = takes[x.id], kaput = zuKurz(x, t);
+                const t = takes[x.id], kaput = taugtNicht(x, t);
                 const name = x.titel || alsText(x);
                 const kopf = (x.id === 't01') ? '<div class="trenner">Lange Texte</div>' : '';
                 return kopf + '<div class="zeile ' + (t ? (kaput ? 'angeschnitten' : 'fertig') : '') + (n === i ? ' hier' : '') + '" data-zu="' + n + '">'
-                    + '<span class="sek ' + (kaput ? 'warn' : '') + '">' + (t ? (t.sekunden || 0).toFixed(1) + 's' : '—') + '</span>'
+                    + '<span class="sek ' + (kaput ? 'warn' : '') + '" title="' + (t && t.pegel != null ? t.pegel + ' dB' : '') + '">'
+                    + (t ? (zuLeise(t) ? 'still' : (t.sekunden || 0).toFixed(1) + 's') : '—') + '</span>'
                     + '<span class="txt">' + name + '</span>'
                     + (t ? '<button data-hoer="' + x.id + '" title="Anhören">' + ICON_PLAY + '</button>'
                          + '<button data-weg="' + x.id + '" title="Verwerfen">' + ICON_WEG + '</button>' : '')
@@ -381,6 +393,40 @@
             }).join('');
             const hier = $('liste').querySelector('.hier');
             if (hier) hier.scrollIntoView({ block: 'nearest' });
+        }
+
+        /* A level meter, because everything else about a silent take looks perfectly fine:
+           the clock runs, the dot blinks, a file appears. Only the needle tells the truth. */
+        let hoerer = null, pegelTakt = null;
+        function pegelAn(stream) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const quelle = ctx.createMediaStreamSource(stream);
+                const analyse = ctx.createAnalyser();
+                analyse.fftSize = 1024;
+                quelle.connect(analyse);
+                const buf = new Float32Array(analyse.fftSize);
+                let spitze = 0;
+                hoerer = ctx;
+                pegelTakt = setInterval(() => {
+                    analyse.getFloatTimeDomainData(buf);
+                    let summe = 0;
+                    for (let k = 0; k < buf.length; k++) summe += buf[k] * buf[k];
+                    const db = 20 * Math.log10(Math.sqrt(summe / buf.length) + 1e-9);
+                    spitze = Math.max(spitze, db);
+                    const anteil = Math.max(0, Math.min(1, (db + 60) / 60));   // -60 dB .. 0 dB
+                    $('pegel').style.width = (anteil * 100) + '%';
+                    $('pegel').style.background = db < -45 ? 'rgb(176, 36, 24)'
+                        : db < -32 ? 'rgb(245, 194, 66)' : 'rgb(121, 158, 49)';
+                    $('pegelwert').textContent = db < -55 ? 'kein Ton' : Math.round(db) + ' dB';
+                }, 80);
+            } catch (e) { /* no meter is survivable; the server measures the take anyway */ }
+        }
+        function pegelAus() {
+            clearInterval(pegelTakt); pegelTakt = null;
+            if (hoerer) { try { hoerer.close(); } catch (e) { } hoerer = null; }
+            $('pegel').style.width = '0%';
+            $('pegelwert').textContent = '';
         }
 
         function uhrAn() {
@@ -401,8 +447,12 @@
                 $('tipp').textContent = 'Mikrofon wird geöffnet …';
                 try {
                     stream = await navigator.mediaDevices.getUserMedia({
-                        // no processing: the clone should hear the room and the voice, not Chrome's guesswork
-                        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 }
+                        /* Automatic gain STAYS ON. Switching it off was meant to give the clone
+                           untouched audio; on Doc's built-in mic it produced -55 to -72 dB - room
+                           noise, no voice (22.09.2026: "man hört gar nix"). A clone needs an audible
+                           voice far more than it needs an unprocessed one. Echo cancellation and
+                           noise suppression stay off: those two chew on the voice itself. */
+                        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true, channelCount: 1 }
                     });
                 } catch (err) {
                     $('tipp').textContent = 'Kein Mikrofon: ' + err.name + ' — ' + err.message;
@@ -419,13 +469,13 @@
             // a timeslice means data arrives during the take, not only at the end - a long passage
             // is then never lost as one big missing chunk
             r.start(1000);
-            laeuft = true; uhrAn(); zeichne();
+            laeuft = true; uhrAn(); pegelAn(stream); zeichne();
             $('tipp').textContent = 'Läuft. Leertaste beendet die Aufnahme.';
         }
 
         function stoppe() {
             if (!laeuft) return;
-            laeuft = false; uhrAus();
+            laeuft = false; uhrAus(); pegelAus();
             if (rec && rec.state !== 'inactive') rec.stop();   // fires onstop -> schicke()
             $('tipp').textContent = 'Wird gespeichert …';
             zeichne();
@@ -444,10 +494,11 @@
             takes = res.takes || {};
             const t = takes[id];
             if (t && t.fehler) $('tipp').textContent = 'Gespeichert, aber ohne WAV: ' + t.fehler;
+            else if (zuLeise(t)) $('tipp').textContent = 'Gespeichert — aber mit ' + t.pegel + ' dB praktisch stumm. Mikrofon prüfen und noch einmal.';
             else if (zuKurz(s, t)) $('tipp').textContent = 'Gespeichert — aber nur ' + t.sekunden + ' s, das ist zu kurz. Bitte noch einmal.';
             else $('tipp').textContent = 'Gespeichert: ' + (t ? t.sekunden : 0) + ' s. Leertaste startet die nächste.';
             // move on only if this take was the one on screen and it looks complete
-            if (id === SAETZE[i].id && t && !zuKurz(s, t) && i < SAETZE.length - 1) i++;
+            if (id === SAETZE[i].id && t && !taugtNicht(s, t) && i < SAETZE.length - 1) i++;
             zeichne();
         }
 
@@ -551,7 +602,7 @@
             takes = d.takes || {};
             if (d.ordner) $('ordner').textContent = d.ordner + '/';
             // start at the first line that is missing or truncated, so a resumed session picks up there
-            const offen = SAETZE.findIndex(s => !takes[s.id] || zuKurz(s, takes[s.id]));
+            const offen = SAETZE.findIndex(s => !takes[s.id] || taugtNicht(s, takes[s.id]));
             i = offen < 0 ? 0 : offen;
             zeichne();
         });

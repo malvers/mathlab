@@ -25,6 +25,7 @@ import http.server
 import importlib
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -91,6 +92,21 @@ def to_wav(src, dst):
         return False, 'ffmpeg hing'
 
 
+def wav_level(path):
+    """Mean volume in dB. Speech recorded properly sits near -20 to -30 dB; below about -45 the
+    file holds room noise and no voice. Doc's first run came back at -55 to -72 dB and he could
+    hear nothing (22.09.2026) - so every take gets measured and a silent one says so."""
+    try:
+        out = subprocess.run(
+            ['ffmpeg', '-i', path, '-af', 'volumedetect', '-f', 'null', '-'],
+            check=True, capture_output=True, timeout=60,
+        )
+        m = re.search(r'mean_volume:\s*(-?[\d.]+) dB', (out.stderr or b'').decode('utf-8', 'replace'))
+        return round(float(m.group(1)), 1) if m else None
+    except Exception:
+        return None
+
+
 def wav_seconds(path):
     """Real duration from the file, not from the browser's timer - the browser counts the
     button press, ffprobe counts the audio. A service that wants '30 minutes' means the audio."""
@@ -150,19 +166,24 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         wav = os.path.join(STORE, key + '.wav')
         ok, err = to_wav(raw, wav)
         secs = wav_seconds(wav) if ok else 0.0
+        pegel = wav_level(wav) if ok else None
 
         takes = load()
         takes[key] = {
             'text': (data.get('text') or '').strip(),
             'sekunden': secs,
+            'pegel': pegel,
             'datei': (key + '.wav') if ok else '',
             'fehler': '' if ok else err,
             'wann': datetime.datetime.now().isoformat(timespec='seconds'),
         }
         save(takes)
         total = sum(t.get('sekunden') or 0 for t in takes.values())
-        print('  %-14s %5.1f s   gesamt %4.1f min   %s'
-              % (key, secs, total / 60, (takes[key]['text'] or '')[:46]))
+        print('  %-14s %5.1f s  %6s dB  gesamt %4.1f min   %s'
+              % (key, secs, ('%.1f' % pegel) if pegel is not None else '?', total / 60,
+                 (takes[key]['text'] or '')[:40]))
+        if pegel is not None and pegel < -45:
+            print('     ZU LEISE - da ist keine Stimme drin')
         if not ok:
             print('     ffmpeg: ' + err[:200])
         return self.reply(200, {'takes': takes, 'gesamt': round(total, 1)})
