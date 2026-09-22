@@ -579,6 +579,12 @@
                tatsaechlich gerenderte Breite - bei einer Zeile, die gerade
                erst im Dokument steht, ist das der verlaessliche Wert. */
             const breite = function (el) { return Math.round(el.getBoundingClientRect().width); };
+            /* Zuerst das Etikett: seine feste Breite bestimmt mit, wie viel
+               vom Fenster fuer den Text uebrig bleibt - und ob der Rubrikname
+               ueberhaupt hineinpasst. Danach erst messen, sonst rechnet das
+               Band mit einem Fenster, das es gleich wieder verliert. */
+            labelBreite(eintraege);
+            engPruefen();
             const platz = view.clientWidth || 600;
             /* Zuerst die Luecken, dann messen - sonst zaehlt die Breite der
                Zeile ohne sie, und die Dauer waere zu kurz. */
@@ -598,7 +604,6 @@
             /* Doc, 20.09.2026: "wenn es laeuft lass das Megafon sprechen und
                wabern" - die Pille bewegt sich genau so lange wie das Band. */
             pill.classList.add('spricht');
-            labelBreite(eintraege);
             labelFolgen(view, run);
         });
     }
@@ -647,6 +652,48 @@
             document.head.appendChild(sc);
         });
     }
+
+    /* ---- Wie viel Platz bleibt dem Laufband? ---------------------------
+       Doc, 22.09.2026: "ticker ... da reicht der Platz ni[cht]" - auf einer
+       schmalen Zeile frass das Rubrik-Etikett fast alles, der Text lief in
+       einem Rest. Bis dahin fiel der Name erst unter 520 px Fensterbreite
+       weg, einer geratenen Grenze; jetzt zaehlt, was der Name von der Zeile
+       wegnimmt. Gemessen am 22.09.2026 auf inf11: das Etikett ist 147 px
+       breit, immer gleich - das sind bei 1200 px Fenster 14 % der Zeile, bei
+       800 px schon 21 % und bei 500 px 34 %. Mehr als ein Viertel darf es
+       nicht nehmen; darueber traegt es nur noch den Pfeil (Klasse "eng",
+       Aussehen in svp-news.css). Die Zeile kippt damit bei rund 660 px
+       Fensterbreite. Ein Verhaeltnis und keine Pixelgrenze: es haelt auch,
+       wenn eine Rubrik einen laengeren Namen bekommt oder die Spur einmal
+       breiter wird. */
+    const LABEL_ANTEIL = 0.25;
+
+    function engPruefen() {
+        const view = box.querySelector('.nav-news-view');
+        if (!view || !box.clientWidth) return;
+        /* Gemessen wird immer am vollen Etikett: "eng" versteckt den Namen,
+           seine Breite waere sonst nicht mehr zu erfahren - und die Zeile
+           kaeme nie wieder heraus, wenn das Fenster breiter wird. Zwischen
+           Ab- und Anschalten malt der Browser nicht, es flackert also nicht.
+           Weil so oder so der breite Zustand die Grundlage ist, kippt die
+           Klasse auch nicht zwischen zwei Messungen hin und her. */
+        if (box.classList.contains('eng')) box.classList.remove('eng');
+        const ganz = box.clientWidth;
+        const etikett = Math.round(label.getBoundingClientRect().width);
+        /* Die gemessenen Werte bleiben am Element stehen: so ist im Zweifel
+           ohne Konsole zu sehen, womit entschieden wurde. */
+        box.dataset.lauf = Math.round(view.getBoundingClientRect().width);
+        box.dataset.etikett = etikett;
+        box.classList.toggle('eng', etikett > ganz * LABEL_ANTEIL);
+    }
+
+    /* Drehen und Fenstergroesse: nur die Klasse wird neu entschieden - das ist
+       eine Messung, kein Neuaufbau des Bandes. */
+    let engUhr = null;
+    window.addEventListener('resize', function () {
+        clearTimeout(engUhr);
+        engUhr = setTimeout(engPruefen, 150);
+    });
 
     /* ---- Das Etikett links -------------------------------------------- */
 

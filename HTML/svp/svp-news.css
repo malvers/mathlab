@@ -337,22 +337,27 @@ html.svp-light .nav-news-item b { color: var(--ypsilon); }
     .nav-news.runs .nav-news-run { animation: none; }
 }
 
-/* Phone: der Rubrikname frisst zu viel von der kurzen Zeile - der Knopf mit
+/* Schmale Zeile: der Rubrikname frisst zu viel vom Laufband - der Knopf mit
    dem Pfeil bleibt aber stehen, sonst waere das Menue dort nicht erreichbar.
+   Was "schmal" heisst, entscheidet seit dem 22.09.2026 nicht mehr eine
+   geratene Fensterbreite (bis dahin: max-width 520px), sondern svp-news.js:
+   es misst, was nach dem Etikett fuer den Text uebrig bleibt, und setzt die
+   Klasse (Doc, 22.09.2026: "ticker ... da reicht der Platz nicht" - im
+   Querformat stand der Rubrikname noch da und das Band hatte nichts mehr).
    Ohne den Namen traegt nur noch der Pfeil, und der hat line-height:0: der
    Knopf waere 8 x 0 px und damit nicht zu treffen (gemessen am 21.09.2026) -
    deshalb hier eine eigene Flaeche zum Tippen. */
-@media (max-width: 520px) {
-    .nav-news-labeltext { display: none; }
-    .nav-news-label {
-        justify-content: center;
-        min-width: 22px;
-        /* Nicht min-height: das zoege die Zeile auf 30 px auf. Gestreckt ist
-           der Knopf so hoch, wie die Zeile ohnehin ist. */
-        align-self: stretch;
-    }
-    .nav-news-caret { line-height: 1; }
+.nav-news.eng .nav-news-labeltext { display: none; }
+
+.nav-news.eng .nav-news-label {
+    justify-content: center;
+    min-width: 22px;
+    /* Nicht min-height: das zoege die Zeile auf 30 px auf. Gestreckt ist
+       der Knopf so hoch, wie die Zeile ohnehin ist. */
+    align-self: stretch;
 }
+
+.nav-news.eng .nav-news-caret { line-height: 1; }
 
 /* ---- Das Megafon spricht, solange das Band laeuft --------------------
    Doc, 20.09.2026: "wenn es laeuft lass das Megafon sprechen und wabern ;-)".
