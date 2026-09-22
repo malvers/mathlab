@@ -9,6 +9,7 @@ import os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from build_infotest12 import build
+from build_inf11_aufgaben import AI_BEGRIFFE      # dieselben zehn Fragen wie in Info 11
 
 GEN = "tools/build_inftest_bgy.py"
 
@@ -4415,6 +4416,7 @@ QUIZZES = [
    ["Vieles davon werdet ihr vergessen.",
     "Das Vorgehen nicht."]),
  ]),
+ (INF12, "ai-begriffe", 6, 39, "Die Begriffe der künstlichen Intelligenz", AI_BEGRIFFE),
 ]
 
 
