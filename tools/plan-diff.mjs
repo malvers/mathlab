@@ -145,16 +145,17 @@ function report(diff, before, after) {
 }
 
 /* One line, parsed by the "WebUntis holen" app: it colours the result and puts
-   it under the progress bar. Keep the two prefixes stable. */
+   it under the progress bar. Keep the two prefixes stable - and say WHAT did not change,
+   the line stands next to the classbook verdict and has to name its own subject. */
 function oneLine(diff) {
     const n = diff.added.length + diff.dropped.length + diff.changed.length;
-    if (!n) return 'KEINE ÄNDERUNGEN';
+    if (!n) return 'KEINE ÄNDERUNGEN AM STUNDENPLAN';
     const mine = mineOnly(diff.added).length + mineOnly(diff.dropped).length + mineOnly(diff.changed).length;
     const parts = [];
     if (diff.added.length) parts.push(diff.added.length + ' neu');
     if (diff.dropped.length) parts.push(diff.dropped.length + ' entfallen');
     if (diff.changed.length) parts.push(diff.changed.length + ' geändert');
-    return 'ÄNDERUNGEN: ' + parts.join(', ') + (mine ? ' · ' + mine + ' bei dir' : '');
+    return 'ÄNDERUNGEN AM STUNDENPLAN: ' + parts.join(', ') + (mine ? ' · ' + mine + ' bei dir' : '');
 }
 
 /* ---------- main -------------------------------------------------------- */

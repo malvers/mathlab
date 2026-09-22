@@ -179,7 +179,7 @@ final class App: NSObject, NSApplicationDelegate {
         for raw in parts.dropLast() {
             let line = raw.trimmingCharacters(in: .whitespaces)
             if line.isEmpty { continue }
-            if line.hasPrefix("KEINE ÄNDERUNGEN") || line.hasPrefix("ÄNDERUNGEN:")
+            if line.hasPrefix("KEINE ÄNDERUNGEN") || line.hasPrefix("ÄNDERUNGEN")
                 || line.hasPrefix("ERSTER LAUF:") {
                 showVerdict(line)
                 continue
@@ -216,7 +216,7 @@ final class App: NSObject, NSApplicationDelegate {
     func showVerdict(_ line: String) {
         verdict.stringValue = broken(line)
         verdict.toolTip = line
-        verdict.textColor = line.hasPrefix("ÄNDERUNGEN:") ? docRed : docGreen
+        verdict.textColor = line.hasPrefix("ÄNDERUNGEN") ? docRed : docGreen
         relayout()
     }
 
