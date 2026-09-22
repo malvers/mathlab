@@ -45,7 +45,10 @@
     /* document.write keeps the parts parser-blocking and in order, exactly as
        the single file was: svp-nav.js, the next tag on every page, still runs
        after the whole plan. */
-    document.write(PARTS.map(function (p) {
-        return '<script src="' + dir + 'svp-plan-' + p + '.js"><\/script>';
-    }).join(''));
+    /* Die gemeinsame Faltung liegt VOR den Teilen: die Suche (Teil "search")
+       benutzt sie, und svp-suche.js unter dem Laufband dieselbe Datei. */
+    document.write('<script src="' + dir + 'svp-falten.js"><\/script>'
+        + PARTS.map(function (p) {
+            return '<script src="' + dir + 'svp-plan-' + p + '.js"><\/script>';
+        }).join(''));
 })();

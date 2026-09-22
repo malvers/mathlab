@@ -1,0 +1,162 @@
+/* ---- Suche ueber alle Plaene, unter dem Laufband -----------------------
+   Doc, 22.09.2026: "mach bitte unter den Ticker eine globale Suche". Gebaut
+   wird die Zeile in svp-suche.js, aufgehaengt von svp-nav.js - beides nur auf
+   Planseiten, denn nur dort gibt es den klebenden Klassenkopf.
+
+   Grund, Rand, Radius und Schrift des Feldes kommen aus dem gemeinsamen
+   Leisten-Block in svp-search.css (.svp-search) - genau wie beim Laufband
+   darueber und bei der Suche in der Werkzeugleiste. Hier steht nur, was die
+   Zeile und ihre Trefferliste selbst brauchen. */
+
+.nav-suche {
+    /* Dieselbe Spur wie Navileiste, Laufband, Werkzeugleiste und Seitenkopf. */
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto 8px;
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    /* Die Trefferliste haengt darunter und legt sich ueber den Plan, statt ihn
+       nach unten zu schieben: Anker ist diese Huelle. */
+    position: relative;
+}
+
+.nav-suche-feld {
+    flex: 1 1 auto;
+    min-width: 120px;
+    padding-top: 3px;      /* so flach wie das Laufband darueber */
+    padding-bottom: 3px;
+    padding-right: 96px;   /* Platz fuer den Zaehler, der im Feld sitzt */
+}
+
+/* Der Zaehler sitzt IM Feld und zieht es nicht schmaler - dieselbe Loesung wie
+   in der Werkzeugleiste (svp-search.css), nur breiter: hier steht nicht
+   "3 von 48", sondern "7 in 3 Plänen". */
+.nav-suche-zahl {
+    margin-left: -96px;
+    min-width: 86px;
+    padding-right: 10px;
+    text-align: right;
+    pointer-events: none;
+}
+
+/* ---- Trefferliste ----------------------------------------------------- */
+.suche-drop {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 60;           /* ueber dem Plan, unter den Dialogen */
+    max-height: min(62vh, 560px);
+    overflow: auto;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.42);
+    padding: 4px;
+}
+
+.suche-drop[hidden] { display: none; }
+
+/* Kopf je Plan: die Pille der Navileiste und der ausgeschriebene Name. So
+   sieht man auf einen Blick, in welchem Fach die Wochen darunter stehen. */
+.suche-kopf {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 8px 4px;
+    position: sticky;      /* beim Scrollen bleibt sichtbar, wessen Wochen das sind */
+    top: -4px;
+    background: var(--card);
+}
+
+.suche-pille { flex: none; }
+
+.suche-lang {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+}
+
+/* Eine Woche: links wo sie steht, in der Mitte ihr Thema, rechts woran es
+   getroffen hat. Grid statt flex, damit die Woche-Spalte in allen Zeilen
+   gleich breit ist und die Themen untereinander beginnen. */
+.suche-zeile {
+    display: grid;
+    /* 212 px, gemessen am 22.09.2026: "SW 1 · KW 34 · 17.–21.08.26" braucht in
+       Orbitron 160 bis 209 px. Bei 148 px lief JEDE Zeile ins Thema hinein
+       (Doc: "ist noch bissl ueberlappend") - nowrap laesst den Text sonst
+       einfach ueber die Spaltengrenze laufen, statt ihn umzubrechen. */
+    grid-template-columns: 212px 1fr auto;
+    gap: 10px;
+    align-items: baseline;
+    padding: 7px 8px;
+    border-radius: 7px;
+    text-decoration: none;
+    color: var(--text);
+}
+
+.suche-zeile:hover,
+.suche-zeile.an { background: rgba(var(--tint), 0.16); }
+
+.suche-wo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.64rem;
+    letter-spacing: 0.05em;
+    color: var(--tint-text);
+    white-space: nowrap;
+    /* Sicherung: waechst eine Angabe doch einmal ueber die Spalte hinaus,
+       wird sie abgeschnitten und nicht ueber das Thema gelegt. */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.suche-thema {
+    font-size: 0.82rem;
+    line-height: 1.35;
+}
+
+.suche-mark {
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+/* Der Treffer im Text - derselbe Ocker wie ::highlight(plan-find) in der
+   Plansuche, damit ein Treffer ueberall gleich aussieht. */
+.suche-drop mark {
+    background: rgba(245, 194, 66, 0.42);
+    color: inherit;
+    border-radius: 3px;
+}
+
+.suche-leer {
+    padding: 12px 10px;
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+/* Woher die Antwort kommt: gebauter Plan-Stand plus lebendige Inhalte. Steht
+   absichtlich in jeder Liste - ein alter Index waere sonst nicht von einem
+   frischen zu unterscheiden. */
+.suche-fuss {
+    padding: 8px 10px 6px;
+    border-top: 1px solid var(--line);
+    margin-top: 4px;
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+}
+
+/* Fon: eigene Zeile, und die Woche-Spalte darf schmaler werden, damit vom
+   Thema noch etwas uebrig bleibt. */
+@media (max-width: 760px) {
+    .nav-suche-feld { padding-right: 86px; }
+    .nav-suche-zahl { margin-left: -86px; min-width: 76px; }
+    .suche-zeile { grid-template-columns: 1fr; gap: 2px; }
+    .suche-mark { display: none; }   /* kein Platz - die Zeile selbst zaehlt */
+}
+
+@media print { .nav-suche { display: none !important; } }

@@ -1147,6 +1147,17 @@
         newsScript.src = base + 'svp-news.js';
         newsScript.dataset.base = base;
         document.head.appendChild(newsScript);
+
+        /* Unter dem Laufband die Suche ueber ALLE Plaene (Doc, 22.09.2026:
+           "mach bitte unter den Ticker eine globale Suche"). Hier
+           aufgehaengt und nicht in jeder Planseite, weil hier schon steht, was
+           eine Planseite ist - und weil es damit eine Stelle bleibt. Die Zeile
+           haengt sich selbst hinter den Dock: der Dock blendet sich aus, wenn
+           es keine Nachrichten gibt, die Suche soll aber bleiben. */
+        const sucheScript = document.createElement('script');
+        sucheScript.src = base + 'svp-suche.js';
+        sucheScript.dataset.base = base;
+        document.head.appendChild(sucheScript);
     }
 })();
 

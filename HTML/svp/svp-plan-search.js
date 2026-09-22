@@ -28,34 +28,13 @@ window.svpPlanParts.push(function (P) {
        DOM, so the contenteditable cells - and everything saveEdits reads back
        out of them - stay untouched. */
     const SEARCH_SKIP = '.sub-head, .katex, .shift-col, .sub-tools, .chev';
-    const SEARCH_UML = { 'ä': 'ae', 'ö': 'oe', 'ü': 'ue', 'ß': 'ss' };
 
-    /* Folding recipe from js/labs-search.js - including its trap: FIRST spell
-       the umlauts out, THEN strip the remaining accents. The other way round
-       "würfel" becomes "wurfel" and never finds "wuerfel" again. */
-    function planFold(value) {
-        return String(value == null ? '' : value)
-            .normalize('NFC')
-            .toLowerCase()
-            .replace(/[äöüß]/g, function (ch) { return SEARCH_UML[ch]; })
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '');
-    }
-
-    /* The same folding per character, so a position in the folded text can be
-       mapped back onto the original text node: at[k] is where folded character
-       k started ("Würfel" folds to "wuerfel", 7 characters over 6). */
-    function planFoldMap(src) {
-        let folded = '';
-        const at = [];
-        for (let i = 0; i < src.length; i++) {
-            const piece = planFold(src[i]);
-            for (let k = 0; k < piece.length; k++) at.push(i);
-            folded += piece;
-        }
-        at.push(src.length);
-        return { folded: folded, at: at };
-    }
+    /* Die Faltung (Umlaute ausschreiben, dann Akzente abwerfen) und ihre
+       Zeichen-Zuordnung stehen in svp-falten.js: die Suche ueber alle Plaene
+       unter dem Laufband braucht genau dieselbe, und zwei Kopien waeren zwei
+       Gelegenheiten, die Reihenfolge zu verdrehen. */
+    const planFold = window.svpFalten;
+    const planFoldMap = window.svpFaltenMap;
 
     /* Every searchable text node of a row, already folded. Rebuilt on each
        keystroke - 40 weeks are a few thousand characters, and a cache would
@@ -176,8 +155,20 @@ window.svpPlanParts.push(function (P) {
         if (!doc || !doc.body) return '';
         doc.body.querySelectorAll('script, style').forEach(function (el) { el.remove(); });
         const titel = doc.querySelector('title');
-        return planFold(((titel ? titel.textContent + ' ' : '') + doc.body.textContent)
-            .replace(/\s+/g, ' '));
+        /* Jede Folie einzeln dazu: nur so kann der Treffer sagen, auf WELCHER
+           Folie das Wort steht (Doc, 22.09.2026: "der Link auf die Seite im
+           Deck"). Ein Deck springt per #<nr> dorthin - fromHash in
+           decks/deck.js, 1-basiert. Eine Seite ohne Folien (Aufgabenblatt)
+           hat eben keine. */
+        const folien = [];
+        doc.querySelectorAll('section.slide').forEach(function (sec) {
+            folien.push(planFold((sec.textContent || '').replace(/\s+/g, ' ')));
+        });
+        return {
+            text: planFold(((titel ? titel.textContent + ' ' : '') + doc.body.textContent)
+                .replace(/\s+/g, ' ')),
+            folien: folien
+        };
     }
 
     /* Was dieser Lauf gebraucht haette, holen - einmal je Adresse. Ist alles
@@ -209,16 +200,65 @@ window.svpPlanParts.push(function (P) {
         const out = [];
         for (const en of vtEintraege(r)) {
             let txt = en.meta;
+            let seite = null;
             /* Der Volltext kommt nur ab VT_MIN Zeichen dazu - Beschreibung und
                Dateiname kosten nichts und zaehlen ab dem ersten Buchstaben. */
             if (tief && en.adresse) {
                 if (!vtText.has(en.adresse)) vtNeed.add(en.adresse);
-                else if (vtText.get(en.adresse)) txt += ' ' + vtText.get(en.adresse);
+                else if (vtText.get(en.adresse)) { seite = vtText.get(en.adresse); txt += ' ' + seite.text; }
             }
             if (!txt) continue;
-            if (terms.every(function (t) { return txt.includes(t) || hay.includes(t); })) out.push(en);
+            /* Mindestens EIN Wort muss in DIESER Datei stehen. Ohne diese Zeile
+               bekam jede Pille einer treffenden Zeile den Ring - auch das
+               PowerPoint, das gar nicht gelesen werden kann (Doc, 22.09.2026:
+               "alle Pillen die umrandet sind enthalten Turing?" - nein, taten
+               sie nicht). Die ZEILE darf weiter ueber beides zusammen treffen;
+               der Ring aber behauptet etwas ueber die Datei. */
+            if (!terms.some(function (t) { return txt.includes(t); })) continue;
+            if (!terms.every(function (t) { return txt.includes(t) || hay.includes(t); })) continue;
+            en.folie = seite ? vtFolie(seite, terms) : 0;
+            out.push(en);
         }
         return out;
+    }
+
+    /* Die erste Folie, auf der ALLE Suchwoerter stehen - sonst die erste mit
+       irgendeinem. 0 heisst: keine Folien (Aufgabenblatt) oder nur im Rahmen
+       des Decks gefunden. */
+    function vtFolie(seite, terms) {
+        const f = seite.folien || [];
+        for (let i = 0; i < f.length; i++) {
+            if (terms.every(function (t) { return f[i].includes(t); })) return i + 1;
+        }
+        for (let i = 0; i < f.length; i++) {
+            if (terms.some(function (t) { return f[i].includes(t); })) return i + 1;
+        }
+        return 0;
+    }
+
+    /* Ein Treffer im Deck fuehrt auf SEINE Folie (Doc, 22.09.2026). Der eigene
+       Klick der Pille oeffnet das Deck im kleinen Fenster und kennt nur die
+       nackte Adresse - deshalb faengt dieser Horcher den Klick in der
+       Capture-Phase ab, solange eine Folie gesetzt ist. Mittelklick und
+       Cmd-Klick bleiben dem Browser: fuer sie steht die Foliennummer im href.
+       Wird die Suche geleert, verschwinden beide wieder. */
+    function vtAnkern(pill, en) {
+        const folie = en.folie || 0;
+        if (!folie) return;
+        pill.dataset.vtFolie = String(folie);
+        if (!pill.dataset.vtHref) pill.dataset.vtHref = pill.getAttribute('href') || '';
+        pill.setAttribute('href', pill.dataset.vtHref.replace(/#.*$/, '') + '#' + folie);
+        pill.title = 'Treffer auf Folie ' + folie;
+        if (pill.vtWired) return;
+        pill.vtWired = true;
+        pill.addEventListener('click', function (e) {
+            const f = pill.dataset.vtFolie;
+            if (!f) return;
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+            e.preventDefault();
+            e.stopPropagation();
+            P.openMat(String(en.url).replace(/#.*$/, '') + '#' + f, null);
+        }, true);
     }
 
     /* Die Pille dieses Eintrags. Erst am href verglichen, den renderMaterial
@@ -248,7 +288,13 @@ window.svpPlanParts.push(function (P) {
             if (s && s.classList.contains('detail-row')) s.classList.remove('open');
         });
         searchOpened = [];
-        vtPainted.forEach(function (pill) { pill.classList.remove('vt-hit'); });
+        vtPainted.forEach(function (pill) {
+            pill.classList.remove('vt-hit');
+            /* Die Folie gilt nur, solange gesucht wird: ohne Suchwort fuehrt
+               die Pille wieder auf die erste Folie. */
+            delete pill.dataset.vtFolie;
+            if (pill.dataset.vtHref) { pill.setAttribute('href', pill.dataset.vtHref); delete pill.dataset.vtHref; }
+        });
         vtPainted = [];
         vtNeed.clear();
         /* Der Volltext kommt erst ab VT_MIN Zeichen dazu (Leerzeichen zaehlen
@@ -312,6 +358,7 @@ window.svpPlanParts.push(function (P) {
                 const pill = vtPille(detail, en);
                 if (!pill) return;
                 pill.classList.add('vt-hit');
+                vtAnkern(pill, en);
                 vtPainted.push(pill);
                 deep = true;
                 const rp = pill.closest('.sub-side [data-pane]');
@@ -410,6 +457,17 @@ window.svpPlanParts.push(function (P) {
             });
             headRow.appendChild(b);
         }
+        /* Aus der Suche unter dem Laufband kommend: ?q=<wort> fuellt das Feld und
+           laesst die Suche laufen, damit der Treffer hier auch angemalt ist -
+           der Sprung ?kw= bringt nur die Woche, nicht das Wort (Doc,
+           22.09.2026). Erst nach dem Aufbau, damit die Zeilen stehen. */
+        (function () {
+            let q = null;
+            try { q = new URLSearchParams(location.search).get('q'); } catch (e) { return; }
+            if (!q) return;
+            searchInput.value = q;
+            setTimeout(planSearchRun, 0);
+        })();
         searchInput.addEventListener('input', planSearchRun);
         searchInput.addEventListener('search', planSearchRun);   /* the native ✕ */
         searchInput.addEventListener('keydown', function (e) {
