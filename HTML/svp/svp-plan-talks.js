@@ -149,23 +149,55 @@ window.svpPlanParts.push(function (P) {
        Gelesen wird nur das Flag taken; die Namen selbst sind gegen Docs
        oeffentlichen Schluessel versiegelt und kommen hier gar nicht erst an
        (svp/informatik/vortraege.js, Tabelle svp_vortrag_namen). */
+    /* Wohin ein Knopf fuehrt - data-href auf den Seiten mit Gruppen-Menue, sonst
+       das blanke onclick. Daran wird der Vortraege-Knopf erkannt: frueher hing
+       die Suche an data-groups, und das Attribut markiert den GRUPPEN-Umschalter.
+       inf11 und informatik9 haben nur eine Liste je Seite und deshalb kein
+       data-groups - dort wurde der Knopf nie gruen, obwohl alles vergeben war
+       (Doc, 22.09.2026: "Vortraege nicht gruen? Alle sind vergeben"). */
+    function talkBtnZiel(b) {
+        return b.getAttribute('data-href') || b.getAttribute('onclick') || '';
+    }
+    function talkButtons() {
+        return [].slice.call(document.querySelectorAll('button')).filter(function (b) {
+            return /-vortraege\.html/.test(talkBtnZiel(b));
+        });
+    }
+
     async function markTalksDone(plan, themen) {
-        const btn = document.querySelector('button[data-groups]');
-        const klasse = P.GROUP || Object.keys(themen)[0];
-        const ids = themen[klasse];
-        if (!btn || !klasse || !ids || !ids.length || !window.svpAuth) return;
+        const btns = talkButtons();
+        const keys = Object.keys(themen);
+        if (!btns.length || !keys.length || !window.svpAuth) return;
+        /* eine Abfrage fuer den ganzen Plan, danach je Lerngruppe getrennt -
+           informatik9 hat zwei Knoepfe (9a und 9b) mit je eigener Liste. */
         const res = await fetch(svpAuth.DB_URL + '/rest/v1/svp_vortrag_namen' +
             '?plan=eq.' + encodeURIComponent(plan) +
-            '&klasse=eq.' + encodeURIComponent(klasse) +
-            '&taken=is.true&select=idx',
+            '&taken=is.true&select=klasse,idx',
             { headers: { apikey: svpAuth.DB_KEY, Authorization: 'Bearer ' + svpAuth.DB_KEY } });
         if (!res.ok) return;
-        const belegt = new Set((await res.json()).map(function (r) { return r.idx; }));
-        const offen = ids.filter(function (id) { return !belegt.has(id); }).length;
-        btn.classList.toggle('vortraege-voll', !offen);
-        /* Der Titel sagt, warum der Knopf gruen ist - oder wie viel noch fehlt. */
-        btn.title = btn.title.replace(/\s—\s(alle vergeben|noch\s\d+.*)$/, '') +
-            (offen ? ' — noch ' + offen + (offen === 1 ? ' Thema' : ' Themen') + ' ohne Namen'
-                   : ' — alle vergeben');
+        const rows = await res.json();
+        btns.forEach(function (btn) {
+            /* "informatik9b-vortraege.html" -> "informatik9b" endet auf den
+               Schluessel "b". Mit ?g= zaehlt die gewaehlte Gruppe, sonst die
+               einzige - und nur wenn nichts passt, die erste. */
+            const seite = (talkBtnZiel(btn).match(/([A-Za-z0-9_+-]+)-vortraege\.html/) || [])[1] || '';
+            const treffer = keys.find(function (k) { return seite.endsWith(k); });
+            /* Laesst sich der Knopf keiner einzelnen Gruppe zuordnen (fos12 ohne
+               ?g=), dann zaehlen ALLE - gruen heisst dort: bei jeder Gruppe ist
+               alles vergeben. Frueher entschied stumm die erste Gruppe. */
+            const zu = P.GROUP ? [P.GROUP] : (treffer ? [treffer] : keys);
+            const ids = zu.reduce(function (a, k) { return a.concat(themen[k] || []); }, []);
+            if (!ids.length) return;
+            const offen = zu.reduce(function (n, k) {
+                const belegt = new Set(rows.filter(function (r) { return r.klasse === k; })
+                    .map(function (r) { return r.idx; }));
+                return n + (themen[k] || []).filter(function (id) { return !belegt.has(id); }).length;
+            }, 0);
+            btn.classList.toggle('vortraege-voll', !offen);
+            /* Der Titel sagt, warum der Knopf gruen ist - oder wie viel noch fehlt. */
+            btn.title = btn.title.replace(/\s—\s(alle vergeben|noch\s\d+.*)$/, '') +
+                (offen ? ' — noch ' + offen + (offen === 1 ? ' Thema' : ' Themen') + ' ohne Namen'
+                       : ' — alle vergeben');
+        });
     }
 });
