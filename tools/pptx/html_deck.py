@@ -942,6 +942,13 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
   background:var(--askbg);border-radius:10px;box-shadow:0 6px 24px rgba(14,36,78,.4);
   padding:12px 12px 10px;color:var(--ink)}
 #ask-panel[hidden]{display:none}
+/* while the panel is open, the question line stands in the footer - behind "... Doc Alvers fragen!" and in front of the
+   page number; the answers stay above Solita (Doc, 23.09.2026: "nicht dauerhaft, nur wenn Solita clicked wie jetzt").
+   JS measures the gap on the screen; too narrow (a phone) and the line stays in the panel. */
+#ask-line{position:fixed;z-index:11;display:none;transform:translateY(-50%)}
+#ask-line.on{display:block}
+#ask-panel{transition:opacity .25s ease}
+#ask-panel.bare{opacity:0;pointer-events:none}   /* nothing above to show: no answer (or folded by a page turn), no label */
 /* a light blue tint (Doc, 16.09.2026: "leicht bläulich"); field and buttons a shade darker blue ("etwas dunkelblauer als der HG") */
 /* the header sits on its own strip with a soft shadow, so answers scroll away UNDER it
    (Doc, 16.09.2026: "setz den Header besser ab") - z-index lifts the shadow above the text */
@@ -1825,7 +1832,7 @@ ASK_JS = r"""
     menu.hidden = true;
     input.focus();
   });
-  panel.addEventListener('contextmenu', function (e) {
+  box.addEventListener('contextmenu', function (e) {   // panel, footer line or her picture (23.09.2026: the line lives in the footer)
     e.preventDefault();
     showWho();
     const sel = getSelection();
@@ -1926,6 +1933,7 @@ ASK_JS = r"""
     input.setAttribute('autocomplete', 'current-password');
     send.textContent = 'OK';
     micBtn.hidden = true; ttsBtn.hidden = true;
+    bare();
   }
   function askQuestion() {
     label.hidden = true;                            // a question needs no label (Doc, 16.09.2026: "weg")
@@ -1935,6 +1943,7 @@ ASK_JS = r"""
     send.textContent = '?';
     micBtn.hidden = !(window.SpeechRecognition || window.webkitSpeechRecognition);
     // the speaker stays hidden: it lives in the right-click menu (Doc, 23.09.2026: "den hier weg")
+    bare();
   }
   // a line cut off at the edge of the box fades out (Doc, 23.09.2026) - only on the edge that really hides text
   function cutEdges() {
@@ -1943,7 +1952,14 @@ ASK_JS = r"""
   }
   out.addEventListener('scroll', cutEdges);
   if (window.ResizeObserver) new ResizeObserver(cutEdges).observe(out);        // pulled taller or shorter
-  new MutationObserver(cutEdges).observe(out, { childList: true, subtree: true, characterData: true });   // text came or went
+  new MutationObserver(function () { cutEdges(); bare(); })   // text came or went, or the box folded (.shut)
+    .observe(out, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class'] });
+  // The panel above Solita shows only when it has something: an answer or the password label. Empty, or folded away
+  // by a page turn, it fades out and only the question line in the footer remains (Doc, 23.09.2026). Opacity, not
+  // display: the box underneath still slides open from zero when the next text arrives.
+  function bare() {
+    panel.classList.toggle('bare', (!out.children.length || out.classList.contains('shut')) && label.hidden);
+  }
   function say(html, cls) {
     const p = document.createElement('div');
     if (cls) p.className = cls;
@@ -2265,15 +2281,64 @@ ASK_JS = r"""
     ear.start();
   };
 
+  // While the panel is open, the question line (mic, field, ?) stands in the footer: behind "... Doc Alvers fragen!"
+  // and in front of the page number, centred on that text line; the answers stay above Solita (Doc, 23.09.2026:
+  // "nicht dauerhaft, nur wenn Solita clicked wie jetzt"). Too little room (a phone, a short footer text) and the
+  // line stays in the panel as before.
+  const row = document.getElementById('ask-row'), rowHome = row.nextSibling;
+  const line = document.createElement('div');
+  line.id = 'ask-line';
+  panel.parentNode.insertBefore(line, panel.nextSibling);   // inside #ask, so the line inherits its font and colours
+  const LINE_GAP = 14, LINE_MIN = 220;
+  const edge = window.ResizeObserver && new ResizeObserver(function () { placeRow(); });   // the page number's width jumps when its font arrives
+  let edgeOn = null;                                  // the page number the observer watches - re-observing it in its own callback would fire every frame
+  function placeRow() {
+    if (panel.hidden) return;
+    const s = slides[si], foot = s && s.querySelector('.foot'), pn = s && s.querySelector('.pageno');
+    let fits = false;
+    if (edge && pn !== edgeOn) { edge.disconnect(); if (pn) edge.observe(pn); edgeOn = pn; }
+    if (foot && pn && foot.textContent.trim()) {
+      const rg = document.createRange();
+      rg.selectNodeContents(foot);                    // the text itself - .foot spans the whole slide
+      const t = rg.getBoundingClientRect(), p = pn.getBoundingClientRect();
+      const left = t.right + LINE_GAP, width = p.left - LINE_GAP - left;
+      if (width >= LINE_MIN) {
+        line.style.left = left + 'px'; line.style.width = width + 'px'; line.style.top = (t.top + t.height / 2) + 'px';
+        fits = true;
+      }
+    }
+    if (fits) { move(line, null); line.classList.add('on'); }
+    else rowBack();
+  }
+  function move(to, before) {                        // moving a focused field blurs it - Doc keeps typing
+    if (row.parentNode === to) return;
+    const typing = document.activeElement === input;
+    to.insertBefore(row, before);
+    if (typing) input.focus();
+  }
+  function rowBack() {
+    line.classList.remove('on');
+    move(panel, rowHome && rowHome.parentNode === panel ? rowHome : null);
+  }
+  painted.push(placeRow);                             // the footer moves with the slide scale and the page
+  addEventListener('resize', placeRow);
+  if (document.fonts) {                               // Orbitron arrives late: the page number's edge moves with it
+    document.fonts.ready.then(placeRow);
+    document.fonts.addEventListener('loadingdone', placeRow);
+  }
+
   function open() {
     if (typeof narr !== 'undefined') narr.stop();   // asking pauses the talk, like turning a page
     panel.hidden = false;
     if (!pwd()) askPassword(); else askQuestion();
+    bare();
+    placeRow();
+    requestAnimationFrame(function () { requestAnimationFrame(placeRow); });   // once the footer has settled after the click
     rest();                                           // the stored height never pushes the panel off the top
     input.focus();
     warm();
   }
-  function close() { panel.hidden = true; stopAudio(); }
+  function close() { panel.hidden = true; rowBack(); stopAudio(); }
 
   document.getElementById('ask-btn').onclick = function () {
     this.classList.remove('invite');                 // found her - no more inviting on this page
@@ -2288,7 +2353,7 @@ ASK_JS = r"""
     if (e.key === 'Enter') { e.preventDefault(); submit(); }
     else if (e.key === 'Escape') { e.preventDefault(); close(); }
   });
-  panel.addEventListener('keydown', function (e) {   // Shift+Space anywhere in the panel: mic on, again: off (Doc, 23.09.2026)
+  box.addEventListener('keydown', function (e) {     // Shift+Space anywhere in the panel or the footer line: mic on, again: off (Doc, 23.09.2026)
     if (e.code === 'Space' && e.shiftKey && !micBtn.hidden) { e.preventDefault(); micBtn.click(); }
     // plain Space while the mic listens sends what was heard - and never lands in the field as a stray space
     // (Doc, 23.09.2026: "auch space soll im Mic Mode abschicken")

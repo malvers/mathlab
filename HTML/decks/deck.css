@@ -434,6 +434,13 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
   background:var(--askbg);border-radius:10px;box-shadow:0 6px 24px rgba(14,36,78,.4);
   padding:12px 12px 10px;color:var(--ink)}
 #ask-panel[hidden]{display:none}
+/* while the panel is open, the question line stands in the footer - behind "... Doc Alvers fragen!" and in front of the
+   page number; the answers stay above Solita (Doc, 23.09.2026: "nicht dauerhaft, nur wenn Solita clicked wie jetzt").
+   JS measures the gap on the screen; too narrow (a phone) and the line stays in the panel. */
+#ask-line{position:fixed;z-index:11;display:none;transform:translateY(-50%)}
+#ask-line.on{display:block}
+#ask-panel{transition:opacity .25s ease}
+#ask-panel.bare{opacity:0;pointer-events:none}   /* nothing above to show: no answer (or folded by a page turn), no label */
 /* a light blue tint (Doc, 16.09.2026: "leicht bläulich"); field and buttons a shade darker blue ("etwas dunkelblauer als der HG") */
 /* the header sits on its own strip with a soft shadow, so answers scroll away UNDER it
    (Doc, 16.09.2026: "setz den Header besser ab") - z-index lifts the shadow above the text */
