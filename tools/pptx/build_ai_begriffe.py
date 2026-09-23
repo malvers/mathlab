@@ -95,9 +95,9 @@ d.bullets("Token — die Währung der Modelle", [
 
 d.figure("Ein Satz, in Token zerlegt", *ai_svg.token(), png=os.path.join(IMG, "aibegriffe-token.png"), width=816)
 
-# the same question from the other side: how big is German? (no PNG twin yet - the .pptx
-# export shows this slide with its title only)
-d.figure("Wie viele Wörter hat Deutsch?", *ai_svg.wortschatz(), width=816)
+# the same question from the other side: how big is German?
+d.figure("Wie viele Wörter hat Deutsch?", *ai_svg.wortschatz(),
+         png=os.path.join(IMG, "aibegriffe-wortschatz.png"), width=816)
 
 d.bullets("Das Kontextfenster", [
     ("**Kontextfenster** = wie viel Text das Modell **gleichzeitig** sehen kann", 0),

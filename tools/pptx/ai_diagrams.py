@@ -259,6 +259,49 @@ def token(path, W=1420, H=520):
     return save(img, path)
 
 
+def wortschatz(path, W=1420, H=600):
+    """How many words German has, next to the whole vocabulary of a model.
+    The .pptx twin of ai_svg.wortschatz(); the web deck draws this figure as SVG."""
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    f_lab = font("Raleway-Regular.ttf", 25)
+    f_val = font("Raleway-Medium.ttf", 24)
+    f_txt = font("Raleway-Medium.ttf", 27)
+    f_small = font("Raleway-Regular.ttf", 23)
+
+    x0, top, bh, gap = 540, 70, 52, 34
+    scale = 270.0                                   # pixels per decade above 10.000
+    rows = [("Duden, Stichwörter", 151000, "151.000", NAVY),
+            ("deutscher Wortschatz, geschätzt", 400000, "300.000–500.000", NAVY),
+            ("mit allen gebeugten Formen", 3000000, "Millionen", NAVY),
+            ("mit Zusammensetzungen", None, "unbegrenzt", GRN)]
+    for i, (name, n, value, col) in enumerate(rows):
+        y = top + i * (bh + gap)
+        w = scale * (math.log10(n) - 4) if n else 750
+        d.rounded_rectangle((x0, y, x0 + w, y + bh), radius=14, fill=col)
+        if not n:                                   # compounds never stop - the bar ends in a tip
+            d.polygon([(x0 + w - 6, y), (x0 + w + 66, y + bh / 2), (x0 + w - 6, y + bh)], fill=col)
+        l, t, r, b = d.textbbox((0, 0), name, font=f_lab)
+        d.text((x0 - 34 - (r - l) - l, y + bh / 2 - (b - t) / 2 - t), name, font=f_lab, fill=BODY)
+        l, t, r, b = d.textbbox((0, 0), value, font=f_val)
+        d.text((x0 + w - 22 - (r - l) - l, y + bh / 2 - (b - t) / 2 - t), value, font=f_val, fill=WHITE)
+
+    # what the model has to get by with: one dashed line through all four bars
+    mx = x0 + scale * (math.log10(100256) - 4)
+    y1, y2 = top - 26, top + 4 * (bh + gap) - gap + 16
+    for yy in range(int(y1), int(y2), 22):          # PIL draws no dashes - one dash at a time
+        d.line([(mx, yy), (mx, min(yy + 12, y2))], fill=ORA, width=4)
+    centered(d, "GPT-4: 100.256 Token", mx, y1 - 26, f_small, ORA)
+
+    centered(d, "Ein Wörterbuch zählt Grundformen: „gehen“ steht einmal drin — "
+                "nicht gehe, gehst, ging, gegangen.", W / 2, H - 150, f_txt, BODY)
+    centered(d, "Mit allen Formen sind es Millionen — und zusammensetzen kann man endlos: "
+                "Kontextfenstergröße …", W / 2, H - 104, f_txt, BODY)
+    centered(d, "Duden 29. Auflage 2024 · Balken logarithmisch, eine Dekade je Schritt",
+             W / 2, H - 52, f_small, MUTED)
+    return save(img, path)
+
+
 def fenster(path, W=1360, H=860):
     """What sits inside the context window - and what falls out when it is full."""
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
@@ -379,6 +422,7 @@ DIAGRAMS = {
     "aibegriffe-netz.png": netz,
     "aibegriffe-training.png": training,
     "aibegriffe-token.png": token,
+    "aibegriffe-wortschatz.png": wortschatz,
     "aibegriffe-fenster.png": fenster,
     "aibegriffe-rag.png": rag,
     "aibegriffe-agent.png": agent,
