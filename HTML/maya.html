@@ -48,15 +48,6 @@
             box-sizing: border-box;
         }
 
-        #maya-head .maya-cap {
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.72rem;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            opacity: 0.45;
-            margin-bottom: 2px;
-        }
-
         #maya-head .maya-num {
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
@@ -162,7 +153,6 @@
     <main id="main-content">
         <div id="canvas-container">
             <div id="maya-head" class="maya-card">
-                <div class="maya-cap" id="maya-cap"></div>
                 <div class="maya-num" id="maya-num"></div>
             </div>
             <div id="maya-solution" class="maya-card">
@@ -306,7 +296,7 @@
 
         // The zero: a scallop shell — ribs fanning out of the hinge, a scalloped rim.
         function drawShell(cx, cy, w, h) {
-            const lw = Math.max(1.2, Math.min(3.2, h * 0.05));
+            const lw = Math.max(2, Math.min(6, h * 0.075));   // one weight for rim, mouth and ribs
             const R = h * 0.92;
             const hx = cx, hy = cy + h * 0.44;          // the hinge
             const spread = 0.44;                        // half opening, in units of PI
@@ -335,7 +325,6 @@
             ctx.closePath();
             ctx.stroke();
 
-            ctx.lineWidth = Math.max(0.8, lw * 0.6);
             for (let i = 1; i < lobes; i++) {
                 const a = a0 + (a1 - a0) * i / lobes;
                 const st = P(a, 0.16), en = P(a, 0.86);
@@ -351,7 +340,7 @@
         // place === null draws a loose digit (panel, drag ghost) and registers no targets.
         function paintDigit(d, cx, cy, bw, bh, place) {
             if (d === 0) {
-                const w = Math.min(bw * 0.62, 104);
+                const w = Math.min(bw * 0.78, 132);   // exactly the width of a bar
                 const h = w * 0.64;
                 drawShell(cx, cy + h * 0.065, w, h);   // the shape is taller above the centre
                 return;
@@ -672,13 +661,9 @@
         }
 
         function updateHead() {
-            const cap = document.getElementById('maya-cap');
             const num = document.getElementById('maya-num');
             const head = document.getElementById('maya-head');
-            if (!cap || !num || !head) return;
-            cap.textContent = task
-                ? (task.done ? T('task_done', 'Richtig gelegt') : T('task_lay', 'Lege'))
-                : T('head', 'Dezimalwert');
+            if (!num || !head) return;
             num.textContent = de(task ? task.target : value());
             head.classList.toggle('solved', !!(task && task.done));
         }
