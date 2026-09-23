@@ -2493,8 +2493,10 @@ ASK_JS = r"""
       // exactly the width of the field it belongs to, flush with it (Doc, 23.09.2026: "Box zu breit", then "so breit
       // wie die Eingabe"). While the panel is closed the field sits inside it and has no width - then the line's.
       const f = input.getBoundingClientRect();
-      const w = f.width ? f.width : parseFloat(line.style.width);
-      panel.style.left = Math.round(f.width ? f.left : parseFloat(line.style.left)) + 'px';
+      if (!sliding && f.width) { fieldW = f.width; fieldL = f.left; }   // its real size, kept for the moments it has none
+      const good = !sliding && f.width;                // a clipped field says nothing about its real size
+      const w = fieldW || (good ? f.width : parseFloat(line.style.width));
+      panel.style.left = Math.round(fieldW ? fieldL : good ? f.left : parseFloat(line.style.left)) + 'px';
       panel.style.width = Math.round(w) + 'px';
       hint();                                        // the field just changed width
       panel.style.bottom = Math.round(innerHeight - (parseFloat(line.style.top) - h / 2) + 8) + 'px';
@@ -2589,16 +2591,22 @@ ASK_JS = r"""
       talk();
     }
   }, true);
-  // the mic line grows out of her picture instead of jumping there
+  // the mic line grows out of her picture instead of jumping there. While it grows the field is clipped, so its
+  // width says nothing - the box above would become a pencil (Doc, 23.09.2026, screenshot).
+  let sliding = false, fieldW = 0, fieldL = 0;
   function slideRow() {
     if (!line.classList.contains('on') || row.parentNode !== line) return;
     const w = row.getBoundingClientRect().width;
     if (!w) return;
+    sliding = true;
     row.style.transition = 'none'; row.style.maxWidth = '0px'; row.style.opacity = '0';
     requestAnimationFrame(function () {
       row.style.transition = 'max-width .3s ease, opacity .3s ease';
       row.style.maxWidth = Math.ceil(w) + 'px'; row.style.opacity = '1';
-      setTimeout(function () { row.style.transition = row.style.maxWidth = row.style.opacity = ''; }, 360);
+      setTimeout(function () {
+        row.style.transition = row.style.maxWidth = row.style.opacity = '';
+        sliding = false; placeRow();                 // now the field has its real width again
+      }, 360);
     });
   }
   box.addEventListener('keydown', function (e) {     // Shift+Space anywhere in the panel or the footer line: mic on, again: off (Doc, 23.09.2026)
