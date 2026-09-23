@@ -941,10 +941,27 @@ fromHash();
     out.classList.toggle('cut-top', out.scrollTop > 1);
     out.classList.toggle('cut-bot', out.scrollTop + out.clientHeight < out.scrollHeight - 1);
   }
-  out.addEventListener('scroll', cutEdges);
+  out.addEventListener('scroll', function () { cutEdges(); syncSoon(); });
   if (window.ResizeObserver) new ResizeObserver(cutEdges).observe(out);        // pulled taller or shorter
-  new MutationObserver(function () { cutEdges(); bare(); })   // text came or went, or the box folded (.shut)
+  new MutationObserver(function () { cutEdges(); bare(); syncSoon(); })   // text came or went, or the box folded (.shut)
     .observe(out, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class'] });
+  // The presenter view mirrors this box (Doc, 23.09.2026: "Solita AI kann ich im Präsi Mode nicht bedienen ... WICHTIG"):
+  // every change and every scroll goes out as HTML, at most every 16 ms, and the presenter shows the same, scrolled the same.
+  // Her voice and the karaoke run here on the beamer only - what the class hears and sees.
+  let syncTimer = 0;                                 // a timer, not rAF: a window hidden behind the presenter gets no frames
+  function syncSoon() { if (!PRESENTER && !syncTimer) syncTimer = setTimeout(sync, 16); }
+  function sync() {
+    syncTimer = 0;
+    if (PRESENTER || !window.DeckLink) return;
+    window.DeckLink.send({ t: 'ask-out', html: panel.hidden ? '' : out.innerHTML, shut: out.classList.contains('shut'),
+                           busy: busy, st: out.scrollTop });
+  }
+  function shown(m) {                                // presenter: the beamer's box, word for word
+    out.innerHTML = m.html || '';
+    out.classList.toggle('shut', !!m.shut);
+    busy = !!m.busy; send.disabled = busy; ready();
+    out.scrollTop = m.st || 0;
+  }
   // The panel above Solita shows only when it has something: an answer or the password label. Empty, or folded away
   // by a page turn, it fades out and only the question line in the footer remains (Doc, 23.09.2026). Opacity, not
   // display: the box underneath still slides open from zero when the next text arrives.
@@ -1146,6 +1163,12 @@ fromHash();
         .catch(function () { busy = false; send.disabled = false; say('Kein Netz.', 'ask-err'); });
       return;
     }
+    if (PRESENTER) {                                  // presenter view: the beamer window asks, shows and speaks (Doc, 23.09.2026)
+      if (ear && ear.active) { heardLate = true; ear.stop(); }
+      input.value = ''; liveOn = false; ready();
+      link.send({ t: 'ask', q: v });
+      return;
+    }
     busy = true; send.disabled = true;
     if (ear && ear.active) { heardLate = true; ear.stop(); }   // its late result is dropped, see onFinal
     input.value = '';
@@ -1240,9 +1263,16 @@ fromHash();
   // While a question is spoken, it already stands in the answer box, and the field scrolls along so its end
   // stays in view (Doc, 23.09.2026: "lass den Text auch schon oben erscheinen und in der Eingabebox mit scrollen").
   // The line mirrors the field until the question is sent - typed corrections follow, an emptied field takes it away.
-  let live = null;
+  let live = null, liveOn = false;                   // liveOn: presenter view, the dictated line already stands on the beamer
   function qHtml(v) { return '<span class="ask-q">' + v.replace(/[<&]/g, function (c) { return c === '<' ? '&lt;' : '&amp;'; }) + '</span>'; }
   function mirror() {
+    if (PRESENTER) {                                 // the beamer shows the line, this window only sends it
+      if (!liveOn) return;
+      const v = input.value.trim();
+      link.send({ t: 'ask-live', q: v });
+      if (!v) liveOn = false;
+      return;
+    }
     if (live && !live.isConnected) live = null;      // "Leeren" took it away
     const v = input.value.trim();
     if (!v) { if (live) { live.remove(); live = null; } return; }
@@ -1252,13 +1282,15 @@ fromHash();
   function heard(t) {                                // recognised text into the field, its end in view
     input.value = t; input.scrollLeft = input.scrollWidth;
     try { input.setSelectionRange(t.length, t.length); } catch (e) { }
+    if (PRESENTER) liveOn = true;
     ready(); mirror();
   }
-  input.addEventListener('input', function () { if (live) mirror(); });
+  input.addEventListener('input', function () { if (live || liveOn) mirror(); });
   micBtn.onclick = function () {
     if (ear && ear.active) { ear.stop(); return; }
     if (!window.SolitaListen) { say('Spracheingabe ist hier nicht geladen.', 'ask-err'); return; }
     stopAudio();                                    // otherwise the mic hears Solita herself
+    if (PRESENTER) link.send({ t: 'ask-hush' });     // ... on the beamer too, where she really speaks
     if (!ear) ear = window.SolitaListen({
       lang: 'de-DE',
       onState: function (st) { micBtn.classList.toggle('on', st === 'listening'); },
@@ -1286,6 +1318,7 @@ fromHash();
   let edgeOn = null;                                  // the page number the observer watches - re-observing it in its own callback would fire every frame
   function placeRow() {
     if (panel.hidden) return;
+    if (PRESENTER) { placePres(); return; }
     const s = slides[si], foot = s && s.querySelector('.foot'), pn = s && s.querySelector('.pageno');
     let fits = false;
     if (edge && pn !== edgeOn) { edge.disconnect(); if (pn) edge.observe(pn); edgeOn = pn; }
@@ -1316,6 +1349,20 @@ fromHash();
     move(panel, rowHome && rowHome.parentNode === panel ? rowHome : null);
     if (btn.parentNode === row) box.insertBefore(btn, btnHome && btnHome.parentNode === box ? btnHome : null);
   }
+  // Presenter view (Doc, 23.09.2026: "Solita AI kann ich im Präsi Mode nicht bedienen ... WICHTIG"): the line rides on the
+  // .p-ask slot under the page turner, her picture in front; the answers hang over the live slide's corner, where the
+  // class sees them on the beamer. The beamer window asks, shows and speaks - this one sends and mirrors (DeckAsk below).
+  function placePres() {
+    const slot = document.querySelector('#pres .p-ask'), frame = document.querySelector('#pres .p-cur .p-frame');
+    if (!slot || !frame) return;                     // the presenter view is not built yet
+    const r = slot.getBoundingClientRect(), f = frame.getBoundingClientRect();
+    line.style.left = r.left + 'px'; line.style.width = r.width + 'px'; line.style.top = (r.top + r.height / 2) + 'px';
+    move(line, null); line.classList.add('on');
+    if (btn.parentNode !== row) row.insertBefore(btn, row.firstChild);
+    box.style.right = Math.round(innerWidth - f.right + 8) + 'px';
+    box.style.top = 'auto';                          // dock() hangs it from the top of the (hidden) footer band
+    box.style.bottom = Math.round(innerHeight - f.bottom + 8) + 'px';
+  }
   painted.push(placeRow);                             // the footer moves with the slide scale and the page
   addEventListener('resize', placeRow);
   if (document.fonts) {                               // Orbitron arrives late: the page number's edge moves with it
@@ -1334,10 +1381,11 @@ fromHash();
     input.focus();
     warm();
   }
-  function close() { panel.hidden = true; rowBack(); stopAudio(); }
+  function close() { if (PRESENTER) return; panel.hidden = true; rowBack(); stopAudio(); }   // the presenter's line stays
 
   document.getElementById('ask-btn').onclick = function () {
     this.classList.remove('invite');                 // found her - no more inviting on this page
+    if (PRESENTER) return;                           // there she leads the question line - nothing to open or close
     if (panel.hidden) open(); else close();
   };
   document.getElementById('ask-close').onclick = close;
@@ -1359,6 +1407,17 @@ fromHash();
   // "beim Seitenwechsel bis auf die Mic Zeile einfahren (animiert)") - clicks through the steps of one slide leave it
   let foldedAt = si;
   painted.push(function () { if (si !== foldedAt) { foldedAt = si; out.classList.add('shut'); } });
+  // the two windows of a show talk through DeckLink (link.receive): the presenter sends ask, ask-live and ask-hush,
+  // the beamer sends its box back as ask-out
+  window.DeckAsk = {
+    ask: function (q) { if (PRESENTER || !q) return; if (panel.hidden) open(); heardLate = false; input.value = q; ready(); submit(); },
+    live: function (q) { if (PRESENTER) return; if (panel.hidden) open(); input.value = q || ''; if (live || q) mirror(); ready(); },
+    hush: stopAudio, shown: shown, sync: sync, place: placeRow
+  };
+  if (PRESENTER) {                                    // the line is always there; the answers come from the beamer
+    panel.hidden = false;
+    if (!pwd()) askPassword(); else askQuestion();
+  }
 })();
 
 // Presenter view (Doc, 16.09.2026: "im Präsimode (full screen) auf einen ggf. ersten Monitor ... Vorschau
@@ -1408,6 +1467,7 @@ const link = (function () {
       if (m.t === 'end') { window.close(); return; }   // Esc on the beamer ended the show
       if (m.t === 'laser-on') { toast(m.on ? 'Laser an (l)' : 'Laser aus (l)'); return; }
       if (m.t === 'skip') { window.DeckSlides.setHidden(m.i | 0, !!m.on, true); return; }
+      if (m.t === 'ask-out') { if (window.DeckAsk) DeckAsk.shown(m); return; }   // the beamer's answer box, mirrored
       if (m.t === 'here') send({ t: 'go', si: si, step: step, to: m.from });   // the beamer window reloaded
       else if (m.t === 'go') {
         // answers to our hello: the window that opened us beats a fullscreen one beats any other tab
@@ -1421,6 +1481,7 @@ const link = (function () {
       if (!mine && document.visibilityState !== 'visible') return;   // a tab in the background stays out
       linked = true;
       send({ t: 'go', si: si, step: step, rank: (mine ? 2 : 0) + (fsOn() ? 1 : 0) });
+      if (window.DeckAsk) DeckAsk.sync();            // and the answer box as it stands
       return;
     }
     if (m.t === 'skip') { window.DeckSlides.setHidden(m.i | 0, !!m.on, true); return; }   // hidden in the presenter
@@ -1432,6 +1493,9 @@ const link = (function () {
       if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
     }
     else if (m.t === 'play') { if (narr.toggle) narr.toggle(); }
+    else if (m.t === 'ask') { if (window.DeckAsk) DeckAsk.ask(m.q); }          // asked in the presenter: answered here
+    else if (m.t === 'ask-live') { if (window.DeckAsk) DeckAsk.live(m.q); }    // dictated there, already on screen here
+    else if (m.t === 'ask-hush') { if (window.DeckAsk) DeckAsk.hush(); }       // the presenter's mic is on: her voice off
     else if (m.t === 'go') apply(m);
     else if (m.t === 'ev') mirror.replay(m);
     else if (m.t === 'laser') laser.show(m);
@@ -1805,7 +1869,8 @@ const link = (function () {
       + '<div class="p-cur"><div class="p-fit" title="Klick: weiter"><div class="p-frame"></div></div>'
       + '<div class="p-nav"><button type="button" class="p-prev" title="Zurück" aria-label="Zurück">' + svg('<path d="m15 5-7 7 7 7"/>') + '</button>'
       + '<div class="p-pos"><span class="p-count"></span><div class="p-prog"><i></i></div></div>'
-      + '<button type="button" class="p-next" title="Weiter" aria-label="Weiter">' + svg('<path d="m9 5 7 7-7 7"/>') + '</button></div></div>'
+      + '<button type="button" class="p-next" title="Weiter" aria-label="Weiter">' + svg('<path d="m9 5 7 7-7 7"/>') + '</button></div>'
+      + '<div class="p-ask"></div></div>'          // the room for the Frag-Solita line (#ask-line rides on it)
       + '<div class="p-side">'
       + '<div class="p-slot"><div class="p-fit"><div class="p-frame"></div></div><div class="p-cap"></div></div>'
       + '<div class="p-slot p-after"><div class="p-fit"><div class="p-frame"></div></div><div class="p-cap"></div></div>'
@@ -1817,7 +1882,7 @@ const link = (function () {
     const fits = [].slice.call(root.querySelectorAll('.p-fit'));
     const frames = fits.map(function (f) { return f.firstChild; });   // now, next click, the click after
     const AFTER = 0.8;                               // the click after: centred, a bit smaller (Doc)
-    const cur = q('.p-cur'), side = q('.p-side'), nav = q('.p-nav');
+    const cur = q('.p-cur'), side = q('.p-side'), nav = q('.p-nav'), askSlot = q('.p-ask');
     const caps = root.querySelectorAll('.p-cap');
     const strip = q('.p-strip'), count = q('.p-count'), prog = q('.p-prog i');
     const timerEl = q('.p-timer'), clockEl = q('.p-clock'), pauseBtn = q('.p-pause');
@@ -1837,7 +1902,8 @@ const link = (function () {
     // the two previews stacked beside it (upright screen: side by side under it)
     function fitAll() {
       const r = 540 / 960;
-      size(0, Math.min(cur.clientWidth, (cur.clientHeight - nav.offsetHeight) / r));
+      const under = nav.offsetHeight + askSlot.offsetHeight + (parseFloat(getComputedStyle(askSlot).marginTop) || 0);
+      size(0, Math.min(cur.clientWidth, (cur.clientHeight - under) / r));
       const lab = caps[0].offsetHeight + 6;           // a caption with its margin
       const gap = parseFloat(getComputedStyle(side).rowGap) || 0;
       const row = getComputedStyle(side).flexDirection === 'row';
@@ -1857,6 +1923,7 @@ const link = (function () {
       }
       cells.forEach(function (c) { scaleIn(c.firstChild); });
       roomForDock();
+      if (window.DeckAsk) DeckAsk.place();          // the question line under the page turner, the answers over the slide
     }
     function shot(i, st, live) {                     // slide i as it stands after st clicks
       const c = slides[i].cloneNode(true);
@@ -1893,7 +1960,7 @@ const link = (function () {
       strip.style.marginTop = strip.style.paddingTop = '';
       const cellH = cells.length ? cells[0].offsetHeight : 0;
       if (!cellH) { dockK = 0; return; }
-      let lowest = nav.getBoundingClientRect().bottom;
+      let lowest = askSlot.getBoundingClientRect().bottom;
       [].forEach.call(caps, function (c) { lowest = Math.max(lowest, c.getBoundingClientRect().bottom); });
       const free = strip.getBoundingClientRect().top - lowest - 6;
       // the ring around a cell grows with it: 3px outline × 2.6 did not fit the 4px padding and the strip cut it

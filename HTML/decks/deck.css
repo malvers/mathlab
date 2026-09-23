@@ -317,7 +317,13 @@ html.presenter #overview{background:var(--night)}   /* opaque over the presenter
 .ov-cell.ov-before{box-shadow:-5px 0 0 #F5C242,0 2px 10px rgba(0,0,0,.35)}
 .ov-cell.ov-after{box-shadow:5px 0 0 #F5C242,0 2px 10px rgba(0,0,0,.35)}
 /* --- presenter view (?presenter - the fullscreen button opens it when a beamer is attached) ------------- */
-html.presenter #stage,html.presenter #hud,html.presenter #nav,html.presenter #ask,html.presenter #bar{display:none!important}
+html.presenter #stage,html.presenter #hud,html.presenter #nav,html.presenter #bar{display:none!important}
+/* Frag Solita in the presenter view (Doc, 23.09.2026: "Solita AI kann ich im Präsi Mode nicht bedienen ... WICHTIG"): the
+   question line stands under the page turner (.p-ask lends it the room), the answers hang over the live slide's corner
+   as the class sees them - the beamer window asks, shows and speaks, this window sends and mirrors (placePres in the JS) */
+html.presenter #ask > #ask-btn{display:none}   /* her picture leads the question line, never the corner */
+html.presenter #ask-panel{bottom:0}
+.p-ask{flex:none;height:34px;width:min(100%,640px);margin:8px auto 0}
 html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(64px,13vh,124px) + 30px)!important}
 #pres{position:fixed;inset:0;z-index:8;background:var(--night);color:#E6ECF8;font-family:Orbitron,system-ui,sans-serif;
   display:grid;gap:12px 26px;padding:12px 22px 10px;
