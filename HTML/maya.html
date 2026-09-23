@@ -219,7 +219,9 @@
         // ---------------------------------------------------------------- palette ---
         const COL = {
             glyph: 'rgb(245, 194, 66)',   // dots and bars
-            shell: 'rgb(121, 158, 49)',   // the shell that stands for zero
+            shell: 'rgb(245, 194, 66)',   // the shell that stands for zero - like the other signs
+            ok: 'rgb(121, 158, 49)',      // right answer, carry done
+            cyan: 'rgb(0, 210, 255)',
             warn: 'rgb(176, 36, 24)',
             dim: 'rgba(245, 194, 66, 0.55)',
             line: 'rgba(255, 255, 255, 0.13)',
@@ -243,6 +245,15 @@
                 limits: [20, 20, 20, 20, 20]
             }
         };
+
+        // C gives every place its own colour - ours plus the cyan of the lab
+        let colorMode = false;
+        const PLACE_COLORS = [
+            'rgb(245, 194, 66)', 'rgb(0, 210, 255)', 'rgb(121, 158, 49)',
+            'rgb(176, 36, 24)', 'rgb(0, 210, 255)'
+        ];
+        const placeColor = (place) =>
+            (colorMode && place !== null && place !== undefined) ? PLACE_COLORS[place] : COL.glyph;
 
         let sysKey = 'kalender';
         let digits = [0, 0, 0, 0, 0];     // index 0 = ones, at the bottom of the board
@@ -295,7 +306,7 @@
         }
 
         // The zero: a scallop shell — ribs fanning out of the hinge, a scalloped rim.
-        function drawShell(cx, cy, w, h) {
+        function drawShell(cx, cy, w, h, col) {
             const lw = Math.max(2, Math.min(6, h * 0.075));   // one weight for rim, mouth and ribs
             const R = h * 0.92;
             const hx = cx, hy = cy + h * 0.44;          // the hinge
@@ -307,7 +318,7 @@
             const lobes = 6;
 
             ctx.save();
-            ctx.strokeStyle = COL.shell;
+            ctx.strokeStyle = col || COL.shell;
             ctx.lineWidth = lw;
             ctx.lineJoin = 'round';
             ctx.lineCap = 'round';
@@ -339,10 +350,11 @@
         // Every bar counts five, every dot one, and the dots sit above the bars.
         // place === null draws a loose digit (panel, drag ghost) and registers no targets.
         function paintDigit(d, cx, cy, bw, bh, place) {
+            const col = placeColor(place);
             if (d === 0) {
                 const w = Math.min(bw * 0.78, 132);   // exactly the width of a bar
                 const h = w * 0.64;
-                drawShell(cx, cy + h * 0.065, w, h);   // the shape is taller above the centre
+                drawShell(cx, cy + h * 0.065, w, h, col);   // the shape is taller above the centre
                 return;
             }
             const bars = Math.floor(d / 5), dots = d % 5;
@@ -361,7 +373,7 @@
                 for (let k = 0; k < dots; k++) {
                     const x = startX + k * step;
                     ctx.beginPath();
-                    ctx.fillStyle = COL.glyph;
+                    ctx.fillStyle = col;
                     ctx.arc(x, y + dotR, dotR, 0, Math.PI * 2);
                     ctx.fill();
                     if (place !== null) {
@@ -371,7 +383,7 @@
                 y += dotsH + gap;
             }
             for (let k = 0; k < bars; k++) {
-                roundRect(cx - barW / 2, y, barW, barH, barH / 2, COL.glyph, null);
+                roundRect(cx - barW / 2, y, barW, barH, barH / 2, col, null);
                 if (place !== null) {
                     glyphs.push({ place, type: 'bar', x: cx - barW / 2, y: y - gap * 0.35, w: barW, h: barH + gap * 0.7 });
                 }
@@ -425,7 +437,10 @@
                     }
                 }
                 solEl.querySelectorAll('.maya-term').forEach(el => {
-                    el.style.left = (colCenter(Number(el.dataset.col)) - blockX) + 'px';
+                    const col = Number(el.dataset.col);
+                    el.style.left = (colCenter(col) - blockX) + 'px';
+                    // in colour mode every term takes the colour of its own place
+                    el.style.color = colorMode ? placeColor(n - 1 - col) : '';
                 });
                 solEl.querySelectorAll('.maya-plus').forEach(el => {
                     const g = Number(el.dataset.gap);
@@ -472,10 +487,10 @@
                 const flash = flashColor(place);
                 const hot = hoverPlace === place;
 
-                ctx.lineWidth = (flash || hot) ? 2 : 1;
+                ctx.lineWidth = (flash || hot || colorMode) ? 2 : 1;
                 roundRect(x, cardY, cardW, cardH, 16,
                     hot ? 'rgba(245, 194, 66, 0.10)' : (flash ? 'rgba(121, 158, 49, 0.10)' : COL.fill),
-                    hot ? COL.glyph : (flash || COL.line));
+                    hot ? COL.glyph : (flash || (colorMode ? placeColor(place) : COL.line)));
 
                 paintDigit(digits[place], x + cardW / 2, cardY + cardH / 2, cardW, cardH, place);
 
@@ -537,7 +552,7 @@
         }
 
         function flashPlace(place, color) {
-            flashes.push({ place, color: color || COL.shell, until: performance.now() + 900 });
+            flashes.push({ place, color: color || COL.ok, until: performance.now() + 900 });
             setTimeout(draw, 950);
         }
 
@@ -557,7 +572,7 @@
                 digits[k + 1]++;
                 flashPlace(k + 1);
                 say(lim[k] + ' × ' + de(sys().values[k]) + ' = ' + de(sys().values[k + 1])
-                    + ' — ' + T('carry', 'das wandert eine Stelle nach oben.'), COL.shell);
+                    + ' — ' + T('carry', 'das wandert eine Stelle nach oben.'));
                 k++;
             }
             changed();
@@ -579,7 +594,7 @@
                 return false;
             }
             digits[place] = d;
-            flashPlace(place, COL.shell);
+            flashPlace(place, COL.ok);
             say('');
             changed();
             return true;
@@ -680,8 +695,9 @@
             if (task && !task.done && value() === task.target) {
                 task.done = true;
                 solvedCount++;
-                say(T('task_correct', 'Richtig! ') + de(task.target) + T('task_lies', ' liegt auf dem Brett.'), COL.shell);
+                say(T('task_correct', 'Richtig! ') + de(task.target) + T('task_lies', ' liegt auf dem Brett.'));
                 for (let i = 0; i < places(); i++) flashPlace(i);
+                updateHead();
                 updateStats();
             }
             draw();
@@ -745,7 +761,7 @@
                 + '</div>', 'rgb(176, 36, 24)');
 
             CyberUI.createCard('ui-container', T('card_help', 'SO GEHT ES'),
-                '<div class="maya-note">' + T('help', 'Zieh eine Ziffer aus dem Panel auf eine Stelle - oder tippe sie an und dann die Stelle. In eine Stelle tippen legt einen Punkt dazu, auf einen Punkt tippen nimmt ihn weg, auf einen Strich nimmt fünf weg. Ist eine Stelle voll, wandert sie nach oben, und die leere zeigt die Muschel - die Null.') + '</div>',
+                '<div class="maya-note">' + T('help', 'Zieh eine Ziffer aus dem Panel auf eine Stelle - oder tippe sie an und dann die Stelle. In eine Stelle tippen legt einen Punkt dazu, auf einen Punkt tippen nimmt ihn weg, auf einen Strich nimmt fünf weg. Ist eine Stelle voll, wandert sie nach oben, und die leere zeigt die Muschel - die Null. Taste C färbt jede Stelle anders.') + '</div>',
                 'rgb(121, 158, 49)');
 
             document.getElementById('maya-lay').onclick = () => {
@@ -793,6 +809,16 @@
             resizeCanvasToContainer();
             draw();
         }
+
+        window.addEventListener('keydown', (e) => {
+            const t = e.target;
+            if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+            if (e.key === 'c' || e.key === 'C') {
+                colorMode = !colorMode;
+                dbg('colour mode ' + (colorMode ? 'on' : 'off'));
+                draw();
+            }
+        });
 
         window.addEventListener('resize', init);
 
