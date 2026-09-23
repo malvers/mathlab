@@ -799,7 +799,8 @@ html.dark-slide #hud button:hover,html.dark-slide #nav button:hover{background:r
    screen is invisible to the browser, so "mirrored" and "laptop alone" look the same; extended = no dot.
    Only where the browser can tell (screen.isExtended, Chrome). */
 #hud #full{position:relative}
-#hud #full .scr-dot{position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;box-shadow:0 0 0 1.5px #EAF0FA}
+/* the badge says what the screens do; a click on it asks the screen again (Doc, 23.09.2026: "etwas größer") */
+#hud #full .scr-dot{position:absolute;top:-4px;right:-4px;width:11px;height:11px;border-radius:50%;cursor:pointer}
 #hud #full .scr-dot.one{background:#F5C242}
 /* footer left: two triangles that jump a whole slide, fully built (Doc, 17.09.2026: "zwei Dreiecke, die von
    Folie zu Folie springen, anis rolled out") - placed by dock() on the footer line like the HUD */
@@ -1543,7 +1544,7 @@ function paintFull(){
   fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
     + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
     + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>'
-    + (SCREEN_KNOWN && !PRESENTER && !ext ? '<span class="scr-dot one"></span>' : '');
+    + (SCREEN_KNOWN && !PRESENTER ? '<span class="scr-dot ' + (ext ? 'ext' : 'one') + '" title="Bildschirme prüfen"></span>' : '');
   fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)'
     : !PRESENTER && ext ? 'Bildschirm erweitert – Präsentieren: Beamer + Referentenansicht (f)'
     : SCREEN_KNOWN ? 'Nur ein Bildschirm – gespiegelt? Cmd F1 / Win P erweitert – Vollbild (f)' : 'Vollbild (f)';
@@ -1556,6 +1557,16 @@ if (SCREEN_KNOWN) {
   if (screen.addEventListener) screen.addEventListener('change', recheck);
   setInterval(recheck, 2000);
 }
+// A click on the badge asks the screen again and says what to do. The page cannot switch mirroring itself - that
+// is the Mac's own setting (Cmd F1), no browser may touch it (Doc, 23.09.2026: "könnten wir bei click schalten?").
+fullBtn.addEventListener('click', function (e) {
+  if (!e.target || !e.target.classList || !e.target.classList.contains('scr-dot')) return;
+  e.preventDefault(); e.stopPropagation();          // the dot does not send the deck into fullscreen
+  paintFull();
+  if (window.DeckNote) DeckNote(screen.isExtended
+    ? 'Bildschirm ist erweitert – f startet Beamer und Referentenansicht'
+    : 'Nur ein Bildschirm. Am Mac Cmd F1, an Windows Win P – dann f');
+}, true);
 function full(){
   const el = document.documentElement;
   if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
@@ -2967,6 +2978,7 @@ const link = (function () {
     return { move: move, show: show, toggle: toggle };
   })();
 
+  window.DeckNote = toast;                            // the deck's one message box, also for the screen badge
   function toast(t) {
     let b = document.getElementById('linkmsg');
     if (!b) {

@@ -474,7 +474,7 @@ function paintFull(){
   fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
     + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
     + (fsOn() ? ICON_EXIT : ICON_ENTER) + '</svg>'
-    + (SCREEN_KNOWN && !PRESENTER ? '<span class="scr-dot ' + (ext ? 'ext' : 'one') + '"></span>' : '');
+    + (SCREEN_KNOWN && !PRESENTER ? '<span class="scr-dot ' + (ext ? 'ext' : 'one') + '" title="Bildschirme prüfen"></span>' : '');
   fullBtn.title = fsOn() ? 'Vollbild verlassen (Esc)'
     : !PRESENTER && ext ? 'Bildschirm erweitert – Präsentieren: Beamer + Referentenansicht (f)'
     : SCREEN_KNOWN ? 'Nur ein Bildschirm – gespiegelt? Cmd F1 / Win P erweitert – Vollbild (f)' : 'Vollbild (f)';
@@ -487,6 +487,16 @@ if (SCREEN_KNOWN) {
   if (screen.addEventListener) screen.addEventListener('change', recheck);
   setInterval(recheck, 2000);
 }
+// A click on the badge asks the screen again and says what to do. The page cannot switch mirroring itself - that
+// is the Mac's own setting (Cmd F1), no browser may touch it (Doc, 23.09.2026: "könnten wir bei click schalten?").
+fullBtn.addEventListener('click', function (e) {
+  if (!e.target || !e.target.classList || !e.target.classList.contains('scr-dot')) return;
+  e.preventDefault(); e.stopPropagation();          // the dot does not send the deck into fullscreen
+  paintFull();
+  if (window.DeckNote) DeckNote(screen.isExtended
+    ? 'Bildschirm ist erweitert – f startet Beamer und Referentenansicht'
+    : 'Nur ein Bildschirm. Am Mac Cmd F1, an Windows Win P – dann f');
+}, true);
 function full(){
   const el = document.documentElement;
   if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
@@ -1895,6 +1905,7 @@ const link = (function () {
     return { move: move, show: show, toggle: toggle };
   })();
 
+  window.DeckNote = toast;                            // the deck's one message box, also for the screen badge
   function toast(t) {
     let b = document.getElementById('linkmsg');
     if (!b) {
