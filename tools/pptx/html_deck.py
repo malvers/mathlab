@@ -2960,9 +2960,14 @@ const link = (function () {
       const f = document.querySelector('#pres .p-cur .p-frame');
       return f && f.getBoundingClientRect();
     }
+    // The mouse only disappears while a dot really stands in its place - after loading there is none yet, and an
+    // invisible pointer over nothing is what Doc saw (23.09.2026: "beim einschalten ... check mal genau").
+    function cursor() {
+      document.documentElement.classList.toggle('laser-on', !!(on && dot && dot.classList.contains('on')));
+    }
     function show(m) {
       if (m.x !== undefined) at = { x: m.x, y: m.y };   // follow the hand even while the dot is out, so L lights it where he points now
-      if (!on || m.x === undefined) { if (dot) dot.classList.remove('on'); return; }
+      if (!on || m.x === undefined) { if (dot) dot.classList.remove('on'); cursor(); return; }
       const box = stage();
       if (!box || !box.width) return;                // the preview is not built yet
       if (!dot) {
@@ -2976,12 +2981,12 @@ const link = (function () {
       dot.style.transform = 'translate(' + (r.left + m.x * r.width).toFixed(1) + 'px,'
                                          + (r.top + m.y * r.height).toFixed(1) + 'px)';
       dot.classList.add('on');
+      cursor();
     }
     // L puts the dot back where it stood, at once - waiting for the next mouse move looked broken (Doc, 23.09.2026:
     // "l bringt nicht den Punkt sofort! Man muss erst bewegen!")
     function light() {
-      document.documentElement.classList.toggle('laser-on', on);   // the presenter's cursor follows it (deck.css)
-      if (on) { if (at) show(at); } else show({});
+      if (on) { if (at) show(at); else cursor(); } else show({});
     }
     function toggle() {
       on = !on;
@@ -2998,7 +3003,7 @@ const link = (function () {
       // goes out on both screens at once, and in the presenter view even with no beamer attached
       if (PRESENTER || linked) toggle();
     });
-    light();                                         // the class says from the start that it is on
+    cursor();                                        // no dot yet: the arrow stays
     window.DeckLaser = function () { return { on: on, want: want, sent: sent, raf: raf, dot: !!dot }; };   // debug
     return { move: move, show: show, toggle: toggle, mirrorOn: mirrorOn };
   })();
