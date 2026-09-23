@@ -32,6 +32,10 @@ A few ground rules:
     - **Unverändert:** Secret-Scan (Regel 18) vor **jedem** Push, **nie** Force-Push, und **nur eigene Hunks** committen, wenn eine andere Sitzung in derselben Datei arbeitet (Regel 19).
     - **Veröffentlichen bleibt gated** — Push auf `main` ist etwas anderes als ein YouTube-Upload, eine Mail oder ein Deploy nach außen. Dafür weiter Docs eindeutiges Wort.
     - **OTWA/Cloud unberührt:** arbeitet auf eigenem `claude-*`-Branch und MUSS dorthin pushen (flüchtige Container, Regel 20).
+23. **Diagramme in Decks IMMER als Inline-SVG mit HTML-Beschriftung** — nie ein gemaltes PNG auf einer Folie (Doc 23.09.2026: „das sieht pixlig aus und ich kann nicht editieren").
+    - Formen, Pfeile, Mathe mit `tools/aufgaben/svgfig.py` auf die Bildbox **816×330**; die **Wörter** als `<p class="fl">`-Labels darüber, `(x, y, Breite, Text[, eigenes CSS])`.
+    - Gebaut wird über `HtmlDeck.figure(title, svg, labels, png=)`; die Figuren eines Decks stehen in einem eigenen Generator (Muster: `tools/pptx/ai_svg.py`). PNG nur noch als Zwilling für den .pptx-Export.
+    - Grund für die Mischung: SVG bleibt auf dem Beamer scharf, aber SVG-Text kann der Deck-Editor nicht anfassen. Labels sind editierbar, verschiebbar und skalierbar (E → deck-label.js).
 
 ## Bevorzugte Farbpalette
 
