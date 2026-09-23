@@ -986,7 +986,7 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 #ask-line #ask-mic svg,#ask-line #ask-tts svg{width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6)}
 #ask-line input{height:100%;padding:0 8px;border-radius:5px;font-size:13px}
 #ask-line #ask-send{width:var(--hudbtn,22px);height:100%;min-width:0;padding:0;border-radius:5px;font-size:14px}   /* square like the others (Doc, 23.09.2026) */
-#ask.foot #ask-panel{bottom:0}   /* the corner is empty: the panel comes down to the footer band */
+#ask.inline #ask-panel{position:fixed;right:auto}   /* the corner is empty: the panel hangs over her picture in the line - left, width and bottom come from placeRow() */
 #ask-panel{transition:opacity .25s ease}
 #ask-panel.bare{opacity:0;pointer-events:none}   /* nothing above to show: no answer (or folded by a page turn), no label */
 /* a light blue tint (Doc, 16.09.2026: "leicht bläulich"); field and buttons a shade darker blue ("etwas dunkelblauer als der HG") */
@@ -2387,9 +2387,14 @@ ASK_JS = r"""
     if (fits) {
       line.classList.add('on'); lead();
       if (panel.hidden) move(panel, home()); else move(line, null);
+      // the answers hang over her picture like a speech bubble: left edge on her, no wider than the line, right above it
+      // (Doc, 23.09.2026: "die Box kommt an der falschen Stelle" when it stayed in the corner)
+      const h = line.offsetHeight || parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hudbtn')) || 22;
+      panel.style.left = line.style.left; panel.style.width = Math.min(360, parseFloat(line.style.width)) + 'px';
+      panel.style.bottom = Math.round(innerHeight - (parseFloat(line.style.top) - h / 2) + 8) + 'px';
     }
     else rowBack();
-    box.classList.toggle('foot', fits);              // the panel then sits right above the footer band
+    box.classList.toggle('inline', fits);            // the panel is then placed from here, not from the corner ('foot' is the slide's footer class - never that)
     if (was !== fits && !again && typeof dock === 'function') {   // the HUD and the page number move with the corner - measure once more
       again = true; dock(); placeRow(); again = false;
     }
@@ -2404,6 +2409,7 @@ ASK_JS = r"""
   }
   function rowBack() {                               // everything back to the corner: the line off, the row in the panel, her picture under it
     line.classList.remove('on');
+    panel.style.left = panel.style.width = panel.style.bottom = '';   // the panel hangs from the corner again (deck.css)
     move(panel, home());
     if (btn.parentNode === line) box.insertBefore(btn, btnHome && btnHome.parentNode === box ? btnHome : null);
   }

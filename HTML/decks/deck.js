@@ -1338,9 +1338,14 @@ fromHash();
     if (fits) {
       line.classList.add('on'); lead();
       if (panel.hidden) move(panel, home()); else move(line, null);
+      // the answers hang over her picture like a speech bubble: left edge on her, no wider than the line, right above it
+      // (Doc, 23.09.2026: "die Box kommt an der falschen Stelle" when it stayed in the corner)
+      const h = line.offsetHeight || parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hudbtn')) || 22;
+      panel.style.left = line.style.left; panel.style.width = Math.min(360, parseFloat(line.style.width)) + 'px';
+      panel.style.bottom = Math.round(innerHeight - (parseFloat(line.style.top) - h / 2) + 8) + 'px';
     }
     else rowBack();
-    box.classList.toggle('foot', fits);              // the panel then sits right above the footer band
+    box.classList.toggle('inline', fits);            // the panel is then placed from here, not from the corner ('foot' is the slide's footer class - never that)
     if (was !== fits && !again && typeof dock === 'function') {   // the HUD and the page number move with the corner - measure once more
       again = true; dock(); placeRow(); again = false;
     }
@@ -1355,6 +1360,7 @@ fromHash();
   }
   function rowBack() {                               // everything back to the corner: the line off, the row in the panel, her picture under it
     line.classList.remove('on');
+    panel.style.left = panel.style.width = panel.style.bottom = '';   // the panel hangs from the corner again (deck.css)
     move(panel, home());
     if (btn.parentNode === line) box.insertBefore(btn, btnHome && btnHome.parentNode === box ? btnHome : null);
   }
