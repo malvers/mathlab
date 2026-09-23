@@ -2371,7 +2371,9 @@ ASK_JS = r"""
     const s = slides[si], foot = s && s.querySelector('.foot'), pn = s && s.querySelector('.pageno');
     let fits = false;
     if (edge && pn !== edgeOn) { edge.disconnect(); if (pn) edge.observe(pn); edgeOn = pn; }
-    if (foot && pn && foot.textContent.trim()) {
+    // not on her greeting page (Doc, 23.09.2026: "auf der 1. Seite nicht bitte") - its footer starts beside her big
+    // picture and leaves the line no room; there she waits in the corner as before
+    if (foot && pn && foot.textContent.trim() && !s.classList.contains('greet')) {
       const rg = document.createRange();
       rg.selectNodeContents(foot);                    // the text itself - .foot spans the whole slide
       const t = rg.getBoundingClientRect(), p = pn.getBoundingClientRect();
