@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Ganzrationale Funktionen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w20-ganzrationale',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Ganzrationale Funktionen',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 20 (LB 1) · 20 Aufgaben: Grad und Verhalten im Unendlichen, Linearfaktorzerlegung, Substitution, Vielfachheit, Symmetrie · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 20 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Grad und Verhalten im Unendlichen (1-5), Nullstellen durch Ausklammern und Linearfaktoren (6-11), Substitution (12-15), Vielfachheit und Symmetrie (16-20). */
+  questions: [
+    {
+      q: 'Welchen Grad hat $f(x) = 3x^5 - 2x^2 + 1$?',
+      opts: ['den Grad $3$', 'den Grad $2$', 'den Grad $5$', 'den Grad $8$'],
+      steps: [
+        'Der Grad ist der höchste vorkommende Exponent von $x$.',
+        'Hier ist das $5$.',
+        'Die $3$ davor ist der Leitkoeffizient, nicht der Grad.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie verhält sich $f(x) = 3x^5 - 2x^2 + 1$ für $x \\to +\\infty$?',
+      opts: ['$f(x) \\to 1$', '$f(x) \\to +\\infty$', '$f(x) \\to -\\infty$', '$f(x) \\to 3$'],
+      steps: [
+        'Entscheidend ist der Term höchsten Grades $3x^5$.',
+        'Ungerader Grad mit positivem Leitkoeffizienten: für große $x$ wächst er über alle Grenzen.',
+        'Probe: $f(10) = 300\\,000 - 200 + 1$, also deutlich positiv.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie verhält sich $f(x) = 3x^5 - 2x^2 + 1$ für $x \\to -\\infty$?',
+      opts: ['$f(x) \\to +\\infty$', '$f(x) \\to 0$', '$f(x) \\to -\\infty$', '$f(x) \\to 1$'],
+      steps: [
+        'Bei ungeradem Grad behält der führende Term das Vorzeichen des Arguments.',
+        '$3 \\cdot (-10)^5 = -300\\,000$',
+        'Der Graph verläuft also von links unten nach rechts oben.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie verhält sich $f(x) = -x^4 + 2x$ für $x \\to \\pm\\infty$?',
+      opts: ['$f(x) \\to +\\infty$ bzw. $f(x) \\to -\\infty$', 'beide Male $f(x) \\to -\\infty$', '$f(x) \\to 0$', 'beide Male $f(x) \\to +\\infty$'],
+      steps: [
+        'Der führende Term ist $-x^4$: gerader Grad, negativer Leitkoeffizient.',
+        'Gerader Grad bedeutet gleiches Verhalten auf beiden Seiten.',
+        'Das Minus zieht beide Äste nach unten.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welcher Term bestimmt das Verhalten einer ganzrationalen Funktion im Unendlichen?',
+      opts: ['das Absolutglied', 'der Term mit dem höchsten Exponenten', 'der Term mit dem größten Koeffizienten', 'alle Terme gleichermaßen'],
+      steps: [
+        'Für große $\\left|x\\right|$ wächst die höchste Potenz am schnellsten.',
+        'Beispiel bei $x = 100$: $x^4 = 100\\,000\\,000$, aber $50x^2 = 500\\,000$.',
+        'Der Term höchsten Grades überwiegt alle anderen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lauten die Nullstellen von $f(x) = x^3 - 4x$?',
+      opts: ['$x = 0$ und $x = 4$', '$x = 0$ und $x = 2$', '$x = 2$ und $x = -2$', '$x = 0$, $x = 2$ und $x = -2$'],
+      steps: [
+        '$x$ ausklammern: $x\\,(x^2 - 4) = 0$.',
+        'Zweiter Faktor über die dritte binomische Formel: $x\\,(x-2)(x+2)$.',
+        'Nullstellen $0$, $2$ und $-2$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lauten die Nullstellen von $f(x) = x^3 - x^2$?',
+      opts: ['$x = 1$ und $x = -1$', 'nur $x = 1$', '$x = 0$ und $x = -1$', '$x = 0$ (doppelt) und $x = 1$'],
+      steps: [
+        '$x^2$ ausklammern: $x^2\\,(x - 1) = 0$.',
+        '$x^2 = 0$ liefert die doppelte Nullstelle $0$.',
+        '$x - 1 = 0$ liefert $x = 1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lauten die reellen Nullstellen von $f(x) = x^4 - 16$?',
+      opts: ['$x = 4$ und $x = -4$', 'nur $x = 2$', '$x = 2$, $x = -2$, $x = 4$ und $x = -4$', '$x = 2$ und $x = -2$'],
+      steps: [
+        'Dritte binomische Formel: $x^4 - 16 = (x^2 - 4)(x^2 + 4)$.',
+        '$x^2 - 4 = 0$ ergibt $x = \\pm 2$.',
+        '$x^2 + 4 = 0$ hat im Reellen keine Lösung, denn $x^2$ ist nie negativ.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lauten die Nullstellen von $f(x) = (x - 1)(x + 2)(x - 3)$?',
+      opts: ['$x = 1$, $x = -2$ und $x = 3$', '$x = 1$, $x = 2$ und $x = 3$', '$x = 6$', '$x = -1$, $x = 2$ und $x = -3$'],
+      steps: [
+        'Nullproduktsatz: jeder Faktor wird für sich null gesetzt.',
+        '$x = 1$, $x = -2$, $x = 3$.',
+        'Die Funktion hat den Grad $3$ und hier die größtmögliche Zahl von drei Nullstellen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele Nullstellen kann eine ganzrationale Funktion vierten Grades höchstens haben?',
+      opts: ['vier', 'beliebig viele', 'drei', 'zwei'],
+      steps: [
+        'Jede Nullstelle entspricht einem Linearfaktor.',
+        'Beim Ausmultiplizieren von mehr als vier Linearfaktoren entstünde ein höherer Grad.',
+        'Also höchstens vier — es können auch weniger sein.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lauten die Nullstellen von $f(x) = x^3 + x^2 - 6x$?',
+      opts: ['$x = -3$ und $x = 2$', '$x = 0$, $x = -3$ und $x = 2$', '$x = 0$, $x = 3$ und $x = -2$', '$x = 0$ und $x = 6$'],
+      steps: [
+        '$x$ ausklammern: $x\\,(x^2 + x - 6) = 0$.',
+        'Die Klammer über Vieta: zwei Zahlen mit Summe $-1$ und Produkt $-6$, also $-3$ und $2$.',
+        '$f(x) = x\\,(x+3)(x-2)$, Nullstellen $0$, $-3$ und $2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse mit Substitution: $x^4 - 5x^2 + 4 = 0$.',
+      opts: ['$x = \\pm 2$', '$x = 1$ und $x = 4$', '$x = \\pm 1$ und $x = \\pm 2$', 'keine reelle Lösung'],
+      steps: [
+        'Substitution $u = x^2$: $u^2 - 5u + 4 = 0$.',
+        'Vieta: $u_1 = 1$ und $u_2 = 4$.',
+        'Rücksubstitution: $x^2 = 1$ ergibt $\\pm 1$, $x^2 = 4$ ergibt $\\pm 2$ — vier Nullstellen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse mit Substitution: $x^4 - 13x^2 + 36 = 0$.',
+      opts: ['$x = \\pm 2$ und $x = \\pm 3$', '$x = \\pm 6$', '$x = \\pm 4$ und $x = \\pm 9$', '$x = 4$ und $x = 9$'],
+      steps: [
+        '$u = x^2$: $u^2 - 13u + 36 = 0$ mit den Lösungen $u = 4$ und $u = 9$.',
+        'Rücksubstitution: $x = \\pm 2$ und $x = \\pm 3$.',
+        'Die Werte $4$ und $9$ sind nur die Zwischenergebnisse, nicht die Nullstellen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Warum hilft die Substitution $u = x^2$ bei $x^4 + b\\,x^2 + c = 0$?',
+      opts: ['Weil sich der Grad dadurch halbiert und die Gleichung linear wird.', 'Weil nur so alle Lösungen gefunden werden.', 'Weil die Gleichung dadurch quadratisch wird und die Lösungsformel gilt.', 'Weil man so die Nullstellen sofort ablesen kann.'],
+      steps: [
+        'Eine Gleichung vierten Grades lässt sich nicht direkt mit der Lösungsformel behandeln.',
+        'Mit $u = x^2$ entsteht $u^2 + bu + c = 0$, also eine quadratische Gleichung.',
+        'Nach dem Lösen muss unbedingt zurücksubstituiert werden: aus jedem positiven $u$ werden zwei Werte für $x$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele reelle Lösungen hat $x^4 + 3x^2 + 2 = 0$?',
+      opts: ['eine', 'keine', 'zwei', 'vier'],
+      steps: [
+        '$u = x^2$: $u^2 + 3u + 2 = 0$ mit den Lösungen $u = -1$ und $u = -2$.',
+        'Beide sind negativ.',
+        'Aus $x^2 = -1$ bzw. $x^2 = -2$ folgt im Reellen nichts — es gibt keine Lösung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was bedeutet eine doppelte Nullstelle für den Graphen?',
+      opts: ['Der Graph berührt die $x$-Achse dort, ohne sie zu durchsetzen.', 'Der Graph schneidet die $x$-Achse dort besonders steil.', 'Der Graph verläuft dort senkrecht.', 'Der Graph hat dort einen Sprung.'],
+      steps: [
+        'Bei einer einfachen Nullstelle wechselt der Funktionswert das Vorzeichen.',
+        'Bei gerader Vielfachheit bleibt das Vorzeichen erhalten.',
+        'Der Graph kommt also an die Achse heran und kehrt auf dieselbe Seite zurück.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie verhält sich der Graph von $f(x) = (x - 1)^2\\,(x + 2)$ an seinen Nullstellen?',
+      opts: ['Er schneidet sie an beiden Stellen.', 'Er schneidet die Achse bei $x = 1$ und berührt sie bei $x = -2$.', 'Er berührt sie an beiden Stellen.', 'Er berührt die Achse bei $x = 1$ und schneidet sie bei $x = -2$.'],
+      steps: [
+        '$x = 1$ tritt wegen des Quadrats doppelt auf, $x = -2$ einfach.',
+        'Gerade Vielfachheit bedeutet Berühren, ungerade bedeutet Schneiden.',
+        'Probe: $f(0) = 1 \\cdot 2 = 2$ und $f(2) = 1 \\cdot 4 = 4$ — beide positiv, die Achse wurde bei $1$ nicht durchsetzt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Woran erkennt man, dass der Graph einer ganzrationalen Funktion achsensymmetrisch zur $y$-Achse ist?',
+      opts: ['Der Leitkoeffizient ist positiv.', 'Das Absolutglied ist null.', 'Es kommen nur ungerade Exponenten vor.', 'Es kommen nur gerade Exponenten vor.'],
+      steps: [
+        'Achsensymmetrie bedeutet $f(-x) = f(x)$.',
+        'Bei geraden Exponenten gilt $(-x)^n = x^n$, das Vorzeichen bleibt.',
+        'Ein Absolutglied ist erlaubt, es entspricht $x^0$ und hat ebenfalls geraden Exponenten.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Woran erkennt man Punktsymmetrie zum Koordinatenursprung?',
+      opts: ['Es kommen nur ungerade Exponenten vor.', 'Der Graph geht durch den Ursprung.', 'Die Funktion hat drei Nullstellen.', 'Es kommen nur gerade Exponenten vor.'],
+      steps: [
+        'Punktsymmetrie bedeutet $f(-x) = -f(x)$.',
+        'Bei ungeraden Exponenten gilt $(-x)^n = -x^n$.',
+        'Ein Absolutglied würde die Symmetrie zerstören, denn es ändert sein Vorzeichen nicht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Symmetrie hat der Graph von $f(x) = x^3 - 4x$?',
+      opts: ['achsensymmetrisch zur $y$-Achse', 'keine Symmetrie', 'punktsymmetrisch zum Ursprung', 'achsensymmetrisch zur $x$-Achse'],
+      steps: [
+        'Es kommen nur die ungeraden Exponenten $3$ und $1$ vor.',
+        'Probe: $f(-x) = -x^3 + 4x = -\\left(x^3 - 4x\\right) = -f(x)$.',
+        'Also Punktsymmetrie zum Ursprung; passend dazu liegen die Nullstellen $-2$, $0$ und $2$ symmetrisch.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

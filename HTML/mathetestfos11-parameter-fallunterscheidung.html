@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Parameter und Fallunterscheidung — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w19-parameter-fallunterscheidung',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Parameter und Fallunterscheidung',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 19 (LB 1) · 20 Aufgaben: Funktionenscharen, Nullstellen in Abhängigkeit vom Parameter, Diskriminante · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 19 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Scharen verstehen (1-5), Nullstellen und Scheitel mit Parameter (6-11), Fallunterscheidung ueber die Diskriminante (12-17), Anwendungen (18-20). */
+  questions: [
+    {
+      q: 'Was ist eine Funktionenschar?',
+      opts: ['eine Menge von Funktionen, die sich nur im Wert eines Parameters unterscheiden', 'eine Funktion, die mehrere Werte zuordnet', 'eine Folge von Funktionswerten', 'eine Funktion mit mehreren Variablen'],
+      steps: [
+        'In der Funktionsgleichung steht neben $x$ ein Buchstabe, der keine Variable, sondern ein Parameter ist.',
+        'Für jeden festen Wert des Parameters entsteht eine einzelne Funktion.',
+        'Alle diese Funktionen zusammen bilden die Schar.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie entstehen die Graphen der Schar $f_a(x) = x^2 + a$ auseinander?',
+      opts: ['durch Spiegelung an der $x$-Achse', 'durch Verschiebung längs der $y$-Achse', 'durch Streckung', 'durch Verschiebung längs der $x$-Achse'],
+      steps: [
+        'Der Parameter wird zum Funktionswert addiert.',
+        'Der Scheitel wandert von $(0|0)$ nach $(0|a)$.',
+        'Form und Öffnung bleiben unverändert.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wo liegt der Scheitelpunkt der Schar $f_a(x) = (x - a)^2$?',
+      opts: ['in $(-a|0)$', 'in $(a|0)$', 'in $(0|a)$', 'in $(a|a)$'],
+      steps: [
+        'Der kleinste Wert $0$ wird angenommen, wenn die Klammer null ist.',
+        '$x - a = 0$ ergibt $x = a$.',
+        'Alle Scheitel liegen also auf der $x$-Achse.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was bewirkt der Parameter in der Schar $f_a(x) = a\\,x^2$ mit $a \\neq 0$?',
+      opts: ['Er verschiebt den Graphen nach rechts.', 'Er ändert die Nullstelle.', 'Er verschiebt den Graphen nach oben.', 'Er bestimmt Öffnungsrichtung und Streckung.'],
+      steps: [
+        'Das Vorzeichen von $a$ entscheidet über die Öffnungsrichtung.',
+        'Der Betrag entscheidet über Streckung oder Stauchung.',
+        'Der Scheitel bleibt für jedes $a$ im Ursprung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welches $a$ verläuft der Graph von $f_a(x) = x^2 + a$ durch den Punkt $P(2|1)$?',
+      opts: ['$a = 3$', '$a = -3$', '$a = -1$', '$a = 1$'],
+      steps: [
+        'Punktprobe: $1 = 2^2 + a$.',
+        '$1 = 4 + a$, also $a = -3$.',
+        'Probe: $f_{-3}(2) = 4 - 3 = 1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lauten die Nullstellen von $f_a(x) = x^2 - a$ für $a > 0$?',
+      opts: ['$x = \\pm\\dfrac{a}{2}$', '$x = \\pm\\sqrt{a}$', '$x = a^2$', '$x = \\pm a$'],
+      steps: [
+        '$x^2 - a = 0$ ergibt $x^2 = a$.',
+        'Wurzel ziehen, beide Vorzeichen: $x = \\pm\\sqrt{a}$.',
+        'Probe mit $a = 9$: Nullstellen $\\pm 3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viele Nullstellen hat $f_a(x) = x^2 - a$ für $a < 0$?',
+      opts: ['eine', 'das hängt vom Betrag von $a$ ab', 'zwei', 'keine'],
+      steps: [
+        'Die Gleichung $x^2 = a$ hätte eine negative rechte Seite.',
+        'Ein Quadrat ist im Reellen nie negativ.',
+        'Für $a < 0$ liegt die ganze Parabel oberhalb der $x$-Achse.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lauten die Nullstellen von $f_a(x) = x^2 - a\\,x$?',
+      opts: ['nur $x = a$', '$x_1 = 0$ und $x_2 = a$', '$x = \\pm\\sqrt{a}$', '$x_1 = 0$ und $x_2 = -a$'],
+      steps: [
+        '$x$ ausklammern: $x\\,(x - a) = 0$.',
+        'Nullproduktsatz: $x = 0$ oder $x = a$.',
+        'Für $a = 0$ fallen beide zusammen, es bleibt die doppelte Nullstelle $0$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was ist das Besondere an $f_a(x) = x^2 - 2a\\,x + a^2$?',
+      opts: ['Der Graph ist nach unten geöffnet.', 'Es gibt keine Nullstelle.', 'Der Term ist $(x - a)^2$, es gibt eine doppelte Nullstelle bei $x = a$.', 'Es gibt zwei getrennte Nullstellen bei $\\pm a$.'],
+      steps: [
+        'Erste binomische Formel rückwärts: $x^2 - 2ax + a^2 = (x-a)^2$.',
+        'Die Nullstelle $a$ tritt doppelt auf.',
+        'Der Graph berührt die $x$-Achse im Punkt $(a|0)$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wo liegt der Scheitelpunkt der Schar $f_a(x) = x^2 - 2a\\,x$?',
+      opts: ['in $\\left(a\\,\\middle|\\,-a^2\\right)$', 'in $\\left(-a\\,\\middle|\\,-a^2\\right)$', 'in $\\left(2a\\,\\middle|\\,0\\right)$', 'in $\\left(a\\,\\middle|\\,a^2\\right)$'],
+      steps: [
+        'Quadratische Ergänzung: $x^2 - 2ax + a^2 - a^2 = (x-a)^2 - a^2$.',
+        'Also $x_S = a$ und $y_S = -a^2$.',
+        'Probe mit $a = 3$: $f_3(x) = x^2 - 6x$ hat den Scheitel $(3|-9)$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Auf welcher Kurve liegen alle Scheitelpunkte der Schar $f_a(x) = x^2 - 2a\\,x$?',
+      opts: ['auf der Parabel $y = x^2$', 'auf der $x$-Achse', 'auf der Parabel $y = -x^2$', 'auf der Geraden $y = -x$'],
+      steps: [
+        'Die Scheitel sind $S\\left(a\\,\\middle|\\,-a^2\\right)$.',
+        'Setzt man $x = a$, so ist $y = -a^2 = -x^2$.',
+        'Diese Kurve heißt Ortskurve der Scheitelpunkte.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lautet die Diskriminante von $f_a(x) = x^2 + a\\,x + 1$?',
+      opts: ['$D = 4 - a^2$', '$D = a - 4$', '$D = a^2 + 4$', '$D = a^2 - 4$'],
+      steps: [
+        'Für $x^2 + px + q$ ist $D = p^2 - 4q$.',
+        'Hier $p = a$ und $q = 1$.',
+        '$D = a^2 - 4$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welche $a$ hat $f_a(x) = x^2 + a\\,x + 1$ zwei verschiedene Nullstellen?',
+      opts: ['für $a < -2$ oder $a > 2$', 'für $a > 0$', 'für $-2 < a < 2$', 'für jedes $a$'],
+      steps: [
+        'Zwei Nullstellen bedeutet $D > 0$, also $a^2 - 4 > 0$.',
+        '$a^2 > 4$ gilt für $\\left|a\\right| > 2$.',
+        'Probe mit $a = 3$: $D = 5 > 0$, es gibt zwei Nullstellen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für welche $a$ hat $f_a(x) = x^2 + a\\,x + 1$ genau eine Nullstelle?',
+      opts: ['für kein $a$', 'für $a = 0$', 'für $a = 2$ und $a = -2$', 'für $a = 1$'],
+      steps: [
+        'Genau eine Nullstelle bedeutet $D = 0$, also $a^2 = 4$.',
+        '$a = 2$ oder $a = -2$.',
+        'Probe: $x^2 + 2x + 1 = (x+1)^2$ hat die doppelte Nullstelle $-1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welche $a$ hat $f_a(x) = x^2 + a\\,x + 1$ keine reelle Nullstelle?',
+      opts: ['für kein $a$', 'für $a < -2$', 'für $a > 2$', 'für $-2 < a < 2$'],
+      steps: [
+        'Keine Nullstelle bedeutet $D < 0$, also $a^2 < 4$.',
+        'Das gilt für $\\left|a\\right| < 2$, also $-2 < a < 2$.',
+        'Probe mit $a = 0$: $x^2 + 1 = 0$ hat im Reellen keine Lösung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Warum muss man bei der Schar $f_a(x) = a\\,x^2 + 2x + 1$ den Fall $a = 0$ getrennt betrachten?',
+      opts: ['Weil der Graph dann eine senkrechte Gerade ist.', 'Weil sie dann keine Nullstelle hat.', 'Weil sie dann nicht definiert ist.', 'Weil die Funktion dann linear ist und die Lösungsformel nicht gilt.'],
+      steps: [
+        'Für $a = 0$ bleibt $f_0(x) = 2x + 1$ stehen — eine Gerade, keine Parabel.',
+        'Die Lösungsformel für quadratische Gleichungen setzt aber $a \\neq 0$ voraus.',
+        'Die Gerade hat genau eine Nullstelle, nämlich $x = -\\dfrac{1}{2}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welche $a \\neq 0$ hat $f_a(x) = a\\,x^2 + 2x + 1$ genau eine Nullstelle?',
+      opts: ['für $a = 1$', 'für $a = 2$', 'für $a = 4$', 'für $a = -1$'],
+      steps: [
+        'Diskriminante der allgemeinen Form: $D = b^2 - 4ac = 4 - 4a$.',
+        '$D = 0$ ergibt $4a = 4$, also $a = 1$.',
+        'Probe: $x^2 + 2x + 1 = (x+1)^2$ berührt die $x$-Achse bei $x = -1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Ball fliegt nach $h_v(t) = -5t^2 + v\\,t$, wobei $v$ die Abwurfgeschwindigkeit in Metern je Sekunde ist. Wann landet er?',
+      opts: ['nach $t = v$ Sekunden', 'nach $t = 5v$ Sekunden', 'nach $t = \\dfrac{v}{5}$ Sekunden', 'nach $t = \\dfrac{v}{10}$ Sekunden'],
+      steps: [
+        'Landen bedeutet $h_v(t) = 0$: $t\\,(-5t + v) = 0$.',
+        '$t = 0$ ist der Abwurf, die zweite Lösung ist $t = \\dfrac{v}{5}$.',
+        'Probe mit $v = 20$: nach $4$ Sekunden, und $h(4) = -80 + 80 = 0$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche größte Höhe erreicht der Ball aus der vorigen Aufgabe?',
+      opts: ['$v^2$ Meter', '$\\dfrac{v^2}{10}$ Meter', '$\\dfrac{v^2}{20}$ Meter', '$\\dfrac{v}{20}$ Meter'],
+      steps: [
+        'Der Scheitel liegt in der Mitte zwischen den Nullstellen $0$ und $\\dfrac{v}{5}$, also bei $t = \\dfrac{v}{10}$.',
+        '$h\\left(\\dfrac{v}{10}\\right) = -5 \\cdot \\dfrac{v^2}{100} + \\dfrac{v^2}{10} = \\dfrac{v^2}{20}$',
+        'Probe mit $v = 20$: $\\dfrac{400}{20} = 20$ Meter.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der Gewinn beträgt $G_p(x) = -x^2 + p\\,x - 24$ (in €), wobei $p$ der Verkaufspreis ist. Für welche $p$ macht der Betrieb überhaupt Gewinn?',
+      opts: ['für $p > \\sqrt{96} \\approx 9{,}8$', 'für jedes $p$', 'für $p > 0$', 'für $p > 24$'],
+      steps: [
+        'Gewinn ist möglich, wenn die Parabel die $x$-Achse schneidet, also $D > 0$.',
+        '$D = p^2 - 4 \\cdot 1 \\cdot 24 = p^2 - 96 > 0$',
+        '$p > \\sqrt{96} \\approx 9{,}8$ €. Darunter liegt die ganze Gewinnkurve unter der Null.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

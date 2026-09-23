@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Zufallsexperimente und Ereignisse — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w22-zufallsexperimente',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Zufallsexperimente und Ereignisse',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 22 (LB 2) · 20 Aufgaben: Ergebnis und Ergebnismenge, Ereignis und Ereignismenge, ein- und mehrstufige Versuche · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 22 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Grundbegriffe (1-6), Ergebnismengen bestimmen (7-12), Ereignisse beschreiben (13-17), mehrstufige Versuche (18-20). */
+  questions: [
+    {
+      q: 'Was kennzeichnet ein Zufallsexperiment?',
+      opts: ['Es ist beliebig oft wiederholbar, und sein Ausgang steht vorher nicht fest, ist aber bekannt.', 'Es hat immer genau zwei mögliche Ausgänge.', 'Sein Ausgang lässt sich vorher berechnen.', 'Es kann nur einmal durchgeführt werden.'],
+      steps: [
+        'Alle möglichen Ausgänge müssen vorher bekannt sein.',
+        'Welcher davon eintritt, entscheidet der Zufall.',
+        'Unter gleichen Bedingungen ist der Versuch beliebig oft wiederholbar.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was ist ein Ergebnis eines Zufallsexperiments?',
+      opts: ['die Wahrscheinlichkeit eines Ausgangs', 'ein einzelner möglicher Ausgang des Versuchs', 'die Anzahl der Versuche', 'eine Zusammenfassung mehrerer Ausgänge'],
+      steps: [
+        'Das Ergebnis ist der konkrete Ausgang, etwa die gewürfelte $3$.',
+        'Alle Ergebnisse zusammen bilden die Ergebnismenge $\\Omega$.',
+        'Eine Zusammenfassung mehrerer Ergebnisse heißt dagegen Ereignis.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was ist ein Ereignis?',
+      opts: ['die Wahrscheinlichkeit eines Ergebnisses', 'eine Teilmenge der Ergebnismenge', 'ein einzelnes Ergebnis', 'die Ergebnismenge selbst'],
+      steps: [
+        'Ein Ereignis fasst Ergebnisse zusammen, die eine gemeinsame Eigenschaft haben.',
+        'Beispiel beim Würfel: „gerade Augenzahl“ ist die Menge $\\{2;\\,4;\\,6\\}$.',
+        'Jede Teilmenge von $\\Omega$ ist ein Ereignis, auch die leere Menge und $\\Omega$ selbst.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viele Elemente hat die Ergebnismenge beim einmaligen Werfen eines Würfels?',
+      opts: ['zwölf', 'zwei', 'eins', 'sechs'],
+      steps: [
+        '$\\Omega = \\{1;\\,2;\\,3;\\,4;\\,5;\\,6\\}$',
+        'Jede Augenzahl ist ein mögliches Ergebnis.',
+        'Also sechs Elemente.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was bedeutet das sichere Ereignis?',
+      opts: ['Es tritt bei jedem Versuch ein und entspricht der gesamten Ergebnismenge $\\Omega$.', 'Es ist das wahrscheinlichste einzelne Ergebnis.', 'Es besteht aus genau einem Ergebnis.', 'Es tritt nie ein.'],
+      steps: [
+        'Das sichere Ereignis enthält alle möglichen Ergebnisse.',
+        'Beim Würfel wäre das „eine Augenzahl zwischen $1$ und $6$“.',
+        'Sein Gegenstück ist das unmögliche Ereignis, die leere Menge.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Beim Würfeln sei $A$ das Ereignis „Augenzahl größer als $4$“. Wie lautet $A$ als Menge?',
+      opts: ['$A = \\{1;\\,2;\\,3;\\,4\\}$', '$A = \\{5;\\,6\\}$', '$A = \\{6\\}$', '$A = \\{4;\\,5;\\,6\\}$'],
+      steps: [
+        'Größer als $4$ bedeutet ab $5$ aufwärts.',
+        '$A = \\{5;\\,6\\}$',
+        'Die $4$ selbst gehört nicht dazu — bei „mindestens $4$“ wäre sie dabei.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet die Ergebnismenge beim einmaligen Werfen einer Münze?',
+      opts: ['$\\Omega = \\{\\text{Kopf}\\}$', '$\\Omega = \\{0;\\,1;\\,2\\}$', '$\\Omega = \\{\\text{Kopf};\\,\\text{Zahl}\\}$', '$\\Omega = \\{1;\\,2\\}$'],
+      steps: [
+        'Eine Münze hat zwei unterscheidbare Seiten.',
+        '$\\Omega = \\{\\text{Kopf};\\,\\text{Zahl}\\}$',
+        'Dass beide gleich wahrscheinlich sind, ist eine zusätzliche Annahme und gehört nicht in die Ergebnismenge.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele Ergebnisse hat der zweimalige Münzwurf, wenn die Reihenfolge beachtet wird?',
+      opts: ['acht', 'zwei', 'vier', 'drei'],
+      steps: [
+        'Für jeden der beiden Würfe gibt es zwei Möglichkeiten.',
+        '$2 \\cdot 2 = 4$',
+        '$\\Omega = \\{\\text{KK};\\,\\text{KZ};\\,\\text{ZK};\\,\\text{ZZ}\\}$ — KZ und ZK sind verschiedene Ergebnisse.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele Ergebnisse hat das zweimalige Werfen eines Würfels, wenn die Reihenfolge beachtet wird?',
+      opts: ['$6$', '$21$', '$12$', '$36$'],
+      steps: [
+        'Allgemeines Zählprinzip: $6$ Möglichkeiten im ersten Wurf, $6$ im zweiten.',
+        '$6 \\cdot 6 = 36$',
+        '$12$ wäre die Summe statt des Produkts.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Aus einer Urne mit den Kugeln $1$, $2$ und $3$ wird zweimal MIT Zurücklegen gezogen. Wie viele Ergebnisse gibt es bei Beachtung der Reihenfolge?',
+      opts: ['$9$', '$6$', '$12$', '$3$'],
+      steps: [
+        'Nach jedem Zug ist die Urne wieder vollständig.',
+        '$3 \\cdot 3 = 9$',
+        'Ohne Zurücklegen wären es nur $3 \\cdot 2 = 6$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Dieselbe Urne, aber zweimal OHNE Zurücklegen. Wie viele Ergebnisse gibt es bei Beachtung der Reihenfolge?',
+      opts: ['$9$', '$3$', '$6$', '$2$'],
+      steps: [
+        'Im ersten Zug drei Möglichkeiten, im zweiten nur noch zwei.',
+        '$3 \\cdot 2 = 6$',
+        'Die gezogene Kugel fehlt beim zweiten Zug.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Beim zweimaligen Würfeln werden die Augenzahlen addiert. Wie lautet die Ergebnismenge der Summe?',
+      opts: ['$\\Omega = \\{2;\\,4;\\,6;\\,8;\\,10;\\,12\\}$', '$\\Omega = \\{2;\\,3;\\,4;\\,\\ldots;\\,12\\}$', '$\\Omega = \\{0;\\,1;\\,\\ldots;\\,12\\}$', '$\\Omega = \\{1;\\,2;\\,\\ldots;\\,12\\}$'],
+      steps: [
+        'Die kleinste Summe ist $1 + 1 = 2$, die größte $6 + 6 = 12$.',
+        'Jede Zahl dazwischen ist erreichbar.',
+        'Achtung: diese elf Ergebnisse sind nicht gleich wahrscheinlich — die $7$ kommt am häufigsten vor.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Beim Würfeln sei $B$ das Ereignis „gerade Augenzahl“. Wie lautet das Gegenereignis $\\overline{B}$?',
+      opts: ['$\\overline{B} = \\{1;\\,3;\\,5\\}$', '$\\overline{B} = \\{\\}$', '$\\overline{B} = \\{2;\\,4;\\,6\\}$', '$\\overline{B} = \\{1;\\,2;\\,3\\}$'],
+      steps: [
+        '$B = \\{2;\\,4;\\,6\\}$',
+        'Das Gegenereignis enthält alle Ergebnisse aus $\\Omega$, die nicht in $B$ liegen.',
+        '$\\overline{B} = \\{1;\\,3;\\,5\\}$, also die ungeraden Augenzahlen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Beim Würfeln sei $A = \\{1;\\,2;\\,3\\}$ und $B = \\{3;\\,4\\}$. Wie lautet $A \\cup B$?',
+      opts: ['$\\{3\\}$', '$\\{1;\\,2;\\,4\\}$', '$\\{1;\\,2;\\,3;\\,4\\}$', '$\\{1;\\,2;\\,3;\\,3;\\,4\\}$'],
+      steps: [
+        'Die Vereinigung enthält alle Ergebnisse, die in $A$ oder in $B$ liegen.',
+        '$A \\cup B = \\{1;\\,2;\\,3;\\,4\\}$',
+        'Die $3$ steht in einer Menge nur einmal, auch wenn sie in beiden vorkommt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Mit $A = \\{1;\\,2;\\,3\\}$ und $B = \\{3;\\,4\\}$ — wie lautet $A \\cap B$?',
+      opts: ['$\\{1;\\,2;\\,4\\}$', '$\\{\\}$', '$\\{1;\\,2;\\,3;\\,4\\}$', '$\\{3\\}$'],
+      steps: [
+        'Der Durchschnitt enthält die Ergebnisse, die in beiden Mengen liegen.',
+        'Nur die $3$ kommt in $A$ und in $B$ vor.',
+        '$A \\cap B = \\{3\\}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wann heißen zwei Ereignisse unvereinbar?',
+      opts: ['wenn ihr Durchschnitt leer ist, sie also nie gemeinsam eintreten', 'wenn eines das Gegenereignis des anderen ist', 'wenn sie gleich wahrscheinlich sind', 'wenn ihre Vereinigung ganz $\\Omega$ ist'],
+      steps: [
+        'Unvereinbar heißt: kein Ergebnis gehört zu beiden Ereignissen.',
+        'In Mengenschreibweise $A \\cap B = \\{\\}$.',
+        'Beim Würfel sind „Augenzahl kleiner als $3$“ und „Augenzahl größer als $4$“ unvereinbar.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Ereignis $A$ hat $4$ Elemente, $\\Omega$ hat $10$. Wie viele Elemente hat $\\overline{A}$?',
+      opts: ['$10$', '$4$', '$14$', '$6$'],
+      steps: [
+        'Das Gegenereignis enthält alles, was nicht in $A$ liegt.',
+        '$10 - 4 = 6$',
+        'Zusammen ergeben $A$ und $\\overline{A}$ immer die ganze Ergebnismenge.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Versuch besteht aus dem Werfen einer Münze und dem anschließenden Würfeln. Wie viele Ergebnisse hat er?',
+      opts: ['$8$', '$12$', '$36$', '$6$'],
+      steps: [
+        'Zählprinzip: $2$ Möglichkeiten bei der Münze, $6$ beim Würfel.',
+        '$2 \\cdot 6 = 12$',
+        'Bei mehrstufigen Versuchen werden die Möglichkeiten der Stufen multipliziert, nicht addiert.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie stellt man einen mehrstufigen Zufallsversuch übersichtlich dar?',
+      opts: ['als Koordinatensystem', 'als Säulendiagramm', 'als Baumdiagramm, mit einer Stufe je Verzweigungsebene', 'als Wertetabelle einer Funktion'],
+      steps: [
+        'Jede Stufe des Versuchs entspricht einer Ebene des Baumes.',
+        'Ein Pfad von der Wurzel bis zu einem Blatt ist genau ein Ergebnis des Gesamtversuchs.',
+        'Die Zahl der Blätter ist damit die Zahl der Ergebnisse.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Aus einer Urne mit $2$ roten und $3$ blauen Kugeln wird einmal gezogen. Wie viele Elemente hat die Ergebnismenge, wenn nur die Farbe interessiert?',
+      opts: ['drei', 'fünf', 'sechs', 'zwei'],
+      steps: [
+        'Interessiert nur die Farbe, gibt es die Ausgänge rot und blau.',
+        '$\\Omega = \\{\\text{rot};\\,\\text{blau}\\}$, also zwei Elemente.',
+        'Sie sind aber nicht gleich wahrscheinlich: drei der fünf Kugeln sind blau. Die Zahl der Ergebnisse sagt nichts über ihre Wahrscheinlichkeit.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

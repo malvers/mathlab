@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Linearfaktoren und Steckbriefaufgaben — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w18-linearfaktoren',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Linearfaktoren und Steckbriefaufgaben',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 18 (LB 1) · 20 Aufgaben: Linearfaktordarstellung, Nullstellen ablesen, Funktionsgleichung aus Bedingungen · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 18 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Linearfaktordarstellung (1-6), Nullstellen und Eigenschaften ablesen (7-11), Funktionsgleichung aus Bedingungen (12-16), groessere Systeme und Anwendungen (17-20). */
+  questions: [
+    {
+      q: 'Wie lauten die Nullstellen von $y = (x - 2)(x - 5)$?',
+      opts: ['$x_1 = -2$ und $x_2 = -5$', '$x_1 = 2$ und $x_2 = 5$', '$x_1 = 2$ und $x_2 = -5$', '$x = 10$'],
+      steps: [
+        'Nullproduktsatz: jeder Faktor wird null gesetzt.',
+        '$x - 2 = 0$ ergibt $x = 2$; $x - 5 = 0$ ergibt $x = 5$.',
+        'In der Linearfaktordarstellung stehen die Nullstellen direkt ablesbar in den Klammern.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet $y = (x - 2)(x - 5)$ in der Normalform?',
+      opts: ['$y = x^2 - 7x - 10$', '$y = x^2 - 10$', '$y = x^2 + 7x + 10$', '$y = x^2 - 7x + 10$'],
+      steps: [
+        'Ausmultiplizieren: $x^2 - 5x - 2x + 10$.',
+        '$y = x^2 - 7x + 10$',
+        'Kontrolle über Vieta: Summe der Nullstellen $7$, Produkt $10$ — passt zu $-7$ und $+10$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zerlege $y = x^2 - x - 12$ in Linearfaktoren.',
+      opts: ['$y = (x + 4)(x - 3)$', '$y = (x - 4)(x - 3)$', '$y = (x - 12)(x + 1)$', '$y = (x - 4)(x + 3)$'],
+      steps: [
+        'Vieta: zwei Zahlen mit der Summe $1$ und dem Produkt $-12$.',
+        'Das sind $4$ und $-3$, also die Nullstellen.',
+        '$y = (x - 4)\\left(x - (-3)\\right) = (x-4)(x+3)$. Probe: $x^2 + 3x - 4x - 12$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Eigenschaften hat $y = 2\\,(x - 1)(x + 3)$?',
+      opts: ['Nullstellen bei $1$ und $-3$, nach oben geöffnet und gestreckt', 'Nullstellen bei $-1$ und $3$, nach oben geöffnet', 'Nullstellen bei $2$ und $-3$', 'Nullstellen bei $1$ und $-3$, nach unten geöffnet'],
+      steps: [
+        'Die Klammern liefern die Nullstellen $1$ und $-3$.',
+        'Der Faktor $a = 2$ ist positiv, die Parabel öffnet nach oben.',
+        'Weil $\\left|a\\right| > 1$ ist, ist sie gegenüber der Normalparabel gestreckt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was bedeutet die Darstellung $y = (x - 3)^2$ für den Graphen?',
+      opts: ['Er hat keine Nullstelle.', 'Er schneidet die $x$-Achse bei $x = 9$.', 'Er schneidet die $x$-Achse bei $x = 3$ und $x = -3$.', 'Er berührt die $x$-Achse bei $x = 3$, es liegt eine doppelte Nullstelle vor.'],
+      steps: [
+        'Beide Linearfaktoren sind gleich: $(x-3)(x-3)$.',
+        'Die Nullstelle $3$ tritt doppelt auf.',
+        'Bei doppelter Nullstelle berührt der Graph die Achse, statt sie zu durchsetzen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet die Normalparabel mit den Nullstellen $4$ und $-1$?',
+      opts: ['$y = (x - 4)(x - 1)$', '$y = (x + 4)(x - 1)$', '$y = (x - 3)(x + 3)$', '$y = (x - 4)(x + 1)$'],
+      steps: [
+        'Zu jeder Nullstelle $x_0$ gehört der Linearfaktor $(x - x_0)$.',
+        '$x_0 = 4$ ergibt $(x-4)$, $x_0 = -1$ ergibt $(x+1)$.',
+        'Normalparabel heißt $a = 1$, also $y = (x-4)(x+1)$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wo schneidet $y = (x - 2)(x - 5)$ die $y$-Achse?',
+      opts: ['in $(0|10)$', 'in $(0|0)$', 'in $(0|-7)$', 'in $(0|-10)$'],
+      steps: [
+        'Bei $x = 0$ einsetzen: $(0-2)(0-5)$.',
+        '$= (-2) \\cdot (-5) = 10$',
+        'Minus mal Minus ergibt Plus.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lauten die Nullstellen von $y = (x + 2)(x - 6)$?',
+      opts: ['$x_1 = 2$ und $x_2 = -6$', '$x_1 = -2$ und $x_2 = 6$', '$x_1 = -2$ und $x_2 = -6$', '$x_1 = 2$ und $x_2 = 6$'],
+      steps: [
+        '$x + 2 = 0$ ergibt $x = -2$.',
+        '$x - 6 = 0$ ergibt $x = 6$.',
+        'Das Vorzeichen kehrt sich beim Ablesen jeweils um.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wo liegt der Scheitelpunkt von $y = (x + 2)(x - 6)$?',
+      opts: ['bei $x = 4$', 'bei $x = 2$', 'bei $x = -2$', 'bei $x = 6$'],
+      steps: [
+        'Die Parabel ist symmetrisch zur Mitte zwischen ihren Nullstellen.',
+        'Mitte von $-2$ und $6$: $\\dfrac{-2 + 6}{2} = 2$.',
+        'Der Scheitelwert ist $y(2) = 4 \\cdot (-4) = -16$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum reicht es nicht, nur die Nullstellen zu kennen, um eine Parabel eindeutig festzulegen?',
+      opts: ['Weil die Normalform nicht berechnet werden kann.', 'Weil noch der Scheitelpunkt fehlt.', 'Weil der Faktor $a$ die Öffnung und Streckung bestimmt und beliebig sein kann.', 'Weil Nullstellen nicht eindeutig sind.'],
+      steps: [
+        'Alle Parabeln $y = a\\,(x - x_1)(x - x_2)$ haben dieselben Nullstellen.',
+        'Sie unterscheiden sich aber in Öffnungsrichtung und Streckung.',
+        'Deshalb braucht es eine dritte Bedingung, etwa einen weiteren Punkt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lautet die Parabel mit den Nullstellen $1$ und $3$, die durch $P(0|6)$ verläuft?',
+      opts: ['$y = -2\\,(x-1)(x-3)$', '$y = (x-1)(x-3)$', '$y = 2\\,(x-1)(x-3)$', '$y = 6\\,(x-1)(x-3)$'],
+      steps: [
+        'Ansatz: $y = a\\,(x-1)(x-3)$.',
+        'Punkt einsetzen: $6 = a \\cdot (-1) \\cdot (-3) = 3a$, also $a = 2$.',
+        '$y = 2\\,(x-1)(x-3)$, ausmultipliziert $y = 2x^2 - 8x + 6$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele Bedingungen braucht man, um eine Parabel $y = ax^2 + bx + c$ eindeutig zu bestimmen?',
+      opts: ['drei', 'eine', 'vier', 'zwei'],
+      steps: [
+        'Es sind drei Unbekannte zu bestimmen: $a$, $b$ und $c$.',
+        'Für drei Unbekannte braucht man drei voneinander unabhängige Gleichungen.',
+        'Jede Bedingung, etwa ein Punkt oder ein Scheitel, liefert eine Gleichung.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Parabel geht durch $A(0|1)$, $B(1|0)$ und $C(2|1)$. Wie lautet sie?',
+      opts: ['$y = x^2 - 2x + 1$', '$y = 2x^2 - 3x + 1$', '$y = x^2 + 2x + 1$', '$y = -x^2 + 2x + 1$'],
+      steps: [
+        '$A$ liefert sofort $c = 1$.',
+        '$B$: $a + b + 1 = 0$; $C$: $4a + 2b + 1 = 1$, also $2a + b = 0$.',
+        'Subtraktion ergibt $a = 1$ und $b = -2$. Probe: $y(1) = 0$ und $y(2) = 1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Parabel hat den Scheitel $S(2|-1)$ und verläuft durch $P(0|3)$. Wie lautet sie?',
+      opts: ['$y = (x - 2)^2 + 3$', '$y = (x - 2)^2 - 1$', '$y = (x + 2)^2 - 1$', '$y = 2\\,(x - 2)^2 - 1$'],
+      steps: [
+        'Scheitelpunktform: $y = a\\,(x - 2)^2 - 1$.',
+        'Punkt einsetzen: $3 = a \\cdot 4 - 1$, also $4a = 4$ und $a = 1$.',
+        '$y = (x-2)^2 - 1$. Probe: $y(0) = 4 - 1 = 3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Parabel hat den Scheitel $S(-1|4)$ und verläuft durch $P(1|0)$. Wie lautet der Faktor $a$?',
+      opts: ['$a = 2$', '$a = -4$', '$a = 1$', '$a = -1$'],
+      steps: [
+        'Ansatz: $y = a\\,(x + 1)^2 + 4$.',
+        'Punkt einsetzen: $0 = a \\cdot 4 + 4$, also $4a = -4$.',
+        '$a = -1$; die Parabel ist nach unten geöffnet.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Bedingung liefert die Aussage „die Parabel schneidet die $y$-Achse bei $5$“?',
+      opts: ['eine Nullstelle bei $5$', '$b = 5$', '$c = 5$ in der Normalform', '$a = 5$'],
+      steps: [
+        'Der Schnittpunkt mit der $y$-Achse liegt bei $x = 0$.',
+        '$y(0) = a \\cdot 0 + b \\cdot 0 + c = c$',
+        'Also ist $c$ immer der $y$-Achsenabschnitt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie löst man ein Gleichungssystem mit drei Gleichungen und drei Unbekannten laut Lehrplan?',
+      opts: ['gar nicht, das ist erst Stoff der Klasse 12', 'mit dem GTR ohne CAS', 'nur grafisch', 'ausschließlich im Kopf'],
+      steps: [
+        'Für zwei Gleichungen mit zwei Unbekannten wird von Hand gerechnet.',
+        'Größere Systeme, wie sie bei Steckbriefaufgaben entstehen, dürfen mit dem GTR gelöst werden.',
+        'Der Ansatz — also das Aufstellen der drei Gleichungen — bleibt aber Handarbeit.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Beim Aufstellen der Bedingungen für eine Parabel durch drei Punkte entsteht ein System. Woran erkennt man einen Fehler im Ansatz besonders schnell?',
+      opts: ['daran, dass der GTR eine Fehlermeldung zeigt', 'gar nicht, der Ansatz lässt sich nicht prüfen', 'an der Probe: die gefundene Funktion muss alle drei Punkte treffen', 'daran, dass $a$ negativ wird'],
+      steps: [
+        'Der GTR löst auch ein falsch aufgestelltes System klaglos.',
+        'Deshalb wird die gefundene Funktionsgleichung in jede der ursprünglichen Bedingungen eingesetzt.',
+        'Erst wenn alle drei Punkte getroffen werden, ist der Ansatz bestätigt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Brückenbogen ist $20\\,\\mathrm{m}$ breit und in der Mitte $5\\,\\mathrm{m}$ hoch. Legt man den Scheitel in $(0|5)$, wie lautet die Parabel?',
+      opts: ['$y = -0{,}05x^2 + 5$', '$y = 0{,}05x^2 + 5$', '$y = -0{,}5x^2 + 5$', '$y = -0{,}05x^2 - 5$'],
+      steps: [
+        'Ansatz $y = a x^2 + 5$; die Enden liegen bei $x = \\pm 10$ auf der Höhe $0$.',
+        '$0 = a \\cdot 100 + 5$, also $a = -0{,}05$.',
+        '$y = -0{,}05x^2 + 5$. Probe: $y(10) = -5 + 5 = 0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Ball wird geworfen und erreicht seine größte Höhe von $4\\,\\mathrm{m}$ nach $2\\,\\mathrm{m}$ waagerechter Strecke; abgeworfen wurde er in Bodenhöhe. Wie lautet die Wurfparabel $h(x)$?',
+      opts: ['$h(x) = -2\\left(x - 2\\right)^2 + 4$', '$h(x) = \\left(x - 2\\right)^2 + 4$', '$h(x) = -\\left(x - 2\\right)^2 + 4$', '$h(x) = -\\left(x + 2\\right)^2 + 4$'],
+      steps: [
+        'Scheitelpunktform mit $S(2|4)$: $h(x) = a\\,(x-2)^2 + 4$.',
+        'Abwurf in Bodenhöhe heißt $h(0) = 0$: $0 = 4a + 4$, also $a = -1$.',
+        '$h(x) = -(x-2)^2 + 4$. Probe: $h(4) = -4 + 4 = 0$, der Ball landet nach $4\\,\\mathrm{m}$.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

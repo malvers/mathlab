@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Wiederholung für Klausur 2 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w21-ka2',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Wiederholung für Klausur 2',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 21 (LB 1) · 20 Aufgaben: Terme, Gleichungen, lineare und quadratische Zusammenhänge, ganzrationale Funktionen · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 21 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Terme und Gleichungen (1-5), lineare Zusammenhaenge (6-10), quadratische Zusammenhaenge (11-16), ganzrationale Funktionen (17-20). */
+  questions: [
+    {
+      q: 'Multipliziere aus: $(x + 4)^2$.',
+      opts: ['$x^2 + 4x + 16$', '$x^2 + 16$', '$x^2 + 8x + 8$', '$x^2 + 8x + 16$'],
+      steps: [
+        'Erste binomische Formel mit $a = x$ und $b = 4$.',
+        '$x^2 + 2 \\cdot 4x + 16 = x^2 + 8x + 16$',
+        'Probe mit $x = 1$: $25$ und $1 + 8 + 16 = 25$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zerlege in Faktoren: $x^2 - 49$.',
+      opts: ['$(x + 49)(x - 1)$', '$(x + 7)^2$', '$(x + 7)(x - 7)$', '$(x - 7)^2$'],
+      steps: [
+        'Dritte binomische Formel: $a^2 - b^2$ mit $b = 7$.',
+        '$x^2 - 49 = (x+7)(x-7)$',
+        'Probe mit $x = 8$: $64 - 49 = 15$ und $15 \\cdot 1 = 15$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse: $6x - 5 = 2x + 11$.',
+      opts: ['$x = 16$', '$x = 6$', '$x = 4$', '$x = 2$'],
+      steps: [
+        '$2x$ abziehen: $4x - 5 = 11$.',
+        '$4x = 16$, also $x = 4$.',
+        'Probe: $24 - 5 = 19$ und $8 + 11 = 19$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse: $\\dfrac{9}{x + 2} = 3$.',
+      opts: ['$x = 1$', '$x = -1$', '$x = 3$', '$x = 25$'],
+      steps: [
+        'Definitionsbereich: $x \\neq -2$.',
+        'Mit $x+2$ multiplizieren: $9 = 3\\,(x+2)$, also $x + 2 = 3$.',
+        '$x = 1$. Probe: $\\dfrac{9}{3} = 3$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse: $2x - 3 < 5$.',
+      opts: ['$x < 1$', '$x < 8$', '$x < 4$', '$x > 4$'],
+      steps: [
+        '$+3$: $2x < 8$.',
+        'Durch $2$ teilen, positive Zahl, das Zeichen bleibt: $x < 4$.',
+        'Probe mit $x = 3$: $3 < 5$ stimmt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lautet die Gerade durch $P(2|7)$ mit dem Anstieg $m = 2$?',
+      opts: ['$y = 2x - 3$', '$y = 2x + 7$', '$y = 2x + 3$', '$y = 7x + 2$'],
+      steps: [
+        'Ansatz $y = 2x + n$, Punkt einsetzen.',
+        '$7 = 4 + n$, also $n = 3$.',
+        '$y = 2x + 3$. Probe: $y(2) = 7$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne die Nullstelle von $y = -5x + 15$.',
+      opts: ['$x = 3$', '$x = 15$', '$x = 5$', '$x = -3$'],
+      steps: [
+        '$-5x + 15 = 0$',
+        '$-5x = -15$, also $x = 3$.',
+        'Probe: $-15 + 15 = 0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wo schneiden sich $y = x - 2$ und $y = -2x + 7$?',
+      opts: ['in $S(1|3)$', 'in $S(3|1)$', 'in $S(3|5)$', 'in $S(2|0)$'],
+      steps: [
+        'Gleichsetzen: $x - 2 = -2x + 7$.',
+        '$3x = 9$, also $x = 3$.',
+        'Einsetzen: $y = 1$, also $S(3|1)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse: $2x + y = 8$ und $x - y = 1$.',
+      opts: ['$x = 2$, $y = 3$', '$x = 3$, $y = 2$', '$x = 4$, $y = 0$', '$x = 3$, $y = -2$'],
+      steps: [
+        'Addieren: $3x = 9$, also $x = 3$.',
+        'Einsetzen: $3 - y = 1$, also $y = 2$.',
+        'Probe: $6 + 2 = 8$ stimmt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Unter welchem Winkel schneidet $y = \\sqrt{3}\\,x - 2$ die $x$-Achse?',
+      opts: ['$\\approx 1{,}7^\\circ$', '$60^\\circ$', '$45^\\circ$', '$30^\\circ$'],
+      steps: [
+        '$\\tan\\alpha = m = \\sqrt{3}$',
+        'Aus der Formelsammlung: $\\tan 60^\\circ = \\sqrt{3}$.',
+        '$30^\\circ$ gehört zu $\\dfrac{1}{\\sqrt{3}}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wo liegt der Scheitelpunkt von $y = x^2 - 4x + 7$?',
+      opts: ['in $(2|3)$', 'in $(2|-3)$', 'in $(-2|3)$', 'in $(4|7)$'],
+      steps: [
+        'Quadratische Ergänzung: $x^2 - 4x + 4 - 4 + 7 = (x-2)^2 + 3$.',
+        'Also $x_S = 2$ und $y_S = 3$.',
+        'Probe: $y(2) = 4 - 8 + 7 = 3$. Die Parabel hat keine Nullstelle, denn ihr tiefster Punkt liegt über der Achse.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse: $x^2 - 2x - 15 = 0$.',
+      opts: ['$x = -5$ und $x = 3$', '$x = 5$ und $x = 3$', '$x = 15$ und $x = -1$', '$x = 5$ und $x = -3$'],
+      steps: [
+        'Vieta: Summe $2$, Produkt $-15$.',
+        'Das sind $5$ und $-3$.',
+        'Probe: $25 - 10 - 15 = 0$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zerlege $y = x^2 - 2x - 15$ in Linearfaktoren.',
+      opts: ['$y = (x - 15)(x + 1)$', '$y = (x - 5)(x + 3)$', '$y = (x + 5)(x - 3)$', '$y = (x - 5)(x - 3)$'],
+      steps: [
+        'Die Nullstellen sind $5$ und $-3$.',
+        'Zu jeder gehört der Linearfaktor $(x - x_0)$.',
+        '$y = (x-5)(x+3)$. Probe durch Ausmultiplizieren: $x^2 + 3x - 5x - 15$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet die Parabel mit den Nullstellen $-1$ und $4$, die durch $P(0|-8)$ verläuft?',
+      opts: ['$y = 8\\,(x + 1)(x - 4)$', '$y = 2\\,(x + 1)(x - 4)$', '$y = (x + 1)(x - 4)$', '$y = -2\\,(x + 1)(x - 4)$'],
+      steps: [
+        'Ansatz: $y = a\\,(x+1)(x-4)$.',
+        'Punkt einsetzen: $-8 = a \\cdot 1 \\cdot (-4) = -4a$, also $a = 2$.',
+        '$y = 2\\,(x+1)(x-4)$, ausmultipliziert $y = 2x^2 - 6x - 8$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viele Lösungen hat $x^2 - 6x + 9 = 0$?',
+      opts: ['zwei, nämlich $3$ und $-3$', 'zwei, nämlich $9$ und $0$', 'keine', 'genau eine, nämlich $x = 3$'],
+      steps: [
+        'Diskriminante: $36 - 36 = 0$.',
+        'Der Term ist ein vollständiges Quadrat: $(x-3)^2 = 0$.',
+        'Also nur $x = 3$, eine doppelte Nullstelle — der Graph berührt die Achse.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welche $a$ hat $x^2 + 4x + a = 0$ keine reelle Lösung?',
+      opts: ['für $a < 4$', 'für $a > 0$', 'für $a = 4$', 'für $a > 4$'],
+      steps: [
+        'Diskriminante: $D = 16 - 4a$.',
+        'Keine reelle Lösung bedeutet $D < 0$, also $16 < 4a$.',
+        '$a > 4$. Probe mit $a = 5$: $D = -4$, tatsächlich keine Lösung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lauten die Nullstellen von $f(x) = x^3 - 9x$?',
+      opts: ['$x = 0$ und $x = 9$', '$x = 0$ und $x = 3$', '$x = 3$ und $x = -3$', '$x = 0$, $x = 3$ und $x = -3$'],
+      steps: [
+        '$x$ ausklammern: $x\\,(x^2 - 9) = 0$.',
+        'Dritte binomische Formel: $x\\,(x-3)(x+3)$.',
+        'Nullstellen $0$, $3$ und $-3$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie verhält sich $f(x) = -2x^3 + 5$ für $x \\to +\\infty$?',
+      opts: ['$f(x) \\to -\\infty$', '$f(x) \\to 5$', '$f(x) \\to 0$', '$f(x) \\to +\\infty$'],
+      steps: [
+        'Der führende Term ist $-2x^3$: ungerader Grad, negativer Leitkoeffizient.',
+        'Für große positive $x$ wird er stark negativ.',
+        'Probe: $f(10) = -2000 + 5 = -1995$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Symmetrie hat der Graph von $f(x) = x^4 - 2x^2$?',
+      opts: ['achsensymmetrisch zur $x$-Achse', 'keine Symmetrie', 'achsensymmetrisch zur $y$-Achse', 'punktsymmetrisch zum Ursprung'],
+      steps: [
+        'Es kommen nur gerade Exponenten vor.',
+        '$f(-x) = x^4 - 2x^2 = f(x)$',
+        'Also Achsensymmetrie zur $y$-Achse.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse mit Substitution: $x^4 - 10x^2 + 9 = 0$.',
+      opts: ['$x = \\pm 1$ und $x = \\pm 3$', '$x = \\pm 3$', '$x = 1$ und $x = 9$', '$x = \\pm 1$ und $x = \\pm 9$'],
+      steps: [
+        '$u = x^2$: $u^2 - 10u + 9 = 0$ mit den Lösungen $u = 1$ und $u = 9$.',
+        'Rücksubstitution: $x^2 = 1$ ergibt $\\pm 1$, $x^2 = 9$ ergibt $\\pm 3$.',
+        'Vier Nullstellen — und die Rücksubstitution darf nicht vergessen werden.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
