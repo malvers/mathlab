@@ -681,6 +681,7 @@ window.svpPlanParts.push(function (P) {
         let sw = 0, lastKw = null;
         for (const tr of tbody.children) {
             if (tr.classList.contains('ferien') || tr.classList.contains('detail-row')) continue;
+            if (tr.classList.contains('col-head')) continue;   /* Kopf-Kopie, keine Woche */
             const swTd = tr.children[1], kwTd = tr.children[2];
             if (!swTd || !kwTd) continue;
             if (kwTd.textContent !== lastKw) { sw++; lastKw = kwTd.textContent; }

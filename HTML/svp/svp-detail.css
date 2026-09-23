@@ -403,8 +403,13 @@ body:not(.plan-searching):not(.shifting) #plan-table tr.ferien-folded.open { dis
     background: rgba(var(--g-green), 0.1);
 }
 
-/* Every block folded: only holiday rows are left, the column heads go too. */
-body:not(.plan-searching):not(.shifting) #plan-table.all-folded thead tr:not(.ferien) { display: none; }
+/* Der Spaltenkopf beschriftet die Wochen unter sich. Stehen dort keine, geht er
+   mit; jeder offene Ferienblock weiter unten traegt dafuer eine eigene Kopie
+   direkt unter seinem Band (svp-plan-rows.js). Suche und Verschieben zeigen den
+   ganzen Plan am Stueck - dort gilt wieder der eine Kopf ganz oben. */
+body:not(.plan-searching):not(.shifting) #plan-table.head-folded thead tr:not(.ferien) { display: none; }
+body.plan-searching #plan-table tr.col-head,
+body.shifting #plan-table tr.col-head { display: none; }
 
 /* A week without a date for this group (Doc, 20.09.2026: "wenn ich die in der
    Woche nicht habe lass die Woche leer"). It carries SW and KW and nothing

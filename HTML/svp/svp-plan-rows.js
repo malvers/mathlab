@@ -108,7 +108,45 @@ window.svpPlanParts.push(function (P) {
         thead.insertBefore(tr, thead.firstChild);
     })();
 
+    /* Doc, 23.09.2026: "wenn ein Ferienjunk offen ist waere es toll wenn er
+       direkt ueber den Junk auftaucht" - der Spaltenkopf gehoert ueber die
+       Wochen, die er beschriftet, nicht nur an den Anfang der Tabelle. Der Kopf
+       im thead beschriftet den ersten Block; jeder weitere offene Block bekommt
+       eine Kopie direkt unter sein Ferienband.
+       Eine Kopie je Block statt eines umgehaengten Kopfes, weil mehrere offene
+       Bloecke mit zugeklappten dazwischen der Normalfall sind (Doc, 23.09.2026:
+       "vorsicht, sind zwei nicht aufeinanderfolgende offen").
+       Die Kopien sind reine Anzeige und werden bei jedem Falten neu gesetzt:
+       Suche, Verschieben und Papier zeigen den Plan am Stueck und blenden sie
+       aus (svp-detail.css, svp-print.css). */
+    function syncColHeads(table) {
+        const master = table.querySelector('thead tr:not(.ferien)');
+        if (!master) return;
+        /* Die Wochen ueber der ersten Ferienzeile haengen am Kopf im thead. */
+        let prevFolded = P.preFerien ? foldedFerien.has(PRE_I) : true;
+        for (const tr of [...P.tbody.children]) {
+            if (!tr.classList.contains('ferien')) continue;
+            const folded = foldedFerien.has(Number(tr.dataset.i));
+            /* Eine Kopie nur, wo sonst keine mehr ueber den Wochen steht:
+               laufen die Wochen des Blocks darueber direkt in dieses Band, ist
+               der Kopf schon dort gelesen - ein offener Plan sieht deshalb aus
+               wie bisher, mit einem einzigen Kopf ganz oben. */
+            if (!folded && prevFolded && tr.classList.contains('foldable')) {
+                const copy = master.cloneNode(true);
+                copy.classList.add('col-head');
+                tr.after(copy);
+            }
+            /* Ein Ferienband ohne Wochen dahinter bringt nichts mit - der Block
+               darueber bleibt der, an dem sich das naechste Band misst. */
+            if (tr.classList.contains('foldable')) prevFolded = folded;
+        }
+    }
+
     function applyFerienFolds() {
+        const table = document.getElementById('plan-table');
+        /* Die Kopf-Kopien zuerst weg: die Schleife unten laeuft ueber alle
+           Kinder des tbody und hielte sie sonst fuer Wochenzeilen. */
+        if (table) for (const old of [...table.querySelectorAll('tr.col-head')]) old.remove();
         let folded = !!P.preFerien && foldedFerien.has(PRE_I);
         if (P.preFerien) P.preFerien.ferienTd.parentElement.classList.toggle('folded', folded);
         for (const tr of P.tbody.children) {
@@ -119,12 +157,17 @@ window.svpPlanParts.push(function (P) {
             }
             tr.classList.toggle('ferien-folded', folded);
         }
-        /* Doc, 19.09.2026: "wenn alle zu auch den Header weg" - with every
-           block folded only holiday rows are left, and column heads over
-           nothing but holidays say nothing (svp.css hides them). */
-        const table = document.getElementById('plan-table');
-        if (table) table.classList.toggle('all-folded', foldableFerien.length > 0
-            && foldableFerien.every(i => foldedFerien.has(i)));
+        if (!table) return;
+        /* Doc, 19.09.2026: "wenn alle zu auch den Header weg" - der Kopf im
+           thead beschriftet die Wochen direkt unter sich. Sind die zugeklappt -
+           oder beginnt der Plan mit Ferien, dann stehen dort gar keine -, dann
+           beschriftet er nichts und geht mit. "Alle zu" ist davon nur der
+           Sonderfall, in dem auch keine Kopie mehr uebrig bleibt. */
+        const first = P.tbody.firstElementChild;
+        table.classList.toggle('head-folded', P.preFerien
+            ? foldedFerien.has(PRE_I)
+            : !!(first && first.classList.contains('ferien')));
+        syncColHeads(table);
     }
     function setFerienFolds(set) {
         foldedFerien = set;

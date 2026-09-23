@@ -8,7 +8,10 @@
 
 table { width: 100%; border-collapse: collapse; min-width: 760px; }
 
-thead th {
+/* Die Kopf-Kopien in den offenen Ferienbloecken (svp-plan-rows.js) sind
+   dieselbe Zeile, nur im tbody - sie tragen dieselben Regeln. */
+thead th,
+#plan-table tr.col-head th {
     font-family: 'Orbitron', sans-serif;
     font-size: 0.68rem;
     letter-spacing: 0.09em;
@@ -41,7 +44,8 @@ thead th {
        Huelle hinaus (Doc, 07.09.2026: "die Ecke ist nicht perfekt"). */
     .table-wrap { overflow: clip; }
     /* --sticky-h ist die Hoehe der Kopfleiste, gesetzt von svp-plan.js */
-    #plan-table thead th { top: var(--sticky-h, 0px); }
+    #plan-table thead th,
+    #plan-table tr.col-head th { top: var(--sticky-h, 0px); }
 }
 
 tbody td {
@@ -75,7 +79,8 @@ td.num { color: var(--muted); font-variant-numeric: tabular-nums; white-space: n
 #plan-table tbody tr:not(.detail-row) > td.shift-col { padding-top: 9px; }
 /* Doc, 09.09.2026: "die Buchstaben SW 3px nach rechts", dann zweimal "noch
    1px" - nur die Ueberschrift, die Zahlen darunter bleiben, wo sie sind. */
-#plan-table thead th:nth-child(2) { padding-left: 21px; }
+#plan-table thead th:nth-child(2),
+#plan-table tr.col-head th:nth-child(2) { padding-left: 21px; }
 /* zweizeilig (siehe setDateText) und so schmal wie ihr Inhalt —
    der gewonnene Platz geht an die Thema-Spalte */
 td.date { white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -119,7 +124,8 @@ td.date.termin-date .ds {
 #plan-table th.ustd-col { letter-spacing: 0; }
 /* Doc, 19.09.2026: "Ustd. -> immer Unterrichtsstunden" - in one line the
    column took 160 px from the topic; the soft hyphen breaks it in two. */
-#plan-table thead th.ustd-col { white-space: normal; hyphens: manual; line-height: 1.25; }
+#plan-table thead th.ustd-col,
+#plan-table tr.col-head th.ustd-col { white-space: normal; hyphens: manual; line-height: 1.25; }
 td.topic { font-weight: 400; min-width: 220px; }
 /* Eine Zeile je Woche (Doc, 07.09.2026): der Rest wird abgeschnitten, der volle
    Titel steht in der aufgeklappten Zeile. Kein nowrap - das wuerde die Spalte

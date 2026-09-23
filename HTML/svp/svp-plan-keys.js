@@ -143,7 +143,7 @@ window.svpPlanParts.push(function (P) {
     let kbRow = null;
     function kbRows() {
         return [...document.querySelectorAll(
-            '#plan-table thead tr.ferien.foldable, #plan-table tbody tr:not(.detail-row)')]
+            '#plan-table thead tr.ferien.foldable, #plan-table tbody tr:not(.detail-row):not(.col-head)')]
             .filter(tr => tr.offsetParent !== null
                 && (!tr.classList.contains('ferien') || tr.classList.contains('foldable')));
     }
@@ -157,10 +157,17 @@ window.svpPlanParts.push(function (P) {
     function kbReveal(tr) {
         const box = tr.getBoundingClientRect();
         let top = 0;
-        for (const el of document.querySelectorAll('.plan-sticky, #plan-table thead th:not(.shift-col)')) {
-            if (el.offsetParent !== null || el.classList.contains('plan-sticky')) {
-                top = Math.max(top, el.getBoundingClientRect().bottom);
-            }
+        /* Die Kopf-Kopien der offenen Ferienbloecke (svp-plan-rows.js) kleben
+           genauso wie der Kopf im thead - im Weg ist aber nur, was gerade
+           wirklich oben steht. Eine Kopie mitten im Plan wuerde den Sprung
+           sonst um ihre ganze Hoehe verschieben. */
+        const stickH = parseFloat(getComputedStyle(document.documentElement)
+            .getPropertyValue('--sticky-h')) || 0;
+        for (const el of document.querySelectorAll('.plan-sticky, #plan-table th:not(.shift-col)')) {
+            if (el.offsetParent === null && !el.classList.contains('plan-sticky')) continue;
+            const r = el.getBoundingClientRect();
+            if (el.tagName === 'TH' && r.top > stickH + 2) continue;
+            top = Math.max(top, r.bottom);
         }
         top = Math.min(top, window.innerHeight / 2);   /* not stuck: the head is far down the page */
         if (box.top < top + 6) window.scrollBy(0, box.top - top - 6);
@@ -181,7 +188,7 @@ window.svpPlanParts.push(function (P) {
         kbReveal(rows[at]);
     }
     function jumpToNow() {
-        const weeks = [...document.querySelectorAll('#plan-table tbody tr:not(.detail-row):not(.ferien)')];
+        const weeks = [...document.querySelectorAll('#plan-table tbody tr:not(.detail-row):not(.ferien):not(.col-head)')];
         /* in the holidays no week is marked - then the next one to come */
         const tr = weeks.find(w => w.classList.contains('kw-now'))
             || weeks.find(w => !w.classList.contains('kw-past'));
