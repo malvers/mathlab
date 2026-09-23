@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoffverteilungsplan Mathematik FO 11 | SJ 2026/27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../../resources/favicon.png">
+    <link rel="stylesheet" href="../svp.css">
+    <script src="../svp-gate.js"></script>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; &Uuml;bersicht Mathematik</a>
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Mathematik &middot; FO<span class="zw zw-g">G</span>26 + FO<span class="zw zw-s">S</span>26 + FO<span class="zw zw-w">W</span>26</h1>
+            </div>
+            <button class="action secondary" onclick="window.open('../lehrplaene/lehrplan_fos_mathematik.pdf', '_blank')">Lehrplan</button>
+        </div>
+        <div class="subtitle">
+            Stoffverteilungsplan &middot; Klasse 11, alle FO-Lerngruppen &middot; 3 Ustd./Woche
+        </div>
+    </header>
+
+    <div class="meta-cards">
+        <div class="meta-card" data-lb="lb1">
+            <div class="k c-orange">Lernbereich 1</div>
+            <div class="v">Funktionale Zusammenh&auml;nge</div>
+            <div class="vu">45 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="lb2">
+            <div class="k c-cyan">Lernbereich 2</div>
+            <div class="v">Ermitteln von Wahrscheinlichkeiten</div>
+            <div class="vu">30 Ustd.</div>
+        </div>
+        <div class="meta-card" data-lb="wb">
+            <div class="k c-green">Wahlbereich 2</div>
+            <div class="v">Finanzmathematik</div>
+            <div class="vu">6 Ustd.</div>
+        </div>
+        <div class="meta-card">
+            <div class="k c-bright">Fortsetzung Klasse 12</div>
+            <div class="v">Vektorrechnung &middot; Differenzial- und Integralrechnung &middot; FHR-Pr&uuml;fung</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" onclick="togglePlanDetails()">Wochen auf</button>
+        <button class="action" onclick="togglePlanEdit(this)">Bearbeiten</button>
+        <button class="action secondary" onclick="resetPlanEdits(this)">Zurücksetzen</button>
+        <div class="legend">
+            <span><span class="dot" style="background: var(--lambda)"></span>LB 1</span>
+            <span><span class="dot" style="background: var(--cyan)"></span>LB 2</span>
+            <span><span class="dot" style="background: var(--phi)"></span>Wahlbereich</span>
+            <span><span class="dot" style="background: var(--ypsilon)"></span>Leistung</span>
+            <span><span class="dot" style="background: rgba(170,190,220,0.5)"></span>Orga/Puffer</span>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="plan-table">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Bereich</th>
+                    <th>Ustd.</th>
+                    <th>Thema / Inhalte</th>
+                    <th>Bemerkungen</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <footer class="page-foot">
+        Reihenfolge wie im Lehrplan: LB 1 Funktionale Zusammenh&auml;nge (45 Ustd.) von den Grundlagen &uuml;ber
+        lineare und quadratische bis zu ganzrationalen Funktionen, danach LB 2 Ermitteln von Wahrscheinlichkeiten
+        (30 Ustd.), zum Schluss der Wahlbereich. Gew&auml;hlt ist WB 2 Finanzmathematik &mdash; er schlie&szlig;t
+        an Prozentrechnung und Exponentialbetrachtungen an; WB 1 Komplexe Zahlen und WB 3 Schaltalgebra sind als
+        gedimmte Pillen in der Legende in den Lehrplan verlinkt und kommen als Exkurswochen vor.
+        Die 75 verbindlichen Unterrichtsstunden liegen gem&auml;&szlig; Lehrplan auf 25 Unterrichtswochen
+        (3 Ustd./Woche), der Wahlbereich auf zwei weiteren; die Klasse 11 l&auml;uft parallel zur fachpraktischen
+        Ausbildung, deshalb sind die &uuml;brigen Wochen als Klausur, &Uuml;bung und Exkurs ausgewiesen.
+        Klausurtermine an den Klausurplan der Schule anpassen; in Klasse 11 gibt es noch keine FHR-Pr&uuml;fung.
+        Hilfsmittel wie im Lehrplan: GTR ohne CAS.
+    </footer>
+
+    <script>
+        // Data-driven plan: one entry per school week (or holiday block).
+        // 3 Ustd./week; u shows the cumulative Ustd. range within the Lernbereich.
+        // details: bullet list shown in the expandable sub-row (lesson sketch).
+        // type: lb1 | lb2 | wb | lk | org | ferien
+        window.PLAN = [
+            { nr: 1, kw: 34, date: '17.–21.08.26', type: 'org', u: '', topic: 'Auftakt: Organisation, Überblick über das Jahr, Grundlagen-Check, GTR-Einführung', remark: 'Erster Schultag Mo 17.08.', details: [
+                'Organisatorisches: Abläufe, Bewertung, Hilfsmittel (GTR ohne CAS, Formelsammlung)',
+                'Grundlagen-Check: Bruch-, Prozent- und Potenzrechnung aus der Oberschule',
+                'GTR einrichten: Graphen zeichnen, Wertetabellen, Nullstellen suchen'
+            ] },
+            { nr: 2, kw: 35, date: '24.–28.08.26', type: 'lb1', u: '1–3/45', topic: 'Zahlenbereiche; Termstrukturen erkennen, Formeln umstellen, Betrag einer Zahl', remark: '', details: [
+                'Zahlenbereiche von $\\mathbb{N}$ bis $\\mathbb{R}$ und die Symbolik der Mengenlehre',
+                'Termstrukturen erkennen: Summe, Produkt, Quotient; Rechnen mit Klammern',
+                'Formeln nach einer Größe umstellen; Betrag einer Zahl'
+            ] },
+            { nr: 3, kw: 36, date: '31.08.–04.09.26', type: 'lb1', u: '4–6/45', topic: 'Binomische Formeln, Prozentrechnung, Potenzgesetze', remark: '', details: [
+                'Binomische Formeln vorwärts und rückwärts anwenden',
+                'Prozentrechnung in Anwendungen (Bezug zu Wirtschaftslehre/Recht)',
+                'Potenzgesetze, auch mit negativen und gebrochenen Exponenten'
+            ] },
+            { nr: 4, kw: 37, date: '07.–11.09.26', type: 'lb1', u: '7–9/45', topic: 'Funktionsbegriff: Darstellungsformen, Definitions- und Wertebereich', remark: '', details: [
+                'Darstellungswechsel: verbal, Wertetabelle, Term, Graph',
+                'Definitions- und Wertebereich in der Symbolik der Mengenlehre angeben',
+                'Eindeutigkeit: wann ist eine Zuordnung eine Funktion?'
+            ] },
+            { nr: 5, kw: 38, date: '14.–18.09.26', type: 'lb1', u: '10–12/45', topic: 'Lineare Funktionen: Eigenschaften, Darstellung, direkte Proportionalität', remark: '', details: [
+                'Anstieg und Achsenabschnitt deuten; direkte Proportionalität als Sonderfall',
+                'Graphen zeichnen und aus Graphen ablesen',
+                'Anwendungen: Kostenfunktionen, Weg-Zeit-Zusammenhänge'
+            ] },
+            { nr: 6, kw: 39, date: '21.–25.09.26', type: 'lb1', u: '13–15/45', topic: 'Geradengleichungen aus Bedingungen; Schnittwinkel mit der $x$-Achse', remark: '', details: [
+                'Geradengleichung aus zwei Punkten bzw. Punkt und Anstieg',
+                'Schnittwinkel mit der $x$-Achse über $\\tan\\alpha = m$',
+                'Übungen mit dem GTR: Gerade durch eine Punktwolke legen'
+            ] },
+            { nr: 7, kw: 40, date: '28.09.–02.10.26', type: 'org', u: '', topic: 'Übung: Terme, Formeln, lineare Funktionen', remark: '', details: [
+                'Übungszirkel zu den bisherigen Inhalten',
+                'Typische Fehlerquellen beim Umstellen von Formeln'
+            ] },
+            { nr: 8, kw: 41, date: '05.–09.10.26', type: 'lb1', u: '16–18/45', topic: 'Lineare Gleichungen und Ungleichungen; Lösungsmengen angeben', remark: '', details: [
+                'Äquivalenzumformungen; Lösungsmenge in Mengenschreibweise',
+                'Lineare Ungleichungen: das Umkehren des Zeichens beim Multiplizieren mit negativen Zahlen',
+                'Sonderfälle: keine Lösung, unendlich viele Lösungen'
+            ] },
+            { ferien: 'Herbstferien · 12.–24.10.2026 (KW 42–43)' },
+            { nr: 9, kw: 44, date: '26.–30.10.26', type: 'lb1', u: '19–21/45', topic: 'Bruchgleichungen, die auf lineare Gleichungen führen', remark: '', details: [
+                'Definitionsbereich bestimmen, bevor gerechnet wird',
+                'Mit dem Hauptnenner multiplizieren; Scheinlösungen erkennen',
+                'Anwendungen: gemeinsame Arbeitszeiten, Mischungsaufgaben'
+            ] },
+            { nr: 10, kw: 45, date: '02.–06.11.26', type: 'lk', u: 'KA 1', topic: 'Wiederholung + Klausur 1 (Grundlagen und lineare Zusammenhänge)', remark: 'Termin nach Klausurplan', details: [
+                'Wiederholung: Terme, Formeln, lineare Funktionen und Gleichungen',
+                'Klausur 1 (90 min)'
+            ] },
+            { nr: 11, kw: 46, date: '09.–13.11.26', type: 'lb1', u: '22–24/45', topic: 'Einfluss von Parametern; Lagebeziehungen zweier Geraden', remark: 'Mi 18.11. Buß- und Bettag (unterrichtsfrei)', details: [
+                'Parameter in $y = mx + n$ verändern und die Wirkung beschreiben',
+                'Lagebeziehungen: parallel, identisch, schneidend, orthogonal',
+                'Schnittpunkt zweier Geraden berechnen'
+            ] },
+            { nr: 12, kw: 47, date: '16.–20.11.26', type: 'lb1', u: '25–27/45', topic: 'Lineare Gleichungssysteme mit zwei Gleichungen und zwei Unbekannten', remark: '', details: [
+                'Gleichsetzungs-, Einsetzungs- und Additionsverfahren',
+                'Grafische Lösung und Kontrolle mit dem GTR (ohne CAS)',
+                'Lösungsmengen deuten: ein Schnittpunkt, keiner, unendlich viele'
+            ] },
+            { nr: 13, kw: 48, date: '23.–27.11.26', type: 'lb1', u: '28–30/45', topic: 'Anwendungen linearer Gleichungssysteme (Wirtschaft und Technik)', remark: '', details: [
+                'Textaufgaben in ein Gleichungssystem übersetzen',
+                'Fachrichtungsbezogene Beispiele: Mischung, Kalkulation, Bewegung',
+                'Auswertung Klausur 1'
+            ] },
+            { nr: 14, kw: 49, date: '30.11.–04.12.26', type: 'org', u: '', topic: 'Übung: Gleichungssysteme und Geraden', remark: '', details: [
+                'Gemischter Übungszirkel',
+                'Lösungswege vergleichen und bewerten'
+            ] },
+            { nr: 15, kw: 50, date: '07.–11.12.26', type: 'lb1', u: '31–33/45', topic: 'Quadratische Funktionen: Eigenschaften, Darstellung, Graphen', remark: '', details: [
+                'Normal- und Scheitelpunktform; Scheitel bestimmen',
+                'Öffnung, Streckung, Verschiebung an Parametern ablesen',
+                'Anwendungen: Wurfparabel, Brückenbogen'
+            ] },
+            { nr: 16, kw: 51, date: '14.–18.12.26', type: 'lb1', u: '34–36/45', topic: 'Quadratische Gleichungen lösen; Nullprodukt und Termstrukturen', remark: '', details: [
+                'Lösungsformel und Satz von Vieta',
+                'Nullproduktsatz und Ausklammern',
+                'Diskriminante: zwei, eine oder keine reelle Lösung'
+            ] },
+            { nr: 17, kw: 52, date: '21.–22.12.26', type: 'org', u: '', topic: 'Vertiefung und Mathe-Rätsel zum Jahresausklang', remark: 'nur Mo/Di — ab Mi 23.12. Ferien', details: [
+                'Kurzer Übungszirkel zu quadratischen Funktionen',
+                'Mathe-Rätsel zum Jahresausklang'
+            ] },
+            { ferien: 'Weihnachtsferien · 23.12.2026–02.01.2027' },
+            { nr: 18, kw: 1, date: '04.–08.01.27', type: 'lb1', u: '37–39/45', topic: 'Linearfaktoren; Funktionsgleichungen aus gegebenen Bedingungen', remark: '', details: [
+                'Darstellung quadratischer Zusammenhänge mit Linearfaktoren',
+                'Funktionsgleichung aus Bedingungen bestimmen (Gleichungssystem)',
+                'Größere Gleichungssysteme nur mit dem GTR ohne CAS'
+            ] },
+            { nr: 19, kw: 2, date: '11.–15.01.27', type: 'lb1', u: '40–42/45', topic: 'Arbeit mit Parametern, auch mit Fallunterscheidung', remark: '', details: [
+                'Quadratische Funktionenscharen untersuchen',
+                'Fallunterscheidung nach dem Parameter',
+                'Grenzfälle diskutieren'
+            ] },
+            { nr: 20, kw: 3, date: '18.–22.01.27', type: 'lb1', u: '43–45/45', topic: 'Ganzrationale Funktionen höheren Grades: Linearfaktorzerlegung, Substitution, Kurvenverlauf', remark: 'LB 1 abgeschlossen', details: [
+                'Linearfaktorzerlegung und Substitution (biquadratische Gleichungen)',
+                'Schnittpunkte mit den Koordinatenachsen; Vielfachheit der Nullstellen und ihre geometrische Bedeutung',
+                'Kurvenverlauf: Monotonie, Symmetrie, Verhalten im Unendlichen'
+            ] },
+            { nr: 21, kw: 4, date: '25.–29.01.27', type: 'lk', u: 'KA 2', topic: 'Wiederholung + Klausur 2 (LB 1: Funktionale Zusammenhänge)', remark: 'Termin nach Klausurplan', details: [
+                'Wiederholung über den ganzen Lernbereich 1',
+                'Klausur 2 (90 min)'
+            ] },
+            { nr: 22, kw: 5, date: '01.–05.02.27', type: 'lb2', u: '1–3/30', topic: 'Zufallsexperimente: Ergebnis, Ergebnismenge, Ereignis, Ereignismenge', remark: 'Fr 05.02. Halbjahresende / Zeugnisse', details: [
+                'Ein- und mehrstufige Zufallsexperimente beschreiben',
+                'Ergebnis und Ereignis unterscheiden; Ergebnis- und Ereignismenge notieren',
+                'Beispiele aus Alltag und Beruf sammeln'
+            ] },
+            { ferien: 'Winterferien · 08.–19.02.2027 (KW 6–7)' },
+            { nr: 23, kw: 8, date: '22.–26.02.27', type: 'lb2', u: '4–6/30', topic: 'Relative Häufigkeit und Wahrscheinlichkeit; Gesetz der großen Zahlen', remark: '', details: [
+                'Relative Häufigkeit als Schätzwert für die Wahrscheinlichkeit',
+                'Gesetz der großen Zahlen am Simulationsversuch erleben (digitale Medien)',
+                'Laplace-Wahrscheinlichkeit; Kolmogorows Axiome anschaulich'
+            ] },
+            { nr: 24, kw: 9, date: '01.–05.03.27', type: 'lb2', u: '7–9/30', topic: 'Verknüpfung von Ereignissen: Vereinigung, Durchschnitt, Komplement; Regeln von de Morgan', remark: '', details: [
+                'Ereignisse verknüpfen und in Mengenschreibweise notieren',
+                'Additionssatz für beliebige Ereignisse',
+                'Regeln von de Morgan an Beispielen prüfen'
+            ] },
+            { nr: 25, kw: 10, date: '08.–12.03.27', type: 'lb2', u: '10–12/30', topic: 'Multiplikationsregel; stochastische Unabhängigkeit zweier Ereignisse', remark: '', details: [
+                'Multiplikationsregel für unabhängige Ereignisse',
+                'Nachweis der stochastischen Unabhängigkeit rechnerisch führen',
+                'Abgrenzung: unabhängig ist nicht dasselbe wie unvereinbar'
+            ] },
+            { nr: 26, kw: 11, date: '15.–19.03.27', type: 'lb2', u: '13–15/30', topic: 'Baumdiagramme und Pfadregeln', remark: '', details: [
+                'Mehrstufige Zufallsexperimente als Baumdiagramm darstellen',
+                'Pfadmultiplikation und Pfadaddition',
+                'Mit und ohne Zurücklegen unterscheiden'
+            ] },
+            { nr: 27, kw: 12, date: '22.–25.03.27', type: 'lb2', u: '16–18/30', topic: 'Anwendungen mehrstufiger Zufallsexperimente', remark: 'ab Fr 26.03. Osterferien', details: [
+                'Vermischte Aufgaben zu Baumdiagrammen',
+                'Fachrichtungsbezogene Beispiele: Qualitätskontrolle, Tests, Auswahlverfahren'
+            ] },
+            { ferien: 'Osterferien · 26.03.–02.04.2027' },
+            { nr: 28, kw: 14, date: '05.–09.04.27', type: 'lb2', u: '19–21/30', topic: 'Abzählprobleme I: Zählprinzip und Permutationen', remark: '', details: [
+                'Allgemeines Zählprinzip an Beispielen',
+                'Permutationen mit und ohne Wiederholung; Fakultät',
+                'Anzahlbestimmung systematisch aufschreiben'
+            ] },
+            { nr: 29, kw: 15, date: '12.–16.04.27', type: 'lb2', u: '22–24/30', topic: 'Abzählprobleme II: Kombination und Variation', remark: '', details: [
+                'Kombination und Variation unterscheiden: kommt es auf die Reihenfolge an?',
+                'Binomialkoeffizient als Anzahl der Kombinationen',
+                'Lotto und Auswahlverfahren als Standardbeispiele'
+            ] },
+            { nr: 30, kw: 16, date: '19.–23.04.27', type: 'lb2', u: '25–27/30', topic: 'Urnenmodell', remark: '', details: [
+                'Ziehen mit und ohne Zurücklegen, mit und ohne Beachtung der Reihenfolge',
+                'Reale Aufgaben auf ein Urnenmodell zurückführen',
+                'Übersicht der vier Grundfälle erarbeiten'
+            ] },
+            { nr: 31, kw: 17, date: '26.–30.04.27', type: 'lb2', u: '28–30/30', topic: 'Bernoulli-Ketten', remark: 'LB 2 abgeschlossen', details: [
+                'Bernoulli-Experiment und Bernoulli-Kette beispielgebunden erarbeiten',
+                'Formel von Bernoulli anwenden (digitale Medien nutzen)',
+                'Ausblick: Binomialverteilung'
+            ] },
+            { nr: 32, kw: 18, date: '03.–05.05.27', type: 'lk', u: 'KA 3', topic: 'Wiederholung + Klausur 3 (LB 2: Wahrscheinlichkeiten)', remark: 'nur Mo–Mi: Do 06.05. Himmelfahrt + Fr 07.05. unterrichtsfrei; Termin nach Klausurplan', details: [
+                'Wiederholung: Ereignisse, Pfadregeln, Abzählprobleme, Bernoulli',
+                'Klausur 3 (90 min)'
+            ] },
+            { nr: 33, kw: 19, date: '10.–14.05.27', type: 'org', u: '', topic: 'Auswertung Klausur 3; Übung Stochastik', remark: '', details: [
+                'Auswertung und individuelle Lücken schließen',
+                'Vermischte Stochastik-Aufgaben'
+            ] },
+            { ferien: 'Pfingsten · Mo 17.05. Pfingstmontag + Di 18.05.2027 Ferientag' },
+            { nr: 34, kw: 20, date: '19.–21.05.27', type: 'wb', u: '1–3/6', topic: 'Wahlbereich 2 „Finanzmathematik“ I: Zinsrechnung und Zinseszins', remark: 'nur Mi–Fr', details: [
+                'Zins, Zinseszins und Wachstumsfaktor; Anschluss an die Prozentrechnung',
+                'Kapital nach $n$ Jahren berechnen; Laufzeit und Zinssatz ermitteln',
+                'Bezug zu Wirtschaftslehre/Recht'
+            ] },
+            { nr: 35, kw: 21, date: '24.–28.05.27', type: 'wb', u: '4–6/6', topic: 'Wahlbereich 2 II: Raten- und Tilgungsrechnung', remark: 'WB abgeschlossen', details: [
+                'Regelmäßige Zahlungen: Sparplan und Ratenkredit',
+                'Tilgungsplan mit der Tabellenkalkulation aufstellen',
+                'Angebote vergleichen und bewerten'
+            ] },
+            { nr: 36, kw: 22, date: '31.05.–04.06.27', type: 'org', u: '', topic: 'Exkurs: Komplexe Zahlen (Wahlbereich 1)', remark: '', details: [
+                'Warum die Zahlenbereiche erweitert wurden: $x^2 = -1$',
+                'Imaginäre Einheit, Darstellungsformen, einfache Rechenoperationen',
+                'Ein Blick in die Gaußsche Zahlenebene'
+            ] },
+            { nr: 37, kw: 23, date: '07.–11.06.27', type: 'org', u: '', topic: 'Exkurs: Schaltalgebra (Wahlbereich 3)', remark: 'Fr 11.06. Vergleichsarbeit im fachrichtungsbezogenen Fach', details: [
+                'Aussagen, Verknüpfungen und Wahrheitstafeln',
+                'Schaltungen als Terme lesen und vereinfachen',
+                'Brücke zur Informatik'
+            ] },
+            { nr: 38, kw: 24, date: '14.–18.06.27', type: 'org', u: '', topic: 'Vertiefung: vermischte Übungen über das ganze Jahr', remark: '', details: [
+                'Funktionen und Gleichungen im Mix',
+                'Stochastik im Mix',
+                'Typische Fehlerquellen besprechen'
+            ] },
+            { nr: 39, kw: 25, date: '21.–25.06.27', type: 'org', u: '', topic: 'Ausblick Klasse 12: Vektorrechnung und Differenzialrechnung', remark: '', details: [
+                'Was in Klasse 12 kommt und worauf es aufbaut',
+                'Erste Schritte: Vektoren als Pfeile, Anstieg als Änderungsrate'
+            ] },
+            { nr: 40, kw: 26, date: '28.06.–02.07.27', type: 'org', u: '', topic: 'Jahresabschluss: Rückblick, Mathe-Spiele und Knobeleien', remark: '', details: [
+                'Jahresrückblick in Aufgaben',
+                'Knobeleien und Spiele zum Abschluss'
+            ] },
+            { nr: 41, kw: 27, date: '05.–09.07.27', type: 'org', u: '', topic: 'Ausklang / Zeugnisausgabe', remark: 'Fr 09.07. letzter Schultag', details: [
+                'Rückgabe und Verabschiedung in die Sommerferien'
+            ] },
+            { ferien: 'Sommerferien · ab 10.07.2027' }
+        ];
+
+        // Lernbereich summaries for the clickable meta cards (see svp-plan.js).
+        // Page numbers point into the Lehrplan PDF (FOS Mathematik 2020, lplandb 192).
+        window.LB_INFO = {
+            pdf: '../lehrplaene/lehrplan_fos_mathematik.pdf',
+            page: 16,
+            lb1: {
+                page: 17,
+                bullets: [
+                    'Zahlenbereiche, Termstrukturen, Formeln umstellen, Betrag, binomische Formeln, Prozentrechnung, Potenzgesetze',
+                    'Funktionsbegriff: Darstellungsformen, Definitions- und Wertebereich',
+                    'Lineare Zusammenhänge: Eigenschaften, Schnittwinkel mit der $x$-Achse, Gleichungen und Ungleichungen, Bruchgleichungen, Parameter, Lagebeziehungen, LGS mit zwei Unbekannten',
+                    'Quadratische Zusammenhänge: Graphen, quadratische Gleichungen, Nullprodukt, Linearfaktoren, Funktionsgleichungen aus Bedingungen, Parameter mit Fallunterscheidung',
+                    'Ganzrationale Funktionen dritten und höheren Grades: Linearfaktorzerlegung, Substitution, Vielfachheit der Nullstellen, Monotonie, Symmetrie, Verhalten im Unendlichen',
+                ]
+            },
+            lb2: {
+                page: 19,
+                bullets: [
+                    'Ein- und mehrstufige Zufallsexperimente: Ergebnis- und Ereignismenge',
+                    'Relative Häufigkeit und Wahrscheinlichkeit; Gesetz der großen Zahlen',
+                    'Verknüpfung von Ereignissen, Regeln von de Morgan; Multiplikationsregel und stochastische Unabhängigkeit',
+                    'Baumdiagramme und Pfadregeln; Abzählprobleme mit Permutation, Kombination und Variation; Urnenmodell',
+                    'Bernoulli-Ketten',
+                ]
+            },
+            wb: {
+                page: 19,
+                bullets: [
+                    'Wahlbereich 2: Finanzmathematik — Zinsrechnung, Zinseszins, Raten- und Tilgungsrechnung',
+                    'Alternativen: WB 1 Komplexe Zahlen, WB 3 Schaltalgebra (beide als Exkurswochen im Plan)',
+                ]
+            },
+        };
+
+        window.BADGE = {
+            lb1: ['b-orange', 'LB 1'],
+            lb2: ['b-cyan', 'LB 2'],
+            wb: ['b-green', 'WB 2'],
+            lk: ['b-grey', 'ORGA'],
+            org: ['b-grey', 'ORGA']
+        };
+
+        // Not-chosen Wahlbereiche, shown as dimmed pills in the legend with
+        // Lehrplan-PDF deep links (WB 1 on page 19, WB 3 on page 20).
+        window.ALT_BADGES = {
+            wb: [['WB 1', 19], ['WB 3', 20]]
+        };
+    </script>
+    <script src="../svp-auth.js"></script>
+    <!-- Like Mathe 11 (BGY) and Mathe FO 12: the FO classes have Doc in Informatik
+         as well, so this plan shows the "Weisheiten der Welt" set and nobody meets
+         the same thought of the week twice. Logic stays central in svp-plan-gdw.js. -->
+    <script>window.GDW_SATZ = 'weisheiten';</script>
+    <script src="../svp-plan.js"></script>
+    <script src="../svp-nav.js"></script>
+</body>
+
+</html>
