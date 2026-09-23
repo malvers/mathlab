@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
-"""Sends the recorded takes to ElevenLabs and makes a voice out of them.
+"""Turns the recorded takes into a usable voice - at Google (Gemini) or at ElevenLabs.
 
-    python3 tools/stimme-hochladen.py              # upload, print the voice id
-    python3 tools/stimme-hochladen.py --probe      # let the finished voice say a sentence
+    python3 tools/stimme-hochladen.py                  # Google if its key is there, else ElevenLabs
+    python3 tools/stimme-hochladen.py --elevenlabs     # force ElevenLabs
+    python3 tools/stimme-hochladen.py --probe          # let the finished voice say a sentence
     python3 tools/stimme-hochladen.py --probe "eigener Text"
 
-The API key NEVER lives in this file (rule 18/21 - this repo is public). It comes out of the
+Google's Voice Replication (announced 23.09.2026) wants exactly two files: 10-30 s of natural
+speech, plus a consent recording of a fixed sentence. The booth records both anyway and writes
+mono 24 kHz WAV, which is precisely the format Google asks for. ElevenLabs instead wants as many
+takes as possible - so the two providers get fed differently, from the same material.
+
+No API key EVER lives in this file (rule 18/21 - this repo is public). Keys come out of the
 macOS keychain, the same way the DOCPAD password does:
 
-    security add-generic-password -s elevenlabs -a api -w        # asks for the key, stores it
+    security add-generic-password -s gemini -a api -w        # Google AI Studio key
+    security add-generic-password -s elevenlabs -a api -w    # ElevenLabs key
 
 What gets uploaded: every take in ~/Movies/stimmklon that is neither too short nor too quiet -
 the booth already measured both and wrote them into aufnahmen.json, so a botched take cannot
@@ -20,6 +27,7 @@ import mimetypes
 import os
 import subprocess
 import sys
+import urllib.error
 import urllib.request
 import uuid
 
@@ -27,27 +35,37 @@ STORE = os.path.expanduser('~/Movies/stimmklon')
 INDEX = os.path.join(STORE, 'aufnahmen.json')
 VOICE = os.path.join(STORE, 'stimme.json')
 API = 'https://api.elevenlabs.io/v1'
+GEMINI = 'https://generativelanguage.googleapis.com/v1beta'
+GEMINI_MODELL = 'gemini-3.8-flash-tts'
 NAME = 'Doc Alvers'
+
+# Google's window for the reference take. Shorter carries too little voice, longer is refused.
+G_MIN, G_MAX = 10.0, 30.0
 
 # Same thresholds the booth shows in the list - one definition of "unusable", not two.
 MIN_PEGEL = -45.0     # dB mean; below this there is room noise and no voice
 KURZ_ANTEIL = 0.55    # of the duration the text should take at ~13 characters a second
 
 
-def key():
-    """The key from the keychain - never a default, never a prompt argument (it would land in the
-    shell history). Missing key: say how to put it there and stop."""
+def key(dienst, pflicht=True):
+    """A key from the keychain - never a default, never a command-line argument (that would land
+    in the shell history). Missing key: say how to store it, or return None when only asking."""
     try:
-        out = subprocess.run(['security', 'find-generic-password', '-s', 'elevenlabs', '-a', 'api', '-w'],
+        out = subprocess.run(['security', 'find-generic-password', '-s', dienst, '-a', 'api', '-w'],
                              capture_output=True, text=True, timeout=20)
         if out.returncode == 0 and out.stdout.strip():
             return out.stdout.strip()
     except Exception:
         pass
-    sys.exit('Kein Schlüssel im Schlüsselbund.\n'
-             'Erst das Konto anlegen (elevenlabs.io, Starter), dann den API-Key ablegen:\n'
-             '    security add-generic-password -s elevenlabs -a api -w\n'
-             '(Der Befehl fragt den Key ab - so steht er nicht in der Shell-Historie.)')
+    if not pflicht:
+        return None
+    woher = ('aistudio.google.com -> Get API key' if dienst == 'gemini'
+             else 'elevenlabs.io, Tarif Starter')
+    sys.exit('Kein Schlüssel „%s" im Schlüsselbund.\n'
+             'Erst dort einen holen (%s), dann ablegen:\n'
+             '    security add-generic-password -s %s -a api -w\n'
+             '(Der Befehl fragt den Key ab - so steht er nicht in der Shell-Historie.)'
+             % (dienst, woher, dienst))
 
 
 def brauchbar():
@@ -100,6 +118,128 @@ def post_multipart(url, felder, dateien, api_key):
         return json.loads(r.read())
 
 
+def zuschnitt(pfad, sek):
+    """Google refuses a reference longer than 30 s. Cut a copy rather than the take itself -
+    the long passages are worth keeping whole for ElevenLabs."""
+    if sek <= G_MAX:
+        return pfad
+    ziel = os.path.join(STORE, 'referenz-30s.wav')
+    subprocess.run(['ffmpeg', '-y', '-i', pfad, '-t', str(G_MAX), '-c', 'copy', ziel],
+                   check=True, capture_output=True, timeout=60)
+    print('   (auf %.0f s zugeschnitten -> %s)' % (G_MAX, os.path.basename(ziel)))
+    return ziel
+
+
+def gemini_hochladen():
+    """Google Voice Replication: exactly one reference take plus the consent recording."""
+    gut, raus = brauchbar()
+    takes = {k: (pfad, sek) for k, pfad, sek in gut}
+
+    einwilligung = takes.get('einwilligung')
+    if not einwilligung:
+        sys.exit('Die Einwilligung fehlt (oder taugt nicht). In der Kabine den ersten Eintrag\n'
+                 'aufnehmen - Google verlangt genau diesen Satz, wortwörtlich.')
+
+    # the longest take that is not the consent one, clipped into Google's 10-30 s window
+    kandidaten = [(k, p_, s_) for k, (p_, s_) in takes.items() if k != 'einwilligung' and s_ >= G_MIN]
+    if not kandidaten:
+        sys.exit('Keine Aufnahme mit mindestens %.0f s. Google braucht 10-30 Sekunden\n'
+                 'zusammenhängende, natürliche Sprache - am besten eine der langen Passagen.' % G_MIN)
+    kandidaten.sort(key=lambda x: -x[2])
+    quelle_id, quelle, quelle_sek = kandidaten[0]
+
+    print('Google Voice Replication')
+    print('   Referenz    : %-14s %5.1f s' % (quelle_id, quelle_sek))
+    print('   Einwilligung: %-14s %5.1f s' % ('einwilligung', einwilligung[1]))
+    quelle = zuschnitt(quelle, quelle_sek)
+
+    def b64(pfad):
+        import base64
+        with open(pfad, 'rb') as f:
+            return base64.b64encode(f.read()).decode('ascii')
+
+    koerper = {
+        'store': True,
+        'voice': {
+            'model': GEMINI_MODELL,
+            'type': 'replicated',
+            'display_name': NAME,
+            'replicated': {
+                'source_audio': {'mime_type': 'audio/wav', 'data': b64(quelle)},
+                'consent_audio': {'mime_type': 'audio/wav', 'data': b64(einwilligung[0])},
+            },
+        },
+    }
+    req = urllib.request.Request(GEMINI + '/voices', data=json.dumps(koerper).encode('utf-8'), method='POST')
+    req.add_header('Content-Type', 'application/json')
+    req.add_header('x-goog-api-key', key('gemini'))
+    try:
+        with urllib.request.urlopen(req, timeout=300) as r:
+            antwort = json.loads(r.read())
+    except urllib.error.HTTPError as err:
+        leib = err.read().decode('utf-8', 'replace')[:500]
+        sys.exit('Google lehnt ab (HTTP %s):\n%s\n\n'
+                 'Bei 403/PERMISSION_DENIED kann es die Region sein - Voice Replication ist im\n'
+                 'EWR möglicherweise gesperrt. Dann bleibt ElevenLabs: --elevenlabs' % (err.code, leib))
+
+    vid = antwort.get('name') or antwort.get('voice_id') or (antwort.get('voice') or {}).get('name')
+    if not vid:
+        sys.exit('Keine voice_id zurückbekommen: ' + json.dumps(antwort)[:400])
+    with open(VOICE, 'w', encoding='utf-8') as f:
+        json.dump({'anbieter': 'gemini', 'voice_id': vid, 'name': NAME,
+                   'aus': [quelle_id, 'einwilligung'], 'modell': GEMINI_MODELL}, f,
+                  ensure_ascii=False, indent=1)
+    print('\nFertig. voice_id: %s\n(gemerkt in %s)' % (vid, VOICE))
+    print('Anhören:  python3 tools/stimme-hochladen.py --probe')
+    return vid
+
+
+def gemini_probe(text, vid):
+    koerper = {
+        'model': GEMINI_MODELL,
+        'input': [{'type': 'user_input',
+                   'content': [{'type': 'text', 'text': text,
+                                'annotations': [{'type': 'speech_metadata',
+                                                 'style': 'warm, lebendig, wie im Unterricht'}]}]}],
+        'response_format': {'type': 'audio'},
+        'generation_config': {'speech_config': [{'voice': vid}]},
+    }
+    req = urllib.request.Request(GEMINI + '/interactions', data=json.dumps(koerper).encode('utf-8'), method='POST')
+    req.add_header('Content-Type', 'application/json')
+    req.add_header('x-goog-api-key', key('gemini'))
+    with urllib.request.urlopen(req, timeout=180) as r:
+        antwort = json.loads(r.read())
+    # the audio comes back base64 somewhere in the response - find it without guessing the shape
+    import base64
+
+    def finde_audio(o):
+        if isinstance(o, dict):
+            for schluessel in ('data', 'audio_data', 'inline_data'):
+                wert = o.get(schluessel)
+                if isinstance(wert, str) and len(wert) > 2000:
+                    return wert
+            for wert in o.values():
+                t = finde_audio(wert)
+                if t:
+                    return t
+        elif isinstance(o, list):
+            for wert in o:
+                t = finde_audio(wert)
+                if t:
+                    return t
+        return None
+
+    roh = finde_audio(antwort)
+    if not roh:
+        sys.exit('Kein Audio in der Antwort: ' + json.dumps(antwort)[:400])
+    ziel = os.path.join(STORE, 'probe.wav')
+    with open(ziel, 'wb') as f:
+        f.write(base64.b64decode(roh))
+    print('Gesprochen:', text)
+    print('Datei     :', ziel)
+    subprocess.run(['afplay', ziel])
+
+
 def hochladen():
     gut, raus = brauchbar()
     if not gut:
@@ -120,15 +260,16 @@ def hochladen():
         API + '/voices/add',
         {'name': NAME, 'description': 'Doc Alvers, Mathe-Labor', 'remove_background_noise': 'true'},
         [('files', pfad) for _, pfad, _ in gut],
-        key(),
+        key('elevenlabs'),
     )
     vid = antwort.get('voice_id')
     if not vid:
         sys.exit('Keine voice_id zurückbekommen: ' + json.dumps(antwort)[:400])
 
     with open(VOICE, 'w', encoding='utf-8') as f:
-        json.dump({'voice_id': vid, 'name': NAME, 'aus': [k for k, _, _ in gut],
-                   'sekunden': round(dauer, 1)}, f, ensure_ascii=False, indent=1)
+        json.dump({'anbieter': 'elevenlabs', 'voice_id': vid, 'name': NAME,
+                   'aus': [k for k, _, _ in gut], 'sekunden': round(dauer, 1)}, f,
+                  ensure_ascii=False, indent=1)
     print('\nFertig. voice_id: %s\n(gemerkt in %s - eine Kennung, kein Geheimnis)' % (vid, VOICE))
     print('Anhören:  python3 tools/stimme-hochladen.py --probe')
     return vid
@@ -137,9 +278,13 @@ def hochladen():
 def probe(text):
     try:
         with open(VOICE, encoding='utf-8') as f:
-            vid = json.load(f)['voice_id']
+            gemerkt = json.load(f)
+        vid = gemerkt['voice_id']
     except (OSError, ValueError, KeyError):
         sys.exit('Noch keine Stimme - erst: python3 tools/stimme-hochladen.py')
+
+    if gemerkt.get('anbieter') == 'gemini':
+        return gemini_probe(text, vid)
 
     req = urllib.request.Request(
         API + '/text-to-speech/' + vid,
@@ -147,7 +292,7 @@ def probe(text):
         method='POST',
     )
     req.add_header('Content-Type', 'application/json')
-    req.add_header('xi-api-key', key())
+    req.add_header('xi-api-key', key('elevenlabs'))
     ziel = os.path.join(STORE, 'probe.mp3')
     with urllib.request.urlopen(req, timeout=120) as r, open(ziel, 'wb') as f:
         f.write(r.read())
@@ -161,5 +306,13 @@ if __name__ == '__main__':
         n = sys.argv.index('--probe')
         satz = sys.argv[n + 1] if len(sys.argv) > n + 1 else 'Nicht verzagen, Doc Alvers fragen!'
         probe(satz)
+    elif '--elevenlabs' in sys.argv:
+        hochladen()
+    elif key('gemini', pflicht=False):
+        # Google first when its key is there: Doc already has the billing, and the booth's
+        # WAVs are exactly the format it asks for.
+        gemini_hochladen()
     else:
+        print('Kein Gemini-Schlüssel im Schlüsselbund - nehme ElevenLabs.')
+        print('(Google wäre der kürzere Weg: security add-generic-password -s gemini -a api -w)\n')
         hochladen()
