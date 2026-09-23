@@ -21,12 +21,7 @@
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="js/lab-shell-minimal.css">
     <style>
-        /* The coach box carries the running sum, so it may grow with the number. */
-        #math-coach-box {
-            width: 420px;
-        }
-
-        #coach-content .katex {
+        #maya-solution .katex {
             font-size: 1.05em;
         }
 
@@ -34,15 +29,56 @@
             touch-action: none;
         }
 
+        /* the number and the sum each sit on their own card over the stage;
+           left and width come from the same block the places and the panel use */
+        .maya-card {
+            position: absolute;
+            margin: 0;
+            padding: 12px 18px;
+            border-radius: 18px;
+            background: rgba(10, 20, 40, 0.4);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            text-align: center;
+            pointer-events: none;
+            box-sizing: border-box;
+        }
+
+        #maya-head .maya-cap {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            opacity: 0.45;
+            margin-bottom: 2px;
+        }
+
+        #maya-head .maya-num {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            line-height: 1;
+            color: rgb(245, 194, 66);
+            font-size: clamp(2.2rem, 7.5vw, 6rem);
+        }
+
+        #maya-head.solved .maya-num {
+            color: rgb(121, 158, 49);
+        }
+
+
+
         #maya-formula {
-            margin-bottom: 6px;
             overflow-x: auto;
             overflow-y: hidden;
         }
 
         #maya-hint {
+            position: absolute;
+            font-family: 'Outfit', sans-serif;
             font-size: 0.92rem;
-            opacity: 0.85;
+            text-align: center;
+            opacity: 0.9;
+            pointer-events: none;
         }
 
         .maya-row {
@@ -94,8 +130,8 @@
         }
 
         @media (max-width: 760px) {
-            #math-coach-box {
-                width: auto;
+            #maya-head .maya-num {
+                font-size: clamp(1.8rem, 12vw, 3.2rem);
             }
         }
     </style>
@@ -119,13 +155,14 @@
 
     <main id="main-content">
         <div id="canvas-container">
-            <div id="math-coach-box">
-                <div class="coach-title" id="coach-title-slot"></div>
-                <div id="coach-content" class="coach-message">
-                    <div id="maya-formula"></div>
-                    <div id="maya-hint"></div>
-                </div>
+            <div id="maya-head" class="maya-card">
+                <div class="maya-cap" id="maya-cap"></div>
+                <div class="maya-num" id="maya-num"></div>
             </div>
+            <div id="maya-solution" class="maya-card">
+                <div id="maya-formula"></div>
+            </div>
+            <div id="maya-hint"></div>
             <canvas id="canvas"></canvas>
         </div>
     </main>
@@ -175,13 +212,6 @@
             subtitle: T('title', 'MAYA-ZAHLEN'),
         });
         CyberUI.init();
-
-        (function setCoachTitle() {
-            const el = document.getElementById('coach-title-slot');
-            if (el) el.textContent = T('coach_title', 'Maya-Rechenbrett');
-            const box = document.getElementById('math-coach-box');
-            if (box) box.classList.add('visible');
-        })();
 
         if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
             CyberLeftChrome.configure({ viewportOnlyZoom: true });
@@ -375,17 +405,45 @@
             const pad = 16;
             const n = places();
 
-            // the places start below the coach box - they run across the whole stage now
-            let top = 14;
-            const box = document.getElementById('math-coach-box');
-            if (box) top = Math.max(top, box.getBoundingClientRect().bottom - rect.top + 16);
-
-            const avail = H - top - pad;
-            if (avail < 200) return;
-
             // places and panel share one width, so their edges line up
             const blockW = Math.min(W - 2 * pad, n * 200 + (n - 1) * 14);
             const blockX = (W - blockW) / 2;
+
+            // the number, the sum and the hint sit above the board as HTML cards -
+            // measure them, then give the board what is left
+            const headEl = document.getElementById('maya-head');
+            const solEl = document.getElementById('maya-solution');
+            const hintEl = document.getElementById('maya-hint');
+            let top = 14;
+            if (headEl && solEl) {
+                for (const el of [headEl, solEl, hintEl]) {
+                    if (!el) continue;
+                    el.style.left = blockX + 'px';
+                    el.style.width = blockW + 'px';
+                }
+                // the branding sits in the top right corner of the stage - stay below it
+                let headTop = 14;
+                const brand = document.querySelector('.canvas-branding');
+                if (brand) {
+                    const b = brand.getBoundingClientRect();
+                    if (b.width && b.left - rect.left < blockX + blockW) {
+                        headTop = Math.max(headTop, b.bottom - rect.top + 12);
+                    }
+                }
+                headEl.style.top = headTop + 'px';
+                const hH = headEl.offsetHeight;
+                solEl.style.top = (headTop + hH + 10) + 'px';
+                const sH = solEl.offsetHeight;
+                let below = headTop + hH + 10 + sH;
+                if (hintEl) {
+                    hintEl.style.top = (below + 10) + 'px';
+                    below += hintEl.textContent ? hintEl.offsetHeight + 10 : 0;
+                }
+                top = below + 18;
+            }
+
+            const avail = H - top - pad;
+            if (avail < 200) return;
 
             // the panel: ten digits in a row where there is width for it, five where there is not
             const cols = blockW >= 720 ? 10 : 5;
@@ -400,25 +458,11 @@
             const cardH = Math.max(90, cardsH - 48);
             const rowX = blockX;
 
-            // one big number stands over everything: the task while one runs, otherwise what
-            // lies on the board. Places, sums and panel travel as one block underneath.
-            const headSize = Math.min(104, blockW * 0.13, avail * 0.18);
-            const headH = headSize * 1.12 + 22;
             const labelH = 24, productH = 30, captionH = 28;
-            const blockH = headH + labelH + cardH + productH + captionH + rows * cellH;
+            const blockH = labelH + cardH + productH + captionH + rows * cellH;
             const startY = top + Math.max(0, (avail - blockH) / 2);
-            const cardY = startY + headH + labelH;
+            const cardY = startY + labelH;
             const panelY = cardY + cardH + productH + captionH;
-
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
-            ctx.font = "400 12px 'Outfit', sans-serif";
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-            ctx.fillText(task ? (task.done ? T('task_done', 'Richtig gelegt.') : T('task_lay', 'Lege'))
-                : T('head', 'Dezimalwert'), blockX + blockW / 2, startY);
-            ctx.font = "700 " + Math.round(headSize) + "px 'Orbitron', sans-serif";
-            ctx.fillStyle = (task && task.done) ? COL.shell : COL.glyph;
-            ctx.fillText(de(task ? task.target : value()), blockX + blockW / 2, startY + 18);
 
             for (let col = 0; col < n; col++) {
                 const place = n - 1 - col;              // the highest place stands on the left
@@ -621,7 +665,20 @@
             }
         }
 
+        function updateHead() {
+            const cap = document.getElementById('maya-cap');
+            const num = document.getElementById('maya-num');
+            const head = document.getElementById('maya-head');
+            if (!cap || !num || !head) return;
+            cap.textContent = task
+                ? (task.done ? T('task_done', 'Richtig gelegt') : T('task_lay', 'Lege'))
+                : T('head', 'Dezimalwert');
+            num.textContent = de(task ? task.target : value());
+            head.classList.toggle('solved', !!(task && task.done));
+        }
+
         function changed() {
+            updateHead();
             if (window.CyberClock) {
                 CyberClock.digits('maya-value', value(), {
                     thousands: true,
@@ -752,8 +809,6 @@
         // measure the stage again whenever that happens instead of trusting a timeout.
         if (window.ResizeObserver) {
             new ResizeObserver(() => init()).observe(container);
-            const coach = document.getElementById('math-coach-box');
-            if (coach) new ResizeObserver(() => draw()).observe(coach);
         }
 
         buildUI();
