@@ -220,22 +220,23 @@ def training(path, W=1420, H=650):
 
 
 # ------------------------------------------------------------------ Modell ---
-def token(path, W=1420, H=480):
-    """A sentence cut into tokens - the pieces a model actually computes with."""
+def token(path, W=1420, H=520):
+    """A sentence cut into tokens - the pieces a model actually computes with.
+    The .pptx twin of ai_svg.token(); the web deck draws this figure as SVG."""
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
     f_tok = font("Raleway-Medium.ttf", 34)
     f_small = font("Raleway-Regular.ttf", 23)
     f_num = font("Raleway-Regular.ttf", 21)
 
-    # The real split and vocabulary ids of GPT-4o's tokenizer (o200k_base), checked
-    # 2026-09-23 with OpenAI's public vocabulary file - not an invented example.
-    # GPT-4 (cl100k_base) would even make 8: Das|Kont|ext|fen|ster|ist|voll|.
-    toks = [("Das", NAVY), ("Kontext", ORA), ("fen", ORA), ("ster", ORA),
+    # The real split and vocabulary ids of GPT-4's tokenizer (cl100k_base), checked 2026-09-23
+    # against OpenAI's public vocabulary file - not an invented example. GPT-4o keeps the whole
+    # "Kontext" and makes 7: Das|Kontext|fen|ster|ist|voll|.
+    toks = [("Das", NAVY), ("Kont", ORA), ("ext", ORA), ("fen", ORA), ("ster", ORA),
             ("ist", NAVY), ("voll", NAVY), (".", MUTED)]
-    ids = ["16110", "198401", "12353", "3968", "2496", "29024", "13"]
+    ids = ["33717", "37966", "428", "31453", "3751", "6127", "57454", "13"]
 
-    pad, gap, y = 26, 14, 220
+    pad, gap, y = 26, 14, 210
     widths = []
     for t, _ in toks:
         l, _, r, _ = d.textbbox((0, 0), t, font=f_tok)
@@ -248,11 +249,13 @@ def token(path, W=1420, H=480):
         centered(d, i, x + w / 2, y + 122, f_num, MUTED)
         x += w + gap
 
-    centered(d, "„Das Kontextfenster ist voll.“", W / 2, 140, f_small, MUTED)
-    centered(d, "7 Token bei GPT-4o — ein langes Wort zerfällt, jedes Stück wird zu einer Zahl.",
-             W / 2, 380, font("Raleway-Medium.ttf", 27), BODY)
+    centered(d, "„Das Kontextfenster ist voll.“", W / 2, 130, f_small, MUTED)
+    centered(d, "8 Token bei GPT-4 — ein langes Wort zerfällt, jedes Stück wird zu einer Zahl.",
+             W / 2, 372, font("Raleway-Medium.ttf", 27), BODY)
     centered(d, "Genau diese Stücke werden gezählt, bezahlt und begrenzt.",
-             W / 2, 430, f_small, MUTED)
+             W / 2, 424, f_small, MUTED)
+    centered(d, "Aus 26 Buchstaben gäbe es 26 + 26² + 26³ + 26⁴ = 475 254 Stücke mit bis zu "
+                "vier Zeichen — GPT-4 kennt 100.256.", W / 2, 476, f_small, BODY)
     return save(img, path)
 
 

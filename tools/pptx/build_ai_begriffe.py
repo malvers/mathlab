@@ -47,7 +47,7 @@ d.bullets("Was das Neuron tut", [
     ("Ein einzelnes Neuron kann fast nichts. Viele zusammen sehr viel", 0),
 ])
 
-d.picture("Viele Neuronen, in Schichten", os.path.join(IMG, "aibegriffe-netz.png"), width=535)
+d.figure("Viele Neuronen, in Schichten", *ai_svg.netz(), png=os.path.join(IMG, "aibegriffe-netz.png"), width=535)
 
 d.bullets("Warum Schichten?", [
     ("Die **Eingabeschicht** nimmt die Rohdaten, die **Ausgabeschicht** gibt das Ergebnis", 0),
@@ -57,7 +57,7 @@ d.bullets("Warum Schichten?", [
     ("Jede Verbindung ist ein Gewicht — bei großen Modellen **Milliarden**", 0),
 ])
 
-d.picture("So lernt ein Netz", os.path.join(IMG, "aibegriffe-training.png"), width=816)
+d.figure("So lernt ein Netz", *ai_svg.training(), png=os.path.join(IMG, "aibegriffe-training.png"), width=816)
 
 d.bullets("Training in einem Satz", [
     ("Das Netz **rät**, vergleicht mit der Lösung und misst den **Fehler**", 0),
@@ -93,7 +93,11 @@ d.bullets("Token — die Währung der Modelle", [
     ("Vor der Rechnung steht immer die **Zerlegung** — der Tokenizer", 0),
 ])
 
-d.picture("Ein Satz, in Token zerlegt", os.path.join(IMG, "aibegriffe-token.png"), width=816)
+d.figure("Ein Satz, in Token zerlegt", *ai_svg.token(), png=os.path.join(IMG, "aibegriffe-token.png"), width=816)
+
+# the same question from the other side: how big is German? (no PNG twin yet - the .pptx
+# export shows this slide with its title only)
+d.figure("Wie viele Wörter hat Deutsch?", *ai_svg.wortschatz(), width=816)
 
 d.bullets("Das Kontextfenster", [
     ("**Kontextfenster** = wie viel Text das Modell **gleichzeitig** sehen kann", 0),
@@ -103,7 +107,7 @@ d.bullets("Das Kontextfenster", [
     ("Es ist ein **Arbeitsspeicher**, keine Festplatte", 0),
 ])
 
-d.picture("Was im Fenster liegt", os.path.join(IMG, "aibegriffe-fenster.png"), width=523)
+d.figure("Was im Fenster liegt", *ai_svg.fenster(), png=os.path.join(IMG, "aibegriffe-fenster.png"), width=523)
 
 d.table_top("Wie groß Fenster geworden sind", [
     ["Jahr", "typisches Fenster", "entspricht etwa"],
@@ -183,7 +187,7 @@ d.bullets("RAG — nachschlagen statt raten", [
     ("Technisch: Texte werden zu **Embeddings**, gesucht wird nach **Ähnlichkeit**", 0),
 ])
 
-d.picture("RAG von vorn bis hinten", os.path.join(IMG, "aibegriffe-rag.png"), width=816)
+d.figure("RAG von vorn bis hinten", *ai_svg.rag(), png=os.path.join(IMG, "aibegriffe-rag.png"), width=816)
 
 # ------------------------------------------------------------- Kapitel 04 ---
 d.chapter(4, "Agenten", "Wenn das Modell handeln darf")
@@ -204,7 +208,7 @@ d.bullets("Agent", [
     ("„Finde den Fehler und behebe ihn“ statt „Zeig mir Zeile 40“", 0),
 ])
 
-d.picture("Die Schleife, die einen Agenten ausmacht", os.path.join(IMG, "aibegriffe-agent.png"), width=570)
+d.figure("Die Schleife, die einen Agenten ausmacht", *ai_svg.agenten_schleife(), png=os.path.join(IMG, "aibegriffe-agent.png"), width=570)
 
 d.table_top("agentisch — vier Stufen", [
     ["Stufe", "wer entscheidet den nächsten Schritt", "Beispiel"],
