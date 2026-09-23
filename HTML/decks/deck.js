@@ -1654,7 +1654,8 @@ const link = (function () {
     else if (m.t === 'go') apply(m);
     else if (m.t === 'ev') mirror.replay(m);
     else if (m.t === 'laser') laser.show(m);
-    else if (m.t === 'laser-toggle') laser.toggle();
+    else if (m.t === 'laser-on') laser.mirrorOn(m.on);   // L was pressed over there: the same state here
+    else if (m.t === 'laser-toggle') laser.toggle();     // a presenter window from before 23.09.2026
   }
   if (chan) chan.onmessage = function (e) { receive(e.data, null); };
   addEventListener('message', function (e) {
