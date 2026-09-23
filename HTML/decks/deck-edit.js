@@ -365,6 +365,9 @@
   function state() {
     const open = !!cur && !busy;
     tools.querySelectorAll('button').forEach(function (b) {
+      if (b.dataset.own) return;                     // not ours: it says itself when it is on (deck-label.js's type size).
+      // Two owners of the same disabled attribute plus a MutationObserver on it = an endless round trip that blocks the
+      // page (Doc, 23.09.2026: "die local site lädt nicht") - every button here belongs to exactly one of them.
       b.disabled = !open;
       const c = b.dataset.cmd;
       let act = false;

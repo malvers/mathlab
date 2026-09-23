@@ -5,6 +5,7 @@
 //   drag a side handle                    -> changes the width - the text wraps
 //   a plain click                         -> opens the text, as before (deck-edit.js)
 //   arrow keys (Shift: 10 px)             -> nudges the chosen label while no text is open
+//   small A / big A in the edit bar      -> the type of the chosen label, 1 px at a time (Doc: "Fontsize wäre toll!")
 // The file side lives in tools/pptx/deck_label.py; it goes live with the green cloud like every text change.
 (function () {
   const E = window.DeckEdit;
@@ -13,6 +14,7 @@
   const HANDLES = ['nw', 'ne', 'se', 'sw', 'e', 'w'];  // no top or bottom: the height is the text's own
   const SAVED = new WeakMap();                         // label -> its style as the file holds it
   let sel = null, drag = null, queue = Promise.resolve(), nudgeT = 0, swallow = 0;   // swallow: when a drag ended
+  let onSelect = function () { };                   // the edit bar's size readout follows the choice (set below)
 
   const css = document.createElement('style');
   css.textContent = [
@@ -59,8 +61,8 @@
     box.style.cssText = 'left:' + sel.offsetLeft + 'px;top:' + sel.offsetTop + 'px;width:' + sel.offsetWidth
       + 'px;height:' + sel.offsetHeight + 'px;--k:' + scale();
   }
-  function select(el) { sel = el; frame(); }
-  function unselect() { sel = null; box.remove(); }
+  function select(el) { sel = el; frame(); onSelect(); }
+  function unselect() { sel = null; box.remove(); onSelect(); }
 
   // the overview keeps copies of the slides - they follow the file too
   function tileLabel(el) {
@@ -160,6 +162,59 @@
     clearTimeout(nudgeT);
     nudgeT = setTimeout(function () { save(el); }, 400);   // a row of presses is one write
   }, true);
+
+  // Type size in the edit bar (Doc, 23.09.2026: "Fontsize wäre toll!"): a small A and a big A act on the chosen label -
+  // the one with the frame, or the one whose text is open - in 1 px steps; the number between them says what it is
+  const bar = document.getElementById('ed-bar');
+  if (bar) {
+    const sep = document.createElement('span'); sep.className = 'ed-sep';
+    const num = document.createElement('span'); num.className = 'ed-size'; num.title = 'Schriftgröße der Beschriftung in px';
+    const mk = function (text, size, title, d) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.title = title; b.setAttribute('aria-label', title);
+      b.dataset.own = 'label';                       // showSize() below owns its state - deck-edit.js's bar leaves it alone
+      b.innerHTML = '<span style="font-size:' + size + 'px;font-weight:600">' + text + '</span>';
+      b.addEventListener('mousedown', function (e) { e.preventDefault(); });   // the caret stays in an open text
+      b.addEventListener('click', function (e) { e.stopPropagation(); bump(d); });
+      return b;
+    };
+    const minus = mk('A', 11, 'Beschriftung kleiner (1 px)', -1), plus = mk('A', 17, 'Beschriftung größer (1 px)', 1);
+    const style = document.createElement('style');
+    style.textContent = '#ed-bar .ed-size{min-width:34px;text-align:center;font:600 13px Raleway,system-ui,sans-serif;'
+      + 'color:#eaf1ff}';                       // the bar's own colour - inherit gave it the body's dark blue on near black (Doc, 23.09.2026: "kaum lesbar")
+    document.head.appendChild(style);
+    bar.appendChild(sep); bar.appendChild(minus); bar.appendChild(num); bar.appendChild(plus);
+    const target = () => sel || document.querySelector('#deck .slide.on .pic p.fl.ed-on');
+    const sizeOf = el => parseFloat(el.style.fontSize) || parseFloat(getComputedStyle(el).fontSize) || 12.5;
+    function showSize() {
+      const el = E.on() ? target() : null;
+      // Write only what really changes: setting an attribute to the value it already has STILL reports a change to a
+      // MutationObserver (DOM standard), and the observer below would call this again - a round trip that never ends
+      // and blocks the whole page (Doc, 23.09.2026: "die local site lädt nicht").
+      const off = !el, txt = el ? String(Math.round(sizeOf(el) * 10) / 10).replace('.', ',') : '–';
+      if (minus.disabled !== off) minus.disabled = off;
+      if (plus.disabled !== off) plus.disabled = off;
+      if (num.textContent !== txt) num.textContent = txt;
+    }
+    function bump(d) {
+      const el = target();
+      if (!el) { E.msg('Erst eine Beschriftung anklicken'); return; }
+      const g = geo(el);
+      place(el, { x: g.x, y: g.y, w: g.w, s: Math.max(4, Math.min(200, sizeOf(el) + d)) });
+      if (el !== sel) select(el);
+      showSize();
+      clearTimeout(nudgeT);
+      nudgeT = setTimeout(function () { save(el); }, 400);   // a row of presses is one write
+    }
+    onSelect = showSize;                               // a label chosen or let go: the number follows
+    // deck-edit.js enables and disables every button of the bar as a text opens or closes - take that moment to
+    // show the chosen label's size again (setting an unchanged attribute fires nothing: no loop)
+    new MutationObserver(showSize).observe(bar, { subtree: true, attributes: true, attributeFilter: ['disabled'] });
+    addEventListener('keyup', showSize);
+    document.addEventListener('deck-edit-off', showSize);
+    painted.push(showSize);
+    showSize();
+  }
 
   document.addEventListener('deck-edit-off', unselect);
   addEventListener('resize', frame);
