@@ -9,6 +9,12 @@ deck_edit.handle() forwards every /__deck/image path here, after its Host/Origin
          op "move": {id, old, x, y, w, h?, r?}  only while the picture still has the style the page saw (old);
                                                 h = stretched height, r = rotation in degrees
          op "del":  {id, old}
+         op "free": {src, n, x, y, w, h?, del?}  a picture the generator placed (in a .pic, .below or .chap-pic box, or
+                                                by hand with left/top) becomes a free-pic where it is shown - from then
+                                                on it moves like any other (Doc, 23.09.2026: "verschieben etc ... IMMER!").
+                                                n counts the slide's not-yet-free pictures with that src (mostly 0).
+                                                del: it is removed instead of freed. A box that held only this picture
+                                                goes with it.
 
 A picture is one tag, always written the same way, with inline styles only (like the live frames) - deck.css needs no
 rule and docalvers.de shows it as it is:
@@ -32,6 +38,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 MAX_BYTES = 5 * 1024 * 1024      # Doc: nothing big in git, above 5 MB ask him - the page downscales long before this
 EXT = {"image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "image/gif": "gif", "image/svg+xml": "svg"}
 PIC = re.compile(r'<img class="free-pic" data-pic="([0-9a-f]{8})" src="([^"]*)" alt="" style="([^"]*)">')
+IMG = re.compile(r'<img\b[^>]*>')
+IMG_SRC = re.compile(r'\ssrc="([^"]*)"')
+# a generator box that holds nothing but the picture: it leaves with it (an empty .pic/.below is invisible, an empty
+# .chap-pic would stay as a bare card)
+BOX_OPEN = re.compile(r'<(div|figure) class="(?:pic|below|chap-pic)(?: [a-z-]+)*">\s*$')
+BOX_CLOSE = re.compile(r'\s*</(div|figure)>')
 SRC = re.compile(r"img/[a-z0-9._-]+\.(?:png|jpg|webp|gif|svg)")
 # an SVG in an <img> runs no script, but opened on its own on docalvers.de it would
 SVG_ACTIVE = re.compile(rb"<script|\son[a-z]+\s*=|javascript:|<foreignObject", re.I)
@@ -115,9 +127,9 @@ def pic(q):
     e = _edit()
     gen = e._gen()
     deck, slide, op = q["deck"], int(q["slide"]), q["op"]
-    if op not in ("add", "move", "del"):
+    if op not in ("add", "move", "del", "free"):
         return 400, {"error": "unknown op"}
-    style = _style(q) if op in ("add", "move") else None
+    style = _style(q) if op in ("add", "move") or (op == "free" and not q.get("del")) else None
     with e._lock:
         page = e._read(deck)
         bounds = e.elements(page, gen)[1]
@@ -138,6 +150,30 @@ def pic(q):
             foot = body.rfind('<p class="foot">', 0, end)   # under the footer line and page number, like all content
             at = foot if foot >= 0 else end
             body = body[:at] + _tag(pid, src, style) + body[at:]
+        elif op == "free":
+            src = q["src"]
+            fixed = [m for m in IMG.finditer(body)
+                     if not m.group(0).startswith('<img class="free-pic"')
+                     and (IMG_SRC.search(m.group(0)) or [None, None])[1] == src]
+            n = int(q.get("n") or 0)
+            if not 0 <= n < len(fixed):
+                return 409, {"error": "Dieses Bild gibt es in der Datei nicht (mehr) – bitte neu laden."}
+            m = fixed[n]
+            s, t = m.start(), m.end()
+            box = BOX_OPEN.search(body, 0, s)
+            close = BOX_CLOSE.match(body, t)
+            if box and close and box.group(1) == close.group(1):
+                s, t = box.start(), close.end()
+            body = body[:s] + body[t:]
+            pid = None
+            if style:
+                pid = secrets.token_hex(4)
+                while 'data-pic="%s"' % pid in page:
+                    pid = secrets.token_hex(4)
+                end = body.rfind("</section>")
+                foot = body.rfind('<p class="foot">', 0, end)
+                at = foot if foot >= 0 else end
+                body = body[:at] + _tag(pid, src, style) + body[at:]
         else:
             pid = q["id"]
             m = next((m for m in PIC.finditer(body) if m.group(1) == pid), None)
@@ -147,7 +183,8 @@ def pic(q):
                 return 409, {"error": "Das Bild wurde inzwischen verändert – bitte neu laden."}
             new = _tag(pid, m.group(2), style) if op == "move" else ""
             body = body[:m.start()] + new + body[m.end():]
-        what = {"add": "Bild eingefügt", "move": "Bild verschoben", "del": "Bild entfernt"}[op]   # "Rückgängig: ..."
+        what = {"add": "Bild eingefügt", "move": "Bild verschoben", "del": "Bild entfernt",
+                "free": "Bild entfernt" if style is None else "Bild freigestellt"}[op]   # "Rückgängig: ..."
         e._write(deck, page[:a] + body + page[b:], gen, what=what)
     return 200, {"id": pid, "style": style, "mtime": e._mtime(deck), "pending": e.pending(deck)}
 

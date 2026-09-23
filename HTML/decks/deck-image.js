@@ -3,6 +3,8 @@
 //   drop a picture file onto the slide, or paste one (Cmd-V)  -> it lands there and is written into the deck file
 //   drag a picture                                            -> moves it (snaps to margins and middle; Shift: straight
 //                                                                only, Alt: no snapping)
+//   touch a picture the generator placed                      -> it becomes a free picture right where it is, then as above
+//                                                                (Doc, 23.09.2026: "verschieben etc ... IMMER!")
 //   drag a corner / a side handle                             -> resizes with the proportions / stretches one way
 //   drag the knob above it                                    -> rotates (snaps to 0/90/180/270; Shift: 15° steps)
 //   Backspace / Delete, arrow keys (Shift: 10 px)             -> removes, nudges
@@ -17,12 +19,13 @@
   const TYPES = /^image\/(png|jpeg|webp|gif|svg\+xml)$/;
   const HANDLES = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
   const SAVED = new WeakMap();                         // picture -> its style as the file holds it
+  const ORIG = new WeakMap();                          // generator picture set free on the page, not yet in the file -> {src, n}
   let sel = null, drag = null, queue = Promise.resolve(), nudgeT = 0;
 
   const css = document.createElement('style');
   css.textContent = [
-    'html.deck-edit .slide .free-pic{cursor:move;-webkit-user-drag:none;user-select:none}',
-    'html.deck-edit .slide .free-pic:hover{outline:1px dashed rgba(245,194,66,.75)}',
+    'html.deck-edit .slide img:not(.greet-pic){cursor:move;-webkit-user-drag:none;user-select:none}',
+    'html.deck-edit .slide img:not(.greet-pic):hover{outline:1px dashed rgba(245,194,66,.75)}',
     '#pic-box{position:absolute;z-index:50;pointer-events:none;outline:calc(2px / var(--k,1)) solid rgb(245,194,66)}',
     '#pic-box i,#pic-box b{position:absolute;width:calc(12px / var(--k,1));height:calc(12px / var(--k,1));',
     '  transform:translate(-50%,-50%);background:#fff;border:calc(2px / var(--k,1)) solid rgb(245,194,66);',
@@ -71,6 +74,36 @@
     if (img === sel) frame();
   }
 
+  // the drawn picture inside its element, in slide px: in a .pic/.below/.chap-pic box it is object-fit:contain, so a
+  // box wider or taller than the picture has margins that are not picture
+  function shown(img) {
+    const d = deckEl().getBoundingClientRect(), k = d.width / W, r = img.getBoundingClientRect();
+    let x = (r.left - d.left) / k, y = (r.top - d.top) / k, w = r.width / k, h = r.height / k;
+    const nw = img.naturalWidth, nh = img.naturalHeight;
+    if (nw && nh && getComputedStyle(img).objectFit === 'contain') {
+      const s = Math.min(w / nw, h / nh), cw = nw * s, ch = nh * s;
+      x += (w - cw) / 2; y += (h - ch) / 2; w = cw; h = ch;
+    }
+    // the height is its own only where the generator squeezed the picture; otherwise the width carries it
+    return { x: x, y: y, w: w, h: h, r: 0, fixed: !(nw && nh) || Math.abs(h - w * nh / nw) > 0.5 };
+  }
+  const emptyBox = el => el.matches('.pic, .below, .chap-pic') && !el.children.length && !el.textContent.trim();
+  // A picture the generator placed (a .pic, a .below, a chapter picture, Kahneman beside his bullets) becomes a free
+  // picture on the first touch, right where it is - on the page now, in the file with its first change. The box that
+  // held only this picture goes with it; a chapter picture loses its card. Solita's greeting picture stays as it is.
+  function free(img) {
+    const slide = img.closest('.slide'), src = img.getAttribute('src'), box = img.parentElement;
+    const n = [...slide.querySelectorAll('img:not(.free-pic)')].filter(function (i) { return i.getAttribute('src') === src; }).indexOf(img);
+    const g = shown(img);
+    ORIG.set(img, { src: src, n: n });
+    img.className = 'free-pic';
+    img.setAttribute('style', 'position:absolute;left:' + round(g.x) + 'px;top:' + round(g.y) + 'px;width:' + round(g.w) + 'px'
+      + (g.fixed ? ';height:' + round(g.h) + 'px' : ''));
+    slide.insertBefore(img, slide.querySelector(':scope > p.foot'));
+    if (emptyBox(box)) box.remove();
+    E.msg('Bild ist frei – ziehen verschiebt, Ecken und Seiten ändern die Größe, der Knopf oben dreht');
+  }
+
   function frame() {
     if (!sel) return;
     sel.after(box);                                    // same slide, same coordinates, right above the picture
@@ -90,6 +123,15 @@
     const t = tileOf(img);
     return t && t.querySelector('.free-pic[data-pic="' + img.dataset.pic + '"]');
   }
+  function freeTile(img, o, keep) {                    // the overview copy of a freed picture follows: freed too, or gone
+    const t = tileOf(img);
+    const c = t && [...t.querySelectorAll('img:not(.free-pic)')].filter(function (i) { return i.getAttribute('src') === o.src; })[o.n];
+    if (!c) return;
+    const box = c.parentElement;
+    if (keep) t.insertBefore(img.cloneNode(), t.querySelector(':scope > p.foot'));
+    c.remove();
+    if (emptyBox(box)) box.remove();
+  }
 
   function post(url, body, type) {
     return fetch(url, { method: 'POST', headers: { 'Content-Type': type }, body: body })
@@ -105,8 +147,16 @@
   }
 
   function save(img) {
-    const old = saved(img), g = geo(img);
-    return send({ slide: slides.indexOf(img.closest('.slide')), op: 'move', id: img.dataset.pic, old: old,
+    const old = saved(img), g = geo(img), i = slides.indexOf(img.closest('.slide')), o = ORIG.get(img);
+    if (o) {                                           // the first change of a generator picture: it enters the file free
+      return send({ slide: i, op: 'free', src: o.src, n: o.n, x: g.x, y: g.y, w: g.w, h: g.fixed ? g.h : null, r: g.r || null })
+        .then(function (j) {
+          ORIG.delete(img); img.dataset.pic = j.id; SAVED.set(img, j.style);
+          freeTile(img, o, true);
+        })
+        .catch(function (err) { E.msg('Bild nicht gespeichert: ' + why(err)); });
+    }
+    return send({ slide: i, op: 'move', id: img.dataset.pic, old: old,
                   x: g.x, y: g.y, w: g.w, h: g.fixed ? g.h : null, r: g.r || null })
       .then(function (j) {
         SAVED.set(img, j.style);
@@ -122,10 +172,11 @@
 
   function remove(img) {
     unselect();
-    send({ slide: slides.indexOf(img.closest('.slide')), op: 'del', id: img.dataset.pic, old: saved(img) })
+    const i = slides.indexOf(img.closest('.slide')), o = ORIG.get(img);
+    send(o ? { slide: i, op: 'free', src: o.src, n: o.n, del: true } : { slide: i, op: 'del', id: img.dataset.pic, old: saved(img) })
       .then(function () {
-        const c = tilePic(img);
-        if (c) c.remove();
+        if (o) freeTile(img, o, false);
+        else { const c = tilePic(img); if (c) c.remove(); }
         img.remove();
         E.msg('Bild entfernt');
       })
@@ -229,12 +280,13 @@
   addEventListener('pointerdown', function (e) {
     if (!E.on() || e.button !== 0 || !e.target.closest) return;
     const handle = e.target.closest('#pic-box [data-c]');
-    const img = handle ? sel : e.target.closest('.slide.on .free-pic');
+    const img = handle ? sel : e.target.closest('#deck .slide.on img:not(.greet-pic)');
     if (!img) {
       if (sel && e.target.closest('#deck')) unselect();
       return;
     }
     e.preventDefault(); e.stopPropagation();          // no native picture drag, no text selection
+    if (!img.classList.contains('free-pic')) free(img);
     if (img !== sel) select(img);
     const g = geo(img);
     drag = { c: handle ? handle.dataset.c : null, from: at(e), g: g, moved: false,
