@@ -250,27 +250,49 @@
             if (stroke) { ctx.strokeStyle = stroke; ctx.stroke(); }
         }
 
-        // The zero: a stylised shell — an oval with a flat lower rim and three ribs,
-        // the same shape the decks draw (tools/pptx/maya_svg.py).
+        // The zero: a scallop shell — ribs fanning out of the hinge, a scalloped rim.
+        // Drawn from the hinge point at the bottom, so it scales with the cell.
         function drawShell(cx, cy, cw, ch) {
-            const rx = Math.max(12, Math.min(cw * 0.17, 46));
-            const ry = Math.max(8, Math.min(rx / 1.55, ch * 0.2));
+            const w = Math.max(38, Math.min(cw * 0.42, 118));
+            const h = Math.min(w * 0.64, ch * 0.62);
+            const lw = Math.max(1.5, Math.min(3.2, h * 0.05));
+            const R = h * 0.92;
+            const hx = cx, hy = cy + h * 0.44;          // the hinge
+            const spread = 0.44;                        // half opening, in units of PI
+            const a0 = -Math.PI / 2 - Math.PI * spread;
+            const a1 = -Math.PI / 2 + Math.PI * spread;
+            const kx = (w / 2) / (R * Math.sin(Math.PI * spread));
+            const P = (a, r) => [hx + kx * R * r * Math.cos(a), hy + R * r * Math.sin(a)];
+            const lobes = 6;
+
             ctx.save();
             ctx.strokeStyle = COL.shell;
-            ctx.lineWidth = Math.max(2, ry * 0.11);
+            ctx.lineWidth = lw;
+            ctx.lineJoin = 'round';
             ctx.lineCap = 'round';
             ctx.beginPath();
-            ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+            const first = P(a0, 0.9);
+            ctx.moveTo(first[0], first[1]);
+            for (let i = 0; i < lobes; i++) {
+                const m = a0 + (a1 - a0) * (i + 0.5) / lobes;
+                const e = a0 + (a1 - a0) * (i + 1) / lobes;
+                const c = P(m, 1.10), q = P(e, 0.9);
+                ctx.quadraticCurveTo(c[0], c[1], q[0], q[1]);
+            }
+            ctx.quadraticCurveTo(hx + w * 0.10, hy + h * 0.10, hx, hy);
+            ctx.quadraticCurveTo(hx - w * 0.10, hy + h * 0.10, first[0], first[1]);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(121, 158, 49, 0.13)';
+            ctx.fill();
             ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(cx - rx * 0.86, cy + ry * 0.24);
-            ctx.quadraticCurveTo(cx, cy + ry * 1.5, cx + rx * 0.86, cy + ry * 0.24);
-            ctx.stroke();
-            ctx.lineWidth = Math.max(1.2, ry * 0.075);
-            for (const f of [-0.42, 0, 0.42]) {
+
+            ctx.lineWidth = Math.max(1, lw * 0.6);
+            for (let i = 1; i < lobes; i++) {
+                const a = a0 + (a1 - a0) * i / lobes;
+                const s = P(a, 0.16), e = P(a, 0.86);
                 ctx.beginPath();
-                ctx.moveTo(cx + rx * f, cy - ry * 0.52);
-                ctx.lineTo(cx + rx * f * 1.25, cy + ry * 0.36);
+                ctx.moveTo(s[0], s[1]);
+                ctx.lineTo(e[0], e[1]);
                 ctx.stroke();
             }
             ctx.restore();
