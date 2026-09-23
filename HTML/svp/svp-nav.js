@@ -44,6 +44,7 @@
            Menue stand die Schulform genauso, das war verwechselbar (Doc, 02.09.2026). */
         ['informatik/fos11.html', 'FO 11', 'b-grey', 'Informatik Fachoberschule Klasse 11 (FO)'],
         ['informatik/fos12.html', 'FO 12', 'b-grey', 'Informatik Fachoberschule Klasse 12 (FO)'],
+        ['mathe/mathefos12.html', 'FO MA 12', 'b-grey', 'Mathematik Fachoberschule Klasse 12 (FO)'],
         ['mathe/uebung.html', 'Üben', 'b-grey', 'Übung macht den Meister'],
         ['notes.html', 'Notizen', 'b-grey', 'Notizen'],
         ['konzepte.html', 'Konzepte', 'b-grey', 'Konzepte'],
@@ -88,6 +89,7 @@
         'informatik/inf13.html': 'b-green',
         'informatik/fos11.html': 'b-orange',
         'informatik/fos12.html': 'b-orange',
+        'mathe/mathefos12.html': 'b-cyan',
     };
 
     // These open in a new tab so the current plan stays put.
@@ -120,6 +122,7 @@
             ['Wirtschaft/Recht', ['wr/wr11.html']]
         ]],
         ['Fachoberschule', [
+            ['Mathematik', ['mathe/mathefos12.html']],
             ['Informatik', ['informatik/fos11.html', 'informatik/fos12.html']]
         ]],
         /* "Mehr" is not a Schulart — it stays at the far right, next to the gear */
