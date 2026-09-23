@@ -10,6 +10,15 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="morpheus/vendor/katex/katex.min.css">
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+    </script>
     <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
     <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
@@ -48,6 +57,34 @@
             box-sizing: border-box;
         }
 
+        /* the die out of the Würfelspiel - the same WebGL die, js/dice3d.js */
+        #maya-dice {
+            pointer-events: auto;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+
+        #die-stage {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+            cursor: grab;
+        }
+
+        #die-stage:active {
+            cursor: grabbing;
+        }
+
+        /* KaTeX_Main has to be in use once, or the browser never loads it for the die faces */
+        #font-probe {
+            position: absolute;
+            left: -999px;
+            font-family: KaTeX_Main, serif;
+        }
+
         #maya-head .maya-num {
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
@@ -56,8 +93,28 @@
             font-size: clamp(2.2rem, 7.5vw, 6rem);
         }
 
+        /* a rolled number rides in from the right */
+        #maya-head {
+            overflow: hidden;
+        }
+
+        @keyframes maya-from-right {
+            from { transform: translateX(45%); opacity: 0; }
+            to   { transform: translateX(0);   opacity: 1; }
+        }
+
+        #maya-head .maya-num .num-ch {
+            display: inline-block;
+        }
+
+        #maya-head .maya-num .num-ch.rolled-in {
+            animation: maya-from-right 0.38s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        /* solved: the same treatment, in our green */
         #maya-head.solved .maya-num {
-            color: rgb(121, 158, 49);
+            background-image: linear-gradient(180deg, #ffffff 0%, #e6f3cd 20%, #9ec44a 60%, #5c7a28 100%);
+            filter: drop-shadow(0 0 25px rgba(121, 158, 49, 0.5));
         }
 
 
@@ -127,7 +184,51 @@
         }
 
         @media (max-width: 760px) {
-            #maya-head .maya-num {
+            /* the die: a still cube in the lab's colours, it only turns when it is rolled */
+        #maya-dice {
+            pointer-events: auto;
+            cursor: pointer;
+            padding: 10px 18px;
+        }
+
+        .cube-stage {
+            perspective: 300px;
+            height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cube {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            transform-style: preserve-3d;
+            transform: rotateX(-24deg) rotateY(32deg);
+            transition: transform 0.15s linear;
+        }
+
+        .cube-face {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 19px;
+            color: rgb(238, 243, 250);
+        }
+
+        .cube-face:nth-child(1) { background: rgb(245, 194, 66); }
+        .cube-face:nth-child(2) { background: rgb(0, 210, 255); }
+        .cube-face:nth-child(3) { background: rgb(121, 158, 49); }
+        .cube-face:nth-child(4) { background: rgb(176, 36, 24); }
+        .cube-face:nth-child(5) { background: rgb(0, 210, 255); }
+        .cube-face:nth-child(6) { background: rgb(245, 194, 66); }
+
+        #maya-head .maya-num {
                 font-size: clamp(1.8rem, 12vw, 3.2rem);
             }
         }
@@ -152,8 +253,12 @@
 
     <main id="main-content">
         <div id="canvas-container">
+            <div id="maya-dice" class="maya-card" title="Würfeln: neue Aufgabe">
+                <div id="die-stage"></div>
+            </div>
+            <span id="font-probe">0123456789</span>
             <div id="maya-head" class="maya-card">
-                <div class="maya-num" id="maya-num"></div>
+                <div class="maya-num cyber-bignum-gold" id="maya-num"></div>
             </div>
             <div id="maya-solution" class="maya-card">
                 <div id="maya-formula"></div>
@@ -179,6 +284,7 @@
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/cyber-clock.js"></script>
+    <script src="js/cyber-trackball.js"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -246,8 +352,20 @@
             }
         };
 
+        // Settings survive a reload. Storage can be blocked or empty, so every touch is guarded
+        // and the lab works exactly the same when it gives nothing back.
+        const store = {
+            get(key, fallback) {
+                try { const v = localStorage.getItem('maya.' + key); return v === null ? fallback : v; }
+                catch (e) { return fallback; }
+            },
+            set(key, value) {
+                try { localStorage.setItem('maya.' + key, value); } catch (e) { }
+            }
+        };
+
         // C gives every place its own colour - ours plus the cyan of the lab
-        let colorMode = false;
+        let colorMode = store.get('colour', '0') === '1';
         const PLACE_COLORS = [
             'rgb(245, 194, 66)', 'rgb(0, 210, 255)', 'rgb(121, 158, 49)',
             'rgb(176, 36, 24)', 'rgb(0, 210, 255)'
@@ -255,7 +373,7 @@
         const placeColor = (place) =>
             (colorMode && place !== null && place !== undefined) ? PLACE_COLORS[place] : COL.glyph;
 
-        let sysKey = 'kalender';
+        let sysKey = store.get('system', 'kalender') === 'rein20' ? 'rein20' : 'kalender';
         let digits = [0, 0, 0, 0, 0];     // index 0 = ones, at the bottom of the board
         let task = null;                  // { target, done }
         let solvedCount = 0;
@@ -419,11 +537,12 @@
 
             // the number and the sum sit above the board as HTML cards -
             // measure them, then give the board what is left
+            const diceEl = document.getElementById('maya-dice');
             const headEl = document.getElementById('maya-head');
             const solEl = document.getElementById('maya-solution');
-            let top = 14, headTop = 14, hH = 0, sH = 0;
+            let top = 14, stackTopMin = 14, dH = 0, hH = 0, sH = 0;
             if (headEl && solEl) {
-                for (const el of [headEl, solEl]) {
+                for (const el of [diceEl, headEl, solEl]) {
                     if (!el) continue;
                     el.style.left = blockX + 'px';
                     el.style.width = blockW + 'px';
@@ -433,7 +552,7 @@
                 if (brand) {
                     const b = brand.getBoundingClientRect();
                     if (b.width && b.left - rect.left < blockX + blockW) {
-                        headTop = Math.max(headTop, b.bottom - rect.top + 12);
+                        stackTopMin = Math.max(stackTopMin, b.bottom - rect.top + 12);
                     }
                 }
                 solEl.querySelectorAll('.maya-term').forEach(el => {
@@ -446,11 +565,18 @@
                     const g = Number(el.dataset.gap);
                     el.style.left = ((colCenter(g) + colCenter(g + 1)) / 2 - blockX) + 'px';
                 });
-                headEl.style.top = headTop + 'px';
+                // the die's box is exactly as high as the number's, the die fills it
+                headEl.style.top = stackTopMin + 'px';
                 hH = headEl.offsetHeight;
-                solEl.style.top = (headTop + hH + 14) + 'px';
+                if (diceEl) {
+                    diceEl.style.height = hH + 'px';
+                    diceEl.style.top = stackTopMin + 'px';
+                    dH = hH + 14;
+                    headEl.style.top = (stackTopMin + dH) + 'px';
+                }
+                solEl.style.top = (stackTopMin + dH + hH + 14) + 'px';
                 sH = solEl.offsetHeight;
-                top = headTop + hH + 14 + sH + 14;
+                top = stackTopMin + dH + hH + 14 + sH + 14;
             }
 
             const avail = H - top - pad;
@@ -471,14 +597,18 @@
             const gapH = 22, captionH = 28;
             const blockH = cardH + gapH + rows * cellH + captionH;
 
-            // number, sum and board keep the same gap the places and the panel keep,
+            // die, number, sum and board keep the same gap the places and the panel keep,
             // and the whole stack stands centred on the stage
             const stackGap = gapH;
-            const stackH = hH + stackGap + sH + stackGap + blockH;
-            const stackTop = Math.max(headTop, Math.min((H - stackH) / 2, H - pad - stackH));
-            if (headEl) headEl.style.top = stackTop + 'px';
-            if (solEl) solEl.style.top = (stackTop + hH + stackGap) + 'px';
-            const cardY = stackTop + hH + stackGap + sH + stackGap;
+            const diceH = diceEl ? diceEl.offsetHeight : 0;
+            const stackH = (diceEl ? diceH + stackGap : 0) + hH + stackGap + sH + stackGap + blockH;
+            const stackTop = Math.max(stackTopMin, Math.min((H - stackH) / 2, H - pad - stackH));
+            let y = stackTop;
+            if (diceEl) { diceEl.style.top = y + 'px'; y += diceH + stackGap; }
+            if (headEl) headEl.style.top = y + 'px';
+            y += hH + stackGap;
+            if (solEl) solEl.style.top = y + 'px';
+            const cardY = y + sH + stackGap;
             const panelY = cardY + cardH + gapH;
 
             for (let col = 0; col < n; col++) {
@@ -675,12 +805,42 @@
             host.style.height = (h || 22) + 'px';
         }
 
-        function updateHead() {
+        // A rolled number does not arrive in one piece: the ones come first, then the tens,
+        // then the hundreds - each digit rides in from the right, a thousands dot with the
+        // digit on its left.
+        function updateHead(animate) {
             const num = document.getElementById('maya-num');
             const head = document.getElementById('maya-head');
             if (!num || !head) return;
-            num.textContent = de(task ? task.target : value());
             head.classList.toggle('solved', !!(task && task.done));
+
+            const text = de(task ? task.target : value());
+            if (!animate) {
+                if (num.dataset.text !== text || num.children.length === 0) {
+                    num.textContent = text;
+                    num.dataset.text = text;
+                }
+                return;
+            }
+            num.dataset.text = text;
+            num.innerHTML = '';
+            const cells = [...text].map(ch => {
+                const el = document.createElement('span');
+                el.className = 'num-ch';
+                el.textContent = ch;
+                el.style.visibility = 'hidden';
+                num.appendChild(el);
+                return el;
+            });
+            let wait = 0;
+            for (let i = cells.length - 1; i >= 0; i--) {
+                const el = cells[i];
+                setTimeout(() => {
+                    el.style.visibility = 'visible';
+                    el.classList.add('rolled-in');
+                }, wait);
+                if (/[0-9]/.test(el.textContent)) wait += 150;   // a separator comes along
+            }
         }
 
         function changed() {
@@ -710,11 +870,14 @@
             ]);
         }
 
-        function newTask() {
-            task = { target: 21 + Math.floor(Math.random() * 9979), done: false };
+        const rollNumber = () => 1000 + Math.floor(Math.random() * 9000);   // always four digits
+
+        function newTask(target) {
+            task = { target: target || rollNumber(), done: false };
             digits = [0, 0, 0, 0, 0];
             say(T('task_hint', 'Lege die Zahl - zieh die Ziffern aus dem Panel auf die Stellen.'), COL.glyph);
             changed();
+            updateHead(true);          // the task number counts itself in, ones first
         }
 
         // --------------------------------------------------------------- side panel ---
@@ -735,6 +898,7 @@
                 { value: 'rein20', label: T('sys_20', 'rein 20er: 1, 20, 400, 8000') }
             ], sysKey, (v) => {
                 sysKey = v;
+                store.set('system', v);
                 // the glyphs stay where they are - only what they are worth changes
                 say(T('sys_switch', 'Dieselben Zeichen, andere Stellenwerte: jetzt ') + de(value()) + '.', COL.glyph);
                 document.getElementById('maya-system-note').textContent = noteFor(v);
@@ -815,6 +979,7 @@
             if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
             if (e.key === 'c' || e.key === 'C') {
                 colorMode = !colorMode;
+                store.set('colour', colorMode ? '1' : '0');
                 dbg('colour mode ' + (colorMode ? 'on' : 'off'));
                 draw();
             }
@@ -829,12 +994,66 @@
         }
 
         buildUI();
+        updateStats();          // the stored system may not be the one the card was built with
         layout(5432);
         say(T('start', 'Eine Maya-Zahl steht schon da. Zieh Ziffern aus dem Panel darauf oder tippe in eine Stelle.'), COL.glyph);
         init();
         changed();
         document.fonts.ready.then(() => { init(); changed(); });
         dbg('lab ready');
+    </script>
+    <script type="module">
+        // The die of the Würfelspiel, not a copy of it: js/dice3d.js, the same module
+        // wuerfelspiel.html and wuerfel3d.html use. A tap rolls it and the roll sets a
+        // new task; dragging turns it (the shared SGI trackball).
+        import { DieView, refreshAllFaces } from './js/dice3d.js';
+
+        // Six faces, ten digits: at every roll the faces are given the next digits of the
+        // 0..9 round, while the die tumbles and nobody can read them. So the die shows any
+        // digit from 0 to 9, although it only ever carries six at a time.
+        const faces = [0, 1, 2, 3, 4, 5];
+        let nextDigit = 6;
+        // pastel faces, the light style of the Würfelspiel deck
+        const tints = ['#FBEBBF', '#E6ECF8', '#DDE8C6', '#F3D2CE', '#CFEAF6', '#F1E3F6'];
+        const ROLL_MS = 900;
+        const st = { idx: 0, fin: 0, t0: 0 };
+
+        function roll() {
+            st.fin = Math.floor(Math.random() * 6);
+            st.t0 = performance.now();
+            for (let i = 0; i < faces.length; i++) {
+                faces[i] = nextDigit % 10;
+                nextDigit++;
+            }
+            refreshAllFaces();
+            setTimeout(() => {
+                if (typeof newTask === 'function') newTask();
+            }, ROLL_MS);
+        }
+
+        function source() {
+            const now = performance.now();
+            const rolling = st.t0 > 0 && now - st.t0 < ROLL_MS;
+            if (!rolling && st.t0 > 0) { st.idx = st.fin; st.t0 = 0; }
+            return {
+                faces, tints,
+                idx: rolling ? st.fin : st.idx,
+                fin: st.fin,
+                rolling,
+                p: rolling ? (now - st.t0) / ROLL_MS : 1,
+                anim: st.t0
+            };
+        }
+
+        try {
+            const view = new DieView(document.getElementById('die-stage'), { style: 'light', fill: true, source, onTap: roll });
+            // the box is as high as the number's box, so a tighter lens is what makes the die big
+            view.camera.fov = 24;
+            view.camera.updateProjectionMatrix();
+        } catch (err) {
+            if (window.DebugWindow) DebugWindow.log('[maya] kein WebGL: ' + err.message);
+        }
+        document.fonts.load('300px KaTeX_Main').then(refreshAllFaces).catch(() => { });
     </script>
 </body>
 
