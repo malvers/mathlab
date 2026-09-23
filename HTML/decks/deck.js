@@ -227,9 +227,10 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
     if (i !== si) s.querySelectorAll('.labframe.full').forEach(fr => labFull(fr, false));
   }));
 
-  // "?" right of the triangles: all keys of the deck (Doc, 17.09.2026: "zeig darauf ein Help O - Overview etc.")
+  // "H" right of the triangles: all keys of the deck (Doc, 17.09.2026: "zeig darauf ein Help O - Overview etc.").
+  // It carries the key that opens it - the "?" belongs to Solita's line now (Doc, 23.09.2026: "links ? -> H").
   const helpB = document.createElement('button');
-  helpB.id = 'nav-help'; helpB.type = 'button'; helpB.textContent = '?';
+  helpB.id = 'nav-help'; helpB.type = 'button'; helpB.textContent = 'H';
   helpB.title = 'Tastenkürzel (H)'; helpB.setAttribute('aria-label', 'Hilfe: Tastenkürzel');
   const help = document.createElement('div');
   help.id = 'help'; help.hidden = true;
@@ -642,8 +643,11 @@ fromHash();
     + 'Hintergrundwissen zum Thema - Personen, Geschichte, Anwendungen, verwandte Begriffe - darfst du '
     + 'ergänzen, wenn du dir sicher bist; sonst sag kurz, dass du es nicht genau weißt. Kurze Nachfragen '
     + 'wie "und woher kam der?" beziehen sich auf das bisherige Gespräch. Sprich nie über deinen Kontext, '
-    + 'die Präsentation als Quelle oder darüber, ob eine Frage zum Thema passt - antworte einfach. Nur wenn '
-    + 'eine Frage gar nichts mit dem Unterricht zu tun hat, lenk in einem Satz freundlich zur Folie zurück. '
+    + 'die Präsentation als Quelle oder darüber, ob eine Frage zum Thema passt - antworte einfach. '
+    + 'JEDE Frage wissenschaftlicher Natur beantwortest du: Mathematik, Physik, Informatik, Chemie, Biologie, '
+    + 'Technik, Medizin, Geschichte der Wissenschaft - auch wenn sie mit dieser Folie und diesem Deck nichts zu '
+    + 'tun hat. Sätze wie "das hat nichts mit dieser Folie zu tun" oder "das gehört nicht zum Thema" sagst du nie. '
+    + 'Nur bei etwas, das mit Wissenschaft und Unterricht gar nichts zu tun hat, lenk in einem Satz freundlich zurück. '
     + 'Lob die Frage nicht ("Das ist eine gute Frage!" und Ähnliches) - nur wenn sie wirklich '
     + 'außergewöhnlich klug ist, darfst du das einmal kurz sagen. Keine Emojis, keine Aufzählungen.';
   // Doc, 16.09.2026: "war der Engländer?" after a question about Efron came back as "passt nicht zum
@@ -725,6 +729,9 @@ fromHash();
   const TTS_KEY = 'solita_tts';
   let ttsOn = true;
   try { ttsOn = localStorage.getItem(TTS_KEY) !== '0'; } catch (e) { }
+  // the send button while the password is asked - an icon, never a letter (Doc's rule for icons)
+  const TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" '
+    + 'stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17.5 19 7"/></svg>';
   const SPK_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
     + 'stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/>'
     + '<path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
@@ -917,14 +924,13 @@ fromHash();
     if (pwd()) post(AI_URL, { ping: true, pass: pwd() }).catch(function () { });
   }
   function askPassword() {          // no password yet: the same field asks for it once, then remembers
-    label.textContent = 'Passwort — wird auf diesem Gerät gemerkt';
-    label.hidden = false;
-    input.setAttribute('aria-label', 'Passwort');
+    label.hidden = true;                            // no note above the line - the field says it itself (Doc, 23.09.2026: "Erklärung weg")
+    input.setAttribute('aria-label', 'Passwort — wird auf diesem Gerät gemerkt');
     input.type = 'password'; input.value = ''; input.placeholder = 'Passwort';
     input.setAttribute('autocomplete', 'current-password');
-    send.textContent = 'OK';
+    send.innerHTML = TICK;                          // a tick, not the word OK, which sat badly in the small square ("OK ist nicht schön")
     micBtn.hidden = true; ttsBtn.hidden = true;
-    bare();
+    bare(); placeRow();                             // the row just lost the mic - the box above follows the field
   }
   function askQuestion() {
     // Chrome keeps its password manager on a field that once was type=password - it then drops its list of saved
@@ -940,10 +946,10 @@ fromHash();
     input.setAttribute('aria-label', 'Deine Frage an Solita');   // the field still has a name (Doc's label rule)
     input.type = 'text'; input.value = ''; input.placeholder = 'Frag Solita zur Folie oder Präsi';
     input.setAttribute('autocomplete', 'off');
-    send.textContent = '?';
+    send.textContent = '?';                         // her sign again, in place of the tick
     micBtn.hidden = !(window.SpeechRecognition || window.webkitSpeechRecognition);
     // the speaker stays hidden: it lives in the right-click menu (Doc, 23.09.2026: "den hier weg")
-    bare();
+    bare(); placeRow();                             // the mic is back and the field is narrower - measure again
   }
   // a line cut off at the edge of the box fades out (Doc, 23.09.2026) - only on the edge that really hides text
   function cutEdges() {
@@ -1120,12 +1126,49 @@ fromHash();
   // show() puts the answer on screen only once her voice has arrived (Doc, 16.09.2026: "den Text erst
   // zeigen, wenn die audiodaten da sind"), so reading and hearing start together. Speaker off, nothing
   // to say, no voice or a voice that hangs: the answer shows anyway.
+  // Formulas are spoken, not skipped (Doc, 23.09.2026: "10 hoch 11 wird gar nicht gelesen", then the law of gravity).
+  // The full path TeX -> KaTeX MathML -> Speech Rule Engine only runs offline (HTML/js/latex-speech.js feeds the
+  // recorded page formeln-vorlesen.html); here a short rewrite turns school formulas into German words. Numbers stay
+  // digits - the voice says them in German by itself ("10 hoch 11" comes out as "zehn hoch elf").
+  const TEX_SIGNS = [
+    [/\\left|\\right|\\displaystyle|\\limits|\\!|\\,|\;|\\:|\\ /g, ' '],
+    [/\\(?:mathrm|mathbf|mathit|boldsymbol|bm|operatorname|text|textbf|mathsf)\s*\{([^{}]*)\}/g, ' $1 '],
+    [/\\sqrt\s*\[\s*([^\]]*)\]\s*\{([^{}]*)\}/g, ' $1-te Wurzel aus $2 '],
+    [/\\sqrt\s*\{([^{}]*)\}/g, ' Wurzel aus $1 '],
+    [/\\d?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, ' $1 durch $2 '],
+    [/\{\s*,\s*\}/g, ','],                           // 0{,}5 is one number: "null Komma fünf", not "null , fünf"
+    [/\^\s*\{?\\circ\}?/g, ' Grad '],                // before the general power, which would eat the \c of \circ
+    [/\\(sum|prod|int)\s*_\s*\{?([^{}\s]*)\}?\s*\^\s*\{?([^{}\s]*)\}?/g,
+     (m, w, a, b) => ' ' + { sum: 'Summe', prod: 'Produkt', int: 'Integral' }[w] + ' von ' + a + ' bis ' + b + ' '],
+    [/\^\s*\{([^{}]*)\}/g, ' hoch $1 '], [/\^\s*\\?(\w)/g, ' hoch $1 '],
+    [/_\s*\{([^{}]*)\}/g, ' Index $1 '], [/_\s*\\?(\w)/g, ' Index $1 '],
+    [/\\cdot|\\times|\\ast/g, ' mal '], [/\\div/g, ' geteilt durch '], [/\\pm/g, ' plus minus '],
+    [/\\approx/g, ' ungefähr '], [/\\neq|\\ne\b/g, ' ungleich '], [/\\leq|\\le\b/g, ' kleiner gleich '],
+    [/\\geq|\\ge\b/g, ' größer gleich '], [/\\ll\b/g, ' viel kleiner '], [/\\gg\b/g, ' viel größer '],
+    [/\\infty/g, ' unendlich '], [/\\sum/g, ' Summe '], [/\\prod/g, ' Produkt '], [/\\int/g, ' Integral '],
+    [/\\partial/g, ' partiell '], [/\\nabla/g, ' Nabla '], [/\\circ\b/g, ' Grad '], [/\\%|%/g, ' Prozent '],
+    [/\\(?:rightarrow|to|Rightarrow|implies)\b/g, ' ergibt '], [/\\(?:ldots|cdots|dots)/g, ' und so weiter '],
+    [/\\in\b/g, ' aus '], [/\\cap\b/g, ' und '], [/\\cup\b/g, ' oder '], [/\\mid\b/g, ' unter der Bedingung '],
+    [/\\(alpha|beta|gamma|delta|epsilon|zeta|eta|theta|kappa|lambda|mu|nu|xi|pi|rho|sigma|tau|phi|chi|psi|omega)/gi,
+     (m, g) => ' ' + g.charAt(0).toUpperCase() + g.slice(1) + ' ']
+  ];
+  function texWords(tex) {
+    let t = ' ' + String(tex) + ' ';
+    for (let i = 0; i < 4; i++) TEX_SIGNS.forEach(function (r) { t = t.replace(r[0], r[1]); });   // unwrap nested braces
+    t = t.replace(/([a-zA-Z])\s*\(/g, '$1 von (')     // f(x) is "f von x", not "f Klammer auf x"
+         .replace(/[{}()[\]]/g, ' ')
+         .replace(/\\[a-zA-Z]+/g, ' ')                // anything this list does not know stays silent
+         .replace(/=/g, ' gleich ').replace(/\+/g, ' plus ').replace(/(\d|\w)\s*-\s*(?=[\w\\])/g, '$1 minus ')
+         .replace(/</g, ' kleiner ').replace(/>/g, ' größer ').replace(/\|/g, ' ');
+    return t.replace(/\s+/g, ' ').trim();
+  }
   const TTS_WAIT = 20000;                            // ms - a hanging voice must not hide the answer
   function speak(text, show) {
     let shown = false, el = null;
     function once() { if (!shown) { shown = true; el = show(); } }
     const clean = String(text)
-      .replace(/\$\$[\s\S]*?\$\$/g, ' ').replace(/\$[^$\n]*?\$/g, ' ')   // maths is shown, not read
+      .replace(/\$\$([\s\S]*?)\$\$/g, function (m, t) { return ' ' + texWords(t) + ' '; })   // maths is read too
+      .replace(/\$([^$\n]*?)\$/g, function (m, t) { return ' ' + texWords(t) + ' '; })
       .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}️‍]/gu, '')
       .replace(/[*_`#>]/g, '')
       .replace(/\s+/g, ' ').trim();
@@ -1341,7 +1384,11 @@ fromHash();
       const t = rg.getBoundingClientRect(), p = pn.getBoundingClientRect();
       const left = t.right + LINE_GAP, width = p.left - LINE_GAP - left;
       if (width >= LINE_MIN) {
-        line.style.left = left + 'px'; line.style.width = width + 'px'; line.style.top = (t.top + t.height / 2) + 'px';
+        // on the same middle as the buttons on the right, not on the footer text's own box - that sat 1.5 px higher
+        // (Doc, 23.09.2026: "bitte alles so hoch wie die butt rechts")
+        const hud = document.getElementById('hud'), h = hud && !hud.hidden && hud.getBoundingClientRect();
+        const mid = h && h.height ? h.top + h.height / 2 : t.top + t.height / 2;
+        line.style.left = left + 'px'; line.style.width = width + 'px'; line.style.top = mid + 'px';
         fits = true;
       }
     }
@@ -1354,10 +1401,12 @@ fromHash();
       // the answers hang right above the line like a speech bubble, centred over the field itself and never beyond the
       // line's ends (Doc, 23.09.2026: "die Box kommt an der falschen Stelle" in the corner, then "über der Suchzeile")
       const h = line.offsetHeight || parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hudbtn')) || 22;
-      const w = Math.min(360, parseFloat(line.style.width)), f = input.getBoundingClientRect();
-      const l0 = parseFloat(line.style.left), l1 = l0 + parseFloat(line.style.width) - w;
-      panel.style.left = Math.round(Math.max(l0, Math.min(l1, (f.left + f.right) / 2 - w / 2))) + 'px';
-      panel.style.width = w + 'px';
+      // exactly the width of the field it belongs to, flush with it (Doc, 23.09.2026: "Box zu breit", then "so breit
+      // wie die Eingabe"). While the panel is closed the field sits inside it and has no width - then the line's.
+      const f = input.getBoundingClientRect();
+      const w = f.width ? f.width : parseFloat(line.style.width);
+      panel.style.left = Math.round(f.width ? f.left : parseFloat(line.style.left)) + 'px';
+      panel.style.width = Math.round(w) + 'px';
       panel.style.bottom = Math.round(innerHeight - (parseFloat(line.style.top) - h / 2) + 8) + 'px';
     }
     else rowBack();
@@ -1446,7 +1495,7 @@ fromHash();
   window.DeckAsk = {
     ask: function (q) { if (PRESENTER || !q) return; if (panel.hidden) open(); heardLate = false; input.value = q; ready(); submit(); },
     live: function (q) { if (PRESENTER) return; if (panel.hidden) open(); input.value = q || ''; if (live || q) mirror(); ready(); },
-    hush: stopAudio, shown: shown, sync: sync, place: placeRow
+    hush: stopAudio, shown: shown, sync: sync, place: placeRow, words: texWords
   };
   if (PRESENTER) {                                    // the line is always there; the answers come from the beamer
     panel.hidden = false;
