@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Jahresrückblick — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w40-jahresabschluss',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Jahresrückblick',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 40 (Abschluss) · 20 Aufgaben: das ganze Jahr in 16 Aufgaben, dazu vier Knobeleien · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 40 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Vektorrechnung (1-4), Grenzwerte (5-6), Differenzialrechnung (7-11), Integralrechnung (12-14), gebrochenrationale und e-Funktionen (15-16), Knobeleien (17-20). In Planreihenfolge. */
+  questions: [
+    {
+      q: 'Berechne den Betrag von $\\vec a = \\begin{pmatrix} 6 \\\\ -2 \\\\ 3 \\end{pmatrix}$.',
+      opts: ['$49$', '$\\sqrt{7}$', '$11$', '$7$'],
+      steps: [
+        '$|\\vec a| = \\sqrt{36 + 4 + 9} = \\sqrt{49}$',
+        '$|\\vec a| = 7$',
+        'Das Minus verschwindet beim Quadrieren: $(-2)^2 = 4$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne das Skalarprodukt $\\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} \\cdot \\begin{pmatrix} 4 \\\\ -1 \\\\ 2 \\end{pmatrix}$.',
+      opts: ['$12$', '$8$', '$-8$', '$\\begin{pmatrix} 4 \\\\ -2 \\\\ 6 \\end{pmatrix}$'],
+      steps: [
+        'Koordinatenweise multiplizieren und addieren: $1 \\cdot 4 + 2 \\cdot (-1) + 3 \\cdot 2$',
+        '$= 4 - 2 + 6 = 8$',
+        'Das Ergebnis ist eine Zahl, kein Vektor — genau das unterscheidet das Skalarprodukt vom Vektorprodukt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet ein Richtungsvektor der Geraden durch $A(1|0|2)$ und $B(3|4|2)$?',
+      opts: ['$\\begin{pmatrix} -2 \\\\ -4 \\\\ 0 \\end{pmatrix}$ ist kein Richtungsvektor', '$\\begin{pmatrix} 3 \\\\ 4 \\\\ 2 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ 4 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} 4 \\\\ 4 \\\\ 4 \\end{pmatrix}$'],
+      steps: [
+        'Richtungsvektor ist $\\overrightarrow{AB} = \\vec b - \\vec a$, also Spitze minus Fuß.',
+        '$\\begin{pmatrix} 3 \\\\ 4 \\\\ 2 \\end{pmatrix} - \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix} = \\begin{pmatrix} 2 \\\\ 4 \\\\ 0 \\end{pmatrix}$',
+        'Auch $\\begin{pmatrix} -2 \\\\ -4 \\\\ 0 \\end{pmatrix}$ wäre ein gültiger Richtungsvektor — jedes Vielfache tut es, nur der Nullvektor nicht.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lautet ein Normalenvektor der Ebene $2x - y + 3z = 6$?',
+      opts: ['$\\begin{pmatrix} -2 \\\\ 1 \\\\ -3 \\end{pmatrix}$ ist kein Normalenvektor', '$\\begin{pmatrix} 6 \\\\ 6 \\\\ 6 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ 1 \\\\ 3 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ -1 \\\\ 3 \\end{pmatrix}$'],
+      steps: [
+        'In der Koordinatengleichung $ax + by + cz = d$ stehen die Koeffizienten des Normalenvektors vorn.',
+        'Also $\\vec n = \\begin{pmatrix} 2 \\\\ -1 \\\\ 3 \\end{pmatrix}$.',
+        'Das Vorzeichen bei $y$ gehört dazu; $\\begin{pmatrix} -2 \\\\ 1 \\\\ -3 \\end{pmatrix}$ zeigt nur in die Gegenrichtung und wäre ebenfalls zulässig.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{n \\to \\infty} \\dfrac{4n - 3}{2n}$.',
+      opts: ['$2$', '$\\infty$', '$0$', '$\\dfrac{1}{2}$'],
+      steps: [
+        'Term aufspalten: $\\dfrac{4n-3}{2n} = 2 - \\dfrac{3}{2n}$',
+        'Der zweite Summand geht gegen $0$.',
+        'Der Grenzwert ist $2$ — bei gleichem Grad entscheidet das Verhältnis der höchsten Koeffizienten.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie verhält sich $f(x) = x^5$ für $x \\to -\\infty$?',
+      opts: ['$f(x) \\to 0$', '$f(x) \\to 5$', '$f(x) \\to -\\infty$', '$f(x) \\to +\\infty$'],
+      steps: [
+        'Der Grad $5$ ist ungerade, der Leitkoeffizient positiv.',
+        'Bei ungeradem Grad bleibt das Vorzeichen des Arguments erhalten.',
+        'Probe: $(-10)^5 = -100\\,000$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Leite ab: $f(x) = 4x^3 - x$.',
+      opts: ['$f^{\\prime}(x) = 12x^2 - x$', '$f^{\\prime}(x) = 12x^2$', '$f^{\\prime}(x) = 12x^2 - 1$', '$f^{\\prime}(x) = 4x^2 - 1$'],
+      steps: [
+        'Potenzregel gliedweise: $4x^3 \\to 12x^2$.',
+        '$-x \\to -1$, denn $x = x^1$ hat die Ableitung $1$.',
+        '$f^{\\prime}(x) = 12x^2 - 1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Leite ab: $f(x) = (3x + 1)^5$.',
+      opts: ['$f^{\\prime}(x) = 15(3x+1)^4$', '$f^{\\prime}(x) = 15(3x+1)^5$', '$f^{\\prime}(x) = 3(3x+1)^4$', '$f^{\\prime}(x) = 5(3x+1)^4$'],
+      steps: [
+        'Kettenregel: äußere mal innere Ableitung.',
+        'Äußere: $5(3x+1)^4$, innere: $3$.',
+        '$f^{\\prime}(x) = 15(3x+1)^4$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme den Extrempunkt von $f(x) = x^2 - 6x$.',
+      opts: ['Hochpunkt $H(3|-9)$', 'Tiefpunkt $T(3|9)$', 'Tiefpunkt $T(6|0)$', 'Tiefpunkt $T(3|-9)$'],
+      steps: [
+        '$f^{\\prime}(x) = 2x - 6 = 0$ liefert $x = 3$.',
+        '$f^{\\prime\\prime}(x) = 2 > 0$, also ein Tiefpunkt.',
+        '$f(3) = 9 - 18 = -9$, somit $T(3|-9)$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme den Wendepunkt von $f(x) = x^3 - 6x^2$.',
+      opts: ['$W(2|16)$', '$W(0|0)$', '$W(2|-16)$', '$W(4|-32)$'],
+      steps: [
+        '$f^{\\prime\\prime}(x) = 6x - 12 = 0$ liefert $x = 2$.',
+        '$f^{\\prime\\prime\\prime}(x) = 6 \\neq 0$, es ist wirklich ein Wendepunkt.',
+        '$f(2) = 8 - 24 = -16$, somit $W(2|-16)$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Summe zweier positiver Zahlen beträgt $12$. Wann ist ihr Produkt am größten?',
+      opts: ['bei $7$ und $5$ mit dem Produkt $35$', 'bei $6$ und $6$ mit dem Produkt $36$', 'bei $11$ und $1$ mit dem Produkt $11$', 'bei $8$ und $4$ mit dem Produkt $32$'],
+      steps: [
+        'Nebenbedingung $x + y = 12$, also $y = 12 - x$.',
+        'Zielfunktion $P(x) = x\\,(12 - x)$, Ableitung $P^{\\prime}(x) = 12 - 2x = 0$ ergibt $x = 6$.',
+        '$P^{\\prime\\prime}(x) = -2 < 0$, also ein Maximum: $6 \\cdot 6 = 36$. Bei fester Summe gewinnt immer die gleichmäßige Aufteilung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet die allgemeine Stammfunktion von $f(x) = 3x^2$?',
+      opts: ['$F(x) = 6x + C$', '$F(x) = x^3$', '$F(x) = \\dfrac{3x^3}{3} $', '$F(x) = x^3 + C$'],
+      steps: [
+        'Exponent um $1$ erhöhen und durch den neuen Exponenten teilen: $\\dfrac{3x^3}{3} = x^3$.',
+        'Die Integrationskonstante gehört dazu: $F(x) = x^3 + C$.',
+        'Probe: $\\left(x^3 + C\\right)^{\\prime} = 3x^2$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\int_0^2 3x^2\\,dx$.',
+      opts: ['$12$', '$8$', '$4$', '$24$'],
+      steps: [
+        'Stammfunktion: $F(x) = x^3$.',
+        'Hauptsatz: $F(2) - F(0) = 8 - 0 = 8$.',
+        '$12$ wäre $f(2)$, also der Funktionswert an der oberen Grenze — nicht der Flächeninhalt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne den Inhalt der Fläche zwischen dem Graphen von $f(x) = 4 - x^2$ und der $x$-Achse.',
+      opts: ['$\\dfrac{32}{3} \\approx 10{,}67$', '$16$', '$8$', '$\\dfrac{16}{3} \\approx 5{,}33$'],
+      steps: [
+        'Nullstellen als Grenzen: $4 - x^2 = 0$ ergibt $x = \\pm 2$.',
+        '$\\int_{-2}^{2} (4 - x^2)\\,dx = \\left[4x - \\dfrac{x^3}{3}\\right]_{-2}^{2} = \\dfrac{16}{3} - \\left(-\\dfrac{16}{3}\\right)$',
+        '$= \\dfrac{32}{3} \\approx 10{,}67$. Wer nur von $0$ bis $2$ rechnet, erhält die halbe Fläche $\\dfrac{16}{3}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet der Definitionsbereich von $f(x) = \\dfrac{x+1}{x-3}$?',
+      opts: ['$D = \\mathbb{R} \\setminus \\{3\\}$', '$D = \\mathbb{R} \\setminus \\{-1;\\,3\\}$', '$D = \\mathbb{R} \\setminus \\{-1\\}$', '$D = \\mathbb{R}$'],
+      steps: [
+        'Der Nenner darf nicht null werden: $x - 3 \\neq 0$.',
+        'Also ist $x = 3$ ausgeschlossen.',
+        '$x = -1$ ist die Nullstelle der Funktion, dort ist sie völlig unproblematisch definiert.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Leite ab: $f(x) = e^{3x}$.',
+      opts: ['$f^{\\prime}(x) = e^{3}$', '$f^{\\prime}(x) = 3x\\,e^{3x}$', '$f^{\\prime}(x) = e^{3x}$', '$f^{\\prime}(x) = 3e^{3x}$'],
+      steps: [
+        'Kettenregel: die e-Funktion bleibt stehen, die innere Ableitung kommt als Faktor davor.',
+        'Innere Funktion $3x$, ihre Ableitung ist $3$.',
+        '$f^{\\prime}(x) = 3e^{3x}$. Die innere Ableitung zu vergessen ist hier der häufigste Fehler.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Beim Nim liegen zwei Häufchen mit je $4$ Hölzchen. Wer abwechselnd beliebig viele Hölzchen von genau einem Häufchen nimmt und das letzte Hölzchen nimmt, gewinnt. Wer gewinnt bei bestem Spiel?',
+      opts: ['der erste Spieler, indem er ein Hölzchen nimmt', 'der zweite Spieler, indem er jeden Zug spiegelt', 'das Spiel endet immer unentschieden', 'der erste Spieler, indem er ein ganzes Häufchen nimmt'],
+      steps: [
+        'Die Stellung ist symmetrisch: beide Häufchen sind gleich groß.',
+        'Der zweite Spieler nimmt einfach immer genauso viele Hölzchen vom anderen Häufchen — nach jedem seiner Züge sind die Häufchen wieder gleich.',
+        'So bleibt ihm stets ein Zug übrig, und er nimmt das letzte Hölzchen. In der Binärsprache des Spiels: $4 \\oplus 4 = 0$, und eine Nullstellung verliert für den, der am Zug ist.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Zahl ist genau dann durch $9$ teilbar, wenn ihre Quersumme durch $9$ teilbar ist. Welche der folgenden Zahlen ist durch $9$ teilbar?',
+      opts: ['$61\\,255$', '$61\\,254$', '$61\\,253$', '$61\\,256$'],
+      steps: [
+        'Quersumme von $61\\,254$: $6 + 1 + 2 + 5 + 4 = 18$, und $18$ ist durch $9$ teilbar.',
+        'Probe: $61\\,254 : 9 = 6806$.',
+        'Der Grund: $10$ lässt beim Teilen durch $9$ den Rest $1$, also auch jede Zehnerpotenz — deshalb zählt nur die Ziffernsumme.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Auf einer Feier begrüßen sich $5$ Personen, jede mit jeder genau einmal per Handschlag. Wie viele Handschläge sind das?',
+      opts: ['$25$', '$20$', '$10$', '$5$'],
+      steps: [
+        'Jede der $5$ Personen schüttelt $4$ anderen die Hand: $5 \\cdot 4 = 20$.',
+        'Dabei ist jeder Handschlag doppelt gezählt, einmal von jeder Seite.',
+        'Also $\\dfrac{5 \\cdot 4}{2} = 10$ Handschläge.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele Diagonalen hat ein regelmäßiges Achteck?',
+      opts: ['$20$', '$8$', '$16$', '$28$'],
+      steps: [
+        'Von jeder der $8$ Ecken gehen Verbindungen zu $5$ Ecken, die weder sie selbst noch ihre beiden Nachbarn sind.',
+        '$8 \\cdot 5 = 40$, und jede Diagonale wird von beiden Enden gezählt.',
+        '$\\dfrac{8 \\cdot 5}{2} = 20$. Die $28$ wären alle Verbindungen inklusive der $8$ Seiten.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

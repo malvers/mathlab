@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Differenzial- und Integralrechnung mit CAS I — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w36-cas1',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Differenzial- und Integralrechnung mit CAS I',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 36 (WB 3) · 20 Aufgaben: exakt und numerisch, Funktionenscharen mit einem und zwei Parametern, Extremalaufgaben · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 36 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: exakt und numerisch (1-4), Scharen mit einem Parameter (5-10), Scharen mit zwei Parametern (11-15), Extremalaufgaben mit CAS (16-18), abschnittsweise definierte Funktionen (19-20). Wahlbereich: hier ist das CAS erlaubt. */
+  questions: [
+    {
+      q: 'Ein CAS gibt für $\\sqrt{8}$ das Ergebnis $2\\sqrt{2}$ aus, ein GTR dagegen $2{,}828427125$. Worin liegt der Unterschied?',
+      opts: ['Das CAS rechnet exakt mit dem Wurzelterm, der GTR liefert einen gerundeten Näherungswert.', 'Der GTR kann keine Wurzeln berechnen.', 'Das CAS rechnet ungenauer als der GTR.', 'Beide Ergebnisse sind verschiedene Zahlen.'],
+      steps: [
+        '$2\\sqrt{2}$ und $2{,}828427125$ bezeichnen dieselbe Zahl, nur in verschiedener Form.',
+        'Exakt heißt: der Term bleibt stehen, es wird nichts gerundet.',
+        'Probe: $\\left(2\\sqrt{2}\\right)^2 = 4 \\cdot 2 = 8$, während der gerundete Wert quadriert $8{,}000000001\\ldots$ ergibt und damit knapp danebenliegt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Lösungen liefert ein CAS für die Gleichung $x^2 = 2$ bei exakter Rechnung?',
+      opts: ['nur $x = \\sqrt{2}$', '$x = \\sqrt{2}$ und $x = -\\sqrt{2}$', '$x = 1$ und $x = 2$', '$x = 1{,}41$ und $x = -1{,}41$'],
+      steps: [
+        'Exakt heißt: die Wurzel bleibt als Term stehen, es wird nicht gerundet.',
+        'Eine quadratische Gleichung hat hier zwei Lösungen, das Vorzeichen darf nicht vergessen werden.',
+        '$1{,}41$ wäre nur eine gerundete Näherung; quadriert ergibt das $1{,}9881$, nicht $2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein CAS liefert für eine Extremstelle das Ergebnis $x = \\dfrac{5}{3}$. Warum lohnt es sich trotzdem, die Aufgabe im Kopf zu überschlagen?',
+      opts: ['Weil ein CAS keine Brüche darstellen kann.', 'Weil ein CAS nur das rechnet, was eingegeben wurde — ein Tippfehler im Term bleibt sonst unbemerkt.', 'Weil ein CAS grundsätzlich ungenau rechnet.', 'Weil Extremstellen immer ganzzahlig sind.'],
+      steps: [
+        'Das CAS prüft nicht, ob die eingegebene Funktion die gemeinte ist.',
+        'Ein Überschlag oder ein Blick auf den Graphen deckt Eingabefehler sofort auf.',
+        'Die Rechnung selbst ist zuverlässig, die Eingabe ist die Fehlerquelle.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein CAS gibt als Stammfunktion von $f(x) = 2x$ das Ergebnis $x^2$ aus. Was fehlt gegenüber der vollständigen mathematischen Antwort?',
+      opts: ['nichts, die Antwort ist vollständig', 'der Exponent', 'die Integrationskonstante $C$', 'der Faktor $2$'],
+      steps: [
+        'Jede Funktion der Form $x^2 + C$ hat die Ableitung $2x$.',
+        'Viele CAS geben nur eine einzelne Stammfunktion aus.',
+        'Vollständig lautet die Antwort $F(x) = x^2 + C$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Nullstellen der Schar $f_a(x) = a\\,x^2 - 2x$ für $a \\neq 0$.',
+      opts: ['$x_1 = 0$ und $x_2 = 2a$', 'nur $x = 0$', '$x_1 = 0$ und $x_2 = \\dfrac{2}{a}$', '$x_1 = 0$ und $x_2 = -\\dfrac{2}{a}$'],
+      steps: [
+        '$x$ ausklammern: $f_a(x) = x\\,(a x - 2)$',
+        'Ein Produkt ist null, wenn ein Faktor null ist: $x = 0$ oder $ax - 2 = 0$.',
+        'Aus $ax = 2$ folgt $x = \\dfrac{2}{a}$. Probe mit $a = 2$: Nullstellen $0$ und $1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Schar $f_a(x) = x^2 - 2a\\,x$ hat für jedes $a$ eine Extremstelle. Wo liegt sie?',
+      opts: ['bei $x = 2a$', 'bei $x = 0$', 'bei $x = -a$', 'bei $x = a$'],
+      steps: [
+        '$f_a^{\\prime}(x) = 2x - 2a = 0$',
+        'Umstellen: $x = a$.',
+        '$f_a^{\\prime\\prime}(x) = 2 > 0$ — es ist stets ein Tiefpunkt, unabhängig von $a$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Extremstellen der Schar $f_a(x) = x^3 - 3a^2 x$ für $a > 0$.',
+      opts: ['$x = a$ und $x = -a$', '$x = 3a$ und $x = -3a$', 'nur $x = 0$', '$x = a^2$ und $x = -a^2$'],
+      steps: [
+        '$f_a^{\\prime}(x) = 3x^2 - 3a^2 = 3\\,(x^2 - a^2) = 0$',
+        'Also $x^2 = a^2$ und damit $x = \\pm a$.',
+        'Probe mit $a = 2$: $f_2^{\\prime}(x) = 3x^2 - 12$ ist bei $x = \\pm 2$ null.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Wert hat der Tiefpunkt der Schar $f_a(x) = x^2 - 2a\\,x$?',
+      opts: ['$f_a(a) = -a^2$', '$f_a(a) = a^2$', '$f_a(a) = -2a^2$', '$f_a(a) = 0$'],
+      steps: [
+        'Die Extremstelle liegt bei $x = a$.',
+        'Einsetzen: $f_a(a) = a^2 - 2a \\cdot a = a^2 - 2a^2 = -a^2$.',
+        'Die Tiefpunkte $T(a|-a^2)$ liegen also alle auf der Parabel $y = -x^2$ — das ist ihre Ortskurve.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie entstehen die Graphen der Schar $f_a(x) = x^2 + a$ auseinander?',
+      opts: ['durch Verschiebung in Richtung der $x$-Achse', 'durch Verschiebung in Richtung der $y$-Achse', 'durch Spiegelung an der $x$-Achse', 'durch Streckung in Richtung der $y$-Achse'],
+      steps: [
+        'Der Parameter $a$ wird zum Funktionswert addiert, nicht zum Argument.',
+        'Jeder Punkt wandert also um $a$ nach oben bzw. unten.',
+        'Bei $f(x) = (x+a)^2$ wäre es dagegen eine Verschiebung längs der $x$-Achse.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welche $a$ ist die Schar $f_a(x) = a\\,x^3$ auf ganz $\\mathbb{R}$ streng monoton steigend?',
+      opts: ['für $a < 0$', 'für kein $a$', 'für $a > 0$', 'für jedes $a$'],
+      steps: [
+        '$f_a^{\\prime}(x) = 3a\\,x^2$, und $x^2 \\geq 0$ für alle $x$.',
+        'Für $a > 0$ ist $f_a^{\\prime}(x) \\geq 0$ und nur an der Stelle $x = 0$ gleich null — das genügt für strenge Monotonie.',
+        'Für $a < 0$ wäre die Funktion fallend, für $a = 0$ konstant.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Nullstellen der Schar $f_{a,b}(x) = a\\,x^2 + b\\,x$ für $a \\neq 0$.',
+      opts: ['$x_1 = 0$ und $x_2 = \\dfrac{b}{a}$', '$x_1 = a$ und $x_2 = b$', '$x_1 = 0$ und $x_2 = -\\dfrac{a}{b}$', '$x_1 = 0$ und $x_2 = -\\dfrac{b}{a}$'],
+      steps: [
+        '$x$ ausklammern: $f_{a,b}(x) = x\\,(a x + b)$',
+        '$x = 0$ oder $ax + b = 0$, also $x = -\\dfrac{b}{a}$.',
+        'Probe mit $a = 1$ und $b = -4$: $x^2 - 4x$ hat die Nullstellen $0$ und $4$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wo liegt der Wendepunkt der Schar $f_{a,b}(x) = x^3 + a\\,x + b$?',
+      opts: ['bei $x = -a$', 'stets bei $x = 0$, unabhängig von $a$ und $b$', 'bei $x = -\\dfrac{a}{3}$', 'bei $x = b$'],
+      steps: [
+        '$f^{\\prime}_{a,b}(x) = 3x^2 + a$ und $f^{\\prime\\prime}_{a,b}(x) = 6x$.',
+        '$6x = 0$ liefert $x = 0$ — die Parameter tauchen in der zweiten Ableitung gar nicht auf.',
+        '$f^{\\prime\\prime\\prime}(x) = 6 \\neq 0$, es ist wirklich ein Wendepunkt; sein $y$-Wert ist $b$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welche Beziehung zwischen $a$ und $b$ hat die Schar $f_{a,b}(x) = a\\,x^2 + b\\,x + 1$ ihren Scheitel an der Stelle $x = 1$?',
+      opts: ['$a = -2b$', '$a = b$', '$b = 2a$', '$b = -2a$'],
+      steps: [
+        '$f^{\\prime}_{a,b}(x) = 2a\\,x + b$, Scheitel bei $f^{\\prime}(1) = 0$.',
+        '$2a + b = 0$, also $b = -2a$.',
+        'Probe mit $a = 3$, $b = -6$: $f(x) = 3x^2 - 6x + 1$ hat den Scheitel bei $x = 1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Schar $f_{a,b}(x) = a\\,x^3 + b\\,x$ besitzt genau dann zwei Extremstellen, wenn …',
+      opts: ['$a$ und $b$ dasselbe Vorzeichen haben.', '$a$ und $b$ verschiedene Vorzeichen haben.', '$b = 0$ gilt.', '$a = b$ gilt.'],
+      steps: [
+        '$f^{\\prime}_{a,b}(x) = 3a\\,x^2 + b = 0$ führt auf $x^2 = -\\dfrac{b}{3a}$.',
+        'Zwei Lösungen gibt es nur, wenn $-\\dfrac{b}{3a} > 0$ ist, also wenn $a$ und $b$ verschiedene Vorzeichen haben.',
+        'Probe: $x^3 - 3x$ hat Extrema bei $\\pm 1$, $x^3 + 3x$ dagegen keine.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Rolle spielen die Parameter in $f_{a,b}(x) = a\\,(x - b)^2$ mit $a > 0$?',
+      opts: ['$a$ streckt oder staucht die Parabel, $b$ verschiebt sie längs der $x$-Achse.', '$a$ verschiebt sie nach oben, $b$ nach rechts.', 'Beide Parameter verschieben die Parabel nach oben.', '$a$ verschiebt sie längs der $x$-Achse, $b$ streckt sie.'],
+      steps: [
+        'Der Faktor vor der Klammer verändert die Öffnung: $a > 1$ streckt, $0 < a < 1$ staucht.',
+        'Das $b$ steht beim Argument, es verschiebt den Scheitel nach $S(b|0)$.',
+        'Probe: $f_{2,3}(x) = 2(x-3)^2$ hat den Scheitel bei $x = 3$ und ist doppelt so steil wie die Normalparabel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine zylindrische Dose soll $1000\\,\\mathrm{cm^3}$ fassen und möglichst wenig Blech verbrauchen. Wie lautet die Zielfunktion für die Oberfläche in Abhängigkeit vom Radius $r$?',
+      opts: ['$O(r) = 2\\pi r^2 + 2\\pi r$', '$O(r) = \\pi r^2 + \\dfrac{1000}{r}$', '$O(r) = 2\\pi r^2 \\cdot \\dfrac{1000}{r}$', '$O(r) = 2\\pi r^2 + \\dfrac{2000}{r}$'],
+      steps: [
+        'Oberfläche: $O = 2\\pi r^2 + 2\\pi r h$, Nebenbedingung: $\\pi r^2 h = 1000$, also $h = \\dfrac{1000}{\\pi r^2}$.',
+        'Einsetzen: $2\\pi r h = 2\\pi r \\cdot \\dfrac{1000}{\\pi r^2} = \\dfrac{2000}{r}$.',
+        'Zielfunktion: $O(r) = 2\\pi r^2 + \\dfrac{2000}{r}$ — erst danach übernimmt das CAS.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Das CAS liefert für $O(r) = 2\\pi r^2 + \\dfrac{2000}{r}$ die Ableitung $O^{\\prime}(r) = 4\\pi r - \\dfrac{2000}{r^2}$. Welcher Radius minimiert die Oberfläche?',
+      opts: ['$r = \\sqrt[3]{\\dfrac{500}{\\pi}} \\approx 5{,}42\\,\\mathrm{cm}$', '$r = 10\\,\\mathrm{cm}$', '$r = \\sqrt{\\dfrac{500}{\\pi}} \\approx 12{,}62\\,\\mathrm{cm}$', '$r = \\sqrt[3]{\\dfrac{2000}{\\pi}} \\approx 8{,}60\\,\\mathrm{cm}$'],
+      steps: [
+        '$O^{\\prime}(r) = 0$ bedeutet $4\\pi r = \\dfrac{2000}{r^2}$, also $r^3 = \\dfrac{2000}{4\\pi} = \\dfrac{500}{\\pi}$.',
+        '$r = \\sqrt[3]{\\dfrac{500}{\\pi}} \\approx 5{,}42\\,\\mathrm{cm}$.',
+        'Die zugehörige Höhe ist $h \\approx 10{,}84\\,\\mathrm{cm}$, also genau der doppelte Radius — so sieht die materialsparendste Dose aus.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Zielfunktion $A(x)$ ist nur auf dem Intervall $0 \\leq x \\leq 4$ sinnvoll. Das CAS findet keine Nullstelle von $A^{\\prime}(x)$ in diesem Intervall. Was folgt daraus?',
+      opts: ['Die Zielfunktion wurde falsch aufgestellt.', 'Das Maximum liegt außerhalb des Intervalls und wird trotzdem genommen.', 'Das Maximum liegt am Rand, also bei $x = 0$ oder $x = 4$.', 'Die Aufgabe hat keine Lösung.'],
+      steps: [
+        'Ein Extremum im Inneren setzt $A^{\\prime}(x) = 0$ voraus.',
+        'Fehlt eine solche Stelle, ist die Funktion auf dem ganzen Intervall monoton.',
+        'Dann entscheiden die Randwerte: beide einsetzen und vergleichen. Randextrema findet das CAS nicht von selbst.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welches $c$ ist die Funktion $f(x) = x^2$ für $x \\leq 2$ und $f(x) = c\\,x$ für $x > 2$ an der Nahtstelle stetig?',
+      opts: ['$c = 1$', '$c = 4$', 'für kein $c$', '$c = 2$'],
+      steps: [
+        'Beide Teile müssen an der Stelle $x = 2$ denselben Wert liefern.',
+        'Links: $2^2 = 4$. Rechts: $c \\cdot 2$.',
+        '$2c = 4$ ergibt $c = 2$. Der Graph geht dann ohne Sprung ineinander über.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Funktion ist stückweise definiert als $f(x) = x^2$ für $x < 1$ und $f(x) = \\dfrac{1}{x}$ für $x \\geq 1$. Wie verhält sie sich für $x \\to \\infty$?',
+      opts: ['$f(x)$ hat keinen Grenzwert', '$f(x) \\to 1$', '$f(x) \\to 0$', '$f(x) \\to \\infty$'],
+      steps: [
+        'Für große $x$ gilt der zweite Zweig, also $f(x) = \\dfrac{1}{x}$.',
+        '$\\lim\\limits_{x \\to \\infty} \\dfrac{1}{x} = 0$.',
+        'Der erste Zweig spielt für das Verhalten im Unendlichen keine Rolle — bei stückweisen Funktionen zählt immer der passende Ast.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

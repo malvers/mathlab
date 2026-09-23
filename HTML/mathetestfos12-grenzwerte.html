@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Grenzwerte — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w11-grenzwerte',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Grenzwerte',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 11 (LB 2) · 20 Aufgaben: Zahlenfolgen, Konvergenz, Verhalten ganzrationaler Funktionen im Unendlichen · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 11 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Zahlenfolgen (1-5), Grenzwert einer Folge (6-11), ganzrationale Funktionen im Unendlichen (12-17), Anwendungen (18-20). Alles ohne CAS. */
+  questions: [
+    {
+      q: 'Die Folge ist durch $a_n = \\dfrac{1}{n}$ gegeben. Wie lautet $a_4$?',
+      opts: ['$4$', '$\\dfrac{1}{5}$', '$\\dfrac{1}{4}$', '$0$'],
+      steps: [
+        'Für das vierte Glied wird $n = 4$ eingesetzt.',
+        '$a_4 = \\dfrac{1}{4}$',
+        'Der Index $n$ zählt die Glieder, er ist nicht der Wert des Gliedes.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Folge ist durch $a_n = \\dfrac{n}{n+1}$ gegeben. Wie lautet $a_3$?',
+      opts: ['$\\dfrac{4}{3}$', '$\\dfrac{1}{4}$', '$\\dfrac{3}{4}$', '$\\dfrac{3}{5}$'],
+      steps: [
+        '$n = 3$ einsetzen: $a_3 = \\dfrac{3}{3+1}$',
+        '$a_3 = \\dfrac{3}{4}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Folge ist eine geometrische Folge?',
+      opts: ['$a_n = \\dfrac{1}{n}$', '$a_n = 3n + 2$', '$a_n = n^2$', '$a_n = 3 \\cdot \\left(\\dfrac{1}{2}\\right)^n$'],
+      steps: [
+        'Bei einer geometrischen Folge ist der Quotient zweier benachbarter Glieder konstant.',
+        'Hier gilt $\\dfrac{a_{n+1}}{a_n} = \\dfrac{1}{2}$ für jedes $n$.',
+        '$a_n = 3n + 2$ ist arithmetisch: dort ist die Differenz konstant, nicht der Quotient.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die ersten Glieder einer Folge lauten $2$, $6$, $18$, $54$. Wie lautet das nächste Glied?',
+      opts: ['$162$', '$216$', '$72$', '$108$'],
+      steps: [
+        'Jedes Glied ist das Dreifache des vorherigen: $6 = 3 \\cdot 2$, $18 = 3 \\cdot 6$, $54 = 3 \\cdot 18$.',
+        'Also $3 \\cdot 54 = 162$.',
+        '$108 = 2 \\cdot 54$ wäre die Verdopplung — hier wird aber verdreifacht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für welches $n$ wird das Glied der Folge $a_n = \\dfrac{1}{n}$ erstmals kleiner als $0{,}01$?',
+      opts: ['$n = 101$', '$n = 99$', '$n = 100$', '$n = 10$'],
+      steps: [
+        'Gesucht ist das kleinste $n$ mit $\\dfrac{1}{n} < 0{,}01$, also $n > 100$.',
+        'Für $n = 100$ ist $\\dfrac{1}{100} = 0{,}01$ — das ist noch nicht kleiner.',
+        'Das erste Glied darunter ist $a_{101} = \\dfrac{1}{101} \\approx 0{,}0099$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{n \\to \\infty} \\dfrac{1}{n}$.',
+      opts: ['die Folge hat keinen Grenzwert', '$\\infty$', '$1$', '$0$'],
+      steps: [
+        'Je größer $n$ wird, desto kleiner wird $\\dfrac{1}{n}$: $0{,}1$, $0{,}01$, $0{,}001$, …',
+        'Die Werte kommen der Null beliebig nahe, erreichen sie aber nie.',
+        'Also $\\lim\\limits_{n \\to \\infty} \\dfrac{1}{n} = 0$; die Folge ist eine Nullfolge.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{n \\to \\infty} \\dfrac{n}{n+1}$.',
+      opts: ['$\\infty$', '$\\dfrac{1}{2}$', '$0$', '$1$'],
+      steps: [
+        'Zähler und Nenner durch $n$ teilen: $\\dfrac{n}{n+1} = \\dfrac{1}{1 + \\frac{1}{n}}$',
+        'Für $n \\to \\infty$ geht $\\dfrac{1}{n}$ gegen $0$, der Nenner also gegen $1$.',
+        'Der Grenzwert ist $1$; die Glieder $\\tfrac{1}{2}$, $\\tfrac{2}{3}$, $\\tfrac{3}{4}$, … wachsen von unten dagegen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{n \\to \\infty} \\left(\\dfrac{1}{2}\\right)^n$.',
+      opts: ['$\\dfrac{1}{2}$', '$\\infty$', '$0$', '$1$'],
+      steps: [
+        'Die Glieder sind $\\tfrac{1}{2}$, $\\tfrac{1}{4}$, $\\tfrac{1}{8}$, $\\tfrac{1}{16}$, …',
+        'Eine geometrische Folge $q^n$ ist für $|q| < 1$ eine Nullfolge.',
+        'Also ist der Grenzwert $0$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Folge ist NICHT konvergent?',
+      opts: ['$a_n = 3 + \\dfrac{1}{n^2}$', '$a_n = \\left(\\dfrac{3}{4}\\right)^n$', '$a_n = \\dfrac{5}{n}$', '$a_n = 2^n$'],
+      steps: [
+        '$a_n = 2^n$ wächst über jede Schranke hinaus: $2$, $4$, $8$, $16$, … — sie ist bestimmt divergent.',
+        'Die anderen drei haben Grenzwerte: $0$, $3$ und $0$.',
+        'Konvergent heißt: die Glieder nähern sich einer festen Zahl beliebig genau an.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{n \\to \\infty} \\dfrac{3n + 1}{n}$.',
+      opts: ['$3$', '$\\infty$', '$0$', '$4$'],
+      steps: [
+        'Term aufspalten: $\\dfrac{3n+1}{n} = 3 + \\dfrac{1}{n}$',
+        'Der zweite Summand geht gegen $0$.',
+        'Der Grenzwert ist $3$. Die $1$ im Zähler fällt gegen das wachsende $n$ nicht ins Gewicht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{n \\to \\infty} \\dfrac{2n^2 + 1}{n^2 + n}$.',
+      opts: ['$2$', '$0$', '$\\dfrac{1}{2}$', '$\\infty$'],
+      steps: [
+        'Zähler und Nenner durch die höchste Potenz $n^2$ teilen.',
+        '$\\dfrac{2 + \\frac{1}{n^2}}{1 + \\frac{1}{n}} \\to \\dfrac{2 + 0}{1 + 0}$',
+        'Der Grenzwert ist $2$ — bei gleichem Grad entscheidet das Verhältnis der höchsten Koeffizienten.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie verhält sich $f(x) = x^3$ für $x \\to +\\infty$ und für $x \\to -\\infty$?',
+      opts: ['beide Male $f(x) \\to -\\infty$', '$f(x) \\to +\\infty$ bzw. $f(x) \\to -\\infty$', 'beide Male $f(x) \\to +\\infty$', '$f(x) \\to -\\infty$ bzw. $f(x) \\to +\\infty$'],
+      steps: [
+        'Der Grad $3$ ist ungerade, der Leitkoeffizient $1$ ist positiv.',
+        'Für große positive $x$ ist $x^3$ groß und positiv, für große negative $x$ groß und negativ.',
+        'Probe: $f(10) = 1000$ und $f(-10) = -1000$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie verhält sich $f(x) = -2x^4$ für $x \\to \\pm\\infty$?',
+      opts: ['beide Male $f(x) \\to +\\infty$', '$f(x) \\to +\\infty$ bzw. $f(x) \\to -\\infty$', '$f(x) \\to 0$', 'beide Male $f(x) \\to -\\infty$'],
+      steps: [
+        'Der Grad $4$ ist gerade, also liefern $x$ und $-x$ denselben Wert von $x^4$.',
+        'Der Leitkoeffizient $-2$ ist negativ, also kippt das Vorzeichen nach unten.',
+        'Probe: $f(10) = -20000$ und $f(-10) = -20000$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welcher Term bestimmt das Verhalten von $f(x) = x^3 - 5x^2 + 2$ im Unendlichen?',
+      opts: ['$-5x^2$', '$x^3$', '$2$', 'alle Terme gleich stark'],
+      steps: [
+        'Für sehr große $|x|$ wächst die höchste Potenz am schnellsten.',
+        'Bei $x = 100$ ist $x^3 = 1\\,000\\,000$, aber $-5x^2 = -50\\,000$ — der kubische Term überwiegt deutlich.',
+        'Deshalb entscheidet allein der Term höchsten Grades über das Verhalten im Unendlichen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie verhält sich $f(x) = -x^3 + 4x$ für $x \\to -\\infty$?',
+      opts: ['$f(x) \\to 4$', '$f(x) \\to +\\infty$', '$f(x) \\to -\\infty$', '$f(x) \\to 0$'],
+      steps: [
+        'Der führende Term ist $-x^3$, der Grad ist ungerade und der Leitkoeffizient negativ.',
+        'Für $x \\to -\\infty$ ist $x^3 \\to -\\infty$, das Minus davor dreht das um.',
+        'Probe: $f(-10) = 1000 - 40 = 960$, und für noch kleinere $x$ wächst das weiter.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine ganzrationale Funktion hat geraden Grad und einen positiven Leitkoeffizienten. Wie verläuft ihr Graph in den Randbereichen?',
+      opts: ['links nach oben, rechts nach unten', 'er fällt auf beiden Seiten nach unten', 'er steigt auf beiden Seiten nach oben', 'links nach unten, rechts nach oben'],
+      steps: [
+        'Gerader Grad heißt: beide Seiten verhalten sich gleich, denn $(-x)^n = x^n$ für gerades $n$.',
+        'Positiver Leitkoeffizient heißt: nach oben.',
+        'Beispiel $f(x) = x^4$ oder $f(x) = 3x^2$ — beide öffnen nach oben.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme $\\lim\\limits_{x \\to \\infty} \\left(3x^5 - x^2\\right)$.',
+      opts: ['$3$', '$+\\infty$', '$-\\infty$', '$0$'],
+      steps: [
+        'Der Term höchsten Grades ist $3x^5$ mit positivem Leitkoeffizienten und ungeradem Grad.',
+        'Für $x \\to +\\infty$ wächst $3x^5$ über alle Grenzen, $-x^2$ bremst das nicht.',
+        'Probe bei $x = 10$: $300\\,000 - 100 = 299\\,900$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Kapital von $1000$ € wird mit $5\\,\\%$ jährlich verzinst. Welche Folge beschreibt das Kapital nach $n$ Jahren, und wie groß ist es nach $2$ Jahren?',
+      opts: ['$K_n = 1000 \\cdot 0{,}05^n$, also $K_2 = 2{,}50$ €', '$K_n = 1000 \\cdot 1{,}05^n$, also $K_2 = 1102{,}50$ €', '$K_n = 1000 + 50n$, also $K_2 = 1100{,}00$ €', '$K_n = 1000 \\cdot 1{,}05^n$, also $K_2 = 1100{,}00$ €'],
+      steps: [
+        'Beim Zinseszins wird jedes Jahr mit dem Faktor $1{,}05$ multipliziert — das ist eine geometrische Folge.',
+        '$K_2 = 1000 \\cdot 1{,}05^2 = 1000 \\cdot 1{,}1025 = 1102{,}50$ €',
+        '$1100$ € käme heraus, wenn man die Zinsen nicht mitverzinste — das ist der Unterschied zwischen Zins und Zinseszins.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Einem Kreis mit Radius $1$ werden regelmäßige $n$-Ecke einbeschrieben. Wogegen strebt ihr Umfang für $n \\to \\infty$?',
+      opts: ['gegen $4$', 'gegen $\\pi \\approx 3{,}142$', 'gegen $2\\pi \\approx 6{,}283$', 'er wächst über alle Grenzen'],
+      steps: [
+        'Mit wachsender Eckenzahl schmiegt sich das Vieleck immer enger an den Kreis an.',
+        'Der Umfang nähert sich dem Kreisumfang $U = 2\\pi r = 2\\pi$.',
+        'So hat schon Archimedes $\\pi$ eingegrenzt — ein Grenzwert, lange bevor es den Begriff gab.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Stückkosten einer Produktion betragen $k(x) = \\dfrac{4000}{x} + 12$ (in € je Stück bei $x$ Stück). Was passiert mit den Stückkosten bei immer größerer Stückzahl?',
+      opts: ['Sie nähern sich $12$ € je Stück, ohne diesen Wert je zu erreichen.', 'Sie wachsen über alle Grenzen.', 'Sie sinken auf $0$ € je Stück.', 'Sie nähern sich $4000$ € je Stück.'],
+      steps: [
+        'Für $x \\to \\infty$ geht der Bruch $\\dfrac{4000}{x}$ gegen $0$.',
+        'Übrig bleibt der Grenzwert $12$ — das sind die variablen Kosten je Stück.',
+        'Probe: bei $x = 1000$ sind es $16$ €, bei $x = 10\\,000$ noch $12{,}40$ €. Die Fixkosten verteilen sich, verschwinden aber nie ganz.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

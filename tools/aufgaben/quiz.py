@@ -123,11 +123,17 @@ class Quiz:
                                'solution': solution, 'fig': fig, 'figcap': figcap})
 
     def verify(self, check):
-        """Run the spec's own numeric check; any AssertionError stops the build."""
+        """Run the spec's own numeric check; any AssertionError stops the build.
+        The message names the failing line - without it the only way to find the
+        assert is a throwaway runner (gemeldet 23.09.2026)."""
         try:
             check()
         except AssertionError as e:
-            raise SystemExit('check() schlägt fehl in %s: %s' % (self.id, e or 'assert'))
+            import traceback
+            tb = traceback.extract_tb(sys.exc_info()[2])[-1]
+            raise SystemExit('check() schlägt fehl in %s\n  %s, Zeile %d:\n    %s\n  %s'
+                             % (self.id, os.path.relpath(tb.filename, ROOT), tb.lineno,
+                                (tb.line or '').strip(), e or 'assert ist falsch'))
         self._checked = True
 
     # build ----------------------------------------------------------------
