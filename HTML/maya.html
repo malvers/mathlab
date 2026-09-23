@@ -10,8 +10,6 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
     <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
     <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
     <link rel="stylesheet" href="js/cyber-layout.css">
@@ -27,11 +25,8 @@
         }
 
         #maya-solution {
-            font-size: 1.35rem;
-        }
-
-        #maya-solution .katex {
-            font-size: 1.45em;
+            font-size: 1.6rem;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         #canvas {
@@ -90,7 +85,6 @@
 
         .maya-plus {
             opacity: 0.5;
-            font-family: 'Outfit', sans-serif;
         }
 
         .maya-row {
@@ -426,7 +420,7 @@
             // measure them, then give the board what is left
             const headEl = document.getElementById('maya-head');
             const solEl = document.getElementById('maya-solution');
-            let top = 14;
+            let top = 14, headTop = 14, hH = 0, sH = 0;
             if (headEl && solEl) {
                 for (const el of [headEl, solEl]) {
                     if (!el) continue;
@@ -434,7 +428,6 @@
                     el.style.width = blockW + 'px';
                 }
                 // the branding sits in the top right corner of the stage - stay below it
-                let headTop = 14;
                 const brand = document.querySelector('.canvas-branding');
                 if (brand) {
                     const b = brand.getBoundingClientRect();
@@ -450,10 +443,10 @@
                     el.style.left = ((colCenter(g) + colCenter(g + 1)) / 2 - blockX) + 'px';
                 });
                 headEl.style.top = headTop + 'px';
-                const hH = headEl.offsetHeight;
-                solEl.style.top = (headTop + hH + 10) + 'px';
-                const sH = solEl.offsetHeight;
-                top = headTop + hH + 10 + sH + 18;
+                hH = headEl.offsetHeight;
+                solEl.style.top = (headTop + hH + 14) + 'px';
+                sH = solEl.offsetHeight;
+                top = headTop + hH + 14 + sH + 14;
             }
 
             const avail = H - top - pad;
@@ -473,8 +466,15 @@
 
             const gapH = 22, captionH = 28;
             const blockH = cardH + gapH + rows * cellH + captionH;
-            const startY = top + Math.max(0, (avail - blockH) / 2);
-            const cardY = startY;
+
+            // number, sum and board keep the same gap the places and the panel keep,
+            // and the whole stack stands centred on the stage
+            const stackGap = gapH;
+            const stackH = hH + stackGap + sH + stackGap + blockH;
+            const stackTop = Math.max(headTop, Math.min((H - stackH) / 2, H - pad - stackH));
+            if (headEl) headEl.style.top = stackTop + 'px';
+            if (solEl) solEl.style.top = (stackTop + hH + stackGap) + 'px';
+            const cardY = stackTop + hH + stackGap + sH + stackGap;
             const panelY = cardY + cardH + gapH;
 
             for (let col = 0; col < n; col++) {
@@ -664,9 +664,7 @@
             host.innerHTML = html;
             host.querySelectorAll('.maya-term').forEach(el => {
                 const place = n - 1 - Number(el.dataset.col);
-                const tex = digits[place] + ' \\cdot ' + sys().values[place];
-                if (window.katex) katex.render(tex, el, { throwOnError: false });
-                else el.textContent = digits[place] + ' \u00b7 ' + sys().values[place];
+                el.textContent = digits[place] + ' \u00b7 ' + sys().values[place];
             });
             let h = 0;
             host.querySelectorAll('span').forEach(el => { h = Math.max(h, el.offsetHeight); });
