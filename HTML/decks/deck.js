@@ -1857,7 +1857,7 @@ const link = (function () {
       g.putImageData(img, 0, 0);
       return 'url(' + c.toDataURL() + ')';
     }
-    let want = null, sent = null, raf = 0;           // presenter
+    let want = null, sent = null, raf = 0, at = null;   // presenter; at = the dot's last place in this window
     // presenter: a mouse position in this window - on the current slide it goes out as a fraction of the slide
     function move(x, y) {
       const f = document.querySelector('#pres .p-cur .p-frame');
@@ -1884,6 +1884,7 @@ const link = (function () {
     }
     function show(m) {
       clearTimeout(rest);
+      if (m.x !== undefined) at = { x: m.x, y: m.y };   // follow the hand even while the dot is out, so L lights it where he points now
       if (!on || m.x === undefined) { if (dot) dot.classList.remove('on'); return; }
       const box = stage();
       if (!box || !box.width) return;                // the preview is not built yet
@@ -1900,12 +1901,15 @@ const link = (function () {
       dot.classList.add('on');
       rest = setTimeout(function () { dot.classList.remove('on'); }, LASER_REST);
     }
+    // L puts the dot back where it stood, at once - waiting for the next mouse move looked broken (Doc, 23.09.2026:
+    // "l bringt nicht den Punkt sofort! Man muss erst bewegen!")
+    function light() { if (on) { if (at) show(at); } else show({}); }
     function toggle() {
       on = !on;
-      if (!on) show({});
+      light();
       send({ t: 'laser-on', on: on });
     }
-    function mirrorOn(v) { on = !!v; if (!on) show({}); }   // the other window switched it
+    function mirrorOn(v) { on = !!v; light(); }      // the other window switched it
     if (PRESENTER) {
       addEventListener('pointermove', function (e) { move(e.clientX, e.clientY); });
       document.documentElement.addEventListener('mouseleave', function () { move(-1, -1); });
