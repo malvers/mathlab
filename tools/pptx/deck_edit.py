@@ -43,7 +43,8 @@ EDITED_MARK = "<!-- deck-master: edited in the browser (tools/pptx/deck_edit.py)
 
 # the text containers html_deck.py writes; foot, pageno and the live greeting line are not text of the deck
 EDITABLE_TAGS = ("h1", "h2", "h3", "th", "td")
-EDITABLE_P = ("kicker", "sub", "line", "col", "satz", "label", "labnote", "greet-quote", "greet-author")
+EDITABLE_P = ("kicker", "sub", "line", "col", "satz", "label", "labnote", "greet-quote", "greet-author",
+              "fl")   # a figure's words over its SVG (html_deck.figure)
 SELECTOR = ",".join(EDITABLE_TAGS + tuple("p." + c for c in EDITABLE_P))
 DECK_NAME = re.compile(r"[a-z0-9][a-z0-9._-]*\.html")
 _lock = threading.Lock()

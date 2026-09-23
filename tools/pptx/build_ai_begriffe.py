@@ -12,6 +12,7 @@ import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from slides import Deck
 from tables import TINT_ORANGE, TINT_RED, TINT_GREEN, TINT_BLUE
+import ai_svg
 
 # absolute, like every other deck: the .pptx embeds the file, html_deck.asset() copies
 # it into HTML/decks/img for the web twin. A relative "img/..." would only work for chapter().
@@ -35,7 +36,8 @@ d.bullets("Bevor wir über Sprache reden", [
     ("Wer das verstanden hat, versteht alle folgenden Begriffe leichter", 0),
 ])
 
-d.picture("Der kleinste Baustein: das Neuron", os.path.join(IMG, "aibegriffe-neuron.png"), width=660)
+# drawn as SVG (ai_svg.py) - sharp and editable in the deck file; the PNG twin only for the .pptx
+d.figure("Der kleinste Baustein: das Neuron", *ai_svg.neuron(), png=os.path.join(IMG, "aibegriffe-neuron.png"), width=660)
 
 d.bullets("Was das Neuron tut", [
     ("Jeder **Eingang** ist eine Zahl — Helligkeit, Lautstärke, ein Wortstück", 0),

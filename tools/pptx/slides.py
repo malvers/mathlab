@@ -374,6 +374,13 @@ class Deck:
             drop_ph(s, 1)
         return s
 
+    def figure(self, title, svg, labels=None, png=None, lines=None, align="center", frames=None, width=CONTENT_W):
+        """The .pptx twin of html_deck.HtmlDeck.figure: a .pptx holds no inline SVG, so the PNG twin
+        from ai_diagrams.py goes in - without one the slide only carries the title and lines."""
+        if png:
+            return self.picture(title, png, lines=lines, width=width, align=align, frames=frames)
+        return self.bullets(title, lines or [])
+
     def picture_bullets(self, title, path, lines, pic_w=380, pic_h=None, side="right"):
         """Bullets on one side, picture on the other (fits inside pic_w x BODY_H)."""
         s, body = self._content("Inhalt", title, lines)

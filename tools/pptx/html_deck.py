@@ -429,6 +429,26 @@ class HtmlDeck:
                         % (markup(title), "pic left" if align == "left" else "pic",
                            img, live_frames(frames)))
 
+    def figure(self, title, svg, labels=None, png=None, lines=None, align="center", frames=None, **kw):
+        """A drawn figure in the picture box (tools/pptx/ai_svg.py, svgfig): the shapes as inline SVG - sharp
+        on any beamer - and the words as <p class="fl"> laid over it, which the deck editor changes like any
+        line (Doc, 23.09.2026: "solche Bilder immer im HTML malen ... kann ich dann editieren?"). A label is
+        (centre x, centre y, width, text) in the box's 816 x 330 coordinates; the SVG must fill the box for
+        them to line up, so `lines` (the smaller .below box) takes no labels. `png`: the .pptx twin only."""
+        words = "".join('<p class="fl" style="left:%gpx;top:%gpx;width:%gpx">%s</p>'
+                        % (x - w / 2, y - 8, w, markup(text)) for x, y, w, text in (labels or []))
+        if lines:
+            assert not labels, "labels need the full picture box - no lines= with labels"
+            self._slide("content has-below", '<h3>%s</h3><div class="rules"></div>'
+                        '<div class="body">%s<div class="below%s">%s</div></div>%s'
+                        % (markup(title), bullet_list(lines)[0],
+                           " left" if align == "left" else "", svg, live_frames(frames)))
+        else:
+            self._slide("content", '<h3>%s</h3><div class="rules"></div>'
+                        '<div class="%s">%s%s</div>%s'
+                        % (markup(title), "pic left" if align == "left" else "pic",
+                           svg, words, live_frames(frames)))
+
     @staticmethod
     def fit(path, box_w, box_h):
         """Size of a picture scaled into box_w x box_h - up or down, like the .pptx does."""
@@ -678,6 +698,8 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 /* flex, not grid: in a grid the % heights resolve against an auto track and a tall picture
    runs out of the box; here they resolve against the box - shrink to fit, never upscale */
 .pic img{max-width:100%;max-height:100%;object-fit:contain}
+.pic svg,.below svg{max-width:100%;max-height:100%;display:block}   /* a drawn figure (inline SVG) fits the box like a picture */
+.pic .fl{position:absolute;margin:0;text-align:center;font-size:12.5px;line-height:16px;color:var(--muted)}   /* a figure's words, laid over the SVG - the editor's text */
 .pic.left{justify-content:flex-start}
 /* small picture bottom right next to a table (table_top corner=) - text keeps clear of it */
 .corner-pic{position:absolute;right:72px;bottom:44px;max-width:200px;max-height:190px}
