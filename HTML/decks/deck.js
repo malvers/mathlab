@@ -1620,7 +1620,7 @@ const link = (function () {
     if (PRESENTER) {
       if (m.p) return;                               // another presenter window: not ours to follow
       if (m.t === 'end') { window.close(); return; }   // Esc on the beamer ended the show
-      if (m.t === 'laser-on') { toast(m.on ? 'Laser an (l)' : 'Laser aus (l)'); return; }
+      if (m.t === 'laser-on') { toast(m.on ? 'Laser an (l)' : 'Laser aus (l)'); laser.mirrorOn(m.on); return; }
       if (m.t === 'skip') { window.DeckSlides.setHidden(m.i | 0, !!m.on, true); return; }
       if (m.t === 'ask-out') { if (window.DeckAsk) DeckAsk.shown(m); return; }   // the beamer's answer box, mirrored
       if (m.t === 'here') send({ t: 'go', si: si, step: step, to: m.from });   // the beamer window reloaded
@@ -1869,19 +1869,30 @@ const link = (function () {
       raf = 0;
       if (!want && !sent) return;                    // off, and the beamer knows
       sent = want;
-      send(want ? { t: 'laser', x: +want.x.toFixed(4), y: +want.y.toFixed(4) } : { t: 'laser' });
+      const m = want ? { t: 'laser', x: +want.x.toFixed(4), y: +want.y.toFixed(4) } : { t: 'laser' };
+      send(m);
+      show(m);                                       // and it stands on his own preview too
     }
-    // beamer: a position shows the dot, a message without one puts it out
+    // Beamer AND presenter view: a position shows the dot, a message without one puts it out. Doc needs to see
+    // where he is pointing while he talks, on his own screen too (Doc, 23.09.2026: "ich muss im PräsiAnsicht den
+    // Laser sehen (parallel)") - there it rides on the preview of the current slide.
+    function stage() {
+      if (!PRESENTER) return deck.getBoundingClientRect();
+      const f = document.querySelector('#pres .p-cur .p-frame');
+      return f && f.getBoundingClientRect();
+    }
     function show(m) {
       clearTimeout(rest);
       if (!on || m.x === undefined) { if (dot) dot.classList.remove('on'); return; }
+      const box = stage();
+      if (!box || !box.width) return;                // the preview is not built yet
       if (!dot) {
         dot = document.createElement('div');
         dot.id = 'laser'; dot.setAttribute('aria-hidden', 'true');
         dot.style.backgroundImage = grating();
         document.body.appendChild(dot);
       }
-      const r = deck.getBoundingClientRect();        // the scaled slide on screen
+      const r = box;                                 // the slide on the beamer, the preview in the presenter view
       dot.style.setProperty('--lz', (SIZE * r.width / 960).toFixed(1) + 'px');
       dot.style.transform = 'translate(' + (r.left + m.x * r.width).toFixed(1) + 'px,'
                                          + (r.top + m.y * r.height).toFixed(1) + 'px)';
@@ -1893,16 +1904,19 @@ const link = (function () {
       if (!on) show({});
       send({ t: 'laser-on', on: on });
     }
+    function mirrorOn(v) { on = !!v; if (!on) show({}); }   // the other window switched it
     if (PRESENTER) {
       addEventListener('pointermove', function (e) { move(e.clientX, e.clientY); });
       document.documentElement.addEventListener('mouseleave', function () { move(-1, -1); });
     }
     addEventListener('keydown', function (e) {
       if ((e.key !== 'l' && e.key !== 'L') || e.metaKey || e.ctrlKey || e.altKey) return;
-      if (PRESENTER) send({ t: 'laser-toggle' });
-      else if (linked) toggle();
+      // whoever presses L sets the state, the other window mirrors it (toggle() sends laser-on) - so the dot
+      // goes out on both screens at once, and in the presenter view even with no beamer attached
+      if (PRESENTER || linked) toggle();
     });
-    return { move: move, show: show, toggle: toggle };
+    window.DeckLaser = function () { return { on: on, want: want, sent: sent, raf: raf, dot: !!dot }; };   // debug
+    return { move: move, show: show, toggle: toggle, mirrorOn: mirrorOn };
   })();
 
   window.DeckNote = toast;                            // the deck's one message box, also for the screen badge
