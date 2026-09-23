@@ -1,6 +1,7 @@
-// Talk-topic list for the SVP pages. Ten topics per plan, shared by every class page of that
-// plan (editable in place, stored ONCE in localStorage so class A and B always show the same
-// titles), two name fields per topic.
+// Talk-topic list for the SVP pages. Ten topics per Lerngruppe (editable in place), two name
+// fields per topic. Since 23.09.2026 every Lerngruppe keeps a list of its OWN - the plan-wide
+// list only serves as the template a group starts from (Doc: "Vortraege echt unabhaengig,
+// sicher getrennt"); before, one list per plan was shared by all its class pages.
 //
 // The NAMES are personal data and are therefore no longer kept on the device: they live in
 // Supabase (svp_vortrag_namen), sealed with Doc's public key by svp-crypto.js. Every browser can
@@ -20,7 +21,9 @@
     const KLASSE = urlG || (script && script.dataset.klasse) || 'a';
     const PLAN = (script && script.dataset.plan) || 'informatik9';
     const KEY_NAMES = 'svp-vortraege-namen:' + PLAN + KLASSE;
-    const KEY_TOPICS = 'svp-vortraege-themen:' + PLAN;
+    /* one list per Lerngruppe, in the browser as well: shared by plan, a list
+       changed offline for one group would go up for the next one opened */
+    const KEY_TOPICS = 'svp-vortraege-themen:' + PLAN + '/' + KLASSE;
 
     /* two talks on the same day: every date twice, in place order */
     const twice = (days) => days.flatMap((d) => [d, d]);
@@ -255,8 +258,8 @@
        04.09.2026). The order is a pure display matter - every entry carries its
        own `id`, and that id IS the `idx` column in the database, so a card can
        move without dragging a pupil's entry along with it.
-       Topics carry no personal data and therefore stay in localStorage, shared
-       by both class pages, as before. Stored shape:
+       Topics carry no personal data and therefore stay in localStorage, one
+       list per Lerngruppe (KEY_TOPICS). Stored shape:
        { v: 2, list: [ { id, lb, title, sub } ] } - the older index-keyed
        override object is lifted into that shape the first time it is read. */
     function loadList() {
@@ -1040,7 +1043,7 @@
         svpCrypto.passDialog('unlock', async () => { await refresh(); setStatus('Namen entschlüsselt.'); });
     }
 
-    /* ---------- edit mode for the topics (shared between the class pages) ---------- */
+    /* ---------- edit mode for the topics (one list per Lerngruppe) ---------- */
     function setEditing(on) {
         editing = on;
         $('list').classList.toggle('editing', on);
@@ -1735,9 +1738,16 @@
        All of it lives in svp_plan_edits (anon-readable, written by Doc only)
        under page keys of its own - svp-plan.js keys by real paths, so these
        rows never meet a plan page. Two rows (Doc, 12.09.2026):
-       - TOPICS_PAGE, per plan: the topics themselves (title, Leitfrage, the
-         copies), shared by the Lerngruppen as before - but in the cloud now,
-         so the pupils see Doc's list and not just the built-in ten.
+       - TOPICS_PAGE, per Lerngruppe (since 23.09.2026): the topics themselves
+         (title, Leitfrage, the copies), so the pupils see Doc's list and not
+         just the built-in ten. Until then ONE row per plan was shared by all
+         its Lerngruppen - renaming a topic for FOS25-1 renamed it for FOS25-2
+         too, while the names hang on the topic NUMBER (Doc: "Vortraege echt
+         unabhaengig, sicher getrennt"). That old plan-wide row, TOPICS_SHARED,
+         is never written any more: it is the template a group without a list
+         of its own still shows, and it is copied into TOPICS_PAGE the first
+         time Doc opens the group logged in (applyCloudList) - the same way
+         ensureRows() creates the places.
        - META_PAGE, per Lerngruppe: the ORDER of the talks, which is the
          schedule (a group that is ready moves to the top), the DATES by
          place (place 1 is the first Friday, whoever stands there), and Doc's
@@ -1749,8 +1759,9 @@
        sheets (weights and scale in svp-noten.js), and Doc can overwrite it.
        Dates are plain text, they are no secret; marks are
        stored as ciphertext only. */
-    const TOPICS_PAGE = '/svp/vortraege/' + PLAN;
-    const META_PAGE = TOPICS_PAGE + '/' + KLASSE;
+    const TOPICS_SHARED = '/svp/vortraege/' + PLAN;
+    const META_PAGE = TOPICS_SHARED + '/' + KLASSE;
+    const TOPICS_PAGE = META_PAGE + '/themen';
     let meta = { order: null, dates: {}, noten: {}, fundus: [], upload: '', fields: {} };
     /* the Fundus of this Lerngruppe - ids put aside, see toFundus() */
     function uniqIds(a) {
@@ -1793,7 +1804,7 @@
         const a = A();
         if (!a) return;
         try {
-            const pages = '(' + [TOPICS_PAGE, META_PAGE].map((p) => '"' + p + '"').join(',') + ')';
+            const pages = '(' + [TOPICS_PAGE, TOPICS_SHARED, META_PAGE].map((p) => '"' + p + '"').join(',') + ')';
             const res = await fetch(a.DB_URL + '/rest/v1/svp_plan_edits?page=in.' +
                 encodeURIComponent(pages) + '&select=page,edits,ts', {
                 headers: { apikey: a.DB_KEY, Authorization: 'Bearer ' + a.DB_KEY }
@@ -1801,7 +1812,9 @@
             if (!res.ok) return;
             const rows = await res.json();
             const own = rows.find((r) => r.page === META_PAGE);
-            const cat = rows.find((r) => r.page === TOPICS_PAGE);
+            /* this Lerngruppe's own list - until it has one, the plan-wide template */
+            const ownCat = rows.find((r) => r.page === TOPICS_PAGE);
+            const cat = ownCat || rows.find((r) => r.page === TOPICS_SHARED);
             const o = (own && own.edits) || {};
             meta = {
                 order: Array.isArray(o.order) ? o.order.map(Number) : null,
@@ -1814,7 +1827,7 @@
                 fields: o.fields && typeof o.fields === 'object' ? o.fields : {}
             };
             const cl = cat && cat.edits ? cleanList(cat.edits.list) : [];
-            cloudCat = cl.length ? { list: cl, ts: Date.parse(cat.ts) || 0 } : null;
+            cloudCat = cl.length ? { list: cl, ts: Date.parse(cat.ts) || 0, shared: !ownCat } : null;
             metaLoaded = true;
         } catch (e) { /* offline: this browser's list and the built-in dates stay */ }
     }
@@ -1855,9 +1868,10 @@
     }
 
     /* The topics and this Lerngruppe's order go up after every change of the
-       list. Logged out nothing leaves the browser - and the buttons that
-       change the list are not even shown then (updateEditBtns). */
-    function pushTopics(ts) {
+       list - into the rows of THIS Lerngruppe only. Logged out nothing leaves
+       the browser - and the buttons that change the list are not even shown
+       then (updateEditBtns). `note` replaces the usual status text. */
+    function pushTopics(ts, note) {
         if (!logged()) return Promise.resolve();
         const cat = catalogue.map((e) => ({ id: e.id, lb: e.lb, title: e.title, sub: e.sub }));
         const order = list.map((e) => e.id);
@@ -1869,34 +1883,40 @@
             if (!metaLoaded) throw new Error('Cloud nicht erreichbar');
             meta.order = order;
             await postEdits(META_PAGE, meta);
-        }).then(() => setStatus('☁ Liste gespeichert'),
+        }).then(() => setStatus(note || '☁ Liste gespeichert'),
             (e) => setStatus('☁ Liste NICHT in der Cloud: ' + e.message, true));
     }
 
     /* Which list to show: the cloud's - unless this browser holds a NEWER one
        of Doc's (changed while offline), which goes up instead. While the cloud
-       has none yet, a browser with a list of its own (Doc's) hands it over; a
-       browser that only knows the built-in ten never does, so a fresh device
-       cannot flatten Doc's topics. */
+       has none for this Lerngruppe (nor a template), a browser with a list of
+       its own (Doc's) hands it over; a browser that only knows the built-in
+       ten never does, so a fresh device cannot flatten Doc's topics.
+       A group still on the plan-wide template gets its own copy the moment
+       Doc opens it logged in - from then on it is independent. */
     function applyCloudList() {
         if (editing || metaBusy || !metaLoaded) return;
         const local = loadJSON(KEY_TOPICS);
         const hasLocal = Array.isArray(local.list) && local.list.length > 0;
         const localTs = Date.parse(local.ts || '') || 0;
         let push = false;
+        let copy = false;
         if (cloudCat && !(logged() && hasLocal && localTs > cloudCat.ts)) {
             catalogue = cloudCat.list.map((e) => Object.assign({}, e));
             saveJSON(KEY_TOPICS, { v: 2, list: catalogue, ts: new Date(cloudCat.ts).toISOString() });
+            /* only Doc may write - a pupil's browser just shows the template */
+            copy = !!cloudCat.shared && logged();
         } else if (logged() && hasLocal) {
             push = true;
         }
         list = arrange(catalogue, meta.order).filter((e) => !inFundus(e.id));
         list.forEach((e) => S(e.id));
         if (push) pushTopics(local.ts || undefined);
+        else if (copy) pushTopics(undefined, 'Themenliste für diese Lerngruppe angelegt — ab jetzt unabhängig von den anderen.');
     }
 
-    /* Changing the list changes it for everybody now, so only Doc - logged
-       in - gets the buttons for it. */
+    /* Changing the list changes it for every pupil of this Lerngruppe, so only
+       Doc - logged in - gets the buttons for it. */
     function updateEditBtns() {
         const on = logged();
         const e = $('btn-edit');
@@ -2123,8 +2143,8 @@
        Lerngruppe it shows. A page that brings its own #list (the test rig) is
        left untouched. */
     const HINT = 'Klick auf <b>&#9998; Bearbeiten</b> macht Thema und Leitfrage editierbar &mdash; gespeichert wird beim Klick auf ' +
-        '&bdquo;Fertig&ldquo;, in der Cloud (nur angemeldet). Die Themen gelten f&uuml;r beide Klassen gemeinsam, ' +
-        'die <b>Reihenfolge</b> je Klasse &mdash; sie ist der Vortragsplan, das Datum h&auml;ngt am Platz. ' +
+        '&bdquo;Fertig&ldquo;, in der Cloud (nur angemeldet). Themen und <b>Reihenfolge</b> gelten je Lerngruppe &mdash; ' +
+        'jede Gruppe hat ihre eigene Liste; die Reihenfolge ist der Vortragsplan, das Datum h&auml;ngt am Platz. ' +
         '<b>+ Vortrag hinzuf&uuml;gen</b> unter der Liste h&auml;ngt jederzeit ein weiteres Thema an &mdash; auch ohne Bearbeiten-Modus. ' +
         'Im Bearbeiten-Modus ist die <b>Nummer der Anfasser</b>: damit l&auml;sst sich die Reihenfolge ziehen. Die ' +
         '<b>rechte Maustaste</b> auf einer Karte dupliziert ein Thema, schiebt es eine Position h&ouml;her oder ' +

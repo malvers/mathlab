@@ -72,8 +72,12 @@ window.svpPlanParts.push(function (P) {
             : (def.klassen || [['a', '']]))
             .filter(function (k) { return !perGroup || !P.GROUP || P.groupKey(k[0]) === P.GROUP_KEY; });
         const base = '/svp/vortraege/' + key;
-        const pages = [base].concat(klassen.map(function (k) { return base + '/' + k[0]; }),
+        const metaPages = klassen.map(function (k) { return base + '/' + k[0]; }).concat(
             klassen.filter(function (k) { return k[1]; }).map(function (k) { return base + '/' + String(k[1]).replace(/[^A-Za-z0-9-]+/g, '_'); }));
+        /* since 23.09.2026 every Lerngruppe has a topic list of its own (META_PAGE +
+           '/themen', see vortraege.js); the plan-wide row is only the template a
+           group without one still shows */
+        const pages = [base].concat(metaPages, metaPages.map(function (p) { return p + '/themen'; }));
         const res = await fetch(svpAuth.DB_URL + '/rest/v1/svp_plan_edits?page=in.' +
             encodeURIComponent('(' + pages.map(function (p) { return '"' + p + '"'; }).join(',') + ')') +
             '&select=page,edits', { headers: { apikey: svpAuth.DB_KEY, Authorization: 'Bearer ' + svpAuth.DB_KEY } });
@@ -87,16 +91,21 @@ window.svpPlanParts.push(function (P) {
             const byGroup = base + '/' + slug(k[1]);
             return !row(base + '/' + k[0]) && k[1] && row(byGroup) ? byGroup : base + '/' + k[0];
         };
-        /* Doc's shared list in its order, else the built-in topics */
-        const seen = new Set();
-        let cat = [];
-        (Array.isArray(edits(base).list) ? edits(base).list : []).forEach(function (e) {
-            const id = +(e && e.id);
-            if (!Number.isFinite(id) || id < 0 || seen.has(id)) return;
-            seen.add(id);
-            cat.push({ id: id, title: typeof e.title === 'string' ? e.title : '' });
-        });
-        if (!cat.length) cat = (def.topics || []).map(function (t, i) { return { id: i, title: t.title }; });
+        /* the topics of one Lerngruppe: its own list, else the plan-wide template,
+           else the built-in ones */
+        const catOf = function (k) {
+            const own = edits(metaPage(k) + '/themen').list;
+            const src = Array.isArray(own) && own.length ? own : edits(base).list;
+            const seen = new Set();
+            const cat = [];
+            (Array.isArray(src) ? src : []).forEach(function (e) {
+                const id = +(e && e.id);
+                if (!Number.isFinite(id) || id < 0 || seen.has(id)) return;
+                seen.add(id);
+                cat.push({ id: id, title: typeof e.title === 'string' ? e.title : '' });
+            });
+            return cat.length ? cat : (def.topics || []).map(function (t, i) { return { id: i, title: t.title }; });
+        };
         /* kw -> Lerngruppe label -> ["1 · Titel", ...] */
         const byKw = {};
         /* dieselben Vortraege noch einmal flach, mit Datum: daraus macht
@@ -109,7 +118,7 @@ window.svpPlanParts.push(function (P) {
             const m = edits(metaPage(k));
             const fundus = new Set((Array.isArray(m.fundus) ? m.fundus : []).map(Number));
             const order = Array.isArray(m.order) ? m.order.map(Number) : null;
-            const list = V.arrange(cat, order).filter(function (e) { return !fundus.has(e.id); });
+            const list = V.arrange(catOf(k), order).filter(function (e) { return !fundus.has(e.id); });
             themen[k[0]] = list.map(function (e) { return e.id; });
             const own = V.datesFor(def, k[0]);
             const md = m.dates && typeof m.dates === 'object' ? m.dates : {};
