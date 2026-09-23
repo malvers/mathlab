@@ -164,6 +164,19 @@ def bullet_list(lines, kind="line", start=0):
     return "\n".join(out), start + len(groups)
 
 
+def figure_label(lab):
+    """One word of a drawn figure as <p class="fl">, centred on (x, y) in the picture box.
+    A label is (centre x, centre y, width, text) and may carry a fifth item: its own CSS, e.g.
+    "font-size:24px;color:#0E244E" for a word that belongs inside a drawn box. The line height
+    follows the type size (deck.css: line-height 1.28), so a bigger label stays centred."""
+    x, y, w, text = lab[:4]
+    css = lab[4] if len(lab) > 4 else ""
+    m = re.search(r"font-size:\s*([\d.]+)px", css)
+    line = float(m.group(1)) * 1.28 if m else 16.0
+    return ('<p class="fl" style="left:%gpx;top:%gpx;width:%gpx%s">%s</p>'
+            % (x - w / 2, y - line / 2, w, ";" + css if css else "", markup(text)))
+
+
 # -------------------------------------------------------------------- deck ---
 class HtmlDeck:
     """Same call surface as slides.Deck / omml.MathDeck - writes HTML."""
@@ -433,10 +446,9 @@ class HtmlDeck:
         """A drawn figure in the picture box (tools/pptx/ai_svg.py, svgfig): the shapes as inline SVG - sharp
         on any beamer - and the words as <p class="fl"> laid over it, which the deck editor changes like any
         line (Doc, 23.09.2026: "solche Bilder immer im HTML malen ... kann ich dann editieren?"). A label is
-        (centre x, centre y, width, text) in the box's 816 x 330 coordinates; the SVG must fill the box for
+        (centre x, centre y, width, text[, css]) in the box's 816 x 330 coordinates; the SVG must fill the box for
         them to line up, so `lines` (the smaller .below box) takes no labels. `png`: the .pptx twin only."""
-        words = "".join('<p class="fl" style="left:%gpx;top:%gpx;width:%gpx">%s</p>'
-                        % (x - w / 2, y - 8, w, markup(text)) for x, y, w, text in (labels or []))
+        words = "".join(figure_label(lab) for lab in (labels or []))
         if lines:
             assert not labels, "labels need the full picture box - no lines= with labels"
             self._slide("content has-below", '<h3>%s</h3><div class="rules"></div>'
@@ -984,7 +996,7 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 /* in the footer the whole line is as flat as the HUD buttons beside it (Doc, 23.09.2026: "mach alle so flach wie die
    restlichen footer butts") - her picture and the mic square, the field and the ? the same height, corners like the HUD */
 #ask-line #ask-btn{width:var(--hudbtn,22px);height:var(--hudbtn,22px);flex:none;box-shadow:none}   /* the inviting pulse stays */
-#ask-line #ask-row{flex:1;min-width:0;height:var(--hudbtn,22px)}
+#ask-line #ask-row{flex:1;min-width:0;height:var(--hudbtn,22px);overflow:hidden}   /* it grows out of her picture, see slideRow() */
 #ask-line #ask-mic,#ask-line #ask-tts{width:var(--hudbtn,22px);height:100%;border-radius:5px}
 #ask-line #ask-mic svg,#ask-line #ask-tts svg{width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6)}
 #ask-line input{height:100%;padding:0 8px;border-radius:5px;font-size:13px}
@@ -1375,7 +1387,8 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
       'Oranger Punkt am Vollbild-Knopf: nur ein Bildschirm – am Board heißt das gespiegelt']] : []),
     [K(['L']), 'Pointer an / aus (in der Präsentation)'],
     null,
-    [K(['P']), 'Solita erklärt – Start / Pause' + (avatar ? ' – rechts unten Solita fragen <img class="navpic" src="' + avatar.src + '" alt="">' : '')],
+    [K(['Shift', 'Leertaste', '/', 'P']), 'Solita zuhören lassen – die Frage sprechen'
+      + (avatar ? ' <img class="navpic" src="' + avatar.src + '" alt="">' : '')],
     null,
     [K(['Esc']), 'Schließen – beendet auch die Präsentation'],
     [K(['H']), 'Diese Hilfe']
@@ -1658,9 +1671,8 @@ const narr = (function () {
   // longer see the (detached) target inside #hud - it turned the page and paused Solita again
   btn.onclick = function (e) { e.stopPropagation(); toggle(); };
   big.onclick = function (e) { e.stopPropagation(); toggle(); };
-  addEventListener('keydown', function (e) {
-    if ((e.key === 'p' || e.key === 'P') && !e.metaKey && !e.ctrlKey && !e.altKey) toggle();
-  });
+  // P belongs to Solita's mic since 23.09.2026 ("shift space und P sollen das Mic starten") - the talk starts
+  // and pauses with its button in the HUD and the big one on the slide.
   show();
   return api;
 })();
@@ -2558,6 +2570,37 @@ ASK_JS = r"""
     });
   }
   bindInput();
+  // Shift+Space and P start the mic from anywhere on the slide, not only inside her panel; a closed line slides
+  // open first (Doc, 23.09.2026: "shift space und P sollen das Mic starten auf der ganzen Folie wenn eingeklappt,
+  // animiert ausklappen"). Capture, because the deck's own keys turn the page on Space.
+  function talk() {
+    const shut = panel.hidden;
+    if (shut) { open(); slideRow(); }                // out of her picture, then listen
+    if (micBtn.hidden) return;                       // no speech recognition in this browser
+    if (shut) setTimeout(function () { micBtn.click(); }, 120);   // after the line stands
+    else micBtn.click();                             // running: the same key stops it
+  }
+  addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const t = e.target;
+    if (t && t.closest && (t.closest('#ask') || t.closest('input, textarea, [contenteditable]'))) return;   // typing
+    if ((e.code === 'Space' && e.shiftKey) || e.key === 'p' || e.key === 'P') {
+      e.preventDefault(); e.stopImmediatePropagation();   // no page turn - the deck's own keys must not see it
+      talk();
+    }
+  }, true);
+  // the mic line grows out of her picture instead of jumping there
+  function slideRow() {
+    if (!line.classList.contains('on') || row.parentNode !== line) return;
+    const w = row.getBoundingClientRect().width;
+    if (!w) return;
+    row.style.transition = 'none'; row.style.maxWidth = '0px'; row.style.opacity = '0';
+    requestAnimationFrame(function () {
+      row.style.transition = 'max-width .3s ease, opacity .3s ease';
+      row.style.maxWidth = Math.ceil(w) + 'px'; row.style.opacity = '1';
+      setTimeout(function () { row.style.transition = row.style.maxWidth = row.style.opacity = ''; }, 360);
+    });
+  }
   box.addEventListener('keydown', function (e) {     // Shift+Space anywhere in the panel or the footer line: mic on, again: off (Doc, 23.09.2026)
     if (e.code === 'Space' && e.shiftKey && !micBtn.hidden) { e.preventDefault(); micBtn.click(); }
     // plain Space while the mic listens sends what was heard - and never lands in the field as a stray space

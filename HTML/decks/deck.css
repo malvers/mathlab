@@ -156,7 +156,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
    runs out of the box; here they resolve against the box - shrink to fit, never upscale */
 .pic img{max-width:100%;max-height:100%;object-fit:contain}
 .pic svg,.below svg{max-width:100%;max-height:100%;display:block}   /* a drawn figure (inline SVG) fits the box like a picture */
-.pic .fl{position:absolute;margin:0;text-align:center;font-size:12.5px;line-height:16px;color:var(--muted)}   /* a figure's words, laid over the SVG - the editor's text */
+.pic .fl{position:absolute;margin:0;text-align:center;font-size:12.5px;line-height:1.28;color:var(--muted)}   /* a figure's words, laid over the SVG - the editor's text; unitless line height, so a label scaled up keeps its own */
 .pic.left{justify-content:flex-start}
 /* small picture bottom right next to a table (table_top corner=) - text keeps clear of it */
 .corner-pic{position:absolute;right:72px;bottom:44px;max-width:200px;max-height:190px}
@@ -456,7 +456,7 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 /* in the footer the whole line is as flat as the HUD buttons beside it (Doc, 23.09.2026: "mach alle so flach wie die
    restlichen footer butts") - her picture and the mic square, the field and the ? the same height, corners like the HUD */
 #ask-line #ask-btn{width:var(--hudbtn,22px);height:var(--hudbtn,22px);flex:none;box-shadow:none}   /* the inviting pulse stays */
-#ask-line #ask-row{flex:1;min-width:0;height:var(--hudbtn,22px)}
+#ask-line #ask-row{flex:1;min-width:0;height:var(--hudbtn,22px);overflow:hidden}   /* it grows out of her picture, see slideRow() */
 #ask-line #ask-mic,#ask-line #ask-tts{width:var(--hudbtn,22px);height:100%;border-radius:5px}
 #ask-line #ask-mic svg,#ask-line #ask-tts svg{width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6)}
 #ask-line input{height:100%;padding:0 8px;border-radius:5px;font-size:13px}

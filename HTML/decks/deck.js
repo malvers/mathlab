@@ -266,7 +266,8 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
       ['<span class="help-dot ext"></span>', 'Grüner Punkt: Bildschirm erweitert – Präsentation kann starten']] : []),
     [K(['L']), 'Pointer an / aus (in der Präsentation)'],
     null,
-    [K(['P']), 'Solita erklärt – Start / Pause' + (avatar ? ' – rechts unten Solita fragen <img class="navpic" src="' + avatar.src + '" alt="">' : '')],
+    [K(['Shift', 'Leertaste', '/', 'P']), 'Solita zuhören lassen – die Frage sprechen'
+      + (avatar ? ' <img class="navpic" src="' + avatar.src + '" alt="">' : '')],
     null,
     [K(['Esc']), 'Schließen – beendet auch die Präsentation'],
     [K(['H']), 'Diese Hilfe']
@@ -601,9 +602,8 @@ const narr = (function () {
   // longer see the (detached) target inside #hud - it turned the page and paused Solita again
   btn.onclick = function (e) { e.stopPropagation(); toggle(); };
   big.onclick = function (e) { e.stopPropagation(); toggle(); };
-  addEventListener('keydown', function (e) {
-    if ((e.key === 'p' || e.key === 'P') && !e.metaKey && !e.ctrlKey && !e.altKey) toggle();
-  });
+  // P belongs to Solita's mic since 23.09.2026 ("shift space und P sollen das Mic starten") - the talk starts
+  // and pauses with its button in the HUD and the big one on the slide.
   show();
   return api;
 })();
@@ -1499,6 +1499,37 @@ fromHash();
     });
   }
   bindInput();
+  // Shift+Space and P start the mic from anywhere on the slide, not only inside her panel; a closed line slides
+  // open first (Doc, 23.09.2026: "shift space und P sollen das Mic starten auf der ganzen Folie wenn eingeklappt,
+  // animiert ausklappen"). Capture, because the deck's own keys turn the page on Space.
+  function talk() {
+    const shut = panel.hidden;
+    if (shut) { open(); slideRow(); }                // out of her picture, then listen
+    if (micBtn.hidden) return;                       // no speech recognition in this browser
+    if (shut) setTimeout(function () { micBtn.click(); }, 120);   // after the line stands
+    else micBtn.click();                             // running: the same key stops it
+  }
+  addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const t = e.target;
+    if (t && t.closest && (t.closest('#ask') || t.closest('input, textarea, [contenteditable]'))) return;   // typing
+    if ((e.code === 'Space' && e.shiftKey) || e.key === 'p' || e.key === 'P') {
+      e.preventDefault(); e.stopImmediatePropagation();   // no page turn - the deck's own keys must not see it
+      talk();
+    }
+  }, true);
+  // the mic line grows out of her picture instead of jumping there
+  function slideRow() {
+    if (!line.classList.contains('on') || row.parentNode !== line) return;
+    const w = row.getBoundingClientRect().width;
+    if (!w) return;
+    row.style.transition = 'none'; row.style.maxWidth = '0px'; row.style.opacity = '0';
+    requestAnimationFrame(function () {
+      row.style.transition = 'max-width .3s ease, opacity .3s ease';
+      row.style.maxWidth = Math.ceil(w) + 'px'; row.style.opacity = '1';
+      setTimeout(function () { row.style.transition = row.style.maxWidth = row.style.opacity = ''; }, 360);
+    });
+  }
   box.addEventListener('keydown', function (e) {     // Shift+Space anywhere in the panel or the footer line: mic on, again: off (Doc, 23.09.2026)
     if (e.code === 'Space' && e.shiftKey && !micBtn.hidden) { e.preventDefault(); micBtn.click(); }
     // plain Space while the mic listens sends what was heard - and never lands in the field as a stray space
