@@ -72,15 +72,6 @@
             overflow-y: hidden;
         }
 
-        #maya-hint {
-            position: absolute;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.92rem;
-            text-align: center;
-            opacity: 0.9;
-            pointer-events: none;
-        }
-
         .maya-row {
             display: flex;
             align-items: stretch;      /* the field takes the button's height, whatever it is */
@@ -162,7 +153,6 @@
             <div id="maya-solution" class="maya-card">
                 <div id="maya-formula"></div>
             </div>
-            <div id="maya-hint"></div>
             <canvas id="canvas"></canvas>
         </div>
     </main>
@@ -413,10 +403,9 @@
             // measure them, then give the board what is left
             const headEl = document.getElementById('maya-head');
             const solEl = document.getElementById('maya-solution');
-            const hintEl = document.getElementById('maya-hint');
             let top = 14;
             if (headEl && solEl) {
-                for (const el of [headEl, solEl, hintEl]) {
+                for (const el of [headEl, solEl]) {
                     if (!el) continue;
                     el.style.left = blockX + 'px';
                     el.style.width = blockW + 'px';
@@ -434,12 +423,7 @@
                 const hH = headEl.offsetHeight;
                 solEl.style.top = (headTop + hH + 10) + 'px';
                 const sH = solEl.offsetHeight;
-                let below = headTop + hH + 10 + sH;
-                if (hintEl) {
-                    hintEl.style.top = (below + 10) + 'px';
-                    below += hintEl.textContent ? hintEl.offsetHeight + 10 : 0;
-                }
-                top = below + 18;
+                top = headTop + hH + 10 + sH + 18;
             }
 
             const avail = H - top - pad;
@@ -453,16 +437,16 @@
             const panelH = rows * cellH + 26;
 
             // the places above it
-            const cardsH = Math.min(avail - panelH - 16, 250);
+            const cardsH = Math.min(avail - panelH - 16, 280);
             const cardW = (blockW - (n - 1) * 14) / n;
-            const cardH = Math.max(90, cardsH - 48);
+            const cardH = Math.max(90, cardsH - 24);
             const rowX = blockX;
 
-            const labelH = 24, productH = 30, captionH = 28;
-            const blockH = labelH + cardH + productH + captionH + rows * cellH;
+            const labelH = 24, captionH = 30;
+            const blockH = labelH + cardH + captionH + rows * cellH;
             const startY = top + Math.max(0, (avail - blockH) / 2);
             const cardY = startY + labelH;
-            const panelY = cardY + cardH + productH + captionH;
+            const panelY = cardY + cardH + captionH;
 
             for (let col = 0; col < n; col++) {
                 const place = n - 1 - col;              // the highest place stands on the left
@@ -483,14 +467,6 @@
                     hot ? COL.glyph : (flash || COL.line));
 
                 paintDigit(digits[place], x + cardW / 2, cardY + cardH / 2, cardW, cardH, place);
-
-                // what the place contributes, under the card
-                const d = digits[place];
-                ctx.textBaseline = 'top';
-                ctx.font = "400 14px 'Outfit', sans-serif";
-                ctx.fillStyle = d ? 'rgba(255, 255, 255, 0.72)' : 'rgba(255, 255, 255, 0.28)';
-                ctx.fillText(d + ' × ' + de(sys().values[place]) + ' = ' + de(d * sys().values[place]),
-                    x + cardW / 2, cardY + cardH + 8);
 
                 cards.push({ place, x, y: cardY, w: cardW, h: cardH });
             }
@@ -541,11 +517,10 @@
             return { x: e.clientX - r.left, y: e.clientY - r.top };
         }
 
-        function say(text, color) {
-            const el = document.getElementById('maya-hint');
-            if (!el) return;
-            el.textContent = text;
-            el.style.color = color || 'rgba(255, 255, 255, 0.8)';
+        // What a message used to say on the stage - the board says it now by flashing,
+        // so this only goes into the debug window.
+        function say(text) {
+            if (text) dbg(text);
         }
 
         function flashPlace(place, color) {
