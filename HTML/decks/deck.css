@@ -461,6 +461,10 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
   display:grid;place-items:center}   /* square like the others (Doc, 23.09.2026) */
 #ask-send svg{width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6);display:block}
 #ask.greet{display:none}   /* her greeting page: nothing of her below the slide (Doc, 23.09.2026: "nimm sie ganz raus") */
+/* in the footer line the answer box grows to about eight lines and no further (Doc, 23.09.2026: "und die Box nicht
+   höher als so") - longer answers scroll inside it, with the fading edges */
+#ask.inline #ask-out{max-height:var(--askmax,200px)}
+#ask.inline #ask-panel.sized #ask-out{height:min(var(--askh),var(--askmax,200px));max-height:var(--askmax,200px)}
 #ask.inline #ask-panel{position:fixed;right:auto}   /* the corner is empty: the panel hangs over her picture in the line - left, width and bottom come from placeRow() */
 #ask-panel{transition:opacity .25s ease}
 #ask-panel.bare{opacity:0;pointer-events:none}   /* nothing above to show: no answer (or folded by a page turn), no label */

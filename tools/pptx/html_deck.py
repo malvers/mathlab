@@ -989,6 +989,10 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
   display:grid;place-items:center}   /* square like the others (Doc, 23.09.2026) */
 #ask-send svg{width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6);display:block}
 #ask.greet{display:none}   /* her greeting page: nothing of her below the slide (Doc, 23.09.2026: "nimm sie ganz raus") */
+/* in the footer line the answer box grows to about eight lines and no further (Doc, 23.09.2026: "und die Box nicht
+   höher als so") - longer answers scroll inside it, with the fading edges */
+#ask.inline #ask-out{max-height:var(--askmax,200px)}
+#ask.inline #ask-panel.sized #ask-out{height:min(var(--askh),var(--askmax,200px));max-height:var(--askmax,200px)}
 #ask.inline #ask-panel{position:fixed;right:auto}   /* the corner is empty: the panel hangs over her picture in the line - left, width and bottom come from placeRow() */
 #ask-panel{transition:opacity .25s ease}
 #ask-panel.bare{opacity:0;pointer-events:none}   /* nothing above to show: no answer (or folded by a page turn), no label */
@@ -1996,7 +2000,7 @@ ASK_JS = r"""
     }
     label.hidden = true;                            // a question needs no label (Doc, 16.09.2026: "weg")
     input.setAttribute('aria-label', 'Deine Frage an Solita');   // the field still has a name (Doc's label rule)
-    input.type = 'text'; input.value = ''; input.placeholder = 'Frag Solita zur Folie oder Präsi';
+    input.type = 'text'; input.value = ''; hint();
     input.setAttribute('autocomplete', 'off');
     send.textContent = '?';                         // her sign again, in place of the tick
     micBtn.hidden = !(window.SpeechRecognition || window.webkitSpeechRecognition);
@@ -2108,6 +2112,10 @@ ASK_JS = r"""
         const span = document.createElement('span');
         try { katex.render(part.slice(1, -1), span, { throwOnError: false, displayMode: false }); }
         catch (e) { span.textContent = part; }
+        // the whole formula is one word for the karaoke, and it knows how long it takes to say: since the voice
+        // reads formulas, leaving them out let everything after them run ahead (Doc, 23.09.2026: "das Hiliting
+        // kommt durch die Formel durcheinander")
+        span.className = 'ask-w'; span.dataset.spoken = texWords(part.slice(1, -1));
         el.appendChild(span);
       } else if (part) {                          // one span per word, so her voice can light it up
         part.split(/(\s+)/).forEach(function (tok) {
@@ -2139,15 +2147,16 @@ ASK_JS = r"""
     const items = [];
     let pos = 0;
     el.querySelectorAll('.ask-w').forEach(function (sp) {
-      const w = sp.textContent.replace(/[*_`#>]/g, '');   // what speak() strips is not spoken either
+      const w = (sp.dataset.spoken || sp.textContent).replace(/[*_`#>]/g, '');   // a formula counts as what is said of it
+      const k = w.split(/\s+/).filter(Boolean).length || 1;   // a formula is several words in one span
       const n = syllables(w);
-      if (n) { items.push({ sp: sp, s: pos }); pos += n + KARA.base; }
+      if (n) { items.push({ sp: sp, s: pos, n: n, k: k }); pos += n + KARA.base * k; }
       if (/[.!?]["')\]]*$/.test(w)) pos += KARA.sentence;
       else if (/[,;:]["')\]]*$/.test(w)) pos += KARA.comma;
     });
     if (!items.length) return;
     const last = items[items.length - 1];
-    const total = last.s + syllables(last.sp.textContent) + KARA.base;
+    const total = last.s + last.n + KARA.base * last.k;
     let on = null;
     function mark(sp) {
       if (sp === on) return;
@@ -2204,6 +2213,19 @@ ASK_JS = r"""
     [/\\(alpha|beta|gamma|delta|epsilon|zeta|eta|theta|kappa|lambda|mu|nu|xi|pi|rho|sigma|tau|phi|chi|psi|omega)/gi,
      (m, g) => ' ' + g.charAt(0).toUpperCase() + g.slice(1) + ' ']
   ];
+  // The invitation in the field, as long as it fits - on a narrow screen the short form, never a cut sentence
+  // (Doc, 23.09.2026: "oder zum gesamten Deck").
+  const HINTS = ['Frag Solita zur Folie oder zum gesamten Deck', 'Frag Solita zur Folie oder zum Deck', 'Frag Solita'];
+  let pen = null;
+  function hint() {
+    if (input.type === 'password') return;
+    const cs = getComputedStyle(input);
+    const room = input.getBoundingClientRect().width - 2 * parseFloat(cs.paddingLeft) - 2;
+    if (!room) { input.placeholder = HINTS[0]; return; }   // not on screen yet - placeRow() asks again
+    if (!pen) pen = document.createElement('canvas').getContext('2d');
+    pen.font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+    input.placeholder = HINTS.find(function (t) { return pen.measureText(t).width <= room; }) || HINTS[HINTS.length - 1];
+  }
   function texWords(tex) {
     let t = ' ' + String(tex) + ' ';
     for (let i = 0; i < 4; i++) TEX_SIGNS.forEach(function (r) { t = t.replace(r[0], r[1]); });   // unwrap nested braces
@@ -2459,6 +2481,7 @@ ASK_JS = r"""
       const w = f.width ? f.width : parseFloat(line.style.width);
       panel.style.left = Math.round(f.width ? f.left : parseFloat(line.style.left)) + 'px';
       panel.style.width = Math.round(w) + 'px';
+      hint();                                        // the field just changed width
       panel.style.bottom = Math.round(innerHeight - (parseFloat(line.style.top) - h / 2) + 8) + 'px';
     }
     else rowBack();
