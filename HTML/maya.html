@@ -21,8 +21,17 @@
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="js/lab-shell-minimal.css">
     <style>
+        #maya-solution {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        #maya-solution {
+            font-size: 1.35rem;
+        }
+
         #maya-solution .katex {
-            font-size: 1.05em;
+            font-size: 1.45em;
         }
 
         #canvas {
@@ -68,8 +77,20 @@
 
 
         #maya-formula {
-            overflow-x: auto;
-            overflow-y: hidden;
+            position: relative;
+        }
+
+        .maya-term,
+        .maya-plus {
+            position: absolute;
+            top: 0;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        .maya-plus {
+            opacity: 0.5;
+            font-family: 'Outfit', sans-serif;
         }
 
         .maya-row {
@@ -318,8 +339,6 @@
             ctx.quadraticCurveTo(hx + w * 0.10, hy + h * 0.10, hx, hy);
             ctx.quadraticCurveTo(hx - w * 0.10, hy + h * 0.10, first[0], first[1]);
             ctx.closePath();
-            ctx.fillStyle = 'rgba(121, 158, 49, 0.13)';
-            ctx.fill();
             ctx.stroke();
 
             ctx.lineWidth = Math.max(0.8, lw * 0.6);
@@ -399,7 +418,11 @@
             const blockW = Math.min(W - 2 * pad, n * 200 + (n - 1) * 14);
             const blockX = (W - blockW) / 2;
 
-            // the number, the sum and the hint sit above the board as HTML cards -
+            // where the places will stand - the sum's terms line up with these columns
+            const cardW = (blockW - (n - 1) * 14) / n;
+            const colCenter = (col) => blockX + col * (cardW + 14) + cardW / 2;
+
+            // the number and the sum sit above the board as HTML cards -
             // measure them, then give the board what is left
             const headEl = document.getElementById('maya-head');
             const solEl = document.getElementById('maya-solution');
@@ -419,6 +442,13 @@
                         headTop = Math.max(headTop, b.bottom - rect.top + 12);
                     }
                 }
+                solEl.querySelectorAll('.maya-term').forEach(el => {
+                    el.style.left = (colCenter(Number(el.dataset.col)) - blockX) + 'px';
+                });
+                solEl.querySelectorAll('.maya-plus').forEach(el => {
+                    const g = Number(el.dataset.gap);
+                    el.style.left = ((colCenter(g) + colCenter(g + 1)) / 2 - blockX) + 'px';
+                });
                 headEl.style.top = headTop + 'px';
                 const hH = headEl.offsetHeight;
                 solEl.style.top = (headTop + hH + 10) + 'px';
@@ -438,14 +468,13 @@
 
             // the places above it
             const cardsH = Math.min(avail - panelH - 16, 280);
-            const cardW = (blockW - (n - 1) * 14) / n;
             const cardH = Math.max(90, cardsH - 24);
             const rowX = blockX;
 
-            const labelH = 24, gapH = 22, captionH = 28;
-            const blockH = labelH + cardH + gapH + rows * cellH + captionH;
+            const gapH = 22, captionH = 28;
+            const blockH = cardH + gapH + rows * cellH + captionH;
             const startY = top + Math.max(0, (avail - blockH) / 2);
-            const cardY = startY + labelH;
+            const cardY = startY;
             const panelY = cardY + cardH + gapH;
 
             for (let col = 0; col < n; col++) {
@@ -453,13 +482,6 @@
                 const x = rowX + col * (cardW + 14);
                 const flash = flashColor(place);
                 const hot = hoverPlace === place;
-
-                // place value above the card
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
-                ctx.fillStyle = COL.dim;
-                ctx.font = "600 15px 'Orbitron', sans-serif";
-                ctx.fillText(de(sys().values[place]), x + cardW / 2, cardY - 6);
 
                 ctx.lineWidth = (flash || hot) ? 2 : 1;
                 roundRect(x, cardY, cardW, cardH, 16,
@@ -628,18 +650,27 @@
         canvas.addEventListener('pointercancel', () => { drag = null; hoverPlace = null; draw(); });
 
         // ------------------------------------------------------------------ readout ---
+        // The sum stands column by column: every term over its place, every plus over
+        // the gap between two places. draw() puts them where the cards are.
         function renderFormula() {
-            const el = document.getElementById('maya-formula');
-            if (!el) return;
+            const host = document.getElementById('maya-formula');
+            if (!host) return;
             const n = places();
-            const parts = [];
-            for (let i = n - 1; i >= 0; i--) parts.push(digits[i] + ' \\cdot ' + sys().values[i]);
-            const tex = parts.join(' + ') + ' = ' + value();
-            if (window.katex) {
-                katex.render(tex, el, { throwOnError: false, displayMode: false });
-            } else {
-                el.textContent = tex.replace(/\\cdot/g, '·');
+            let html = '';
+            for (let i = 0; i < n; i++) {
+                html += '<span class="maya-term" data-col="' + i + '"></span>';
+                if (i < n - 1) html += '<span class="maya-plus" data-gap="' + i + '">+</span>';
             }
+            host.innerHTML = html;
+            host.querySelectorAll('.maya-term').forEach(el => {
+                const place = n - 1 - Number(el.dataset.col);
+                const tex = digits[place] + ' \\cdot ' + sys().values[place];
+                if (window.katex) katex.render(tex, el, { throwOnError: false });
+                else el.textContent = digits[place] + ' \u00b7 ' + sys().values[place];
+            });
+            let h = 0;
+            host.querySelectorAll('span').forEach(el => { h = Math.max(h, el.offsetHeight); });
+            host.style.height = (h || 22) + 'px';
         }
 
         function updateHead() {
