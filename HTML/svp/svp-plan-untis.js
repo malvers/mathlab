@@ -261,7 +261,7 @@ window.svpPlanParts.push(function (P) {
                 (!pick || pick.has(l.date + '|' + l.start + '|' + classKey(l.klassen))));
             if (!mine.length) {
                 targets.textContent = pick
-                    ? 'Keine passende Stunde fuer diesen Termin.'
+                    ? 'Keine passende Stunde für diesen Termin.'
                     : 'Keine passende Stunde in dieser Woche.';
                 return;
             }

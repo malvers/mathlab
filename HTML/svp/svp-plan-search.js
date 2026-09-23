@@ -443,7 +443,7 @@ window.svpPlanParts.push(function (P) {
         searchInput.placeholder = 'Suchen …';
         searchInput.autocomplete = 'off';
         searchInput.setAttribute('aria-label', 'Im Plan suchen');
-        searchInput.title = 'Sucht in Woche, Bereich, Thema, Stichpunkten, Notizen und Material - samt Dateiname und Beschreibung, ab drei Zeichen auch IM verlinkten Material (Decks, Aufgabenblaetter)';
+        searchInput.title = 'Sucht in Woche, Bereich, Thema, Stichpunkten, Notizen und Material - samt Dateiname und Beschreibung, ab drei Zeichen auch IM verlinkten Material (Decks, Aufgabenblätter)';
         searchCount = document.createElement('span');
         searchCount.className = 'svp-search-count';
         /* At the right end of the toolbar: the pill legend that used to sit
@@ -487,7 +487,7 @@ window.svpPlanParts.push(function (P) {
             b.className = 'action secondary';
             b.textContent = 'Formelsammlung';
             b.title = 'Mathematisch-Naturwissenschaftliche Formelsammlung (IQB/KMK) - ' +
-                'das einzige zugelassene Hilfsmittel der Abiturpruefung';
+                'das einzige zugelassene Hilfsmittel der Abiturprüfung';
             b.addEventListener('click', function () {
                 window.open(FORMELN_URL, '_blank', 'noopener');
             });

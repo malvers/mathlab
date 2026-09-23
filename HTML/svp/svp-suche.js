@@ -42,10 +42,10 @@
     feld.type = 'search';
     feld.id = 'svp-suche';
     feld.className = 'svp-search nav-suche-feld';
-    feld.placeholder = 'Alle Plaene durchsuchen …';
+    feld.placeholder = 'Alle Pläne durchsuchen …';
     feld.autocomplete = 'off';
-    feld.setAttribute('aria-label', 'Ueber alle Stoffverteilungsplaene suchen');
-    feld.title = 'Sucht in allen Plaenen: Woche, Bereich, Thema, Stichpunkte und Material';
+    feld.setAttribute('aria-label', 'Über alle Stoffverteilungspläne suchen');
+    feld.title = 'Sucht in allen Plänen: Woche, Bereich, Thema, Stichpunkte und Material';
     const zahl = document.createElement('span');
     zahl.className = 'svp-search-count nav-suche-zahl';
     const drop = document.createElement('div');

@@ -16,7 +16,7 @@
     const PLAN_HREF = LOCAL ? 'stundenplan.html' : 'meinplan.html';
     const PLAN_TITLE = LOCAL
         ? 'Stundenplan der ganzen Schule (Konflikte, Optimierer)'
-        : 'Mein Stundenplan - die veroeffentlichte Wochenansicht';
+        : 'Mein Stundenplan - die veröffentlichte Wochenansicht';
 
     // [href relative to svp root, short label (pill row), badge color class,
     //  spelled-out label for the edit panel]
@@ -475,8 +475,8 @@
     untisPill.target = '_blank';
     untisPill.rel = 'noopener';
     untisPill.textContent = 'U';
-    untisPill.title = 'WebUntis oeffnen';
-    untisPill.setAttribute('aria-label', 'WebUntis oeffnen');
+    untisPill.title = 'WebUntis öffnen';
+    untisPill.setAttribute('aria-label', 'WebUntis öffnen');
     navMid.appendChild(untisPill);
     const moreWrap = navSchul.querySelector('.nav-drop-wrap[data-drop="Mehr"]');
     if (moreWrap) navMore.appendChild(moreWrap);

@@ -138,7 +138,7 @@ window.svpPlanParts.push(function (P) {
             raus.push({
                 label: 'Formelsammlung', url: FORMELN_URL, icon: 'link',
                 titel: 'Mathematisch-Naturwissenschaftliche Formelsammlung (IQB/KMK) - ' +
-                    'das einzige zugelassene Hilfsmittel der Abiturpruefung'
+                    'das einzige zugelassene Hilfsmittel der Abiturprüfung'
             });
         }
         return raus;
@@ -786,7 +786,7 @@ window.svpPlanParts.push(function (P) {
                 a.href = siteHref(en.url);
                 a.target = '_blank';
                 a.rel = 'noopener';
-                a.title = 'Dateien hochladen — oeffnet OneDrive';
+                a.title = 'Dateien hochladen — öffnet OneDrive';
                 const ico = document.createElement('span');
                 ico.className = 'mat-upload-ico';
                 ico.textContent = '\u2191';
