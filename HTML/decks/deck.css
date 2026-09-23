@@ -305,7 +305,8 @@ html.presenter #overview{background:var(--night)}   /* opaque over the presenter
   transform-origin:0 0;pointer-events:none}
 .ov-thumb .step{opacity:1!important}
 .ov-num{position:absolute;left:8px;bottom:6px;padding:2px 7px;border-radius:5px;
-  background:rgba(14,36,78,.78);color:#fff;font:600 12px Raleway,system-ui,sans-serif}
+  background:rgba(14,36,78,.45);color:rgba(255,255,255,.92);font:500 12px Raleway,system-ui,sans-serif;
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}   /* softer (Doc, 23.09.2026: "die Zahlen pillen sehen zu hart aus") */
 /* a hidden slide (class "skip"): the class never sees it, while editing it sits greyed out in the overview */
 .ov-cell[hidden]{display:none}
 /* while editing the tile stays fully readable (Doc, 21.09.2026: "nee lass bitte drin") -
@@ -391,7 +392,8 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 #pres .p-cell.off .p-num{background:rgba(176,36,24,.9);letter-spacing:.5px;text-transform:uppercase}
 .p-thumb{position:absolute;inset:0;overflow:hidden;background:#fff;border-radius:5px}
 .p-num{position:absolute;left:5px;bottom:4px;padding:1px 6px;border-radius:4px;
-  background:rgba(14,36,78,.78);color:#fff;font:600 11px Raleway,system-ui,sans-serif}
+  background:rgba(14,36,78,.45);color:rgba(255,255,255,.92);font:500 11px Raleway,system-ui,sans-serif;
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}   /* as soft as in the overview */
 /* upright screen (a tablet as presenter): slide on top, both previews side by side below */
 @media (max-aspect-ratio:1/1){
   #pres{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1.4fr) minmax(0,1fr) clamp(64px,13vh,124px);
@@ -443,9 +445,18 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 /* while the panel is open, the question line stands in the footer - behind "... Doc Alvers fragen!" and in front of the
    page number; the answers stay above Solita (Doc, 23.09.2026: "nicht dauerhaft, nur wenn Solita clicked wie jetzt").
    JS measures the gap on the screen; too narrow (a phone) and the line stays in the panel. */
-#ask-line{position:fixed;z-index:11;display:none;transform:translateY(-50%)}
-#ask-line.on{display:block}
-#ask-row #ask-btn{width:32px;height:32px;flex:none;align-self:center;box-shadow:none;opacity:1;animation:none}   /* leading the footer line, as tall as the mic button */
+#ask-line{position:fixed;z-index:11;display:none;transform:translateY(-50%);gap:6px;align-items:center;pointer-events:none}   /* the empty part lets clicks reach the slide */
+#ask-line.on{display:flex}
+#ask-line>*{pointer-events:auto}
+/* in the footer the whole line is as flat as the HUD buttons beside it (Doc, 23.09.2026: "mach alle so flach wie die
+   restlichen footer butts") - her picture and the mic square, the field and the ? the same height, corners like the HUD */
+#ask-line #ask-btn{width:var(--hudbtn,22px);height:var(--hudbtn,22px);flex:none;box-shadow:none}   /* the inviting pulse stays */
+#ask-line #ask-row{flex:1;min-width:0;height:var(--hudbtn,22px)}
+#ask-line #ask-mic,#ask-line #ask-tts{width:var(--hudbtn,22px);height:100%;border-radius:5px}
+#ask-line #ask-mic svg,#ask-line #ask-tts svg{width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6)}
+#ask-line input{height:100%;padding:0 8px;border-radius:5px;font-size:13px}
+#ask-line #ask-send{width:var(--hudbtn,22px);height:100%;min-width:0;padding:0;border-radius:5px;font-size:14px}   /* square like the others (Doc, 23.09.2026) */
+#ask.foot #ask-panel{bottom:0}   /* the corner is empty: the panel comes down to the footer band */
 #ask-panel{transition:opacity .25s ease}
 #ask-panel.bare{opacity:0;pointer-events:none}   /* nothing above to show: no answer (or folded by a page turn), no label */
 /* a light blue tint (Doc, 16.09.2026: "leicht bläulich"); field and buttons a shade darker blue ("etwas dunkelblauer als der HG") */

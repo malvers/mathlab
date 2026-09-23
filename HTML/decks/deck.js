@@ -104,7 +104,7 @@ function dock(){
   let right = Math.max(8, Math.round(innerWidth - (r.right - 16 * s)));
   if (ask) {
     ask.style.right = right + 'px'; ask.style.bottom = 'auto'; ask.style.top = Math.round(cy - av / 2) + 'px';
-    right += av + 8;
+    if (ask.querySelector(':scope > #ask-btn')) right += av + 8;   // her picture in the corner needs the room - in the footer line it does not (Doc, 23.09.2026: "Solita pille rechts weg")
   }
   hud.style.right = right + 'px'; hud.style.bottom = 'auto'; hud.style.top = Math.round(cy - btn / 2) + 'px';
   const nav = document.getElementById('nav');       // the slide triangles: left end of the footer line
@@ -268,7 +268,7 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
     [K(['P']), 'Solita erklärt – Start / Pause' + (avatar ? ' – rechts unten Solita fragen <img class="navpic" src="' + avatar.src + '" alt="">' : '')],
     null,
     [K(['Esc']), 'Schließen – beendet auch die Präsentation'],
-    [K(['H', '|', '?']), 'Diese Hilfe']
+    [K(['H']), 'Diese Hilfe']
   ];
   help.innerHTML = '<h4>Tastenkürzel</h4><table>'
     + rows.map(r => r ? '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>'
@@ -279,7 +279,7 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
   addEventListener('keydown', e => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.target && e.target.closest && e.target.closest('#ask, #linkgo, input, textarea')) return;   // a "?" typed to Solita
-    if (e.key === '?' || e.key === 'h' || e.key === 'H') { help.hidden = !help.hidden; e.preventDefault(); }
+    if (e.key === 'h' || e.key === 'H') { help.hidden = !help.hidden; e.preventDefault(); }   // only H - the ? belongs to Solita's line (Doc, 23.09.2026)
     else if (e.key === 'Escape' && !help.hidden) help.hidden = true;
   });
 })();
@@ -1316,8 +1316,8 @@ fromHash();
   const LINE_GAP = 14, LINE_MIN = 220;
   const edge = window.ResizeObserver && new ResizeObserver(function () { placeRow(); });   // the page number's width jumps when its font arrives
   let edgeOn = null;                                  // the page number the observer watches - re-observing it in its own callback would fire every frame
+  let again = false;                                  // one re-measure after the corner emptied or filled, never a loop
   function placeRow() {
-    if (panel.hidden) return;
     if (PRESENTER) { placePres(); return; }
     const s = slides[si], foot = s && s.querySelector('.foot'), pn = s && s.querySelector('.pageno');
     let fits = false;
@@ -1332,22 +1332,31 @@ fromHash();
         fits = true;
       }
     }
-    if (fits) {                                       // her picture leads the line, the corner is empty (Doc, 23.09.2026: "Solita links neben das Mic, rechts weg")
-      move(line, null); line.classList.add('on');
-      if (btn.parentNode !== row) row.insertBefore(btn, row.firstChild);
+    // Her picture always stands behind "... fragen!", the corner stays empty; the row (mic, field, ?) joins her while the
+    // panel is open (Doc, 23.09.2026: "Solita pille rechts weg und immer nach fragen!"). No room: everything in the corner.
+    const was = btn.parentNode === line;
+    if (fits) {
+      line.classList.add('on'); lead();
+      if (panel.hidden) move(panel, home()); else move(line, null);
     }
     else rowBack();
+    box.classList.toggle('foot', fits);              // the panel then sits right above the footer band
+    if (was !== fits && !again && typeof dock === 'function') {   // the HUD and the page number move with the corner - measure once more
+      again = true; dock(); placeRow(); again = false;
+    }
   }
+  function lead() { if (btn.parentNode !== line) line.insertBefore(btn, line.firstChild); }
+  function home() { return rowHome && rowHome.parentNode === panel ? rowHome : null; }
   function move(to, before) {                        // moving a focused field blurs it - Doc keeps typing
     if (row.parentNode === to) return;
     const typing = document.activeElement === input;
     to.insertBefore(row, before);
     if (typing) input.focus();
   }
-  function rowBack() {
+  function rowBack() {                               // everything back to the corner: the line off, the row in the panel, her picture under it
     line.classList.remove('on');
-    move(panel, rowHome && rowHome.parentNode === panel ? rowHome : null);
-    if (btn.parentNode === row) box.insertBefore(btn, btnHome && btnHome.parentNode === box ? btnHome : null);
+    move(panel, home());
+    if (btn.parentNode === line) box.insertBefore(btn, btnHome && btnHome.parentNode === box ? btnHome : null);
   }
   // Presenter view (Doc, 23.09.2026: "Solita AI kann ich im Präsi Mode nicht bedienen ... WICHTIG"): the line rides on the
   // .p-ask slot under the page turner, her picture in front; the answers hang over the live slide's corner, where the
@@ -1357,8 +1366,7 @@ fromHash();
     if (!slot || !frame) return;                     // the presenter view is not built yet
     const r = slot.getBoundingClientRect(), f = frame.getBoundingClientRect();
     line.style.left = r.left + 'px'; line.style.width = r.width + 'px'; line.style.top = (r.top + r.height / 2) + 'px';
-    move(line, null); line.classList.add('on');
-    if (btn.parentNode !== row) row.insertBefore(btn, row.firstChild);
+    move(line, null); line.classList.add('on'); lead();
     box.style.right = Math.round(innerWidth - f.right + 8) + 'px';
     box.style.top = 'auto';                          // dock() hangs it from the top of the (hidden) footer band
     box.style.bottom = Math.round(innerHeight - f.bottom + 8) + 'px';
@@ -1381,7 +1389,7 @@ fromHash();
     input.focus();
     warm();
   }
-  function close() { if (PRESENTER) return; panel.hidden = true; rowBack(); stopAudio(); }   // the presenter's line stays
+  function close() { if (PRESENTER) return; panel.hidden = true; placeRow(); stopAudio(); }   // the row goes home, her picture stays in the footer; the presenter's line stays
 
   document.getElementById('ask-btn').onclick = function () {
     this.classList.remove('invite');                 // found her - no more inviting on this page
@@ -1418,16 +1426,9 @@ fromHash();
     panel.hidden = false;
     if (!pwd()) askPassword(); else askQuestion();
   }
-  // The ordinary window too (Doc, 23.09.2026: "im Präsi Mode ist es schon richtig ... im Normal bitte auch so"): where the
-  // password is stored - Doc's own devices - the line stands in the footer from the start, no click on her picture needed.
-  // Without it (the students' devices) her picture waits for the click as before: nobody meets a password prompt uninvited.
-  // No focus and no warm-up here: the keys stay with the deck until Doc clicks into the field.
-  else if (pwd()) {
-    panel.hidden = false;
-    askQuestion();
-    rest();
-    placeRow();
-  }
+  // The ordinary window starts with her picture alone behind "... fragen!" - password stored or not - and the line (mic,
+  // field, ?) comes with the click on her (Doc, 23.09.2026: "default: nur Solita"; before that day the stored password
+  // opened the line at load). No focus and no warm-up here: the keys stay with the deck until Doc clicks into the field.
   addEventListener('load', placeRow);                 // dock() has just moved the page number - place the line after it
 })();
 
