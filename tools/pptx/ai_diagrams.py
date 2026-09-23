@@ -283,10 +283,12 @@ def fenster(path, W=1360, H=860):
     d.rounded_rectangle((x0 - 26, y0 - 34, x1 + 26, y + 10), radius=20, outline=NAVY, width=5)
     centered(d, "KONTEXTFENSTER", (x0 + x1) / 2, y0 - 66, f_head, NAVY)
 
+    # what fell out is greyed, but only to MUTED: the lighter (176,186,206) vanished on the
+    # slide's pale blue background (Doc, 23.09.2026: "kaum lesbar")
     dy = y + 110
     for i, t in enumerate(("… die ersten Sätze des Gesprächs", "… die Datei von vorhin")):
-        centered(d, t, (x0 + x1) / 2, dy + i * 40, f_small, (176, 186, 206))
-    arrow(d, ((x0 + x1) / 2, y + 24), ((x0 + x1) / 2, dy - 34), (176, 186, 206), 4, head=16)
+        centered(d, t, (x0 + x1) / 2, dy + i * 40, f_small, MUTED)
+    arrow(d, ((x0 + x1) / 2, y + 24), ((x0 + x1) / 2, dy - 34), MUTED, 4, head=16)
     centered(d, "Ist es voll, fällt das Älteste heraus — das Modell vergisst.",
              W / 2, H - 42, f_lab, BODY)
     return save(img, path)
