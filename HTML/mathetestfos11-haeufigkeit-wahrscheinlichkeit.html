@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Häufigkeit und Wahrscheinlichkeit — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w23-haeufigkeit-wahrscheinlichkeit',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Häufigkeit und Wahrscheinlichkeit',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 23 (LB 2) · 20 Aufgaben: relative Häufigkeit, Laplace-Wahrscheinlichkeit, Eigenschaften, Gesetz der großen Zahlen · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 23 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: relative Haeufigkeit (1-6), Laplace-Wahrscheinlichkeit (7-12), Eigenschaften (13-17), Gesetz der grossen Zahlen (18-20). */
+  questions: [
+    {
+      q: 'Wie berechnet man die relative Häufigkeit eines Ereignisses?',
+      opts: ['absolute Häufigkeit geteilt durch die Anzahl der Versuche', 'absolute Häufigkeit mal Anzahl der Versuche', 'Anzahl der Versuche geteilt durch die absolute Häufigkeit', 'absolute Häufigkeit minus Anzahl der Versuche'],
+      steps: [
+        'Die absolute Häufigkeit zählt, wie oft das Ereignis eingetreten ist.',
+        'Die relative Häufigkeit setzt das ins Verhältnis zur Gesamtzahl: $h = \\dfrac{k}{n}$.',
+        'Dadurch werden Versuchsreihen unterschiedlicher Länge vergleichbar.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bei $60$ Würfen fällt $12$-mal eine Sechs. Wie groß ist die relative Häufigkeit?',
+      opts: ['$12$', '$0{,}12$', '$5$', '$0{,}2$'],
+      steps: [
+        '$h = \\dfrac{12}{60}$',
+        '$= \\dfrac{1}{5} = 0{,}2$',
+        'Das sind $20\\,\\%$ der Würfe — deutlich mehr als der theoretische Wert $\\dfrac{1}{6} \\approx 0{,}167$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Werte kann eine relative Häufigkeit annehmen?',
+      opts: ['alle Werte zwischen $0$ und $1$ einschließlich der Grenzen', 'nur Werte zwischen $0$ und $0{,}5$', 'alle natürlichen Zahlen', 'alle Werte zwischen $-1$ und $1$'],
+      steps: [
+        'Der Zähler ist höchstens so groß wie der Nenner.',
+        'Tritt das Ereignis nie ein, ist $h = 0$; tritt es immer ein, ist $h = 1$.',
+        'Also $0 \\leq h \\leq 1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was ergibt die Summe der relativen Häufigkeiten aller Ergebnisse einer Versuchsreihe?',
+      opts: ['immer $0$', 'die Anzahl der Versuche', 'immer $1$', 'das hängt vom Versuch ab'],
+      steps: [
+        'Jeder Versuch liefert genau ein Ergebnis.',
+        'Die absoluten Häufigkeiten addieren sich also zur Versuchszahl $n$.',
+        'Geteilt durch $n$ ergibt das $1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bei $200$ Würfen einer Münze fällt $94$-mal Kopf. Wie groß ist die relative Häufigkeit für Zahl?',
+      opts: ['$0{,}53$', '$106$', '$0{,}47$', '$0{,}5$'],
+      steps: [
+        'Zahl fiel $200 - 94 = 106$-mal.',
+        '$h = \\dfrac{106}{200} = 0{,}53$',
+        'Die Summe beider relativer Häufigkeiten ist $0{,}47 + 0{,}53 = 1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wozu dient die relative Häufigkeit in der Wahrscheinlichkeitsrechnung?',
+      opts: ['Sie ersetzt die Ergebnismenge.', 'Sie gibt an, wie oft ein Versuch wiederholt werden muss.', 'Sie ist immer genau gleich der Wahrscheinlichkeit.', 'Sie ist ein Schätzwert für die Wahrscheinlichkeit, wenn diese nicht theoretisch bestimmbar ist.'],
+      steps: [
+        'Bei einer Reißzwecke oder einem verbeulten Würfel lässt sich die Wahrscheinlichkeit nicht ausrechnen.',
+        'Man ermittelt sie dann durch viele Versuche und nimmt die relative Häufigkeit als Schätzwert.',
+        'Je mehr Versuche, desto verlässlicher der Schätzwert.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie berechnet man die Wahrscheinlichkeit bei einem Laplace-Versuch?',
+      opts: ['günstige Ergebnisse mal alle Ergebnisse', 'günstige Ergebnisse minus alle Ergebnisse', 'Anzahl aller Ergebnisse geteilt durch die günstigen', 'Anzahl der günstigen Ergebnisse geteilt durch die Anzahl aller Ergebnisse'],
+      steps: [
+        '$P(A) = \\dfrac{\\left|A\\right|}{\\left|\\Omega\\right|}$',
+        'Voraussetzung ist, dass alle Ergebnisse gleich wahrscheinlich sind.',
+        'Nur dann darf einfach abgezählt werden.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist beim Würfel die Wahrscheinlichkeit für eine gerade Augenzahl?',
+      opts: ['$\\dfrac{1}{6}$', '$\\dfrac{1}{2}$', '$\\dfrac{2}{3}$', '$\\dfrac{1}{3}$'],
+      steps: [
+        'Günstig sind $2$, $4$ und $6$, also drei Ergebnisse.',
+        '$P = \\dfrac{3}{6} = \\dfrac{1}{2}$',
+        'Gerade und ungerade sind gleich wahrscheinlich.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist beim Würfel die Wahrscheinlichkeit für eine Augenzahl größer als $4$?',
+      opts: ['$\\dfrac{1}{6}$', '$\\dfrac{1}{3}$', '$\\dfrac{1}{2}$', '$\\dfrac{2}{6}$ und damit $\\dfrac{1}{4}$'],
+      steps: [
+        'Günstig sind $5$ und $6$.',
+        '$P = \\dfrac{2}{6} = \\dfrac{1}{3}$',
+        'Die $4$ zählt nicht mit, denn gefragt ist „größer als“, nicht „mindestens“.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In einer Urne liegen $3$ rote und $5$ blaue Kugeln. Wie groß ist die Wahrscheinlichkeit, eine rote zu ziehen?',
+      opts: ['$\\dfrac{5}{8}$', '$\\dfrac{3}{8}$', '$\\dfrac{1}{3}$', '$\\dfrac{3}{5}$'],
+      steps: [
+        'Insgesamt sind es $3 + 5 = 8$ Kugeln.',
+        '$P(\\text{rot}) = \\dfrac{3}{8}$',
+        '$\\dfrac{3}{5}$ wäre das Verhältnis rot zu blau, nicht die Wahrscheinlichkeit.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Aus einem Skatblatt mit $32$ Karten wird eine gezogen. Wie groß ist die Wahrscheinlichkeit für Herz?',
+      opts: ['$\\dfrac{8}{24}$', '$\\dfrac{1}{32}$', '$\\dfrac{1}{4}$', '$\\dfrac{1}{8}$'],
+      steps: [
+        'Von den vier Farben hat jede $8$ Karten.',
+        '$P = \\dfrac{8}{32} = \\dfrac{1}{4}$',
+        'Das ist derselbe Wert wie der Anteil einer Farbe am Blatt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welcher Versuch ist KEIN Laplace-Versuch?',
+      opts: ['das Werfen einer fairen Münze', 'das Werfen eines fairen Würfels', 'das Ziehen einer Karte aus einem gut gemischten Skatblatt', 'das Ziehen einer Kugel aus einer Urne mit $3$ roten und $5$ blauen Kugeln, wenn nur die Farbe zählt'],
+      steps: [
+        'Bei einem Laplace-Versuch müssen alle Ergebnisse gleich wahrscheinlich sein.',
+        'Zählt nur die Farbe, hat $\\Omega = \\{\\text{rot};\\,\\text{blau}\\}$ zwei Ergebnisse — aber blau ist wahrscheinlicher.',
+        'Zählt man dagegen die einzelnen Kugeln, ist es wieder ein Laplace-Versuch.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchen Wert hat die Wahrscheinlichkeit des sicheren Ereignisses?',
+      opts: ['$P(\\Omega) = 0$', '$P(\\Omega) = 0{,}5$', '$P(\\Omega) = 1$', 'das hängt vom Versuch ab'],
+      steps: [
+        'Das sichere Ereignis umfasst alle Ergebnisse.',
+        '$P(\\Omega) = \\dfrac{\\left|\\Omega\\right|}{\\left|\\Omega\\right|} = 1$',
+        'Eine Wahrscheinlichkeit von $1$ bedeutet: es tritt mit Sicherheit ein.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Wert hat die Wahrscheinlichkeit des unmöglichen Ereignisses?',
+      opts: ['$-1$', '$0$', 'das ist nicht definiert', '$1$'],
+      steps: [
+        'Das unmögliche Ereignis ist die leere Menge.',
+        'Es enthält kein günstiges Ergebnis: $P = \\dfrac{0}{\\left|\\Omega\\right|} = 0$.',
+        'Beispiel: beim Würfel eine Sieben zu werfen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Ereignis $A$ hat die Wahrscheinlichkeit $P(A) = 0{,}3$. Wie groß ist $P\\left(\\overline{A}\\right)$?',
+      opts: ['$1{,}3$', '$-0{,}3$', '$0{,}7$', '$0{,}3$'],
+      steps: [
+        'Ein Ereignis und sein Gegenereignis schließen einander aus und decken zusammen $\\Omega$ ab.',
+        '$P\\left(\\overline{A}\\right) = 1 - P(A)$',
+        '$1 - 0{,}3 = 0{,}7$. Diese Regel spart oft viel Rechnerei.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Angabe kann KEINE Wahrscheinlichkeit sein?',
+      opts: ['$0{,}85$', '$1{,}2$', '$0$', '$1$'],
+      steps: [
+        'Für jede Wahrscheinlichkeit gilt $0 \\leq P(A) \\leq 1$.',
+        '$1{,}2$ liegt außerhalb dieses Bereichs.',
+        'Auch negative Werte sind ausgeschlossen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Beim Würfel ist $A = \\{1;\\,2\\}$. Wie groß ist die Wahrscheinlichkeit, dass $A$ NICHT eintritt?',
+      opts: ['$\\dfrac{2}{3}$', '$\\dfrac{5}{6}$', '$\\dfrac{1}{3}$', '$\\dfrac{1}{2}$'],
+      steps: [
+        '$P(A) = \\dfrac{2}{6} = \\dfrac{1}{3}$',
+        '$P\\left(\\overline{A}\\right) = 1 - \\dfrac{1}{3} = \\dfrac{2}{3}$',
+        'Probe durch Abzählen: $\\overline{A} = \\{3;\\,4;\\,5;\\,6\\}$, also $\\dfrac{4}{6} = \\dfrac{2}{3}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was besagt das Gesetz der großen Zahlen?',
+      opts: ['Mit wachsender Versuchszahl nähert sich die relative Häufigkeit der Wahrscheinlichkeit an.', 'Nach vielen Versuchen tritt jedes Ergebnis genau gleich oft ein.', 'Ab $100$ Versuchen stimmt die relative Häufigkeit mit der Wahrscheinlichkeit überein.', 'Je mehr Versuche, desto größer die Wahrscheinlichkeit.'],
+      steps: [
+        'Bei wenigen Würfen schwankt die relative Häufigkeit stark.',
+        'Mit wachsender Versuchszahl werden die Schwankungen kleiner.',
+        'Sie verschwinden aber nie ganz — exakte Gleichheit ist nicht garantiert.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Münze wurde fünfmal geworfen, jedes Mal fiel Kopf. Wie groß ist die Wahrscheinlichkeit, dass beim sechsten Wurf Zahl fällt?',
+      opts: ['$\\dfrac{1}{6}$', 'größer als $\\dfrac{1}{2}$, weil Zahl nun fällig ist', 'kleiner als $\\dfrac{1}{2}$, weil Kopf eine Serie hat', '$\\dfrac{1}{2}$, wie bei jedem Wurf'],
+      steps: [
+        'Die Münze hat kein Gedächtnis: jeder Wurf ist unabhängig von den vorherigen.',
+        'Die Wahrscheinlichkeit bleibt $\\dfrac{1}{2}$.',
+        'Der gegenteilige Glaube heißt Spielerfehlschluss; das Gesetz der großen Zahlen gleicht nichts aus, es verdünnt nur.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'In einer Simulation mit $6000$ Würfen fällt die Sechs $1050$-mal. Wie beurteilst du das?',
+      opts: ['Der Würfel ist eindeutig gezinkt.', 'Die Simulation ist fehlerhaft, es müssten genau $1000$ sein.', 'Die relative Häufigkeit $0{,}175$ liegt nahe am theoretischen Wert $\\dfrac{1}{6} \\approx 0{,}167$.', 'Das Ergebnis widerspricht dem Gesetz der großen Zahlen.'],
+      steps: [
+        '$h = \\dfrac{1050}{6000} = 0{,}175$',
+        'Der theoretische Wert ist $\\dfrac{1}{6} \\approx 0{,}167$, der Erwartungswert also rund $1000$ Sechsen.',
+        'Eine Abweichung von $50$ bei $6000$ Würfen ist normale Schwankung, kein Hinweis auf einen gezinkten Würfel.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

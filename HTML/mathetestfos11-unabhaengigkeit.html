@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Multiplikationsregel und Unabhängigkeit — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w25-unabhaengigkeit',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Multiplikationsregel und Unabhängigkeit',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 25 (LB 2) · 20 Aufgaben: Multiplikationsregel, Nachweis der stochastischen Unabhängigkeit, Abgrenzung zu unvereinbar · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 25 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Multiplikationsregel (1-6), Unabhaengigkeit nachweisen (7-13), Abgrenzung unvereinbar gegen unabhaengig (14-16), Anwendungen (17-20). */
+  questions: [
+    {
+      q: 'Wie lautet die Multiplikationsregel für zwei unabhängige Ereignisse?',
+      opts: ['$P(A \\cap B) = P(A) \\cdot P(B)$', '$P(A \\cap B) = P(A) - P(B)$', '$P(A \\cap B) = \\dfrac{P(A)}{P(B)}$', '$P(A \\cap B) = P(A) + P(B)$'],
+      steps: [
+        'Unabhängig heißt: das Eintreten des einen ändert die Wahrscheinlichkeit des anderen nicht.',
+        'Dann multiplizieren sich die Wahrscheinlichkeiten.',
+        'Addiert wird dagegen bei der Vereinigung, nicht beim Durchschnitt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Zwei Münzen werden geworfen. Wie groß ist die Wahrscheinlichkeit, dass beide Kopf zeigen?',
+      opts: ['$\\dfrac{1}{3}$', '$1$', '$\\dfrac{1}{2}$', '$\\dfrac{1}{4}$'],
+      steps: [
+        'Die Würfe sind unabhängig, jeder hat $P(\\text{Kopf}) = \\dfrac{1}{2}$.',
+        '$P = \\dfrac{1}{2} \\cdot \\dfrac{1}{2} = \\dfrac{1}{4}$',
+        'Probe durch Abzählen: von den vier Ergebnissen KK, KZ, ZK, ZZ ist eines günstig.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zwei Würfel werden geworfen. Wie groß ist die Wahrscheinlichkeit für zweimal Sechs?',
+      opts: ['$\\dfrac{2}{6}$', '$\\dfrac{1}{6}$', '$\\dfrac{1}{36}$', '$\\dfrac{1}{12}$'],
+      steps: [
+        '$P = \\dfrac{1}{6} \\cdot \\dfrac{1}{6}$',
+        '$= \\dfrac{1}{36}$',
+        '$\\dfrac{1}{12}$ wäre das Ergebnis der falschen Addition $\\dfrac{1}{6} + \\dfrac{1}{6}$ geteilt durch zwei.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Würfel und eine Münze werden geworfen. Wie groß ist die Wahrscheinlichkeit für „Sechs und Kopf“?',
+      opts: ['$\\dfrac{1}{6}$', '$\\dfrac{1}{12}$', '$\\dfrac{2}{3}$', '$\\dfrac{1}{8}$'],
+      steps: [
+        'Die beiden Versuche beeinflussen sich nicht.',
+        '$P = \\dfrac{1}{6} \\cdot \\dfrac{1}{2} = \\dfrac{1}{12}$',
+        'Probe: der Gesamtversuch hat $6 \\cdot 2 = 12$ gleich wahrscheinliche Ergebnisse, eines davon ist günstig.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Münze wird dreimal geworfen. Wie groß ist die Wahrscheinlichkeit für dreimal Kopf?',
+      opts: ['$\\dfrac{1}{2}$', '$\\dfrac{3}{8}$', '$\\dfrac{1}{6}$', '$\\dfrac{1}{8}$'],
+      steps: [
+        'Drei unabhängige Würfe: $\\left(\\dfrac{1}{2}\\right)^3$.',
+        '$= \\dfrac{1}{8}$',
+        'Von den $2^3 = 8$ möglichen Folgen ist genau eine KKK.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Aus einer Urne mit $3$ roten und $5$ blauen Kugeln wird zweimal MIT Zurücklegen gezogen. Wie groß ist die Wahrscheinlichkeit für zweimal Rot?',
+      opts: ['$\\dfrac{9}{64}$', '$\\dfrac{3}{8}$', '$\\dfrac{6}{16}$', '$\\dfrac{3}{32}$'],
+      steps: [
+        'Durch das Zurücklegen sind die Züge unabhängig, beide Male ist $P(\\text{rot}) = \\dfrac{3}{8}$.',
+        '$P = \\dfrac{3}{8} \\cdot \\dfrac{3}{8} = \\dfrac{9}{64}$',
+        'Ohne Zurücklegen wäre es $\\dfrac{3}{8} \\cdot \\dfrac{2}{7} = \\dfrac{6}{56} = \\dfrac{3}{28}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie weist man nach, dass zwei Ereignisse stochastisch unabhängig sind?',
+      opts: ['Man prüft, ob $P(A \\cap B) = P(A) \\cdot P(B)$ gilt.', 'Man prüft, ob $A \\cap B = \\{\\}$ gilt.', 'Man prüft, ob $P(A) + P(B) = 1$ gilt.', 'Man prüft, ob $P(A) = P(B)$ gilt.'],
+      steps: [
+        'Die Multiplikationsregel ist nicht nur Folge, sondern Definition der Unabhängigkeit.',
+        'Stimmen beide Seiten überein, sind die Ereignisse unabhängig, sonst abhängig.',
+        'Alle drei Größen müssen dafür bekannt sein.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Gegeben sind $P(A) = 0{,}5$, $P(B) = 0{,}4$ und $P(A \\cap B) = 0{,}2$. Sind $A$ und $B$ unabhängig?',
+      opts: ['Nein, denn $0{,}5 + 0{,}4 \\neq 0{,}2$.', 'Nein, denn $P(A) \\neq P(B)$.', 'Das lässt sich nicht entscheiden.', 'Ja, denn $0{,}5 \\cdot 0{,}4 = 0{,}2$.'],
+      steps: [
+        'Produkt berechnen: $0{,}5 \\cdot 0{,}4 = 0{,}2$.',
+        'Das stimmt mit $P(A \\cap B)$ überein.',
+        'Die Ereignisse sind also stochastisch unabhängig.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Gegeben sind $P(A) = 0{,}5$, $P(B) = 0{,}4$ und $P(A \\cap B) = 0{,}3$. Sind $A$ und $B$ unabhängig?',
+      opts: ['Ja, denn $0{,}3 < 0{,}4$.', 'Das lässt sich nicht entscheiden.', 'Nein, denn $0{,}5 \\cdot 0{,}4 = 0{,}2 \\neq 0{,}3$.', 'Ja, denn beide Wahrscheinlichkeiten sind positiv.'],
+      steps: [
+        'Das Produkt wäre $0{,}2$.',
+        'Tatsächlich ist der Durchschnitt mit $0{,}3$ größer.',
+        'Die Ereignisse treten häufiger gemeinsam ein als bei Unabhängigkeit zu erwarten — sie sind abhängig.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Beim Würfel sei $A$ = „gerade Augenzahl“ und $B$ = „Augenzahl größer als $4$“. Sind sie unabhängig?',
+      opts: ['Nein, denn sie haben die $6$ gemeinsam.', 'Ja, denn sie sind unvereinbar.', 'Ja, denn $\\dfrac{1}{2} \\cdot \\dfrac{1}{3} = \\dfrac{1}{6} = P(A \\cap B)$.', 'Nein, denn $P(A) \\neq P(B)$.'],
+      steps: [
+        '$P(A) = \\dfrac{3}{6} = \\dfrac{1}{2}$ und $P(B) = \\dfrac{2}{6} = \\dfrac{1}{3}$.',
+        '$A \\cap B = \\{6\\}$, also $P(A \\cap B) = \\dfrac{1}{6}$.',
+        'Das Produkt ist ebenfalls $\\dfrac{1}{6}$ — die Ereignisse sind unabhängig, obwohl sie sich überschneiden.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Beim Würfel sei $A$ = „gerade Augenzahl“ und $C = \\{1;\\,2;\\,3\\}$. Sind $A$ und $C$ unabhängig?',
+      opts: ['Ja, denn $A \\cap C = \\{2\\}$ ist nicht leer.', 'Nein, denn sie sind unvereinbar.', 'Nein, denn $P(A \\cap C) = \\dfrac{1}{6}$, aber $P(A) \\cdot P(C) = \\dfrac{1}{4}$.', 'Ja, denn beide haben die Wahrscheinlichkeit $\\dfrac{1}{2}$.'],
+      steps: [
+        '$P(A) = P(C) = \\dfrac{1}{2}$, das Produkt ist $\\dfrac{1}{4}$.',
+        '$A \\cap C = \\{2\\}$, also $P(A \\cap C) = \\dfrac{1}{6}$.',
+        '$\\dfrac{1}{6} \\neq \\dfrac{1}{4}$, die Ereignisse sind abhängig.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Warum sind zwei Züge aus einer Urne OHNE Zurücklegen abhängig?',
+      opts: ['Weil die Urne leer wird.', 'Weil sich der Urneninhalt und damit die Wahrscheinlichkeit für den zweiten Zug ändert.', 'Weil die Reihenfolge keine Rolle spielt.', 'Weil beide Züge dieselbe Wahrscheinlichkeit haben.'],
+      steps: [
+        'Nach dem ersten Zug fehlt eine Kugel.',
+        'Bei $3$ roten von $8$ Kugeln ist $P(\\text{rot})$ im zweiten Zug $\\dfrac{2}{7}$ oder $\\dfrac{3}{7}$, je nach erstem Zug.',
+        'Das Ergebnis des ersten Zuges beeinflusst also den zweiten.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum sind zwei Züge MIT Zurücklegen unabhängig?',
+      opts: ['Weil die Wahrscheinlichkeiten addiert werden.', 'Weil zweimal gezogen wird.', 'Weil die Kugeln gleich aussehen.', 'Weil die Urne vor jedem Zug denselben Inhalt hat.'],
+      steps: [
+        'Die gezogene Kugel wandert zurück, bevor erneut gezogen wird.',
+        'Die Ausgangslage ist für jeden Zug identisch.',
+        'Deshalb gilt die Multiplikationsregel mit gleichbleibenden Wahrscheinlichkeiten.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was ist der Unterschied zwischen „unvereinbar“ und „unabhängig“?',
+      opts: ['Unvereinbar heißt $A \\cap B = \\{\\}$, unabhängig heißt $P(A \\cap B) = P(A) \\cdot P(B)$.', 'Unabhängig heißt, dass die Ereignisse nie zusammen eintreten.', 'Unvereinbar bezieht sich auf Wahrscheinlichkeiten, unabhängig auf Mengen.', 'Die beiden Begriffe bedeuten dasselbe.'],
+      steps: [
+        'Unvereinbarkeit ist eine Aussage über die Mengen: sie überschneiden sich nicht.',
+        'Unabhängigkeit ist eine Aussage über die Wahrscheinlichkeiten.',
+        'Die Begriffe werden oft verwechselt, sie haben aber nichts miteinander zu tun.'
+      ],
+      solution: 0
+    },
+    {
+      q: '$A$ und $B$ seien unvereinbar mit $P(A) = 0{,}3$ und $P(B) = 0{,}4$. Sind sie unabhängig?',
+      opts: ['Das lässt sich nicht entscheiden.', 'Nein, denn $P(A \\cap B) = 0$, aber $P(A) \\cdot P(B) = 0{,}12$.', 'Ja, denn $0{,}3 + 0{,}4 < 1$.', 'Ja, denn sie beeinflussen sich nicht.'],
+      steps: [
+        'Unvereinbar bedeutet $A \\cap B = \\{\\}$, also $P(A \\cap B) = 0$.',
+        'Das Produkt ist dagegen $0{,}12 \\neq 0$.',
+        'Zwei unvereinbare Ereignisse mit positiver Wahrscheinlichkeit sind immer abhängig — tritt das eine ein, ist das andere ausgeschlossen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Können zwei Ereignisse gleichzeitig unvereinbar und unabhängig sein?',
+      opts: ['Nur wenn mindestens eines die Wahrscheinlichkeit $0$ hat.', 'Nein, niemals.', 'Ja, wenn beide dieselbe Wahrscheinlichkeit haben.', 'Ja, das ist der Normalfall.'],
+      steps: [
+        'Unvereinbar erzwingt $P(A \\cap B) = 0$.',
+        'Unabhängig verlangt $P(A) \\cdot P(B) = 0$.',
+        'Ein Produkt ist nur null, wenn ein Faktor null ist — der Fall ist also möglich, aber ohne praktischen Wert.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Zwei Maschinen fallen unabhängig voneinander mit je $10\\,\\%$ Wahrscheinlichkeit aus. Wie groß ist die Wahrscheinlichkeit, dass beide ausfallen?',
+      opts: ['$10\\,\\%$', '$1\\,\\%$', '$20\\,\\%$', '$19\\,\\%$'],
+      steps: [
+        '$P = 0{,}10 \\cdot 0{,}10$',
+        '$= 0{,}01$, also $1\\,\\%$.',
+        '$20\\,\\%$ wäre die falsche Addition.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist in der vorigen Aufgabe die Wahrscheinlichkeit, dass mindestens eine Maschine ausfällt?',
+      opts: ['$1\\,\\%$', '$19\\,\\%$', '$20\\,\\%$', '$81\\,\\%$'],
+      steps: [
+        'Über das Gegenereignis: keine fällt aus mit $0{,}9 \\cdot 0{,}9 = 0{,}81$.',
+        '$1 - 0{,}81 = 0{,}19$, also $19\\,\\%$.',
+        'Der Weg über das Gegenereignis ist bei „mindestens eines“ fast immer der kürzere.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zwei Bauteile sind in Reihe geschaltet, die Anlage läuft nur, wenn beide funktionieren. Jedes funktioniert unabhängig mit $90\\,\\%$. Wie zuverlässig ist die Anlage?',
+      opts: ['$99\\,\\%$', '$180\\,\\%$', '$90\\,\\%$', '$81\\,\\%$'],
+      steps: [
+        '$P = 0{,}90 \\cdot 0{,}90$',
+        '$= 0{,}81$, also $81\\,\\%$.',
+        'Eine Reihenschaltung ist immer unzuverlässiger als ihr schwächstes Bauteil.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bei einer Produktion ist jedes Stück unabhängig mit $10\\,\\%$ Wahrscheinlichkeit fehlerhaft. Wie groß ist die Wahrscheinlichkeit, dass drei geprüfte Stücke alle in Ordnung sind?',
+      opts: ['$90\\,\\%$', '$30\\,\\%$', '$72{,}9\\,\\%$', '$0{,}1\\,\\%$'],
+      steps: [
+        'Jedes Stück ist mit $0{,}9$ in Ordnung.',
+        '$P = 0{,}9^3 = 0{,}729$',
+        'Also rund $72{,}9\\,\\%$. Die Wahrscheinlichkeit für mindestens einen Fehler ist entsprechend $27{,}1\\,\\%$.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

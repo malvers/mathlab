@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Ereignisse verknüpfen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w24-ereignisse-verknuepfen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Ereignisse verknüpfen',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 24 (LB 2) · 20 Aufgaben: Vereinigung, Durchschnitt, Komplement, Additionssatz, Regeln von de Morgan · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 24 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Mengenoperationen (1-6), Additionssatz (7-12), Regeln von de Morgan (13-16), Anwendungen (17-20). */
+  questions: [
+    {
+      q: 'Was bedeutet das Ereignis $A \\cup B$ in Worten?',
+      opts: ['Genau eines der beiden Ereignisse tritt ein.', 'Keines der beiden Ereignisse tritt ein.', 'Beide Ereignisse treten gleichzeitig ein.', 'Mindestens eines der beiden Ereignisse tritt ein.'],
+      steps: [
+        'Die Vereinigung enthält alle Ergebnisse, die in $A$ oder in $B$ liegen.',
+        'Das „oder“ ist nicht ausschließend: Ergebnisse in beiden Mengen gehören dazu.',
+        'Also: $A$ tritt ein oder $B$ tritt ein oder beide.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was bedeutet das Ereignis $A \\cap B$ in Worten?',
+      opts: ['Mindestens eines tritt ein.', 'Genau eines tritt ein.', 'Beide Ereignisse treten gleichzeitig ein.', 'Keines tritt ein.'],
+      steps: [
+        'Der Durchschnitt enthält nur Ergebnisse, die in beiden Mengen liegen.',
+        'Ein solches Ergebnis erfüllt beide Bedingungen zugleich.',
+        'Beim Würfel: „gerade“ und „größer als $4$“ trifft nur auf die $6$ zu.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was beschreibt das Gegenereignis $\\overline{A}$?',
+      opts: ['alle Ergebnisse, die zu $A$ gehören', 'die Ergebnisse mit der kleinsten Wahrscheinlichkeit', 'alle Ergebnisse aus $\\Omega$, die nicht zu $A$ gehören', 'die leere Menge'],
+      steps: [
+        'Das Gegenereignis heißt auch Komplement.',
+        '$\\overline{A} = \\Omega \\setminus A$',
+        '$A$ und $\\overline{A}$ ergänzen sich lückenlos zur gesamten Ergebnismenge.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Beim Würfel sei $A = \\{1;\\,2;\\,3\\}$ und $B = \\{2;\\,4;\\,6\\}$. Wie lautet $A \\cup B$?',
+      opts: ['$\\{1;\\,2;\\,3;\\,4;\\,5;\\,6\\}$', '$\\{1;\\,3;\\,4;\\,6\\}$', '$\\{1;\\,2;\\,3;\\,4;\\,6\\}$', '$\\{2\\}$'],
+      steps: [
+        'Alle Ergebnisse aus beiden Mengen zusammentragen.',
+        '$\\{1;\\,2;\\,3\\} \\cup \\{2;\\,4;\\,6\\} = \\{1;\\,2;\\,3;\\,4;\\,6\\}$',
+        'Die $5$ fehlt, sie liegt in keiner der beiden Mengen. Die $2$ wird nur einmal aufgeführt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Mit $A = \\{1;\\,2;\\,3\\}$ und $B = \\{2;\\,4;\\,6\\}$ — wie lautet $A \\cap B$?',
+      opts: ['$\\{2\\}$', '$\\{4;\\,6\\}$', '$\\{1;\\,3\\}$', '$\\{\\}$'],
+      steps: [
+        'Gesucht sind die Ergebnisse, die in beiden Mengen vorkommen.',
+        'Nur die $2$ erfüllt das.',
+        '$A \\cap B = \\{2\\}$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Mit $A = \\{1;\\,2;\\,3\\}$ beim Würfel — wie lautet $\\overline{A}$?',
+      opts: ['$\\{\\}$', '$\\{4;\\,5;\\,6\\}$', '$\\{1;\\,2;\\,3\\}$', '$\\{4;\\,5\\}$'],
+      steps: [
+        '$\\Omega = \\{1;\\,2;\\,3;\\,4;\\,5;\\,6\\}$',
+        '$\\overline{A}$ enthält alles außer $1$, $2$ und $3$.',
+        '$\\overline{A} = \\{4;\\,5;\\,6\\}$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet der Additionssatz für beliebige Ereignisse?',
+      opts: ['$P(A \\cup B) = P(A) \\cdot P(B)$', '$P(A \\cup B) = P(A) + P(B) + P(A \\cap B)$', '$P(A \\cup B) = P(A) + P(B) - P(A \\cap B)$', '$P(A \\cup B) = P(A) + P(B)$'],
+      steps: [
+        'Addiert man einfach $P(A)$ und $P(B)$, zählt man den Überschneidungsbereich doppelt.',
+        'Deshalb wird $P(A \\cap B)$ einmal abgezogen.',
+        'Bei einem Mengenbild sieht man das sofort.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Warum muss im Additionssatz $P(A \\cap B)$ abgezogen werden?',
+      opts: ['weil der Durchschnitt nie eintreten kann', 'weil sonst das Ergebnis negativ würde', 'weil Wahrscheinlichkeiten nicht addiert werden dürfen', 'weil die gemeinsamen Ergebnisse sonst doppelt gezählt würden'],
+      steps: [
+        'Jedes Ergebnis im Durchschnitt steckt sowohl in $A$ als auch in $B$.',
+        'In der Summe $P(A) + P(B)$ ist es daher zweimal enthalten.',
+        'Das Abziehen stellt die einfache Zählung wieder her.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie vereinfacht sich der Additionssatz bei unvereinbaren Ereignissen?',
+      opts: ['$P(A \\cup B) = P(A) \\cdot P(B)$', '$P(A \\cup B) = 1$', '$P(A \\cup B) = 0$', '$P(A \\cup B) = P(A) + P(B)$'],
+      steps: [
+        'Unvereinbar heißt $A \\cap B = \\{\\}$.',
+        'Dann ist $P(A \\cap B) = 0$, der Korrekturterm fällt weg.',
+        'Es gibt keine Überschneidung, die doppelt gezählt werden könnte.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Gegeben sind $P(A) = 0{,}4$, $P(B) = 0{,}3$ und $P(A \\cap B) = 0{,}1$. Wie groß ist $P(A \\cup B)$?',
+      opts: ['$0{,}7$', '$0{,}12$', '$0{,}8$', '$0{,}6$'],
+      steps: [
+        '$P(A \\cup B) = 0{,}4 + 0{,}3 - 0{,}1$',
+        '$= 0{,}6$',
+        '$0{,}7$ entstünde ohne den Abzug der Überschneidung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Beim Würfel: wie groß ist die Wahrscheinlichkeit für „gerade Augenzahl oder Augenzahl größer als $4$“?',
+      opts: ['$\\dfrac{1}{2}$', '$\\dfrac{2}{3}$', '$\\dfrac{1}{6}$', '$\\dfrac{5}{6}$'],
+      steps: [
+        '$A = \\{2;\\,4;\\,6\\}$ und $B = \\{5;\\,6\\}$, also $A \\cap B = \\{6\\}$.',
+        '$P = \\dfrac{3}{6} + \\dfrac{2}{6} - \\dfrac{1}{6} = \\dfrac{4}{6}$',
+        '$= \\dfrac{2}{3}$. Probe durch Abzählen: $A \\cup B = \\{2;\\,4;\\,5;\\,6\\}$, also vier von sechs.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Aus einem Skatblatt mit $32$ Karten wird eine gezogen. Wie groß ist die Wahrscheinlichkeit für „Herz oder As“?',
+      opts: ['$\\dfrac{11}{32}$', '$\\dfrac{12}{32}$', '$\\dfrac{4}{32}$', '$\\dfrac{8}{32}$'],
+      steps: [
+        'Herz: $8$ Karten. Asse: $4$ Karten. Beides zugleich: das Herz-As, also $1$ Karte.',
+        '$P = \\dfrac{8}{32} + \\dfrac{4}{32} - \\dfrac{1}{32} = \\dfrac{11}{32}$',
+        '$\\dfrac{12}{32}$ wäre die Antwort ohne Abzug — das Herz-As wäre doppelt gezählt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die erste Regel von de Morgan?',
+      opts: ['$\\overline{A \\cup B} = \\overline{A} \\cap \\overline{B}$', '$\\overline{A \\cup B} = A \\cap B$', '$\\overline{A \\cup B} = \\overline{A} \\cup \\overline{B}$', '$\\overline{A \\cup B} = \\overline{A} + \\overline{B}$'],
+      steps: [
+        '„Nicht (A oder B)“ bedeutet: weder $A$ noch $B$ tritt ein.',
+        'Also muss $A$ ausbleiben UND $B$ ausbleiben.',
+        'Beim Negieren wird aus „oder“ ein „und“.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die zweite Regel von de Morgan?',
+      opts: ['$\\overline{A \\cap B} = \\overline{A} \\cap \\overline{B}$', '$\\overline{A \\cap B} = \\overline{A} \\cup \\overline{B}$', '$\\overline{A \\cap B} = \\overline{A} \\cdot \\overline{B}$', '$\\overline{A \\cap B} = A \\cup B$'],
+      steps: [
+        '„Nicht (A und B)“ bedeutet: die beiden treten nicht gemeinsam ein.',
+        'Dann fehlt mindestens eines von beiden.',
+        'Beim Negieren wird aus „und“ ein „oder“.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Beim Würfel sei $A = \\{1;\\,2\\}$ und $B = \\{2;\\,3\\}$. Wie lautet $\\overline{A \\cup B}$?',
+      opts: ['$\\{1;\\,2;\\,3\\}$', '$\\{4;\\,5;\\,6\\}$', '$\\{2\\}$', '$\\{1;\\,3\\}$'],
+      steps: [
+        '$A \\cup B = \\{1;\\,2;\\,3\\}$',
+        'Das Komplement davon ist $\\{4;\\,5;\\,6\\}$.',
+        'Kontrolle über de Morgan: $\\overline{A} = \\{3;\\,4;\\,5;\\,6\\}$ und $\\overline{B} = \\{1;\\,4;\\,5;\\,6\\}$, ihr Durchschnitt ist $\\{4;\\,5;\\,6\\}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie formuliert man „es trifft nicht zu, dass beide Bauteile funktionieren“ ohne Verneinung des Ganzen?',
+      opts: ['Mindestens eines der Bauteile ist defekt.', 'Genau ein Bauteil ist defekt.', 'Keines der Bauteile ist defekt.', 'Beide Bauteile sind defekt.'],
+      steps: [
+        'Das ist die zweite Regel von de Morgan in Worten.',
+        'Die Verneinung von „beide funktionieren“ ist nicht „beide sind defekt“.',
+        'Es genügt, dass eines ausfällt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In einem Betrieb trinken $60\\,\\%$ Kaffee, $50\\,\\%$ Tee und $30\\,\\%$ beides. Wie viel Prozent trinken mindestens eines von beiden?',
+      opts: ['$90\\,\\%$', '$80\\,\\%$', '$110\\,\\%$', '$70\\,\\%$'],
+      steps: [
+        'Additionssatz: $0{,}60 + 0{,}50 - 0{,}30$',
+        '$= 0{,}80$, also $80\\,\\%$.',
+        'Ohne den Abzug käme $110\\,\\%$ heraus — unmöglich, denn Wahrscheinlichkeiten übersteigen $1$ nie.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viel Prozent trinken in der vorigen Aufgabe weder Kaffee noch Tee?',
+      opts: ['$50\\,\\%$', '$30\\,\\%$', '$10\\,\\%$', '$20\\,\\%$'],
+      steps: [
+        '„Weder noch“ ist das Gegenereignis zu „mindestens eines“.',
+        '$1 - 0{,}80 = 0{,}20$',
+        'Genau hier hilft de Morgan: $\\overline{K \\cup T} = \\overline{K} \\cap \\overline{T}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Maschine hat zwei unabhängige Sicherungen. $A$ sei „Sicherung 1 löst aus“, $B$ sei „Sicherung 2 löst aus“. Welches Ereignis beschreibt „die Anlage wird geschützt, weil mindestens eine Sicherung auslöst“?',
+      opts: ['$A \\cup B$', '$\\overline{A \\cup B}$', '$A \\cap B$', '$\\overline{A} \\cap \\overline{B}$'],
+      steps: [
+        'Mindestens eine bedeutet: die erste oder die zweite oder beide.',
+        'Das ist die Vereinigung $A \\cup B$.',
+        '$\\overline{A} \\cap \\overline{B}$ wäre der Fall, dass keine auslöst — der gefährliche.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In einer Lerngruppe lernen $18$ von $25$ Personen Englisch, $10$ lernen Spanisch, $5$ lernen beides. Wie viele lernen keine der beiden Sprachen?',
+      opts: ['$7$', '$0$', '$2$', '$3$'],
+      steps: [
+        'Mindestens eine Sprache: $18 + 10 - 5 = 23$.',
+        'Keine der beiden: $25 - 23 = 2$.',
+        'Ohne den Abzug der $5$ Doppelten käme man auf $28$ — mehr Personen, als die Gruppe hat.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

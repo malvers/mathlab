@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Baumdiagramme und Pfadregeln — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w26-baumdiagramme',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Baumdiagramme und Pfadregeln',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 26 (LB 2) · 20 Aufgaben: Pfadmultiplikation, Pfadaddition, Ziehen mit und ohne Zurücklegen · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 26 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Aufbau des Baumdiagramms (1-5), erste Pfadregel (6-11), zweite Pfadregel (12-16), mit und ohne Zuruecklegen (17-20). Urne durchgehend: 2 rote und 3 blaue Kugeln. */
+  questions: [
+    {
+      q: 'Was stellt ein Pfad in einem Baumdiagramm dar?',
+      opts: ['die Wahrscheinlichkeit einer Stufe', 'genau ein Ergebnis des mehrstufigen Zufallsversuchs', 'ein Ereignis mit mehreren Ergebnissen', 'die Anzahl der Stufen'],
+      steps: [
+        'Ein Pfad führt von der Wurzel über je einen Ast pro Stufe bis zu einem Blatt.',
+        'Er beschreibt damit den vollständigen Ausgang des Versuchs, etwa „erst rot, dann blau“.',
+        'Die Zahl der Blätter ist die Zahl der Ergebnisse.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was gilt für die Wahrscheinlichkeiten an den Ästen, die von einem Knoten ausgehen?',
+      opts: ['Ihr Produkt ist $1$.', 'Sie sind immer gleich groß.', 'Ihre Summe ist $1$.', 'Ihre Summe ist $0$.'],
+      steps: [
+        'An jedem Knoten tritt genau einer der möglichen Fälle ein.',
+        'Die Äste decken also alle Möglichkeiten dieser Stufe ab.',
+        'Deshalb addieren sich ihre Wahrscheinlichkeiten zu $1$ — eine gute Kontrolle beim Zeichnen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Versuch hat drei Stufen mit je zwei Möglichkeiten. Wie viele Pfade hat das Baumdiagramm?',
+      opts: ['$6$', '$2$', '$3$', '$8$'],
+      steps: [
+        'Zählprinzip: $2 \\cdot 2 \\cdot 2$.',
+        '$= 8$ Pfade',
+        '$6$ wäre die Summe $2 + 2 + 2$ — bei Baumdiagrammen wird multipliziert.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Urne enthält $2$ rote und $3$ blaue Kugeln. Welche Wahrscheinlichkeiten stehen an den Ästen der ersten Stufe?',
+      opts: ['$\\dfrac{2}{3}$ für rot und $\\dfrac{3}{2}$ für blau', '$\\dfrac{2}{5}$ für rot und $\\dfrac{3}{5}$ für blau', '$\\dfrac{1}{2}$ für rot und $\\dfrac{1}{2}$ für blau', '$2$ für rot und $3$ für blau'],
+      steps: [
+        'Insgesamt sind $5$ Kugeln in der Urne.',
+        '$P(\\text{rot}) = \\dfrac{2}{5}$ und $P(\\text{blau}) = \\dfrac{3}{5}$.',
+        'Kontrolle: $\\dfrac{2}{5} + \\dfrac{3}{5} = 1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was bedeutet ein Blatt im Baumdiagramm?',
+      opts: ['die Wahrscheinlichkeit der letzten Stufe', 'ein Ereignis', 'den Startpunkt des Versuchs', 'das Ende eines Pfades und damit ein Ergebnis des Gesamtversuchs'],
+      steps: [
+        'Die Wurzel steht für den Start, die Blätter für die Abschlüsse.',
+        'Jedes Blatt entspricht genau einem Ergebnis.',
+        'Seine Wahrscheinlichkeit erhält man durch Multiplikation entlang des Pfades.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet die erste Pfadregel?',
+      opts: ['Die Wahrscheinlichkeiten mehrerer Pfade werden multipliziert.', 'Die Wahrscheinlichkeiten werden subtrahiert.', 'Die Wahrscheinlichkeiten längs eines Pfades werden multipliziert.', 'Die Wahrscheinlichkeiten längs eines Pfades werden addiert.'],
+      steps: [
+        'Entlang eines Pfades müssen alle Stufen nacheinander eintreten.',
+        'Für ein Nacheinander gilt die Multiplikationsregel.',
+        'Addiert wird erst, wenn mehrere Pfade zu einem Ereignis gehören.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Aus der Urne mit $2$ roten und $3$ blauen Kugeln wird zweimal MIT Zurücklegen gezogen. Wie groß ist $P(\\text{rot};\\,\\text{rot})$?',
+      opts: ['$\\dfrac{1}{10}$', '$\\dfrac{4}{5}$', '$\\dfrac{4}{25}$', '$\\dfrac{2}{25}$'],
+      steps: [
+        'Durch das Zurücklegen bleibt $P(\\text{rot}) = \\dfrac{2}{5}$ in beiden Zügen.',
+        '$P = \\dfrac{2}{5} \\cdot \\dfrac{2}{5} = \\dfrac{4}{25}$',
+        '$\\dfrac{1}{10}$ wäre die Antwort ohne Zurücklegen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Dieselbe Urne, zweimal OHNE Zurücklegen. Wie groß ist $P(\\text{rot};\\,\\text{rot})$?',
+      opts: ['$\\dfrac{2}{25}$', '$\\dfrac{4}{25}$', '$\\dfrac{1}{5}$', '$\\dfrac{1}{10}$'],
+      steps: [
+        'Erster Zug: $\\dfrac{2}{5}$. Danach sind noch $1$ rote und $3$ blaue Kugeln da.',
+        'Zweiter Zug: $\\dfrac{1}{4}$.',
+        '$P = \\dfrac{2}{5} \\cdot \\dfrac{1}{4} = \\dfrac{2}{20} = \\dfrac{1}{10}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zweimal mit Zurücklegen: wie groß ist $P(\\text{rot};\\,\\text{blau})$, also erst rot, dann blau?',
+      opts: ['$\\dfrac{5}{25}$', '$\\dfrac{6}{25}$', '$\\dfrac{12}{25}$', '$\\dfrac{6}{20}$'],
+      steps: [
+        '$P = \\dfrac{2}{5} \\cdot \\dfrac{3}{5}$',
+        '$= \\dfrac{6}{25}$',
+        'Das gilt für genau diese Reihenfolge; „blau, dann rot“ ist ein eigener Pfad mit demselben Wert.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Münze wird zweimal geworfen. Wie groß ist die Wahrscheinlichkeit für „erst Kopf, dann Zahl“?',
+      opts: ['$\\dfrac{1}{4}$', '$\\dfrac{1}{3}$', '$\\dfrac{1}{2}$', '$\\dfrac{3}{4}$'],
+      steps: [
+        '$P = \\dfrac{1}{2} \\cdot \\dfrac{1}{2} = \\dfrac{1}{4}$',
+        'Der Baum hat vier Pfade: KK, KZ, ZK, ZZ.',
+        'Jeder hat die Wahrscheinlichkeit $\\dfrac{1}{4}$, zusammen ergibt das $1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was ergibt die Summe der Wahrscheinlichkeiten aller Pfade eines Baumdiagramms?',
+      opts: ['immer $1$', 'das hängt vom Versuch ab', 'die Anzahl der Pfade', 'immer $0$'],
+      steps: [
+        'Die Pfade beschreiben alle möglichen Ausgänge des Gesamtversuchs.',
+        'Genau einer davon tritt ein.',
+        'Deshalb ist ihre Summe $1$ — die wichtigste Kontrollrechnung beim Baumdiagramm.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die zweite Pfadregel?',
+      opts: ['Die Wahrscheinlichkeiten aller Pfade werden multipliziert.', 'Man nimmt den größten Pfadwert.', 'Man nimmt den Mittelwert der Pfade.', 'Die Wahrscheinlichkeiten aller Pfade, die zum Ereignis gehören, werden addiert.'],
+      steps: [
+        'Ein Ereignis fasst oft mehrere Ergebnisse zusammen.',
+        'Jedes dieser Ergebnisse entspricht einem Pfad.',
+        'Weil sich die Pfade gegenseitig ausschließen, dürfen ihre Wahrscheinlichkeiten addiert werden.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zweimal mit Zurücklegen aus der Urne: wie groß ist die Wahrscheinlichkeit für genau einmal Rot?',
+      opts: ['$\\dfrac{16}{25}$', '$\\dfrac{12}{25}$', '$\\dfrac{6}{25}$', '$\\dfrac{4}{25}$'],
+      steps: [
+        'Zwei Pfade führen zum Ziel: rot-blau und blau-rot.',
+        'Jeder hat die Wahrscheinlichkeit $\\dfrac{2}{5} \\cdot \\dfrac{3}{5} = \\dfrac{6}{25}$.',
+        'Zusammen $\\dfrac{12}{25}$. Der Faktor $2$ für die Reihenfolge wird leicht vergessen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zweimal mit Zurücklegen: wie groß ist die Wahrscheinlichkeit für mindestens einmal Rot?',
+      opts: ['$\\dfrac{12}{25}$', '$\\dfrac{9}{25}$', '$\\dfrac{16}{25}$', '$\\dfrac{4}{25}$'],
+      steps: [
+        'Über das Gegenereignis: „kein einziges Mal rot“ bedeutet zweimal blau.',
+        '$P(\\text{blau};\\,\\text{blau}) = \\dfrac{3}{5} \\cdot \\dfrac{3}{5} = \\dfrac{9}{25}$',
+        '$1 - \\dfrac{9}{25} = \\dfrac{16}{25}$. Probe über die drei günstigen Pfade: $\\dfrac{4}{25} + \\dfrac{6}{25} + \\dfrac{6}{25} = \\dfrac{16}{25}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zweimal mit Zurücklegen: wie groß ist die Wahrscheinlichkeit für zwei Kugeln gleicher Farbe?',
+      opts: ['$\\dfrac{9}{25}$', '$\\dfrac{13}{25}$', '$\\dfrac{4}{25}$', '$\\dfrac{12}{25}$'],
+      steps: [
+        'Zwei Pfade sind günstig: rot-rot und blau-blau.',
+        '$\\dfrac{4}{25} + \\dfrac{9}{25} = \\dfrac{13}{25}$',
+        'Probe: das Gegenereignis „verschiedene Farben“ hat $\\dfrac{12}{25}$, zusammen $1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum lohnt bei „mindestens einmal“ der Weg über das Gegenereignis?',
+      opts: ['Weil die Pfadregeln dort nicht gelten.', 'Weil man sonst multiplizieren müsste.', 'Weil das Gegenereignis immer wahrscheinlicher ist.', 'Weil das Gegenereignis meist aus nur einem Pfad besteht.'],
+      steps: [
+        '„Mindestens einmal“ umfasst oft viele Pfade.',
+        'Das Gegenereignis „kein einziges Mal“ ist dagegen genau ein Pfad.',
+        'Ein Pfad statt vieler spart Rechenarbeit, besonders bei mehr als zwei Stufen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was ändert sich im Baumdiagramm beim Ziehen OHNE Zurücklegen?',
+      opts: ['Die Wahrscheinlichkeiten der zweiten Stufe hängen vom Ergebnis der ersten ab.', 'Die Zahl der Pfade wird größer.', 'Die Summe aller Pfadwahrscheinlichkeiten ist nicht mehr $1$.', 'Die Pfadregeln gelten nicht mehr.'],
+      steps: [
+        'Nach dem ersten Zug hat sich der Urneninhalt verändert.',
+        'Die Äste der zweiten Stufe tragen deshalb je nach Vorgeschichte andere Zahlen.',
+        'Die beiden Pfadregeln gelten unverändert, und die Summe bleibt $1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Zweimal OHNE Zurücklegen aus der Urne mit $2$ roten und $3$ blauen Kugeln: wie groß ist die Wahrscheinlichkeit für zwei blaue?',
+      opts: ['$\\dfrac{6}{25}$', '$\\dfrac{9}{25}$', '$\\dfrac{3}{10}$', '$\\dfrac{1}{10}$'],
+      steps: [
+        'Erster Zug blau: $\\dfrac{3}{5}$. Danach sind noch $2$ blaue von $4$ Kugeln übrig.',
+        '$P = \\dfrac{3}{5} \\cdot \\dfrac{2}{4} = \\dfrac{6}{20} = \\dfrac{3}{10}$',
+        'Mit Zurücklegen wäre es $\\dfrac{9}{25}$ — etwas mehr.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zweimal ohne Zurücklegen: wie groß ist die Wahrscheinlichkeit für genau einmal Rot?',
+      opts: ['$\\dfrac{3}{5}$', '$\\dfrac{12}{25}$', '$\\dfrac{1}{10}$', '$\\dfrac{3}{10}$'],
+      steps: [
+        'Pfad rot-blau: $\\dfrac{2}{5} \\cdot \\dfrac{3}{4} = \\dfrac{6}{20}$. Pfad blau-rot: $\\dfrac{3}{5} \\cdot \\dfrac{2}{4} = \\dfrac{6}{20}$.',
+        'Zusammen $\\dfrac{12}{20} = \\dfrac{3}{5}$.',
+        'Kontrolle aller vier Pfade: $\\dfrac{2}{20} + \\dfrac{6}{20} + \\dfrac{6}{20} + \\dfrac{6}{20} = 1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In einer Produktion sind $10\\,\\%$ der Teile fehlerhaft. Zwei Teile werden unabhängig geprüft. Wie groß ist die Wahrscheinlichkeit, dass genau eines fehlerhaft ist?',
+      opts: ['$18\\,\\%$', '$20\\,\\%$', '$1\\,\\%$', '$10\\,\\%$'],
+      steps: [
+        'Zwei Pfade: fehlerhaft-gut und gut-fehlerhaft.',
+        'Jeder hat $0{,}1 \\cdot 0{,}9 = 0{,}09$.',
+        'Zusammen $0{,}18$, also $18\\,\\%$.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
