@@ -47,21 +47,32 @@
 
         .maya-row {
             display: flex;
-            align-items: center;
+            align-items: stretch;      /* the field takes the button's height, whatever it is */
             gap: 8px;
             margin-top: 8px;
         }
 
+        .maya-row>* {
+            flex: 1 1 0;               /* two equal halves, like the row below */
+            min-width: 0;
+        }
+
+        /* the shared button carries a 10px top margin; inside a row it would make the
+           field next to it that much taller, so the row spacing lives on .maya-row */
+        #ui-container .maya-row .cyber-btn {
+            margin-top: 0;
+        }
+
         .maya-row input[type="number"] {
-            flex: 1 1 96px;
-            min-width: 96px;
+            text-align: center;
             background: rgba(0, 0, 0, 0.35);
             border: 1px solid rgba(245, 194, 66, 0.35);
             border-radius: 10px;
             color: rgb(245, 194, 66);
             font-family: 'Orbitron', sans-serif;
-            font-size: 1rem;
-            padding: 8px 10px;
+            font-size: 0.95rem;
+            line-height: 1;            /* Orbitron's line box would make the field taller */
+            padding: 6px 10px;         /* than the button beside it */
         }
 
         .maya-row input[type="number"]:focus {
@@ -372,28 +383,44 @@
             const avail = H - top - pad;
             if (avail < 200) return;
 
-            // the panel at the bottom: ten digits in a row on a wide screen, five on a narrow one
-            const cols = W >= 1000 ? 10 : 5;
+            // places and panel share one width, so their edges line up
+            const blockW = Math.min(W - 2 * pad, n * 200 + (n - 1) * 14);
+            const blockX = (W - blockW) / 2;
+
+            // the panel: ten digits in a row where there is width for it, five where there is not
+            const cols = blockW >= 720 ? 10 : 5;
             const rows = 20 / cols;
-            const cellW = Math.min((W - 2 * pad) / cols, 96);
+            const cellW = blockW / cols;
             const cellH = Math.min(cellW * 0.95, (avail * 0.5 - 26) / rows);
             const panelH = rows * cellH + 26;
 
             // the places above it
             const cardsH = Math.min(avail - panelH - 16, 250);
-            const cardW = Math.min((W - 2 * pad - (n - 1) * 14) / n, 200);
+            const cardW = (blockW - (n - 1) * 14) / n;
             const cardH = Math.max(90, cardsH - 48);
-            const rowW = n * cardW + (n - 1) * 14;
-            const rowX = (W - rowW) / 2;
+            const rowX = blockX;
 
-            // places, their sums, the task line and the panel travel as one block,
-            // so no gap opens up between them on a tall screen
-            const labelH = 24, productH = 30, captionH = 28, taskH = task ? 26 : 0;
-            const blockH = labelH + cardH + productH + taskH + captionH + rows * cellH;
+            // the task stands above everything, big; places, sums and panel travel as one
+            // block underneath, so no gap opens up between them on a tall screen
+            const taskSize = Math.min(104, blockW * 0.13, avail * 0.18);
+            const taskH = task ? taskSize * 1.12 + 22 : 0;
+            const labelH = 24, productH = 30, captionH = 28;
+            const blockH = taskH + labelH + cardH + productH + captionH + rows * cellH;
             const startY = top + Math.max(0, (avail - blockH) / 2);
-            const cardY = startY + labelH;
-            const taskY = cardY + cardH + productH + taskH / 2;
-            const panelY = cardY + cardH + productH + taskH + captionH;
+            const cardY = startY + taskH + labelH;
+            const panelY = cardY + cardH + productH + captionH;
+
+            if (task) {
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.font = "400 12px 'Outfit', sans-serif";
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.fillText(task.done ? T('task_done', 'Richtig gelegt.') : T('task_lay', 'Lege'),
+                    blockX + blockW / 2, startY);
+                ctx.font = "700 " + Math.round(taskSize) + "px 'Orbitron', sans-serif";
+                ctx.fillStyle = task.done ? COL.shell : COL.glyph;
+                ctx.fillText(de(task.target), blockX + blockW / 2, startY + 18);
+            }
 
             for (let col = 0; col < n; col++) {
                 const place = n - 1 - col;              // the highest place stands on the left
@@ -431,8 +458,7 @@
             ctx.textBaseline = 'bottom';
             ctx.font = "400 13px 'Outfit', sans-serif";
             ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-            const gridW = cols * cellW;
-            const gridX = (W - gridW) / 2;
+            const gridX = blockX;
             ctx.fillText(T('panel', 'Ziffern — auf eine Stelle ziehen'), gridX, panelY - 8);
 
             for (let k = 0; k < 20; k++) {
@@ -452,18 +478,6 @@
 
                 paintDigit(k, cx0 + cellW / 2, cy0 + cellH * 0.62, cellW - 14, cellH * 0.6, null);
                 palette.push({ digit: k, x: cx0, y: cy0, w: cellW, h: cellH });
-            }
-
-            // the task, written between the places and the panel
-            if (task) {
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.font = "400 15px 'Outfit', sans-serif";
-                ctx.fillStyle = task.done ? COL.shell : 'rgba(255, 255, 255, 0.6)';
-                const line = task.done
-                    ? T('task_done', 'Richtig gelegt.')
-                    : T('task_lay', 'Lege') + ' ' + de(task.target);
-                ctx.fillText(line, W / 2, taskY);
             }
 
             // the digit being dragged hangs on the finger
@@ -671,17 +685,17 @@
                 '<div class="maya-row">'
                 + '<input type="number" id="maya-input" min="0" max="2000000" placeholder="5432"'
                 + ' aria-label="' + T('card_lay', 'ZAHL LEGEN') + '">'
-                + '<button class="cyber-btn" id="maya-lay" style="flex:0 0 auto">' + T('btn_lay', 'LEGEN') + '</button>'
+                + '<button class="cyber-btn" id="maya-lay">' + T('btn_lay', 'LEGEN') + '</button>'
                 + '</div>'
                 + '<div class="maya-row">'
-                + '<button class="cyber-btn" id="maya-random" style="flex:1">' + T('btn_random', 'ZUFALL') + '</button>'
-                + '<button class="cyber-btn" id="maya-clear" style="flex:1">' + T('btn_clear', 'LEEREN') + '</button>'
+                + '<button class="cyber-btn" id="maya-random">' + T('btn_random', 'ZUFALL') + '</button>'
+                + '<button class="cyber-btn" id="maya-clear">' + T('btn_clear', 'LEEREN') + '</button>'
                 + '</div>', 'rgb(245, 194, 66)');
 
             CyberUI.createCard('ui-container', T('card_task', 'AUFGABE'),
                 '<div class="maya-note">' + T('task_note', 'Eine Zahl wird genannt, Du legst sie. Stimmt sie, färbt sich das Brett grün.') + '</div>'
                 + '<div class="maya-row">'
-                + '<button class="cyber-btn" id="maya-task" style="flex:1">' + T('btn_task', 'NEUE AUFGABE') + '</button>'
+                + '<button class="cyber-btn" id="maya-task">' + T('btn_task', 'NEUE AUFGABE') + '</button>'
                 + '</div>', 'rgb(176, 36, 24)');
 
             CyberUI.createCard('ui-container', T('card_help', 'SO GEHT ES'),
