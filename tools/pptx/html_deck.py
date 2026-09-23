@@ -890,9 +890,10 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 .p-clock{margin-left:auto}
 .p-cur{grid-area:cur;display:flex;flex-direction:column;min-height:0}
 .p-fit{display:flex;justify-content:center;min-width:0}   /* JS sizes the frame inside */
-/* the mouse IS the laser here, so it aims instead of pointing at a link - the click still turns the page
-   (Doc, 23.09.2026: "Der Cursor ist im Presenter eine Hand ... stellen wir das so ein?") */
-.p-cur .p-fit{cursor:crosshair}
+/* While the laser is on, the red dot IS the pointer and the mouse shows nothing; switched off, a plain arrow -
+   the link hand was wrong here (Doc, 23.09.2026: "wenn laser keine sonst Pfeil"). The click still turns the page. */
+.p-cur .p-fit{cursor:default}
+html.laser-on .p-cur .p-fit{cursor:none}
 .p-frame{position:relative;flex:none;overflow:hidden;background:#fff;border-radius:6px;
   box-shadow:0 2px 12px rgba(0,0,0,.35)}
 .p-frame:empty{visibility:hidden}
@@ -2978,7 +2979,10 @@ const link = (function () {
     }
     // L puts the dot back where it stood, at once - waiting for the next mouse move looked broken (Doc, 23.09.2026:
     // "l bringt nicht den Punkt sofort! Man muss erst bewegen!")
-    function light() { if (on) { if (at) show(at); } else show({}); }
+    function light() {
+      document.documentElement.classList.toggle('laser-on', on);   // the presenter's cursor follows it (deck.css)
+      if (on) { if (at) show(at); } else show({});
+    }
     function toggle() {
       on = !on;
       light();
@@ -2994,6 +2998,7 @@ const link = (function () {
       // goes out on both screens at once, and in the presenter view even with no beamer attached
       if (PRESENTER || linked) toggle();
     });
+    light();                                         // the class says from the start that it is on
     window.DeckLaser = function () { return { on: on, want: want, sent: sent, raf: raf, dot: !!dot }; };   // debug
     return { move: move, show: show, toggle: toggle, mirrorOn: mirrorOn };
   })();

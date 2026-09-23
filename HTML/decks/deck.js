@@ -1903,7 +1903,10 @@ const link = (function () {
     }
     // L puts the dot back where it stood, at once - waiting for the next mouse move looked broken (Doc, 23.09.2026:
     // "l bringt nicht den Punkt sofort! Man muss erst bewegen!")
-    function light() { if (on) { if (at) show(at); } else show({}); }
+    function light() {
+      document.documentElement.classList.toggle('laser-on', on);   // the presenter's cursor follows it (deck.css)
+      if (on) { if (at) show(at); } else show({});
+    }
     function toggle() {
       on = !on;
       light();
@@ -1919,6 +1922,7 @@ const link = (function () {
       // goes out on both screens at once, and in the presenter view even with no beamer attached
       if (PRESENTER || linked) toggle();
     });
+    light();                                         // the class says from the start that it is on
     window.DeckLaser = function () { return { on: on, want: want, sent: sent, raf: raf, dot: !!dot }; };   // debug
     return { move: move, show: show, toggle: toggle, mirrorOn: mirrorOn };
   })();
