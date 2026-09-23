@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Vertiefung: das ganze Jahr — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w38-vertiefung',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Vertiefung: das ganze Jahr',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 38 (Übung) · 20 Aufgaben: Terme, Gleichungen, Funktionen und Stochastik gemischt · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 38 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Terme und Gleichungen (1-5), Funktionen (6-11), Stochastik (12-17), Abzaehlen und Anwendung (18-20). */
+  questions: [
+    {
+      q: 'Multipliziere aus: $(x - 6)^2$.',
+      opts: ['$x^2 - 12x - 36$', '$x^2 - 6x + 36$', '$x^2 - 36$', '$x^2 - 12x + 36$'],
+      steps: [
+        'Zweite binomische Formel.',
+        '$x^2 - 2 \\cdot 6x + 36 = x^2 - 12x + 36$',
+        'Probe mit $x = 1$: $25$ und $1 - 12 + 36 = 25$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zerlege in Faktoren: $x^2 + 7x + 10$.',
+      opts: ['$(x + 2)(x - 5)$', '$(x + 2)(x + 5)$', '$(x + 1)(x + 10)$', '$(x - 2)(x - 5)$'],
+      steps: [
+        'Vieta: zwei Zahlen mit der Summe $7$ und dem Produkt $10$.',
+        'Das sind $2$ und $5$.',
+        '$x^2 + 7x + 10 = (x+2)(x+5)$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse: $8x - 3 = 5x + 9$.',
+      opts: ['$x = 4$', '$x = 2$', '$x = 12$', '$x = 3$'],
+      steps: [
+        '$5x$ abziehen: $3x - 3 = 9$.',
+        '$3x = 12$, also $x = 4$.',
+        'Probe: $32 - 3 = 29$ und $20 + 9 = 29$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse: $\\dfrac{2}{x - 4} = 1$.',
+      opts: ['$x = 4$', '$x = 2$', '$x = -2$', '$x = 6$'],
+      steps: [
+        'Definitionsbereich: $x \\neq 4$.',
+        'Mit $x-4$ multiplizieren: $2 = x - 4$.',
+        '$x = 6$. Probe: $\\dfrac{2}{2} = 1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Löse: $3 - 2x > 7$.',
+      opts: ['$x < -2$', '$x < 2$', '$x > 2$', '$x > -2$'],
+      steps: [
+        '$-3$: $-2x > 4$.',
+        'Durch $-2$ teilen, das Zeichen kippt: $x < -2$.',
+        'Probe mit $x = -3$: $3 + 6 = 9 > 7$ stimmt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die Gerade durch $A(1|5)$ und $B(3|11)$?',
+      opts: ['$y = 3x - 2$', '$y = 3x + 2$', '$y = 2x + 3$', '$y = 6x - 1$'],
+      steps: [
+        '$m = \\dfrac{11 - 5}{3 - 1} = 3$',
+        '$A$ einsetzen: $5 = 3 + n$, also $n = 2$.',
+        '$y = 3x + 2$. Probe mit $B$: $9 + 2 = 11$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne die Nullstelle von $y = 6 - 2x$.',
+      opts: ['$x = 3$', '$x = 6$', '$x = 2$', '$x = -3$'],
+      steps: [
+        '$6 - 2x = 0$',
+        '$2x = 6$, also $x = 3$.',
+        'Probe: $6 - 6 = 0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wo liegt der Scheitelpunkt von $y = x^2 + 6x + 5$?',
+      opts: ['in $(3|-4)$', 'in $(-3|4)$', 'in $(-3|-4)$', 'in $(-6|5)$'],
+      steps: [
+        'Quadratische Ergänzung: $x^2 + 6x + 9 - 9 + 5 = (x+3)^2 - 4$.',
+        'Also $x_S = -3$ und $y_S = -4$.',
+        'Probe: $y(-3) = 9 - 18 + 5 = -4$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lauten die Nullstellen von $y = x^2 + 6x + 5$?',
+      opts: ['$x_1 = 1$ und $x_2 = 5$', '$x_1 = -1$ und $x_2 = -5$', '$x_1 = -6$ und $x_2 = 5$', '$x_1 = -1$ und $x_2 = 5$'],
+      steps: [
+        'Vieta: Summe $-6$, Produkt $5$.',
+        'Das sind $-1$ und $-5$.',
+        'Probe: $1 - 6 + 5 = 0$ und $25 - 30 + 5 = 0$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lauten die Nullstellen von $f(x) = x^3 - 16x$?',
+      opts: ['$x = 0$ und $x = 16$', '$x = 4$ und $x = -4$', '$x = 0$ und $x = 4$', '$x = 0$, $x = 4$ und $x = -4$'],
+      steps: [
+        '$x$ ausklammern: $x\\,(x^2 - 16) = 0$.',
+        'Dritte binomische Formel: $x\\,(x-4)(x+4)$.',
+        'Nullstellen $0$, $4$ und $-4$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Symmetrie hat der Graph von $f(x) = x^5 - x^3$?',
+      opts: ['achsensymmetrisch zur $x$-Achse', 'keine Symmetrie', 'punktsymmetrisch zum Ursprung', 'achsensymmetrisch zur $y$-Achse'],
+      steps: [
+        'Es kommen nur ungerade Exponenten vor.',
+        '$f(-x) = -x^5 + x^3 = -f(x)$',
+        'Also Punktsymmetrie zum Ursprung.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist beim Würfel die Wahrscheinlichkeit für eine Augenzahl höchstens $2$?',
+      opts: ['$\\dfrac{1}{2}$', '$\\dfrac{1}{6}$', '$\\dfrac{1}{3}$', '$\\dfrac{2}{3}$'],
+      steps: [
+        'Günstig sind $1$ und $2$.',
+        '$P = \\dfrac{2}{6} = \\dfrac{1}{3}$',
+        '„Höchstens $2$“ schließt die $2$ ein.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zwei unabhängige Ereignisse haben $P(A) = 0{,}4$ und $P(B) = 0{,}3$. Wie groß ist $P(A \\cap B)$?',
+      opts: ['$0{,}7$', '$0{,}1$', '$0{,}12$', '$0{,}58$'],
+      steps: [
+        'Bei Unabhängigkeit gilt die Multiplikationsregel.',
+        '$0{,}4 \\cdot 0{,}3 = 0{,}12$',
+        '$0{,}7$ wäre die Summe, also $P(A \\cup B)$ bei Unvereinbarkeit.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Urne enthält $2$ rote und $3$ grüne Kugeln. Zweimal wird mit Zurücklegen gezogen. Wie groß ist die Wahrscheinlichkeit für zweimal Rot?',
+      opts: ['$\\dfrac{1}{10}$', '$\\dfrac{4}{25}$', '$\\dfrac{9}{25}$', '$\\dfrac{2}{5}$'],
+      steps: [
+        '$P(\\text{rot}) = \\dfrac{2}{5}$ in beiden Zügen.',
+        '$P = \\dfrac{2}{5} \\cdot \\dfrac{2}{5} = \\dfrac{4}{25}$',
+        'Erste Pfadregel: längs des Pfades multiplizieren.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Dieselbe Urne: wie groß ist die Wahrscheinlichkeit für mindestens einmal Rot?',
+      opts: ['$\\dfrac{9}{25}$', '$\\dfrac{4}{25}$', '$\\dfrac{12}{25}$', '$\\dfrac{16}{25}$'],
+      steps: [
+        'Gegenereignis: zweimal Grün mit $\\dfrac{3}{5} \\cdot \\dfrac{3}{5} = \\dfrac{9}{25}$.',
+        '$1 - \\dfrac{9}{25} = \\dfrac{16}{25}$',
+        'Der Weg über das Gegenereignis spart hier zwei Pfade.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Versuch mit $p = \\dfrac{1}{4}$ wird viermal wiederholt. Wie groß ist die Wahrscheinlichkeit für keinen Treffer?',
+      opts: ['$\\dfrac{1}{256}$', '$\\dfrac{3}{4}$', '$\\dfrac{81}{256}$', '$\\dfrac{175}{256}$'],
+      steps: [
+        '$P(X = 0) = \\left(\\dfrac{3}{4}\\right)^4$',
+        '$= \\dfrac{81}{256} \\approx 0{,}316$',
+        'Für $k = 0$ vereinfacht sich die Formel von Bernoulli zu $(1-p)^n$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie groß ist in der vorigen Aufgabe die Wahrscheinlichkeit für mindestens einen Treffer?',
+      opts: ['$\\dfrac{175}{256}$', '$\\dfrac{81}{256}$', '$1$', '$\\dfrac{1}{4}$'],
+      steps: [
+        'Gegenereignis zu „kein Treffer“.',
+        '$1 - \\dfrac{81}{256} = \\dfrac{175}{256}$',
+        'Das sind rund $68\\,\\%$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Aus $9$ Personen werden $2$ für ein Team gewählt. Wie viele Möglichkeiten gibt es?',
+      opts: ['$18$', '$36$', '$72$', '$81$'],
+      steps: [
+        'Die Reihenfolge spielt keine Rolle.',
+        '$\\binom{9}{2} = \\dfrac{9 \\cdot 8}{2} = 36$',
+        '$72$ wäre die Zählung mit Reihenfolge.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Auf wie viele Arten lassen sich $5$ verschiedene Bilder nebeneinander hängen?',
+      opts: ['$120$', '$25$', '$20$', '$10$'],
+      steps: [
+        '$5! = 5 \\cdot 4 \\cdot 3 \\cdot 2 \\cdot 1$',
+        '$= 120$',
+        'Eine Permutation ohne Wiederholung.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Zwei Sorten kosten $6$ € und $10$ € je Kilogramm. Wie viel der teuren Sorte steckt in $8\\,\\mathrm{kg}$ Mischung zu $7{,}50$ € je Kilogramm?',
+      opts: ['$2\\,\\mathrm{kg}$', '$4\\,\\mathrm{kg}$', '$5\\,\\mathrm{kg}$', '$3\\,\\mathrm{kg}$'],
+      steps: [
+        'Ansatz: $a + b = 8$ und $6a + 10b = 8 \\cdot 7{,}50 = 60$.',
+        '$6\\,(8 - b) + 10b = 60$ ergibt $48 + 4b = 60$, also $b = 3$.',
+        '$3\\,\\mathrm{kg}$ der teuren und $5\\,\\mathrm{kg}$ der billigen Sorte. Probe: $30 + 30 = 60$ €.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

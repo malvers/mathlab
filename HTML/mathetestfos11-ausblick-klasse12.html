@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Ausblick auf Klasse 12 — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w39-ausblick-klasse12',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Ausblick auf Klasse 12',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 39 (Ausblick) · 20 Aufgaben: erste Schritte in Vektorrechnung und Differenzialrechnung · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 39 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Vektoren erste Schritte (1-7), Aenderungsrate und Anstieg (8-14), was in Klasse 12 kommt (15-20). Alle Regeln stehen jeweils in der Aufgabe. */
+  questions: [
+    {
+      q: 'Ein Vektor beschreibt eine Verschiebung im Raum. Wie viele Zahlen braucht man dafür im $\\mathbb{R}^3$?',
+      opts: ['eine', 'vier', 'zwei', 'drei, je eine für jede Koordinatenrichtung'],
+      steps: [
+        'Der Raum hat drei Richtungen, üblicherweise $x$, $y$ und $z$.',
+        'Eine Verschiebung legt für jede Richtung einen Wert fest.',
+        'Deshalb schreibt man einen Vektor als Spalte mit drei Zahlen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Ortsvektor eines Punktes zeigt vom Ursprung zu diesem Punkt. Wie lautet er für $P(2|3|6)$?',
+      opts: ['$\\begin{pmatrix} 0 \\\\ 0 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ 3 \\\\ 6 \\end{pmatrix}$ geteilt durch $3$', '$\\begin{pmatrix} 2 \\\\ 3 \\\\ 6 \\end{pmatrix}$', '$\\begin{pmatrix} 6 \\\\ 3 \\\\ 2 \\end{pmatrix}$'],
+      steps: [
+        'Der Ortsvektor trägt genau die Koordinaten des Punktes.',
+        '$\\overrightarrow{OP} = \\begin{pmatrix} 2 \\\\ 3 \\\\ 6 \\end{pmatrix}$',
+        'Punkt und Ortsvektor werden deshalb oft gleichgesetzt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Länge eines Vektors berechnet man mit $\\sqrt{a_1^2 + a_2^2 + a_3^2}$. Wie lang ist $\\begin{pmatrix} 2 \\\\ 3 \\\\ 6 \\end{pmatrix}$?',
+      opts: ['$7$', '$11$', '$\\sqrt{11}$', '$49$'],
+      steps: [
+        '$\\sqrt{4 + 9 + 36} = \\sqrt{49}$',
+        '$= 7$',
+        'Das ist die räumliche Fassung des Satzes von Pythagoras.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Der Verbindungsvektor von $A$ nach $B$ ist „Spitze minus Fuß“. Wie lautet er für $A(1|0|2)$ und $B(4|4|2)$?',
+      opts: ['$\\begin{pmatrix} 5 \\\\ 4 \\\\ 4 \\end{pmatrix}$', '$\\begin{pmatrix} -3 \\\\ -4 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} 3 \\\\ 4 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} 4 \\\\ 4 \\\\ 2 \\end{pmatrix}$'],
+      steps: [
+        '$\\overrightarrow{AB} = \\vec b - \\vec a$',
+        '$\\begin{pmatrix} 4 \\\\ 4 \\\\ 2 \\end{pmatrix} - \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix} = \\begin{pmatrix} 3 \\\\ 4 \\\\ 0 \\end{pmatrix}$',
+        'Die dritte Koordinate ist $0$ — beide Punkte liegen gleich hoch.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lang ist die Strecke $\\overline{AB}$ aus der vorigen Aufgabe?',
+      opts: ['$7$', '$5$', '$25$', '$\\sqrt{7}$'],
+      steps: [
+        'Die Länge der Strecke ist der Betrag des Verbindungsvektors.',
+        '$\\sqrt{9 + 16 + 0} = \\sqrt{25}$',
+        '$= 5$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Vektoren werden koordinatenweise addiert. Wie lautet $\\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix} + \\begin{pmatrix} 3 \\\\ -1 \\\\ 5 \\end{pmatrix}$?',
+      opts: ['$\\begin{pmatrix} 4 \\\\ 1 \\\\ 5 \\end{pmatrix}$', '$\\begin{pmatrix} 4 \\\\ 3 \\\\ 5 \\end{pmatrix}$', '$\\begin{pmatrix} 3 \\\\ -2 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} -2 \\\\ 3 \\\\ -5 \\end{pmatrix}$'],
+      steps: [
+        'Jede Zeile für sich addieren: $1+3$, $2+(-1)$, $0+5$.',
+        '$= \\begin{pmatrix} 4 \\\\ 1 \\\\ 5 \\end{pmatrix}$',
+        'Anschaulich hängt man die zweite Verschiebung an die erste an.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wozu braucht man Vektoren in Klasse 12?',
+      opts: ['um Geraden und Ebenen im Raum zu beschreiben und Lagen, Winkel und Abstände zu berechnen', 'nur um Punkte aufzuschreiben', 'um Wahrscheinlichkeiten zu berechnen', 'um Gleichungen zu lösen'],
+      steps: [
+        'Mit Vektoren lassen sich Geraden als $\\vec x = \\vec p + t\\,\\vec u$ schreiben.',
+        'Ebenen bekommen eine ähnliche Darstellung.',
+        'Darauf bauen Schnittpunkte, Schnittwinkel, Lotfußpunkte und Flächeninhalte auf.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die mittlere Änderungsrate einer Funktion zwischen $x_1$ und $x_2$ ist $\\dfrac{f(x_2) - f(x_1)}{x_2 - x_1}$. Wie groß ist sie für $f(x) = x^2$ zwischen $1$ und $4$?',
+      opts: ['$\\dfrac{1}{5}$', '$5$', '$15$', '$3$'],
+      steps: [
+        '$f(4) = 16$ und $f(1) = 1$.',
+        '$\\dfrac{16 - 1}{4 - 1} = \\dfrac{15}{3}$',
+        '$= 5$. Das ist der Anstieg der Geraden durch die beiden Kurvenpunkte.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie heißt die Gerade, die den Graphen in zwei Punkten schneidet und deren Anstieg die mittlere Änderungsrate ist?',
+      opts: ['Tangente', 'Sekante', 'Normale', 'Asymptote'],
+      steps: [
+        'Die Sekante verbindet zwei Punkte des Graphen.',
+        'Ihr Anstieg ist der Differenzenquotient.',
+        'Lässt man die beiden Punkte zusammenrücken, wird aus der Sekante die Tangente.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne die mittlere Änderungsrate von $f(x) = x^2$ zwischen $2$ und $3$.',
+      opts: ['$\\dfrac{13}{2}$', '$1$', '$5$', '$6$'],
+      steps: [
+        '$f(3) = 9$ und $f(2) = 4$.',
+        '$\\dfrac{9 - 4}{3 - 2} = 5$',
+        'Zufällig derselbe Wert wie zwischen $1$ und $4$ — die Sekanten sind parallel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was ist die momentane Änderungsrate an einer Stelle?',
+      opts: ['der Anstieg der Sekante', 'der Abstand zur $x$-Achse', 'der Funktionswert an dieser Stelle', 'der Anstieg der Tangente in diesem Punkt'],
+      steps: [
+        'Man lässt die zweite Stelle immer näher an die erste heranrücken.',
+        'Die Sekanten nähern sich dabei einer Grenzlage, der Tangente.',
+        'Deren Anstieg heißt momentane Änderungsrate oder Ableitung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für $f(x) = x^2$ gilt die Ableitung $f^{\\prime}(x) = 2x$. Wie groß ist der Tangentenanstieg an der Stelle $x = 3$?',
+      opts: ['$2$', '$6$', '$9$', '$3$'],
+      steps: [
+        '$f^{\\prime}(3) = 2 \\cdot 3$',
+        '$= 6$',
+        '$9$ wäre der Funktionswert $f(3)$, nicht der Anstieg.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Fahrzeug legt nach $t$ Sekunden den Weg $s(t) = 5t^2$ Meter zurück. Wie groß ist seine mittlere Geschwindigkeit in den ersten $4$ Sekunden?',
+      opts: ['$80\\,\\mathrm{m/s}$', '$5\\,\\mathrm{m/s}$', '$40\\,\\mathrm{m/s}$', '$20\\,\\mathrm{m/s}$'],
+      steps: [
+        '$s(4) = 80$ Meter, $s(0) = 0$.',
+        '$\\dfrac{80 - 0}{4 - 0} = 20$',
+        'Also $20\\,\\mathrm{m/s}$. Die Geschwindigkeit am Ende ist höher, weil das Fahrzeug beschleunigt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Warum ist die momentane Geschwindigkeit nach $4$ Sekunden größer als die mittlere über die ersten $4$ Sekunden?',
+      opts: ['Weil das Fahrzeug beschleunigt und am Anfang langsamer war.', 'Sie ist nicht größer, beide sind gleich.', 'Weil die mittlere Geschwindigkeit immer zu groß ist.', 'Weil die Strecke falsch gemessen wurde.'],
+      steps: [
+        'Der Weg wächst quadratisch, also immer schneller.',
+        'Die mittlere Geschwindigkeit mittelt über die langsame Anfangsphase mit.',
+        'Mit $s^{\\prime}(t) = 10t$ ergibt sich momentan $40\\,\\mathrm{m/s}$ — doppelt so viel wie im Mittel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Lernbereiche stehen in Klasse 12 an?',
+      opts: ['dieselben wie in Klasse 11', 'nur Stochastik', 'nur Vektorrechnung', 'Vektorrechnung, Differenzialrechnung, Integralrechnung und weitere Funktionsklassen'],
+      steps: [
+        'Klasse 12 beginnt mit der Vektorrechnung bei geometrischen Problemen.',
+        'Danach folgen Differenzialrechnung, Integralrechnung und gebrochenrationale sowie e-Funktionen.',
+        'Die Stochastik aus Klasse 11 wird nicht fortgesetzt, bleibt aber prüfungsrelevant.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Womit schließt die Klasse 12 ab?',
+      opts: ['mit der schriftlichen Prüfung zur Fachhochschulreife', 'mit einem Praktikumsbericht', 'mit einer Projektarbeit', 'mit einer Klassenarbeit'],
+      steps: [
+        'Am Ende der Klasse 12 steht die Prüfung zur Fachhochschulreife.',
+        'Mathematik wird dabei schriftlich geprüft.',
+        'Die Inhalte beider Jahre können vorkommen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welches Hilfsmittel ist laut Lehrplan in Klasse 12 vorgesehen?',
+      opts: ['nur ein einfacher Taschenrechner', 'gar kein Hilfsmittel', 'ein Computeralgebrasystem in allen Aufgaben', 'der grafikfähige Taschenrechner ohne Computeralgebrasystem'],
+      steps: [
+        'Der Lehrplan nennt durchgehend „GTR ohne CAS“.',
+        'Der Rechner darf also Graphen zeichnen und numerisch lösen, aber nicht symbolisch umformen.',
+        'Nur im Wahlbereich ist ein Computeralgebrasystem ausdrücklich vorgesehen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welcher Stoff aus Klasse 11 wird in Klasse 12 am unmittelbarsten gebraucht?',
+      opts: ['die Bernoulli-Ketten', 'das Urnenmodell', 'das Untersuchen ganzrationaler Funktionen und das Lösen von Gleichungen', 'die Abzählprobleme'],
+      steps: [
+        'Die Differenzialrechnung untersucht ganzrationale Funktionen weiter.',
+        'Nullstellen, Linearfaktoren und das Verhalten im Unendlichen sind dort Alltag.',
+        'Auch das sichere Lösen von Gleichungen wird ständig gebraucht.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lässt sich der Übergang in Klasse 12 gut vorbereiten?',
+      opts: ['indem man die Stochastik vergisst', 'indem man Termumformungen und das Lösen von Gleichungen sicher beherrscht', 'indem man alle Formeln auswendig lernt', 'indem man nur mit dem Rechner arbeitet'],
+      steps: [
+        'In der Analysis steckt in fast jeder Aufgabe eine Gleichung, die gelöst werden muss.',
+        'Wer dort sicher ist, kann sich auf das Neue konzentrieren.',
+        'Formeln stehen in der Formelsammlung, die Umformungen müssen im Kopf sitzen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Ableitung von $f(x) = x^2$ ist $f^{\\prime}(x) = 2x$, die von $f(x) = x^3$ ist $f^{\\prime}(x) = 3x^2$. Wie lautet vermutlich die Ableitung von $f(x) = x^4$?',
+      opts: ['$f^{\\prime}(x) = 4x^4$', '$f^{\\prime}(x) = 3x^4$', '$f^{\\prime}(x) = 4x^3$', '$f^{\\prime}(x) = x^3$'],
+      steps: [
+        'Das Muster: der Exponent wandert als Faktor nach vorn und wird um $1$ kleiner.',
+        'Aus $x^4$ wird also $4x^3$.',
+        'Diese Regel heißt Potenzregel und ist das erste Werkzeug der Differenzialrechnung.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

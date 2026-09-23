@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Finanzmathematik: Sparplan und Tilgung — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w35-finanzmathematik2',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Finanzmathematik: Sparplan und Tilgung',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 35 (WB 2) · 20 Aufgaben: regelmäßige Zahlungen, Endwert eines Sparplans, Tilgungsplan, Angebote vergleichen · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 35 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Sparplan verstehen (1-6), Endwert berechnen (7-11), Tilgungsrechnung (12-17), Angebote vergleichen (18-20). Beispielkredit: 10000 Euro, 5 Prozent, Annuitaet 3000 Euro. */
+  questions: [
+    {
+      q: 'Was kennzeichnet einen Sparplan gegenüber einer einmaligen Anlage?',
+      opts: ['Der Zinssatz ändert sich jedes Jahr.', 'Die Zinsen werden nicht mitverzinst.', 'Es wird einmal eingezahlt und regelmäßig ausgezahlt.', 'Es wird regelmäßig ein gleichbleibender Betrag eingezahlt, jede Rate wird ab ihrer Einzahlung verzinst.'],
+      steps: [
+        'Beim Sparplan kommt jedes Jahr eine neue Rate hinzu.',
+        'Jede Rate wird von ihrer Einzahlung an mitverzinst.',
+        'Die zuerst eingezahlten Raten tragen deshalb am meisten zum Endwert bei.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Jemand zahlt drei Jahre lang je $1000$ € ein, es gibt keine Zinsen. Wie hoch ist der Endwert?',
+      opts: ['$3152{,}50$ €', '$3300$ €', '$1000$ €', '$3000$ €'],
+      steps: [
+        'Ohne Verzinsung addieren sich nur die Raten.',
+        '$3 \\cdot 1000 = 3000$ €',
+        'Mit Zinsen läge der Endwert darüber — die Differenz ist der Zinsertrag.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet der Endwert eines nachschüssigen Sparplans mit $n$ Raten der Höhe $r$ und dem Faktor $q$?',
+      opts: ['$E = \\dfrac{r}{q^n}$', '$E = r \\cdot q^n$', '$E = r \\cdot \\dfrac{q^n - 1}{q - 1}$', '$E = r \\cdot n \\cdot q$'],
+      steps: [
+        'Die erste Rate wird $n-1$ Jahre verzinst, die letzte gar nicht.',
+        'Die Summe $r + rq + rq^2 + \\ldots + rq^{n-1}$ ist eine geometrische Summe.',
+        'Ihr Wert ist $r \\cdot \\dfrac{q^n - 1}{q - 1}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Warum steht in der Sparplanformel eine geometrische Summe?',
+      opts: ['Weil der Zinssatz geometrisch wächst.', 'Weil die Laufzeit geometrisch gemessen wird.', 'Weil jede Rate mit einer anderen Potenz von $q$ verzinst wird.', 'Weil die Raten sich jedes Jahr verdoppeln.'],
+      steps: [
+        'Die zuerst eingezahlte Rate liegt am längsten und wird mit $q^{n-1}$ verzinst.',
+        'Die nächste mit $q^{n-2}$ und so weiter bis zur letzten mit $q^0 = 1$.',
+        'Aufsummiert ergibt das genau eine geometrische Summe.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Rate eines Sparplans trägt am meisten zum Endwert bei?',
+      opts: ['die zuerst eingezahlte, weil sie am längsten verzinst wird', 'alle gleich viel, weil sie gleich hoch sind', 'die mittlere Rate', 'die zuletzt eingezahlte, weil sie am frischesten ist'],
+      steps: [
+        'Alle Raten sind gleich hoch, aber unterschiedlich lange angelegt.',
+        'Die erste Rate wird $n-1$ Jahre verzinst.',
+        'Deshalb lohnt früh anfangen mehr als später mehr einzahlen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was bedeutet „nachschüssig“ bei einem Sparplan?',
+      opts: ['Die Rate wird am Ende jeder Periode eingezahlt.', 'Die Raten steigen von Jahr zu Jahr.', 'Die Rate wird am Anfang jeder Periode eingezahlt.', 'Die Zinsen werden erst am Ende der Laufzeit gutgeschrieben.'],
+      steps: [
+        'Nachschüssig heißt: Zahlung am Periodenende.',
+        'Die letzte Rate wird dann gar nicht mehr verzinst.',
+        'Vorschüssig wäre die Zahlung am Periodenanfang, der Endwert entsprechend um den Faktor $q$ größer.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Jemand zahlt drei Jahre lang nachschüssig je $1000$ € bei $5\\,\\%$ ein. Wie hoch ist der Endwert?',
+      opts: ['$3152{,}50$ €', '$3000{,}00$ €', '$1157{,}63$ €', '$3310{,}00$ €'],
+      steps: [
+        '$E = 1000 \\cdot \\dfrac{1{,}05^3 - 1}{0{,}05}$',
+        '$= 1000 \\cdot \\dfrac{0{,}157625}{0{,}05} = 1000 \\cdot 3{,}15250$',
+        '$= 3152{,}50$ €, also $152{,}50$ € Zinsertrag.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Jemand zahlt vier Jahre lang nachschüssig je $500$ € bei $4\\,\\%$ ein. Wie hoch ist der Endwert?',
+      opts: ['$2080{,}00$ €', '$2000{,}00$ €', '$2123{,}23$ €', '$2338{,}25$ €'],
+      steps: [
+        '$E = 500 \\cdot \\dfrac{1{,}04^4 - 1}{0{,}04}$',
+        '$= 500 \\cdot \\dfrac{0{,}169859}{0{,}04} \\approx 500 \\cdot 4{,}246464$',
+        '$\\approx 2123{,}23$ €'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie hoch ist beim Sparplan aus der vorigen Aufgabe der reine Zinsertrag?',
+      opts: ['etwa $500{,}00$ €', 'etwa $23{,}23$ €', 'etwa $80{,}00$ €', 'etwa $123{,}23$ €'],
+      steps: [
+        'Eingezahlt wurden $4 \\cdot 500 = 2000$ €.',
+        '$2123{,}23 - 2000 = 123{,}23$ €',
+        'Der Zinsertrag ist die Differenz zwischen Endwert und Summe der Einzahlungen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie verändert sich der Endwert eines Sparplans, wenn die Rate verdoppelt wird?',
+      opts: ['Er bleibt gleich.', 'Er verdoppelt sich ebenfalls.', 'Er vervierfacht sich.', 'Er steigt um den Faktor $q$.'],
+      steps: [
+        'In der Formel steht $r$ als Faktor vor dem Bruch.',
+        'Verdoppelt man $r$, verdoppelt sich das gesamte Produkt.',
+        'Die Laufzeit wirkt dagegen im Exponenten und damit viel stärker.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Sparplan läuft zehn Jahre mit jährlich $1200$ € bei $3\\,\\%$. Welche Größenordnung hat der Endwert?',
+      opts: ['rund $12\\,000$ €', 'rund $13\\,757$ €', 'rund $16\\,127$ €', 'rund $1613$ €'],
+      steps: [
+        '$E = 1200 \\cdot \\dfrac{1{,}03^{10} - 1}{0{,}03}$',
+        '$1{,}03^{10} \\approx 1{,}343916$, also $E \\approx 1200 \\cdot 11{,}4638$',
+        '$\\approx 13\\,757$ €. Eingezahlt wurden $12\\,000$ €, der Rest sind Zinsen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Kredit über $10\\,000$ € wird mit $5\\,\\%$ verzinst, jährlich werden $3000$ € zurückgezahlt. Wie hoch ist die Restschuld nach einem Jahr?',
+      opts: ['$7500$ €', '$8000$ €', '$7000$ €', '$7350$ €'],
+      steps: [
+        'Zuerst werden die Zinsen aufgeschlagen: $10\\,000 \\cdot 1{,}05 = 10\\,500$ €.',
+        'Dann wird die Zahlung abgezogen: $10\\,500 - 3000$.',
+        '$= 7500$ €. $7000$ € wäre das Ergebnis ohne Berücksichtigung der Zinsen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie hoch ist die Restschuld desselben Kredits nach zwei Jahren?',
+      opts: ['$5000$ €', '$4875$ €', '$4500$ €', '$4750$ €'],
+      steps: [
+        '$7500 \\cdot 1{,}05 = 7875$ €',
+        '$7875 - 3000 = 4875$ €',
+        'Jedes Jahr wird dieselbe Rechnung auf die neue Restschuld angewandt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie hoch ist die Restschuld desselben Kredits nach drei Jahren?',
+      opts: ['$2500{,}00$ €', '$2118{,}75$ €', '$2000{,}00$ €', '$1875{,}00$ €'],
+      steps: [
+        '$4875 \\cdot 1{,}05 = 5118{,}75$ €',
+        '$5118{,}75 - 3000 = 2118{,}75$ €',
+        'Im vierten Jahr wäre der Kredit mit einer kleineren Schlusszahlung getilgt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie teilt sich die erste Zahlung von $3000$ € in Zins- und Tilgungsanteil?',
+      opts: ['$150$ € Zinsen und $2850$ € Tilgung', '$500$ € Zinsen und $2500$ € Tilgung', '$3000$ € Zinsen und $0$ € Tilgung', '$2500$ € Zinsen und $500$ € Tilgung'],
+      steps: [
+        'Zinsen des ersten Jahres: $10\\,000 \\cdot 0{,}05 = 500$ €.',
+        'Der Rest der Zahlung tilgt: $3000 - 500 = 2500$ €.',
+        'Probe: $10\\,000 - 2500 = 7500$ € Restschuld.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie teilt sich die zweite Zahlung von $3000$ € auf?',
+      opts: ['$500$ € Zinsen und $2500$ € Tilgung', '$250$ € Zinsen und $2750$ € Tilgung', '$375$ € Zinsen und $2625$ € Tilgung', '$300$ € Zinsen und $2700$ € Tilgung'],
+      steps: [
+        'Zinsen auf die Restschuld: $7500 \\cdot 0{,}05 = 375$ €.',
+        'Tilgung: $3000 - 375 = 2625$ €.',
+        'Probe: $7500 - 2625 = 4875$ € Restschuld.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Warum wächst bei gleichbleibender Zahlung der Tilgungsanteil von Jahr zu Jahr?',
+      opts: ['Weil die Zahlung jedes Jahr steigt.', 'Weil die Bank den Tilgungsanteil festlegt.', 'Weil der Zinssatz jedes Jahr fällt.', 'Weil die Restschuld sinkt und damit auch der Zinsanteil kleiner wird.'],
+      steps: [
+        'Die Zahlung bleibt gleich, sie teilt sich aber neu auf.',
+        'Die Zinsen richten sich nach der jeweiligen Restschuld, und die sinkt.',
+        'Was an Zinsen wegfällt, wird zusätzlich zur Tilgung frei — deshalb geht es am Ende schnell.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Angebot A: $10\\,000$ € zu $5\\,\\%$ über $4$ Jahre. Angebot B: derselbe Betrag zu $4\\,\\%$ über $5$ Jahre. Was lässt sich ohne Rechnung sagen?',
+      opts: ['B ist immer günstiger, weil der Zinssatz niedriger ist.', 'A ist immer günstiger, weil die Laufzeit kürzer ist.', 'Nichts Sicheres — niedrigerer Zinssatz und längere Laufzeit wirken gegeneinander.', 'Beide kosten gleich viel.'],
+      steps: [
+        'Ein niedrigerer Zinssatz spricht für B.',
+        'Eine längere Laufzeit bedeutet aber, dass länger Zinsen anfallen.',
+        'Welcher Effekt überwiegt, zeigt erst die Rechnung mit den tatsächlichen Zahlungen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Worauf sollte man beim Vergleich zweier Kreditangebote vor allem achten?',
+      opts: ['nur auf den Zinssatz', 'nur auf die monatliche Rate', 'nur auf die Laufzeit', 'auf die Gesamtkosten über die ganze Laufzeit, nicht nur auf die Höhe der Rate'],
+      steps: [
+        'Eine niedrige Rate kann durch eine lange Laufzeit erkauft sein.',
+        'Dann zahlt man insgesamt mehr, obwohl es monatlich günstiger aussieht.',
+        'Aussagekräftig ist die Summe aller Zahlungen im Vergleich zur Kreditsumme.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wozu eignet sich eine Tabellenkalkulation bei der Tilgungsrechnung besonders gut?',
+      opts: ['Eine Zeile je Jahr mit Restschuld, Zinsen und Tilgung lässt sich nach unten kopieren.', 'Sie ist dafür ungeeignet.', 'Sie berechnet den Zinssatz automatisch.', 'Sie ersetzt die Zinseszinsformel.'],
+      steps: [
+        'Jede Zeile greift auf die Restschuld der Vorzeile zu.',
+        'Genau solche rekursiven Rechnungen erledigt eine Tabellenkalkulation in einem Zug.',
+        'So sieht man auf einen Blick, wie sich Zins- und Tilgungsanteil über die Jahre verschieben.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

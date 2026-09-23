@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Exkurs: Schaltalgebra — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w37-schaltalgebra',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Exkurs: Schaltalgebra',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 37 (WB 3) · 20 Aufgaben: Aussagen, UND, ODER, NICHT, Wahrheitstafeln, Vereinfachen, Schaltungen · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 37 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Aussagen und Verknuepfungen (1-6), Wahrheitstafeln (7-12), Rechengesetze und Vereinfachen (13-17), Schaltungen (18-20). */
+  questions: [
+    {
+      q: 'Was ist in der Aussagenlogik eine Aussage?',
+      opts: ['jede Frage', 'eine Rechenanweisung', 'jeder Satz mit einem Verb', 'ein Satz, dem sich eindeutig wahr oder falsch zuordnen lässt'],
+      steps: [
+        'Entscheidend ist die Zweiwertigkeit: wahr oder falsch, nichts dazwischen.',
+        '„Berlin liegt in Deutschland“ ist eine Aussage.',
+        '„Wie spät ist es?“ dagegen nicht — eine Frage ist weder wahr noch falsch.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Werte verwendet die Schaltalgebra?',
+      opts: ['alle reellen Zahlen', 'die ganzen Zahlen', 'die Werte $-1$, $0$ und $1$', 'nur $0$ und $1$, gedeutet als falsch und wahr'],
+      steps: [
+        'Die Schaltalgebra ist zweiwertig.',
+        '$1$ steht für wahr oder „Strom fließt“, $0$ für falsch oder „Strom fließt nicht“.',
+        'Deshalb passt sie so gut zu elektrischen Schaltungen und zur Informatik.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wann ist die Konjunktion $a \\land b$ wahr?',
+      opts: ['wenn genau eine wahr ist', 'wenn mindestens eine wahr ist', 'nur wenn $a$ und $b$ beide wahr sind', 'wenn beide falsch sind'],
+      steps: [
+        '$\\land$ ist das logische UND.',
+        'Nur die Kombination $1 \\land 1$ ergibt $1$.',
+        'In allen drei anderen Fällen ist das Ergebnis $0$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wann ist die Disjunktion $a \\lor b$ falsch?',
+      opts: ['wenn genau eine wahr ist', 'wenn beide wahr sind', 'wenn mindestens eine falsch ist', 'nur wenn $a$ und $b$ beide falsch sind'],
+      steps: [
+        '$\\lor$ ist das logische ODER, und zwar nicht ausschließend.',
+        'Nur $0 \\lor 0$ ergibt $0$.',
+        'Sind beide wahr, ist das Ergebnis ebenfalls wahr.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was bewirkt die Negation $\\overline{a}$?',
+      opts: ['Sie verknüpft zwei Aussagen.', 'Sie kehrt den Wahrheitswert um: aus $0$ wird $1$ und umgekehrt.', 'Sie macht jede Aussage falsch.', 'Sie lässt den Wert unverändert.'],
+      steps: [
+        'Die Negation ist die einzige einstellige Verknüpfung.',
+        '$\\overline{0} = 1$ und $\\overline{1} = 0$.',
+        'Zweimal negiert ergibt wieder den Ausgangswert: $\\overline{\\overline{a}} = a$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welcher Schaltung entspricht die Konjunktion $a \\land b$?',
+      opts: ['einem einzelnen Schalter', 'der Reihenschaltung zweier Schalter', 'einem Wechselschalter', 'der Parallelschaltung zweier Schalter'],
+      steps: [
+        'In Reihe muss der Strom beide Schalter passieren.',
+        'Er fließt nur, wenn beide geschlossen sind.',
+        'Die Parallelschaltung entspricht dagegen dem ODER.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viele Zeilen hat die Wahrheitstafel einer Verknüpfung mit zwei Variablen?',
+      opts: ['acht', 'zwei', 'drei', 'vier'],
+      steps: [
+        'Jede Variable kann $0$ oder $1$ sein.',
+        '$2 \\cdot 2 = 4$ Kombinationen.',
+        'Das sind $00$, $01$, $10$ und $11$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele Zeilen hat die Wahrheitstafel bei drei Variablen?',
+      opts: ['vier', 'neun', 'acht', 'sechs'],
+      steps: [
+        '$2^3 = 8$',
+        'Allgemein sind es $2^n$ Zeilen bei $n$ Variablen.',
+        'Die Tafel wächst also exponentiell mit der Zahl der Eingänge.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Wert hat $1 \\land 0$?',
+      opts: ['nicht definiert', 'beides möglich', '$0$', '$1$'],
+      steps: [
+        'Die Konjunktion ist nur wahr, wenn beide Werte wahr sind.',
+        'Hier ist einer $0$.',
+        'Also $1 \\land 0 = 0$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Wert hat $0 \\lor 1$?',
+      opts: ['$1$', '$0$', 'nicht definiert', 'beides möglich'],
+      steps: [
+        'Die Disjunktion ist wahr, sobald mindestens ein Wert wahr ist.',
+        'Hier ist einer $1$.',
+        'Also $0 \\lor 1 = 1$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Wert hat $\\overline{1 \\land 1}$?',
+      opts: ['beides möglich', 'nicht definiert', '$1$', '$0$'],
+      steps: [
+        'Zuerst die Klammer: $1 \\land 1 = 1$.',
+        'Dann negieren: $\\overline{1} = 0$.',
+        'Diese Verknüpfung heißt NAND und ist in der Technik besonders wichtig.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welche Belegung ist $a \\land \\overline{b}$ wahr?',
+      opts: ['für $a = 1$ und $b = 1$', 'für $a = 0$ und $b = 1$', 'für $a = 1$ und $b = 0$', 'für $a = 0$ und $b = 0$'],
+      steps: [
+        'Die Konjunktion verlangt, dass beide Teile wahr sind.',
+        '$a$ muss $1$ sein, und $\\overline{b}$ muss $1$ sein, also $b = 0$.',
+        'Nur die Belegung $a = 1$, $b = 0$ erfüllt beides.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lässt sich $a \\land 1$ vereinfachen?',
+      opts: ['zu $a$', 'zu $0$', 'zu $\\overline{a}$', 'zu $1$'],
+      steps: [
+        'Ist der zweite Wert stets wahr, hängt das Ergebnis nur noch von $a$ ab.',
+        '$a \\land 1 = a$',
+        'In der Schaltung: ein dauerhaft geschlossener Schalter in Reihe ändert nichts.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lässt sich $a \\lor 0$ vereinfachen?',
+      opts: ['zu $1$', 'zu $a$', 'zu $\\overline{a}$', 'zu $0$'],
+      steps: [
+        'Ist der zweite Wert stets falsch, entscheidet nur noch $a$.',
+        '$a \\lor 0 = a$',
+        'In der Schaltung: ein dauerhaft offener Schalter parallel ändert nichts.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lässt sich $a \\land 0$ vereinfachen?',
+      opts: ['zu $a$', 'zu $0$', 'zu $\\overline{a}$', 'zu $1$'],
+      steps: [
+        'Die Konjunktion verlangt beide Werte wahr.',
+        'Einer ist aber fest $0$.',
+        'Also ist das Ergebnis immer $0$ — in Reihe mit einer Unterbrechung fließt nie Strom.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Wert hat $a \\land \\overline{a}$?',
+      opts: ['$a$', '$0$, unabhängig von $a$', '$\\overline{a}$', '$1$, unabhängig von $a$'],
+      steps: [
+        'Eine Aussage und ihre Verneinung sind nie gleichzeitig wahr.',
+        'Ist $a = 1$, so ist $\\overline{a} = 0$, und umgekehrt.',
+        'Das Ergebnis ist stets $0$; entsprechend gilt $a \\lor \\overline{a} = 1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet die erste Regel von de Morgan in der Schaltalgebra?',
+      opts: ['$\\overline{a \\lor b} = \\overline{a} \\land \\overline{b}$', '$\\overline{a \\lor b} = \\overline{a} \\lor \\overline{b}$', '$\\overline{a \\lor b} = a \\land b$', '$\\overline{a \\land b} = \\overline{a} \\land \\overline{b}$'],
+      steps: [
+        'Beim Negieren einer Verknüpfung wechselt $\\lor$ zu $\\land$.',
+        'Zugleich wird jeder einzelne Teil negiert.',
+        'Probe mit $a = 1$, $b = 0$: links $\\overline{1} = 0$, rechts $0 \\land 1 = 0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Lampe soll leuchten, wenn mindestens einer von zwei Schaltern geschlossen ist. Welcher Term beschreibt das?',
+      opts: ['$a \\lor b$', '$\\overline{a \\lor b}$', '$a \\land b$', '$\\overline{a} \\land \\overline{b}$'],
+      steps: [
+        'Mindestens einer bedeutet die Disjunktion.',
+        '$a \\lor b$',
+        'Technisch ist das die Parallelschaltung beider Schalter.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Maschine darf nur anlaufen, wenn die Schutztür geschlossen ist UND der Startknopf gedrückt wird UND kein Notaus ausgelöst ist. Welcher Term beschreibt das?',
+      opts: ['$t \\land s \\land \\overline{n}$', '$\\overline{t \\land s}$', '$t \\land s \\land n$', '$t \\lor s \\lor n$'],
+      steps: [
+        'Alle drei Bedingungen müssen zugleich erfüllt sein, also Konjunktionen.',
+        'Der Notaus darf gerade NICHT ausgelöst sein, deshalb $\\overline{n}$.',
+        '$t \\land s \\land \\overline{n}$ — eine typische Freigabeschaltung.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was leistet die Schaltalgebra für die Technik?',
+      opts: ['Sie ersetzt die Wahrheitstafel.', 'Sie gilt nur für theoretische Überlegungen.', 'Sie erlaubt es, Schaltungen als Terme zu schreiben und vor dem Bau zu vereinfachen.', 'Sie berechnet die Stromstärke in einer Schaltung.'],
+      steps: [
+        'Jede Schaltung lässt sich als Term aus UND, ODER und NICHT darstellen.',
+        'Mit den Rechengesetzen wird der Term vereinfacht.',
+        'Ein kürzerer Term bedeutet weniger Bauteile — das spart Geld und senkt die Fehlerquote.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Exkurs: Komplexe Zahlen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w36-komplexe-zahlen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Exkurs: Komplexe Zahlen',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 36 (WB 1) · 20 Aufgaben: Zahlbereichserweiterung, imaginäre Einheit, Rechenoperationen, Gaußsche Zahlenebene · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 36 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Notwendigkeit der Erweiterung (1-5), Darstellung (6-11), Rechenoperationen (12-17), Zahlenebene und Gleichungen (18-20). */
+  questions: [
+    {
+      q: 'Warum reichen die reellen Zahlen nicht aus, um jede quadratische Gleichung zu lösen?',
+      opts: ['Weil ein Quadrat im Reellen nie negativ ist, hat $x^2 = -1$ keine reelle Lösung.', 'Weil die Lösungsformel nur für positive Koeffizienten gilt.', 'Weil die reellen Zahlen nicht dicht liegen.', 'Weil quadratische Gleichungen immer zwei Lösungen haben müssen.'],
+      steps: [
+        'Für jede reelle Zahl $x$ gilt $x^2 \\geq 0$.',
+        'Also kann $x^2 = -1$ im Reellen nicht erfüllt werden.',
+        'Die Lösungsmenge ist leer — genau hier setzt die Erweiterung an.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die Kette der Zahlbereichserweiterungen?',
+      opts: ['$\\mathbb{N} \\subset \\mathbb{Z} \\subset \\mathbb{Q} \\subset \\mathbb{R} \\subset \\mathbb{C}$', '$\\mathbb{N} \\subset \\mathbb{Q} \\subset \\mathbb{Z} \\subset \\mathbb{R} \\subset \\mathbb{C}$', '$\\mathbb{Z} \\subset \\mathbb{N} \\subset \\mathbb{Q} \\subset \\mathbb{R} \\subset \\mathbb{C}$', '$\\mathbb{C} \\subset \\mathbb{R} \\subset \\mathbb{Q} \\subset \\mathbb{Z} \\subset \\mathbb{N}$'],
+      steps: [
+        'Jede Erweiterung macht eine bisher unlösbare Aufgabe lösbar.',
+        '$\\mathbb{Z}$ erlaubt das Subtrahieren, $\\mathbb{Q}$ das Dividieren, $\\mathbb{R}$ das Wurzelziehen aus positiven Zahlen.',
+        '$\\mathbb{C}$ schließlich erlaubt das Wurzelziehen aus negativen Zahlen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Aufgabe wird durch den Übergang von $\\mathbb{Z}$ zu $\\mathbb{Q}$ lösbar?',
+      opts: ['das Subtrahieren, etwa $3 - 5$', 'das Wurzelziehen aus negativen Zahlen', 'das Teilen, etwa $3 : 4$', 'das Wurzelziehen, etwa $\\sqrt{2}$'],
+      steps: [
+        'In $\\mathbb{Z}$ lässt sich $3 : 4$ nicht ausführen.',
+        'Die Brüche schließen diese Lücke.',
+        '$\\sqrt{2}$ erfordert dagegen den Schritt zu $\\mathbb{R}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie ist die imaginäre Einheit $i$ definiert?',
+      opts: ['durch $i^2 = 1$', 'durch $i^2 = -1$', 'durch $i = -1$', 'durch $i = 0$'],
+      steps: [
+        '$i$ ist die Zahl, deren Quadrat $-1$ ergibt.',
+        'Man schreibt auch $i = \\sqrt{-1}$, meint damit aber die Festlegung $i^2 = -1$.',
+        'Mit dieser einen Festlegung wird jede quadratische Gleichung lösbar.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was ist der Nutzen der komplexen Zahlen über die Mathematik hinaus?',
+      opts: ['Sie werden nur in der reinen Mathematik gebraucht.', 'Sie dienen ausschließlich dem Lösen von Gleichungen.', 'Sie beschreiben Wechselströme und Schwingungen in der Elektrotechnik.', 'Sie ersetzen die reellen Zahlen in der Statistik.'],
+      steps: [
+        'In der Elektrotechnik wird der Wechselstromwiderstand als komplexe Größe gerechnet.',
+        'Auch Schwingungen und Regelungstechnik nutzen sie.',
+        'Der Name „imaginär“ täuscht: die Anwendungen sind sehr handfest.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lautet die allgemeine Form einer komplexen Zahl?',
+      opts: ['$z = a^b \\cdot i$', '$z = \\dfrac{a}{b}\\,i$', '$z = a \\cdot b\\,i$', '$z = a + b\\,i$ mit reellen $a$ und $b$'],
+      steps: [
+        'Jede komplexe Zahl besteht aus einem reellen und einem imaginären Anteil.',
+        '$z = a + b\\,i$ heißt algebraische oder Normalform.',
+        '$a$ und $b$ sind dabei gewöhnliche reelle Zahlen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lauten Real- und Imaginärteil von $z = 3 + 4i$?',
+      opts: ['$\\operatorname{Re}(z) = 4$ und $\\operatorname{Im}(z) = 3$', '$\\operatorname{Re}(z) = 3$ und $\\operatorname{Im}(z) = 4$', '$\\operatorname{Re}(z) = 3$ und $\\operatorname{Im}(z) = 4i$', '$\\operatorname{Re}(z) = 7$ und $\\operatorname{Im}(z) = 0$'],
+      steps: [
+        'Der Realteil ist der Summand ohne $i$.',
+        'Der Imaginärteil ist der Vorfaktor von $i$ — eine reelle Zahl, ohne das $i$.',
+        'Also $\\operatorname{Re}(z) = 3$ und $\\operatorname{Im}(z) = 4$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche komplexen Zahlen sind zugleich reelle Zahlen?',
+      opts: ['die mit dem Realteil $0$', 'gar keine', 'die mit dem Imaginärteil $0$', 'die mit $a = b$'],
+      steps: [
+        'Für $b = 0$ bleibt $z = a$ übrig.',
+        'Das ist eine gewöhnliche reelle Zahl.',
+        'Deshalb ist $\\mathbb{R}$ eine Teilmenge von $\\mathbb{C}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was ist eine rein imaginäre Zahl?',
+      opts: ['eine Zahl mit Imaginärteil $0$', 'jede komplexe Zahl', 'eine Zahl mit $a = b$', 'eine Zahl der Form $b\\,i$ mit $b \\neq 0$, also mit Realteil $0$'],
+      steps: [
+        'Für $a = 0$ bleibt $z = b\\,i$ übrig.',
+        'Beispiele sind $2i$ oder $-5i$.',
+        'Sie liegen in der Zahlenebene auf der imaginären Achse.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet die konjugiert komplexe Zahl zu $z = 2 - 5i$?',
+      opts: ['$\\overline{z} = -2 + 5i$', '$\\overline{z} = 2 + 5i$', '$\\overline{z} = -2 - 5i$', '$\\overline{z} = 5 - 2i$'],
+      steps: [
+        'Beim Konjugieren kehrt das Vorzeichen des Imaginärteils um.',
+        'Aus $2 - 5i$ wird $2 + 5i$.',
+        'Der Realteil bleibt unverändert.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie berechnet man den Betrag einer komplexen Zahl $z = a + b\\,i$?',
+      opts: ['$\\left|z\\right| = a + b$', '$\\left|z\\right| = \\sqrt{a^2 + b^2}$', '$\\left|z\\right| = \\sqrt{a^2 - b^2}$', '$\\left|z\\right| = a \\cdot b$'],
+      steps: [
+        'In der Zahlenebene ist $z$ der Punkt $(a|b)$.',
+        'Der Betrag ist sein Abstand vom Ursprung.',
+        'Nach dem Satz des Pythagoras $\\sqrt{a^2 + b^2}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $(2 + 3i) + (1 - 5i)$.',
+      opts: ['$3 - 2i$', '$3 - 2$', '$1 - 2i$', '$3 + 8i$'],
+      steps: [
+        'Real- und Imaginärteile werden getrennt addiert.',
+        '$(2+1) + (3-5)\\,i$',
+        '$= 3 - 2i$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $(4 + i) - (1 + 3i)$.',
+      opts: ['$3 + 4i$', '$3 + 2i$', '$5 + 4i$', '$3 - 2i$'],
+      steps: [
+        'Getrennt subtrahieren: $(4-1) + (1-3)\\,i$.',
+        '$= 3 - 2i$',
+        'Das Minus vor der Klammer trifft beide Teile.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $(2 + 3i)(1 - i)$.',
+      opts: ['$5 + i$', '$2 - 3i$', '$-1 + i$', '$5 - i$'],
+      steps: [
+        'Ausmultiplizieren wie bei Klammern: $2 - 2i + 3i - 3i^2$.',
+        'Wegen $i^2 = -1$ wird $-3i^2 = +3$.',
+        '$= (2+3) + (-2+3)\\,i = 5 + i$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Wert hat $i^3$?',
+      opts: ['$1$', '$i$', '$-1$', '$-i$'],
+      steps: [
+        '$i^3 = i^2 \\cdot i$',
+        '$= (-1) \\cdot i = -i$',
+        'Die Potenzen wiederholen sich im Viererrhythmus: $i$, $-1$, $-i$, $1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchen Wert hat $i^4$?',
+      opts: ['$i$', '$-1$', '$-i$', '$1$'],
+      steps: [
+        '$i^4 = \\left(i^2\\right)^2$',
+        '$= (-1)^2 = 1$',
+        'Deshalb ist $i^{100} = 1$, denn $100$ ist durch $4$ teilbar.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $(3 + 4i)(3 - 4i)$.',
+      opts: ['$9 + 16i^2$ und damit $-7$', '$9 - 16i$', '$25$', '$-7$'],
+      steps: [
+        'Dritte binomische Formel: $a^2 - b^2$ mit $b = 4i$.',
+        '$9 - 16i^2 = 9 + 16$',
+        '$= 25$. Das Produkt aus $z$ und $\\overline{z}$ ist stets reell und gleich $\\left|z\\right|^2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie stellt man komplexe Zahlen anschaulich dar?',
+      opts: ['auf dem gewöhnlichen Zahlenstrahl', 'gar nicht, sie sind nicht darstellbar', 'als Punkte in der Gaußschen Zahlenebene, waagerecht der Real-, senkrecht der Imaginärteil', 'als Vektoren im dreidimensionalen Raum'],
+      steps: [
+        'Eine komplexe Zahl braucht zwei Angaben, passt also nicht auf eine Gerade.',
+        'In der Ebene entspricht $z = a + b\\,i$ dem Punkt $(a|b)$.',
+        'Die reellen Zahlen liegen dabei auf der waagerechten Achse.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lauten die Lösungen von $x^2 + 1 = 0$ in $\\mathbb{C}$?',
+      opts: ['$x = i$ und $x = -i$', 'keine Lösung', 'nur $x = i$', '$x = 1$ und $x = -1$'],
+      steps: [
+        '$x^2 = -1$',
+        'Sowohl $i$ als auch $-i$ haben das Quadrat $-1$, denn $(-i)^2 = i^2 = -1$.',
+        'Also zwei Lösungen — im Komplexen hat jede quadratische Gleichung zwei.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lauten die Lösungen von $x^2 - 2x + 5 = 0$ in $\\mathbb{C}$?',
+      opts: ['$x = 1 + 4i$ und $x = 1 - 4i$', '$x = 1 + 2i$ und $x = 1 - 2i$', 'keine Lösung', '$x = 2 + i$ und $x = 2 - i$'],
+      steps: [
+        'Lösungsformel: $x = \\dfrac{2 \\pm \\sqrt{4 - 20}}{2} = \\dfrac{2 \\pm \\sqrt{-16}}{2}$',
+        '$\\sqrt{-16} = 4i$, also $x = \\dfrac{2 \\pm 4i}{2}$',
+        '$= 1 \\pm 2i$. Die beiden Lösungen sind zueinander konjugiert komplex — das gilt bei reellen Koeffizienten immer.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

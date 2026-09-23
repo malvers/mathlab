@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Finanzmathematik: Zins und Zinseszins — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w34-finanzmathematik1',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Finanzmathematik: Zins und Zinseszins',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 34 (WB 2) · 20 Aufgaben: Zinsen, Wachstumsfaktor, Zinseszinsformel, Kapital vorwärts und rückwärts · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 34 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: einfache Zinsrechnung (1-6), Zinseszins (7-13), rueckwaerts rechnen (14-17), Anwendungen (18-20). */
+  questions: [
+    {
+      q: 'Wie viel Zinsen bringt ein Kapital von $2000$ € in einem Jahr bei $3\\,\\%$?',
+      opts: ['$6$ €', '$600$ €', '$2060$ €', '$60$ €'],
+      steps: [
+        '$Z = 2000 \\cdot 0{,}03$',
+        '$= 60$ €',
+        '$2060$ € wäre das Kapital nach dem Jahr, nicht der Zinsbetrag.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Auf welchen Betrag wächst das Kapital aus der vorigen Aufgabe nach einem Jahr?',
+      opts: ['$2600$ €', '$60$ €', '$2003$ €', '$2060$ €'],
+      steps: [
+        'Kapital plus Zinsen: $2000 + 60$.',
+        '$= 2060$ €',
+        'Kürzer über den Wachstumsfaktor: $2000 \\cdot 1{,}03 = 2060$ €.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet der Wachstumsfaktor bei einem Zinssatz von $3\\,\\%$?',
+      opts: ['$1{,}03$', '$0{,}97$', '$3$', '$0{,}03$'],
+      steps: [
+        'Aus $100\\,\\%$ werden $103\\,\\%$.',
+        'Als Faktor: $q = 1 + \\dfrac{p}{100} = 1{,}03$.',
+        '$0{,}97$ wäre der Faktor bei einer Minderung um $3\\,\\%$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Kapital von $2000$ € wird drei Jahre lang mit $3\\,\\%$ verzinst, die Zinsen werden aber jährlich ausgezahlt und nicht mitverzinst. Wie viel Zinsen sind das insgesamt?',
+      opts: ['$2180$ €', '$185{,}45$ €', '$180$ €', '$60$ €'],
+      steps: [
+        'Ohne Mitverzinsung bleibt der Zinsbetrag jedes Jahr gleich.',
+        '$3 \\cdot 60 = 180$ €',
+        'Mit Zinseszins wären es $185{,}45$ € — die Differenz wächst mit der Laufzeit.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viel Zinsen bringt ein Kapital von $6000$ € in $4$ Monaten bei $3\\,\\%$ Jahreszins?',
+      opts: ['$60$ €', '$15$ €', '$720$ €', '$180$ €'],
+      steps: [
+        'Jahreszinsen: $6000 \\cdot 0{,}03 = 180$ €.',
+        'Für $4$ von $12$ Monaten also ein Drittel davon.',
+        '$\\dfrac{180}{3} = 60$ €'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Worin unterscheiden sich Zins und Zinseszins?',
+      opts: ['Beim Zinseszins ist der Zinssatz höher.', 'Beim Zinseszins werden die Zinsen dem Kapital zugeschlagen und künftig mitverzinst.', 'Beim Zinseszins wird monatlich statt jährlich verzinst.', 'Es gibt keinen Unterschied.'],
+      steps: [
+        'Bei einfacher Verzinsung bleibt die Berechnungsgrundlage das Anfangskapital.',
+        'Beim Zinseszins wächst sie jedes Jahr mit.',
+        'Deshalb ist einfaches Zinswachstum linear, Zinseszins dagegen exponentiell.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet die Zinseszinsformel?',
+      opts: ['$K_n = K_0 \\cdot n^q$', '$K_n = K_0 \\cdot q \\cdot n$', '$K_n = K_0 + q^n$', '$K_n = K_0 \\cdot q^n$'],
+      steps: [
+        'Jedes Jahr wird mit demselben Faktor $q$ multipliziert.',
+        'Nach $n$ Jahren also $n$-mal: $K_n = K_0 \\cdot q^n$.',
+        'Das ist eine geometrische Folge mit dem Quotienten $q$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Auf welchen Betrag wachsen $2000$ € in drei Jahren bei $3\\,\\%$ Zinseszins?',
+      opts: ['$2060{,}00$ €', '$2270{,}00$ €', '$2185{,}45$ €', '$2180{,}00$ €'],
+      steps: [
+        '$K_3 = 2000 \\cdot 1{,}03^3$',
+        '$= 2000 \\cdot 1{,}092727 = 2185{,}454$',
+        'Gerundet $2185{,}45$ € — gut $5$ € mehr als bei einfacher Verzinsung.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Auf welchen Betrag wachsen $1000$ € in zehn Jahren bei $5\\,\\%$?',
+      opts: ['$1500{,}00$ €', '$1050{,}00$ €', '$2000{,}00$ €', '$1628{,}89$ €'],
+      steps: [
+        '$K_{10} = 1000 \\cdot 1{,}05^{10}$',
+        '$\\approx 1000 \\cdot 1{,}62889 = 1628{,}89$ €',
+        '$1500$ € wäre die einfache Verzinsung — der Zinseszins bringt gut $128$ € mehr.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Auf welchen Betrag wachsen $5000$ € in fünf Jahren bei $2\\,\\%$?',
+      opts: ['$5500{,}00$ €', '$6000{,}00$ €', '$5520{,}40$ €', '$5100{,}00$ €'],
+      steps: [
+        '$K_5 = 5000 \\cdot 1{,}02^5$',
+        '$\\approx 5000 \\cdot 1{,}10408 = 5520{,}40$ €',
+        'Auf fünf Jahre macht der Zinseszins hier gut $20$ € aus.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Nach wie vielen Jahren hat sich ein Kapital bei $5\\,\\%$ etwa verdoppelt?',
+      opts: ['nach etwa $20$ Jahren', 'nach etwa $15$ Jahren', 'nach etwa $50$ Jahren', 'nach etwa $10$ Jahren'],
+      steps: [
+        'Gesucht ist $1{,}05^n \\approx 2$; mit dem GTR probiert man.',
+        '$1{,}05^{14} \\approx 1{,}98$ und $1{,}05^{15} \\approx 2{,}08$.',
+        'Also nach rund $15$ Jahren. Ohne Zinseszins wären $20$ Jahre nötig.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Kapital wächst mit dem Faktor $q = 1{,}04$. Wie hoch ist der Zinssatz?',
+      opts: ['$1{,}04\\,\\%$', '$4\\,\\%$', '$0{,}4\\,\\%$', '$104\\,\\%$'],
+      steps: [
+        '$q = 1 + \\dfrac{p}{100}$',
+        '$1{,}04 - 1 = 0{,}04$, also $p = 4$.',
+        'Der Zinssatz beträgt $4\\,\\%$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum wächst ein Kapital bei Zinseszins exponentiell und nicht linear?',
+      opts: ['Weil jedes Jahr mit demselben Faktor multipliziert wird, statt denselben Betrag zu addieren.', 'Weil die Zinsen jedes Jahr niedriger werden.', 'Weil der Zinssatz jedes Jahr steigt.', 'Weil die Laufzeit im Exponenten der Zinsen steht.'],
+      steps: [
+        'Linear heißt: gleicher Zuwachs je Zeitschritt.',
+        'Exponentiell heißt: gleicher Faktor je Zeitschritt.',
+        'Beim Zinseszins wächst die Grundlage mit, deshalb wird der Zuwachs jedes Jahr größer.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welches Anfangskapital ergibt bei $10\\,\\%$ nach zwei Jahren genau $1210$ €?',
+      opts: ['$968$ €', '$1008{,}33$ €', '$1000$ €', '$1100$ €'],
+      steps: [
+        '$K_0 = \\dfrac{K_n}{q^n} = \\dfrac{1210}{1{,}1^2}$',
+        '$= \\dfrac{1210}{1{,}21} = 1000$ €',
+        'Probe: $1000 \\cdot 1{,}21 = 1210$ €.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Kapital von $1000$ € ist nach zwei Jahren auf $1102{,}50$ € gewachsen. Wie hoch war der Zinssatz?',
+      opts: ['$2\\,\\%$', '$5\\,\\%$', '$5{,}125\\,\\%$', '$10{,}25\\,\\%$'],
+      steps: [
+        '$q^2 = \\dfrac{1102{,}50}{1000} = 1{,}1025$',
+        '$q = \\sqrt{1{,}1025} = 1{,}05$',
+        'Also $5\\,\\%$. Die $10{,}25\\,\\%$ sind der Gesamtzuwachs über beide Jahre.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie berechnet man den Zinssatz aus Anfangs- und Endkapital bei $n$ Jahren?',
+      opts: ['$q = \\sqrt[n]{\\dfrac{K_n}{K_0}}$', '$q = \\dfrac{K_n}{K_0 \\cdot n}$', '$q = \\left(\\dfrac{K_n}{K_0}\\right)^n$', '$q = \\dfrac{K_n - K_0}{n}$'],
+      steps: [
+        'Aus $K_n = K_0 \\cdot q^n$ folgt $q^n = \\dfrac{K_n}{K_0}$.',
+        'Die $n$-te Wurzel liefert $q$.',
+        'Der Zinssatz ist dann $p = (q - 1) \\cdot 100$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Kapital von $4000$ € wächst in $3$ Jahren auf $4630{,}50$ €. Wie hoch ist der Zinssatz?',
+      opts: ['$5{,}25\\,\\%$', '$5\\,\\%$', '$4\\,\\%$', '$6\\,\\%$'],
+      steps: [
+        '$q^3 = \\dfrac{4630{,}50}{4000} = 1{,}157625$',
+        '$q = \\sqrt[3]{1{,}157625} = 1{,}05$',
+        'Also $5\\,\\%$. Probe: $4000 \\cdot 1{,}05^3 = 4630{,}50$ €.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Jemand legt $3000$ € für $6$ Jahre bei $2{,}5\\,\\%$ an. Welchen Betrag erhält er am Ende?',
+      opts: ['etwa $3075{,}00$ €', 'etwa $4500{,}00$ €', 'etwa $3450{,}00$ €', 'etwa $3479{,}08$ €'],
+      steps: [
+        '$K_6 = 3000 \\cdot 1{,}025^6$',
+        '$\\approx 3000 \\cdot 1{,}159693 = 3479{,}08$ €',
+        'Die einfache Verzinsung ergäbe $3450$ € — rund $29$ € weniger.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Kredit von $8000$ € wird mit $6\\,\\%$ verzinst und zwei Jahre lang nicht getilgt. Welche Schuld besteht dann?',
+      opts: ['$9600{,}00$ €', '$8480{,}00$ €', '$8988{,}80$ €', '$8960{,}00$ €'],
+      steps: [
+        'Auch Schulden wachsen mit dem Zinseszins.',
+        '$8000 \\cdot 1{,}06^2 = 8000 \\cdot 1{,}1236$',
+        '$= 8988{,}80$ €. Ohne Tilgung wächst die Schuld also spürbar.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Preise steigen jährlich um $2\\,\\%$. Wie viel ist ein heutiger Euro in zehn Jahren wert?',
+      opts: ['etwa $0{,}82$ €', 'etwa $0{,}98$ €', 'etwa $0{,}80$ €', 'etwa $1{,}22$ €'],
+      steps: [
+        'Die Kaufkraft sinkt um denselben Faktor, um den die Preise steigen.',
+        '$\\dfrac{1}{1{,}02^{10}} \\approx \\dfrac{1}{1{,}21899}$',
+        '$\\approx 0{,}82$ €. Rund ein Fünftel der Kaufkraft ist in zehn Jahren dahin.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
