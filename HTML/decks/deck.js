@@ -1654,7 +1654,7 @@ const link = (function () {
     else if (m.t === 'go') apply(m);
     else if (m.t === 'ev') mirror.replay(m);
     else if (m.t === 'laser') laser.show(m);
-    else if (m.t === 'laser-on') laser.mirrorOn(m.on);   // L was pressed over there: the same state here
+    else if (m.t === 'laser-on') { toast(m.on ? 'Laser an (l)' : 'Laser aus (l)'); laser.mirrorOn(m.on); }   // L over there
     else if (m.t === 'laser-toggle') laser.toggle();     // a presenter window from before 23.09.2026
   }
   if (chan) chan.onmessage = function (e) { receive(e.data, null); };
@@ -1910,11 +1910,14 @@ const link = (function () {
     // L puts the dot back where it stood, at once - waiting for the next mouse move looked broken (Doc, 23.09.2026:
     // "l bringt nicht den Punkt sofort! Man muss erst bewegen!")
     function light() {
-      if (on) { if (at) show(at); else cursor(); } else show({});
+      // Switched on it must be SEEN, even if the mouse has never been over the slide yet - then it starts in the
+      // middle (Doc, 23.09.2026: "L -> laser an aber kein laser zu sehen")
+      if (on) show(at || { x: 0.5, y: 0.5 }); else show({});
     }
     function toggle() {
       on = !on;
       light();
+      if (window.DeckNote) DeckNote(on ? 'Laser an (l)' : 'Laser aus (l)');   // said in the window he pressed it in
       send({ t: 'laser-on', on: on });
     }
     function mirrorOn(v) { on = !!v; light(); }      // the other window switched it
@@ -1923,9 +1926,9 @@ const link = (function () {
     }
     addEventListener('keydown', function (e) {
       if ((e.key !== 'l' && e.key !== 'L') || e.metaKey || e.ctrlKey || e.altKey) return;
-      // whoever presses L sets the state, the other window mirrors it (toggle() sends laser-on) - so the dot
-      // goes out on both screens at once, and in the presenter view even with no beamer attached
-      if (PRESENTER || linked) toggle();
+      // L works on both screens, whichever window has the focus, linked or not (Doc, 23.09.2026: "lass l auf
+      // beiden screens zu") - whoever presses it sets the state and the other window mirrors it (laser-on)
+      toggle();
     });
     cursor();                                        // no dot yet: the arrow stays
     window.DeckLaser = function () { return { on: on, want: want, sent: sent, raf: raf, dot: !!dot }; };   // debug
