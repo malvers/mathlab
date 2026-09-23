@@ -400,27 +400,25 @@
             const cardH = Math.max(90, cardsH - 48);
             const rowX = blockX;
 
-            // the task stands above everything, big; places, sums and panel travel as one
-            // block underneath, so no gap opens up between them on a tall screen
-            const taskSize = Math.min(104, blockW * 0.13, avail * 0.18);
-            const taskH = task ? taskSize * 1.12 + 22 : 0;
+            // one big number stands over everything: the task while one runs, otherwise what
+            // lies on the board. Places, sums and panel travel as one block underneath.
+            const headSize = Math.min(104, blockW * 0.13, avail * 0.18);
+            const headH = headSize * 1.12 + 22;
             const labelH = 24, productH = 30, captionH = 28;
-            const blockH = taskH + labelH + cardH + productH + captionH + rows * cellH;
+            const blockH = headH + labelH + cardH + productH + captionH + rows * cellH;
             const startY = top + Math.max(0, (avail - blockH) / 2);
-            const cardY = startY + taskH + labelH;
+            const cardY = startY + headH + labelH;
             const panelY = cardY + cardH + productH + captionH;
 
-            if (task) {
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'top';
-                ctx.font = "400 12px 'Outfit', sans-serif";
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-                ctx.fillText(task.done ? T('task_done', 'Richtig gelegt.') : T('task_lay', 'Lege'),
-                    blockX + blockW / 2, startY);
-                ctx.font = "700 " + Math.round(taskSize) + "px 'Orbitron', sans-serif";
-                ctx.fillStyle = task.done ? COL.shell : COL.glyph;
-                ctx.fillText(de(task.target), blockX + blockW / 2, startY + 18);
-            }
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.font = "400 12px 'Outfit', sans-serif";
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.fillText(task ? (task.done ? T('task_done', 'Richtig gelegt.') : T('task_lay', 'Lege'))
+                : T('head', 'Dezimalwert'), blockX + blockW / 2, startY);
+            ctx.font = "700 " + Math.round(headSize) + "px 'Orbitron', sans-serif";
+            ctx.fillStyle = (task && task.done) ? COL.shell : COL.glyph;
+            ctx.fillText(de(task ? task.target : value()), blockX + blockW / 2, startY + 18);
 
             for (let col = 0; col < n; col++) {
                 const place = n - 1 - col;              // the highest place stands on the left
