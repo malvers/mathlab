@@ -131,6 +131,9 @@
       b = document.createElement('div'); b.id = 'linkmsg'; b.setAttribute('role', 'status');
       document.body.appendChild(b);
     }
+    // under the toolbar, never over it (Doc, 23.09.2026: "mindestens UNTER die Toolbar")
+    const r = !tools.hidden && tools.getBoundingClientRect();
+    b.style.top = r && r.height ? Math.round(r.bottom + 10) + 'px' : '';
     b.textContent = t; b.hidden = false;
     clearTimeout(tt); tt = setTimeout(function () { b.hidden = true; }, 4500);
   }
@@ -413,8 +416,9 @@
       on = true; root.classList.add('deck-edit'); label();
       if (!PRES) { tools.hidden = false; place(); state(); }
       document.dispatchEvent(new Event('deck-edit-on'));
-      msg(skipped ? skipped + ' Folie(n) lassen sich nicht bearbeiten – der Rest schon.'
-                  : 'Text anklicken · Enter speichert · Esc verwirft · ' + K + 'D kopiert · ' + K + '⌫ löscht · E beendet');
+      // no welcome note any more - the bar is there to be seen, the keys stand in the help (Doc, 23.09.2026:
+      // "dieser Erklärtext soll raus"). A skipped slide is real news and still says so.
+      if (skipped) msg(skipped + ' Folie(n) lassen sich nicht bearbeiten – der Rest schon.');
     }).catch(function (err) {
       msg('Bearbeiten geht nicht: ' + (/fetch/i.test(err.message) ? 'serve.py antwortet nicht' : err.message));
     });
