@@ -16,6 +16,7 @@
   const DECK = decodeURIComponent(location.pathname.split('/').pop());
   const SRC = new WeakMap();                          // element -> its source text, as the file holds it
   let on = false, cur = null, busy = false, tt = 0, selector = '', pending = false, publishing = false, dirty = false;
+  let held = 0;                                       // when a drag ended (deck-label.js): its click, if one comes at all, opens no text
   let known = Math.floor(Date.parse(document.lastModified) / 1000) || 0;   // file time this page was loaded with
   const MAC = /Mac|iP(hone|ad|od)/.test(navigator.platform);
   const cmd = e => MAC ? e.metaKey : e.ctrlKey;       // Ctrl-D on a Mac stays "delete forward" while typing
@@ -689,6 +690,8 @@
     if (e.target.closest('a')) e.preventDefault();   // picture credits stay put while editing
     if (cur && cur.el.contains(e.target)) return;
     if (cur) end(true);
+    if (held && Date.now() - held < 400) { held = 0; return; }   // a label was just dragged - nothing to open
+    held = 0;                                        // a handle drag ends without a click: the hold must not outlive it
     const el = e.target.closest('[data-ed]');
     if (el && !cur && !busy) begin(el);
   }, true);
@@ -741,12 +744,17 @@
       if (reply && typeof reply.pending === 'boolean') pending = reply.pending;
       label();
     },
-    msg: msg
+    msg: msg,
+    hold: function () { held = Date.now(); }         // deck-label.js: a click inside #deck right now is a drag's end
   };
   const pics = document.createElement('script');
   pics.src = '/decks/deck-image.js';
   pics.onerror = function () { pics.remove(); };      // not there yet: the text editor works without it
   document.head.appendChild(pics);
+  const labels = document.createElement('script');    // a figure's words: moved and sized (deck-label.js)
+  labels.src = '/decks/deck-label.js';
+  labels.onerror = function () { labels.remove(); };
+  document.head.appendChild(labels);
 
   // after an undo the page came back: edit mode on again, and say what was undone
   try {

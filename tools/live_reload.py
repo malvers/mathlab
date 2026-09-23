@@ -46,7 +46,7 @@ def files_for(page):
         if p and p.endswith(WATCHED):
             out.append(p)
     if base == DECKS:                                 # serve.py injects the editor into decks - not in the file
-        out += [os.path.join(DECKS, "deck-edit.js"), os.path.join(DECKS, "deck-image.js")]
+        out += [os.path.join(DECKS, f) for f in ("deck-edit.js", "deck-image.js", "deck-label.js")]
     return out
 
 

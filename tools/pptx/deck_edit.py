@@ -9,6 +9,7 @@ Only the local dev server (serve.py, 127.0.0.1:8765) talks to this module; the l
     POST /__deck/publish  {deck}  -> {commit, files}   the deck (and pictures it needs) onto origin/main
     POST /__deck/undo  {deck, redo}  -> {what, mtime, pending}   one step back or forward (deck_undo.py)
     *    /__deck/image/...   pictures on slides - handled by deck_image.py
+    *    /__deck/label       a figure's words moved or sized - handled by deck_label.py
 
 Publishing is Doc's click on "Änderungen speichern" - his standing go-ahead for exactly these pushes (Doc,
 17.09.2026: "Nur von/für hier um Änderungen zu pushen ja: Dauerfreigabe"). The commit is built on origin/main in a
@@ -628,6 +629,12 @@ def handle(method, path, headers, body):
         return 403, {"error": "origin"}
     url = urlsplit(path)
     try:
+        if url.path == "/__deck/label":
+            # a figure's words moved or sized (deck_label.py) - reloaded per call like deck_image
+            if HERE not in sys.path:
+                sys.path.insert(0, HERE)
+            import deck_label
+            return importlib.reload(deck_label).handle(method, path, headers, body)
         if url.path.startswith("/__deck/image"):
             # DocPoint pictures live in deck_image.py: raw image bytes, it checks its own content types - so this comes
             # after the Host/Origin checks but before the JSON-only rule below. Reloaded per call, like deck_markup.
