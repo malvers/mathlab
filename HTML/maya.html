@@ -442,11 +442,11 @@
             const cardH = Math.max(90, cardsH - 24);
             const rowX = blockX;
 
-            const labelH = 24, captionH = 30;
-            const blockH = labelH + cardH + captionH + rows * cellH;
+            const labelH = 24, gapH = 22, captionH = 28;
+            const blockH = labelH + cardH + gapH + rows * cellH + captionH;
             const startY = top + Math.max(0, (avail - blockH) / 2);
             const cardY = startY + labelH;
-            const panelY = cardY + cardH + captionH;
+            const panelY = cardY + cardH + gapH;
 
             for (let col = 0; col < n; col++) {
                 const place = n - 1 - col;              // the highest place stands on the left
@@ -472,12 +472,7 @@
             }
 
             // ---- the panel of all twenty digits ----
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'bottom';
-            ctx.font = "400 13px 'Outfit', sans-serif";
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
             const gridX = blockX;
-            ctx.fillText(T('panel', 'Ziffern — auf eine Stelle ziehen'), gridX, panelY - 8);
 
             for (let k = 0; k < 20; k++) {
                 const cx0 = gridX + (k % cols) * cellW;
@@ -497,6 +492,13 @@
                 paintDigit(k, cx0 + cellW / 2, cy0 + cellH * 0.62, cellW - 14, cellH * 0.6, null);
                 palette.push({ digit: k, x: cx0, y: cy0, w: cellW, h: cellH });
             }
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.font = "400 13px 'Outfit', sans-serif";
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.fillText(T('panel', 'Ziffern — auf eine Stelle ziehen'),
+                blockX + blockW / 2, panelY + rows * cellH + 8);
 
             // the digit being dragged hangs on the finger
             if (drag) {
