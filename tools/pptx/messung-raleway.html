@@ -1,0 +1,34 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css"></head><body>
+<div class="slide on"><div class="pic"><p class="fl" id="probe">x</p></div></div>
+<div id="out">warte</div>
+<script>
+// Measured inside a real .fl label, so whatever deck.css does to it is included.
+const ZEICHEN = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`"
+  + "abcdefghijklmnopqrstuvwxyz{|}~ÄÖÜäöüßÁÉÍÓÚáéíóúñÑ„“”‚‘’–—·…×÷°±≈≤≥";
+const PROBEN = [["Das Maya-Gebiet",15,600],["Südmexiko, Guatemala, Belize,",12,400],
+  ["Honduras, El Salvador",12,400],["Das Zweistromland",15,600],
+  ["Sumer und Babylonien",12,400],["— heute Irak",12,400]];
+const N = 20;
+document.fonts.ready.then(()=>{
+  const p = document.getElementById('probe');
+  p.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;width:auto;font-size:100px';
+  const out = {};
+  for (const w of [400, 600]) {
+    p.style.fontWeight = w;
+    const t = {};
+    for (const ch of ZEICHEN) {
+      p.textContent = ch.repeat(N);
+      t[ch] = +(p.getBoundingClientRect().width / N).toFixed(3);
+    }
+    out[w] = t;
+  }
+  const kontrolle = PROBEN.map(([s,size,w])=>{
+    p.style.fontWeight = w; p.style.fontSize = size+'px'; p.textContent = s;
+    return [s, +p.getBoundingClientRect().width.toFixed(1)];
+  });
+  document.getElementById('out').textContent =
+    'JSON' + JSON.stringify({tab: out, kontrolle}) + 'ENDE';
+});
+</script></body></html>
