@@ -986,6 +986,7 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 #ask-line #ask-mic svg,#ask-line #ask-tts svg{width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6)}
 #ask-line input{height:100%;padding:0 8px;border-radius:5px;font-size:13px}
 #ask-line #ask-send{width:var(--hudbtn,22px);height:100%;min-width:0;padding:0;border-radius:5px;font-size:14px}   /* square like the others (Doc, 23.09.2026) */
+#ask.greet{display:none}   /* her greeting page: nothing of her below the slide (Doc, 23.09.2026: "nimm sie ganz raus") */
 #ask.inline #ask-panel{position:fixed;right:auto}   /* the corner is empty: the panel hangs over her picture in the line - left, width and bottom come from placeRow() */
 #ask-panel{transition:opacity .25s ease}
 #ask-panel.bare{opacity:0;pointer-events:none}   /* nothing above to show: no answer (or folded by a page turn), no label */
@@ -1208,7 +1209,7 @@ function dock(){
   let right = Math.max(8, Math.round(innerWidth - (r.right - 16 * s)));
   if (ask) {
     ask.style.right = right + 'px'; ask.style.bottom = 'auto'; ask.style.top = Math.round(cy - av / 2) + 'px';
-    if (ask.querySelector(':scope > #ask-btn')) right += av + 8;   // her picture in the corner needs the room - in the footer line it does not (Doc, 23.09.2026: "Solita pille rechts weg")
+    if (ask.querySelector(':scope > #ask-btn') && !ask.classList.contains('greet')) right += av + 8;   // her picture in the corner needs the room - in the footer line, or hidden on her greeting page, it does not
   }
   hud.style.right = right + 'px'; hud.style.bottom = 'auto'; hud.style.top = Math.round(cy - btn / 2) + 'px';
   const nav = document.getElementById('nav');       // the slide triangles: left end of the footer line
@@ -1722,7 +1723,7 @@ ASK_JS = r"""
 
   const panel = document.getElementById('ask-panel');
   const out = document.getElementById('ask-out');
-  const input = document.getElementById('ask-in');
+  let input = document.getElementById('ask-in');    // exchanged once the password is in - see askQuestion()
   const send = document.getElementById('ask-send');
   const label = box.querySelector('label');
   const micBtn = document.getElementById('ask-mic');
@@ -1976,6 +1977,15 @@ ASK_JS = r"""
     bare();
   }
   function askQuestion() {
+    // Chrome keeps its password manager on a field that once was type=password - it then drops its list of saved
+    // logins over the question line (Doc, 23.09.2026: "wenn pwd eingegeben darf das kein pwd mehr sein"). Changing
+    // the type back is not enough; a brand new field carries none of that history.
+    if (input.type === 'password') {
+      const fresh = input.cloneNode(false);
+      input.replaceWith(fresh);
+      input = fresh;
+      bindInput();
+    }
     label.hidden = true;                            // a question needs no label (Doc, 16.09.2026: "weg")
     input.setAttribute('aria-label', 'Deine Frage an Solita');   // the field still has a name (Doc's label rule)
     input.type = 'text'; input.value = ''; input.placeholder = 'Frag Solita zur Folie oder Präsi';
@@ -2334,7 +2344,6 @@ ASK_JS = r"""
     if (PRESENTER) liveOn = true;
     ready(); mirror();
   }
-  input.addEventListener('input', function () { if (live || liveOn) mirror(); });
   micBtn.onclick = function () {
     if (ear && ear.active) { ear.stop(); return; }
     if (!window.SolitaListen) { say('Spracheingabe ist hier nicht geladen.', 'ask-err'); return; }
@@ -2370,10 +2379,13 @@ ASK_JS = r"""
     if (PRESENTER) { placePres(); return; }
     const s = slides[si], foot = s && s.querySelector('.foot'), pn = s && s.querySelector('.pageno');
     let fits = false;
+    // her greeting page shows her large already: nothing of her below the slide, no picture, no corner - and the
+    // corner is not reserved either (Doc, 23.09.2026: "auf der 1. Seite nicht bitte", then "nimm sie ganz raus")
+    const greet = !!s && s.classList.contains('greet');
+    if (greet !== box.classList.contains('greet')) { box.classList.toggle('greet', greet); if (typeof dock === 'function') dock(); }
+    if (greet) return;
     if (edge && pn !== edgeOn) { edge.disconnect(); if (pn) edge.observe(pn); edgeOn = pn; }
-    // not on her greeting page (Doc, 23.09.2026: "auf der 1. Seite nicht bitte") - its footer starts beside her big
-    // picture and leaves the line no room; there she waits in the corner as before
-    if (foot && pn && foot.textContent.trim() && !s.classList.contains('greet')) {
+    if (foot && pn && foot.textContent.trim()) {
       const rg = document.createRange();
       rg.selectNodeContents(foot);                    // the text itself - .foot spans the whole slide
       const t = rg.getBoundingClientRect(), p = pn.getBoundingClientRect();
@@ -2460,11 +2472,15 @@ ASK_JS = r"""
   send.onclick = submit;
   // a question in the field makes the button breathe (not while Solita is busy, not for the password)
   function ready() { send.classList.toggle('ready', !busy && input.type === 'text' && input.value.trim() !== ''); }
-  input.addEventListener('input', ready);
-  input.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') { e.preventDefault(); submit(); }
-    else if (e.key === 'Escape') { e.preventDefault(); close(); }
-  });
+  function bindInput() {                           // everything the field itself listens to - a new field gets it too
+    input.addEventListener('input', function () { if (live || liveOn) mirror(); });   // dictated text on the slide
+    input.addEventListener('input', ready);
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); submit(); }
+      else if (e.key === 'Escape') { e.preventDefault(); close(); }
+    });
+  }
+  bindInput();
   box.addEventListener('keydown', function (e) {     // Shift+Space anywhere in the panel or the footer line: mic on, again: off (Doc, 23.09.2026)
     if (e.code === 'Space' && e.shiftKey && !micBtn.hidden) { e.preventDefault(); micBtn.click(); }
     // plain Space while the mic listens sends what was heard - and never lands in the field as a stray space
