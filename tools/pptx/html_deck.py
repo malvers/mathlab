@@ -2387,10 +2387,13 @@ ASK_JS = r"""
     if (fits) {
       line.classList.add('on'); lead();
       if (panel.hidden) move(panel, home()); else move(line, null);
-      // the answers hang over her picture like a speech bubble: left edge on her, no wider than the line, right above it
-      // (Doc, 23.09.2026: "die Box kommt an der falschen Stelle" when it stayed in the corner)
+      // the answers hang right above the line like a speech bubble, centred over the field itself and never beyond the
+      // line's ends (Doc, 23.09.2026: "die Box kommt an der falschen Stelle" in the corner, then "über der Suchzeile")
       const h = line.offsetHeight || parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hudbtn')) || 22;
-      panel.style.left = line.style.left; panel.style.width = Math.min(360, parseFloat(line.style.width)) + 'px';
+      const w = Math.min(360, parseFloat(line.style.width)), f = input.getBoundingClientRect();
+      const l0 = parseFloat(line.style.left), l1 = l0 + parseFloat(line.style.width) - w;
+      panel.style.left = Math.round(Math.max(l0, Math.min(l1, (f.left + f.right) / 2 - w / 2))) + 'px';
+      panel.style.width = w + 'px';
       panel.style.bottom = Math.round(innerHeight - (parseFloat(line.style.top) - h / 2) + 8) + 'px';
     }
     else rowBack();
