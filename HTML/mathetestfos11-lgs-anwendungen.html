@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Anwendungen linearer Gleichungssysteme — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w13-lgs-anwendungen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Anwendungen linearer Gleichungssysteme',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 13 (LB 1) · 20 Aufgaben: Ansatz aus dem Text, Mischung, Kalkulation, Bewegung, Technik · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 13 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Ansatz finden (1-5), Mischung und Kalkulation (6-12), Bewegung (13-16), Technik und Alltag (17-20). */
+  questions: [
+    {
+      q: 'Die Summe zweier Zahlen ist $34$, ihre Differenz $8$. Wie lauten die Zahlen?',
+      opts: ['$26$ und $8$', '$17$ und $17$', '$20$ und $14$', '$21$ und $13$'],
+      steps: [
+        'Ansatz: $x + y = 34$ und $x - y = 8$.',
+        'Addieren: $2x = 42$, also $x = 21$ und $y = 13$.',
+        'Probe: $21 + 13 = 34$ und $21 - 13 = 8$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was ist beim Aufstellen eines Gleichungssystems aus einem Text der erste Schritt?',
+      opts: ['festlegen, wofür die beiden Variablen stehen, samt Einheit', 'den Text in eine Zeichnung übersetzen', 'die Lösung schätzen', 'die Gleichungen sofort addieren'],
+      steps: [
+        'Ohne klare Bedeutung der Variablen lässt sich keine Gleichung sauber aufstellen.',
+        'Man schreibt also zuerst auf: $x$ ist die Anzahl von …, $y$ ist der Preis von … in Euro.',
+        'Erst danach wird jede Aussage des Textes in eine Gleichung übersetzt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Vater ist dreimal so alt wie sein Sohn, zusammen sind sie $48$ Jahre alt. Wie alt sind beide?',
+      opts: ['Vater $36$, Sohn $16$', 'Vater $24$, Sohn $8$', 'Vater $32$, Sohn $16$', 'Vater $36$, Sohn $12$'],
+      steps: [
+        'Ansatz: $v = 3s$ und $v + s = 48$.',
+        'Einsetzen: $3s + s = 48$, also $4s = 48$ und $s = 12$.',
+        '$v = 36$. Probe: $36 = 3 \\cdot 12$ und $36 + 12 = 48$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Zahl ist doppelt so groß wie die andere, zusammen ergeben sie $27$. Wie lauten sie?',
+      opts: ['$17$ und $10$', '$18$ und $9$', '$13{,}5$ und $13{,}5$', '$20$ und $7$'],
+      steps: [
+        'Ansatz: $x = 2y$ und $x + y = 27$.',
+        '$2y + y = 27$, also $3y = 27$ und $y = 9$.',
+        '$x = 18$. Probe: $18 = 2 \\cdot 9$ und $18 + 9 = 27$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zum Satz „Zwei Hefte und drei Stifte kosten zusammen $8$ €“ gehört welche Gleichung, wenn $h$ der Heftpreis und $s$ der Stiftpreis ist?',
+      opts: ['$h + s = 8$', '$3h + 2s = 8$', '$2h \\cdot 3s = 8$', '$2h + 3s = 8$'],
+      steps: [
+        'Die Anzahl steht als Faktor vor dem Preis.',
+        'Zwei Hefte kosten $2h$, drei Stifte kosten $3s$.',
+        'Zusammen: $2h + 3s = 8$. Die Zuordnung der Zahlen zu den Variablen darf nicht verrutschen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Aus zwei Sorten zu $2$ € und $3$ € je Liter sollen $30$ Liter zu $2{,}40$ € je Liter gemischt werden. Wie viel Liter der billigen Sorte braucht man?',
+      opts: ['$20$ Liter', '$18$ Liter', '$12$ Liter', '$15$ Liter'],
+      steps: [
+        'Ansatz: $a + b = 30$ und $2a + 3b = 30 \\cdot 2{,}40 = 72$.',
+        'Einsetzen von $b = 30 - a$: $2a + 90 - 3a = 72$, also $a = 18$.',
+        '$18$ Liter der billigen und $12$ Liter der teuren Sorte. Probe: $36 + 36 = 72$ €.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zwei Kaffeesorten kosten $9$ € und $15$ € je Kilogramm. Wie viel der teuren Sorte steckt in $10\\,\\mathrm{kg}$ Mischung zu $11$ € je Kilogramm?',
+      opts: ['$6{,}67\\,\\mathrm{kg}$', '$\\dfrac{10}{3} \\approx 3{,}33\\,\\mathrm{kg}$', '$2\\,\\mathrm{kg}$', '$5\\,\\mathrm{kg}$'],
+      steps: [
+        'Ansatz: $a + b = 10$ und $9a + 15b = 110$.',
+        '$9\\,(10 - b) + 15b = 110$, also $90 + 6b = 110$ und $b = \\dfrac{10}{3}$.',
+        'Rund $3{,}33\\,\\mathrm{kg}$ der teuren Sorte. Weil der Mischpreis näher bei $9$ € liegt, muss die billige Sorte überwiegen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bei $100$ Stück betragen die Gesamtkosten $700$ €, bei $200$ Stück $1200$ €. Wie hoch sind die variablen Kosten je Stück?',
+      opts: ['$6$ €', '$5$ €', '$2$ €', '$7$ €'],
+      steps: [
+        'Ansatz $K(x) = kx + f$: $100k + f = 700$ und $200k + f = 1200$.',
+        'Subtrahieren: $100k = 500$, also $k = 5$ €.',
+        'Probe: mit $f = 200$ € ergibt sich $K(100) = 700$ €.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie hoch sind in der vorigen Aufgabe die Fixkosten?',
+      opts: ['$700$ €', '$500$ €', '$200$ €', '$100$ €'],
+      steps: [
+        'Aus $100 \\cdot 5 + f = 700$ folgt $f = 200$ €.',
+        'Die Kostenfunktion lautet $K(x) = 5x + 200$.',
+        'Die Fixkosten sind der Funktionswert bei $x = 0$, sie fallen auch ohne Produktion an.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Drei Hefte und zwei Stifte kosten $11$ €, zwei Hefte und vier Stifte kosten $14$ €. Was kostet ein Heft?',
+      opts: ['$2{,}50$ €', '$1{,}50$ €', '$3$ €', '$2$ €'],
+      steps: [
+        'Ansatz: $3h + 2s = 11$ und $2h + 4s = 14$.',
+        'Die erste Gleichung mit $2$ multiplizieren: $6h + 4s = 22$; davon die zweite abziehen: $4h = 8$.',
+        '$h = 2$ € und damit $s = 2{,}50$ €. Probe: $6 + 5 = 11$ und $4 + 10 = 14$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zwei Handytarife: A kostet $10$ € Grundgebühr und $0{,}10$ € je Minute, B kostet $4$ € und $0{,}25$ € je Minute. Ab welcher Gesprächszeit ist A günstiger?',
+      opts: ['A ist nie günstiger', 'ab mehr als $60$ Minuten', 'ab mehr als $24$ Minuten', 'ab mehr als $40$ Minuten'],
+      steps: [
+        'Gleichsetzen: $0{,}10x + 10 = 0{,}25x + 4$.',
+        '$6 = 0{,}15x$, also $x = 40$.',
+        'Bei $40$ Minuten kosten beide $14$ €; darüber ist A günstiger, weil der Minutenpreis niedriger ist.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Betrieb verkauft Ware zu $9$ € je Stück bei Kosten $K(x) = 5x + 240$. Ab welcher Stückzahl arbeitet er mit Gewinn?',
+      opts: ['ab mehr als $60$ Stück', 'ab mehr als $27$ Stück', 'ab mehr als $48$ Stück', 'ab mehr als $30$ Stück'],
+      steps: [
+        'Erlös: $E(x) = 9x$. Gewinnschwelle bei $E(x) = K(x)$.',
+        '$9x = 5x + 240$, also $4x = 240$ und $x = 60$.',
+        'Bei $60$ Stück ist der Gewinn null, darüber positiv. Probe: $540 = 300 + 240$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Boot fährt $24\\,\\mathrm{km}$ flussabwärts in $2$ Stunden und dieselbe Strecke flussaufwärts in $3$ Stunden. Wie schnell ist das Boot im stehenden Wasser?',
+      opts: ['$10\\,\\mathrm{km/h}$', '$8\\,\\mathrm{km/h}$', '$12\\,\\mathrm{km/h}$', '$2\\,\\mathrm{km/h}$'],
+      steps: [
+        'Ansatz: $(b + s) \\cdot 2 = 24$ und $(b - s) \\cdot 3 = 24$, also $b + s = 12$ und $b - s = 8$.',
+        'Addieren: $2b = 20$, also $b = 10\\,\\mathrm{km/h}$.',
+        'Probe: mit $s = 2$ ergibt sich $12 \\cdot 2 = 24$ und $8 \\cdot 3 = 24$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie schnell fließt der Fluss in der vorigen Aufgabe?',
+      opts: ['$4\\,\\mathrm{km/h}$', '$1\\,\\mathrm{km/h}$', '$2\\,\\mathrm{km/h}$', '$10\\,\\mathrm{km/h}$'],
+      steps: [
+        'Aus $b + s = 12$ und $b = 10$ folgt $s = 2\\,\\mathrm{km/h}$.',
+        'Flussabwärts addieren sich die Geschwindigkeiten, flussaufwärts subtrahieren sie sich.',
+        'Probe: $10 - 2 = 8$ und $8 \\cdot 3 = 24\\,\\mathrm{km}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zwei Orte liegen $180\\,\\mathrm{km}$ auseinander. Zwei Fahrzeuge starten gleichzeitig aufeinander zu, eines mit $80\\,\\mathrm{km/h}$, das andere mit $100\\,\\mathrm{km/h}$. Nach welcher Zeit treffen sie sich?',
+      opts: ['nach $2$ Stunden', 'nach $1$ Stunde', 'nach $1{,}5$ Stunden', 'nach $0{,}9$ Stunden'],
+      steps: [
+        'Die Annäherungsgeschwindigkeit ist die Summe: $180\\,\\mathrm{km/h}$.',
+        '$t = \\dfrac{180}{180} = 1$ Stunde.',
+        'Probe: $80 + 100 = 180\\,\\mathrm{km}$ in einer Stunde, genau die Entfernung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Radfahrer startet mit $15\\,\\mathrm{km/h}$. Zwei Stunden später startet ein Auto mit $75\\,\\mathrm{km/h}$ vom selben Ort. Nach welcher Fahrzeit des Autos hat es den Radfahrer eingeholt?',
+      opts: ['nach $1$ Stunde', 'nach $2$ Stunden', 'nach $0{,}5$ Stunden', 'nach $1{,}5$ Stunden'],
+      steps: [
+        'Vorsprung des Radfahrers: $2 \\cdot 15 = 30\\,\\mathrm{km}$.',
+        'Ansatz: $75t = 15t + 30$, also $60t = 30$.',
+        '$t = 0{,}5$ Stunden. Probe: das Auto fährt $37{,}5\\,\\mathrm{km}$, der Radfahrer ist dann $30 + 7{,}5 = 37{,}5\\,\\mathrm{km}$ weit.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Aus zwei Legierungen mit $40\\,\\%$ und $70\\,\\%$ Kupferanteil sollen $60\\,\\mathrm{kg}$ mit $50\\,\\%$ Kupfer entstehen. Wie viel der ersten Legierung wird gebraucht?',
+      opts: ['$30\\,\\mathrm{kg}$', '$20\\,\\mathrm{kg}$', '$40\\,\\mathrm{kg}$', '$45\\,\\mathrm{kg}$'],
+      steps: [
+        'Ansatz: $a + b = 60$ und $0{,}40a + 0{,}70b = 0{,}50 \\cdot 60 = 30$.',
+        '$0{,}40a + 0{,}70\\,(60 - a) = 30$ ergibt $42 - 0{,}30a = 30$, also $a = 40$.',
+        '$40\\,\\mathrm{kg}$ der ersten und $20\\,\\mathrm{kg}$ der zweiten Legierung.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Rechteck hat den Umfang $26\\,\\mathrm{cm}$, die Länge ist um $3\\,\\mathrm{cm}$ größer als die Breite. Wie lauten die Seiten?',
+      opts: ['$9\\,\\mathrm{cm}$ und $6\\,\\mathrm{cm}$', '$10\\,\\mathrm{cm}$ und $3\\,\\mathrm{cm}$', '$8\\,\\mathrm{cm}$ und $5\\,\\mathrm{cm}$', '$7\\,\\mathrm{cm}$ und $4\\,\\mathrm{cm}$'],
+      steps: [
+        'Ansatz: $2\\,(l + b) = 26$ und $l = b + 3$.',
+        '$l + b = 13$, eingesetzt: $b + 3 + b = 13$, also $b = 5$.',
+        '$l = 8$. Probe: $2 \\cdot 13 = 26\\,\\mathrm{cm}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Auf einem Hof leben Hühner und Kaninchen: $20$ Köpfe und $56$ Beine. Wie viele Kaninchen sind es?',
+      opts: ['$8$ Kaninchen', '$6$ Kaninchen', '$12$ Kaninchen', '$10$ Kaninchen'],
+      steps: [
+        'Ansatz: $h + k = 20$ und $2h + 4k = 56$.',
+        '$2\\,(20 - k) + 4k = 56$ ergibt $40 + 2k = 56$, also $k = 8$.',
+        '$8$ Kaninchen und $12$ Hühner. Probe: $24 + 32 = 56$ Beine.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Betrieb fertigt zwei Gerätesorten. Für $5$ Geräte der Sorte A und $3$ der Sorte B werden $31$ Bauteile gebraucht, für $2$ Geräte A und $4$ der Sorte B $18$ Bauteile. Wie viele Bauteile stecken in einem Gerät A?',
+      opts: ['$5$ Bauteile', '$4$ Bauteile', '$2$ Bauteile', '$3$ Bauteile'],
+      steps: [
+        'Ansatz: $5a + 3b = 31$ und $2a + 4b = 18$.',
+        'Die zweite Gleichung durch $2$ teilen: $a + 2b = 9$, also $a = 9 - 2b$.',
+        'Einsetzen: $45 - 10b + 3b = 31$ ergibt $-7b = -14$, also $b = 2$ und $a = 5$. Probe: $25 + 6 = 31$ und $10 + 8 = 18$.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

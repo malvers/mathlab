@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Parameter und Lagebeziehungen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w11-parameter-lagebeziehungen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Parameter und Lagebeziehungen',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 11 (LB 1) · 20 Aufgaben: Wirkung von Anstieg und Achsenabschnitt, parallel, identisch, schneidend, orthogonal · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 11 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Einfluss der Parameter (1-7), Lagebeziehungen (8-14), Schnittpunkte und Bedingungen (15-20). */
+  questions: [
+    {
+      q: 'Was bewirkt ein größerer Wert von $m$ in $y = mx + n$?',
+      opts: ['Die Gerade wird steiler.', 'Die Gerade wandert nach oben.', 'Die Gerade wird flacher.', 'Die Gerade wandert nach rechts.'],
+      steps: [
+        '$m$ ist der Anstieg: er gibt an, um wie viel $y$ wächst, wenn $x$ um $1$ zunimmt.',
+        'Ein größeres $m$ bedeutet mehr Höhengewinn pro Schritt, also eine steilere Gerade.',
+        'Die Lage auf der $y$-Achse ändert sich dabei nicht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was bewirkt eine Vergrößerung von $n$ in $y = mx + n$?',
+      opts: ['Die Gerade wird an der $x$-Achse gespiegelt.', 'Die Gerade wird flacher.', 'Die Gerade wird steiler.', 'Die Gerade wird parallel nach oben verschoben.'],
+      steps: [
+        '$n$ ist der $y$-Achsenabschnitt.',
+        'Jeder Punkt wandert um denselben Betrag nach oben, der Anstieg bleibt gleich.',
+        'Die alte und die neue Gerade sind deshalb parallel.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie entsteht der Graph von $y = 2x + 4$ aus dem von $y = 2x + 1$?',
+      opts: ['durch Verschiebung um $3$ nach oben', 'durch Verdreifachung des Anstiegs', 'durch Spiegelung an der $y$-Achse', 'durch Verschiebung um $3$ nach rechts'],
+      steps: [
+        'Beide haben denselben Anstieg $m = 2$, sie sind also parallel.',
+        'Der Achsenabschnitt wächst von $1$ auf $4$, das sind $3$ Einheiten.',
+        'Also Verschiebung um $3$ nach oben.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie entsteht der Graph von $y = 3x$ aus dem von $y = x$?',
+      opts: ['Er wird an der $x$-Achse gespiegelt.', 'Er wird steiler, der Anstieg verdreifacht sich.', 'Er wird flacher.', 'Er wird um $3$ nach oben verschoben.'],
+      steps: [
+        'Beide gehen durch den Ursprung, der Achsenabschnitt ist unverändert $0$.',
+        'Der Anstieg wächst von $1$ auf $3$.',
+        'Probe: bei $x = 2$ liegt der eine Punkt bei $y = 2$, der andere bei $y = 6$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Gerade entsteht, wenn man $y = 2x + 3$ an der $x$-Achse spiegelt?',
+      opts: ['$y = -\\dfrac{1}{2}x - 3$', '$y = 2x - 3$', '$y = -2x - 3$', '$y = -2x + 3$'],
+      steps: [
+        'Beim Spiegeln an der $x$-Achse wechselt jeder Funktionswert das Vorzeichen.',
+        'Aus $y$ wird $-y$, also $y = -(2x + 3)$.',
+        '$y = -2x - 3$. Beide Parameter kehren ihr Vorzeichen um.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was gilt für $y = mx + n$ mit $m = 0$?',
+      opts: ['Der Graph ist eine senkrechte Gerade.', 'Der Graph ist eine waagerechte Gerade auf der Höhe $n$.', 'Der Graph geht durch den Ursprung.', 'Es gibt keinen Graphen.'],
+      steps: [
+        'Mit $m = 0$ bleibt $y = n$ für jedes $x$.',
+        'Der Funktionswert ändert sich also nie.',
+        'Der Graph ist eine Parallele zur $x$-Achse in der Höhe $n$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Gerade $y = mx + n$ geht genau dann durch den Ursprung, wenn …',
+      opts: ['$m = n$ ist.', '$m = 1$ ist.', '$n = 0$ ist.', '$m = 0$ ist.'],
+      steps: [
+        'Der Ursprung ist der Punkt $(0|0)$.',
+        'Einsetzen: $0 = m \\cdot 0 + n$, also $n = 0$.',
+        'Dann liegt direkte Proportionalität vor.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wann sind zwei Geraden $y = m_1x + n_1$ und $y = m_2x + n_2$ parallel, aber nicht identisch?',
+      opts: ['wenn $m_1 = m_2$ und $n_1 \\neq n_2$', 'wenn $m_1 = m_2$ und $n_1 = n_2$', 'wenn $m_1 \\cdot m_2 = -1$', 'wenn $m_1 \\neq m_2$ und $n_1 = n_2$'],
+      steps: [
+        'Gleicher Anstieg bedeutet gleiche Richtung.',
+        'Unterschiedliche Achsenabschnitte bedeuten, dass sie nicht aufeinanderliegen.',
+        'Solche Geraden haben keinen gemeinsamen Punkt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wann sind zwei Geraden orthogonal, schneiden sich also rechtwinklig?',
+      opts: ['wenn $m_1 \\cdot m_2 = -1$', 'wenn $n_1 \\cdot n_2 = -1$', 'wenn $m_1 + m_2 = 0$', 'wenn $m_1 = m_2$'],
+      steps: [
+        'Die Bedingung betrifft nur die Anstiege.',
+        '$m_1 \\cdot m_2 = -1$, die Anstiege sind also negativ zueinander kehrwertig.',
+        'Beispiel: $m_1 = 3$ und $m_2 = -\\dfrac{1}{3}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie liegen $y = 2x + 3$ und $y = -\\dfrac{1}{2}x + 1$ zueinander?',
+      opts: ['Sie sind parallel.', 'Sie schneiden sich unter $45^\\circ$.', 'Sie schneiden sich rechtwinklig.', 'Sie sind identisch.'],
+      steps: [
+        'Anstiege: $m_1 = 2$ und $m_2 = -\\dfrac{1}{2}$.',
+        '$2 \\cdot \\left(-\\dfrac{1}{2}\\right) = -1$',
+        'Die Bedingung für Orthogonalität ist erfüllt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie liegen $y = 3x - 1$ und $6x - 2y = 2$ zueinander?',
+      opts: ['Sie schneiden sich in genau einem Punkt.', 'Sie schneiden sich rechtwinklig.', 'Sie sind identisch.', 'Sie sind parallel und verschieden.'],
+      steps: [
+        'Die zweite Gleichung nach $y$ auflösen: $-2y = -6x + 2$, also $y = 3x - 1$.',
+        'Beide Geraden haben denselben Anstieg und denselben Achsenabschnitt.',
+        'Es ist dieselbe Gerade, nur anders geschrieben.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie liegen $y = 4x + 2$ und $y = 4x - 5$ zueinander?',
+      opts: ['Sie schneiden sich rechtwinklig.', 'Sie sind identisch.', 'Sie schneiden sich in $(0|2)$.', 'Sie sind parallel und haben keinen gemeinsamen Punkt.'],
+      steps: [
+        'Gleicher Anstieg $m = 4$, verschiedene Achsenabschnitte.',
+        'Gleichsetzen führt auf $2 = -5$, eine falsche Aussage.',
+        'Also gibt es keinen Schnittpunkt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele gemeinsame Punkte haben zwei identische Geraden?',
+      opts: ['genau einen', 'unendlich viele', 'genau zwei', 'keinen'],
+      steps: [
+        'Identische Geraden bestehen aus denselben Punkten.',
+        'Jeder Punkt der einen liegt auch auf der anderen.',
+        'Beim Gleichsetzen entsteht eine immer wahre Aussage wie $0 = 0$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Beim Gleichsetzen zweier Geradengleichungen entsteht die Aussage $7 = 3$. Was bedeutet das?',
+      opts: ['Die Geraden sind identisch.', 'Die Geraden sind parallel und verschieden, es gibt keinen Schnittpunkt.', 'Es wurde falsch gerechnet.', 'Der Schnittpunkt liegt bei $x = 7$.'],
+      steps: [
+        'Die Variable ist beim Umformen herausgefallen, übrig blieb eine falsche Zahlengleichung.',
+        'Es gibt also kein $x$, für das beide Geraden denselben Wert liefern.',
+        'Genau das kennzeichnet parallele, aber verschiedene Geraden.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wo schneiden sich $y = x + 1$ und $y = -2x + 7$?',
+      opts: ['in $S(2|5)$', 'in $S(2|3)$', 'in $S(3|2)$', 'in $S(1|2)$'],
+      steps: [
+        'Gleichsetzen: $x + 1 = -2x + 7$.',
+        '$3x = 6$, also $x = 2$.',
+        'Einsetzen: $y = 3$, also $S(2|3)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wo schneiden sich $y = 3x - 4$ und $y = x + 2$?',
+      opts: ['in $S(2|4)$', 'in $S(5|3)$', 'in $S(3|7)$', 'in $S(3|5)$'],
+      steps: [
+        'Gleichsetzen: $3x - 4 = x + 2$.',
+        '$2x = 6$, also $x = 3$.',
+        'Einsetzen in die zweite Gleichung: $y = 5$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welches $a$ sind $y = a\\,x + 1$ und $y = 4x - 2$ parallel?',
+      opts: ['$a = 4$', '$a = \\dfrac{1}{4}$', '$a = -2$', '$a = -4$'],
+      steps: [
+        'Parallel bedeutet gleicher Anstieg.',
+        '$a = 4$',
+        'Die Achsenabschnitte $1$ und $-2$ sind verschieden, die Geraden also parallel und nicht identisch.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für welches $a$ steht $y = a\\,x + 3$ senkrecht auf $y = 2x - 1$?',
+      opts: ['$a = -2$', '$a = 2$', '$a = \\dfrac{1}{2}$', '$a = -\\dfrac{1}{2}$'],
+      steps: [
+        'Bedingung: $a \\cdot 2 = -1$.',
+        '$a = -\\dfrac{1}{2}$',
+        'Probe: $-\\dfrac{1}{2} \\cdot 2 = -1$ stimmt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welches $b$ geht die Gerade $y = 2x + b$ durch den Punkt $P(3|1)$?',
+      opts: ['$b = -7$', '$b = 5$', '$b = -5$', '$b = 7$'],
+      steps: [
+        'Punktprobe: $1 = 2 \\cdot 3 + b$.',
+        '$1 = 6 + b$, also $b = -5$.',
+        'Probe: $y = 2 \\cdot 3 - 5 = 1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zwei Tarife werden durch $y = 0{,}25x + 15$ und $y = 0{,}40x$ beschrieben. Was bedeutet ihr Schnittpunkt im Sachzusammenhang?',
+      opts: ['die Grundgebühr des ersten Tarifs', 'die maximale Menge', 'den günstigsten Tarif', 'die Menge, bei der beide Tarife gleich viel kosten'],
+      steps: [
+        'Im Schnittpunkt haben beide Funktionen denselben Wert.',
+        'Gleichsetzen: $0{,}25x + 15 = 0{,}40x$ ergibt $x = 100$ und $y = 40$ €.',
+        'Unterhalb von $100$ Einheiten ist der zweite Tarif günstiger, darüber der erste.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

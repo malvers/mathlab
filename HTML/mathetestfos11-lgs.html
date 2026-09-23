@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Lineare Gleichungssysteme — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w12-lgs',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Lineare Gleichungssysteme',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 12 (LB 1) · 20 Aufgaben: Gleichsetzungs-, Einsetzungs- und Additionsverfahren, Lösungsfälle, grafische Deutung · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 12 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Verfahren erkennen (1-4), Systeme loesen (5-13), Loesungsfaelle (14-16), grafisch und Anwendungen (17-20). */
+  questions: [
+    {
+      q: 'Welches Verfahren bietet sich an, wenn beide Gleichungen nach $y$ aufgelöst sind?',
+      opts: ['das Gleichsetzungsverfahren', 'das Additionsverfahren', 'gar keines, man muss erst umformen', 'das Einsetzungsverfahren'],
+      steps: [
+        'Stehen links beide Male $y$, so sind die rechten Seiten einander gleich.',
+        'Man setzt sie gleich und erhält eine Gleichung mit nur einer Variablen.',
+        'Das ist das Gleichsetzungsverfahren.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welches Verfahren bietet sich bei $2x + y = 7$ und $y = x + 1$ an?',
+      opts: ['das Einsetzungsverfahren', 'das Additionsverfahren', 'das Gleichsetzungsverfahren', 'nur die grafische Lösung'],
+      steps: [
+        'Die zweite Gleichung ist bereits nach $y$ aufgelöst.',
+        'Dieser Ausdruck wird in die erste Gleichung eingesetzt.',
+        'Das ist das Einsetzungsverfahren.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welches Verfahren bietet sich bei $x + 2y = 8$ und $3x - 2y = 4$ an?',
+      opts: ['das Additionsverfahren, denn $+2y$ und $-2y$ heben sich auf', 'das Einsetzungsverfahren', 'das Gleichsetzungsverfahren', 'es lässt sich nicht lösen'],
+      steps: [
+        'Die $y$-Terme sind bereits entgegengesetzt gleich.',
+        'Addiert man beide Gleichungen, fällt $y$ heraus.',
+        'Das ist das Additionsverfahren, auch Eliminationsverfahren genannt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was ist das gemeinsame Ziel aller drei Verfahren?',
+      opts: ['die Lösung zu zeichnen', 'beide Gleichungen nach $y$ aufzulösen', 'eine Gleichung mit nur noch einer Variablen zu erhalten', 'die Gleichungen zu addieren'],
+      steps: [
+        'Ein System mit zwei Unbekannten lässt sich nicht direkt lösen.',
+        'Jedes Verfahren eliminiert eine Variable.',
+        'Die verbleibende Gleichung wird gelöst, dann wird zurückgesetzt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse: $x + y = 10$ und $x - y = 4$.',
+      opts: ['$x = 14$, $y = 4$', '$x = 3$, $y = 7$', '$x = 6$, $y = 4$', '$x = 7$, $y = 3$'],
+      steps: [
+        'Addieren: $2x = 14$, also $x = 7$.',
+        'Einsetzen in die erste Gleichung: $7 + y = 10$, also $y = 3$.',
+        'Probe: $7 - 3 = 4$ stimmt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Löse: $2x + y = 7$ und $y = x + 1$.',
+      opts: ['$x = 1$, $y = 2$', '$x = 3$, $y = 2$', '$x = 2$, $y = 3$', '$x = 2$, $y = 5$'],
+      steps: [
+        'Einsetzen: $2x + (x+1) = 7$, also $3x + 1 = 7$.',
+        '$3x = 6$, also $x = 2$.',
+        '$y = 2 + 1 = 3$. Probe: $4 + 3 = 7$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse: $3x + 2y = 12$ und $x = 2y$.',
+      opts: ['$x = 4$, $y = 2$', '$x = 1{,}5$, $y = 3$', '$x = 6$, $y = 3$', '$x = 3$, $y = 1{,}5$'],
+      steps: [
+        'Einsetzen: $3 \\cdot 2y + 2y = 12$, also $8y = 12$.',
+        '$y = 1{,}5$ und damit $x = 3$.',
+        'Probe: $9 + 3 = 12$ stimmt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Löse: $x + 2y = 8$ und $3x - 2y = 4$.',
+      opts: ['$x = 3$, $y = 2$', '$x = 3$, $y = 2{,}5$', '$x = 4$, $y = 2$', '$x = 2{,}5$, $y = 3$'],
+      steps: [
+        'Addieren: $4x = 12$, also $x = 3$.',
+        'Einsetzen: $3 + 2y = 8$, also $y = 2{,}5$.',
+        'Probe: $9 - 5 = 4$ stimmt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse: $2x + 3y = 12$ und $4x - 3y = 6$.',
+      opts: ['$x = 1{,}5$, $y = 3$', '$x = 2$, $y = 3$', '$x = 3$, $y = 2$', '$x = 3$, $y = -2$'],
+      steps: [
+        'Addieren: $6x = 18$, also $x = 3$.',
+        'Einsetzen: $6 + 3y = 12$, also $y = 2$.',
+        'Probe: $12 - 6 = 6$ stimmt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse: $5x - 2y = 4$ und $3x + 2y = 12$.',
+      opts: ['$x = 2$, $y = 3$', '$x = 2$, $y = -3$', '$x = 3$, $y = 2$', '$x = 1$, $y = 4{,}5$'],
+      steps: [
+        'Addieren: $8x = 16$, also $x = 2$.',
+        'Einsetzen: $6 + 2y = 12$, also $y = 3$.',
+        'Probe: $10 - 6 = 4$ stimmt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse: $x + 2y = 7$ und $2x + y = 8$.',
+      opts: ['$x = 4$, $y = 1{,}5$', '$x = 3$, $y = 2$', '$x = 2$, $y = 3$', '$x = 1$, $y = 3$'],
+      steps: [
+        'Hier hebt sich nichts direkt auf: die erste Gleichung mit $2$ multiplizieren.',
+        '$2x + 4y = 14$, davon $2x + y = 8$ abziehen: $3y = 6$, also $y = 2$.',
+        '$x = 7 - 4 = 3$. Probe: $6 + 2 = 8$ stimmt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse: $4x + y = 14$ und $y = 2x + 2$.',
+      opts: ['$x = 1$, $y = 10$', '$x = 2$, $y = 6$', '$x = 3$, $y = 2$', '$x = 2$, $y = 4$'],
+      steps: [
+        'Einsetzen: $4x + 2x + 2 = 14$, also $6x = 12$.',
+        '$x = 2$ und $y = 2 \\cdot 2 + 2 = 6$.',
+        'Probe: $8 + 6 = 14$ stimmt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum gehört zu jedem gelösten Gleichungssystem eine Probe?',
+      opts: ['Weil die Verfahren nicht zuverlässig sind.', 'Weil das Wertepaar BEIDE Gleichungen erfüllen muss, nicht nur die, in die zurückgesetzt wurde.', 'Weil die Probe das Verfahren ersetzt.', 'Weil sonst die Lösungsmenge nicht angegeben werden darf.'],
+      steps: [
+        'Beim Zurücksetzen wird meist nur eine der beiden Gleichungen benutzt.',
+        'Ein Rechenfehler in der anderen bliebe dann unbemerkt.',
+        'Deshalb wird das Paar in die bisher nicht verwendete Gleichung eingesetzt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet die Lösungsmenge von $x + y = 3$ und $x + y = 5$?',
+      opts: ['$L = \\{(3|5)\\}$', '$L = \\mathbb{R}$', '$L = \\{\\}$', '$L = \\{(4|1)\\}$'],
+      steps: [
+        'Subtrahiert man die Gleichungen, bleibt $0 = -2$.',
+        'Das ist eine falsche Aussage.',
+        'Grafisch: zwei parallele, verschiedene Geraden ohne Schnittpunkt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele Lösungen hat das System $x + y = 3$ und $2x + 2y = 6$?',
+      opts: ['keine', 'genau eine', 'unendlich viele', 'genau zwei'],
+      steps: [
+        'Die zweite Gleichung ist das Doppelte der ersten.',
+        'Beide beschreiben dieselbe Gerade.',
+        'Jeder Punkt dieser Geraden ist Lösung, etwa $(1|2)$ und $(0|3)$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wann hat ein lineares Gleichungssystem mit zwei Unbekannten genau eine Lösung?',
+      opts: ['wenn die Geraden denselben Anstieg haben', 'wenn die zugehörigen Geraden verschiedene Anstiege haben', 'wenn beide Gleichungen dasselbe Absolutglied haben', 'immer'],
+      steps: [
+        'Verschiedene Anstiege bedeuten, dass die Geraden nicht parallel sind.',
+        'Zwei nicht parallele Geraden schneiden sich in genau einem Punkt.',
+        'Dieser Schnittpunkt ist die eindeutige Lösung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was bedeutet die Lösung eines Gleichungssystems grafisch?',
+      opts: ['Sie ist der Schnittpunkt der Geraden mit der $x$-Achse.', 'Sie hat keine grafische Bedeutung.', 'Sie ist der Mittelpunkt zwischen beiden Geraden.', 'Sie ist der Schnittpunkt der beiden zugehörigen Geraden.'],
+      steps: [
+        'Jede Gleichung beschreibt eine Gerade.',
+        'Ein Wertepaar, das beide Gleichungen erfüllt, liegt auf beiden Geraden.',
+        'Also ist es genau ihr Schnittpunkt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Um das System $y = 2x - 1$ und $y = -x + 5$ mit dem GTR grafisch zu lösen, was gibt man ein?',
+      opts: ['die Differenz beider Gleichungen', 'nur die erste Gleichung', 'die Summe beider Gleichungen', 'beide Terme als Funktionen und lässt den Schnittpunkt bestimmen'],
+      steps: [
+        'Beide Gleichungen sind bereits nach $y$ aufgelöst und lassen sich direkt eingeben.',
+        'Der GTR zeichnet beide Geraden und findet den Schnittpunkt.',
+        'Zur Kontrolle rechnet man nach: $2x - 1 = -x + 5$ ergibt $x = 2$ und $y = 3$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für eine Veranstaltung wurden $120$ Karten verkauft, insgesamt für $1090$ €. Eine Erwachsenenkarte kostet $12$ €, eine ermäßigte $5$ €. Wie viele Karten jeder Sorte waren es?',
+      opts: ['$70$ Erwachsenen- und $50$ ermäßigte Karten', '$60$ und $60$ Karten', '$50$ Erwachsenen- und $70$ ermäßigte Karten', '$80$ Erwachsenen- und $40$ ermäßigte Karten'],
+      steps: [
+        'Ansatz: $e + m = 120$ und $12e + 5m = 1090$.',
+        'Aus der ersten Gleichung $m = 120 - e$, eingesetzt: $12e + 600 - 5e = 1090$, also $7e = 490$.',
+        '$e = 70$ und $m = 50$. Probe: $840 + 250 = 1090$ €.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In einer Werkstatt stehen Fahrräder und Autos, zusammen $12$ Fahrzeuge mit $34$ Rädern. Wie viele Autos sind es?',
+      opts: ['$4$ Autos', '$7$ Autos', '$6$ Autos', '$5$ Autos'],
+      steps: [
+        'Ansatz: $f + a = 12$ und $2f + 4a = 34$.',
+        'Aus der ersten Gleichung $f = 12 - a$, eingesetzt: $24 - 2a + 4a = 34$, also $2a = 10$.',
+        '$a = 5$ Autos und $f = 7$ Fahrräder. Probe: $14 + 20 = 34$ Räder.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

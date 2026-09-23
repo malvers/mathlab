@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Bruchgleichungen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w09-bruchgleichungen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Bruchgleichungen',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 9 (LB 1) · 20 Aufgaben: Definitionsbereich, Lösen über den Hauptnenner, Scheinlösungen, Anwendungen · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 9 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Definitionsbereich (1-5), Loesen (6-13), Scheinloesungen (14-17), Anwendungen (18-20). */
+  questions: [
+    {
+      q: 'Wie lautet der Definitionsbereich von $\\dfrac{1}{x - 4} = 2$?',
+      opts: ['$D = \\mathbb{R} \\setminus \\{0\\}$', '$D = \\mathbb{R}$', '$D = \\mathbb{R} \\setminus \\{-4\\}$', '$D = \\mathbb{R} \\setminus \\{4\\}$'],
+      steps: [
+        'Der Nenner darf nicht null werden: $x - 4 \\neq 0$.',
+        'Also ist $x = 4$ ausgeschlossen.',
+        'Der Definitionsbereich wird vor dem Rechnen bestimmt, nicht danach.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet der Definitionsbereich von $\\dfrac{x}{x + 3} = 1$?',
+      opts: ['$D = \\mathbb{R} \\setminus \\{-3\\}$', '$D = \\mathbb{R} \\setminus \\{0\\}$', '$D = \\mathbb{R} \\setminus \\{3\\}$', '$D = \\mathbb{R}$'],
+      steps: [
+        '$x + 3 \\neq 0$ bedeutet $x \\neq -3$.',
+        'Das Vorzeichen dreht sich beim Umstellen um.',
+        'Dass auch $x$ im Zähler steht, spielt für den Definitionsbereich keine Rolle.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet der Definitionsbereich von $\\dfrac{1}{x - 1} + \\dfrac{1}{x + 2} = 0$?',
+      opts: ['$D = \\mathbb{R} \\setminus \\{-1;\\,2\\}$', '$D = \\mathbb{R} \\setminus \\{1;\\,-2\\}$', '$D = \\mathbb{R} \\setminus \\{0\\}$', '$D = \\mathbb{R} \\setminus \\{1\\}$'],
+      steps: [
+        'Jeder Nenner liefert eine Bedingung.',
+        '$x - 1 \\neq 0$ und $x + 2 \\neq 0$.',
+        'Also sind $1$ und $-2$ ausgeschlossen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet der Definitionsbereich von $\\dfrac{5}{2x - 6} = 1$?',
+      opts: ['$D = \\mathbb{R} \\setminus \\{2\\}$', '$D = \\mathbb{R} \\setminus \\{3\\}$', '$D = \\mathbb{R} \\setminus \\{6\\}$', '$D = \\mathbb{R} \\setminus \\{-3\\}$'],
+      steps: [
+        '$2x - 6 \\neq 0$',
+        '$2x \\neq 6$, also $x \\neq 3$.',
+        'Der Nenner muss erst nach $x$ aufgelöst werden — die $6$ allein ist nicht die verbotene Stelle.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum bestimmt man bei einer Bruchgleichung zuerst den Definitionsbereich?',
+      opts: ['Weil die Gleichung sonst nicht umgeformt werden darf.', 'Weil der Definitionsbereich die Lösung bereits angibt.', 'Weil sonst der Hauptnenner nicht gefunden werden kann.', 'Weil eine Zahl, die einen Nenner null macht, niemals Lösung sein kann, auch wenn die Rechnung sie liefert.'],
+      steps: [
+        'Beim Multiplizieren mit dem Hauptnenner können Zahlen als Lösungen auftauchen, die in der ursprünglichen Gleichung gar nicht eingesetzt werden dürfen.',
+        'Solche Werte heißen Scheinlösungen.',
+        'Nur mit dem vorher notierten Definitionsbereich lassen sie sich sicher ausschließen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Löse: $\\dfrac{6}{x} = 3$.',
+      opts: ['$x = 2$', '$x = 3$', '$x = 18$', '$x = \\dfrac{1}{2}$'],
+      steps: [
+        'Definitionsbereich: $x \\neq 0$.',
+        'Mit $x$ multiplizieren: $6 = 3x$, also $x = 2$.',
+        'Probe: $\\dfrac{6}{2} = 3$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse: $\\dfrac{12}{x + 1} = 4$.',
+      opts: ['$x = 3$', '$x = 47$', '$x = 2$', '$x = -2$'],
+      steps: [
+        'Definitionsbereich: $x \\neq -1$.',
+        'Mit $x+1$ multiplizieren: $12 = 4\\,(x+1)$, also $x + 1 = 3$.',
+        '$x = 2$. Probe: $\\dfrac{12}{3} = 4$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse: $\\dfrac{1}{x} + \\dfrac{1}{2} = 1$.',
+      opts: ['$x = 4$', '$x = 2$', '$x = 1$', '$x = \\dfrac{1}{2}$'],
+      steps: [
+        'Definitionsbereich: $x \\neq 0$.',
+        '$\\dfrac{1}{x} = 1 - \\dfrac{1}{2} = \\dfrac{1}{2}$',
+        'Kehrwert bilden: $x = 2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse: $\\dfrac{3}{x - 2} = 1$.',
+      opts: ['$x = 3$', '$x = 1$', '$x = -1$', '$x = 5$'],
+      steps: [
+        'Definitionsbereich: $x \\neq 2$.',
+        'Mit $x-2$ multiplizieren: $3 = x - 2$.',
+        '$x = 5$. Probe: $\\dfrac{3}{3} = 1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Löse: $\\dfrac{2}{x + 1} = \\dfrac{3}{x + 4}$.',
+      opts: ['$x = 5$', '$x = -5$', '$x = 1$', '$x = 11$'],
+      steps: [
+        'Definitionsbereich: $x \\neq -1$ und $x \\neq -4$.',
+        'Über Kreuz multiplizieren: $2\\,(x+4) = 3\\,(x+1)$, also $2x + 8 = 3x + 3$.',
+        '$x = 5$. Probe: $\\dfrac{2}{6} = \\dfrac{1}{3}$ und $\\dfrac{3}{9} = \\dfrac{1}{3}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse: $\\dfrac{x + 2}{3} = \\dfrac{x - 1}{2}$.',
+      opts: ['$x = 1$', '$x = -7$', '$x = 5$', '$x = 7$'],
+      steps: [
+        'Hier stehen nur Zahlen in den Nennern, der Definitionsbereich ist ganz $\\mathbb{R}$.',
+        'Über Kreuz: $2\\,(x+2) = 3\\,(x-1)$, also $2x + 4 = 3x - 3$.',
+        '$x = 7$. Probe: $\\dfrac{9}{3} = 3$ und $\\dfrac{6}{2} = 3$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Löse: $\\dfrac{1}{x - 1} = \\dfrac{2}{x + 1}$.',
+      opts: ['$x = 1$', '$x = -3$', '$x = \\dfrac{1}{3}$', '$x = 3$'],
+      steps: [
+        'Definitionsbereich: $x \\neq 1$ und $x \\neq -1$.',
+        'Über Kreuz: $x + 1 = 2\\,(x - 1) = 2x - 2$.',
+        '$x = 3$. Probe: $\\dfrac{1}{2}$ auf beiden Seiten.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Womit multipliziert man $\\dfrac{1}{x} + \\dfrac{1}{x + 3} = \\dfrac{5}{4}$ am besten?',
+      opts: ['mit $x + 3$', 'mit $x$', 'mit dem Hauptnenner $4x\\,(x+3)$', 'mit $4$'],
+      steps: [
+        'Der Hauptnenner enthält jeden vorkommenden Nenner als Faktor.',
+        'Hier sind das $x$, $x+3$ und $4$, zusammen also $4x\\,(x+3)$.',
+        'Damit verschwinden alle Brüche in einem Schritt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse: $\\dfrac{x}{x - 3} = \\dfrac{3}{x - 3}$.',
+      opts: ['$L = \\{0\\}$', '$L = \\{\\}$, denn $x = 3$ ist ausgeschlossen.', '$L = \\mathbb{R}$', '$L = \\{3\\}$'],
+      steps: [
+        'Definitionsbereich: $x \\neq 3$.',
+        'Mit $x-3$ multiplizieren ergibt $x = 3$.',
+        'Dieser Wert liegt nicht im Definitionsbereich, es ist eine Scheinlösung. Die Gleichung hat keine Lösung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was ist eine Scheinlösung?',
+      opts: ['Eine Lösung, die doppelt vorkommt.', 'Eine Lösung, die man nur näherungsweise bestimmen kann.', 'Eine Zahl, die die umgeformte Gleichung erfüllt, aber nicht im Definitionsbereich der ursprünglichen liegt.', 'Eine Lösung, die negativ ist.'],
+      steps: [
+        'Beim Multiplizieren mit einem Term, der null werden kann, ist die Umformung keine Äquivalenzumformung.',
+        'Dabei können Werte hinzukommen, die vorher verboten waren.',
+        'Deshalb gehört am Ende jeder Bruchgleichung der Abgleich mit dem Definitionsbereich.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lautet die Lösungsmenge von $\\dfrac{2x}{x + 1} = 2$?',
+      opts: ['$L = \\{1\\}$', '$L = \\{-1\\}$', '$L = \\{\\}$', '$L = \\mathbb{R}$'],
+      steps: [
+        'Definitionsbereich: $x \\neq -1$.',
+        'Mit $x+1$ multiplizieren: $2x = 2x + 2$, also $0 = 2$.',
+        'Das ist eine falsche Aussage, es gibt keine Lösung.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Probe ist bei einer Bruchgleichung unverzichtbar?',
+      opts: ['das Nachrechnen des Hauptnenners', 'der Abgleich der gefundenen Werte mit dem Definitionsbereich', 'die Umwandlung in Dezimalzahlen', 'das Kürzen aller Brüche vor dem Rechnen'],
+      steps: [
+        'Die Rechnung selbst kann korrekt sein und trotzdem einen verbotenen Wert liefern.',
+        'Nur der Vergleich mit dem Definitionsbereich deckt eine Scheinlösung auf.',
+        'Zusätzlich lohnt das Einsetzen in die ursprüngliche Gleichung als Rechenkontrolle.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Bagger allein braucht $6$ Stunden für eine Grube, ein zweiter allein $3$ Stunden. Wie lange brauchen beide zusammen?',
+      opts: ['$2$ Stunden', '$9$ Stunden', '$1{,}5$ Stunden', '$4{,}5$ Stunden'],
+      steps: [
+        'In einer Stunde schafft der erste $\\dfrac{1}{6}$, der zweite $\\dfrac{1}{3}$ der Arbeit.',
+        'Zusammen: $\\dfrac{1}{6} + \\dfrac{1}{3} = \\dfrac{1}{2}$ der Arbeit je Stunde.',
+        'Für die ganze Arbeit brauchen sie also $2$ Stunden — weniger als der schnellere allein.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Zwei Pumpen füllen ein Becken zusammen in $4$ Stunden. Die erste allein braucht $12$ Stunden. Wie lange braucht die zweite allein?',
+      opts: ['$6$ Stunden', '$8$ Stunden', '$16$ Stunden', '$3$ Stunden'],
+      steps: [
+        'Gleichung: $\\dfrac{1}{12} + \\dfrac{1}{x} = \\dfrac{1}{4}$.',
+        '$\\dfrac{1}{x} = \\dfrac{1}{4} - \\dfrac{1}{12} = \\dfrac{2}{12} = \\dfrac{1}{6}$',
+        'Also $x = 6$ Stunden. $8$ Stunden käme heraus, wenn man fälschlich $12 - 4$ rechnet.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Stückkosten betragen $k(x) = \\dfrac{3000}{x} + 5$ €. Bei welcher Stückzahl liegen sie bei $20$ € je Stück?',
+      opts: ['bei $600$ Stück', 'bei $120$ Stück', 'bei $200$ Stück', 'bei $150$ Stück'],
+      steps: [
+        'Gleichung: $\\dfrac{3000}{x} + 5 = 20$, also $\\dfrac{3000}{x} = 15$.',
+        'Mit $x$ multiplizieren: $3000 = 15x$, also $x = 200$.',
+        'Probe: $\\dfrac{3000}{200} + 5 = 15 + 5 = 20$ €.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
