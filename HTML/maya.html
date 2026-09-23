@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Maya-Zahlen</title>
+    <meta name="description"
+        content="Maya-Zahlen selbst legen: Punkte, Striche und die Muschel für die Null — und der Dezimalwert läuft mit.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-clock.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        /* The coach box carries the running sum, so it may grow with the number. */
+        #math-coach-box {
+            width: 420px;
+        }
+
+        #coach-content .katex {
+            font-size: 1.05em;
+        }
+
+        #maya-formula {
+            margin-bottom: 6px;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
+        #maya-hint {
+            font-size: 0.92rem;
+            opacity: 0.85;
+        }
+
+        .maya-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .maya-row input[type="number"] {
+            flex: 1 1 96px;
+            min-width: 96px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(245, 194, 66, 0.35);
+            border-radius: 10px;
+            color: rgb(245, 194, 66);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            padding: 8px 10px;
+        }
+
+        .maya-row input[type="number"]:focus {
+            outline: none;
+            border-color: rgb(245, 194, 66);
+        }
+
+        .maya-note {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            opacity: 0.8;
+        }
+
+        .maya-task-target {
+            display: flex;
+            justify-content: center;
+            margin: 6px 0 10px;
+        }
+
+        @media (max-width: 760px) {
+            #math-coach-box {
+                width: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message">
+                    <div id="maya-formula"></div>
+                    <div id="maya-hint"></div>
+                </div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script>
+        // Debug output goes into the central DEBUG window, never into the console.
+        if (/[?&]debug=1\b/.test(location.search)) {
+            var s = document.createElement('script');
+            s.src = 'js/debug-window.js';
+            s.onload = function () { try { DebugWindow.show(); } catch (e) { } };
+            document.head.appendChild(s);
+        }
+    </script>
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cyber-clock.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        const T = (k, fb) => (typeof CyberI18n !== 'undefined' && CyberI18n.getOr)
+            ? CyberI18n.getOr('maya.' + k, fb)
+            : fb;
+
+        function dbg(m) { if (window.DebugWindow) DebugWindow.log('[maya] ' + m); }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: T('title', 'MAYA-ZAHLEN'),
+        });
+        CyberUI.init();
+
+        (function setCoachTitle() {
+            const el = document.getElementById('coach-title-slot');
+            if (el) el.textContent = T('coach_title', 'Maya-Rechenbrett');
+            const box = document.getElementById('math-coach-box');
+            if (box) box.classList.add('visible');
+        })();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        // ---------------------------------------------------------------- palette ---
+        const COL = {
+            glyph: 'rgb(245, 194, 66)',   // dots and bars
+            shell: 'rgb(121, 158, 49)',   // the shell that stands for zero
+            warn: 'rgb(176, 36, 24)',
+            dim: 'rgba(245, 194, 66, 0.55)',
+            line: 'rgba(255, 255, 255, 0.13)',
+            fill: 'rgba(255, 255, 255, 0.03)'
+        };
+
+        // ------------------------------------------------------------ number system ---
+        // A Maya number is written from the bottom up: the ones sit at the bottom, every row
+        // above is worth more. The Long Count is not a pure base 20 - its third place is worth
+        // 360 (18 x 20, the 360 day year), and from there it goes times 20 again. So the ones
+        // place rolls over at 20, but the twenties place rolls over at 18.
+        const SYSTEMS = {
+            kalender: {
+                label: 'Kalender (Long Count)',
+                values: [1, 20, 360, 7200, 144000],
+                limits: [20, 18, 20, 20, 20]
+            },
+            rein20: {
+                label: 'rein 20er',
+                values: [1, 20, 400, 8000, 160000],
+                limits: [20, 20, 20, 20, 20]
+            }
+        };
+
+        let sysKey = 'kalender';
+        let digits = [0, 0, 0, 0, 0];     // index 0 = ones, at the bottom of the board
+        let task = null;                  // { target, done }
+        let solvedCount = 0;
+        let flashes = [];                 // { place, color, until }
+        let cells = [];                   // click targets: one per place
+        let glyphs = [];                  // click targets: every dot and every bar
+
+        const sys = () => SYSTEMS[sysKey];
+        const value = () => digits.reduce((sum, d, i) => sum + d * sys().values[i], 0);
+        const de = (n) => n.toLocaleString('de-DE');
+
+        function places() {
+            let top = 3;                  // four places are always on the board
+            for (let i = digits.length - 1; i >= 0; i--) {
+                if (digits[i] > 0) { top = Math.max(top, i); break; }
+            }
+            return top + 1;
+        }
+
+        // Lay a decimal number out over the places, highest first.
+        function layout(n) {
+            const v = sys().values;
+            const maxValue = v[4] * (sys().limits[4] - 1) + v[4] - 1;
+            n = Math.max(0, Math.min(Math.floor(n), maxValue));
+            const out = [0, 0, 0, 0, 0];
+            for (let i = v.length - 1; i >= 0; i--) {
+                out[i] = Math.floor(n / v[i]);
+                n -= out[i] * v[i];
+            }
+            digits = out;
+        }
+
+        // ------------------------------------------------------------------ drawing ---
+        function roundRect(x, y, w, h, r, fill, stroke) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.arcTo(x + w, y, x + w, y + h, r);
+            ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r);
+            ctx.arcTo(x, y, x + w, y, r);
+            ctx.closePath();
+            if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+            if (stroke) { ctx.strokeStyle = stroke; ctx.stroke(); }
+        }
+
+        // The zero: a stylised shell — an oval with a flat lower rim and three ribs,
+        // the same shape the decks draw (tools/pptx/maya_svg.py).
+        function drawShell(cx, cy, cw, ch) {
+            const rx = Math.max(12, Math.min(cw * 0.17, 46));
+            const ry = Math.max(8, Math.min(rx / 1.55, ch * 0.2));
+            ctx.save();
+            ctx.strokeStyle = COL.shell;
+            ctx.lineWidth = Math.max(2, ry * 0.11);
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(cx - rx * 0.86, cy + ry * 0.24);
+            ctx.quadraticCurveTo(cx, cy + ry * 1.5, cx + rx * 0.86, cy + ry * 0.24);
+            ctx.stroke();
+            ctx.lineWidth = Math.max(1.2, ry * 0.075);
+            for (const f of [-0.42, 0, 0.42]) {
+                ctx.beginPath();
+                ctx.moveTo(cx + rx * f, cy - ry * 0.52);
+                ctx.lineTo(cx + rx * f * 1.25, cy + ry * 0.36);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        // Every bar counts five, every dot one, and they sit dots over bars.
+        function drawDigit(place, cx, cy, cw, ch) {
+            const d = digits[place];
+            if (d === 0) { drawShell(cx, cy, cw, ch); return; }
+
+            const bars = Math.floor(d / 5);
+            const dots = d % 5;
+            const barH = Math.max(5, ch * 0.12);
+            const barW = Math.min(cw * 0.5, 140);
+            const gap = Math.max(4, ch * 0.075);
+            const dotR = Math.max(4, ch * 0.072);
+            const dotsH = dots ? dotR * 2 : 0;
+            const barsH = bars ? bars * barH + (bars - 1) * gap : 0;
+            const totalH = dotsH + barsH + (dots && bars ? gap : 0);
+            let y = cy - totalH / 2;
+
+            if (dots) {
+                const step = Math.min(dotR * 3.1, barW / 3.6);
+                const startX = cx - step * (dots - 1) / 2;
+                for (let k = 0; k < dots; k++) {
+                    const x = startX + k * step;
+                    ctx.beginPath();
+                    ctx.fillStyle = COL.glyph;
+                    ctx.arc(x, y + dotR, dotR, 0, Math.PI * 2);
+                    ctx.fill();
+                    glyphs.push({ place, type: 'dot', x: x - dotR * 1.5, y: y - dotR * 0.5, w: dotR * 3, h: dotR * 3 });
+                }
+                y += dotsH + gap;
+            }
+            for (let k = 0; k < bars; k++) {
+                roundRect(cx - barW / 2, y, barW, barH, barH / 2, COL.glyph, null);
+                glyphs.push({ place, type: 'bar', x: cx - barW / 2, y: y - gap * 0.35, w: barW, h: barH + gap * 0.7 });
+                y += barH + gap;
+            }
+        }
+
+        function flashColor(place) {
+            const now = performance.now();
+            const f = flashes.find(f => f.place === place && f.until > now);
+            return f ? f.color : null;
+        }
+
+        function draw() {
+            const rect = container.getBoundingClientRect();
+            const W = rect.width, H = rect.height;
+            ctx.clearRect(0, 0, W, H);
+            cells = [];
+            glyphs = [];
+            if (W < 160 || H < 160) return;   // the chrome has not settled yet
+
+            const n = places();
+            const narrow = W < 700;
+
+            // keep the board clear of the coach box when there is no room beside it
+            let topGuard = 12;
+            const box = document.getElementById('math-coach-box');
+            if (box && narrow) {
+                const b = box.getBoundingClientRect();
+                topGuard = Math.max(topGuard, b.bottom - rect.top + 14);
+            }
+
+            const padY = 14;
+            const avail = H - topGuard - padY;
+            const rowH = Math.min(avail / n, 138);
+            const boardH = rowH * n;
+            const top0 = topGuard + (avail - boardH) / 2;
+
+            const labelW = narrow ? 58 : 92;
+            const prodW = narrow ? 0 : 196;
+            const cellW = Math.max(120, Math.min(narrow ? W - labelW - 30 : 268, W * 0.62));
+            const totalW = labelW + 14 + cellW + (prodW ? 14 + prodW : 0);
+            const x0 = Math.max(12, (W - totalW) / 2);
+            const cellX = x0 + labelW + 14;
+
+            for (let row = 0; row < n; row++) {
+                const place = n - 1 - row;            // the highest place is drawn on top
+                const y = top0 + row * rowH;
+                const h = rowH - 6;
+                const flash = flashColor(place);
+
+                ctx.lineWidth = flash ? 2 : 1;
+                roundRect(cellX, y + 3, cellW, h, 14, flash ? 'rgba(121, 158, 49, 0.10)' : COL.fill, flash || COL.line);
+
+                // place value on the left
+                ctx.fillStyle = COL.dim;
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                ctx.font = (narrow ? '600 13px' : '600 16px') + " 'Orbitron', sans-serif";
+                ctx.fillText(de(sys().values[place]), x0 + labelW, y + rowH / 2);
+
+                drawDigit(place, cellX + cellW / 2, y + rowH / 2, cellW, h);
+
+                // what this place contributes, on the right
+                if (prodW) {
+                    const d = digits[place];
+                    ctx.textAlign = 'left';
+                    ctx.font = "400 15px 'Outfit', sans-serif";
+                    ctx.fillStyle = d ? 'rgba(255, 255, 255, 0.72)' : 'rgba(255, 255, 255, 0.28)';
+                    const line = d + ' × ' + de(sys().values[place]) + ' = ' + de(d * sys().values[place]);
+                    ctx.fillText(line, cellX + cellW + 14, y + rowH / 2);
+                }
+
+                cells.push({ place, x: cellX, y: y + 3, w: cellW, h });
+            }
+
+            // the task, written under the board
+            if (task) {
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.font = "400 15px 'Outfit', sans-serif";
+                ctx.fillStyle = task.done ? COL.shell : 'rgba(255, 255, 255, 0.6)';
+                const line = task.done
+                    ? T('task_done', 'Richtig gelegt.')
+                    : T('task_lay', 'Lege') + ' ' + de(task.target);
+                ctx.fillText(line, W / 2, Math.min(H - 26, top0 + boardH + 10));
+            }
+        }
+
+        // ------------------------------------------------------------- interaction ---
+        function inRect(p, r) {
+            return p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
+        }
+
+        function say(text, color) {
+            const el = document.getElementById('maya-hint');
+            if (!el) return;
+            el.textContent = text;
+            el.style.color = color || 'rgba(255, 255, 255, 0.8)';
+        }
+
+        function flashPlace(place, color) {
+            flashes.push({ place, color: color || COL.shell, until: performance.now() + 900 });
+            setTimeout(draw, 950);
+        }
+
+        // Adding beyond the last digit of a place carries into the place above - that is the
+        // whole point of a place value system, so it gets said out loud.
+        function addOne(place) {
+            const lim = sys().limits;
+            let k = place;
+            digits[k]++;
+            while (digits[k] >= lim[k]) {
+                if (k + 1 >= digits.length) {
+                    digits[k] = lim[k] - 1;
+                    say(T('full', 'Das Brett ist voll — höher geht es hier nicht.'), COL.warn);
+                    break;
+                }
+                digits[k] = 0;
+                digits[k + 1]++;
+                flashPlace(k + 1);
+                say(lim[k] + ' × ' + de(sys().values[k]) + ' = ' + de(sys().values[k + 1])
+                    + ' — ' + T('carry', 'das wandert eine Stelle nach oben.'), COL.shell);
+                k++;
+            }
+            changed();
+        }
+
+        function removeGlyph(g) {
+            digits[g.place] = Math.max(0, digits[g.place] - (g.type === 'bar' ? 5 : 1));
+            changed();
+        }
+
+        canvas.addEventListener('pointerdown', (e) => {
+            const r = canvas.getBoundingClientRect();
+            const p = { x: e.clientX - r.left, y: e.clientY - r.top };
+            const g = glyphs.find(h => inRect(p, h));
+            if (g) { removeGlyph(g); return; }
+            const c = cells.find(h => inRect(p, h));
+            if (c) addOne(c.place);
+        });
+
+        // ------------------------------------------------------------------ readout ---
+        function renderFormula() {
+            const el = document.getElementById('maya-formula');
+            if (!el) return;
+            const n = places();
+            const parts = [];
+            for (let i = n - 1; i >= 0; i--) parts.push(digits[i] + ' \\cdot ' + sys().values[i]);
+            const tex = parts.join(' + ') + ' = ' + value();
+            if (window.katex) {
+                katex.render(tex, el, { throwOnError: false, displayMode: false });
+            } else {
+                el.textContent = tex.replace(/\\cdot/g, '·');
+            }
+        }
+
+        function changed() {
+            if (window.CyberClock) {
+                CyberClock.digits('maya-value', value(), {
+                    thousands: true,
+                    style: { size: '30px', digitWidth: '29px' }
+                });
+            }
+            renderFormula();
+            if (task && !task.done && value() === task.target) {
+                task.done = true;
+                solvedCount++;
+                say(T('task_correct', 'Richtig! ') + de(task.target) + T('task_lies', ' liegt auf dem Brett.'), COL.shell);
+                for (let i = 0; i < places(); i++) flashPlace(i);
+                updateStats();
+            }
+            draw();
+        }
+
+        function updateStats() {
+            CyberUI.updateStatsGrid('maya-stats', [
+                { value: de(solvedCount) },
+                { value: sysKey === 'kalender' ? '360' : '400' }
+            ]);
+        }
+
+        function newTask() {
+            task = { target: 21 + Math.floor(Math.random() * 9979), done: false };
+            digits = [0, 0, 0, 0, 0];
+            say(T('task_hint', 'Lege die Zahl — tippe ins Feld, um Punkte zu setzen.'), COL.glyph);
+            changed();
+        }
+
+        // --------------------------------------------------------------- side panel ---
+        function buildUI() {
+            CyberUI.createCard('ui-container', T('card_value', 'DEZIMALWERT'),
+                '<div id="maya-value" style="display:flex;justify-content:center;padding:4px 0 2px;"></div>'
+                + '<div id="maya-stats"></div>', 'rgb(245, 194, 66)');
+            CyberUI.createStatsGrid('maya-stats', [
+                { label: T('stat_solved', 'GELÖST'), value: '0', color: 'rgb(121, 158, 49)' },
+                { label: T('stat_third', '3. STELLE'), value: '360', color: 'rgb(245, 194, 66)' }
+            ]);
+
+            CyberUI.createCard('ui-container', T('card_system', 'STELLENWERTE'),
+                '<div id="maya-system"></div>'
+                + '<div class="maya-note" id="maya-system-note"></div>', 'rgb(121, 158, 49)');
+            CyberUI.createRadioGroup('maya-system', null, [
+                { value: 'kalender', label: T('sys_cal', 'Kalender: 1, 20, 360, 7200') },
+                { value: 'rein20', label: T('sys_20', 'rein 20er: 1, 20, 400, 8000') }
+            ], sysKey, (v) => {
+                sysKey = v;
+                // the glyphs stay where they are - only what they are worth changes
+                say(T('sys_switch', 'Dieselben Zeichen, andere Stellenwerte: jetzt ') + de(value()) + '.', COL.glyph);
+                document.getElementById('maya-system-note').textContent = noteFor(v);
+                updateStats();
+                changed();
+            });
+            document.getElementById('maya-system-note').textContent = noteFor(sysKey);
+
+            CyberUI.createCard('ui-container', T('card_lay', 'ZAHL LEGEN'),
+                '<div class="maya-row">'
+                + '<input type="number" id="maya-input" min="0" max="2000000" placeholder="5432"'
+                + ' aria-label="' + T('card_lay', 'ZAHL LEGEN') + '">'
+                + '<button class="cyber-btn" id="maya-lay" style="flex:0 0 auto">' + T('btn_lay', 'LEGEN') + '</button>'
+                + '</div>'
+                + '<div class="maya-row">'
+                + '<button class="cyber-btn" id="maya-random" style="flex:1">' + T('btn_random', 'ZUFALL') + '</button>'
+                + '<button class="cyber-btn" id="maya-clear" style="flex:1">' + T('btn_clear', 'LEEREN') + '</button>'
+                + '</div>', 'rgb(245, 194, 66)');
+
+            CyberUI.createCard('ui-container', T('card_task', 'AUFGABE'),
+                '<div class="maya-note">' + T('task_note', 'Eine Zahl wird genannt, Du legst sie. Stimmt sie, färbt sich das Brett grün.') + '</div>'
+                + '<div class="maya-row">'
+                + '<button class="cyber-btn" id="maya-task" style="flex:1">' + T('btn_task', 'NEUE AUFGABE') + '</button>'
+                + '</div>', 'rgb(176, 36, 24)');
+
+            CyberUI.createCard('ui-container', T('card_help', 'SO GEHT ES'),
+                '<div class="maya-note">' + T('help', 'Ins Feld tippen legt einen Punkt dazu. Auf einen Punkt tippen nimmt ihn weg, auf einen Strich nimmt fünf weg. Fünf Punkte werden ein Strich, und ist eine Stelle voll, wandert sie nach oben. Die leere Stelle zeigt die Muschel — die Null.') + '</div>',
+                'rgb(121, 158, 49)');
+
+            document.getElementById('maya-lay').onclick = () => {
+                const el = document.getElementById('maya-input');
+                const n = parseInt(el.value, 10);
+                if (!isNaN(n)) { layout(n); task = null; say(''); changed(); dbg('laid out ' + n); }
+            };
+            document.getElementById('maya-input').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') document.getElementById('maya-lay').click();
+            });
+            document.getElementById('maya-random').onclick = () => {
+                layout(21 + Math.floor(Math.random() * 9979));
+                task = null;
+                say('');
+                changed();
+            };
+            document.getElementById('maya-clear').onclick = () => {
+                digits = [0, 0, 0, 0, 0];
+                task = null;
+                say('');
+                changed();
+            };
+            document.getElementById('maya-task').onclick = newTask;
+        }
+
+        function noteFor(key) {
+            return key === 'kalender'
+                ? T('note_cal', 'Die dritte Stelle ist 360 statt 400 — 18 × 20, das Kalenderjahr der Maya. Deshalb fasst die Zwanziger-Stelle hier nur bis 17.')
+                : T('note_20', 'Reines Zwanzigersystem, jede Stelle das Zwanzigfache der vorigen. Zum Vergleichen gedacht.');
+        }
+
+        // ---------------------------------------------------------------------- run ---
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            const w = Math.max(1, rect.width);
+            const h = Math.max(1, rect.height);
+            canvas.width = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
+
+        function init() {
+            resizeCanvasToContainer();
+            draw();
+        }
+
+        window.addEventListener('resize', init);
+
+        buildUI();
+        layout(5432);
+        say(T('start', 'Eine Maya-Zahl steht schon da. Tippe hinein und ändere sie.'), COL.glyph);
+        init();
+        changed();
+        document.fonts.ready.then(() => { init(); changed(); });
+        dbg('lab ready');
+    </script>
+</body>
+
+</html>
