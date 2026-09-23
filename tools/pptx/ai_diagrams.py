@@ -228,9 +228,12 @@ def token(path, W=1420, H=480):
     f_small = font("Raleway-Regular.ttf", 23)
     f_num = font("Raleway-Regular.ttf", 21)
 
-    toks = [("Das", NAVY), ("Kon", ORA), ("text", ORA), ("fenster", ORA),
+    # The real split and vocabulary ids of GPT-4o's tokenizer (o200k_base), checked
+    # 2026-09-23 with OpenAI's public vocabulary file - not an invented example.
+    # GPT-4 (cl100k_base) would even make 8: Das|Kont|ext|fen|ster|ist|voll|.
+    toks = [("Das", NAVY), ("Kontext", ORA), ("fen", ORA), ("ster", ORA),
             ("ist", NAVY), ("voll", NAVY), (".", MUTED)]
-    ids = ["1094", "4417", "1613", "8022", "689", "2941", "13"]
+    ids = ["16110", "198401", "12353", "3968", "2496", "29024", "13"]
 
     pad, gap, y = 26, 14, 220
     widths = []
@@ -246,7 +249,7 @@ def token(path, W=1420, H=480):
         x += w + gap
 
     centered(d, "„Das Kontextfenster ist voll.“", W / 2, 140, f_small, MUTED)
-    centered(d, "7 Token — ein langes Wort zerfällt in mehrere, jedes wird zu einer Zahl.",
+    centered(d, "7 Token bei GPT-4o — ein langes Wort zerfällt, jedes Stück wird zu einer Zahl.",
              W / 2, 380, font("Raleway-Medium.ttf", 27), BODY)
     centered(d, "Genau diese Stücke werden gezählt, bezahlt und begrenzt.",
              W / 2, 430, f_small, MUTED)
