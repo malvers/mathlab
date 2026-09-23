@@ -441,16 +441,32 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
   color:#7E8FB5;display:flex;justify-content:space-between;align-items:center;
   position:relative;z-index:1;margin:-12px -12px 0;padding:11px 12px 9px;background:var(--askbg);
   border-radius:10px 10px 0 0;box-shadow:0 4px 8px -4px rgba(14,36,78,.35)}
-/* the header without its title: a slim edge with the grip, the cost figure left and the × right - the title
-   is the field's placeholder now (Doc, 22.09.2026: "nimm den Header raus und in die Zeile Frag Solita") */
-#ask-head.slim{padding:9px 8px 3px 12px;box-shadow:none;min-height:0}
-#ask-head.slim>span{font-size:9px;letter-spacing:.8px}
+/* no header at all: a zero-height strip whose grip hangs OUTSIDE, above the panel's top edge, thin (Doc,
+   23.09.2026: "den header weg, nur eine dünne handle außen"); the title is the field's placeholder (22.09.),
+   Esc or her picture close the panel, so the × goes too. ::after is the invisible hit area around the grip. */
+#ask-head.slim{padding:0;height:0;min-height:0;box-shadow:none;border-radius:0}
+#ask-head.slim>span,#ask-head.slim>#ask-close{display:none}
+#ask-head.slim::before{top:-8px;width:36px;height:4px;margin-left:-18px;opacity:.6}
+#ask-head.slim::after{content:'';position:absolute;left:50%;top:-16px;width:80px;height:20px;margin-left:-40px}
 #ask-close{border:0;background:none;color:#7E8FB5;font-size:16px;line-height:1;cursor:pointer;padding:0 2px}
 #ask-close:hover{color:var(--red)}
 #ask-out{font-size:14px;line-height:1.45;color:var(--body);max-height:calc(100vh - var(--askrest,200px));overflow:auto;
   margin-bottom:9px;padding-top:9px;white-space:pre-wrap}
-#ask-out:empty{display:none}
-#ask-out:empty + label{margin-top:10px}
+/* a line cut off at the top or bottom fades out instead of being sliced (Doc, 23.09.2026: "wenn eine Zeile
+   angeschnitten ist ... lass ausfaden"); JS sets cut-top/cut-bot from the scroll position, so a first or
+   last line that is fully in view stays crisp */
+#ask-out{--cutT:0px;--cutB:0px;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 var(--cutT),#000 calc(100% - var(--cutB)),transparent 100%);
+  mask-image:linear-gradient(to bottom,transparent 0,#000 var(--cutT),#000 calc(100% - var(--cutB)),transparent 100%)}
+#ask-out.cut-top{--cutT:26px}
+#ask-out.cut-bot{--cutB:26px}
+/* Nothing to show - or folded away by a page turn (.shut) - and the box stands at zero height, only the mic line
+   remains; the next text slides it open again, up to the height Doc pulled it to (23.09.2026: "wenn da noch nix
+   steht eingefahren und dann mit dem Text bis zu dieser Höhe ausfahren", "beim Seitenwechsel bis auf die Mic Zeile
+   einfahren (animiert)"). interpolate-size lets Chrome animate 0 <-> auto; elsewhere the box just jumps. */
+#ask-out{interpolate-size:allow-keywords;transition:height .4s ease,margin-bottom .4s ease,padding-top .4s ease}
+#ask-out:empty,#ask-out.shut{height:0;margin-bottom:0;padding-top:0;overflow:hidden}
+#ask-out:empty + label,#ask-out.shut + label{margin-top:10px}
 #ask-out .ask-q{color:var(--ink);font-weight:600}
 #ask-out .ask-err{color:var(--red)}
 /* DeepSeek's answer to the same question, silent, for comparison (Doc, 17.09.2026: "mach den Text von DS rot (China ;-)") */
@@ -473,16 +489,18 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 #ask-out .ask-wave i:nth-child(7){animation-delay:.6s}
 @keyframes askwave{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(.9)}}
 @media (prefers-reduced-motion:reduce){#ask-out .ask-wave i{animation-duration:2.4s}}
-#ask-out::-webkit-scrollbar{width:8px}
-#ask-out::-webkit-scrollbar-thumb{background:#b8c6df;border-radius:4px}
-#ask-out{scrollbar-width:thin;scrollbar-color:#b8c6df transparent}
+/* the scrollbar barely there: 4 px, half-transparent (Doc, 23.09.2026: "scroll noch dezenter") */
+#ask-out::-webkit-scrollbar{width:4px}
+#ask-out::-webkit-scrollbar-thumb{background:rgba(184,198,223,.55);border-radius:2px}
+#ask-out{scrollbar-width:thin;scrollbar-color:rgba(184,198,223,.55) transparent}
 #ask label{display:block;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:1.3px;
   text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 /* the label only shows for the password; a question needs none (Doc, 16.09.2026: "weg") */
 #ask label[hidden]{display:none}
-#ask-out:empty + label[hidden] + #ask-row{margin-top:10px}
-#ask-row{display:flex;gap:6px}
-#ask-cost{margin-left:9px;font-weight:400;color:var(--muted);cursor:pointer;white-space:nowrap}
+#ask-out:empty + label[hidden] + #ask-row,#ask-out.shut + label[hidden] + #ask-row{margin-top:10px}
+#ask-row{display:flex;gap:6px;transition:margin-top .4s ease}
+/* the cost figure stands behind the answer, in its type, a shade lighter (Doc, 23.09.2026) */
+#ask-cost{margin-left:6px;font:inherit;color:var(--muted);cursor:pointer;white-space:nowrap}
 /* DeepSeek switched on by a right click on the field: the field itself gets a red edge (in the header it broke the line) */
 #ask input.ds,#ask input.ds:focus{border-color:var(--red)}
 /* right click in the panel: who answers - Solita, DeepSeek or both. "#ask #ask-menu": the panel's own label and
@@ -513,7 +531,9 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 #ask-head::before{content:'';position:absolute;left:50%;top:4px;width:30px;height:3px;margin-left:-15px;
   border-radius:2px;background:#7E8FB5;opacity:.45}
 #ask-panel.sized #ask-out{height:min(var(--askh),calc(100vh - var(--askrest,200px)));max-height:none}
-#ask-panel.sized #ask-out:empty{display:block}   /* a panel pulled taller keeps its size before the first answer too */
+#ask-panel.sized #ask-out:empty,#ask-panel.sized #ask-out.shut{height:0}   /* pulled taller or not: empty stays folded (23.09.2026) */
+/* while the grip is dragged the box shows at the dragged height, empty or not, and follows the hand without easing */
+#ask-panel.drag #ask-out{transition:none;height:min(var(--askh),calc(100vh - var(--askrest,200px)))}
 #ask-mic,#ask-tts{flex:none;width:34px;display:grid;place-items:center;cursor:pointer;color:var(--ink);
   background:var(--askfield);border:1px solid var(--askline);border-radius:7px}
 #ask-mic svg,#ask-tts svg{width:16px;height:16px}

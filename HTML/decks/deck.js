@@ -684,7 +684,8 @@ fromHash();
   // What THIS question cost - not a running total (Doc, 16.09.2026: the sum belongs in the 08:00
   // mail, where it covers every device). Claude is real money from the first token; the voice is
   // characters against Google's monthly free quota, so it shows as characters, with the list price
-  // it WOULD cost only in the tooltip.
+  // it WOULD cost only in the tooltip. The figure stands behind the answer it belongs to, in the
+  // answer's own type, a shade lighter (Doc, 23.09.2026: "hinter den Text ... so wie Text, bissl heller").
   let last = null;
   function money(eur) {
     if (eur >= 1) return eur.toFixed(2).replace('.', ',') + ' \u20ac';
@@ -716,9 +717,9 @@ fromHash();
       chars: 0,
       msAi: ms, msVoice: 0,
     };
-    showCost();
   }
-  function addVoice(chars, ms) { if (last) { last.chars = chars; last.msVoice = ms; showCost(); } }
+  function addVoice(chars, ms) { if (last) { last.chars = chars; last.msVoice = ms; } }
+  function placeCost(el) { el.appendChild(costEl); showCost(); }   // after render(): render() empties the element first
   // Reading aloud on/off. Same localStorage key as solita.html, so switching her quiet holds here
   // too - and with it off, no TTS request goes out at all (the voice is 97 % of what a question costs).
   const TTS_KEY = 'solita_tts';
@@ -850,7 +851,7 @@ fromHash();
   // das Fenster nach oben größer ziehen ... persist"). The panel hangs from its bottom edge, so it grows upwards.
   const H_KEY = 'solita_ask_h', H_MIN = 90, TOP_GAP = 48;   // 48: clear of the edit pencil and the LOCAL badge
   const head = document.getElementById('ask-head');
-  (function slimHead() {                           // the title text goes, the cost figure and the × remain
+  (function slimHead() {                           // no header: title and × are hidden by .slim, only the grip above the panel remains
     const span = head.querySelector('span');
     if (span && span.firstChild && span.firstChild.nodeType === 3) span.firstChild.remove();
     head.classList.add('slim');
@@ -872,12 +873,14 @@ fromHash();
     e.preventDefault();
     const y0 = e.clientY, h0 = out.offsetHeight, max = innerHeight - rest();
     head.setPointerCapture(e.pointerId);
+    panel.classList.add('drag'); setHeight(h0);      // follows the hand without easing; a folded box starts from zero
     function move(ev) { setHeight(Math.max(H_MIN, Math.min(max, h0 + y0 - ev.clientY))); }
     function up() {
       head.removeEventListener('pointermove', move);
       head.removeEventListener('pointerup', up);
       head.removeEventListener('pointercancel', up);
       try { localStorage.setItem(H_KEY, String(out.offsetHeight)); } catch (err) { }
+      panel.classList.remove('drag');                // empty or folded: it eases shut again now
     }
     head.addEventListener('pointermove', move);
     head.addEventListener('pointerup', up);
@@ -929,12 +932,21 @@ fromHash();
     input.setAttribute('autocomplete', 'off');
     send.textContent = '?';
     micBtn.hidden = !(window.SpeechRecognition || window.webkitSpeechRecognition);
-    ttsBtn.hidden = false;
+    // the speaker stays hidden: it lives in the right-click menu (Doc, 23.09.2026: "den hier weg")
   }
+  // a line cut off at the edge of the box fades out (Doc, 23.09.2026) - only on the edge that really hides text
+  function cutEdges() {
+    out.classList.toggle('cut-top', out.scrollTop > 1);
+    out.classList.toggle('cut-bot', out.scrollTop + out.clientHeight < out.scrollHeight - 1);
+  }
+  out.addEventListener('scroll', cutEdges);
+  if (window.ResizeObserver) new ResizeObserver(cutEdges).observe(out);        // pulled taller or shorter
+  new MutationObserver(cutEdges).observe(out, { childList: true, subtree: true, characterData: true });   // text came or went
   function say(html, cls) {
     const p = document.createElement('div');
     if (cls) p.className = cls;
     p.innerHTML = html;
+    out.classList.remove('shut');                    // text arrives: the box slides open again
     out.appendChild(p); out.scrollTop = out.scrollHeight;
     return p;
   }
@@ -1050,9 +1062,10 @@ fromHash();
       on = sp;
       if (!sp) return;
       sp.classList.add('on');
-      const r = sp.getBoundingClientRect(), o = out.getBoundingClientRect();   // keep her word in view
-      if (r.bottom > o.bottom - 4) out.scrollTop += r.bottom - o.bottom + 24;
-      else if (r.top < o.top + 4) out.scrollTop -= o.top - r.top + 24;
+      // her word stays in the middle of the box, as far as the scroll range allows (Doc, 23.09.2026)
+      const r = sp.getBoundingClientRect(), o = out.getBoundingClientRect();
+      const want = out.scrollTop + (r.top + r.bottom) / 2 - (o.top + o.bottom) / 2;
+      if (Math.abs(want - out.scrollTop) > 2) out.scrollTo({ top: want, behavior: 'smooth' });
     }
     function frame() {
       if (audio !== a || a.paused) { mark(null); return; }   // stopped, closed or finished
@@ -1128,7 +1141,8 @@ fromHash();
     if (ear && ear.active) { heardLate = true; ear.stop(); }   // its late result is dropped, see onFinal
     input.value = '';
     ready();
-    say('<span class="ask-q">' + v.replace(/[<&]/g, function (c) { return c === '<' ? '&lt;' : '&amp;'; }) + '</span>');
+    const q = live && live.isConnected ? live : say('');   // dictated: the line already standing there becomes the question
+    q.innerHTML = qHtml(v); live = null;
     // the wave runs while Claude thinks AND while her voice is fetched - it gives way to the answer
     const wait = say('<span class="ask-wave" role="status" aria-label="Solita denkt nach">'
       + '<i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>');
@@ -1198,7 +1212,7 @@ fromHash();
       .then(function (res) {
         if (!res.text) { fail(res.error); herTurn = true; dsShow(); return; }
         addClaude(res.j.usage, Date.now() - t0);
-        answer(res.text, function () { render(wait, res.text); herTurn = true; dsShow(); });
+        answer(res.text, function () { render(wait, res.text); placeCost(wait); herTurn = true; dsShow(); });
       })
       .catch(function () { fail('Kein Netz.'); herTurn = true; dsShow(); });
   }
@@ -1210,9 +1224,28 @@ fromHash();
     + 'stroke-linecap="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/>'
     + '<path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>';
   if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) micBtn.hidden = true;
+  micBtn.title = 'Frage sprechen (Shift+Leertaste)'; micBtn.setAttribute('aria-label', 'Frage sprechen, Shift+Leertaste');
   micBtn.addEventListener('mousedown', function (e) { e.preventDefault(); });   // the field keeps the caret
   micBtn.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
   let heardLate = false;                             // stop() still delivers the text - not after it was sent
+  // While a question is spoken, it already stands in the answer box, and the field scrolls along so its end
+  // stays in view (Doc, 23.09.2026: "lass den Text auch schon oben erscheinen und in der Eingabebox mit scrollen").
+  // The line mirrors the field until the question is sent - typed corrections follow, an emptied field takes it away.
+  let live = null;
+  function qHtml(v) { return '<span class="ask-q">' + v.replace(/[<&]/g, function (c) { return c === '<' ? '&lt;' : '&amp;'; }) + '</span>'; }
+  function mirror() {
+    if (live && !live.isConnected) live = null;      // "Leeren" took it away
+    const v = input.value.trim();
+    if (!v) { if (live) { live.remove(); live = null; } return; }
+    if (!live) live = say('');
+    live.innerHTML = qHtml(v); out.scrollTop = out.scrollHeight;
+  }
+  function heard(t) {                                // recognised text into the field, its end in view
+    input.value = t; input.scrollLeft = input.scrollWidth;
+    try { input.setSelectionRange(t.length, t.length); } catch (e) { }
+    ready(); mirror();
+  }
+  input.addEventListener('input', function () { if (live) mirror(); });
   micBtn.onclick = function () {
     if (ear && ear.active) { ear.stop(); return; }
     if (!window.SolitaListen) { say('Spracheingabe ist hier nicht geladen.', 'ask-err'); return; }
@@ -1220,11 +1253,11 @@ fromHash();
     if (!ear) ear = window.SolitaListen({
       lang: 'de-DE',
       onState: function (st) { micBtn.classList.toggle('on', st === 'listening'); },
-      onPartial: function (t) { if (heardLate) return; input.value = t; ready(); },
+      onPartial: function (t) { if (heardLate) return; heard(t); },
       onFinal: function (t) {
         micBtn.classList.remove('on');
         if (heardLate) { heardLate = false; return; }   // already sent from the field - nothing lands behind the answer
-        input.value = t; input.focus(); ready();
+        input.focus(); heard(t);
       }
     });
     ear.start();
@@ -1253,6 +1286,16 @@ fromHash();
     if (e.key === 'Enter') { e.preventDefault(); submit(); }
     else if (e.key === 'Escape') { e.preventDefault(); close(); }
   });
+  panel.addEventListener('keydown', function (e) {   // Shift+Space anywhere in the panel: mic on, again: off (Doc, 23.09.2026)
+    if (e.code === 'Space' && e.shiftKey && !micBtn.hidden) { e.preventDefault(); micBtn.click(); }
+    // plain Space while the mic listens sends what was heard - and never lands in the field as a stray space
+    // (Doc, 23.09.2026: "auch space soll im Mic Mode abschicken")
+    else if (e.code === 'Space' && ear && ear.active) { e.preventDefault(); if (input.value.trim()) submit(); }
+  });
+  // a page turn folds the answers away, down to the mic line; the next text opens the box again (Doc, 23.09.2026:
+  // "beim Seitenwechsel bis auf die Mic Zeile einfahren (animiert)") - clicks through the steps of one slide leave it
+  let foldedAt = si;
+  painted.push(function () { if (si !== foldedAt) { foldedAt = si; out.classList.add('shut'); } });
 })();
 
 // Presenter view (Doc, 16.09.2026: "im Präsimode (full screen) auf einen ggf. ersten Monitor ... Vorschau

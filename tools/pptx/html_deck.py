@@ -949,16 +949,32 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
   color:#7E8FB5;display:flex;justify-content:space-between;align-items:center;
   position:relative;z-index:1;margin:-12px -12px 0;padding:11px 12px 9px;background:var(--askbg);
   border-radius:10px 10px 0 0;box-shadow:0 4px 8px -4px rgba(14,36,78,.35)}
-/* the header without its title: a slim edge with the grip, the cost figure left and the × right - the title
-   is the field's placeholder now (Doc, 22.09.2026: "nimm den Header raus und in die Zeile Frag Solita") */
-#ask-head.slim{padding:9px 8px 3px 12px;box-shadow:none;min-height:0}
-#ask-head.slim>span{font-size:9px;letter-spacing:.8px}
+/* no header at all: a zero-height strip whose grip hangs OUTSIDE, above the panel's top edge, thin (Doc,
+   23.09.2026: "den header weg, nur eine dünne handle außen"); the title is the field's placeholder (22.09.),
+   Esc or her picture close the panel, so the × goes too. ::after is the invisible hit area around the grip. */
+#ask-head.slim{padding:0;height:0;min-height:0;box-shadow:none;border-radius:0}
+#ask-head.slim>span,#ask-head.slim>#ask-close{display:none}
+#ask-head.slim::before{top:-8px;width:36px;height:4px;margin-left:-18px;opacity:.6}
+#ask-head.slim::after{content:'';position:absolute;left:50%;top:-16px;width:80px;height:20px;margin-left:-40px}
 #ask-close{border:0;background:none;color:#7E8FB5;font-size:16px;line-height:1;cursor:pointer;padding:0 2px}
 #ask-close:hover{color:var(--red)}
 #ask-out{font-size:14px;line-height:1.45;color:var(--body);max-height:calc(100vh - var(--askrest,200px));overflow:auto;
   margin-bottom:9px;padding-top:9px;white-space:pre-wrap}
-#ask-out:empty{display:none}
-#ask-out:empty + label{margin-top:10px}
+/* a line cut off at the top or bottom fades out instead of being sliced (Doc, 23.09.2026: "wenn eine Zeile
+   angeschnitten ist ... lass ausfaden"); JS sets cut-top/cut-bot from the scroll position, so a first or
+   last line that is fully in view stays crisp */
+#ask-out{--cutT:0px;--cutB:0px;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 var(--cutT),#000 calc(100% - var(--cutB)),transparent 100%);
+  mask-image:linear-gradient(to bottom,transparent 0,#000 var(--cutT),#000 calc(100% - var(--cutB)),transparent 100%)}
+#ask-out.cut-top{--cutT:26px}
+#ask-out.cut-bot{--cutB:26px}
+/* Nothing to show - or folded away by a page turn (.shut) - and the box stands at zero height, only the mic line
+   remains; the next text slides it open again, up to the height Doc pulled it to (23.09.2026: "wenn da noch nix
+   steht eingefahren und dann mit dem Text bis zu dieser Höhe ausfahren", "beim Seitenwechsel bis auf die Mic Zeile
+   einfahren (animiert)"). interpolate-size lets Chrome animate 0 <-> auto; elsewhere the box just jumps. */
+#ask-out{interpolate-size:allow-keywords;transition:height .4s ease,margin-bottom .4s ease,padding-top .4s ease}
+#ask-out:empty,#ask-out.shut{height:0;margin-bottom:0;padding-top:0;overflow:hidden}
+#ask-out:empty + label,#ask-out.shut + label{margin-top:10px}
 #ask-out .ask-q{color:var(--ink);font-weight:600}
 #ask-out .ask-err{color:var(--red)}
 /* DeepSeek's answer to the same question, silent, for comparison (Doc, 17.09.2026: "mach den Text von DS rot (China ;-)") */
@@ -981,16 +997,18 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 #ask-out .ask-wave i:nth-child(7){animation-delay:.6s}
 @keyframes askwave{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(.9)}}
 @media (prefers-reduced-motion:reduce){#ask-out .ask-wave i{animation-duration:2.4s}}
-#ask-out::-webkit-scrollbar{width:8px}
-#ask-out::-webkit-scrollbar-thumb{background:#b8c6df;border-radius:4px}
-#ask-out{scrollbar-width:thin;scrollbar-color:#b8c6df transparent}
+/* the scrollbar barely there: 4 px, half-transparent (Doc, 23.09.2026: "scroll noch dezenter") */
+#ask-out::-webkit-scrollbar{width:4px}
+#ask-out::-webkit-scrollbar-thumb{background:rgba(184,198,223,.55);border-radius:2px}
+#ask-out{scrollbar-width:thin;scrollbar-color:rgba(184,198,223,.55) transparent}
 #ask label{display:block;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:1.3px;
   text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 /* the label only shows for the password; a question needs none (Doc, 16.09.2026: "weg") */
 #ask label[hidden]{display:none}
-#ask-out:empty + label[hidden] + #ask-row{margin-top:10px}
-#ask-row{display:flex;gap:6px}
-#ask-cost{margin-left:9px;font-weight:400;color:var(--muted);cursor:pointer;white-space:nowrap}
+#ask-out:empty + label[hidden] + #ask-row,#ask-out.shut + label[hidden] + #ask-row{margin-top:10px}
+#ask-row{display:flex;gap:6px;transition:margin-top .4s ease}
+/* the cost figure stands behind the answer, in its type, a shade lighter (Doc, 23.09.2026) */
+#ask-cost{margin-left:6px;font:inherit;color:var(--muted);cursor:pointer;white-space:nowrap}
 /* DeepSeek switched on by a right click on the field: the field itself gets a red edge (in the header it broke the line) */
 #ask input.ds,#ask input.ds:focus{border-color:var(--red)}
 /* right click in the panel: who answers - Solita, DeepSeek or both. "#ask #ask-menu": the panel's own label and
@@ -1021,7 +1039,9 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
 #ask-head::before{content:'';position:absolute;left:50%;top:4px;width:30px;height:3px;margin-left:-15px;
   border-radius:2px;background:#7E8FB5;opacity:.45}
 #ask-panel.sized #ask-out{height:min(var(--askh),calc(100vh - var(--askrest,200px)));max-height:none}
-#ask-panel.sized #ask-out:empty{display:block}   /* a panel pulled taller keeps its size before the first answer too */
+#ask-panel.sized #ask-out:empty,#ask-panel.sized #ask-out.shut{height:0}   /* pulled taller or not: empty stays folded (23.09.2026) */
+/* while the grip is dragged the box shows at the dragged height, empty or not, and follows the hand without easing */
+#ask-panel.drag #ask-out{transition:none;height:min(var(--askh),calc(100vh - var(--askrest,200px)))}
 #ask-mic,#ask-tts{flex:none;width:34px;display:grid;place-items:center;cursor:pointer;color:var(--ink);
   background:var(--askfield);border:1px solid var(--askline);border-radius:7px}
 #ask-mic svg,#ask-tts svg{width:16px;height:16px}
@@ -1666,7 +1686,8 @@ ASK_JS = r"""
   // What THIS question cost - not a running total (Doc, 16.09.2026: the sum belongs in the 08:00
   // mail, where it covers every device). Claude is real money from the first token; the voice is
   // characters against Google's monthly free quota, so it shows as characters, with the list price
-  // it WOULD cost only in the tooltip.
+  // it WOULD cost only in the tooltip. The figure stands behind the answer it belongs to, in the
+  // answer's own type, a shade lighter (Doc, 23.09.2026: "hinter den Text ... so wie Text, bissl heller").
   let last = null;
   function money(eur) {
     if (eur >= 1) return eur.toFixed(2).replace('.', ',') + ' \u20ac';
@@ -1698,9 +1719,9 @@ ASK_JS = r"""
       chars: 0,
       msAi: ms, msVoice: 0,
     };
-    showCost();
   }
-  function addVoice(chars, ms) { if (last) { last.chars = chars; last.msVoice = ms; showCost(); } }
+  function addVoice(chars, ms) { if (last) { last.chars = chars; last.msVoice = ms; } }
+  function placeCost(el) { el.appendChild(costEl); showCost(); }   // after render(): render() empties the element first
   // Reading aloud on/off. Same localStorage key as solita.html, so switching her quiet holds here
   // too - and with it off, no TTS request goes out at all (the voice is 97 % of what a question costs).
   const TTS_KEY = 'solita_tts';
@@ -1832,7 +1853,7 @@ ASK_JS = r"""
   // das Fenster nach oben größer ziehen ... persist"). The panel hangs from its bottom edge, so it grows upwards.
   const H_KEY = 'solita_ask_h', H_MIN = 90, TOP_GAP = 48;   // 48: clear of the edit pencil and the LOCAL badge
   const head = document.getElementById('ask-head');
-  (function slimHead() {                           // the title text goes, the cost figure and the × remain
+  (function slimHead() {                           // no header: title and × are hidden by .slim, only the grip above the panel remains
     const span = head.querySelector('span');
     if (span && span.firstChild && span.firstChild.nodeType === 3) span.firstChild.remove();
     head.classList.add('slim');
@@ -1854,12 +1875,14 @@ ASK_JS = r"""
     e.preventDefault();
     const y0 = e.clientY, h0 = out.offsetHeight, max = innerHeight - rest();
     head.setPointerCapture(e.pointerId);
+    panel.classList.add('drag'); setHeight(h0);      // follows the hand without easing; a folded box starts from zero
     function move(ev) { setHeight(Math.max(H_MIN, Math.min(max, h0 + y0 - ev.clientY))); }
     function up() {
       head.removeEventListener('pointermove', move);
       head.removeEventListener('pointerup', up);
       head.removeEventListener('pointercancel', up);
       try { localStorage.setItem(H_KEY, String(out.offsetHeight)); } catch (err) { }
+      panel.classList.remove('drag');                // empty or folded: it eases shut again now
     }
     head.addEventListener('pointermove', move);
     head.addEventListener('pointerup', up);
@@ -1911,12 +1934,21 @@ ASK_JS = r"""
     input.setAttribute('autocomplete', 'off');
     send.textContent = '?';
     micBtn.hidden = !(window.SpeechRecognition || window.webkitSpeechRecognition);
-    ttsBtn.hidden = false;
+    // the speaker stays hidden: it lives in the right-click menu (Doc, 23.09.2026: "den hier weg")
   }
+  // a line cut off at the edge of the box fades out (Doc, 23.09.2026) - only on the edge that really hides text
+  function cutEdges() {
+    out.classList.toggle('cut-top', out.scrollTop > 1);
+    out.classList.toggle('cut-bot', out.scrollTop + out.clientHeight < out.scrollHeight - 1);
+  }
+  out.addEventListener('scroll', cutEdges);
+  if (window.ResizeObserver) new ResizeObserver(cutEdges).observe(out);        // pulled taller or shorter
+  new MutationObserver(cutEdges).observe(out, { childList: true, subtree: true, characterData: true });   // text came or went
   function say(html, cls) {
     const p = document.createElement('div');
     if (cls) p.className = cls;
     p.innerHTML = html;
+    out.classList.remove('shut');                    // text arrives: the box slides open again
     out.appendChild(p); out.scrollTop = out.scrollHeight;
     return p;
   }
@@ -2032,9 +2064,10 @@ ASK_JS = r"""
       on = sp;
       if (!sp) return;
       sp.classList.add('on');
-      const r = sp.getBoundingClientRect(), o = out.getBoundingClientRect();   // keep her word in view
-      if (r.bottom > o.bottom - 4) out.scrollTop += r.bottom - o.bottom + 24;
-      else if (r.top < o.top + 4) out.scrollTop -= o.top - r.top + 24;
+      // her word stays in the middle of the box, as far as the scroll range allows (Doc, 23.09.2026)
+      const r = sp.getBoundingClientRect(), o = out.getBoundingClientRect();
+      const want = out.scrollTop + (r.top + r.bottom) / 2 - (o.top + o.bottom) / 2;
+      if (Math.abs(want - out.scrollTop) > 2) out.scrollTo({ top: want, behavior: 'smooth' });
     }
     function frame() {
       if (audio !== a || a.paused) { mark(null); return; }   // stopped, closed or finished
@@ -2110,7 +2143,8 @@ ASK_JS = r"""
     if (ear && ear.active) { heardLate = true; ear.stop(); }   // its late result is dropped, see onFinal
     input.value = '';
     ready();
-    say('<span class="ask-q">' + v.replace(/[<&]/g, function (c) { return c === '<' ? '&lt;' : '&amp;'; }) + '</span>');
+    const q = live && live.isConnected ? live : say('');   // dictated: the line already standing there becomes the question
+    q.innerHTML = qHtml(v); live = null;
     // the wave runs while Claude thinks AND while her voice is fetched - it gives way to the answer
     const wait = say('<span class="ask-wave" role="status" aria-label="Solita denkt nach">'
       + '<i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>');
@@ -2180,7 +2214,7 @@ ASK_JS = r"""
       .then(function (res) {
         if (!res.text) { fail(res.error); herTurn = true; dsShow(); return; }
         addClaude(res.j.usage, Date.now() - t0);
-        answer(res.text, function () { render(wait, res.text); herTurn = true; dsShow(); });
+        answer(res.text, function () { render(wait, res.text); placeCost(wait); herTurn = true; dsShow(); });
       })
       .catch(function () { fail('Kein Netz.'); herTurn = true; dsShow(); });
   }
@@ -2192,9 +2226,28 @@ ASK_JS = r"""
     + 'stroke-linecap="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/>'
     + '<path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>';
   if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) micBtn.hidden = true;
+  micBtn.title = 'Frage sprechen (Shift+Leertaste)'; micBtn.setAttribute('aria-label', 'Frage sprechen, Shift+Leertaste');
   micBtn.addEventListener('mousedown', function (e) { e.preventDefault(); });   // the field keeps the caret
   micBtn.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
   let heardLate = false;                             // stop() still delivers the text - not after it was sent
+  // While a question is spoken, it already stands in the answer box, and the field scrolls along so its end
+  // stays in view (Doc, 23.09.2026: "lass den Text auch schon oben erscheinen und in der Eingabebox mit scrollen").
+  // The line mirrors the field until the question is sent - typed corrections follow, an emptied field takes it away.
+  let live = null;
+  function qHtml(v) { return '<span class="ask-q">' + v.replace(/[<&]/g, function (c) { return c === '<' ? '&lt;' : '&amp;'; }) + '</span>'; }
+  function mirror() {
+    if (live && !live.isConnected) live = null;      // "Leeren" took it away
+    const v = input.value.trim();
+    if (!v) { if (live) { live.remove(); live = null; } return; }
+    if (!live) live = say('');
+    live.innerHTML = qHtml(v); out.scrollTop = out.scrollHeight;
+  }
+  function heard(t) {                                // recognised text into the field, its end in view
+    input.value = t; input.scrollLeft = input.scrollWidth;
+    try { input.setSelectionRange(t.length, t.length); } catch (e) { }
+    ready(); mirror();
+  }
+  input.addEventListener('input', function () { if (live) mirror(); });
   micBtn.onclick = function () {
     if (ear && ear.active) { ear.stop(); return; }
     if (!window.SolitaListen) { say('Spracheingabe ist hier nicht geladen.', 'ask-err'); return; }
@@ -2202,11 +2255,11 @@ ASK_JS = r"""
     if (!ear) ear = window.SolitaListen({
       lang: 'de-DE',
       onState: function (st) { micBtn.classList.toggle('on', st === 'listening'); },
-      onPartial: function (t) { if (heardLate) return; input.value = t; ready(); },
+      onPartial: function (t) { if (heardLate) return; heard(t); },
       onFinal: function (t) {
         micBtn.classList.remove('on');
         if (heardLate) { heardLate = false; return; }   // already sent from the field - nothing lands behind the answer
-        input.value = t; input.focus(); ready();
+        input.focus(); heard(t);
       }
     });
     ear.start();
@@ -2235,6 +2288,16 @@ ASK_JS = r"""
     if (e.key === 'Enter') { e.preventDefault(); submit(); }
     else if (e.key === 'Escape') { e.preventDefault(); close(); }
   });
+  panel.addEventListener('keydown', function (e) {   // Shift+Space anywhere in the panel: mic on, again: off (Doc, 23.09.2026)
+    if (e.code === 'Space' && e.shiftKey && !micBtn.hidden) { e.preventDefault(); micBtn.click(); }
+    // plain Space while the mic listens sends what was heard - and never lands in the field as a stray space
+    // (Doc, 23.09.2026: "auch space soll im Mic Mode abschicken")
+    else if (e.code === 'Space' && ear && ear.active) { e.preventDefault(); if (input.value.trim()) submit(); }
+  });
+  // a page turn folds the answers away, down to the mic line; the next text opens the box again (Doc, 23.09.2026:
+  // "beim Seitenwechsel bis auf die Mic Zeile einfahren (animiert)") - clicks through the steps of one slide leave it
+  let foldedAt = si;
+  painted.push(function () { if (si !== foldedAt) { foldedAt = si; out.classList.add('shut'); } });
 })();
 """
 
