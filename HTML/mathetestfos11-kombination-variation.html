@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Kombination und Variation — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w29-kombination-variation',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Kombination und Variation',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 29 (LB 2) · 20 Aufgaben: Reihenfolge oder nicht, Binomialkoeffizient, Auswahlprobleme · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 29 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Unterscheidung Kombination und Variation (1-5), Binomialkoeffizient (6-11), Kombinationen anwenden (12-16), Variationen und Anwendungen (17-20). */
+  questions: [
+    {
+      q: 'Worin unterscheiden sich Kombination und Variation?',
+      opts: ['Bei der Variation kommt es auf die Reihenfolge an, bei der Kombination nicht.', 'Bei der Kombination kommt es auf die Reihenfolge an, bei der Variation nicht.', 'Sie bedeuten dasselbe.', 'Die Variation erlaubt Wiederholungen, die Kombination nie.'],
+      steps: [
+        'Beide beschreiben die Auswahl von $k$ aus $n$ Elementen.',
+        'Entscheidend ist die Frage: ändert eine andere Reihenfolge das Ergebnis?',
+        'Wenn ja, ist es eine Variation; wenn nein, eine Kombination.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Beim Lotto werden $6$ aus $49$ Kugeln gezogen. Welcher Fall liegt vor?',
+      opts: ['Kombination ohne Wiederholung', 'Permutation', 'Variation mit Wiederholung', 'Variation ohne Wiederholung'],
+      steps: [
+        'Eine gezogene Kugel kommt nicht zurück, also ohne Wiederholung.',
+        'Die Reihenfolge der Ziehung ist für den Gewinn ohne Bedeutung.',
+        'Also eine Kombination ohne Wiederholung.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Zahlenschloss verlangt drei Ziffern in der richtigen Reihenfolge, Ziffern dürfen sich wiederholen. Welcher Fall liegt vor?',
+      opts: ['Kombination ohne Wiederholung', 'Kombination mit Wiederholung', 'Permutation', 'Variation mit Wiederholung'],
+      steps: [
+        '$1$-$2$-$3$ öffnet das Schloss, $3$-$2$-$1$ nicht — die Reihenfolge zählt.',
+        'Ziffern dürfen mehrfach vorkommen.',
+        'Also Variation mit Wiederholung; die Zahl der Möglichkeiten ist $10^3 = 1000$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bei einem Wettkampf werden aus $8$ Teilnehmenden die drei Podestplätze vergeben. Welcher Fall liegt vor?',
+      opts: ['Kombination ohne Wiederholung', 'Variation mit Wiederholung', 'Permutation aller Teilnehmenden', 'Variation ohne Wiederholung'],
+      steps: [
+        'Gold, Silber und Bronze sind unterscheidbar, die Reihenfolge zählt also.',
+        'Niemand kann zwei Plätze belegen, daher ohne Wiederholung.',
+        'Variation ohne Wiederholung: $8 \\cdot 7 \\cdot 6 = 336$ Möglichkeiten.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Aus $10$ Personen wird eine dreiköpfige Arbeitsgruppe gebildet. Welcher Fall liegt vor?',
+      opts: ['Variation mit Wiederholung', 'Kombination ohne Wiederholung', 'Variation ohne Wiederholung', 'Permutation'],
+      steps: [
+        'In der Gruppe gibt es keine unterscheidbaren Rollen.',
+        'Ob jemand zuerst oder zuletzt ausgewählt wurde, ändert die Gruppe nicht.',
+        'Also eine Kombination ohne Wiederholung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie ist der Binomialkoeffizient $\\binom{n}{k}$ definiert?',
+      opts: ['$\\binom{n}{k} = n! \\cdot k!$', '$\\binom{n}{k} = \\dfrac{k!}{n!}$', '$\\binom{n}{k} = \\dfrac{n!}{k!}$', '$\\binom{n}{k} = \\dfrac{n!}{k!\\,(n-k)!}$'],
+      steps: [
+        'Er gibt die Zahl der Kombinationen von $k$ aus $n$ Elementen ohne Wiederholung an.',
+        '$\\binom{n}{k} = \\dfrac{n!}{k!\\,(n-k)!}$',
+        'Gelesen wird er „$n$ über $k$“.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\binom{5}{2}$.',
+      opts: ['$25$', '$20$', '$10$', '$120$'],
+      steps: [
+        '$\\binom{5}{2} = \\dfrac{5!}{2!\\,3!} = \\dfrac{5 \\cdot 4}{2 \\cdot 1}$',
+        '$= 10$',
+        '$20$ wäre $5 \\cdot 4$, also die Variante mit Reihenfolge.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $\\binom{6}{3}$.',
+      opts: ['$18$', '$20$', '$120$', '$216$'],
+      steps: [
+        '$\\binom{6}{3} = \\dfrac{6 \\cdot 5 \\cdot 4}{3 \\cdot 2 \\cdot 1}$',
+        '$= \\dfrac{120}{6} = 20$',
+        'Praktisch: im Zähler $k$ absteigende Faktoren, im Nenner $k!$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Wert hat $\\binom{n}{0}$?',
+      opts: ['$n$', 'nicht definiert', '$1$', '$0$'],
+      steps: [
+        '$\\binom{n}{0} = \\dfrac{n!}{0!\\,n!} = \\dfrac{1}{0!}$, und $0! = 1$.',
+        'Also $\\binom{n}{0} = 1$.',
+        'Anschaulich: es gibt genau eine Möglichkeit, nichts auszuwählen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Wert hat $\\binom{n}{1}$?',
+      opts: ['$1$', '$n - 1$', '$n$', '$n!$'],
+      steps: [
+        '$\\binom{n}{1} = \\dfrac{n!}{1!\\,(n-1)!} = n$',
+        'Anschaulich: ein einzelnes Element lässt sich auf genau $n$ Arten auswählen.',
+        'Ebenso gilt $\\binom{n}{n} = 1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Warum gilt $\\binom{n}{k} = \\binom{n}{n-k}$?',
+      opts: ['Weil das Auswählen von $k$ Elementen dasselbe ist wie das Weglassen der übrigen $n-k$.', 'Weil die Fakultät symmetrisch ist.', 'Das gilt gar nicht.', 'Weil $k$ und $n-k$ immer gleich groß sind.'],
+      steps: [
+        'Jede Auswahl von $k$ Elementen legt zugleich fest, welche $n-k$ übrig bleiben.',
+        'Die beiden Zählungen entsprechen einander eins zu eins.',
+        'Probe: $\\binom{6}{2} = 15$ und $\\binom{6}{4} = 15$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Aus $10$ Personen wird eine dreiköpfige Gruppe gebildet. Wie viele Gruppen sind möglich?',
+      opts: ['$30$', '$120$', '$720$', '$1000$'],
+      steps: [
+        '$\\binom{10}{3} = \\dfrac{10 \\cdot 9 \\cdot 8}{3 \\cdot 2 \\cdot 1}$',
+        '$= \\dfrac{720}{6} = 120$',
+        '$720$ wäre die Zahl mit Reihenfolge, also bei unterscheidbaren Rollen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Sechs Personen begrüßen sich, jede mit jeder genau einmal. Wie viele Handschläge sind das?',
+      opts: ['$30$', '$36$', '$12$', '$15$'],
+      steps: [
+        'Ein Handschlag ist die Auswahl von zwei Personen ohne Reihenfolge.',
+        '$\\binom{6}{2} = \\dfrac{6 \\cdot 5}{2} = 15$',
+        '$30$ wäre die Zählung mit Reihenfolge, bei der jeder Handschlag doppelt vorkäme.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele Diagonalen hat ein Achteck?',
+      opts: ['$16$', '$20$', '$24$', '$28$'],
+      steps: [
+        'Jede Verbindung zweier Ecken ist eine Kombination: $\\binom{8}{2} = 28$.',
+        'Davon sind $8$ Verbindungen Seiten, keine Diagonalen.',
+        '$28 - 8 = 20$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Aus $5$ Eissorten werden $2$ verschiedene gewählt. Wie viele Möglichkeiten gibt es?',
+      opts: ['$10$', '$25$', '$20$', '$5$'],
+      steps: [
+        'Die Reihenfolge der Kugeln spielt keine Rolle.',
+        '$\\binom{5}{2} = 10$',
+        'Dürften beide Kugeln dieselbe Sorte sein, wären es $15$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele Möglichkeiten gibt es beim Lotto „$6$ aus $49$“?',
+      opts: ['$10\\,068\\,347\\,520$', '$49^6$', '$294$', '$13\\,983\\,816$'],
+      steps: [
+        '$\\binom{49}{6} = \\dfrac{49 \\cdot 48 \\cdot 47 \\cdot 46 \\cdot 45 \\cdot 44}{6!}$',
+        '$= 13\\,983\\,816$',
+        'Die Gewinnwahrscheinlichkeit für sechs Richtige ist also rund $1$ zu $14$ Millionen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Aus $8$ Personen werden $3$ auf unterscheidbare Plätze gesetzt. Wie viele Möglichkeiten gibt es?',
+      opts: ['$24$', '$336$', '$56$', '$512$'],
+      steps: [
+        'Variation ohne Wiederholung: $8 \\cdot 7 \\cdot 6$.',
+        '$= 336$',
+        '$56$ wäre $\\binom{8}{3}$, also ohne Beachtung der Reihenfolge.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Code besteht aus $3$ Zeichen aus einem Vorrat von $8$, Wiederholungen erlaubt. Wie viele Codes gibt es?',
+      opts: ['$336$', '$56$', '$512$', '$24$'],
+      steps: [
+        'Variation mit Wiederholung: für jede Stelle stehen alle $8$ Zeichen zur Verfügung.',
+        '$8^3 = 512$',
+        'Ohne Wiederholung wären es nur $336$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Passwort besteht aus $4$ Kleinbuchstaben (aus $26$), Wiederholungen erlaubt. Wie viele gibt es?',
+      opts: ['$456\\,976$', '$104$', '$14\\,950$', '$358\\,800$'],
+      steps: [
+        '$26^4$',
+        '$= 456\\,976$',
+        'Ohne Wiederholung wären es $26 \\cdot 25 \\cdot 24 \\cdot 23 = 358\\,800$ — also spürbar weniger.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Prüfung besteht aus $10$ Aufgaben, von denen $7$ bearbeitet werden müssen. Wie viele Auswahlmöglichkeiten gibt es?',
+      opts: ['$210$', '$604\\,800$', '$120$', '$70$'],
+      steps: [
+        'Die Reihenfolge der Bearbeitung ist gleichgültig, es zählt nur, welche Aufgaben gewählt werden.',
+        '$\\binom{10}{7} = \\binom{10}{3} = 120$',
+        'Der Symmetrie wegen ist das dieselbe Zahl wie beim Weglassen von drei Aufgaben.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

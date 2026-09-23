@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Das Urnenmodell — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w30-urnenmodell',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Das Urnenmodell',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 30 (LB 2) · 20 Aufgaben: die vier Grundfälle, Anzahlen bestimmen, Wahrscheinlichkeiten beim Ziehen · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 30 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: die vier Grundfaelle (1-6), Anzahlen bestimmen (7-12), Wahrscheinlichkeiten (13-17), reale Aufgaben uebertragen (18-20). Urne in Block 3: 4 rote und 6 blaue Kugeln. */
+  questions: [
+    {
+      q: 'Wodurch unterscheiden sich die vier Grundfälle des Urnenmodells?',
+      opts: ['durch die Anzahl der Kugeln und ihre Farbe', 'durch Ziehen mit oder ohne Zurücklegen und mit oder ohne Beachtung der Reihenfolge', 'durch die Wahrscheinlichkeit der einzelnen Kugeln', 'durch die Größe der Urne und die Zahl der Züge'],
+      steps: [
+        'Zwei Fragen sind zu klären: kommt die Kugel zurück, und zählt die Reihenfolge?',
+        'Jede Frage hat zwei Antworten, das ergibt vier Fälle.',
+        'Die Antwort auf beide Fragen entscheidet über die Formel.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viele Möglichkeiten gibt es beim Ziehen von $k$ aus $n$ Kugeln MIT Zurücklegen und MIT Beachtung der Reihenfolge?',
+      opts: ['$\\binom{n}{k}$', '$k^n$', '$n^k$', '$\\dfrac{n!}{(n-k)!}$'],
+      steps: [
+        'Vor jedem Zug ist die Urne wieder vollständig.',
+        'Für jeden der $k$ Züge gibt es also $n$ Möglichkeiten.',
+        '$n \\cdot n \\cdot \\ldots \\cdot n = n^k$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele Möglichkeiten gibt es beim Ziehen von $k$ aus $n$ Kugeln OHNE Zurücklegen und MIT Beachtung der Reihenfolge?',
+      opts: ['$n!$', '$n^k$', '$\\binom{n}{k}$', '$\\dfrac{n!}{(n-k)!}$'],
+      steps: [
+        'Im ersten Zug $n$ Möglichkeiten, dann $n-1$, dann $n-2$ und so weiter.',
+        'Das Produkt der ersten $k$ absteigenden Faktoren ist $\\dfrac{n!}{(n-k)!}$.',
+        'Dieser Fall heißt Variation ohne Wiederholung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie viele Möglichkeiten gibt es beim Ziehen von $k$ aus $n$ Kugeln OHNE Zurücklegen und OHNE Beachtung der Reihenfolge?',
+      opts: ['$n^k$', '$k!$', '$\\dfrac{n!}{(n-k)!}$', '$\\binom{n}{k}$'],
+      steps: [
+        'Man nimmt die Zahl mit Reihenfolge und teilt durch $k!$.',
+        '$\\dfrac{n!}{(n-k)!\\,k!} = \\binom{n}{k}$',
+        'Dieser Fall heißt Kombination ohne Wiederholung und ist der häufigste in Aufgaben.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchem Grundfall entspricht die Ziehung der Lottozahlen?',
+      opts: ['mit Zurücklegen, mit Beachtung der Reihenfolge', 'ohne Zurücklegen, ohne Beachtung der Reihenfolge', 'mit Zurücklegen, ohne Beachtung der Reihenfolge', 'ohne Zurücklegen, mit Beachtung der Reihenfolge'],
+      steps: [
+        'Eine gezogene Kugel bleibt draußen.',
+        'Für den Gewinn ist gleichgültig, in welcher Reihenfolge die Zahlen kamen.',
+        'Also $\\binom{49}{6}$ Möglichkeiten.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchem Grundfall entspricht die Eingabe einer vierstelligen Geheimzahl?',
+      opts: ['ohne Zurücklegen, ohne Beachtung der Reihenfolge', 'mit Zurücklegen, mit Beachtung der Reihenfolge', 'ohne Zurücklegen, mit Beachtung der Reihenfolge', 'mit Zurücklegen, ohne Beachtung der Reihenfolge'],
+      steps: [
+        'Ziffern dürfen sich wiederholen, also mit Zurücklegen.',
+        '$1234$ und $4321$ sind verschiedene Geheimzahlen, die Reihenfolge zählt.',
+        '$10^4 = 10\\,000$ Möglichkeiten.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Aus einer Urne mit $10$ Kugeln werden $3$ ohne Zurücklegen und ohne Beachtung der Reihenfolge gezogen. Wie viele Möglichkeiten gibt es?',
+      opts: ['$30$', '$1000$', '$720$', '$120$'],
+      steps: [
+        '$\\binom{10}{3} = \\dfrac{10 \\cdot 9 \\cdot 8}{3 \\cdot 2 \\cdot 1}$',
+        '$= 120$',
+        'Das ist der kleinste der drei Werte — ohne Reihenfolge fallen die meisten Fälle zusammen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Dieselbe Urne, $3$ Kugeln ohne Zurücklegen, aber MIT Beachtung der Reihenfolge. Wie viele Möglichkeiten gibt es?',
+      opts: ['$120$', '$1000$', '$720$', '$30$'],
+      steps: [
+        '$10 \\cdot 9 \\cdot 8$',
+        '$= 720$',
+        'Jede der $120$ Auswahlen lässt sich auf $3! = 6$ Arten anordnen: $120 \\cdot 6 = 720$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Dieselbe Urne, $3$ Kugeln MIT Zurücklegen und mit Beachtung der Reihenfolge. Wie viele Möglichkeiten gibt es?',
+      opts: ['$1000$', '$720$', '$30$', '$120$'],
+      steps: [
+        'Für jeden Zug stehen wieder alle $10$ Kugeln bereit.',
+        '$10^3 = 1000$',
+        'Das ist der größte der drei Werte.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Aus $5$ Kugeln werden $2$ ohne Zurücklegen mit Beachtung der Reihenfolge gezogen. Wie viele Möglichkeiten gibt es?',
+      opts: ['$20$', '$10$', '$25$', '$120$'],
+      steps: [
+        '$5 \\cdot 4 = 20$',
+        'Ohne Reihenfolge wären es $\\binom{5}{2} = 10$.',
+        'Mit Zurücklegen und Reihenfolge wären es $5^2 = 25$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Warum gibt es ohne Beachtung der Reihenfolge immer weniger Möglichkeiten?',
+      opts: ['Weil mehrere Reihenfolgen derselben Auswahl zu einem einzigen Fall zusammenfallen.', 'Weil nur die erste Kugel zählt.', 'Weil die Urne kleiner wird.', 'Weil weniger Kugeln gezogen werden.'],
+      steps: [
+        'Die Auswahlen $\\{1;\\,2;\\,3\\}$ und $\\{3;\\,1;\\,2\\}$ sind dieselbe Menge.',
+        'Mit Reihenfolge werden sie getrennt gezählt, ohne Reihenfolge nur einmal.',
+        'Deshalb wird durch $k!$ geteilt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Um welchen Faktor unterscheiden sich die Anzahlen mit und ohne Beachtung der Reihenfolge beim Ziehen von $4$ Kugeln?',
+      opts: ['um den Faktor $12$', 'um den Faktor $16$', 'um den Faktor $24$', 'um den Faktor $4$'],
+      steps: [
+        'Jede Auswahl von $4$ Elementen lässt sich auf $4!$ Arten anordnen.',
+        '$4! = 24$',
+        'Also ist die Zahl mit Reihenfolge $24$-mal so groß.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Urne enthält $4$ rote und $6$ blaue Kugeln. Zwei werden ohne Zurücklegen gezogen. Wie groß ist die Wahrscheinlichkeit für zwei rote?',
+      opts: ['$\\dfrac{4}{25}$', '$\\dfrac{1}{3}$', '$\\dfrac{2}{15}$', '$\\dfrac{8}{15}$'],
+      steps: [
+        'Günstig: $\\binom{4}{2} = 6$. Möglich: $\\binom{10}{2} = 45$.',
+        '$P = \\dfrac{6}{45} = \\dfrac{2}{15}$',
+        'Über das Baumdiagramm: $\\dfrac{4}{10} \\cdot \\dfrac{3}{9} = \\dfrac{12}{90} = \\dfrac{2}{15}$ — dasselbe Ergebnis.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Dieselbe Urne: wie groß ist die Wahrscheinlichkeit für zwei blaue Kugeln?',
+      opts: ['$\\dfrac{8}{15}$', '$\\dfrac{1}{3}$', '$\\dfrac{2}{15}$', '$\\dfrac{9}{25}$'],
+      steps: [
+        'Günstig: $\\binom{6}{2} = 15$. Möglich: $45$.',
+        '$P = \\dfrac{15}{45} = \\dfrac{1}{3}$',
+        'Probe über den Baum: $\\dfrac{6}{10} \\cdot \\dfrac{5}{9} = \\dfrac{30}{90} = \\dfrac{1}{3}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Dieselbe Urne: wie groß ist die Wahrscheinlichkeit für genau eine rote Kugel?',
+      opts: ['$\\dfrac{2}{15}$', '$\\dfrac{8}{15}$', '$\\dfrac{1}{3}$', '$\\dfrac{4}{15}$'],
+      steps: [
+        'Günstig: eine rote aus $4$ und eine blaue aus $6$, also $\\binom{4}{1} \\cdot \\binom{6}{1} = 24$.',
+        '$P = \\dfrac{24}{45} = \\dfrac{8}{15}$',
+        'Kontrolle: $\\dfrac{2}{15} + \\dfrac{1}{3} + \\dfrac{8}{15} = \\dfrac{2 + 5 + 8}{15} = 1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Dieselbe Urne, aber zwei Züge MIT Zurücklegen. Wie groß ist die Wahrscheinlichkeit für zwei rote?',
+      opts: ['$\\dfrac{4}{25}$', '$\\dfrac{12}{90}$ und damit $\\dfrac{2}{15}$', '$\\dfrac{1}{3}$', '$\\dfrac{2}{15}$'],
+      steps: [
+        'Mit Zurücklegen bleibt $P(\\text{rot}) = \\dfrac{4}{10} = \\dfrac{2}{5}$.',
+        '$P = \\dfrac{2}{5} \\cdot \\dfrac{2}{5} = \\dfrac{4}{25}$',
+        'Etwas mehr als ohne Zurücklegen — dort fehlt beim zweiten Zug eine rote Kugel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie hängen die beiden Rechenwege — Baumdiagramm und Binomialkoeffizienten — zusammen?',
+      opts: ['Der Baum ist immer ungenauer.', 'Sie liefern grundsätzlich verschiedene Werte.', 'Die Koeffizienten gelten nur mit Zurücklegen.', 'Sie führen zum selben Ergebnis; der Baum rechnet mit Reihenfolge, die Koeffizienten ohne.'],
+      steps: [
+        'Im Baum zählt man Pfade, also Reihenfolgen, und addiert sie.',
+        'Mit Binomialkoeffizienten zählt man Auswahlen ohne Reihenfolge.',
+        'Weil in Zähler und Nenner dieselbe Reihenfolge-Zählung steckt, kürzt sie sich heraus.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Lieferung von $20$ Teilen enthält $3$ fehlerhafte. Zwei Teile werden zufällig geprüft. Wie groß ist die Wahrscheinlichkeit, dass beide in Ordnung sind?',
+      opts: ['$\\dfrac{68}{95}$', '$\\dfrac{289}{400}$', '$\\dfrac{3}{190}$', '$\\dfrac{17}{20}$'],
+      steps: [
+        'Günstig: $\\binom{17}{2} = 136$. Möglich: $\\binom{20}{2} = 190$.',
+        '$P = \\dfrac{136}{190} = \\dfrac{68}{95}$',
+        'Das sind rund $71{,}6\\,\\%$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Aus einem Skatblatt mit $32$ Karten, darunter $4$ Asse, werden zwei Karten gezogen. Wie groß ist die Wahrscheinlichkeit für zwei Asse?',
+      opts: ['$\\dfrac{1}{8}$', '$\\dfrac{6}{32}$', '$\\dfrac{1}{64}$', '$\\dfrac{3}{248}$'],
+      steps: [
+        'Günstig: $\\binom{4}{2} = 6$. Möglich: $\\binom{32}{2} = 496$.',
+        '$P = \\dfrac{6}{496} = \\dfrac{3}{248}$',
+        'Das sind rund $1{,}2\\,\\%$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Größen muss man einer Textaufgabe entnehmen, um sie als Urnenmodell zu behandeln?',
+      opts: ['nur die Zahl der günstigen Fälle', 'nur die Gesamtzahl der Elemente', 'die Gesamtzahl, die Zahl der Züge und ob mit Zurücklegen und mit Reihenfolge gezogen wird', 'die Wahrscheinlichkeit jedes einzelnen Elements'],
+      steps: [
+        'Die Gesamtzahl $n$ und die Zahl der Züge $k$ legen die Größenordnung fest.',
+        'Die beiden Ja-oder-Nein-Fragen entscheiden über die Formel.',
+        'Erst danach wird gerechnet — das Übersetzen ist der eigentliche Schritt.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

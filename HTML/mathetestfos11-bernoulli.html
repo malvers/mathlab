@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Bernoulli-Ketten — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w31-bernoulli',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Bernoulli-Ketten',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 31 (LB 2) · 20 Aufgaben: Bernoulli-Experiment, Formel von Bernoulli, genau k Treffer, mindestens ein Treffer · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 31 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Bernoulli-Experiment (1-5), Formel von Bernoulli (6-11), Rechnen (12-17), Anwendungen (18-20). */
+  questions: [
+    {
+      q: 'Was kennzeichnet ein Bernoulli-Experiment?',
+      opts: ['Es wird genau einmal durchgeführt.', 'Es hat genau zwei mögliche Ausgänge, meist Treffer und Niete genannt.', 'Alle Ausgänge sind gleich wahrscheinlich.', 'Es hat genau sechs mögliche Ausgänge.'],
+      steps: [
+        'Die beiden Ausgänge heißen Treffer und Niete oder Erfolg und Misserfolg.',
+        'Ihre Wahrscheinlichkeiten sind $p$ und $1 - p$.',
+        'Gleich wahrscheinlich müssen sie nicht sein, nur genau zwei an der Zahl.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welcher Versuch ist unmittelbar ein Bernoulli-Experiment?',
+      opts: ['das Ziehen einer Karte aus einem Skatblatt mit Blick auf die Farbe', 'das Messen einer Körpergröße', 'das Werfen eines Würfels mit Blick auf die Augenzahl', 'das Werfen einer Münze'],
+      steps: [
+        'Die Münze hat genau zwei Ausgänge: Kopf und Zahl.',
+        'Beim Würfel sind es sechs, bei der Kartenfarbe vier.',
+        'Solche Versuche lassen sich aber leicht umdeuten, etwa in „Sechs“ und „keine Sechs“.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie macht man aus dem Würfeln ein Bernoulli-Experiment?',
+      opts: ['indem man nur gerade Augenzahlen zulässt', 'indem man den Würfel zweimal wirft', 'indem man nur zwischen „Sechs“ und „keine Sechs“ unterscheidet', 'gar nicht, das geht nicht'],
+      steps: [
+        'Man fasst die interessierenden Ergebnisse zum Treffer zusammen.',
+        'Alles übrige wird zur Niete.',
+        'Hier: $p = \\dfrac{1}{6}$ und $1 - p = \\dfrac{5}{6}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was ist eine Bernoulli-Kette der Länge $n$?',
+      opts: ['eine Folge von $n$ verschiedenen Zufallsversuchen', 'die Aneinanderreihung von $n$ Baumdiagrammen', 'ein Versuch mit $n$ möglichen Ausgängen', 'die $n$-fache unabhängige Wiederholung eines Bernoulli-Experiments mit gleichbleibendem $p$'],
+      steps: [
+        'Derselbe Versuch wird $n$-mal durchgeführt.',
+        'Die Durchführungen beeinflussen sich nicht, und $p$ bleibt gleich.',
+        'Beides zusammen macht die Bernoulli-Kette aus.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Bedingung ist beim Ziehen aus einer Urne für eine Bernoulli-Kette nötig?',
+      opts: ['Es muss mit Zurücklegen gezogen werden, damit $p$ gleich bleibt.', 'Es darf höchstens zweimal gezogen werden.', 'Die Urne muss gleich viele Kugeln jeder Farbe enthalten.', 'Es muss ohne Zurücklegen gezogen werden.'],
+      steps: [
+        'Ohne Zurücklegen ändert sich der Urneninhalt und damit $p$.',
+        'Die Züge wären dann weder unabhängig noch gleichwahrscheinlich.',
+        'Mit Zurücklegen bleibt $p$ konstant, die Voraussetzungen sind erfüllt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die Formel von Bernoulli für genau $k$ Treffer bei $n$ Versuchen?',
+      opts: ['$P(X = k) = \\binom{n}{k}\\,p^k\\,(1-p)^{n-k}$', '$P(X = k) = \\binom{n}{k}\\,p^k$', '$P(X = k) = \\binom{n}{k}\\,p\\,(1-p)$', '$P(X = k) = p^k\\,(1-p)^{n-k}$'],
+      steps: [
+        '$p^k$ steht für die $k$ Treffer, $(1-p)^{n-k}$ für die übrigen Nieten.',
+        'Der Binomialkoeffizient zählt, auf wie viele Arten sich die Treffer auf die $n$ Plätze verteilen.',
+        'Ohne ihn erhielte man nur die Wahrscheinlichkeit einer einzigen festen Reihenfolge.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wofür steht der Binomialkoeffizient in der Formel von Bernoulli?',
+      opts: ['für die Wahrscheinlichkeit einer Niete', 'für die Wahrscheinlichkeit eines Treffers', 'für die Anzahl der möglichen Reihenfolgen der $k$ Treffer', 'für die Anzahl der Versuche'],
+      steps: [
+        'Bei $3$ Würfen und $2$ Treffern gibt es die Muster TTN, TNT und NTT.',
+        'Das sind $\\binom{3}{2} = 3$ Möglichkeiten.',
+        'Jede hat dieselbe Wahrscheinlichkeit, deshalb wird einmal gerechnet und mit der Anzahl multipliziert.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Münze wird dreimal geworfen. Wie groß ist die Wahrscheinlichkeit für genau zweimal Kopf?',
+      opts: ['$\\dfrac{1}{4}$', '$\\dfrac{3}{8}$', '$\\dfrac{2}{3}$', '$\\dfrac{1}{8}$'],
+      steps: [
+        '$n = 3$, $k = 2$, $p = \\dfrac{1}{2}$.',
+        '$P = \\binom{3}{2} \\cdot \\left(\\dfrac{1}{2}\\right)^2 \\cdot \\dfrac{1}{2} = 3 \\cdot \\dfrac{1}{8}$',
+        '$= \\dfrac{3}{8}$. Der Faktor $3$ steht für die drei möglichen Reihenfolgen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Münze wird viermal geworfen. Wie groß ist die Wahrscheinlichkeit für viermal Kopf?',
+      opts: ['$\\dfrac{1}{16}$', '$\\dfrac{1}{8}$', '$\\dfrac{4}{16}$', '$\\dfrac{1}{4}$'],
+      steps: [
+        '$P = \\binom{4}{4} \\cdot \\left(\\dfrac{1}{2}\\right)^4 = 1 \\cdot \\dfrac{1}{16}$',
+        '$= \\dfrac{1}{16}$',
+        'Für $k = n$ ist der Binomialkoeffizient $1$ — es gibt nur eine Reihenfolge.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Würfel wird fünfmal geworfen. Wie groß ist die Wahrscheinlichkeit für genau eine Sechs?',
+      opts: ['$\\dfrac{1}{6} \\approx 0{,}167$', '$\\dfrac{5}{6} \\approx 0{,}833$', '$\\dfrac{625}{7776} \\approx 0{,}080$', '$\\dfrac{3125}{7776} \\approx 0{,}402$'],
+      steps: [
+        '$n = 5$, $k = 1$, $p = \\dfrac{1}{6}$.',
+        '$P = \\binom{5}{1} \\cdot \\dfrac{1}{6} \\cdot \\left(\\dfrac{5}{6}\\right)^4 = 5 \\cdot \\dfrac{625}{7776}$',
+        '$= \\dfrac{3125}{7776} \\approx 0{,}402$. Ohne den Faktor $5$ käme nur eine feste Reihenfolge heraus.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bei einem Versuch mit $p = 0{,}2$ wird dreimal wiederholt. Wie groß ist die Wahrscheinlichkeit für keinen Treffer?',
+      opts: ['$0{,}2$', '$0{,}512$', '$0{,}008$', '$0{,}8$'],
+      steps: [
+        '$k = 0$, also $P = \\binom{3}{0} \\cdot 0{,}2^0 \\cdot 0{,}8^3$.',
+        '$= 1 \\cdot 1 \\cdot 0{,}512 = 0{,}512$',
+        'Für $k = 0$ vereinfacht sich die Formel zu $(1-p)^n$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Münze wird viermal geworfen. Wie groß ist die Wahrscheinlichkeit für genau zweimal Kopf?',
+      opts: ['$\\dfrac{3}{8}$', '$\\dfrac{1}{4}$', '$\\dfrac{1}{2}$', '$\\dfrac{6}{8}$'],
+      steps: [
+        '$P = \\binom{4}{2} \\cdot \\left(\\dfrac{1}{2}\\right)^4 = 6 \\cdot \\dfrac{1}{16}$',
+        '$= \\dfrac{6}{16} = \\dfrac{3}{8}$',
+        'Zwei Treffer bei vier Würfen ist der wahrscheinlichste Einzelfall, aber keineswegs sicher.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bei einer Produktion sind $10\\,\\%$ der Teile fehlerhaft. Wie groß ist die Wahrscheinlichkeit, dass unter $10$ Teilen kein fehlerhaftes ist?',
+      opts: ['etwa $0{,}9$', 'etwa $0{,}349$', 'etwa $0{,}1$', 'etwa $0{,}651$'],
+      steps: [
+        '$P(X = 0) = 0{,}9^{10}$',
+        '$\\approx 0{,}349$',
+        'Also nur rund $35\\,\\%$ — bei zehn Teilen ist ein Fehler eher die Regel als die Ausnahme.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie groß ist in der vorigen Aufgabe die Wahrscheinlichkeit für mindestens ein fehlerhaftes Teil?',
+      opts: ['etwa $0{,}349$', 'etwa $0{,}1$', 'etwa $0{,}651$', '$1$'],
+      steps: [
+        'Gegenereignis zu „kein fehlerhaftes“.',
+        '$1 - 0{,}349 = 0{,}651$',
+        'Bei „mindestens einmal“ ist der Weg über $k = 0$ fast immer der kürzeste.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie berechnet man bei einer Bernoulli-Kette die Wahrscheinlichkeit für mindestens einen Treffer?',
+      opts: ['$\\binom{n}{1}\\,p\\,(1-p)^{n-1}$', '$p^n$', '$1 - (1-p)^n$', '$n \\cdot p$'],
+      steps: [
+        'Mindestens ein Treffer ist das Gegenereignis zu „kein Treffer“.',
+        '$P(X = 0) = (1-p)^n$',
+        'Also $P(X \\geq 1) = 1 - (1-p)^n$. $\\binom{n}{1}\\,p\\,(1-p)^{n-1}$ wäre genau ein Treffer.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Würfel wird sechsmal geworfen. Wie groß ist die Wahrscheinlichkeit für sechsmal eine gerade Augenzahl?',
+      opts: ['$\\dfrac{1}{12}$', '$\\dfrac{6}{64}$', '$\\dfrac{1}{2}$', '$\\dfrac{1}{64}$'],
+      steps: [
+        'Gerade Augenzahl hat $p = \\dfrac{1}{2}$.',
+        '$P = \\left(\\dfrac{1}{2}\\right)^6 = \\dfrac{1}{64}$',
+        'Der Binomialkoeffizient $\\binom{6}{6}$ ist $1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bei $n$ Versuchen mit Trefferwahrscheinlichkeit $p$ — wie viele Treffer sind im Mittel zu erwarten?',
+      opts: ['$\\dfrac{n}{p}$', '$p^n$', '$n \\cdot p$', '$n + p$'],
+      steps: [
+        'Bei $10$ Würfen einer Münze erwartet man $5$-mal Kopf.',
+        '$10 \\cdot 0{,}5 = 5$',
+        'Allgemein ist der Erwartungswert $n \\cdot p$ — die tatsächliche Trefferzahl schwankt aber darum herum.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bei einem Test mit $5$ Fragen und je $4$ Antworten wird geraten. Wie groß ist die Wahrscheinlichkeit, genau zwei richtig zu haben?',
+      opts: ['$\\dfrac{135}{512} \\approx 0{,}264$', '$\\dfrac{1}{16} \\approx 0{,}063$', '$\\dfrac{9}{16} \\approx 0{,}563$', '$\\dfrac{2}{5} = 0{,}4$'],
+      steps: [
+        '$n = 5$, $k = 2$, $p = \\dfrac{1}{4}$.',
+        '$P = \\binom{5}{2} \\cdot \\left(\\dfrac{1}{4}\\right)^2 \\cdot \\left(\\dfrac{3}{4}\\right)^3 = 10 \\cdot \\dfrac{1}{16} \\cdot \\dfrac{27}{64}$',
+        '$= \\dfrac{270}{1024} = \\dfrac{135}{512} \\approx 0{,}264$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Bauteil fällt mit $5\\,\\%$ Wahrscheinlichkeit aus. Wie groß ist die Wahrscheinlichkeit, dass von $20$ Bauteilen keines ausfällt?',
+      opts: ['etwa $0{,}642$', 'etwa $0{,}358$', 'etwa $0{,}95$', 'etwa $0{,}05$'],
+      steps: [
+        '$P(X = 0) = 0{,}95^{20}$',
+        '$\\approx 0{,}358$',
+        'Also fällt mit rund $64\\,\\%$ mindestens eines aus — bei vielen Bauteilen summiert sich auch ein kleines Risiko.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'In einer Umfrage stimmen $30\\,\\%$ zu. Wie groß ist die Wahrscheinlichkeit, dass von $4$ zufällig Befragten genau eine Person zustimmt?',
+      opts: ['$0{,}2401$', '$0{,}0081$', '$0{,}3$', '$0{,}4116$'],
+      steps: [
+        '$n = 4$, $k = 1$, $p = 0{,}3$.',
+        '$P = \\binom{4}{1} \\cdot 0{,}3 \\cdot 0{,}7^3 = 4 \\cdot 0{,}3 \\cdot 0{,}343$',
+        '$= 0{,}4116$. $0{,}2401$ wäre $0{,}7^4$, also niemand stimmt zu.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
