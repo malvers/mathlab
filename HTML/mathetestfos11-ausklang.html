@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Ausklang: Mathematik im Alltag — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w41-ausklang',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Ausklang: Mathematik im Alltag',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 41 (Abschluss) · 20 Aufgaben: Prozente, Maßstab, Einheiten und mathematische Kuriositäten · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 41 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Geld und Prozente (1-6), Messen und Umrechnen (7-13), Kuriositaeten (14-20). Leichte Abschlusswoche. */
+  questions: [
+    {
+      q: 'Ein Artikel kostet $45$ € und wird um $20\\,\\%$ reduziert. Was kostet er dann?',
+      opts: ['$9$ €', '$36$ €', '$54$ €', '$25$ €'],
+      steps: [
+        'Reduzierung um $20\\,\\%$ bedeutet Multiplikation mit $0{,}8$.',
+        '$45 \\cdot 0{,}8 = 36$ €',
+        'Der Rabatt selbst beträgt $9$ €.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie viel Trinkgeld sind $10\\,\\%$ auf eine Rechnung von $38$ €?',
+      opts: ['$3{,}00$ €', '$4{,}20$ €', '$0{,}38$ €', '$3{,}80$ €'],
+      steps: [
+        '$10\\,\\%$ entspricht dem Zehntel.',
+        '$\\dfrac{38}{10} = 3{,}80$ €',
+        'Insgesamt zahlt man dann $41{,}80$ €.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Netto-Preis von $150$ € wird mit $19\\,\\%$ Umsatzsteuer belegt. Wie hoch ist der Brutto-Preis?',
+      opts: ['$121{,}50$ €', '$169{,}00$ €', '$178{,}50$ €', '$28{,}50$ €'],
+      steps: [
+        '$150 \\cdot 1{,}19$',
+        '$= 178{,}50$ €',
+        'Die Steuer allein beträgt $28{,}50$ €.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Brutto-Preis beträgt $119$ €, darin sind $19\\,\\%$ Umsatzsteuer enthalten. Wie hoch ist der Netto-Preis?',
+      opts: ['$101$ €', '$100$ €', '$96{,}39$ €', '$99{,}00$ €'],
+      steps: [
+        'Der Brutto-Preis entspricht $119\\,\\%$ des Netto-Preises.',
+        '$\\dfrac{119}{1{,}19} = 100$ €',
+        'Falsch wäre, $19\\,\\%$ von $119$ € abzuziehen — das ergäbe $96{,}39$ €.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Drei Personen teilen sich eine Rechnung von $87$ € zu gleichen Teilen. Wie viel zahlt jede?',
+      opts: ['$29$ €', '$30$ €', '$26$ €', '$27$ €'],
+      steps: [
+        '$\\dfrac{87}{3}$',
+        '$= 29$ €',
+        'Probe: $3 \\cdot 29 = 87$ €.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Guthaben von $2500$ € wird ein Jahr lang mit $1{,}5\\,\\%$ verzinst. Wie viel Zinsen sind das?',
+      opts: ['$375$ €', '$3{,}75$ €', '$37{,}50$ €', '$15$ €'],
+      steps: [
+        '$2500 \\cdot 0{,}015$',
+        '$= 37{,}50$ €',
+        'Das Guthaben wächst also auf $2537{,}50$ €.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Auf einer Karte im Maßstab $1 : 25\\,000$ sind zwei Orte $4\\,\\mathrm{cm}$ voneinander entfernt. Wie weit sind sie in Wirklichkeit auseinander?',
+      opts: ['$25\\,\\mathrm{km}$', '$100\\,\\mathrm{m}$', '$1\\,\\mathrm{km}$', '$10\\,\\mathrm{km}$'],
+      steps: [
+        '$1\\,\\mathrm{cm}$ auf der Karte sind $25\\,000\\,\\mathrm{cm}$ in der Natur.',
+        '$4 \\cdot 25\\,000 = 100\\,000\\,\\mathrm{cm}$',
+        '$= 1000\\,\\mathrm{m} = 1\\,\\mathrm{km}$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele Meter pro Sekunde sind $90\\,\\mathrm{km/h}$?',
+      opts: ['$324\\,\\mathrm{m/s}$', '$90\\,\\mathrm{m/s}$', '$25\\,\\mathrm{m/s}$', '$1{,}5\\,\\mathrm{m/s}$'],
+      steps: [
+        '$90\\,\\mathrm{km} = 90\\,000\\,\\mathrm{m}$ und $1\\,\\mathrm{h} = 3600\\,\\mathrm{s}$.',
+        '$\\dfrac{90\\,000}{3600} = 25$',
+        'Merkregel: durch $3{,}6$ teilen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Auto verbraucht $6{,}5$ Liter auf $100\\,\\mathrm{km}$. Wie viel braucht es für $250\\,\\mathrm{km}$?',
+      opts: ['$16{,}25$ Liter', '$15$ Liter', '$26$ Liter', '$2{,}6$ Liter'],
+      steps: [
+        'Der Verbrauch ist proportional zur Strecke.',
+        '$\\dfrac{6{,}5}{100} \\cdot 250 = 0{,}065 \\cdot 250$',
+        '$= 16{,}25$ Liter'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Zimmer ist $4{,}50\\,\\mathrm{m}$ lang und $3{,}20\\,\\mathrm{m}$ breit. Wie groß ist seine Bodenfläche?',
+      opts: ['$14{,}4\\,\\mathrm{m^2}$', '$7{,}7\\,\\mathrm{m^2}$', '$15{,}4\\,\\mathrm{m^2}$', '$14{,}4\\,\\mathrm{m}$'],
+      steps: [
+        '$A = 4{,}50 \\cdot 3{,}20$',
+        '$= 14{,}4\\,\\mathrm{m^2}$',
+        'Die Einheit einer Fläche ist Quadratmeter, nicht Meter.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Becken ist $5\\,\\mathrm{m}$ lang, $3\\,\\mathrm{m}$ breit und $1{,}2\\,\\mathrm{m}$ tief. Wie viele Liter fasst es?',
+      opts: ['$1800$ Liter', '$180\\,000$ Liter', '$18$ Liter', '$18\\,000$ Liter'],
+      steps: [
+        '$V = 5 \\cdot 3 \\cdot 1{,}2 = 18\\,\\mathrm{m^3}$',
+        'Ein Kubikmeter fasst $1000$ Liter.',
+        '$18 \\cdot 1000 = 18\\,000$ Liter'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Rezept für $4$ Personen braucht $300\\,\\mathrm{g}$ Mehl. Wie viel braucht man für $6$ Personen?',
+      opts: ['$400\\,\\mathrm{g}$', '$450\\,\\mathrm{g}$', '$200\\,\\mathrm{g}$', '$500\\,\\mathrm{g}$'],
+      steps: [
+        'Dreisatz: pro Person $\\dfrac{300}{4} = 75\\,\\mathrm{g}$.',
+        '$6 \\cdot 75 = 450\\,\\mathrm{g}$',
+        'Oder direkt mit dem Faktor $\\dfrac{6}{4} = 1{,}5$: $300 \\cdot 1{,}5 = 450\\,\\mathrm{g}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Jemand hat die Noten $2$, $3$, $1$ und $2$ geschrieben. Wie lautet der Durchschnitt?',
+      opts: ['$8$', '$2{,}0$', '$2{,}5$', '$1{,}75$'],
+      steps: [
+        '$\\dfrac{2 + 3 + 1 + 2}{4} = \\dfrac{8}{4}$',
+        '$= 2{,}0$',
+        'Die $8$ ist nur die Summe, noch nicht der Mittelwert.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Warum gilt $0{,}\\overline{9} = 1$?',
+      opts: ['Weil die Differenz zu klein zum Messen ist.', 'Das gilt gar nicht, $0{,}\\overline{9}$ ist kleiner als $1$.', 'Weil man großzügig rundet.', 'Weil $0{,}\\overline{3} = \\dfrac{1}{3}$ ist und das Dreifache davon sowohl $0{,}\\overline{9}$ als auch $1$ ergibt.'],
+      steps: [
+        '$\\dfrac{1}{3} = 0{,}\\overline{3}$ ist unstrittig.',
+        'Multipliziert man beide Seiten mit $3$, steht links $1$ und rechts $0{,}\\overline{9}$.',
+        'Es sind zwei Schreibweisen derselben Zahl, keine Näherung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was ist das Besondere am Möbiusband?',
+      opts: ['Es hat nur eine Seite und nur eine Kante.', 'Es hat unendlich viele Seiten.', 'Es ist immer kreisrund.', 'Es lässt sich nicht aus Papier herstellen.'],
+      steps: [
+        'Man klebt einen Papierstreifen zusammen und dreht ein Ende zuvor um eine halbe Drehung.',
+        'Fährt man mit dem Stift entlang, landet man ohne abzusetzen wieder am Start — auf der „anderen“ Seite.',
+        'Schneidet man es längs in der Mitte durch, zerfällt es nicht in zwei Teile.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele Primzahlen gibt es?',
+      opts: ['nur endlich viele, die größte ist bekannt', 'so viele, wie man bisher gefunden hat', 'genau $1000$', 'unendlich viele, das hat Euklid bewiesen'],
+      steps: [
+        'Euklids Beweis ist über zweitausend Jahre alt und erstaunlich kurz.',
+        'Nimmt man alle bekannten Primzahlen, multipliziert sie und addiert $1$, so ist die neue Zahl durch keine von ihnen teilbar.',
+        'Also fehlte mindestens eine — die Liste kann nie vollständig sein.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was besagt der Vier-Farben-Satz?',
+      opts: ['Jede Landkarte lässt sich mit vier Farben so färben, dass benachbarte Länder verschiedene Farben haben.', 'Jede Landkarte braucht mindestens vier Farben.', 'Vier Länder können nie aneinandergrenzen.', 'Es gibt genau vier Grundfarben.'],
+      steps: [
+        'Die Vermutung stammt von 1852, der Beweis gelang erst 1976.',
+        'Er war der erste große Beweis, der ohne Computer nicht auskam.',
+        'Manche Karten kommen mit weniger Farben aus, mehr als vier braucht aber keine.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Der $14$. März wird weltweit als Pi-Tag gefeiert. Warum gerade dieser Tag?',
+      opts: ['weil der März der dritte Monat ist', 'weil $14 : 3 \\approx \\pi$ gilt', 'weil er in amerikanischer Schreibweise $3/14$ lautet und $\\pi \\approx 3{,}14$ ist', 'weil $\\pi$ an diesem Tag berechnet wurde'],
+      steps: [
+        'In den USA schreibt man den Monat zuerst: $3/14$.',
+        'Das sind die ersten drei Ziffern von $\\pi = 3{,}14159\\ldots$',
+        'Wer es genauer mag, feiert um $1$ Uhr $59$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was sind Primzahlzwillinge?',
+      opts: ['Primzahlen, die aufeinanderfolgende Zahlen sind', 'zwei Primzahlen mit dem Abstand $2$, etwa $11$ und $13$', 'zwei gleich große Primzahlen', 'Primzahlen mit derselben Quersumme'],
+      steps: [
+        'Beispiele sind $3$ und $5$, $11$ und $13$, $17$ und $19$.',
+        'Näher als $2$ können zwei Primzahlen über $2$ nicht beieinanderliegen, denn eine von zwei Nachbarzahlen ist gerade.',
+        'Ob es unendlich viele Zwillinge gibt, ist bis heute ungelöst.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Womit geht es in Klasse 12 weiter?',
+      opts: ['mit der Stochastik', 'mit denselben Themen wie in Klasse 11', 'mit der Finanzmathematik', 'mit der Vektorrechnung, danach Differenzial- und Integralrechnung'],
+      steps: [
+        'Klasse 12 beginnt mit Geraden und Ebenen im Raum.',
+        'Danach folgt die Analysis bis zur Integralrechnung.',
+        'Am Ende steht die schriftliche Prüfung zur Fachhochschulreife. Schöne Ferien!'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
