@@ -2886,13 +2886,14 @@ const link = (function () {
 
   // Laser pointer (Doc, 16.09.2026: "wenn ich die Maus auf presenter bewege, könnte da ein Laser im Show sein?",
   // then "lass mal immer kommen" and "l schalten ihn!"). The mouse over the presenter's current slide shows as a
-  // red dot at the same place on the beamer, over labs and dice too. It goes out when the mouse leaves the slide
-  // or rests for LASER_REST. On at the start; l in either window switches it - the beamer keeps the switch
-  // (the presenter only reports the mouse) and the presenter window says which way it went.
+  // red dot at the same place on the beamer, over labs and dice too, and in the presenter view itself.
+  // On at the start; l in either window switches it and the other follows - the dot stays where it was put
+  // (a window that was opened before today still understands the old laser-toggle).
   const laser = (function () {
-    const LASER_REST = 2000;                         // ms without a move, then the dot fades (as agreed with Doc)
+    // It stays where he left it until L puts it out (Doc, 23.09.2026: "lass ihn an bis l" - until that day it faded
+    // after two seconds without a move, and leaving the slide took it away too).
     const SIZE = 19;                                 // edge of the square pattern in slide pixels
-    let on = true, dot = null, rest = 0;             // beamer
+    let on = true, dot = null;                       // beamer
     // The dot as a laser through a crossed grating - a subtle grid of points around the beam (Doc, 16.09.2026:
     // "in der Mitte zu weiß", then "eher so wie ein grid. Wenn man Doppelspalt in 2D macht ... so punkte aber
     // sehr subtil"). Far field of a 2D grating in a beam: one beam spot per order (m, n), weighted by the single
@@ -2935,8 +2936,9 @@ const link = (function () {
     function move(x, y) {
       const f = document.querySelector('#pres .p-cur .p-frame');
       const r = f && f.getBoundingClientRect();
-      want = r && r.width && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom
-        ? { x: (x - r.left) / r.width, y: (y - r.top) / r.height } : null;
+      if (!r || !r.width) return;
+      if (x < r.left || x > r.right || y < r.top || y > r.bottom) return;   // off the slide: it stays where it is
+      want = { x: (x - r.left) / r.width, y: (y - r.top) / r.height };
       if (!raf) raf = requestAnimationFrame(flush);   // one message per frame at most
     }
     function flush() {
@@ -2956,7 +2958,6 @@ const link = (function () {
       return f && f.getBoundingClientRect();
     }
     function show(m) {
-      clearTimeout(rest);
       if (m.x !== undefined) at = { x: m.x, y: m.y };   // follow the hand even while the dot is out, so L lights it where he points now
       if (!on || m.x === undefined) { if (dot) dot.classList.remove('on'); return; }
       const box = stage();
@@ -2972,7 +2973,6 @@ const link = (function () {
       dot.style.transform = 'translate(' + (r.left + m.x * r.width).toFixed(1) + 'px,'
                                          + (r.top + m.y * r.height).toFixed(1) + 'px)';
       dot.classList.add('on');
-      rest = setTimeout(function () { dot.classList.remove('on'); }, LASER_REST);
     }
     // L puts the dot back where it stood, at once - waiting for the next mouse move looked broken (Doc, 23.09.2026:
     // "l bringt nicht den Punkt sofort! Man muss erst bewegen!")
@@ -2985,7 +2985,6 @@ const link = (function () {
     function mirrorOn(v) { on = !!v; light(); }      // the other window switched it
     if (PRESENTER) {
       addEventListener('pointermove', function (e) { move(e.clientX, e.clientY); });
-      document.documentElement.addEventListener('mouseleave', function () { move(-1, -1); });
     }
     addEventListener('keydown', function (e) {
       if ((e.key !== 'l' && e.key !== 'L') || e.metaKey || e.ctrlKey || e.altKey) return;
