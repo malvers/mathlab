@@ -30,6 +30,10 @@
             font-size: 1.05em;
         }
 
+        #canvas {
+            touch-action: none;
+        }
+
         #maya-formula {
             margin-bottom: 6px;
             overflow-x: auto;
@@ -209,8 +213,12 @@
         let task = null;                  // { target, done }
         let solvedCount = 0;
         let flashes = [];                 // { place, color, until }
-        let cells = [];                   // click targets: one per place
-        let glyphs = [];                  // click targets: every dot and every bar
+        let cards = [];                   // the places, side by side
+        let glyphs = [];                  // every dot and every bar, for taking them away
+        let palette = [];                 // the twenty digits to drag from
+        let drag = null;                  // { digit, x, y, moved }
+        let picked = null;                // digit tapped in the panel, waiting for a place
+        let hoverPlace = null;            // the place a dragged digit is over
 
         const sys = () => SYSTEMS[sysKey];
         const value = () => digits.reduce((sum, d, i) => sum + d * sys().values[i], 0);
@@ -251,11 +259,8 @@
         }
 
         // The zero: a scallop shell — ribs fanning out of the hinge, a scalloped rim.
-        // Drawn from the hinge point at the bottom, so it scales with the cell.
-        function drawShell(cx, cy, cw, ch) {
-            const w = Math.max(38, Math.min(cw * 0.42, 118));
-            const h = Math.min(w * 0.64, ch * 0.62);
-            const lw = Math.max(1.5, Math.min(3.2, h * 0.05));
+        function drawShell(cx, cy, w, h) {
+            const lw = Math.max(1.2, Math.min(3.2, h * 0.05));
             const R = h * 0.92;
             const hx = cx, hy = cy + h * 0.44;          // the hinge
             const spread = 0.44;                        // half opening, in units of PI
@@ -286,29 +291,32 @@
             ctx.fill();
             ctx.stroke();
 
-            ctx.lineWidth = Math.max(1, lw * 0.6);
+            ctx.lineWidth = Math.max(0.8, lw * 0.6);
             for (let i = 1; i < lobes; i++) {
                 const a = a0 + (a1 - a0) * i / lobes;
-                const s = P(a, 0.16), e = P(a, 0.86);
+                const st = P(a, 0.16), en = P(a, 0.86);
                 ctx.beginPath();
-                ctx.moveTo(s[0], s[1]);
-                ctx.lineTo(e[0], e[1]);
+                ctx.moveTo(st[0], st[1]);
+                ctx.lineTo(en[0], en[1]);
                 ctx.stroke();
             }
             ctx.restore();
         }
 
-        // Every bar counts five, every dot one, and they sit dots over bars.
-        function drawDigit(place, cx, cy, cw, ch) {
-            const d = digits[place];
-            if (d === 0) { drawShell(cx, cy, cw, ch); return; }
-
-            const bars = Math.floor(d / 5);
-            const dots = d % 5;
-            const barH = Math.max(5, ch * 0.12);
-            const barW = Math.min(cw * 0.5, 140);
-            const gap = Math.max(4, ch * 0.075);
-            const dotR = Math.max(4, ch * 0.072);
+        // Every bar counts five, every dot one, and the dots sit above the bars.
+        // place === null draws a loose digit (panel, drag ghost) and registers no targets.
+        function paintDigit(d, cx, cy, bw, bh, place) {
+            if (d === 0) {
+                const w = Math.min(bw * 0.62, 104);
+                const h = w * 0.64;
+                drawShell(cx, cy + h * 0.065, w, h);   // the shape is taller above the centre
+                return;
+            }
+            const bars = Math.floor(d / 5), dots = d % 5;
+            const barW = Math.min(bw * 0.78, 132);
+            const barH = Math.max(4, bh * 0.115);
+            const gap = Math.max(3, bh * 0.07);
+            const dotR = Math.max(3, Math.min(bh * 0.072, barW * 0.09));
             const dotsH = dots ? dotR * 2 : 0;
             const barsH = bars ? bars * barH + (bars - 1) * gap : 0;
             const totalH = dotsH + barsH + (dots && bars ? gap : 0);
@@ -323,13 +331,17 @@
                     ctx.fillStyle = COL.glyph;
                     ctx.arc(x, y + dotR, dotR, 0, Math.PI * 2);
                     ctx.fill();
-                    glyphs.push({ place, type: 'dot', x: x - dotR * 1.5, y: y - dotR * 0.5, w: dotR * 3, h: dotR * 3 });
+                    if (place !== null) {
+                        glyphs.push({ place, type: 'dot', x: x - dotR * 1.5, y: y - dotR * 0.5, w: dotR * 3, h: dotR * 3 });
+                    }
                 }
                 y += dotsH + gap;
             }
             for (let k = 0; k < bars; k++) {
                 roundRect(cx - barW / 2, y, barW, barH, barH / 2, COL.glyph, null);
-                glyphs.push({ place, type: 'bar', x: cx - barW / 2, y: y - gap * 0.35, w: barW, h: barH + gap * 0.7 });
+                if (place !== null) {
+                    glyphs.push({ place, type: 'bar', x: cx - barW / 2, y: y - gap * 0.35, w: barW, h: barH + gap * 0.7 });
+                }
                 y += barH + gap;
             }
         }
@@ -344,81 +356,133 @@
             const rect = container.getBoundingClientRect();
             const W = rect.width, H = rect.height;
             ctx.clearRect(0, 0, W, H);
-            cells = [];
+            cards = [];
             glyphs = [];
-            if (W < 160 || H < 160) return;   // the chrome has not settled yet
+            palette = [];
+            if (W < 200 || H < 200) return;     // the chrome has not settled yet
 
+            const pad = 16;
             const n = places();
-            const narrow = W < 700;
 
-            // keep the board clear of the coach box when there is no room beside it
-            let topGuard = 12;
+            // the places start below the coach box - they run across the whole stage now
+            let top = 14;
             const box = document.getElementById('math-coach-box');
-            if (box && narrow) {
-                const b = box.getBoundingClientRect();
-                topGuard = Math.max(topGuard, b.bottom - rect.top + 14);
-            }
+            if (box) top = Math.max(top, box.getBoundingClientRect().bottom - rect.top + 16);
 
-            const padY = 14;
-            const avail = H - topGuard - padY;
-            const rowH = Math.min(avail / n, 138);
-            const boardH = rowH * n;
-            const top0 = topGuard + (avail - boardH) / 2;
+            const avail = H - top - pad;
+            if (avail < 200) return;
 
-            const labelW = narrow ? 58 : 92;
-            const prodW = narrow ? 0 : 196;
-            const cellW = Math.max(120, Math.min(narrow ? W - labelW - 30 : 268, W * 0.62));
-            const totalW = labelW + 14 + cellW + (prodW ? 14 + prodW : 0);
-            const x0 = Math.max(12, (W - totalW) / 2);
-            const cellX = x0 + labelW + 14;
+            // the panel at the bottom: ten digits in a row on a wide screen, five on a narrow one
+            const cols = W >= 1000 ? 10 : 5;
+            const rows = 20 / cols;
+            const cellW = Math.min((W - 2 * pad) / cols, 96);
+            const cellH = Math.min(cellW * 0.95, (avail * 0.5 - 26) / rows);
+            const panelH = rows * cellH + 26;
 
-            for (let row = 0; row < n; row++) {
-                const place = n - 1 - row;            // the highest place is drawn on top
-                const y = top0 + row * rowH;
-                const h = rowH - 6;
+            // the places above it
+            const cardsH = Math.min(avail - panelH - 16, 250);
+            const cardW = Math.min((W - 2 * pad - (n - 1) * 14) / n, 200);
+            const cardH = Math.max(90, cardsH - 48);
+            const rowW = n * cardW + (n - 1) * 14;
+            const rowX = (W - rowW) / 2;
+
+            // places, their sums, the task line and the panel travel as one block,
+            // so no gap opens up between them on a tall screen
+            const labelH = 24, productH = 30, captionH = 28, taskH = task ? 26 : 0;
+            const blockH = labelH + cardH + productH + taskH + captionH + rows * cellH;
+            const startY = top + Math.max(0, (avail - blockH) / 2);
+            const cardY = startY + labelH;
+            const taskY = cardY + cardH + productH + taskH / 2;
+            const panelY = cardY + cardH + productH + taskH + captionH;
+
+            for (let col = 0; col < n; col++) {
+                const place = n - 1 - col;              // the highest place stands on the left
+                const x = rowX + col * (cardW + 14);
                 const flash = flashColor(place);
+                const hot = hoverPlace === place;
 
-                ctx.lineWidth = flash ? 2 : 1;
-                roundRect(cellX, y + 3, cellW, h, 14, flash ? 'rgba(121, 158, 49, 0.10)' : COL.fill, flash || COL.line);
-
-                // place value on the left
+                // place value above the card
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
                 ctx.fillStyle = COL.dim;
-                ctx.textAlign = 'right';
-                ctx.textBaseline = 'middle';
-                ctx.font = (narrow ? '600 13px' : '600 16px') + " 'Orbitron', sans-serif";
-                ctx.fillText(de(sys().values[place]), x0 + labelW, y + rowH / 2);
+                ctx.font = "600 15px 'Orbitron', sans-serif";
+                ctx.fillText(de(sys().values[place]), x + cardW / 2, cardY - 6);
 
-                drawDigit(place, cellX + cellW / 2, y + rowH / 2, cellW, h);
+                ctx.lineWidth = (flash || hot) ? 2 : 1;
+                roundRect(x, cardY, cardW, cardH, 16,
+                    hot ? 'rgba(245, 194, 66, 0.10)' : (flash ? 'rgba(121, 158, 49, 0.10)' : COL.fill),
+                    hot ? COL.glyph : (flash || COL.line));
 
-                // what this place contributes, on the right
-                if (prodW) {
-                    const d = digits[place];
-                    ctx.textAlign = 'left';
-                    ctx.font = "400 15px 'Outfit', sans-serif";
-                    ctx.fillStyle = d ? 'rgba(255, 255, 255, 0.72)' : 'rgba(255, 255, 255, 0.28)';
-                    const line = d + ' × ' + de(sys().values[place]) + ' = ' + de(d * sys().values[place]);
-                    ctx.fillText(line, cellX + cellW + 14, y + rowH / 2);
-                }
+                paintDigit(digits[place], x + cardW / 2, cardY + cardH / 2, cardW, cardH, place);
 
-                cells.push({ place, x: cellX, y: y + 3, w: cellW, h });
+                // what the place contributes, under the card
+                const d = digits[place];
+                ctx.textBaseline = 'top';
+                ctx.font = "400 14px 'Outfit', sans-serif";
+                ctx.fillStyle = d ? 'rgba(255, 255, 255, 0.72)' : 'rgba(255, 255, 255, 0.28)';
+                ctx.fillText(d + ' × ' + de(sys().values[place]) + ' = ' + de(d * sys().values[place]),
+                    x + cardW / 2, cardY + cardH + 8);
+
+                cards.push({ place, x, y: cardY, w: cardW, h: cardH });
             }
 
-            // the task, written under the board
-            if (task) {
+            // ---- the panel of all twenty digits ----
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'bottom';
+            ctx.font = "400 13px 'Outfit', sans-serif";
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            const gridW = cols * cellW;
+            const gridX = (W - gridW) / 2;
+            ctx.fillText(T('panel', 'Ziffern — auf eine Stelle ziehen'), gridX, panelY - 8);
+
+            for (let k = 0; k < 20; k++) {
+                const cx0 = gridX + (k % cols) * cellW;
+                const cy0 = panelY + Math.floor(k / cols) * cellH;
+                const on = picked === k || (drag && drag.digit === k);
+
+                roundRect(cx0 + 3, cy0 + 2, cellW - 6, cellH - 4, 10,
+                    on ? 'rgba(245, 194, 66, 0.12)' : 'rgba(255, 255, 255, 0.02)',
+                    on ? COL.glyph : 'rgba(255, 255, 255, 0.07)');
+
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'top';
+                ctx.font = "600 12px 'Orbitron', sans-serif";
+                ctx.fillStyle = on ? COL.glyph : 'rgba(255, 255, 255, 0.45)';
+                ctx.fillText(String(k), cx0 + cellW / 2, cy0 + 6);
+
+                paintDigit(k, cx0 + cellW / 2, cy0 + cellH * 0.62, cellW - 14, cellH * 0.6, null);
+                palette.push({ digit: k, x: cx0, y: cy0, w: cellW, h: cellH });
+            }
+
+            // the task, written between the places and the panel
+            if (task) {
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
                 ctx.font = "400 15px 'Outfit', sans-serif";
                 ctx.fillStyle = task.done ? COL.shell : 'rgba(255, 255, 255, 0.6)';
                 const line = task.done
                     ? T('task_done', 'Richtig gelegt.')
                     : T('task_lay', 'Lege') + ' ' + de(task.target);
-                ctx.fillText(line, W / 2, Math.min(H - 26, top0 + boardH + 10));
+                ctx.fillText(line, W / 2, taskY);
+            }
+
+            // the digit being dragged hangs on the finger
+            if (drag) {
+                ctx.save();
+                ctx.globalAlpha = 0.9;
+                paintDigit(drag.digit, drag.x, drag.y, Math.min(cardW, 150), Math.min(cardH, 130), null);
+                ctx.restore();
             }
         }
 
         // ------------------------------------------------------------- interaction ---
         function inRect(p, r) {
             return p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
+        }
+
+        function pos(e) {
+            const r = canvas.getBoundingClientRect();
+            return { x: e.clientX - r.left, y: e.clientY - r.top };
         }
 
         function say(text, color) {
@@ -433,7 +497,7 @@
             setTimeout(draw, 950);
         }
 
-        // Adding beyond the last digit of a place carries into the place above - that is the
+        // Adding beyond the last digit of a place carries into the place above — that is the
         // whole point of a place value system, so it gets said out loud.
         function addOne(place) {
             const lim = sys().limits;
@@ -460,14 +524,75 @@
             changed();
         }
 
+        // A whole digit dropped on a place - the calendar reckoning only lets the twenties
+        // place run to 17, so a 18 or 19 has to be refused there.
+        function applyDigit(place, d) {
+            const lim = sys().limits[place];
+            if (d >= lim) {
+                flashPlace(place, COL.warn);
+                say(T('too_big', 'Diese Stelle fasst nur bis ') + (lim - 1) + '.', COL.warn);
+                draw();
+                return false;
+            }
+            digits[place] = d;
+            flashPlace(place, COL.shell);
+            say('');
+            changed();
+            return true;
+        }
+
         canvas.addEventListener('pointerdown', (e) => {
-            const r = canvas.getBoundingClientRect();
-            const p = { x: e.clientX - r.left, y: e.clientY - r.top };
+            const p = pos(e);
+            const pal = palette.find(h => inRect(p, h));
+            if (pal) {
+                drag = { digit: pal.digit, x: p.x, y: p.y, moved: false };
+                try { canvas.setPointerCapture(e.pointerId); } catch (err) { }
+                draw();
+                return;
+            }
+            const card = cards.find(h => inRect(p, h));
+            if (picked !== null && card) {
+                applyDigit(card.place, picked);
+                picked = null;
+                return;
+            }
             const g = glyphs.find(h => inRect(p, h));
             if (g) { removeGlyph(g); return; }
-            const c = cells.find(h => inRect(p, h));
-            if (c) addOne(c.place);
+            if (card) addOne(card.place);
         });
+
+        canvas.addEventListener('pointermove', (e) => {
+            if (!drag) return;
+            const p = pos(e);
+            if (Math.abs(p.x - drag.x) > 4 || Math.abs(p.y - drag.y) > 4) drag.moved = true;
+            drag.x = p.x;
+            drag.y = p.y;
+            const card = cards.find(h => inRect(p, h));
+            hoverPlace = card ? card.place : null;
+            draw();
+        });
+
+        function endDrag(e) {
+            if (!drag) return;
+            const p = pos(e);
+            const card = cards.find(h => inRect(p, h));
+            const d = drag.digit, moved = drag.moved;
+            drag = null;
+            hoverPlace = null;
+            if (card) {
+                applyDigit(card.place, d);
+                picked = null;
+                dbg('dropped ' + d + ' on place ' + card.place);
+            } else if (!moved) {
+                // a tap in the panel picks the digit up, the next tap on a place puts it down
+                picked = (picked === d) ? null : d;
+                say(picked === null ? '' : T('picked', 'Ziffer ') + d + T('picked2', ' — jetzt auf eine Stelle tippen.'), COL.glyph);
+            }
+            draw();
+        }
+
+        canvas.addEventListener('pointerup', endDrag);
+        canvas.addEventListener('pointercancel', () => { drag = null; hoverPlace = null; draw(); });
 
         // ------------------------------------------------------------------ readout ---
         function renderFormula() {
@@ -512,7 +637,7 @@
         function newTask() {
             task = { target: 21 + Math.floor(Math.random() * 9979), done: false };
             digits = [0, 0, 0, 0, 0];
-            say(T('task_hint', 'Lege die Zahl — tippe ins Feld, um Punkte zu setzen.'), COL.glyph);
+            say(T('task_hint', 'Lege die Zahl - zieh die Ziffern aus dem Panel auf die Stellen.'), COL.glyph);
             changed();
         }
 
@@ -560,7 +685,7 @@
                 + '</div>', 'rgb(176, 36, 24)');
 
             CyberUI.createCard('ui-container', T('card_help', 'SO GEHT ES'),
-                '<div class="maya-note">' + T('help', 'Ins Feld tippen legt einen Punkt dazu. Auf einen Punkt tippen nimmt ihn weg, auf einen Strich nimmt fünf weg. Fünf Punkte werden ein Strich, und ist eine Stelle voll, wandert sie nach oben. Die leere Stelle zeigt die Muschel — die Null.') + '</div>',
+                '<div class="maya-note">' + T('help', 'Zieh eine Ziffer aus dem Panel auf eine Stelle - oder tippe sie an und dann die Stelle. In eine Stelle tippen legt einen Punkt dazu, auf einen Punkt tippen nimmt ihn weg, auf einen Strich nimmt fünf weg. Ist eine Stelle voll, wandert sie nach oben, und die leere zeigt die Muschel - die Null.') + '</div>',
                 'rgb(121, 158, 49)');
 
             document.getElementById('maya-lay').onclick = () => {
@@ -611,9 +736,17 @@
 
         window.addEventListener('resize', init);
 
+        // The left chrome settles a moment after load and the coach box grows with the sum -
+        // measure the stage again whenever that happens instead of trusting a timeout.
+        if (window.ResizeObserver) {
+            new ResizeObserver(() => init()).observe(container);
+            const coach = document.getElementById('math-coach-box');
+            if (coach) new ResizeObserver(() => draw()).observe(coach);
+        }
+
         buildUI();
         layout(5432);
-        say(T('start', 'Eine Maya-Zahl steht schon da. Tippe hinein und ändere sie.'), COL.glyph);
+        say(T('start', 'Eine Maya-Zahl steht schon da. Zieh Ziffern aus dem Panel darauf oder tippe in eine Stelle.'), COL.glyph);
         init();
         changed();
         document.fonts.ready.then(() => { init(); changed(); });
