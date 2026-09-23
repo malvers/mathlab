@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Ableitungsregeln — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w14-ableitungsregeln',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Ableitungsregeln',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 14 (LB 2) · 20 Aufgaben: Konstanten-, Potenz-, Faktor- und Summenregel, höhere Ableitungen · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 14 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Konstanten-, Potenz-, Faktor- und Summenregel (1-6), negative und gebrochene Exponenten (7-12), höhere Ableitungen (13-17), Anwendungen (18-20). Alles ohne CAS. */
+  questions: [
+    {
+      q: 'Bestimme die Ableitung von $f(x) = x^5$.',
+      opts: ['$f^{\\prime}(x) = x^4$', '$f^{\\prime}(x) = 4x^4$', '$f^{\\prime}(x) = 5x^5$', '$f^{\\prime}(x) = 5x^4$'],
+      steps: [
+        'Potenzregel: $(x^n)^{\\prime} = n \\cdot x^{n-1}$.',
+        'Der Exponent $5$ kommt als Faktor nach vorn und wird um $1$ kleiner: $5x^4$.',
+        'Falle: Der Exponent wird gesenkt, nicht der Faktor.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = 8$.',
+      opts: ['$f^{\\prime}(x) = 0$', '$f^{\\prime}(x) = 8x$', '$f^{\\prime}(x) = 1$', '$f^{\\prime}(x) = 8$'],
+      steps: [
+        'Konstantenregel: Der Graph von $f(x) = 8$ ist eine waagerechte Gerade.',
+        'Eine waagerechte Gerade hat überall den Anstieg $0$, also $f^{\\prime}(x) = 0$.',
+        'Deshalb fallen konstante Summanden beim Ableiten immer weg.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = 4x^3$.',
+      opts: ['$f^{\\prime}(x) = 12x^3$', '$f^{\\prime}(x) = 4x^2$', '$f^{\\prime}(x) = 3x^2$', '$f^{\\prime}(x) = 12x^2$'],
+      steps: [
+        'Faktorregel: Der Faktor $4$ bleibt stehen, abgeleitet wird nur $x^3$.',
+        '$f^{\\prime}(x) = 4 \\cdot 3x^2 = 12x^2$',
+        'Falle: $4x^2$ entsteht, wenn man den Exponenten senkt, aber nicht als Faktor mitnimmt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Warum darf man beim Ableiten von $f(x) = 7x^4$ den Faktor $7$ einfach stehen lassen und nur $x^4$ ableiten?',
+      opts: ['wegen der Konstantenregel: Konstanten haben die Ableitung $0$', 'wegen der Faktorregel: $(c \\cdot g(x))^{\\prime} = c \\cdot g^{\\prime}(x)$', 'wegen der Summenregel: Summanden werden einzeln abgeleitet', 'wegen der Potenzregel: der Exponent wird zum Faktor'],
+      steps: [
+        'Ein konstanter Faktor streckt den Graphen nur in $y$-Richtung, damit streckt er auch jeden Anstieg um denselben Faktor.',
+        '$f^{\\prime}(x) = 7 \\cdot 4x^3 = 28x^3$',
+        'Falle: Die Konstantenregel gilt für den Summanden $7$, nicht für den Faktor $7$ vor $x^4$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = 2x^3 + 5x^2 - 4x + 9$.',
+      opts: ['$f^{\\prime}(x) = 6x^2 + 10x + 4$', '$f^{\\prime}(x) = 6x^2 + 10x - 4$', '$f^{\\prime}(x) = 6x^3 + 10x^2 - 4$', '$f^{\\prime}(x) = 6x^2 + 10x - 4 + 9$'],
+      steps: [
+        'Summenregel: gliedweise ableiten.',
+        '$2 \\cdot 3x^2 + 5 \\cdot 2x - 4 + 0 = 6x^2 + 10x - 4$',
+        'Falle: $-4x$ wird zu $-4$ (das $x$ verschwindet), die Konstante $9$ fällt ganz weg.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\dfrac{1}{2}x^4 - 3x$.',
+      opts: ['$f^{\\prime}(x) = 2x^3 - 3x$', '$f^{\\prime}(x) = \\dfrac{1}{2}x^3 - 3$', '$f^{\\prime}(x) = 4x^3 - 3$', '$f^{\\prime}(x) = 2x^3 - 3$'],
+      steps: [
+        '$\\dfrac{1}{2} \\cdot 4x^3 = 2x^3$',
+        '$(3x)^{\\prime} = 3$, also $f^{\\prime}(x) = 2x^3 - 3$.',
+        'Probe im Kopf: Bei $x = 1$ ist der Anstieg $2 - 3 = -1$, der Graph fällt dort.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\dfrac{1}{x}$.',
+      opts: ['$f^{\\prime}(x) = -\\dfrac{2}{x^3}$', '$f^{\\prime}(x) = -\\dfrac{1}{x^2}$', '$f^{\\prime}(x) = -\\dfrac{1}{2x^2}$', '$f^{\\prime}(x) = \\dfrac{1}{x^2}$'],
+      steps: [
+        'Erst als Potenz schreiben: $\\dfrac{1}{x} = x^{-1}$.',
+        'Potenzregel: $f^{\\prime}(x) = -1 \\cdot x^{-2} = -\\dfrac{1}{x^2}$',
+        'Das Minus passt zum Bild: Die Hyperbel fällt auf beiden Ästen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\sqrt{x}$.',
+      opts: ['$f^{\\prime}(x) = \\dfrac{1}{\\sqrt{x}}$', '$f^{\\prime}(x) = \\dfrac{1}{2}\\sqrt{x}$', '$f^{\\prime}(x) = \\dfrac{1}{2\\sqrt{x}}$', '$f^{\\prime}(x) = 2\\sqrt{x}$'],
+      steps: [
+        'Als Potenz: $\\sqrt{x} = x^{\\frac{1}{2}}$.',
+        '$f^{\\prime}(x) = \\dfrac{1}{2}x^{-\\frac{1}{2}} = \\dfrac{1}{2\\sqrt{x}}$',
+        'Probe: Bei $x = 4$ ist der Anstieg $\\dfrac{1}{4}$ - die Wurzelkurve wird nach rechts immer flacher.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\dfrac{1}{x^2}$.',
+      opts: ['$f^{\\prime}(x) = -\\dfrac{1}{2x^3}$', '$f^{\\prime}(x) = \\dfrac{2}{x^3}$', '$f^{\\prime}(x) = -\\dfrac{2}{x}$', '$f^{\\prime}(x) = -\\dfrac{2}{x^3}$'],
+      steps: [
+        '$\\dfrac{1}{x^2} = x^{-2}$',
+        '$f^{\\prime}(x) = -2 \\cdot x^{-3} = -\\dfrac{2}{x^3}$',
+        'Falle: Der Exponent $-2$ wird um $1$ kleiner, also $-3$ - nicht größer.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\dfrac{1}{\\sqrt{x}}$.',
+      opts: ['$f^{\\prime}(x) = \\dfrac{1}{2}x^{-\\frac{3}{2}}$', '$f^{\\prime}(x) = -2x^{-\\frac{3}{2}}$', '$f^{\\prime}(x) = -\\dfrac{1}{2}x^{-\\frac{3}{2}}$', '$f^{\\prime}(x) = -\\dfrac{1}{2}x^{-\\frac{1}{2}}$'],
+      steps: [
+        'Als Potenz: $\\dfrac{1}{\\sqrt{x}} = x^{-\\frac{1}{2}}$.',
+        '$f^{\\prime}(x) = -\\dfrac{1}{2}x^{-\\frac{3}{2}}$, denn $-\\dfrac{1}{2} - 1 = -\\dfrac{3}{2}$.',
+        'In Wurzelschreibweise: $f^{\\prime}(x) = -\\dfrac{1}{2x\\sqrt{x}}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = (2x + 1)(x - 3)$.',
+      opts: ['$f^{\\prime}(x) = 2$', '$f^{\\prime}(x) = 2x - 5$', '$f^{\\prime}(x) = 4x - 5$', '$f^{\\prime}(x) = 4x - 6$'],
+      steps: [
+        'Ohne Produktregel: erst ausmultiplizieren.',
+        '$f(x) = 2x^2 - 6x + x - 3 = 2x^2 - 5x - 3$',
+        '$f^{\\prime}(x) = 4x - 5$. Falle: Die Ableitungen der Faktoren zu multiplizieren ($2 \\cdot 1 = 2$) ist falsch.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\dfrac{x^2 + 3}{x}$.',
+      opts: ['$f^{\\prime}(x) = 1 - \\dfrac{3}{x^2}$', '$f^{\\prime}(x) = 1 - \\dfrac{3}{x}$', '$f^{\\prime}(x) = 2x$', '$f^{\\prime}(x) = 1 + \\dfrac{3}{x^2}$'],
+      steps: [
+        'Ohne Quotientenregel: den Bruch aufteilen.',
+        '$f(x) = \\dfrac{x^2}{x} + \\dfrac{3}{x} = x + 3x^{-1}$',
+        '$f^{\\prime}(x) = 1 - 3x^{-2} = 1 - \\dfrac{3}{x^2}$. Falle: Zähler und Nenner einzeln abzuleiten ergibt Unsinn.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $f^{\\prime}(2)$ für $f(x) = x^3 - 6x^2 + 9x$.',
+      opts: ['$f^{\\prime}(2) = 3$', '$f^{\\prime}(2) = -9$', '$f^{\\prime}(2) = -3$', '$f^{\\prime}(2) = 2$'],
+      steps: [
+        '$f^{\\prime}(x) = 3x^2 - 12x + 9$',
+        '$f^{\\prime}(2) = 3 \\cdot 4 - 12 \\cdot 2 + 9 = 12 - 24 + 9 = -3$',
+        'Falle: $f(2) = 8 - 24 + 18 = 2$ ist der Funktionswert, nicht der Anstieg.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lautet die zweite Ableitung von $f(x) = x^5$?',
+      opts: ['$f^{\\prime\\prime}(x) = 60x^2$', '$f^{\\prime\\prime}(x) = 20x^3$', '$f^{\\prime\\prime}(x) = 5x^4$', '$f^{\\prime\\prime}(x) = 20x^4$'],
+      steps: [
+        '$f^{\\prime}(x) = 5x^4$',
+        'Noch einmal ableiten: $f^{\\prime\\prime}(x) = 5 \\cdot 4x^3 = 20x^3$',
+        'Falle: $60x^2$ wäre bereits $f^{\\prime\\prime\\prime}(x)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme $f^{\\prime\\prime}(x)$ für $f(x) = 2x^3 - 4x^2 + x$.',
+      opts: ['$f^{\\prime\\prime}(x) = 12x - 8$', '$f^{\\prime\\prime}(x) = 12x - 8x$', '$f^{\\prime\\prime}(x) = 12x - 4$', '$f^{\\prime\\prime}(x) = 6x^2 - 8x + 1$'],
+      steps: [
+        '$f^{\\prime}(x) = 6x^2 - 8x + 1$',
+        '$f^{\\prime\\prime}(x) = 12x - 8$ - der konstante Summand $1$ fällt weg.',
+        'Falle: $6x^2 - 8x + 1$ ist erst die erste Ableitung.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die dritte Ableitung von $f(x) = x^4$?',
+      opts: ['$f^{\\prime\\prime\\prime}(x) = 24x^2$', '$f^{\\prime\\prime\\prime}(x) = 24$', '$f^{\\prime\\prime\\prime}(x) = 24x$', '$f^{\\prime\\prime\\prime}(x) = 12x^2$'],
+      steps: [
+        '$f^{\\prime}(x) = 4x^3$, $f^{\\prime\\prime}(x) = 12x^2$',
+        '$f^{\\prime\\prime\\prime}(x) = 24x$',
+        'Erst die vierte Ableitung ist die Konstante $24$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $f^{\\prime\\prime}(1)$ für $f(x) = 2x^4 - x^2$.',
+      opts: ['$f^{\\prime\\prime}(1) = 6$', '$f^{\\prime\\prime}(1) = 23$', '$f^{\\prime\\prime}(1) = 26$', '$f^{\\prime\\prime}(1) = 22$'],
+      steps: [
+        '$f^{\\prime}(x) = 8x^3 - 2x$',
+        '$f^{\\prime\\prime}(x) = 24x^2 - 2$, also $f^{\\prime\\prime}(1) = 24 - 2 = 22$.',
+        'Falle: $f^{\\prime}(1) = 8 - 2 = 6$ ist die erste Ableitung an dieser Stelle.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Fahrzeug legt den Weg $s(t) = t^3 - 9t^2 + 24t$ zurück ($s$ in m, $t$ in s). Wie groß ist seine Beschleunigung $a(t) = s^{\\prime\\prime}(t)$ zum Zeitpunkt $t = 1$?',
+      opts: ['$-12\\,\\dfrac{\\mathrm{m}}{\\mathrm{s}^2}$', '$9\\,\\dfrac{\\mathrm{m}}{\\mathrm{s}^2}$', '$12\\,\\dfrac{\\mathrm{m}}{\\mathrm{s}^2}$', '$-18\\,\\dfrac{\\mathrm{m}}{\\mathrm{s}^2}$'],
+      steps: [
+        '$v(t) = s^{\\prime}(t) = 3t^2 - 18t + 24$',
+        '$a(t) = s^{\\prime\\prime}(t) = 6t - 18$, also $a(1) = 6 - 18 = -12\\,\\dfrac{\\mathrm{m}}{\\mathrm{s}^2}$.',
+        'Das Minus heißt: Das Fahrzeug bremst gerade. Falle: $v(1) = 9\\,\\dfrac{\\mathrm{m}}{\\mathrm{s}}$ ist die Geschwindigkeit.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Gesamtkosten eines Betriebs betragen $K(x) = 0{,}1x^3 - 2x^2 + 30x + 100$ (in €, $x$ in ME). Wie groß sind die Grenzkosten $K^{\\prime}(x)$ bei $x = 10$?',
+      opts: ['$30$ € je ME', '$20$ € je ME', '$300$ € je ME', '$10$ € je ME'],
+      steps: [
+        '$K^{\\prime}(x) = 0{,}3x^2 - 4x + 30$',
+        '$K^{\\prime}(10) = 0{,}3 \\cdot 100 - 40 + 30 = 30 - 40 + 30 = 20$',
+        'Falle: $K(10) = 100 - 200 + 300 + 100 = 300$ € sind die Gesamtkosten, nicht die Grenzkosten.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welchen Wert von $a$ hat der Graph von $f(x) = x^3 + a\\,x$ an der Stelle $x = 1$ den Anstieg $0$?',
+      opts: ['$a = -3$', '$a = 3$', '$a = -1$', '$a = 0$'],
+      steps: [
+        '$f^{\\prime}(x) = 3x^2 + a$',
+        'Bedingung: $f^{\\prime}(1) = 3 + a = 0$, also $a = -3$.',
+        'Probe: $f(x) = x^3 - 3x$ hat $f^{\\prime}(x) = 3x^2 - 3$ und damit $f^{\\prime}(1) = 0$.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

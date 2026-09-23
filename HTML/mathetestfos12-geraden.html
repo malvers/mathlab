@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Geraden im Raum — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w04-geraden',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Geraden im Raum',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 4 (LB 1) · 20 Aufgaben: Parametergleichung, Punktprobe, Spurpunkte · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 4 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Geradengleichung aufstellen (1-6), Punktprobe und Parameter (7-12), Spurpunkte (13-16), Quader und Anwendungen (17-20). Alles ohne CAS. */
+  questions: [
+    {
+      q: 'Die Gerade $g$ geht durch $P(1|2|3)$ und hat den Richtungsvektor $\\vec u = \\begin{pmatrix} 2 \\\\ 0 \\\\ -1 \\end{pmatrix}$. Wie lautet eine Gleichung von $g$?',
+      opts: ['$g: \\vec x = \\begin{pmatrix} 2 \\\\ 0 \\\\ -1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix}$', '$g: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 0 \\\\ -1 \\end{pmatrix}$', '$g: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 3 \\\\ 2 \\\\ 2 \\end{pmatrix}$', '$g: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 0 \\\\ 1 \\end{pmatrix}$'],
+      steps: [
+        'Punkt-Richtungs-Form: $\\vec x = \\vec p + t \\cdot \\vec u$ - Stützvektor ist der Ortsvektor des Punktes, dahinter der Richtungsvektor.',
+        '$g: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 0 \\\\ -1 \\end{pmatrix}$',
+        'Falle: Stütz- und Richtungsvektor vertauschen ergibt eine andere Gerade.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Stelle eine Gleichung der Geraden durch $A(1|0|2)$ und $B(3|4|1)$ auf.',
+      opts: ['$g: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 3 \\\\ 4 \\\\ 1 \\end{pmatrix}$', '$g: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 4 \\\\ 4 \\\\ 3 \\end{pmatrix}$', '$g: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 4 \\\\ -1 \\end{pmatrix}$', '$g: \\vec x = \\begin{pmatrix} 2 \\\\ 4 \\\\ -1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix}$'],
+      steps: [
+        'Zwei-Punkte-Form: $\\vec x = \\vec a + t \\cdot \\overrightarrow{AB}$',
+        '$\\overrightarrow{AB} = \\vec b - \\vec a = \\begin{pmatrix} 2 \\\\ 4 \\\\ -1 \\end{pmatrix}$',
+        'Falle: der Ortsvektor von $B$ ist kein Richtungsvektor - es muss die Differenz sein.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Gegeben ist $g: \\vec x = \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ -2 \\\\ 3 \\end{pmatrix}$. Welcher Vektor ist ebenfalls ein Richtungsvektor von $g$?',
+      opts: ['$\\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} 3 \\\\ -1 \\\\ 3 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix}$', '$\\begin{pmatrix} -2 \\\\ 4 \\\\ -6 \\end{pmatrix}$'],
+      steps: [
+        'Jedes Vielfache $k \\cdot \\vec u$ mit $k \\neq 0$ ist ein Richtungsvektor derselben Geraden.',
+        '$\\begin{pmatrix} -2 \\\\ 4 \\\\ -6 \\end{pmatrix} = -2 \\cdot \\begin{pmatrix} 1 \\\\ -2 \\\\ 3 \\end{pmatrix}$ - passt.',
+        'Der Stützvektor $\\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix}$ ist ein Punkt der Geraden, keine Richtung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Gerade $g$ geht durch den Ursprung und den Punkt $P(3|-1|2)$. Wie lautet eine Gleichung von $g$?',
+      opts: ['$g: \\vec x = t \\cdot \\begin{pmatrix} 3 \\\\ 1 \\\\ 2 \\end{pmatrix}$', '$g: \\vec x = \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 3 \\\\ -1 \\\\ 2 \\end{pmatrix}$', '$g: \\vec x = t \\cdot \\begin{pmatrix} 3 \\\\ -1 \\\\ 2 \\end{pmatrix}$', '$g: \\vec x = \\begin{pmatrix} 3 \\\\ -1 \\\\ 2 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$'],
+      steps: [
+        'Stützpunkt $O(0|0|0)$, Richtungsvektor $\\overrightarrow{OP} = \\begin{pmatrix} 3 \\\\ -1 \\\\ 2 \\end{pmatrix}$',
+        '$g: \\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 3 \\\\ -1 \\\\ 2 \\end{pmatrix} = t \\cdot \\begin{pmatrix} 3 \\\\ -1 \\\\ 2 \\end{pmatrix}$',
+        'Probe: $t = 1$ liefert $P$, $t = 0$ den Ursprung.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele Richtungsvektoren hat eine Gerade im Raum?',
+      opts: ['unendlich viele - jedes Vielfache $k \\cdot \\vec u$ mit $k \\neq 0$', 'genau einen', 'genau drei, einen für jede Koordinatenachse', 'genau zwei: $\\vec u$ und $-\\vec u$'],
+      steps: [
+        'Ein Richtungsvektor gibt nur die Richtung an; seine Länge und seine Orientierung sind frei.',
+        'Deshalb beschreiben $\\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 0 \\\\ -1 \\end{pmatrix}$ und $\\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + s \\cdot \\begin{pmatrix} -4 \\\\ 0 \\\\ 2 \\end{pmatrix}$ dieselbe Gerade.',
+        'Ebenso darf jeder Punkt der Geraden als Stützpunkt dienen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Stelle eine Gleichung der Geraden durch $A(2|-1|4)$ und $B(2|3|4)$ auf.',
+      opts: ['$g: \\vec x = \\begin{pmatrix} 2 \\\\ -1 \\\\ 4 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$', '$g: \\vec x = \\begin{pmatrix} 2 \\\\ -1 \\\\ 4 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 4 \\\\ 2 \\\\ 8 \\end{pmatrix}$', '$g: \\vec x = \\begin{pmatrix} 2 \\\\ -1 \\\\ 4 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix}$', '$g: \\vec x = \\begin{pmatrix} 0 \\\\ 4 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ -1 \\\\ 4 \\end{pmatrix}$'],
+      steps: [
+        '$\\overrightarrow{AB} = \\begin{pmatrix} 0 \\\\ 4 \\\\ 0 \\end{pmatrix}$, gekürzt zu $\\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$ - das ist erlaubt, nur die Richtung zählt.',
+        '$g: \\vec x = \\begin{pmatrix} 2 \\\\ -1 \\\\ 4 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$',
+        'Die Gerade verläuft parallel zur $y$-Achse: nur die $y$-Koordinate ändert sich.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Liegt der Punkt $P(5|2|1)$ auf $g: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 0 \\\\ -1 \\end{pmatrix}$?',
+      opts: ['ja, für $t = -2$', 'nein, die dritte Koordinate passt nicht', 'nein, die zweite Koordinate passt nicht', 'ja, für $t = 2$'],
+      steps: [
+        'Punktprobe: $\\vec p$ einsetzen und zeilenweise nach $t$ auflösen.',
+        '$1 + 2t = 5$ gibt $t = 2$; zweite Zeile: $2 = 2$ stimmt; dritte Zeile: $3 - 2 = 1$ stimmt.',
+        'Alle drei Zeilen liefern denselben Wert - $P$ liegt auf $g$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Liegt der Punkt $Q(3|4|0)$ auf $g: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 4 \\\\ -1 \\end{pmatrix}$?',
+      opts: ['nein: aus den ersten beiden Zeilen folgt $t = 1$, aber $2 - 1 = 1 \\neq 0$', 'ja, für $t = 1$', 'nein, die erste Koordinate passt nicht', 'ja, für $t = 2$'],
+      steps: [
+        '$1 + 2t = 3$ gibt $t = 1$; $0 + 4t = 4$ gibt ebenfalls $t = 1$.',
+        'Dritte Zeile: $2 - 1 \\cdot 1 = 1$, aber die $z$-Koordinate von $Q$ ist $0$ - Widerspruch.',
+        'Falle: nach zwei passenden Zeilen aufhören. Alle drei müssen stimmen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für welchen Parameterwert $t$ liefert $g: \\vec x = \\begin{pmatrix} 0 \\\\ 1 \\\\ -2 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ -1 \\\\ 2 \\end{pmatrix}$ den Punkt $(3|-2|4)$?',
+      opts: ['$t = -3$', '$t = 3$', '$t = 2$', 'für keinen Wert von $t$'],
+      steps: [
+        '$0 + t = 3$ gibt $t = 3$.',
+        'Probe: $1 - 3 = -2$ und $-2 + 2 \\cdot 3 = 4$ - beide Zeilen passen.',
+        'Der Punkt liegt also auf $g$, und zwar bei $t = 3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welcher Punkt liegt auf $g: \\vec x = \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ -1 \\\\ 3 \\end{pmatrix}$?',
+      opts: ['$(2|-1|3)$', '$(-1|2|-1)$', '$(3|0|3)$', '$(5|-1|7)$'],
+      steps: [
+        '$(5|-1|7)$: $1 + 2t = 5$ gibt $t = 2$; $1 - 2 = -1$ und $1 + 6 = 7$ - passt.',
+        '$(3|0|3)$: $t = 1$ liefert $(3|0|4)$, nicht $(3|0|3)$. $(-1|2|-1)$: $t = -1$ liefert $(-1|2|-2)$.',
+        '$(2|-1|3)$ sind nur die Koordinaten des Richtungsvektors - als Punkt liegt er nicht auf $g$: $t = \\frac{1}{2}$ liefert $(2|0{,}5|2{,}5)$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne den Punkt von $g: \\vec x = \\begin{pmatrix} 4 \\\\ 0 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} -1 \\\\ 2 \\\\ 3 \\end{pmatrix}$ für $t = -2$.',
+      opts: ['$(5|-2|-2)$', '$(2|4|7)$', '$(6|-4|-5)$', '$(2|-4|-6)$'],
+      steps: [
+        '$\\vec x = \\begin{pmatrix} 4 \\\\ 0 \\\\ 1 \\end{pmatrix} - 2 \\cdot \\begin{pmatrix} -1 \\\\ 2 \\\\ 3 \\end{pmatrix} = \\begin{pmatrix} 4 \\\\ 0 \\\\ 1 \\end{pmatrix} + \\begin{pmatrix} 2 \\\\ -4 \\\\ -6 \\end{pmatrix}$',
+        '$= \\begin{pmatrix} 6 \\\\ -4 \\\\ -5 \\end{pmatrix}$',
+        'Falle: $-2 \\cdot (-1) = +2$; und den Stützvektor nicht vergessen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der Punkt $P(3|a|4)$ liegt auf $g: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ -1 \\\\ 2 \\end{pmatrix}$. Bestimme $a$.',
+      opts: ['$a = 2$', '$a = 0$', '$a = 4$', '$a = -2$'],
+      steps: [
+        'Aus der ersten Zeile: $1 + t = 3$, also $t = 2$. Probe dritte Zeile: $0 + 2 \\cdot 2 = 4$ - passt.',
+        'Zweite Zeile mit $t = 2$: $a = 2 - 2 = 0$',
+        'Falle: $2 + 2 = 4$ - das Minus im Richtungsvektor übersehen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme den Spurpunkt von $g: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 0 \\\\ -1 \\end{pmatrix}$ mit der $x$-$y$-Ebene.',
+      opts: ['$S_{xy}(1|2|0)$', '$S_{xy}(-5|2|0)$', '$S_{xy}(7|2|0)$', '$S_{xy}(7|2|3)$'],
+      steps: [
+        'In der $x$-$y$-Ebene ist $z = 0$: $3 - t = 0$, also $t = 3$.',
+        '$t = 3$ einsetzen: $x = 1 + 6 = 7$, $y = 2$, $z = 0$ - Spurpunkt $S_{xy}(7|2|0)$.',
+        'Falle: einfach $z$ durch $0$ ersetzen ($(1|2|0)$) - der Punkt liegt nicht auf $g$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme den Spurpunkt von $g: \\vec x = \\begin{pmatrix} 2 \\\\ 4 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ -2 \\\\ 3 \\end{pmatrix}$ mit der $x$-$z$-Ebene.',
+      opts: ['$S_{xz}(2|0|1)$', '$S_{xz}(0|0|-5)$', '$S_{xz}(3|2|4)$', '$S_{xz}(4|0|7)$'],
+      steps: [
+        'In der $x$-$z$-Ebene ist $y = 0$: $4 - 2t = 0$, also $t = 2$.',
+        '$x = 2 + 2 = 4$, $z = 1 + 6 = 7$ - Spurpunkt $S_{xz}(4|0|7)$.',
+        '$(0|0|-5)$ gehört zu $t = -2$ - Vorzeichenfehler beim Auflösen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme den Spurpunkt von $g: \\vec x = \\begin{pmatrix} 3 \\\\ 1 \\\\ -2 \\end{pmatrix} + t \\cdot \\begin{pmatrix} -1 \\\\ 2 \\\\ 1 \\end{pmatrix}$ mit der $y$-$z$-Ebene.',
+      opts: ['$S_{yz}(0|-5|-5)$', '$S_{yz}(0|7|1)$', '$S_{yz}(0|1|-2)$', '$S_{yz}(0|7|-1)$'],
+      steps: [
+        'In der $y$-$z$-Ebene ist $x = 0$: $3 - t = 0$, also $t = 3$.',
+        '$y = 1 + 6 = 7$, $z = -2 + 3 = 1$ - Spurpunkt $S_{yz}(0|7|1)$.',
+        'Probe: $t = 3$ in alle drei Zeilen einsetzen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Spurpunkt hat die Gerade $g: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix}$ nicht?',
+      opts: ['keinen mit der $x$-$y$-Ebene, weil $z = 3$ konstant bleibt', 'keinen mit der $y$-$z$-Ebene', 'keinen mit der $x$-$z$-Ebene', 'Sie hat alle drei Spurpunkte.'],
+      steps: [
+        'Die $z$-Koordinate ist $3 + 0 \\cdot t = 3$ für jedes $t$ - sie wird nie $0$.',
+        '$g$ verläuft parallel zur $x$-$y$-Ebene in der Höhe $3$ und trifft sie nicht.',
+        'Mit den anderen beiden Ebenen: $y = 0$ bei $t = -2$, $x = 0$ bei $t = -\\frac{1}{2}$ - die gibt es.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Quader hat die Ecken $A(0|0|0)$, $B(4|0|0)$, $C(4|3|0)$, $D(0|3|0)$ und darüber $E$, $F$, $G$, $H$ in der Höhe $2$. Wie lautet eine Gleichung der Geraden durch die Kante $\\overline{BF}$?',
+      fig: '<svg viewBox="0 0 360 340" width="360" height="340" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Quader ABCDEFGH"><path d="M 89.6 304.8 L 197.6 304.8 L 197.6 232.8 L 89.6 232.8 Z" fill="#F5C242" opacity="0.22"/><path d="M 140 168 L 89.6 232.8 L 197.6 232.8 L 248 168 Z" fill="#F5C242" opacity="0.12"/><line x1="89.6" y1="304.8" x2="197.6" y2="304.8" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="197.6" y1="304.8" x2="248" y2="240" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="89.6" y1="304.8" x2="89.6" y2="232.8" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="197.6" y1="304.8" x2="197.6" y2="232.8" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="248" y1="240" x2="248" y2="168" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="140" y1="168" x2="89.6" y2="232.8" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="89.6" y1="232.8" x2="197.6" y2="232.8" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="197.6" y1="232.8" x2="248" y2="168" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="248" y1="168" x2="140" y2="168" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="140" y1="240" x2="89.6" y2="304.8" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="4 3"/><line x1="140" y1="240" x2="248" y2="240" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="4 3"/><line x1="140" y1="240" x2="140" y2="168" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="4 3"/><line x1="89.6" y1="304.8" x2="89.6" y2="232.8" stroke="#B02418" stroke-width="3" stroke-linecap="round"/><circle cx="140" cy="240" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="132" y="245" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">A</text><circle cx="89.6" cy="304.8" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="82.6" y="319.8" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">B</text><circle cx="197.6" cy="304.8" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="204.6" y="319.8" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">C</text><circle cx="248" cy="240" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="256" y="245" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">D</text><circle cx="140" cy="168" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="133" y="161" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">E</text><circle cx="89.6" cy="232.8" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="81.6" y="237.8" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">F</text><circle cx="197.6" cy="232.8" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="205.6" y="237.8" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">G</text><circle cx="248" cy="168" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="255" y="161" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">H</text></svg>',
+      figcap: 'Quader mit der Kante $\\overline{BF}$',
+      opts: ['$g: \\vec x = \\begin{pmatrix} 4 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix}$', '$g: \\vec x = \\begin{pmatrix} 4 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$', '$g: \\vec x = \\begin{pmatrix} 4 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 4 \\\\ 0 \\\\ 2 \\end{pmatrix}$', '$g: \\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 4 \\\\ 0 \\\\ 2 \\end{pmatrix}$'],
+      steps: [
+        '$F$ liegt senkrecht über $B$: $F(4|0|2)$, also $\\overrightarrow{BF} = \\begin{pmatrix} 0 \\\\ 0 \\\\ 2 \\end{pmatrix}$, gekürzt $\\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix}$.',
+        '$g: \\vec x = \\begin{pmatrix} 4 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix}$',
+        '$\\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 4 \\\\ 0 \\\\ 2 \\end{pmatrix}$ wäre die Flächendiagonale $\\overline{AF}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Im selben Quader: Liegt der Punkt $P(2|1{,}5|2)$ auf der Geraden durch die Flächendiagonale $\\overline{EG}$?',
+      fig: '<svg viewBox="0 0 360 340" width="360" height="340" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Quader ABCDEFGH"><path d="M 89.6 304.8 L 197.6 304.8 L 197.6 232.8 L 89.6 232.8 Z" fill="#F5C242" opacity="0.22"/><path d="M 140 168 L 89.6 232.8 L 197.6 232.8 L 248 168 Z" fill="#F5C242" opacity="0.12"/><line x1="89.6" y1="304.8" x2="197.6" y2="304.8" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="197.6" y1="304.8" x2="248" y2="240" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="89.6" y1="304.8" x2="89.6" y2="232.8" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="197.6" y1="304.8" x2="197.6" y2="232.8" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="248" y1="240" x2="248" y2="168" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="140" y1="168" x2="89.6" y2="232.8" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="89.6" y1="232.8" x2="197.6" y2="232.8" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="197.6" y1="232.8" x2="248" y2="168" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="248" y1="168" x2="140" y2="168" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="140" y1="240" x2="89.6" y2="304.8" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="4 3"/><line x1="140" y1="240" x2="248" y2="240" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="4 3"/><line x1="140" y1="240" x2="140" y2="168" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="4 3"/><line x1="140" y1="168" x2="197.6" y2="232.8" stroke="#799E31" stroke-width="3" stroke-linecap="round"/><circle cx="140" cy="240" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="132" y="245" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">A</text><circle cx="89.6" cy="304.8" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="82.6" y="319.8" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">B</text><circle cx="197.6" cy="304.8" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="204.6" y="319.8" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">C</text><circle cx="248" cy="240" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="256" y="245" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">D</text><circle cx="140" cy="168" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="133" y="161" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">E</text><circle cx="89.6" cy="232.8" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="81.6" y="237.8" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">F</text><circle cx="197.6" cy="232.8" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="205.6" y="237.8" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">G</text><circle cx="248" cy="168" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="255" y="161" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">H</text></svg>',
+      figcap: 'Quader mit der Flächendiagonale $\\overline{EG}$',
+      opts: ['ja, für $t = 2$', 'nein, die $y$-Koordinate passt nicht', 'ja, für $t = \\dfrac{1}{2}$ - $P$ ist der Mittelpunkt der Deckfläche', 'nein, die $z$-Koordinate passt nicht'],
+      steps: [
+        '$E(0|0|2)$, $G(4|3|2)$: $g_{EG}: \\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 2 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 4 \\\\ 3 \\\\ 0 \\end{pmatrix}$',
+        '$4t = 2$ gibt $t = \\frac{1}{2}$; $3 \\cdot \\frac{1}{2} = 1{,}5$ stimmt; $z = 2$ stimmt.',
+        '$t = \\frac{1}{2}$ heißt: $P$ liegt genau in der Mitte zwischen $E$ und $G$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Drohne startet in $P(2|1|0)$ und fliegt geradlinig; ihre Position nach $t$ Sekunden ist $\\vec x = \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 3 \\\\ 4 \\\\ 1 \\end{pmatrix}$ (Angaben in Metern). Wann erreicht sie die Höhe $6\\,\\mathrm{m}$, und wo ist sie dann?',
+      opts: ['nach $2\\,\\mathrm{s}$ im Punkt $(8|9|2)$', 'nach $6\\,\\mathrm{s}$ im Punkt $(20|25|6)$', 'nach $6\\,\\mathrm{s}$ im Punkt $(18|24|6)$', 'nach $3\\,\\mathrm{s}$ im Punkt $(11|13|3)$'],
+      steps: [
+        'Höhe ist die $z$-Koordinate: $0 + 1 \\cdot t = 6$, also $t = 6$.',
+        '$x = 2 + 18 = 20$, $y = 1 + 24 = 25$, $z = 6$',
+        'Falle: $(18|24|6)$ vergisst den Startpunkt $P$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Lichtstrahl geht von der Lampe $L(2|3|6)$ aus durch den Punkt $P(3|4|4)$. Wo trifft er den Boden (die $x$-$y$-Ebene)?',
+      opts: ['$(6|7|0)$', '$(4|5|2)$', '$(3|4|0)$', '$(5|6|0)$'],
+      steps: [
+        'Gerade durch $L$ und $P$: $\\overrightarrow{LP} = \\begin{pmatrix} 1 \\\\ 1 \\\\ -2 \\end{pmatrix}$, also $g: \\vec x = \\begin{pmatrix} 2 \\\\ 3 \\\\ 6 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ -2 \\end{pmatrix}$',
+        'Boden: $z = 0$, also $6 - 2t = 0$, $t = 3$.',
+        '$x = 2 + 3 = 5$, $y = 3 + 3 = 6$ - Auftreffpunkt $(5|6|0)$; das ist der Spurpunkt $S_{xy}$.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

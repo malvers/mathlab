@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Ebenen im Raum I — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w06-ebenen1',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Ebenen im Raum I',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 6 (LB 1) · 20 Aufgaben: Parametergleichung, Vektorprodukt, Normalenvektor, Koordinatengleichung · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 6 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Parametergleichung (1-5), Vektorprodukt und Normalenvektor (6-11), Koordinatengleichung (12-16), Spurpunkte und Anwendungen (17-20). Alles ohne CAS. */
+  questions: [
+    {
+      q: 'Stelle eine Parametergleichung der Ebene durch $A(1|2|0)$, $B(3|2|1)$ und $C(1|5|2)$ auf.',
+      opts: ['$E: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 2 \\\\ 0 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 3 \\\\ 2 \\end{pmatrix}$', '$E: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 3 \\\\ 2 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 5 \\\\ 2 \\end{pmatrix}$', '$E: \\vec x = \\begin{pmatrix} 2 \\\\ 0 \\\\ 1 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 3 \\\\ 2 \\end{pmatrix}$', '$E: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 4 \\\\ 4 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 7 \\\\ 2 \\end{pmatrix}$'],
+      steps: [
+        'Drei-Punkte-Form: $\\vec x = \\vec a + s \\cdot \\overrightarrow{AB} + t \\cdot \\overrightarrow{AC}$',
+        '$\\overrightarrow{AB} = \\begin{pmatrix} 2 \\\\ 0 \\\\ 1 \\end{pmatrix}$ und $\\overrightarrow{AC} = \\begin{pmatrix} 0 \\\\ 3 \\\\ 2 \\end{pmatrix}$ - jeweils „Spitze minus Fuß“.',
+        'Falle: die Ortsvektoren von $B$ und $C$ sind keine Spannvektoren, es müssen die Differenzen sein.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Liegt $P(3|3|3)$ in der Ebene $E: \\vec x = \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 2 \\\\ 1 \\end{pmatrix}$?',
+      opts: ['ja, mit $s = 2$ und $t = 1$', 'das lässt sich nur mit einer Koordinatengleichung entscheiden', 'nein, $P$ liegt nicht in $E$', 'ja, mit $s = 1$ und $t = 2$'],
+      steps: [
+        'Punktprobe: $1 + s = 3$, $1 + 2t = 3$, $s + t = 3$.',
+        'Aus den ersten beiden Zeilen: $s = 2$ und $t = 1$. Probe in der dritten: $2 + 1 = 3$ - stimmt.',
+        'Erst wenn alle drei Zeilen passen, liegt der Punkt in der Ebene.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Bedingung müssen die beiden Spannvektoren einer Ebene erfüllen?',
+      opts: ['Sie müssen senkrecht zum Stützvektor stehen.', 'Sie dürfen nicht parallel (kollinear) sein.', 'Sie müssen senkrecht aufeinander stehen.', 'Sie müssen beide den Betrag $1$ haben.'],
+      steps: [
+        'Zwei parallele Spannvektoren spannen nur eine Gerade auf, keine Ebene.',
+        'Senkrecht oder normiert müssen sie nicht sein - das macht die Rechnung nur bequemer.',
+        'Probe: ist $\\vec v = k \\cdot \\vec u$, so beschreibt die Gleichung keine Ebene.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Stelle eine Parametergleichung der Ebene auf, die den Punkt $P(2|1|3)$ und die Gerade $g: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix} + r \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix}$ enthält.',
+      opts: ['$E: \\vec x = \\begin{pmatrix} 2 \\\\ 1 \\\\ 3 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix}$', '$E: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 3 \\\\ 1 \\\\ 4 \\end{pmatrix}$', '$E: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 2 \\end{pmatrix}$', '$E: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ 3 \\end{pmatrix}$'],
+      steps: [
+        'Die Ebene erbt Stützpunkt und Richtungsvektor der Geraden.',
+        'Zweiter Spannvektor: vom Stützpunkt der Geraden zu $P$, also $\\begin{pmatrix} 2 \\\\ 1 \\\\ 3 \\end{pmatrix} - \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix} = \\begin{pmatrix} 1 \\\\ 1 \\\\ 2 \\end{pmatrix}$.',
+        'Probe: $s = 0$, $t = 1$ liefert $P(2|1|3)$; $t = 0$ liefert die ganze Gerade.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Gleichung beschreibt die Ebene, die parallel zur $x$-$y$-Ebene in der Höhe $z = 4$ liegt?',
+      opts: ['$E: \\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 4 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$', '$E: \\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 4 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix}$', '$E: \\vec x = \\begin{pmatrix} 4 \\\\ 0 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix}$', '$E: \\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$'],
+      steps: [
+        'Der Stützpunkt muss die Höhe $4$ haben: $(0|0|4)$.',
+        'Die Spannvektoren dürfen die Höhe nicht verändern, also $\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $\\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$.',
+        'Jeder Punkt der Ebene hat dann $z = 4$ - das ist die Koordinatengleichung $z = 4$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne das Vektorprodukt $\\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix} \\times \\begin{pmatrix} 3 \\\\ 1 \\\\ 0 \\end{pmatrix}$.',
+      opts: ['$\\begin{pmatrix} -2 \\\\ -6 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} 3 \\\\ 0 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} -2 \\\\ 6 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ 6 \\\\ 1 \\end{pmatrix}$'],
+      steps: [
+        '$\\vec u \\times \\vec v = \\begin{pmatrix} u_2 v_3 - u_3 v_2 \\\\ u_3 v_1 - u_1 v_3 \\\\ u_1 v_2 - u_2 v_1 \\end{pmatrix}$',
+        '$\\begin{pmatrix} 0 \\cdot 0 - 2 \\cdot 1 \\\\ 2 \\cdot 3 - 1 \\cdot 0 \\\\ 1 \\cdot 1 - 0 \\cdot 3 \\end{pmatrix} = \\begin{pmatrix} -2 \\\\ 6 \\\\ 1 \\end{pmatrix}$',
+        'Probe: $\\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix} \\cdot \\begin{pmatrix} -2 \\\\ 6 \\\\ 1 \\end{pmatrix} = -2 + 0 + 2 = 0$ - das Ergebnis steht senkrecht auf beiden.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Eigenschaft hat das Vektorprodukt $\\vec u \\times \\vec v$?',
+      opts: ['Es ist parallel zu $\\vec u$.', 'Es steht senkrecht auf $\\vec u$ und auf $\\vec v$.', 'Sein Betrag ist stets $|\\vec u| \\cdot |\\vec v|$.', 'Es ist eine Zahl, kein Vektor.'],
+      steps: [
+        'Deshalb ist es genau der Normalenvektor der von $\\vec u$ und $\\vec v$ aufgespannten Ebene.',
+        'Eine Zahl liefert das Skalarprodukt $\\vec u \\cdot \\vec v$ - beim Vektorprodukt kommt ein Vektor heraus.',
+        'Für den Betrag gilt $|\\vec u \\times \\vec v| = |\\vec u| \\cdot |\\vec v| \\cdot \\sin\\varphi$, also nur bei $\\varphi = 90^\\circ$ das volle Produkt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bei welchem Paar ist das Vektorprodukt der Nullvektor?',
+      opts: ['$\\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$ und $\\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix}$ und $\\begin{pmatrix} 2 \\\\ 4 \\\\ 6 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix}$ und $\\begin{pmatrix} 3 \\\\ 2 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $\\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$'],
+      steps: [
+        '$\\begin{pmatrix} 2 \\\\ 4 \\\\ 6 \\end{pmatrix} = 2 \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix}$ - die Vektoren sind parallel.',
+        'Parallele Vektoren spannen kein Parallelogramm auf, die Fläche ist $0$: $\\vec u \\times \\vec v = \\vec 0$.',
+        'Falle: $\\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$ und $\\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix}$ stehen senkrecht - da ist das Skalarprodukt $0$, nicht das Vektorprodukt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme einen Normalenvektor der Ebene $E: \\vec x = \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix}$.',
+      opts: ['$\\begin{pmatrix} 2 \\\\ 0 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} 3 \\\\ 1 \\\\ 2 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ -4 \\\\ -1 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ 4 \\\\ -1 \\end{pmatrix}$'],
+      steps: [
+        'Der Normalenvektor ist das Vektorprodukt der Spannvektoren: $\\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix} \\times \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix}$.',
+        '$\\begin{pmatrix} 1 \\cdot 2 - 0 \\cdot 0 \\\\ 0 \\cdot 1 - 2 \\cdot 2 \\\\ 2 \\cdot 0 - 1 \\cdot 1 \\end{pmatrix} = \\begin{pmatrix} 2 \\\\ -4 \\\\ -1 \\end{pmatrix}$',
+        'Probe: $4 - 4 + 0 = 0$ und $2 + 0 - 2 = 0$ - beide Skalarprodukte verschwinden.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ist $\\vec n = \\begin{pmatrix} 1 \\\\ -2 \\\\ 1 \\end{pmatrix}$ ein Normalenvektor der Ebene $E: \\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$?',
+      opts: ['ja, denn beide Skalarprodukte sind $0$', 'nein, denn $\\vec n$ hat nicht den Betrag $1$', 'ja, denn $\\vec n \\times \\vec u = \\vec 0$', 'nein, denn $\\vec n \\cdot \\vec u = 4$'],
+      steps: [
+        '$\\vec n \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix} = 2 - 2 + 0 = 0$',
+        '$\\vec n \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix} = 1 - 2 + 1 = 0$',
+        'Der Vektor steht auf beiden Spannvektoren senkrecht - das Vektorprodukt muss man dafür nicht ausrechnen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme einen Normalenvektor der Ebene durch $A(2|0|0)$, $B(0|4|0)$ und $C(0|0|4)$.',
+      opts: ['$\\begin{pmatrix} 2 \\\\ 4 \\\\ 4 \\end{pmatrix}$', '$\\begin{pmatrix} -2 \\\\ 4 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}$', '$\\begin{pmatrix} 2 \\\\ 1 \\\\ 1 \\end{pmatrix}$'],
+      steps: [
+        '$\\overrightarrow{AB} = \\begin{pmatrix} -2 \\\\ 4 \\\\ 0 \\end{pmatrix}$ und $\\overrightarrow{AC} = \\begin{pmatrix} -2 \\\\ 0 \\\\ 4 \\end{pmatrix}$',
+        '$\\overrightarrow{AB} \\times \\overrightarrow{AC} = \\begin{pmatrix} 16 \\\\ 8 \\\\ 8 \\end{pmatrix}$; gekürzt mit $8$: $\\begin{pmatrix} 2 \\\\ 1 \\\\ 1 \\end{pmatrix}$',
+        'Probe: $-4 + 4 + 0 = 0$ und $-4 + 0 + 4 = 0$. $\\begin{pmatrix} -2 \\\\ 4 \\\\ 0 \\end{pmatrix}$ liegt dagegen in der Ebene.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Die Ebene $E$ hat den Normalenvektor $\\vec n = \\begin{pmatrix} 2 \\\\ -1 \\\\ 3 \\end{pmatrix}$ und geht durch $P(1|1|2)$. Wie lautet ihre Koordinatengleichung?',
+      opts: ['$x + y + 2z = 6$', '$2x - y + 3z = -7$', '$2x - y + 3z = 4$', '$2x - y + 3z = 7$'],
+      steps: [
+        'Aus dem Normalenvektor kommen die Koeffizienten: $2x - y + 3z = d$.',
+        '$d$ durch Einsetzen von $P$: $2 \\cdot 1 - 1 + 3 \\cdot 2 = 7$',
+        'Falle: $d$ ist nicht die Summe der Punktkoordinaten ($1 + 1 + 2 = 4$), sondern das Skalarprodukt $\\vec n \\cdot \\vec p$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wandle $E: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$ in eine Koordinatengleichung um.',
+      opts: ['$x - y + z = 0$', '$x - y + z = 3$', '$x + y + z = 3$', '$x - y + z = 1$'],
+      steps: [
+        'Normalenvektor: $\\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix} \\times \\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix} = \\begin{pmatrix} 1 \\\\ -1 \\\\ 1 \\end{pmatrix}$',
+        'Ansatz $x - y + z = d$, Stützpunkt $(1|0|2)$ einsetzen: $1 - 0 + 2 = 3$',
+        'Probe mit einem zweiten Punkt, z. B. $s = 1$: $(2|1|2)$ gibt $2 - 1 + 2 = 3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Liegt $P(2|1|-1)$ in der Ebene $E: 3x - 2y + z = 3$?',
+      opts: ['das lässt sich nur mit der Parametergleichung prüfen', 'ja, denn $3 \\cdot 2 - 2 \\cdot 1 + (-1) = 3$', 'nein, es kommt $5$ heraus', 'nein, es kommt $9$ heraus'],
+      steps: [
+        'Punktprobe: die Koordinaten von $P$ in die linke Seite einsetzen.',
+        '$6 - 2 - 1 = 3$ - das ist genau die rechte Seite, also liegt $P$ in $E$.',
+        'In der Koordinatenform ist die Punktprobe nur eine Zeile - in der Parameterform ein ganzes LGS.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Ebene ist echt parallel zu $E: 2x + y - 2z = 6$?',
+      opts: ['$4x + 2y - 4z = 12$', '$2x + y + 2z = 6$', '$x + 2y - 2z = 6$', '$4x + 2y - 4z = 1$'],
+      steps: [
+        'Parallel heißt: gleicher Normalenvektor bis auf einen Faktor. $\\begin{pmatrix} 4 \\\\ 2 \\\\ -4 \\end{pmatrix} = 2 \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ -2 \\end{pmatrix}$',
+        'Echt parallel heißt außerdem: kein gemeinsamer Punkt. Die rechte Seite müsste bei $4x + 2y - 4z$ den Wert $12$ haben, damit es dieselbe Ebene wäre.',
+        '$4x + 2y - 4z = 12$ ist also $E$ selbst; die beiden anderen haben einen anderen Normalenvektor und schneiden $E$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Spurpunkte von $E: 2x + 3y + 6z = 12$.',
+      opts: ['$S_x(12|0|0)$, $S_y(0|12|0)$, $S_z(0|0|12)$', '$S_x(6|0|0)$, $S_y(0|2|0)$, $S_z(0|0|4)$', '$S_x(2|0|0)$, $S_y(0|3|0)$, $S_z(0|0|6)$', '$S_x(6|0|0)$, $S_y(0|4|0)$, $S_z(0|0|2)$'],
+      steps: [
+        'Spurpunkt auf der $x$-Achse: $y = z = 0$ setzen, also $2x = 12$ und $x = 6$.',
+        'Ebenso $3y = 12$ mit $y = 4$ und $6z = 12$ mit $z = 2$.',
+        'Merkregel: $d$ durch den jeweiligen Koeffizienten teilen - nicht die Koeffizienten selbst hinschreiben.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Ebene schneidet die $x$-Achse bei $4$, die $y$-Achse bei $6$ und die $z$-Achse bei $3$ (siehe Skizze). Wie lautet ihre Koordinatengleichung?',
+      fig: '<svg viewBox="0 0 360 270" width="360" height="270" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ebene mit ihren drei Spurpunkten"><defs><marker id="f1-ar-6E7E9F" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#6E7E9F"/></marker></defs><line x1="85" y1="175" x2="29" y2="247" stroke="#6E7E9F" stroke-width="1.1" marker-end="url(#f1-ar-6E7E9F)"/><text x="19" y="261" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#6E7E9F" text-anchor="end" font-style="italic">x</text><line x1="85" y1="175" x2="309" y2="175" stroke="#6E7E9F" stroke-width="1.1" marker-end="url(#f1-ar-6E7E9F)"/><text x="319" y="189" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#6E7E9F" text-anchor="start" font-style="italic">y</text><line x1="85" y1="175" x2="85" y2="47" stroke="#6E7E9F" stroke-width="1.1" marker-end="url(#f1-ar-6E7E9F)"/><text x="95" y="43" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#6E7E9F" text-anchor="start" font-style="italic">z</text><path d="M 40.2 232.6 L 277 175 L 85 79 Z" fill="#799E31" opacity="0.18"/><path d="M 40.2 232.6 L 277 175 L 85 79 Z" fill="none" stroke="#799E31" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/><circle cx="40.2" cy="232.6" r="3.0" fill="#799E31" stroke="#FFFFFF" stroke-width="1.4"/><text x="33.2" y="247.6" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Sx</text><circle cx="277" cy="175" r="3.0" fill="#799E31" stroke="#FFFFFF" stroke-width="1.4"/><text x="284" y="190" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Sy</text><circle cx="85" cy="79" r="3.0" fill="#799E31" stroke="#FFFFFF" stroke-width="1.4"/><text x="85" y="70" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Sz</text><text x="74" y="181" font-family="Raleway, system-ui, sans-serif" font-size="12" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">O</text></svg>',
+      figcap: 'Die Ebene und ihr Spurdreieck',
+      opts: ['$3x + 2y + 4z = 12$', '$2x + 3y + 4z = 12$', '$6x + 4y + 3z = 12$', '$4x + 6y + 3z = 12$'],
+      steps: [
+        'Ansatz $ax + by + cz = d$ mit $d = 12$ (dem kleinsten gemeinsamen Vielfachen von $4$, $6$ und $3$).',
+        '$a = \\dfrac{12}{4} = 3$, $b = \\dfrac{12}{6} = 2$, $c = \\dfrac{12}{3} = 4$',
+        'Probe: $(4|0|0)$ gibt $12$, $(0|6|0)$ gibt $12$, $(0|0|3)$ gibt $12$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Besonderheit hat die Ebene $E: 3y + 2z = 6$?',
+      opts: ['Sie verläuft parallel zur $x$-$y$-Ebene.', 'Sie geht durch den Ursprung.', 'Sie verläuft parallel zur $x$-Achse.', 'Sie verläuft parallel zur $y$-$z$-Ebene.'],
+      steps: [
+        'Der Normalenvektor ist $\\begin{pmatrix} 0 \\\\ 3 \\\\ 2 \\end{pmatrix}$; er steht senkrecht auf $\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$, der Richtung der $x$-Achse.',
+        'Ein Richtungsvektor der Ebene ist damit $\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ - die Ebene läuft in $x$-Richtung unbegrenzt weiter.',
+        'Durch den Ursprung geht sie nicht: $0 \\ne 6$. Deshalb gibt es auch keinen Spurpunkt auf der $x$-Achse.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Solaranlage liegt in der Ebene durch $A(0|0|2)$, $B(4|0|2)$ und $C(0|3|5)$ (Angaben in Metern). Wie lautet eine Koordinatengleichung dieser Ebene?',
+      opts: ['$x - y + z = 2$', '$-y + z = 0$', '$-y + z = 2$', '$y + z = 2$'],
+      steps: [
+        '$\\overrightarrow{AB} = \\begin{pmatrix} 4 \\\\ 0 \\\\ 0 \\end{pmatrix}$, $\\overrightarrow{AC} = \\begin{pmatrix} 0 \\\\ 3 \\\\ 3 \\end{pmatrix}$, Vektorprodukt $\\begin{pmatrix} 0 \\\\ -12 \\\\ 12 \\end{pmatrix}$, gekürzt $\\begin{pmatrix} 0 \\\\ -1 \\\\ 1 \\end{pmatrix}$.',
+        '$-y + z = d$ mit $A(0|0|2)$: $d = 2$.',
+        'Probe: $C$ gibt $-3 + 5 = 2$. Dass $x$ fehlt, passt: die Anlage steigt nur in $y$-Richtung an.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Liegen die vier Punkte $A(1|0|0)$, $B(0|1|0)$, $C(0|0|1)$ und $D(1|1|1)$ in einer gemeinsamen Ebene?',
+      opts: ['Ja, alle vier erfüllen $x + y + z = 1$.', 'Nein, weil $A$, $B$ und $C$ auf einer Geraden liegen.', 'Ja, weil sie Ecken eines Würfels sind.', 'Nein: $A$, $B$ und $C$ spannen die Ebene $x + y + z = 1$ auf, für $D$ ergibt sich aber $3$.'],
+      steps: [
+        'Die Ebene durch $A$, $B$, $C$ hat die Spurpunkte $(1|0|0)$, $(0|1|0)$, $(0|0|1)$, also $x + y + z = 1$.',
+        'Punktprobe für $D$: $1 + 1 + 1 = 3 \\ne 1$.',
+        '$D$ liegt also über der Ebene - vier Punkte im Raum liegen im Allgemeinen nicht in einer Ebene.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

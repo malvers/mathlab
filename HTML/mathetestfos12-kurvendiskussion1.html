@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Kurvendiskussion I — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w16-kurvendiskussion1',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Kurvendiskussion I',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 16 (LB 2) · 20 Aufgaben: Nullstellen und Vielfachheit, Symmetrie, Monotonie, Extrempunkte · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 16 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Nullstellen und Vielfachheit (1-6), Symmetrie (7-10), Monotonie (11-14), Extrempunkte und ihre Art (15-18), Anwendungen (19-20). Alles ohne CAS. */
+  questions: [
+    {
+      q: 'Bestimme die Nullstellen von $f(x) = x^2 - 6x + 5$.',
+      opts: ['$x_1 = 5$ und $x_2 = 6$', '$x_1 = -1$ und $x_2 = -5$', '$x_1 = 1$ und $x_2 = 6$', '$x_1 = 1$ und $x_2 = 5$'],
+      steps: [
+        'Satz von Vieta oder $pq$-Formel: gesucht sind zwei Zahlen mit der Summe $6$ und dem Produkt $5$.',
+        '$f(x) = (x - 1)(x - 5)$, also $x_1 = 1$ und $x_2 = 5$.',
+        'Probe: $f(1) = 1 - 6 + 5 = 0$ und $f(5) = 25 - 30 + 5 = 0$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Nullstellen hat $f(x) = (x + 2)(x - 1)(x - 4)$?',
+      opts: ['$x_1 = -2$, $x_2 = 1$, $x_3 = 4$', '$x_1 = -2$, $x_2 = -1$, $x_3 = -4$', 'keine - dazu müsste man erst ausmultiplizieren', '$x_1 = 2$, $x_2 = -1$, $x_3 = -4$'],
+      steps: [
+        'Ein Produkt ist genau dann $0$, wenn einer der Faktoren $0$ ist (Satz vom Nullprodukt).',
+        '$x + 2 = 0$, $x - 1 = 0$, $x - 4 = 0$ liefern $-2$, $1$ und $4$.',
+        'Falle: Das Vorzeichen in der Klammer dreht sich um - $(x + 2)$ gehört zur Nullstelle $-2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Abbildung zeigt den Graphen von $f(x) = (x - 2)^2 (x + 1)$. Was passiert an den Nullstellen?',
+      fig: '<svg viewBox="0 0 520 340" width="520" height="340" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Graph von f mit einer einfachen und einer doppelten Nullstelle"><defs><clipPath id="f1-clip"><rect x="39" y="19" width="460" height="288"/></clipPath><marker id="f1-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="117.77" y1="306" x2="117.77" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="204.19" y1="306" x2="204.19" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="290.6" y1="306" x2="290.6" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="377.02" y1="306" x2="377.02" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="463.43" y1="306" x2="463.43" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="306" x2="498" y2="306" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="280" x2="498" y2="280" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="254" x2="498" y2="254" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="228" x2="498" y2="228" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="202" x2="498" y2="202" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="176" x2="498" y2="176" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="150" x2="498" y2="150" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="124" x2="498" y2="124" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="98" x2="498" y2="98" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="72" x2="498" y2="72" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="46" x2="498" y2="46" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="20" x2="498" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="202" x2="498" y2="202" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><line x1="204.19" y1="306" x2="204.19" y2="20" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><text x="500" y="218" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">x</text><text x="192.19" y="18" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">y</text><text x="197.19" y="217" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="117.77" y1="198.5" x2="117.77" y2="205.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="290.6" y1="198.5" x2="290.6" y2="205.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="377.02" y1="198.5" x2="377.02" y2="205.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="463.43" y1="198.5" x2="463.43" y2="205.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="200.69" y1="306" x2="207.69" y2="306" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="200.69" y1="280" x2="207.69" y2="280" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="200.69" y1="254" x2="207.69" y2="254" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="200.69" y1="228" x2="207.69" y2="228" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="200.69" y1="176" x2="207.69" y2="176" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="200.69" y1="150" x2="207.69" y2="150" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="200.69" y1="124" x2="207.69" y2="124" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="200.69" y1="98" x2="207.69" y2="98" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="200.69" y1="72" x2="207.69" y2="72" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="200.69" y1="46" x2="207.69" y2="46" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><g clip-path="url(#f1-clip)"><path d="M 57.28 451.16 L 58.91 441.99 L 60.54 432.96 L 62.17 424.09 L 63.8 415.36 L 65.43 406.77 L 67.05 398.34 L 68.68 390.04 L 70.31 381.89 L 71.94 373.87 L 73.57 366 L 75.2 358.27 L 76.83 350.67 L 78.45 343.22 L 80.08 335.89 L 81.71 328.71 L 83.34 321.65 L 84.97 314.73 L 86.6 307.94 L 88.23 301.29 L 89.85 294.76 L 91.48 288.36 L 93.11 282.09 L 94.74 275.94 L 96.37 269.93 L 98 264.03 L 99.63 258.26 L 101.26 252.61 L 102.88 247.08 L 104.51 241.68 L 106.14 236.39 L 107.77 231.22 L 109.4 226.17 L 111.03 221.23 L 112.66 216.41 L 114.28 211.71 L 115.91 207.11 L 117.54 202.63 L 119.17 198.26 L 120.8 194 L 122.43 189.85 L 124.06 185.8 L 125.68 181.87 L 127.31 178.04 L 128.94 174.31 L 130.57 170.69 L 132.2 167.17 L 133.83 163.75 L 135.46 160.43 L 137.08 157.21 L 138.71 154.09 L 140.34 151.07 L 141.97 148.14 L 143.6 145.31 L 145.23 142.57 L 146.86 139.93 L 148.48 137.38 L 150.11 134.91 L 151.74 132.54 L 153.37 130.26 L 155 128.07 L 156.63 125.96 L 158.26 123.94 L 159.88 122.01 L 161.51 120.15 L 163.14 118.39 L 164.77 116.7 L 166.4 115.09 L 168.03 113.56 L 169.66 112.12 L 171.28 110.74 L 172.91 109.45 L 174.54 108.23 L 176.17 107.09 L 177.8 106.01 L 179.43 105.02 L 181.06 104.09 L 182.68 103.23 L 184.31 102.44 L 185.94 101.72 L 187.57 101.07 L 189.2 100.48 L 190.83 99.96 L 192.46 99.5 L 194.08 99.11 L 195.71 98.77 L 197.34 98.5 L 198.97 98.29 L 200.6 98.14 L 202.23 98.04 L 203.86 98 L 205.48 98.02 L 207.11 98.09 L 208.74 98.21 L 210.37 98.39 L 212 98.62 L 213.63 98.9 L 215.26 99.22 L 216.89 99.6 L 218.51 100.02 L 220.14 100.49 L 221.77 101.01 L 223.4 101.57 L 225.03 102.17 L 226.66 102.82 L 228.29 103.5 L 229.91 104.23 L 231.54 104.99 L 233.17 105.79 L 234.8 106.63 L 236.43 107.51 L 238.06 108.42 L 239.69 109.36 L 241.31 110.33 L 242.94 111.34 L 244.57 112.38 L 246.2 113.45 L 247.83 114.54 L 249.46 115.67 L 251.09 116.82 L 252.71 117.99 L 254.34 119.19 L 255.97 120.41 L 257.6 121.66 L 259.23 122.92 L 260.86 124.21 L 262.49 125.52 L 264.11 126.84 L 265.74 128.18 L 267.37 129.54 L 269 130.91 L 270.63 132.29 L 272.26 133.69 L 273.89 135.1 L 275.51 136.52 L 277.14 137.95 L 278.77 139.39 L 280.4 140.83 L 282.03 142.29 L 283.66 143.74 L 285.29 145.21 L 286.91 146.67 L 288.54 148.14 L 290.17 149.61 L 291.8 151.08 L 293.43 152.55 L 295.06 154.02 L 296.69 155.48 L 298.31 156.94 L 299.94 158.4 L 301.57 159.85 L 303.2 161.29 L 304.83 162.72 L 306.46 164.15 L 308.09 165.56 L 309.71 166.97 L 311.34 168.36 L 312.97 169.74 L 314.6 171.1 L 316.23 172.45 L 317.86 173.78 L 319.49 175.1 L 321.11 176.4 L 322.74 177.67 L 324.37 178.93 L 326 180.16 L 327.63 181.37 L 329.26 182.56 L 330.89 183.73 L 332.52 184.86 L 334.14 185.97 L 335.77 187.06 L 337.4 188.11 L 339.03 189.13 L 340.66 190.13 L 342.29 191.09 L 343.92 192.02 L 345.54 192.91 L 347.17 193.77 L 348.8 194.59 L 350.43 195.37 L 352.06 196.12 L 353.69 196.83 L 355.32 197.49 L 356.94 198.12 L 358.57 198.7 L 360.2 199.24 L 361.83 199.73 L 363.46 200.18 L 365.09 200.58 L 366.72 200.94 L 368.34 201.24 L 369.97 201.5 L 371.6 201.7 L 373.23 201.85 L 374.86 201.95 L 376.49 202 L 378.12 201.99 L 379.74 201.92 L 381.37 201.8 L 383 201.62 L 384.63 201.38 L 386.26 201.08 L 387.89 200.71 L 389.52 200.29 L 391.14 199.8 L 392.77 199.25 L 394.4 198.63 L 396.03 197.95 L 397.66 197.2 L 399.29 196.38 L 400.92 195.49 L 402.54 194.52 L 404.17 193.49 L 405.8 192.39 L 407.43 191.21 L 409.06 189.95 L 410.69 188.62 L 412.32 187.21 L 413.94 185.73 L 415.57 184.16 L 417.2 182.52 L 418.83 180.79 L 420.46 178.99 L 422.09 177.1 L 423.72 175.12 L 425.34 173.06 L 426.97 170.91 L 428.6 168.68 L 430.23 166.35 L 431.86 163.94 L 433.49 161.44 L 435.12 158.84 L 436.74 156.16 L 438.37 153.37 L 440 150.5 L 441.63 147.53 L 443.26 144.46 L 444.89 141.29 L 446.52 138.03 L 448.15 134.66 L 449.77 131.19 L 451.4 127.63 L 453.03 123.95 L 454.66 120.18 L 456.29 116.3 L 457.92 112.31 L 459.55 108.22 L 461.17 104.01 L 462.8 99.7 L 464.43 95.28 L 466.06 90.75 L 467.69 86.1 L 469.32 81.34 L 470.95 76.46 L 472.57 71.47 L 474.2 66.37 L 475.83 61.14 L 477.46 55.8 L 479.09 50.34 L 480.72 44.75" fill="none" stroke="#B02418" stroke-width="2.1" stroke-linejoin="round" stroke-linecap="round"/></g><text x="117.77" y="218" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-1</text><text x="290.6" y="218" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">1</text><text x="377.02" y="218" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">2</text><text x="463.43" y="218" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">3</text><text x="197.19" y="310" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-4</text><text x="197.19" y="284" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-3</text><text x="197.19" y="258" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-2</text><text x="197.19" y="232" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-1</text><text x="197.19" y="180" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">1</text><text x="197.19" y="154" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">2</text><text x="197.19" y="128" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">3</text><text x="197.19" y="102" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">4</text><text x="197.19" y="76" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">5</text><text x="197.19" y="50" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">6</text></svg>',
+      figcap: 'Graph von $f(x) = (x - 2)^2 (x + 1)$',
+      opts: ['Der Graph schneidet die $x$-Achse an beiden Stellen.', 'Der Graph berührt die $x$-Achse an beiden Stellen.', 'Bei $x = -1$ berührt der Graph die $x$-Achse, bei $x = 2$ schneidet er sie.', 'Bei $x = 2$ berührt der Graph die $x$-Achse, bei $x = -1$ schneidet er sie.'],
+      steps: [
+        '$x = 2$ ist wegen des Quadrats eine doppelte Nullstelle, $x = -1$ eine einfache.',
+        'Gerade Vielfachheit heißt berühren, ungerade Vielfachheit heißt schneiden.',
+        'Im Bild liegt der Graph links und rechts von $x = 2$ oberhalb der Achse, bei $x = -1$ wechselt er die Seite.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Nullstellen von $f(x) = x^3 + 3x^2$ mit ihrer Vielfachheit.',
+      opts: ['$x = 0$ einfach (schneiden), $x = -3$ doppelt (berühren)', '$x = 0$ doppelt (berühren), $x = -3$ einfach (schneiden)', '$x = 0$ dreifach (schneiden mit waagerechter Tangente)', '$x = 3$ doppelt (berühren), $x = 0$ einfach (schneiden)'],
+      steps: [
+        'Ausklammern: $f(x) = x^2\\,(x + 3)$',
+        'Der Faktor $x^2$ liefert die doppelte Nullstelle $x = 0$, der Faktor $x + 3$ die einfache Nullstelle $x = -3$.',
+        'Probe im Kopf: $f(-1) = -1 + 3 = 2 > 0$ und $f(1) = 4 > 0$ - der Graph bleibt links und rechts der $0$ oben, er berührt dort also nur.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme alle Nullstellen von $f(x) = x^4 - 5x^2 + 4$.',
+      opts: ['$x = \\pm 1$ und $x = \\pm 2$', '$x = 1$ und $x = 4$', 'nur $x = \\pm 1$', 'nur $x = \\pm 2$'],
+      steps: [
+        'Substitution $u = x^2$: $u^2 - 5u + 4 = 0$ mit den Lösungen $u_1 = 1$ und $u_2 = 4$.',
+        'Rücksubstitution: $x^2 = 1$ gibt $x = \\pm 1$, $x^2 = 4$ gibt $x = \\pm 2$.',
+        'Falle: $u_1 = 1$ und $u_2 = 4$ sind noch keine Nullstellen von $f$, erst die Wurzeln daraus.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Vielfachheit hat die Nullstelle $x = 0$ von $f(x) = x^4 - 4x^3$, und was folgt daraus für den Graphen?',
+      opts: ['dreifach - der Graph berührt die $x$-Achse', 'einfach - der Graph schneidet die $x$-Achse schräg', 'vierfach - der Graph berührt die $x$-Achse', 'dreifach - der Graph schneidet die $x$-Achse mit waagerechter Tangente'],
+      steps: [
+        'Ausklammern: $f(x) = x^3\\,(x - 4)$ - die Nullstelle $x = 0$ ist dreifach.',
+        'Ungerade Vielfachheit heißt schneiden; ab der Vielfachheit $3$ legt sich der Graph dabei waagerecht an die Achse.',
+        'Nachrechnen: $f^{\\prime}(x) = 4x^3 - 12x^2$ und $f^{\\prime}(0) = 0$ - die Tangente ist dort tatsächlich waagerecht.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welcher Graph ist achsensymmetrisch zur $y$-Achse?',
+      opts: ['$f(x) = x^3 - x$', '$f(x) = x^4 - 3x^2 + 1$', '$f(x) = x^2 + x$', '$f(x) = x^3 + x^2$'],
+      steps: [
+        'Achsensymmetrie zur $y$-Achse bedeutet $f(-x) = f(x)$.',
+        'Bei einer ganzrationalen Funktion gilt das genau dann, wenn nur gerade Exponenten vorkommen (die Konstante zählt als $x^0$).',
+        '$x^4 - 3x^2 + 1$ hat nur gerade Exponenten; $x^3 - x$ ist punktsymmetrisch, die beiden anderen sind unsymmetrisch.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Symmetrie hat der Graph von $f(x) = x^5 - 4x^3 + x$?',
+      opts: ['punktsymmetrisch zum Ursprung', 'achsensymmetrisch zur $y$-Achse', 'achsensymmetrisch zur $x$-Achse', 'weder achsen- noch punktsymmetrisch'],
+      steps: [
+        'Es kommen nur ungerade Exponenten vor ($5$, $3$, $1$).',
+        'Damit gilt $f(-x) = -f(x)$, der Graph ist punktsymmetrisch zum Ursprung.',
+        'Zur $x$-Achse kann ein Funktionsgraph nie symmetrisch sein - sonst gäbe es zu einem $x$ zwei Funktionswerte.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Symmetrie hat der Graph von $f(x) = x^4 + 2x^3$?',
+      opts: ['achsensymmetrisch zur $y$-Achse', 'achsensymmetrisch zur Geraden $x = 2$', 'weder achsen- noch punktsymmetrisch', 'punktsymmetrisch zum Ursprung'],
+      steps: [
+        'Hier treffen gerade ($4$) und ungerade ($3$) Exponenten aufeinander.',
+        'Probe: $f(1) = 3$, aber $f(-1) = 1 - 2 = -1$ - weder gleich noch entgegengesetzt.',
+        'Also liegt keine der beiden Symmetrien vor.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der Graph von $f$ ist punktsymmetrisch zum Ursprung und es gilt $f(2) = 5$. Welchen Wert hat $f(-2)$?',
+      opts: ['$f(-2) = -5$', '$f(-2) = 5$', '$f(-2) = -2$', '$f(-2) = 0$'],
+      steps: [
+        'Punktsymmetrie zum Ursprung heißt $f(-x) = -f(x)$.',
+        '$f(-2) = -f(2) = -5$',
+        'Bei Achsensymmetrie zur $y$-Achse wäre dagegen $f(-2) = f(2) = 5$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Auf welchem Bereich ist $f(x) = x^2 - 6x$ monoton fallend?',
+      opts: ['für $x > 3$', 'für $x < 3$', 'für $x < 0$', 'für $0 < x < 6$'],
+      steps: [
+        '$f^{\\prime}(x) = 2x - 6$',
+        'Monoton fallend heißt $f^{\\prime}(x) < 0$: $2x - 6 < 0$, also $x < 3$.',
+        'Falle: $0 < x < 6$ ist der Bereich, in dem $f$ negativ ist - das ist etwas anderes als fallend.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Auf welchem Intervall ist $f(x) = x^3 - 12x$ monoton fallend?',
+      opts: ['$x > 2$', '$x < -2$', '$0 < x < 2$', '$-2 < x < 2$'],
+      steps: [
+        '$f^{\\prime}(x) = 3x^2 - 12 = 3\\,(x - 2)(x + 2)$',
+        'Die Parabel $f^{\\prime}$ ist zwischen ihren Nullstellen $-2$ und $2$ negativ.',
+        'Probe: $f^{\\prime}(0) = -12 < 0$, also fällt $f$ dort - außerhalb wächst der Graph.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für eine Funktion $f$ gilt $f^{\\prime}(x) = (x - 1)^2$. Welche Aussage ist richtig?',
+      opts: ['$f$ hat bei $x = 1$ einen Hochpunkt', '$f$ ist auf ganz $\\mathbb{R}$ monoton fallend', '$f$ ist auf ganz $\\mathbb{R}$ monoton wachsend; bei $x = 1$ liegt nur eine waagerechte Tangente', '$f$ hat bei $x = 1$ einen Tiefpunkt'],
+      steps: [
+        '$(x - 1)^2 \\ge 0$ für jedes $x$, also ist der Anstieg nirgends negativ.',
+        'Nur bei $x = 1$ ist $f^{\\prime}(x) = 0$, dort verläuft die Tangente waagerecht.',
+        '$f^{\\prime}$ wechselt dort aber das Vorzeichen nicht - ohne Vorzeichenwechsel kein Extrempunkt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Auf welchem Intervall wächst der Graph von $f(x) = -x^3 + 3x^2$?',
+      opts: ['$0 < x < 2$', '$-2 < x < 0$', '$x > 2$', '$x < 0$'],
+      steps: [
+        '$f^{\\prime}(x) = -3x^2 + 6x = -3x\\,(x - 2)$',
+        'Die nach unten geöffnete Parabel $f^{\\prime}$ ist zwischen ihren Nullstellen $0$ und $2$ positiv.',
+        'Probe: $f^{\\prime}(1) = 3 > 0$ - dort steigt der Graph.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Bedingungen sichern einen Hochpunkt an der Stelle $x_0$?',
+      opts: ['$f(x_0) = 0$ und $f^{\\prime}(x_0) < 0$', '$f^{\\prime}(x_0) = 0$ und $f^{\\prime\\prime}(x_0) < 0$', '$f^{\\prime}(x_0) = 0$ und $f^{\\prime\\prime}(x_0) > 0$', '$f^{\\prime\\prime}(x_0) = 0$ und $f^{\\prime}(x_0) < 0$'],
+      steps: [
+        'Notwendig ist eine waagerechte Tangente: $f^{\\prime}(x_0) = 0$.',
+        'Hinreichend wird es durch $f^{\\prime\\prime}(x_0) < 0$ - oder gleichwertig durch den Vorzeichenwechsel von $f^{\\prime}$ von $+$ nach $-$.',
+        'Falle: $f^{\\prime\\prime}(x_0) > 0$ gehört zum Tiefpunkt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme den Extrempunkt von $f(x) = x^2 + 6x + 5$ und seine Art.',
+      opts: ['Tiefpunkt $T(-3|4)$', 'Hochpunkt $H(-3|-4)$', 'Tiefpunkt $T(-3|-4)$', 'Tiefpunkt $T(3|32)$'],
+      steps: [
+        '$f^{\\prime}(x) = 2x + 6 = 0$ liefert $x = -3$.',
+        '$f(-3) = 9 - 18 + 5 = -4$, also der Punkt $(-3|-4)$.',
+        '$f^{\\prime\\prime}(x) = 2 > 0$: Es ist ein Tiefpunkt - passend zur nach oben geöffneten Parabel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme Lage und Art der Extrempunkte von $f(x) = 2x^3 - 3x^2 - 12x$.',
+      opts: ['$T(-1|7)$ und $H(2|-20)$', 'nur $T(2|-20)$', '$H(-1|7)$ und $T(2|-20)$', '$H(-1|7)$ und $T(2|20)$'],
+      steps: [
+        '$f^{\\prime}(x) = 6x^2 - 6x - 12 = 6\\,(x - 2)(x + 1)$, also $x_1 = -1$ und $x_2 = 2$.',
+        '$f(-1) = -2 - 3 + 12 = 7$ und $f(2) = 16 - 12 - 24 = -20$.',
+        '$f^{\\prime\\prime}(x) = 12x - 6$: $f^{\\prime\\prime}(-1) = -18 < 0$ (Hochpunkt), $f^{\\prime\\prime}(2) = 18 > 0$ (Tiefpunkt).'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Extrempunkte hat $f(x) = x^4 - 2x^2$?',
+      opts: ['nur $H(0|0)$', '$H(0|0)$, $T(-1|-1)$ und $T(1|-1)$', '$T(0|0)$, $H(-1|-1)$ und $H(1|-1)$', '$H(0|0)$, $T(-1|1)$ und $T(1|1)$'],
+      steps: [
+        '$f^{\\prime}(x) = 4x^3 - 4x = 4x\\,(x - 1)(x + 1)$, also $x = 0$, $x = 1$ und $x = -1$.',
+        '$f^{\\prime\\prime}(x) = 12x^2 - 4$: $f^{\\prime\\prime}(0) = -4 < 0$, $f^{\\prime\\prime}(\\pm 1) = 8 > 0$.',
+        'Funktionswerte: $f(0) = 0$ und $f(\\pm 1) = 1 - 2 = -1$ - die typische Doppelmulde.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Aus einem $24$ cm langen Draht wird ein Rechteck gebogen. Wie groß ist der größtmögliche Flächeninhalt?',
+      opts: ['$32\\,\\mathrm{cm}^2$', '$24\\,\\mathrm{cm}^2$', '$144\\,\\mathrm{cm}^2$', '$36\\,\\mathrm{cm}^2$'],
+      steps: [
+        'Halber Umfang: $x + y = 12$, also $y = 12 - x$ und $A(x) = x\\,(12 - x) = 12x - x^2$.',
+        '$A^{\\prime}(x) = 12 - 2x = 0$ liefert $x = 6$; $A^{\\prime\\prime}(x) = -2 < 0$, also ein Hochpunkt.',
+        '$A(6) = 36\\,\\mathrm{cm}^2$ - das Quadrat gewinnt. Ein Rechteck $4 \\times 8$ brächte nur $32\\,\\mathrm{cm}^2$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Gewinn eines Betriebs beträgt $G(x) = -x^3 + 9x^2 - 15x$ (in Tsd. €, $x$ in ME, $0 \\leq x \\leq 7$). Bei welcher Menge ist der Gewinn am größten?',
+      opts: ['bei $x = 5$ ME mit $75$ Tsd. €', 'bei $x = 3$ ME mit $9$ Tsd. €', 'bei $x = 5$ ME mit $25$ Tsd. €', 'bei $x = 1$ ME mit $-7$ Tsd. €'],
+      steps: [
+        '$G^{\\prime}(x) = -3x^2 + 18x - 15 = -3\\,(x - 1)(x - 5)$, also $x = 1$ und $x = 5$.',
+        '$G^{\\prime\\prime}(x) = -6x + 18$: $G^{\\prime\\prime}(5) = -12 < 0$ - bei $x = 5$ liegt der Hochpunkt, bei $x = 1$ ein Tiefpunkt.',
+        '$G(5) = -125 + 225 - 75 = 25$ Tsd. €; die Ränder bringen weniger: $G(0) = 0$ und $G(7) = -7$.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

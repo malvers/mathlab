@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Lagebeziehungen von Geraden — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w05-lagebeziehungen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Lagebeziehungen von Geraden',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 5 (LB 1) · 20 Aufgaben: identisch, parallel, schneidend, windschief; Schnittpunkt und Schnittwinkel · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 5 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Richtungsvektoren vergleichen (1-5), Fallunterscheidung mit LGS (6-11), Schnittwinkel und Orthogonalität (12-17), Anwendungen (18-20). Alles ohne CAS. */
+  questions: [
+    {
+      q: 'Sind $\\vec u = \\begin{pmatrix} 2 \\\\ -4 \\\\ 6 \\end{pmatrix}$ und $\\vec v = \\begin{pmatrix} -1 \\\\ 2 \\\\ -3 \\end{pmatrix}$ parallel (kollinear)?',
+      opts: ['ja, $\\vec v = -2\\,\\vec u$', 'ja, $\\vec v = \\dfrac{1}{2}\\,\\vec u$', 'nein, die Vorzeichen passen nicht', 'ja, $\\vec v = -\\dfrac{1}{2}\\,\\vec u$'],
+      steps: [
+        'Ansatz $\\vec v = k \\cdot \\vec u$: erste Koordinate $-1 = 2k$, also $k = -\\frac{1}{2}$.',
+        'Probe: $-\\frac{1}{2} \\cdot (-4) = 2$ und $-\\frac{1}{2} \\cdot 6 = -3$ - alle Koordinaten passen.',
+        'Entgegengesetzte Vorzeichen stören nicht: $k$ darf negativ sein.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Sind $\\vec u = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix}$ und $\\vec v = \\begin{pmatrix} 2 \\\\ 4 \\\\ 5 \\end{pmatrix}$ parallel (kollinear)?',
+      opts: ['nein, weil keiner der Vektoren eine Nullkoordinate hat', 'ja, $\\vec v = 2\\,\\vec u$', 'nein: aus den ersten Koordinaten folgt $k = 2$, aber $2 \\cdot 3 = 6 \\neq 5$', 'ja, mit $k = \\dfrac{5}{3}$'],
+      steps: [
+        '$2 = k \\cdot 1$ gibt $k = 2$; zweite Koordinate $4 = 2 \\cdot 2$ stimmt.',
+        'Dritte Koordinate: $2 \\cdot 3 = 6$, aber $v_3 = 5$ - Widerspruch, also nicht parallel.',
+        'Falle: nach zwei passenden Koordinaten aufhören.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Richtungsvektoren zweier Geraden $g$ und $h$ sind parallel. Welche Lagen sind dann noch möglich?',
+      opts: ['schneidend oder windschief', 'nur identisch', 'nur echt parallel', 'identisch oder echt parallel - die Punktprobe entscheidet'],
+      steps: [
+        'Parallele Richtungsvektoren heißen: gleiche Richtung. Entweder haben die Geraden alle Punkte gemeinsam oder keinen.',
+        'Punktprobe: liegt der Stützpunkt von $h$ auf $g$, sind sie identisch, sonst echt parallel.',
+        'Schneidend oder windschief geht nur bei nicht parallelen Richtungsvektoren.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was bedeutet es, dass zwei Geraden windschief sind?',
+      opts: ['Sie sind nicht parallel und haben keinen gemeinsamen Punkt.', 'Sie haben genau einen gemeinsamen Punkt, aber keinen rechten Winkel.', 'Sie sind parallel und haben keinen gemeinsamen Punkt.', 'Sie liegen in einer gemeinsamen Ebene, schneiden sich aber nicht.'],
+      steps: [
+        'Windschiefe Geraden laufen aneinander vorbei: keine gemeinsame Richtung, kein Schnittpunkt.',
+        'Das gibt es nur im Raum - in der Ebene sind zwei Geraden immer parallel oder schneidend.',
+        'Zwei Geraden in einer gemeinsamen Ebene ohne Schnittpunkt wären parallel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Untersuche die Lage von $g: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ -1 \\\\ 2 \\end{pmatrix}$ und $h: \\vec x = \\begin{pmatrix} 3 \\\\ 0 \\\\ 7 \\end{pmatrix} + s \\cdot \\begin{pmatrix} -2 \\\\ 2 \\\\ -4 \\end{pmatrix}$.',
+      opts: ['identisch', 'windschief', 'echt parallel', 'schneidend'],
+      steps: [
+        'Richtungsvektoren: $\\begin{pmatrix} -2 \\\\ 2 \\\\ -4 \\end{pmatrix} = -2 \\cdot \\begin{pmatrix} 1 \\\\ -1 \\\\ 2 \\end{pmatrix}$ - parallel.',
+        'Punktprobe mit dem Stützpunkt $(3|0|7)$ von $h$ in $g$: $1 + t = 3$ gibt $t = 2$; $2 - 2 = 0$ und $3 + 4 = 7$ passen.',
+        'Der Stützpunkt von $h$ liegt auf $g$ - die Geraden sind identisch.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Untersuche die Lage von $g: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ und $h: \\vec x = \\begin{pmatrix} 0 \\\\ 3 \\\\ 5 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 2 \\\\ 2 \\\\ 0 \\end{pmatrix}$.',
+      opts: ['schneidend', 'windschief', 'echt parallel', 'identisch'],
+      steps: [
+        '$\\begin{pmatrix} 2 \\\\ 2 \\\\ 0 \\end{pmatrix} = 2 \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ - die Richtungsvektoren sind parallel.',
+        'Punktprobe $(0|3|5)$ in $g$: die $z$-Koordinate von $g$ ist immer $2$, aber $5 \\neq 2$.',
+        'Gleiche Richtung, kein gemeinsamer Punkt: echt parallel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Untersuche die Lage von $g: \\vec x = \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix}$ und $h: \\vec x = \\begin{pmatrix} 2 \\\\ 3 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ -1 \\end{pmatrix}$.',
+      opts: ['echt parallel', 'identisch', 'windschief', 'schneidend, Schnittpunkt $S(2|1|2)$'],
+      steps: [
+        'Die Richtungsvektoren sind nicht parallel. Gleichsetzen: $1 + t = 2$, $1 = 3 + s$, $1 + t = -s$.',
+        'Aus den ersten beiden Zeilen: $t = 1$, $s = -2$. Dritte Zeile: $1 + 1 = 2$ und $-(-2) = 2$ - stimmt.',
+        '$t = 1$ in $g$: $S(2|1|2)$. Probe mit $s = -2$ in $h$: $(2|1|2)$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Untersuche die Lage der $x$-Achse $g: \\vec x = t \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und der Geraden $h: \\vec x = \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix}$.',
+      opts: ['windschief', 'identisch', 'echt parallel', 'schneidend'],
+      steps: [
+        'Die Richtungsvektoren $\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $\\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix}$ sind nicht parallel.',
+        'Gleichsetzen: $t = 0$, $0 = 1$, $0 = s$ - die zweite Zeile ist ein Widerspruch.',
+        'Nicht parallel, kein Schnittpunkt: windschief. $h$ verläuft parallel zur $z$-Achse, um $1$ in $y$-Richtung verschoben.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Untersuche die Lage von $g: \\vec x = \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 1 \\end{pmatrix}$ und $h: \\vec x = \\begin{pmatrix} 1 \\\\ 4 \\\\ 1 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 2 \\\\ -1 \\\\ 0 \\end{pmatrix}$.',
+      opts: ['schneidend in $S(1|4|1)$', 'schneidend in $S(3|3|1)$', 'windschief', 'echt parallel'],
+      steps: [
+        'Gleichsetzen: $2 + t = 1 + 2s$, $1 + 2t = 4 - s$, $t = 1$.',
+        '$t = 1$ in die erste Zeile: $3 = 1 + 2s$, also $s = 1$. Probe zweite Zeile: $1 + 2 = 3$ und $4 - 1 = 3$ - stimmt.',
+        'Schnittpunkt: $t = 1$ in $g$ gibt $S(3|3|1)$; $(1|4|1)$ ist nur der Stützpunkt von $h$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welchen Wert von $a$ sind $g: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ a \\\\ 4 \\end{pmatrix}$ und $h: \\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ 3 \\\\ 2 \\end{pmatrix}$ parallel?',
+      opts: ['$a = 1{,}5$', '$a = 12$', '$a = 3$', '$a = 6$'],
+      steps: [
+        'Parallel heißt $\\begin{pmatrix} 2 \\\\ a \\\\ 4 \\end{pmatrix} = k \\cdot \\begin{pmatrix} 1 \\\\ 3 \\\\ 2 \\end{pmatrix}$. Erste Koordinate: $k = 2$; dritte: $4 = 2 \\cdot 2$ stimmt.',
+        'Zweite Koordinate: $a = 2 \\cdot 3 = 6$',
+        'Probe: $\\begin{pmatrix} 2 \\\\ 6 \\\\ 4 \\end{pmatrix} = 2 \\cdot \\begin{pmatrix} 1 \\\\ 3 \\\\ 2 \\end{pmatrix}$'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Untersuche die Lage von $g: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$ und $h: \\vec x = \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix}$.',
+      opts: ['schneidend in $S(1|0|0)$', 'echt parallel', 'windschief', 'schneidend in $S(1|1|1)$'],
+      steps: [
+        'Gleichsetzen: $1 = s$, $t = 1$, $t = s$.',
+        '$s = 1$ und $t = 1$ erfüllen auch die dritte Zeile: $1 = 1$.',
+        '$t = 1$ in $g$: $S(1|1|1)$. Probe in $h$ mit $s = 1$: $(1|1|1)$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zwei Geraden schneiden sich und haben die Richtungsvektoren $\\vec u = \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ und $\\vec v = \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix}$. Berechne den Schnittwinkel.',
+      opts: ['$90^\\circ$', '$30^\\circ$', '$60^\\circ$', '$45^\\circ$'],
+      steps: [
+        '$\\cos\\varphi = \\dfrac{|\\vec u \\cdot \\vec v|}{|\\vec u| \\cdot |\\vec v|} = \\dfrac{1}{\\sqrt{2} \\cdot \\sqrt{2}} = \\dfrac{1}{2}$',
+        '$\\varphi = \\cos^{-1}(0{,}5) = 60^\\circ$',
+        'Beide Vektoren sind Flächendiagonalen eines Würfels - sie bilden mit der dritten ein gleichseitiges Dreieck.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne den Schnittwinkel zweier Geraden mit den Richtungsvektoren $\\vec u = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $\\vec v = \\begin{pmatrix} -1 \\\\ 1 \\\\ 0 \\end{pmatrix}$.',
+      opts: ['$90^\\circ$', '$45^\\circ$', '$60^\\circ$', '$135^\\circ$'],
+      steps: [
+        '$\\vec u \\cdot \\vec v = -1$, $|\\vec u| = 1$, $|\\vec v| = \\sqrt{2}$',
+        'Schnittwinkel: $\\cos\\varphi = \\dfrac{|-1|}{1 \\cdot \\sqrt{2}} \\approx 0{,}707$, also $\\varphi = 45^\\circ$',
+        'Falle: ohne den Betrag käme $135^\\circ$ heraus - der Schnittwinkel von Geraden ist immer der spitze, höchstens $90^\\circ$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Geraden $g$ und $h$ mit $\\vec u = \\begin{pmatrix} 2 \\\\ 1 \\\\ 2 \\end{pmatrix}$ und $\\vec v = \\begin{pmatrix} 0 \\\\ 3 \\\\ 4 \\end{pmatrix}$ schneiden sich. Berechne den Schnittwinkel.',
+      opts: ['$\\varphi \\approx 42{,}8^\\circ$', '$\\varphi \\approx 47{,}2^\\circ$', '$\\varphi \\approx 137{,}2^\\circ$', '$\\varphi \\approx 36{,}9^\\circ$'],
+      steps: [
+        '$\\vec u \\cdot \\vec v = 0 + 3 + 8 = 11$, $|\\vec u| = \\sqrt{4 + 1 + 4} = 3$, $|\\vec v| = \\sqrt{0 + 9 + 16} = 5$',
+        '$\\cos\\varphi = \\dfrac{11}{15} \\approx 0{,}733$, also $\\varphi = \\cos^{-1}(0{,}733) \\approx 42{,}8^\\circ$',
+        'Falle: $\\sin^{-1}$ statt $\\cos^{-1}$ liefert $47{,}2^\\circ$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Aussage über $g: \\vec x = t \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}$ und $h: \\vec x = \\begin{pmatrix} -1 \\\\ 1 \\\\ 4 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ -2 \\end{pmatrix}$ ist richtig?',
+      opts: ['$g$ und $h$ sind windschief.', '$g$ und $h$ sind echt parallel.', '$g$ und $h$ schneiden sich in $S(1|2|2)$ und stehen senkrecht aufeinander.', '$g$ und $h$ schneiden sich unter $60^\\circ$.'],
+      steps: [
+        'Gleichsetzen: $t = -1 + 2s$, $2t = 1 + s$, $2t = 4 - 2s$. Aus den letzten beiden: $1 + s = 4 - 2s$, also $s = 1$, $t = 1$.',
+        'Erste Zeile: $1 = -1 + 2$ stimmt - Schnittpunkt $S(1|2|2)$.',
+        '$\\vec u \\cdot \\vec v = 2 + 2 - 4 = 0$ - die Richtungsvektoren sind orthogonal, Schnittwinkel $90^\\circ$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne den Schnittpunkt von $g: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ 3 \\end{pmatrix}$ und $h: \\vec x = \\begin{pmatrix} 5 \\\\ 1 \\\\ 3 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ -1 \\\\ 0 \\end{pmatrix}$.',
+      opts: ['$S(7|-1|3)$', '$S(3|3|3)$', '$S(1|2|0)$', '$S(5|1|3)$'],
+      steps: [
+        'Gleichsetzen: $1 + 2t = 5 + s$, $2 + t = 1 - s$, $3t = 3$.',
+        '$t = 1$; erste Zeile: $3 = 5 + s$, also $s = -2$. Probe zweite Zeile: $2 + 1 = 3$ und $1 + 2 = 3$ - stimmt.',
+        '$t = 1$ in $g$: $S(3|3|3)$; $(5|1|3)$ und $(1|2|0)$ sind nur die Stützpunkte.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welchen Wert von $b$ schneiden sich $g: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ b \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ und $h: \\vec x = \\begin{pmatrix} 0 \\\\ 2 \\\\ 3 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ -1 \\\\ 0 \\end{pmatrix}$?',
+      opts: ['$b = 0$', '$b = 3$', 'für keinen Wert von $b$', '$b = -3$'],
+      steps: [
+        'Beide Richtungsvektoren haben $z$-Koordinate $0$: $g$ liegt in der Höhe $z = b$, $h$ in der Höhe $z = 3$.',
+        'Die Richtungsvektoren sind nicht parallel, die Geraden können sich also nur in derselben Höhe treffen: $b = 3$.',
+        'Dann: $1 + t = s$ und $t = 2 - s$ geben $t = \\frac{1}{2}$, $s = \\frac{3}{2}$ - Schnittpunkt $(1{,}5|0{,}5|3)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zwei Flugzeuge fliegen geradlinig; die Position von Flugzeug 1 nach $t$ Minuten ist $\\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 5 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix}$, die von Flugzeug 2 ist $\\vec x = \\begin{pmatrix} 5 \\\\ -5 \\\\ 5 \\end{pmatrix} + t \\cdot \\begin{pmatrix} -1 \\\\ 2 \\\\ 0 \\end{pmatrix}$ (Angaben in km). Kommt es zum Zusammenstoß?',
+      opts: ['Ja, die Flugzeuge stoßen in $S(2|1|5)$ zusammen.', 'Nein: die Bahnen schneiden sich in $S(2|1|5)$, aber Flugzeug 1 ist bei $t = 1$ dort, Flugzeug 2 erst bei $t = 3$.', 'Nein, die Bahnen sind windschief.', 'Nein, die Bahnen sind parallel.'],
+      steps: [
+        'Schnittpunkt der Bahnen (verschiedene Parameter $t$ und $s$): $2t = 5 - s$, $t = -5 + 2s$, $5 = 5$. Lösung: $t = 1$, $s = 3$, also $S(2|1|5)$.',
+        'Für einen Zusammenstoß müssten beide zur selben Zeit dort sein - Flugzeug 1 bei $t = 1$, Flugzeug 2 bei $t = 3$.',
+        'Probe: gleiche Zeit $t$ in beiden: $2t = 5 - t$ gibt $t = \\frac{5}{3}$, aber $t = -5 + 2t$ gibt $t = 5$ - kein gemeinsames $t$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Zwei Rohrleitungen verlaufen längs $g: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix}$ und $h: \\vec x = \\begin{pmatrix} 3 \\\\ 4 \\\\ 2 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ -1 \\\\ 0 \\end{pmatrix}$. Unter welchem Winkel treffen sie aufeinander?',
+      opts: ['$\\varphi \\approx 71{,}6^\\circ$', '$\\varphi \\approx 18{,}4^\\circ$', '$\\varphi \\approx 108{,}4^\\circ$', '$45^\\circ$'],
+      steps: [
+        'Beide liegen in der Höhe $z = 2$ und sind nicht parallel - sie treffen sich: $1 + 2t = 3 + s$, $t = 4 - s$ geben $t = 2$, $s = 2$, Treffpunkt $(5|2|2)$.',
+        '$\\cos\\varphi = \\dfrac{|\\vec u \\cdot \\vec v|}{|\\vec u| \\cdot |\\vec v|} = \\dfrac{|2 - 1 + 0|}{\\sqrt{5} \\cdot \\sqrt{2}} = \\dfrac{1}{\\sqrt{10}} \\approx 0{,}316$',
+        '$\\varphi = \\cos^{-1}(0{,}316) \\approx 71{,}6^\\circ$ - das Verbindungsstück braucht diesen Winkel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Würfel hat die Ecken $A(0|0|0)$, $B(1|0|0)$, $G(1|1|1)$ und $H(0|1|1)$. Unter welchem Winkel schneiden sich die Raumdiagonalen $\\overline{AG}$ und $\\overline{BH}$?',
+      opts: ['$\\varphi \\approx 109{,}5^\\circ$', '$90^\\circ$', '$\\varphi \\approx 70{,}5^\\circ$', '$\\varphi \\approx 54{,}7^\\circ$'],
+      steps: [
+        '$\\overrightarrow{AG} = \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$, $\\overrightarrow{BH} = \\begin{pmatrix} -1 \\\\ 1 \\\\ 1 \\end{pmatrix}$, beide haben den Betrag $\\sqrt{3}$.',
+        '$\\cos\\varphi = \\dfrac{|-1 + 1 + 1|}{\\sqrt{3} \\cdot \\sqrt{3}} = \\dfrac{1}{3}$, also $\\varphi = \\cos^{-1}\\!\\left(\\dfrac{1}{3}\\right) \\approx 70{,}5^\\circ$',
+        'Die Raumdiagonalen eines Würfels stehen also nicht senkrecht aufeinander; $109{,}5^\\circ$ ist der Nebenwinkel.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

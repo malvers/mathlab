@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Prüfungsvorbereitung I — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w33-pruefungsvorbereitung1',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Prüfungsvorbereitung I',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 33 (Prüfungsvorbereitung) · 20 Aufgaben: Analysis und Vektorrechnung im Stil der FHR-Prüfung · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 33 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Vektorrechnung (1-5), Kurvendiskussion ganzrational (6-8), Extremalaufgaben (9-11), Integral und Fläche (12-14), gebrochenrationale Funktionen (15-17), e-Funktionen (18-20). GTR ohne CAS. */
+  questions: [
+    {
+      q: 'Wie liegen die Geraden $g\\!: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ -1 \\end{pmatrix}$ und $h\\!: \\vec x = \\begin{pmatrix} 3 \\\\ 1 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} -4 \\\\ -2 \\\\ 2 \\end{pmatrix}$ zueinander?',
+      opts: ['$g$ und $h$ sind echt parallel.', '$g$ und $h$ sind identisch.', '$g$ und $h$ schneiden sich in einem Punkt.', '$g$ und $h$ sind windschief.'],
+      steps: [
+        'Richtungsvektoren: $\\begin{pmatrix} -4 \\\\ -2 \\\\ 2 \\end{pmatrix} = -2 \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ -1 \\end{pmatrix}$, also parallel.',
+        'Punktprobe: Liegt der Stützpunkt $(3|1|1)$ von $h$ auf $g$? $\\begin{pmatrix} 3 \\\\ 1 \\\\ 1 \\end{pmatrix} - \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix} = \\begin{pmatrix} 2 \\\\ 1 \\\\ -1 \\end{pmatrix}$, das ist $1 \\cdot$ Richtungsvektor - ja.',
+        'Parallel und ein gemeinsamer Punkt: identisch. Ohne Punktprobe hätte man nur „parallel“ sagen können.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Unter welchem Winkel schneiden sich zwei Geraden mit den Richtungsvektoren $\\vec u = \\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}$ und $\\vec v = \\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$?',
+      opts: ['$\\varphi \\approx 116{,}4^\\circ$', '$\\varphi = 90^\\circ$', '$\\varphi \\approx 63{,}6^\\circ$', '$\\varphi \\approx 26{,}4^\\circ$'],
+      steps: [
+        '$\\cos\\varphi = \\dfrac{|\\vec u \\cdot \\vec v|}{|\\vec u| \\cdot |\\vec v|}$ mit $\\vec u \\cdot \\vec v = 2 - 2 + 4 = 4$, $|\\vec u| = |\\vec v| = 3$',
+        '$\\cos\\varphi = \\dfrac{4}{9} \\Rightarrow \\varphi = \\cos^{-1}\\!\\left(\\dfrac{4}{9}\\right) \\approx 63{,}6^\\circ$',
+        'Der Schnittwinkel liegt immer zwischen $0^\\circ$ und $90^\\circ$; $116{,}4^\\circ$ wäre der Nebenwinkel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Ebene $E$ geht durch $P(1|0|0)$ und wird von $\\vec u = \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ und $\\vec v = \\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$ aufgespannt. Wie lautet ihre Koordinatengleichung?',
+      opts: ['$E\\!: x - y + z = 0$', '$E\\!: x + y + z = 1$', '$E\\!: x - y + z = 1$', '$E\\!: x + y - z = 1$'],
+      steps: [
+        'Normalenvektor mit dem Vektorprodukt: $\\vec n = \\vec u \\times \\vec v = \\begin{pmatrix} 1 \\cdot 1 - 0 \\cdot 1 \\\\ 0 \\cdot 0 - 1 \\cdot 1 \\\\ 1 \\cdot 1 - 1 \\cdot 0 \\end{pmatrix} = \\begin{pmatrix} 1 \\\\ -1 \\\\ 1 \\end{pmatrix}$',
+        'Ansatz $x - y + z = d$, Punkt $P$ einsetzen: $1 - 0 + 0 = 1$, also $d = 1$.',
+        'Probe: $\\vec n \\cdot \\vec u = 1 - 1 + 0 = 0$ und $\\vec n \\cdot \\vec v = 0 - 1 + 1 = 0$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie weit ist der Punkt $P(3|1|5)$ von der Ebene $E\\!: 2x - y + 2z = 3$ entfernt?',
+      opts: ['$d = 5$', '$d = 4$', '$d = \\dfrac{4}{3}$', '$d = 12$'],
+      steps: [
+        'Lotgerade durch $P$ in Richtung $\\vec n = \\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$: $\\vec x = \\begin{pmatrix} 3 \\\\ 1 \\\\ 5 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$',
+        'In $E$ einsetzen: $2(3 + 2t) - (1 - t) + 2(5 + 2t) = 3 \\Rightarrow 15 + 9t = 3 \\Rightarrow t = -\\dfrac{4}{3}$',
+        'Abstand $= |t| \\cdot |\\vec n| = \\dfrac{4}{3} \\cdot 3 = 4$. Lotfußpunkt: $F\\!\\left(\\dfrac{1}{3}\\middle|\\dfrac{7}{3}\\middle|\\dfrac{7}{3}\\right)$. $12$ ist nur der Zähler $|2 \\cdot 3 - 1 + 2 \\cdot 5 - 3|$ ohne Division durch $|\\vec n|$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne den Flächeninhalt des Dreiecks $ABC$ mit $A(1|0|0)$, $B(0|2|0)$ und $C(0|0|2)$.',
+      opts: ['$A_\\triangle = \\sqrt{6} \\approx 2{,}45$', '$A_\\triangle = 4$', '$A_\\triangle = 2\\sqrt{6} \\approx 4{,}90$', '$A_\\triangle = 12$'],
+      steps: [
+        '$\\overrightarrow{AB} = \\begin{pmatrix} -1 \\\\ 2 \\\\ 0 \\end{pmatrix}$, $\\overrightarrow{AC} = \\begin{pmatrix} -1 \\\\ 0 \\\\ 2 \\end{pmatrix}$, Vektorprodukt: $\\overrightarrow{AB} \\times \\overrightarrow{AC} = \\begin{pmatrix} 4 \\\\ 2 \\\\ 2 \\end{pmatrix}$',
+        '$|\\overrightarrow{AB} \\times \\overrightarrow{AC}| = \\sqrt{16 + 4 + 4} = \\sqrt{24} = 2\\sqrt{6}$ ist die Parallelogrammfläche.',
+        'Dreieck: die Hälfte, $A_\\triangle = \\sqrt{6} \\approx 2{,}45$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Extrempunkte des Graphen von $f(x) = x^3 - 3x^2$.',
+      opts: ['$H(0|0)$ und $T(2|-4)$', 'nur $W(1|-2)$', '$H(0|0)$ und $T(2|4)$', '$T(0|0)$ und $H(2|-4)$'],
+      steps: [
+        '$f^{\\prime}(x) = 3x^2 - 6x = 3x(x - 2) = 0 \\Rightarrow x = 0$ oder $x = 2$',
+        '$f^{\\prime\\prime}(x) = 6x - 6$: $f^{\\prime\\prime}(0) = -6 < 0$ (Hochpunkt), $f^{\\prime\\prime}(2) = 6 > 0$ (Tiefpunkt)',
+        '$f(0) = 0$, $f(2) = 8 - 12 = -4$, also $H(0|0)$ und $T(2|-4)$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die Gleichung der Wendetangente an den Graphen von $f(x) = x^3 - 3x^2$?',
+      opts: ['$y = -3x - 2$', '$y = 3x - 5$', '$y = -2$', '$y = -3x + 1$'],
+      steps: [
+        '$f^{\\prime\\prime}(x) = 6x - 6 = 0 \\Rightarrow x_W = 1$, $f(1) = -2$, $f^{\\prime\\prime\\prime}(x) = 6 \\ne 0$: Wendepunkt $W(1|-2)$',
+        'Anstieg der Tangente: $m = f^{\\prime}(1) = 3 - 6 = -3$',
+        '$y = -3(x - 1) - 2 = -3x + 1$. Falle: $-2$ ist der Funktionswert, nicht der $y$-Achsenabschnitt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Graph einer ganzrationalen Funktion 3. Grades ist punktsymmetrisch zum Ursprung und hat den Hochpunkt $H(1|2)$. Wie lautet die Funktionsgleichung?',
+      opts: ['$f(x) = -x^3 + 3x$', '$f(x) = x^3 + x$', '$f(x) = -x^3 + 3x^2$', '$f(x) = x^3 - 3x$'],
+      steps: [
+        'Punktsymmetrie: nur ungerade Potenzen, Ansatz $f(x) = ax^3 + bx$ mit $f^{\\prime}(x) = 3ax^2 + b$.',
+        'Bedingungen: $f(1) = a + b = 2$ und $f^{\\prime}(1) = 3a + b = 0 \\Rightarrow 2a = -2 \\Rightarrow a = -1$, $b = 3$',
+        'Probe: $f^{\\prime\\prime}(1) = -6 < 0$, also wirklich ein Hochpunkt. $x^3 - 3x$ hätte dort einen Tiefpunkt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein rechteckiges Beet soll mit $40\\,\\mathrm{m}$ Zaun eingefasst werden. Welche Zielfunktion beschreibt den Flächeninhalt in Abhängigkeit von der Seitenlänge $x$?',
+      opts: ['$A(x) = x \\cdot (40 - x)$', '$A(x) = 2x + 2(20 - x)$', '$A(x) = x \\cdot (40 - 2x)$', '$A(x) = x \\cdot (20 - x)$'],
+      steps: [
+        'Nebenbedingung Umfang: $2x + 2y = 40 \\Rightarrow y = 20 - x$',
+        'Hauptbedingung Fläche: $A = x \\cdot y = x \\cdot (20 - x)$ mit $0 < x < 20$',
+        '$40 - x$ vergisst die Halbierung, $2x + 2(20 - x)$ ist der Umfang (konstant $40$).'
+      ],
+      solution: 3
+    },
+    {
+      q: 'An einer Mauer soll mit $60\\,\\mathrm{m}$ Zaun ein rechteckiges Gehege abgegrenzt werden - die Mauer bildet eine Seite. Welche Maße liefern die größte Fläche?',
+      opts: ['$30\\,\\mathrm{m} \\times 30\\,\\mathrm{m}$, $A = 900\\,\\mathrm{m^2}$', '$15\\,\\mathrm{m} \\times 30\\,\\mathrm{m}$, $A = 450\\,\\mathrm{m^2}$', '$15\\,\\mathrm{m} \\times 15\\,\\mathrm{m}$, $A = 225\\,\\mathrm{m^2}$', '$20\\,\\mathrm{m} \\times 20\\,\\mathrm{m}$, $A = 400\\,\\mathrm{m^2}$'],
+      steps: [
+        'Zaun für drei Seiten: $2x + y = 60 \\Rightarrow y = 60 - 2x$; $A(x) = x(60 - 2x) = 60x - 2x^2$',
+        '$A^{\\prime}(x) = 60 - 4x = 0 \\Rightarrow x = 15$; $A^{\\prime\\prime}(x) = -4 < 0$: Maximum',
+        '$y = 60 - 30 = 30$, $A = 15 \\cdot 30 = 450\\,\\mathrm{m^2}$. Das Quadrat ist hier nicht optimal.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine oben offene Schachtel mit quadratischer Grundfläche (Seite $x$) soll $500\\,\\mathrm{cm^3}$ fassen und möglichst wenig Material verbrauchen. Welche Maße sind optimal?',
+      opts: ['$x = h \\approx 7{,}94\\,\\mathrm{cm}$', '$x = 20\\,\\mathrm{cm}$, $h = 1{,}25\\,\\mathrm{cm}$', '$x = 5\\,\\mathrm{cm}$, $h = 20\\,\\mathrm{cm}$', '$x = 10\\,\\mathrm{cm}$, $h = 5\\,\\mathrm{cm}$'],
+      steps: [
+        'Nebenbedingung: $x^2 h = 500 \\Rightarrow h = \\dfrac{500}{x^2}$; Oberfläche ohne Deckel: $O = x^2 + 4xh = x^2 + \\dfrac{2000}{x}$',
+        '$O^{\\prime}(x) = 2x - \\dfrac{2000}{x^2} = 0 \\Rightarrow x^3 = 1000 \\Rightarrow x = 10$; $O^{\\prime\\prime}(x) = 2 + \\dfrac{4000}{x^3} > 0$: Minimum',
+        '$h = \\dfrac{500}{100} = 5\\,\\mathrm{cm}$, $O = 100 + 200 = 300\\,\\mathrm{cm^2}$. Der Würfel wäre nur bei geschlossener Schachtel optimal.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\int_{-1}^{2} (3x^2 - 2x)\\,dx$.',
+      opts: ['$12$', '$4$', '$6$', '$2$'],
+      steps: [
+        'Stammfunktion: $F(x) = x^3 - x^2$',
+        '$F(2) - F(-1) = (8 - 4) - (-1 - 1) = 4 + 2 = 6$',
+        'Falle: $F(-1) = (-1)^3 - (-1)^2 = -2$, nicht $0$ und nicht $+2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der Graph von $f(x) = x^2 - 4x + 3$ schließt mit der $x$-Achse zwischen seinen Nullstellen eine Fläche ein. Wie groß ist sie?',
+      opts: ['$A = \\dfrac{8}{3}$', '$A = \\dfrac{2}{3}$', '$A = \\dfrac{4}{3}$', '$A = -\\dfrac{4}{3}$'],
+      steps: [
+        'Nullstellen: $x^2 - 4x + 3 = (x - 1)(x - 3) = 0 \\Rightarrow x = 1$, $x = 3$; dazwischen ist $f < 0$.',
+        '$\\int_1^3 (x^2 - 4x + 3)\\,dx = \\left[\\dfrac{x^3}{3} - 2x^2 + 3x\\right]_1^3 = 0 - \\dfrac{4}{3} = -\\dfrac{4}{3}$',
+        'Flächeninhalt ist der Betrag: $A = \\dfrac{4}{3}$. Ein negativer Flächeninhalt ist nie richtig.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Graphen von $f(x) = -x^2 + 4$ und $g(x) = x + 2$ begrenzen eine Fläche. Wie groß ist sie?',
+      opts: ['$A = 2{,}25$', '$A = 3$', '$A = 9$', '$A = 4{,}5$'],
+      steps: [
+        'Schnittstellen: $-x^2 + 4 = x + 2 \\Rightarrow x^2 + x - 2 = 0 \\Rightarrow x = -2$ oder $x = 1$; dazwischen liegt $f$ oben.',
+        '$A = \\int_{-2}^{1} (-x^2 - x + 2)\\,dx = \\left[-\\dfrac{x^3}{3} - \\dfrac{x^2}{2} + 2x\\right]_{-2}^{1} = \\dfrac{7}{6} - \\left(-\\dfrac{10}{3}\\right) = \\dfrac{27}{6} = 4{,}5$',
+        'Kontrolle mit dem GTR (numerisches Integral): $4{,}5$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche waagerechte Asymptote hat der Graph von $f(x) = \\dfrac{3x^2 - 3}{x^2 - 4}$?',
+      opts: ['$y = 3$', '$y = -\\dfrac{3}{4}$', '$y = \\dfrac{3}{4}$', '$y = 0$'],
+      steps: [
+        'Zählergrad $=$ Nennergrad $= 2$: Für $x \\to \\pm\\infty$ strebt $f(x)$ gegen den Quotienten der Leitkoeffizienten.',
+        '$y = \\dfrac{3}{1} = 3$. Polstellen bei $x = \\pm 2$, Nullstellen bei $x = \\pm 1$.',
+        '$\\dfrac{3}{4}$ ist $f(0)$, der $y$-Achsenabschnitt - kein Grenzwert.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Tiefpunkt hat der Graph von $f(x) = \\dfrac{x^2 + 4}{x}$?',
+      opts: ['$T(2|0)$', '$T(-2|-4)$', '$T(2|4)$', '$T(4|5)$'],
+      steps: [
+        'Quotientenregel: $f^{\\prime}(x) = \\dfrac{2x \\cdot x - (x^2 + 4) \\cdot 1}{x^2} = \\dfrac{x^2 - 4}{x^2} = 0 \\Rightarrow x = \\pm 2$',
+        '$f^{\\prime\\prime}(x) = \\dfrac{8}{x^3}$: $f^{\\prime\\prime}(2) = 1 > 0$ Tiefpunkt, $f^{\\prime\\prime}(-2) < 0$ Hochpunkt',
+        '$f(2) = \\dfrac{8}{2} = 4$, also $T(2|4)$; $H(-2|-4)$ ist der Hochpunkt - nicht verwechseln.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $\\int_1^2 \\dfrac{1}{x^2}\\,dx$.',
+      opts: ['$\\dfrac{1}{2}$', '$-\\dfrac{1}{2}$', '$\\dfrac{3}{2}$', '$\\ln 2 \\approx 0{,}69$'],
+      steps: [
+        '$\\dfrac{1}{x^2} = x^{-2}$, Stammfunktion nach dem Grundintegral: $\\dfrac{x^{-1}}{-1} = -\\dfrac{1}{x}$',
+        '$\\left[-\\dfrac{1}{x}\\right]_1^2 = -\\dfrac{1}{2} - (-1) = \\dfrac{1}{2}$',
+        'Kontrolle mit dem GTR: $0{,}5$. $\\ln 2$ wäre $\\int_1^2 \\dfrac{1}{x}\\,dx$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = (2x - 1) \\cdot e^{x}$.',
+      opts: ['$f^{\\prime}(x) = 2e^{x}$', '$f^{\\prime}(x) = (2x - 1)\\,e^{x}$', '$f^{\\prime}(x) = (2x - 3)\\,e^{x}$', '$f^{\\prime}(x) = (2x + 1)\\,e^{x}$'],
+      steps: [
+        'Produktregel: $u = 2x - 1$, $u^{\\prime} = 2$, $v = e^{x}$, $v^{\\prime} = e^{x}$',
+        '$f^{\\prime}(x) = 2e^{x} + (2x - 1)e^{x} = (2x + 1)\\,e^{x}$',
+        '$e^{x}$ ausklammern und die Klammern zusammenfassen - $2e^{x}$ allein vergisst den zweiten Summanden.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchen Extrempunkt hat der Graph von $f(x) = (2x - 1) \\cdot e^{x}$?',
+      opts: ['Tiefpunkt $T(-0{,}5|0)$', 'Tiefpunkt $T(-0{,}5|-2e^{-0{,}5})$, $-2e^{-0{,}5} \\approx -1{,}21$', 'Hochpunkt $H(-0{,}5|-2e^{-0{,}5})$', 'Tiefpunkt $T(0{,}5|0)$'],
+      steps: [
+        '$f^{\\prime}(x) = (2x + 1)\\,e^{x} = 0 \\Rightarrow x = -0{,}5$ (da $e^{x} > 0$)',
+        '$f^{\\prime\\prime}(x) = (2x + 3)\\,e^{x}$, $f^{\\prime\\prime}(-0{,}5) = 2e^{-0{,}5} > 0$: Tiefpunkt',
+        '$f(-0{,}5) = -2 \\cdot e^{-0{,}5} \\approx -1{,}21$. $x = 0{,}5$ ist die Nullstelle, nicht die Extremstelle.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Medikament wird mit der Rate $r(t) = 6e^{-0{,}5t}$ (in mg pro Stunde, $t$ in Stunden) abgebaut. Wie viel mg werden in den ersten $4$ Stunden abgebaut?',
+      opts: ['$24\\,\\mathrm{mg}$', '$12\\,(1 - e^{-2}) \\approx 10{,}38\\,\\mathrm{mg}$', '$6\\,(1 - e^{-2}) \\approx 5{,}19\\,\\mathrm{mg}$', '$12e^{-2} \\approx 1{,}62\\,\\mathrm{mg}$'],
+      steps: [
+        'Abgebaute Menge $= \\int_0^4 6e^{-0{,}5t}\\,dt$ mit Stammfunktion $\\dfrac{6}{-0{,}5}\\,e^{-0{,}5t} = -12e^{-0{,}5t}$',
+        '$\\left[-12e^{-0{,}5t}\\right]_0^4 = -12e^{-2} - (-12) = 12\\,(1 - e^{-2}) \\approx 10{,}38$',
+        '$24$ wäre $6 \\cdot 4$ (konstante Rate); $5{,}19$ entsteht, wenn man nicht durch $-0{,}5$ teilt.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

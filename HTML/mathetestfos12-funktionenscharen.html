@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Schnittpunkte, Funktionenscharen, Steckbriefaufgaben — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w19-funktionenscharen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Schnittpunkte, Funktionenscharen, Steckbriefaufgaben',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 19 (LB 2) · 20 Aufgaben: Schnitt- und Berührungspunkte, Scharen mit Parameter, Funktionsgleichungen bestimmen · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 19 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Schnittpunkte (1-5), Berührung (6-8), Funktionenscharen (9-14), Steckbriefaufgaben (15-20). Alles ohne CAS. */
+  questions: [
+    {
+      q: 'Bestimme die Schnittpunkte der Graphen von $f(x) = x^2$ und $g(x) = 2x + 3$.',
+      opts: ['nur $S(3|9)$', '$S_1(-1|1)$ und $S_2(3|9)$', '$S_1(-1|-1)$ und $S_2(3|9)$', '$S_1(1|5)$ und $S_2(-3|-3)$'],
+      steps: [
+        'Gleichsetzen: $x^2 = 2x + 3 \\Leftrightarrow x^2 - 2x - 3 = 0$',
+        '$x_{1,2} = 1 \\pm \\sqrt{1 + 3} = 1 \\pm 2$, also $x_1 = -1$, $x_2 = 3$',
+        '$y$-Werte: $f(-1) = 1$, $f(3) = 9$; Probe mit $g$: $g(-1) = 1$, $g(3) = 9$. Passt.',
+        'Falle: $(-1|-1)$ - der $y$-Wert von $x^2$ ist bei $x = -1$ positiv.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wo schneiden sich die Graphen von $f(x) = x^3 - x$ und $g(x) = 3x$?',
+      opts: ['in $(0|0)$, $(2|6)$ und $(-2|-6)$', 'nur in $(2|6)$ und $(-2|-6)$', 'in $(0|0)$, $(4|12)$ und $(-4|-12)$', 'nur in $(0|0)$ und $(2|6)$'],
+      steps: [
+        '$x^3 - x = 3x \\Leftrightarrow x^3 - 4x = 0 \\Leftrightarrow x\\,(x - 2)(x + 2) = 0$',
+        '$x = 0$, $x = 2$, $x = -2$; $y$-Werte über $g$: $0$, $6$, $-6$',
+        'Falle: Division durch $x$ verschluckt den Schnittpunkt im Ursprung.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die gemeinsamen Punkte von $f(x) = x^2 - 4$ und $g(x) = -x^2 + 4$.',
+      opts: ['$(0|4)$ und $(0|-4)$', '$(2|0)$ und $(-2|0)$', 'keine gemeinsamen Punkte', '$(2|4)$ und $(-2|4)$'],
+      steps: [
+        '$x^2 - 4 = -x^2 + 4 \\Leftrightarrow 2x^2 = 8 \\Leftrightarrow x^2 = 4$',
+        '$x = \\pm 2$, $f(\\pm 2) = 4 - 4 = 0$',
+        'Beide Parabeln schneiden sich genau in ihren Nullstellen auf der $x$-Achse.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welche $x$ liegt der Graph von $f(x) = x^2$ oberhalb des Graphen von $g(x) = 2x + 3$?',
+      opts: ['für $-1 < x < 3$', 'für alle $x$', 'für $x < -1$ und für $x > 3$', 'nur für $x > 3$'],
+      steps: [
+        'Schnittstellen aus $x^2 - 2x - 3 = 0$: $x = -1$ und $x = 3$.',
+        'Die Differenz $d(x) = x^2 - 2x - 3$ ist eine nach oben geöffnete Parabel: positiv außerhalb der Nullstellen.',
+        'Probe: $d(0) = -3 < 0$ (dazwischen liegt $f$ unter $g$), $d(4) = 5 > 0$. Passt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie viele gemeinsame Punkte haben die Graphen von $f(x) = x^2 + 1$ und $g(x) = x - 1$?',
+      opts: ['keinen', 'genau einen, nämlich $(2|5)$', 'genau einen (Berührung)', 'zwei'],
+      steps: [
+        '$x^2 + 1 = x - 1 \\Leftrightarrow x^2 - x + 2 = 0$',
+        'Diskriminante: $D = 1 - 8 = -7 < 0$: keine reelle Lösung.',
+        'Anschaulich: die Parabel liegt oberhalb von $y = 1$, die Gerade $x - 1$ bleibt darunter, solange $x < 2$ - und für $x \\geq 2$ wächst $x^2 + 1$ schneller.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wann berühren sich die Graphen zweier Funktionen $f$ und $g$ an der Stelle $x_0$?',
+      opts: ['wenn $f^{\\prime}(x_0) = g^{\\prime}(x_0)$ gilt', 'wenn $f(x_0) = g(x_0)$ und $f^{\\prime}(x_0) = g^{\\prime}(x_0)$ gilt', 'wenn $f(x_0) = g(x_0)$ und $f^{\\prime\\prime}(x_0) = g^{\\prime\\prime}(x_0)$ gilt', 'wenn $f(x_0) = g(x_0)$ gilt'],
+      steps: [
+        'Berühren heißt: gemeinsamer Punkt und gemeinsame Tangente.',
+        'Gemeinsamer Punkt: $f(x_0) = g(x_0)$; gemeinsame Tangente: gleicher Anstieg $f^{\\prime}(x_0) = g^{\\prime}(x_0)$.',
+        'Nur gleicher Funktionswert wäre ein Schnittpunkt; nur gleicher Anstieg bedeutet parallele Tangenten, vielleicht weit voneinander entfernt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welches $c$ berührt die Gerade $g(x) = 2x + c$ die Parabel $f(x) = x^2$?',
+      opts: ['$c = 0$', '$c = -2$', '$c = -1$', '$c = 1$'],
+      steps: [
+        'Gleicher Anstieg: $f^{\\prime}(x) = 2x = 2 \\Rightarrow x_0 = 1$',
+        'Gleicher Funktionswert: $f(1) = 1 = 2 \\cdot 1 + c \\Rightarrow c = -1$',
+        'Probe: $x^2 = 2x - 1 \\Leftrightarrow (x - 1)^2 = 0$, doppelte Lösung - Berührung in $B(1|1)$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Untersuche die gemeinsamen Punkte von $f(x) = x^3 - 3x$ und der Geraden $g(x) = -2$.',
+      fig: '<svg viewBox="0 0 520 340" width="520" height="340" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Graph von f und Gerade g mit Berührpunkt B und Schnittpunkt S"><defs><clipPath id="f1-clip"><rect x="39" y="19" width="460" height="288"/></clipPath><marker id="f1-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="40" y1="306" x2="40" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="116.33" y1="306" x2="116.33" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="192.67" y1="306" x2="192.67" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="269" y1="306" x2="269" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="345.33" y1="306" x2="345.33" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="421.67" y1="306" x2="421.67" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="498" y1="306" x2="498" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="306" x2="498" y2="306" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="270.25" x2="498" y2="270.25" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="234.5" x2="498" y2="234.5" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="198.75" x2="498" y2="198.75" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="163" x2="498" y2="163" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="127.25" x2="498" y2="127.25" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="91.5" x2="498" y2="91.5" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="55.75" x2="498" y2="55.75" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="20" x2="498" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="163" x2="498" y2="163" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><line x1="269" y1="306" x2="269" y2="20" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><text x="500" y="179" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">x</text><text x="257" y="18" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">y</text><text x="262" y="178" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="40" y1="159.5" x2="40" y2="166.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="116.33" y1="159.5" x2="116.33" y2="166.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="192.67" y1="159.5" x2="192.67" y2="166.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="345.33" y1="159.5" x2="345.33" y2="166.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="421.67" y1="159.5" x2="421.67" y2="166.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="265.5" y1="306" x2="272.5" y2="306" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="265.5" y1="270.25" x2="272.5" y2="270.25" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="265.5" y1="234.5" x2="272.5" y2="234.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="265.5" y1="198.75" x2="272.5" y2="198.75" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="265.5" y1="127.25" x2="272.5" y2="127.25" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="265.5" y1="91.5" x2="272.5" y2="91.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="265.5" y1="55.75" x2="272.5" y2="55.75" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><g clip-path="url(#f1-clip)"><path d="M 85.8 399.81 L 87.21 390.47 L 88.62 381.31 L 90.03 372.32 L 91.44 363.5 L 92.85 354.85 L 94.26 346.37 L 95.66 338.06 L 97.07 329.91 L 98.48 321.93 L 99.89 314.11 L 101.3 306.45 L 102.71 298.95 L 104.12 291.62 L 105.53 284.44 L 106.94 277.42 L 108.35 270.55 L 109.76 263.83 L 111.17 257.27 L 112.58 250.86 L 113.98 244.6 L 115.39 238.49 L 116.8 232.53 L 118.21 226.71 L 119.62 221.04 L 121.03 215.5 L 122.44 210.11 L 123.85 204.87 L 125.26 199.76 L 126.67 194.78 L 128.08 189.95 L 129.49 185.25 L 130.9 180.68 L 132.3 176.24 L 133.71 171.94 L 135.12 167.76 L 136.53 163.72 L 137.94 159.8 L 139.35 156 L 140.76 152.33 L 142.17 148.79 L 143.58 145.36 L 144.99 142.05 L 146.4 138.87 L 147.81 135.8 L 149.22 132.85 L 150.62 130.01 L 152.03 127.28 L 153.44 124.67 L 154.85 122.17 L 156.26 119.77 L 157.67 117.49 L 159.08 115.31 L 160.49 113.24 L 161.9 111.27 L 163.31 109.4 L 164.72 107.63 L 166.13 105.97 L 167.54 104.4 L 168.94 102.93 L 170.35 101.56 L 171.76 100.28 L 173.17 99.09 L 174.58 98 L 175.99 96.99 L 177.4 96.08 L 178.81 95.25 L 180.22 94.51 L 181.63 93.85 L 183.04 93.28 L 184.45 92.79 L 185.86 92.38 L 187.26 92.05 L 188.67 91.8 L 190.08 91.62 L 191.49 91.53 L 192.9 91.5 L 194.31 91.55 L 195.72 91.67 L 197.13 91.86 L 198.54 92.12 L 199.95 92.44 L 201.36 92.84 L 202.77 93.29 L 204.18 93.82 L 205.58 94.4 L 206.99 95.04 L 208.4 95.74 L 209.81 96.51 L 211.22 97.32 L 212.63 98.2 L 214.04 99.12 L 215.45 100.1 L 216.86 101.13 L 218.27 102.22 L 219.68 103.34 L 221.09 104.52 L 222.5 105.74 L 223.9 107.01 L 225.31 108.32 L 226.72 109.67 L 228.13 111.07 L 229.54 112.5 L 230.95 113.97 L 232.36 115.47 L 233.77 117.01 L 235.18 118.59 L 236.59 120.2 L 238 121.84 L 239.41 123.5 L 240.82 125.2 L 242.22 126.92 L 243.63 128.67 L 245.04 130.45 L 246.45 132.24 L 247.86 134.06 L 249.27 135.9 L 250.68 137.75 L 252.09 139.63 L 253.5 141.52 L 254.91 143.42 L 256.32 145.34 L 257.73 147.28 L 259.14 149.22 L 260.54 151.17 L 261.95 153.13 L 263.36 155.09 L 264.77 157.07 L 266.18 159.04 L 267.59 161.02 L 269 163 L 270.41 164.98 L 271.82 166.96 L 273.23 168.93 L 274.64 170.91 L 276.05 172.87 L 277.46 174.83 L 278.86 176.78 L 280.27 178.72 L 281.68 180.66 L 283.09 182.58 L 284.5 184.48 L 285.91 186.37 L 287.32 188.25 L 288.73 190.1 L 290.14 191.94 L 291.55 193.76 L 292.96 195.55 L 294.37 197.33 L 295.78 199.08 L 297.18 200.8 L 298.59 202.5 L 300 204.16 L 301.41 205.8 L 302.82 207.41 L 304.23 208.99 L 305.64 210.53 L 307.05 212.03 L 308.46 213.5 L 309.87 214.93 L 311.28 216.33 L 312.69 217.68 L 314.1 218.99 L 315.5 220.26 L 316.91 221.48 L 318.32 222.66 L 319.73 223.78 L 321.14 224.87 L 322.55 225.9 L 323.96 226.88 L 325.37 227.8 L 326.78 228.68 L 328.19 229.49 L 329.6 230.26 L 331.01 230.96 L 332.42 231.6 L 333.82 232.18 L 335.23 232.71 L 336.64 233.16 L 338.05 233.56 L 339.46 233.88 L 340.87 234.14 L 342.28 234.33 L 343.69 234.45 L 345.1 234.5 L 346.51 234.47 L 347.92 234.38 L 349.33 234.2 L 350.74 233.95 L 352.14 233.62 L 353.55 233.21 L 354.96 232.72 L 356.37 232.15 L 357.78 231.49 L 359.19 230.75 L 360.6 229.92 L 362.01 229.01 L 363.42 228 L 364.83 226.91 L 366.24 225.72 L 367.65 224.44 L 369.06 223.07 L 370.46 221.6 L 371.87 220.03 L 373.28 218.37 L 374.69 216.6 L 376.1 214.73 L 377.51 212.76 L 378.92 210.69 L 380.33 208.51 L 381.74 206.23 L 383.15 203.83 L 384.56 201.33 L 385.97 198.72 L 387.38 195.99 L 388.78 193.15 L 390.19 190.2 L 391.6 187.13 L 393.01 183.95 L 394.42 180.64 L 395.83 177.21 L 397.24 173.67 L 398.65 170 L 400.06 166.2 L 401.47 162.28 L 402.88 158.24 L 404.29 154.06 L 405.7 149.76 L 407.1 145.32 L 408.51 140.75 L 409.92 136.05 L 411.33 131.22 L 412.74 126.24 L 414.15 121.13 L 415.56 115.89 L 416.97 110.5 L 418.38 104.96 L 419.79 99.29 L 421.2 93.47 L 422.61 87.51 L 424.02 81.4 L 425.42 75.14 L 426.83 68.73 L 428.24 62.17 L 429.65 55.45 L 431.06 48.58 L 432.47 41.56 L 433.88 34.38 L 435.29 27.05 L 436.7 19.55 L 438.11 11.89 L 439.52 4.07 L 440.93 -3.91 L 442.34 -12.06 L 443.74 -20.37 L 445.15 -28.85 L 446.56 -37.5 L 447.97 -46.32 L 449.38 -55.31 L 450.79 -64.47 L 452.2 -73.81" fill="none" stroke="#B02418" stroke-width="2.1" stroke-linejoin="round" stroke-linecap="round"/></g><line x1="40" y1="234.5" x2="498" y2="234.5" stroke="#799E31" stroke-width="1.7" stroke-linecap="round"/><circle cx="345.33" cy="234.5" r="3.6" fill="#B02418" stroke="#FFFFFF" stroke-width="1.4"/><text x="345.33" y="253.5" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">B</text><circle cx="116.33" cy="234.5" r="3.6" fill="#B02418" stroke="#FFFFFF" stroke-width="1.4"/><text x="108.33" y="226.5" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">S</text><text x="40" y="179" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-3</text><text x="116.33" y="179" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-2</text><text x="192.67" y="179" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-1</text><text x="345.33" y="179" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">1</text><text x="421.67" y="179" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">2</text><text x="262" y="310" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-4</text><text x="262" y="274.25" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-3</text><text x="262" y="238.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-2</text><text x="262" y="202.75" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-1</text><text x="262" y="131.25" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">1</text><text x="262" y="95.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">2</text><text x="262" y="59.75" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">3</text></svg>',
+      figcap: '$f(x) = x^3 - 3x$ und $g(x) = -2$: Berührpunkt $B$ und Schnittpunkt $S$',
+      opts: ['Berührung in $B(1|-2)$, zusätzlich ein Schnittpunkt $S(-2|-2)$', 'Schnittpunkt in $(1|-2)$, keine Berührung', 'nur eine Berührung in $B(1|-2)$', 'keine gemeinsamen Punkte'],
+      steps: [
+        '$x^3 - 3x = -2 \\Leftrightarrow x^3 - 3x + 2 = 0$; $x = 1$ ist Lösung, Polynomdivision: $(x - 1)(x^2 + x - 2) = (x - 1)^2 (x + 2)$',
+        'Doppelte Lösung $x = 1$: Berührung. Probe über den Anstieg: $f^{\\prime}(1) = 3 - 3 = 0 = g^{\\prime}(1)$. Passt.',
+        'Einfache Lösung $x = -2$: dort schneidet die Gerade den Graphen, $f^{\\prime}(-2) = 9 \\neq 0$.',
+        '$B(1|-2)$ ist zugleich der Tiefpunkt von $f$ - die waagerechte Gerade durch einen Tiefpunkt berührt immer.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Gegeben ist die Schar $f_a(x) = x^2 - a$. Wie viele Nullstellen hat $f_a$ in Abhängigkeit von $a$?',
+      opts: ['für jedes $a$ zwei Nullstellen $x = \\pm\\sqrt{a}$', '$a > 0$: eine ($x = \\sqrt{a}$), sonst keine', '$a < 0$: zwei, $a = 0$: eine, $a > 0$: keine', '$a > 0$: zwei ($x = \\pm\\sqrt{a}$), $a = 0$: eine ($x = 0$), $a < 0$: keine'],
+      steps: [
+        '$x^2 - a = 0 \\Leftrightarrow x^2 = a$',
+        'Fallunterscheidung: $a > 0$: $x = \\pm\\sqrt{a}$; $a = 0$: nur $x = 0$ (doppelt); $a < 0$: $x^2$ kann nicht negativ sein.',
+        'Beispiel $a = 4$: $x = \\pm 2$; Beispiel $a = -1$: $x^2 = -1$ hat keine Lösung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welche Werte von $a$ hat die Schar $f_a(x) = x^3 - a\\,x$ Extrempunkte?',
+      opts: ['für alle $a$', 'nur für $a > 0$', 'für alle $a \\neq 0$', 'nur für $a < 0$'],
+      steps: [
+        '$f_a^{\\prime}(x) = 3x^2 - a = 0 \\Leftrightarrow x^2 = \\dfrac{a}{3}$',
+        'Lösbar nur für $a > 0$: $x = \\pm\\sqrt{\\dfrac{a}{3}}$; dann $f_a^{\\prime\\prime}(x) = 6x \\neq 0$ - ein Hoch- und ein Tiefpunkt.',
+        '$a = 0$: $f_0(x) = x^3$ hat nur einen Sattelpunkt; $a < 0$: $f_a^{\\prime}(x) > 0$ überall, der Graph steigt nur.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme den Extrempunkt von $f_a(x) = a\\,x^2 - 4x$ ($a \\neq 0$) und seine Art.',
+      opts: ['$E\\left(\\dfrac{a}{2}\\,\\middle|\\,-\\dfrac{4}{a}\\right)$, Tiefpunkt für alle $a$', '$E\\left(\\dfrac{2}{a}\\,\\middle|\\,\\dfrac{4}{a}\\right)$, Tiefpunkt für $a > 0$', '$E\\left(\\dfrac{2}{a}\\,\\middle|\\,-\\dfrac{4}{a}\\right)$, Tiefpunkt für $a > 0$, Hochpunkt für $a < 0$', '$E\\left(\\dfrac{2}{a}\\,\\middle|\\,-\\dfrac{4}{a}\\right)$, Hochpunkt für $a > 0$, Tiefpunkt für $a < 0$'],
+      steps: [
+        '$f_a^{\\prime}(x) = 2ax - 4 = 0 \\Rightarrow x_E = \\dfrac{2}{a}$',
+        '$f_a\\!\\left(\\dfrac{2}{a}\\right) = a \\cdot \\dfrac{4}{a^2} - \\dfrac{8}{a} = \\dfrac{4}{a} - \\dfrac{8}{a} = -\\dfrac{4}{a}$',
+        '$f_a^{\\prime\\prime}(x) = 2a$: für $a > 0$ positiv (Tiefpunkt, Parabel nach oben offen), für $a < 0$ negativ (Hochpunkt).',
+        'Probe mit $a = 2$: $f_2(x) = 2x^2 - 4x$ hat den Tiefpunkt $(1|-2)$. Passt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welches $a$ verläuft der Graph von $f_a(x) = x^2 + a\\,x + 4$ durch den Punkt $P(1|2)$?',
+      opts: ['$a = -5$', '$a = -7$', '$a = 3$', '$a = -3$'],
+      steps: [
+        'Punktprobe: $f_a(1) = 1 + a + 4 = 2$',
+        '$a + 5 = 2 \\Rightarrow a = -3$',
+        'Probe: $f_{-3}(1) = 1 - 3 + 4 = 2$. Passt. Falle: $a = -5$ ergibt $f_a(1) = 0$, also eine Nullstelle statt $P$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welche $a$ hat $f_a(x) = x^2 + a\\,x + 4$ genau eine Nullstelle (der Graph berührt die $x$-Achse)?',
+      opts: ['$a = 16$', '$a = 4$ oder $a = -4$', '$a = 2$ oder $a = -2$', 'nur $a = 4$'],
+      steps: [
+        'Genau eine Nullstelle, wenn die Diskriminante null ist: $D = a^2 - 4 \\cdot 1 \\cdot 4 = a^2 - 16$',
+        '$a^2 - 16 = 0 \\Rightarrow a = \\pm 4$',
+        'Probe: $a = 4$: $(x + 2)^2$; $a = -4$: $(x - 2)^2$ - beide berühren die $x$-Achse.',
+        'Falle: das negative $a$ nicht vergessen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme den Wendepunkt der Schar $f_a(x) = x^3 - 3a\\,x^2$ in Abhängigkeit von $a$.',
+      opts: ['$W(a\\,|\\,-2a^3)$', '$W(2a\\,|\\,-4a^3)$', '$W(a\\,|\\,a^3)$', '$W(0\\,|\\,0)$'],
+      steps: [
+        '$f_a^{\\prime}(x) = 3x^2 - 6ax$, $f_a^{\\prime\\prime}(x) = 6x - 6a = 0 \\Rightarrow x = a$; $f_a^{\\prime\\prime\\prime}(x) = 6 \\neq 0$',
+        '$f_a(a) = a^3 - 3a \\cdot a^2 = a^3 - 3a^3 = -2a^3$',
+        'Falle: $(2a|-4a^3)$ ist der zweite Extrempunkt ($f_a^{\\prime}(2a) = 0$), nicht der Wendepunkt.',
+        'Probe mit $a = 1$: $f_1(x) = x^3 - 3x^2$ hat den Wendepunkt $(1|-2)$. Passt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Parabel $f(x) = ax^2 + bx + c$ schneidet die $y$-Achse bei $1$ und hat den Tiefpunkt $T(2|-3)$. Wie lautet $f$?',
+      opts: ['$f(x) = x^2 - 4x - 3$', '$f(x) = -x^2 + 4x + 1$', '$f(x) = x^2 + 4x + 1$', '$f(x) = x^2 - 4x + 1$'],
+      steps: [
+        'Bedingungen: $f(0) = 1$, $f(2) = -3$, $f^{\\prime}(2) = 0$ (waagerechte Tangente im Tiefpunkt).',
+        '$f(0) = 1 \\Rightarrow c = 1$; $f^{\\prime}(x) = 2ax + b$: $4a + b = 0 \\Rightarrow b = -4a$',
+        '$f(2) = 4a + 2b + 1 = 4a - 8a + 1 = -3 \\Rightarrow a = 1$, $b = -4$',
+        'Probe: $f(2) = 4 - 8 + 1 = -3$, $f^{\\prime\\prime}(2) = 2 > 0$ (Tiefpunkt). Passt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Graph einer ganzrationalen Funktion dritten Grades ist punktsymmetrisch zum Ursprung und hat den Tiefpunkt $T(1|-2)$. Wie lautet die Funktionsgleichung?',
+      opts: ['$f(x) = x^3 + 3x$', '$f(x) = -x^3 + 3x$', '$f(x) = -x^3 + x$', '$f(x) = x^3 - 3x$'],
+      steps: [
+        'Punktsymmetrie zum Ursprung: nur ungerade Exponenten, Ansatz $f(x) = ax^3 + bx$ (zwei Unbekannte, zwei Bedingungen).',
+        '$f(1) = a + b = -2$ und $f^{\\prime}(1) = 3a + b = 0$',
+        'Subtrahieren: $2a = 2 \\Rightarrow a = 1$, $b = -3$',
+        'Probe: $f^{\\prime\\prime}(1) = 6 > 0$, also wirklich ein Tiefpunkt. Passt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Graph einer ganzrationalen Funktion dritten Grades hat den Wendepunkt im Ursprung und den Hochpunkt $H(1|2)$. Wie lautet $f$?',
+      opts: ['$f(x) = -x^3 + 3x$', '$f(x) = x^3 - 3x$', '$f(x) = -x^3 + 2x$', '$f(x) = -x^3 + 3x^2$'],
+      steps: [
+        'Ansatz $f(x) = ax^3 + bx^2 + cx + d$; Wendepunkt im Ursprung: $f(0) = 0 \\Rightarrow d = 0$ und $f^{\\prime\\prime}(0) = 2b = 0 \\Rightarrow b = 0$',
+        'Hochpunkt $H(1|2)$: $f(1) = a + c = 2$ und $f^{\\prime}(1) = 3a + c = 0$',
+        'Subtrahieren: $2a = -2 \\Rightarrow a = -1$, $c = 3$',
+        'Probe: $f^{\\prime\\prime}(1) = -6 < 0$ (Hochpunkt), $f^{\\prime\\prime\\prime}(0) = -6 \\neq 0$ (Wendepunkt). Passt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Der Graph einer ganzrationalen Funktion vierten Grades ist achsensymmetrisch zur $y$-Achse. Wie viele Bedingungen braucht man, um die Funktionsgleichung zu bestimmen?',
+      opts: ['$4$', '$2$', '$5$, wie bei jeder Funktion vierten Grades', '$3$, denn der Ansatz $f(x) = ax^4 + bx^2 + c$ hat drei Unbekannte'],
+      steps: [
+        'Achsensymmetrie zur $y$-Achse: nur gerade Exponenten, also $f(x) = ax^4 + bx^2 + c$.',
+        'Drei Koeffizienten $a$, $b$, $c$ - drei unabhängige Bedingungen genügen.',
+        'Ohne Symmetrie wären es fünf Unbekannte ($x^4$ bis $x^0$) und damit fünf Bedingungen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine ganzrationale Funktion dritten Grades hat den Tiefpunkt $T(0|0)$ und den Hochpunkt $H(2|4)$. Wie lautet $f$?',
+      opts: ['$f(x) = x^3 - 3x^2$', '$f(x) = -x^3 + 2x^2$', '$f(x) = -x^3 + 3x^2$', '$f(x) = -x^3 + 3x^2 - 4$'],
+      steps: [
+        'Ansatz $f(x) = ax^3 + bx^2 + cx + d$; $T(0|0)$: $f(0) = 0 \\Rightarrow d = 0$, $f^{\\prime}(0) = 0 \\Rightarrow c = 0$',
+        '$H(2|4)$: $f(2) = 8a + 4b = 4$ und $f^{\\prime}(2) = 12a + 4b = 0$',
+        'Subtrahieren: $4a = -4 \\Rightarrow a = -1$, dann $4b = 12 \\Rightarrow b = 3$',
+        'Probe: $f^{\\prime\\prime}(x) = -6x + 6$: $f^{\\prime\\prime}(0) = 6 > 0$ (Tiefpunkt), $f^{\\prime\\prime}(2) = -6 < 0$ (Hochpunkt). Passt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Rampe soll durch eine ganzrationale Funktion dritten Grades beschrieben werden: Sie beginnt in $(0|0)$ waagerecht und geht in $(4|2)$ waagerecht in die obere Ebene über (Maße in m). Wie lautet $f$?',
+      opts: ['$f(x) = \\dfrac{1}{16}x^3 - \\dfrac{3}{8}x^2$', '$f(x) = -\\dfrac{1}{8}x^3 + \\dfrac{3}{4}x^2$', '$f(x) = -\\dfrac{1}{16}x^3 + \\dfrac{3}{8}x^2$', '$f(x) = -\\dfrac{1}{16}x^3 + \\dfrac{3}{8}x^2 + 2$'],
+      steps: [
+        'Bedingungen: $f(0) = 0$, $f^{\\prime}(0) = 0$, $f(4) = 2$, $f^{\\prime}(4) = 0$; damit $d = 0$ und $c = 0$.',
+        '$f(4) = 64a + 16b = 2$ und $f^{\\prime}(4) = 48a + 8b = 0 \\Rightarrow b = -6a$',
+        '$64a - 96a = 2 \\Rightarrow a = -\\dfrac{1}{16}$, $b = \\dfrac{3}{8}$',
+        'Probe: $f(4) = -4 + 6 = 2$, $f^{\\prime}(4) = -3 + 3 = 0$. Passt. Falle: $-\\dfrac{1}{8}x^3 + \\dfrac{3}{4}x^2$ endet bei $f(4) = 4$, doppelt so hoch.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

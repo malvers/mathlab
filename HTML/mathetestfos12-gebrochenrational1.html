@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Gebrochenrationale Funktionen I — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w25-gebrochenrational1',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Gebrochenrationale Funktionen I',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 25 (LB 4) · 20 Aufgaben: Definitionsbereich, Polstellen und Lücken, Verhalten im Unendlichen, Asymptoten · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 25 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Definitionsbereich (1-5), Polstellen und hebbare Lücken (6-10), Verhalten im Unendlichen (11-15), Asymptoten und Kurvenverlauf (16-20). GTR ohne CAS. */
+  questions: [
+    {
+      q: 'Bestimme den Definitionsbereich von $f(x) = \\dfrac{5}{x-3}$.',
+      opts: ['$D = \\mathbb{R} \\setminus \\{0\\}$', '$D = \\mathbb{R} \\setminus \\{3\\}$', '$D = \\mathbb{R} \\setminus \\{5\\}$', '$D = \\mathbb{R} \\setminus \\{-3\\}$'],
+      steps: [
+        'Verboten ist nur, was den Nenner null macht: $x - 3 = 0$, also $x = 3$.',
+        '$D = \\mathbb{R} \\setminus \\{3\\}$',
+        'Falle: das Vorzeichen drehen. Aus $x - 3 = 0$ folgt $x = +3$, nicht $x = -3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme den Definitionsbereich von $f(x) = \\dfrac{2x}{x^2-9}$.',
+      opts: ['$D = \\mathbb{R} \\setminus \\{9\\}$', '$D = \\mathbb{R} \\setminus \\{0;\\,3\\}$', '$D = \\mathbb{R} \\setminus \\{3\\}$', '$D = \\mathbb{R} \\setminus \\{-3;\\,3\\}$'],
+      steps: [
+        'Nenner null setzen: $x^2 - 9 = 0$, also $x^2 = 9$.',
+        'Eine quadratische Gleichung hat hier zwei Lösungen: $x = 3$ und $x = -3$.',
+        'Falle: nur die positive Wurzel nehmen. Der Zähler darf null werden - $x = 0$ ist erlaubt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme den Definitionsbereich von $f(x) = \\dfrac{3x}{x^2+1}$.',
+      opts: ['$D = \\mathbb{R} \\setminus \\{-1;\\,1\\}$', '$D = \\mathbb{R}$', '$D = \\mathbb{R} \\setminus \\{0\\}$', '$D = \\mathbb{R} \\setminus \\{-1\\}$'],
+      steps: [
+        '$x^2 + 1 = 0$ hätte $x^2 = -1$ zur Folge - das hat keine reelle Lösung.',
+        'Der Nenner ist für jedes $x$ mindestens $1$, also $D = \\mathbb{R}$.',
+        'Merke: $x^2 + 1$ ist eine Summe, keine Differenz - hier gibt es nichts wegzukürzen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme den Definitionsbereich von $f(x) = \\dfrac{x-1}{x^2-5x+6}$.',
+      opts: ['$D = \\mathbb{R} \\setminus \\{1\\}$', '$D = \\mathbb{R} \\setminus \\{-2;\\,-3\\}$', '$D = \\mathbb{R} \\setminus \\{5;\\,6\\}$', '$D = \\mathbb{R} \\setminus \\{2;\\,3\\}$'],
+      steps: [
+        'Nenner null: $x^2 - 5x + 6 = 0$. Satz von Vieta: Summe $5$, Produkt $6$.',
+        'Also $x = 2$ und $x = 3$; Probe: $2 + 3 = 5$ und $2 \\cdot 3 = 6$.',
+        'Falle: $x = 1$ ist die Nullstelle des Zählers - die gehört zum Definitionsbereich dazu.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme den Definitionsbereich von $f(x) = \\dfrac{x+4}{x^2+2x}$.',
+      opts: ['$D = \\mathbb{R} \\setminus \\{-2;\\,0\\}$', '$D = \\mathbb{R} \\setminus \\{-2\\}$', '$D = \\mathbb{R} \\setminus \\{2;\\,0\\}$', '$D = \\mathbb{R} \\setminus \\{-4\\}$'],
+      steps: [
+        'Ausklammern: $x^2 + 2x = x \\cdot (x + 2)$.',
+        'Ein Produkt ist null, wenn ein Faktor null ist: $x = 0$ oder $x = -2$.',
+        'Falle: die Lösung $x = 0$ übersehen, weil sie beim Ausklammern so unscheinbar aussieht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Was passiert bei $f(x) = \\dfrac{x^2-16}{x-4}$ an der Stelle $x = 4$?',
+      opts: ['Nullstelle bei $x = 4$', 'hebbare Lücke bei $L(4 \\mid 8)$', 'hebbare Lücke bei $L(4 \\mid 0)$', 'Polstelle bei $x = 4$'],
+      steps: [
+        '$x = 4$ gehört nicht zu $D$, denn der Nenner wird null. Also erst kürzen.',
+        '$\\dfrac{x^2-16}{x-4} = \\dfrac{(x-4)(x+4)}{x-4} = x + 4$ für $x \\neq 4$.',
+        'Der Faktor $(x-4)$ kürzt sich weg: hebbare Lücke. Der Lückenwert ist $4 + 4 = 8$, also $L(4 \\mid 8)$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Untersuche $f(x) = \\dfrac{x-2}{(x-2)(x+3)}$ auf Polstellen und Lücken.',
+      opts: ['Polstelle bei $x = 2$, hebbare Lücke bei $x = -3$', 'hebbare Lücke bei $x = 2$, Polstelle bei $x = -3$', 'Polstellen bei $x = 2$ und $x = -3$', 'hebbare Lücken bei $x = 2$ und $x = -3$'],
+      steps: [
+        '$D = \\mathbb{R} \\setminus \\{-3;\\,2\\}$ - beide Nullstellen des Nenners fehlen zunächst.',
+        'Kürzen: $f(x) = \\dfrac{1}{x+3}$ für $x \\neq 2$. Der Faktor $(x-2)$ verschwindet, $(x+3)$ bleibt stehen.',
+        'Gekürzter Faktor bedeutet hebbare Lücke, stehengebliebener Faktor bedeutet Polstelle.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie verhält sich $f(x) = \\dfrac{1}{x-2}$ links und rechts der Polstelle?',
+      fig: '<svg viewBox="0 0 520 330" width="520" height="330" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Graph von f mit der senkrechten Asymptote x gleich 2"><defs><clipPath id="f1-clip"><rect x="39" y="19" width="460" height="278"/></clipPath><marker id="f1-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="40" y1="158" x2="498" y2="158" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><line x1="164.91" y1="296" x2="164.91" y2="20" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><text x="500" y="174" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">x</text><text x="152.91" y="18" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">y</text><text x="157.91" y="173" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="60.82" y1="154.5" x2="60.82" y2="161.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="60.82" y="174" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-2</text><line x1="112.86" y1="154.5" x2="112.86" y2="161.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="112.86" y="174" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-1</text><line x1="216.95" y1="154.5" x2="216.95" y2="161.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="216.95" y="174" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">1</text><line x1="269" y1="154.5" x2="269" y2="161.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="269" y="174" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">2</text><line x1="321.05" y1="154.5" x2="321.05" y2="161.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="321.05" y="174" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">3</text><line x1="373.09" y1="154.5" x2="373.09" y2="161.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="373.09" y="174" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">4</text><line x1="425.14" y1="154.5" x2="425.14" y2="161.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="425.14" y="174" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">5</text><line x1="477.18" y1="154.5" x2="477.18" y2="161.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="477.18" y="174" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">6</text><line x1="161.41" y1="290.69" x2="168.41" y2="290.69" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="157.91" y="294.69" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-5</text><line x1="161.41" y1="264.15" x2="168.41" y2="264.15" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="157.91" y="268.15" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-4</text><line x1="161.41" y1="237.62" x2="168.41" y2="237.62" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="157.91" y="241.62" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-3</text><line x1="161.41" y1="211.08" x2="168.41" y2="211.08" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="157.91" y="215.08" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-2</text><line x1="161.41" y1="184.54" x2="168.41" y2="184.54" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="157.91" y="188.54" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-1</text><line x1="161.41" y1="131.46" x2="168.41" y2="131.46" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="157.91" y="135.46" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">1</text><line x1="161.41" y1="104.92" x2="168.41" y2="104.92" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="157.91" y="108.92" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">2</text><line x1="161.41" y1="78.38" x2="168.41" y2="78.38" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="157.91" y="82.38" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">3</text><line x1="161.41" y1="51.85" x2="168.41" y2="51.85" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="157.91" y="55.85" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">4</text><line x1="161.41" y1="25.31" x2="168.41" y2="25.31" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="157.91" y="29.31" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">5</text><line x1="269" y1="296" x2="269" y2="20" stroke="#6E7E9F" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="6 4"/><g clip-path="url(#f1-clip)"><path d="M 45.2 164.17 L 46.02 164.19 L 46.84 164.22 L 47.65 164.24 L 48.47 164.26 L 49.29 164.29 L 50.1 164.31 L 50.92 164.33 L 51.74 164.36 L 52.55 164.38 L 53.37 164.41 L 54.19 164.43 L 55.01 164.45 L 55.82 164.48 L 56.64 164.5 L 57.46 164.53 L 58.27 164.55 L 59.09 164.58 L 59.91 164.61 L 60.72 164.63 L 61.54 164.66 L 62.36 164.68 L 63.17 164.71 L 63.99 164.74 L 64.81 164.76 L 65.62 164.79 L 66.44 164.82 L 67.26 164.85 L 68.07 164.87 L 68.89 164.9 L 69.71 164.93 L 70.52 164.96 L 71.34 164.99 L 72.16 165.02 L 72.97 165.05 L 73.79 165.08 L 74.61 165.11 L 75.42 165.14 L 76.24 165.17 L 77.06 165.2 L 77.87 165.23 L 78.69 165.26 L 79.51 165.29 L 80.32 165.32 L 81.14 165.35 L 81.96 165.38 L 82.77 165.42 L 83.59 165.45 L 84.41 165.48 L 85.22 165.52 L 86.04 165.55 L 86.86 165.58 L 87.67 165.62 L 88.49 165.65 L 89.31 165.69 L 90.12 165.72 L 90.94 165.76 L 91.76 165.79 L 92.57 165.83 L 93.39 165.87 L 94.21 165.9 L 95.02 165.94 L 95.84 165.98 L 96.66 166.01 L 97.47 166.05 L 98.29 166.09 L 99.11 166.13 L 99.92 166.17 L 100.74 166.21 L 101.56 166.25 L 102.37 166.29 L 103.19 166.33 L 104.01 166.37 L 104.82 166.41 L 105.64 166.46 L 106.46 166.5 L 107.27 166.54 L 108.09 166.58 L 108.91 166.63 L 109.72 166.67 L 110.54 166.72 L 111.36 166.76 L 112.18 166.81 L 112.99 166.85 L 113.81 166.9 L 114.63 166.95 L 115.44 166.99 L 116.26 167.04 L 117.08 167.09 L 117.89 167.14 L 118.71 167.19 L 119.53 167.24 L 120.34 167.29 L 121.16 167.34 L 121.98 167.39 L 122.79 167.45 L 123.61 167.5 L 124.43 167.55 L 125.24 167.61 L 126.06 167.66 L 126.88 167.72 L 127.69 167.77 L 128.51 167.83 L 129.33 167.89 L 130.14 167.95 L 130.96 168.01 L 131.78 168.07 L 132.59 168.13 L 133.41 168.19 L 134.23 168.25 L 135.04 168.31 L 135.86 168.37 L 136.68 168.44 L 137.49 168.5 L 138.31 168.57 L 139.13 168.64 L 139.94 168.7 L 140.76 168.77 L 141.58 168.84 L 142.39 168.91 L 143.21 168.98 L 144.03 169.05 L 144.84 169.12 L 145.66 169.2 L 146.48 169.27 L 147.29 169.35 L 148.11 169.43 L 148.93 169.5 L 149.74 169.58 L 150.56 169.66 L 151.38 169.74 L 152.19 169.82 L 153.01 169.91 L 153.83 169.99 L 154.64 170.08 L 155.46 170.17 L 156.28 170.25 L 157.09 170.34 L 157.91 170.43 L 158.73 170.53 L 159.54 170.62 L 160.36 170.71 L 161.18 170.81 L 161.99 170.91 L 162.81 171.01 L 163.63 171.11 L 164.44 171.21 L 165.26 171.31 L 166.08 171.42 L 166.89 171.53 L 167.71 171.64 L 168.53 171.75 L 169.34 171.86 L 170.16 171.97 L 170.98 172.09 L 171.8 172.21 L 172.61 172.33 L 173.43 172.45 L 174.25 172.58 L 175.06 172.7 L 175.88 172.83 L 176.7 172.96 L 177.51 173.1 L 178.33 173.23 L 179.15 173.37 L 179.96 173.51 L 180.78 173.66 L 181.6 173.8 L 182.41 173.95 L 183.23 174.1 L 184.05 174.26 L 184.86 174.42 L 185.68 174.58 L 186.5 174.74 L 187.31 174.91 L 188.13 175.08 L 188.95 175.25 L 189.76 175.43 L 190.58 175.61 L 191.4 175.8 L 192.21 175.99 L 193.03 176.18 L 193.85 176.38 L 194.66 176.58 L 195.48 176.79 L 196.3 177 L 197.11 177.21 L 197.93 177.43 L 198.75 177.66 L 199.56 177.89 L 200.38 178.13 L 201.2 178.37 L 202.01 178.62 L 202.83 178.87 L 203.65 179.13 L 204.46 179.4 L 205.28 179.68 L 206.1 179.96 L 206.91 180.25 L 207.73 180.54 L 208.55 180.85 L 209.36 181.16 L 210.18 181.48 L 211 181.81 L 211.81 182.15 L 212.63 182.5 L 213.45 182.86 L 214.26 183.23 L 215.08 183.62 L 215.9 184.01 L 216.71 184.42 L 217.53 184.84 L 218.35 185.27 L 219.16 185.72 L 219.98 186.18 L 220.8 186.65 L 221.61 187.15 L 222.43 187.66 L 223.25 188.19 L 224.06 188.74 L 224.88 189.31 L 225.7 189.9 L 226.51 190.51 L 227.33 191.15 L 228.15 191.81 L 228.97 192.5 L 229.78 193.22 L 230.6 193.97 L 231.42 194.75 L 232.23 195.57 L 233.05 196.42 L 233.87 197.31 L 234.68 198.25 L 235.5 199.23 L 236.32 200.26 L 237.13 201.34 L 237.95 202.48 L 238.77 203.68 L 239.58 204.95 L 240.4 206.29 L 241.22 207.71 L 242.03 209.22 L 242.85 210.82 L 243.67 212.52 L 244.48 214.34 L 245.3 216.28 L 246.12 218.36 L 246.93 220.59 L 247.75 223 L 248.57 225.59 L 249.38 228.41 L 250.2 231.47 L 251.02 234.8 L 251.83 238.46 L 252.65 242.48 L 253.47 246.92 L 254.28 251.85 L 255.1 257.37 L 255.92 263.57 L 256.73 270.6 L 257.55 278.63" fill="none" stroke="#B02418" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></g><g clip-path="url(#f1-clip)"><path d="M 280.45 37.37 L 281.27 45.4 L 282.08 52.43 L 282.9 58.63 L 283.72 64.15 L 284.53 69.08 L 285.35 73.52 L 286.17 77.54 L 286.98 81.2 L 287.8 84.53 L 288.62 87.59 L 289.43 90.41 L 290.25 93 L 291.07 95.41 L 291.88 97.64 L 292.7 99.72 L 293.52 101.66 L 294.33 103.48 L 295.15 105.18 L 295.97 106.78 L 296.78 108.29 L 297.6 109.71 L 298.42 111.05 L 299.23 112.32 L 300.05 113.52 L 300.87 114.66 L 301.68 115.74 L 302.5 116.77 L 303.32 117.75 L 304.13 118.69 L 304.95 119.58 L 305.77 120.43 L 306.58 121.25 L 307.4 122.03 L 308.22 122.78 L 309.03 123.5 L 309.85 124.19 L 310.67 124.85 L 311.49 125.49 L 312.3 126.1 L 313.12 126.69 L 313.94 127.26 L 314.75 127.81 L 315.57 128.34 L 316.39 128.85 L 317.2 129.35 L 318.02 129.82 L 318.84 130.28 L 319.65 130.73 L 320.47 131.16 L 321.29 131.58 L 322.1 131.99 L 322.92 132.38 L 323.74 132.77 L 324.55 133.14 L 325.37 133.5 L 326.19 133.85 L 327 134.19 L 327.82 134.52 L 328.64 134.84 L 329.45 135.15 L 330.27 135.46 L 331.09 135.75 L 331.9 136.04 L 332.72 136.32 L 333.54 136.6 L 334.35 136.87 L 335.17 137.13 L 335.99 137.38 L 336.8 137.63 L 337.62 137.87 L 338.44 138.11 L 339.25 138.34 L 340.07 138.57 L 340.89 138.79 L 341.7 139 L 342.52 139.21 L 343.34 139.42 L 344.15 139.62 L 344.97 139.82 L 345.79 140.01 L 346.6 140.2 L 347.42 140.39 L 348.24 140.57 L 349.05 140.75 L 349.87 140.92 L 350.69 141.09 L 351.5 141.26 L 352.32 141.42 L 353.14 141.58 L 353.95 141.74 L 354.77 141.9 L 355.59 142.05 L 356.4 142.2 L 357.22 142.34 L 358.04 142.49 L 358.85 142.63 L 359.67 142.77 L 360.49 142.9 L 361.3 143.04 L 362.12 143.17 L 362.94 143.3 L 363.75 143.42 L 364.57 143.55 L 365.39 143.67 L 366.2 143.79 L 367.02 143.91 L 367.84 144.03 L 368.66 144.14 L 369.47 144.25 L 370.29 144.36 L 371.11 144.47 L 371.92 144.58 L 372.74 144.69 L 373.56 144.79 L 374.37 144.89 L 375.19 144.99 L 376.01 145.09 L 376.82 145.19 L 377.64 145.29 L 378.46 145.38 L 379.27 145.47 L 380.09 145.57 L 380.91 145.66 L 381.72 145.75 L 382.54 145.83 L 383.36 145.92 L 384.17 146.01 L 384.99 146.09 L 385.81 146.18 L 386.62 146.26 L 387.44 146.34 L 388.26 146.42 L 389.07 146.5 L 389.89 146.57 L 390.71 146.65 L 391.52 146.73 L 392.34 146.8 L 393.16 146.88 L 393.97 146.95 L 394.79 147.02 L 395.61 147.09 L 396.42 147.16 L 397.24 147.23 L 398.06 147.3 L 398.87 147.36 L 399.69 147.43 L 400.51 147.5 L 401.32 147.56 L 402.14 147.63 L 402.96 147.69 L 403.77 147.75 L 404.59 147.81 L 405.41 147.87 L 406.22 147.93 L 407.04 147.99 L 407.86 148.05 L 408.67 148.11 L 409.49 148.17 L 410.31 148.23 L 411.12 148.28 L 411.94 148.34 L 412.76 148.39 L 413.57 148.45 L 414.39 148.5 L 415.21 148.55 L 416.02 148.61 L 416.84 148.66 L 417.66 148.71 L 418.47 148.76 L 419.29 148.81 L 420.11 148.86 L 420.92 148.91 L 421.74 148.96 L 422.56 149.01 L 423.37 149.05 L 424.19 149.1 L 425.01 149.15 L 425.82 149.19 L 426.64 149.24 L 427.46 149.28 L 428.28 149.33 L 429.09 149.37 L 429.91 149.42 L 430.73 149.46 L 431.54 149.5 L 432.36 149.54 L 433.18 149.59 L 433.99 149.63 L 434.81 149.67 L 435.63 149.71 L 436.44 149.75 L 437.26 149.79 L 438.08 149.83 L 438.89 149.87 L 439.71 149.91 L 440.53 149.95 L 441.34 149.99 L 442.16 150.02 L 442.98 150.06 L 443.79 150.1 L 444.61 150.13 L 445.43 150.17 L 446.24 150.21 L 447.06 150.24 L 447.88 150.28 L 448.69 150.31 L 449.51 150.35 L 450.33 150.38 L 451.14 150.42 L 451.96 150.45 L 452.78 150.48 L 453.59 150.52 L 454.41 150.55 L 455.23 150.58 L 456.04 150.62 L 456.86 150.65 L 457.68 150.68 L 458.49 150.71 L 459.31 150.74 L 460.13 150.77 L 460.94 150.8 L 461.76 150.83 L 462.58 150.86 L 463.39 150.89 L 464.21 150.92 L 465.03 150.95 L 465.84 150.98 L 466.66 151.01 L 467.48 151.04 L 468.29 151.07 L 469.11 151.1 L 469.93 151.13 L 470.74 151.15 L 471.56 151.18 L 472.38 151.21 L 473.19 151.24 L 474.01 151.26 L 474.83 151.29 L 475.64 151.32 L 476.46 151.34 L 477.28 151.37 L 478.09 151.39 L 478.91 151.42 L 479.73 151.45 L 480.54 151.47 L 481.36 151.5 L 482.18 151.52 L 482.99 151.55 L 483.81 151.57 L 484.63 151.59 L 485.45 151.62 L 486.26 151.64 L 487.08 151.67 L 487.9 151.69 L 488.71 151.71 L 489.53 151.74 L 490.35 151.76 L 491.16 151.78 L 491.98 151.81 L 492.8 151.83" fill="none" stroke="#B02418" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></g></svg>',
+      figcap: 'Graph von $f(x) = \\dfrac{1}{x-2}$ mit der senkrechten Asymptote $x = 2$',
+      opts: ['für $x \\to 2^{-}$ gilt $f(x) \\to -\\infty$, für $x \\to 2^{+}$ gilt $f(x) \\to +\\infty$', 'auf beiden Seiten gilt $f(x) \\to 0$', 'auf beiden Seiten gilt $f(x) \\to +\\infty$', 'auf beiden Seiten gilt $f(x) \\to -\\infty$'],
+      steps: [
+        'Für $x$ knapp unter $2$ ist $x - 2$ eine sehr kleine negative Zahl, der Kehrwert also stark negativ: $f(1{,}9) = -10$.',
+        'Für $x$ knapp über $2$ ist $x - 2$ klein und positiv: $f(2{,}1) = 10$.',
+        'Der Nennerfaktor steht in ungerader Ordnung - Polstelle mit Vorzeichenwechsel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie verhält sich $f(x) = \\dfrac{1}{(x+1)^2}$ an der Stelle $x = -1$?',
+      opts: ['links $f(x) \\to -\\infty$, rechts $f(x) \\to +\\infty$ - Polstelle mit Vorzeichenwechsel', 'auf beiden Seiten gilt $f(x) \\to -\\infty$', 'es liegt eine hebbare Lücke vor', 'auf beiden Seiten gilt $f(x) \\to +\\infty$ - Polstelle ohne Vorzeichenwechsel'],
+      steps: [
+        '$(x+1)^2$ ist für jedes $x \\neq -1$ positiv, also ist auch $f(x)$ immer positiv.',
+        '$f(-1{,}1) = \\dfrac{1}{0{,}01} = 100$ und $f(-0{,}9) = 100$ - beide Seiten laufen nach oben.',
+        'Gerade Ordnung des Nennerfaktors bedeutet: kein Vorzeichenwechsel.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Untersuche $f(x) = \\dfrac{x+3}{x^2-9}$ an den Stellen $x = -3$ und $x = 3$.',
+      opts: ['Polstellen bei $x = -3$ und $x = 3$', 'hebbare Lücke $L(-3 \\mid 0)$, Polstelle bei $x = 3$', 'hebbare Lücke $L\\left(-3 \\mid -\\dfrac{1}{6}\\right)$, Polstelle bei $x = 3$', 'Polstelle bei $x = -3$, hebbare Lücke bei $x = 3$'],
+      steps: [
+        'Dritte binomische Formel: $x^2 - 9 = (x-3)(x+3)$, also $f(x) = \\dfrac{x+3}{(x-3)(x+3)}$.',
+        'Kürzen: $f(x) = \\dfrac{1}{x-3}$ für $x \\neq -3$. Bei $x = -3$ bleibt eine hebbare Lücke.',
+        'Lückenwert: $\\dfrac{1}{-3-3} = -\\dfrac{1}{6}$. Bei $x = 3$ steht der Faktor noch im Nenner: Polstelle.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchem Wert nähert sich $f(x) = \\dfrac{2x+1}{x-3}$ für $x \\to \\pm\\infty$?',
+      opts: ['$f(x) \\to 2$', '$f(x) \\to -\\dfrac{1}{3}$', '$f(x) \\to 0$', '$f(x) \\to \\pm\\infty$'],
+      steps: [
+        'Zählergrad und Nennergrad sind beide $1$ - dann entscheiden die Leitkoeffizienten.',
+        '$\\dfrac{2x+1}{x-3} = \\dfrac{2 + \\frac{1}{x}}{1 - \\frac{3}{x}} \\to \\dfrac{2}{1} = 2$, denn $\\dfrac{1}{x} \\to 0$.',
+        'Kontrolle mit dem GTR: $f(1000) \\approx 2{,}007$. Der Wert $-\\dfrac{1}{3}$ ist $f(0)$, nicht der Grenzwert.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchem Wert nähert sich $f(x) = \\dfrac{3x}{x^2+1}$ für $x \\to \\pm\\infty$?',
+      opts: ['$f(x) \\to 3$', '$f(x) \\to \\pm\\infty$', '$f(x) \\to 1$', '$f(x) \\to 0$'],
+      steps: [
+        'Der Nennergrad $2$ ist größer als der Zählergrad $1$: Der Nenner wächst schneller.',
+        '$f(100) = \\dfrac{300}{10001} \\approx 0{,}03$ und $f(1000) \\approx 0{,}003$.',
+        'Zählergrad kleiner als Nennergrad bedeutet immer: Grenzwert $0$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie verhält sich $f(x) = \\dfrac{x^2+1}{x-1}$ für $x \\to +\\infty$?',
+      opts: ['$f(x) \\to 1$', '$f(x) \\to -\\infty$', '$f(x) \\to +\\infty$ - es gibt keine waagerechte Asymptote', '$f(x) \\to 0$'],
+      steps: [
+        'Der Zählergrad $2$ ist größer als der Nennergrad $1$: Der Zähler gewinnt.',
+        '$f(100) = \\dfrac{10001}{99} \\approx 101$ und $f(1000) \\approx 1002$ - die Werte wachsen über alle Grenzen.',
+        'Eine waagerechte Asymptote gibt es nur, wenn der Zählergrad höchstens so groß ist wie der Nennergrad.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche dieser Funktionen hat die waagerechte Asymptote $y = 0$?',
+      opts: ['$f(x) = \\dfrac{3x^2}{x^2+1}$', '$f(x) = \\dfrac{5}{x^2+3}$', '$f(x) = \\dfrac{x^2}{x+1}$', '$f(x) = \\dfrac{2x+1}{x-3}$'],
+      steps: [
+        'Gefragt ist: Zählergrad kleiner als Nennergrad.',
+        'Bei $\\dfrac{5}{x^2+3}$ ist der Zählergrad $0$ und der Nennergrad $2$ - Grenzwert $0$.',
+        'Die anderen haben die Grenzwerte $3$ bzw. $2$ bzw. gar keinen (Zählergrad größer).'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wovon hängt es ab, ob der Graph von $f(x) = \\dfrac{z(x)}{n(x)}$ eine waagerechte Asymptote hat?',
+      opts: ['vom Vergleich der Grade von $z$ und $n$: Zählergrad $\\leq$ Nennergrad', 'vom Vorzeichen des Leitkoeffizienten im Zähler', 'von der Anzahl der Nullstellen des Nenners', 'davon, ob sich der Bruch kürzen lässt'],
+      steps: [
+        'Zählergrad kleiner als Nennergrad: Asymptote $y = 0$.',
+        'Zählergrad gleich Nennergrad: Asymptote $y = \\dfrac{\\text{Leitkoeffizient von } z}{\\text{Leitkoeffizient von } n}$.',
+        'Zählergrad größer als Nennergrad: keine waagerechte Asymptote. Die Nennernullstellen liefern die senkrechten Asymptoten - eine andere Frage.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche achsenparallelen Asymptoten hat der Graph von $f(x) = \\dfrac{3x-2}{x+1}$?',
+      fig: '<svg viewBox="0 0 520 340" width="520" height="340" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Graph mit den Asymptoten x gleich minus 1 und y gleich 3"><defs><clipPath id="f2-clip"><rect x="39" y="19" width="460" height="288"/></clipPath><marker id="f2-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="40" y1="212.03" x2="498" y2="212.03" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f2-ar-0E244E)"/><line x1="311.41" y1="306" x2="311.41" y2="20" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f2-ar-0E244E)"/><text x="500" y="228.03" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">x</text><text x="299.41" y="18" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">y</text><text x="304.41" y="227.03" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="56.96" y1="208.53" x2="56.96" y2="215.53" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="56.96" y="228.03" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-6</text><line x1="99.37" y1="208.53" x2="99.37" y2="215.53" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="99.37" y="228.03" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-5</text><line x1="141.78" y1="208.53" x2="141.78" y2="215.53" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="141.78" y="228.03" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-4</text><line x1="184.19" y1="208.53" x2="184.19" y2="215.53" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="184.19" y="228.03" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-3</text><line x1="226.59" y1="208.53" x2="226.59" y2="215.53" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="226.59" y="228.03" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-2</text><line x1="269" y1="208.53" x2="269" y2="215.53" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="269" y="228.03" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-1</text><line x1="353.81" y1="208.53" x2="353.81" y2="215.53" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="353.81" y="228.03" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">1</text><line x1="396.22" y1="208.53" x2="396.22" y2="215.53" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="396.22" y="228.03" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">2</text><line x1="438.63" y1="208.53" x2="438.63" y2="215.53" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="438.63" y="228.03" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">3</text><line x1="481.04" y1="208.53" x2="481.04" y2="215.53" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="481.04" y="228.03" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">4</text><line x1="307.91" y1="293.74" x2="314.91" y2="293.74" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="304.41" y="297.74" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-4</text><line x1="307.91" y1="252.89" x2="314.91" y2="252.89" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="304.41" y="256.89" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-2</text><line x1="307.91" y1="171.17" x2="314.91" y2="171.17" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="304.41" y="175.17" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">2</text><line x1="307.91" y1="130.31" x2="314.91" y2="130.31" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="304.41" y="134.31" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">4</text><line x1="307.91" y1="89.46" x2="314.91" y2="89.46" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="304.41" y="93.46" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">6</text><line x1="307.91" y1="48.6" x2="314.91" y2="48.6" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="304.41" y="52.6" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">8</text><line x1="269" y1="306" x2="269" y2="20" stroke="#6E7E9F" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="6 4"/><line x1="40" y1="150.74" x2="498" y2="150.74" stroke="#6E7E9F" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="6 4"/><g clip-path="url(#f2-clip)"><path d="M 44.24 131.47 L 45.07 131.4 L 45.9 131.33 L 46.74 131.25 L 47.57 131.18 L 48.4 131.11 L 49.23 131.03 L 50.06 130.96 L 50.9 130.88 L 51.73 130.81 L 52.56 130.73 L 53.39 130.65 L 54.22 130.57 L 55.05 130.5 L 55.89 130.42 L 56.72 130.34 L 57.55 130.26 L 58.38 130.18 L 59.21 130.1 L 60.05 130.01 L 60.88 129.93 L 61.71 129.85 L 62.54 129.76 L 63.37 129.68 L 64.2 129.59 L 65.04 129.51 L 65.87 129.42 L 66.7 129.33 L 67.53 129.24 L 68.36 129.15 L 69.2 129.06 L 70.03 128.97 L 70.86 128.88 L 71.69 128.79 L 72.52 128.7 L 73.36 128.6 L 74.19 128.51 L 75.02 128.41 L 75.85 128.32 L 76.68 128.22 L 77.51 128.12 L 78.35 128.02 L 79.18 127.92 L 80.01 127.82 L 80.84 127.72 L 81.67 127.62 L 82.51 127.52 L 83.34 127.41 L 84.17 127.31 L 85 127.2 L 85.83 127.09 L 86.66 126.99 L 87.5 126.88 L 88.33 126.77 L 89.16 126.66 L 89.99 126.55 L 90.82 126.43 L 91.66 126.32 L 92.49 126.2 L 93.32 126.09 L 94.15 125.97 L 94.98 125.85 L 95.81 125.73 L 96.65 125.61 L 97.48 125.49 L 98.31 125.37 L 99.14 125.24 L 99.97 125.12 L 100.81 124.99 L 101.64 124.86 L 102.47 124.73 L 103.3 124.6 L 104.13 124.47 L 104.96 124.34 L 105.8 124.2 L 106.63 124.07 L 107.46 123.93 L 108.29 123.79 L 109.12 123.65 L 109.96 123.51 L 110.79 123.36 L 111.62 123.22 L 112.45 123.07 L 113.28 122.93 L 114.12 122.78 L 114.95 122.63 L 115.78 122.47 L 116.61 122.32 L 117.44 122.16 L 118.27 122 L 119.11 121.84 L 119.94 121.68 L 120.77 121.52 L 121.6 121.36 L 122.43 121.19 L 123.27 121.02 L 124.1 120.85 L 124.93 120.68 L 125.76 120.5 L 126.59 120.33 L 127.42 120.15 L 128.26 119.97 L 129.09 119.78 L 129.92 119.6 L 130.75 119.41 L 131.58 119.22 L 132.42 119.03 L 133.25 118.83 L 134.08 118.64 L 134.91 118.44 L 135.74 118.24 L 136.57 118.03 L 137.41 117.83 L 138.24 117.62 L 139.07 117.4 L 139.9 117.19 L 140.73 116.97 L 141.57 116.75 L 142.4 116.53 L 143.23 116.3 L 144.06 116.07 L 144.89 115.84 L 145.72 115.61 L 146.56 115.37 L 147.39 115.12 L 148.22 114.88 L 149.05 114.63 L 149.88 114.38 L 150.72 114.12 L 151.55 113.86 L 152.38 113.6 L 153.21 113.33 L 154.04 113.06 L 154.88 112.79 L 155.71 112.51 L 156.54 112.23 L 157.37 111.94 L 158.2 111.65 L 159.03 111.35 L 159.87 111.05 L 160.7 110.75 L 161.53 110.44 L 162.36 110.12 L 163.19 109.8 L 164.03 109.48 L 164.86 109.15 L 165.69 108.81 L 166.52 108.47 L 167.35 108.13 L 168.18 107.78 L 169.02 107.42 L 169.85 107.06 L 170.68 106.69 L 171.51 106.31 L 172.34 105.93 L 173.18 105.54 L 174.01 105.14 L 174.84 104.74 L 175.67 104.33 L 176.5 103.91 L 177.33 103.49 L 178.17 103.06 L 179 102.61 L 179.83 102.17 L 180.66 101.71 L 181.49 101.24 L 182.33 100.77 L 183.16 100.28 L 183.99 99.79 L 184.82 99.29 L 185.65 98.77 L 186.48 98.25 L 187.32 97.71 L 188.15 97.17 L 188.98 96.61 L 189.81 96.04 L 190.64 95.46 L 191.48 94.87 L 192.31 94.26 L 193.14 93.64 L 193.97 93.01 L 194.8 92.36 L 195.64 91.7 L 196.47 91.02 L 197.3 90.33 L 198.13 89.62 L 198.96 88.9 L 199.79 88.15 L 200.63 87.39 L 201.46 86.61 L 202.29 85.81 L 203.12 84.99 L 203.95 84.15 L 204.79 83.29 L 205.62 82.4 L 206.45 81.49 L 207.28 80.56 L 208.11 79.6 L 208.94 78.62 L 209.78 77.6 L 210.61 76.56 L 211.44 75.49 L 212.27 74.39 L 213.1 73.25 L 213.94 72.08 L 214.77 70.87 L 215.6 69.63 L 216.43 68.34 L 217.26 67.02 L 218.09 65.65 L 218.93 64.24 L 219.76 62.78 L 220.59 61.26 L 221.42 59.7 L 222.25 58.08 L 223.09 56.4 L 223.92 54.66 L 224.75 52.85 L 225.58 50.98 L 226.41 49.03 L 227.25 47 L 228.08 44.9 L 228.91 42.7 L 229.74 40.41 L 230.57 38.02 L 231.4 35.53 L 232.24 32.92 L 233.07 30.19 L 233.9 27.34 L 234.73 24.34 L 235.56 21.2 L 236.4 17.89 L 237.23 14.41 L 238.06 10.75 L 238.89 6.88 L 239.72 2.79 L 240.55 -1.53 L 241.39 -6.12 L 242.22 -10.99 L 243.05 -16.18 L 243.88 -21.71 L 244.71 -27.61 L 245.55 -33.94 L 246.38 -40.73 L 247.21 -48.04 L 248.04 -55.93 L 248.87 -64.47 L 249.7 -73.75 L 250.54 -83.86 L 251.37 -94.93 L 252.2 -107.09 L 253.03 -120.53 L 253.86 -135.43 L 254.7 -152.08 L 255.53 -170.77 L 256.36 -191.93 L 257.19 -216.07 L 258.02 -243.87 L 258.85 -276.22 L 259.69 -314.36 L 260.52 -359.97" fill="none" stroke="#B02418" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></g><g clip-path="url(#f2-clip)"><path d="M 277.48 661.46 L 278.31 615.84 L 279.15 577.71 L 279.98 545.35 L 280.81 517.55 L 281.64 493.42 L 282.47 472.26 L 283.3 453.56 L 284.14 436.92 L 284.97 422.01 L 285.8 408.58 L 286.63 396.41 L 287.46 385.35 L 288.3 375.23 L 289.13 365.95 L 289.96 357.41 L 290.79 349.52 L 291.62 342.21 L 292.45 335.42 L 293.29 329.1 L 294.12 323.19 L 294.95 317.66 L 295.78 312.48 L 296.61 307.61 L 297.45 303.02 L 298.28 298.69 L 299.11 294.61 L 299.94 290.74 L 300.77 287.07 L 301.6 283.59 L 302.44 280.29 L 303.27 277.15 L 304.1 274.15 L 304.93 271.29 L 305.76 268.57 L 306.6 265.96 L 307.43 263.46 L 308.26 261.08 L 309.09 258.79 L 309.92 256.59 L 310.75 254.48 L 311.59 252.46 L 312.42 250.51 L 313.25 248.63 L 314.08 246.83 L 314.91 245.08 L 315.75 243.41 L 316.58 241.79 L 317.41 240.22 L 318.24 238.71 L 319.07 237.25 L 319.91 235.83 L 320.74 234.47 L 321.57 233.14 L 322.4 231.86 L 323.23 230.61 L 324.06 229.41 L 324.9 228.24 L 325.73 227.1 L 326.56 226 L 327.39 224.92 L 328.22 223.88 L 329.06 222.87 L 329.89 221.88 L 330.72 220.93 L 331.55 219.99 L 332.38 219.08 L 333.21 218.2 L 334.05 217.34 L 334.88 216.49 L 335.71 215.67 L 336.54 214.88 L 337.37 214.09 L 338.21 213.33 L 339.04 212.59 L 339.87 211.86 L 340.7 211.15 L 341.53 210.46 L 342.36 209.78 L 343.2 209.12 L 344.03 208.48 L 344.86 207.84 L 345.69 207.22 L 346.52 206.62 L 347.36 206.02 L 348.19 205.44 L 349.02 204.87 L 349.85 204.32 L 350.68 203.77 L 351.52 203.24 L 352.35 202.71 L 353.18 202.2 L 354.01 201.7 L 354.84 201.2 L 355.67 200.72 L 356.51 200.24 L 357.34 199.78 L 358.17 199.32 L 359 198.87 L 359.83 198.43 L 360.67 198 L 361.5 197.57 L 362.33 197.16 L 363.16 196.75 L 363.99 196.34 L 364.82 195.95 L 365.66 195.56 L 366.49 195.18 L 367.32 194.8 L 368.15 194.43 L 368.98 194.07 L 369.82 193.71 L 370.65 193.36 L 371.48 193.01 L 372.31 192.67 L 373.14 192.34 L 373.97 192.01 L 374.81 191.68 L 375.64 191.36 L 376.47 191.05 L 377.3 190.74 L 378.13 190.43 L 378.97 190.13 L 379.8 189.84 L 380.63 189.55 L 381.46 189.26 L 382.29 188.98 L 383.12 188.7 L 383.96 188.42 L 384.79 188.15 L 385.62 187.89 L 386.45 187.62 L 387.28 187.36 L 388.12 187.11 L 388.95 186.86 L 389.78 186.61 L 390.61 186.36 L 391.44 186.12 L 392.28 185.88 L 393.11 185.65 L 393.94 185.41 L 394.77 185.18 L 395.6 184.96 L 396.43 184.73 L 397.27 184.51 L 398.1 184.3 L 398.93 184.08 L 399.76 183.87 L 400.59 183.66 L 401.43 183.45 L 402.26 183.25 L 403.09 183.05 L 403.92 182.85 L 404.75 182.65 L 405.58 182.46 L 406.42 182.26 L 407.25 182.08 L 408.08 181.89 L 408.91 181.7 L 409.74 181.52 L 410.58 181.34 L 411.41 181.16 L 412.24 180.98 L 413.07 180.81 L 413.9 180.64 L 414.73 180.47 L 415.57 180.3 L 416.4 180.13 L 417.23 179.97 L 418.06 179.8 L 418.89 179.64 L 419.73 179.48 L 420.56 179.32 L 421.39 179.17 L 422.22 179.01 L 423.05 178.86 L 423.88 178.71 L 424.72 178.56 L 425.55 178.41 L 426.38 178.27 L 427.21 178.12 L 428.04 177.98 L 428.88 177.84 L 429.71 177.7 L 430.54 177.56 L 431.37 177.42 L 432.2 177.28 L 433.04 177.15 L 433.87 177.02 L 434.7 176.88 L 435.53 176.75 L 436.36 176.62 L 437.19 176.5 L 438.03 176.37 L 438.86 176.24 L 439.69 176.12 L 440.52 176 L 441.35 175.88 L 442.19 175.75 L 443.02 175.63 L 443.85 175.52 L 444.68 175.4 L 445.51 175.28 L 446.34 175.17 L 447.18 175.05 L 448.01 174.94 L 448.84 174.83 L 449.67 174.72 L 450.5 174.61 L 451.34 174.5 L 452.17 174.39 L 453 174.28 L 453.83 174.18 L 454.66 174.07 L 455.49 173.97 L 456.33 173.87 L 457.16 173.76 L 457.99 173.66 L 458.82 173.56 L 459.65 173.46 L 460.49 173.36 L 461.32 173.27 L 462.15 173.17 L 462.98 173.07 L 463.81 172.98 L 464.64 172.88 L 465.48 172.79 L 466.31 172.7 L 467.14 172.6 L 467.97 172.51 L 468.8 172.42 L 469.64 172.33 L 470.47 172.24 L 471.3 172.15 L 472.13 172.07 L 472.96 171.98 L 473.8 171.89 L 474.63 171.81 L 475.46 171.72 L 476.29 171.64 L 477.12 171.56 L 477.95 171.47 L 478.79 171.39 L 479.62 171.31 L 480.45 171.23 L 481.28 171.15 L 482.11 171.07 L 482.95 170.99 L 483.78 170.91 L 484.61 170.83 L 485.44 170.76 L 486.27 170.68 L 487.1 170.6 L 487.94 170.53 L 488.77 170.45 L 489.6 170.38 L 490.43 170.3 L 491.26 170.23 L 492.1 170.16 L 492.93 170.09 L 493.76 170.02" fill="none" stroke="#B02418" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></g></svg>',
+      figcap: 'Graph von $f(x) = \\dfrac{3x-2}{x+1}$ mit beiden Asymptoten',
+      opts: ['$x = -1$ und $y = 3$', '$x = -1$ und $y = -2$', '$x = 1$ und $y = 3$', '$x = -1$ und $y = 0$'],
+      steps: [
+        'Senkrechte Asymptote an der Polstelle: $x + 1 = 0$, also $x = -1$.',
+        'Waagerechte Asymptote: gleicher Grad, Leitkoeffizienten $3$ und $1$, also $y = 3$.',
+        'Falle: $y = -2$ ist der Zähler bei $x = 0$, nicht der Grenzwert im Unendlichen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Asymptoten hat der Graph von $f(x) = 3 + \\dfrac{1}{x+2}$?',
+      opts: ['$x = -2$ und $y = 0$', '$x = 3$ und $y = -2$', '$x = -2$ und $y = 3$', '$x = 2$ und $y = 3$'],
+      steps: [
+        'Der Bruch $\\dfrac{1}{x+2}$ ist für $x = -2$ nicht definiert: senkrechte Asymptote $x = -2$.',
+        'Für $x \\to \\pm\\infty$ wird $\\dfrac{1}{x+2}$ beliebig klein, also $f(x) \\to 3$.',
+        'Der Graph ist die um $2$ nach links und $3$ nach oben verschobene Hyperbel $y = \\dfrac{1}{x}$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der GTR zeigt einen Graphen mit der senkrechten Asymptote $x = 1$ und der waagerechten Asymptote $y = -2$. Welche Funktionsgleichung passt?',
+      opts: ['$f(x) = \\dfrac{x-2}{x-1}$', '$f(x) = \\dfrac{2x+3}{x-1}$', '$f(x) = \\dfrac{-2x+3}{x-1}$', '$f(x) = \\dfrac{-2x+3}{x+1}$'],
+      steps: [
+        'Senkrechte Asymptote $x = 1$: Der Nenner muss bei $x = 1$ null werden, also $x - 1$.',
+        'Waagerechte Asymptote $y = -2$: Die Leitkoeffizienten müssen sich zu $-2$ verhalten, also Zähler $-2x + \\ldots$',
+        'Probe: $f(1000) = \\dfrac{-1997}{999} \\approx -2{,}0$. Bei $\\dfrac{x-2}{x-1}$ wäre die Asymptote $y = 1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Betrieb hat Fixkosten von $4000$ € und $12$ € variable Kosten je Stück. Die Stückkosten sind $k(x) = \\dfrac{4000 + 12x}{x}$ (in €, $x > 0$). Welchem Wert nähern sich die Stückkosten bei sehr großer Stückzahl?',
+      opts: ['$4000$ € - die Fixkosten bleiben übrig', '$0$ € - die Stückkosten verschwinden', '$4012$ € - Fixkosten plus variable Kosten', '$12$ € - die Gerade $y = 12$ ist waagerechte Asymptote und wird nie erreicht'],
+      steps: [
+        'Umformen: $k(x) = \\dfrac{4000}{x} + \\dfrac{12x}{x} = 12 + \\dfrac{4000}{x}$.',
+        'Für große $x$ wird $\\dfrac{4000}{x}$ beliebig klein: $k(1000) = 16$, $k(10\\,000) = 12{,}4$.',
+        'Die Fixkosten verteilen sich auf immer mehr Stücke (Fixkostendegression), aber $12$ € je Stück bleiben immer.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Untersuche $f(x) = \\dfrac{x^2-9}{x^2-3x}$ vollständig auf Definitionslücken und Asymptoten.',
+      opts: ['$D = \\mathbb{R} \\setminus \\{0;\\,3\\}$, hebbare Lücke $L(3 \\mid 0)$, Polstelle $x = 0$, keine waagerechte Asymptote', '$D = \\mathbb{R} \\setminus \\{3\\}$, hebbare Lücke $L(3 \\mid 2)$, waagerechte Asymptote $y = 0$', '$D = \\mathbb{R} \\setminus \\{0;\\,3\\}$, hebbare Lücke $L(3 \\mid 2)$, Polstelle $x = 0$, waagerechte Asymptote $y = 1$', '$D = \\mathbb{R} \\setminus \\{0;\\,3\\}$, Polstellen $x = 0$ und $x = 3$, waagerechte Asymptote $y = 1$'],
+      steps: [
+        'Nenner: $x^2 - 3x = x(x-3)$, also $D = \\mathbb{R} \\setminus \\{0;\\,3\\}$.',
+        'Zähler: $x^2 - 9 = (x-3)(x+3)$. Kürzen ergibt $f(x) = \\dfrac{x+3}{x}$ für $x \\neq 3$.',
+        'Lückenwert: $\\dfrac{3+3}{3} = 2$, also $L(3 \\mid 2)$. Bei $x = 0$ bleibt eine Polstelle.',
+        'Gleicher Grad in Zähler und Nenner, beide Leitkoeffizienten $1$: waagerechte Asymptote $y = 1$.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

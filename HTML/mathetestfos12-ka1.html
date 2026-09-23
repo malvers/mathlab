@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Wiederholung Vektorrechnung — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w10-ka1',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Wiederholung Vektorrechnung',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 10 (LB 1) · 20 Aufgaben: Wiederholung für Klausur 1: Vektoren, Geraden, Ebenen · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 10 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Vektoren und Skalarprodukt (1-5), Geraden und Lagebeziehungen (6-9), Ebenen (10-14), Gerade-Ebene, Lot und Flaechen (15-18), Anwendungen (19-20). Alles ohne CAS; die Distraktoren sind typische Klausurfehler. */
+  questions: [
+    {
+      q: 'Berechne den Betrag von $\\vec a = \\begin{pmatrix} 6 \\\\ -6 \\\\ 3 \\end{pmatrix}$.',
+      opts: ['$9$', '$3$', '$81$', '$15$'],
+      steps: [
+        '$|\\vec a| = \\sqrt{6^2 + (-6)^2 + 3^2} = \\sqrt{36 + 36 + 9}$',
+        '$= \\sqrt{81} = 9$',
+        'Typische Fehler: Wurzel vergessen ($81$), Koordinaten addiert ($6 - 6 + 3 = 3$) oder Beträge addiert ($15$).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welcher Vektor ist parallel zu $\\vec a = \\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$ und hat den Betrag $12$?',
+      opts: ['$\\begin{pmatrix} 24 \\\\ -12 \\\\ 24 \\end{pmatrix}$', '$\\begin{pmatrix} 4 \\\\ -2 \\\\ 4 \\end{pmatrix}$', '$\\begin{pmatrix} 8 \\\\ -4 \\\\ 8 \\end{pmatrix}$', '$\\begin{pmatrix} 12 \\\\ -6 \\\\ 12 \\end{pmatrix}$'],
+      steps: [
+        '$|\\vec a| = \\sqrt{4 + 1 + 4} = 3$, gesucht ist also $\\dfrac{12}{3} \\cdot \\vec a = 4\\,\\vec a$.',
+        '$4 \\cdot \\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix} = \\begin{pmatrix} 8 \\\\ -4 \\\\ 8 \\end{pmatrix}$; Probe: $\\sqrt{64 + 16 + 64} = \\sqrt{144} = 12$.',
+        'Falle: mit $12$ multiplizieren gibt den Betrag $36$, nicht $12$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne den Winkel zwischen $\\vec a = \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix}$ und $\\vec b = \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix}$.',
+      opts: ['$\\varphi \\approx 66{,}4^\\circ$', '$45^\\circ$', '$\\varphi \\approx 23{,}6^\\circ$', '$\\varphi \\approx 113{,}6^\\circ$'],
+      steps: [
+        '$\\vec a \\cdot \\vec b = 2 + 0 + 0 = 2$, $|\\vec a| = |\\vec b| = \\sqrt{5}$',
+        '$\\cos\\varphi = \\dfrac{2}{\\sqrt{5} \\cdot \\sqrt{5}} = \\dfrac{2}{5} = 0{,}4$',
+        '$\\varphi = \\cos^{-1}(0{,}4) \\approx 66{,}4^\\circ$ - mit $\\sin^{-1}$ käme fälschlich $23{,}6^\\circ$ heraus.'
+      ],
+      solution: 0
+    },
+    {
+      q: '$M(3|2|5)$ ist der Mittelpunkt der Strecke $\\overline{AB}$ mit $A(1|4|2)$. Bestimme $B$.',
+      opts: ['$B(4|6|7)$', '$B(2|-2|3)$', '$B(5|0|8)$', '$B(6|4|10)$'],
+      steps: [
+        'Aus $\\vec m = \\tfrac{1}{2}\\,(\\vec a + \\vec b)$ folgt $\\vec b = 2\\,\\vec m - \\vec a$.',
+        '$2 \\cdot \\begin{pmatrix} 3 \\\\ 2 \\\\ 5 \\end{pmatrix} - \\begin{pmatrix} 1 \\\\ 4 \\\\ 2 \\end{pmatrix} = \\begin{pmatrix} 6 \\\\ 4 \\\\ 10 \\end{pmatrix} - \\begin{pmatrix} 1 \\\\ 4 \\\\ 2 \\end{pmatrix} = \\begin{pmatrix} 5 \\\\ 0 \\\\ 8 \\end{pmatrix}$',
+        'Probe: der Mittelpunkt von $A(1|4|2)$ und $B(5|0|8)$ ist $(3|2|5)$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Liegen $A(1|2|3)$, $B(3|5|7)$ und $C(7|11|15)$ auf einer gemeinsamen Geraden?',
+      opts: ['ja, weil alle drei Koordinaten von $A$ nach $C$ wachsen', 'ja, denn $\\overrightarrow{AC} = 3 \\cdot \\overrightarrow{AB}$', 'das lässt sich nur mit einer Ebenengleichung entscheiden', 'nein, $\\overrightarrow{AB}$ und $\\overrightarrow{AC}$ sind nicht parallel'],
+      steps: [
+        '$\\overrightarrow{AB} = \\begin{pmatrix} 2 \\\\ 3 \\\\ 4 \\end{pmatrix}$ und $\\overrightarrow{AC} = \\begin{pmatrix} 6 \\\\ 9 \\\\ 12 \\end{pmatrix}$',
+        '$\\begin{pmatrix} 6 \\\\ 9 \\\\ 12 \\end{pmatrix} = 3 \\cdot \\begin{pmatrix} 2 \\\\ 3 \\\\ 4 \\end{pmatrix}$ - die beiden Vektoren sind kollinear.',
+        'Drei Punkte liegen genau dann auf einer Geraden, wenn zwei ihrer Verbindungsvektoren parallel sind.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Stelle eine Gleichung der Geraden durch $A(2|3|-1)$ und $B(5|3|5)$ auf.',
+      opts: ['$g: \\vec x = \\begin{pmatrix} 3 \\\\ 0 \\\\ 6 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 3 \\\\ -1 \\end{pmatrix}$', '$g: \\vec x = \\begin{pmatrix} 2 \\\\ 3 \\\\ -1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 5 \\\\ 3 \\\\ 5 \\end{pmatrix}$', '$g: \\vec x = \\begin{pmatrix} 2 \\\\ 3 \\\\ -1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix}$', '$g: \\vec x = \\begin{pmatrix} 2 \\\\ 3 \\\\ -1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 7 \\\\ 6 \\\\ 4 \\end{pmatrix}$'],
+      steps: [
+        '$\\overrightarrow{AB} = \\begin{pmatrix} 5 \\\\ 3 \\\\ 5 \\end{pmatrix} - \\begin{pmatrix} 2 \\\\ 3 \\\\ -1 \\end{pmatrix} = \\begin{pmatrix} 3 \\\\ 0 \\\\ 6 \\end{pmatrix}$',
+        'Der Richtungsvektor darf gekürzt werden: $\\begin{pmatrix} 3 \\\\ 0 \\\\ 6 \\end{pmatrix} = 3 \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix}$.',
+        'Typische Fehler: Ortsvektor von $B$ als Richtung, Addition statt Subtraktion, Stütz- und Richtungsvektor vertauscht.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Liegt $P(5|-3|8)$ auf $g: \\vec x = \\begin{pmatrix} 1 \\\\ 1 \\\\ 2 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ -2 \\\\ 3 \\end{pmatrix}$?',
+      opts: ['ja, für $t = 3$', 'nein, das Gleichungssystem ist unlösbar', 'nein, nur die ersten beiden Gleichungen passen', 'ja, für $t = 2$'],
+      steps: [
+        'Erste Zeile: $1 + 2t = 5$, also $t = 2$.',
+        'Probe in den anderen Zeilen: $1 - 2 \\cdot 2 = -3$ und $2 + 3 \\cdot 2 = 8$ - beide stimmen.',
+        'Ein Punkt liegt nur dann auf der Geraden, wenn dasselbe $t$ alle drei Zeilen erfüllt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Untersuche die Lage von $g: \\vec x = \\begin{pmatrix} 2 \\\\ 2 \\\\ 2 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ -1 \\\\ 2 \\end{pmatrix}$ und $h: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 4 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix}$.',
+      opts: ['echt parallel', 'schneidend, $S(2|2|2)$', 'windschief', 'schneidend, $S(3|1|4)$'],
+      steps: [
+        'Die Richtungsvektoren sind nicht parallel. Gleichsetzen: $2 + t = 1 + 2s$, $2 - t = s$, $2 + 2t = 4$.',
+        'Dritte Zeile: $t = 1$; zweite Zeile: $s = 1$. Probe erste Zeile: $3 = 1 + 2$ - stimmt.',
+        '$t = 1$ in $g$: $S(3|1|4)$; $(2|2|2)$ ist nur der Stützpunkt von $g$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Untersuche die Lage von $g: \\vec x = \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 1 \\end{pmatrix}$ und $h: \\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 3 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$.',
+      opts: ['echt parallel', 'schneidend, $S(5|7|3)$', 'windschief', 'identisch'],
+      steps: [
+        '$\\begin{pmatrix} 1 \\\\ 2 \\\\ 1 \\end{pmatrix}$ und $\\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ sind nicht parallel - identisch oder parallel scheidet aus.',
+        'Gleichsetzen: $2 + t = s$, $1 + 2t = s$, $t = 3$. Aus der dritten Zeile $t = 3$, aus der ersten $s = 5$.',
+        'Zweite Zeile: $1 + 6 = 7 \\ne 5$ - Widerspruch. Nicht parallel und kein Schnittpunkt heißt windschief.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme eine Koordinatengleichung der Ebene durch $A(1|0|1)$, $B(3|1|1)$ und $C(1|2|3)$.',
+      opts: ['$x - 2y + 2z = 3$', '$x - 2y + 2z = 0$', '$x + 2y + 2z = 3$', '$2x - 4y + 4z = 3$'],
+      steps: [
+        '$\\overrightarrow{AB} = \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix}$, $\\overrightarrow{AC} = \\begin{pmatrix} 0 \\\\ 2 \\\\ 2 \\end{pmatrix}$, Vektorprodukt $\\begin{pmatrix} 2 \\\\ -4 \\\\ 4 \\end{pmatrix}$, gekürzt $\\begin{pmatrix} 1 \\\\ -2 \\\\ 2 \\end{pmatrix}$.',
+        '$x - 2y + 2z = d$ mit $A(1|0|1)$: $d = 1 - 0 + 2 = 3$.',
+        'Probe: $B$ gibt $3 - 2 + 2 = 3$, $C$ gibt $1 - 4 + 6 = 3$. Kürzt man den Normalenvektor, muss auch $d$ mitgekürzt werden.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $\\begin{pmatrix} 3 \\\\ 1 \\\\ 2 \\end{pmatrix} \\times \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix}$.',
+      opts: ['$\\begin{pmatrix} 4 \\\\ 2 \\\\ 5 \\end{pmatrix}$', '$\\begin{pmatrix} 3 \\\\ 2 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} -4 \\\\ -2 \\\\ 5 \\end{pmatrix}$', '$\\begin{pmatrix} -4 \\\\ 2 \\\\ 5 \\end{pmatrix}$'],
+      steps: [
+        '$\\begin{pmatrix} 1 \\cdot 0 - 2 \\cdot 2 \\\\ 2 \\cdot 1 - 3 \\cdot 0 \\\\ 3 \\cdot 2 - 1 \\cdot 1 \\end{pmatrix} = \\begin{pmatrix} -4 \\\\ 2 \\\\ 5 \\end{pmatrix}$',
+        'Probe: $\\begin{pmatrix} 3 \\\\ 1 \\\\ 2 \\end{pmatrix} \\cdot \\begin{pmatrix} -4 \\\\ 2 \\\\ 5 \\end{pmatrix} = -12 + 2 + 10 = 0$',
+        'In der mittleren Zeile sind die Indizes vertauscht ($u_3 v_1 - u_1 v_3$) - dort passieren die meisten Vorzeichenfehler.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Lage haben die Ebenen $E: 2x - y + 2z = 6$ und $F: -4x + 2y - 4z = 12$ zueinander?',
+      opts: ['Sie sind identisch.', 'Sie schneiden sich in einer Geraden.', 'Sie sind echt parallel.', 'Sie stehen senkrecht aufeinander.'],
+      steps: [
+        '$\\begin{pmatrix} -4 \\\\ 2 \\\\ -4 \\end{pmatrix} = -2 \\cdot \\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$ - die Normalenvektoren sind parallel.',
+        '$E$ mit $-2$ multipliziert: $-4x + 2y - 4z = -12$. Die rechte Seite von $F$ ist aber $12$.',
+        'Gleiche Richtung, verschiedene rechte Seite: kein gemeinsamer Punkt, also echt parallel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Ebene $E$ enthält $P(2|1|3)$ und steht senkrecht auf $g: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$. Wie lautet ihre Koordinatengleichung?',
+      opts: ['$2x - y + 2z = 9$', '$2x - y + 2z = 6$', '$2x - y + 2z = -9$', '$2x + y + 2z = 11$'],
+      steps: [
+        'Steht die Ebene senkrecht auf $g$, ist der Richtungsvektor ihr Normalenvektor: $\\vec n = \\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$.',
+        '$2x - y + 2z = d$ mit $P(2|1|3)$: $d = 4 - 1 + 6 = 9$.',
+        'Falle: $d$ ist nicht die Summe der Punktkoordinaten ($2 + 1 + 3 = 6$).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In welchem Punkt schneidet $E: 4x + 3y + 6z = 24$ die $z$-Achse?',
+      opts: ['$(0|0|8)$', '$(0|0|24)$', '$(0|0|6)$', '$(0|0|4)$'],
+      steps: [
+        'Auf der $z$-Achse ist $x = y = 0$.',
+        'Es bleibt $6z = 24$, also $z = 4$.',
+        'Der Koeffizient $6$ ist nicht der Spurpunkt - durch ihn wird geteilt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne den Durchstoßpunkt von $g: \\vec x = \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 2 \\end{pmatrix}$ mit $E: x + y + z = 8$.',
+      opts: ['$D(1|1|0)$', '$D(1|4|6)$', '$D(1|2|2)$', '$D(1|3|4)$'],
+      steps: [
+        'Geradenpunkt einsetzen: $1 + (1 + t) + 2t = 8$',
+        '$2 + 3t = 8$, also $t = 2$.',
+        '$t = 2$ in $g$: $D(1|3|4)$. Probe: $1 + 3 + 4 = 8$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme den Lotfußpunkt $F$ von $P(4|4|4)$ auf $E: 2x + y + 2z = 2$.',
+      opts: ['$F(2|3|2)$', '$F(0|2|0)$', '$F(4|4|4)$', '$F(8|6|8)$'],
+      steps: [
+        'Lotgerade: $\\vec x = \\begin{pmatrix} 4 \\\\ 4 \\\\ 4 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ 2 \\end{pmatrix}$ mit dem Normalenvektor als Richtung.',
+        'Einsetzen: $2\\,(4 + 2t) + (4 + t) + 2\\,(4 + 2t) = 20 + 9t = 2$, also $t = -2$.',
+        '$t = -2$: $F(0|2|0)$. Probe: $0 + 2 + 0 = 2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie weit ist $P(4|4|4)$ von der Ebene $E: 2x + y + 2z = 2$ entfernt?',
+      opts: ['$6$', '$18$', '$2$', '$12$'],
+      steps: [
+        'Abstandsformel: $d = \\dfrac{|2 \\cdot 4 + 4 + 2 \\cdot 4 - 2|}{|\\vec n|}$ mit $|\\vec n| = \\sqrt{4 + 1 + 4} = 3$.',
+        '$d = \\dfrac{|20 - 2|}{3} = \\dfrac{18}{3} = 6$',
+        'Probe über den Lotfußpunkt $F(0|2|0)$: $|\\overrightarrow{FP}| = |\\begin{pmatrix} 4 \\\\ 2 \\\\ 4 \\end{pmatrix}| = 6$. Falle: durch $|\\vec n|^2 = 9$ teilen gibt $2$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne den Flächeninhalt des Dreiecks $ABC$ mit $A(1|1|1)$, $B(5|1|1)$ und $C(1|4|5)$.',
+      opts: ['$A = 12$', '$A = 10$', '$A = 6$', '$A = 20$'],
+      steps: [
+        '$\\overrightarrow{AB} = \\begin{pmatrix} 4 \\\\ 0 \\\\ 0 \\end{pmatrix}$, $\\overrightarrow{AC} = \\begin{pmatrix} 0 \\\\ 3 \\\\ 4 \\end{pmatrix}$',
+        '$\\overrightarrow{AB} \\times \\overrightarrow{AC} = \\begin{pmatrix} 0 \\\\ -16 \\\\ 12 \\end{pmatrix}$ mit dem Betrag $\\sqrt{256 + 144} = 20$.',
+        'Dreieck: $A = \\tfrac{1}{2} \\cdot 20 = 10$. $20$ wäre das Parallelogramm, $6 = \\tfrac{1}{2} \\cdot 4 \\cdot 3$ vergisst die Höhe im Raum.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein GPS-Empfänger kennt seinen Abstand zu mehreren Satelliten; jeder Abstand legt ihn auf eine Kugelfläche. Warum reichen im Alltag drei Satelliten nicht aus?',
+      opts: ['Drei Kugelflächen haben grundsätzlich keinen gemeinsamen Punkt.', 'Die Uhr des Empfängers ist ungenau; der Zeitfehler ist eine vierte Unbekannte, deshalb braucht man einen vierten Satelliten.', 'Die Satelliten bewegen sich, deshalb sind ihre Positionen unbekannt.', 'Die Erde ist keine Kugel, deshalb versagt die Vektorrechnung.'],
+      steps: [
+        'Gesucht sind drei Koordinaten $x$, $y$, $z$ - dafür würden drei Kugelgleichungen genügen.',
+        'Die Laufzeit wird aber mit der billigen Uhr im Gerät gemessen; ihr Gangfehler geht in jeden Abstand ein.',
+        'Mit vier Gleichungen lassen sich Position und Zeitfehler zugleich bestimmen - deshalb braucht GPS mindestens vier Satelliten.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Überwachungskamera hängt in $K(3|6|3)$ und blickt senkrecht auf eine Wand, die in $E: x + 2y + 2z = 12$ liegt (Angaben in Metern). Wo trifft die optische Achse die Wand, und wie weit ist die Kamera entfernt?',
+      opts: ['$F(1|2|-1)$, Abstand $6\\,\\mathrm{m}$', '$F(2|4|1)$, Abstand $3\\,\\mathrm{m}$', '$F(4|8|5)$, Abstand $3\\,\\mathrm{m}$', '$F(2|4|1)$, Abstand $9\\,\\mathrm{m}$'],
+      steps: [
+        'Die optische Achse ist die Lotgerade $\\vec x = \\begin{pmatrix} 3 \\\\ 6 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}$.',
+        'Einsetzen: $(3 + t) + 2\\,(6 + 2t) + 2\\,(3 + 2t) = 21 + 9t = 12$, also $t = -1$ und $F(2|4|1)$.',
+        'Abstand: $\\dfrac{|21 - 12|}{|\\vec n|} = \\dfrac{9}{3} = 3\\,\\mathrm{m}$ - dasselbe wie $|\\overrightarrow{FK}| = |\\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}| = 3$.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

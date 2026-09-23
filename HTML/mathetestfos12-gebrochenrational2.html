@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Gebrochenrationale Funktionen II — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w26-gebrochenrational2',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Gebrochenrationale Funktionen II',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 26 (LB 4) · 20 Aufgaben: Quotientenregel, Achsenschnittpunkte, Monotonie, Symmetrie · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 26 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Quotientenregel (1-7), Schnittpunkte mit den Achsen (8-11), Monotonie (12-15), Symmetrie (16-18), Anwendung und Transfer (19-20). GTR ohne CAS. */
+  questions: [
+    {
+      q: 'Wie lautet die Quotientenregel für $f(x) = \\dfrac{u(x)}{v(x)}$?',
+      opts: ['$f^{\\prime}(x) = \\dfrac{u^{\\prime}}{v^{\\prime}}$', '$f^{\\prime}(x) = \\dfrac{u \\cdot v^{\\prime} - u^{\\prime} \\cdot v}{v^2}$', '$f^{\\prime}(x) = \\dfrac{u^{\\prime} \\cdot v + u \\cdot v^{\\prime}}{v^2}$', '$f^{\\prime}(x) = \\dfrac{u^{\\prime} \\cdot v - u \\cdot v^{\\prime}}{v^2}$'],
+      steps: [
+        'Im Zähler steht „Ableitung des Zählers mal Nenner minus Zähler mal Ableitung des Nenners“.',
+        'Im Nenner steht der ursprüngliche Nenner im Quadrat.',
+        'Die Reihenfolge im Zähler ist wichtig: Anders als bei der Produktregel darf man hier nicht tauschen - sonst dreht sich das Vorzeichen um.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Leite $f(x) = \\dfrac{1}{x}$ mit der Quotientenregel ab.',
+      opts: ['$f^{\\prime}(x) = -\\dfrac{1}{2x}$', '$f^{\\prime}(x) = -\\dfrac{1}{x^2}$', '$f^{\\prime}(x) = \\dfrac{1}{x^2}$', '$f^{\\prime}(x) = 0$'],
+      steps: [
+        '$u = 1$, $u^{\\prime} = 0$, $v = x$, $v^{\\prime} = 1$.',
+        '$f^{\\prime}(x) = \\dfrac{0 \\cdot x - 1 \\cdot 1}{x^2} = -\\dfrac{1}{x^2}$',
+        'Probe mit der Potenzregel: $x^{-1}$ abgeleitet ist $-1 \\cdot x^{-2}$. Falle: $u^{\\prime} = 0$ macht die Ableitung nicht null.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Leite $f(x) = \\dfrac{x}{x+1}$ ab.',
+      opts: ['$f^{\\prime}(x) = \\dfrac{1}{(x+1)^2}$', '$f^{\\prime}(x) = \\dfrac{2x+1}{(x+1)^2}$', '$f^{\\prime}(x) = \\dfrac{1}{x+1}$', '$f^{\\prime}(x) = 1$'],
+      steps: [
+        '$u = x$, $u^{\\prime} = 1$, $v = x+1$, $v^{\\prime} = 1$.',
+        '$f^{\\prime}(x) = \\dfrac{1 \\cdot (x+1) - x \\cdot 1}{(x+1)^2} = \\dfrac{x + 1 - x}{(x+1)^2} = \\dfrac{1}{(x+1)^2}$',
+        'Falle: Zähler und Nenner einzeln ableiten ergäbe $\\dfrac{1}{1} = 1$ - das ist keine Regel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Leite $f(x) = \\dfrac{2x-1}{x+3}$ ab.',
+      opts: ['$f^{\\prime}(x) = \\dfrac{-5}{(x+3)^2}$', '$f^{\\prime}(x) = \\dfrac{2}{1} = 2$', '$f^{\\prime}(x) = \\dfrac{4x+5}{(x+3)^2}$', '$f^{\\prime}(x) = \\dfrac{7}{(x+3)^2}$'],
+      steps: [
+        '$u^{\\prime} = 2$ und $v^{\\prime} = 1$.',
+        '$f^{\\prime}(x) = \\dfrac{2(x+3) - (2x-1) \\cdot 1}{(x+3)^2} = \\dfrac{2x + 6 - 2x + 1}{(x+3)^2} = \\dfrac{7}{(x+3)^2}$',
+        'Falle: das Minus nur vor die Klammer schreiben und $-1$ stehen lassen - dann kommt $5$ statt $7$ heraus.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Leite $f(x) = \\dfrac{1}{x^2+1}$ ab.',
+      opts: ['$f^{\\prime}(x) = \\dfrac{-2x}{(x^2+1)^2}$', '$f^{\\prime}(x) = \\dfrac{-2x}{x^2+1}$', '$f^{\\prime}(x) = \\dfrac{1}{2x}$', '$f^{\\prime}(x) = \\dfrac{2x}{(x^2+1)^2}$'],
+      steps: [
+        '$u = 1$, $u^{\\prime} = 0$, $v = x^2+1$, $v^{\\prime} = 2x$.',
+        '$f^{\\prime}(x) = \\dfrac{0 \\cdot (x^2+1) - 1 \\cdot 2x}{(x^2+1)^2} = \\dfrac{-2x}{(x^2+1)^2}$',
+        'Falle: den Nenner nicht quadrieren. Das Minus kommt aus dem $-u \\cdot v^{\\prime}$ der Regel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Woraus lässt sich die Quotientenregel herleiten?',
+      opts: ['aus der Summenregel allein', 'aus der Produktregel und der Kettenregel, indem man $\\dfrac{u}{v}$ als $u \\cdot v^{-1}$ schreibt', 'gar nicht - sie ist ein eigenständiges Axiom', 'aus der Potenzregel allein'],
+      steps: [
+        '$\\dfrac{u}{v} = u \\cdot v^{-1}$. Produktregel: $u^{\\prime} \\cdot v^{-1} + u \\cdot (v^{-1})^{\\prime}$.',
+        'Kettenregel: $(v^{-1})^{\\prime} = -v^{-2} \\cdot v^{\\prime}$, also insgesamt $\\dfrac{u^{\\prime}}{v} - \\dfrac{u \\cdot v^{\\prime}}{v^2}$.',
+        'Auf den Hauptnenner $v^2$ gebracht ergibt das $\\dfrac{u^{\\prime} v - u v^{\\prime}}{v^2}$ - die Quotientenregel.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Leite $f(x) = \\dfrac{x^2+3}{x-1}$ ab.',
+      opts: ['$f^{\\prime}(x) = \\dfrac{x^2-2x-3}{(x-1)^2}$', '$f^{\\prime}(x) = \\dfrac{3x^2-2x+3}{(x-1)^2}$', '$f^{\\prime}(x) = \\dfrac{2x}{1} = 2x$', '$f^{\\prime}(x) = \\dfrac{x^2-2x+3}{(x-1)^2}$'],
+      steps: [
+        '$u = x^2+3$, $u^{\\prime} = 2x$, $v = x-1$, $v^{\\prime} = 1$.',
+        '$f^{\\prime}(x) = \\dfrac{2x(x-1) - (x^2+3)}{(x-1)^2} = \\dfrac{2x^2 - 2x - x^2 - 3}{(x-1)^2} = \\dfrac{x^2-2x-3}{(x-1)^2}$',
+        'Falle: $-(x^2+3)$ wird zu $-x^2-3$, nicht zu $-x^2+3$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Nullstellen von $f(x) = \\dfrac{x^2-4}{x+3}$.',
+      opts: ['$x = -3$', '$f$ hat keine Nullstellen', '$x = 4$', '$x = -2$ und $x = 2$'],
+      steps: [
+        'Ein Bruch ist genau dann null, wenn der Zähler null ist und der Nenner nicht.',
+        '$x^2 - 4 = 0$ ergibt $x = 2$ und $x = -2$; der Nenner ist dort $5$ bzw. $1$, also nicht null.',
+        'Falle: $x = -3$ ist die Polstelle. Dort ist $f$ überhaupt nicht definiert.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Nullstellen von $f(x) = \\dfrac{x^2-9}{x-3}$.',
+      opts: ['$f$ hat keine Nullstellen', 'nur $x = 3$', 'nur $x = -3$', '$x = -3$ und $x = 3$'],
+      steps: [
+        'Zähler null: $x^2 - 9 = 0$ liefert $x = 3$ und $x = -3$.',
+        'Aber $D = \\mathbb{R} \\setminus \\{3\\}$ - bei $x = 3$ wird auch der Nenner null.',
+        'Es bleibt nur $x = -3$. Bei $x = 3$ liegt eine hebbare Lücke, keine Nullstelle.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wo schneidet der Graph von $f(x) = \\dfrac{2x-1}{x+3}$ die $y$-Achse?',
+      opts: ['$S_y\\left(0 \\mid \\dfrac{1}{3}\\right)$', '$S_y\\left(0 \\mid -\\dfrac{1}{2}\\right)$', '$S_y\\left(0 \\mid -\\dfrac{1}{3}\\right)$', '$S_y(0 \\mid 2)$'],
+      steps: [
+        'Für den $y$-Achsenabschnitt setzt man $x = 0$ ein.',
+        '$f(0) = \\dfrac{2 \\cdot 0 - 1}{0 + 3} = \\dfrac{-1}{3} = -\\dfrac{1}{3}$',
+        'Falle: das Minus im Zähler verlieren. Der Wert $2$ wäre der Grenzwert im Unendlichen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Warum hat der Graph von $f(x) = \\dfrac{x+1}{x}$ keinen Schnittpunkt mit der $y$-Achse?',
+      opts: ['weil der Zähler bei $x = 0$ nicht null wird', 'weil $f(0) = 1$ ist', 'weil $f$ punktsymmetrisch ist', 'weil $x = 0$ nicht zum Definitionsbereich gehört'],
+      steps: [
+        'Ein $y$-Achsenabschnitt ist der Funktionswert an der Stelle $x = 0$.',
+        'Hier ist $D = \\mathbb{R} \\setminus \\{0\\}$: An der Stelle $x = 0$ liegt eine Polstelle, der Graph läuft dort an der $y$-Achse entlang ins Unendliche.',
+        'Merke: Genau eine Polstelle bei $x = 0$ verhindert den Schnittpunkt mit der $y$-Achse.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Untersuche die Monotonie von $f(x) = \\dfrac{x}{x+1}$ mit $f^{\\prime}(x) = \\dfrac{1}{(x+1)^2}$.',
+      opts: ['auf $]-\\infty;\\,-1[$ und auf $]-1;\\,\\infty[$ jeweils streng monoton steigend', 'auf ganz $\\mathbb{R}$ streng monoton fallend', 'auf $]-\\infty;\\,-1[$ fallend, auf $]-1;\\,\\infty[$ steigend', 'konstant, denn $f^{\\prime}$ hat keine Nullstelle'],
+      steps: [
+        '$(x+1)^2 > 0$ für jedes $x \\neq -1$, also ist $f^{\\prime}(x) > 0$ auf dem ganzen Definitionsbereich.',
+        'Positive Ableitung bedeutet streng monoton steigend.',
+        'Wichtig: Die Polstelle $x = -1$ zerschneidet den Definitionsbereich - man gibt beide Teilintervalle getrennt an.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für $f(x) = \\dfrac{3x}{x^2+1}$ gilt $f^{\\prime}(x) = \\dfrac{3 - 3x^2}{(x^2+1)^2}$. Auf welchem Intervall ist $f$ streng monoton steigend?',
+      opts: ['auf $]-1;\\,1[$', 'auf $]0;\\,\\infty[$', 'auf $]-\\infty;\\,-1[$ und $]1;\\,\\infty[$', 'auf ganz $\\mathbb{R}$'],
+      steps: [
+        'Der Nenner $(x^2+1)^2$ ist immer positiv - es entscheidet der Zähler $3 - 3x^2 = 3(1-x^2)$.',
+        '$3(1-x^2) > 0$ gilt genau für $-1 < x < 1$.',
+        'Probe: $f^{\\prime}(0) = 3 > 0$ und $f^{\\prime}(2) = \\dfrac{-9}{25} < 0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Gegeben ist $f^{\\prime}(x) = \\dfrac{x^2-2x-3}{(x-1)^2}$ mit $D = \\mathbb{R} \\setminus \\{1\\}$. Bestimme die Monotonieintervalle von $f$.',
+      opts: ['steigend auf $]-\\infty;\\,-3[$ und $]1;\\,\\infty[$, fallend auf $]-3;\\,1[$', 'steigend auf $]-1;\\,3[$, fallend sonst', 'steigend auf $]-\\infty;\\,-1[$ und $]3;\\,\\infty[$, fallend auf $]-1;\\,1[$ und $]1;\\,3[$', 'steigend auf $]-\\infty;\\,1[$, fallend auf $]1;\\,\\infty[$'],
+      steps: [
+        'Der Nenner $(x-1)^2$ ist positiv - es entscheidet der Zähler $x^2 - 2x - 3 = (x+1)(x-3)$.',
+        'Das Produkt ist positiv für $x < -1$ und für $x > 3$, dazwischen negativ.',
+        'Probe: $f^{\\prime}(-2) = \\dfrac{5}{9} > 0$, $f^{\\prime}(0) = -3 < 0$, $f^{\\prime}(4) = \\dfrac{5}{9} > 0$.',
+        'Falle: die Polstelle $x = 1$ vergessen - das fallende Stück zerfällt in zwei Intervalle.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für eine Funktion gilt $f^{\\prime}(x) = \\dfrac{-5}{(x-2)^2}$ mit $D = \\mathbb{R} \\setminus \\{2\\}$. Welche Aussage stimmt?',
+      opts: ['$f$ ist streng monoton steigend', '$f$ ist auf beiden Teilintervallen streng monoton fallend und hat keine Extremstellen', '$f$ hat bei $x = 2$ einen Tiefpunkt', '$f$ hat bei $x = 2$ eine Extremstelle, weil $f^{\\prime}$ dort nicht definiert ist'],
+      steps: [
+        '$(x-2)^2 > 0$, also ist $f^{\\prime}(x) = \\dfrac{-5}{(x-2)^2} < 0$ für jedes $x \\neq 2$.',
+        'Negative Ableitung überall bedeutet: überall streng monoton fallend.',
+        'Extremstellen brauchen $f^{\\prime}(x) = 0$. Der Zähler $-5$ wird nie null, und bei $x = 2$ ist $f$ gar nicht definiert.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Untersuche $f(x) = \\dfrac{x^2+1}{x^2-4}$ auf Symmetrie.',
+      opts: ['punktsymmetrisch zum Ursprung', 'achsensymmetrisch zur $y$-Achse', 'achsensymmetrisch zur Geraden $x = 2$', 'weder noch'],
+      steps: [
+        '$f(-x) = \\dfrac{(-x)^2+1}{(-x)^2-4} = \\dfrac{x^2+1}{x^2-4} = f(x)$',
+        '$f(-x) = f(x)$ bedeutet Achsensymmetrie zur $y$-Achse.',
+        'Merkregel: Kommt $x$ nur in geraden Potenzen vor, ist der Graph achsensymmetrisch.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Untersuche $f(x) = \\dfrac{x}{x^2-1}$ auf Symmetrie.',
+      opts: ['achsensymmetrisch zur $y$-Achse', 'weder noch', 'punktsymmetrisch zum Punkt $(1 \\mid 0)$', 'punktsymmetrisch zum Ursprung'],
+      steps: [
+        '$f(-x) = \\dfrac{-x}{(-x)^2-1} = \\dfrac{-x}{x^2-1} = -f(x)$',
+        '$f(-x) = -f(x)$ bedeutet Punktsymmetrie zum Ursprung.',
+        'Probe mit Zahlen: $f(2) = \\dfrac{2}{3}$ und $f(-2) = -\\dfrac{2}{3}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Untersuche $f(x) = \\dfrac{x+1}{x^2}$ auf Symmetrie.',
+      opts: ['achsensymmetrisch zur $x$-Achse', 'weder achsen- noch punktsymmetrisch', 'punktsymmetrisch zum Ursprung', 'achsensymmetrisch zur $y$-Achse'],
+      steps: [
+        '$f(-x) = \\dfrac{-x+1}{(-x)^2} = \\dfrac{1-x}{x^2}$',
+        'Das ist weder $f(x) = \\dfrac{1+x}{x^2}$ noch $-f(x) = \\dfrac{-1-x}{x^2}$.',
+        'Gegenbeispiel genügt: $f(1) = 2$, $f(-1) = 0$. Wäre der Graph symmetrisch, müsste $0 = 2$ oder $0 = -2$ gelten.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Betrieb hat Fixkosten von $50$ € je Tag und $2$ € Materialkosten je Stück. Die Stückkosten sind $k(x) = \\dfrac{2x+50}{x}$ (in €, $x > 0$). Was sagt die Ableitung über den Verlauf?',
+      fig: '<svg viewBox="0 0 520 320" width="520" height="320" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Stückkostenkurve, streng monoton fallend, mit der Asymptote k gleich 2"><defs><clipPath id="f1-clip"><rect x="39" y="19" width="460" height="268"/></clipPath><marker id="f1-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="40" y1="263.2" x2="498" y2="263.2" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><line x1="55.79" y1="286" x2="55.79" y2="20" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><text x="500" y="279.2" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">x</text><text x="43.79" y="18" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">k</text><text x="48.79" y="278.2" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="108.44" y1="259.7" x2="108.44" y2="266.7" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="108.44" y="279.2" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">5</text><line x1="161.08" y1="259.7" x2="161.08" y2="266.7" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="161.08" y="279.2" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">10</text><line x1="213.72" y1="259.7" x2="213.72" y2="266.7" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="213.72" y="279.2" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">15</text><line x1="266.37" y1="259.7" x2="266.37" y2="266.7" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="266.37" y="279.2" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">20</text><line x1="319.01" y1="259.7" x2="319.01" y2="266.7" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="319.01" y="279.2" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">25</text><line x1="371.66" y1="259.7" x2="371.66" y2="266.7" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="371.66" y="279.2" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">30</text><line x1="424.3" y1="259.7" x2="424.3" y2="266.7" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="424.3" y="279.2" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">35</text><line x1="476.94" y1="259.7" x2="476.94" y2="266.7" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="476.94" y="279.2" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">40</text><line x1="52.29" y1="225.2" x2="59.29" y2="225.2" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="48.79" y="229.2" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">5</text><line x1="52.29" y1="187.2" x2="59.29" y2="187.2" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="48.79" y="191.2" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">10</text><line x1="52.29" y1="149.2" x2="59.29" y2="149.2" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="48.79" y="153.2" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">15</text><line x1="52.29" y1="111.2" x2="59.29" y2="111.2" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="48.79" y="115.2" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">20</text><line x1="52.29" y1="73.2" x2="59.29" y2="73.2" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="48.79" y="77.2" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">25</text><line x1="52.29" y1="35.2" x2="59.29" y2="35.2" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="48.79" y="39.2" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">30</text><line x1="40" y1="248" x2="498" y2="248" stroke="#6E7E9F" stroke-width="1.3" stroke-linecap="round" stroke-dasharray="6 4"/><g clip-path="url(#f1-clip)"><path d="M 73.69 24.47 L 75.3 42.94 L 76.92 58.58 L 78.53 72.01 L 80.14 83.66 L 81.75 93.87 L 83.36 102.88 L 84.97 110.89 L 86.59 118.07 L 88.2 124.53 L 89.81 130.38 L 91.42 135.7 L 93.03 140.56 L 94.64 145.02 L 96.26 149.12 L 97.87 152.91 L 99.48 156.42 L 101.09 159.68 L 102.7 162.71 L 104.31 165.54 L 105.93 168.19 L 107.54 170.68 L 109.15 173.02 L 110.76 175.21 L 112.37 177.29 L 113.98 179.25 L 115.6 181.1 L 117.21 182.85 L 118.82 184.52 L 120.43 186.1 L 122.04 187.61 L 123.65 189.04 L 125.27 190.41 L 126.88 191.72 L 128.49 192.96 L 130.1 194.16 L 131.71 195.3 L 133.33 196.4 L 134.94 197.45 L 136.55 198.46 L 138.16 199.43 L 139.77 200.36 L 141.38 201.26 L 143 202.12 L 144.61 202.95 L 146.22 203.75 L 147.83 204.53 L 149.44 205.28 L 151.05 206 L 152.67 206.7 L 154.28 207.38 L 155.89 208.03 L 157.5 208.66 L 159.11 209.28 L 160.72 209.87 L 162.34 210.45 L 163.95 211.01 L 165.56 211.55 L 167.17 212.08 L 168.78 212.59 L 170.39 213.09 L 172.01 213.57 L 173.62 214.04 L 175.23 214.5 L 176.84 214.95 L 178.45 215.38 L 180.06 215.81 L 181.68 216.22 L 183.29 216.62 L 184.9 217.01 L 186.51 217.39 L 188.12 217.77 L 189.73 218.13 L 191.35 218.48 L 192.96 218.83 L 194.57 219.17 L 196.18 219.5 L 197.79 219.82 L 199.41 220.14 L 201.02 220.45 L 202.63 220.75 L 204.24 221.05 L 205.85 221.34 L 207.46 221.62 L 209.08 221.9 L 210.69 222.17 L 212.3 222.44 L 213.91 222.7 L 215.52 222.95 L 217.13 223.2 L 218.75 223.45 L 220.36 223.69 L 221.97 223.92 L 223.58 224.15 L 225.19 224.38 L 226.8 224.6 L 228.42 224.82 L 230.03 225.04 L 231.64 225.25 L 233.25 225.45 L 234.86 225.66 L 236.47 225.86 L 238.09 226.05 L 239.7 226.24 L 241.31 226.43 L 242.92 226.62 L 244.53 226.8 L 246.14 226.98 L 247.76 227.16 L 249.37 227.33 L 250.98 227.5 L 252.59 227.67 L 254.2 227.84 L 255.81 228 L 257.43 228.16 L 259.04 228.31 L 260.65 228.47 L 262.26 228.62 L 263.87 228.77 L 265.49 228.92 L 267.1 229.07 L 268.71 229.21 L 270.32 229.35 L 271.93 229.49 L 273.54 229.63 L 275.16 229.76 L 276.77 229.89 L 278.38 230.03 L 279.99 230.15 L 281.6 230.28 L 283.21 230.41 L 284.83 230.53 L 286.44 230.65 L 288.05 230.77 L 289.66 230.89 L 291.27 231.01 L 292.88 231.12 L 294.5 231.24 L 296.11 231.35 L 297.72 231.46 L 299.33 231.57 L 300.94 231.68 L 302.55 231.79 L 304.17 231.89 L 305.78 232 L 307.39 232.1 L 309 232.2 L 310.61 232.3 L 312.22 232.4 L 313.84 232.5 L 315.45 232.59 L 317.06 232.69 L 318.67 232.78 L 320.28 232.87 L 321.89 232.96 L 323.51 233.06 L 325.12 233.14 L 326.73 233.23 L 328.34 233.32 L 329.95 233.41 L 331.56 233.49 L 333.18 233.58 L 334.79 233.66 L 336.4 233.74 L 338.01 233.82 L 339.62 233.9 L 341.24 233.98 L 342.85 234.06 L 344.46 234.14 L 346.07 234.22 L 347.68 234.29 L 349.29 234.37 L 350.91 234.44 L 352.52 234.52 L 354.13 234.59 L 355.74 234.66 L 357.35 234.73 L 358.96 234.8 L 360.58 234.87 L 362.19 234.94 L 363.8 235.01 L 365.41 235.08 L 367.02 235.14 L 368.63 235.21 L 370.25 235.28 L 371.86 235.34 L 373.47 235.41 L 375.08 235.47 L 376.69 235.53 L 378.3 235.59 L 379.92 235.66 L 381.53 235.72 L 383.14 235.78 L 384.75 235.84 L 386.36 235.9 L 387.97 235.96 L 389.59 236.01 L 391.2 236.07 L 392.81 236.13 L 394.42 236.18 L 396.03 236.24 L 397.64 236.3 L 399.26 236.35 L 400.87 236.41 L 402.48 236.46 L 404.09 236.51 L 405.7 236.57 L 407.32 236.62 L 408.93 236.67 L 410.54 236.72 L 412.15 236.77 L 413.76 236.82 L 415.37 236.87 L 416.99 236.92 L 418.6 236.97 L 420.21 237.02 L 421.82 237.07 L 423.43 237.12 L 425.04 237.16 L 426.66 237.21 L 428.27 237.26 L 429.88 237.3 L 431.49 237.35 L 433.1 237.4 L 434.71 237.44 L 436.33 237.49 L 437.94 237.53 L 439.55 237.57 L 441.16 237.62 L 442.77 237.66 L 444.38 237.7 L 446 237.75 L 447.61 237.79 L 449.22 237.83 L 450.83 237.87 L 452.44 237.91 L 454.05 237.95 L 455.67 237.99 L 457.28 238.03 L 458.89 238.07 L 460.5 238.11 L 462.11 238.15 L 463.72 238.19 L 465.34 238.23 L 466.95 238.27 L 468.56 238.31 L 470.17 238.34 L 471.78 238.38 L 473.4 238.42 L 475.01 238.46 L 476.62 238.49 L 478.23 238.53 L 479.84 238.56 L 481.45 238.6 L 483.07 238.64 L 484.68 238.67 L 486.29 238.71 L 487.9 238.74 L 489.51 238.78 L 491.12 238.81 L 492.74 238.84" fill="none" stroke="#B02418" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></g></svg>',
+      figcap: 'Stückkosten $k(x) = \\dfrac{2x+50}{x}$ mit der Asymptote $k = 2$',
+      opts: ['$k^{\\prime}(x) = \\dfrac{50}{x^2} > 0$: Die Stückkosten steigen streng monoton.', '$k^{\\prime}(x) = 2$: Die Stückkosten wachsen gleichmäßig.', '$k^{\\prime}(x) = -\\dfrac{50}{x^2} < 0$: Die Stückkosten fallen streng monoton, ein Minimum gibt es nicht.', '$k^{\\prime}(x) = \\dfrac{2x - 50}{x^2}$: Bei $x = 25$ sind die Stückkosten minimal.'],
+      steps: [
+        'Quotientenregel: $k^{\\prime}(x) = \\dfrac{2 \\cdot x - (2x+50) \\cdot 1}{x^2} = \\dfrac{2x - 2x - 50}{x^2} = -\\dfrac{50}{x^2}$.',
+        'Der Zähler $-50$ wird nie null, also gibt es keine Extremstelle.',
+        'Probe: $k(10) = 7$, $k(25) = 4$, $k(50) = 3$ - die Kurve fällt und nähert sich der Asymptote $k = 2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für welchen Wert von $a$ hat $f(x) = \\dfrac{x^2+a}{x-2}$ die Nullstelle $x = 3$?',
+      opts: ['$a = -3$', '$a = 9$', '$a = -9$', '$a = -6$'],
+      steps: [
+        'Eine Nullstelle des Bruchs ist eine Nullstelle des Zählers: $3^2 + a = 0$.',
+        '$9 + a = 0$, also $a = -9$.',
+        'Probe: $f(x) = \\dfrac{x^2-9}{x-2}$ und $f(3) = \\dfrac{0}{1} = 0$. Der Nenner ist bei $x = 3$ gleich $1$, also nicht null - die Nullstelle zählt wirklich.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

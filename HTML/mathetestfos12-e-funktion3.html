@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: e-Funktionen III — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w30-e-funktion3',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · e-Funktionen III',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 30 (LB 4) · 20 Aufgaben: Extrem- und Wendepunkte, Wertebereich, Stammfunktion und Flächen · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 30 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Extrempunkte (1-6), Wendepunkte (7-10), Wertebereich (11-13), Stammfunktion von e hoch (ax+b) (14-16), Flächen und Anwendungen (17-20). GTR ohne CAS. */
+  questions: [
+    {
+      q: 'Wie löst man die Gleichung $(2-x) \\cdot e^{x} = 0$?',
+      opts: ['Beide Faktoren null setzen: $x = 2$ und $x = 0$.', 'Die Gleichung hat keine Lösung, weil $e^{x} > 0$ ist.', '$e^{x} = 0$ für $x = 0$, also $x = 0$.', '$e^{x}$ ist nie null, also muss $2 - x = 0$ sein: $x = 2$.'],
+      steps: [
+        'Ein Produkt ist null, wenn ein Faktor null ist.',
+        '$e^{x} > 0$ für jedes $x$ - dieser Faktor liefert nie eine Lösung.',
+        'Es bleibt $2 - x = 0$, also $x = 2$. Diese Überlegung braucht man bei jeder Extremstelle von $p(x) \\cdot e^{ax+b}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Gegeben ist $f(x) = (x-2) \\cdot e^{x}$ mit $f^{\\prime}(x) = (x-1) \\cdot e^{x}$ und $f^{\\prime\\prime}(x) = x \\cdot e^{x}$. Bestimme den Extrempunkt und seine Art.',
+      opts: ['Hochpunkt $H(1 \\mid -e)$', 'Tiefpunkt $T(1 \\mid 0)$', 'Tiefpunkt $T(1 \\mid -e) \\approx T(1 \\mid -2{,}72)$', 'Tiefpunkt $T(2 \\mid 0)$'],
+      steps: [
+        '$f^{\\prime}(x) = 0$: $e^{x} \\neq 0$, also $x - 1 = 0$ und $x = 1$.',
+        '$f(1) = (1-2) \\cdot e^{1} = -e \\approx -2{,}72$',
+        '$f^{\\prime\\prime}(1) = 1 \\cdot e = e > 0$, also ein Tiefpunkt.',
+        'Falle: $x = 2$ ist die Nullstelle von $f$, nicht die Extremstelle.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Extrempunkte von $f(x) = x^2 \\cdot e^{-x}$. Es gilt $f^{\\prime}(x) = (2x - x^2) \\cdot e^{-x}$.',
+      opts: ['$H(0 \\mid 0)$ und $T(2 \\mid 4e^{-2})$', '$T(0 \\mid 0)$ und $H(2 \\mid 4e^{-2}) \\approx H(2 \\mid 0{,}541)$', '$T(0 \\mid 0)$ und $H(2 \\mid 4)$', 'nur $T(0 \\mid 0)$'],
+      steps: [
+        '$f^{\\prime}(x) = x(2-x) \\cdot e^{-x} = 0$ ergibt $x = 0$ und $x = 2$.',
+        '$f(0) = 0$ und $f(2) = 4 \\cdot e^{-2} \\approx 0{,}541$.',
+        'Vorzeichen von $f^{\\prime}$: für $x < 0$ negativ, zwischen $0$ und $2$ positiv, für $x > 2$ negativ - also erst Tiefpunkt, dann Hochpunkt.',
+        'Falle: den Faktor $e^{-2}$ weglassen; der $y$-Wert ist $0{,}541$, nicht $4$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme den Extrempunkt von $f(x) = e^{x} - x$.',
+      opts: ['Tiefpunkt $T(0 \\mid 0)$', 'Tiefpunkt $T(1 \\mid e-1)$', 'Hochpunkt $H(0 \\mid 1)$', 'Tiefpunkt $T(0 \\mid 1)$'],
+      steps: [
+        '$f^{\\prime}(x) = e^{x} - 1 = 0$ ergibt $e^{x} = 1$, also $x = 0$ (Exponentenvergleich mit $e^{0}$).',
+        '$f(0) = e^{0} - 0 = 1$',
+        '$f^{\\prime\\prime}(x) = e^{x}$, also $f^{\\prime\\prime}(0) = 1 > 0$: Tiefpunkt $T(0 \\mid 1)$.',
+        'Nebenbei: Damit ist $e^{x} \\geq x + 1$ für alle $x$ gezeigt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme den Extrempunkt von $f(x) = x \\cdot e^{2x}$.',
+      opts: ['Tiefpunkt $T(0 \\mid 0)$', 'Tiefpunkt $T(-0{,}5 \\mid -0{,}184)$', 'Tiefpunkt $T(-2 \\mid -0{,}037)$', 'Hochpunkt $H(-0{,}5 \\mid -0{,}184)$'],
+      steps: [
+        'Produktregel: $f^{\\prime}(x) = 1 \\cdot e^{2x} + x \\cdot 2e^{2x} = (1 + 2x) \\cdot e^{2x}$.',
+        '$1 + 2x = 0$ ergibt $x = -0{,}5$; $f(-0{,}5) = -0{,}5 \\cdot e^{-1} \\approx -0{,}184$.',
+        '$f^{\\prime\\prime}(x) = (4 + 4x) \\cdot e^{2x}$ und $f^{\\prime\\prime}(-0{,}5) = 2 \\cdot e^{-1} > 0$: Tiefpunkt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Extrempunkte von $f(x) = (x^2-3) \\cdot e^{x}$.',
+      opts: ['$H(-3 \\mid 6e^{-3}) \\approx H(-3 \\mid 0{,}299)$ und $T(1 \\mid -2e) \\approx T(1 \\mid -5{,}44)$', 'nur $T(1 \\mid -2e)$', '$T(-3 \\mid 6e^{-3})$ und $H(1 \\mid -2e)$', '$H(-\\sqrt{3} \\mid 0)$ und $T(\\sqrt{3} \\mid 0)$'],
+      steps: [
+        'Produktregel: $f^{\\prime}(x) = 2x \\cdot e^{x} + (x^2-3) \\cdot e^{x} = (x^2 + 2x - 3) \\cdot e^{x}$.',
+        '$x^2 + 2x - 3 = (x+3)(x-1) = 0$ ergibt $x = -3$ und $x = 1$.',
+        '$f(-3) = 6 \\cdot e^{-3} \\approx 0{,}299$ und $f(1) = -2 \\cdot e \\approx -5{,}44$.',
+        '$f^{\\prime\\prime}(x) = (x^2 + 4x - 1) \\cdot e^{x}$: $f^{\\prime\\prime}(-3) = -4e^{-3} < 0$ (Hochpunkt), $f^{\\prime\\prime}(1) = 4e > 0$ (Tiefpunkt). $\\pm\\sqrt{3}$ sind die Nullstellen von $f$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für $f(x) = x \\cdot e^{-x}$ gilt $f^{\\prime\\prime}(x) = (x-2) \\cdot e^{-x}$. Bestimme den Wendepunkt.',
+      fig: '<svg viewBox="0 0 520 320" width="520" height="320" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Graph von f mit Hochpunkt H bei x gleich 1 und Wendepunkt W bei x gleich 2"><defs><clipPath id="f1-clip"><rect x="39" y="19" width="460" height="268"/></clipPath><marker id="f1-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="40" y1="139.24" x2="498" y2="139.24" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><line x1="118.34" y1="286" x2="118.34" y2="20" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><text x="500" y="155.24" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">x</text><text x="106.34" y="18" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">y</text><text x="111.34" y="154.24" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="58.08" y1="135.74" x2="58.08" y2="142.74" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="58.08" y="155.24" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-1</text><line x1="178.61" y1="135.74" x2="178.61" y2="142.74" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="178.61" y="155.24" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">1</text><line x1="238.87" y1="135.74" x2="238.87" y2="142.74" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="238.87" y="155.24" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">2</text><line x1="299.13" y1="135.74" x2="299.13" y2="142.74" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="299.13" y="155.24" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">3</text><line x1="359.39" y1="135.74" x2="359.39" y2="142.74" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="359.39" y="155.24" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">4</text><line x1="419.66" y1="135.74" x2="419.66" y2="142.74" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="419.66" y="155.24" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">5</text><line x1="479.92" y1="135.74" x2="479.92" y2="142.74" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="479.92" y="155.24" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">6</text><line x1="114.84" y1="230.97" x2="121.84" y2="230.97" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="111.34" y="234.97" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-1</text><line x1="114.84" y1="47.52" x2="121.84" y2="47.52" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="111.34" y="51.52" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">1</text><g clip-path="url(#f1-clip)"><path d="M 85.2 226.68 L 86.76 220.42 L 88.33 214.42 L 89.89 208.67 L 91.46 203.18 L 93.02 197.91 L 94.58 192.88 L 96.15 188.06 L 97.71 183.46 L 99.28 179.06 L 100.84 174.85 L 102.41 170.84 L 103.97 167 L 105.54 163.35 L 107.1 159.86 L 108.67 156.54 L 110.23 153.37 L 111.79 150.35 L 113.36 147.48 L 114.92 144.75 L 116.49 142.15 L 118.05 139.68 L 119.62 137.34 L 121.18 135.12 L 122.75 133.01 L 124.31 131.01 L 125.88 129.12 L 127.44 127.33 L 129 125.64 L 130.57 124.05 L 132.13 122.54 L 133.7 121.13 L 135.26 119.79 L 136.83 118.54 L 138.39 117.36 L 139.96 116.26 L 141.52 115.23 L 143.08 114.26 L 144.65 113.36 L 146.21 112.53 L 147.78 111.75 L 149.34 111.03 L 150.91 110.37 L 152.47 109.76 L 154.04 109.19 L 155.6 108.68 L 157.17 108.21 L 158.73 107.79 L 160.29 107.41 L 161.86 107.07 L 163.42 106.77 L 164.99 106.5 L 166.55 106.27 L 168.12 106.07 L 169.68 105.91 L 171.25 105.77 L 172.81 105.66 L 174.38 105.59 L 175.94 105.53 L 177.5 105.5 L 179.07 105.5 L 180.63 105.52 L 182.2 105.56 L 183.76 105.61 L 185.33 105.69 L 186.89 105.79 L 188.46 105.9 L 190.02 106.03 L 191.59 106.18 L 193.15 106.34 L 194.71 106.51 L 196.28 106.69 L 197.84 106.89 L 199.41 107.1 L 200.97 107.32 L 202.54 107.55 L 204.1 107.79 L 205.67 108.03 L 207.23 108.29 L 208.79 108.55 L 210.36 108.82 L 211.92 109.1 L 213.49 109.38 L 215.05 109.66 L 216.62 109.96 L 218.18 110.25 L 219.75 110.55 L 221.31 110.86 L 222.88 111.16 L 224.44 111.47 L 226 111.79 L 227.57 112.1 L 229.13 112.42 L 230.7 112.74 L 232.26 113.06 L 233.83 113.38 L 235.39 113.7 L 236.96 114.02 L 238.52 114.34 L 240.09 114.66 L 241.65 114.99 L 243.21 115.31 L 244.78 115.63 L 246.34 115.95 L 247.91 116.27 L 249.47 116.59 L 251.04 116.91 L 252.6 117.22 L 254.17 117.54 L 255.73 117.85 L 257.3 118.16 L 258.86 118.47 L 260.42 118.78 L 261.99 119.08 L 263.55 119.38 L 265.12 119.68 L 266.68 119.98 L 268.25 120.28 L 269.81 120.57 L 271.38 120.86 L 272.94 121.15 L 274.5 121.43 L 276.07 121.72 L 277.63 122 L 279.2 122.27 L 280.76 122.55 L 282.33 122.82 L 283.89 123.09 L 285.46 123.35 L 287.02 123.61 L 288.59 123.87 L 290.15 124.13 L 291.71 124.38 L 293.28 124.63 L 294.84 124.88 L 296.41 125.12 L 297.97 125.36 L 299.54 125.6 L 301.1 125.84 L 302.67 126.07 L 304.23 126.3 L 305.8 126.52 L 307.36 126.75 L 308.92 126.97 L 310.49 127.18 L 312.05 127.4 L 313.62 127.61 L 315.18 127.81 L 316.75 128.02 L 318.31 128.22 L 319.88 128.42 L 321.44 128.61 L 323.01 128.81 L 324.57 128.99 L 326.13 129.18 L 327.7 129.37 L 329.26 129.55 L 330.83 129.73 L 332.39 129.9 L 333.96 130.07 L 335.52 130.24 L 337.09 130.41 L 338.65 130.58 L 340.21 130.74 L 341.78 130.9 L 343.34 131.05 L 344.91 131.21 L 346.47 131.36 L 348.04 131.51 L 349.6 131.66 L 351.17 131.8 L 352.73 131.94 L 354.3 132.08 L 355.86 132.22 L 357.42 132.35 L 358.99 132.49 L 360.55 132.62 L 362.12 132.75 L 363.68 132.87 L 365.25 133 L 366.81 133.12 L 368.38 133.24 L 369.94 133.35 L 371.51 133.47 L 373.07 133.58 L 374.63 133.69 L 376.2 133.8 L 377.76 133.91 L 379.33 134.01 L 380.89 134.12 L 382.46 134.22 L 384.02 134.32 L 385.59 134.42 L 387.15 134.51 L 388.72 134.61 L 390.28 134.7 L 391.84 134.79 L 393.41 134.88 L 394.97 134.97 L 396.54 135.05 L 398.1 135.14 L 399.67 135.22 L 401.23 135.3 L 402.8 135.38 L 404.36 135.46 L 405.92 135.54 L 407.49 135.61 L 409.05 135.69 L 410.62 135.76 L 412.18 135.83 L 413.75 135.9 L 415.31 135.97 L 416.88 136.04 L 418.44 136.1 L 420.01 136.17 L 421.57 136.23 L 423.13 136.29 L 424.7 136.35 L 426.26 136.41 L 427.83 136.47 L 429.39 136.53 L 430.96 136.58 L 432.52 136.64 L 434.09 136.69 L 435.65 136.75 L 437.22 136.8 L 438.78 136.85 L 440.34 136.9 L 441.91 136.95 L 443.47 137 L 445.04 137.04 L 446.6 137.09 L 448.17 137.13 L 449.73 137.18 L 451.3 137.22 L 452.86 137.26 L 454.43 137.31 L 455.99 137.35 L 457.55 137.39 L 459.12 137.43 L 460.68 137.46 L 462.25 137.5 L 463.81 137.54 L 465.38 137.57 L 466.94 137.61 L 468.51 137.64 L 470.07 137.68 L 471.63 137.71 L 473.2 137.74 L 474.76 137.78 L 476.33 137.81 L 477.89 137.84 L 479.46 137.87 L 481.02 137.9 L 482.59 137.93 L 484.15 137.95 L 485.72 137.98 L 487.28 138.01 L 488.84 138.04 L 490.41 138.06 L 491.97 138.09" fill="none" stroke="#B02418" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></g><circle cx="178.61" cy="105.5" r="3.6" fill="#B02418" stroke="#FFFFFF" stroke-width="1.4"/><text x="186.61" y="97.5" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">H</text><circle cx="238.87" cy="114.41" r="3.6" fill="#B02418" stroke="#FFFFFF" stroke-width="1.4"/><text x="246.87" y="106.41" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">W</text></svg>',
+      figcap: 'Graph von $f(x) = x \\cdot e^{-x}$ mit Hochpunkt und Wendepunkt',
+      opts: ['$W(0 \\mid 0)$', '$W(2 \\mid 0)$', '$W(1 \\mid e^{-1})$', '$W(2 \\mid 2e^{-2}) \\approx W(2 \\mid 0{,}271)$'],
+      steps: [
+        '$f^{\\prime\\prime}(x) = 0$: Weil $e^{-x} \\neq 0$ ist, bleibt $x - 2 = 0$, also $x = 2$.',
+        'Vorzeichenwechsel: $f^{\\prime\\prime}(1) = -e^{-1} < 0$, $f^{\\prime\\prime}(3) = e^{-3} > 0$ - die Krümmung wechselt von rechts nach links.',
+        '$y$-Wert aus $f$: $f(2) = 2 \\cdot e^{-2} \\approx 0{,}271$. Falle: $x = 1$ ist die Extremstelle, nicht die Wendestelle.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für $f(x) = (x-2) \\cdot e^{x}$ gilt $f^{\\prime\\prime}(x) = x \\cdot e^{x}$. Bestimme den Wendepunkt.',
+      opts: ['$W(0 \\mid -2)$', '$W(1 \\mid -e)$', '$W(2 \\mid 0)$', '$W(0 \\mid 0)$'],
+      steps: [
+        '$x \\cdot e^{x} = 0$ ergibt $x = 0$, denn $e^{x}$ ist nie null.',
+        'Vorzeichenwechsel: $f^{\\prime\\prime}(-1) = -e^{-1} < 0$ und $f^{\\prime\\prime}(1) = e > 0$ - also wirklich ein Wendepunkt.',
+        '$f(0) = (0-2) \\cdot e^{0} = -2$, also $W(0 \\mid -2)$. Falle: $y = 0$ einsetzen statt $f(0)$ zu rechnen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Der GTR liefert für $f(x) = x^2 \\cdot e^{-x}$ die zweite Ableitung $f^{\\prime\\prime}(x) = (x^2-4x+2) \\cdot e^{-x}$. Wie viele Wendestellen hat der Graph?',
+      opts: ['eine: $x = 2$', 'keine, weil $e^{-x}$ nie null wird', 'drei: $x = 0$, $x = 2 - \\sqrt{2}$ und $x = 2 + \\sqrt{2}$', 'zwei: $x = 2 - \\sqrt{2} \\approx 0{,}586$ und $x = 2 + \\sqrt{2} \\approx 3{,}414$'],
+      steps: [
+        '$e^{-x} \\neq 0$, also $x^2 - 4x + 2 = 0$.',
+        '$p$-$q$-Formel: $x = 2 \\pm \\sqrt{4-2} = 2 \\pm \\sqrt{2}$, also $x \\approx 0{,}586$ und $x \\approx 3{,}414$.',
+        'Beide sind einfache Nullstellen einer Parabel - dort wechselt $f^{\\prime\\prime}$ das Vorzeichen.',
+        'Falle: $x = 0$ und $x = 2$ sind die Extremstellen von $f$, nicht die Wendestellen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Was folgt aus $f^{\\prime\\prime}(x) = 4 \\cdot e^{2x}$ für den Graphen von $f(x) = e^{2x}$?',
+      opts: ['Der Graph ist überall linksgekrümmt und hat keinen Wendepunkt.', 'Der Graph hat bei $x = 0$ einen Wendepunkt.', 'Der Graph ist überall rechtsgekrümmt.', 'Der Graph wechselt bei $x = 0$ die Krümmung.'],
+      steps: [
+        '$e^{2x} > 0$ für jedes $x$, also ist $f^{\\prime\\prime}(x) = 4 \\cdot e^{2x} > 0$ überall.',
+        '$f^{\\prime\\prime} > 0$ bedeutet Linkskrümmung.',
+        '$f^{\\prime\\prime}$ hat keine Nullstelle und damit keinen Vorzeichenwechsel - kein Wendepunkt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme den Wertebereich von $f(x) = 5 - 2 \\cdot e^{x}$.',
+      opts: ['$W = \\{y \\mid y > 5\\}$', '$W = \\mathbb{R}$', '$W = \\{y \\mid y < 5\\}$', '$W = \\{y \\mid y \\leq 5\\}$'],
+      steps: [
+        '$e^{x} > 0$ für alle $x$, also ist $2 \\cdot e^{x} > 0$ und $5 - 2 \\cdot e^{x} < 5$.',
+        'Für $x \\to -\\infty$ geht $e^{x} \\to 0$, also $f(x) \\to 5$ - die Asymptote $y = 5$ wird nur angenähert.',
+        'Für $x \\to +\\infty$ fällt $f$ unbegrenzt. Falle: $y \\leq 5$ - der Wert $5$ wird nie erreicht.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der Graph von $f(x) = x \\cdot e^{-x}$ hat den Hochpunkt $H(1 \\mid e^{-1})$; außerdem gilt $f(x) \\to -\\infty$ für $x \\to -\\infty$ und $f(x) \\to 0$ für $x \\to +\\infty$. Bestimme den Wertebereich.',
+      opts: ['$W = \\{y \\mid 0 < y \\leq e^{-1}\\}$', '$W = \\{y \\mid y \\geq 0\\}$', '$W = \\{y \\mid y \\leq e^{-1}\\} \\approx \\{y \\mid y \\leq 0{,}368\\}$', '$W = \\mathbb{R}$'],
+      steps: [
+        'Der größte Funktionswert ist der Hochpunktwert $e^{-1} \\approx 0{,}368$, und er wird angenommen.',
+        'Nach unten gibt es keine Schranke: Für $x \\to -\\infty$ ist $x$ negativ und $e^{-x}$ riesig, also $f(x) \\to -\\infty$.',
+        'Also $W = \\{y \\mid y \\leq e^{-1}\\}$. Falle: nur den rechten Ast ansehen und die negativen Werte vergessen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme den Wertebereich von $f(x) = x^2 \\cdot e^{-x}$ mit $D = \\mathbb{R}$.',
+      opts: ['$W = \\mathbb{R}$', '$W = \\{y \\mid y \\geq 0\\}$', '$W = \\{y \\mid y > 0\\}$', '$W = \\{y \\mid 0 \\leq y \\leq 4e^{-2}\\}$'],
+      steps: [
+        '$x^2 \\geq 0$ und $e^{-x} > 0$, also ist $f(x) \\geq 0$ für jedes $x$; der Wert $0$ wird bei $x = 0$ angenommen.',
+        'Nach oben gibt es keine Schranke: Für $x \\to -\\infty$ wachsen beide Faktoren, etwa $f(-5) = 25 \\cdot e^{5} \\approx 3710$.',
+        'Falle: nur den Hochpunkt $H(2 \\mid 4e^{-2})$ betrachten - der begrenzt bloß den rechten Ast.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Funktion ist eine Stammfunktion von $f(x) = e^{2x}$?',
+      opts: ['$F(x) = \\dfrac{1}{2} \\cdot e^{2x}$', '$F(x) = \\dfrac{1}{2} \\cdot e^{2x^2}$', '$F(x) = e^{2x}$', '$F(x) = 2 \\cdot e^{2x}$'],
+      steps: [
+        'Regel: $\\displaystyle\\int e^{ax+b}\\,dx = \\dfrac{1}{a} \\cdot e^{ax+b} + C$; hier ist $a = 2$.',
+        '$F(x) = \\dfrac{1}{2} \\cdot e^{2x}$',
+        'Probe durch Ableiten: $F^{\\prime}(x) = \\dfrac{1}{2} \\cdot 2 \\cdot e^{2x} = e^{2x}$. Beim Integrieren wird durch $a$ geteilt, beim Ableiten mit $a$ multipliziert.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Funktion ist eine Stammfunktion von $f(x) = e^{3x-2}$?',
+      opts: ['$F(x) = \\dfrac{1}{3} \\cdot e^{3x-2} - 2x$', '$F(x) = \\dfrac{1}{3x-2} \\cdot e^{3x-2}$', '$F(x) = \\dfrac{1}{3} \\cdot e^{3x-2}$', '$F(x) = 3 \\cdot e^{3x-2}$'],
+      steps: [
+        'Nur der Faktor $a = 3$ vor dem $x$ zählt; die Konstante $-2$ bleibt im Exponenten stehen.',
+        '$F(x) = \\dfrac{1}{3} \\cdot e^{3x-2} + C$',
+        'Probe: $F^{\\prime}(x) = \\dfrac{1}{3} \\cdot 3 \\cdot e^{3x-2} = e^{3x-2}$. Der Exponent wird beim Integrieren nicht verändert.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Funktion ist eine Stammfunktion von $f(x) = 4 \\cdot e^{-0{,}5x}$?',
+      opts: ['$F(x) = -8 \\cdot e^{-0{,}5x}$', '$F(x) = 8 \\cdot e^{-0{,}5x}$', '$F(x) = -2 \\cdot e^{-0{,}5x}$', '$F(x) = -0{,}5 \\cdot e^{-0{,}5x}$'],
+      steps: [
+        'Der Vorfaktor $4$ bleibt erhalten, dazu kommt $\\dfrac{1}{a} = \\dfrac{1}{-0{,}5} = -2$.',
+        '$F(x) = 4 \\cdot (-2) \\cdot e^{-0{,}5x} = -8 \\cdot e^{-0{,}5x} + C$',
+        'Probe: $F^{\\prime}(x) = -8 \\cdot (-0{,}5) \\cdot e^{-0{,}5x} = 4 \\cdot e^{-0{,}5x}$. Falle: das Minus vergessen, weil $a$ negativ ist.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $\\displaystyle\\int_0^1 e^{x}\\,dx$.',
+      opts: ['$1 - e \\approx -1{,}718$', '$e - 1 \\approx 1{,}718$', '$\\dfrac{e^2}{2} \\approx 3{,}69$', '$e \\approx 2{,}718$'],
+      steps: [
+        'Stammfunktion: $F(x) = e^{x}$.',
+        '$\\left[e^{x}\\right]_0^1 = e^{1} - e^{0} = e - 1 \\approx 1{,}718$',
+        'Falle: $e^{0} = 1$, nicht $0$ - deshalb muss man wirklich $1$ abziehen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne den Inhalt der Fläche zwischen dem Graphen von $f(x) = e^{-x}$, der $x$-Achse und den Geraden $x = 0$ und $x = 2$.',
+      fig: '<svg viewBox="0 0 520 310" width="520" height="310" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Fläche unter dem Graphen von e hoch minus x zwischen x gleich 0 und x gleich 2"><defs><clipPath id="f2-clip"><rect x="39" y="19" width="460" height="258"/></clipPath><marker id="f2-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="40" y1="231.86" x2="498" y2="231.86" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f2-ar-0E244E)"/><line x1="110.46" y1="276" x2="110.46" y2="20" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f2-ar-0E244E)"/><text x="500" y="247.86" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">x</text><text x="98.46" y="18" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">y</text><text x="103.46" y="246.86" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="198.54" y1="228.36" x2="198.54" y2="235.36" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="198.54" y="247.86" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">1</text><line x1="286.62" y1="228.36" x2="286.62" y2="235.36" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="286.62" y="247.86" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">2</text><line x1="374.69" y1="228.36" x2="374.69" y2="235.36" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="374.69" y="247.86" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">3</text><line x1="462.77" y1="228.36" x2="462.77" y2="235.36" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="462.77" y="247.86" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">4</text><line x1="106.96" y1="143.59" x2="113.96" y2="143.59" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="103.46" y="147.59" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">1</text><line x1="106.96" y1="55.31" x2="113.96" y2="55.31" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="103.46" y="59.31" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">2</text><g clip-path="url(#f2-clip)"><path d="M 110.46 231.86 L 110.46 143.59 L 111.44 144.56 L 112.42 145.53 L 113.4 146.48 L 114.38 147.42 L 115.35 148.36 L 116.33 149.28 L 117.31 150.19 L 118.29 151.09 L 119.27 151.99 L 120.25 152.87 L 121.23 153.74 L 122.21 154.61 L 123.18 155.46 L 124.16 156.3 L 125.14 157.14 L 126.12 157.96 L 127.1 158.78 L 128.08 159.59 L 129.06 160.39 L 130.03 161.18 L 131.01 161.96 L 131.99 162.73 L 132.97 163.49 L 133.95 164.25 L 134.93 165 L 135.91 165.74 L 136.88 166.47 L 137.86 167.19 L 138.84 167.9 L 139.82 168.61 L 140.8 169.31 L 141.78 170 L 142.76 170.68 L 143.74 171.36 L 144.71 172.03 L 145.69 172.69 L 146.67 173.34 L 147.65 173.99 L 148.63 174.63 L 149.61 175.26 L 150.59 175.89 L 151.56 176.51 L 152.54 177.12 L 153.52 177.72 L 154.5 178.32 L 155.48 178.91 L 156.46 179.5 L 157.44 180.08 L 158.41 180.65 L 159.39 181.21 L 160.37 181.77 L 161.35 182.33 L 162.33 182.87 L 163.31 183.42 L 164.29 183.95 L 165.26 184.48 L 166.24 185 L 167.22 185.52 L 168.2 186.03 L 169.18 186.54 L 170.16 187.04 L 171.14 187.54 L 172.12 188.03 L 173.09 188.51 L 174.07 188.99 L 175.05 189.46 L 176.03 189.93 L 177.01 190.39 L 177.99 190.85 L 178.97 191.31 L 179.94 191.75 L 180.92 192.2 L 181.9 192.64 L 182.88 193.07 L 183.86 193.5 L 184.84 193.92 L 185.82 194.34 L 186.79 194.76 L 187.77 195.17 L 188.75 195.57 L 189.73 195.97 L 190.71 196.37 L 191.69 196.76 L 192.67 197.15 L 193.65 197.53 L 194.62 197.91 L 195.6 198.29 L 196.58 198.66 L 197.56 199.02 L 198.54 199.39 L 199.52 199.75 L 200.5 200.1 L 201.47 200.45 L 202.45 200.8 L 203.43 201.14 L 204.41 201.48 L 205.39 201.82 L 206.37 202.15 L 207.35 202.48 L 208.32 202.8 L 209.3 203.12 L 210.28 203.44 L 211.26 203.75 L 212.24 204.07 L 213.22 204.37 L 214.2 204.68 L 215.18 204.98 L 216.15 205.27 L 217.13 205.57 L 218.11 205.86 L 219.09 206.15 L 220.07 206.43 L 221.05 206.71 L 222.03 206.99 L 223 207.26 L 223.98 207.54 L 224.96 207.8 L 225.94 208.07 L 226.92 208.33 L 227.9 208.59 L 228.88 208.85 L 229.85 209.1 L 230.83 209.36 L 231.81 209.6 L 232.79 209.85 L 233.77 210.09 L 234.75 210.33 L 235.73 210.57 L 236.71 210.81 L 237.68 211.04 L 238.66 211.27 L 239.64 211.5 L 240.62 211.72 L 241.6 211.94 L 242.58 212.17 L 243.56 212.38 L 244.53 212.6 L 245.51 212.81 L 246.49 213.02 L 247.47 213.23 L 248.45 213.44 L 249.43 213.64 L 250.41 213.84 L 251.38 214.04 L 252.36 214.24 L 253.34 214.43 L 254.32 214.62 L 255.3 214.81 L 256.28 215 L 257.26 215.19 L 258.24 215.37 L 259.21 215.56 L 260.19 215.74 L 261.17 215.91 L 262.15 216.09 L 263.13 216.26 L 264.11 216.44 L 265.09 216.61 L 266.06 216.78 L 267.04 216.94 L 268.02 217.11 L 269 217.27 L 269.98 217.43 L 270.96 217.59 L 271.94 217.75 L 272.91 217.9 L 273.89 218.06 L 274.87 218.21 L 275.85 218.36 L 276.83 218.51 L 277.81 218.66 L 278.79 218.8 L 279.76 218.95 L 280.74 219.09 L 281.72 219.23 L 282.7 219.37 L 283.68 219.51 L 284.66 219.65 L 285.64 219.78 L 286.62 219.92 L 286.62 231.86 Z" fill="#F5C242" opacity="0.35"/></g><g clip-path="url(#f2-clip)"><path d="M 44.4 44.98 L 46.11 48.58 L 47.83 52.1 L 49.54 55.56 L 51.25 58.95 L 52.96 62.28 L 54.67 65.54 L 56.38 68.74 L 58.09 71.88 L 59.8 74.95 L 61.51 77.97 L 63.22 80.93 L 64.93 83.84 L 66.64 86.68 L 68.35 89.48 L 70.06 92.21 L 71.78 94.9 L 73.49 97.54 L 75.2 100.12 L 76.91 102.65 L 78.62 105.14 L 80.33 107.58 L 82.04 109.97 L 83.75 112.31 L 85.46 114.61 L 87.17 116.87 L 88.88 119.08 L 90.59 121.25 L 92.3 123.38 L 94.01 125.46 L 95.73 127.51 L 97.44 129.52 L 99.15 131.49 L 100.86 133.42 L 102.57 135.31 L 104.28 137.17 L 105.99 138.99 L 107.7 140.78 L 109.41 142.53 L 111.12 144.25 L 112.83 145.93 L 114.54 147.58 L 116.25 149.21 L 117.97 150.8 L 119.68 152.35 L 121.39 153.88 L 123.1 155.38 L 124.81 156.86 L 126.52 158.3 L 128.23 159.71 L 129.94 161.1 L 131.65 162.46 L 133.36 163.8 L 135.07 165.11 L 136.78 166.39 L 138.49 167.65 L 140.2 168.88 L 141.92 170.1 L 143.63 171.28 L 145.34 172.45 L 147.05 173.59 L 148.76 174.71 L 150.47 175.81 L 152.18 176.89 L 153.89 177.95 L 155.6 178.99 L 157.31 180 L 159.02 181 L 160.73 181.98 L 162.44 182.94 L 164.15 183.88 L 165.87 184.8 L 167.58 185.71 L 169.29 186.59 L 171 187.47 L 172.71 188.32 L 174.42 189.16 L 176.13 189.98 L 177.84 190.78 L 179.55 191.57 L 181.26 192.35 L 182.97 193.11 L 184.68 193.85 L 186.39 194.59 L 188.1 195.3 L 189.82 196.01 L 191.53 196.7 L 193.24 197.37 L 194.95 198.04 L 196.66 198.69 L 198.37 199.32 L 200.08 199.95 L 201.79 200.56 L 203.5 201.17 L 205.21 201.76 L 206.92 202.34 L 208.63 202.9 L 210.34 203.46 L 212.05 204.01 L 213.77 204.54 L 215.48 205.07 L 217.19 205.58 L 218.9 206.09 L 220.61 206.59 L 222.32 207.07 L 224.03 207.55 L 225.74 208.02 L 227.45 208.47 L 229.16 208.92 L 230.87 209.37 L 232.58 209.8 L 234.29 210.22 L 236.01 210.64 L 237.72 211.05 L 239.43 211.45 L 241.14 211.84 L 242.85 212.23 L 244.56 212.6 L 246.27 212.97 L 247.98 213.34 L 249.69 213.69 L 251.4 214.04 L 253.11 214.39 L 254.82 214.72 L 256.53 215.05 L 258.24 215.37 L 259.96 215.69 L 261.67 216 L 263.38 216.31 L 265.09 216.61 L 266.8 216.9 L 268.51 217.19 L 270.22 217.47 L 271.93 217.75 L 273.64 218.02 L 275.35 218.29 L 277.06 218.55 L 278.77 218.8 L 280.48 219.05 L 282.19 219.3 L 283.91 219.54 L 285.62 219.78 L 287.33 220.01 L 289.04 220.24 L 290.75 220.46 L 292.46 220.68 L 294.17 220.9 L 295.88 221.11 L 297.59 221.31 L 299.3 221.52 L 301.01 221.72 L 302.72 221.91 L 304.43 222.1 L 306.14 222.29 L 307.86 222.48 L 309.57 222.66 L 311.28 222.83 L 312.99 223.01 L 314.7 223.18 L 316.41 223.34 L 318.12 223.51 L 319.83 223.67 L 321.54 223.83 L 323.25 223.98 L 324.96 224.13 L 326.67 224.28 L 328.38 224.43 L 330.09 224.57 L 331.81 224.71 L 333.52 224.85 L 335.23 224.98 L 336.94 225.11 L 338.65 225.24 L 340.36 225.37 L 342.07 225.5 L 343.78 225.62 L 345.49 225.74 L 347.2 225.86 L 348.91 225.97 L 350.62 226.09 L 352.33 226.2 L 354.05 226.31 L 355.76 226.41 L 357.47 226.52 L 359.18 226.62 L 360.89 226.72 L 362.6 226.82 L 364.31 226.92 L 366.02 227.01 L 367.73 227.11 L 369.44 227.2 L 371.15 227.29 L 372.86 227.37 L 374.57 227.46 L 376.28 227.55 L 378 227.63 L 379.71 227.71 L 381.42 227.79 L 383.13 227.87 L 384.84 227.95 L 386.55 228.02 L 388.26 228.09 L 389.97 228.17 L 391.68 228.24 L 393.39 228.31 L 395.1 228.38 L 396.81 228.44 L 398.52 228.51 L 400.23 228.57 L 401.95 228.64 L 403.66 228.7 L 405.37 228.76 L 407.08 228.82 L 408.79 228.88 L 410.5 228.94 L 412.21 228.99 L 413.92 229.05 L 415.63 229.1 L 417.34 229.15 L 419.05 229.21 L 420.76 229.26 L 422.47 229.31 L 424.18 229.36 L 425.9 229.4 L 427.61 229.45 L 429.32 229.5 L 431.03 229.54 L 432.74 229.59 L 434.45 229.63 L 436.16 229.67 L 437.87 229.72 L 439.58 229.76 L 441.29 229.8 L 443 229.84 L 444.71 229.88 L 446.42 229.92 L 448.13 229.95 L 449.85 229.99 L 451.56 230.03 L 453.27 230.06 L 454.98 230.1 L 456.69 230.13 L 458.4 230.16 L 460.11 230.2 L 461.82 230.23 L 463.53 230.26 L 465.24 230.29 L 466.95 230.32 L 468.66 230.35 L 470.37 230.38 L 472.09 230.41 L 473.8 230.44 L 475.51 230.46 L 477.22 230.49 L 478.93 230.52 L 480.64 230.54 L 482.35 230.57 L 484.06 230.59 L 485.77 230.62 L 487.48 230.64 L 489.19 230.66" fill="none" stroke="#B02418" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></g></svg>',
+      figcap: 'Fläche unter $f(x) = e^{-x}$ über dem Intervall $[0;\\,2]$',
+      opts: ['$A = e^{-2} - 1 \\approx -0{,}865$', '$A = e^{2} - 1 \\approx 6{,}39$', '$A = e^{-2} \\approx 0{,}135$', '$A = 1 - e^{-2} \\approx 0{,}865$'],
+      steps: [
+        '$f(x) = e^{-x} > 0$ auf $[0;\\,2]$, also ist die Fläche gleich dem Integral.',
+        'Stammfunktion: $F(x) = -e^{-x}$ (Faktor $\\dfrac{1}{-1} = -1$).',
+        '$\\left[-e^{-x}\\right]_0^2 = -e^{-2} - (-e^{0}) = 1 - e^{-2} \\approx 0{,}865$',
+        'Falle: die Grenzen vertauschen - dann kommt ein negativer Wert heraus, und ein Flächeninhalt ist nie negativ.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'In ein Becken fließt Wasser mit der Rate $z(t) = 5 \\cdot e^{-0{,}5t}$ (in $\\mathrm{m^3}$ pro Stunde, $t$ in Stunden). Wie viel Wasser fließt in den ersten $4$ Stunden zu?',
+      opts: ['$20\\,\\mathrm{m^3}$', '$5 \\cdot e^{-2} \\approx 0{,}68\\,\\mathrm{m^3}$', '$10 \\cdot (1 - e^{-2}) \\approx 8{,}65\\,\\mathrm{m^3}$', '$2{,}5 \\cdot (1 - e^{-2}) \\approx 2{,}16\\,\\mathrm{m^3}$'],
+      steps: [
+        'Die Menge ist das Integral über die Rate: $\\displaystyle\\int_0^4 5 \\cdot e^{-0{,}5t}\\,dt$.',
+        'Stammfunktion: $Z(t) = 5 \\cdot (-2) \\cdot e^{-0{,}5t} = -10 \\cdot e^{-0{,}5t}$.',
+        '$\\left[-10 \\cdot e^{-0{,}5t}\\right]_0^4 = -10 \\cdot e^{-2} + 10 = 10 \\cdot (1 - e^{-2}) \\approx 8{,}65\\,\\mathrm{m^3}$',
+        'Falle: $z(4) \\approx 0{,}68$ ist die Rate nach $4$ Stunden, nicht die Menge.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Fläche unter dem Graphen von $f(x) = e^{-x}$ über dem Intervall $[0;\\,b]$ beträgt $A(b) = 1 - e^{-b}$. Welchem Wert nähert sich $A(b)$, wenn $b$ immer größer wird?',
+      opts: ['$A(b) \\to 0$', '$A(b) \\to 1$', '$A(b) \\to e$', '$A(b) \\to \\infty$'],
+      steps: [
+        'Für $b \\to \\infty$ gilt $e^{-b} \\to 0$, also $A(b) \\to 1 - 0 = 1$.',
+        'Zahlenprobe: $A(5) \\approx 0{,}993$, $A(10) \\approx 0{,}99995$.',
+        'Bemerkenswert: Der Streifen wird unendlich lang, sein Flächeninhalt bleibt aber unter $1$.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

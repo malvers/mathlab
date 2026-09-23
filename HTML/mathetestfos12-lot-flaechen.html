@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Lot und Flächeninhalt — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w08-lot-flaechen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Lot und Flächeninhalt',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 8 (LB 1) · 20 Aufgaben: Lotgerade, Lotfußpunkt, Abstand Punkt–Ebene, Flächeninhalt mit dem Vektorprodukt · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 8 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Lotgerade und Lotfußpunkt (1-6), Abstand Punkt-Ebene (7-11), Flächeninhalt mit dem Vektorprodukt (12-17), Anwendungen (18-20). Alles ohne CAS. */
+  questions: [
+    {
+      q: 'Stelle die Gleichung der Lotgeraden $l$ durch $P(1|2|3)$ auf die Ebene $E\\colon 2x - y + 2z = 5$ auf.',
+      opts: ['$l\\colon \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix}$', '$l\\colon \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$', '$l\\colon \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix}$', '$l\\colon \\vec x = \\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix}$'],
+      steps: [
+        'Die Lotgerade steht senkrecht auf $E$, ihr Richtungsvektor ist also der Normalenvektor $\\vec n = \\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$.',
+        'Stützpunkt ist $P$: $l\\colon \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$',
+        'Falle: $\\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix}$ liegt in $E$ ($2 - 2 + 0 = 0$), das wäre kein Lot.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Ebene $E\\colon \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + r \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$ ist in Parameterform gegeben. Welcher Vektor ist ein Richtungsvektor der Lotgeraden auf $E$?',
+      opts: ['$\\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ -1 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$'],
+      steps: [
+        'Das Lot ist parallel zum Normalenvektor $\\vec n = \\vec u \\times \\vec v$.',
+        '$\\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix} \\times \\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix} = \\begin{pmatrix} 1 \\cdot 1 - 0 \\cdot 1 \\\\ 0 \\cdot 0 - 1 \\cdot 1 \\\\ 1 \\cdot 1 - 1 \\cdot 0 \\end{pmatrix} = \\begin{pmatrix} 1 \\\\ -1 \\\\ 1 \\end{pmatrix}$',
+        'Probe: $\\vec n \\cdot \\vec u = 1 - 1 + 0 = 0$ und $\\vec n \\cdot \\vec v = 0 - 1 + 1 = 0$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Gerade $l\\colon \\vec x = \\begin{pmatrix} 2 \\\\ -1 \\\\ 7 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ -2 \\end{pmatrix}$ ist die Lotgerade durch $P(2|-1|7)$ auf $E\\colon x + 2y - 2z = -5$. Bestimme den Lotfußpunkt $F$.',
+      opts: ['$F(3|1|5)$', '$F(2|-1|7)$', '$F(1|-3|9)$', '$F(4|3|3)$'],
+      steps: [
+        '$l$ in $E$ einsetzen: $(2 + t) + 2(-1 + 2t) - 2(7 - 2t) = -5$',
+        '$9t - 14 = -5$, also $t = 1$',
+        '$F = \\begin{pmatrix} 2 \\\\ -1 \\\\ 7 \\end{pmatrix} + 1 \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ -2 \\end{pmatrix} = \\begin{pmatrix} 3 \\\\ 1 \\\\ 5 \\end{pmatrix}$; Probe: $3 + 2 - 10 = -5$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme den Lotfußpunkt $F$ von $P(2|3|1)$ auf die Ebene $E\\colon x + 2y + 2z = 1$.',
+      opts: ['$F(1|1|-1)$', '$F(0|-1|-3)$', '$F(3|5|3)$', '$F(1|1|1)$'],
+      steps: [
+        'Lotgerade: $\\vec x = \\begin{pmatrix} 2 \\\\ 3 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}$',
+        'Einsetzen: $(2 + t) + 2(3 + 2t) + 2(1 + 2t) = 10 + 9t = 1$, also $t = -1$',
+        '$F(1|1|-1)$; Probe: $1 + 2 - 2 = 1$. Passt.',
+        'Falle: mit $t = +1$ landet man auf der falschen Seite bei $(3|5|3)$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme den Lotfußpunkt $F$ von $P(4|0|5)$ auf die Ebene $E\\colon 2x - 2y + z = 4$.',
+      opts: ['$F(0|4|3)$', '$F(6|-2|6)$', '$F(2|2|4)$', '$F(2|2|5)$'],
+      steps: [
+        'Lotgerade: $\\vec x = \\begin{pmatrix} 4 \\\\ 0 \\\\ 5 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ -2 \\\\ 1 \\end{pmatrix}$',
+        'Einsetzen: $2(4 + 2t) - 2(-2t) + (5 + t) = 13 + 9t = 4$, also $t = -1$',
+        '$F = \\begin{pmatrix} 4 \\\\ 0 \\\\ 5 \\end{pmatrix} - \\begin{pmatrix} 2 \\\\ -2 \\\\ 1 \\end{pmatrix} = \\begin{pmatrix} 2 \\\\ 2 \\\\ 4 \\end{pmatrix}$; Probe: $4 - 4 + 4 = 4$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Aussage über die Lotgerade $l$ von einem Punkt $P$ auf eine Ebene $E$ ist richtig?',
+      opts: ['Ihr Richtungsvektor ist ein Normalenvektor von $E$, und der Lotfußpunkt ist der Schnittpunkt von $l$ und $E$.', 'Ihr Richtungsvektor ist der Ortsvektor von $P$.', 'Ihr Richtungsvektor ist ein Spannvektor von $E$.', 'Sie verläuft parallel zu $E$ durch den Punkt $P$.'],
+      steps: [
+        'Ein Lot steht senkrecht auf der Ebene - genau das leistet der Normalenvektor $\\vec n$.',
+        'Der Lotfußpunkt $F$ ist der Durchstoßpunkt der Lotgeraden mit $E$; $|\\overrightarrow{PF}|$ ist der Abstand von $P$ zu $E$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne den Abstand des Punktes $P(1|2|3)$ von der Ebene $E\\colon 2x + 3y + 6z = 5$.',
+      opts: ['$d = 21$', '$d = 3$', '$d \\approx 3{,}71$', '$d = \\dfrac{3}{7}$'],
+      steps: [
+        'Abstandsformel: $d = \\dfrac{|2 \\cdot 1 + 3 \\cdot 2 + 6 \\cdot 3 - 5|}{\\sqrt{2^2 + 3^2 + 6^2}} = \\dfrac{|26 - 5|}{7}$',
+        '$d = \\dfrac{21}{7} = 3$',
+        'Falle: das Teilen durch $|\\vec n| = 7$ vergessen ($21$) oder durch $|\\vec n|^2 = 49$ teilen ($\\tfrac{3}{7}$).'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne den Abstand des Punktes $P(4|-1|2)$ von der Ebene $E\\colon 3y + 4z = 10$.',
+      opts: ['$d = -1$', '$d = 5$', '$d = 1$', '$d = 0{,}2$'],
+      steps: [
+        'Normalenvektor $\\vec n = \\begin{pmatrix} 0 \\\\ 3 \\\\ 4 \\end{pmatrix}$, $|\\vec n| = \\sqrt{0 + 9 + 16} = 5$',
+        '$d = \\dfrac{|0 \\cdot 4 + 3 \\cdot (-1) + 4 \\cdot 2 - 10|}{5} = \\dfrac{|-5|}{5} = 1$',
+        'Ein Abstand ist nie negativ - der Betrag gehört dazu.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Abstand hat der Koordinatenursprung von der Ebene $E\\colon 2x - y + 2z = 12$?',
+      opts: ['$d = 6$', '$d = 4$', '$d = 12$', '$d = \\dfrac{4}{3}$'],
+      steps: [
+        '$|\\vec n| = \\sqrt{4 + 1 + 4} = 3$',
+        '$d = \\dfrac{|2 \\cdot 0 - 0 + 2 \\cdot 0 - 12|}{3} = \\dfrac{12}{3} = 4$',
+        'Falle: durch $|\\vec n|^2 = 9$ statt durch $|\\vec n| = 3$ teilen liefert $\\tfrac{4}{3}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Ebene $E\\colon \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + r \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$ und der Punkt $P(4|5|1)$ sind gegeben. Berechne den Abstand von $P$ zu $E$.',
+      opts: ['$d = \\sqrt{2} \\approx 1{,}41$', '$d = 2$', '$d = 3$', '$d = 2\\sqrt{2} \\approx 2{,}83$'],
+      steps: [
+        'Normalenvektor: $\\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix} \\times \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix} = \\begin{pmatrix} -1 \\\\ 0 \\\\ 1 \\end{pmatrix}$, kürzer $\\vec n = \\begin{pmatrix} 1 \\\\ 0 \\\\ -1 \\end{pmatrix}$',
+        'Koordinatengleichung mit Stützpunkt $(1|0|0)$: $x - z = 1$',
+        '$d = \\dfrac{|4 - 1 - 1|}{\\sqrt{1 + 1}} = \\dfrac{2}{\\sqrt{2}} = \\sqrt{2} \\approx 1{,}41$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Sensor hängt im Punkt $P(2|1|10)$ über einer geneigten Rampe, die in der Ebene $E\\colon 2x + 2y + z = 4$ liegt (Angaben in Metern). Wie weit ist der Sensor von der Rampe entfernt?',
+      opts: ['$12\\,\\mathrm{m}$', '$10\\,\\mathrm{m}$', '$\\approx 5{,}33\\,\\mathrm{m}$', '$4\\,\\mathrm{m}$'],
+      steps: [
+        'Gesucht ist der Abstand Punkt-Ebene: $d = \\dfrac{|2 \\cdot 2 + 2 \\cdot 1 + 10 - 4|}{\\sqrt{4 + 4 + 1}} = \\dfrac{12}{3}$',
+        '$d = 4\\,\\mathrm{m}$',
+        'Falle: die Höhe $z = 10$ ist nicht der Abstand zur geneigten Rampe; ohne die $-4$ käme $\\tfrac{16}{3} \\approx 5{,}33$ heraus.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne das Vektorprodukt $\\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix} \\times \\begin{pmatrix} 0 \\\\ 1 \\\\ 3 \\end{pmatrix}$.',
+      opts: ['$\\begin{pmatrix} 6 \\\\ 3 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} -6 \\\\ 3 \\\\ -1 \\end{pmatrix}$', '$\\begin{pmatrix} 0 \\\\ 2 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} 6 \\\\ -3 \\\\ 1 \\end{pmatrix}$'],
+      steps: [
+        '$\\vec a \\times \\vec b = \\begin{pmatrix} a_2 b_3 - a_3 b_2 \\\\ a_3 b_1 - a_1 b_3 \\\\ a_1 b_2 - a_2 b_1 \\end{pmatrix}$',
+        '$= \\begin{pmatrix} 2 \\cdot 3 - 0 \\cdot 1 \\\\ 0 \\cdot 0 - 1 \\cdot 3 \\\\ 1 \\cdot 1 - 2 \\cdot 0 \\end{pmatrix} = \\begin{pmatrix} 6 \\\\ -3 \\\\ 1 \\end{pmatrix}$',
+        'Probe: $\\begin{pmatrix} 6 \\\\ -3 \\\\ 1 \\end{pmatrix} \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix} = 6 - 6 + 0 = 0$. Der Vektor steht senkrecht auf beiden.',
+        'Falle: koordinatenweise multiplizieren ($\\begin{pmatrix} 0 \\\\ 2 \\\\ 0 \\end{pmatrix}$) ist kein Vektorprodukt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne den Flächeninhalt des Parallelogramms, das von $\\vec u = \\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}$ und $\\vec v = \\begin{pmatrix} 2 \\\\ 1 \\\\ -2 \\end{pmatrix}$ aufgespannt wird.',
+      opts: ['$A = 4{,}5$', '$A = 3$', '$A = 9$', '$A = 81$'],
+      steps: [
+        '$\\vec u \\times \\vec v = \\begin{pmatrix} 2 \\cdot (-2) - 2 \\cdot 1 \\\\ 2 \\cdot 2 - 1 \\cdot (-2) \\\\ 1 \\cdot 1 - 2 \\cdot 2 \\end{pmatrix} = \\begin{pmatrix} -6 \\\\ 6 \\\\ -3 \\end{pmatrix}$',
+        '$A = |\\vec u \\times \\vec v| = \\sqrt{36 + 36 + 9} = \\sqrt{81} = 9$',
+        'Falle: die Wurzel vergessen ($81$) oder das Parallelogramm halbieren ($4{,}5$ wäre das Dreieck).'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne den Flächeninhalt des Dreiecks $ABC$ mit $A(1|1|0)$, $B(2|3|2)$ und $C(3|-1|1)$.',
+      opts: ['$A = 3$', '$A = 9$', '$A = 4{,}5$', '$A = 18$'],
+      steps: [
+        '$\\overrightarrow{AB} = \\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}$, $\\overrightarrow{AC} = \\begin{pmatrix} 2 \\\\ -2 \\\\ 1 \\end{pmatrix}$',
+        '$\\overrightarrow{AB} \\times \\overrightarrow{AC} = \\begin{pmatrix} 2 \\cdot 1 - 2 \\cdot (-2) \\\\ 2 \\cdot 2 - 1 \\cdot 1 \\\\ 1 \\cdot (-2) - 2 \\cdot 2 \\end{pmatrix} = \\begin{pmatrix} 6 \\\\ 3 \\\\ -6 \\end{pmatrix}$',
+        '$A = \\tfrac{1}{2}\\,|\\begin{pmatrix} 6 \\\\ 3 \\\\ -6 \\end{pmatrix}| = \\tfrac{1}{2} \\cdot \\sqrt{36 + 9 + 36} = \\tfrac{1}{2} \\cdot 9 = 4{,}5$'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Parallelogramm $ABCD$ hat die Ecken $A(1|1|1)$, $B(3|1|2)$ und $D(1|4|1)$. Berechne seinen Flächeninhalt.',
+      opts: ['$A = 6$', '$A = 3\\sqrt{5} \\approx 6{,}71$', '$A \\approx 3{,}35$', '$A = 45$'],
+      steps: [
+        '$\\overrightarrow{AB} = \\begin{pmatrix} 2 \\\\ 0 \\\\ 1 \\end{pmatrix}$, $\\overrightarrow{AD} = \\begin{pmatrix} 0 \\\\ 3 \\\\ 0 \\end{pmatrix}$',
+        '$\\overrightarrow{AB} \\times \\overrightarrow{AD} = \\begin{pmatrix} 0 \\cdot 0 - 1 \\cdot 3 \\\\ 1 \\cdot 0 - 2 \\cdot 0 \\\\ 2 \\cdot 3 - 0 \\cdot 0 \\end{pmatrix} = \\begin{pmatrix} -3 \\\\ 0 \\\\ 6 \\end{pmatrix}$',
+        '$A = \\sqrt{9 + 0 + 36} = \\sqrt{45} = 3\\sqrt{5} \\approx 6{,}71$',
+        'Falle: $2 \\cdot 3 = 6$ ignoriert die $z$-Koordinate von $\\overrightarrow{AB}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Was gibt der Betrag des Vektorprodukts $|\\vec u \\times \\vec v|$ an?',
+      opts: ['den Flächeninhalt des von $\\vec u$ und $\\vec v$ aufgespannten Dreiecks', 'das Produkt der Beträge $|\\vec u| \\cdot |\\vec v|$', 'den Winkel zwischen $\\vec u$ und $\\vec v$', 'den Flächeninhalt des von $\\vec u$ und $\\vec v$ aufgespannten Parallelogramms'],
+      steps: [
+        '$|\\vec u \\times \\vec v| = |\\vec u| \\cdot |\\vec v| \\cdot \\sin\\varphi$ - das ist Grundseite mal Höhe, also die Parallelogrammfläche.',
+        'Das Dreieck ist die Hälfte davon: $A_\\triangle = \\tfrac{1}{2}\\,|\\vec u \\times \\vec v|$.',
+        '$|\\vec u| \\cdot |\\vec v|$ stimmt nur, wenn die Vektoren senkrecht stehen ($\\sin 90^\\circ = 1$).'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Zwei Vektoren haben die Beträge $|\\vec u| = 4$ und $|\\vec v| = 5$ und schließen den Winkel $30^\\circ$ ein. Welchen Flächeninhalt hat das von ihnen aufgespannte Parallelogramm?',
+      opts: ['$A = 10$', '$A = 5$', '$A = 20$', '$A = 10\\sqrt{3} \\approx 17{,}32$'],
+      steps: [
+        '$A = |\\vec u \\times \\vec v| = |\\vec u| \\cdot |\\vec v| \\cdot \\sin\\varphi = 4 \\cdot 5 \\cdot \\sin 30^\\circ$',
+        '$A = 20 \\cdot 0{,}5 = 10$',
+        'Falle: mit $\\cos 30^\\circ$ rechnet man das Skalarprodukt ($10\\sqrt{3}$), nicht die Fläche.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Pultdach hat die Form eines Parallelogramms, das von $\\vec u = \\begin{pmatrix} 8 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $\\vec v = \\begin{pmatrix} 0 \\\\ 4 \\\\ 3 \\end{pmatrix}$ aufgespannt wird (in Metern). Wie viel Quadratmeter Dachfläche sind zu decken?',
+      opts: ['$20\\,\\mathrm{m}^2$', '$56\\,\\mathrm{m}^2$', '$32\\,\\mathrm{m}^2$', '$40\\,\\mathrm{m}^2$'],
+      steps: [
+        '$\\vec u \\times \\vec v = \\begin{pmatrix} 0 \\cdot 3 - 0 \\cdot 4 \\\\ 0 \\cdot 0 - 8 \\cdot 3 \\\\ 8 \\cdot 4 - 0 \\cdot 0 \\end{pmatrix} = \\begin{pmatrix} 0 \\\\ -24 \\\\ 32 \\end{pmatrix}$',
+        '$A = \\sqrt{0 + 576 + 1024} = \\sqrt{1600} = 40\\,\\mathrm{m}^2$',
+        'Probe: $|\\vec v| = 5$ ist die Sparrenlänge, $8 \\cdot 5 = 40$. Der Grundriss ($8 \\cdot 4 = 32$) ist kleiner als das schräge Dach.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Giebel eines Hauses ist das Dreieck mit den Ecken $A(0|0|4)$, $B(6|0|4)$ und $C(3|0|7)$ (in Metern). Wie groß ist die Giebelfläche?',
+      opts: ['$18\\,\\mathrm{m}^2$', '$4{,}5\\,\\mathrm{m}^2$', '$9\\,\\mathrm{m}^2$', '$12\\,\\mathrm{m}^2$'],
+      steps: [
+        '$\\overrightarrow{AB} = \\begin{pmatrix} 6 \\\\ 0 \\\\ 0 \\end{pmatrix}$, $\\overrightarrow{AC} = \\begin{pmatrix} 3 \\\\ 0 \\\\ 3 \\end{pmatrix}$',
+        '$\\overrightarrow{AB} \\times \\overrightarrow{AC} = \\begin{pmatrix} 0 \\cdot 3 - 0 \\cdot 0 \\\\ 0 \\cdot 3 - 6 \\cdot 3 \\\\ 6 \\cdot 0 - 0 \\cdot 3 \\end{pmatrix} = \\begin{pmatrix} 0 \\\\ -18 \\\\ 0 \\end{pmatrix}$',
+        '$A = \\tfrac{1}{2} \\cdot 18 = 9\\,\\mathrm{m}^2$; Probe: Grundseite $6$, Höhe $3$, also $\\tfrac{1}{2} \\cdot 6 \\cdot 3 = 9$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Pyramide hat die Grundfläche $ABC$ mit $A(1|0|0)$, $B(3|1|-2)$, $C(1|2|-2)$ und die Spitze $S(2|3|1)$. Die Grundfläche liegt in der Ebene $E\\colon x + 2y + 2z = 1$. Berechne das Volumen der Pyramide.',
+      opts: ['$V = 6$', '$V = 9$', '$V = 1$', '$V = 3$'],
+      steps: [
+        'Grundfläche: $\\overrightarrow{AB} \\times \\overrightarrow{AC} = \\begin{pmatrix} 2 \\\\ 1 \\\\ -2 \\end{pmatrix} \\times \\begin{pmatrix} 0 \\\\ 2 \\\\ -2 \\end{pmatrix} = \\begin{pmatrix} 2 \\\\ 4 \\\\ 4 \\end{pmatrix}$, also $G = \\tfrac{1}{2} \\cdot \\sqrt{4 + 16 + 16} = 3$',
+        'Höhe = Abstand von $S$ zu $E$: $h = \\dfrac{|2 + 6 + 2 - 1|}{\\sqrt{1 + 4 + 4}} = \\dfrac{9}{3} = 3$',
+        '$V = \\tfrac{1}{3} \\cdot G \\cdot h = \\tfrac{1}{3} \\cdot 3 \\cdot 3 = 3$',
+        'Falle: $\\tfrac{1}{3}$ vergessen ($9$) oder die Parallelogrammfläche statt des Dreiecks nehmen ($6$).'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

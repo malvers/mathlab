@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Skalarprodukt — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w03-skalarprodukt',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Skalarprodukt',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 3 (LB 1) · 20 Aufgaben: Skalarprodukt, Winkel zwischen Vektoren, Orthogonalität · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 3 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Skalarprodukt berechnen (1-5), Winkel (6-10), Orthogonalität (11-15), Kräfte und Körper (16-20). Alles ohne CAS. */
+  questions: [
+    {
+      q: 'Berechne das Skalarprodukt $\\vec a \\cdot \\vec b$ für $\\vec a = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix}$ und $\\vec b = \\begin{pmatrix} 4 \\\\ -1 \\\\ 2 \\end{pmatrix}$.',
+      opts: ['$2$', '$8$', '$12$', '$\\begin{pmatrix} 4 \\\\ -2 \\\\ 6 \\end{pmatrix}$'],
+      steps: [
+        'Skalarprodukt in Koordinaten: $\\vec a \\cdot \\vec b = a_1 b_1 + a_2 b_2 + a_3 b_3$',
+        '$1 \\cdot 4 + 2 \\cdot (-1) + 3 \\cdot 2 = 4 - 2 + 6 = 8$',
+        'Falle: das Ergebnis ist eine Zahl, kein Vektor - und $2 \\cdot (-1)$ ist $-2$, nicht $+2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $\\begin{pmatrix} 2 \\\\ 0 \\\\ -3 \\end{pmatrix} \\cdot \\begin{pmatrix} 5 \\\\ 4 \\\\ 1 \\end{pmatrix}$.',
+      opts: ['$-7$', '$13$', '$7$', '$17$'],
+      steps: [
+        '$2 \\cdot 5 + 0 \\cdot 4 + (-3) \\cdot 1 = 10 + 0 - 3$',
+        '$= 7$',
+        'Der Summand mit der $0$ fällt weg; das Minus von $-3$ bleibt erhalten.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $\\begin{pmatrix} 0{,}5 \\\\ 2 \\\\ 4 \\end{pmatrix} \\cdot \\begin{pmatrix} 6 \\\\ -1 \\\\ 0{,}5 \\end{pmatrix}$.',
+      opts: ['$\\begin{pmatrix} 3 \\\\ -2 \\\\ 2 \\end{pmatrix}$', '$1$', '$3$', '$7$'],
+      steps: [
+        '$0{,}5 \\cdot 6 + 2 \\cdot (-1) + 4 \\cdot 0{,}5 = 3 - 2 + 2$',
+        '$= 3$',
+        'Erst alle drei Produkte bilden, dann erst addieren - wer nach $3 - 2$ aufhört, bekommt $1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $\\vec a \\cdot \\vec a$ für $\\vec a = \\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$.',
+      opts: ['$0$', '$3$', '$9$', '$\\begin{pmatrix} 4 \\\\ 1 \\\\ 4 \\end{pmatrix}$'],
+      steps: [
+        '$\\vec a \\cdot \\vec a = 2^2 + (-1)^2 + 2^2 = 4 + 1 + 4 = 9$',
+        'Allgemein gilt $\\vec a \\cdot \\vec a = |\\vec a|^2$ - hier ist $|\\vec a| = 3$ und $3^2 = 9$.',
+        '$3$ wäre der Betrag, nicht das Skalarprodukt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Zwei Vektoren haben die Beträge $|\\vec a| = 3$ und $|\\vec b| = 4$ und schließen den Winkel $\\varphi = 60^\\circ$ ein. Berechne $\\vec a \\cdot \\vec b$.',
+      opts: ['$\\approx 10{,}39$', '$6$', '$0$', '$12$'],
+      steps: [
+        'Skalarprodukt über den Winkel: $\\vec a \\cdot \\vec b = |\\vec a| \\cdot |\\vec b| \\cdot \\cos\\varphi$',
+        '$= 3 \\cdot 4 \\cdot \\cos 60^\\circ = 12 \\cdot 0{,}5 = 6$',
+        'Falle: $12$ vergisst den Kosinus, $10{,}39$ nimmt den Sinus.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welchen Winkel schließen $\\vec a = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ und $\\vec b = \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ ein?',
+      opts: ['$60^\\circ$', '$30^\\circ$', '$45^\\circ$', '$90^\\circ$'],
+      steps: [
+        '$\\cos\\varphi = \\dfrac{\\vec a \\cdot \\vec b}{|\\vec a| \\cdot |\\vec b|} = \\dfrac{1}{1 \\cdot \\sqrt{2}} \\approx 0{,}707$',
+        '$\\varphi = \\cos^{-1}(0{,}707) = 45^\\circ$',
+        'Anschaulich: $\\vec b$ ist die Diagonale eines Quadrats in der $x$-$y$-Ebene, $\\vec a$ eine Seite.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne den Winkel zwischen $\\vec a = \\begin{pmatrix} 2 \\\\ 2 \\\\ 1 \\end{pmatrix}$ und $\\vec b = \\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}$.',
+      opts: ['$\\varphi \\approx 152{,}7^\\circ$', '$\\varphi \\approx 84{,}3^\\circ$', '$\\varphi \\approx 62{,}7^\\circ$', '$\\varphi \\approx 27{,}3^\\circ$'],
+      steps: [
+        '$\\vec a \\cdot \\vec b = 2 + 4 + 2 = 8$, $|\\vec a| = \\sqrt{4 + 4 + 1} = 3$, $|\\vec b| = \\sqrt{1 + 4 + 4} = 3$',
+        '$\\cos\\varphi = \\dfrac{8}{3 \\cdot 3} = \\dfrac{8}{9} \\approx 0{,}889$, also $\\varphi = \\cos^{-1}\\!\\left(\\dfrac{8}{9}\\right) \\approx 27{,}3^\\circ$',
+        'Fallen: $\\sin^{-1}$ statt $\\cos^{-1}$ ($62{,}7^\\circ$), Wurzel vergessen ($\\cos\\varphi = \\frac{8}{81}$, also $84{,}3^\\circ$).'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchen Winkel schließen $\\vec a = \\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$ und $\\vec b = \\begin{pmatrix} -4 \\\\ 2 \\\\ -4 \\end{pmatrix}$ ein?',
+      opts: ['$180^\\circ$', '$60^\\circ$', '$0^\\circ$', '$90^\\circ$'],
+      steps: [
+        '$\\vec a \\cdot \\vec b = -8 - 2 - 8 = -18$, $|\\vec a| = 3$, $|\\vec b| = 6$',
+        '$\\cos\\varphi = \\dfrac{-18}{3 \\cdot 6} = -1$, also $\\varphi = 180^\\circ$',
+        'Kein Wunder: $\\vec b = -2\\,\\vec a$, die Vektoren sind antiparallel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Im Dreieck $ABC$ mit $A(0|0|0)$, $B(2|2|1)$ und $C(0|3|4)$: Wie groß ist der Innenwinkel $\\alpha$ bei $A$?',
+      opts: ['$\\alpha \\approx 48{,}2^\\circ$', '$\\alpha \\approx 41{,}8^\\circ$', '$\\alpha \\approx 131{,}8^\\circ$', '$\\alpha \\approx 87{,}5^\\circ$'],
+      steps: [
+        'Beide Vektoren müssen in $A$ beginnen: $\\overrightarrow{AB} = \\begin{pmatrix} 2 \\\\ 2 \\\\ 1 \\end{pmatrix}$, $\\overrightarrow{AC} = \\begin{pmatrix} 0 \\\\ 3 \\\\ 4 \\end{pmatrix}$',
+        '$\\overrightarrow{AB} \\cdot \\overrightarrow{AC} = 0 + 6 + 4 = 10$, $|\\overrightarrow{AB}| = 3$, $|\\overrightarrow{AC}| = 5$',
+        '$\\cos\\alpha = \\dfrac{10}{15} = \\dfrac{2}{3}$, also $\\alpha \\approx 48{,}2^\\circ$'
+      ],
+      solution: 0
+    },
+    {
+      q: 'In einem Würfel: Welchen Winkel bildet die Raumdiagonale $\\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$ mit der Kante $\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$?',
+      opts: ['$45^\\circ$', '$\\approx 35{,}3^\\circ$', '$60^\\circ$', '$\\approx 54{,}7^\\circ$'],
+      steps: [
+        '$\\cos\\varphi = \\dfrac{1 \\cdot 1 + 1 \\cdot 0 + 1 \\cdot 0}{\\sqrt{3} \\cdot 1} = \\dfrac{1}{\\sqrt{3}} \\approx 0{,}577$',
+        '$\\varphi = \\cos^{-1}(0{,}577) \\approx 54{,}7^\\circ$',
+        '$45^\\circ$ gilt nur für die Flächendiagonale; $35{,}3^\\circ$ ist der Winkel zwischen Raum- und Flächendiagonale.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welcher Vektor steht senkrecht auf $\\vec a = \\begin{pmatrix} 2 \\\\ -1 \\\\ 3 \\end{pmatrix}$?',
+      opts: ['$\\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} -2 \\\\ 1 \\\\ -3 \\end{pmatrix}$', '$\\begin{pmatrix} 3 \\\\ 1 \\\\ -2 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix}$'],
+      steps: [
+        'Orthogonalitätstest: $\\vec a \\cdot \\vec b = 0$',
+        '$\\begin{pmatrix} 2 \\\\ -1 \\\\ 3 \\end{pmatrix} \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix} = 2 - 2 + 0 = 0$ - passt.',
+        'Die anderen: $4$, $-1$ und $-14$ - alle ungleich $0$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welchen Wert von $k$ stehen $\\vec a = \\begin{pmatrix} k \\\\ 2 \\\\ -1 \\end{pmatrix}$ und $\\vec b = \\begin{pmatrix} 3 \\\\ 1 \\\\ 4 \\end{pmatrix}$ senkrecht aufeinander?',
+      opts: ['$k = -\\dfrac{2}{3}$', '$k = \\dfrac{2}{3}$', '$k = 2$', '$k = -2$'],
+      steps: [
+        'Ansatz: $\\vec a \\cdot \\vec b = 3k + 2 \\cdot 1 + (-1) \\cdot 4 = 3k - 2 = 0$',
+        '$3k = 2$, also $k = \\dfrac{2}{3}$',
+        'Probe: $3 \\cdot \\frac{2}{3} + 2 - 4 = 2 + 2 - 4 = 0$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für zwei Vektoren $\\vec a \\neq \\vec 0$ und $\\vec b \\neq \\vec 0$ gilt $\\vec a \\cdot \\vec b = 0$. Was folgt daraus?',
+      opts: ['$\\vec a$ und $\\vec b$ haben denselben Betrag.', '$\\vec a$ und $\\vec b$ sind parallel.', '$\\vec a$ und $\\vec b$ sind orthogonal, sie schließen einen Winkel von $90^\\circ$ ein.', 'Einer der beiden Vektoren muss doch der Nullvektor sein.'],
+      steps: [
+        '$\\vec a \\cdot \\vec b = |\\vec a| \\cdot |\\vec b| \\cdot \\cos\\varphi$ - die Beträge sind ungleich $0$, also muss $\\cos\\varphi = 0$ sein.',
+        '$\\cos\\varphi = 0$ bedeutet $\\varphi = 90^\\circ$: die Vektoren stehen senkrecht aufeinander.',
+        'Deshalb ist $\\vec a \\cdot \\vec b = 0$ der Orthogonalitätstest.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ohne den Winkel auszurechnen: Welche Art von Winkel schließen $\\vec a = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix}$ und $\\vec b = \\begin{pmatrix} -2 \\\\ 1 \\\\ -1 \\end{pmatrix}$ ein?',
+      opts: ['einen stumpfen Winkel (zwischen $90^\\circ$ und $180^\\circ$)', 'einen spitzen Winkel (zwischen $0^\\circ$ und $90^\\circ$)', 'genau $180^\\circ$', 'genau $90^\\circ$'],
+      steps: [
+        '$\\vec a \\cdot \\vec b = -2 + 2 - 3 = -3 < 0$',
+        'Das Vorzeichen des Skalarprodukts ist das Vorzeichen von $\\cos\\varphi$: negativ heißt $\\varphi > 90^\\circ$.',
+        '$180^\\circ$ wäre es nur, wenn $\\vec b$ ein negatives Vielfaches von $\\vec a$ wäre - ist es nicht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Gegeben ist das Dreieck $ABC$ mit $A(2|1|0)$, $B(3|4|1)$ und $C(1|3|1)$. In welchem Eckpunkt hat es einen rechten Winkel?',
+      opts: ['bei $C$', 'bei $B$', 'bei $A$', 'Es hat keinen rechten Winkel.'],
+      steps: [
+        '$\\overrightarrow{CA} = \\begin{pmatrix} 1 \\\\ -2 \\\\ -1 \\end{pmatrix}$, $\\overrightarrow{CB} = \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix}$, Skalarprodukt: $2 - 2 + 0 = 0$',
+        'Also ist der Winkel bei $C$ ein rechter.',
+        'Zur Kontrolle: bei $A$ ergibt $\\overrightarrow{AB} \\cdot \\overrightarrow{AC} = 6$, bei $B$ ergibt $\\overrightarrow{BA} \\cdot \\overrightarrow{BC} = 5$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Kraft $\\vec F = \\begin{pmatrix} 3 \\\\ 4 \\\\ 0 \\end{pmatrix}\\,\\mathrm{N}$ verschiebt einen Körper um $\\vec s = \\begin{pmatrix} 2 \\\\ 0 \\\\ 0 \\end{pmatrix}\\,\\mathrm{m}$. Welche Arbeit $W = \\vec F \\cdot \\vec s$ wird verrichtet?',
+      opts: ['$W = 6\\,\\mathrm{J}$', '$W = 10\\,\\mathrm{J}$', '$W = 14\\,\\mathrm{J}$', '$W = 0\\,\\mathrm{J}$'],
+      steps: [
+        '$W = \\vec F \\cdot \\vec s = 3 \\cdot 2 + 4 \\cdot 0 + 0 \\cdot 0 = 6\\,\\mathrm{J}$',
+        'Nur der Kraftanteil in Wegrichtung zählt ($3\\,\\mathrm{N}$); der Anteil $4\\,\\mathrm{N}$ quer zum Weg leistet keine Arbeit.',
+        '$|\\vec F| \\cdot |\\vec s| = 5 \\cdot 2 = 10$ wäre nur richtig, wenn Kraft und Weg dieselbe Richtung hätten.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Das Parallelogramm $ABCD$ wird von $\\overrightarrow{AB} = \\begin{pmatrix} 2 \\\\ 1 \\\\ 2 \\end{pmatrix}$ und $\\overrightarrow{AD} = \\begin{pmatrix} 1 \\\\ -2 \\\\ 0 \\end{pmatrix}$ aufgespannt. Was für ein Viereck ist es?',
+      opts: ['eine Raute, aber kein Rechteck', 'ein Rechteck, aber kein Quadrat', 'ein Parallelogramm ohne rechten Winkel', 'ein Quadrat'],
+      steps: [
+        '$\\overrightarrow{AB} \\cdot \\overrightarrow{AD} = 2 - 2 + 0 = 0$, also ist der Winkel bei $A$ ein rechter: Rechteck.',
+        '$|\\overrightarrow{AB}| = \\sqrt{4 + 1 + 4} = 3$, $|\\overrightarrow{AD}| = \\sqrt{1 + 4 + 0} = \\sqrt{5}$ - verschieden lang, also kein Quadrat.',
+        'Rechteck: rechte Winkel. Raute: gleich lange Seiten. Quadrat: beides.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Quader hat die Ecken $A(0|0|0)$, $B(4|0|0)$, $D(0|3|0)$ und $E(0|0|2)$. Welchen Winkel bildet die Raumdiagonale $\\overline{AG}$ mit der Kante $\\overline{AB}$?',
+      fig: '<svg viewBox="0 0 360 340" width="360" height="340" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Quader mit Raumdiagonale AG"><defs><marker id="f1-ar-799E31" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#799E31"/></marker></defs><path d="M 89.6 304.8 L 197.6 304.8 L 197.6 232.8 L 89.6 232.8 Z" fill="#F5C242" opacity="0.22"/><path d="M 140 168 L 89.6 232.8 L 197.6 232.8 L 248 168 Z" fill="#F5C242" opacity="0.12"/><line x1="89.6" y1="304.8" x2="197.6" y2="304.8" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="197.6" y1="304.8" x2="248" y2="240" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="89.6" y1="304.8" x2="89.6" y2="232.8" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="197.6" y1="304.8" x2="197.6" y2="232.8" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="248" y1="240" x2="248" y2="168" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="140" y1="168" x2="89.6" y2="232.8" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="89.6" y1="232.8" x2="197.6" y2="232.8" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="197.6" y1="232.8" x2="248" y2="168" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="248" y1="168" x2="140" y2="168" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="140" y1="240" x2="89.6" y2="304.8" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="4 3"/><line x1="140" y1="240" x2="248" y2="240" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="4 3"/><line x1="140" y1="240" x2="140" y2="168" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="4 3"/><line x1="140" y1="240" x2="197.6" y2="232.8" stroke="#799E31" stroke-width="1.6" marker-end="url(#f1-ar-799E31)"/><line x1="140" y1="240" x2="89.6" y2="304.8" stroke="#799E31" stroke-width="1.6" marker-end="url(#f1-ar-799E31)"/><text x="164.8" y="226.4" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="middle" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">AG</text><text x="98.8" y="280.4" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="middle" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">AB</text><circle cx="140" cy="240" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="132" y="245" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">A</text><circle cx="89.6" cy="304.8" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="82.6" y="319.8" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">B</text><circle cx="197.6" cy="304.8" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="204.6" y="319.8" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">C</text><circle cx="248" cy="240" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="256" y="245" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">D</text><circle cx="140" cy="168" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="133" y="161" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">E</text><circle cx="89.6" cy="232.8" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="81.6" y="237.8" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">F</text><circle cx="197.6" cy="232.8" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="205.6" y="237.8" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">G</text><circle cx="248" cy="168" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="255" y="161" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">H</text></svg>',
+      figcap: 'Quader mit Raumdiagonale $\\overline{AG}$ und Kante $\\overline{AB}$',
+      opts: ['$\\approx 48{,}0^\\circ$', '$\\approx 36{,}9^\\circ$', '$\\approx 53{,}1^\\circ$', '$\\approx 42{,}0^\\circ$'],
+      steps: [
+        '$G(4|3|2)$, also $\\overrightarrow{AG} = \\begin{pmatrix} 4 \\\\ 3 \\\\ 2 \\end{pmatrix}$ und $\\overrightarrow{AB} = \\begin{pmatrix} 4 \\\\ 0 \\\\ 0 \\end{pmatrix}$',
+        '$\\cos\\varphi = \\dfrac{16 + 0 + 0}{\\sqrt{29} \\cdot 4} = \\dfrac{4}{\\sqrt{29}} \\approx 0{,}743$, also $\\varphi \\approx 42{,}0^\\circ$',
+        '$36{,}9^\\circ$ wäre der Winkel der Flächendiagonale $\\overline{AC}$ mit $\\overline{AB}$ - in der Grundfläche, nicht im Raum.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine quadratische Pyramide hat die Grundfläche $A(0|0|0)$, $B(4|0|0)$, $C(4|4|0)$, $D(0|4|0)$ und die Spitze $S(2|2|4)$. Unter welchem Winkel trifft die Kante $\\overline{AS}$ auf die Grundkante $\\overline{AB}$?',
+      fig: '<svg viewBox="0 0 360 340" width="360" height="340" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Quadratische Pyramide ABCDS"><defs><marker id="f2-ar-799E31" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#799E31"/></marker></defs><path d="M 89.6 304.8 L 233.6 304.8 L 186.8 128.4 Z" fill="#F5C242" opacity="0.22"/><path d="M 233.6 304.8 L 284 240 L 186.8 128.4 Z" fill="#F5C242" opacity="0.12"/><line x1="89.6" y1="304.8" x2="233.6" y2="304.8" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="233.6" y1="304.8" x2="284" y2="240" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="89.6" y1="304.8" x2="186.8" y2="128.4" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="233.6" y1="304.8" x2="186.8" y2="128.4" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="284" y1="240" x2="186.8" y2="128.4" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="140" y1="240" x2="89.6" y2="304.8" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="4 3"/><line x1="140" y1="240" x2="284" y2="240" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="4 3"/><line x1="140" y1="240" x2="186.8" y2="128.4" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="4 3"/><line x1="140" y1="240" x2="186.8" y2="128.4" stroke="#799E31" stroke-width="1.6" marker-end="url(#f2-ar-799E31)"/><line x1="140" y1="240" x2="89.6" y2="304.8" stroke="#799E31" stroke-width="1.6" marker-end="url(#f2-ar-799E31)"/><text x="149.4" y="184.2" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="middle" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">AS</text><text x="98.8" y="280.4" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="middle" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">AB</text><circle cx="140" cy="240" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="132" y="245" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">A</text><circle cx="89.6" cy="304.8" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="82.6" y="319.8" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">B</text><circle cx="233.6" cy="304.8" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="240.6" y="319.8" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">C</text><circle cx="284" cy="240" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="292" y="245" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">D</text><circle cx="186.8" cy="128.4" r="3.0" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="186.8" y="119.4" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="middle" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">S</text></svg>',
+      figcap: 'Quadratische Pyramide mit Kante $\\overline{AS}$ und Grundkante $\\overline{AB}$',
+      opts: ['$45^\\circ$', '$\\approx 65{,}9^\\circ$', '$\\approx 54{,}7^\\circ$', '$\\approx 24{,}1^\\circ$'],
+      steps: [
+        '$\\overrightarrow{AS} = \\begin{pmatrix} 2 \\\\ 2 \\\\ 4 \\end{pmatrix}$, $\\overrightarrow{AB} = \\begin{pmatrix} 4 \\\\ 0 \\\\ 0 \\end{pmatrix}$',
+        '$\\overrightarrow{AS} \\cdot \\overrightarrow{AB} = 8$, $|\\overrightarrow{AS}| = \\sqrt{4 + 4 + 16} = \\sqrt{24}$, $|\\overrightarrow{AB}| = 4$',
+        '$\\cos\\varphi = \\dfrac{8}{\\sqrt{24} \\cdot 4} = \\dfrac{2}{\\sqrt{24}} \\approx 0{,}408$, also $\\varphi \\approx 65{,}9^\\circ$'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Von zwei Vektoren ist bekannt: $|\\vec a| = 3$, $|\\vec b| = 4$ und $\\vec a \\cdot \\vec b = 6$. Berechne $|\\vec a + \\vec b|$.',
+      opts: ['$\\sqrt{31} \\approx 5{,}57$', '$7$', '$5$', '$\\sqrt{37} \\approx 6{,}08$'],
+      steps: [
+        '$|\\vec a + \\vec b|^2 = (\\vec a + \\vec b) \\cdot (\\vec a + \\vec b) = \\vec a \\cdot \\vec a + 2\\,\\vec a \\cdot \\vec b + \\vec b \\cdot \\vec b$',
+        '$= 9 + 2 \\cdot 6 + 16 = 37$, also $|\\vec a + \\vec b| = \\sqrt{37} \\approx 6{,}08$',
+        '$7$ wäre nur richtig, wenn die Vektoren gleichgerichtet wären; $5$ nur, wenn sie senkrecht stünden.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

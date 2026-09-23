@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: e-Funktionen II — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w29-e-funktion2',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · e-Funktionen II',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 29 (LB 4) · 20 Aufgaben: Ableitung mit Ketten- und Produktregel, Produkte mit ganzrationalen Funktionen · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 29 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Kettenregel (1-6), Produktregel (7-12), Tangenten und zweite Ableitung (13-16), Änderungsraten in Anwendungen (17-20). GTR ohne CAS. */
+  questions: [
+    {
+      q: 'Leite $f(x) = e^{3x}$ ab.',
+      opts: ['$f^{\\prime}(x) = \\dfrac{1}{3} \\cdot e^{3x}$', '$f^{\\prime}(x) = 3x \\cdot e^{3x-1}$', '$f^{\\prime}(x) = 3 \\cdot e^{3x}$', '$f^{\\prime}(x) = e^{3x}$'],
+      steps: [
+        'Kettenregel: äußere Ableitung $e^{3x}$ mal innere Ableitung $(3x)^{\\prime} = 3$.',
+        '$f^{\\prime}(x) = 3 \\cdot e^{3x}$',
+        'Falle: die Potenzregel gilt für $x^{n}$, nicht für $e^{x}$ - der Exponent wandert nicht nach vorn.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Leite $f(x) = e^{-0{,}5x+2}$ ab.',
+      opts: ['$f^{\\prime}(x) = 0{,}5 \\cdot e^{-0{,}5x+2}$', '$f^{\\prime}(x) = e^{-0{,}5x+2}$', '$f^{\\prime}(x) = (-0{,}5x+2) \\cdot e^{-0{,}5x+2}$', '$f^{\\prime}(x) = -0{,}5 \\cdot e^{-0{,}5x+2}$'],
+      steps: [
+        'Innere Funktion $-0{,}5x + 2$, innere Ableitung $-0{,}5$ (die $+2$ fällt weg).',
+        '$f^{\\prime}(x) = -0{,}5 \\cdot e^{-0{,}5x+2}$',
+        'Nur die Ableitung des Exponenten kommt als Faktor davor, nicht der Exponent selbst.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Leite $f(x) = 4 \\cdot e^{2x} - 3x$ ab.',
+      opts: ['$f^{\\prime}(x) = 8 \\cdot e^{2x} - 3$', '$f^{\\prime}(x) = 8 \\cdot e^{x} - 3$', '$f^{\\prime}(x) = 8 \\cdot e^{2x} - 3x$', '$f^{\\prime}(x) = 4 \\cdot e^{2x} - 3$'],
+      steps: [
+        'Faktor- und Summenregel: $(4 \\cdot e^{2x})^{\\prime} = 4 \\cdot 2 \\cdot e^{2x} = 8 \\cdot e^{2x}$ und $(-3x)^{\\prime} = -3$.',
+        '$f^{\\prime}(x) = 8 \\cdot e^{2x} - 3$',
+        'Der Exponent $2x$ bleibt beim Ableiten unverändert stehen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Leite $f(x) = e^{x} + e^{-x}$ ab.',
+      opts: ['$f^{\\prime}(x) = e^{x} - e^{-x}$', '$f^{\\prime}(x) = -e^{x} + e^{-x}$', '$f^{\\prime}(x) = e^{x}$', '$f^{\\prime}(x) = e^{x} + e^{-x}$'],
+      steps: [
+        '$(e^{x})^{\\prime} = e^{x}$ und $(e^{-x})^{\\prime} = -1 \\cdot e^{-x}$ (innere Ableitung $-1$).',
+        '$f^{\\prime}(x) = e^{x} - e^{-x}$',
+        'Falle: $e^{-x}$ ist keine Konstante, sie fällt beim Ableiten nicht weg.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Leite $f(x) = 5 - 2 \\cdot e^{1-x}$ ab.',
+      opts: ['$f^{\\prime}(x) = 5 + 2 \\cdot e^{1-x}$', '$f^{\\prime}(x) = -2 \\cdot e^{1-x}$', '$f^{\\prime}(x) = 2 \\cdot e^{1-x}$', '$f^{\\prime}(x) = -2 \\cdot e^{-x}$'],
+      steps: [
+        'Die Konstante $5$ fällt weg; innere Ableitung von $1 - x$ ist $-1$.',
+        '$f^{\\prime}(x) = -2 \\cdot (-1) \\cdot e^{1-x} = 2 \\cdot e^{1-x}$',
+        'Minus mal Minus gibt Plus - $f$ ist also streng monoton wachsend.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Gegeben ist $f(x) = e^{2x-1}$. Berechne $f^{\\prime}(0{,}5)$.',
+      opts: ['$f^{\\prime}(0{,}5) = e \\approx 2{,}72$', '$f^{\\prime}(0{,}5) = 1$', '$f^{\\prime}(0{,}5) = 2$', '$f^{\\prime}(0{,}5) = 2e \\approx 5{,}44$'],
+      steps: [
+        '$f^{\\prime}(x) = 2 \\cdot e^{2x-1}$',
+        '$f^{\\prime}(0{,}5) = 2 \\cdot e^{2 \\cdot 0{,}5 - 1} = 2 \\cdot e^{0} = 2 \\cdot 1 = 2$',
+        'Falle: $e^{0} = 1$, nicht $e$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Leite $f(x) = x \\cdot e^{x}$ ab.',
+      opts: ['$f^{\\prime}(x) = x \\cdot e^{x}$', '$f^{\\prime}(x) = (x-1) \\cdot e^{x}$', '$f^{\\prime}(x) = e^{x}$', '$f^{\\prime}(x) = (x+1) \\cdot e^{x}$'],
+      steps: [
+        'Produktregel: $(u \\cdot v)^{\\prime} = u^{\\prime} \\cdot v + u \\cdot v^{\\prime}$ mit $u = x$, $v = e^{x}$.',
+        '$f^{\\prime}(x) = 1 \\cdot e^{x} + x \\cdot e^{x} = (x+1) \\cdot e^{x}$',
+        'Falle: nur $u^{\\prime} \\cdot v = e^{x}$ - das ist die halbe Produktregel.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Leite $f(x) = x \\cdot e^{-x}$ ab.',
+      opts: ['$f^{\\prime}(x) = -e^{-x}$', '$f^{\\prime}(x) = (x-1) \\cdot e^{-x}$', '$f^{\\prime}(x) = (1+x) \\cdot e^{-x}$', '$f^{\\prime}(x) = (1-x) \\cdot e^{-x}$'],
+      steps: [
+        '$u = x$, $u^{\\prime} = 1$, $v = e^{-x}$, $v^{\\prime} = -e^{-x}$ (Kettenregel).',
+        '$f^{\\prime}(x) = 1 \\cdot e^{-x} + x \\cdot (-e^{-x}) = e^{-x} - x \\cdot e^{-x} = (1-x) \\cdot e^{-x}$',
+        'Ausklammern von $e^{-x}$ macht die Nullstelle von $f^{\\prime}$ sichtbar: $x = 1$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Leite $f(x) = (x^2 - 1) \\cdot e^{x}$ ab.',
+      opts: ['$f^{\\prime}(x) = (x^2 + 2x - 1) \\cdot e^{x}$', '$f^{\\prime}(x) = 2x + (x^2 - 1) \\cdot e^{x}$', '$f^{\\prime}(x) = 2x \\cdot e^{x}$', '$f^{\\prime}(x) = (x^2 - 2x - 1) \\cdot e^{x}$'],
+      steps: [
+        '$u = x^2 - 1$, $u^{\\prime} = 2x$, $v = e^{x}$, $v^{\\prime} = e^{x}$.',
+        '$f^{\\prime}(x) = 2x \\cdot e^{x} + (x^2 - 1) \\cdot e^{x} = (x^2 + 2x - 1) \\cdot e^{x}$',
+        'Beide Summanden enthalten $e^{x}$ - ausklammern. Falle: $u^{\\prime} + u \\cdot v^{\\prime}$ (Summe statt Produkt).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Leite $f(x) = (2x + 1) \\cdot e^{3x}$ ab.',
+      opts: ['$f^{\\prime}(x) = (2x + 3) \\cdot e^{3x}$', '$f^{\\prime}(x) = (6x + 5) \\cdot e^{3x}$', '$f^{\\prime}(x) = (6x + 3) \\cdot e^{3x}$', '$f^{\\prime}(x) = 6 \\cdot e^{3x}$'],
+      steps: [
+        '$u^{\\prime} = 2$, $v^{\\prime} = 3 \\cdot e^{3x}$ (Kettenregel).',
+        '$f^{\\prime}(x) = 2 \\cdot e^{3x} + (2x+1) \\cdot 3 \\cdot e^{3x} = (2 + 6x + 3) \\cdot e^{3x} = (6x + 5) \\cdot e^{3x}$',
+        'Falle: die innere Ableitung $3$ vergessen ergibt $(2x + 3) \\cdot e^{3x}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Leite $f(x) = x^2 \\cdot e^{-2x}$ ab.',
+      opts: ['$f^{\\prime}(x) = (2x - 2x^2) \\cdot e^{-2x}$', '$f^{\\prime}(x) = (2x + 2x^2) \\cdot e^{-2x}$', '$f^{\\prime}(x) = 2x \\cdot e^{-2x}$', '$f^{\\prime}(x) = -4x \\cdot e^{-2x}$'],
+      steps: [
+        '$u = x^2$, $u^{\\prime} = 2x$, $v = e^{-2x}$, $v^{\\prime} = -2 \\cdot e^{-2x}$.',
+        '$f^{\\prime}(x) = 2x \\cdot e^{-2x} + x^2 \\cdot (-2) \\cdot e^{-2x} = (2x - 2x^2) \\cdot e^{-2x}$',
+        'Falle: $u^{\\prime} \\cdot v^{\\prime} = 2x \\cdot (-2e^{-2x}) = -4x \\cdot e^{-2x}$ ist keine Produktregel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Gegeben ist $f(x) = x \\cdot e^{-x}$. Berechne $f^{\\prime}(1)$.',
+      opts: ['$f^{\\prime}(1) = 2e^{-1} \\approx 0{,}736$', '$f^{\\prime}(1) = -e^{-1} \\approx -0{,}368$', '$f^{\\prime}(1) = e^{-1} \\approx 0{,}368$', '$f^{\\prime}(1) = 0$'],
+      steps: [
+        '$f^{\\prime}(x) = (1 - x) \\cdot e^{-x}$',
+        '$f^{\\prime}(1) = (1 - 1) \\cdot e^{-1} = 0$ - waagerechte Tangente.',
+        'Die Distraktoren entstehen, wenn ein Teil der Produktregel fehlt oder das Vorzeichen der inneren Ableitung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Gleichung der Tangente an den Graphen von $f(x) = e^{2x}$ im Punkt $P(0 \\mid f(0))$.',
+      opts: ['$y = 2x$', '$y = 2x + 1$', '$y = 2x + e$', '$y = x + 1$'],
+      steps: [
+        '$f(0) = e^{0} = 1$, Berührpunkt $P(0 \\mid 1)$.',
+        '$f^{\\prime}(x) = 2 \\cdot e^{2x}$, Anstieg $m = f^{\\prime}(0) = 2$.',
+        'Tangente: $y = m \\cdot x + n$ mit $n = 1$ (Schnitt mit der $y$-Achse bei $x = 0$): $y = 2x + 1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Gleichung der Tangente an den Graphen von $f(x) = x \\cdot e^{x}$ an der Stelle $x = 1$.',
+      opts: ['$y = 2e \\cdot x$', '$y = e \\cdot x$', '$y = 2e \\cdot x - e$', '$y = 2e \\cdot x + e$'],
+      steps: [
+        '$f(1) = e$ und $f^{\\prime}(x) = (x + 1) \\cdot e^{x}$, also $m = f^{\\prime}(1) = 2e$.',
+        '$n = f(1) - m \\cdot 1 = e - 2e = -e$, Tangente: $y = 2e \\cdot x - e \\approx 5{,}44x - 2{,}72$.',
+        'Falle: ohne Produktregel wäre $m = e$ und die Tangente $y = e \\cdot x$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme $f^{\\prime\\prime}(x)$ für $f(x) = e^{-2x}$.',
+      opts: ['$f^{\\prime\\prime}(x) = 4 \\cdot e^{-4x}$', '$f^{\\prime\\prime}(x) = -2 \\cdot e^{-2x}$', '$f^{\\prime\\prime}(x) = -4 \\cdot e^{-2x}$', '$f^{\\prime\\prime}(x) = 4 \\cdot e^{-2x}$'],
+      steps: [
+        '$f^{\\prime}(x) = -2 \\cdot e^{-2x}$',
+        '$f^{\\prime\\prime}(x) = -2 \\cdot (-2) \\cdot e^{-2x} = 4 \\cdot e^{-2x}$',
+        'Jede Ableitung bringt den Faktor $-2$; der Exponent bleibt $-2x$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme $f^{\\prime\\prime}(x)$ für $f(x) = x \\cdot e^{x}$.',
+      opts: ['$f^{\\prime\\prime}(x) = e^{x}$', '$f^{\\prime\\prime}(x) = (x + 2) \\cdot e^{x}$', '$f^{\\prime\\prime}(x) = (2x + 1) \\cdot e^{x}$', '$f^{\\prime\\prime}(x) = (x + 1) \\cdot e^{x}$'],
+      steps: [
+        '$f^{\\prime}(x) = (x + 1) \\cdot e^{x}$ - wieder ein Produkt, also noch einmal Produktregel.',
+        '$f^{\\prime\\prime}(x) = 1 \\cdot e^{x} + (x + 1) \\cdot e^{x} = (x + 2) \\cdot e^{x}$',
+        'Merkregel: Bei $(x + a) \\cdot e^{x}$ erhöht jede Ableitung $a$ um $1$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Nutzerzahl einer App wächst nach $N(t) = 200 \\cdot e^{0{,}4t}$ ($t$ in Monaten). Mit welcher Rate wächst sie zu Beginn ($t = 0$)?',
+      opts: ['$N^{\\prime}(0) = 80$ Nutzer pro Monat', '$N^{\\prime}(0) \\approx 119$ Nutzer pro Monat', '$N^{\\prime}(0) = 200$ Nutzer pro Monat', '$N^{\\prime}(0) = 0{,}4$ Nutzer pro Monat'],
+      steps: [
+        'Momentane Änderungsrate = Ableitung: $N^{\\prime}(t) = 200 \\cdot 0{,}4 \\cdot e^{0{,}4t} = 80 \\cdot e^{0{,}4t}$.',
+        '$N^{\\prime}(0) = 80 \\cdot e^{0} = 80$',
+        '$200$ ist der Anfangsbestand $N(0)$, $119 \\approx N^{\\prime}(1)$ die Rate nach einem Monat.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Kondensator entlädt sich; die Spannung beträgt $U(t) = 12 \\cdot e^{-0{,}5t}$ ($U$ in Volt, $t$ in Sekunden). Wie schnell ändert sich die Spannung zum Zeitpunkt $t = 2$?',
+      opts: ['$U^{\\prime}(2) \\approx +2{,}21$ V/s', '$U^{\\prime}(2) = -6 \\cdot e^{-1} \\approx -2{,}21$ V/s', '$U^{\\prime}(2) \\approx 4{,}41$ V/s', '$U^{\\prime}(2) = -6$ V/s'],
+      steps: [
+        '$U^{\\prime}(t) = 12 \\cdot (-0{,}5) \\cdot e^{-0{,}5t} = -6 \\cdot e^{-0{,}5t}$',
+        '$U^{\\prime}(2) = -6 \\cdot e^{-1} \\approx -2{,}21$: Die Spannung sinkt um etwa $2{,}21$ Volt pro Sekunde.',
+        '$4{,}41 \\approx U(2)$ ist die Spannung selbst, $-6 = U^{\\prime}(0)$ die Rate am Anfang.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Der Anteil der Bevölkerung, der eine Nachricht kennt, wird durch $A(t) = 1 - e^{-0{,}2t}$ beschrieben ($t$ in Tagen). Welche Aussage über die Ausbreitungsgeschwindigkeit $A^{\\prime}(t)$ stimmt?',
+      opts: ['$A^{\\prime}(t) = 0{,}2 \\cdot e^{-0{,}2t}$; die Ausbreitung wird mit der Zeit schneller.', '$A^{\\prime}(t) = 0{,}2 \\cdot e^{-0{,}2t} > 0$; die Ausbreitung wird mit der Zeit langsamer.', '$A^{\\prime}(t) = -0{,}2 \\cdot e^{-0{,}2t} < 0$; der Anteil nimmt ab.', '$A^{\\prime}(t) = e^{-0{,}2t}$; die Ausbreitung startet mit Rate $1$.'],
+      steps: [
+        '$(1)^{\\prime} = 0$ und $(-e^{-0{,}2t})^{\\prime} = -(-0{,}2) \\cdot e^{-0{,}2t} = 0{,}2 \\cdot e^{-0{,}2t}$.',
+        '$A^{\\prime}(t) > 0$: der Anteil wächst. $e^{-0{,}2t}$ wird kleiner, also sinkt die Rate - Sättigung bei $A = 1$.',
+        '$A^{\\prime}(0) = 0{,}2$, $A^{\\prime}(10) = 0{,}2 \\cdot e^{-2} \\approx 0{,}027$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'An welcher Stelle hat der Graph von $f(x) = (x - 2) \\cdot e^{x}$ eine waagerechte Tangente?',
+      opts: ['$x = 0$', '$x = 2$', '$x = 1$', '$x = -1$'],
+      steps: [
+        'Waagerechte Tangente: $f^{\\prime}(x) = 0$. Produktregel: $f^{\\prime}(x) = 1 \\cdot e^{x} + (x - 2) \\cdot e^{x} = (x - 1) \\cdot e^{x}$.',
+        '$e^{x}$ ist nie null, also $x - 1 = 0$ und $x = 1$.',
+        '$x = 2$ ist die Nullstelle von $f$, nicht von $f^{\\prime}$.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

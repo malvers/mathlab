@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Übung Differenzialrechnung — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w17-uebung-differenzial',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Übung Differenzialrechnung',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 17 (Übung) · 20 Aufgaben: Ableiten, Tangenten, Extrempunkte gemischt, dazu Mathe-Rätsel · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 17 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Ableitungsregeln (1-6), Tangente und Normale (7-10), Nullstellen und Extrema (11-16), Mathe-Rätsel zum Jahresausklang (17-20). Alles ohne CAS. */
+  questions: [
+    {
+      q: 'Bestimme die Ableitung von $f(x) = 3x^4 - 2x^2 + 5$.',
+      opts: ['$f^{\\prime}(x) = 12x^3 - 4x$', '$f^{\\prime}(x) = 12x^3 - 4x + 5$', '$f^{\\prime}(x) = 3x^3 - 2x$', '$f^{\\prime}(x) = 12x^4 - 4x^2$'],
+      steps: [
+        'Potenzregel gliedweise: $(x^n)^{\\prime} = n \\cdot x^{n-1}$, Faktoren bleiben stehen.',
+        '$3 \\cdot 4x^3 - 2 \\cdot 2x^1 + 0 = 12x^3 - 4x$',
+        'Falle: die Konstante $5$ fällt weg, sie hat die Ableitung $0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = (2x - 3)^5$.',
+      opts: ['$f^{\\prime}(x) = 10\\,(2x - 3)^5$', '$f^{\\prime}(x) = 5\\,(2x - 3)^4$', '$f^{\\prime}(x) = 2\\,(2x - 3)^4$', '$f^{\\prime}(x) = 10\\,(2x - 3)^4$'],
+      steps: [
+        'Kettenregel: äußere Ableitung mal innere Ableitung.',
+        'Äußere: $5\\,(2x - 3)^4$, innere: $(2x - 3)^{\\prime} = 2$',
+        '$f^{\\prime}(x) = 5\\,(2x - 3)^4 \\cdot 2 = 10\\,(2x - 3)^4$',
+        'Falle: die innere Ableitung $2$ vergessen ergibt $5\\,(2x - 3)^4$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Gegeben ist $f(x) = \\dfrac{1}{4}x^4 - x^3$. Wie lautet die zweite Ableitung $f^{\\prime\\prime}(x)$?',
+      opts: ['$f^{\\prime\\prime}(x) = 3x^2 - 3x$', '$f^{\\prime\\prime}(x) = 3x^2 - 6x$', '$f^{\\prime\\prime}(x) = 6x - 6$', '$f^{\\prime\\prime}(x) = x^3 - 3x^2$'],
+      steps: [
+        'Erste Ableitung: $f^{\\prime}(x) = \\dfrac{1}{4} \\cdot 4x^3 - 3x^2 = x^3 - 3x^2$',
+        'Noch einmal ableiten: $f^{\\prime\\prime}(x) = 3x^2 - 6x$',
+        '$6x - 6$ wäre schon die dritte Ableitung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne $f^{\\prime}(1)$ für $f(x) = (x^2 + 1)^3$.',
+      opts: ['$f^{\\prime}(1) = 8$', '$f^{\\prime}(1) = 48$', '$f^{\\prime}(1) = 24$', '$f^{\\prime}(1) = 12$'],
+      steps: [
+        'Kettenregel: $f^{\\prime}(x) = 3\\,(x^2 + 1)^2 \\cdot 2x = 6x\\,(x^2 + 1)^2$',
+        '$f^{\\prime}(1) = 6 \\cdot 1 \\cdot (1 + 1)^2 = 6 \\cdot 4 = 24$',
+        'Fallen: ohne innere Ableitung $3 \\cdot 2^2 = 12$; der Funktionswert $f(1) = 2^3 = 8$ ist kein Anstieg.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Anstieg hat der Graph von $f(x) = 2x^3 - 5x$ an der Stelle $x = -1$?',
+      opts: ['$m = 3$', '$m = -1$', '$m = 1$', '$m = -11$'],
+      steps: [
+        'Der Anstieg ist der Wert der Ableitung: $f^{\\prime}(x) = 6x^2 - 5$',
+        '$f^{\\prime}(-1) = 6 \\cdot (-1)^2 - 5 = 6 - 5 = 1$',
+        'Fallen: $(-1)^2 = +1$, nicht $-1$ (sonst $-11$); $f(-1) = 3$ ist der Funktionswert, nicht der Anstieg.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = (3x - 1)^2$.',
+      opts: ['$f^{\\prime}(x) = 18x - 1$', '$f^{\\prime}(x) = 6x - 2$', '$f^{\\prime}(x) = 18x - 6$', '$f^{\\prime}(x) = 9x - 3$'],
+      steps: [
+        'Kettenregel: $f^{\\prime}(x) = 2\\,(3x - 1) \\cdot 3 = 6\\,(3x - 1) = 18x - 6$',
+        'Probe über Ausmultiplizieren: $f(x) = 9x^2 - 6x + 1$, also $f^{\\prime}(x) = 18x - 6$. Passt.',
+        'Falle: ohne innere Ableitung $3$ käme $6x - 2$ heraus.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lautet die Gleichung der Tangente an den Graphen von $f(x) = x^2 - 3x + 1$ im Punkt mit $x = 2$?',
+      opts: ['$t(x) = 2x - 5$', '$t(x) = x - 1$', '$t(x) = -x + 1$', '$t(x) = x - 3$'],
+      steps: [
+        'Berührpunkt: $f(2) = 4 - 6 + 1 = -1$, also $P(2|-1)$.',
+        'Anstieg: $f^{\\prime}(x) = 2x - 3$, $f^{\\prime}(2) = 1$',
+        'Tangente: $t(x) = 1 \\cdot (x - 2) + (-1) = x - 3$',
+        'Falle: $t(x) = x - 1$ hat den richtigen Anstieg, geht aber nicht durch $P$ ($t(2) = 1 \\neq -1$).'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Unter welchem Winkel $\\alpha$ steigt der Graph von $f(x) = x^3$ an der Stelle $x = 1$ (Steigungswinkel gegen die $x$-Achse)?',
+      opts: ['$\\alpha \\approx 18{,}4^\\circ$', '$\\alpha \\approx 71{,}6^\\circ$', '$\\alpha = 60^\\circ$', '$\\alpha = 45^\\circ$'],
+      steps: [
+        '$f^{\\prime}(x) = 3x^2$, also Anstieg $m = f^{\\prime}(1) = 3$.',
+        'Steigungswinkel: $\\tan\\alpha = m = 3 \\Rightarrow \\alpha = \\arctan 3 \\approx 71{,}6^\\circ$',
+        'Falle: $\\arctan\\dfrac{1}{3} \\approx 18{,}4^\\circ$ wäre der Winkel zur $y$-Achse.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'An welcher Stelle hat der Graph von $f(x) = x^2 - 4x + 7$ eine Tangente, die parallel zur Geraden $y = 2x + 1$ verläuft?',
+      opts: ['$x = 6$', '$x = 1$', '$x = 2$', '$x = 3$'],
+      steps: [
+        'Parallel heißt gleicher Anstieg: $f^{\\prime}(x) = 2$',
+        '$f^{\\prime}(x) = 2x - 4 = 2 \\Rightarrow 2x = 6 \\Rightarrow x = 3$',
+        'Falle: $x = 2$ ist die Stelle mit waagerechter Tangente ($f^{\\prime}(2) = 0$), $x = 6$ entsteht, wenn man am Ende nicht durch $2$ teilt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet die Normale an den Graphen von $f(x) = x^2$ im Punkt $P(1|1)$?',
+      opts: ['$n(x) = -\\dfrac{1}{2}x + \\dfrac{3}{2}$', '$n(x) = \\dfrac{1}{2}x + \\dfrac{1}{2}$', '$n(x) = -\\dfrac{1}{2}x + 1$', '$n(x) = -2x + 3$'],
+      steps: [
+        'Tangentenanstieg: $f^{\\prime}(x) = 2x$, $f^{\\prime}(1) = 2$',
+        'Normalenanstieg: $m_n = -\\dfrac{1}{m_t} = -\\dfrac{1}{2}$',
+        '$n(x) = -\\dfrac{1}{2}(x - 1) + 1 = -\\dfrac{1}{2}x + \\dfrac{3}{2}$; Probe: $n(1) = 1$. Passt.',
+        'Falle: $-2x + 3$ hat den negativen Tangentenanstieg statt des negativen Kehrwerts.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme alle Nullstellen von $f(x) = x^3 - 4x$.',
+      opts: ['$x_1 = 0$, $x_2 = 4$', '$x_1 = 0$, $x_2 = 2$, $x_3 = -2$', '$x_1 = 0$, $x_2 = 2$', '$x_1 = 2$, $x_2 = -2$'],
+      steps: [
+        '$x$ ausklammern: $f(x) = x\\,(x^2 - 4) = x\\,(x - 2)(x + 2)$',
+        'Ein Produkt ist null, wenn ein Faktor null ist: $x = 0$, $x = 2$, $x = -2$',
+        'Falle: wer durch $x$ dividiert, verliert die Nullstelle $x = 0$.'
+      ],
+      solution: 1
+    },
+    {
+      q: '$f(x) = x^3 - 3x^2 + 4$ hat die Nullstellen $x = -1$ und $x = 2$. Welche Aussage ist richtig?',
+      opts: ['Bei $x = 2$ berührt der Graph die $x$-Achse (doppelte Nullstelle), bei $x = -1$ schneidet er sie.', 'Der Graph berührt die $x$-Achse an beiden Stellen.', 'Der Graph schneidet die $x$-Achse an beiden Stellen.', 'Bei $x = -1$ berührt der Graph die $x$-Achse, bei $x = 2$ schneidet er sie.'],
+      steps: [
+        'Linearfaktoren: $f(x) = (x + 1)(x - 2)^2$, Probe durch Ausmultiplizieren: $(x + 1)(x^2 - 4x + 4) = x^3 - 3x^2 + 4$.',
+        '$x = 2$ hat die Vielfachheit $2$ (gerade): Berühren ohne Vorzeichenwechsel.',
+        '$x = -1$ hat die Vielfachheit $1$ (ungerade): Schneiden mit Vorzeichenwechsel.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Extrempunkte von $f(x) = x^3 - 3x$.',
+      opts: ['nur ein Tiefpunkt $T(1|-2)$', 'Hochpunkt $H(-1|2)$, Tiefpunkt $T(1|-2)$', 'Hochpunkt $H(1|-2)$, Tiefpunkt $T(-1|2)$', 'Hochpunkt $H(-1|0)$, Tiefpunkt $T(1|0)$'],
+      steps: [
+        'Notwendig: $f^{\\prime}(x) = 3x^2 - 3 = 0 \\Rightarrow x = \\pm 1$',
+        'Hinreichend: $f^{\\prime\\prime}(x) = 6x$; $f^{\\prime\\prime}(-1) = -6 < 0$ (Hochpunkt), $f^{\\prime\\prime}(1) = 6 > 0$ (Tiefpunkt)',
+        'Funktionswerte: $f(-1) = -1 + 3 = 2$, $f(1) = 1 - 3 = -2$',
+        'Merkregel: $f^{\\prime\\prime} < 0$ - der Graph ist dort rechtsgekrümmt, das ist ein Hochpunkt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Extrempunkte hat $f(x) = x^4 - 8x^2$?',
+      opts: ['drei Tiefpunkte bei $x = 0$ und $x = \\pm 2$', 'ein Tiefpunkt $T(0|0)$ und zwei Hochpunkte $H_{1,2}(\\pm 2|-16)$', 'ein Hochpunkt $H(0|0)$ und zwei Tiefpunkte $T_{1,2}(\\pm 2|-16)$', 'nur zwei Tiefpunkte $T_{1,2}(\\pm 2|-16)$'],
+      steps: [
+        '$f^{\\prime}(x) = 4x^3 - 16x = 4x\\,(x^2 - 4) = 0 \\Rightarrow x = 0$ oder $x = \\pm 2$',
+        '$f^{\\prime\\prime}(x) = 12x^2 - 16$: $f^{\\prime\\prime}(0) = -16 < 0$ (Hochpunkt), $f^{\\prime\\prime}(\\pm 2) = 32 > 0$ (Tiefpunkte)',
+        '$f(0) = 0$, $f(\\pm 2) = 16 - 32 = -16$',
+        'Der Graph ist achsensymmetrisch (nur gerade Exponenten) - die beiden Tiefpunkte liegen spiegelbildlich.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Für $f(x) = x^3$ gilt $f^{\\prime}(0) = 0$. Welche Aussage ist richtig?',
+      opts: ['$f^{\\prime}(0) = 0$ ist die hinreichende Bedingung für einen Extrempunkt.', 'Der Graph hat bei $x = 0$ einen Hochpunkt, weil $f^{\\prime\\prime}(0) = 0$ gilt.', '$f^{\\prime}(0) = 0$ ist nur die notwendige Bedingung - $f$ hat bei $x = 0$ keinen Extrempunkt, sondern einen Sattelpunkt.', 'Der Graph hat bei $x = 0$ einen Tiefpunkt, weil $f^{\\prime}(0) = 0$ gilt.'],
+      steps: [
+        '$f^{\\prime}(x) = 3x^2 \\geq 0$ für alle $x$: der Graph steigt überall, kein Vorzeichenwechsel von $f^{\\prime}$.',
+        '$f^{\\prime\\prime}(x) = 6x$, $f^{\\prime\\prime}(0) = 0$ - die hinreichende Bedingung $f^{\\prime\\prime}(x_0) \\neq 0$ ist nicht erfüllt.',
+        'Waagerechte Tangente ohne Extremum: Sattelpunkt $S(0|0)$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der Gewinn eines Betriebs hängt von der Stückzahl $x$ ab: $G(x) = -2x^2 + 120x - 1000$ (in €). Bei welcher Stückzahl ist der Gewinn maximal, und wie groß ist er?',
+      opts: ['$x = 15$, $G_{\\max} = 350$ €', '$x = 30$, $G_{\\max} = 1800$ €', '$x = 60$, $G_{\\max} = 800$ €', '$x = 30$, $G_{\\max} = 800$ €'],
+      steps: [
+        '$G^{\\prime}(x) = -4x + 120 = 0 \\Rightarrow x = 30$',
+        '$G^{\\prime\\prime}(x) = -4 < 0$: Maximum.',
+        '$G(30) = -2 \\cdot 900 + 3600 - 1000 = 800$',
+        'Falle: die Fixkosten $1000$ am Ende vergessen ergibt $1800$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Rätsel: Am 1. Weihnachtstag bekommst du 1 Geschenk, am 2. Tag $1 + 2$ Geschenke, am 3. Tag $1 + 2 + 3$ Geschenke und so weiter bis zum 12. Tag. Wie viele Geschenke sind es insgesamt?',
+      opts: ['$364$', '$156$', '$312$', '$78$'],
+      steps: [
+        'Tag $n$ bringt die Dreieckszahl $D_n = \\dfrac{n\\,(n + 1)}{2}$: $1,\\ 3,\\ 6,\\ 10,\\ 15,\\ 21,\\ 28,\\ 36,\\ 45,\\ 55,\\ 66,\\ 78$.',
+        'Summe: $1 + 3 + 6 + \\dots + 78 = 364$ - fast ein Geschenk für jeden Tag des Jahres.',
+        'Formel: $\\dfrac{n\\,(n + 1)(n + 2)}{6} = \\dfrac{12 \\cdot 13 \\cdot 14}{6} = 364$',
+        'Falle: $78$ ist nur das Paket vom 12. Tag.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Rätsel: Zwei gleich lange Kerzen werden gleichzeitig angezündet. Die erste ist nach $4$ Stunden abgebrannt, die zweite nach $6$ Stunden. Nach welcher Zeit ist die zweite Kerze doppelt so lang wie die erste?',
+      opts: ['nach $2$ Stunden', 'nach $3{,}5$ Stunden', 'nach $2{,}4$ Stunden', 'nach $3$ Stunden'],
+      steps: [
+        'Länge in Anteilen der Anfangslänge: $L_1(t) = 1 - \\dfrac{t}{4}$, $L_2(t) = 1 - \\dfrac{t}{6}$ (lineare Funktionen).',
+        'Bedingung $L_2 = 2 \\cdot L_1$: $1 - \\dfrac{t}{6} = 2 - \\dfrac{t}{2} \\Rightarrow \\dfrac{t}{2} - \\dfrac{t}{6} = 1 \\Rightarrow \\dfrac{t}{3} = 1$',
+        '$t = 3$; Probe: $L_1(3) = \\dfrac{1}{4}$, $L_2(3) = \\dfrac{1}{2}$. Passt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Rätsel: Die Ziffernsumme einer zweistelligen Zahl ist $12$. Vertauscht man die beiden Ziffern, wird die Zahl um $36$ größer. Wie heißt die Zahl?',
+      opts: ['$57$', '$48$', '$84$', '$39$'],
+      steps: [
+        'Zahl $10a + b$ mit $a + b = 12$; vertauscht: $10b + a$.',
+        '$(10b + a) - (10a + b) = 9\\,(b - a) = 36 \\Rightarrow b - a = 4$',
+        'Mit $a + b = 12$: $b = 8$, $a = 4$, also $48$. Probe: $84 - 48 = 36$. Passt.',
+        'Falle: $84$ hat die richtigen Ziffern, wird beim Vertauschen aber kleiner.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Rätsel: Bei der Weihnachtsfeier stößt jede Person mit jeder anderen genau einmal an. Es klirrt $66$-mal. Wie viele Personen feiern mit?',
+      opts: ['$12$', '$33$', '$11$', '$13$'],
+      steps: [
+        'Bei $n$ Personen gibt es $\\dfrac{n\\,(n - 1)}{2}$ Paare.',
+        '$\\dfrac{n\\,(n - 1)}{2} = 66 \\Rightarrow n^2 - n - 132 = 0 \\Rightarrow n = \\dfrac{1 + \\sqrt{1 + 528}}{2} = \\dfrac{1 + 23}{2} = 12$',
+        'Probe: $\\dfrac{12 \\cdot 11}{2} = 66$. Passt; $11$ Personen ergäben nur $55$ Paare.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

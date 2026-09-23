@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Gebrochenrationale Funktionen III — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w27-gebrochenrational3',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Gebrochenrationale Funktionen III',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 27 (LB 4) · 20 Aufgaben: Extrem- und Wendepunkte, Wertebereich, Flächen · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 27 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Extrempunkte mit der Quotientenregel (1-7), Wendepunkte mit dem GTR (8-10), Wertebereich (11-13), Flächen (14-17), Untersuchung und Anwendung (18-20). GTR ohne CAS. */
+  questions: [
+    {
+      q: 'Gegeben ist $f(x) = \\dfrac{x^2+1}{x}$. Bestimme $f^{\\prime}(x)$ mit der Quotientenregel.',
+      opts: ['$f^{\\prime}(x) = \\dfrac{x^2-1}{x^2}$', '$f^{\\prime}(x) = \\dfrac{x^2+1}{x^2}$', '$f^{\\prime}(x) = \\dfrac{3x^2+1}{x^2}$', '$f^{\\prime}(x) = 2x$'],
+      steps: [
+        'Quotientenregel: $f^{\\prime}(x) = \\dfrac{u^{\\prime} \\cdot v - u \\cdot v^{\\prime}}{v^2}$ mit $u = x^2+1$ und $v = x$.',
+        '$f^{\\prime}(x) = \\dfrac{2x \\cdot x - (x^2+1) \\cdot 1}{x^2} = \\dfrac{2x^2 - x^2 - 1}{x^2} = \\dfrac{x^2-1}{x^2}$',
+        'Falle: Zähler und Nenner getrennt ableiten ($2x$) oder im Zähler ein Plus setzen ($3x^2+1$).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'An welchen Stellen kann $f(x) = \\dfrac{x^2+1}{x}$ Extrempunkte haben?',
+      opts: ['$x = -1$ und $x = 1$', '$x = 0$', '$x = -1$, $x = 0$ und $x = 1$', 'nur $x = 1$'],
+      steps: [
+        '$f^{\\prime}(x) = \\dfrac{x^2-1}{x^2} = 0$: ein Bruch ist null, wenn der Zähler null ist.',
+        '$x^2 - 1 = 0$, also $x = 1$ oder $x = -1$.',
+        '$x = 0$ ist die Polstelle - dort ist $f$ gar nicht definiert, ein Extrempunkt ist unmöglich.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme den Extrempunkt von $f(x) = \\dfrac{x^2+1}{x}$ an der Stelle $x = 1$ und seine Art.',
+      opts: ['Hochpunkt $H(1 \\mid 2)$', 'Tiefpunkt $T(1 \\mid 0)$', 'Hochpunkt $H(1 \\mid -2)$', 'Tiefpunkt $T(1 \\mid 2)$'],
+      steps: [
+        '$f(1) = \\dfrac{1+1}{1} = 2$',
+        '$f^{\\prime}(x) = 1 - \\dfrac{1}{x^2}$, also $f^{\\prime\\prime}(x) = \\dfrac{2}{x^3}$ und $f^{\\prime\\prime}(1) = 2 > 0$: Tiefpunkt.',
+        'Falle: $y$-Wert nicht ausrechnen ($T(1 \\mid 0)$) - der $y$-Wert kommt aus $f$, nicht aus $f^{\\prime}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Gegeben ist $g(x) = \\dfrac{x^2}{x-1}$. Bestimme $g^{\\prime}(x)$.',
+      opts: ['$g^{\\prime}(x) = \\dfrac{x^2 - 2x}{x-1}$', '$g^{\\prime}(x) = \\dfrac{3x^2 - 2x}{(x-1)^2}$', '$g^{\\prime}(x) = \\dfrac{x^2 - 2x}{(x-1)^2}$', '$g^{\\prime}(x) = 2x$'],
+      steps: [
+        '$u = x^2$, $u^{\\prime} = 2x$, $v = x - 1$, $v^{\\prime} = 1$.',
+        '$g^{\\prime}(x) = \\dfrac{2x(x-1) - x^2 \\cdot 1}{(x-1)^2} = \\dfrac{2x^2 - 2x - x^2}{(x-1)^2} = \\dfrac{x^2 - 2x}{(x-1)^2}$',
+        'Falle: den Nenner nicht quadrieren oder $u \\cdot v^{\\prime}$ addieren statt subtrahieren.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Extrempunkte hat $g(x) = \\dfrac{x^2}{x-1}$?',
+      opts: ['$T(0 \\mid 0)$ und $H(2 \\mid 4)$', 'nur $T(2 \\mid 4)$', '$H(0 \\mid 0)$, $T(2 \\mid 4)$ und ein Tiefpunkt bei $x = 1$', '$H(0 \\mid 0)$ und $T(2 \\mid 4)$'],
+      steps: [
+        'Zähler von $g^{\\prime}$: $x^2 - 2x = x(x-2) = 0$, also $x = 0$ oder $x = 2$.',
+        '$g(0) = 0$ und $g(2) = \\dfrac{4}{1} = 4$.',
+        '$g^{\\prime\\prime}(x) = \\dfrac{2}{(x-1)^3}$: $g^{\\prime\\prime}(0) = -2 < 0$ (Hochpunkt), $g^{\\prime\\prime}(2) = 2 > 0$ (Tiefpunkt).',
+        'Bei $x = 1$ ist eine Polstelle, kein Extrempunkt. Der Hochpunkt liegt unter dem Tiefpunkt - bei Polstellen ist das normal.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für eine gebrochenrationale Funktion gilt $f^{\\prime}(x) = \\dfrac{x^2 - 9}{(x^2+3)^2}$. Welche Aussage über die Extremstellen stimmt?',
+      opts: ['Hochstelle bei $x = -3$, Tiefstelle bei $x = 3$', 'Extremstellen bei $x = \\pm\\sqrt{3}$', 'keine Extremstellen, weil der Nenner nie null wird', 'Tiefstelle bei $x = -3$, Hochstelle bei $x = 3$'],
+      steps: [
+        'Nullstellen des Zählers: $x^2 - 9 = 0$, also $x = -3$ und $x = 3$. Der Nenner ist immer positiv.',
+        'Vorzeichen von $f^{\\prime}$: für $x < -3$ positiv, zwischen $-3$ und $3$ negativ, für $x > 3$ positiv.',
+        'Bei $x = -3$ wechselt $f^{\\prime}$ von $+$ nach $-$ (Hochstelle), bei $x = 3$ von $-$ nach $+$ (Tiefstelle).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die Stückkosten eines Produkts (in Euro) hängen von der Losgröße $x$ ab: $K(x) = \\dfrac{x^2 + 100}{x}$ für $x > 0$. Für welche Losgröße sind die Stückkosten minimal, und wie hoch sind sie dann?',
+      opts: ['$x = 20$, minimale Stückkosten $25$ Euro', '$x = 10$, minimale Stückkosten $20$ Euro', '$x = 10$, minimale Stückkosten $10$ Euro', '$x = 100$, minimale Stückkosten $101$ Euro'],
+      steps: [
+        '$K(x) = x + \\dfrac{100}{x}$, also $K^{\\prime}(x) = 1 - \\dfrac{100}{x^2} = \\dfrac{x^2 - 100}{x^2}$.',
+        '$x^2 - 100 = 0$ ergibt $x = 10$ (nur $x > 0$ ist sinnvoll).',
+        '$K(10) = 10 + \\dfrac{100}{10} = 20$; $K^{\\prime\\prime}(x) = \\dfrac{200}{x^3} > 0$, also ein Minimum.',
+        'Probe mit dem GTR: $K(20) = 25$ und $K(5) = 25$ sind beide größer als $20$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für $f(x) = \\dfrac{x^2+1}{x}$ liefert der GTR $f^{\\prime\\prime}(x) = \\dfrac{2}{x^3}$. Hat der Graph von $f$ Wendepunkte?',
+      opts: ['Ja, $W(0 \\mid 0)$, weil $f^{\\prime\\prime}$ dort das Vorzeichen wechselt.', 'Nein - $f^{\\prime\\prime}$ hat keine Nullstelle; der Krümmungswechsel bei $x = 0$ liegt an der Polstelle, nicht an einem Wendepunkt.', 'Ja, bei $x = -1$ und $x = 1$.', 'Ja, $W(1 \\mid 2)$, weil dort $f^{\\prime}(1) = 0$ ist.'],
+      steps: [
+        'Wendepunkt: $f^{\\prime\\prime}(x) = 0$ mit Vorzeichenwechsel. Der Zähler $2$ wird nie null.',
+        'Zwar ist $f^{\\prime\\prime} < 0$ für $x < 0$ und $f^{\\prime\\prime} > 0$ für $x > 0$, aber $x = 0$ gehört nicht zum Definitionsbereich.',
+        '$x = \\pm 1$ sind die Extremstellen ($f^{\\prime} = 0$), keine Wendestellen.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für $f(x) = \\dfrac{4x}{x^2+1}$ liefert der GTR die Nullstellen von $f^{\\prime\\prime}$: $x = 0$, $x = \\sqrt{3}$ und $x = -\\sqrt{3}$, jeweils mit Vorzeichenwechsel. Wie lauten die Wendepunkte?',
+      opts: ['$W_1(0 \\mid 0)$, $W_2(\\sqrt{3} \\mid 0)$, $W_3(-\\sqrt{3} \\mid 0)$', 'nur $W(0 \\mid 0)$', '$W_1(0 \\mid 0)$, $W_2(\\sqrt{3} \\mid \\sqrt{3})$, $W_3(-\\sqrt{3} \\mid -\\sqrt{3})$', '$W_1(1 \\mid 2)$ und $W_2(-1 \\mid -2)$'],
+      steps: [
+        'Die $y$-Werte kommen aus $f$: $f(0) = 0$.',
+        '$f(\\sqrt{3}) = \\dfrac{4\\sqrt{3}}{3+1} = \\sqrt{3} \\approx 1{,}73$ und $f(-\\sqrt{3}) = -\\sqrt{3}$.',
+        '$(1 \\mid 2)$ und $(-1 \\mid -2)$ sind die Extrempunkte von $f$, nicht die Wendepunkte.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der GTR zeigt für $f(x) = \\dfrac{4x}{x^2+1}$: $f^{\\prime\\prime}(x) < 0$ für $0 < x < \\sqrt{3}$ und $f^{\\prime\\prime}(x) > 0$ für $x > \\sqrt{3}$. Was bedeutet das für den Graphen?',
+      opts: ['$f$ hat bei $x = \\sqrt{3}$ ein Minimum.', 'Für $0 < x < \\sqrt{3}$ ist der Graph rechtsgekrümmt, für $x > \\sqrt{3}$ linksgekrümmt; bei $x = \\sqrt{3}$ liegt ein Wendepunkt.', '$f$ fällt für $0 < x < \\sqrt{3}$ und steigt für $x > \\sqrt{3}$.', 'Für $0 < x < \\sqrt{3}$ ist der Graph linksgekrümmt, für $x > \\sqrt{3}$ rechtsgekrümmt; bei $x = \\sqrt{3}$ liegt ein Wendepunkt.'],
+      steps: [
+        '$f^{\\prime\\prime} < 0$ bedeutet Rechtskrümmung, $f^{\\prime\\prime} > 0$ Linkskrümmung.',
+        'Wechselt das Vorzeichen von $f^{\\prime\\prime}$, wechselt die Krümmung: Wendepunkt.',
+        'Über Steigen und Fallen entscheidet $f^{\\prime}$, nicht $f^{\\prime\\prime}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Der Graph von $f(x) = \\dfrac{x^2+1}{x}$ hat den Hochpunkt $H(-1 \\mid -2)$ und den Tiefpunkt $T(1 \\mid 2)$. Bestimme den Wertebereich.',
+      fig: '<svg viewBox="0 0 520 340" width="520" height="340" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Graph von f mit Hochpunkt H(-1|-2) und Tiefpunkt T(1|2)"><defs><clipPath id="f1-clip"><rect x="39" y="19" width="460" height="288"/></clipPath><marker id="f1-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="40" y1="163" x2="498" y2="163" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><line x1="269" y1="306" x2="269" y2="20" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><text x="500" y="179" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">x</text><text x="257" y="18" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">y</text><text x="262" y="178" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="50.9" y1="159.5" x2="50.9" y2="166.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="50.9" y="179" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-4</text><line x1="105.43" y1="159.5" x2="105.43" y2="166.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="105.43" y="179" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-3</text><line x1="159.95" y1="159.5" x2="159.95" y2="166.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="159.95" y="179" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-2</text><line x1="214.48" y1="159.5" x2="214.48" y2="166.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="214.48" y="179" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-1</text><line x1="323.52" y1="159.5" x2="323.52" y2="166.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="323.52" y="179" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">1</text><line x1="378.05" y1="159.5" x2="378.05" y2="166.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="378.05" y="179" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">2</text><line x1="432.57" y1="159.5" x2="432.57" y2="166.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="432.57" y="179" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">3</text><line x1="487.1" y1="159.5" x2="487.1" y2="166.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="487.1" y="179" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">4</text><line x1="265.5" y1="295" x2="272.5" y2="295" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="262" y="299" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-6</text><line x1="265.5" y1="251" x2="272.5" y2="251" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="262" y="255" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-4</text><line x1="265.5" y1="207" x2="272.5" y2="207" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="262" y="211" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-2</text><line x1="265.5" y1="119" x2="272.5" y2="119" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="262" y="123" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">2</text><line x1="265.5" y1="75" x2="272.5" y2="75" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="262" y="79" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">4</text><line x1="265.5" y1="31" x2="272.5" y2="31" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="262" y="35" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">6</text><g clip-path="url(#f1-clip)"><path d="M 45.45 258.57 L 46.28 258.25 L 47.1 257.94 L 47.93 257.63 L 48.76 257.31 L 49.58 257 L 50.41 256.69 L 51.24 256.37 L 52.06 256.06 L 52.89 255.75 L 53.71 255.44 L 54.54 255.13 L 55.37 254.81 L 56.19 254.5 L 57.02 254.19 L 57.85 253.88 L 58.67 253.57 L 59.5 253.26 L 60.32 252.95 L 61.15 252.64 L 61.98 252.33 L 62.8 252.02 L 63.63 251.71 L 64.46 251.4 L 65.28 251.09 L 66.11 250.78 L 66.93 250.47 L 67.76 250.16 L 68.59 249.85 L 69.41 249.54 L 70.24 249.23 L 71.07 248.93 L 71.89 248.62 L 72.72 248.31 L 73.54 248 L 74.37 247.69 L 75.2 247.39 L 76.02 247.08 L 76.85 246.77 L 77.68 246.47 L 78.5 246.16 L 79.33 245.86 L 80.15 245.55 L 80.98 245.24 L 81.81 244.94 L 82.63 244.63 L 83.46 244.33 L 84.29 244.02 L 85.11 243.72 L 85.94 243.42 L 86.76 243.11 L 87.59 242.81 L 88.42 242.51 L 89.24 242.2 L 90.07 241.9 L 90.9 241.6 L 91.72 241.3 L 92.55 241 L 93.37 240.69 L 94.2 240.39 L 95.03 240.09 L 95.85 239.79 L 96.68 239.49 L 97.51 239.19 L 98.33 238.89 L 99.16 238.59 L 99.98 238.29 L 100.81 238 L 101.64 237.7 L 102.46 237.4 L 103.29 237.1 L 104.12 236.8 L 104.94 236.51 L 105.77 236.21 L 106.59 235.92 L 107.42 235.62 L 108.25 235.32 L 109.07 235.03 L 109.9 234.74 L 110.73 234.44 L 111.55 234.15 L 112.38 233.85 L 113.2 233.56 L 114.03 233.27 L 114.86 232.98 L 115.68 232.69 L 116.51 232.4 L 117.34 232.1 L 118.16 231.81 L 118.99 231.52 L 119.81 231.24 L 120.64 230.95 L 121.47 230.66 L 122.29 230.37 L 123.12 230.08 L 123.95 229.8 L 124.77 229.51 L 125.6 229.23 L 126.42 228.94 L 127.25 228.66 L 128.08 228.37 L 128.9 228.09 L 129.73 227.81 L 130.56 227.53 L 131.38 227.24 L 132.21 226.96 L 133.03 226.68 L 133.86 226.4 L 134.69 226.13 L 135.51 225.85 L 136.34 225.57 L 137.17 225.29 L 137.99 225.02 L 138.82 224.74 L 139.64 224.47 L 140.47 224.19 L 141.3 223.92 L 142.12 223.65 L 142.95 223.38 L 143.78 223.11 L 144.6 222.84 L 145.43 222.57 L 146.25 222.3 L 147.08 222.03 L 147.91 221.77 L 148.73 221.5 L 149.56 221.24 L 150.39 220.97 L 151.21 220.71 L 152.04 220.45 L 152.86 220.19 L 153.69 219.93 L 154.52 219.67 L 155.34 219.41 L 156.17 219.16 L 157 218.9 L 157.82 218.65 L 158.65 218.4 L 159.47 218.14 L 160.3 217.89 L 161.13 217.65 L 161.95 217.4 L 162.78 217.15 L 163.61 216.91 L 164.43 216.66 L 165.26 216.42 L 166.08 216.18 L 166.91 215.94 L 167.74 215.7 L 168.56 215.47 L 169.39 215.23 L 170.22 215 L 171.04 214.77 L 171.87 214.54 L 172.69 214.31 L 173.52 214.09 L 174.35 213.86 L 175.17 213.64 L 176 213.42 L 176.83 213.21 L 177.65 212.99 L 178.48 212.78 L 179.3 212.56 L 180.13 212.36 L 180.96 212.15 L 181.78 211.94 L 182.61 211.74 L 183.44 211.54 L 184.26 211.35 L 185.09 211.15 L 185.91 210.96 L 186.74 210.77 L 187.57 210.59 L 188.39 210.41 L 189.22 210.23 L 190.05 210.05 L 190.87 209.88 L 191.7 209.71 L 192.52 209.54 L 193.35 209.38 L 194.18 209.22 L 195 209.07 L 195.83 208.92 L 196.66 208.77 L 197.48 208.63 L 198.31 208.49 L 199.13 208.36 L 199.96 208.23 L 200.79 208.11 L 201.61 207.99 L 202.44 207.88 L 203.27 207.77 L 204.09 207.67 L 204.92 207.58 L 205.74 207.49 L 206.57 207.4 L 207.4 207.33 L 208.22 207.26 L 209.05 207.2 L 209.88 207.14 L 210.7 207.1 L 211.53 207.06 L 212.35 207.03 L 213.18 207.01 L 214.01 207 L 214.83 207 L 215.66 207.01 L 216.49 207.03 L 217.31 207.06 L 218.14 207.11 L 218.96 207.16 L 219.79 207.23 L 220.62 207.31 L 221.44 207.41 L 222.27 207.52 L 223.1 207.65 L 223.92 207.8 L 224.75 207.96 L 225.57 208.14 L 226.4 208.35 L 227.23 208.57 L 228.05 208.82 L 228.88 209.09 L 229.71 209.38 L 230.53 209.7 L 231.36 210.05 L 232.18 210.44 L 233.01 210.85 L 233.84 211.3 L 234.66 211.79 L 235.49 212.32 L 236.32 212.89 L 237.14 213.51 L 237.97 214.18 L 238.79 214.9 L 239.62 215.68 L 240.45 216.53 L 241.27 217.45 L 242.1 218.44 L 242.93 219.52 L 243.75 220.7 L 244.58 221.97 L 245.4 223.36 L 246.23 224.87 L 247.06 226.52 L 247.88 228.32 L 248.71 230.3 L 249.53 232.48 L 250.36 234.88 L 251.19 237.53 L 252.01 240.47 L 252.84 243.75 L 253.67 247.41 L 254.49 251.54 L 255.32 256.2 L 256.14 261.5 L 256.97 267.57 L 257.8 274.6 L 258.62 282.79 L 259.45 292.46 L 260.28 304.02" fill="none" stroke="#B02418" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></g><g clip-path="url(#f1-clip)"><path d="M 277.72 21.98 L 278.55 33.54 L 279.38 43.21 L 280.2 51.4 L 281.03 58.43 L 281.86 64.5 L 282.68 69.8 L 283.51 74.46 L 284.33 78.59 L 285.16 82.25 L 285.99 85.53 L 286.81 88.47 L 287.64 91.12 L 288.47 93.52 L 289.29 95.7 L 290.12 97.68 L 290.94 99.48 L 291.77 101.13 L 292.6 102.64 L 293.42 104.03 L 294.25 105.3 L 295.07 106.48 L 295.9 107.56 L 296.73 108.55 L 297.55 109.47 L 298.38 110.32 L 299.21 111.1 L 300.03 111.82 L 300.86 112.49 L 301.68 113.11 L 302.51 113.68 L 303.34 114.21 L 304.16 114.7 L 304.99 115.15 L 305.82 115.56 L 306.64 115.95 L 307.47 116.3 L 308.29 116.62 L 309.12 116.91 L 309.95 117.18 L 310.77 117.43 L 311.6 117.65 L 312.43 117.86 L 313.25 118.04 L 314.08 118.2 L 314.9 118.35 L 315.73 118.48 L 316.56 118.59 L 317.38 118.69 L 318.21 118.77 L 319.04 118.84 L 319.86 118.89 L 320.69 118.94 L 321.51 118.97 L 322.34 118.99 L 323.17 119 L 323.99 119 L 324.82 118.99 L 325.65 118.97 L 326.47 118.94 L 327.3 118.9 L 328.12 118.86 L 328.95 118.8 L 329.78 118.74 L 330.6 118.67 L 331.43 118.6 L 332.26 118.51 L 333.08 118.42 L 333.91 118.33 L 334.73 118.23 L 335.56 118.12 L 336.39 118.01 L 337.21 117.89 L 338.04 117.77 L 338.87 117.64 L 339.69 117.51 L 340.52 117.37 L 341.34 117.23 L 342.17 117.08 L 343 116.93 L 343.82 116.78 L 344.65 116.62 L 345.48 116.46 L 346.3 116.29 L 347.13 116.12 L 347.95 115.95 L 348.78 115.77 L 349.61 115.59 L 350.43 115.41 L 351.26 115.23 L 352.09 115.04 L 352.91 114.85 L 353.74 114.65 L 354.56 114.46 L 355.39 114.26 L 356.22 114.06 L 357.04 113.85 L 357.87 113.64 L 358.7 113.44 L 359.52 113.22 L 360.35 113.01 L 361.17 112.79 L 362 112.58 L 362.83 112.36 L 363.65 112.14 L 364.48 111.91 L 365.31 111.69 L 366.13 111.46 L 366.96 111.23 L 367.78 111 L 368.61 110.77 L 369.44 110.53 L 370.26 110.3 L 371.09 110.06 L 371.92 109.82 L 372.74 109.58 L 373.57 109.34 L 374.39 109.09 L 375.22 108.85 L 376.05 108.6 L 376.87 108.35 L 377.7 108.11 L 378.53 107.86 L 379.35 107.6 L 380.18 107.35 L 381 107.1 L 381.83 106.84 L 382.66 106.59 L 383.48 106.33 L 384.31 106.07 L 385.14 105.81 L 385.96 105.55 L 386.79 105.29 L 387.61 105.03 L 388.44 104.76 L 389.27 104.5 L 390.09 104.23 L 390.92 103.97 L 391.75 103.7 L 392.57 103.43 L 393.4 103.16 L 394.22 102.89 L 395.05 102.62 L 395.88 102.35 L 396.7 102.08 L 397.53 101.81 L 398.36 101.53 L 399.18 101.26 L 400.01 100.98 L 400.83 100.71 L 401.66 100.43 L 402.49 100.15 L 403.31 99.87 L 404.14 99.6 L 404.97 99.32 L 405.79 99.04 L 406.62 98.76 L 407.44 98.47 L 408.27 98.19 L 409.1 97.91 L 409.92 97.63 L 410.75 97.34 L 411.58 97.06 L 412.4 96.77 L 413.23 96.49 L 414.05 96.2 L 414.88 95.92 L 415.71 95.63 L 416.53 95.34 L 417.36 95.05 L 418.19 94.76 L 419.01 94.48 L 419.84 94.19 L 420.66 93.9 L 421.49 93.6 L 422.32 93.31 L 423.14 93.02 L 423.97 92.73 L 424.8 92.44 L 425.62 92.15 L 426.45 91.85 L 427.27 91.56 L 428.1 91.26 L 428.93 90.97 L 429.75 90.68 L 430.58 90.38 L 431.41 90.08 L 432.23 89.79 L 433.06 89.49 L 433.88 89.2 L 434.71 88.9 L 435.54 88.6 L 436.36 88.3 L 437.19 88 L 438.02 87.71 L 438.84 87.41 L 439.67 87.11 L 440.49 86.81 L 441.32 86.51 L 442.15 86.21 L 442.97 85.91 L 443.8 85.61 L 444.63 85.31 L 445.45 85 L 446.28 84.7 L 447.1 84.4 L 447.93 84.1 L 448.76 83.8 L 449.58 83.49 L 450.41 83.19 L 451.24 82.89 L 452.06 82.58 L 452.89 82.28 L 453.71 81.98 L 454.54 81.67 L 455.37 81.37 L 456.19 81.06 L 457.02 80.76 L 457.85 80.45 L 458.67 80.14 L 459.5 79.84 L 460.32 79.53 L 461.15 79.23 L 461.98 78.92 L 462.8 78.61 L 463.63 78.31 L 464.46 78 L 465.28 77.69 L 466.11 77.38 L 466.93 77.07 L 467.76 76.77 L 468.59 76.46 L 469.41 76.15 L 470.24 75.84 L 471.07 75.53 L 471.89 75.22 L 472.72 74.91 L 473.54 74.6 L 474.37 74.29 L 475.2 73.98 L 476.02 73.67 L 476.85 73.36 L 477.68 73.05 L 478.5 72.74 L 479.33 72.43 L 480.15 72.12 L 480.98 71.81 L 481.81 71.5 L 482.63 71.19 L 483.46 70.87 L 484.29 70.56 L 485.11 70.25 L 485.94 69.94 L 486.76 69.63 L 487.59 69.31 L 488.42 69 L 489.24 68.69 L 490.07 68.37 L 490.9 68.06 L 491.72 67.75 L 492.55 67.43" fill="none" stroke="#B02418" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></g><circle cx="214.48" cy="207" r="3.6" fill="#B02418" stroke="#FFFFFF" stroke-width="1.4"/><text x="206.48" y="223" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">H</text><circle cx="323.52" cy="119" r="3.6" fill="#B02418" stroke="#FFFFFF" stroke-width="1.4"/><text x="331.52" y="111" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">T</text></svg>',
+      figcap: 'Graph von $f(x) = \\dfrac{x^2+1}{x}$ mit $H$ und $T$',
+      opts: ['$W = \\{y \\mid -2 \\leq y \\leq 2\\}$', '$W = \\{y \\mid y \\geq 2\\}$', '$W = \\{y \\mid y \\leq -2 \\text{ oder } y \\geq 2\\}$', '$W = \\mathbb{R}$'],
+      steps: [
+        'Rechter Ast ($x > 0$): kommt von $+\\infty$ (Polstelle), fällt bis $T(1 \\mid 2)$ und steigt wieder nach $+\\infty$ - Werte $y \\geq 2$.',
+        'Linker Ast ($x < 0$): punktsymmetrisch dazu - Werte $y \\leq -2$.',
+        'Werte zwischen $-2$ und $2$ werden nie angenommen: Die Polstelle reißt den Wertebereich auf.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme den Wertebereich von $f(x) = \\dfrac{1}{x^2} + 1$.',
+      opts: ['$W = \\{y \\mid y \\geq 1\\}$', '$W = \\mathbb{R} \\setminus \\{1\\}$', '$W = \\{y \\mid y > 0\\}$', '$W = \\{y \\mid y > 1\\}$'],
+      steps: [
+        '$\\dfrac{1}{x^2}$ ist für jedes $x \\neq 0$ positiv und wird beliebig groß (Pol bei $x = 0$) und beliebig klein (für $x \\to \\pm\\infty$).',
+        'Also $f(x) > 1$ für alle $x$; die Asymptote $y = 1$ wird nicht erreicht.',
+        'Falle: $y \\geq 1$ - der Wert $1$ selbst wird nie angenommen.'
+      ],
+      solution: 3
+    },
+    {
+      q: '$f(x) = \\dfrac{4x}{x^2+1}$ hat den Hochpunkt $H(1 \\mid 2)$ und den Tiefpunkt $T(-1 \\mid -2)$; für $x \\to \\pm\\infty$ gilt $f(x) \\to 0$. Wertebereich?',
+      opts: ['$W = \\{y \\mid y \\leq -2 \\text{ oder } y \\geq 2\\}$', '$W = \\mathbb{R}$', '$W = \\{y \\mid -2 < y < 2\\}$', '$W = \\{y \\mid -2 \\leq y \\leq 2\\}$'],
+      steps: [
+        '$f$ ist auf ganz $\\mathbb{R}$ definiert (Nenner $x^2 + 1 > 0$), es gibt keine Polstelle.',
+        'Der größte Wert ist $2$ (Hochpunkt), der kleinste $-2$ (Tiefpunkt) - beide werden angenommen.',
+        'Falle: $-2 < y < 2$ - die Extremwerte gehören dazu, nur die Asymptote $y = 0$ wäre ausgeschlossen, sie liegt aber im Inneren.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\displaystyle\\int_1^2 \\dfrac{1}{x^2}\\,dx$.',
+      opts: ['$-\\dfrac{1}{2}$', '$\\dfrac{1}{2}$', '$\\ln 2$', '$\\dfrac{7}{24}$'],
+      steps: [
+        '$\\dfrac{1}{x^2} = x^{-2}$, Stammfunktion $F(x) = \\dfrac{x^{-1}}{-1} = -\\dfrac{1}{x}$.',
+        '$\\left[-\\dfrac{1}{x}\\right]_1^2 = -\\dfrac{1}{2} - (-1) = \\dfrac{1}{2}$',
+        'Falle: $\\ln$ gehört zu $\\dfrac{1}{x}$, nicht zu $\\dfrac{1}{x^2}$; beim Exponenten $-2$ wird zu $-1$ erhöht, nicht zu $-3$ erniedrigt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Funktion ist eine Stammfunktion von $f(x) = \\dfrac{x^2+1}{x^2}$?',
+      opts: ['$F(x) = x - \\dfrac{1}{x}$', '$F(x) = \\dfrac{\\frac{1}{3}x^3 + x}{\\frac{1}{3}x^3}$', '$F(x) = -\\dfrac{2}{x^3}$', '$F(x) = x + \\dfrac{1}{x}$'],
+      steps: [
+        'Erst vereinfachen: $f(x) = \\dfrac{x^2}{x^2} + \\dfrac{1}{x^2} = 1 + x^{-2}$.',
+        'Summandenweise: $F(x) = x + \\dfrac{x^{-1}}{-1} = x - \\dfrac{1}{x}$',
+        'Probe: $F^{\\prime}(x) = 1 + \\dfrac{1}{x^2}$. Zähler und Nenner getrennt zu integrieren ist falsch.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne den Inhalt der Fläche zwischen dem Graphen von $f(x) = \\dfrac{x^2+1}{x^2}$ und der $x$-Achse über dem Intervall $[1;\\,3]$.',
+      opts: ['$A = \\dfrac{4}{3}$', '$A = 2$', '$A = \\dfrac{8}{3} \\approx 2{,}67$', '$A = \\dfrac{10}{3}$'],
+      steps: [
+        '$f(x) > 0$ auf $[1;\\,3]$, also $A = \\displaystyle\\int_1^3 \\left(1 + \\dfrac{1}{x^2}\\right) dx$.',
+        '$\\left[x - \\dfrac{1}{x}\\right]_1^3 = \\left(3 - \\dfrac{1}{3}\\right) - (1 - 1) = \\dfrac{8}{3}$',
+        'Kontrolle mit dem GTR: $\\displaystyle\\int_1^3 f(x)\\,dx \\approx 2{,}667$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der Graph von $f(x) = \\dfrac{x^3+1}{x^2}$ schließt mit der $x$-Achse und den Geraden $x = 1$ und $x = 2$ eine Fläche ein. Berechne ihren Inhalt.',
+      opts: ['$A = 1$', '$A = \\dfrac{3}{2}$', '$A = 2$', '$A = \\dfrac{5}{2}$'],
+      steps: [
+        'Vereinfachen: $f(x) = \\dfrac{x^3}{x^2} + \\dfrac{1}{x^2} = x + x^{-2}$, positiv auf $[1;\\,2]$.',
+        '$F(x) = \\dfrac{1}{2}x^2 - \\dfrac{1}{x}$, also $A = F(2) - F(1) = \\left(2 - \\dfrac{1}{2}\\right) - \\left(\\dfrac{1}{2} - 1\\right) = \\dfrac{3}{2} + \\dfrac{1}{2} = 2$',
+        'Falle: $F(1) = -\\dfrac{1}{2}$ nicht vergessen - die untere Grenze liefert hier keinen Nullwert.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Konzentration eines Wirkstoffs im Blut (in mg/l) wird durch $c(t) = \\dfrac{10t}{t^2+4}$ beschrieben ($t$ in Stunden nach der Einnahme). Wann ist die Konzentration am höchsten, und wie hoch ist sie?',
+      opts: ['nach $2$ Stunden, $c = 5$ mg/l', 'nach $2$ Stunden, $c = 2{,}5$ mg/l', 'nach $4$ Stunden, $c = 2$ mg/l', 'nach $1$ Stunde, $c = 2$ mg/l'],
+      steps: [
+        'Quotientenregel: $c^{\\prime}(t) = \\dfrac{10(t^2+4) - 10t \\cdot 2t}{(t^2+4)^2} = \\dfrac{40 - 10t^2}{(t^2+4)^2}$',
+        'Zähler null: $40 - 10t^2 = 0$, also $t^2 = 4$ und $t = 2$ (nur $t > 0$ sinnvoll).',
+        '$c(2) = \\dfrac{20}{8} = 2{,}5$; vorher steigt $c$ ($c^{\\prime} > 0$), danach fällt $c$: Maximum.',
+        'Probe: $c(1) = 2$ und $c(4) = 2$ sind kleiner als $2{,}5$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Aussage über $f(x) = \\dfrac{x^2+1}{x}$ trifft zu?',
+      opts: ['$f$ hat keine Nullstellen und ist punktsymmetrisch zum Ursprung.', '$f$ hat die Nullstelle $x = 0$.', '$f$ hat die Nullstellen $x = -1$ und $x = 1$.', '$f$ ist achsensymmetrisch zur $y$-Achse.'],
+      steps: [
+        'Nullstellen: Zähler $x^2 + 1 = 0$ hat keine Lösung, denn $x^2 + 1 \\geq 1$.',
+        '$f(-x) = \\dfrac{x^2+1}{-x} = -f(x)$: punktsymmetrisch zum Ursprung.',
+        '$x = 0$ ist die Polstelle (Nenner null), keine Nullstelle.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welchen Inhalt hat die Fläche, die der Graph von $f(x) = \\dfrac{4 - x^2}{x^2}$ im Intervall $[1;\\,4]$ mit der $x$-Achse einschließt?',
+      fig: '<svg viewBox="0 0 520 320" width="520" height="320" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Graph von f mit den beiden Flächenstücken zwischen x gleich 1 und x gleich 4"><defs><clipPath id="f2-clip"><rect x="39" y="19" width="460" height="268"/></clipPath><marker id="f2-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="40" y1="204.15" x2="498" y2="204.15" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f2-ar-0E244E)"/><line x1="90.89" y1="286" x2="90.89" y2="20" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f2-ar-0E244E)"/><text x="500" y="220.15" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">x</text><text x="78.89" y="18" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">y</text><text x="83.89" y="219.15" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="175.7" y1="200.65" x2="175.7" y2="207.65" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="175.7" y="220.15" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">1</text><line x1="260.52" y1="200.65" x2="260.52" y2="207.65" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="260.52" y="220.15" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">2</text><line x1="345.33" y1="200.65" x2="345.33" y2="207.65" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="345.33" y="220.15" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">3</text><line x1="430.15" y1="200.65" x2="430.15" y2="207.65" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="430.15" y="220.15" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">4</text><line x1="87.39" y1="255.31" x2="94.39" y2="255.31" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="83.89" y="259.31" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-1</text><line x1="87.39" y1="153" x2="94.39" y2="153" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="83.89" y="157" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">1</text><line x1="87.39" y1="101.85" x2="94.39" y2="101.85" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="83.89" y="105.85" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">2</text><line x1="87.39" y1="50.69" x2="94.39" y2="50.69" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="83.89" y="54.69" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">3</text><g clip-path="url(#f2-clip)"><path d="M 175.7 204.15 L 175.7 50.69 L 176.17 52.95 L 176.65 55.16 L 177.12 57.35 L 177.59 59.49 L 178.06 61.6 L 178.53 63.68 L 179 65.72 L 179.47 67.74 L 179.94 69.72 L 180.42 71.66 L 180.89 73.58 L 181.36 75.47 L 181.83 77.33 L 182.3 79.16 L 182.77 80.96 L 183.24 82.74 L 183.71 84.48 L 184.19 86.2 L 184.66 87.9 L 185.13 89.57 L 185.6 91.21 L 186.07 92.83 L 186.54 94.43 L 187.01 96.01 L 187.48 97.56 L 187.95 99.08 L 188.43 100.59 L 188.9 102.07 L 189.37 103.54 L 189.84 104.98 L 190.31 106.4 L 190.78 107.8 L 191.25 109.18 L 191.72 110.55 L 192.2 111.89 L 192.67 113.21 L 193.14 114.52 L 193.61 115.81 L 194.08 117.08 L 194.55 118.33 L 195.02 119.57 L 195.49 120.79 L 195.97 121.99 L 196.44 123.18 L 196.91 124.35 L 197.38 125.51 L 197.85 126.65 L 198.32 127.78 L 198.79 128.89 L 199.26 129.99 L 199.73 131.07 L 200.21 132.14 L 200.68 133.19 L 201.15 134.23 L 201.62 135.26 L 202.09 136.28 L 202.56 137.28 L 203.03 138.27 L 203.5 139.25 L 203.98 140.21 L 204.45 141.16 L 204.92 142.11 L 205.39 143.04 L 205.86 143.95 L 206.33 144.86 L 206.8 145.76 L 207.27 146.64 L 207.74 147.52 L 208.22 148.38 L 208.69 149.24 L 209.16 150.08 L 209.63 150.91 L 210.1 151.74 L 210.57 152.55 L 211.04 153.35 L 211.51 154.15 L 211.99 154.93 L 212.46 155.71 L 212.93 156.48 L 213.4 157.24 L 213.87 157.99 L 214.34 158.73 L 214.81 159.46 L 215.28 160.19 L 215.76 160.9 L 216.23 161.61 L 216.7 162.31 L 217.17 163.01 L 217.64 163.69 L 218.11 164.37 L 218.58 165.04 L 219.05 165.7 L 219.52 166.36 L 220 167 L 220.47 167.64 L 220.94 168.28 L 221.41 168.91 L 221.88 169.53 L 222.35 170.14 L 222.82 170.75 L 223.29 171.35 L 223.77 171.94 L 224.24 172.53 L 224.71 173.11 L 225.18 173.69 L 225.65 174.26 L 226.12 174.82 L 226.59 175.38 L 227.06 175.93 L 227.53 176.48 L 228.01 177.02 L 228.48 177.55 L 228.95 178.08 L 229.42 178.61 L 229.89 179.13 L 230.36 179.64 L 230.83 180.15 L 231.3 180.65 L 231.78 181.15 L 232.25 181.65 L 232.72 182.13 L 233.19 182.62 L 233.66 183.1 L 234.13 183.57 L 234.6 184.04 L 235.07 184.51 L 235.55 184.97 L 236.02 185.42 L 236.49 185.87 L 236.96 186.32 L 237.43 186.76 L 237.9 187.2 L 238.37 187.64 L 238.84 188.07 L 239.31 188.49 L 239.79 188.92 L 240.26 189.33 L 240.73 189.75 L 241.2 190.16 L 241.67 190.57 L 242.14 190.97 L 242.61 191.37 L 243.08 191.76 L 243.56 192.15 L 244.03 192.54 L 244.5 192.93 L 244.97 193.31 L 245.44 193.69 L 245.91 194.06 L 246.38 194.43 L 246.85 194.8 L 247.33 195.16 L 247.8 195.52 L 248.27 195.88 L 248.74 196.23 L 249.21 196.59 L 249.68 196.93 L 250.15 197.28 L 250.62 197.62 L 251.09 197.96 L 251.57 198.29 L 252.04 198.63 L 252.51 198.96 L 252.98 199.28 L 253.45 199.61 L 253.92 199.93 L 254.39 200.25 L 254.86 200.57 L 255.34 200.88 L 255.81 201.19 L 256.28 201.5 L 256.75 201.8 L 257.22 202.1 L 257.69 202.41 L 258.16 202.7 L 258.63 203 L 259.1 203.29 L 259.58 203.58 L 260.05 203.87 L 260.52 204.15 L 260.52 204.15 Z" fill="#F5C242" opacity="0.35"/></g><g clip-path="url(#f2-clip)"><path d="M 260.52 204.15 L 260.52 204.15 L 261.46 204.72 L 262.4 205.27 L 263.35 205.82 L 264.29 206.35 L 265.23 206.88 L 266.17 207.4 L 267.12 207.91 L 268.06 208.41 L 269 208.91 L 269.94 209.4 L 270.88 209.88 L 271.83 210.35 L 272.77 210.81 L 273.71 211.27 L 274.65 211.72 L 275.6 212.16 L 276.54 212.6 L 277.48 213.03 L 278.42 213.46 L 279.37 213.87 L 280.31 214.28 L 281.25 214.69 L 282.19 215.09 L 283.14 215.48 L 284.08 215.87 L 285.02 216.25 L 285.96 216.63 L 286.91 217 L 287.85 217.36 L 288.79 217.73 L 289.73 218.08 L 290.67 218.43 L 291.62 218.78 L 292.56 219.12 L 293.5 219.45 L 294.44 219.78 L 295.39 220.11 L 296.33 220.43 L 297.27 220.75 L 298.21 221.06 L 299.16 221.37 L 300.1 221.68 L 301.04 221.98 L 301.98 222.28 L 302.93 222.57 L 303.87 222.86 L 304.81 223.14 L 305.75 223.43 L 306.7 223.7 L 307.64 223.98 L 308.58 224.25 L 309.52 224.52 L 310.47 224.78 L 311.41 225.04 L 312.35 225.3 L 313.29 225.55 L 314.23 225.8 L 315.18 226.05 L 316.12 226.29 L 317.06 226.53 L 318 226.77 L 318.95 227.01 L 319.89 227.24 L 320.83 227.47 L 321.77 227.7 L 322.72 227.92 L 323.66 228.14 L 324.6 228.36 L 325.54 228.58 L 326.49 228.79 L 327.43 229 L 328.37 229.21 L 329.31 229.41 L 330.26 229.62 L 331.2 229.82 L 332.14 230.02 L 333.08 230.21 L 334.02 230.41 L 334.97 230.6 L 335.91 230.79 L 336.85 230.98 L 337.79 231.16 L 338.74 231.35 L 339.68 231.53 L 340.62 231.71 L 341.56 231.88 L 342.51 232.06 L 343.45 232.23 L 344.39 232.4 L 345.33 232.57 L 346.28 232.74 L 347.22 232.91 L 348.16 233.07 L 349.1 233.23 L 350.05 233.39 L 350.99 233.55 L 351.93 233.71 L 352.87 233.86 L 353.81 234.02 L 354.76 234.17 L 355.7 234.32 L 356.64 234.47 L 357.58 234.61 L 358.53 234.76 L 359.47 234.9 L 360.41 235.05 L 361.35 235.19 L 362.3 235.33 L 363.24 235.46 L 364.18 235.6 L 365.12 235.74 L 366.07 235.87 L 367.01 236 L 367.95 236.13 L 368.89 236.26 L 369.84 236.39 L 370.78 236.52 L 371.72 236.64 L 372.66 236.77 L 373.6 236.89 L 374.55 237.01 L 375.49 237.14 L 376.43 237.26 L 377.37 237.37 L 378.32 237.49 L 379.26 237.61 L 380.2 237.72 L 381.14 237.84 L 382.09 237.95 L 383.03 238.06 L 383.97 238.17 L 384.91 238.28 L 385.86 238.39 L 386.8 238.5 L 387.74 238.6 L 388.68 238.71 L 389.63 238.81 L 390.57 238.92 L 391.51 239.02 L 392.45 239.12 L 393.4 239.22 L 394.34 239.32 L 395.28 239.42 L 396.22 239.52 L 397.16 239.62 L 398.11 239.71 L 399.05 239.81 L 399.99 239.9 L 400.93 240 L 401.88 240.09 L 402.82 240.18 L 403.76 240.27 L 404.7 240.36 L 405.65 240.45 L 406.59 240.54 L 407.53 240.63 L 408.47 240.71 L 409.42 240.8 L 410.36 240.89 L 411.3 240.97 L 412.24 241.05 L 413.19 241.14 L 414.13 241.22 L 415.07 241.3 L 416.01 241.38 L 416.95 241.46 L 417.9 241.54 L 418.84 241.62 L 419.78 241.7 L 420.72 241.78 L 421.67 241.86 L 422.61 241.93 L 423.55 242.01 L 424.49 242.08 L 425.44 242.16 L 426.38 242.23 L 427.32 242.3 L 428.26 242.38 L 429.21 242.45 L 430.15 242.52 L 430.15 204.15 Z" fill="#799E31" opacity="0.3"/></g><g clip-path="url(#f2-clip)"><path d="M 154.5 -108.45 L 155.79 -94.15 L 157.08 -80.68 L 158.37 -67.97 L 159.65 -55.97 L 160.94 -44.62 L 162.23 -33.89 L 163.52 -23.72 L 164.81 -14.07 L 166.1 -4.92 L 167.39 3.77 L 168.67 12.04 L 169.96 19.9 L 171.25 27.39 L 172.54 34.53 L 173.83 41.33 L 175.12 47.83 L 176.41 54.03 L 177.69 59.97 L 178.98 65.64 L 180.27 71.07 L 181.56 76.27 L 182.85 81.25 L 184.14 86.03 L 185.42 90.61 L 186.71 95.01 L 188 99.23 L 189.29 103.3 L 190.58 107.2 L 191.87 110.96 L 193.16 114.57 L 194.44 118.05 L 195.73 121.4 L 197.02 124.64 L 198.31 127.75 L 199.6 130.76 L 200.89 133.66 L 202.18 136.46 L 203.46 139.16 L 204.75 141.78 L 206.04 144.3 L 207.33 146.75 L 208.62 149.11 L 209.91 151.4 L 211.2 153.61 L 212.48 155.76 L 213.77 157.83 L 215.06 159.85 L 216.35 161.8 L 217.64 163.69 L 218.93 165.52 L 220.22 167.3 L 221.5 169.03 L 222.79 170.71 L 224.08 172.34 L 225.37 173.92 L 226.66 175.46 L 227.95 176.95 L 229.23 178.4 L 230.52 179.82 L 231.81 181.19 L 233.1 182.53 L 234.39 183.83 L 235.68 185.1 L 236.97 186.33 L 238.25 187.53 L 239.54 188.7 L 240.83 189.84 L 242.12 190.95 L 243.41 192.03 L 244.7 193.09 L 245.99 194.12 L 247.27 195.12 L 248.56 196.1 L 249.85 197.06 L 251.14 197.99 L 252.43 198.9 L 253.72 199.79 L 255.01 200.66 L 256.29 201.51 L 257.58 202.34 L 258.87 203.15 L 260.16 203.94 L 261.45 204.71 L 262.74 205.47 L 264.03 206.21 L 265.31 206.93 L 266.6 207.63 L 267.89 208.33 L 269.18 209 L 270.47 209.67 L 271.76 210.31 L 273.05 210.95 L 274.33 211.57 L 275.62 212.18 L 276.91 212.77 L 278.2 213.36 L 279.49 213.93 L 280.78 214.49 L 282.06 215.03 L 283.35 215.57 L 284.64 216.1 L 285.93 216.62 L 287.22 217.12 L 288.51 217.62 L 289.8 218.1 L 291.08 218.58 L 292.37 219.05 L 293.66 219.51 L 294.95 219.96 L 296.24 220.4 L 297.53 220.84 L 298.82 221.26 L 300.1 221.68 L 301.39 222.09 L 302.68 222.49 L 303.97 222.89 L 305.26 223.28 L 306.55 223.66 L 307.84 224.03 L 309.12 224.4 L 310.41 224.76 L 311.7 225.12 L 312.99 225.47 L 314.28 225.81 L 315.57 226.15 L 316.86 226.48 L 318.14 226.81 L 319.43 227.13 L 320.72 227.44 L 322.01 227.75 L 323.3 228.06 L 324.59 228.36 L 325.87 228.65 L 327.16 228.94 L 328.45 229.23 L 329.74 229.51 L 331.03 229.78 L 332.32 230.06 L 333.61 230.32 L 334.89 230.59 L 336.18 230.84 L 337.47 231.1 L 338.76 231.35 L 340.05 231.6 L 341.34 231.84 L 342.63 232.08 L 343.91 232.32 L 345.2 232.55 L 346.49 232.78 L 347.78 233 L 349.07 233.23 L 350.36 233.44 L 351.65 233.66 L 352.93 233.87 L 354.22 234.08 L 355.51 234.29 L 356.8 234.49 L 358.09 234.69 L 359.38 234.89 L 360.67 235.08 L 361.95 235.28 L 363.24 235.46 L 364.53 235.65 L 365.82 235.83 L 367.11 236.02 L 368.4 236.19 L 369.68 236.37 L 370.97 236.54 L 372.26 236.72 L 373.55 236.89 L 374.84 237.05 L 376.13 237.22 L 377.42 237.38 L 378.7 237.54 L 379.99 237.7 L 381.28 237.85 L 382.57 238.01 L 383.86 238.16 L 385.15 238.31 L 386.44 238.46 L 387.72 238.6 L 389.01 238.75 L 390.3 238.89 L 391.59 239.03 L 392.88 239.17 L 394.17 239.3 L 395.46 239.44 L 396.74 239.57 L 398.03 239.71 L 399.32 239.84 L 400.61 239.96 L 401.9 240.09 L 403.19 240.22 L 404.48 240.34 L 405.76 240.46 L 407.05 240.58 L 408.34 240.7 L 409.63 240.82 L 410.92 240.94 L 412.21 241.05 L 413.5 241.16 L 414.78 241.28 L 416.07 241.39 L 417.36 241.5 L 418.65 241.61 L 419.94 241.71 L 421.23 241.82 L 422.51 241.92 L 423.8 242.03 L 425.09 242.13 L 426.38 242.23 L 427.67 242.33 L 428.96 242.43 L 430.25 242.53 L 431.53 242.62 L 432.82 242.72 L 434.11 242.81 L 435.4 242.91 L 436.69 243 L 437.98 243.09 L 439.27 243.18 L 440.55 243.27 L 441.84 243.36 L 443.13 243.44 L 444.42 243.53 L 445.71 243.62 L 447 243.7 L 448.29 243.78 L 449.57 243.87 L 450.86 243.95 L 452.15 244.03 L 453.44 244.11 L 454.73 244.19 L 456.02 244.27 L 457.31 244.34 L 458.59 244.42 L 459.88 244.5 L 461.17 244.57 L 462.46 244.65 L 463.75 244.72 L 465.04 244.79 L 466.32 244.87 L 467.61 244.94 L 468.9 245.01 L 470.19 245.08 L 471.48 245.15 L 472.77 245.21 L 474.06 245.28 L 475.34 245.35 L 476.63 245.42 L 477.92 245.48 L 479.21 245.55 L 480.5 245.61 L 481.79 245.67 L 483.08 245.74 L 484.36 245.8 L 485.65 245.86 L 486.94 245.92 L 488.23 245.98 L 489.52 246.04" fill="none" stroke="#B02418" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></g></svg>',
+      figcap: 'Graph von $f(x) = \\dfrac{4 - x^2}{x^2}$: oberhalb und unterhalb der $x$-Achse',
+      opts: ['$A = -1$', '$A = 0$', '$A = 1$', '$A = 2$'],
+      steps: [
+        'Nullstelle im Intervall: $4 - x^2 = 0$, also $x = 2$. Die Fläche besteht aus zwei Teilen.',
+        '$f(x) = 4x^{-2} - 1$, Stammfunktion $F(x) = -\\dfrac{4}{x} - x$.',
+        '$\\displaystyle\\int_1^2 f(x)\\,dx = F(2) - F(1) = -4 - (-5) = 1$ und $\\displaystyle\\int_2^4 f(x)\\,dx = F(4) - F(2) = -5 - (-4) = -1$.',
+        '$A = 1 + |{-1}| = 2$. Falle: das Gesamtintegral $\\displaystyle\\int_1^4 f(x)\\,dx = 0$ ist nicht die Fläche.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

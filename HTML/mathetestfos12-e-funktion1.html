@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: e-Funktionen I — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w28-e-funktion1',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · e-Funktionen I',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 28 (LB 4) · 20 Aufgaben: Kurvenverlauf, Asymptote, Exponentialgleichungen durch Exponentenvergleich · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 28 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: die Zahl e (1-4), Kurvenverlauf und Asymptote (5-10), Exponentialgleichungen (11-16), Achsenschnittpunkte und Anwendungen (17-20). GTR ohne CAS. */
+  questions: [
+    {
+      q: 'Welcher Näherungswert gehört zur Eulerschen Zahl $e$?',
+      opts: ['$e \\approx 2{,}718$', '$e \\approx 3{,}142$', '$e \\approx 2{,}5$', '$e \\approx 1{,}618$'],
+      steps: [
+        '$e = 2{,}71828\\ldots$ ist wie $\\pi$ eine irrationale Zahl.',
+        '$3{,}142$ ist $\\pi$, $1{,}618$ der Goldene Schnitt.',
+        'Auf dem GTR: $e^1$ eintippen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Aussage über $f(x) = e^{x}$ ist richtig?',
+      opts: ['$f(0) = 0$', '$f$ ist für alle $x \\in \\mathbb{R}$ definiert, und alle Funktionswerte sind positiv.', '$f$ hat die Nullstelle $x = 0$.', '$f$ ist nur für $x > 0$ definiert.'],
+      steps: [
+        'Eine Potenz mit positiver Basis ist immer positiv: $e^{x} > 0$ für jedes $x$.',
+        '$f(0) = e^0 = 1$, der Graph schneidet die $y$-Achse bei $1$ und die $x$-Achse nie.',
+        'Der Definitionsbereich ist $\\mathbb{R}$ - auch negative Exponenten sind erlaubt: $e^{-1} = \\dfrac{1}{e}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne mit dem GTR: $e^{2} \\approx$',
+      opts: ['$4{,}718$', '$5{,}437$', '$6{,}581$', '$7{,}389$'],
+      steps: [
+        '$e^2 = e \\cdot e \\approx 2{,}718 \\cdot 2{,}718 \\approx 7{,}389$',
+        'Falle: $2 \\cdot e \\approx 5{,}437$ oder $e + 2 \\approx 4{,}718$ sind keine Potenzen.',
+        '$2^{e} \\approx 6{,}581$ hat Basis und Exponent vertauscht.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Vereinfache $e^{x} \\cdot e^{2}$.',
+      opts: ['$e^{x+2}$', '$e^{2x}$', '$e^{2x+2}$', '$2 \\cdot e^{x}$'],
+      steps: [
+        'Potenzgesetz: gleiche Basis, Exponenten addieren: $e^{x} \\cdot e^{2} = e^{x+2}$.',
+        '$e^{2x}$ wäre $(e^{x})^2 = e^{x} \\cdot e^{x}$.',
+        'Dieses Gesetz braucht man beim Exponentenvergleich ständig.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme den Definitionsbereich von $f(x) = e^{2x-1}$.',
+      opts: ['$D = \\mathbb{R} \\setminus \\{0{,}5\\}$', '$D = \\{x \\mid x \\geq 0{,}5\\}$', '$D = \\mathbb{R}$', '$D = \\{x \\mid x > 0\\}$'],
+      steps: [
+        'Der Exponent $2x - 1$ darf jede reelle Zahl sein - auch negativ oder null.',
+        'Also $D = \\mathbb{R}$. Einschränkungen gibt es erst bei Brüchen, Wurzeln oder $\\ln$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Beschreibe das Monotonieverhalten von $f(x) = e^{-0{,}5x+1}$.',
+      opts: ['$f$ wächst nur für $x > 2$.', '$f$ ist auf ganz $\\mathbb{R}$ streng monoton fallend.', '$f$ fällt für $x < 2$ und wächst für $x > 2$.', '$f$ ist auf ganz $\\mathbb{R}$ streng monoton wachsend.'],
+      steps: [
+        '$f(x) = e^{ax+b}$ mit $a = -0{,}5 < 0$: Wächst $x$, wird der Exponent kleiner, also auch $f(x)$.',
+        'Die Nullstelle des Exponenten ($x = 2$) ist keine Extremstelle - dort ist $f(2) = e^0 = 1$, mehr nicht.',
+        'Probe: $f(0) = e^1 \\approx 2{,}72$, $f(2) = 1$, $f(4) = e^{-1} \\approx 0{,}37$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie verhält sich $f(x) = e^{2x-1}$ für $x \\to -\\infty$ und für $x \\to +\\infty$?',
+      opts: ['$x \\to -\\infty$: $f(x) \\to e^{-1}$; $x \\to +\\infty$: $f(x) \\to +\\infty$', '$x \\to -\\infty$: $f(x) \\to +\\infty$; $x \\to +\\infty$: $f(x) \\to 0$', '$x \\to -\\infty$: $f(x) \\to -\\infty$; $x \\to +\\infty$: $f(x) \\to +\\infty$', '$x \\to -\\infty$: $f(x) \\to 0$; $x \\to +\\infty$: $f(x) \\to +\\infty$'],
+      steps: [
+        'Für $x \\to -\\infty$ geht der Exponent gegen $-\\infty$, und $e^{\\text{sehr negativ}}$ ist fast null: $f(x) \\to 0$.',
+        'Für $x \\to +\\infty$ wächst der Exponent, $f(x) \\to +\\infty$.',
+        '$f(x)$ wird nie negativ - $-\\infty$ ist unmöglich. $e^{-1}$ ist nur der Wert bei $x = 0$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche Asymptote hat der Graph von $f(x) = e^{x} + 2$?',
+      opts: ['$y = 0$', '$x = 2$', '$y = -2$', '$y = 2$'],
+      steps: [
+        'Für $x \\to -\\infty$ gilt $e^{x} \\to 0$, also $f(x) \\to 0 + 2 = 2$.',
+        'Die Asymptote ist die waagerechte Gerade $y = 2$; der Graph von $e^{x}$ wurde um $2$ nach oben verschoben.',
+        'Falle: $y = 0$ gilt nur für $e^{x}$ ohne Verschiebung.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Gegeben ist $f(x) = 3 - e^{-x}$. Welche Aussage zur Asymptote stimmt?',
+      fig: '<svg viewBox="0 0 520 320" width="520" height="320" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Graph von f mit der waagerechten Asymptote y gleich 3 und dem Punkt P(0|2)"><defs><clipPath id="f1-clip"><rect x="39" y="19" width="460" height="268"/></clipPath><marker id="f1-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="40" y1="184.29" x2="498" y2="184.29" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><line x1="184.63" y1="286" x2="184.63" y2="20" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><text x="500" y="200.29" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">x</text><text x="172.63" y="18" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">y</text><text x="177.63" y="199.29" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="64.11" y1="180.79" x2="64.11" y2="187.79" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="64.11" y="200.29" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-2</text><line x1="124.37" y1="180.79" x2="124.37" y2="187.79" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="124.37" y="200.29" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">-1</text><line x1="244.89" y1="180.79" x2="244.89" y2="187.79" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="244.89" y="200.29" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">1</text><line x1="305.16" y1="180.79" x2="305.16" y2="187.79" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="305.16" y="200.29" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">2</text><line x1="365.42" y1="180.79" x2="365.42" y2="187.79" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="365.42" y="200.29" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">3</text><line x1="425.68" y1="180.79" x2="425.68" y2="187.79" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="425.68" y="200.29" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">4</text><line x1="485.95" y1="180.79" x2="485.95" y2="187.79" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="485.95" y="200.29" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle">5</text><line x1="181.13" y1="262.53" x2="188.13" y2="262.53" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="177.63" y="266.53" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-2</text><line x1="181.13" y1="223.41" x2="188.13" y2="223.41" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="177.63" y="227.41" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">-1</text><line x1="181.13" y1="145.18" x2="188.13" y2="145.18" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="177.63" y="149.18" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">1</text><line x1="181.13" y1="106.06" x2="188.13" y2="106.06" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="177.63" y="110.06" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">2</text><line x1="181.13" y1="66.94" x2="188.13" y2="66.94" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="177.63" y="70.94" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">3</text><line x1="181.13" y1="27.82" x2="188.13" y2="27.82" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><text x="177.63" y="31.82" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end">4</text><line x1="40" y1="66.94" x2="498" y2="66.94" stroke="#6E7E9F" stroke-width="1.3" stroke-linecap="round" stroke-dasharray="6 4"/><g clip-path="url(#f1-clip)"><path d="M 79.17 292.05 L 80.76 286.19 L 82.35 280.49 L 83.93 274.94 L 85.52 269.53 L 87.11 264.26 L 88.7 259.13 L 90.28 254.14 L 91.87 249.27 L 93.46 244.53 L 95.05 239.91 L 96.64 235.41 L 98.22 231.03 L 99.81 226.77 L 101.4 222.61 L 102.99 218.56 L 104.57 214.62 L 106.16 210.78 L 107.75 207.04 L 109.34 203.4 L 110.93 199.85 L 112.51 196.39 L 114.1 193.03 L 115.69 189.75 L 117.28 186.55 L 118.86 183.44 L 120.45 180.42 L 122.04 177.46 L 123.63 174.59 L 125.21 171.79 L 126.8 169.07 L 128.39 166.41 L 129.98 163.82 L 131.57 161.3 L 133.15 158.85 L 134.74 156.46 L 136.33 154.13 L 137.92 151.87 L 139.5 149.66 L 141.09 147.51 L 142.68 145.41 L 144.27 143.37 L 145.85 141.38 L 147.44 139.45 L 149.03 137.56 L 150.62 135.73 L 152.21 133.94 L 153.79 132.2 L 155.38 130.5 L 156.97 128.85 L 158.56 127.24 L 160.14 125.67 L 161.73 124.14 L 163.32 122.65 L 164.91 121.21 L 166.49 119.8 L 168.08 118.42 L 169.67 117.08 L 171.26 115.78 L 172.85 114.51 L 174.43 113.27 L 176.02 112.07 L 177.61 110.89 L 179.2 109.75 L 180.78 108.64 L 182.37 107.55 L 183.96 106.5 L 185.55 105.47 L 187.13 104.47 L 188.72 103.49 L 190.31 102.54 L 191.9 101.62 L 193.49 100.71 L 195.07 99.84 L 196.66 98.98 L 198.25 98.15 L 199.84 97.34 L 201.42 96.55 L 203.01 95.78 L 204.6 95.03 L 206.19 94.3 L 207.77 93.58 L 209.36 92.89 L 210.95 92.22 L 212.54 91.56 L 214.13 90.92 L 215.71 90.3 L 217.3 89.69 L 218.89 89.1 L 220.48 88.52 L 222.06 87.96 L 223.65 87.41 L 225.24 86.88 L 226.83 86.36 L 228.42 85.86 L 230 85.37 L 231.59 84.89 L 233.18 84.42 L 234.77 83.97 L 236.35 83.52 L 237.94 83.09 L 239.53 82.67 L 241.12 82.26 L 242.7 81.86 L 244.29 81.48 L 245.88 81.1 L 247.47 80.73 L 249.06 80.37 L 250.64 80.02 L 252.23 79.68 L 253.82 79.35 L 255.41 79.03 L 256.99 78.71 L 258.58 78.41 L 260.17 78.11 L 261.76 77.82 L 263.34 77.54 L 264.93 77.26 L 266.52 76.99 L 268.11 76.73 L 269.7 76.48 L 271.28 76.23 L 272.87 75.99 L 274.46 75.75 L 276.05 75.52 L 277.63 75.3 L 279.22 75.08 L 280.81 74.87 L 282.4 74.66 L 283.98 74.46 L 285.57 74.27 L 287.16 74.08 L 288.75 73.89 L 290.34 73.71 L 291.92 73.54 L 293.51 73.36 L 295.1 73.2 L 296.69 73.03 L 298.27 72.88 L 299.86 72.72 L 301.45 72.57 L 303.04 72.42 L 304.62 72.28 L 306.21 72.14 L 307.8 72.01 L 309.39 71.88 L 310.98 71.75 L 312.56 71.62 L 314.15 71.5 L 315.74 71.38 L 317.33 71.27 L 318.91 71.15 L 320.5 71.05 L 322.09 70.94 L 323.68 70.83 L 325.26 70.73 L 326.85 70.63 L 328.44 70.54 L 330.03 70.45 L 331.62 70.35 L 333.2 70.27 L 334.79 70.18 L 336.38 70.09 L 337.97 70.01 L 339.55 69.93 L 341.14 69.85 L 342.73 69.78 L 344.32 69.71 L 345.91 69.63 L 347.49 69.56 L 349.08 69.5 L 350.67 69.43 L 352.26 69.36 L 353.84 69.3 L 355.43 69.24 L 357.02 69.18 L 358.61 69.12 L 360.19 69.07 L 361.78 69.01 L 363.37 68.96 L 364.96 68.9 L 366.55 68.85 L 368.13 68.8 L 369.72 68.75 L 371.31 68.71 L 372.9 68.66 L 374.48 68.62 L 376.07 68.57 L 377.66 68.53 L 379.25 68.49 L 380.83 68.45 L 382.42 68.41 L 384.01 68.37 L 385.6 68.33 L 387.19 68.3 L 388.77 68.26 L 390.36 68.23 L 391.95 68.2 L 393.54 68.16 L 395.12 68.13 L 396.71 68.1 L 398.3 68.07 L 399.89 68.04 L 401.47 68.01 L 403.06 67.98 L 404.65 67.96 L 406.24 67.93 L 407.83 67.9 L 409.41 67.88 L 411 67.86 L 412.59 67.83 L 414.18 67.81 L 415.76 67.79 L 417.35 67.76 L 418.94 67.74 L 420.53 67.72 L 422.11 67.7 L 423.7 67.68 L 425.29 67.66 L 426.88 67.64 L 428.47 67.63 L 430.05 67.61 L 431.64 67.59 L 433.23 67.57 L 434.82 67.56 L 436.4 67.54 L 437.99 67.53 L 439.58 67.51 L 441.17 67.5 L 442.75 67.48 L 444.34 67.47 L 445.93 67.45 L 447.52 67.44 L 449.11 67.43 L 450.69 67.41 L 452.28 67.4 L 453.87 67.39 L 455.46 67.38 L 457.04 67.37 L 458.63 67.36 L 460.22 67.35 L 461.81 67.33 L 463.4 67.32 L 464.98 67.31 L 466.57 67.3 L 468.16 67.3 L 469.75 67.29 L 471.33 67.28 L 472.92 67.27 L 474.51 67.26 L 476.1 67.25 L 477.68 67.24 L 479.27 67.24 L 480.86 67.23 L 482.45 67.22 L 484.04 67.21 L 485.62 67.21 L 487.21 67.2 L 488.8 67.19 L 490.39 67.19 L 491.97 67.18" fill="none" stroke="#B02418" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></g><circle cx="184.63" cy="106.06" r="3.6" fill="#B02418" stroke="#FFFFFF" stroke-width="1.4"/><text x="176.63" y="98.06" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">P</text></svg>',
+      figcap: 'Graph von $f(x) = 3 - e^{-x}$ mit Asymptote (gestrichelt)',
+      opts: ['$y = 2$', '$y = 3$; der Graph nähert sich ihr für $x \\to +\\infty$.', '$y = 3$; der Graph nähert sich ihr für $x \\to -\\infty$.', '$y = 0$'],
+      steps: [
+        'Für $x \\to +\\infty$ wird $-x$ sehr negativ, $e^{-x} \\to 0$ und $f(x) \\to 3$.',
+        'Für $x \\to -\\infty$ wächst $e^{-x}$ über alle Grenzen, $f(x) \\to -\\infty$.',
+        '$y = 2$ ist nur der Schnittpunkt mit der $y$-Achse: $f(0) = 3 - 1 = 2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Funktion ist streng monoton fallend und hat die Asymptote $y = -1$?',
+      opts: ['$f(x) = -e^{-x} - 1$', '$f(x) = 1 - e^{x}$', '$f(x) = e^{x} - 1$', '$f(x) = e^{-x} - 1$'],
+      steps: [
+        '$e^{-x}$ ist fallend; $-1$ verschiebt den Graphen nach unten: Asymptote $y = -1$.',
+        '$e^{x} - 1$ ist wachsend; $1 - e^{x}$ ist fallend, hat aber die Asymptote $y = 1$.',
+        '$-e^{-x} - 1$ hat die Asymptote $y = -1$, ist aber wachsend (das Minus vor $e^{-x}$ spiegelt).'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Löse $e^{x+1} = e^{4}$.',
+      opts: ['$x = 3$', '$x = 4$', '$x = \\ln 4$', '$x = 5$'],
+      steps: [
+        'Gleiche Basis $e$ auf beiden Seiten: Exponentenvergleich $x + 1 = 4$.',
+        '$x = 3$; Probe: $e^{3+1} = e^4$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse $e^{2x} = 1$.',
+      opts: ['$x = \\dfrac{1}{2}$', '$x = 0$', '$x = 1$', 'keine Lösung'],
+      steps: [
+        '$1 = e^{0}$, also $e^{2x} = e^{0}$ und $2x = 0$.',
+        '$x = 0$. Falle: $1$ ist nicht $e^{1}$, sondern $e^{0}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Löse $3 \\cdot e^{2x-1} - 3 = 0$.',
+      opts: ['$x = 0$', '$x = -\\dfrac{1}{2}$', '$x = \\dfrac{1}{2}$', '$x = 1$'],
+      steps: [
+        'Umstellen: $3 \\cdot e^{2x-1} = 3$, also $e^{2x-1} = 1 = e^{0}$.',
+        'Exponentenvergleich: $2x - 1 = 0$, also $x = \\dfrac{1}{2}$.',
+        'Probe: $3 \\cdot e^{0} - 3 = 0$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Löse $e^{3x} = e^{x+4}$.',
+      opts: ['$x = 2$', '$x = 1$', '$x = -2$', '$x = 4$'],
+      steps: [
+        'Exponentenvergleich: $3x = x + 4$.',
+        '$2x = 4$, also $x = 2$. Probe: $e^{6} = e^{6}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse $e^{x} = 5$.',
+      opts: ['$x = \\ln 5 \\approx 1{,}609$', '$x = e^{5} \\approx 148{,}4$', '$x = \\lg 5 \\approx 0{,}699$', '$x = \\dfrac{5}{e} \\approx 1{,}839$'],
+      steps: [
+        '$5$ ist keine Potenz von $e$ - daher der natürliche Logarithmus: $x = \\ln 5$.',
+        '$\\ln 5 \\approx 1{,}609$; Probe: $e^{1{,}609} \\approx 5$.',
+        'Falle: $\\lg$ (Basis $10$) statt $\\ln$ (Basis $e$).'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Löse $2 \\cdot e^{0{,}5x} = 8$.',
+      opts: ['$x = \\dfrac{\\ln 4}{2} \\approx 0{,}693$', '$x = \\ln 4 \\approx 1{,}386$', '$x = 2 \\ln 8 \\approx 4{,}159$', '$x = 2 \\ln 4 \\approx 2{,}773$'],
+      steps: [
+        'Erst durch $2$ teilen: $e^{0{,}5x} = 4$.',
+        'Logarithmieren: $0{,}5x = \\ln 4$, also $x = 2 \\ln 4 \\approx 2{,}773$.',
+        'Fallen: nicht durch $2$ teilen ($\\ln 8$) oder den Faktor $0{,}5$ vergessen bzw. falsch herum verrechnen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wo schneidet der Graph von $f(x) = e^{2x-1}$ die $y$-Achse?',
+      opts: ['$S_y(0 \\mid 1)$', '$S_y(0 \\mid e) \\approx (0 \\mid 2{,}718)$', '$S_y(0 \\mid e^{-1}) \\approx (0 \\mid 0{,}368)$', '$S_y(0 \\mid -1)$'],
+      steps: [
+        '$y$-Achse: $x = 0$ einsetzen: $f(0) = e^{2 \\cdot 0 - 1} = e^{-1} = \\dfrac{1}{e}$.',
+        '$e^{-1} \\approx 0{,}368$. Falle: $e^{0} = 1$ gilt nur, wenn der ganze Exponent null ist.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wo schneidet der Graph von $f(x) = e^{x} - 2$ die $x$-Achse?',
+      opts: ['$S_x(2 \\mid 0)$', '$S_x(\\ln 2 \\mid 0) \\approx (0{,}693 \\mid 0)$', 'Der Graph schneidet die $x$-Achse nicht.', '$S_x(0 \\mid -1)$'],
+      steps: [
+        '$x$-Achse: $f(x) = 0$, also $e^{x} - 2 = 0$ und $e^{x} = 2$.',
+        '$x = \\ln 2 \\approx 0{,}693$.',
+        '$e^{x}$ allein hat keine Nullstelle, aber $e^{x} - 2$ schon. $(0 \\mid -1)$ ist der Schnittpunkt mit der $y$-Achse.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Kapital wächst nach $K(t) = 5000 \\cdot e^{0{,}03t}$ ($K$ in Euro, $t$ in Jahren). Nach welcher Zeit hat es sich verdoppelt?',
+      opts: ['$t = \\ln 2 \\approx 0{,}69$ Jahre', '$t = \\dfrac{2}{0{,}03} \\approx 66{,}7$ Jahre', '$t = \\dfrac{\\ln 2}{0{,}03} \\approx 23{,}1$ Jahre', '$t = \\dfrac{1}{0{,}03} \\approx 33{,}3$ Jahre'],
+      steps: [
+        'Verdoppelt: $5000 \\cdot e^{0{,}03t} = 10000$, also $e^{0{,}03t} = 2$.',
+        'Logarithmieren: $0{,}03t = \\ln 2$, also $t = \\dfrac{\\ln 2}{0{,}03} \\approx 23{,}1$.',
+        'Falle: $e^{0{,}03t} = 2$ heißt nicht $0{,}03t = 2$ - auf der rechten Seite steht $\\ln 2$, nicht $2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Bauteil kühlt nach $T(t) = 20 + 60 \\cdot e^{-0{,}1t}$ ab ($T$ in Grad Celsius, $t$ in Minuten). Wann ist es auf $20$ Grad Celsius abgekühlt?',
+      opts: ['nach $60$ Minuten', 'nach etwa $6{,}9$ Minuten', 'nie - $y = 20$ ist die Asymptote, es gilt $T(t) > 20$ für alle $t$', 'nach $10$ Minuten'],
+      steps: [
+        '$T(t) = 20$ hieße $60 \\cdot e^{-0{,}1t} = 0$ - eine Potenz von $e$ ist aber nie null.',
+        'Der Graph nähert sich der Umgebungstemperatur $20$ nur an; $T(0) = 80$.',
+        'Nach $10 \\ln 2 \\approx 6{,}9$ Minuten ist erst die Hälfte des Temperaturüberschusses abgebaut ($T = 50$).'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

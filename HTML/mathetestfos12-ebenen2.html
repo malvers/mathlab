@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Ebenen im Raum II — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w07-ebenen2',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Ebenen im Raum II',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 7 (LB 1) · 20 Aufgaben: Parameter- und Koordinatengleichung, Lage Gerade-Ebene, Durchstoßpunkt · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 7 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Umwandlung der Gleichungsformen (1-7), Lage Gerade-Ebene (8-13), Durchstosspunkt (14-16), Schnittwinkel und Orthogonalitaet (17-20). Alles ohne CAS. */
+  questions: [
+    {
+      q: 'Gib eine Parametergleichung der Ebene $E: x + 2y + z = 4$ an.',
+      opts: ['$E: \\vec x = \\begin{pmatrix} 4 \\\\ 0 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} -1 \\\\ 0 \\\\ 1 \\end{pmatrix}$', '$E: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 1 \\end{pmatrix} + s \\cdot \\begin{pmatrix} -2 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} -1 \\\\ 0 \\\\ 1 \\end{pmatrix}$', '$E: \\vec x = \\begin{pmatrix} 4 \\\\ 0 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} -2 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} -1 \\\\ 0 \\\\ 1 \\end{pmatrix}$', '$E: \\vec x = \\begin{pmatrix} 4 \\\\ 0 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 1 \\end{pmatrix}$'],
+      steps: [
+        'Drei Punkte suchen: $y = z = 0$ gibt $(4|0|0)$, $y = 1$, $z = 0$ gibt $(2|1|0)$, $y = 0$, $z = 1$ gibt $(3|0|1)$.',
+        'Spannvektoren als Differenzen: $\\begin{pmatrix} -2 \\\\ 1 \\\\ 0 \\end{pmatrix}$ und $\\begin{pmatrix} -1 \\\\ 0 \\\\ 1 \\end{pmatrix}$.',
+        'Probe: beide Spannvektoren sind senkrecht zu $\\vec n = \\begin{pmatrix} 1 \\\\ 2 \\\\ 1 \\end{pmatrix}$ - der Normalenvektor selbst darf kein Spannvektor sein.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welcher Punkt liegt $\\textbf{nicht}$ in der Ebene $E: 2x - y + 3z = 6$?',
+      opts: ['$P(3|0|0)$', '$P(1|2|2)$', '$P(1|1|2)$', '$P(0|0|2)$'],
+      steps: [
+        'Punktprobe heißt: einsetzen und mit $6$ vergleichen.',
+        '$2 \\cdot 1 - 1 + 3 \\cdot 2 = 7 \\ne 6$ - dieser Punkt liegt nicht in $E$.',
+        'Die anderen drei liefern $6$: $6 - 0 + 0$, $0 - 0 + 6$ und $2 - 2 + 6$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Gib eine Parametergleichung der Ebene $E: 3x - z = 6$ an.',
+      opts: ['$E: \\vec x = \\begin{pmatrix} 2 \\\\ 0 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 3 \\end{pmatrix}$', '$E: \\vec x = \\begin{pmatrix} 6 \\\\ 0 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 3 \\end{pmatrix}$', '$E: \\vec x = \\begin{pmatrix} 2 \\\\ 0 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 3 \\\\ 0 \\\\ -1 \\end{pmatrix}$', '$E: \\vec x = \\begin{pmatrix} 2 \\\\ 0 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix}$'],
+      steps: [
+        '$y$ kommt nicht vor, ist also frei wählbar: $\\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$ ist ein Spannvektor.',
+        'Stützpunkt aus $y = z = 0$: $3x = 6$, also $(2|0|0)$. Ein zweiter Punkt mit $z = 3$: $3x = 9$, also $(3|0|3)$ - Differenz $\\begin{pmatrix} 1 \\\\ 0 \\\\ 3 \\end{pmatrix}$.',
+        'Probe: $\\vec n = \\begin{pmatrix} 3 \\\\ 0 \\\\ -1 \\end{pmatrix}$ steht senkrecht auf beiden Spannvektoren; als Spannvektor taugt $\\vec n$ gerade nicht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wandle $E: \\vec x = \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ -1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 2 \\\\ 1 \\end{pmatrix}$ in eine Koordinatengleichung um.',
+      opts: ['$2x - y + 2z = 3$', '$2x - y + 2z = 5$', '$2x + y + 2z = 3$', '$x - y + 2z = 3$'],
+      steps: [
+        'Normalenvektor: $\\begin{pmatrix} 1 \\\\ 0 \\\\ -1 \\end{pmatrix} \\times \\begin{pmatrix} 0 \\\\ 2 \\\\ 1 \\end{pmatrix} = \\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix}$',
+        'Ansatz $2x - y + 2z = d$, Stützpunkt $(2|1|0)$ einsetzen: $4 - 1 + 0 = 3$',
+        'Probe mit $s = 1$, $t = 0$: $(3|1|-1)$ gibt $6 - 1 - 2 = 3$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Aussage über die Gleichungsformen einer Ebene ist richtig?',
+      opts: ['Eine Ebene hat unendlich viele Parametergleichungen; ihre Koordinatengleichung ist bis auf einen gemeinsamen Faktor eindeutig.', 'Eine Koordinatengleichung gibt es nur, wenn die Ebene durch den Ursprung geht.', 'Eine Ebene hat genau drei Parametergleichungen, eine je Punkt.', 'Beide Formen sind eindeutig - zu einer Ebene gehört genau eine Gleichung.'],
+      steps: [
+        'Stützpunkt und Spannvektoren darf man frei wählen, solange sie in der Ebene liegen - daher unendlich viele Parametergleichungen.',
+        'Multipliziert man $2x - y + 2z = 3$ mit $5$, entsteht $10x - 5y + 10z = 15$ - dieselbe Ebene.',
+        'Geht die Ebene durch den Ursprung, ist lediglich $d = 0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wandle $E: \\vec x = \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 2 \\end{pmatrix}$ in eine Koordinatengleichung um.',
+      opts: ['$x + 2y + z = 0$', '$x - 2y + z = 0$', '$2x - 4y + 2z = 1$', '$x - 2y + z = 4$'],
+      steps: [
+        '$\\begin{pmatrix} 2 \\\\ 1 \\\\ 0 \\end{pmatrix} \\times \\begin{pmatrix} 0 \\\\ 1 \\\\ 2 \\end{pmatrix} = \\begin{pmatrix} 2 \\\\ -4 \\\\ 2 \\end{pmatrix}$, gekürzt $\\begin{pmatrix} 1 \\\\ -2 \\\\ 1 \\end{pmatrix}$.',
+        'Stützpunkt $(1|1|1)$ einsetzen: $1 - 2 + 1 = 0$, also $d = 0$.',
+        '$d = 0$ heißt: die Ebene geht durch den Ursprung. $2x - 4y + 2z = 1$ wäre dagegen eine echt parallele Ebene.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet die Koordinatengleichung von $E: \\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 3 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix}$?',
+      opts: ['$z = 0$', '$x + y + z = 3$', '$x + y = 3$', '$z = 3$'],
+      steps: [
+        '$\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} \\times \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix} = \\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix}$, also $0x + 0y + 1z = d$.',
+        'Stützpunkt $(0|0|3)$: $d = 3$, somit $z = 3$.',
+        'Die Ebene liegt waagerecht in der Höhe $3$ - alle Punkte haben dieselbe $z$-Koordinate.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Untersuche die Lage von $g: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix}$ und $E: x + y + z = 7$.',
+      opts: ['$g$ schneidet $E$ in $S(1|0|0)$', '$g$ ist echt parallel zu $E$', '$g$ schneidet $E$ in $S(3|4|0)$', '$g$ liegt in $E$'],
+      steps: [
+        '$\\vec u \\cdot \\vec n = 1 + 2 + 0 = 3 \\ne 0$ - die Gerade schneidet die Ebene.',
+        'Einsetzen: $(1 + t) + 2t + 0 = 7$, also $1 + 3t = 7$ und $t = 2$.',
+        '$t = 2$ in $g$: $S(3|4|0)$. Probe: $3 + 4 + 0 = 7$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Untersuche die Lage von $g: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ -1 \\\\ 1 \\end{pmatrix}$ und $E: 2x + 3y - z = 5$.',
+      opts: ['$g$ ist echt parallel zu $E$', '$g$ steht senkrecht auf $E$', '$g$ schneidet $E$ in $S(1|2|0)$', '$g$ liegt in $E$'],
+      steps: [
+        '$\\vec u \\cdot \\vec n = 4 - 3 - 1 = 0$ - die Gerade läuft parallel zur Ebene oder liegt in ihr.',
+        'Punktprobe mit dem Stützpunkt $(1|2|0)$: $2 + 6 - 0 = 8 \\ne 5$.',
+        'Kein gemeinsamer Punkt, also echt parallel. Einsetzen liefert hier die falsche Aussage $8 = 5$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Untersuche die Lage von $g: \\vec x = \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ -1 \\\\ 0 \\end{pmatrix}$ und $E: x + y + 2z = 4$.',
+      opts: ['$g$ ist echt parallel zu $E$', '$g$ steht senkrecht auf $E$', '$g$ schneidet $E$ in $S(1|1|1)$', '$g$ liegt in $E$'],
+      steps: [
+        '$\\vec u \\cdot \\vec n = 1 - 1 + 0 = 0$ - parallel zur Ebene oder in ihr.',
+        'Punktprobe $(1|1|1)$: $1 + 1 + 2 = 4$ - der Stützpunkt liegt in $E$.',
+        'Ein gemeinsamer Punkt bei paralleler Richtung heißt: die ganze Gerade liegt in der Ebene. Einsetzen gibt $4 = 4$ für jedes $t$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Woran erkennt man, dass eine Gerade parallel zu einer Ebene verläuft oder in ihr liegt?',
+      opts: ['Der Richtungsvektor ist ein Vielfaches des Normalenvektors.', 'Das Skalarprodukt aus Richtungsvektor und Normalenvektor ist $0$.', 'Das Vektorprodukt aus Richtungsvektor und Normalenvektor ist der Nullvektor.', 'Der Stützpunkt der Geraden ist der Ursprung.'],
+      steps: [
+        '$\\vec u \\cdot \\vec n = 0$ heißt: die Laufrichtung führt nie von der Ebene weg.',
+        'Ob die Gerade in der Ebene liegt oder echt parallel ist, entscheidet danach die Punktprobe mit dem Stützpunkt.',
+        'Ist $\\vec u$ dagegen ein Vielfaches von $\\vec n$, steht die Gerade senkrecht auf der Ebene - der Gegenfall.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Für welchen Wert von $a$ steht $g: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 2 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ a \\\\ -1 \\end{pmatrix}$ senkrecht auf $E: 4x + 6y - 2z = 7$?',
+      opts: ['$a = -3$', '$a = 6$', '$a = 3$', '$a = 0$'],
+      steps: [
+        'Senkrecht auf der Ebene heißt: $\\vec u$ ist parallel zum Normalenvektor $\\vec n = \\begin{pmatrix} 4 \\\\ 6 \\\\ -2 \\end{pmatrix}$.',
+        '$\\begin{pmatrix} 4 \\\\ 6 \\\\ -2 \\end{pmatrix} = 2 \\cdot \\begin{pmatrix} 2 \\\\ 3 \\\\ -1 \\end{pmatrix}$, also muss $\\vec u = \\begin{pmatrix} 2 \\\\ 3 \\\\ -1 \\end{pmatrix}$ sein: $a = 3$.',
+        'Falle: $a = 0$ macht $\\vec u \\cdot \\vec n = 8 + 0 + 2 = 10$ - das wäre weder parallel noch senkrecht.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Gerade soll durch $P(1|0|1)$ verlaufen und ganz in $E: 3x - y + 2z = 5$ liegen. Welcher Richtungsvektor ist möglich?',
+      opts: ['$\\begin{pmatrix} 2 \\\\ 1 \\\\ 1 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ 3 \\\\ 0 \\end{pmatrix}$', '$\\begin{pmatrix} 3 \\\\ -1 \\\\ 2 \\end{pmatrix}$', '$\\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix}$'],
+      steps: [
+        '$P$ liegt in $E$: $3 - 0 + 2 = 5$. Der Richtungsvektor muss senkrecht zu $\\vec n = \\begin{pmatrix} 3 \\\\ -1 \\\\ 2 \\end{pmatrix}$ stehen.',
+        '$\\begin{pmatrix} 3 \\\\ -1 \\\\ 2 \\end{pmatrix} \\cdot \\begin{pmatrix} 1 \\\\ 3 \\\\ 0 \\end{pmatrix} = 3 - 3 + 0 = 0$ - passt.',
+        'Die anderen liefern $4$, $14$ und $7$; $\\begin{pmatrix} 3 \\\\ -1 \\\\ 2 \\end{pmatrix}$ selbst führt sogar senkrecht aus der Ebene heraus.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Berechne den Durchstoßpunkt von $g: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ -1 \\end{pmatrix}$ mit $E: x - y + 2z = 3$.',
+      opts: ['$D(1|2|3)$', '$D(5|4|1)$', '$D(3|3|2)$', '$D(7|5|0)$'],
+      steps: [
+        'Geradenpunkt einsetzen: $(1 + 2t) - (2 + t) + 2\\,(3 - t) = 3$',
+        '$1 + 2t - 2 - t + 6 - 2t = 5 - t = 3$, also $t = 2$.',
+        '$t = 2$ in $g$: $D(5|4|1)$. Probe: $5 - 4 + 2 = 3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Gerade durch $A(1|1|1)$ und $B(3|0|4)$ durchstößt $E: 2x + y + z = 16$. Bestimme den Durchstoßpunkt.',
+      opts: ['$D(7|-2|10)$', '$D(3|0|4)$', '$D(1|1|1)$', '$D(5|-1|7)$'],
+      steps: [
+        'Richtungsvektor $\\overrightarrow{AB} = \\begin{pmatrix} 2 \\\\ -1 \\\\ 3 \\end{pmatrix}$, also $g: \\vec x = \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ -1 \\\\ 3 \\end{pmatrix}$.',
+        'Einsetzen: $2\\,(1 + 2t) + (1 - t) + (1 + 3t) = 4 + 6t = 16$, also $t = 2$.',
+        '$D(5|-1|7)$; Probe: $10 - 1 + 7 = 16$. $A$ und $B$ selbst liegen nicht in $E$ ($4$ bzw. $10$).'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Bohrer bewegt sich längs $g: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 8 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ -2 \\\\ -2 \\end{pmatrix}$ auf eine Platte zu, die in $E: x - 2y - 2z = -10$ liegt. Trifft er senkrecht auf, und wo?',
+      opts: ['nein, $g$ verläuft parallel zur Platte', 'ja, senkrecht; Durchstoßpunkt $D(2|0|6)$', 'ja, senkrecht; Durchstoßpunkt $D(1|2|8)$', 'nein, der Schnittwinkel beträgt $45^\\circ$; $D(2|0|6)$'],
+      steps: [
+        '$\\vec u = \\begin{pmatrix} 1 \\\\ -2 \\\\ -2 \\end{pmatrix}$ ist genau der Normalenvektor der Ebene - die Gerade steht senkrecht auf der Platte.',
+        'Einsetzen: $(1 + t) - 2\\,(2 - 2t) - 2\\,(8 - 2t) = 9t - 19 = -10$, also $t = 1$.',
+        '$D(2|0|6)$; Probe: $2 - 0 - 12 = -10$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Unter welchem Winkel schneidet die Gerade $g: \\vec x = t \\cdot \\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix}$ die Ebene $E: x + y + z = 1$?',
+      opts: ['$90^\\circ$', '$\\alpha \\approx 54{,}7^\\circ$', '$45^\\circ$', '$\\alpha \\approx 35{,}3^\\circ$'],
+      steps: [
+        'Für den Schnittwinkel von Gerade und Ebene gilt $\\sin\\alpha = \\dfrac{|\\vec u \\cdot \\vec n|}{|\\vec u| \\cdot |\\vec n|}$.',
+        '$\\sin\\alpha = \\dfrac{1}{1 \\cdot \\sqrt{3}} \\approx 0{,}577$, also $\\alpha = \\sin^{-1}(0{,}577) \\approx 35{,}3^\\circ$',
+        'Falle: mit $\\cos^{-1}$ käme $54{,}7^\\circ$ heraus - das ist der Winkel zwischen $g$ und dem Normalenvektor.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne den Schnittwinkel von $g: \\vec x = \\begin{pmatrix} 0 \\\\ 1 \\\\ 0 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}$ und $E: 2x - y + 2z = 3$.',
+      opts: ['$\\alpha \\approx 24{,}0^\\circ$', '$45^\\circ$', '$\\alpha \\approx 26{,}4^\\circ$', '$\\alpha \\approx 63{,}6^\\circ$'],
+      steps: [
+        '$\\vec u \\cdot \\vec n = 2 - 2 + 4 = 4$, $|\\vec u| = 3$, $|\\vec n| = 3$',
+        '$\\sin\\alpha = \\dfrac{4}{9} \\approx 0{,}444$, also $\\alpha \\approx 26{,}4^\\circ$',
+        '$63{,}6^\\circ$ entsteht mit $\\cos^{-1}$, $24{,}0^\\circ$ mit $\\tan^{-1}$ - beim Schnittwinkel Gerade-Ebene ist es der Sinus.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Laserstrahl startet in $L(0|0|6)$ und läuft in Richtung $\\begin{pmatrix} 1 \\\\ 2 \\\\ -1 \\end{pmatrix}$ (Angaben in Metern). In welchem Punkt trifft er die geneigte Wand $E: 2x + y + z = 12$?',
+      opts: ['$(1|2|5)$', 'er trifft die Wand nicht, er verläuft parallel dazu', '$(3|6|3)$', '$(2|4|4)$'],
+      steps: [
+        'Strahlpunkt: $(t|2t|6 - t)$. Einsetzen: $2t + 2t + (6 - t) = 3t + 6 = 12$',
+        '$t = 2$ liefert den Auftreffpunkt $(2|4|4)$. Probe: $4 + 4 + 4 = 12$.',
+        '$\\vec u \\cdot \\vec n = 2 + 2 - 1 = 3 \\ne 0$ - der Strahl läuft also nicht parallel zur Wand.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Flugzeug fliegt längs $g: \\vec x = \\begin{pmatrix} 0 \\\\ 0 \\\\ 2 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 4 \\\\ 3 \\\\ 1 \\end{pmatrix}$ (Angaben in km). Eine Wolkenschicht liegt in der Ebene $z = 5$. Wo und unter welchem Winkel durchstößt es die Schicht?',
+      opts: ['in $(12|9|5)$ unter etwa $11{,}3^\\circ$', 'in $(12|9|5)$ unter etwa $78{,}7^\\circ$', 'in $(12|9|5)$ unter $45^\\circ$', 'in $(4|3|3)$ unter etwa $11{,}3^\\circ$'],
+      steps: [
+        '$z = 2 + t = 5$ gibt $t = 3$, also den Punkt $(12|9|5)$.',
+        'Normalenvektor der Schicht: $\\vec n = \\begin{pmatrix} 0 \\\\ 0 \\\\ 1 \\end{pmatrix}$; $\\sin\\alpha = \\dfrac{|1|}{\\sqrt{26} \\cdot 1} \\approx 0{,}196$',
+        '$\\alpha \\approx 11{,}3^\\circ$ - ein flacher Steigflug. $78{,}7^\\circ$ wäre der Winkel zur Senkrechten.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

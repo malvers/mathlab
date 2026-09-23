@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Prüfungsvorbereitung II — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w34-pruefungsvorbereitung2',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Prüfungsvorbereitung II',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 34 (Prüfungsvorbereitung) · 20 Aufgaben: Generalprobe: alle Lernbereiche gemischt, dazu Wahrscheinlichkeiten aus Klasse 11 · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 34 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Pruefungsstrategie (1-2), Vektorrechnung (3-6), Differenzialrechnung (7-10), Integral und weitere Funktionen (11-14), Wahrscheinlichkeiten Klasse 11 (15-19), Anwendung (20). GTR ohne CAS. */
+  questions: [
+    {
+      q: 'Im Lehrplan steht bei fast jedem Lernziel „Nutzung des GTR ohne CAS“. Welche Hilfsmittel sind demnach in der schriftlichen Prüfung vorgesehen?',
+      opts: ['der GTR ohne CAS, die zugelassene Formelsammlung und Zeichengeräte', 'gar kein Hilfsmittel, alles muss im Kopf gerechnet werden', 'nur ein einfacher wissenschaftlicher Taschenrechner ohne Grafikfunktion', 'ein CAS-Rechner, weil er exakt ableiten und integrieren kann'],
+      steps: [
+        'Der Lehrplan nennt als Werkzeug durchgehend den GTR ohne CAS - genau dieses Gerät ist auch in der Prüfung vorgesehen.',
+        'Dazu kommen die zugelassene Formelsammlung und Zeichengeräte.',
+        'Ein CAS ist erst im Wahlbereich 3 nach der schriftlichen Prüfung erlaubt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Extremalaufgabe liefert die Kantenlänge $x = \\sqrt{54}\\,\\mathrm{cm} \\approx 7{,}35\\,\\mathrm{cm}$. Gesucht ist die Oberfläche $O = 6x^2$ eines Würfels. Wie lautet das Ergebnis?',
+      opts: ['$O = 324\\,\\mathrm{cm}$', '$O = 324\\,\\mathrm{cm^2}$', '$O \\approx 44{,}1\\,\\mathrm{cm^2}$', '$O \\approx 319{,}7\\,\\mathrm{cm^2}$'],
+      steps: [
+        'Mit dem ungerundeten Wert weiterrechnen: $x^2 = 54$, also $O = 6 \\cdot 54 = 324$.',
+        'Das Ergebnis ist exakt: $O = 324\\,\\mathrm{cm^2}$ - eine Fläche hat die Einheit $\\mathrm{cm^2}$.',
+        'Fallen: mit $x \\approx 7{,}3$ vorgerundet kommt $319{,}7$ heraus, und $6 \\cdot 7{,}35 = 44{,}1$ vergisst das Quadrat.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme den Durchstoßpunkt der Geraden $g\\!: \\vec x = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ 1 \\\\ -1 \\end{pmatrix}$ mit der Ebene $E\\!: x - y + 2z = 3$.',
+      opts: ['$S(5|4|1)$', '$S(3|3|2)$', '$S(1|2|3)$', '$g$ ist echt parallel zu $E$, es gibt keinen Durchstoßpunkt.'],
+      steps: [
+        'Koordinaten von $g$ in $E$ einsetzen: $(1 + 2t) - (2 + t) + 2\\,(3 - t) = 5 - t$',
+        '$5 - t = 3 \\Rightarrow t = 2$, eingesetzt in $g$: $S(5|4|1)$',
+        'Probe: $5 - 4 + 2 \\cdot 1 = 3$. Bei $t = 1$ erhielte man $(3|3|2)$ - dort ist $3 - 3 + 4 = 4 \\ne 3$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie liegen die Geraden $g\\!: \\vec x = \\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix} + s \\cdot \\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ und $h\\!: \\vec x = \\begin{pmatrix} 0 \\\\ 1 \\\\ 3 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$ zueinander?',
+      opts: ['$g$ und $h$ schneiden sich in $S(0|-1|0)$.', '$g$ und $h$ sind identisch.', '$g$ und $h$ sind echt parallel.', '$g$ und $h$ sind windschief.'],
+      steps: [
+        'Die Richtungsvektoren $\\begin{pmatrix} 1 \\\\ 1 \\\\ 0 \\end{pmatrix}$ und $\\begin{pmatrix} 0 \\\\ 1 \\\\ 1 \\end{pmatrix}$ sind kein Vielfaches voneinander - parallel scheidet aus.',
+        'Gleichsetzen: $1 + s = 0 \\Rightarrow s = -1$; dritte Zeile $0 = 3 + t \\Rightarrow t = -3$',
+        'Probe in der zweiten Zeile: $s = 1 + t$ hieße $-1 = -2$ - Widerspruch, also kein Schnittpunkt: windschief.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie liegt die Gerade $g\\!: \\vec x = \\begin{pmatrix} 1 \\\\ 1 \\\\ 1 \\end{pmatrix} + t \\cdot \\begin{pmatrix} 2 \\\\ -4 \\\\ 2 \\end{pmatrix}$ zur Ebene $E\\!: x - 2y + z = 3$?',
+      opts: ['$g$ liegt in $E$.', '$g$ schneidet $E$, steht aber nicht senkrecht darauf.', '$g$ steht senkrecht auf $E$ und trifft sie in $S(1{,}5|0|1{,}5)$.', '$g$ ist echt parallel zu $E$.'],
+      steps: [
+        'Normalenvektor $\\vec n = \\begin{pmatrix} 1 \\\\ -2 \\\\ 1 \\end{pmatrix}$, Richtungsvektor $\\begin{pmatrix} 2 \\\\ -4 \\\\ 2 \\end{pmatrix} = 2\\,\\vec n$: also $g \\perp E$.',
+        'Durchstoßpunkt: $(1 + 2t) - 2\\,(1 - 4t) + (1 + 2t) = 12t = 3 \\Rightarrow t = \\dfrac{1}{4}$',
+        '$S(1{,}5|0|1{,}5)$; Probe: $1{,}5 - 0 + 1{,}5 = 3$. Der Stützpunkt $(1|1|1)$ liegt wegen $1 - 2 + 1 = 0 \\ne 3$ nicht in $E$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein dreieckiges Sonnensegel ist in den Punkten $A(0|0|0)$, $B(3|0|0)$ und $C(0|4|3)$ befestigt (Angaben in Metern). Wie groß ist seine Fläche?',
+      opts: ['$15\\,\\mathrm{m^2}$', '$12\\,\\mathrm{m^2}$', '$6\\,\\mathrm{m^2}$', '$7{,}5\\,\\mathrm{m^2}$'],
+      steps: [
+        '$\\overrightarrow{AB} = \\begin{pmatrix} 3 \\\\ 0 \\\\ 0 \\end{pmatrix}$, $\\overrightarrow{AC} = \\begin{pmatrix} 0 \\\\ 4 \\\\ 3 \\end{pmatrix}$, Vektorprodukt: $\\overrightarrow{AB} \\times \\overrightarrow{AC} = \\begin{pmatrix} 0 \\\\ -9 \\\\ 12 \\end{pmatrix}$',
+        '$|\\overrightarrow{AB} \\times \\overrightarrow{AC}| = \\sqrt{0 + 81 + 144} = \\sqrt{225} = 15$ ist die Parallelogrammfläche.',
+        'Das Dreieck ist halb so groß: $A_\\triangle = 7{,}5\\,\\mathrm{m^2}$. $6$ käme heraus, wenn man die Höhe $3$ vergisst.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet die Gleichung der Tangente an den Graphen von $f(x) = x^3 - 4x$ an der Stelle $x = 2$?',
+      opts: ['$y = 12x - 24$', '$y = 8x$', '$y = 8x - 16$', '$y = 8x + 16$'],
+      steps: [
+        '$f(2) = 8 - 8 = 0$, der Berührpunkt ist $B(2|0)$.',
+        '$f^{\\prime}(x) = 3x^2 - 4$, also $m = f^{\\prime}(2) = 12 - 4 = 8$',
+        '$y = 8\\,(x - 2) + 0 = 8x - 16$. Falle: $f^{\\prime}(2) = 12$ entsteht, wenn man die $-4$ vergisst.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Extrempunkte des Graphen von $f(x) = x^3 - 6x^2 + 9x$.',
+      opts: ['$H(1|4)$ und $T(3|0)$', '$W(2|2)$', '$T(1|4)$ und $H(3|0)$', 'nur $H(1|4)$'],
+      steps: [
+        '$f^{\\prime}(x) = 3x^2 - 12x + 9 = 3\\,(x - 1)(x - 3) = 0 \\Rightarrow x = 1$ oder $x = 3$',
+        '$f^{\\prime\\prime}(x) = 6x - 12$: $f^{\\prime\\prime}(1) = -6 < 0$ (Hochpunkt), $f^{\\prime\\prime}(3) = 6 > 0$ (Tiefpunkt)',
+        '$f(1) = 4$, $f(3) = 0$. $W(2|2)$ ist der Wendepunkt - dort ist $f^{\\prime\\prime} = 0$, nicht $f^{\\prime}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Unter welchem Winkel schneidet der Graph von $f(x) = x^2 - 2x$ die $x$-Achse an der Nullstelle $x = 2$?',
+      opts: ['$\\alpha \\approx 116{,}6^\\circ$', '$\\alpha \\approx 63{,}4^\\circ$', '$\\alpha = 45^\\circ$', '$\\alpha \\approx 26{,}6^\\circ$'],
+      steps: [
+        '$f^{\\prime}(x) = 2x - 2$, also $m = f^{\\prime}(2) = 2$',
+        '$\\tan\\alpha = m = 2 \\Rightarrow \\alpha = \\tan^{-1}(2) \\approx 63{,}4^\\circ$',
+        '$26{,}6^\\circ$ wäre $\\tan^{-1}\\!\\left(\\dfrac{1}{2}\\right)$; der Schnittwinkel mit einer Achse wird immer zwischen $0^\\circ$ und $90^\\circ$ angegeben.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Rechteck liegt mit der Grundseite auf der $x$-Achse, die beiden oberen Ecken liegen auf dem Graphen von $f(x) = 12 - x^2$. Welche Maße liefern die größte Fläche?',
+      opts: ['Breite $4$, Höhe $8$, $A = 32$', 'Breite $2$, Höhe $8$, $A = 16$', 'Breite $4$, Höhe $12$, $A = 48$', 'Breite $6$, Höhe $3$, $A = 18$'],
+      steps: [
+        'Die Ecken sind $(\\pm x\\,|\\,0)$ und $(\\pm x\\,|\\,12 - x^2)$, also $A(x) = 2x\\,(12 - x^2) = 24x - 2x^3$ mit $0 < x < \\sqrt{12}$.',
+        '$A^{\\prime}(x) = 24 - 6x^2 = 0 \\Rightarrow x = 2$; $A^{\\prime\\prime}(x) = -12x < 0$: Maximum',
+        'Breite $2x = 4$, Höhe $f(2) = 8$, $A = 32$. Bei $x = 3$ ergäbe sich $6 \\cdot 3 = 18$ - weniger.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne $\\int_{0}^{2} (x^3 - 4x)\\,dx$ und deute das Ergebnis.',
+      opts: ['$0$: die Flächen oberhalb und unterhalb heben sich auf.', '$4$: das ist der Flächeninhalt zwischen Graph und $x$-Achse.', '$-8$: der Graph verläuft unterhalb der $x$-Achse.', '$-4$: der Graph verläuft zwischen $0$ und $2$ unterhalb der $x$-Achse.'],
+      steps: [
+        'Stammfunktion: $F(x) = \\dfrac{x^4}{4} - 2x^2$',
+        '$F(2) - F(0) = (4 - 8) - 0 = -4$',
+        'Ein negatives Integral bedeutet: der Graph liegt im ganzen Intervall unter der $x$-Achse. Der Flächeninhalt wäre $4$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie groß ist der Inhalt der Fläche, die der Graph von $f(x) = x^3 - 4x$ im Intervall $[0\\,;\\,3]$ mit der $x$-Achse einschließt?',
+      opts: ['$A = 6{,}25$', '$A = 4$', '$A = 10{,}25$', '$A = 2{,}25$'],
+      steps: [
+        'Nullstelle im Intervall: $x\\,(x^2 - 4) = 0 \\Rightarrow x = 2$ (und $x = 0$), also in zwei Teilen rechnen.',
+        '$\\int_0^2 (x^3 - 4x)\\,dx = -4$ und $\\int_2^3 (x^3 - 4x)\\,dx = \\left(\\dfrac{81}{4} - 18\\right) - (4 - 8) = 6{,}25$',
+        'Flächeninhalt: $|-4| + 6{,}25 = 10{,}25$. Falle: $\\int_0^3 = 2{,}25$ ist nur die Bilanz, nicht die Fläche.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Untersuche $f(x) = \\dfrac{x^2 - 3x}{x^2 - 9}$ an der Stelle $x = 3$.',
+      opts: ['behebbare Lücke mit dem Grenzwert $0$', '$f$ ist dort definiert und stetig', 'Polstelle mit Vorzeichenwechsel', 'behebbare Lücke mit dem Grenzwert $\\dfrac{1}{2}$'],
+      steps: [
+        'Zähler und Nenner faktorisieren: $\\dfrac{x\\,(x - 3)}{(x - 3)(x + 3)} = \\dfrac{x}{x + 3}$ für $x \\ne 3$',
+        'Der Faktor $(x - 3)$ kürzt sich weg: keine Polstelle, sondern eine behebbare Lücke.',
+        'Grenzwert: $\\dfrac{3}{3 + 3} = \\dfrac{1}{2}$. Bei $x = -3$ bleibt dagegen eine Polstelle.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welchen Extrempunkt hat der Graph von $f(x) = x \\cdot e^{2x}$?',
+      opts: ['Hochpunkt $H(-0{,}5|-0{,}18)$', 'Tiefpunkt $T(-1|-0{,}14)$', 'Tiefpunkt $T(0|0)$', 'Tiefpunkt $T(-0{,}5|-0{,}18)$'],
+      steps: [
+        'Produktregel: $f^{\\prime}(x) = e^{2x} + x \\cdot 2e^{2x} = (1 + 2x)\\,e^{2x}$',
+        '$e^{2x} > 0$, also $1 + 2x = 0 \\Rightarrow x = -0{,}5$; $f^{\\prime\\prime}(x) = (4x + 4)\\,e^{2x}$, $f^{\\prime\\prime}(-0{,}5) = 2e^{-1} > 0$: Tiefpunkt',
+        '$f(-0{,}5) = -0{,}5 \\cdot e^{-1} \\approx -0{,}18$. Falle: die Kettenregel liefert den Faktor $2$, sonst käme $x = -1$ heraus.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'In einer Schachtel liegen $4$ rote und $6$ grüne Bonbons. Zwei werden nacheinander ohne Zurücklegen gezogen. Wie groß ist die Wahrscheinlichkeit, dass beide grün sind?',
+      opts: ['$0{,}36$', '$\\dfrac{1}{3}$', '$\\dfrac{2}{15}$', '$\\dfrac{2}{5}$'],
+      steps: [
+        'Baumdiagramm, erster Pfad: $P(\\text{grün}) = \\dfrac{6}{10}$, danach sind nur noch $5$ von $9$ grün.',
+        'Produktregel (Pfadregel): $P = \\dfrac{6}{10} \\cdot \\dfrac{5}{9} = \\dfrac{30}{90} = \\dfrac{1}{3}$',
+        '$0{,}36 = 0{,}6^2$ gilt nur mit Zurücklegen; $\\dfrac{2}{15}$ wäre $P(\\text{beide rot})$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Bauteil ist unabhängig von den anderen mit der Wahrscheinlichkeit $5\\,\\%$ defekt. Ein Gerät enthält $3$ solche Bauteile. Wie groß ist die Wahrscheinlichkeit, dass mindestens eines defekt ist?',
+      opts: ['$0{,}0125\\,\\%$', '$15\\,\\%$', '$\\approx 14{,}3\\,\\%$', '$\\approx 85{,}7\\,\\%$'],
+      steps: [
+        'Gegenereignis: kein Bauteil defekt, $P = 0{,}95^3 = 0{,}857375$',
+        '$P(\\text{mindestens eines defekt}) = 1 - 0{,}857375 = 0{,}142625 \\approx 14{,}3\\,\\%$',
+        '$3 \\cdot 5\\,\\% = 15\\,\\%$ ist nur eine grobe Näherung: Wahrscheinlichkeiten addiert man nicht über Pfade hinweg.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'In einem Betrieb arbeiten $250$ Personen, davon $100$ im Außendienst. $60$ Personen fahren einen Dienstwagen, darunter $45$ aus dem Außendienst. Wie viele Personen im Innendienst haben keinen Dienstwagen?',
+      opts: ['$190$', '$135$', '$150$', '$105$'],
+      steps: [
+        'Vierfeldertafel: Innendienst $= 250 - 100 = 150$.',
+        'Dienstwagen im Innendienst: $60 - 45 = 15$',
+        'Innendienst ohne Dienstwagen: $150 - 15 = 135$. Probe: $45 + 55 + 15 + 135 = 250$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Gleicher Betrieb ($250$ Personen, $100$ im Außendienst, $60$ Dienstwagen, davon $45$ im Außendienst): Eine zufällig gewählte Person fährt einen Dienstwagen. Mit welcher Wahrscheinlichkeit arbeitet sie im Außendienst?',
+      opts: ['$0{,}75$', '$0{,}24$', '$0{,}45$', '$0{,}18$'],
+      steps: [
+        'Bedingte Wahrscheinlichkeit: $P(A|D) = \\dfrac{P(A \\cap D)}{P(D)}$, hier mit Anzahlen: $\\dfrac{45}{60}$',
+        '$\\dfrac{45}{60} = 0{,}75$',
+        'Falle: $\\dfrac{45}{100} = 0{,}45$ ist $P(D|A)$ - die Bedingung steht im Nenner.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Zwei Zulieferer: $A$ liefert $70\\,\\%$ der Teile mit $4\\,\\%$ Ausschuss, $B$ liefert $30\\,\\%$ mit $10\\,\\%$ Ausschuss. Wie groß ist der Ausschussanteil insgesamt?',
+      opts: ['$8{,}2\\,\\%$', '$7\\,\\%$', '$5{,}8\\,\\%$', '$14\\,\\%$'],
+      steps: [
+        'Zweistufiges Baumdiagramm, Pfade über $A$ und über $B$ addieren.',
+        '$P = 0{,}7 \\cdot 0{,}04 + 0{,}3 \\cdot 0{,}10 = 0{,}028 + 0{,}03 = 0{,}058$',
+        '$8{,}2\\,\\%$ entsteht beim Vertauschen der Anteile, $7\\,\\%$ ist der ungewichtete Mittelwert.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Betrieb hat die Kostenfunktion $K(x) = x^3 - 6x^2 + 12x + 80$ (in Tsd. €, $x$ in ME) und verkauft jede ME für $48$ Tsd. €. Bei welcher Menge ist der Gewinn maximal?',
+      opts: ['$x = 4$ ME, $G = 96$ Tsd. €', '$x = 6$ ME, $G = 136$ Tsd. €', '$x = 6$ ME, $G = 216$ Tsd. €', '$x = 2$ ME, $G = 8$ Tsd. €'],
+      steps: [
+        'Gewinn: $G(x) = 48x - K(x) = -x^3 + 6x^2 + 36x - 80$',
+        '$G^{\\prime}(x) = -3x^2 + 12x + 36 = -3\\,(x - 6)(x + 2) = 0 \\Rightarrow x = 6$ (die Lösung $x = -2$ ist ohne Bedeutung)',
+        '$G^{\\prime\\prime}(x) = -6x + 12$, $G^{\\prime\\prime}(6) = -24 < 0$: Maximum. $G(6) = -216 + 216 + 216 - 80 = 136$',
+        '$x = 2$ ist die Stelle der Kostenkehre ($K^{\\prime\\prime} = 0$), nicht das Gewinnmaximum.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

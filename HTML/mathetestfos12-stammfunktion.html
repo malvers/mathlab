@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Stammfunktion und unbestimmtes Integral — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w22-stammfunktion',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Stammfunktion und unbestimmtes Integral',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 22 (LB 3) · 20 Aufgaben: Stammfunktion, Grundintegral, Faktor- und Summenregel · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 22 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Begriff und Grundintegral (1-6), Faktor- und Summenregel (7-13), Bedingung, Probe und Anwendung (14-20). Alles ohne CAS. */
+  questions: [
+    {
+      q: 'Wann heißt eine Funktion $F$ Stammfunktion von $f$?',
+      opts: ['Wenn $F(x) \\cdot f(x) = 1$ für alle $x$ gilt.', 'Wenn $F^{\\prime}(x) = f(x)$ für alle $x$ gilt.', 'Wenn $F(x) = f(x) + C$ mit einer Konstanten $C$ gilt.', 'Wenn $f^{\\prime}(x) = F(x)$ für alle $x$ gilt.'],
+      steps: [
+        'Integrieren ist die Umkehrung des Ableitens: Die Ableitung der Stammfunktion ist wieder $f$.',
+        'Beispiel: $F(x) = x^2$ ist Stammfunktion von $f(x) = 2x$, denn $F^{\\prime}(x) = 2x$.',
+        'Die Richtung ist entscheidend - $f^{\\prime} = F$ wäre die falsche Reihenfolge.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme eine Stammfunktion von $f(x) = x^3$.',
+      opts: ['$F(x) = \\dfrac{x^4}{4} + C$', '$F(x) = \\dfrac{x^3}{3} + C$', '$F(x) = 3x^2 + C$', '$F(x) = x^4 + C$'],
+      steps: [
+        'Grundintegral: $\\int x^n\\,dx = \\dfrac{x^{n+1}}{n+1} + C$',
+        'Mit $n = 3$: $F(x) = \\dfrac{x^4}{4} + C$',
+        'Probe: $F^{\\prime}(x) = \\dfrac{4x^3}{4} = x^3$. Fallen: abgeleitet ($3x^2$), nicht geteilt ($x^4$), durch den alten Exponenten geteilt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme eine Stammfunktion von $f(x) = 5$.',
+      opts: ['$F(x) = 5x + C$', '$F(x) = 5 + C$', '$F(x) = \\dfrac{5x^2}{2} + C$', '$F(x) = 0$'],
+      steps: [
+        '$5 = 5 \\cdot x^0$, also $\\int 5\\,dx = 5 \\cdot \\dfrac{x^1}{1} + C = 5x + C$',
+        'Probe: $(5x + C)^{\\prime} = 5$.',
+        '$0$ wäre die Ableitung von $5$, nicht die Stammfunktion.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme eine Stammfunktion von $f(x) = \\dfrac{1}{x^2} = x^{-2}$ für $x > 0$.',
+      opts: ['$F(x) = -\\dfrac{1}{3x^3} + C$', '$F(x) = -\\dfrac{1}{x} + C$', '$F(x) = \\dfrac{1}{x} + C$', '$F(x) = -\\dfrac{2}{x^3} + C$'],
+      steps: [
+        'Grundintegral mit $n = -2$: $\\dfrac{x^{-2+1}}{-2+1} = \\dfrac{x^{-1}}{-1} = -\\dfrac{1}{x}$',
+        'Probe: $\\left(-x^{-1}\\right)^{\\prime} = -(-1) \\cdot x^{-2} = \\dfrac{1}{x^2}$.',
+        'Falle: Der Exponent wird um $1$ erhöht, also von $-2$ auf $-1$ - nicht auf $-3$. $-\\dfrac{2}{x^3}$ ist die Ableitung.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme eine Stammfunktion von $f(x) = \\sqrt{x} = x^{\\frac{1}{2}}$ für $x > 0$.',
+      opts: ['$F(x) = \\dfrac{2}{3}\\,x^{\\frac{3}{2}} + C$', '$F(x) = \\dfrac{1}{2\\sqrt{x}} + C$', '$F(x) = \\dfrac{3}{2}\\,x^{\\frac{3}{2}} + C$', '$F(x) = \\dfrac{2}{3}\\,x^{\\frac{1}{2}} + C$'],
+      steps: [
+        '$n = \\dfrac{1}{2}$, neuer Exponent $\\dfrac{1}{2} + 1 = \\dfrac{3}{2}$',
+        '$\\int x^{\\frac{1}{2}}\\,dx = \\dfrac{x^{\\frac{3}{2}}}{\\frac{3}{2}} + C = \\dfrac{2}{3}\\,x^{\\frac{3}{2}} + C$',
+        'Durch $\\dfrac{3}{2}$ teilen heißt mit $\\dfrac{2}{3}$ multiplizieren. $\\dfrac{1}{2\\sqrt{x}}$ ist die Ableitung von $\\sqrt{x}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie viele Stammfunktionen hat $f(x) = x^2$?',
+      opts: ['Genau zwei: $\\dfrac{x^3}{3}$ und $-\\dfrac{x^3}{3}$.', 'Keine, weil $x^2$ keine Ableitung einer Funktion ist.', 'Genau eine, nämlich $F(x) = \\dfrac{x^3}{3}$.', 'Unendlich viele - sie unterscheiden sich nur um eine Konstante $C$.'],
+      steps: [
+        '$\\dfrac{x^3}{3}$, $\\dfrac{x^3}{3} + 1$ und $\\dfrac{x^3}{3} - 100$ haben alle die Ableitung $x^2$.',
+        'Die Konstante fällt beim Ableiten weg, deshalb steht sie im unbestimmten Integral: $\\int x^2\\,dx = \\dfrac{x^3}{3} + C$.',
+        'Die Menge aller Stammfunktionen heißt unbestimmtes Integral.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\int 6x^2\\,dx$.',
+      opts: ['$12x + C$', '$3x^3 + C$', '$6x^3 + C$', '$2x^3 + C$'],
+      steps: [
+        'Faktorregel: Der konstante Faktor bleibt stehen, $\\int 6x^2\\,dx = 6 \\cdot \\int x^2\\,dx$',
+        '$= 6 \\cdot \\dfrac{x^3}{3} + C = 2x^3 + C$',
+        'Probe: $(2x^3)^{\\prime} = 6x^2$. Falle: $12x$ ist die Ableitung, $6x^3$ vergisst das Teilen durch $3$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\int (3x^2 + 4x - 5)\\,dx$.',
+      opts: ['$x^3 + 2x^2 - 5x + C$', '$x^3 + 4x^2 - 5x + C$', '$x^3 + 2x^2 + C$', '$6x + 4 + C$'],
+      steps: [
+        'Summenregel: jeden Summanden einzeln integrieren.',
+        '$3 \\cdot \\dfrac{x^3}{3} + 4 \\cdot \\dfrac{x^2}{2} - 5x = x^3 + 2x^2 - 5x$',
+        'Auch die Konstante $-5$ bekommt ein $x$: $\\int (-5)\\,dx = -5x$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme eine Stammfunktion von $f(x) = x^4 - 2x$.',
+      opts: ['$F(x) = 4x^3 - 2 + C$', '$F(x) = \\dfrac{x^5}{4} - x^2 + C$', '$F(x) = \\dfrac{x^5}{5} - x^2 + C$', '$F(x) = \\dfrac{x^5}{5} - 2x^2 + C$'],
+      steps: [
+        '$\\int x^4\\,dx = \\dfrac{x^5}{5}$ und $\\int 2x\\,dx = 2 \\cdot \\dfrac{x^2}{2} = x^2$',
+        '$F(x) = \\dfrac{x^5}{5} - x^2 + C$',
+        'Probe: $F^{\\prime}(x) = x^4 - 2x$. Falle: bei $2x$ das Teilen durch $2$ vergessen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme eine Stammfunktion von $f(x) = \\dfrac{1}{2}x^2 + 3$.',
+      opts: ['$F(x) = x + C$', '$F(x) = \\dfrac{1}{6}x^3 + C$', '$F(x) = \\dfrac{1}{6}x^3 + 3x + C$', '$F(x) = \\dfrac{1}{2}x^3 + 3x + C$'],
+      steps: [
+        '$\\int \\dfrac{1}{2}x^2\\,dx = \\dfrac{1}{2} \\cdot \\dfrac{x^3}{3} = \\dfrac{1}{6}x^3$',
+        '$\\int 3\\,dx = 3x$, zusammen $F(x) = \\dfrac{1}{6}x^3 + 3x + C$',
+        'Probe: $F^{\\prime}(x) = \\dfrac{3}{6}x^2 + 3 = \\dfrac{1}{2}x^2 + 3$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme eine Stammfunktion von $f(x) = x \\cdot (x + 2)$.',
+      opts: ['$F(x) = \\dfrac{x^2}{2} \\cdot \\left(\\dfrac{x^2}{2} + 2x\\right) + C$', '$F(x) = 2x + 2 + C$', '$F(x) = \\dfrac{x^3}{3} + x^2 + C$', '$F(x) = \\dfrac{x^3}{3} + 2x + C$'],
+      steps: [
+        'Es gibt keine Produktregel fürs Integrieren - erst ausmultiplizieren: $f(x) = x^2 + 2x$',
+        '$F(x) = \\dfrac{x^3}{3} + 2 \\cdot \\dfrac{x^2}{2} = \\dfrac{x^3}{3} + x^2 + C$',
+        'Probe: $F^{\\prime}(x) = x^2 + 2x = x(x + 2)$. Faktorweise integrieren ist falsch.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme eine Stammfunktion von $f(x) = (2x - 1)^2$.',
+      opts: ['$F(x) = \\dfrac{4}{3}x^3 - 4x^2 + x + C$', '$F(x) = 2 \\cdot (2x - 1) + C$', '$F(x) = \\dfrac{4}{3}x^3 - 2x^2 + x + C$', '$F(x) = \\dfrac{(2x - 1)^3}{3} + C$'],
+      steps: [
+        'Binomische Formel: $(2x - 1)^2 = 4x^2 - 4x + 1$',
+        '$F(x) = 4 \\cdot \\dfrac{x^3}{3} - 4 \\cdot \\dfrac{x^2}{2} + x = \\dfrac{4}{3}x^3 - 2x^2 + x + C$',
+        'Probe: $F^{\\prime}(x) = 4x^2 - 4x + 1$. Bei $\\dfrac{(2x - 1)^3}{3}$ liefert die Kettenregel beim Ableiten den Faktor $2$ zu viel.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Funktion ist KEINE Stammfunktion von $f(x) = 2x$?',
+      opts: ['$F(x) = x^2 + 5$', '$F(x) = x^2 - 3$', '$F(x) = x^2$', '$F(x) = x^2 + 2x$'],
+      steps: [
+        'Ableiten: $x^2 + 5$, $x^2 - 3$ und $x^2$ ergeben alle $2x$ - die Konstante verschwindet.',
+        '$(x^2 + 2x)^{\\prime} = 2x + 2 \\neq 2x$',
+        'Stammfunktionen dürfen sich nur um eine additive Konstante unterscheiden, nicht um einen Summanden mit $x$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Für welchen Wert von $a$ ist $F(x) = a\\,x^3 + 2x$ eine Stammfunktion von $f(x) = 6x^2 + 2$?',
+      opts: ['$a = 18$', '$a = 2$', '$a = 6$', '$a = \\dfrac{1}{2}$'],
+      steps: [
+        'Ableiten: $F^{\\prime}(x) = 3a\\,x^2 + 2$',
+        'Vergleich mit $f(x) = 6x^2 + 2$: $3a = 6$, also $a = 2$.',
+        'Probe: $(2x^3 + 2x)^{\\prime} = 6x^2 + 2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Stammfunktion $F$ von $f(x) = 2x$ mit $F(1) = 5$.',
+      opts: ['$F(x) = x^2 + 4$', '$F(x) = x^2 + 5$', '$F(x) = x^2 + C$', '$F(x) = x^2 - 4$'],
+      steps: [
+        'Alle Stammfunktionen: $F(x) = x^2 + C$',
+        'Bedingung: $F(1) = 1 + C = 5$, also $C = 4$.',
+        '$F(x) = x^2 + 4$; Probe: $F(1) = 5$. Die Bedingung legt $C$ fest - $x^2 + C$ ist noch nicht die Antwort.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Stammfunktion $F$ von $f(x) = 3x^2 - 2$ mit $F(2) = 1$.',
+      opts: ['$F(x) = x^3 - 2x - 5$', '$F(x) = x^3 - 2x + 3$', '$F(x) = x^3 - 2x - 3$', '$F(x) = x^3 - 2x + 1$'],
+      steps: [
+        '$F(x) = x^3 - 2x + C$',
+        '$F(2) = 8 - 4 + C = 4 + C = 1$, also $C = -3$.',
+        '$F(x) = x^3 - 2x - 3$; Probe: $F(2) = 8 - 4 - 3 = 1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Prüfe durch Ableiten: Welche Funktion ist eine Stammfunktion von $f(x) = 4x^3 - 6x$?',
+      opts: ['$F(x) = 12x^2 - 6$', '$F(x) = x^4 - 3x^2 + 1$', '$F(x) = \\dfrac{x^4}{4} - 3x^2$', '$F(x) = x^4 - 6x^2$'],
+      steps: [
+        '$(x^4 - 3x^2 + 1)^{\\prime} = 4x^3 - 6x$ - passt.',
+        '$(x^4 - 6x^2)^{\\prime} = 4x^3 - 12x$ und $\\left(\\dfrac{x^4}{4} - 3x^2\\right)^{\\prime} = x^3 - 6x$ - passen nicht.',
+        '$12x^2 - 6$ ist die Ableitung von $f$, nicht eine Stammfunktion.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Grenzkosten eines Betriebs sind $K^{\\prime}(x) = 0{,}6x + 4$ (in € pro Stück), die Fixkosten betragen $K(0) = 200$ €. Wie lautet die Kostenfunktion $K$?',
+      opts: ['$K(x) = 0{,}6x^2 + 4x + 200$', '$K(x) = 0{,}3x^2 + 200$', '$K(x) = 0{,}3x^2 + 4x$', '$K(x) = 0{,}3x^2 + 4x + 200$'],
+      steps: [
+        'Die Kostenfunktion ist eine Stammfunktion der Grenzkosten: $K(x) = 0{,}6 \\cdot \\dfrac{x^2}{2} + 4x + C = 0{,}3x^2 + 4x + C$',
+        'Fixkosten: $K(0) = C = 200$',
+        '$K(x) = 0{,}3x^2 + 4x + 200$; Probe: $K^{\\prime}(x) = 0{,}6x + 4$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Wagen fährt mit der Geschwindigkeit $v(t) = 6t$ (in $\\mathrm{m/s}$) an und steht zur Zeit $t = 0$ bei $s(0) = 2$ (in $\\mathrm{m}$). Wie lautet die Weg-Zeit-Funktion $s$?',
+      opts: ['$s(t) = 3t^2$', '$s(t) = 3t^2 + 2$', '$s(t) = 6$', '$s(t) = 6t^2 + 2$'],
+      steps: [
+        'Die Geschwindigkeit ist die Ableitung des Weges: $s^{\\prime}(t) = v(t)$, also ist $s$ eine Stammfunktion von $v$.',
+        '$s(t) = 6 \\cdot \\dfrac{t^2}{2} + C = 3t^2 + C$, mit $s(0) = 2$ folgt $C = 2$.',
+        '$s(t) = 3t^2 + 2$; nach $2\\,\\mathrm{s}$ ist der Wagen bei $s(2) = 14\\,\\mathrm{m}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Der Graph einer Funktion $F$ hat an jeder Stelle $x$ die Steigung $3x^2 + 1$ und geht durch den Punkt $P(1|3)$. Wie lautet $F$?',
+      opts: ['$F(x) = x^3 + x + 3$', '$F(x) = 6x + 3$', '$F(x) = x^3 + x$', '$F(x) = x^3 + x + 1$'],
+      steps: [
+        'Die Steigung ist die Ableitung: $F^{\\prime}(x) = 3x^2 + 1$, also $F(x) = x^3 + x + C$',
+        '$F(1) = 1 + 1 + C = 3$, also $C = 1$.',
+        '$F(x) = x^3 + x + 1$; Probe: $F(1) = 3$ und $F^{\\prime}(1) = 4$.'
+      ],
+      solution: 3
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Kettenregel, Tangente und Normale — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos12-w15-kettenregel-tangente',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Kettenregel, Tangente und Normale',
+  subtitle: 'Fachoberschule · Klasse 12 · Woche 15 (LB 2) · 20 Aufgaben: Kettenregel, Graph von f und Ableitungsfunktion, Tangente, Normale, Schnittwinkel · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 12 · Woche 15 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos12.html', /* opened from the plan */
+  /* Blocks: Kettenregel (1-6), Graph von f und Graph der Ableitung (7-10), Tangente und Normale (11-16), Schnittwinkel und Transfer (17-20). Alles ohne CAS. */
+  questions: [
+    {
+      q: 'Bestimme die Ableitung von $f(x) = (3x + 2)^4$.',
+      opts: ['$f^{\\prime}(x) = 12\\,(3x + 2)^4$', '$f^{\\prime}(x) = 3\\,(3x + 2)^3$', '$f^{\\prime}(x) = 4\\,(3x + 2)^3$', '$f^{\\prime}(x) = 12\\,(3x + 2)^3$'],
+      steps: [
+        'Kettenregel: äußere Ableitung mal innere Ableitung.',
+        'Äußere: $4\\,(3x + 2)^3$, innere: $(3x + 2)^{\\prime} = 3$.',
+        '$f^{\\prime}(x) = 4\\,(3x + 2)^3 \\cdot 3 = 12\\,(3x + 2)^3$. Falle: die innere Ableitung vergessen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = (x - 5)^3$.',
+      opts: ['$f^{\\prime}(x) = (x - 5)^2$', '$f^{\\prime}(x) = 3\\,(x - 5)^2$', '$f^{\\prime}(x) = 3\\,(x - 5)^3$', '$f^{\\prime}(x) = 3x^2$'],
+      steps: [
+        'Innere Funktion $x - 5$, innere Ableitung $1$.',
+        '$f^{\\prime}(x) = 3\\,(x - 5)^2 \\cdot 1 = 3\\,(x - 5)^2$',
+        'Falle: $3x^2$ entsteht, wenn man die Klammer einfach ignoriert.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = (4 - 2x)^3$.',
+      opts: ['$f^{\\prime}(x) = 6\\,(4 - 2x)^2$', '$f^{\\prime}(x) = -6\\,(4 - 2x)^3$', '$f^{\\prime}(x) = -6\\,(4 - 2x)^2$', '$f^{\\prime}(x) = 3\\,(4 - 2x)^2$'],
+      steps: [
+        'Innere Ableitung: $(4 - 2x)^{\\prime} = -2$.',
+        '$f^{\\prime}(x) = 3\\,(4 - 2x)^2 \\cdot (-2) = -6\\,(4 - 2x)^2$',
+        'Das Minus gehört dazu: Die Klammer wird mit wachsendem $x$ kleiner.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\dfrac{1}{2x + 1}$.',
+      opts: ['$f^{\\prime}(x) = -\\dfrac{2}{(2x + 1)^2}$', '$f^{\\prime}(x) = \\dfrac{2}{(2x + 1)^2}$', '$f^{\\prime}(x) = -\\dfrac{1}{(2x + 1)^2}$', '$f^{\\prime}(x) = -\\dfrac{2}{2x + 1}$'],
+      steps: [
+        'Als Potenz: $f(x) = (2x + 1)^{-1}$.',
+        'Kettenregel: $f^{\\prime}(x) = -1 \\cdot (2x + 1)^{-2} \\cdot 2 = -\\dfrac{2}{(2x + 1)^2}$',
+        'Falle: ohne die innere Ableitung $2$ bliebe nur $-\\dfrac{1}{(2x + 1)^2}$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Ableitung von $f(x) = \\sqrt{2x + 1}$.',
+      opts: ['$f^{\\prime}(x) = \\dfrac{1}{2}\\sqrt{2x + 1}$', '$f^{\\prime}(x) = \\dfrac{2}{\\sqrt{2x + 1}}$', '$f^{\\prime}(x) = \\dfrac{1}{\\sqrt{2x + 1}}$', '$f^{\\prime}(x) = \\dfrac{1}{2\\sqrt{2x + 1}}$'],
+      steps: [
+        'Als Potenz: $f(x) = (2x + 1)^{\\frac{1}{2}}$.',
+        '$f^{\\prime}(x) = \\dfrac{1}{2}\\,(2x + 1)^{-\\frac{1}{2}} \\cdot 2 = (2x + 1)^{-\\frac{1}{2}}$',
+        'Also $f^{\\prime}(x) = \\dfrac{1}{\\sqrt{2x + 1}}$ - die innere Ableitung $2$ kürzt sich gegen den Nenner $2$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $f^{\\prime}(2)$ für $f(x) = (x^2 - 1)^3$.',
+      opts: ['$54$', '$9$', '$108$', '$27$'],
+      steps: [
+        '$f^{\\prime}(x) = 3\\,(x^2 - 1)^2 \\cdot 2x = 6x\\,(x^2 - 1)^2$',
+        '$f^{\\prime}(2) = 6 \\cdot 2 \\cdot (4 - 1)^2 = 12 \\cdot 9 = 108$',
+        'Fallen: $54$ entsteht ohne den Faktor $2$ aus der inneren Ableitung, $27$ ganz ohne sie.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Die Abbildung zeigt den Graphen von $f(x) = x^3 - 6x^2 + 9x$. An welchen Stellen hat die Ableitungsfunktion $f^{\\prime}$ eine Nullstelle?',
+      fig: '<svg viewBox="0 0 520 340" width="520" height="340" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Graph von f mit zwei waagerechten Tangenten"><defs><clipPath id="f1-clip"><rect x="39" y="19" width="460" height="288"/></clipPath><marker id="f1-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="102.86" y1="306" x2="102.86" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="192.67" y1="306" x2="192.67" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="282.47" y1="306" x2="282.47" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="372.27" y1="306" x2="372.27" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="462.08" y1="306" x2="462.08" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="289.18" x2="498" y2="289.18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="255.53" x2="498" y2="255.53" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="221.88" x2="498" y2="221.88" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="188.24" x2="498" y2="188.24" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="154.59" x2="498" y2="154.59" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="120.94" x2="498" y2="120.94" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="87.29" x2="498" y2="87.29" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="53.65" x2="498" y2="53.65" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="20" x2="498" y2="20" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="221.88" x2="498" y2="221.88" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><line x1="102.86" y1="306" x2="102.86" y2="20" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><text x="500" y="237.88" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">x</text><text x="90.86" y="18" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">y</text><text x="95.86" y="236.88" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="192.67" y1="218.38" x2="192.67" y2="225.38" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="282.47" y1="218.38" x2="282.47" y2="225.38" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="372.27" y1="218.38" x2="372.27" y2="225.38" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="462.08" y1="218.38" x2="462.08" y2="225.38" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="99.36" y1="289.18" x2="106.36" y2="289.18" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="99.36" y1="255.53" x2="106.36" y2="255.53" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="99.36" y1="188.24" x2="106.36" y2="188.24" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="99.36" y1="154.59" x2="106.36" y2="154.59" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="99.36" y1="120.94" x2="106.36" y2="120.94" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="99.36" y1="87.29" x2="106.36" y2="87.29" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="99.36" y1="53.65" x2="106.36" y2="53.65" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><g clip-path="url(#f1-clip)"><path d="M 57.96 427.97 L 59.58 418.47 L 61.21 409.14 L 62.83 399.97 L 64.45 390.96 L 66.08 382.11 L 67.7 373.42 L 69.32 364.89 L 70.95 356.51 L 72.57 348.29 L 74.19 340.22 L 75.82 332.31 L 77.44 324.55 L 79.06 316.93 L 80.69 309.47 L 82.31 302.16 L 83.93 294.99 L 85.56 287.97 L 87.18 281.09 L 88.8 274.36 L 90.43 267.77 L 92.05 261.32 L 93.68 255.01 L 95.3 248.84 L 96.92 242.81 L 98.55 236.91 L 100.17 231.15 L 101.79 225.52 L 103.42 220.03 L 105.04 214.66 L 106.66 209.43 L 108.29 204.33 L 109.91 199.35 L 111.53 194.5 L 113.16 189.78 L 114.78 185.18 L 116.4 180.7 L 118.03 176.35 L 119.65 172.11 L 121.27 168 L 122.9 164 L 124.52 160.12 L 126.14 156.36 L 127.77 152.71 L 129.39 149.18 L 131.01 145.76 L 132.64 142.45 L 134.26 139.25 L 135.88 136.16 L 137.51 133.17 L 139.13 130.3 L 140.75 127.53 L 142.38 124.86 L 144 122.29 L 145.62 119.83 L 147.25 117.47 L 148.87 115.21 L 150.49 113.04 L 152.12 110.97 L 153.74 109 L 155.36 107.12 L 156.99 105.34 L 158.61 103.65 L 160.23 102.05 L 161.86 100.53 L 163.48 99.11 L 165.1 97.78 L 166.73 96.53 L 168.35 95.36 L 169.97 94.28 L 171.6 93.28 L 173.22 92.37 L 174.84 91.53 L 176.47 90.78 L 178.09 90.1 L 179.71 89.49 L 181.34 88.97 L 182.96 88.52 L 184.58 88.14 L 186.21 87.83 L 187.83 87.59 L 189.45 87.42 L 191.08 87.33 L 192.7 87.29 L 194.32 87.33 L 195.95 87.43 L 197.57 87.59 L 199.19 87.81 L 200.82 88.1 L 202.44 88.45 L 204.06 88.85 L 205.69 89.31 L 207.31 89.83 L 208.93 90.41 L 210.56 91.03 L 212.18 91.72 L 213.81 92.45 L 215.43 93.23 L 217.05 94.06 L 218.68 94.94 L 220.3 95.87 L 221.92 96.84 L 223.55 97.86 L 225.17 98.92 L 226.79 100.02 L 228.42 101.17 L 230.04 102.35 L 231.66 103.57 L 233.29 104.83 L 234.91 106.13 L 236.53 107.46 L 238.16 108.82 L 239.78 110.22 L 241.4 111.64 L 243.03 113.1 L 244.65 114.59 L 246.27 116.1 L 247.9 117.65 L 249.52 119.21 L 251.14 120.8 L 252.77 122.42 L 254.39 124.05 L 256.01 125.71 L 257.64 127.39 L 259.26 129.08 L 260.88 130.79 L 262.51 132.52 L 264.13 134.26 L 265.75 136.01 L 267.38 137.78 L 269 139.56 L 270.62 141.35 L 272.25 143.15 L 273.87 144.95 L 275.49 146.76 L 277.12 148.58 L 278.74 150.4 L 280.36 152.22 L 281.99 154.04 L 283.61 155.87 L 285.23 157.69 L 286.86 159.51 L 288.48 161.33 L 290.1 163.15 L 291.73 164.96 L 293.35 166.76 L 294.97 168.55 L 296.6 170.34 L 298.22 172.11 L 299.84 173.87 L 301.47 175.62 L 303.09 177.36 L 304.71 179.08 L 306.34 180.78 L 307.96 182.47 L 309.58 184.14 L 311.21 185.79 L 312.83 187.41 L 314.45 189.02 L 316.08 190.6 L 317.7 192.16 L 319.32 193.69 L 320.95 195.19 L 322.57 196.67 L 324.19 198.11 L 325.82 199.53 L 327.44 200.91 L 329.07 202.26 L 330.69 203.58 L 332.31 204.86 L 333.94 206.1 L 335.56 207.31 L 337.18 208.48 L 338.81 209.6 L 340.43 210.69 L 342.05 211.73 L 343.68 212.73 L 345.3 213.69 L 346.92 214.59 L 348.55 215.46 L 350.17 216.27 L 351.79 217.03 L 353.42 217.74 L 355.04 218.4 L 356.66 219.01 L 358.29 219.56 L 359.91 220.06 L 361.53 220.5 L 363.16 220.88 L 364.78 221.2 L 366.4 221.46 L 368.03 221.66 L 369.65 221.8 L 371.27 221.87 L 372.9 221.88 L 374.52 221.82 L 376.14 221.69 L 377.77 221.5 L 379.39 221.23 L 381.01 220.9 L 382.64 220.49 L 384.26 220 L 385.88 219.45 L 387.51 218.81 L 389.13 218.1 L 390.75 217.32 L 392.38 216.45 L 394 215.5 L 395.62 214.47 L 397.25 213.35 L 398.87 212.16 L 400.49 210.87 L 402.12 209.5 L 403.74 208.04 L 405.36 206.5 L 406.99 204.86 L 408.61 203.13 L 410.23 201.31 L 411.86 199.39 L 413.48 197.38 L 415.1 195.27 L 416.73 193.07 L 418.35 190.77 L 419.97 188.36 L 421.6 185.86 L 423.22 183.25 L 424.84 180.54 L 426.47 177.73 L 428.09 174.81 L 429.71 171.78 L 431.34 168.65 L 432.96 165.4 L 434.58 162.05 L 436.21 158.58 L 437.83 155 L 439.45 151.31 L 441.08 147.5 L 442.7 143.57 L 444.32 139.53 L 445.95 135.37 L 447.57 131.09 L 449.2 126.68 L 450.82 122.16 L 452.44 117.51 L 454.07 112.73 L 455.69 107.83 L 457.31 102.8 L 458.94 97.65 L 460.56 92.36 L 462.18 86.94 L 463.81 81.4 L 465.43 75.71 L 467.05 69.9 L 468.68 63.95 L 470.3 57.86 L 471.92 51.63 L 473.55 45.26 L 475.17 38.76 L 476.79 32.11 L 478.42 25.32 L 480.04 18.38" fill="none" stroke="#B02418" stroke-width="2.1" stroke-linejoin="round" stroke-linecap="round"/></g><text x="192.67" y="237.88" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">1</text><text x="282.47" y="237.88" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">2</text><text x="372.27" y="237.88" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">3</text><text x="462.08" y="237.88" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">4</text><text x="95.86" y="293.18" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-2</text><text x="95.86" y="259.53" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-1</text><text x="95.86" y="192.24" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">1</text><text x="95.86" y="158.59" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">2</text><text x="95.86" y="124.94" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">3</text><text x="95.86" y="91.29" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">4</text><text x="95.86" y="57.65" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">5</text></svg>',
+      figcap: 'Graph von $f(x) = x^3 - 6x^2 + 9x$',
+      opts: ['nur bei $x = 2$', 'bei $x = 0$ und $x = 3$', 'nur bei $x = 1$', 'bei $x = 1$ und $x = 3$'],
+      steps: [
+        '$f^{\\prime}$ hat dort eine Nullstelle, wo der Graph von $f$ eine waagerechte Tangente hat - im Bild am Hochpunkt und am Tiefpunkt.',
+        'Nachrechnen: $f^{\\prime}(x) = 3x^2 - 12x + 9 = 3\\,(x - 1)(x - 3)$, also $x = 1$ und $x = 3$.',
+        'Falle: $x = 0$ und $x = 3$ sind die Nullstellen von $f$ selbst, nicht die von $f^{\\prime}$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Graph von $f$ ist eine nach oben geöffnete Parabel mit dem Scheitel $S(2|-1)$. Wie sieht der Graph von $f^{\\prime}$ aus?',
+      opts: ['eine steigende Gerade, die die $x$-Achse bei $x = 2$ schneidet', 'eine waagerechte Gerade', 'eine steigende Gerade, die die $x$-Achse bei $x = -1$ schneidet', 'wieder eine nach oben geöffnete Parabel mit dem Scheitel $S(2|-1)$'],
+      steps: [
+        'Die Parabel lautet $f(x) = (x - 2)^2 - 1 = x^2 - 4x + 3$.',
+        '$f^{\\prime}(x) = 2x - 4$ - eine Gerade mit dem Anstieg $2$ und der Nullstelle $x = 2$.',
+        'Das passt: Im Scheitel verläuft die Tangente waagerecht, dort ist $f^{\\prime}(2) = 0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Auf einem Intervall gilt $f^{\\prime}(x) < 0$. Was bedeutet das für den Graphen von $f$?',
+      opts: ['Der Graph liegt dort unterhalb der $x$-Achse.', 'Der Graph hat dort eine Nullstelle.', 'Der Graph fällt dort.', 'Der Graph verläuft dort waagerecht.'],
+      steps: [
+        '$f^{\\prime}(x)$ ist der Anstieg der Tangente an der Stelle $x$.',
+        'Ein negativer Anstieg heißt: Der Graph geht von links nach rechts nach unten - $f$ ist monoton fallend.',
+        'Falle: Das Vorzeichen von $f^{\\prime}$ sagt nichts über das Vorzeichen von $f$ aus.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Der Graph von $f^{\\prime}$ ist die waagerechte Gerade $y = 3$. Was für eine Funktion ist $f$?',
+      opts: ['eine Parabel der Form $f(x) = 3x^2 + c$', 'die konstante Funktion $f(x) = 3$', 'eine Funktion mit einer waagerechten Tangente bei $x = 3$', 'eine lineare Funktion mit dem Anstieg $3$, also $f(x) = 3x + c$'],
+      steps: [
+        '$f^{\\prime}(x) = 3$ heißt: An jeder Stelle ist der Anstieg $3$.',
+        'Das leistet genau eine Gerade mit dem Anstieg $3$: $f(x) = 3x + c$.',
+        'Probe: $(3x + c)^{\\prime} = 3$ für jedes $c$ - die Höhe der Geraden bleibt unbestimmt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet die Gleichung der Tangente an den Graphen von $f(x) = x^2$ im Punkt $P(3|9)$?',
+      opts: ['$y = 6x - 9$', '$y = 9x - 6$', '$y = 6x + 9$', '$y = 6x$'],
+      steps: [
+        'Anstieg: $f^{\\prime}(x) = 2x$, also $m = f^{\\prime}(3) = 6$.',
+        'Punkt-Anstiegs-Form: $y = 9 + 6\\,(x - 3) = 6x - 9$',
+        'Probe: Für $x = 3$ liefert $6 \\cdot 3 - 9 = 9$ genau $f(3)$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Bestimme die Tangente an den Graphen von $f(x) = x^3 - 2x$ an der Stelle $x_0 = 1$.',
+      opts: ['$y = x - 1$', '$y = x - 2$', '$y = -x$', '$y = 3x - 4$'],
+      steps: [
+        '$f(1) = 1 - 2 = -1$ und $f^{\\prime}(x) = 3x^2 - 2$, also $m = f^{\\prime}(1) = 1$.',
+        '$y = -1 + 1 \\cdot (x - 1) = x - 2$',
+        'Probe: $x = 1$ gibt $y = -1$ - der Berührpunkt $(1|-1)$ liegt auf der Geraden.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet die Normale an den Graphen von $f(x) = x^2$ im Punkt $P(2|4)$?',
+      opts: ['$y = -\\dfrac{1}{4}x + 4$', '$y = -\\dfrac{1}{4}x + 4{,}5$', '$y = -4x + 12$', '$y = 4x - 4$'],
+      steps: [
+        'Tangentenanstieg: $f^{\\prime}(2) = 4$.',
+        'Die Normale steht senkrecht dazu: $m_n = -\\dfrac{1}{4}$.',
+        '$y = 4 - \\dfrac{1}{4}\\,(x - 2) = -\\dfrac{1}{4}x + 4{,}5$. Falle: $y = 4x - 4$ ist die Tangente.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Tangente in einem Punkt hat den Anstieg $2$. Welchen Anstieg hat dort die Normale?',
+      opts: ['$-2$', '$\\dfrac{1}{2}$', '$2$', '$-\\dfrac{1}{2}$'],
+      steps: [
+        'Für senkrechte Geraden gilt $m_t \\cdot m_n = -1$.',
+        '$m_n = -\\dfrac{1}{m_t} = -\\dfrac{1}{2}$',
+        'Falle: nur das Vorzeichen zu wechseln ($-2$) reicht nicht, der Kehrwert gehört dazu.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bestimme die Tangente an den Graphen von $f(x) = (2x - 1)^3$ an der Stelle $x_0 = 1$.',
+      opts: ['$y = 6x - 6$', '$y = 3x - 2$', '$y = 6x - 5$', '$y = 6x + 1$'],
+      steps: [
+        '$f(1) = 1^3 = 1$; Kettenregel: $f^{\\prime}(x) = 3\\,(2x - 1)^2 \\cdot 2 = 6\\,(2x - 1)^2$.',
+        '$m = f^{\\prime}(1) = 6$, also $y = 1 + 6\\,(x - 1) = 6x - 5$.',
+        'Probe: $6 \\cdot 1 - 5 = 1 = f(1)$. Falle: $y = 6x - 6$ geht durch $(1|0)$ statt durch $(1|1)$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lautet die Normale an den Graphen von $f(x) = x^3$ im Punkt $P(1|1)$?',
+      opts: ['$y = -\\dfrac{1}{3}x + 1$', '$y = 3x - 2$', '$y = -3x + 4$', '$y = -\\dfrac{1}{3}x + \\dfrac{4}{3}$'],
+      steps: [
+        '$f^{\\prime}(x) = 3x^2$, also $m_t = f^{\\prime}(1) = 3$ und $m_n = -\\dfrac{1}{3}$.',
+        '$y = 1 - \\dfrac{1}{3}\\,(x - 1) = -\\dfrac{1}{3}x + \\dfrac{4}{3}$',
+        'Probe: $x = 1$ gibt $-\\dfrac{1}{3} + \\dfrac{4}{3} = 1$. Falle: $y = 3x - 2$ ist die Tangente.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Unter welchem Winkel schneidet der Graph von $f(x) = x^2 - 4$ die $x$-Achse im Punkt $(2|0)$?',
+      opts: ['$\\alpha \\approx 76{,}0^\\circ$', '$\\alpha \\approx 4{,}0^\\circ$', '$\\alpha = 45^\\circ$', '$\\alpha \\approx 14{,}0^\\circ$'],
+      steps: [
+        'Der Schnittwinkel mit der $x$-Achse ist der Steigungswinkel der Tangente: $\\tan(\\alpha) = f^{\\prime}(x_0)$.',
+        '$f^{\\prime}(x) = 2x$, also $\\tan(\\alpha) = f^{\\prime}(2) = 4$.',
+        '$\\alpha = \\arctan(4) \\approx 76{,}0^\\circ$. Falle: $14{,}0^\\circ$ ist der Winkel zur $y$-Achse.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Unter welchem Winkel schneidet der Graph von $f(x) = x^3 - x$ die $x$-Achse an der Stelle $x = 1$?',
+      opts: ['$\\alpha \\approx 63{,}4^\\circ$', '$\\alpha \\approx 26{,}6^\\circ$', '$\\alpha = 45^\\circ$', '$\\alpha \\approx 2{,}0^\\circ$'],
+      steps: [
+        '$f^{\\prime}(x) = 3x^2 - 1$, also $\\tan(\\alpha) = f^{\\prime}(1) = 2$.',
+        '$\\alpha = \\arctan(2) \\approx 63{,}4^\\circ$',
+        'Falle: $2$ ist der Anstieg, nicht der Winkel; $26{,}6^\\circ$ ergänzt $63{,}4^\\circ$ zu $90^\\circ$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Hang wird im Querschnitt durch $f(x) = 0{,}01x^2$ beschrieben ($x$ und $f(x)$ in m). Unter welchem Winkel gegen die Waagerechte verläuft er an der Stelle $x = 50$?',
+      opts: ['$\\alpha \\approx 0{,}6^\\circ$', '$\\alpha = 45^\\circ$', '$\\alpha \\approx 87{,}7^\\circ$', '$\\alpha \\approx 26{,}6^\\circ$'],
+      steps: [
+        '$f^{\\prime}(x) = 0{,}02x$, also $\\tan(\\alpha) = f^{\\prime}(50) = 1$.',
+        '$\\alpha = \\arctan(1) = 45^\\circ$ - der Hang steigt dort um $1$ m je Meter.',
+        'Falle: Mit $f(50) = 25$ statt $f^{\\prime}(50)$ käme $87{,}7^\\circ$ heraus, ein senkrechter Absturz.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Die Tangente an den Graphen von $f(x) = x^2 + 3$ im Punkt $P(x_0|f(x_0))$ verläuft durch den Ursprung. Bestimme das positive $x_0$.',
+      opts: ['$x_0 = \\sqrt{2} \\approx 1{,}41$', '$x_0 = \\sqrt{3} \\approx 1{,}73$', '$x_0 = \\dfrac{3}{2}$', '$x_0 = 3$'],
+      steps: [
+        'Tangente: $y = x_0^2 + 3 + 2x_0\\,(x - x_0) = 2x_0\\,x - x_0^2 + 3$',
+        'Durch den Ursprung heißt $y(0) = 0$: $-x_0^2 + 3 = 0$, also $x_0 = \\sqrt{3}$.',
+        'Probe: $f(\\sqrt{3}) = 6$ und $f^{\\prime}(\\sqrt{3}) = 2\\sqrt{3}$; die Gerade $y = 2\\sqrt{3}\\,x$ trifft $(\\sqrt{3}|6)$.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
