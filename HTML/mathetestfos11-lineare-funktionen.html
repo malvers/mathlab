@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Lineare Funktionen — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w05-lineare-funktionen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Lineare Funktionen',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 5 (LB 1) · 20 Aufgaben: Anstieg und Achsenabschnitt, direkte Proportionalität, Anwendungen · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 5 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Anstieg und Achsenabschnitt (1-7), direkte Proportionalitaet (8-12), Anwendungen (13-20). */
+  questions: [
+    {
+      q: 'Welchen Anstieg hat die Gerade $f(x) = 3x - 2$?',
+      opts: ['$m = -2$', '$m = \\dfrac{3}{2}$', '$m = 3$', '$m = 2$'],
+      steps: [
+        'In der Form $f(x) = mx + n$ ist $m$ der Anstieg.',
+        'Hier also $m = 3$.',
+        '$-2$ ist der $y$-Achsenabschnitt.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wo schneidet $f(x) = 3x - 2$ die $y$-Achse?',
+      opts: ['bei $\\left(\\dfrac{2}{3}\\,\\middle|\\,0\\right)$', 'bei $(0|3)$', 'bei $(-2|0)$', 'bei $(0|-2)$'],
+      steps: [
+        'Die $y$-Achse wird bei $x = 0$ geschnitten.',
+        '$f(0) = -2$, also im Punkt $(0|-2)$.',
+        '$\\left(\\dfrac{2}{3}\\,\\middle|\\,0\\right)$ ist dagegen der Schnittpunkt mit der $x$-Achse.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Eine Gerade verläuft durch $A(1|2)$ und $B(4|11)$. Wie groß ist ihr Anstieg?',
+      opts: ['$m = \\dfrac{1}{3}$', '$m = 3$', '$m = 9$', '$m = -3$'],
+      steps: [
+        'Anstieg: $m = \\dfrac{y_B - y_A}{x_B - x_A}$',
+        '$m = \\dfrac{11 - 2}{4 - 1} = \\dfrac{9}{3} = 3$',
+        'Wer Zähler und Nenner vertauscht, erhält $\\dfrac{1}{3}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie verläuft der Graph von $f(x) = -2x + 5$?',
+      opts: ['Er steigt, denn der Achsenabschnitt ist positiv.', 'Er ist waagerecht.', 'Er fällt, denn der Anstieg ist negativ.', 'Er ist senkrecht.'],
+      steps: [
+        'Das Vorzeichen des Anstiegs entscheidet über Steigen und Fallen.',
+        '$m = -2 < 0$, der Graph fällt.',
+        'Pro Schritt nach rechts geht es um $2$ nach unten.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Gerade ist parallel zu $y = 2x + 1$?',
+      opts: ['$y = -2x + 1$', '$y = \\dfrac{1}{2}x + 1$', '$y = 2x - 4$', '$y = x + 2$'],
+      steps: [
+        'Parallele Geraden haben denselben Anstieg.',
+        'Nur $y = 2x - 4$ hat ebenfalls $m = 2$.',
+        'Der Achsenabschnitt darf sich unterscheiden, sonst wären die Geraden identisch.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was lässt sich über $f(x) = 4$ sagen?',
+      opts: ['Der Graph ist eine waagerechte Gerade mit dem Anstieg $0$.', 'Der Anstieg ist $4$.', 'Es ist keine Funktion.', 'Der Graph ist eine senkrechte Gerade.'],
+      steps: [
+        'Der Term lässt sich als $f(x) = 0 \\cdot x + 4$ schreiben.',
+        'Der Anstieg ist also $0$, der Graph verläuft waagerecht auf der Höhe $4$.',
+        'Eine senkrechte Gerade wäre dagegen keine Funktion — sie bestünde den Senkrechtentest nicht.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Berechne die Nullstelle von $f(x) = 3x - 9$.',
+      opts: ['$x = 9$', '$x = -3$', '$x = \\dfrac{1}{3}$', '$x = 3$'],
+      steps: [
+        'Nullstelle heißt $f(x) = 0$.',
+        '$3x - 9 = 0$ ergibt $3x = 9$, also $x = 3$.',
+        'Probe: $f(3) = 9 - 9 = 0$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Woran erkennt man eine direkte Proportionalität?',
+      opts: ['Der Graph ist eine Gerade durch den Ursprung, der Term hat die Form $y = k \\cdot x$.', 'Der Graph ist eine Gerade mit beliebigem Achsenabschnitt.', 'Der Graph ist eine Parabel.', 'Der Quotient $\\dfrac{x}{y}$ ist nicht konstant.'],
+      steps: [
+        'Bei direkter Proportionalität gehört zum doppelten $x$ der doppelte $y$-Wert.',
+        'Das geht nur, wenn der Graph durch den Ursprung verläuft, also $n = 0$ ist.',
+        'Kennzeichen: der Quotient $\\dfrac{y}{x}$ ist für alle Wertepaare gleich und heißt Proportionalitätsfaktor $k$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Zuordnung ist direkt proportional?',
+      opts: ['$y = \\dfrac{6}{x}$', '$y = x^2$', '$y = 2x + 3$', '$y = 0{,}8x$'],
+      steps: [
+        'Gesucht ist die Form $y = k \\cdot x$ ohne Summanden.',
+        '$y = 0{,}8x$ hat den Proportionalitätsfaktor $k = 0{,}8$.',
+        '$y = \\dfrac{6}{x}$ ist umgekehrt proportional, $y = 2x + 3$ hat einen Achsenabschnitt.'
+      ],
+      solution: 3
+    },
+    {
+      q: '$3\\,\\mathrm{kg}$ einer Ware kosten $7{,}50$ €. Was kosten $5\\,\\mathrm{kg}$?',
+      opts: ['$12{,}50$ €', '$4{,}50$ €', '$11{,}25$ €', '$15{,}00$ €'],
+      steps: [
+        'Preis pro Kilogramm: $\\dfrac{7{,}50}{3} = 2{,}50$ €.',
+        '$5 \\cdot 2{,}50 = 12{,}50$ €',
+        'Kontrolle über den Dreisatz: mehr Ware, entsprechend mehr Geld.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Wertetabelle enthält die Paare $(2|5)$, $(4|10)$ und $(6|15)$. Wie lautet der Proportionalitätsfaktor?',
+      opts: ['$k = 2{,}5$', '$k = 3$', '$k = 0{,}4$', '$k = 5$'],
+      steps: [
+        '$k = \\dfrac{y}{x}$, und dieser Quotient muss für alle Paare gleich sein.',
+        '$\\dfrac{5}{2} = \\dfrac{10}{4} = \\dfrac{15}{6} = 2{,}5$',
+        'Der Term lautet also $y = 2{,}5x$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Warum ist $y = 2x + 3$ NICHT direkt proportional?',
+      opts: ['Weil der Anstieg zu groß ist.', 'Weil der Graph keine Gerade ist.', 'Weil $y$ mit wachsendem $x$ zunimmt.', 'Weil der Graph nicht durch den Ursprung geht: zu $x = 0$ gehört $y = 3$.'],
+      steps: [
+        'Bei direkter Proportionalität muss zum $x$-Wert $0$ auch der $y$-Wert $0$ gehören.',
+        'Hier ist $y(0) = 3$.',
+        'Probe: Verdoppelt man $x$ von $1$ auf $2$, wächst $y$ von $5$ auf $7$ — also nicht aufs Doppelte.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Ein Taxi verlangt $3{,}50$ € Grundgebühr und $2{,}20$ € je Kilometer. Wie lautet die Kostenfunktion?',
+      opts: ['$K(x) = 5{,}70x$', '$K(x) = 2{,}20x$', '$K(x) = 2{,}20x + 3{,}50$', '$K(x) = 3{,}50x + 2{,}20$'],
+      steps: [
+        'Die Grundgebühr fällt einmal an, sie ist der Achsenabschnitt.',
+        'Der Kilometerpreis ist der Anstieg.',
+        '$K(x) = 2{,}20x + 3{,}50$. Probe: bei $0$ Kilometern kostet es $3{,}50$ €.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was kostet die Fahrt aus der vorigen Aufgabe über $12\\,\\mathrm{km}$?',
+      opts: ['$46{,}20$ €', '$29{,}90$ €', '$68{,}40$ €', '$26{,}40$ €'],
+      steps: [
+        '$K(12) = 2{,}20 \\cdot 12 + 3{,}50$',
+        '$= 26{,}40 + 3{,}50 = 29{,}90$ €',
+        '$26{,}40$ € wäre der Fahrpreis ohne die Grundgebühr.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Betrieb hat die Kostenfunktion $K(x) = 0{,}50x + 20$ (in €). Wie viele Einheiten kann er für $60$ € herstellen?',
+      opts: ['$120$ Einheiten', '$80$ Einheiten', '$40$ Einheiten', '$160$ Einheiten'],
+      steps: [
+        'Gleichung: $0{,}50x + 20 = 60$.',
+        '$0{,}50x = 40$, also $x = 80$.',
+        'Probe: $0{,}50 \\cdot 80 + 20 = 60$ €.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Tarif A kostet $K_A(x) = 0{,}30x + 12$, Tarif B kostet $K_B(x) = 0{,}50x + 6$. Bei welcher Menge sind beide gleich teuer?',
+      opts: ['bei $x = 90$', 'bei $x = 18$', 'bei $x = 30$', 'bei $x = 9$'],
+      steps: [
+        'Gleichsetzen: $0{,}30x + 12 = 0{,}50x + 6$.',
+        '$6 = 0{,}20x$, also $x = 30$.',
+        'Probe: beide ergeben $21$ €. Darunter ist B günstiger, darüber A.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Fahrzeug fährt gleichmäßig. Der Weg-Zeit-Graph verläuft durch $(0|0)$ und $(2|150)$, wobei $x$ in Stunden und $y$ in Kilometern gemessen wird. Wie schnell fährt es?',
+      opts: ['$300\\,\\mathrm{km/h}$', '$75\\,\\mathrm{km/h}$', '$150\\,\\mathrm{km/h}$', '$2\\,\\mathrm{km/h}$'],
+      steps: [
+        'Die Geschwindigkeit ist der Anstieg des Weg-Zeit-Graphen.',
+        '$m = \\dfrac{150 - 0}{2 - 0} = 75$',
+        'Also $75\\,\\mathrm{km/h}$. Weil der Graph durch den Ursprung geht, ist der Weg direkt proportional zur Zeit.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Wassertank enthält $200$ Liter und wird mit $15$ Litern je Minute geleert. Wie lautet die Funktion für den Inhalt nach $t$ Minuten?',
+      opts: ['$V(t) = 200 - 15t$', '$V(t) = 15t$', '$V(t) = 15 - 200t$', '$V(t) = 200 + 15t$'],
+      steps: [
+        'Der Anfangsinhalt $200$ ist der Achsenabschnitt.',
+        'Geleert heißt abnehmend, der Anstieg ist also negativ: $-15$.',
+        '$V(t) = 200 - 15t$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wann ist der Tank aus der vorigen Aufgabe leer?',
+      opts: ['nach $15$ Minuten', 'nach etwa $7{,}5$ Minuten', 'nach $200$ Minuten', 'nach etwa $13{,}3$ Minuten'],
+      steps: [
+        'Leer bedeutet $V(t) = 0$: $200 - 15t = 0$.',
+        '$15t = 200$, also $t = \\dfrac{200}{15} = \\dfrac{40}{3} \\approx 13{,}3$ Minuten.',
+        'Die Nullstelle der linearen Funktion beantwortet hier die Sachfrage.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Bei der Kostenfunktion $K(x) = 4x + 250$ eines Betriebes — was bedeutet die Zahl $250$?',
+      opts: ['die maximale Stückzahl', 'die Fixkosten, die auch ohne Produktion anfallen', 'den Gewinn je Stück', 'die Kosten je Stück'],
+      steps: [
+        'Der Achsenabschnitt ist der Funktionswert bei $x = 0$.',
+        '$K(0) = 250$ € fallen also an, wenn gar nichts produziert wird: Miete, Versicherung, Grundgebühren.',
+        'Die $4$ sind dagegen die variablen Kosten je Stück.'
+      ],
+      solution: 1
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

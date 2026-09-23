@@ -297,18 +297,28 @@ def _js(s):
     return "'" + s.replace('\\', '\\\\').replace("'", "\\'") + "'"
 
 
-# ------------------------------------------------------------ FO 12 Mathe ----
+# ------------------------------------------------------------- FO Mathe ----
+def _fos(klasse, nr, slug, thema, lb, blurb, comment):
+    return Quiz(
+        id='mathefos%d-w%02d-%s' % (klasse, nr, slug),
+        file='mathetestfos%d-%s.html' % (klasse, slug),
+        title='Aufgaben · ' + thema,
+        subtitle='Fachoberschule · Klasse %d · Woche %d (%s) · 20 Aufgaben: %s · genau eine Antwort pro Aufgabe'
+                 % (klasse, nr, lb, blurb),
+        dash_sub='FO · Klasse %d · Woche %d · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe'
+                 % (klasse, nr),
+        back='svp/mathe/mathefos%d.html' % klasse,
+        comment=comment)
+
+
+def fos11(nr, slug, thema, lb, blurb, comment=''):
+    """Sheet for the Fachoberschule-11 Mathematik plan (mathe/mathefos11.html)."""
+    return _fos(11, nr, slug, thema, lb, blurb, comment)
+
+
 def fos12(nr, slug, thema, lb, blurb, comment=''):
     """Sheet for the Fachoberschule-12 Mathematik plan (mathe/mathefos12.html)."""
-    return Quiz(
-        id='mathefos12-w%02d-%s' % (nr, slug),
-        file='mathetestfos12-%s.html' % slug,
-        title='Aufgaben · ' + thema,
-        subtitle='Fachoberschule · Klasse 12 · Woche %d (%s) · 20 Aufgaben: %s · genau eine Antwort pro Aufgabe'
-                 % (nr, lb, blurb),
-        dash_sub='FO · Klasse 12 · Woche %d · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe' % nr,
-        back='svp/mathe/mathefos12.html',
-        comment=comment)
+    return _fos(12, nr, slug, thema, lb, blurb, comment)
 
 
 # ------------------------------------------------------------------ wiring ----

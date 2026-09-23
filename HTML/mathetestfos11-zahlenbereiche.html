@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Zahlenbereiche und Terme — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w02-zahlenbereiche',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Zahlenbereiche und Terme',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 2 (LB 1) · 20 Aufgaben: Zahlenbereiche, Termstrukturen, Klammern, Formeln umstellen, Betrag · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 2 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Zahlenbereiche (1-5), Termstrukturen und Klammern (6-11), Formeln umstellen (12-16), Betrag (17-20). Alles ohne Hilfsmittel. */
+  questions: [
+    {
+      q: 'Welche der folgenden Zahlen ist irrational?',
+      opts: ['$\\sqrt{2}$', '$0{,}75$', '$\\dfrac{1}{3}$', '$-5$'],
+      steps: [
+        'Irrational heißt: nicht als Bruch zweier ganzer Zahlen darstellbar.',
+        '$0{,}75 = \\dfrac{3}{4}$ und $-5 = \\dfrac{-5}{1}$ sind rational, $\\dfrac{1}{3}$ ohnehin.',
+        '$\\sqrt{2}$ lässt sich nicht als Bruch schreiben — das ist seit der Antike bewiesen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Aussage über die Zahlenbereiche ist richtig?',
+      opts: ['Jede natürliche Zahl ist auch eine rationale Zahl.', 'Die ganzen Zahlen enthalten alle Bruchzahlen.', 'Jede rationale Zahl ist auch eine natürliche Zahl.', 'Jede reelle Zahl ist auch rational.'],
+      steps: [
+        'Es gilt die Kette $\\mathbb{N} \\subset \\mathbb{Z} \\subset \\mathbb{Q} \\subset \\mathbb{R}$.',
+        'Zum Beispiel ist $7 = \\dfrac{7}{1}$ eine rationale Zahl.',
+        'Umgekehrt gilt das nicht: $\\dfrac{1}{2}$ ist rational, aber nicht natürlich.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Zu welchem Zahlenbereich gehört $0{,}\\overline{3} = 0{,}333\\ldots$?',
+      opts: ['Sie ist keine reelle Zahl.', 'Sie ist irrational, weil die Dezimaldarstellung nicht abbricht.', 'Sie ist rational, denn $0{,}\\overline{3} = \\dfrac{1}{3}$.', 'Sie ist eine ganze Zahl.'],
+      steps: [
+        'Entscheidend ist nicht, ob die Dezimaldarstellung abbricht, sondern ob sie periodisch ist.',
+        'Jede periodische Dezimalzahl lässt sich als Bruch schreiben: $0{,}\\overline{3} = \\dfrac{1}{3}$.',
+        'Probe: $\\dfrac{1}{3} \\cdot 3 = 1$ und $0{,}\\overline{3} \\cdot 3 = 0{,}\\overline{9} = 1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Zahl gehört zu $\\mathbb{Z}$, aber nicht zu $\\mathbb{N}$?',
+      opts: ['$\\dfrac{3}{2}$', '$-3$', '$\\sqrt{3}$', '$3$'],
+      steps: [
+        '$\\mathbb{Z}$ enthält zusätzlich zu den natürlichen Zahlen deren Gegenzahlen.',
+        '$-3$ ist ganz, aber nicht natürlich.',
+        '$\\dfrac{3}{2}$ ist rational und $\\sqrt{3}$ irrational — beide liegen nicht in $\\mathbb{Z}$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche der folgenden Wurzeln ist eine rationale Zahl?',
+      opts: ['$\\sqrt{9}$', '$\\sqrt{5}$', '$\\sqrt{10}$', '$\\sqrt{8}$'],
+      steps: [
+        '$\\sqrt{9} = 3$, denn $9$ ist eine Quadratzahl.',
+        'Die Wurzel aus einer natürlichen Zahl ist genau dann rational, wenn die Zahl eine Quadratzahl ist.',
+        '$8$, $5$ und $10$ sind keine Quadratzahlen, ihre Wurzeln sind irrational.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Struktur hat der Term $3\\,(x + 2)$?',
+      opts: ['Es ist ein Produkt aus $3$ und der Summe $x + 2$.', 'Es ist eine Summe aus $3$ und $x + 2$.', 'Es ist ein Quotient.', 'Es ist eine Differenz.'],
+      steps: [
+        'Man fragt: welche Rechenoperation wird zuletzt ausgeführt?',
+        'Hier wird zuletzt multipliziert, also ist der Term ein Produkt.',
+        'Die Termstruktur zu erkennen entscheidet darüber, welche Umformung erlaubt ist.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Struktur hat der Term $(2 + x)^2$?',
+      opts: ['Es ist eine Summe aus $2^2$ und $x^2$.', 'Es ist eine Potenz, genauer das Quadrat der Summe $2 + x$.', 'Es ist eine Differenz.', 'Es ist ein Produkt aus $2$ und $x^2$.'],
+      steps: [
+        'Zuletzt wird potenziert, also ist der Term eine Potenz.',
+        'Achtung: $(2+x)^2$ ist nicht $4 + x^2$ — ausmultipliziert ergibt sich $4 + 4x + x^2$.',
+        'Probe mit $x = 1$: $(2+1)^2 = 9$, aber $4 + 1 = 5$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Vereinfache: $5 - (3 - x)$.',
+      opts: ['$2 - x$', '$-2 + x$', '$8 - x$', '$2 + x$'],
+      steps: [
+        'Das Minus vor der Klammer dreht jedes Vorzeichen darin um.',
+        '$5 - 3 + x = 2 + x$',
+        'Probe mit $x = 1$: $5 - (3-1) = 3$ und $2 + 1 = 3$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Vereinfache: $-2\\,(x - 4)$.',
+      opts: ['$-2x - 4$', '$2x - 8$', '$-2x - 8$', '$-2x + 8$'],
+      steps: [
+        'Der Faktor $-2$ trifft beide Summanden in der Klammer.',
+        '$-2 \\cdot x = -2x$ und $-2 \\cdot (-4) = +8$.',
+        'Minus mal Minus ergibt Plus — das ist hier die häufigste Falle.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Vereinfache: $3a - \\left(2a - (a - 1)\\right)$.',
+      opts: ['$2a + 1$', '$2a - 1$', '$-1$', '$4a - 1$'],
+      steps: [
+        'Von innen nach außen: $2a - (a-1) = 2a - a + 1 = a + 1$.',
+        'Dann $3a - (a+1) = 3a - a - 1 = 2a - 1$.',
+        'Probe mit $a = 2$: innen $4 - 1 = 3$, außen $6 - 3 = 3$, und $2 \\cdot 2 - 1 = 3$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Multipliziere aus: $(x + 3)(x - 2)$.',
+      opts: ['$x^2 + x - 6$', '$x^2 + 5x - 6$', '$x^2 - x - 6$', '$x^2 - 6$'],
+      steps: [
+        'Jeder Summand der ersten Klammer trifft jeden der zweiten.',
+        '$x^2 - 2x + 3x - 6$',
+        'Zusammenfassen: $x^2 + x - 6$. Probe mit $x = 1$: $4 \\cdot (-1) = -4$ und $1 + 1 - 6 = -4$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Stelle die Flächenformel $A = a \\cdot b$ nach $b$ um.',
+      opts: ['$b = \\dfrac{a}{A}$', '$b = A \\cdot a$', '$b = A - a$', '$b = \\dfrac{A}{a}$'],
+      steps: [
+        '$b$ steht im Produkt mit $a$, also durch $a$ teilen.',
+        '$b = \\dfrac{A}{a}$',
+        'Kontrolle mit Einheiten: $\\mathrm{m^2}$ geteilt durch $\\mathrm{m}$ ergibt $\\mathrm{m}$ — das passt zu einer Länge.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Stelle den Rechteckumfang $U = 2\\,(a + b)$ nach $b$ um.',
+      opts: ['$b = \\dfrac{U}{2a}$', '$b = U - 2a$', '$b = \\dfrac{U - a}{2}$', '$b = \\dfrac{U}{2} - a$'],
+      steps: [
+        'Zuerst durch $2$ teilen: $\\dfrac{U}{2} = a + b$.',
+        'Dann $a$ abziehen: $b = \\dfrac{U}{2} - a$.',
+        'Probe mit $a = 3$ und $b = 5$: $U = 16$, und $\\dfrac{16}{2} - 3 = 5$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Stelle das Zylindervolumen $V = \\pi r^2 h$ nach $h$ um.',
+      opts: ['$h = \\dfrac{V}{\\pi r}$', '$h = \\dfrac{V}{\\pi r^2}$', '$h = \\dfrac{\\pi r^2}{V}$', '$h = V - \\pi r^2$'],
+      steps: [
+        '$h$ steht im Produkt mit $\\pi r^2$.',
+        'Also durch $\\pi r^2$ teilen: $h = \\dfrac{V}{\\pi r^2}$.',
+        'Probe: doppelte Höhe bei gleichem Radius bedeutet doppeltes Volumen — die Formel gibt das her.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Stelle $s = v \\cdot t$ nach $t$ um.',
+      opts: ['$t = \\dfrac{v}{s}$', '$t = \\dfrac{s}{v}$', '$t = s \\cdot v$', '$t = s - v$'],
+      steps: [
+        'Durch $v$ teilen: $t = \\dfrac{s}{v}$.',
+        'Probe mit $s = 120\\,\\mathrm{km}$ und $v = 60\\,\\mathrm{km/h}$: $t = 2\\,\\mathrm{h}$.',
+        'Auch hier hilft die Einheitenkontrolle: km geteilt durch km/h ergibt h.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Stelle das ohmsche Gesetz $R = \\dfrac{U}{I}$ nach $I$ um.',
+      opts: ['$I = U \\cdot R$', '$I = \\dfrac{R}{U}$', '$I = U - R$', '$I = \\dfrac{U}{R}$'],
+      steps: [
+        'Mit $I$ multiplizieren: $R \\cdot I = U$.',
+        'Dann durch $R$ teilen: $I = \\dfrac{U}{R}$.',
+        'Probe mit $U = 12\\,\\mathrm{V}$ und $R = 4\\,\\Omega$: $I = 3\\,\\mathrm{A}$, und $\\dfrac{12}{3} = 4$ stimmt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Berechne $\\left|-7\\right|$.',
+      opts: ['$0$', '$\\dfrac{1}{7}$', '$7$', '$-7$'],
+      steps: [
+        'Der Betrag ist der Abstand der Zahl von der Null auf dem Zahlenstrahl.',
+        'Ein Abstand ist nie negativ: $\\left|-7\\right| = 7$.',
+        'Auch $\\left|7\\right| = 7$ — beide Zahlen haben denselben Abstand zur Null.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Berechne $\\left|3 - 8\\right|$.',
+      opts: ['$-5$', '$11$', '$5$', '$-11$'],
+      steps: [
+        'Zuerst die Klammer ausrechnen: $3 - 8 = -5$.',
+        'Dann den Betrag bilden: $\\left|-5\\right| = 5$.',
+        'Der Betrag wirkt auf das Ergebnis, nicht auf die einzelnen Zahlen — sonst käme $11$ heraus.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welche Zahlen erfüllen $\\left|x\\right| = 4$?',
+      opts: ['nur $x = 4$', '$x = 16$', '$x = 4$ und $x = -4$', 'nur $x = -4$'],
+      steps: [
+        'Gesucht sind alle Zahlen mit dem Abstand $4$ von der Null.',
+        'Das sind zwei: $4$ und $-4$.',
+        'Eine Betragsgleichung hat deshalb in der Regel zwei Lösungen.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Was beschreibt der Term $\\left|x - 3\\right|$?',
+      opts: ['den Abstand der Zahl $x$ von der Null', 'die Differenz $x - 3$, immer positiv gerechnet ohne geometrische Bedeutung', 'den Abstand der Zahl $x$ von der Zahl $3$', 'die Summe von $x$ und $3$'],
+      steps: [
+        '$\\left|a - b\\right|$ ist der Abstand der beiden Zahlen auf dem Zahlenstrahl.',
+        'Hier also der Abstand von $x$ zu $3$.',
+        'Probe: für $x = 7$ ergibt sich $4$, für $x = -1$ ebenfalls $4$ — beide liegen $4$ von der $3$ entfernt.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

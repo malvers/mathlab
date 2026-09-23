@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Geradengleichungen und Schnittwinkel — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w06-geradengleichungen',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Geradengleichungen und Schnittwinkel',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 6 (LB 1) · 20 Aufgaben: Geraden aus Punkt und Anstieg, aus zwei Punkten, Schnittwinkel mit der x-Achse · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 6 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: aus Punkt und Anstieg (1-6), aus zwei Punkten (7-12), Schnittwinkel (13-17), Anwendungen (18-20). */
+  questions: [
+    {
+      q: 'Wie lautet die Gleichung der Geraden durch $P(2|5)$ mit dem Anstieg $m = 3$?',
+      opts: ['$y = 3x - 1$', '$y = 3x + 5$', '$y = 3x + 1$', '$y = 3x - 5$'],
+      steps: [
+        'Ansatz $y = 3x + n$, dann den Punkt einsetzen.',
+        '$5 = 3 \\cdot 2 + n$, also $n = -1$.',
+        '$y = 3x - 1$. Probe: bei $x = 2$ ergibt sich $5$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die Gerade durch $P(0|4)$ mit $m = -2$?',
+      opts: ['$y = -2x$', '$y = -2x + 4$', '$y = 4x - 2$', '$y = -2x - 4$'],
+      steps: [
+        'Der Punkt liegt auf der $y$-Achse, sein $y$-Wert ist also direkt der Achsenabschnitt.',
+        '$n = 4$',
+        '$y = -2x + 4$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet die Gerade durch $P(1|-2)$ mit $m = \\dfrac{1}{2}$?',
+      opts: ['$y = \\dfrac{1}{2}x + 2{,}5$', '$y = \\dfrac{1}{2}x - 2{,}5$', '$y = \\dfrac{1}{2}x - 1{,}5$', '$y = \\dfrac{1}{2}x - 2$'],
+      steps: [
+        '$-2 = \\dfrac{1}{2} \\cdot 1 + n$',
+        '$n = -2 - 0{,}5 = -2{,}5$',
+        '$y = \\dfrac{1}{2}x - 2{,}5$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Liegt der Punkt $Q(3|7)$ auf der Geraden $y = 2x + 1$?',
+      opts: ['Das lässt sich ohne Zeichnung nicht entscheiden.', 'Nein, denn $2 \\cdot 3 + 1 = 6$.', 'Ja, denn $2 \\cdot 3 + 1 = 7$.', 'Nein, denn der Anstieg passt nicht.'],
+      steps: [
+        'Die Punktprobe setzt die Koordinaten in die Gleichung ein.',
+        'Links steht $7$, rechts $2 \\cdot 3 + 1 = 7$.',
+        'Beide Seiten stimmen überein, der Punkt liegt also auf der Geraden.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Eine Gerade mit dem Anstieg $m = -\\dfrac{1}{3}$ geht durch $P(6|1)$. Wie groß ist ihr $y$-Achsenabschnitt?',
+      opts: ['$n = -1$', '$n = -3$', '$n = 1$', '$n = 3$'],
+      steps: [
+        '$1 = -\\dfrac{1}{3} \\cdot 6 + n$',
+        '$1 = -2 + n$, also $n = 3$.',
+        'Die Gerade lautet $y = -\\dfrac{1}{3}x + 3$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet die Gerade, die parallel zu $y = 3x + 2$ verläuft und durch $P(1|1)$ geht?',
+      opts: ['$y = 3x + 2$', '$y = x + 2$', '$y = -3x + 4$', '$y = 3x - 2$'],
+      steps: [
+        'Parallel bedeutet denselben Anstieg: $m = 3$.',
+        '$1 = 3 \\cdot 1 + n$ ergibt $n = -2$.',
+        '$y = 3x - 2$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet die Gerade durch $A(1|3)$ und $B(3|7)$?',
+      opts: ['$y = 4x - 1$', '$y = \\dfrac{1}{2}x + 2{,}5$', '$y = 2x - 1$', '$y = 2x + 1$'],
+      steps: [
+        'Anstieg: $m = \\dfrac{7-3}{3-1} = 2$.',
+        'Punkt $A$ einsetzen: $3 = 2 + n$, also $n = 1$.',
+        '$y = 2x + 1$. Probe mit $B$: $2 \\cdot 3 + 1 = 7$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet die Gerade durch $A(-2|4)$ und $B(2|0)$?',
+      opts: ['$y = -x + 2$', '$y = -2x$', '$y = -x - 2$', '$y = x + 6$'],
+      steps: [
+        '$m = \\dfrac{0 - 4}{2 - (-2)} = \\dfrac{-4}{4} = -1$',
+        '$B$ einsetzen: $0 = -2 + n$, also $n = 2$.',
+        '$y = -x + 2$. Probe mit $A$: $2 + 2 = 4$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wie lautet die Gerade durch $A(0|3)$ und $B(4|3)$?',
+      opts: ['$y = 3$', '$y = 3x$', '$x = 3$', '$y = 4x + 3$'],
+      steps: [
+        '$m = \\dfrac{3-3}{4-0} = 0$ — beide Punkte liegen gleich hoch.',
+        'Der Graph ist eine waagerechte Gerade auf der Höhe $3$.',
+        '$y = 3$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Warum lässt sich die Gerade durch $A(2|1)$ und $B(2|5)$ nicht in der Form $y = mx + n$ schreiben?',
+      opts: ['Weil sie senkrecht verläuft und damit keine Funktion ist.', 'Weil sie nicht durch den Ursprung geht.', 'Weil beide Punkte denselben $y$-Wert haben.', 'Weil ihr Anstieg null ist.'],
+      steps: [
+        'Beide Punkte haben dieselbe $x$-Koordinate, die Gerade verläuft also senkrecht.',
+        'Im Anstiegsbruch stünde im Nenner $2 - 2 = 0$ — durch null darf man nicht teilen.',
+        'Ihre Gleichung lautet $x = 2$; dem Wert $x = 2$ sind unendlich viele $y$ zugeordnet, also ist es keine Funktion.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Wo schneidet die Gerade durch $A(1|3)$ und $B(3|7)$ die $x$-Achse?',
+      opts: ['bei $x = 0{,}5$', 'bei $x = -0{,}5$', 'bei $x = 1$', 'bei $x = -1$'],
+      steps: [
+        'Die Gerade lautet $y = 2x + 1$.',
+        'Nullstelle: $2x + 1 = 0$, also $x = -\\dfrac{1}{2}$.',
+        'Probe: $2 \\cdot (-0{,}5) + 1 = 0$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wo schneiden sich die Geraden $y = 2x + 1$ und $y = -x + 7$?',
+      opts: ['in $S(3|7)$', 'in $S(2|3)$', 'in $S(2|5)$', 'in $S(5|2)$'],
+      steps: [
+        'Gleichsetzen: $2x + 1 = -x + 7$.',
+        '$3x = 6$, also $x = 2$.',
+        'Einsetzen in eine der beiden Gleichungen: $y = 5$, also $S(2|5)$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Unter welchem Winkel schneidet die Gerade $y = x + 2$ die $x$-Achse?',
+      opts: ['$90^\\circ$', '$30^\\circ$', '$60^\\circ$', '$45^\\circ$'],
+      steps: [
+        'Für den Schnittwinkel gilt $\\tan\\alpha = m$.',
+        '$\\tan\\alpha = 1$ ergibt $\\alpha = 45^\\circ$.',
+        'Anschaulich: ein Schritt nach rechts, ein Schritt nach oben.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Unter welchem Winkel schneidet die Gerade $y = \\sqrt{3}\\,x$ die $x$-Achse?',
+      opts: ['$30^\\circ$', '$45^\\circ$', '$\\approx 1{,}7^\\circ$', '$60^\\circ$'],
+      steps: [
+        '$\\tan\\alpha = \\sqrt{3}$',
+        'Aus der Formelsammlung: $\\tan 60^\\circ = \\sqrt{3}$.',
+        '$\\tan 30^\\circ = \\dfrac{1}{\\sqrt{3}}$ wäre der flachere Fall.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Unter welchem Winkel schneidet $y = 2x - 3$ die $x$-Achse?',
+      opts: ['$2^\\circ$', '$\\approx 26{,}6^\\circ$', '$\\approx 63{,}4^\\circ$', '$\\approx 71{,}6^\\circ$'],
+      steps: [
+        '$\\tan\\alpha = 2$',
+        '$\\alpha = \\arctan 2 \\approx 63{,}4^\\circ$',
+        '$26{,}6^\\circ$ ist der Winkel zur $y$-Achse, die beiden ergänzen sich zu $90^\\circ$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Anstieg hat eine Gerade, die die $x$-Achse unter $30^\\circ$ schneidet?',
+      opts: ['$m = \\dfrac{1}{\\sqrt{3}} \\approx 0{,}577$', '$m = \\sqrt{3} \\approx 1{,}732$', '$m = 0{,}5$', '$m = 30$'],
+      steps: [
+        'Aus $\\tan\\alpha = m$ folgt $m = \\tan 30^\\circ$.',
+        '$\\tan 30^\\circ = \\dfrac{1}{\\sqrt{3}} \\approx 0{,}577$',
+        '$\\sqrt{3}$ gehört zu $60^\\circ$ — die beiden Werte werden gern verwechselt.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Eine Gerade hat den Anstieg $m = -1$. Welchen Winkel schließt sie mit der positiven $x$-Achse ein?',
+      opts: ['$-45^\\circ$ und damit keinen sinnvollen Winkel', '$135^\\circ$', '$90^\\circ$', '$45^\\circ$'],
+      steps: [
+        '$\\tan\\alpha = -1$ liefert zunächst $-45^\\circ$.',
+        'Winkel zur positiven $x$-Achse werden gegen den Uhrzeigersinn gemessen: $180^\\circ - 45^\\circ = 135^\\circ$.',
+        'Die Gerade fällt also unter $45^\\circ$ — der Neigungswinkel selbst ist $45^\\circ$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Eine Rampe hat eine Steigung von $6\\,\\%$. Unter welchem Winkel steigt sie an?',
+      opts: ['$\\approx 34{,}0^\\circ$', '$\\approx 3{,}4^\\circ$', '$\\approx 6{,}0^\\circ$', '$\\approx 0{,}06^\\circ$'],
+      steps: [
+        '$6\\,\\%$ Steigung bedeutet $6\\,\\mathrm{m}$ Höhe auf $100\\,\\mathrm{m}$ Länge, also $m = 0{,}06$.',
+        '$\\alpha = \\arctan 0{,}06 \\approx 3{,}4^\\circ$',
+        'Prozentangabe und Gradzahl sind nicht dasselbe — bei kleinen Winkeln liegen sie nur zufällig nah beieinander.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Ein Dach steigt auf $4\\,\\mathrm{m}$ waagerechter Strecke um $3\\,\\mathrm{m}$ an. Wie groß ist der Neigungswinkel?',
+      opts: ['$\\approx 53{,}1^\\circ$', '$75^\\circ$', '$\\approx 36{,}9^\\circ$', '$\\approx 48{,}6^\\circ$'],
+      steps: [
+        '$m = \\dfrac{3}{4} = 0{,}75$',
+        '$\\alpha = \\arctan 0{,}75 \\approx 36{,}9^\\circ$',
+        '$53{,}1^\\circ$ wäre der Winkel an der Spitze, also der Rest zu $90^\\circ$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Ein Weg trägt das Schild „$12\\,\\%$ Steigung“. Um wie viele Meter steigt er auf $250\\,\\mathrm{m}$ waagerechter Strecke?',
+      opts: ['$3\\,\\mathrm{m}$', '$12\\,\\mathrm{m}$', '$30\\,\\mathrm{m}$', '$300\\,\\mathrm{m}$'],
+      steps: [
+        '$12\\,\\%$ bedeutet den Anstieg $m = 0{,}12$.',
+        '$0{,}12 \\cdot 250 = 30$',
+        'Der Weg gewinnt also $30\\,\\mathrm{m}$ an Höhe.'
+      ],
+      solution: 2
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>

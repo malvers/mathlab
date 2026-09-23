@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben: Der Funktionsbegriff — Doc Alvers Mathe-Labor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="js/quiz.css">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+</head>
+<body>
+<!-- Page markup, scoring, statistics and the teacher dashboard live in
+     js/quiz-engine.js — this file only carries the questions. -->
+<script>
+window.QUIZ = {
+  id: 'mathefos11-w04-funktionsbegriff',
+  version: 'v1',
+  submitLabel: 'Auswertung',   /* Uebungsblatt: der Knopf heisst Auswertung */
+  solutions: 'always',  /* Loesung pro Aufgabe sofort aufklappbar */
+  title: 'Aufgaben · Der Funktionsbegriff',
+  subtitle: 'Fachoberschule · Klasse 11 · Woche 4 (LB 1) · 20 Aufgaben: Eindeutigkeit, Darstellungsformen, Definitions- und Wertebereich · genau eine Antwort pro Aufgabe',
+  dashSub: 'FO · Klasse 11 · Woche 4 · Live-Auswertung: anonyme Einzelscores + Gruppenleistung pro Aufgabe',
+  back: 'svp/mathe/mathefos11.html', /* opened from the plan */
+  /* Blocks: Funktionsbegriff und Eindeutigkeit (1-6), Darstellungsformen und Funktionswerte (7-12), Definitions- und Wertebereich (13-20). */
+  questions: [
+    {
+      q: 'Was kennzeichnet eine Funktion?',
+      opts: ['Jedem Funktionswert wird genau ein Element des Definitionsbereichs zugeordnet.', 'Jedem Element des Definitionsbereichs wird genau ein Funktionswert zugeordnet.', 'Der Graph muss eine Gerade sein.', 'Jedem Element des Definitionsbereichs werden mehrere Funktionswerte zugeordnet.'],
+      steps: [
+        'Entscheidend ist die Eindeutigkeit in einer Richtung: von $x$ nach $y$.',
+        'Zu jedem $x$ gehört genau ein $y$ — nie zwei.',
+        'Umgekehrt darf derselbe $y$-Wert mehrfach vorkommen, etwa bei $f(x) = x^2$ für $x = 2$ und $x = -2$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Welche Zuordnung ist KEINE Funktion?',
+      opts: ['Jeder Person wird ihr Geburtsdatum zugeordnet.', 'Jeder Zahl $x$ wird $y = 2x - 1$ zugeordnet.', 'Jeder Zahl $x$ wird $y = x^2$ zugeordnet.', 'Jeder Zahl $x$ wird jede Zahl $y$ mit $y^2 = x$ zugeordnet.'],
+      steps: [
+        'Für $x = 4$ gäbe es dort zwei Werte: $y = 2$ und $y = -2$.',
+        'Damit ist die Eindeutigkeit verletzt.',
+        'Die anderen drei ordnen jedem Element genau einen Wert zu.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie erkennt man am Graphen, ob eine Funktion vorliegt?',
+      opts: ['Der Graph muss zusammenhängend sein.', 'Jede Parallele zur $x$-Achse schneidet den Graphen höchstens einmal.', 'Jede Parallele zur $y$-Achse schneidet den Graphen höchstens einmal.', 'Der Graph muss durch den Ursprung gehen.'],
+      steps: [
+        'Eine Parallele zur $y$-Achse steht für ein festes $x$.',
+        'Träfe sie den Graphen zweimal, gäbe es zu diesem $x$ zwei Funktionswerte.',
+        'Das ist der sogenannte Senkrechtentest.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Gegeben ist $f(x) = 2x + 1$. Berechne $f(3)$.',
+      opts: ['$1$', '$6$', '$7$', '$5$'],
+      steps: [
+        'Für $x$ wird die Zahl $3$ eingesetzt.',
+        '$f(3) = 2 \\cdot 3 + 1 = 7$',
+        '$6$ wäre $2 \\cdot 3$ ohne den Summanden $1$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Gegeben ist $f(x) = x^2$. Berechne $f(-2)$.',
+      opts: ['$4$', '$-4$', '$2$', '$-2$'],
+      steps: [
+        '$f(-2) = (-2)^2$',
+        'Das Quadrat einer negativen Zahl ist positiv: $4$.',
+        '$-4$ wäre $-\\left(2^2\\right)$ — die Klammer entscheidet.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Für welches $x$ gilt $f(x) = 0$ bei $f(x) = 2x - 6$?',
+      opts: ['$x = -3$', '$x = 6$', '$x = -6$', '$x = 3$'],
+      steps: [
+        'Die Nullstelle ist die Lösung von $f(x) = 0$.',
+        '$2x - 6 = 0$ ergibt $2x = 6$, also $x = 3$.',
+        'Probe: $f(3) = 6 - 6 = 0$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Welche der folgenden ist KEINE der üblichen Darstellungsformen einer Funktion?',
+      opts: ['die Lösungsmenge einer Ungleichung', 'der Funktionsterm', 'der Graph', 'die Wertetabelle'],
+      steps: [
+        'Üblich sind vier Formen: verbale Beschreibung, Wertetabelle, Term und Graph.',
+        'Zwischen ihnen wechselt man je nach Fragestellung.',
+        'Eine Lösungsmenge beschreibt dagegen keine Zuordnung, sondern eine Auswahl von Zahlen.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Die verbale Beschreibung lautet: „Verdopple die Zahl und addiere $3$.“ Wie lautet der Funktionsterm?',
+      opts: ['$f(x) = 2x + 3$', '$f(x) = x^2 + 3$', '$f(x) = 3x + 2$', '$f(x) = 2(x + 3)$'],
+      steps: [
+        'Verdoppeln heißt mit $2$ multiplizieren, danach wird $3$ addiert.',
+        '$f(x) = 2x + 3$',
+        '$2(x+3)$ würde erst addieren und dann verdoppeln — die Reihenfolge ändert das Ergebnis.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Welche Beschreibung passt zu $f(x) = \\dfrac{x}{2} - 4$?',
+      opts: ['Ziehe $4$ ab und halbiere dann.', 'Halbiere die um $4$ verminderte Zahl.', 'Halbiere die Zahl und ziehe $4$ ab.', 'Verdopple die Zahl und ziehe $4$ ab.'],
+      steps: [
+        'Im Term wird zuerst geteilt, dann subtrahiert.',
+        'Also: halbieren, danach $4$ abziehen.',
+        'Probe mit $x = 10$: $5 - 4 = 1$. Die Variante „erst abziehen“ ergäbe $3$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'In der Wertetabelle zu $f(x) = x^2 - 1$ steht ein Fehler. Welche Zuordnung ist falsch?',
+      opts: ['$x = -1 \\mapsto 0$', '$x = 2 \\mapsto 3$', '$x = 0 \\mapsto -1$', '$x = 3 \\mapsto 9$'],
+      steps: [
+        '$f(3) = 9 - 1 = 8$, nicht $9$.',
+        'Die anderen stimmen: $f(0) = -1$, $f(2) = 3$, $f(-1) = 0$.',
+        'Beim Aufstellen einer Wertetabelle wird der Subtraktionsteil leicht vergessen.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Der Graph einer Funktion verläuft durch $P(0|2)$ und $Q(2|6)$ und ist eine Gerade. Wie lautet der Term?',
+      opts: ['$f(x) = x + 2$', '$f(x) = 2x + 2$', '$f(x) = 2x + 6$', '$f(x) = 3x$'],
+      steps: [
+        'Der $y$-Achsenabschnitt ist $2$, denn der Graph schneidet die $y$-Achse bei $P(0|2)$.',
+        'Anstieg: $m = \\dfrac{6-2}{2-0} = 2$.',
+        '$f(x) = 2x + 2$. Probe: $f(2) = 6$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Gegeben ist $f(x) = 3x - 5$. Für welches $x$ gilt $f(x) = 7$?',
+      opts: ['$x = 16$', '$x = 4$', '$x = 2$', '$x = \\dfrac{7}{3}$'],
+      steps: [
+        'Gleichung aufstellen: $3x - 5 = 7$.',
+        '$3x = 12$, also $x = 4$.',
+        'Probe: $f(4) = 12 - 5 = 7$.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet der größtmögliche Definitionsbereich von $f(x) = \\dfrac{1}{x - 2}$?',
+      opts: ['$D = \\mathbb{R} \\setminus \\{-2\\}$', '$D = \\{x \\in \\mathbb{R} \\mid x > 2\\}$', '$D = \\mathbb{R}$', '$D = \\mathbb{R} \\setminus \\{2\\}$'],
+      steps: [
+        'Der Nenner darf nicht null werden: $x - 2 \\neq 0$.',
+        'Also ist $x = 2$ ausgeschlossen.',
+        'Alle anderen reellen Zahlen sind erlaubt.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet der größtmögliche Definitionsbereich von $f(x) = \\sqrt{x - 3}$?',
+      opts: ['$D = \\mathbb{R}$', '$D = \\{x \\in \\mathbb{R} \\mid x \\geq 3\\}$', '$D = \\{x \\in \\mathbb{R} \\mid x > 3\\}$', '$D = \\{x \\in \\mathbb{R} \\mid x \\geq -3\\}$'],
+      steps: [
+        'Unter der Wurzel darf im Reellen nichts Negatives stehen: $x - 3 \\geq 0$.',
+        'Also $x \\geq 3$.',
+        'Die $3$ selbst gehört dazu, denn $\\sqrt{0} = 0$ ist definiert.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet der Wertebereich von $f(x) = x^2$ mit $D = \\mathbb{R}$?',
+      opts: ['$W = \\{y \\in \\mathbb{R} \\mid y > 0\\}$', '$W = \\{y \\in \\mathbb{R} \\mid y \\geq 0\\}$', '$W = \\mathbb{R}$', '$W = \\{y \\in \\mathbb{R} \\mid y \\leq 0\\}$'],
+      steps: [
+        'Ein Quadrat ist nie negativ.',
+        'Der kleinste Wert ist $0$, er wird bei $x = 0$ angenommen.',
+        'Nach oben ist der Wertebereich unbegrenzt.'
+      ],
+      solution: 1
+    },
+    {
+      q: 'Wie lautet der Wertebereich von $f(x) = x^2 + 2$ mit $D = \\mathbb{R}$?',
+      opts: ['$W = \\mathbb{R}$', '$W = \\{y \\in \\mathbb{R} \\mid y \\geq 0\\}$', '$W = \\{y \\in \\mathbb{R} \\mid y > 2\\}$', '$W = \\{y \\in \\mathbb{R} \\mid y \\geq 2\\}$'],
+      steps: [
+        'Der Graph ist die um $2$ nach oben verschobene Normalparabel.',
+        'Der kleinste Wert ist der Scheitelwert $f(0) = 2$.',
+        'Er wird auch angenommen, deshalb steht dort $\\geq$ und nicht $>$.'
+      ],
+      solution: 3
+    },
+    {
+      q: 'Wie lautet der Wertebereich von $f(x) = -x^2 + 4$ mit $D = \\mathbb{R}$?',
+      opts: ['$W = \\{y \\in \\mathbb{R} \\mid y \\geq 4\\}$', '$W = \\mathbb{R}$', '$W = \\{y \\in \\mathbb{R} \\mid y \\leq 4\\}$', '$W = \\{y \\in \\mathbb{R} \\mid y \\leq 0\\}$'],
+      steps: [
+        'Das Minus vor dem Quadrat spiegelt die Parabel, sie ist nach unten geöffnet.',
+        'Der größte Wert ist der Scheitelwert $f(0) = 4$.',
+        'Nach unten ist sie unbegrenzt, also $y \\leq 4$.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Wie lautet der größtmögliche Definitionsbereich von $f(x) = \\dfrac{1}{\\sqrt{x}}$?',
+      opts: ['$D = \\{x \\in \\mathbb{R} \\mid x > 0\\}$', '$D = \\{x \\in \\mathbb{R} \\mid x \\geq 0\\}$', '$D = \\mathbb{R} \\setminus \\{0\\}$', '$D = \\mathbb{R}$'],
+      steps: [
+        'Zwei Bedingungen treffen zusammen: unter der Wurzel darf nichts Negatives stehen, und der Nenner darf nicht null sein.',
+        '$x \\geq 0$ und $\\sqrt{x} \\neq 0$, also $x \\neq 0$.',
+        'Übrig bleibt $x > 0$.'
+      ],
+      solution: 0
+    },
+    {
+      q: 'Ein Betrieb stellt bis zu $500$ Stück her, die Kosten betragen $K(x) = 4x + 1000$. Welcher Definitionsbereich ist im Sachzusammenhang sinnvoll?',
+      opts: ['$D = \\mathbb{R}$', '$D = \\{x \\in \\mathbb{R} \\mid x \\geq 0\\}$', '$D = \\{x \\in \\mathbb{N} \\mid 0 \\leq x \\leq 500\\}$', '$D = \\{x \\in \\mathbb{N} \\mid x \\geq 1000\\}$'],
+      steps: [
+        'Stückzahlen sind nicht negativ und in der Regel ganzzahlig.',
+        'Die Kapazität begrenzt sie nach oben auf $500$.',
+        'Der Sachzusammenhang schränkt den mathematisch möglichen Definitionsbereich also ein.'
+      ],
+      solution: 2
+    },
+    {
+      q: 'Welchen Wertebereich hat die Kostenfunktion $K(x) = 4x + 1000$ auf $D = \\{x \\in \\mathbb{N} \\mid 0 \\leq x \\leq 500\\}$?',
+      opts: ['alle Werte von $1000$ bis $3000$, die sich als $4x + 1000$ mit ganzzahligem $x$ ergeben', 'alle Werte von $0$ bis $3000$', 'alle reellen Zahlen ab $1000$', 'alle reellen Zahlen von $1000$ bis $3000$'],
+      steps: [
+        'Die Funktion steigt, also liegt der kleinste Wert bei $x = 0$ und der größte bei $x = 500$.',
+        '$K(0) = 1000$ und $K(500) = 2000 + 1000 = 3000$.',
+        'Weil nur ganzzahlige Stückzahlen vorkommen, sind es einzelne Werte im Abstand von $4$, nicht alle Zahlen dazwischen.'
+      ],
+      solution: 0
+    }
+  ]
+};
+</script>
+<script src="js/quiz-collapse.js"></script>
+<script src="js/quiz-engine.js"></script>
+</body>
+</html>
