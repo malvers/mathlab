@@ -2434,6 +2434,17 @@ ASK_JS = r"""
     panel.hidden = false;
     if (!pwd()) askPassword(); else askQuestion();
   }
+  // The ordinary window too (Doc, 23.09.2026: "im Präsi Mode ist es schon richtig ... im Normal bitte auch so"): where the
+  // password is stored - Doc's own devices - the line stands in the footer from the start, no click on her picture needed.
+  // Without it (the students' devices) her picture waits for the click as before: nobody meets a password prompt uninvited.
+  // No focus and no warm-up here: the keys stay with the deck until Doc clicks into the field.
+  else if (pwd()) {
+    panel.hidden = false;
+    askQuestion();
+    rest();
+    placeRow();
+  }
+  addEventListener('load', placeRow);                 // dock() has just moved the page number - place the line after it
 })();
 """
 
