@@ -114,13 +114,20 @@ d.table_top("Wie groß Fenster geworden sind", [
     ("Und jedes Token im Fenster **kostet** — bei jeder einzelnen Anfrage neu", 0),
 ], font_size=11, bold_cols=(0,), marks={(4, 1): TINT_GREEN})
 
-d.bullets("Halluzination", [
+# Kahneman's cover next to the bullets (Doc, 23.09.2026): the fast, plausible answer is System 1.
+# The file is fetched (Open Library, ISBN 9780374275631) and lives tracked in HTML/decks/img;
+# asset() copies from an absolute path onto itself, so it goes through the generator's folder.
+import shutil
+DECK_IMG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "HTML", "decks", "img")
+os.makedirs(IMG, exist_ok=True)
+shutil.copyfile(os.path.join(DECK_IMG, "aibegriffe-kahneman.jpg"), os.path.join(IMG, "aibegriffe-kahneman.jpg"))
+d.picture_bullets("Halluzination", os.path.join(IMG, "aibegriffe-kahneman.jpg"), [
     ("**Halluzination** = das Modell erfindet etwas, das **plausibel klingt**", 0),
     ("Ursache: es sagt das **wahrscheinlichste** Wort voraus, nicht das wahre", 0),
     ("Es hat keine „weiß ich nicht“-Taste — **Zuversicht ist kein Wahrheitsmaß**", 0),
     ("Typische Opfer: **Quellen, Zitate, Zahlen, Paragraphen**", 0),
     ("Gegenmittel: **Beleg mitgeben** und **nachprüfen** — nie umgekehrt", 0),
-])
+], pic_w=240)
 
 # ------------------------------------------------------------- Kapitel 03 ---
 d.chapter(3, "Reden mit dem Modell", "Prompt und Kontext")
