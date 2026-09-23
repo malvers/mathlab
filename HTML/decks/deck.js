@@ -1277,6 +1277,7 @@ fromHash();
   // "nicht dauerhaft, nur wenn Solita clicked wie jetzt"). Too little room (a phone, a short footer text) and the
   // line stays in the panel as before.
   const row = document.getElementById('ask-row'), rowHome = row.nextSibling;
+  const btn = document.getElementById('ask-btn'), btnHome = btn.nextSibling;   // her picture: bottom right, or leading the footer line
   const line = document.createElement('div');
   line.id = 'ask-line';
   panel.parentNode.insertBefore(line, panel.nextSibling);   // inside #ask, so the line inherits its font and colours
@@ -1298,7 +1299,10 @@ fromHash();
         fits = true;
       }
     }
-    if (fits) { move(line, null); line.classList.add('on'); }
+    if (fits) {                                       // her picture leads the line, the corner is empty (Doc, 23.09.2026: "Solita links neben das Mic, rechts weg")
+      move(line, null); line.classList.add('on');
+      if (btn.parentNode !== row) row.insertBefore(btn, row.firstChild);
+    }
     else rowBack();
   }
   function move(to, before) {                        // moving a focused field blurs it - Doc keeps typing
@@ -1310,6 +1314,7 @@ fromHash();
   function rowBack() {
     line.classList.remove('on');
     move(panel, rowHome && rowHome.parentNode === panel ? rowHome : null);
+    if (btn.parentNode === row) box.insertBefore(btn, btnHome && btnHome.parentNode === box ? btnHome : null);
   }
   painted.push(placeRow);                             // the footer moves with the slide scale and the page
   addEventListener('resize', placeRow);

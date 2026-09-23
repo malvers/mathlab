@@ -947,6 +947,7 @@ html.presenter #jump{top:auto!important;right:24px!important;bottom:calc(clamp(6
    JS measures the gap on the screen; too narrow (a phone) and the line stays in the panel. */
 #ask-line{position:fixed;z-index:11;display:none;transform:translateY(-50%)}
 #ask-line.on{display:block}
+#ask-row #ask-btn{width:32px;height:32px;flex:none;align-self:center;box-shadow:none;opacity:1;animation:none}   /* leading the footer line, as tall as the mic button */
 #ask-panel{transition:opacity .25s ease}
 #ask-panel.bare{opacity:0;pointer-events:none}   /* nothing above to show: no answer (or folded by a page turn), no label */
 /* a light blue tint (Doc, 16.09.2026: "leicht bläulich"); field and buttons a shade darker blue ("etwas dunkelblauer als der HG") */
@@ -2286,6 +2287,7 @@ ASK_JS = r"""
   // "nicht dauerhaft, nur wenn Solita clicked wie jetzt"). Too little room (a phone, a short footer text) and the
   // line stays in the panel as before.
   const row = document.getElementById('ask-row'), rowHome = row.nextSibling;
+  const btn = document.getElementById('ask-btn'), btnHome = btn.nextSibling;   // her picture: bottom right, or leading the footer line
   const line = document.createElement('div');
   line.id = 'ask-line';
   panel.parentNode.insertBefore(line, panel.nextSibling);   // inside #ask, so the line inherits its font and colours
@@ -2307,7 +2309,10 @@ ASK_JS = r"""
         fits = true;
       }
     }
-    if (fits) { move(line, null); line.classList.add('on'); }
+    if (fits) {                                       // her picture leads the line, the corner is empty (Doc, 23.09.2026: "Solita links neben das Mic, rechts weg")
+      move(line, null); line.classList.add('on');
+      if (btn.parentNode !== row) row.insertBefore(btn, row.firstChild);
+    }
     else rowBack();
   }
   function move(to, before) {                        // moving a focused field blurs it - Doc keeps typing
@@ -2319,6 +2324,7 @@ ASK_JS = r"""
   function rowBack() {
     line.classList.remove('on');
     move(panel, rowHome && rowHome.parentNode === panel ? rowHome : null);
+    if (btn.parentNode === row) box.insertBefore(btn, btnHome && btnHome.parentNode === box ? btnHome : null);
   }
   painted.push(placeRow);                             // the footer moves with the slide scale and the page
   addEventListener('resize', placeRow);
