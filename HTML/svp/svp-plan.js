@@ -47,7 +47,10 @@
        after the whole plan. */
     /* Die gemeinsame Faltung liegt VOR den Teilen: die Suche (Teil "search")
        benutzt sie, und svp-suche.js unter dem Laufband dieselbe Datei. */
+    /* Die Formatierleiste ebenso: der Fahrplan (Teil "fahrplan") haengt sie in
+       sein Blatt, und notes.html soll dieselbe bekommen. */
     document.write('<script src="' + dir + 'svp-falten.js"><\/script>'
+        + '<script src="' + dir + 'svp-fmtbar.js"><\/script>'
         + PARTS.map(function (p) {
             return '<script src="' + dir + 'svp-plan-' + p + '.js"><\/script>';
         }).join(''));

@@ -8,6 +8,11 @@
 //
 // The text is kept per week in the browser, next to the plan's own edits. It belongs to the
 // teacher, so the stack shows only for a signed-in session, exactly like the Notizen tab.
+//
+// A line may carry bold, italic, underline and a colour (Doc, 23.09.2026: "wenn ich in der
+// Editbox bin paar Farben Bold etc."): the bar over the list is the shared one from
+// svp-fmtbar.js, and what is stored is one line of tame HTML per point - svpFmtBar.clean()
+// keeps the marks and throws everything else out, so a paste never smuggles fonts in.
 window.svpPlanParts.push(function (P) {
     Object.assign(P, { fahrplanBtn, fahrplanOf, fahrplaene, replaceFahrplaene, markFahrplaene });
 
@@ -64,7 +69,7 @@ window.svpPlanParts.push(function (P) {
 
     /* A week that has a run of its own says so - like "Notizen" turning green when something
        stands in it (Doc, 07.09.2026). */
-    function markiere(b, text) { b.classList.toggle('has-fahr', !!text.trim()); }
+    function markiere(b, text) { b.classList.toggle('has-fahr', !!svpFmtBar.textOf(text)); }
 
     // --- the sheet -------------------------------------------------------
     let box = null, blatt = null, feld = null, bild = null, mat = null, offen = null, timer = null;
@@ -82,7 +87,14 @@ window.svpPlanParts.push(function (P) {
         const titel = document.createElement('p');
         titel.className = 'fahr-title';
         titel.textContent = 'Inhalte';
-        blatt.appendChild(titel);
+        /* Die Ueberschrift und die Formatierleiste teilen sich die erste Zeile
+           des Blattes; die Leiste zeigt sich nur, solange der Cursor im Text
+           steht (svp-fahrplan.css). Die Farben sind die des Hauses, exakt,
+           dazu das Navy der Schrift als Weg zurueck. */
+        const kopf = document.createElement('div');
+        kopf.className = 'fahr-head';
+        kopf.appendChild(titel);
+        blatt.appendChild(kopf);
         /* Eine echte Liste, kein Textfeld: dann setzt der Browser bei Enter von selbst
            den naechsten Punkt (Doc, 20.09.2026: "bullets"). */
         feld = document.createElement('ul');
@@ -91,6 +103,16 @@ window.svpPlanParts.push(function (P) {
         feld.setAttribute('role', 'textbox');
         feld.setAttribute('aria-label', 'Inhalte der Stunde');
         blatt.appendChild(feld);
+        kopf.appendChild(svpFmtBar.build({
+            target: feld,
+            colors: [
+                ['rgb(176, 36, 24)', 'Rot (\u03a5)'],
+                ['rgb(121, 158, 49)', 'Gr\u00fcn (\u03c6)'],
+                ['rgb(245, 194, 66)', 'Orange (\u03bb)'],
+                ['#002060', 'Navy (Standard)']
+            ],
+            marker: 'rgba(245, 194, 66, 0.45)'
+        }));
         /* Der Gedanke der Woche in der Ecke: derselbe Klick wie in der Wochenzeile
            (Doc, 20.09.2026: "mach rechts oben ein thumb vom GDW"). */
         bild = document.createElement('button');
@@ -120,6 +142,13 @@ window.svpPlanParts.push(function (P) {
             clearTimeout(timer);
             timer = setTimeout(save, 600);      /* typing saves itself, like the notes field */
             fitFont();                          /* mehr Text -> kleinere Schrift */
+        });
+        /* Eingefuegt wird nur der Text: was aus einer Mail oder einem Deck kommt,
+           bringt sonst seine Schrift, Groesse und Farbe mit auf das Blatt. */
+        feld.addEventListener('paste', function (ev) {
+            ev.preventDefault();
+            const cb = ev.clipboardData;
+            document.execCommand('insertText', false, cb ? (cb.getData('text/plain') || '') : '');
         });
         /* typing must not reach the plan: it walks its rows with the arrow keys and folds
            weeks on Enter */
@@ -183,13 +212,14 @@ window.svpPlanParts.push(function (P) {
         blatt.style.fontSize = best.toFixed(1) + 'px';
     }
 
-    /* One line per bullet - that is what is stored, the list is only how it is shown. */
+    /* One line per bullet - that is what is stored, the list is only how it is shown.
+       Each line is tame HTML: the marks and colours stay, all else goes (svpFmtBar.clean). */
     function zeilen() {
         /* Reads the direct children, whatever the browser made of them while typing -
            a stray <div> or a bare text node counts as its own point, same as an <li>. */
         return [].map.call(feld.childNodes, function (n) {
-            return (n.textContent || '').replace(/\u00a0/g, ' ').trim();
-        }).filter(Boolean);
+            return svpFmtBar.clean(n);
+        }).filter(function (z) { return svpFmtBar.textOf(z); });
     }
 
     function save() {
@@ -208,7 +238,9 @@ window.svpPlanParts.push(function (P) {
         /* an empty plan still needs one point, otherwise the cursor has nowhere to sit */
         (zn.length ? zn : ['']).forEach(function (t) {
             const li = document.createElement('li');
-            li.textContent = t;
+            /* through clean() also on the way in: older lines are plain text and pass
+               as they are, a line from the cloud is trusted no further than a typed one */
+            li.innerHTML = svpFmtBar.clean(t);
             feld.appendChild(li);
         });
         /* das Bild der Woche in die Ecke - ohne Gedanken bleibt die Ecke leer */

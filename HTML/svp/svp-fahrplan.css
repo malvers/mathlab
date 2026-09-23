@@ -89,14 +89,39 @@
     font-size: min(2.88rem, 6.5vw);
     line-height: 1.25;
 }
-/* Die feste Ueberschrift - etwas ruhiger als die Punkte darunter. */
-.fahr-title {
+/* Die erste Zeile des Blattes: links die feste Ueberschrift, rechts die
+   Formatierleiste (Doc, 23.09.2026: "wenn ich in der Editbox bin paar Farben
+   Bold etc."). */
+.fahr-head {
     grid-column: 1;
     grid-row: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 16px;
     margin: 0 0 0.5em;
+}
+/* Die feste Ueberschrift - etwas ruhiger als die Punkte darunter. */
+.fahr-title {
+    margin: 0;
     font-size: 0.86em;
     font-weight: 600;
     color: #002060;
+}
+/* Die Leiste ist im Navy der Schrift gehalten und nur da, solange der Cursor im
+   Text steht - ihre Knoepfe schlucken den Mausdruck, der Fokus bleibt also im
+   Text, waehrend man klickt. Geht er zum Gedanken oder zu den Pillen, wird
+   das Blatt wieder das ruhige Blatt. */
+.fahr-head .fmtbar {
+    color: #002060;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+.fahr-sheet:focus-within .fahr-head .fmtbar {
+    visibility: visible;
+    opacity: 1;
 }
 /* Der Gedanke der Woche, oben rechts auf dem Blatt - Klick oeffnet ihn gross.
    Sitzt in der rechten Rasterspalte, ganz oben; das Blatt rechnet seine Hoehe
@@ -220,6 +245,11 @@
     display: list-item;
     margin: 0 0 0.35em;
 }
+/* Fett heisst hier 600: das Blatt schreibt Outfit 300, und "bolder" davon
+   ist nur 400 - kaum zu sehen, und der Browser zaehlt es nicht einmal als
+   fett (die Leiste wuesste nicht, dass B gedrueckt ist). 600 ist der
+   schwerste Schnitt, den die Seiten laden. Gemessen 23.09.2026. */
+.fahr-list b { font-weight: 600; }
 .fahr-list > *:last-child { margin-bottom: 0; }
 
 /* Telefon: nebeneinander ist hier nichts mehr - 154 px Material neben 46-px-

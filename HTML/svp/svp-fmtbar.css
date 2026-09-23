@@ -1,0 +1,48 @@
+/* --- Formatierleiste (svp-fmtbar.js) --------------------------------------
+   Fett, kursiv, unterstrichen, ein paar Farbpunkte, Marker, Tx. Die Leiste
+   rechnet alles aus currentColor: wer sie einhaengt, gibt ihr nur die Farbe
+   der Schrift, dann passt sie auf jeden Grund - auf das blaue Papier des
+   Fahrplans wie in eine dunkle Karte. Die Groesse steht fest in Pixeln, damit
+   ein Blatt, das seine Schrift schrumpft, die Leiste nicht mitschrumpft. */
+.fmtbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    font-size: 14px;
+    line-height: 1;
+}
+.fmtbar-btn {
+    box-sizing: border-box;
+    min-width: 28px;
+    height: 26px;
+    padding: 0 7px;
+    border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+    border-radius: 6px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-family: 'Outfit', sans-serif;
+    cursor: pointer;
+    outline: none;
+}
+.fmtbar-btn:hover { border-color: color-mix(in srgb, currentColor 70%, transparent); }
+/* Die Auszeichnung, die die Auswahl gerade traegt, ist eingedrueckt. */
+.fmtbar-btn.on {
+    background: color-mix(in srgb, currentColor 18%, transparent);
+    border-color: currentColor;
+}
+.fmtbar-dot {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    vertical-align: -2px;
+    border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+}
+.fmtbar-mark {
+    display: inline-block;
+    padding: 0 4px;
+    border-radius: 3px;
+}
+@media print { .fmtbar { display: none !important; } }
