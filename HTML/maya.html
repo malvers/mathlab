@@ -40,6 +40,7 @@
 
         #canvas {
             touch-action: none;
+            cursor: default;
         }
 
         /* the number and the sum each sit on their own card over the stage;
@@ -67,11 +68,25 @@
             box-sizing: border-box;
         }
 
+        /* grey whenever the die has nothing to say - the die itself, not its card: the card
+           keeps its glass and its edge, only the cube steps back */
+        #maya-dice.dimmed #die-stage {
+            filter: grayscale(1);
+            opacity: 0.45;
+        }
+
+        /* while the number is being typed it takes no tap either - the first tap just
+           leaves the number, it does not roll */
+        #maya-dice.locked {
+            pointer-events: none;
+        }
+
         #die-stage {
             width: 100%;
             height: 100%;
             touch-action: none;
             cursor: grab;
+            transition: filter 0.2s ease, opacity 0.2s ease;
         }
 
         #die-stage:active {
@@ -89,8 +104,75 @@
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
             line-height: 1;
+            min-height: 1em;           /* the box keeps its size while the digits are still arriving */
             color: rgb(245, 194, 66);
             font-size: clamp(2.2rem, 7.5vw, 6rem);
+            /* the number is a field as well: tap it and type another one */
+            pointer-events: auto;
+            cursor: pointer;
+            caret-color: rgb(245, 194, 66);
+            outline: none;
+        }
+
+        #maya-head {
+            transition: border-color 0.2s ease;
+        }
+
+        /* two small triangles at the right edge, there only while the number is typed */
+        .maya-spin {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: auto;
+        }
+
+        /* the left pair says how many places stand below - that one is always there */
+        .maya-spin.left {
+            display: flex;
+            right: auto;
+            left: 18px;
+        }
+
+        .maya-spin button {
+            margin: 0;
+            padding: 6px;
+            border: 0;
+            background: none;
+            line-height: 0;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.3);
+            transition: color 0.15s ease;
+        }
+
+        .maya-spin button:hover,
+        .maya-spin button:active {
+            color: rgb(245, 194, 66);
+        }
+
+        .maya-spin svg {
+            display: block;
+            width: 18px;
+            height: 11px;
+            fill: currentColor;
+        }
+
+        /* stepping with the triangles or the arrow keys: no blinking caret in the way */
+        #maya-num.no-caret {
+            caret-color: transparent;
+        }
+
+        #maya-num::selection,
+        #maya-num ::selection {
+            background: rgba(245, 194, 66, 0.28);
+        }
+
+        #maya-head:hover,
+        #maya-head.editing {
+            border-color: rgba(245, 194, 66, 0.5);
         }
 
         /* a rolled number rides in from the right */
@@ -112,12 +194,76 @@
         }
 
         /* solved: the same treatment, in our green */
-        #maya-head.solved .maya-num {
+        #maya-head.solved .maya-num .num-ch {
             background-image: linear-gradient(180deg, #ffffff 0%, #e6f3cd 20%, #9ec44a 60%, #5c7a28 100%);
             filter: drop-shadow(0 0 25px rgba(121, 158, 49, 0.5));
         }
 
 
+
+        /* the link between the number above and the board below: sits on the seam of the
+           two cards, and set it lays the rolled number in Maya on the places */
+        .maya-link {
+            position: absolute;
+            width: 46px;
+            height: 46px;
+            margin: 0;
+            padding: 0;
+            border-radius: 50%;
+            border: 1px solid rgb(245, 194, 66);
+            background: rgba(10, 20, 40, 0.85);
+            backdrop-filter: blur(25px);
+            color: rgb(245, 194, 66);
+            box-shadow: 0 0 18px rgba(245, 194, 66, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            pointer-events: auto;
+            z-index: 2;                /* over both cards - no card edge runs through it */
+            transition: box-shadow 0.2s ease;
+        }
+
+        .maya-link:hover,
+        .maya-link:focus-visible {
+            box-shadow: 0 0 26px rgba(245, 194, 66, 0.6);
+            outline: none;
+        }
+
+        /* the arrow itself is the state: down means the number lays the board, up means the
+           board says what the number is - and the turn is what you see */
+        .maya-link svg {
+            transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: rotate(180deg);
+        }
+
+        .maya-link.down svg {
+            transform: rotate(0deg);
+        }
+
+        /* grey and pointing down: a number stands above and nothing lies below yet - that is
+           the task. One click and it lays itself, which is the answer. */
+        .maya-link.pending {
+            border-color: rgba(255, 255, 255, 0.25);
+            color: rgba(255, 255, 255, 0.4);
+            box-shadow: none;
+        }
+
+        .maya-link.pending:hover {
+            color: rgba(255, 255, 255, 0.75);
+            border-color: rgba(255, 255, 255, 0.45);
+            box-shadow: none;
+        }
+
+        .maya-link svg {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
 
         #maya-formula {
             position: relative;
@@ -168,6 +314,51 @@
         .maya-row input[type="number"]:focus {
             outline: none;
             border-color: rgb(245, 194, 66);
+        }
+
+        /* the place value system sits in a popup - the stage itself stays clear */
+        .maya-dlg {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: rgba(0, 0, 20, 0.6);
+            backdrop-filter: blur(6px);
+        }
+
+        .maya-dlg[hidden] {
+            display: none;
+        }
+
+        .maya-dlg-card {
+            width: min(92vw, 420px);
+            box-sizing: border-box;
+            padding: 22px 24px 18px;
+            border-radius: 18px;
+            background: rgba(10, 20, 40, 0.92);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(121, 158, 49, 0.45);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+        }
+
+        .maya-dlg h2 {
+            margin: 0 0 14px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 0.12em;
+            color: rgb(121, 158, 49);
+        }
+
+        .maya-dlg .maya-note {
+            margin-top: 10px;
+        }
+
+        .maya-dlg .cyber-btn {
+            width: 100%;
         }
 
         .maya-note {
@@ -237,19 +428,14 @@
 
 <body>
     <nav id="mini-rail">
-        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
+        <div class="nav-btn" onclick="openSystem()" title="Stellenwerte">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3.2"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
             </svg>
         </div>
     </nav>
-
-    <aside id="side-panel">
-        <header id="sidebar-header"></header>
-        <div id="ui-container"></div>
-    </aside>
 
     <main id="main-content">
         <div id="canvas-container">
@@ -258,14 +444,47 @@
             </div>
             <span id="font-probe">0123456789</span>
             <div id="maya-head" class="maya-card">
-                <div class="maya-num cyber-bignum-gold" id="maya-num"></div>
+                <div class="maya-num" id="maya-num" role="textbox" tabindex="0" inputmode="numeric"
+                    title="Zahl antippen und neu eingeben"></div>
+                <div class="maya-spin left" id="maya-places">
+                    <button type="button" class="spin-up" tabindex="-1" title="eine Stelle mehr">
+                        <svg viewBox="0 0 18 11" aria-hidden="true"><path d="M9 0 18 11 0 11Z" /></svg>
+                    </button>
+                    <button type="button" class="spin-down" tabindex="-1" title="eine Stelle weniger">
+                        <svg viewBox="0 0 18 11" aria-hidden="true"><path d="M9 11 0 0 18 0Z" /></svg>
+                    </button>
+                </div>
+                <div class="maya-spin">
+                    <button type="button" class="spin-up" tabindex="-1" title="eins mehr (Pfeil hoch)">
+                        <svg viewBox="0 0 18 11" aria-hidden="true"><path d="M9 0 18 11 0 11Z" /></svg>
+                    </button>
+                    <button type="button" class="spin-down" tabindex="-1" title="eins weniger (Pfeil runter)">
+                        <svg viewBox="0 0 18 11" aria-hidden="true"><path d="M9 11 0 0 18 0Z" /></svg>
+                    </button>
+                </div>
             </div>
+            <button id="maya-link" class="maya-link" type="button"
+                title="Unten bestimmt oben — klicken dreht die Richtung um">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 4.5V19" />
+                    <path d="M5.8 13.2 12 19.4l6.2-6.2" />
+                </svg>
+            </button>
             <div id="maya-solution" class="maya-card">
                 <div id="maya-formula"></div>
             </div>
             <canvas id="canvas"></canvas>
         </div>
     </main>
+
+    <div id="maya-dlg" class="maya-dlg" hidden>
+        <div class="maya-dlg-card" role="dialog" aria-modal="true" aria-labelledby="maya-dlg-title">
+            <h2 id="maya-dlg-title">STELLENWERTE</h2>
+            <div id="maya-system"></div>
+            <div class="maya-note" id="maya-system-note"></div>
+            <button type="button" class="cyber-btn" id="maya-dlg-close">FERTIG</button>
+        </div>
+    </div>
 
     <script>
         // Debug output goes into the central DEBUG window, never into the console.
@@ -286,20 +505,6 @@
     <script src="js/cyber-clock.js"></script>
     <script src="js/cyber-trackball.js"></script>
     <script>
-        function toggleSidebar() {
-            const panel = document.getElementById('side-panel');
-            panel.classList.toggle('collapsed');
-            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
-                CyberLeftChrome.publishResolvedScale();
-            }
-            setTimeout(() => {
-                window.dispatchEvent(new Event('resize'));
-                if (typeof init === 'function') init();
-                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
-                    CyberLeftChrome.publishResolvedScale();
-                }
-            }, 400);
-        }
 
         const T = (k, fb) => (typeof CyberI18n !== 'undefined' && CyberI18n.getOr)
             ? CyberI18n.getOr('maya.' + k, fb)
@@ -330,6 +535,7 @@
             cyan: 'rgb(0, 210, 255)',
             warn: 'rgb(176, 36, 24)',
             dim: 'rgba(245, 194, 66, 0.55)',
+            mute: 'rgba(255, 255, 255, 0.3)',   // the grey of the open link - out of play
             line: 'rgba(255, 255, 255, 0.13)',
             fill: 'rgba(255, 255, 255, 0.03)'
         };
@@ -368,7 +574,7 @@
         let colorMode = store.get('colour', '0') === '1';
         const PLACE_COLORS = [
             'rgb(245, 194, 66)', 'rgb(0, 210, 255)', 'rgb(121, 158, 49)',
-            'rgb(176, 36, 24)', 'rgb(0, 210, 255)'
+            'rgb(176, 36, 24)', 'rgb(157, 80, 187)'   // the fifth its own, not the cyan again
         ];
         const placeColor = (place) =>
             (colorMode && place !== null && place !== undefined) ? PLACE_COLORS[place] : COL.glyph;
@@ -376,7 +582,19 @@
         let sysKey = store.get('system', 'kalender') === 'rein20' ? 'rein20' : 'kalender';
         let digits = [0, 0, 0, 0, 0];     // index 0 = ones, at the bottom of the board
         let task = null;                  // { target, done }
-        let solvedCount = 0;
+        // Which way the arrow points, and whether it has been followed yet:
+        //   'up'   - the board leads, the number above says what lies there
+        //   'down' - the number above leads, the board is its Maya
+        //   'task' - the arrow points down but grey: a number stands above, the board is
+        //            empty, and laying it is yours. One click lays it - that is the answer.
+        // Whoever is worked on leads, so the arrow turns by itself.
+        let flow = 'up';
+        let editing = false;              // the big number is being typed over
+        let before = null;                // what lay on the board before it was typed over
+        let blank = false;                // nothing lies on the board - not even a zero
+        // how many places stand there - four unless it is set otherwise, and never fewer than
+        // the number needs
+        let placeCount = Math.min(5, Math.max(1, parseInt(store.get('places', '4'), 10) || 4));
         let flashes = [];                 // { place, color, until }
         let cards = [];                   // the places, side by side
         let glyphs = [];                  // every dot and every bar, for taking them away
@@ -390,12 +608,40 @@
         const de = (n) => n.toLocaleString('de-DE');
 
         function places() {
-            let top = 3;                  // four places are always on the board
+            let top = placeCount - 1;     // as many as are set, more if the number needs them
             for (let i = digits.length - 1; i >= 0; i--) {
                 if (digits[i] > 0) { top = Math.max(top, i); break; }
             }
             return top + 1;
         }
+
+        // the left pair of triangles: one place more, one place less. Fewer than the number
+        // needs is not possible - those places hold something.
+        function setPlaces(n) {
+            placeCount = Math.min(5, Math.max(1, n));
+            store.set('places', String(placeCount));
+            // a number that no longer fits has nowhere to go, so it goes: empty board, empty
+            // number, and the arrow back up. Whatever fits simply stays.
+            const room = maxValue(placeCount);
+            if (value() > room || (task && task.target > room)) {
+                digits = [0, 0, 0, 0, 0];
+                blank = true;
+                task = null;
+                setFlow('up', true);
+                say(T('places_clear', 'Zu wenig Stellen für diese Zahl - das Brett ist leer.'), COL.glyph);
+            }
+            changed();
+        }
+
+        // the largest number that fits into n places
+        function maxValue(n) {
+            const v = sys().values, lim = sys().limits;
+            let m = 0;
+            for (let i = 0; i < n; i++) m += (lim[i] - 1) * v[i];
+            return m;
+        }
+
+        // the highest place that holds something, one-based
 
         // Lay a decimal number out over the places, highest first.
         function layout(n) {
@@ -408,6 +654,7 @@
                 n -= out[i] * v[i];
             }
             digits = out;
+            blank = false;
         }
 
         // ------------------------------------------------------------------ drawing ---
@@ -465,10 +712,38 @@
             ctx.restore();
         }
 
+        // The place value as a power, drawn small under its card. In the calendar reckoning
+        // only the first two places are plain powers of twenty - above them every place is
+        // eighteen twenties, so they read 18*20^n. That is exactly why the third place is 360.
+        function powerOf(place) {
+            if (sysKey === 'rein20') return { pre: '', exp: place };
+            return place < 2 ? { pre: '', exp: place } : { pre: '18\u00b7', exp: place - 1 };
+        }
+
+        function drawPower(place, cx, y) {
+            const { pre, exp } = powerOf(place);
+            const base = pre + '20';
+            ctx.save();
+            ctx.fillStyle = colorMode ? placeColor(place) : 'rgba(255, 255, 255, 0.45)';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            ctx.font = "600 12px 'Orbitron', sans-serif";
+            const bw = ctx.measureText(base).width;
+            ctx.font = "600 9px 'Orbitron', sans-serif";
+            const ew = ctx.measureText(String(exp)).width;
+            const x = cx - (bw + 1 + ew) / 2;
+            ctx.font = "600 12px 'Orbitron', sans-serif";
+            ctx.fillText(base, x, y);
+            ctx.font = "600 9px 'Orbitron', sans-serif";
+            ctx.fillText(String(exp), x + bw + 1, y - 3);
+            ctx.restore();
+        }
+
         // Every bar counts five, every dot one, and the dots sit above the bars.
         // place === null draws a loose digit (panel, drag ghost) and registers no targets.
-        function paintDigit(d, cx, cy, bw, bh, place) {
-            const col = placeColor(place);
+        function paintDigit(d, cx, cy, bw, bh, place, colOverride) {
+            if (d === null) return;               // an empty place shows nothing at all
+            const col = colOverride || placeColor(place);
             if (d === 0) {
                 const w = Math.min(bw * 0.78, 132);   // exactly the width of a bar
                 const h = w * 0.64;
@@ -527,8 +802,12 @@
             const pad = 16;
             const n = places();
 
-            // places and panel share one width, so their edges line up
-            const blockW = Math.min(W - 2 * pad, n * 200 + (n - 1) * 14);
+            // places and panel share one width, so their edges line up. That width is fixed -
+            // it is always the one four places take - so setting the number of places does not
+            // move the number, the sum or the panel. Only the places themselves get wider or
+            // narrower to fill it.
+            const REF_PLACES = 4;
+            const blockW = Math.min(W - 2 * pad, REF_PLACES * 200 + (REF_PLACES - 1) * 14);
             const blockX = (W - blockW) / 2;
 
             // where the places will stand - the sum's terms line up with these columns
@@ -602,33 +881,59 @@
             const stackGap = gapH;
             const diceH = diceEl ? diceEl.offsetHeight : 0;
             const stackH = (diceEl ? diceH + stackGap : 0) + hH + stackGap + sH + stackGap + blockH;
-            const stackTop = Math.max(stackTopMin, Math.min((H - stackH) / 2, H - pad - stackH));
+            const DROP = 28;            // the whole block sits a little lower than centred
+            const lowest = Math.max(stackTopMin, H - pad - stackH);
+            const stackTop = Math.min(
+                Math.max(stackTopMin, Math.min((H - stackH) / 2, H - pad - stackH)) + DROP,
+                lowest);
             let y = stackTop;
             if (diceEl) { diceEl.style.top = y + 'px'; y += diceH + stackGap; }
             if (headEl) headEl.style.top = y + 'px';
             y += hH + stackGap;
             if (solEl) solEl.style.top = y + 'px';
+            const linkEl = document.getElementById('maya-link');
+            if (linkEl) {
+                const seam = y - stackGap / 2;        // the gap between the number and the sum
+                linkEl.style.top = (seam - linkEl.offsetHeight / 2) + 'px';
+                linkEl.style.left = (blockX + blockW / 2 - linkEl.offsetWidth / 2) + 'px';
+            }
             const cardY = y + sH + stackGap;
             const panelY = cardY + cardH + gapH;
+
+            // what the stage was measured to be, for the debug window
+            window.__layout = { W, H, n, stackTopMin, top, avail, hH, sH, diceH, cellH, cardH, panelH, blockH, stackH, stackTop };
 
             for (let col = 0; col < n; col++) {
                 const place = n - 1 - col;              // the highest place stands on the left
                 const x = rowX + col * (cardW + 14);
                 const flash = flashColor(place);
                 const hot = hoverPlace === place;
+                // the moment a digit is picked up, every place that cannot hold it goes grey -
+                // the answer is there before it is carried anywhere (the calendar twenties
+                // place only runs to 17: 18 x 20 makes the 360 above it)
+                const blocked = drag && drag.digit >= sys().limits[place];
 
                 ctx.lineWidth = (flash || hot || colorMode) ? 2 : 1;
                 roundRect(x, cardY, cardW, cardH, 16,
-                    hot ? 'rgba(245, 194, 66, 0.10)' : (flash ? 'rgba(121, 158, 49, 0.10)' : COL.fill),
-                    hot ? COL.glyph : (flash || (colorMode ? placeColor(place) : COL.line)));
+                    blocked ? 'rgba(255, 255, 255, 0.04)'
+                        : (hot ? 'rgba(245, 194, 66, 0.10)' : (flash ? 'rgba(121, 158, 49, 0.10)' : COL.fill)),
+                    blocked ? COL.mute
+                        : (hot ? COL.glyph : (flash || (colorMode ? placeColor(place) : COL.line))));
 
-                paintDigit(digits[place], x + cardW / 2, cardY + cardH / 2, cardW, cardH, place);
+                paintDigit(blank ? null : digits[place], x + cardW / 2, cardY + cardH / 2, cardW, cardH,
+                    place, blocked ? COL.mute : null);
+
+                drawPower(place, x + cardW / 2, cardY + 8);
 
                 cards.push({ place, x, y: cardY, w: cardW, h: cardH });
             }
 
             // ---- the panel of all twenty digits ----
             const gridX = blockX;
+
+            // with the link set the number lays the board, so the twenty digits are nothing
+            // but a key down there - they step back into grey
+            const panelCol = flow === 'down' ? COL.mute : null;
 
             for (let k = 0; k < 20; k++) {
                 const cx0 = gridX + (k % cols) * cellW;
@@ -645,7 +950,7 @@
                 ctx.fillStyle = on ? COL.glyph : 'rgba(255, 255, 255, 0.45)';
                 ctx.fillText(String(k), cx0 + cellW / 2, cy0 + 6);
 
-                paintDigit(k, cx0 + cellW / 2, cy0 + cellH * 0.62, cellW - 14, cellH * 0.6, null);
+                paintDigit(k, cx0 + cellW / 2, cy0 + cellH * 0.62, cellW - 14, cellH * 0.6, null, panelCol);
                 palette.push({ digit: k, x: cx0, y: cy0, w: cellW, h: cellH });
             }
 
@@ -653,7 +958,7 @@
             ctx.textBaseline = 'top';
             ctx.font = "400 13px 'Outfit', sans-serif";
             ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-            ctx.fillText(T('panel', 'Ziffern — auf eine Stelle ziehen'),
+            ctx.fillText(T('panel', 'Die zwanzig Ziffern'),
                 blockX + blockW / 2, panelY + rows * cellH + 8);
 
             // the digit being dragged hangs on the finger
@@ -689,6 +994,8 @@
         // Adding beyond the last digit of a place carries into the place above — that is the
         // whole point of a place value system, so it gets said out loud.
         function addOne(place) {
+            handBelow();
+            blank = false;
             const lim = sys().limits;
             let k = place;
             digits[k]++;
@@ -709,6 +1016,7 @@
         }
 
         function removeGlyph(g) {
+            handBelow();
             digits[g.place] = Math.max(0, digits[g.place] - (g.type === 'bar' ? 5 : 1));
             changed();
         }
@@ -723,6 +1031,8 @@
                 draw();
                 return false;
             }
+            handBelow();
+            blank = false;
             digits[place] = d;
             flashPlace(place, COL.ok);
             say('');
@@ -730,28 +1040,21 @@
             return true;
         }
 
+        // A digit is dragged out of the panel onto a place - that is the one thing the mouse
+        // does on the board. The places themselves take nothing: no dot on a tap, no glyph
+        // taken away, and while a number is being typed the board is out of play altogether.
         canvas.addEventListener('pointerdown', (e) => {
+            if (editing) return;
             const p = pos(e);
             const pal = palette.find(h => inRect(p, h));
-            if (pal) {
-                drag = { digit: pal.digit, x: p.x, y: p.y, moved: false };
-                try { canvas.setPointerCapture(e.pointerId); } catch (err) { }
-                draw();
-                return;
-            }
-            const card = cards.find(h => inRect(p, h));
-            if (picked !== null && card) {
-                applyDigit(card.place, picked);
-                picked = null;
-                return;
-            }
-            const g = glyphs.find(h => inRect(p, h));
-            if (g) { removeGlyph(g); return; }
-            if (card) addOne(card.place);
+            if (!pal) return;
+            drag = { digit: pal.digit, x: p.x, y: p.y, moved: false };
+            try { canvas.setPointerCapture(e.pointerId); } catch (err) { }
+            draw();
         });
 
         canvas.addEventListener('pointermove', (e) => {
-            if (!drag) return;
+            if (editing || !drag) return;
             const p = pos(e);
             if (Math.abs(p.x - drag.x) > 4 || Math.abs(p.y - drag.y) > 4) drag.moved = true;
             drag.x = p.x;
@@ -765,23 +1068,25 @@
             if (!drag) return;
             const p = pos(e);
             const card = cards.find(h => inRect(p, h));
-            const d = drag.digit, moved = drag.moved;
+            const d = drag.digit;
             drag = null;
             hoverPlace = null;
             if (card) {
                 applyDigit(card.place, d);
-                picked = null;
                 dbg('dropped ' + d + ' on place ' + card.place);
-            } else if (!moved) {
-                // a tap in the panel picks the digit up, the next tap on a place puts it down
-                picked = (picked === d) ? null : d;
-                say(picked === null ? '' : T('picked', 'Ziffer ') + d + T('picked2', ' — jetzt auf eine Stelle tippen.'), COL.glyph);
             }
             draw();
         }
 
         canvas.addEventListener('pointerup', endDrag);
         canvas.addEventListener('pointercancel', () => { drag = null; hoverPlace = null; draw(); });
+
+        // The right button belongs to the lab, not to the browser: it opens the place values
+        // instead of "Save Image As".
+        container.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            openSystem();
+        });
 
         // ------------------------------------------------------------------ readout ---
         // The sum stands column by column: every term over its place, every plus over
@@ -798,7 +1103,7 @@
             host.innerHTML = html;
             host.querySelectorAll('.maya-term').forEach(el => {
                 const place = n - 1 - Number(el.dataset.col);
-                el.textContent = digits[place] + ' \u00b7 ' + sys().values[place];
+                el.textContent = digits[place] + ' \u00b7 ' + de(sys().values[place]);
             });
             let h = 0;
             host.querySelectorAll('span').forEach(el => { h = Math.max(h, el.offsetHeight); });
@@ -812,87 +1117,248 @@
             const num = document.getElementById('maya-num');
             const head = document.getElementById('maya-head');
             if (!num || !head) return;
+            if (editing) return;              // what is being typed stays where it is
             head.classList.toggle('solved', !!(task && task.done));
 
-            const text = de(task ? task.target : value());
-            if (!animate) {
-                if (num.dataset.text !== text || num.children.length === 0) {
-                    num.textContent = text;
-                    num.dataset.text = text;
-                }
-                return;
-            }
+            // a task shows its goal, otherwise the number says what lies on the board
+            const text = de(flow === 'task' && task ? task.target : value());
+            if (!animate && num.dataset.text === text && num.children.length) return;
+
             num.dataset.text = text;
             num.innerHTML = '';
             const cells = [...text].map(ch => {
                 const el = document.createElement('span');
-                el.className = 'num-ch';
+                el.className = 'num-ch cyber-bignum-gold';
                 el.textContent = ch;
-                el.style.visibility = 'hidden';
+                if (animate) el.style.display = 'none';   // no placeholder: what is there stays centred
                 num.appendChild(el);
                 return el;
             });
-            let wait = 0;
+            if (!animate) return;
+            // the last digit lands as the die comes to rest: four digits keep the old
+            // 0.5 s / 1.0 s / 1.5 s / 2.0 s, a longer number simply counts in faster
+            const nDigits = text.replace(/\D/g, '').length || 1;
+            const DIGIT_STEP = Math.max(140, Math.round(ROLL_IN_MS / nDigits));
+            let wait = DIGIT_STEP;
             for (let i = cells.length - 1; i >= 0; i--) {
                 const el = cells[i];
                 setTimeout(() => {
-                    el.style.visibility = 'visible';
+                    el.style.display = 'inline-block';
                     el.classList.add('rolled-in');
                 }, wait);
-                if (/[0-9]/.test(el.textContent)) wait += 150;   // a separator comes along
+                if (/[0-9]/.test(el.textContent)) wait += DIGIT_STEP;   // a separator comes along
             }
+        }
+
+        // ------------------------------------------------------------------ typing ---
+        // The big number can be typed over. Every keystroke rebuilds it as the same gold
+        // characters - the gradient has to sit on each one, a gradient over the whole line
+        // leaves ghosts behind - and the caret goes back to the end, where typing runs.
+        function renderTyped() {
+            const num = document.getElementById('maya-num');
+            const raw = num.textContent.replace(/\D/g, '').slice(0, 7);
+            const text = raw === '' ? '' : de(parseInt(raw, 10));
+            num.innerHTML = '';
+            for (const ch of text) {
+                const el = document.createElement('span');
+                el.className = 'num-ch cyber-bignum-gold';
+                el.textContent = ch;
+                num.appendChild(el);
+            }
+            const sel = window.getSelection();
+            const r = document.createRange();
+            r.selectNodeContents(num);
+            r.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(r);
+
+            // typing works on the number above, so the board follows at once
+            task = null;
+            layout(raw === '' ? 0 : parseInt(raw, 10));
+            changed();
+        }
+
+        // One step on the number above - the two triangles on the right and the arrow keys.
+        // Outside of typing it works just the same: the number is what is being worked on, so
+        // the arrow turns down and the board follows.
+        function stepTyped(delta) {
+            if (!editing) {
+                const shown = (flow === 'task' && task) ? task.target : value();
+                const n = Math.min(9999999, Math.max(0, shown + delta));
+                task = null;
+                setFlow('down', true);
+                layout(n);
+                changed();
+                return;
+            }
+            const num = document.getElementById('maya-num');
+            const raw = num.textContent.replace(/\D/g, '');
+            const n = Math.min(9999999, Math.max(0, (raw === '' ? 0 : parseInt(raw, 10)) + delta));
+            num.textContent = String(n);
+            num.classList.add('no-caret');      // stepped, not typed - the caret stays away
+            renderTyped();
+            num.focus();
+        }
+
+        function startEdit() {
+            const num = document.getElementById('maya-num');
+            if (!num || editing) return;
+            editing = true;
+            before = { digits: digits.slice(), task, blank, flow };   // Escape puts this back
+            task = null;                  // typing replaces whatever was set
+            setFlow('down', true);        // the number is being worked on: it leads now
+            document.getElementById('maya-head').classList.add('editing');
+            updateDice();
+            num.classList.remove('no-caret');
+            try { num.contentEditable = 'plaintext-only'; } catch (e) { }
+            if (num.contentEditable !== 'plaintext-only') num.contentEditable = 'true';
+            num.focus();
+            // no selection band over the number - the caret simply stands at its end
+            const sel = window.getSelection();
+            const r = document.createRange();
+            r.selectNodeContents(num);
+            r.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(r);
+            say(T('edit_hint', 'Tipp eine Zahl ein — Enter übernimmt sie.'), COL.glyph);
+        }
+
+        // Enter takes the number: it lies down on the board at once, because typing turned
+        // the arrow down. Escape puts back what was there before.
+        function endEdit(commit) {
+            const num = document.getElementById('maya-num');
+            if (!num || !editing) return;
+            const raw = num.textContent.replace(/\D/g, '');
+            editing = false;
+            document.getElementById('maya-head').classList.remove('editing');
+            updateDice();
+            num.contentEditable = 'false';
+            num.dataset.text = '';           // whatever stands there now, draw it fresh
+            try { window.getSelection().removeAllRanges(); } catch (e) { }
+            const n = parseInt(raw, 10);
+            if (!commit || isNaN(n)) {
+                if (before) {
+                    digits = before.digits;
+                    task = before.task;
+                    blank = before.blank;
+                    setFlow(before.flow, true);
+                }
+                say('');
+                changed();
+                return;
+            }
+            task = null;                 // the board has been following all along
+            layout(n);
+            say('');
+            changed();
         }
 
         function changed() {
             updateHead();
-            if (window.CyberClock) {
-                CyberClock.digits('maya-value', value(), {
-                    thousands: true,
-                    style: { size: '30px', digitWidth: '29px' }
-                });
-            }
             renderFormula();
-            if (task && !task.done && value() === task.target) {
+            // laid by hand and it matches: the task is done, and both sides now agree
+            if (task && !task.done && !task.shown && !blank && value() === task.target) {
                 task.done = true;
-                solvedCount++;
+                setFlow('down', true);
                 say(T('task_correct', 'Richtig! ') + de(task.target) + T('task_lies', ' liegt auf dem Brett.'));
                 for (let i = 0; i < places(); i++) flashPlace(i);
                 updateHead();
-                updateStats();
             }
             draw();
         }
 
-        function updateStats() {
-            CyberUI.updateStatsGrid('maya-stats', [
-                { value: de(solvedCount) },
-                { value: sysKey === 'kalender' ? '360' : '400' }
-            ]);
+        // Turn the arrow. keep = something else is doing the laying already, so lay nothing
+        // here. Turning it down on a task is what shows the answer.
+        function setFlow(next, keep) {
+            flow = next;
+            const el = document.getElementById('maya-link');
+            if (el) {
+                el.classList.toggle('down', flow !== 'up');
+                el.classList.toggle('pending', flow === 'task');
+                el.title = flow === 'task'
+                    ? T('flow_task', 'Aufgabe — klicken legt die Zahl hin')
+                    : (flow === 'down'
+                        ? T('flow_down', 'Oben bestimmt unten — klicken dreht die Richtung um')
+                        : T('flow_up', 'Unten bestimmt oben — klicken dreht die Richtung um'));
+            }
+            updateDice();
+            if (flow === 'down' && !keep) {
+                if (task) {
+                    task.shown = true;      // shown is shown, this one no longer turns green
+                    layout(task.target);
+                    say(T('flow_show', 'Die Zahl liegt jetzt in Maya auf dem Brett.'), COL.glyph);
+                } else {
+                    layout(value());        // zero has a shell too: an empty board fills up
+                }
+            }
+            changed();
         }
 
-        const rollNumber = () => 1000 + Math.floor(Math.random() * 9000);   // always four digits
+        // One click on the arrow. Grey and pointing down, it lays the number - that is the
+        // answer. Orange and pointing down, it takes the answer away again: the number stays
+        // up there, the board is cleared, and that is a task to lay by hand. Pointing up, the
+        // number lays itself. So the arrow shows and hides the Maya of what stands above.
+        function turnFlow() {
+            if (flow === 'down') {
+                task = { target: value(), done: false };   // the number stays, as the goal
+                digits = [0, 0, 0, 0, 0];
+                blank = true;
+                setFlow('task', true);
+                say(T('flow_hide', 'Weg damit - leg die Zahl selbst.'), COL.glyph);
+                return;
+            }
+            setFlow('down');
+        }
 
+        // whoever acts, leads: anything laid below turns the arrow up, and from then on the
+        // number says what lies there. A rolled task stays alive in the background - lay it
+        // right and it still turns green, you just have to keep the number in your head.
+        function handBelow() {
+            if (flow !== 'up') setFlow('up', true);
+        }
+
+        // The die names the number above, so it is awake wherever that number counts: while a
+        // task stands and while the arrow points down. Pointing up the board leads and the die
+        // has nothing to say - grey, though a tap still rolls. Typing takes it out altogether.
+        function updateDice() {
+            const el = document.getElementById('maya-dice');
+            if (!el) return;
+            el.classList.toggle('dimmed', flow === 'up' || editing);
+            el.classList.toggle('locked', editing);
+        }
+
+        // A roll gives a number with as many decimal digits as there are places, and it is
+        // always big enough to fill the top place - one place 1..9, two 20..99, three
+        // 360..999, four 7200..9999. Both at once only works up to four: the fifth place is
+        // worth 144000, so it cannot be reached by a five digit number. There the roll takes
+        // what the places can hold instead.
+        const rollNumber = () => {
+            const lo = placeCount === 1 ? 1 : sys().values[placeCount - 1];
+            const digitCap = Math.pow(10, placeCount) - 1;
+            const hi = digitCap > lo ? Math.min(maxValue(placeCount), digitCap) : maxValue(placeCount);
+            return lo + Math.floor(Math.random() * (hi - lo + 1));
+        };
+        const ROLL_IN_MS = 2000;     // the number is in when the die stops rolling
+
+        // A roll sets a task: the number counts itself in above while the die is still
+        // tumbling, the board stays empty, and the arrow points down but grey. Laying it is
+        // yours from here - or one click on the grey arrow and it lays itself.
         function newTask(target) {
-            task = { target: target || rollNumber(), done: false };
+            const n = target || rollNumber();
+            task = { target: n, done: false };
             digits = [0, 0, 0, 0, 0];
+            blank = true;
+            setFlow('task', true);
             say(T('task_hint', 'Lege die Zahl - zieh die Ziffern aus dem Panel auf die Stellen.'), COL.glyph);
             changed();
-            updateHead(true);          // the task number counts itself in, ones first
+            updateHead(true);                      // ones first, one digit every half second
         }
 
         // --------------------------------------------------------------- side panel ---
+        // Everything that used to stand in the side panel is gone - the number itself is
+        // the field, the die makes the tasks. Only the place value system is left, and it
+        // lives in the popup behind the gear.
         function buildUI() {
-            CyberUI.createCard('ui-container', T('card_value', 'DEZIMALWERT'),
-                '<div id="maya-value" style="display:flex;justify-content:center;padding:4px 0 2px;"></div>'
-                + '<div id="maya-stats"></div>', 'rgb(245, 194, 66)');
-            CyberUI.createStatsGrid('maya-stats', [
-                { label: T('stat_solved', 'GELÖST'), value: '0', color: 'rgb(121, 158, 49)' },
-                { label: T('stat_third', '3. STELLE'), value: '360', color: 'rgb(245, 194, 66)' }
-            ]);
-
-            CyberUI.createCard('ui-container', T('card_system', 'STELLENWERTE'),
-                '<div id="maya-system"></div>'
-                + '<div class="maya-note" id="maya-system-note"></div>', 'rgb(121, 158, 49)');
             CyberUI.createRadioGroup('maya-system', null, [
                 { value: 'kalender', label: T('sys_cal', 'Kalender: 1, 20, 360, 7200') },
                 { value: 'rein20', label: T('sys_20', 'rein 20er: 1, 20, 400, 8000') }
@@ -902,53 +1368,55 @@
                 // the glyphs stay where they are - only what they are worth changes
                 say(T('sys_switch', 'Dieselben Zeichen, andere Stellenwerte: jetzt ') + de(value()) + '.', COL.glyph);
                 document.getElementById('maya-system-note').textContent = noteFor(v);
-                updateStats();
                 changed();
             });
             document.getElementById('maya-system-note').textContent = noteFor(sysKey);
-
-            CyberUI.createCard('ui-container', T('card_lay', 'ZAHL LEGEN'),
-                '<div class="maya-row">'
-                + '<input type="number" id="maya-input" min="0" max="2000000" placeholder="5432"'
-                + ' aria-label="' + T('card_lay', 'ZAHL LEGEN') + '">'
-                + '<button class="cyber-btn" id="maya-lay">' + T('btn_lay', 'LEGEN') + '</button>'
-                + '</div>'
-                + '<div class="maya-row">'
-                + '<button class="cyber-btn" id="maya-random">' + T('btn_random', 'ZUFALL') + '</button>'
-                + '<button class="cyber-btn" id="maya-clear">' + T('btn_clear', 'LEEREN') + '</button>'
-                + '</div>', 'rgb(245, 194, 66)');
-
-            CyberUI.createCard('ui-container', T('card_task', 'AUFGABE'),
-                '<div class="maya-note">' + T('task_note', 'Eine Zahl wird genannt, Du legst sie. Stimmt sie, färbt sich das Brett grün.') + '</div>'
-                + '<div class="maya-row">'
-                + '<button class="cyber-btn" id="maya-task">' + T('btn_task', 'NEUE AUFGABE') + '</button>'
-                + '</div>', 'rgb(176, 36, 24)');
-
-            CyberUI.createCard('ui-container', T('card_help', 'SO GEHT ES'),
-                '<div class="maya-note">' + T('help', 'Zieh eine Ziffer aus dem Panel auf eine Stelle - oder tippe sie an und dann die Stelle. In eine Stelle tippen legt einen Punkt dazu, auf einen Punkt tippen nimmt ihn weg, auf einen Strich nimmt fünf weg. Ist eine Stelle voll, wandert sie nach oben, und die leere zeigt die Muschel - die Null. Taste C färbt jede Stelle anders.') + '</div>',
-                'rgb(121, 158, 49)');
-
-            document.getElementById('maya-lay').onclick = () => {
-                const el = document.getElementById('maya-input');
-                const n = parseInt(el.value, 10);
-                if (!isNaN(n)) { layout(n); task = null; say(''); changed(); dbg('laid out ' + n); }
-            };
-            document.getElementById('maya-input').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') document.getElementById('maya-lay').click();
+            document.getElementById('maya-dlg-close').onclick = closeSystem;
+            document.getElementById('maya-dlg').addEventListener('pointerdown', (e) => {
+                if (e.target.id === 'maya-dlg') closeSystem();     // a click beside the card closes it
             });
-            document.getElementById('maya-random').onclick = () => {
-                layout(21 + Math.floor(Math.random() * 9979));
-                task = null;
-                say('');
-                changed();
-            };
-            document.getElementById('maya-clear').onclick = () => {
-                digits = [0, 0, 0, 0, 0];
-                task = null;
-                say('');
-                changed();
-            };
-            document.getElementById('maya-task').onclick = newTask;
+
+            const numEl = document.getElementById('maya-num');
+            numEl.addEventListener('pointerdown', (e) => {
+                if (!editing) { e.preventDefault(); startEdit(); }
+            });
+            numEl.addEventListener('input', () => {
+                numEl.classList.remove('no-caret');   // a key was pressed, the caret is back
+                renderTyped();
+            });
+            numEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); endEdit(true); }
+                else if (e.key === 'Escape') { e.preventDefault(); endEdit(false); }
+                else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    stepTyped((e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 10 : 1));
+                }
+            });
+            numEl.addEventListener('blur', () => endEdit(true));
+
+            document.querySelectorAll('#maya-places button').forEach((b) => {
+                b.addEventListener('pointerdown', (e) => e.preventDefault());
+                b.addEventListener('click', () => setPlaces(placeCount + (b.classList.contains('spin-up') ? 1 : -1)));
+            });
+
+            document.querySelectorAll('#maya-head > .maya-spin:not(.left) button').forEach((b) => {
+                // the number has to keep the caret, so the triangle never takes the focus
+                b.addEventListener('pointerdown', (e) => e.preventDefault());
+                b.addEventListener('click', () => stepTyped(b.classList.contains('spin-up') ? 1 : -1));
+            });
+
+            const linkBtn = document.getElementById('maya-link');
+            linkBtn.onclick = turnFlow;
+            setFlow(flow, true);
+        }
+
+        function openSystem() {
+            if (editing) endEdit(true);
+            document.getElementById('maya-dlg').hidden = false;
+        }
+
+        function closeSystem() {
+            document.getElementById('maya-dlg').hidden = true;
         }
 
         function noteFor(key) {
@@ -976,7 +1444,11 @@
 
         window.addEventListener('keydown', (e) => {
             const t = e.target;
-            if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+            if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+            if (e.key === 'Escape' && !document.getElementById('maya-dlg').hidden) {
+                closeSystem();
+                return;
+            }
             if (e.key === 'c' || e.key === 'C') {
                 colorMode = !colorMode;
                 store.set('colour', colorMode ? '1' : '0');
@@ -989,14 +1461,45 @@
 
         // The left chrome settles a moment after load and the coach box grows with the sum -
         // measure the stage again whenever that happens instead of trusting a timeout.
+        // The branding in the top right corner counts too: the stack stands below it, and it
+        // grows by about three pixels when Orbitron swaps in. Without watching it, that late
+        // growth sits in nobody's measurement until the first click redraws - and then the
+        // whole stage jumps down. It is injected after this script, so wait for it.
         if (window.ResizeObserver) {
             new ResizeObserver(() => init()).observe(container);
         }
 
+        // The stack stands below the branding in the top right corner, and that branding keeps
+        // moving for a while after load: branding.js throws it away and builds it again, its
+        // font swaps in, and the left chrome scales it. A ResizeObserver does not catch all of
+        // that - a transform changes where the thing sits without changing the box it reports.
+        // So watch the measurement that actually matters until it stops moving. Without this
+        // the last draw of the load keeps a branding that has since grown, and the whole stage
+        // jumps down at the first redraw - the first click.
+        function brandingBottom() {
+            const brand = document.querySelector('.canvas-branding');
+            if (!brand) return -1;
+            const r = brand.getBoundingClientRect();
+            return r.width ? Math.round(r.bottom * 100) / 100 : -1;
+        }
+
+        let lastBranding = brandingBottom();
+        let brandingSteady = 0;
+        (function settleBranding() {
+            const now = brandingBottom();
+            if (now !== lastBranding) { lastBranding = now; brandingSteady = 0; init(); }
+            else brandingSteady++;
+            if (brandingSteady < 15) setTimeout(settleBranding, 100);   // 1.5 s quiet = it stands
+        })();
+
+        window.addEventListener('cyber-left-chrome-zoom', () => init());
+        window.addEventListener('load', () => init());
+
         buildUI();
-        updateStats();          // the stored system may not be the one the card was built with
-        layout(5432);
-        say(T('start', 'Eine Maya-Zahl steht schon da. Zieh Ziffern aus dem Panel darauf oder tippe in eine Stelle.'), COL.glyph);
+        // an empty board and the arrow pointing up: lay something and the number counts it,
+        // or roll and the die names one
+        blank = true;
+        say(T('start', 'Zieh Ziffern aus dem Panel auf die Stellen - oder würfle eine Aufgabe.'), COL.glyph);
         init();
         changed();
         document.fonts.ready.then(() => { init(); changed(); });
@@ -1015,20 +1518,22 @@
         let nextDigit = 6;
         // pastel faces, the light style of the Würfelspiel deck
         const tints = ['#FBEBBF', '#E6ECF8', '#DDE8C6', '#F3D2CE', '#CFEAF6', '#F1E3F6'];
-        const ROLL_MS = 900;
+        const ROLL_MS = 2000;      // the number counts itself in while the die is still rolling
         const st = { idx: 0, fin: 0, t0: 0 };
 
         function roll() {
+            const target = typeof rollNumber === 'function' ? rollNumber() : 1000;
+            const lead = Number(String(target)[0]);       // the die lands on the leading digit
             st.fin = Math.floor(Math.random() * 6);
             st.t0 = performance.now();
             for (let i = 0; i < faces.length; i++) {
+                if (i === st.fin) { faces[i] = lead; continue; }
+                while (nextDigit % 10 === lead) nextDigit++;   // no second copy of it on the die
                 faces[i] = nextDigit % 10;
                 nextDigit++;
             }
             refreshAllFaces();
-            setTimeout(() => {
-                if (typeof newTask === 'function') newTask();
-            }, ROLL_MS);
+            if (typeof newTask === 'function') newTask(target);
         }
 
         function source() {
