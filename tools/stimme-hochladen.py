@@ -223,13 +223,16 @@ def probe_ziel(text):
     return pfad
 
 
-def gemini_probe(text, vid, modell=None, ziel=None, abspielen=True):
+STIL = 'warm, lebendig, wie im Unterricht'
+
+
+def gemini_probe(text, vid, modell=None, ziel=None, abspielen=True, stil=None):
     koerper = {
         'model': modell or GEMINI_MODELL,
         'input': [{'type': 'user_input',
                    'content': [{'type': 'text', 'text': text,
                                 'annotations': [{'type': 'speech_metadata',
-                                                 'style': 'warm, lebendig, wie im Unterricht'}]}]}],
+                                                 'style': stil or STIL}]}]}],
         'response_format': {'type': 'audio'},
         'generation_config': {'speech_config': [{'voice': vid}]},
     }
