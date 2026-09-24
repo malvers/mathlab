@@ -58,7 +58,19 @@
         #satztext p:last-child { margin-bottom: 0; }
 
         .regie { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 8px; }
-        .regie { gap: 14px; }
+        /* Everything on the horizontal axis, record dead centre (Doc, 24.09.2026: "rec in die
+           mitte alle x zentr"). A 1fr | auto | 1fr grid keeps the record button on the axis no
+           matter how many buttons sit on either side of it. */
+        .regie { display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 6px 0 4px; }
+        .transport { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 18px; width: 100%; }
+        .seite { display: flex; gap: 14px; align-items: center; }
+        .seite.links { justify-content: flex-end; }
+        .seite.rechts { justify-content: flex-start; }
+        /* fixed height: clock and meter appear while recording without shoving the page down */
+        .laufzeile { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 22px; }
+        .optionen { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 14px; }
+        /* silent unless there is news; the fixed height keeps the page from jumping when there is */
+        #tipp { text-align: center; min-height: 1.6em; margin: 8px 0 14px; }
         .regie .cyber-btn {
             flex: 0 1 auto; min-width: 142px; cursor: pointer; border-radius: 8px;
             background: rgba(255, 255, 255, 0.03);
@@ -88,8 +100,10 @@
         .uhr.laeuft { color: rgb(176, 36, 24); }
         /* Clock and level meter show only while a take runs. At rest, "0:00" beside an empty bar
            looks exactly like a player's progress line (Doc, 24.09.2026: "progress dort raus"). */
-        .regie .uhr, .regie .pegelbox, .regie .pegelwert, .regie .punkt { display: none; }
-        .regie.aktiv .uhr, .regie.aktiv .pegelbox, .regie.aktiv .pegelwert, .regie.aktiv .punkt { display: inline-block; }
+        .regie .uhr, .regie .pegelbox, .regie .pegelwert, .regie .punkt, .regie .mikroname { display: none; }
+        .mikroname { font-size: 0.66rem; opacity: .75; }
+        .mikroname.fremd { color: rgb(245, 194, 66); opacity: 1; }
+        .regie.aktiv .uhr, .regie.aktiv .pegelbox, .regie.aktiv .pegelwert, .regie.aktiv .punkt, .regie.aktiv .mikroname { display: inline-block; }
 
         .ikon {
             width: 52px; height: 52px; border-radius: 50%; padding: 0; cursor: pointer;
@@ -101,6 +115,7 @@
         .ikon:hover { background: rgba(0, 210, 255, .12); }
         .ikon:active { transform: scale(.94); }
         .ikon:disabled { opacity: .3; cursor: not-allowed; }
+        .ikon[hidden] { display: none; }
         /* record: Doc's red - a filled dot at rest, a filled square while it runs */
         .ikon.rec { width: 64px; height: 64px; border-color: rgb(176, 36, 24); color: rgb(176, 36, 24); }
         .ikon.rec svg { width: 26px; height: 26px; }
@@ -182,29 +197,37 @@
             <span id="satztext">…</span>
         </div>
 
-        <div class="regie ws-btns">
-            <span class="punkt" id="punkt" title="Aufnahme"></span>
-            <span class="uhr" id="uhr">0:00</span>
-            <span class="pegelbox" title="Aussteuerung"><i id="pegel"></i></span>
-            <span class="pegelwert" id="pegelwert"></span>
-            <button class="ikon rec" id="btnRec" title="Aufnehmen (Leertaste)" aria-label="Aufnehmen"></button>
-            <button class="ikon" id="btnPlay" title="Anhören" aria-label="Anhören"><svg viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19" fill="currentColor"/></svg></button>
-            <button class="ikon" id="btnPrev" title="Voriger Text (←)" aria-label="Voriger Text"><svg viewBox="0 0 24 24"><polygon points="17,5 8,12 17,19" fill="currentColor"/><rect x="5" y="5" width="2.4" height="14" rx="1" fill="currentColor"/></svg></button>
-            <button class="ikon" id="btnNext" title="Nächster Text (→)" aria-label="Nächster Text"><svg viewBox="0 0 24 24"><polygon points="7,5 16,12 7,19" fill="currentColor"/><rect x="16.6" y="5" width="2.4" height="14" rx="1" fill="currentColor"/></svg></button>
-            <label class="agc"><input type="checkbox" id="agc"> Aussteuerung automatisch</label>
-            <label class="agc" for="mikro">Mikrofon</label>
-            <select id="mikro" class="mikrowahl" title="Mikrofon"></select>
+        <div class="regie">
+            <div class="transport">
+                <div class="seite links">
+                    <button class="ikon" id="btnPrev" title="Voriger Text (←)" aria-label="Voriger Text"><svg viewBox="0 0 24 24"><polygon points="17,5 8,12 17,19" fill="currentColor"/><rect x="5" y="5" width="2.4" height="14" rx="1" fill="currentColor"/></svg></button>
+                </div>
+                <button class="ikon rec" id="btnRec" title="Aufnehmen (Leertaste)" aria-label="Aufnehmen"></button>
+                <div class="seite rechts">
+                    <button class="ikon" id="btnPlay" title="Anhören" aria-label="Anhören"><svg viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19" fill="currentColor"/></svg></button>
+                    <button class="ikon" id="btnNext" title="Nächster Text (→)" aria-label="Nächster Text"><svg viewBox="0 0 24 24"><polygon points="7,5 16,12 7,19" fill="currentColor"/><rect x="16.6" y="5" width="2.4" height="14" rx="1" fill="currentColor"/></svg></button>
+                </div>
+            </div>
+            <div class="laufzeile">
+                <span class="punkt" id="punkt" title="Aufnahme"></span>
+                <span class="uhr" id="uhr">0:00</span>
+                <span class="pegelbox" title="Aussteuerung"><i id="pegel"></i></span>
+                <span class="pegelwert" id="pegelwert"></span>
+                <span class="mikroname" id="mikroname"></span>
+            </div>
+            <div class="optionen">
+                <label class="agc"><input type="checkbox" id="agc"> Aussteuerung automatisch</label>
+                <label class="agc" for="mikro">Mikrofon</label>
+                <select id="mikro" class="mikrowahl" title="Mikrofon"></select>
+            </div>
         </div>
-        <p class="hinweis" id="tipp">Leertaste startet und stoppt. Pfeiltasten blättern.</p>
+        <p class="hinweis" id="tipp"></p>
 
         <div class="vgl">
             <button class="cyber-btn" data-hoer="vergleich-original">Original — Doc am RØDE</button>
             <button class="cyber-btn" data-hoer="vergleich-klon">Klon</button>
             <button class="cyber-btn" data-hoer="vergleich-klon-eq">Klon + Höhen (+3 dB ab 6 kHz)</button>
         </div>
-        <p class="hinweis" style="margin-top:10px">
-            Derselbe Text, dreimal. Zischlaute relativ zum Original: Klon −2,7 dB, mit Filter −0,8 dB.
-        </p>
 
         <div class="liste" id="liste"></div>
         <p class="hinweis">
@@ -399,7 +422,7 @@
         $('mikro').onchange = () => {
             try { localStorage.setItem('mikro', $('mikro').value); } catch (e) { }
             if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-            $('tipp').textContent = 'Mikrofon gewechselt — beim nächsten Start wirksam.';
+            $('tipp').textContent = 'Mikrofon gewechselt — beim nächsten Start wirksam.'; verblasse();
         };
 
         $('alle').onchange = () => { alleZeigen = $('alle').checked; i = 0; zeichne(); };
@@ -408,10 +431,15 @@
             try { localStorage.setItem('agc', $('agc').checked ? 'an' : 'aus'); } catch (e) { }
             if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
             $('tipp').textContent = 'Aussteuerung ' + ($('agc').checked ? 'automatisch' : 'aus')
-                + ' — beim nächsten Start wirksam. Pegel im Auge behalten.';
+                + ' — beim nächsten Start wirksam. Pegel im Auge behalten.'; verblasse(4000);
         };
 
         // Anything that throws used to fail silently and look like "nothing was recorded" - say it out loud.
+        const verblasse = (ms = 3000) => {
+            const war = $('tipp').textContent;
+            setTimeout(() => { if ($('tipp').textContent === war) $('tipp').textContent = ''; }, ms);
+        };
+
         window.addEventListener('error', e => { $('tipp').textContent = 'Fehler: ' + e.message; });
         window.addEventListener('unhandledrejection', e => {
             $('tipp').textContent = 'Fehler: ' + ((e.reason && e.reason.message) || e.reason);
@@ -437,6 +465,8 @@
             $('btnRec').title = wort + ' (Leertaste)'; $('btnRec').setAttribute('aria-label', wort);
             $('btnRec').classList.toggle('stopp', laeuft);
             document.querySelector('.regie').classList.toggle('aktiv', laeuft);
+            // one text: nothing to page through, so the arrows stay out of sight
+            $('btnPrev').hidden = $('btnNext').hidden = !alleZeigen;
             $('btnPrev').disabled = laeuft || i === 0;
             $('btnNext').disabled = laeuft || i >= LISTE.length - 1;
             $('btnPlay').disabled = !takes[s.id];
@@ -545,7 +575,12 @@
                take under the wrong text. Found 24.09.2026 while rebuilding the page. */
             const meine = sichtbar()[i].id;
             // a stream from a previous take can be dead (device switched, tab slept) - take a fresh one then
-            if (stream && !stream.getAudioTracks().some(t => t.readyState === 'live')) stream = null;
+            if (stream) {
+                const spur = stream.getAudioTracks()[0], soll = $('mikro').value;
+                const passt = spur && spur.readyState === 'live'
+                    && (!soll || (spur.getSettings && spur.getSettings().deviceId === soll));
+                if (!passt) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+            }
             if (!stream) {
                 $('tipp').textContent = 'Mikrofon wird geöffnet …';
                 try {
@@ -575,8 +610,13 @@
             // is then never lost as one big missing chunk
             r.start(1000);
             laeuft = true; uhrAn(); pegelAn(stream); zeichne();
+            {   // say which microphone this take really comes from - orange if it is not a RØDE
+                const name = (stream.getAudioTracks()[0] || {}).label || 'unbekanntes Mikrofon';
+                $('mikroname').textContent = '· ' + name;
+                $('mikroname').classList.toggle('fremd', !/r[oø]de/i.test(name));
+            }
             mikroListe();                 // labels arrive only after the first permission
-            $('tipp').textContent = 'Läuft. Leertaste beendet die Aufnahme.';
+            $('tipp').textContent = '';     // clock, meter and the stop square say it already
         }
 
         function stoppe() {
@@ -602,7 +642,7 @@
             if (t && t.fehler) $('tipp').textContent = 'Gespeichert, aber ohne WAV: ' + t.fehler;
             else if (zuLeise(t)) $('tipp').textContent = 'Gespeichert — aber mit ' + t.pegel + ' dB praktisch stumm. Mikrofon prüfen und noch einmal.';
             else if (zuKurz(s, t)) $('tipp').textContent = 'Gespeichert — aber nur ' + t.sekunden + ' s, das ist zu kurz. Bitte noch einmal.';
-            else $('tipp').textContent = 'Gespeichert: ' + (t ? t.sekunden : 0) + ' s. Leertaste startet die nächste.';
+            else { $('tipp').textContent = 'Gespeichert: ' + (t ? t.sekunden : 0).toString().replace('.', ',') + ' s'; verblasse(); }
             // move on only if this take was the one on screen and it looks complete
             const L = sichtbar();
             if (id === L[i].id && t && !taugtNicht(s, t) && i < L.length - 1) i++;
