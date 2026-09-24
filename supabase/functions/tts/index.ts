@@ -37,7 +37,10 @@ const GOOGLE_TTS = 'https://texttospeech.googleapis.com/v1/text:synthesize';
 const GEMINI_INTERACTIONS = 'https://generativelanguage.googleapis.com/v1beta/interactions';
 const DOC_MODEL = 'gemini-3.8-flash-tts';
 const DOC_VOICE = 'voice_ns9j59rfoa3l';           // valid until 24.09.2027 (~/Movies/stimmklon/stimme.json)
-const DOC_STYLE = 'warm, lebendig, wie im Unterricht';
+// Doc on the first tour takes: "nicht pathetisch, nicht kindlich, Oberstufe" - the same text as STYLE in
+// videopipeline/maya/voice_doc.py, so the deck and the tour sound alike
+const DOC_STYLE = 'ruhig und sachlich, mit leiser Begeisterung für die Sache, wie ein Lehrer vor einer Oberstufenklasse - '
+  + 'nicht pathetisch, nicht kindlich, normales Sprechtempo';
 const DOC_WAIT = 15_000;                          // ms - after that Solita's voice steps in (the deck waits 20 s)
 const FALLBACK_VOICE = 'de-DE-Studio-C';
 
