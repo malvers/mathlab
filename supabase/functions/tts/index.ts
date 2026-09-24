@@ -42,11 +42,12 @@ const DOC_WAIT = 15_000;                          // ms - after that Solita's vo
 const FALLBACK_VOICE = 'de-DE-Studio-C';
 
 // Doc's voice: one Gemini "interaction", the audio comes back base64 inside steps[].content[].
-// Returns null on anything but a clean answer - the caller then falls back to Solita.
-async function docVoice(text: string): Promise<string | null> {
+// Returns the audio, or why there is none - the caller then falls back to Solita and passes the
+// reason on (status and Google's message only, never the key), so a failure can be read from outside.
+async function docVoice(text: string): Promise<{ wav?: string; why?: string }> {
   // its own key if set, else the general one - which only works if it belongs to the voice's project
   const key = Deno.env.get('GEMINI_VOICE_KEY') || Deno.env.get('GEMINI_API_KEY');
-  if (!key) return null;
+  if (!key) return { why: 'no key' };
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), DOC_WAIT);
   try {
@@ -62,16 +63,18 @@ async function docVoice(text: string): Promise<string | null> {
       }),
       signal: ctl.signal,
     });
-    if (!r.ok) return null;
-    const data = await r.json().catch(() => null) as { steps?: { content?: { type?: string; data?: string }[] }[] } | null;
+    const raw = await r.text();
+    if (!r.ok) return { why: r.status + ' ' + raw.slice(0, 300) };
+    let data: { status?: string; steps?: { content?: { type?: string; data?: string }[] }[] } | null = null;
+    try { data = JSON.parse(raw); } catch (_) { return { why: 'no json' }; }
     for (const step of data?.steps || []) {
       for (const c of step.content || []) {
-        if (c.type === 'audio' && typeof c.data === 'string' && c.data.length > 1000) return c.data;
+        if (c.type === 'audio' && typeof c.data === 'string' && c.data.length > 1000) return { wav: c.data };
       }
     }
-    return null;
-  } catch (_) {
-    return null;                                  // timeout, 429 or network - Solita takes over
+    return { why: 'no audio, status ' + (data?.status || '?') };
+  } catch (e) {
+    return { why: String((e as Error)?.name || e) };   // timeout, network - Solita takes over
   } finally {
     clearTimeout(timer);
   }
@@ -112,8 +115,11 @@ Deno.serve(async (req) => {
   if (spent) return spent;
 
   const wantDoc = b.voice === 'doc';
+  let docWhy = '';
   if (wantDoc && !b.ssml) {
-    const wav = await docVoice(String(b.text));
+    const doc = await docVoice(String(b.text));
+    docWhy = doc.why || '';
+    const wav = doc.wav;
     if (wav) {
       try {
         const er = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
@@ -153,7 +159,7 @@ Deno.serve(async (req) => {
         if (er?.waitUntil) er.waitUntil(p);
       } catch (_) { /* never affect the response */ }
     }
-    if (wantDoc && r.ok) return json({ ...data, mime: 'audio/mp3', fallback: true });   // Doc's voice did not come
+    if (wantDoc && r.ok) return json({ ...data, mime: 'audio/mp3', fallback: true, why: docWhy });   // Doc's voice did not come
     return json(data, r.ok ? 200 : (r.status || 502)); // pass Google's { audioContent } (or its error) through
   } catch (e) {
     return json({ error: String((e && (e as Error).message) || e) }, 502);
