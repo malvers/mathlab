@@ -68,6 +68,7 @@
         .seite.rechts { justify-content: flex-start; }
         /* fixed height: clock and meter appear while recording without shoving the page down */
         .laufzeile { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 22px; }
+        .optionen[hidden] { display: none; }
         .optionen { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 14px; }
         /* silent unless there is news; the fixed height keeps the page from jumping when there is */
         #tipp { text-align: center; min-height: 1.6em; margin: 8px 0 14px; }
@@ -215,7 +216,7 @@
                 <span class="pegelwert" id="pegelwert"></span>
                 <span class="mikroname" id="mikroname"></span>
             </div>
-            <div class="optionen">
+            <div class="optionen" hidden>
                 <label class="agc"><input type="checkbox" id="agc"> Aussteuerung automatisch</label>
                 <label class="agc" for="mikro">Mikrofon</label>
                 <select id="mikro" class="mikrowahl" title="Mikrofon"></select>
@@ -399,7 +400,9 @@
         /* Automatic gain: ON by default, because the built-in mic is far too quiet without it
            (22.09., -55 dB takes). A RØDE does not need it and sounds cleaner without - hence the
            switch. Changing it drops the stream, so the next take opens the microphone afresh. */
-        try { $('agc').checked = localStorage.getItem('agc') !== 'aus'; } catch (e) { $('agc').checked = true; }
+        /* Gain is ON, as in the story that made the good clone (24.09.2026). The switch is hidden
+           (Doc: "müssen wir das haben?"), so a remembered 'off' would act unseen - ignore it. */
+        $('agc').checked = true;
         /* Which microphone: Chrome silently takes the system default, and that is how a RØDE
            gets ignored while the built-in one records (24.09.2026). Device labels stay empty
            until permission was granted once - so the list is refilled after that. */
@@ -407,16 +410,13 @@
             let geraete = [];
             try { geraete = (await navigator.mediaDevices.enumerateDevices()).filter(g => g.kind === 'audioinput'); }
             catch (e) { return; }
-            const gemerkt = (() => { try { return localStorage.getItem('mikro') || ''; } catch (e) { return ''; } })();
             const w = $('mikro');
             w.innerHTML = '<option value="">Systemvorgabe</option>' + geraete.map(g =>
                 '<option value="' + g.deviceId + '">' + (g.label || 'Mikrofon') + '</option>').join('');
-            if (gemerkt && geraete.some(g => g.deviceId === gemerkt)) w.value = gemerkt;
-            else {
-                // no choice yet: prefer a RØDE if one is plugged in - that is why Doc bought it
-                const rode = geraete.find(g => /r[oø]de/i.test(g.label || ''));
-                if (rode) { w.value = rode.deviceId; try { localStorage.setItem('mikro', rode.deviceId); } catch (e) { } }
-            }
+            // A RØDE, when plugged in, always wins - the menu is hidden, so an old pick (say the
+            // built-in mic) must not quietly lock the RØDE out. Otherwise the system default.
+            const rode = geraete.find(g => /r[oø]de/i.test(g.label || ''));
+            w.value = rode ? rode.deviceId : '';
         }
         mikroListe();
         $('mikro').onchange = () => {
