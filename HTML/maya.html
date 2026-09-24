@@ -118,6 +118,12 @@
             transition: border-color 0.2s ease;
         }
 
+        /* upright the number stands over two columns only, so it is smaller and never wraps */
+        #maya-head.column .maya-num {
+            font-size: clamp(1.4rem, 2.8vw, 2.9rem);
+            white-space: nowrap;
+        }
+
         /* two small triangles at the right edge, there only while the number is typed */
         .maya-spin {
             position: absolute;
@@ -241,6 +247,17 @@
             transform: rotate(0deg);
         }
 
+        /* upright the number stands to the right of the board, so the arrow lies on its
+           side: right to the number when the board leads, left into the board when the
+           number leads */
+        .maya-link.sideways svg {
+            transform: rotate(-90deg);
+        }
+
+        .maya-link.sideways.down svg {
+            transform: rotate(90deg);
+        }
+
         /* grey and pointing down: a number stands above and nothing lies below yet - that is
            the task. One click and it lays itself, which is the answer. */
         .maya-link.pending {
@@ -269,12 +286,30 @@
             position: relative;
         }
 
+        #maya-solution.column #maya-formula {
+            height: 100%;
+        }
+
         .maya-term,
         .maya-plus {
             position: absolute;
             top: 0;
             transform: translateX(-50%);
             white-space: nowrap;
+        }
+
+        /* upright: the board is a column, so the sum is one term per row beside it */
+        #maya-solution.column {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 1.15rem;
+        }
+
+        #maya-solution.column .maya-term,
+        #maya-solution.column .maya-plus {
+            top: auto;
+            left: 0;
+            transform: translateY(-50%);
         }
 
         .maya-plus {
@@ -342,6 +377,10 @@
             backdrop-filter: blur(25px);
             border: 1px solid rgba(121, 158, 49, 0.45);
             box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+        }
+
+        .maya-dlg .maya-dlg-h2 {
+            margin-top: 18px;
         }
 
         .maya-dlg h2 {
@@ -482,6 +521,8 @@
             <h2 id="maya-dlg-title">STELLENWERTE</h2>
             <div id="maya-system"></div>
             <div class="maya-note" id="maya-system-note"></div>
+            <h2 class="maya-dlg-h2">ANORDNUNG</h2>
+            <div id="maya-arrange"></div>
             <button type="button" class="cyber-btn" id="maya-dlg-close">FERTIG</button>
         </div>
     </div>
@@ -595,6 +636,9 @@
         // how many places stand there - four unless it is set otherwise, and never fewer than
         // the number needs
         let placeCount = Math.min(5, Math.max(1, parseInt(store.get('places', '4'), 10) || 4));
+        // two ways to stand: flat, the places side by side, or upright, the way the Maya wrote
+        // them - a column with the highest place on top
+        let upright = store.get('upright', '0') === '1';
         let flashes = [];                 // { place, color, until }
         let cards = [];                   // the places, side by side
         let glyphs = [];                  // every dot and every bar, for taking them away
@@ -745,7 +789,8 @@
             if (d === null) return;               // an empty place shows nothing at all
             const col = colOverride || placeColor(place);
             if (d === 0) {
-                const w = Math.min(bw * 0.78, 132);   // exactly the width of a bar
+                let w = Math.min(bw * 0.78, 132);     // exactly the width of a bar
+                if (w * 0.64 > bh) w = bh / 0.64;     // ... unless the box is too flat for it
                 const h = w * 0.64;
                 drawShell(cx, cy + h * 0.065, w, h, col);   // the shape is taller above the centre
                 return;
@@ -798,6 +843,7 @@
             glyphs = [];
             palette = [];
             if (W < 200 || H < 200) return;     // the chrome has not settled yet
+            if (upright) { drawUpright(rect, W, H); return; }
 
             const pad = 16;
             const n = places();
@@ -819,6 +865,7 @@
             const diceEl = document.getElementById('maya-dice');
             const headEl = document.getElementById('maya-head');
             const solEl = document.getElementById('maya-solution');
+            const linkEl = document.getElementById('maya-link');
             let top = 14, stackTopMin = 14, dH = 0, hH = 0, sH = 0;
             if (headEl && solEl) {
                 for (const el of [diceEl, headEl, solEl]) {
@@ -834,14 +881,22 @@
                         stackTopMin = Math.max(stackTopMin, b.bottom - rect.top + 12);
                     }
                 }
+                solEl.classList.remove('column');
+                headEl.classList.remove('column');
+                if (linkEl) linkEl.classList.remove('sideways');
+                solEl.style.height = '';
                 solEl.querySelectorAll('.maya-term').forEach(el => {
                     const col = Number(el.dataset.col);
+                    el.style.top = '';
+                    el.style.right = '';
                     el.style.left = (colCenter(col) - blockX) + 'px';
                     // in colour mode every term takes the colour of its own place
                     el.style.color = colorMode ? placeColor(n - 1 - col) : '';
                 });
                 solEl.querySelectorAll('.maya-plus').forEach(el => {
                     const g = Number(el.dataset.gap);
+                    el.style.top = '';
+                    el.style.right = '';
                     el.style.left = ((colCenter(g) + colCenter(g + 1)) / 2 - blockX) + 'px';
                 });
                 // the die's box is exactly as high as the number's, the die fills it
@@ -891,7 +946,6 @@
             if (headEl) headEl.style.top = y + 'px';
             y += hH + stackGap;
             if (solEl) solEl.style.top = y + 'px';
-            const linkEl = document.getElementById('maya-link');
             if (linkEl) {
                 const seam = y - stackGap / 2;        // the gap between the number and the sum
                 linkEl.style.top = (seam - linkEl.offsetHeight / 2) + 'px';
@@ -968,6 +1022,181 @@
                 paintDigit(drag.digit, drag.x, drag.y, Math.min(cardW, 150), Math.min(cardH, 130), null);
                 ctx.restore();
             }
+        }
+
+        // The upright board: the places stand in a column the way the Maya wrote them, the
+        // highest on top, and every term of the sum stands beside its own place. The twenty
+        // digits move to the right, because the column is tall. Nothing is rotated - dots,
+        // bars, shell and every word stay heads up.
+        function drawUpright(rect, W, H) {
+            const pad = 16;
+            const n = places();
+
+            const diceEl = document.getElementById('maya-dice');
+            const headEl = document.getElementById('maya-head');
+            const solEl = document.getElementById('maya-solution');
+            const linkEl = document.getElementById('maya-link');
+            if (!diceEl || !headEl || !solEl) return;
+
+            solEl.classList.add('column');
+            headEl.classList.add('column');
+            if (linkEl) linkEl.classList.add('sideways');
+
+            // three columns stand side by side: the board, its sum, and the twenty digits.
+            // The number sits over the first two - it is what they say - and the die over the
+            // digits. The whole group stands centred, no wider than it needs to be.
+            // five columns from left to right: the twenty digits, the board, its sum, the
+            // decimal number and the die - the whole stage turned on its side, but every
+            // word, glyph and number still standing upright
+            const gap = 18;
+            const clamp = (lo, v, hi) => Math.max(lo, Math.min(hi, v));
+            const groupW = Math.min(W - 2 * pad, 1500);
+            const groupX = (W - groupW) / 2;
+            const panelW = clamp(110, groupW * 0.15, 210);
+            const boardW = clamp(120, groupW * 0.18, 240);
+            const termW = boardW;                       // the sum box is as wide as the board
+            const dieW = clamp(80, groupW * 0.096, 152);   // a fifth narrower than it was
+            const numW = clamp(204, groupW * 0.288, 396);   // a fifth wider than it was
+
+            // everything together, centred on the stage
+            const usedW = panelW + boardW + termW + numW + dieW + 4 * gap;
+            const groupX2 = (W - usedW) / 2;
+
+            const panelX = groupX2;
+            const boardX = panelX + panelW + gap;
+            const termX = boardX + boardW + gap;
+            const numX = termX + termW + gap;
+            const dieX = numX + numW + gap;
+
+            headEl.style.left = numX + 'px';
+            headEl.style.width = numW + 'px';
+            diceEl.style.left = dieX + 'px';
+            diceEl.style.width = dieW + 'px';
+
+            let stackTopMin = 14;
+            const brand = document.querySelector('.canvas-branding');
+            if (brand) {
+                const b = brand.getBoundingClientRect();
+                if (b.width && b.left - rect.left < groupX + groupW) {
+                    stackTopMin = Math.max(stackTopMin, b.bottom - rect.top + 12);
+                }
+            }
+
+            // number and die stand on the right, halfway up the stage
+            headEl.style.top = stackTopMin + 'px';
+            const hH = headEl.offsetHeight;
+            const midTop = Math.max(stackTopMin, (H - hH) / 2);
+            headEl.style.top = midTop + 'px';
+            diceEl.style.height = hH + 'px';
+            diceEl.style.top = midTop + 'px';
+
+            const colTop = stackTopMin;
+            const boardBottom = H - pad;
+            const availH = boardBottom - colTop;
+            if (availH < 120) return;
+
+            // board, sum and digits start and end on the same lines - flush top and bottom
+            const rowGap = 10;
+            const cardH = Math.max(40, (availH - (n - 1) * rowGap) / n);
+            const boardH = availH;
+            const boardTop = colTop;
+
+            if (linkEl) {
+                // on the seam between the sum and the number beside it
+                linkEl.style.left = (numX - gap / 2 - linkEl.offsetWidth / 2) + 'px';
+                linkEl.style.top = (midTop + hH / 2 - linkEl.offsetHeight / 2) + 'px';
+            }
+
+            // the sum stands beside the board, one term per place
+            solEl.style.left = termX + 'px';
+            solEl.style.width = termW + 'px';
+            solEl.style.top = boardTop + 'px';
+            solEl.style.height = boardH + 'px';
+            const rowCenter = (col) => col * (cardH + rowGap) + cardH / 2;
+            solEl.querySelectorAll('.maya-term').forEach(el => {
+                const col = Number(el.dataset.col);
+                el.style.top = rowCenter(col) + 'px';
+                el.style.left = '0';
+                el.style.right = 'auto';
+                el.style.color = colorMode ? placeColor(n - 1 - col) : '';
+            });
+            solEl.querySelectorAll('.maya-plus').forEach(el => {
+                const g = Number(el.dataset.gap);
+                el.style.top = ((rowCenter(g) + rowCenter(g + 1)) / 2) + 'px';
+                el.style.left = '0';
+                el.style.right = 'auto';
+            });
+
+            // the terms take as much type as the box allows: measure the widest one at the
+            // stylesheet's size, then scale everything to fit - always from the same base, so
+            // the result does not creep from one draw to the next
+            solEl.style.fontSize = '';
+            let widest = 0;
+            solEl.querySelectorAll('.maya-term').forEach(el => {
+                widest = Math.max(widest, el.scrollWidth);
+            });
+            if (widest > 0) {
+                const base = parseFloat(getComputedStyle(solEl).fontSize) || 18;
+                const inner = termW - 32;
+                solEl.style.fontSize = clamp(14, base * inner / widest, 40) + 'px';
+            }
+
+            // the places, highest on top
+            for (let row = 0; row < n; row++) {
+                const place = n - 1 - row;
+                const y = boardTop + row * (cardH + rowGap);
+                const flash = flashColor(place);
+                const hot = hoverPlace === place;
+                const blocked = drag && drag.digit >= sys().limits[place];
+
+                ctx.lineWidth = (flash || hot || colorMode) ? 2 : 1;
+                roundRect(boardX, y, boardW, cardH, 14,
+                    blocked ? 'rgba(255, 255, 255, 0.04)'
+                        : (hot ? 'rgba(245, 194, 66, 0.10)' : (flash ? 'rgba(121, 158, 49, 0.10)' : COL.fill)),
+                    blocked ? COL.mute
+                        : (hot ? COL.glyph : (flash || (colorMode ? placeColor(place) : COL.line))));
+
+                drawPower(place, boardX + boardW / 2, y + 6);
+                paintDigit(blank ? null : digits[place], boardX + boardW / 2, y + cardH / 2 + 4,
+                    boardW, cardH - 14, place, blocked ? COL.mute : null);
+
+                cards.push({ place, x: boardX, y, w: boardW, h: cardH });
+            }
+
+            // the twenty digits: two columns beside the board, over the whole height
+            const cols = 2, rows = 10;
+            const cellW = panelW / cols;
+            const cellH = availH / rows;                 // flush with the board, top and bottom
+            const panelTop = colTop;
+            const panelCol = flow === 'down' ? COL.mute : null;
+
+            for (let k = 0; k < 20; k++) {
+                const cx0 = panelX + (k % cols) * cellW;
+                const cy0 = panelTop + Math.floor(k / cols) * cellH;
+                const on = picked === k || (drag && drag.digit === k);
+
+                roundRect(cx0 + 3, cy0 + 2, cellW - 6, cellH - 4, 10,
+                    on ? 'rgba(245, 194, 66, 0.12)' : 'rgba(255, 255, 255, 0.02)',
+                    on ? COL.glyph : 'rgba(255, 255, 255, 0.07)');
+
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                ctx.font = "600 12px 'Orbitron', sans-serif";
+                ctx.fillStyle = on ? COL.glyph : 'rgba(255, 255, 255, 0.45)';
+                ctx.fillText(String(k), cx0 + cellW / 2, cy0 + 5);
+
+                paintDigit(k, cx0 + cellW / 2, cy0 + cellH * 0.62, cellW - 14, cellH * 0.58, null, panelCol);
+                palette.push({ digit: k, x: cx0, y: cy0, w: cellW, h: cellH });
+            }
+
+            if (drag) {
+                ctx.save();
+                ctx.globalAlpha = 0.9;
+                paintDigit(drag.digit, drag.x, drag.y, Math.min(boardW, 150), Math.min(cardH, 130), null);
+                ctx.restore();
+            }
+
+            window.__layout = { modus: 'hochkant', W, H, n, boardW, termW, panelW, cardH, boardH, boardTop };
         }
 
         // ------------------------------------------------------------- interaction ---
@@ -1105,6 +1334,7 @@
                 const place = n - 1 - Number(el.dataset.col);
                 el.textContent = digits[place] + ' \u00b7 ' + de(sys().values[place]);
             });
+            if (upright) { host.style.height = ''; return; }
             let h = 0;
             host.querySelectorAll('span').forEach(el => { h = Math.max(h, el.offsetHeight); });
             host.style.height = (h || 22) + 'px';
@@ -1371,6 +1601,16 @@
                 changed();
             });
             document.getElementById('maya-system-note').textContent = noteFor(sysKey);
+
+            CyberUI.createRadioGroup('maya-arrange', null, [
+                { value: 'flat', label: T('arr_flat', 'waagerecht: die Stellen nebeneinander') },
+                { value: 'upright', label: T('arr_upright', 'hochkant: als Spalte, wie die Maya schrieben') }
+            ], upright ? 'upright' : 'flat', (v) => {
+                upright = v === 'upright';
+                store.set('upright', upright ? '1' : '0');
+                renderFormula();          // the terms are placed differently in each mode
+                init();
+            });
             document.getElementById('maya-dlg-close').onclick = closeSystem;
             document.getElementById('maya-dlg').addEventListener('pointerdown', (e) => {
                 if (e.target.id === 'maya-dlg') closeSystem();     // a click beside the card closes it
