@@ -167,6 +167,14 @@ d.summary("Ohne Null: ein Keil kann 1, 60 oder 3600 sein; im Text half der Zusam
           "Rechnen nicht. Die Maya hatten eine Null, die Babylonier nicht. Unsere Null kam über "
           "Indien und die Araber um 1200 nach Europa.")
 
+# the lab lives inside the slide, as in the Maya deck - there it stands upright by itself
+d.lab("Das babylonische Rechenbrett", "babylon.html",
+      note="**Würfel** stellt eine Aufgabe · Ziffern auf die Stellen **ziehen** · Zahnrad: mit oder **ohne Null**")
+d.summary("Im Deck steckt das Lab „Babylonische Zahlen“ (babylon.html): ein Rechenbrett zur Basis 60, "
+          "auf dem eine Zahl aus Keilen und Winkelhaken gelegt wird. Der Würfel stellt Aufgaben, die "
+          "Ziffern 0 bis 59 werden auf die Stellen gezogen, und hinter dem Zahnrad lässt sich die leere "
+          "Stelle mit Platzhalter oder ganz ohne Null schreiben.")
+
 # ------------------------------------------------------------- Kapitel 05 ---
 d.chapter(5, "Das Erbe", "Was davon heute noch auf deinem Handgelenk sitzt")
 
