@@ -247,33 +247,29 @@
             touch-action: manipulation;
         }
 
-        .kz-figure * {
-            fill: rgb(46, 64, 94);
-            stroke: none;
+        .kz-photo {
+            pointer-events: none;
         }
 
-        .kz-figure .limb {
-            fill: none;
-            stroke: rgb(46, 64, 94);
-            stroke-linecap: round;
-            stroke-linejoin: round;
+        .kz-ai {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            text-anchor: end;
+            fill: rgba(255, 255, 255, 0.85);
+            paint-order: stroke;
+            stroke: rgba(10, 20, 40, 0.6);
+            stroke-width: 4px;
+            pointer-events: none;
         }
 
-        .kz-figure .feature {
-            fill: rgb(22, 34, 56);
-        }
-
-        .kz-figure .feature-line {
-            fill: none;
-            stroke: rgb(22, 34, 56);
-            stroke-width: 4;
-            stroke-linecap: round;
+        .kz-round-bg {
+            fill: rgba(10, 20, 40, 0.7);
         }
 
         /* the path the counting walks, faint, so the order can be read before it is lit */
         .kz-trail {
             fill: none;
-            stroke: rgba(245, 194, 66, 0.14);
+            stroke: rgba(255, 255, 255, 0.35);
             stroke-width: 2;
             stroke-dasharray: 4 7;
         }
@@ -295,9 +291,9 @@
         }
 
         .kz-pt .dot {
-            fill: rgba(255, 255, 255, 0.35);
-            stroke: rgba(255, 255, 255, 0.55);
-            stroke-width: 1.5;
+            fill: rgba(10, 20, 40, 0.45);
+            stroke: rgba(255, 255, 255, 0.85);
+            stroke-width: 2;
             transition: fill 0.15s ease;
         }
 
@@ -308,7 +304,7 @@
         .kz-pt text {
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
-            font-size: 15px;
+            font-size: 17px;
             text-anchor: middle;
             dominant-baseline: central;
             fill: rgb(10, 20, 40);
@@ -455,7 +451,7 @@
             <div id="kz-sol" class="kz-card">
                 <div id="kz-say"></div>
             </div>
-            <svg id="kz-body" viewBox="20 110 960 560" preserveAspectRatio="xMidYMid meet"
+            <svg id="kz-body" viewBox="0 0 1376 768" preserveAspectRatio="xMidYMid meet"
                 xmlns="http://www.w3.org/2000/svg" aria-label="Eine Figur mit 27 Zählpunkten"></svg>
         </div>
     </main>
@@ -525,29 +521,38 @@
         // ------------------------------------------------------------- the body ---
         // The 27 counting points of the Oksapmin (Papua New Guinea), after Geoffrey Saxe:
         // the fingers of one hand, thumb first, up the arm, round the face to the nose, and
-        // mirrored back down to the little finger of the other hand. The figure faces us, so
-        // "left" and "right" are as seen on the screen. Only the left half is written down -
-        // the right half is its mirror image, walked the other way.
-        const HALF = [
-            { x: 190, y: 222, name: 'Daumen' },
-            { x: 157, y: 176, name: 'Zeigefinger' },
-            { x: 121, y: 168, name: 'Mittelfinger' },
-            { x: 88, y: 180, name: 'Ringfinger' },
-            { x: 63, y: 210, name: 'kleiner Finger' },
-            { x: 162, y: 318, name: 'Handgelenk' },
-            { x: 205, y: 372, name: 'Unterarm' },
-            { x: 252, y: 424, name: 'Ellbogen' },
-            { x: 330, y: 384, name: 'Oberarm' },
-            { x: 405, y: 338, name: 'Schulter' },
-            { x: 468, y: 300, name: 'Hals' },
-            { x: 438, y: 212, name: 'Ohr' },
-            { x: 474, y: 190, name: 'Auge' }
-        ];
-        const NOSE = { x: 500, y: 232, name: 'Nase' };
+        // back down the other side to the little finger. "Left" and "right" are as seen on the
+        // screen. The coordinates are pixels of the photo (1376 x 768), measured on it - a new
+        // photo needs them measured again.
+        const PHOTO = { src: 'resources/koerperzaehlen-foto.jpg', w: 1376, h: 768 };
         const POINTS = [
-            ...HALF.map(p => ({ ...p, side: 'links' })),
-            { ...NOSE, side: '' },
-            ...HALF.slice().reverse().map(p => ({ x: 1000 - p.x, y: p.y, name: p.name, side: 'rechts' }))
+            { x: 350, y: 220, name: 'Daumen', side: 'links' },
+            { x: 291, y: 152, name: 'Zeigefinger', side: 'links' },
+            { x: 258, y: 137, name: 'Mittelfinger', side: 'links' },
+            { x: 223, y: 160, name: 'Ringfinger', side: 'links' },
+            { x: 200, y: 198, name: 'kleiner Finger', side: 'links' },
+            { x: 283, y: 335, name: 'Handgelenk', side: 'links' },
+            { x: 305, y: 440, name: 'Unterarm', side: 'links' },
+            { x: 340, y: 558, name: 'Ellbogen', side: 'links' },
+            { x: 410, y: 525, name: 'Oberarm', side: 'links' },
+            { x: 495, y: 440, name: 'Schulter', side: 'links' },
+            { x: 655, y: 380, name: 'Hals', side: 'links' },
+            { x: 610, y: 248, name: 'Ohr', side: 'links' },
+            { x: 660, y: 240, name: 'Auge', side: 'links' },
+            { x: 692, y: 282, name: 'Nase', side: '' },
+            { x: 727, y: 240, name: 'Auge', side: 'rechts' },
+            { x: 775, y: 248, name: 'Ohr', side: 'rechts' },
+            { x: 730, y: 380, name: 'Hals', side: 'rechts' },
+            { x: 885, y: 440, name: 'Schulter', side: 'rechts' },
+            { x: 985, y: 510, name: 'Oberarm', side: 'rechts' },
+            { x: 1062, y: 548, name: 'Ellbogen', side: 'rechts' },
+            { x: 1105, y: 440, name: 'Unterarm', side: 'rechts' },
+            { x: 1118, y: 330, name: 'Handgelenk', side: 'rechts' },
+            { x: 1062, y: 200, name: 'Daumen', side: 'rechts' },
+            { x: 1133, y: 146, name: 'Zeigefinger', side: 'rechts' },
+            { x: 1174, y: 136, name: 'Mittelfinger', side: 'rechts' },
+            { x: 1206, y: 160, name: 'Ringfinger', side: 'rechts' },
+            { x: 1218, y: 208, name: 'kleiner Finger', side: 'rechts' }
         ];
         const N = POINTS.length;          // 27 - a count of body points, not a chosen base
 
@@ -589,32 +594,10 @@
         }
 
         function buildBody() {
-            const fig = el('g', { class: 'kz-figure' }, bodyEl);
-            // torso, neck, head
-            el('path', { d: 'M395 330 Q500 308 605 330 L588 660 L412 660 Z' }, fig);
-            el('rect', { x: 478, y: 262, width: 44, height: 64, rx: 10 }, fig);
-            el('ellipse', { cx: 438, cy: 212, rx: 13, ry: 22 }, fig);
-            el('ellipse', { cx: 562, cy: 212, rx: 13, ry: 22 }, fig);
-            el('ellipse', { cx: 500, cy: 205, rx: 58, ry: 72 }, fig);
-            // arms: shoulder - elbow - wrist, raised the way the counting shows them
-            for (const s of [1, -1]) {
-                const X = (x) => s === 1 ? x : 1000 - x;
-                el('polyline', {
-                    class: 'limb', 'stroke-width': 42,
-                    points: [[405, 338], [252, 424], [158, 306]].map(([x, y]) => X(x) + ',' + y).join(' ')
-                }, fig);
-                el('circle', { cx: X(132), cy: 262, r: 34 }, fig);            // the palm
-                for (const [tx, ty] of [[190, 222], [157, 176], [121, 168], [88, 180], [63, 210]]) {
-                    el('line', {
-                        class: 'limb', 'stroke-width': 17,
-                        x1: X(132), y1: 262, x2: X(tx), y2: ty
-                    }, fig);
-                }
-            }
-            // a face, quietly: the counting points sit on top of it
-            el('circle', { class: 'feature', cx: 474, cy: 190, r: 6 }, fig);
-            el('circle', { class: 'feature', cx: 526, cy: 190, r: 6 }, fig);
-            el('path', { class: 'feature-line', d: 'M488 250 Q500 258 512 250' }, fig);
+            // the photo: generated, not a real person - and it says so in its corner
+            el('image', { href: PHOTO.src, x: 0, y: 0, width: PHOTO.w, height: PHOTO.h, class: 'kz-photo' }, bodyEl);
+            const ai = el('text', { class: 'kz-ai', x: PHOTO.w - 14, y: PHOTO.h - 14 }, bodyEl);
+            ai.textContent = T('ai_note', 'KI-generiertes Bild');
 
             // the walk, faint from start to end, and the lit part of it on top
             const all = POINTS.map(p => p.x + ',' + p.y).join(' ');
@@ -623,8 +606,8 @@
 
             POINTS.forEach((p, i) => {
                 const g = el('g', { class: 'kz-pt', 'data-p': i + 1 }, bodyEl);
-                el('circle', { class: 'hit', cx: p.x, cy: p.y, r: 24 }, g);
-                el('circle', { class: 'dot', cx: p.x, cy: p.y, r: 15 }, g);
+                el('circle', { class: 'hit', cx: p.x, cy: p.y, r: 21 }, g);
+                el('circle', { class: 'dot', cx: p.x, cy: p.y, r: 16 }, g);
                 const t = el('text', { x: p.x, y: p.y + 1 }, g);
                 t.textContent = String(i + 1);
                 const tip = el('title', {}, g);
@@ -653,10 +636,11 @@
             roundsG.innerHTML = '';
             const r = (flow === 'task' && !(task && (task.done || task.shown))) ? 0 : (n > 0 ? split(n).r : 0);
             if (r > 0) {
-                const lab = el('text', { class: 'kz-round-label', x: 40, y: 600 }, roundsG);
+                el('rect', { class: 'kz-round-bg', x: 18, y: PHOTO.h - 96, width: 64 + r * 40, height: 78, rx: 14 }, roundsG);
+                const lab = el('text', { class: 'kz-round-label', x: 36, y: PHOTO.h - 64 }, roundsG);
                 lab.textContent = T('rounds', 'Runden:');
                 for (let i = 0; i < r; i++) {
-                    el('circle', { class: 'kz-round', cx: 60 + i * 34, cy: 630, r: 12 }, roundsG);
+                    el('circle', { class: 'kz-round', cx: 52 + i * 40, cy: PHOTO.h - 38, r: 13 }, roundsG);
                 }
             }
         }
@@ -927,7 +911,7 @@
             const hH = headEl.offsetHeight;
             diceEl.style.height = hH + 'px';
             const sH = solEl.offsetHeight;
-            const VB_RATIO = 560 / 960;
+            const VB_RATIO = PHOTO.h / PHOTO.w;
             const room = H - pad - topMin - (hH + gap) * 2 - sH - gap;
             const figH = Math.max(120, Math.min(room, blockW * VB_RATIO));
             const stackH = (hH + gap) * 2 + sH + gap + figH;
