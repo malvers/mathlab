@@ -24,6 +24,10 @@ import zahlsystem_bilder as B
 
 d = Deck("zahlensystem-maya.pptx")
 
+# Doc himself sits in the Frag-Solita row of this deck, with his team photo (Doc, 24.09.2026)
+if hasattr(d, "set_avatar"):
+    d.set_avatar("../resources/team/alvers_final.png", "Doc Alvers")
+
 
 def kapitel(num, titel, unter, bild):
     """A chapter divider with a Commons photograph - the licence line comes with the picture."""
