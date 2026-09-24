@@ -12,10 +12,11 @@
 
     This page reads exactly that - but across ALL plans and sorted by calendar week: "what is on
     this week" instead of "what is in this plan". Which row belongs to which week is told by
-    plan-suchindex.json (tools/build-plan-suchindex.mjs); a week's current topic comes from
-    svp_plan_edits on top of it, so what stands here is not the state of the HTML file. The
-    bullets themselves sit on the same bluish paper as in the lesson - the colours of the
-    formatting bar are meant for that paper, on a dark ground the navy would be unreadable.
+    plan-suchindex.json (tools/build-plan-suchindex.mjs). The topic of the week is deliberately
+    NOT shown (Doc, 24.09.2026: „und das immer raus") - the card is the name of the class and
+    what is going to happen in the lesson, nothing else. The bullets sit on the same bluish
+    paper as in the lesson - the colours of the formatting bar are meant for that paper, on a
+    dark ground the navy would be unreadable.
 -->
 
 <head>
@@ -118,12 +119,15 @@
             line-height: 1.12;
             letter-spacing: 0.01em;
             white-space: nowrap;
-            color: var(--muted);
+            /* Doc, 24.09.2026: „bitte im Dunkel noch wieder gelb". Not a colour of its own:
+               --lambda IS the accent of the scheme in force - the house orange in the dark and
+               the grey one, and the blue of the material pills in the light one, where orange
+               washes out to ochre. One token, no rule per scheme. */
+            color: var(--lambda);
             text-decoration: none;
         }
 
         .fp-klasse:hover { text-decoration: underline; }
-        .fp-thema { margin: 0 0 10px; font-size: 1.02rem; color: var(--text); }
 
         /* The paper - the same two values as the sheet in the lesson
            (.fahr-sheet in svp-fahrplan.css): bluish paper, navy on it, in EVERY
@@ -231,77 +235,6 @@
                 return String(p || '').split(/[?#]/)[0].split('/').filter(Boolean).slice(-2).join('/');
             }
 
-            /* ---- topic: marks and formulas ----------------------------------------
-               The topic comes from the plan and carries its six marks and $...$
-               formulas. The original is paintSrc in svp-plan-text.js - which hangs on
-               the whole plan renderer and is not to be had here, hence this short
-               twin, for the head of a card only. */
-            const KATEX = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min';
-            const MARK_RE = /<(\/?)(b|i|u|c1|c2|c3)>/g;
-            const MARK_EL = {
-                b: ['b', ''], i: ['i', ''], u: ['u', ''],
-                c1: ['span', 'hl-l'], c2: ['span', 'hl-y'], c3: ['span', 'hl-p']
-            };
-            const mathEls = new Set();
-
-            function ensureKatex() {
-                if (window.katex || document.getElementById('katex-js')) return;
-                const link = document.createElement('link');
-                link.rel = 'stylesheet';
-                link.href = KATEX + '.css';
-                document.head.appendChild(link);
-                const s = document.createElement('script');
-                s.id = 'katex-js';
-                s.src = KATEX + '.js';
-                s.onload = function () {
-                    mathEls.forEach(function (el) { if (el.isConnected) paint(el, el.dataset.src || ''); });
-                };
-                document.head.appendChild(s);
-            }
-
-            function appendText(parent, text) {
-                if (!text) return;
-                if (!window.katex || !text.includes('$')) {
-                    parent.appendChild(document.createTextNode(text));
-                    return;
-                }
-                text.split(/\$([^$]+)\$/).forEach(function (part, idx) {
-                    if (!part) return;
-                    if (idx % 2 === 0) { parent.appendChild(document.createTextNode(part)); return; }
-                    const span = document.createElement('span');
-                    try { katex.render(part, span, { throwOnError: false }); }
-                    catch (e) { span.textContent = '$' + part + '$'; }
-                    parent.appendChild(span);
-                });
-            }
-
-            function paint(el, src) {
-                src = String(src == null ? '' : src);
-                el.textContent = '';
-                el.dataset.src = src;
-                if (src.includes('$')) { mathEls.add(el); ensureKatex(); }
-                const stack = [el], open = [];
-                let last = 0, m;
-                MARK_RE.lastIndex = 0;
-                while ((m = MARK_RE.exec(src))) {
-                    appendText(stack[stack.length - 1], src.slice(last, m.index));
-                    last = MARK_RE.lastIndex;
-                    if (m[1]) {
-                        /* an unmatched </b> is text, not a command */
-                        if (open[open.length - 1] === m[2]) { open.pop(); stack.pop(); }
-                        else appendText(stack[stack.length - 1], m[0]);
-                    } else {
-                        const def = MARK_EL[m[2]];
-                        const e = document.createElement(def[0]);
-                        if (def[1]) e.className = def[1];
-                        stack[stack.length - 1].appendChild(e);
-                        stack.push(e);
-                        open.push(m[2]);
-                    }
-                }
-                appendText(stack[stack.length - 1], src.slice(last));
-            }
-
             /* ---- loading ----------------------------------------------------------- */
             async function ladeIndex() {
                 const res = await fetch(new URL('plan-suchindex.json', BASE));
@@ -333,38 +266,6 @@
                 rows.forEach(function (r) { if (r && r.page) fahr[tailOf(r.page)] = r.fahrplan || {}; });
                 try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), fahr: fahr })); }
                 catch (e) { /* full or locked - then simply without a store */ }
-            }
-
-            /* A week's topic stands in the index as the plan FILE knows it -
-               what Doc has changed since lives in svp_plan_edits. Publicly
-               readable, the same query the search in svp-suche.js makes. */
-            async function ladeThemen() {
-                if (!window.svpAuth || !plaene.length) return;
-                const liste2 = plaene.map(function (p) {
-                    return '"' + new URL(p.href, BASE).pathname + '"';
-                }).join(',');
-                const url = svpAuth.DB_URL + '/rest/v1/svp_plan_edits?select=page,edits&page=in.('
-                    + encodeURIComponent(liste2) + ')';
-                const abbruch = new AbortController();
-                const uhr = setTimeout(function () { abbruch.abort(); }, 8000);
-                try {
-                    const res = await fetch(url, {
-                        signal: abbruch.signal,
-                        headers: { apikey: svpAuth.DB_KEY, Authorization: 'Bearer ' + svpAuth.DB_KEY }
-                    });
-                    if (!res.ok) return;
-                    const rows = await res.json();
-                    const byTail = {};
-                    rows.forEach(function (r) { if (r && r.page) byTail[tailOf(r.page)] = r.edits || {}; });
-                    plaene.forEach(function (p) {
-                        const ov = byTail[p.tail] || {};
-                        p.wochen.forEach(function (w) {
-                            const e = ov[String(w.i)];
-                            if (e && e.topic) w.thema = e.topic;
-                        });
-                    });
-                } catch (e) { /* offline or too slow - the index's own state will do */ }
-                finally { clearTimeout(uhr); }
             }
 
             /* ---- showing ----------------------------------------------------------- */
@@ -412,13 +313,6 @@
                 kopf.appendChild(a);
                 art.appendChild(kopf);
 
-                if (w.thema) {
-                    const th = document.createElement('div');
-                    th.className = 'fp-thema';
-                    paint(th, w.thema);
-                    art.appendChild(th);
-                }
-
                 const papier = document.createElement('div');
                 papier.className = 'fp-paper';
                 const ul = document.createElement('ul');
@@ -441,7 +335,6 @@
             function zeige() {
                 liste.textContent = '';
                 leerEl.textContent = '';
-                mathEls.clear();
                 if (pos < 0 || !wochen.length) { kwEl.textContent = ' '; datumEl.textContent = ' '; return; }
 
                 const w = wochen[pos];
@@ -548,8 +441,6 @@
                     status.textContent = netz ? '☁ ' + e.message : '☁ offline — letzter Stand';
                 }
                 pruefeVerwaiste();
-                zeige();
-                await ladeThemen();
                 zeige();
             }
 
