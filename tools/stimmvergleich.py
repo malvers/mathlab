@@ -14,6 +14,7 @@ and writes, next to them in analyse/:
     klon.png       spectrogram of the clone, TIME-ALIGNED to Doc
     diff.png       Doc minus clone, red where Doc is louder, blue where the clone is
     diff-eq.png    Doc minus the clone with the high shelf - does the filter help?
+    *-hell.png     the same two differences on a white ground (zero = white)
     daten.json     scale, durations, per-band balance - the numbers under the picture
     ziel.json      what an EQ on the clone would have to do: the weighted mean difference
                    per frequency, the weights, and the part no filter can ever remove
@@ -157,6 +158,11 @@ GRUND = np.array([10, 15, 30], dtype=np.float64)
 # stronger than it is - a measurement map, not UI colour.
 ROT = np.array([255, 72, 52], dtype=np.float64)
 BLAU = np.array([64, 150, 255], dtype=np.float64)
+# the light variant (Doc, 24.09.2026: "black/white machs schaltbar"): the classic paper convention,
+# zero on white, red and blue darkened so they carry on a white ground (ColorBrewer RdBu ends)
+HELL_GRUND = np.array([255, 255, 255], dtype=np.float64)
+HELL_ROT = np.array([178, 24, 43], dtype=np.float64)
+HELL_BLAU = np.array([33, 102, 172], dtype=np.float64)
 
 
 def bild(rgb_frames_bins, pfad):
@@ -172,8 +178,11 @@ def diffbild(dB_o, dB_k, oben, pfad):
     t = np.clip((dB_o - dB_k) / DIFF_SKALA, -1, 1)
     gewicht = np.clip((np.maximum(dB_o, dB_k) - (oben - 70)) / 45, 0, 1)
     staerke = (np.abs(t) * gewicht)[..., None]
-    ziel = np.where((t >= 0)[..., None], ROT, BLAU)
-    bild(GRUND + (ziel - GRUND) * staerke, pfad)
+    # dark ground and light ground from the very same numbers - only the three colours differ
+    for grund, rot, blau, ziel_pfad in ((GRUND, ROT, BLAU, pfad),
+                                        (HELL_GRUND, HELL_ROT, HELL_BLAU, pfad.replace('.png', '-hell.png'))):
+        ziel = np.where((t >= 0)[..., None], rot, blau)
+        bild(grund + (ziel - grund) * staerke, ziel_pfad)
 
 
 def grundfrequenz(x, sr, lo=65.0, hi=320.0):
@@ -369,7 +378,8 @@ def main():
         # the colour ramps travel with the numbers, so the page's legends are drawn from the very
         # same values that painted the pictures - one source, not two copies that drift apart
         'farben': {'intensitaet': [[t, list(c)] for t, c in INTENSITAET],
-                   'grund': GRUND.tolist(), 'rot': ROT.tolist(), 'blau': BLAU.tolist()},
+                   'grund': GRUND.tolist(), 'rot': ROT.tolist(), 'blau': BLAU.tolist(),
+                   'hell': {'grund': HELL_GRUND.tolist(), 'rot': HELL_ROT.tolist(), 'blau': HELL_BLAU.tolist()}},
     }
     with open(os.path.join(ZIEL, 'daten.json'), 'w', encoding='utf-8') as fh:
         json.dump(daten, fh, ensure_ascii=False, indent=1)
