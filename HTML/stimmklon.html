@@ -493,7 +493,11 @@
         const G_MIN = 10, G_MAX = 30;      // Google's reference window, same as tools/stimme-hochladen.py
         // Only the story is shown: the consent recording is done and stays valid, and Google
         // takes it from disk (Doc, 24.09.2026: "Ich bin Eigentümer auch raus").
-        const NUR = ['story'];
+        // The story is the clone's reference (Google takes 10-30 s). Three long passages next to it
+        // are for US: they are what the CMA-ES filter learns and is tested on (Doc, 24.09.2026:
+        // "fuer den Klon bringt mehr nichts - aber fuer UNS"). Read them all at the RØDE.
+        const NUR = ['story', 't01', 't02', 't10'];
+        const REFERENZ = 'story';
         let alleZeigen = false;
         const sichtbar = () => alleZeigen ? SAETZE : SAETZE.filter(s => NUR.includes(s.id));
 
@@ -578,8 +582,8 @@
             $('btnRec').title = wort + ' (Leertaste)'; $('btnRec').setAttribute('aria-label', wort);
             $('btnRec').classList.toggle('stopp', laeuft);
             document.querySelector('.regie').classList.toggle('aktiv', laeuft);
-            // one text: nothing to page through, so the arrows stay out of sight
-            $('btnPrev').hidden = $('btnNext').hidden = !alleZeigen;
+            // a single text: nothing to page through, so the arrows stay out of sight
+            $('btnPrev').hidden = $('btnNext').hidden = LISTE.length <= 1;
             $('btnPrev').disabled = laeuft || i === 0;
             $('btnNext').disabled = laeuft || i >= LISTE.length - 1;
             $('btnPlay').disabled = !takes[s.id];
@@ -595,9 +599,10 @@
                plus the consent recording. The old scale ran to 30 minutes - that was ElevenLabs,
                which wants as much material as it can get, and it made a perfect take read
                "noch zu wenig" (Doc, 24.09.2026). */
-            const refKand = LISTE.filter(x => x.id !== 'einwilligung' && takes[x.id] && !taugtNicht(x, takes[x.id]))
-                                 .map(x => takes[x.id].sekunden || 0);
-            const ref = refKand.length ? Math.max.apply(null, refKand) : 0;
+            // the reference is the story by name: a two-minute passage is analysis material, and
+            // "the longest take" would silently have made it the clone's reference
+            const refT = takes[REFERENZ], refS = SAETZE.find(x => x.id === REFERENZ);
+            const ref = (refT && !taugtNicht(refS, refT)) ? (refT.sekunden || 0) : 0;
             const okEinw = takes['einwilligung'] && !taugtNicht(SAETZE[0], takes['einwilligung']);
 
             $('minuten').textContent = ref ? ref.toFixed(1).replace('.', ',') : '0';

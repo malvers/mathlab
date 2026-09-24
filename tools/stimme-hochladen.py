@@ -144,7 +144,13 @@ def gemini_hochladen():
                  'aufnehmen - Google verlangt genau diesen Satz, wortwörtlich.')
 
     # the longest take that is not the consent one, clipped into Google's 10-30 s window
-    kandidaten = [(k, p_, s_) for k, (p_, s_) in takes.items() if k != 'einwilligung' and s_ >= G_MIN]
+    # the story is the reference by name: the long passages (t01, ...) are material for the
+    # filter search, and "longest take" would make a two-minute passage the reference
+    if 'story' in takes and takes['story'][1] >= G_MIN:
+        kandidaten = [('story',) + takes['story']]
+    else:
+        kandidaten = [(k, p_, s_) for k, (p_, s_) in takes.items()
+                      if k != 'einwilligung' and not k.startswith('t') and s_ >= G_MIN]
     if not kandidaten:
         sys.exit('Keine Aufnahme mit mindestens %.0f s. Google braucht 10-30 Sekunden\n'
                  'zusammenhängende, natürliche Sprache - am besten eine der langen Passagen.' % G_MIN)
