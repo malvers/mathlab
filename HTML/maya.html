@@ -779,6 +779,10 @@
             return place < 2 ? { pre: '', exp: place } : { pre: '18\u00b7', exp: place - 1 };
         }
 
+        // the place value label at the top of a card (drawn at 6-8 px, 12 px Orbitron plus its
+        // exponent) - the digit below keeps clear of this strip
+        const LABEL_H = 24;
+
         function drawPower(place, cx, y) {
             const { pre, exp } = powerOf(place);
             const base = pre + '20';
@@ -914,6 +918,23 @@
                     el.style.right = '';
                     el.style.left = ((colCenter(g) + colCenter(g + 1)) / 2 - blockX) + 'px';
                 });
+                // five places make narrow columns and long terms (0 · 144.000): the sum gets
+                // smaller until every term is no wider than the bars in its card. Measured from
+                // the CSS size every time, so it does not creep.
+                solEl.style.fontSize = '';        // the upright mode sizes the whole card - not here
+                const formEl = document.getElementById('maya-formula');
+                if (formEl) {
+                    formEl.style.fontSize = '';
+                    const terms = [...formEl.querySelectorAll('.maya-term')];
+                    const widest = Math.max(0, ...terms.map(el => el.offsetWidth));
+                    const room = Math.min(cardW * 0.78, 132 + 20);
+                    if (widest > room) {
+                        formEl.style.fontSize = (parseFloat(getComputedStyle(formEl).fontSize) * room / widest) + 'px';
+                        let fh = 0;
+                        formEl.querySelectorAll('span').forEach(el => { fh = Math.max(fh, el.offsetHeight); });
+                        formEl.style.height = (fh || 22) + 'px';
+                    }
+                }
                 if (titleEl) {
                     titleEl.style.left = blockX + 'px';
                     titleEl.style.width = blockW + 'px';
@@ -996,8 +1017,9 @@
                     blocked ? COL.mute
                         : (hot ? COL.glyph : (flash || (colorMode ? placeColor(place) : COL.line))));
 
-                paintDigit(blank ? null : digits[place], x + cardW / 2, cardY + cardH / 2, cardW, cardH,
-                    place, blocked ? COL.mute : null);
+                // the digit gets the card below the place value label, so a big shell never covers it
+                paintDigit(blank ? null : digits[place], x + cardW / 2, cardY + (LABEL_H + cardH - 6) / 2,
+                    cardW, cardH - LABEL_H - 6, place, blocked ? COL.mute : null);
 
                 drawPower(place, x + cardW / 2, cardY + 8);
 
@@ -1185,8 +1207,8 @@
                         : (hot ? COL.glyph : (flash || (colorMode ? placeColor(place) : COL.line))));
 
                 drawPower(place, boardX + boardW / 2, y + 6);
-                paintDigit(blank ? null : digits[place], boardX + boardW / 2, y + cardH / 2 + 4,
-                    boardW, cardH - 14, place, blocked ? COL.mute : null);
+                paintDigit(blank ? null : digits[place], boardX + boardW / 2, y + (LABEL_H + cardH - 6) / 2,
+                    boardW, cardH - LABEL_H - 6, place, blocked ? COL.mute : null);
 
                 cards.push({ place, x: boardX, y, w: boardW, h: cardH });
             }
