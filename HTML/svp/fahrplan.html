@@ -32,6 +32,14 @@
     </noscript>
     <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
     <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+    <!-- The page installs as an app: manifest, the house lambda as its icon, own window.
+         The colour is the page's own ground, so the system bars match it. -->
+    <link rel="manifest" href="fahrplan.webmanifest">
+    <link rel="apple-touch-icon" href="../resources/apple-touch-icon.png">
+    <meta name="theme-color" content="#08142a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Fahrplan">
     <link rel="stylesheet" href="svp.css">
     <script src="svp-gate.js"></script>
     <style>
@@ -488,7 +496,11 @@
                     wolke.textContent = '☁ angemeldet';
                     wolke.classList.add('on');
                 } catch (e) {
-                    wolke.textContent = '☁ ' + e.message;
+                    /* In a classroom without signal this is the normal case, not a fault:
+                       the page then shows the last state it carries. "Failed to fetch" is
+                       what the browser says, and that is not an answer for Doc. */
+                    const netz = navigator.onLine && !/fetch|network|load failed/i.test(e.message);
+                    wolke.textContent = netz ? '☁ ' + e.message : '☁ offline — letzter Stand';
                     wolke.classList.remove('on');
                 }
                 pruefeVerwaiste();
@@ -556,6 +568,17 @@
                 const c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
                 if (c && c.fahr) fahr = c.fahr;
             } catch (e) { fahr = {}; }
+
+            /* The worker around the page: it makes Chrome offer a real install (an app icon
+               instead of a shortcut) and carries the shell into a classroom without signal.
+               Its scope is this page alone - the plan pages next to it must stay uncached.
+               Not under file://, where there is no worker. */
+            if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+                window.addEventListener('load', function () {
+                    navigator.serviceWorker.register('sw-fahrplan.js', { scope: 'fahrplan.html' })
+                        .catch(function () { /* no app then - the page itself is unaffected */ });
+                });
+            }
 
             authUi();
             ladeIndex().then(function () {
