@@ -93,15 +93,31 @@
         .fp-tools { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
         .fp-tools button.action { min-height: 46px; }
 
-        .fp-liste { max-width: 1200px; margin: 0 auto; display: grid; gap: 20px; }
+        /* minmax(0, 1fr), not 1fr: a grid track grows with its widest child, and the class
+           name is one nowrap line - without the cap it stretched the column (and the page)
+           to 718 px on a 390 px phone, and fillWidth() found nothing to shrink. */
+        .fp-liste {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 20px;
+        }
 
-        .fp-card-head { margin: 0 0 8px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+        .fp-card-head { margin: 0 0 6px; }
 
-        /* Doc, 24.09.2026: „schreib da nur grau Mathematik 11" - the orange short label
-           („MA 11") and the spelled-out one next to it were two names for the same class.
-           One grey line is left, and the topic below it carries the weight. */
+        /* Doc, 24.09.2026: „schreib da nur grau Mathematik 11", then „orbi und groß (über
+           Breite Pixel)" - the orange short label („MA 11") and the spelled-out one next to
+           it were two names for the same class. What is left is ONE grey line, in Orbitron,
+           as wide as the card. The size in here is only the ceiling; fillWidth() in the
+           script takes it down until the name fits on one line. */
         .fp-klasse {
-            font-size: 0.95rem;
+            display: block;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 44px;
+            line-height: 1.12;
+            letter-spacing: 0.01em;
+            white-space: nowrap;
             color: var(--muted);
             text-decoration: none;
         }
@@ -362,6 +378,25 @@
                     .replace(/\bKlasse\s+/, '');
             }
 
+            /* The class name spans the card (Doc, 24.09.2026: „orbi und groß (über Breite
+               Pixel)"). Measured, not guessed: „Physik 10" and „Informatik Fachoberschule 11"
+               are worlds apart, and one fixed size would either run over the edge of the phone
+               or leave half the line empty. One measurement per name - the element is nowrap,
+               so its scrollWidth IS the width of the text. */
+            const KLASSE_MAX = 44, KLASSE_MIN = 13;
+            function breiteFuellen(el) {
+                el.style.fontSize = KLASSE_MAX + 'px';
+                const platz = (el.parentElement ? el.parentElement.clientWidth : 0) - 1;
+                const breit = el.scrollWidth;
+                if (platz <= 0 || !breit) return;
+                const px = Math.max(KLASSE_MIN, Math.min(KLASSE_MAX, KLASSE_MAX * platz / breit));
+                el.style.fontSize = px.toFixed(1) + 'px';
+            }
+
+            function alleBreiten() {
+                [].forEach.call(liste.querySelectorAll('.fp-klasse'), breiteFuellen);
+            }
+
             function karte(p, w, text) {
                 const art = document.createElement('article');
                 art.className = 'fp-card';
@@ -431,6 +466,8 @@
                 /* Only the cards there are: the list of the remaining classes stood on
                    the phone as three grey lines under the sheet and said nothing
                    Doc does not know. */
+                alleBreiten();
+
                 if (!karten) {
                     leerEl.textContent = svpAuth.hasSession()
                         ? 'Für diese Woche steht noch kein Fahrplan.'
@@ -532,6 +569,12 @@
             $('fp-heute').addEventListener('click', heute);
             $('fp-kleiner').addEventListener('click', function () { setScale(scale - 0.1); });
             $('fp-groesser').addEventListener('click', function () { setScale(scale + 0.1); });
+
+            /* Orbitron arrives late (the stylesheet is loaded without blocking), and a
+               measurement taken before it is one of the fallback font - so measure again once
+               it is there, and again when the phone is turned. */
+            window.addEventListener('resize', alleBreiten);
+            if (document.fonts && document.fonts.ready) document.fonts.ready.then(alleBreiten);
 
             document.addEventListener('keydown', function (ev) {
                 if (ev.target && /^(INPUT|TEXTAREA)$/.test(ev.target.tagName)) return;
