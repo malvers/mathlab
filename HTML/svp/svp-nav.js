@@ -48,6 +48,9 @@
         ['mathe/mathefos12.html', 'FO MA 12', 'b-grey', 'Mathematik Fachoberschule Klasse 12 (FO)'],
         ['mathe/uebung.html', 'Üben', 'b-grey', 'Übung macht den Meister'],
         ['notes.html', 'Notizen', 'b-grey', 'Notizen'],
+        /* Doc, 24.09.2026: the run of every lesson of the week, across all plans -
+           read on the phone during the lesson, not in the plan page. */
+        ['fahrplan.html', 'Fahrplan', 'b-grey', 'Fahrplan der Woche'],
         ['konzepte.html', 'Konzepte', 'b-grey', 'Konzepte'],
         ['operatoren.html', 'Operatoren', 'b-grey', 'Operatoren'],
         /* Doc, 12.09.2026: "Notenschluessel" with a sub-menu BGY / OS GY - one
@@ -97,7 +100,7 @@
     // These open in a new tab so the current plan stays put.
     // The Stundenplan no longer does (Doc, 10.09.2026: "auf click SP unter dem
     // Header wie alles sonst") - it opens in place, below this nav band.
-    const NEW_TAB = new Set(['notes.html', 'konzepte.html', 'operatoren.html',
+    const NEW_TAB = new Set(['notes.html', 'fahrplan.html', 'konzepte.html', 'operatoren.html',
         'punktetabelle.html', 'punktetabelle.html?s=osgy', 'bewertungen.html', '../fokus.html']);
 
     // The pill row only carries Home, Notizen and one dropdown per Schulart —
@@ -134,7 +137,7 @@
             /* Doc, 09.09.2026: "BM ganz unten" - die Bewertungsmatrix schliesst
                das Menue ab, hinter dem Timer. */
             /* An entry is an href or a sub-menu { sub: label, hrefs: [...] }. */
-            [null, ['notes.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
+            [null, ['notes.html', 'fahrplan.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
                     { sub: 'Notenspiegel', hrefs: ['punktetabelle.html', 'punktetabelle.html?s=osgy',
                                                   'bewertungen.html'] },
                     '../fokus.html', 'bewertungsmatrix.html', '../vote.html?host']],

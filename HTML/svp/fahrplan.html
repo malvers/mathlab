@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<!--
+    Fahrplan der Woche - one page for the phone.
+
+    The run of a lesson is written in the plan page (the frameless sheet behind the hamburger
+    stack, svp-plan-fahrplan.js). It is stored PER WEEK: the key is the row index i of the plan
+    row, the value one line of tame HTML per bullet, separated by "\n". Locally that sits under
+    'svp-plan-fahrplan:<page>', in the cloud in the table svp_plan_fahrplan (page, fahrplan, ts
+    - RLS: Doc only).
+
+    This page reads exactly that - but across ALL plans and sorted by calendar week: "what is on
+    this week" instead of "what is in this plan". Which row belongs to which week is told by
+    plan-suchindex.json (tools/build-plan-suchindex.mjs); a week's current topic comes from
+    svp_plan_edits on top of it, so what stands here is not the state of the HTML file. The
+    bullets themselves sit on the same bluish paper as in the lesson - the colours of the
+    formatting bar are meant for that paper, on a dark ground the navy would be unreadable.
+-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Fahrplan | Stoffverteilungspläne</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+    <link rel="stylesheet" href="svp.css">
+    <script src="svp-gate.js"></script>
+    <style>
+        /* Only what this page adds - ground, type, buttons and the sticky head all
+           come from svp.css and svp-nav.js (body.head-sticky). */
+
+        /* The week bar: arrow, week, arrow - and the tools to the right of them.
+           It sticks along with the head (data-stick), so the week switch stays a
+           thumb away even far down the list. */
+        .fp-bar {
+            max-width: 1200px;
+            margin: 0 auto 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px 14px;
+            flex-wrap: wrap;
+        }
+
+        .fp-step {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            line-height: 1;
+            color: var(--text);
+            background: rgba(var(--g-btn), 0.16);
+            border: 1px solid rgba(var(--tint), 0.5);
+            border-radius: 8px;
+            /* 46 px: a thumb does not reliably hit anything smaller */
+            min-width: 46px;
+            height: 46px;
+            cursor: pointer;
+        }
+
+        .fp-step:hover { background: rgba(var(--g-btn), 0.3); border-color: rgb(var(--tint)); }
+        .fp-step:disabled { opacity: 0.35; cursor: default; }
+
+        .fp-week { min-width: 180px; text-align: center; }
+
+        .fp-kw {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.05rem;
+            letter-spacing: 0.06em;
+            color: var(--head);
+        }
+
+        .fp-datum { font-size: 0.92rem; color: var(--muted); }
+
+        /* The running week carries the house orange - the same mark as the yellow
+           row in the plan. */
+        .fp-bar.jetzt .fp-kw { color: var(--lambda); }
+
+        .fp-tools { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+        .fp-tools button.action { min-height: 46px; }
+
+        .fp-liste { max-width: 1200px; margin: 0 auto; display: grid; gap: 20px; }
+
+        .fp-card-head { margin: 0 0 8px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+
+        .fp-klasse {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            letter-spacing: 0.05em;
+            color: var(--lambda);
+            text-decoration: none;
+        }
+
+        .fp-klasse:hover { text-decoration: underline; }
+        .fp-lang { font-size: 0.9rem; color: var(--muted); }
+        .fp-thema { margin: 0 0 10px; font-size: 1.02rem; color: var(--text); }
+
+        /* The paper - the same two values as the sheet in the lesson
+           (.fahr-sheet in svp-fahrplan.css): bluish paper, navy on it, in EVERY
+           scheme. The type size hangs on the A- / A+ buttons. */
+        .fp-paper {
+            background: #d8e6f8;
+            color: #002060;
+            border-radius: 14px;
+            padding: 18px 22px 20px 26px;
+            font-size: calc(1.15rem * var(--fp-scale, 1));
+            line-height: 1.38;
+        }
+
+        .fp-list { margin: 0; padding-left: 1.05em; list-style: disc; }
+        /* Every direct child is a bullet - one stored line per bullet, and which of
+           them ends up an <li> is the browser's decision while typing. */
+        .fp-list > * { display: list-item; margin: 0 0 0.45em; }
+        .fp-list > *:last-child { margin-bottom: 0; }
+        /* Bold means 600 - Outfit 300 turns "bolder" into 400 only (svp-fahrplan.css). */
+        .fp-list b { font-weight: 600; }
+
+        .fp-hinweis { max-width: 1200px; margin: 18px auto 0; color: var(--muted); font-size: 0.92rem; }
+        .fp-hinweis:empty { display: none; }
+        .fp-leer { max-width: 1200px; margin: 0 auto; color: var(--muted); }
+
+        @media (max-width: 560px) {
+            .fp-week { min-width: 120px; }
+            .fp-tools { width: 100%; margin-left: 0; }
+            .fp-tools button.action { flex: 1 1 auto; }
+            .fp-paper { padding: 16px 16px 18px 22px; }
+            .fp-liste { gap: 16px; }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="page-head">
+        <a class="back-link" href="./">&larr; Stoffverteilungspl&auml;ne</a>
+        <h1>Fahrplan <span class="cloud-state" id="cloud-state"></span></h1>
+    </header>
+
+    <div class="fp-bar" id="fp-bar" data-stick>
+        <button type="button" class="fp-step" id="fp-prev" aria-label="Woche zur&uuml;ck">&#8249;</button>
+        <div class="fp-week">
+            <div class="fp-kw" id="fp-kw">&nbsp;</div>
+            <div class="fp-datum" id="fp-datum">&nbsp;</div>
+        </div>
+        <button type="button" class="fp-step" id="fp-next" aria-label="Woche vor">&#8250;</button>
+        <div class="fp-tools">
+            <button type="button" class="action" id="fp-heute">Heute</button>
+            <button type="button" class="action secondary" id="fp-kleiner" aria-label="Schrift kleiner">A&minus;</button>
+            <button type="button" class="action secondary" id="fp-groesser" aria-label="Schrift gr&ouml;&szlig;er">A+</button>
+            <button type="button" class="action secondary" id="fp-auth">&#9729; Anmelden</button>
+        </div>
+    </div>
+
+    <main class="fp-liste" id="fp-liste"></main>
+    <p class="fp-leer" id="fp-leer"></p>
+    <p class="fp-hinweis" id="fp-hinweis"></p>
+
+    <footer class="page-foot">
+        Der Fahrplan wird in der Planseite geschrieben (Hamburger vor &bdquo;Inhalt&ldquo;) und liegt
+        pro Woche in der Cloud &mdash; diese Seite liest ihn nur, quer &uuml;ber alle Pl&auml;ne.
+        Pfeile oder Wischen wechseln die Woche.
+    </footer>
+
+    <script src="svp-auth.js"></script>
+    <script src="svp-fmtbar.js"></script>
+    <script>
+        (function () {
+            'use strict';
+
+            const $ = function (id) { return document.getElementById(id); };
+            const liste = $('fp-liste'), leerEl = $('fp-leer'), hinweis = $('fp-hinweis');
+            const bar = $('fp-bar'), kwEl = $('fp-kw'), datumEl = $('fp-datum');
+            const wolke = $('cloud-state'), authBtn = $('fp-auth');
+
+            const BASE = new URL('.', location.href);
+            const CACHE_KEY = 'svp-fahrplan-cache';
+            const SCALE_KEY = 'svp-fahrplan-scale';
+
+            let plaene = [];    /* from plan-suchindex.json, per plan { href, kurz, lang, wochen, tail } */
+            let wochen = [];    /* [{ key, kw, datum }] in school-year order */
+            let pos = -1;       /* cursor into wochen */
+            let fahr = {};      /* "mathe/mathe11.html" -> { "5": "line\nline" } */
+
+            /* ---- week and address --------------------------------------------------
+               Dieselbe ISO-Wochennummer, mit der der Plan seine laufende Woche
+               marks its running week with (isoWeek in svp-plan-keys.js). */
+            function isoWeek(d) {
+                const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+                t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));   /* Thursday of this week */
+                const jan1 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+                return Math.ceil(((t - jan1) / 86400000 + 1) / 7);
+            }
+
+            /* A school year runs from week 34 into July - August first, January after it.
+               Within one school year every week number appears exactly once. */
+            function keyOf(kw) { return kw >= 32 ? kw : kw + 100; }
+
+            /* What is stored is the plan page's full address (location.pathname).
+               Only the last two parts are compared, so the page finds its rows even
+               under a different root (local, docalvers.de, a preview). */
+            function tailOf(p) {
+                return String(p || '').split(/[?#]/)[0].split('/').filter(Boolean).slice(-2).join('/');
+            }
+
+            /* ---- topic: marks and formulas ----------------------------------------
+               The topic comes from the plan and carries its six marks and $...$
+               formulas. The original is paintSrc in svp-plan-text.js - which hangs on
+               the whole plan renderer and is not to be had here, hence this short
+               twin, for the head of a card only. */
+            const KATEX = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min';
+            const MARK_RE = /<(\/?)(b|i|u|c1|c2|c3)>/g;
+            const MARK_EL = {
+                b: ['b', ''], i: ['i', ''], u: ['u', ''],
+                c1: ['span', 'hl-l'], c2: ['span', 'hl-y'], c3: ['span', 'hl-p']
+            };
+            const mathEls = new Set();
+
+            function ensureKatex() {
+                if (window.katex || document.getElementById('katex-js')) return;
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = KATEX + '.css';
+                document.head.appendChild(link);
+                const s = document.createElement('script');
+                s.id = 'katex-js';
+                s.src = KATEX + '.js';
+                s.onload = function () {
+                    mathEls.forEach(function (el) { if (el.isConnected) paint(el, el.dataset.src || ''); });
+                };
+                document.head.appendChild(s);
+            }
+
+            function appendText(parent, text) {
+                if (!text) return;
+                if (!window.katex || !text.includes('$')) {
+                    parent.appendChild(document.createTextNode(text));
+                    return;
+                }
+                text.split(/\$([^$]+)\$/).forEach(function (part, idx) {
+                    if (!part) return;
+                    if (idx % 2 === 0) { parent.appendChild(document.createTextNode(part)); return; }
+                    const span = document.createElement('span');
+                    try { katex.render(part, span, { throwOnError: false }); }
+                    catch (e) { span.textContent = '$' + part + '$'; }
+                    parent.appendChild(span);
+                });
+            }
+
+            function paint(el, src) {
+                src = String(src == null ? '' : src);
+                el.textContent = '';
+                el.dataset.src = src;
+                if (src.includes('$')) { mathEls.add(el); ensureKatex(); }
+                const stack = [el], open = [];
+                let last = 0, m;
+                MARK_RE.lastIndex = 0;
+                while ((m = MARK_RE.exec(src))) {
+                    appendText(stack[stack.length - 1], src.slice(last, m.index));
+                    last = MARK_RE.lastIndex;
+                    if (m[1]) {
+                        /* an unmatched </b> is text, not a command */
+                        if (open[open.length - 1] === m[2]) { open.pop(); stack.pop(); }
+                        else appendText(stack[stack.length - 1], m[0]);
+                    } else {
+                        const def = MARK_EL[m[2]];
+                        const e = document.createElement(def[0]);
+                        if (def[1]) e.className = def[1];
+                        stack[stack.length - 1].appendChild(e);
+                        stack.push(e);
+                        open.push(m[2]);
+                    }
+                }
+                appendText(stack[stack.length - 1], src.slice(last));
+            }
+
+            /* ---- loading ----------------------------------------------------------- */
+            async function ladeIndex() {
+                const res = await fetch(new URL('plan-suchindex.json', BASE));
+                if (!res.ok) throw new Error('plan-suchindex.json fehlt');
+                const idx = await res.json();
+                plaene = (idx.plaene || []).map(function (p) {
+                    return { href: p.href, kurz: p.kurz, lang: p.lang, wochen: p.wochen || [], tail: tailOf(p.href) };
+                });
+                const map = new Map();
+                plaene.forEach(function (p) {
+                    p.wochen.forEach(function (w) {
+                        if (!w.kw) return;                     /* holiday rows carry no week number */
+                        const k = keyOf(w.kw);
+                        const da = map.get(k);
+                        if (!da) map.set(k, { key: k, kw: w.kw, datum: w.datum || '' });
+                        else if (!da.datum && w.datum) da.datum = w.datum;
+                    });
+                });
+                wochen = Array.from(map.values()).sort(function (a, b) { return a.key - b.key; });
+            }
+
+            /* One request for every plan: the table carries Doc's own rows only (RLS),
+               which is not quite twenty of them. */
+            async function ladeFahr() {
+                const res = await svpAuth.api('svp_plan_fahrplan?select=page,fahrplan');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const rows = await res.json();
+                fahr = {};
+                rows.forEach(function (r) { if (r && r.page) fahr[tailOf(r.page)] = r.fahrplan || {}; });
+                try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), fahr: fahr })); }
+                catch (e) { /* full or locked - then simply without a store */ }
+            }
+
+            /* A week's topic stands in the index as the plan FILE knows it -
+               what Doc has changed since lives in svp_plan_edits. Publicly
+               readable, the same query the search in svp-suche.js makes. */
+            async function ladeThemen() {
+                if (!window.svpAuth || !plaene.length) return;
+                const liste2 = plaene.map(function (p) {
+                    return '"' + new URL(p.href, BASE).pathname + '"';
+                }).join(',');
+                const url = svpAuth.DB_URL + '/rest/v1/svp_plan_edits?select=page,edits&page=in.('
+                    + encodeURIComponent(liste2) + ')';
+                const abbruch = new AbortController();
+                const uhr = setTimeout(function () { abbruch.abort(); }, 8000);
+                try {
+                    const res = await fetch(url, {
+                        signal: abbruch.signal,
+                        headers: { apikey: svpAuth.DB_KEY, Authorization: 'Bearer ' + svpAuth.DB_KEY }
+                    });
+                    if (!res.ok) return;
+                    const rows = await res.json();
+                    const byTail = {};
+                    rows.forEach(function (r) { if (r && r.page) byTail[tailOf(r.page)] = r.edits || {}; });
+                    plaene.forEach(function (p) {
+                        const ov = byTail[p.tail] || {};
+                        p.wochen.forEach(function (w) {
+                            const e = ov[String(w.i)];
+                            if (e && e.topic) w.thema = e.topic;
+                        });
+                    });
+                } catch (e) { /* offline or too slow - the index's own state will do */ }
+                finally { clearTimeout(uhr); }
+            }
+
+            /* ---- showing ----------------------------------------------------------- */
+            function karte(p, w, text) {
+                const art = document.createElement('article');
+                art.className = 'fp-card';
+
+                const kopf = document.createElement('div');
+                kopf.className = 'fp-card-head';
+                const a = document.createElement('a');
+                a.className = 'fp-klasse';
+                a.href = p.href;
+                a.target = '_blank';
+                a.rel = 'noopener';
+                a.textContent = p.kurz || p.lang || p.href;
+                const lang = document.createElement('span');
+                lang.className = 'fp-lang';
+                lang.textContent = p.lang || '';
+                kopf.appendChild(a);
+                kopf.appendChild(lang);
+                art.appendChild(kopf);
+
+                if (w.thema) {
+                    const th = document.createElement('div');
+                    th.className = 'fp-thema';
+                    paint(th, w.thema);
+                    art.appendChild(th);
+                }
+
+                const papier = document.createElement('div');
+                papier.className = 'fp-paper';
+                const ul = document.createElement('ul');
+                ul.className = 'fp-list';
+                String(text).split('\n').forEach(function (z) {
+                    /* through the same cleaning as in the sheet: marks and colours stay,
+                       everything else falls away - a line from the cloud is trusted
+                       no further than a typed one */
+                    const sauber = svpFmtBar.clean(z);
+                    if (!svpFmtBar.textOf(sauber)) return;
+                    const li = document.createElement('li');
+                    li.innerHTML = sauber;
+                    ul.appendChild(li);
+                });
+                papier.appendChild(ul);
+                art.appendChild(papier);
+                return art;
+            }
+
+            function zeige() {
+                liste.textContent = '';
+                leerEl.textContent = '';
+                mathEls.clear();
+                if (pos < 0 || !wochen.length) { kwEl.textContent = ' '; datumEl.textContent = ' '; return; }
+
+                const w = wochen[pos];
+                kwEl.textContent = 'KW ' + w.kw;
+                datumEl.textContent = w.datum || '';
+                bar.classList.toggle('jetzt', w.key === keyOf(isoWeek(new Date())));
+                $('fp-prev').disabled = pos <= 0;
+                $('fp-next').disabled = pos >= wochen.length - 1;
+
+                let karten = 0;
+                plaene.forEach(function (p) {
+                    const zeilen = p.wochen.filter(function (x) { return x.kw === w.kw; });
+                    if (!zeilen.length) return;
+                    zeilen.forEach(function (z) {
+                        const text = (fahr[p.tail] || {})[String(z.i)];
+                        if (!text || !svpFmtBar.textOf(text)) return;
+                        liste.appendChild(karte(p, z, text));
+                        karten++;
+                    });
+                });
+
+                /* Only the cards there are: the list of the remaining classes stood on
+                   the phone as three grey lines under the sheet and said nothing
+                   Doc does not know. */
+                if (!karten) {
+                    leerEl.textContent = svpAuth.hasSession()
+                        ? 'Für diese Woche steht noch kein Fahrplan.'
+                        : 'Bitte anmelden — der Fahrplan gehört zum eigenen Konto.';
+                }
+            }
+
+            /* Entries sitting in a row without a week number (holidays) have no week
+               to jump to here - then the page at least says they exist instead of
+               swallowing them silently. */
+            function pruefeVerwaiste() {
+                let n = 0;
+                plaene.forEach(function (p) {
+                    const eintraege = fahr[p.tail] || {};
+                    const mitKw = new Set(p.wochen.filter(function (w) { return w.kw; })
+                        .map(function (w) { return String(w.i); }));
+                    Object.keys(eintraege).forEach(function (i) {
+                        if (svpFmtBar.textOf(eintraege[i]) && !mitKw.has(i)) n++;
+                    });
+                });
+                hinweis.textContent = n
+                    ? n + (n === 1 ? ' Eintrag liegt' : ' Einträge liegen')
+                      + ' in einer Zeile ohne Kalenderwoche (Ferien) — nur in der Planseite zu sehen.'
+                    : '';
+            }
+
+            function gehe(d) {
+                if (!wochen.length) return;
+                const neu = Math.min(Math.max(pos + d, 0), wochen.length - 1);
+                if (neu === pos) return;
+                pos = neu;
+                zeige();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            function heute() {
+                const k = keyOf(isoWeek(new Date()));
+                let idx = wochen.findIndex(function (w) { return w.key === k; });
+                /* In the holidays no plan week carries this number - then the next one
+                   that comes (and at the end of the year simply the last). */
+                if (idx < 0) idx = wochen.findIndex(function (w) { return w.key > k; });
+                if (idx < 0) idx = wochen.length - 1;
+                pos = idx;
+                zeige();
+            }
+
+            /* ---- type size ---------------------------------------------------------- */
+            let scale = parseFloat(localStorage.getItem(SCALE_KEY) || '1') || 1;
+            function setScale(v) {
+                scale = Math.min(Math.max(v, 0.7), 2.2);
+                document.body.style.setProperty('--fp-scale', scale.toFixed(2));
+                try { localStorage.setItem(SCALE_KEY, String(scale)); } catch (e) { }
+            }
+            setScale(scale);
+
+            /* ---- signing in --------------------------------------------------------- */
+            function authUi() {
+                const on = svpAuth.hasSession();
+                authBtn.textContent = on ? 'Abmelden' : '☁ Anmelden';
+                wolke.textContent = on ? '☁ angemeldet' : '';
+                wolke.classList.toggle('on', on);
+                return on;
+            }
+
+            async function hole() {
+                if (!authUi()) { zeige(); return; }
+                try {
+                    await ladeFahr();
+                    wolke.textContent = '☁ angemeldet';
+                    wolke.classList.add('on');
+                } catch (e) {
+                    wolke.textContent = '☁ ' + e.message;
+                    wolke.classList.remove('on');
+                }
+                pruefeVerwaiste();
+                zeige();
+                await ladeThemen();
+                zeige();
+            }
+
+            authBtn.addEventListener('click', function () {
+                if (svpAuth.hasSession()) {
+                    svpAuth.storeSession(null);
+                    fahr = {};
+                    authUi();
+                    zeige();
+                    return;
+                }
+                svpAuth.loginDialog(function () { authUi(); hole(); }, 'Bitte anmelden, um den Fahrplan zu sehen');
+            });
+
+            $('fp-prev').addEventListener('click', function () { gehe(-1); });
+            $('fp-next').addEventListener('click', function () { gehe(1); });
+            $('fp-heute').addEventListener('click', heute);
+            $('fp-kleiner').addEventListener('click', function () { setScale(scale - 0.1); });
+            $('fp-groesser').addEventListener('click', function () { setScale(scale + 0.1); });
+
+            /* listed in the "?" panel of the nav row (svp-nav.js) */
+            window.svpKeys = (window.svpKeys || []).concat([
+                [['←', '→'], 'Eine Woche zurück oder vor (oder wischen)'],
+                [['J'], 'Zur aktuellen Woche springen (jetzt)']
+            ]);
+
+            document.addEventListener('keydown', function (ev) {
+                if (ev.target && /^(INPUT|TEXTAREA)$/.test(ev.target.tagName)) return;
+                if (ev.key === 'ArrowLeft') gehe(-1);
+                else if (ev.key === 'ArrowRight') gehe(1);
+                else if (ev.key === 'j' || ev.key === 'J') heute();
+            });
+
+            /* A swipe changes the week - on the phone the shorter way than the
+               arrow. Horizontal only and only past 60 px, so scrolling stays
+               untouched. */
+            let x0 = null, y0 = null;
+            document.addEventListener('touchstart', function (ev) {
+                if (ev.touches.length !== 1) { x0 = null; return; }
+                x0 = ev.touches[0].clientX; y0 = ev.touches[0].clientY;
+            }, { passive: true });
+            document.addEventListener('touchend', function (ev) {
+                if (x0 === null || !ev.changedTouches.length) return;
+                const dx = ev.changedTouches[0].clientX - x0;
+                const dy = ev.changedTouches[0].clientY - y0;
+                x0 = null;
+                if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) gehe(dx < 0 ? 1 : -1);
+            }, { passive: true });
+
+            /* Fetch again on coming back (phone unlocked, tab in front again): during
+               the lesson the run keeps being written at the computer. */
+            document.addEventListener('visibilitychange', function () {
+                if (!document.hidden && svpAuth.hasSession()) hole();
+            });
+
+            /* ---- start -------------------------------------------------------------
+               First the store from the last visit (there at once, also without a
+               network), then the index, then the cloud. */
+            try {
+                const c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+                if (c && c.fahr) fahr = c.fahr;
+            } catch (e) { fahr = {}; }
+
+            authUi();
+            ladeIndex().then(function () {
+                heute();
+                pruefeVerwaiste();
+                if (svpAuth.hasSession()) return hole();
+                /* Without a session the page is empty - so ask right away instead of
+                   showing an empty sheet first. */
+                svpAuth.loginDialog(function () { authUi(); hole(); }, 'Bitte anmelden, um den Fahrplan zu sehen');
+            }).catch(function (e) {
+                leerEl.textContent = 'Der Wochen-Index lädt nicht: ' + e.message;
+            });
+        })();
+    </script>
+    <script>
+        /* The sticky head is the central mechanism (body.head-sticky, the wrapper
+           from svp-nav.js) - but wrong on the phone: band, head and week bar are
+           412 of 844 px together there and would hold half the screen (measured at
+           390 px). So only on the big screen, and set BEFORE svp-nav.js builds the
+           wrapper. A swipe works everywhere anyway. */
+        if (window.innerWidth >= 900) document.body.classList.add('head-sticky');
+    </script>
+    <script src="svp-nav.js"></script>
+</body>
+
+</html>
