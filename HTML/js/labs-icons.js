@@ -247,16 +247,17 @@ const LAB_ICONS = {
             <circle cx="74" cy="61" r="5" fill="rgba(215,55,40,0.4)" stroke="#D73728" stroke-width="1.7" />
         </svg>`,
     "maya": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <!-- a Maya thirteen: three dots over two bars, and the shell that is the zero -->
+            <!-- a Maya eight: three dots over one bar, and the shell that is the zero -
+                 the shell path is the one of resources/muschel.svg, scaled into the corner -->
             <g fill="#F5C242">
-                <circle cx="32" cy="22" r="6" /><circle cx="52" cy="22" r="6" /><circle cx="72" cy="22" r="6" />
-                <rect x="22" y="38" width="60" height="11" rx="5.5" />
-                <rect x="22" y="56" width="60" height="11" rx="5.5" />
+                <circle cx="30" cy="14" r="6" /><circle cx="50" cy="14" r="6" /><circle cx="70" cy="14" r="6" />
+                <rect x="20" y="28" width="60" height="11" rx="5.5" />
             </g>
-            <g fill="none" stroke="#F5C242" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round">
-                <path d="M6 88 Q9 78 14 82 Q17 72 21 80 Q26 72 28 82 Q33 78 35 88 Q26 93 20.5 92 Q15 93 6 88 Z" />
+            <g transform="translate(50 94) scale(0.44)" fill="none" stroke="#F5C242" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+                <path d="M 1.74 -0.99 L 35.12 -26.48 A 5.71 5.71 0 0 1 40.76 -16.55 Z M 1.42 -1.41 L 38.49 -49.49 A 8.14 8.14 0 0 1 49.93 -37.91 Z M 1.01 -1.73 L 29.81 -71.05 A 10.00 10.00 0 0 1 47.10 -60.98 Z M 0.52 -1.93 L 11.46 -85.33 A 11.18 11.18 0 0 1 33.05 -79.50 Z M 0.00 -2.00 L -11.58 -88.42 A 11.58 11.58 0 0 1 11.58 -88.42 Z M -0.52 -1.93 L -33.05 -79.50 A 11.18 11.18 0 0 1 -11.46 -85.33 Z M -1.01 -1.73 L -47.10 -60.98 A 10.00 10.00 0 0 1 -29.81 -71.05 Z M -1.42 -1.41 L -49.93 -37.91 A 8.14 8.14 0 0 1 -38.49 -49.49 Z M -1.74 -0.99 L -40.76 -16.55 A 5.71 5.71 0 0 1 -35.12 -26.48 Z M 1.74 -0.99 L 29.83 -12.19 L 29.83 -2.20 L 5.00 -2.20 L 0.00 -0.00 M -1.74 -0.99 L -29.83 -12.19 L -29.83 -2.20 L -5.00 -2.20 L 0.00 -0.00" />
             </g>
         </svg>`,
+
     "babylon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- a Babylonian twenty-three: two corner wedges, three upright wedges -->
             <g fill="#F5C242">
