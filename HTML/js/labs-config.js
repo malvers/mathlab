@@ -35,6 +35,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "babylon",
+        "href": "babylon.html",
+        "title": "Babylonische Zahlen",
+        "description": "Ein Rechenbrett f\u00fcr das Sechzigersystem der Babylonier: der senkrechte Keil z\u00e4hlt eins, der Winkelhaken zehn, und jede Stelle ist sechzigmal so viel wert wie die rechts daneben \u2014 bis heute stecken die 60 Minuten und 3.600 Sekunden darin. Zur Wahl stehen die sp\u00e4te Schreibweise mit zwei schr\u00e4gen Keilen als Platzhalter und die altbabylonische ohne Null, in der eine leere Stelle einfach fehlt. Der Pfeil zwischen Zahl und Brett sagt, wer f\u00fchrt, und der W\u00fcrfel stellt Aufgaben, die genau so viele Stellen f\u00fcllen, wie eingestellt sind.",
+        "tagline": "Zahlensysteme / Stellenwert / Babylon",
+        "icon": LAB_ICONS["babylon"],
+        "category": "zahlensysteme neu",
+        "keywords": "babylon babylonier babylonisch keilschrift keil winkelhaken sexagesimal sechzigersystem basis 60 zahlensystem stellenwertsystem stellenwert platzhalter null seleukidisch altbabylonisch mesopotamien tontafel minuten sekunden ziffern legen rechenbrett kulturgeschichte",
+        "color": "gold"
+    },
+    {
         "id": "wuerfelspiel",
         "href": "wuerfelspiel.html",
         "title": "Das W\u00fcrfelspiel",
