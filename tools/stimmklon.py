@@ -304,6 +304,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def send_analyse(self, name):
         """Pictures and numbers from tools/stimmvergleich.py; they live outside HTML/."""
         typen = {'original.png': 'image/png', 'klon.png': 'image/png', 'diff.png': 'image/png',
+                 'diff-eq.png': 'image/png',
                  'daten.json': 'application/json; charset=utf-8'}
         if name not in typen:
             return self.send_error(404, 'unbekannt')

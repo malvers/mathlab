@@ -98,7 +98,21 @@
         .spek-legende .verlauf { width: 14px; border-radius: 3px; border: 1px solid rgba(255, 255, 255, .15); }
         .spek-legende .marken { display: flex; flex-direction: column; justify-content: space-between;
             font-size: 0.62rem; opacity: .75; line-height: 1.2; }
+        .spek-zweit[hidden] { display: none; }
+        .spek-zweit .spek-rahmen { margin-top: 26px; }
+        .spek-marke {
+            position: absolute; left: 10px; top: 8px; z-index: 2; font-size: 0.7rem; letter-spacing: .03em;
+            padding: 3px 9px; border-radius: 999px; background: rgba(10, 15, 30, .78);
+            border: 1px solid rgba(255, 255, 255, .18); pointer-events: none;
+        }
+        #spekMarke { display: none; }
+        #spekMarke.an { display: block; }
         .spek-baender { margin: 30px auto 0; max-width: 760px; }
+        .band .spuren { display: flex; flex-direction: column; gap: 5px; }
+        .band .werte { display: flex; flex-direction: column; gap: 1px; text-align: right;
+            font-variant-numeric: tabular-nums; font-weight: 700; }
+        .band.zwei .werte span:last-child, .band.zwei .spur:last-child { opacity: .8; }
+        .band.zwei .spur { height: 9px; }
         .spek-baender .kopf { display: flex; justify-content: space-between; font-size: 0.66rem; opacity: .7;
             margin: 0 0 8px 190px; padding-right: 64px; }
         .band { display: grid; grid-template-columns: 100px 80px 1fr 60px; gap: 10px; align-items: center;
@@ -316,10 +330,22 @@
                     <img data-bild="original" alt="Spektrogramm: Doc">
                     <img data-bild="klon" alt="Spektrogramm: Klon, zeitlich ausgerichtet">
                     <img data-bild="diff" alt="Differenz Doc minus Klon">
+                    <span class="spek-marke" id="spekMarke">Doc − Klon</span>
                 </div>
                 <div class="spek-legende" id="spekLegende"></div>
             </div>
             <div class="spek-x" id="spekX"></div>
+            <div class="spek-zweit" id="spekZweit" hidden>
+                <div class="spek-rahmen">
+                    <div class="spek-y" id="spekY2"></div>
+                    <div class="spek-bild">
+                        <img id="spekEq" class="an" alt="Differenz Doc minus Klon mit Höhen">
+                        <span class="spek-marke">Doc − Klon mit Höhen (+3 dB ab 6 kHz)</span>
+                    </div>
+                    <div class="spek-legende" id="spekLegende2"></div>
+                </div>
+                <div class="spek-x" id="spekX2"></div>
+            </div>
             <div class="spek-baender" id="spekBaender" hidden></div>
             <p class="hinweis" id="spekStatus" style="text-align:center"></p>
         </div>
@@ -792,7 +818,8 @@
             original: ['Original', d => 'Doc am RØDE, die Geschichte — ' + zahl(d.dauer_original_s) + ' s'],
             klon: ['Klon', d => 'Gemini Voice Replication, derselbe Text (' + zahl(d.dauer_klon_s)
                 + ' s) — zeitlich auf Doc ausgerichtet, damit die Laute übereinanderliegen'],
-            diff: ['Diff', () => 'Doc minus Klon, beide auf gleiche Lautheit gebracht. Rot: Doc lauter · Blau: Klon lauter'],
+            diff: ['Diff', d => 'Doc minus Klon, beide auf gleiche Lautheit gebracht. Rot: Doc lauter · Blau: Klon lauter'
+                + (d.mit_eq ? '. Oben der Klon, darunter derselbe Klon mit Höhenfilter.' : '')],
         };
 
         function zeigeTab(id) {
@@ -815,6 +842,7 @@
             analyse = r.daten;
             const t = Date.now();
             document.querySelectorAll('#spekBild img').forEach(img => { img.src = '/__stimme/analyse/' + img.dataset.bild + '.png?t=' + t; });
+            if (analyse.mit_eq) $('spekEq').src = '/__stimme/analyse/diff-eq.png?t=' + t;
             $('spekStatus').textContent = '';
             achsen();
             zeigeSpektrum();
@@ -829,6 +857,7 @@
             let x = '';
             for (let t = 0; t <= dauer; t += schritt) x += '<span style="left:' + (t / dauer * 100) + '%">' + t + ' s</span>';
             $('spekX').innerHTML = x;
+            $('spekY2').innerHTML = y; $('spekX2').innerHTML = x;     // same axes for the second difference
         }
 
         function legende(id) {
@@ -845,22 +874,30 @@
             }
             $('spekLegende').innerHTML = '<div class="verlauf" style="background:' + verlauf + '"></div>'
                 + '<div class="marken">' + marken.map(m => '<span>' + m + '</span>').join('') + '</div>';
+            $('spekLegende2').innerHTML = $('spekLegende').innerHTML;
         }
 
         function baender() {
-            const F = analyse.farben, S = 5;           // a bar saturates at +-5 dB
-            $('spekBaender').innerHTML = '<div class="kopf"><span>← Doc lauter</span><span>Klon lauter →</span></div>'
+            const F = analyse.farben, S = 5, zwei = analyse.mit_eq;   // a bar saturates at +-5 dB
+            const spur = v => {
+                const w = Math.min(Math.abs(v) / S, 1) * 50;
+                // v < 0: the clone has less there = Doc louder = red, left of the centre line
+                return '<span class="spur"><i style="' + (v < 0 ? 'right:50%;' : 'left:50%;') + 'width:' + w
+                    + '%;background:' + rgb(v < 0 ? F.rot : F.blau) + '"></i></span>';
+            };
+            // one decimal throughout, so +2,0 does not stand beside -2,9 looking less precise
+            const wert = v => '<span>' + (v > 0 ? '+' : v < 0 ? '−' : '±') + Math.abs(v).toFixed(1).replace('.', ',') + ' dB</span>';
+            $('spekBaender').innerHTML = '<div class="kopf"><span>← Doc lauter</span>'
+                + (zwei ? '<span style="opacity:.8">oben Klon · unten mit Höhen</span>' : '')
+                + '<span>Klon lauter →</span></div>'
                 + analyse.baender.map(b => {
-                    const v = b.klon_minus_original_db, w = Math.min(Math.abs(v) / S, 1) * 50;
-                    // v < 0: the clone has less there = Doc louder = red, left of the centre line
-                    const stil = (v < 0 ? 'right:50%;' : 'left:50%;') + 'width:' + w + '%;background:' + rgb(v < 0 ? F.rot : F.blau);
+                    const v1 = b.klon_minus_original_db, v2 = b.klon_eq_minus_original_db;
                     const hz = b.bis <= 1000 ? b.von + '–' + b.bis + ' Hz'
                         : b.von >= 1000 ? zahl(b.von / 1000) + '–' + zahl(b.bis / 1000) + ' kHz'
                         : b.von + ' Hz–' + zahl(b.bis / 1000) + ' kHz';
-                    // one decimal throughout, so +2,0 does not stand beside -2,9 looking less precise
-                    const wert = (v > 0 ? '+' : v < 0 ? '−' : '±') + Math.abs(v).toFixed(1).replace('.', ',') + ' dB';
-                    return '<div class="band"><span>' + b.name + '</span><span class="hz">' + hz + '</span>'
-                        + '<span class="spur"><i style="' + stil + '"></i></span><span class="wert">' + wert + '</span></div>';
+                    return '<div class="band' + (zwei ? ' zwei' : '') + '"><span>' + b.name + '</span><span class="hz">' + hz + '</span>'
+                        + '<span class="spuren">' + spur(v1) + (zwei ? spur(v2) : '') + '</span>'
+                        + '<span class="werte">' + wert(v1) + (zwei ? wert(v2) : '') + '</span></div>';
                 }).join('');
         }
 
@@ -872,6 +909,8 @@
             document.querySelectorAll('#spekBild img').forEach(img => img.classList.toggle('an', img.dataset.bild === tab));
             legende(tab);
             $('spekBaender').hidden = tab !== 'diff';
+            $('spekZweit').hidden = !(tab === 'diff' && analyse.mit_eq);
+            $('spekMarke').classList.toggle('an', tab === 'diff');
             if (tab === 'diff') baender();
         }
 

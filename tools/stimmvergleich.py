@@ -13,6 +13,7 @@ and writes, next to them in analyse/:
     original.png   spectrogram of Doc
     klon.png       spectrogram of the clone, TIME-ALIGNED to Doc
     diff.png       Doc minus clone, red where Doc is louder, blue where the clone is
+    diff-eq.png    Doc minus the clone with the high shelf - does the filter help?
     daten.json     scale, durations, per-band balance - the numbers under the picture
 
 Why the alignment: the two readings are not the same length (Doc 28.4 s, the clone
@@ -44,6 +45,9 @@ except ImportError as err:
 STORE = os.path.expanduser('~/Movies/stimmklon')
 ZIEL = os.path.join(STORE, 'analyse')
 QUELLEN = {'original': 'vergleich-original.wav', 'klon': 'vergleich-klon.wav'}
+# the clone with the +3 dB high shelf above 6 kHz - optional: its difference answers whether
+# the filter actually closes the gap (Doc, 24.09.2026: "haben wir nicht zwei diffs? weil zwei Klone")
+QUELLE_EQ = ('klon_eq', 'vergleich-klon-eq.wav')
 
 N_FFT = 1024          # ~43 ms window at 24 kHz
 HOP = 480             # 20 ms - finer than a pixel at page width, coarse enough for a quick DTW
@@ -159,6 +163,16 @@ def bild(rgb_frames_bins, pfad):
     Image.fromarray(a, 'RGB').resize((a.shape[1], HOEHE), Image.BICUBIC).save(pfad, optimize=True)
 
 
+def diffbild(dB_o, dB_k, oben, pfad):
+    """Doc minus a clone, weighted by how much sound is there: silence carries no information,
+    and its random differences would otherwise fill the picture with noise."""
+    t = np.clip((dB_o - dB_k) / DIFF_SKALA, -1, 1)
+    gewicht = np.clip((np.maximum(dB_o, dB_k) - (oben - 70)) / 45, 0, 1)
+    staerke = (np.abs(t) * gewicht)[..., None]
+    ziel = np.where((t >= 0)[..., None], ROT, BLAU)
+    bild(GRUND + (ziel - GRUND) * staerke, pfad)
+
+
 def main():
     os.makedirs(ZIEL, exist_ok=True)
     signale = {}
@@ -167,6 +181,9 @@ def main():
         if not os.path.isfile(pfad):
             sys.exit('Fehlt: %s - erst in der Kabine die Vergleichsdateien anlegen.' % pfad)
         signale[name] = lies(pfad)
+    pfad_eq = os.path.join(STORE, QUELLE_EQ[1])
+    if os.path.isfile(pfad_eq):
+        signale[QUELLE_EQ[0]] = lies(pfad_eq)
     sr = signale['original'][1]
     if signale['klon'][1] != sr:
         sys.exit('Abtastraten verschieden - beide müssen gleich sein')
@@ -181,31 +198,34 @@ def main():
     # the clone brought onto Doc's clock: every Doc frame gets the mean power of its partners
     P_klon = np.stack([P['klon'][js].mean(axis=0) for js in paare])
     P_orig = P['original']
+    # the filtered clone is the same recording through an EQ - identical timing, so the very same
+    # alignment path applies; no second DTW needed
+    P_eq = np.stack([P['klon_eq'][js].mean(axis=0) for js in paare]) if 'klon_eq' in P else None
 
     dB_o = 10 * np.log10(P_orig + 1e-20)
     dB_k = 10 * np.log10(P_klon + 1e-20)
-    oben = max(dB_o.max(), dB_k.max())
+    dB_e = 10 * np.log10(P_eq + 1e-20) if P_eq is not None else None
+    oben = max(dB_o.max(), dB_k.max(), dB_e.max() if dB_e is not None else -1e9)
     unten = oben - DYNAMIK
 
     bild(farbband(INTENSITAET, (dB_o - unten) / DYNAMIK), os.path.join(ZIEL, 'original.png'))
     bild(farbband(INTENSITAET, (dB_k - unten) / DYNAMIK), os.path.join(ZIEL, 'klon.png'))
 
-    # the difference, weighted by how much sound is there: silence carries no information,
-    # and its random differences would otherwise fill the picture with noise
-    diff = dB_o - dB_k
-    t = np.clip(diff / DIFF_SKALA, -1, 1)
-    gewicht = np.clip((np.maximum(dB_o, dB_k) - (oben - 70)) / 45, 0, 1)
-    staerke = (np.abs(t) * gewicht)[..., None]
-    ziel = np.where((t >= 0)[..., None], ROT, BLAU)
-    bild(GRUND + (ziel - GRUND) * staerke, os.path.join(ZIEL, 'diff.png'))
+    diffbild(dB_o, dB_k, oben, os.path.join(ZIEL, 'diff.png'))
+    if dB_e is not None:
+        diffbild(dB_o, dB_e, oben, os.path.join(ZIEL, 'diff-eq.png'))
 
     # per-band balance: each band's share of the total, clone against Doc
     f = np.fft.rfftfreq(N_FFT, 1 / sr)
     def anteil(Pm, a, b):
         return 10 * np.log10(Pm[:, (f >= a) & (f < b)].sum() / Pm.sum())
-    baender = [{'name': n, 'von': a, 'bis': b,
-                'klon_minus_original_db': round(float(anteil(P['klon'], a, b) - anteil(P_orig, a, b)), 1)}
-               for n, a, b in BAENDER]
+    baender = []
+    for n, a, b in BAENDER:
+        zeile = {'name': n, 'von': a, 'bis': b,
+                 'klon_minus_original_db': round(float(anteil(P['klon'], a, b) - anteil(P_orig, a, b)), 1)}
+        if 'klon_eq' in P:
+            zeile['klon_eq_minus_original_db'] = round(float(anteil(P['klon_eq'], a, b) - anteil(P_orig, a, b)), 1)
+        baender.append(zeile)
 
     daten = {
         'erstellt': datetime.datetime.now().isoformat(timespec='seconds'),
@@ -213,7 +233,7 @@ def main():
         'dauer_klon_s': round(len(signale['klon'][0]) / sr, 2),
         'frames': int(len(P_orig)), 'hop_ms': HOP * 1000 / sr, 'nyquist_hz': sr / 2,
         'skala_db': [round(float(unten - oben), 1), 0.0], 'diff_skala_db': DIFF_SKALA,
-        'baender': baender,
+        'baender': baender, 'mit_eq': 'klon_eq' in P,
         # the colour ramps travel with the numbers, so the page's legends are drawn from the very
         # same values that painted the pictures - one source, not two copies that drift apart
         'farben': {'intensitaet': [[t, list(c)] for t, c in INTENSITAET],
@@ -224,8 +244,9 @@ def main():
 
     print('Analyse fertig ->', ZIEL)
     for b in baender:
-        print('   %-11s %5d-%5d Hz   Klon gegenüber Original %+5.1f dB' % (b['name'], b['von'], b['bis'],
-                                                                         b['klon_minus_original_db']))
+        eq = ('   mit Höhen %+5.1f dB' % b['klon_eq_minus_original_db']) if 'klon_eq_minus_original_db' in b else ''
+        print('   %-11s %5d-%5d Hz   Klon %+5.1f dB%s' % (b['name'], b['von'], b['bis'],
+                                                          b['klon_minus_original_db'], eq))
     return daten
 
 
