@@ -423,7 +423,10 @@
                speaks when something is missing. */
             function authUi() {
                 const on = svpAuth.hasSession();
-                authBtn.textContent = on ? 'Abmelden' : '☁ Anmelden';
+                /* Doc, 24.09.2026: „mach bei Fahrplan den Abmelde weg" - a signed-in page has
+                   no use for it; the session is meant to last on the phone. What is left is
+                   the way IN, for the case the login was waved away on opening. */
+                authBtn.hidden = on;
                 if (on) status.textContent = '';
                 return on;
             }
@@ -445,13 +448,6 @@
             }
 
             authBtn.addEventListener('click', function () {
-                if (svpAuth.hasSession()) {
-                    svpAuth.storeSession(null);
-                    fahr = {};
-                    authUi();
-                    zeige();
-                    return;
-                }
                 svpAuth.loginDialog(function () { authUi(); hole(); }, 'Bitte anmelden, um den Fahrplan zu sehen');
             });
 
