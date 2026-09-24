@@ -246,6 +246,17 @@ const LAB_ICONS = {
             <circle cx="74" cy="39" r="5" fill="rgba(245,194,66,0.4)" stroke="#F5C242" stroke-width="1.7" />
             <circle cx="74" cy="61" r="5" fill="rgba(215,55,40,0.4)" stroke="#D73728" stroke-width="1.7" />
         </svg>`,
+    "maya": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- a Maya thirteen: three dots over two bars, and the shell that is the zero -->
+            <g fill="#F5C242">
+                <circle cx="32" cy="22" r="6" /><circle cx="52" cy="22" r="6" /><circle cx="72" cy="22" r="6" />
+                <rect x="22" y="38" width="60" height="11" rx="5.5" />
+                <rect x="22" y="56" width="60" height="11" rx="5.5" />
+            </g>
+            <g fill="none" stroke="#F5C242" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round">
+                <path d="M6 88 Q9 78 14 82 Q17 72 21 80 Q26 72 28 82 Q33 78 35 88 Q26 93 20.5 92 Q15 93 6 88 Z" />
+            </g>
+        </svg>`,
     "subtraktion": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(255, 77, 77, 0.1)" stroke="#ff4d4d" stroke-width="2" />
             <line x1="32" y1="50" x2="68" y2="50" stroke="#ff4d4d" stroke-width="6" stroke-linecap="round" />

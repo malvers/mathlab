@@ -24,6 +24,17 @@
 
 const LABS_DATA = [
     {
+        "id": "maya",
+        "href": "maya.html",
+        "title": "Maya-Zahlen",
+        "description": "Ein Rechenbrett f\u00fcr das Zahlensystem der Maya: Punkte z\u00e4hlen eins, Striche f\u00fcnf, die Muschel ist die Null \u2014 und jede Stelle ist zwanzigmal so viel wert wie die darunter. Im Kalender der Maya ist die dritte Stelle 360 statt 400, weil achtzehn Zwanziger das Jahr ergeben; beide Systeme stehen zur Wahl. Der Pfeil zwischen Zahl und Brett sagt, wer f\u00fchrt: nach oben z\u00e4hlt die Zahl mit, was Du legst, nach unten legt sie das Brett selbst, und grau ist sie eine Aufgabe. Der W\u00fcrfel stellt Aufgaben, die genau so viele Stellen f\u00fcllen, wie eingestellt sind.",
+        "tagline": "Zahlensysteme / Stellenwert / Maya",
+        "icon": LAB_ICONS["maya"],
+        "category": "zahlensysteme neu",
+        "keywords": "maya mayazahlen zahlensystem stellenwertsystem stellenwert vigesimal zwanzigersystem basis 20 punkte striche muschel null long count kalender 360 18 mal 20 babylonier roemisch ziffern legen rechenbrett kulturgeschichte",
+        "color": "gold"
+    },
+    {
         "id": "wuerfelspiel",
         "href": "wuerfelspiel.html",
         "title": "Das W\u00fcrfelspiel",
