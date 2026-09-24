@@ -659,7 +659,12 @@
         let placeCount = Math.min(5, Math.max(1, parseInt(store.get('places', '4'), 10) || 4));
         // two ways to stand: flat, the places side by side, or upright, the way the Maya wrote
         // them - a column with the highest place on top
-        let upright = store.get('upright', '0') === '1';
+        // Inside a slide (an iframe in a deck) the lab gets a wide, flat strip - that is exactly
+        // the upright layout, so it takes that there without touching the saved choice, and it
+        // drops its title, because the slide has its own.
+        const EMBEDDED = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+        if (EMBEDDED) document.documentElement.classList.add('lab-embedded');
+        let upright = EMBEDDED || store.get('upright', '0') === '1';
         let flashes = [];                 // { place, color, until }
         let cards = [];                   // the places, side by side
         let glyphs = [];                  // every dot and every bar, for taking them away
@@ -912,7 +917,7 @@
                 if (titleEl) {
                     titleEl.style.left = blockX + 'px';
                     titleEl.style.width = blockW + 'px';
-                    tH = titleEl.offsetHeight + 14;
+                    tH = titleEl.offsetHeight ? titleEl.offsetHeight + 14 : 0;
                 }
                 // the die's box is exactly as high as the number's, the die fills it
                 headEl.style.top = stackTopMin + 'px';
@@ -950,7 +955,7 @@
             // and the whole stack stands centred on the stage
             const stackGap = gapH;
             const diceH = diceEl ? diceEl.offsetHeight : 0;
-            const titleH = titleEl ? titleEl.offsetHeight + stackGap : 0;
+            const titleH = titleEl && titleEl.offsetHeight ? titleEl.offsetHeight + stackGap : 0;
             const stackH = titleH + (diceEl ? diceH + stackGap : 0) + hH + stackGap + sH + stackGap + blockH;
             const DROP = 28;            // the whole block sits a little lower than centred
             const lowest = Math.max(stackTopMin, H - pad - stackH);

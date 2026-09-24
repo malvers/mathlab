@@ -154,10 +154,10 @@ d.chapter(5, "Jetzt du", "Eine Zahl im System der Maya")
 
 # the lab lives inside the slide - the one thing PowerPoint cannot do (forloop-49 built it)
 d.lab("Das Maya-Rechenbrett", "maya.html",
-      note="Zahl eintippen und **LEGEN** · **ZUFALL** würfelt · Schalter: **360** gegen **400**")
+      note="**Würfel** stellt eine Aufgabe · Ziffern auf die Stellen **ziehen** · Zahl antippen und eintippen")
 d.summary("Im Deck steckt das Lab „Maya-Zahlen“ (maya.html): ein Rechenbrett, auf dem eine Zahl "
-          "aus Punkten, Strichen und Muschel gelegt statt getippt wird. Knöpfe: LEGEN, ZUFALL, "
-          "LEEREN, NEUE AUFGABE; ein Schalter vergleicht die Stellenwerte 360 und 400.")
+          "aus Punkten, Strichen und Muschel gelegt statt getippt wird. Der Würfel stellt Aufgaben, "
+          "die Ziffern werden auf die Stellen gezogen, und der Pfeil zeigt, ob Zahl oder Brett führt.")
 
 d.figure("Aufgabe: Schreibe **5432** im System der Maya", *F.aufgabe(5432))
 d.say("Nimm dir einen Moment. Fang oben an: wie oft passt siebentausendzweihundert in "
