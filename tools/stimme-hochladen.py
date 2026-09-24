@@ -223,7 +223,7 @@ def probe_ziel(text):
     return pfad
 
 
-def gemini_probe(text, vid, modell=None):
+def gemini_probe(text, vid, modell=None, ziel=None, abspielen=True):
     koerper = {
         'model': modell or GEMINI_MODELL,
         'input': [{'type': 'user_input',
@@ -261,12 +261,38 @@ def gemini_probe(text, vid, modell=None):
     roh = finde_audio(antwort)
     if not roh:
         sys.exit('Kein Audio in der Antwort: ' + json.dumps(antwort)[:400])
-    ziel = probe_ziel(text + (' lite' if (modell or '').endswith('lite-tts') else ''))
+    ziel = ziel or probe_ziel(text + (' lite' if (modell or '').endswith('lite-tts') else ''))
     with open(ziel, 'wb') as f:
         f.write(base64.b64decode(roh))
-    print('Gesprochen:', text)
+    print('Gesprochen:', text[:70] + ('…' if len(text) > 70 else ''))
     print('Datei     :', ziel)
-    subprocess.run(['afplay', ziel])
+    if abspielen:
+        subprocess.run(['afplay', ziel])
+
+
+def nachsprechen(ids):
+    """Let the clone read the very texts Doc recorded - the pairs the CMA-ES filter learns from.
+    Doc, 24.09.2026: more reading does not make a better clone, but it gives US material. Same
+    voice and same style prompt as the story comparison, or the pairs would not be comparable."""
+    with open(VOICE, encoding='utf-8') as f:
+        gemerkt = json.load(f)
+    if gemerkt.get('anbieter') != 'gemini':
+        sys.exit('Nachsprechen geht nur mit der Google-Stimme.')
+    with open(INDEX, encoding='utf-8') as f:
+        takes = json.load(f)
+    ordner = os.path.join(STORE, 'nachgesprochen')
+    os.makedirs(ordner, exist_ok=True)
+    for tid in ids:
+        t = takes.get(tid)
+        if not t or not t.get('text'):
+            print('%s: keine Aufnahme mit Text - übersprungen' % tid)
+            continue
+        ziel = os.path.join(ordner, tid + '.wav')
+        if os.path.isfile(ziel):
+            print('%s: liegt schon da - übersprungen (löschen für neu)' % tid)
+            continue
+        print('%s: Klon liest %d Zeichen …' % (tid, len(t['text'])))
+        gemini_probe(t['text'], gemerkt['voice_id'], ziel=ziel, abspielen=False)
 
 
 def hochladen():
@@ -331,7 +357,10 @@ def probe(text):
 
 
 if __name__ == '__main__':
-    if '--probe' in sys.argv:
+    if '--nachsprechen' in sys.argv:
+        n = sys.argv.index('--nachsprechen')
+        nachsprechen([a for a in sys.argv[n + 1:] if not a.startswith('--')])
+    elif '--probe' in sys.argv:
         n = sys.argv.index('--probe')
         satz = sys.argv[n + 1] if len(sys.argv) > n + 1 else 'Nicht verzagen, Doc Alvers fragen!'
         if satz == '--lite':
