@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Stimmklon — Aufnahmekabine</title>
+    <title>Recording</title>
     <meta name="description" content="Nimmt Docs Stimme satzweise auf und legt saubere WAVs für einen Stimmklon ab.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="js/cyber-tabbar.css">
     <style>
         /* Page-local only: the recording booth layout. Everything shared (buttons, colours,
            panels, scrollbars) comes from the central sheets linked above. */
@@ -72,6 +73,49 @@
         .optionen { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 14px; }
         /* silent unless there is news; the fixed height keeps the page from jumping when there is */
         .alle-zeile { text-align: center; }
+
+        /* ———— spectrum tabs ————————————————————————————————————————————————————
+           One view serves Original, Klon and Diff: the three pictures lie on top of each
+           other in the same frame, so switching tabs is a true blink comparison. Axes are
+           HTML, not baked into the pictures - sharp and readable at any width. */
+        .booth[hidden], .spek-ansicht[hidden] { display: none !important; }
+        .spek-ansicht {
+            position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden;
+            padding: 0 clamp(16px, 3vw, 34px) 60px;
+        }
+        .spek-rahmen { display: grid; grid-template-columns: 52px 1fr 92px; gap: 10px; margin-top: 18px; }
+        .spek-bild {
+            position: relative; aspect-ratio: 1420 / 420; border-radius: 6px; overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, .12); background: rgb(10, 15, 30);
+        }
+        .spek-bild img { position: absolute; inset: 0; width: 100%; height: 100%; visibility: hidden; }
+        .spek-bild img.an { visibility: visible; }
+        .spek-y, .spek-x { position: relative; font-size: 0.66rem; opacity: .7; font-variant-numeric: tabular-nums; }
+        .spek-y span { position: absolute; right: 2px; transform: translateY(50%); white-space: nowrap; }
+        .spek-x { height: 22px; margin: 6px 102px 0 62px; }
+        .spek-x span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+        .spek-legende { display: flex; gap: 8px; align-items: stretch; }
+        .spek-legende .verlauf { width: 14px; border-radius: 3px; border: 1px solid rgba(255, 255, 255, .15); }
+        .spek-legende .marken { display: flex; flex-direction: column; justify-content: space-between;
+            font-size: 0.62rem; opacity: .75; line-height: 1.2; }
+        .spek-baender { margin: 30px auto 0; max-width: 760px; }
+        .spek-baender .kopf { display: flex; justify-content: space-between; font-size: 0.66rem; opacity: .7;
+            margin: 0 0 8px 190px; padding-right: 64px; }
+        .band { display: grid; grid-template-columns: 100px 80px 1fr 60px; gap: 10px; align-items: center;
+            padding: 7px 0; font-size: 0.9rem; border-bottom: 1px solid rgba(255, 255, 255, .06); }
+        .band .hz { font-size: 0.72rem; opacity: .6; }
+        .band .wert { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
+        .band .spur { position: relative; height: 12px; background: rgba(255, 255, 255, .05); border-radius: 6px; }
+        .band .spur::after { content: ''; position: absolute; left: 50%; top: -3px; bottom: -3px;
+            width: 1px; background: rgba(255, 255, 255, .35); }
+        .band .spur i { position: absolute; top: 0; bottom: 0; border-radius: 6px; }
+        @media (max-width: 640px) {
+            .spek-rahmen { grid-template-columns: 38px 1fr 70px; gap: 6px; }
+            .spek-x { margin: 6px 76px 0 44px; }
+            .band { grid-template-columns: 80px 1fr 52px; }
+            .band .hz { display: none; }
+            .spek-baender .kopf { margin-left: 90px; }
+        }
         /* a pill, not a checkbox (Doc, 24.09.2026) - the checkbox stays underneath, the script reads it */
         .pille { display: inline-flex; cursor: pointer; }
         .pille input { position: absolute; opacity: 0; pointer-events: none; }
@@ -192,10 +236,17 @@
 </head>
 
 <body>
-    <main id="main-content">
+    <main id="main-content" class="has-tabbar">
+    <div id="tab-bar">
+        <button class="tab-btn active" data-tab="rec">Recording</button>
+        <button class="tab-btn" data-tab="original">Original</button>
+        <button class="tab-btn" data-tab="klon">Klon</button>
+        <button class="tab-btn" data-tab="diff">Diff</button>
+    </div>
+    <div id="tab-stage">
     <div class="booth">
         <div class="bahn">
-        <h1 style="margin:26px 0 4px;font-size:clamp(1.3rem,4vw,2rem)">Stimmklon — Aufnahmekabine</h1>
+        <h1 style="margin:26px 0 4px;font-size:clamp(1.3rem,4vw,2rem)">Recording</h1>
         <p class="hinweis" style="margin-top:0">
             Sprich so, wie du im Labor redest — nicht vorlesen, erzählen. Bei den langen Stücken ruhig
             atmen und Fehler einfach überlesen, das stört den Klon nicht.
@@ -253,6 +304,26 @@
         </p>
 
         </div>
+    </div>
+
+    <div class="spek-ansicht" hidden>
+        <div class="bahn">
+            <h1 id="spekTitel" style="margin:26px 0 4px;font-size:clamp(1.3rem,4vw,2rem)">Spektrum</h1>
+            <p class="hinweis" id="spekSub" style="margin-top:0"></p>
+            <div class="spek-rahmen">
+                <div class="spek-y" id="spekY"></div>
+                <div class="spek-bild" id="spekBild">
+                    <img data-bild="original" alt="Spektrogramm: Doc">
+                    <img data-bild="klon" alt="Spektrogramm: Klon, zeitlich ausgerichtet">
+                    <img data-bild="diff" alt="Differenz Doc minus Klon">
+                </div>
+                <div class="spek-legende" id="spekLegende"></div>
+            </div>
+            <div class="spek-x" id="spekX"></div>
+            <div class="spek-baender" id="spekBaender" hidden></div>
+            <p class="hinweis" id="spekStatus" style="text-align:center"></p>
+        </div>
+    </div>
     </div>
     </main>
 
@@ -710,9 +781,117 @@
             if (z && !laeuft) { i = +z.dataset.zu; zeichne(); }   // click a line to jump to it
         };
 
+        /* ———— tabs: Recording, and the three spectrum views ————————————————————————
+           Original, Klon and Diff share one frame (see the CSS), so arrows or 1 2 3 blink
+           between them. The pictures come from tools/stimmvergleich.py via the server. */
+        let tab = 'rec', analyse = null, analyseLaeuft = false;
+        const SPEK = ['original', 'klon', 'diff'];
+        const zahl = x => String(Math.round(x * 10) / 10).replace('.', ',');
+        const rgb = a => 'rgb(' + a.map(Math.round).join(',') + ')';
+        const SPEK_TEXT = {
+            original: ['Original', d => 'Doc am RØDE, die Geschichte — ' + zahl(d.dauer_original_s) + ' s'],
+            klon: ['Klon', d => 'Gemini Voice Replication, derselbe Text (' + zahl(d.dauer_klon_s)
+                + ' s) — zeitlich auf Doc ausgerichtet, damit die Laute übereinanderliegen'],
+            diff: ['Diff', () => 'Doc minus Klon, beide auf gleiche Lautheit gebracht. Rot: Doc lauter · Blau: Klon lauter'],
+        };
+
+        function zeigeTab(id) {
+            if (laeuft) return;                        // never walk away from a take that is still running
+            tab = id;
+            document.querySelectorAll('#tab-bar .tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+            document.querySelector('.booth').hidden = id !== 'rec';
+            document.querySelector('.spek-ansicht').hidden = id === 'rec';
+            if (id !== 'rec') zeigeSpektrum();
+        }
+
+        async function ladeAnalyse() {
+            if (analyseLaeuft) return;
+            analyseLaeuft = true;
+            $('spekStatus').textContent = 'Rechne das Spektrum …';
+            const r = await fetch('/__stimme/analysieren', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+                .then(x => x.json()).catch(e => ({ error: String(e) }));
+            analyseLaeuft = false;
+            if (r.error) { $('spekStatus').textContent = 'Analyse: ' + r.error; return; }
+            analyse = r.daten;
+            const t = Date.now();
+            document.querySelectorAll('#spekBild img').forEach(img => { img.src = '/__stimme/analyse/' + img.dataset.bild + '.png?t=' + t; });
+            $('spekStatus').textContent = '';
+            achsen();
+            zeigeSpektrum();
+        }
+
+        function achsen() {
+            const nyq = analyse.nyquist_hz, dauer = analyse.dauer_original_s;
+            let y = '';
+            for (let f = 0; f <= nyq + 1; f += 2000) y += '<span style="bottom:' + (f / nyq * 100) + '%">' + (f ? f / 1000 + ' kHz' : '0') + '</span>';
+            $('spekY').innerHTML = y;
+            const schritt = dauer > 40 ? 10 : 5;
+            let x = '';
+            for (let t = 0; t <= dauer; t += schritt) x += '<span style="left:' + (t / dauer * 100) + '%">' + t + ' s</span>';
+            $('spekX').innerHTML = x;
+        }
+
+        function legende(id) {
+            const F = analyse.farben;
+            let verlauf, marken;
+            if (id === 'diff') {
+                verlauf = 'linear-gradient(to top,' + rgb(F.blau) + ',' + rgb(F.grund) + ',' + rgb(F.rot) + ')';
+                const d = analyse.diff_skala_db;
+                marken = ['Doc lauter<br>+' + d + ' dB', '0', 'Klon lauter<br>−' + d + ' dB'];
+            } else {
+                verlauf = 'linear-gradient(to top,' + F.intensitaet.map(([t, c]) => rgb(c) + ' ' + (t * 100) + '%').join(',') + ')';
+                const u = analyse.skala_db[0];
+                marken = ['0 dB', Math.round(u / 2) + ' dB', Math.round(u) + ' dB'];
+            }
+            $('spekLegende').innerHTML = '<div class="verlauf" style="background:' + verlauf + '"></div>'
+                + '<div class="marken">' + marken.map(m => '<span>' + m + '</span>').join('') + '</div>';
+        }
+
+        function baender() {
+            const F = analyse.farben, S = 5;           // a bar saturates at +-5 dB
+            $('spekBaender').innerHTML = '<div class="kopf"><span>← Doc lauter</span><span>Klon lauter →</span></div>'
+                + analyse.baender.map(b => {
+                    const v = b.klon_minus_original_db, w = Math.min(Math.abs(v) / S, 1) * 50;
+                    // v < 0: the clone has less there = Doc louder = red, left of the centre line
+                    const stil = (v < 0 ? 'right:50%;' : 'left:50%;') + 'width:' + w + '%;background:' + rgb(v < 0 ? F.rot : F.blau);
+                    const hz = b.bis <= 1000 ? b.von + '–' + b.bis + ' Hz'
+                        : b.von >= 1000 ? zahl(b.von / 1000) + '–' + zahl(b.bis / 1000) + ' kHz'
+                        : b.von + ' Hz–' + zahl(b.bis / 1000) + ' kHz';
+                    // one decimal throughout, so +2,0 does not stand beside -2,9 looking less precise
+                    const wert = (v > 0 ? '+' : v < 0 ? '−' : '±') + Math.abs(v).toFixed(1).replace('.', ',') + ' dB';
+                    return '<div class="band"><span>' + b.name + '</span><span class="hz">' + hz + '</span>'
+                        + '<span class="spur"><i style="' + stil + '"></i></span><span class="wert">' + wert + '</span></div>';
+                }).join('');
+        }
+
+        function zeigeSpektrum() {
+            const [titel, sub] = SPEK_TEXT[tab];
+            $('spekTitel').textContent = titel;
+            if (!analyse) { $('spekSub').textContent = ''; return ladeAnalyse(); }
+            $('spekSub').textContent = sub(analyse);
+            document.querySelectorAll('#spekBild img').forEach(img => img.classList.toggle('an', img.dataset.bild === tab));
+            legende(tab);
+            $('spekBaender').hidden = tab !== 'diff';
+            if (tab === 'diff') baender();
+        }
+
+        document.querySelectorAll('#tab-bar .tab-btn').forEach(b =>
+            b.addEventListener('click', () => { b.blur(); zeigeTab(b.dataset.tab); }));
+
+        // spectrum tabs: arrows walk Original -> Klon -> Diff, 1 2 3 jump there directly -
+        // and the space bar does NOTHING here, a take started in a hidden tab would go unseen
+        function spektrumTaste(e) {
+            const k = SPEK.indexOf(tab);
+            if (e.code === 'ArrowRight') { e.preventDefault(); zeigeTab(SPEK[(k + 1) % 3]); }
+            else if (e.code === 'ArrowLeft') { e.preventDefault(); zeigeTab(SPEK[(k + 2) % 3]); }
+            else if (/^Digit[123]$/.test(e.code)) zeigeTab(SPEK[+e.code.slice(5) - 1]);
+            else if (e.code === 'Space') e.preventDefault();
+        }
+
         document.addEventListener('keydown', e => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
             if (e.target.tagName === 'BUTTON') return;      // let the button's own click handle it, once
+            if (tab !== 'rec') return spektrumTaste(e);
             if (e.code === 'Space' && !e.repeat) { e.preventDefault(); laeuft ? stoppe() : starte(); }
             if (e.code === 'ArrowRight') $('btnNext').click();
             if (e.code === 'ArrowLeft') $('btnPrev').click();

@@ -44,6 +44,10 @@ PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 0   # 0 = look for a free one,
 STORE = os.path.expanduser('~/Movies/stimmklon')
 RAW = os.path.join(STORE, 'roh')
 INDEX = os.path.join(STORE, 'aufnahmen.json')
+ANALYSE = os.path.join(STORE, 'analyse')
+# the spectral comparison needs numpy + Pillow; this server itself does not. The repo's venv has
+# both, and it is used when the interpreter running this server lacks them.
+VENV_PY = os.path.join(REPO, '.venv-i18n', 'bin', 'python3')
 
 
 def free_port(start=DEFAULT_PORT, tries=12):
@@ -105,6 +109,27 @@ def wav_level(path):
         return round(float(m.group(1)), 1) if m else None
     except Exception:
         return None
+
+
+def analyse_python():
+    """An interpreter that can import numpy and Pillow - ours if possible, else the repo venv."""
+    for py in (sys.executable, VENV_PY):
+        if py and os.path.isfile(py):
+            ok = subprocess.run([py, '-c', 'import numpy, PIL'], capture_output=True, timeout=30)
+            if ok.returncode == 0:
+                return py
+    return None
+
+
+def analyse_veraltet():
+    """Recompute when either comparison file is newer than the last result."""
+    ergebnis = os.path.join(ANALYSE, 'daten.json')
+    if not os.path.isfile(ergebnis):
+        return True
+    stand = os.path.getmtime(ergebnis)
+    return any(os.path.getmtime(os.path.join(STORE, f)) > stand
+               for f in ('vergleich-original.wav', 'vergleich-klon.wav')
+               if os.path.isfile(os.path.join(STORE, f)))
 
 
 def wav_seconds(path):
@@ -223,7 +248,27 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def analysieren(self):
+        n = int(self.headers.get('Content-Length') or 0)
+        try:
+            data = json.loads(self.rfile.read(n) or b'{}')
+        except ValueError:
+            data = {}
+        if not data.get('neu') and not analyse_veraltet():
+            with open(os.path.join(ANALYSE, 'daten.json'), encoding='utf-8') as f:
+                return self.reply(200, {'daten': json.load(f), 'frisch': False})
+        py = analyse_python()
+        if not py:
+            return self.reply(500, {'error': 'numpy/Pillow fehlen - im Repo liegt .venv-i18n, das sie hat'})
+        r = subprocess.run([py, os.path.join(TOOLS, 'stimmvergleich.py')], capture_output=True, text=True, timeout=300)
+        if r.returncode:
+            return self.reply(500, {'error': (r.stderr or r.stdout or 'Analyse fehlgeschlagen')[-400:]})
+        with open(os.path.join(ANALYSE, 'daten.json'), encoding='utf-8') as f:
+            return self.reply(200, {'daten': json.load(f), 'frisch': True})
+
     def do_POST(self):
+        if self.path == '/__stimme/analysieren':
+            return self.analysieren()
         if self.path == '/__stimme/aufnahme':
             return self.add_take()
         if self.path == '/__stimme/loeschen':
@@ -238,6 +283,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self.reply(200, {'takes': takes, 'gesamt': round(total, 1), 'ordner': STORE})
         if p.startswith('/__stimme/hoeren/'):
             return self.send_wav(p.rsplit('/', 1)[-1])
+        if p.startswith('/__stimme/analyse/'):
+            return self.send_analyse(p.rsplit('/', 1)[-1])
         if self.path.startswith('/__live/'):
             return self.live_api()
         self.path = local_icon(self.path) or self.path   # red lambda, like on :8765
@@ -253,6 +300,24 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         return super().do_GET()
 
     do_HEAD = do_GET
+
+    def send_analyse(self, name):
+        """Pictures and numbers from tools/stimmvergleich.py; they live outside HTML/."""
+        typen = {'original.png': 'image/png', 'klon.png': 'image/png', 'diff.png': 'image/png',
+                 'daten.json': 'application/json; charset=utf-8'}
+        if name not in typen:
+            return self.send_error(404, 'unbekannt')
+        path = os.path.join(ANALYSE, name)
+        if not os.path.isfile(path):
+            return self.send_error(404, 'noch nicht berechnet')
+        with open(path, 'rb') as f:
+            body = f.read()
+        self.send_response(200)
+        self.send_header('Content-Type', typen[name])
+        self.send_header('Cache-Control', 'no-store')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
     def send_wav(self, name):
         """Play a take back. The WAVs live outside HTML/, so SimpleHTTPRequestHandler cannot reach them."""
