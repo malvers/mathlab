@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Körperzählen</title>
+    <meta name="description"
+        content="Zählen über den Körper wie in Papua-Neuguinea: 27 Punkte von Hand zu Hand über die Nase — und warum das kein Stellenwertsystem ist.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="morpheus/vendor/katex/katex.min.css">
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+    </script>
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-clock.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        /* the die, the number and the sentence each sit on their own card over the stage;
+           left and width come from the same block the body uses */
+        .kz-card {
+            position: absolute;
+            margin: 0;
+            padding: 12px 18px;
+            border-radius: 18px;
+            background: rgba(10, 20, 40, 0.4);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            text-align: center;
+            pointer-events: none;
+            box-sizing: border-box;
+        }
+
+        /* the die out of the Würfelspiel - the same WebGL die, js/dice3d.js */
+        #kz-dice {
+            pointer-events: auto;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #kz-dice.dimmed #die-stage {
+            filter: grayscale(1);
+            opacity: 0.45;
+        }
+
+        #kz-dice.locked {
+            pointer-events: none;
+        }
+
+        #die-stage {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+            cursor: grab;
+            transition: filter 0.2s ease, opacity 0.2s ease;
+        }
+
+        #die-stage:active {
+            cursor: grabbing;
+        }
+
+        /* KaTeX_Main has to be in use once, or the browser never loads it for the die faces */
+        #font-probe {
+            position: absolute;
+            left: -999px;
+            font-family: KaTeX_Main, serif;
+        }
+
+        #kz-head {
+            overflow: hidden;
+            transition: border-color 0.2s ease;
+        }
+
+        #kz-head .kz-num {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            line-height: 1;
+            min-height: 1em;
+            color: rgb(245, 194, 66);
+            font-size: clamp(2.2rem, 7.5vw, 6rem);
+            pointer-events: auto;
+            cursor: pointer;
+            caret-color: rgb(245, 194, 66);
+            outline: none;
+        }
+
+        #kz-num.no-caret {
+            caret-color: transparent;
+        }
+
+        #kz-num::selection,
+        #kz-num ::selection {
+            background: rgba(245, 194, 66, 0.28);
+        }
+
+        #kz-head:hover,
+        #kz-head.editing {
+            border-color: rgba(245, 194, 66, 0.5);
+        }
+
+        @keyframes kz-from-right {
+            from { transform: translateX(45%); opacity: 0; }
+            to   { transform: translateX(0);   opacity: 1; }
+        }
+
+        #kz-head .kz-num .num-ch {
+            display: inline-block;
+        }
+
+        #kz-head .kz-num .num-ch.rolled-in {
+            animation: kz-from-right 0.38s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        #kz-head.solved .kz-num .num-ch {
+            background-image: linear-gradient(180deg, #ffffff 0%, #e6f3cd 20%, #9ec44a 60%, #5c7a28 100%);
+            filter: drop-shadow(0 0 25px rgba(121, 158, 49, 0.5));
+        }
+
+        /* two small triangles at the right edge: one more, one less */
+        .kz-spin {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: auto;
+        }
+
+        .kz-spin button {
+            margin: 0;
+            padding: 6px;
+            border: 0;
+            background: none;
+            line-height: 0;
+            cursor: pointer;
+            color: rgba(121, 158, 49, 0.5);
+            transition: color 0.15s ease;
+        }
+
+        .kz-spin button:hover,
+        .kz-spin button:active {
+            color: rgb(121, 158, 49);
+        }
+
+        .kz-spin svg {
+            display: block;
+            width: 18px;
+            height: 11px;
+            fill: currentColor;
+        }
+
+        /* the sentence under the number: which body part, and how many rounds */
+        #kz-say {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(1rem, 2.6vw, 1.45rem);
+            color: rgba(255, 255, 255, 0.85);
+            min-height: 1.4em;
+            line-height: 1.4;
+        }
+
+        #kz-say b {
+            color: rgb(245, 194, 66);
+            font-weight: 600;
+        }
+
+        #kz-say.ok b {
+            color: rgb(121, 158, 49);
+        }
+
+        /* the link between the number and the body: the same arrow as in the Maya lab */
+        .kz-link {
+            position: absolute;
+            width: 46px;
+            height: 46px;
+            margin: 0;
+            padding: 0;
+            border-radius: 50%;
+            border: 1px solid rgb(245, 194, 66);
+            background: rgba(10, 20, 40, 0.85);
+            backdrop-filter: blur(25px);
+            color: rgb(245, 194, 66);
+            box-shadow: 0 0 18px rgba(245, 194, 66, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            pointer-events: auto;
+            z-index: 2;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .kz-link:hover,
+        .kz-link:focus-visible {
+            box-shadow: 0 0 26px rgba(245, 194, 66, 0.6);
+            outline: none;
+        }
+
+        .kz-link svg {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: rotate(180deg);
+        }
+
+        .kz-link.down svg {
+            transform: rotate(0deg);
+        }
+
+        .kz-link.pending {
+            border-color: rgba(255, 255, 255, 0.25);
+            color: rgba(255, 255, 255, 0.4);
+            box-shadow: none;
+        }
+
+        .kz-link.pending:hover {
+            color: rgba(255, 255, 255, 0.75);
+            border-color: rgba(255, 255, 255, 0.45);
+            box-shadow: none;
+        }
+
+        /* ---------------------------------------------------------------- the body --- */
+        #kz-body {
+            position: absolute;
+            display: block;
+            overflow: visible;
+            touch-action: manipulation;
+        }
+
+        .kz-figure * {
+            fill: rgb(46, 64, 94);
+            stroke: none;
+        }
+
+        .kz-figure .limb {
+            fill: none;
+            stroke: rgb(46, 64, 94);
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .kz-figure .feature {
+            fill: rgb(22, 34, 56);
+        }
+
+        .kz-figure .feature-line {
+            fill: none;
+            stroke: rgb(22, 34, 56);
+            stroke-width: 4;
+            stroke-linecap: round;
+        }
+
+        /* the path the counting walks, faint, so the order can be read before it is lit */
+        .kz-trail {
+            fill: none;
+            stroke: rgba(245, 194, 66, 0.14);
+            stroke-width: 2;
+            stroke-dasharray: 4 7;
+        }
+
+        .kz-trail-lit {
+            fill: none;
+            stroke: rgba(245, 194, 66, 0.75);
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .kz-pt {
+            cursor: pointer;
+        }
+
+        .kz-pt .hit {
+            fill: transparent;
+        }
+
+        .kz-pt .dot {
+            fill: rgba(255, 255, 255, 0.35);
+            stroke: rgba(255, 255, 255, 0.55);
+            stroke-width: 1.5;
+            transition: fill 0.15s ease;
+        }
+
+        .kz-pt:hover .dot {
+            fill: rgba(245, 194, 66, 0.55);
+        }
+
+        .kz-pt text {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            text-anchor: middle;
+            dominant-baseline: central;
+            fill: rgb(10, 20, 40);
+            pointer-events: none;
+            display: none;
+        }
+
+        .kz-pt.lit .dot {
+            fill: rgb(245, 194, 66);
+            stroke: rgb(245, 194, 66);
+        }
+
+        .kz-pt.lit text {
+            display: block;
+        }
+
+        .kz-pt.here .dot {
+            stroke: #fff;
+            stroke-width: 3;
+        }
+
+        .kz-pt.ok .dot {
+            fill: rgb(121, 158, 49);
+            stroke: #fff;
+        }
+
+        .kz-pt.bad .dot {
+            fill: rgb(176, 36, 24);
+            stroke: rgb(176, 36, 24);
+        }
+
+        /* while a number is being typed the body takes no taps */
+        #kz-body.off .kz-pt {
+            pointer-events: none;
+        }
+
+        /* rounds already walked: one small ring per round, bottom left of the stage */
+        .kz-round {
+            fill: none;
+            stroke: rgb(245, 194, 66);
+            stroke-width: 3;
+        }
+
+        .kz-round-label {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            font-size: 16px;
+            fill: rgba(255, 255, 255, 0.55);
+        }
+
+        /* ----------------------------------------------------------------- popup --- */
+        .kz-dlg {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: rgba(0, 0, 20, 0.6);
+            backdrop-filter: blur(6px);
+        }
+
+        .kz-dlg[hidden] {
+            display: none;
+        }
+
+        .kz-dlg-card {
+            width: min(92vw, 460px);
+            max-height: 90vh;
+            overflow: auto;
+            box-sizing: border-box;
+            padding: 22px 24px 18px;
+            border-radius: 18px;
+            background: rgba(10, 20, 40, 0.92);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(121, 158, 49, 0.45);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+        }
+
+        .kz-dlg h2 {
+            margin: 0 0 14px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 0.12em;
+            color: rgb(121, 158, 49);
+        }
+
+        .kz-dlg .kz-dlg-h2 {
+            margin-top: 18px;
+        }
+
+        .kz-dlg .cyber-btn {
+            width: 100%;
+        }
+
+        .kz-note {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            line-height: 1.55;
+            opacity: 0.85;
+            margin: 0 0 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="openSystem()" title="Einstellungen und: Basis 27?">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3.2"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+        </div>
+    </nav>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="kz-dice" class="kz-card" title="Würfeln: neue Aufgabe">
+                <div id="die-stage"></div>
+            </div>
+            <span id="font-probe">0123456789</span>
+            <div id="kz-head" class="kz-card">
+                <div class="kz-num" id="kz-num" role="textbox" tabindex="0" inputmode="numeric"
+                    title="Zahl antippen und neu eingeben"></div>
+                <div class="kz-spin">
+                    <button type="button" class="spin-up" tabindex="-1" title="eins weiter (Pfeil hoch)">
+                        <svg viewBox="0 0 18 11" aria-hidden="true"><path d="M9 0 18 11 0 11Z" /></svg>
+                    </button>
+                    <button type="button" class="spin-down" tabindex="-1" title="eins zurück (Pfeil runter)">
+                        <svg viewBox="0 0 18 11" aria-hidden="true"><path d="M9 11 0 0 18 0Z" /></svg>
+                    </button>
+                </div>
+            </div>
+            <button id="kz-link" class="kz-link" type="button"
+                title="Der Körper bestimmt die Zahl — klicken dreht die Richtung um">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 4.5V19" />
+                    <path d="M5.8 13.2 12 19.4l6.2-6.2" />
+                </svg>
+            </button>
+            <div id="kz-sol" class="kz-card">
+                <div id="kz-say"></div>
+            </div>
+            <svg id="kz-body" viewBox="20 110 960 560" preserveAspectRatio="xMidYMid meet"
+                xmlns="http://www.w3.org/2000/svg" aria-label="Eine Figur mit 27 Zählpunkten"></svg>
+        </div>
+    </main>
+
+    <div id="kz-dlg" class="kz-dlg" hidden>
+        <div class="kz-dlg-card" role="dialog" aria-modal="true" aria-labelledby="kz-dlg-title">
+            <h2 id="kz-dlg-title">WÜRFEL</h2>
+            <div id="kz-range"></div>
+            <h2 class="kz-dlg-h2">BASIS 27?</h2>
+            <p class="kz-note" id="kz-note-1"></p>
+            <p class="kz-note" id="kz-note-2"></p>
+            <p class="kz-note" id="kz-note-3"></p>
+            <button type="button" class="cyber-btn" id="kz-dlg-close">FERTIG</button>
+        </div>
+    </div>
+
+    <script>
+        // Debug output goes into the central DEBUG window, never into the console.
+        if (/[?&]debug=1\b/.test(location.search)) {
+            var s = document.createElement('script');
+            s.src = 'js/debug-window.js';
+            s.onload = function () { try { DebugWindow.show(); } catch (e) { } };
+            document.head.appendChild(s);
+        }
+    </script>
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cyber-clock.js"></script>
+    <script src="js/cyber-trackball.js"></script>
+    <script>
+
+        const T = (k, fb) => (typeof CyberI18n !== 'undefined' && CyberI18n.getOr)
+            ? CyberI18n.getOr('koerper.' + k, fb)
+            : fb;
+
+        function dbg(m) { if (window.DebugWindow) DebugWindow.log('[koerper] ' + m); }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: T('title', 'KÖRPERZÄHLEN'),
+        });
+        CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        const container = document.getElementById('canvas-container');
+        const SVGNS = 'http://www.w3.org/2000/svg';
+
+        const store = {
+            get(key, fallback) {
+                try { const v = localStorage.getItem('koerper.' + key); return v === null ? fallback : v; }
+                catch (e) { return fallback; }
+            },
+            set(key, value) {
+                try { localStorage.setItem('koerper.' + key, value); } catch (e) { }
+            }
+        };
+
+        // ------------------------------------------------------------- the body ---
+        // The 27 counting points of the Oksapmin (Papua New Guinea), after Geoffrey Saxe:
+        // the fingers of one hand, thumb first, up the arm, round the face to the nose, and
+        // mirrored back down to the little finger of the other hand. The figure faces us, so
+        // "left" and "right" are as seen on the screen. Only the left half is written down -
+        // the right half is its mirror image, walked the other way.
+        const HALF = [
+            { x: 190, y: 222, name: 'Daumen' },
+            { x: 157, y: 176, name: 'Zeigefinger' },
+            { x: 121, y: 168, name: 'Mittelfinger' },
+            { x: 88, y: 180, name: 'Ringfinger' },
+            { x: 63, y: 210, name: 'kleiner Finger' },
+            { x: 162, y: 318, name: 'Handgelenk' },
+            { x: 205, y: 372, name: 'Unterarm' },
+            { x: 252, y: 424, name: 'Ellbogen' },
+            { x: 330, y: 384, name: 'Oberarm' },
+            { x: 405, y: 338, name: 'Schulter' },
+            { x: 468, y: 300, name: 'Hals' },
+            { x: 438, y: 212, name: 'Ohr' },
+            { x: 474, y: 190, name: 'Auge' }
+        ];
+        const NOSE = { x: 500, y: 232, name: 'Nase' };
+        const POINTS = [
+            ...HALF.map(p => ({ ...p, side: 'links' })),
+            { ...NOSE, side: '' },
+            ...HALF.slice().reverse().map(p => ({ x: 1000 - p.x, y: p.y, name: p.name, side: 'rechts' }))
+        ];
+        const N = POINTS.length;          // 27 - a count of body points, not a chosen base
+
+        const partName = (p) => {
+            const q = POINTS[p - 1];
+            return q.side ? q.name + ' ' + q.side : q.name;
+        };
+
+        // A number is a body point, and past the little finger the count simply starts again:
+        // 40 is one full round and then the 13th point.
+        const split = (n) => ({ r: Math.floor((n - 1) / N), p: (n - 1) % N + 1 });
+
+        // ---------------------------------------------------------------- state ---
+        let n = 0;                        // 0: nothing counted yet - there is no zero here
+        let lit = 0;                      // how far along the body the count is lit right now
+        let task = null;                  // { target, done, shown }
+        // Whoever acts, leads - the same arrow as in the Maya lab:
+        //   'up'   - the body leads, a tap on it says what the number is
+        //   'down' - the number leads, the body shows where it lands
+        //   'task' - grey: a number stands above, the body is dark, finding it is yours
+        let flow = 'up';
+        let editing = false;
+        let before = null;
+        let walkTimer = null;
+        let badPoint = 0;
+        let range = store.get('range', '27') === '81' ? 81 : 27;
+        const MAX_N = 999;
+
+        // --------------------------------------------------------------- drawing ---
+        const bodyEl = document.getElementById('kz-body');
+        const ptEls = [];
+        let trailLit = null, roundsG = null;
+
+        function el(tag, attrs, parent) {
+            const e = document.createElementNS(SVGNS, tag);
+            for (const k in attrs) e.setAttribute(k, attrs[k]);
+            if (parent) parent.appendChild(e);
+            return e;
+        }
+
+        function buildBody() {
+            const fig = el('g', { class: 'kz-figure' }, bodyEl);
+            // torso, neck, head
+            el('path', { d: 'M395 330 Q500 308 605 330 L588 660 L412 660 Z' }, fig);
+            el('rect', { x: 478, y: 262, width: 44, height: 64, rx: 10 }, fig);
+            el('ellipse', { cx: 438, cy: 212, rx: 13, ry: 22 }, fig);
+            el('ellipse', { cx: 562, cy: 212, rx: 13, ry: 22 }, fig);
+            el('ellipse', { cx: 500, cy: 205, rx: 58, ry: 72 }, fig);
+            // arms: shoulder - elbow - wrist, raised the way the counting shows them
+            for (const s of [1, -1]) {
+                const X = (x) => s === 1 ? x : 1000 - x;
+                el('polyline', {
+                    class: 'limb', 'stroke-width': 42,
+                    points: [[405, 338], [252, 424], [158, 306]].map(([x, y]) => X(x) + ',' + y).join(' ')
+                }, fig);
+                el('circle', { cx: X(132), cy: 262, r: 34 }, fig);            // the palm
+                for (const [tx, ty] of [[190, 222], [157, 176], [121, 168], [88, 180], [63, 210]]) {
+                    el('line', {
+                        class: 'limb', 'stroke-width': 17,
+                        x1: X(132), y1: 262, x2: X(tx), y2: ty
+                    }, fig);
+                }
+            }
+            // a face, quietly: the counting points sit on top of it
+            el('circle', { class: 'feature', cx: 474, cy: 190, r: 6 }, fig);
+            el('circle', { class: 'feature', cx: 526, cy: 190, r: 6 }, fig);
+            el('path', { class: 'feature-line', d: 'M488 250 Q500 258 512 250' }, fig);
+
+            // the walk, faint from start to end, and the lit part of it on top
+            const all = POINTS.map(p => p.x + ',' + p.y).join(' ');
+            el('polyline', { class: 'kz-trail', points: all }, bodyEl);
+            trailLit = el('polyline', { class: 'kz-trail-lit', points: '' }, bodyEl);
+
+            POINTS.forEach((p, i) => {
+                const g = el('g', { class: 'kz-pt', 'data-p': i + 1 }, bodyEl);
+                el('circle', { class: 'hit', cx: p.x, cy: p.y, r: 24 }, g);
+                el('circle', { class: 'dot', cx: p.x, cy: p.y, r: 15 }, g);
+                const t = el('text', { x: p.x, y: p.y + 1 }, g);
+                t.textContent = String(i + 1);
+                const tip = el('title', {}, g);
+                tip.textContent = partName(i + 1);
+                g.addEventListener('pointerdown', (e) => { e.preventDefault(); tapPoint(i + 1); });
+                ptEls.push(g);
+            });
+
+            roundsG = el('g', {}, bodyEl);
+        }
+
+        // Paint the body from the state: points up to `lit` glow with their number, the
+        // current one wears a white ring, and the rounds already walked stand bottom left.
+        function paintBody() {
+            const cur = lit;
+            const solved = task && task.done;
+            ptEls.forEach((g, i) => {
+                const k = i + 1;
+                g.classList.toggle('lit', k <= cur);
+                g.classList.toggle('here', k === cur);
+                g.classList.toggle('ok', !!solved && k === cur);
+                g.classList.toggle('bad', k === badPoint);
+            });
+            trailLit.setAttribute('points', POINTS.slice(0, cur).map(p => p.x + ',' + p.y).join(' '));
+
+            roundsG.innerHTML = '';
+            const r = (flow === 'task' && !(task && (task.done || task.shown))) ? 0 : (n > 0 ? split(n).r : 0);
+            if (r > 0) {
+                const lab = el('text', { class: 'kz-round-label', x: 40, y: 600 }, roundsG);
+                lab.textContent = T('rounds', 'Runden:');
+                for (let i = 0; i < r; i++) {
+                    el('circle', { class: 'kz-round', cx: 60 + i * 34, cy: 630, r: 12 }, roundsG);
+                }
+            }
+        }
+
+        // ------------------------------------------------------------ the sentence ---
+        function sayLine() {
+            const say = document.getElementById('kz-say');
+            say.classList.toggle('ok', !!(task && task.done));
+            if (flow === 'task' && task && !task.done) {
+                say.innerHTML = T('task_q', 'Wo landet die ') + '<b>' + task.target + '</b>'
+                    + T('task_q2', '? Tipp auf den Körper.');
+                return;
+            }
+            if (n === 0) {
+                say.textContent = T('no_zero', 'Keine Null: gezählt wird ab 1 — am Daumen.');
+                return;
+            }
+            const { r, p } = split(n);
+            const part = '<b>' + partName(p) + '</b>';
+            if (r === 0) { say.innerHTML = n + ' = ' + part; return; }
+            say.innerHTML = n + ' = ' + r + (r === 1 ? T('round1', ' Runde') : T('roundN', ' Runden'))
+                + ' + ' + p + ' = ' + part;
+        }
+
+        // A number rides in digit by digit, like the rolled numbers in the Maya lab.
+        function updateHead(animate) {
+            const num = document.getElementById('kz-num');
+            const head = document.getElementById('kz-head');
+            if (editing) return;
+            head.classList.toggle('solved', !!(task && task.done));
+            const shown = flow === 'task' && task ? task.target : n;
+            const text = shown === 0 ? '' : String(shown);
+            if (!animate && num.dataset.text === text && (num.children.length || !text)) return;
+            num.dataset.text = text;
+            num.innerHTML = '';
+            const cells = [...text].map(ch => {
+                const e = document.createElement('span');
+                e.className = 'num-ch cyber-bignum-gold';
+                e.textContent = ch;
+                if (animate) e.style.display = 'none';
+                num.appendChild(e);
+                return e;
+            });
+            if (!animate) return;
+            const step = Math.max(140, Math.round(ROLL_IN_MS / (cells.length || 1)));
+            cells.slice().reverse().forEach((e, i) => setTimeout(() => {
+                e.style.display = 'inline-block';
+                e.classList.add('rolled-in');
+            }, step * (i + 1)));
+        }
+
+        function refresh() {
+            updateHead();
+            sayLine();
+            paintBody();
+            layoutStage();
+        }
+
+        // ------------------------------------------------------------ counting ---
+        // The count walks: point after point lights up, the way the finger goes along the
+        // body. A long walk goes faster, so no walk takes much more than a second.
+        function walkTo(p, from) {
+            clearTimeout(walkTimer);
+            lit = from || 0;
+            const step = Math.max(35, Math.min(110, 1300 / Math.max(1, p - lit)));
+            const tick = () => {
+                if (lit >= p) { refresh(); return; }
+                lit++;
+                paintBody();
+                walkTimer = setTimeout(tick, step);
+            };
+            tick();
+        }
+
+        function showNumber(walk) {
+            if (n === 0) { clearTimeout(walkTimer); lit = 0; refresh(); return; }
+            const { p } = split(n);
+            if (walk) { refresh(); walkTo(p); }
+            else { clearTimeout(walkTimer); lit = p; refresh(); }
+        }
+
+        // A tap on the body. In a task that is the answer; otherwise the body leads and the
+        // number follows - keeping the rounds that were already there.
+        function tapPoint(p) {
+            if (editing) return;
+            if (flow === 'task' && task && !task.done) {
+                const want = split(task.target).p;
+                if (p === want) {
+                    task.done = true;
+                    n = task.target;
+                    setFlow('down', true);
+                    showNumber(true);
+                    dbg('task solved: ' + n);
+                } else {
+                    badPoint = p;
+                    paintBody();
+                    setTimeout(() => { badPoint = 0; paintBody(); }, 700);
+                }
+                return;
+            }
+            const r = n > 0 ? split(n).r : 0;
+            n = r * N + p;
+            task = null;
+            setFlow('up', true);
+            showNumber(true);
+        }
+
+        // ----------------------------------------------------------- the arrow ---
+        function setFlow(next, keep) {
+            flow = next;
+            const e = document.getElementById('kz-link');
+            e.classList.toggle('down', flow !== 'up');
+            e.classList.toggle('pending', flow === 'task');
+            e.title = flow === 'task'
+                ? T('flow_task', 'Aufgabe — klicken zeigt, wo die Zahl landet')
+                : (flow === 'down'
+                    ? T('flow_down', 'Die Zahl bestimmt den Körper — klicken macht eine Aufgabe daraus')
+                    : T('flow_up', 'Der Körper bestimmt die Zahl — klicken dreht die Richtung um'));
+            updateDice();
+            if (flow === 'down' && !keep) {
+                if (task && !task.done) { task.shown = true; n = task.target; }
+                showNumber(true);
+            }
+        }
+
+        // Grey: show the answer. Orange and down: hide the body again, the number stays as a
+        // task. Up: let the number lead.
+        function turnFlow() {
+            if (flow === 'down' && n > 0) {
+                task = { target: n, done: false };
+                clearTimeout(walkTimer);
+                lit = 0;
+                setFlow('task', true);
+                refresh();
+                return;
+            }
+            setFlow('down');
+        }
+
+        function updateDice() {
+            const e = document.getElementById('kz-dice');
+            e.classList.toggle('dimmed', flow === 'up' || editing);
+            e.classList.toggle('locked', editing);
+        }
+
+        // --------------------------------------------------------------- typing ---
+        function renderTyped() {
+            const num = document.getElementById('kz-num');
+            const raw = num.textContent.replace(/\D/g, '').slice(0, 3);
+            num.innerHTML = '';
+            for (const ch of raw) {
+                const e = document.createElement('span');
+                e.className = 'num-ch cyber-bignum-gold';
+                e.textContent = ch;
+                num.appendChild(e);
+            }
+            const sel = window.getSelection();
+            const rg = document.createRange();
+            rg.selectNodeContents(num);
+            rg.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(rg);
+            task = null;
+            n = raw === '' ? 0 : Math.min(MAX_N, parseInt(raw, 10));
+            showNumber(false);
+        }
+
+        function stepBy(delta) {
+            if (!editing) {
+                const shown = (flow === 'task' && task) ? task.target : n;
+                const from = n > 0 && flow !== 'task' ? split(n).p : 0;
+                n = Math.min(MAX_N, Math.max(0, shown + delta));
+                task = null;
+                setFlow('down', true);
+                // one step forward walks one point on; backwards it simply stands there
+                if (delta === 1 && n > 1 && split(n).p === from + 1) { refresh(); walkTo(split(n).p, from); }
+                else showNumber(false);
+                return;
+            }
+            const num = document.getElementById('kz-num');
+            const raw = num.textContent.replace(/\D/g, '');
+            num.textContent = String(Math.min(MAX_N, Math.max(0, (raw === '' ? 0 : parseInt(raw, 10)) + delta)));
+            num.classList.add('no-caret');
+            renderTyped();
+            num.focus();
+        }
+
+        function startEdit() {
+            const num = document.getElementById('kz-num');
+            if (editing) return;
+            editing = true;
+            before = { n, task, flow };
+            task = null;
+            setFlow('down', true);
+            document.getElementById('kz-head').classList.add('editing');
+            bodyEl.classList.add('off');
+            updateDice();
+            num.classList.remove('no-caret');
+            try { num.contentEditable = 'plaintext-only'; } catch (e) { }
+            if (num.contentEditable !== 'plaintext-only') num.contentEditable = 'true';
+            num.focus();
+            const sel = window.getSelection();
+            const rg = document.createRange();
+            rg.selectNodeContents(num);
+            rg.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(rg);
+        }
+
+        function endEdit(commit) {
+            const num = document.getElementById('kz-num');
+            if (!editing) return;
+            const raw = num.textContent.replace(/\D/g, '');
+            editing = false;
+            document.getElementById('kz-head').classList.remove('editing');
+            bodyEl.classList.remove('off');
+            num.contentEditable = 'false';
+            num.dataset.text = '';
+            try { window.getSelection().removeAllRanges(); } catch (e) { }
+            if (!commit || raw === '') {
+                if (before) { n = before.n; task = before.task; setFlow(before.flow, true); }
+                showNumber(false);
+                return;
+            }
+            task = null;
+            n = Math.min(MAX_N, parseInt(raw, 10));
+            updateDice();
+            showNumber(true);             // Enter: the count walks to where the number lands
+        }
+
+        // ------------------------------------------------------------- the die ---
+        const ROLL_IN_MS = 2000;
+        const rollNumber = () => 1 + Math.floor(Math.random() * range);
+
+        function newTask(target) {
+            task = { target: target || rollNumber(), done: false };
+            clearTimeout(walkTimer);
+            lit = 0;
+            setFlow('task', true);
+            refresh();
+            updateHead(true);
+        }
+
+        // ------------------------------------------------------------- layout ---
+        // Die, number, sentence and body stand in one column as wide as the Maya stack, the
+        // whole group centred on the stage and below the branding in the top right corner.
+        function layoutStage() {
+            const rect = container.getBoundingClientRect();
+            const W = rect.width, H = rect.height;
+            if (W < 200 || H < 200) return;
+            const pad = 16, gap = 18;
+            const blockW = Math.min(W - 2 * pad, 842);
+            const blockX = (W - blockW) / 2;
+            const diceEl = document.getElementById('kz-dice');
+            const headEl = document.getElementById('kz-head');
+            const solEl = document.getElementById('kz-sol');
+            const linkEl = document.getElementById('kz-link');
+            for (const e of [diceEl, headEl, solEl]) {
+                e.style.left = blockX + 'px';
+                e.style.width = blockW + 'px';
+            }
+            let topMin = 14;
+            const brand = document.querySelector('.canvas-branding');
+            if (brand) {
+                const b = brand.getBoundingClientRect();
+                if (b.width && b.left - rect.left < blockX + blockW) topMin = Math.max(topMin, b.bottom - rect.top + 12);
+            }
+            const hH = headEl.offsetHeight;
+            diceEl.style.height = hH + 'px';
+            const sH = solEl.offsetHeight;
+            const VB_RATIO = 560 / 960;
+            const room = H - pad - topMin - (hH + gap) * 2 - sH - gap;
+            const figH = Math.max(120, Math.min(room, blockW * VB_RATIO));
+            const stackH = (hH + gap) * 2 + sH + gap + figH;
+            let y = Math.max(topMin, (H - stackH) / 2);
+            diceEl.style.top = y + 'px'; y += hH + gap;
+            headEl.style.top = y + 'px'; y += hH + gap;
+            linkEl.style.top = (y - gap / 2 - linkEl.offsetHeight / 2) + 'px';
+            linkEl.style.left = (blockX + blockW / 2 - linkEl.offsetWidth / 2) + 'px';
+            solEl.style.top = y + 'px'; y += sH + gap;
+            bodyEl.style.left = blockX + 'px';
+            bodyEl.style.top = y + 'px';
+            bodyEl.style.width = blockW + 'px';
+            bodyEl.style.height = figH + 'px';
+            window.__layout = { W, H, blockW, hH, sH, figH, topMin };
+        }
+
+        // --------------------------------------------------------------- popup ---
+        function openSystem() {
+            if (editing) endEdit(true);
+            document.getElementById('kz-dlg').hidden = false;
+        }
+
+        function closeSystem() {
+            document.getElementById('kz-dlg').hidden = true;
+        }
+
+        function buildUI() {
+            CyberUI.createRadioGroup('kz-range', null, [
+                { value: '27', label: T('range_27', '1 bis 27: einmal über den Körper') },
+                { value: '81', label: T('range_81', '1 bis 81: bis zu drei Runden') }
+            ], String(range), (v) => {
+                range = v === '81' ? 81 : 27;
+                store.set('range', String(range));
+            });
+            document.getElementById('kz-note-1').textContent = T('note_1',
+                'Das Buch sagt „Basis 27“ — streng genommen stimmt das nicht. Zu einer echten Basis 27 gehörten Stellen: 1, 27, 729 … und Ziffern, die man an diese Stellen schreibt. Beides gibt es hier nicht.');
+            document.getElementById('kz-note-2').textContent = T('note_2',
+                '27 ist einfach die Zahl der Punkte, die der Zählweg über den Körper hat. Andere Gruppen in Papua-Neuguinea zählen anders und kommen auf 19, 23 oder 33 Punkte.');
+            document.getElementById('kz-note-3').textContent = T('note_3',
+                'Wer weiterzählt, fängt wieder am Daumen an und merkt sich die Runden. Wie schreibt man damit 500? Genau dafür haben Maya und Babylonier Stellenwerte erfunden.');
+            document.getElementById('kz-dlg-close').onclick = closeSystem;
+            document.getElementById('kz-dlg').addEventListener('pointerdown', (e) => {
+                if (e.target.id === 'kz-dlg') closeSystem();
+            });
+
+            const numEl = document.getElementById('kz-num');
+            numEl.addEventListener('pointerdown', (e) => { if (!editing) { e.preventDefault(); startEdit(); } });
+            numEl.addEventListener('input', () => { numEl.classList.remove('no-caret'); renderTyped(); });
+            numEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); endEdit(true); }
+                else if (e.key === 'Escape') { e.preventDefault(); endEdit(false); }
+                else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    stepBy(e.key === 'ArrowUp' ? 1 : -1);
+                }
+            });
+            numEl.addEventListener('blur', () => endEdit(true));
+
+            document.querySelectorAll('.kz-spin button').forEach((b) => {
+                b.addEventListener('pointerdown', (e) => e.preventDefault());
+                b.addEventListener('click', () => stepBy(b.classList.contains('spin-up') ? 1 : -1));
+            });
+            document.getElementById('kz-link').onclick = turnFlow;
+        }
+
+        window.addEventListener('keydown', (e) => {
+            const t = e.target;
+            if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+            if (e.key === 'Escape' && !document.getElementById('kz-dlg').hidden) { closeSystem(); return; }
+            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { e.preventDefault(); stepBy(e.key === 'ArrowUp' ? 1 : -1); }
+        });
+
+        container.addEventListener('contextmenu', (e) => { e.preventDefault(); openSystem(); });
+
+        // ----------------------------------------------------------------- run ---
+        window.addEventListener('resize', layoutStage);
+        if (window.ResizeObserver) new ResizeObserver(() => layoutStage()).observe(container);
+        window.addEventListener('cyber-left-chrome-zoom', () => layoutStage());
+        window.addEventListener('load', () => layoutStage());
+
+        // the branding in the top right corner keeps moving for a while after load (see the
+        // Maya lab) - watch where it ends until it has stood still for 1.5 s
+        let lastBrand = -2, brandQuiet = 0;
+        (function settleBranding() {
+            const b = document.querySelector('.canvas-branding');
+            const now = b ? Math.round(b.getBoundingClientRect().bottom * 100) / 100 : -1;
+            if (now !== lastBrand) { lastBrand = now; brandQuiet = 0; layoutStage(); }
+            else brandQuiet++;
+            if (brandQuiet < 15) setTimeout(settleBranding, 100);
+        })();
+
+        buildBody();
+        buildUI();
+        setFlow('up', true);
+        refresh();
+        document.fonts.ready.then(() => layoutStage());
+        dbg('lab ready');
+    </script>
+    <script type="module">
+        // The die of the Würfelspiel, not a copy of it: js/dice3d.js. A tap rolls it and the
+        // roll sets a new task; dragging turns it (the shared SGI trackball).
+        import { DieView, refreshAllFaces } from './js/dice3d.js';
+
+        const faces = [0, 1, 2, 3, 4, 5];
+        let nextDigit = 6;
+        const tints = ['#FBEBBF', '#E6ECF8', '#DDE8C6', '#F3D2CE', '#CFEAF6', '#F1E3F6'];
+        const ROLL_MS = 2000;
+        const st = { idx: 0, fin: 0, t0: 0 };
+
+        function roll() {
+            const target = typeof rollNumber === 'function' ? rollNumber() : 14;
+            const lead = Number(String(target)[0]);       // the die lands on the leading digit
+            st.fin = Math.floor(Math.random() * 6);
+            st.t0 = performance.now();
+            for (let i = 0; i < faces.length; i++) {
+                if (i === st.fin) { faces[i] = lead; continue; }
+                while (nextDigit % 10 === lead) nextDigit++;
+                faces[i] = nextDigit % 10;
+                nextDigit++;
+            }
+            refreshAllFaces();
+            if (typeof newTask === 'function') newTask(target);
+        }
+
+        function source() {
+            const now = performance.now();
+            const rolling = st.t0 > 0 && now - st.t0 < ROLL_MS;
+            if (!rolling && st.t0 > 0) { st.idx = st.fin; st.t0 = 0; }
+            return {
+                faces, tints,
+                idx: rolling ? st.fin : st.idx,
+                fin: st.fin,
+                rolling,
+                p: rolling ? (now - st.t0) / ROLL_MS : 1,
+                anim: st.t0
+            };
+        }
+
+        try {
+            const view = new DieView(document.getElementById('die-stage'), { style: 'light', fill: true, source, onTap: roll });
+            view.camera.fov = 24;
+            view.camera.updateProjectionMatrix();
+        } catch (err) {
+            if (window.DebugWindow) DebugWindow.log('[koerper] kein WebGL: ' + err.message);
+        }
+        document.fonts.load('300px KaTeX_Main').then(refreshAllFaces).catch(() => { });
+    </script>
+</body>
+
+</html>
