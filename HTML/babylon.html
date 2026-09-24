@@ -498,6 +498,7 @@
 
     <main id="main-content">
         <div id="canvas-container">
+            <h1 id="lab-title" class="lab-stage-title">Babylonische Zahlen</h1>
             <div id="bab-dice" class="bab-card" title="Würfeln: neue Aufgabe">
                 <div id="die-stage"></div>
             </div>
@@ -909,7 +910,8 @@
             const headEl = document.getElementById('bab-head');
             const solEl = document.getElementById('bab-solution');
             const linkEl = document.getElementById('bab-link');
-            let top = 14, stackTopMin = 14, dH = 0, hH = 0, sH = 0;
+            const titleEl = document.getElementById('lab-title');
+            let top = 14, stackTopMin = 14, dH = 0, hH = 0, sH = 0, tH = 0;
             if (headEl && solEl) {
                 for (const el of [diceEl, headEl, solEl]) {
                     if (!el) continue;
@@ -942,6 +944,11 @@
                     el.style.right = '';
                     el.style.left = ((colCenter(g) + colCenter(g + 1)) / 2 - blockX) + 'px';
                 });
+                if (titleEl) {
+                    titleEl.style.left = blockX + 'px';
+                    titleEl.style.width = blockW + 'px';
+                    tH = titleEl.offsetHeight + 14;
+                }
                 // the die's box is exactly as high as the number's, the die fills it
                 headEl.style.top = stackTopMin + 'px';
                 hH = headEl.offsetHeight;
@@ -953,7 +960,7 @@
                 }
                 solEl.style.top = (stackTopMin + dH + hH + 14) + 'px';
                 sH = solEl.offsetHeight;
-                top = stackTopMin + dH + hH + 14 + sH + 14;
+                top = stackTopMin + tH + dH + hH + 14 + sH + 14;
             }
 
             const avail = H - top - pad;
@@ -978,13 +985,15 @@
             // and the whole stack stands centred on the stage
             const stackGap = gapH;
             const diceH = diceEl ? diceEl.offsetHeight : 0;
-            const stackH = (diceEl ? diceH + stackGap : 0) + hH + stackGap + sH + stackGap + blockH;
+            const titleH = titleEl ? titleEl.offsetHeight + stackGap : 0;
+            const stackH = titleH + (diceEl ? diceH + stackGap : 0) + hH + stackGap + sH + stackGap + blockH;
             const DROP = 28;            // the whole block sits a little lower than centred
             const lowest = Math.max(stackTopMin, H - pad - stackH);
             const stackTop = Math.min(
                 Math.max(stackTopMin, Math.min((H - stackH) / 2, H - pad - stackH)) + DROP,
                 lowest);
             let y = stackTop;
+            if (titleEl) { titleEl.style.top = y + 'px'; y += titleH; }
             if (diceEl) { diceEl.style.top = y + 'px'; y += diceH + stackGap; }
             if (headEl) headEl.style.top = y + 'px';
             y += hH + stackGap;
@@ -1114,6 +1123,12 @@
             headEl.style.top = midTop + 'px';
             diceEl.style.height = hH + 'px';
             diceEl.style.top = midTop + 'px';
+            const titleUp = document.getElementById('lab-title');
+            if (titleUp) {
+                titleUp.style.left = numX + 'px';
+                titleUp.style.width = (numW + gap + dieW) + 'px';
+                titleUp.style.top = (midTop - titleUp.offsetHeight - gap) + 'px';
+            }
 
             const colTop = stackTopMin;
             const boardBottom = H - pad;
