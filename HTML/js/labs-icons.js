@@ -266,6 +266,24 @@ const LAB_ICONS = {
                 <path d="M84 30 L98 30 L93 44 L91.8 72 L90.2 72 L89 44 Z" />
             </g>
         </svg>`,
+    "koerperzaehlen": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- a figure with raised arms, and the counting path lit up to the nose -->
+            <g fill="none" stroke="rgb(46,64,94)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="40,58 25,66 15,48" /><polyline points="60,58 75,66 85,48" />
+                <path d="M40 58 L42 94 L58 94 L60 58 Z" fill="rgb(46,64,94)" />
+            </g>
+            <ellipse cx="50" cy="38" rx="11" ry="13" fill="rgb(46,64,94)" />
+            <polyline points="12,36 15,48 25,66 40,58 46,50 45,34 50,42" fill="none" stroke="#F5C242" stroke-width="2" stroke-linejoin="round" />
+            <g fill="#F5C242">
+                <circle cx="12" cy="36" r="3.5" /><circle cx="15" cy="48" r="3.5" /><circle cx="25" cy="66" r="3.5" />
+                <circle cx="40" cy="58" r="3.5" /><circle cx="46" cy="50" r="3.5" /><circle cx="45" cy="34" r="3.5" />
+                <circle cx="50" cy="42" r="4.5" stroke="#fff" stroke-width="1.5" />
+            </g>
+            <g fill="rgba(255,255,255,0.45)">
+                <circle cx="55" cy="34" r="3" /><circle cx="54" cy="50" r="3" /><circle cx="60" cy="58" r="3" />
+                <circle cx="75" cy="66" r="3" /><circle cx="85" cy="48" r="3" /><circle cx="88" cy="36" r="3" />
+            </g>
+        </svg>`,
     "subtraktion": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(255, 77, 77, 0.1)" stroke="#ff4d4d" stroke-width="2" />
             <line x1="32" y1="50" x2="68" y2="50" stroke="#ff4d4d" stroke-width="6" stroke-linecap="round" />
