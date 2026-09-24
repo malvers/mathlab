@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Muschel - die Null der Maya</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --shell: rgb(245, 194, 66); --bg: #0a0e17; --ink: #8fa6c0; }
+    body { margin: 0; background: var(--bg); color: var(--shell);
+           font-family: 'Orbitron', sans-serif; padding: 28px; }
+    h1 { font-size: 16px; letter-spacing: .08em; color: var(--ink); font-weight: 600; margin: 0 0 6px; }
+    p  { font-size: 12px; color: #6d7f95; margin: 0 0 26px; letter-spacing: .04em; }
+    .grid { display: flex; flex-wrap: wrap; gap: 34px; align-items: flex-end; }
+    figure { margin: 0; text-align: center; }
+    figcaption { color: var(--ink); font-size: 12px; margin-top: 12px; letter-spacing: .05em; }
+    svg { display: block; outline: 1px dashed rgba(143, 166, 192, .35); }
+  </style>
+</head>
+<body>
+  <h1>Muschel - die Null im Maya-Brett</h1>
+  <p>resources/muschel.svg, erzeugt von tools/muschel-svg.py. Der Rahmen ist die viewBox.</p>
+  <div class="grid" id="grid"></div>
+  <script>
+    // The page shows the file itself, never a copy of it - edit the SVG and reload.
+    const SIZES = [300, 132, 84, 44];
+    fetch('resources/muschel.svg').then(r => r.text()).then(txt => {
+      const src = new DOMParser().parseFromString(txt, 'image/svg+xml').querySelector('svg');
+      const [, , vw, vh] = src.getAttribute('viewBox').trim().split(/[\s,]+/).map(Number);
+      const grid = document.getElementById('grid');
+      for (const h of SIZES) {
+        const svg = src.cloneNode(true);
+        svg.setAttribute('height', h);
+        svg.setAttribute('width', (h * vw / vh).toFixed(1));
+        const fig = document.createElement('figure');
+        fig.append(svg, Object.assign(document.createElement('figcaption'), { textContent: h + ' px' }));
+        grid.append(fig);
+      }
+    });
+  </script>
+</body>
+</html>

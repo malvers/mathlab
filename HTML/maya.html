@@ -714,45 +714,34 @@
             if (stroke) { ctx.strokeStyle = stroke; ctx.stroke(); }
         }
 
-        // The zero: a scallop shell — ribs fanning out of the hinge, a scalloped rim.
-        function drawShell(cx, cy, w, h, col) {
-            const lw = Math.max(2, Math.min(6, h * 0.075));   // one weight for rim, mouth and ribs
-            const R = h * 0.92;
-            const hx = cx, hy = cy + h * 0.44;          // the hinge
-            const spread = 0.44;                        // half opening, in units of PI
-            const a0 = -Math.PI / 2 - Math.PI * spread;
-            const a1 = -Math.PI / 2 + Math.PI * spread;
-            const kx = (w / 2) / (R * Math.sin(Math.PI * spread));
-            const P = (a, r) => [hx + kx * R * r * Math.cos(a), hy + R * r * Math.sin(a)];
-            const lobes = 6;
+        // The zero: the scallop shell, drawn straight from resources/muschel.svg. That file
+        // is the one source for the shape - edit it (or rerun tools/muschel-svg.py) and the
+        // board follows. It carries its own box and stroke width, so nothing here guesses.
+        const shell = { path: null, w: 1, h: 1, mx: 0, my: 0, lw: 3.2 };
+        fetch('resources/muschel.svg').then(r => r.text()).then(txt => {
+            const doc = new DOMParser().parseFromString(txt, 'image/svg+xml');
+            const svg = doc.querySelector('svg'), d = doc.querySelector('path').getAttribute('d');
+            const [x, y, w, h] = svg.getAttribute('viewBox').trim().split(/[\s,]+/).map(Number);
+            shell.path = new Path2D(d);
+            shell.w = w; shell.h = h;
+            shell.mx = x + w / 2; shell.my = y + h / 2;          // the middle of its box
+            shell.lw = parseFloat(svg.getAttribute('stroke-width')) || 3.2;
+            draw();                                             // it arrives after the first paint
+        }).catch(() => { });
 
+        // cx, cy is the middle of the shell, size the square it has to fit into
+        function drawShell(cx, cy, size, col) {
+            if (!shell.path) return;                            // still loading - the next draw has it
+            const k = size / Math.max(shell.w, shell.h);
             ctx.save();
+            ctx.translate(cx, cy);
+            ctx.scale(k, k);
+            ctx.translate(-shell.mx, -shell.my);
             ctx.strokeStyle = col || COL.shell;
-            ctx.lineWidth = lw;
+            ctx.lineWidth = shell.lw;
             ctx.lineJoin = 'round';
             ctx.lineCap = 'round';
-            ctx.beginPath();
-            const first = P(a0, 0.9);
-            ctx.moveTo(first[0], first[1]);
-            for (let i = 0; i < lobes; i++) {
-                const m = a0 + (a1 - a0) * (i + 0.5) / lobes;
-                const e = a0 + (a1 - a0) * (i + 1) / lobes;
-                const c = P(m, 1.10), q = P(e, 0.9);
-                ctx.quadraticCurveTo(c[0], c[1], q[0], q[1]);
-            }
-            ctx.quadraticCurveTo(hx + w * 0.10, hy + h * 0.10, hx, hy);
-            ctx.quadraticCurveTo(hx - w * 0.10, hy + h * 0.10, first[0], first[1]);
-            ctx.closePath();
-            ctx.stroke();
-
-            for (let i = 1; i < lobes; i++) {
-                const a = a0 + (a1 - a0) * i / lobes;
-                const st = P(a, 0.16), en = P(a, 0.86);
-                ctx.beginPath();
-                ctx.moveTo(st[0], st[1]);
-                ctx.lineTo(en[0], en[1]);
-                ctx.stroke();
-            }
+            ctx.stroke(shell.path);
             ctx.restore();
         }
 
@@ -789,10 +778,9 @@
             if (d === null) return;               // an empty place shows nothing at all
             const col = colOverride || placeColor(place);
             if (d === 0) {
-                let w = Math.min(bw * 0.78, 132);     // exactly the width of a bar
-                if (w * 0.64 > bh) w = bh / 0.64;     // ... unless the box is too flat for it
-                const h = w * 0.64;
-                drawShell(cx, cy + h * 0.065, w, h, col);   // the shape is taller above the centre
+                let s = Math.min(bw * 0.78, 132);     // at most as wide as a bar
+                if (s > bh * 0.96) s = bh * 0.96;     // ... and never taller than its box
+                drawShell(cx, cy, s, col);
                 return;
             }
             const bars = Math.floor(d / 5), dots = d % 5;
