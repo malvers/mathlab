@@ -1,9 +1,10 @@
 /* Live tour "Maya" - the Drehbuch of tours/maya.html.
  *
- * Like kreisteilung.js this one does NOT come from a film: no take, no voice, no cue list. It is the silent
- * walkthrough Doc wants BEFORE a film is shot (18.09.2026: "erst das Lab kritisieren, dann drehen"), so every
- * scene simply shows one thing the lab does and leaves air to look at it. There is no voice, so a scene's
- * length is its `air`: t.rest() waits until then.
+ * Like kreisteilung.js this one does NOT come from a film: no take, no cue list. It is the walkthrough Doc wants
+ * BEFORE a film is shot (18.09.2026: "erst das Lab kritisieren, dann drehen"), every scene shows one thing the lab
+ * does. The voice is DOC's own (his clone, Doc 24.09.2026: "nimm mich"): videopipeline/maya/narration.json ->
+ * voice_doc.py -> ~/Movies/videopipeline/maya/sN.mp3, and the second every line starts -> maya-times.js, so each
+ * tap below lands on the word that names it (lines(sid)(k)).
  *
  * Space pauses, Enter records a remark (tools/tourkritik.py keeps them per scene and second).
  *
@@ -25,6 +26,17 @@
     async function tapOn(t, sec, sel) {
         await t.at(sec - TAP_S);
         return t.tap('lab', sel);
+    }
+
+    /* where Doc starts his k-th line in a scene - measured by videopipeline/maya/voice_doc.py (maya-times.js) */
+    const lines = (sid) => (k) => ((window.MAYA_TIMES || {})[sid] || [])[k] ?? 2 * k;
+
+    /* the gear in the rail opens the place values (a right click on the stage does the same) */
+    async function gear(t, sec) {
+        const sel = '#mini-rail .nav-btn[title="Stellenwerte"]';
+        if (await ev(t, (sel) => !!document.querySelector(sel), sel)) return tapOn(t, sec, sel);
+        await t.at(sec);
+        await ev(t, () => openSystem());
     }
 
     /* the chapter line; the title card goes */
@@ -105,8 +117,8 @@
         return out.filter((p, j) => p[1] > 0 || out.slice(0, j).some((q) => q[1] > 0));
     }, n);
 
-    /* typing on the big number, one key after the other */
-    async function type(t, sec, text) {
+    /* typing on the big number, one key after the other - Enter at enterSec */
+    async function type(t, sec, text, enterSec) {
         await t.at(sec - TAP_S);
         const xy = await centerOf(t, '#maya-num');
         await t.tapAt('lab', xy[0], xy[1]);          // pointerdown opens the field
@@ -119,7 +131,7 @@
                 renderTyped();
             }, ch);
         }
-        await t.wait(700);
+        await t.at(enterSec);
         await ev(t, () => endEdit(true));           // Enter
     }
 
@@ -146,91 +158,101 @@
 
         scenes: [
             {
-                id: 's0', n: '00', title: 'Ein leeres Brett', air: 4000,
+                id: 's0', n: '00', title: 'Ein leeres Brett',
                 async enter(t) { await start(t); },
                 async run(t) {
                     begin(t, '00', 'Ein leeres Brett');
-                    await t.at(1.0);
+                    await start(t);         /* always from the plain lab - a run may follow a replay that left it hochkant */
+                    const L = lines('s0');
+                    await t.at(L(1) + 0.3);                 /* "Oben steht unsere Zahl" */
                     await t.point('lab', '#maya-head');
                     await t.rest();
                 },
             },
             {
-                id: 's1', n: '01', title: 'Die zwanzig Ziffern', air: 7000,
+                id: 's1', n: '01', title: 'Die zwanzig Ziffern',
                 async enter(t) { await start(t); },
                 async run(t) {
                     begin(t, '01', 'Die zwanzig Ziffern');
-                    /* a dot is one, a bar is five, the shell is nothing */
-                    for (const [sec, d] of [[1.0, 1], [2.2, 4], [3.4, 5], [4.6, 13], [5.8, 19]]) {
-                        await t.at(sec);
-                        const xy = await cellXY(t, d);
+                    const L = lines('s1');
+                    /* one, four, five, thirteen, nineteen, and the shell - each as Doc names it */
+                    const shown = [1, 4, 5, 13, 19, 0];
+                    for (let k = 0; k < shown.length; k++) {
+                        await t.at(L(k + 1) - 0.4);
+                        const xy = await cellXY(t, shown[k]);
                         if (xy) await t.pointAt('lab', xy[0], xy[1]);
                     }
                     await t.rest();
                 },
             },
             {
-                id: 's2', n: '02', title: 'Eine Ziffer legen', air: 6000,
+                id: 's2', n: '02', title: 'Eine Ziffer legen',
                 async enter(t) { await start(t); },
                 async run(t) {
                     begin(t, '02', 'Eine Ziffer legen');
-                    await lay(t, 2.5, 7, 0);          // seven on the ones: the number counts along
+                    const L = lines('s2');
+                    await lay(t, L(1) + 1.2, 7, 0);          /* "Sieben auf die Einer" */
                     await t.rest();
                 },
             },
             {
-                id: 's3', n: '03', title: 'Die Zwanziger-Stelle', air: 8000,
+                id: 's3', n: '03', title: 'Die Zwanziger-Stelle',
                 async enter(t) { await lie(t, 7); },
                 async run(t) {
                     begin(t, '03', 'Die Zwanziger-Stelle');
-                    await lay(t, 2.5, 2, 1);          // two twenties and seven: 47
-                    await lay(t, 5.5, 18, 1);         // 18 does not fit there in the calendar - refused
+                    const L = lines('s3');
+                    await lay(t, L(1) + 1.0, 2, 1);          /* "Zwei Punkte dort": 47 */
+                    await lay(t, L(2) + 1.6, 18, 1);         /* "Die Achtzehn passt hier aber nicht hin" - refused */
                     await t.rest();
                 },
             },
             {
                 id: 's4', n: '04', title: 'Übertrag',
-                air: 10000,
                 async enter(t) { await lie(t, 47); },
                 async run(t) {
                     begin(t, '04', 'Übertrag');
-                    /* 17 on the ones (57), then the right triangles count on: 58, 59 - and 60 carries */
-                    await lay(t, 2.5, 17, 0);
+                    const L = lines('s4');
+                    await lay(t, L(0) + 2.4, 17, 0);         /* "siebzehn auf die Einer": 57 */
                     const up = '#maya-head > .maya-spin:not(.left) .spin-up';
-                    await tapOn(t, 4.0, up);
-                    await tapOn(t, 5.5, up);
-                    await tapOn(t, 7.0, up);
+                    await tapOn(t, L(2) + 0.1, up);          /* 58 */
+                    await tapOn(t, L(3) + 0.1, up);          /* 59 */
+                    await tapOn(t, L(4) + 0.1, up);          /* 60 - twenty ones carry */
                     await t.rest();
                 },
             },
             {
-                id: 's5', n: '05', title: 'Eine Zahl eintippen', air: 9000,
+                id: 's5', n: '05', title: 'Eine Zahl eintippen',
                 async enter(t) { await start(t); },
                 async run(t) {
                     begin(t, '05', 'Eine Zahl eintippen');
-                    await type(t, 1.5, '2026');
+                    const L = lines('s5');
+                    await type(t, L(1) - 0.5, '2026', L(1) + 2.4);   /* "Zweitausendsechsundzwanzig, Enter" */
                     await t.rest();
                 },
             },
             {
-                id: 's6', n: '06', title: 'Der Pfeil', air: 9000,
+                id: 's6', n: '06', title: 'Der Pfeil',
                 async enter(t) {
                     await start(t);
                     await ev(t, () => { layout(2026); setFlow('down', true); changed(); });
                 },
                 async run(t) {
                     begin(t, '06', 'Der Pfeil');
-                    await tapOn(t, 1.5, '#maya-link');    // orange down: the answer goes, the number stays
-                    await tapOn(t, 5.0, '#maya-link');    // grey down: the answer lays itself again
+                    const L = lines('s6');
+                    await t.at(0.6);
+                    await t.point('lab', '#maya-link');      /* "Der Pfeil in der Mitte" */
+                    await tapOn(t, L(1) + 0.5, '#maya-link'); /* "Ein Klick" - the answer goes, the number stays */
+                    await tapOn(t, L(3) + 0.8, '#maya-link'); /* "Noch ein Klick" - it lays itself again */
                     await t.rest();
                 },
             },
             {
-                id: 's7', n: '07', title: 'Würfeln und legen', air: 17000,
+                id: 's7', n: '07', title: 'Würfeln und legen', air: 2500,
                 async enter(t) { await start(t); },
                 async run(t) {
                     begin(t, '07', 'Würfeln und legen');
-                    await t.at(1.5 - TAP_S);
+                    const L = lines('s7');
+                    await t.at(0.9 - TAP_S);
                     const die = await centerOf(t, '#maya-dice');
                     await t.tapAt('lab', die[0], die[1]);
                     /* no die (no WebGL) - a task all the same, so the scene still plays */
@@ -238,58 +260,58 @@
                     if (!(await ev(t, () => !!task))) await ev(t, () => newTask());
                     const target = await ev(t, () => task.target);
                     const plan = await digitsOf(t, target);
-                    let sec = 5.0;
-                    for (const [place, d] of plan) {      // highest place first, as one reads the number
+                    let sec = L(2) + 1.0;                    /* "Stelle für Stelle, von oben nach unten" */
+                    for (const [place, d] of plan) {
                         if (d > 0) await lay(t, sec, d, place);
-                        sec += 2.6;
+                        sec += 2.4;
                     }
-                    await t.rest();                        // laid right: the number turns green
+                    await t.rest();                          /* "Stimmt alles, wird die Zahl grün" */
                 },
             },
             {
-                id: 's8', n: '08', title: 'Wie viele Stellen', air: 13000,
+                id: 's8', n: '08', title: 'Wie viele Stellen',
                 async enter(t) { await start(t); },
                 async run(t) {
                     begin(t, '08', 'Wie viele Stellen');
-                    await type(t, 1.0, '47');             // a small number, so two places are enough
+                    const L = lines('s8');
+                    await type(t, 0.2, '47', L(1) + 0.4);    /* "Siebenundvierzig passt in zwei" */
                     const up = '#maya-places .spin-up', down = '#maya-places .spin-down';
-                    await tapOn(t, 4.0, down);            // three places
-                    await tapOn(t, 5.5, down);            // two - 47 still fits
-                    await tapOn(t, 7.5, up);
-                    await tapOn(t, 8.7, up);
-                    await tapOn(t, 9.9, up);              // five: the fifth place has its own colour
+                    await tapOn(t, L(2) + 2.0, down);        /* "nimmst du Stellen weg": three */
+                    await tapOn(t, L(2) + 3.0, down);        /* two - 47 still fits */
+                    await tapOn(t, L(3) + 0.6, up);          /* "oder gibst welche dazu" */
+                    await tapOn(t, L(3) + 1.5, up);
+                    await tapOn(t, L(3) + 2.4, up);          /* five: "Die fünfte hat ihre eigene Farbe" */
                     await t.rest();
                 },
             },
             {
-                id: 's9', n: '09', title: 'Kalender oder rein zwanzig', air: 14000,
+                id: 's9', n: '09', title: 'Kalender oder rein zwanzig', air: 2500,
                 async enter(t) { await start(t); },
                 async run(t) {
                     begin(t, '09', 'Kalender oder rein zwanzig');
-                    await type(t, 1.0, '2026');
-                    await t.at(4.5);
-                    await t.point('lab', '#canvas');
-                    await ev(t, () => openSystem());      // what a right click on the stage does
-                    await tapOn(t, 6.5, '#maya-system label:has(input[value="rein20"])');   // same glyphs, other value
-                    await tapOn(t, 9.5, '#maya-system label:has(input[value="kalender"])');
-                    await tapOn(t, 11.5, '#maya-dlg-close');
+                    const L = lines('s9');
+                    await type(t, 0.3, '2026', 2.6);
+                    await gear(t, L(2) + 0.8);                /* "Hinter dem Zahnrad" */
+                    await tapOn(t, L(3) + 0.2, '#maya-system label:has(input[value="rein20"])');   /* "dieselben Zeichen, ein anderer Wert" */
+                    await tapOn(t, L(4) + 0.2, '#maya-system label:has(input[value="kalender"])'); /* "Und wieder zurück" */
+                    await tapOn(t, L(4) + 1.8, '#maya-dlg-close');
                     await t.rest();
                 },
             },
             {
-                id: 's10', n: '10', title: 'Hochkant', air: 10000,
+                id: 's10', n: '10', title: 'Hochkant',
                 async enter(t) { await start(t); await lie(t, 2026); },
                 async run(t) {
                     begin(t, '10', 'Hochkant');
-                    await t.at(1.0);
-                    await ev(t, () => openSystem());
-                    await tapOn(t, 2.5, '#maya-arrange label:has(input[value="upright"])');
-                    await tapOn(t, 4.0, '#maya-dlg-close');
+                    const L = lines('s10');
+                    await gear(t, L(0) + 1.8);
+                    await tapOn(t, L(1) + 0.4, '#maya-arrange label:has(input[value="upright"])');  /* "Hochkant" */
+                    await tapOn(t, L(1) + 1.6, '#maya-dlg-close');
                     await t.rest();
                 },
             },
             {
-                id: 's11', n: '11', title: 'Farben', air: 7000,
+                id: 's11', n: '11', title: 'Farben', air: 2500,
                 async enter(t) {
                     await start(t);
                     await ev(t, () => document.querySelector('#maya-arrange input[value="upright"]').click());
@@ -297,8 +319,9 @@
                 },
                 async run(t) {
                     begin(t, '11', 'Farben');
-                    /* the key C: every place its own colour */
-                    await t.at(1.5);
+                    const L = lines('s11');
+                    /* "Mit der Taste C": every place its own colour */
+                    await t.at(L(0) + 1.3);
                     await ev(t, () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'c', bubbles: true })));
                     await t.rest();
                     t.hideCursor();
