@@ -293,6 +293,9 @@ def nachsprechen(ids):
             continue
         print('%s: Klon liest %d Zeichen …' % (tid, len(t['text'])))
         gemini_probe(t['text'], gemerkt['voice_id'], ziel=ziel, abspielen=False)
+        # the third comparison version, with exactly the shelf the story's -eq file got
+        subprocess.run(['ffmpeg', '-y', '-i', ziel, '-af', 'highshelf=f=6000:g=3',
+                        os.path.join(ordner, tid + '-eq.wav')], capture_output=True, timeout=120)
 
 
 def hochladen():

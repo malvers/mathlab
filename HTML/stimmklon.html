@@ -211,6 +211,7 @@
             border: 1px solid rgb(245, 194, 66); color: rgb(245, 194, 66);
         }
         .vgl .cyber-btn:hover { background: rgba(245, 194, 66, .14); }
+        .vgl .cyber-btn:disabled { opacity: .3; cursor: not-allowed; }
         /* the icon says what a click does: play at rest, stop while this one plays */
         .vgl .cyber-btn { gap: 10px; }
         .vgl .cyber-btn svg { width: 15px; height: 15px; flex: 0 0 auto; }
@@ -281,9 +282,9 @@
         </div>
 
         <div class="vgl">
-            <button class="cyber-btn" data-hoer="vergleich-original"><svg class="ic-play" viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19" fill="currentColor"/></svg><svg class="ic-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor"/></svg><span>Original — Doc am RØDE</span></button>
-            <button class="cyber-btn" data-hoer="vergleich-klon"><svg class="ic-play" viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19" fill="currentColor"/></svg><svg class="ic-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor"/></svg><span>Klon</span></button>
-            <button class="cyber-btn" data-hoer="vergleich-klon-eq"><svg class="ic-play" viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19" fill="currentColor"/></svg><svg class="ic-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor"/></svg><span>Klon + Höhen (+3 dB ab 6 kHz)</span></button>
+            <button class="cyber-btn" data-rolle="original" data-hoer="vergleich-original"><svg class="ic-play" viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19" fill="currentColor"/></svg><svg class="ic-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor"/></svg><span>Original — Doc am RØDE</span></button>
+            <button class="cyber-btn" data-rolle="klon" data-hoer="vergleich-klon"><svg class="ic-play" viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19" fill="currentColor"/></svg><svg class="ic-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor"/></svg><span>Klon</span></button>
+            <button class="cyber-btn" data-rolle="eq" data-hoer="vergleich-klon-eq"><svg class="ic-play" viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19" fill="currentColor"/></svg><svg class="ic-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor"/></svg><span>Klon + Höhen (+3 dB ab 6 kHz)</span></button>
         </div>
         <div class="regie">
             <div class="transport">
@@ -507,7 +508,7 @@
         const erwartet = s => alsText(s).length / 13;
 
         let i = 0, takes = {}, rec = null, stream = null, laeuft = false, uhrAb = 0, uhrTakt = null;
-        let klang = null, falscherServer = false;                 // keep the Audio alive: a bare new Audio().play() can be collected mid-play
+        let klang = null, falscherServer = false, nachgesprochen = [];                 // keep the Audio alive: a bare new Audio().play() can be collected mid-play
         const $ = id => document.getElementById(id);
 
         /* Live reload must not pull the page out from under a running take - the recording would be
@@ -581,6 +582,23 @@
             const wort = laeuft ? 'Stopp' : (takes[s.id] ? 'Neu aufnehmen' : 'Aufnehmen');
             $('btnRec').title = wort + ' (Leertaste)'; $('btnRec').setAttribute('aria-label', wort);
             $('btnRec').classList.toggle('stopp', laeuft);
+
+            /* The three comparison buttons follow the selected text: Doc's own take, the clone
+               reading that same text, and the clone with the high shelf. The story has its fixed
+               comparison files; every other text uses the take and nachgesprochen/. A version that
+               does not exist yet (not read, not re-read by the clone) greys out instead of playing
+               silence. A button that is playing the old text's file stops when the text changes. */
+            const quelle = s.id === 'story'
+                ? { original: 'vergleich-original', klon: 'vergleich-klon', eq: 'vergleich-klon-eq' }
+                : { original: s.id, klon: 'klon-' + s.id, eq: 'klon-eq-' + s.id };
+            const da = s.id === 'story' || nachgesprochen.includes(s.id);
+            const vorhanden = { original: s.id === 'story' || !!takes[s.id], klon: da, eq: da };
+            document.querySelectorAll('.vgl [data-rolle]').forEach(b => {
+                const neu = quelle[b.dataset.rolle];
+                if (b.dataset.hoer !== neu && b.classList.contains('laeuft')) { if (klang) klang.pause(); b.classList.remove('laeuft'); }
+                b.dataset.hoer = neu;
+                b.disabled = !vorhanden[b.dataset.rolle];
+            });
             document.querySelector('.regie').classList.toggle('aktiv', laeuft);
             // a single text: nothing to page through, so the arrows stay out of sight
             $('btnPrev').hidden = $('btnNext').hidden = LISTE.length <= 1;
@@ -1006,6 +1024,7 @@
                 return zeichne();
             }
             takes = d.takes || {};
+            nachgesprochen = d.nachgesprochen || [];
             // (the folder used to be shown here; Doc wanted the line out - it lives in the handoff)
             // start at the first line that is missing or truncated, so a resumed session picks up there
             const offen = sichtbar().findIndex(s => !takes[s.id] || taugtNicht(s, takes[s.id]));

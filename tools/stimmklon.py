@@ -280,7 +280,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if p == '/__stimme/liste':
             takes = load()
             total = sum(t.get('sekunden') or 0 for t in takes.values())
-            return self.reply(200, {'takes': takes, 'gesamt': round(total, 1), 'ordner': STORE})
+            nd = os.path.join(STORE, 'nachgesprochen')
+            klon = sorted(n[:-4] for n in os.listdir(nd) if n.endswith('.wav') and not n.endswith('-eq.wav')) \
+                if os.path.isdir(nd) else []
+            return self.reply(200, {'takes': takes, 'gesamt': round(total, 1), 'ordner': STORE, 'nachgesprochen': klon})
         if p.startswith('/__stimme/hoeren/'):
             return self.send_wav(p.rsplit('/', 1)[-1])
         if p.startswith('/__stimme/analyse/'):
@@ -325,6 +328,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not all(c.isalnum() or c in '-_' for c in name):
             return self.send_error(400, 'ungültig')
         path = os.path.join(STORE, name + '.wav')
+        if name.startswith('klon-eq-'):
+            path = os.path.join(STORE, 'nachgesprochen', name[8:] + '-eq.wav')
+        elif name.startswith('klon-'):
+            path = os.path.join(STORE, 'nachgesprochen', name[5:] + '.wav')
         if not os.path.isfile(path):
             return self.send_error(404, 'keine Aufnahme')
         with open(path, 'rb') as f:
