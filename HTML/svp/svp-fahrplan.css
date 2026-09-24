@@ -119,10 +119,15 @@
     opacity: 0;
     transition: opacity 0.15s;
 }
-.fahr-sheet:focus-within .fahr-head .fmtbar {
+/* ... and only once the sheet is really being written in: it opens to be READ (Doc,
+   24.09.2026: „wenn ich das aufmache bitte nicht im Edit"), and a row of buttons over the
+   text would say the opposite. The list carries the state, so :has() asks it. */
+.fahr-sheet:has(.fahr-list[contenteditable="true"]):focus-within .fahr-head .fmtbar {
     visibility: visible;
     opacity: 1;
 }
+/* A text cursor over the still unwritable text: it is one click away from being editable. */
+.fahr-list:not([contenteditable="true"]) { cursor: text; }
 /* Der Gedanke der Woche, oben rechts auf dem Blatt - Klick oeffnet ihn gross.
    Sitzt in der rechten Rasterspalte, ganz oben; das Blatt rechnet seine Hoehe
    mit ein (siehe .fahr-sheet). */

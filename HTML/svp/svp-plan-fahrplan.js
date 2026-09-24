@@ -99,7 +99,12 @@ window.svpPlanParts.push(function (P) {
            den naechsten Punkt (Doc, 20.09.2026: "bullets"). */
         feld = document.createElement('ul');
         feld.className = 'fahr-list';
-        feld.setAttribute('contenteditable', 'true');
+        /* Doc, 24.09.2026: "wenn ich das aufmache bitte nicht im Edit" - the sheet opens as a
+           sheet to READ; a click into it turns it into one to write in (bearbeiten below).
+           It stays focusable with tabindex, because the focus is also what keeps the keys off
+           the plan behind it: the plan walks its rows with the arrows and folds weeks on Enter. */
+        feld.setAttribute('contenteditable', 'false');
+        feld.setAttribute('tabindex', '-1');
         feld.setAttribute('role', 'textbox');
         feld.setAttribute('aria-label', 'Inhalte der Stunde');
         blatt.appendChild(feld);
@@ -156,6 +161,12 @@ window.svpPlanParts.push(function (P) {
             if (ev.key === 'Escape') { hide(); return; }
             ev.stopPropagation();
         });
+        /* Into the text = into edit mode. The caret goes where the finger or the mouse went,
+           not to the end: on a sheet of ten points, being thrown back to the first one is
+           worse than no caret at all. Without a hit (the browsers spell the call differently)
+           it falls back to the end of the first point - the place Doc asked for on 20.09.2026. */
+        feld.addEventListener('mousedown', bearbeiten);
+        feld.addEventListener('touchstart', bearbeiten, { passive: true });
         box.addEventListener('click', function (ev) { if (ev.target === box) hide(); });
         window.addEventListener('resize', fitFont);
         return box;
@@ -226,6 +237,9 @@ window.svpPlanParts.push(function (P) {
         clearTimeout(timer);
         if (!offen) return;
         const text = zeilen().join('\n');
+        /* Reading is now the normal case, and closing a sheet that was only read must not
+           write anything - it would push the same text into the cloud on every peek. */
+        if (text === textOf(offen.i)) return;
         store(offen.i, text);
         if (offen.fahrBtn) markiere(offen.fahrBtn, text);
     }
@@ -271,21 +285,38 @@ window.svpPlanParts.push(function (P) {
         mat.hidden = !mat.childNodes.length;
         b.hidden = false;
         fitFont();                  /* sofort, nicht erst im naechsten Bild */
+        /* Focus, but no caret and no edit mode: the sheet is there to be read, and the focus
+           only keeps Escape and the arrow keys away from the plan. The caret follows the first
+           click (bearbeiten), where Doc's wish from 20.09.2026 lives on - "setz den cursor
+           eine Zeile tiefer hinter den ersten bullet" is what happens when a click cannot be
+           resolved to a place in the text. */
+        feld.setAttribute('contenteditable', 'false');
         feld.focus();
-        /* Doc, 20.09.2026: "setz den cursor eine Zeile tiefer hinter den ersten bullet" -
-           er steht also im ERSTEN Punkt, hinter dem, was dort schon steht. */
         const sel = window.getSelection();
-        if (sel && feld.firstChild) {
-            const r = document.createRange();
-            r.selectNodeContents(feld.firstChild);
-            r.collapse(false);
-            sel.removeAllRanges();
-            sel.addRange(r);
+        if (sel) sel.removeAllRanges();
+    }
+
+    /* From reading to writing. Called by the first click into the text; every further click
+       finds it editable already and runs through. */
+    function bearbeiten(ev) {
+        if (feld.getAttribute('contenteditable') === 'true') return;
+        feld.setAttribute('contenteditable', 'true');
+        feld.focus();
+        const punkt = ev.touches ? ev.touches[0] : ev;
+        let r = null;
+        if (document.caretRangeFromPoint) r = document.caretRangeFromPoint(punkt.clientX, punkt.clientY);
+        else if (document.caretPositionFromPoint) {
+            const pos = document.caretPositionFromPoint(punkt.clientX, punkt.clientY);
+            if (pos) { r = document.createRange(); r.setStart(pos.offsetNode, pos.offset); r.collapse(true); }
         }
+        if (!r && feld.firstChild) { r = document.createRange(); r.selectNodeContents(feld.firstChild); r.collapse(false); }
+        const sel = window.getSelection();
+        if (r && sel) { sel.removeAllRanges(); sel.addRange(r); }
     }
 
     function hide() {
         save();
+        feld.setAttribute('contenteditable', 'false');   /* the next sheet opens to read again */
         box.hidden = true;
         offen = null;
     }
