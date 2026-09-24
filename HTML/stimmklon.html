@@ -71,6 +71,18 @@
         .optionen[hidden] { display: none; }
         .optionen { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 14px; }
         /* silent unless there is news; the fixed height keeps the page from jumping when there is */
+        .alle-zeile { text-align: center; }
+        /* a pill, not a checkbox (Doc, 24.09.2026) - the checkbox stays underneath, the script reads it */
+        .pille { display: inline-flex; cursor: pointer; }
+        .pille input { position: absolute; opacity: 0; pointer-events: none; }
+        .pille span {
+            padding: 6px 18px; border-radius: 999px; font-size: 0.68rem; letter-spacing: .04em;
+            border: 1px solid rgba(255, 255, 255, .25); color: rgba(255, 255, 255, .75);
+            transition: background .15s, color .15s, border-color .15s;
+        }
+        .pille:hover span { border-color: var(--neon-blue); color: var(--neon-blue); }
+        .pille input:checked + span { background: var(--neon-blue); border-color: var(--neon-blue); color: #0a0f1a; }
+        .pille input:focus-visible + span { outline: 2px solid var(--neon-blue); outline-offset: 2px; }
         #tipp { text-align: center; min-height: 1.6em; margin: 8px 0 14px; }
         .regie .cyber-btn {
             flex: 0 1 auto; min-width: 142px; cursor: pointer; border-radius: 8px;
@@ -141,6 +153,11 @@
             border: 1px solid rgb(245, 194, 66); color: rgb(245, 194, 66);
         }
         .vgl .cyber-btn:hover { background: rgba(245, 194, 66, .14); }
+        /* the icon says what a click does: play at rest, stop while this one plays */
+        .vgl .cyber-btn { gap: 10px; }
+        .vgl .cyber-btn svg { width: 15px; height: 15px; flex: 0 0 auto; }
+        .vgl .ic-stop, .vgl .laeuft .ic-play { display: none; }
+        .vgl .laeuft .ic-stop { display: inline-block; }
         .vgl .cyber-btn.laeuft { background: rgb(245, 194, 66); color: #0a0f1a; }
 
         .trenner {
@@ -205,7 +222,7 @@
                 </div>
                 <button class="ikon rec" id="btnRec" title="Aufnehmen (Leertaste)" aria-label="Aufnehmen"></button>
                 <div class="seite rechts">
-                    <button class="ikon" id="btnPlay" title="Anhören" aria-label="Anhören"><svg viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19" fill="currentColor"/></svg></button>
+                    <button class="ikon" id="btnPlay" hidden title="Anhören" aria-label="Anhören"><svg viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19" fill="currentColor"/></svg></button>
                     <button class="ikon" id="btnNext" title="Nächster Text (→)" aria-label="Nächster Text"><svg viewBox="0 0 24 24"><polygon points="7,5 16,12 7,19" fill="currentColor"/><rect x="16.6" y="5" width="2.4" height="14" rx="1" fill="currentColor"/></svg></button>
                 </div>
             </div>
@@ -225,15 +242,14 @@
         <p class="hinweis" id="tipp"></p>
 
         <div class="vgl">
-            <button class="cyber-btn" data-hoer="vergleich-original">Original — Doc am RØDE</button>
-            <button class="cyber-btn" data-hoer="vergleich-klon">Klon</button>
-            <button class="cyber-btn" data-hoer="vergleich-klon-eq">Klon + Höhen (+3 dB ab 6 kHz)</button>
+            <button class="cyber-btn" data-hoer="vergleich-original"><svg class="ic-play" viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19" fill="currentColor"/></svg><svg class="ic-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor"/></svg><span>Original — Doc am RØDE</span></button>
+            <button class="cyber-btn" data-hoer="vergleich-klon"><svg class="ic-play" viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19" fill="currentColor"/></svg><svg class="ic-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor"/></svg><span>Klon</span></button>
+            <button class="cyber-btn" data-hoer="vergleich-klon-eq"><svg class="ic-play" viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19" fill="currentColor"/></svg><svg class="ic-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor"/></svg><span>Klon + Höhen (+3 dB ab 6 kHz)</span></button>
         </div>
 
         <div class="liste" id="liste"></div>
-        <p class="hinweis">
-            Aufnahmen als WAV unter <code id="ordner">~/Movies/stimmklon/</code> — außerhalb des Repos.
-            <label class="agc" style="display:inline-flex;margin-left:14px"><input type="checkbox" id="alle"> alle Texte zeigen</label>
+        <p class="hinweis alle-zeile">
+            <label class="pille"><input type="checkbox" id="alle"><span>alle Texte zeigen</span></label>
         </p>
 
         </div>
@@ -767,7 +783,7 @@
                 return zeichne();
             }
             takes = d.takes || {};
-            if (d.ordner) $('ordner').textContent = d.ordner + '/';
+            // (the folder used to be shown here; Doc wanted the line out - it lives in the handoff)
             // start at the first line that is missing or truncated, so a resumed session picks up there
             const offen = sichtbar().findIndex(s => !takes[s.id] || taugtNicht(s, takes[s.id]));
             i = offen < 0 ? 0 : offen;
