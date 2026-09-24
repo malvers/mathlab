@@ -20,7 +20,7 @@
            panels, scrollbars) comes from the central sheets linked above. */
         .booth {
             position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden;
-            padding: 0 clamp(16px, 3vw, 34px) 70px;
+            padding: 22px clamp(16px, 3vw, 34px) 70px;
         }
         .bahn { max-width: 1240px; margin: 0 auto; }
 
@@ -40,7 +40,7 @@
 
         .satz {
             margin: 22px 0 14px; padding: 24px 26px; border-radius: 14px;
-            min-height: 46vh; display: flex; flex-direction: column; justify-content: center;
+            min-height: 34vh; display: flex; flex-direction: column; justify-content: center;
             background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.14);
         }
         .satz.laeuft { border-color: rgb(176, 36, 24); box-shadow: 0 0 0 2px rgba(176, 36, 24, .35); }
@@ -76,27 +76,36 @@
         }
         .pegelbox i { display: block; height: 100%; width: 0; background: rgb(121, 158, 49); transition: width .07s linear; }
         .pegelwert { font-size: 0.7rem; opacity: .6; min-width: 5em; font-variant-numeric: tabular-nums; }
+        .agc { font-size: 0.68rem; opacity: .7; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+        .agc input { accent-color: var(--neon-blue); cursor: pointer; }
+        .mikrowahl {
+            font: inherit; font-size: 0.68rem; max-width: 230px; padding: 4px 8px; cursor: pointer;
+            background: rgba(255, 255, 255, .05); color: inherit; border-radius: 7px;
+            border: 1px solid rgba(255, 255, 255, .2);
+        }
+        .mikrowahl:focus { border-color: var(--neon-blue); outline: none; }
         .uhr.laeuft { color: rgb(176, 36, 24); }
 
         .punkt { width: 11px; height: 11px; border-radius: 50%; background: rgba(255, 255, 255, .25); display: inline-block; }
         .punkt.an { background: rgb(176, 36, 24); animation: puls 1s infinite; }
         @keyframes puls { 50% { opacity: .25; } }
 
-        /* #ui-container is already a flex column (cyber-lab-overrides.css) - so the last card
-           takes the rest of the sidebar and the list scrolls inside it, instead of stopping at a
-           fixed height and leaving the panel empty below (Doc, 22.09.2026: "hier ist Platz"). */
-        #ui-container > .instrument-card:last-of-type {
-            flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
-        }
-        #ui-container > .instrument-card:last-of-type > .card-content {
-            flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
-        }
-        .liste { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 0 -4px; padding: 0 4px; }
+        .liste { margin: 18px 0 0; }
         .zeile {
             display: flex; gap: 7px; align-items: center; padding: 6px 8px; border-radius: 8px;
             border: 1px solid transparent; font-size: 0.7rem; cursor: pointer; margin-bottom: 3px;
         }
         .zeile:hover { background: rgba(0, 210, 255, 0.07); }
+        .vgl { display: flex; flex-wrap: wrap; gap: 8px; }
+        .vgl .cyber-btn {
+            flex: 1 1 200px; width: auto !important; font-size: 0.66rem !important;
+            cursor: pointer; border-radius: 8px;
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid rgb(245, 194, 66); color: rgb(245, 194, 66);
+        }
+        .vgl .cyber-btn:hover { background: rgba(245, 194, 66, .14); }
+        .vgl .cyber-btn.laeuft { background: rgb(245, 194, 66); color: #0a0f1a; }
+
         .trenner {
             font-size: 0.6rem; letter-spacing: .14em; text-transform: uppercase;
             opacity: .45; margin: 12px 0 6px 8px;
@@ -129,21 +138,6 @@
 </head>
 
 <body>
-    <nav id="mini-rail">
-        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-        </div>
-    </nav>
-
-    <aside id="side-panel">
-        <header id="sidebar-header"></header>
-        <div id="ui-container"></div>
-    </aside>
-
     <main id="main-content">
     <div class="booth">
         <div class="bahn">
@@ -152,6 +146,13 @@
             Sprich so, wie du im Labor redest — nicht vorlesen, erzählen. Bei den langen Stücken ruhig
             atmen und Fehler einfach überlesen, das stört den Klon nicht.
         </p>
+
+        <div class="zaehler">
+            <span><b id="minuten">0</b><span id="einheit"> s Referenz</span></span>
+            <span id="urteil" class="fehlt">noch nichts</span>
+            <span id="stand" style="opacity:.6"></span>
+        </div>
+        <div class="balken"><i id="fortschritt"></i></div>
 
         <div id="warnung"></div>
 
@@ -169,8 +170,26 @@
             <button class="cyber-btn" id="btnPlay">Anhören</button>
             <button class="cyber-btn" id="btnPrev">Zurück</button>
             <button class="cyber-btn" id="btnNext">Weiter</button>
+            <label class="agc"><input type="checkbox" id="agc"> Aussteuerung automatisch</label>
+            <label class="agc" for="mikro">Mikrofon</label>
+            <select id="mikro" class="mikrowahl" title="Mikrofon"></select>
         </div>
         <p class="hinweis" id="tipp">Leertaste startet und stoppt. Pfeiltasten blättern.</p>
+
+        <div class="vgl">
+            <button class="cyber-btn" data-hoer="vergleich-original">Original — Doc am RØDE</button>
+            <button class="cyber-btn" data-hoer="vergleich-klon">Klon</button>
+            <button class="cyber-btn" data-hoer="vergleich-klon-eq">Klon + Höhen (+3 dB ab 6 kHz)</button>
+        </div>
+        <p class="hinweis" style="margin-top:10px">
+            Derselbe Text, dreimal. Zischlaute relativ zum Original: Klon −2,7 dB, mit Filter −0,8 dB.
+        </p>
+
+        <div class="liste" id="liste"></div>
+        <p class="hinweis">
+            Aufnahmen als WAV unter <code id="ordner">~/Movies/stimmklon/</code> — außerhalb des Repos.
+            <label class="agc" style="display:inline-flex;margin-left:14px"><input type="checkbox" id="alle"> alle Texte zeigen</label>
+        </p>
 
         </div>
     </div>
@@ -190,6 +209,11 @@
            a take Doc already recorded. */
         const SAETZE = [
             { id: 'einwilligung', text: 'Ich bin der Eigentümer dieser Stimme und bin damit einverstanden, dass Google diese Stimme zur Erstellung eines synthetischen Stimmmodells verwendet.', hinweis: 'Einwilligung — wortwörtlich so, das verlangt Google.' },
+            { id: 'story', hinweis: 'Die Geschichte — 30 Sekunden, das eigentliche Training. Gedankenstriche sind Pausen; bei „Mensch" ruhig seufzen; das Lachen nicht spielen.', text: [
+                'Also. Ich sitze da, halb zwölf nachts, und die Gleichung geht einfach nicht auf. Dreimal gerechnet, dreimal derselbe Unsinn. Und ich denke: Du hast Physik studiert, Mensch — und kriegst das nicht hin.',
+                'Und dann, plötzlich: da war ein Vorzeichen. Ein einziges Minus, an der falschen Stelle!',
+                'Ich hab laut gelacht. Um Mitternacht, allein in der Küche. So ist Mathe: ärgert dich stundenlang, und beschenkt dich in einer Sekunde.',
+            ] },
             { id: 's01', text: 'Nicht verzagen, Doc Alvers fragen!' },
             { id: 's02', text: 'Herzlich willkommen im Mathe-Labor. Schön, dass ihr da seid.' },
             { id: 's03', text: 'Schauen wir uns das mal in Ruhe an: Was passiert eigentlich, wenn wir den Radius verdoppeln?' },
@@ -302,24 +326,18 @@
             ] },
         ];
 
-        /* The sidebar is where a lab keeps its instruments - so the counter and the take list go
-           there (CyberUI.createCard, the central helper), and the main area is left to the text
-           being read. The ids stay exactly as they were, so the rest of the script is untouched. */
-        CyberUI.createCard('ui-container', 'Fortschritt', `
-            <div class="zaehler">
-                <span><b id="minuten">0,0</b> min brauchbar</span>
-                <span id="urteil" class="fehlt">noch nichts</span>
-            </div>
-            <div class="balken"><i id="fortschritt"></i></div>
-            <div class="ziel">Ziel: 2 min für den Schnellklon · 30 min für die gute Qualität</div>
-        `);
-        CyberUI.createCard('ui-container', 'Aufnahmen', `
-            <div class="liste" id="liste"></div>
-            <div class="ziel">Liegen als WAV unter <code id="ordner">~/Movies/stimmklon/</code> — außerhalb des Repos.</div>
-        `);
-
         const ICON_PLAY = '<svg viewBox="0 0 24 24"><polygon points="7,4 20,12 7,20" fill="currentColor" stroke="none"/></svg>';
         const ICON_WEG = '<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
+
+        /* Only two texts are needed now: the consent line and the story Google actually learns
+           from. The other 27 stay in SAETZE - Doc, 24.09.2026: "nicht wegwerfen, vlt. brauchen
+           wir das noch" - and the switch below brings them back. */
+        const G_MIN = 10, G_MAX = 30;      // Google's reference window, same as tools/stimme-hochladen.py
+        // Only the story is shown: the consent recording is done and stays valid, and Google
+        // takes it from disk (Doc, 24.09.2026: "Ich bin Eigentümer auch raus").
+        const NUR = ['story'];
+        let alleZeigen = false;
+        const sichtbar = () => alleZeigen ? SAETZE : SAETZE.filter(s => NUR.includes(s.id));
 
         const alsText = s => Array.isArray(s.text) ? s.text.join(' ') : s.text;
         /* A rough reading pace, used only to spot a take that was cut off: German read aloud runs at
@@ -334,6 +352,44 @@
            gone without a trace. Same hook filmkritik.html and cyber-tour.js use (tools/live_reload.py). */
         window.__liveReloadBusy = () => laeuft;
 
+        /* Automatic gain: ON by default, because the built-in mic is far too quiet without it
+           (22.09., -55 dB takes). A RØDE does not need it and sounds cleaner without - hence the
+           switch. Changing it drops the stream, so the next take opens the microphone afresh. */
+        try { $('agc').checked = localStorage.getItem('agc') !== 'aus'; } catch (e) { $('agc').checked = true; }
+        /* Which microphone: Chrome silently takes the system default, and that is how a RØDE
+           gets ignored while the built-in one records (24.09.2026). Device labels stay empty
+           until permission was granted once - so the list is refilled after that. */
+        async function mikroListe() {
+            let geraete = [];
+            try { geraete = (await navigator.mediaDevices.enumerateDevices()).filter(g => g.kind === 'audioinput'); }
+            catch (e) { return; }
+            const gemerkt = (() => { try { return localStorage.getItem('mikro') || ''; } catch (e) { return ''; } })();
+            const w = $('mikro');
+            w.innerHTML = '<option value="">Systemvorgabe</option>' + geraete.map(g =>
+                '<option value="' + g.deviceId + '">' + (g.label || 'Mikrofon') + '</option>').join('');
+            if (gemerkt && geraete.some(g => g.deviceId === gemerkt)) w.value = gemerkt;
+            else {
+                // no choice yet: prefer a RØDE if one is plugged in - that is why Doc bought it
+                const rode = geraete.find(g => /r[oø]de/i.test(g.label || ''));
+                if (rode) { w.value = rode.deviceId; try { localStorage.setItem('mikro', rode.deviceId); } catch (e) { } }
+            }
+        }
+        mikroListe();
+        $('mikro').onchange = () => {
+            try { localStorage.setItem('mikro', $('mikro').value); } catch (e) { }
+            if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+            $('tipp').textContent = 'Mikrofon gewechselt — beim nächsten Start wirksam.';
+        };
+
+        $('alle').onchange = () => { alleZeigen = $('alle').checked; i = 0; zeichne(); };
+
+        $('agc').onchange = () => {
+            try { localStorage.setItem('agc', $('agc').checked ? 'an' : 'aus'); } catch (e) { }
+            if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+            $('tipp').textContent = 'Aussteuerung ' + ($('agc').checked ? 'automatisch' : 'aus')
+                + ' — beim nächsten Start wirksam. Pegel im Auge behalten.';
+        };
+
         // Anything that throws used to fail silently and look like "nothing was recorded" - say it out loud.
         window.addEventListener('error', e => { $('tipp').textContent = 'Fehler: ' + e.message; });
         window.addEventListener('unhandledrejection', e => {
@@ -345,8 +401,8 @@
         const taugtNicht = (s, t) => zuKurz(s, t) || zuLeise(t);
 
         function zeichne() {
-            const s = SAETZE[i], lang = Array.isArray(s.text);
-            $('satznr').textContent = s.hinweis || (lang ? ('Langer Text — ' + s.titel) : ('Satz ' + i + ' von 14'));
+            const LISTE = sichtbar(), s = LISTE[i], lang = Array.isArray(s.text);
+            $('satznr').textContent = s.hinweis || (lang ? ('Langer Text — ' + s.titel) : ('Text ' + (i + 1) + ' von ' + LISTE.length));
             $('satztext').className = lang ? '' : 'kurz';
             $('satztext').innerHTML = lang
                 ? s.text.map(p => '<p>' + p + '</p>').join('')
@@ -359,19 +415,34 @@
 
             // only takes that are not obviously truncated count towards the goal
             let gut = 0, kaputt = 0;
-            SAETZE.forEach(x => {
+            LISTE.forEach(x => {
                 const t = takes[x.id];
                 if (!t || !t.sekunden) return;
                 if (taugtNicht(x, t)) kaputt++; else gut += t.sekunden;
             });
-            $('minuten').textContent = (gut / 60).toFixed(1).replace('.', ',');
-            $('fortschritt').style.width = Math.min(100, gut / 1800 * 100) + '%';
+            /* The bar measures what Google actually asks for: ONE reference take of 10-30 s,
+               plus the consent recording. The old scale ran to 30 minutes - that was ElevenLabs,
+               which wants as much material as it can get, and it made a perfect take read
+               "noch zu wenig" (Doc, 24.09.2026). */
+            const refKand = LISTE.filter(x => x.id !== 'einwilligung' && takes[x.id] && !taugtNicht(x, takes[x.id]))
+                                 .map(x => takes[x.id].sekunden || 0);
+            const ref = refKand.length ? Math.max.apply(null, refKand) : 0;
+            const okEinw = takes['einwilligung'] && !taugtNicht(SAETZE[0], takes['einwilligung']);
+
+            $('minuten').textContent = ref ? ref.toFixed(1).replace('.', ',') : '0';
+            $('einheit').textContent = ' s Referenz';
+            $('fortschritt').style.width = Math.min(100, ref / G_MAX * 100) + '%';
+            $('fortschritt').style.background = ref >= G_MIN ? 'rgb(121, 158, 49)' : 'rgb(245, 194, 66)';
+
             const u = $('urteil');
-            if (gut >= 1800) { u.textContent = 'reicht für die beste Qualität'; u.className = 'genug'; }
-            else if (gut >= 600) { u.textContent = 'reicht für einen guten Klon'; u.className = 'genug'; }
-            else if (gut >= 120) { u.textContent = 'reicht für den Schnellklon'; u.className = 'genug'; }
-            else if (gut > 0) { u.textContent = 'noch zu wenig'; u.className = 'fehlt'; }
-            else { u.textContent = 'noch nichts'; u.className = 'fehlt'; }
+            if (!ref) { u.textContent = 'keine Referenz'; u.className = 'fehlt'; }
+            else if (ref < G_MIN) { u.textContent = 'zu kurz — Google will mindestens ' + G_MIN + ' s'; u.className = 'fehlt'; }
+            else if (ref > G_MAX) { u.textContent = 'länger als ' + G_MAX + ' s — wird beim Hochladen gekürzt'; u.className = 'fehlt'; }
+            else { u.textContent = 'passt'; u.className = 'genug'; }
+
+            $('stand').textContent = (okEinw ? 'Einwilligung liegt vor' : 'Einwilligung fehlt noch')
+                + ' · Google nimmt ' + G_MIN + '–' + G_MAX + ' s'
+                + (alleZeigen ? ' · ' + LISTE.filter(x => takes[x.id]).length + ' von ' + LISTE.length + ' Texten' : '');
 
             if (!falscherServer) $('warnung').innerHTML = kaputt
                 ? '<div class="warnkasten"><b>' + kaputt + ' Aufnahme' + (kaputt > 1 ? 'n taugen' : ' taugt') + ' nicht</b> — '
@@ -379,10 +450,10 @@
                   + 'Achte beim Sprechen auf den Pegelbalken: er muss grün ausschlagen.</div>'
                 : '';
 
-            $('liste').innerHTML = SAETZE.map((x, n) => {
+            $('liste').innerHTML = LISTE.map((x, n) => {
                 const t = takes[x.id], kaput = taugtNicht(x, t);
                 const name = x.titel || alsText(x);
-                const kopf = (x.id === 't01') ? '<div class="trenner">Lange Texte</div>' : '';
+                const kopf = (alleZeigen && x.id === 't01') ? '<div class="trenner">Lange Texte</div>' : '';
                 return kopf + '<div class="zeile ' + (t ? (kaput ? 'angeschnitten' : 'fertig') : '') + (n === i ? ' hier' : '') + '" data-zu="' + n + '">'
                     + '<span class="sek ' + (kaput ? 'warn' : '') + '" title="' + (t && t.pegel != null ? t.pegel + ' dB' : '') + '">'
                     + (t ? (zuLeise(t) ? 'still' : (t.sekunden || 0).toFixed(1) + 's') : '—') + '</span>'
@@ -441,6 +512,10 @@
 
         async function starte() {
             if (laeuft) return;
+            /* Bound NOW, before the microphone opens: getUserMedia is an await, and anything that
+               moves the cursor in between (the server check at load, a key press) would file this
+               take under the wrong text. Found 24.09.2026 while rebuilding the page. */
+            const meine = sichtbar()[i].id;
             // a stream from a previous take can be dead (device switched, tab slept) - take a fresh one then
             if (stream && !stream.getAudioTracks().some(t => t.readyState === 'live')) stream = null;
             if (!stream) {
@@ -452,7 +527,10 @@
                            noise, no voice (22.09.2026: "man hört gar nix"). A clone needs an audible
                            voice far more than it needs an unprocessed one. Echo cancellation and
                            noise suppression stay off: those two chew on the voice itself. */
-                        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true, channelCount: 1 }
+                        audio: Object.assign(
+                            { echoCancellation: false, noiseSuppression: false,
+                              autoGainControl: $('agc').checked, channelCount: 1 },
+                            $('mikro').value ? { deviceId: { exact: $('mikro').value } } : {})
                     });
                 } catch (err) {
                     $('tipp').textContent = 'Kein Mikrofon: ' + err.name + ' — ' + err.message;
@@ -461,7 +539,6 @@
             }
             const typ = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'].find(c => MediaRecorder.isTypeSupported(c)) || '';
             const r = new MediaRecorder(stream, typ ? { mimeType: typ } : undefined);
-            const meine = SAETZE[i].id;      // bind the id NOW - Doc may page on while this take is still uploading
             const stuecke = [];              // own array per take, so the next start cannot empty this one
             r.ondataavailable = e => e.data.size && stuecke.push(e.data);
             r.onstop = () => schicke(meine, stuecke, r.mimeType || 'audio/webm');
@@ -470,6 +547,7 @@
             // is then never lost as one big missing chunk
             r.start(1000);
             laeuft = true; uhrAn(); pegelAn(stream); zeichne();
+            mikroListe();                 // labels arrive only after the first permission
             $('tipp').textContent = 'Läuft. Leertaste beendet die Aufnahme.';
         }
 
@@ -498,13 +576,18 @@
             else if (zuKurz(s, t)) $('tipp').textContent = 'Gespeichert — aber nur ' + t.sekunden + ' s, das ist zu kurz. Bitte noch einmal.';
             else $('tipp').textContent = 'Gespeichert: ' + (t ? t.sekunden : 0) + ' s. Leertaste startet die nächste.';
             // move on only if this take was the one on screen and it looks complete
-            if (id === SAETZE[i].id && t && !taugtNicht(s, t) && i < SAETZE.length - 1) i++;
+            const L = sichtbar();
+            if (id === L[i].id && t && !taugtNicht(s, t) && i < L.length - 1) i++;
             zeichne();
         }
 
         function hoere(id) {
             if (klang) { klang.pause(); }
+            document.querySelectorAll('.vgl .cyber-btn').forEach(b => b.classList.remove('laeuft'));
+            const knopfV = document.querySelector('.vgl [data-hoer="' + id + '"]');
+            if (knopfV) knopfV.classList.add('laeuft');
             klang = new Audio('/__stimme/hoeren/' + id + '?t=' + Date.now());
+            klang.onended = () => { if (knopfV) knopfV.classList.remove('laeuft'); };
             klang.onerror = () => { $('tipp').textContent = 'Konnte die Aufnahme nicht abspielen.'; };
             klang.play().catch(e => { $('tipp').textContent = 'Wiedergabe abgelehnt: ' + e.message; });
         }
@@ -513,9 +596,22 @@
            toggle twice - start, and immediately stop again. That is what cut the first takes short. */
         const knopf = (el, tu) => el.onclick = () => { el.blur(); tu(); };
         knopf($('btnRec'), () => laeuft ? stoppe() : starte());
-        knopf($('btnPlay'), () => hoere(SAETZE[i].id));
+        knopf($('btnPlay'), () => hoere(sichtbar()[i].id));
         knopf($('btnPrev'), () => { if (!laeuft && i > 0) { i--; zeichne(); } });
-        knopf($('btnNext'), () => { if (!laeuft && i < SAETZE.length - 1) { i++; zeichne(); } });
+        knopf($('btnNext'), () => { if (!laeuft && i < sichtbar().length - 1) { i++; zeichne(); } });
+
+        /* No separate stop button: clicking the one that is playing stops it (Doc, 24.09.2026:
+           "raus -> nochmaliges Klicken"). Clicking another one switches over. */
+        document.addEventListener('click', e => {
+            const v = e.target.closest && e.target.closest('.vgl [data-hoer]');
+            if (!v) return;
+            if (v.classList.contains('laeuft')) {
+                if (klang) klang.pause();
+                v.classList.remove('laeuft');
+                return;
+            }
+            hoere(v.dataset.hoer);
+        });
 
         $('liste').onclick = async e => {
             const h = e.target.closest('[data-hoer]'), w = e.target.closest('[data-weg]'), z = e.target.closest('[data-zu]');
@@ -549,7 +645,9 @@
         if (location.search.includes('selbsttest')) {
             SAETZE.push({ id: 'selbsttest', text: 'Selbsttest, drei Sekunden Ton.' });
             setTimeout(async () => {
-                i = SAETZE.length - 1;
+                // the test line is hidden by the text filter - show everything, then find it by id
+                alleZeigen = true;
+                i = sichtbar().findIndex(x => x.id === 'selbsttest');
                 await starte();
                 if (!laeuft) { document.title = 'SELBSTTEST: Aufnahme startete nicht'; return; }
                 setTimeout(() => {
@@ -559,7 +657,7 @@
                         document.title = 'SELBSTTEST: ' + (t && t.sekunden ? t.sekunden + ' s, WAV ' + t.datei : 'NICHTS ANGEKOMMEN');
                     }, 2500);
                 }, 3000);
-            }, 400);
+            }, 1800);   // after the server check - it moves the cursor too
         }
 
         /* This page lives in HTML/, so serve.py (:8765) and every filmkritik server hand it out too -
@@ -584,6 +682,7 @@
             return null;
         }
 
+
         stehtDerServer().then(async d => {
             if (!d) {
                 falscherServer = true;
@@ -602,7 +701,7 @@
             takes = d.takes || {};
             if (d.ordner) $('ordner').textContent = d.ordner + '/';
             // start at the first line that is missing or truncated, so a resumed session picks up there
-            const offen = SAETZE.findIndex(s => !takes[s.id] || taugtNicht(s, takes[s.id]));
+            const offen = sichtbar().findIndex(s => !takes[s.id] || taugtNicht(s, takes[s.id]));
             i = offen < 0 ? 0 : offen;
             zeichne();
         });

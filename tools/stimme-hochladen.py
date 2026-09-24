@@ -37,6 +37,9 @@ VOICE = os.path.join(STORE, 'stimme.json')
 API = 'https://api.elevenlabs.io/v1'
 GEMINI = 'https://generativelanguage.googleapis.com/v1beta'
 GEMINI_MODELL = 'gemini-3.8-flash-tts'
+# Flash-Lite costs 6 $ instead of 9 $ per million audio tokens and is, per Google, the one
+# "optimised for reliable voice replication" - worth hearing side by side (--lite).
+GEMINI_LITE = 'gemini-3.8-flash-lite-tts'
 NAME = 'Doc Alvers'
 
 # Google's window for the reference take. Shorter carries too little voice, longer is refused.
@@ -182,21 +185,41 @@ def gemini_hochladen():
                  'Bei 403/PERMISSION_DENIED kann es die Region sein - Voice Replication ist im\n'
                  'EWR möglicherweise gesperrt. Dann bleibt ElevenLabs: --elevenlabs' % (err.code, leib))
 
-    vid = antwort.get('name') or antwort.get('voice_id') or (antwort.get('voice') or {}).get('name')
+    # Google answers with 'id' (voice_...); the others are there for older/other shapes
+    vid = (antwort.get('id') or antwort.get('voice_id') or antwort.get('name')
+           or (antwort.get('voice') or {}).get('id'))
     if not vid:
         sys.exit('Keine voice_id zurückbekommen: ' + json.dumps(antwort)[:400])
     with open(VOICE, 'w', encoding='utf-8') as f:
         json.dump({'anbieter': 'gemini', 'voice_id': vid, 'name': NAME,
-                   'aus': [quelle_id, 'einwilligung'], 'modell': GEMINI_MODELL}, f,
-                  ensure_ascii=False, indent=1)
+                   'aus': [quelle_id, 'einwilligung'], 'modell': GEMINI_MODELL,
+                   'laeuft_ab': antwort.get('expire_time', '')}, f, ensure_ascii=False, indent=1)
     print('\nFertig. voice_id: %s\n(gemerkt in %s)' % (vid, VOICE))
     print('Anhören:  python3 tools/stimme-hochladen.py --probe')
     return vid
 
 
-def gemini_probe(text, vid):
+def probe_ziel(text):
+    """Every sample keeps its own file. The first one nearly died under the second
+    (Doc, 24.09.2026: „diesn clip aufheben!") - a take that was just generated is exactly
+    what one wants to play again, so nothing here ever overwrites."""
+    ordner = os.path.join(STORE, 'proben')
+    os.makedirs(ordner, exist_ok=True)
+    nummern = [int(n[6:9]) for n in os.listdir(ordner)
+               if n.startswith('probe-') and n[6:9].isdigit()]
+    nr = max(nummern, default=0) + 1
+    kurz = ''.join(c if c.isalnum() else '-' for c in text.lower()[:34]).strip('-')
+    while '--' in kurz:
+        kurz = kurz.replace('--', '-')
+    pfad = os.path.join(ordner, 'probe-%03d-%s.wav' % (nr, kurz or 'probe'))
+    with open(os.path.join(ordner, 'proben.txt'), 'a', encoding='utf-8') as f:
+        f.write('%s  %s\n' % (os.path.basename(pfad), text))
+    return pfad
+
+
+def gemini_probe(text, vid, modell=None):
     koerper = {
-        'model': GEMINI_MODELL,
+        'model': modell or GEMINI_MODELL,
         'input': [{'type': 'user_input',
                    'content': [{'type': 'text', 'text': text,
                                 'annotations': [{'type': 'speech_metadata',
@@ -232,7 +255,7 @@ def gemini_probe(text, vid):
     roh = finde_audio(antwort)
     if not roh:
         sys.exit('Kein Audio in der Antwort: ' + json.dumps(antwort)[:400])
-    ziel = os.path.join(STORE, 'probe.wav')
+    ziel = probe_ziel(text + (' lite' if (modell or '').endswith('lite-tts') else ''))
     with open(ziel, 'wb') as f:
         f.write(base64.b64decode(roh))
     print('Gesprochen:', text)
@@ -284,7 +307,7 @@ def probe(text):
         sys.exit('Noch keine Stimme - erst: python3 tools/stimme-hochladen.py')
 
     if gemerkt.get('anbieter') == 'gemini':
-        return gemini_probe(text, vid)
+        return gemini_probe(text, vid, GEMINI_LITE if '--lite' in sys.argv else None)
 
     req = urllib.request.Request(
         API + '/text-to-speech/' + vid,
@@ -293,7 +316,7 @@ def probe(text):
     )
     req.add_header('Content-Type', 'application/json')
     req.add_header('xi-api-key', key('elevenlabs'))
-    ziel = os.path.join(STORE, 'probe.mp3')
+    ziel = probe_ziel(text).replace('.wav', '.mp3')
     with urllib.request.urlopen(req, timeout=120) as r, open(ziel, 'wb') as f:
         f.write(r.read())
     print('Gesprochen:', text)
@@ -305,6 +328,8 @@ if __name__ == '__main__':
     if '--probe' in sys.argv:
         n = sys.argv.index('--probe')
         satz = sys.argv[n + 1] if len(sys.argv) > n + 1 else 'Nicht verzagen, Doc Alvers fragen!'
+        if satz == '--lite':
+            satz = sys.argv[n + 2] if len(sys.argv) > n + 2 else 'Nicht verzagen, Doc Alvers fragen!'
         probe(satz)
     elif '--elevenlabs' in sys.argv:
         hochladen()
