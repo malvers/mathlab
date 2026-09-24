@@ -546,6 +546,10 @@ class HtmlDeck:
         (Doc, 24.09.2026: the Maya deck shows his own team photo). src is relative to HTML/decks/."""
         self.avatar = (src, alt)
 
+    def set_voice(self, voice):
+        """'doc': Frag Solita answers in Doc's own voice (a Google Voice Replication, 24.09.2026)."""
+        self.voice = voice
+
     def render(self):
         # the spoken parts travel inside the page - deck_audio.mjs reads them from here too
         narr = (json.dumps({"deck": self.name,
@@ -556,6 +560,10 @@ class HtmlDeck:
                           ensure_ascii=False).replace("</", "<\\/")
         out = page(_html.escape(self.doc_title, quote=False), _html.escape(self.subtitle, quote=False),
                    "\n".join(self.slides), narr, summ)
+        voice = getattr(self, "voice", None)
+        if voice:
+            assert out.count("<body>") == 1, "PAGE has no plain <body> - set_voice() needs updating"
+            out = out.replace("<body>", '<body data-voice="%s">' % _html.escape(voice, quote=True), 1)
         avatar = getattr(self, "avatar", None)
         if avatar:
             old = '<img src="../resources/solita-avatar.png" alt="Solita"'
@@ -1731,7 +1739,10 @@ ASK_JS = r"""
   const AI_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/claude';
   const TTS_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/tts';
   const MODEL = 'claude-haiku-4-5';        // ~0.3 ct per question; the voice costs far more than the answer
-  const VOICE = 'de-DE-Studio-C';          // Solita's DocPad voice - NEVER the browser voice (Doc)
+  // Solita's DocPad voice - NEVER the browser voice (Doc). A deck can speak in Doc's own voice instead:
+  // <body data-voice="doc"> (html_deck set_voice), the tts function then answers in wav, or in
+  // Studio-C mp3 when his voice is too slow - j.mime says which.
+  const VOICE = (document.body && document.body.dataset.voice === 'doc') ? 'doc' : 'de-DE-Studio-C';
   const SYS = 'Du bist Solita, die Tutorin in Doc Alvers Mathe-Labor. Du hilfst Schülerinnen und '
     + 'Schülern der Klassen 11 bis 13 am Beruflichen Gymnasium und an der Fachoberschule. '
     + 'Du bekommst eine Übersicht der Präsentation und die Folie, auf der die Klasse gerade steht. '
@@ -2302,7 +2313,7 @@ ASK_JS = r"""
         once();
         if (!ttsOn || panel.hidden) return;          // switched off or closed while she was fetching
         stopAudio();
-        audio = new Audio('data:audio/mp3;base64,' + j.audioContent);
+        audio = new Audio('data:' + (j.mime || 'audio/mp3') + ';base64,' + j.audioContent);
         if (el) karaoke(el, audio);
         audio.play().catch(function () { });
       })

@@ -3,6 +3,12 @@
 // { ssml | text, voice?, languageCode?, speakingRate?, pitch? }; we add the key, call Google, and
 // return Google's JSON verbatim ({ audioContent: <base64 mp3> }).
 //
+// voice: 'doc' is Doc's own voice - a Google Voice Replication (Gemini TTS, built 24.09.2026 from his
+// recordings). It answers { audioContent: <base64 wav>, mime: 'audio/wav' }. If Gemini is slow or
+// fails, the same text comes back in Solita's Studio voice as mp3 (mime: 'audio/mp3', fallback: true),
+// so a deck never goes silent. Secret: GEMINI_VOICE_KEY - a key of the Google project that owns the
+// replicated voice (the voice id is project bound). Without it GEMINI_API_KEY is tried.
+//
 // Deploy (no JWT — it only calls an external API, touches no user data):
 //   supabase functions deploy tts --no-verify-jwt
 // Secret: GOOGLE_API_KEY (Dashboard → Edge Functions → Secrets) — a Google API key with the
@@ -28,6 +34,48 @@ async function logTtsChars(voice: string, chars: number) {
 }
 
 const GOOGLE_TTS = 'https://texttospeech.googleapis.com/v1/text:synthesize';
+const GEMINI_INTERACTIONS = 'https://generativelanguage.googleapis.com/v1beta/interactions';
+const DOC_MODEL = 'gemini-3.8-flash-tts';
+const DOC_VOICE = 'voice_ns9j59rfoa3l';           // valid until 24.09.2027 (~/Movies/stimmklon/stimme.json)
+const DOC_STYLE = 'warm, lebendig, wie im Unterricht';
+const DOC_WAIT = 15_000;                          // ms - after that Solita's voice steps in (the deck waits 20 s)
+const FALLBACK_VOICE = 'de-DE-Studio-C';
+
+// Doc's voice: one Gemini "interaction", the audio comes back base64 inside steps[].content[].
+// Returns null on anything but a clean answer - the caller then falls back to Solita.
+async function docVoice(text: string): Promise<string | null> {
+  // its own key if set, else the general one - which only works if it belongs to the voice's project
+  const key = Deno.env.get('GEMINI_VOICE_KEY') || Deno.env.get('GEMINI_API_KEY');
+  if (!key) return null;
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), DOC_WAIT);
+  try {
+    const r = await fetch(GEMINI_INTERACTIONS, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+      body: JSON.stringify({
+        model: DOC_MODEL,
+        input: [{ type: 'user_input', content: [{ type: 'text', text,
+          annotations: [{ type: 'speech_metadata', style: DOC_STYLE }] }] }],
+        response_format: { type: 'audio' },
+        generation_config: { speech_config: [{ voice: DOC_VOICE }] },
+      }),
+      signal: ctl.signal,
+    });
+    if (!r.ok) return null;
+    const data = await r.json().catch(() => null) as { steps?: { content?: { type?: string; data?: string }[] }[] } | null;
+    for (const step of data?.steps || []) {
+      for (const c of step.content || []) {
+        if (c.type === 'audio' && typeof c.data === 'string' && c.data.length > 1000) return c.data;
+      }
+    }
+    return null;
+  } catch (_) {
+    return null;                                  // timeout, 429 or network - Solita takes over
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -63,9 +111,22 @@ Deno.serve(async (req) => {
   const spent = budgetExceeded(req, chars, 150_000);
   if (spent) return spent;
 
+  const wantDoc = b.voice === 'doc';
+  if (wantDoc && !b.ssml) {
+    const wav = await docVoice(String(b.text));
+    if (wav) {
+      try {
+        const er = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
+        const p = logTtsChars('doc-replica', chars);
+        if (er?.waitUntil) er.waitUntil(p);
+      } catch (_) { /* never affect the response */ }
+      return json({ audioContent: wav, mime: 'audio/wav' });
+    }
+  }
+
   // Chirp3-HD voices reject pitch/speakingRate ("This voice does not support pitch parameters") → omit
   // them for Chirp; everything else (Neural2/Wavenet/Studio, incl. glocken) keeps the same audioConfig.
-  const voiceName = b.voice || 'de-DE-Neural2-B';
+  const voiceName = wantDoc ? FALLBACK_VOICE : (b.voice || 'de-DE-Neural2-B');
   const isChirp = /chirp/i.test(voiceName);
   const audioConfig: Record<string, unknown> = { audioEncoding: 'MP3' };
   if (!isChirp) {
@@ -92,6 +153,7 @@ Deno.serve(async (req) => {
         if (er?.waitUntil) er.waitUntil(p);
       } catch (_) { /* never affect the response */ }
     }
+    if (wantDoc && r.ok) return json({ ...data, mime: 'audio/mp3', fallback: true });   // Doc's voice did not come
     return json(data, r.ok ? 200 : (r.status || 502)); // pass Google's { audioContent } (or its error) through
   } catch (e) {
     return json({ error: String((e && (e as Error).message) || e) }, 502);

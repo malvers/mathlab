@@ -644,7 +644,10 @@ fromHash();
   const AI_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/claude';
   const TTS_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/tts';
   const MODEL = 'claude-haiku-4-5';        // ~0.3 ct per question; the voice costs far more than the answer
-  const VOICE = 'de-DE-Studio-C';          // Solita's DocPad voice - NEVER the browser voice (Doc)
+  // Solita's DocPad voice - NEVER the browser voice (Doc). A deck can speak in Doc's own voice instead:
+  // <body data-voice="doc"> (html_deck set_voice), the tts function then answers in wav, or in
+  // Studio-C mp3 when his voice is too slow - j.mime says which.
+  const VOICE = (document.body && document.body.dataset.voice === 'doc') ? 'doc' : 'de-DE-Studio-C';
   const SYS = 'Du bist Solita, die Tutorin in Doc Alvers Mathe-Labor. Du hilfst Schülerinnen und '
     + 'Schülern der Klassen 11 bis 13 am Beruflichen Gymnasium und an der Fachoberschule. '
     + 'Du bekommst eine Übersicht der Präsentation und die Folie, auf der die Klasse gerade steht. '
@@ -1215,7 +1218,7 @@ fromHash();
         once();
         if (!ttsOn || panel.hidden) return;          // switched off or closed while she was fetching
         stopAudio();
-        audio = new Audio('data:audio/mp3;base64,' + j.audioContent);
+        audio = new Audio('data:' + (j.mime || 'audio/mp3') + ';base64,' + j.audioContent);
         if (el) karaoke(el, audio);
         audio.play().catch(function () { });
       })
