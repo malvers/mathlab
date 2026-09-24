@@ -58,6 +58,7 @@
         #satztext p:last-child { margin-bottom: 0; }
 
         .regie { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 8px; }
+        .regie { gap: 14px; }
         .regie .cyber-btn {
             flex: 0 1 auto; min-width: 142px; cursor: pointer; border-radius: 8px;
             background: rgba(255, 255, 255, 0.03);
@@ -85,6 +86,26 @@
         }
         .mikrowahl:focus { border-color: var(--neon-blue); outline: none; }
         .uhr.laeuft { color: rgb(176, 36, 24); }
+        /* Clock and level meter show only while a take runs. At rest, "0:00" beside an empty bar
+           looks exactly like a player's progress line (Doc, 24.09.2026: "progress dort raus"). */
+        .regie .uhr, .regie .pegelbox, .regie .pegelwert, .regie .punkt { display: none; }
+        .regie.aktiv .uhr, .regie.aktiv .pegelbox, .regie.aktiv .pegelwert, .regie.aktiv .punkt { display: inline-block; }
+
+        .ikon {
+            width: 52px; height: 52px; border-radius: 50%; padding: 0; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: rgba(255, 255, 255, .03); border: 1px solid var(--neon-blue); color: var(--neon-blue);
+            transition: background .15s, transform .1s;
+        }
+        .ikon svg { width: 22px; height: 22px; }
+        .ikon:hover { background: rgba(0, 210, 255, .12); }
+        .ikon:active { transform: scale(.94); }
+        .ikon:disabled { opacity: .3; cursor: not-allowed; }
+        /* record: Doc's red - a filled dot at rest, a filled square while it runs */
+        .ikon.rec { width: 64px; height: 64px; border-color: rgb(176, 36, 24); color: rgb(176, 36, 24); }
+        .ikon.rec svg { width: 26px; height: 26px; }
+        .ikon.rec:hover { background: rgba(176, 36, 24, .16); }
+        .ikon.rec.stopp { background: rgb(176, 36, 24); color: #fff; animation: puls 1.2s infinite; }
 
         .punkt { width: 11px; height: 11px; border-radius: 50%; background: rgba(255, 255, 255, .25); display: inline-block; }
         .punkt.an { background: rgb(176, 36, 24); animation: puls 1s infinite; }
@@ -166,10 +187,10 @@
             <span class="uhr" id="uhr">0:00</span>
             <span class="pegelbox" title="Aussteuerung"><i id="pegel"></i></span>
             <span class="pegelwert" id="pegelwert"></span>
-            <button class="cyber-btn" id="btnRec">Aufnehmen</button>
-            <button class="cyber-btn" id="btnPlay">Anhören</button>
-            <button class="cyber-btn" id="btnPrev">Zurück</button>
-            <button class="cyber-btn" id="btnNext">Weiter</button>
+            <button class="ikon rec" id="btnRec" title="Aufnehmen (Leertaste)" aria-label="Aufnehmen"></button>
+            <button class="ikon" id="btnPlay" title="Anhören" aria-label="Anhören"><svg viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19" fill="currentColor"/></svg></button>
+            <button class="ikon" id="btnPrev" title="Voriger Text (←)" aria-label="Voriger Text"><svg viewBox="0 0 24 24"><polygon points="17,5 8,12 17,19" fill="currentColor"/><rect x="5" y="5" width="2.4" height="14" rx="1" fill="currentColor"/></svg></button>
+            <button class="ikon" id="btnNext" title="Nächster Text (→)" aria-label="Nächster Text"><svg viewBox="0 0 24 24"><polygon points="7,5 16,12 7,19" fill="currentColor"/><rect x="16.6" y="5" width="2.4" height="14" rx="1" fill="currentColor"/></svg></button>
             <label class="agc"><input type="checkbox" id="agc"> Aussteuerung automatisch</label>
             <label class="agc" for="mikro">Mikrofon</label>
             <select id="mikro" class="mikrowahl" title="Mikrofon"></select>
@@ -409,8 +430,15 @@
                 : s.text;
             $('satz').classList.toggle('laeuft', laeuft);
             $('punkt').classList.toggle('an', laeuft);
-            $('btnRec').textContent = laeuft ? 'Stopp' : (takes[s.id] ? 'Neu aufnehmen' : 'Aufnehmen');
+            const REC = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="currentColor"/></svg>';
+            const STOP = '<svg viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor"/></svg>';
+            $('btnRec').innerHTML = laeuft ? STOP : REC;
+            const wort = laeuft ? 'Stopp' : (takes[s.id] ? 'Neu aufnehmen' : 'Aufnehmen');
+            $('btnRec').title = wort + ' (Leertaste)'; $('btnRec').setAttribute('aria-label', wort);
             $('btnRec').classList.toggle('stopp', laeuft);
+            document.querySelector('.regie').classList.toggle('aktiv', laeuft);
+            $('btnPrev').disabled = laeuft || i === 0;
+            $('btnNext').disabled = laeuft || i >= LISTE.length - 1;
             $('btnPlay').disabled = !takes[s.id];
 
             // only takes that are not obviously truncated count towards the goal
