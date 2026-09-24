@@ -182,13 +182,18 @@
             nav.appendChild(homeBtn);
             nav.appendChild(backBtn);
             nav.appendChild(qrBtn);
-            nav.appendChild(bugBtn);
-            nav.appendChild(donateBtn);
-            nav.appendChild(briefingBtn);
+            // Doc 24.09.2026: bug, heart and briefing (?) out - commented, not deleted
+            // nav.appendChild(bugBtn);
+            // nav.appendChild(donateBtn);
+            // nav.appendChild(briefingBtn);
 
             const miniRail = document.getElementById("mini-rail");
             if (miniRail) {
                 queueMicrotask(() => {
+                    // leftovers from an earlier pass: empty nav strips only make gaps
+                    miniRail.querySelectorAll('.cyber-nav.integrated').forEach(el => {
+                        if (!el.children.length) el.remove();
+                    });
                     // 1. Move language to end first — it sits right after hamburger by default
                     //    and would otherwise push QR/bug to position 2 when we insert before it.
                     const langBtn = miniRail.querySelector('#rail-lang-display-btn');
@@ -197,7 +202,9 @@
                     // 2. Insert play→home→back→?→heart directly after the hamburger button.
                     const hamburger = miniRail.firstElementChild;
                     let anchor = hamburger;
-                    [playBtn, homeBtn, backBtn, briefingBtn, donateBtn].forEach(btn => {
+                    // Doc 24.09.2026: briefing (?) and heart out of the rail - commented, not deleted
+                    // [playBtn, homeBtn, backBtn, briefingBtn, donateBtn].forEach(btn => {
+                    [playBtn, homeBtn, backBtn].forEach(btn => {
                         btn.dataset.cyberBrandingNav = "1";
                         miniRail.insertBefore(btn, anchor.nextSibling);
                         anchor = btn;
@@ -206,7 +213,9 @@
                     // 3. Insert QR→bug after coffee (or after heart if coffee not present yet).
                     const coffeeBtn = miniRail.querySelector('.coffee-btn');
                     let anchor2 = coffeeBtn || anchor;
-                    [qrBtn, bugBtn].forEach(btn => {
+                    // Doc 24.09.2026: bug out of the rail - commented, not deleted
+                    // [qrBtn, bugBtn].forEach(btn => {
+                    [qrBtn].forEach(btn => {
                         btn.dataset.cyberBrandingNav = "1";
                         miniRail.insertBefore(btn, anchor2.nextSibling);
                         anchor2 = btn;
@@ -215,7 +224,9 @@
                     // language is already last (moved in step 1)
                     nav.style.display = "none";
                     nav.classList.add("integrated");
-                    miniRail.appendChild(nav);
+                    // empty since the bug/heart/briefing buttons are commented out - an empty
+                    // one still costs its margin and tears a gap in the rail
+                    if (nav.children.length) miniRail.appendChild(nav);
                 });
             } else {
                 const sidebarHeader = document.getElementById("sidebar-header");

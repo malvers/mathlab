@@ -31,11 +31,12 @@ class CyberUI {
                 }
                 CyberUI.applyMiniRailMenuLabel();
                 // CyberUI.injectContactHeartButton(); // Moved to top nav row
-                if (CyberUI.injectCoffeeButton()) {
-                    console.log("☕ Cyber-Coffee injected.");
-                } else {
-                    setTimeout(tryInject, 100);
-                }
+                // Doc 24.09.2026: coffee out of the rail - commented, not deleted
+                // if (CyberUI.injectCoffeeButton()) {
+                //     console.log("☕ Cyber-Coffee injected.");
+                // } else {
+                //     setTimeout(tryInject, 100);
+                // }
                 return;
             }
 

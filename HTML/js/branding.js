@@ -648,9 +648,10 @@ const CyberBranding = {
         nav.appendChild(homeBtn);
         nav.appendChild(backBtn);
         nav.appendChild(qrBtn);
-        nav.appendChild(bugBtn);
-        nav.appendChild(donateBtn);
-        nav.appendChild(briefingBtn);
+        // Doc 24.09.2026: bug, heart and briefing (?) out - commented, not deleted
+        // nav.appendChild(bugBtn);
+        // nav.appendChild(donateBtn);
+        // nav.appendChild(briefingBtn);
 
         const sidebarHeader = document.getElementById('sidebar-header');
         const sidebar = sidebarHeader ||
