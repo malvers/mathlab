@@ -97,16 +97,16 @@
 
         .fp-card-head { margin: 0 0 8px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 
+        /* Doc, 24.09.2026: „schreib da nur grau Mathematik 11" - the orange short label
+           („MA 11") and the spelled-out one next to it were two names for the same class.
+           One grey line is left, and the topic below it carries the weight. */
         .fp-klasse {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1rem;
-            letter-spacing: 0.05em;
-            color: var(--lambda);
+            font-size: 0.95rem;
+            color: var(--muted);
             text-decoration: none;
         }
 
         .fp-klasse:hover { text-decoration: underline; }
-        .fp-lang { font-size: 0.9rem; color: var(--muted); }
         .fp-thema { margin: 0 0 10px; font-size: 1.02rem; color: var(--text); }
 
         /* The paper - the same two values as the sheet in the lesson
@@ -144,12 +144,11 @@
 </head>
 
 <body>
-    <header class="page-head">
-        <a class="back-link" href="./">&larr; Stoffverteilungspl&auml;ne</a>
-        <h1>Fahrplan <span class="cloud-state" id="cloud-state"></span></h1>
-    </header>
-
-    <div class="fp-bar" id="fp-bar" data-stick>
+    <!-- No head at all (Doc, 24.09.2026: „nimm in dem FP den ganzen Header raus also bis
+         Fahrplan"): as an app on the phone the page carries its name in the icon and in the
+         window title, while band and heading ate the upper third of the screen. So the page
+         starts with the week - and svp-nav.js is not loaded here. -->
+    <div class="fp-bar" id="fp-bar">
         <button type="button" class="fp-step" id="fp-prev" aria-label="Woche zur&uuml;ck">&#8249;</button>
         <div class="fp-week">
             <div class="fp-kw" id="fp-kw">&nbsp;</div>
@@ -164,6 +163,7 @@
         </div>
     </div>
 
+    <p class="fp-hinweis" id="fp-status"></p>
     <main class="fp-liste" id="fp-liste"></main>
     <p class="fp-leer" id="fp-leer"></p>
     <p class="fp-hinweis" id="fp-hinweis"></p>
@@ -183,7 +183,7 @@
             const $ = function (id) { return document.getElementById(id); };
             const liste = $('fp-liste'), leerEl = $('fp-leer'), hinweis = $('fp-hinweis');
             const bar = $('fp-bar'), kwEl = $('fp-kw'), datumEl = $('fp-datum');
-            const wolke = $('cloud-state'), authBtn = $('fp-auth');
+            const status = $('fp-status'), authBtn = $('fp-auth');
 
             const BASE = new URL('.', location.href);
             const CACHE_KEY = 'svp-fahrplan-cache';
@@ -352,6 +352,16 @@
             }
 
             /* ---- showing ----------------------------------------------------------- */
+            /* „Mathematik Klasse 11 (BGY)" -> „Mathematik 11". The school form in brackets
+               goes: within one week no two classes of a subject and year meet, and where the
+               Fachoberschule has one of its own, that word stays in the middle of the name
+               („Mathematik Fachoberschule 11"). */
+            function klasseName(p) {
+                return String(p.lang || p.kurz || '')
+                    .replace(/\s*\([^)]*\)\s*$/, '')
+                    .replace(/\bKlasse\s+/, '');
+            }
+
             function karte(p, w, text) {
                 const art = document.createElement('article');
                 art.className = 'fp-card';
@@ -363,12 +373,8 @@
                 a.href = p.href;
                 a.target = '_blank';
                 a.rel = 'noopener';
-                a.textContent = p.kurz || p.lang || p.href;
-                const lang = document.createElement('span');
-                lang.className = 'fp-lang';
-                lang.textContent = p.lang || '';
+                a.textContent = klasseName(p);
                 kopf.appendChild(a);
-                kopf.appendChild(lang);
                 art.appendChild(kopf);
 
                 if (w.thema) {
@@ -480,12 +486,15 @@
             }
             setScale(scale);
 
-            /* ---- signing in --------------------------------------------------------- */
+            /* ---- signing in ---------------------------------------------------------
+               There is no "angemeldet" any more (Doc, 24.09.2026: „angemeldet weg bitte") -
+               a signed-in page says so by showing the Fahrplan, and the button says
+               "Abmelden". The line below the week stays silent while all is well and only
+               speaks when something is missing. */
             function authUi() {
                 const on = svpAuth.hasSession();
                 authBtn.textContent = on ? 'Abmelden' : '☁ Anmelden';
-                wolke.textContent = on ? '☁ angemeldet' : '';
-                wolke.classList.toggle('on', on);
+                if (on) status.textContent = '';
                 return on;
             }
 
@@ -493,15 +502,13 @@
                 if (!authUi()) { zeige(); return; }
                 try {
                     await ladeFahr();
-                    wolke.textContent = '☁ angemeldet';
-                    wolke.classList.add('on');
+                    status.textContent = '';
                 } catch (e) {
                     /* In a classroom without signal this is the normal case, not a fault:
                        the page then shows the last state it carries. "Failed to fetch" is
                        what the browser says, and that is not an answer for Doc. */
                     const netz = navigator.onLine && !/fetch|network|load failed/i.test(e.message);
-                    wolke.textContent = netz ? '☁ ' + e.message : '☁ offline — letzter Stand';
-                    wolke.classList.remove('on');
+                    status.textContent = netz ? '☁ ' + e.message : '☁ offline — letzter Stand';
                 }
                 pruefeVerwaiste();
                 zeige();
@@ -525,12 +532,6 @@
             $('fp-heute').addEventListener('click', heute);
             $('fp-kleiner').addEventListener('click', function () { setScale(scale - 0.1); });
             $('fp-groesser').addEventListener('click', function () { setScale(scale + 0.1); });
-
-            /* listed in the "?" panel of the nav row (svp-nav.js) */
-            window.svpKeys = (window.svpKeys || []).concat([
-                [['←', '→'], 'Eine Woche zurück oder vor (oder wischen)'],
-                [['J'], 'Zur aktuellen Woche springen (jetzt)']
-            ]);
 
             document.addEventListener('keydown', function (ev) {
                 if (ev.target && /^(INPUT|TEXTAREA)$/.test(ev.target.tagName)) return;
@@ -593,15 +594,6 @@
             });
         })();
     </script>
-    <script>
-        /* The sticky head is the central mechanism (body.head-sticky, the wrapper
-           from svp-nav.js) - but wrong on the phone: band, head and week bar are
-           412 of 844 px together there and would hold half the screen (measured at
-           390 px). So only on the big screen, and set BEFORE svp-nav.js builds the
-           wrapper. A swipe works everywhere anyway. */
-        if (window.innerWidth >= 900) document.body.classList.add('head-sticky');
-    </script>
-    <script src="svp-nav.js"></script>
 </body>
 
 </html>
