@@ -48,7 +48,7 @@ const LABS_DATA = [
     {
         "id": "koerperzaehlen",
         "href": "koerperzaehlen.html",
-        "title": "Körperzählen",
+        "title": "Z\u00e4hlen in Papua-Neuguinea",
         "description": "Z\u00e4hlen \u00fcber den K\u00f6rper, wie es die Oksapmin in Papua-Neuguinea tun: vom Daumen \u00fcber die Finger, den Arm hinauf, um das Gesicht bis zur Nase \u2014 die 14 \u2014 und auf der anderen Seite zur\u00fcck bis zum kleinen Finger, der 27. Tipp auf den K\u00f6rper und die Zahl l\u00e4uft mit, tipp eine Zahl ein und der Z\u00e4hlweg leuchtet auf. \u00dcber 27 f\u00e4ngt man wieder am Daumen an und z\u00e4hlt Runden. Im Buch hei\u00dft das \u201eBasis 27\u201c \u2014 warum das kein Stellenwertsystem ist, steht hinter dem Zahnrad.",
         "tagline": "Zahlensysteme / Zählen / Papua-Neuguinea",
         "icon": LAB_ICONS["koerperzaehlen"],

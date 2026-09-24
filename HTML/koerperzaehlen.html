@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOC ALVERS MATHE-LABORE | Körperzählen</title>
+    <title>DOC ALVERS MATHE-LABORE | Zählen in Papua-Neuguinea</title>
     <meta name="description"
         content="Zählen über den Körper wie in Papua-Neuguinea: 27 Punkte von Hand zu Hand über die Nase — und warum das kein Stellenwertsystem ist.">
     <link
@@ -441,6 +441,7 @@
 
     <main id="main-content">
         <div id="canvas-container">
+            <h1 id="lab-title" class="lab-stage-title">Zählen in Papua-Neuguinea</h1>
             <div id="kz-dice" class="kz-card" title="Würfeln: neue Aufgabe">
                 <div id="die-stage"></div>
             </div>
@@ -513,7 +514,7 @@
         CyberBranding.init({
             useExternalStyles: true,
             title: CyberI18n.get('ui.coach_title'),
-            subtitle: T('title', 'KÖRPERZÄHLEN'),
+            subtitle: T('title', 'ZÄHLEN IN PAPUA-NEUGUINEA'),
         });
         CyberUI.init();
 
@@ -920,7 +921,8 @@
             const headEl = document.getElementById('kz-head');
             const solEl = document.getElementById('kz-sol');
             const linkEl = document.getElementById('kz-link');
-            for (const e of [diceEl, headEl, solEl]) {
+            const titleEl = document.getElementById('lab-title');
+            for (const e of [titleEl, diceEl, headEl, solEl]) {
                 e.style.left = blockX + 'px';
                 e.style.width = blockW + 'px';
             }
@@ -934,10 +936,12 @@
             diceEl.style.height = hH + 'px';
             const sH = solEl.offsetHeight;
             const VB_RATIO = PHOTO.h / PHOTO.w;
-            const room = H - pad - topMin - (hH + gap) * 2 - sH - gap;
+            const tH = titleEl.offsetHeight + gap;
+            const room = H - pad - topMin - tH - (hH + gap) * 2 - sH - gap;
             const figH = Math.max(120, Math.min(room, blockW * VB_RATIO));
-            const stackH = (hH + gap) * 2 + sH + gap + figH;
+            const stackH = tH + (hH + gap) * 2 + sH + gap + figH;
             let y = Math.max(topMin, (H - stackH) / 2);
+            titleEl.style.top = y + 'px'; y += tH;
             diceEl.style.top = y + 'px'; y += hH + gap;
             headEl.style.top = y + 'px'; y += hH + gap;
             linkEl.style.top = (y - gap / 2 - linkEl.offsetHeight / 2) + 'px';
