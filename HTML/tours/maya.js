@@ -139,6 +139,8 @@
         id: 'maya',
         title: 'Maya-Zahlen',
         card: { title: 'Maya-Zahlen', sub: 'Punkte, Striche, eine Muschel – und die Zwanzig als Grundzahl' },
+        /* Doc's head in the corner: 80 % of Solita's size in the films - his photo from ~/Movies/videopipeline/maya/ */
+        avatar: { poster: '/__tour/audio/avatar.png', scale: 0.8, zoom: 1.15 },
 
         /* the lab, fresh, while the page loads: its settings live in this origin's storage (the tour server's
            own - Doc's :8765 and docalvers.de keep theirs) */

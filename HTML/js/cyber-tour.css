@@ -74,6 +74,36 @@ body.cyber-tour {
     padding: 0 16px 12px;
 }
 
+/* the avatar (def.avatar): a round head in the lower right corner of the stage, like Solita in the films */
+#tour-avatar {
+    position: absolute;
+    right: 32px;
+    bottom: 24px;
+    z-index: 5;
+    width: var(--avatar-size, 304px);
+    height: var(--avatar-size, 304px);
+    border-radius: 50%;
+    overflow: hidden;
+    pointer-events: none;
+    background: #0a1a36 center 42% / 150% no-repeat;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* the talking clip, framed exactly like the poster underneath: same zoom, same 42 % down */
+#tour-avatar video {
+    position: absolute;
+    left: 50%;
+    top: 42%;
+    width: calc(var(--avatar-zoom, 1.5) * 100%);
+    height: calc(var(--avatar-zoom, 1.5) * 100%);
+    transform: translate(-50%, -42%);
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+#tour-avatar video.on { opacity: 1; }
+
 .tour-col { position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .tour-col.grow { flex: 1 1 auto; }
 

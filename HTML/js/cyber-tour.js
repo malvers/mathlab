@@ -60,6 +60,7 @@
     const FAST = 8;              // speed of the replay before a jump
     const LEAD = 500;            // the voice starts this long after the scene mark (as buildScenes' adelay)
     const AIR = 1500;            // room after every scene's voice
+    const SOLITA_SHARE = 380 / 1440;   // Solita's bubble in the films: 380 px on a 1440 px frame
     const PULSE = 5000;          // the page's pulse to the server (it tears an armed tour down without one)
     const SUBMIT_GUARD_MS = 3000;
     let CRITICS = new URLSearchParams(location.search).has('critics');     // and only with the tour server (define)
@@ -235,6 +236,12 @@
             v.lines = timeLines(ssmlLines((await E.texts)[sc.id]), buf);
             v.audio = new Audio(URL.createObjectURL(new Blob([bytes], { type: res.headers.get('Content-Type') || 'audio/mpeg' })));
             v.audio.preload = 'auto';
+            /* the avatar's talking head for this scene, if the tour's folder has one (sN.mp4, made from this very
+               voice) - held as a blob, so seeking after a pause is instant */
+            if (E.def.avatar && E.local) {
+                const r2 = await fetch(url.replace(/\.mp3$/, '.mp4')).catch(() => null);
+                if (r2 && r2.ok) v.video = URL.createObjectURL(await r2.blob());
+            }
             dbg(sc.id + ': ' + v.dur.toFixed(1) + ' s, Regiepausen ' + v.cues.map((c) => c.start.toFixed(1)).join('/'));
         } catch (err) {
             dbg(sc.id + ': keine Stimme (' + err.message + ') — ' + v.dur + ' s ohne Ton');
@@ -251,20 +258,43 @@
             E.voice = { audio: v.audio, at };
             v.audio.currentTime = 0;
             v.audio.play().catch((e) => dbg('Stimme: ' + e.message));
+            avatarTalk(v.video, 0);
         }).catch(() => { /* cancelled */ });
     }
-    function voicePause() { if (E.voice) E.voice.audio.pause(); }
+    function voicePause() { if (E.voice) E.voice.audio.pause(); avatarPause(); }
     function voiceResume() {
         if (!E.voice) return;
         const a = E.voice.audio, pos = (clock.now() - E.voice.at) / 1000;
         if (pos < 0 || pos >= a.duration) return;
         a.currentTime = pos;
         a.play().catch((e) => dbg('Stimme: ' + e.message));
+        avatarResume(pos);
     }
     function voiceStop() {
+        avatarTalk(null);
         if (!E.voice) return;
         E.voice.audio.pause();
         E.voice = null;
+    }
+
+    /* the avatar's clip runs on the voice's clock: muted (the voice is the sound), started, paused and sought with
+       it. A scene without a clip shows the still picture. */
+    function avatarVideo() { const av = $id('tour-avatar'); return av ? av.querySelector('video') : null; }
+    function avatarTalk(src, pos) {
+        const vid = avatarVideo();
+        if (!vid) return;
+        if (!src) { vid.pause(); vid.classList.remove('on'); return; }
+        if (vid.dataset.src !== src) { vid.src = src; vid.dataset.src = src; }
+        vid.currentTime = pos || 0;
+        vid.classList.add('on');
+        vid.play().catch((e) => dbg('Avatar: ' + e.message));
+    }
+    function avatarPause() { const vid = avatarVideo(); if (vid) vid.pause(); }
+    function avatarResume(pos) {
+        const vid = avatarVideo();
+        if (!vid || !vid.classList.contains('on')) return;
+        vid.currentTime = pos;
+        vid.play().catch((e) => dbg('Avatar: ' + e.message));
     }
 
     /* ============================================================== frames */
@@ -980,6 +1010,26 @@
         stage.parentNode.insertBefore(view, stage);
         view.appendChild(el('div', { id: 'tour-cap' }, '<span class="k"></span><span class="n"></span><span class="t"></span>'));
         view.appendChild(stage);
+        /* a round head in the stage's lower right corner, the way Solita sits in the films: def.avatar =
+           { poster, scale, zoom }. Its size is Solita's share of the film - 380 px of 1440 - taken of the stage's height,
+           times scale (Doc, 24.09.2026: 304 px fixed was "viel zu groß! Solita ist niemals sooo groß + 20%").
+           The poster alone for now. */
+        if (E.def.avatar) {
+            const av = el('div', { id: 'tour-avatar' });
+            if (E.def.avatar.poster) av.style.backgroundImage = 'url("' + E.def.avatar.poster + '")';
+            if (E.def.avatar.zoom) av.style.backgroundSize = (E.def.avatar.zoom * 100) + '%';   // < 1.5: the camera steps back
+            av.style.setProperty('--avatar-zoom', String(E.def.avatar.zoom || 1.5));
+            const vid = el('video', {});
+            vid.muted = true;
+            vid.playsInline = true;
+            vid.preload = 'auto';
+            av.appendChild(vid);
+            stage.appendChild(av);
+            const fit = () => av.style.setProperty('--avatar-size',
+                Math.round(stage.clientHeight * SOLITA_SHARE * (E.def.avatar.scale || 1)) + 'px');
+            fit();
+            if (window.ResizeObserver) new ResizeObserver(fit).observe(stage);
+        }
         const c = E.def.card || {};
         const cardEl = el('div', { id: 'tour-card' }, '<div class="blk"><h1></h1><p></p><div class="sig">Doc Alvers Mathe-Labor</div></div>');
         cardEl.querySelector('h1').textContent = c.title || E.def.title || '';

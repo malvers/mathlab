@@ -126,12 +126,14 @@ class Handler(fk.Handler):
 
     # ------------------------------------------------------------------ audio
     def send_audio(self, name):
-        if not re.match(r'^[A-Za-z0-9_.-]+\.(mp3|wav|m4a)$', name):
+        # the avatar's picture (and later its clips) come from the same working directory - not from the repo
+        if not re.match(r'^[A-Za-z0-9_.-]+\.(mp3|wav|m4a|mp4|png|jpg)$', name):
             return self.send_error(404)
         path = os.path.join(WORK, name)
         if not os.path.isfile(path):
             return self.send_error(404, 'keine Tonspur: ' + name)
-        ctype = {'mp3': 'audio/mpeg', 'wav': 'audio/wav', 'm4a': 'audio/mp4'}[name.rsplit('.', 1)[1]]
+        ctype = {'mp3': 'audio/mpeg', 'wav': 'audio/wav', 'm4a': 'audio/mp4', 'mp4': 'video/mp4',
+                 'png': 'image/png', 'jpg': 'image/jpeg'}[name.rsplit('.', 1)[1]]
         with open(path, 'rb') as f:
             data = f.read()
         self.send_response(200)
