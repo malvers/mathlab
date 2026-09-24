@@ -257,6 +257,15 @@ const LAB_ICONS = {
                 <path d="M6 88 Q9 78 14 82 Q17 72 21 80 Q26 72 28 82 Q33 78 35 88 Q26 93 20.5 92 Q15 93 6 88 Z" />
             </g>
         </svg>`,
+    "babylon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- a Babylonian twenty-three: two corner wedges, three upright wedges -->
+            <g fill="#F5C242">
+                <path d="M26 36 L8 50 L26 64 L17 50 Z" /><path d="M44 36 L26 50 L44 64 L35 50 Z" />
+                <path d="M50 30 L64 30 L59 44 L57.8 72 L56.2 72 L55 44 Z" />
+                <path d="M67 30 L81 30 L76 44 L74.8 72 L73.2 72 L72 44 Z" />
+                <path d="M84 30 L98 30 L93 44 L91.8 72 L90.2 72 L89 44 Z" />
+            </g>
+        </svg>`,
     "subtraktion": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <rect x="15" y="15" width="70" height="70" rx="10" fill="rgba(255, 77, 77, 0.1)" stroke="#ff4d4d" stroke-width="2" />
             <line x1="32" y1="50" x2="68" y2="50" stroke="#ff4d4d" stroke-width="6" stroke-linecap="round" />
