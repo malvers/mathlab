@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<!--
+  Vorrechnen: write a calculation by hand, line by line, and watch the strokes be
+  grouped into symbols and rows.
+
+  This is the missing first half of the vision in /IDEAS.md ("Nutzer schreibt
+  handschriftlich Formeln, die sich kaum merkbar in LaTeX morphen"). morpheus/
+  already has the morph; what never worked was knowing which stroke belongs to
+  which LaTeX glyph, because morpheus rasterises the drawing and tries to recover
+  the reading order from the geometry.
+
+  Here the pen keeps what it knows: every stroke carries its position AND its
+  time, and the grouping in js/stroke-symbols.js reads the order straight off it.
+  No API call is involved on this page - the grouping is geometry plus the clock,
+  so it can be judged, tuned and tested without a key.
+
+  The sliders exist because the thresholds must be calibrated against real
+  handwriting, not against what looks plausible in a test. Draw, watch the boxes,
+  turn the knobs until they sit, then EXPORT - the saved strokes can be replayed
+  offline as often as needed.
+-->
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Vorrechnen</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <style>
+        /* The pen must own the surface: without this the tablet scrolls instead
+           of drawing, and a resting palm pans the page. */
+        #canvas {
+            touch-action: none;
+            cursor: crosshair;
+        }
+
+        #stat-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.5rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.06em;
+        }
+
+        #stat-row .stat b {
+            display: block;
+            font-size: 1.45rem;
+            line-height: 1.1;
+            color: var(--neon-blue, #00d2ff);
+        }
+
+        #stat-row .stat span {
+            opacity: 0.65;
+            font-weight: 400;
+        }
+
+        #pen-hint {
+            margin-top: 0.6rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            opacity: 0.75;
+            line-height: 1.45;
+        }
+
+        .btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.6rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Menü">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <div id="math-coach-box">
+                <div class="coach-title" id="coach-title-slot"></div>
+                <div id="coach-content" class="coach-message"></div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/stroke-symbols.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (typeof init === 'function') init();
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({ useExternalStyles: true, title: 'Vorrechnen', subtitle: 'Lab' });
+        CyberUI.init();
+
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+
+        // ── State ───────────────────────────────────────────────────────────
+        // A stroke is { points: [{x, y, t}], width }. The time is what morpheus
+        // never kept, and it is the only thing that separates two glyphs written
+        // close together from one glyph drawn in two parts.
+        const strokes = [];
+        let current = null;
+        let analysis = { symbols: [], lines: [] };
+
+        const opts = Object.assign({}, StrokeSymbols.DEFAULTS);
+        const view = { boxes: true, numbers: true, rows: true, penOnly: false };
+
+        const INK = '#adff2f';                       // same green as morpheus
+        // Symbol colours: Doc's palette first, then neon blue, cycling. Red-free
+        // on purpose so it never reads as an error marker.
+        const SYM_COLORS = ['#00d2ff', 'rgb(245,194,66)', 'rgb(121,158,49)', '#c77dff', '#ff9e64'];
+
+        // ── Drawing ─────────────────────────────────────────────────────────
+        function canvasPos(ev) {
+            const rect = canvas.getBoundingClientRect();
+            return { x: ev.clientX - rect.left, y: ev.clientY - rect.top, t: performance.now() };
+        }
+
+        function penAccepted(ev) {
+            // Palm rejection: with "nur Stift" on, only the pen draws, so a hand
+            // resting on the tablet leaves no marks.
+            if (!view.penOnly) return true;
+            return ev.pointerType === 'pen';
+        }
+
+        canvas.addEventListener('pointerdown', ev => {
+            if (!penAccepted(ev)) return;
+            canvas.setPointerCapture(ev.pointerId);
+            const p = canvasPos(ev);
+            // Pressure widens the line a little where the tablet reports it.
+            const w = 2.5 + (ev.pressure > 0 ? ev.pressure * 2.5 : 1.2);
+            current = { points: [p], width: w, pointerType: ev.pointerType };
+            ev.preventDefault();
+        });
+
+        canvas.addEventListener('pointermove', ev => {
+            if (!current || !penAccepted(ev)) return;
+            current.points.push(canvasPos(ev));
+            redraw();
+            ev.preventDefault();
+        });
+
+        function endStroke(ev) {
+            if (!current) return;
+            if (current.points.length > 1) strokes.push(current);
+            current = null;
+            recompute();
+        }
+        canvas.addEventListener('pointerup', endStroke);
+        canvas.addEventListener('pointercancel', endStroke);
+        canvas.addEventListener('pointerleave', endStroke);
+
+        function recompute() {
+            analysis = StrokeSymbols.analyse(strokes, opts);
+            redraw();
+            updateStats();
+        }
+
+        // ── Rendering ───────────────────────────────────────────────────────
+        function strokePath(s) {
+            if (s.points.length < 2) return;
+            ctx.beginPath();
+            ctx.moveTo(s.points[0].x, s.points[0].y);
+            for (let i = 1; i < s.points.length; i++) ctx.lineTo(s.points[i].x, s.points[i].y);
+            ctx.lineWidth = s.width;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        }
+
+        function redraw() {
+            const rect = container.getBoundingClientRect();
+            ctx.clearRect(0, 0, rect.width, rect.height);
+
+            // Row bands first, so they sit behind everything.
+            if (view.rows) {
+                analysis.lines.forEach(l => {
+                    if (!l.bbox) return;
+                    ctx.fillStyle = 'rgba(0, 210, 255, 0.055)';
+                    ctx.fillRect(0, l.bbox.y - 8, rect.width, l.bbox.h + 16);
+                });
+            }
+
+            ctx.strokeStyle = INK;
+            strokes.forEach(strokePath);
+            if (current) strokePath(current);
+
+            if (view.boxes) {
+                analysis.lines.forEach(line => {
+                    line.symbols.forEach((sym, i) => {
+                        const c = SYM_COLORS[i % SYM_COLORS.length];
+                        const b = sym.bbox;
+                        ctx.strokeStyle = c;
+                        ctx.lineWidth = 1.5;
+                        ctx.setLineDash([4, 3]);
+                        ctx.strokeRect(b.x - 4, b.y - 4, b.w + 8, b.h + 8);
+                        ctx.setLineDash([]);
+                        if (view.numbers) {
+                            ctx.fillStyle = c;
+                            ctx.font = '600 12px Orbitron, sans-serif';
+                            ctx.fillText(String(sym.readIdx), b.x - 4, b.y - 9);
+                            // Stroke count, so a glyph that fell apart is obvious.
+                            ctx.font = '400 10px Outfit, sans-serif';
+                            ctx.globalAlpha = 0.65;
+                            ctx.fillText(sym.strokeIdxs.length + '×', b.x + b.w - 4, b.y - 9);
+                            ctx.globalAlpha = 1;
+                        }
+                    });
+                });
+            }
+        }
+
+        function updateStats() {
+            const el = document.getElementById('stat-row');
+            if (!el) return;
+            const perLine = analysis.lines.map(l => l.symbols.length).join(' · ') || '–';
+            el.innerHTML =
+                `<div class="stat"><b>${strokes.length}</b><span>Striche</span></div>` +
+                `<div class="stat"><b>${analysis.symbols.length}</b><span>Symbole</span></div>` +
+                `<div class="stat"><b>${analysis.lines.length}</b><span>Zeilen</span></div>` +
+                `<div class="stat"><b>${perLine}</b><span>je Zeile</span></div>`;
+        }
+
+        // ── Export / import ─────────────────────────────────────────────────
+        // The point of this page: draw once, then replay the strokes as often as
+        // needed while tuning, without picking the tablet back up.
+        function exportStrokes() {
+            const data = {
+                version: 1,
+                created: new Date().toISOString(),
+                canvas: { w: Math.round(container.getBoundingClientRect().width),
+                          h: Math.round(container.getBoundingClientRect().height) },
+                options: opts,
+                strokes,
+            };
+            const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'striche-' + new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-') + '.json';
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        function importStrokes(file) {
+            const r = new FileReader();
+            r.onload = () => {
+                try {
+                    const d = JSON.parse(r.result);
+                    if (!Array.isArray(d.strokes)) throw new Error('keine Striche in der Datei');
+                    strokes.length = 0;
+                    d.strokes.forEach(s => strokes.push(s));
+                    recompute();
+                } catch (e) {
+                    alert('Konnte die Datei nicht lesen: ' + e.message);
+                }
+            };
+            r.readAsText(file);
+        }
+
+        function clearAll() {
+            strokes.length = 0;
+            current = null;
+            recompute();
+        }
+
+        function undoStroke() {
+            strokes.pop();
+            recompute();
+        }
+
+        // ── Side panel ──────────────────────────────────────────────────────
+        function buildPanel() {
+            CyberUI.createCard('ui-container', 'Aufnahme', `
+                <div id="stat-row"></div>
+                <div class="btn-row">
+                    <button class="cyber-btn" onclick="undoStroke()">ZURÜCK</button>
+                    <button class="cyber-btn" onclick="clearAll()">LEEREN</button>
+                </div>
+                <div class="btn-row">
+                    <button class="cyber-btn" onclick="exportStrokes()">STRICHE SICHERN</button>
+                    <button class="cyber-btn" onclick="document.getElementById('import-file').click()">LADEN</button>
+                    <input type="file" id="import-file" accept="application/json" style="display:none"
+                           onchange="if(this.files[0]) importStrokes(this.files[0])">
+                </div>
+                <div id="pen-hint">Schreib eine Zeile, geh in die nächste. Die Kästchen zeigen,
+                    welche Striche als <b>ein</b> Zeichen gelten — <b>2×</b> heißt: aus zwei Strichen.</div>
+            `, '#00d2ff');
+
+            CyberUI.createCheckbox('ui-container', 'Nur Stift (Handballen ignorieren)', view.penOnly,
+                v => { view.penOnly = v; });
+            CyberUI.createCheckbox('ui-container', 'Kästchen zeigen', view.boxes,
+                v => { view.boxes = v; redraw(); });
+            CyberUI.createCheckbox('ui-container', 'Nummern zeigen', view.numbers,
+                v => { view.numbers = v; redraw(); });
+            CyberUI.createCheckbox('ui-container', 'Zeilen zeigen', view.rows,
+                v => { view.rows = v; redraw(); });
+
+            CyberUI.createCard('ui-container', 'Feineinstellung', `
+                <div style="font-family:'Outfit',sans-serif;font-size:0.85rem;opacity:0.75;line-height:1.45">
+                    Diese Werte sind an nachgebauten Strichen eingestellt, nicht an echter Handschrift.
+                    Zieh sie zurecht, bis die Kästchen sitzen — dann sichern wir sie.
+                </div>
+            `, 'rgb(245,194,66)');
+
+            const sl = (label, key, min, max, step) =>
+                CyberUI.createSlider('ui-container', label, min, max, opts[key], step,
+                    v => { opts[key] = parseFloat(v); recompute(); }, 'rgb(245,194,66)');
+
+            sl('Zeilenabstand', 'lineGapFactor', 0.4, 2.5, 0.05);
+            sl('Überlappung seitlich', 'xOverlapRatio', 0.1, 0.95, 0.05);
+            sl('Nachbarschaft seitlich', 'xGapFactor', 0.05, 0.8, 0.01);
+            sl('Nur-Nähe: Zeitfenster (ms)', 'nearOnlyMs', 60, 800, 10);
+            sl('Gleiches Zeichen: Zeitfenster (ms)', 'sameSymbolMs', 200, 2500, 50);
+            sl('Später gesetzt: Überlappung', 'lateJoinRatio', 0.3, 1.0, 0.05);
+            sl('Zeilentrennung senkrecht', 'yGapFactor', 0.3, 2.0, 0.05);
+        }
+
+        // ── Boot ────────────────────────────────────────────────────────────
+        function resizeCanvasToContainer() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            canvas.width = Math.floor(Math.max(1, rect.width) * dpr);
+            canvas.height = Math.floor(Math.max(1, rect.height) * dpr);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
+
+        function init() {
+            resizeCanvasToContainer();
+            redraw();
+            updateStats();
+        }
+
+        window.addEventListener('resize', init);
+        document.fonts.ready.then(() => { buildPanel(); init(); });
+    </script>
+</body>
+
+</html>
