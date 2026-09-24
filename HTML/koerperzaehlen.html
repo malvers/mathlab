@@ -267,11 +267,9 @@
         }
 
         /* the path the counting walks, faint, so the order can be read before it is lit */
+        /* the whole walk stays hidden - only what has been counted shows */
         .kz-trail {
-            fill: none;
-            stroke: rgba(255, 255, 255, 0.35);
-            stroke-width: 2;
-            stroke-dasharray: 4 7;
+            display: none;
         }
 
         .kz-trail-lit {
@@ -290,15 +288,20 @@
             fill: transparent;
         }
 
+        /* a point shows once a number has reached it; before that it is only there under
+           the mouse, so the body can still be tapped */
         .kz-pt .dot {
-            fill: rgba(10, 20, 40, 0.45);
+            fill: rgba(245, 194, 66, 0.55);
             stroke: rgba(255, 255, 255, 0.85);
             stroke-width: 2;
-            transition: fill 0.15s ease;
+            opacity: 0;
+            transition: opacity 0.15s ease;
         }
 
-        .kz-pt:hover .dot {
-            fill: rgba(245, 194, 66, 0.55);
+        .kz-pt:hover .dot,
+        .kz-pt.lit .dot,
+        .kz-pt.bad .dot {
+            opacity: 1;
         }
 
         .kz-pt text {
@@ -595,7 +598,13 @@
 
         function buildBody() {
             // the photo: generated, not a real person - and it says so in its corner
-            el('image', { href: PHOTO.src, x: 0, y: 0, width: PHOTO.w, height: PHOTO.h, class: 'kz-photo' }, bodyEl);
+            // rounded corners like the cards above - 18 px on a 842 px wide stage
+            const clip = el('clipPath', { id: 'kz-photo-clip' }, el('defs', {}, bodyEl));
+            el('rect', { x: 0, y: 0, width: PHOTO.w, height: PHOTO.h, rx: 30 }, clip);
+            el('image', {
+                href: PHOTO.src, x: 0, y: 0, width: PHOTO.w, height: PHOTO.h,
+                class: 'kz-photo', 'clip-path': 'url(#kz-photo-clip)'
+            }, bodyEl);
             const ai = el('text', { class: 'kz-ai', x: PHOTO.w - 14, y: PHOTO.h - 14 }, bodyEl);
             ai.textContent = T('ai_note', 'KI-generiertes Bild');
 
