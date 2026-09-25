@@ -300,11 +300,9 @@ def potenzen():
                        "font-size:18px;font-weight:600;color:%s" % color))
         for i, e in enumerate((4, 3, 2, 1, 0)):
             y = 72 + i * 46
-            labels.append((x0 + 60, y, 130, "$%d^%d$" % (basis, e),
-                           "font-size:20px;color:%s" % S.BODY))
-            labels.append((x0 + 190, y, 160, "$= %s$" % "{:,}".format(basis ** e).replace(",", "\\,"),
-                           "font-size:20px;font-weight:600;color:%s"
-                           % (S.RED if e == 0 else S.INK)))
+            gleich(labels, x0 + 112, y, "%d^%d" % (basis, e),
+                   "{:,}".format(basis ** e).replace(",", "\\,"), "font-size:20px;color:%s" % S.BODY,
+                   "font-size:20px;font-weight:600;color:%s" % (S.RED if e == 0 else S.INK), wl=110, wr=140)
             if i:
                 c.arrow(x0 + 276, y - 46 + 12, x0 + 276, y - 12, color=color, width=1.8)
                 labels.append((x0 + 316, y - 23, 110, "$: %d$" % basis,
