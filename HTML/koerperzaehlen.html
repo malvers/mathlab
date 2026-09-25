@@ -522,6 +522,10 @@
             CyberLeftChrome.configure({ viewportOnlyZoom: true });
         }
 
+        // Inside a slide (an iframe in a deck) the slide carries the title - same as Maya and Babylon
+        const EMBEDDED = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+        if (EMBEDDED) document.documentElement.classList.add('lab-embedded');
+
         const container = document.getElementById('canvas-container');
         const SVGNS = 'http://www.w3.org/2000/svg';
 
@@ -932,11 +936,45 @@
                 const b = brand.getBoundingClientRect();
                 if (b.width && b.left - rect.left < blockX + blockW) topMin = Math.max(topMin, b.bottom - rect.top + 12);
             }
+            const VB_RATIO = PHOTO.h / PHOTO.w;
+
+            // A wide, flat window - a deck slide gives the lab such a strip - would leave the photo a
+            // stamp at the bottom of the column. There the photo stands on the left as big as the
+            // height allows, and die, number and sentence stack beside it on the right.
+            if (W / H > 1.9) {
+                const colW = Math.max(300, Math.min(520, W * 0.32));
+                let figH = H - 2 * pad, figW = figH / VB_RATIO;
+                if (figW > W - 2 * pad - gap - colW) { figW = W - 2 * pad - gap - colW; figH = figW * VB_RATIO; }
+                const x0 = (W - (figW + gap + colW)) / 2, colX = x0 + figW + gap;
+                bodyEl.style.left = x0 + 'px';
+                bodyEl.style.top = ((H - figH) / 2) + 'px';
+                bodyEl.style.width = figW + 'px';
+                bodyEl.style.height = figH + 'px';
+                for (const e of [titleEl, diceEl, headEl, solEl]) {
+                    e.style.left = colX + 'px';
+                    e.style.width = colW + 'px';
+                }
+                const wH = headEl.offsetHeight;
+                diceEl.style.height = wH + 'px';
+                const wS = solEl.offsetHeight;
+                const wT = titleEl.offsetHeight ? titleEl.offsetHeight + gap : 0;
+                const colH = wT + (wH + gap) * 2 + wS;
+                // the branding sits in the top right corner - over this column - so stay below it
+                let y = Math.max(topMin, (H - colH) / 2);
+                titleEl.style.top = y + 'px'; y += wT;
+                diceEl.style.top = y + 'px'; y += wH + gap;
+                headEl.style.top = y + 'px'; y += wH + gap;
+                linkEl.style.top = (y - gap / 2 - linkEl.offsetHeight / 2) + 'px';
+                linkEl.style.left = (colX + colW / 2 - linkEl.offsetWidth / 2) + 'px';
+                solEl.style.top = y + 'px';
+                window.__layout = { modus: 'quer', W, H, figW, figH, colW, topMin };
+                return;
+            }
+
             const hH = headEl.offsetHeight;
             diceEl.style.height = hH + 'px';
             const sH = solEl.offsetHeight;
-            const VB_RATIO = PHOTO.h / PHOTO.w;
-            const tH = titleEl.offsetHeight + gap;
+            const tH = titleEl.offsetHeight ? titleEl.offsetHeight + gap : 0;
             const room = H - pad - topMin - tH - (hH + gap) * 2 - sH - gap;
             const figH = Math.max(120, Math.min(room, blockW * VB_RATIO));
             const stackH = tH + (hH + gap) * 2 + sH + gap + figH;

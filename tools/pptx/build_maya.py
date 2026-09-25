@@ -222,6 +222,14 @@ d.summary("Zum Schluss: in Papua-Neuguinea zählen einige Gruppen am Körper (Fi
           "weiterzählt, merkt sich die Runden - große Zahlen wie 500 lassen sich so nicht schreiben, "
           "genau dafür haben Maya und Babylonier Stellenwerte erfunden.")
 
+# ... and the body count to try out - the lab right after the slide that explains it (Doc, 25.09.2026)
+d.lab("Zählen in Papua-Neuguinea", "koerperzaehlen.html",
+      note="Auf den Körper **tippen** · **Würfel** stellt eine Aufgabe · über 27 zählt man **Runden**")
+d.summary("Im Deck steckt das Lab „Zählen in Papua-Neuguinea“ (koerperzaehlen.html): ein Foto mit den "
+          "27 Zählpunkten vom Daumen bis zum kleinen Finger der anderen Hand. Tippen auf den Körper "
+          "zeigt die Zahl, der Würfel stellt Aufgaben, und über 27 zählt man Runden - 40 ist eine Runde "
+          "und dann das linke Auge.")
+
 d.table_top("Zum Nachschlagen", [
     ["Begriff", "in einem Satz"],
     ["Basis", "die Zahl, mit der jede Stelle wächst — bei uns 10, bei den Maya 20"],
