@@ -197,7 +197,7 @@
         }
         if (!gruppen || !gruppen.length) gruppen = [{ g: glyphen.map((_, k) => k), quellen: alle }];
 
-        const koerner = [];
+        const koerner = [], rahmenListe = [];
         let tintenFlaeche = 0, flaeche = 0;
         for (const gr of gruppen) {
             const fl = gr.g.reduce((s, k) => s + glyphen[k].maske.flaeche, 0);
@@ -226,8 +226,11 @@
             const An = tinte.map(q => ({ x: (q.x - fa.cx) / fa.sx, y: (q.y - fa.cy) / fa.sy }));
             const Bn = B.map(q => ({ x: (q.x - fb.cx) / fb.sx, y: (q.y - fb.cy) / fb.sy }));
             const zu = paaren(An, Bn, o.fenster);
+            const gi = rahmenListe.length;
+            rahmenListe.push(fa.cx, fa.cy, fa.sx, fa.sy, fb.cx, fb.cy, fb.sx, fb.sy);
             tinte.forEach((p, i) => koerner.push({
-                p, q: B[zu[i]], rVon: Math.max(0.6, Math.min(p.w * 0.5, rTinte)), rNach: rB[zu[i]], glyph: gB[zu[i]],
+                p, qa: An[i], qb: Bn[zu[i]], gruppe: gi / 8,
+                rVon: Math.max(0.6, Math.min(p.w * 0.5, rTinte)), rNach: rB[zu[i]], glyph: gB[zu[i]],
             }));
         }
         const N = koerner.length;
@@ -240,24 +243,30 @@
         let x0 = Infinity, x1 = -Infinity;
         koerner.forEach(k => { x0 = Math.min(x0, k.p.x); x1 = Math.max(x1, k.p.x); });
 
-        const a = new Float32Array(2 * N), b = new Float32Array(2 * N), c = new Float32Array(2 * N);
+        // Doc, 25.09.: "bei Staub gehen immer noch Staubkörner wild durch". On
+        // straight paths across the page they did: the pairing keeps paths
+        // apart only in the shared unit frame, and a tall handwritten sum is not
+        // the shape of the typeset one. So - as in strich-morph - each symbol
+        // glides as a whole (its frame: centre, size) and every grain moves
+        // inside that frame, where no two paths meet. The cloud is a small
+        // displacement on top that swells to the middle and is gone at the end.
+        const qa = new Float32Array(2 * N), qb = new Float32Array(2 * N), aus = new Float32Array(2 * N);
+        const gruppe = new Int32Array(N), rahmenFeld = Float32Array.from(rahmenListe);
         const rVon = new Float32Array(N), rNach = new Float32Array(N), los = new Float32Array(N), glyph = new Int32Array(N);
         koerner.forEach((k, i) => {
-            const p = k.p, q = k.q;
-            a[2 * i] = p.x; a[2 * i + 1] = p.y;
-            b[2 * i] = q.x; b[2 * i + 1] = q.y;
-            // the cloud: half way, scattered, lifted
-            const mx = (p.x + q.x) / 2 + gauss(rnd) * o.wolke * mass;
-            const my = (p.y + q.y) / 2 + gauss(rnd) * o.wolke * mass * 0.7 - o.auftrieb * mass;
-            // control point of a quadratic curve that passes the cloud spot at u = 0.5
-            c[2 * i] = 2 * mx - (p.x + q.x) / 2;
-            c[2 * i + 1] = 2 * my - (p.y + q.y) / 2;
+            const p = k.p;
+            qa[2 * i] = k.qa.x; qa[2 * i + 1] = k.qa.y;
+            qb[2 * i] = k.qb.x; qb[2 * i + 1] = k.qb.y;
+            gruppe[i] = k.gruppe;
+            // the cloud: scattered, lifted
+            aus[2 * i] = gauss(rnd) * o.wolke * mass;
+            aus[2 * i + 1] = gauss(rnd) * o.wolke * mass * 0.7 - o.auftrieb * mass;
             rVon[i] = k.rVon;
             rNach[i] = k.rNach;
             los[i] = (p.x - x0) / Math.max(1, x1 - x0);         // the wave runs left to right
             glyph[i] = k.glyph;
         });
-        return { N, a, b, c, rVon, rNach, los, glyph, glyphen: glyphen.map(g => g.atom), mass, quellen: alle,
+        return { N, qa, qb, aus, gruppe, rahmen: rahmenFeld, rVon, rNach, los, glyph, glyphen: glyphen.map(g => g.atom), mass, quellen: alle,
                  tintenFlaeche, flaeche, proZeichen: gruppen.length > 1 || !!paare };
     }
 
@@ -308,10 +317,14 @@
         const pfade = Array.from({ length: o.stufen }, () => new Path2D());
         for (let i = 0; i < v.N; i++) {
             if (fertig[v.glyph[i]]) continue;
-            const e = ease(u[i]), f = 1 - e;
-            let x = f * f * v.a[2 * i] + 2 * e * f * v.c[2 * i] + e * e * v.b[2 * i];
-            let y = f * f * v.a[2 * i + 1] + 2 * e * f * v.c[2 * i + 1] + e * e * v.b[2 * i + 1];
-            const hub = Math.sin(Math.PI * e);
+            const e = ease(u[i]), hub = Math.sin(Math.PI * e);
+            // the symbol's frame glides (centre linear, size geometric) ...
+            const R = v.rahmen, g = 8 * v.gruppe[i];
+            const cx = R[g] + (R[g + 4] - R[g]) * e, cy = R[g + 1] + (R[g + 5] - R[g + 1]) * e;
+            const sx = R[g + 2] * Math.pow(R[g + 6] / R[g + 2], e), sy = R[g + 3] * Math.pow(R[g + 7] / R[g + 3], e);
+            // ... and the grain moves inside it, plus the cloud's swell
+            let x = cx + (v.qa[2 * i] + (v.qb[2 * i] - v.qa[2 * i]) * e) * sx + v.aus[2 * i] * hub;
+            let y = cy + (v.qa[2 * i + 1] + (v.qb[2 * i + 1] - v.qa[2 * i + 1]) * e) * sy + v.aus[2 * i + 1] * hub;
             const bx = x / M, by = y / M;
             x += Math.sin(2.3 * by + 1.1 * bx) * o.wirbel * M * hub;
             y += Math.cos(1.9 * bx - 1.4 * by) * o.wirbel * M * hub;
