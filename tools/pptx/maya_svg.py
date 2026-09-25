@@ -27,6 +27,12 @@ def label(c, x, y, markup, size=14, color=S.INK, family=S.SANS, weight=None, anc
              ' font-weight="%s"' % weight if weight else "", markup))
 
 
+def tsd(n):
+    """A number for KaTeX with the German thousands dot - 43{.}927; the braces keep the dot
+    from getting the space of punctuation (Doc, 25.09.2026: "Tausendertrennen .")."""
+    return "{:,}".format(n).replace(",", "{.}")
+
+
 # ------------------------------------------------------------------ digits ---
 # A Maya digit is written from the bottom up: every bar counts five, every dot one,
 # and a shell stands for zero. Four dots and three bars is as far as one place goes (19).
@@ -34,41 +40,34 @@ BAR_H = 9.0      # thickness of a bar
 ROW_GAP = 6.0    # air between two rows of a digit
 
 
-def _shell(c, cx, cy, w, color):
-    """The zero: a scallop shell - ribs fanning out of the hinge, a scalloped rim.
+MUSCHEL = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "HTML", "resources", "muschel.svg")
 
-    From forloop-49, who rendered four variants and kept the one that still reads at 30 px;
-    HTML/maya.html (the Maya reckoning board) draws the same shape, so lab and deck match."""
-    h = w * 0.64
-    R = h * 0.92
-    hx, hy = cx, cy + h * 0.44           # the hinge sits below the centre
-    spread = 0.44                         # half opening, in units of pi
-    a0, a1 = -math.pi / 2 - math.pi * spread, -math.pi / 2 + math.pi * spread
-    kx = (w / 2) / (R * math.sin(math.pi * spread))
-    P = lambda a, r: (hx + kx * R * r * math.cos(a), hy + R * r * math.sin(a))
-    lobes = 6
-    x0, y0 = P(a0, 0.9)
-    d = ["M %s %s" % (S.fmt(x0), S.fmt(y0))]
-    for i in range(lobes):
-        mx, my = P(a0 + (a1 - a0) * (i + 0.5) / lobes, 1.10)
-        ex, ey = P(a0 + (a1 - a0) * (i + 1) / lobes, 0.9)
-        d.append("Q %s %s %s %s" % (S.fmt(mx), S.fmt(my), S.fmt(ex), S.fmt(ey)))
-    d.append("Q %s %s %s %s" % (S.fmt(hx + w * 0.10), S.fmt(hy + h * 0.10), S.fmt(hx), S.fmt(hy)))
-    d.append("Q %s %s %s %s" % (S.fmt(hx - w * 0.10), S.fmt(hy + h * 0.10), S.fmt(x0), S.fmt(y0)))
-    d.append("Z")
-    c.raw('<path d="%s" fill="%s" fill-opacity="0.10" stroke="%s" stroke-width="2.2"'
-          ' stroke-linejoin="round"/>' % (" ".join(d), color, color))
-    for i in range(1, lobes):
-        a = a0 + (a1 - a0) * i / lobes
-        sx, sy = P(a, 0.16)
-        ex, ey = P(a, 0.86)
-        c.line(sx, sy, ex, ey, color=color, width=1.4)
+
+def _muschel():
+    """The shell's path, box and stroke width, read from HTML/resources/muschel.svg - the one
+    source the lab (HTML/maya.html) draws from too, so deck and lab show the same Pecten."""
+    import re as _re
+    txt = open(MUSCHEL, encoding="utf-8").read()
+    x, y, w, h = map(float, _re.search(r'viewBox="([^"]+)"', txt).group(1).split())
+    lw = float((_re.search(r'stroke-width="([\d.]+)"', txt) or [None, "3.2"])[1])
+    return _re.search(r'<path d="([^"]+)"', txt).group(1), x, y, w, h, lw
+
+
+def _shell(c, cx, cy, w, color):
+    """The zero, centred on cx, cy and fitted into a w x w square (Doc, 25.09.2026: the deck
+    still showed the old hand-drawn shell)."""
+    d, x, y, bw, bh, lw = _muschel()
+    k = w / max(bw, bh)
+    c.raw('<g transform="translate(%s %s) scale(%s) translate(%s %s)" fill="none" stroke="%s"'
+          ' stroke-width="%s" stroke-linejoin="round" stroke-linecap="round"><path d="%s"/></g>'
+          % (S.fmt(cx), S.fmt(cy), S.fmt(k), S.fmt(-(x + bw / 2)), S.fmt(-(y + bh / 2)), color,
+             S.fmt(lw), d))
 
 
 def digit_height(n):
     """Height a digit needs - so a row of digits can be aligned on a common baseline."""
     if n == 0:
-        return 26.0
+        return 30.0
     rows = n // 5 + (1 if n % 5 else 0)
     return rows * BAR_H + (rows - 1) * ROW_GAP + (6.0 if n % 5 else 0.0)
 
@@ -76,8 +75,8 @@ def digit_height(n):
 def digit(c, cx, top, n, w=52, color=S.INK, dot=None):
     """One Maya digit 0..19, its top edge at `top`, centred on cx. Returns its height."""
     if n == 0:
-        _shell(c, cx, top + 15, w * 0.82, color)
-        return 26.0
+        _shell(c, cx, top + 15, w * 0.62, color)
+        return 30.0
     bars, dots = n // 5, n % 5
     y = top
     if dots:
@@ -126,7 +125,7 @@ def punkt_strich_muschel():
         elif name == "Strich":
             c.rect(cx - 62, 98, 124, 20, fill=color, rx=4)
         else:
-            _shell(c, cx, 108, 120, color)
+            _shell(c, cx, 108, 100, color)
         label(c, cx, 180, "= %s" % val, 30, color=color, weight="600")
         labels.append((cx, 250, 210, name, "font-size:19px;font-weight:600;color:%s" % S.INK))
     labels.append((W / 2, 300, W, "Mehr Zeichen braucht es nicht — jede der zwanzig Ziffern "
@@ -191,7 +190,7 @@ def stellen20():
                        "font-size:17px;font-weight:600;color:%s" % S.MUTED))
     c.arrow(x0 + 4 * cw - 10, 258, x0 + 6, 258, color=S.ORANGE, width=2.6)
     labels.append((W / 2, 288, 620, "Dieselben Ziffern, ein ganz anderer Wert: "
-                                    "$6207_{20} = 48\\,807$",
+                                    "$6207_{20} = 48{.}807$",
                    "font-size:16px;color:%s" % S.BODY))
     return c.svg("Die Ziffernfolge 6207 im reinen Stellenwertsystem zur Basis 20"), labels
 
@@ -209,13 +208,13 @@ def stellen_maya():
     # the broken step is what this slide is about, so it is marked
     c.rect(x0 - 8, 58, 2 * cw + 6, ch + 34, fill="none", stroke=S.ORANGE,
            width=2.6, rx=12, opacity=0.95)
-    labels.append((x0 + cw - 5, 38, 520, "hier bricht das System: 7200 und 360 statt 8000 und 400",
+    labels.append((x0 + cw - 5, 38, 520, "hier bricht das System: 7.200 und 360 statt 8.000 und 400",
                    "font-size:15px;font-weight:600;color:%s" % S.ORANGE))
     labels.append((W / 2, 238, W - 80, "Ein Maya-Jahr hatte **18 Monate zu 20 Tagen = 360 Tage**. "
                                        "Damit die dritte Stelle das Jahr trifft, zählt sie 360 — "
                                        "nicht $20^2 = 400$.", "font-size:15px;color:%s" % S.BODY))
-    labels.append((W / 2, 300, 700, "$6207_{Maya} = 6 \\cdot 7200 + 2 \\cdot 360 + 0 \\cdot 20 + "
-                                    "7 = 43\\,927$", "font-size:18px;color:%s" % S.INK))
+    labels.append((W / 2, 300, 700, "$6207_{Maya} = 6 \\cdot 7{.}200 + 2 \\cdot 360 + 0 \\cdot 20 + "
+                                    "7 = 43{.}927$", "font-size:18px;color:%s" % S.INK))
     return c.svg("Die echten Maya-Stellenwerte: 1, 20, 360, 7200"), labels
 
 
@@ -236,13 +235,13 @@ def maya_zahl(stellen=(6, 2, 0, 7), werte=("7.200", "360", "20", "1"), titel=Non
         digit(c, x_glyph, top + (ch - 8 - h) / 2 - 2, z, w=48, color=S.INK, dot=S.RED)
         wert = int(w.replace(".", "")) * z
         gesamt += wert
-        gleich(labels, x_eq, top + ch / 2 - 4, "%s \\cdot %s" % (z, w.replace(".", "\\,")),
-               "{:,}".format(wert).replace(",", "\\,"), "font-size:19px;color:%s" % S.BODY,
+        gleich(labels, x_eq, top + ch / 2 - 4, "%s \\cdot %s" % (z, w.replace(".", "{.}")),
+               tsd(wert), "font-size:19px;color:%s" % S.BODY,
                "font-size:19px;font-weight:600;color:%s" % S.INK)
     y = top0 + n * ch + 4
     c.line(x_eq - 100, y, x_eq + 110, y, color=S.INK, width=2)
-    gleich(labels, x_eq, y + 26, None, "{:,}".format(gesamt).replace(",", "\\,"),
-           "", "font-size:26px;font-weight:600;color:%s" % S.RED)
+    gleich(labels, x_eq, y + 26, None, tsd(gesamt),
+           "", "font-size:19px;font-weight:600;color:%s" % S.RED)
     labels.append((150, 44, 220, "höchste Stelle **oben**",
                    "font-size:14px;font-weight:600;color:%s" % S.MUTED))
     c.arrow(150, 70, 150, y - 26, color=S.MUTED, width=2)
@@ -270,18 +269,18 @@ def aufgabe(zahl=5432, loesung=False):
         if loesung:
             h = digit_height(z)
             digit(c, x_glyph, top + (ch - 10 - h) / 2 - 2, z, w=48, color=S.INK, dot=S.RED)
-        labels.append((x_glyph - 150, top + ch / 2 - 5, 120, "$%s$" % "{:,}".format(w).replace(",", "\\,"),
+        labels.append((x_glyph - 150, top + ch / 2 - 5, 120, "$%s$" % tsd(w),
                        "font-size:20px;font-weight:600;color:%s" % S.MUTED))
         if loesung:
             css = "font-size:18px;color:%s" % S.BODY
             gleich(labels, x_rech, top + ch / 2 - 5,
-                   "%s \\cdot %s" % (z, "{:,}".format(w).replace(",", "\\,")),
-                   "{:,}".format(z * w).replace(",", "\\,"), css, css)
+                   "%s \\cdot %s" % (z, tsd(w)),
+                   tsd(z * w), css, css)
     if loesung:
         y = top0 + 4 * ch + 2
         c.line(x_rech - 110, y, x_rech + 110, y, color=S.INK, width=2)
-        gleich(labels, x_rech, y + 24, None, "{:,}".format(zahl).replace(",", "\\,"),
-               "", "font-size:24px;font-weight:600;color:%s" % S.RED)
+        gleich(labels, x_rech, y + 24, None, tsd(zahl),
+               "", "font-size:18px;font-weight:600;color:%s" % S.RED)
     else:
         labels.append((W / 2, 300, W - 80, "Wie viele Siebentausendzweihunderter, "
                                            "Dreihundertsechziger, Zwanziger und Einer stecken in "
@@ -301,7 +300,7 @@ def potenzen():
         for i, e in enumerate((4, 3, 2, 1, 0)):
             y = 72 + i * 46
             gleich(labels, x0 + 112, y, "%d^%d" % (basis, e),
-                   "{:,}".format(basis ** e).replace(",", "\\,"), "font-size:20px;color:%s" % S.BODY,
+                   tsd(basis ** e), "font-size:20px;color:%s" % S.BODY,
                    "font-size:20px;font-weight:600;color:%s" % (S.RED if e == 0 else S.INK), wl=110, wr=140)
             if i:
                 c.arrow(x0 + 276, y - 46 + 12, x0 + 276, y - 12, color=color, width=1.8)
