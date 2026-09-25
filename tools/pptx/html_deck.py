@@ -1915,9 +1915,21 @@ ASK_JS = r"""
       showWho();
     });
   });
+  // the face goes with the voice: Brain = Solita shows her photo, Doc his own (Doc, 25.09.2026: "Solita selected aber
+  // mein Bild"). A deck that set its own picture for Doc (set_avatar) keeps that one for him.
+  const faceImg = document.querySelector('#ask-btn img');
+  const SOLITA_PIC = '../resources/solita-avatar.png';
+  const DOC_PIC = faceImg && document.body.dataset.voice === 'doc' ? faceImg.getAttribute('src') : '../resources/team/alvers_blick.png';
+  function showFace() {
+    if (!faceImg) return;
+    const doc = VOICE === 'doc';
+    faceImg.setAttribute('src', doc ? DOC_PIC : SOLITA_PIC);
+    faceImg.alt = doc ? 'Doc Alvers' : 'Solita';
+  }
   function showWho() {
     ttsBox.checked = ttsOn;
     ttsBox.parentNode.querySelector('i').textContent = VOICE === 'doc' ? 'Docs Stimme' : 'Solitas Stimme';
+    showFace();
     voiceChecks.forEach(function (c) { c.checked = c.dataset.voice === VOICE; });
     menu.querySelector('.ask-spk').innerHTML = ttsOn ? SPK_ON : SPK_OFF;
     checks.forEach(function (c) {
