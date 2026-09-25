@@ -789,13 +789,15 @@ fromHash();
   menu.id = 'ask-menu';
   menu.hidden = true;
   menu.setAttribute('role', 'menu');
-  menu.innerHTML = '<div class="ask-mhead">Wer antwortet?</div>'
-    + '<label><input type="checkbox" data-who="claude"><span>Solita<i>Claude Haiku</i></span></label>'
+  // Brain = who speaks (Solita's voice or Doc's), Model = which AI answers (Doc, 25.09.2026: two mini headers)
+  menu.innerHTML = '<div class="ask-mhead">Brain</div>'
+    + '<label><input type="checkbox" data-voice="de-DE-Studio-C"><span>Solita</span></label>'
+    + '<label><input type="checkbox" data-voice="doc"><span>Doc</span></label>'
+    + '<div class="ask-mhead">Model</div>'
+    + '<label><input type="checkbox" data-who="claude"><span>Claude<i>Haiku</i></span></label>'
     + '<label class="ds"><input type="checkbox" data-who="ds"><span>DeepSeek</span></label>'
     + '<div class="ask-msep"></div>'
     + '<label><input type="checkbox" data-act="tts"><span><em class="ask-spk"></em>Vorlesen<i></i></span></label>'
-    + '<label><input type="checkbox" data-voice="de-DE-Studio-C"><span>Solita<i>Stimme</i></span></label>'
-    + '<label><input type="checkbox" data-voice="doc"><span>Doc<i>Stimme</i></span></label>'
     + '<div class="ask-msep"></div>'
     + '<button type="button" data-act="copy">Kopieren</button>'
     + '<button type="button" data-act="clear">Leeren</button>';
@@ -1392,12 +1394,14 @@ fromHash();
     if (PRESENTER) link.send({ t: 'ask-hush' });     // ... on the beamer too, where she really speaks
     if (!ear) ear = window.SolitaListen({
       lang: 'de-DE',
+      silenceMs: 2000,                               // 2 s quiet ends the question - and sends it (Doc, 25.09.2026: 3 s "zu lang")
       onState: function (st) { micBtn.classList.toggle('on', st === 'listening'); },
       onPartial: function (t) { if (heardLate) return; heard(t); },
       onFinal: function (t) {
         micBtn.classList.remove('on');
         if (heardLate) { heardLate = false; return; }   // already sent from the field - nothing lands behind the answer
         input.focus(); heard(t);
+        if (input.value.trim()) submit();              // "nach ... s Pause selbst abschicken" - no Enter needed
       }
     });
     ear.start();

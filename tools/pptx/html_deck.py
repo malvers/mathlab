@@ -1071,7 +1071,7 @@ html.laser-on .p-cur .p-fit{cursor:none}
 #ask-out .ask-q{color:var(--ink);font-weight:600}
 #ask-out .ask-err{color:var(--red)}
 /* DeepSeek's answer to the same question, silent, for comparison (Doc, 17.09.2026: "mach den Text von DS rot (China ;-)") */
-#ask-out .ask-ds{color:var(--red);margin-top:6px}
+#ask-out .ask-ds{color:var(--muted);margin-top:6px}   /* grey, not red (Doc, 25.09.2026) */
 #ask-out .ask-ds b{color:inherit;font:700 9px/1 Orbitron,sans-serif;letter-spacing:1px;text-transform:uppercase;margin-right:6px}
 /* karaoke: the word Solita is saying right now */
 #ask-out .ask-w{border-radius:3px;transition:background-color .12s,box-shadow .12s}
@@ -1111,15 +1111,19 @@ html.laser-on .p-cur .p-fit{cursor:none}
 #ask #ask-menu[hidden]{display:none}
 #ask #ask-menu .ask-mhead{font:700 9px/1 Orbitron,sans-serif;letter-spacing:1.1px;text-transform:uppercase;color:#7E8FB5;
   padding:7px 8px 6px}
+#ask #ask-menu label + .ask-mhead{margin-top:6px}
+/* above the Frag-Solita line: that line sits later inside #ask with its own z-index 11 and covered the menu's
+   lower rows (Doc, 25.09.2026: "das Pop sollte oben liegen") */
+#ask #ask-menu{z-index:20}
 #ask #ask-menu label{display:flex;align-items:center;gap:9px;margin:0;padding:7px 8px;border-radius:6px;cursor:pointer;
   font:400 13px/1.2 Raleway,system-ui,sans-serif;letter-spacing:normal;text-transform:none;color:var(--ink)}
 #ask #ask-menu label:hover{background:var(--askfield)}
 #ask #ask-menu input{appearance:none;-webkit-appearance:none;flex:none;width:15px;height:15px;min-width:0;margin:0;padding:0;
   cursor:pointer;border:1px solid var(--askline);border-radius:4px;background:#fff center/11px 11px no-repeat}
 #ask #ask-menu input:checked{background-color:#0E244E;border-color:#0E244E;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.3 2.3 4.7-5' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
-#ask #ask-menu .ds input:checked{background-color:var(--red);border-color:var(--red)}
+#ask #ask-menu .ds input:checked{background-color:var(--muted);border-color:var(--muted)}
 #ask #ask-menu input:disabled{cursor:default;opacity:.6}
-#ask #ask-menu .ds span{color:var(--red)}
+#ask #ask-menu .ds span{color:var(--muted)}
 #ask #ask-menu i{font-style:normal;font-size:11px;color:var(--muted);margin-left:6px}
 #ask #ask-menu .ask-msep{height:1px;margin:4px 6px;background:var(--askline);opacity:.6}
 #ask #ask-menu button{display:block;width:100%;margin:0;padding:7px 8px 7px 32px;border:0;border-radius:6px;
@@ -1150,6 +1154,8 @@ html.laser-on .p-cur .p-fit{cursor:none}
 #ask-send{border:0;border-radius:7px;padding:0 12px;min-width:44px;cursor:pointer;background:var(--green);
   color:#fff;font-family:Orbitron,sans-serif;font-size:17px;font-weight:700;line-height:1}
 #ask-send:hover{filter:brightness(1.08)}
+/* no send button: Enter sends, dictation sends itself after 2 s of quiet (Doc, 25.09.2026: "nimm ? grün mal raus") */
+#ask #ask-send{display:none}
 #ask-send:disabled{opacity:.5;cursor:default}
 /* a question in the field: the "?" breathes gently until it is sent - by click or Enter (Doc, 16.09.2026) */
 #ask-send.ready{animation:askwaber 1.6s ease-in-out infinite}
@@ -1884,13 +1890,15 @@ ASK_JS = r"""
   menu.id = 'ask-menu';
   menu.hidden = true;
   menu.setAttribute('role', 'menu');
-  menu.innerHTML = '<div class="ask-mhead">Wer antwortet?</div>'
-    + '<label><input type="checkbox" data-who="claude"><span>Solita<i>Claude Haiku</i></span></label>'
+  // Brain = who speaks (Solita's voice or Doc's), Model = which AI answers (Doc, 25.09.2026: two mini headers)
+  menu.innerHTML = '<div class="ask-mhead">Brain</div>'
+    + '<label><input type="checkbox" data-voice="de-DE-Studio-C"><span>Solita</span></label>'
+    + '<label><input type="checkbox" data-voice="doc"><span>Doc</span></label>'
+    + '<div class="ask-mhead">Model</div>'
+    + '<label><input type="checkbox" data-who="claude"><span>Claude<i>Haiku</i></span></label>'
     + '<label class="ds"><input type="checkbox" data-who="ds"><span>DeepSeek</span></label>'
     + '<div class="ask-msep"></div>'
     + '<label><input type="checkbox" data-act="tts"><span><em class="ask-spk"></em>Vorlesen<i></i></span></label>'
-    + '<label><input type="checkbox" data-voice="de-DE-Studio-C"><span>Solita<i>Stimme</i></span></label>'
-    + '<label><input type="checkbox" data-voice="doc"><span>Doc<i>Stimme</i></span></label>'
     + '<div class="ask-msep"></div>'
     + '<button type="button" data-act="copy">Kopieren</button>'
     + '<button type="button" data-act="clear">Leeren</button>';
@@ -2487,12 +2495,14 @@ ASK_JS = r"""
     if (PRESENTER) link.send({ t: 'ask-hush' });     // ... on the beamer too, where she really speaks
     if (!ear) ear = window.SolitaListen({
       lang: 'de-DE',
+      silenceMs: 2000,                               // 2 s quiet ends the question - and sends it (Doc, 25.09.2026: 3 s "zu lang")
       onState: function (st) { micBtn.classList.toggle('on', st === 'listening'); },
       onPartial: function (t) { if (heardLate) return; heard(t); },
       onFinal: function (t) {
         micBtn.classList.remove('on');
         if (heardLate) { heardLate = false; return; }   // already sent from the field - nothing lands behind the answer
         input.focus(); heard(t);
+        if (input.value.trim()) submit();              // "nach ... s Pause selbst abschicken" - no Enter needed
       }
     });
     ear.start();
