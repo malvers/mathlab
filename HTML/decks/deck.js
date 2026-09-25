@@ -1163,10 +1163,10 @@ fromHash();
     });
     return s;
   }
-  function karaoke(el, a) {
+  function karaoke(el, a, spans) {                // spans: a piece's share of the answer (default: all of it)
     const items = [];
     let pos = 0;
-    el.querySelectorAll('.ask-w').forEach(function (sp) {
+    (spans || el.querySelectorAll('.ask-w')).forEach(function (sp) {
       const w = (sp.dataset.spoken || sp.textContent).replace(/[*_`#>]/g, '');   // a formula counts as what is said of it
       const k = w.split(/\s+/).filter(Boolean).length || 1;   // a formula is several words in one span
       const n = syllables(w);
@@ -1257,39 +1257,99 @@ fromHash();
     return t.replace(/\s+/g, ' ').trim();
   }
   const TTS_WAIT = 20000;                            // ms - a hanging voice must not hide the answer
+  // What the voice is given: formulas as words, no emoji or markdown.
+  function cleanOf(text) {
+    return String(text)
+        .replace(/\$\$([\s\S]*?)\$\$/g, function (m, t) { return ' ' + texWords(t) + ' '; })   // maths is read too
+        .replace(/\$([^$\n]*?)\$/g, function (m, t) { return ' ' + texWords(t) + ' '; })
+        .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}️‍]/gu, '')
+        .replace(/[*_`#>]/g, '')
+        .replace(/\s+/g, ' ').trim();
+  }
+  // Doc's voice needs ~5 s for a sentence and 16 s for a long answer, past the tts function's 15 s (then Studio-C
+  // steps in). So it comes sentence by sentence: the first piece at once, the next fetched while one plays, played on
+  // without a gap (Doc, 25.09.2026, forloop-73's proposal). Pieces end at sentence ends outside $...$, so each one
+  // renders into exactly its share of the answer's word spans - the karaoke runs piece by piece over those.
+  function pieces(text) {
+    const src = String(text), ends = [];
+    let inMath = false;
+    for (let i = 0; i < src.length; i++) {
+      const ch = src[i];
+      if (ch === '$') inMath = !inMath;
+      else if (!inMath && /[.!?]/.test(ch) && (i + 1 === src.length || /\s/.test(src[i + 1]))) ends.push(i + 1);
+    }
+    const out = [];
+    let from = 0, cur = '';
+    ends.concat(src.length).forEach(function (e) {
+      if (e <= from) return;
+      cur += src.slice(from, e); from = e;
+      const want = out.length ? 120 : 60;            // a short first piece: the voice starts sooner
+      if (cur.trim().length >= want) { out.push(cur.trim()); cur = ''; }
+    });
+    if (cur.trim()) { if (out.length && cur.trim().length < 40) out[out.length - 1] += ' ' + cur.trim(); else out.push(cur.trim()); }
+    return out;
+  }
+  function wordsIn(raw) {                             // how many .ask-w spans render() makes of this text
+    let n = 0;
+    String(raw).split(/(\$[^$\n]+\$)/).forEach(function (part) {
+      if (/^\$[^$\n]+\$$/.test(part)) n++;
+      else if (part) n += part.split(/\s+/).filter(Boolean).length;
+    });
+    return n;
+  }
   function speak(text, show) {
     let shown = false, el = null;
     function once() { if (!shown) { shown = true; el = show(); } }
-    const clean = String(text)
-      .replace(/\$\$([\s\S]*?)\$\$/g, function (m, t) { return ' ' + texWords(t) + ' '; })   // maths is read too
-      .replace(/\$([^$\n]*?)\$/g, function (m, t) { return ' ' + texWords(t) + ' '; })
-      .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}️‍]/gu, '')
-      .replace(/[*_`#>]/g, '')
-      .replace(/\s+/g, ' ').trim();
-    if (!ttsOn || !clean) { once(); return; }        // speaker off: no request, no cost
-    const ctl = window.AbortController ? new AbortController() : null;
-    const timer = setTimeout(function () { if (ctl) ctl.abort(); }, TTS_WAIT);
+    const whole = cleanOf(text);
+    if (!ttsOn || !whole) { once(); return; }        // speaker off: no request, no cost
+    let parts = (VOICE === 'doc' ? pieces(text) : [String(text)]).map(function (raw) {
+      return { clean: cleanOf(raw), n: wordsIn(raw) };
+    }).filter(function (p) { return p.clean; });
+    // the pieces must add up to the spans of the whole answer, or the light would wander - then one piece
+    if (parts.length > 1 && parts.reduce(function (a, p) { return a + p.n; }, 0) !== wordsIn(text)) {
+      parts = [{ clean: whole, n: wordsIn(text) }];
+    }
     const t0 = Date.now();
-    // no password here: the tts function has no password gate - never send it where it is not needed
-    post(TTS_URL, { text: clean.slice(0, 4800), voice: VOICE, languageCode: 'de-DE', speakingRate: 1.0 },
-         ctl ? ctl.signal : undefined)
-      .then(function (r) { return r.json(); })
-      .then(function (j) {
-        clearTimeout(timer);
-        if (!j || !j.audioContent) throw new Error('keine Stimme');
-        addVoice(clean.length, Date.now() - t0);     // Google bills it even if it is not played
-        once();
+    let voice = VOICE;                                // a piece that fell back to Studio-C takes the rest along
+    const got = [];
+    function get(i) {                                 // no password here: the tts function has no password gate
+      if (got[i]) return got[i];
+      const ctl = window.AbortController ? new AbortController() : null;
+      const timer = setTimeout(function () { if (ctl) ctl.abort(); }, TTS_WAIT);
+      got[i] = post(TTS_URL, { text: parts[i].clean.slice(0, 4800), voice: voice, languageCode: 'de-DE', speakingRate: 1.0 },
+                    ctl ? ctl.signal : undefined)
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          clearTimeout(timer);
+          if (!j || !j.audioContent) throw new Error('keine Stimme');
+          if (j.fallback) voice = 'de-DE-Studio-C';
+          return j;
+        }, function (e) { clearTimeout(timer); throw e; });
+      return got[i];
+    }
+    let first = 0;                                    // the spans before piece i
+    function play(i, before) {
+      get(i).then(function (j) {
+        if (i === 0) { addVoice(whole.length, Date.now() - t0); once(); }   // Google bills it even if it is not played
         if (!ttsOn || panel.hidden) return;          // switched off or closed while she was fetching
-        stopAudio();
-        audio = new Audio('data:' + (j.mime || 'audio/mp3') + ';base64,' + j.audioContent);
-        if (el) karaoke(el, audio);
-        audio.play().catch(function () { });
-      })
-      .catch(function () {
-        clearTimeout(timer);
+        if (i === 0) stopAudio();
+        else if (audio !== before) return;           // stopped, or a new answer took over
+        const a = audio = new Audio('data:' + (j.mime || 'audio/mp3') + ';base64,' + j.audioContent);
+        if (i + 1 < parts.length) get(i + 1);         // the next piece comes while this one plays
+        if (el) {
+          const all = el.querySelectorAll('.ask-w');
+          karaoke(el, a, [].slice.call(all, first, first + parts[i].n));
+        }
+        first += parts[i].n;
+        a.addEventListener('ended', function () { if (audio === a && i + 1 < parts.length) play(i + 1, a); });
+        a.play().catch(function () { });
+      }).catch(function () {
+        if (i > 0) return;                            // the answer stands; the rest simply stays silent
         once();
         say('Solitas Stimme war gerade nicht erreichbar.', 'ask-err');
       });
+    }
+    play(0, null);
   }
   function stopAudio() { if (audio) { try { audio.pause(); } catch (e) { } audio = null; } }
 
