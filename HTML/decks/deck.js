@@ -1125,11 +1125,43 @@ fromHash();
   // as far off, and anchoring on the pauses found in the audio made it worse, not better.
   // lead/tail: the silence Google puts before and after the speech (measured 0.10 s and 0.09 s).
   const KARA = { lead: 0.10, tail: 0.09, base: 0.3, sentence: 1.5, comma: 0.6 };
+  // Syllables of what is SAID, token by token: a number counts as its German words ("216000" = zwei-hun-dert-sech-
+  // zehn-tau-send), decimals digit by digit after "Komma". Before 25.09.2026 a formula span like "1 plus 24 durch 60"
+  // counted only plus and durch, and a bare number 1.5 per digit - the light ran ahead over every formula (Doc: "out of
+  // sync"). Measured on a formula-heavy answer against Studio-C cut off after every word: mean error 0.20 s -> 0.13 s,
+  // worst 0.72 s -> 0.43 s. Anchoring on the pauses in the audio was tried again and doubled the error (0.40 s).
+  const UNIT = [1, 1, 1, 1, 1, 1, 1, 2, 1, 1];     // null eins zwei drei vier fünf sechs sieben acht neun
+  function below100(n) {
+    if (n < 10) return UNIT[n];
+    if (n < 13) return 1;                            // zehn elf zwölf
+    if (n < 20) return n === 16 || n === 17 ? 2 : UNIT[n - 10] + 1;
+    const u = n % 10;
+    return 2 + (u ? UNIT[u] + 1 : 0);                // zwanzig ... / einundzwanzig
+  }
+  function numSyl(n) {
+    if (n === 0) return 1;
+    if (n >= 1000000) return 6;
+    let s = 0;
+    const th = Math.floor(n / 1000), h = Math.floor(n % 1000 / 100), r = n % 100;
+    if (th) s += (th === 1 ? 1 : numSyl(th)) + 2;    // (ein)tausend
+    if (h) s += (h === 1 ? 1 : UNIT[h]) + 2;          // (ein)hundert
+    if (r) s += below100(r);
+    return s;
+  }
   function syllables(w) {
-    const v = w.toLowerCase().match(/[aeiouyäöü]+/g);
-    if (v) return v.length;
-    const d = w.replace(/\D/g, '');
-    return d.length * 1.5;                           // a bare number: roughly one and a half per digit
+    let s = 0;
+    w.split(/\s+/).forEach(function (t) {
+      const m = t.match(/^\D*?(\d+)(?:([,.])(\d+))?\D*$/);
+      if (m) {
+        if (m[2] === '.' && m[3].length === 3) { s += numSyl(+(m[1] + m[3])); return; }   // 3.800 - a thousands dot
+        s += numSyl(+m[1]);
+        if (m[3]) s += 2 + m[3].split('').reduce(function (a, c) { return a + UNIT[+c]; }, 0);   // Komma, digit by digit
+        return;
+      }
+      const v = t.toLowerCase().match(/[aeiouyäöü]+/g);
+      if (v) s += v.length;
+    });
+    return s;
   }
   function karaoke(el, a) {
     const items = [];
