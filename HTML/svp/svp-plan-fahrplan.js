@@ -203,14 +203,44 @@ window.svpPlanParts.push(function (P) {
         return (isFinite(m) ? m : window.innerHeight) - LUFT;
     }
 
-    /* Zu gross ist die Schrift auch, wenn ein Wort seitlich hinauslaeuft. */
+    /* Only the TEXT column counts (Doc, 25.09.2026: "Fahrplan ist die Schrift ploetzlich
+       klein?"): measured on the whole sheet, a tall right column - the thought of the week
+       plus eight pills - never fit a low window, and the type went down to MIN_PX however
+       short the text was. The list itself is stretched to the row height, so the bottom of
+       its last point is what the text really needs. Too big is also a word running out
+       sideways. */
     function passt() {
-        return blatt.scrollHeight <= grenze() &&
+        const letzter = feld.lastElementChild;
+        const unten = letzter ? letzter.offsetTop + letzter.offsetHeight : feld.offsetTop;
+        return unten + parseFloat(getComputedStyle(blatt).paddingBottom) <= grenze() &&
             blatt.scrollWidth <= blatt.clientWidth + 1;
+    }
+
+    /* The right column has to fit as well, but it is not text - smaller type does nothing
+       for it. So the picture gives way: it gets narrower (aspect-ratio keeps it whole, no
+       crop) until picture and pills fit under the max-height; before, the pills slid up
+       over it. Below BILD_MIN it is no picture any more and goes, and the pills then take
+       the whole column, up into the head row. On the phone the column stands under the
+       text and the sheet scrolls - nothing to do there. */
+    const BILD_BREITE = 154, BILD_ASPEKT = 1.445, BILD_MIN = 60;
+    function fitSide() {
+        bild.style.width = '';
+        bild.style.display = '';
+        mat.style.gridRow = '';
+        const cs = getComputedStyle(blatt);
+        if (cs.gridTemplateColumns.split(' ').length < 2) return;
+        if (bild.hidden) { mat.style.gridRow = '1 / span 3'; return; }
+        const innen = grenze() + LUFT - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+        const matH = mat.hidden ? 0 : mat.offsetHeight + parseFloat(getComputedStyle(mat).marginTop);
+        const breite = Math.min(BILD_BREITE, (innen - matH) / BILD_ASPEKT);
+        if (breite >= BILD_BREITE) return;
+        if (breite < BILD_MIN) { bild.style.display = 'none'; mat.style.gridRow = '1 / span 3'; }
+        else bild.style.width = breite.toFixed(1) + 'px';
     }
 
     function fitFont() {
         if (!blatt || !box || box.hidden) return;
+        fitSide();
         blatt.style.fontSize = '';                      /* erst zurueck auf das CSS-Mass */
         const basis = parseFloat(getComputedStyle(blatt).fontSize) || 46;
         if (passt()) return;                            /* alles da, nichts zu tun */
