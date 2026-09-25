@@ -130,6 +130,18 @@
             margin: 0.15rem 0;
         }
 
+        /* The film strip along the bottom edge (see "Film strip" in the script):
+           the whole strip is the grip, the line and the dot only show where. */
+        #zeitleiste .zl-spur, #zeitleiste .zl-fuellung {
+            position: absolute; left: 24px; top: 50%; height: 3px; margin-top: -1.5px; border-radius: 2px;
+        }
+        #zeitleiste .zl-spur { right: 24px; background: rgba(234, 240, 247, 0.18); }
+        #zeitleiste .zl-fuellung { width: 0; background: rgba(234, 240, 247, 0.7); }
+        #zeitleiste .zl-knopf {
+            position: absolute; left: 24px; top: 50%; width: 18px; height: 18px;
+            margin: -9px 0 0 -9px; border-radius: 50%; background: #eaf0f7;
+        }
+
         .erk-ok { color: rgb(121, 158, 49); }
         .erk-warn { color: rgb(245, 194, 66); }
         .erk-fehler { color: rgb(176, 36, 24); }
@@ -366,6 +378,7 @@
         }
 
         function redraw() {
+            zeigeZeitleiste();
             const rect = container.getBoundingClientRect();
             ctx.clearRect(0, 0, rect.width, rect.height);
 
@@ -558,7 +571,7 @@
                 host.id = 'formel-schicht';
                 // Doc: "so groß wie oben und weiter runter" - the counterpart of the
                 // template strip: a strip at the bottom edge, formulas centred
-                host.style.cssText = 'position:absolute;left:0;right:0;bottom:0;min-height:84px;pointer-events:none;' +
+                host.style.cssText = 'position:absolute;left:0;right:0;bottom:56px;min-height:84px;pointer-events:none;' +
                     'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.4rem';
                 container.appendChild(host);
             }
@@ -628,6 +641,46 @@
             if (morphAnim) { cancelAnimationFrame(morphAnim); morphAnim = null; }
             morphT = parseFloat(v);
             redraw();
+        }
+
+        // ── Film strip: scrub the morph back and forth ──────────────────────
+        // Doc: "wie in einem Movie einen Slider (vor, zurück)", "mit dem Finger
+        // ... ganze Breite", "oder Stift!". A strip of its own along the bottom
+        // edge, not a gesture on the page: Doc writes with pen AND finger. Any
+        // pointer anywhere across the full width sets the morph to that point.
+        // Built on first use; redraw() keeps it in step with the morph.
+        let zeitleiste = null;
+        function zeigeZeitleiste() {
+            if (!zeitleiste) {
+                zeitleiste = document.createElement('div');
+                zeitleiste.id = 'zeitleiste';
+                zeitleiste.setAttribute('role', 'slider');
+                zeitleiste.setAttribute('aria-label', 'Morph vor und zurück');
+                zeitleiste.setAttribute('aria-valuemin', '0');
+                zeitleiste.setAttribute('aria-valuemax', '1');
+                zeitleiste.style.cssText = 'position:absolute;left:0;right:0;bottom:0;height:56px;' +
+                    'touch-action:none;cursor:ew-resize;z-index:5';
+                zeitleiste.innerHTML = '<div class="zl-spur"></div><div class="zl-fuellung"></div><div class="zl-knopf"></div>';
+                container.appendChild(zeitleiste);
+                const zeitAn = ev => {
+                    const r = zeitleiste.getBoundingClientRect();
+                    return Math.max(0, Math.min(1, (ev.clientX - r.left - 24) / Math.max(1, r.width - 48)));
+                };
+                zeitleiste.addEventListener('pointerdown', ev => {
+                    try { zeitleiste.setPointerCapture(ev.pointerId); } catch (_) {}
+                    clearTimeout(beispielTimer);            // a pending replay must not jump in
+                    setzeMorph(zeitAn(ev));
+                    ev.preventDefault();
+                });
+                zeitleiste.addEventListener('pointermove', ev => {
+                    if (zeitleiste.hasPointerCapture && zeitleiste.hasPointerCapture(ev.pointerId)) setzeMorph(zeitAn(ev));
+                });
+            }
+            const b = Math.max(0, zeitleiste.clientWidth - 48);
+            zeitleiste.querySelector('.zl-fuellung').style.width = (b * morphT) + 'px';
+            zeitleiste.querySelector('.zl-knopf').style.left = (24 + b * morphT) + 'px';
+            zeitleiste.style.opacity = morphVorbereitet.some(Boolean) ? '1' : '0.35';
+            zeitleiste.setAttribute('aria-valuenow', morphT.toFixed(2));
         }
 
         function setErgebnisText(msg) {
@@ -730,10 +783,12 @@
             // only if it would not fit - never enlarged, it is Doc's size.
             let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
             d.strokes.forEach(st => st.points.forEach(q => { x0 = Math.min(x0, q.x); y0 = Math.min(y0, q.y); x1 = Math.max(x1, q.x); y1 = Math.max(y1, q.y); }));
-            const rect = container.getBoundingClientRect(), KOPF = 84;
+            // between the template strip on top and, at the bottom, the recognised
+            // formula (84 px) above the film strip (56 px)
+            const rect = container.getBoundingClientRect(), KOPF = 84, FUSS = 140;
             const w = Math.max(1, x1 - x0), h = Math.max(1, y1 - y0);
-            const sk = Math.min(1, (rect.width - 100) / w, (rect.height - KOPF - 60) / h);
-            const ox = (rect.width - w * sk) / 2, oy = KOPF + (rect.height - KOPF - h * sk) / 2;
+            const sk = Math.min(1, (rect.width - 100) / w, (rect.height - KOPF - FUSS - 20) / h);
+            const ox = (rect.width - w * sk) / 2, oy = KOPF + (rect.height - KOPF - FUSS - h * sk) / 2;
             d.strokes.forEach(st => strokes.push(Object.assign({}, st, {
                 width: (st.width || 3) * sk,
                 points: st.points.map(q => Object.assign({}, q, { x: ox + (q.x - x0) * sk, y: oy + (q.y - y0) * sk })),
