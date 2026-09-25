@@ -215,6 +215,38 @@
         let morphAnim = null;
         const view = { boxes: true, numbers: true, rows: true, penOnly: false };
 
+        // The corpus, easy to hard. Doc copies each one by hand, ERKENNEN saves
+        // the probe, and the grouping is then tuned against all of them. Roots
+        // and tall brackets come late on purpose - KaTeX draws those as SVG, so
+        // they show where the morph still stops.
+        const VORLAGEN = [
+            ['linear',        '2x+3=11'],
+            ['gerade',        'y=mx+b'],
+            ['quadrat',       'x^2-4=0'],
+            ['pythagoras',    'a^2+b^2=c^2'],
+            ['binom',         '(a+b)^2=a^2+2ab+b^2'],
+            ['funktion',      'f(x)=x^3-2x'],
+            ['brueche',       '\\frac{1}{2}+\\frac{1}{3}=\\frac{5}{6}'],
+            ['log',           '\\log_2 8=3'],
+            ['ableitung',     "f'(x)=2x"],
+            ['euler',         'e^{i\\pi}+1=0'],
+            ['trig',          '\\sin^2\\alpha+\\cos^2\\alpha=1'],
+            ['wahrsch',       'P(A\\cap B)=P(A)\\cdot P(B)'],
+            ['summe',         '\\sum_{k=1}^{n}k=\\frac{n(n+1)}{2}'],
+            ['limes',         '\\lim_{x\\to\\infty}\\frac{1}{x}=0'],
+            ['ableitung2',    '\\frac{d}{dx}\\sin x=\\cos x'],
+            ['integral',      '\\int_0^1 x^2\\,dx=\\frac{1}{3}'],
+            ['vektor',        '\\vec{a}\\cdot\\vec{b}=|a||b|\\cos\\varphi'],
+            ['wurzel',        '\\sqrt{16}=4'],
+            ['pq',            'x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}'],
+            ['reihe',         '\\sum_{i=1}^{\\infty}\\frac{1}{2^i}=1'],
+        ];
+        let vorlageIdx = 0;
+        try { vorlageIdx = Math.min(VORLAGEN.length - 1, parseInt(localStorage.getItem('vorrechnen-vorlage') || '0', 10) || 0); } catch (_) {}
+        // Does the server take probes? Checked once at load; otherwise the probe
+        // is offered as a download, the way SICHERN does it.
+        let speichernApi = false;
+
         const INK = '#adff2f';                       // same green as morpheus
         // Symbol colours: Doc's palette first, then neon blue, cycling. Red-free
         // on purpose so it never reads as an error marker.
@@ -486,6 +518,8 @@
             // Straight into the morph - with the button gone there is nothing
             // left to press, and Doc wanted it to happen by itself anyway.
             if (morphVorbereitet.some(Boolean)) morphen(1);
+            // Every ERKENNEN is a probe for the corpus, good or bad.
+            if (strokes.length) speichereProbe();
         }
 
         // The typeset formula under the handwriting - real LaTeX, set by KaTeX.
@@ -554,6 +588,75 @@
                     <div class="erk-info">${e.atome.length} Zeichen gesetzt · ${e.ms} ms</div></div>`;
             });
             el.innerHTML = teile.join('') || '<div class="erk-info">–</div>';
+        }
+
+        // ── Vorlage: the formula to copy, shown above the writing area ──────
+        function zeigeVorlage() {
+            let host = document.getElementById('vorlage-schicht');
+            if (!host) {
+                host = document.createElement('div');
+                host.id = 'vorlage-schicht';
+                host.style.cssText = 'position:absolute;left:24px;top:14px;right:24px;pointer-events:none;' +
+                    'display:flex;align-items:baseline;gap:1.2rem;color:#00d2ff';
+                container.appendChild(host);
+            }
+            const [slug, latex] = VORLAGEN[vorlageIdx];
+            host.innerHTML = `<span style="font-family:Orbitron,sans-serif;font-size:0.8rem;letter-spacing:0.1em;opacity:0.7">` +
+                `VORLAGE ${vorlageIdx + 1} / ${VORLAGEN.length}</span><span id="vorlage-formel" style="font-size:2.4rem"></span>`;
+            try { katex.render(latex, document.getElementById('vorlage-formel'), { throwOnError: false }); }
+            catch (e) { document.getElementById('vorlage-formel').textContent = latex; }
+        }
+
+        function naechsteVorlage() {
+            vorlageIdx = (vorlageIdx + 1) % VORLAGEN.length;
+            try { localStorage.setItem('vorrechnen-vorlage', String(vorlageIdx)); } catch (_) {}
+            clearAll();
+            zeigeVorlage();
+            setProbeStatus('–');
+        }
+
+        function setProbeStatus(msg) {
+            const el = document.getElementById('probe-status');
+            if (el) el.textContent = msg;
+        }
+
+        // One probe per ERKENNEN: strokes, the template, what was recognised,
+        // and how the pairing went. The server picks the running number.
+        async function speichereProbe() {
+            const [slug, vorlage] = VORLAGEN[vorlageIdx];
+            const erg = analysis.lines.map(l => zeilenErgebnis[l.lineIdx]).find(e => e && e.latex);
+            const probe = {
+                version: 2, created: new Date().toISOString(), geraet: navigator.userAgent.includes('Android') ? 'Tablet' : 'Mac',
+                canvas: { w: canvas.width, h: canvas.height, dpr: devicePixelRatio },
+                vorlage: { idx: vorlageIdx, slug, latex: vorlage },
+                latex: erg ? erg.latex : '', tokens: erg ? erg.tokens : [],
+                zeichen: erg && erg.atome ? erg.atome.length : 0,
+                passt: !!(erg && erg.zuordnung && erg.zuordnung.passt),
+                nachjustiert: !!(erg && erg.nachjustiert),
+                diagnose: erg && erg.zuordnung ? erg.zuordnung.diagnose : (erg && erg.fehler) || '',
+                morph: !!morphVorbereitet.some(Boolean),
+                options: opts, strokes,
+            };
+            const body = JSON.stringify(probe, null, 1);
+            if (speichernApi) {
+                try {
+                    const r = await fetch('/__proben/' + encodeURIComponent(slug), {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+                    const j = await r.json().catch(() => ({}));
+                    if (r.ok && j.name) { setProbeStatus('gespeichert: ' + j.name); return; }
+                    setProbeStatus('Speichern fehlgeschlagen (' + r.status + ') – Download stattdessen');
+                } catch (e) {
+                    setProbeStatus('Speichern fehlgeschlagen – Download stattdessen');
+                }
+            } else {
+                setProbeStatus('kein Speicher-Endpunkt – Download stattdessen');
+            }
+            const blob = new Blob([body], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'probe-' + slug + '-' + new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-') + '.json';
+            a.click();
+            URL.revokeObjectURL(a.href);
         }
 
         // ── Export / import ─────────────────────────────────────────────────
@@ -636,7 +739,9 @@
                     <button class="cyber-btn gross" style="height:6rem;min-height:6rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6rem" onclick="clearAll()">LEEREN</button>
                     <button class="cyber-btn gross" style="height:6rem;min-height:6rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6rem" onclick="exportStrokes()">SICHERN</button>
                     <button class="cyber-btn gross" style="height:6rem;min-height:6rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6rem" onclick="erkennen()">ERKENNEN</button>
+                    <button class="cyber-btn gross" style="height:6rem;min-height:6rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6rem" onclick="naechsteVorlage()">WEITER</button>
                 </div>
+                <div id="probe-status" class="erk-info" style="margin-top:0.6rem">–</div>
                 <div id="erkennung-out" style="margin-top:1rem"><div class="erk-info">–</div></div>
                 <input type="file" id="import-file" accept="application/json" style="display:none"
                        onchange="if(this.files[0]) importStrokes(this.files[0])">
@@ -718,7 +823,12 @@
         }
 
         window.addEventListener('resize', init);
-        document.fonts.ready.then(() => { buildPanel(); holeStriche(); recompute(); init(); });
+        document.fonts.ready.then(() => {
+            buildPanel(); holeStriche(); recompute(); init(); zeigeVorlage();
+            fetch('/__proben/', { cache: 'no-store' }).then(r => { speichernApi = r.ok; })
+                .catch(() => { speichernApi = false; })
+                .then(() => setProbeStatus(speichernApi ? 'Speichern auf dem Mac bereit' : 'kein Speicher-Endpunkt – Proben als Download'));
+        });
     </script>
 </body>
 

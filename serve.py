@@ -123,14 +123,38 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def proben_api(self):
+        """Handwriting probes for vorrechnen.html (tools/proben.py) - reloaded per call, no restart after a change."""
+        n = int(self.headers.get('Content-Length') or 0)
+        if n > 4 * 1024 * 1024:
+            return self.send_error(413, 'too large')
+        data = self.rfile.read(n) if n else b''
+        try:
+            if TOOLS not in sys.path:
+                sys.path.insert(0, TOOLS)
+            import proben
+            status, reply = importlib.reload(proben).handle(self.command, self.path, self.headers, data)
+        except Exception as err:
+            status, reply = 500, {'error': 'serve.py: %s: %s' % (type(err).__name__, err)}
+        body = json.dumps(reply, ensure_ascii=False).encode('utf-8')
+        self.send_response(status)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_POST(self):
         if self.path.startswith('/__deck/'):
             return self.deck_api()
+        if self.path.startswith('/__proben/'):
+            return self.proben_api()
         self.send_error(405, 'read-only server')
 
     def do_GET(self):
         if self.path.startswith('/__deck/'):
             return self.deck_api()
+        if self.path.startswith('/__proben/'):
+            return self.proben_api()
         if self.path.startswith('/__live/'):
             return self.live_api()
         self.path = local_icon(self.path) or self.path   # served as usual, just the red file
