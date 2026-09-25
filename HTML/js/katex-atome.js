@@ -142,41 +142,54 @@
         const own = textLeafOf(el);
         if (own !== null && own.length) {
             if (isStrut(el, own)) return;
-            const r = el.getBoundingClientRect();
-            const cs = getComputedStyle(el);
-            const font = {
-                family: cs.fontFamily.split(',')[0].replace(/["']/g, '').trim(),
-                style: cs.fontStyle,
-                size: parseFloat(cs.fontSize),
-            };
-            const text = own.replace(/​/g, '');
-            const left = r.left - origin.x, top = r.top - origin.y;
-            const baseline = probeBaseline(el) - origin.y;
-            // "lim", "sin", "log" are ONE span in KaTeX but three letters under
-            // the pen - one atom each, or the counts never match (corpus probes
-            // 12, 15, 18). Each letter's pen position comes from the font's own
-            // advances, the same face the span is set in.
-            const zeichen = Array.from(text).filter(c => c.trim());
-            if (zeichen.length > 1) {
-                const m = messKontext();
-                m.font = `${font.style === 'italic' ? 'italic ' : ''}${cs.fontWeight} ${font.size}px "${font.family}"`;
-                let vor = '';
-                for (const c of Array.from(text)) {
-                    const x = left + m.measureText(vor).width;
-                    const w = m.measureText(c).width;
-                    vor += c;
-                    if (!c.trim()) continue;
-                    out.push({ art: 'text', text: c, font, left: x, baseline,
-                               box: { x, y: top, w, h: r.height } });
-                }
-                return;
-            }
-            out.push({ art: 'text', text, font, left, baseline,
-                       box: { x: left, y: top, w: r.width, h: r.height } });
+            textAtome(own, el, el.getBoundingClientRect(), out, origin);
             return;
         }
 
-        for (const ch of el.children) walk(ch, out, origin, stats);
+        // Mixed content: KaTeX sets \log as the text "lo" plus a span for the
+        // "g" (its italic correction). Walking only the element children lost
+        // the bare text - "log_2 8 = 3" morphed into "g_2 8 = 3" (Doc, 25.09.).
+        for (const ch of el.childNodes) {
+            if (ch.nodeType === 1) { walk(ch, out, origin, stats); continue; }
+            if (ch.nodeType !== 3 || !ch.textContent.replace(/​/g, '').trim()) continue;
+            const range = document.createRange();
+            range.selectNodeContents(ch);
+            textAtome(ch.textContent, el, range.getBoundingClientRect(), out, origin);
+        }
+    }
+
+    // Atoms for a run of text set in `el`'s face, whose box is `r`.
+    // "lim", "sin", "log" are ONE run in KaTeX but three letters under the pen -
+    // one atom each, or the counts never match (corpus probes 12, 15, 18). Each
+    // letter's pen position comes from the font's own advances, the same face
+    // the run is set in.
+    function textAtome(roh, el, r, out, origin) {
+        const cs = getComputedStyle(el);
+        const font = {
+            family: cs.fontFamily.split(',')[0].replace(/["']/g, '').trim(),
+            style: cs.fontStyle,
+            size: parseFloat(cs.fontSize),
+        };
+        const text = roh.replace(/​/g, '');
+        const left = r.left - origin.x, top = r.top - origin.y;
+        const baseline = probeBaseline(el) - origin.y;
+        const zeichen = Array.from(text).filter(c => c.trim());
+        if (zeichen.length > 1) {
+            const m = messKontext();
+            m.font = `${font.style === 'italic' ? 'italic ' : ''}${cs.fontWeight} ${font.size}px "${font.family}"`;
+            let vor = '';
+            for (const c of Array.from(text)) {
+                const x = left + m.measureText(vor).width;
+                const w = m.measureText(c).width;
+                vor += c;
+                if (!c.trim()) continue;
+                out.push({ art: 'text', text: c, font, left: x, baseline,
+                           box: { x, y: top, w, h: r.height } });
+            }
+            return;
+        }
+        out.push({ art: 'text', text, font, left, baseline,
+                   box: { x: left, y: top, w: r.width, h: r.height } });
     }
 
     // The boxes are only right once the KaTeX faces are in memory. Measured
