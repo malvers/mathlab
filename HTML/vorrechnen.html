@@ -792,7 +792,11 @@
                     const r = await fetch('/__proben/' + encodeURIComponent(slug), {
                         method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
                     const j = await r.json().catch(() => ({}));
-                    if (r.ok && j.name) { setProbeStatus('gespeichert: ' + j.name); return; }
+                    if (r.ok && j.name) {
+                        setProbeStatus('gespeichert: ' + j.name);
+                        korpus = null;          // a new probe is an example right away, not after a reload
+                        return;
+                    }
                     setProbeStatus('Speichern fehlgeschlagen (' + r.status + ') – Download stattdessen');
                 } catch (e) {
                     setProbeStatus('Speichern fehlgeschlagen – Download stattdessen');
