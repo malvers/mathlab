@@ -166,6 +166,7 @@
     <!-- Morph building blocks from morpheus: contour tracing and polygon helpers. -->
     <script src="morpheus/geometry.js"></script>
     <script src="morpheus/contours.js"></script>
+    <script src="js/katex-atome.js"></script>
     <script src="js/formel-erkennen.js"></script>
     <script src="js/handschrift-morph.js"></script>
     <script>
@@ -273,6 +274,19 @@
             current = null;
             if (neu && zeilenErgebnis.length) verwerfeErkennung();
             recompute();
+            merkeStriche();
+        }
+
+        // Live-reload kept wiping Doc's strokes mid-session. They now survive a
+        // reload in localStorage; LEEREN clears them for good.
+        function merkeStriche() {
+            try { localStorage.setItem('vorrechnen-striche', JSON.stringify(strokes)); } catch (_) {}
+        }
+        function holeStriche() {
+            try {
+                const d = JSON.parse(localStorage.getItem('vorrechnen-striche') || '[]');
+                if (Array.isArray(d) && d.length) { strokes.length = 0; d.forEach(s => strokes.push(s)); }
+            } catch (_) {}
         }
         canvas.addEventListener('pointerup', endStroke);
         canvas.addEventListener('pointercancel', endStroke);
@@ -378,43 +392,70 @@
         // strokes. Both lists are in reading order, so laying them onto each
         // other needs no coordinates from the model - which is good, because its
         // coordinates were never trustworthy.
+        // Hidden host where KaTeX sets the formula for measuring. visibility:hidden,
+        // not display:none - the boxes must exist.
+        function messHost() {
+            let h = document.getElementById('mess-host');
+            if (!h) {
+                h = document.createElement('div');
+                h.id = 'mess-host';
+                h.style.cssText = 'position:absolute;left:-10000px;top:0;visibility:hidden;white-space:nowrap;pointer-events:none';
+                document.body.appendChild(h);
+            }
+            return h;
+        }
+
+        // A row that is only a speck (a slip of the pen) is not a formula.
+        function zuKlein(line) {
+            return !line.bbox || Math.max(line.bbox.w, line.bbox.h) < 16;
+        }
+
         async function erkennen() {
             if (erkennenLaeuft) return;
             if (!analysis.lines.length) { setErgebnisText('Erst etwas schreiben.'); return; }
             erkennenLaeuft = true;
             setErgebnisText('Erkenne …');
-            // The KaTeX faces must be in memory before any glyph is traced,
-            // otherwise the first one is measured in a fallback font.
-            try { await HandschriftMorph.schriftenBereit(220); } catch (_) {}
             const modelEl = document.getElementById('modell-wahl');
             const model = modelEl ? modelEl.value : 'gemini-2.5-flash';
             try {
                 for (const line of analysis.lines) {
+                    if (zuKlein(line)) { zeilenErgebnis[line.lineIdx] = { uebersprungen: true }; continue; }
                     const idxs = line.symbols.flatMap(sy => sy.strokeIdxs);
                     const r = await FormelErkennen.erkenneZeile(strokes, idxs, { model });
                     if (!r.ok) {
                         zeilenErgebnis[line.lineIdx] = { fehler: r.error };
+                    } else if (!r.latex || /^\(?\s*(empty|leer)\s*\)?$/i.test(r.latex)) {
+                        zeilenErgebnis[line.lineIdx] = { fehler: 'nichts erkannt' };
                     } else {
-                        const zuordnung = FormelErkennen.ordneZu(line.symbols, r.tokens);
+                        // KaTeX sets the formula; the atoms say where every glyph
+                        // sits. Then the whole block is scaled and moved onto the
+                        // handwriting: same height as the row, left edge aligned,
+                        // centred vertically. That is Doc's "gleiche Größe".
+                        const m = await KatexAtome.atomeAusLatex(r.latex, messHost(), { fontSize: 100 });
+                        const u = KatexAtome.umfang(m.atome);
+                        let atome = m.atome;
+                        if (u && u.h > 0) {
+                            const skala = line.bbox.h / u.h;
+                            const dx = line.bbox.x - u.x * skala;
+                            const dy = (line.bbox.y + line.bbox.h / 2) - (u.y + u.h / 2) * skala;
+                            atome = KatexAtome.transformiere(m.atome, skala, dx, dy);
+                        }
+                        const zuordnung = FormelErkennen.ordneZu(line.symbols, atome);
                         zeilenErgebnis[line.lineIdx] = {
-                            latex: r.latex, tokens: r.tokens, ms: r.ms, zuordnung,
+                            latex: r.latex, tokens: r.tokens, atome, ms: r.ms, zuordnung, svg: m.svg,
                         };
-                        // Only morph when the mapping actually holds. Where the
-                        // counts differ - a fraction, say, whose numerator and
-                        // denominator sit above each other while the tokens come
-                        // in one line - a left-to-right pairing would put the
-                        // wrong glyph on the wrong ink and quietly drop the rest.
-                        // Showing the handwriting plus the typeset formula is
-                        // honest; a half-wrong morph is not.
-                        if (!zuordnung.passt) {
-                            morphVorbereitet[line.lineIdx] = null;
-                        } else {
+                        // Morph only when the mapping holds and every target is a
+                        // glyph we can trace (radicals and tall delimiters are SVG
+                        // in KaTeX - not yet).
+                        if (zuordnung.passt && !m.svg) {
                             try {
-                                morphVorbereitet[line.lineIdx] =
-                                    HandschriftMorph.vorbereiten(line, strokes, zuordnung);
+                                await HandschriftMorph.schriftenBereit(atome);
+                                morphVorbereitet[line.lineIdx] = HandschriftMorph.vorbereiten(line, strokes, zuordnung);
                             } catch (e) {
                                 morphVorbereitet[line.lineIdx] = null;
                             }
+                        } else {
+                            morphVorbereitet[line.lineIdx] = null;
                         }
                     }
                     redraw();
@@ -463,8 +504,8 @@
                 const f = Math.min(1, (performance.now() - t0) / dauer);
                 morphT = von + (nach - von) * f;
                 redraw();
-                const s = document.getElementById('morph-regler');
-                if (s) s.value = morphT;
+                const sl = document.getElementById('morph-regler');
+                if (sl) sl.value = morphT;
                 if (f < 1) morphAnim = requestAnimationFrame(schritt);
                 else { morphAnim = null; morphT = nach; redraw(); }
             };
@@ -486,11 +527,13 @@
                 if (!e) return '';
                 if (e.fehler) return `<div class="erk-zeile"><b>Zeile ${l.lineIdx}</b>
                     <div class="erk-fehler">${e.fehler}</div></div>`;
+                if (e.uebersprungen) return '';
                 const z = e.zuordnung;
+                const hinweis = e.svg ? `<div class="erk-warn">Wurzel oder große Klammer – Morph dafür noch nicht gebaut</div>` : '';
                 return `<div class="erk-zeile"><b>Zeile ${l.lineIdx}</b>
                     <div class="erk-latex">${e.latex.replace(/</g, '&lt;')}</div>
-                    <div class="${z.passt ? 'erk-ok' : 'erk-warn'}">${z.diagnose}</div>
-                    <div class="erk-info">${e.tokens.length} Zeichen · ${e.ms} ms</div></div>`;
+                    <div class="${z.passt ? 'erk-ok' : 'erk-warn'}">${z.diagnose}</div>${hinweis}
+                    <div class="erk-info">${e.atome.length} Zeichen gesetzt · ${e.ms} ms</div></div>`;
             });
             el.innerHTML = teile.join('') || '<div class="erk-info">–</div>';
         }
@@ -552,12 +595,14 @@
             current = null;
             verwerfeErkennung();
             recompute();
+            merkeStriche();
         }
 
         function undoStroke() {
             strokes.pop();
             verwerfeErkennung();
             recompute();
+            merkeStriche();
         }
 
         // ── Side panel ──────────────────────────────────────────────────────
@@ -655,7 +700,7 @@
         }
 
         window.addEventListener('resize', init);
-        document.fonts.ready.then(() => { buildPanel(); init(); });
+        document.fonts.ready.then(() => { buildPanel(); holeStriche(); recompute(); init(); });
     </script>
 </body>
 

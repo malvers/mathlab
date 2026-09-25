@@ -139,6 +139,9 @@
     // symbols than tokens means the pen split a glyph, fewer means two glyphs
     // were written so close together that they fused. We mark it instead of
     // silently shifting everything by one.
+    // `tokens` may be plain strings (from the model) or atoms from
+    // js/katex-atome.js - anything with a .text. The pair keeps the object, so a
+    // caller that passed atoms gets the geometry back with it.
     function ordneZu(symbols, tokens) {
         const n = Math.min(symbols.length, tokens.length);
         const paare = [];
