@@ -670,8 +670,10 @@
             catch (e) { document.getElementById('vorlage-formel').textContent = latex; }
         }
 
-        function naechsteVorlage() {
-            vorlageIdx = (vorlageIdx + 1) % VORLAGEN.length;
+        // Doc: "mach bei Weiter einen left right mit Dreiecken" - back and forth
+        function naechsteVorlage(schritt) {
+            const n = VORLAGEN.length;
+            vorlageIdx = (vorlageIdx + (schritt === -1 ? -1 : 1) + n) % n;
             try { localStorage.setItem('vorrechnen-vorlage', String(vorlageIdx)); } catch (_) {}
             clearAll();
             zeigeVorlage();
@@ -889,7 +891,17 @@
                     <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="clearAll()">LEEREN</button>
                     <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="exportStrokes()">SICHERN</button>
                     <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="erkennen()">ERKENNEN</button>
-                    <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="naechsteVorlage()">WEITER</button>
+                    <!-- WEITER as two triangles side by side: previous / next template -->
+                    <div style="display:flex;gap:0.9rem">
+                        <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;flex:1;min-width:0;padding:0;display:flex;align-items:center;justify-content:center"
+                                onclick="naechsteVorlage(-1)" title="vorige Vorlage" aria-label="vorige Vorlage">
+                            <svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 4 L6 12 L17 20 Z" fill="currentColor"/></svg>
+                        </button>
+                        <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;flex:1;min-width:0;padding:0;display:flex;align-items:center;justify-content:center"
+                                onclick="naechsteVorlage(1)" title="nächste Vorlage" aria-label="nächste Vorlage">
+                            <svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4 L18 12 L7 20 Z" fill="currentColor"/></svg>
+                        </button>
+                    </div>
                     <!-- Doc: "mach die NOCHMAL so wie WEITER" -->
                     <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="nochmal()">NOCHMAL</button>
                 </div>
