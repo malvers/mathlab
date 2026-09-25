@@ -3,13 +3,16 @@
 // logged, and afterwards Doc's voice (sN.mp3) is laid under the picture at exactly those moments.
 //
 //     node maya/film.mjs            (from videopipeline/, the tour server must run on :8769)
+//     node maya/film.mjs --no-take  (keep the take, only voice, outro and cut again)
 //
 // Doc, 25.09.2026: "go und danach ein Video für YT". The tour is the approved Drehbuch - Doc reviewed it in the
 // critics tool - so nothing is re-staged here. Out: ~/Movies/videopipeline/maya/film/maya-tour-1440p.mp4
 import fs from 'fs';
 import os from 'os';
 import { execFileSync } from 'child_process';
+const dur = (f) => parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString());
 import { runScenes } from '../lib/record-cdp.mjs';
+import { recordOutros } from '../lib/outro.mjs';
 
 const WORK = os.homedir() + '/Movies/videopipeline/maya';
 const OUT = WORK + '/film';
@@ -59,7 +62,7 @@ async function run(page, { mark }) {
     fs.writeFileSync(OUT + '/plays.json', JSON.stringify({ ref, plays }));
 }
 
-await runScenes([{ name: 'tour', url: URL, run }],
+if (!process.argv.includes('--no-take')) await runScenes([{ name: 'tour', url: URL, run }],
     { outDir: OUT, viewport: VIEW, dsf: DSF, upscale: 1,
       args: ['--mute-audio', '--autoplay-policy=no-user-gesture-required'] });
 
@@ -77,6 +80,17 @@ const chain = at.map((t, i) => `[${i + 1}:a]adelay=${Math.round(t * 1000)}:all=1
 execFileSync('ffmpeg', ['-nostdin', '-y', '-v', 'error', '-ss', START.toFixed(3), '-i', `${OUT}/tour.mp4`, ...ins,
     '-filter_complex', chain, '-map', '0:v', '-map', '[a]', '-c:v', 'libx264', '-crf', '16', '-preset', 'medium',
     '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', '-shortest',
+    `${OUT}/maya-tour-body.mp4`], { stdio: 'inherit' });
+
+// the end titles every film has: DAS CRAZY! and the logo card with a QR to the lab (Doc: "Abspann fehlt!")
+const outros = await recordOutros({ outDir: OUT, qrUrl: 'https://docalvers.de/maya.html' });
+const parts = [`${OUT}/maya-tour-body.mp4`, ...outros];
+const cat = '[0:a]aresample=48000,aformat=channel_layouts=mono[a0];' + parts.map((_, i) => i === 0 ? `[0:v][a0]`
+    : `[${i}:v]`+`[s${i}]`).join('') + `concat=n=${parts.length}:v=1:a=1[v][a]`;
+const silence = outros.map((f, k) => `anullsrc=r=48000:cl=mono,atrim=0:${dur(f).toFixed(3)}[s${k + 1}]`).join(';');
+execFileSync('ffmpeg', ['-nostdin', '-y', '-v', 'error', ...parts.map((f) => ['-i', f]).flat(),
+    '-filter_complex', silence + ';' + cat, '-map', '[v]', '-map', '[a]',
+    '-c:v', 'libx264', '-crf', '16', '-preset', 'medium', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k',
     `${OUT}/maya-tour-1440p.mp4`], { stdio: 'inherit' });
 console.log('Stimmen bei', at.map((t) => t.toFixed(2)).join(' '));
 console.log('fertig:', `${OUT}/maya-tour-1440p.mp4`);

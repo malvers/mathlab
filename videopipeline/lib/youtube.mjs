@@ -80,12 +80,14 @@ export async function setThumbnail(videoId, file) {
 }
 
 // thumbnail: a finished image file | a makeThumbnail() config | undefined = hero from the film | false = none
-export async function uploadVideo(file, { title, description = '', tags = [], privacy = 'public', dryRun = false, thumbnail }) {
+// synthetic: YouTube's disclosure for realistic altered or synthetic content (status.containsSyntheticMedia) - a cloned
+// voice or an AI-animated real face must carry it (Maya tour film, 25.09.2026: Doc's voice clone and D-ID face).
+export async function uploadVideo(file, { title, description = '', tags = [], privacy = 'public', dryRun = false, thumbnail, synthetic = false }) {
   const size = fs.statSync(file).size;
   console.log(`→ Uploading: ${file}`);
   console.log(`  Title:      ${title}`);
   console.log(`  Tags:       ${tags.join(', ')}`);
-  console.log(`  Size:       ${(size / 1e6).toFixed(1)} MB · visibility: ${privacy}`);
+  console.log(`  Size:       ${(size / 1e6).toFixed(1)} MB · visibility: ${privacy}${synthetic ? ' · KI-Inhalt gekennzeichnet' : ''}`);
   /* rendered BEFORE the upload, also in a dry run: a broken thumbnail stops the run while nothing is public yet */
   const thumb = thumbnail === false ? null
     : typeof thumbnail === 'string' ? thumbnail
@@ -93,7 +95,7 @@ export async function uploadVideo(file, { title, description = '', tags = [], pr
   if (dryRun) { console.log('  [dry run] nothing was sent.'); return null; }
   const at = await accessToken();
   // Explicit video language: without it YouTube auto-shows ASR captions / auto-translation for many viewers.
-  const meta = { snippet: { title, description, tags, categoryId: '27', defaultLanguage: 'de', defaultAudioLanguage: 'de' }, status: { privacyStatus: privacy } };
+  const meta = { snippet: { title, description, tags, categoryId: '27', defaultLanguage: 'de', defaultAudioLanguage: 'de' }, status: { privacyStatus: privacy, ...(synthetic ? { containsSyntheticMedia: true } : {}) } };
   const init = await fetch('https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status', {
     method: 'POST',
     headers: { Authorization: `Bearer ${at}`, 'Content-Type': 'application/json', 'X-Upload-Content-Length': size, 'X-Upload-Content-Type': 'video/mp4' },
