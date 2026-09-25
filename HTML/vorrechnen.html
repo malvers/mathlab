@@ -502,6 +502,24 @@
             return { atome, svg: m.svg };
         }
 
+        // Which handwritten symbol is which typeset glyph. The typesetter knows
+        // the glyph count; when the grouping disagrees it gives way - fused
+        // symbols are split at their widest gap, fragments merged - and the
+        // reading order is redone.
+        function ordneZeile(line, atome) {
+            let zuordnung = FormelErkennen.ordneZu(line.symbols, atome);
+            let nachjustiert = false;
+            if (!zuordnung.passt) {
+                const neu = StrokeSymbols.nachjustieren(line, strokes, atome.length, opts);
+                if (neu.length === atome.length) {
+                    line.symbols = neu;
+                    zuordnung = FormelErkennen.ordneZu(neu, atome);
+                    nachjustiert = true;
+                }
+            }
+            return { zuordnung, nachjustiert };
+        }
+
         async function erkennen() {
             if (erkennenLaeuft) return;
             if (!analysis.lines.length) { setErgebnisText('Erst etwas schreiben.'); return; }
@@ -520,31 +538,19 @@
                         zeilenErgebnis[line.lineIdx] = { fehler: 'nichts erkannt' };
                     } else {
                         const { atome, svg } = await formelAufZeile(r.latex, line);
-                        let zuordnung = FormelErkennen.ordneZu(line.symbols, atome);
-                        let nachjustiert = false;
-                        if (!zuordnung.passt) {
-                            // The typesetter knows the glyph count; the grouping
-                            // gives way - fused symbols are split at their widest
-                            // gap, fragments merged - and reading order is redone.
-                            const neu = StrokeSymbols.nachjustieren(line, strokes, atome.length, opts);
-                            if (neu.length === atome.length) {
-                                line.symbols = neu;
-                                zuordnung = FormelErkennen.ordneZu(neu, atome);
-                                nachjustiert = true;
-                            }
-                        }
+                        const { zuordnung, nachjustiert } = ordneZeile(line, atome);
                         zeilenErgebnis[line.lineIdx] = {
                             latex: r.latex, tokens: r.tokens, atome, ms: r.ms, zuordnung, svg, nachjustiert,
                         };
                         // Doc's plan B: the row crumbles to one dust cloud and
-                        // settles into the formula (js/staub-morph.js). It needs
-                        // the typeset atoms only, not the grouping - so it runs
-                        // even when the mapping does not hold. Radicals and
+                        // settles into the formula (js/staub-morph.js) - each
+                        // symbol's dust into its own glyph when the mapping holds,
+                        // the row as a whole when it does not. Radicals and
                         // vector arrows are SVG in KaTeX - they are traced first.
                         try {
                             await HandschriftMorph.schriftenBereit(atome);
                             await HandschriftMorph.svgVorbereiten(atome);
-                            morphVorbereitet[line.lineIdx] = StaubMorph.vorbereiten(line, strokes, atome, morphOpts);
+                            morphVorbereitet[line.lineIdx] = StaubMorph.vorbereiten(line, strokes, zuordnung, morphOpts);
                         } catch (e) {
                             morphVorbereitet[line.lineIdx] = null;
                         }
@@ -603,7 +609,7 @@
             analysis.lines.forEach(line => {
                 const erg = zeilenErgebnis[line.lineIdx];
                 if (!erg || !erg.atome || !morphVorbereitet[line.lineIdx]) return;
-                morphVorbereitet[line.lineIdx] = StaubMorph.vorbereiten(line, strokes, erg.atome, morphOpts);
+                morphVorbereitet[line.lineIdx] = StaubMorph.vorbereiten(line, strokes, erg.zuordnung || erg.atome, morphOpts);
             });
         }
         // Letting go of a slider replays the morph, so the effect can be judged.
@@ -801,10 +807,11 @@
             if (zeilen.length !== 1) return;
             const line = zeilen[0];
             const { atome, svg } = await formelAufZeile(latex, line);
-            zeilenErgebnis[line.lineIdx] = { latex, tokens: [], atome, ms: 0, zuordnung: FormelErkennen.ordneZu(line.symbols, atome), svg };
+            const { zuordnung, nachjustiert } = ordneZeile(line, atome);
+            zeilenErgebnis[line.lineIdx] = { latex, tokens: [], atome, ms: 0, zuordnung, svg, nachjustiert };
             await HandschriftMorph.schriftenBereit(atome);
             await HandschriftMorph.svgVorbereiten(atome);
-            morphVorbereitet[line.lineIdx] = StaubMorph.vorbereiten(line, strokes, atome, morphOpts);
+            morphVorbereitet[line.lineIdx] = StaubMorph.vorbereiten(line, strokes, zuordnung, morphOpts);
             zeigeFormeln();
             beispielTimer = setTimeout(() => morphen(1), morphOpts.pause * 1000);
         }

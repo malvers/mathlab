@@ -149,64 +149,101 @@
     }
 
     // ── Preparing a row ─────────────────────────────────────────────────────
-    // `atome` may be the atom list or a zuordnung (then its tokens are used).
-    function vorbereiten(line, strokes, atome, opts) {
-        const o = Object.assign({ dichte: 0.5, seed: 7, wolke: 0.25, auftrieb: 0.25 }, opts || {});
-        if (atome && atome.paare) atome = atome.paare.map(p => p.token);
-        atome = (atome || []).filter(a => a && typeof a === 'object');
-        if (!atome.length || typeof HandschriftMorph === 'undefined') return null;
-        const idxs = [].concat(...line.symbols.map(s => s.strokeIdxs));
-        const quellen = idxs.map(i => strokes[i]).filter(s => s && s.points.length);
-        if (!quellen.length) return null;
-        const rnd = zufall(o.seed);
-
-        const glyphen = atome.map(a => {
-            const polys = HandschriftMorph.zielFlaechen(a).filter(q => q.length > 2);
-            return polys.length ? { atom: a, maske: glyphMaske(polys) } : null;
-        }).filter(Boolean);
-        const flaeche = glyphen.reduce((s, g) => s + g.maske.flaeche, 0);
-        // Doc: "die Anzahl der Punkte an der Fläche orientieren" - the ink's
-        // area (length x pen width) and the glyphs' area, one density for both;
-        // the bigger of the two sets the count
-        let tintenFlaeche = 0;
+    // `atome` may be the atom list or a zuordnung. With a zuordnung that holds
+    // (every handwritten symbol knows its typeset glyph) the grains of a symbol
+    // go to ITS glyph only - Doc, 25.09.: "all at once, aber der a-Staub zu
+    // a-LaTeX". It still is one cloud: every grain flies at the same time.
+    // Without a zuordnung the whole row is paired as one.
+    function tintenFlaecheVon(quellen) {
+        let f = 0;
         quellen.forEach(s => {
             const w = s.width || 3;
             let l = 0;
             for (let i = 1; i < s.points.length; i++) l += Math.hypot(s.points[i].x - s.points[i - 1].x, s.points[i].y - s.points[i - 1].y);
-            tintenFlaeche += Math.max(l, w) * w;
+            f += Math.max(l, w) * w;
         });
-        const n = Math.max(60, Math.round(Math.max(flaeche, tintenFlaeche) * o.dichte));
+        return f;
+    }
 
-        // targets: every glyph gets its share by area
-        const B = [], rNachG = [], glyphVon = [];
-        let rest = n;
-        glyphen.forEach((g, k) => {
-            const m = k === glyphen.length - 1 ? rest : Math.max(1, Math.round(n * g.maske.flaeche / flaeche));
-            rest -= m;
-            if (m <= 0) return;
-            const res = glyphKoerner(g.maske, m, rnd);
-            res.koerner.forEach(q => { B.push(q); rNachG.push(Math.max(0.6, res.d * 0.78)); glyphVon.push(k); });
+    function vorbereiten(line, strokes, atome, opts) {
+        const o = Object.assign({ dichte: 0.5, seed: 7, wolke: 0.25, auftrieb: 0.25 }, opts || {});
+        let paare = null;
+        if (atome && atome.paare) {
+            if (atome.passt) paare = atome.paare;
+            atome = atome.paare.map(p => p.token);
+        }
+        atome = (atome || []).filter(a => a && typeof a === 'object');
+        if (!atome.length || typeof HandschriftMorph === 'undefined') return null;
+        const strich = i => strokes[i] && strokes[i].points.length ? strokes[i] : null;
+        const alle = [].concat(...line.symbols.map(s => s.strokeIdxs)).map(strich).filter(Boolean);
+        if (!alle.length) return null;
+        const rnd = zufall(o.seed);
+
+        const glyphen = [], nummer = new Map();
+        atome.forEach(a => {
+            const polys = HandschriftMorph.zielFlaechen(a).filter(q => q.length > 2);
+            if (!polys.length) return;
+            nummer.set(a, glyphen.length);
+            glyphen.push({ atom: a, maske: glyphMaske(polys) });
         });
-        const N = B.length;
-        const tinte = tinteKoerner(quellen, N, rnd).koerner;
-        // grain size on the ink: N discs cover its area about twice over
-        const rTinte = Math.sqrt(2 * tintenFlaeche / (Math.PI * N));
+        if (!glyphen.length) return null;
 
-        // Doc: "gleich groß zoomen" - both clouds into the same unit frame
-        const fa = rahmen(tinte), fb = rahmen(B);
-        const An = tinte.map(q => ({ x: (q.x - fa.cx) / fa.sx, y: (q.y - fa.cy) / fa.sy }));
-        const Bn = B.map(q => ({ x: (q.x - fb.cx) / fb.sx, y: (q.y - fb.cy) / fb.sy }));
-        const zu = paaren(An, Bn, o.fenster);
+        // what is paired with what: symbol -> its glyph, or the row as a whole
+        let gruppen = null;
+        if (paare) {
+            gruppen = paare
+                .map(p => ({ g: nummer.has(p.token) ? [nummer.get(p.token)] : [], quellen: p.symbol.strokeIdxs.map(strich).filter(Boolean) }))
+                .filter(gr => gr.g.length && gr.quellen.length);
+        }
+        if (!gruppen || !gruppen.length) gruppen = [{ g: glyphen.map((_, k) => k), quellen: alle }];
+
+        const koerner = [];
+        let tintenFlaeche = 0, flaeche = 0;
+        for (const gr of gruppen) {
+            const fl = gr.g.reduce((s, k) => s + glyphen[k].maske.flaeche, 0);
+            // Doc: "die Anzahl der Punkte an der Fläche orientieren" - the ink's
+            // area (length x pen width) and the glyphs' area, one density for
+            // both; the bigger of the two sets the count
+            const tf = tintenFlaecheVon(gr.quellen);
+            tintenFlaeche += tf; flaeche += fl;
+            const n = Math.max(12, Math.round(Math.max(fl, tf) * o.dichte));
+            // targets: every glyph of the group gets its share by area
+            const B = [], rB = [], gB = [];
+            let rest = n;
+            gr.g.forEach((k, j) => {
+                const m = j === gr.g.length - 1 ? rest : Math.max(1, Math.round(n * glyphen[k].maske.flaeche / Math.max(1, fl)));
+                rest -= m;
+                if (m <= 0) return;
+                const res = glyphKoerner(glyphen[k].maske, m, rnd);
+                res.koerner.forEach(q => { B.push(q); rB.push(Math.max(0.6, res.d * 0.78)); gB.push(k); });
+            });
+            if (!B.length) continue;
+            const tinte = tinteKoerner(gr.quellen, B.length, rnd).koerner;
+            // grain size on the ink: the discs cover its area about twice over
+            const rTinte = Math.sqrt(2 * tf / (Math.PI * B.length));
+            // Doc: "gleich groß zoomen" - both clouds of the group into one unit frame
+            const fa = rahmen(tinte), fb = rahmen(B);
+            const An = tinte.map(q => ({ x: (q.x - fa.cx) / fa.sx, y: (q.y - fa.cy) / fa.sy }));
+            const Bn = B.map(q => ({ x: (q.x - fb.cx) / fb.sx, y: (q.y - fb.cy) / fb.sy }));
+            const zu = paaren(An, Bn, o.fenster);
+            tinte.forEach((p, i) => koerner.push({
+                p, q: B[zu[i]], rVon: Math.max(0.6, Math.min(p.w * 0.5, rTinte)), rNach: rB[zu[i]], glyph: gB[zu[i]],
+            }));
+        }
+        const N = koerner.length;
+        if (!N) return null;
 
         // letter height of the row (median glyph height) - the unit for the
-        // cloud's spread, lift and swirl
+        // cloud's spread, lift and swirl; the ink's x range for the wave
         const hs = glyphen.map(g => g.maske.H / g.maske.k).sort((a, b) => a - b);
         const mass = hs[hs.length >> 1] || 20;
+        let x0 = Infinity, x1 = -Infinity;
+        koerner.forEach(k => { x0 = Math.min(x0, k.p.x); x1 = Math.max(x1, k.p.x); });
 
         const a = new Float32Array(2 * N), b = new Float32Array(2 * N), c = new Float32Array(2 * N);
         const rVon = new Float32Array(N), rNach = new Float32Array(N), los = new Float32Array(N), glyph = new Int32Array(N);
-        for (let i = 0; i < N; i++) {
-            const p = tinte[i], q = B[zu[i]];
+        koerner.forEach((k, i) => {
+            const p = k.p, q = k.q;
             a[2 * i] = p.x; a[2 * i + 1] = p.y;
             b[2 * i] = q.x; b[2 * i + 1] = q.y;
             // the cloud: half way, scattered, lifted
@@ -215,12 +252,13 @@
             // control point of a quadratic curve that passes the cloud spot at u = 0.5
             c[2 * i] = 2 * mx - (p.x + q.x) / 2;
             c[2 * i + 1] = 2 * my - (p.y + q.y) / 2;
-            rVon[i] = Math.max(0.6, Math.min(p.w * 0.5, rTinte));
-            rNach[i] = rNachG[zu[i]];
-            los[i] = (p.x - fa.x0) / Math.max(1, fa.x1 - fa.x0);     // the wave runs left to right
-            glyph[i] = glyphVon[zu[i]];
-        }
-        return { N, a, b, c, rVon, rNach, los, glyph, glyphen: glyphen.map(g => g.atom), mass, quellen, tintenFlaeche, flaeche };
+            rVon[i] = k.rVon;
+            rNach[i] = k.rNach;
+            los[i] = (p.x - x0) / Math.max(1, x1 - x0);         // the wave runs left to right
+            glyph[i] = k.glyph;
+        });
+        return { N, a, b, c, rVon, rNach, los, glyph, glyphen: glyphen.map(g => g.atom), mass, quellen: alle,
+                 tintenFlaeche, flaeche, proZeichen: gruppen.length > 1 || !!paare };
     }
 
     const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
