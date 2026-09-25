@@ -396,13 +396,22 @@
                         zeilenErgebnis[line.lineIdx] = {
                             latex: r.latex, tokens: r.tokens, ms: r.ms, zuordnung,
                         };
-                        // Everything the morph needs is known now: which ink
-                        // becomes which glyph.
-                        try {
-                            morphVorbereitet[line.lineIdx] =
-                                HandschriftMorph.vorbereiten(line, strokes, zuordnung);
-                        } catch (e) {
+                        // Only morph when the mapping actually holds. Where the
+                        // counts differ - a fraction, say, whose numerator and
+                        // denominator sit above each other while the tokens come
+                        // in one line - a left-to-right pairing would put the
+                        // wrong glyph on the wrong ink and quietly drop the rest.
+                        // Showing the handwriting plus the typeset formula is
+                        // honest; a half-wrong morph is not.
+                        if (!zuordnung.passt) {
                             morphVorbereitet[line.lineIdx] = null;
+                        } else {
+                            try {
+                                morphVorbereitet[line.lineIdx] =
+                                    HandschriftMorph.vorbereiten(line, strokes, zuordnung);
+                            } catch (e) {
+                                morphVorbereitet[line.lineIdx] = null;
+                            }
                         }
                     }
                     redraw();
