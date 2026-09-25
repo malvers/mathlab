@@ -193,6 +193,8 @@
     <script src="js/formel-erkennen.js"></script>
     <script src="js/handschrift-morph.js"></script>
     <script src="js/staub-morph.js"></script>
+    <script src="morpheus/vendor/trace_skeleton.js"></script>
+    <script src="js/strich-morph.js"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -461,8 +463,7 @@
                     const erg = zeilenErgebnis[l.lineIdx];
                     if (morphT >= 1 && erg && erg.satz) return;
                     // Doc: "alles grün" - the formula ends in the ink's green, no blue
-                    if (v) StaubMorph.zeichnen(ctx, v, morphT, { farbe: INK, zielFarbe: INK,
-                        staffel: morphOpts.staffel, wirbel: morphOpts.wirbel, staub: morphOpts.staub });
+                    if (v) zeichneMorph(ctx, v, morphT);
                 });
             }
 
@@ -624,7 +625,7 @@
                         try {
                             await HandschriftMorph.schriftenBereit(atome);
                             await HandschriftMorph.svgVorbereiten(atome);
-                            morphVorbereitet[line.lineIdx] = StaubMorph.vorbereiten(line, strokes, zuordnung, morphOpts);
+                            morphVorbereitet[line.lineIdx] = bereiteMorph(line, zuordnung, atome);
                         } catch (e) {
                             morphVorbereitet[line.lineIdx] = null;
                         }
@@ -676,6 +677,32 @@
         // (slider "Morph-Dauer", remembered on the device).
         // Doc: 0.1 to 1 s ("mach den speed slider 0.1 - 1 s")
         let morphDauer = 0.6;                        // seconds
+        // Dust or strokes (Doc, 25.09.: "Bau mir bitte einen Schalter ... welches
+        // von beiden"). The stroke morph (js/strich-morph.js) bends each pen line
+        // onto the glyph's centre line; it needs the symbol-glyph pairing, so
+        // without one the dust takes over.
+        let morphArt = 'staub';
+        try { if (localStorage.getItem('vorrechnen-morph-art') === 'strich') morphArt = 'strich'; } catch (_) {}
+        function bereiteMorph(line, zuordnung, atome) {
+            if (morphArt === 'strich' && zuordnung && zuordnung.passt) {
+                const g = StrichMorph.vorbereiten(line, strokes, zuordnung);
+                if (g && g.length) return { art: 'strich', glyphen: g };
+            }
+            const v = StaubMorph.vorbereiten(line, strokes, zuordnung && zuordnung.paare ? zuordnung : atome, morphOpts);
+            return v ? Object.assign(v, { art: 'staub' }) : null;
+        }
+        function zeichneMorph(c, v, t) {
+            if (v.art === 'strich') StrichMorph.zeichnen(c, v.glyphen, t, { farbe: INK, zielFarbe: INK, staffel: morphOpts.staffel });
+            else StaubMorph.zeichnen(c, v, t, { farbe: INK, zielFarbe: INK,
+                staffel: morphOpts.staffel, wirbel: morphOpts.wirbel, staub: morphOpts.staub });
+        }
+        function wechsleMorphArt(art) {
+            morphArt = art || (morphArt === 'staub' ? 'strich' : 'staub');
+            try { localStorage.setItem('vorrechnen-morph-art', morphArt); } catch (_) {}
+            document.querySelectorAll('input[name="morph-art"]').forEach(r => { r.checked = r.value === morphArt; });
+            nachRegler(true);                    // prepare again in the new kind, replay
+        }
+
         // The dust morph's knobs (js/staub-morph.js), on sliders for Doc: the
         // cloud's shape needs a new preparation, the rest only a new drawing.
         const morphOpts = { dichte: 0.5, wolke: 0.25, auftrieb: 0.25, wirbel: 0.1, staffel: 0, staub: 0.8, pause: 0.9 };
@@ -684,7 +711,7 @@
             analysis.lines.forEach(line => {
                 const erg = zeilenErgebnis[line.lineIdx];
                 if (!erg || !erg.atome || !morphVorbereitet[line.lineIdx]) return;
-                morphVorbereitet[line.lineIdx] = StaubMorph.vorbereiten(line, strokes, erg.zuordnung || erg.atome, morphOpts);
+                morphVorbereitet[line.lineIdx] = bereiteMorph(line, erg.zuordnung, erg.atome);
             });
         }
         // Letting go of a slider replays the morph, so the effect can be judged.
@@ -788,7 +815,19 @@
                     const r = zeitleiste.getBoundingClientRect();
                     return Math.max(0, Math.min(1, (ev.clientX - r.left - 24) / Math.max(1, r.width - 48)));
                 };
+                // Doc: "den Switch zwischen den beiden auf Double-Tap oder Double-
+                // Mausklick" - here, not on the page, where two quick taps are a
+                // colon or an i's dot
+                let tippZeit = 0, tippX = 0;
                 zeitleiste.addEventListener('pointerdown', ev => {
+                    const jetzt = performance.now();
+                    if (jetzt - tippZeit < 350 && Math.abs(ev.clientX - tippX) < 40) {
+                        tippZeit = 0;
+                        ev.preventDefault();
+                        wechsleMorphArt();
+                        return;
+                    }
+                    tippZeit = jetzt; tippX = ev.clientX;
                     try { zeitleiste.setPointerCapture(ev.pointerId); } catch (_) {}
                     clearTimeout(beispielTimer);            // a pending replay must not jump in
                     setzeMorph(zeitAn(ev));
@@ -938,7 +977,7 @@
             zeilenErgebnis[line.lineIdx] = { latex, tokens: [], atome, ms: 0, zuordnung, svg, nachjustiert, satz };
             await HandschriftMorph.schriftenBereit(atome);
             await HandschriftMorph.svgVorbereiten(atome);
-            morphVorbereitet[line.lineIdx] = StaubMorph.vorbereiten(line, strokes, zuordnung, morphOpts);
+            morphVorbereitet[line.lineIdx] = bereiteMorph(line, zuordnung, atome);
             zeigeFormeln();
             beispielTimer = setTimeout(() => morphen(1), morphOpts.pause * 1000);
         }
@@ -1096,8 +1135,8 @@
                             <svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4 L18 12 L7 20 Z" fill="currentColor"/></svg>
                         </button>
                     </div>
-                    <!-- Doc: "mach die NOCHMAL so wie WEITER" -->
-                    <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="nochmal()">NOCHMAL</button>
+                    <!-- Doc: "mach die NOCHMAL so wie WEITER", then "NOCHMAL -> PLAY" -->
+                    <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="nochmal()">PLAY</button>
                 </div>
                 <!-- Doc 25.09.2026: "BEISPIEL Button raus" - kept, commented out, beispiel() still exists
                 <div class="btn-row" style="margin-top:0.8rem">
@@ -1120,6 +1159,11 @@
 
             // Doc: "speed slider für mich". Letting go replays the morph at the
             // new speed, so the effect can be judged right away.
+            CyberUI.createRadioGroup('morph-steuerung', 'Morph (Doppel-Tippen auf die Zeitleiste)', [
+                { value: 'staub', label: 'Staub' }, { value: 'strich', label: 'Strich' },
+            ], morphArt, v => wechsleMorphArt(v));
+            document.querySelectorAll('#morph-steuerung .cyber-radio-input').forEach(r => { r.name = 'morph-art'; });
+
             CyberUI.createSlider('morph-steuerung', 'Morph-Dauer', 0.1, 1, morphDauer, 0.05, v => {
                 morphDauer = v;
                 try { localStorage.setItem('vorrechnen-morph-dauer', String(v)); } catch (_) {}
