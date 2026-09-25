@@ -30,6 +30,12 @@
         rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
     <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <!-- Installs as an app that starts in full screen (Doc: "immer im Vollbild starten") -
+         a page alone may only go full screen on a touch. Pattern: svp/fahrplan.html. -->
+    <link rel="manifest" href="vorrechnen.webmanifest">
+    <link rel="apple-touch-icon" href="resources/apple-touch-icon.png">
+    <meta name="theme-color" content="#08142a">
+    <meta name="mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="js/cyber-layout.css">
     <link rel="stylesheet" href="js/buttons-ultra.css">
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
@@ -257,7 +263,9 @@
         // is offered as a download, the way SICHERN does it.
         let speichernApi = false;
 
-        const INK = '#adff2f';                       // same green as morpheus
+        // Doc, 25.09.: "irgendwie lenkt das grün ab ... mach mal fast weiß" - ink,
+        // template and morph share this one colour
+        const INK = '#eaf0f7';
         // Symbol colours: Doc's palette first, then neon blue, cycling. Red-free
         // on purpose so it never reads as an error marker.
         const SYM_COLORS = ['#00d2ff', 'rgb(245,194,66)', 'rgb(121,158,49)', '#c77dff', '#ff9e64'];
@@ -384,7 +392,8 @@
                 analysis.lines.forEach(l => {
                     const v = morphVorbereitet[l.lineIdx];
                     // Doc: "alles grün" - the formula ends in the ink's green, no blue
-                    if (v) StaubMorph.zeichnen(ctx, v, morphT, { farbe: INK, zielFarbe: INK, staffel: 0 });
+                    if (v) StaubMorph.zeichnen(ctx, v, morphT, { farbe: INK, zielFarbe: INK,
+                        staffel: morphOpts.staffel, wirbel: morphOpts.wirbel, staub: morphOpts.staub });
                 });
             }
 
@@ -517,7 +526,7 @@
                         try {
                             await HandschriftMorph.schriftenBereit(atome);
                             await HandschriftMorph.svgVorbereiten(atome);
-                            morphVorbereitet[line.lineIdx] = StaubMorph.vorbereiten(line, strokes, atome);
+                            morphVorbereitet[line.lineIdx] = StaubMorph.vorbereiten(line, strokes, atome, morphOpts);
                         } catch (e) {
                             morphVorbereitet[line.lineIdx] = null;
                         }
@@ -563,8 +572,33 @@
         // Doc: "meine in LT faden (morph nicht transp)" - the ink turns into
         // the formula, it does not fade. How long it takes is Doc's to set
         // (slider "Morph-Dauer", remembered on the device).
-        let morphDauer = 1.6;                        // seconds
-        try { const v = parseFloat(localStorage.getItem('vorrechnen-morph-dauer')); if (v > 0) morphDauer = v; } catch (_) {}
+        // Doc: 0.1 to 1 s ("mach den speed slider 0.1 - 1 s")
+        let morphDauer = 0.6;                        // seconds
+        // The dust morph's knobs (js/staub-morph.js), on sliders for Doc: the
+        // cloud's shape needs a new preparation, the rest only a new drawing.
+        const morphOpts = { dichte: 0.5, wolke: 0.25, auftrieb: 0.25, wirbel: 0.1, staffel: 0, staub: 0.8, pause: 0.9 };
+        try { Object.assign(morphOpts, JSON.parse(localStorage.getItem('vorrechnen-morph') || '{}')); } catch (_) {}
+        function bereiteMorphNeu() {
+            analysis.lines.forEach(line => {
+                const erg = zeilenErgebnis[line.lineIdx];
+                if (!erg || !erg.atome || !morphVorbereitet[line.lineIdx]) return;
+                morphVorbereitet[line.lineIdx] = StaubMorph.vorbereiten(line, strokes, erg.atome, morphOpts);
+            });
+        }
+        // Letting go of a slider replays the morph, so the effect can be judged.
+        let reglerTimer = null, reglerNeu = false;
+        function nachRegler(neu) {
+            reglerNeu = reglerNeu || neu;
+            clearTimeout(reglerTimer);
+            reglerTimer = setTimeout(() => {
+                if (reglerNeu) bereiteMorphNeu();
+                reglerNeu = false;
+                if (!morphVorbereitet.some(Boolean)) return;
+                setzeMorph(0);
+                morphen(1);
+            }, 350);
+        }
+        try { const v = parseFloat(localStorage.getItem('vorrechnen-morph-dauer')); if (v > 0) morphDauer = Math.min(1, Math.max(0.1, v)); } catch (_) {}
         function morphen(ziel) {
             if (morphAnim) cancelAnimationFrame(morphAnim);
             const von = morphT, nach = (ziel === undefined) ? (morphT > 0.5 ? 0 : 1) : ziel;
@@ -697,9 +731,9 @@
             zeilenErgebnis[line.lineIdx] = { latex, tokens: [], atome, ms: 0, zuordnung: FormelErkennen.ordneZu(line.symbols, atome), svg };
             await HandschriftMorph.schriftenBereit(atome);
             await HandschriftMorph.svgVorbereiten(atome);
-            morphVorbereitet[line.lineIdx] = StaubMorph.vorbereiten(line, strokes, atome);
+            morphVorbereitet[line.lineIdx] = StaubMorph.vorbereiten(line, strokes, atome, morphOpts);
             zeigeFormeln();
-            beispielTimer = setTimeout(() => morphen(1), 900);
+            beispielTimer = setTimeout(() => morphen(1), morphOpts.pause * 1000);
         }
 
         // Doc: "Show (again)" - back to the handwriting, a moment to see it,
@@ -708,7 +742,7 @@
             if (!morphVorbereitet.some(Boolean)) { setProbeStatus('Erst ERKENNEN oder BEISPIEL'); return; }
             clearTimeout(beispielTimer);
             setzeMorph(0);
-            beispielTimer = setTimeout(() => morphen(1), 600);
+            beispielTimer = setTimeout(() => morphen(1), morphOpts.pause * 1000);
         }
 
         function setProbeStatus(msg) {
@@ -839,11 +873,12 @@
                     <button class="cyber-btn gross" style="height:6rem;min-height:6rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6rem" onclick="exportStrokes()">SICHERN</button>
                     <button class="cyber-btn gross" style="height:6rem;min-height:6rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6rem" onclick="erkennen()">ERKENNEN</button>
                     <button class="cyber-btn gross" style="height:6rem;min-height:6rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6rem" onclick="naechsteVorlage()">WEITER</button>
+                    <!-- Doc: "mach die NOCHMAL so wie WEITER" -->
+                    <button class="cyber-btn gross" style="height:6rem;min-height:6rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6rem" onclick="nochmal()">NOCHMAL</button>
                 </div>
                 <!-- right under the big buttons: the Lenovo is only 665 px high -->
                 <div class="btn-row" style="margin-top:0.8rem">
                     <button class="cyber-btn" style="flex:1" onclick="beispiel()">BEISPIEL</button>
-                    <button class="cyber-btn" style="flex:1" onclick="nochmal()">NOCHMAL</button>
                 </div>
                 <div id="morph-steuerung" style="margin-top:0.3rem"></div>
                 <!-- Doc: no text under the slider. Still written, just not shown -
@@ -861,17 +896,11 @@
 
             // Doc: "speed slider für mich". Letting go replays the morph at the
             // new speed, so the effect can be judged right away.
-            let wiederholen = null;
-            CyberUI.createSlider('morph-steuerung', 'Morph-Dauer', 0.3, 5, morphDauer, 0.1, v => {
+            CyberUI.createSlider('morph-steuerung', 'Morph-Dauer', 0.1, 1, morphDauer, 0.05, v => {
                 morphDauer = v;
                 try { localStorage.setItem('vorrechnen-morph-dauer', String(v)); } catch (_) {}
-                clearTimeout(wiederholen);
-                wiederholen = setTimeout(() => {
-                    if (!morphVorbereitet.some(Boolean)) return;
-                    setzeMorph(0);
-                    morphen(1);
-                }, 350);
-            }, '#00d2ff', v => v.toFixed(1) + ' s');
+                nachRegler(false);
+            }, '#00d2ff', v => v.toFixed(2) + ' s');
 
             CyberUI.createCheckbox('morph-steuerung', 'Boxen zeigen', view.boxes, v => {
                 view.boxes = view.rows = v;
@@ -883,6 +912,24 @@
                 testModus = v;
                 try { localStorage.setItem('vorrechnen-testmodus', v ? '1' : '0'); } catch (_) {}
                 if (v) beispiel();
+            });
+
+            // Doc: "welche Parameter haben wir noch - alle auf Slider bitte"
+            // [label, key, min, max, step, format, needs a new preparation]
+            [
+                ['Körnerdichte', 'dichte', 0.1, 1, 0.05, v => v.toFixed(2), true],
+                ['Wolke: Streuung', 'wolke', 0, 1, 0.05, v => v.toFixed(2), true],
+                ['Wolke: Auftrieb', 'auftrieb', 0, 1, 0.05, v => v.toFixed(2), true],
+                ['Wirbel', 'wirbel', 0, 0.5, 0.01, v => v.toFixed(2), false],
+                ['Welle links nach rechts', 'staffel', 0, 0.6, 0.05, v => v.toFixed(2), false],
+                ['Staubkorn', 'staub', 0.3, 2, 0.1, v => v.toFixed(1) + ' px', false],
+                ['Pause vor dem Morph', 'pause', 0, 2, 0.1, v => v.toFixed(1) + ' s', false],
+            ].forEach(([label, key, min, max, step, fmt, neu]) => {
+                CyberUI.createSlider('morph-steuerung', label, min, max, morphOpts[key], step, v => {
+                    morphOpts[key] = v;
+                    try { localStorage.setItem('vorrechnen-morph', JSON.stringify(morphOpts)); } catch (_) {}
+                    nachRegler(neu);
+                }, '#00d2ff', fmt);
             });
 
             /* Ausgeblendet auf Docs Wunsch (25.09.) - die Funktionen dahinter
@@ -956,6 +1003,15 @@
         }
 
         window.addEventListener('resize', init);
+        // The worker makes Chrome offer a real install (sw-vorrechnen.js says why).
+        // Its scope is this page alone. Not under file://, where there is none.
+        if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw-vorrechnen.js', { scope: 'vorrechnen.html' })
+                    .catch(() => { /* no app then - the page itself is unaffected */ });
+            });
+        }
+
         document.fonts.ready.then(() => {
             buildPanel(); holeStriche(); recompute(); init(); zeigeVorlage();
             if (testModus && !strokes.length) beispiel();

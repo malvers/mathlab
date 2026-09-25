@@ -531,6 +531,9 @@ const CyberBranding = {
         if (!document.body || document.body.dataset.vollbild !== "immer") return;
         if (window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform()) return;
         if (window.CyberDeckLab && window.CyberDeckLab.frame()) return;
+        // Installed with "display": "fullscreen" (vorrechnen.webmanifest) the app is full screen
+        // already - asking again would only block live reload, which pauses in API full screen.
+        if (window.matchMedia && window.matchMedia("(display-mode: fullscreen)").matches) return;
         const los = (e) => {
             const maus = e.pointerType === "mouse";
             if ((e.type === "pointerdown") !== maus) return;
