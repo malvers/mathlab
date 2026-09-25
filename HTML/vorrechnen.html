@@ -440,9 +440,21 @@
                             const dy = (line.bbox.y + line.bbox.h / 2) - (u.y + u.h / 2) * skala;
                             atome = KatexAtome.transformiere(m.atome, skala, dx, dy);
                         }
-                        const zuordnung = FormelErkennen.ordneZu(line.symbols, atome);
+                        let zuordnung = FormelErkennen.ordneZu(line.symbols, atome);
+                        let nachjustiert = false;
+                        if (!zuordnung.passt) {
+                            // The typesetter knows the glyph count; the grouping
+                            // gives way - fused symbols are split at their widest
+                            // gap, fragments merged - and reading order is redone.
+                            const neu = StrokeSymbols.nachjustieren(line, strokes, atome.length, opts);
+                            if (neu.length === atome.length) {
+                                line.symbols = neu;
+                                zuordnung = FormelErkennen.ordneZu(neu, atome);
+                                nachjustiert = true;
+                            }
+                        }
                         zeilenErgebnis[line.lineIdx] = {
-                            latex: r.latex, tokens: r.tokens, atome, ms: r.ms, zuordnung, svg: m.svg,
+                            latex: r.latex, tokens: r.tokens, atome, ms: r.ms, zuordnung, svg: m.svg, nachjustiert,
                         };
                         // Morph only when the mapping holds and every target is a
                         // glyph we can trace (radicals and tall delimiters are SVG
@@ -532,7 +544,7 @@
                 const hinweis = e.svg ? `<div class="erk-warn">Wurzel oder große Klammer – Morph dafür noch nicht gebaut</div>` : '';
                 return `<div class="erk-zeile"><b>Zeile ${l.lineIdx}</b>
                     <div class="erk-latex">${e.latex.replace(/</g, '&lt;')}</div>
-                    <div class="${z.passt ? 'erk-ok' : 'erk-warn'}">${z.diagnose}</div>${hinweis}
+                    <div class="${z.passt ? 'erk-ok' : 'erk-warn'}">${z.diagnose}${e.nachjustiert ? ' – Gruppierung an die Zeichenzahl angeglichen' : ''}</div>${hinweis}
                     <div class="erk-info">${e.atome.length} Zeichen gesetzt · ${e.ms} ms</div></div>`;
             });
             el.innerHTML = teile.join('') || '<div class="erk-info">–</div>';

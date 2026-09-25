@@ -53,7 +53,27 @@
         barMinWidth: 1.2,
         // …but only a candidate: a minus sign looks the same. What settles it is
         // ink ABOVE and BELOW, within this multiple of the line height.
-        barReach: 1.4,
+        barReach: 2.2,         // a numerator is often written high above the bar
+        // A tall symbol (integral, sum) with ink near its top or bottom, within
+        // its span, is a big operator with limits: read operator, upper limit,
+        // lower limit - the order \int_a^b lists them in.
+        opMinHeight: 1.5,      // × line height, for reading order within a row
+        opMinRatio: 1.7,       // height / width
+        opReachX: 0.4,         // slack beyond the operator's span, × its width
+        // Pulling a neighbouring ROW into an operator's row is riskier - a tall
+        // "y" must not swallow the next line of a calculation - so that needs a
+        // really tall stroke and a small claimed one.
+        opRowMinHeight: 2.2,   // × line height
+        opLimitMax: 0.6,       // claimed stroke's height, × the operator's
+        // Merging across a vertical gap is only for dots (the i) and stacked
+        // bars (the =). Anything else that does not touch vertically is another
+        // symbol - a "0" written under an integral sign is its lower limit.
+        touchGap: 0.12,        // × line height: closer than this counts as touching
+        dotSize: 0.32,         // × line height
+        barGap: 0.7,           // × line height, the two bars of "=" (measured 0.13 on Doc's, 0.54 synthetic)
+        // Two rows are one row when a stroke bridges them - the integral sign
+        // reaches from its upper limit down to its lower one.
+        bridgeOverlap: 0.3,
     };
 
     function bboxOfPoints(points) {
@@ -184,7 +204,18 @@
             for (let s = symbols.length - 1; s >= 0; s--) {
                 const sym = symbols[s];
                 if (sym.bruch) continue;                 // never merge into a bar
-                if (yGap(bb, sym.bbox) > lineHeight * o.yGapFactor) continue;
+                const yg = yGap(bb, sym.bbox);
+                if (yg > lineHeight * o.yGapFactor) continue;
+                if (yg > lineHeight * o.touchGap) {
+                    // Not touching vertically: only a dot (the i, the j) or the
+                    // second bar of an "=" still belongs. A "0" under an integral
+                    // overlaps it sideways and sits close - and is another symbol.
+                    const tiny = b => b.w < lineHeight * o.dotSize && b.h < lineHeight * o.dotSize;
+                    const flat = b => b.w / b.h > 2.2;       // a handwritten "=" bar can be short and thick (Doc's: 2.9)
+                    const dot = tiny(bb) || tiny(sym.bbox);
+                    const bars = flat(bb) && flat(sym.bbox) && yg < lineHeight * o.barGap;
+                    if (!dot && !bars) continue;
+                }
 
                 const ratio = xOverlapRatio(bb, sym.bbox);
                 const near = xGap(bb, sym.bbox) <= lineHeight * o.xGapFactor;
@@ -219,63 +250,175 @@
     // \frac{...}{...} puts them in. Symbols that sit within a bar's span are
     // claimed by it; the rest of the row keeps its left-to-right order, with the
     // whole fraction taking the bar's place in that sequence.
-    function leseReihenfolge(symbols) {
-        const baeren = symbols.filter(s => s.bruch);
-        if (!baeren.length) return symbols.slice().sort((a, b) => a.bbox.x - b.bbox.x);
+    function leseReihenfolge(symbols, lineHeight, opts) {
+        const o = Object.assign({}, DEFAULTS, opts || {});
+        const lh = lineHeight || median(symbols.map(s => s.bbox.h)) || 1;
+        const istOperator = s => !s.bruch && s.bbox.h > lh * o.opMinHeight && s.bbox.h / s.bbox.w > o.opMinRatio;
+        const anker = symbols.filter(s => s.bruch || istOperator(s));
+        if (!anker.length) return symbols.slice().sort((a, b) => a.bbox.x - b.bbox.x);
 
         const vergeben = new Set();
-        const gruppen = baeren.map(bar => {
-            const zaehler = [], nenner = [];
+        const gruppen = [];
+        // Bars claim first (numerator, denominator), then the tall operators
+        // (upper limit, lower limit). A tall glyph that claims nothing - a
+        // bracket, a "y" - is not an anchor at all and stays in the row.
+        for (const a of anker.filter(s => s.bruch).concat(anker.filter(s => !s.bruch))) {
+            const oben = [], unten = [];
+            const slack = a.bbox.w * (a.bruch ? 0.15 : o.opReachX);
+            const x0 = a.bbox.x - slack, x1 = a.bbox.x + a.bbox.w + slack;
             symbols.forEach(s => {
-                if (s === bar || s.bruch || vergeben.has(s)) return;
+                if (s === a || vergeben.has(s) || s.bruch) return;
                 const m = s.bbox.x + s.bbox.w / 2;
-                if (m < bar.bbox.x || m > bar.bbox.x + bar.bbox.w) return;
+                if (m < x0 || m > x1) return;
                 const my = s.bbox.y + s.bbox.h / 2;
-                if (my < bar.bbox.y) { zaehler.push(s); vergeben.add(s); }
-                else if (my > bar.bbox.y + bar.bbox.h) { nenner.push(s); vergeben.add(s); }
+                if (a.bruch) {
+                    if (my < a.bbox.y) { oben.push(s); vergeben.add(s); }
+                    else if (my > a.bbox.y + a.bbox.h) { unten.push(s); vergeben.add(s); }
+                } else {
+                    // Limits sit at the ends of a tall operator, not beside its middle.
+                    if (my < a.bbox.y + a.bbox.h * 0.35) { oben.push(s); vergeben.add(s); }
+                    else if (my > a.bbox.y + a.bbox.h * 0.65) { unten.push(s); vergeben.add(s); }
+                }
             });
-            const lr = (a, b) => a.bbox.x - b.bbox.x;
-            return { bar, folge: [bar, ...zaehler.sort(lr), ...nenner.sort(lr)] };
-        });
-
-        // Put each fraction where its bar sits in the row, keep the rest in place.
-        const rest = symbols.filter(s => !s.bruch && !vergeben.has(s));
-        const eintraege = rest.map(s => ({ x: s.bbox.x, folge: [s] }))
-            .concat(gruppen.map(g => ({ x: g.bar.bbox.x, folge: g.folge })));
-        eintraege.sort((a, b) => a.x - b.x);
+            if (!a.bruch && !oben.length && !unten.length) continue;
+            vergeben.add(a);
+            const lr = (p, q) => p.bbox.x - q.bbox.x;
+            gruppen.push({ x: a.bbox.x, folge: [a, ...oben.sort(lr), ...unten.sort(lr)] });
+        }
+        const rest = symbols.filter(s => !vergeben.has(s));
+        const eintraege = rest.map(s => ({ x: s.bbox.x, folge: [s] })).concat(gruppen);
+        eintraege.sort((p, q) => p.x - q.x);
         return [].concat(...eintraege.map(e => e.folge));
+    }
+
+    // Rows are one row when a stroke reaches into both: the integral sign spans
+    // from its upper limit down to its lower one, and the row splitter, which
+    // only sees gaps between stroke centres, had cut the limit off.
+    function verbindeUeberbrueckte(rows, o) {
+        const extent = r => {
+            let y0 = Infinity, y1 = -Infinity;
+            r.forEach(e => { y0 = Math.min(y0, e.bbox.y); y1 = Math.max(y1, e.bbox.y + e.bbox.h); });
+            return { y0, y1 };
+        };
+        let changed = true;
+        while (changed && rows.length > 1) {
+            changed = false;
+            const ext = rows.map(extent);
+            outer: for (let i = 0; i < rows.length - 1; i++) {
+                const a = ext[i], b = ext[i + 1];
+                for (const e of rows[i].concat(rows[i + 1])) {
+                    const t = e.bbox.y, bt = e.bbox.y + e.bbox.h;
+                    const ovA = Math.min(bt, a.y1) - Math.max(t, a.y0);
+                    const ovB = Math.min(bt, b.y1) - Math.max(t, b.y0);
+                    const needA = Math.min(e.bbox.h, a.y1 - a.y0) * o.bridgeOverlap;
+                    const needB = Math.min(e.bbox.h, b.y1 - b.y0) * o.bridgeOverlap;
+                    if (ovA > needA && ovB > needB) {
+                        rows.splice(i, 2, rows[i].concat(rows[i + 1]).sort((p, q) => p.idx - q.idx));
+                        changed = true;
+                        break outer;
+                    }
+                }
+            }
+        }
+        return rows;
+    }
+
+    // The typesetter knows how many glyphs there are. When the grouping found
+    // a different number, it is the grouping that gives way: too few symbols,
+    // and the one whose strokes are furthest apart sideways is split there; too
+    // many, and the two closest neighbours are merged. Bars are never touched.
+    function abgleichen(symbols, entries, soll) {
+        const byIdx = new Map(entries.map(e => [e.idx, e]));
+        const mk = es => ({
+            strokeIdxs: es.map(e => e.idx),
+            bbox: es.map(e => e.bbox).reduce((a, c) => bboxUnion(a, c)),
+            tStart: Math.min(...es.map(e => e.tStart === null ? Infinity : e.tStart)),
+            tEnd: Math.max(...es.map(e => e.tEnd === null ? -Infinity : e.tEnd)),
+            nachjustiert: true,
+        });
+        let syms = symbols.map(s => Object.assign({}, s, { strokeIdxs: s.strokeIdxs.slice() }));
+        let guard = 24;
+        while (syms.length < soll && guard--) {
+            let best = null;
+            for (const sy of syms) {
+                if (sy.bruch || sy.strokeIdxs.length < 2) continue;
+                const es = sy.strokeIdxs.map(i => byIdx.get(i)).filter(Boolean).sort((a, b) => a.bbox.x - b.bbox.x);
+                for (let k = 1; k < es.length; k++) {
+                    const gap = es[k].bbox.x - (es[k - 1].bbox.x + es[k - 1].bbox.w);
+                    if (!best || gap > best.gap) best = { sy, gap, links: es.slice(0, k), rechts: es.slice(k) };
+                }
+            }
+            if (!best) break;
+            syms.splice(syms.indexOf(best.sy), 1, mk(best.links), mk(best.rechts));
+        }
+        while (syms.length > soll && guard--) {
+            const byX = syms.slice().sort((a, b) => a.bbox.x - b.bbox.x);
+            let best = null;
+            for (let k = 1; k < byX.length; k++) {
+                if (byX[k].bruch || byX[k - 1].bruch) continue;
+                const gap = xGap(byX[k - 1].bbox, byX[k].bbox);
+                if (!best || gap < best.gap) best = { gap, a: byX[k - 1], b: byX[k] };
+            }
+            if (!best) break;
+            const es = best.a.strokeIdxs.concat(best.b.strokeIdxs).map(i => byIdx.get(i)).filter(Boolean);
+            syms = syms.filter(x => x !== best.a && x !== best.b).concat([mk(es)]);
+        }
+        return syms;
+    }
+
+    function eintraege(strokes) {
+        const out = [];
+        strokes.forEach((stroke, idx) => {
+            if (!stroke.points || stroke.points.length === 0) return;
+            const t = strokeTimes(stroke);
+            out.push({ idx, bbox: bboxOfPoints(stroke.points), tStart: t.start, tEnd: t.end });
+        });
+        return out;
+    }
+
+    // Re-group one row to a known glyph count and put it back in reading order.
+    // Returns the new symbols (or the old ones if the count cannot be reached).
+    function nachjustieren(line, strokes, soll, opts) {
+        const o = Object.assign({}, DEFAULTS, opts || {});
+        const entries = eintraege(strokes);
+        const lh = median(entries.map(e => e.bbox.h)) || 1;
+        const neu = abgleichen(line.symbols, entries, soll);
+        if (neu.length !== soll) return line.symbols;
+        const geordnet = leseReihenfolge(neu, lh, o);
+        geordnet.forEach((sy, i) => { sy.readIdx = i; sy.lineIdx = line.lineIdx; });
+        return geordnet;
     }
 
     function analyse(strokes, opts) {
         const o = Object.assign({}, DEFAULTS, opts || {});
-        const entries = [];
-        strokes.forEach((stroke, idx) => {
-            if (!stroke.points || stroke.points.length === 0) return;
-            const t = strokeTimes(stroke);
-            entries.push({ idx, bbox: bboxOfPoints(stroke.points), tStart: t.start, tEnd: t.end });
-        });
-        if (!entries.length) return { symbols: [], lines: [] };
+        const entries = eintraege(strokes);
+        if (!entries.length) return { symbols: [], lines: [], lineHeight: 1 };
 
         let rows = splitStrokesIntoRows(entries, o);
         const lineHeight = median(entries.map(e => e.bbox.h)) || 1;
 
         const bruchIds = findeBruchstriche(entries, lineHeight, o);
-        // A fraction spans rows by nature - numerator above, denominator below -
-        // so the row splitter, which only sees vertical gaps, cuts the
-        // denominator off. Put it back: whatever lies within a bar's span
-        // belongs to the bar's row.
-        if (bruchIds.size) {
+        // Stacked constructs span rows by nature - numerator over denominator, a
+        // limit above an integral sign - and the row splitter, which only sees
+        // vertical gaps, cuts them apart. Anchors pull them back: a fraction bar
+        // claims what lies within its span above and below; a really tall
+        // stroke claims small things within its span (plus slack) near its top
+        // or bottom.
+        const anker = entries.filter(e => bruchIds.has(e.idx) ||
+            (e.bbox.h > lineHeight * o.opRowMinHeight && e.bbox.h / e.bbox.w > o.opMinRatio));
+        if (anker.length && rows.length > 1) {
             const zeileVon = new Map();
             rows.forEach((row, i) => row.forEach(e => zeileVon.set(e.idx, i)));
             const verschmelze = new Map();          // row -> row it joins
-            for (const e of entries) {
-                if (!bruchIds.has(e.idx)) continue;
+            for (const e of anker) {
                 const b = e.bbox, heim = zeileVon.get(e.idx);
+                const istBar = bruchIds.has(e.idx);
+                const slack = istBar ? 0 : b.w * o.opReachX;
                 for (const f of entries) {
                     if (f === e) continue;
-                    const fb = f.bbox;
-                    if (fb.x + fb.w < b.x || fb.x > b.x + b.w) continue;
-                    const fm = fb.y + fb.h / 2;
+                    const fb = f.bbox, fm = fb.y + fb.h / 2, fx = fb.x + fb.w / 2;
+                    if (fx < b.x - slack || fx > b.x + b.w + slack) continue;
+                    if (!istBar && fb.h > b.h * o.opLimitMax) continue;
                     const nah = (fm < b.y && b.y - fm < lineHeight * o.barReach) ||
                                 (fm > b.y + b.h && fm - (b.y + b.h) < lineHeight * o.barReach);
                     const zeile = zeileVon.get(f.idx);
@@ -285,16 +428,18 @@
             if (verschmelze.size) {
                 const neu = [];
                 rows.forEach((row, i) => {
-                    const ziel = verschmelze.has(i) ? verschmelze.get(i) : i;
+                    let ziel = i;
+                    for (let g = 0; g < 8 && verschmelze.has(ziel); g++) ziel = verschmelze.get(ziel);
                     (neu[ziel] = neu[ziel] || []).push(...row);
                 });
                 rows = neu.filter(Boolean).map(r => r.sort((a, b) => a.idx - b.idx));
             }
         }
+        rows = verbindeUeberbrueckte(rows, o);
         const lines = [];
         const all = [];
         rows.forEach((row, lineIdx) => {
-            const syms = leseReihenfolge(groupRowIntoSymbols(row, lineHeight, o, bruchIds));
+            const syms = leseReihenfolge(groupRowIntoSymbols(row, lineHeight, o, bruchIds), lineHeight, o);
             syms.forEach((s, i) => {
                 s.readIdx = i;
                 s.lineIdx = lineIdx;
@@ -310,11 +455,11 @@
         });
         // Rows came out top to bottom; that is also the order they were written in
         // for a calculation worked downwards.
-        return { symbols: all, lines };
+        return { symbols: all, lines, lineHeight };
     }
 
     const api = { DEFAULTS, analyse, splitStrokesIntoRows, groupRowIntoSymbols,
-                  findeBruchstriche, leseReihenfolge,
+                  findeBruchstriche, leseReihenfolge, verbindeUeberbrueckte, abgleichen, nachjustieren, eintraege,
                   bboxOfPoints, bboxUnion, xOverlapRatio, xGap, yGap, median };
 
     if (typeof module === 'object' && module.exports) module.exports = api;
