@@ -647,7 +647,11 @@ fromHash();
   // Solita's DocPad voice - NEVER the browser voice (Doc). A deck can speak in Doc's own voice instead:
   // <body data-voice="doc"> (html_deck set_voice), the tts function then answers in wav, or in
   // Studio-C mp3 when his voice is too slow - j.mime says which.
-  const VOICE = (document.body && document.body.dataset.voice === 'doc') ? 'doc' : 'de-DE-Studio-C';
+  // Which voice is the deck's default; the right-click menu switches it, remembered per deck on this device
+  // (Doc, 25.09.2026: "meine Stimme in (u.a.) das Maya Deck schaltbar im Pop"). speak() reads it at every call.
+  const VOICE_KEY = 'solita_voice:' + location.pathname;
+  let VOICE = (document.body && document.body.dataset.voice === 'doc') ? 'doc' : 'de-DE-Studio-C';
+  try { const kept = localStorage.getItem(VOICE_KEY); if (kept === 'doc' || kept === 'de-DE-Studio-C') VOICE = kept; } catch (e) { }
   const SYS = 'Du bist Solita, die Tutorin in Doc Alvers Mathe-Labor. Du hilfst Schülerinnen und '
     + 'Schülern der Klassen 11 bis 13 am Beruflichen Gymnasium und an der Fachoberschule. '
     + 'Du bekommst eine Übersicht der Präsentation und die Folie, auf der die Klasse gerade steht. '
@@ -789,7 +793,9 @@ fromHash();
     + '<label><input type="checkbox" data-who="claude"><span>Solita<i>Claude Haiku</i></span></label>'
     + '<label class="ds"><input type="checkbox" data-who="ds"><span>DeepSeek</span></label>'
     + '<div class="ask-msep"></div>'
-    + '<label><input type="checkbox" data-act="tts"><span><em class="ask-spk"></em>Vorlesen<i>Solitas Stimme</i></span></label>'
+    + '<label><input type="checkbox" data-act="tts"><span><em class="ask-spk"></em>Vorlesen<i></i></span></label>'
+    + '<label><input type="checkbox" data-voice="de-DE-Studio-C"><span>Solita<i>Stimme</i></span></label>'
+    + '<label><input type="checkbox" data-voice="doc"><span>Doc<i>Stimme</i></span></label>'
     + '<div class="ask-msep"></div>'
     + '<button type="button" data-act="copy">Kopieren</button>'
     + '<button type="button" data-act="clear">Leeren</button>';
@@ -797,8 +803,19 @@ fromHash();
   const checks = menu.querySelectorAll('input[data-who]');
   const ttsBox = menu.querySelector('input[data-act="tts"]');
   ttsBox.addEventListener('change', function () { ttsBtn.onclick(); });
+  // the two voices work like radio buttons: one is always on
+  const voiceChecks = menu.querySelectorAll('input[data-voice]');
+  voiceChecks.forEach(function (c) {
+    c.addEventListener('change', function () {
+      VOICE = c.dataset.voice;
+      try { localStorage.setItem(VOICE_KEY, VOICE); } catch (e) { }
+      showWho();
+    });
+  });
   function showWho() {
     ttsBox.checked = ttsOn;
+    ttsBox.parentNode.querySelector('i').textContent = VOICE === 'doc' ? 'Docs Stimme' : 'Solitas Stimme';
+    voiceChecks.forEach(function (c) { c.checked = c.dataset.voice === VOICE; });
     menu.querySelector('.ask-spk').innerHTML = ttsOn ? SPK_ON : SPK_OFF;
     checks.forEach(function (c) {
       c.checked = who[c.dataset.who];
