@@ -499,7 +499,7 @@
             if (!autoErkennen || testModus) return;
             autoTimer = setTimeout(() => {
                 if (current || tipp || geste) return;          // the end of that input restarts the clock
-                if (erkennenLaeuft || hochLaeuft) return autoBald();
+                if (erkennenLaeuft) return autoBald();
                 if (analysis.lines.some(l => !zuKlein(l) && !zeilenErgebnis[l.lineIdx])) erkennen();
             }, AUTO_PAUSE);
         }
@@ -615,6 +615,17 @@
                 });
             }
 
+            // lines on their way up (rechenwegHoch): ink or morph in a frame
+            // that glides and shrinks towards the step's place
+            fluege.forEach(f => {
+                ctx.save();
+                ctx.translate(f.p.tx, f.p.ty);
+                ctx.scale(f.p.s, f.p.s);
+                if (f.v && f.mt > 0) zeichneMorph(ctx, f.v, f.mt);
+                else { ctx.strokeStyle = INK; f.striche.forEach(strokePath); }
+                ctx.restore();
+            });
+
             if (view.boxes && morphT === 0) {
                 analysis.lines.forEach(line => {
                     line.symbols.forEach((sym, i) => {
@@ -705,7 +716,7 @@
             // at the end of the morph goes to exactly the same place
             const hr = messHost().getBoundingClientRect(), kh = messHost().querySelector('.katex-html');
             const kr = kh ? kh.getBoundingClientRect() : hr;
-            const satz = { latex, skala: 1, dx: 0, dy: 0, kx: kr.left - hr.left, ky: kr.top - hr.top };
+            const satz = { latex, skala: 1, dx: 0, dy: 0, kx: kr.left - hr.left, ky: kr.top - hr.top, kw: kr.width };
             if (u && u.h > 0 && u.w > 0) {
                 // "Gleiche Größe" means: the typeset block fits the footprint of
                 // the handwriting - height AND width - and never leaves the
@@ -729,11 +740,11 @@
         // the glyph count; when the grouping disagrees it gives way - fused
         // symbols are split at their widest gap, fragments merged - and the
         // reading order is redone.
-        function ordneZeile(line, atome) {
+        function ordneZeile(line, atome, striche = strokes) {
             let zuordnung = FormelErkennen.ordneZu(line.symbols, atome);
             let nachjustiert = false;
             if (!zuordnung.passt) {
-                const neu = StrokeSymbols.nachjustieren(line, strokes, atome.length, opts);
+                const neu = StrokeSymbols.nachjustieren(line, striche, atome.length, opts);
                 if (neu.length === atome.length) {
                     line.symbols = neu;
                     zuordnung = FormelErkennen.ordneZu(neu, atome);
@@ -836,12 +847,12 @@
         // without one the dust takes over.
         let morphArt = 'staub';
         try { if (localStorage.getItem('vorrechnen-morph-art') === 'strich') morphArt = 'strich'; } catch (_) {}
-        function bereiteMorph(line, zuordnung, atome) {
+        function bereiteMorph(line, zuordnung, atome, striche = strokes) {
             if (morphArt === 'strich' && zuordnung && zuordnung.passt) {
-                const g = StrichMorph.vorbereiten(line, strokes, zuordnung);
+                const g = StrichMorph.vorbereiten(line, striche, zuordnung);
                 if (g && g.length) return { art: 'strich', glyphen: g };
             }
-            const v = StaubMorph.vorbereiten(line, strokes, zuordnung && zuordnung.paare ? zuordnung : atome, morphOpts);
+            const v = StaubMorph.vorbereiten(line, striche, zuordnung && zuordnung.paare ? zuordnung : atome, morphOpts);
             return v ? Object.assign(v, { art: 'staub' }) : null;
         }
         function zeichneMorph(c, v, t) {
@@ -1043,6 +1054,7 @@
                 `${nr + 1} / ${liste.length}${hinweis ? ' · ' + hinweis : ''}</span>` +
                 (testModus ? `<span id="vorlage-formel" style="font-size:2.4rem;color:${INK}"></span>` : '') +
                 (nach ? `<span id="vorlage-nach" style="${RAND};right:24px">NACH <span style="font-size:1.6em"></span></span>` : '');
+            zeigeTafelPfeile();
             if (nach) {
                 const v = host.querySelector('#vorlage-nach span');
                 try { katex.render(nach, v, { throwOnError: false }); } catch (e) { v.textContent = nach; }
@@ -1118,7 +1130,7 @@
                 host.appendChild(d);
             });
             if (!testModus) zeile(AUFGABEN[aufgabeIdx][1], 'aufgabe', false);
-            rechenweg.forEach((latex, i) => zeile(latex, i, verborgenAb !== undefined && i >= verborgenAb));
+            rechenweg.forEach((latex, i) => zeile(latex, i, (verborgenAb !== undefined && i >= verborgenAb) || imFlug.has(i)));
             // counter and "NACH x" sit level with the task
             if (!testModus) {
                 let o = Infinity, u = -Infinity;
@@ -1132,22 +1144,155 @@
                 }
             }
         }
-        let hochLaeuft = false;
-        async function rechenwegHoch() {
-            if (hochLaeuft || erkennenLaeuft) return;
-            const fertig = () => analysis.lines.filter(l => zeilenErgebnis[l.lineIdx] && zeilenErgebnis[l.lineIdx].latex);
-            if (!fertig().length) {
-                // not recognised yet: the swipe recognises first and lets the
-                // morph land, then the line goes up
-                if (!analysis.lines.some(l => !zuKlein(l))) return;
-                hochLaeuft = true;
+        // ── In flight: the line goes up while it is being recognised ────────
+        // The ink leaves the page at once (the next step can be written right
+        // away) and glides, shrinking, to where the next step will be. When
+        // Gemini answers (~1.5 s) the row is laid out hidden, the frame turns
+        // towards its exact place and the morph plays on the way; on landing
+        // the KaTeX row takes over. A line that cannot be read flies back.
+        const fluege = [];                 // lines in the air, in swipe order
+        const imFlug = new Set();          // steps laid out, their line not landed yet
+        let flugKette = Promise.resolve(), flugFrame = null, flugStand = 0;
+        // LEEREN of the working or another task: lines in the air are dropped
+        function flugAbbrechen() {
+            flugStand++;
+            fluege.length = 0;
+            imFlug.clear();
+            redraw();
+        }
+        const FLUG_START = 800;            // ms to the estimated place
+        function flugZiel(f, ziel, dauer) {
+            f.von = Object.assign({}, f.p);
+            f.ziel = ziel;
+            f.t0 = performance.now();
+            f.dauer = dauer;
+            flugLos();
+        }
+        function flugLos() { if (!flugFrame) flugFrame = requestAnimationFrame(flugSchritt); }
+        function flugSchritt() {
+            flugFrame = null;
+            const jetzt = performance.now();
+            fluege.slice().forEach(f => {
+                const u = Math.min(1, (jetzt - f.t0) / f.dauer), e = 1 - Math.pow(1 - u, 3);
+                ['tx', 'ty', 's'].forEach(k => { f.p[k] = f.von[k] + (f.ziel[k] - f.von[k]) * e; });
+                if (f.v && f.mt0 !== null) f.mt = Math.min(1, (jetzt - f.mt0) / (morphDauer * 1000));
+                if (u < 1) return;
+                if (f.zurueck) flugZurueck(f);
+                else if (f.bereit && (!f.v || f.mt >= 1)) flugLandet(f);
+            });
+            redraw();
+            if (fluege.some(f => f.von)) flugFrame = requestAnimationFrame(flugSchritt);
+        }
+        function flugWeg(f) {
+            const i = fluege.indexOf(f);
+            if (i >= 0) fluege.splice(i, 1);
+        }
+        function flugLandet(f) {
+            flugWeg(f);
+            imFlug.delete(f.schritt);
+            document.querySelectorAll(`#rechenweg-schicht [data-schritt="${f.schritt}"]`).forEach(z => { z.style.visibility = ''; });
+        }
+        function flugZurueck(f) {
+            flugWeg(f);
+            f.striche.forEach(st => strokes.push(st));
+            recompute();
+            merkeStriche();
+        }
+        // where the k-th line still waiting will go: under the last row, its
+        // centre on the column of the equals signs, about a step's height
+        function schaetzeZiel(b, k) {
+            const host = document.getElementById('rechenweg-schicht');
+            const c = container.getBoundingClientRect(), cs = getComputedStyle(host);
+            const gap = parseFloat(cs.rowGap) || 0, glyph = 1.21 * parseFloat(cs.fontSize);
+            let unten = host.getBoundingClientRect().top - c.top - gap, gleich = c.width / 2;
+            [...host.children].forEach(z => { const r = z.getBoundingClientRect(); if (r.height) unten = Math.max(unten, r.bottom - c.top); });
+            if (host.children[0]) gleich = host.children[0].getBoundingClientRect().right - c.left;
+            const s = Math.min(1, 1.2 * glyph / Math.max(1, b.h));
+            const oben = unten + gap + k * (1.25 * glyph + gap);
+            return { s, tx: gleich - s * (b.x + b.w / 2), ty: oben - s * b.y };
+        }
+        function starteFluege(zeilen) {
+            const wartend = fluege.filter(f => !f.bereit).length;
+            const neu = zeilen.map((l, k) => {
+                const idxs = [...new Set(l.symbols.flatMap(sy => sy.strokeIdxs))].sort((a, b) => a - b);
+                const erg = zeilenErgebnis[l.lineIdx];
+                const f = { striche: idxs.map(i => strokes[i]), latex: erg && erg.latex || null, v: null, mt: 0, mt0: null,
+                    p: { tx: 0, ty: 0, s: 1 }, bereit: false, zurueck: false, schritt: -1 };
+                flugZiel(f, schaetzeZiel(l.bbox, wartend + k), FLUG_START);
+                return f;
+            });
+            // the page is free at once; a recognition under way is void now
+            const weg = new Set(zeilen.flatMap(l => l.symbols.flatMap(sy => sy.strokeIdxs)));
+            const bleiben = strokes.filter((_, i) => !weg.has(i));
+            strokes.length = 0;
+            bleiben.forEach(st => strokes.push(st));
+            neu.forEach(f => fluege.push(f));
+            verwerfeErkennung();
+            recompute();
+            merkeStriche();
+            // one after the other, so the steps keep the order they were swiped in
+            neu.forEach(f => { flugKette = flugKette.then(() => erkenneFlug(f)); });
+        }
+        async function erkenneFlug(f) {
+            const stand = flugStand;
+            try {
+                const ana = StrokeSymbols.analyse(f.striche, opts);
+                if (ana.lines.length !== 1) throw new Error('keine einzelne Zeile');
+                const line = ana.lines[0];
+                let latex = f.latex;
+                if (!latex) {
+                    const modelEl = document.getElementById('modell-wahl');
+                    const r = await FormelErkennen.erkenneZeile(f.striche, line.symbols.flatMap(sy => sy.strokeIdxs),
+                        { model: modelEl ? modelEl.value : 'gemini-2.5-flash' });
+                    if (!r.ok || !r.latex || /^\(?\s*(empty|leer)\s*\)?$/i.test(r.latex)) throw new Error(r.error || 'nichts erkannt');
+                    latex = r.latex;
+                }
+                if (stand !== flugStand) return;
+                const { atome, satz } = await formelAufZeile(latex, line);
+                const { zuordnung } = ordneZeile(line, atome, f.striche);
                 try {
-                    await erkennen();
-                    await new Promise(r => setTimeout(r, morphDauer * 1000 + 400));
-                } finally { hochLaeuft = false; }
-                if (!fertig().length) return;
+                    await HandschriftMorph.schriftenBereit(atome);
+                    await HandschriftMorph.svgVorbereiten(atome);
+                    f.v = bereiteMorph(line, zuordnung, atome, f.striche);
+                } catch (_) { f.v = null; }
+                if (stand !== flugStand) return;
+                // the row, hidden, gives the exact place: the typeset line's
+                // corner and width map onto the row's
+                const i = rechenweg.length;
+                rechenweg.push(latex);
+                merkeRechenweg();
+                imFlug.add(i);
+                zeigeRechenweg();
+                const c = container.getBoundingClientRect();
+                let x0 = Infinity, y0 = Infinity, x1 = -Infinity;
+                document.querySelectorAll(`#rechenweg-schicht [data-schritt="${i}"]`).forEach(z => {
+                    const r = (z.querySelector('.katex-html') || z).getBoundingClientRect();
+                    if (r.width) { x0 = Math.min(x0, r.left); y0 = Math.min(y0, r.top); x1 = Math.max(x1, r.right); }
+                });
+                f.schritt = i;
+                f.bereit = true;
+                if (!isFinite(x0) || !satz.kw) { f.v = null; flugZiel(f, f.ziel, 1); return; }
+                const sx = satz.dx + satz.kx * satz.skala, sy = satz.dy + satz.ky * satz.skala, sw = satz.kw * satz.skala;
+                const s = (x1 - x0) / Math.max(1, sw);
+                f.mt0 = performance.now();
+                flugZiel(f, { s, tx: x0 - c.left - s * sx, ty: y0 - c.top - s * sy }, Math.max(500, morphDauer * 1000));
+            } catch (e) {
+                if (stand !== flugStand) return;
+                f.zurueck = true;
+                flugZiel(f, { tx: 0, ty: 0, s: 1 }, 600);
             }
-            const zeilen = fertig();
+        }
+
+        function rechenwegHoch() {
+            const zeilen = analysis.lines.filter(l => !zuKlein(l));
+            if (!zeilen.length) return;
+            // Doc, 25.09.: "wenn ich mit zwei Fingern nach oben schiebe, die
+            // Erkennung sofort beginnt ... Vielleicht sogar in der Bewegung" -
+            // a line not typeset yet takes off at once and morphs on the way
+            // (starteFluege); so does everything while earlier flights are
+            // still up, or the steps would overtake each other
+            const fertig = zeilen.every(l => zeilenErgebnis[l.lineIdx] && zeilenErgebnis[l.lineIdx].latex && zeilenErgebnis[l.lineIdx].satz);
+            if (!fertig || fluege.length) { starteFluege(zeilen); return; }
             if (morphT < 1) setzeMorph(1);
             const c = container.getBoundingClientRect();
             // where each line is now: its typeset formula, or its ink if the morph did not take
@@ -1205,6 +1350,27 @@
             });
         }
 
+        // Doc: "auf der rechten Seite im großen Panel links und rechts ein
+        // Dreieck", then "in die Mitte. Y" - the panel's back and forth on the
+        // board itself, at the left and right edge, halfway down
+        function zeigeTafelPfeile() {
+            if (document.getElementById('tafel-pfeil-zurueck')) return;
+            const PFEIL = 'position:absolute;top:50%;transform:translateY(-50%);width:56px;height:96px;padding:0;' +
+                'border:none;background:transparent;color:#8a93a3;cursor:pointer;touch-action:manipulation;z-index:5;' +
+                'display:flex;align-items:center;justify-content:center';
+            [['zurueck', -1, 'left:0', 'vorige Aufgabe', 'M17 4 L6 12 L17 20 Z'],
+             ['vor', 1, 'right:0', 'nächste Aufgabe', 'M7 4 L18 12 L7 20 Z']].forEach(([id, schritt, seite, text, d]) => {
+                const b = document.createElement('button');
+                b.id = 'tafel-pfeil-' + id;
+                b.style.cssText = PFEIL + ';' + seite;
+                b.title = text;
+                b.setAttribute('aria-label', text);
+                b.innerHTML = `<svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="${d}" fill="currentColor"/></svg>`;
+                b.addEventListener('click', () => naechsteVorlage(schritt));
+                container.appendChild(b);
+            });
+        }
+
         // Doc: "mach bei Weiter einen left right mit Dreiecken" - back and forth.
         // Without "Meine Beispiele" it steps through the tasks; a new task
         // starts on a clean board.
@@ -1213,6 +1379,7 @@
                 const n = AUFGABEN.length;
                 aufgabeIdx = (aufgabeIdx + (schritt === -1 ? -1 : 1) + n) % n;
                 try { localStorage.setItem('vorrechnen-aufgabe', String(aufgabeIdx)); } catch (_) {}
+                flugAbbrechen();
                 rechenweg.length = 0;
                 merkeRechenweg();
                 clearAll();
@@ -1424,7 +1591,8 @@
         function clearAll() {
             // The working survives a LEEREN of the page (a botched step must not
             // cost the lesson's board); LEEREN on an empty page clears it too.
-            if (!strokes.length && !current && !tipp && rechenweg.length) {
+            if (!strokes.length && !current && !tipp && (rechenweg.length || fluege.length)) {
+                flugAbbrechen();
                 rechenweg.length = 0;
                 merkeRechenweg();
                 zeigeRechenweg();
