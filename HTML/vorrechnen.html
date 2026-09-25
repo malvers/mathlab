@@ -609,7 +609,7 @@
         }
 
         // ── Vorlage: the formula to copy, shown above the writing area ──────
-        function zeigeVorlage() {
+        function zeigeVorlage(hinweis) {
             let host = document.getElementById('vorlage-schicht');
             if (!host) {
                 host = document.createElement('div');
@@ -623,7 +623,7 @@
             const [slug, latex] = VORLAGEN[vorlageIdx];
             host.innerHTML = `<span style="position:absolute;left:24px;top:50%;transform:translateY(-50%);` +
                 `font-family:Orbitron,sans-serif;font-size:0.8rem;letter-spacing:0.1em;color:#8a93a3">` +
-                `${vorlageIdx + 1} / ${VORLAGEN.length}</span><span id="vorlage-formel" style="font-size:2.4rem;color:${INK}"></span>`;
+                `${vorlageIdx + 1} / ${VORLAGEN.length}${hinweis ? ' · ' + hinweis : ''}</span><span id="vorlage-formel" style="font-size:2.4rem;color:${INK}"></span>`;
             try { katex.render(latex, document.getElementById('vorlage-formel'), { throwOnError: false }); }
             catch (e) { document.getElementById('vorlage-formel').textContent = latex; }
         }
@@ -634,47 +634,64 @@
             clearAll();
             zeigeVorlage();
             setProbeStatus('–');
+            if (testModus) beispiel();
         }
 
-        // ── Examples ────────────────────────────────────────────────────────
-        // Doc: "kannst du mir da Beispiele von mir geben?" - his own corpus,
-        // replayed: the strokes as he wrote them, the formula from the template
-        // (no API call), a moment to see the ink, then the morph. An example is
-        // never saved as a probe, not even by a later ERKENNEN.
-        let beispiele = null, beispielIdx = -1, beispielTimer = null, istBeispiel = false;
+        // ── Test mode: Doc's own handwriting for the template on top ────────
+        // Doc, 25.09.: "Wir sind jetzt im Modus, dass wir erstmal testen, wie gut
+        // das Morph funktioniert. Aufgrund der Beispiele, die wir haben." With
+        // "Meine Beispiele" on, every template (WEITER, and at start) comes with
+        // what he wrote for it - the corpus from the OneDrive zip - centred, a
+        // moment to see the ink, then the morph into the template. BEISPIEL shows
+        // it again. No API call; an example is never saved as a probe.
+        let korpus = null, beispielTimer = null, istBeispiel = false;
+        let testModus = true;
+        try { const v = localStorage.getItem('vorrechnen-testmodus'); if (v !== null) testModus = v === '1'; } catch (_) {}
+
+        // template LaTeX -> the first probe written for it. Later probes under the
+        // same slug may hold anything (probe 26-32: an integral under "linear").
+        async function ladeKorpus() {
+            if (korpus) return korpus;
+            korpus = new Map();
+            try {
+                const namen = (await (await fetch('/__proben/', { cache: 'no-store' })).json()).proben || [];
+                const daten = await Promise.all(namen.map(n =>
+                    fetch('morpheus/handschrift-proben/' + n, { cache: 'no-store' }).then(r => r.json()).catch(() => null)));
+                daten.forEach(d => {
+                    const l = d && d.vorlage && d.vorlage.latex;
+                    if (l && d.strokes && d.strokes.length && !korpus.has(l)) korpus.set(l, d);
+                });
+            } catch (_) {}
+            return korpus;
+        }
+
         async function beispiel() {
-            if (!beispiele) {
-                try { beispiele = (await (await fetch('/__proben/', { cache: 'no-store' })).json()).proben || []; }
-                catch (_) { beispiele = []; }
-            }
-            if (!beispiele.length) { setProbeStatus('keine Beispiele gefunden'); return; }
-            beispielIdx = (beispielIdx + 1) % beispiele.length;
-            const name = beispiele[beispielIdx];
-            let d;
-            try { d = await (await fetch('morpheus/handschrift-proben/' + name, { cache: 'no-store' })).json(); }
-            catch (_) { setProbeStatus('Beispiel nicht lesbar: ' + name); return; }
-            const latex = (d.vorlage && d.vorlage.latex) || d.latex;
+            const latex = VORLAGEN[vorlageIdx][1];
+            const d = (await ladeKorpus()).get(latex);
             clearTimeout(beispielTimer);
             verwerfeErkennung();
             strokes.length = 0;
             current = null;
-            // Written on another screen: moved to the top left, shrunk only if
-            // it would not fit - never enlarged, it is Doc's size.
+            istBeispiel = !!d;
+            if (!d) { recompute(); merkeStriche(); redraw(); zeigeVorlage('keine Probe'); return; }
+            // Written on another screen: centred under the head strip, shrunk
+            // only if it would not fit - never enlarged, it is Doc's size.
             let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
             d.strokes.forEach(st => st.points.forEach(q => { x0 = Math.min(x0, q.x); y0 = Math.min(y0, q.y); x1 = Math.max(x1, q.x); y1 = Math.max(y1, q.y); }));
-            const rect = container.getBoundingClientRect();
-            const sk = Math.min(1, (rect.width - 100) / Math.max(1, x1 - x0), (rect.height - 260) / Math.max(1, y1 - y0));
+            const rect = container.getBoundingClientRect(), KOPF = 84;
+            const w = Math.max(1, x1 - x0), h = Math.max(1, y1 - y0);
+            const sk = Math.min(1, (rect.width - 100) / w, (rect.height - KOPF - 60) / h);
+            const ox = (rect.width - w * sk) / 2, oy = KOPF + (rect.height - KOPF - h * sk) / 2;
             d.strokes.forEach(st => strokes.push(Object.assign({}, st, {
                 width: (st.width || 3) * sk,
-                points: st.points.map(q => Object.assign({}, q, { x: 50 + (q.x - x0) * sk, y: 140 + (q.y - y0) * sk })),
+                points: st.points.map(q => Object.assign({}, q, { x: ox + (q.x - x0) * sk, y: oy + (q.y - y0) * sk })),
             })));
-            istBeispiel = true;
             recompute();
             merkeStriche();
             redraw();
-            setProbeStatus(`Beispiel ${beispielIdx + 1} / ${beispiele.length}: ${(d.vorlage && d.vorlage.slug) || name.replace(/^probe-\d+-|\.json$/g, '')}`);
+            zeigeVorlage();
             const zeilen = analysis.lines.filter(l => !zuKlein(l));
-            if (zeilen.length !== 1 || !latex) return;
+            if (zeilen.length !== 1) return;
             const line = zeilen[0];
             const { atome, svg } = await formelAufZeile(latex, line);
             zeilenErgebnis[line.lineIdx] = { latex, tokens: [], atome, ms: 0, zuordnung: FormelErkennen.ordneZu(line.symbols, atome), svg };
@@ -862,6 +879,12 @@
                 redraw();
             });
 
+            CyberUI.createCheckbox('morph-steuerung', 'Meine Beispiele', testModus, v => {
+                testModus = v;
+                try { localStorage.setItem('vorrechnen-testmodus', v ? '1' : '0'); } catch (_) {}
+                if (v) beispiel();
+            });
+
             /* Ausgeblendet auf Docs Wunsch (25.09.) - die Funktionen dahinter
                leben weiter, nur die Bedienelemente sind weg:
 
@@ -935,6 +958,7 @@
         window.addEventListener('resize', init);
         document.fonts.ready.then(() => {
             buildPanel(); holeStriche(); recompute(); init(); zeigeVorlage();
+            if (testModus && !strokes.length) beispiel();
             fetch('/__proben/', { cache: 'no-store' }).then(r => { speichernApi = r.ok; })
                 .catch(() => { speichernApi = false; })
                 .then(() => setProbeStatus(speichernApi ? 'Speichern auf dem Mac bereit' : 'kein Speicher-Endpunkt – Proben als Download'));
