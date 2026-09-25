@@ -214,7 +214,10 @@
 
         canvas.addEventListener('pointerdown', ev => {
             if (!penAccepted(ev)) return;
-            canvas.setPointerCapture(ev.pointerId);
+            // Capture keeps the stroke alive when the pen leaves the canvas mid
+            // draw. If it is refused, carry on regardless - losing the capture is
+            // a nuisance, losing the stroke is not acceptable.
+            try { canvas.setPointerCapture(ev.pointerId); } catch (_) {}
             const p = canvasPos(ev);
             // Pressure widens the line a little where the tablet reports it.
             const w = 2.5 + (ev.pressure > 0 ? ev.pressure * 2.5 : 1.2);
@@ -623,19 +626,40 @@
         }
 
         // ── Boot ────────────────────────────────────────────────────────────
+        // The drawing surface must match its box exactly, or the ink lands beside
+        // the pen: the browser stretches the canvas to its CSS size, so a stale
+        // pixel size shows up as a horizontal offset that grows to the right.
+        // Measured on the tablet: 1287 px wide inside a 993 px box at dpr 1.5 -
+        // 1.296 instead of 1.5.
+        let letzteGroesse = '';
         function resizeCanvasToContainer() {
             const dpr = window.devicePixelRatio || 1;
             const rect = container.getBoundingClientRect();
-            canvas.width = Math.floor(Math.max(1, rect.width) * dpr);
-            canvas.height = Math.floor(Math.max(1, rect.height) * dpr);
+            const w = Math.max(1, Math.round(rect.width)), h = Math.max(1, Math.round(rect.height));
+            const key = w + 'x' + h + '@' + dpr;
+            if (key === letzteGroesse) return false;
+            letzteGroesse = key;
+            canvas.width = Math.round(w * dpr);
+            canvas.height = Math.round(h * dpr);
+            canvas.style.width = w + 'px';
+            canvas.style.height = h + 'px';
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.scale(dpr, dpr);
+            return true;
         }
 
         function init() {
             resizeCanvasToContainer();
             redraw();
             updateStats();
+        }
+
+        // The sidebar changes width when cards are added or it is collapsed, and
+        // window.resize says nothing about that. Watch the box itself.
+        if (typeof ResizeObserver === 'function') {
+            new ResizeObserver(() => {
+                if (resizeCanvasToContainer()) { redraw(); zeigeFormeln(); }
+            }).observe(container);
         }
 
         window.addEventListener('resize', init);
