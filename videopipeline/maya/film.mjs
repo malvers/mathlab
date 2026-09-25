@@ -13,6 +13,7 @@ import { execFileSync } from 'child_process';
 const dur = (f) => parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString());
 import { runScenes } from '../lib/record-cdp.mjs';
 import { recordOutros } from '../lib/outro.mjs';
+import { buildBed } from '../lib/musicbed.mjs';
 
 const WORK = os.homedir() + '/Movies/videopipeline/maya';
 const OUT = WORK + '/film';
@@ -91,6 +92,16 @@ const silence = outros.map((f, k) => `anullsrc=r=48000:cl=mono,atrim=0:${dur(f).
 execFileSync('ffmpeg', ['-nostdin', '-y', '-v', 'error', ...parts.map((f) => ['-i', f]).flat(),
     '-filter_complex', silence + ';' + cat, '-map', '[v]', '-map', '[a]',
     '-c:v', 'libx264', '-crf', '16', '-preset', 'medium', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k',
+    `${OUT}/maya-tour-cut.mp4`], { stdio: 'inherit' });
+
+// the music bed every demo has (Infinity, lib/musicbed.mjs) under voice and end titles - Doc, 25.09.2026: "da ist ja
+// überhaupt keine Musik hinterlegt". Gain 0.05 as in the Würfelspiel film, fading in and out with the film.
+const total = dur(`${OUT}/maya-tour-cut.mp4`);
+buildBed(total, `${OUT}/bed.m4a`);
+execFileSync('ffmpeg', ['-nostdin', '-y', '-v', 'error', '-i', `${OUT}/maya-tour-cut.mp4`, '-i', `${OUT}/bed.m4a`,
+    '-filter_complex', `[1:a]aresample=48000,aformat=channel_layouts=mono,volume=0.05,afade=t=in:st=0:d=1.5,` +
+    `afade=t=out:st=${(total - 2.5).toFixed(2)}:d=2.5[mus];[0:a][mus]amix=inputs=2:normalize=0,atrim=0:${total.toFixed(2)}[a]`,
+    '-map', '0:v', '-map', '[a]', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k',
     `${OUT}/maya-tour-1440p.mp4`], { stdio: 'inherit' });
 console.log('Stimmen bei', at.map((t) => t.toFixed(2)).join(' '));
 console.log('fertig:', `${OUT}/maya-tour-1440p.mp4`);
