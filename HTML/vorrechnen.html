@@ -35,6 +35,7 @@
     <link rel="stylesheet" href="js/cyber-lab-overrides.css">
     <link rel="stylesheet" href="js/branding.styles.extracted.css">
     <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="morpheus/vendor/katex/katex.min.css">
     <style>
         /* The pen must own the surface: without this the tablet scrolls instead
            of drawing, and a resting palm pans the page. */
@@ -141,7 +142,12 @@
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/stroke-symbols.js"></script>
+    <script src="morpheus/vendor/katex/katex.min.js"></script>
+    <!-- Morph building blocks from morpheus: contour tracing and polygon helpers. -->
+    <script src="morpheus/geometry.js"></script>
+    <script src="morpheus/contours.js"></script>
     <script src="js/formel-erkennen.js"></script>
+    <script src="js/handschrift-morph.js"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -181,6 +187,11 @@
         // Recognition result per row: { latex, tokens, zuordnung, fehler }
         const zeilenErgebnis = [];
         let erkennenLaeuft = false;
+        // Morph state: 0 = pure handwriting, 1 = fully typeset. Per row, the
+        // prepared point pairs; morphT is shared so a row moves as a whole.
+        const morphVorbereitet = [];
+        let morphT = 0;
+        let morphAnim = null;
         const view = { boxes: true, numbers: true, rows: true, penOnly: false };
 
         const INK = '#adff2f';                       // same green as morpheus
@@ -259,11 +270,29 @@
                 });
             }
 
+            // Strokes that belong to a morphing row are drawn by the morph
+            // itself - otherwise the original ink would still sit underneath and
+            // the whole thing would look like a cross-fade, which is exactly what
+            // Doc does not want.
+            const imMorph = new Set();
+            if (morphT > 0) {
+                analysis.lines.forEach(l => {
+                    if (morphVorbereitet[l.lineIdx])
+                        l.symbols.forEach(sy => sy.strokeIdxs.forEach(i => imMorph.add(i)));
+                });
+            }
             ctx.strokeStyle = INK;
-            strokes.forEach(strokePath);
+            strokes.forEach((s, i) => { if (!imMorph.has(i)) strokePath(s); });
             if (current) strokePath(current);
 
-            if (view.boxes) {
+            if (morphT > 0) {
+                analysis.lines.forEach(l => {
+                    const v = morphVorbereitet[l.lineIdx];
+                    if (v) HandschriftMorph.zeichnen(ctx, v, morphT, { farbe: INK });
+                });
+            }
+
+            if (view.boxes && morphT === 0) {
                 analysis.lines.forEach(line => {
                     line.symbols.forEach((sym, i) => {
                         const c = SYM_COLORS[i % SYM_COLORS.length];
@@ -293,6 +322,7 @@
             analysis.lines.forEach(line => {
                 const erg = zeilenErgebnis[line.lineIdx];
                 if (!erg || !erg.zuordnung || !line.bbox) return;
+                if (morphT > 0) return;                  // the morph speaks for itself
                 const baseY = line.bbox.y + line.bbox.h + 58;
 
                 ctx.save();
@@ -353,17 +383,74 @@
                     if (!r.ok) {
                         zeilenErgebnis[line.lineIdx] = { fehler: r.error };
                     } else {
+                        const zuordnung = FormelErkennen.ordneZu(line.symbols, r.tokens);
                         zeilenErgebnis[line.lineIdx] = {
-                            latex: r.latex, tokens: r.tokens, ms: r.ms,
-                            zuordnung: FormelErkennen.ordneZu(line.symbols, r.tokens),
+                            latex: r.latex, tokens: r.tokens, ms: r.ms, zuordnung,
                         };
+                        // Everything the morph needs is known now: which ink
+                        // becomes which glyph.
+                        try {
+                            morphVorbereitet[line.lineIdx] =
+                                HandschriftMorph.vorbereiten(line, strokes, zuordnung);
+                        } catch (e) {
+                            morphVorbereitet[line.lineIdx] = null;
+                        }
                     }
                     redraw();
                     setErgebnisText(null);
+                    zeigeFormeln();
                 }
             } finally {
                 erkennenLaeuft = false;
             }
+        }
+
+        // The typeset formula under the handwriting - real LaTeX, set by KaTeX.
+        function zeigeFormeln() {
+            let host = document.getElementById('formel-schicht');
+            if (!host) {
+                host = document.createElement('div');
+                host.id = 'formel-schicht';
+                host.style.cssText = 'position:absolute;inset:0;pointer-events:none';
+                container.appendChild(host);
+            }
+            host.innerHTML = '';
+            analysis.lines.forEach(line => {
+                const erg = zeilenErgebnis[line.lineIdx];
+                if (!erg || !erg.latex || !line.bbox) return;
+                const d = document.createElement('div');
+                d.style.cssText = `position:absolute;left:${line.bbox.x}px;` +
+                    `top:${line.bbox.y + line.bbox.h + 74}px;color:#00d2ff;font-size:2rem`;
+                try { katex.render(erg.latex, d, { throwOnError: false, displayMode: false }); }
+                catch (e) { d.textContent = erg.latex; }
+                host.appendChild(d);
+            });
+        }
+
+        // ── Morph ───────────────────────────────────────────────────────────
+        // Doc: "meine in LT faden (morph nicht transp)" - the ink deforms, it
+        // does not fade. Slow on purpose: it should be "kaum merkbar".
+        function morphen(ziel) {
+            if (morphAnim) cancelAnimationFrame(morphAnim);
+            const von = morphT, nach = (ziel === undefined) ? (morphT > 0.5 ? 0 : 1) : ziel;
+            const dauer = 2600;
+            const t0 = performance.now();
+            const schritt = () => {
+                const f = Math.min(1, (performance.now() - t0) / dauer);
+                morphT = von + (nach - von) * f;
+                redraw();
+                const s = document.getElementById('morph-regler');
+                if (s) s.value = morphT;
+                if (f < 1) morphAnim = requestAnimationFrame(schritt);
+                else { morphAnim = null; morphT = nach; redraw(); }
+            };
+            schritt();
+        }
+
+        function setzeMorph(v) {
+            if (morphAnim) { cancelAnimationFrame(morphAnim); morphAnim = null; }
+            morphT = parseFloat(v);
+            redraw();
         }
 
         function setErgebnisText(msg) {
@@ -461,6 +548,13 @@
                     </select>
                 </div>
                 <div id="erkennung-out" style="margin-top:0.7rem"><div class="erk-info">–</div></div>
+                <div class="btn-row">
+                    <button class="cyber-btn" onclick="morphen()">MORPHEN</button>
+                </div>
+                <label class="cyber-label" for="morph-regler"
+                       style="display:block;margin-top:0.6rem;font-size:0.8rem">Handschrift ⟶ Satz</label>
+                <input type="range" id="morph-regler" min="0" max="1" step="0.01" value="0"
+                       oninput="setzeMorph(this.value)" style="width:100%">
                 <div id="pen-hint">Gemini sagt <b>was</b> dasteht, die Striche sagen <b>wo</b>.
                     Das erkannte Zeichen steht unter seinem Kästchen.</div>
             `, 'rgb(121,158,49)');
