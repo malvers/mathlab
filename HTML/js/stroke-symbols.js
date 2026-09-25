@@ -289,8 +289,14 @@
                 symbols.push({ strokeIdxs: [e.idx], bbox: bb, tStart: e.tStart, tEnd: e.tEnd, bruch: true, pts: [e.pts] });
                 continue;
             }
-            // Dots are placed last, onto what is below them - see below.
-            if (tiny(bb)) { punkte.push(e); continue; }
+            // Dots are placed last, onto what is below them - see below. But
+            // only a FREE dot is a dot: the little lead-in hook of Doc's root
+            // sign is just as small and compact, and touches the upstroke it
+            // belongs to (probe 21). An i-dot floats.
+            if (tiny(bb) && !symbols.some(sym => !sym.bruch && yGap(bb, sym.bbox) < lineHeight * 0.1 &&
+                    xGap(bb, sym.bbox) < lineHeight * 0.1 && beruehrt(e.pts, sym.pts, lineHeight * 0.08))) {
+                punkte.push(e); continue;
+            }
             let target = null;
 
             // A long flat line that is not a fraction bar - a root's vinculum, an
@@ -333,7 +339,7 @@
                     // close - and is another symbol.
                     const flat = b => b.w / b.h > 2.2;       // a handwritten "=" bar can be short and thick (Doc's: 2.9)
                     const unterstrich = s === symbols.length - 1 && flat(bb) && !flat(sym.bbox) &&
-                        bb.y > sym.bbox.y + sym.bbox.h * 0.5 && yg < lineHeight * 0.4 &&
+                        bb.y > sym.bbox.y + sym.bbox.h * 0.5 && yg < lineHeight * 0.8 &&   // Doc's sits 0.6 below (probe 21)
                         bb.w <= sym.bbox.w * 1.3 && xOverlapRatio(bb, sym.bbox) >= 0.6;
                     if (!(flat(bb) && flat(sym.bbox) && yg < lineHeight * o.barGap) && !unterstrich) continue;
                 }
