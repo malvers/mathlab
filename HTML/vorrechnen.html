@@ -231,8 +231,10 @@
 
         function endStroke(ev) {
             if (!current) return;
-            if (current.points.length > 1) strokes.push(current);
+            const neu = current.points.length > 1;
+            if (neu) strokes.push(current);
             current = null;
+            if (neu && zeilenErgebnis.length) verwerfeErkennung();
             recompute();
         }
         canvas.addEventListener('pointerup', endStroke);
@@ -507,14 +509,32 @@
             r.readAsText(file);
         }
 
+        // Anything that was recognised belongs to the strokes as they were. Once
+        // the ink changes, that result is stale - so it goes, together with the
+        // morph built from it. Otherwise a second example would inherit the
+        // first one's glyphs.
+        function verwerfeErkennung() {
+            zeilenErgebnis.length = 0;
+            morphVorbereitet.length = 0;
+            if (morphAnim) { cancelAnimationFrame(morphAnim); morphAnim = null; }
+            morphT = 0;
+            const r = document.getElementById('morph-regler');
+            if (r) r.value = 0;
+            const h = document.getElementById('formel-schicht');
+            if (h) h.innerHTML = '';
+            setErgebnisText('–');
+        }
+
         function clearAll() {
             strokes.length = 0;
             current = null;
+            verwerfeErkennung();
             recompute();
         }
 
         function undoStroke() {
             strokes.pop();
+            verwerfeErkennung();
             recompute();
         }
 
