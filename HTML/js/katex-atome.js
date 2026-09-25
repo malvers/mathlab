@@ -48,6 +48,12 @@
         return y;
     }
 
+    let _mess = null;
+    function messKontext() {
+        if (!_mess) _mess = document.createElement('canvas').getContext('2d');
+        return _mess;
+    }
+
     function textLeafOf(el) {
         // A leaf holds exactly its own text and no element child with text.
         let own = '';
@@ -99,18 +105,35 @@
             if (isStrut(el, own)) return;
             const r = el.getBoundingClientRect();
             const cs = getComputedStyle(el);
-            out.push({
-                art: 'text',
-                text: own.replace(/​/g, ''),
-                font: {
-                    family: cs.fontFamily.split(',')[0].replace(/["']/g, '').trim(),
-                    style: cs.fontStyle,
-                    size: parseFloat(cs.fontSize),
-                },
-                left: r.left - origin.x,
-                baseline: probeBaseline(el) - origin.y,
-                box: { x: r.left - origin.x, y: r.top - origin.y, w: r.width, h: r.height },
-            });
+            const font = {
+                family: cs.fontFamily.split(',')[0].replace(/["']/g, '').trim(),
+                style: cs.fontStyle,
+                size: parseFloat(cs.fontSize),
+            };
+            const text = own.replace(/​/g, '');
+            const left = r.left - origin.x, top = r.top - origin.y;
+            const baseline = probeBaseline(el) - origin.y;
+            // "lim", "sin", "log" are ONE span in KaTeX but three letters under
+            // the pen - one atom each, or the counts never match (corpus probes
+            // 12, 15, 18). Each letter's pen position comes from the font's own
+            // advances, the same face the span is set in.
+            const zeichen = Array.from(text).filter(c => c.trim());
+            if (zeichen.length > 1) {
+                const m = messKontext();
+                m.font = `${font.style === 'italic' ? 'italic ' : ''}${cs.fontWeight} ${font.size}px "${font.family}"`;
+                let vor = '';
+                for (const c of Array.from(text)) {
+                    const x = left + m.measureText(vor).width;
+                    const w = m.measureText(c).width;
+                    vor += c;
+                    if (!c.trim()) continue;
+                    out.push({ art: 'text', text: c, font, left: x, baseline,
+                               box: { x, y: top, w, h: r.height } });
+                }
+                return;
+            }
+            out.push({ art: 'text', text, font, left, baseline,
+                       box: { x: left, y: top, w: r.width, h: r.height } });
             return;
         }
 

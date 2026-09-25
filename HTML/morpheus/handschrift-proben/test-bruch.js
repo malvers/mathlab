@@ -12,9 +12,9 @@ const st = [
   stroke(blob(120, 300, 55, 90)),                 // F
   stroke(line(190, 285, 245, 285)), stroke(line(190, 310, 245, 310), 130),  // =
   stroke(blob(330, 255, 60, 70)),                 // m1  (numerator)
-  stroke(line(375, 240, 375, 285), 140),          // 1
+  stroke(line(375, 240, 375, 285), 300),          // 1  (300 ms: Doc's real minimum between two glyphs is 238, measured 25.09.)
   stroke(blob(470, 255, 60, 70), 260),            // m2
-  stroke(line(515, 240, 515, 285), 140),          // 2
+  stroke(line(515, 240, 515, 285), 300),          // 2
   stroke(line(300, 320, 600, 322), 300),          // ← the fraction bar
   stroke(blob(400, 390, 45, 60), 280),            // r   (denominator)
   stroke(line(455, 360, 455, 400), 150),          // 2

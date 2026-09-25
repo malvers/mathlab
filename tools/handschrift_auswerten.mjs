@@ -16,10 +16,11 @@
 //   node tools/handschrift_auswerten.mjs              # all probes
 //   node tools/handschrift_auswerten.mjs 17 21        # only these
 //   node tools/handschrift_auswerten.mjs --detail 21  # per-pair table
+//   node tools/handschrift_auswerten.mjs --bild 11    # + a picture per probe (boxes, glyphs, stroke numbers)
 //
 // Needs serve.py on :8765 and headless Chrome. No API call.
 import { spawn } from 'node:child_process';
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 const DIR = new URL('../HTML/morpheus/handschrift-proben/', import.meta.url).pathname;
@@ -27,7 +28,10 @@ const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const PORT = 9341;
 const args = process.argv.slice(2);
 const detail = args.includes('--detail');
-const only = args.filter(a => a !== '--detail');
+const bild = args.includes('--bild');
+const only = args.filter(a => !a.startsWith('--'));
+const BILDER = '/tmp/handschrift-bilder';
+if (bild) mkdirSync(BILDER, { recursive: true });
 const GRENZE = 0.35;              // normalised distance above which a pair counts as misplaced
 
 const files = readdirSync(DIR).filter(f => /^probe-\d+-.*\.json$/.test(f)).sort()
@@ -84,6 +88,7 @@ for (const f of files) {
         const leseOk = gelesen.map(txt).join(' ') === soll.map(txt).join(' ');
 
         const echte = analysis.lines.filter(l => !zuKlein(l));
+        window.__syms = analysis.symbols; window.__soll = soll;
         const res = { soll: soll.length, svg: mSoll.svg, leseOk, gelesen: gelesen.map(txt).join(' '),
                       sollText: soll.map(txt).join(' '), zeilen: echte.length,
                       proZeile: echte.map(l => l.symbols.length).join('+') };
@@ -95,6 +100,7 @@ for (const f of files) {
             const neu = StrokeSymbols.nachjustieren(line, strokes, soll.length, opts);
             if (neu.length === soll.length) { syms = neu; res.nach = true; }
         }
+        window.__syms = syms; window.__soll = soll;
         if (syms.length !== soll.length) return res;
 
         // order check: both sides normalised to their own box
@@ -111,6 +117,34 @@ for (const f of files) {
         return res;
     })()`);
     const name = f.replace(/^probe-|\.json$/g, '');
+    if (bild) {
+        // boxes per symbol, the glyph it was paired with above, its stroke numbers below
+        await ev_(`(() => {
+            view.boxes = true; morphT = 0; redraw();
+            const syms = window.__syms || [], soll = window.__soll || [];
+            const farben = ['#00d2ff', 'rgb(245,194,66)', 'rgb(121,158,49)', '#c77dff', '#ff9e64', '#ff5c8a'];
+            ctx.save();
+            syms.forEach((s, i) => {
+                const b = s.bbox, c = farben[i % farben.length];
+                ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.setLineDash([]);
+                ctx.strokeRect(b.x - 5, b.y - 5, b.w + 10, b.h + 10);
+                ctx.fillStyle = c;
+                ctx.font = '700 17px Arial';
+                const g = soll[i] ? (soll[i].art === 'line' ? '—' : soll[i].text) : '?';
+                ctx.fillText(i + ':' + g, b.x - 4, b.y - 10);
+                ctx.font = '11px Arial';
+                ctx.fillText('[' + s.strokeIdxs.join(',') + ']', b.x - 4, b.y + b.h + 18);
+            });
+            ctx.restore();
+        })()`);
+        const box = await ev_(`(() => { const r = document.getElementById('canvas').getBoundingClientRect();
+            let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; strokes.forEach(s => s.points.forEach(p => {
+              x0=Math.min(x0,p.x); y0=Math.min(y0,p.y); x1=Math.max(x1,p.x); y1=Math.max(y1,p.y); }));
+            return { x: Math.max(0, r.left + x0 - 60), y: Math.max(0, r.top + y0 - 60),
+                     width: Math.min(r.width, x1 - x0 + 120), height: Math.min(r.height, y1 - y0 + 120) }; })()`);
+        const shot = await send('Page.captureScreenshot', { format: 'png', clip: { ...box, scale: 1 } });
+        if (shot?.result?.data) writeFileSync(`${BILDER}/${name}.png`, Buffer.from(shot.result.data, 'base64'));
+    }
     summe.n++;
     if (r && r.ERROR) { zeilen.push(`${name.padEnd(18)} FEHLER ${r.ERROR}`); continue; }
     if (r.leseOk) summe.gelesen++;
@@ -130,6 +164,7 @@ for (const f of files) {
     if (detail && !r.leseOk) zeilen.push(`      Vorlage : ${r.sollText}\n      gelesen : ${r.gelesen}`);
 }
 console.log(zeilen.join('\n'));
+if (bild) console.log(`\nBilder: ${BILDER}/`);
 console.log(`\n${summe.n} Proben   Gemini liest richtig: ${summe.gelesen}   ` +
     `Gruppierung auf Anhieb richtig: ${summe.roh}   mit Nachjustieren: ${summe.nach}`);
 ws.close(); chrome.kill(); process.exit(0);

@@ -119,6 +119,41 @@
         return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
     }
 
+    // The yardstick for every distance in here. Not the median of ALL stroke
+    // heights: bars, minus signs and the two strokes of every "=" are flat, and
+    // in a formula with fractions they are a third of the strokes - they pulled
+    // the median down until a numerator counted as out of reach of its own bar
+    // and the two bars of an "=" as too far apart to be one glyph (corpus,
+    // 25.09.2026: probes 11 and 17). So flat strokes and specks are left out.
+    function typischeHoehe(entries) {
+        const hs = entries.map(e => e.bbox)
+            .filter(b => b.w / b.h <= 2.5 && Math.max(b.w, b.h) >= 6)
+            .map(b => b.h);
+        return median(hs.length ? hs : entries.map(e => e.bbox.h)) || 1;
+    }
+
+    // Vertical overlap as a fraction of the lower of the two boxes.
+    function yOverlapRatio(a, b) {
+        const overlap = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+        return overlap <= 0 ? 0 : overlap / Math.min(a.h, b.h);
+    }
+
+    // Left to right - except where two symbols share their columns, and there
+    // the pen decides. Doc's prime in f'(x) sits above the start of the bracket,
+    // so by x it came after "("; he wrote it before, and so does LaTeX.
+    function linksNachRechts(list) {
+        const out = list.slice().sort((a, b) => a.bbox.x - b.bbox.x);
+        for (let i = 1; i < out.length; i++) {
+            for (let j = i; j > 0; j--) {
+                const p = out[j - 1], q = out[j];
+                if (xOverlapRatio(p.bbox, q.bbox) < 0.5) break;
+                if (p.tStart === null || q.tStart === null || !(q.tStart < p.tStart)) break;
+                out[j - 1] = q; out[j] = p;
+            }
+        }
+        return out;
+    }
+
     function strokeTimes(stroke) {
         const pts = stroke.points;
         const t0 = pts.length ? pts[0].t : undefined;
@@ -164,9 +199,7 @@
     function splitStrokesIntoRows(entries, opts) {
         const o = Object.assign({}, DEFAULTS, opts || {});
         if (!entries.length) return [];
-        // Typical glyph height: tall strokes (a bracket) and flat ones (a bar)
-        // both occur, so the median is steadier than the mean.
-        const h = median(entries.map(e => e.bbox.h)) || 1;
+        const h = typischeHoehe(entries);
 
         const byY = entries.slice().sort((a, b) => centreY(a.bbox) - centreY(b.bbox));
         const rows = [];
@@ -218,7 +251,12 @@
                 }
 
                 const ratio = xOverlapRatio(bb, sym.bbox);
-                const near = xGap(bb, sym.bbox) <= lineHeight * o.xGapFactor;
+                // Merely near is only enough side by side on the same level. An
+                // exponent follows its base quickly and closely too - but it is
+                // raised: in a^2 the 2 overlaps the a vertically by a few pixels
+                // (corpus probe 08), the parts of one glyph overlap far more.
+                const near = xGap(bb, sym.bbox) <= lineHeight * o.xGapFactor &&
+                             yOverlapRatio(bb, sym.bbox) >= 0.25;
                 const gap = (e.tStart !== null && sym.tEnd !== null) ? e.tStart - sym.tEnd : null;
                 const soonAfter = (gap === null) || gap <= o.sameSymbolMs;
 
@@ -253,9 +291,18 @@
     function leseReihenfolge(symbols, lineHeight, opts) {
         const o = Object.assign({}, DEFAULTS, opts || {});
         const lh = lineHeight || median(symbols.map(s => s.bbox.h)) || 1;
-        const istOperator = s => !s.bruch && s.bbox.h > lh * o.opMinHeight && s.bbox.h / s.bbox.w > o.opMinRatio;
+        // An operator with limits: tall and narrow like an integral sign - or
+        // anything with something clearly smaller stacked right above or below
+        // it inside its own columns. A handwritten sum sign is as wide as it is
+        // tall, so "tall and narrow" alone never caught it (corpus probe 17).
+        const gestapelt = a => symbols.some(s => s !== a && !s.bruch &&
+            s.bbox.h < a.bbox.h * 0.75 &&
+            s.bbox.x + s.bbox.w / 2 >= a.bbox.x && s.bbox.x + s.bbox.w / 2 <= a.bbox.x + a.bbox.w &&
+            yGap(s.bbox, a.bbox) > lh * o.touchGap && yGap(s.bbox, a.bbox) < lh * o.barReach);
+        const istOperator = s => !s.bruch && s.bbox.h > lh * o.opMinHeight &&
+            (s.bbox.h / s.bbox.w > o.opMinRatio || gestapelt(s));
         const anker = symbols.filter(s => s.bruch || istOperator(s));
-        if (!anker.length) return symbols.slice().sort((a, b) => a.bbox.x - b.bbox.x);
+        if (!anker.length) return linksNachRechts(symbols);
 
         const vergeben = new Set();
         const gruppen = [];
@@ -263,6 +310,7 @@
         // (upper limit, lower limit). A tall glyph that claims nothing - a
         // bracket, a "y" - is not an anchor at all and stays in the row.
         for (const a of anker.filter(s => s.bruch).concat(anker.filter(s => !s.bruch))) {
+            if (vergeben.has(a)) continue;               // claimed by an outer fraction already
             const oben = [], unten = [];
             const slack = a.bbox.w * (a.bruch ? 0.15 : o.opReachX);
             const x0 = a.bbox.x - slack, x1 = a.bbox.x + a.bbox.w + slack;
@@ -282,13 +330,21 @@
             });
             if (!a.bruch && !oben.length && !unten.length) continue;
             vergeben.add(a);
-            const lr = (p, q) => p.bbox.x - q.bbox.x;
-            gruppen.push({ x: a.bbox.x, folge: [a, ...oben.sort(lr), ...unten.sort(lr)] });
+            gruppen.push({ x: a.bbox.x, folge: [a, ...linksNachRechts(oben), ...linksNachRechts(unten)] });
         }
-        const rest = symbols.filter(s => !vergeben.has(s));
-        const eintraege = rest.map(s => ({ x: s.bbox.x, folge: [s] })).concat(gruppen);
-        eintraege.sort((p, q) => p.x - q.x);
-        return [].concat(...eintraege.map(e => e.folge));
+        // Merge the stacked groups into the row by position - WITHOUT sorting the
+        // row again: that re-sort by x undid the pen-order tie-break and put
+        // Doc's prime behind the bracket (probe 13).
+        const rest = linksNachRechts(symbols.filter(s => !vergeben.has(s)));
+        const gs = gruppen.sort((p, q) => p.x - q.x);
+        const out = [];
+        let gi = 0;
+        for (const s of rest) {
+            while (gi < gs.length && gs[gi].x <= s.bbox.x) out.push(...gs[gi++].folge);
+            out.push(s);
+        }
+        while (gi < gs.length) out.push(...gs[gi++].folge);
+        return out;
     }
 
     // Rows are one row when a stroke reaches into both: the integral sign spans
@@ -351,13 +407,26 @@
             if (!best) break;
             syms.splice(syms.indexOf(best.sy), 1, mk(best.links), mk(best.rechts));
         }
+        // Merging: the closest pair in BOTH directions, vertical distance counting
+        // double - stacked things are different glyphs (a numerator and its
+        // denominator have no horizontal gap at all, and got merged, probe 11) -
+        // and a pair that was not written one after the other costs extra.
+        const lh = typischeHoehe(entries);
+        const nacheinander = (a, b) => {
+            const ta = a.tEnd, tb = b.tStart, tc = b.tEnd, td = a.tStart;
+            if (ta === null || tb === null) return true;
+            return Math.min(Math.abs(tb - ta), Math.abs(td - tc)) < 1200;
+        };
         while (syms.length > soll && guard--) {
-            const byX = syms.slice().sort((a, b) => a.bbox.x - b.bbox.x);
             let best = null;
-            for (let k = 1; k < byX.length; k++) {
-                if (byX[k].bruch || byX[k - 1].bruch) continue;
-                const gap = xGap(byX[k - 1].bbox, byX[k].bbox);
-                if (!best || gap < best.gap) best = { gap, a: byX[k - 1], b: byX[k] };
+            for (let i = 0; i < syms.length; i++) {
+                for (let k = i + 1; k < syms.length; k++) {
+                    const a = syms[i], b = syms[k];
+                    if (a.bruch || b.bruch) continue;
+                    const cost = Math.hypot(xGap(a.bbox, b.bbox), 2 * yGap(a.bbox, b.bbox)) +
+                                 (nacheinander(a, b) ? 0 : lh * 0.5);
+                    if (!best || cost < best.cost) best = { cost, a, b };
+                }
             }
             if (!best) break;
             const es = best.a.strokeIdxs.concat(best.b.strokeIdxs).map(i => byIdx.get(i)).filter(Boolean);
@@ -381,7 +450,7 @@
     function nachjustieren(line, strokes, soll, opts) {
         const o = Object.assign({}, DEFAULTS, opts || {});
         const entries = eintraege(strokes);
-        const lh = median(entries.map(e => e.bbox.h)) || 1;
+        const lh = typischeHoehe(entries);
         const neu = abgleichen(line.symbols, entries, soll);
         if (neu.length !== soll) return line.symbols;
         const geordnet = leseReihenfolge(neu, lh, o);
@@ -395,7 +464,7 @@
         if (!entries.length) return { symbols: [], lines: [], lineHeight: 1 };
 
         let rows = splitStrokesIntoRows(entries, o);
-        const lineHeight = median(entries.map(e => e.bbox.h)) || 1;
+        const lineHeight = typischeHoehe(entries);
 
         const bruchIds = findeBruchstriche(entries, lineHeight, o);
         // Stacked constructs span rows by nature - numerator over denominator, a
@@ -460,7 +529,8 @@
 
     const api = { DEFAULTS, analyse, splitStrokesIntoRows, groupRowIntoSymbols,
                   findeBruchstriche, leseReihenfolge, verbindeUeberbrueckte, abgleichen, nachjustieren, eintraege,
-                  bboxOfPoints, bboxUnion, xOverlapRatio, xGap, yGap, median };
+                  typischeHoehe, linksNachRechts,
+                  bboxOfPoints, bboxUnion, xOverlapRatio, yOverlapRatio, xGap, yGap, median };
 
     if (typeof module === 'object' && module.exports) module.exports = api;
     else root.StrokeSymbols = api;
