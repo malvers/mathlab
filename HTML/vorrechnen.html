@@ -237,6 +237,7 @@
         // Recognition result per row: { latex, tokens, zuordnung, fehler }
         const zeilenErgebnis = [];
         let erkennenLaeuft = false;
+        let erkennenStand = 0;             // bumped by every change a result could miss
         // Morph state: 0 = pure handwriting, 1 = fully typeset. Per row, the
         // prepared point pairs; morphT is shared so a row moves as a whole.
         const morphVorbereitet = [];
@@ -433,6 +434,7 @@
             const w = 2.5 + (ev.pressure > 0 ? ev.pressure * 2.5 : 1.2);
             current = { points: [p], width: w, pointerType: ev.pointerType };
             currentId = ev.pointerId;
+            clearTimeout(autoTimer);
             ev.preventDefault();
         });
 
@@ -477,9 +479,29 @@
         function legeStrich(s) {
             if (s.points.length < 2) return false;
             strokes.push(s);
+            erkennenStand++;
             merkeBeispiel(false);
             if (zeilenErgebnis.length) verwerfeErkennung();
+            autoBald();
             return true;
+        }
+
+        // Doc, 25.09.: "Das Erkennen probieren wir mal automatisch, sagen wir
+        // mal nach zwei Sekunden keine Eingabe." Every stroke restarts the
+        // clock, a pen or finger on the page stops it. Only lines not yet
+        // recognised (or failed) are sent. In class only - with "Meine
+        // Beispiele" every pause would save half a line as a probe.
+        const AUTO_PAUSE = 2000;           // ms without input
+        let autoErkennen = true, autoTimer = null;
+        try { const v = localStorage.getItem('vorrechnen-auto'); if (v !== null) autoErkennen = v === '1'; } catch (_) {}
+        function autoBald() {
+            clearTimeout(autoTimer);
+            if (!autoErkennen || testModus) return;
+            autoTimer = setTimeout(() => {
+                if (current || tipp || geste) return;          // the end of that input restarts the clock
+                if (erkennenLaeuft || hochLaeuft) return autoBald();
+                if (analysis.lines.some(l => !zuKlein(l) && !zeilenErgebnis[l.lineIdx])) erkennen();
+            }, AUTO_PAUSE);
         }
         function tippAblegen() {
             if (!tipp) return;
@@ -725,6 +747,8 @@
             if (erkennenLaeuft) return;
             if (!analysis.lines.length) { setErgebnisText('Erst etwas schreiben.'); return; }
             erkennenLaeuft = true;
+            // a stroke written while the answer is on its way makes it stale
+            const stand = erkennenStand;
             setErgebnisText('Erkenne …');
             const modelEl = document.getElementById('modell-wahl');
             const model = modelEl ? modelEl.value : 'gemini-2.5-flash';
@@ -733,12 +757,14 @@
                     if (zuKlein(line)) { zeilenErgebnis[line.lineIdx] = { uebersprungen: true }; continue; }
                     const idxs = line.symbols.flatMap(sy => sy.strokeIdxs);
                     const r = await FormelErkennen.erkenneZeile(strokes, idxs, { model });
+                    if (stand !== erkennenStand) return;
                     if (!r.ok) {
                         zeilenErgebnis[line.lineIdx] = { fehler: r.error };
                     } else if (!r.latex || /^\(?\s*(empty|leer)\s*\)?$/i.test(r.latex)) {
                         zeilenErgebnis[line.lineIdx] = { fehler: 'nichts erkannt' };
                     } else {
                         const { atome, svg, satz } = await formelAufZeile(r.latex, line);
+                        if (stand !== erkennenStand) return;
                         const { zuordnung, nachjustiert } = ordneZeile(line, atome);
                         zeilenErgebnis[line.lineIdx] = {
                             latex: r.latex, tokens: r.tokens, atome, ms: r.ms, zuordnung, svg, nachjustiert, satz,
@@ -751,6 +777,7 @@
                         try {
                             await HandschriftMorph.schriftenBereit(atome);
                             await HandschriftMorph.svgVorbereiten(atome);
+                            if (stand !== erkennenStand) return;
                             morphVorbereitet[line.lineIdx] = bereiteMorph(line, zuordnung, atome);
                         } catch (e) {
                             morphVorbereitet[line.lineIdx] = null;
@@ -1353,6 +1380,7 @@
         // morph built from it. Otherwise a second example would inherit the
         // first one's glyphs.
         function verwerfeErkennung() {
+            erkennenStand++;
             zeilenErgebnis.length = 0;
             morphVorbereitet.length = 0;
             if (morphAnim) { cancelAnimationFrame(morphAnim); morphAnim = null; }
@@ -1373,6 +1401,7 @@
                 zeigeRechenweg();
             }
             clearTimeout(beispielTimer);
+            clearTimeout(autoTimer);
             istBeispiel = false;
             merkeBeispiel(false);
             strokes.length = 0;
@@ -1478,6 +1507,12 @@
             CyberUI.createCheckbox('morph-steuerung', 'Handballen ignorieren', view.handballen, v => {
                 view.handballen = v;
                 try { localStorage.setItem('vorrechnen-handballen', v ? '1' : '0'); } catch (_) {}
+            });
+
+            CyberUI.createCheckbox('morph-steuerung', 'Automatisch erkennen (2 s)', autoErkennen, v => {
+                autoErkennen = v;
+                try { localStorage.setItem('vorrechnen-auto', v ? '1' : '0'); } catch (_) {}
+                if (v) autoBald(); else clearTimeout(autoTimer);
             });
 
             CyberUI.createCheckbox('morph-steuerung', 'Meine Beispiele', testModus, v => {
