@@ -169,6 +169,7 @@
     <script src="js/katex-atome.js"></script>
     <script src="js/formel-erkennen.js"></script>
     <script src="js/handschrift-morph.js"></script>
+    <script src="js/staub-morph.js"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -373,7 +374,7 @@
             if (morphT > 0) {
                 analysis.lines.forEach(l => {
                     const v = morphVorbereitet[l.lineIdx];
-                    if (v) HandschriftMorph.zeichnen(ctx, v, morphT, { farbe: INK });
+                    if (v) StaubMorph.zeichnen(ctx, v, morphT, { farbe: INK, staffel: 0 });
                 });
             }
 
@@ -494,17 +495,16 @@
                         zeilenErgebnis[line.lineIdx] = {
                             latex: r.latex, tokens: r.tokens, atome, ms: r.ms, zuordnung, svg: m.svg, nachjustiert,
                         };
-                        // Morph only when the mapping holds. Radicals and vector
-                        // arrows are SVG in KaTeX - they are traced first.
-                        if (zuordnung.passt) {
-                            try {
-                                await HandschriftMorph.schriftenBereit(atome);
-                                await HandschriftMorph.svgVorbereiten(atome);
-                                morphVorbereitet[line.lineIdx] = HandschriftMorph.vorbereiten(line, strokes, zuordnung);
-                            } catch (e) {
-                                morphVorbereitet[line.lineIdx] = null;
-                            }
-                        } else {
+                        // Doc's plan B: the row crumbles to one dust cloud and
+                        // settles into the formula (js/staub-morph.js). It needs
+                        // the typeset atoms only, not the grouping - so it runs
+                        // even when the mapping does not hold. Radicals and
+                        // vector arrows are SVG in KaTeX - they are traced first.
+                        try {
+                            await HandschriftMorph.schriftenBereit(atome);
+                            await HandschriftMorph.svgVorbereiten(atome);
+                            morphVorbereitet[line.lineIdx] = StaubMorph.vorbereiten(line, strokes, atome);
+                        } catch (e) {
                             morphVorbereitet[line.lineIdx] = null;
                         }
                     }
@@ -545,12 +545,15 @@
         }
 
         // ── Morph ───────────────────────────────────────────────────────────
-        // Doc: "meine in LT faden (morph nicht transp)" - the ink deforms, it
-        // does not fade. Slow on purpose: it should be "kaum merkbar".
+        // Doc: "meine in LT faden (morph nicht transp)" - the ink turns into
+        // the formula, it does not fade. How long it takes is Doc's to set
+        // (slider "Morph-Dauer", remembered on the device).
+        let morphDauer = 1.6;                        // seconds
+        try { const v = parseFloat(localStorage.getItem('vorrechnen-morph-dauer')); if (v > 0) morphDauer = v; } catch (_) {}
         function morphen(ziel) {
             if (morphAnim) cancelAnimationFrame(morphAnim);
             const von = morphT, nach = (ziel === undefined) ? (morphT > 0.5 ? 0 : 1) : ziel;
-            const dauer = 2600;
+            const dauer = morphDauer * 1000;
             const t0 = performance.now();
             const schritt = () => {
                 const f = Math.min(1, (performance.now() - t0) / dauer);
@@ -751,6 +754,20 @@
                 <input type="range" id="morph-regler" min="0" max="1" step="0.01" value="0"
                        oninput="setzeMorph(this.value)" style="display:none">
             `, '#00d2ff');
+
+            // Doc: "speed slider für mich". Letting go replays the morph at the
+            // new speed, so the effect can be judged right away.
+            let nochmal = null;
+            CyberUI.createSlider('ui-container', 'Morph-Dauer', 0.3, 5, morphDauer, 0.1, v => {
+                morphDauer = v;
+                try { localStorage.setItem('vorrechnen-morph-dauer', String(v)); } catch (_) {}
+                clearTimeout(nochmal);
+                nochmal = setTimeout(() => {
+                    if (!morphVorbereitet.some(Boolean)) return;
+                    setzeMorph(0);
+                    morphen(1);
+                }, 350);
+            }, '#00d2ff', v => v.toFixed(1) + ' s');
 
             /* Ausgeblendet auf Docs Wunsch (25.09.) - die Funktionen dahinter
                leben weiter, nur die Bedienelemente sind weg:
