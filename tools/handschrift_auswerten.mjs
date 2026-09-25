@@ -81,10 +81,10 @@ for (const f of files) {
         ${JSON.stringify(d.strokes)}.forEach(s => strokes.push(s));
         recompute();
         const txt = a => a.art === 'line' ? '—' : (a.text || '▭');
-        const mSoll = await KatexAtome.atomeAusLatex(${JSON.stringify(vorlage)}, messHost(), { fontSize: 100 });
+        const mSoll = await KatexAtome.atomeAusLatex(${JSON.stringify(vorlage)}, messHost(), { fontSize: 100, display: true });
         const soll = mSoll.atome;
         const gelesen = ${JSON.stringify(erkannt)}
-            ? (await KatexAtome.atomeAusLatex(${JSON.stringify(erkannt)}, messHost(), { fontSize: 100 })).atome : [];
+            ? (await KatexAtome.atomeAusLatex(${JSON.stringify(erkannt)}, messHost(), { fontSize: 100, display: true })).atome : [];
         const leseOk = gelesen.map(txt).join(' ') === soll.map(txt).join(' ');
 
         const echte = analysis.lines.filter(l => !zuKlein(l));

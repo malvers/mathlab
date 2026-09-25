@@ -120,6 +120,23 @@
             return;
         }
 
+        // Limits above and below an operator (\sum, \lim in display style):
+        // written operator first, then what is above it, then what is below -
+        // KaTeX lists them bottom, operator, top. The operator's cell is the one
+        // not set in the small (mtight) size.
+        if (el.classList.contains('op-limits')) {
+            const vlist = el.querySelector(':scope .vlist');
+            if (vlist) {
+                const cells = Array.from(vlist.children)
+                    .map(c => ({ el: c, top: c.getBoundingClientRect().top }))
+                    .sort((a, b) => a.top - b.top);
+                const basis = cells.find(c => !c.el.querySelector('.mtight'));
+                if (basis) walk(basis.el, out, origin, stats);
+                for (const c of cells) if (c !== basis) walk(c.el, out, origin, stats);
+                return;
+            }
+        }
+
         // Stacked constructs: order the cells by where they are, not by DOM order.
         if (el.classList.contains('mfrac') || el.classList.contains('msupsub')) {
             const vlist = el.querySelector(':scope .vlist');
@@ -212,11 +229,13 @@
 
     // Render `latex` into `host` (any element; may be visibility:hidden but not
     // display:none) and return its atoms in reading order.
+    // display: set in display style (\displaystyle) - limits above and below
+    // \sum, full-size fractions - the way a formula is written by hand.
     async function atomeAusLatex(latex, host, opts) {
-        const o = Object.assign({ fontSize: 100 }, opts || {});
+        const o = Object.assign({ fontSize: 100, display: false }, opts || {});
         host.innerHTML = '';
         host.style.fontSize = o.fontSize + 'px';
-        try { katex.render(latex, host, { throwOnError: false, displayMode: false }); }
+        try { katex.render((o.display ? '\\displaystyle ' : '') + latex, host, { throwOnError: false, displayMode: false }); }
         catch (e) { return { atome: [], fehler: e.message, svg: 0 }; }
         await schriftenLaden(host);
 

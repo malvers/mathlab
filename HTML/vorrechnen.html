@@ -484,11 +484,18 @@
             return !line.bbox || Math.max(line.bbox.w, line.bbox.h) < 16;
         }
 
+        // Doc: "Wurzel und Summenzeichen sehen noch falsch aus" - KaTeX set them
+        // in text style (limits beside the sum, squeezed fractions and roots). By
+        // hand a formula is written in display style, so every formula on this
+        // page - template, measurement, the end of the morph, the recognised one
+        // - is set that way.
+        function alsDisplay(latex) { return '\\displaystyle ' + latex; }
+
         // KaTeX sets the formula; the atoms say where every glyph sits. Then the
         // whole block is scaled and moved onto the handwriting: same height as
         // the row, left edge aligned, centred vertically - Doc's "gleiche Größe".
         async function formelAufZeile(latex, line) {
-            const m = await KatexAtome.atomeAusLatex(latex, messHost(), { fontSize: 100 });
+            const m = await KatexAtome.atomeAusLatex(latex, messHost(), { fontSize: 100, display: true });
             const u = KatexAtome.umfang(m.atome);
             let atome = m.atome;
             // where KaTeX's box sat inside the measuring host - the real formula
@@ -501,10 +508,13 @@
                 // the handwriting - height AND width - and never leaves the
                 // canvas. Height alone sent a tall integral's fraction off the
                 // right edge.
+                // Centred on the handwriting (Doc: "den Morph bitte auch x
+                // zentriert"), and it must fit on both sides of that centre.
                 const breite = container.getBoundingClientRect().width;
-                const skala = Math.min(line.bbox.h / u.h, line.bbox.w / u.w,
-                                       Math.max(40, breite - line.bbox.x - 24) / u.w);
-                const dx = line.bbox.x - u.x * skala;
+                const mitte = line.bbox.x + line.bbox.w / 2;
+                const platz = 2 * Math.max(20, Math.min(mitte - 24, breite - mitte - 24));
+                const skala = Math.min(line.bbox.h / u.h, line.bbox.w / u.w, platz / u.w);
+                const dx = mitte - (u.x + u.w / 2) * skala;
                 const dy = (line.bbox.y + line.bbox.h / 2) - (u.y + u.h / 2) * skala;
                 atome = KatexAtome.transformiere(m.atome, skala, dx, dy);
                 Object.assign(satz, { skala, dx, dy });
@@ -599,7 +609,7 @@
                 const d = document.createElement('div');
                 // a shade darker than the ink, as large as the template on top
                 d.style.cssText = 'color:#9aa5b5;font-size:2.4rem';
-                try { katex.render(erg.latex, d, { throwOnError: false, displayMode: false }); }
+                try { katex.render(alsDisplay(erg.latex), d, { throwOnError: false, displayMode: false }); }
                 catch (e) { d.textContent = erg.latex; }
                 host.appendChild(d);
             });
@@ -688,7 +698,7 @@
                 d.style.cssText = `position:absolute;left:${z.dx}px;top:${z.dy}px;font-size:${100 * z.skala}px;` +
                     `white-space:nowrap;line-height:normal;color:${INK}`;
                 host.appendChild(d);
-                try { katex.render(z.latex, d, { throwOnError: false, displayMode: false }); } catch (_) { return; }
+                try { katex.render(alsDisplay(z.latex), d, { throwOnError: false, displayMode: false }); } catch (_) { return; }
                 // land on the measured spot: correct whatever the surroundings shifted
                 const k = d.querySelector('.katex-html');
                 if (!k) return;
@@ -768,15 +778,16 @@
                 host.id = 'vorlage-schicht';
                 // Doc: the template centred in x and y in the head strip; the
                 // counter stays at the left edge
-                host.style.cssText = 'position:absolute;left:0;right:0;top:0;height:84px;pointer-events:none;' +
-                    'display:flex;align-items:center;justify-content:center;color:#00d2ff';
+                // at least 84 px; a display-style sum with its limits needs more
+                host.style.cssText = 'position:absolute;left:0;right:0;top:0;min-height:84px;padding:6px 0;box-sizing:border-box;' +
+                    'pointer-events:none;display:flex;align-items:center;justify-content:center;color:#00d2ff';
                 container.appendChild(host);
             }
             const [slug, latex] = VORLAGEN[vorlageIdx];
             host.innerHTML = `<span style="position:absolute;left:24px;top:50%;transform:translateY(-50%);` +
                 `font-family:Orbitron,sans-serif;font-size:0.8rem;letter-spacing:0.1em;color:#8a93a3">` +
                 `${vorlageIdx + 1} / ${VORLAGEN.length}${hinweis ? ' · ' + hinweis : ''}</span><span id="vorlage-formel" style="font-size:2.4rem;color:${INK}"></span>`;
-            try { katex.render(latex, document.getElementById('vorlage-formel'), { throwOnError: false }); }
+            try { katex.render(alsDisplay(latex), document.getElementById('vorlage-formel'), { throwOnError: false }); }
             catch (e) { document.getElementById('vorlage-formel').textContent = latex; }
         }
 
@@ -842,7 +853,11 @@
             d.strokes.forEach(st => st.points.forEach(q => { x0 = Math.min(x0, q.x); y0 = Math.min(y0, q.y); x1 = Math.max(x1, q.x); y1 = Math.max(y1, q.y); }));
             // between the template strip on top and, at the bottom, the recognised
             // formula (84 px) above the film strip (56 px)
-            const rect = container.getBoundingClientRect(), KOPF = 84, FUSS = 140;
+            // the recognised formula is the same formula, so it is as tall as the
+            // template strip
+            const rect = container.getBoundingClientRect();
+            const kopfEl = document.getElementById('vorlage-schicht');
+            const KOPF = Math.max(84, kopfEl ? kopfEl.getBoundingClientRect().height : 84), FUSS = 56 + KOPF;
             const w = Math.max(1, x1 - x0), h = Math.max(1, y1 - y0);
             const sk = Math.min(1, (rect.width - 100) / w, (rect.height - KOPF - FUSS - 20) / h);
             const ox = (rect.width - w * sk) / 2, oy = KOPF + (rect.height - KOPF - FUSS - h * sk) / 2;
