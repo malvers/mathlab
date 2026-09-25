@@ -23,7 +23,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- viewport-fit=cover: as a full-screen app the page may use the strip where the status bar
+         was - without it that strip stayed black and the scene sat 39 px low (Doc, Lenovo, 25.09.) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>DOC ALVERS MATHE-LABORE | Vorrechnen</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
@@ -241,7 +243,7 @@
         // formelUnten: the typeset formula under the handwriting - Doc first: "lass
         // die unten weg", then: "zeig bitte doch die erkannte Formel unten x mittig
         // etwas dunkler" (25.09.)
-        const view = { boxes: false, numbers: true, rows: true, penOnly: false, formelUnten: true };
+        const view = { boxes: false, numbers: true, rows: true, penOnly: false, formelUnten: true, handballen: true };
         // Doc: boxes off by default, and the choice is remembered on the device
         try { view.boxes = localStorage.getItem('vorrechnen-boxen') === '1'; } catch (_) {}
         // the row bands are the same kind of calibration aid - Doc: "komische Box"
@@ -311,15 +313,37 @@
             return { x: ev.clientX - rect.left, y: ev.clientY - rect.top, t: performance.now() };
         }
 
+        // Palm rejection. "Nur Stift" (hidden) lets only the pen draw. On by
+        // default is something smarter (Doc, 25.09.: "default ein!"), because Doc
+        // also writes with a finger: once the pen is in use - down or hovering -
+        // fingers and the ball of the hand do not draw, until a few seconds after
+        // the pen was last seen. A touch stroke under way when the pen lands is
+        // dropped, a second pointer while one draws is ignored, and a contact as
+        // wide as a palm never draws.
+        const STIFT_RUHE = 3000;           // ms after the pen was last seen
+        const BALLEN_BREITE = 45;          // px of contact: wider is a palm, not a finger
+        let stiftZuletzt = -Infinity, currentId = null;
+        try { const v = localStorage.getItem('vorrechnen-handballen'); if (v !== null) view.handballen = v === '1'; } catch (_) {}
+
         function penAccepted(ev) {
-            // Palm rejection: with "nur Stift" on, only the pen draws, so a hand
-            // resting on the tablet leaves no marks.
-            if (!view.penOnly) return true;
-            return ev.pointerType === 'pen';
+            if (view.penOnly) return ev.pointerType === 'pen';
+            if (ev.pointerType !== 'touch' || !view.handballen) return true;
+            if (performance.now() - stiftZuletzt < STIFT_RUHE) return false;
+            return !((ev.width || 0) > BALLEN_BREITE || (ev.height || 0) > BALLEN_BREITE);
         }
 
         canvas.addEventListener('pointerdown', ev => {
+            if (ev.pointerType === 'pen') {
+                stiftZuletzt = performance.now();
+                // a finger or palm stroke under way when the pen lands was not meant
+                if (current && current.pointerType !== 'pen' && view.handballen) {
+                    current = null;
+                    currentId = null;
+                    redrawBald();
+                }
+            }
             if (!penAccepted(ev)) return;
+            if (current && ev.pointerId !== currentId) return;       // one stroke at a time
             // Capture keeps the stroke alive when the pen leaves the canvas mid
             // draw. If it is refused, carry on regardless - losing the capture is
             // a nuisance, losing the stroke is not acceptable.
@@ -328,6 +352,7 @@
             // Pressure widens the line a little where the tablet reports it.
             const w = 2.5 + (ev.pressure > 0 ? ev.pressure * 2.5 : 1.2);
             current = { points: [p], width: w, pointerType: ev.pointerType };
+            currentId = ev.pointerId;
             ev.preventDefault();
         });
 
@@ -344,7 +369,8 @@
         }
 
         canvas.addEventListener('pointermove', ev => {
-            if (!current || !penAccepted(ev)) return;
+            if (ev.pointerType === 'pen') stiftZuletzt = performance.now();   // hovering counts too
+            if (!current || ev.pointerId !== currentId) return;
             const roh = (typeof ev.getCoalescedEvents === 'function') ? ev.getCoalescedEvents() : null;
             if (roh && roh.length) roh.forEach(e => current.points.push(canvasPos(e)));
             else current.points.push(canvasPos(ev));
@@ -353,7 +379,9 @@
         });
 
         function endStroke(ev) {
-            if (!current) return;
+            if (ev && ev.pointerType === 'pen') stiftZuletzt = performance.now();
+            if (!current || (ev && ev.pointerId !== currentId)) return;
+            currentId = null;
             const neu = current.points.length > 1;
             if (neu) strokes.push(current);
             if (neu) merkeBeispiel(false);
@@ -1121,6 +1149,11 @@
                 view.boxes = view.rows = v;
                 try { localStorage.setItem('vorrechnen-boxen', v ? '1' : '0'); } catch (_) {}
                 redraw();
+            });
+
+            CyberUI.createCheckbox('morph-steuerung', 'Handballen ignorieren', view.handballen, v => {
+                view.handballen = v;
+                try { localStorage.setItem('vorrechnen-handballen', v ? '1' : '0'); } catch (_) {}
             });
 
             CyberUI.createCheckbox('morph-steuerung', 'Meine Beispiele', testModus, v => {
