@@ -73,14 +73,49 @@
     // are one node; through a node of two the line simply continues, through a
     // junction it continues in the straightest direction - so an "x" becomes two
     // diagonals, not four half-arms.
-    function ketten(polys, tol) {
+    function ketten(polys, tol, radAn) {
         const segs = polys.filter(p => p.length >= 2).map(p => p.map(q => ({ x: q[0], y: q[1] })));
         const knoten = [];
         const knotenVon = pt => {
             for (let k = 0; k < knoten.length; k++) if (Math.hypot(knoten[k].x - pt.x, knoten[k].y - pt.y) <= tol) return k;
             knoten.push({ x: pt.x, y: pt.y }); return knoten.length - 1;
         };
-        const kanten = segs.map(p => ({ p, a: knotenVon(p[0]), b: knotenVon(p[p.length - 1]), frei: true }));
+        let kanten = segs.map(p => ({ p, a: knotenVon(p[0]), b: knotenVon(p[p.length - 1]), frei: true }));
+        // Spurs. The tracer leaves short dead ends where a stroke comes to a
+        // point or turns sharply - into the tip of the root's V, at its tick -
+        // and turns plain corners into crossings. A dead end shorter than three
+        // times the stroke's half width where it branches off goes; the serifs
+        // of the typeface go with it, and Doc does not write serifs anyway.
+        // Only at a corner, though: a short arm that leaves a line running
+        // straight through the node is a real stroke - the bar of an f or a t.
+        const wegVon = (k, n) => {          // direction out of node n along edge k
+            const p = k.a === n ? k.p : k.p.slice().reverse(), m = Math.min(6, p.length - 1);
+            const dx = p[m].x - p[0].x, dy = p[m].y - p[0].y, L = Math.hypot(dx, dy) || 1;
+            return { x: dx / L, y: dy / L };
+        };
+        if (radAn) {
+            for (let runde = 0; runde < 2; runde++) {
+                const g = new Array(knoten.length).fill(0);
+                kanten.forEach(k => { g[k.a]++; g[k.b]++; });
+                const weg = new Set();
+                kanten.forEach(k => {
+                    const offen = g[k.a] === 1 ? k.b : g[k.b] === 1 ? k.a : -1;   // the end that branches off
+                    if (offen < 0 || g[offen] < 3) return;
+                    if (lang(k.p) >= 3 * radAn(knoten[offen].x, knoten[offen].y)) return;
+                    const andere = kanten.filter(e => e !== k && (e.a === offen || e.b === offen)).map(e => wegVon(e, offen));
+                    for (let i = 0; i < andere.length; i++) for (let j = i + 1; j < andere.length; j++)
+                        if (andere[i].x * andere[j].x + andere[i].y * andere[j].y < -0.85) return;   // straight through
+                    weg.add(k);
+                });
+                kanten = kanten.filter(k => !weg.has(k));
+            }
+        }
+        // How many line ends meet at a node. Where exactly two meet it is just a
+        // corner, however sharp - the root's tick, its V, its turn into the bar
+        // (Doc, 25.09.: "stimmt mit dem Wurzelzeichen was fundamental nicht" -
+        // the root came apart in three pieces and morphed into an x).
+        const grad = new Array(knoten.length).fill(0);
+        kanten.forEach(k => { grad[k.a]++; grad[k.b]++; });
         const richtungAm = (p, amEnde) => {
             const n = Math.min(6, p.length - 1);
             const A = amEnde ? p[p.length - 1 - n] : p[n], B = amEnde ? p[p.length - 1] : p[0];
@@ -106,7 +141,8 @@
                         const cos = -(hier.x * weg.x + hier.y * weg.y);   // straight on = 1
                         if (!best || cos > best.cos) best = { k, q, cos };
                     }
-                    if (!best || best.cos < 0.2) break;      // no reasonable continuation
+                    // a corner always goes on; at a crossing only straight on
+                    if (!best || (grad[knot] > 2 && best.cos < 0.2)) break;
                     best.k.frei = false;
                     if (seite === 'ende') { pts = pts.concat(best.q.slice(1)); knot = best.k.a === knot ? best.k.b : best.k.a; }
                     else { pts = best.q.slice().reverse().concat(pts.slice(1)); knot = best.k.a === knot ? best.k.b : best.k.a; }
@@ -117,11 +153,56 @@
         return out;
     }
 
+    // The pieces of a glyph (8-connected), and in each the pixel deepest inside.
+    function stuecke(bin, W, H, d) {
+        const label = new Int32Array(W * H), tief = [];
+        let n = 0;
+        const stapel = [];
+        for (let i0 = 0; i0 < W * H; i0++) {
+            if (!bin[i0] || label[i0]) continue;
+            n++;
+            let groesse = 0, best = i0;
+            label[i0] = n; stapel.push(i0);
+            while (stapel.length) {
+                const i = stapel.pop(), x = i % W, y = (i - x) / W;
+                groesse++;
+                if (d[i] > d[best]) best = i;
+                for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+                    const xx = x + dx, yy = y + dy;
+                    if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue;
+                    const j = yy * W + xx;
+                    if (bin[j] && !label[j]) { label[j] = n; stapel.push(j); }
+                }
+            }
+            tief[n] = { i: best, groesse };
+        }
+        return { label, tief, n };
+    }
+
     function skelettAus(bin, W, H, umrechnen) {
         const d = abstand(bin, W, H);
         const sk = TraceSkeleton.fromBoolArray(bin.slice(), W, H);
         const rad = (x, y) => d[Math.max(0, Math.min(H - 1, Math.round(y))) * W + Math.max(0, Math.min(W - 1, Math.round(x)))] / 3;
-        return ketten(sk.polylines || [], 2.5).map(p => p.map(q => umrechnen(q.x, q.y, rad(q.x, q.y))));
+        const linien = ketten(sk.polylines || [], 2.5, rad);
+        // A dot thins down to nothing and the tracer leaves it out - the i's
+        // and j's dot, \cdot had no line at all (Doc's sheet of centre lines,
+        // 25.09.). Every piece of the glyph without a line gets one: a single
+        // spot where it is deepest, as wide as the piece.
+        const st = stuecke(bin, W, H, d);
+        const hat = new Uint8Array(st.n + 1);
+        linien.forEach(l => l.forEach(q => {
+            const x = Math.round(q.x), y = Math.round(q.y);
+            for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+                const xx = x + dx, yy = y + dy;
+                if (xx >= 0 && yy >= 0 && xx < W && yy < H && st.label[yy * W + xx]) hat[st.label[yy * W + xx]] = 1;
+            }
+        }));
+        for (let c = 1; c <= st.n; c++) {
+            if (hat[c] || st.tief[c].groesse < 6) continue;            // covered, or antialiasing dust
+            const i = st.tief[c].i, x = i % W, y = (i - x) / W;
+            linien.push([{ x, y }, { x: x + 0.5, y }]);
+        }
+        return linien.map(p => p.map(q => umrechnen(q.x, q.y, rad(q.x, q.y))));
     }
 
     // Skeleton of a text atom, in the same frame as the glyph outlines of
