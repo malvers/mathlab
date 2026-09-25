@@ -174,17 +174,40 @@
         const zielHoehe = o.hoehe || median(line.symbols.map(s => s.bbox.h));
         const skala = zielHoehe / referenzHoehe(o.size);
         const renderMitte = { x: o.size, y: o.size * 2 * 0.72 };   // the baseline point
-        // Sit the row on the baseline of the handwriting: a little above the
-        // lowest ink, so descenders have room.
         const grundlinie = line.bbox.y + line.bbox.h * 0.82;
 
-        return line.symbols.map((sym, i) => {
+        // Where each glyph ENDS UP is a typesetting question, not a handwriting
+        // one. Putting the "(" where Doc drew it makes it collide with the "x",
+        // because a set bracket is wider than his. So lay the row out properly:
+        // measure every glyph, then walk from left to right with real spacing.
+        const gesetzt = line.symbols.map((sym, i) => {
             const paar = zuordnung.paare[i];
             if (!paar) return null;
             const polys = zielKonturen(paar.token, { size: o.size });
             if (!polys.length) return null;
-            const platz = { skala, mitteX: sym.bbox.x + sym.bbox.w / 2, grundlinie, renderMitte };
-            return { token: paar.token, symbol: sym, teile: paare(sym, strokes, polys, platz) };
+            const all = [].concat(...polys);
+            const b = bbox(all);
+            return { paar, polys, sym, breite: b.w * skala, versatz: (b.x + b.w / 2 - renderMitte.x) * skala };
+        });
+
+        // Operators breathe, digits and letters sit close - the usual convention.
+        const luft = t => (/^[=+\-<>]$|^\\(times|cdot|div|pm|leq|geq|neq|approx)$/.test(t)
+            ? zielHoehe * 0.28 : zielHoehe * 0.10);
+
+        let x = line.bbox.x;
+        const plaetze = gesetzt.map((g, i) => {
+            if (!g) return null;
+            const vorher = i > 0 && gesetzt[i - 1] ? Math.max(luft(gesetzt[i - 1].paar.token), luft(g.paar.token)) : 0;
+            x += vorher;
+            const mitteX = x + g.breite / 2 - g.versatz;
+            x += g.breite;
+            return mitteX;
+        });
+
+        return gesetzt.map((g, i) => {
+            if (!g) return null;
+            const platz = { skala, mitteX: plaetze[i], grundlinie, renderMitte };
+            return { token: g.paar.token, symbol: g.sym, teile: paare(g.sym, strokes, g.polys, platz) };
         }).filter(Boolean);
     }
 
