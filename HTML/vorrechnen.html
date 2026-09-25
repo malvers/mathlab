@@ -380,15 +380,60 @@
             ev.preventDefault();
         });
 
+        // Double tap on the page switches dust <-> strokes. Doc tapped twice on
+        // the page (25.09.) and got two dots, the first of which also threw the
+        // recognition away. A tap is held back for a moment: a second tap on
+        // the same spot switches and neither stays; otherwise it lands as a dot.
+        // A colon's dots sit apart, one above the other, so they still write.
+        const TIPP_GROESSE = 10;           // px: a stroke this small is a tap
+        const TIPP_FENSTER = 300;          // ms between the two taps (Doc: ~150)
+        const TIPP_ABSTAND = 25;           // px sideways between the two taps
+        const TIPP_HOEHE = 12;             // px up or down: more is a colon
+        let tipp = null;                   // { strich, x, y, zeit, timer }
+        function istTipp(s) {
+            const xs = s.points.map(p => p.x), ys = s.points.map(p => p.y);
+            return Math.max(...xs) - Math.min(...xs) <= TIPP_GROESSE &&
+                Math.max(...ys) - Math.min(...ys) <= TIPP_GROESSE;
+        }
+        function legeStrich(s) {
+            if (s.points.length < 2) return false;
+            strokes.push(s);
+            merkeBeispiel(false);
+            if (zeilenErgebnis.length) verwerfeErkennung();
+            return true;
+        }
+        function tippAblegen() {
+            if (!tipp) return;
+            clearTimeout(tipp.timer);
+            const s = tipp.strich;
+            tipp = null;
+            if (legeStrich(s)) { recompute(); merkeStriche(); }
+            else redrawBald();
+        }
+
         function endStroke(ev) {
             if (ev && ev.pointerType === 'pen') stiftZuletzt = performance.now();
             if (!current || (ev && ev.pointerId !== currentId)) return;
             currentId = null;
-            const neu = current.points.length > 1;
-            if (neu) strokes.push(current);
-            if (neu) merkeBeispiel(false);
+            const s = current;
             current = null;
-            if (neu && zeilenErgebnis.length) verwerfeErkennung();
+            if (istTipp(s)) {
+                const p = s.points[0], jetzt = performance.now();
+                if (tipp && jetzt - tipp.zeit < TIPP_FENSTER &&
+                    Math.abs(p.x - tipp.x) < TIPP_ABSTAND && Math.abs(p.y - tipp.y) < TIPP_HOEHE) {
+                    clearTimeout(tipp.timer);
+                    tipp = null;
+                    redrawBald();
+                    wechsleMorphArt();
+                    return;
+                }
+                tippAblegen();
+                tipp = { strich: s, x: p.x, y: p.y, zeit: jetzt, timer: setTimeout(tippAblegen, TIPP_FENSTER) };
+                redrawBald();
+                return;
+            }
+            tippAblegen();
+            legeStrich(s);
             recompute();
             merkeStriche();
         }
@@ -455,6 +500,7 @@
             ctx.strokeStyle = INK;
             strokes.forEach((s, i) => { if (!imMorph.has(i)) strokePath(s); });
             if (current) strokePath(current);
+            if (tipp) strokePath(tipp.strich);
 
             if (morphT > 0) {
                 analysis.lines.forEach(l => {
@@ -1098,6 +1144,7 @@
             merkeBeispiel(false);
             strokes.length = 0;
             current = null;
+            if (tipp) { clearTimeout(tipp.timer); tipp = null; }
             verwerfeErkennung();
             recompute();
             merkeStriche();
