@@ -789,6 +789,8 @@
                 `${vorlageIdx + 1} / ${VORLAGEN.length}${hinweis ? ' · ' + hinweis : ''}</span><span id="vorlage-formel" style="font-size:2.4rem;color:${INK}"></span>`;
             try { katex.render(alsDisplay(latex), document.getElementById('vorlage-formel'), { throwOnError: false }); }
             catch (e) { document.getElementById('vorlage-formel').textContent = latex; }
+            // Doc: without "Meine Beispiele" nothing up there - free writing
+            host.style.display = testModus ? 'flex' : 'none';
         }
 
         // Doc: "mach bei Weiter einen left right mit Dreiecken" - back and forth
@@ -1093,6 +1095,7 @@
             CyberUI.createCheckbox('morph-steuerung', 'Meine Beispiele', testModus, v => {
                 testModus = v;
                 try { localStorage.setItem('vorrechnen-testmodus', v ? '1' : '0'); } catch (_) {}
+                zeigeVorlage();
                 if (v) beispiel();
             });
 
