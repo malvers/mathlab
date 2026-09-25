@@ -443,6 +443,28 @@
             return !line.bbox || Math.max(line.bbox.w, line.bbox.h) < 16;
         }
 
+        // KaTeX sets the formula; the atoms say where every glyph sits. Then the
+        // whole block is scaled and moved onto the handwriting: same height as
+        // the row, left edge aligned, centred vertically - Doc's "gleiche Größe".
+        async function formelAufZeile(latex, line) {
+            const m = await KatexAtome.atomeAusLatex(latex, messHost(), { fontSize: 100 });
+            const u = KatexAtome.umfang(m.atome);
+            let atome = m.atome;
+            if (u && u.h > 0 && u.w > 0) {
+                // "Gleiche Größe" means: the typeset block fits the footprint of
+                // the handwriting - height AND width - and never leaves the
+                // canvas. Height alone sent a tall integral's fraction off the
+                // right edge.
+                const breite = container.getBoundingClientRect().width;
+                const skala = Math.min(line.bbox.h / u.h, line.bbox.w / u.w,
+                                       Math.max(40, breite - line.bbox.x - 24) / u.w);
+                const dx = line.bbox.x - u.x * skala;
+                const dy = (line.bbox.y + line.bbox.h / 2) - (u.y + u.h / 2) * skala;
+                atome = KatexAtome.transformiere(m.atome, skala, dx, dy);
+            }
+            return { atome, svg: m.svg };
+        }
+
         async function erkennen() {
             if (erkennenLaeuft) return;
             if (!analysis.lines.length) { setErgebnisText('Erst etwas schreiben.'); return; }
@@ -460,25 +482,7 @@
                     } else if (!r.latex || /^\(?\s*(empty|leer)\s*\)?$/i.test(r.latex)) {
                         zeilenErgebnis[line.lineIdx] = { fehler: 'nichts erkannt' };
                     } else {
-                        // KaTeX sets the formula; the atoms say where every glyph
-                        // sits. Then the whole block is scaled and moved onto the
-                        // handwriting: same height as the row, left edge aligned,
-                        // centred vertically. That is Doc's "gleiche Größe".
-                        const m = await KatexAtome.atomeAusLatex(r.latex, messHost(), { fontSize: 100 });
-                        const u = KatexAtome.umfang(m.atome);
-                        let atome = m.atome;
-                        if (u && u.h > 0 && u.w > 0) {
-                            // "Gleiche Größe" means: the typeset block fits the
-                            // footprint of the handwriting - height AND width -
-                            // and never leaves the canvas. Height alone sent a
-                            // tall integral's fraction off the right edge.
-                            const breite = container.getBoundingClientRect().width;
-                            const skala = Math.min(line.bbox.h / u.h, line.bbox.w / u.w,
-                                                   Math.max(40, breite - line.bbox.x - 24) / u.w);
-                            const dx = line.bbox.x - u.x * skala;
-                            const dy = (line.bbox.y + line.bbox.h / 2) - (u.y + u.h / 2) * skala;
-                            atome = KatexAtome.transformiere(m.atome, skala, dx, dy);
-                        }
+                        const { atome, svg } = await formelAufZeile(r.latex, line);
                         let zuordnung = FormelErkennen.ordneZu(line.symbols, atome);
                         let nachjustiert = false;
                         if (!zuordnung.passt) {
@@ -493,7 +497,7 @@
                             }
                         }
                         zeilenErgebnis[line.lineIdx] = {
-                            latex: r.latex, tokens: r.tokens, atome, ms: r.ms, zuordnung, svg: m.svg, nachjustiert,
+                            latex: r.latex, tokens: r.tokens, atome, ms: r.ms, zuordnung, svg, nachjustiert,
                         };
                         // Doc's plan B: the row crumbles to one dust cloud and
                         // settles into the formula (js/staub-morph.js). It needs
@@ -618,6 +622,55 @@
             setProbeStatus('–');
         }
 
+        // ── Examples ────────────────────────────────────────────────────────
+        // Doc: "kannst du mir da Beispiele von mir geben?" - his own corpus,
+        // replayed: the strokes as he wrote them, the formula from the template
+        // (no API call), a moment to see the ink, then the morph. An example is
+        // never saved as a probe, not even by a later ERKENNEN.
+        let beispiele = null, beispielIdx = -1, beispielTimer = null, istBeispiel = false;
+        async function beispiel() {
+            if (!beispiele) {
+                try { beispiele = (await (await fetch('/__proben/', { cache: 'no-store' })).json()).proben || []; }
+                catch (_) { beispiele = []; }
+            }
+            if (!beispiele.length) { setProbeStatus('keine Beispiele gefunden'); return; }
+            beispielIdx = (beispielIdx + 1) % beispiele.length;
+            const name = beispiele[beispielIdx];
+            let d;
+            try { d = await (await fetch('morpheus/handschrift-proben/' + name, { cache: 'no-store' })).json(); }
+            catch (_) { setProbeStatus('Beispiel nicht lesbar: ' + name); return; }
+            const latex = (d.vorlage && d.vorlage.latex) || d.latex;
+            clearTimeout(beispielTimer);
+            verwerfeErkennung();
+            strokes.length = 0;
+            current = null;
+            // Written on another screen: moved to the top left, shrunk only if
+            // it would not fit - never enlarged, it is Doc's size.
+            let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+            d.strokes.forEach(st => st.points.forEach(q => { x0 = Math.min(x0, q.x); y0 = Math.min(y0, q.y); x1 = Math.max(x1, q.x); y1 = Math.max(y1, q.y); }));
+            const rect = container.getBoundingClientRect();
+            const sk = Math.min(1, (rect.width - 100) / Math.max(1, x1 - x0), (rect.height - 260) / Math.max(1, y1 - y0));
+            d.strokes.forEach(st => strokes.push(Object.assign({}, st, {
+                width: (st.width || 3) * sk,
+                points: st.points.map(q => Object.assign({}, q, { x: 50 + (q.x - x0) * sk, y: 140 + (q.y - y0) * sk })),
+            })));
+            istBeispiel = true;
+            recompute();
+            merkeStriche();
+            redraw();
+            setProbeStatus(`Beispiel ${beispielIdx + 1} / ${beispiele.length}: ${(d.vorlage && d.vorlage.slug) || name.replace(/^probe-\d+-|\.json$/g, '')}`);
+            const zeilen = analysis.lines.filter(l => !zuKlein(l));
+            if (zeilen.length !== 1 || !latex) return;
+            const line = zeilen[0];
+            const { atome, svg } = await formelAufZeile(latex, line);
+            zeilenErgebnis[line.lineIdx] = { latex, tokens: [], atome, ms: 0, zuordnung: FormelErkennen.ordneZu(line.symbols, atome), svg };
+            await HandschriftMorph.schriftenBereit(atome);
+            await HandschriftMorph.svgVorbereiten(atome);
+            morphVorbereitet[line.lineIdx] = StaubMorph.vorbereiten(line, strokes, atome);
+            zeigeFormeln();
+            beispielTimer = setTimeout(() => morphen(1), 900);
+        }
+
         function setProbeStatus(msg) {
             const el = document.getElementById('probe-status');
             if (el) el.textContent = msg;
@@ -626,6 +679,7 @@
         // One probe per ERKENNEN: strokes, the template, what was recognised,
         // and how the pairing went. The server picks the running number.
         async function speichereProbe() {
+            if (istBeispiel) return;
             const [slug, vorlage] = VORLAGEN[vorlageIdx];
             const erg = analysis.lines.map(l => zeilenErgebnis[l.lineIdx]).find(e => e && e.latex);
             const probe = {
@@ -715,6 +769,8 @@
         }
 
         function clearAll() {
+            clearTimeout(beispielTimer);
+            istBeispiel = false;
             strokes.length = 0;
             current = null;
             verwerfeErkennung();
@@ -768,6 +824,9 @@
                     morphen(1);
                 }, 350);
             }, '#00d2ff', v => v.toFixed(1) + ' s');
+
+            document.getElementById('ui-container').insertAdjacentHTML('beforeend',
+                '<button class="cyber-btn" style="width:100%;margin-top:0.8rem" onclick="beispiel()">BEISPIEL</button>');
 
             /* Ausgeblendet auf Docs Wunsch (25.09.) - die Funktionen dahinter
                leben weiter, nur die Bedienelemente sind weg:
