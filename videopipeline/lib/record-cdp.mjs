@@ -40,8 +40,10 @@ const CURSOR_JS = () => {
 // option. The old default (upscale 2, dsf 1) shot 720p and blew it up to 1440p - the file
 // still reported 2560x1440, so ffprobe never gave the blur away. It slipped through twice.
 // To re-cut an older film exactly as it was shot, pass { upscale: 2, dsf: 1 } explicitly.
-export async function runScenes(scenes, { outDir, viewport = { width: 1280, height: 720 }, upscale = 1, dsf = 2, showCursor = false, record = true }) {
-  const browser = await chromium.launch({ channel: 'chromium' });
+// args: extra browser flags - a page that plays sound (a tour's voice) runs with --mute-audio, so a take never talks
+// through Doc's speakers (Doc, 24.09.2026: "stopp mal sound").
+export async function runScenes(scenes, { outDir, viewport = { width: 1280, height: 720 }, upscale = 1, dsf = 2, showCursor = false, record = true, args = [] }) {
+  const browser = await chromium.launch({ channel: 'chromium', args });
   const results = {};
   for (const sc of scenes) {
     const frameDir = `${outDir}/${sc.name}_frames`;
