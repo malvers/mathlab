@@ -214,7 +214,9 @@
         const morphVorbereitet = [];
         let morphT = 0;
         let morphAnim = null;
-        const view = { boxes: true, numbers: true, rows: true, penOnly: false };
+        const view = { boxes: false, numbers: true, rows: true, penOnly: false };
+        // Doc: boxes off by default, and the choice is remembered on the device
+        try { view.boxes = localStorage.getItem('vorrechnen-boxen') === '1'; } catch (_) {}
 
         // The corpus, easy to hard. Doc copies each one by hand, ERKENNEN saves
         // the probe, and the grouping is then tuned against all of them. Roots
@@ -815,8 +817,10 @@
                     <button class="cyber-btn" style="flex:1" onclick="nochmal()">NOCHMAL</button>
                 </div>
                 <div id="morph-steuerung" style="margin-top:0.3rem"></div>
-                <div id="probe-status" class="erk-info" style="margin-top:0.6rem">–</div>
-                <div id="erkennung-out" style="margin-top:1rem"><div class="erk-info">–</div></div>
+                <!-- Doc: no text under the slider. Still written, just not shown -
+                     display:none off again when calibrating. -->
+                <div id="probe-status" class="erk-info" style="margin-top:0.6rem;display:none">–</div>
+                <div id="erkennung-out" style="margin-top:1rem;display:none"><div class="erk-info">–</div></div>
                 <input type="file" id="import-file" accept="application/json" style="display:none"
                        onchange="if(this.files[0]) importStrokes(this.files[0])">
                 <select id="modell-wahl" style="display:none">
@@ -839,6 +843,12 @@
                     morphen(1);
                 }, 350);
             }, '#00d2ff', v => v.toFixed(1) + ' s');
+
+            CyberUI.createCheckbox('morph-steuerung', 'Boxen zeigen', view.boxes, v => {
+                view.boxes = v;
+                try { localStorage.setItem('vorrechnen-boxen', v ? '1' : '0'); } catch (_) {}
+                redraw();
+            });
 
             /* Ausgeblendet auf Docs Wunsch (25.09.) - die Funktionen dahinter
                leben weiter, nur die Bedienelemente sind weg:
