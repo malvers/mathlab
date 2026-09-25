@@ -26,7 +26,7 @@ d = Deck("zahlensystem-maya.pptx")
 
 # Doc himself sits in the Frag-Solita row of this deck, with his team photo (Doc, 24.09.2026)
 if hasattr(d, "set_avatar") and hasattr(d, "set_voice"):
-    d.set_avatar("../resources/team/alvers_final.png", "Doc Alvers")
+    d.set_avatar("../resources/team/alvers_blick.png", "Doc Alvers")   # looking at the viewer (25.09.2026)
     d.set_voice("doc")                       # ... and answers in his own voice
 
 
@@ -98,9 +98,9 @@ d.summary("6207 zur Basis 10: 6 Tausender, 2 Hunderter, 0 Zehner, 7 Einer. Die S
           "10^3=1000, 10^2=100, 10^1=10, 10^0=1. Jede Stelle ist zehnmal so viel wert wie die rechte.")
 
 d.bullets("Ausgerechnet", [
-    ("$6207 = 6 \\cdot 1000 + 2 \\cdot 100 + 0 \\cdot 10 + 7 \\cdot 1$", 0),
-    ("$= 6000 + 200 + 0 + 7$", 0),
-    ("$= 6207$", 0),
+    # one aligned block, so the three = stand under one another (Doc, 25.09.2026)
+    ("$\\begin{aligned} 6207 &= 6 \\cdot 1000 + 2 \\cdot 100 + 0 \\cdot 10 + 7 \\cdot 1 \\\\ "
+     "&= 6000 + 200 + 0 + 7 \\\\ &= 6207 \\end{aligned}$", 0),
     ("Die **Null** hält die Stelle frei — ohne sie stünde da $627$", 0),
     ("Genau dafür ist die Null da: sie sagt **hier ist nichts**", 0),
 ])
@@ -207,16 +207,20 @@ d.summary("Mit diesem Zahlensystem sagten die Maya Venus-Läufe tagegenau voraus
           "Jahreslänge war genauer als der Julianische Kalender. Möglich nur durch "
           "Stellenwertsystem und Null.")
 
-d.bullets("Und noch ein System: Basis 27", [
-    ("In **Papua-Neuguinea** zählen einige Völker zur Basis **27**", 0),
-    ("Gezählt wird am Körper: Finger, Arm, Schulter, Ohr, Nase — und zurück", 0),
-    ("$5 + 6 + 3 + \\ldots$ Stationen ergeben genau **27**", 0),
-    ("Es gibt kein „richtiges\" Zahlensystem — nur **gewählte** Basen", 0),
-    ("Unsere **10** ist auch nur eine Hand voll Zufall", 0),
+# Doc, 25.09.2026: "Basis ist falsch! Wie ich gelernt habe von Euch" - the same words as the
+# lab's "Basis 27?" note (HTML/koerperzaehlen.html): a count of body points is no base
+d.bullets("Und noch ein Weg: Zählen am Körper", [
+    ("In **Papua-Neuguinea** zählen einige Gruppen am Körper: Finger, Arm, Schulter, Ohr, Nase — und zurück", 0),
+    ("Der Zählweg hat **27** Punkte — andere Gruppen kommen auf 19, 23 oder 33", 0),
+    ("Oft heißt es „Basis 27“ — das stimmt **nicht**: es gibt keine Stellen $1, 27, 729, \\ldots$ und keine Ziffern dafür", 0),
+    ("Wer weiterzählt, fängt wieder am Daumen an und merkt sich die Runden — wie schreibt man damit $500$?", 0),
+    ("Genau dafür haben Maya und Babylonier **Stellenwerte** erfunden", 0),
 ])
-d.summary("Zum Schluss: in Papua-Neuguinea wird zur Basis 27 am Körper gezählt (Finger, Arm, "
-          "Schulter, Ohr, Nase und zurück). Es gibt kein richtiges Zahlensystem, nur gewählte "
-          "Basen — unsere 10 kommt von den zehn Fingern.")
+d.summary("Zum Schluss: in Papua-Neuguinea zählen einige Gruppen am Körper (Finger, Arm, Schulter, "
+          "Ohr, Nase und zurück), der Zählweg hat 27 Punkte, bei anderen Gruppen 19, 23 oder 33. "
+          "Das ist keine Basis 27: es gibt keine Stellen 1, 27, 729 und keine Ziffern dafür. Wer "
+          "weiterzählt, merkt sich die Runden - große Zahlen wie 500 lassen sich so nicht schreiben, "
+          "genau dafür haben Maya und Babylonier Stellenwerte erfunden.")
 
 d.table_top("Zum Nachschlagen", [
     ["Begriff", "in einem Satz"],
