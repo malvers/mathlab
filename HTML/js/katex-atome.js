@@ -48,6 +48,31 @@
         return y;
     }
 
+    // One SVG atom: its VISIBLE box (a root's SVG is 400em wide and clipped by
+    // a .hide-tail span - the span is what shows), a label for reading, and a
+    // self-contained copy of the markup, white on transparent, for tracing.
+    function svgAtom(svg, origin) {
+        const clip = svg.parentElement && svg.parentElement.classList.contains('hide-tail')
+            ? svg.parentElement : svg;
+        const r = clip.getBoundingClientRect();
+        if (r.width < 0.5 || r.height < 0.5) return null;
+        const label = svg.closest('.sqrt') ? '√' : svg.closest('.accent') ? '→' : '▭';
+        const kopie = svg.cloneNode(true);
+        kopie.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        kopie.setAttribute('width', '%W%');
+        kopie.setAttribute('height', '%H%');
+        kopie.setAttribute('style', 'color:#fff;fill:#fff');
+        kopie.querySelectorAll('path, line, rect, polygon').forEach(p => {
+            if (!p.getAttribute('fill') || p.getAttribute('fill') === 'currentColor') p.setAttribute('fill', '#fff');
+            if (p.getAttribute('stroke') && p.getAttribute('stroke') !== 'none') p.setAttribute('stroke', '#fff');
+        });
+        return {
+            art: 'svg', text: label,
+            box: { x: r.left - origin.x, y: r.top - origin.y, w: r.width, h: r.height },
+            svg: new XMLSerializer().serializeToString(kopie),
+        };
+    }
+
     let _mess = null;
     function messKontext() {
         if (!_mess) _mess = document.createElement('canvas').getContext('2d');
@@ -68,9 +93,23 @@
         if (!el || el.nodeType !== 1) return;
         if (el.classList.contains('katex-mathml')) return;       // hidden accessibility twin
 
-        if (el.tagName === 'svg' || el.tagName === 'SVG') {       // radicals, tall delimiters
-            stats.svg++;
+        // Radicals, vector arrows, tall delimiters: KaTeX draws them as SVG, not
+        // as text. Each becomes one atom; its outline is traced from the SVG
+        // itself when the morph needs it (HandschriftMorph.svgVorbereiten).
+        if (el.tagName === 'svg' || el.tagName === 'SVG') {
+            if (!stats.gesehen.has(el)) {
+                stats.gesehen.add(el);
+                const a = svgAtom(el, origin);
+                if (a) { out.push(a); stats.svg++; }
+            }
             return;
+        }
+
+        // A root is written sign first, then what is under it - but KaTeX puts
+        // the radicand first in the DOM. So the sign goes out before anything
+        // else inside it (corpus probes 20, 21).
+        if (el.classList.contains('sqrt')) {
+            el.querySelectorAll('svg').forEach(sv => walk(sv, out, origin, stats));
         }
 
         if (LINE_CLASSES.test(el.className || '')) {
@@ -172,7 +211,7 @@
         const r = host.getBoundingClientRect();
         const origin = { x: r.left, y: r.top };
         const out = [];
-        const stats = { svg: 0 };
+        const stats = { svg: 0, gesehen: new Set() };
         walk(rootEl, out, origin, stats);
         return { atome: out, svg: stats.svg, box: { w: r.width, h: r.height }, fontSize: o.fontSize };
     }
@@ -183,6 +222,7 @@
         return atome.map(a => {
             const b = { x: a.box.x * skala + dx, y: a.box.y * skala + dy, w: a.box.w * skala, h: a.box.h * skala };
             if (a.art === 'line') return { art: 'line', box: b };
+            if (a.art === 'svg') return { art: 'svg', text: a.text, svg: a.svg, box: b };
             return {
                 art: 'text', text: a.text,
                 font: { family: a.font.family, style: a.font.style, size: a.font.size * skala },

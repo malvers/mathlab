@@ -213,18 +213,31 @@
         for (const e of entries) {
             const b = e.bbox;
             if (b.w / b.h < o.barRatio) continue;
-            if (b.w < lineHeight * o.barMinWidth) continue;
+            // Length is not what makes a bar: Doc's bar over a single digit is
+            // 0.86 line heights wide (probe 11). What makes it one is ink above
+            // AND below. A short one needs that ink close, so a minus between
+            // two lines of a calculation does not qualify.
+            if (b.w < lineHeight * 0.6) continue;
+            const reach = lineHeight * (b.w < lineHeight * o.barMinWidth ? 1.4 : o.barReach);
 
-            const mitte = b.x + b.w / 2;
             let drueber = false, drunter = false;
             for (const f of entries) {
                 if (f === e) continue;
                 const fb = f.bbox;
-                // must sit within the bar's span, not beside it
-                if (fb.x + fb.w < b.x || fb.x > b.x + b.w) continue;
+                // Evidence is a glyph, not another flat stroke: the lower bar of
+                // an "=" has the upper one above it, the underline of a ± has the
+                // big fraction bar below it (probe 21) - neither is a fraction.
+                if (fb.w / fb.h > 4) continue;
+                // Centred over or under it - an exponent overhanging from the
+                // left does not count (the 2 of a^2, probe 08) ...
+                const fx = fb.x + fb.w / 2;
+                if (fx < b.x || fx > b.x + b.w) continue;
+                // ... and never ink that CROSSES it: that is the other stroke of
+                // a "+" (probe 08), not a numerator.
+                if (beruehrt(f.pts, [e.pts], 0)) continue;
                 const fm = fb.y + fb.h / 2;
-                if (fm < b.y && b.y - fm < lineHeight * o.barReach) drueber = true;
-                if (fm > b.y + b.h && fm - (b.y + b.h) < lineHeight * o.barReach) drunter = true;
+                if (fm < b.y && b.y - fm < reach) drueber = true;
+                if (fm > b.y + b.h && fm - (b.y + b.h) < reach) drunter = true;
                 if (drueber && drunter) break;
             }
             if (drueber && drunter) ids.add(e.idx);
@@ -280,18 +293,49 @@
             if (tiny(bb)) { punkte.push(e); continue; }
             let target = null;
 
+            // A long flat line that is not a fraction bar - a root's vinculum, an
+            // overline - joins only the root sign at whose tip it starts (Doc
+            // draws it right after the sign, or after the radicand: probe 21).
+            // And nothing joins it by overlap: the radicand lies right under
+            // it, fully inside its columns, and is not part of it.
+            const langeLinie = b => b.w / b.h > 4 && b.w > lineHeight * 1.5;
+            if (langeLinie(bb)) {
+                const links = e.pts.reduce((m, p) => p.x < m.x ? p : m, e.pts[0]);
+                for (let s = symbols.length - 1; s >= 0 && !target; s--) {
+                    const sym = symbols[s];
+                    if (sym.bruch || sym.linie) continue;
+                    const spitze = { x: sym.bbox.x + sym.bbox.w, y: sym.bbox.y };
+                    if (Math.hypot(links.x - spitze.x, links.y - spitze.y) < lineHeight * 0.45 &&
+                        links.x >= sym.bbox.x + sym.bbox.w * 0.5) target = sym;
+                }
+                if (target) {
+                    target.strokeIdxs.push(e.idx);
+                    target.bbox = bboxUnion(target.bbox, bb);
+                    target.pts.push(e.pts);
+                    if (e.tEnd !== null) target.tEnd = e.tEnd;
+                } else {
+                    symbols.push({ strokeIdxs: [e.idx], bbox: bb, tStart: e.tStart, tEnd: e.tEnd, pts: [e.pts], linie: true });
+                }
+                continue;
+            }
+
             // Most recent first: that is where a multi-stroke glyph continues.
             for (let s = symbols.length - 1; s >= 0; s--) {
                 const sym = symbols[s];
-                if (sym.bruch) continue;                 // never merge into a bar
+                if (sym.bruch || sym.linie) continue;    // never merge into a bar or a long line
                 const yg = yGap(bb, sym.bbox);
                 if (yg > lineHeight * o.yGapFactor) continue;
                 if (yg > lineHeight * o.touchGap) {
                     // Not touching vertically: only the second bar of an "="
-                    // still belongs. A "0" under an integral overlaps it
-                    // sideways and sits close - and is another symbol.
+                    // still belongs - or the underline of a ±, ≤, ≥: short, flat,
+                    // right under the glyph just written, no wider than it.
+                    // A "0" under an integral overlaps it sideways and sits
+                    // close - and is another symbol.
                     const flat = b => b.w / b.h > 2.2;       // a handwritten "=" bar can be short and thick (Doc's: 2.9)
-                    if (!(flat(bb) && flat(sym.bbox) && yg < lineHeight * o.barGap)) continue;
+                    const unterstrich = s === symbols.length - 1 && flat(bb) && !flat(sym.bbox) &&
+                        bb.y > sym.bbox.y + sym.bbox.h * 0.5 && yg < lineHeight * 0.4 &&
+                        bb.w <= sym.bbox.w * 1.3 && xOverlapRatio(bb, sym.bbox) >= 0.6;
+                    if (!(flat(bb) && flat(sym.bbox) && yg < lineHeight * o.barGap) && !unterstrich) continue;
                 }
 
                 // Has the pen started another symbol since this one? Then boxes
@@ -299,10 +343,18 @@
                 // still belongs (a t-bar, the slash of ≠). Doc writes the parts
                 // of a glyph in one go (199 ms median between them).
                 if (s < symbols.length - 1) {
-                    if (xOverlapRatio(bb, sym.bbox) > 0 && beruehrt(e.pts, sym.pts, lineHeight * 0.06)) { target = sym; break; }
+                    if (xOverlapRatio(bb, sym.bbox) >= 0 && beruehrt(e.pts, sym.pts, lineHeight * 0.1)) { target = sym; break; }
                     if (bb.x > sym.bbox.x + sym.bbox.w + lineHeight) break;
                     continue;
                 }
+
+                // Inside a big glyph's box without touching its ink: the radicand
+                // under a root's vinculum, a letter written into a large bracket.
+                // A new symbol, however quickly it followed.
+                const drin = bb.x >= sym.bbox.x - 2 && bb.x + bb.w <= sym.bbox.x + sym.bbox.w + 2 &&
+                             bb.y >= sym.bbox.y - 2 && bb.y + bb.h <= sym.bbox.y + sym.bbox.h + 2;
+                if (drin && sym.bbox.w > 1.5 * bb.w && sym.bbox.h > 1.2 * bb.h &&
+                    !beruehrt(e.pts, sym.pts, lineHeight * 0.06)) continue;
 
                 const ratio = xOverlapRatio(bb, sym.bbox);
                 // Merely near is only enough side by side on the same level. An
@@ -566,6 +618,51 @@
         return out;
     }
 
+    // ── A long line drawn in pieces ─────────────────────────────────────────
+    // Doc draws long lines in two strokes: the fraction bar of the p-q formula,
+    // and the vinculum of its root, left half then right half, overlapping a
+    // little (corpus probe 21). Flat, level, end to end: one line. The two bars
+    // of an "=" are not pieces - they lie ABOVE each other and overlap almost
+    // completely sideways.
+    function stueckeZusammen(entries, lh) {
+        const flach = e => e.bbox.w / e.bbox.h > 4 && e.bbox.w > lh * 0.5;
+        const weg = new Set(), out = [];
+        for (const a of entries) {
+            if (weg.has(a.idx)) continue;
+            if (!flach(a)) { out.push(a); continue; }
+            const m = Object.assign({}, a, { mit: [] });
+            let weiter = true;
+            while (weiter) {
+                weiter = false;
+                for (const b of entries) {
+                    if (b === a || weg.has(b.idx) || !flach(b)) continue;
+                    if (xGap(b.bbox, m.bbox) > lh * 0.3) continue;
+                    if (xOverlapRatio(b.bbox, m.bbox) > 0.5) continue;
+                    // Level - or meeting at the join: Doc's right half sags 18 px
+                    // but its ink starts where the left half ends.
+                    const dy = Math.abs(centreY(b.bbox) - centreY(m.bbox));
+                    if (dy > lh * 0.25 && !(dy <= lh * 0.6 && beruehrt(b.pts, [m.pts], lh * 0.25))) continue;
+                    weg.add(b.idx);
+                    m.mit.push(b.idx);
+                    m.bbox = bboxUnion(m.bbox, b.bbox);
+                    m.pts = m.pts.concat(b.pts);
+                    if (b.tStart !== null && (m.tStart === null || b.tStart < m.tStart)) m.tStart = b.tStart;
+                    if (b.tEnd !== null && (m.tEnd === null || b.tEnd > m.tEnd)) m.tEnd = b.tEnd;
+                    weiter = true;
+                }
+            }
+            out.push(m);
+        }
+        return out;
+    }
+
+    // Symbols carry the pieces again, so every stroke index is accounted for.
+    function stueckeAufloesen(symbols, entries) {
+        const mit = new Map(entries.filter(e => e.mit && e.mit.length).map(e => [e.idx, e.mit]));
+        if (!mit.size) return;
+        symbols.forEach(s => { s.strokeIdxs = s.strokeIdxs.flatMap(i => [i, ...(mit.get(i) || [])]); });
+    }
+
     // Re-group one row to a known glyph count and put it back in reading order.
     // Returns the new symbols (or the old ones if the count cannot be reached).
     function nachjustieren(line, strokes, soll, opts) {
@@ -581,11 +678,12 @@
 
     function analyse(strokes, opts) {
         const o = Object.assign({}, DEFAULTS, opts || {});
-        const entries = eintraege(strokes);
-        if (!entries.length) return { symbols: [], lines: [], lineHeight: 1 };
+        const roh = eintraege(strokes);
+        if (!roh.length) return { symbols: [], lines: [], lineHeight: 1 };
+        const lineHeight = typischeHoehe(roh);
+        const entries = stueckeZusammen(roh, lineHeight);
 
         let rows = splitStrokesIntoRows(entries, o);
-        const lineHeight = typischeHoehe(entries);
 
         const bruchIds = findeBruchstriche(entries, lineHeight, o);
         // Stacked constructs span rows by nature - numerator over denominator, a
@@ -644,6 +742,7 @@
                 tEnd: Math.max(...syms.map(s => s.tEnd === null ? -Infinity : s.tEnd)),
             });
         });
+        stueckeAufloesen(all, entries);
         // Rows came out top to bottom; that is also the order they were written in
         // for a calculation worked downwards.
         return { symbols: all, lines, lineHeight };

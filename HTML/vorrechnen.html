@@ -494,12 +494,12 @@
                         zeilenErgebnis[line.lineIdx] = {
                             latex: r.latex, tokens: r.tokens, atome, ms: r.ms, zuordnung, svg: m.svg, nachjustiert,
                         };
-                        // Morph only when the mapping holds and every target is a
-                        // glyph we can trace (radicals and tall delimiters are SVG
-                        // in KaTeX - not yet).
-                        if (zuordnung.passt && !m.svg) {
+                        // Morph only when the mapping holds. Radicals and vector
+                        // arrows are SVG in KaTeX - they are traced first.
+                        if (zuordnung.passt) {
                             try {
                                 await HandschriftMorph.schriftenBereit(atome);
+                                await HandschriftMorph.svgVorbereiten(atome);
                                 morphVorbereitet[line.lineIdx] = HandschriftMorph.vorbereiten(line, strokes, zuordnung);
                             } catch (e) {
                                 morphVorbereitet[line.lineIdx] = null;
@@ -581,7 +581,7 @@
                     <div class="erk-fehler">${e.fehler}</div></div>`;
                 if (e.uebersprungen) return '';
                 const z = e.zuordnung;
-                const hinweis = e.svg ? `<div class="erk-warn">Wurzel oder große Klammer – Morph dafür noch nicht gebaut</div>` : '';
+                const hinweis = '';
                 return `<div class="erk-zeile"><b>Zeile ${l.lineIdx}</b>
                     <div class="erk-latex">${e.latex.replace(/</g, '&lt;')}</div>
                     <div class="${z.passt ? 'erk-ok' : 'erk-warn'}">${z.diagnose}${e.nachjustiert ? ' – Gruppierung an die Zeichenzahl angeglichen' : ''}</div>${hinweis}

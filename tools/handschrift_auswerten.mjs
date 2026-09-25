@@ -80,7 +80,7 @@ for (const f of files) {
         strokes.length = 0;
         ${JSON.stringify(d.strokes)}.forEach(s => strokes.push(s));
         recompute();
-        const txt = a => a.art === 'line' ? '—' : a.text;
+        const txt = a => a.art === 'line' ? '—' : (a.text || '▭');
         const mSoll = await KatexAtome.atomeAusLatex(${JSON.stringify(vorlage)}, messHost(), { fontSize: 100 });
         const soll = mSoll.atome;
         const gelesen = ${JSON.stringify(erkannt)}
@@ -130,7 +130,7 @@ for (const f of files) {
                 ctx.strokeRect(b.x - 5, b.y - 5, b.w + 10, b.h + 10);
                 ctx.fillStyle = c;
                 ctx.font = '700 17px Arial';
-                const g = soll[i] ? (soll[i].art === 'line' ? '—' : soll[i].text) : '?';
+                const g = soll[i] ? (soll[i].art === 'line' ? '—' : (soll[i].text || '▭')) : '?';
                 ctx.fillText(i + ':' + g, b.x - 4, b.y - 10);
                 ctx.font = '11px Arial';
                 ctx.fillText('[' + s.strokeIdxs.join(',') + ']', b.x - 4, b.y + b.h + 18);

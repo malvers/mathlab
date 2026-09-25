@@ -81,12 +81,59 @@
         await Promise.all(jobs);
     }
 
+    // ── SVG atoms: roots, vector arrows ──────────────────────────────────────
+    // KaTeX draws these as SVG, so there is no font to trace. The SVG itself is
+    // rasterised big, traced with the same marching squares, and the outlines
+    // are kept relative to the atom's box (0..1), because the atom is scaled
+    // onto the handwriting afterwards. Asynchronous - an image has to decode.
+    const SVG_CACHE = new Map();
+    async function svgKonturen(atom) {
+        const Wz = Math.max(40, Math.round(atom.box.w * 8)), Hz = Math.max(40, Math.round(atom.box.h * 8));
+        const key = atom.svg + '|' + (atom.box.w / atom.box.h).toFixed(3);
+        if (SVG_CACHE.has(key)) return SVG_CACHE.get(key);
+        // cap the size: a long vinculum at x8 would be a huge canvas
+        const f = Math.min(1, 900 / Math.max(Wz, Hz));
+        const W = Math.round(Wz * f), H = Math.round(Hz * f);
+        const markup = atom.svg.replace('%W%', W).replace('%H%', H);
+        const img = new Image();
+        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(markup);
+        try { await img.decode(); } catch (e) { SVG_CACHE.set(key, []); return []; }
+        const P = 4;                                             // margin so the outline can close
+        const c = document.createElement('canvas');
+        c.width = W + 2 * P; c.height = H + 2 * P;
+        const ctx = c.getContext('2d', { willReadFrequently: true });
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(img, P, P, W, H);
+        const px = ctx.getImageData(0, 0, c.width, c.height).data;
+        const grid = new Uint8Array(c.width * c.height);
+        for (let i = 0, p = 0; i < px.length; i += 4, p++) grid[p] = px[i] > 128 ? 1 : 0;
+        let polys = [];
+        try { polys = getContoursWithHoles(grid, c.width, c.height) || []; } catch (e) { polys = []; }
+        polys = polys.filter(p => p && p.length >= 8).map(poly => poly.map(pt => [
+            ((pt[0] !== undefined ? pt[0] : pt.x) - P) / W,
+            ((pt[1] !== undefined ? pt[1] : pt.y) - P) / H]));
+        SVG_CACHE.set(key, polys);
+        return polys;
+    }
+
+    // Trace every SVG atom once, before vorbereiten() needs the shapes.
+    async function svgVorbereiten(atome) {
+        for (const a of atome || []) {
+            if (a.art === 'svg' && !a.normPolys) a.normPolys = await svgKonturen(a);
+        }
+    }
+
     // ── The target shape of one atom, in page coordinates ───────────────────
     function zielFlaechen(atom) {
         if (atom.art === 'line') {
             const b = atom.box;
             const h = Math.max(b.h, 1.5);
             return [[[b.x, b.y], [b.x + b.w, b.y], [b.x + b.w, b.y + h], [b.x, b.y + h]]];
+        }
+        if (atom.art === 'svg') {
+            const b = atom.box;
+            return (atom.normPolys || []).map(poly => poly.map(p => [b.x + p[0] * b.w, b.y + p[1] * b.h]));
         }
         const s = atom.font.size / RENDER;
         return glyphKonturen(atom.text, atom.font)
@@ -205,7 +252,7 @@
         ctx.restore();
     }
 
-    const api = { glyphKonturen, zielFlaechen, vorbereiten, zeichnen, schriftenBereit, strichZuFlaeche, ease, RENDER };
+    const api = { glyphKonturen, zielFlaechen, vorbereiten, zeichnen, schriftenBereit, svgVorbereiten, strichZuFlaeche, ease, RENDER };
     if (typeof module === 'object' && module.exports) module.exports = api;
     else root.HandschriftMorph = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
