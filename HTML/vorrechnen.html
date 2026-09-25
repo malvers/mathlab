@@ -242,6 +242,13 @@
         const morphVorbereitet = [];
         let morphT = 0;
         let morphAnim = null;
+        // The working under the task: one LaTeX line per step, top to bottom.
+        // Kept on the device - live reload must not eat a lesson's board.
+        const rechenweg = [];
+        try {
+            const d = JSON.parse(localStorage.getItem('vorrechnen-rechenweg') || '[]');
+            if (Array.isArray(d)) d.forEach(l => { if (typeof l === 'string') rechenweg.push(l); });
+        } catch (_) {}
         // formelUnten: the typeset formula under the handwriting - Doc first: "lass
         // die unten weg", then: "zeig bitte doch die erkannte Formel unten x mittig
         // etwas dunkler" (25.09.)
@@ -298,6 +305,34 @@
         ];
         let vorlageIdx = 0;
         try { vorlageIdx = Math.min(VORLAGEN.length - 1, parseInt(localStorage.getItem('vorrechnen-vorlage') || '0', 10) || 0); } catch (_) {}
+
+        // Doc, 25.09. evening: without "Meine Beispiele" the head strip holds a
+        // task to work through in class - year 11, revision, rearranging
+        // equations from easy to harder. [slug, LaTeX, solve for]
+        const AUFGABEN = [
+            ['plus',        'x+7=12',                                     'x'],
+            ['mal',         '4x=28',                                      'x'],
+            ['zwei-schritte', '3x+5=20',                                  'x'],
+            ['beidseitig',  '7x-4=3x+8',                                  'x'],
+            ['klammer',     '5(x-2)=3x+6',                                'x'],
+            ['klammern',    '3(2x+1)-2(x-4)=19',                          'x'],
+            ['bruch',       '\\frac{x}{4}+3=7',                           'x'],
+            ['zaehler',     '\\frac{2x-1}{3}=5',                          'x'],
+            ['brueche',     '\\frac{x}{2}+\\frac{x}{3}=10',               'x'],
+            ['nenner',      '\\frac{6}{x-1}=2',                           'x'],
+            ['geschwindigkeit', 'v=\\frac{s}{t}',                         't'],
+            ['ohm',         'U=R\\cdot I',                                'R'],
+            ['gerade',      'y=mx+b',                                     'm'],
+            ['dreieck',     'A=\\frac{g\\cdot h}{2}',                     'h'],
+            ['trapez',      'A=\\frac{a+c}{2}\\cdot h',                   'a'],
+            ['parameter',   'ax+b=cx+d',                                  'x'],
+            ['energie',     'E=\\frac{1}{2}mv^2',                         'v'],
+            ['gravitation', 'F=G\\frac{m_1 m_2}{r^2}',                    'r'],
+            ['pendel',      'T=2\\pi\\sqrt{\\frac{l}{g}}',                'g'],
+            ['linse',       '\\frac{1}{f}=\\frac{1}{g}+\\frac{1}{b}',     'b'],
+        ];
+        let aufgabeIdx = 0;
+        try { aufgabeIdx = Math.min(AUFGABEN.length - 1, parseInt(localStorage.getItem('vorrechnen-aufgabe') || '0', 10) || 0); } catch (_) {}
         // Does the server take probes? Checked once at load; otherwise the probe
         // is offered as a download, the way SICHERN does it.
         let speichernApi = false;
@@ -334,7 +369,50 @@
             return !((ev.width || 0) > BALLEN_BREITE || (ev.height || 0) > BALLEN_BREITE);
         }
 
+        // Swipe up with two or more fingers: the finished lines join the
+        // working under the task (rechenwegHoch). Doc asked for four fingers;
+        // Windows 11 may keep three and four for itself on a touchscreen, so
+        // any two or more count. Fingers in a gesture never draw, and a stroke
+        // the first finger had begun is dropped. A palm is not a finger.
+        const WISCH = 60;                  // px upwards, averaged over the fingers
+        const finger = new Map();          // pointerId -> { x0, y0, x, y, weg }
+        let geste = false, gesteAbgebrochen = false;
+        function fingerRunter(ev) {
+            if (ev.pointerType !== 'touch') return false;
+            if ((ev.width || 0) > BALLEN_BREITE || (ev.height || 0) > BALLEN_BREITE) return geste;
+            finger.set(ev.pointerId, { x0: ev.clientX, y0: ev.clientY, x: ev.clientX, y: ev.clientY, weg: false });
+            if (!geste && [...finger.values()].filter(f => !f.weg).length >= 2) {
+                geste = true;
+                gesteAbgebrochen = false;
+                if (current && current.pointerType === 'touch') { current = null; currentId = null; redrawBald(); }
+            }
+            return geste;
+        }
+        function fingerZieht(ev) {
+            const f = finger.get(ev.pointerId);
+            if (f && !f.weg) { f.x = ev.clientX; f.y = ev.clientY; }
+            return geste && !!f;
+        }
+        function fingerHoch(ev) {
+            const f = finger.get(ev.pointerId);
+            if (!f) return false;
+            if (!geste) { finger.delete(ev.pointerId); return false; }
+            // a cancelled pointer (the system took the gesture) has no position
+            if (ev.type === 'pointercancel') gesteAbgebrochen = true;
+            else if (!f.weg) { f.x = ev.clientX; f.y = ev.clientY; }
+            f.weg = true;
+            if ([...finger.values()].some(g => !g.weg)) return true;
+            const alle = [...finger.values()];
+            const dx = alle.reduce((s, g) => s + g.x - g.x0, 0) / alle.length;
+            const dy = alle.reduce((s, g) => s + g.y - g.y0, 0) / alle.length;
+            finger.clear();
+            geste = false;
+            if (!gesteAbgebrochen && dy < -WISCH && Math.abs(dy) > Math.abs(dx)) rechenwegHoch();
+            return true;
+        }
+
         canvas.addEventListener('pointerdown', ev => {
+            if (fingerRunter(ev)) { ev.preventDefault(); return; }
             if (ev.pointerType === 'pen') {
                 stiftZuletzt = performance.now();
                 // a finger or palm stroke under way when the pen lands was not meant
@@ -372,6 +450,7 @@
 
         canvas.addEventListener('pointermove', ev => {
             if (ev.pointerType === 'pen') stiftZuletzt = performance.now();   // hovering counts too
+            if (fingerZieht(ev)) { ev.preventDefault(); return; }
             if (!current || ev.pointerId !== currentId) return;
             const roh = (typeof ev.getCoalescedEvents === 'function') ? ev.getCoalescedEvents() : null;
             if (roh && roh.length) roh.forEach(e => current.points.push(canvasPos(e)));
@@ -413,6 +492,7 @@
 
         function endStroke(ev) {
             if (ev && ev.pointerType === 'pen') stiftZuletzt = performance.now();
+            if (ev && fingerHoch(ev)) return;
             if (!current || (ev && ev.pointerId !== currentId)) return;
             currentId = null;
             const s = current;
@@ -923,22 +1003,166 @@
                     'pointer-events:none;display:flex;align-items:center;justify-content:center;color:#00d2ff';
                 container.appendChild(host);
             }
-            const [slug, latex] = VORLAGEN[vorlageIdx];
-            host.innerHTML = `<span style="position:absolute;left:24px;top:50%;transform:translateY(-50%);` +
-                `font-family:Orbitron,sans-serif;font-size:0.8rem;letter-spacing:0.1em;color:#8a93a3">` +
-                `${vorlageIdx + 1} / ${VORLAGEN.length}${hinweis ? ' · ' + hinweis : ''}</span><span id="vorlage-formel" style="font-size:2.4rem;color:${INK}"></span>`;
+            // "Meine Beispiele" on: the template to copy; off: the task (AUFGABEN)
+            // with what to solve for at the right edge
+            const liste = testModus ? VORLAGEN : AUFGABEN, nr = testModus ? vorlageIdx : aufgabeIdx;
+            const [slug, latex, nach] = liste[nr];
+            const RAND = 'position:absolute;top:50%;transform:translateY(-50%);' +
+                'font-family:Orbitron,sans-serif;font-size:0.8rem;letter-spacing:0.1em;color:#8a93a3';
+            host.innerHTML = `<span style="${RAND};left:24px">` +
+                `${nr + 1} / ${liste.length}${hinweis ? ' · ' + hinweis : ''}</span><span id="vorlage-formel" style="font-size:2.4rem;color:${INK}"></span>` +
+                (nach ? `<span id="vorlage-nach" style="${RAND};right:24px">NACH <span style="font-size:1.6em"></span></span>` : '');
             try { katex.render(alsDisplay(latex), document.getElementById('vorlage-formel'), { throwOnError: false }); }
             catch (e) { document.getElementById('vorlage-formel').textContent = latex; }
-            // Doc: without "Meine Beispiele" nothing up there - free writing
-            host.style.display = testModus ? 'flex' : 'none';
+            if (nach) {
+                const v = host.querySelector('#vorlage-nach span');
+                try { katex.render(nach, v, { throwOnError: false }); } catch (e) { v.textContent = nach; }
+            }
+            host.style.display = 'flex';
             // a long one (Navier-Stokes) shrinks until it clears the counter
-            const zaehler = host.querySelector('span');
-            const rand = zaehler ? zaehler.getBoundingClientRect().right - host.getBoundingClientRect().left + 32 : 170;
+            const h = host.getBoundingClientRect();
+            const zaehler = host.querySelector('span'), nachEl = document.getElementById('vorlage-nach');
+            const rand = Math.max(zaehler ? zaehler.getBoundingClientRect().right - h.left + 32 : 170,
+                nachEl ? h.right - nachEl.getBoundingClientRect().left + 32 : 0);
             passeEin(document.getElementById('vorlage-formel'), host.clientWidth - 2 * rand);
+            zeigeRechenweg();
         }
 
-        // Doc: "mach bei Weiter einen left right mit Dreiecken" - back and forth
+        // ── Working: the finished lines climb up under the task ─────────────
+        // Doc, 25.09.: "wenn ich zum Beispiel mit vier Fingern nach oben schiebe,
+        // dass diese Formel ... kleiner wird und als nächste Zeile für die Lösung
+        // dieser Umformung oben steht". Each recognised line on the page becomes
+        // one step: its typeset formula shrinks and flies up, its ink is gone,
+        // the page is free for the next step. The steps line up at their first
+        // equals sign, the way one writes a working on the board.
+        function merkeRechenweg() {
+            try { localStorage.setItem('vorrechnen-rechenweg', JSON.stringify(rechenweg)); } catch (_) {}
+        }
+        // "3x+5=20" -> ["3x+5", "{}=20"]; the empty group keeps the space
+        // before the "=". Only an "=" outside braces splits.
+        function amGleich(latex) {
+            let tiefe = 0;
+            for (let i = 0; i < latex.length; i++) {
+                const c = latex[i];
+                if (c === '\\') { i++; continue; }
+                if (c === '{') tiefe++;
+                else if (c === '}') tiefe--;
+                else if (c === '=' && tiefe === 0) return [latex.slice(0, i), '{}' + latex.slice(i)];
+            }
+            return [latex, ''];
+        }
+        // verborgenAb: steps from this index on are laid out but not yet shown -
+        // they are where the flying lines land
+        function zeigeRechenweg(verborgenAb) {
+            let host = document.getElementById('rechenweg-schicht');
+            if (!host) {
+                host = document.createElement('div');
+                host.id = 'rechenweg-schicht';
+                host.style.cssText = 'position:absolute;left:0;right:0;pointer-events:none;display:grid;' +
+                    `grid-template-columns:max-content max-content;justify-content:center;align-items:baseline;row-gap:0.35rem;font-size:2rem;color:${INK}`;
+                container.appendChild(host);
+            }
+            const kopf = document.getElementById('vorlage-schicht');
+            host.style.top = ((kopf && kopf.style.display !== 'none') ? kopf.getBoundingClientRect().height : 12) + 'px';
+            host.innerHTML = '';
+            rechenweg.forEach((latex, i) => {
+                amGleich(latex).forEach((teil, j) => {
+                    const d = document.createElement('div');
+                    d.dataset.schritt = i;
+                    d.style.justifySelf = j ? 'start' : 'end';
+                    if (verborgenAb !== undefined && i >= verborgenAb) d.style.visibility = 'hidden';
+                    try { katex.render(alsDisplay(teil), d, { throwOnError: false }); } catch (_) { d.textContent = teil; }
+                    host.appendChild(d);
+                });
+            });
+        }
+        let hochLaeuft = false;
+        async function rechenwegHoch() {
+            if (hochLaeuft || erkennenLaeuft) return;
+            const fertig = () => analysis.lines.filter(l => zeilenErgebnis[l.lineIdx] && zeilenErgebnis[l.lineIdx].latex);
+            if (!fertig().length) {
+                // not recognised yet: the swipe recognises first and lets the
+                // morph land, then the line goes up
+                if (!analysis.lines.some(l => !zuKlein(l))) return;
+                hochLaeuft = true;
+                try {
+                    await erkennen();
+                    await new Promise(r => setTimeout(r, morphDauer * 1000 + 400));
+                } finally { hochLaeuft = false; }
+                if (!fertig().length) return;
+            }
+            const zeilen = fertig();
+            if (morphT < 1) setzeMorph(1);
+            const c = container.getBoundingClientRect();
+            // where each line is now: its typeset formula, or its ink if the morph did not take
+            const von = zeilen.map(l => {
+                const k = document.querySelector(`#satz-schicht [data-zeile="z${l.lineIdx}"] .katex-html`);
+                if (k) { const r = k.getBoundingClientRect(); if (r.width) return { x: r.left - c.left, y: r.top - c.top, w: r.width }; }
+                return { x: l.bbox.x, y: l.bbox.y, w: l.bbox.w };
+            });
+            const latexe = zeilen.map(l => zeilenErgebnis[l.lineIdx].latex);
+            const erster = rechenweg.length;
+            latexe.forEach(l => rechenweg.push(l));
+            merkeRechenweg();
+            // the ink and the typeset line go; the new steps wait hidden in their place
+            const weg = new Set(zeilen.flatMap(l => l.symbols.flatMap(sy => sy.strokeIdxs)));
+            const bleiben = strokes.filter((_, i) => !weg.has(i));
+            strokes.length = 0;
+            bleiben.forEach(s => strokes.push(s));
+            verwerfeErkennung();
+            recompute();
+            merkeStriche();
+            zeigeRechenweg(erster);
+            const host = document.getElementById('rechenweg-schicht');
+            latexe.forEach((latex, k) => {
+                const zellen = [...host.querySelectorAll(`[data-schritt="${erster + k}"]`)];
+                const zeigen = () => zellen.forEach(z => { z.style.visibility = ''; });
+                let x0 = Infinity, y0 = Infinity;
+                zellen.forEach(z => {
+                    const r = (z.querySelector('.katex-html') || z).getBoundingClientRect();
+                    if (r.width) { x0 = Math.min(x0, r.left); y0 = Math.min(y0, r.top); }
+                });
+                if (!isFinite(x0)) { zeigen(); return; }
+                // one piece in flight, set at the step's size and nudged onto its spot
+                const flug = document.createElement('div');
+                flug.style.cssText = `position:absolute;left:${x0 - c.left}px;top:${y0 - c.top}px;pointer-events:none;` +
+                    `white-space:nowrap;line-height:normal;font-size:2rem;color:${INK};z-index:4`;
+                try { katex.render(alsDisplay(latex), flug, { throwOnError: false }); } catch (_) { flug.textContent = latex; }
+                container.appendChild(flug);
+                const fk = flug.querySelector('.katex-html') || flug;
+                let r = fk.getBoundingClientRect();
+                const links = x0 - c.left + (x0 - r.left), oben = y0 - c.top + (y0 - r.top);
+                flug.style.left = links + 'px';
+                flug.style.top = oben + 'px';
+                r = fk.getBoundingClientRect();
+                const a = von[k], s = a.w / Math.max(1, r.width);
+                // scale about the formula's own corner, so start and end are exact
+                flug.style.transformOrigin = `${r.left - c.left - links}px ${r.top - c.top - oben}px`;
+                flug.style.transform = `translate(${a.x - (r.left - c.left)}px, ${a.y - (r.top - c.top)}px) scale(${s})`;
+                flug.getBoundingClientRect();
+                flug.style.transition = 'transform 0.7s cubic-bezier(0.3, 0.7, 0.3, 1)';
+                flug.style.transform = 'none';
+                let gelandet = false;
+                const landen = () => { if (gelandet) return; gelandet = true; flug.remove(); zeigen(); };
+                flug.addEventListener('transitionend', landen, { once: true });
+                setTimeout(landen, 1000);
+            });
+        }
+
+        // Doc: "mach bei Weiter einen left right mit Dreiecken" - back and forth.
+        // Without "Meine Beispiele" it steps through the tasks; a new task
+        // starts on a clean board.
         function naechsteVorlage(schritt) {
+            if (!testModus) {
+                const n = AUFGABEN.length;
+                aufgabeIdx = (aufgabeIdx + (schritt === -1 ? -1 : 1) + n) % n;
+                try { localStorage.setItem('vorrechnen-aufgabe', String(aufgabeIdx)); } catch (_) {}
+                rechenweg.length = 0;
+                merkeRechenweg();
+                clearAll();
+                zeigeVorlage();
+                return;
+            }
             const n = VORLAGEN.length;
             vorlageIdx = (vorlageIdx + (schritt === -1 ? -1 : 1) + n) % n;
             try { localStorage.setItem('vorrechnen-vorlage', String(vorlageIdx)); } catch (_) {}
@@ -1045,7 +1269,9 @@
         // One probe per ERKENNEN: strokes, the template, what was recognised,
         // and how the pairing went. The server picks the running number.
         async function speichereProbe() {
-            if (istBeispiel) return;
+            // probes are for the templates only - in class (the tasks) nothing
+            // is saved, and on docalvers.de nothing may land as a download
+            if (istBeispiel || !testModus) return;
             const [slug, vorlage] = VORLAGEN[vorlageIdx];
             const erg = analysis.lines.map(l => zeilenErgebnis[l.lineIdx]).find(e => e && e.latex);
             const probe = {
@@ -1139,6 +1365,13 @@
         }
 
         function clearAll() {
+            // The working survives a LEEREN of the page (a botched step must not
+            // cost the lesson's board); LEEREN on an empty page clears it too.
+            if (!strokes.length && !current && !tipp && rechenweg.length) {
+                rechenweg.length = 0;
+                merkeRechenweg();
+                zeigeRechenweg();
+            }
             clearTimeout(beispielTimer);
             istBeispiel = false;
             merkeBeispiel(false);
@@ -1206,7 +1439,7 @@
 
             // Doc: "speed slider für mich". Letting go replays the morph at the
             // new speed, so the effect can be judged right away.
-            CyberUI.createRadioGroup('morph-steuerung', 'Morph (Doppel-Tippen auf die Zeitleiste)', [
+            CyberUI.createRadioGroup('morph-steuerung', 'Morph (Doppel-Tippen)', [
                 { value: 'staub', label: 'Staub' }, { value: 'strich', label: 'Strich' },
             ], morphArt, v => wechsleMorphArt(v));
             document.querySelectorAll('#morph-steuerung .cyber-radio-input').forEach(r => { r.name = 'morph-art'; });
