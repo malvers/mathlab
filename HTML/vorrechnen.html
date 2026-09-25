@@ -379,6 +379,7 @@
 
         function redraw() {
             zeigeZeitleiste();
+            zeigeSatz();
             const rect = container.getBoundingClientRect();
             ctx.clearRect(0, 0, rect.width, rect.height);
 
@@ -409,6 +410,9 @@
             if (morphT > 0) {
                 analysis.lines.forEach(l => {
                     const v = morphVorbereitet[l.lineIdx];
+                    // at t = 1 the row is real KaTeX (zeigeSatz), the canvas steps aside
+                    const erg = zeilenErgebnis[l.lineIdx];
+                    if (morphT >= 1 && erg && erg.satz) return;
                     // Doc: "alles grün" - the formula ends in the ink's green, no blue
                     if (v) StaubMorph.zeichnen(ctx, v, morphT, { farbe: INK, zielFarbe: INK,
                         staffel: morphOpts.staffel, wirbel: morphOpts.wirbel, staub: morphOpts.staub });
@@ -487,6 +491,11 @@
             const m = await KatexAtome.atomeAusLatex(latex, messHost(), { fontSize: 100 });
             const u = KatexAtome.umfang(m.atome);
             let atome = m.atome;
+            // where KaTeX's box sat inside the measuring host - the real formula
+            // at the end of the morph goes to exactly the same place
+            const hr = messHost().getBoundingClientRect(), kh = messHost().querySelector('.katex-html');
+            const kr = kh ? kh.getBoundingClientRect() : hr;
+            const satz = { latex, skala: 1, dx: 0, dy: 0, kx: kr.left - hr.left, ky: kr.top - hr.top };
             if (u && u.h > 0 && u.w > 0) {
                 // "Gleiche Größe" means: the typeset block fits the footprint of
                 // the handwriting - height AND width - and never leaves the
@@ -498,8 +507,9 @@
                 const dx = line.bbox.x - u.x * skala;
                 const dy = (line.bbox.y + line.bbox.h / 2) - (u.y + u.h / 2) * skala;
                 atome = KatexAtome.transformiere(m.atome, skala, dx, dy);
+                Object.assign(satz, { skala, dx, dy });
             }
-            return { atome, svg: m.svg };
+            return { atome, svg: m.svg, satz };
         }
 
         // Which handwritten symbol is which typeset glyph. The typesetter knows
@@ -537,10 +547,10 @@
                     } else if (!r.latex || /^\(?\s*(empty|leer)\s*\)?$/i.test(r.latex)) {
                         zeilenErgebnis[line.lineIdx] = { fehler: 'nichts erkannt' };
                     } else {
-                        const { atome, svg } = await formelAufZeile(r.latex, line);
+                        const { atome, svg, satz } = await formelAufZeile(r.latex, line);
                         const { zuordnung, nachjustiert } = ordneZeile(line, atome);
                         zeilenErgebnis[line.lineIdx] = {
-                            latex: r.latex, tokens: r.tokens, atome, ms: r.ms, zuordnung, svg, nachjustiert,
+                            latex: r.latex, tokens: r.tokens, atome, ms: r.ms, zuordnung, svg, nachjustiert, satz,
                         };
                         // Doc's plan B: the row crumbles to one dust cloud and
                         // settles into the formula (js/staub-morph.js) - each
@@ -647,6 +657,47 @@
             if (morphAnim) { cancelAnimationFrame(morphAnim); morphAnim = null; }
             morphT = parseFloat(v);
             redraw();
+        }
+
+        // ── The end of the morph is real LaTeX ──────────────────────────────
+        // Doc: "könntest Du heimlich am Ende LaTeX zeigen (ich sehe das :-)". The
+        // dust lands on traced outlines of the KaTeX glyphs; at t = 1 the row is
+        // handed to KaTeX itself, at exactly the place and size the atoms were
+        // measured from - the swap cannot be seen, the result is just sharper.
+        function zeigeSatz() {
+            let host = document.getElementById('satz-schicht');
+            if (!host) {
+                host = document.createElement('div');
+                host.id = 'satz-schicht';
+                host.style.cssText = 'position:absolute;inset:0;pointer-events:none';
+                container.appendChild(host);
+            }
+            const soll = new Set();
+            analysis.lines.forEach(line => {
+                const erg = zeilenErgebnis[line.lineIdx];
+                if (morphT < 1 || !erg || !erg.satz || !morphVorbereitet[line.lineIdx]) return;
+                const z = erg.satz, key = 'z' + line.lineIdx;
+                const sig = [z.latex, z.skala, z.dx, z.dy].join('|');
+                soll.add(key);
+                const alt = host.querySelector(`[data-zeile="${key}"]`);
+                if (alt && alt.dataset.sig === sig) return;
+                if (alt) alt.remove();
+                const d = document.createElement('div');
+                d.dataset.zeile = key;
+                d.dataset.sig = sig;
+                d.style.cssText = `position:absolute;left:${z.dx}px;top:${z.dy}px;font-size:${100 * z.skala}px;` +
+                    `white-space:nowrap;line-height:normal;color:${INK}`;
+                host.appendChild(d);
+                try { katex.render(z.latex, d, { throwOnError: false, displayMode: false }); } catch (_) { return; }
+                // land on the measured spot: correct whatever the surroundings shifted
+                const k = d.querySelector('.katex-html');
+                if (!k) return;
+                const c = container.getBoundingClientRect(), r = k.getBoundingClientRect();
+                const sollX = z.dx + z.kx * z.skala, sollY = z.dy + z.ky * z.skala;
+                d.style.left = (z.dx + sollX - (r.left - c.left)) + 'px';
+                d.style.top = (z.dy + sollY - (r.top - c.top)) + 'px';
+            });
+            host.querySelectorAll('[data-zeile]').forEach(d => { if (!soll.has(d.dataset.zeile)) d.remove(); });
         }
 
         // ── Film strip: scrub the morph back and forth ──────────────────────
@@ -806,9 +857,9 @@
             const zeilen = analysis.lines.filter(l => !zuKlein(l));
             if (zeilen.length !== 1) return;
             const line = zeilen[0];
-            const { atome, svg } = await formelAufZeile(latex, line);
+            const { atome, svg, satz } = await formelAufZeile(latex, line);
             const { zuordnung, nachjustiert } = ordneZeile(line, atome);
-            zeilenErgebnis[line.lineIdx] = { latex, tokens: [], atome, ms: 0, zuordnung, svg, nachjustiert };
+            zeilenErgebnis[line.lineIdx] = { latex, tokens: [], atome, ms: 0, zuordnung, svg, nachjustiert, satz };
             await HandschriftMorph.schriftenBereit(atome);
             await HandschriftMorph.svgVorbereiten(atome);
             morphVorbereitet[line.lineIdx] = StaubMorph.vorbereiten(line, strokes, zuordnung, morphOpts);
@@ -955,7 +1006,8 @@
             CyberUI.createCard('ui-container', '', `
                 <div class="gross-row">
                     <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="clearAll()">LEEREN</button>
-                    <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="exportStrokes()">SICHERN</button>
+                    <!-- Doc, 25.09.: "nimm den SICHERN unter Kommentar" - ERKENNEN saves every probe anyway
+                    <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="exportStrokes()">SICHERN</button> -->
                     <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="erkennen()">ERKENNEN</button>
                     <!-- WEITER as two triangles side by side: previous / next template -->
                     <div style="display:flex;gap:0.9rem">
