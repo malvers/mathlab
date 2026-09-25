@@ -1011,7 +1011,7 @@
         view.appendChild(el('div', { id: 'tour-cap' }, '<span class="k"></span><span class="n"></span><span class="t"></span>'));
         view.appendChild(stage);
         /* a round head in the stage's lower right corner, the way Solita sits in the films: def.avatar =
-           { poster, scale, zoom }. Its size is Solita's share of the film - 380 px of 1440 - taken of the stage's height,
+           { poster, scale, zoom, y }. Its size is Solita's share of the film - 380 px of 1440 - taken of the stage's height,
            times scale (Doc, 24.09.2026: 304 px fixed was "viel zu groß! Solita ist niemals sooo groß + 20%").
            The poster alone for now. */
         if (E.def.avatar) {
@@ -1019,6 +1019,8 @@
             if (E.def.avatar.poster) av.style.backgroundImage = 'url("' + E.def.avatar.poster + '")';
             if (E.def.avatar.zoom) av.style.backgroundSize = (E.def.avatar.zoom * 100) + '%';   // < 1.5: the camera steps back
             av.style.setProperty('--avatar-zoom', String(E.def.avatar.zoom || 1.5));
+            // y: where the circle sits on the picture, 0 = at its top, 1 = at its bottom (default 0.42)
+            if (E.def.avatar.y !== undefined) av.style.setProperty('--avatar-y', (E.def.avatar.y * 100) + '%');
             const vid = el('video', {});
             vid.muted = true;
             vid.playsInline = true;

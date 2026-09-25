@@ -85,18 +85,18 @@ body.cyber-tour {
     border-radius: 50%;
     overflow: hidden;
     pointer-events: none;
-    background: #0a1a36 center 42% / 150% no-repeat;
+    background: #0a1a36 center var(--avatar-y, 42%) / 150% no-repeat;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
 }
 
-/* the talking clip, framed exactly like the poster underneath: same zoom, same 42 % down */
+/* the talking clip, framed exactly like the poster underneath: same zoom, same height (--avatar-y, default 42 %) */
 #tour-avatar video {
     position: absolute;
     left: 50%;
-    top: 42%;
+    top: var(--avatar-y, 42%);
     width: calc(var(--avatar-zoom, 1.5) * 100%);
     height: calc(var(--avatar-zoom, 1.5) * 100%);
-    transform: translate(-50%, -42%);
+    transform: translate(-50%, calc(-1 * var(--avatar-y, 42%)));
     object-fit: cover;
     opacity: 0;
     transition: opacity 0.3s;
