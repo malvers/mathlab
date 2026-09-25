@@ -35,7 +35,9 @@ async function logTtsChars(voice: string, chars: number) {
 
 const GOOGLE_TTS = 'https://texttospeech.googleapis.com/v1/text:synthesize';
 const GEMINI_INTERACTIONS = 'https://generativelanguage.googleapis.com/v1beta/interactions';
-const DOC_MODEL = 'gemini-3.8-flash-tts';
+// Lite, not Flash (Doc, 25.09.2026: "Lite passt"): about a third cheaper, and its own daily quota -
+// Flash's 100 requests a day belong to the tours and films (videopipeline/maya/voice_doc.py)
+const DOC_MODEL = 'gemini-3.8-flash-lite-tts';
 const DOC_VOICE = 'voice_ns9j59rfoa3l';           // valid until 24.09.2027 (~/Movies/stimmklon/stimme.json)
 // Doc on the first tour takes: "nicht pathetisch, nicht kindlich, Oberstufe" - the same text as STYLE in
 // videopipeline/maya/voice_doc.py, so the deck and the tour sound alike
