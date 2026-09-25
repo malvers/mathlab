@@ -434,8 +434,14 @@
                         const m = await KatexAtome.atomeAusLatex(r.latex, messHost(), { fontSize: 100 });
                         const u = KatexAtome.umfang(m.atome);
                         let atome = m.atome;
-                        if (u && u.h > 0) {
-                            const skala = line.bbox.h / u.h;
+                        if (u && u.h > 0 && u.w > 0) {
+                            // "Gleiche Größe" means: the typeset block fits the
+                            // footprint of the handwriting - height AND width -
+                            // and never leaves the canvas. Height alone sent a
+                            // tall integral's fraction off the right edge.
+                            const breite = container.getBoundingClientRect().width;
+                            const skala = Math.min(line.bbox.h / u.h, line.bbox.w / u.w,
+                                                   Math.max(40, breite - line.bbox.x - 24) / u.w);
                             const dx = line.bbox.x - u.x * skala;
                             const dy = (line.bbox.y + line.bbox.h / 2) - (u.y + u.h / 2) * skala;
                             atome = KatexAtome.transformiere(m.atome, skala, dx, dy);
