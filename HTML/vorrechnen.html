@@ -1036,16 +1036,30 @@
             const [slug, latex, nach] = liste[nr];
             const RAND = 'position:absolute;top:50%;transform:translateY(-50%);' +
                 'font-family:Orbitron,sans-serif;font-size:0.8rem;letter-spacing:0.1em;color:#8a93a3';
+            // Doc: "Font-Size überall gleich", "Gleichheitszeichen untereinander" -
+            // in class the task is the first row of the working (zeigeRechenweg),
+            // up here only the counter and what to solve for, on the task's height
             host.innerHTML = `<span style="${RAND};left:24px">` +
-                `${nr + 1} / ${liste.length}${hinweis ? ' · ' + hinweis : ''}</span><span id="vorlage-formel" style="font-size:2.4rem;color:${INK}"></span>` +
+                `${nr + 1} / ${liste.length}${hinweis ? ' · ' + hinweis : ''}</span>` +
+                (testModus ? `<span id="vorlage-formel" style="font-size:2.4rem;color:${INK}"></span>` : '') +
                 (nach ? `<span id="vorlage-nach" style="${RAND};right:24px">NACH <span style="font-size:1.6em"></span></span>` : '');
-            try { katex.render(alsDisplay(latex), document.getElementById('vorlage-formel'), { throwOnError: false }); }
-            catch (e) { document.getElementById('vorlage-formel').textContent = latex; }
             if (nach) {
                 const v = host.querySelector('#vorlage-nach span');
                 try { katex.render(nach, v, { throwOnError: false }); } catch (e) { v.textContent = nach; }
             }
             host.style.display = 'flex';
+            if (!testModus) {
+                host.style.minHeight = '0';
+                host.style.padding = '0';
+                zeigeRechenweg();
+                return;
+            }
+            host.style.minHeight = '84px';
+            host.style.padding = '6px 0';
+            host.style.top = '0';
+            host.style.height = '';
+            try { katex.render(alsDisplay(latex), document.getElementById('vorlage-formel'), { throwOnError: false }); }
+            catch (e) { document.getElementById('vorlage-formel').textContent = latex; }
             // a long one (Navier-Stokes) shrinks until it clears the counter
             const h = host.getBoundingClientRect();
             const zaehler = host.querySelector('span'), nachEl = document.getElementById('vorlage-nach');
@@ -1078,6 +1092,8 @@
             }
             return [latex, ''];
         }
+        // One size for the task and every step, the flying line included
+        const RECHEN_SCHRIFT = '2.2rem';
         // verborgenAb: steps from this index on are laid out but not yet shown -
         // they are where the flying lines land
         function zeigeRechenweg(verborgenAb) {
@@ -1086,22 +1102,35 @@
                 host = document.createElement('div');
                 host.id = 'rechenweg-schicht';
                 host.style.cssText = 'position:absolute;left:0;right:0;pointer-events:none;display:grid;' +
-                    `grid-template-columns:max-content max-content;justify-content:center;align-items:baseline;row-gap:0.35rem;font-size:2rem;color:${INK}`;
+                    'grid-template-columns:max-content max-content;justify-content:center;align-items:baseline;' +
+                    `row-gap:0.6em;font-size:${RECHEN_SCHRIFT};color:${INK}`;          // Doc: more room between the equations
                 container.appendChild(host);
             }
             const kopf = document.getElementById('vorlage-schicht');
-            host.style.top = ((kopf && kopf.style.display !== 'none') ? kopf.getBoundingClientRect().height : 12) + 'px';
+            host.style.top = testModus ? kopf.getBoundingClientRect().height + 'px' : '14px';
             host.innerHTML = '';
-            rechenweg.forEach((latex, i) => {
-                amGleich(latex).forEach((teil, j) => {
-                    const d = document.createElement('div');
-                    d.dataset.schritt = i;
-                    d.style.justifySelf = j ? 'start' : 'end';
-                    if (verborgenAb !== undefined && i >= verborgenAb) d.style.visibility = 'hidden';
-                    try { katex.render(alsDisplay(teil), d, { throwOnError: false }); } catch (_) { d.textContent = teil; }
-                    host.appendChild(d);
-                });
+            const zeile = (latex, schritt, verborgen) => amGleich(latex).forEach((teil, j) => {
+                const d = document.createElement('div');
+                d.dataset.schritt = schritt;
+                d.style.justifySelf = j ? 'start' : 'end';
+                if (verborgen) d.style.visibility = 'hidden';
+                try { katex.render(alsDisplay(teil), d, { throwOnError: false }); } catch (_) { d.textContent = teil; }
+                host.appendChild(d);
             });
+            if (!testModus) zeile(AUFGABEN[aufgabeIdx][1], 'aufgabe', false);
+            rechenweg.forEach((latex, i) => zeile(latex, i, verborgenAb !== undefined && i >= verborgenAb));
+            // counter and "NACH x" sit level with the task
+            if (!testModus) {
+                let o = Infinity, u = -Infinity;
+                host.querySelectorAll('[data-schritt="aufgabe"]').forEach(z => {
+                    const r = z.getBoundingClientRect(); o = Math.min(o, r.top); u = Math.max(u, r.bottom);
+                });
+                if (isFinite(o)) {
+                    const c = container.getBoundingClientRect();
+                    kopf.style.top = (o - c.top) + 'px';
+                    kopf.style.height = (u - o) + 'px';
+                }
+            }
         }
         let hochLaeuft = false;
         async function rechenwegHoch() {
@@ -1153,7 +1182,7 @@
                 // one piece in flight, set at the step's size and nudged onto its spot
                 const flug = document.createElement('div');
                 flug.style.cssText = `position:absolute;left:${x0 - c.left}px;top:${y0 - c.top}px;pointer-events:none;` +
-                    `white-space:nowrap;line-height:normal;font-size:2rem;color:${INK};z-index:4`;
+                    `white-space:nowrap;line-height:normal;font-size:${RECHEN_SCHRIFT};color:${INK};z-index:4`;
                 try { katex.render(alsDisplay(latex), flug, { throwOnError: false }); } catch (_) { flug.textContent = latex; }
                 container.appendChild(flug);
                 const fk = flug.querySelector('.katex-html') || flug;
