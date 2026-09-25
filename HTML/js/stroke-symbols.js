@@ -47,6 +47,13 @@
         // Strokes never join across a vertical gap wider than this multiple of the
         // line height - that is a different row of the calculation.
         yGapFactor: 0.95,
+        // A fraction bar is long and flat. Width/height above this, and wider
+        // than barMinWidth x line height, makes it a candidate…
+        barRatio: 4.0,
+        barMinWidth: 1.2,
+        // …but only a candidate: a minus sign looks the same. What settles it is
+        // ink ABOVE and BELOW, within this multiple of the line height.
+        barReach: 1.4,
     };
 
     function bboxOfPoints(points) {
@@ -100,6 +107,37 @@
                  end: (typeof t1 === 'number') ? t1 : null };
     }
 
+    // ── Fraction bars ───────────────────────────────────────────────────────
+    // Telling a fraction bar from a minus sign cannot be done from the stroke
+    // alone - they are the same gesture. The difference is what surrounds it:
+    // a bar has ink above AND below it. Once known, a bar must never swallow its
+    // neighbours (it overlaps every one of them horizontally), and it gives the
+    // row a structure: numerator over denominator.
+    function findeBruchstriche(entries, lineHeight, opts) {
+        const o = Object.assign({}, DEFAULTS, opts || {});
+        const ids = new Set();
+        for (const e of entries) {
+            const b = e.bbox;
+            if (b.w / b.h < o.barRatio) continue;
+            if (b.w < lineHeight * o.barMinWidth) continue;
+
+            const mitte = b.x + b.w / 2;
+            let drueber = false, drunter = false;
+            for (const f of entries) {
+                if (f === e) continue;
+                const fb = f.bbox;
+                // must sit within the bar's span, not beside it
+                if (fb.x + fb.w < b.x || fb.x > b.x + b.w) continue;
+                const fm = fb.y + fb.h / 2;
+                if (fm < b.y && b.y - fm < lineHeight * o.barReach) drueber = true;
+                if (fm > b.y + b.h && fm - (b.y + b.h) < lineHeight * o.barReach) drunter = true;
+                if (drueber && drunter) break;
+            }
+            if (drueber && drunter) ids.add(e.idx);
+        }
+        return ids;
+    }
+
     // ── Step 1: strokes → rows ──────────────────────────────────────────────
     // Purely vertical: cluster stroke centres, split on gaps. Done before any
     // symbol grouping, otherwise the "3" of line two joins the "3" of line one.
@@ -126,17 +164,26 @@
     // ── Step 2: strokes of one row → symbols ────────────────────────────────
     // Walks in writing order. Each stroke joins the symbol it overlaps or sits
     // right next to, otherwise it opens a new one.
-    function groupRowIntoSymbols(entries, lineHeight, opts) {
+    function groupRowIntoSymbols(entries, lineHeight, opts, bruchIds) {
         const o = Object.assign({}, DEFAULTS, opts || {});
+        const bar = bruchIds || new Set();
         const symbols = [];
 
         for (const e of entries) {
             const bb = e.bbox;
+            // A fraction bar is its own symbol and takes nobody with it - it
+            // overlaps every glyph of the fraction horizontally, so without this
+            // it would swallow the whole term.
+            if (bar.has(e.idx)) {
+                symbols.push({ strokeIdxs: [e.idx], bbox: bb, tStart: e.tStart, tEnd: e.tEnd, bruch: true });
+                continue;
+            }
             let target = null;
 
             // Most recent first: that is where a multi-stroke glyph continues.
             for (let s = symbols.length - 1; s >= 0; s--) {
                 const sym = symbols[s];
+                if (sym.bruch) continue;                 // never merge into a bar
                 if (yGap(bb, sym.bbox) > lineHeight * o.yGapFactor) continue;
 
                 const ratio = xOverlapRatio(bb, sym.bbox);
@@ -166,6 +213,39 @@
         return symbols;
     }
 
+    // ── Reading order with fractions ────────────────────────────────────────
+    // Left to right is only right while nothing is stacked. A fraction reads
+    // bar first, then everything above it, then everything below - the order
+    // \frac{...}{...} puts them in. Symbols that sit within a bar's span are
+    // claimed by it; the rest of the row keeps its left-to-right order, with the
+    // whole fraction taking the bar's place in that sequence.
+    function leseReihenfolge(symbols) {
+        const baeren = symbols.filter(s => s.bruch);
+        if (!baeren.length) return symbols.slice().sort((a, b) => a.bbox.x - b.bbox.x);
+
+        const vergeben = new Set();
+        const gruppen = baeren.map(bar => {
+            const zaehler = [], nenner = [];
+            symbols.forEach(s => {
+                if (s === bar || s.bruch || vergeben.has(s)) return;
+                const m = s.bbox.x + s.bbox.w / 2;
+                if (m < bar.bbox.x || m > bar.bbox.x + bar.bbox.w) return;
+                const my = s.bbox.y + s.bbox.h / 2;
+                if (my < bar.bbox.y) { zaehler.push(s); vergeben.add(s); }
+                else if (my > bar.bbox.y + bar.bbox.h) { nenner.push(s); vergeben.add(s); }
+            });
+            const lr = (a, b) => a.bbox.x - b.bbox.x;
+            return { bar, folge: [bar, ...zaehler.sort(lr), ...nenner.sort(lr)] };
+        });
+
+        // Put each fraction where its bar sits in the row, keep the rest in place.
+        const rest = symbols.filter(s => !s.bruch && !vergeben.has(s));
+        const eintraege = rest.map(s => ({ x: s.bbox.x, folge: [s] }))
+            .concat(gruppen.map(g => ({ x: g.bar.bbox.x, folge: g.folge })));
+        eintraege.sort((a, b) => a.x - b.x);
+        return [].concat(...eintraege.map(e => e.folge));
+    }
+
     function analyse(strokes, opts) {
         const o = Object.assign({}, DEFAULTS, opts || {});
         const entries = [];
@@ -176,14 +256,45 @@
         });
         if (!entries.length) return { symbols: [], lines: [] };
 
-        const rows = splitStrokesIntoRows(entries, o);
+        let rows = splitStrokesIntoRows(entries, o);
         const lineHeight = median(entries.map(e => e.bbox.h)) || 1;
 
+        const bruchIds = findeBruchstriche(entries, lineHeight, o);
+        // A fraction spans rows by nature - numerator above, denominator below -
+        // so the row splitter, which only sees vertical gaps, cuts the
+        // denominator off. Put it back: whatever lies within a bar's span
+        // belongs to the bar's row.
+        if (bruchIds.size) {
+            const zeileVon = new Map();
+            rows.forEach((row, i) => row.forEach(e => zeileVon.set(e.idx, i)));
+            const verschmelze = new Map();          // row -> row it joins
+            for (const e of entries) {
+                if (!bruchIds.has(e.idx)) continue;
+                const b = e.bbox, heim = zeileVon.get(e.idx);
+                for (const f of entries) {
+                    if (f === e) continue;
+                    const fb = f.bbox;
+                    if (fb.x + fb.w < b.x || fb.x > b.x + b.w) continue;
+                    const fm = fb.y + fb.h / 2;
+                    const nah = (fm < b.y && b.y - fm < lineHeight * o.barReach) ||
+                                (fm > b.y + b.h && fm - (b.y + b.h) < lineHeight * o.barReach);
+                    const zeile = zeileVon.get(f.idx);
+                    if (nah && zeile !== heim) verschmelze.set(zeile, heim);
+                }
+            }
+            if (verschmelze.size) {
+                const neu = [];
+                rows.forEach((row, i) => {
+                    const ziel = verschmelze.has(i) ? verschmelze.get(i) : i;
+                    (neu[ziel] = neu[ziel] || []).push(...row);
+                });
+                rows = neu.filter(Boolean).map(r => r.sort((a, b) => a.idx - b.idx));
+            }
+        }
         const lines = [];
         const all = [];
         rows.forEach((row, lineIdx) => {
-            const syms = groupRowIntoSymbols(row, lineHeight, o)
-                .sort((a, b) => a.bbox.x - b.bbox.x);          // reading order
+            const syms = leseReihenfolge(groupRowIntoSymbols(row, lineHeight, o, bruchIds));
             syms.forEach((s, i) => {
                 s.readIdx = i;
                 s.lineIdx = lineIdx;
@@ -203,6 +314,7 @@
     }
 
     const api = { DEFAULTS, analyse, splitStrokesIntoRows, groupRowIntoSymbols,
+                  findeBruchstriche, leseReihenfolge,
                   bboxOfPoints, bboxUnion, xOverlapRatio, xGap, yGap, median };
 
     if (typeof module === 'object' && module.exports) module.exports = api;
