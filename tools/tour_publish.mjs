@@ -4,6 +4,7 @@
 //
 //     node tools/tour_publish.mjs --setup          # once: bucket "tours", public r2.dev URL, CORS for GET
 //     node tools/tour_publish.mjs wuerfelspiel     # ~/Movies/videopipeline/wuerfelspiel/sN.mp3 + tour.json
+//                                                  (+ sN.mp4 and avatar.png, if the tour has an avatar)
 //
 // Run it again after every new take (run1.mjs): the MP3s are replaced, tour.json gets a new version, and the pages
 // ask for sN.mp3?v=<version> - nobody hears an old take out of a cache. The audio never goes into git: it changes
@@ -56,11 +57,21 @@ function publish(tour) {
             '--content-type', 'audio/mpeg', '--cache-control', 'public, max-age=86400', '--remote']);
         process.stdout.write(id + ' ');
     }
+    // the avatar (def.avatar in the Drehbuch): a talking clip per scene next to its voice, and the still picture
+    const clips = ids.filter((id) => fs.existsSync(path.join(work, id + '.mp4')));
+    for (const id of clips) {
+        wrangler(['r2', 'object', 'put', BUCKET + '/' + tour + '/' + id + '.mp4', '--file', path.join(work, id + '.mp4'),
+            '--content-type', 'video/mp4', '--cache-control', 'public, max-age=86400', '--remote']);
+        process.stdout.write(id + '.mp4 ');
+    }
+    const still = fs.existsSync(path.join(work, 'avatar.png'));
+    if (still) wrangler(['r2', 'object', 'put', BUCKET + '/' + tour + '/avatar.png', '--file', path.join(work, 'avatar.png'),
+        '--content-type', 'image/png', '--cache-control', 'public, max-age=86400', '--remote']);
     const manifest = path.join(os.tmpdir(), 'tour-' + tour + '.json');
     fs.writeFileSync(manifest, JSON.stringify({ version: new Date().toISOString(), texts }));
     wrangler(['r2', 'object', 'put', BUCKET + '/' + tour + '/tour.json', '--file', manifest,
         '--content-type', 'application/json; charset=utf-8', '--cache-control', 'no-cache', '--remote']);
-    console.log('\n' + ids.length + ' Tonspuren + tour.json in ' + BUCKET + '/' + tour + '/');
+    console.log('\n' + ids.length + ' Tonspuren, ' + clips.length + ' Avatar-Clips' + (still ? ', Avatar-Bild' : '') + ' + tour.json in ' + BUCKET + '/' + tour + '/');
 }
 
 const arg = process.argv[2] || '';

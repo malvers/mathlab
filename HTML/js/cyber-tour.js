@@ -238,8 +238,8 @@
             v.audio.preload = 'auto';
             /* the avatar's talking head for this scene, if the tour's folder has one (sN.mp4, made from this very
                voice) - held as a blob, so seeking after a pause is instant */
-            if (E.def.avatar && E.local) {
-                const r2 = await fetch(url.replace(/\.mp3$/, '.mp4')).catch(() => null);
+            if (E.def.avatar) {                        // locally from the tour server, online from R2 (tour_publish.mjs)
+                const r2 = await fetch(url.replace(/\.mp3(\?|$)/, '.mp4$1')).catch(() => null);
                 if (r2 && r2.ok) v.video = URL.createObjectURL(await r2.blob());
             }
             dbg(sc.id + ': ' + v.dur.toFixed(1) + ' s, Regiepausen ' + v.cues.map((c) => c.start.toFixed(1)).join('/'));
@@ -1016,7 +1016,13 @@
            The poster alone for now. */
         if (E.def.avatar) {
             const av = el('div', { id: 'tour-avatar' });
-            if (E.def.avatar.poster) av.style.backgroundImage = 'url("' + E.def.avatar.poster + '")';
+            // a bare file name lives next to the voice: the tour server's working dir locally, the R2 bucket online
+            const poster = E.def.avatar.poster;
+            if (poster && poster.includes('/')) av.style.backgroundImage = 'url("' + poster + '")';
+            else if (poster && E.local) av.style.backgroundImage = 'url("/__tour/audio/' + poster + '")';
+            else if (poster) E.manifest.then((m) => {
+                av.style.backgroundImage = 'url("' + MEDIA_BASE + E.def.id + '/' + poster + '?v=' + encodeURIComponent(m.version || '') + '")';
+            }).catch(() => { });
             if (E.def.avatar.zoom) av.style.backgroundSize = (E.def.avatar.zoom * 100) + '%';   // < 1.5: the camera steps back
             av.style.setProperty('--avatar-zoom', String(E.def.avatar.zoom || 1.5));
             // y: where the circle sits on the picture, 0 = at its top, 1 = at its bottom (default 0.42)
