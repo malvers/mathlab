@@ -1482,6 +1482,9 @@ fromHash();
 
   function open() {
     if (typeof narr !== 'undefined') narr.stop();   // asking pauses the talk, like turning a page
+    // decide "empty" BEFORE it shows: on the first open the panel had no .bare yet, stood there at full opacity
+    // and faded out over 250 ms (Doc, 25.09.2026: "flashed ... beim ersten Mal")
+    bare();
     panel.hidden = false;
     if (!pwd()) askPassword(); else askQuestion();
     bare();
