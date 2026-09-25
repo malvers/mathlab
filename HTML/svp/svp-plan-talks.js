@@ -138,8 +138,8 @@ window.svpPlanParts.push(function (P) {
             const texts = labels.map(function (l) { return g[l].join(' · '); });
             /* the same talk in every Lerngruppe: one line without the group */
             ref.talk = texts.every(function (t) { return t === texts[0]; })
-                ? [['Vortrag:', texts[0]]]
-                : labels.map(function (l, n) { return [(n ? '' : 'Vortrag ') + l + ':', texts[n]]; });
+                ? [['Vortrag', texts[0]]]
+                : labels.map(function (l, n) { return [(n ? '' : 'Vortrag ') + l, texts[n]]; });
             /* Doc, 18.09.2026: more than one talk in the week (inf11: two per day, FOS 12:
                two per group) - "laufbandmaessig durchlaufen" */
             ref.talkTicker = labels.some(function (l) { return g[l].length > 1; }) || ref.talk.length > 1;
