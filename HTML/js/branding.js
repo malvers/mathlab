@@ -389,6 +389,7 @@ const CyberBranding = {
     },
 
     init(config = {}) {
+        this.setupAutoFullscreen();
         this.ensureCoreModuleLoaded();
         this.ensureNavModuleLoaded();
         this.ensureOverlaysModuleLoaded();
@@ -518,6 +519,31 @@ const CyberBranding = {
             document.getElementById('workspace') ||
             document.body;
         anchor.appendChild(container);
+    },
+
+    // A page that should run full screen from the start says so on its body:
+    // <body data-vollbild="immer"> (Doc for vorrechnen, 25.09.2026: "starte immer
+    // im fullscreen"). Browsers grant full screen only on a user gesture, so it
+    // comes with the first one - for pen and finger that is the LIFT (pointerup),
+    // for the mouse the press - i.e. after the first stroke, never in the middle
+    // of one. Once per page load: leaving full screen afterwards stays possible.
+    setupAutoFullscreen() {
+        if (!document.body || document.body.dataset.vollbild !== "immer") return;
+        if (window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform()) return;
+        if (window.CyberDeckLab && window.CyberDeckLab.frame()) return;
+        const los = (e) => {
+            const maus = e.pointerType === "mouse";
+            if ((e.type === "pointerdown") !== maus) return;
+            if (e.target && e.target.closest && e.target.closest(".canvas-branding")) return;   // the toggle does it itself
+            document.removeEventListener("pointerdown", los, true);
+            document.removeEventListener("pointerup", los, true);
+            if (document.fullscreenElement || !document.documentElement.requestFullscreen) return;
+            document.documentElement.requestFullscreen().catch(err => {
+                console.warn(`Fullscreen error: ${err.message}`);
+            });
+        };
+        document.addEventListener("pointerdown", los, true);
+        document.addEventListener("pointerup", los, true);
     },
 
     toggleFullscreen() {

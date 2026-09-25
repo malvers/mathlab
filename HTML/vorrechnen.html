@@ -128,7 +128,7 @@
     </style>
 </head>
 
-<body>
+<body data-vollbild="immer">
     <nav id="mini-rail">
         <div class="nav-btn" onclick="toggleSidebar()" title="Menü">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -186,7 +186,10 @@
             }, 400);
         }
 
-        CyberBranding.init({ useExternalStyles: true, title: 'Vorrechnen', subtitle: 'Lab' });
+        // Doc, 25.09.: "Branding rechts oben auskommentieren" - the pad needs the
+        // room. The central switch, so navigation and the rest stay as they are.
+        // CyberBranding.init({ useExternalStyles: true, title: 'Vorrechnen', subtitle: 'Lab' });
+        CyberBranding.init({ useExternalStyles: true, title: 'Vorrechnen', subtitle: 'Lab', skipCanvasBranding: true });
         CyberUI.init();
 
         if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
@@ -214,9 +217,13 @@
         const morphVorbereitet = [];
         let morphT = 0;
         let morphAnim = null;
-        const view = { boxes: false, numbers: true, rows: true, penOnly: false };
+        // formelUnten: the typeset formula under the handwriting - Doc: "lass die
+        // unten weg" (25.09.), the morph shows it anyway
+        const view = { boxes: false, numbers: true, rows: true, penOnly: false, formelUnten: false };
         // Doc: boxes off by default, and the choice is remembered on the device
         try { view.boxes = localStorage.getItem('vorrechnen-boxen') === '1'; } catch (_) {}
+        // the row bands are the same kind of calibration aid - Doc: "komische Box"
+        view.rows = view.boxes;
 
         // The corpus, easy to hard. Doc copies each one by hand, ERKENNEN saves
         // the probe, and the grouping is then tuned against all of them. Roots
@@ -538,6 +545,7 @@
                 container.appendChild(host);
             }
             host.innerHTML = '';
+            if (!view.formelUnten) return;
             analysis.lines.forEach(line => {
                 const erg = zeilenErgebnis[line.lineIdx];
                 if (!erg || !erg.latex || !line.bbox) return;
@@ -605,13 +613,16 @@
             if (!host) {
                 host = document.createElement('div');
                 host.id = 'vorlage-schicht';
-                host.style.cssText = 'position:absolute;left:24px;top:14px;right:24px;pointer-events:none;' +
-                    'display:flex;align-items:baseline;gap:1.2rem;color:#00d2ff';
+                // Doc: the template centred in x and y in the head strip; the
+                // counter stays at the left edge
+                host.style.cssText = 'position:absolute;left:0;right:0;top:0;height:84px;pointer-events:none;' +
+                    'display:flex;align-items:center;justify-content:center;color:#00d2ff';
                 container.appendChild(host);
             }
             const [slug, latex] = VORLAGEN[vorlageIdx];
-            host.innerHTML = `<span style="font-family:Orbitron,sans-serif;font-size:0.8rem;letter-spacing:0.1em;opacity:0.7">` +
-                `VORLAGE ${vorlageIdx + 1} / ${VORLAGEN.length}</span><span id="vorlage-formel" style="font-size:2.4rem"></span>`;
+            host.innerHTML = `<span style="position:absolute;left:24px;top:50%;transform:translateY(-50%);` +
+                `font-family:Orbitron,sans-serif;font-size:0.8rem;letter-spacing:0.1em;color:#8a93a3">` +
+                `${vorlageIdx + 1} / ${VORLAGEN.length}</span><span id="vorlage-formel" style="font-size:2.4rem;color:${INK}"></span>`;
             try { katex.render(latex, document.getElementById('vorlage-formel'), { throwOnError: false }); }
             catch (e) { document.getElementById('vorlage-formel').textContent = latex; }
         }
@@ -845,7 +856,7 @@
             }, '#00d2ff', v => v.toFixed(1) + ' s');
 
             CyberUI.createCheckbox('morph-steuerung', 'Boxen zeigen', view.boxes, v => {
-                view.boxes = v;
+                view.boxes = view.rows = v;
                 try { localStorage.setItem('vorrechnen-boxen', v ? '1' : '0'); } catch (_) {}
                 redraw();
             });
