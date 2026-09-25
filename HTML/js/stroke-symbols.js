@@ -38,6 +38,12 @@
         // the jump to the next, where the pen lifts and travels. So a merge on
         // proximity alone must happen within this many ms.
         nearOnlyMs: 250,
+        // Overlap below strongOverlap is weak evidence: Doc's bracket and the x
+        // written into it overlap 0.48, the two strokes of a glyph as little as
+        // 0.46. The pause separates them - within a glyph 210-255 ms, to the
+        // neighbour from 297 ms (corpus, 25.09.2026).
+        strongOverlap: 0.7,
+        weakOverlapMs: 280,
         // A stroke starting within this many ms of the previous one is still the
         // same symbol - the second bar of an "=", the cross of a "+".
         sameSymbolMs: 900,
@@ -132,6 +138,39 @@
         return median(hs.length ? hs : entries.map(e => e.bbox.h)) || 1;
     }
 
+    // ── Ink, not boxes ──────────────────────────────────────────────────────
+    // A big glyph's bounding box contains plenty that is not part of it: the
+    // lower limit of a sum sign sits inside the sign's box (corpus probe 22).
+    // Whether a late stroke belongs is decided by the ink: does it cross or
+    // touch the strokes already there?
+    function duenn(pts, max) {
+        if (pts.length <= max) return pts;
+        const step = (pts.length - 1) / (max - 1), out = [];
+        for (let i = 0; i < max; i++) out.push(pts[Math.round(i * step)]);
+        return out;
+    }
+
+    function schneiden(p1, p2, p3, p4) {
+        const d = (a, b, c) => (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+        const d1 = d(p3, p4, p1), d2 = d(p3, p4, p2), d3 = d(p1, p2, p3), d4 = d(p1, p2, p4);
+        return ((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0));
+    }
+
+    function beruehrt(pts, strokeListe, nah) {
+        if (!pts || !strokeListe) return false;
+        const A = duenn(pts, 48);
+        for (const other of strokeListe) {
+            const B = duenn(other, 48);
+            for (let i = 0; i < A.length; i++) {
+                for (let j = 0; j < B.length; j++) {
+                    if (Math.hypot(A[i].x - B[j].x, A[i].y - B[j].y) < nah) return true;
+                    if (i && j && schneiden(A[i - 1], A[i], B[j - 1], B[j])) return true;
+                }
+            }
+        }
+        return false;
+    }
+
     // Vertical overlap as a fraction of the lower of the two boxes.
     function yOverlapRatio(a, b) {
         const overlap = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
@@ -221,6 +260,12 @@
         const o = Object.assign({}, DEFAULTS, opts || {});
         const bar = bruchIds || new Set();
         const symbols = [];
+        // A dot is small AND compact. A small dash is not a dot: the "=" of a
+        // lower limit is two of them, and treating them as i-dots tore it apart
+        // (corpus probes 17, 22).
+        const tiny = b => b.w < lineHeight * o.dotSize && b.h < lineHeight * o.dotSize &&
+                          b.w / b.h <= 3 && b.h / b.w <= 3;
+        const punkte = [];
 
         for (const e of entries) {
             const bb = e.bbox;
@@ -228,9 +273,11 @@
             // overlaps every glyph of the fraction horizontally, so without this
             // it would swallow the whole term.
             if (bar.has(e.idx)) {
-                symbols.push({ strokeIdxs: [e.idx], bbox: bb, tStart: e.tStart, tEnd: e.tEnd, bruch: true });
+                symbols.push({ strokeIdxs: [e.idx], bbox: bb, tStart: e.tStart, tEnd: e.tEnd, bruch: true, pts: [e.pts] });
                 continue;
             }
+            // Dots are placed last, onto what is below them - see below.
+            if (tiny(bb)) { punkte.push(e); continue; }
             let target = null;
 
             // Most recent first: that is where a multi-stroke glyph continues.
@@ -240,14 +287,21 @@
                 const yg = yGap(bb, sym.bbox);
                 if (yg > lineHeight * o.yGapFactor) continue;
                 if (yg > lineHeight * o.touchGap) {
-                    // Not touching vertically: only a dot (the i, the j) or the
-                    // second bar of an "=" still belongs. A "0" under an integral
-                    // overlaps it sideways and sits close - and is another symbol.
-                    const tiny = b => b.w < lineHeight * o.dotSize && b.h < lineHeight * o.dotSize;
+                    // Not touching vertically: only the second bar of an "="
+                    // still belongs. A "0" under an integral overlaps it
+                    // sideways and sits close - and is another symbol.
                     const flat = b => b.w / b.h > 2.2;       // a handwritten "=" bar can be short and thick (Doc's: 2.9)
-                    const dot = tiny(bb) || tiny(sym.bbox);
-                    const bars = flat(bb) && flat(sym.bbox) && yg < lineHeight * o.barGap;
-                    if (!dot && !bars) continue;
+                    if (!(flat(bb) && flat(sym.bbox) && yg < lineHeight * o.barGap)) continue;
+                }
+
+                // Has the pen started another symbol since this one? Then boxes
+                // are no evidence any more - only ink that crosses or touches it
+                // still belongs (a t-bar, the slash of ≠). Doc writes the parts
+                // of a glyph in one go (199 ms median between them).
+                if (s < symbols.length - 1) {
+                    if (xOverlapRatio(bb, sym.bbox) > 0 && beruehrt(e.pts, sym.pts, lineHeight * 0.06)) { target = sym; break; }
+                    if (bb.x > sym.bbox.x + sym.bbox.w + lineHeight) break;
+                    continue;
                 }
 
                 const ratio = xOverlapRatio(bb, sym.bbox);
@@ -255,8 +309,13 @@
                 // exponent follows its base quickly and closely too - but it is
                 // raised: in a^2 the 2 overlaps the a vertically by a few pixels
                 // (corpus probe 08), the parts of one glyph overlap far more.
+                // An exponent is raised AND clearly smaller - the i over the 2 in
+                // 2^i is 40 % of it. Two parts of one glyph can be offset too (the
+                // two strokes of Doc's "4", 122 and 136 px), but are of a size.
+                const kleiner = Math.min(bb.h, sym.bbox.h) < 0.6 * Math.max(bb.h, sym.bbox.h);
+                const versetzt = Math.abs(centreY(bb) - centreY(sym.bbox)) > 0.35 * Math.max(bb.h, sym.bbox.h);
                 const near = xGap(bb, sym.bbox) <= lineHeight * o.xGapFactor &&
-                             yOverlapRatio(bb, sym.bbox) >= 0.25;
+                             yOverlapRatio(bb, sym.bbox) >= 0.25 && !(kleiner && versetzt);
                 const gap = (e.tStart !== null && sym.tEnd !== null) ? e.tStart - sym.tEnd : null;
                 const soonAfter = (gap === null) || gap <= o.sameSymbolMs;
 
@@ -264,7 +323,9 @@
                 // later); merely adjacent ones must follow quickly, or they are
                 // the next glyph.
                 const quick = (gap === null) || gap <= o.nearOnlyMs;
-                if (soonAfter && ratio >= o.xOverlapRatio) { target = sym; break; }
+                const knapp = (gap === null) || gap <= o.weakOverlapMs;
+                if (ratio >= o.strongOverlap && soonAfter) { target = sym; break; }
+                if (ratio >= o.xOverlapRatio && knapp) { target = sym; break; }
                 if (quick && near) { target = sym; break; }
                 if (ratio >= o.lateJoinRatio) { target = sym; break; }   // dot added later
                 // The pen has clearly moved past this symbol - stop looking back.
@@ -274,12 +335,72 @@
             if (target) {
                 target.strokeIdxs.push(e.idx);
                 target.bbox = bboxUnion(target.bbox, bb);
+                target.pts.push(e.pts);
                 if (e.tEnd !== null) target.tEnd = e.tEnd;
             } else {
-                symbols.push({ strokeIdxs: [e.idx], bbox: bb, tStart: e.tStart, tEnd: e.tEnd });
+                symbols.push({ strokeIdxs: [e.idx], bbox: bb, tStart: e.tStart, tEnd: e.tEnd, pts: [e.pts] });
+            }
+        }
+
+        // The dot of an i or j belongs to the stem right below it, whenever it
+        // was set - Doc sets it after the stem, or after the whole word. Done
+        // last, when every stem exists. A dot with nothing directly below it
+        // (a multiplication dot sits beside its neighbours, not above) stays a
+        // symbol of its own. Corpus: sin, lim, e^{i\pi} (probes 14, 15, 18).
+        for (const e of punkte) {
+            const cx = e.bbox.x + e.bbox.w / 2, unterkante = e.bbox.y + e.bbox.h;
+            let best = null;
+            for (const sym of symbols) {
+                if (sym.bruch) continue;
+                const slack = lineHeight * 0.25;
+                if (cx < sym.bbox.x - slack || cx > sym.bbox.x + sym.bbox.w + slack) continue;
+                if (unterkante > sym.bbox.y + sym.bbox.h * 0.3) continue;      // must sit above it
+                const abstand = sym.bbox.y - unterkante;
+                if (abstand > lineHeight * 1.2) continue;
+                if (!best || abstand < best.abstand) best = { sym, abstand };
+            }
+            if (best) {
+                const sym = best.sym;
+                sym.strokeIdxs.push(e.idx);
+                sym.bbox = bboxUnion(sym.bbox, e.bbox);
+                sym.pts.push(e.pts);
+                if (e.tEnd !== null && (sym.tEnd === null || e.tEnd > sym.tEnd)) sym.tEnd = e.tEnd;
+            } else {
+                symbols.push({ strokeIdxs: [e.idx], bbox: e.bbox, tStart: e.tStart, tEnd: e.tEnd, pts: [e.pts] });
             }
         }
         return symbols;
+    }
+
+    // ── Raised and lowered rows ─────────────────────────────────────────────
+    // An exponent written high, or a limit above a sum sign, can end up as a row
+    // of its own: its centre is far enough up. It is not a new line of the
+    // calculation - it is narrow, and it almost touches the row it belongs to
+    // (corpus: e^{i\pi}, probe 14; ∞ over ∑, probe 22).
+    function verbindeHochTief(rows, lineHeight) {
+        const box = r => {
+            let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+            r.forEach(e => { x0 = Math.min(x0, e.bbox.x); y0 = Math.min(y0, e.bbox.y);
+                             x1 = Math.max(x1, e.bbox.x + e.bbox.w); y1 = Math.max(y1, e.bbox.y + e.bbox.h); });
+            return { x0, y0, x1, y1, w: x1 - x0 };
+        };
+        let changed = true;
+        while (changed && rows.length > 1) {
+            changed = false;
+            const bs = rows.map(box);
+            for (let i = 0; i < rows.length - 1; i++) {
+                const a = bs[i], b = bs[i + 1];
+                const gap = b.y0 - a.y1;
+                if (gap > lineHeight * 0.45) continue;
+                const [schmal, breit] = a.w < b.w ? [a, b] : [b, a];
+                if (schmal.w > breit.w * 0.5) continue;
+                if (schmal.x0 < breit.x0 - lineHeight || schmal.x1 > breit.x1 + lineHeight) continue;
+                rows.splice(i, 2, rows[i].concat(rows[i + 1]).sort((p, q) => p.idx - q.idx));
+                changed = true;
+                break;
+            }
+        }
+        return rows;
     }
 
     // ── Reading order with fractions ────────────────────────────────────────
@@ -440,7 +561,7 @@
         strokes.forEach((stroke, idx) => {
             if (!stroke.points || stroke.points.length === 0) return;
             const t = strokeTimes(stroke);
-            out.push({ idx, bbox: bboxOfPoints(stroke.points), tStart: t.start, tEnd: t.end });
+            out.push({ idx, bbox: bboxOfPoints(stroke.points), tStart: t.start, tEnd: t.end, pts: stroke.points });
         });
         return out;
     }
@@ -505,6 +626,7 @@
             }
         }
         rows = verbindeUeberbrueckte(rows, o);
+        rows = verbindeHochTief(rows, lineHeight);
         const lines = [];
         const all = [];
         rows.forEach((row, lineIdx) => {
@@ -528,7 +650,7 @@
     }
 
     const api = { DEFAULTS, analyse, splitStrokesIntoRows, groupRowIntoSymbols,
-                  findeBruchstriche, leseReihenfolge, verbindeUeberbrueckte, abgleichen, nachjustieren, eintraege,
+                  findeBruchstriche, leseReihenfolge, verbindeUeberbrueckte, verbindeHochTief, abgleichen, nachjustieren, eintraege,
                   typischeHoehe, linksNachRechts,
                   bboxOfPoints, bboxUnion, xOverlapRatio, yOverlapRatio, xGap, yGap, median };
 
