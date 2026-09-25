@@ -81,9 +81,10 @@ def digit(c, cx, top, n, w=52, color=S.INK, dot=None):
     bars, dots = n // 5, n % 5
     y = top
     if dots:
-        # the dots sit in one row above the bars, evenly spread over the bar's width
-        r = 5.6
-        step = w / 5.0
+        # the dots sit in one row above the bars; four of them fill the bar's width with air
+        # between them (Doc, 25.09.2026: the dots stood "extrem dicht" - at w/5 they overlapped)
+        r = min(5.6, w * 0.09)
+        step = (w - 2 * r) / 3.0
         x0 = cx - step * (dots - 1) / 2
         for i in range(dots):
             c.circle(x0 + i * step, y + r, r, fill=dot or color, stroke="none", width=0)
@@ -132,6 +133,15 @@ def punkt_strich_muschel():
                                   "wird daraus zusammengesetzt.",
                    "font-size:15px;color:%s" % S.BODY))
     return c.svg("Die drei Zeichen des Maya-Systems: Punkt, Strich und Muschel"), labels
+
+
+def gleich(labels, x_eq, y, links, rechts, css_l, css_r, wl=200, wr=160):
+    """One line of a sum, lined up on its equals sign: `links` ends just before x_eq,
+    `= rechts` starts at x_eq - so every = of the column stands under the one above
+    (Doc, 25.09.2026: "= nicht untereinander")."""
+    if links:
+        labels.append((x_eq - 6 - wl / 2, y, wl, "$%s$" % links, "text-align:right;" + css_l))
+    labels.append((x_eq + wr / 2, y, wr, "$= %s$" % rechts, "text-align:left;" + css_r))
 
 
 # ------------------------------------------------------- place value tables ---
@@ -216,7 +226,7 @@ def maya_zahl(stellen=(6, 2, 0, 7), werte=("7.200", "360", "20", "1"), titel=Non
     labels = []
     n = len(stellen)
     ch = 62.0
-    x_glyph, x_wert, x_rech = 300.0, 470.0, 620.0
+    x_glyph, x_eq = 300.0, 560.0         # x_eq: where every = of the sum stands
     top0 = 24.0
     gesamt = 0
     for i, (z, w) in enumerate(zip(stellen, werte)):
@@ -224,16 +234,15 @@ def maya_zahl(stellen=(6, 2, 0, 7), werte=("7.200", "360", "20", "1"), titel=Non
         c.rect(x_glyph - 78, top - 4, 156, ch - 8, fill="#F4F7FC", stroke="#DCE4F0", width=1.4, rx=8)
         h = digit_height(z)
         digit(c, x_glyph, top + (ch - 8 - h) / 2 - 2, z, w=48, color=S.INK, dot=S.RED)
-        labels.append((x_wert, top + ch / 2 - 4, 150, "$%s \\cdot %s$" % (z, w.replace(".", "\\,")),
-                       "font-size:19px;color:%s" % S.BODY))
         wert = int(w.replace(".", "")) * z
         gesamt += wert
-        labels.append((x_rech, top + ch / 2 - 4, 150, "$= %s$" % ("{:,}".format(wert).replace(",", "\\,")),
-                       "font-size:19px;font-weight:600;color:%s" % S.INK))
+        gleich(labels, x_eq, top + ch / 2 - 4, "%s \\cdot %s" % (z, w.replace(".", "\\,")),
+               "{:,}".format(wert).replace(",", "\\,"), "font-size:19px;color:%s" % S.BODY,
+               "font-size:19px;font-weight:600;color:%s" % S.INK)
     y = top0 + n * ch + 4
-    c.line(x_rech - 70, y, x_rech + 70, y, color=S.INK, width=2)
-    labels.append((x_rech, y + 26, 220, "$%s$" % "{:,}".format(gesamt).replace(",", "\\,"),
-                   "font-size:26px;font-weight:600;color:%s" % S.RED))
+    c.line(x_eq - 100, y, x_eq + 110, y, color=S.INK, width=2)
+    gleich(labels, x_eq, y + 26, None, "{:,}".format(gesamt).replace(",", "\\,"),
+           "", "font-size:26px;font-weight:600;color:%s" % S.RED)
     labels.append((150, 44, 220, "höchste Stelle **oben**",
                    "font-size:14px;font-weight:600;color:%s" % S.MUTED))
     c.arrow(150, 70, 150, y - 26, color=S.MUTED, width=2)
@@ -264,15 +273,15 @@ def aufgabe(zahl=5432, loesung=False):
         labels.append((x_glyph - 150, top + ch / 2 - 5, 120, "$%s$" % "{:,}".format(w).replace(",", "\\,"),
                        "font-size:20px;font-weight:600;color:%s" % S.MUTED))
         if loesung:
-            labels.append((x_rech, top + ch / 2 - 5, 260,
-                           "$%s \\cdot %s = %s$" % (z, "{:,}".format(w).replace(",", "\\,"),
-                                                    "{:,}".format(z * w).replace(",", "\\,")),
-                           "font-size:18px;color:%s" % S.BODY))
+            css = "font-size:18px;color:%s" % S.BODY
+            gleich(labels, x_rech, top + ch / 2 - 5,
+                   "%s \\cdot %s" % (z, "{:,}".format(w).replace(",", "\\,")),
+                   "{:,}".format(z * w).replace(",", "\\,"), css, css)
     if loesung:
         y = top0 + 4 * ch + 2
-        c.line(x_rech - 80, y, x_rech + 80, y, color=S.INK, width=2)
-        labels.append((x_rech, y + 24, 240, "$= %s$" % "{:,}".format(zahl).replace(",", "\\,"),
-                       "font-size:24px;font-weight:600;color:%s" % S.RED))
+        c.line(x_rech - 110, y, x_rech + 110, y, color=S.INK, width=2)
+        gleich(labels, x_rech, y + 24, None, "{:,}".format(zahl).replace(",", "\\,"),
+               "", "font-size:24px;font-weight:600;color:%s" % S.RED)
     else:
         labels.append((W / 2, 300, W - 80, "Wie viele Siebentausendzweihunderter, "
                                            "Dreihundertsechziger, Zwanziger und Einer stecken in "
