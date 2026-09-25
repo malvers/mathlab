@@ -1,0 +1,27 @@
+/* The look of a "Gedanke der Woche" sheet, measured from Doc's own export (gdw-export.pdf):
+   white sheet, navy #002060 for the sentence, red #C00000 for the words that carry it,
+   portrait 450:650 = 190.5 x 275.2 mm, font Outfit (not Orbitron), photo in the lower half. */
+:root { --navy: #002060; --rot: #C00000; --quelle: #44659B; --rolle: #7A93BE; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+@page { size: 190.5mm 275.2mm; margin: 0; }
+body { background: #fff; font-family: 'Outfit', -apple-system, 'Helvetica Neue', sans-serif; }
+.blatt {
+    width: 190.5mm; height: 275.2mm;
+    padding: 24mm 16mm 10mm;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    page-break-after: always; break-after: page; background: #fff;
+}
+.blatt:last-child { page-break-after: auto; break-after: auto; }
+.spruch { color: var(--navy); font-weight: 400; line-height: 1.24; max-width: 152mm; }
+.riesig .spruch { font-size: 30mm; line-height: 1.08; }
+.kurz   .spruch { font-size: 20mm; line-height: 1.16; }
+.mittel .spruch { font-size: 14mm; }
+.lang   .spruch { font-size: 10.6mm; }
+.spruch b { font-weight: 400; color: var(--rot); }
+/* the picture takes the lower half, with the soft shadow PowerPoint puts under a photo */
+.bild { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; width: 100%; padding: 6mm 0 4mm; }
+.bild img { max-width: 120mm; max-height: 108mm; object-fit: contain;
+            box-shadow: 0 1.6mm 5mm rgba(0, 32, 96, 0.28); }
+.quelle { color: var(--quelle); font-size: 5mm; font-weight: 600; }
+.rolle  { color: var(--rolle); font-size: 3.5mm; font-weight: 300; margin-top: 1mm; }
+.bildquelle { color: #B6C2D6; font-size: 2.5mm; font-weight: 300; margin-top: 3mm; }
