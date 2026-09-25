@@ -272,6 +272,25 @@
             ['wurzel',        '\\sqrt{16}=4'],
             ['pq',            'x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}'],
             ['reihe',         '\\sum_{i=1}^{\\infty}\\frac{1}{2^i}=1'],
+            // Doc, 25.09.: the formulas of the old morpheus/equationocr lab
+            // (morpheus/formulas.js) - there only as pictures of his hand, which
+            // carry no strokes. Written once more on the pad they become examples
+            // too. The five complex ones first.
+            ['riemann',       '\\zeta(s)=\\sum_{n=1}^{\\infty}\\frac{1}{n^s}'],
+            ['dirac',         '(i\\hbar\\gamma^\\mu\\partial_\\mu - mc)\\psi=0'],
+            ['cauchy',        'f(a)=\\frac{1}{2\\pi i}\\oint_\\gamma\\frac{f(z)}{z-a}\\,dz'],
+            ['einstein',      'R_{\\mu\\nu}-\\tfrac{1}{2}g_{\\mu\\nu}R+\\Lambda g_{\\mu\\nu}=\\frac{8\\pi G}{c^4}T_{\\mu\\nu}'],
+            ['navier',        '\\rho\\!\\left(\\frac{\\partial\\mathbf{v}}{\\partial t}+\\mathbf{v}\\!\\cdot\\!\\nabla\\mathbf{v}\\right)=-\\nabla p+\\mu\\nabla^2\\mathbf{v}+\\mathbf{f}'],
+            ['emc2',          'E=mc^2'],
+            ['taylor',        'e^x=\\sum_{n=0}^{\\infty}\\frac{x^n}{n!}'],
+            ['gauss',         '\\int_{-\\infty}^{\\infty}e^{-x^2}dx=\\sqrt{\\pi}'],
+            ['binomko',       '\\binom{n}{k}=\\frac{n!}{k!(n-k)!}'],
+            ['potenzregel',   '\\frac{d}{dx}x^n=nx^{n-1}'],
+            ['integral-ab',   '\\int_a^b f(x)\\,dx'],
+            ['gravitation',   'F=G\\frac{m_1 m_2}{r^2}'],
+            ['schroedinger',  'i\\hbar\\frac{\\partial}{\\partial t}\\Psi=\\hat{H}\\Psi'],
+            ['maxwell-gauss', '\\nabla\\cdot E=\\frac{\\rho}{\\varepsilon_0}'],
+            ['maxwell-ampere','\\nabla\\times B=\\mu_0 J+\\mu_0\\varepsilon_0\\frac{\\partial E}{\\partial t}'],
         ];
         let vorlageIdx = 0;
         try { vorlageIdx = Math.min(VORLAGEN.length - 1, parseInt(localStorage.getItem('vorrechnen-vorlage') || '0', 10) || 0); } catch (_) {}
@@ -491,6 +510,13 @@
         // - is set that way.
         function alsDisplay(latex) { return '\\displaystyle ' + latex; }
 
+        // Shrink a rendered formula (font size in rem) until it fits `frei` px.
+        function passeEin(el, frei) {
+            if (!el || frei <= 0) return;
+            const breit = el.getBoundingClientRect().width;     // scrollWidth is 0 for an inline span
+            if (breit > frei) el.style.fontSize = (2.4 * frei / breit).toFixed(3) + 'rem';
+        }
+
         // KaTeX sets the formula; the atoms say where every glyph sits. Then the
         // whole block is scaled and moved onto the handwriting: same height as
         // the row, left edge aligned, centred vertically - Doc's "gleiche Größe".
@@ -612,6 +638,7 @@
                 try { katex.render(alsDisplay(erg.latex), d, { throwOnError: false, displayMode: false }); }
                 catch (e) { d.textContent = erg.latex; }
                 host.appendChild(d);
+                passeEin(d, host.clientWidth - 48);
             });
         }
 
@@ -791,6 +818,10 @@
             catch (e) { document.getElementById('vorlage-formel').textContent = latex; }
             // Doc: without "Meine Beispiele" nothing up there - free writing
             host.style.display = testModus ? 'flex' : 'none';
+            // a long one (Navier-Stokes) shrinks until it clears the counter
+            const zaehler = host.querySelector('span');
+            const rand = zaehler ? zaehler.getBoundingClientRect().right - host.getBoundingClientRect().left + 32 : 170;
+            passeEin(document.getElementById('vorlage-formel'), host.clientWidth - 2 * rand);
         }
 
         // Doc: "mach bei Weiter einen left right mit Dreiecken" - back and forth
