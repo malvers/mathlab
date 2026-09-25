@@ -222,10 +222,24 @@
             ev.preventDefault();
         });
 
+        // A pen samples far faster than the browser fires pointermove - the rest
+        // arrives bundled in getCoalescedEvents(). Without them a 260 px stroke
+        // ends up with 15 points and every curve turns into a chain of straight
+        // bits, which is exactly what "ich kann nicht richtig schreiben" feels
+        // like. Redrawing is throttled to one frame: doing it per event made the
+        // tablet drop the events we are trying to collect.
+        let zeichenFrame = null;
+        function redrawBald() {
+            if (zeichenFrame) return;
+            zeichenFrame = requestAnimationFrame(() => { zeichenFrame = null; redraw(); });
+        }
+
         canvas.addEventListener('pointermove', ev => {
             if (!current || !penAccepted(ev)) return;
-            current.points.push(canvasPos(ev));
-            redraw();
+            const roh = (typeof ev.getCoalescedEvents === 'function') ? ev.getCoalescedEvents() : null;
+            if (roh && roh.length) roh.forEach(e => current.points.push(canvasPos(e)));
+            else current.points.push(canvasPos(ev));
+            redrawBald();
             ev.preventDefault();
         });
 
