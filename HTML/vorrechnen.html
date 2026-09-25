@@ -73,6 +73,26 @@
             line-height: 1.45;
         }
 
+        .gross-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+        }
+
+        /* Doc: "die Taste richtig groß" - hit with a finger while the other
+           hand holds the pen. buttons-ultra.css sets a central height for lab
+           buttons, so this needs the extra weight to win; a deliberate local
+           exception, like Cavalieri's. */
+        #ui-container .cyber-btn.gross {
+            font-size: 1.5rem !important;
+            letter-spacing: 0.12em;
+            padding: 1.6rem 1rem !important;
+            height: auto !important;
+            min-height: 5.5rem !important;
+            line-height: 1.1;
+            width: 100%;
+        }
+
         .btn-row {
             display: flex;
             flex-wrap: wrap;
@@ -321,7 +341,9 @@
                         ctx.setLineDash([4, 3]);
                         ctx.strokeRect(b.x - 4, b.y - 4, b.w + 8, b.h + 8);
                         ctx.setLineDash([]);
-                        if (view.numbers) {
+                        // Doc: "keine Boxbeschriftung" - numbers and stroke
+                        // counts were for calibrating, they only clutter now.
+                        if (false && view.numbers) {
                             ctx.fillStyle = c;
                             ctx.font = '600 12px Orbitron, sans-serif';
                             ctx.fillText(String(sym.readIdx), b.x - 4, b.y - 9);
@@ -335,47 +357,9 @@
                 });
             }
 
-            // The transcription: all glyphs of a row on ONE baseline under it,
-            // each centred beneath its own box. Per-box labels were unreadable -
-            // boxes differ in height, so the glyphs scattered over the canvas.
-            analysis.lines.forEach(line => {
-                const erg = zeilenErgebnis[line.lineIdx];
-                if (!erg || !erg.zuordnung || !line.bbox) return;
-                if (morphT > 0) return;                  // the morph speaks for itself
-                const baseY = line.bbox.y + line.bbox.h + 58;
-
-                ctx.save();
-                // Maths, not UI: the same serif the glyphs morph into. Orbitron
-                // is the lab's voice, but a formula set in it reads wrong.
-                ctx.font = '34px "Times New Roman", "Latin Modern Roman", serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'alphabetic';
-                line.symbols.forEach((sym, i) => {
-                    const paar = erg.zuordnung.paare[i];
-                    const cx = sym.bbox.x + sym.bbox.w / 2;
-                    const col = SYM_COLORS[i % SYM_COLORS.length];
-                    // A thin drop line ties the glyph to the strokes it came from.
-                    ctx.strokeStyle = col;
-                    ctx.globalAlpha = 0.28;
-                    ctx.lineWidth = 1;
-                    ctx.setLineDash([2, 4]);
-                    ctx.beginPath();
-                    ctx.moveTo(cx, sym.bbox.y + sym.bbox.h + 6);
-                    ctx.lineTo(cx, baseY - 26);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-                    ctx.globalAlpha = 1;
-
-                    ctx.fillStyle = paar ? col : 'rgb(245,194,66)';
-                    const zeichen = paar ? HandschriftMorph.glyphOf(paar.token) : '?';
-                    // Variables slanted, digits and operators upright - the usual
-                    // mathematical convention.
-                    ctx.font = (/^[a-zA-Z]$/.test(zeichen) ? 'italic ' : '') +
-                        '34px "Times New Roman", "Latin Modern Roman", serif';
-                    ctx.fillText(zeichen, cx, baseY);
-                });
-                ctx.restore();
-            });
+            // Doc: "NUR die LaTeX Formel" - the per-glyph transcription on the
+            // canvas is gone; the typeset formula under the row (KaTeX, see
+            // zeigeFormeln) says the same thing and says it properly.
         }
 
         function updateStats() {
@@ -428,6 +412,9 @@
             } finally {
                 erkennenLaeuft = false;
             }
+            // Straight into the morph - with the button gone there is nothing
+            // left to press, and Doc wanted it to happen by itself anyway.
+            if (morphVorbereitet.some(Boolean)) morphen(1);
         }
 
         // The typeset formula under the handwriting - real LaTeX, set by KaTeX.
@@ -563,44 +550,38 @@
 
         // ── Side panel ──────────────────────────────────────────────────────
         function buildPanel() {
+            // Three buttons, nothing else (Doc, 25.09.). Everything that was
+            // here before - statistics, undo, load, model picker, the morph
+            // slider, the display switches and the seven tuning sliders - is
+            // kept at the bottom of this function, commented out, because the
+            // functions behind them still exist and we will want them back for
+            // calibrating.
+            CyberUI.createCard('ui-container', '', `
+                <div class="gross-row">
+                    <button class="cyber-btn gross" style="height:6rem;min-height:6rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6rem" onclick="clearAll()">LEEREN</button>
+                    <button class="cyber-btn gross" style="height:6rem;min-height:6rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6rem" onclick="exportStrokes()">SICHERN</button>
+                    <button class="cyber-btn gross" style="height:6rem;min-height:6rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6rem" onclick="erkennen()">ERKENNEN</button>
+                </div>
+                <div id="erkennung-out" style="margin-top:1rem"><div class="erk-info">–</div></div>
+                <input type="file" id="import-file" accept="application/json" style="display:none"
+                       onchange="if(this.files[0]) importStrokes(this.files[0])">
+                <select id="modell-wahl" style="display:none">
+                    <option value="gemini-2.5-flash">2.5-flash</option>
+                </select>
+                <input type="range" id="morph-regler" min="0" max="1" step="0.01" value="0"
+                       oninput="setzeMorph(this.value)" style="display:none">
+            `, '#00d2ff');
+
+            /* Ausgeblendet auf Docs Wunsch (25.09.) - die Funktionen dahinter
+               leben weiter, nur die Bedienelemente sind weg:
+
             CyberUI.createCard('ui-container', 'Aufnahme', `
                 <div id="stat-row"></div>
                 <div class="btn-row">
                     <button class="cyber-btn" onclick="undoStroke()">ZURÜCK</button>
-                    <button class="cyber-btn" onclick="clearAll()">LEEREN</button>
-                </div>
-                <div class="btn-row">
-                    <button class="cyber-btn" onclick="exportStrokes()">STRICHE SICHERN</button>
                     <button class="cyber-btn" onclick="document.getElementById('import-file').click()">LADEN</button>
-                    <input type="file" id="import-file" accept="application/json" style="display:none"
-                           onchange="if(this.files[0]) importStrokes(this.files[0])">
                 </div>
-                <div id="pen-hint">Schreib eine Zeile, geh in die nächste. Die Kästchen zeigen,
-                    welche Striche als <b>ein</b> Zeichen gelten — <b>2×</b> heißt: aus zwei Strichen.</div>
             `, '#00d2ff');
-
-            CyberUI.createCard('ui-container', 'Erkennung', `
-                <div class="btn-row">
-                    <button class="cyber-btn" onclick="erkennen()">ERKENNEN</button>
-                    <select id="modell-wahl" class="cyber-select"
-                            style="background:rgba(0,0,0,0.3);color:inherit;border:1px solid rgba(0,210,255,0.35);
-                                   border-radius:4px;padding:0.35rem 0.5rem;font-family:'Outfit',sans-serif">
-                        <option value="gemini-2.5-flash">2.5-flash</option>
-                        <option value="gemini-3.5-flash">3.5-flash</option>
-                        <option value="gemini-3.5-flash-lite">3.5-flash-lite</option>
-                    </select>
-                </div>
-                <div id="erkennung-out" style="margin-top:0.7rem"><div class="erk-info">–</div></div>
-                <div class="btn-row">
-                    <button class="cyber-btn" onclick="morphen()">MORPHEN</button>
-                </div>
-                <label class="cyber-label" for="morph-regler"
-                       style="display:block;margin-top:0.6rem;font-size:0.8rem">Handschrift ⟶ Satz</label>
-                <input type="range" id="morph-regler" min="0" max="1" step="0.01" value="0"
-                       oninput="setzeMorph(this.value)" style="width:100%">
-                <div id="pen-hint">Gemini sagt <b>was</b> dasteht, die Striche sagen <b>wo</b>.
-                    Das erkannte Zeichen steht unter seinem Kästchen.</div>
-            `, 'rgb(121,158,49)');
 
             CyberUI.createCheckbox('ui-container', 'Nur Stift (Handballen ignorieren)', view.penOnly,
                 v => { view.penOnly = v; });
@@ -611,17 +592,9 @@
             CyberUI.createCheckbox('ui-container', 'Zeilen zeigen', view.rows,
                 v => { view.rows = v; redraw(); });
 
-            CyberUI.createCard('ui-container', 'Feineinstellung', `
-                <div style="font-family:'Outfit',sans-serif;font-size:0.85rem;opacity:0.75;line-height:1.45">
-                    Diese Werte sind an nachgebauten Strichen eingestellt, nicht an echter Handschrift.
-                    Zieh sie zurecht, bis die Kästchen sitzen — dann sichern wir sie.
-                </div>
-            `, 'rgb(245,194,66)');
-
             const sl = (label, key, min, max, step) =>
                 CyberUI.createSlider('ui-container', label, min, max, opts[key], step,
                     v => { opts[key] = parseFloat(v); recompute(); }, 'rgb(245,194,66)');
-
             sl('Zeilenabstand', 'lineGapFactor', 0.4, 2.5, 0.05);
             sl('Überlappung seitlich', 'xOverlapRatio', 0.1, 0.95, 0.05);
             sl('Nachbarschaft seitlich', 'xGapFactor', 0.05, 0.8, 0.01);
@@ -629,6 +602,7 @@
             sl('Gleiches Zeichen: Zeitfenster (ms)', 'sameSymbolMs', 200, 2500, 50);
             sl('Später gesetzt: Überlappung', 'lateJoinRatio', 0.3, 1.0, 0.05);
             sl('Zeilentrennung senkrecht', 'yGapFactor', 0.3, 2.0, 0.05);
+            */
         }
 
         // ── Boot ────────────────────────────────────────────────────────────
