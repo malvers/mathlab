@@ -226,9 +226,11 @@ window.svpPlanParts.push(function (P) {
     /* Ein Foliensatz aus dem eigenen Haus: docalvers.de/decks/<name>.html.
        Dieselbe Pruefung wie istLab, nur ein Ordner tiefer - istLab laesst
        /decks/ ausdruecklich aus, die beiden Sorten kommen sich nicht ins
-       Gehege. */
+       Gehege. Eine Live-Tour (docalvers.de/tours/<name>.html) zaehlt mit:
+       sie traegt dasselbe D und steht mit den Foliensaetzen vorn (Doc,
+       25.09.2026: "gib dem auch das D icon"). */
     function istDeck(url) {
-        return eigenerPfad(url, /^\/decks\/[\w-]+\.html$/i);
+        return eigenerPfad(url, /^\/(?:decks|tours)\/[\w-]+\.html$/i);
     }
 
     /* Beide Pruefungen fragen dasselbe: zeigt die Adresse ins eigene Haus, und
