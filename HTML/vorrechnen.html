@@ -809,6 +809,12 @@
                     <button class="cyber-btn gross" style="height:6rem;min-height:6rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6rem" onclick="erkennen()">ERKENNEN</button>
                     <button class="cyber-btn gross" style="height:6rem;min-height:6rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6rem" onclick="naechsteVorlage()">WEITER</button>
                 </div>
+                <!-- right under the big buttons: the Lenovo is only 665 px high -->
+                <div class="btn-row" style="margin-top:0.8rem">
+                    <button class="cyber-btn" style="flex:1" onclick="beispiel()">BEISPIEL</button>
+                    <button class="cyber-btn" style="flex:1" onclick="nochmal()">NOCHMAL</button>
+                </div>
+                <div id="morph-steuerung" style="margin-top:0.3rem"></div>
                 <div id="probe-status" class="erk-info" style="margin-top:0.6rem">–</div>
                 <div id="erkennung-out" style="margin-top:1rem"><div class="erk-info">–</div></div>
                 <input type="file" id="import-file" accept="application/json" style="display:none"
@@ -822,22 +828,17 @@
 
             // Doc: "speed slider für mich". Letting go replays the morph at the
             // new speed, so the effect can be judged right away.
-            let nochmal = null;
-            CyberUI.createSlider('ui-container', 'Morph-Dauer', 0.3, 5, morphDauer, 0.1, v => {
+            let wiederholen = null;
+            CyberUI.createSlider('morph-steuerung', 'Morph-Dauer', 0.3, 5, morphDauer, 0.1, v => {
                 morphDauer = v;
                 try { localStorage.setItem('vorrechnen-morph-dauer', String(v)); } catch (_) {}
-                clearTimeout(nochmal);
-                nochmal = setTimeout(() => {
+                clearTimeout(wiederholen);
+                wiederholen = setTimeout(() => {
                     if (!morphVorbereitet.some(Boolean)) return;
                     setzeMorph(0);
                     morphen(1);
                 }, 350);
             }, '#00d2ff', v => v.toFixed(1) + ' s');
-
-            document.getElementById('ui-container').insertAdjacentHTML('beforeend',
-                '<div class="btn-row" style="margin-top:0.8rem">' +
-                '<button class="cyber-btn" style="flex:1" onclick="beispiel()">BEISPIEL</button>' +
-                '<button class="cyber-btn" style="flex:1" onclick="nochmal()">NOCHMAL</button></div>');
 
             /* Ausgeblendet auf Docs Wunsch (25.09.) - die Funktionen dahinter
                leben weiter, nur die Bedienelemente sind weg:
