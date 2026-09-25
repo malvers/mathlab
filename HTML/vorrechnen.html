@@ -345,7 +345,9 @@
                 const baseY = line.bbox.y + line.bbox.h + 58;
 
                 ctx.save();
-                ctx.font = '700 34px Orbitron, sans-serif';
+                // Maths, not UI: the same serif the glyphs morph into. Orbitron
+                // is the lab's voice, but a formula set in it reads wrong.
+                ctx.font = '34px "Times New Roman", "Latin Modern Roman", serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'alphabetic';
                 line.symbols.forEach((sym, i) => {
@@ -365,8 +367,12 @@
                     ctx.globalAlpha = 1;
 
                     ctx.fillStyle = paar ? col : 'rgb(245,194,66)';
-                    // one leading backslash, not two: \\sqrt -> sqrt
-                    ctx.fillText(paar ? paar.token.replace(/^\\/, '') : '?', cx, baseY);
+                    const zeichen = paar ? HandschriftMorph.glyphOf(paar.token) : '?';
+                    // Variables slanted, digits and operators upright - the usual
+                    // mathematical convention.
+                    ctx.font = (/^[a-zA-Z]$/.test(zeichen) ? 'italic ' : '') +
+                        '34px "Times New Roman", "Latin Modern Roman", serif';
+                    ctx.fillText(zeichen, cx, baseY);
                 });
                 ctx.restore();
             });
