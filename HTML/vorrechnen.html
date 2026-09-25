@@ -325,6 +325,7 @@
             if (!current) return;
             const neu = current.points.length > 1;
             if (neu) strokes.push(current);
+            if (neu) merkeBeispiel(false);
             current = null;
             if (neu && zeilenErgebnis.length) verwerfeErkennung();
             recompute();
@@ -555,7 +556,10 @@
             if (!host) {
                 host = document.createElement('div');
                 host.id = 'formel-schicht';
-                host.style.cssText = 'position:absolute;inset:0;pointer-events:none';
+                // Doc: "so groß wie oben und weiter runter" - the counterpart of the
+                // template strip: a strip at the bottom edge, formulas centred
+                host.style.cssText = 'position:absolute;left:0;right:0;bottom:0;min-height:84px;pointer-events:none;' +
+                    'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.4rem';
                 container.appendChild(host);
             }
             host.innerHTML = '';
@@ -564,9 +568,8 @@
                 const erg = zeilenErgebnis[line.lineIdx];
                 if (!erg || !erg.latex || !line.bbox) return;
                 const d = document.createElement('div');
-                // centred across the canvas, a shade darker than the ink
-                d.style.cssText = `position:absolute;left:0;right:0;text-align:center;` +
-                    `top:${line.bbox.y + line.bbox.h + 74}px;color:#9aa5b5;font-size:2rem`;
+                // a shade darker than the ink, as large as the template on top
+                d.style.cssText = 'color:#9aa5b5;font-size:2.4rem';
                 try { katex.render(erg.latex, d, { throwOnError: false, displayMode: false }); }
                 catch (e) { d.textContent = erg.latex; }
                 host.appendChild(d);
@@ -704,6 +707,13 @@
             return korpus;
         }
 
+        // A reload (live reload after every edit) brings the strokes back but not
+        // the recognition - Doc then saw his handwriting without morph or formula.
+        // So the lab remembers that the canvas shows an example and replays it.
+        function merkeBeispiel(ja) {
+            try { localStorage.setItem('vorrechnen-beispiel', ja ? '1' : '0'); } catch (_) {}
+        }
+
         async function beispiel() {
             const latex = VORLAGEN[vorlageIdx][1];
             const d = (await ladeKorpus()).get(latex);
@@ -712,6 +722,7 @@
             strokes.length = 0;
             current = null;
             istBeispiel = !!d;
+            merkeBeispiel(!!d);
             if (!d) { recompute(); merkeStriche(); redraw(); zeigeVorlage('keine Probe'); return; }
             // Written on another screen: centred under the head strip, shrunk
             // only if it would not fit - never enlarged, it is Doc's size.
@@ -850,6 +861,7 @@
         function clearAll() {
             clearTimeout(beispielTimer);
             istBeispiel = false;
+            merkeBeispiel(false);
             strokes.length = 0;
             current = null;
             verwerfeErkennung();
@@ -1020,7 +1032,9 @@
 
         document.fonts.ready.then(() => {
             buildPanel(); holeStriche(); recompute(); init(); zeigeVorlage();
-            if (testModus && !strokes.length) beispiel();
+            let warBeispiel = false;
+            try { warBeispiel = localStorage.getItem('vorrechnen-beispiel') === '1'; } catch (_) {}
+            if (testModus && (!strokes.length || warBeispiel)) beispiel();
             fetch('/__proben/', { cache: 'no-store' }).then(r => { speichernApi = r.ok; })
                 .catch(() => { speichernApi = false; })
                 .then(() => setProbeStatus(speichernApi ? 'Speichern auf dem Mac bereit' : 'kein Speicher-Endpunkt – Proben als Download'));
