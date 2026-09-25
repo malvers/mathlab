@@ -89,13 +89,16 @@
            hand holds the pen. buttons-ultra.css sets a central height for lab
            buttons, so this needs the extra weight to win; a deliberate local
            exception, like Cavalieri's. */
+        /* Doc, 25.09.: "butts 30% schmaler" - 101 px down to 70 px on the Lenovo,
+           where a rem is about 11 px (6.4rem), so the main sliders fit right under
+           them. */
         #ui-container .cyber-btn.gross {
             font-size: 1.5rem !important;
             letter-spacing: 0.12em;
-            padding: 1.6rem 1rem !important;
-            height: auto !important;
-            min-height: 5.5rem !important;
-            line-height: 1.1;
+            padding: 0 1rem !important;
+            height: 6.4rem !important;
+            min-height: 6.4rem !important;
+            line-height: 6.4rem;
             width: 100%;
         }
 
@@ -223,9 +226,10 @@
         const morphVorbereitet = [];
         let morphT = 0;
         let morphAnim = null;
-        // formelUnten: the typeset formula under the handwriting - Doc: "lass die
-        // unten weg" (25.09.), the morph shows it anyway
-        const view = { boxes: false, numbers: true, rows: true, penOnly: false, formelUnten: false };
+        // formelUnten: the typeset formula under the handwriting - Doc first: "lass
+        // die unten weg", then: "zeig bitte doch die erkannte Formel unten x mittig
+        // etwas dunkler" (25.09.)
+        const view = { boxes: false, numbers: true, rows: true, penOnly: false, formelUnten: true };
         // Doc: boxes off by default, and the choice is remembered on the device
         try { view.boxes = localStorage.getItem('vorrechnen-boxen') === '1'; } catch (_) {}
         // the row bands are the same kind of calibration aid - Doc: "komische Box"
@@ -560,8 +564,9 @@
                 const erg = zeilenErgebnis[line.lineIdx];
                 if (!erg || !erg.latex || !line.bbox) return;
                 const d = document.createElement('div');
-                d.style.cssText = `position:absolute;left:${line.bbox.x}px;` +
-                    `top:${line.bbox.y + line.bbox.h + 74}px;color:#00d2ff;font-size:2rem`;
+                // centred across the canvas, a shade darker than the ink
+                d.style.cssText = `position:absolute;left:0;right:0;text-align:center;` +
+                    `top:${line.bbox.y + line.bbox.h + 74}px;color:#9aa5b5;font-size:2rem`;
                 try { katex.render(erg.latex, d, { throwOnError: false, displayMode: false }); }
                 catch (e) { d.textContent = erg.latex; }
                 host.appendChild(d);
@@ -869,12 +874,12 @@
             // calibrating.
             CyberUI.createCard('ui-container', '', `
                 <div class="gross-row">
-                    <button class="cyber-btn gross" style="height:6rem;min-height:6rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6rem" onclick="clearAll()">LEEREN</button>
-                    <button class="cyber-btn gross" style="height:6rem;min-height:6rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6rem" onclick="exportStrokes()">SICHERN</button>
-                    <button class="cyber-btn gross" style="height:6rem;min-height:6rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6rem" onclick="erkennen()">ERKENNEN</button>
-                    <button class="cyber-btn gross" style="height:6rem;min-height:6rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6rem" onclick="naechsteVorlage()">WEITER</button>
+                    <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="clearAll()">LEEREN</button>
+                    <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="exportStrokes()">SICHERN</button>
+                    <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="erkennen()">ERKENNEN</button>
+                    <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="naechsteVorlage()">WEITER</button>
                     <!-- Doc: "mach die NOCHMAL so wie WEITER" -->
-                    <button class="cyber-btn gross" style="height:6rem;min-height:6rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6rem" onclick="nochmal()">NOCHMAL</button>
+                    <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="nochmal()">NOCHMAL</button>
                 </div>
                 <!-- right under the big buttons: the Lenovo is only 665 px high -->
                 <div class="btn-row" style="margin-top:0.8rem">
@@ -902,6 +907,25 @@
                 nachRegler(false);
             }, '#00d2ff', v => v.toFixed(2) + ' s');
 
+            // Doc: "welche Parameter haben wir noch - alle auf Slider bitte"
+            // [label, key, min, max, step, format, needs a new preparation] -
+            // most important first (Doc: "die wichtigsten als erste")
+            [
+                ['Wolke: Streuung', 'wolke', 0, 1, 0.05, v => v.toFixed(2), true],
+                ['Wolke: Auftrieb', 'auftrieb', 0, 1, 0.05, v => v.toFixed(2), true],
+                ['Wirbel', 'wirbel', 0, 0.5, 0.01, v => v.toFixed(2), false],
+                ['Körnerdichte', 'dichte', 0.1, 1, 0.05, v => v.toFixed(2), true],
+                ['Staubkorn', 'staub', 0.3, 2, 0.1, v => v.toFixed(1) + ' px', false],
+                ['Welle links nach rechts', 'staffel', 0, 0.6, 0.05, v => v.toFixed(2), false],
+                ['Pause vor dem Morph', 'pause', 0, 2, 0.1, v => v.toFixed(1) + ' s', false],
+            ].forEach(([label, key, min, max, step, fmt, neu]) => {
+                CyberUI.createSlider('morph-steuerung', label, min, max, morphOpts[key], step, v => {
+                    morphOpts[key] = v;
+                    try { localStorage.setItem('vorrechnen-morph', JSON.stringify(morphOpts)); } catch (_) {}
+                    nachRegler(neu);
+                }, '#00d2ff', fmt);
+            });
+
             CyberUI.createCheckbox('morph-steuerung', 'Boxen zeigen', view.boxes, v => {
                 view.boxes = view.rows = v;
                 try { localStorage.setItem('vorrechnen-boxen', v ? '1' : '0'); } catch (_) {}
@@ -912,24 +936,6 @@
                 testModus = v;
                 try { localStorage.setItem('vorrechnen-testmodus', v ? '1' : '0'); } catch (_) {}
                 if (v) beispiel();
-            });
-
-            // Doc: "welche Parameter haben wir noch - alle auf Slider bitte"
-            // [label, key, min, max, step, format, needs a new preparation]
-            [
-                ['Körnerdichte', 'dichte', 0.1, 1, 0.05, v => v.toFixed(2), true],
-                ['Wolke: Streuung', 'wolke', 0, 1, 0.05, v => v.toFixed(2), true],
-                ['Wolke: Auftrieb', 'auftrieb', 0, 1, 0.05, v => v.toFixed(2), true],
-                ['Wirbel', 'wirbel', 0, 0.5, 0.01, v => v.toFixed(2), false],
-                ['Welle links nach rechts', 'staffel', 0, 0.6, 0.05, v => v.toFixed(2), false],
-                ['Staubkorn', 'staub', 0.3, 2, 0.1, v => v.toFixed(1) + ' px', false],
-                ['Pause vor dem Morph', 'pause', 0, 2, 0.1, v => v.toFixed(1) + ' s', false],
-            ].forEach(([label, key, min, max, step, fmt, neu]) => {
-                CyberUI.createSlider('morph-steuerung', label, min, max, morphOpts[key], step, v => {
-                    morphOpts[key] = v;
-                    try { localStorage.setItem('vorrechnen-morph', JSON.stringify(morphOpts)); } catch (_) {}
-                    nachRegler(neu);
-                }, '#00d2ff', fmt);
             });
 
             /* Ausgeblendet auf Docs Wunsch (25.09.) - die Funktionen dahinter
