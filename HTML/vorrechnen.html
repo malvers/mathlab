@@ -273,23 +273,6 @@
                         ctx.setLineDash([4, 3]);
                         ctx.strokeRect(b.x - 4, b.y - 4, b.w + 8, b.h + 8);
                         ctx.setLineDash([]);
-                        // The recognised glyph, right under its own box - this is
-                        // the mapping that was missing before.
-                        const erg = zeilenErgebnis[line.lineIdx];
-                        const paar = erg && erg.zuordnung && erg.zuordnung.paare[i];
-                        if (paar) {
-                            ctx.fillStyle = c;
-                            ctx.font = '700 15px Orbitron, sans-serif';
-                            ctx.textAlign = 'center';
-                            ctx.fillText(paar.token.replace(/^\\\\/, ''), b.x + b.w / 2, b.y + b.h + 22);
-                            ctx.textAlign = 'start';
-                        } else if (erg && erg.zuordnung && !erg.zuordnung.passt) {
-                            ctx.fillStyle = 'rgb(245,194,66)';
-                            ctx.font = '700 15px Orbitron, sans-serif';
-                            ctx.textAlign = 'center';
-                            ctx.fillText('?', b.x + b.w / 2, b.y + b.h + 22);
-                            ctx.textAlign = 'start';
-                        }
                         if (view.numbers) {
                             ctx.fillStyle = c;
                             ctx.font = '600 12px Orbitron, sans-serif';
@@ -303,6 +286,41 @@
                     });
                 });
             }
+
+            // The transcription: all glyphs of a row on ONE baseline under it,
+            // each centred beneath its own box. Per-box labels were unreadable -
+            // boxes differ in height, so the glyphs scattered over the canvas.
+            analysis.lines.forEach(line => {
+                const erg = zeilenErgebnis[line.lineIdx];
+                if (!erg || !erg.zuordnung || !line.bbox) return;
+                const baseY = line.bbox.y + line.bbox.h + 58;
+
+                ctx.save();
+                ctx.font = '700 34px Orbitron, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'alphabetic';
+                line.symbols.forEach((sym, i) => {
+                    const paar = erg.zuordnung.paare[i];
+                    const cx = sym.bbox.x + sym.bbox.w / 2;
+                    const col = SYM_COLORS[i % SYM_COLORS.length];
+                    // A thin drop line ties the glyph to the strokes it came from.
+                    ctx.strokeStyle = col;
+                    ctx.globalAlpha = 0.28;
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([2, 4]);
+                    ctx.beginPath();
+                    ctx.moveTo(cx, sym.bbox.y + sym.bbox.h + 6);
+                    ctx.lineTo(cx, baseY - 26);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.globalAlpha = 1;
+
+                    ctx.fillStyle = paar ? col : 'rgb(245,194,66)';
+                    // one leading backslash, not two: \\sqrt -> sqrt
+                    ctx.fillText(paar ? paar.token.replace(/^\\/, '') : '?', cx, baseY);
+                });
+                ctx.restore();
+            });
         }
 
         function updateStats() {
