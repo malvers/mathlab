@@ -671,6 +671,15 @@
             beispielTimer = setTimeout(() => morphen(1), 900);
         }
 
+        // Doc: "Show (again)" - back to the handwriting, a moment to see it,
+        // then the morph once more. Nothing is recognised or saved again.
+        function nochmal() {
+            if (!morphVorbereitet.some(Boolean)) { setProbeStatus('Erst ERKENNEN oder BEISPIEL'); return; }
+            clearTimeout(beispielTimer);
+            setzeMorph(0);
+            beispielTimer = setTimeout(() => morphen(1), 600);
+        }
+
         function setProbeStatus(msg) {
             const el = document.getElementById('probe-status');
             if (el) el.textContent = msg;
@@ -826,7 +835,9 @@
             }, '#00d2ff', v => v.toFixed(1) + ' s');
 
             document.getElementById('ui-container').insertAdjacentHTML('beforeend',
-                '<button class="cyber-btn" style="width:100%;margin-top:0.8rem" onclick="beispiel()">BEISPIEL</button>');
+                '<div class="btn-row" style="margin-top:0.8rem">' +
+                '<button class="cyber-btn" style="flex:1" onclick="beispiel()">BEISPIEL</button>' +
+                '<button class="cyber-btn" style="flex:1" onclick="nochmal()">NOCHMAL</button></div>');
 
             /* Ausgeblendet auf Docs Wunsch (25.09.) - die Funktionen dahinter
                leben weiter, nur die Bedienelemente sind weg:
