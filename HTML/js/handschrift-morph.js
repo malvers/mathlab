@@ -21,12 +21,52 @@
 
     const CACHE = new Map();
 
-    // Glyphs a mathematician expects: upright digits and operators, italic
-    // letters - the same convention LaTeX follows.
+    // The very fonts KaTeX sets with, so the morph ends in the same shapes the
+    // formula below it shows. Doc asked why the "=" looked different: it was
+    // Times New Roman against KaTeX's Computer Modern - two different faces, so
+    // two different glyphs. KaTeX_Math is the italic one for variables,
+    // KaTeX_Main the upright one for digits and operators, KaTeX_Caligraphic for
+    // \mathcal. The files ship with the local KaTeX in morpheus/vendor.
     function fontFor(token) {
         const t = String(token);
-        const italic = /^[a-zA-Z]$/.test(t) ? 'italic ' : '';
-        return `${italic}400 %SIZE%px "Times New Roman", "Latin Modern Roman", serif`;
+        const istBuchstabe = /^[a-zA-Z]$/.test(t);
+        const familie = istBuchstabe ? 'KaTeX_Math'
+            : /^\\mathcal/.test(t) ? 'KaTeX_Caligraphic'
+            : 'KaTeX_Main';
+        // KaTeX_Math is declared as an italic face - without "italic" the browser
+        // will not use it, and variables come out upright while the formula below
+        // has them slanted.
+        return `${istBuchstabe ? 'italic ' : ''}400 %SIZE%px "${familie}", "Times New Roman", serif`;
+    }
+
+    // Canvas draws nothing useful from a webfont that has not loaded yet - the
+    // first glyph would come out in a fallback face and be traced wrong.
+    async function schriftenBereit(size) {
+        if (!document.fonts || !document.fonts.load) return;
+        await Promise.all([
+            `400 ${size}px "KaTeX_Main"`,
+            `italic 400 ${size}px "KaTeX_Math"`,      // the italic face, see fontFor
+            `400 ${size}px "KaTeX_Caligraphic"`,
+        ].map(f => document.fonts.load(f).catch(() => {})));
+    }
+
+    // ── A stroke as an area ─────────────────────────────────────────────────
+    // To fill the morph, both sides must be areas. A handwritten stroke is a
+    // line, so it gets an outline: offset to the left along the way out, to the
+    // right along the way back. Then a filled stroke morphs into a filled glyph,
+    // with no fading anywhere.
+    function strichZuFlaeche(pts, breite) {
+        const halb = Math.max(1.2, (breite || 3) / 2);
+        const links = [], rechts = [];
+        for (let i = 0; i < pts.length; i++) {
+            const vor = pts[Math.max(0, i - 1)], nach = pts[Math.min(pts.length - 1, i + 1)];
+            const dx = nach[0] - vor[0], dy = nach[1] - vor[1];
+            const L = Math.hypot(dx, dy) || 1;
+            const nx = -dy / L * halb, ny = dx / L * halb;
+            links.push([pts[i][0] + nx, pts[i][1] + ny]);
+            rechts.push([pts[i][0] - nx, pts[i][1] - ny]);
+        }
+        return links.concat(rechts.reverse());
     }
 
     // What a token should look like on screen. LaTeX commands are drawn as the
@@ -140,7 +180,8 @@
         const quellen = symbol.strokeIdxs
             .map(i => strokes[i])
             .filter(s => s && s.points.length > 1)
-            .map(s => s.points.map(p => [p.x, p.y]));
+            // Outlined, so the ink is an area like the glyph it becomes.
+            .map(s => strichZuFlaeche(s.points.map(p => [p.x, p.y]), s.width));
         if (!quellen.length || !zielPolys.length) return [];
 
         const ziele = platzieren(zielPolys, platz.skala, platz.mitteX, platz.grundlinie, platz.renderMitte);
@@ -223,25 +264,26 @@
 
     // Draw one row at progress t (0 = handwriting, 1 = typeset).
     function zeichnen(ctx, vorbereitet, t, opts) {
-        const o = Object.assign({ farbe: '#adff2f', zielFarbe: '#00d2ff', breite: 3 }, opts || {});
+        const o = Object.assign({ farbe: '#adff2f', zielFarbe: '#00d2ff' }, opts || {});
         const e = ease(Math.max(0, Math.min(1, t)));
         ctx.save();
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
+        ctx.fillStyle = mischen(o.farbe, o.zielFarbe, e);
         vorbereitet.forEach(g => {
+            // All pieces of one glyph in one path. Nonzero winding, NOT even-odd:
+            // a glyph drawn with two strokes sends both onto the same outline,
+            // and even-odd would cancel the two coincident areas out - which is
+            // why x, +, 5 and y vanished. Holes still work, because the tracer
+            // returns them wound the other way.
+            ctx.beginPath();
             g.teile.forEach(teil => {
-                ctx.beginPath();
                 for (let i = 0; i < teil.von.length; i++) {
                     const x = teil.von[i][0] + (teil.nach[i][0] - teil.von[i][0]) * e;
                     const y = teil.von[i][1] + (teil.nach[i][1] - teil.von[i][1]) * e;
                     i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
                 }
-                // The colour travels with the shape; no cross-fade, nothing is
-                // drawn twice on top of itself.
-                ctx.strokeStyle = mischen(o.farbe, o.zielFarbe, e);
-                ctx.lineWidth = o.breite * (1 - e) + Math.max(1.5, o.breite * 0.6) * e;
-                ctx.stroke();
+                ctx.closePath();
             });
+            ctx.fill();
         });
         ctx.restore();
     }
@@ -257,7 +299,8 @@
         return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',')})`;
     }
 
-    const api = { zielKonturen, vorbereiten, zeichnen, glyphOf, platzieren, referenzHoehe, ease };
+    const api = { zielKonturen, vorbereiten, zeichnen, glyphOf, platzieren, referenzHoehe,
+                  schriftenBereit, strichZuFlaeche, ease };
     if (typeof module === 'object' && module.exports) module.exports = api;
     else root.HandschriftMorph = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

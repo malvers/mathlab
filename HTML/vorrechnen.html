@@ -383,6 +383,9 @@
             if (!analysis.lines.length) { setErgebnisText('Erst etwas schreiben.'); return; }
             erkennenLaeuft = true;
             setErgebnisText('Erkenne …');
+            // The KaTeX faces must be in memory before any glyph is traced,
+            // otherwise the first one is measured in a fallback font.
+            try { await HandschriftMorph.schriftenBereit(220); } catch (_) {}
             const modelEl = document.getElementById('modell-wahl');
             const model = modelEl ? modelEl.value : 'gemini-2.5-flash';
             try {
