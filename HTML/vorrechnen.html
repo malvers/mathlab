@@ -78,6 +78,32 @@
             gap: 0.5rem;
             margin-top: 0.6rem;
         }
+
+        .erk-zeile {
+            margin-bottom: 0.7rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+        }
+
+        .erk-zeile b {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            opacity: 0.7;
+        }
+
+        .erk-latex {
+            font-family: 'Outfit', monospace;
+            font-size: 1rem;
+            color: var(--neon-blue, #00d2ff);
+            word-break: break-all;
+            margin: 0.15rem 0;
+        }
+
+        .erk-ok { color: rgb(121, 158, 49); }
+        .erk-warn { color: rgb(245, 194, 66); }
+        .erk-fehler { color: rgb(176, 36, 24); }
+        .erk-info { opacity: 0.6; font-size: 0.8rem; }
     </style>
 </head>
 
@@ -115,6 +141,7 @@
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/stroke-symbols.js"></script>
+    <script src="js/formel-erkennen.js"></script>
     <script>
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
@@ -151,6 +178,9 @@
         let analysis = { symbols: [], lines: [] };
 
         const opts = Object.assign({}, StrokeSymbols.DEFAULTS);
+        // Recognition result per row: { latex, tokens, zuordnung, fehler }
+        const zeilenErgebnis = [];
+        let erkennenLaeuft = false;
         const view = { boxes: true, numbers: true, rows: true, penOnly: false };
 
         const INK = '#adff2f';                       // same green as morpheus
@@ -243,6 +273,23 @@
                         ctx.setLineDash([4, 3]);
                         ctx.strokeRect(b.x - 4, b.y - 4, b.w + 8, b.h + 8);
                         ctx.setLineDash([]);
+                        // The recognised glyph, right under its own box - this is
+                        // the mapping that was missing before.
+                        const erg = zeilenErgebnis[line.lineIdx];
+                        const paar = erg && erg.zuordnung && erg.zuordnung.paare[i];
+                        if (paar) {
+                            ctx.fillStyle = c;
+                            ctx.font = '700 15px Orbitron, sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(paar.token.replace(/^\\\\/, ''), b.x + b.w / 2, b.y + b.h + 22);
+                            ctx.textAlign = 'start';
+                        } else if (erg && erg.zuordnung && !erg.zuordnung.passt) {
+                            ctx.fillStyle = 'rgb(245,194,66)';
+                            ctx.font = '700 15px Orbitron, sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.fillText('?', b.x + b.w / 2, b.y + b.h + 22);
+                            ctx.textAlign = 'start';
+                        }
                         if (view.numbers) {
                             ctx.fillStyle = c;
                             ctx.font = '600 12px Orbitron, sans-serif';
@@ -267,6 +314,56 @@
                 `<div class="stat"><b>${analysis.symbols.length}</b><span>Symbole</span></div>` +
                 `<div class="stat"><b>${analysis.lines.length}</b><span>Zeilen</span></div>` +
                 `<div class="stat"><b>${perLine}</b><span>je Zeile</span></div>`;
+        }
+
+        // ── Recognition ─────────────────────────────────────────────────────
+        // One call per row. Gemini says WHAT is written; WHERE comes from the
+        // strokes. Both lists are in reading order, so laying them onto each
+        // other needs no coordinates from the model - which is good, because its
+        // coordinates were never trustworthy.
+        async function erkennen() {
+            if (erkennenLaeuft) return;
+            if (!analysis.lines.length) { setErgebnisText('Erst etwas schreiben.'); return; }
+            erkennenLaeuft = true;
+            setErgebnisText('Erkenne …');
+            const modelEl = document.getElementById('modell-wahl');
+            const model = modelEl ? modelEl.value : 'gemini-2.5-flash';
+            try {
+                for (const line of analysis.lines) {
+                    const idxs = line.symbols.flatMap(sy => sy.strokeIdxs);
+                    const r = await FormelErkennen.erkenneZeile(strokes, idxs, { model });
+                    if (!r.ok) {
+                        zeilenErgebnis[line.lineIdx] = { fehler: r.error };
+                    } else {
+                        zeilenErgebnis[line.lineIdx] = {
+                            latex: r.latex, tokens: r.tokens, ms: r.ms,
+                            zuordnung: FormelErkennen.ordneZu(line.symbols, r.tokens),
+                        };
+                    }
+                    redraw();
+                    setErgebnisText(null);
+                }
+            } finally {
+                erkennenLaeuft = false;
+            }
+        }
+
+        function setErgebnisText(msg) {
+            const el = document.getElementById('erkennung-out');
+            if (!el) return;
+            if (msg) { el.innerHTML = '<div class="erk-info">' + msg + '</div>'; return; }
+            const teile = analysis.lines.map(l => {
+                const e = zeilenErgebnis[l.lineIdx];
+                if (!e) return '';
+                if (e.fehler) return `<div class="erk-zeile"><b>Zeile ${l.lineIdx}</b>
+                    <div class="erk-fehler">${e.fehler}</div></div>`;
+                const z = e.zuordnung;
+                return `<div class="erk-zeile"><b>Zeile ${l.lineIdx}</b>
+                    <div class="erk-latex">${e.latex.replace(/</g, '&lt;')}</div>
+                    <div class="${z.passt ? 'erk-ok' : 'erk-warn'}">${z.diagnose}</div>
+                    <div class="erk-info">${e.tokens.length} Zeichen · ${e.ms} ms</div></div>`;
+            });
+            el.innerHTML = teile.join('') || '<div class="erk-info">–</div>';
         }
 
         // ── Export / import ─────────────────────────────────────────────────
@@ -333,6 +430,22 @@
                 <div id="pen-hint">Schreib eine Zeile, geh in die nächste. Die Kästchen zeigen,
                     welche Striche als <b>ein</b> Zeichen gelten — <b>2×</b> heißt: aus zwei Strichen.</div>
             `, '#00d2ff');
+
+            CyberUI.createCard('ui-container', 'Erkennung', `
+                <div class="btn-row">
+                    <button class="cyber-btn" onclick="erkennen()">ERKENNEN</button>
+                    <select id="modell-wahl" class="cyber-select"
+                            style="background:rgba(0,0,0,0.3);color:inherit;border:1px solid rgba(0,210,255,0.35);
+                                   border-radius:4px;padding:0.35rem 0.5rem;font-family:'Outfit',sans-serif">
+                        <option value="gemini-2.5-flash">2.5-flash</option>
+                        <option value="gemini-3.5-flash">3.5-flash</option>
+                        <option value="gemini-3.5-flash-lite">3.5-flash-lite</option>
+                    </select>
+                </div>
+                <div id="erkennung-out" style="margin-top:0.7rem"><div class="erk-info">–</div></div>
+                <div id="pen-hint">Gemini sagt <b>was</b> dasteht, die Striche sagen <b>wo</b>.
+                    Das erkannte Zeichen steht unter seinem Kästchen.</div>
+            `, 'rgb(121,158,49)');
 
             CyberUI.createCheckbox('ui-container', 'Nur Stift (Handballen ignorieren)', view.penOnly,
                 v => { view.penOnly = v; });
