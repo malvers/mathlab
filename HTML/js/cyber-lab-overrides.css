@@ -111,7 +111,7 @@
     border-right: none !important;
 }
 
-#mini-rail .nav-btn {
+:is(#mini-rail, #right-rail) .nav-btn {
     flex: 0 0 auto !important;
     min-width: 52px !important;
     min-height: 52px !important;
@@ -131,7 +131,7 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
 }
 
-#mini-rail .nav-btn:hover {
+:is(#mini-rail, #right-rail) .nav-btn:hover {
     transform: translateY(-3px) scale(1.05);
     background: rgba(0, 210, 255, 0.2) !important;
     border-color: #00d2ff !important;
@@ -149,7 +149,7 @@
 }
 
 /* Stroke width like coffee cup (1.5); overrides cyber-layout .nav-btn svg (2.8) */
-#mini-rail .nav-btn svg {
+:is(#mini-rail, #right-rail) .nav-btn svg {
     width: 26px !important;
     height: 26px !important;
     stroke-width: 1.5 !important;
@@ -672,6 +672,38 @@ body.cyber-shell-grid > #main-content {
     isolation: isolate;
     /* Verhindert, dass Kinder der Hauptfläche unter Compositing über die Chrome-Spalte „malen“. */
     contain: paint;
+}
+
+/* ————— Right rail (optional) ——————————————————————————————————
+ * A second mini-rail on the right edge for a lab's own tools (Doc, 26.09.2026,
+ * vorrechnen: "rechts einen dunkelblauen Streifen, so wie das Mini-Rail, genauso
+ * breit"). Same width, look and scale as the left rail, its buttons share the
+ * #mini-rail .nav-btn rules. Only a page with <nav id="right-rail"><div
+ * id="right-rail-inner"> gets the third grid column. */
+body.cyber-shell-grid:has(> #right-rail) {
+    grid-template-columns: min(calc(var(--cyber-left-natural-w) * var(--cyber-left-scale, 1)), var(--cyber-left-cap)) minmax(0, 1fr) calc(var(--cyber-rail-w) * min(var(--cyber-left-scale, 1), 1.12)) !important;
+}
+body.cyber-shell-grid > #right-rail {
+    grid-column: 3;
+    grid-row: 1;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    z-index: 2100;
+}
+body.cyber-shell-grid #right-rail-inner {
+    width: var(--cyber-rail-w);
+    height: calc(100vh / min(var(--cyber-left-scale, 1), 1.12));
+    transform: scale(min(var(--cyber-left-scale, 1), 1.12));
+    transform-origin: top left;
+    box-sizing: border-box;
+    background: rgba(5, 10, 20, 0.95);
+    border-left: 1px solid rgba(0, 210, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: var(--cyber-nav-band-top) 0 22px 0;
 }
 
 /* cyber-layout.css: #canvas-container war absolute/inset-eligible; Overrides setzen sonst nur

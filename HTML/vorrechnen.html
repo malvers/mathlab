@@ -192,7 +192,7 @@
                 linear-gradient(to right, transparent 31px, rgba(31, 64, 150, 0.13) 31px);
             background-size: 32px 32px;
         }
-        #canvas-container.hell :is(#tafel-pfeil-vor, #tafel-pfeil-zurueck, [id^="werkzeug-"], #zl-play) {
+        #canvas-container.hell :is(#tafel-pfeil-vor, #tafel-pfeil-zurueck, #zl-play) {
             color: #5d6678 !important;
         }
         #canvas-container.hell #zeitleiste .zl-spur { background: rgba(31, 64, 150, 0.18); }
@@ -208,7 +208,7 @@
             content: ''; position: fixed; inset: 0; z-index: 999;
             background: var(--anzeige-grund, #050d1c);
         }
-        body.anzeige :is(#mini-rail, #side-panel, #tafel-pfeil-vor, #tafel-pfeil-zurueck,
+        body.anzeige :is(#cyber-left-chrome, #mini-rail, #side-panel, #right-rail, #tafel-pfeil-vor, #tafel-pfeil-zurueck,
             [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play) {
             display: none !important;
         }
@@ -257,6 +257,9 @@
             <canvas id="canvas"></canvas>
         </div>
     </main>
+    <!-- Doc, 26.09.: "rechts einen dunkelblauen Streifen, so wie das Mini-Rail" -
+         the board's tools (colours, C, undo, redo, light, beamer); zeigeWerkzeuge() fills it -->
+    <nav id="right-rail" aria-label="Werkzeuge"><div id="right-rail-inner"></div></nav>
 
     <script src="js/cyber-left-chrome.js"></script>
     <script src="js/branding/briefings.js"></script>
@@ -1382,6 +1385,7 @@
         }
         // The paper (light mode): lines down to about two thirds, ending on a
         // line, squares below - Doc's writing field
+        function papierGrenze(h) { return Math.round(h * 2 / 3 / ZEILE) * ZEILE; }
         function zeigePapier() {
             if (anzeigeModus) return;
             let p = document.getElementById('papier');
@@ -1391,8 +1395,7 @@
                 p.innerHTML = '<div class="linien"></div><div class="karo"></div>';
                 container.insertBefore(p, container.firstChild);
             }
-            const h = container.getBoundingClientRect().height;
-            const grenze = Math.round(h * 2 / 3 / ZEILE) * ZEILE;
+            const grenze = papierGrenze(container.getBoundingClientRect().height);
             p.firstChild.style.height = grenze + 'px';
             p.lastChild.style.top = grenze + 'px';
         }
@@ -1624,7 +1627,14 @@
         // board itself, at the left and right edge, halfway down
         function zeigeTafelPfeile() {
             const da = document.querySelectorAll('[id^="tafel-pfeil-"]');
-            if (da.length) { da.forEach(b => { b.style.display = modus === 'frei' ? 'none' : 'flex'; }); return; }
+            if (da.length) {
+                // Doc, 26.09.: "bring die vor/zurück Pfeile runter in den Karobereich" -
+                // halfway down the squares (above the film strip when it shows)
+                const h = container.getBoundingClientRect().height;
+                const mitte = (papierGrenze(h) + h - (testModus ? ZEITLEISTE_H : 0)) / 2;
+                da.forEach(b => { b.style.display = modus === 'frei' ? 'none' : 'flex'; b.style.top = mitte + 'px'; });
+                return;
+            }
             const PFEIL = 'position:absolute;top:50%;transform:translateY(-50%);width:56px;height:96px;padding:0;' +
                 'border:none;background:transparent;color:#8a93a3;cursor:pointer;touch-action:manipulation;z-index:5;' +
                 'display:flex;align-items:center;justify-content:center';
@@ -1855,77 +1865,88 @@
             stelleHer(vorwaerts.pop());
         }
 
-        // Circles on the right edge, under the VOR triangle: C, undo, redo.
-        // Icons are SVG (Doc: never a font glyph) - the C too.
+        // The tools sit on the right rail (Doc, 26.09.: "rechts einen dunkelblauen
+        // Streifen, so wie das Mini-Rail ... pack die Icons auf dieses Mini-Rail"):
+        // rail buttons like the left ones - the colours, then C / undo / redo, then
+        // light and beamer. Icons are SVG (Doc: never a font glyph), the C too;
+        // their stroke is the rail's (1.5, js/cyber-lab-overrides.css).
         const WERKZEUG_ICONS = {
-            clear: '<path d="M16.5 7.2 A6.8 6.8 0 1 0 16.5 16.8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>',
+            clear: '<path d="M16.5 7.2 A6.8 6.8 0 1 0 16.5 16.8" fill="none" stroke="currentColor" stroke-linecap="round"/>',
+            undo: '<path d="M9 13 L4.5 8.5 L9 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>' +
+                  '<path d="M4.5 8.5 H14 A5.5 5.5 0 0 1 14 19.5 H10" fill="none" stroke="currentColor" stroke-linecap="round"/>',
+            redo: '<path d="M15 13 L19.5 8.5 L15 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>' +
+                  '<path d="M19.5 8.5 H10 A5.5 5.5 0 0 0 10 19.5 H14" fill="none" stroke="currentColor" stroke-linecap="round"/>',
             // light / dark: a circle, half filled
-            // beamer: a screen on its stand
-            beamer: '<rect x="3.5" y="5" width="17" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/>' +
-                    '<path d="M12 16 V20 M8 20 H16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
-            hell: '<circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/>' +
+            hell: '<circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor"/>' +
                   '<path d="M12 4.5 A7.5 7.5 0 0 0 12 19.5 Z" fill="currentColor"/>',
-            undo: '<path d="M9 13 L4.5 8.5 L9 4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>' +
-                  '<path d="M4.5 8.5 H14 A5.5 5.5 0 0 1 14 19.5 H10" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
-            redo: '<path d="M15 13 L19.5 8.5 L15 4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>' +
-                  '<path d="M19.5 8.5 H10 A5.5 5.5 0 0 0 10 19.5 H14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+            // beamer: a screen on its stand
+            beamer: '<rect x="3.5" y="5" width="17" height="11" rx="1.5" fill="none" stroke="currentColor"/>' +
+                    '<path d="M12 16 V20 M8 20 H16" fill="none" stroke="currentColor" stroke-linecap="round"/>',
         };
-        function zeigeWerkzeuge() {
-            if (!document.getElementById('werkzeug-clear')) {
-                [['clear', 'Seite leeren (C)', () => clearAll()],
-                 ['undo', 'Rückgängig', () => rueckgaengig()],
-                 ['redo', 'Wiederholen', () => wiederholen()],
-                 ['hell', 'Hell / Dunkel', () => setzeHell(!hell)],
-                 // Doc: "(rechts unten)" - in mission control it ends the projection
-                 ['beamer', STEUERUNG ? 'Beamer beenden' : 'Beamer: nur die Rechnung projizieren',
-                     () => { if (STEUERUNG) window.close(); else beamerStart(); }]].forEach(([id, text, tun], i) => {
-                    const b = document.createElement('button');
-                    b.id = 'werkzeug-' + id;
-                    b.title = text;
-                    b.setAttribute('aria-label', text);
-                    // under the VOR triangle (96 px tall, centred at 50%), 60 px apart
-                    b.style.cssText = `position:absolute;right:4px;top:calc(50% + ${60 + i * 60}px);width:48px;height:48px;` +
-                        'padding:0;border:1.5px solid currentColor;border-radius:50%;background:transparent;color:#8a93a3;' +
-                        'cursor:pointer;touch-action:manipulation;z-index:5;display:flex;align-items:center;justify-content:center';
-                    b.innerHTML = `<svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${WERKZEUG_ICONS[id]}</svg>`;
-                    b.addEventListener('click', tun);
-                    container.appendChild(b);
-                });
+        function railKnopf(id, text, inhalt, tun, neueGruppe) {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.id = id;
+            b.className = 'nav-btn';
+            b.title = text;
+            b.setAttribute('aria-label', text);
+            b.style.touchAction = 'manipulation';
+            if (neueGruppe) b.style.marginTop = '12px';
+            b.innerHTML = inhalt;
+            b.addEventListener('click', tun);
+            document.getElementById('right-rail-inner').appendChild(b);
+            return b;
+        }
+        // lit = the rail's hover look; the central rule has !important, so this too
+        function leuchte(b, an) {
+            if (an) {
+                b.style.setProperty('border-color', '#00d2ff', 'important');
+                b.style.setProperty('box-shadow', '0 0 18px rgba(0, 210, 255, 0.5)', 'important');
+            } else {
+                b.style.removeProperty('border-color');
+                b.style.removeProperty('box-shadow');
             }
-            // Doc: "rechts über ... den VOR Dreieck in Kreisen, oben: Farben" -
-            // white on top, the palette down to the triangle
+        }
+        function zeigeWerkzeuge() {
+            if (!document.getElementById('right-rail-inner')) return;
             if (!document.getElementById('farbe-0')) {
                 FARBEN.forEach(([name, wert], i) => {
-                    const b = document.createElement('button');
-                    b.id = 'farbe-' + i;
+                    const b = railKnopf('farbe-' + i, 'Stift ' + name,
+                        `<span style="display:block;width:26px;height:26px;border-radius:50%;background:${wert};` +
+                        'box-shadow:0 0 0 1px rgba(255, 255, 255, 0.35)"></span>',
+                        () => {
+                            stiftFarbe = wert;
+                            try { localStorage.setItem('vorrechnen-farbe', wert); } catch (_) {}
+                            zeigeWerkzeuge();
+                        }, false);
                     b.dataset.farbe = wert;
-                    b.title = 'Stift ' + name;
-                    b.setAttribute('aria-label', 'Stiftfarbe ' + name);
-                    b.style.cssText = `position:absolute;right:4px;top:calc(50% - ${108 + (FARBEN.length - 1 - i) * 60}px);width:48px;height:48px;` +
-                        'padding:0;border-radius:50%;background:transparent;cursor:pointer;touch-action:manipulation;z-index:5;' +
-                        'display:flex;align-items:center;justify-content:center;box-sizing:border-box';
-                    b.innerHTML = `<span style="display:block;width:30px;height:30px;border-radius:50%;background:${wert}"></span>`;
-                    b.addEventListener('click', () => {
-                        stiftFarbe = wert;
-                        try { localStorage.setItem('vorrechnen-farbe', wert); } catch (_) {}
-                        zeigeWerkzeuge();
-                    });
-                    container.appendChild(b);
+                });
+                [['clear', 'Seite leeren (C)', () => clearAll(), true],
+                 ['undo', 'Rückgängig', () => rueckgaengig(), false],
+                 ['redo', 'Wiederholen', () => wiederholen(), false],
+                 ['hell', 'Hell / Dunkel', () => setzeHell(!hell), true],
+                 // in mission control it ends the projection
+                 ['beamer', STEUERUNG ? 'Beamer beenden' : 'Beamer: nur die Rechnung projizieren',
+                     () => { if (STEUERUNG) window.close(); else beamerStart(); }, false]].forEach(([id, text, tun, neueGruppe]) => {
+                    railKnopf('werkzeug-' + id, text,
+                        `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${WERKZEUG_ICONS[id]}</svg>`, tun, neueGruppe);
                 });
             }
-            // the pen's colour has a bright ring (dark on paper); white is ink on paper
+            // the pen's colour is lit; white is ink on paper
             FARBEN.forEach((_, i) => {
                 const b = document.getElementById('farbe-' + i), an = b.dataset.farbe === stiftFarbe;
-                b.style.border = an ? `3px solid ${hell ? TINTE : '#eaf0f7'}` : `1.5px solid ${hell ? '#5d6678' : '#8a93a3'}`;
+                leuchte(b, an);
                 b.setAttribute('aria-pressed', an ? 'true' : 'false');
                 if (i === 0) {
                     b.firstElementChild.style.background = anzeige(INK);
                     b.title = hell ? 'Stift Tinte' : 'Stift Weiß';
                 }
             });
-            document.getElementById('werkzeug-hell').setAttribute('aria-pressed', hell ? 'true' : 'false');
-            // in mission control the beamer circle is lit: the projection runs
-            if (STEUERUNG) document.getElementById('werkzeug-beamer').style.borderWidth = '3px';
+            const hk = document.getElementById('werkzeug-hell');
+            hk.setAttribute('aria-pressed', hell ? 'true' : 'false');
+            leuchte(hk, hell);
+            // in mission control the beamer button is lit: the projection runs
+            if (STEUERUNG) leuchte(document.getElementById('werkzeug-beamer'), true);
             // nothing to undo or redo: dimmed
             document.getElementById('werkzeug-undo').style.opacity = verlauf.length ? '1' : '0.35';
             document.getElementById('werkzeug-redo').style.opacity = vorwaerts.length ? '1' : '0.35';
@@ -2410,6 +2431,7 @@
         function init() {
             resizeCanvasToContainer();
             zeigePapier();
+            zeigeTafelPfeile();                // halfway down the squares
             zeigeRechenweg();                  // the "=" column follows the board's width
             redraw();
             updateStats();
@@ -2419,7 +2441,7 @@
         // window.resize says nothing about that. Watch the box itself.
         if (typeof ResizeObserver === 'function') {
             new ResizeObserver(() => {
-                if (resizeCanvasToContainer()) { zeigePapier(); zeigeRechenweg(); redraw(); zeigeFormeln(); }
+                if (resizeCanvasToContainer()) { zeigePapier(); zeigeTafelPfeile(); zeigeRechenweg(); redraw(); zeigeFormeln(); }
             }).observe(container);
         }
 
