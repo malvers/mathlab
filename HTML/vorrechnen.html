@@ -166,30 +166,39 @@
         .instrument-card:is(:has(#modus-wahl), :has(#regler)) .instrument-title { font-size: 1.25rem; }
         .instrument-card:is(:has(#modus-wahl), :has(#regler)) .toggle-icon svg { width: 16px; height: 16px; }
 
+        /* Doc, 26.09.: "auf den dunklen Design auch Linien und Karos" - the same paper
+           on the dark board, drawn in the white ink, about as faint as on sand */
+        #canvas-container {
+            isolation: isolate;        /* #papier (z-index -1) lies on the board, under the ink */
+            --papier-linie: rgba(234, 240, 247, 0.13);
+            --papier-karo: rgba(234, 240, 247, 0.09);
+            --papier-grenze: rgba(234, 240, 247, 0.23);
+        }
         /* Doc, 26.09.: "hell mode ... mit leicht sandfarbenen Papier und Tinte und
            zeilen (toggle)" - the board as paper with a ruled line every 96 px;
            the controls on it get darker so they stay visible on sand */
         #canvas-container.hell {
             background: #f4ecd8;
-            isolation: isolate;        /* #papier (z-index -1) lies on the sand, under the ink */
+            --papier-linie: rgba(31, 64, 150, 0.2);
+            --papier-karo: rgba(31, 64, 150, 0.13);
+            --papier-grenze: rgba(31, 64, 150, 0.35);
         }
         /* Doc, 26.09.: "die Aufgabe direkt auf der Zeile und noch etwas enger. Im
            unteren Drittel ... Karos um abzugrenzen" - ruled lines every 64 px down
            to two thirds, squares of 32 px below. Each is one tile repeated, so every
            line is drawn the same, also at a device pixel ratio of 1.5. */
-        #papier { position: absolute; inset: 0; z-index: -1; pointer-events: none; display: none; }
-        #canvas-container.hell #papier { display: block; }
+        #papier { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
         #papier .linien {
             position: absolute; left: 0; right: 0; top: 0;
-            background-image: linear-gradient(to bottom, transparent 63px, rgba(31, 64, 150, 0.2) 63px);
+            background-image: linear-gradient(to bottom, transparent 63px, var(--papier-linie) 63px);
             background-size: 100% 64px;
         }
         #papier .karo {
             position: absolute; left: 0; right: 0; bottom: 0;
-            border-top: 2px solid rgba(31, 64, 150, 0.35);
+            border-top: 2px solid var(--papier-grenze);
             background-image:
-                linear-gradient(to bottom, transparent 31px, rgba(31, 64, 150, 0.13) 31px),
-                linear-gradient(to right, transparent 31px, rgba(31, 64, 150, 0.13) 31px);
+                linear-gradient(to bottom, transparent 31px, var(--papier-karo) 31px),
+                linear-gradient(to right, transparent 31px, var(--papier-karo) 31px);
             background-size: 32px 32px;
         }
         #canvas-container.hell :is(#tafel-pfeil-vor, #tafel-pfeil-zurueck, #zl-play) {
@@ -230,6 +239,13 @@
            margins; the paper simply runs on far beyond them (nothing clips it), on any
            screen. 4000 = 125 squares, so the squares stay in step. */
         body.anzeige #papier { left: -4000px; right: -4000px; }
+        /* Dark: the board's glow spans the whole screen and the board itself is
+           clear, so the margins are board too - one surface under the lines, as the
+           sand is in light mode (else the board shows as a lighter box) */
+        body.anzeige:has(> #canvas-container:not(.hell))::before {
+            background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(8, 20, 42, 1) 100%);
+        }
+        body.anzeige #canvas-container:not(.hell) { background: transparent; }
 
         /* Doc, 26.09.: "mach in der unteren Zeile dann doch den Erkennen-Button" -
            small, bottom centre, until the recognised line takes its place */
@@ -1488,7 +1504,7 @@
             }
             anzeigeBald();
         }
-        // The paper (light mode): lines down to about two thirds, ending on a
+        // The paper (light and dark): lines down to about two thirds, ending on a
         // line, squares below - Doc's writing field
         function papierGrenze(h) { return Math.round(h * 2 / 3 / ZEILE) * ZEILE; }
         function zeigePapier() {
