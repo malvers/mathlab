@@ -186,6 +186,24 @@
         #canvas-container.hell #zeitleiste .zl-fuellung { background: rgba(31, 64, 150, 0.6); }
         #canvas-container.hell #zeitleiste .zl-knopf { background: rgb(31, 64, 150); }
 
+        /* Doc, 26.09.: "baue einen modus wie in den Decks, das ich projizieren
+           kann. Kids sehen nur die Rechnungen, ich mission control" - the window on
+           the beamer shows only the board; everything to operate it is gone, and
+           a backdrop in the board's colour fills the rest of the screen */
+        body.anzeige { overflow: hidden; }
+        body.anzeige::before {
+            content: ''; position: fixed; inset: 0; z-index: 999;
+            background: var(--anzeige-grund, #050d1c);
+        }
+        body.anzeige :is(#mini-rail, #side-panel, #tafel-pfeil-vor, #tafel-pfeil-zurueck,
+            [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play) {
+            display: none !important;
+        }
+        body.anzeige #canvas-container {
+            position: fixed !important; left: 0 !important; top: 0 !important;
+            transform-origin: 0 0; z-index: 1000;
+        }
+
         .erk-ok { color: rgb(121, 158, 49); }
         .erk-warn { color: rgb(245, 194, 66); }
         .erk-fehler { color: rgb(176, 36, 24); }
@@ -276,6 +294,11 @@
 
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
+        // Beamer (see "Beamer" further down): this window is either mission
+        // control (opened with ?steuerung, Doc writes here) or, while it projects,
+        // the board on the beamer that only shows what mission control sends.
+        const STEUERUNG = new URLSearchParams(location.search).has('steuerung');
+        let anzeigeModus = false;
         const container = document.getElementById('canvas-container');
 
         // ── State ───────────────────────────────────────────────────────────
@@ -503,6 +526,7 @@
         }
 
         canvas.addEventListener('pointerdown', ev => {
+            if (anzeigeModus) return;
             if (fingerRunter(ev)) { ev.preventDefault(); return; }
             if (ev.pointerType === 'pen') {
                 stiftZuletzt = performance.now();
@@ -666,6 +690,7 @@
         }
 
         function redraw() {
+            if (anzeigeModus) return;
             zeigeZeitleiste();
             zeigeWerkzeuge();
             zeigeSatz();
@@ -707,6 +732,8 @@
                     if (v) zeichneMorph(ctx, v, morphT, anzeige(linienFarbe(l)));
                 });
             }
+
+            anzeigeBald();
 
             // lines on their way up (rechenwegHoch): ink or morph in a frame
             // that glides and shrinks towards the step's place
@@ -903,6 +930,7 @@
 
         // The typeset formula under the handwriting - real LaTeX, set by KaTeX.
         function zeigeFormeln() {
+            if (anzeigeModus) return;
             let host = document.getElementById('formel-schicht');
             if (!host) {
                 host = document.createElement('div');
@@ -928,6 +956,7 @@
                 host.appendChild(d);
                 passeEin(d, host.clientWidth - 48);
             });
+            anzeigeBald();
         }
 
         // ── Morph ───────────────────────────────────────────────────────────
@@ -1146,6 +1175,7 @@
 
         // ── Vorlage: the formula to copy, shown above the writing area ──────
         function zeigeVorlage(hinweis) {
+            if (anzeigeModus) return;
             let host = document.getElementById('vorlage-schicht');
             if (!host) {
                 host = document.createElement('div');
@@ -1243,6 +1273,7 @@
         // verborgenAb: steps from this index on are laid out but not yet shown -
         // they are where the flying lines land
         function zeigeRechenweg(verborgenAb) {
+            if (anzeigeModus) return;
             let host = document.getElementById('rechenweg-schicht');
             if (!host) {
                 host = document.createElement('div');
@@ -1279,6 +1310,7 @@
                     kopf.style.height = (u - o) + 'px';
                 }
             }
+            anzeigeBald();
         }
         // ── In flight: the line goes up while it is being recognised ────────
         // The ink leaves the page at once (the next step can be written right
@@ -1478,11 +1510,25 @@
                 // scale about the formula's own corner, so start and end are exact
                 flug.style.transformOrigin = `${r.left - c.left - links}px ${r.top - c.top - oben}px`;
                 flug.style.transform = `translate(${a.x - (r.left - c.left)}px, ${a.y - (r.top - c.top)}px) scale(${s})`;
+                const zwilling = anzeigeZwilling(flug);       // the same piece on the beamer
                 flug.getBoundingClientRect();
                 flug.style.transition = 'transform 0.7s cubic-bezier(0.3, 0.7, 0.3, 1)';
                 flug.style.transform = 'none';
+                if (zwilling) {
+                    try {
+                        zwilling.getBoundingClientRect();
+                        zwilling.style.transition = flug.style.transition;
+                        zwilling.style.transform = 'none';
+                    } catch (_) {}
+                }
                 let gelandet = false;
-                const landen = () => { if (gelandet) return; gelandet = true; flug.remove(); zeigen(); };
+                const landen = () => {
+                    if (gelandet) return;
+                    gelandet = true;
+                    flug.remove();
+                    if (zwilling) try { zwilling.remove(); } catch (_) {}
+                    zeigen();
+                };
                 flug.addEventListener('transitionend', landen, { once: true });
                 setTimeout(landen, 1000);
             });
@@ -1509,6 +1555,166 @@
                 container.appendChild(b);
             });
             zeigeTafelPfeile();
+        }
+
+        // ── Beamer ──────────────────────────────────────────────────────────
+        // Doc, 26.09.: "baue einen modus wie in den Decks, das ich projizieren
+        // kann. Kids sehen nur die Rechnungen, ich mission control" - and: "der
+        // Beamer soll gerade nicht spiegeln". As in the decks: one tap puts this
+        // window fullscreen on the beamer (Window Management API) and opens
+        // mission control on the laptop (?steuerung) - the full lab, where Doc
+        // writes. Mission control sends every picture of the board: the canvas
+        // (drawImage from its own), the layers when they change, the typeset
+        // line's flight as a twin. Controls never reach the beamer. Closing
+        // mission control brings this window back.
+        let steuerFenster = null, anzeigeFrame = null, buehne = { w: 0, h: 0 };
+        const SPIEGEL_SCHICHTEN = ['vorlage-schicht', 'rechenweg-schicht', 'satz-schicht', 'formel-schicht'];
+        const spiegelCache = {};
+        function anzeigeLaeuft() { return anzeigeModus; }
+        function anzeigeZiel() {
+            if (!STEUERUNG) return null;
+            try {
+                const z = window.opener;
+                return (z && !z.closed && typeof z.anzeigeLaeuft === 'function' && z.anzeigeLaeuft()) ? z : null;
+            } catch (_) { return null; }
+        }
+        // a layer's markup, read again only when it changed (watched per layer)
+        function spiegelSchicht(id) {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            let c = spiegelCache[id];
+            if (!c || c.el !== el) {
+                c = spiegelCache[id] = { el, dirty: true, version: 0 };
+                // any change of a layer sends by itself - a landing only unhides
+                // a row, and nothing draws after it
+                c.obs = new MutationObserver(() => { c.dirty = true; anzeigeBald(); });
+                c.obs.observe(el, { subtree: true, childList: true, attributes: true, characterData: true });
+            }
+            if (c.obs.takeRecords().length) c.dirty = true;
+            if (c.dirty) { c.css = el.style.cssText; c.html = el.innerHTML; c.dirty = false; c.version++; }
+            return [id, c.css, c.html, c.version];
+        }
+        function anzeigeSenden() {
+            anzeigeFrame = null;
+            const ziel = anzeigeZiel();
+            if (!ziel) return;
+            const r = container.getBoundingClientRect();
+            try {
+                ziel.anzeigeEmpfang({ w: Math.round(r.width), h: Math.round(r.height), hell, leinwand: canvas,
+                    schichten: SPIEGEL_SCHICHTEN.map(spiegelSchicht).filter(Boolean) });
+            } catch (_) {}
+        }
+        function anzeigeBald() {
+            if (STEUERUNG && !anzeigeFrame) anzeigeFrame = requestAnimationFrame(anzeigeSenden);
+        }
+        function anzeigeZwilling(el) {
+            const ziel = anzeigeZiel();
+            try { return ziel ? ziel.anzeigeKlon(el.outerHTML) : null; } catch (_) { return null; }
+        }
+
+        // -- on the beamer --
+        function anzeigeEmpfang(d) {
+            if (!anzeigeModus) return;
+            if (d.w !== buehne.w || d.h !== buehne.h) { buehne = { w: d.w, h: d.h }; anzeigeEinpassen(); }
+            if (container.classList.contains('hell') !== d.hell) {
+                container.classList.toggle('hell', d.hell);
+                document.documentElement.style.setProperty('--anzeige-grund', d.hell ? '#f4ecd8' : '#050d1c');
+            }
+            const q = d.leinwand;
+            if (canvas.width !== q.width || canvas.height !== q.height) { canvas.width = q.width; canvas.height = q.height; }
+            canvas.style.width = d.w + 'px';
+            canvas.style.height = d.h + 'px';
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(q, 0, 0);
+            d.schichten.forEach(([id, css, html, version]) => {
+                let el = document.getElementById(id);
+                if (!el) { el = document.createElement('div'); el.id = id; container.appendChild(el); }
+                if (el.dataset.version === String(version)) return;
+                el.dataset.version = String(version);
+                el.style.cssText = css;
+                el.innerHTML = html;
+            });
+        }
+        function anzeigeKlon(html) {
+            if (!anzeigeModus) return null;
+            const t = document.createElement('template');
+            t.innerHTML = html;
+            const el = t.content.firstElementChild;
+            container.appendChild(el);
+            return el;
+        }
+        // mission control's board, as large as the beamer allows, centred
+        function anzeigeEinpassen() {
+            if (!anzeigeModus || !buehne.w) return;
+            const sk = Math.min(innerWidth / buehne.w, innerHeight / buehne.h);
+            container.style.width = buehne.w + 'px';
+            container.style.height = buehne.h + 'px';
+            container.style.transform = `translate(${(innerWidth - buehne.w * sk) / 2}px, ${(innerHeight - buehne.h * sk) / 2}px) scale(${sk})`;
+        }
+        window.addEventListener('resize', anzeigeEinpassen);
+        function anzeigeAn() {
+            anzeigeModus = true;
+            clearTimeout(autoTimer);
+            clearTimeout(beispielTimer);
+            if (tipp) { clearTimeout(tipp.timer); tipp = null; }
+            current = null;
+            fluege.length = 0;
+            document.documentElement.style.setProperty('--anzeige-grund', hell ? '#f4ecd8' : '#050d1c');
+            document.body.classList.add('anzeige');
+            // out of the page layout: inside it the board sat under the backdrop
+            // (an ancestor has its own stacking order); leaving reloads anyway
+            document.body.appendChild(container);
+            // mission control closed: back to normal
+            const wache = setInterval(() => { if (!steuerFenster || steuerFenster.closed) { clearInterval(wache); anzeigeAus(); } }, 800);
+        }
+        // back to normal: the state is mission control's now, so load it afresh
+        function anzeigeAus() {
+            try { if (document.fullscreenElement) document.exitFullscreen(); } catch (_) {}
+            location.reload();
+        }
+        async function beamerStart() {
+            if (!window.getScreenDetails) { beamerAngebot('Dieser Browser kann keinen zweiten Bildschirm ansteuern – bitte Chrome oder Edge.', false); return; }
+            let sd = null;
+            try { sd = await window.getScreenDetails(); } catch (_) {}
+            if (!sd) { beamerAngebot('Die Seite darf keine Fenster auf andere Bildschirme legen – bitte „Fenster verwalten“ erlauben (Schloss in der Adressleiste).', true); return; }
+            const lap = sd.screens.find(x => x.isInternal) || sd.currentScreen;
+            const beamer = sd.screens.find(x => x !== lap);
+            if (!beamer) { beamerAngebot('Kein zweiter Bildschirm gefunden. Den Beamer auf „Erweitern“ stellen, nicht „Duplizieren“ (Windows: Win + P, Mac: ⌘ F1) – dann noch einmal.', true); return; }
+            // Chrome's question "Fenster verwalten" uses up the tap that asked it
+            // (decks, 16.09.) - then a fresh tap on the card starts it
+            try { await document.documentElement.requestFullscreen({ screen: beamer }); }
+            catch (_) { beamerAngebot('Bereit – noch einmal tippen, dann kommt die Rechnung auf den Beamer.', true); return; }
+            const w = window.open(location.pathname + '?steuerung', 'vorrechnen-steuerung',
+                'popup,left=' + lap.availLeft + ',top=' + lap.availTop + ',width=' + lap.availWidth + ',height=' + lap.availHeight);
+            if (!w) {
+                try { document.exitFullscreen(); } catch (_) {}
+                beamerAngebot('Mission Control wurde blockiert – bitte Pop-ups für diese Seite erlauben.', true);
+                return;
+            }
+            steuerFenster = w;
+            anzeigeAn();
+        }
+        function beamerAngebot(text, nochmal) {
+            let k = document.getElementById('beamer-angebot');
+            if (!k) {
+                k = document.createElement('div');
+                k.id = 'beamer-angebot';
+                k.setAttribute('role', 'dialog');
+                k.setAttribute('aria-label', 'Beamer');
+                k.style.cssText = 'position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;background:rgba(2,8,20,0.6)';
+                k.innerHTML = '<div style="background:#0b1a33;border:1px solid rgba(0,210,255,0.35);border-radius:18px;padding:28px 32px;' +
+                    'max-width:520px;font-family:Orbitron,sans-serif;color:#eaf0f7;text-align:center">' +
+                    '<p class="beamer-text" style="margin:0 0 24px;line-height:1.6;font-size:1rem"></p>' +
+                    '<div style="display:flex;gap:14px;justify-content:center">' +
+                    '<button type="button" class="cyber-btn beamer-los" style="flex:1">AUF DEN BEAMER</button>' +
+                    '<button type="button" class="cyber-btn beamer-nein" style="flex:1">ABBRECHEN</button></div></div>';
+                document.body.appendChild(k);
+                k.querySelector('.beamer-los').addEventListener('click', () => { k.remove(); beamerStart(); });
+                k.querySelector('.beamer-nein').addEventListener('click', () => k.remove());
+            }
+            k.querySelector('.beamer-text').textContent = text;
+            k.querySelector('.beamer-los').style.display = nochmal ? '' : 'none';
         }
 
         // ── Undo / redo ─────────────────────────────────────────────────────
@@ -1569,6 +1775,9 @@
         const WERKZEUG_ICONS = {
             clear: '<path d="M16.5 7.2 A6.8 6.8 0 1 0 16.5 16.8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>',
             // light / dark: a circle, half filled
+            // beamer: a screen on its stand
+            beamer: '<rect x="3.5" y="5" width="17" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/>' +
+                    '<path d="M12 16 V20 M8 20 H16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
             hell: '<circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/>' +
                   '<path d="M12 4.5 A7.5 7.5 0 0 0 12 19.5 Z" fill="currentColor"/>',
             undo: '<path d="M9 13 L4.5 8.5 L9 4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>' +
@@ -1581,7 +1790,10 @@
                 [['clear', 'Seite leeren (C)', () => clearAll()],
                  ['undo', 'Rückgängig', () => rueckgaengig()],
                  ['redo', 'Wiederholen', () => wiederholen()],
-                 ['hell', 'Hell / Dunkel', () => setzeHell(!hell)]].forEach(([id, text, tun], i) => {
+                 ['hell', 'Hell / Dunkel', () => setzeHell(!hell)],
+                 // Doc: "(rechts unten)" - in mission control it ends the projection
+                 ['beamer', STEUERUNG ? 'Beamer beenden' : 'Beamer: nur die Rechnung projizieren',
+                     () => { if (STEUERUNG) window.close(); else beamerStart(); }]].forEach(([id, text, tun], i) => {
                     const b = document.createElement('button');
                     b.id = 'werkzeug-' + id;
                     b.title = text;
@@ -1627,6 +1839,8 @@
                 }
             });
             document.getElementById('werkzeug-hell').setAttribute('aria-pressed', hell ? 'true' : 'false');
+            // in mission control the beamer circle is lit: the projection runs
+            if (STEUERUNG) document.getElementById('werkzeug-beamer').style.borderWidth = '3px';
             // nothing to undo or redo: dimmed
             document.getElementById('werkzeug-undo').style.opacity = verlauf.length ? '1' : '0.35';
             document.getElementById('werkzeug-redo').style.opacity = vorwaerts.length ? '1' : '0.35';
@@ -2092,6 +2306,7 @@
         // 1.296 instead of 1.5.
         let letzteGroesse = '';
         function resizeCanvasToContainer() {
+            if (anzeigeModus) return false;
             const dpr = window.devicePixelRatio || 1;
             const rect = container.getBoundingClientRect();
             const w = Math.max(1, Math.round(rect.width)), h = Math.max(1, Math.round(rect.height));
