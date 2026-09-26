@@ -270,7 +270,10 @@
         const rechenweg = [];
         try {
             const d = JSON.parse(localStorage.getItem('vorrechnen-rechenweg') || '[]');
-            if (Array.isArray(d)) d.forEach(l => { if (typeof l === 'string') rechenweg.push(l); });
+            if (Array.isArray(d)) d.forEach(l => {
+                if (typeof l === 'string') rechenweg.push({ latex: l, farbe: null });
+                else if (l && typeof l.latex === 'string') rechenweg.push({ latex: l.latex, farbe: l.farbe || null });
+            });
         } catch (_) {}
         // formelUnten: the typeset formula under the handwriting - Doc first: "lass
         // die unten weg", then: "zeig bitte doch die erkannte Formel unten x mittig
@@ -365,6 +368,28 @@
         // Doc, 25.09.: "irgendwie lenkt das grün ab ... mach mal fast weiß" - ink,
         // template and morph share this one colour
         const INK = '#eaf0f7';
+        // Doc, 26.09.: "oben: Farben", "klar! Unsere" - the ink plus the palette
+        // of CLAUDE.md, exact. A stroke keeps its colour through the morph into
+        // LaTeX and up into the working.
+        const FARBEN = [
+            ['Weiß', INK],
+            ['Orange', 'rgb(245, 194, 66)'],     // lambda
+            ['Rot', 'rgb(176, 36, 24)'],         // Upsilon
+            ['Grün', 'rgb(121, 158, 49)'],       // phi
+        ];
+        let stiftFarbe = INK;
+        try { const f = localStorage.getItem('vorrechnen-farbe'); if (FARBEN.some(x => x[1] === f)) stiftFarbe = f; } catch (_) {}
+        // a line's colour: the one most of its strokes carry
+        function linienFarbe(line, striche = strokes) {
+            const n = new Map();
+            (line.symbols || []).forEach(sy => sy.strokeIdxs.forEach(i => {
+                const f = (striche[i] && striche[i].farbe) || INK;
+                n.set(f, (n.get(f) || 0) + 1);
+            }));
+            let beste = INK, max = 0;
+            n.forEach((k, f) => { if (k > max) { max = k; beste = f; } });
+            return beste;
+        }
         // Symbol colours: Doc's palette first, then neon blue, cycling. Red-free
         // on purpose so it never reads as an error marker.
         const SYM_COLORS = ['#00d2ff', 'rgb(245,194,66)', 'rgb(121,158,49)', '#c77dff', '#ff9e64'];
@@ -459,7 +484,7 @@
             const p = canvasPos(ev);
             // Pressure widens the line a little where the tablet reports it.
             const w = 2.5 + (ev.pressure > 0 ? ev.pressure * 2.5 : 1.2);
-            current = { points: [p], width: w, pointerType: ev.pointerType };
+            current = { points: [p], width: w, pointerType: ev.pointerType, farbe: stiftFarbe };
             currentId = ev.pointerId;
             clearTimeout(autoTimer);
             ev.preventDefault();
@@ -592,6 +617,7 @@
         // ── Rendering ───────────────────────────────────────────────────────
         function strokePath(s) {
             if (s.points.length < 2) return;
+            ctx.strokeStyle = s.farbe || INK;
             ctx.beginPath();
             ctx.moveTo(s.points[0].x, s.points[0].y);
             for (let i = 1; i < s.points.length; i++) ctx.lineTo(s.points[i].x, s.points[i].y);
@@ -640,7 +666,7 @@
                     const erg = zeilenErgebnis[l.lineIdx];
                     if (morphT >= 1 && erg && erg.satz) return;
                     // Doc: "alles grün" - the formula ends in the ink's green, no blue
-                    if (v) zeichneMorph(ctx, v, morphT);
+                    if (v) zeichneMorph(ctx, v, morphT, linienFarbe(l));
                 });
             }
 
@@ -650,8 +676,8 @@
                 ctx.save();
                 ctx.translate(f.p.tx, f.p.ty);
                 ctx.scale(f.p.s, f.p.s);
-                if (f.v && f.mt > 0) zeichneMorph(ctx, f.v, f.mt);
-                else { ctx.strokeStyle = INK; f.striche.forEach(strokePath); }
+                if (f.v && f.mt > 0) zeichneMorph(ctx, f.v, f.mt, f.farbe);
+                else f.striche.forEach(strokePath);
                 ctx.restore();
             });
 
@@ -886,9 +912,9 @@
             const v = StaubMorph.vorbereiten(line, striche, zuordnung && zuordnung.paare ? zuordnung : atome, morphOpts);
             return v ? Object.assign(v, { art: 'staub' }) : null;
         }
-        function zeichneMorph(c, v, t) {
-            if (v.art === 'strich') StrichMorph.zeichnen(c, v.glyphen, t, { farbe: INK, zielFarbe: INK, staffel: morphOpts.staffel });
-            else StaubMorph.zeichnen(c, v, t, { farbe: INK, zielFarbe: INK,
+        function zeichneMorph(c, v, t, farbe = INK) {
+            if (v.art === 'strich') StrichMorph.zeichnen(c, v.glyphen, t, { farbe, zielFarbe: farbe, staffel: morphOpts.staffel });
+            else StaubMorph.zeichnen(c, v, t, { farbe, zielFarbe: farbe,
                 staffel: morphOpts.staffel, wirbel: morphOpts.wirbel, staub: morphOpts.staub });
         }
         function wechsleMorphArt(art) {
@@ -963,8 +989,8 @@
             analysis.lines.forEach(line => {
                 const erg = zeilenErgebnis[line.lineIdx];
                 if (morphT < 1 || !erg || !erg.satz || !morphVorbereitet[line.lineIdx]) return;
-                const z = erg.satz, key = 'z' + line.lineIdx;
-                const sig = [z.latex, z.skala, z.dx, z.dy].join('|');
+                const z = erg.satz, key = 'z' + line.lineIdx, farbe = linienFarbe(line);
+                const sig = [z.latex, z.skala, z.dx, z.dy, farbe].join('|');
                 soll.add(key);
                 const alt = host.querySelector(`[data-zeile="${key}"]`);
                 if (alt && alt.dataset.sig === sig) return;
@@ -973,7 +999,7 @@
                 d.dataset.zeile = key;
                 d.dataset.sig = sig;
                 d.style.cssText = `position:absolute;left:${z.dx}px;top:${z.dy}px;font-size:${100 * z.skala}px;` +
-                    `white-space:nowrap;line-height:normal;color:${INK}`;
+                    `white-space:nowrap;line-height:normal;color:${farbe}`;
                 host.appendChild(d);
                 try { katex.render(alsDisplay(z.latex), d, { throwOnError: false, displayMode: false }); } catch (_) { return; }
                 // land on the measured spot: correct whatever the surroundings shifted
@@ -1191,16 +1217,17 @@
             const kopf = document.getElementById('vorlage-schicht');
             host.style.top = testModus ? kopf.getBoundingClientRect().height + 'px' : '14px';
             host.innerHTML = '';
-            const zeile = (latex, schritt, verborgen) => amGleich(latex).forEach((teil, j) => {
+            const zeile = (latex, schritt, verborgen, farbe) => amGleich(latex).forEach((teil, j) => {
                 const d = document.createElement('div');
                 d.dataset.schritt = schritt;
+                if (farbe) d.style.color = farbe;
                 d.style.justifySelf = j ? 'start' : 'end';
                 if (verborgen) d.style.visibility = 'hidden';
                 try { katex.render(alsDisplay(teil), d, { throwOnError: false }); } catch (_) { d.textContent = teil; }
                 host.appendChild(d);
             });
             if (aufgabenModus) zeile(AUFGABEN[aufgabeIdx][1], 'aufgabe', false);
-            rechenweg.forEach((latex, i) => zeile(latex, i, (verborgenAb !== undefined && i >= verborgenAb) || imFlug.has(i)));
+            rechenweg.forEach((e, i) => zeile(e.latex, i, (verborgenAb !== undefined && i >= verborgenAb) || imFlug.has(i), e.farbe));
             // counter and "NACH x" sit level with the task
             if (aufgabenModus) {
                 let o = Infinity, u = -Infinity;
@@ -1286,7 +1313,7 @@
             const neu = zeilen.map((l, k) => {
                 const idxs = [...new Set(l.symbols.flatMap(sy => sy.strokeIdxs))].sort((a, b) => a - b);
                 const erg = zeilenErgebnis[l.lineIdx];
-                const f = { striche: idxs.map(i => strokes[i]), latex: erg && erg.latex || null, v: null, mt: 0, mt0: null,
+                const f = { striche: idxs.map(i => strokes[i]), latex: erg && erg.latex || null, farbe: linienFarbe(l), v: null, mt: 0, mt0: null,
                     p: { tx: 0, ty: 0, s: 1 }, bereit: false, zurueck: false, schritt: -1 };
                 flugZiel(f, schaetzeZiel(l.bbox, wartend + k), FLUG_START);
                 return f;
@@ -1329,7 +1356,7 @@
                 // the row, hidden, gives the exact place: the typeset line's
                 // corner and width map onto the row's
                 const i = rechenweg.length;
-                rechenweg.push(latex);
+                rechenweg.push({ latex, farbe: f.farbe });
                 merkeRechenweg();
                 imFlug.add(i);
                 zeigeRechenweg();
@@ -1373,8 +1400,9 @@
                 return { x: l.bbox.x, y: l.bbox.y, w: l.bbox.w };
             });
             const latexe = zeilen.map(l => zeilenErgebnis[l.lineIdx].latex);
+            const farben = zeilen.map(l => linienFarbe(l));
             const erster = rechenweg.length;
-            latexe.forEach(l => rechenweg.push(l));
+            latexe.forEach((l, k) => rechenweg.push({ latex: l, farbe: farben[k] }));
             merkeRechenweg();
             // the ink and the typeset line go; the new steps wait hidden in their place
             const weg = new Set(zeilen.flatMap(l => l.symbols.flatMap(sy => sy.strokeIdxs)));
@@ -1398,7 +1426,7 @@
                 // one piece in flight, set at the step's size and nudged onto its spot
                 const flug = document.createElement('div');
                 flug.style.cssText = `position:absolute;left:${x0 - c.left}px;top:${y0 - c.top}px;pointer-events:none;` +
-                    `white-space:nowrap;line-height:normal;font-size:${RECHEN_SCHRIFT};color:${INK};z-index:4`;
+                    `white-space:nowrap;line-height:normal;font-size:${RECHEN_SCHRIFT};color:${farben[k]};z-index:4`;
                 try { katex.render(alsDisplay(latex), flug, { throwOnError: false }); } catch (_) { flug.textContent = latex; }
                 container.appendChild(flug);
                 const fk = flug.querySelector('.katex-html') || flug;
@@ -1515,6 +1543,33 @@
                     container.appendChild(b);
                 });
             }
+            // Doc: "rechts über ... den VOR Dreieck in Kreisen, oben: Farben" -
+            // white on top, the palette down to the triangle
+            if (!document.getElementById('farbe-0')) {
+                FARBEN.forEach(([name, wert], i) => {
+                    const b = document.createElement('button');
+                    b.id = 'farbe-' + i;
+                    b.dataset.farbe = wert;
+                    b.title = 'Stift ' + name;
+                    b.setAttribute('aria-label', 'Stiftfarbe ' + name);
+                    b.style.cssText = `position:absolute;right:4px;top:calc(50% - ${108 + (FARBEN.length - 1 - i) * 60}px);width:48px;height:48px;` +
+                        'padding:0;border-radius:50%;background:transparent;cursor:pointer;touch-action:manipulation;z-index:5;' +
+                        'display:flex;align-items:center;justify-content:center;box-sizing:border-box';
+                    b.innerHTML = `<span style="display:block;width:30px;height:30px;border-radius:50%;background:${wert}"></span>`;
+                    b.addEventListener('click', () => {
+                        stiftFarbe = wert;
+                        try { localStorage.setItem('vorrechnen-farbe', wert); } catch (_) {}
+                        zeigeWerkzeuge();
+                    });
+                    container.appendChild(b);
+                });
+            }
+            // the pen's colour has a bright ring
+            FARBEN.forEach((_, i) => {
+                const b = document.getElementById('farbe-' + i), an = b.dataset.farbe === stiftFarbe;
+                b.style.border = an ? '3px solid #eaf0f7' : '1.5px solid #8a93a3';
+                b.setAttribute('aria-pressed', an ? 'true' : 'false');
+            });
             // nothing to undo or redo: dimmed
             document.getElementById('werkzeug-undo').style.opacity = verlauf.length ? '1' : '0.35';
             document.getElementById('werkzeug-redo').style.opacity = vorwaerts.length ? '1' : '0.35';
