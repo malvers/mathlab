@@ -1649,7 +1649,6 @@
                     <button class="cyber-btn" style="flex:1" onclick="beispiel()">BEISPIEL</button>
                 </div>
                 -->
-                <div id="morph-steuerung" style="margin-top:0.3rem"></div>
                 <!-- Doc: no text under the slider. Still written, just not shown -
                      display:none off again when calibrating. -->
                 <div id="probe-status" class="erk-info" style="margin-top:0.6rem;display:none">–</div>
@@ -1662,6 +1661,11 @@
                 <input type="range" id="morph-regler" min="0" max="1" step="0.01" value="0"
                        oninput="setzeMorph(this.value)" style="display:none">
             `, '#00d2ff');
+
+            // Doc, 26.09.: "alle Settings (Staub Strich Slider) in eine card, die
+            // default geschlossen ... persist" - the big buttons stay on top
+            CyberUI.createCard('ui-container', 'Einstellungen', '<div id="morph-steuerung"></div>', '#00d2ff',
+                { collapsible: true, collapsed: true, persistKey: 'vorrechnen-einstellungen-zu' });
 
             // Doc: "speed slider für mich". Letting go replays the morph at the
             // new speed, so the effect can be judged right away.

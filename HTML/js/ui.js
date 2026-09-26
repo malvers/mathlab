@@ -1460,17 +1460,34 @@ class CyberUI {
         update();
     }
 
+    /**
+     * @param {object} [options]
+     * @param {boolean} [options.collapsible] the title opens and closes the card
+     * @param {boolean} [options.collapsed] start closed (with persistKey: only until the first toggle)
+     * @param {string} [options.persistKey] localStorage key - the open/closed state is remembered on the device
+     */
     static createCard(containerId, title, contentHTML, accentColor = '#00d2ff', options = { collapsible: false }) {
         const container = document.getElementById(containerId);
         if (!container) return;
 
         const cardId = `card-${Math.random().toString(36).substr(2, 9)}`;
-        const toggleHtml = options.collapsible ? '<span class="toggle-icon">▶</span>' : '';
+        // Doc: icons always SVG, never a font glyph
+        const toggleHtml = options.collapsible
+            ? '<span class="toggle-icon"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true" focusable="false">' +
+              '<path d="M2 1 L9 5 L2 9 Z" fill="currentColor"/></svg></span>'
+            : '';
+        let collapsed = !!options.collapsed;
+        if (options.collapsible && options.persistKey) {
+            try {
+                const v = localStorage.getItem(options.persistKey);
+                if (v !== null) collapsed = v === '1';
+            } catch (_) { /* no storage: the default holds */ }
+        }
 
         const glowColor = (typeof accentColor === 'string' && accentColor.startsWith('#')) ? `${accentColor}66` : 'rgba(0, 210, 255, 0.4)';
 
         const cardHTML = `
-            <div id="${cardId}" class="instrument-card ${options.collapsible ? 'collapsible' : ''} ${options.collapsed ? 'collapsed' : ''}">
+            <div id="${cardId}" class="instrument-card ${options.collapsible ? 'collapsible' : ''} ${collapsed ? 'collapsed' : ''}">
                 ${title ? `
                 <div class="instrument-title" style="color: ${accentColor}; text-shadow: 0 0 10px ${glowColor};">
                     ${toggleHtml}
@@ -1489,6 +1506,9 @@ class CyberUI {
             const titleEl = card.querySelector('.instrument-title');
             titleEl.addEventListener('click', () => {
                 card.classList.toggle('collapsed');
+                if (options.persistKey) {
+                    try { localStorage.setItem(options.persistKey, card.classList.contains('collapsed') ? '1' : '0'); } catch (_) {}
+                }
             });
         }
     }
