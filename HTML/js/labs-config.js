@@ -898,6 +898,17 @@ const LABS_DATA = [
         "color": "blue"
     },
     {
+        "id": "tour-trigonometrie",
+        "href": "tours/trigonometrie.html",
+        "title": "Tour: Vom Dreieck zur Welle",
+        "description": "Live-Tour durch das Trigonometrie-Lab: Solita führt mit Stimme, Cursor und Untertiteln durch alle elf Kapitel — vom rechtwinkligen Dreieck über Einheitskreis und Bogenmaß, die Sinuskurve, die aus dem Kreis abrollt, Gleichungen, Parameter mit Rätsel und die Tageslänge in Dresden bis zu Tangens, Sinussatz und Ableitung. Das echte Lab läuft dabei live im Browser. 12 Szenen, etwa 4½ Minuten, jederzeit anhalten und selbst ausprobieren.",
+        "tagline": "Live-Tour / Trigonometrie / 11 Kapitel",
+        "icon": LAB_ICONS["trigonometrie"],
+        "category": "touren",
+        "keywords": "tour touren live-tour rundgang fuehrung solita stimme untertitel trigonometrie sinus kosinus tangens einheitskreis bogenmass sinuskurve gleichung parameter raetsel tageslaenge dresden sinussatz ableitung dreieck welle",
+        "color": "gold"
+    },
+    {
         "id": "costablanca",
         "href": "tracker/costablanca.html",
         "title": "Highlights Costa Blanca",
