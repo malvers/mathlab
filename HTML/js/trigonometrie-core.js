@@ -115,6 +115,55 @@
     }
 
     // ==================================================================
+    // Canvas labels set like LaTeX (Doc 26.09.: "Beschriftungen größer und LaTeX")
+    // ==================================================================
+    const TEXF = {
+        math: "KaTeX_Math, 'CMU Serif', 'Times New Roman', serif",   // italic identifiers: a, α, π
+        main: "KaTeX_Main, 'CMU Serif', 'Times New Roman', serif",   // digits, operators, °
+        word: "'CMU Serif', KaTeX_Main, 'Times New Roman', serif",   // upright words — CMU has the umlauts
+    };
+    const SUBS = '₀₁₂₃₄₅₆₇₈₉';
+    const isLetter = ch => /[A-Za-zÄÖÜäöüß]/.test(ch);
+    const isGreek = ch => /[\u0391-\u03A9\u03B1-\u03C9]/.test(ch);
+    /**
+     * Split a label into runs the way LaTeX sets it: a single letter or a Greek
+     * letter is an italic identifier, a word (sin, Hypotenuse) stays upright,
+     * digits right after an identifier become its index (x1 -> x₁, β2 -> β₂).
+     * `roman` keeps single letters upright (quadrant numerals I, II …).
+     */
+    function texRuns(str, roman) {
+        // TeX glyphs: centred dot, prime, and a real minus instead of the hyphen from toLocaleString
+        str = String(str).replace(/·/g, '⋅').replace(/'/g, '′').replace(/-/g, '−');
+        const runs = [];
+        const push = (t, kind) => {
+            const last = runs[runs.length - 1];
+            if (last && last.kind === kind) last.t += t; else runs.push({ t, kind });
+        };
+        const index = i => {
+            let k = i;
+            while (k < str.length && /[0-9]/.test(str[k])) k++;
+            if (k > i) push(str.slice(i, k), 'sub');
+            return k;
+        };
+        let i = 0;
+        while (i < str.length) {
+            const ch = str[i];
+            if (SUBS.includes(ch)) { push(String(SUBS.indexOf(ch)), 'sub'); i++; continue; }
+            if (isLetter(ch)) {
+                let j = i;
+                while (j < str.length && isLetter(str[j])) j++;
+                const w = str.slice(i, j);
+                if (w.length === 1 && !roman) { push(w, 'math'); i = index(j); }
+                else { push(w, 'word'); i = j; }
+                continue;
+            }
+            if (isGreek(ch)) { push(ch, 'math'); i = ch === 'π' ? i + 1 : index(i + 1); continue; }
+            push(ch, 'main'); i++;
+        }
+        return runs;
+    }
+
+    // ==================================================================
     // Stage — VekLab.Stage2D plus π-axis, separate y scale and HUD-aware fit
     // ==================================================================
     class TrigStage extends VekLab.Stage2D {
@@ -130,13 +179,59 @@
             this.box = null;           // last requested fit box, reapplied on resize
             this.moved = false;        // the user zoomed or panned: stop refitting
             this.hudEl = null;         // floating panel to keep clear of
-            this.fontScale = 1.25;     // every canvas text, one knob (Doc 26.09.: "tendenziell zu klein")
+            // size knobs for all canvas text: labels, axis numbers, label offsets
+            this.texScale = 1.7;       // a label written as "13px" is set at 13 · 1.7 px
+            this.tickScale = 1.45;     // axis numbers
+            this.offScale = 1.3;       // dx/dy of labels grow with them
+            // the canvas only sees a font once it is loaded — redraw when the TeX faces arrive
+            const kick = () => Promise.all(['italic 20px KaTeX_Math', '20px KaTeX_Main', '20px "CMU Serif"']
+                .map(f => document.fonts.load(f, 'aπ1ä'))).then(() => { if (this.w) this.render(); }).catch(() => { });
+            if (document.fonts) {
+                window.addEventListener('load', kick);
+                document.fonts.addEventListener('loadingdone', () => { if (this.w) this.render(); });
+            }
         }
-        /** "600 13px 'Orbitron'" -> the same font at fontScale times the size. */
-        _font(f) { return f.replace(/(\d+(?:\.\d+)?)px/, (_, n) => (parseFloat(n) * this.fontScale).toFixed(1) + 'px'); }
+        /** Pixel size from a legacy font string ("600 13px 'Orbitron'" -> 13). */
+        _px(f) { const m = /(\d+(?:\.\d+)?)px/.exec(f || ''); return m ? parseFloat(m[1]) : 13; }
+        /**
+         * Set a label in LaTeX style at screen point (sx, sy). opt: align, baseline
+         * ('middle' | 'top' | 'bottom'), halo (dark outline, default on), roman.
+         */
+        texAt(str, sx, sy, size, color, opt = {}) {
+            const c = this.ctx, runs = texRuns(str, opt.roman);
+            const font = r => r.kind === 'math' ? `italic ${size}px ${TEXF.math}`
+                : r.kind === 'word' ? `${size}px ${TEXF.word}`
+                    : r.kind === 'sub' ? `${(size * 0.7).toFixed(1)}px ${TEXF.main}` : `${size}px ${TEXF.main}`;
+            c.save();
+            let W = 0;
+            const ws = runs.map((r, k) => {
+                c.font = font(r);
+                let w = c.measureText(r.t).width;
+                // italic correction before an upright neighbour, as TeX does
+                if (r.kind === 'math' && runs[k + 1] && runs[k + 1].kind !== 'sub') w += size * 0.07;
+                W += w;
+                return w;
+            });
+            const align = opt.align || 'center', base = opt.baseline || 'middle';
+            let x = align === 'left' ? sx : align === 'right' ? sx - W : sx - W / 2;
+            // alphabetic baseline from the requested anchor (Computer Modern: caps ≈ 0.68 em)
+            const by = base === 'top' ? sy + size * 0.74 : base === 'bottom' ? sy - size * 0.24 : sy + size * 0.33;
+            c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+            const place = [];
+            runs.forEach((r, k) => { place.push([r, x, r.kind === 'sub' ? by + size * 0.2 : by]); x += ws[k]; });
+            if (opt.halo !== false) {
+                c.lineJoin = 'round'; c.lineWidth = Math.max(3, size * 0.24); c.strokeStyle = 'rgba(4,10,22,0.85)';
+                place.forEach(([r, px, py]) => { c.font = font(r); c.strokeText(r.t, px, py); });
+            }
+            c.fillStyle = color;
+            place.forEach(([r, px, py]) => { c.font = font(r); c.fillText(r.t, px, py); });
+            c.restore();
+        }
         /** All labels go through here — Stage2D's handle names and angle labels included. */
         text(t, p, color, opt = {}) {
-            super.text(t, p, color, Object.assign({}, opt, { font: this._font(opt.font || "600 13px 'Orbitron', sans-serif") }));
+            const s = this.w2s(p);
+            this.texAt(t, s[0] + (opt.dx || 0) * this.offScale, s[1] + (opt.dy || 0) * this.offScale,
+                this._px(opt.font) * this.texScale, color, opt);
         }
         /** Back to the chapter's own framing (button bottom right, or double click). */
         resetView() {
@@ -212,8 +307,9 @@
         grid() {
             if (!this.showGrid) return;
             const c = this.ctx;
-            const xs = this.xMode === 'pi' ? piStep(this.unit, 44 * this.fontScale) : niceStep(this.unit, 34 * this.fontScale);
-            const ys = niceStep(this.uy, 30 * this.fontScale);
+            const tick = 12 * this.tickScale;
+            const xs = this.xMode === 'pi' ? piStep(this.unit, 3.6 * tick) : niceStep(this.unit, 2.9 * tick);
+            const ys = niceStep(this.uy, 2.1 * tick);
             const [x0, y1] = this.s2w([0, 0]);
             const [x1, y0] = this.s2w([this.w, this.h]);
             const xmin = this.xClip == null ? x0 : Math.max(x0, this.xClip);
@@ -240,38 +336,30 @@
             c.stroke();
 
             // x labels
-            const fs = this.fontScale;
-            c.fillStyle = 'rgba(255,255,255,0.55)';
-            c.font = this._font('12px Arial, Helvetica, sans-serif');
-            c.textAlign = 'center'; c.textBaseline = 'top';
-            const ly = Math.min(Math.max(o[1] + 5, 4), this.h - (this.degLabels ? 30 : 16) * fs);
+            const numCol = 'rgba(255,255,255,0.6)', plain = { halo: false };
+            const ly = Math.min(Math.max(o[1] + 5, 4), this.h - (this.degLabels ? 2.4 : 1.3) * tick);
             for (let x = Math.ceil(xmin / xs - 1e-9) * xs; x <= x1; x += xs) {
                 if (Math.abs(x) < xs / 2) continue;
                 const sx = this.w2s([x, 0])[0];
-                c.fillText(this.xMode === 'pi' ? piText(x) : num(x, 3), sx, ly);
+                this.texAt(this.xMode === 'pi' ? piText(x) : num(x, 3), sx, ly, tick, numCol, Object.assign({ baseline: 'top' }, plain));
                 if (this.xMode === 'pi' && this.degLabels) {
-                    c.save(); c.fillStyle = 'rgba(255,255,255,0.32)'; c.font = this._font('10px Arial, Helvetica, sans-serif');
-                    c.fillText(num(deg(x), 0) + '°', sx, ly + 14 * fs); c.restore();
+                    this.texAt(num(deg(x), 0) + '°', sx, ly + 1.15 * tick, tick * 0.8, 'rgba(255,255,255,0.35)', Object.assign({ baseline: 'top' }, plain));
                 }
             }
             // y labels
             if (o[0] >= sxClip - 1) {
-                c.textAlign = 'right'; c.textBaseline = 'middle';
-                const lx = Math.min(Math.max(o[0] - 6, 26), this.w - 4);
+                const lx = Math.min(Math.max(o[0] - 7, 2.2 * tick), this.w - 4);
                 for (let y = Math.ceil(y0 / ys) * ys; y <= y1; y += ys) {
                     if (Math.abs(y) < ys / 2) continue;
-                    c.fillText(num(y, 3), lx, this.w2s([0, y])[1]);
+                    this.texAt(num(y, 3), lx, this.w2s([0, y])[1], tick, numCol, Object.assign({ align: 'right' }, plain));
                 }
             }
             // axis names
-            c.fillStyle = 'rgba(255,255,255,0.75)';
-            c.font = this._font("600 12px 'Orbitron', sans-serif");
-            c.textAlign = 'right'; c.textBaseline = 'bottom';
-            c.fillText(this.names[0], this.w - 6, Math.min(Math.max(o[1] - 5, 14), this.h - 4));
+            const nameSize = 12 * this.texScale, nameCol = 'rgba(255,255,255,0.8)';
+            this.texAt(this.names[0], this.w - 8, Math.min(Math.max(o[1] - 6, nameSize), this.h - 4), nameSize, nameCol, { align: 'right', baseline: 'bottom' });
             if (o[0] >= sxClip - 1) {
-                c.textAlign = 'left'; c.textBaseline = 'top';
                 const top = this.box && !this.moved ? Math.max(6, this.w2s([0, this.box.y1])[1] - 4) : 6;
-                c.fillText(this.names[1], Math.min(Math.max(o[0] + 6, 4), this.w - 60), top);
+                this.texAt(this.names[1], Math.min(Math.max(o[0] + 8, 4), this.w - 80), top, nameSize, nameCol, { align: 'left', baseline: 'top' });
             }
         }
 
@@ -450,7 +538,7 @@
             q.forEach((s, i) => {
                 const at = [m[0] + s[0] * r * 0.62, m[1] + s[1] * r * 0.62];
                 const active = Math.floor(wrap(x) / (PI / 2)) === i;
-                st.text(names[i], at, active ? '#fff' : 'rgba(255,255,255,0.32)', { dy: -10, font: "700 12px 'Orbitron', sans-serif" });
+                st.text(names[i], at, active ? '#fff' : 'rgba(255,255,255,0.32)', { dy: -10, font: "700 12px 'Orbitron', sans-serif", roman: true });
                 st.text((s[1] > 0 ? 'sin +' : 'sin −'), at, active ? C.sin : 'rgba(245,194,66,0.35)', { dy: 8, font: "600 11px Arial, Helvetica, sans-serif" });
                 st.text((s[0] > 0 ? 'cos +' : 'cos −'), at, active ? C.cos : 'rgba(0,210,255,0.35)', { dy: 22, font: "600 11px Arial, Helvetica, sans-serif" });
             });
@@ -505,6 +593,6 @@
 
     window.TrigLab = Object.assign({}, window.VekLab, {
         PI, TAU, C, rad, deg, wrap, snapAngle, piFrac, piTex, piText, radTex, exactTex, valTex,
-        degText, degTex, niceStep, TrigStage, unitCircle, circleHandle,
+        degText, degTex, niceStep, TrigStage, unitCircle, circleHandle, texRuns,
     });
 })();

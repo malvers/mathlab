@@ -479,7 +479,7 @@
             }
             st.segment([x, 0], [x, m], C.cos, { width: 1.4, dash: [3, 3] });
             st.dot([x, m], C.cos, 6);
-            st.text("f '(x)", [x, m], C.cos, { dx: 10, dy: m >= 0 ? -12 : 12, font: SMALL, align: 'left' });
+            st.text('f′(x)', [x, m], C.cos, { dx: 10, dy: m >= 0 ? -12 : 12, font: SMALL, align: 'left' });
         },
     });
 })();

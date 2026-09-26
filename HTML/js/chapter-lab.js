@@ -84,8 +84,8 @@
                 hud(html) { if (current === id) queueHud(html); },
                 /** One line of grey text at the bottom left of the stage. */
                 tip(t) { if (current === id) tip.textContent = `KAPITEL ${chapterNo} / ${CHAPTERS.length}` + (t ? '  ·  ' + t : ''); },
-                theory: html => lib.theory(id, html),
-                tasks: list => lib.tasks(id, list),
+                theory: html => lib.theory(id, glue(html)),
+                tasks: list => lib.tasks(id, list.map(t => Object.assign({}, t, { q: glue(t.q), hint: t.hint && glue(t.hint), sol: glue(t.sol) }))),
                 redraw: () => { if (current === id) renderStage(); },
             };
             ctxs[id] = ctx;
@@ -192,6 +192,11 @@
         });
 
         return { switchTab, get current() { return current; }, renderStage };
+    }
+
+    /** Keep punctuation on the line of the formula before it: "$2r$." never breaks before the dot. */
+    function glue(html) {
+        return typeof html === 'string' ? html.replace(/(\$[^$]+\$)([.,;:!?)]+)/g, '<span class="v-nobr">$1$2</span>') : html;
     }
 
     function dbg(msg) { if (window.DebugWindow) window.DebugWindow.log('[chapter-lab] ' + msg); }
