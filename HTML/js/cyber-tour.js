@@ -24,6 +24,7 @@
  *   t.at(sec) t.rest() t.wait(ms) t.cue(i, fallback) t.cueEnd(i, fallback) t.until(fn, timeout)
  *   t.load(frame, url) t.eval(frame, fn, arg) t.$(frame, sel) t.scroll(frame, sel, block) t.show(frame, on)
  *   t.point(frame, sel) t.tap(frame, sel) t.pointAt(frame, x, y) t.tapAt(frame, x, y) (a place on a canvas)
+ *   t.drag(frame, path, ms) (a finger along path(k) -> [x, y]) t.slide(frame, sel, to, ms) (a range input)
  *   t.line(k, fallback) (second where Solita's k-th subtitle line starts) t.dur t.hold(text) (the tour pauses itself)
  *   t.callout(text, xy) t.hideCursor() t.caption(n, title)
  *   t.card(on) t.cardImage(on, animate) t.sound(url, vol) t.hook(name, args) t.every(ms, fn) t.later(ms, fn)
@@ -380,11 +381,18 @@
     }
 
     /* ============================================================ overlay */
-    function cursorTo(x, y) {
+    /* follow: the cursor rides on a dragging finger - every step lands at once, without the easing of a pointing move */
+    function cursorTo(x, y, follow) {
         const c = $id('tour-cursor');
         c.classList.add('on');
+        c.classList.toggle('follow', !!follow);
         c.style.left = x + 'px';
         c.style.top = y + 'px';
+    }
+    /* a point in a frame's page (its client coordinates) on the tour page */
+    function toTour(f, x, y) {
+        const k = coordScale(f), R = f.getBoundingClientRect(), s = f.offsetWidth ? R.width / f.offsetWidth : 1;
+        return [R.left + x * k * s, R.top + y * k * s];
     }
     function ripple(x, y) {
         const r = document.createElement('div');
@@ -601,6 +609,65 @@
                 el.dispatchEvent(new w.MouseEvent('click', { ...o, buttons: 0 }));
                 await t.wait(250);
                 return xy;
+            },
+            /* A drag with the finger (Trigonometrie tour, 26.09.2026: P once round the circle, a point along a curve):
+               pointerdown where path(0) is, pointermoves along path(k) for k up to 1, pointerup at the end - all sent to
+               the element under the start, as to a captured pointer. The cursor rides on the finger. path(k) gives the
+               page's client coordinates and may be async (it can ask the page where a point of its drawing is now);
+               ms is how long the finger moves. */
+            async drag(name, path, ms = 1200) {
+                const f = frameEl(name), w = f.contentWindow;
+                const p0 = await path(0);
+                const xy0 = await t.pointAt(name, p0[0], p0[1]);
+                check(run);
+                ripple(xy0[0], xy0[1]);
+                const el = w.document.elementFromPoint(p0[0], p0[1]) || w.document.body;
+                const send = (type, xy, buttons) => el.dispatchEvent(new w.PointerEvent(type, { bubbles: true, cancelable: true,
+                    composed: true, view: w, clientX: xy[0], clientY: xy[1], button: 0, buttons, pointerId: 1, pointerType: 'mouse', isPrimary: true }));
+                send('pointerdown', p0, 1);
+                const n = Math.max(2, Math.round(ms / 40));
+                let xy = p0;
+                try {
+                    for (let i = 1; i <= n; i++) {
+                        await t.wait(ms / n);
+                        xy = await path(i / n);
+                        const T = toTour(f, xy[0], xy[1]);
+                        cursorTo(T[0], T[1], true);
+                        send('pointermove', xy, 1);
+                    }
+                } finally {
+                    send('pointerup', xy, 0);           // a jump mid-drag must not leave a finger down in the page
+                }
+                await t.wait(150);
+                return xy;
+            },
+            /* A slider moved by the finger: from its value now to `to`, each step an input event as a real drag sends it
+               (the page's own handler runs, the browser snaps to the slider's step), a change event at the end. The
+               cursor sits on the thumb. */
+            async slide(name, sel, to, ms = 900) {
+                const f = frameEl(name), w = f.contentWindow;
+                const el = typeof sel === 'string' ? f.contentDocument.querySelector(sel) : sel;
+                if (!el) throw new Error('kein Regler: ' + name + ' ' + sel);
+                const min = el.min === '' ? 0 : +el.min, max = el.max === '' ? 100 : +el.max, step = +el.step || 1;
+                const thumb = (v) => {
+                    const b = el.getBoundingClientRect(), k = (v - min) / ((max - min) || 1);
+                    return [b.left + 8 + k * (b.width - 16), b.top + b.height / 2];
+                };
+                el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+                const from = +el.value, n = Math.max(1, Math.round(Math.abs(to - from) / step));
+                const p0 = thumb(from), xy0 = await t.pointAt(name, p0[0], p0[1]);
+                check(run);
+                ripple(xy0[0], xy0[1]);
+                for (let i = 1; i <= n; i++) {
+                    await t.wait(ms / n);
+                    el.value = String(i === n ? to : from + (to - from) * i / n);
+                    el.dispatchEvent(new w.Event('input', { bubbles: true }));
+                    const p = thumb(+el.value), T = toTour(f, p[0], p[1]);
+                    cursorTo(T[0], T[1], true);
+                }
+                el.dispatchEvent(new w.Event('change', { bubbles: true }));
+                await t.wait(150);
+                return +el.value;
             },
             /* a simulated device looks away (another window) and back - the page's own visibility path */
             leave(name, on) {
