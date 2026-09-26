@@ -505,6 +505,7 @@
         }
         function legeStrich(s) {
             if (s.points.length < 2) return false;
+            merkeVerlauf();
             strokes.push(s);
             erkennenStand++;
             merkeBeispiel(false);
@@ -602,6 +603,7 @@
 
         function redraw() {
             zeigeZeitleiste();
+            zeigeWerkzeuge();
             zeigeSatz();
             const rect = container.getBoundingClientRect();
             ctx.clearRect(0, 0, rect.width, rect.height);
@@ -1351,6 +1353,7 @@
         function rechenwegHoch() {
             const zeilen = analysis.lines.filter(l => !zuKlein(l));
             if (!zeilen.length) return;
+            merkeVerlauf();
             // Doc, 25.09.: "wenn ich mit zwei Fingern nach oben schiebe, die
             // Erkennung sofort beginnt ... Vielleicht sogar in der Bewegung" -
             // a line not typeset yet takes off at once and morphs on the way
@@ -1438,6 +1441,82 @@
             zeigeTafelPfeile();
         }
 
+        // ── Undo / redo ─────────────────────────────────────────────────────
+        // Doc, 26.09.: "unten: C (für clear), undo/redo". A snapshot of the page
+        // and the working before every change (a stroke, C / LEEREN, a swipe);
+        // undo steps back through them, redo forth. A new task, mode or
+        // example starts a new history.
+        const verlauf = [], vorwaerts = [];
+        const VERLAUF_MAX = 200;
+        function schnappschuss() { return { striche: strokes.slice(), rechenweg: rechenweg.slice() }; }
+        function merkeVerlauf() {
+            verlauf.push(schnappschuss());
+            if (verlauf.length > VERLAUF_MAX) verlauf.shift();
+            vorwaerts.length = 0;
+        }
+        function vergissVerlauf() { verlauf.length = 0; vorwaerts.length = 0; }
+        function stelleHer(z) {
+            flugAbbrechen();
+            clearTimeout(autoTimer);
+            clearTimeout(beispielTimer);
+            if (tipp) { clearTimeout(tipp.timer); tipp = null; }
+            current = null;
+            strokes.length = 0;
+            z.striche.forEach(st => strokes.push(st));
+            rechenweg.length = 0;
+            z.rechenweg.forEach(l => rechenweg.push(l));
+            istBeispiel = false;
+            merkeBeispiel(false);
+            verwerfeErkennung();
+            recompute();
+            merkeStriche();
+            merkeRechenweg();
+            zeigeRechenweg();
+            autoBald();                        // a line that came back is read again
+        }
+        function rueckgaengig() {
+            if (!verlauf.length) return;
+            vorwaerts.push(schnappschuss());
+            stelleHer(verlauf.pop());
+        }
+        function wiederholen() {
+            if (!vorwaerts.length) return;
+            verlauf.push(schnappschuss());
+            stelleHer(vorwaerts.pop());
+        }
+
+        // Circles on the right edge, under the VOR triangle: C, undo, redo.
+        // Icons are SVG (Doc: never a font glyph) - the C too.
+        const WERKZEUG_ICONS = {
+            clear: '<path d="M16.5 7.2 A6.8 6.8 0 1 0 16.5 16.8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>',
+            undo: '<path d="M9 13 L4.5 8.5 L9 4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>' +
+                  '<path d="M4.5 8.5 H14 A5.5 5.5 0 0 1 14 19.5 H10" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+            redo: '<path d="M15 13 L19.5 8.5 L15 4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>' +
+                  '<path d="M19.5 8.5 H10 A5.5 5.5 0 0 0 10 19.5 H14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+        };
+        function zeigeWerkzeuge() {
+            if (!document.getElementById('werkzeug-clear')) {
+                [['clear', 'Seite leeren (C)', () => clearAll()],
+                 ['undo', 'Rückgängig', () => rueckgaengig()],
+                 ['redo', 'Wiederholen', () => wiederholen()]].forEach(([id, text, tun], i) => {
+                    const b = document.createElement('button');
+                    b.id = 'werkzeug-' + id;
+                    b.title = text;
+                    b.setAttribute('aria-label', text);
+                    // under the VOR triangle (96 px tall, centred at 50%), 60 px apart
+                    b.style.cssText = `position:absolute;right:4px;top:calc(50% + ${60 + i * 60}px);width:48px;height:48px;` +
+                        'padding:0;border:1.5px solid currentColor;border-radius:50%;background:transparent;color:#8a93a3;' +
+                        'cursor:pointer;touch-action:manipulation;z-index:5;display:flex;align-items:center;justify-content:center';
+                    b.innerHTML = `<svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${WERKZEUG_ICONS[id]}</svg>`;
+                    b.addEventListener('click', tun);
+                    container.appendChild(b);
+                });
+            }
+            // nothing to undo or redo: dimmed
+            document.getElementById('werkzeug-undo').style.opacity = verlauf.length ? '1' : '0.35';
+            document.getElementById('werkzeug-redo').style.opacity = vorwaerts.length ? '1' : '0.35';
+        }
+
         // Doc: "mach bei Weiter einen left right mit Dreiecken" - back and forth.
         // Without "Meine Beispiele" it steps through the tasks; a new task
         // starts on a clean board.
@@ -1451,6 +1530,7 @@
                 rechenweg.length = 0;
                 merkeRechenweg();
                 clearAll();
+                vergissVerlauf();          // undo must not bring the last task's ink onto this one
                 zeigeVorlage();
                 return;
             }
@@ -1458,6 +1538,7 @@
             vorlageIdx = (vorlageIdx + (schritt === -1 ? -1 : 1) + n) % n;
             try { localStorage.setItem('vorrechnen-vorlage', String(vorlageIdx)); } catch (_) {}
             clearAll();
+            vergissVerlauf();
             zeigeVorlage();
             setProbeStatus('–');
             if (testModus) beispiel();
@@ -1500,6 +1581,7 @@
             clearTimeout(beispielTimer);
             clearTimeout(autoTimer);
             flugAbbrechen();
+            vergissVerlauf();
             rechenweg.length = 0;
             merkeRechenweg();
             strokes.length = 0;
@@ -1540,6 +1622,7 @@
             const latex = VORLAGEN[vorlageIdx][1];
             const d = (await ladeKorpus()).get(latex);
             clearTimeout(beispielTimer);
+            vergissVerlauf();
             verwerfeErkennung();
             strokes.length = 0;
             current = null;
@@ -1695,6 +1778,7 @@
         }
 
         function clearAll() {
+            if (strokes.length || tipp || rechenweg.length) merkeVerlauf();   // C / LEEREN can be undone
             // The working survives a LEEREN of the page (a botched step must not
             // cost the lesson's board); LEEREN on an empty page clears it too.
             if (!strokes.length && !current && !tipp && (rechenweg.length || fluege.length)) {
