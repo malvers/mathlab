@@ -70,7 +70,9 @@ window.svpPlanParts.push(function (P) {
             ref.redBtnEl = rb;
             P.watchRedBtn(ref);
         }
-        const hasMat = !!text && (n > 0 || !alle.length || matTail(text));
+        /* the board of a lesson (svp-plan-tafel.js) is material of its week, even alone */
+        const tafeln = P.tafelLinks ? P.tafelLinks(ref).length : 0;
+        const hasMat = (!!text && (n > 0 || !alle.length || matTail(text))) || tafeln > 0;
         /* Doc, 20.09.2026: "macht den clip weg bitte" - die Bueroklammer mit der
            Material-Anzahl ist aus der Wochenzeile raus; rechts steht dort jetzt
            das Vorschaubild der Woche. Dass die Zeile etwas zu zeigen hat,
@@ -96,8 +98,8 @@ window.svpPlanParts.push(function (P) {
            zurueck, sonst zeigt die Haelfte ins Leere. */
         /* what the Zusatzmaterial tab holds: no exercises, no films; free text alone
            still counts as one, like the paperclip */
-        const zusatz = alle.filter(en => !P.isExerciseEntry(en) && !P.isVideoEntry(en)).length
-            || (matTail(text) ? 1 : 0);
+        const zusatz = (alle.filter(en => !P.isExerciseEntry(en) && !P.isVideoEntry(en)).length
+            || (matTail(text) ? 1 : 0)) + tafeln;
         P.setVideoReiter(ref, vids, zusatz, P.fillAufgabenPane(ref, text, ex));
         decorateMatCell(ref);
         /* renderMaterial builds every pill from scratch, so the width measured

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<!--
+    Tafel - the board of one lesson, for the class.
+
+    Doc, 26.09.2026: "das, was wir hier gemacht haben, sollen definitiv alle sehen. Das ist ja
+    gerade der Witz. Wir rechnen es gemeinsam und die haben dann die Musterlösung schon vor sich
+    liegen." vorrechnen.html sends what was worked out on the board ("Tafel senden" on its right
+    rail) to the table svp_tafel: one row per plan page and day - the tasks, and under each the
+    lines of its working as LaTeX. Everyone may read it (it is mathematics, nothing about a
+    student), only Doc's account writes. The plan shows the row as a pill "Tafel 26.09." in its
+    week (svp-plan-tafel.js) and the pill opens this page: ?id=<row id>.
+
+    Here the working is set with KaTeX, lined up at the "=" like on the board, the result
+    underlined twice; the PDF button prints it - the browser's "save as PDF" keeps the formulas
+    as vectors, sharp at any size. Signed in, Doc can take the board out of the plan again.
+-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Tafel | Stoffverteilungspläne</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="svp.css">
+    <script src="svp-gate.js"></script>
+    <style>
+        /* Only what this page adds - ground, type and buttons come from svp.css. */
+
+        /* the head: back to the plan, class and day, the tools */
+        .tf-bar {
+            max-width: 1100px;
+            margin: 0 auto 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px 16px;
+            flex-wrap: wrap;
+        }
+
+        .tf-kopf { min-width: 0; flex: 1 1 260px; }
+
+        /* the class in Orbitron, the house accent of the scheme in force (as in the Fahrplan) */
+        .tf-klasse {
+            display: block;
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.25rem, 4.2vw, 2.1rem);
+            line-height: 1.15;
+            color: var(--lambda);
+            text-decoration: none;
+        }
+
+        .tf-klasse:hover { text-decoration: underline; }
+
+        .tf-datum { margin-top: 4px; font-size: 0.95rem; color: var(--muted); }
+
+        .tf-tools { display: flex; gap: 8px; flex-wrap: wrap; }
+        .tf-tools button.action { min-height: 46px; }
+        .tf-tools button.action.wirklich { border-color: rgb(176, 36, 24); color: rgb(176, 36, 24); }
+
+        .tf-liste {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 20px;
+        }
+
+        .tf-karte-kopf {
+            display: flex;
+            align-items: baseline;
+            gap: 6px 14px;
+            flex-wrap: wrap;
+            margin: 0 0 6px;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.06em;
+        }
+
+        .tf-nr { font-size: 1rem; color: var(--head); }
+        .tf-nach { font-size: 0.85rem; color: var(--muted); }
+
+        /* The paper of the Fahrplan: bluish, navy on it, in EVERY scheme - it prints as it is. */
+        .tf-papier {
+            background: #d8e6f8;
+            color: #002060;
+            border-radius: 14px;
+            padding: 18px 22px;
+            overflow-x: auto;
+        }
+
+        /* The working lined up at the "=": left side flush right, the sign, right side flush
+           left - one row per line. No column gap: the air around the "=" is set inside the
+           formulas (\;), so the double line under the result runs through without a break. */
+        .tf-rechnung {
+            display: grid;
+            grid-template-columns: max-content max-content max-content;
+            justify-content: start;
+            align-items: baseline;
+            row-gap: 0.55em;
+            font-size: 1.3rem;
+        }
+
+        .tf-links { justify-self: end; }
+        .tf-gleich { justify-self: center; }
+        .tf-rechts { justify-self: start; }
+        .tf-ganz { grid-column: 1 / -1; }
+
+        .tf-hinweis { max-width: 1100px; margin: 0 auto 14px; color: var(--muted); font-size: 0.95rem; }
+        .tf-hinweis:empty { display: none; }
+
+        @media (max-width: 560px) {
+            .tf-tools { width: 100%; }
+            .tf-tools button.action { flex: 1 1 auto; }
+            .tf-papier { padding: 14px 14px; }
+            .tf-rechnung { font-size: 1.08rem; }
+            .tf-liste { gap: 16px; }
+        }
+
+        /* The PDF: white paper, navy ink, no buttons; a task never breaks across two pages. */
+        @media print {
+            @page { size: A4; margin: 14mm; }
+            html, body { background: #fff !important; }
+            .tf-tools, .tf-hinweis, footer.page-foot { display: none !important; }
+            .tf-klasse, .tf-datum, .tf-nr, .tf-nach { color: #002060 !important; }
+            .tf-papier { background: #fff; border: 1px solid #c3d3ea; padding: 10px 14px; overflow: visible; }
+            .tf-karte { break-inside: avoid; page-break-inside: avoid; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="tf-bar">
+        <div class="tf-kopf">
+            <a class="tf-klasse" id="tf-klasse" target="_top" href="index.html">Tafel</a>
+            <div class="tf-datum" id="tf-datum">&nbsp;</div>
+        </div>
+        <div class="tf-tools">
+            <button type="button" class="action" id="tf-pdf" disabled>PDF</button>
+            <button type="button" class="action secondary" id="tf-weg" hidden>Aus dem Plan nehmen</button>
+        </div>
+    </div>
+
+    <p class="tf-hinweis" id="tf-status">Lade die Tafel &hellip;</p>
+    <main class="tf-liste" id="tf-liste"></main>
+
+    <footer class="page-foot">
+        Gerechnet in der Stunde an der Tafel &mdash; der PDF-Knopf speichert die Rechnung als PDF.
+    </footer>
+
+    <script src="svp-auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script>
+        (function () {
+            'use strict';
+
+            const $ = function (id) { return document.getElementById(id); };
+            const liste = $('tf-liste'), status = $('tf-status');
+            const klasseEl = $('tf-klasse'), datumEl = $('tf-datum');
+            const pdfBtn = $('tf-pdf'), wegBtn = $('tf-weg');
+            const BASE = new URL('.', location.href);
+            const id = new URLSearchParams(location.search).get('id') || '';
+            const TAGE = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+
+            /* ---- the formulas ------------------------------------------------------ */
+            function setze(el, tex) {
+                try { katex.render('\\displaystyle ' + tex, el, { throwOnError: false }); }
+                catch (e) { el.textContent = tex; }
+            }
+
+            /* The first "=" outside any braces and \left ... \right: "\frac{a}{b=c}" is no split. */
+            function teileAmGleich(tex) {
+                let tiefe = 0;
+                for (let k = 0; k < tex.length; k++) {
+                    const c = tex[k];
+                    if (c === '\\') {
+                        const cmd = /^\\([a-zA-Z]+)/.exec(tex.slice(k));
+                        if (cmd && cmd[1] === 'left') tiefe++;
+                        else if (cmd && cmd[1] === 'right') tiefe--;
+                        k += cmd ? cmd[0].length - 1 : 1;
+                        continue;
+                    }
+                    if (c === '{') tiefe++;
+                    else if (c === '}') tiefe--;
+                    else if (c === '=' && tiefe === 0) return [tex.slice(0, k), tex.slice(k + 1)];
+                }
+                return null;
+            }
+
+            function norm(tex) { return String(tex || '').replace(/\\(?:left|right|displaystyle|[,;:! ])|\s|\{\}/g, ''); }
+
+            /* One task: its number and what it is solved for, then the task and every line of the
+               working. The last line "x = ..." (x = what is solved for, no x on the right) is the
+               result - underlined twice, the rule of vorrechnen.html. */
+            function karte(a, k) {
+                const sec = document.createElement('section');
+                sec.className = 'tf-karte';
+                const kopf = document.createElement('div');
+                kopf.className = 'tf-karte-kopf';
+                const nr = document.createElement('span');
+                nr.className = 'tf-nr';
+                nr.textContent = a.nr ? 'Aufgabe ' + a.nr : 'Rechnung ' + (k + 1);
+                kopf.appendChild(nr);
+                /* the block of the task ("Level 2 · Anforderungsbereich II") and what it is solved for */
+                const dazu = [a.block, a.nach ? 'umstellen nach ' + a.nach : ''].filter(Boolean).join(' · ');
+                if (dazu) {
+                    const nach = document.createElement('span');
+                    nach.className = 'tf-nach';
+                    nach.textContent = dazu;
+                    kopf.appendChild(nach);
+                }
+                sec.appendChild(kopf);
+                const papier = document.createElement('div');
+                papier.className = 'tf-papier';
+                const rechnung = document.createElement('div');
+                rechnung.className = 'tf-rechnung';
+                const zeilen = (a.latex ? [a.latex] : []).concat(a.rechenweg || []);
+                zeilen.forEach(function (tex, z) {
+                    const teile = teileAmGleich(tex);
+                    const letzte = z === zeilen.length - 1 && z > 0;
+                    /* the right side without its commands: the "a" in \frac is no variable */
+                    const ergebnis = letzte && a.nach && teile && norm(teile[0]) === a.nach &&
+                        norm(teile[1]).replace(/\\[a-zA-Z]+/g, '').indexOf(a.nach) < 0;
+                    if (!teile) {
+                        const ganz = document.createElement('div');
+                        ganz.className = 'tf-ganz';
+                        setze(ganz, tex);
+                        rechnung.appendChild(ganz);
+                        return;
+                    }
+                    /* The result is underlined twice in the formula itself: each part carries the
+                       height and depth of both sides (\vphantom), so the three lines lie at one
+                       height even when only one side has a fraction. */
+                    const beide = '\\vphantom{' + teile[0] + '}\\vphantom{' + teile[1] + '}';
+                    /* {=}: a plain sign, without the spacing of a relation - the air is the \; */
+                    [['tf-links', '{' + teile[0] + '}\\;'], ['tf-gleich', '{=}'], ['tf-rechts', '\\;{' + teile[1] + '}']].forEach(function (t) {
+                        const zelle = document.createElement('div');
+                        zelle.className = t[0];
+                        setze(zelle, ergebnis ? '\\underline{\\underline{' + t[1] + beide + '}}' : t[1]);
+                        rechnung.appendChild(zelle);
+                    });
+                });
+                papier.appendChild(rechnung);
+                sec.appendChild(papier);
+                return sec;
+            }
+
+            /* ---- the class, from the plan index (the name the Fahrplan shows) ------ */
+            function tailOf(p) {
+                return String(p || '').split(/[?#]/)[0].split('/').filter(Boolean).slice(-2).join('/');
+            }
+            async function planName(page) {
+                try {
+                    const res = await fetch(new URL('plan-suchindex.json', BASE));
+                    const idx = await res.json();
+                    const p = (idx.plaene || []).find(function (q) { return tailOf(q.href) === tailOf(page); });
+                    if (p) return { kurz: p.kurz || '', lang: String(p.lang || p.kurz || '').replace(/\s*\([^)]*\)\s*$/, '').replace(/\bKlasse\s+/, '') };
+                } catch (e) { /* without the index: the page name */ }
+                return { kurz: tailOf(page), lang: tailOf(page) };
+            }
+
+            /* ---- loading ----------------------------------------------------------- */
+            let zeile = null;
+            async function lade() {
+                if (!/^[0-9a-f-]{36}$/i.test(id)) { status.textContent = 'Keine Tafel angegeben.'; return; }
+                let rows;
+                try {
+                    const res = await fetch(svpAuth.DB_URL + '/rest/v1/svp_tafel?id=eq.' + id +
+                        '&select=id,page,datum,kw,aufgaben', { headers: { apikey: svpAuth.DB_KEY } });
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    rows = await res.json();
+                } catch (e) {
+                    status.textContent = 'Die Tafel lässt sich gerade nicht laden (' + e.message + ').';
+                    return;
+                }
+                if (!rows.length) { status.textContent = 'Diese Tafel gibt es nicht (mehr).'; return; }
+                zeile = rows[0];
+                const d = new Date(zeile.datum + 'T12:00:00');
+                const tag = String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear();
+                const name = await planName(zeile.page);
+                klasseEl.textContent = name.lang;
+                /* back to the plan, at the week of the board (?kw= jumps there, svp-plan-keys.js) */
+                klasseEl.href = new URL(zeile.page.replace(/^\/svp\//, ''), BASE).href + '?kw=' + zeile.kw;
+                klasseEl.title = 'Zum Stoffverteilungsplan, KW ' + zeile.kw;
+                datumEl.textContent = 'Tafel vom ' + TAGE[d.getDay()] + ', ' + tag + ' · KW ' + zeile.kw;
+                /* the PDF's file name is the page title */
+                document.title = 'Tafel ' + name.kurz + ' ' + tag;
+                liste.textContent = '';
+                (zeile.aufgaben || []).forEach(function (a, k) { liste.appendChild(karte(a, k)); });
+                status.textContent = (zeile.aufgaben || []).length ? '' : 'Auf dieser Tafel steht nichts.';
+                pdfBtn.disabled = false;
+                wegBtn.hidden = !svpAuth.hasSession();
+            }
+
+            pdfBtn.addEventListener('click', function () { window.print(); });
+
+            /* Take the board out of the plan - Doc only (RLS). Two taps, no native dialog:
+               the first one asks, the second one within four seconds deletes. */
+            let fragt = null;
+            wegBtn.addEventListener('click', async function () {
+                if (!fragt) {
+                    wegBtn.textContent = 'Wirklich aus dem Plan nehmen?';
+                    wegBtn.classList.add('wirklich');
+                    fragt = setTimeout(function () {
+                        fragt = null;
+                        wegBtn.textContent = 'Aus dem Plan nehmen';
+                        wegBtn.classList.remove('wirklich');
+                    }, 4000);
+                    return;
+                }
+                clearTimeout(fragt);
+                fragt = null;
+                wegBtn.disabled = true;
+                try {
+                    const res = await svpAuth.api('svp_tafel?id=eq.' + id, {
+                        method: 'DELETE', headers: { Prefer: 'return=representation' }
+                    });
+                    const weg = res.ok ? await res.json() : [];
+                    if (!weg.length) throw new Error(res.ok ? 'nichts gelöscht - angemeldet als ' + (svpAuth.whoami() || '?') : 'HTTP ' + res.status);
+                    liste.textContent = '';
+                    status.textContent = 'Die Tafel ist aus dem Plan genommen.';
+                    pdfBtn.disabled = true;
+                    wegBtn.hidden = true;
+                } catch (e) {
+                    status.textContent = 'Nicht gelöscht: ' + e.message;
+                    wegBtn.disabled = false;
+                    wegBtn.textContent = 'Aus dem Plan nehmen';
+                    wegBtn.classList.remove('wirklich');
+                }
+            });
+
+            lade();
+        })();
+    </script>
+</body>
+
+</html>

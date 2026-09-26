@@ -16,6 +16,7 @@
     const PARTS = [
         'core',             // group view (?g=), page head and foot, Lehrplan menu, table head
         'material',         // material pills: icons, labels, viewer, tooltip
+        'tafel',            // the board of a lesson from vorrechnen.html, as a pill in its week
         'aufgaben',         // week quiz, "Aufgaben" menu, red test button and its list
         'gdw',              // "Gedanke der Woche": preview in the week row, full page on click
         'fahrplan',         // the run of a lesson, in a frameless sheet behind the stack

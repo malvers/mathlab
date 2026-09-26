@@ -565,7 +565,8 @@ window.svpPlanParts.push(function (P) {
             const src0 = ref.matTd ? (ref.matTd.dataset.src || '') : '';
             const alle0 = P.parseMat(src0);
             P.setVideoReiter(ref, alle0.filter(P.isVideoEntry).length,
-                alle0.filter(en => !P.isExerciseEntry(en) && !P.isVideoEntry(en)).length || (P.matTail(src0) ? 1 : 0),
+                (alle0.filter(en => !P.isExerciseEntry(en) && !P.isVideoEntry(en)).length || (P.matTail(src0) ? 1 : 0))
+                    + (P.tafelLinks ? P.tafelLinks(ref).length : 0),   /* a board counts (svp-plan-tafel.js) */
                 /* fuellt den Aufgaben-Reiter und liefert die Zahl dahinter -
                    die Aufklappzeile kann auch spaeter entstehen (Notiz,
                    Bearbeiten), dann lief updateMaterial laengst. */

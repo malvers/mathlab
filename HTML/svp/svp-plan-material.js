@@ -128,12 +128,17 @@ window.svpPlanParts.push(function (P) {
        haette matKind ihr das PDF-Programmsymbol gegeben. */
     function festesIcon(e) {
         if (e.icon === 'link') return drawnIcon('mat-ico-drawn mat-ico-link', LINK_PATH, 'rgb(120, 160, 220)');
+        /* the board of a lesson (svp-plan-tafel.js): a board on its stand, an "=" on it */
+        if (e.icon === 'tafel') return drawnIcon('mat-ico-drawn mat-ico-tafel', TAFEL_PATH, 'rgb(121, 158, 49)', 1.8);
         return null;   /* ohne icon: das Zeichen, das matKind gewaehlt hat */
     }
+    const TAFEL_PATH = 'M3 4.5h18v11.5H3z M12 16v3.5 M8 20.5h8 M8 9h8 M8 12h8';
 
-    function festeLinks() {
+    /* Die Tafel einer Stunde (Doc, 26.09.2026) haengt an ihrer Woche, nicht am Fach -
+       sie kommt deshalb mit der Zeile (ref) und steht vor der Formelsammlung. */
+    function festeLinks(ref) {
         const seite = location.pathname.replace(/.*\//, '').replace(/\.html$/, '');
-        const raus = [];
+        const raus = P.tafelLinks ? P.tafelLinks(ref) : [];
         if (FORMELN_ON.indexOf(seite) >= 0) {
             raus.push({
                 label: 'Formelsammlung', url: FORMELN_URL, icon: 'link',
@@ -157,7 +162,7 @@ window.svpPlanParts.push(function (P) {
        ref.matBlock ist das, was gespeichert wird - dort darf nichts Fremdes
        hinein. */
     function festePillen(ziel, ref) {
-        const links = festeLinks();
+        const links = festeLinks(ref);
         if (!links.length) return;
         const behelf = document.createElement('div');
         behelf.className = 'mat-block';
