@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Trigonometrie</title>
+    <meta name="description" content="Sinus, Kosinus und Tangens vom rechtwinkligen Dreieck über den Einheitskreis bis zu Sinussatz, Modellieren und Ableitung — elf Kapitel, die aufeinander aufbauen.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="js/cyber-tabbar.css">
+    <link rel="stylesheet" href="js/chapter-lab.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content" class="has-tabbar">
+        <div id="tab-strip">
+            <div id="tab-bar"></div>
+            <div id="v-progress"></div>
+        </div>
+        <div id="tab-stage">
+            <div id="v-stage">
+                <div id="v-canvas-wrap">
+                    <div class="cyber-grid"></div>
+                    <canvas id="canvas"></canvas>
+                </div>
+                <div id="v-hud"></div>
+                <div id="v-tip"></div>
+            </div>
+            <aside id="v-doc"></aside>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+    <script src="js/vektoren-core.js"></script>
+    <script src="js/trigonometrie-core.js"></script>
+    <script src="js/trigonometrie-mod-kreis.js"></script>
+    <script src="js/trigonometrie-mod-kurven.js"></script>
+    <script src="js/trigonometrie-mod-parameter.js"></script>
+    <script src="js/trigonometrie-mod-saetze.js"></script>
+    <script src="js/chapter-lab.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Trigonometrie',
+        });
+        // Worked through on a tablet as well — the documentation column stacks under
+        // the stage below 900px, so only a genuinely tiny screen gets the warning.
+        CyberUI.init({ screenWarning: false });
+        CyberUI.ensureScreenWarning({
+            minWidth: 380, minHeight: 480,
+            message: 'Für das Trigonometrie-Labor ist der Bildschirm sehr klein — quer halten hilft.',
+        });
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+        // on a narrow screen the stage needs the room more than the controls do
+        if (window.innerWidth < 900) document.getElementById('side-panel').classList.add('collapsed');
+
+        // ------------------------------------------------------------------
+        // Chapters — the order a learner works through, 1 to 11.
+        // `plan` names the grade (Gymnasium); `core` = Pflichtstoff, grey = Ausblick.
+        // ------------------------------------------------------------------
+        const CHAPTERS = [
+            { id: 'dreieck', tab: 'Dreieck', plan: 'Klasse 9 · rechtwinkliges Dreieck', core: true },
+            { id: 'kreis', tab: 'Einheitskreis', plan: 'Klasse 10 · Sinus und Kosinus am Einheitskreis', core: true },
+            { id: 'bogen', tab: 'Bogenmaß', plan: 'Klasse 10 · Grad- und Bogenmaß', core: true },
+            { id: 'sinus', tab: 'Sinuskurve', plan: 'Klasse 10 · vom Einheitskreis zur Sinusfunktion', core: true },
+            { id: 'kosinus', tab: 'Kosinus', plan: 'Klasse 10 · Kosinusfunktion', core: true },
+            { id: 'gleichung', tab: 'Gleichungen', plan: 'Klasse 10 · Werte, Symmetrie, sin x = y₀', core: true },
+            { id: 'parameter', tab: 'Parameter', plan: 'Klasse 10 · Amplitude, Periode, Verschiebung', core: true },
+            { id: 'modell', tab: 'Modellieren', plan: 'Klasse 10 · periodische Vorgänge', core: true },
+            { id: 'tangens', tab: 'Tangens', plan: 'Klasse 10 · Tangensfunktion', core: true },
+            { id: 'saetze', tab: 'Sinussatz', plan: 'Klasse 10 · Sinussatz, Kosinussatz, Fläche', core: true },
+            { id: 'ableitung', tab: 'Ableitung', plan: 'Oberstufe — Ausblick über Klasse 10 hinaus' },
+        ];
+
+        const stage = new TrigLab.TrigStage(document.getElementById('canvas'));
+        stage.hudEl = document.getElementById('v-hud');
+        ChapterLab.start({ chapters: CHAPTERS, lib: TrigLab, stage2: stage, first: 'dreieck' });
+    </script>
+</body>
+
+</html>
