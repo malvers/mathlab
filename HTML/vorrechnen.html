@@ -144,6 +144,25 @@
             margin: -9px 0 0 -9px; border-radius: 50%; background: #eaf0f7;
         }
 
+        /* Doc, 26.09.: "Schrift größer ... an den checks", "alle checks größer",
+           "noch größer" - every checkbox and radio in the settings card, text as
+           large as on the big buttons (24 px), box 32 px. A lab exception like the
+           big buttons; a central rule pins inputs to 18 px with !important. */
+        :is(#modus-wahl, #schalter, #morph-steuerung) :is(.cyber-checkbox-wrapper, .cyber-radio-wrapper) .cyber-label {
+            font-size: 1.5rem;
+        }
+        :is(#modus-wahl, #schalter, #morph-steuerung) :is(.cyber-checkbox-wrapper, .cyber-radio-wrapper) { gap: 18px; }
+        :is(#modus-wahl, #schalter, #morph-steuerung) .cyber-checkbox-wrapper { margin-bottom: 16px; }
+        :is(#modus-wahl, #schalter, #morph-steuerung) .cyber-radio-group { gap: 16px; }
+        :is(#modus-wahl, #schalter, #morph-steuerung) :is(.cyber-checkbox, .cyber-radio-input) {
+            width: 32px !important;
+            height: 32px !important;
+            min-height: 32px !important;
+        }
+        :is(#modus-wahl, #schalter, #morph-steuerung) .cyber-checkbox { border-radius: 7px; }
+        :is(#modus-wahl, #schalter, #morph-steuerung) .cyber-checkbox::after { width: 9px; height: 18px; border-width: 0 3px 3px 0; }
+        :is(#modus-wahl, #schalter, #morph-steuerung) .cyber-radio-input::after { width: 18px; height: 18px; }
+
         .erk-ok { color: rgb(121, 158, 49); }
         .erk-warn { color: rgb(245, 194, 66); }
         .erk-fehler { color: rgb(176, 36, 24); }
@@ -1683,7 +1702,8 @@
                     <!-- Doc, 25.09.: "nimm den SICHERN unter Kommentar" - ERKENNEN saves every probe anyway
                     <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="exportStrokes()">SICHERN</button> -->
                     <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="erkennen()">ERKENNEN</button>
-                    <!-- WEITER as two triangles side by side: previous / next template -->
+                    <!-- Doc, 26.09.: "nimm die beiden vor/zur butts links raus" - the
+                         triangles on the board do it now; kept, commented out
                     <div style="display:flex;gap:0.9rem">
                         <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;flex:1;min-width:0;padding:0;display:flex;align-items:center;justify-content:center"
                                 onclick="naechsteVorlage(-1)" title="vorige Vorlage" aria-label="vorige Vorlage">
@@ -1694,6 +1714,7 @@
                             <svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4 L18 12 L7 20 Z" fill="currentColor"/></svg>
                         </button>
                     </div>
+                    -->
                     <!-- Doc: "mach die NOCHMAL so wie WEITER", then "NOCHMAL -> PLAY" -->
                     <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="nochmal()">PLAY</button>
                 </div>
@@ -1718,7 +1739,7 @@
             // Doc, 26.09.: "alle Settings (Staub Strich Slider) in eine card, die
             // default geschlossen ... persist" - the big buttons stay on top
             CyberUI.createCard('ui-container', 'Einstellungen',
-                '<div id="modus-wahl" style="margin-bottom:0.6rem"></div><div id="schalter" style="margin-bottom:0.6rem"></div><div id="morph-steuerung"></div>', '#00d2ff',
+                '<div id="modus-wahl" style="margin-bottom:28px"></div><div id="schalter" style="margin-bottom:28px"></div><div id="morph-steuerung"></div>', '#00d2ff',
                 { collapsible: true, collapsed: true, persistKey: 'vorrechnen-einstellungen-zu' });
             CyberUI.createRadioGroup('modus-wahl', 'Modus', [
                 { value: 'frei', label: 'Frei' }, { value: 'aufgaben', label: 'Aufgaben' },
