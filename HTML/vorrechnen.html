@@ -192,7 +192,7 @@
                 linear-gradient(to right, transparent 31px, rgba(31, 64, 150, 0.13) 31px);
             background-size: 32px 32px;
         }
-        #canvas-container.hell :is(#tafel-pfeil-vor, #tafel-pfeil-zurueck, #zl-play) {
+        #canvas-container.hell :is(#tafel-pfeil-vor, #tafel-pfeil-zurueck, #hoch-pfeil, #zl-play) {
             color: #5d6678 !important;
         }
         #canvas-container.hell #zeitleiste .zl-spur { background: rgba(31, 64, 150, 0.18); }
@@ -208,7 +208,7 @@
             content: ''; position: fixed; inset: 0; z-index: 999;
             background: var(--anzeige-grund, #050d1c);
         }
-        body.anzeige :is(#cyber-left-chrome, #mini-rail, #side-panel, #right-rail, #tafel-pfeil-vor, #tafel-pfeil-zurueck,
+        body.anzeige :is(#cyber-left-chrome, #mini-rail, #side-panel, #right-rail, #tafel-pfeil-vor, #tafel-pfeil-zurueck, #hoch-pfeil,
             [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play) {
             display: none !important;
         }
@@ -717,6 +717,7 @@
             if (anzeigeModus) return;
             zeigeZeitleiste();
             zeigeWerkzeuge();
+            hochPfeilFarbe();
             zeigeSatz();
             const rect = container.getBoundingClientRect();
             ctx.clearRect(0, 0, rect.width, rect.height);
@@ -947,7 +948,11 @@
             }
             // Straight into the morph - with the button gone there is nothing
             // left to press, and Doc wanted it to happen by itself anyway.
-            if (morphVorbereitet.some(Boolean)) morphen(1);
+            // Doc, 26.09.: "Wenn die Erkennung fertig ist mach es grün (noch nix
+            // weiter)" - outside "Beispiele" the up triangle turns green and the
+            // ink waits; it morphs on its way up (rechenwegHoch)
+            if (testModus && morphVorbereitet.some(Boolean)) morphen(1);
+            redraw();
             // Every ERKENNEN is a probe for the corpus, good or bad.
             if (strokes.length) speichereProbe();
         }
@@ -1548,7 +1553,10 @@
             // a line not typeset yet takes off at once and morphs on the way
             // (starteFluege); so does everything while earlier flights are
             // still up, or the steps would overtake each other
-            const fertig = zeilen.every(l => zeilenErgebnis[l.lineIdx] && zeilenErgebnis[l.lineIdx].latex && zeilenErgebnis[l.lineIdx].satz);
+            // ("Wenn ich dann zwei Finger oder Dreieck, soll die Handschrift hochfliegen
+            // und im Flug sich verwandeln" - only a line already typeset in place,
+            // as in "Beispiele", flies as KaTeX)
+            const fertig = morphT >= 1 && zeilen.every(l => zeilenErgebnis[l.lineIdx] && zeilenErgebnis[l.lineIdx].latex && zeilenErgebnis[l.lineIdx].satz);
             if (!fertig || fluege.length) { starteFluege(zeilen); return; }
             if (morphT < 1) setzeMorph(1);
             const c = container.getBoundingClientRect();
@@ -1625,7 +1633,40 @@
         // Doc: "auf der rechten Seite im großen Panel links und rechts ein
         // Dreieck", then "in die Mitte. Y" - the panel's back and forth on the
         // board itself, at the left and right edge, halfway down
+        // Doc, 26.09.: "gib mir im Karofeld oben ein Dreieck nach oben" - grey,
+        // green once the page is recognised; a tap sends the ink up like the
+        // two-finger swipe
+        function zeigeHochPfeil() {
+            let b = document.getElementById('hoch-pfeil');
+            if (!b) {
+                b = document.createElement('button');
+                b.id = 'hoch-pfeil';
+                b.type = 'button';
+                b.title = 'Hochschicken';
+                b.setAttribute('aria-label', 'Hochschicken');
+                b.style.cssText = 'position:absolute;left:50%;transform:translateX(-50%);width:96px;height:52px;padding:0;' +
+                    'border:none;background:transparent;color:#8a93a3;cursor:pointer;touch-action:manipulation;z-index:5;' +
+                    'display:flex;align-items:center;justify-content:center';
+                b.innerHTML = '<svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18 L12 6 L20 18 Z" fill="currentColor"/></svg>';
+                b.addEventListener('click', () => rechenwegHoch());
+                container.appendChild(b);
+            }
+            b.style.top = (papierGrenze(container.getBoundingClientRect().height) + 6) + 'px';
+            hochPfeilFarbe();
+        }
+        // green = every line on the page is recognised; the paper's grey rule
+        // has !important, so the green needs it too
+        function hochPfeilFarbe() {
+            const b = document.getElementById('hoch-pfeil');
+            if (!b) return;
+            const zeilen = analysis.lines.filter(l => !zuKlein(l));
+            const bereit = zeilen.length > 0 && zeilen.every(l => zeilenErgebnis[l.lineIdx] && zeilenErgebnis[l.lineIdx].latex);
+            if (bereit) b.style.setProperty('color', 'rgb(121, 158, 49)', 'important');
+            else b.style.removeProperty('color');
+            b.style.opacity = zeilen.length ? '1' : '0.35';
+        }
         function zeigeTafelPfeile() {
+            zeigeHochPfeil();
             const da = document.querySelectorAll('[id^="tafel-pfeil-"]');
             if (da.length) {
                 // Doc, 26.09.: "bring die vor/zurück Pfeile runter in den Karobereich" -
