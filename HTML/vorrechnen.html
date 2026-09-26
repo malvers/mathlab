@@ -148,23 +148,23 @@
            "noch größer" - every checkbox and radio in the settings card, text as
            large as on the big buttons (24 px), box 32 px. A lab exception like the
            big buttons; a central rule pins inputs to 18 px with !important. */
-        :is(#modus-wahl, #schalter, #morph-steuerung) :is(.cyber-checkbox-wrapper, .cyber-radio-wrapper) .cyber-label {
+        :is(#modus-wahl, #schalter, #morph-steuerung, #regler) :is(.cyber-checkbox-wrapper, .cyber-radio-wrapper) .cyber-label {
             font-size: 1.5rem;
         }
-        :is(#modus-wahl, #schalter, #morph-steuerung) :is(.cyber-checkbox-wrapper, .cyber-radio-wrapper) { gap: 18px; }
-        :is(#modus-wahl, #schalter, #morph-steuerung) .cyber-checkbox-wrapper { margin-bottom: 16px; }
-        :is(#modus-wahl, #schalter, #morph-steuerung) .cyber-radio-group { gap: 16px; }
-        :is(#modus-wahl, #schalter, #morph-steuerung) :is(.cyber-checkbox, .cyber-radio-input) {
+        :is(#modus-wahl, #schalter, #morph-steuerung, #regler) :is(.cyber-checkbox-wrapper, .cyber-radio-wrapper) { gap: 18px; }
+        :is(#modus-wahl, #schalter, #morph-steuerung, #regler) .cyber-checkbox-wrapper { margin-bottom: 16px; }
+        :is(#modus-wahl, #schalter, #morph-steuerung, #regler) .cyber-radio-group { gap: 16px; }
+        :is(#modus-wahl, #schalter, #morph-steuerung, #regler) :is(.cyber-checkbox, .cyber-radio-input) {
             width: 32px !important;
             height: 32px !important;
             min-height: 32px !important;
         }
-        :is(#modus-wahl, #schalter, #morph-steuerung) .cyber-checkbox { border-radius: 7px; }
-        :is(#modus-wahl, #schalter, #morph-steuerung) .cyber-checkbox::after { width: 9px; height: 18px; border-width: 0 3px 3px 0; }
-        :is(#modus-wahl, #schalter, #morph-steuerung) .cyber-radio-input::after { width: 18px; height: 18px; }
+        :is(#modus-wahl, #schalter, #morph-steuerung, #regler) .cyber-checkbox { border-radius: 7px; }
+        :is(#modus-wahl, #schalter, #morph-steuerung, #regler) .cyber-checkbox::after { width: 9px; height: 18px; border-width: 0 3px 3px 0; }
+        :is(#modus-wahl, #schalter, #morph-steuerung, #regler) .cyber-radio-input::after { width: 18px; height: 18px; }
         /* Doc: "Einstellungen die Schrift" - the card's title, larger, arrow too */
-        .instrument-card:has(#modus-wahl) .instrument-title { font-size: 1.25rem; }
-        .instrument-card:has(#modus-wahl) .toggle-icon svg { width: 16px; height: 16px; }
+        .instrument-card:is(:has(#modus-wahl), :has(#regler)) .instrument-title { font-size: 1.25rem; }
+        .instrument-card:is(:has(#modus-wahl), :has(#regler)) .toggle-icon svg { width: 16px; height: 16px; }
 
         .erk-ok { color: rgb(121, 158, 49); }
         .erk-warn { color: rgb(245, 194, 66); }
@@ -1772,11 +1772,17 @@
             `, '#00d2ff');
 
             // Doc, 26.09.: "alle Settings (Staub Strich Slider) in eine card, die
-            // default geschlossen ... persist" - the big buttons stay on top
-            CyberUI.createCard('ui-container', 'Einstellungen',
+            // default geschlossen ... persist", then "mach Einstellungen zu Modus
+            // und pack alle Sliders in eine neue card Einstellungen" - the big
+            // buttons on top, then "Modus" (the switches), then "Einstellungen"
+            // (the sliders), both closed at first and remembered
+            CyberUI.createCard('ui-container', 'Modus',
                 '<div id="modus-wahl" style="margin-bottom:28px"></div><div id="schalter" style="margin-bottom:28px"></div><div id="morph-steuerung"></div>', '#00d2ff',
-                { collapsible: true, collapsed: true, persistKey: 'vorrechnen-einstellungen-zu' });
-            CyberUI.createRadioGroup('modus-wahl', 'Modus', [
+                { collapsible: true, collapsed: true, persistKey: 'vorrechnen-einstellungen-zu' });   // the old card's state
+            CyberUI.createCard('ui-container', 'Einstellungen', '<div id="regler"></div>', '#00d2ff',
+                { collapsible: true, collapsed: true, persistKey: 'vorrechnen-regler-zu' });
+            // no "MODUS" over the three choices - the card says it
+            CyberUI.createRadioGroup('modus-wahl', '', [
                 { value: 'frei', label: 'Frei' }, { value: 'aufgaben', label: 'Aufgaben' },
                 { value: 'beispiele', label: 'Beispiele' },          // Doc: "Meine Beispiele -> Beispiele"
             ], modus, v => setzeModus(v));
@@ -1788,7 +1794,7 @@
             ], morphArt, v => wechsleMorphArt(v));
             document.querySelectorAll('#morph-steuerung .cyber-radio-input').forEach(r => { r.name = 'morph-art'; });
 
-            CyberUI.createSlider('morph-steuerung', 'Morph-Dauer', 0.1, 1, morphDauer, 0.05, v => {
+            CyberUI.createSlider('regler', 'Morph-Dauer', 0.1, 1, morphDauer, 0.05, v => {
                 morphDauer = v;
                 try { localStorage.setItem('vorrechnen-morph-dauer', String(v)); } catch (_) {}
                 nachRegler(false);
@@ -1806,7 +1812,7 @@
                 ['Welle links nach rechts', 'staffel', 0, 0.6, 0.05, v => v.toFixed(2), false],
                 ['Pause vor dem Morph', 'pause', 0, 2, 0.1, v => v.toFixed(1) + ' s', false],
             ].forEach(([label, key, min, max, step, fmt, neu]) => {
-                CyberUI.createSlider('morph-steuerung', label, min, max, morphOpts[key], step, v => {
+                CyberUI.createSlider('regler', label, min, max, morphOpts[key], step, v => {
                     morphOpts[key] = v;
                     try { localStorage.setItem('vorrechnen-morph', JSON.stringify(morphOpts)); } catch (_) {}
                     nachRegler(neu);
@@ -1816,10 +1822,12 @@
             // Doc: "nur Stift ganz unter die Slider" - fingers then do not draw;
             // the two-finger swipe still works. Off on a new device: in class
             // Doc writes with his finger.
-            CyberUI.createCheckbox('morph-steuerung', 'Nur Stift', view.penOnly, v => {
+            // ... and it stays under the sliders when they moved to "Einstellungen"
+            const nurStift = CyberUI.createCheckbox('regler', 'Nur Stift', view.penOnly, v => {
                 view.penOnly = v;
                 try { localStorage.setItem('vorrechnen-nur-stift', v ? '1' : '0'); } catch (_) {}
             });
+            nurStift.style.marginTop = '20px';
 
             /* Doc, 26.09.: "Boxen zeigen weg" - back for calibrating
             CyberUI.createCheckbox('schalter', 'Boxen zeigen', view.boxes, v => {
