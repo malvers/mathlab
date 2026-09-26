@@ -1324,15 +1324,18 @@
             // with what to solve for at the right edge
             const liste = testModus ? VORLAGEN : AUFGABEN, nr = testModus ? vorlageIdx : aufgabeIdx;
             const [slug, latex, nach] = liste[nr];
-            const RAND = 'position:absolute;top:50%;transform:translateY(-50%);' +
-                'font-family:Orbitron,sans-serif;font-size:0.8rem;letter-spacing:0.1em;color:#8a93a3';
+            // Doc, 26.09.: "7 von 20 ... und nach x - bring das links und rechts an die
+            // Formel ran, mach's größer, in der Y-Mitte der Zeile; rechts 'umstellen
+            // nach x'" - in class larger, placed beside the task by zeigeRechenweg
+            const RAND = 'position:absolute;top:50%;transform:translateY(-50%);white-space:nowrap;' +
+                `font-family:Orbitron,sans-serif;font-size:${aufgabenModus ? '1.2rem' : '0.8rem'};letter-spacing:0.1em;color:#8a93a3`;
             // Doc: "Font-Size überall gleich", "Gleichheitszeichen untereinander" -
             // in class the task is the first row of the working (zeigeRechenweg),
             // up here only the counter and what to solve for, on the task's height
             host.innerHTML = `<span style="${RAND};left:24px">` +
                 `${nr + 1} / ${liste.length}${hinweis ? ' · ' + hinweis : ''}</span>` +
                 (testModus ? `<span id="vorlage-formel" style="font-size:2.4rem;color:${anzeige(INK)}"></span>` : '') +
-                (nach ? `<span id="vorlage-nach" style="${RAND};right:24px">NACH <span style="font-size:1.6em"></span></span>` : '');
+                (nach ? `<span id="vorlage-nach" style="${RAND};right:24px">umstellen nach <span style="font-size:1.4em"></span></span>` : '');
             if (nach) {
                 const v = host.querySelector('#vorlage-nach span');
                 try { katex.render(nach, v, { throwOnError: false }); } catch (e) { v.textContent = nach; }
@@ -1461,14 +1464,25 @@
             }
             // counter and "NACH x" sit level with the task
             if (aufgabenModus) {
+                // the typeset formula itself, not its cells: the labels sit on its middle
                 let o = Infinity, u = -Infinity;
-                host.querySelectorAll('[data-schritt="aufgabe"]').forEach(z => {
-                    const r = z.getBoundingClientRect(); o = Math.min(o, r.top); u = Math.max(u, r.bottom);
+                host.querySelectorAll('[data-schritt="aufgabe"] .katex-html').forEach(z => {
+                    const r = z.getBoundingClientRect();
+                    if (r.height) { o = Math.min(o, r.top); u = Math.max(u, r.bottom); }
                 });
                 if (isFinite(o)) {
                     const c = container.getBoundingClientRect();
                     kopf.style.top = (o - c.top) + 'px';
                     kopf.style.height = (u - o) + 'px';
+                    // the counter ends, "umstellen nach x" starts, 28 px beside the task
+                    let links = Infinity, rechts = -Infinity;
+                    host.querySelectorAll('[data-schritt="aufgabe"] .katex-html').forEach(z => {
+                        const r = z.getBoundingClientRect();
+                        if (r.width) { links = Math.min(links, r.left); rechts = Math.max(rechts, r.right); }
+                    });
+                    const zaehler = kopf.querySelector('span'), nach = document.getElementById('vorlage-nach');
+                    if (isFinite(links) && zaehler) { zaehler.style.left = 'auto'; zaehler.style.right = (c.right - links + 28) + 'px'; }
+                    if (isFinite(rechts) && nach) { nach.style.right = 'auto'; nach.style.left = (rechts - c.left + 28) + 'px'; }
                 }
             }
             anzeigeBald();
