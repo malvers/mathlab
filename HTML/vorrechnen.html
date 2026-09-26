@@ -254,8 +254,10 @@
         // die unten weg", then: "zeig bitte doch die erkannte Formel unten x mittig
         // etwas dunkler" (25.09.)
         const view = { boxes: false, numbers: true, rows: true, penOnly: false, formelUnten: true, handballen: true };
-        // Doc: boxes off by default, and the choice is remembered on the device
-        try { view.boxes = localStorage.getItem('vorrechnen-boxen') === '1'; } catch (_) {}
+        // Doc: boxes off by default, and the choice is remembered on the device.
+        // Doc, 26.09.: "Boxen zeigen weg" - with the switch gone a stored "on"
+        // would stay for good, so the boxes are off
+        // try { view.boxes = localStorage.getItem('vorrechnen-boxen') === '1'; } catch (_) {}
         // the row bands are the same kind of calibration aid - Doc: "komische Box"
         view.rows = view.boxes;
 
@@ -361,7 +363,10 @@
         const STIFT_RUHE = 3000;           // ms after the pen was last seen
         const BALLEN_BREITE = 45;          // px of contact: wider is a palm, not a finger
         let stiftZuletzt = -Infinity, currentId = null;
-        try { const v = localStorage.getItem('vorrechnen-handballen'); if (v !== null) view.handballen = v === '1'; } catch (_) {}
+        // Doc, 26.09.: "Handballen -> nur Stift" - the palm filter has no switch
+        // any more and is always on; "Nur Stift" (penOnly) lets only the pen draw
+        // try { const v = localStorage.getItem('vorrechnen-handballen'); if (v !== null) view.handballen = v === '1'; } catch (_) {}
+        try { view.penOnly = localStorage.getItem('vorrechnen-nur-stift') === '1'; } catch (_) {}
 
         function penAccepted(ev) {
             if (view.penOnly) return ev.pointerType === 'pen';
@@ -1717,7 +1722,7 @@
                 { collapsible: true, collapsed: true, persistKey: 'vorrechnen-einstellungen-zu' });
             CyberUI.createRadioGroup('modus-wahl', 'Modus', [
                 { value: 'frei', label: 'Frei' }, { value: 'aufgaben', label: 'Aufgaben' },
-                { value: 'beispiele', label: 'Meine Beispiele' },
+                { value: 'beispiele', label: 'Beispiele' },          // Doc: "Meine Beispiele -> Beispiele"
             ], modus, v => setzeModus(v));
 
             // Doc: "speed slider für mich". Letting go replays the morph at the
@@ -1752,18 +1757,31 @@
                 }, '#00d2ff', fmt);
             });
 
+            // Doc: "nur Stift ganz unter die Slider" - fingers then do not draw;
+            // the two-finger swipe still works. Off on a new device: in class
+            // Doc writes with his finger.
+            CyberUI.createCheckbox('morph-steuerung', 'Nur Stift', view.penOnly, v => {
+                view.penOnly = v;
+                try { localStorage.setItem('vorrechnen-nur-stift', v ? '1' : '0'); } catch (_) {}
+            });
+
+            /* Doc, 26.09.: "Boxen zeigen weg" - back for calibrating
             CyberUI.createCheckbox('schalter', 'Boxen zeigen', view.boxes, v => {
                 view.boxes = view.rows = v;
                 try { localStorage.setItem('vorrechnen-boxen', v ? '1' : '0'); } catch (_) {}
                 redraw();
             });
+            */
 
+            /* Doc, 26.09.: "Handballen -> nur Stift" - the filter is always on now
             CyberUI.createCheckbox('schalter', 'Handballen ignorieren', view.handballen, v => {
                 view.handballen = v;
                 try { localStorage.setItem('vorrechnen-handballen', v ? '1' : '0'); } catch (_) {}
             });
+            */
 
-            CyberUI.createCheckbox('schalter', 'Automatisch erkennen (2 s)', autoErkennen, v => {
+            // Doc: "Auto reicht" - recognises after 2 s without input
+            CyberUI.createCheckbox('schalter', 'Auto', autoErkennen, v => {
                 autoErkennen = v;
                 try { localStorage.setItem('vorrechnen-auto', v ? '1' : '0'); } catch (_) {}
                 if (v) autoBald(); else clearTimeout(autoTimer);
