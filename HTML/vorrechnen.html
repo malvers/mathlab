@@ -170,14 +170,27 @@
            zeilen (toggle)" - the board as paper with a ruled line every 96 px;
            the controls on it get darker so they stay visible on sand */
         #canvas-container.hell {
-            /* one 80 px tile with its line at the bottom, repeated: every line is
-               drawn the same, also at a device pixel ratio of 1.5 (120 device px).
-               Doc: "zeilen enger" - 96 -> 80 px; his strokes on the Lenovo are
-               72 px high in the median */
-            background-color: #f4ecd8;
-            background-image: linear-gradient(to bottom, transparent 79px, rgba(31, 64, 150, 0.2) 79px);
-            background-size: 100% 80px;
-            background-repeat: repeat;
+            background: #f4ecd8;
+            isolation: isolate;        /* #papier (z-index -1) lies on the sand, under the ink */
+        }
+        /* Doc, 26.09.: "die Aufgabe direkt auf der Zeile und noch etwas enger. Im
+           unteren Drittel ... Karos um abzugrenzen" - ruled lines every 64 px down
+           to two thirds, squares of 32 px below. Each is one tile repeated, so every
+           line is drawn the same, also at a device pixel ratio of 1.5. */
+        #papier { position: absolute; inset: 0; z-index: -1; pointer-events: none; display: none; }
+        #canvas-container.hell #papier { display: block; }
+        #papier .linien {
+            position: absolute; left: 0; right: 0; top: 0;
+            background-image: linear-gradient(to bottom, transparent 63px, rgba(31, 64, 150, 0.2) 63px);
+            background-size: 100% 64px;
+        }
+        #papier .karo {
+            position: absolute; left: 0; right: 0; bottom: 0;
+            border-top: 2px solid rgba(31, 64, 150, 0.35);
+            background-image:
+                linear-gradient(to bottom, transparent 31px, rgba(31, 64, 150, 0.13) 31px),
+                linear-gradient(to right, transparent 31px, rgba(31, 64, 150, 0.13) 31px);
+            background-size: 32px 32px;
         }
         #canvas-container.hell :is(#tafel-pfeil-vor, #tafel-pfeil-zurueck, [id^="werkzeug-"], #zl-play) {
             color: #5d6678 !important;
@@ -199,6 +212,14 @@
             [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play) {
             display: none !important;
         }
+        /* Doc, 26.09.: "nimm bitte HIER das LOCAL rechts oben nach links unten
+           kleiner" - serve.py's badge (local only), in this lab only */
+        #local-badge {
+            top: auto !important; right: auto !important;
+            left: 8px !important; bottom: 8px !important;
+            transform: scale(0.7); transform-origin: left bottom;
+        }
+        body.anzeige #local-badge { display: none !important; }
         body.anzeige #canvas-container {
             position: fixed !important; left: 0 !important; top: 0 !important;
             transform-origin: 0 0; z-index: 1000;
@@ -1272,32 +1293,79 @@
         const RECHEN_SCHRIFT = '2.2rem';
         // verborgenAb: steps from this index on are laid out but not yet shown -
         // they are where the flying lines land
+        // Doc, 26.09.: "die Aufgabe direkt auf der Zeile" - every row's baseline
+        // lies on a ruled line: one line per row, two when a fraction needs the
+        // room. The "=" stay in one column (left cell ends there, right starts).
+        const ZEILE = 64;                  // px between the ruled lines (#papier)
+        const ZEILEN_LUFT = 8;             // px at least between two rows
+        let rechenwegWartet = false;
         function zeigeRechenweg(verborgenAb) {
             if (anzeigeModus) return;
             let host = document.getElementById('rechenweg-schicht');
             if (!host) {
                 host = document.createElement('div');
                 host.id = 'rechenweg-schicht';
-                host.style.cssText = 'position:absolute;left:0;right:0;pointer-events:none;display:grid;' +
-                    'grid-template-columns:max-content max-content;justify-content:center;align-items:baseline;' +
-                    `row-gap:0.6em;font-size:${RECHEN_SCHRIFT};color:${INK}`;          // Doc: more room between the equations
+                host.style.cssText = `position:absolute;left:0;top:0;right:0;height:0;pointer-events:none;font-size:${RECHEN_SCHRIFT}`;
                 container.appendChild(host);
             }
             const kopf = document.getElementById('vorlage-schicht');
+            if (!kopf) return;                 // at start: zeigeVorlage() builds it and calls back
             host.style.color = anzeige(INK);
-            host.style.top = testModus ? kopf.getBoundingClientRect().height + 'px' : '14px';
             host.innerHTML = '';
-            const zeile = (latex, schritt, verborgen, farbe) => amGleich(latex).forEach((teil, j) => {
+            const zeilen = [];
+            const zelle = (teil, schritt, verborgen, farbe) => {
                 const d = document.createElement('div');
                 d.dataset.schritt = schritt;
+                d.style.cssText = 'position:absolute;left:0;top:0;white-space:nowrap;line-height:normal';
                 if (farbe && farbe !== INK) d.style.color = farbe;
-                d.style.justifySelf = j ? 'start' : 'end';
                 if (verborgen) d.style.visibility = 'hidden';
                 try { katex.render(alsDisplay(teil), d, { throwOnError: false }); } catch (_) { d.textContent = teil; }
+                const sonde = document.createElement('span');          // a probe on the baseline
+                sonde.style.cssText = 'display:inline-block;width:0;height:0';
+                d.appendChild(sonde);
                 host.appendChild(d);
-            });
+                return d;
+            };
+            const zeile = (latex, schritt, verborgen, farbe) => {
+                const [l, r] = amGleich(latex);
+                zeilen.push({ links: zelle(l, schritt, verborgen, farbe), rechts: zelle(r, schritt, verborgen, farbe) });
+            };
             if (aufgabenModus) zeile(AUFGABEN[aufgabeIdx][1], 'aufgabe', false);
             rechenweg.forEach((e, i) => zeile(e.latex, i, (verborgenAb !== undefined && i >= verborgenAb) || imFlug.has(i), e.farbe));
+            // width, and how far each cell reaches above and below its baseline
+            const mass = d => {
+                const r = d.getBoundingClientRect(), b = d.lastChild.getBoundingClientRect();
+                return { w: r.width, hoch: b.top - r.top, tief: r.bottom - b.top };
+            };
+            zeilen.forEach(z => { z.l = mass(z.links); z.r = mass(z.rechts); });
+            const lmax = Math.max(0, ...zeilen.map(z => z.l.w)), rmax = Math.max(0, ...zeilen.map(z => z.r.w));
+            const gleichX = (container.getBoundingClientRect().width - lmax - rmax) / 2 + lmax;
+            // down the lines, from the top edge (or under the template strip)
+            let unten = testModus ? kopf.getBoundingClientRect().height : 0;
+            zeilen.forEach(z => {
+                const hoch = Math.max(z.l.hoch, z.r.hoch), tief = Math.max(z.l.tief, z.r.tief);
+                const basis = Math.ceil((unten + ZEILEN_LUFT + hoch + 1) / ZEILE) * ZEILE - 1;
+                z.links.style.left = (gleichX - z.l.w) + 'px';
+                z.links.style.top = (basis - z.l.hoch) + 'px';
+                z.rechts.style.left = gleichX + 'px';
+                z.rechts.style.top = (basis - z.r.hoch) + 'px';
+                z.basis = basis;
+                unten = basis + tief;
+            });
+            // a second look: each cell exactly on its line (a cell may lay out
+            // a little differently where it ends up)
+            const oben = container.getBoundingClientRect().top;
+            zeilen.forEach(z => [z.links, z.rechts].forEach(d => {
+                const ist = d.lastChild.getBoundingClientRect().top - oben;
+                if (Math.abs(ist - z.basis) > 0.25) d.style.top = (parseFloat(d.style.top) + z.basis - ist) + 'px';
+            }));
+            // KaTeX's fonts may still be on their way (the first layout after a
+            // load): measured with a stand-in font the rows miss their lines and
+            // the "=" gap - lay them out again once the fonts are there
+            if (document.fonts && document.fonts.status === 'loading' && !rechenwegWartet) {
+                rechenwegWartet = true;
+                document.fonts.ready.then(() => { rechenwegWartet = false; zeigeRechenweg(verborgenAb); });
+            }
             // counter and "NACH x" sit level with the task
             if (aufgabenModus) {
                 let o = Infinity, u = -Infinity;
@@ -1312,6 +1380,23 @@
             }
             anzeigeBald();
         }
+        // The paper (light mode): lines down to about two thirds, ending on a
+        // line, squares below - Doc's writing field
+        function zeigePapier() {
+            if (anzeigeModus) return;
+            let p = document.getElementById('papier');
+            if (!p) {
+                p = document.createElement('div');
+                p.id = 'papier';
+                p.innerHTML = '<div class="linien"></div><div class="karo"></div>';
+                container.insertBefore(p, container.firstChild);
+            }
+            const h = container.getBoundingClientRect().height;
+            const grenze = Math.round(h * 2 / 3 / ZEILE) * ZEILE;
+            p.firstChild.style.height = grenze + 'px';
+            p.lastChild.style.top = grenze + 'px';
+        }
+
         // ── In flight: the line goes up while it is being recognised ────────
         // The ink leaves the page at once (the next step can be written right
         // away) and glides, shrinking, to where the next step will be. When
@@ -1568,7 +1653,7 @@
         // line's flight as a twin. Controls never reach the beamer. Closing
         // mission control brings this window back.
         let steuerFenster = null, anzeigeFrame = null, buehne = { w: 0, h: 0 };
-        const SPIEGEL_SCHICHTEN = ['vorlage-schicht', 'rechenweg-schicht', 'satz-schicht', 'formel-schicht'];
+        const SPIEGEL_SCHICHTEN = ['papier', 'vorlage-schicht', 'rechenweg-schicht', 'satz-schicht', 'formel-schicht'];
         const spiegelCache = {};
         function anzeigeLaeuft() { return anzeigeModus; }
         function anzeigeZiel() {
@@ -2324,6 +2409,8 @@
 
         function init() {
             resizeCanvasToContainer();
+            zeigePapier();
+            zeigeRechenweg();                  // the "=" column follows the board's width
             redraw();
             updateStats();
         }
@@ -2332,7 +2419,7 @@
         // window.resize says nothing about that. Watch the box itself.
         if (typeof ResizeObserver === 'function') {
             new ResizeObserver(() => {
-                if (resizeCanvasToContainer()) { redraw(); zeigeFormeln(); }
+                if (resizeCanvasToContainer()) { zeigePapier(); zeigeRechenweg(); redraw(); zeigeFormeln(); }
             }).observe(container);
         }
 
