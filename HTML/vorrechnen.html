@@ -224,6 +224,14 @@
             position: fixed !important; left: 0 !important; top: 0 !important;
             transform-origin: 0 0; z-index: 1000;
         }
+        /* Doc, 26.09. (on the wide LG): "die Linien und das Karo gehen nicht bis zum
+           Rand - nach links und rechts erweitern". Mission control's board keeps its
+           proportions on the beamer, so a wider screen gets margins; the paper runs
+           on into them (--rand-x: one margin, in board px - anzeigeEinpassen) */
+        body.anzeige #papier {
+            left: calc(-1 * var(--rand-x, 0px));
+            right: calc(-1 * var(--rand-x, 0px));
+        }
 
         /* Doc, 26.09.: "mach in der unteren Zeile dann doch den Erkennen-Button" -
            small, bottom centre, until the recognised line takes its place */
@@ -244,7 +252,9 @@
     </style>
 </head>
 
-<body data-vollbild="immer">
+<!-- Doc, 26.09.: "den automatischen Vollbildmodus, wenn ich drauf tippe, ausschalten" -
+     no data-vollbild="immer" any more; the installed app (Lenovo) is full screen by its manifest -->
+<body>
     <nav id="mini-rail">
         <div class="nav-btn" onclick="toggleSidebar()" title="Menü">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1856,6 +1866,8 @@
             const sk = Math.min(innerWidth / buehne.w, innerHeight / buehne.h);
             container.style.width = buehne.w + 'px';
             container.style.height = buehne.h + 'px';
+            // the side margin in board px (+2 so no hairline of backdrop shows)
+            container.style.setProperty('--rand-x', Math.ceil((innerWidth - buehne.w * sk) / 2 / sk + 2) + 'px');
             container.style.transform = `translate(${(innerWidth - buehne.w * sk) / 2}px, ${(innerHeight - buehne.h * sk) / 2}px) scale(${sk})`;
         }
         window.addEventListener('resize', anzeigeEinpassen);
