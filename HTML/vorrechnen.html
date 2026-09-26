@@ -170,11 +170,13 @@
            zeilen (toggle)" - the board as paper with a ruled line every 96 px;
            the controls on it get darker so they stay visible on sand */
         #canvas-container.hell {
-            /* one 96 px tile with its line at the bottom, repeated: every line is
-               drawn the same, also at a device pixel ratio of 1.5 */
+            /* one 80 px tile with its line at the bottom, repeated: every line is
+               drawn the same, also at a device pixel ratio of 1.5 (120 device px).
+               Doc: "zeilen enger" - 96 -> 80 px; his strokes on the Lenovo are
+               72 px high in the median */
             background-color: #f4ecd8;
-            background-image: linear-gradient(to bottom, transparent 95px, rgba(31, 64, 150, 0.2) 95px);
-            background-size: 100% 96px;
+            background-image: linear-gradient(to bottom, transparent 79px, rgba(31, 64, 150, 0.2) 79px);
+            background-size: 100% 80px;
             background-repeat: repeat;
         }
         #canvas-container.hell :is(#tafel-pfeil-vor, #tafel-pfeil-zurueck, [id^="werkzeug-"], #zl-play) {
@@ -239,6 +241,8 @@
         function toggleSidebar() {
             const panel = document.getElementById('side-panel');
             panel.classList.toggle('collapsed');
+            // Doc, 26.09.: "persist sidebar visible" - as in batman.html
+            try { localStorage.setItem('vorrechnen-seitenleiste-zu', panel.classList.contains('collapsed') ? '1' : '0'); } catch (_) {}
             if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
                 CyberLeftChrome.publishResolvedScale();
             }
@@ -250,6 +254,15 @@
                 }
             }, 400);
         }
+        // Restore it before the chrome renders, so the panel does not show and
+        // then fold away a frame later
+        try {
+            if (localStorage.getItem('vorrechnen-seitenleiste-zu') === '1') {
+                const zu = () => { const panel = document.getElementById('side-panel'); if (panel) panel.classList.add('collapsed'); };
+                if (document.getElementById('side-panel')) zu();
+                else document.addEventListener('DOMContentLoaded', zu, { once: true });
+            }
+        } catch (_) {}
 
         // Doc, 25.09.: "Branding rechts oben auskommentieren" - the pad needs the
         // room. The central switch, so navigation and the rest stay as they are.
