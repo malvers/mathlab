@@ -1092,6 +1092,14 @@
                 container.appendChild(host);
             }
             zeigeTafelPfeile();
+            // Doc, 26.09.: "Erkennen nur im Frei mod" - in class Auto and the swipe
+            // recognise, the examples bring their LaTeX. buttons-ultra.css pins
+            // .cyber-btn to display:flex !important, so hiding needs !important too.
+            const ek = document.getElementById('knopf-erkennen');
+            if (ek) {
+                if (modus === 'frei') ek.style.removeProperty('display');
+                else ek.style.setProperty('display', 'none', 'important');
+            }
             // frei: nothing up there, the board is Doc's
             if (modus === 'frei') {
                 host.style.display = 'none';
@@ -1727,7 +1735,7 @@
                     <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="clearAll()">LEEREN</button>
                     <!-- Doc, 25.09.: "nimm den SICHERN unter Kommentar" - ERKENNEN saves every probe anyway
                     <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="exportStrokes()">SICHERN</button> -->
-                    <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="erkennen()">ERKENNEN</button>
+                    <button id="knopf-erkennen" class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="erkennen()">ERKENNEN</button>
                     <!-- Doc, 26.09.: "nimm die beiden vor/zur butts links raus" - the
                          triangles on the board do it now; kept, commented out
                     <div style="display:flex;gap:0.9rem">
