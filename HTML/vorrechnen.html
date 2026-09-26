@@ -1041,7 +1041,15 @@
                     'pointer-events:none;display:flex;align-items:center;justify-content:center;color:#00d2ff';
                 container.appendChild(host);
             }
-            // "Meine Beispiele" on: the template to copy; off: the task (AUFGABEN)
+            zeigeTafelPfeile();
+            // frei: nothing up there, the board is Doc's
+            if (modus === 'frei') {
+                host.style.display = 'none';
+                host.innerHTML = '';
+                zeigeRechenweg();
+                return;
+            }
+            // beispiele: the template to copy; aufgaben: the task (AUFGABEN)
             // with what to solve for at the right edge
             const liste = testModus ? VORLAGEN : AUFGABEN, nr = testModus ? vorlageIdx : aufgabeIdx;
             const [slug, latex, nach] = liste[nr];
@@ -1054,13 +1062,12 @@
                 `${nr + 1} / ${liste.length}${hinweis ? ' · ' + hinweis : ''}</span>` +
                 (testModus ? `<span id="vorlage-formel" style="font-size:2.4rem;color:${INK}"></span>` : '') +
                 (nach ? `<span id="vorlage-nach" style="${RAND};right:24px">NACH <span style="font-size:1.6em"></span></span>` : '');
-            zeigeTafelPfeile();
             if (nach) {
                 const v = host.querySelector('#vorlage-nach span');
                 try { katex.render(nach, v, { throwOnError: false }); } catch (e) { v.textContent = nach; }
             }
             host.style.display = 'flex';
-            if (!testModus) {
+            if (aufgabenModus) {
                 host.style.minHeight = '0';
                 host.style.padding = '0';
                 zeigeRechenweg();
@@ -1129,10 +1136,10 @@
                 try { katex.render(alsDisplay(teil), d, { throwOnError: false }); } catch (_) { d.textContent = teil; }
                 host.appendChild(d);
             });
-            if (!testModus) zeile(AUFGABEN[aufgabeIdx][1], 'aufgabe', false);
+            if (aufgabenModus) zeile(AUFGABEN[aufgabeIdx][1], 'aufgabe', false);
             rechenweg.forEach((latex, i) => zeile(latex, i, (verborgenAb !== undefined && i >= verborgenAb) || imFlug.has(i)));
             // counter and "NACH x" sit level with the task
-            if (!testModus) {
+            if (aufgabenModus) {
                 let o = Infinity, u = -Infinity;
                 host.querySelectorAll('[data-schritt="aufgabe"]').forEach(z => {
                     const r = z.getBoundingClientRect(); o = Math.min(o, r.top); u = Math.max(u, r.bottom);
@@ -1354,7 +1361,8 @@
         // Dreieck", then "in die Mitte. Y" - the panel's back and forth on the
         // board itself, at the left and right edge, halfway down
         function zeigeTafelPfeile() {
-            if (document.getElementById('tafel-pfeil-zurueck')) return;
+            const da = document.querySelectorAll('[id^="tafel-pfeil-"]');
+            if (da.length) { da.forEach(b => { b.style.display = modus === 'frei' ? 'none' : 'flex'; }); return; }
             const PFEIL = 'position:absolute;top:50%;transform:translateY(-50%);width:56px;height:96px;padding:0;' +
                 'border:none;background:transparent;color:#8a93a3;cursor:pointer;touch-action:manipulation;z-index:5;' +
                 'display:flex;align-items:center;justify-content:center';
@@ -1369,13 +1377,15 @@
                 b.addEventListener('click', () => naechsteVorlage(schritt));
                 container.appendChild(b);
             });
+            zeigeTafelPfeile();
         }
 
         // Doc: "mach bei Weiter einen left right mit Dreiecken" - back and forth.
         // Without "Meine Beispiele" it steps through the tasks; a new task
         // starts on a clean board.
         function naechsteVorlage(schritt) {
-            if (!testModus) {
+            if (modus === 'frei') return;
+            if (aufgabenModus) {
                 const n = AUFGABEN.length;
                 aufgabeIdx = (aufgabeIdx + (schritt === -1 ? -1 : 1) + n) % n;
                 try { localStorage.setItem('vorrechnen-aufgabe', String(aufgabeIdx)); } catch (_) {}
@@ -1403,8 +1413,46 @@
         // moment to see the ink, then the morph into the template. BEISPIEL shows
         // it again. No API call; an example is never saved as a probe.
         let korpus = null, beispielTimer = null, istBeispiel = false;
-        let testModus = true;
-        try { const v = localStorage.getItem('vorrechnen-testmodus'); if (v !== null) testModus = v === '1'; } catch (_) {}
+        // Doc, 26.09.: "Meine Beispiele ist off dennoch erscheinen sie oben ...
+        // wir brauchen einen Aufgaben Modus" - three modes instead of one
+        // switch: frei (nothing on top), aufgaben (the tasks, for class),
+        // beispiele (the templates with Doc's own handwriting, for testing)
+        const MODI = ['frei', 'aufgaben', 'beispiele'];
+        let modus = 'aufgaben';
+        try {
+            const m = localStorage.getItem('vorrechnen-modus');
+            if (MODI.includes(m)) modus = m;
+            else if (localStorage.getItem('vorrechnen-testmodus') === '1') modus = 'beispiele';
+        } catch (_) {}
+        let testModus = modus === 'beispiele', aufgabenModus = modus === 'aufgaben';
+
+        // A new mode is a new board: the page, the lines in flight and the
+        // working all go
+        function setzeModus(m) {
+            if (!MODI.includes(m) || m === modus) return;
+            modus = m;
+            testModus = m === 'beispiele';
+            aufgabenModus = m === 'aufgaben';
+            try { localStorage.setItem('vorrechnen-modus', m); } catch (_) {}
+            leereTafel();
+            zeigeVorlage();
+            if (testModus) beispiel();
+        }
+        function leereTafel() {
+            clearTimeout(beispielTimer);
+            clearTimeout(autoTimer);
+            flugAbbrechen();
+            rechenweg.length = 0;
+            merkeRechenweg();
+            strokes.length = 0;
+            current = null;
+            if (tipp) { clearTimeout(tipp.timer); tipp = null; }
+            istBeispiel = false;
+            merkeBeispiel(false);
+            verwerfeErkennung();
+            recompute();
+            merkeStriche();
+        }
 
         // template LaTeX -> the first probe written for it. Later probes under the
         // same slug may hold anything (probe 26-32: an integral under "linear").
@@ -1664,8 +1712,13 @@
 
             // Doc, 26.09.: "alle Settings (Staub Strich Slider) in eine card, die
             // default geschlossen ... persist" - the big buttons stay on top
-            CyberUI.createCard('ui-container', 'Einstellungen', '<div id="morph-steuerung"></div>', '#00d2ff',
+            CyberUI.createCard('ui-container', 'Einstellungen',
+                '<div id="modus-wahl" style="margin-bottom:0.6rem"></div><div id="schalter" style="margin-bottom:0.6rem"></div><div id="morph-steuerung"></div>', '#00d2ff',
                 { collapsible: true, collapsed: true, persistKey: 'vorrechnen-einstellungen-zu' });
+            CyberUI.createRadioGroup('modus-wahl', 'Modus', [
+                { value: 'frei', label: 'Frei' }, { value: 'aufgaben', label: 'Aufgaben' },
+                { value: 'beispiele', label: 'Meine Beispiele' },
+            ], modus, v => setzeModus(v));
 
             // Doc: "speed slider für mich". Letting go replays the morph at the
             // new speed, so the effect can be judged right away.
@@ -1699,28 +1752,21 @@
                 }, '#00d2ff', fmt);
             });
 
-            CyberUI.createCheckbox('morph-steuerung', 'Boxen zeigen', view.boxes, v => {
+            CyberUI.createCheckbox('schalter', 'Boxen zeigen', view.boxes, v => {
                 view.boxes = view.rows = v;
                 try { localStorage.setItem('vorrechnen-boxen', v ? '1' : '0'); } catch (_) {}
                 redraw();
             });
 
-            CyberUI.createCheckbox('morph-steuerung', 'Handballen ignorieren', view.handballen, v => {
+            CyberUI.createCheckbox('schalter', 'Handballen ignorieren', view.handballen, v => {
                 view.handballen = v;
                 try { localStorage.setItem('vorrechnen-handballen', v ? '1' : '0'); } catch (_) {}
             });
 
-            CyberUI.createCheckbox('morph-steuerung', 'Automatisch erkennen (2 s)', autoErkennen, v => {
+            CyberUI.createCheckbox('schalter', 'Automatisch erkennen (2 s)', autoErkennen, v => {
                 autoErkennen = v;
                 try { localStorage.setItem('vorrechnen-auto', v ? '1' : '0'); } catch (_) {}
                 if (v) autoBald(); else clearTimeout(autoTimer);
-            });
-
-            CyberUI.createCheckbox('morph-steuerung', 'Meine Beispiele', testModus, v => {
-                testModus = v;
-                try { localStorage.setItem('vorrechnen-testmodus', v ? '1' : '0'); } catch (_) {}
-                zeigeVorlage();
-                if (v) beispiel();
             });
 
             /* Ausgeblendet auf Docs Wunsch (25.09.) - die Funktionen dahinter
@@ -1808,6 +1854,15 @@
             let warBeispiel = false;
             try { warBeispiel = localStorage.getItem('vorrechnen-beispiel') === '1'; } catch (_) {}
             if (testModus && (!strokes.length || warBeispiel)) beispiel();
+            else if (!testModus && warBeispiel) {
+                // an example never belongs on the board outside "Meine Beispiele"
+                strokes.length = 0;
+                istBeispiel = false;
+                merkeBeispiel(false);
+                verwerfeErkennung();
+                recompute();
+                merkeStriche();
+            }
             fetch('/__proben/', { cache: 'no-store' }).then(r => { speichernApi = r.ok; })
                 .catch(() => { speichernApi = false; })
                 .then(() => setProbeStatus(speichernApi ? 'Speichern auf dem Mac bereit' : 'kein Speicher-Endpunkt – Proben als Download'));

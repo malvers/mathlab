@@ -597,6 +597,10 @@ class CyberUI {
                 opacity: 0;
                 margin: 0;
                 padding: 0;
+                /* cyber-lab-overrides.css forces overflow: visible - without this the
+                   invisible sliders and checkboxes still lie under a closed card and
+                   take touches (measured 26.09.2026 on the Lenovo) */
+                visibility: hidden;
             }
 
             /* CYBER CHECKBOX SYSTEM (PREMIUM) */
