@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BLF-Training: Teil A — ohne Hilfsmittel (Satz 1) — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="BLF-Training Mathematik Gymnasium Klasse 10, Teil A ohne Hilfsmittel: Ankreuzaufgaben zu Potenzen, Einheiten, Prozent und Funktionen, eine Gerade mit Rotationskörper und ein Glücksrad, mit Lösungen und Abbildungen.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+/* bar colour by AFB: I green, II orange, III red */
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--green)}
+.task.afb2::before{background:var(--orange)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+/* formula plus the punctuation that follows it - see the KaTeX pass in the script */
+.nowrap{white-space:nowrap}
+/* ...but only the seam between formula and comma: inside the formula KaTeX may still
+   break after = and + - inherited nowrap pushed long formulas past a 390 px phone
+   (measured 26.09.2026: Teil A 559 px wide) */
+.nowrap .katex{white-space:normal}
+
+/* figures: drawn as inline SVG by tools/aufgaben/svgfig.py, never as a bitmap -
+   sharp on screen and in print, and the coordinates come from the same numbers
+   that verify() checks (Doc, 08.09.2026). */
+figure.fig{margin:14px 0 4px;text-align:center;break-inside:avoid;page-break-inside:avoid}
+figure.fig svg{max-width:100%;height:auto;display:inline-block;vertical-align:top}
+figure.fig figcaption{margin-top:4px;color:var(--muted);font-size:13.5px}
+.sol figure.fig{margin:10px 0 6px}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* per-task solution: button under the task, the solution opens right there
+   (Doc, 07.09.2026). The copy is built by JS from the solutions section, so
+   the sheet keeps exactly one source for every solution text. */
+.solbtn{font-family:Orbitron,system-ui,sans-serif;font-size:11px;letter-spacing:1px;
+  color:var(--green);background:transparent;cursor:pointer;margin-top:14px;
+  border:.75px solid rgba(121,158,49,.5);border-radius:4px;padding:7px 12px}
+.solbtn:hover{border-color:var(--green);background:rgba(121,158,49,.08)}
+.solinline{margin:14px 0 0;background:rgba(121,158,49,.07)}
+.solinline h3{display:none}
+.solinline[hidden]{display:none}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  /* the inline copies stay out of print - the solutions keep their own page */
+  .solbtn,.solinline{display:none!important}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>BLF-Training: Teil A — ohne Hilfsmittel (Satz 1)</h1>
+  <div class="sub">Gymnasium · Klasse 10 · Besondere Leistungsfeststellung Mathematik · Teil A · 25 Minuten, nur Zeichengeräte · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/blf.html">Zur Übersicht</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Viermal ankreuzen</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Bei jeder Teilaufgabe ist genau <b>eine</b> der fünf Antworten richtig. Notieren Sie nur den Buchstaben; ein Lösungsweg wird nicht verlangt. Taschenrechner und Formelsammlung sind nicht zugelassen.</p>
+    <ol class="parts">
+      <li>Der Term $\dfrac{a^{5} \cdot a^{-2}}{a^{4}}$ mit $a \neq 0$ ist äquivalent zu: • (A) $a^{3}$ • (B) $\frac{1}{a}$ • (C) $a$ • (D) $a^{-14}$ • (E) $\frac{1}{a^{3}}$</li>
+      <li>Ein Volumen von $0{,}35\ \mathrm{m}^3$ sind: • (A) $35\ \mathrm{dm}^3$ • (B) $3500\ \mathrm{cm}^3$ • (C) $350\ \ell$ • (D) $35\ \mathrm{hl}$ • (E) $0{,}35\ \ell$</li>
+      <li>Ein Preis wird zuerst um $10\ \%$ erhöht und danach um $10\ \%$ gesenkt. Verglichen mit dem ursprünglichen Preis gilt dann: • (A) Er ist gleich geblieben. • (B) Er ist um $1\ \%$ gesunken. • (C) Er ist um $1\ \%$ gestiegen. • (D) Er ist um $0{,}1\ \%$ gesunken. • (E) Er ist um $10\ \%$ gesunken.</li>
+      <li>Welche in $\mathbb{R}$ definierte Funktion $f$ hat einen Graphen, der die $y$-Achse im Punkt $(0 \mid 3)$ schneidet und im gesamten Definitionsbereich monoton fallend ist? • (A) $f(x) = 3x$ • (B) $f(x) = -x + 3$ • (C) $f(x) = x^2 + 3$ • (D) $f(x) = 3 \cdot 2^{x}$ • (E) $f(x) = -3x$</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Eine Gerade und ihr Kegel</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Die Abbildung zeigt den Graphen der linearen Funktion $g$, der durch die Punkte $P(-2 \mid 5)$ und $Q(4 \mid 2)$ verläuft. Die Aufgabe ist ohne Taschenrechner zu lösen; Wurzeln und $\pi$ dürfen im Ergebnis stehen bleiben.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 520 330" width="520" height="330" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Koordinatensystem mit der fallenden Geraden g durch P und Q; die Gerade schliesst mit den beiden Achsen ein Dreieck ein"><defs><clipPath id="f1-clip"><rect x="39" y="17" width="460" height="280"/></clipPath><marker id="f1-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="47.27" y1="296" x2="47.27" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="83.62" y1="296" x2="83.62" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="119.97" y1="296" x2="119.97" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="156.32" y1="296" x2="156.32" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="192.67" y1="296" x2="192.67" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="229.02" y1="296" x2="229.02" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="265.37" y1="296" x2="265.37" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="301.71" y1="296" x2="301.71" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="338.06" y1="296" x2="338.06" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="374.41" y1="296" x2="374.41" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="410.76" y1="296" x2="410.76" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="447.11" y1="296" x2="447.11" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="483.46" y1="296" x2="483.46" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="288.68" x2="498" y2="288.68" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="252.11" x2="498" y2="252.11" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="215.53" x2="498" y2="215.53" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="178.95" x2="498" y2="178.95" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="142.37" x2="498" y2="142.37" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="105.79" x2="498" y2="105.79" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="69.21" x2="498" y2="69.21" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="32.63" x2="498" y2="32.63" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="40" y1="252.11" x2="498" y2="252.11" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><line x1="156.32" y1="296" x2="156.32" y2="18" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f1-ar-0E244E)"/><text x="500" y="268.11" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">x</text><text x="144.32" y="16" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">y</text><text x="149.32" y="267.11" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="47.27" y1="248.61" x2="47.27" y2="255.61" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="83.62" y1="248.61" x2="83.62" y2="255.61" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="119.97" y1="248.61" x2="119.97" y2="255.61" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="192.67" y1="248.61" x2="192.67" y2="255.61" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="229.02" y1="248.61" x2="229.02" y2="255.61" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="265.37" y1="248.61" x2="265.37" y2="255.61" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="301.71" y1="248.61" x2="301.71" y2="255.61" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="338.06" y1="248.61" x2="338.06" y2="255.61" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="374.41" y1="248.61" x2="374.41" y2="255.61" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="410.76" y1="248.61" x2="410.76" y2="255.61" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="447.11" y1="248.61" x2="447.11" y2="255.61" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="483.46" y1="248.61" x2="483.46" y2="255.61" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="152.82" y1="288.68" x2="159.82" y2="288.68" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="152.82" y1="215.53" x2="159.82" y2="215.53" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="152.82" y1="178.95" x2="159.82" y2="178.95" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="152.82" y1="142.37" x2="159.82" y2="142.37" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="152.82" y1="105.79" x2="159.82" y2="105.79" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="152.82" y1="69.21" x2="159.82" y2="69.21" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="152.82" y1="32.63" x2="159.82" y2="32.63" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><path d="M 156.32 252.11 L 447.11 252.11 L 156.32 105.79 Z" fill="#F5C242" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round" opacity="0.35"/><g clip-path="url(#f1-clip)"><path d="M 40 47.26 L 41.76 48.15 L 43.52 49.04 L 45.28 49.92 L 47.05 50.81 L 48.81 51.69 L 50.57 52.58 L 52.33 53.47 L 54.09 54.35 L 55.85 55.24 L 57.62 56.13 L 59.38 57.01 L 61.14 57.9 L 62.9 58.79 L 64.66 59.67 L 66.42 60.56 L 68.18 61.44 L 69.95 62.33 L 71.71 63.22 L 73.47 64.1 L 75.23 64.99 L 76.99 65.88 L 78.75 66.76 L 80.52 67.65 L 82.28 68.54 L 84.04 69.42 L 85.8 70.31 L 87.56 71.19 L 89.32 72.08 L 91.08 72.97 L 92.85 73.85 L 94.61 74.74 L 96.37 75.63 L 98.13 76.51 L 99.89 77.4 L 101.65 78.28 L 103.42 79.17 L 105.18 80.06 L 106.94 80.94 L 108.7 81.83 L 110.46 82.72 L 112.22 83.6 L 113.98 84.49 L 115.75 85.38 L 117.51 86.26 L 119.27 87.15 L 121.03 88.03 L 122.79 88.92 L 124.55 89.81 L 126.32 90.69 L 128.08 91.58 L 129.84 92.47 L 131.6 93.35 L 133.36 94.24 L 135.12 95.13 L 136.88 96.01 L 138.65 96.9 L 140.41 97.78 L 142.17 98.67 L 143.93 99.56 L 145.69 100.44 L 147.45 101.33 L 149.22 102.22 L 150.98 103.1 L 152.74 103.99 L 154.5 104.88 L 156.26 105.76 L 158.02 106.65 L 159.78 107.53 L 161.55 108.42 L 163.31 109.31 L 165.07 110.19 L 166.83 111.08 L 168.59 111.97 L 170.35 112.85 L 172.12 113.74 L 173.88 114.62 L 175.64 115.51 L 177.4 116.4 L 179.16 117.28 L 180.92 118.17 L 182.68 119.06 L 184.45 119.94 L 186.21 120.83 L 187.97 121.72 L 189.73 122.6 L 191.49 123.49 L 193.25 124.37 L 195.02 125.26 L 196.78 126.15 L 198.54 127.03 L 200.3 127.92 L 202.06 128.81 L 203.82 129.69 L 205.58 130.58 L 207.35 131.47 L 209.11 132.35 L 210.87 133.24 L 212.63 134.12 L 214.39 135.01 L 216.15 135.9 L 217.92 136.78 L 219.68 137.67 L 221.44 138.56 L 223.2 139.44 L 224.96 140.33 L 226.72 141.21 L 228.48 142.1 L 230.25 142.99 L 232.01 143.87 L 233.77 144.76 L 235.53 145.65 L 237.29 146.53 L 239.05 147.42 L 240.82 148.31 L 242.58 149.19 L 244.34 150.08 L 246.1 150.96 L 247.86 151.85 L 249.62 152.74 L 251.38 153.62 L 253.15 154.51 L 254.91 155.4 L 256.67 156.28 L 258.43 157.17 L 260.19 158.06 L 261.95 158.94 L 263.72 159.83 L 265.48 160.71 L 267.24 161.6 L 269 162.49 L 270.76 163.37 L 272.52 164.26 L 274.28 165.15 L 276.05 166.03 L 277.81 166.92 L 279.57 167.8 L 281.33 168.69 L 283.09 169.58 L 284.85 170.46 L 286.62 171.35 L 288.38 172.24 L 290.14 173.12 L 291.9 174.01 L 293.66 174.9 L 295.42 175.78 L 297.18 176.67 L 298.95 177.55 L 300.71 178.44 L 302.47 179.33 L 304.23 180.21 L 305.99 181.1 L 307.75 181.99 L 309.52 182.87 L 311.28 183.76 L 313.04 184.65 L 314.8 185.53 L 316.56 186.42 L 318.32 187.3 L 320.08 188.19 L 321.85 189.08 L 323.61 189.96 L 325.37 190.85 L 327.13 191.74 L 328.89 192.62 L 330.65 193.51 L 332.42 194.39 L 334.18 195.28 L 335.94 196.17 L 337.7 197.05 L 339.46 197.94 L 341.22 198.83 L 342.98 199.71 L 344.75 200.6 L 346.51 201.49 L 348.27 202.37 L 350.03 203.26 L 351.79 204.14 L 353.55 205.03 L 355.32 205.92 L 357.08 206.8 L 358.84 207.69 L 360.6 208.58 L 362.36 209.46 L 364.12 210.35 L 365.88 211.24 L 367.65 212.12 L 369.41 213.01 L 371.17 213.89 L 372.93 214.78 L 374.69 215.67 L 376.45 216.55 L 378.22 217.44 L 379.98 218.33 L 381.74 219.21 L 383.5 220.1 L 385.26 220.99 L 387.02 221.87 L 388.78 222.76 L 390.55 223.64 L 392.31 224.53 L 394.07 225.42 L 395.83 226.3 L 397.59 227.19 L 399.35 228.08 L 401.12 228.96 L 402.88 229.85 L 404.64 230.73 L 406.4 231.62 L 408.16 232.51 L 409.92 233.39 L 411.68 234.28 L 413.45 235.17 L 415.21 236.05 L 416.97 236.94 L 418.73 237.83 L 420.49 238.71 L 422.25 239.6 L 424.02 240.48 L 425.78 241.37 L 427.54 242.26 L 429.3 243.14 L 431.06 244.03 L 432.82 244.92 L 434.58 245.8 L 436.35 246.69 L 438.11 247.58 L 439.87 248.46 L 441.63 249.35 L 443.39 250.23 L 445.15 251.12 L 446.92 252.01 L 448.68 252.89 L 450.44 253.78 L 452.2 254.67 L 453.96 255.55 L 455.72 256.44 L 457.48 257.32 L 459.25 258.21 L 461.01 259.1 L 462.77 259.98 L 464.53 260.87 L 466.29 261.76 L 468.05 262.64 L 469.82 263.53 L 471.58 264.42 L 473.34 265.3 L 475.1 266.19 L 476.86 267.07 L 478.62 267.96 L 480.38 268.85 L 482.15 269.73 L 483.91 270.62 L 485.67 271.51 L 487.43 272.39 L 489.19 273.28 L 490.95 274.17 L 492.72 275.05 L 494.48 275.94 L 496.24 276.82 L 498 277.71" fill="none" stroke="#B02418" stroke-width="2.1" stroke-linejoin="round" stroke-linecap="round"/></g><text x="47.27" y="268.11" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-3</text><text x="83.62" y="268.11" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-2</text><text x="119.97" y="268.11" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-1</text><text x="192.67" y="268.11" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">1</text><text x="229.02" y="268.11" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">2</text><text x="265.37" y="268.11" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">3</text><text x="301.71" y="268.11" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">4</text><text x="338.06" y="268.11" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">5</text><text x="374.41" y="268.11" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">6</text><text x="410.76" y="268.11" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">7</text><text x="447.11" y="268.11" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">8</text><text x="483.46" y="268.11" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">9</text><text x="149.32" y="292.68" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-1</text><text x="149.32" y="219.53" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">1</text><text x="149.32" y="182.95" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">2</text><text x="149.32" y="146.37" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">3</text><text x="149.32" y="109.79" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">4</text><text x="149.32" y="73.21" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">5</text><text x="149.32" y="36.63" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">6</text><circle cx="83.62" cy="69.21" r="3.6" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="91.62" y="61.21" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">P</text><circle cx="301.71" cy="178.95" r="3.6" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="309.71" y="170.95" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Q</text><text x="381.68" y="199.07" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="15" fill="#B02418" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">g</text></svg>
+      <figcaption>Der Graph von g mit den Punkten P und Q. Das Dreieck zwischen g und den Achsen ist orange hinterlegt.</figcaption>
+    </figure>
+    <ol class="parts">
+      <li>Geben Sie eine Gleichung der Funktion $g$ an.</li>
+      <li>Berechnen Sie die Stelle, an der $g$ den Funktionswert $-46$ annimmt.</li>
+      <li>Der Graph von $g$ und die beiden Koordinatenachsen begrenzen ein Dreieck. Berechnen Sie die Länge der Seite dieses Dreiecks, die auf dem Graphen von $g$ liegt.</li>
+      <li>Das Dreieck rotiert um die $y$-Achse. Begründen Sie ohne Taschenrechner, dass das Volumen des entstehenden Körpers größer als $250$ Volumeneinheiten ist.</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Das Glücksrad mit drei Farben</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Ein Glücksrad besteht aus drei Sektoren: Der rote hat einen Mittelpunktswinkel von $180°$, der blaue von $120°$ und der gelbe von $60°$. Ein Zufallsversuch besteht aus dem Drehen des Rades und dem Feststellen der Farbe, auf die der Zeiger zeigt.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 470 280" width="470" height="280" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gluecksrad mit einem roten Sektor von 180 Grad, einem blauen von 120 Grad und einem gelben von 60 Grad"><path d="M 128 146 L 128 40 A 106 106 0 0 1 128 252 Z" fill="#B02418" opacity="0.75" stroke="#FFFFFF" stroke-width="1.4"/><text x="193.72" y="150" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">rot</text><path d="M 128 146 L 128 252 A 106 106 0 0 1 36.2 93 Z" fill="#2C3C60" opacity="0.75" stroke="#FFFFFF" stroke-width="1.4"/><text x="71.08" y="182.86" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">blau</text><path d="M 128 146 L 36.2 93 A 106 106 0 0 1 128 40 Z" fill="#F5C242" opacity="0.75" stroke="#FFFFFF" stroke-width="1.4"/><text x="95.14" y="93.08" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#0E244E" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">gelb</text><circle cx="128" cy="146" r="106" fill="none" stroke="#0E244E" stroke-width="1.5"/><path d="M 119 23 L 137 23 L 128 47 Z" fill="#0E244E" stroke="#0E244E" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/><rect x="255" y="100.5" width="127.55" height="59" rx="4" fill="#FFFFFF" stroke="#DCE4F0" stroke-width="1" opacity="0.92"/><rect x="262" y="106" width="17" height="11" rx="0" fill="#B02418" opacity="0.45"/><text x="287" y="116" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="start">rot: 180 Grad</text><rect x="262" y="123" width="17" height="11" rx="0" fill="#2C3C60" opacity="0.45"/><text x="287" y="133" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="start">blau: 120 Grad</text><rect x="262" y="140" width="17" height="11" rx="0" fill="#F5C242" opacity="0.45"/><text x="287" y="150" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#2C3C60" text-anchor="start">gelb: 60 Grad</text></svg>
+      <figcaption>Das Glücksrad. Der Zeiger steht oben fest, das Rad dreht sich.</figcaption>
+    </figure>
+    <ol class="parts">
+      <li>Begründen Sie, dass das einmalige Drehen kein Laplace-Versuch ist.</li>
+      <li>Das Rad wird zweimal gedreht. Berechnen Sie die Wahrscheinlichkeit dafür, dass beide Male dieselbe Farbe erscheint.</li>
+      <li>Das Rad wird dreimal gedreht. Berechnen Sie die Wahrscheinlichkeit dafür, dass mindestens einmal Gelb erscheint.</li>
+      <li>Das Rad wird dreimal gedreht. Geben Sie ein Ereignis an, dessen Wahrscheinlichkeit mit dem Term $3 \cdot \frac{1}{3} \cdot \left(\frac{2}{3}\right)^{2}$ berechnet werden kann.</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Viermal ankreuzen</h3>
+      <p><b>a)</b> Richtig ist <b>(B)</b>. Im Zähler werden die Exponenten addiert: $a^{5} \cdot a^{-2} = a^{3}$. Beim Dividieren wird subtrahiert: $a^{3} : a^{4} = a^{-1} = \frac{1}{a}$. (A) ist nur der Zähler, (D) entsteht, wenn man $5 \cdot (-2)$ rechnet statt $5 + (-2)$, und (C) und (E) haben das Vorzeichen beziehungsweise die Größe des Exponenten verloren. Probe mit $a = 2$: $\frac{32 \cdot \frac{1}{4}}{16} = \frac{8}{16} = \frac{1}{2}$.</p>
+      <p><b>b)</b> Richtig ist <b>(C)</b>. Ein Kubikmeter hat $1000$ Kubikdezimeter, und ein Kubikdezimeter ist ein Liter. Also $0{,}35\ \mathrm{m}^3 = 350\ \mathrm{dm}^3 = 350\ \ell$. (A) rechnet mit dem Faktor $100$ wie bei Flächen, (B) ist nur $3{,}5\ \ell$, (D) sind $3500\ \ell$ und (E) ist tausendmal zu klein. Mit Hektolitern wäre $3{,}5\ \mathrm{hl}$ richtig gewesen.</p>
+      <p><b>c)</b> Richtig ist <b>(B)</b>. Beide Änderungen sind Faktoren: $1{,}1 \cdot 0{,}9 = 0{,}99$. Der Endpreis ist $99\ \%$ des Anfangspreises, also um $1\ \%$ niedriger. Die $10\ \%$ Abschlag beziehen sich auf den <b>erhöhten</b> Preis und sind deshalb mehr als der Aufschlag. Beispiel: 100 € → 110 € → 99 €.</p>
+      <p><b>d)</b> Richtig ist <b>(B)</b>. Der Graph von $f(x) = -x + 3$ ist eine Gerade mit dem Anstieg $-1$ (fallend) und dem $y$-Achsenabschnitt $3$. (D) schneidet die $y$-Achse zwar auch bei $3$, denn $3 \cdot 2^{0} = 3$, ist aber monoton steigend. (C) hat bei $(0 \mid 3)$ seinen Scheitel und fällt nur für $x &lt; 0$. (A) und (E) gehen durch den Ursprung.</p>
+      <p class="why">Bei c) ist die Versuchung groß, $+10\ \%$ und $-10\ \%$ zu null zu addieren. Prozentsätze beziehen sich aber immer auf den jeweils aktuellen Grundwert, deshalb werden sie als <b>Faktoren</b> multipliziert, nicht addiert.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Eine Gerade und ihr Kegel</h3>
+      <p><b>a)</b> Anstieg aus den beiden Punkten: $m = \frac{2 - 5}{4 - (-2)} = \frac{-3}{6} = -\frac{1}{2}$. Einsetzen von $Q$ in $y = -\frac{1}{2}x + n$: $2 = -2 + n$, also $n = 4$. Damit ist $g(x) = -\frac{1}{2}x + 4$. Probe mit $P$: $-\frac{1}{2} \cdot (-2) + 4 = 1 + 4 = 5$.</p>
+      <p><b>b)</b> $-\frac{1}{2}x + 4 = -46$ ergibt $-\frac{1}{2}x = -50$ und damit $x = 100$. An der Stelle $100$ hat $g$ den Funktionswert $-46$.</p>
+      <p><b>c)</b> Die Gerade schneidet die $y$-Achse bei $(0 \mid 4)$, die $x$-Achse dort, wo $-\frac{1}{2}x + 4 = 0$ ist, also bei $(8 \mid 0)$. Die gesuchte Seite ist die Hypotenuse des rechtwinkligen Dreiecks mit den Katheten $8$ und $4$: $\sqrt{8^2 + 4^2} = \sqrt{80} = \sqrt{16 \cdot 5} = 4\sqrt{5}$. Wegen $\sqrt{5} \approx 2{,}24$ sind das etwa $9$ Längeneinheiten.</p>
+      <p><b>d)</b> Bei der Drehung um die $y$-Achse entsteht ein <b>Kegel</b> mit dem Radius $r = 8$ (Abschnitt auf der $x$-Achse) und der Höhe $h = 4$. $V = \frac{1}{3}\pi r^2 h = \frac{1}{3} \cdot \pi \cdot 64 \cdot 4 = \frac{256}{3}\pi$. Wegen $\pi &gt; 3$ gilt $V &gt; \frac{256}{3} \cdot 3 = 256 &gt; 250$. Das Volumen ist also größer als $250$ Volumeneinheiten.</p>
+      <figure class="fig">
+        <svg viewBox="0 0 420 250" width="420" height="250" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kegel mit Radius 8 und Hoehe 4, der entsteht, wenn das Dreieck um die y-Achse rotiert"><defs><marker id="f2-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><ellipse cx="210" cy="200" rx="150" ry="30" fill="#F5C242" opacity="0.25"/><path d="M 60 200 A 150 30 0 0 0 360 200" fill="none" stroke="#0E244E" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M 60 200 A 150 30 0 0 1 360 200" fill="none" stroke="#6E7E9F" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="5 4"/><line x1="60" y1="200" x2="210" y2="60" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="360" y1="200" x2="210" y2="60" stroke="#0E244E" stroke-width="1.5" stroke-linecap="round"/><line x1="210" y1="200" x2="210" y2="60" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="4 3"/><line x1="210" y1="200" x2="360" y2="200" stroke="#B02418" stroke-width="1.8" stroke-linecap="round"/><line x1="210" y1="234" x2="210" y2="26" stroke="#0E244E" stroke-width="1.2" marker-end="url(#f2-ar-0E244E)"/><text x="218" y="30" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">y</text><text x="285" y="192" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#B02418" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">r = 8</text><text x="202" y="134" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#0E244E" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">h = 4</text></svg>
+        <figcaption>Zu d): Die Kathete auf der x-Achse wird zum Radius, die auf der y-Achse zur Höhe des Kegels.</figcaption>
+      </figure>
+      <p class="why">Bei d) kommt es auf die Drehachse an. Um die $y$-Achse wird die $8$ zum Radius; um die $x$-Achse wäre es umgekehrt, Radius $4$ und Höhe $8$, mit nur $\frac{128}{3}\pi$. Und für die Begründung genügt die grobe Abschätzung $\pi &gt; 3$, gerechnet werden muss $\pi$ gar nicht.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Das Glücksrad mit drei Farben</h3>
+      <p><b>a)</b> Bei einem Laplace-Versuch sind alle Ergebnisse gleich wahrscheinlich. Hier sind die Sektoren verschieden groß: $P(\text{rot}) = \frac{180}{360} = \frac{1}{2}$, $P(\text{blau}) = \frac{120}{360} = \frac{1}{3}$ und $P(\text{gelb}) = \frac{60}{360} = \frac{1}{6}$. Die drei Farben sind also nicht gleich wahrscheinlich.</p>
+      <p><b>b)</b> Dreimal ein Pfad mit zwei gleichen Farben: $P = \left(\frac{1}{2}\right)^2 + \left(\frac{1}{3}\right)^2 + \left(\frac{1}{6}\right)^2 = \frac{9}{36} + \frac{4}{36} + \frac{1}{36} = \frac{14}{36} = \frac{7}{18}$. Das sind knapp $39\ \%$.</p>
+      <p><b>c)</b> Über das Gegenereignis „keinmal Gelb“: $P = 1 - \left(\frac{5}{6}\right)^3 = 1 - \frac{125}{216} = \frac{91}{216}$. Das sind etwa $42\ \%$. Ohne Rechner genügt der Bruch.</p>
+      <p><b>d)</b> $\frac{1}{3}$ ist die Wahrscheinlichkeit für Blau, $\frac{2}{3}$ die für „nicht Blau“. Ein Pfad mit einmal Blau und zweimal etwas anderem hat die Wahrscheinlichkeit $\frac{1}{3} \cdot \left(\frac{2}{3}\right)^2$, und es gibt drei solche Pfade, je nachdem, bei welcher Drehung Blau kommt. Das Ereignis heißt also: <b>„Bei drei Drehungen erscheint genau einmal Blau.“</b></p>
+      <p class="why">Bei c) hilft das Gegenereignis. Wer „mindestens einmal“ direkt rechnet, muss die Fälle einmal, zweimal und dreimal Gelb einzeln addieren und vergisst leicht einen Pfad. Und bei d) gehört der Faktor $3$ zu „genau einmal“, nicht zu „mindestens einmal“.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      // A formula is an inline-block, so a comma or full stop right after it can wrap
+      // onto the next line all by itself. Keep the two together (Doc, 09.09.2026).
+      const next = parts[i + 1];
+      const tail = next && /^[.,;:!?)\]]/.test(next) ? next[0] : '';
+      if (tail) {
+        parts[i + 1] = next.slice(1);
+        const keep = document.createElement('span');
+        keep.className = 'nowrap';
+        keep.appendChild(span);
+        keep.appendChild(document.createTextNode(tail));
+        frag.appendChild(keep);
+        return;
+      }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+// Per task its own solution, right under the task (Doc, 07.09.2026). The block
+// is copied from the solutions section on first click - after KaTeX has run, so
+// the formulas come along rendered. The original stays where it is: the
+// solutions page in print and the big toggle above keep working unchanged.
+document.querySelectorAll('.task .solbtn').forEach((btn, i) => {
+  let box = null;
+  btn.onclick = () => {
+    if (!box) {
+      const src = document.querySelectorAll('#sol .sol')[i];
+      if (!src) return;
+      box = src.cloneNode(true);
+      box.className = 'sol solinline';
+      box.hidden = true;
+      btn.after(box);
+    }
+    box.hidden = !box.hidden;
+    btn.textContent = box.hidden ? 'Lösung anzeigen' : 'Lösung verbergen';
+  };
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+/* Training pages (Abitur BGY, BLF Gymnasium): collapsible cards and the worksheet list.
+   Taken over 1:1 from the page styles of mathe/abitur.html (26.09.2026), so a second
+   training page does not carry its own copy. Colours, header and footer come from
+   svp.css - only the layout of these pages lives here. */
+.abi-list {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    gap: 14px;
+}
+
+.abi-card {
+    background: var(--card-soft);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    /* Grid items are min-width:auto by default — without this the wide BE
+       table would push the whole card past the viewport on a phone,
+       .abi-tablewrap's overflow notwithstanding. */
+    min-width: 0;
+}
+
+.abi-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.abi-chev {
+    color: var(--muted);
+    font-size: 0.95rem;
+    padding-top: 2px;
+    transition: transform 0.15s;
+}
+
+.abi-card.open .abi-chev { transform: rotate(90deg); }
+
+.abi-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
+    color: var(--lambda);
+}
+
+.abi-card.c-geo .abi-title { color: var(--cyan); }
+.abi-card.c-alg .abi-title { color: var(--violet); }
+.abi-card.c-sto .abi-title { color: var(--phi); }
+.abi-card.c-open .abi-title { color: rgb(235, 120, 105); }
+html.svp-light .abi-card.c-open .abi-title { color: var(--ypsilon); }
+
+.abi-sub {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-top: 3px;
+}
+
+.abi-card:not(.open) .abi-body { display: none; }
+
+.abi-body {
+    padding: 12px 2px 2px 26px;
+    line-height: 1.55;
+    font-size: 0.95rem;
+}
+
+.abi-body p { margin: 0 0 10px; }
+.abi-body p:last-child { margin-bottom: 0; }
+
+.abi-body ul { margin: 0 0 10px; padding-left: 18px; }
+.abi-body li { margin-bottom: 4px; }
+
+.abi-body h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 14px 0 6px;
+}
+
+.abi-body h3:first-child { margin-top: 0; }
+
+.abi-body b { color: var(--head); font-weight: 600; }
+
+/* Tables scroll on their own so a narrow phone never scrolls the page
+   sideways (Doc: we work responsive). */
+.abi-tablewrap { overflow-x: auto; margin: 0 0 12px; }
+
+table.abi-table {
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    min-width: 480px;
+}
+
+table.abi-table th,
+table.abi-table td {
+    border-bottom: 1px solid var(--row-line);
+    padding: 5px 12px 5px 0;
+    text-align: left;
+    vertical-align: top;
+    white-space: nowrap;
+}
+
+table.abi-table th {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 400;
+    font-size: 0.74rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+table.abi-table td.num,
+table.abi-table th.num { text-align: right; padding-right: 18px; }
+table.abi-table tr.sum td { color: var(--lambda); }
+
+.abi-note {
+    border-left: 3px solid var(--lambda);
+    padding: 2px 0 2px 12px;
+    color: var(--muted);
+    font-size: 0.88rem;
+}
+
+/* The worksheets card sits first and is the reason the page exists — same
+   treatment as the featured card on the start page (Doc, 08.09.2026). */
+.abi-card.feat {
+    background: rgba(245, 194, 66, 0.13);
+    border-color: rgba(245, 194, 66, 0.5);
+    border-left: 4px solid var(--lambda);
+    padding-left: 13px;
+}
+
+.abi-card.feat .abi-title { font-size: 1.25rem; }
+.abi-card.feat .abi-sub { font-size: 0.86rem; }
+.abi-card.feat .abi-chev { color: var(--lambda); }
+
+html.svp-light .abi-card.feat {
+    background: rgba(120, 160, 220, 0.16);
+    border-color: rgba(30, 60, 120, 0.5);
+    border-left-color: var(--lambda);
+}
+
+/* The worksheets: one row per sheet, title as the link, topic line below it. */
+ul.sheet-list { list-style: none; margin: 4px 0 14px; padding: 0; counter-reset: sheet; }
+
+.abi-card.feat ul.sheet-list li { border-top-color: rgba(245, 194, 66, 0.35); }
+.abi-card.feat ul.sheet-list a { font-size: 1rem; }
+
+ul.sheet-list li {
+    border-top: 1px solid var(--row-line);
+    padding: 9px 124px 9px 16px;
+    position: relative;
+    counter-increment: sheet;
+}
+
+/* Running sheet number on the right, same treatment as the Jahrgang on a
+   Stundenplan tile (Doc, 09.09.2026): Orbitron, big, and dimmed down so
+   it only runs along instead of shouting. */
+ul.sheet-list li::after {
+    content: counter(sheet);
+    position: absolute;
+    right: 4px;
+    width: 42px;
+    text-align: right;
+    top: 50%;
+    transform: translateY(calc(-50% + 2px));
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 1.9rem;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--lambda);
+    opacity: 0.4;
+}
+
+/* Course level in front of the number, same dimmed treatment, just small:
+   GK and LK share most sheets, four are Leistungskurs only. */
+ul.sheet-list .lvl {
+    position: absolute;
+    right: 54px;
+    top: 50%;
+    /* Sits a touch below the middle so it lines up with the waist of the
+       big number next to it, not with its cap (Doc, 09.09.2026). */
+    transform: translateY(calc(-50% + 6px));
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 0.84rem;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    color: var(--lambda);
+    opacity: 0.55;
+}
+
+@media (max-width: 560px) {
+    ul.sheet-list li { padding-right: 92px; }
+    ul.sheet-list li::after { font-size: 1.3rem; width: 26px; }
+    ul.sheet-list .lvl { right: 36px; font-size: 0.72rem; }
+}
+
+ul.sheet-list li::before {
+    content: '\203A';
+    position: absolute;
+    left: 0;
+    color: var(--lambda);
+}
+
+ul.sheet-list a {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.88rem;
+    letter-spacing: 0.03em;
+    color: var(--lambda);
+    text-decoration: none;
+}
+
+ul.sheet-list a:hover { text-decoration: underline; }
+ul.sheet-list span { display: block; margin-top: 3px; color: var(--muted); font-size: 0.86rem; }

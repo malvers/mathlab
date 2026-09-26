@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BLF-Training: Teil A — ohne Hilfsmittel (Satz 2) — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="BLF-Training Mathematik Gymnasium Klasse 10, Teil A ohne Hilfsmittel: Ankreuzaufgaben zu Trigonometrie, Sinusfunktion, Gleichungssystem und Abzählen, ein Kreis mit Thales und Gleichungen ohne Rechner, mit Lösungen.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+/* bar colour by AFB: I green, II orange, III red */
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--green)}
+.task.afb2::before{background:var(--orange)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+/* formula plus the punctuation that follows it - see the KaTeX pass in the script */
+.nowrap{white-space:nowrap}
+/* ...but only the seam between formula and comma: inside the formula KaTeX may still
+   break after = and + - inherited nowrap pushed long formulas past a 390 px phone
+   (measured 26.09.2026: Teil A 559 px wide) */
+.nowrap .katex{white-space:normal}
+
+/* figures: drawn as inline SVG by tools/aufgaben/svgfig.py, never as a bitmap -
+   sharp on screen and in print, and the coordinates come from the same numbers
+   that verify() checks (Doc, 08.09.2026). */
+figure.fig{margin:14px 0 4px;text-align:center;break-inside:avoid;page-break-inside:avoid}
+figure.fig svg{max-width:100%;height:auto;display:inline-block;vertical-align:top}
+figure.fig figcaption{margin-top:4px;color:var(--muted);font-size:13.5px}
+.sol figure.fig{margin:10px 0 6px}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* per-task solution: button under the task, the solution opens right there
+   (Doc, 07.09.2026). The copy is built by JS from the solutions section, so
+   the sheet keeps exactly one source for every solution text. */
+.solbtn{font-family:Orbitron,system-ui,sans-serif;font-size:11px;letter-spacing:1px;
+  color:var(--green);background:transparent;cursor:pointer;margin-top:14px;
+  border:.75px solid rgba(121,158,49,.5);border-radius:4px;padding:7px 12px}
+.solbtn:hover{border-color:var(--green);background:rgba(121,158,49,.08)}
+.solinline{margin:14px 0 0;background:rgba(121,158,49,.07)}
+.solinline h3{display:none}
+.solinline[hidden]{display:none}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  /* the inline copies stay out of print - the solutions keep their own page */
+  .solbtn,.solinline{display:none!important}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>BLF-Training: Teil A — ohne Hilfsmittel (Satz 2)</h1>
+  <div class="sub">Gymnasium · Klasse 10 · Besondere Leistungsfeststellung Mathematik · Teil A · 25 Minuten, nur Zeichengeräte · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/blf.html">Zur Übersicht</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Noch viermal ankreuzen</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Bei jeder Teilaufgabe ist genau <b>eine</b> der fünf Antworten richtig. Notieren Sie nur den Buchstaben. Die Abbildung gehört zu Teilaufgabe a).</p>
+    <figure class="fig">
+      <svg viewBox="0 0 440 250" width="440" height="250" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rechtwinkliges Dreieck ABC mit dem rechten Winkel bei C, den Seiten a, b und c und den Winkeln alpha bei A und beta bei B"><path d="M 50 205 L 390 205 L 135.00000000000003 57.77568135664541 Z" fill="#F5C242" opacity="0.18"/><path d="M 50 205 L 390 205 L 135 57.78 Z" fill="none" stroke="#0E244E" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/><path d="M 127 71.63 L 140.86 79.63 L 148.86 65.78" fill="none" stroke="#0E244E" stroke-width="1.1" stroke-linejoin="round" stroke-linecap="round"/><circle cx="138.22" cy="69.8" r="1.6" fill="#0E244E" stroke="#0E244E" stroke-width="0"/><text x="38" y="213" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="15" fill="#0E244E" text-anchor="middle" font-style="italic">A</text><text x="402" y="213" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="15" fill="#0E244E" text-anchor="middle" font-style="italic">B</text><text x="131" y="47.78" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="15" fill="#0E244E" text-anchor="middle" font-style="italic">C</text><text x="274.5" y="125.39" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="15" fill="#B02418" text-anchor="start" font-style="italic">a</text><text x="80.5" y="129.39" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="15" fill="#B02418" text-anchor="end" font-style="italic">b</text><text x="220" y="229" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="15" fill="#B02418" text-anchor="middle" font-style="italic">c</text><path d="M 84 205 A 34 34 0 0 0 67 175.56" fill="none" stroke="#799E31" stroke-width="1.4"/><text x="92.7" y="184.35" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#799E31" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">α</text><path d="M 357.09 186 A 38 38 0 0 0 352 205" fill="none" stroke="#799E31" stroke-width="1.4"/><text x="336.78" y="194.74" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#799E31" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">β</text></svg>
+      <figcaption>Zu a): Das Dreieck ABC mit dem rechten Winkel bei C.</figcaption>
+    </figure>
+    <ol class="parts">
+      <li>Welche Aussage über das abgebildete Dreieck $ABC$ ist <b>falsch</b>? • (A) $\sin\alpha = \frac{a}{c}$ • (B) $\cos\alpha = \frac{b}{c}$ • (C) $\tan\alpha = \frac{a}{b}$ • (D) $\sin\beta = \frac{a}{c}$ • (E) $a^2 + b^2 = c^2$</li>
+      <li>Für die in $\mathbb{R}$ definierte Funktion $f$ mit $f(x) = 2 \cdot \sin x + 1$ gilt: • (A) Der Wertebereich ist $-1 \leq y \leq 3$. • (B) Die kleinste Periode ist $\pi$. • (C) Der Graph ist symmetrisch zur $y$-Achse. • (D) $f(0) = 2$ • (E) $x = 0$ ist eine Nullstelle von $f$.</li>
+      <li>Das Gleichungssystem $2x + y = 7$ und $x - y = -1$ hat die Lösung: • (A) $x = 3;\ y = 1$ • (B) $x = 2;\ y = 3$ • (C) $x = 1;\ y = 5$ • (D) $x = 3;\ y = 4$ • (E) $x = -2;\ y = -1$</li>
+      <li>Ein Fahrradschloss hat drei Stellräder mit je den Ziffern $0$ bis $9$. Wie viele verschiedene Einstellungen gibt es? • (A) $30$ • (B) $100$ • (C) $720$ • (D) $1000$ • (E) $59\,049$</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Kreis, Sektor und Thales</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>In einem Koordinatensystem liegt ein Kreis mit dem Mittelpunkt $M$ im Koordinatenursprung. Er verläuft durch den Punkt $P(3 \mid 4)$. Rechnen Sie ohne Taschenrechner; $\pi$ und Wurzeln dürfen im Ergebnis stehen bleiben.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 404 378" width="404" height="378" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kreis um den Ursprung mit dem Radius 5 und den Punkten P(3|4) und Q(-4|3); der Kreissektor zwischen P und Q ist hinterlegt"><defs><clipPath id="f2-clip"><rect x="29" y="17" width="354" height="332"/></clipPath><marker id="f2-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="41" y1="348" x2="41" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="68.5" y1="348" x2="68.5" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="96" y1="348" x2="96" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="123.5" y1="348" x2="123.5" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="151" y1="348" x2="151" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="178.5" y1="348" x2="178.5" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="206" y1="348" x2="206" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="233.5" y1="348" x2="233.5" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="261" y1="348" x2="261" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="288.5" y1="348" x2="288.5" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="316" y1="348" x2="316" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="343.5" y1="348" x2="343.5" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="371" y1="348" x2="371" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="348" x2="382" y2="348" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="320.5" x2="382" y2="320.5" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="293" x2="382" y2="293" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="265.5" x2="382" y2="265.5" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="238" x2="382" y2="238" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="210.5" x2="382" y2="210.5" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="183" x2="382" y2="183" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="155.5" x2="382" y2="155.5" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="128" x2="382" y2="128" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="100.5" x2="382" y2="100.5" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="73" x2="382" y2="73" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="45.5" x2="382" y2="45.5" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="18" x2="382" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="183" x2="382" y2="183" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f2-ar-0E244E)"/><line x1="206" y1="348" x2="206" y2="18" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f2-ar-0E244E)"/><text x="384" y="199" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">x</text><text x="194" y="16" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">y</text><text x="199" y="198" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="41" y1="179.5" x2="41" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="68.5" y1="179.5" x2="68.5" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="96" y1="179.5" x2="96" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="123.5" y1="179.5" x2="123.5" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="151" y1="179.5" x2="151" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="178.5" y1="179.5" x2="178.5" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="233.5" y1="179.5" x2="233.5" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="261" y1="179.5" x2="261" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="288.5" y1="179.5" x2="288.5" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="316" y1="179.5" x2="316" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="343.5" y1="179.5" x2="343.5" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="371" y1="179.5" x2="371" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="348" x2="209.5" y2="348" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="320.5" x2="209.5" y2="320.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="293" x2="209.5" y2="293" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="265.5" x2="209.5" y2="265.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="238" x2="209.5" y2="238" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="210.5" x2="209.5" y2="210.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="155.5" x2="209.5" y2="155.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="128" x2="209.5" y2="128" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="100.5" x2="209.5" y2="100.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="73" x2="209.5" y2="73" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="45.5" x2="209.5" y2="45.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><circle cx="206" cy="183" r="137.5" fill="none" stroke="#B02418" stroke-width="2"/><path d="M 206 183 L 288.5 73 A 137.5 137.5 0 0 0 96 100.5 Z" fill="#F5C242" opacity="0.35"/><line x1="206" y1="183" x2="288.5" y2="73" stroke="#0E244E" stroke-width="1.4" stroke-linecap="round"/><line x1="206" y1="183" x2="96" y2="100.5" stroke="#0E244E" stroke-width="1.4" stroke-linecap="round"/><text x="41" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-6</text><text x="68.5" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-5</text><text x="96" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-4</text><text x="123.5" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-3</text><text x="151" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-2</text><text x="178.5" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-1</text><text x="233.5" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">1</text><text x="261" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">2</text><text x="288.5" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">3</text><text x="316" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">4</text><text x="343.5" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">5</text><text x="371" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">6</text><text x="199" y="352" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-6</text><text x="199" y="324.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-5</text><text x="199" y="297" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-4</text><text x="199" y="269.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-3</text><text x="199" y="242" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-2</text><text x="199" y="214.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-1</text><text x="199" y="159.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">1</text><text x="199" y="132" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">2</text><text x="199" y="104.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">3</text><text x="199" y="77" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">4</text><text x="199" y="49.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">5</text><circle cx="288.5" cy="73" r="3.6" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="296.5" y="65" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">P</text><circle cx="96" cy="100.5" r="3.6" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="88" y="92.5" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Q</text></svg>
+      <figcaption>Der Kreis mit P und Q. Der Sektor zwischen MP und MQ ist orange hinterlegt.</figcaption>
+    </figure>
+    <ol class="parts">
+      <li>Geben Sie den Radius des Kreises an.</li>
+      <li>Zeigen Sie, dass auch $Q(-4 \mid 3)$ auf dem Kreis liegt und dass die Strecken $\overline{MP}$ und $\overline{MQ}$ senkrecht aufeinander stehen.</li>
+      <li>Berechnen Sie den Flächeninhalt des Kreissektors zwischen $\overline{MP}$ und $\overline{MQ}$ und die Länge des zugehörigen Kreisbogens.</li>
+      <li>Ein dritter Punkt $R$ liegt so auf dem Kreis, dass $\angle PQR = 90°$ ist. Geben Sie die Länge der Strecke $\overline{PR}$ an und begründen Sie Ihre Angabe.</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Gleichungen ohne Rechner</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Die vier Teilaufgaben sind unabhängig voneinander und ohne Hilfsmittel zu lösen.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 360 190" width="360" height="190" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rechteck mit den Seiten a und b und der Diagonalen d von 13 Zentimetern, Umfang 34 Zentimeter"><rect x="60" y="30" width="240" height="100" rx="0" fill="#F5C242" opacity="0.18"/><rect x="60" y="30" width="240" height="100" rx="0" fill="none" stroke="#0E244E" stroke-width="1.6"/><line x1="60" y1="130" x2="300" y2="30" stroke="#B02418" stroke-width="1.8" stroke-linecap="round"/><text x="180" y="152" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="15" fill="#0E244E" text-anchor="middle" font-style="italic">a</text><text x="312" y="85" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="15" fill="#0E244E" text-anchor="start" font-style="italic">b</text><text x="188" y="72" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#B02418" text-anchor="start" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">d = 13 cm</text><text x="180" y="180" font-family="Raleway, system-ui, sans-serif" font-size="13" fill="#6E7E9F" text-anchor="middle">Umfang 34 cm</text></svg>
+      <figcaption>Zu c): Das Rechteck mit seiner Diagonalen.</figcaption>
+    </figure>
+    <ol class="parts">
+      <li>Das Volumen eines Kegels ist $V = \frac{1}{3} \pi r^2 h$. Stellen Sie die Formel nach $h$ um.</li>
+      <li>Bestimmen Sie $p$ so, dass $x = -2$ eine Lösung der Gleichung $x^2 + p \cdot x - 10 = 0$ ist, und geben Sie die zweite Lösung an.</li>
+      <li>Ein Rechteck hat den Umfang $34$ cm, seine Diagonale ist $13$ cm lang. Berechnen Sie den Flächeninhalt des Rechtecks.</li>
+      <li>Geben Sie alle Werte von $c$ an, für die die Gleichung $x^2 - 6x + c = 0$ <b>keine</b> reelle Lösung hat. Begründen Sie Ihre Angabe.</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Noch viermal ankreuzen</h3>
+      <p><b>a)</b> Falsch ist <b>(D)</b>. Für $\beta$ ist $b$ die Gegenkathete, also $\sin\beta = \frac{b}{c}$. Der Bruch $\frac{a}{c}$ gehört zu $\cos\beta$. (A) bis (C) sind richtig: $a$ liegt $\alpha$ gegenüber, $b$ liegt an $\alpha$ an, $c$ ist die Hypotenuse. (E) ist der Satz des Pythagoras mit dem rechten Winkel bei $C$.</p>
+      <p><b>b)</b> Richtig ist <b>(A)</b>. $\sin x$ läuft zwischen $-1$ und $1$; verdoppelt sind das $-2$ bis $2$, um $1$ nach oben verschoben $-1$ bis $3$. (B) Die Periode bleibt $2\pi$, denn vor dem $x$ steht kein Faktor. (C) Der Graph ist nicht achsensymmetrisch, denn $f\left(\frac{\pi}{2}\right) = 3$, aber $f\left(-\frac{\pi}{2}\right) = -1$. (D) und (E) scheitern an $f(0) = 2 \cdot 0 + 1 = 1$.</p>
+      <p><b>c)</b> Richtig ist <b>(B)</b>. Addiert man beide Gleichungen, fällt $y$ weg: $3x = 6$, also $x = 2$ und $y = 7 - 4 = 3$. Probe: $2 - 3 = -1$. Die anderen vier Paare erfüllen jeweils <b>nur eine</b> der beiden Gleichungen, (A) und (C) die erste, (D) und (E) die zweite. Eine Probe muss deshalb immer beide Gleichungen prüfen.</p>
+      <p><b>d)</b> Richtig ist <b>(D)</b>. Jedes Rad hat unabhängig von den anderen $10$ Möglichkeiten, und Ziffern dürfen sich wiederholen: $10 \cdot 10 \cdot 10 = 1000$. Das sind genau die Zahlen von $000$ bis $999$. (C) $= 10 \cdot 9 \cdot 8$ verbietet Wiederholungen, (A) addiert statt zu multiplizieren, und (E) $= 3^{10}$ vertauscht Basis und Exponent.</p>
+      <p class="why">Bei a) hilft es, jedes Mal vom Winkel aus zu fragen: Welche Seite liegt <b>gegenüber</b>, welche <b>anliegend</b>? Wer sich „$a$ steht immer oben“ merkt, liegt bei $\beta$ falsch.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Kreis, Sektor und Thales</h3>
+      <p><b>a)</b> Der Radius ist der Abstand von $M(0 \mid 0)$ zu $P$: $r = \sqrt{3^2 + 4^2} = \sqrt{25} = 5$.</p>
+      <p><b>b)</b> $(-4)^2 + 3^2 = 16 + 9 = 25 = r^2$, also hat $Q$ ebenfalls den Abstand $5$ von $M$ und liegt auf dem Kreis. Die Gerade $MP$ hat den Anstieg $\frac{4}{3}$, die Gerade $MQ$ den Anstieg $\frac{3}{-4} = -\frac{3}{4}$. Das Produkt ist $\frac{4}{3} \cdot \left(-\frac{3}{4}\right) = -1$, die beiden Strecken stehen also senkrecht aufeinander.</p>
+      <p><b>c)</b> Der Mittelpunktswinkel beträgt $90°$, der Sektor ist ein Viertelkreis. $A = \frac{1}{4} \pi r^2 = \frac{25}{4}\pi$ und $b = \frac{1}{4} \cdot 2\pi r = \frac{5}{2}\pi$. Das sind etwa $19{,}6$ Flächeneinheiten und $7{,}9$ Längeneinheiten.</p>
+      <p><b>d)</b> $\overline{PR} = 10$. Nach der Umkehrung des <b>Satzes des Thales</b> liegt ein rechter Winkel $\angle PQR$ genau dann vor, wenn $\overline{PR}$ ein Durchmesser des Kreises ist. Also ist $\overline{PR} = 2r = 10$ und $R$ der Punkt $(-3 \mid -4)$ gegenüber von $P$.</p>
+      <figure class="fig">
+        <svg viewBox="0 0 404 378" width="404" height="378" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kreis um den Ursprung mit dem Radius 5 und den Punkten P(3|4) und Q(-4|3); dazu R(-3|-4) und das Dreieck PQR"><defs><clipPath id="f3-clip"><rect x="29" y="17" width="354" height="332"/></clipPath><marker id="f3-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="41" y1="348" x2="41" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="68.5" y1="348" x2="68.5" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="96" y1="348" x2="96" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="123.5" y1="348" x2="123.5" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="151" y1="348" x2="151" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="178.5" y1="348" x2="178.5" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="206" y1="348" x2="206" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="233.5" y1="348" x2="233.5" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="261" y1="348" x2="261" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="288.5" y1="348" x2="288.5" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="316" y1="348" x2="316" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="343.5" y1="348" x2="343.5" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="371" y1="348" x2="371" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="348" x2="382" y2="348" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="320.5" x2="382" y2="320.5" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="293" x2="382" y2="293" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="265.5" x2="382" y2="265.5" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="238" x2="382" y2="238" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="210.5" x2="382" y2="210.5" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="183" x2="382" y2="183" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="155.5" x2="382" y2="155.5" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="128" x2="382" y2="128" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="100.5" x2="382" y2="100.5" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="73" x2="382" y2="73" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="45.5" x2="382" y2="45.5" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="18" x2="382" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="30" y1="183" x2="382" y2="183" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f3-ar-0E244E)"/><line x1="206" y1="348" x2="206" y2="18" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f3-ar-0E244E)"/><text x="384" y="199" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">x</text><text x="194" y="16" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">y</text><text x="199" y="198" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="41" y1="179.5" x2="41" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="68.5" y1="179.5" x2="68.5" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="96" y1="179.5" x2="96" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="123.5" y1="179.5" x2="123.5" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="151" y1="179.5" x2="151" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="178.5" y1="179.5" x2="178.5" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="233.5" y1="179.5" x2="233.5" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="261" y1="179.5" x2="261" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="288.5" y1="179.5" x2="288.5" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="316" y1="179.5" x2="316" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="343.5" y1="179.5" x2="343.5" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="371" y1="179.5" x2="371" y2="186.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="348" x2="209.5" y2="348" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="320.5" x2="209.5" y2="320.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="293" x2="209.5" y2="293" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="265.5" x2="209.5" y2="265.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="238" x2="209.5" y2="238" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="210.5" x2="209.5" y2="210.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="155.5" x2="209.5" y2="155.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="128" x2="209.5" y2="128" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="100.5" x2="209.5" y2="100.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="73" x2="209.5" y2="73" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="202.5" y1="45.5" x2="209.5" y2="45.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><circle cx="206" cy="183" r="137.5" fill="none" stroke="#B02418" stroke-width="2"/><path d="M 288.5 73 L 96 100.5 L 123.5 293 Z" fill="#799E31" stroke="none" stroke-width="0" stroke-linejoin="round" stroke-linecap="round" opacity="0.2"/><path d="M 288.5 73 L 96 100.5 L 123.5 293 Z" fill="none" stroke="#799E31" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/><line x1="288.5" y1="73" x2="123.5" y2="293" stroke="#799E31" stroke-width="1.8" stroke-linecap="round"/><text x="41" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-6</text><text x="68.5" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-5</text><text x="96" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-4</text><text x="123.5" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-3</text><text x="151" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-2</text><text x="178.5" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-1</text><text x="233.5" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">1</text><text x="261" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">2</text><text x="288.5" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">3</text><text x="316" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">4</text><text x="343.5" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">5</text><text x="371" y="199" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">6</text><text x="199" y="352" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-6</text><text x="199" y="324.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-5</text><text x="199" y="297" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-4</text><text x="199" y="269.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-3</text><text x="199" y="242" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-2</text><text x="199" y="214.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">-1</text><text x="199" y="159.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">1</text><text x="199" y="132" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">2</text><text x="199" y="104.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">3</text><text x="199" y="77" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">4</text><text x="199" y="49.5" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">5</text><circle cx="288.5" cy="73" r="3.6" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="296.5" y="65" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="start" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">P</text><circle cx="96" cy="100.5" r="3.6" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="88" y="92.5" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Q</text><circle cx="123.5" cy="293" r="3.6" fill="#0E244E" stroke="#FFFFFF" stroke-width="1.4"/><text x="115.5" y="309" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="13" fill="#0E244E" text-anchor="end" font-style="italic" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">R</text></svg>
+        <figcaption>Zu d): R liegt P genau gegenüber. Das Dreieck PQR hat bei Q einen rechten Winkel.</figcaption>
+      </figure>
+      <p class="why">Bei d) muss man nichts ausrechnen, wenn man Thales erkennt: Der rechte Winkel liegt bei $Q$, also ist die Seite <b>gegenüber</b> von $Q$ der Durchmesser.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Gleichungen ohne Rechner</h3>
+      <p><b>a)</b> Mit $3$ multiplizieren und durch $\pi r^2$ teilen: $h = \dfrac{3V}{\pi r^2}$.</p>
+      <p><b>b)</b> Einsetzen: $(-2)^2 + p \cdot (-2) - 10 = 0$, also $4 - 2p - 10 = 0$ und $p = -3$. Die Gleichung lautet dann $x^2 - 3x - 10 = 0$, zerlegt $(x + 2)(x - 5) = 0$. Die zweite Lösung ist $x = 5$. Nach Vieta passt das: $-2 \cdot 5 = -10$ und $-2 + 5 = 3 = -p$.</p>
+      <p><b>c)</b> Aus dem Umfang folgt $a + b = 17$, aus dem Pythagoras $a^2 + b^2 = 169$. Quadriert man die erste Gleichung, erhält man $a^2 + 2ab + b^2 = 289$. Zieht man die zweite ab, bleibt $2ab = 120$, also $A = ab = 60\ \mathrm{cm}^2$. Die Seiten selbst braucht man dafür nicht; es sind $12$ cm und $5$ cm.</p>
+      <p><b>d)</b> Quadratisch ergänzen: $x^2 - 6x + c = (x - 3)^2 - 9 + c$. Die Gleichung $(x - 3)^2 = 9 - c$ hat keine Lösung, wenn die rechte Seite negativ ist, denn ein Quadrat ist nie negativ. Also für alle $c &gt; 9$. Bei $c = 9$ gibt es genau eine Lösung ($x = 3$), bei $c &lt; 9$ zwei.</p>
+      <p class="why">Bei c) ist der Umweg über die einzelnen Seiten möglich, aber länger: Man müsste eine quadratische Gleichung lösen. Der Trick mit $(a + b)^2$ liefert das Produkt $ab$ direkt, und nach dem ist gefragt.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      // A formula is an inline-block, so a comma or full stop right after it can wrap
+      // onto the next line all by itself. Keep the two together (Doc, 09.09.2026).
+      const next = parts[i + 1];
+      const tail = next && /^[.,;:!?)\]]/.test(next) ? next[0] : '';
+      if (tail) {
+        parts[i + 1] = next.slice(1);
+        const keep = document.createElement('span');
+        keep.className = 'nowrap';
+        keep.appendChild(span);
+        keep.appendChild(document.createTextNode(tail));
+        frag.appendChild(keep);
+        return;
+      }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+// Per task its own solution, right under the task (Doc, 07.09.2026). The block
+// is copied from the solutions section on first click - after KaTeX has run, so
+// the formulas come along rendered. The original stays where it is: the
+// solutions page in print and the big toggle above keep working unchanged.
+document.querySelectorAll('.task .solbtn').forEach((btn, i) => {
+  let box = null;
+  btn.onclick = () => {
+    if (!box) {
+      const src = document.querySelectorAll('#sol .sol')[i];
+      if (!src) return;
+      box = src.cloneNode(true);
+      box.className = 'sol solinline';
+      box.hidden = true;
+      btn.after(box);
+    }
+    box.hidden = !box.hidden;
+    btn.textContent = box.hidden ? 'Lösung anzeigen' : 'Lösung verbergen';
+  };
+});
+</script>
+</body>
+</html>

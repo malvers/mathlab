@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BLF-Training: Wachstum und periodische Vorgänge — Doc Alvers Mathe-Labor</title>
+<meta name="description" content="BLF-Training Mathematik Gymnasium Klasse 10: exponentielles Wachstum mit Logarithmus, ein Riesenrad als periodischer Vorgang und abkühlender Tee als begrenzte Abnahme, mit Lösungen und Abbildungen.">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Palette and type follow the deck generator (tools/pptx/design_lib.py) - one look for
+   slides, quizzes and worksheets. Light page on purpose: this sheet gets printed. */
+:root{
+  --ink:#0E244E; --body:#2C3C60; --muted:#6E7E9F; --card:#FFFFFF;
+  --orange:#F5C242; --red:#B02418; --green:#799E31; --page:#EEF2F8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--page)}
+body{font-family:Raleway,system-ui,sans-serif;color:var(--body);background:var(--page);
+  line-height:1.45;font-size:17px}
+h1,h2,h3,.afb,.brand,.btn{font-family:Orbitron,system-ui,sans-serif}
+.sheet{max-width:820px;margin:0 auto;padding:32px 22px 60px}
+
+/* header */
+.brand{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
+h1{font-size:clamp(22px,4.2vw,32px);color:var(--ink);line-height:1.12;margin:10px 0 6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:15px}
+.rules{width:64px;height:3px;margin:16px 0 26px;position:relative}
+.rules::before,.rules::after{content:"";position:absolute;top:0;height:3px}
+.rules::before{left:0;width:44px;background:var(--orange)}
+.rules::after{left:50px;width:14px;background:var(--green)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 28px}
+.btn{font-size:11px;letter-spacing:1px;color:var(--ink);background:var(--card);cursor:pointer;
+  border:.75px solid rgba(14,36,78,.22);border-radius:4px;padding:8px 12px;text-decoration:none}
+.btn:hover{border-color:var(--red);color:var(--red)}
+
+/* tasks */
+.task{background:var(--card);border:.75px solid rgba(14,36,78,.12);padding:22px 24px 20px;
+  margin:0 0 18px;position:relative}
+/* bar colour by AFB: I green, II orange, III red */
+.task::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--green)}
+.task.afb2::before{background:var(--orange)}
+.task.afb3::before{background:var(--red)}
+.task-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.task h2{font-size:17px;color:var(--ink);font-weight:700}
+.afb{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.afb b{color:var(--ink)}
+.task p{margin:0 0 8px}
+ol.parts{margin:10px 0 0 0;padding-left:0;list-style:none;counter-reset:part}
+ol.parts>li{position:relative;padding-left:30px;margin:0 0 7px;counter-increment:part}
+ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left:0;top:0;
+  color:var(--red);font-weight:700}
+.hint{color:var(--muted);font-size:15px;margin-top:8px}
+b{font-weight:700;color:var(--ink)}
+/* formula plus the punctuation that follows it - see the KaTeX pass in the script */
+.nowrap{white-space:nowrap}
+/* ...but only the seam between formula and comma: inside the formula KaTeX may still
+   break after = and + - inherited nowrap pushed long formulas past a 390 px phone
+   (measured 26.09.2026: Teil A 559 px wide) */
+.nowrap .katex{white-space:normal}
+
+/* figures: drawn as inline SVG by tools/aufgaben/svgfig.py, never as a bitmap -
+   sharp on screen and in print, and the coordinates come from the same numbers
+   that verify() checks (Doc, 08.09.2026). */
+figure.fig{margin:14px 0 4px;text-align:center;break-inside:avoid;page-break-inside:avoid}
+figure.fig svg{max-width:100%;height:auto;display:inline-block;vertical-align:top}
+figure.fig figcaption{margin-top:4px;color:var(--muted);font-size:13.5px}
+.sol figure.fig{margin:10px 0 6px}
+
+/* solutions */
+#sol{margin-top:36px}
+#sol[hidden]{display:none}
+#sol h2.big{font-size:20px;color:var(--ink);margin-bottom:14px}
+.sol{background:rgba(255,255,255,.6);border-left:3px solid var(--green);padding:16px 20px;margin:0 0 14px}
+.sol h3{font-size:14px;color:var(--ink);margin-bottom:8px}
+.sol p{margin:0 0 6px}
+.sol .why{color:var(--muted);font-size:15px}
+.katex{font-size:1.02em}
+
+/* per-task solution: button under the task, the solution opens right there
+   (Doc, 07.09.2026). The copy is built by JS from the solutions section, so
+   the sheet keeps exactly one source for every solution text. */
+.solbtn{font-family:Orbitron,system-ui,sans-serif;font-size:11px;letter-spacing:1px;
+  color:var(--green);background:transparent;cursor:pointer;margin-top:14px;
+  border:.75px solid rgba(121,158,49,.5);border-radius:4px;padding:7px 12px}
+.solbtn:hover{border-color:var(--green);background:rgba(121,158,49,.08)}
+.solinline{margin:14px 0 0;background:rgba(121,158,49,.07)}
+.solinline h3{display:none}
+.solinline[hidden]{display:none}
+
+/* print: A4, solutions on their own page so the sheet works without them */
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff}
+  .sheet{max-width:none;padding:0}
+  .tools{display:none}
+  /* the inline copies stay out of print - the solutions keep their own page */
+  .solbtn,.solinline{display:none!important}
+  body{font-size:14.5px;line-height:1.38}
+  h1{font-size:24px}
+  .rules{margin:12px 0 18px}
+  .task{break-inside:avoid;page-break-inside:avoid;padding:16px 20px 14px;margin-bottom:12px}
+  ol.parts>li{margin-bottom:4px}
+  .hint,.sol .why{font-size:13px}
+  .sol{break-inside:avoid;page-break-inside:avoid;background:#fff;padding:12px 18px;margin-bottom:10px}
+  #sol{display:block!important;break-before:page;page-break-before:always;margin-top:0}
+}
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="brand">Doc Alvers Mathe-Labor</div>
+  <h1>BLF-Training: Wachstum und periodische Vorgänge</h1>
+  <div class="sub">Gymnasium · Klasse 10 · Besondere Leistungsfeststellung Mathematik · Teil B, mit MMS und Formelsammlung · drei Aufgaben, Anforderungsbereiche I bis III</div>
+  <div class="rules"></div>
+  <div class="tools">
+    <button class="btn" id="toggle" type="button">Lösungen anzeigen</button>
+    <a class="btn" href="../svp/mathe/blf.html">Zur Übersicht</a>
+  </div>
+
+  <section class="task afb1">
+    <div class="task-head"><h2>Der Algenteppich</h2><span class="afb">AFB <b>I</b> · Reproduzieren</span></div>
+    <p>Auf einem Teich wächst ein Algenteppich. Seine Fläche wird näherungsweise durch $A(t) = 4 \cdot 1{,}35^{t}$ beschrieben, $t$ in Wochen nach Beobachtungsbeginn, $A(t)$ in Quadratmetern.</p>
+    <ol class="parts">
+      <li>Geben Sie die Fläche zu Beobachtungsbeginn und das wöchentliche Wachstum in Prozent an.</li>
+      <li>Berechnen Sie die Fläche nach sechs Wochen.</li>
+      <li>Berechnen Sie, nach wie vielen Wochen der Teppich $100\ \mathrm{m}^2$ bedeckt.</li>
+      <li>Berechnen Sie die Verdopplungszeit und zeigen Sie, dass sie nicht von der Anfangsfläche abhängt.</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section class="task afb2">
+    <div class="task-head"><h2>Das Riesenrad</h2><span class="afb">AFB <b>II</b> · Zusammenhänge herstellen</span></div>
+    <p>Ein Riesenrad hat einen Durchmesser von $36$ m, seine Achse liegt $20$ m über dem Boden. Für eine Umdrehung braucht es $12$ Minuten. Eine Gondel startet ganz unten am Einstieg. Ihre Höhe über dem Boden wird durch $h(t) = 20 - 18 \cdot \cos\left(\frac{\pi}{6} \cdot t\right)$ beschrieben, $t$ in Minuten, $h(t)$ in Metern.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 300 300" width="300" height="300" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Riesenrad mit 24 Gondeln; die rote Gondel steht unten am Einstieg"><line x1="90" y1="286" x2="150" y2="132" stroke="#0E244E" stroke-width="2" stroke-linecap="round"/><line x1="210" y1="286" x2="150" y2="132" stroke="#0E244E" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="286" x2="280" y2="286" stroke="#0E244E" stroke-width="1.6" stroke-linecap="round"/><circle cx="150" cy="132" r="108" fill="none" stroke="#0E244E" stroke-width="2"/><line x1="150" y1="132" x2="150" y2="240" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="150" cy="240" r="5.4" fill="#B02418" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="177.95" y2="236.32" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="177.95" cy="236.32" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="204" y2="225.53" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="204" cy="225.53" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="226.37" y2="208.37" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="226.37" cy="208.37" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="243.53" y2="186" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="243.53" cy="186" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="254.32" y2="159.95" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="254.32" cy="159.95" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="258" y2="132" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="258" cy="132" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="254.32" y2="104.05" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="254.32" cy="104.05" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="243.53" y2="78" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="243.53" cy="78" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="226.37" y2="55.63" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="226.37" cy="55.63" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="204" y2="38.47" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="204" cy="38.47" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="177.95" y2="27.68" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="177.95" cy="27.68" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="150" y2="24" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="150" cy="24" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="122.05" y2="27.68" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="122.05" cy="27.68" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="96" y2="38.47" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="96" cy="38.47" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="73.63" y2="55.63" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="73.63" cy="55.63" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="56.47" y2="78" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="56.47" cy="78" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="45.68" y2="104.05" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="45.68" cy="104.05" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="42" y2="132" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="42" cy="132" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="45.68" y2="159.95" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="45.68" cy="159.95" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="56.47" y2="186" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="56.47" cy="186" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="73.63" y2="208.37" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="73.63" cy="208.37" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="96" y2="225.53" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="96" cy="225.53" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><line x1="150" y1="132" x2="122.05" y2="236.32" stroke="#6E7E9F" stroke-width="0.7" stroke-linecap="round"/><circle cx="122.05" cy="236.32" r="4.2" fill="#F5C242" stroke="#0E244E" stroke-width="0.8"/><circle cx="150" cy="132" r="4" fill="#0E244E" stroke="#0E244E" stroke-width="0"/><line x1="156" y1="244" x2="208" y2="256" stroke="#B02418" stroke-width="0.9" stroke-linecap="round"/><text x="212" y="260" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#B02418" text-anchor="start">Einstieg</text></svg>
+      <figcaption>Das Riesenrad mit 24 Gondeln. Die rote Gondel startet am Einstieg.</figcaption>
+    </figure>
+    <ol class="parts">
+      <li>Geben Sie die kleinste und die größte Höhe der Gondel sowie die kleinste Periode von $h$ an.</li>
+      <li>Berechnen Sie die Höhe der Gondel zwei Minuten nach dem Start.</li>
+      <li>Ermitteln Sie, wie lange sich die Gondel während einer Umdrehung höher als $29$ m über dem Boden befindet.</li>
+      <li>Am Rad sind $24$ Gondeln in gleichen Abständen befestigt. Berechnen Sie die Länge des Kreisbogens zwischen zwei benachbarten Gondeln und die Zeit, bis nach einer Gondel die nächste den Einstieg erreicht.</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section class="task afb3">
+    <div class="task-head"><h2>Der Tee kühlt ab</h2><span class="afb">AFB <b>III</b> · Reflektieren und Beurteilen</span></div>
+    <p>Frisch aufgebrühter Tee kühlt in einem Raum ab. Seine Temperatur wird durch $T(t) = 20 + 70 \cdot e^{-0{,}08 \cdot t}$ beschrieben, $t$ in Minuten, $T(t)$ in Grad Celsius.</p>
+    <figure class="fig">
+      <svg viewBox="0 0 500 290" width="500" height="290" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Abkuehlkurve des Tees von 90 Grad Celsius auf die Raumtemperatur von 20 Grad Celsius zu"><defs><clipPath id="f3-clip"><rect x="43" y="17" width="408" height="240"/></clipPath><marker id="f3-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="56.69" y1="256" x2="56.69" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="120.12" y1="256" x2="120.12" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="183.56" y1="256" x2="183.56" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="247" y1="256" x2="247" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="310.44" y1="256" x2="310.44" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="373.88" y1="256" x2="373.88" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="437.31" y1="256" x2="437.31" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="256" x2="450" y2="256" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="232.2" x2="450" y2="232.2" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="208.4" x2="450" y2="208.4" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="184.6" x2="450" y2="184.6" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="160.8" x2="450" y2="160.8" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="137" x2="450" y2="137" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="113.2" x2="450" y2="113.2" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="89.4" x2="450" y2="89.4" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="65.6" x2="450" y2="65.6" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="41.8" x2="450" y2="41.8" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="18" x2="450" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="256" x2="450" y2="256" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f3-ar-0E244E)"/><line x1="56.69" y1="256" x2="56.69" y2="18" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f3-ar-0E244E)"/><text x="452" y="272" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">t in min</text><text x="44.69" y="16" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">T in °C</text><text x="49.69" y="271" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="120.12" y1="252.5" x2="120.12" y2="259.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="183.56" y1="252.5" x2="183.56" y2="259.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="247" y1="252.5" x2="247" y2="259.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="310.44" y1="252.5" x2="310.44" y2="259.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="373.88" y1="252.5" x2="373.88" y2="259.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="437.31" y1="252.5" x2="437.31" y2="259.5" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="53.19" y1="208.4" x2="60.19" y2="208.4" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="53.19" y1="160.8" x2="60.19" y2="160.8" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="53.19" y1="113.2" x2="60.19" y2="113.2" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="53.19" y1="65.6" x2="60.19" y2="65.6" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="44" y1="208.4" x2="450" y2="208.4" stroke="#6E7E9F" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="5 4"/><g clip-path="url(#f3-clip)"><path d="M 56.69 41.8 L 58.2 43.38 L 59.71 44.95 L 61.23 46.5 L 62.74 48.04 L 64.25 49.56 L 65.76 51.07 L 67.28 52.56 L 68.79 54.04 L 70.3 55.51 L 71.81 56.96 L 73.33 58.39 L 74.84 59.82 L 76.35 61.23 L 77.87 62.63 L 79.38 64.01 L 80.89 65.38 L 82.4 66.74 L 83.92 68.08 L 85.43 69.42 L 86.94 70.73 L 88.46 72.04 L 89.97 73.34 L 91.48 74.62 L 92.99 75.89 L 94.51 77.15 L 96.02 78.39 L 97.53 79.63 L 99.04 80.85 L 100.56 82.06 L 102.07 83.26 L 103.58 84.45 L 105.1 85.62 L 106.61 86.79 L 108.12 87.94 L 109.63 89.09 L 111.15 90.22 L 112.66 91.34 L 114.17 92.45 L 115.68 93.55 L 117.2 94.64 L 118.71 95.72 L 120.22 96.79 L 121.74 97.85 L 123.25 98.9 L 124.76 99.94 L 126.27 100.97 L 127.79 101.99 L 129.3 103 L 130.81 104 L 132.32 104.99 L 133.84 105.97 L 135.35 106.95 L 136.86 107.91 L 138.38 108.86 L 139.89 109.81 L 141.4 110.74 L 142.91 111.67 L 144.43 112.59 L 145.94 113.5 L 147.45 114.4 L 148.96 115.29 L 150.48 116.18 L 151.99 117.05 L 153.5 117.92 L 155.02 118.78 L 156.53 119.63 L 158.04 120.47 L 159.55 121.31 L 161.07 122.13 L 162.58 122.95 L 164.09 123.76 L 165.6 124.57 L 167.12 125.36 L 168.63 126.15 L 170.14 126.93 L 171.66 127.71 L 173.17 128.47 L 174.68 129.23 L 176.19 129.98 L 177.71 130.73 L 179.22 131.46 L 180.73 132.19 L 182.24 132.92 L 183.76 133.63 L 185.27 134.34 L 186.78 135.05 L 188.3 135.74 L 189.81 136.43 L 191.32 137.12 L 192.83 137.79 L 194.35 138.46 L 195.86 139.13 L 197.37 139.78 L 198.89 140.44 L 200.4 141.08 L 201.91 141.72 L 203.42 142.35 L 204.94 142.98 L 206.45 143.6 L 207.96 144.22 L 209.47 144.83 L 210.99 145.43 L 212.5 146.03 L 214.01 146.62 L 215.53 147.21 L 217.04 147.79 L 218.55 148.36 L 220.06 148.93 L 221.58 149.5 L 223.09 150.06 L 224.6 150.61 L 226.11 151.16 L 227.63 151.7 L 229.14 152.24 L 230.65 152.77 L 232.17 153.3 L 233.68 153.82 L 235.19 154.34 L 236.7 154.86 L 238.22 155.36 L 239.73 155.87 L 241.24 156.37 L 242.75 156.86 L 244.27 157.35 L 245.78 157.83 L 247.29 158.31 L 248.81 158.79 L 250.32 159.26 L 251.83 159.73 L 253.34 160.19 L 254.86 160.65 L 256.37 161.1 L 257.88 161.55 L 259.39 161.99 L 260.91 162.43 L 262.42 162.87 L 263.93 163.3 L 265.45 163.73 L 266.96 164.15 L 268.47 164.57 L 269.98 164.99 L 271.5 165.4 L 273.01 165.81 L 274.52 166.22 L 276.03 166.62 L 277.55 167.01 L 279.06 167.41 L 280.57 167.79 L 282.09 168.18 L 283.6 168.56 L 285.11 168.94 L 286.62 169.31 L 288.14 169.69 L 289.65 170.05 L 291.16 170.42 L 292.68 170.78 L 294.19 171.13 L 295.7 171.49 L 297.21 171.84 L 298.73 172.19 L 300.24 172.53 L 301.75 172.87 L 303.26 173.21 L 304.78 173.54 L 306.29 173.87 L 307.8 174.2 L 309.32 174.53 L 310.83 174.85 L 312.34 175.17 L 313.85 175.48 L 315.37 175.79 L 316.88 176.1 L 318.39 176.41 L 319.9 176.71 L 321.42 177.01 L 322.93 177.31 L 324.44 177.61 L 325.96 177.9 L 327.47 178.19 L 328.98 178.48 L 330.49 178.76 L 332.01 179.04 L 333.52 179.32 L 335.03 179.6 L 336.54 179.87 L 338.06 180.14 L 339.57 180.41 L 341.08 180.67 L 342.6 180.94 L 344.11 181.2 L 345.62 181.46 L 347.13 181.71 L 348.65 181.97 L 350.16 182.22 L 351.67 182.46 L 353.18 182.71 L 354.7 182.96 L 356.21 183.2 L 357.72 183.44 L 359.24 183.67 L 360.75 183.91 L 362.26 184.14 L 363.77 184.37 L 365.29 184.6 L 366.8 184.82 L 368.31 185.05 L 369.82 185.27 L 371.34 185.49 L 372.85 185.71 L 374.36 185.92 L 375.88 186.14 L 377.39 186.35 L 378.9 186.56 L 380.41 186.76 L 381.93 186.97 L 383.44 187.17 L 384.95 187.37 L 386.46 187.57 L 387.98 187.77 L 389.49 187.97 L 391 188.16 L 392.52 188.35 L 394.03 188.54 L 395.54 188.73 L 397.05 188.92 L 398.57 189.1 L 400.08 189.29 L 401.59 189.47 L 403.11 189.65 L 404.62 189.83 L 406.13 190 L 407.64 190.18 L 409.16 190.35 L 410.67 190.52 L 412.18 190.69 L 413.69 190.86 L 415.21 191.03 L 416.72 191.19 L 418.23 191.35 L 419.75 191.52 L 421.26 191.68 L 422.77 191.84 L 424.28 191.99 L 425.8 192.15 L 427.31 192.3 L 428.82 192.46 L 430.33 192.61 L 431.85 192.76 L 433.36 192.9 L 434.87 193.05 L 436.39 193.2 L 437.9 193.34 L 439.41 193.49 L 440.92 193.63 L 442.44 193.77 L 443.95 193.91 L 445.46 194.04 L 446.97 194.18 L 448.49 194.31 L 450 194.45" fill="none" stroke="#B02418" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></g><text x="120.12" y="272" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">5</text><text x="183.56" y="272" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">10</text><text x="247" y="272" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">15</text><text x="310.44" y="272" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">20</text><text x="373.88" y="272" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">25</text><text x="437.31" y="272" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">30</text><text x="49.69" y="212.4" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">20</text><text x="49.69" y="164.8" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">40</text><text x="49.69" y="117.2" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">60</text><text x="49.69" y="69.6" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">80</text><text x="443.66" y="202.4" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">Raumtemperatur</text></svg>
+      <figcaption>Die Abkühlkurve und die Raumtemperatur (gestrichelt).</figcaption>
+    </figure>
+    <ol class="parts">
+      <li>Geben Sie die Anfangstemperatur an und deuten Sie die Zahl $20$ im Sachzusammenhang.</li>
+      <li>Der Tee ist trinkbar, sobald er höchstens $60\ °\mathrm{C}$ warm ist. Berechnen Sie, wie lange man warten muss.</li>
+      <li>Berechnen Sie die mittlere Abkühlung pro Minute in den ersten fünf Minuten und in den fünf Minuten danach. Deuten Sie den Unterschied.</li>
+      <li>Zeigen Sie, dass sich der Unterschied zwischen Tee- und Raumtemperatur in gleichen Zeitabständen immer um denselben Prozentsatz verringert, und geben Sie diesen Prozentsatz pro Minute an.</li>
+    </ol>
+    <button class="solbtn" type="button">Lösung anzeigen</button>
+  </section>
+
+  <section id="sol" hidden>
+    <h2 class="big">Lösungen</h2>
+
+    <div class="sol">
+      <h3>1 · Der Algenteppich</h3>
+      <p><b>a)</b> $A(0) = 4$: Zu Beginn sind es $4\ \mathrm{m}^2$. Der Faktor $1{,}35$ bedeutet ein Wachstum um $35\ \%$ pro Woche.</p>
+      <p><b>b)</b> $A(6) = 4 \cdot 1{,}35^6 \approx 4 \cdot 6{,}05 \approx 24{,}2\ \mathrm{m}^2$.</p>
+      <p><b>c)</b> $4 \cdot 1{,}35^t = 100$ ergibt $1{,}35^t = 25$, also $t = \log_{1{,}35} 25 = \frac{\lg 25}{\lg 1{,}35} \approx 10{,}7$. Im Laufe der elften Woche sind $100\ \mathrm{m}^2$ bedeckt.</p>
+      <p><b>d)</b> Aus $A_0 \cdot 1{,}35^{t} = 2 \cdot A_0$ kürzt sich $A_0$ heraus: $1{,}35^{t} = 2$, also $t = \frac{\lg 2}{\lg 1{,}35} \approx 2{,}3$ Wochen. Die Anfangsfläche kommt in der Gleichung nicht mehr vor, deshalb ist die Verdopplungszeit für jeden Startwert dieselbe.</p>
+      <p class="why">$35\ \%$ Wachstum heißt Faktor $1{,}35$, nicht $0{,}35$. Und beim Logarithmus gehört der Faktor $4$ vorher auf die andere Seite: $\lg(4 \cdot 1{,}35^t)$ ist nicht $t \cdot \lg 5{,}4$.</p>
+    </div>
+
+    <div class="sol">
+      <h3>2 · Das Riesenrad</h3>
+      <p><b>a)</b> Der Kosinus liegt zwischen $-1$ und $1$: kleinste Höhe $20 - 18 = 2$ m (am Einstieg), größte $20 + 18 = 38$ m. Die Periode ist $p = \frac{2\pi}{\pi/6} = 12$ Minuten, eine Umdrehung.</p>
+      <p><b>b)</b> $h(2) = 20 - 18 \cdot \cos\frac{\pi}{3} = 20 - 18 \cdot 0{,}5 = 11$ m.</p>
+      <p><b>c)</b> $20 - 18 \cos\left(\frac{\pi}{6}t\right) = 29$ ergibt $\cos\left(\frac{\pi}{6}t\right) = -\frac{1}{2}$ mit den Lösungen $t = 4$ und $t = 8$ in der ersten Umdrehung. Dazwischen liegt die Gondel höher: $8 - 4 = 4$ Minuten, also ein Drittel der Fahrt.</p>
+      <p><b>d)</b> Umfang $u = \pi \cdot 36 \approx 113{,}1$ m, geteilt durch $24$: $b = \frac{36\pi}{24} = 1{,}5\pi \approx 4{,}71$ m. Für eine Umdrehung braucht das Rad $12$ Minuten, für ein Vierundzwanzigstel davon $\frac{12}{24} = 0{,}5$ Minuten, also $30$ Sekunden.</p>
+      <figure class="fig">
+        <svg viewBox="0 0 500 290" width="500" height="290" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Graph der Hoehe einer Gondel ueber der Zeit, eine Kosinuskurve zwischen 2 m und 38 m mit der Periode 12 Minuten, dazu die Linie in 29 m Hoehe"><defs><clipPath id="f2-clip"><rect x="43" y="17" width="408" height="240"/></clipPath><marker id="f2-ar-0E244E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="#0E244E"/></marker></defs><line x1="61.4" y1="256" x2="61.4" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="90.4" y1="256" x2="90.4" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="119.4" y1="256" x2="119.4" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="148.4" y1="256" x2="148.4" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="177.4" y1="256" x2="177.4" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="206.4" y1="256" x2="206.4" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="235.4" y1="256" x2="235.4" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="264.4" y1="256" x2="264.4" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="293.4" y1="256" x2="293.4" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="322.4" y1="256" x2="322.4" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="351.4" y1="256" x2="351.4" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="380.4" y1="256" x2="380.4" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="409.4" y1="256" x2="409.4" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="438.4" y1="256" x2="438.4" y2="18" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="240.13" x2="450" y2="240.13" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="213.69" x2="450" y2="213.69" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="187.24" x2="450" y2="187.24" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="160.8" x2="450" y2="160.8" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="134.36" x2="450" y2="134.36" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="107.91" x2="450" y2="107.91" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="81.47" x2="450" y2="81.47" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="55.02" x2="450" y2="55.02" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="28.58" x2="450" y2="28.58" stroke="#DCE4F0" stroke-width="1" stroke-linecap="butt"/><line x1="44" y1="240.13" x2="450" y2="240.13" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f2-ar-0E244E)"/><line x1="61.4" y1="256" x2="61.4" y2="18" stroke="#0E244E" stroke-width="1.3" marker-end="url(#f2-ar-0E244E)"/><text x="452" y="256.13" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="start" font-style="italic">t in min</text><text x="49.4" y="16" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="14" fill="#0E244E" text-anchor="end" font-style="italic">h in m</text><text x="54.4" y="255.13" font-family="Cambria Math, Georgia, Times New Roman, serif" font-size="12" fill="#6E7E9F" text-anchor="end" font-style="italic">O</text><line x1="90.4" y1="236.63" x2="90.4" y2="243.63" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="119.4" y1="236.63" x2="119.4" y2="243.63" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="148.4" y1="236.63" x2="148.4" y2="243.63" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="177.4" y1="236.63" x2="177.4" y2="243.63" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="206.4" y1="236.63" x2="206.4" y2="243.63" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="235.4" y1="236.63" x2="235.4" y2="243.63" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="264.4" y1="236.63" x2="264.4" y2="243.63" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="293.4" y1="236.63" x2="293.4" y2="243.63" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="322.4" y1="236.63" x2="322.4" y2="243.63" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="351.4" y1="236.63" x2="351.4" y2="243.63" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="380.4" y1="236.63" x2="380.4" y2="243.63" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="409.4" y1="236.63" x2="409.4" y2="243.63" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="438.4" y1="236.63" x2="438.4" y2="243.63" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="57.9" y1="187.24" x2="64.9" y2="187.24" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="57.9" y1="134.36" x2="64.9" y2="134.36" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="57.9" y1="81.47" x2="64.9" y2="81.47" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="57.9" y1="28.58" x2="64.9" y2="28.58" stroke="#0E244E" stroke-width="1.1" stroke-linecap="round"/><line x1="61.4" y1="86.76" x2="450" y2="86.76" stroke="#799E31" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="5 4"/><g clip-path="url(#f2-clip)"><path d="M 61.4 229.56 L 62.87 229.52 L 64.34 229.42 L 65.82 229.25 L 67.29 229.02 L 68.76 228.72 L 70.23 228.35 L 71.71 227.91 L 73.18 227.41 L 74.65 226.84 L 76.12 226.21 L 77.6 225.51 L 79.07 224.75 L 80.54 223.93 L 82.01 223.04 L 83.48 222.09 L 84.96 221.07 L 86.43 220 L 87.9 218.86 L 89.37 217.67 L 90.85 216.42 L 92.32 215.1 L 93.79 213.73 L 95.26 212.31 L 96.74 210.83 L 98.21 209.3 L 99.68 207.71 L 101.15 206.07 L 102.62 204.38 L 104.1 202.64 L 105.57 200.85 L 107.04 199.02 L 108.51 197.14 L 109.99 195.22 L 111.46 193.25 L 112.93 191.24 L 114.4 189.19 L 115.88 187.1 L 117.35 184.98 L 118.82 182.82 L 120.29 180.62 L 121.76 178.39 L 123.24 176.13 L 124.71 173.85 L 126.18 171.53 L 127.65 169.19 L 129.13 166.82 L 130.6 164.43 L 132.07 162.02 L 133.54 159.59 L 135.02 157.14 L 136.49 154.67 L 137.96 152.19 L 139.43 149.7 L 140.9 147.2 L 142.38 144.69 L 143.85 142.17 L 145.32 139.64 L 146.79 137.12 L 148.27 134.59 L 149.74 132.06 L 151.21 129.53 L 152.68 127 L 154.16 124.48 L 155.63 121.97 L 157.1 119.46 L 158.57 116.97 L 160.04 114.49 L 161.52 112.02 L 162.99 109.57 L 164.46 107.13 L 165.93 104.72 L 167.41 102.32 L 168.88 99.95 L 170.35 97.61 L 171.82 95.28 L 173.3 92.99 L 174.77 90.73 L 176.24 88.49 L 177.71 86.29 L 179.18 84.12 L 180.66 81.99 L 182.13 79.9 L 183.6 77.84 L 185.07 75.83 L 186.55 73.85 L 188.02 71.92 L 189.49 70.03 L 190.96 68.19 L 192.44 66.39 L 193.91 64.64 L 195.38 62.94 L 196.85 61.3 L 198.32 59.7 L 199.8 58.16 L 201.27 56.67 L 202.74 55.23 L 204.21 53.85 L 205.69 52.53 L 207.16 51.27 L 208.63 50.06 L 210.1 48.91 L 211.58 47.83 L 213.05 46.8 L 214.52 45.84 L 215.99 44.94 L 217.46 44.1 L 218.94 43.33 L 220.41 42.62 L 221.88 41.98 L 223.35 41.4 L 224.83 40.89 L 226.3 40.44 L 227.77 40.06 L 229.24 39.74 L 230.72 39.5 L 232.19 39.32 L 233.66 39.2 L 235.13 39.16 L 236.6 39.18 L 238.08 39.27 L 239.55 39.42 L 241.02 39.65 L 242.49 39.94 L 243.97 40.29 L 245.44 40.71 L 246.91 41.2 L 248.38 41.76 L 249.86 42.38 L 251.33 43.07 L 252.8 43.81 L 254.27 44.63 L 255.74 45.51 L 257.22 46.45 L 258.69 47.45 L 260.16 48.51 L 261.63 49.64 L 263.11 50.82 L 264.58 52.06 L 266.05 53.37 L 267.52 54.72 L 269 56.14 L 270.47 57.61 L 271.94 59.13 L 273.41 60.71 L 274.88 62.34 L 276.36 64.02 L 277.83 65.75 L 279.3 67.53 L 280.77 69.35 L 282.25 71.23 L 283.72 73.14 L 285.19 75.1 L 286.66 77.1 L 288.14 79.15 L 289.61 81.23 L 291.08 83.34 L 292.55 85.5 L 294.02 87.69 L 295.5 89.91 L 296.97 92.16 L 298.44 94.45 L 299.91 96.76 L 301.39 99.1 L 302.86 101.46 L 304.33 103.85 L 305.8 106.25 L 307.28 108.68 L 308.75 111.13 L 310.22 113.59 L 311.69 116.07 L 313.16 118.55 L 314.64 121.06 L 316.11 123.57 L 317.58 126.08 L 319.05 128.61 L 320.53 131.14 L 322 133.67 L 323.47 136.2 L 324.94 138.73 L 326.42 141.25 L 327.89 143.77 L 329.36 146.29 L 330.83 148.79 L 332.3 151.29 L 333.78 153.77 L 335.25 156.24 L 336.72 158.7 L 338.19 161.14 L 339.67 163.56 L 341.14 165.95 L 342.61 168.33 L 344.08 170.68 L 345.56 173.01 L 347.03 175.31 L 348.5 177.58 L 349.97 179.81 L 351.44 182.02 L 352.92 184.2 L 354.39 186.33 L 355.86 188.44 L 357.33 190.5 L 358.81 192.52 L 360.28 194.5 L 361.75 196.45 L 363.22 198.34 L 364.7 200.19 L 366.17 202 L 367.64 203.75 L 369.11 205.46 L 370.58 207.12 L 372.06 208.72 L 373.53 210.28 L 375 211.78 L 376.47 213.22 L 377.95 214.61 L 379.42 215.94 L 380.89 217.22 L 382.36 218.44 L 383.84 219.59 L 385.31 220.69 L 386.78 221.73 L 388.25 222.7 L 389.72 223.61 L 391.2 224.46 L 392.67 225.24 L 394.14 225.97 L 395.61 226.62 L 397.09 227.21 L 398.56 227.74 L 400.03 228.2 L 401.5 228.59 L 402.98 228.92 L 404.45 229.18 L 405.92 229.37 L 407.39 229.49 L 408.86 229.55 L 410.34 229.54 L 411.81 229.47 L 413.28 229.32 L 414.75 229.11 L 416.23 228.83 L 417.7 228.49 L 419.17 228.08 L 420.64 227.6 L 422.12 227.06 L 423.59 226.45 L 425.06 225.78 L 426.53 225.04 L 428 224.23 L 429.48 223.37 L 430.95 222.44 L 432.42 221.45 L 433.89 220.4 L 435.37 219.28 L 436.84 218.11 L 438.31 216.88 L 439.78 215.59 L 441.26 214.24 L 442.73 212.83 L 444.2 211.37" fill="none" stroke="#B02418" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></g><text x="90.4" y="256.13" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">1</text><text x="119.4" y="256.13" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">2</text><text x="148.4" y="256.13" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">3</text><text x="177.4" y="256.13" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">4</text><text x="206.4" y="256.13" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">5</text><text x="235.4" y="256.13" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">6</text><text x="264.4" y="256.13" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">7</text><text x="293.4" y="256.13" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">8</text><text x="322.4" y="256.13" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">9</text><text x="351.4" y="256.13" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">10</text><text x="380.4" y="256.13" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">11</text><text x="409.4" y="256.13" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">12</text><text x="438.4" y="256.13" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">13</text><text x="54.4" y="191.24" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">10</text><text x="54.4" y="138.36" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">20</text><text x="54.4" y="85.47" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">30</text><text x="54.4" y="32.58" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#6E7E9F" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">40</text><text x="447.1" y="80.76" font-family="Raleway, system-ui, sans-serif" font-size="11.5" fill="#799E31" text-anchor="end" stroke="#FFFFFF" stroke-width="4" paint-order="stroke" stroke-linejoin="round">29 m</text></svg>
+        <figcaption>Zu c): Oberhalb der grünen Linie ist die Gondel höher als 29 m, von der vierten bis zur achten Minute.</figcaption>
+      </figure>
+      <p class="why">Bei c) liefert der Rechner für $\cos x = -\frac{1}{2}$ nur einen Wert. Den zweiten findet man über die Symmetrie der Kurve zur Stelle $t = 6$ (ganz oben): $6 - 2 = 4$ und $6 + 2 = 8$. Der Graph zeigt es sofort.</p>
+    </div>
+
+    <div class="sol">
+      <h3>3 · Der Tee kühlt ab</h3>
+      <p><b>a)</b> $T(0) = 20 + 70 = 90\ °\mathrm{C}$. Für große $t$ geht $e^{-0{,}08t}$ gegen $0$ und $T(t)$ gegen $20$: Das ist die <b>Raumtemperatur</b>, auf die der Tee zuläuft, ohne sie je ganz zu erreichen.</p>
+      <p><b>b)</b> $20 + 70 e^{-0{,}08t} = 60$ ergibt $e^{-0{,}08t} = \frac{4}{7}$, also $t = \frac{\ln\frac{7}{4}}{0{,}08} \approx 7{,}0$. Nach etwa sieben Minuten ist der Tee trinkbar.</p>
+      <p><b>c)</b> $T(5) \approx 66{,}9\ °\mathrm{C}$ und $T(10) \approx 51{,}5\ °\mathrm{C}$. In den ersten fünf Minuten: $\frac{90 - 66{,}9}{5} \approx 4{,}6$ Grad pro Minute; danach: $\frac{66{,}9 - 51{,}5}{5} \approx 3{,}1$ Grad pro Minute. Der Tee kühlt am Anfang schneller ab, weil der Unterschied zur Umgebung dann am größten ist. Die Abnahme ist also nicht linear.</p>
+      <p><b>d)</b> Der Unterschied ist $T(t) - 20 = 70 \cdot e^{-0{,}08t} = 70 \cdot \left(e^{-0{,}08}\right)^t$. In jeder Minute wird er mit demselben Faktor $e^{-0{,}08} \approx 0{,}923$ multipliziert, er sinkt also jede Minute um etwa $7{,}7\ \%$. Nach rund $8{,}7$ Minuten ist er jeweils halbiert.</p>
+      <p class="why">Exponentiell sinkt hier nicht die Temperatur selbst, sondern ihr <b>Abstand zur Raumtemperatur</b>. Wer $T(t)$ direkt mit einem Faktor pro Minute beschreibt, landet irgendwann bei $0\ °\mathrm{C}$, und das passiert mit Tee in einem warmen Zimmer nicht.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// Formulas: every $...$ in the text is rendered by KaTeX, once the vendor script is in.
+addEventListener('load', () => {
+  if (!window.katex) return;
+  const walker = document.createTreeWalker(document.querySelector('.sheet'), NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes('$')) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.nodeValue.split(/\$([^$]+)\$/);
+    if (parts.length < 3) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const span = document.createElement('span');
+      try { katex.render(part, span, { throwOnError: false, displayMode: false }); }
+      catch (err) { span.textContent = part; }
+      // A formula is an inline-block, so a comma or full stop right after it can wrap
+      // onto the next line all by itself. Keep the two together (Doc, 09.09.2026).
+      const next = parts[i + 1];
+      const tail = next && /^[.,;:!?)\]]/.test(next) ? next[0] : '';
+      if (tail) {
+        parts[i + 1] = next.slice(1);
+        const keep = document.createElement('span');
+        keep.className = 'nowrap';
+        keep.appendChild(span);
+        keep.appendChild(document.createTextNode(tail));
+        frag.appendChild(keep);
+        return;
+      }
+      frag.appendChild(span);
+    });
+    node.parentNode.replaceChild(frag, node);
+  });
+});
+
+// Solutions stay hidden until asked - in print they are always on, on their own page.
+const sol = document.getElementById('sol'), toggle = document.getElementById('toggle');
+toggle.onclick = () => {
+  sol.hidden = !sol.hidden;
+  toggle.textContent = sol.hidden ? 'Lösungen anzeigen' : 'Lösungen verbergen';
+  if (!sol.hidden) sol.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+// Per task its own solution, right under the task (Doc, 07.09.2026). The block
+// is copied from the solutions section on first click - after KaTeX has run, so
+// the formulas come along rendered. The original stays where it is: the
+// solutions page in print and the big toggle above keep working unchanged.
+document.querySelectorAll('.task .solbtn').forEach((btn, i) => {
+  let box = null;
+  btn.onclick = () => {
+    if (!box) {
+      const src = document.querySelectorAll('#sol .sol')[i];
+      if (!src) return;
+      box = src.cloneNode(true);
+      box.className = 'sol solinline';
+      box.hidden = true;
+      btn.after(box);
+    }
+    box.hidden = !box.hidden;
+    btn.textContent = box.hidden ? 'Lösung anzeigen' : 'Lösung verbergen';
+  };
+});
+</script>
+</body>
+</html>
