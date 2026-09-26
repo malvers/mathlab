@@ -192,7 +192,7 @@
                 linear-gradient(to right, transparent 31px, rgba(31, 64, 150, 0.13) 31px);
             background-size: 32px 32px;
         }
-        #canvas-container.hell :is(#tafel-pfeil-vor, #tafel-pfeil-zurueck, #hoch-pfeil, #zl-play) {
+        #canvas-container.hell :is(#tafel-pfeil-vor, #tafel-pfeil-zurueck, #zl-play) {
             color: #5d6678 !important;
         }
         #canvas-container.hell #zeitleiste .zl-spur { background: rgba(31, 64, 150, 0.18); }
@@ -208,7 +208,7 @@
             content: ''; position: fixed; inset: 0; z-index: 999;
             background: var(--anzeige-grund, #050d1c);
         }
-        body.anzeige :is(#cyber-left-chrome, #mini-rail, #side-panel, #right-rail, #tafel-pfeil-vor, #tafel-pfeil-zurueck, #hoch-pfeil,
+        body.anzeige :is(#cyber-left-chrome, #mini-rail, #side-panel, #right-rail, #tafel-pfeil-vor, #tafel-pfeil-zurueck, #formel-schicht, #erkennen-klein,
             [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play) {
             display: none !important;
         }
@@ -223,6 +223,18 @@
         body.anzeige #canvas-container {
             position: fixed !important; left: 0 !important; top: 0 !important;
             transform-origin: 0 0; z-index: 1000;
+        }
+
+        /* Doc, 26.09.: "mach in der unteren Zeile dann doch den Erkennen-Button" -
+           small, bottom centre, until the recognised line takes its place */
+        #erkennen-klein {
+            position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); z-index: 5;
+            padding: 6px 18px; border-radius: 6px; cursor: pointer; touch-action: manipulation;
+            font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 0.12em;
+            color: #eaf0f7; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(0, 210, 255, 0.35);
+        }
+        #canvas-container.hell #erkennen-klein {
+            color: #5d6678; background: transparent; border-color: rgba(31, 64, 150, 0.35);
         }
 
         .erk-ok { color: rgb(121, 158, 49); }
@@ -717,7 +729,7 @@
             if (anzeigeModus) return;
             zeigeZeitleiste();
             zeigeWerkzeuge();
-            hochPfeilFarbe();
+            erkennenKlein();
             zeigeSatz();
             const rect = container.getBoundingClientRect();
             ctx.clearRect(0, 0, rect.width, rect.height);
@@ -899,6 +911,52 @@
             return { zuordnung, nachjustiert };
         }
 
+        // Gemini's reading is cleaned before it is used. Doc, 26.09.: "Ein rund-
+        // oder ungefähr-Zeichen müssen wir immer in ein Gleichheitszeichen
+        // umbauen" (an unsplit "≈" also threw the row out of the "=" column), and
+        // "macht er manchmal aus Kleinbuchstaben, besonders bei x, ein großes X -
+        // können wir die Konsistenz checken?": a letter the task and the working
+        // know only in the other case takes that case (with "A" and "a" both in
+        // use, as in the trapezium, nothing changes).
+        const UNGEFAEHR = /\\(?:approx|thickapprox|simeq|cong|sim)(?![a-zA-Z])|[≈≃≅∼]/g;
+        const TEXT_BEFEHL = /^\\(?:text|textrm|mathrm|operatorname)$/;
+        // the letters of a formula - command names and \text{...} left out
+        function buchstaben(latex) {
+            return latex.replace(/\\(?:text|textrm|mathrm|operatorname)\s*\{[^}]*\}/g, ' ')
+                .replace(/\\[a-zA-Z]+/g, ' ').split('').filter(c => /[a-zA-Z]/.test(c));
+        }
+        function bereinige(latex) {
+            const s = latex.replace(UNGEFAEHR, '=');
+            const kontext = new Set();
+            if (aufgabenModus) {
+                buchstaben(AUFGABEN[aufgabeIdx][1]).forEach(c => kontext.add(c));
+                kontext.add(AUFGABEN[aufgabeIdx][2]);
+            }
+            rechenweg.forEach(e => buchstaben(e.latex).forEach(c => kontext.add(c)));
+            let out = '', i = 0;
+            while (i < s.length) {
+                if (s[i] === '\\') {
+                    const m = /^\\([a-zA-Z]+|.)/.exec(s.slice(i));
+                    const befehl = m ? m[0] : '\\';
+                    let n = befehl.length;
+                    if (TEXT_BEFEHL.test(befehl)) {
+                        const gruppe = /^\s*\{[^}]*\}/.exec(s.slice(i + n));
+                        if (gruppe) n += gruppe[0].length;
+                    }
+                    out += s.slice(i, i + n);
+                    i += n;
+                    continue;
+                }
+                const c = s[i];
+                if (/[a-zA-Z]/.test(c)) {
+                    const andere = c === c.toLowerCase() ? c.toUpperCase() : c.toLowerCase();
+                    out += (!kontext.has(c) && kontext.has(andere)) ? andere : c;
+                } else out += c;
+                i++;
+            }
+            return out;
+        }
+
         async function erkennen() {
             if (erkennenLaeuft) return;
             if (!analysis.lines.length) { setErgebnisText('Erst etwas schreiben.'); return; }
@@ -919,11 +977,12 @@
                     } else if (!r.latex || /^\(?\s*(empty|leer)\s*\)?$/i.test(r.latex)) {
                         zeilenErgebnis[line.lineIdx] = { fehler: 'nichts erkannt' };
                     } else {
-                        const { atome, svg, satz } = await formelAufZeile(r.latex, line);
+                        const latex = bereinige(r.latex);
+                        const { atome, svg, satz } = await formelAufZeile(latex, line);
                         if (stand !== erkennenStand) return;
                         const { zuordnung, nachjustiert } = ordneZeile(line, atome);
                         zeilenErgebnis[line.lineIdx] = {
-                            latex: r.latex, tokens: r.tokens, atome, ms: r.ms, zuordnung, svg, nachjustiert, satz,
+                            latex, tokens: r.tokens, atome, ms: r.ms, zuordnung, svg, nachjustiert, satz,
                         };
                         // Doc's plan B: the row crumbles to one dust cloud and
                         // settles into the formula (js/staub-morph.js) - each
@@ -948,9 +1007,9 @@
             }
             // Straight into the morph - with the button gone there is nothing
             // left to press, and Doc wanted it to happen by itself anyway.
-            // Doc, 26.09.: "Wenn die Erkennung fertig ist mach es grün (noch nix
-            // weiter)" - outside "Beispiele" the up triangle turns green and the
-            // ink waits; it morphs on its way up (rechenwegHoch)
+            // Doc, 26.09.: "Wenn die Erkennung fertig ist ... noch nix weiter" -
+            // outside "Beispiele" the recognised line shows at the bottom and the
+            // ink waits; a tap on that line sends it up, morphing on the way
             if (testModus && morphVorbereitet.some(Boolean)) morphen(1);
             redraw();
             // Every ERKENNEN is a probe for the corpus, good or bad.
@@ -971,17 +1030,35 @@
                 container.appendChild(host);
             }
             host.innerHTML = '';
-            // without the film strip (only in "Beispiele") the formula sits at the bottom edge
-            host.style.bottom = (testModus ? ZEITLEISTE_H : 0) + 'px';
+            // above the film strip in "Beispiele"; in class at the bottom edge -
+            // Doc, 26.09.: "zeige unten nur, was Google erkannt hat, sozusagen als
+            // Zeile ... tippt drauf, wusch, geht's hoch"
+            host.style.bottom = (testModus ? ZEITLEISTE_H : 8) + 'px';
+            host.style.minHeight = testModus ? '84px' : '0';
+            host.style.justifyContent = testModus ? 'center' : 'flex-end';
             if (!view.formelUnten) return;
             analysis.lines.forEach(line => {
                 const erg = zeilenErgebnis[line.lineIdx];
                 if (!erg || !erg.latex || !line.bbox) return;
                 const d = document.createElement('div');
-                // a shade darker than the ink, as large as the template on top
-                d.style.cssText = `color:${hell ? '#7a8294' : '#9aa5b5'};font-size:2.4rem`;
+                // a shade darker than the ink, as large as the template on top; in
+                // class green - Doc: "wenn die Formel da ist ... die Formel in grün"
+                d.style.cssText = `color:${testModus ? (hell ? '#7a8294' : '#9aa5b5') : 'rgb(121, 158, 49)'};font-size:2.4rem`;
                 try { katex.render(alsDisplay(erg.latex), d, { throwOnError: false, displayMode: false }); }
                 catch (e) { d.textContent = erg.latex; }
+                if (!testModus) {
+                    // a tap (not a stroke) sends the page up, as the two-finger swipe does
+                    d.style.pointerEvents = 'auto';
+                    d.style.cursor = 'pointer';
+                    d.style.touchAction = 'manipulation';
+                    d.title = 'Tippen: hochschicken';
+                    let tipp0 = null;
+                    d.addEventListener('pointerdown', ev => { tipp0 = { x: ev.clientX, y: ev.clientY }; });
+                    d.addEventListener('pointerup', ev => {
+                        if (tipp0 && Math.hypot(ev.clientX - tipp0.x, ev.clientY - tipp0.y) < 12) rechenwegHoch();
+                        tipp0 = null;
+                    });
+                }
                 host.appendChild(d);
                 passeEin(d, host.clientWidth - 48);
             });
@@ -1339,7 +1416,7 @@
                 zeilen.push({ links: zelle(l, schritt, verborgen, farbe), rechts: zelle(r, schritt, verborgen, farbe) });
             };
             if (aufgabenModus) zeile(AUFGABEN[aufgabeIdx][1], 'aufgabe', false);
-            rechenweg.forEach((e, i) => zeile(e.latex, i, (verborgenAb !== undefined && i >= verborgenAb) || imFlug.has(i), e.farbe));
+            rechenweg.forEach((e, i) => zeile(e.latex.replace(UNGEFAEHR, '='), i, (verborgenAb !== undefined && i >= verborgenAb) || imFlug.has(i), e.farbe));
             // width, and how far each cell reaches above and below its baseline
             const mass = d => {
                 const r = d.getBoundingClientRect(), b = d.lastChild.getBoundingClientRect();
@@ -1506,7 +1583,7 @@
                     const r = await FormelErkennen.erkenneZeile(f.striche, line.symbols.flatMap(sy => sy.strokeIdxs),
                         { model: modelEl ? modelEl.value : 'gemini-2.5-flash' });
                     if (!r.ok || !r.latex || /^\(?\s*(empty|leer)\s*\)?$/i.test(r.latex)) throw new Error(r.error || 'nichts erkannt');
-                    latex = r.latex;
+                    latex = bereinige(r.latex);
                 }
                 if (stand !== flugStand) return;
                 const { atome, satz } = await formelAufZeile(latex, line);
@@ -1553,9 +1630,9 @@
             // a line not typeset yet takes off at once and morphs on the way
             // (starteFluege); so does everything while earlier flights are
             // still up, or the steps would overtake each other
-            // ("Wenn ich dann zwei Finger oder Dreieck, soll die Handschrift hochfliegen
-            // und im Flug sich verwandeln" - only a line already typeset in place,
-            // as in "Beispiele", flies as KaTeX)
+            // ("zwei Finger oder ... soll die Handschrift hochfliegen und im Flug sich
+            // verwandeln", a tap on the recognised line too - only a line already
+            // typeset in place, as in "Beispiele", flies as KaTeX)
             const fertig = morphT >= 1 && zeilen.every(l => zeilenErgebnis[l.lineIdx] && zeilenErgebnis[l.lineIdx].latex && zeilenErgebnis[l.lineIdx].satz);
             if (!fertig || fluege.length) { starteFluege(zeilen); return; }
             if (morphT < 1) setzeMorph(1);
@@ -1633,40 +1710,31 @@
         // Doc: "auf der rechten Seite im großen Panel links und rechts ein
         // Dreieck", then "in die Mitte. Y" - the panel's back and forth on the
         // board itself, at the left and right edge, halfway down
-        // Doc, 26.09.: "gib mir im Karofeld oben ein Dreieck nach oben" - grey,
-        // green once the page is recognised; a tap sends the ink up like the
-        // two-finger swipe
-        function zeigeHochPfeil() {
-            let b = document.getElementById('hoch-pfeil');
-            if (!b) {
-                b = document.createElement('button');
-                b.id = 'hoch-pfeil';
-                b.type = 'button';
-                b.title = 'Hochschicken';
-                b.setAttribute('aria-label', 'Hochschicken');
-                b.style.cssText = 'position:absolute;left:50%;transform:translateX(-50%);width:96px;height:52px;padding:0;' +
-                    'border:none;background:transparent;color:#8a93a3;cursor:pointer;touch-action:manipulation;z-index:5;' +
-                    'display:flex;align-items:center;justify-content:center';
-                b.innerHTML = '<svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18 L12 6 L20 18 Z" fill="currentColor"/></svg>';
-                b.addEventListener('click', () => rechenwegHoch());
-                container.appendChild(b);
-            }
-            b.style.top = (papierGrenze(container.getBoundingClientRect().height) + 6) + 'px';
-            hochPfeilFarbe();
-        }
-        // green = every line on the page is recognised; the paper's grey rule
-        // has !important, so the green needs it too
-        function hochPfeilFarbe() {
-            const b = document.getElementById('hoch-pfeil');
-            if (!b) return;
+        // Bottom centre in class (Aufgaben, Frei): the small ERKENNEN until the
+        // page is recognised, then the recognised line in its place - a tap on
+        // that line is GO (zeigeFormeln). Doc: "wenn da noch nichts steht, kann
+        // ich auch nicht abschicken ... mach dann doch den Erkennen-Button"
+        function seiteErkannt() {
             const zeilen = analysis.lines.filter(l => !zuKlein(l));
-            const bereit = zeilen.length > 0 && zeilen.every(l => zeilenErgebnis[l.lineIdx] && zeilenErgebnis[l.lineIdx].latex);
-            if (bereit) b.style.setProperty('color', 'rgb(121, 158, 49)', 'important');
-            else b.style.removeProperty('color');
-            b.style.opacity = zeilen.length ? '1' : '0.35';
+            return zeilen.length > 0 && zeilen.every(l => zeilenErgebnis[l.lineIdx] && zeilenErgebnis[l.lineIdx].latex);
+        }
+        function erkennenKlein() {
+            let k = document.getElementById('erkennen-klein');
+            if (!k) {
+                k = document.createElement('button');
+                k.id = 'erkennen-klein';
+                k.type = 'button';
+                k.textContent = 'ERKENNEN';
+                k.title = 'Erkennen';
+                k.addEventListener('click', () => erkennen());
+                container.appendChild(k);
+            }
+            k.style.display = (testModus || seiteErkannt()) ? 'none' : '';
+            // pale on an empty page and while Gemini reads
+            k.style.opacity = (!analysis.lines.some(l => !zuKlein(l)) || erkennenLaeuft) ? '0.4' : '';
         }
         function zeigeTafelPfeile() {
-            zeigeHochPfeil();
+            erkennenKlein();
             const da = document.querySelectorAll('[id^="tafel-pfeil-"]');
             if (da.length) {
                 // Doc, 26.09.: "bring die vor/zurück Pfeile runter in den Karobereich" -
@@ -1704,7 +1772,9 @@
         // line's flight as a twin. Controls never reach the beamer. Closing
         // mission control brings this window back.
         let steuerFenster = null, anzeigeFrame = null, buehne = { w: 0, h: 0 };
-        const SPIEGEL_SCHICHTEN = ['papier', 'vorlage-schicht', 'rechenweg-schicht', 'satz-schicht', 'formel-schicht'];
+        // not 'formel-schicht': the recognised line is Doc's GO, the class sees
+        // only the ink fly up and turn into LaTeX
+        const SPIEGEL_SCHICHTEN = ['papier', 'vorlage-schicht', 'rechenweg-schicht', 'satz-schicht'];
         const spiegelCache = {};
         function anzeigeLaeuft() { return anzeigeModus; }
         function anzeigeZiel() {
