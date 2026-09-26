@@ -1154,6 +1154,7 @@
             strokes.forEach((s, i) => { if (!istNotiz(s)) nr.push(i); });
             analysis = StrokeSymbols.analyse(nr.map(i => strokes[i]), opts);
             if (nr.length !== strokes.length) analysis.symbols.forEach(sy => { sy.strokeIdxs = sy.strokeIdxs.map(k => nr[k]); });
+            if (aufgabenModus && naechsterSchritt()) alsEineZeile(analysis);
             const nk = document.getElementById('notiz-leeren');
             if (nk) nk.style.opacity = nr.length < strokes.length ? '' : '0.35';     // no notes: dimmed
             const sk = document.getElementById('seite-leeren');
@@ -2674,6 +2675,7 @@
             const stand = flugStand;
             try {
                 const ana = StrokeSymbols.analyse(f.striche, opts);
+                if (aufgabenModus) alsEineZeile(ana, true);     // in class the flight is one step, as its row was
                 if (ana.lines.length !== 1) throw new Error('keine einzelne Zeile');
                 const line = ana.lines[0];
                 let latex = f.latex;
@@ -2933,15 +2935,36 @@
             if (atome.length !== line.symbols.length || !lagePasst(line.symbols, atome)) return false;
             return line.symbols.every((sy, i) => symbolKlasse(sy, striche) === glyphKlasse(atome[i]));
         }
+        // In class one tap is one step (the next one of the solution lands, see below): what the
+        // analysis cut into several rows - a fraction it did not see as one, an exponent or a
+        // correction too far off - is taken as ONE row, or one tap would use up two steps.
+        // Crumbs (zuKlein) stay rows of their own and stay on the page, as before - except in
+        // a flight (alle): every stroke there belongs to the one row that took off.
+        function alsEineZeile(a, alle = false) {
+            const echt = alle ? a.lines : a.lines.filter(l => !zuKlein(l));
+            if (echt.length < 2) return;
+            const idx = echt[0].lineIdx;
+            // the analysis' own reading order: a fraction that fell apart overlaps in x
+            const syms = StrokeSymbols.leseReihenfolge(echt.flatMap(l => l.symbols), a.lineHeight,
+                Object.assign({}, StrokeSymbols.DEFAULTS, opts));
+            syms.forEach((s, i) => { s.lineIdx = idx; s.readIdx = i; });
+            const zeile = { lineIdx: idx, symbols: syms, tEnd: Math.max(...echt.map(l => l.tEnd)),
+                bbox: syms.reduce((acc, s) => acc ? StrokeSymbols.bboxUnion(acc, s.bbox) : s.bbox, null) };
+            a.lines = (alle ? [] : a.lines.filter(l => zuKlein(l))).concat([zeile]).sort((p, q) => p.lineIdx - q.lineIdx);
+        }
+        // Doc, 26.09. night, after Gemini had set hats on every T of "c1 m1 T1 - c1 m1 TM = ..."
+        // and read TM as T_mu: "ich versuche das ordentlich abzuschreiben, dass da keine Fehler
+        // passieren. Aber schickt das direkt rüber" - in class the next step of the solution
+        // lands, whatever the ink says; Gemini reads only when no step is left. The fit test
+        // above (passtZuSchritt: count, place, signs) is parked, not deleted.
         async function erwarteterSchritt(line, striche = strokes, ab = null) {
             const loesung = aufgabenModus && LOESUNGEN[AUFGABEN[aufgabeIdx][0]];
             if (!loesung || !line.symbols.length) return null;
-            for (let j = ab !== null ? ab : naechsterIndex(loesung); j < loesung.length; j++) {
-                const latex = loesung[j][0];
-                const { atome, svg, satz } = await formelAufZeile(latex, line);
-                if (passtZuSchritt(line, atome, striche)) return { latex, atome, svg, satz, j };
-            }
-            return null;
+            const j = ab !== null ? ab : naechsterIndex(loesung);
+            if (j >= loesung.length) return null;
+            const latex = loesung[j][0];
+            const { atome, svg, satz } = await formelAufZeile(latex, line);
+            return { latex, atome, svg, satz, j };
         }
         function zeigeHinweis() {
             if (anzeigeModus) return;
