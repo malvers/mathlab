@@ -1101,6 +1101,9 @@
             if (ek) {
                 if (modus === 'frei') ek.style.removeProperty('display');
                 else ek.style.setProperty('display', 'none', 'important');
+                // with LEEREN gone ERKENNEN is the card's only button - no empty box
+                const karte = ek.closest('.instrument-card');
+                if (karte) karte.style.display = modus === 'frei' ? '' : 'none';
             }
             // frei: nothing up there, the board is Doc's
             if (modus === 'frei') {
@@ -1816,7 +1819,8 @@
             // calibrating.
             CyberUI.createCard('ui-container', '', `
                 <div class="gross-row">
-                    <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="clearAll()">LEEREN</button>
+                    <!-- Doc, 26.09.: "LEEREN butt weg! links" - the C on the board does it
+                    <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="clearAll()">LEEREN</button> -->
                     <!-- Doc, 25.09.: "nimm den SICHERN unter Kommentar" - ERKENNEN saves every probe anyway
                     <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="exportStrokes()">SICHERN</button> -->
                     <button id="knopf-erkennen" class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="erkennen()">ERKENNEN</button>
