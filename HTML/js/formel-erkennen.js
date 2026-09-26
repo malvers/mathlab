@@ -22,6 +22,10 @@
 
     // Same wording as equationocr.html: visible ink only, in reading order, and
     // explicitly no bounding boxes - we do not want them and would not trust them.
+    // Plus, since 26.09.2026 (Doc: "wenn ich Zahlen explizit durchgestrichen habe,
+    // dass wir die bei der Erkennung rauslassen"): crossed-out glyphs are cancelled.
+    // Tested on Doc's own line (x/2 + x/3 times 6, cancelled: read "3x+2x") and on
+    // the corpus (55 probes, none lost a glyph).
     const PROMPT =
         'This image shows a single printed or handwritten mathematical equation.\n\n' +
         'Return strict JSON, no markdown, no commentary:\n' +
@@ -34,6 +38,9 @@
         '- Example: "E=mc^2" → tokens = ["E", "=", "m", "c", "2"].\n' +
         '- Example: "\\\\sqrt{x}+1" → tokens = ["\\\\sqrt", "x", "+", "1"].\n' +
         '- No bounding boxes. Just the labels.\n' +
+        '- CANCELLED GLYPHS: a digit or letter with a long slanted line drawn THROUGH it (the line usually sticks out beyond the glyph, as when cancelling a fraction) is cancelled. It does NOT count: never write it, not in latex and not in tokens.\n' +
+        '- This also holds for a crossed-out numerator or denominator: then that part of the fraction is empty, and a fraction with a cancelled denominator is just its numerator (drop the fraction bar).\n' +
+        '- Example: y over a crossed-out 4, then + 1 → latex "y+1" (not \\\\frac{y}{4}).\n' +
         '- If empty/unreadable: { "latex": "(empty)", "tokens": [] }';
 
     // Render just the ink of these strokes, black on white, with a margin. The

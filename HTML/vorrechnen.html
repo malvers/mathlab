@@ -224,7 +224,7 @@
             background: var(--anzeige-grund, #050d1c);
         }
         body.anzeige :is(#cyber-left-chrome, #mini-rail, #side-panel, #right-rail, #tafel-pfeil-vor, #tafel-pfeil-zurueck, #formel-schicht, #erkennen-klein,
-            #schritt-hinweis, #schritt-op, #notiz-rand, #notiz-leeren, #seite-leeren, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play) {
+            #schritt-hinweis, #schritt-op, #notiz-rand, #notiz-leeren, #seite-leeren, #radierer, #radier-rahmen, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play) {
             display: none !important;
         }
         /* Doc, 26.09.: "nimm bitte HIER das LOCAL rechts oben nach links unten
@@ -266,7 +266,7 @@
            --knopf scales both when the margin is narrow (erkennenKlein) */
         /* Doc, 26.09.: the notes' C "im gleichen Stil wie Erkennen, auch die
            Buchstabengröße und Font" - one look for both buttons in the margin */
-        :is(#erkennen-klein, #notiz-leeren, #seite-leeren) {
+        :is(#erkennen-klein, #notiz-leeren, #seite-leeren, #radierer) {
             position: absolute; z-index: 5;
             display: flex; align-items: center; justify-content: center; box-sizing: border-box;
             bottom: 12px; height: calc(46px * var(--knopf, 1)); border-radius: 8px; cursor: pointer; touch-action: manipulation;
@@ -276,7 +276,7 @@
             background: linear-gradient(rgba(0, 210, 255, 0.14), rgba(0, 210, 255, 0.14)) #07162f;
             box-shadow: 0 0 14px rgba(0, 210, 255, 0.35);
         }
-        #canvas-container.hell :is(#erkennen-klein, #notiz-leeren, #seite-leeren) {
+        #canvas-container.hell :is(#erkennen-klein, #notiz-leeren, #seite-leeren, #radierer) {
             color: rgb(31, 64, 150); border-color: rgba(31, 64, 150, 0.85);
             background: linear-gradient(rgba(31, 64, 150, 0.08), rgba(31, 64, 150, 0.08)) #f4ecd8;
             box-shadow: none;
@@ -332,6 +332,17 @@
            (Doc, 26.09.: "in dem Feld, wo ich die Formel schreibe, links neben die
            gestrichelte Linie"); right set by zeigeNotizRand */
         #seite-leeren { width: calc(46px * var(--knopf, 1)); padding: 0; letter-spacing: 0; }
+        /* the eraser: bottom centre of the writing field, lit while it rubs; its frame
+           is one square of the paper (Doc, 26.09.) */
+        #radierer { width: calc(46px * var(--knopf, 1)); padding: 0; transform: translateX(-50%); }
+        #radierer svg { width: calc(24px * var(--knopf, 1)); height: calc(24px * var(--knopf, 1)); }
+        #radierer.an { background: linear-gradient(rgba(0, 210, 255, 0.4), rgba(0, 210, 255, 0.4)) #07162f; box-shadow: 0 0 20px rgba(0, 210, 255, 0.75); }
+        #canvas-container.hell #radierer.an { background: linear-gradient(rgba(31, 64, 150, 0.25), rgba(31, 64, 150, 0.25)) #f4ecd8; }
+        #radier-rahmen {
+            position: absolute; z-index: 6; pointer-events: none; box-sizing: border-box;
+            border: 2px solid rgba(0, 210, 255, 0.9); border-radius: 3px; background: rgba(0, 210, 255, 0.08);
+        }
+        #canvas-container.hell #radier-rahmen { border-color: rgba(31, 64, 150, 0.85); background: rgba(31, 64, 150, 0.06); }
         /* Doc, 26.09.: "bitte keine selects" - the board's own buttons (◀ ▶, ERKENNEN,
            PLAY) are tapped, never tabbed through: no focus ring after a key press */
         #canvas-container button:focus { outline: none; }
@@ -341,22 +352,35 @@
         .erk-fehler { color: rgb(176, 36, 24); }
         .erk-info { opacity: 0.6; font-size: 0.8rem; }
 
-        /* Doc, 26.09.: all tasks in one panel (central modal, the grid is the lab's) */
+        /* Doc, 26.09.: all tasks in one panel (central modal, the grid is the lab's); night:
+           flatter tiles, no heading, no "nach x", a small cross, light on sand with ink */
         #aufgaben-overlay { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+        #aufgaben-overlay .cyber-modal { padding: 52px 24px 24px; }          /* room for the cross */
         #aufgaben-overlay .aufgaben-liste {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;
         }
         #aufgaben-overlay .aufgabe-karte {
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 8px;
-            min-height: 150px; padding: 14px 12px 12px; box-sizing: border-box; cursor: pointer; touch-action: manipulation;
-            color: #eaf0f7; background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.25); border-radius: 12px;
+            position: relative; display: flex; align-items: center; justify-content: center;
+            min-height: 84px; padding: 16px 10px 10px; box-sizing: border-box; cursor: pointer; touch-action: manipulation;
+            color: #eaf0f7; background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.25); border-radius: 10px;
         }
         #aufgaben-overlay .aufgabe-karte:focus { outline: none; }
         #aufgaben-overlay .aufgabe-karte.aktuell { border-color: #00d2ff; box-shadow: 0 0 16px rgba(0, 210, 255, 0.45); }
-        #aufgaben-overlay :is(.ak-nr, .ak-nach) {
-            font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 0.1em; color: #8a93a3;
+        #aufgaben-overlay .ak-nr {
+            position: absolute; top: 6px; left: 10px;
+            font-family: 'Orbitron', sans-serif; font-size: 0.72rem; letter-spacing: 0.08em; color: #8a93a3;
         }
-        #aufgaben-overlay .ak-formel { font-size: 1.35rem; white-space: nowrap; }
+        #aufgaben-overlay .ak-formel { font-size: 1.3rem; white-space: nowrap; }
+        /* light: sand and royal blue ink, like the board */
+        #aufgaben-overlay.hell { background: rgba(244, 236, 216, 0.72); }
+        #aufgaben-overlay.hell .cyber-modal {
+            background: #f4ecd8; color: rgb(31, 64, 150); border-color: rgba(31, 64, 150, 0.45);
+            box-shadow: 0 25px 60px rgba(31, 64, 150, 0.22);
+        }
+        #aufgaben-overlay.hell .aufgabe-karte { color: rgb(31, 64, 150); background: rgba(31, 64, 150, 0.05); border-color: rgba(31, 64, 150, 0.25); }
+        #aufgaben-overlay.hell .aufgabe-karte.aktuell { border-color: rgb(31, 64, 150); box-shadow: 0 0 14px rgba(31, 64, 150, 0.35); }
+        #aufgaben-overlay.hell .ak-nr { color: #5d6678; }
+        #aufgaben-overlay.hell .cyber-modal-x { color: rgba(31, 64, 150, 0.7); border-color: rgba(31, 64, 150, 0.3); }
     </style>
 </head>
 
@@ -595,6 +619,11 @@
             'pendel':          [['T^2=4\\pi^2\\cdot\\frac{l}{g}', '\\text{quadrieren}'], ['T^2\\cdot g=4\\pi^2 l', '\\cdot g'], ['g=\\frac{4\\pi^2 l}{T^2}', ':T^2']],
             'linse':           [['\\frac{1}{f}-\\frac{1}{g}=\\frac{1}{b}', '-\\frac{1}{g}'], ['\\frac{g-f}{fg}=\\frac{1}{b}', '\\text{Hauptnenner}'], ['b=\\frac{fg}{g-f}', '\\text{Kehrwert}']],
         };
+        // Doc, 26.09.: "einen Button mit P der bedeutet Preview und der soll die grauen
+        // Vorhersagen ... wegbringen. Und also Toggle" - the grey step and its operation
+        // on or off (P on the right rail), remembered
+        let vorschau = true;
+        try { vorschau = localStorage.getItem('vorrechnen-vorschau') !== '0'; } catch (_) {}
         let aufgabeIdx = 0;
         try { aufgabeIdx = Math.min(AUFGABEN.length - 1, parseInt(localStorage.getItem('vorrechnen-aufgabe') || '0', 10) || 0); } catch (_) {}
         // Does the server take probes? Checked once at load; otherwise the probe
@@ -729,6 +758,15 @@
             // a nuisance, losing the stroke is not acceptable.
             try { canvas.setPointerCapture(ev.pointerId); } catch (_) {}
             const p = canvasPos(ev);
+            if (radieren) {
+                if (radierId !== null && ev.pointerId !== radierId) return;
+                radierId = ev.pointerId;
+                radierGeaendert = false;
+                radiere(p);
+                zeigeRadierer(p);
+                ev.preventDefault();
+                return;
+            }
             // Pressure widens the line a little where the tablet reports it.
             const w = 2.5 + (ev.pressure > 0 ? ev.pressure * 2.5 : 1.2);
             current = { points: [p], width: w, pointerType: ev.pointerType, farbe: stiftFarbe };
@@ -749,9 +787,112 @@
             zeichenFrame = requestAnimationFrame(() => { zeichenFrame = null; redraw(); });
         }
 
+        // Doc, 26.09.: "Gib mir bitte unten in dem Formelfeld in der Mitte ein
+        // Radiergummi, der etwa so groß ist wie so ein Kästchen" - a square of one
+        // square of the paper: every piece of ink that runs through it goes (a stroke
+        // is cut there, the rest stays). One wipe is one undo step. A colour in the
+        // rail takes the pen again.
+        let radieren = false, radierId = null, radierGeaendert = false;
+        function radierKasten(p) {
+            const h = ZEILE / 4;
+            return { x0: p.x - h, x1: p.x + h, y0: p.y - h, y1: p.y + h };
+        }
+        // where the segment a-b runs through the box: its entry and exit as fractions
+        // of the way from a to b, or null (Liang-Barsky)
+        function imKasten(a, b, k) {
+            let t0 = 0, t1 = 1;
+            const dx = b.x - a.x, dy = b.y - a.y;
+            for (const [pp, q] of [[-dx, a.x - k.x0], [dx, k.x1 - a.x], [-dy, a.y - k.y0], [dy, k.y1 - a.y]]) {
+                if (pp === 0) { if (q < 0) return null; continue; }
+                const r = q / pp;
+                if (pp < 0) { if (r > t1) return null; if (r > t0) t0 = r; }
+                else { if (r < t0) return null; if (r < t1) t1 = r; }
+            }
+            return { t0, t1 };
+        }
+        const zwischen = (a, b, u) => ({ x: a.x + (b.x - a.x) * u, y: a.y + (b.y - a.y) * u,
+            t: a.t !== undefined && b.t !== undefined ? a.t + (b.t - a.t) * u : a.t });
+        // the ink in the box goes: each stroke is cut exactly at the box's edge, so
+        // the pieces before and after it stay however few points they have
+        function radiere(p) {
+            const k = radierKasten(p);
+            let geaendert = false;
+            const neu = [];
+            strokes.forEach(st => {
+                const pts = st.points;
+                const b = StrokeSymbols.bboxOfPoints(pts);
+                if (b.x > k.x1 || b.x + b.w < k.x0 || b.y > k.y1 || b.y + b.h < k.y0) { neu.push(st); return; }
+                const laeufe = [];
+                let lauf = [pts[0]], getroffen = false;
+                for (let i = 1; i < pts.length; i++) {
+                    const a = pts[i - 1], c = pts[i], t = imKasten(a, c, k);
+                    if (!t) { lauf.push(c); continue; }
+                    getroffen = true;
+                    if (t.t0 > 0) lauf.push(zwischen(a, c, t.t0));        // up to where it enters
+                    if (lauf.length >= 2) laeufe.push(lauf);
+                    lauf = t.t1 < 1 ? [zwischen(a, c, t.t1), c] : [];    // on from where it leaves
+                }
+                if (!getroffen) { neu.push(st); return; }
+                if (lauf.length >= 2) laeufe.push(lauf);
+                geaendert = true;
+                laeufe.forEach(l => neu.push(Object.assign({}, st, { points: l })));
+            });
+            if (!geaendert) return;
+            if (!radierGeaendert) { merkeVerlauf(); radierGeaendert = true; }
+            strokes.length = 0;
+            neu.forEach(st => strokes.push(st));
+            redrawBald();
+        }
+        function radierEnde() {
+            radierId = null;
+            if (!radierGeaendert) return;
+            radierGeaendert = false;
+            erkennenStand++;                   // an answer on its way is void
+            verwerfeErkennung();
+            recompute();
+            merkeStriche();
+        }
+        // the eraser's frame under the finger, for Doc only (not on the canvas: the
+        // canvas goes to the beamer)
+        function zeigeRadierer(p) {
+            let r = document.getElementById('radier-rahmen');
+            if (!radieren || !p) { if (r) r.style.display = 'none'; return; }
+            if (!r) {
+                r = document.createElement('div');
+                r.id = 'radier-rahmen';
+                r.setAttribute('aria-hidden', 'true');
+                container.appendChild(r);
+            }
+            const k = radierKasten(p);
+            Object.assign(r.style, { display: '', left: k.x0 + 'px', top: k.y0 + 'px', width: (k.x1 - k.x0) + 'px', height: (k.y1 - k.y0) + 'px' });
+        }
+        // Doc, 26.09. night: "der Radiergummi ist mir zu präsent ... so wie die beiden
+        // C-Buttons, wenn er nicht selektiert ist" - dimmed like them while there is no
+        // ink, lit only while it rubs
+        function radiererBlass() {
+            const b = document.getElementById('radierer');
+            if (b) b.style.opacity = radieren || strokes.length ? '' : '0.35';
+        }
+        function setzeRadieren(an) {
+            radieren = an;
+            const b = document.getElementById('radierer');
+            if (b) { b.classList.toggle('an', an); b.setAttribute('aria-pressed', an ? 'true' : 'false'); }
+            radiererBlass();
+            canvas.style.cursor = an ? 'none' : '';
+            if (!an) zeigeRadierer(null);
+        }
+
         canvas.addEventListener('pointermove', ev => {
             if (ev.pointerType === 'pen') stiftZuletzt = performance.now();   // hovering counts too
             if (fingerZieht(ev)) { ev.preventDefault(); return; }
+            if (radieren) {
+                zeigeRadierer(canvasPos(ev));
+                if (radierId === null || ev.pointerId !== radierId) return;
+                const roh = (typeof ev.getCoalescedEvents === 'function') ? ev.getCoalescedEvents() : null;
+                (roh && roh.length ? roh : [ev]).forEach(e => radiere(canvasPos(e)));
+                ev.preventDefault();
+                return;
+            }
             if (!current || ev.pointerId !== currentId) return;
             const roh = (typeof ev.getCoalescedEvents === 'function') ? ev.getCoalescedEvents() : null;
             if (roh && roh.length) roh.forEach(e => current.points.push(canvasPos(e)));
@@ -826,6 +967,7 @@
         function endStroke(ev) {
             if (ev && ev.pointerType === 'pen') stiftZuletzt = performance.now();
             if (ev && fingerHoch(ev)) return;
+            if (radierId !== null && (!ev || ev.pointerId === radierId)) { radierEnde(); return; }
             if (!current || (ev && ev.pointerId !== currentId)) return;
             currentId = null;
             const s = current;
@@ -865,6 +1007,7 @@
         canvas.addEventListener('pointerup', endStroke);
         canvas.addEventListener('pointercancel', endStroke);
         canvas.addEventListener('pointerleave', endStroke);
+        canvas.addEventListener('pointerleave', () => { if (radieren && radierId === null) zeigeRadierer(null); });
 
         // Doc, 26.09.: "Gib mir bitte unten ein Drittel auf der rechten Seite, wo ich
         // Anweisungen schreiben kann, die aber nicht mit transkribiert werden ...
@@ -902,6 +1045,7 @@
             if (nk) nk.style.opacity = nr.length < strokes.length ? '' : '0.35';     // no notes: dimmed
             const sk = document.getElementById('seite-leeren');
             if (sk) sk.style.opacity = nr.length ? '' : '0.35';                     // nothing written: dimmed
+            radiererBlass();
             redraw();
             updateStats();
         }
@@ -1251,23 +1395,29 @@
             setErgebnisText('Erkenne …');
             const modelEl = document.getElementById('modell-wahl');
             const model = modelEl ? modelEl.value : 'gemini-2.5-flash';
+            let ab = null;                     // a second line tries the steps after the first one's
             try {
                 for (const line of analysis.lines) {
                     if (zuKlein(line)) { zeilenErgebnis[line.lineIdx] = { uebersprungen: true }; continue; }
                     const idxs = line.symbols.flatMap(sy => sy.strokeIdxs);
-                    const r = await FormelErkennen.erkenneZeile(strokes, idxs, { model });
+                    // in class the steps still to come first - Gemini only when none fits
+                    const erwartet = await erwarteterSchritt(line, strokes, ab);
+                    if (stand !== erkennenStand) return;
+                    if (erwartet) ab = erwartet.j + 1;
+                    const r = erwartet ? { ok: true, latex: erwartet.latex, tokens: [], ms: 0 }
+                        : await FormelErkennen.erkenneZeile(strokes, idxs, { model });
                     if (stand !== erkennenStand) return;
                     if (!r.ok) {
                         zeilenErgebnis[line.lineIdx] = { fehler: r.error };
                     } else if (!r.latex || /^\(?\s*(empty|leer)\s*\)?$/i.test(r.latex)) {
                         zeilenErgebnis[line.lineIdx] = { fehler: 'nichts erkannt' };
                     } else {
-                        const latex = bereinige(r.latex);
-                        const { atome, svg, satz } = await formelAufZeile(latex, line);
+                        const latex = erwartet ? erwartet.latex : bereinige(r.latex);
+                        const { atome, svg, satz } = erwartet || await formelAufZeile(latex, line);
                         if (stand !== erkennenStand) return;
                         const { zuordnung, nachjustiert } = ordneZeile(line, atome);
                         zeilenErgebnis[line.lineIdx] = {
-                            latex, tokens: r.tokens, atome, ms: r.ms, zuordnung, svg, nachjustiert, satz,
+                            latex, tokens: r.tokens, atome, ms: r.ms, zuordnung, svg, nachjustiert, satz, erwartet: !!erwartet,
                         };
                         // Doc's plan B: the row crumbles to one dust cloud and
                         // settles into the formula (js/staub-morph.js) - each
@@ -2187,6 +2337,10 @@
                 if (ana.lines.length !== 1) throw new Error('keine einzelne Zeile');
                 const line = ana.lines[0];
                 let latex = f.latex;
+                if (!latex) {                       // in class the steps still to come first
+                    const e = await erwarteterSchritt(line, f.striche);
+                    if (e) latex = e.latex;
+                }
                 if (!latex) {
                     const modelEl = document.getElementById('modell-wahl');
                     flugLiest++;
@@ -2349,6 +2503,10 @@
                 k.innerHTML = '<span class="erk-wort">ERKENNEN</span>' +
                     '<svg class="erk-welle" viewBox="0 0 120 24" aria-hidden="true" focusable="false">' +
                     '<path d="M0 12 Q10 3 20 12 T40 12 T60 12 T80 12 T100 12 T120 12 T140 12 T160 12"/></svg>';
+                // Reading comes first, down on the page, then the line flies with its exact
+                // place known. (26.09. night a tap sent it at once and it was read in flight:
+                // when Gemini had to read, the line hovered half way and then set off a second
+                // time - Doc: "das war vorher absolut perfekt". Reverted.)
                 k.addEventListener('click', () => erkennen());
                 container.appendChild(k);
             }
@@ -2373,17 +2531,81 @@
         function schrittNorm(s) {
             return String(s).replace(/\\(?:left|right|displaystyle|cdot|times|[,;:! ])|\s|\{\}/g, '').replace(/\\[dt]frac/g, '\\frac');
         }
-        function naechsterSchritt() {
-            const loesung = aufgabenModus && LOESUNGEN[AUFGABEN[aufgabeIdx][0]];
-            if (!loesung) return null;
+        function naechsterIndex(loesung) {
             const letzte = rechenweg.length ? schrittNorm(rechenweg[rechenweg.length - 1].latex) : null;
             let hier = -1;
             loesung.forEach(([st], k) => { if (schrittNorm(st) === letzte) hier = k; });
-            return loesung[hier >= 0 ? hier + 1 : rechenweg.length] || null;
+            return hier >= 0 ? hier + 1 : rechenweg.length;
+        }
+        function naechsterSchritt() {
+            const loesung = aufgabenModus && LOESUNGEN[AUFGABEN[aufgabeIdx][0]];
+            if (!loesung) return null;
+            return loesung[naechsterIndex(loesung)] || null;
+        }
+        // Doc, 26.09. evening: "warum machen wir denn bei den Aufgaben überhaupt eine
+        // Erkennung? Wir kennen ja das Ergebnis" - in class a line is first laid against
+        // the steps still to come: the next one, then later ones (a step skipped). A step
+        // counts when the handwriting's own grouping has exactly its glyphs - no
+        // regrouping, that would make almost anything fit - and every glyph sits where
+        // its symbol sits (both scaled to their own box, the check of
+        // tools/handschrift_auswerten.mjs). Only when none fits does Gemini read.
+        const LAGE_GRENZE = 0.35;
+        function lagePasst(symbole, atome) {
+            const mitten = (liste, kasten) => {
+                let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+                liste.forEach(e => { const q = kasten(e); x0 = Math.min(x0, q.x); y0 = Math.min(y0, q.y); x1 = Math.max(x1, q.x + q.w); y1 = Math.max(y1, q.y + q.h); });
+                const w = Math.max(1e-6, x1 - x0), h = Math.max(1e-6, y1 - y0);
+                return liste.map(e => { const q = kasten(e); return { x: (q.x + q.w / 2 - x0) / w, y: (q.y + q.h / 2 - y0) / h }; });
+            };
+            const s = mitten(symbole, e => e.bbox), a = mitten(atome, e => e.box);
+            return s.every((p, i) => Math.hypot(p.x - a[i].x, p.y - a[i].y) <= LAGE_GRENZE);
+        }
+        // Count and place alone let a flat line fit almost any flat step of the same
+        // length (measured on the corpus: 68 of 2650 wrong pairs), so the operators must
+        // agree too, read off the strokes' shape: "=" two flat strokes one above the
+        // other, "-" one flat stroke, "+" a flat and a steep one crossing, a fraction bar
+        // as the grouping marks it. Anything unclear counts as "other" - a wrong guess
+        // only means Gemini reads, never a wrong step.
+        function glyphKlasse(a) {
+            if (a.art === 'line') return 'bar';
+            const t = a.art === 'text' ? a.text : '';
+            return t === '=' ? '=' : (t === '+' ? '+' : (t === '\u2212' || t === '-' ? '-' : 'o'));
+        }
+        function symbolKlasse(sy, striche) {
+            if (sy.bruch || sy.linie) return 'bar';
+            const k = sy.strokeIdxs.map(i => striche[i]).filter(st => st && st.points && st.points.length)
+                .map(st => StrokeSymbols.bboxOfPoints(st.points));
+            const flach = b => b.w >= 6 && b.h <= 0.35 * b.w, steil = b => b.h >= 6 && b.w <= 0.35 * b.h;
+            if (k.length === 1 && flach(k[0])) return '-';
+            if (k.length !== 2) return 'o';
+            const [a, b] = k;
+            if (flach(a) && flach(b)) {
+                const ueber = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+                const abstand = Math.abs((a.y + a.h / 2) - (b.y + b.h / 2));
+                return ueber >= 0.4 * Math.min(a.w, b.w) && abstand > Math.max(a.h, b.h) ? '=' : 'o';
+            }
+            const [w, v] = flach(a) && steil(b) ? [a, b] : (flach(b) && steil(a) ? [b, a] : [null, null]);
+            if (!w) return 'o';
+            const vx = v.x + v.w / 2, wy = w.y + w.h / 2;
+            return vx > w.x && vx < w.x + w.w && wy > v.y && wy < v.y + v.h ? '+' : 'o';
+        }
+        function passtZuSchritt(line, atome, striche) {
+            if (atome.length !== line.symbols.length || !lagePasst(line.symbols, atome)) return false;
+            return line.symbols.every((sy, i) => symbolKlasse(sy, striche) === glyphKlasse(atome[i]));
+        }
+        async function erwarteterSchritt(line, striche = strokes, ab = null) {
+            const loesung = aufgabenModus && LOESUNGEN[AUFGABEN[aufgabeIdx][0]];
+            if (!loesung || !line.symbols.length) return null;
+            for (let j = ab !== null ? ab : naechsterIndex(loesung); j < loesung.length; j++) {
+                const latex = loesung[j][0];
+                const { atome, svg, satz } = await formelAufZeile(latex, line);
+                if (passtZuSchritt(line, atome, striche)) return { latex, atome, svg, satz, j };
+            }
+            return null;
         }
         function zeigeHinweis() {
             if (anzeigeModus) return;
-            const schritt = naechsterSchritt();
+            const schritt = vorschau && naechsterSchritt();          // P off: nothing grey
             let el = document.getElementById('schritt-hinweis'), opEl = document.getElementById('schritt-op');
             if (!schritt) { [el, opEl].forEach(e => { if (e) e.style.display = 'none'; }); return; }
             if (!el) {
@@ -2432,7 +2654,8 @@
             let el = document.getElementById('notiz-rand');
             if (modus === 'beispiele') {
                 if (el) el.style.display = 'none';
-                ['notiz-leeren', 'seite-leeren'].forEach(id => { const k = document.getElementById(id); if (k) k.style.display = 'none'; });
+                ['notiz-leeren', 'seite-leeren', 'radierer'].forEach(id => { const k = document.getElementById(id); if (k) k.style.display = 'none'; });
+                setzeRadieren(false);
                 return;
             }
             if (!el) {
@@ -2477,6 +2700,24 @@
             }
             sk.style.right = (r.width - notizX(r.width) + 12) + 'px';
             sk.style.display = '';
+            // the eraser, bottom centre of the writing field (Doc, 26.09.)
+            let rk = document.getElementById('radierer');
+            if (!rk) {
+                rk = document.createElement('button');
+                rk.id = 'radierer';
+                rk.type = 'button';
+                rk.title = 'Radiergummi';
+                rk.setAttribute('aria-label', 'Radiergummi');
+                rk.setAttribute('aria-pressed', 'false');
+                rk.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor"' +
+                    ' stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3 L21 10 L11 20 L4 13 Z"/>' +
+                    '<path d="M8 9 L15 16"/><path d="M11 20 H20"/></g></svg>';
+                rk.addEventListener('click', () => setzeRadieren(!radieren));
+                container.appendChild(rk);
+            }
+            rk.style.left = Math.round(notizX(r.width) / 2) + 'px';
+            radiererBlass();
+            rk.style.display = '';
         }
         // the writing field without the notes: what is written there goes (undo brings
         // it back), the notes and the working stay; its recognition is void
@@ -2775,6 +3016,8 @@
             vollbildAus: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">' +
                       '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>' +
                       '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/></g>',
+            // preview: a P, drawn like the C
+            vorschau: '<path d="M7.5 19.5 V4.5 H12 A4.25 4.25 0 0 1 12 13 H7.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>',
             // all tasks: a list
             aufgaben: '<path d="M9.5 6.5 H19.5 M9.5 12 H19.5 M9.5 17.5 H19.5" fill="none" stroke="currentColor" stroke-linecap="round"/>' +
                       '<circle cx="5" cy="6.5" r="1.4" fill="currentColor"/><circle cx="5" cy="12" r="1.4" fill="currentColor"/>' +
@@ -2894,6 +3137,7 @@
                         'box-shadow:0 0 0 1px rgba(255, 255, 255, 0.35)"></span>',
                         () => {
                             stiftFarbe = wert;
+                            setzeRadieren(false);          // a colour: the pen again
                             try { localStorage.setItem('vorrechnen-farbe', wert); } catch (_) {}
                             zeigeWerkzeuge();
                         }, false);
@@ -2902,7 +3146,16 @@
                 document.getElementById('farbe-0').style.marginTop = 'auto';
                 // Doc, 26.09.: "rechts in das Rail einen Button unter die grüne Farbe, über
                 // das C, wo ich mir alle Aufgaben in einem Panel anzeigen lassen kann"
-                werkzeuge([['aufgaben', 'Alle Aufgaben', () => aufgabenPanel(true), true]]);
+                // Doc, 26.09.: "über dem Button der die ganzen Aufgaben anzeigt, einen Button
+                // mit P" - the grey preview on / off, lit while it shows
+                werkzeuge([
+                    ['vorschau', 'Vorschau: der graue nächste Schritt (P)', () => {
+                        vorschau = !vorschau;
+                        try { localStorage.setItem('vorrechnen-vorschau', vorschau ? '1' : '0'); } catch (_) {}
+                        zeigeHinweis();
+                        zeigeWerkzeuge();
+                    }, true],
+                    ['aufgaben', 'Alle Aufgaben', () => aufgabenPanel(true), false]]);
                 werkzeuge([
                     ['clear', 'Seite leeren (C)', () => clearAll(), true],
                     ['undo', 'Rückgängig', () => rueckgaengig(), false],
@@ -2930,9 +3183,15 @@
             else if (SCHIRM_BEKANNT && screen.isExtended) bk.style.removeProperty('display');
             else bk.style.setProperty('display', 'none', 'important');
             zeigeVollbildKnopf();
-            const ak = document.getElementById('werkzeug-aufgaben');
-            if (aufgabenModus) ak.style.removeProperty('display');
-            else ak.style.setProperty('display', 'none', 'important');
+            // the preview and the panel only where there are tasks
+            ['werkzeug-vorschau', 'werkzeug-aufgaben'].forEach(id => {
+                const b = document.getElementById(id);
+                if (aufgabenModus) b.style.removeProperty('display');
+                else b.style.setProperty('display', 'none', 'important');
+            });
+            const vk = document.getElementById('werkzeug-vorschau');
+            vk.setAttribute('aria-pressed', vorschau ? 'true' : 'false');
+            leuchte(vk, vorschau);
             // nothing to undo or redo: dimmed
             document.getElementById('werkzeug-undo').style.opacity = verlauf.length ? '1' : '0.35';
             document.getElementById('werkzeug-redo').style.opacity = vorwaerts.length ? '1' : '0.35';
@@ -2971,7 +3230,15 @@
             if (wechsel) aufgabeEinblenden();
         }
         // All tasks in one panel (Doc, 26.09.), for Doc only: a tap on one goes there.
-        // The look is the central modal (ui.js: .cyber-overlay, .cyber-modal--wide).
+        // The look is the central modal (ui.js: .cyber-overlay, .cyber-modal--wide,
+        // .cyber-modal-x). Night: "die Kacheln sind schön, aber zu groß ... flacher ...
+        // Aufgaben oben drüber weglassen ... nach x gefällt mir nicht ... Schließen oben
+        // rechts klein ... im hellen Modus hell, mit blauer Schrift wie Tinte" - a tile is
+        // its number and its formula; what to solve for is coloured in the formula itself:
+        // Doc's orange on the dark board, his red on sand (orange is too pale there)
+        function hebeVariable(latex, v, farbe) {
+            return latex.replace(/\\[a-zA-Z]+|./g, t => t === v ? `\\textcolor{${farbe}}{${v}}` : t);
+        }
         function aufgabenPanel(auf) {
             let o = document.getElementById('aufgaben-overlay');
             if (!auf) { if (o) o.classList.remove('open'); return; }
@@ -2980,33 +3247,36 @@
                 o.id = 'aufgaben-overlay';
                 o.className = 'cyber-overlay';
                 o.innerHTML = '<div class="cyber-modal cyber-modal--neon cyber-modal--wide" role="dialog" aria-label="Alle Aufgaben">' +
-                    '<h3>Aufgaben</h3><div class="aufgaben-liste"></div>' +
-                    '<button type="button" class="cyber-modal-close">Schließen</button></div>';
+                    '<button type="button" class="cyber-modal-x" title="Schließen" aria-label="Schließen">' +
+                    '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6 L18 18 M18 6 L6 18" fill="none"' +
+                    ' stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>' +
+                    '<div class="aufgaben-liste"></div></div>';
                 o.addEventListener('click', e => { if (e.target === o) aufgabenPanel(false); });
-                o.querySelector('.cyber-modal-close').addEventListener('click', () => aufgabenPanel(false));
+                o.querySelector('.cyber-modal-x').addEventListener('click', () => aufgabenPanel(false));
                 const liste = o.querySelector('.aufgaben-liste');
-                AUFGABEN.forEach(([, latex, nach], i) => {
+                AUFGABEN.forEach((_, i) => {
                     const b = document.createElement('button');
                     b.type = 'button';
                     b.className = 'aufgabe-karte';
-                    b.innerHTML = `<span class="ak-nr">Aufgabe ${i + 1}</span><span class="ak-formel"></span>` +
-                        '<span class="ak-nach">nach <span></span></span>';
-                    try {
-                        katex.render(alsDisplay(latex), b.querySelector('.ak-formel'), { throwOnError: false });
-                        katex.render(nach, b.querySelector('.ak-nach span'), { throwOnError: false });
-                    } catch (e) { b.querySelector('.ak-formel').textContent = latex; }
+                    b.innerHTML = `<span class="ak-nr">${i + 1}</span><span class="ak-formel"></span>`;
                     b.addEventListener('click', () => { aufgabenPanel(false); zeigeAufgabe(i); });
                     liste.appendChild(b);
                 });
                 document.body.appendChild(o);
             }
-            // one line each: a long task shrinks to its card (the overlay is laid out while hidden)
-            o.querySelectorAll('.aufgabe-karte').forEach(b => {
+            // light or dark like the board; the formulas are set again for their colour, and
+            // one line each: a long one shrinks to its tile (the overlay is laid out while hidden)
+            o.classList.toggle('hell', hell);
+            const farbe = hell ? '#B02418' : '#F5C242';
+            o.querySelectorAll('.aufgabe-karte').forEach((b, i) => {
+                const [, latex, nach] = AUFGABEN[i];
                 const f = b.querySelector('.ak-formel');
+                try { katex.render(alsDisplay(hebeVariable(latex, nach, farbe)), f, { throwOnError: false }); }
+                catch (e) { f.textContent = latex; }
                 f.style.fontSize = '';
-                passeEin(f, b.clientWidth - 24, 1.35);
+                passeEin(f, b.clientWidth - 24, 1.3);
+                b.classList.toggle('aktuell', i === aufgabeIdx);
             });
-            o.querySelectorAll('.aufgabe-karte').forEach((b, i) => b.classList.toggle('aktuell', i === aufgabeIdx));
             requestAnimationFrame(() => o.classList.add('open'));
         }
         // Doc, 26.09.: "left arrow key & right arrow key" - the arrow keys step like
