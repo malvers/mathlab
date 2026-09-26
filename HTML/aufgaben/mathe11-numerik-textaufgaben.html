@@ -57,6 +57,10 @@ ol.parts>li::before{content:counter(part,lower-alpha) ")";position:absolute;left
 b{font-weight:700;color:var(--ink)}
 /* formula plus the punctuation that follows it - see the KaTeX pass in the script */
 .nowrap{white-space:nowrap}
+/* ...but only the seam between formula and comma: inside the formula KaTeX may still
+   break after = and + - inherited nowrap pushed long formulas past a 390 px phone
+   (measured 26.09.2026: Teil A 559 px wide) */
+.nowrap .katex{white-space:normal}
 
 /* figures: drawn as inline SVG by tools/aufgaben/svgfig.py, never as a bitmap -
    sharp on screen and in print, and the coordinates come from the same numbers
