@@ -151,6 +151,35 @@ class CyberUI {
         window.location.href = u.toString();
     }
 
+    /**
+     * Hard reload from a button, for a board or a tablet without a keyboard (Doc, 26.09.2026:
+     * the HP folded as a tent, no Ctrl+F5). A plain reload takes stylesheets and scripts from
+     * the HTTP cache while they are fresh (GitHub Pages: max-age=600), so after a push the page
+     * came back half new. Here every same-origin stylesheet, script and JSON file the page
+     * loaded is fetched past the cache first (cache: 'reload' writes the fresh copy back, also
+     * through a network-first service worker), then the page reloads. Service worker stores
+     * are left alone: other apps of the site keep their offline copies.
+     */
+    static async hardReload() {
+        try {
+            const urls = new Set([location.href.split('#')[0]]);
+            const nimm = (u) => {
+                try {
+                    const url = new URL(u, location.href);
+                    if (url.origin === location.origin && !url.pathname.startsWith('/__')) urls.add(url.href.split('#')[0]);
+                } catch (e) { /* not a URL */ }
+            };
+            document.querySelectorAll('link[rel~="stylesheet"][href], script[src]').forEach((el) => nimm(el.href || el.src));
+            performance.getEntriesByType('resource').forEach((e) => {
+                if (/\.(css|m?js|json)(\?|$)/i.test(e.name)) nimm(e.name);
+            });
+            await Promise.all([...urls].map((u) => fetch(u, { cache: 'reload' }).catch(() => null)));
+        } catch (e) {
+            /* reload anyway */
+        }
+        location.reload();
+    }
+
     static syncCyberLangDisplayButtons() {
         if (typeof CyberI18n === 'undefined') return;
         const code = CyberI18n.current;
