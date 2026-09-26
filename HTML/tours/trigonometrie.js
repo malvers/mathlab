@@ -138,6 +138,8 @@
         id: 'trigonometrie',
         title: 'Trigonometrie',
         card: { title: 'Trigonometrie', sub: 'Vom rechtwinkligen Dreieck zur Welle – in elf Kapiteln' },
+        /* what is spelled for Solita's voice, written back for the subtitles (Gegenkatehte -> Gegenkathete) */
+        spelled: { atehte: 'athete' },
 
         /* the lab, fresh, while the page loads: its settings live in this origin's storage (the tour server's own -
            Doc's :8765 and docalvers.de keep theirs) */

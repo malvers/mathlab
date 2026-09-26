@@ -11,7 +11,9 @@
 // of that action, so a change here wants a look at tours/trigonometrie.js.
 //
 // PRONUNCIATION: single letters go through say-as (the corner B, the point P, the parameters a to d), numbers are
-// written as words. No "Lab" (Studio-C says "Laab") - the page is "das Labor".
+// written as words. No "Lab" (Studio-C says "Laab") - the page is "das Labor". "Kathete" is spelled "Katehte": Studio-C
+// said "Kathäte" (Doc, 26.09.2026, tour s1 0:20), and of three spellings (Katéte, Kateete, Katehte) Doc picked the
+// third by ear. tours/trigonometrie.js writes it back for the subtitles (spelled).
 //
 // CHECKED AGAINST THE LAB (26.09.2026): B (4|3) -> (8|6) keeps sin 0.6, cos 0.8; 1 rad = 57.3°; sin x = 1/2 at 30° and
 // 150°; cos x = sin(x + 90°); the puzzle 1.5·sin(x − π/2) − 1 is hit with a = 1.5, c = π/2, d = −1; Dresden: longest
@@ -27,9 +29,9 @@ export const NARRATION = {
 
     // 1 · the ratios stay when the triangle grows; hypotenuse 1 = the bridge to the circle
     s1: speak(`Ein rechtwinkliges Dreieck. ${b()} Oben links rechnet das Labor mit: ${b()} ` +
-        `Gegenkathete durch Hypotenuse ist der Sinus, ${b()} Ankathete durch Hypotenuse der Kosinus. ${b()} ` +
+        `Gegenkatehte durch Hypotenuse ist der Sinus, ${b()} Ankatehte durch Hypotenuse der Kosinus. ${b()} ` +
         `Zieh die Ecke ${ch('B')} nach außen. ${b(1600)} Das Dreieck wird größer, ${b()} die Verhältnisse bleiben gleich. ${b()} ` +
-        `Ist die Hypotenuse genau eins lang, ${b(1200)} sind Sinus und Kosinus einfach die beiden Katheten.`),
+        `Ist die Hypotenuse genau eins lang, ${b(1200)} sind Sinus und Kosinus einfach die beiden Katehten.`),
 
     // 2 · P(cos | sin), past 90°: the signs in the quadrants
     s2: speak(`Die Spitze liegt jetzt auf dem Einheitskreis. ${b()} Der Punkt ${ch('P')} hat die Koordinaten Kosinus und Sinus: ${b()} ` +
