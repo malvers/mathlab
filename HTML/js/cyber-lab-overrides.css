@@ -796,3 +796,16 @@ body.cyber-shell-grid > #main-content > #canvas-container {
 .lab-embedded .lab-stage-title {
     display: none;
 }
+
+/* --- NO TEXT SELECTION ON CONTROLS ---
+   Rails, buttons, card titles and the labels of the controls never select text. On a
+   touch board a long press or a double tap marked them, and a translate bubble popped
+   up over the lab (vorrechnen, the language button's "GB" - Doc 26.09.2026: "Text
+   selektiert und dann kommt immer dieses Google Übersetzungsding. Bitte nicht").
+   None of these hold a text field. */
+:is(#mini-rail, #right-rail, .nav-btn, .cyber-btn, .instrument-title, .cyber-control-group .control-header,
+    .cyber-checkbox-wrapper, .cyber-radio-group, .cyber-dropdown) {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
