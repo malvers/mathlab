@@ -4,6 +4,23 @@
  */
 
 const LAB_ICONS = {
+    "trigonometrie": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- axes: the circle's own and the graph's -->
+            <line x1="5" y1="50" x2="97" y2="50" stroke="rgba(255, 255, 255, 0.35)" stroke-width="1.1" />
+            <line x1="52" y1="26" x2="52" y2="74" stroke="rgba(255, 255, 255, 0.35)" stroke-width="1.1" />
+            <circle cx="27" cy="50" r="18" fill="none" stroke="rgba(255, 255, 255, 0.6)" stroke-width="1.4" />
+            <!-- the sine curve, drawn from the circle -->
+            <path d="M52.0 50.0 L52.9 47.7 L53.8 45.3 L54.7 43.1 L55.6 41.0 L56.5 39.0 L57.4 37.3 L58.3 35.7 L59.2 34.4 L60.1 33.4 L61.0 32.6 L61.9 32.2 L62.8 32.0 L63.6 32.2 L64.5 32.6 L65.4 33.4 L66.3 34.4 L67.2 35.7 L68.1 37.3 L69.0 39.0 L69.9 41.0 L70.8 43.1 L71.7 45.3 L72.6 47.7 L73.5 50.0 L74.4 52.3 L75.3 54.7 L76.2 56.9 L77.1 59.0 L78.0 61.0 L78.9 62.7 L79.8 64.3 L80.7 65.6 L81.6 66.6 L82.5 67.4 L83.4 67.8 L84.2 68.0 L85.1 67.8 L86.0 67.4 L86.9 66.6 L87.8 65.6 L88.7 64.3 L89.6 62.7 L90.5 61.0 L91.4 59.0 L92.3 56.9 L93.2 54.7 L94.1 52.3 L95.0 50.0" fill="none" stroke="#F5C242" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" />
+            <!-- angle, radius, cosine (blue) and sine (orange) at 60° -->
+            <path d="M34 50 A7 7 0 0 0 30.5 43.9" fill="none" stroke="rgb(121, 158, 49)" stroke-width="1.6" />
+            <line x1="27" y1="50" x2="36.0" y2="34.4" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
+            <line x1="27" y1="50" x2="36.0" y2="50" stroke="#00D2FF" stroke-width="2.8" stroke-linecap="round" />
+            <line x1="36.0" y1="50" x2="36.0" y2="34.4" stroke="#F5C242" stroke-width="2.8" stroke-linecap="round" />
+            <!-- projection from P to the curve -->
+            <line x1="36.0" y1="34.4" x2="59.2" y2="34.4" stroke="rgba(245, 194, 66, 0.7)" stroke-width="1.2" stroke-dasharray="3 2.5" />
+            <circle cx="36.0" cy="34.4" r="3.2" fill="rgb(121, 158, 49)" />
+            <circle cx="59.2" cy="34.4" r="3.2" fill="#F5C242" />
+        </svg>`,
     "wuerfelspiel": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- tree diagram: Lena's three branches, Mia's two on every end, green = Lena wins -->
             <g stroke="rgba(157, 232, 255, 0.85)" stroke-width="2" stroke-linecap="round">

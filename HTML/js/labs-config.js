@@ -24,6 +24,17 @@
 
 const LABS_DATA = [
     {
+        "id": "trigonometrie",
+        "href": "trigonometrie.html",
+        "title": "Trigonometrie",
+        "description": "Sinus, Kosinus und Tangens vom rechtwinkligen Dreieck bis zur Ableitung \u2014 elf Kapitel, die aufeinander aufbauen. Links der Einheitskreis, rechts der Graph im selben Ma\u00dfstab: Der gr\u00fcne Bogen am Kreis ist genau die Strecke auf der x-Achse, und wer P herumzieht, sieht die Sinuskurve entstehen. Gleichungen wie sin x = \u00bd zeigen beide L\u00f6sungen, auch die, die der Taschenrechner verschweigt; im Parameter-Kapitel stellt man a\u00b7sin(b(x\u2212c))+d direkt am Hochpunkt ein oder l\u00f6st ein Kurven-R\u00e4tsel. Tagesl\u00e4nge in Dresden, Riesenrad und Gezeiten werden aus Hoch- und Tiefpunkt modelliert, Sinus- und Kosinussatz zeigen auch den Fall mit zwei Dreiecken. Jedes Kapitel bringt Theorie, eine B\u00fchne zum Anfassen und Aufgaben mit ausklappbarem L\u00f6sungsweg \u2014 gesetzt wie in LaTeX.",
+        "tagline": "Funktionen / Trigonometrie / 11 Kapitel",
+        "icon": LAB_ICONS["trigonometrie"],
+        "category": "geometrie funktionen neu highlight hot grade9 grade10 grade11",
+        "keywords": "trigonometrie sinus kosinus cosinus tangens sin cos tan einheitskreis bogenmass gradmass radiant rad grad rechtwinkliges dreieck gegenkathete ankathete hypotenuse sinuskurve kosinuskurve tangenskurve sinusfunktion kosinusfunktion tangensfunktion periode amplitude frequenz verschiebung phasenverschiebung mittellage wertebereich nullstellen hochpunkt tiefpunkt symmetrie periodisch schwingung gedaempfte schwingung modellieren tageslaenge riesenrad gezeiten ebbe flut wechselspannung exakte werte gleichung arcsin arccos arkussinus umkehrfunktion polstelle asymptote steigungswinkel sinussatz kosinussatz flaecheninhalt allgemeines dreieck ssw umkreis pythagoras ableitung kettenregel winkel",
+        "color": "gold"
+    },
+    {
         "id": "maya",
         "href": "maya.html",
         "title": "Maya-Zahlen",
