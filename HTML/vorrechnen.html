@@ -135,12 +135,12 @@
         /* The film strip along the bottom edge (see "Film strip" in the script):
            the whole strip is the grip, the line and the dot only show where. */
         #zeitleiste .zl-spur, #zeitleiste .zl-fuellung {
-            position: absolute; left: 24px; top: 50%; height: 3px; margin-top: -1.5px; border-radius: 2px;
+            position: absolute; left: 24px; top: 28px; height: 3px; margin-top: -1.5px; border-radius: 2px;
         }
         #zeitleiste .zl-spur { right: 24px; background: rgba(234, 240, 247, 0.18); }
         #zeitleiste .zl-fuellung { width: 0; background: rgba(234, 240, 247, 0.7); }
         #zeitleiste .zl-knopf {
-            position: absolute; left: 24px; top: 50%; width: 18px; height: 18px;
+            position: absolute; left: 24px; top: 28px; width: 18px; height: 18px;
             margin: -9px 0 0 -9px; border-radius: 50%; background: #eaf0f7;
         }
 
@@ -162,6 +162,9 @@
         :is(#modus-wahl, #schalter, #morph-steuerung) .cyber-checkbox { border-radius: 7px; }
         :is(#modus-wahl, #schalter, #morph-steuerung) .cyber-checkbox::after { width: 9px; height: 18px; border-width: 0 3px 3px 0; }
         :is(#modus-wahl, #schalter, #morph-steuerung) .cyber-radio-input::after { width: 18px; height: 18px; }
+        /* Doc: "Einstellungen die Schrift" - the card's title, larger, arrow too */
+        .instrument-card:has(#modus-wahl) .instrument-title { font-size: 1.25rem; }
+        .instrument-card:has(#modus-wahl) .toggle-icon svg { width: 16px; height: 16px; }
 
         .erk-ok { color: rgb(121, 158, 49); }
         .erk-warn { color: rgb(245, 194, 66); }
@@ -840,7 +843,7 @@
                 host.id = 'formel-schicht';
                 // Doc: "so groß wie oben und weiter runter" - the counterpart of the
                 // template strip: a strip at the bottom edge, formulas centred
-                host.style.cssText = 'position:absolute;left:0;right:0;bottom:56px;min-height:84px;pointer-events:none;' +
+                host.style.cssText = `position:absolute;left:0;right:0;bottom:${ZEITLEISTE_H}px;min-height:84px;pointer-events:none;` +
                     'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.4rem';
                 container.appendChild(host);
             }
@@ -986,7 +989,12 @@
         // edge, not a gesture on the page: Doc writes with pen AND finger. Any
         // pointer anywhere across the full width sets the morph to that point.
         // Built on first use; redraw() keeps it in step with the morph.
-        let zeitleiste = null;
+        let zeitleiste = null, abspielen = null;
+        // Doc, 26.09.: "nimm PLAY butt raus und mach ihn unter den Slider rechts
+        // als Dreieck", then "x mittig", "größer wie vor zurück" - the strip grew
+        // from 56 to 80 px: the track stays 28 px from its top, PLAY sits under
+        // its middle, as large as the board's back/forward triangles
+        const ZEITLEISTE_H = 80;
         function zeigeZeitleiste() {
             if (!zeitleiste) {
                 zeitleiste = document.createElement('div');
@@ -995,10 +1003,22 @@
                 zeitleiste.setAttribute('aria-label', 'Morph vor und zurück');
                 zeitleiste.setAttribute('aria-valuemin', '0');
                 zeitleiste.setAttribute('aria-valuemax', '1');
-                zeitleiste.style.cssText = 'position:absolute;left:0;right:0;bottom:0;height:56px;' +
+                zeitleiste.style.cssText = `position:absolute;left:0;right:0;bottom:0;height:${ZEITLEISTE_H}px;` +
                     'touch-action:none;cursor:ew-resize;z-index:5';
                 zeitleiste.innerHTML = '<div class="zl-spur"></div><div class="zl-fuellung"></div><div class="zl-knopf"></div>';
                 container.appendChild(zeitleiste);
+                // a sibling above the strip, so a tap on it plays and does not scrub
+                abspielen = document.createElement('button');
+                abspielen.id = 'zl-play';
+                abspielen.title = 'Morph noch einmal abspielen';
+                abspielen.setAttribute('aria-label', 'Morph noch einmal abspielen');
+                abspielen.style.cssText = 'position:absolute;left:50%;transform:translateX(-50%);bottom:1px;width:56px;height:40px;padding:0;border:none;' +
+                    'background:transparent;color:#8a93a3;cursor:pointer;touch-action:manipulation;z-index:6;' +
+                    'display:flex;align-items:center;justify-content:center';
+                abspielen.innerHTML = '<svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+                    '<path d="M7 4 L18 12 L7 20 Z" fill="currentColor"/></svg>';
+                abspielen.addEventListener('click', () => nochmal());
+                container.appendChild(abspielen);
                 const zeitAn = ev => {
                     const r = zeitleiste.getBoundingClientRect();
                     return Math.max(0, Math.min(1, (ev.clientX - r.left - 24) / Math.max(1, r.width - 48)));
@@ -1029,6 +1049,7 @@
             zeitleiste.querySelector('.zl-fuellung').style.width = (b * morphT) + 'px';
             zeitleiste.querySelector('.zl-knopf').style.left = (24 + b * morphT) + 'px';
             zeitleiste.style.opacity = morphVorbereitet.some(Boolean) ? '1' : '0.35';
+            abspielen.style.opacity = zeitleiste.style.opacity;
             zeitleiste.setAttribute('aria-valuenow', morphT.toFixed(2));
         }
 
@@ -1517,12 +1538,12 @@
             let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
             d.strokes.forEach(st => st.points.forEach(q => { x0 = Math.min(x0, q.x); y0 = Math.min(y0, q.y); x1 = Math.max(x1, q.x); y1 = Math.max(y1, q.y); }));
             // between the template strip on top and, at the bottom, the recognised
-            // formula (84 px) above the film strip (56 px)
+            // formula (84 px) above the film strip (ZEITLEISTE_H)
             // the recognised formula is the same formula, so it is as tall as the
             // template strip
             const rect = container.getBoundingClientRect();
             const kopfEl = document.getElementById('vorlage-schicht');
-            const KOPF = Math.max(84, kopfEl ? kopfEl.getBoundingClientRect().height : 84), FUSS = 56 + KOPF;
+            const KOPF = Math.max(84, kopfEl ? kopfEl.getBoundingClientRect().height : 84), FUSS = ZEITLEISTE_H + KOPF;
             const w = Math.max(1, x1 - x0), h = Math.max(1, y1 - y0);
             const sk = Math.min(1, (rect.width - 100) / w, (rect.height - KOPF - FUSS - 20) / h);
             const ox = (rect.width - w * sk) / 2, oy = KOPF + (rect.height - KOPF - FUSS - h * sk) / 2;
@@ -1715,8 +1736,9 @@
                         </button>
                     </div>
                     -->
-                    <!-- Doc: "mach die NOCHMAL so wie WEITER", then "NOCHMAL -> PLAY" -->
-                    <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="nochmal()">PLAY</button>
+                    <!-- Doc: "mach die NOCHMAL so wie WEITER", then "NOCHMAL -> PLAY", then
+                         26.09.: "nimm PLAY butt raus" - it is a triangle under the film strip now
+                    <button class="cyber-btn gross" style="height:6.4rem;min-height:6.4rem;font-size:1.6rem;letter-spacing:0.12em;width:100%;padding:0;line-height:6.4rem" onclick="nochmal()">PLAY</button> -->
                 </div>
                 <!-- Doc 25.09.2026: "BEISPIEL Button raus" - kept, commented out, beispiel() still exists
                 <div class="btn-row" style="margin-top:0.8rem">
