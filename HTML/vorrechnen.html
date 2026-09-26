@@ -225,13 +225,11 @@
             transform-origin: 0 0; z-index: 1000;
         }
         /* Doc, 26.09. (on the wide LG): "die Linien und das Karo gehen nicht bis zum
-           Rand - nach links und rechts erweitern". Mission control's board keeps its
-           proportions on the beamer, so a wider screen gets margins; the paper runs
-           on into them (--rand-x: one margin, in board px - anzeigeEinpassen) */
-        body.anzeige #papier {
-            left: calc(-1 * var(--rand-x, 0px));
-            right: calc(-1 * var(--rand-x, 0px));
-        }
+           Rand - nach links und rechts erweitern ... denk an die Promethean". Mission
+           control's board keeps its proportions on the beamer, so a wider screen gets
+           margins; the paper simply runs on far beyond them (nothing clips it), on any
+           screen. 4000 = 125 squares, so the squares stay in step. */
+        body.anzeige #papier { left: -4000px; right: -4000px; }
 
         /* Doc, 26.09.: "mach in der unteren Zeile dann doch den Erkennen-Button" -
            small, bottom centre, until the recognised line takes its place */
@@ -1866,8 +1864,6 @@
             const sk = Math.min(innerWidth / buehne.w, innerHeight / buehne.h);
             container.style.width = buehne.w + 'px';
             container.style.height = buehne.h + 'px';
-            // the side margin in board px (+2 so no hairline of backdrop shows)
-            container.style.setProperty('--rand-x', Math.ceil((innerWidth - buehne.w * sk) / 2 / sk + 2) + 'px');
             container.style.transform = `translate(${(innerWidth - buehne.w * sk) / 2}px, ${(innerHeight - buehne.h * sk) / 2}px) scale(${sk})`;
         }
         window.addEventListener('resize', anzeigeEinpassen);
