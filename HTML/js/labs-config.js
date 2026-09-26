@@ -898,6 +898,17 @@ const LABS_DATA = [
         "color": "blue"
     },
     {
+        "id": "tour-maya",
+        "href": "tours/maya.html",
+        "title": "Tour: Punkt, Strich, Muschel",
+        "description": "Live-Tour durch das Maya-Rechenbrett, gesprochen von Doc Alvers (KI-Stimmklon), mit Cursor und Untertiteln: die zwanzig Ziffern aus Punkt, Strich und Muschel, Ziffern legen, der Übertrag von 59 auf 60, eine Zahl eintippen, Würfelaufgaben, Kalender oder reine Zwanzig und die Schreibweise hochkant. Das echte Lab läuft dabei live im Browser. 12 Szenen, etwa 3 Minuten, jederzeit anhalten und selbst ausprobieren.",
+        "tagline": "Live-Tour / Zahlensysteme / Maya",
+        "icon": LAB_ICONS["maya"],
+        "category": "touren",
+        "keywords": "tour touren live-tour rundgang fuehrung doc alvers stimme stimmklon avatar untertitel maya mayazahlen zahlensystem stellenwert basis 20 punkt strich muschel null uebertrag kalender hochkant",
+        "color": "gold"
+    },
+    {
         "id": "tour-trigonometrie",
         "href": "tours/trigonometrie.html",
         "title": "Tour: Vom Dreieck zur Welle",

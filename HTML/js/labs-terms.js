@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 74 labs, 1435 terms, 2026-09-26
+ * 75 labs, 1448 terms, 2026-09-26
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -67,6 +67,7 @@ const LABS_TERMS = {
     "shell": ["DAS BILD IST EIN PROTOKOLL", "DAS SUBSTRAT IST DIE ERKLÄRUNG", "EINE ZELLE STECKT AN", "FORMELN", "SUBSTRAT-SCHATTEN", "VIELE ZÜNDUNGEN - ZELTE", "WEITER &rarr", "WENIGE ZÜNDUNGEN - LINIEN", "ZWEI WELLEN LÖSCHEN SICH AUS"],
     "steigung": ["DREIECK BREITE (ΔX)", "DREIECK POSITION (X)", "FUNKTION", "GERADEN-STEIGUNG M", "LINEARE FUNKTIONEN", "NULLSTELLE X₀", "STEIGUNG M", "Y-ABSCHNITT N"],
     "subtraktion": ["Minuend", "SCHRIFTLICHE SUBTRAKTION", "Subtrahend"],
+    "tour-maya": ["Der Pfeil", "Die zwanzig Ziffern", "Die Zwanziger-Stelle", "Ein leeres Brett", "Eine Zahl eintippen", "Eine Ziffer legen", "Farben", "Hochkant", "Kalender oder rein zwanzig", "Maya-Zahlen", "Übertrag", "Wie viele Stellen", "Würfeln und legen"],
     "tour-mission-control": ["Abgabe", "Der rote Knopf", "Die ganze Klasse im Blick", "Die Klasse als Ganzes", "Die Klasse legt los", "Die Zettel", "Frage für Frage", "Kein Name auf dem Server", "Kurz mal weg", "Offline", "QR scannen"],
     "tour-trigonometrie": ["Das Bogenmaß", "Das rechtwinklige Dreieck", "Der Einheitskreis", "Der Tangens", "Die Ableitung", "Die Kosinuskurve", "Die Sinuskurve", "Gleichungen", "Tageslänge in Dresden", "Trigonometrie", "Vier Parameter", "Vom Dreieck zur Welle", "Zwei Dreiecke"],
     "tour-wuerfelspiel": ["Abspann", "An jedes Ende", "Das Paradox nachgerechnet", "Das Rezept", "Der wichtigste Trick", "Der Würfel-Kreis", "Die Lösung", "Die Pfadregel", "Die Sieben schlägt die Sechs", "Die Summenregel", "Eine Fläche, und das Spiel ist fair", "Fehler 1: die halbe Wahrheit", "Fehler 2: Wahrscheinlichkeit fünf", "Fehler 3: der vergessene Weg", "Fehler 4 und 5", "Fünf von neun", "Gleiche Würfel, kein Halbe-halbe", "Jetzt ihr", "Sechs Flächen, nicht drei Zahlen", "Stimmt das wirklich?", "Stufe 1", "Tauschen und Zufall", "Zählen statt raten", "Zwei Stufen", "Zwei Würfel, eine Frage"],
