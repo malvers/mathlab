@@ -1359,13 +1359,23 @@ class CyberUI {
             /* Contact modal (lab mini-rail heart): cyan like hover, not gold like donate modal */
             /* Wide modal for a list or a grid (vorrechnen: all tasks, Doc 26.09.2026) - scrolls inside */
             .cyber-modal.cyber-modal--wide {
-                max-width: min(1200px, 94vw);
-                width: 94vw;
-                max-height: 88vh;
+                max-width: min(1400px, 96vw);
+                width: 96vw;
+                max-height: 92vh;
                 overflow-y: auto;
                 padding: 28px 32px;
                 box-sizing: border-box;
             }
+            /* A small close cross top right, for a modal without a button row (the SVG cross is the caller's) */
+            .cyber-modal-x {
+                position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; padding: 0;
+                display: flex; align-items: center; justify-content: center; cursor: pointer;
+                background: transparent; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px;
+                color: rgba(255, 255, 255, 0.55); transition: all 0.2s;
+            }
+            .cyber-modal-x:hover { color: rgba(255, 255, 255, 0.9); border-color: rgba(255, 255, 255, 0.4); background: rgba(255, 255, 255, 0.05); }
+            .cyber-modal-x:focus { outline: none; }
+            .cyber-modal-x svg { width: 16px; height: 16px; }
             .cyber-modal.cyber-modal--neon {
                 border: 1px solid rgba(0, 210, 255, 0.38);
                 box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 28px rgba(0, 210, 255, 0.14);
