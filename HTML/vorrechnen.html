@@ -848,6 +848,8 @@
                 container.appendChild(host);
             }
             host.innerHTML = '';
+            // without the film strip (only in "Beispiele") the formula sits at the bottom edge
+            host.style.bottom = (testModus ? ZEITLEISTE_H : 0) + 'px';
             if (!view.formelUnten) return;
             analysis.lines.forEach(line => {
                 const erg = zeilenErgebnis[line.lineIdx];
@@ -1050,6 +1052,9 @@
             zeitleiste.querySelector('.zl-knopf').style.left = (24 + b * morphT) + 'px';
             zeitleiste.style.opacity = morphVorbereitet.some(Boolean) ? '1' : '0.35';
             abspielen.style.opacity = zeitleiste.style.opacity;
+            // Doc, 26.09.: "zeig play und slider nur in Beispiel Mode"
+            zeitleiste.style.display = testModus ? '' : 'none';
+            abspielen.style.display = testModus ? 'flex' : 'none';
             zeitleiste.setAttribute('aria-valuenow', morphT.toFixed(2));
         }
 
