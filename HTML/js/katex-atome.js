@@ -238,8 +238,6 @@
         try { katex.render((o.display ? '\\displaystyle ' : '') + latex, host, { throwOnError: false, displayMode: false }); }
         catch (e) { return { atome: [], fehler: e.message, svg: 0 }; }
         await schriftenLaden(host);
-        // nachSatz(host): reshape the set formula before it is read (fonts are in)
-        if (o.nachSatz) o.nachSatz(host);
 
         const rootEl = host.querySelector('.katex-html') || host;
         const r = host.getBoundingClientRect();

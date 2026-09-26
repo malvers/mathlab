@@ -189,22 +189,23 @@
             --papier-grenze: rgba(31, 64, 150, 0.35);
         }
         /* Doc, 26.09.: "die Aufgabe direkt auf der Zeile und noch etwas enger. Im
-           unteren Drittel ... Karos um abzugrenzen" - ruled lines every 64 px down
-           to two thirds, squares of 32 px below. Each is one tile repeated, so every
-           line is drawn the same, also at a device pixel ratio of 1.5. */
-        #papier { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+           unteren Drittel ... Karos um abzugrenzen" - ruled lines every --zeile px
+           down to two thirds, squares of half that below (zeigePapier sets --zeile
+           from the screen, 64 px on a 1080 board). Each is one tile repeated, so
+           every line is drawn the same, also at a device pixel ratio of 1.5. */
+        #papier { --zeile: 64px; position: absolute; inset: 0; z-index: -1; pointer-events: none; }
         #papier .linien {
             position: absolute; left: 0; right: 0; top: 0;
-            background-image: linear-gradient(to bottom, transparent 63px, var(--papier-linie) 63px);
-            background-size: 100% 64px;
+            background-image: linear-gradient(to bottom, transparent calc(var(--zeile) - 1px), var(--papier-linie) calc(var(--zeile) - 1px));
+            background-size: 100% var(--zeile);
         }
         #papier .karo {
             position: absolute; left: 0; right: 0; bottom: 0;
             border-top: 2px solid var(--papier-grenze);
             background-image:
-                linear-gradient(to bottom, transparent 31px, var(--papier-karo) 31px),
-                linear-gradient(to right, transparent 31px, var(--papier-karo) 31px);
-            background-size: 32px 32px;
+                linear-gradient(to bottom, transparent calc(var(--zeile) / 2 - 1px), var(--papier-karo) calc(var(--zeile) / 2 - 1px)),
+                linear-gradient(to right, transparent calc(var(--zeile) / 2 - 1px), var(--papier-karo) calc(var(--zeile) / 2 - 1px));
+            background-size: calc(var(--zeile) / 2) calc(var(--zeile) / 2);
         }
         #canvas-container.hell :is(#tafel-pfeil-vor, #tafel-pfeil-zurueck, #zl-play) {
             color: #5d6678 !important;
@@ -223,7 +224,7 @@
             background: var(--anzeige-grund, #050d1c);
         }
         body.anzeige :is(#cyber-left-chrome, #mini-rail, #side-panel, #right-rail, #tafel-pfeil-vor, #tafel-pfeil-zurueck, #formel-schicht, #erkennen-klein,
-            #schritt-hinweis, #notiz-rand, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play) {
+            #schritt-hinweis, #schritt-op, #notiz-rand, #notiz-leeren, #seite-leeren, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play) {
             display: none !important;
         }
         /* Doc, 26.09.: "nimm bitte HIER das LOCAL rechts oben nach links unten
@@ -258,23 +259,32 @@
            sehe ja nur ich" - larger, bold, a strong frame with a glow. "Wenn der
            Prozess des Erkennens läuft ... eine Welle" - while Gemini reads, a wave
            runs through the button instead of its word (same size, nothing jumps) */
-        #erkennen-klein {
-            position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); z-index: 5;
+        /* Doc, 26.09.: "Der Erkennen-Button muss in das Feld, was rechts ist ... Ich
+           komme oft mit dem Finger dran" - in the notes margin, where nothing is
+           read; then "kann kleiner sein und sollte links neben dem C stehen, immer
+           unten. Weniger Platz ist, macht die beiden Buttons einfach kleiner" -
+           --knopf scales both when the margin is narrow (erkennenKlein) */
+        /* Doc, 26.09.: the notes' C "im gleichen Stil wie Erkennen, auch die
+           Buchstabengröße und Font" - one look for both buttons in the margin */
+        :is(#erkennen-klein, #notiz-leeren, #seite-leeren) {
+            position: absolute; z-index: 5;
             display: flex; align-items: center; justify-content: center; box-sizing: border-box;
-            min-width: 210px; height: 46px; padding: 0 26px; border-radius: 8px; cursor: pointer; touch-action: manipulation;
-            font-family: 'Orbitron', sans-serif; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.14em;
+            bottom: 12px; height: calc(46px * var(--knopf, 1)); border-radius: 8px; cursor: pointer; touch-action: manipulation;
+            font-family: 'Orbitron', sans-serif; font-size: calc(1.05rem * var(--knopf, 1)); font-weight: 700; letter-spacing: 0.14em;
             color: #eaf0f7; border: 2px solid rgba(0, 210, 255, 0.85);
             /* opaque, so the squares do not show through: the tint over the board's colour there */
             background: linear-gradient(rgba(0, 210, 255, 0.14), rgba(0, 210, 255, 0.14)) #07162f;
             box-shadow: 0 0 14px rgba(0, 210, 255, 0.35);
         }
-        #canvas-container.hell #erkennen-klein {
+        #canvas-container.hell :is(#erkennen-klein, #notiz-leeren, #seite-leeren) {
             color: rgb(31, 64, 150); border-color: rgba(31, 64, 150, 0.85);
             background: linear-gradient(rgba(31, 64, 150, 0.08), rgba(31, 64, 150, 0.08)) #f4ecd8;
             box-shadow: none;
         }
+        /* at the margin's line (left: erkennenKlein); a fixed width, so the wave takes the word's place without a jump */
+        #erkennen-klein { width: calc(150px * var(--knopf, 1)); padding: 0; }
         #erkennen-klein .erk-welle {
-            display: none; width: 150px; height: 24px;
+            display: none; width: calc(110px * var(--knopf, 1)); height: calc(24px * var(--knopf, 1));
             -webkit-mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
             mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
         }
@@ -292,19 +302,36 @@
         /* Doc, 26.09.: the next step of the solution, grey, for Doc only - at the top
            of the squares, under the ink (z-index -1 after #papier: over the paper,
            under the canvas), never on the beamer (no mirrored layer, hidden there) */
+        /* Doc, 26.09.: "die graue Formel unten ungefähr 80% so groß ... und pack die links
+           in die Ecke oben in das Karo-Feld" */
         #schritt-hinweis {
-            position: absolute; left: 0; right: 0; z-index: -1; pointer-events: none;
-            display: flex; justify-content: center;
+            position: absolute; left: 24px; right: 0; z-index: -1; pointer-events: none;
+            display: flex; justify-content: flex-start;
             white-space: nowrap; color: #8a93a3;
-            font-size: 2.2rem;         /* a size to read and copy, not the working's (RECHEN_SCHRIFT) */
+            font-size: 1.76rem;        /* 80 % of 2.2rem; its own size, not the working's (rechenSchrift()) */
         }
         #canvas-container.hell #schritt-hinweis { color: #7a8294; }
-        /* the edge of the notes margin (right third of the squares): dashed, under the ink */
+        /* the operation to it, top left in the notes margin at its line - the grey
+           line's mirror (Doc, 26.09.: "so wie erkennen links an die gestrichelte
+           Linie ... symmetrisch zur Formel links"); left set by zeigeHinweis */
+        #schritt-op {
+            position: absolute; z-index: -1; pointer-events: none; width: max-content;   /* passeEin measures the real width */
+            white-space: nowrap; color: #8a93a3; font-size: 1.76rem;
+        }
+        #canvas-container.hell #schritt-op { color: #7a8294; }
+        /* the edge of the notes margin (right quarter of the squares): dashed, under the ink */
         #notiz-rand {
             position: absolute; bottom: 0; width: 0; z-index: -1; pointer-events: none;
             border-left: 2px dashed rgba(234, 240, 247, 0.3);
         }
         #canvas-container.hell #notiz-rand { border-left-color: rgba(31, 64, 150, 0.4); }
+        /* the notes' own C, bottom right in the margin (Doc only) - a letter like
+           ERKENNEN's (Doc asked for its size and font), its look shared above */
+        #notiz-leeren { right: 12px; width: calc(46px * var(--knopf, 1)); padding: 0; letter-spacing: 0; }
+        /* the writing field's own C: in the field, bottom, 12 px left of the margin's line
+           (Doc, 26.09.: "in dem Feld, wo ich die Formel schreibe, links neben die
+           gestrichelte Linie"); right set by zeigeNotizRand */
+        #seite-leeren { width: calc(46px * var(--knopf, 1)); padding: 0; letter-spacing: 0; }
         /* Doc, 26.09.: "bitte keine selects" - the board's own buttons (◀ ▶, ERKENNEN,
            PLAY) are tapped, never tabbed through: no focus ring after a key press */
         #canvas-container button:focus { outline: none; }
@@ -313,6 +340,23 @@
         .erk-warn { color: rgb(245, 194, 66); }
         .erk-fehler { color: rgb(176, 36, 24); }
         .erk-info { opacity: 0.6; font-size: 0.8rem; }
+
+        /* Doc, 26.09.: all tasks in one panel (central modal, the grid is the lab's) */
+        #aufgaben-overlay { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+        #aufgaben-overlay .aufgaben-liste {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px;
+        }
+        #aufgaben-overlay .aufgabe-karte {
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 8px;
+            min-height: 150px; padding: 14px 12px 12px; box-sizing: border-box; cursor: pointer; touch-action: manipulation;
+            color: #eaf0f7; background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.25); border-radius: 12px;
+        }
+        #aufgaben-overlay .aufgabe-karte:focus { outline: none; }
+        #aufgaben-overlay .aufgabe-karte.aktuell { border-color: #00d2ff; box-shadow: 0 0 16px rgba(0, 210, 255, 0.45); }
+        #aufgaben-overlay :is(.ak-nr, .ak-nach) {
+            font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 0.1em; color: #8a93a3;
+        }
+        #aufgaben-overlay .ak-formel { font-size: 1.35rem; white-space: nowrap; }
     </style>
 </head>
 
@@ -636,6 +680,7 @@
             if (!geste && [...finger.values()].filter(f => !f.weg).length >= 2) {
                 geste = true;
                 gesteAbgebrochen = false;
+                verlaufGesteBeginnt();
                 if (current && current.pointerType === 'touch') { current = null; currentId = null; redrawBald(); }
             }
             return geste;
@@ -643,6 +688,7 @@
         function fingerZieht(ev) {
             const f = finger.get(ev.pointerId);
             if (f && !f.weg) { f.x = ev.clientX; f.y = ev.clientY; }
+            if (geste && f) verlaufZiehen([...finger.values()]);      // two fingers down: back in time
             return geste && !!f;
         }
         function fingerHoch(ev) {
@@ -659,6 +705,7 @@
             const dy = alle.reduce((s, g) => s + g.y - g.y0, 0) / alle.length;
             finger.clear();
             geste = false;
+            if (verlaufZug) { verlaufLoslassen(); return true; }        // it was scrolling, not a send
             if (!gesteAbgebrochen && dy < -WISCH && Math.abs(dy) > Math.abs(dx)) rechenwegHoch();
             return true;
         }
@@ -718,6 +765,10 @@
         // recognition away. A tap is held back for a moment: a second tap on
         // the same spot switches and neither stays; otherwise it lands as a dot.
         // A colon's dots sit apart, one above the other, so they still write.
+        // Only in "Beispiele" now (Doc, 26.09.: "ja, absolut gute Idee"): in class a
+        // small colon ("| :3" in the notes) or a dot set down twice switched the
+        // morph by accident and vanished; there a tap is a dot at once. The switch
+        // stays in the card "Modus".
         const TIPP_GROESSE = 10;           // px: a stroke this small is a tap
         const TIPP_FENSTER = 300;          // ms between the two taps (Doc: ~150)
         const TIPP_ABSTAND = 25;           // px sideways between the two taps
@@ -732,8 +783,11 @@
             if (s.points.length < 2) return false;
             merkeVerlauf();
             strokes.push(s);
-            erkennenStand++;
             merkeBeispiel(false);
+            // a note in the margin changes nothing that was read: the recognised
+            // line stays, no second round with Gemini (the notes margin)
+            if (notizPruefer()(s)) return true;
+            erkennenStand++;
             if (zeilenErgebnis.length) verwerfeErkennung();
             autoBald();
             return true;
@@ -744,9 +798,13 @@
         // clock, a pen or finger on the page stops it. Only lines not yet
         // recognised (or failed) are sent. In class only - with "Meine
         // Beispiele" every pause would save half a line as a probe.
+        // Doc, 26.09. evening: "startet das Erkennen noch automatisch? ... das ist keine
+        // gute Idee. Ich tippe da lieber" - off unless the "Auto" box is ticked; after
+        // a tap on ERKENNEN the line still flies up at once. A new key: an "on" stored
+        // under the old one must not keep it on.
         const AUTO_PAUSE = 2000;           // ms without input
-        let autoErkennen = true, autoTimer = null;
-        try { const v = localStorage.getItem('vorrechnen-auto'); if (v !== null) autoErkennen = v === '1'; } catch (_) {}
+        let autoErkennen = false, autoTimer = null;
+        try { const v = localStorage.getItem('vorrechnen-auto-erkennen'); if (v !== null) autoErkennen = v === '1'; } catch (_) {}
         function autoBald() {
             clearTimeout(autoTimer);
             if (!autoErkennen || testModus) return;
@@ -772,7 +830,7 @@
             currentId = null;
             const s = current;
             current = null;
-            if (istTipp(s)) {
+            if (testModus && istTipp(s)) {
                 const p = s.points[0], jetzt = performance.now();
                 if (tipp && jetzt - tipp.zeit < TIPP_FENSTER &&
                     Math.abs(p.x - tipp.x) < TIPP_ABSTAND && Math.abs(p.y - tipp.y) < TIPP_HOEHE) {
@@ -810,14 +868,22 @@
 
         // Doc, 26.09.: "Gib mir bitte unten ein Drittel auf der rechten Seite, wo ich
         // Anweisungen schreiben kann, die aber nicht mit transkribiert werden ...
-        // senkrechter Strich, wir teilen durch drei" - the right third of the squares
-        // is a margin for notes: its ink stays on the board (the class sees it), but
+        // senkrechter Strich, wir teilen durch drei", then "ein Viertel reicht" - the
+        // right quarter of the squares is a margin for notes: its ink stays on the board (the class sees it), but
         // it is never read and never flies up; it goes with the line it belonged to.
         // A stroke counts by the middle of its box. Not in "Beispiele" (the corpus).
-        const NOTIZ_ANTEIL = 1 / 3;
+        const NOTIZ_ANTEIL = 1 / 4;
+        // where the margin starts, px from the left: on a line of the squares (Doc,
+        // 26.09.: "die gestrichelte Linie soll coincide mit dem Karo") - the squares'
+        // lines lie at k * ZEILE/2 - 1 (#papier .karo). Every part of the margin -
+        // its line, what is read, the hint, the buttons - takes it from here.
+        function notizX(breite) {
+            const karo = ZEILE / 2;
+            return Math.round(breite * (1 - NOTIZ_ANTEIL) / karo) * karo - 1;
+        }
         function notizPruefer() {
             if (modus === 'beispiele') return () => false;
-            const r = container.getBoundingClientRect(), x0 = r.width * (1 - NOTIZ_ANTEIL), y0 = papierGrenze(r.height);
+            const r = container.getBoundingClientRect(), x0 = notizX(r.width), y0 = papierGrenze(r.height);
             return s => {
                 if (!s.points || !s.points.length) return false;
                 const b = StrokeSymbols.bboxOfPoints(s.points);
@@ -832,6 +898,10 @@
             strokes.forEach((s, i) => { if (!istNotiz(s)) nr.push(i); });
             analysis = StrokeSymbols.analyse(nr.map(i => strokes[i]), opts);
             if (nr.length !== strokes.length) analysis.symbols.forEach(sy => { sy.strokeIdxs = sy.strokeIdxs.map(k => nr[k]); });
+            const nk = document.getElementById('notiz-leeren');
+            if (nk) nk.style.opacity = nr.length < strokes.length ? '' : '0.35';     // no notes: dimmed
+            const sk = document.getElementById('seite-leeren');
+            if (sk) sk.style.opacity = nr.length ? '' : '0.35';                     // nothing written: dimmed
             redraw();
             updateStats();
         }
@@ -977,75 +1047,110 @@
         // hand a formula is written in display style, so every formula on this
         // page - template, measurement, the end of the morph, the recognised one
         // - is set that way.
-        function alsDisplay(latex) { return '\\displaystyle ' + latex; }
+        function alsDisplay(latex) { return '\\displaystyle ' + engeBrueche(latex); }
 
         // Doc, 26.09.: "kommen so große Abstände aus LaTeX?" - yes: in display
         // style TeX lifts every numerator and lowers every denominator by the
-        // same fixed amount, whatever they hold. Then "JA" to closing them up:
-        // numerator and denominator come to BRUCH_LUECKE from the bar, as by hand
-        // (only closer - a gap already smaller stays). The ink is measured on a
-        // canvas; KaTeX's boxes are taller than the glyphs. wurzel: an element
-        // KaTeX has rendered into, on the page, fonts loaded - every formula on
-        // the board goes through here, so the morph lands on what is shown.
-        const BRUCH_LUECKE = 0.2;          // em between bar and ink
-        function bruchEng(wurzel) {
-            if (!wurzel) return;
-            const ctx = bruchEng.ctx || (bruchEng.ctx = document.createElement('canvas').getContext('2d'));
-            // how far the glyphs, lines and SVGs (roots) in el reach, in page px
-            const tinte = el => {
-                let o = Infinity, u = -Infinity;
-                el.querySelectorAll('svg, .frac-line, .sqrt-line, .overline-line, .underline-line').forEach(x => {
-                    const r = x.getBoundingClientRect();
-                    if (r.width || r.height) { o = Math.min(o, r.top); u = Math.max(u, r.bottom); }
-                });
-                const gang = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-                for (let t = gang.nextNode(); t; t = gang.nextNode()) {
-                    const text = t.textContent.replace(/​/g, '');
-                    if (!text.trim() || t.parentElement.closest('svg')) continue;
-                    const p = t.parentElement, cs = getComputedStyle(p);
-                    ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-                    const m = ctx.measureText(text);
-                    const sonde = document.createElement('span');          // on the text's baseline
-                    sonde.style.cssText = 'display:inline-block;width:0;height:0';
-                    p.appendChild(sonde);
-                    const y = sonde.getBoundingClientRect().top;
-                    sonde.remove();
-                    o = Math.min(o, y - m.actualBoundingBoxAscent); u = Math.max(u, y + m.actualBoundingBoxDescent);
+        // same fixed amount, whatever they hold. Then "JA" to closing them up,
+        // and "die Wurzeln nicht so wahnsinnig auseinandergezogen" - so it is
+        // done in the LaTeX, before KaTeX sets it: the numerator goes down, the
+        // denominator up, and KaTeX stops each at its least distance from the
+        // bar (3 bar widths) - and sizes roots and \left( \right) around the
+        // tight fraction. Only fractions set in display style (not those in a
+        // numerator or an exponent: they are small and tight already).
+        function engeBrueche(latex, display = true) {
+            let aus = '', i = 0;
+            const n = latex.length;
+            // one argument: a {group} or a single token
+            const arg = () => {
+                while (latex[i] === ' ') i++;
+                if (latex[i] === '{') {
+                    const s = ++i;
+                    for (let t = 1; i < n; i++) {
+                        if (latex[i] === '\\') { i++; continue; }
+                        if (latex[i] === '{') t++;
+                        else if (latex[i] === '}' && --t === 0) break;
+                    }
+                    return { text: latex.slice(s, i++), gruppe: true };
                 }
-                return isFinite(o) ? { o, u } : null;
+                return { text: befehl() || latex[i++] || '', gruppe: false };
             };
-            // a part of the stack moves by px (KaTeX places it with top in em)
-            const rueck = (k, px) => { k.style.top = (parseFloat(k.style.top) + px / parseFloat(getComputedStyle(k).fontSize)) + 'em'; };
-            // innermost first: a fraction in a numerator is closed up before its outer one measures it
-            [...wurzel.querySelectorAll('.mfrac')].reverse().forEach(f => {
-                // a root or \left( \right) was sized for the fraction as TeX set it
-                if (f.closest('.sqrt, .minner')) return;
-                const vl = f.querySelector(':scope > .vlist-t > .vlist-r > .vlist');
-                if (!vl) return;
-                // KaTeX stacks them bottom up: denominator, bar, numerator
-                const teile = [...vl.children], i = teile.findIndex(k => k.querySelector('.frac-line'));
-                if (i < 0) return;                 // \binom: no bar
-                const strich = teile[i].querySelector('.frac-line').getBoundingClientRect();
-                const luecke = BRUCH_LUECKE * parseFloat(getComputedStyle(f).fontSize);
-                const zaehler = teile[i + 1], nenner = teile[i - 1];
-                const z = zaehler && tinte(zaehler), n = nenner && tinte(nenner);
-                if (z && strich.top - z.u > luecke) rueck(zaehler, strich.top - z.u - luecke);
-                if (n && n.o - strich.bottom > luecke) rueck(nenner, -(n.o - strich.bottom - luecke));
+            // a \command at i (or nothing)
+            const befehl = () => {
+                if (latex[i] !== '\\') return '';
+                const s = i++;
+                if (/[a-zA-Z]/.test(latex[i] || '')) while (i < n && /[a-zA-Z]/.test(latex[i])) i++;
+                else i++;
+                return latex.slice(s, i);
+            };
+            while (i < n) {
+                const c = latex[i];
+                if (c === '\\') {
+                    const b = befehl();
+                    if (b === '\\frac' || b === '\\dfrac') {
+                        const z = engeBrueche(arg().text, false), m = engeBrueche(arg().text, false);
+                        aus += display || b === '\\dfrac'
+                            ? `${b}{\\raisebox{-0.3em}{$${z}$}}{\\raisebox{0.6em}{$${m}$}}` : `${b}{${z}}{${m}}`;
+                        continue;
+                    }
+                    if (b === '\\displaystyle') display = true;
+                    else if (/^\\(text|script|scriptscript)style$/.test(b)) display = false;
+                    aus += b;
+                } else if (c === '^' || c === '_') {
+                    i++;
+                    const a = arg();
+                    aus += c + (a.gruppe ? '{' + engeBrueche(a.text, false) + '}' : a.text);
+                } else if (c === '{') {
+                    aus += '{' + engeBrueche(arg().text, display) + '}';
+                } else { aus += c; i++; }
+            }
+            return aus;
+        }
+
+        // How far the ink of a set formula reaches, in page px: glyphs measured
+        // on a canvas at their baseline, lines and SVGs (roots) by their boxes.
+        // KaTeX's boxes are taller than the glyphs - and a denominator raised by
+        // engeBrueche keeps its full depth there.
+        const tinteCtx = document.createElement('canvas').getContext('2d');
+        function tinte(el) {
+            let o = Infinity, u = -Infinity;
+            el.querySelectorAll('svg, .frac-line, .sqrt-line, .overline-line, .underline-line').forEach(x => {
+                const r = x.getBoundingClientRect();
+                if (r.width || r.height) { o = Math.min(o, r.top); u = Math.max(u, r.bottom); }
             });
+            const texte = [], gang = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+            for (let t = gang.nextNode(); t; t = gang.nextNode()) {
+                const text = t.textContent.replace(/​/g, '');
+                if (!text.trim() || t.parentElement.closest('svg, .katex-mathml')) continue;
+                const sonde = document.createElement('span');          // on the text's baseline
+                sonde.style.cssText = 'display:inline-block;width:0;height:0';
+                t.parentElement.appendChild(sonde);
+                texte.push({ text, p: t.parentElement, sonde });
+            }
+            // all probes in, then all read: one layout, not one per glyph
+            texte.forEach(x => { x.y = x.sonde.getBoundingClientRect().top; });
+            texte.forEach(({ text, p, sonde, y }) => {
+                sonde.remove();
+                const cs = getComputedStyle(p);
+                tinteCtx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+                const m = tinteCtx.measureText(text);
+                o = Math.min(o, y - m.actualBoundingBoxAscent); u = Math.max(u, y + m.actualBoundingBoxDescent);
+            });
+            return isFinite(o) ? { o, u } : null;
         }
 
         // Shrink a rendered formula (font size in rem) until it fits `frei` px.
-        function passeEin(el, frei) {
+        function passeEin(el, frei, basis = 2.4) {             // basis: its font size in rem
             if (!el || frei <= 0) return;
             const breit = el.getBoundingClientRect().width;     // scrollWidth is 0 for an inline span
-            if (breit > frei) el.style.fontSize = (2.4 * frei / breit).toFixed(3) + 'rem';
+            if (breit > frei) el.style.fontSize = (basis * frei / breit).toFixed(3) + 'rem';
         }
 
         // KaTeX sets the formula; the atoms say where every glyph sits. Then the
         // whole block is scaled and moved onto the handwriting: same height as
         // the row, left edge aligned, centred vertically - Doc's "gleiche Größe".
         async function formelAufZeile(latex, line) {
-            const m = await KatexAtome.atomeAusLatex(latex, messHost(), { fontSize: 100, display: true, nachSatz: bruchEng });
+            const m = await KatexAtome.atomeAusLatex(engeBrueche(latex), messHost(), { fontSize: 100, display: true });
             const u = KatexAtome.umfang(m.atome);
             let atome = m.atome;
             // where KaTeX's box sat inside the measuring host - the real formula
@@ -1195,6 +1300,13 @@
             redraw();
             // Every ERKENNEN is a probe for the corpus, good or bad.
             if (strokes.length) speichereProbe();
+            // Doc, 26.09. evening: "Wenn das erkannt ist, starte bitte die Animation
+            // sofort" - in class the recognised page flies up at once, no tap needed.
+            // By itself only a whole step: every line with an "=" (a pause in the
+            // middle sent "1/f - 1/g" up without its "= 1/b"); a tap or two fingers
+            // still send anything
+            const ganz = analysis.lines.every(l => zuKlein(l) || (zeilenErgebnis[l.lineIdx] && /=/.test(zeilenErgebnis[l.lineIdx].latex || '')));
+            if (!testModus && seiteErkannt() && ganz) rechenwegHoch();
         }
 
         // The typeset formula under the handwriting - real LaTeX, set by KaTeX.
@@ -1356,7 +1468,6 @@
                     `white-space:nowrap;line-height:normal;color:${farbe}`;
                 host.appendChild(d);
                 try { katex.render(alsDisplay(z.latex), d, { throwOnError: false, displayMode: false }); } catch (_) { return; }
-                bruchEng(d);
                 // land on the measured spot: correct whatever the surroundings shifted
                 const k = d.querySelector('.katex-html');
                 if (!k) return;
@@ -1560,24 +1671,54 @@
             }
             return [latex, ''];
         }
-        const ZEILE = 64;                  // px between the ruled lines (#papier)
-        // Doc, 26.09.: "mach mal die 3x 80% der Zeile aber y mittig und die Brüche
-        // wieder groß", then "Großbuchstaben mittig 80% geben die Grundlinie vor" -
-        // a capital fills 80 % of a line, in its middle; that sets the baseline.
-        // A fraction keeps its full size: numerator in the line above, the bar
-        // and the "=" in the row's own line, denominator in the line below.
-        const VERSAL = 0.8 * ZEILE;        // px, a capital's height in the working
-        const VERSAL_EM = 0.68333;         // a capital's height in KaTeX_Main, in em
-        const LINIE_AB = (ZEILE - VERSAL) / 2;   // px from the baseline down to the ruled line
-        // One size for the task and every step, the flying line included
-        // (.katex sets itself 1.21 times the size around it)
-        const RECHEN_SCHRIFT = (VERSAL / VERSAL_EM / 1.21).toFixed(1) + 'px';
+        // Doc, 26.09.: "die Zeilengröße müssen wir an den Bildschirm anpassen" - a
+        // fixed number of ruled lines above the squares; the line height follows
+        // the board's height (even, so the squares stay whole pixels). The paper
+        // takes it as --zeile.
+        const LINIEN = 11;                 // ruled lines above the squares
+        let ZEILE = 64;                    // px between the ruled lines (zeileMessen)
+        function zeileMessen() {
+            const h = container.getBoundingClientRect().height;
+            if (h > 0) ZEILE = Math.max(32, 2 * Math.floor(h * 2 / 3 / LINIEN / 2));
+        }
+        // Doc, 26.09.: first "Großbuchstaben mittig 80%", then "die 80% in der
+        // Zeile sind offensichtlich zu groß ... Klammern ragen über die untere
+        // Zeile" - a parenthesis (1 em in KaTeX, 0.75 above the baseline and 0.25
+        // below) fills 85 % of a line, and the math axis - the middle of a
+        // parenthesis, the bar of a fraction, the "=" - lies on the middle of the
+        // line. Capitals come to about 60 %.
+        const KLAMMER = 0.85;              // a parenthesis' share of a line
+        const ACHSE_EM = 0.25;             // the math axis above the baseline, in em
+        // px of KaTeX's em at full size; one size for the task and every step,
+        // the flying line included
+        const rechenEm = () => KLAMMER * ZEILE;
+        // the font size around the formula (.katex sets itself 1.21 times that)
+        const rechenSchrift = () => (rechenEm() / 1.21).toFixed(2) + 'px';
+        // px from the baseline of a row at size s down to its ruled line
+        const linieAb = s => ZEILE / 2 - ACHSE_EM * rechenEm() * s;
         // verborgenAb: steps from this index on are laid out but not yet shown -
         // they are where the flying lines land
         // Doc, 26.09.: "die Aufgabe direkt auf der Zeile" - every row sits in a
         // line of its own, and takes the lines above and below that its
         // fractions reach into. The "=" stay in one column (left cell ends
         // there, right starts).
+        // Doc, 26.09.: "Wenn da steht x ist gleich irgendwas, dann ist das
+        // offensichtlich das Ergebnis. Und das kann man sofort automatisch doppelt
+        // unterstreichen" - the last step that reads VAR = something without VAR,
+        // VAR being what the task asks for; never the task itself, not in Frei (no
+        // task, no VAR). -1 when there is none.
+        function ergebnisSchritt() {
+            if (!aufgabenModus) return -1;
+            const v = AUFGABEN[aufgabeIdx][2];
+            for (let i = rechenweg.length - 1; i >= 0; i--) {
+                const [l, r] = amGleich(rechenweg[i].latex.replace(UNGEFAEHR, '='));
+                const links = l.replace(/\\displaystyle|[\s{}]/g, '');
+                // every letter left once the commands (\frac, \cdot) are gone is a variable
+                const rechts = r.replace(/^\{\}=/, '').replace(/\\[a-zA-Z]+/g, ' ');
+                if (links === v && rechts.replace(/[\s{}]/g, '') && !rechts.includes(v)) return i;
+            }
+            return -1;
+        }
         let rechenwegWartet = false;
         let rechenwegLinie = 0;            // the last line the working takes (schaetzeZiel)
         function zeigeRechenweg(verborgenAb) {
@@ -1586,9 +1727,11 @@
             if (!host) {
                 host = document.createElement('div');
                 host.id = 'rechenweg-schicht';
-                host.style.cssText = `position:absolute;left:0;top:0;right:0;height:0;pointer-events:none;font-size:${RECHEN_SCHRIFT}`;
+                host.style.cssText = 'position:absolute;left:0;top:0;right:0;height:0;pointer-events:none';
                 container.appendChild(host);
             }
+            zeileMessen();
+            host.style.fontSize = rechenSchrift();
             const kopf = document.getElementById('vorlage-schicht');
             if (!kopf) return;                 // at start: zeigeVorlage() builds it and calls back
             host.style.color = anzeige(INK);
@@ -1605,56 +1748,123 @@
                 sonde.style.cssText = 'display:inline-block;width:0;height:0';
                 d.appendChild(sonde);
                 host.appendChild(d);
-                bruchEng(d);
                 return d;
             };
+            const ergebnis = ergebnisSchritt();
             const zeile = (latex, schritt, verborgen, farbe) => {
                 const [l, r] = amGleich(latex);
-                zeilen.push({ links: zelle(l, schritt, verborgen, farbe), rechts: zelle(r, schritt, verborgen, farbe) });
+                zeilen.push({ links: zelle(l, schritt, verborgen, farbe), rechts: zelle(r, schritt, verborgen, farbe),
+                    schritt, verborgen, farbe, ergebnis: schritt === ergebnis });
             };
             if (aufgabenModus) zeile(AUFGABEN[aufgabeIdx][1], 'aufgabe', false);
             rechenweg.forEach((e, i) => zeile(e.latex.replace(UNGEFAEHR, '='), i, (verborgenAb !== undefined && i >= verborgenAb) || imFlug.has(i), e.farbe));
-            // width, where the baseline lies in the cell, and how far the
-            // formula reaches above and below it (KaTeX's struts; the cell's
-            // own line box is far taller than the ink)
+            // the double underline of the result: two lines UNTER_EM apart under
+            // the ink, the first as far below it (in em of the row)
+            const UNTER_EM = 0.12, unterDicke = em => Math.max(1.5, 0.05 * em);
+            // width, where the baseline lies in the cell, and how far the ink
+            // reaches above and below it (the cell's own line box is far taller)
+            // - all of it, and the fractions on their own
             const mass = d => {
                 const r = d.getBoundingClientRect(), b = d.lastChild.getBoundingClientRect().top;
-                let hoch = 0, tief = 0;
-                d.querySelectorAll('.strut').forEach(s => {
-                    const q = s.getBoundingClientRect();
-                    hoch = Math.max(hoch, b - q.top); tief = Math.max(tief, q.bottom - b);
+                const t = tinte(d) || { o: b, u: b };
+                let bruchHoch = 0, bruchTief = 0;
+                d.querySelectorAll('.mfrac').forEach(f => {
+                    const q = tinte(f);
+                    if (q) { bruchHoch = Math.max(bruchHoch, b - q.o); bruchTief = Math.max(bruchTief, q.u - b); }
                 });
-                return { w: r.width, auf: b - r.top, hoch, tief };
+                return { w: r.width, auf: b - r.top, hoch: b - t.o, tief: t.u - b, bruchHoch, bruchTief };
             };
             zeilen.forEach(z => { z.l = mass(z.links); z.r = mass(z.rechts); });
-            const lmax = Math.max(0, ...zeilen.map(z => z.l.w)), rmax = Math.max(0, ...zeilen.map(z => z.r.w));
-            const gleichX = (container.getBoundingClientRect().width - lmax - rmax) / 2 + lmax;
             // down the lines, from the second line (or under the template strip).
             // Line n runs from (n-1)*ZEILE - 1 to n*ZEILE - 1. A row takes a line
             // of its own plus every line above and below that it reaches more
-            // than a quarter into - a parenthesis may stick out that far, as by
-            // hand, a fraction takes the lines above and below.
+            // than a quarter into - a parenthesis or an exponent may stick out
+            // that far, as by hand. A fraction keeps an eighth of a line of air
+            // from the ink of the row above and below: its numerator's x stood
+            // right under the x of the row above.
             // Doc, 26.09.: "beginne IMMER in der 2. Zeile ... oder 3. wenn nötig
             // nicht erste" - the first row's own line (the "=") is the second; a
             // numerator may use the first. The third only when more stands above
             // (a root over a fraction), never the first.
-            const ragt = ZEILE / 4;
-            const oberhalb = hoch => Math.max(0, Math.ceil((hoch - (ZEILE - LINIE_AB) - ragt) / ZEILE));
-            const unterhalb = tief => Math.max(0, Math.ceil((tief - LINIE_AB - ragt) / ZEILE));
-            let linie = testModus ? Math.ceil(kopf.getBoundingClientRect().height / ZEILE) : 0;
+            const ragt = ZEILE / 4, luft = ZEILE / 8;
+            const linien = (weit, frei) => Math.max(0, Math.ceil((weit - frei - ragt) / ZEILE));
+            const erste = testModus ? Math.ceil(kopf.getBoundingClientRect().height / ZEILE) : 0;
+            // the rows at sizes s[i]: on which line each stands, and the last line taken
+            const legen = s => {
+                let linie = erste, vor = null;
+                const lage = zeilen.map((z, i) => {
+                    const ab = linieAb(s[i]);
+                    const hoch = s[i] * Math.max(z.l.hoch, z.r.hoch);
+                    // the result's double underline takes its room below the ink
+                    const unter = z.ergebnis ? 2 * UNTER_EM * rechenEm() + unterDicke(rechenEm()) : 0;
+                    const tief = s[i] * (Math.max(z.l.tief, z.r.tief) + unter);
+                    const bruch = z.l.bruchHoch || z.r.bruchHoch || z.l.bruchTief || z.r.bruchTief;
+                    linie += 1 + linien(hoch, ZEILE - ab);
+                    if (i === 0) linie = Math.max(linie, 2);
+                    if (vor && (bruch || vor.bruch)) {
+                        while (linie * ZEILE - 1 - ab - hoch - (vor.basis + vor.tief) < luft) linie++;
+                    }
+                    const hier = { linie, ab, basis: linie * ZEILE - 1 - ab, tief, bruch };
+                    linie += linien(tief, ab);
+                    vor = hier;
+                    return hier;
+                });
+                return { lage, linie };
+            };
+            // Doc, 26.09.: the task "breiter als der Platz zwischen 'Aufgabe 6 / 20'
+            // und 'umstellen nach x'" on the Lenovo - all rows shrink together
+            // until the widest fits, the task with its two labels beside it
+            const c = container.getBoundingClientRect(), RAND = 16;
+            const zaehler = kopf.querySelector('span'), nach = document.getElementById('vorlage-nach');
+            const zw = aufgabenModus && zaehler ? zaehler.getBoundingClientRect().width : 0;
+            const nw = aufgabenModus && nach ? nach.getBoundingClientRect().width : 0;
+            const spalte = s => {
+                const lm = Math.max(0, ...zeilen.map((z, i) => s[i] * z.l.w)), rm = Math.max(0, ...zeilen.map((z, i) => s[i] * z.r.w));
+                return { lm, rm, x: (c.width - lm - rm) / 2 + lm };
+            };
+            const passtBreit = s => {
+                const { lm, rm, x } = spalte(s);
+                if (lm + rm > c.width - 2 * RAND) return false;
+                if (!aufgabenModus || !zeilen.length) return true;
+                return x - s[0] * zeilen[0].l.w - 48 - zw >= RAND && x + s[0] * zeilen[0].r.w + 48 + nw <= c.width - RAND;
+            };
+            let g = 1;
+            while (g > 0.3 && !passtBreit(zeilen.map(() => g))) g -= 0.02;
+            // Doc, 26.09.: "jedes Mal, wenn eine neue Zeile dazukommt, werden die
+            // oben kleiner und die nächste ein bisschen weniger kleiner ... so eine
+            // Pyramiden-Size" - the newest row at full size, each older one q
+            // times the next, q as large as lets everything end above the squares
+            // (the task counts too). Never below half size; what does not fit
+            // then runs into the squares for now (scrolling, a fit button: later).
+            const platz = papierGrenze(c.height) / ZEILE;
+            const groessen = q => zeilen.map((_, i) => g * Math.max(0.5, Math.pow(q, zeilen.length - 1 - i)));
+            let s = groessen(1), gelegt = legen(s);
+            for (let q = 0.98; gelegt.linie > platz && q >= 0.5; q -= 0.02) { s = groessen(q); gelegt = legen(s); }
+            const gleichX = spalte(s).x, F = parseFloat(host.style.fontSize);
             zeilen.forEach((z, i) => {
-                const hoch = Math.max(z.l.hoch, z.r.hoch), tief = Math.max(z.l.tief, z.r.tief);
-                linie += 1 + oberhalb(hoch);
-                if (i === 0) linie = Math.max(linie, 2);
-                const basis = linie * ZEILE - 1 - LINIE_AB;
-                z.links.style.left = (gleichX - z.l.w) + 'px';
-                z.links.style.top = (basis - z.l.auf) + 'px';
+                const { basis, ab } = gelegt.lage[i];
+                if (s[i] < 1) [z.links, z.rechts].forEach(d => { d.style.fontSize = (s[i] * F).toFixed(2) + 'px'; });
+                z.links.style.left = (gleichX - s[i] * z.l.w) + 'px';
+                z.links.style.top = (basis - s[i] * z.l.auf) + 'px';
                 z.rechts.style.left = gleichX + 'px';
-                z.rechts.style.top = (basis - z.r.auf) + 'px';
+                z.rechts.style.top = (basis - s[i] * z.r.auf) + 'px';
                 z.basis = basis;
-                linie += unterhalb(tief);
+                z.ab = ab;
             });
-            rechenwegLinie = linie;
+            rechenwegLinie = zeilen.length ? gelegt.linie : Math.max(erste, 1);
+            // the double underline, under the whole row; it lands with it (data-schritt)
+            zeilen.forEach((z, i) => {
+                if (!z.ergebnis) return;
+                const em = rechenEm() * s[i], dicke = unterDicke(em);
+                const u = document.createElement('div');
+                u.dataset.schritt = z.schritt;
+                u.style.cssText = `position:absolute;left:${gleichX - s[i] * z.l.w}px;width:${s[i] * (z.l.w + z.r.w)}px;` +
+                    `top:${z.basis + s[i] * Math.max(z.l.tief, z.r.tief) + UNTER_EM * em}px;height:${UNTER_EM * em + dicke}px;` +
+                    `box-sizing:border-box;border-top:${dicke}px solid currentColor;border-bottom:${dicke}px solid currentColor`;
+                if (z.farbe && z.farbe !== INK) u.style.color = z.farbe;
+                if (z.verborgen) u.style.visibility = 'hidden';
+                host.appendChild(u);
+            });
             // a second look: each cell exactly on its line (a cell may lay out
             // a little differently where it ends up)
             const oben = container.getBoundingClientRect().top;
@@ -1680,7 +1890,7 @@
                 if (isFinite(o)) {
                     const c = container.getBoundingClientRect();
                     // centred on the task's own line (the strip is at least 84 px)
-                    const h = Math.max(84, u - o), mitte = zeilen[0].basis + LINIE_AB - ZEILE / 2;
+                    const h = Math.max(84, u - o), mitte = zeilen[0].basis + zeilen[0].ab - ZEILE / 2;
                     kopf.style.top = (mitte - h / 2) + 'px';
                     kopf.style.height = h + 'px';
                     // the counter ends, "umstellen nach x" starts, 48 px beside the task
@@ -1697,6 +1907,155 @@
             }
             anzeigeBald();
         }
+        // Doc, 26.09.: "wenn die Rechnung fertig ist ... und ich tippe das rechte
+        // Dreieck für die nächste Aufgabe, dann sollen ... alle Zeilen einschließlich
+        // Aufgabe und umstellen nach x nach oben raus scrollen ... und erhalten
+        // bleiben bitte. Und die nächste Aufgabe soll sozusagen out of the dark ...
+        // faden" - a copy of the task strip and the working glides up past the top
+        // edge (the beamer gets its twin), and the task that comes fades in where
+        // the task stands. What was computed is kept on the device (vorrechnen-erledigt).
+        const WECHSEL_MS = 900;
+        function rechenwegArchivieren() {
+            let a = [];
+            try { a = JSON.parse(localStorage.getItem('vorrechnen-erledigt') || '[]'); } catch (_) {}
+            if (!Array.isArray(a)) a = [];
+            a.push({ aufgabe: AUFGABEN[aufgabeIdx][0], latex: AUFGABEN[aufgabeIdx][1], zeit: Date.now(),
+                rechenweg: rechenweg.map(e => ({ latex: e.latex, farbe: e.farbe || null })) });
+            try { localStorage.setItem('vorrechnen-erledigt', JSON.stringify(a.slice(-200))); } catch (_) {}
+        }
+        function rechenwegHochScrollen() {
+            const teile = ['vorlage-schicht', 'rechenweg-schicht'].map(id => document.getElementById(id)).filter(Boolean);
+            if (!teile.length) return;
+            // a window over the board, and in it the copy that moves
+            const fenster = document.createElement('div');
+            fenster.style.cssText = 'position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:4';
+            const zug = document.createElement('div');
+            zug.style.cssText = 'position:absolute;inset:0';
+            teile.forEach(el => zug.appendChild(el.cloneNode(true)));
+            zug.querySelectorAll('[id]').forEach(e => e.removeAttribute('id'));
+            fenster.appendChild(zug);
+            container.appendChild(fenster);
+            const zwilling = anzeigeZwilling(fenster);
+            // up by whole lines, until the last line of the working has left
+            const hoch = (rechenwegLinie + 1) * ZEILE;
+            verlaufMerken(zug.innerHTML, hoch);       // it waits above, for two fingers pulling down
+            [fenster, zwilling].forEach(f => {
+                if (!f) return;
+                try {
+                    const z = f.firstElementChild;
+                    z.getBoundingClientRect();
+                    z.style.transition = `transform ${WECHSEL_MS}ms cubic-bezier(0.45, 0, 0.25, 1)`;
+                    z.style.transform = `translateY(${-hoch}px)`;
+                } catch (_) {}
+            });
+            setTimeout(() => {
+                fenster.remove();
+                if (zwilling) try { zwilling.remove(); } catch (_) {}
+            }, WECHSEL_MS + 100);
+        }
+        // Doc, 26.09.: "wie kann ich da hoch?" - "Zwei Finger": two fingers pulled
+        // down scroll back up to the tasks done before, as in an exercise book;
+        // two fingers up scroll back down (no line is sent up then). ▶, a line
+        // sent up, or VERLAUF_RUHE without a touch bring the board back. The lined
+        // part moves, whole lines when let go, cut at the squares; the squares
+        // stay. Each task done waits above as it stood when it left (kept for
+        // this tab: a live reload keeps it, the next day starts clean).
+        const verlaufBloecke = [];         // { html, hoehe } per task done, oldest first
+        try {
+            const d = JSON.parse(sessionStorage.getItem('vorrechnen-verlauf') || '[]');
+            if (Array.isArray(d)) d.forEach(b => { if (b && b.html && b.hoehe > 0) verlaufBloecke.push(b); });
+        } catch (_) {}
+        const VERLAUF_RUHE = 8000;         // ms without a touch, then back to the task
+        let verlaufY = 0, verlaufUhr = null, verlaufZug = false, verlaufStartY = 0;
+        const VERLAUF_EBENEN = ['verlauf-schicht', 'vorlage-schicht', 'rechenweg-schicht'];
+        const verlaufMax = () => verlaufBloecke.reduce((s, b) => s + b.hoehe, 0);
+        function verlaufMerken(html, hoehe) {
+            verlaufBloecke.push({ html, hoehe });
+            if (verlaufBloecke.length > 60) verlaufBloecke.shift();
+            try { sessionStorage.setItem('vorrechnen-verlauf', JSON.stringify(verlaufBloecke)); } catch (_) {}
+            zeigeVerlauf();
+        }
+        // the tasks done, stacked upwards from the top of the board
+        function zeigeVerlauf() {
+            if (anzeigeModus) return;
+            let v = document.getElementById('verlauf-schicht');
+            if (!v) {
+                v = document.createElement('div');
+                v.id = 'verlauf-schicht';
+                v.style.cssText = 'position:absolute;left:0;right:0;top:0;height:0;pointer-events:none';
+                container.appendChild(v);
+            }
+            v.innerHTML = '';
+            let y = 0;
+            for (let i = verlaufBloecke.length - 1; i >= 0; i--) {
+                y -= verlaufBloecke[i].hoehe;
+                const d = document.createElement('div');
+                d.style.cssText = `position:absolute;left:0;right:0;top:${y}px;height:${verlaufBloecke[i].hoehe}px`;
+                d.innerHTML = verlaufBloecke[i].html;
+                v.appendChild(d);
+            }
+            verlaufSetzen(verlaufY);
+        }
+        // the lined part moved down by y px, cut at the squares (dauer: ms of
+        // gliding, 0 for following the fingers, left out to keep what runs)
+        function verlaufSetzen(y, dauer) {
+            verlaufY = Math.max(0, Math.min(verlaufMax(), y));
+            const grenze = papierGrenze(container.getBoundingClientRect().height);
+            VERLAUF_EBENEN.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (dauer !== undefined) el.style.transition = dauer
+                    ? `transform ${dauer}ms cubic-bezier(0.3, 0.7, 0.3, 1), clip-path ${dauer}ms cubic-bezier(0.3, 0.7, 0.3, 1)` : 'none';
+                el.style.transform = verlaufY ? `translateY(${verlaufY}px)` : '';
+                const t0 = el.offsetTop, h = el.offsetHeight;
+                el.style.clipPath = verlaufY ? `inset(${-(t0 + verlaufY)}px -100vw ${h - (grenze - t0 - verlaufY)}px -100vw)` : '';
+            });
+            clearTimeout(verlaufUhr);
+            if (verlaufY > 0 && !verlaufZug) verlaufUhr = setTimeout(() => verlaufSetzen(0, 600), VERLAUF_RUHE);
+        }
+        // two fingers on the board: from where the scrolling starts
+        function verlaufGesteBeginnt() {
+            verlaufStartY = verlaufY;
+            verlaufZug = verlaufY > 0;             // already back in time: every move scrolls
+            clearTimeout(verlaufUhr);
+        }
+        // the fingers move: pulled down far enough (or already scrolled), the board follows
+        function verlaufZiehen(fingerListe) {
+            const aktiv = fingerListe.filter(g => !g.weg);
+            if (aktiv.length < 2) return;
+            const dx = aktiv.reduce((s, g) => s + g.x - g.x0, 0) / aktiv.length;
+            const dy = aktiv.reduce((s, g) => s + g.y - g.y0, 0) / aktiv.length;
+            if (!verlaufZug) {
+                if (!verlaufBloecke.length || dy < 12 || dy < Math.abs(dx)) return;
+                verlaufZug = true;
+                if (!document.getElementById('verlauf-schicht')) zeigeVerlauf();
+            }
+            verlaufSetzen(verlaufStartY + dy, 0);
+        }
+        // let go: onto whole lines
+        function verlaufLoslassen() {
+            verlaufZug = false;
+            verlaufSetzen(Math.round(verlaufY / ZEILE) * ZEILE, 250);
+        }
+        // back to the task at once (▶, a line sent up)
+        function verlaufZurueck() {
+            if (verlaufY) verlaufSetzen(0, 0);
+        }
+        // a touch holds the board where it is; letting go starts the wait again
+        container.addEventListener('pointerdown', () => clearTimeout(verlaufUhr), true);
+        container.addEventListener('pointerup', () => {
+            if (verlaufY > 0 && !verlaufZug) { clearTimeout(verlaufUhr); verlaufUhr = setTimeout(() => verlaufSetzen(0, 600), VERLAUF_RUHE); }
+        }, true);
+        // the new task out of the dark: dark at once, then (once the beamer has
+        // that too) fading in while the old one leaves
+        function aufgabeEinblenden() {
+            const teile = ['vorlage-schicht', 'rechenweg-schicht'].map(id => document.getElementById(id)).filter(Boolean);
+            teile.forEach(el => { el.style.transition = 'none'; el.style.opacity = '0'; });
+            setTimeout(() => teile.forEach(el => {
+                el.style.transition = `opacity ${WECHSEL_MS}ms ease-in`;
+                el.style.opacity = '';
+            }), WECHSEL_MS / 2);
+        }
         // The paper (light and dark): lines down to about two thirds, ending on a
         // line, squares below - Doc's writing field
         function papierGrenze(h) { return Math.round(h * 2 / 3 / ZEILE) * ZEILE; }
@@ -1709,6 +2068,8 @@
                 p.innerHTML = '<div class="linien"></div><div class="karo"></div>';
                 container.insertBefore(p, container.firstChild);
             }
+            zeileMessen();
+            p.style.setProperty('--zeile', ZEILE + 'px');       // inline: the beamer's copy takes it along
             const grenze = papierGrenze(container.getBoundingClientRect().height);
             p.firstChild.style.height = grenze + 'px';
             p.lastChild.style.top = grenze + 'px';
@@ -1742,9 +2103,22 @@
         function flugSchritt() {
             flugFrame = null;
             const jetzt = performance.now();
+            const grenze = papierGrenze(container.getBoundingClientRect().height);
             fluege.slice().forEach(f => {
                 const u = Math.min(1, (jetzt - f.t0) / f.dauer), e = 1 - Math.pow(1 - u, 3);
                 ['tx', 'ty', 's'].forEach(k => { f.p[k] = f.von[k] + (f.ziel[k] - f.von[k]) * e; });
+                // Doc, 26.09.: "das eigentliche Morph soll beginnen, sobald das Ding den
+                // unteren Teil verlässt ... wenn die die Linie für mein Schreibpad
+                // überschreitet" - once the ink's lower edge is above the line. The rest
+                // of the way then takes as long as the morph, so both arrive together
+                // (set here, not by flugZiel: that would start a second frame loop).
+                if (f.morphBereit && f.mt0 === null && f.p.ty + f.p.s * f.unten < grenze) {
+                    f.mt0 = jetzt;
+                    f.von = Object.assign({}, f.p);
+                    f.t0 = jetzt;
+                    f.dauer = Math.max(300, morphDauer * 1000);
+                    return;
+                }
                 if (f.v && f.mt0 !== null) f.mt = Math.min(1, (jetzt - f.mt0) / (morphDauer * 1000));
                 if (u < 1) return;
                 if (f.zurueck) flugZurueck(f);
@@ -1786,6 +2160,7 @@
                 const idxs = [...new Set(l.symbols.flatMap(sy => sy.strokeIdxs))].sort((a, b) => a - b);
                 const erg = zeilenErgebnis[l.lineIdx];
                 const f = { striche: idxs.map(i => strokes[i]), latex: erg && erg.latex || null, farbe: linienFarbe(l), v: null, mt: 0, mt0: null,
+                    unten: Math.max(...idxs.flatMap(i => strokes[i].points.map(q => q.y))), morphBereit: false,
                     p: { tx: 0, ty: 0, s: 1 }, bereit: false, zurueck: false, schritt: -1 };
                 flugZiel(f, schaetzeZiel(l.bbox, wartend + k), FLUG_START);
                 return f;
@@ -1854,7 +2229,7 @@
                 if (!isFinite(x0) || !satz.kw) { f.v = null; flugZiel(f, f.ziel, 1); return; }
                 const sx = satz.dx + satz.kx * satz.skala, sy = satz.dy + satz.ky * satz.skala, sw = satz.kw * satz.skala;
                 const s = (x1 - x0) / Math.max(1, sw);
-                f.mt0 = performance.now();
+                f.morphBereit = true;              // it starts once the ink is over the line (flugSchritt)
                 flugZiel(f, { s, tx: x0 - c.left - s * sx, ty: y0 - c.top - s * sy }, Math.max(500, morphDauer * 1000));
             } catch (e) {
                 if (stand !== flugStand) return;
@@ -1866,6 +2241,7 @@
         function rechenwegHoch() {
             const zeilen = analysis.lines.filter(l => !zuKlein(l));
             if (!zeilen.length) return;
+            verlaufZurueck();
             merkeVerlauf();
             // Doc, 25.09.: "wenn ich mit zwei Fingern nach oben schiebe, die
             // Erkennung sofort beginnt ... Vielleicht sogar in der Bewegung" -
@@ -1909,13 +2285,13 @@
                     if (r.width) { x0 = Math.min(x0, r.left); y0 = Math.min(y0, r.top); }
                 });
                 if (!isFinite(x0)) { zeigen(); return; }
-                // one piece in flight, set at the step's size and nudged onto its spot
+                // one piece in flight, set at the step's size (smaller when newer
+                // steps came with it) and nudged onto its spot
                 const flug = document.createElement('div');
                 flug.style.cssText = `position:absolute;left:${x0 - c.left}px;top:${y0 - c.top}px;pointer-events:none;` +
-                    `white-space:nowrap;line-height:normal;font-size:${RECHEN_SCHRIFT};color:${anzeige(farben[k])};z-index:4`;
+                    `white-space:nowrap;line-height:normal;font-size:${getComputedStyle(zellen[0]).fontSize};color:${anzeige(farben[k])};z-index:4`;
                 try { katex.render(alsDisplay(latex), flug, { throwOnError: false }); } catch (_) { flug.textContent = latex; }
                 container.appendChild(flug);
-                bruchEng(flug);
                 const fk = flug.querySelector('.katex-html') || flug;
                 let r = fk.getBoundingClientRect();
                 const links = x0 - c.left + (x0 - r.left), oben = y0 - c.top + (y0 - r.top);
@@ -1976,6 +2352,13 @@
                 k.addEventListener('click', () => erkennen());
                 container.appendChild(k);
             }
+            // ERKENNEN starts 12 px right of the margin's line (Doc: "linksbündig an
+            // die gestrichelte Linie"); both buttons of the margin shrink together
+            // when it is narrower than ERKENNEN (150), the C (46) and their gaps
+            // (12 + 8 + 12)
+            const breite = container.getBoundingClientRect().width, x = notizX(breite);
+            k.style.left = (x + 2 + 12) + 'px';                     // the line is 2 px wide
+            container.style.setProperty('--knopf', Math.min(1, (breite - x - 2 - 32) / (150 + 46)).toFixed(3));
             const liest = erkennenLaeuft || flugLiest > 0;
             k.style.display = (testModus || seiteErkannt()) ? 'none' : '';
             k.classList.toggle('liest', liest);
@@ -2001,34 +2384,57 @@
         function zeigeHinweis() {
             if (anzeigeModus) return;
             const schritt = naechsterSchritt();
-            let el = document.getElementById('schritt-hinweis');
-            if (!schritt) { if (el) el.style.display = 'none'; return; }
+            let el = document.getElementById('schritt-hinweis'), opEl = document.getElementById('schritt-op');
+            if (!schritt) { [el, opEl].forEach(e => { if (e) e.style.display = 'none'; }); return; }
             if (!el) {
                 el = document.createElement('div');
                 el.id = 'schritt-hinweis';
                 el.setAttribute('aria-hidden', 'true');
                 container.appendChild(el);
             }
-            // only the equation to copy. The operation stays in LOESUNGEN but is not
-            // shown: beside the new line "| −b" reads as "now take b off this line" -
-            // on the board it stands beside the line before (Doc, 26.09.: "das hinter |
-            // scheint immer falsch!")
-            const [latex] = schritt;
+            if (!opEl) {
+                opEl = document.createElement('div');
+                opEl.id = 'schritt-op';
+                opEl.setAttribute('aria-hidden', 'true');
+                container.appendChild(opEl);
+            }
+            // Here only the equation to copy: beside the new line "| −b" read as "now
+            // take b off this line" (Doc, 26.09.: "das hinter | scheint immer falsch!").
+            // The operation goes where it stands on the board, see below.
+            const [latex, op] = schritt;
             if (el.dataset.sig !== latex) {
                 el.dataset.sig = latex;
                 try { katex.render(alsDisplay(latex), el, { throwOnError: false }); }
                 catch (e) { el.textContent = latex; }
             }
             const r = container.getBoundingClientRect();
-            el.style.top = (papierGrenze(r.height) + 12) + 'px';
-            el.style.right = Math.round(r.width * NOTIZ_ANTEIL) + 'px';    // centred over the writing, not the margin
+            el.style.top = (papierGrenze(r.height) + 10) + 'px';          // top left corner of the squares
+            el.style.right = (r.width - notizX(r.width)) + 'px';    // the writing's width, not the margin
             el.style.display = '';
+            // Doc, 26.09. evening: "Schreib mir bitte rechts oben in die Ecke, in das Feld
+            // rechts, wo Erkennen und C steht, was der Schritt gewesen ist" - the operation
+            // that leads to the grey line, top right in the notes margin, grey and under
+            // the ink like the line; a colon of its own, not stuck to the bar
+            if (opEl.dataset.sig !== op) {
+                opEl.dataset.sig = op;
+                try { katex.render('\\mid ' + op.replace(/^:/, '{:}\\,'), opEl, { throwOnError: false }); }
+                catch (e) { opEl.textContent = '| ' + op; }
+            }
+            opEl.style.top = (papierGrenze(r.height) + 10) + 'px';
+            opEl.style.left = (notizX(r.width) + 2 + 12) + 'px';         // like ERKENNEN: 12 px right of the line
+            opEl.style.display = '';
+            opEl.style.fontSize = '';
+            passeEin(opEl, r.width - notizX(r.width) - 2 - 12 - 16, 1.76);   // "ausmultiplizieren" fits the margin
         }
         // the margin's edge, a dashed line for Doc only (not mirrored, hidden on the beamer)
         function zeigeNotizRand() {
             if (anzeigeModus) return;
             let el = document.getElementById('notiz-rand');
-            if (modus === 'beispiele') { if (el) el.style.display = 'none'; return; }
+            if (modus === 'beispiele') {
+                if (el) el.style.display = 'none';
+                ['notiz-leeren', 'seite-leeren'].forEach(id => { const k = document.getElementById(id); if (k) k.style.display = 'none'; });
+                return;
+            }
             if (!el) {
                 el = document.createElement('div');
                 el.id = 'notiz-rand';
@@ -2036,10 +2442,72 @@
                 container.appendChild(el);
             }
             const r = container.getBoundingClientRect();
-            el.style.left = Math.round(r.width * (1 - NOTIZ_ANTEIL)) + 'px';
+            el.style.left = notizX(r.width) + 'px';
             el.style.top = papierGrenze(r.height) + 'px';
             el.style.display = '';
+            // Doc, 26.09.: "rechts in dem Feld unten ... einen extra Clear-Button. Nur für
+            // dieses Feld" - the C of the rail, for the notes alone, in the margin's corner
+            let k = document.getElementById('notiz-leeren');
+            if (!k) {
+                k = document.createElement('button');
+                k.id = 'notiz-leeren';
+                k.type = 'button';
+                k.title = 'Notizen löschen';
+                k.setAttribute('aria-label', 'Notizen löschen');
+                k.textContent = 'C';           // Doc: "im gleichen Stil wie Erkennen ... Buchstabengröße und Font"
+                k.addEventListener('click', () => notizenLeeren());
+                container.appendChild(k);
+                k.style.opacity = strokes.some(notizPruefer()) ? '' : '0.35';
+            }
+            k.style.display = '';
+            // Doc, 26.09.: "für das linke Feld, wo ich die Gleichung schreibe, auch einen
+            // Clear-Button" (a check written there, then gone again) - bottom left
+            let sk = document.getElementById('seite-leeren');
+            if (!sk) {
+                sk = document.createElement('button');
+                sk.id = 'seite-leeren';
+                sk.type = 'button';
+                sk.title = 'Schreibfeld löschen';
+                sk.setAttribute('aria-label', 'Schreibfeld löschen');
+                sk.textContent = 'C';
+                sk.addEventListener('click', () => seiteLeeren());
+                container.appendChild(sk);
+                const istNotiz = notizPruefer();
+                sk.style.opacity = strokes.some(st => !istNotiz(st)) ? '' : '0.35';
+            }
+            sk.style.right = (r.width - notizX(r.width) + 12) + 'px';
+            sk.style.display = '';
         }
+        // the writing field without the notes: what is written there goes (undo brings
+        // it back), the notes and the working stay; its recognition is void
+        function seiteLeeren() {
+            const istNotiz = notizPruefer();
+            if (!strokes.some(st => !istNotiz(st)) && !tipp) return;
+            merkeVerlauf();
+            if (tipp) { clearTimeout(tipp.timer); tipp = null; }
+            clearTimeout(autoTimer);
+            const bleiben = strokes.filter(istNotiz);
+            strokes.length = 0;
+            bleiben.forEach(st => strokes.push(st));
+            erkennenStand++;                   // an answer on its way is void
+            verwerfeErkennung();
+            recompute();
+            merkeStriche();
+        }
+        // only the notes go; undo brings them back. The line read before stays read:
+        // in class only its LaTeX is used later, and the flight reads its own strokes
+        function notizenLeeren() {
+            const istNotiz = notizPruefer();
+            if (!strokes.some(istNotiz)) return;
+            merkeVerlauf();
+            const bleiben = strokes.filter(st => !istNotiz(st));
+            strokes.length = 0;
+            bleiben.forEach(st => strokes.push(st));
+            recompute();
+            merkeStriche();
+        }
+        // the KaTeX fonts change the widths: fit the operation once more when they are in
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => zeigeHinweis());
         function zeigeTafelPfeile() {
             erkennenKlein();
             zeigeHinweis();
@@ -2083,7 +2551,7 @@
         let steuerFenster = null, anzeigeFrame = null, buehne = { w: 0, h: 0 };
         // not 'formel-schicht': the recognised line is Doc's GO, the class sees
         // only the ink fly up and turn into LaTeX
-        const SPIEGEL_SCHICHTEN = ['papier', 'vorlage-schicht', 'rechenweg-schicht', 'satz-schicht'];
+        const SPIEGEL_SCHICHTEN = ['papier', 'verlauf-schicht', 'vorlage-schicht', 'rechenweg-schicht', 'satz-schicht'];
         const spiegelCache = {};
         function anzeigeLaeuft() { return anzeigeModus; }
         function anzeigeZiel() {
@@ -2307,6 +2775,10 @@
             vollbildAus: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">' +
                       '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>' +
                       '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/></g>',
+            // all tasks: a list
+            aufgaben: '<path d="M9.5 6.5 H19.5 M9.5 12 H19.5 M9.5 17.5 H19.5" fill="none" stroke="currentColor" stroke-linecap="round"/>' +
+                      '<circle cx="5" cy="6.5" r="1.4" fill="currentColor"/><circle cx="5" cy="12" r="1.4" fill="currentColor"/>' +
+                      '<circle cx="5" cy="17.5" r="1.4" fill="currentColor"/>',
             // beamer: a screen on its stand
             beamer: '<rect x="3.5" y="5" width="17" height="11" rx="1.5" fill="none" stroke="currentColor"/>' +
                     '<path d="M12 16 V20 M8 20 H16" fill="none" stroke="currentColor" stroke-linecap="round"/>',
@@ -2428,6 +2900,9 @@
                     b.dataset.farbe = wert;
                 });
                 document.getElementById('farbe-0').style.marginTop = 'auto';
+                // Doc, 26.09.: "rechts in das Rail einen Button unter die grüne Farbe, über
+                // das C, wo ich mir alle Aufgaben in einem Panel anzeigen lassen kann"
+                werkzeuge([['aufgaben', 'Alle Aufgaben', () => aufgabenPanel(true), true]]);
                 werkzeuge([
                     ['clear', 'Seite leeren (C)', () => clearAll(), true],
                     ['undo', 'Rückgängig', () => rueckgaengig(), false],
@@ -2455,6 +2930,9 @@
             else if (SCHIRM_BEKANNT && screen.isExtended) bk.style.removeProperty('display');
             else bk.style.setProperty('display', 'none', 'important');
             zeigeVollbildKnopf();
+            const ak = document.getElementById('werkzeug-aufgaben');
+            if (aufgabenModus) ak.style.removeProperty('display');
+            else ak.style.setProperty('display', 'none', 'important');
             // nothing to undo or redo: dimmed
             document.getElementById('werkzeug-undo').style.opacity = verlauf.length ? '1' : '0.35';
             document.getElementById('werkzeug-redo').style.opacity = vorwaerts.length ? '1' : '0.35';
@@ -2465,18 +2943,7 @@
         // starts on a clean board.
         function naechsteVorlage(schritt) {
             if (modus === 'frei') return;
-            if (aufgabenModus) {
-                const n = AUFGABEN.length;
-                aufgabeIdx = (aufgabeIdx + (schritt === -1 ? -1 : 1) + n) % n;
-                try { localStorage.setItem('vorrechnen-aufgabe', String(aufgabeIdx)); } catch (_) {}
-                flugAbbrechen();
-                rechenweg.length = 0;
-                merkeRechenweg();
-                clearAll();
-                vergissVerlauf();          // undo must not bring the last task's ink onto this one
-                zeigeVorlage();
-                return;
-            }
+            if (aufgabenModus) { zeigeAufgabe(aufgabeIdx + (schritt === -1 ? -1 : 1)); return; }
             const n = VORLAGEN.length;
             vorlageIdx = (vorlageIdx + (schritt === -1 ? -1 : 1) + n) % n;
             try { localStorage.setItem('vorrechnen-vorlage', String(vorlageIdx)); } catch (_) {}
@@ -2486,11 +2953,71 @@
             setProbeStatus('–');
             if (testModus) beispiel();
         }
+        // a task by its number: the triangles, the arrow keys and the list of all tasks
+        function zeigeAufgabe(i) {
+            const n = AUFGABEN.length;
+            // a task computed scrolls up and is kept, the next fades in (rechenwegHochScrollen)
+            const wechsel = rechenweg.length > 0 && !anzeigeModus;
+            verlaufZurueck();
+            if (wechsel) { rechenwegArchivieren(); rechenwegHochScrollen(); }
+            aufgabeIdx = ((i % n) + n) % n;
+            try { localStorage.setItem('vorrechnen-aufgabe', String(aufgabeIdx)); } catch (_) {}
+            flugAbbrechen();
+            rechenweg.length = 0;
+            merkeRechenweg();
+            clearAll();
+            vergissVerlauf();          // undo must not bring the last task's ink onto this one
+            zeigeVorlage();
+            if (wechsel) aufgabeEinblenden();
+        }
+        // All tasks in one panel (Doc, 26.09.), for Doc only: a tap on one goes there.
+        // The look is the central modal (ui.js: .cyber-overlay, .cyber-modal--wide).
+        function aufgabenPanel(auf) {
+            let o = document.getElementById('aufgaben-overlay');
+            if (!auf) { if (o) o.classList.remove('open'); return; }
+            if (!o) {
+                o = document.createElement('div');
+                o.id = 'aufgaben-overlay';
+                o.className = 'cyber-overlay';
+                o.innerHTML = '<div class="cyber-modal cyber-modal--neon cyber-modal--wide" role="dialog" aria-label="Alle Aufgaben">' +
+                    '<h3>Aufgaben</h3><div class="aufgaben-liste"></div>' +
+                    '<button type="button" class="cyber-modal-close">Schließen</button></div>';
+                o.addEventListener('click', e => { if (e.target === o) aufgabenPanel(false); });
+                o.querySelector('.cyber-modal-close').addEventListener('click', () => aufgabenPanel(false));
+                const liste = o.querySelector('.aufgaben-liste');
+                AUFGABEN.forEach(([, latex, nach], i) => {
+                    const b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'aufgabe-karte';
+                    b.innerHTML = `<span class="ak-nr">Aufgabe ${i + 1}</span><span class="ak-formel"></span>` +
+                        '<span class="ak-nach">nach <span></span></span>';
+                    try {
+                        katex.render(alsDisplay(latex), b.querySelector('.ak-formel'), { throwOnError: false });
+                        katex.render(nach, b.querySelector('.ak-nach span'), { throwOnError: false });
+                    } catch (e) { b.querySelector('.ak-formel').textContent = latex; }
+                    b.addEventListener('click', () => { aufgabenPanel(false); zeigeAufgabe(i); });
+                    liste.appendChild(b);
+                });
+                document.body.appendChild(o);
+            }
+            // one line each: a long task shrinks to its card (the overlay is laid out while hidden)
+            o.querySelectorAll('.aufgabe-karte').forEach(b => {
+                const f = b.querySelector('.ak-formel');
+                f.style.fontSize = '';
+                passeEin(f, b.clientWidth - 24, 1.35);
+            });
+            o.querySelectorAll('.aufgabe-karte').forEach((b, i) => b.classList.toggle('aktuell', i === aufgabeIdx));
+            requestAnimationFrame(() => o.classList.add('open'));
+        }
         // Doc, 26.09.: "left arrow key & right arrow key" - the arrow keys step like
         // ◀ ▶. A tapped button, slider or radio keeps the focus: it lets go first, so
         // no focus ring turns up ("bitte keine selects") and a radio does not switch
         // the mode. Text fields keep their keys; holding a key does not race on.
         document.addEventListener('keydown', e => {
+            if (document.querySelector('#aufgaben-overlay.open')) {
+                if (e.key === 'Escape') aufgabenPanel(false);
+                return;
+            }
             if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
             if (anzeigeModus || modus === 'frei' || e.repeat || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
             const f = document.activeElement;
@@ -2889,7 +3416,7 @@
             // Doc: "Auto reicht" - recognises after 2 s without input
             CyberUI.createCheckbox('schalter', 'Auto', autoErkennen, v => {
                 autoErkennen = v;
-                try { localStorage.setItem('vorrechnen-auto', v ? '1' : '0'); } catch (_) {}
+                try { localStorage.setItem('vorrechnen-auto-erkennen', v ? '1' : '0'); } catch (_) {}
                 if (v) autoBald(); else clearTimeout(autoTimer);
             });
 
