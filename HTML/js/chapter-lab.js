@@ -31,6 +31,19 @@
         const hud = document.getElementById('v-hud');
         const tip = document.getElementById('v-tip');
 
+        // reset-view button on the stage, for stages that know their own framing
+        if (wrap2 && typeof stage2.resetView === 'function') {
+            const rb = document.createElement('button');
+            rb.className = 'v-reset';
+            rb.type = 'button';
+            rb.title = 'Ansicht zurücksetzen (auch: Doppelklick auf die Bühne)';
+            rb.setAttribute('aria-label', 'Ansicht zurücksetzen');
+            rb.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+                '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><circle cx="12" cy="12" r="2.2"/></svg>';
+            rb.addEventListener('click', () => stage2.resetView());
+            wrap2.appendChild(rb);
+        }
+
         CHAPTERS.forEach((ch, i) => {
             const b = document.createElement('button');
             b.className = 'tab-btn';

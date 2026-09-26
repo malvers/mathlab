@@ -82,12 +82,12 @@
 <p>Zieh $P$ einmal ganz herum: Die orange Strecke wandert vom Kreis hinüber auf die Kurve. Der grüne Bogen am Kreis und die grüne Strecke auf der x‑Achse sind <b>gleich lang</b> — deshalb passt die Kurve genau zum Kreis.</p>
 <p class="v-sub">Eigenschaften</p>
 <div class="v-table-wrap"><table class="v-table">
-<tr><th>Definitionsbereich</th><td>$D=\mathbb{R}$</td></tr>
-<tr><th>Wertebereich</th><td>$W=[-1;\,1]$</td></tr>
+<tr><th>Definitions&shy;bereich</th><td>$D=\mathbb{R}$</td></tr>
+<tr><th>Werte&shy;bereich</th><td>$W=[-1;\,1]$</td></tr>
 <tr><th>Periode</th><td>$2\pi$, also $\sin(x+2\pi)=\sin x$</td></tr>
-<tr><th>Nullstellen</th><td>$x=k\cdot\pi,\; k\in\mathbb{Z}$</td></tr>
-<tr><th>Hochpunkte</th><td>$\left(\tfrac{\pi}{2}+k\cdot 2\pi\mid 1\right)$</td></tr>
-<tr><th>Tiefpunkte</th><td>$\left(\tfrac{3\pi}{2}+k\cdot 2\pi\mid -1\right)$</td></tr>
+<tr><th>Null&shy;stellen</th><td>$x=k\cdot\pi,\; k\in\mathbb{Z}$</td></tr>
+<tr><th>Hoch&shy;punkte</th><td>$\left(\tfrac{\pi}{2}+k\cdot 2\pi\mid 1\right)$</td></tr>
+<tr><th>Tief&shy;punkte</th><td>$\left(\tfrac{3\pi}{2}+k\cdot 2\pi\mid -1\right)$</td></tr>
 <tr><th>Symmetrie</th><td>punktsymmetrisch zum Ursprung: $\sin(-x)=-\sin x$</td></tr>
 </table></div>
 <div class="v-aha"><b>Periodisch</b> heißt: Nach $2\pi$ wiederholt sich alles. Schalte <i>Zweite Umdrehung</i> ein — die zweite Welle ist eine exakte Kopie der ersten. Solche Vorgänge gibt es überall: Riesenrad, Pendel, Wechselstrom, Tageslänge, Ebbe und Flut.</div>
@@ -199,11 +199,11 @@
 <p>Der Kosinus ist die <b>x‑Koordinate</b> von $P$. Trägt man sie genauso über $x$ ab wie vorher den Sinus, entsteht die Kosinuskurve:</p>
 <div class="v-key">$$f(x)=\cos x$$ beginnt oben: $\cos 0=1$ — der Punkt $P(1\mid 0)$ liegt ganz rechts.</div>
 <div class="v-table-wrap"><table class="v-table">
-<tr><th>Wertebereich</th><td>$W=[-1;\,1]$</td></tr>
+<tr><th>Werte&shy;bereich</th><td>$W=[-1;\,1]$</td></tr>
 <tr><th>Periode</th><td>$2\pi$</td></tr>
-<tr><th>Nullstellen</th><td>$x=\tfrac{\pi}{2}+k\cdot\pi,\;k\in\mathbb{Z}$</td></tr>
-<tr><th>Hochpunkte</th><td>$(k\cdot 2\pi\mid 1)$</td></tr>
-<tr><th>Tiefpunkte</th><td>$(\pi+k\cdot 2\pi\mid -1)$</td></tr>
+<tr><th>Null&shy;stellen</th><td>$x=\tfrac{\pi}{2}+k\cdot\pi,\;k\in\mathbb{Z}$</td></tr>
+<tr><th>Hoch&shy;punkte</th><td>$(k\cdot 2\pi\mid 1)$</td></tr>
+<tr><th>Tief&shy;punkte</th><td>$(\pi+k\cdot 2\pi\mid -1)$</td></tr>
 <tr><th>Symmetrie</th><td>achsensymmetrisch zur y‑Achse: $\cos(-x)=\cos x$</td></tr>
 </table></div>
 <p class="v-sub">Dieselbe Welle, nur verschoben</p>
@@ -442,11 +442,11 @@
 <p><b>Am Einheitskreis:</b> Verlängere den Radius durch $P$, bis er die senkrechte Tangente bei $x=1$ trifft. Der Treffpunkt $T$ hat die Höhe $\tan x$ — daher der Name. (Strahlensatz: $\tfrac{\tan x}{1}=\tfrac{\sin x}{\cos x}$.)</p>
 <p>Je näher $P$ an $90^\circ$ kommt, desto steiler wird der Strahl und desto weiter läuft $T$ nach oben weg. Bei genau $90^\circ$ ist der Strahl parallel zur Tangente — es gibt keinen Schnittpunkt.</p>
 <div class="v-table-wrap"><table class="v-table">
-<tr><th>Definitionsbereich</th><td>$x\neq\tfrac{\pi}{2}+k\cdot\pi$</td></tr>
-<tr><th>Polstellen</th><td>$x=\tfrac{\pi}{2}+k\cdot\pi$ (senkrechte Asymptoten)</td></tr>
-<tr><th>Wertebereich</th><td>$W=\mathbb{R}$</td></tr>
+<tr><th>Definitions&shy;bereich</th><td>$x\neq\tfrac{\pi}{2}+k\cdot\pi$</td></tr>
+<tr><th>Pol&shy;stellen</th><td>$x=\tfrac{\pi}{2}+k\cdot\pi$ (senkrechte Asymptoten)</td></tr>
+<tr><th>Werte&shy;bereich</th><td>$W=\mathbb{R}$</td></tr>
 <tr><th>Periode</th><td>$\pi$ (nicht $2\pi$!)</td></tr>
-<tr><th>Nullstellen</th><td>$x=k\cdot\pi$</td></tr>
+<tr><th>Null&shy;stellen</th><td>$x=k\cdot\pi$</td></tr>
 <tr><th>Symmetrie</th><td>punktsymmetrisch zum Ursprung</td></tr>
 </table></div>
 <div class="v-aha"><b>Steigungswinkel:</b> Eine Gerade mit dem Steigungswinkel $\alpha$ hat die Steigung $m=\tan\alpha$ — der Strahl am Kreis ist genau so eine Gerade.</div>

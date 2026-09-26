@@ -70,7 +70,7 @@
             CyberUI.createCard(c, 'Bedienung', '<div class="v-note">Regler oder direkt ziehen: Der <b>lila</b> Punkt verschiebt die Kurve (c und d), der <b>orange</b> Hochpunkt stellt Amplitude und Periode ein.</div>', COL.blue);
 
             ctx.theory(R`
-<div class="v-key">$$f(x)=a\cdot\sin\big(b\,(x-c)\big)+d$$</div>
+<div class="v-key">$$f(x)=a\sin\big(b(x-c)\big)+d$$</div>
 <div class="v-table-wrap"><table class="v-table">
 <tr><th>Parameter</th><th>wirkt als</th><th>ablesen</th></tr>
 <tr><td style="color:rgb(245,194,66)">$a$</td><td>Streckung in y‑Richtung</td><td>Amplitude $|a|$</td></tr>
@@ -272,7 +272,7 @@
 
             ctx.theory(R`
 <p>Viele Vorgänge wiederholen sich: Tageslänge, Riesenrad, Gezeiten, Wechselstrom, Töne. Man beschreibt sie mit</p>
-<div class="v-key">$$f(t)=a\cdot\sin\big(b\,(t-c)\big)+d$$</div>
+<div class="v-key">$$f(t)=a\sin\big(b(t-c)\big)+d$$</div>
 <p class="v-sub">Das Rezept — aus Hoch- und Tiefpunkt</p>
 <ul>
 <li><b style="color:#a86cff">Mittellage</b> $d=\dfrac{y_{\max}+y_{\min}}{2}$</li>

@@ -4,6 +4,8 @@
  * Copied 1:1 from the inline block of vektoren.html (26.09.2026); vektoren.html
  * still carries its own copy until it is switched over to this file.
  */
+@import url('https://cdn.jsdelivr.net/npm/computer-modern@0.1.3/cmu-serif.css');
+
 /* ---- stage: visualisation left, theory + exercises right ---- */
 #tab-stage { display: flex; align-items: stretch; min-height: 0; }
 #v-stage { flex: 1 1 auto; position: relative; min-width: 0; }
@@ -15,7 +17,7 @@
 /* floating live-values panel over the stage */
 #v-hud {
     position: absolute; top: 12px; left: 12px; z-index: 5;
-    max-width: min(46%, 360px); max-height: calc(100% - 24px);
+    max-width: min(48%, 410px); max-height: calc(100% - 24px);
     overflow-y: auto; scrollbar-width: none; pointer-events: none;
 }
 #v-hud::-webkit-scrollbar { display: none; }
@@ -23,16 +25,16 @@
     background: rgba(7, 17, 31, 0.82); border: 0.5px solid rgba(2, 100, 123, 0.9);
     border-radius: 10px; padding: 10px 13px; backdrop-filter: blur(3px);
 }
-#v-hud .katex { font-size: 1.12em; }
+#v-hud .katex { font-size: 1.25em; }
 .v-hud-row { display: flex; justify-content: space-between; gap: 14px; align-items: baseline; padding: 2px 0; }
-.v-hud-lab { font-family: 'Orbitron', sans-serif; font-size: 0.7rem; letter-spacing: 1px; color: #8fa3bd; }
-.v-hud-val { font-family: Arial, Helvetica, sans-serif; font-size: 0.95rem; font-weight: 600; color: #fff; }
-.v-hud-note { font-family: Arial, Helvetica, sans-serif; font-size: 0.82rem; color: #a9b4c6; margin-top: 6px; line-height: 1.35; }
+.v-hud-lab { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1px; color: #8fa3bd; }
+.v-hud-val { font-family: Arial, Helvetica, sans-serif; font-size: 1.1rem; font-weight: 600; color: #fff; }
+.v-hud-note { font-family: Arial, Helvetica, sans-serif; font-size: 0.95rem; color: #a9b4c6; margin-top: 6px; line-height: 1.35; }
 
 /* hint strip under the stage: says what can be dragged */
 #v-tip {
     position: absolute; left: 12px; bottom: 10px; z-index: 5; pointer-events: none;
-    font-family: 'Orbitron', sans-serif; font-size: 0.72rem; letter-spacing: 1.1px;
+    font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 1.1px;
     color: rgba(255, 255, 255, 0.42);
 }
 
@@ -40,7 +42,7 @@
 #v-doc {
     flex: 0 0 400px; width: 400px; overflow-y: auto; padding: 14px 14px 40px;
     background: #060e1c; border-left: 1px solid rgba(255, 255, 255, 0.08);
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'CMU Serif', KaTeX_Main, 'Times New Roman', serif;
 }
 #v-doc::-webkit-scrollbar { width: 9px; }
 #v-doc::-webkit-scrollbar-track { background: #060e1c; }
@@ -49,7 +51,7 @@
 .v-doc-tab { display: none; }
 .v-doc-tab.active { display: block; }
 .v-plan {
-    font-family: 'Orbitron', sans-serif; font-size: 0.68rem; letter-spacing: 1.5px;
+    font-family: inherit; font-size: 1rem; font-style: italic;
     color: #6d8199; margin: 0 2px 10px; display: flex; align-items: center; gap: 7px;
 }
 .v-plan::before {
@@ -63,20 +65,20 @@
     border-radius: 12px; padding: 13px 15px 15px; margin-bottom: 14px;
 }
 .v-doc-card > h3 {
-    font-family: 'Orbitron', sans-serif; font-size: 0.74rem; letter-spacing: 2px;
+    font-family: inherit; font-size: 1.3rem; letter-spacing: 0.2px;
     color: rgb(245, 194, 66); margin: 0 0 10px; font-weight: 700;
 }
 .v-doc-card.v-tasks > h3 { color: rgb(121, 158, 49); }
-.v-doc-body { color: #cfd8e6; font-size: 0.88rem; line-height: 1.55; }
+.v-doc-body { color: #cfd8e6; font-size: 1.12rem; line-height: 1.5; hyphens: auto; -webkit-hyphens: auto; }
 .v-doc-body p { margin: 0 0 9px; }
 .v-doc-body p:last-child { margin-bottom: 0; }
 .v-doc-body b, .v-doc-body strong { color: #fff; font-weight: 600; }
 .v-doc-body ul { margin: 0 0 9px; padding-left: 18px; }
 .v-doc-body li { margin-bottom: 4px; }
 /* formulas read larger than the running text, display maths larger still */
-.v-doc-body .katex, .v-task-q .katex, .v-task-body .katex { font-size: 1.2em; }
+.v-doc-body .katex, .v-task-q .katex, .v-task-body .katex { font-size: 1em; }
 .v-doc-body .katex-display > .katex,
-.v-task-body .katex-display > .katex,
+.v-task-body .katex-display > .katex { font-size: 1.3em; }
 #v-hud .katex-display > .katex { font-size: 1.5em; }
 /* a wide formula must scroll inside its own box — the column must never scroll sideways */
 .v-doc-body .katex-display, .v-task-body .katex-display, #v-hud .katex-display {
@@ -109,32 +111,32 @@
 .v-task:first-child { border-top: none; padding-top: 2px; }
 .v-task-head { display: flex; gap: 9px; align-items: flex-start; }
 .v-task-no {
-    flex: 0 0 auto; width: 21px; height: 21px; border-radius: 50%;
+    flex: 0 0 auto; width: 25px; height: 25px; border-radius: 50%;
     background: rgba(121, 158, 49, 0.22); border: 1px solid rgba(121, 158, 49, 0.8);
-    color: rgb(160, 200, 90); font-family: 'Orbitron', sans-serif; font-size: 0.74rem;
+    color: rgb(160, 200, 90); font-family: inherit; font-weight: 700; font-size: 1rem;
     display: flex; align-items: center; justify-content: center; margin-top: 1px;
 }
-.v-task-q { color: #cfd8e6; font-size: 0.87rem; line-height: 1.5; }
+.v-task-q { color: #cfd8e6; font-size: 1.1rem; line-height: 1.5; }
 .v-task-btn {
-    margin: 8px 6px 0 30px; padding: 4px 11px; border-radius: 6px; cursor: pointer;
+    margin: 8px 6px 0 34px; padding: 4px 12px; border-radius: 6px; cursor: pointer;
     background: rgba(2, 100, 123, 0.18); border: 0.5px solid rgba(2, 100, 123, 0.9);
-    color: #7fd8ee; font-family: 'Orbitron', sans-serif; font-size: 0.68rem; letter-spacing: 1px;
+    color: #7fd8ee; font-family: inherit; font-size: 1rem; letter-spacing: 0.2px;
     transition: background 0.15s, color 0.15s;
 }
 .v-task-btn:hover { background: rgba(2, 100, 123, 0.38); color: #fff; }
 .v-task-btn.open { background: rgba(245, 194, 66, 0.16); border-color: rgba(245, 194, 66, 0.8); color: rgb(245, 194, 66); }
 .v-task-btn.v-hint { background: rgba(245, 194, 66, 0.1); border-color: rgba(245, 194, 66, 0.5); color: rgb(226, 186, 100); }
 .v-task-body {
-    display: none; margin: 9px 0 4px 30px; padding: 10px 12px; border-radius: 8px;
+    display: none; margin: 9px 0 4px 34px; padding: 10px 12px; border-radius: 8px;
     background: rgba(255, 255, 255, 0.035); border-left: 2px solid rgba(2, 100, 123, 0.9);
-    color: #c3cddc; font-size: 0.85rem; line-height: 1.55;
+    color: #c3cddc; font-size: 1.08rem; line-height: 1.5;
 }
 .v-task-body.v-hint-body { border-left-color: rgba(245, 194, 66, 0.8); }
 .v-task-body.open { display: block; }
 .v-task-body p { margin: 0 0 7px; }
 .v-task-body p:last-child { margin-bottom: 0; }
 .v-task-body .katex-display { margin: 8px 0; }
-.v-step { color: rgb(245, 194, 66); font-family: 'Orbitron', sans-serif; font-size: 0.68rem; letter-spacing: 1.2px; display: block; margin: 9px 0 3px; }
+.v-step { color: rgb(245, 194, 66); font-family: inherit; font-style: italic; font-weight: 700; font-size: 1.05rem; display: block; margin: 9px 0 3px; }
 .v-step:first-child { margin-top: 0; }
 .v-res { color: rgb(160, 200, 90); font-weight: 600; }
 
@@ -143,12 +145,12 @@
 .v-tab.active { display: block; }
 .v-tab .cyber-control-group { margin-top: 7px !important; margin-bottom: 0 !important; }
 .v-tab .cyber-control-group input[type="range"] { min-height: 20px !important; padding: 4px 0 !important; }
-.v-note { font-size: 0.82rem; color: #a9b4c6; line-height: 1.4; font-family: Arial, Helvetica, sans-serif; width: 0; min-width: 100%; box-sizing: border-box; }
+.v-note { font-size: 0.92rem; color: #a9b4c6; line-height: 1.4; font-family: Arial, Helvetica, sans-serif; width: 0; min-width: 100%; box-sizing: border-box; }
 .v-btnrow { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 4px; }
 .v-mini {
     padding: 5px 11px; border-radius: 6px; cursor: pointer; flex: 1 1 auto;
     background: rgba(2, 100, 123, 0.18); border: 0.5px solid rgba(2, 100, 123, 0.9);
-    color: #7fd8ee; font-family: 'Orbitron', sans-serif; font-size: 0.68rem; letter-spacing: 1px;
+    color: #7fd8ee; font-family: 'Orbitron', sans-serif; font-size: 0.76rem; letter-spacing: 1px;
 }
 .v-mini:hover { background: rgba(2, 100, 123, 0.4); color: #fff; }
 
@@ -157,7 +159,7 @@
     flex: 0 0 auto; align-self: center; margin: 0 20px 0 12px;
     width: 0; overflow: hidden;
 }
-#tab-bar .tab-btn { padding: 11px 10px; font-size: 0.6rem; letter-spacing: 0.8px; }
+#tab-bar .tab-btn { padding: 11px 10px; font-size: 0.68rem; letter-spacing: 0.8px; }
 #tab-bar .tab-btn .v-no { color: rgba(245, 194, 66, 0.55); margin-right: 5px; }
 #tab-bar .tab-btn.active .v-no { color: rgb(245, 194, 66); }
 
@@ -185,21 +187,34 @@
 #v-canvas-wrap canvas { touch-action: none; }
 /* green sub-heading inside a theory card */
 .v-sub {
-    color: rgb(121, 158, 49); font-family: 'Orbitron', sans-serif; font-size: 0.6rem;
-    letter-spacing: 2px; margin: 18px 0 8px; font-weight: 700;
+    color: rgb(121, 158, 49); font-family: inherit; font-size: 1.15rem;
+    letter-spacing: 0.2px; margin: 18px 0 8px; font-weight: 700;
 }
 /* small value table inside a theory card */
-.v-table { border-collapse: collapse; margin: 8px 0 10px; width: 100%; font-size: 0.85rem; }
+.v-table { border-collapse: collapse; margin: 8px 0 10px; width: 100%; font-size: 1.02rem; }
 .v-table th, .v-table td {
     border: 0.5px solid rgba(2, 100, 123, 0.6); padding: 4px 5px; text-align: center; color: #cfd8e6;
 }
-.v-table th { font-family: 'Orbitron', sans-serif; font-size: 0.6rem; letter-spacing: 1px; color: #8fa3bd; font-weight: 600; }
-.v-table .katex { font-size: 1.05em; }
+.v-table th { font-family: inherit; font-size: 0.98rem; color: #8fa3bd; font-weight: 700; }
+.v-table .katex { font-size: 1em; }
 /* a wide table scrolls inside its own box, never the column */
 .v-table-wrap { overflow-x: auto; scrollbar-width: thin; scrollbar-color: rgba(2, 100, 123, 0.7) transparent; }
 /* table cells break between words (hyphenated), never inside one */
 .v-doc-body .v-table th, .v-doc-body .v-table td { overflow-wrap: normal; word-break: normal; hyphens: auto; -webkit-hyphens: auto; }
 /* the narrow 330px column (901–1180px): display maths a notch smaller so it fits */
 @media (min-width: 901px) and (max-width: 1180px) {
-    .v-doc-body .katex-display > .katex, .v-task-body .katex-display > .katex { font-size: 1.3em; }
+    .v-doc-body .katex-display > .katex, .v-task-body .katex-display > .katex { font-size: 1.1em; }
 }
+
+/* ---- reset-view button, bottom right of the stage ---- */
+.v-reset {
+    position: absolute; right: 12px; bottom: 10px; z-index: 6;
+    width: 38px; height: 38px; border-radius: 9px; cursor: pointer; padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(7, 17, 31, 0.82); border: 0.5px solid rgba(2, 100, 123, 0.9);
+    color: #7fd8ee; transition: background 0.15s, color 0.15s;
+}
+.v-reset:hover { background: rgba(2, 100, 123, 0.45); color: #fff; }
+.v-reset svg { width: 20px; height: 20px; }
+/* table headings break only where the text allows it (&shy;), never inside a syllable */
+.v-doc-body .v-table th { hyphens: manual; -webkit-hyphens: manual; }

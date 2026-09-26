@@ -130,6 +130,20 @@
             this.box = null;           // last requested fit box, reapplied on resize
             this.moved = false;        // the user zoomed or panned: stop refitting
             this.hudEl = null;         // floating panel to keep clear of
+            this.fontScale = 1.25;     // every canvas text, one knob (Doc 26.09.: "tendenziell zu klein")
+        }
+        /** "600 13px 'Orbitron'" -> the same font at fontScale times the size. */
+        _font(f) { return f.replace(/(\d+(?:\.\d+)?)px/, (_, n) => (parseFloat(n) * this.fontScale).toFixed(1) + 'px'); }
+        /** All labels go through here — Stage2D's handle names and angle labels included. */
+        text(t, p, color, opt = {}) {
+            super.text(t, p, color, Object.assign({}, opt, { font: this._font(opt.font || "600 13px 'Orbitron', sans-serif") }));
+        }
+        /** Back to the chapter's own framing (button bottom right, or double click). */
+        resetView() {
+            if (!this.box) return;
+            this.moved = false;
+            this._applyBox();
+            this.render();
         }
         get uy() { return this.unit * this.k; }
         w2s(p) { return [this.w / 2 + (p[0] - this.cx) * this.unit, this.h / 2 - (p[1] - this.cy) * this.uy]; }
@@ -198,8 +212,8 @@
         grid() {
             if (!this.showGrid) return;
             const c = this.ctx;
-            const xs = this.xMode === 'pi' ? piStep(this.unit, 44) : niceStep(this.unit, 34);
-            const ys = niceStep(this.uy, 30);
+            const xs = this.xMode === 'pi' ? piStep(this.unit, 44 * this.fontScale) : niceStep(this.unit, 34 * this.fontScale);
+            const ys = niceStep(this.uy, 30 * this.fontScale);
             const [x0, y1] = this.s2w([0, 0]);
             const [x1, y0] = this.s2w([this.w, this.h]);
             const xmin = this.xClip == null ? x0 : Math.max(x0, this.xClip);
@@ -226,17 +240,18 @@
             c.stroke();
 
             // x labels
+            const fs = this.fontScale;
             c.fillStyle = 'rgba(255,255,255,0.55)';
-            c.font = '12px Arial, Helvetica, sans-serif';
+            c.font = this._font('12px Arial, Helvetica, sans-serif');
             c.textAlign = 'center'; c.textBaseline = 'top';
-            const ly = Math.min(Math.max(o[1] + 5, 4), this.h - (this.degLabels ? 30 : 16));
+            const ly = Math.min(Math.max(o[1] + 5, 4), this.h - (this.degLabels ? 30 : 16) * fs);
             for (let x = Math.ceil(xmin / xs - 1e-9) * xs; x <= x1; x += xs) {
                 if (Math.abs(x) < xs / 2) continue;
                 const sx = this.w2s([x, 0])[0];
                 c.fillText(this.xMode === 'pi' ? piText(x) : num(x, 3), sx, ly);
                 if (this.xMode === 'pi' && this.degLabels) {
-                    c.save(); c.fillStyle = 'rgba(255,255,255,0.32)'; c.font = '10px Arial, Helvetica, sans-serif';
-                    c.fillText(num(deg(x), 0) + '°', sx, ly + 14); c.restore();
+                    c.save(); c.fillStyle = 'rgba(255,255,255,0.32)'; c.font = this._font('10px Arial, Helvetica, sans-serif');
+                    c.fillText(num(deg(x), 0) + '°', sx, ly + 14 * fs); c.restore();
                 }
             }
             // y labels
@@ -250,7 +265,7 @@
             }
             // axis names
             c.fillStyle = 'rgba(255,255,255,0.75)';
-            c.font = "600 12px 'Orbitron', sans-serif";
+            c.font = this._font("600 12px 'Orbitron', sans-serif");
             c.textAlign = 'right'; c.textBaseline = 'bottom';
             c.fillText(this.names[0], this.w - 6, Math.min(Math.max(o[1] - 5, 14), this.h - 4));
             if (o[0] >= sxClip - 1) {
@@ -399,7 +414,7 @@
                 this.render();
             }, { passive: false });
             // double click / double tap: back to the chapter's own framing
-            this.cv.addEventListener('dblclick', () => { if (this.box) { this.moved = false; this._applyBox(); this.render(); } });
+            this.cv.addEventListener('dblclick', () => this.resetView());
         }
     }
 
