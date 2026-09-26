@@ -1333,7 +1333,7 @@
             // in class the task is the first row of the working (zeigeRechenweg),
             // up here only the counter and what to solve for, on the task's height
             host.innerHTML = `<span style="${RAND};left:24px">` +
-                `${nr + 1} / ${liste.length}${hinweis ? ' · ' + hinweis : ''}</span>` +
+                `${aufgabenModus ? 'Aufgabe ' : ''}${nr + 1} / ${liste.length}${hinweis ? ' · ' + hinweis : ''}</span>` +      // Doc: "schreib links vor 4 von 20 Aufgabe"
                 (testModus ? `<span id="vorlage-formel" style="font-size:2.4rem;color:${anzeige(INK)}"></span>` : '') +
                 (nach ? `<span id="vorlage-nach" style="${RAND};right:24px">umstellen nach <span style="font-size:1.4em"></span></span>` : '');
             if (nach) {
@@ -2013,8 +2013,13 @@
             // light / dark: a circle, half filled
             hell: '<circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor"/>' +
                   '<path d="M12 4.5 A7.5 7.5 0 0 0 12 19.5 Z" fill="currentColor"/>',
-            // full screen: four corners
-            vollbild: '<path d="M4 9 V4 H9 M15 4 H20 V9 M20 15 V20 H15 M9 20 H4 V15" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>',
+            // full screen, as in the decks: corners out / corners in
+            vollbild: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">' +
+                      '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>' +
+                      '<path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></g>',
+            vollbildAus: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">' +
+                      '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>' +
+                      '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/></g>',
             // beamer: a screen on its stand
             beamer: '<rect x="3.5" y="5" width="17" height="11" rx="1.5" fill="none" stroke="currentColor"/>' +
                     '<path d="M12 16 V20 M8 20 H16" fill="none" stroke="currentColor" stroke-linecap="round"/>',
@@ -2029,7 +2034,7 @@
             b.style.touchAction = 'manipulation';
             if (neueGruppe) b.style.marginTop = '12px';
             b.innerHTML = inhalt;
-            b.addEventListener('click', tun);
+            b.addEventListener('click', e => tun(e));
             document.getElementById('right-rail-inner').appendChild(b);
             return b;
         }
@@ -2037,7 +2042,49 @@
             if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
             else document.documentElement.requestFullscreen().catch(() => {});
         }
+        // The dot of the decks (deck.js, Doc 21.09.): orange = not extended - at the
+        // board that means mirrored, Win P / Cmd F1 (mirrored and "laptop alone" look
+        // the same to the browser); green = extended, the beamer is ready. Only where
+        // the browser can tell (Chrome), and not in mission control: it projects already.
+        const SCHIRM_BEKANNT = 'isExtended' in screen;
+        function zeigeVollbildKnopf() {
+            const b = document.getElementById('werkzeug-vollbild');
+            if (!b) return;
+            const an = !!document.fullscreenElement, erweitert = SCHIRM_BEKANNT && screen.isExtended;
+            const punkt = SCHIRM_BEKANNT && !STEUERUNG;
+            const sig = [an, erweitert, punkt].join();
+            if (b.dataset.sig !== sig) {
+                b.dataset.sig = sig;
+                b.style.position = 'relative';
+                b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${WERKZEUG_ICONS[an ? 'vollbildAus' : 'vollbild']}</svg>` +
+                    (punkt ? `<span class="schirm-punkt" style="position:absolute;top:-4px;right:-4px;width:11px;height:11px;` +
+                        `border-radius:50%;background:${erweitert ? 'rgb(121, 158, 49)' : 'rgb(245, 194, 66)'}"></span>` : '');
+                b.title = an ? 'Vollbild verlassen'
+                    : erweitert ? 'Vollbild – der zweite Bildschirm ist erweitert, der Beamer-Knopf ist da'
+                    : SCHIRM_BEKANNT ? 'Vollbild – nur ein Bildschirm: gespiegelt? Windows: Win P → Erweitern' : 'Vollbild';
+            }
+            leuchte(b, an);
+        }
+        // a tap on the dot says what the screens do; anywhere else on the button: full screen
+        function vollbildKnopf(e) {
+            if (e && e.target && e.target.closest && e.target.closest('.schirm-punkt')) {
+                const erweitert = screen.isExtended;
+                beamerAngebot(erweitert
+                    ? 'Der zweite Bildschirm ist erweitert – der Beamer-Knopf in der rechten Leiste projiziert nur die Rechnung.'
+                    : 'Nur ein Bildschirm zu sehen. Hängt der Beamer dran, ist er gespiegelt: Windows Win P → „Erweitern“, am Mac ⌘ F1.', erweitert);
+                return;
+            }
+            vollbildUmschalten();
+        }
         document.addEventListener('fullscreenchange', () => zeigeWerkzeuge());
+        // a beamer plugged in or out, mirrored or extended: at once where the browser
+        // says so, and a slow look as a net (as in the decks)
+        if (SCHIRM_BEKANNT) {
+            let zuletzt = !!screen.isExtended;
+            const nochmal = () => { if (!!screen.isExtended !== zuletzt) { zuletzt = !!screen.isExtended; zeigeWerkzeuge(); } };
+            if (screen.addEventListener) screen.addEventListener('change', nochmal);
+            setInterval(nochmal, 2000);
+        }
         // lit = the rail's hover look; the central rule has !important, so this too
         function leuchte(b, an) {
             if (an) {
@@ -2069,9 +2116,9 @@
                  // in mission control it ends the projection
                  ['beamer', STEUERUNG ? 'Beamer beenden' : 'Beamer: nur die Rechnung projizieren',
                      () => { if (STEUERUNG) window.close(); else beamerStart(); }, false],
-                 // Doc, 26.09.: "im Präsentationsmodus bräuchte ich noch einen Fullscreen-
-                 // Button, dass der Screen vom HP auch in Fullscreen geht" - mission control only
-                 ...(STEUERUNG ? [['vollbild', 'Vollbild', () => vollbildUmschalten(), false]] : [])].forEach(([id, text, tun, neueGruppe]) => {
+                 // Doc, 26.09.: "Fullscreen immer zeigen, auch wenn kein zweiter Bildschirm
+                 // dran ist, den Beamer nur, wenn ein zweiter Bildschirm wirklich dran ist"
+                 ['vollbild', 'Vollbild', (e) => vollbildKnopf(e), false]].forEach(([id, text, tun, neueGruppe]) => {
                     railKnopf('werkzeug-' + id, text,
                         `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${WERKZEUG_ICONS[id]}</svg>`, tun, neueGruppe);
                 });
@@ -2089,12 +2136,14 @@
             const hk = document.getElementById('werkzeug-hell');
             hk.setAttribute('aria-pressed', hell ? 'true' : 'false');
             leuchte(hk, hell);
-            // in mission control the beamer button is lit: the projection runs; the
-            // full-screen button is lit while mission control is full screen
-            if (STEUERUNG) {
-                leuchte(document.getElementById('werkzeug-beamer'), true);
-                leuchte(document.getElementById('werkzeug-vollbild'), !!document.fullscreenElement);
-            }
+            // in mission control the beamer button is lit: the projection runs;
+            // elsewhere it only shows with a second screen, extended
+            const bk = document.getElementById('werkzeug-beamer');
+            if (STEUERUNG) leuchte(bk, true);
+            // (the rail's buttons are display:flex !important - hiding needs it too)
+            else if (SCHIRM_BEKANNT && screen.isExtended) bk.style.removeProperty('display');
+            else bk.style.setProperty('display', 'none', 'important');
+            zeigeVollbildKnopf();
             // nothing to undo or redo: dimmed
             document.getElementById('werkzeug-undo').style.opacity = verlauf.length ? '1' : '0.35';
             document.getElementById('werkzeug-redo').style.opacity = vorwaerts.length ? '1' : '0.35';
