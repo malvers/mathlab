@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 94 labs, 1687 terms, 2026-09-27
+ * 95 labs, 1698 terms, 2026-09-27
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -82,6 +82,7 @@ const LABS_TERMS = {
     "shell": ["DAS BILD IST EIN PROTOKOLL", "DAS SUBSTRAT IST DIE ERKLÄRUNG", "EINE ZELLE STECKT AN", "FORMELN", "SUBSTRAT-SCHATTEN", "VIELE ZÜNDUNGEN - ZELTE", "WEITER &rarr", "WENIGE ZÜNDUNGEN - LINIEN", "ZWEI WELLEN LÖSCHEN SICH AUS"],
     "solita-avatar": ["Ansicht: Kopf", "Frage an Solita", "Sprechen", "Stimmung: neutral"],
     "steigung": ["DREIECK BREITE (ΔX)", "DREIECK POSITION (X)", "FUNKTION", "GERADEN-STEIGUNG M", "LINEARE FUNKTIONEN", "NULLSTELLE X₀", "STEIGUNG M", "Y-ABSCHNITT N"],
+    "stimmklon": ["alle Texte zeigen", "Aussteuerung automatisch", "Diff", "heller Grund", "Klon", "Mikrofon", "Original", "Original — Doc am RØDE", "Recording", "Spektrum", "Systemvorgabe"],
     "subtraktion": ["Minuend", "SCHRIFTLICHE SUBTRAKTION", "Subtrahend"],
     "tour-kreisteilung": ["Abspielen", "Die Formel", "Jedes Mal das Doppelte", "Kreisteilung", "Nummern", "Regelmäßig oder allgemein", "Und dann 31", "Was kommt dann?", "Was man sieht", "Zwei Punkte, eine Sehne"],
     "tour-maya": ["Der Pfeil", "Die zwanzig Ziffern", "Die Zwanziger-Stelle", "Ein leeres Brett", "Eine Zahl eintippen", "Eine Ziffer legen", "Farben", "Hochkant", "Kalender oder rein zwanzig", "Maya-Zahlen", "Übertrag", "Wie viele Stellen", "Würfeln und legen"],

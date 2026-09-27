@@ -994,5 +994,14 @@ const LAB_ICONS = {
             <g fill="none" stroke="#00D2FF" stroke-width="1.8" stroke-linecap="round">
                 <path d="M80 34 A12 12 0 0 1 80 50" /><path d="M86 28 A20 20 0 0 1 86 56" />
             </g>
+        </svg>`,
+    "stimmklon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- the microphone, and two voices beside it: Doc's (white) and the clone's (cyan) -->
+            <rect x="40" y="10" width="20" height="36" rx="10" fill="rgba(245, 194, 66, 0.2)" stroke="#F5C242" stroke-width="2" />
+            <path d="M32 40 C32 52 40 58 50 58 C60 58 68 52 68 40" fill="none" stroke="#F5C242" stroke-width="2" stroke-linecap="round" />
+            <line x1="50" y1="58" x2="50" y2="68" stroke="#F5C242" stroke-width="2" stroke-linecap="round" />
+            <line x1="40" y1="68" x2="60" y2="68" stroke="#F5C242" stroke-width="2" stroke-linecap="round" />
+            <polyline points="6,82 12,74 18,90 24,70 30,88 36,78 42,84" fill="none" stroke="rgba(255, 255, 255, 0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <polyline points="58,84 64,76 70,90 76,72 82,88 88,78 94,82" fill="none" stroke="#00D2FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
         </svg>`
 };

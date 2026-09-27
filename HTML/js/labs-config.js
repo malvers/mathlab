@@ -1051,6 +1051,17 @@ const LABS_DATA = [
         "color": "orange"
     },
     {
+        "id": "stimmklon",
+        "href": "stimmklon.html",
+        "title": "Stimmklon",
+        "description": "Das Studio für Docs Stimmklon: Ein Text zum Erzählen, nicht zum Vorlesen, wird am Mikrofon aufgenommen; Pegelanzeige und automatische Aussteuerung sorgen dafür, dass eine stille Aufnahme nicht unbemerkt bleibt, und ein Balken zeigt, ob die Referenz von 10 bis 30 Sekunden steht. Danach der Vergleich zum selben Text: Original, Klon und Klon mit angehobenen Höhen, dazu die Spektren als Bild und ihre Differenz, rot, wo Doc lauter ist. Die Aufnahmen landen über den lokalen Server auf der Platte, die Seite arbeitet also nur lokal.",
+        "tagline": "Werkzeug / Stimme / Klon",
+        "icon": LAB_ICONS["stimmklon"],
+        "category": "apps neu",
+        "keywords": "stimmklon stimme klon aufnahme recording mikrofon roede pegel aussteuerung referenz spektrum differenz vergleich hoehen tts sprachsynthese studio",
+        "color": "gold"
+    },
+    {
         "id": "handschrift",
         "href": "handschrift.html",
         "title": "Handschrift",
