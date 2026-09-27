@@ -1,0 +1,84 @@
+/* Würfelspiel (wuerfelspiel.html) - the page's own styles, moved out of its <style> block (27.09.2026, refactor audit). */
+
+/* Readouts, hint boxes and the face picker - everything else comes from the central layout */
+
+/* Place and width come from the central layout (js/lab-shell-minimal.css): a copy here kept the box 14px below
+   the side panel's top after the centre had moved it (Doc, 19.09.2026: "nicht bündig mit dem Top") */
+#math-coach-box {
+    box-sizing: border-box;
+}
+
+#coach-content .katex { font-size: 1.08em; }
+
+[hidden] { display: none !important; }
+
+/* note text in cards: .lab-note, central in js/cyber-lab-overrides.css */
+
+
+.ws-btns { display: flex; flex-wrap: wrap; gap: 7px; }
+
+.ws-btns .cyber-btn {
+    flex: 1 1 auto;
+    font-size: 0.66rem !important;
+    letter-spacing: 0.5px !important;
+}
+
+.ws-btns .cyber-btn.ws-on {
+    border-color: rgb(245, 194, 66) !important;
+    color: rgb(245, 194, 66) !important;
+    box-shadow: 0 0 12px rgba(245, 194, 66, 0.35);
+}
+
+.ws-res {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.95rem;
+    color: #dbe8f7;
+}
+
+.ws-res .ws-a { color: rgb(160, 212, 70); }
+.ws-res .ws-b { color: #e06a5e; }
+.ws-res .ws-d { color: #9fb4d6; }
+
+.ws-dice { display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem; color: #cfe0f5; }
+
+#canvas { touch-action: none; }
+
+/* One WebGL stage per die, laid over the canvas where the view wants the die */
+.ws-die3d {
+    position: absolute;
+    z-index: 5;
+    touch-action: none;
+    cursor: grab;
+}
+
+.ws-die3d:active { cursor: grabbing; }
+
+/* Face picker: tap a face of a die net in the lab, choose its new number */
+#ws-pick {
+    position: absolute;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: repeat(5, 42px);
+    gap: 6px;
+    padding: 10px;
+    background: rgba(8, 18, 38, 0.94);
+    border: 1px solid rgba(0, 210, 255, 0.4);
+    border-radius: 14px;
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
+}
+
+#ws-pick button {
+    height: 42px;
+    border-radius: 9px;
+    border: 1px solid rgba(157, 232, 255, 0.35);
+    background: rgba(20, 40, 72, 0.9);
+    color: #ffffff;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+#ws-pick button:hover { border-color: #9de8ff; background: rgba(0, 110, 160, 0.55); }
+
+#ws-pick button.on { border-color: rgb(245, 194, 66); color: rgb(245, 194, 66); }

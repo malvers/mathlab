@@ -1,0 +1,880 @@
+/* Mandelbrot (mandelbrot.html) - the page's own styles, moved out of its <style> block (27.09.2026, refactor audit). */
+
+:root {
+    --cyber-left-natural-w: 426px; /* 66px rail + 360px sidebar */
+}
+
+body.cyber-shell-grid #cyber-left-chrome-inner {
+    grid-template-columns: 66px 360px !important;
+}
+
+#main-content {
+    background: #000;
+    /* Flex: fills remaining width like multiplikation.html — avoids visible stripe on the right */
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    /* Worked-example box (#orbit-mb-worked): vertical slot under masthead / formula lane */
+    --mb-orbit-worked-top: calc(var(--cyber-nav-band-top, 14px) + clamp(64px, 11.5vmin, 102px));
+}
+
+/* Sidebar: global 350px + 10px in this lab only */
+#side-panel:not(.collapsed) {
+    width: 360px !important;
+    min-width: 360px !important;
+}
+
+/* Same as multiplikation.html — colors/glass */
+#side-panel {
+    background: rgba(10, 20, 36, 0.75);
+    border: none;
+    border-right: 1px solid rgba(0, 210, 255, 0.28);
+    backdrop-filter: blur(28px);
+    align-items: stretch !important;
+}
+
+#side-panel #ui-container {
+    width: 100% !important;
+    max-width: none !important;
+    align-self: stretch !important;
+}
+
+#side-panel .instrument-card {
+    background: rgba(255, 255, 255, 0.055);
+    border-color: rgba(0, 210, 255, 0.32);
+    box-shadow: 0 0 18px rgba(0, 180, 220, 0.07);
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+    margin-bottom: 12px;
+}
+
+#side-panel .instrument-card:last-child {
+    margin-bottom: 6px;
+}
+
+#side-panel .instrument-title {
+    color: rgba(0, 210, 255, 0.92) !important;
+    text-shadow: 0 0 12px rgba(0, 210, 255, 0.35) !important;
+}
+
+/* Numbers only in sidebar — no canvas HUD */
+/* Top icon row: no separate shrink sizing — size comes from cyber-lab-overrides.css (52×52). */
+#sidebar-header .cyber-nav {
+    margin: 0 0 6px 0 !important;
+    gap: 6px !important;
+}
+
+/* Sidebar: centered layout (cyber-lab-overrides + even cards) */
+#ui-container {
+    min-height: 0;
+}
+
+/* Two-way rows like lissajous.html (#grp-view · lissajous-view-btn), not oversized pill layout */
+#side-panel .fraktal-seg-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#side-panel .fraktal-seg-btn {
+    flex: 1;
+    min-width: 118px;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 8px 10px;
+    font-family: Orbitron, sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    border-radius: 10px;
+    cursor: pointer;
+    outline: none;
+    background: rgba(16, 30, 52, 0.9);
+    border: 1px solid rgba(90, 200, 230, 0.38);
+    color: #d4eefc;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+#side-panel .fraktal-seg-btn:hover:not(:disabled) {
+    border-color: rgba(120, 220, 255, 0.55);
+    background: rgba(20, 38, 62, 0.95);
+}
+
+#side-panel .fraktal-seg-btn.is-active {
+    border-color: rgba(0, 210, 255, 0.9);
+    box-shadow: 0 0 16px rgba(0, 210, 255, 0.3);
+    color: #f0fdff;
+    background: rgba(0, 210, 255, 0.14);
+}
+
+#side-panel .fraktal-seg-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+#side-panel .stats-grid.fraktal-readouts {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+}
+
+#side-panel .fraktal-readouts .stats-card {
+    min-width: 0;
+}
+
+#side-panel .fraktal-readouts .stats-val {
+    font-size: 0.72rem;
+    line-height: 1.25;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+/* FRACTAL PARAMS: buttons-ultra sets .cyber-control-group margin-top:15px — tighten heavily here */
+#side-panel .instrument-card:has(#jx-mount) #jx-mount > .cyber-control-group:first-child {
+    margin-top: 0 !important;
+}
+
+#side-panel .instrument-card:has(#jx-mount) .cyber-control-group {
+    margin-top: 2px !important;
+    margin-bottom: 0 !important;
+}
+
+#side-panel .instrument-card:has(#jx-mount) .control-header {
+    margin-bottom: 1px !important;
+    line-height: 1.15 !important;
+}
+
+#side-panel .instrument-card:has(#jx-mount) .cyber-slider {
+    margin-top: 2px !important;
+    margin-bottom: 2px !important;
+}
+
+/* Box 1 (KaTeX |z²|/N): left; Box 2 (stable c): plot center — shared row, full width */
+.mb-fractal-formula-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: none;
+    transform: none;
+    top: var(--cyber-nav-band-top, 14px);
+    z-index: 6;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+.mb-fractal-formula-overlay[hidden] {
+    display: none !important;
+}
+
+.mb-fractal-formula-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: stretch;
+    width: 100%;
+    min-height: 52px;
+    gap: 10px;
+    box-sizing: border-box;
+}
+
+/* Same row height (stretch); KaTeX box in left column */
+.mb-fractal-formula-row > .mb-fractal-formula-box:not(.mb-fractal-stable-panel) {
+    grid-column: 1;
+    justify-self: start;
+    align-self: stretch;
+    margin-left: clamp(12px, 2.5vw, 28px);
+    display: flex;
+    align-items: center;
+}
+
+/* Stable c: middle column (centered in plot) */
+.mb-fractal-formula-row > #mb-fractal-stable-panel.mb-fractal-stable-panel {
+    grid-column: 2;
+    justify-self: center;
+    align-self: stretch;
+    transform: none;
+    display: flex;
+    align-items: center;
+}
+
+/* display:flex wins over [hidden] — otherwise empty bordered box stayed visible */
+.mb-fractal-formula-row > #mb-fractal-stable-panel.mb-fractal-stable-panel[hidden] {
+    display: none !important;
+}
+
+.mb-fractal-stable-panel .mb-fractal-stable-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 100%;
+    min-width: 124px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.mb-fractal-formula-row #mb-fractal-stable-panel .mb-fractal-stable-inner {
+    height: 100%;
+    min-height: 0;
+}
+
+/* the digits widget, centred and gold in the top panel */
+#mb-fractal-stable-widget {
+    justify-content: center;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    align-self: center;
+    --cc-digit: #f2bb44;
+    --cc-shadow: 0 0 12px rgba(242, 187, 68, 0.48);
+}
+
+.mb-fractal-stable-label {
+    font-family: Orbitron, sans-serif;
+    font-size: 0.52rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(0, 210, 255, 0.94);
+    text-shadow: 0 0 12px rgba(0, 210, 255, 0.38);
+    line-height: 1.2;
+    max-width: 11rem;
+}
+
+.mb-fractal-stable-note {
+    font-family: Orbitron, system-ui, sans-serif;
+    font-size: 0.47rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    line-height: 1.35;
+    color: rgba(186, 214, 235, 0.92);
+    text-shadow: 0 0 8px rgba(0, 210, 255, 0.22);
+    max-width: min(17rem, 86vw);
+    margin-top: 2px;
+    white-space: pre-line;
+}
+/* KaTeX: readable; min ~ button height, box grows with formula */
+.mb-fractal-formula-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-height: clamp(44px, 10vmin, 52px);
+    height: auto;
+    padding: clamp(6px, 1.8vmin, 10px) clamp(10px, 2.8vmin, 18px);
+    background: rgba(6, 14, 28, 0.9);
+    border-radius: 12px;
+    border: 0.5px solid rgba(242, 187, 68, 0.48);
+    box-shadow:
+        0 0 16px rgba(242, 187, 68, 0.14),
+        0 0 22px rgba(0, 210, 255, 0.08);
+}
+
+#canvas-container .mb-fractal-formula-box .katex-display {
+    margin: 0 !important;
+}
+
+/* Orbit |z²|/N: Kasten nur so breit wie Inhalt — max. 368px / volle Plotbreite kleiner davon */
+#mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics {
+    box-sizing: border-box;
+    width: fit-content;
+    max-width: min(368px, calc(100% - 20px));
+    min-width: 0;
+    min-height: 52px;
+    padding: clamp(8px, 2vmin, 11px) clamp(12px, 3.2vmin, 22px);
+    flex-shrink: 1;
+    justify-content: flex-start;
+    align-items: center;
+    contain: layout style;
+    border-radius: 999px;
+    background: linear-gradient(
+        165deg,
+        rgba(16, 28, 52, 0.94) 0%,
+        rgba(7, 14, 30, 0.86) 48%,
+        rgba(10, 22, 42, 0.92) 100%
+    );
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(242, 187, 68, 0.45);
+    box-shadow:
+        0 0 0 1px rgba(0, 210, 255, 0.12) inset,
+        0 1px 0 rgba(255, 255, 255, 0.05) inset,
+        0 12px 36px rgba(0, 0, 0, 0.58),
+        0 0 32px rgba(0, 210, 255, 0.14),
+        0 0 52px rgba(242, 187, 68, 0.09);
+}
+
+/* FRACTAL: compact box around main row (no extra empty space like orbit |z²|/N tile) */
+#mb-fractal-formula-panel.mb-fractal-formula-panel--fractal-banner {
+    box-sizing: border-box;
+    width: fit-content;
+    max-width: min(560px, calc(100% - 20px));
+    min-width: 0;
+    min-height: 52px;
+    padding: 8px 14px;
+    flex-shrink: 0;
+    justify-content: flex-start;
+    align-items: center;
+    contain: layout style;
+}
+
+#mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics #mb-fractal-formula-tex,
+#mb-fractal-formula-panel.mb-fractal-formula-panel--fractal-banner #mb-fractal-formula-tex {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    min-height: 2.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics #mb-fractal-formula-tex {
+    width: auto;
+    max-width: 100%;
+    min-height: 0;
+    justify-content: flex-start;
+    text-align: left;
+}
+
+/* Orbit/scan: |z²| und N nebeneinander mit Gap — keine künstliche Pillenbreite */
+#mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics
+    #mb-fractal-formula-tex.mb-fractal-mz-split {
+    position: relative;
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: baseline;
+    gap: clamp(0.55rem, 2vmin, 1rem);
+    justify-content: flex-start;
+    text-align: left;
+}
+
+#mb-fractal-formula-tex.mb-fractal-mz-split .mb-fractal-mz-z2 {
+    display: inline-block;
+    vertical-align: middle;
+    text-align: left;
+    flex-shrink: 0;
+}
+
+#mb-fractal-formula-tex.mb-fractal-mz-split .mb-fractal-mz-n {
+    position: static;
+    transform: none;
+    left: auto;
+    top: auto;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+#mb-fractal-formula-tex.mb-fractal-mz-split .mb-fractal-mz-spd {
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+#mb-fractal-formula-tex.mb-fractal-mz-split .mb-fractal-mz-spd .katex {
+    text-shadow: none !important;
+}
+
+/* μ-Zeile: lesbar ohne Fraktal-Palette (Parent `.katex` erzwingt sonst Gold + \textcolor verliert gegen !important). */
+#canvas-container
+    #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics
+    #mb-fractal-formula-tex.mb-fractal-mz-split
+    .mb-fractal-mz-spd--white
+    .katex {
+    color: #f8faff !important;
+    text-shadow: none !important;
+    filter: none !important;
+}
+
+#canvas-container
+    #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics
+    #mb-fractal-formula-tex.mb-fractal-mz-split
+    .mb-fractal-mz-spd--muted
+    .katex {
+    color: #94a3b8 !important;
+    text-shadow: none !important;
+    filter: none !important;
+}
+
+/* FRACTAL main row left-aligned; width follows KaTeX */
+#mb-fractal-formula-panel.mb-fractal-formula-panel--fractal-banner #mb-fractal-formula-tex:not(.mb-fractal-mz-split) {
+    justify-content: flex-start;
+    text-align: left;
+    width: auto;
+    min-width: 0;
+}
+
+#canvas-container #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics .katex-display,
+#canvas-container #mb-fractal-formula-panel.mb-fractal-formula-panel--fractal-banner .katex-display {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+#canvas-container #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics .katex-display {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+#canvas-container
+    #mb-fractal-formula-panel.mb-fractal-formula-panel--fractal-banner
+    #mb-fractal-formula-tex:not(.mb-fractal-mz-split)
+    .katex-display {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+}
+
+#canvas-container #mb-fractal-formula-tex .katex {
+    font-size: clamp(0.88rem, 0.55rem + 1.8vmin, 1.38rem) !important;
+    color: #f2bb44 !important;
+    text-shadow:
+        0 0 14px rgba(242, 187, 68, 0.42),
+        0 0 26px rgba(255, 228, 170, 0.18);
+    line-height: 1.2 !important;
+}
+
+#canvas-container
+    #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics
+    #mb-fractal-formula-tex
+    .katex {
+    font-size: clamp(0.86rem, 0.52rem + 1.75vmin, 1.34rem) !important;
+    text-shadow:
+        0 0 20px rgba(242, 187, 68, 0.38),
+        0 0 38px rgba(0, 210, 255, 0.14),
+        0 1px 2px rgba(0, 0, 0, 0.5);
+    filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.35));
+}
+
+/* Main WebGL: hide in orbit view (CyberCanvas stacks above) */
+#canvas-container #canvas.mb-fractal-view-hidden {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.orbit-view-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    background: #050b18;
+}
+
+.orbit-view-wrap[hidden] {
+    display: none !important;
+}
+
+/** KaTeX labels at orbit (HTML over canvas — no canvas LaTeX). */
+.orbit-point-katex {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    padding: 2px 8px;
+    pointer-events: none;
+    z-index: 6;
+    max-width: min(96%, 440px);
+    background: rgba(5, 12, 24, 0.72);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 210, 255, 0.35);
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.45);
+    transform-origin: 0 0;
+}
+
+.orbit-point-katex--c {
+    transform: scale(0.6);
+    color: rgba(248, 250, 255, 0.96);
+    border-color: rgba(168, 85, 247, 0.48) !important;
+    text-shadow: 0 0 10px rgba(167, 85, 247, 0.38);
+}
+
+.orbit-point-katex--waypoint {
+    transform: scale(0.6);
+    z-index: 5;
+}
+
+.orbit-point-katex[hidden],
+.orbit-point-katex--hidden {
+    display: none !important;
+}
+
+#orbit-view-wrap .orbit-point-katex.orbit-point-katex--waypoint .katex {
+    font-size: clamp(1.02rem, 0.74rem + 1.95vmin, 1.72rem) !important;
+    /* kein Farb-!important — \textcolor{…}{z} in KaTeX muss wirken */
+    color: rgba(248, 250, 255, 0.96);
+    text-shadow:
+        0 0 14px rgba(0, 210, 255, 0.28),
+        0 0 24px rgba(0, 0, 0, 0.25);
+    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+}
+
+#orbit-view-wrap .orbit-point-katex.orbit-point-katex--c .katex {
+    font-size: clamp(1.02rem, 0.74rem + 1.95vmin, 1.72rem) !important;
+    /* kein Farb-!important — \textcolor am \(\mathbf c\) */
+    color: rgba(248, 250, 255, 0.96);
+    text-shadow:
+        0 0 12px rgba(167, 85, 247, 0.22),
+        0 0 22px rgba(0, 0, 0, 0.2);
+    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+}
+
+#orbit-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+}
+
+/*
+ * Rechenbox: direkt unter #main-content — nicht in #canvas-container.
+ * Sonst liegt die ganze Plot-Ebene unter .canvas-branding (z-index 120) und die Box blieb unsichtbar.
+ */
+#main-content > #orbit-mb-worked.orbit-mb-worked {
+    position: absolute;
+    right: clamp(16px, 2.6vw, 36px);
+    top: var(--mb-orbit-worked-top);
+    z-index: 200;
+    /**
+     * \texttt{inline-flex} + \texttt{align-items: flex-start}: Kartenbreite = \(\max\)(Merkhilfe, Rechenspur),
+     * nicht die volle \#main-content-Breite (Problem war \texttt{width:fit-content}-Flex mit \texttt{stretch}
+     * + \(\texttt{max-width:100\%}\) Kindern beim abs.\ Positionieren).
+     */
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    /* Obere Merkhilfe + Schritte: begrenzt breit; \(z^2\)-Zeile bleibt einzeilig. */
+    max-width: min(940px, calc(100vw - 20px));
+    min-width: 0;
+    padding: 10px 12px 14px;
+    box-sizing: border-box;
+    pointer-events: auto;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    font-family: Outfit, system-ui, sans-serif;
+    font-size: 1.06rem;
+    background: rgba(5, 12, 26, 0.88);
+    backdrop-filter: blur(10px);
+    border-radius: 18px;
+    border: 1px solid rgba(0, 210, 255, 0.45);
+    box-shadow:
+        0 0 0 1px rgba(0, 210, 255, 0.1),
+        0 0 22px rgba(0, 210, 255, 0.18),
+        0 12px 36px rgba(0, 0, 0, 0.42);
+}
+
+#main-content > #orbit-mb-worked.orbit-mb-worked[hidden] {
+    display: none !important;
+}
+
+.orbit-mb-worked-caption {
+    display: none;
+}
+
+#main-content > #orbit-mb-worked.orbit-mb-worked.orbit-mb-worked--drag {
+    cursor: grabbing;
+}
+
+/** Rechenspur: Inhaltsbreite wie Merkhilfe (Kartenbreite kommt vom breiteren Block). */
+#orbit-mb-worked .orbit-mb-worked-tex-scroll {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    width: fit-content;
+    max-width: 100%;
+    min-width: 0;
+    align-self: flex-start;
+    max-height: min(38vh, 15rem);
+    scrollbar-gutter: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+}
+
+/**
+ Über der Scrollleiste vertikaler „Hoch/Runter“-Cursor (\texttt{ns-resize}).
+ Nur WebKit: bei Firefox wirkt natives Scrollbar-Verhalten ohne eigenen Cursor-Stil pro Streifen.
+ */
+#orbit-mb-worked .orbit-mb-worked-tex-scroll::-webkit-scrollbar {
+    width: 8px;
+    cursor: ns-resize;
+}
+
+#orbit-mb-worked .orbit-mb-worked-tex-scroll::-webkit-scrollbar-thumb {
+    cursor: ns-resize;
+    background: rgba(0, 210, 255, 0.35);
+    border-radius: 6px;
+}
+
+#orbit-mb-worked .orbit-mb-worked-tex-scroll::-webkit-scrollbar-track {
+    cursor: ns-resize;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 6px;
+}
+
+#orbit-mb-worked .orbit-mb-worked-tex {
+    margin: 0;
+    padding: 0;
+    width: fit-content;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    text-align: left;
+}
+
+#orbit-mb-worked .orbit-mb-worked-tex .katex {
+    font-size: clamp(0.92rem, 0.78rem + 1.35vmin, 1.22rem) !important;
+    color: rgba(248, 250, 255, 0.96) !important;
+    filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.5));
+}
+
+#orbit-mb-worked .orbit-mb-worked-tex .katex-display {
+    margin: 0 !important;
+    text-align: left !important;
+    width: fit-content;
+    max-width: 100%;
+}
+
+#orbit-mb-worked .orbit-mb-worked-tex .katex-display > .katex {
+    margin: 0 !important;
+    display: inline-block;
+    text-align: left;
+}
+
+.orbit-mb-worked-plain {
+    margin: 0;
+    text-align: left;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 1.03rem;
+    line-height: 1.52;
+    color: rgba(230, 240, 255, 0.96);
+    white-space: pre-line;
+    tab-size: 4;
+}
+
+/** Merkhilfe: Inhaltsbreite (kein volle-Breite-\(aligned\)-Stretch der Modulus-Zeile). */
+#orbit-mb-worked-memo {
+    margin: 0 0 2px;
+    width: fit-content;
+    max-width: 100%;
+    min-width: 0;
+    align-self: flex-start;
+    box-sizing: border-box;
+}
+
+#orbit-mb-worked-memo.orbit-mb-worked-plain {
+    padding: 0 2px;
+}
+
+#orbit-mb-worked-memo .katex-display {
+    margin: 0 !important;
+    width: fit-content;
+    max-width: 100%;
+}
+
+#orbit-mb-worked-memo .katex {
+    /* gleiche Skalierung/Schlagschatten wie `.orbit-mb-worked-tex .katex` */
+    font-size: clamp(0.92rem, 0.78rem + 1.35vmin, 1.22rem) !important;
+    /* kein Farb-!important — kursives \(\textcolor{}{z}\) wie Rechenspur */
+    color: rgba(248, 250, 255, 0.96);
+    filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.5));
+}
+
+#orbit-mb-worked-rule {
+    border: none;
+    border-top: 1px solid rgba(0, 210, 255, 0.38);
+    margin: 12px 0 16px;
+    align-self: stretch;
+    width: auto;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.orbit-hud {
+    position: absolute;
+    left: 14px;
+    bottom: 14px;
+    max-width: min(92vw, 520px);
+    padding: 8px 12px;
+    box-sizing: border-box;
+    font-family: Outfit, system-ui, sans-serif;
+    font-size: 0.78rem;
+    line-height: 1.32;
+    color: rgba(220, 235, 250, 0.92);
+    background: rgba(6, 14, 28, 0.88);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 210, 255, 0.28);
+    pointer-events: none;
+    z-index: 5;
+    white-space: pre-line;
+}
+
+.orbit-hud.orbit-hud-hidden {
+    display: none;
+}
+
+.orbit-hud-stable {
+    margin-top: 0.35em;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+.orbit-hud-stable--zero {
+    color: #e53935;
+    text-shadow: 0 0 10px rgba(229, 57, 53, 0.42);
+}
+
+.orbit-hud-stable--hits {
+    color: #f2bb44;
+    text-shadow: 0 0 10px rgba(242, 187, 68, 0.42);
+}
+
+/* Lag hint only in orbit HUD (not sidebar) */
+.orbit-hud-lag {
+    font-size: 0.72em;
+    font-weight: 500;
+    color: rgba(160, 175, 198, 0.92);
+    letter-spacing: 0.03em;
+}
+
+.orbit-hud-lag--warn {
+    color: #ffb74d;
+    text-shadow: 0 0 8px rgba(255, 183, 77, 0.38);
+}
+
+/* Orbit HUD: c and z₀ as aligned rows, tabular digits */
+.orbit-hud-values {
+    display: table;
+    margin: 0.35em 0 0.2em;
+    border-collapse: separate;
+    border-spacing: 0 0.12em;
+    font-family: Orbitron, ui-monospace, monospace;
+    font-size: 0.84em;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.03em;
+    line-height: 1.35;
+    color: rgba(232, 244, 255, 0.96);
+}
+
+.orbit-hud-cz-row {
+    display: table-row;
+}
+
+.orbit-hud-cz-lab {
+    display: table-cell;
+    text-align: right;
+    vertical-align: baseline;
+    padding-right: 0.45em;
+    white-space: nowrap;
+    font-weight: 600;
+    color: rgba(0, 210, 255, 0.88);
+    text-shadow: 0 0 10px rgba(0, 210, 255, 0.22);
+}
+
+.orbit-hud-cz-num {
+    display: table-cell;
+    vertical-align: baseline;
+    white-space: nowrap;
+    padding-left: 0.05em;
+}
+
+/* CyberBranding puts .canvas-branding with pointer-events:auto over plot — mouse never reached canvas */
+#main-content .canvas-branding {
+    pointer-events: none !important;
+}
+
+@media (max-width: 720px) {
+    .mb-fractal-formula-row {
+        grid-template-columns: 1fr;
+        gap: clamp(6px, 1.8vmin, 10px);
+        min-height: 0;
+        align-items: center;
+    }
+
+    .mb-fractal-formula-row > .mb-fractal-formula-box:not(.mb-fractal-stable-panel) {
+        grid-column: 1;
+        justify-self: start;
+        align-self: stretch;
+        margin-left: clamp(8px, 2.4vw, 16px);
+        margin-right: auto;
+        width: fit-content;
+        max-width: calc(100% - 16px);
+    }
+
+    .mb-fractal-formula-row > #mb-fractal-stable-panel.mb-fractal-stable-panel {
+        grid-column: 1;
+        justify-self: center;
+    }
+
+    #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics,
+    #mb-fractal-formula-panel.mb-fractal-formula-panel--fractal-banner {
+        width: fit-content;
+        max-width: calc(100% - 16px);
+    }
+}
+
+@media (max-width: 520px) {
+    #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics {
+        border-radius: 14px;
+        width: fit-content;
+        max-width: calc(100% - 12px);
+    }
+
+    #mb-fractal-formula-panel.mb-fractal-formula-panel--orbit-metrics
+        #mb-fractal-formula-tex.mb-fractal-mz-split {
+        flex-direction: column;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+        gap: 6px;
+        min-height: 0;
+    }
+
+    #mb-fractal-formula-tex.mb-fractal-mz-split .mb-fractal-mz-n {
+        position: static !important;
+        left: auto !important;
+        top: auto !important;
+        transform: none !important;
+    }
+}
+
+
+/*
+ * Shell: Sidebar/Chrome sicher über die Plot-Spalte legen; #main-content immer explizit Spalte 2
+ * (ohne das bleibt bei 2-Spalten-Grid ggf. cyber-layout grid-column: 3 → implizite Spalte / Vollbreiten-Bug).
+ * Doppelt am Ende des Blocks, damit es nach allen eingebundenen .css-Links sicher greift.
+ */
+body.cyber-shell-grid > #cyber-left-chrome {
+    z-index: 2100 !important;
+    position: relative !important;
+    isolation: isolate;
+}
+body.cyber-shell-grid > #main-content {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    z-index: 0 !important;
+    position: relative !important;
+    isolation: isolate;
+}
+@media (max-width: 560px) {
+    body.cyber-shell-grid > #cyber-left-chrome {
+        z-index: 2100 !important;
+        position: relative !important;
+        isolation: isolate;
+    }
+    body.cyber-shell-grid > #main-content {
+        grid-column: 1 !important;
+        grid-row: 2 !important;
+        z-index: 0 !important;
+    }
+}
