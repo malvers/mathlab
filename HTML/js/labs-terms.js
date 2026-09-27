@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 91 labs, 1677 terms, 2026-09-27
+ * 94 labs, 1687 terms, 2026-09-27
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -24,6 +24,7 @@ const LABS_TERMS = {
     "butterfly": ["ANIMATION ENGINE", "Animation zurücksetzen", "Basis-Farbton", "Cos Amp", "Cos Freq", "Exp Amp", "GLOW", "Glow Effekt AN/AUS", "KURVEN-PARAMETER", "MESSWERTE", "SCHMETTERLINGS-LABOR", "Sin Amp", "Sin Div"],
     "buzzer": ["CODE VON DER TAFEL", "HAB ICH NICHT VERSTANDEN"],
     "cmaes": ["EVOLUTIONSDATEN", "FITNESS", "FLÄCHE", "FLÄCHENOPTIMIERUNG", "GENERATION", "MAX 5000", "OPTIMIERUNG KREIS", "OPTIMIERUNG LINSE", "OPTIMIERUNG: KREIS", "STEP 1", "STEP 10", "UMFANG"],
+    "collatz": ["Collatz", "Härtester Start", "Weg ablaufen"],
     "conuslab": ["FORMELN", "ZÜNDEN"],
     "cool-squares": ["DER ULTIMATIVE QUADRAT-BEWEIS", "Ergebnis y", "Fläche Grün", "Labels einblenden", "Lücke x", "PROPORTIONEN", "Zentral-Seite a"],
     "coordinatensystemtester": ["COORD-SYSTEM TESTER", "PROJEKTIONS-STEUERUNG"],
@@ -47,6 +48,7 @@ const LABS_TERMS = {
     "gravitation": ["BERECHNEN", "ERZEUGE DREIECK", "ERZEUGE TRAININGSDATEN", "Geometrie", "Kugel", "Messpunkt M", "Neuronales Netz", "POLYEDER", "Polyeder · gz", "Quader (1×2×3)", "SZENE", "TRAINIEREN", "Trainingsdaten"],
     "handschrift": ["Als .txt sichern", "Bild wählen", "Dokument", "Ergebnis", "Erkennung", "Handschrift", "kein Modell geladen", "Kopieren", "Modell", "Ollama nicht erreichbar", "Status", "Streifen pro Seite", "Transkribieren"],
     "heart3d": ["Oberflächen-Modulation (B)", "SDF KONTROLLE", "Stauchungs-Faktor (A)"],
+    "hermanngitter": ["Hermanngitter", "Punkte (Scintillating Grid)", "Umgekehrt (hell auf dunkel)"],
     "hexadezimal": ["Hexadezimalzahlen", "Sechzehnersystem", "WARUM SECHZEHN?"],
     "imaginarynumbers": ["Imaginäre Zahlen", "Imaginary numbers"],
     "infektionssimulation": ["Infektionssimulation", "Zurücksetzen"],
@@ -78,6 +80,7 @@ const LABS_TERMS = {
     "pythagorasbeweis": ["AUẞERHALB DES RAHMENS", "BEWEIS RESET", "FLÄCHE CM²", "KOLLISION ERKANNT", "MISSIONS-STATUS", "Pythagoras-Beweis", "Summe Dreiecke", "SUMME Σ", "TRIANGULIERUNG AN", "TRIANGULIERUNG AUS", "TRIANGULIERUNG DEAKTIVIERT", "Zielfläche [ABCD]"],
     "reaction-diffusion": ["Eis", "Feuer", "Graustufen", "Grün", "LEEREN", "SÄEN", "Violett"],
     "shell": ["DAS BILD IST EIN PROTOKOLL", "DAS SUBSTRAT IST DIE ERKLÄRUNG", "EINE ZELLE STECKT AN", "FORMELN", "SUBSTRAT-SCHATTEN", "VIELE ZÜNDUNGEN - ZELTE", "WEITER &rarr", "WENIGE ZÜNDUNGEN - LINIEN", "ZWEI WELLEN LÖSCHEN SICH AUS"],
+    "solita-avatar": ["Ansicht: Kopf", "Frage an Solita", "Sprechen", "Stimmung: neutral"],
     "steigung": ["DREIECK BREITE (ΔX)", "DREIECK POSITION (X)", "FUNKTION", "GERADEN-STEIGUNG M", "LINEARE FUNKTIONEN", "NULLSTELLE X₀", "STEIGUNG M", "Y-ABSCHNITT N"],
     "subtraktion": ["Minuend", "SCHRIFTLICHE SUBTRAKTION", "Subtrahend"],
     "tour-kreisteilung": ["Abspielen", "Die Formel", "Jedes Mal das Doppelte", "Kreisteilung", "Nummern", "Regelmäßig oder allgemein", "Und dann 31", "Was kommt dann?", "Was man sieht", "Zwei Punkte, eine Sehne"],

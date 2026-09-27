@@ -962,5 +962,37 @@ const LAB_ICONS = {
             <g fill="#799E31">
                 <rect x="28" y="56" width="36" height="4.5" rx="1.5" /><rect x="28" y="65" width="44" height="4.5" rx="1.5" /><rect x="28" y="74" width="30" height="4.5" rx="1.5" /><rect x="28" y="83" width="40" height="4.5" rx="1.5" />
             </g>
+        </svg>`,
+    "collatz": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- one hailstone path: up and down, and at the end always 1 -->
+            <line x1="8" y1="84" x2="92" y2="84" stroke="rgba(255, 255, 255, 0.3)" stroke-width="1" />
+            <polyline points="10,70 18,52 24,62 32,34 38,46 46,22 52,36 58,50 64,42 70,58 78,66 86,84" fill="none" stroke="rgba(255, 255, 255, 0.75)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="46" cy="22" r="3.5" fill="#D73728" />
+            <circle cx="32" cy="34" r="2.6" fill="#799E31" />
+            <circle cx="64" cy="42" r="2.6" fill="#799E31" />
+            <circle cx="86" cy="84" r="4" fill="#F5C242" />
+            <text x="22" y="24" font-family="Arial, sans-serif" font-weight="700" font-size="13" fill="#F5C242">3n+1</text>
+        </svg>`,
+    "hermanngitter": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- the grid itself: dark tiles, light streets, and the grey ghosts at the crossings -->
+            <rect x="10" y="10" width="84" height="84" rx="3" fill="rgba(255, 255, 255, 0.88)" />
+            <g fill="rgb(8, 20, 42)">
+                <rect x="14" y="14" width="20" height="20" /><rect x="42" y="14" width="20" height="20" /><rect x="70" y="14" width="20" height="20" />
+                <rect x="14" y="42" width="20" height="20" /><rect x="42" y="42" width="20" height="20" /><rect x="70" y="42" width="20" height="20" />
+                <rect x="14" y="70" width="20" height="20" /><rect x="42" y="70" width="20" height="20" /><rect x="70" y="70" width="20" height="20" />
+            </g>
+            <g fill="rgba(8, 20, 42, 0.32)">
+                <circle cx="38" cy="38" r="3.6" /><circle cx="66" cy="38" r="3.6" /><circle cx="38" cy="66" r="3.6" /><circle cx="66" cy="66" r="3.6" />
+            </g>
+        </svg>`,
+    "solita-avatar": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- a head that speaks: open mouth, the words leaving to the right -->
+            <path d="M20 94 C20 78 32 70 50 70 C68 70 80 78 80 94" fill="rgba(245, 194, 66, 0.12)" stroke="#F5C242" stroke-width="1.8" />
+            <circle cx="50" cy="42" r="24" fill="rgba(245, 194, 66, 0.08)" stroke="#F5C242" stroke-width="2" />
+            <circle cx="41" cy="38" r="2.6" fill="#ffffff" /><circle cx="59" cy="38" r="2.6" fill="#ffffff" />
+            <ellipse cx="50" cy="53" rx="6" ry="4" fill="#00D2FF" />
+            <g fill="none" stroke="#00D2FF" stroke-width="1.8" stroke-linecap="round">
+                <path d="M80 34 A12 12 0 0 1 80 50" /><path d="M86 28 A20 20 0 0 1 86 56" />
+            </g>
         </svg>`
 };

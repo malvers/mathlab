@@ -343,6 +343,17 @@ const LABS_DATA = [
         "color": "purple"
     },
     {
+        "id": "hermanngitter",
+        "href": "hermanngitter.html",
+        "title": "Hermanngitter",
+        "description": "Dunkle Kacheln, helle Gassen, und an jeder Kreuzung erscheint ein grauer Fleck, der nicht da ist: das Hermann-Gitter. Kachelgröße, Gassenbreite und Helligkeit der Gassen lassen sich verschieben, und man sieht, wann die Täuschung kippt. Der Schalter für die Punkte legt in jede Kreuzung eine Scheibe, dann blitzen sie schwarz auf: das Scintillating Grid von Lingelbach aus dem Jahr 1994. Umgekehrt geht es auch, hell auf dunkel.",
+        "tagline": "Wahrnehmung / Täuschung / Hermann-Gitter",
+        "icon": LAB_ICONS["hermanngitter"],
+        "category": "fun neu sonst grade5 grade6 grade7 grade8",
+        "keywords": "hermann gitter hermanngitter optische taeuschung illusion scintillating grid lingelbach kreuzung grauer fleck wahrnehmung netzhaut laterale hemmung kacheln gassen",
+        "color": "blue"
+    },
+    {
         "id": "addition",
         "href": "addition.html",
         "title": "Schriftliche Addition",
@@ -808,6 +819,17 @@ const LABS_DATA = [
         "color": "orange"
     },
     {
+        "id": "collatz",
+        "href": "collatz.html",
+        "title": "Collatz",
+        "description": "Gerade halbieren, ungerade mal drei plus eins: Jede je geprüfte Startzahl landet bei 1, beweisen kann es niemand. Oben der Weg einer Zahl auf logarithmischer Skala, rot die ungeraden, grün die geraden Schritte, und „Weg ablaufen“ lässt ihn Schritt für Schritt entstehen. Unten die Länge des Weges für alle Starts bis N, „Härtester Start“ springt zu der Zahl, die am längsten braucht. Zwei Schieber: die Startzahl und die Grenze N.",
+        "tagline": "Zahlen / Folgen / 3n + 1",
+        "icon": LAB_ICONS["collatz"],
+        "category": "arithmetik fun neu grade7 grade8 grade9 grade10",
+        "keywords": "collatz vermutung 3n+1 folge ulam syracuse hagelkorn zahlen gerade ungerade halbieren schritte laengster weg zahlentheorie",
+        "color": "green"
+    },
+    {
         "id": "mandelbrot-deep",
         "href": "mandelbrot.html",
         "title": "Fraktale",
@@ -862,6 +884,17 @@ const LABS_DATA = [
         "category": "apps",
         "keywords": "solita ai ki assistent sprache voice chat claude vorlesen weckwort",
         "color": "blue"
+    },
+    {
+        "id": "solita-avatar",
+        "href": "solita-avatar.html",
+        "title": "Solita Avatar",
+        "description": "Solitas Kopf in 3D, der beim Sprechen die Lippen bewegt: Text eintippen, Sprechen drücken, und die Mundstellungen werden Wort für Wort nachgeführt, sobald das Wort tatsächlich gesprochen wird, interpoliert statt getauscht, deshalb ohne Ruckeln. Stimmung und Kameraansicht schalten per Knopf durch. Die Stimme kommt hier aus dem Browser, alles läuft lokal ohne Server; die echte Stimme gibt es in Solita Live.",
+        "tagline": "Solita / 3D-Kopf / Lippen",
+        "icon": LAB_ICONS["solita-avatar"],
+        "category": "apps neu",
+        "keywords": "solita avatar kopf 3d lippen mund viseme sprechen stimmung ansicht sprachsynthese browserstimme lokal",
+        "color": "gold"
     },
     {
         "id": "gameoflife",
@@ -1091,7 +1124,7 @@ const LABS_DATA = [
         "description": "Live-Tour durch das Kreisteilungs-Lab, noch ohne Stimme: Kapitelzeile und Cursor führen von zwei Punkten und einer Sehne über das Verdoppeln 1, 2, 4, 8, 16 zum Bruch bei 31, dann zu regelmäßig oder frei gesetzten Punkten, den Ansichten, den Nummern der Flächen, dem Abspielen und zuletzt zur Formel. Das echte Lab läuft dabei live im Browser. 9 Szenen, jederzeit anhalten und selbst ausprobieren; die gesprochene Fassung kommt nach dem Dreh.",
         "tagline": "Live-Tour / Geometrie / Kreisteilung",
         "icon": LAB_ICONS["kreisteilung"],
-        "category": "touren neu",
+        "category": "touren",
         "keywords": "tour touren live-tour rundgang fuehrung kreisteilung kreis sehnen flaechen regionen folge vermutung 31 moser stumm ohne stimme",
         "color": "gold"
     },
