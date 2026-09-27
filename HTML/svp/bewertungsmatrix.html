@@ -1062,19 +1062,31 @@
                 box.appendChild(link);
             }
 
+            /* Saved the safe way (27.09.2026, svpAuth.sicherSpeichern): only on the cloud row this sheet was built on;
+               if another device wrote meanwhile, merged key by key - never the whole sheet over a newer one unseen. */
+            const EDIT_BASE = 'svp-edits-basis:' + location.pathname;
+            /* per tab (two tabs share localStorage); localStorage only carries it over a reload */
+            let editTab = null;
+            function editBasis() { if (editTab) return editTab; try { return JSON.parse(localStorage.getItem(EDIT_BASE) || 'null'); } catch (e) { return null; } }
+            function editBasisSetzen(ts, daten) { editTab = { ts: ts, daten: JSON.parse(JSON.stringify(daten || {})) }; try { localStorage.setItem(EDIT_BASE, JSON.stringify(editTab)); } catch (e) { } }
             function pushRemote() {
                 if (!window.svpAuth || !svpAuth.hasSession()) {
                     cloudNote('☁ Nur lokal gespeichert, nicht in der Cloud');
                     return null;
                 }
-                const ts = localStorage.getItem(EDIT_TS) || new Date().toISOString();
-                return svpAuth.api('svp_plan_edits', {
-                    method: 'POST',
-                    headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-                    body: JSON.stringify([{ page: location.pathname, edits: overrides, ts: ts }])
-                }).then(function (res) {
-                    cloudNote(res.ok ? '' : '☁ Fehler: HTTP ' + res.status +
-                        (res.status === 403 ? ' — diese Seite gehört einem anderen Konto' : ''));
+                const gesendet = JSON.parse(JSON.stringify(overrides || {}));
+                return svpAuth.sicherSpeichern({ tabelle: 'svp_plan_edits', spalte: 'edits', seite: location.pathname,
+                    lokal: gesendet, basis: editBasis() }).then(function (r) {
+                    cloudNote(r.ok ? '' : '☁ Fehler: HTTP ' + r.status +
+                        (r.status === 403 ? ' — diese Seite gehört einem anderen Konto' : ''));
+                    if (!r.ok) return;
+                    editBasisSetzen(r.ts, r.daten);
+                    try { localStorage.setItem(EDIT_TS, r.ts); } catch (e) { }
+                    if (r.gemischt && svpAuth.gleich(overrides, gesendet)) {
+                        overrides = r.daten || {};
+                        try { localStorage.setItem(EDIT_KEY, JSON.stringify(overrides)); } catch (e) { }
+                        if (!editing) { drawTable(); drawVerdict(); }
+                    }
                 }).catch(function (e) { cloudNote('☁ ' + e.message); });
             }
 
@@ -1097,6 +1109,7 @@
                     }
                     const remoteTs = Date.parse(rows[0].ts) || 0;
                     if (remoteTs > localTs) {
+                        editBasisSetzen(rows[0].ts, rows[0].edits);
                         overrides = rows[0].edits || {};
                         try {
                             localStorage.setItem(EDIT_KEY, JSON.stringify(overrides));
@@ -1104,7 +1117,9 @@
                         } catch (e) { }
                         if (!editing) { drawTable(); drawVerdict(); }
                     } else if (localTs > remoteTs && svpAuth.hasSession()) {
-                        pushRemote();
+                        pushRemote();          /* merged onto the cloud row (its base: the last one seen here) */
+                    } else if (remoteTs === localTs) {
+                        editBasisSetzen(rows[0].ts, rows[0].edits);
                     }
                 } catch (e) { /* offline: the local state stays */ }
             }

@@ -136,7 +136,13 @@ window.svpPlanParts.push(function (P) {
                 out[r.i] = entry;
             }
         }
-        localStorage.setItem(P.KEY, JSON.stringify(out));
+        /* Only what was changed on screen goes onto the newest state (P.einarbeiten), and that state is this tab's
+           state from now on - P.saved stayed the old one before (27.09.2026: a pill or an eye after "Speichern"
+           then sent the table as it was before the edit). */
+        const neu = P.einarbeiten ? P.einarbeiten(out) : out;
+        P.saved = neu;
+        P.domBasis = JSON.parse(JSON.stringify(neu));
+        localStorage.setItem(P.KEY, JSON.stringify(neu));
         localStorage.setItem(P.TS_KEY, new Date().toISOString());
         P.pushRemote();
         if (P.notesAllowed()) {
@@ -288,6 +294,10 @@ window.svpPlanParts.push(function (P) {
         localStorage.removeItem(P.TS_KEY);
         localStorage.removeItem(P.NOTES_KEY);
         localStorage.removeItem(P.NOTES_TS_KEY);
+        /* the cloud row this browser built on is gone with it */
+        ['svp-edits-basis:', 'svp-edits-offen:', 'svp-plan-notes-basis:'].forEach(function (k) {
+            localStorage.removeItem(k + location.pathname);
+        });
         P.planNotes = {};
         const done = () => location.reload();
         if (window.svpAuth && svpAuth.hasSession()) {

@@ -165,18 +165,27 @@ window.svpPlanParts.push(function (P) {
             if (!panel.hidden && closeLbPanel) closeLbPanel();
         });
 
+        /* Saved the safe way (27.09.2026, svpAuth.sicherSpeichern): on the row this text was built on - if another
+           device wrote meanwhile, merged, never the whole text over a newer one unseen. */
+        const BBASE = BKEY + ':basis';
+        /* per tab (two tabs share localStorage); localStorage only carries it over a reload */
+        let bTab = null;
+        const bBasis = () => { if (bTab) return bTab; try { return JSON.parse(localStorage.getItem(BBASE) || 'null'); } catch (e) { return null; } };
+        const bBasisSetzen = (ts, daten) => { bTab = { ts: ts, daten: JSON.parse(JSON.stringify(daten || {})) }; try { localStorage.setItem(BBASE, JSON.stringify(bTab)); } catch (e) { } };
         function pushBridge() {
             if (!window.svpAuth || !svpAuth.hasSession()) return;
-            svpAuth.api('svp_plan_edits', {
-                method: 'POST',
-                headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-                body: JSON.stringify([{
-                    page: PAGE,
-                    edits: { html: localStorage.getItem(BKEY) || '' },
-                    ts: localStorage.getItem(BTS) || new Date().toISOString()
-                }])
-            }).then(res => { foot.textContent = HINT + (res.ok ? ' · ☁ synchron' : ' · ' + P.cloudErr(res.status)); })
-                .catch(() => {});
+            const gesendet = { html: localStorage.getItem(BKEY) || '' };
+            svpAuth.sicherSpeichern({ tabelle: 'svp_plan_edits', spalte: 'edits', seite: PAGE, lokal: gesendet, basis: bBasis() })
+                .then(r => {
+                    foot.textContent = HINT + (r.ok ? ' · ☁ synchron' : ' · ' + P.cloudErr(r.status));
+                    if (!r.ok) return;
+                    bBasisSetzen(r.ts, r.daten);
+                    localStorage.setItem(BTS, r.ts);
+                    if (r.gemischt && (localStorage.getItem(BKEY) || '') === gesendet.html) {
+                        localStorage.setItem(BKEY, (r.daten && r.daten.html) || '');
+                        body.innerHTML = (r.daten && r.daten.html) || '';
+                    }
+                }).catch(() => {});
         }
 
         let timer = null;
@@ -216,13 +225,15 @@ window.svpPlanParts.push(function (P) {
                 }
                 const remoteTs = Date.parse(rows[0].ts) || 0;
                 if (remoteTs > localTs) {
+                    bBasisSetzen(rows[0].ts, rows[0].edits);
                     localStorage.setItem(BKEY, rows[0].edits.html || '');
                     localStorage.setItem(BTS, rows[0].ts);
                     body.innerHTML = rows[0].edits.html || '';
                     foot.textContent = HINT + ' · ☁ synchron';
                 } else if (localTs > remoteTs) {
-                    pushBridge();
+                    pushBridge();          /* merged onto the cloud row (its base: the last one seen here) */
                 } else {
+                    bBasisSetzen(rows[0].ts, rows[0].edits);
                     foot.textContent = HINT + ' · ☁ synchron';
                 }
             } catch (e) { /* offline: local copy stays */ }

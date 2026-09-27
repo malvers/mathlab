@@ -2,7 +2,8 @@
 // One session under localStorage 'svp-session': logging in on notes.html
 // logs every svp page in. Plain fetch, no supabase-js needed here.
 // Exposes window.svpAuth = { DB_URL, DB_KEY, session, hasSession,
-// storeSession, ensureFreshToken, api, login, loginDialog, whoami }.
+// storeSession, ensureFreshToken, api, login, loginDialog, whoami,
+// gleich, merge3, sicherSpeichern } - the last three: saving without overwriting what came meanwhile (below).
 (function () {
     const DB_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
     const DB_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk'; /* publishable key – public by design */
@@ -147,6 +148,93 @@
         } catch (e) { return ''; }
     }
 
+    /* ---- Saving a whole-object row without overwriting what came meanwhile -------------------------------------
+       Doc, 27.09.2026: "Das darf nie passieren. Dann stehe ich am Montag im Unterricht und alles ist weg." - a plan
+       tab open since the morning saved its old state over a pill added at noon: every save wrote the whole row, the
+       last write won. Now a save lands only on the cloud state it was built on: one PATCH with ts=eq.<base ts>, so
+       nothing can slip in between reading and writing. If another device wrote meanwhile, no row comes back: the
+       current row is fetched, merged (base / this tab / cloud) and the write tries again on it. The database keeps
+       every former row as well (<table>_history). */
+
+    /* equal as data - jsonb hands keys back in its own order, so plain JSON.stringify would see changes that are none */
+    function stabil(v) {
+        if (Array.isArray(v)) return '[' + v.map(stabil).join(',') + ']';
+        if (v && typeof v === 'object') {
+            return '{' + Object.keys(v).filter(k => v[k] !== undefined).sort()
+                .map(k => JSON.stringify(k) + ':' + stabil(v[k])).join(',') + '}';
+        }
+        return JSON.stringify(v === undefined ? null : v);
+    }
+    function gleich(a, b) { return stabil(a) === stabil(b); }
+
+    /* The general merge, key by key and as deep as both sides are objects: what one side changed wins; both the same
+       way: that; both differently: this tab's (it is the one saving now) - or the cloud's while the base is unknown
+       (null) - and a conflict is noted with both values. */
+    function merge3(base, lokal, cloud, pfad, konflikte) {
+        pfad = pfad || [];
+        konflikte = konflikte || [];
+        const obj = v => v && typeof v === 'object' && !Array.isArray(v);
+        if (gleich(lokal, cloud)) return { wert: lokal, konflikte };
+        if (base !== null && gleich(lokal, base)) return { wert: cloud, konflikte };
+        if (base !== null && gleich(cloud, base)) return { wert: lokal, konflikte };
+        if (obj(lokal) && obj(cloud)) {
+            const out = {};
+            new Set([...Object.keys(lokal), ...Object.keys(cloud), ...Object.keys(obj(base) ? base : {})]).forEach(k => {
+                const b = base === null ? null : (obj(base) ? base[k] : undefined);
+                const w = merge3(b, lokal[k], cloud[k], pfad.concat(k), konflikte).wert;
+                if (w !== undefined) out[k] = w;
+            });
+            return { wert: out, konflikte };
+        }
+        konflikte.push({ pfad: pfad.join('.'), lokal: lokal, cloud: cloud });
+        return { wert: base === null ? (cloud === undefined ? lokal : cloud) : lokal, konflikte };
+    }
+
+    /* opts: { tabelle, spalte, seite, lokal, basis, mergen }
+         basis   { ts, daten }: the cloud row this tab built on; null: none known (an existing row is then merged with
+                 the base unknown)
+         mergen  (base|null, lokal, cloud) -> { daten, konflikte } or { stop: text } (do not write, say why);
+                 default: merge3
+       -> { ok, status, daten, ts, gemischt, konflikte, stop } - daten/ts: what the cloud holds now */
+    async function sicherSpeichern(opts) {
+        const tab = opts.tabelle, sp = opts.spalte;
+        const q = tab + '?page=eq.' + encodeURIComponent(opts.seite);
+        const mergen = opts.mergen || function (b, l, c) { const m = merge3(b, l, c); return { daten: m.wert, konflikte: m.konflikte }; };
+        let base = opts.basis && opts.basis.ts ? opts.basis : null, daten = opts.lokal, gemischt = false, konflikte = [];
+        for (let versuch = 0; versuch < 5; versuch++) {
+            const ts = new Date().toISOString(), zeile = { ts: ts };
+            zeile[sp] = daten;
+            let res;
+            if (base) {
+                res = await api(q + '&ts=eq.' + encodeURIComponent(base.ts), {
+                    method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify(zeile)
+                });
+            } else {
+                zeile.page = opts.seite;
+                /* no row known: insert - a row there already answers 409, and is merged below */
+                res = await api(tab, { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify([zeile]) });
+            }
+            if (res.ok) {
+                const rows = await res.json().catch(() => []);
+                if (rows.length) return { ok: true, status: res.status, daten: rows[0][sp], ts: rows[0].ts, gemischt, konflikte };
+            } else if (!(res.status === 409 && !base)) {
+                return { ok: false, status: res.status, gemischt, konflikte };
+            }
+            // nothing written: another device was faster - fetch its row and merge
+            const r2 = await api(q + '&select=' + sp + ',ts');
+            if (!r2.ok) return { ok: false, status: r2.status, gemischt, konflikte };
+            const cloud = (await r2.json())[0];
+            if (!cloud) { base = null; continue; }
+            const m = mergen(base ? base.daten : null, daten, cloud[sp] || {});
+            if (m.stop) return { ok: false, status: 409, stop: m.stop, cloud: { daten: cloud[sp] || {}, ts: cloud.ts }, gemischt, konflikte };
+            daten = m.daten;
+            konflikte = konflikte.concat(m.konflikte || []);
+            base = { ts: cloud.ts, daten: cloud[sp] || {} };
+            gemischt = true;
+        }
+        return { ok: false, status: 409, gemischt, konflikte };
+    }
+
     window.svpAuth = {
         DB_URL: DB_URL,
         DB_KEY: DB_KEY,
@@ -157,6 +245,9 @@
         api: api,
         login: login,
         loginDialog: loginDialog,
-        whoami: whoami
+        whoami: whoami,
+        gleich: gleich,
+        merge3: merge3,
+        sicherSpeichern: sicherSpeichern
     };
 })();

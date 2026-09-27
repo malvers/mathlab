@@ -3,7 +3,7 @@
 window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
-        updateMaterial, removeMatEntry, toggleMatAus, closeMatModal, parseMat, matTail, wirePillMenu,
+        updateMaterial, removeMatEntry, toggleMatAus, closeMatModal, parseMat, matTail, matToSrc, wirePillMenu,
         wirePillTouch, decorateMatCell, wireMaterialDrop
     });
 
@@ -130,6 +130,11 @@ window.svpPlanParts.push(function (P) {
         if (!P.saved[ref.i]) P.saved[ref.i] = {};
         if (src) P.saved[ref.i].material = src;
         else delete P.saved[ref.i].material;
+        /* the table shows it now too (svp-plan-sync.js: P.domBasis) */
+        if (P.domBasis) {
+            if (!P.domBasis[ref.i]) P.domBasis[ref.i] = {};
+            if (src) P.domBasis[ref.i].material = src; else delete P.domBasis[ref.i].material;
+        }
         localStorage.setItem(P.KEY, JSON.stringify(P.saved));
         localStorage.setItem(P.TS_KEY, new Date().toISOString());
         P.pushRemote();

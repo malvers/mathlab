@@ -3,8 +3,132 @@
 window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
-        cloudErr, setCloud, pushRemote, pushNotes, pushFahrplan, fetchPublicEdits
+        cloudErr, setCloud, pushRemote, pushNotes, pushFahrplan, fetchPublicEdits, einarbeiten
     });
+
+    /* Doc, 27.09.2026: "Das darf nie passieren. Dann stehe ich am Montag im Unterricht und alles ist weg." - a plan tab
+       open since the morning (its P.saved and table from then) saved at 15:15 over a pill added at 13:24: every save
+       wrote the whole row, the last write won. Now:
+       - BASE_KEY holds the cloud row the local edits were built on ({ ts, daten }, ts exactly as the database gave it);
+         a save only lands on that row (svpAuth.sicherSpeichern: PATCH ts=eq.<base>), else it is merged week by week
+         and field by field (planMerge) and written on the new row - pills of both sides always stay.
+       - PENDING_KEY marks local edits not in the cloud yet (a failed save, a tab closed mid-write): the next load
+         merges them in instead of dropping them or pushing them blindly.
+       - P.domBasis is what the table on screen was drawn from: saving the table (saveEdits) takes only what was
+         changed on screen since then onto the newest state (einarbeiten), so an old table cannot bring back old weeks.
+       The database keeps every former row besides (svp_plan_edits_history). */
+    const BASE_KEY = 'svp-edits-basis:' + location.pathname, PENDING_KEY = 'svp-edits-offen:' + location.pathname;
+    const klon = o => JSON.parse(JSON.stringify(o || {}));
+    /* The base belongs to THIS tab: two tabs on one computer share localStorage, and a base another tab stored would
+       let this tab's old table through again. localStorage only carries it over a reload (open edits). */
+    let tabBasis = null;
+    function basis() {
+        if (tabBasis) return tabBasis;
+        try { return JSON.parse(localStorage.getItem(BASE_KEY) || 'null'); } catch (e) { return null; }
+    }
+    function basisSetzen(ts, daten) {
+        tabBasis = { ts: ts, daten: klon(daten) };
+        try { localStorage.setItem(BASE_KEY, JSON.stringify(tabBasis)); } catch (e) { }
+    }
+    function lokal() { try { return JSON.parse(localStorage.getItem(P.KEY) || '{}') || {}; } catch (e) { return {}; } }
+    P.domBasis = klon(P.saved);
+
+    /* A shift moves the content of the weeks to other rows (svp-plan-shift.js: topic, material, bullets, type travel;
+       number, week and date stay with the row): then a week index no longer means the same content on both sides.
+       Seen as: a holiday row or a number/week that differs, a row past the page's PLAN that came or went, or at
+       least two topics that moved together by the same number of rows. */
+    function strukturGeaendert(a, b) {
+        a = a || {}; b = b || {};
+        const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+        for (const k of keys) {
+            const x = a[k], y = b[k];
+            if (!x || !y) { if (Number(k) >= window.PLAN.length) return true; continue; }
+            if ((x.ferien != null) !== (y.ferien != null)) return true;
+            for (const f of ['nr', 'kw']) if (x[f] != null && y[f] != null && String(x[f]) !== String(y[f])) return true;
+        }
+        const thema = (o, k) => { const w = o[k]; const t = w && w.topic != null ? String(w.topic).trim() : ''; return t && t !== '—' && t !== '-' ? t : ''; };
+        for (const d of [-3, -2, -1, 1, 2, 3]) {
+            let gewandert = 0;
+            for (const k of keys) {
+                const i = Number(k), t = thema(a, k);
+                if (!Number.isInteger(i) || !t || t === thema(b, k)) continue;
+                if (t === thema(b, String(i - d))) gewandert++;
+            }
+            if (gewandert >= 2) return true;
+        }
+        return false;
+    }
+    /* Material: pill by pill (by its link) - added on either side: in; deleted on one side and untouched on the other:
+       out; changed on one side: that one. Without a base both sides' pills are kept. */
+    function materialMerge(b, l, c) {
+        if (!P.parseMat || !P.matToSrc) return b === null ? (c || l) : l;
+        const bl = b === null ? null : P.parseMat(b || ''), ll = P.parseMat(l || ''), cl = P.parseMat(c || '');
+        if (!ll.length && !cl.length) return b === null ? (c || l) : l;          /* free text, no links */
+        const bei = (liste, u) => liste && liste.find(e => e.url === u), g = svpAuth.gleich, out = [];
+        ll.forEach(e => {
+            const ce = bei(cl, e.url), be = bei(bl, e.url);
+            if (ce) out.push(be && g(e, be) ? ce : e);
+            else if (!be || !g(e, be)) out.push(e);                              /* added here, or changed here */
+        });
+        cl.forEach(e => {
+            if (bei(ll, e.url)) return;
+            const be = bei(bl, e.url);
+            if (!be || !g(e, be)) out.push(e);                                   /* added there, or changed there */
+        });
+        const rest = P.matTail ? P.matTail(l || '') : '';
+        return (P.matToSrc(out) + (rest ? ' ' + rest : '')).trim();
+    }
+    /* base (null: unknown), this tab, the cloud -> { daten, konflikte } or { stop } */
+    function planMerge(base, lok, cloud) {
+        const g = svpAuth.gleich;
+        lok = lok || {}; cloud = cloud || {};
+        if (base) {
+            const sL = strukturGeaendert(base, lok), sC = strukturGeaendert(base, cloud);
+            if (((sL && !g(cloud, base)) || (sC && !g(lok, base))) && !(sL && sC && g(lok, cloud))) {
+                return { stop: 'der Plan wurde verschoben, und zugleich hat sich auf einem anderen Gerät etwas geändert' };
+            }
+        } else if (strukturGeaendert(lok, cloud)) {
+            return { stop: 'dieser Browser kennt den Plan anders verschoben als die Cloud' };
+        }
+        const bekannt = !!base, out = {}, konflikte = [];
+        for (const k of new Set([...Object.keys(lok), ...Object.keys(cloud), ...Object.keys(base || {})])) {
+            const b = bekannt ? base[k] : null, l = lok[k], c = cloud[k];
+            if (g(l, c)) { if (l !== undefined) out[k] = l; continue; }
+            if (bekannt && g(l, b)) { if (c !== undefined) out[k] = c; continue; }
+            if (bekannt && g(c, b)) { if (l !== undefined) out[k] = l; continue; }
+            if (!l || !c || l.ferien != null || c.ferien != null) {
+                const w = bekannt ? (l !== undefined ? l : c) : (c !== undefined ? c : l);
+                if (w !== undefined) out[k] = w;
+                konflikte.push({ woche: k, feld: '' });
+                continue;
+            }
+            const w = {};
+            for (const f of new Set([...Object.keys(l), ...Object.keys(c), ...Object.keys(b || {})])) {
+                const bf = bekannt ? (b ? b[f] : undefined) : null, lf = l[f], cf = c[f];
+                if (g(lf, cf)) { if (lf !== undefined) w[f] = lf; continue; }
+                if (bekannt && g(lf, bf)) { if (cf !== undefined) w[f] = cf; continue; }
+                if (bekannt && g(cf, bf)) { if (lf !== undefined) w[f] = lf; continue; }
+                if (f === 'material') { w[f] = materialMerge(bekannt ? (bf || '') : null, lf, cf); continue; }   /* nothing lost */
+                const sieger = bekannt ? (lf !== undefined ? lf : cf) : (cf !== undefined ? cf : lf);
+                if (sieger !== undefined) w[f] = sieger;
+                konflikte.push({ woche: k, feld: f });
+            }
+            out[k] = w;
+        }
+        return { daten: out, konflikte: konflikte };
+    }
+    /* saveEdits: what was changed on screen (against the table as drawn) onto the newest state of this tab */
+    function einarbeiten(ausTabelle) {
+        if (svpAuth.gleich(P.domBasis, P.saved)) return ausTabelle;
+        const m = planMerge(P.domBasis, ausTabelle, P.saved);
+        return m.stop ? ausTabelle : m.daten;
+    }
+    /* "Woche 7 Thema" - the week as the plan counts it */
+    function stelle(k) {
+        const r = (P.saved && P.saved[k]) || (P.planRows && P.planRows[k]) || {};
+        return (r.nr != null ? 'Woche ' + r.nr : 'Zeile ' + (Number(k) + 1)) + (r.kw != null ? ' (KW ' + r.kw + ')' : '');
+    }
+    const FELD = { topic: 'Thema', remark: 'Bemerkung', details: 'Stichpunkte', date: 'Datum', u: 'Stunden', material: 'Material', ferien: 'Ferien' };
 
     // Safety net: persist pending edits when the tab closes mid-edit.
     // Skipped while resetting/shifting: those reload out of edit mode, and
@@ -70,6 +194,23 @@ window.svpPlanParts.push(function (P) {
             (who ? ' (angemeldet als ' + who + ')' : '');
     }
 
+    /* A merge is news, not an error: a green note bottom right (the error banner's place and look, the palette's
+       green), a tap closes it; with a conflict it stays until then. */
+    function hinweis(text, bleibt) {
+        let box = document.getElementById('svp-cloud-hinweis');
+        if (!text) { if (box) box.remove(); return; }
+        if (!box) {
+            box = document.createElement('div');
+            box.id = 'svp-cloud-hinweis';
+            box.title = 'Tippen: schließen';
+            box.addEventListener('click', () => box.remove());
+            document.body.appendChild(box);
+        }
+        box.textContent = text;
+        clearTimeout(box._uhr);
+        if (!bleibt) box._uhr = setTimeout(() => box.remove(), 9000);
+    }
+
     function setCloud(text, ok) {
         showCloudError(ok ? '' : text);
         if (cloudEl.tagName === 'A') return; /* logged out: keep the login hint */
@@ -80,6 +221,7 @@ window.svpPlanParts.push(function (P) {
     // Re-applies an edits object to the already rendered table (remote wins).
     function applyEdits(map) {
         P.heileMathe(map);
+        P.domBasis = klon(map);
         /* Badges, numbers and the row count are baked into the DOM at render
            time, so a structurally different state — someone shifted the plan on
            another device — needs a real reload, not a text update. */
@@ -111,25 +253,60 @@ window.svpPlanParts.push(function (P) {
         P.planSearchRun();
     }
 
+    /* One save at a time: a second one waits for the first, else both would build on the same base. */
+    let schreibt = Promise.resolve();
     function pushRemote() {
         /* Frueher ein stilles return - Doc speicherte mit abgelaufener Session,
            nichts ging in die Cloud, und niemand hat es ihm gesagt (01.09.2026:
            die Kids sahen den alten Cloud-Stand, er seinen neuen lokalen). */
+        localStorage.setItem(PENDING_KEY, '1');
         if (!window.svpAuth || !svpAuth.hasSession()) {
             setCloud('☁ NICHT in der Cloud gespeichert — bitte neu anmelden!', false);
             return null;
         }
-        const ts = localStorage.getItem(TS_KEY) || new Date().toISOString();
-        return svpAuth.api('svp_plan_edits', {
-            method: 'POST',
-            headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-            body: JSON.stringify([{
-                page: location.pathname,
-                edits: JSON.parse(localStorage.getItem(P.KEY) || '{}'),
-                ts: ts
-            }])
-        }).then(res => setCloud(res.ok ? '☁ synchron' : cloudErr(res.status), res.ok))
-            .catch(e => setCloud('☁ ' + e.message, false));
+        const lauf = schreibt.then(speichernJetzt, speichernJetzt);
+        schreibt = lauf;
+        return lauf;
+    }
+    async function speichernJetzt() {
+        const gesendet = lokal();
+        let r;
+        try {
+            r = await svpAuth.sicherSpeichern({ tabelle: 'svp_plan_edits', spalte: 'edits', seite: location.pathname,
+                lokal: gesendet, basis: basis(), mergen: planMerge });
+        } catch (e) { setCloud('☁ ' + e.message, false); return; }
+        if (!r.ok) {
+            if (r.stop) {
+                setCloud('☁ NICHT gespeichert: ' + r.stop + '. Deine Änderung bleibt in diesem Browser. ' +
+                    '„?cloud“ an der URL holt den Cloud-Stand', false);
+            } else setCloud(cloudErr(r.status), false);
+            return;
+        }
+        basisSetzen(r.ts, r.daten);
+        localStorage.setItem(TS_KEY, r.ts);
+        const jetzt = lokal();
+        if (svpAuth.gleich(jetzt, gesendet)) {
+            /* nothing new here meanwhile: the cloud's state is this tab's state */
+            P.saved = r.daten;
+            localStorage.setItem(P.KEY, JSON.stringify(r.daten));
+            localStorage.removeItem(PENDING_KEY);
+        } else if (r.gemischt) {
+            /* this tab saved again while the merge ran: its newer change goes onto the merged state, the queued save
+               carries it (PENDING stays) */
+            const m = planMerge(gesendet, jetzt, r.daten);
+            if (!m.stop) { P.saved = m.daten; localStorage.setItem(P.KEY, JSON.stringify(m.daten)); }
+        }
+        setCloud('☁ synchron', true);
+        if (r.gemischt) {
+            /* the table shows the merged weeks - not while editing: the cells hold what is being typed */
+            if (!document.body.classList.contains('editing')) applyEdits(P.saved);
+            const k = r.konflikte || [];
+            hinweis(k.length
+                ? 'Zusammengeführt: ein anderes Gerät hatte inzwischen gespeichert. Beide hatten geändert: ' +
+                  k.slice(0, 4).map(x => stelle(x.woche) + (x.feld ? ' ' + (FELD[x.feld] || x.feld) : '')).join(', ') +
+                  (k.length > 4 ? ' …' : '') + ' – hier gilt deine Fassung, die andere ist in der Sicherung.'
+                : 'Zusammengeführt: ein anderes Gerät hatte inzwischen gespeichert – beides ist jetzt drin.', k.length > 0);
+        }
     }
 
     /* --- Notizen sync (own table svp_plan_notes, RLS owner-only) ---------
@@ -141,17 +318,34 @@ window.svpPlanParts.push(function (P) {
     const NOTES_TS_KEY = P.NOTES_TS_KEY = 'svp-plan-notes-ts:' + location.pathname;
     let notesTableMissing = false;
 
+    /* Notes and Fahrplan are saved the same safe way (27.09.2026): on the row they were built on, else merged week
+       by week (svpAuth.merge3) - never the whole object over a newer one. */
+    const NOTES_BASE = 'svp-plan-notes-basis:' + location.pathname, FAHR_BASE = 'svp-plan-fahrplan-basis:' + location.pathname;
+    const tabBasen = {};   /* per tab, as the edits' base above */
+    function basisVon(key) {
+        if (tabBasen[key]) return tabBasen[key];
+        try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; }
+    }
+    function basisNach(key, ts, daten) {
+        tabBasen[key] = { ts: ts, daten: klon(daten) };
+        try { localStorage.setItem(key, JSON.stringify(tabBasen[key])); } catch (e) { }
+    }
+
     function pushNotes() {
         if (!P.notesAllowed() || notesTableMissing) return null;
-        const ts = new Date().toISOString();
-        localStorage.setItem(NOTES_TS_KEY, ts);
-        return svpAuth.api('svp_plan_notes', {
-            method: 'POST',
-            headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-            body: JSON.stringify([{ page: location.pathname, notes: P.planNotes, ts: ts }])
-        }).then(function (res) {
-            if (res.status === 404) { notesTableMissing = true; return; }
-            if (!res.ok) setCloud('☁ Notizen nicht gespeichert — HTTP ' + res.status, false);
+        localStorage.setItem(NOTES_TS_KEY, new Date().toISOString());
+        const gesendet = klon(P.planNotes);
+        return svpAuth.sicherSpeichern({ tabelle: 'svp_plan_notes', spalte: 'notes', seite: location.pathname,
+            lokal: gesendet, basis: basisVon(NOTES_BASE) }).then(function (r) {
+            if (r.status === 404) { notesTableMissing = true; return; }
+            if (!r.ok) { setCloud('☁ Notizen nicht gespeichert — HTTP ' + r.status, false); return; }
+            basisNach(NOTES_BASE, r.ts, r.daten);
+            localStorage.setItem(NOTES_TS_KEY, r.ts);
+            if (r.gemischt && svpAuth.gleich(P.planNotes, gesendet)) {
+                P.planNotes = r.daten || {};
+                P.persistNotes();
+                applyNotes();
+            }
         }).catch(function () { /* offline: the local copy stays */ });
     }
 
@@ -166,7 +360,10 @@ window.svpPlanParts.push(function (P) {
             const localTs = Date.parse(localStorage.getItem(NOTES_TS_KEY) || '') || 0;
             if (!rows.length) { if (Object.keys(P.planNotes).length) pushNotes(); return; }
             const remoteTs = Date.parse(rows[0].ts) || 0;
-            if (remoteTs <= localTs) { if (localTs > remoteTs) pushNotes(); return; }
+            /* newer here (typed offline): merged in by pushNotes on the row it came from */
+            if (remoteTs < localTs) { pushNotes(); return; }
+            basisNach(NOTES_BASE, rows[0].ts, rows[0].notes);
+            if (remoteTs === localTs) return;
             P.planNotes = rows[0].notes || {};
             P.persistNotes();
             localStorage.setItem(NOTES_TS_KEY, rows[0].ts);
@@ -184,15 +381,18 @@ window.svpPlanParts.push(function (P) {
 
     function pushFahrplan() {
         if (!P.notesAllowed() || fahrTableMissing) return null;
-        const ts = new Date().toISOString();
-        localStorage.setItem(FAHR_TS_KEY, ts);
-        return svpAuth.api('svp_plan_fahrplan', {
-            method: 'POST',
-            headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-            body: JSON.stringify([{ page: location.pathname, fahrplan: P.fahrplaene(), ts: ts }])
-        }).then(function (res) {
-            if (res.status === 404) { fahrTableMissing = true; return; }
-            if (!res.ok) setCloud('\u2601 Fahrplan nicht gespeichert \u2014 HTTP ' + res.status, false);
+        localStorage.setItem(FAHR_TS_KEY, new Date().toISOString());
+        const gesendet = klon(P.fahrplaene());
+        return svpAuth.sicherSpeichern({ tabelle: 'svp_plan_fahrplan', spalte: 'fahrplan', seite: location.pathname,
+            lokal: gesendet, basis: basisVon(FAHR_BASE) }).then(function (r) {
+            if (r.status === 404) { fahrTableMissing = true; return; }
+            if (!r.ok) { setCloud('\u2601 Fahrplan nicht gespeichert \u2014 HTTP ' + r.status, false); return; }
+            basisNach(FAHR_BASE, r.ts, r.daten);
+            localStorage.setItem(FAHR_TS_KEY, r.ts);
+            if (r.gemischt && svpAuth.gleich(P.fahrplaene(), gesendet)) {
+                P.replaceFahrplaene(r.daten || {});
+                P.markFahrplaene();
+            }
         }).catch(function () { /* offline: the local copy stays */ });
     }
 
@@ -207,7 +407,9 @@ window.svpPlanParts.push(function (P) {
             const localTs = Date.parse(localStorage.getItem(FAHR_TS_KEY) || '') || 0;
             if (!rows.length) { if (Object.keys(P.fahrplaene()).length) pushFahrplan(); return; }
             const remoteTs = Date.parse(rows[0].ts) || 0;
-            if (remoteTs <= localTs) { if (localTs > remoteTs) pushFahrplan(); return; }
+            if (remoteTs < localTs) { pushFahrplan(); return; }
+            basisNach(FAHR_BASE, rows[0].ts, rows[0].fahrplan);
+            if (remoteTs === localTs) return;
             P.replaceFahrplaene(rows[0].fahrplan || {});
             localStorage.setItem(FAHR_TS_KEY, rows[0].ts);
             P.markFahrplaene();
@@ -238,6 +440,33 @@ window.svpPlanParts.push(function (P) {
         return rows.length ? rows[0] : null;
     }
 
+    /* The cloud row came in: take it - unless local edits are still open (PENDING), those are merged in by a save.
+       A browser from before 27.09. has no base: if its local state is newer than the cloud (typed offline), it counts
+       as open with the base unknown - the merge then keeps what the cloud has and adds this browser's pills. */
+    function cloudZeile(row) {
+        const neu = row.edits || {};
+        let offen = localStorage.getItem(PENDING_KEY) === '1';
+        if (!offen && !basis() && localStorage.getItem(P.KEY)) {
+            const localTs = Date.parse(localStorage.getItem(TS_KEY) || '') || 0;
+            if (localTs > (Date.parse(row.ts) || 0) && !svpAuth.gleich(lokal(), neu)) {
+                localStorage.setItem(PENDING_KEY, '1');
+                offen = true;
+            }
+        }
+        if (offen) {
+            if (!tabBasis) { const b = basis(); if (b) tabBasis = b; }
+            return true;
+        }
+        basisSetzen(row.ts, neu);
+        localStorage.setItem(TS_KEY, row.ts);
+        if (!svpAuth.gleich(neu, P.saved)) {
+            P.saved = neu;
+            localStorage.setItem(P.KEY, JSON.stringify(neu));
+            applyEdits(neu);
+        }
+        return false;
+    }
+
     async function syncFromRemote() {
         if (!window.svpAuth || !svpAuth.hasSession()) return;
         try {
@@ -245,48 +474,15 @@ window.svpPlanParts.push(function (P) {
                 'svp_plan_edits?page=eq.' + encodeURIComponent(location.pathname) + '&select=edits,ts');
             if (!res.ok) { setCloud(cloudErr(res.status), false); return; }
             const rows = await res.json();
-            const localTs = Date.parse(localStorage.getItem(TS_KEY) || '') || 0;
             if (!rows.length) {
                 /* nothing in the cloud yet — seed it from local edits if any */
                 if (localStorage.getItem(P.KEY)) pushRemote();
                 else setCloud('☁ synchron', true);
                 return;
             }
-            const remoteTs = Date.parse(rows[0].ts) || 0;
-            if (remoteTs > localTs) {
-                P.saved = rows[0].edits || {};
-                localStorage.setItem(P.KEY, JSON.stringify(P.saved));
-                localStorage.setItem(TS_KEY, rows[0].ts);
-                applyEdits(P.saved);
-                setCloud('☁ synchron', true);
-            } else if (localTs > remoteTs) {
-                /* Bevor der Automatik-Push die Cloud ueberschreibt: hat der
-                   lokale Stand ueberhaupt so viel Substanz wie die Cloud?
-                   Ein Browser mit altem Inhalt aber neuerem Zeitstempel haette
-                   heute (01.09.2026) beim naechsten Laden alle Material-Links
-                   der Cloud plattgemacht. Weniger Zeilen oder weniger Links
-                   -> nicht pushen, laut sagen, Doc entscheidet (?cloud holt
-                   die Cloud, bewusstes Speichern pusht weiter normal). */
-                const weigh = o => {
-                    let rows = 0, links = 0;
-                    for (const k in (o || {})) {
-                        rows++;
-                        const m = (o[k] && o[k].material) || '';
-                        links += (String(m).match(/https?:\/\//g) || []).length;
-                    }
-                    return { rows, links };
-                };
-                const L = weigh(P.saved), R = weigh(rows[0].edits);
-                if (L.rows < R.rows || L.links < R.links) {
-                    setCloud('☁ Konflikt: lokal weniger Inhalt als die Cloud (' +
-                        L.links + ' statt ' + R.links + ' Links) — NICHT überschrieben. ' +
-                        '„?cloud" an der URL holt die Cloud.', false);
-                } else {
-                    pushRemote(); /* offline edits from this browser win */
-                }
-            } else {
-                setCloud('☁ synchron', true);
-            }
+            /* open local edits: merged onto the cloud row (the base says what changed here) */
+            if (cloudZeile(rows[0])) pushRemote();
+            else setCloud('☁ synchron', true);
         } catch (e) { setCloud('☁ ' + e.message, false); }
     }
 
@@ -308,6 +504,8 @@ window.svpPlanParts.push(function (P) {
                 if (new URLSearchParams(location.search).has('cloud')) {
                     localStorage.removeItem(P.KEY);
                     localStorage.removeItem(TS_KEY);
+                    localStorage.removeItem(BASE_KEY);
+                    localStorage.removeItem(PENDING_KEY);
                     const u = new URL(location.href);
                     u.searchParams.delete('cloud');
                     history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
@@ -315,15 +513,7 @@ window.svpPlanParts.push(function (P) {
             } catch (e) { }
             try {
                 const row = await fetchPublicEdits(location.pathname);
-                if (row) {
-                    const localTs = Date.parse(localStorage.getItem(TS_KEY) || '') || 0;
-                    if ((Date.parse(row.ts) || 0) > localTs) {
-                        P.saved = row.edits || {};
-                        localStorage.setItem(P.KEY, JSON.stringify(P.saved));
-                        localStorage.setItem(TS_KEY, row.ts);
-                        applyEdits(P.saved);
-                    }
-                }
+                if (row) cloudZeile(row);
             } catch (e) { /* offline: local state stays */ }
             if (svpAuth.hasSession()) { syncFromRemote(); pullNotes(); pullFahrplan(); }
         })();
