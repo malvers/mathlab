@@ -47,6 +47,21 @@
             font-size: clamp(0.72rem, 0.55rem + 1.4vmin, 1.12rem);
         }
 
+        /* Curve type (Parabel, Hyperbel, Gerade …) in the top-left corner of the drawing area */
+        #curve-type {
+            position: absolute;
+            top: clamp(10px, 2vmin, 22px);
+            left: clamp(12px, 2.4vmin, 28px);
+            pointer-events: none;
+            z-index: 5;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1rem, 0.7rem + 1.8vmin, 1.9rem);
+            letter-spacing: 2px;
+            color: var(--neon-purple);
+            text-shadow: 0 0 12px var(--neon-purple), 0 0 4px black;
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -83,6 +98,7 @@
 
     <div id="main-content">
         <div id="canvas-container">
+            <div id="curve-type"></div>
             <div id="canvas-latex-vertex"></div>
             <canvas id="canvas"></canvas>
         </div>
@@ -111,7 +127,8 @@
         }
         console.log("🚀 Parabel-Labor: Booting...");
         let cc = null;
-        let paraA = 1, paraD = 0, paraE = 0;
+        let paraA = 1, paraD = 0, paraE = 0, paraN = 2;
+        let fracN = false; // fractional and negative exponents allowed (slider −3 … 7)
         let draggedHandle = null;
 
         function varColor(name) {
@@ -247,6 +264,14 @@
                         </div>
 
                         <div style="display: flex; flex-direction: column; gap: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                            <div id="power-options"></div>
+                            <div>
+                                <div class="label-row">
+                                    <span>${CyberI18n.get('parabola.power_n')}</span>
+                                    <span id="label-slider-n" class="cyber-number" style="font-size: 0.8rem; color: var(--neon-pink);">2</span>
+                                </div>
+                                <input type="range" id="slider-n" min="2" max="7" step="1" value="2">
+                            </div>
                             <div>
                                 <div class="label-row">
                                     <span>${CyberI18n.get('parabola.stretch_a')}</span>
@@ -274,12 +299,22 @@
                     `, 'var(--neon-purple)', { collapsible: false });
                 }
 
+                if (typeof CyberUI !== 'undefined') {
+                    const fracBox = CyberUI.createCheckbox('power-options', CyberI18n.get('parabola.fractional_n'), false, (on) => {
+                        setFractional(on);
+                        syncSliders();
+                        draw();
+                    });
+                    if (fracBox) fracBox.style.marginBottom = '0';
+                }
+
                 // Bind Sliders
-                ['a', 'd', 'e'].forEach(id => {
+                ['n', 'a', 'd', 'e'].forEach(id => {
                     const el = document.getElementById('slider-' + id);
                     if (el) {
                         el.oninput = (e) => {
                             const val = parseFloat(e.target.value);
+                            if (id === 'n') paraN = fracN ? Math.round(val * 100) / 100 : Math.round(val);
                             if (id === 'a') paraA = val;
                             if (id === 'd') paraD = val;
                             if (id === 'e') paraE = val;
@@ -314,7 +349,8 @@
         // -------------------------------------
         window.resetView = () => {
             console.log("♻️ Resetting View...");
-            paraA = 1; paraD = 0; paraE = 0;
+            paraA = 1; paraD = 0; paraE = 0; paraN = 2;
+            setFractional(false);
             if (cc) {
                 cc.view = { minX: -6, maxX: 6, minY: -4, maxY: 6 };
                 cc.isInitialized = false; 
@@ -330,7 +366,34 @@
             draw();
         };
 
+        // Fractional mode: n in −3 … 7 (step 0.05); back to whole numbers 2 … 7 when switched off
+        function setFractional(on) {
+            fracN = on;
+            const box = document.querySelector('#power-options .cyber-checkbox');
+            if (box) box.checked = on;
+            const sN = document.getElementById('slider-n');
+            if (sN) {
+                sN.step = on ? '0.05' : '1';
+                sN.min = on ? '-3' : '2';
+            }
+            if (!on) paraN = Math.min(7, Math.max(2, Math.round(paraN)));
+        }
+
+        function nIsInteger() {
+            return Math.abs(paraN - Math.round(paraN)) < 1e-9;
+        }
+
+        // Exponent as text: 3, 0.5, 1.25
+        function nText() {
+            return String(parseFloat(paraN.toFixed(2)));
+        }
+
         function syncSliders() {
+            const sN = document.getElementById('slider-n');
+            const lN = document.getElementById('label-slider-n');
+            if (sN) sN.value = paraN;
+            if (lN) lN.innerText = fracN ? paraN.toFixed(2) : String(paraN);
+
             const sA = document.getElementById('slider-a');
             const sD = document.getElementById('slider-d');
             const sE = document.getElementById('slider-e');
@@ -353,11 +416,27 @@
 
             const startX = cc.view.minX;
             const endX = cc.view.maxX;
-            const step = (endX - startX) / 150;
+            // Higher powers climb steeply: finer steps, and y clamped a few views out
+            const step = (endX - startX) / 600;
+            const spanY = cc.view.maxY - cc.view.minY;
+            const yLo = cc.view.minY - 10 * spanY, yHi = cc.view.maxY + 10 * spanY;
 
+            // A fractional power is only defined for x ≥ d: for n > 0 the curve starts exactly at S(d|e).
+            // A negative power has a pole at x = d: the stroke must not jump across it.
+            const integerN = nIsInteger();
+            const n = integerN ? Math.round(paraN) : paraN;
             let first = true;
+            if (!integerN && n > 0 && paraD >= startX && paraD <= endX) {
+                ctx.moveTo(cc.mapX(paraD), cc.mapY(paraE));
+                first = false;
+            }
+            let lastSide = 0;
             for (let x = startX; x <= endX; x += step) {
-                const y = paraA * Math.pow(x - paraD, 2) + paraE;
+                if (!integerN && x <= paraD) continue;
+                const side = x < paraD ? -1 : 1;
+                if (n < 0 && side !== lastSide) first = true;
+                lastSide = side;
+                const y = Math.min(yHi, Math.max(yLo, paraA * Math.pow(x - paraD, n) + paraE));
                 if (first) {
                     ctx.moveTo(cc.mapX(x), cc.mapY(y));
                     first = false;
@@ -371,6 +450,21 @@
             ctx.shadowColor = varColor('--neon-purple');
             ctx.stroke();
             ctx.shadowBlur = 0;
+        }
+
+        // Negative power: asymptotes x = d and y = e, dashed
+        function drawAsymptotes(ctx, ui) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+            ctx.lineWidth = Math.max(1, 1.5 * ui);
+            ctx.setLineDash([8 * ui, 6 * ui]);
+            ctx.beginPath();
+            ctx.moveTo(cc.mapX(paraD), cc.mapY(cc.view.minY));
+            ctx.lineTo(cc.mapX(paraD), cc.mapY(cc.view.maxY));
+            ctx.moveTo(cc.mapX(cc.view.minX), cc.mapY(paraE));
+            ctx.lineTo(cc.mapX(cc.view.maxX), cc.mapY(paraE));
+            ctx.stroke();
+            ctx.restore();
         }
 
         function drawHandle(ctx, mathX, mathY, color, label, position = "top-right", isHandle = true, ui = 1) {
@@ -417,6 +511,57 @@
             }
         }
 
+        // Real zeros of a·(x−d)^n + e, i.e. (x−d)^n = −e/a
+        function realRoots() {
+            const disc = -paraE / paraA;
+            // n = 0 is the constant a + e; a negative power never reaches e, so disc = 0 gives no zero
+            if (Math.abs(paraN) < 1e-9) return [];
+            const touch = Math.abs(disc) < 0.0001;
+            if (!nIsInteger()) {
+                // Only x ≥ d counts, so there is at most one zero
+                if (disc > 0 && Number.isFinite(disc)) return [paraD + Math.pow(disc, 1 / paraN)];
+                if (touch && paraN > 0) return [paraD];
+                return [];
+            }
+            if (Math.abs(paraN) % 2 === 1) {
+                if (!Number.isFinite(disc) || (touch && paraN < 0)) return [];
+                return [paraD + Math.sign(disc) * Math.pow(Math.abs(disc), 1 / paraN)];
+            }
+            if (disc > 0) {
+                const r = Math.pow(disc, 1 / paraN);
+                return [paraD - r, paraD + r];
+            }
+            if (touch && paraN > 0) return [paraD];
+            return [];
+        }
+
+        // Domain behind the vertex form: x ≥ d (fractional n > 0), x > d (fractional n < 0), x ≠ d (whole n < 0).
+        // Braced so KaTeX never breaks the line between x ≠ and d.
+        function domainLatex() {
+            const d = `\\textcolor{#00d2ff}{${paraD.toFixed(2)}}`;
+            if (!nIsInteger()) return `, \\quad {x ${paraN > 0 ? '\\geq' : '>'} ${d}}`;
+            if (paraN < 0) return `, \\quad {x \\neq ${d}}`;
+            return '';
+        }
+
+        // Name of the curve: a = 0, n = 0 and n = 1 give a line; whole n ≥ 2 a parabola, whole n < 0 a hyperbola
+        function curveTypeText() {
+            const t = (key, rep) => CyberI18n.get('parabola.' + key, rep);
+            const n = Math.round(paraN);
+            if (Math.abs(paraA) < 0.005 || (nIsInteger() && (n === 0 || n === 1))) return t('type_line');
+            if (!nIsInteger()) return paraN > 0 && paraN < 1 ? t('type_root') : t('type_power');
+            if (n === 2) return t('type_parabola');
+            if (n > 2) return t('type_parabola_order', { n });
+            if (n === -1) return t('type_hyperbola');
+            return t('type_hyperbola_order', { n: -n });
+        }
+
+        function binom(n, k) {
+            let r = 1;
+            for (let i = 1; i <= k; i++) r = r * (n - k + i) / i;
+            return r;
+        }
+
         function draw() {
             if (!cc || !cc.isInitialized) return;
             const ui = cc.getUiScale();
@@ -425,18 +570,20 @@
 
             cc.drawGrid();
 
+            if (paraN < 0) drawAsymptotes(ctx, ui);
             drawParabola(ctx, ui);
 
+            const typeEl = document.getElementById('curve-type');
+            if (typeEl) typeEl.textContent = curveTypeText();
+
             // --- DRAW ROOTS ON CANVAS ---
-            const disc = -paraE / paraA;
+            const roots = realRoots();
             const green = "#4ade80"; // varColor('--neon-green')
-            if (disc > 0) {
-                const x1 = paraD - Math.sqrt(disc);
-                const x2 = paraD + Math.sqrt(disc);
-                drawHandle(ctx, x1, 0, green, "x1", "bottom", false, ui);
-                drawHandle(ctx, x2, 0, green, "x2", "bottom", false, ui);
-            } else if (Math.abs(disc) < 0.0001) {
-                drawHandle(ctx, paraD, 0, green, "x0", "bottom", false, ui);
+            if (roots.length === 2) {
+                drawHandle(ctx, roots[0], 0, green, "x1", "bottom", false, ui);
+                drawHandle(ctx, roots[1], 0, green, "x2", "bottom", false, ui);
+            } else if (roots.length === 1) {
+                drawHandle(ctx, roots[0], 0, green, "x0", "bottom", false, ui);
             }
 
             // Draw handles LAST so they are on top
@@ -477,20 +624,30 @@
             const eSign = paraE >= 0 ? "+" : "-";
             const eVal = Math.abs(paraE).toFixed(2);
             
-            const vertexLatex = `f(x) = \\textcolor{#faff00}{${paraA.toFixed(2)}} \\, (x ${dSign} \\textcolor{#00d2ff}{${dVal}})^2 ${eSign} \\textcolor{#00d2ff}{${eVal}}`;
+            const vertexLatex = `f(x) = \\textcolor{#faff00}{${paraA.toFixed(2)}} \\, (x ${dSign} \\textcolor{#00d2ff}{${dVal}})^{\\textcolor{#ff00ff}{${nText()}}} ${eSign} \\textcolor{#00d2ff}{${eVal}}`
+                // Fractional or negative n: the domain is cut at d
+                + domainLatex();
             const eqV = document.getElementById('eq-vertex');
             if (eqV) katex.render(vertexLatex, eqV, { throwOnError: false });
 
-            const b = -2 * paraA * paraD;
-            const c = (paraA * paraD * paraD) + paraE;
-            const bSign = b >= 0 ? "+" : "-";
-            const bVal = Math.abs(b).toFixed(2);
-            const cSign = c >= 0 ? "+" : "-";
-            const cVal = Math.abs(c).toFixed(2);
-            
-            const normalLatex = `f(x) = \\textcolor{#faff00}{${paraA.toFixed(2)}} \\, x^2 ${bSign} \\textcolor{#00d2ff}{${bVal}} \\, x ${cSign} ${cVal}`;
+            // Expanded form only for a polynomial (whole n ≥ 1): hidden otherwise
             const eqN = document.getElementById('eq-normal');
-            if (eqN) katex.render(normalLatex, eqN, { throwOnError: false });
+            const polynomial = nIsInteger() && paraN >= 1;
+            if (eqN) eqN.parentElement.style.display = polynomial ? '' : 'none';
+            if (polynomial) {
+                // Expanded form: a·(x−d)^n + e = Σ a·C(n,k)·(−d)^(n−k)·x^k + e
+                let normalLatex = `f(x) = \\textcolor{#faff00}{${paraA.toFixed(2)}} \\, x${paraN === 1 ? '' : `^{${paraN}}`}`;
+                for (let k = paraN - 1; k >= 0; k--) {
+                    const coef = paraA * binom(paraN, k) * Math.pow(-paraD, paraN - k) + (k === 0 ? paraE : 0);
+                    // n = 2 keeps b and c visible even at 0; higher powers drop the zero terms
+                    if (paraN > 2 && Math.abs(coef) < 0.005) continue;
+                    const sign = coef >= 0 ? "+" : "-";
+                    const val = Math.abs(coef).toFixed(2);
+                    if (k === 0) normalLatex += ` ${sign} ${val}`;
+                    else normalLatex += ` ${sign} \\textcolor{#00d2ff}{${val}} \\, x${k === 1 ? '' : `^{${k}}`}`;
+                }
+                if (eqN) katex.render(normalLatex, eqN, { throwOnError: false });
+            }
 
             // --- NULLSTELLEN CALCULATION ---
             const rootsContainer = document.getElementById('eq-roots-container');
@@ -498,14 +655,12 @@
             
             if (rootsContainer && rootsTarget) {
                 rootsContainer.style.display = 'block';
-                const disc = -paraE / paraA;
-                
-                if (disc > 0) {
-                    const x1 = paraD - Math.sqrt(disc);
-                    const x2 = paraD + Math.sqrt(disc);
-                    katex.render(`x_1 = ${x1.toFixed(2)}, \\quad x_2 = ${x2.toFixed(2)}`, rootsTarget, { throwOnError: false });
-                } else if (Math.abs(disc) < 0.0001) {
-                    katex.render(`x_0 = ${paraD.toFixed(2)}`, rootsTarget, { throwOnError: false });
+                const roots = realRoots();
+
+                if (roots.length === 2) {
+                    katex.render(`x_1 = ${roots[0].toFixed(2)}, \\quad x_2 = ${roots[1].toFixed(2)}`, rootsTarget, { throwOnError: false });
+                } else if (roots.length === 1) {
+                    katex.render(`x_0 = ${roots[0].toFixed(2)}`, rootsTarget, { throwOnError: false });
                 } else {
                     katex.render(`\\text{${CyberI18n.get('parabola.roots_none')}}`, rootsTarget, { throwOnError: false });
                 }

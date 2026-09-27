@@ -523,6 +523,15 @@ CyberI18n.translations.it = {
                 stretch_a: "Dilatazione a",
                 shift_d: "Traslazione d (x)",
                 shift_e: "Traslazione e (y)",
+                power_n: "Potenza n",
+                fractional_n: "Esponente frazionario",
+                type_parabola: "PARABOLA",
+                type_parabola_order: "PARABOLA DI ORDINE {n}",
+                type_hyperbola: "IPERBOLE",
+                type_hyperbola_order: "IPERBOLE DI ORDINE {n}",
+                type_line: "RETTA",
+                type_root: "CURVA RADICE",
+                type_power: "CURVA POTENZA",
                 vertex_label: "VERTICE"
             },
             angle3d: {

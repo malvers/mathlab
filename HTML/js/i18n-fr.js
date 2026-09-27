@@ -523,6 +523,15 @@ CyberI18n.translations.fr = {
                 stretch_a: "Étirement a",
                 shift_d: "Décalage d (x)",
                 shift_e: "Décalage e (y)",
+                power_n: "Puissance n",
+                fractional_n: "Exposant fractionnaire",
+                type_parabola: "PARABOLE",
+                type_parabola_order: "PARABOLE D'ORDRE {n}",
+                type_hyperbola: "HYPERBOLE",
+                type_hyperbola_order: "HYPERBOLE D'ORDRE {n}",
+                type_line: "DROITE",
+                type_root: "COURBE RACINE",
+                type_power: "COURBE PUISSANCE",
                 vertex_label: "SOMMET"
             },
             angle3d: {

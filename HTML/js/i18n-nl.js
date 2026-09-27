@@ -513,6 +513,15 @@ Object.assign(CyberI18n.translations.nl.fractal, {
             stretch_a: "Uitrekking a",
             shift_d: "Verschuiving d (x)",
             shift_e: "Verschuiving e (y)",
+            power_n: "Macht n",
+            fractional_n: "Gebroken exponent",
+            type_parabola: "PARABOOL",
+            type_parabola_order: "PARABOOL VAN ORDE {n}",
+            type_hyperbola: "HYPERBOOL",
+            type_hyperbola_order: "HYPERBOOL VAN ORDE {n}",
+            type_line: "RECHTE LIJN",
+            type_root: "WORTELKROMME",
+            type_power: "MACHTSKROMME",
             vertex_label: "TOPPUNT"
         },
         angle3d: {

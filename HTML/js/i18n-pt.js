@@ -523,6 +523,15 @@ CyberI18n.translations.pt = {
                 stretch_a: "Stretching a",
                 shift_d: "Shift d (x)",
                 shift_e: "Shift e (y)",
+                power_n: "Potência n",
+                fractional_n: "Expoente fracionário",
+                type_parabola: "PARÁBOLA",
+                type_parabola_order: "PARÁBOLA DE ORDEM {n}",
+                type_hyperbola: "HIPÉRBOLE",
+                type_hyperbola_order: "HIPÉRBOLE DE ORDEM {n}",
+                type_line: "RETA",
+                type_root: "CURVA RAIZ",
+                type_power: "CURVA POTÊNCIA",
                 vertex_label: "VERTEX"
             },
             angle3d: {

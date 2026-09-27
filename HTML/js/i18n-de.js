@@ -574,6 +574,15 @@ CyberI18n.translations.de = {
                 stretch_a: "Streckung a",
                 shift_d: "Verschiebung d (x)",
                 shift_e: "Verschiebung e (y)",
+                power_n: "Potenz n",
+                fractional_n: "Gebrochener Exponent",
+                type_parabola: "PARABEL",
+                type_parabola_order: "PARABEL {n}. ORDNUNG",
+                type_hyperbola: "HYPERBEL",
+                type_hyperbola_order: "HYPERBEL {n}. ORDNUNG",
+                type_line: "GERADE",
+                type_root: "WURZELKURVE",
+                type_power: "POTENZKURVE",
                 vertex_label: "SCHEITELPUNKT"
             },
             angle3d: {

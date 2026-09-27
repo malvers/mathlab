@@ -522,6 +522,15 @@ CyberI18n.translations.sw = {
                 stretch_a: "Kunyoosha a",
                 shift_d: "Shift d (x)",
                 shift_e: "Shift e (y)",
+                power_n: "Kipeo n",
+                fractional_n: "Kipeo cha sehemu",
+                type_parabola: "PARABOLA",
+                type_parabola_order: "PARABOLA YA DARAJA {n}",
+                type_hyperbola: "HAIPERBOLA",
+                type_hyperbola_order: "HAIPERBOLA YA DARAJA {n}",
+                type_line: "MSTARI ULIONYOOKA",
+                type_root: "MKUNJO WA MZIZI",
+                type_power: "MKUNJO WA KIPEO",
                 vertex_label: "VERTEX"
             },
             angle3d: {

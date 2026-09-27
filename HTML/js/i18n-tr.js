@@ -523,6 +523,15 @@ CyberI18n.translations.tr = {
                 stretch_a: "",
                 shift_d: "Uzatmak Shift d (x)",
                 shift_e: "Shift e (y)",
+                power_n: "Kuvvet n",
+                fractional_n: "Kesirli üs",
+                type_parabola: "PARABOL",
+                type_parabola_order: "{n}. DERECEDEN PARABOL",
+                type_hyperbola: "HİPERBOL",
+                type_hyperbola_order: "{n}. DERECEDEN HİPERBOL",
+                type_line: "DOĞRU",
+                type_root: "KÖK EĞRİSİ",
+                type_power: "KUVVET EĞRİSİ",
                 vertex_label: "KÖŞE"
             },
             angle3d: {
