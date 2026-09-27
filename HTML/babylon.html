@@ -397,6 +397,17 @@
             backdrop-filter: blur(25px);
             border: 1px solid rgba(121, 158, 49, 0.45);
             box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+            /* the story at the bottom makes it tall - on a phone held sideways it scrolls */
+            max-height: calc(100dvh - 32px);
+            overflow-y: auto;
+        }
+
+        .bab-dlg .bab-story {
+            margin: 0 0 16px;
+        }
+
+        .bab-story p {
+            margin: 0 0 8px;
         }
 
         .bab-dlg .bab-dlg-h2 {
@@ -544,6 +555,20 @@
             <div class="bab-note" id="bab-system-note"></div>
             <h2 class="bab-dlg-h2">ANORDNUNG</h2>
             <div id="bab-arrange"></div>
+            <h2 class="bab-dlg-h2">OHNE NULL?</h2>
+            <div class="bab-note bab-story">
+                <p>Die Babylonier hatten keine Null. Eine leere Stelle war einfach eine Lücke — oft
+                    nicht einmal das. Ein einzelner Keil konnte 1, 60, 3.600 oder sogar ein Sechzigstel
+                    bedeuten.</p>
+                <p>Welche Zahl gemeint war, verriet der Zusammenhang: ein Preis, eine Fläche, eine Zeile
+                    in einer Tabelle. Man konnte also jede Zahl schreiben, aber nicht eindeutig lesen.</p>
+                <p>Beim Rechnen störte das kaum: Mit Tabellen für Produkte und Kehrwerte rechnete man nur
+                    mit den Ziffern und dachte sich die Größenordnung dazu — wie später beim
+                    Rechenschieber.</p>
+                <p>Erst spät, ab etwa 300 v. Chr., hielten zwei schräge Keile eine leere Stelle in der
+                    Mitte fest. Am Ende einer Zahl standen sie nie, und rechnen konnte man mit ihnen nicht.
+                    Die Null als eigene Zahl kam erst viel später, aus Indien.</p>
+            </div>
             <button type="button" class="cyber-btn" id="bab-dlg-close">FERTIG</button>
         </div>
     </div>
@@ -686,6 +711,21 @@
                 if (digits[i] > 0) { top = Math.max(top, i); break; }
             }
             return top + 1;
+        }
+
+        // What a place on the board shows. The late placeholder only ever stood inside a
+        // number, between the highest and the lowest place that hold something: in front of a
+        // number nobody writes an empty place, at its end the scribes never did, and 0 itself
+        // could not be written at all. There the place stays empty.
+        function shownDigit(place) {
+            if (blank) return null;
+            const d = digits[place];
+            if (d !== 0) return d;
+            let lo = -1, hi = -1;
+            for (let i = 0; i < digits.length; i++) {
+                if (digits[i] > 0) { if (lo < 0) lo = i; hi = i; }
+            }
+            return place > lo && place < hi ? 0 : null;
         }
 
         // the left pair of triangles: one place more, one place less. Fewer than the number
@@ -870,6 +910,8 @@
 
         // One cell of the digit panel: its number small in the top left corner, the digit in
         // cuneiform filling the rest. Sixty cells are small, so the label keeps out of the way.
+        // The first cell is no digit: there was no 0. It is the empty place - the eraser for a
+        // place, drawn as the placeholder where the system has one.
         function paletteCell(k, cx0, cy0, cellW, cellH, panelCol) {
             const on = picked === k || (drag && drag.digit === k);
             roundRect(cx0 + 2, cy0 + 2, cellW - 4, cellH - 4, 8,
@@ -879,7 +921,7 @@
             ctx.textBaseline = 'top';
             ctx.font = "600 9px 'Orbitron', sans-serif";
             ctx.fillStyle = on ? COL.glyph : 'rgba(255, 255, 255, 0.4)';
-            ctx.fillText(String(k), cx0 + 6, cy0 + 5);
+            ctx.fillText(k === 0 ? T('empty_cell', 'leer') : String(k), cx0 + 6, cy0 + 5);
             paintDigit(k, cx0 + cellW / 2 + 3, cy0 + cellH * 0.56, cellW - 14, cellH * 0.72, null, panelCol);
             palette.push({ digit: k, x: cx0, y: cy0, w: cellW, h: cellH });
         }
@@ -1030,7 +1072,7 @@
                     blocked ? COL.mute
                         : (hot ? COL.glyph : (flash || (colorMode ? placeColor(place) : COL.line))));
 
-                paintDigit(blank ? null : digits[place], x + cardW / 2, cardY + cardH / 2, cardW, cardH,
+                paintDigit(shownDigit(place), x + cardW / 2, cardY + cardH / 2, cardW, cardH,
                     place, blocked ? COL.mute : null);
 
                 drawPower(place, x + cardW / 2, cardY + 8);
@@ -1202,7 +1244,7 @@
                         : (hot ? COL.glyph : (flash || (colorMode ? placeColor(place) : COL.line))));
 
                 drawPower(place, boardX + boardW / 2, y + 6);
-                paintDigit(blank ? null : digits[place], boardX + boardW / 2, y + cardH / 2 + 4,
+                paintDigit(shownDigit(place), boardX + boardW / 2, y + cardH / 2 + 4,
                     boardW, cardH - 14, place, blocked ? COL.mute : null);
 
                 cards.push({ place, x: boardX, y, w: boardW, h: cardH });
@@ -1552,7 +1594,7 @@
                     layout(task.target);
                     say(T('flow_show', 'Die Zahl liegt jetzt in Keilschrift auf dem Brett.'), COL.glyph);
                 } else {
-                    layout(value());        // zero has its sign too: an empty board fills up
+                    layout(value());        // 0 has no sign: its places stay empty, but they are laid
                 }
             }
             changed();
@@ -1689,7 +1731,7 @@
 
         function noteFor(key) {
             return key === 'platzhalter'
-                ? T('note_zero', 'Jede Stelle ist das Sechzigfache der rechten. Zwei schräge Keile halten eine leere Stelle fest — eine echte Null war das noch nicht, am Ende einer Zahl stand sie nie.')
+                ? T('note_zero', 'Jede Stelle ist das Sechzigfache der rechten. Zwei schräge Keile halten eine leere Stelle in der Mitte fest — eine echte Null war das noch nicht: Am Ende einer Zahl standen sie nie, und die 0 allein ließ sich gar nicht schreiben.')
                 : T('note_nozero', 'So schrieben die Babylonier fast zweitausend Jahre lang: eine leere Stelle war eine Lücke. 1 und 60 sahen genau gleich aus — was gemeint war, sagte der Zusammenhang.');
         }
 
