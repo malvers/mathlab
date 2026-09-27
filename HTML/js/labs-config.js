@@ -255,6 +255,39 @@ const LABS_DATA = [
         "color": "green"
     },
     {
+        "id": "fuzzy",
+        "href": "fuzzy/fuzzy.html",
+        "title": "Fuzzy Search",
+        "description": "Suchen mit Tippfehlern: Text und Anfrage werden in Trigramme zerlegt, drei Zeichen am Stück, und jede Stelle glüht so heiß, wie viele passende Trigramme sie überdecken, weiß bis rot wie im Original von 2003. Die Treffer stehen als Schnipsel geordnet daneben, die Pfeiltasten springen durch sie, IDF gewichtet seltene Silben stärker, und eine eigene Textdatei lässt sich öffnen. Hell oder dunkel, alles im Browser.",
+        "tagline": "Informatik / Suche / Trigramme",
+        "icon": LAB_ICONS["fuzzy"],
+        "category": "informatik neu uni grade11 grade12 sonst",
+        "keywords": "fuzzy search suche unscharf trigramm trigramme n-gramm heatmap tippfehler aehnlichkeit idf volltext textsuche stringvergleich 2003",
+        "color": "gold"
+    },
+    {
+        "id": "morph",
+        "href": "morpheus/morph.html",
+        "title": "Morph",
+        "description": "Zeichne ein Zeichen mit Maus oder Finger, und es verwandelt sich Schritt für Schritt in das gesetzte Symbol: Aus dem Gekrakel werden Umrisse, deren Punkte dem Ziel zugeordnet werden, und der Schieber oder die Leertaste lässt den Morph laufen. Ziele sind griechische Buchstaben, Operatoren, Relationen und Mengen aus dem LaTeX-Schriftsatz, dazu Linien- und Punkteansicht, Zoom, Undo und ein 3D-Blick auf den Übergang.",
+        "tagline": "Informatik / Formen / Morphing",
+        "icon": LAB_ICONS["morph"],
+        "category": "fun informatik neu sonst",
+        "keywords": "morph morphing zeichnen symbol buchstabe griechisch latex umriss kontur zuordnung ungarische methode animation uebergang formel handschrift 3d",
+        "color": "blue"
+    },
+    {
+        "id": "equationocr",
+        "href": "morpheus/equationocr.html",
+        "title": "Equation OCR",
+        "description": "Eine Formel mit dem Stift auf die Tafel schreiben, ERKENNEN drücken, und ein Sprachmodell liest sie als LaTeX zurück: Das Ergebnis erscheint gesetzt und als farbige Umrisse über der eigenen Handschrift, sodass man Zeichen für Zeichen vergleichen kann. Vorlagen aus der Formelsammlung lassen sich abschreiben, das Modell ist wählbar, und eine Kostenanzeige zählt mit, weil jede Erkennung einen echten Aufruf kostet.",
+        "tagline": "Informatik / KI / Handschrift zu LaTeX",
+        "icon": LAB_ICONS["equationocr"],
+        "category": "informatik apps neu sonst",
+        "keywords": "ocr formel erkennen handschrift latex gemini ki texterkennung gleichung tafel stift umriss kosten sprachmodell vision",
+        "color": "orange"
+    },
+    {
         "id": "pinkerfinder",
         "href": "pinkerfinder/index.html",
         "title": "PinkerFinder",
@@ -341,6 +374,28 @@ const LABS_DATA = [
         "category": "logik informatik fun hot highlight grade9 grade10",
         "keywords": "ki neuronales netz machine learning evolution cmaes rechenberg evolutionsstrategie backpropagation gewichte training volladdierer xor \u00fcbertrag carry bit lernen gradient",
         "color": "gold"
+    },
+    {
+        "id": "ann",
+        "href": "ann.html",
+        "title": "Künstliche Neuronen",
+        "description": "Ein kleines neuronales Netz lernt Addition, Subtraktion, Multiplikation oder Division aus Beispielen statt aus Regeln: zwei Eingaben links, Schichten und Neuronen kommen per Knopf dazu oder weg, dann Training, und die Verlustkurve zeigt, wie der Fehler fällt. Verbindungen und Knoten werden live gezeichnet, rechts stehen Ausgabe, Ziel und Abweichung. Mit eigenen Zahlen sieht man sofort, wo das Netz gut rät und wo es scheitert, etwa außerhalb des Trainingsbereichs. Läuft mit TensorFlow.js komplett im Browser.",
+        "tagline": "Informatik / KI / Neuronales Netz",
+        "icon": LAB_ICONS["ann"],
+        "category": "informatik logik neu hot uni grade10 grade11 grade12",
+        "keywords": "ann knn neuronales netz neuron neuronen schicht layer gewichte training verlust loss tensorflow ki kuenstliche intelligenz maschinelles lernen addition subtraktion multiplikation division lernen backpropagation",
+        "color": "gold"
+    },
+    {
+        "id": "numberrecognition",
+        "href": "numberrecognition.html",
+        "title": "KI Zahlenerkennung",
+        "description": "Ein Faltungsnetz lernt Ziffern aus 10 000 echten Handschriften der MNIST-Sammlung, und zwar hier im Browser: Erst rieseln die Trainingsbilder als Raster durch, dann laufen acht Durchgänge, bei denen Treffsicherheit und Fehler mitlaufen. Danach schreibt man selbst eine Ziffer mit Maus oder Finger und sieht die Vorhersage in Echtzeit. Das fertige Modell bleibt im Browser gespeichert, das Training muss nur einmal laufen.",
+        "tagline": "Informatik / KI / MNIST",
+        "icon": LAB_ICONS["numberrecognition"],
+        "category": "informatik neu highlight hot grade9 grade10 grade11 grade12 uni",
+        "keywords": "zahlenerkennung ziffern erkennen mnist handschrift cnn faltungsnetz neuronales netz ki kuenstliche intelligenz training softmax vorhersage zeichnen tensorflow maschinelles lernen",
+        "color": "purple"
     },
     {
         "id": "subtraktion",
@@ -541,6 +596,17 @@ const LABS_DATA = [
         "color": "purple"
     },
     {
+        "id": "coordinatensystemtester",
+        "href": "coordinatensystemtester.html",
+        "title": "Koordinatensystem-Labor",
+        "description": "Das nackte Koordinatensystem der Labore zum Anfassen: Ziehen verschiebt, das Rad zoomt, ein Rechtsklick setzt die Ansicht zurück. Achsen, Beschriftung und Telemetrie lassen sich einzeln ein- und ausschalten, und zwei Kurven zeigen, wie die Zeichenmaschine mit Steilheit und Polstelle umgeht: f(x) = −x² und g(x) = x⁻² mit ihrer Lücke bei null. Die Prüfumgebung für den Canvas-Kern, der in vielen Labs steckt.",
+        "tagline": "Funktionen / Koordinatensystem / Zeichenmaschine",
+        "icon": LAB_ICONS["coordinatensystemtester"],
+        "category": "funktionen neu grade7 grade8 sonst",
+        "keywords": "koordinatensystem koordinaten achsen ursprung x-achse y-achse gitter zoom verschieben funktion graph parabel hyperbel polstelle canvas tester werkzeug",
+        "color": "blue"
+    },
+    {
         "id": "winkellabor",
         "href": "winkellabor.html",
         "title": "Winkel-Labor",
@@ -550,6 +616,17 @@ const LABS_DATA = [
         "category": "grade6 grade7 dreiecke hot",
         "keywords": "geometrie winkel dreieck winkelsumme beweis",
         "color": "green"
+    },
+    {
+        "id": "winkelpuzzle",
+        "href": "winkelpuzzle.html",
+        "title": "Winkel-Puzzle",
+        "description": "Fünf Geraden, drei gegebene Winkel: 39°, 112° und 116° stehen in Blau an der Figur, gesucht sind α, β und γ. Wer die Lösung in Rot einblendet, sieht die Zahlen; wer die gelben Zwischenschritte dazuschaltet, sieht den Weg über Nebenwinkel, Scheitelwinkel und die Winkel im Dreieck. Vier Schieber verschieben die Punkte, der Keil verändert den ersten Winkel, und die gesuchten Winkel rechnen live mit.",
+        "tagline": "Geometrie / Winkel / Neben- und Scheitelwinkel",
+        "icon": LAB_ICONS["winkelpuzzle"],
+        "category": "geometrie dreiecke neu grade6 grade7 grade8",
+        "keywords": "winkel puzzle winkelpuzzle nebenwinkel scheitelwinkel stufenwinkel wechselwinkel winkelsumme dreieck alpha beta gamma gegebene winkel gesuchte winkel geraden schnittpunkt raetsel",
+        "color": "blue"
     },
     {
         "id": "uhrzeitwinkel",
@@ -628,6 +705,17 @@ const LABS_DATA = [
         "keywords": "cmaes flächenoptimierung fläche polygon geometrie evolution optimierung strategie simulation",
         "color": "green"
     },
+    {
+        "id": "particleswarm",
+        "href": "particleswarm.html",
+        "title": "Particle Swarm",
+        "description": "Ein Schwarm Teilchen sucht den tiefsten Punkt einer Landschaft, und keines kennt die Karte: Jedes merkt sich seine beste Stelle, alle kennen die beste des Schwarms, und aus Trägheit, Eigensinn und Herdentrieb entsteht der nächste Schritt. Drei Landschaften stehen zur Wahl, die Parabel mit einem Tal, Himmelblau mit vier Minima und Rastrigin mit vielen Tälern, dazu Schieber für w, c₁ und c₂ und die Schwarmgröße. Rundenweise oder im Lauf sieht man, wie der Schwarm ein Tal findet, oder im falschen hängen bleibt. Kennedy und Eberhart, 1995.",
+        "tagline": "Optimierung / Schwarm / PSO",
+        "icon": LAB_ICONS["particleswarm"],
+        "category": "uni informatik fun neu grade10 grade11 grade12",
+        "keywords": "particle swarm pso partikelschwarm schwarm optimierung minimum suchen rastrigin himmelblau parabel landschaft traegheit eigensinn herdentrieb kennedy eberhart algorithmus",
+        "color": "purple"
+    },
     /*
      * Happy-birthday tile (Cyber-Cake): temporarily disabled — happybirthday.html remains reachable via direct URL.
     {
@@ -652,6 +740,28 @@ const LABS_DATA = [
         "category": "fun highlight hot grade8 top5",
         "keywords": "galton board nagelbrett wahrscheinlichkeit zufall binomialverteilung histogramm simulation",
         "color": "blue"
+    },
+    {
+        "id": "fallingpi",
+        "href": "fallingpi.html",
+        "title": "Falling Pi",
+        "description": "Darts regnen in ein Quadrat, und der Viertelkreis darin fängt ungefähr π/4 von ihnen: Treffer im Kreis geteilt durch alle Würfe, mal vier, nähert sich π. Der Schieber regelt die Darts je Bild, ein Knopf wirft hundert auf einmal, und die Fehlerkurve zeigt, wie zäh die Näherung wird: Der Fehler fällt nur wie 1/√n, für eine Stelle mehr braucht es also hundertmal so viele Würfe. Monte Carlo, wie es das alte Java-Programm ThrowingDarts vorgemacht hat.",
+        "tagline": "Stochastik / Monte Carlo / π",
+        "icon": LAB_ICONS["fallingpi"],
+        "category": "stochastik fun neu grade8 grade9 grade10",
+        "keywords": "pi monte carlo zufall darts quadrat viertelkreis flaeche naeherung wahrscheinlichkeit simulation fehler wurzel n konvergenz zufallszahlen kreiszahl",
+        "color": "orange"
+    },
+    {
+        "id": "infektionssimulation",
+        "href": "infektionssimulation.html",
+        "title": "Infektionssimulation",
+        "description": "Ein Gitter voller Menschen, jede Zelle eine Person, Kontakte sind die vier Nachbarn, ein Schritt ist ein Tag: Gesunde stecken sich mit einer Wahrscheinlichkeit je Kontakt an, sind eine einstellbare Zahl von Tagen ansteckend und danach immun. Vier Schieber stellen Ansteckung je Kontakt, Dauer, den Anteil vorher Immuner und die Größe der Bevölkerung ein. Die Kurve darunter zeigt den Anteil Kranker pro Tag mit markiertem Gipfel: „flatten the curve“, aus dem eigenen Lauf gezeichnet.",
+        "tagline": "Stochastik / Simulation / SIR-Modell",
+        "icon": LAB_ICONS["infektionssimulation"],
+        "category": "stochastik fun neu grade9 grade10 grade11",
+        "keywords": "infektion epidemie pandemie simulation sir modell ansteckung immun impfung herdenimmunitaet gitter zellautomat kurve gipfel flatten the curve exponentiell wachstum wahrscheinlichkeit",
+        "color": "green"
     },
     {
         "id": "atomorbitale",
@@ -908,6 +1018,17 @@ const LABS_DATA = [
         "color": "orange"
     },
     {
+        "id": "handschrift",
+        "href": "handschrift.html",
+        "title": "Handschrift",
+        "description": "Handgeschriebene Seiten in Text verwandeln: Bild hineinziehen, einfügen oder aus der Seitenleiste wählen, dann liest ein Vision-Modell die Seite streifenweise ab und gibt den Text wörtlich wieder, ohne zu korrigieren, ohne zu ergänzen, Unleserliches als [?]. Modell und Streifen pro Seite sind einstellbar, das Ergebnis lässt sich kopieren oder als .txt sichern. Braucht ein lokal laufendes Ollama, arbeitet also auf dem eigenen Rechner und schickt nichts ins Netz.",
+        "tagline": "Werkzeug / KI / Transkription",
+        "icon": LAB_ICONS["handschrift"],
+        "category": "apps neu",
+        "keywords": "handschrift transkription transkribieren ocr ollama vision modell lokal text erkennen scan seite streifen txt werkzeug",
+        "color": "green"
+    },
+    {
         "id": "mathtrainer",
         "href": "mathtrainer/mathtrainer.html",
         "title": "MathTrainer",
@@ -961,6 +1082,17 @@ const LABS_DATA = [
         "icon": LAB_ICONS["trigonometrie"],
         "category": "touren",
         "keywords": "tour touren live-tour rundgang fuehrung solita stimme untertitel trigonometrie sinus kosinus tangens einheitskreis bogenmass sinuskurve gleichung parameter raetsel tageslaenge dresden sinussatz ableitung dreieck welle",
+        "color": "gold"
+    },
+    {
+        "id": "tour-kreisteilung",
+        "href": "tours/kreisteilung.html",
+        "title": "Tour: Und dann 31",
+        "description": "Live-Tour durch das Kreisteilungs-Lab, noch ohne Stimme: Kapitelzeile und Cursor führen von zwei Punkten und einer Sehne über das Verdoppeln 1, 2, 4, 8, 16 zum Bruch bei 31, dann zu regelmäßig oder frei gesetzten Punkten, den Ansichten, den Nummern der Flächen, dem Abspielen und zuletzt zur Formel. Das echte Lab läuft dabei live im Browser. 9 Szenen, jederzeit anhalten und selbst ausprobieren; die gesprochene Fassung kommt nach dem Dreh.",
+        "tagline": "Live-Tour / Geometrie / Kreisteilung",
+        "icon": LAB_ICONS["kreisteilung"],
+        "category": "touren neu",
+        "keywords": "tour touren live-tour rundgang fuehrung kreisteilung kreis sehnen flaechen regionen folge vermutung 31 moser stumm ohne stimme",
         "color": "gold"
     },
     {

@@ -820,5 +820,147 @@ const LAB_ICONS = {
                 <rect x="31" y="82" width="8" height="5" rx="1.5" /><rect x="41" y="82" width="8" height="5" rx="1.5" /><rect x="51" y="82" width="8" height="5" rx="1.5" />
             </g>
             <rect x="61" y="82" width="8" height="5" rx="1.5" fill="rgb(121, 158, 49)" />
+        </svg>`,
+    "winkelpuzzle": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- three lines through one point: the given angle (blue), its vertical angle (red), a supplementary one (yellow) -->
+            <line x1="10" y1="72" x2="90" y2="28" stroke="rgba(255, 255, 255, 0.7)" stroke-width="2" stroke-linecap="round" />
+            <line x1="18" y1="21" x2="82" y2="79" stroke="rgba(255, 255, 255, 0.7)" stroke-width="2" stroke-linecap="round" />
+            <line x1="50" y1="8" x2="50" y2="92" stroke="rgba(255, 255, 255, 0.4)" stroke-width="1.6" stroke-linecap="round" />
+            <path d="M64 42.3 A16 16 0 0 1 61.9 60.7" fill="none" stroke="#00D2FF" stroke-width="3" stroke-linecap="round" />
+            <path d="M36 57.7 A16 16 0 0 1 38.1 39.3" fill="none" stroke="#D73728" stroke-width="3" stroke-linecap="round" />
+            <path d="M61.9 60.7 A16 16 0 0 1 50 66" fill="none" stroke="#F5C242" stroke-width="2.2" stroke-linecap="round" />
+            <circle cx="50" cy="50" r="2.6" fill="#ffffff" />
+        </svg>`,
+    "coordinatensystemtester": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- the bare grid with axes; f(x) = -x^2 in gold, g(x) = x^-2 in cyan with its gap at the pole -->
+            <g stroke="rgba(255, 255, 255, 0.12)" stroke-width="1">
+                <line x1="20" y1="6" x2="20" y2="94" /><line x1="35" y1="6" x2="35" y2="94" /><line x1="65" y1="6" x2="65" y2="94" /><line x1="80" y1="6" x2="80" y2="94" />
+                <line x1="6" y1="20" x2="94" y2="20" /><line x1="6" y1="35" x2="94" y2="35" /><line x1="6" y1="65" x2="94" y2="65" /><line x1="6" y1="80" x2="94" y2="80" />
+            </g>
+            <line x1="6" y1="50" x2="94" y2="50" stroke="rgba(255, 255, 255, 0.75)" stroke-width="1.6" />
+            <line x1="50" y1="94" x2="50" y2="6" stroke="rgba(255, 255, 255, 0.75)" stroke-width="1.6" />
+            <path d="M90 47 L94 50 L90 53" fill="none" stroke="rgba(255, 255, 255, 0.75)" stroke-width="1.6" />
+            <path d="M47 10 L50 6 L53 10" fill="none" stroke="rgba(255, 255, 255, 0.75)" stroke-width="1.6" />
+            <path d="M26 86 Q50 14 74 86" fill="none" stroke="#F5C242" stroke-width="2.4" stroke-linecap="round" />
+            <path d="M94 47 C70 47 60 40 56 10" fill="none" stroke="#00D2FF" stroke-width="2.2" stroke-linecap="round" />
+            <path d="M6 47 C30 47 40 40 44 10" fill="none" stroke="#00D2FF" stroke-width="2.2" stroke-linecap="round" />
+        </svg>`,
+    "ann": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- two inputs, one hidden layer of three, one output: the little net that learns to calculate -->
+            <g stroke="rgba(255, 255, 255, 0.35)" stroke-width="1.5">
+                <line x1="18" y1="36" x2="50" y2="22" /><line x1="18" y1="36" x2="50" y2="50" /><line x1="18" y1="36" x2="50" y2="78" />
+                <line x1="18" y1="64" x2="50" y2="22" /><line x1="18" y1="64" x2="50" y2="50" /><line x1="18" y1="64" x2="50" y2="78" />
+                <line x1="50" y1="22" x2="82" y2="50" /><line x1="50" y1="50" x2="82" y2="50" /><line x1="50" y1="78" x2="82" y2="50" />
+            </g>
+            <circle cx="18" cy="36" r="6" fill="rgba(121, 158, 49, 0.4)" stroke="#799E31" stroke-width="1.8" />
+            <circle cx="18" cy="64" r="6" fill="rgba(80, 170, 255, 0.4)" stroke="#50AAFF" stroke-width="1.8" />
+            <circle cx="50" cy="22" r="6" fill="rgba(0, 210, 255, 0.25)" stroke="#00D2FF" stroke-width="1.8" />
+            <circle cx="50" cy="50" r="6" fill="rgba(0, 210, 255, 0.25)" stroke="#00D2FF" stroke-width="1.8" />
+            <circle cx="50" cy="78" r="6" fill="rgba(0, 210, 255, 0.25)" stroke="#00D2FF" stroke-width="1.8" />
+            <circle cx="82" cy="50" r="7.5" fill="rgba(245, 194, 66, 0.35)" stroke="#F5C242" stroke-width="2" />
+        </svg>`,
+    "numberrecognition": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- a 5x7 pixel digit "3" as the net sees it; the tall gold bar is the class it picks -->
+            <g fill="rgba(255, 255, 255, 0.08)">
+                <rect x="14" y="14" width="9" height="9" /><rect x="24" y="14" width="9" height="9" /><rect x="34" y="14" width="9" height="9" /><rect x="44" y="14" width="9" height="9" /><rect x="54" y="14" width="9" height="9" />
+                <rect x="14" y="24" width="9" height="9" /><rect x="24" y="24" width="9" height="9" /><rect x="34" y="24" width="9" height="9" /><rect x="44" y="24" width="9" height="9" /><rect x="54" y="24" width="9" height="9" />
+                <rect x="14" y="34" width="9" height="9" /><rect x="24" y="34" width="9" height="9" /><rect x="34" y="34" width="9" height="9" /><rect x="44" y="34" width="9" height="9" /><rect x="54" y="34" width="9" height="9" />
+                <rect x="14" y="44" width="9" height="9" /><rect x="24" y="44" width="9" height="9" /><rect x="34" y="44" width="9" height="9" /><rect x="44" y="44" width="9" height="9" /><rect x="54" y="44" width="9" height="9" />
+                <rect x="14" y="54" width="9" height="9" /><rect x="24" y="54" width="9" height="9" /><rect x="34" y="54" width="9" height="9" /><rect x="44" y="54" width="9" height="9" /><rect x="54" y="54" width="9" height="9" />
+                <rect x="14" y="64" width="9" height="9" /><rect x="24" y="64" width="9" height="9" /><rect x="34" y="64" width="9" height="9" /><rect x="44" y="64" width="9" height="9" /><rect x="54" y="64" width="9" height="9" />
+                <rect x="14" y="74" width="9" height="9" /><rect x="24" y="74" width="9" height="9" /><rect x="34" y="74" width="9" height="9" /><rect x="44" y="74" width="9" height="9" /><rect x="54" y="74" width="9" height="9" />
+            </g>
+            <g fill="#F5C242">
+                <rect x="14" y="14" width="9" height="9" /><rect x="24" y="14" width="9" height="9" /><rect x="34" y="14" width="9" height="9" /><rect x="44" y="14" width="9" height="9" />
+                <rect x="54" y="24" width="9" height="9" /><rect x="54" y="34" width="9" height="9" />
+                <rect x="24" y="44" width="9" height="9" /><rect x="34" y="44" width="9" height="9" /><rect x="44" y="44" width="9" height="9" />
+                <rect x="54" y="54" width="9" height="9" /><rect x="54" y="64" width="9" height="9" />
+                <rect x="14" y="74" width="9" height="9" /><rect x="24" y="74" width="9" height="9" /><rect x="34" y="74" width="9" height="9" /><rect x="44" y="74" width="9" height="9" />
+            </g>
+            <g>
+                <rect x="72" y="76" width="6" height="7" fill="rgba(157, 232, 255, 0.5)" />
+                <rect x="80" y="30" width="6" height="53" fill="#F5C242" />
+                <rect x="88" y="71" width="6" height="12" fill="rgba(157, 232, 255, 0.5)" />
+            </g>
+        </svg>`,
+    "fallingpi": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- the unit square, the quarter circle in it, darts inside (green) and outside (red) -->
+            <rect x="18" y="18" width="64" height="64" fill="rgba(255, 255, 255, 0.04)" stroke="rgba(255, 255, 255, 0.7)" stroke-width="1.8" />
+            <path d="M18 18 A64 64 0 0 1 82 82" fill="rgba(245, 194, 66, 0.1)" stroke="#F5C242" stroke-width="2.2" />
+            <g fill="#799E31">
+                <circle cx="30" cy="60" r="3" /><circle cx="45" cy="70" r="3" /><circle cx="28" cy="40" r="3" /><circle cx="55" cy="50" r="3" /><circle cx="40" cy="30" r="3" /><circle cx="65" cy="65" r="3" /><circle cx="36" cy="76" r="3" /><circle cx="26" cy="26" r="3" />
+            </g>
+            <g fill="#D73728">
+                <circle cx="70" cy="25" r="3" /><circle cx="60" cy="30" r="3" /><circle cx="76" cy="44" r="3" /><circle cx="52" cy="22" r="3" />
+            </g>
+        </svg>`,
+    "infektionssimulation": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- a grid of people: healthy green, infected red in the middle, recovered grey; the curve below with its peak -->
+            <g>
+                <circle cx="20" cy="16" r="4" fill="#799E31" /><circle cx="32" cy="16" r="4" fill="#799E31" /><circle cx="44" cy="16" r="4" fill="#799E31" /><circle cx="56" cy="16" r="4" fill="#799E31" /><circle cx="68" cy="16" r="4" fill="#799E31" /><circle cx="80" cy="16" r="4" fill="#799E31" />
+                <circle cx="20" cy="28" r="4" fill="#799E31" /><circle cx="32" cy="28" r="4" fill="#799E31" /><circle cx="44" cy="28" r="4" fill="#D73728" /><circle cx="56" cy="28" r="4" fill="#D73728" /><circle cx="68" cy="28" r="4" fill="#799E31" /><circle cx="80" cy="28" r="4" fill="#799E31" />
+                <circle cx="20" cy="40" r="4" fill="#799E31" /><circle cx="32" cy="40" r="4" fill="#D73728" /><circle cx="44" cy="40" r="4" fill="rgba(255, 255, 255, 0.35)" /><circle cx="56" cy="40" r="4" fill="rgba(255, 255, 255, 0.35)" /><circle cx="68" cy="40" r="4" fill="#D73728" /><circle cx="80" cy="40" r="4" fill="#799E31" />
+                <circle cx="20" cy="52" r="4" fill="#799E31" /><circle cx="32" cy="52" r="4" fill="#799E31" /><circle cx="44" cy="52" r="4" fill="#D73728" /><circle cx="56" cy="52" r="4" fill="#D73728" /><circle cx="68" cy="52" r="4" fill="#799E31" /><circle cx="80" cy="52" r="4" fill="#799E31" />
+            </g>
+            <line x1="14" y1="90" x2="86" y2="90" stroke="rgba(255, 255, 255, 0.4)" stroke-width="1" />
+            <path d="M14 90 C30 88 38 66 48 66 C58 66 66 88 86 90" fill="rgba(215, 55, 40, 0.18)" stroke="#D73728" stroke-width="2" stroke-linecap="round" />
+            <line x1="48" y1="62" x2="48" y2="70" stroke="#F5C242" stroke-width="1.6" stroke-linecap="round" />
+        </svg>`,
+    "particleswarm": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- contour lines of the landscape, the swarm (cyan) on its way, the best spot found so far (gold) -->
+            <g fill="none" stroke="rgba(255, 255, 255, 0.22)" stroke-width="1.2">
+                <ellipse cx="60" cy="60" rx="34" ry="28" transform="rotate(-20 60 60)" />
+                <ellipse cx="60" cy="60" rx="22" ry="17" transform="rotate(-20 60 60)" />
+                <ellipse cx="60" cy="60" rx="10" ry="7" transform="rotate(-20 60 60)" />
+            </g>
+            <g stroke="#00D2FF" stroke-width="1.4" stroke-linecap="round">
+                <line x1="16" y1="22" x2="24" y2="28" /><line x1="30" y1="14" x2="36" y2="22" /><line x1="14" y1="48" x2="23" y2="50" />
+                <line x1="82" y1="18" x2="76" y2="26" /><line x1="28" y1="80" x2="35" y2="74" /><line x1="86" y1="86" x2="80" y2="80" />
+            </g>
+            <g fill="#00D2FF">
+                <circle cx="16" cy="22" r="3" /><circle cx="30" cy="14" r="3" /><circle cx="14" cy="48" r="3" /><circle cx="82" cy="18" r="3" /><circle cx="28" cy="80" r="3" /><circle cx="86" cy="86" r="3" /><circle cx="46" cy="40" r="3" /><circle cx="70" cy="74" r="3" />
+            </g>
+            <circle cx="60" cy="60" r="4.5" fill="#F5C242" />
+        </svg>`,
+    "fuzzy": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- lines of text; the hit glows red in the middle and fades to pink and white towards its edges -->
+            <g fill="rgba(255, 255, 255, 0.28)">
+                <rect x="12" y="20" width="22" height="7" rx="2" /><rect x="38" y="20" width="14" height="7" rx="2" /><rect x="56" y="20" width="32" height="7" rx="2" />
+                <rect x="12" y="66" width="30" height="7" rx="2" /><rect x="46" y="66" width="18" height="7" rx="2" /><rect x="68" y="66" width="20" height="7" rx="2" />
+                <rect x="12" y="82" width="16" height="7" rx="2" /><rect x="32" y="82" width="36" height="7" rx="2" />
+            </g>
+            <rect x="12" y="43" width="14" height="7" rx="2" fill="rgba(255, 255, 255, 0.28)" />
+            <rect x="30" y="39" width="42" height="15" rx="4" fill="rgba(255, 255, 255, 0.9)" />
+            <rect x="36" y="39" width="30" height="15" rx="4" fill="rgba(255, 150, 150, 0.95)" />
+            <rect x="43" y="39" width="16" height="15" rx="4" fill="#D73728" />
+            <rect x="76" y="43" width="12" height="7" rx="2" fill="rgba(255, 255, 255, 0.28)" />
+        </svg>`,
+    "morph": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- a wobbly hand-drawn stroke on the left becomes the typeset lambda on the right -->
+            <path d="M14 30 C22 22 27 34 22 44 C18 54 26 66 30 54 C33 46 20 40 16 60 C14 70 26 72 30 62" fill="none" stroke="rgba(255, 255, 255, 0.75)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+            <line x1="42" y1="50" x2="58" y2="50" stroke="#00D2FF" stroke-width="2" stroke-linecap="round" />
+            <path d="M54 45 L59 50 L54 55" fill="none" stroke="#00D2FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <text x="78" y="68" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="50" fill="#F5C242">λ</text>
+        </svg>`,
+    "equationocr": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- the board: a handwritten x squared on the left, the recognised one typeset on the right, the scan line between -->
+            <rect x="6" y="22" width="88" height="56" rx="6" fill="rgba(255, 255, 255, 0.04)" stroke="rgba(255, 255, 255, 0.5)" stroke-width="1.6" />
+            <path d="M16 42 C22 48 28 58 34 64 M34 42 C28 50 22 58 16 64" fill="none" stroke="rgba(255, 255, 255, 0.8)" stroke-width="2.6" stroke-linecap="round" />
+            <path d="M36 40 C38 34 44 34 43 39 C42 42 38 43 37 45 L44 45" fill="none" stroke="rgba(255, 255, 255, 0.8)" stroke-width="1.8" stroke-linecap="round" />
+            <line x1="50" y1="26" x2="50" y2="74" stroke="#00D2FF" stroke-width="1.6" stroke-dasharray="3 2.5" />
+            <text x="66" y="63" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="30" fill="#F5C242">x</text>
+            <text x="81" y="48" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="17" fill="#F5C242">2</text>
+        </svg>`,
+    "handschrift": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- a page: handwriting above, the transcribed lines below -->
+            <rect x="20" y="8" width="60" height="84" rx="5" fill="rgba(255, 255, 255, 0.04)" stroke="rgba(255, 255, 255, 0.55)" stroke-width="1.6" />
+            <g fill="none" stroke="rgba(255, 255, 255, 0.8)" stroke-width="1.8" stroke-linecap="round">
+                <path d="M28 24 C31 19 34 27 37 22 C40 17 43 26 46 22 C49 18 52 25 55 21 C58 18 61 24 64 21 L70 22" />
+                <path d="M28 36 C32 31 35 38 39 34 C42 30 45 38 49 34 C52 31 55 37 58 33 L64 34" />
+            </g>
+            <line x1="26" y1="48" x2="74" y2="48" stroke="#00D2FF" stroke-width="1.2" stroke-dasharray="3 2.5" />
+            <g fill="#799E31">
+                <rect x="28" y="56" width="36" height="4.5" rx="1.5" /><rect x="28" y="65" width="44" height="4.5" rx="1.5" /><rect x="28" y="74" width="30" height="4.5" rx="1.5" /><rect x="28" y="83" width="40" height="4.5" rx="1.5" />
+            </g>
         </svg>`
 };
