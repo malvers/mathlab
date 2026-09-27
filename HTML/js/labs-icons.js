@@ -275,6 +275,30 @@ const LAB_ICONS = {
             </g>
         </svg>`,
 
+    "vorrechnen": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- the board with a handwritten row: 1 · 1 = 1, the result underlined twice;
+                 shifted so the board lines up with the card title (measured 4.5 px) -->
+            <g transform="translate(-4.8 0)">
+            <rect x="6" y="12" width="80" height="58" rx="5" fill="none" stroke="rgba(255, 255, 255, 0.6)" stroke-width="1.6" />
+            <path d="M15.5 32.5 Q18.5 30 21.5 26.5 L21 50 M35.5 32.5 Q38.5 30 41.5 26.5 L41 50 M48.5 35 Q54 34 59.5 35.5 M48.5 43 Q54 42 59.5 43.5" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="30" cy="39" r="2.2" fill="#ffffff" />
+            <path d="M65.5 32.5 Q68.5 30 71.5 26.5 L71 50" fill="none" stroke="#F5C242" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M63 55.5 Q70 54.5 77 55.5 M63 60 Q70 59 77 60" fill="none" stroke="#F5C242" stroke-width="2" stroke-linecap="round" />
+            <!-- the pen, just done -->
+            <path d="M82.2 51.2 L94.2 39.2 L99.8 44.8 L87.8 56.8 Z" fill="#F5C242" />
+            <path d="M82.2 51.2 L87.8 56.8 L78 62 Z" fill="#ffffff" />
+            </g>
+        </svg>`,
+    "buzzer": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- a small question mark over a big red buzzer; shifted so the base lines up with the card title (measured 5 px) -->
+            <g transform="translate(-5.5 0)">
+            <path d="M44 14 Q44 6 50 6 Q56 6 56 12.5 Q56 17.5 50 19.5 L50 23.5" fill="none" stroke="#F5C242" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="50" cy="30" r="2.6" fill="#F5C242" />
+            <path d="M14 80 A36 36 0 0 1 86 80 Z" fill="rgb(176, 36, 24)" />
+            <path d="M26.4 69 A26 26 0 0 1 39 56.4" fill="none" stroke="rgba(255, 255, 255, 0.45)" stroke-width="3" stroke-linecap="round" />
+            <rect x="7" y="80" width="86" height="13" rx="4" fill="none" stroke="rgba(255, 255, 255, 0.6)" stroke-width="2" />
+            </g>
+        </svg>`,
     "babylon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- a Babylonian twenty-three: two corner wedges, three upright wedges -->
             <g fill="#F5C242">

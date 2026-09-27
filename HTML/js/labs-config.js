@@ -57,6 +57,28 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "vorrechnen",
+        "href": "vorrechnen.html",
+        "title": "Vorrechnen",
+        "description": "Die digitale Tafel für die Stunde: Mit dem Stift wird Zeile für Zeile vorgerechnet, und jeder Rechenschritt wird als saubere Formel gesetzt. Die Aufgaben der Stunde liegen bereit, der Verlauf hält den ganzen Tag fest, und am Ende geht die Tafel mit einem Tipp in den Stoffverteilungsplan. Gebaut für Tablet und interaktive Tafel im Vollbild; am Rand sitzt der QR-Code für den Buzzer der Klasse.",
+        "tagline": "Unterricht / Tafel / Handschrift",
+        "icon": LAB_ICONS["vorrechnen"],
+        "category": "unterricht neu",
+        "keywords": "vorrechnen tafel whiteboard handschrift stift tablet beamer unterricht stunde rechenweg rechenschritt formel latex erkennen vollbild verlauf stoffverteilungsplan buzzer",
+        "color": "green"
+    },
+    {
+        "id": "buzzer",
+        "href": "buzzer.html",
+        "title": "Buzzer",
+        "description": "Ein Knopf für die Klasse: „Nicht verstanden“ – anonym. Wer den QR-Code an der Tafel scannt oder den Code eintippt, kann jederzeit drücken. Gespeichert werden nur der Code und die Uhrzeit, kein Gerät und kein Name. Vorne sieht nur die Lehrkraft still, dass jemand nachfragen möchte, und erklärt es einfach noch einmal.",
+        "tagline": "Unterricht / Klasse / anonym",
+        "icon": LAB_ICONS["buzzer"],
+        "category": "unterricht neu",
+        "keywords": "buzzer nicht verstanden anonym frage nachfragen klasse unterricht qr code knopf melden rueckmeldung feedback",
+        "color": "orange"
+    },
+    {
         "id": "koerperzaehlen",
         "href": "koerperzaehlen.html",
         "title": "Z\u00e4hlen in Papua-Neuguinea",
