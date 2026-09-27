@@ -1255,6 +1255,9 @@ if (PRESENTER) document.documentElement.classList.add('presenter');
 // the still picture from deck.css: one WebGL scene is enough. Offline or without WebGL the picture simply stays.
 if (!PRESENTER && document.querySelector('.slide.title'))
   import('./deck-flow.js').then(function (m) { m.start(document.querySelector('.slide.title')); }).catch(function () { });
+// the pen (s): ink on the slides, and a tablet as a remote pen (deck-ink.js, Doc 27.09.2026) - a module runs only
+// after this whole file, so everything it uses is there
+import('./deck-ink.js').catch(function () { });
 // slide and click survive a reload (Doc, 17.09.2026: "persist slide and click") - per tab, so a new tab still
 // starts at the beginning; a #7 in the URL wins
 const KEEP = 'deck-pos:' + location.pathname + (PRESENTER ? ':presenter' : '');
