@@ -136,7 +136,19 @@ RELOAD_JS = r"""// Live reload - only on Doc's machine: serve.py puts this into 
         // A page that loads more scripts later watches more files than a moment ago - that is a longer list, not a
         // change on disk. Taking it for one would reload, and after the reload again: a loop. So: take the new
         // ground and wait for a REAL change.
-        if (first === null || now !== firstRefs) { first = j.stamp; firstRefs = now; return; }
+        if (first === null) { first = j.stamp; firstRefs = now; return; }
+        if (now !== firstRefs) {
+          // ... but first ask with the OLD list whether something already changed meanwhile - otherwise the new
+          // ground swallows it (27.09.2026: vorrechnen loaded the QR library on a tap, and the edit made just
+          // before that never reached the Lenovo)
+          const alt = firstRefs, altStamp = first;
+          return fetch('/__live/stamp?page=' + encodeURIComponent(page) + '&refs=' + encodeURIComponent(alt), { cache: 'no-store' })
+            .then(function (r) { return r.json(); })
+            .then(function (k) {
+              if (k.stamp !== altStamp) { if (!busy()) location.reload(); return; }   // busy: asked again next round
+              first = j.stamp; firstRefs = now;
+            });
+        }
         if (j.stamp === first || busy()) return;
         location.reload();
       })
