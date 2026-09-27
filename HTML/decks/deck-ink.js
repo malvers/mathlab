@@ -401,7 +401,11 @@ document.body.appendChild(bar);
 function placeBar(r) {
   if (!penOn) return;
   const bw = bar.offsetWidth, bh = bar.offsetHeight;
-  const x = r.left >= bw + 16 ? r.left - bw - 8 : Math.max(6, r.left + 6);   // beside the slide if there is room
+  // beside the slide if there is room; on the tablet at the right, where the writing hand is (Doc, 27.09.2026:
+  // "Mach bitte die Bedienbar auf die rechte Seite, auf dem Lenovo")
+  const x = REMOTE
+    ? (innerWidth - r.right >= bw + 16 ? r.right + 8 : Math.min(innerWidth - bw - 6, r.right - bw - 6))
+    : (r.left >= bw + 16 ? r.left - bw - 8 : Math.max(6, r.left + 6));
   const y = Math.max(6, Math.min(innerHeight - bh - 6, r.top + (r.height - bh) / 2));
   bar.style.left = Math.round(x) + 'px'; bar.style.top = Math.round(y) + 'px';
 }
