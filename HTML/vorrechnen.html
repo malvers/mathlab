@@ -243,7 +243,7 @@
         }
         body.anzeige :is(#cyber-left-chrome, #mini-rail, #side-panel, #right-rail, #tafel-pfeil-vor, #tafel-pfeil-zurueck, #formel-schicht, #erkennen-klein,
             #schritt-hinweis, #schritt-op, #notiz-rand, #notiz-leeren, #seite-leeren, #radierer, #radier-rahmen, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play,
-            #buzz-aufgabe, #buzzer-overlay, #tafel-overlay) {
+            #buzz-aufgabe, #buzzer-overlay, #tafel-overlay, #namen-overlay, #namen-pille) {
             display: none !important;
         }
         /* Doc, 26.09.: "nimm bitte HIER das LOCAL rechts oben nach links unten
@@ -499,6 +499,7 @@
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/buzzer.js"></script>
+    <script src="js/namen-ziehen.js"></script>
     <script src="js/stroke-symbols.js"></script>
     <script src="morpheus/vendor/katex/katex.min.js"></script>
     <!-- Morph building blocks from morpheus: contour tracing and polygon helpers. -->
@@ -2590,6 +2591,24 @@
             buzzerZwilling = anzeigeZwilling(bild);
             requestAnimationFrame(() => o.classList.add('open'));
         }
+        // Doc, 27.09.: "in Vorrechnen rechts einen Button mit einem Porträt ... Namen sollen zufällig (sinnvoll)
+        // gezogen werden", read out by Solita and by Doc in turn - "das Panel ... bitte nicht zeigen. Einfach nur
+        // den Namen", the big one "zu aggressiv", then "deutlich dezenter". Central in js/namen-ziehen.js (the class
+        // file stays on the device); here only the button: the name in a quiet pill on the line above the squares,
+        // on the beamer there too.
+        // Doc, 27.09.: at the top there is no room above a tall formula - "Plan B ... die Pille über die Linie, die den
+        // unteren Teil abtrennt": the edge of the squares (#papier .karo, set by zeigePapier)
+        function namenOpts() {
+            return { buehne: container, linie: namenLinie, zwilling: el => anzeigeZwilling(el) };
+        }
+        function namenLinie() {
+            const karo = document.querySelector('#papier .karo');
+            const y = karo ? parseFloat(karo.style.top) : NaN;
+            return isFinite(y) ? y : papierGrenze(container.getBoundingClientRect().height);
+        }
+        function namenKnopf() {
+            if (window.Namen) Namen.ziehen(namenOpts());
+        }
         window.addEventListener('keydown', e => {
             if (!document.querySelector('#buzzer-overlay.open')) return;
             if (e.key === 'Escape') buzzerKarte(false);
@@ -3669,6 +3688,9 @@
             buzzer: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">' +
                     '<path d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"/>' +
                     '<path d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z"/></g>',
+            // who comes to the board: a portrait, head and shoulders
+            namen: '<circle cx="12" cy="8.5" r="3.75" fill="none" stroke="currentColor"/>' +
+                   '<path d="M4.75 20 A7.25 6.5 0 0 1 19.25 20" fill="none" stroke="currentColor" stroke-linecap="round"/>',
             // light / dark: a circle, half filled
             hell: '<circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor"/>' +
                   '<path d="M12 4.5 A7.5 7.5 0 0 0 12 19.5 Z" fill="currentColor"/>',
@@ -3795,7 +3817,11 @@
                         () => { if (STEUERUNG) window.close(); else beamerStart(); }, false],
                     ['hell', 'Hell / Dunkel', () => setzeHell(!hell), false],
                     // Doc, 26./27.09.: the anonymous "nicht verstanden" buzzer (js/buzzer.js)
-                    ['buzzer', 'Buzzer – „nicht verstanden“, anonym (erster Tipp: QR aufs Board)', () => buzzerKnopf(), false]]);
+                    ['buzzer', 'Buzzer – „nicht verstanden“, anonym (erster Tipp: QR aufs Board)', () => buzzerKnopf(), false],
+                    // Doc, 27.09.: "rechts einen Button mit einem Porträt" - a name drawn (js/namen-ziehen.js)
+                    ['namen', 'Name ziehen – wer kommt an die Tafel (lange drücken: die Klasse)', () => namenKnopf(), false]]);
+                // held down (or a right click): the panel with the class, not a draw
+                if (window.Namen) Namen.knopf(document.getElementById('werkzeug-namen'), namenOpts);
                 // "... die Farbknöpfe, C und Undo, Redo über den Hard Reload-Button, der
                 // jetzt rechts unten ist" - the rail is a column, from the colours down
                 // everything sits at its foot
