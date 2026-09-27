@@ -188,6 +188,9 @@ window.svpPlanParts.push(function (P) {
        gehoert der Kollegin. Ohne Kontonamen ist die Meldung ein Raetsel
        (Doc, 01.09.2026). */
     function cloudErr(status) {
+        /* 409: the database refused the save - this tab builds on an older state than the cloud (trigger
+           svp_plan_*_basis, 27.09.2026). Nothing is lost: the change stays in this browser and comes in after a reload. */
+        if (status === 409) return '☁ Nicht gespeichert: diese Seite ist nicht mehr aktuell — bitte neu laden, deine Änderung bleibt hier gesichert';
         if (status !== 403) return '☁ Fehler: HTTP ' + status;
         const who = window.svpAuth && svpAuth.whoami ? svpAuth.whoami() : '';
         return '☁ Fehler: HTTP 403 — diese Seite gehört einem anderen Konto' +
