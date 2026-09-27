@@ -3589,7 +3589,41 @@ const link = (function () {
   return { present: present, send: send };
 })();
 """
-JS = JS + ASK_JS + PRES_JS
+FOOT_JS = r"""
+/* ————— The footer line speaks, in Doc's own voice ——————————————————————————
+ * Click "Nicht verzagen, Doc Alvers fragen!" and it says itself - a voice replica of Doc
+ * (Google Voice Replication, built 24.09.2026 from his own recordings).
+ *
+ * Two traps this walks around:
+ *   .foot spans the WHOLE slide, so a plain handler would fire on every click anywhere.
+ *   We measure the text's own box with a Range, exactly as placeRow() does next door.
+ *   And the Audio object is kept in a variable: a bare new Audio().play() can be collected
+ *   mid-play (that bit us in the recording booth on 22.09.).
+ *
+ * The mp3 is LOCAL ONLY for now (Doc, 24.09.2026: "ersmal nur lokal") - it is listed in
+ * .git/info/exclude, so a missing file must stay harmless: no error, nothing in the console.
+ */
+(function () {
+  var spruch = null;
+  document.addEventListener('click', function (e) {
+    var foot = e.target && e.target.closest && e.target.closest('.foot');
+    if (!foot || !foot.textContent.trim()) return;
+    var rg = document.createRange();
+    rg.selectNodeContents(foot);
+    var t = rg.getBoundingClientRect();
+    if (e.clientX < t.left || e.clientX > t.right || e.clientY < t.top || e.clientY > t.bottom) return;
+    if (!spruch) { spruch = new Audio('../resources/doc-spruch.mp3'); spruch.preload = 'none'; }
+    spruch.currentTime = 0;
+    spruch.play().then(function () {
+      foot.style.transition = 'opacity .18s';        // a short blink, so the click has an answer
+      foot.style.opacity = '.45';
+      setTimeout(function () { foot.style.opacity = ''; }, 260);
+    }).catch(function () { /* file not there locally - stay silent, this is a local extra */ });
+  });
+})();
+"""
+
+JS = JS + ASK_JS + PRES_JS + FOOT_JS
 
 
 PAGE = """<!DOCTYPE html>
