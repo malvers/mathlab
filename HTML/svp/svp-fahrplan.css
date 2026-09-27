@@ -69,19 +69,23 @@
     grid-template-columns: minmax(0, 1fr) 154px;
     grid-template-rows: auto 1fr auto;
     column-gap: 32px;
-    padding: 32px 32px 36px 40px;
-    /* So hoch wie die rechte Spalte mindestens ist (30 + Bild 222 + 36): ein
+    /* As much air above as below (Doc, 27.09.2026: "der Abstand oben ist jetzt
+       geringer als unten") - since title, bar and card sit flush on the top
+       edge, the top padding alone decides the gap there. */
+    padding: 36px 32px 36px 40px;
+    /* So hoch wie die rechte Spalte mindestens ist (36 + Bild 222 + 36): ein
        Blatt mit einer einzigen Zeile sieht damit aus wie jedes andere. */
-    min-height: 288px;
+    min-height: 294px;
     border: 0;
     border-radius: 14px;   /* Doc, 20.09.2026: "die Ecken etwas rounder" */
     /* Papier, in JEDEM Schema: var(--card)/var(--ink) sind im dunklen Schema beide
        dunkelblau, das Blatt war damit unlesbar. Leicht blaeuliches Papier mit
        dunkelblauer Schrift (Doc, 20.09.2026: "Mach den HG leich blauisch und die
        Schrift dunkel blau") - dasselbe Navy wie in Docs Decks.
-       A step darker since 27.09.2026 (Doc: "ein bisschen dunkler, damit man das
-       Gelb besser sieht"); fahrplan.html carries the same value for its paper. */
-    background: #b6cdea;
+       27.09.2026: a darker step (#b6cdea) for the yellow did not work out - Doc:
+       "das dunklere Blau ... ist nicht gut, eher heller"; so a step lighter than
+       the original #d8e6f8. fahrplan.html carries the same value for its paper. */
+    background: #e8f0fb;
     color: #002060;
     /* Das ist der GROESSTE Grad, nicht der einzige: das Blatt waechst mit dem
        Text bis an seine max-height, und was dann noch dazukommt, wird kleiner
@@ -272,7 +276,7 @@
     .fahr-sheet {
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: auto auto auto auto;
-        padding: 24px 24px 28px 28px;
+        padding: 28px 24px 28px 28px;   /* as much air above as below, like the desktop sheet */
         row-gap: 16px;
     }
     .fahr-list { grid-column: 1; grid-row: 2; }
