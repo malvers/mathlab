@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Hexadezimalzahlen</title>
+    <meta name="description"
+        content="Hexadezimalzahlen selbst legen: sechzehn Ziffern von 0 bis F, jede Stelle sechzehnmal so viel wert wie die rechte — und unter jeder Ziffer ihre vier Bits.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="morpheus/vendor/katex/katex.min.css">
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+    </script>
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-clock.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="js/stellenwert-brett.css">
+</head>
+
+<body>
+    <!-- the board, the popup and the gear come from js/stellenwert-brett.js -->
+    <nav id="mini-rail"></nav>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <h1 id="lab-title" class="lab-stage-title">Hexadezimalzahlen</h1>
+        </div>
+    </main>
+
+    <!-- the hex lab's own sections of the popup, above the FERTIG button -->
+    <template id="board-dlg-extra">
+        <h2 class="board-dlg-h2">ANZEIGE</h2>
+        <div id="hex-bits"></div>
+        <h2 class="board-dlg-h2">WARUM SECHZEHN?</h2>
+        <div class="board-note board-story">
+            <p>Sechzehn ist 2 · 2 · 2 · 2. Darum fasst eine Hex-Ziffer genau vier Bits, und zwei
+                Hex-Ziffern sind ein Byte: 00 bis FF, also 0 bis 255.</p>
+            <p>Aus der langen Bitreihe 1010 1101 wird so kurz AD — viel leichter zu lesen und
+                abzuschreiben. Deshalb stehen Speicheradressen und Maschinencode hexadezimal da.</p>
+            <p>Auch Farben im Web: #F5C242 ist das Orange dieses Labors — F5 Rot, C2 Grün, 42 Blau,
+                jede Farbe ein Byte von 0 bis 255.</p>
+        </div>
+    </template>
+
+    <script>
+        // Debug output goes into the central DEBUG window, never into the console.
+        if (/[?&]debug=1\b/.test(location.search)) {
+            var s = document.createElement('script');
+            s.src = 'js/debug-window.js';
+            s.onload = function () { try { DebugWindow.show(); } catch (e) { } };
+            document.head.appendChild(s);
+        }
+    </script>
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cyber-clock.js"></script>
+    <script src="js/cyber-trackball.js"></script>
+    <script>
+        // Only what is hexadecimal lives here - the board itself is js/stellenwert-brett.js. The
+        // functions below draw with its helpers (ctx, COL, placeColor, store, draw), which exist by
+        // the time anything is drawn.
+
+        // Base sixteen: after 9 the digits go on with letters, A = 10 up to F = 15, and every place
+        // is worth sixteen times the one to its right. Sixteen is 2^4, so one hex digit is exactly
+        // four bits - the bridge to binaer.html.
+        const HEX = '0123456789ABCDEF';
+        let showBits = true;              // the four bits under every digit on the board
+        let bitsBox = null;               // the checkbox in the popup
+
+        const BOARD = {
+            key: 'hexadezimal',
+            subtitle: 'HEXADEZIMALZAHLEN',
+            digits: 16,
+            defaultPlaces: 2,             // one byte, 00 to FF
+            typedDigits: 8,
+            rollFitsDecimals: false,      // the top place is always set: 2 places 16..255
+            systems: {
+                sechzehn: {
+                    values: [1, 16, 256, 4096, 65536, 1048576],
+                    limits: [16, 16, 16, 16, 16, 16],
+                    label: 'Sechzehnersystem',
+                    note: 'Jede Stelle ist das Sechzehnfache der rechten: 1, 16, 256, 4096 … Nach der 9 geht es mit Buchstaben weiter: A = 10, B = 11, C = 12, D = 13, E = 14, F = 15. Zwei Stellen sind ein Byte: 00 bis FF, also 0 bis 255.'
+                }
+            },
+            defaultSystem: 'sechzehn',
+            arrange: {
+                flat: 'waagerecht: die Stellen nebeneinander, wie wir Zahlen schreiben',
+                upright: 'hochkant: als Spalte, die höchste Stelle oben'
+            },
+            panelCaption: 'Die sechzehn Ziffern — darüber ihr Wert',
+            // two rows of eight: 0 to 7 and 8 to F
+            panelFlat: () => ({ cols: 8, cellRatio: 0.95, share: 0.5 }),
+            // upright: two columns beside the board, 0 to 7 and 8 to F
+            upright: { panel: [110, 0.15, 210], board: [120, 0.18, 240], num: [204, 0.288, 396], cols: 2, byColumn: true },
+            fitTerms: true,
+            power: (place) => ({ pre: '', base: '16', exp: place }),
+            // colour mode: the ones place cyan and the sixteens green - the same colours the two
+            // nibbles of a byte wear in binaer.html
+            placeColors: [
+                'rgb(0, 210, 255)', 'rgb(121, 158, 49)', 'rgb(245, 194, 66)',
+                'rgb(176, 36, 24)', 'rgb(157, 80, 187)', 'rgb(238, 243, 250)'
+            ],
+            paintDigit,
+            onReady() {
+                showBits = store.get('bits', '1') === '1';
+                bitsBox = CyberUI.createCheckbox('hex-bits', T('bits', 'unter jeder Ziffer ihre vier Bits (Taste B)'),
+                    showBits, setBits);
+            }
+        };
+
+        function setBits(on) {
+            showBits = on;
+            store.set('bits', on ? '1' : '0');
+            const box = bitsBox && bitsBox.querySelector('input');
+            if (box) box.checked = on;
+            draw();
+        }
+
+        // B shows and hides the bits, like C the colours - not while the number is being typed
+        window.addEventListener('keydown', (e) => {
+            const t = e.target;
+            if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+            if (e.key === 'b' || e.key === 'B') setBits(!showBits);
+        });
+
+        const orbitron = (size) => "700 " + size + "px 'Orbitron', sans-serif";
+
+        // One character in Orbitron, centred in its box. All sixteen digits share one size - the
+        // widest of them has to fit - and one baseline, taken from the 0.
+        function drawGlyph(ch, cx, cy, bw, bh, col) {
+            ctx.save();
+            ctx.textBaseline = 'alphabetic';      // before measuring: the box is taken from this line
+            ctx.textAlign = 'center';
+            let size = Math.max(8, bh * 0.78);
+            ctx.font = orbitron(size);
+            let widest = 0;
+            for (const c of HEX) widest = Math.max(widest, ctx.measureText(c).width);
+            if (widest > bw * 0.8) {
+                size *= bw * 0.8 / widest;
+                ctx.font = orbitron(size);
+            }
+            const m = ctx.measureText('0');
+            ctx.fillStyle = col;
+            ctx.fillText(ch, cx, cy + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2);
+            ctx.restore();
+        }
+
+        // The four bits of one digit, 8 4 2 1 from left to right: a 1 lit in the digit's colour, a
+        // 0 dark, the weight small underneath.
+        function drawBits(d, cx, top, bw, h, col) {
+            const cell = Math.min(bw * 0.8 / 4, h * 0.75, 44);
+            const x0 = cx - 2 * cell;
+            for (let k = 0; k < 4; k++) {
+                const bit = (d >> (3 - k)) & 1;
+                const x = x0 + (k + 0.5) * cell;
+                ctx.save();
+                ctx.globalAlpha = bit ? 1 : 0.3;
+                drawGlyph(String(bit), x, top + h * 0.38, cell, h * 0.62, col);
+                ctx.restore();
+                ctx.save();
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = "600 " + Math.max(8, Math.min(11, h * 0.18)) + "px 'Orbitron', sans-serif";
+                ctx.fillText(String(8 >> k), x, top + h * 0.84);
+                ctx.restore();
+            }
+        }
+
+        // A digit on the board carries its four bits underneath when they are switched on; in the
+        // panel and on the finger it stands alone. place === null draws such a loose digit.
+        function paintDigit(d, cx, cy, bw, bh, place, colOverride) {
+            if (d === null) return;               // an empty place shows nothing at all
+            const col = colOverride || placeColor(place);
+            const bits = showBits && place !== null && place !== undefined;
+            if (!bits) {
+                drawGlyph(HEX[d], cx, cy, bw, bh, col);
+                return;
+            }
+            const dh = bh * 0.62;                 // the digit above, the bits below
+            drawGlyph(HEX[d], cx, cy - bh / 2 + dh / 2, bw, dh, col);
+            drawBits(d, cx, cy - bh / 2 + dh, bw, bh - dh, col);
+        }
+    </script>
+    <script src="js/stellenwert-brett.js"></script>
+</body>
+
+</html>

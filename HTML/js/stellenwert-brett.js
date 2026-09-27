@@ -24,6 +24,7 @@
  *         shownDigit(place)  -> digit | null                // optional: what a place shows
  *         paletteCell(k, x, y, w, h, panelCol, upright)     // optional: one cell of the digit panel
  *         placeColors: [...]           // optional: the colours of colour mode (C), one per place
+ *         onReady()                    // optional: wire the lab's own controls, before the first draw
  *     };
  *
  * A lab's own popup section goes into <template id="board-dlg-extra">, above the FERTIG button.
@@ -1228,6 +1229,8 @@ window.addEventListener('cyber-left-chrome-zoom', () => init());
 window.addEventListener('load', () => init());
 
 buildUI();
+// the lab's own controls (a checkbox in its popup section, a key) - the board stands, nothing is drawn yet
+if (BOARD.onReady) BOARD.onReady();
 // an empty board and the arrow pointing up: lay something and the number counts it,
 // or roll and the die names one
 blank = true;

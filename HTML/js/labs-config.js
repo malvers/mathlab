@@ -68,6 +68,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "hexadezimal",
+        "href": "hexadezimal.html",
+        "title": "Hexadezimalzahlen",
+        "description": "Ein Rechenbrett für das Sechzehnersystem: nach der 9 geht es mit Buchstaben weiter, A ist 10 und F ist 15, und jede Stelle ist sechzehnmal so viel wert wie die rechts daneben. Unter jeder Ziffer stehen ihre vier Bits — eine Hex-Ziffer ist genau ein halbes Byte, zwei sind ein ganzes: 00 bis FF, also 0 bis 255. Der Pfeil zwischen Zahl und Brett sagt, wer führt, und der Würfel stellt Aufgaben. Mit sechs Stellen passt ein Farbcode wie #F5C242 aufs Brett.",
+        "tagline": "Zahlensysteme / Stellenwert / Hexadezimal",
+        "icon": LAB_ICONS["hexadezimal"],
+        "category": "zahlensysteme informatik neu",
+        "keywords": "hexadezimal hex hexzahlen hexadezimalzahlen sechzehnersystem basis 16 bit byte nibble halbbyte a b c d e f 0x ff 255 farbcode rgb webfarbe speicheradresse stellenwertsystem stellenwert informatik computer ziffern legen rechenbrett",
+        "color": "gold"
+    },
+    {
         "id": "vorrechnen",
         "href": "vorrechnen.html",
         "title": "Vorrechnen",

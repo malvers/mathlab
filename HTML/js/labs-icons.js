@@ -317,6 +317,19 @@ const LAB_ICONS = {
                 <path d="M74 37 L82 30 L82 70" stroke="#F5C242" />
             </g>
         </svg>`,
+    "hexadezimal": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- FF, and under each F its four bits, all lit: one byte, full -->
+            <g fill="none" stroke="#F5C242" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M31 22 L15 22 L15 58 M15 39 L27 39" />
+                <path d="M77 22 L61 22 L61 58 M61 39 L73 39" />
+            </g>
+            <g fill="#F5C242">
+                <rect x="8" y="68" width="7" height="7" rx="1.5" /><rect x="17" y="68" width="7" height="7" rx="1.5" />
+                <rect x="26" y="68" width="7" height="7" rx="1.5" /><rect x="35" y="68" width="7" height="7" rx="1.5" />
+                <rect x="54" y="68" width="7" height="7" rx="1.5" /><rect x="63" y="68" width="7" height="7" rx="1.5" />
+                <rect x="72" y="68" width="7" height="7" rx="1.5" /><rect x="81" y="68" width="7" height="7" rx="1.5" />
+            </g>
+        </svg>`,
     "koerperzaehlen": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- a figure with raised arms, and the counting path lit up to the nose -->
             <g fill="none" stroke="rgb(46,64,94)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
