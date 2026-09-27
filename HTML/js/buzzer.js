@@ -10,7 +10,8 @@
 // at most 40 a minute per code). This side listens - realtime, and a look every 5 s as a net, because school Wi-Fi
 // drops websockets (see vote.html) - and tells its page, which shows it silently where only the teacher looks.
 //
-//   Buzzer.start(onBuzz)     listen to today's code; onBuzz(n, neu): n buzzes not seen yet, neu = one just came
+//   Buzzer.start(onBuzz)     listen to today's code; onBuzz(n, neu, frisch): n buzzes not seen yet, neu = one just
+//                            came, frisch = the ids of those that came just now
 //   Buzzer.weiter(onBuzz)    the same, but only if it was listening today already (a reload keeps it running)
 //   Buzzer.gesehen()         the teacher has seen them: back to 0
 //   Buzzer.neuerCode()       a fresh code - for the next class; phones with the old one no longer count
@@ -60,13 +61,15 @@
             document.head.appendChild(s);
         });
     }
+    // onBuzz(n, neu, frisch): frisch = the ids that came just now - a page that keeps a log counts by id, so two
+    // buzzes in one look count twice and a reload does not count the unseen ones again
     function zaehlen(neue) {
-        const gesehen = lies(KEY_GESEHEN, 0) || 0;
-        neue.forEach(id => { if (id > gesehen) ids.add(id); });
+        const gesehen = lies(KEY_GESEHEN, 0) || 0, frisch = [];
+        neue.forEach(id => { if (id > gesehen && !ids.has(id)) { ids.add(id); frisch.push(id); } });
         if (ids.size !== bisher) {
             const neu = ids.size > bisher;
             bisher = ids.size;
-            if (melde) melde(bisher, neu);
+            if (melde) melde(bisher, neu, frisch);
         }
     }
     // the net: what came since the last one seen (also after a reload, a lost websocket, a sleeping laptop)

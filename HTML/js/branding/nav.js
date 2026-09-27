@@ -179,9 +179,12 @@
             <span style="font-family: 'Orbitron', sans-serif; font-weight: 400; font-size: 1.35rem; line-height: 1; display: block;">?</span>
         `;
 
+            // A page can do without the QR of its own address: <body data-ohne-qr> (Doc 27.09.2026 for
+            // vorrechnen - there the QR on the rail is the class buzzer's, one QR button is enough)
+            const ohneQr = !!(document.body && document.body.hasAttribute("data-ohne-qr"));
             nav.appendChild(homeBtn);
             nav.appendChild(backBtn);
-            nav.appendChild(qrBtn);
+            if (!ohneQr) nav.appendChild(qrBtn);
             // Doc 24.09.2026: bug, heart and briefing (?) out - commented, not deleted
             // nav.appendChild(bugBtn);
             // nav.appendChild(donateBtn);
@@ -215,7 +218,7 @@
                     let anchor2 = coffeeBtn || anchor;
                     // Doc 24.09.2026: bug out of the rail - commented, not deleted
                     // [qrBtn, bugBtn].forEach(btn => {
-                    [qrBtn].forEach(btn => {
+                    (ohneQr ? [] : [qrBtn]).forEach(btn => {
                         btn.dataset.cyberBrandingNav = "1";
                         miniRail.insertBefore(btn, anchor2.nextSibling);
                         anchor2 = btn;
