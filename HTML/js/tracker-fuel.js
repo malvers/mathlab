@@ -17,7 +17,7 @@ window.TrackerFuel = function (ctx) {
     const CHEAP_EPS = 0.02;      // ≥2 ct below the local median = "cheap" (green); ≥2 ct above = pricey
     const FUELS = ['e5', 'e10', 'diesel'];
 
-    const dbg = (m) => { if (window.DebugWindow && DebugWindow.log) DebugWindow.log('fuel: ' + m); };
+    const dbg = DebugWindow.tag('fuel:');   // ../js/debug-window.js loads before the tracker modules
 
     let layer = null;
     let stations = [];

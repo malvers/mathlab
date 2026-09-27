@@ -69,12 +69,7 @@ window.svpPlanParts.push(function (P) {
        der Nummer genuegt also. In den Ferien trifft nichts zu - die Ferienzeilen
        tragen keine kw, dann bleibt der Plan eben unmarkiert. Zentral hier, damit
        alle Plaene es bekommen. */
-    function isoWeek(d) {
-        const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-        t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));   /* Donnerstag dieser Woche */
-        const jan1 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
-        return Math.ceil(((t - jan1) / 86400000 + 1) / 7);
-    }
+    function isoWeek(d) { return svpIsoWeek(d); }   // svp-woche.js, loaded by svp-plan.js before the parts
 
     (function markCurrentWeek() {
         const now = String(isoWeek(new Date()));

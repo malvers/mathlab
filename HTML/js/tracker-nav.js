@@ -990,19 +990,7 @@ window.TrackerNav = function (ctx) {
     }
 
     // ---- Turn-by-turn guidance (spoken + on-screen banner) ----
-    function haversine(a, b) {
-        const R = 6371000, t = Math.PI / 180;
-        const dLat = (b[0] - a[0]) * t, dLng = (b[1] - a[1]) * t;
-        const x = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * t) * Math.cos(b[0] * t) * Math.sin(dLng / 2) ** 2;
-        return 2 * R * Math.asin(Math.sqrt(x));
-    }
-    // Initial bearing (deg, 0=N) from a=[lat,lng] to b=[lat,lng] — the live travel heading for reroutes.
-    function bearingDeg(a, b) {
-        const t = Math.PI / 180;
-        const y = Math.sin((b[1] - a[1]) * t) * Math.cos(b[0] * t);
-        const x = Math.cos(a[0] * t) * Math.sin(b[0] * t) - Math.sin(a[0] * t) * Math.cos(b[0] * t) * Math.cos((b[1] - a[1]) * t);
-        return (Math.atan2(y, x) / t + 360) % 360;
-    }
+    const { haversine, bearingDeg } = window.TrackGeo;   // ../js/track-geo.js, loaded before this module
 
     // OSRM maneuver (type + modifier + road name) → a short German instruction. We map the data;
     // we do not invent phrasings beyond this table.

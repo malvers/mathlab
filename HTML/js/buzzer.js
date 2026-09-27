@@ -52,15 +52,7 @@
 
     // ---- listening ----------------------------------------------------------------------------------------------
     let laeuft = false, melde = null, ids = new Set(), kanal = null, sb = null, timer = null, bisher = 0;
-    function ladeSkript(src) {
-        return new Promise((ok, fehler) => {
-            const s = document.createElement('script');
-            s.src = src;
-            s.onload = ok;
-            s.onerror = () => fehler(new Error(src));
-            document.head.appendChild(s);
-        });
-    }
+    // ladeSkript: js/lade-skript.js, loaded before this file
     // onBuzz(n, neu, frisch): frisch = the ids that came just now - a page that keeps a log counts by id, so two
     // buzzes in one look count twice and a reload does not count the unseen ones again
     function zaehlen(neue) {

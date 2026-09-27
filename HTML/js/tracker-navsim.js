@@ -15,7 +15,7 @@
 //   4) Click the map mid-drive → the car deviates toward the click → reroute. Watch DEBUG (sim: …).
 window.TrackerNavSim = function (ctx) {
     const { map, feed, setSim, nav } = ctx;
-    const dbg = (m) => { if (window.DebugWindow && DebugWindow.log) DebugWindow.log('sim: ' + m); };
+    const dbg = DebugWindow.tag('sim:');   // ../js/debug-window.js loads before the tracker modules
 
     let car = null;          // [lat,lng] current simulated position
     let brg = 0;             // current heading (deg, 0 = N)
@@ -44,17 +44,7 @@ window.TrackerNavSim = function (ctx) {
 
     // ---- geo helpers (degrees) ----
     const T = Math.PI / 180;
-    function bearingDeg(a, b) {
-        const y = Math.sin((b[1] - a[1]) * T) * Math.cos(b[0] * T);
-        const x = Math.cos(a[0] * T) * Math.sin(b[0] * T) - Math.sin(a[0] * T) * Math.cos(b[0] * T) * Math.cos((b[1] - a[1]) * T);
-        return (Math.atan2(y, x) / T + 360) % 360;
-    }
-    function haversine(a, b) {
-        const R = 6371000;
-        const dLat = (b[0] - a[0]) * T, dLng = (b[1] - a[1]) * T;
-        const h = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * T) * Math.cos(b[0] * T) * Math.sin(dLng / 2) ** 2;
-        return 2 * R * Math.asin(Math.sqrt(h));
-    }
+    const { haversine, bearingDeg } = window.TrackGeo;   // ../js/track-geo.js, loaded before this module
     function moveAlong(from, brgDeg, distM) {
         const R = 6371000, d = distM / R, b = brgDeg * T, la1 = from[0] * T, lo1 = from[1] * T;
         const la2 = Math.asin(Math.sin(la1) * Math.cos(d) + Math.cos(la1) * Math.sin(d) * Math.cos(b));

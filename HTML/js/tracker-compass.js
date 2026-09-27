@@ -13,7 +13,7 @@ window.TrackerCompass = function (ctx) {
     let sawEvent = false;    // did ANY orientation event ever fire? (WebView/permission diagnosis)
     let watchdog = null;
     let lastHeading = null;  // latest bearing in ° (0–360, CW from north); read by the Foto-Spur via getHeading()
-    const dbg = (m) => { if (window.DebugWindow && window.DebugWindow.log) window.DebugWindow.log('compass: ' + m); };
+    const dbg = DebugWindow.tag('compass:');   // ../js/debug-window.js loads before the tracker modules
 
     function applyHeading(h) {
         const rose = $('compass-rose'); if (!rose) return;

@@ -569,6 +569,14 @@ const DebugWindow = (() => {
         }
     }
 
+    // A tagged logger for one module: const dbg = DebugWindow.tag('poi:'); dbg('x') -> "poi: x".
+    // Refactor audit 27.09.2026: twelve tracker modules carried their own copy of that one-liner.
+    // Only for scripts that load AFTER this file (tracker.html's module list) - the others keep
+    // their `if (window.DebugWindow) …` guard.
+    function tag(prefix) {
+        return function (msg) { try { log(prefix ? prefix + ' ' + msg : msg); } catch (_) {} };
+    }
+
     function log(msg) {
         if (!debugEl) init();
         const timestamp = new Date().toLocaleTimeString('de-DE', { hour12: false });
@@ -724,7 +732,7 @@ const DebugWindow = (() => {
         debugEl.style.display = 'none';
     }
 
-    return { init, log, status, clear, toggle, show, hide };
+    return { init, log, status, clear, toggle, show, hide, tag };
 })();
 
 // Expose on window: a top-level `const` is NOT a window property, so every

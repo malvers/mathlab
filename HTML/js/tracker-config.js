@@ -4,7 +4,7 @@
 window.TrackerConfig = (function () {
     const URL = '../config.json';     // HTML/config.json → docalvers.de/config.json (Pages root = HTML/)
     let polling = false;              // in-flight guard: collapse overlapping triggers into ONE fetch
-    const dbg = (m) => { if (window.DebugWindow && DebugWindow.log) DebugWindow.log('cfg: ' + m); };
+    const dbg = DebugWindow.tag('cfg:');   // ../js/debug-window.js loads before the tracker modules
 
     // Build a token lookup from cfg._palette (the brand vocabulary, config v6+): each token name and
     // each of its aka-synonyms (e.g. "phi" / "gruen" / "φ") maps to its rgb. Empty if _palette absent.

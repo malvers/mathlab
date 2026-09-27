@@ -16,6 +16,7 @@
     <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
     <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
     <link rel="stylesheet" href="svp.css">
+    <script src="../js/lade-skript.js"></script>
     <script src="svp-gate.js"></script>
     <style>
         .notes-list {
@@ -412,13 +413,7 @@
             ]);
         }
 
-        function loadScript(src) {
-            return new Promise((res, rej) => {
-                const s = document.createElement('script');
-                s.src = src; s.onload = res; s.onerror = () => rej(new Error('Bibliothek lädt nicht'));
-                document.head.appendChild(s);
-            });
-        }
+        // ladeSkript: ../js/lade-skript.js
 
         /* PostgREST call via shared core; on a dead session also reset the UI. */
         async function api(path, opts) {
@@ -558,7 +553,7 @@
            signInWithPassword. Throwaway client: storage, auto-refresh and URL
            detection are off, we only extract the tokens. */
         async function sdkLogin(email, password) {
-            if (!window.supabase) await withTimeout(loadScript('../js/vendor/supabase.min.js'), 10000, 'Bibliothek laden');
+            if (!window.supabase) await withTimeout(ladeSkript('../js/vendor/supabase.min.js'), 10000, 'Bibliothek laden');
             const client = window.supabase.createClient(DB_URL, DB_KEY, {
                 auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: 'svp-auth-tmp' }
             });

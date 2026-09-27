@@ -30,6 +30,7 @@
 <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
 <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
 <link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script src="../js/lade-skript.js"></script>
 <script defer src="../morpheus/vendor/katex/katex.min.js"></script>
 <script defer src="../js/solita-listen.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
@@ -314,15 +315,7 @@
     return { kurz: tailOf(page), lang: tailOf(page) };
   }
 
-  function ladeSkript(src) {
-    return new Promise(function (ok, fehler) {
-      const s = document.createElement('script');
-      s.src = src;
-      s.onload = ok;
-      s.onerror = function () { fehler(new Error(src + ' fehlt')); };
-      document.head.appendChild(s);
-    });
-  }
+  // ladeSkript: ../js/lade-skript.js
 
   /* ?aufgaben: every task of the Vorrechnen lab with its whole solution, from the same source the
      lab reads (js/vorrechnen-aufgaben.js) - Doc, 27.09.2026: "mach das ganze Deck fertig, also nicht

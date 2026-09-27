@@ -33,7 +33,7 @@ window.TrackerSpeedProbe = function () {
         'unclassified', 'residential', 'living_street', 'service', 'road',
         'motorway_link', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link']);
 
-    function dbg(m) { try { if (window.DebugWindow) DebugWindow.log('📏 ' + m); } catch (e) { } }
+    const dbg = DebugWindow.tag('📏');   // ../js/debug-window.js loads before the tracker modules
     function load(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v || d; } catch (e) { return d; } }
     function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } }
 
@@ -64,24 +64,11 @@ window.TrackerSpeedProbe = function () {
         if (geom.length === 1) { const a = xy(geom[0].lat, geom[0].lon); min = Math.hypot(px[0] - a[0], px[1] - a[1]); }
         return { d: min, brg };
     }
-    function bearingDeg(a, b) {
-        const t = Math.PI / 180;
-        const la1 = (a.lat != null ? a.lat : a[0]) * t, la2 = (b.lat != null ? b.lat : b[0]) * t;
-        const dLon = ((b.lon != null ? b.lon : b[1]) - (a.lon != null ? a.lon : a[1])) * t;
-        const y = Math.sin(dLon) * Math.cos(la2);
-        const x = Math.cos(la1) * Math.sin(la2) - Math.sin(la1) * Math.cos(la2) * Math.cos(dLon);
-        return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-    }
+    const { haversine, bearingDeg } = window.TrackGeo;   // ../js/track-geo.js, loaded before this module
     function aligned(travel, seg, tol) {
         if (travel == null || seg == null) return true;
         const d = Math.abs(travel - seg) % 180;
         return Math.min(d, 180 - d) <= tol;
-    }
-    function haversine(a, b) {
-        const R = 6371000, t = Math.PI / 180;
-        const dLat = (b[0] - a[0]) * t, dLng = (b[1] - a[1]) * t;
-        const x = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * t) * Math.cos(b[0] * t) * Math.sin(dLng / 2) ** 2;
-        return 2 * R * Math.asin(Math.sqrt(x));
     }
 
     // The nearest CONFIRMED way at p — mirrors the live sign's pick() EXACTLY: prefer bearing-aligned ways,

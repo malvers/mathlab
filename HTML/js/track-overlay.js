@@ -8,12 +8,7 @@
 // (each [lat, lng, tIso, alt, speed, activity, …], no null coords) so indices stay aligned.
 (function (global) {
     'use strict';
-    const R = 6371000, rad = d => d * Math.PI / 180;
-    function haversine(a, b) {
-        const dLat = rad(b[0] - a[0]), dLon = rad(b[1] - a[1]);
-        const s = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a[0])) * Math.cos(rad(b[0])) * Math.sin(dLon / 2) ** 2;
-        return 2 * R * Math.asin(Math.min(1, Math.sqrt(s)));
-    }
+    const { haversine } = window.TrackGeo;   // ../js/track-geo.js, loaded before this module
     // Compact duration: "2:07 h" or "23 min".
     function fmtClock(ms) {
         const s = Math.max(0, Math.round(ms / 1000)), p = n => String(n).padStart(2, '0');

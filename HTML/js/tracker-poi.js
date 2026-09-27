@@ -43,7 +43,7 @@ window.TrackerPoi = function (ctx) {
     const MAX_POIS = 80;           // cap pins so the map doesn't turn into a carpet
     const DEBOUNCE_MS = 400;       // settle after panning before querying (snappier first appearance)
 
-    const dbg = (m) => { if (window.DebugWindow && DebugWindow.log) DebugWindow.log('poi: ' + m); };
+    const dbg = DebugWindow.tag('poi:');   // ../js/debug-window.js loads before the tracker modules
 
     let layer = null, busy = false, lastFetch = 0, lastBox = '', tmr = null, shown = {};
     function ensureLayer() { if (!layer) layer = L.layerGroup().addTo(map); return layer; }

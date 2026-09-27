@@ -60,6 +60,7 @@
         </div>
     </main>
 
+    <script src="svp-woche.js"></script>
     <script src="svp-timetable.js"></script>
     <script>
         'use strict';
@@ -116,12 +117,7 @@
         }
 
         /* ISO calendar week of a YYYYMMDD date - the plan pages open at ?kw= */
-        function isoWeek(ymd) {
-            const d = parseYmd(ymd);
-            const t = new Date(d);
-            t.setDate(t.getDate() + 4 - (t.getDay() || 7));
-            return Math.ceil(((t - new Date(t.getFullYear(), 0, 1)) / 86400000 + 1) / 7);
-        }
+        function isoWeek(ymd) { return svpIsoWeek(parseYmd(ymd)); }   /* svp-woche.js */
 
         /* Anonymous read - no login, no key beyond the publishable one. */
         function db(path) {

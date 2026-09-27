@@ -27,7 +27,7 @@ window.TrackerStreetQuality = function (ctx) {
     // road-info probe is armed.
     const mapEl = (map.getContainer && map.getContainer()) || null;
 
-    function dbg(msg) { try { if (window.DebugWindow) DebugWindow.log('🛣️ ' + msg); } catch (e) { } }
+    const dbg = DebugWindow.tag('🛣️');   // ../js/debug-window.js loads before the tracker modules
 
     // ---- German labels for the OSM tag values. Unknown values fall through to the raw tag so we still
     //      show *something* rather than hiding it. quality: 'good' | 'mid' | 'bad' drives the colour.

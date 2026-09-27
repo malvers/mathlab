@@ -121,14 +121,9 @@ window.TrackerSpeedLimit = function (ctx) {
 
     // Optional one-liner into the existing DebugWindow so Doc can tell "no tag on this road" apart
     // from "Overpass unreachable" without adding any new on-screen element.
-    function dbg(msg) { try { if (window.DebugWindow) DebugWindow.log('🛑 ' + msg); } catch (e) { } }
+    const dbg = DebugWindow.tag('🛑');   // ../js/debug-window.js loads before the tracker modules
 
-    function haversine(a, b) {
-        const R = 6371000, t = Math.PI / 180;
-        const dLat = (b[0] - a[0]) * t, dLng = (b[1] - a[1]) * t;
-        const x = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * t) * Math.cos(b[0] * t) * Math.sin(dLng / 2) ** 2;
-        return 2 * R * Math.asin(Math.sqrt(x));
-    }
+    const { haversine, bearingDeg } = window.TrackGeo;   // ../js/track-geo.js, loaded before this module
 
     // OSM maxspeed string → km/h number, 'none' (Autobahn unlimited), or null (unknown).
     // German implicit zone tags resolve to their legal default (so e.g. "DE:rural" shows 100, not blank).
@@ -442,15 +437,6 @@ window.TrackerSpeedLimit = function (ctx) {
         return { d: min, brg };
     }
 
-    // Compass bearing a→b in degrees [0,360). a/b are {lat,lon} (way nodes) or [lat,lng] (GPS) — read both.
-    function bearingDeg(a, b) {
-        const t = Math.PI / 180;
-        const la1 = (a.lat != null ? a.lat : a[0]) * t, la2 = (b.lat != null ? b.lat : b[0]) * t;
-        const dLon = ((b.lon != null ? b.lon : b[1]) - (a.lon != null ? a.lon : a[1])) * t;
-        const y = Math.sin(dLon) * Math.cos(la2);
-        const x = Math.cos(la1) * Math.sin(la2) - Math.sin(la1) * Math.cos(la2) * Math.cos(dLon);
-        return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-    }
 
     // True when two bearings run along the same line (direction-agnostic: a road is the same whether you
     // drive it N→S or S→N), within `tol` degrees. Used to keep the sign on the road you're travelling.

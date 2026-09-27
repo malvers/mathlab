@@ -14,13 +14,7 @@
     const HAMPEL_SIGMA = 3;          // |x - median| beyond this many robust sigmas → replace with median
     const SMOOTH_W = [1, 4, 6, 4, 1]; // window-5 binomial weights — smooth but turn-preserving
 
-    function haversine(a, b) {
-        const R = 6371000, toRad = (d) => d * Math.PI / 180;
-        const dLat = toRad(b[0] - a[0]), dLon = toRad(b[1] - a[1]);
-        const x = Math.sin(dLat / 2) ** 2 +
-            Math.cos(toRad(a[0])) * Math.cos(toRad(b[0])) * Math.sin(dLon / 2) ** 2;
-        return 2 * R * Math.asin(Math.sqrt(x));
-    }
+    const { haversine } = window.TrackGeo;   // ../js/track-geo.js, loaded before this module
     function median(arr) {
         const s = arr.slice().sort((x, y) => x - y), n = s.length;
         return n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2;

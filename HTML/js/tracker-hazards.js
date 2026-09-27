@@ -103,21 +103,10 @@ window.TrackerHazards = function (ctx) {
     let lastDrawWayId;              // id of "my road" at the last pin draw ('nav' while navigating) → redraw on change
     const warned = {};              // node id -> last warn timestamp
 
-    function dbg(m) { try { if (window.DebugWindow) DebugWindow.log('⚠️ ' + m); } catch (e) { } }
+    const dbg = DebugWindow.tag('⚠️');   // ../js/debug-window.js loads before the tracker modules
     function ensureLayer() { if (!layer) layer = L.layerGroup().addTo(map); return layer; }
 
-    function haversine(a, b) {
-        const R = 6371000, t = Math.PI / 180;
-        const dLat = (b[0] - a[0]) * t, dLng = (b[1] - a[1]) * t;
-        const x = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * t) * Math.cos(b[0] * t) * Math.sin(dLng / 2) ** 2;
-        return 2 * R * Math.asin(Math.sqrt(x));
-    }
-    function bearingDeg(a, b) {
-        const t = Math.PI / 180, la1 = a[0] * t, la2 = b[0] * t, dLon = (b[1] - a[1]) * t;
-        const y = Math.sin(dLon) * Math.cos(la2);
-        const x = Math.cos(la1) * Math.sin(la2) - Math.sin(la1) * Math.cos(la2) * Math.cos(dLon);
-        return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-    }
+    const { haversine, bearingDeg } = window.TrackGeo;   // ../js/track-geo.js, loaded before this module
     // True when the bearing to the hazard is within tol of the travel direction (i.e. genuinely AHEAD,
     // not behind) — DIRECTIONAL, unlike the speed sign's road-alignment (which is mod 180).
     function ahead(travel, brgTo, tol) {

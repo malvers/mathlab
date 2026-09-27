@@ -18,7 +18,7 @@
     const SB_ANON = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';
     const PWD_KEY = 'dev_access'; // Solita stores the app password here (solita-core.js)
 
-    const dbg = (m) => { if (window.DebugWindow && window.DebugWindow.log) window.DebugWindow.log('solita: ' + m); };
+    const dbg = DebugWindow.tag('solita:');   // ../js/debug-window.js loads before the tracker modules
 
     // The edge functions are password-gated. Reuse Solita's stored password; if absent (e.g. Doc never logged
     // into Solita in this browser, or the native APK with a separate origin), ask once and remember it.

@@ -20,7 +20,7 @@ window.TrackerTraffic = function (ctx) {
     const MAX_NEAR_M = 30000;      // only show items within 30 km of the current position
     const ROUTE_HIT_M = 200;       // a closure this close to the nav route counts as "on your route"
 
-    const dbg = (m) => { if (window.DebugWindow && DebugWindow.log) DebugWindow.log('traffic: ' + m); };
+    const dbg = DebugWindow.tag('traffic:');   // ../js/debug-window.js loads before the tracker modules
 
     // Inline Lucide-style glyphs (keyless, no emoji) — stroke uses currentColor (set per kind via CSS).
     const ICONS = {

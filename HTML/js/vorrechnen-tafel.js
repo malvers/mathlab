@@ -18,20 +18,8 @@ function tagIso(d) {
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 // the ISO week, the one the plan numbers its rows by (svp-plan-keys.js)
-function isoWoche(d) {
-    const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-    t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
-    return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7);
-}
-function ladeSkript(src) {
-    return new Promise((ok, fehler) => {
-        const s = document.createElement('script');
-        s.src = src;
-        s.onload = ok;
-        s.onerror = () => fehler(new Error(src + ' fehlt'));
-        document.head.appendChild(s);
-    });
-}
+function isoWoche(d) { return svpIsoWeek(d); }   // svp/svp-woche.js, loaded by vorrechnen.html before this file
+// ladeSkript: js/lade-skript.js, loaded before this file
 // the login of the plans (one session for every svp page), only when it is needed
 async function svpAnmeldungLaden() {
     if (!window.svpAuth) await ladeSkript('svp/svp-auth.js');
