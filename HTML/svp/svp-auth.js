@@ -206,6 +206,9 @@
             zeile[sp] = daten;
             let res;
             if (base) {
+                /* the base goes along as well: the database refuses an update without it (trigger svp_plan_*_basis,
+                   27.09.2026) - so a tab still running the old code gets an error instead of overwriting */
+                zeile.basis = base.ts;
                 res = await api(q + '&ts=eq.' + encodeURIComponent(base.ts), {
                     method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify(zeile)
                 });
