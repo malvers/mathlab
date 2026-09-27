@@ -62,6 +62,11 @@
    Anweisung pro Zeile, was zu machen ist"), with the bar in front: "| -3x". */
 .tf-op{position:absolute;left:calc(50% + var(--tf-op, 200px));top:50%;transform:translateY(-50%);
   font-size:.8em;color:var(--green);white-space:nowrap}
+/* The step's number (1), (2), ... flush right at the end of the lines, grey and smaller - as vorrechnen.html
+   numbers its working (Doc, 27.09.2026: "wie das so in wissenschaftlichen Publikationen üblich ist ...
+   dahinter in Klammern", then "bei den anderen überall"). --tf-halb counts it in (einpassen). */
+.tf-nr{position:absolute;right:calc(50% - var(--tf-halb, 300px));top:50%;transform:translateY(-50%);
+  font-size:.7em;color:var(--muted);white-space:nowrap}
 
 /* The step mark on a line of the working: the triangle in front, a thin box with the same overhang on both
    sides - both around the widest line of the slide, symmetric about the middle (--tf-halb: half its width,
@@ -169,10 +174,17 @@
 
   /* One line of the working as one element: data-tex carries the whole line and what is done to it for
      Solita (deck.js puts it back as $...$ when she reads the slide), the cells show it lined up at the "=". */
-  function zeileBauen(tex, ergebnis, op, nach) {
+  function zeileBauen(tex, ergebnis, op, nach, nr) {
     const zeile = document.createElement('div');
     zeile.className = 'tf-zeile';
     zeile.dataset.tex = op ? tex + ' \\quad \\big|\\; ' + op : tex;
+    /* the step's number - Solita does not read it: the line is read as its data-tex */
+    if (nr) {
+      const n = document.createElement('div');
+      n.className = 'tf-nr';
+      try { katex.render('(' + nr + ')', n, { throwOnError: false }); } catch (e) { n.textContent = '(' + nr + ')'; }
+      zeile.appendChild(n);
+    }
     if (op) {
       const u = document.createElement('div');
       u.className = 'tf-op';
@@ -231,7 +243,7 @@
       /* the right side without its commands: the "a" in \frac is no variable */
       const ergebnis = letzte && a.nach && teile && norm(teile[0]) === a.nach &&
         norm(teile[1]).replace(/\\[a-zA-Z]+/g, '').indexOf(a.nach) < 0;
-      const zeile = zeileBauen(tex, ergebnis, ops[z + 1 - erste] || null, a.nach);
+      const zeile = zeileBauen(tex, ergebnis, ops[z + 1 - erste] || null, a.nach, z >= erste ? z - erste + 1 : null);
       if (z >= erste) { zeile.classList.add('step'); zeile.dataset.g = z - erste; }
       rechnung.appendChild(zeile);
     });
@@ -273,7 +285,9 @@
       const gleich = max('.tf-gleich') / 2, ganz = max('.tf-ganz') / 2, op = max('.tf-op');
       const rechtsBis = Math.max(gleich + max('.tf-rechts'), ganz);
       const luft = op ? 0.9 * parseFloat(r.style.fontSize) : 0;   // between the right side and its step
-      const halb = Math.max(gleich + max('.tf-links'), ganz, rechtsBis + luft + op);
+      /* the numbers flush right behind it all, after 1.5 em of air (as on the board) */
+      const nr = max('.tf-nr'), nrLuft = nr ? 1.5 * parseFloat(r.style.fontSize) : 0;
+      const halb = Math.max(gleich + max('.tf-links'), ganz, rechtsBis + luft + op + nrLuft + nr);
       return { halb: halb, op: rechtsBis + luft };
     }
     deckEl.querySelectorAll('.tf-rechnung').forEach(function (r) {
