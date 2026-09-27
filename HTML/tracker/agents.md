@@ -25,7 +25,8 @@ Design: **standalone** Vollbild (wie `glocken`, KEIN Cyber-Grid). KISS — „Ö
 
 | Pfad | Rolle |
 |---|---|
-| `HTML/tracker/tracker.html` | **DIE App** — eine Datei (HTML+CSS+JS). Hier wird editiert. |
+| `HTML/tracker/tracker.html` | **DIE App** — Seite mit CSS; die Logik liegt seit 27.09.2026 in `HTML/js/tracker-app-*.js`. |
+| `HTML/js/tracker-app-*.js` | Die App-Logik in 13 klassischen Skripten mit EINEM globalen Scope (map, view, state, position, geo, record, live, acquire, tracks, menus, modules, panels, start) — Reihenfolge = die Liste in tracker.html, Regel im Kopf jeder Datei. Vorher eine `tracker.js` mit 4246 Zeilen. |
 | `HTML/tracker/index.html` | Landing-Page (VGP-Stil): Header + 2 Kacheln (Im Browser → `tracker.html`, Android-App → APK). |
 | `HTML/tracker/icon.svg` | Brand-Icon (dunkelblau, oranger GPS-Trail, grüner Start-, roter Positions-Punkt). |
 | R2 `media/tracker/doc-alvers-tracker.apk` | Herunterladbare APK — seit 27.09.2026 **nicht mehr im Git**: `node tools/media_publish.mjs <app-debug.apk> tracker/doc-alvers-tracker.apk`; Links und `version.json` zeigen auf `pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev`. |

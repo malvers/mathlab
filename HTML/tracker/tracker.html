@@ -661,9 +661,17 @@
     <!-- Supabase client — SELF-HOSTED (same-origin) so a device content-blocker (e.g. Samsung Internet)
          can't block it like the unpkg CDN → fixes "Supabase-Lib nicht geladen" / "Sync fehlgeschlagen". -->
     <script src="../js/vendor/supabase.min.js"></script>
-    <!-- tracker.js gets the SAME ?v= cache-bust as the other local scripts (it was bare → a JS-only
-         fix could be served stale from the WebView HTTP cache when the SW isn't yet controlling). -->
-    <script>document.write('<script src="../js/tracker.js' + (window.__ASSET_V || '') + '"><\/script>');</script>
+    <!-- The app logic: js/tracker-app-*.js, split from the single tracker.js (27.09.2026). Classic scripts in ONE
+         global scope, in THIS order (see the header of each part). Same ?v= cache-bust as the other local
+         scripts (a bare tag could be served stale from the WebView HTTP cache when the SW isn't yet controlling). -->
+    <script>
+        (function () {
+            var v = window.__ASSET_V || '';
+            ['map', 'view', 'state', 'position', 'geo', 'record', 'live', 'acquire', 'tracks', 'menus', 'modules', 'panels', 'start'].forEach(function (p) {
+                document.write('<script src="../js/tracker-app-' + p + '.js' + v + '"><\/script>');
+            });
+        })();
+    </script>
 </body>
 
 </html>
