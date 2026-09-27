@@ -1,0 +1,412 @@
+/* Vorrechnen (vorrechnen.html): the page's own styles, moved out of its <style> block (27.09.2026). */
+
+/* The pen must own the surface: without this the tablet scrolls instead
+   of drawing, and a resting palm pans the page. */
+#canvas {
+    touch-action: none;
+    cursor: crosshair;
+}
+
+#stat-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+}
+
+#stat-row .stat b {
+    display: block;
+    font-size: 1.45rem;
+    line-height: 1.1;
+    color: var(--neon-blue, #00d2ff);
+}
+
+#stat-row .stat span {
+    opacity: 0.65;
+    font-weight: 400;
+}
+
+#pen-hint {
+    margin-top: 0.6rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    opacity: 0.75;
+    line-height: 1.45;
+}
+
+.gross-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+/* Doc: "die Taste richtig groß" - hit with a finger while the other
+   hand holds the pen. buttons-ultra.css sets a central height for lab
+   buttons, so this needs the extra weight to win; a deliberate local
+   exception, like Cavalieri's. */
+/* Doc, 25.09.: "butts 30% schmaler" - 101 px down to 70 px on the Lenovo,
+   where a rem is about 11 px (6.4rem), so the main sliders fit right under
+   them. */
+#ui-container .cyber-btn.gross {
+    font-size: 1.5rem !important;
+    letter-spacing: 0.12em;
+    padding: 0 1rem !important;
+    height: 6.4rem !important;
+    min-height: 6.4rem !important;
+    line-height: 6.4rem;
+    width: 100%;
+}
+
+.btn-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+}
+
+.erk-zeile {
+    margin-bottom: 0.7rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+}
+
+.erk-zeile b {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+}
+
+.erk-latex {
+    font-family: 'Outfit', monospace;
+    font-size: 1rem;
+    color: var(--neon-blue, #00d2ff);
+    word-break: break-all;
+    margin: 0.15rem 0;
+}
+
+/* The film strip along the bottom edge (see "Film strip" in the script):
+   the whole strip is the grip, the line and the dot only show where. */
+#zeitleiste .zl-spur, #zeitleiste .zl-fuellung {
+    position: absolute; left: 24px; top: 28px; height: 3px; margin-top: -1.5px; border-radius: 2px;
+}
+#zeitleiste .zl-spur { right: 24px; background: rgba(234, 240, 247, 0.18); }
+#zeitleiste .zl-fuellung { width: 0; background: rgba(234, 240, 247, 0.7); }
+#zeitleiste .zl-knopf {
+    position: absolute; left: 24px; top: 28px; width: 18px; height: 18px;
+    margin: -9px 0 0 -9px; border-radius: 50%; background: #eaf0f7;
+}
+
+/* Doc, 26.09.: "Schrift größer ... an den checks", "alle checks größer",
+   "noch größer" - every checkbox and radio in the settings card, text as
+   large as on the big buttons (24 px), box 32 px. A lab exception like the
+   big buttons; a central rule pins inputs to 18 px with !important. */
+:is(#modus-wahl, #schalter, #morph-steuerung, #regler) :is(.cyber-checkbox-wrapper, .cyber-radio-wrapper) .cyber-label {
+    font-size: 1.5rem;
+}
+:is(#modus-wahl, #schalter, #morph-steuerung, #regler) :is(.cyber-checkbox-wrapper, .cyber-radio-wrapper) { gap: 18px; }
+:is(#modus-wahl, #schalter, #morph-steuerung, #regler) .cyber-checkbox-wrapper { margin-bottom: 16px; }
+:is(#modus-wahl, #schalter, #morph-steuerung, #regler) .cyber-radio-group { gap: 16px; }
+:is(#modus-wahl, #schalter, #morph-steuerung, #regler) :is(.cyber-checkbox, .cyber-radio-input) {
+    width: 32px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+}
+:is(#modus-wahl, #schalter, #morph-steuerung, #regler) .cyber-checkbox { border-radius: 7px; }
+:is(#modus-wahl, #schalter, #morph-steuerung, #regler) .cyber-checkbox::after { width: 9px; height: 18px; border-width: 0 3px 3px 0; }
+:is(#modus-wahl, #schalter, #morph-steuerung, #regler) .cyber-radio-input::after { width: 18px; height: 18px; }
+/* Doc: "Einstellungen die Schrift" - the card's title, larger, arrow too */
+.instrument-card:is(:has(#modus-wahl), :has(#regler)) .instrument-title { font-size: 1.25rem; }
+.instrument-card:is(:has(#modus-wahl), :has(#regler)) .toggle-icon svg { width: 16px; height: 16px; }
+
+/* Doc, 26.09.: "auf der Seite kann man ... Text markieren ... dieses Google
+   Übersetzungsding. Bitte nicht" - nothing on the board selects text (task,
+   working, the green line, its buttons); the controls around the board are
+   unselectable centrally (cyber-lab-overrides.css) */
+#canvas-container { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+/* Doc, 26.09.: "auf den dunklen Design auch Linien und Karos" - the same paper
+   on the dark board, drawn in the white ink, about as faint as on sand */
+#canvas-container {
+    isolation: isolate;        /* #papier (z-index -1) lies on the board, under the ink */
+    --papier-linie: rgba(234, 240, 247, 0.09);
+    --papier-karo: rgba(234, 240, 247, 0.09);
+    --papier-grenze: rgba(234, 240, 247, 0.23);
+}
+/* Doc, 26.09.: "hell mode ... mit leicht sandfarbenen Papier und Tinte und
+   zeilen (toggle)" - the board as paper with a ruled line every 96 px;
+   the controls on it get darker so they stay visible on sand */
+#canvas-container.hell {
+    background: #f4ecd8;
+    --papier-linie: rgba(31, 64, 150, 0.13);
+    --papier-karo: rgba(31, 64, 150, 0.13);
+    --papier-grenze: rgba(31, 64, 150, 0.35);
+}
+/* Doc, 26.09.: "die Aufgabe direkt auf der Zeile und noch etwas enger. Im
+   unteren Drittel ... Karos um abzugrenzen" - ruled lines every --zeile px
+   down to two thirds, squares of half that below (zeigePapier sets --zeile
+   from the screen, 64 px on a 1080 board). Each is one tile repeated, so
+   every line is drawn the same, also at a device pixel ratio of 1.5. */
+#papier { --zeile: 64px; position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+#papier .linien {
+    position: absolute; left: 0; right: 0; top: 0;
+    /* Doc, 27.09.: "Mach die Zeilen oben mal dünner und heller" - 2/3 px: one device
+       pixel at a ratio of 1.5 (the tile is a whole number of them, --zeile is even) */
+    background-image: linear-gradient(to bottom, transparent calc(var(--zeile) - 0.667px), var(--papier-linie) calc(var(--zeile) - 0.667px));
+    background-size: 100% var(--zeile);
+}
+#papier .karo {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    border-top: 2px solid var(--papier-grenze);
+}
+/* the squares - not in the notes margin (Doc, 27.09.: "in dem Bereich rechts keine
+   Karos ... Die Schrift passt mit den Karos eigentlich nie so richtig zusammen");
+   --notiz-breite from zeigeNotizRand, inline, so the beamer's copy has it too */
+#papier .karo::before {
+    content: ''; position: absolute; top: 0; bottom: 0; left: 0; right: var(--notiz-breite, 0px);
+    background-image:
+        linear-gradient(to bottom, transparent calc(var(--zeile) / 2 - 1px), var(--papier-karo) calc(var(--zeile) / 2 - 1px)),
+        linear-gradient(to right, transparent calc(var(--zeile) / 2 - 1px), var(--papier-karo) calc(var(--zeile) / 2 - 1px));
+    background-size: calc(var(--zeile) / 2) calc(var(--zeile) / 2);
+}
+/* Doc, 27.09.: "könnte man eigentlich das Karo links auch rauslassen, weil ... die
+   Formeln passen auch nicht mit den Zeilen zusammen. Und nicht in die Kästchen. Nimm
+   das mal raus" - to try: no squares at all; the line above and the margin's stay */
+#papier .karo::before { display: none; }
+#canvas-container.hell #zl-play { color: #5d6678 !important; }
+/* the task arrows in the grey of the steps (Doc, 27.09.: "Die Dreiecke sind ziemlich
+   dunkel, müssen nicht so dunkel sein"); their opacity with them, inline */
+#canvas-container.hell :is(#tafel-pfeil-vor, #tafel-pfeil-zurueck) { color: #7a8294 !important; }
+/* Doc, 27.09.: "Wenn man die Dreiecke drückt, werden die irgendwie gehighlightet. Bitte rausnehmen" -
+   no focus ring, no pressed look from the central button styles */
+:is(#tafel-pfeil-vor, #tafel-pfeil-zurueck):is(:focus, :focus-visible, :active, :hover) {
+    outline: none !important; box-shadow: none !important; background: transparent !important; transform: none !important;
+}
+#canvas-container.hell #zeitleiste .zl-spur { background: rgba(31, 64, 150, 0.18); }
+#canvas-container.hell #zeitleiste .zl-fuellung { background: rgba(31, 64, 150, 0.6); }
+#canvas-container.hell #zeitleiste .zl-knopf { background: rgb(31, 64, 150); }
+
+/* Doc, 26.09.: "baue einen modus wie in den Decks, das ich projizieren
+   kann. Kids sehen nur die Rechnungen, ich mission control" - the window on
+   the beamer shows only the board; everything to operate it is gone, and
+   a backdrop in the board's colour fills the rest of the screen */
+body.anzeige { overflow: hidden; }
+body.anzeige::before {
+    content: ''; position: fixed; inset: 0; z-index: 999;
+    background: var(--anzeige-grund, #050d1c);
+}
+body.anzeige :is(#cyber-left-chrome, #mini-rail, #side-panel, #right-rail, #tafel-pfeil-vor, #tafel-pfeil-zurueck, #formel-schicht, #erkennen-klein,
+    #schritt-hinweis, #schritt-op, #notiz-rand, #notiz-leeren, #seite-leeren, #radierer, #radier-rahmen, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play,
+    #buzz-aufgabe, #buzzer-overlay, #tafel-overlay, #namen-overlay, #namen-pille) {
+    display: none !important;
+}
+/* Doc, 26.09.: "nimm bitte HIER das LOCAL rechts oben nach links unten
+   kleiner" - serve.py's badge (local only), in this lab only */
+#local-badge {
+    top: auto !important; right: auto !important;
+    left: 8px !important; bottom: 8px !important;
+    transform: scale(0.7); transform-origin: left bottom;
+}
+body.anzeige #local-badge { display: none !important; }
+body.anzeige #canvas-container {
+    position: fixed !important; left: 0 !important; top: 0 !important;
+    transform-origin: 0 0; z-index: 1000;
+}
+/* Doc, 26.09. (on the wide LG): "die Linien und das Karo gehen nicht bis zum
+   Rand - nach links und rechts erweitern ... denk an die Promethean". Mission
+   control's board keeps its proportions on the beamer, so a wider screen gets
+   margins; the paper simply runs on far beyond them (nothing clips it), on any
+   screen. 4000 = 125 squares, so the squares stay in step. */
+body.anzeige #papier { left: -4000px; right: -4000px; }
+/* Dark: the board's glow spans the whole screen and the board itself is
+   clear, so the margins are board too - one surface under the lines, as the
+   sand is in light mode (else the board shows as a lighter box) */
+body.anzeige:has(> #canvas-container:not(.hell))::before {
+    background: radial-gradient(circle at 50% 50%, rgba(5, 25, 55, 1) 0%, rgba(8, 20, 42, 1) 100%);
+}
+body.anzeige #canvas-container:not(.hell) { background: transparent; }
+
+/* Doc, 26.09.: "mach in der unteren Zeile dann doch den Erkennen-Button" -
+   small, bottom centre, until the recognised line takes its place */
+/* Doc, 26.09.: "mache den Erkennen-Button unten etwas deutlicher, denn den
+   sehe ja nur ich" - larger, bold, a strong frame with a glow. "Wenn der
+   Prozess des Erkennens läuft ... eine Welle" - while Gemini reads, a wave
+   runs through the button instead of its word (same size, nothing jumps) */
+/* Doc, 26.09.: "Der Erkennen-Button muss in das Feld, was rechts ist ... Ich
+   komme oft mit dem Finger dran" - in the notes margin, where nothing is
+   read; then "kann kleiner sein und sollte links neben dem C stehen, immer
+   unten. Weniger Platz ist, macht die beiden Buttons einfach kleiner" -
+   --knopf scales both when the margin is narrow (erkennenKlein) */
+/* Doc, 26.09.: the notes' C "im gleichen Stil wie Erkennen, auch die
+   Buchstabengröße und Font" - one look for both buttons in the margin */
+:is(#erkennen-klein, #notiz-leeren, #seite-leeren, #radierer) {
+    position: absolute; z-index: 5;
+    display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+    bottom: 6px; height: calc(46px * var(--knopf, 1)); border-radius: 8px; cursor: pointer; touch-action: manipulation;
+    font-family: 'Orbitron', sans-serif; font-size: calc(1.05rem * var(--knopf, 1)); font-weight: 700; letter-spacing: 0.14em;
+    color: #eaf0f7; border: 1px solid rgba(0, 210, 255, 0.85);   /* Doc, 27.09.: "die Ränder ... dünner" (was 2px) */
+    /* opaque, so the squares do not show through: the tint over the board's colour there */
+    background: linear-gradient(rgba(0, 210, 255, 0.14), rgba(0, 210, 255, 0.14)) #07162f;
+    box-shadow: 0 0 14px rgba(0, 210, 255, 0.35);
+}
+#canvas-container.hell :is(#erkennen-klein, #notiz-leeren, #seite-leeren, #radierer) {
+    color: rgb(31, 64, 150); border-color: rgba(31, 64, 150, 0.85);
+    background: linear-gradient(rgba(31, 64, 150, 0.08), rgba(31, 64, 150, 0.08)) #f4ecd8;
+    box-shadow: none;
+}
+/* at the margin's line (left: erkennenKlein); a fixed width, so the wave takes the word's place without a jump */
+#erkennen-klein { width: calc(150px * var(--knopf, 1)); padding: 0; }
+#erkennen-klein .erk-welle {
+    display: none; width: calc(110px * var(--knopf, 1)); height: calc(24px * var(--knopf, 1));
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
+}
+#erkennen-klein .erk-welle path {
+    fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round;
+    animation: erk-welle 0.8s linear infinite;
+}
+#erkennen-klein.liest .erk-wort { display: none; }
+#erkennen-klein.liest .erk-welle { display: block; }
+/* one period (40) per turn, travelling to the right */
+@keyframes erk-welle { from { transform: translateX(-40px); } to { transform: translateX(0); } }
+/* the reload button at the foot of the right rail turns while it fetches */
+#werkzeug-neuladen.dreht svg { animation: neu-drehen 0.8s linear infinite; }
+@keyframes neu-drehen { to { transform: rotate(360deg); } }
+/* Doc, 26.09.: the next step of the solution, grey, for Doc only - at the top
+   of the squares, under the ink (z-index -1 after #papier: over the paper,
+   under the canvas), never on the beamer (no mirrored layer, hidden there) */
+/* Doc, 26.09.: "die graue Formel unten ungefähr 80% so groß ... und pack die links
+   in die Ecke oben in das Karo-Feld" */
+#schritt-hinweis {
+    position: absolute; left: 24px; right: 0; z-index: -1; pointer-events: none;
+    white-space: nowrap; color: #8a93a3;
+    font-size: 1.76rem;        /* 80 % of 2.2rem; its own size, not the working's (rechenSchrift()) */
+}
+#canvas-container.hell #schritt-hinweis { color: #7a8294; }
+/* Doc, 27.09.: "zeig die nächsten 3" - one row per step, placed by zeigeHinweis (by
+   their ink), the operation on its equation's middle; all of one size and one light
+   grey: the first "auch so klein und auch so hell hellgrau wie die anderen" */
+.sh-zeile { position: absolute; left: 0; top: 0; display: flex; align-items: center; width: max-content; opacity: 0.6; }
+/* the operation to it, top left in the notes margin at its line - the grey
+   line's mirror (Doc, 26.09.: "so wie erkennen links an die gestrichelte
+   Linie ... symmetrisch zur Formel links"); left set by zeigeHinweis */
+#schritt-op {
+    position: absolute; z-index: -1; pointer-events: none;
+    white-space: nowrap; color: #8a93a3; font-size: 1.76rem;
+}
+#canvas-container.hell #schritt-op { color: #7a8294; }
+/* the edge of the notes margin (right quarter of the squares), under the ink - solid
+   like the line above the squares (Doc, 27.09.: "die Dashline nach unten bitte durchgezogen") */
+#notiz-rand {
+    position: absolute; bottom: 0; width: 0; z-index: -1; pointer-events: none;
+    border-left: 2px solid var(--papier-grenze);
+}
+/* the notes' own C, bottom right in the margin (Doc only) - a letter like
+   ERKENNEN's (Doc asked for its size and font), its look shared above */
+#notiz-leeren { right: 12px; width: calc(46px * var(--knopf, 1)); padding: 0; letter-spacing: 0; }
+/* the writing field's own C: in the field, bottom, 12 px left of the margin's line
+   (Doc, 26.09.: "in dem Feld, wo ich die Formel schreibe, links neben die
+   gestrichelte Linie"); right set by zeigeNotizRand */
+#seite-leeren { width: calc(46px * var(--knopf, 1)); padding: 0; letter-spacing: 0; }
+/* the eraser: bottom centre of the writing field, lit while it rubs; its frame
+   is one square of the paper (Doc, 26.09.) */
+#radierer { width: calc(46px * var(--knopf, 1)); padding: 0; transform: translateX(-50%); }
+#radierer svg { width: calc(24px * var(--knopf, 1)); height: calc(24px * var(--knopf, 1)); }
+#radierer.an { background: linear-gradient(rgba(0, 210, 255, 0.4), rgba(0, 210, 255, 0.4)) #07162f; box-shadow: 0 0 20px rgba(0, 210, 255, 0.75); }
+#canvas-container.hell #radierer.an { background: linear-gradient(rgba(31, 64, 150, 0.25), rgba(31, 64, 150, 0.25)) #f4ecd8; }
+#radier-rahmen {
+    position: absolute; z-index: 6; pointer-events: none; box-sizing: border-box;
+    border: 2px solid rgba(0, 210, 255, 0.9); border-radius: 3px; background: rgba(0, 210, 255, 0.08);
+}
+#canvas-container.hell #radier-rahmen { border-color: rgba(31, 64, 150, 0.85); background: rgba(31, 64, 150, 0.06); }
+/* Doc, 26.09.: "bitte keine selects" - the board's own buttons (◀ ▶, ERKENNEN,
+   PLAY) are tapped, never tabbed through: no focus ring after a key press */
+#canvas-container button:focus { outline: none; }
+
+.erk-ok { color: rgb(121, 158, 49); }
+.erk-warn { color: rgb(245, 194, 66); }
+.erk-fehler { color: rgb(176, 36, 24); }
+.erk-info { opacity: 0.6; font-size: 0.8rem; }
+
+/* Doc, 26./27.09.: the buzzer's QR card (js/buzzer.js) in the central modal - wide enough for the code */
+#buzzer-overlay .cyber-modal { max-width: min(760px, 94vw); padding: 52px 28px 24px; }
+#buzzer-overlay .bz-knoepfe { display: flex; gap: 12px; margin-top: 22px; }
+#buzzer-overlay .bz-knoepfe .cyber-btn { flex: 1; }
+/* the count per step, at the right edge on the newest row's height (zeigeBuzzAufgabe sets place and size) */
+/* the ground runs green - orange - red with the count (zeigeBuzzAufgabe), the number alone on it */
+#buzz-aufgabe {
+    position: absolute; z-index: 3; pointer-events: none; box-sizing: border-box;   /* left/top: zeigeBuzzAufgabe */
+    display: flex; align-items: center; justify-content: center; min-width: 2.4em; padding: 0 0.6em;
+    /* Doc, 27.09.: "keine Orbi-Zahlen, die kann man doch relativ schlecht lesen ... Arial" */
+    border-radius: 999px; font-family: Arial, Helvetica, sans-serif; font-weight: 700; line-height: 1;
+}
+
+/* Doc, 26.09.: "Tafel senden" - today's working into the plan, in the central modal;
+   chips for the class and the tasks, light on sand with ink like the task panel */
+#tafel-overlay { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+#tafel-overlay .cyber-modal { padding: 52px 28px 26px; max-width: 660px; text-align: left; font-family: 'Orbitron', sans-serif; }
+#tafel-overlay h3 { text-align: center; }
+#tafel-overlay :is(.ts-text, .ts-status) { font-size: 0.85rem; line-height: 1.6; letter-spacing: 0.03em; }
+#tafel-overlay .ts-text { margin: 0 0 6px; text-align: center; }
+#tafel-overlay .ts-label {
+    margin: 16px 0 8px; font-family: 'Orbitron', sans-serif; font-size: 0.72rem; letter-spacing: 0.1em; color: #8a93a3;
+}
+#tafel-overlay .ts-reihe { display: flex; flex-wrap: wrap; gap: 8px; }
+#tafel-overlay .ts-chip {
+    min-height: 42px; padding: 0 14px; cursor: pointer; touch-action: manipulation;
+    font-family: 'Orbitron', sans-serif; font-size: 0.8rem; letter-spacing: 0.06em;
+    color: #eaf0f7; background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.25); border-radius: 10px;
+}
+#tafel-overlay .ts-chip.an { border-color: #00d2ff; background: rgba(0, 210, 255, 0.14); box-shadow: 0 0 12px rgba(0, 210, 255, 0.45); }
+#tafel-overlay .ts-chip:focus { outline: none; }
+#tafel-overlay .ts-woche { margin-top: 10px; font-size: 0.78rem; letter-spacing: 0.03em; line-height: 1.5; color: #8a93a3; }
+#tafel-overlay .ts-status { min-height: 1.4em; margin: 18px 0 0; text-align: center; }
+#tafel-overlay .ts-knoepfe { display: flex; gap: 12px; margin-top: 14px; }
+#tafel-overlay .ts-knoepfe .cyber-btn { flex: 1; }
+#tafel-overlay.hell { background: rgba(244, 236, 216, 0.72); }
+#tafel-overlay.hell .cyber-modal {
+    background: #f4ecd8; color: rgb(31, 64, 150); border-color: rgba(31, 64, 150, 0.45);
+    box-shadow: 0 25px 60px rgba(31, 64, 150, 0.22);
+}
+#tafel-overlay.hell .ts-chip { color: rgb(31, 64, 150); background: rgba(31, 64, 150, 0.05); border-color: rgba(31, 64, 150, 0.25); }
+#tafel-overlay.hell .ts-chip.an { border-color: rgb(31, 64, 150); background: rgba(31, 64, 150, 0.12); box-shadow: 0 0 10px rgba(31, 64, 150, 0.3); }
+#tafel-overlay.hell :is(.ts-label, .ts-woche) { color: #5d6678; }
+#tafel-overlay.hell .cyber-modal-x { color: rgba(31, 64, 150, 0.7); border-color: rgba(31, 64, 150, 0.3); }
+
+/* Doc, 26.09.: all tasks in one panel (central modal, the grid is the lab's); night:
+   flatter tiles, no heading, no "nach x", a small cross, light on sand with ink */
+#aufgaben-overlay { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+#aufgaben-overlay .cyber-modal { padding: 52px 24px 24px; }          /* room for the cross */
+#aufgaben-overlay .aufgaben-liste {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px;
+}
+#aufgaben-overlay .aufgabe-karte {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    min-height: 76px; padding: 14px 10px 6px; box-sizing: border-box; cursor: pointer; touch-action: manipulation;
+    color: #eaf0f7; background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.25); border-radius: 10px;
+}
+#aufgaben-overlay .aufgabe-karte:focus { outline: none; }
+#aufgaben-overlay .aufgabe-karte.aktuell { border-color: #00d2ff; box-shadow: 0 0 16px rgba(0, 210, 255, 0.45); }
+#aufgaben-overlay .ak-nr {
+    position: absolute; top: 6px; left: 10px;
+    font-family: 'Orbitron', sans-serif; font-size: 0.72rem; letter-spacing: 0.08em; color: #8a93a3;
+}
+#aufgaben-overlay .ak-formel { font-size: 1.3rem; white-space: nowrap; }
+/* a block's small title (Level 1, Level 2 ...) above its grid */
+#aufgaben-overlay .ak-block {
+    text-align: left; margin: 12px 2px 6px; font-family: 'Orbitron', sans-serif; font-size: 0.78rem;
+    letter-spacing: 0.12em; text-transform: uppercase; color: #8a93a3;
+}
+#aufgaben-overlay .ak-block:first-of-type { margin-top: 0; }
+#aufgaben-overlay.hell .ak-block { color: #5d6678; }
+/* light: sand and royal blue ink, like the board */
+#aufgaben-overlay.hell { background: rgba(244, 236, 216, 0.72); }
+#aufgaben-overlay.hell .cyber-modal {
+    background: #f4ecd8; color: rgb(31, 64, 150); border-color: rgba(31, 64, 150, 0.45);
+    box-shadow: 0 25px 60px rgba(31, 64, 150, 0.22);
+}
+#aufgaben-overlay.hell .aufgabe-karte { color: rgb(31, 64, 150); background: rgba(31, 64, 150, 0.05); border-color: rgba(31, 64, 150, 0.25); }
+#aufgaben-overlay.hell .aufgabe-karte.aktuell { border-color: rgb(31, 64, 150); box-shadow: 0 0 14px rgba(31, 64, 150, 0.35); }
+#aufgaben-overlay.hell .ak-nr { color: #5d6678; }
+#aufgaben-overlay.hell .cyber-modal-x { color: rgba(31, 64, 150, 0.7); border-color: rgba(31, 64, 150, 0.3); }
