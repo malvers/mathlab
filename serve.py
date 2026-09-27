@@ -143,7 +143,22 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def local_caller(self):
+        """Only our own pages may write here (audit 27.09.2026).
+
+        The server binds to 127.0.0.1, but any web site open in the browser can still POST to it -
+        with text/plain there is not even a preflight - and the deck editor writes files. So a POST
+        must come from a page served here (Origin) and be addressed to this machine (Host).
+        """
+        ok = ('localhost', '127.0.0.1', '[::1]', '::1')
+        host = (self.headers.get('Host') or '').rsplit(':', 1)[0]
+        origin = self.headers.get('Origin') or ''
+        origin_host = origin.split('//', 1)[-1].rsplit(':', 1)[0] if origin else host
+        return host in ok and origin_host in ok
+
     def do_POST(self):
+        if not self.local_caller():
+            return self.send_error(403, 'local pages only')
         if self.path.startswith('/__deck/'):
             return self.deck_api()
         if self.path.startswith('/__proben/'):

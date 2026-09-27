@@ -143,5 +143,44 @@
         return String(html || '').replace(/<[^>]*>/g, '').replace(/&nbsp;|\u00a0/g, ' ').trim();
     }
 
-    window.svpFmtBar = { build: build, clean: clean, textOf: textOf };
+    /* The same HTML, structure and all, with nothing in it that runs: paragraphs, lists, marks, colours and
+       plain links stay, every other tag goes with its content (script, style, iframe, img ...) and of the
+       attributes only href (http, https, mailto or a plain path) and the two colours come through. For text
+       that is stored as HTML and set as HTML again for every visitor - the bridge panel of a plan page
+       (audit 27.09.2026). clean() above is not the tool for it: it makes one line of everything. */
+    const SAFE_TAGS = {
+        DIV: 1, P: 1, BR: 1, HR: 1, UL: 1, OL: 1, LI: 1, B: 1, STRONG: 1, I: 1, EM: 1, U: 1, S: 1, STRIKE: 1,
+        SPAN: 1, FONT: 1, A: 1, H1: 1, H2: 1, H3: 1, H4: 1, BLOCKQUOTE: 1, SUB: 1, SUP: 1, CODE: 1, PRE: 1
+    };
+    function safe(src) {
+        const t = document.createElement('template');
+        t.innerHTML = String(src || '');
+        const out = document.createElement('div');
+        (function copy(from, to) {
+            [].forEach.call(from.childNodes, function (n) {
+                if (n.nodeType === 3) { to.appendChild(document.createTextNode(n.nodeValue)); return; }
+                if (n.nodeType !== 1 || !SAFE_TAGS[n.nodeName]) return;
+                const e = document.createElement(n.nodeName.toLowerCase());
+                const color = (n.style && n.style.color) || n.getAttribute('color') || '';
+                const bg = (n.style && n.style.backgroundColor) || '';
+                if (color) e.style.color = color;
+                if (bg) e.style.backgroundColor = bg;
+                if (n.nodeName === 'A') {
+                    /* control characters and blanks go first: the browser drops them when it reads a URL,
+                       so "java\nscript:" would run - here it must read as the scheme it is */
+                    const href = (n.getAttribute('href') || '').replace(/[\u0000- ]/g, '');
+                    const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(href);
+                    if (href && (!scheme || /^(https?|mailto)$/i.test(scheme[1]))) {
+                        e.setAttribute('href', href);
+                        e.setAttribute('rel', 'noopener');
+                    }
+                }
+                copy(n, e);
+                to.appendChild(e);
+            });
+        })(t.content, out);
+        return out.innerHTML;
+    }
+
+    window.svpFmtBar = { build: build, clean: clean, safe: safe, textOf: textOf };
 })();

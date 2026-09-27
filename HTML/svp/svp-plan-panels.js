@@ -151,7 +151,9 @@ window.svpPlanParts.push(function (P) {
         const body = document.createElement('div');
         body.className = 'bridge-body';
         body.setAttribute('contenteditable', 'true');
-        body.innerHTML = localStorage.getItem(BKEY) || window.BRIDGE.html || '';
+        /* The text is stored as HTML and comes back from the cloud for every visitor - it is set through
+           svpFmtBar.safe (structure stays, nothing runs), here and at every pull below (audit 27.09.2026). */
+        body.innerHTML = svpFmtBar.safe(localStorage.getItem(BKEY) || window.BRIDGE.html || '');
         panel.appendChild(body);
 
         closeBridgePanel = function () {
@@ -183,7 +185,7 @@ window.svpPlanParts.push(function (P) {
                     localStorage.setItem(BTS, r.ts);
                     if (r.gemischt && (localStorage.getItem(BKEY) || '') === gesendet.html) {
                         localStorage.setItem(BKEY, (r.daten && r.daten.html) || '');
-                        body.innerHTML = (r.daten && r.daten.html) || '';
+                        body.innerHTML = svpFmtBar.safe((r.daten && r.daten.html) || '');
                     }
                 }).catch(() => {});
         }
@@ -208,7 +210,7 @@ window.svpPlanParts.push(function (P) {
                     if (row && (Date.parse(row.ts) || 0) > localTs) {
                         localStorage.setItem(BKEY, row.edits.html || '');
                         localStorage.setItem(BTS, row.ts);
-                        body.innerHTML = row.edits.html || '';
+                        body.innerHTML = svpFmtBar.safe(row.edits.html || '');
                     }
                 } catch (e) { /* offline: local copy stays */ }
                 return;
@@ -228,7 +230,7 @@ window.svpPlanParts.push(function (P) {
                     bBasisSetzen(rows[0].ts, rows[0].edits);
                     localStorage.setItem(BKEY, rows[0].edits.html || '');
                     localStorage.setItem(BTS, rows[0].ts);
-                    body.innerHTML = rows[0].edits.html || '';
+                    body.innerHTML = svpFmtBar.safe(rows[0].edits.html || '');
                     foot.textContent = HINT + ' · ☁ synchron';
                 } else if (localTs > remoteTs) {
                     pushBridge();          /* merged onto the cloud row (its base: the last one seen here) */
