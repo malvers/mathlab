@@ -8,9 +8,10 @@
  *
  * Space pauses, Enter records a remark (tools/tourkritik.py keeps them per scene and second).
  *
- * The lab's script is a classic top-level script, so its functions (layout, changed, setPlaces, turnFlow, ...)
- * and its state (digits, flow, task, placeCount, upright) are reachable through t.eval. Every scene has enter():
- * a jump builds the lab's state directly instead of replaying what came before.
+ * The lab's board (js/stellenwert-brett.js, shared with babylon.html) is a classic top-level script, so its
+ * functions (layout, changed, setPlaces, turnFlow, ...) and its state (digits, flow, task, placeCount, upright)
+ * are reachable through t.eval, and its elements carry the board's ids (#board-num, #board-link, ...).
+ * Every scene has enter(): a jump builds the lab's state directly instead of replaying what came before.
  *
  * Laying a digit is a real drag: pointerdown on the panel cell, pointermoves along the way, pointerup on the
  * place - the lab's own endDrag() decides, so a refused digit (18 on the twenties place) is refused here too.
@@ -51,8 +52,8 @@
     const start = (t) => ev(t, () => {
         if (editing) endEdit(false);
         closeSystem();
-        if (upright) document.querySelector('#maya-arrange input[value="flat"]').click();
-        if (sysKey !== 'kalender') document.querySelector('#maya-system input[value="kalender"]').click();
+        if (upright) document.querySelector('#board-arrange input[value="flat"]').click();
+        if (sysKey !== 'kalender') document.querySelector('#board-system input[value="kalender"]').click();
         if (colorMode) { colorMode = false; store.set('colour', '0'); }
         setPlaces(4);
         task = null;
@@ -120,13 +121,13 @@
     /* typing on the big number, one key after the other - Enter at enterSec */
     async function type(t, sec, text, enterSec) {
         await t.at(sec - TAP_S);
-        const xy = await centerOf(t, '#maya-num');
+        const xy = await centerOf(t, '#board-num');
         await t.tapAt('lab', xy[0], xy[1]);          // pointerdown opens the field
-        await ev(t, () => { const n = document.getElementById('maya-num'); n.textContent = ''; renderTyped(); });
+        await ev(t, () => { const n = document.getElementById('board-num'); n.textContent = ''; renderTyped(); });
         for (const ch of text) {
             await t.wait(380);
             await ev(t, (ch) => {
-                const n = document.getElementById('maya-num');
+                const n = document.getElementById('board-num');
                 n.textContent = n.textContent + ch;
                 renderTyped();
             }, ch);
@@ -167,7 +168,7 @@
                     await start(t);         /* always from the plain lab - a run may follow a replay that left it hochkant */
                     const L = lines('s0');
                     await t.at(L(1) + 0.3);                 /* "Oben steht unsere Zahl" */
-                    await t.point('lab', '#maya-head');
+                    await t.point('lab', '#board-head');
                     await t.rest();
                 },
             },
@@ -215,7 +216,7 @@
                     begin(t, '04', 'Übertrag');
                     const L = lines('s4');
                     await lay(t, L(0) + 2.4, 17, 0);         /* "siebzehn auf die Einer": 57 */
-                    const up = '#maya-head > .maya-spin:not(.left) .spin-up';
+                    const up = '#board-head > .board-spin:not(.left) .spin-up';
                     await tapOn(t, L(2) + 0.1, up);          /* 58 */
                     await tapOn(t, L(3) + 0.1, up);          /* 59 */
                     await tapOn(t, L(4) + 0.1, up);          /* 60 - twenty ones carry */
@@ -242,9 +243,9 @@
                     begin(t, '06', 'Der Pfeil');
                     const L = lines('s6');
                     await t.at(0.6);
-                    await t.point('lab', '#maya-link');      /* "Der Pfeil in der Mitte" */
-                    await tapOn(t, L(1) + 0.5, '#maya-link'); /* "Ein Klick" - the answer goes, the number stays */
-                    await tapOn(t, L(3) + 0.8, '#maya-link'); /* "Noch ein Klick" - it lays itself again */
+                    await t.point('lab', '#board-link');      /* "Der Pfeil in der Mitte" */
+                    await tapOn(t, L(1) + 0.5, '#board-link'); /* "Ein Klick" - the answer goes, the number stays */
+                    await tapOn(t, L(3) + 0.8, '#board-link'); /* "Noch ein Klick" - it lays itself again */
                     await t.rest();
                 },
             },
@@ -255,7 +256,7 @@
                     begin(t, '07', 'Würfeln und legen');
                     const L = lines('s7');
                     await t.at(0.9 - TAP_S);
-                    const die = await centerOf(t, '#maya-dice');
+                    const die = await centerOf(t, '#board-dice');
                     await t.tapAt('lab', die[0], die[1]);
                     /* no die (no WebGL) - a task all the same, so the scene still plays */
                     await t.wait(300);
@@ -277,7 +278,7 @@
                     begin(t, '08', 'Wie viele Stellen');
                     const L = lines('s8');
                     await type(t, 0.2, '47', L(1) + 0.4);    /* "Siebenundvierzig passt in zwei" */
-                    const up = '#maya-places .spin-up', down = '#maya-places .spin-down';
+                    const up = '#board-places .spin-up', down = '#board-places .spin-down';
                     await tapOn(t, L(2) + 2.0, down);        /* "nimmst du Stellen weg": three */
                     await tapOn(t, L(2) + 3.0, down);        /* two - 47 still fits */
                     await tapOn(t, L(3) + 0.6, up);          /* "oder gibst welche dazu" */
@@ -294,9 +295,9 @@
                     const L = lines('s9');
                     await type(t, 0.3, '2026', 2.6);
                     await gear(t, L(2) + 0.8);                /* "Hinter dem Zahnrad" */
-                    await tapOn(t, L(3) + 0.2, '#maya-system label:has(input[value="rein20"])');   /* "dieselben Zeichen, ein anderer Wert" */
-                    await tapOn(t, L(4) + 0.2, '#maya-system label:has(input[value="kalender"])'); /* "Und wieder zurück" */
-                    await tapOn(t, L(4) + 1.8, '#maya-dlg-close');
+                    await tapOn(t, L(3) + 0.2, '#board-system label:has(input[value="rein20"])');   /* "dieselben Zeichen, ein anderer Wert" */
+                    await tapOn(t, L(4) + 0.2, '#board-system label:has(input[value="kalender"])'); /* "Und wieder zurück" */
+                    await tapOn(t, L(4) + 1.8, '#board-dlg-close');
                     await t.rest();
                 },
             },
@@ -307,8 +308,8 @@
                     begin(t, '10', 'Hochkant');
                     const L = lines('s10');
                     await gear(t, L(0) + 1.8);
-                    await tapOn(t, L(1) + 0.4, '#maya-arrange label:has(input[value="upright"])');  /* "Hochkant" */
-                    await tapOn(t, L(1) + 1.6, '#maya-dlg-close');
+                    await tapOn(t, L(1) + 0.4, '#board-arrange label:has(input[value="upright"])');  /* "Hochkant" */
+                    await tapOn(t, L(1) + 1.6, '#board-dlg-close');
                     await t.rest();
                 },
             },
@@ -316,7 +317,7 @@
                 id: 's11', n: '11', title: 'Farben', air: 2500,
                 async enter(t) {
                     await start(t);
-                    await ev(t, () => document.querySelector('#maya-arrange input[value="upright"]').click());
+                    await ev(t, () => document.querySelector('#board-arrange input[value="upright"]').click());
                     await lie(t, 2026);
                 },
                 async run(t) {

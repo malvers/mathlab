@@ -1,0 +1,469 @@
+/* The place value board (Stellenwert-Brett) - the one look of maya.html, babylon.html and every lab
+   that lays a number on places. The logic is js/stellenwert-brett.js; a lab only brings its digits. */
+
+#board-solution {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+#board-solution {
+    font-size: 1.6rem;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#canvas {
+    touch-action: none;
+    cursor: default;
+}
+
+/* the number and the sum each sit on their own card over the stage;
+   left and width come from the same block the places and the panel use */
+.board-card {
+    position: absolute;
+    margin: 0;
+    padding: 12px 18px;
+    border-radius: 18px;
+    background: rgba(10, 20, 40, 0.4);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(0, 210, 255, 0.2);
+    text-align: center;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+/* the die out of the Würfelspiel - the same WebGL die, js/dice3d.js */
+#board-dice {
+    pointer-events: auto;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+/* grey whenever the die has nothing to say - the die itself, not its card: the card
+   keeps its glass and its edge, only the cube steps back */
+#board-dice.dimmed #die-stage {
+    filter: grayscale(1);
+    opacity: 0.45;
+}
+
+/* while the number is being typed it takes no tap either - the first tap just
+   leaves the number, it does not roll */
+#board-dice.locked {
+    pointer-events: none;
+}
+
+#die-stage {
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    cursor: grab;
+    transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+#die-stage:active {
+    cursor: grabbing;
+}
+
+/* KaTeX_Main has to be in use once, or the browser never loads it for the die faces */
+#font-probe {
+    position: absolute;
+    left: -999px;
+    font-family: KaTeX_Main, serif;
+}
+
+#board-head .board-num {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    line-height: 1;
+    min-height: 1em;           /* the box keeps its size while the digits are still arriving */
+    color: rgb(245, 194, 66);
+    font-size: clamp(2.2rem, 7.5vw, 6rem);
+    /* the number is a field as well: tap it and type another one */
+    pointer-events: auto;
+    cursor: pointer;
+    caret-color: rgb(245, 194, 66);
+    outline: none;
+}
+
+#board-head {
+    transition: border-color 0.2s ease;
+}
+
+/* upright the number stands over two columns only, so it is smaller and never wraps */
+#board-head.column .board-num {
+    font-size: clamp(1.4rem, 2.8vw, 2.9rem);
+    white-space: nowrap;
+}
+
+/* two small triangles at the right edge, there only while the number is typed */
+.board-spin {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: auto;
+}
+
+/* the left pair says how many places stand below - that one is always there */
+.board-spin.left {
+    display: flex;
+    right: auto;
+    left: 18px;
+}
+
+.board-spin button {
+    margin: 0;
+    padding: 6px;
+    border: 0;
+    background: none;
+    line-height: 0;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.3);
+    transition: color 0.15s ease;
+}
+
+.board-spin button:hover,
+.board-spin button:active {
+    color: rgb(245, 194, 66);
+}
+
+/* the two pairs do different things, so they wear different colours:
+   left (how many places) a soft yellow, right (the number itself) green */
+.board-spin.left button {
+    color: rgba(245, 194, 66, 0.5);
+}
+
+.board-spin.left button:hover,
+.board-spin.left button:active {
+    color: rgb(245, 194, 66);
+}
+
+.board-spin:not(.left) button {
+    color: rgba(121, 158, 49, 0.5);
+}
+
+.board-spin:not(.left) button:hover,
+.board-spin:not(.left) button:active {
+    color: rgb(121, 158, 49);
+}
+
+.board-spin svg {
+    display: block;
+    width: 18px;
+    height: 11px;
+    fill: currentColor;
+}
+
+/* stepping with the triangles or the arrow keys: no blinking caret in the way */
+#board-num.no-caret {
+    caret-color: transparent;
+}
+
+#board-num::selection,
+#board-num ::selection {
+    background: rgba(245, 194, 66, 0.28);
+}
+
+#board-head:hover,
+#board-head.editing {
+    border-color: rgba(245, 194, 66, 0.5);
+}
+
+/* a rolled number rides in from the right */
+#board-head {
+    overflow: hidden;
+}
+
+@keyframes board-from-right {
+    from { transform: translateX(45%); opacity: 0; }
+    to   { transform: translateX(0);   opacity: 1; }
+}
+
+#board-head .board-num .num-ch {
+    display: inline-block;
+}
+
+#board-head .board-num .num-ch.rolled-in {
+    animation: board-from-right 0.38s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* solved: the same treatment, in our green */
+#board-head.solved .board-num .num-ch {
+    background-image: linear-gradient(180deg, #ffffff 0%, #e6f3cd 20%, #9ec44a 60%, #5c7a28 100%);
+    filter: drop-shadow(0 0 25px rgba(121, 158, 49, 0.5));
+}
+
+
+
+/* the link between the number above and the board below: sits on the seam of the
+   two cards, and set it lays the rolled number on the places */
+.board-link {
+    position: absolute;
+    width: 46px;
+    height: 46px;
+    margin: 0;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid rgb(245, 194, 66);
+    background: rgba(10, 20, 40, 0.85);
+    backdrop-filter: blur(25px);
+    color: rgb(245, 194, 66);
+    box-shadow: 0 0 18px rgba(245, 194, 66, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 2;                /* over both cards - no card edge runs through it */
+    transition: box-shadow 0.2s ease;
+}
+
+.board-link:hover,
+.board-link:focus-visible {
+    box-shadow: 0 0 26px rgba(245, 194, 66, 0.6);
+    outline: none;
+}
+
+/* the arrow itself is the state: down means the number lays the board, up means the
+   board says what the number is - and the turn is what you see */
+.board-link svg {
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform: rotate(180deg);
+}
+
+.board-link.down svg {
+    transform: rotate(0deg);
+}
+
+/* upright the number stands to the right of the board, so the arrow lies on its
+   side: right to the number when the board leads, left into the board when the
+   number leads */
+.board-link.sideways svg {
+    transform: rotate(-90deg);
+}
+
+.board-link.sideways.down svg {
+    transform: rotate(90deg);
+}
+
+/* grey and pointing down: a number stands above and nothing lies below yet - that is
+   the task. One click and it lays itself, which is the answer. */
+.board-link.pending {
+    border-color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.4);
+    box-shadow: none;
+}
+
+.board-link.pending:hover {
+    color: rgba(255, 255, 255, 0.75);
+    border-color: rgba(255, 255, 255, 0.45);
+    box-shadow: none;
+}
+
+.board-link svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+#board-formula {
+    position: relative;
+}
+
+#board-solution.column #board-formula {
+    height: 100%;
+}
+
+.board-term,
+.board-plus {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+/* upright: the board is a column, so the sum is one term per row beside it */
+#board-solution.column {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 1.15rem;
+}
+
+#board-solution.column .board-term,
+#board-solution.column .board-plus {
+    top: auto;
+    left: 0;
+    transform: translateY(-50%);
+}
+
+.board-plus {
+    opacity: 0.5;
+}
+
+.board-row {
+    display: flex;
+    align-items: stretch;      /* the field takes the button's height, whatever it is */
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.board-row>* {
+    flex: 1 1 0;               /* two equal halves, like the row below */
+    min-width: 0;
+}
+
+/* the shared button carries a 10px top margin; inside a row it would make the
+   field next to it that much taller, so the row spacing lives on .board-row */
+#ui-container .board-row .cyber-btn {
+    margin-top: 0;
+}
+
+.board-row input[type="number"] {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(245, 194, 66, 0.35);
+    border-radius: 10px;
+    color: rgb(245, 194, 66);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.95rem;
+    line-height: 1;            /* Orbitron's line box would make the field taller */
+    padding: 6px 10px;         /* than the button beside it */
+}
+
+.board-row input[type="number"]:focus {
+    outline: none;
+    border-color: rgb(245, 194, 66);
+}
+
+/* the place value system sits in a popup - the stage itself stays clear */
+.board-dlg {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 20, 0.6);
+    backdrop-filter: blur(6px);
+}
+
+.board-dlg[hidden] {
+    display: none;
+}
+
+.board-dlg-card {
+    width: min(92vw, 420px);
+    box-sizing: border-box;
+    padding: 22px 24px 18px;
+    border-radius: 18px;
+    background: rgba(10, 20, 40, 0.92);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(121, 158, 49, 0.45);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    /* a lab's own section at the bottom can make it tall - on a phone held sideways it scrolls */
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+}
+
+/* a lab's own story in the popup (babylon.html: why there was no zero) */
+.board-dlg .board-story {
+    margin: 0 0 16px;
+}
+
+.board-story p {
+    margin: 0 0 8px;
+}
+
+.board-dlg .board-dlg-h2 {
+    margin-top: 18px;
+}
+
+.board-dlg h2 {
+    margin: 0 0 14px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.12em;
+    color: rgb(121, 158, 49);
+}
+
+.board-dlg .board-note {
+    margin-top: 10px;
+}
+
+.board-dlg .cyber-btn {
+    width: 100%;
+}
+
+.board-note {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    opacity: 0.8;
+}
+
+.board-task-target {
+    display: flex;
+    justify-content: center;
+    margin: 6px 0 10px;
+}
+
+@media (max-width: 760px) {
+    /* the die: a still cube in the lab's colours, it only turns when it is rolled */
+    #board-dice {
+        pointer-events: auto;
+        cursor: pointer;
+        padding: 10px 18px;
+    }
+
+    .cube-stage {
+        perspective: 300px;
+        height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .cube {
+        position: relative;
+        width: 44px;
+        height: 44px;
+        transform-style: preserve-3d;
+        transform: rotateX(-24deg) rotateY(32deg);
+        transition: transform 0.15s linear;
+    }
+
+    .cube-face {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 700;
+        font-size: 19px;
+        color: rgb(238, 243, 250);
+    }
+
+    .cube-face:nth-child(1) { background: rgb(245, 194, 66); }
+    .cube-face:nth-child(2) { background: rgb(0, 210, 255); }
+    .cube-face:nth-child(3) { background: rgb(121, 158, 49); }
+    .cube-face:nth-child(4) { background: rgb(176, 36, 24); }
+    .cube-face:nth-child(5) { background: rgb(0, 210, 255); }
+    .cube-face:nth-child(6) { background: rgb(245, 194, 66); }
+
+    #board-head .board-num {
+        font-size: clamp(1.8rem, 12vw, 3.2rem);
+    }
+}
