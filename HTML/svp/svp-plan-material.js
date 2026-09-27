@@ -951,7 +951,7 @@ window.svpPlanParts.push(function (P) {
         svg.setAttribute('aria-hidden', 'true');
         svg.setAttribute('fill', 'none');
         svg.setAttribute('stroke', 'currentColor');
-        svg.setAttribute('stroke-width', '2');
+        svg.setAttribute('stroke-width', '1.6');
         svg.setAttribute('stroke-linecap', 'round');
         svg.setAttribute('stroke-linejoin', 'round');
         [AUGE_PATH].concat(aus ? ['M4 4 L20 20'] : []).forEach(function (d) {
@@ -962,7 +962,7 @@ window.svpPlanParts.push(function (P) {
         const pupille = document.createElementNS(ns, 'circle');
         pupille.setAttribute('cx', '12');
         pupille.setAttribute('cy', '12');
-        pupille.setAttribute('r', '3');
+        pupille.setAttribute('r', '2.6');
         svg.appendChild(pupille);
         b.appendChild(svg);
         b.addEventListener('click', function (e) {
