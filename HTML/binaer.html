@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Binärzahlen</title>
+    <meta name="description"
+        content="Binärzahlen selbst legen: nur 0 und 1, jede Stelle doppelt so viel wert wie die rechte — und der Dezimalwert läuft mit.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="morpheus/vendor/katex/katex.min.css">
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+    </script>
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-clock.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="js/stellenwert-brett.css">
+</head>
+
+<body>
+    <!-- the board, the popup and the gear come from js/stellenwert-brett.js -->
+    <nav id="mini-rail"></nav>
+
+    <main id="main-content">
+        <div id="canvas-container">
+            <h1 id="lab-title" class="lab-stage-title">Binärzahlen</h1>
+        </div>
+    </main>
+
+    <!-- the binary lab's own section of the popup, above the FERTIG button -->
+    <template id="board-dlg-extra">
+        <h2 class="board-dlg-h2">WARUM NUR ZWEI?</h2>
+        <div class="board-note board-story">
+            <p>Ein Schalter kennt zwei Zustände: aus und an. Mehr braucht ein Computer nicht — jede Zahl,
+                jeder Buchstabe und jedes Bild ist in ihm eine Reihe aus Nullen und Einsen.</p>
+            <p>Eine Stelle im Zweiersystem heißt Bit, kurz für „binary digit“. Acht Bits sind ein Byte:
+                von 00000000 bis 11111111, also von 0 bis 255 — genau 256 Möglichkeiten.</p>
+            <p>Das Rechnen mit 0 und 1 hat Gottfried Wilhelm Leibniz schon 1703 beschrieben, mehr als
+                zweihundert Jahre vor den ersten Computern.</p>
+        </div>
+    </template>
+
+    <script>
+        // Debug output goes into the central DEBUG window, never into the console.
+        if (/[?&]debug=1\b/.test(location.search)) {
+            var s = document.createElement('script');
+            s.src = 'js/debug-window.js';
+            s.onload = function () { try { DebugWindow.show(); } catch (e) { } };
+            document.head.appendChild(s);
+        }
+    </script>
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/cyber-clock.js"></script>
+    <script src="js/cyber-trackball.js"></script>
+    <script>
+        // Only what is binary lives here - the board itself is js/stellenwert-brett.js. The
+        // functions below draw with its helpers (ctx, COL, roundRect, placeColor, palette),
+        // which exist by the time anything is drawn.
+
+        // Base two: two digits, 0 and 1, and every place is worth twice the one to its right.
+        // Eight places are a byte - 0 to 255.
+        const BOARD = {
+            key: 'binaer',
+            subtitle: 'BINÄRZAHLEN',
+            digits: 2,
+            defaultPlaces: 8,             // one byte
+            typedDigits: 3,
+            rollFitsDecimals: false,      // the top place is always set: 4 places 8..15, 8 places 128..255
+            systems: {
+                zwei: {
+                    values: [1, 2, 4, 8, 16, 32, 64, 128],
+                    limits: [2, 2, 2, 2, 2, 2, 2, 2],
+                    label: 'Zweiersystem',
+                    note: 'Jede Stelle ist das Doppelte der rechten: 1, 2, 4, 8, 16, 32, 64, 128. Es gibt nur zwei Ziffern, 0 und 1. Acht Stellen sind ein Byte und fassen 0 bis 255.'
+                }
+            },
+            defaultSystem: 'zwei',
+            arrange: {
+                flat: 'waagerecht: die Stellen nebeneinander, wie wir Zahlen schreiben',
+                upright: 'hochkant: als Spalte, die höchste Stelle oben'
+            },
+            panelCaption: 'Die zwei Ziffern',
+            // two wide keys under the board
+            panelFlat: () => ({ cols: 2, cellRatio: 0.24, share: 0.5 }),
+            // upright: one narrow column beside the board, a square key in each half
+            upright: { panel: [100, 0.09, 150], board: [120, 0.18, 240], num: [204, 0.288, 396], cols: 1, byColumn: false },
+            fitTerms: true,
+            power: (place) => ({ pre: '', base: '2', exp: place }),
+            // colour mode colours by nibble: the four bits on the right and the four on the left -
+            // each group of four is one digit in hexadecimal
+            placeColors: [
+                'rgb(0, 210, 255)', 'rgb(0, 210, 255)', 'rgb(0, 210, 255)', 'rgb(0, 210, 255)',
+                'rgb(121, 158, 49)', 'rgb(121, 158, 49)', 'rgb(121, 158, 49)', 'rgb(121, 158, 49)'
+            ],
+            paintDigit,
+            paletteCell
+        };
+
+        // A binary digit is simply 0 or 1, drawn big in Orbitron. Both are measured on the 0, so
+        // they share one size and one baseline, and they stand centred in their box whatever the
+        // font's own metrics are.
+        function paintDigit(d, cx, cy, bw, bh, place, colOverride) {
+            if (d === null) return;               // an empty place shows nothing at all
+            const col = colOverride || placeColor(place);
+            let size = Math.max(8, Math.min(bh * 0.78, bw * 1.1));
+            ctx.save();
+            ctx.textBaseline = 'alphabetic';      // before measuring: the box is taken from this line
+            ctx.font = "700 " + size + "px 'Orbitron', sans-serif";
+            let m = ctx.measureText('0');
+            if (m.width > bw * 0.8) {
+                size *= bw * 0.8 / m.width;
+                ctx.font = "700 " + size + "px 'Orbitron', sans-serif";
+                m = ctx.measureText('0');
+            }
+            ctx.fillStyle = col;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillText(String(d), cx, cy + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2);
+            ctx.restore();
+        }
+
+        // One key of the digit panel - the digit is its own label. Upright the two cells are tall
+        // halves of a narrow column, so the key is a square in the middle of each.
+        function paletteCell(k, cx0, cy0, cellW, cellH, panelCol, upright) {
+            let x = cx0, y = cy0, w = cellW, h = cellH;
+            if (upright) {
+                const side = Math.min(cellW, cellH, 150);
+                x = cx0 + (cellW - side) / 2;
+                y = cy0 + (cellH - side) / 2;
+                w = side;
+                h = side;
+            }
+            const on = picked === k || (drag && drag.digit === k);
+            roundRect(x + 3, y + 2, w - 6, h - 4, 10,
+                on ? 'rgba(245, 194, 66, 0.12)' : 'rgba(255, 255, 255, 0.02)',
+                on ? COL.glyph : 'rgba(255, 255, 255, 0.07)');
+            paintDigit(k, x + w / 2, y + h / 2, w - 14, h * 0.62, null, panelCol);
+            palette.push({ digit: k, x, y, w, h });
+        }
+    </script>
+    <script src="js/stellenwert-brett.js"></script>
+</body>
+
+</html>

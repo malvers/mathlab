@@ -57,6 +57,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "binaer",
+        "href": "binaer.html",
+        "title": "Binärzahlen",
+        "description": "Ein Rechenbrett für das Zweiersystem: nur zwei Ziffern, 0 und 1, und jede Stelle ist doppelt so viel wert wie die rechts daneben — 1, 2, 4, 8 bis 128. Acht Stellen sind ein Byte und fassen 0 bis 255. Der Pfeil zwischen Zahl und Brett sagt, wer führt, und der Würfel stellt Aufgaben, die genau so viele Stellen füllen, wie eingestellt sind. Mit der Taste C färben sich die Stellen in Vierergruppen — jede Gruppe ist eine Ziffer im Hexadezimalsystem.",
+        "tagline": "Zahlensysteme / Stellenwert / Binär",
+        "icon": LAB_ICONS["binaer"],
+        "category": "zahlensysteme informatik neu",
+        "keywords": "binaer binär binaerzahlen binärzahlen zweiersystem dualsystem dualzahlen basis 2 bit byte nibble halbbyte null eins stellenwertsystem stellenwert zweierpotenzen 128 255 leibniz computer informatik ziffern legen rechenbrett",
+        "color": "gold"
+    },
+    {
         "id": "vorrechnen",
         "href": "vorrechnen.html",
         "title": "Vorrechnen",

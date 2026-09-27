@@ -23,6 +23,7 @@
  *         digitBox(x, y, w, h, upright) -> [cx, cy, bw, bh] // optional: where a digit sits in its card
  *         shownDigit(place)  -> digit | null                // optional: what a place shows
  *         paletteCell(k, x, y, w, h, panelCol, upright)     // optional: one cell of the digit panel
+ *         placeColors: [...]           // optional: the colours of colour mode (C), one per place
  *     };
  *
  * A lab's own popup section goes into <template id="board-dlg-extra">, above the FERTIG button.
@@ -144,14 +145,15 @@ const store = {
     }
 };
 
-// C gives every place its own colour - ours plus the cyan of the lab
+// C gives every place its own colour - ours plus the cyan of the lab. A lab with more places
+// brings its own list (binaer.html colours by nibble, the four bits of one hex digit).
 let colorMode = store.get('colour', '0') === '1';
-const PLACE_COLORS = [
+const PLACE_COLORS = BOARD.placeColors || [
     'rgb(245, 194, 66)', 'rgb(0, 210, 255)', 'rgb(121, 158, 49)',
     'rgb(176, 36, 24)', 'rgb(157, 80, 187)'   // the fifth its own, not the cyan again
 ];
 const placeColor = (place) =>
-    (colorMode && place !== null && place !== undefined) ? PLACE_COLORS[place] : COL.glyph;
+    (colorMode && place !== null && place !== undefined) ? PLACE_COLORS[place % PLACE_COLORS.length] : COL.glyph;
 
 let sysKey = (() => {
     const k = store.get('system', BOARD.defaultSystem);
@@ -1080,15 +1082,18 @@ function newTask(target) {
 // The number itself is the field, the die makes the tasks. Only the place value system and the
 // arrangement are left, and they live in the popup behind the gear.
 function buildUI() {
-    CyberUI.createRadioGroup('board-system', null,
-        Object.keys(BOARD.systems).map(k => ({ value: k, label: T('sys_' + k, BOARD.systems[k].label) })),
-        sysKey, (v) => {
-            sysKey = v;
-            store.set('system', v);
-            dbg('system ' + v + ': ' + de(value()));
-            document.getElementById('board-system-note').textContent = noteFor(v);
-            changed();
-        });
+    // one system alone is no choice - then only its note stands under the heading
+    if (Object.keys(BOARD.systems).length > 1) {
+        CyberUI.createRadioGroup('board-system', null,
+            Object.keys(BOARD.systems).map(k => ({ value: k, label: T('sys_' + k, BOARD.systems[k].label) })),
+            sysKey, (v) => {
+                sysKey = v;
+                store.set('system', v);
+                dbg('system ' + v + ': ' + de(value()));
+                document.getElementById('board-system-note').textContent = noteFor(v);
+                changed();
+            });
+    }
     document.getElementById('board-system-note').textContent = noteFor(sysKey);
 
     CyberUI.createRadioGroup('board-arrange', null, [

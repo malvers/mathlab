@@ -308,6 +308,15 @@ const LAB_ICONS = {
                 <path d="M84 30 L98 30 L93 44 L91.8 72 L90.2 72 L89 44 Z" />
             </g>
         </svg>`,
+    "binaer": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- eleven in binary: 1 0 1 1 - the ones lit, the zero dark -->
+            <g fill="none" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 37 L19 30 L19 70" stroke="#F5C242" />
+                <rect x="30" y="30" width="17" height="40" rx="7" stroke="rgba(255, 255, 255, 0.45)" />
+                <path d="M53 37 L61 30 L61 70" stroke="#F5C242" />
+                <path d="M74 37 L82 30 L82 70" stroke="#F5C242" />
+            </g>
+        </svg>`,
     "koerperzaehlen": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- a figure with raised arms, and the counting path lit up to the nose -->
             <g fill="none" stroke="rgb(46,64,94)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
