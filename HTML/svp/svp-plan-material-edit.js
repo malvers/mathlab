@@ -3,7 +3,7 @@
 window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
-        updateMaterial, removeMatEntry, closeMatModal, parseMat, matTail, wirePillMenu,
+        updateMaterial, removeMatEntry, toggleMatAus, closeMatModal, parseMat, matTail, wirePillMenu,
         wirePillTouch, decorateMatCell, wireMaterialDrop
     });
 
@@ -115,6 +115,12 @@ window.svpPlanParts.push(function (P) {
     function removeMatEntry(ref, url) {
         saveMaterial(ref, matToSrc(parseMat(ref.matTd.dataset.src || '')
             .filter(en => en.url !== url)));
+    }
+
+    // Hide a link from the class, or bring it back (the eye over its pill while editing).
+    function toggleMatAus(ref, url) {
+        saveMaterial(ref, matToSrc(parseMat(ref.matTd.dataset.src || '')
+            .map(en => en.url === url ? Object.assign({}, en, { aus: !en.aus }) : en)));
     }
 
     function saveMaterial(ref, src) {
@@ -304,18 +310,24 @@ window.svpPlanParts.push(function (P) {
        (Doc, 22.09.2026). Steht wie [[datei:…]] hinter dem Link und ist
        unsichtbar; alte Zeilen ohne die Marke bleiben, wie sie sind. */
     const WICHTIG_RE = /^\s*\[\[wichtig\]\]\s*/;
+    /* Blendet eine Pille fuer die Klasse aus (Doc, 27.09.2026: "koennen wir die ausblenden ...
+       wenn ich edit bin in die Mitte ueber den Text ein Auge"). Gleiche Art Marke; das Auge im
+       Bearbeiten-Modus schaltet sie (toggleMatAus). */
+    const AUS_RE = /^\s*\[\[aus\]\]\s*/;
 
-    /* Frisst fuehrende «Beschreibung», [[datei:…]] und [[wichtig]] in beliebiger
+    /* Frisst fuehrende «Beschreibung», [[datei:…]], [[wichtig]] und [[aus]] in beliebiger
        Reihenfolge - deshalb so viele Durchgaenge wie es Anhaenge gibt. */
     function nimmAnhang(text) {
-        const a = { desc: '', datei: '', wichtig: false, rest: text };
-        for (let i = 0; i < 3; i++) {
+        const a = { desc: '', datei: '', wichtig: false, aus: false, rest: text };
+        for (let i = 0; i < 4; i++) {
             let m = a.rest.match(DESC_RE);
             if (m) { a.desc = m[1].trim(); a.rest = a.rest.slice(m[0].length); continue; }
             m = a.rest.match(DATEI_RE);
             if (m) { a.datei = m[1].trim(); a.rest = a.rest.slice(m[0].length); continue; }
             m = a.rest.match(WICHTIG_RE);
             if (m) { a.wichtig = true; a.rest = a.rest.slice(m[0].length); continue; }
+            m = a.rest.match(AUS_RE);
+            if (m) { a.aus = true; a.rest = a.rest.slice(m[0].length); continue; }
             break;
         }
         return a;
@@ -331,6 +343,7 @@ window.svpPlanParts.push(function (P) {
                 if (a.desc) vor.desc = a.desc;
                 if (a.datei) vor.datei = a.datei;
                 if (a.wichtig) vor.wichtig = true;
+                if (a.aus) vor.aus = true;
                 pre = a.rest;
             }
             out.push({
@@ -338,7 +351,8 @@ window.svpPlanParts.push(function (P) {
                 url: parts[k],
                 desc: '',
                 datei: '',
-                wichtig: false
+                wichtig: false,
+                aus: false
             });
         }
         if (parts.length > 1 && out.length) {
@@ -347,6 +361,7 @@ window.svpPlanParts.push(function (P) {
             if (a.desc) letzt.desc = a.desc;
             if (a.datei) letzt.datei = a.datei;
             if (a.wichtig) letzt.wichtig = true;
+            if (a.aus) letzt.aus = true;
         }
         return out;
     }
@@ -362,7 +377,8 @@ window.svpPlanParts.push(function (P) {
         return entries.map(en => (en.label ? en.label + ' ' : '') + en.url +
             (en.desc ? ' «' + en.desc.replace(/[«»]/g, '') + '»' : '') +
             (en.datei ? ' [[datei:' + en.datei.replace(/[\[\]]/g, '') + ']]' : '') +
-            (en.wichtig ? ' [[wichtig]]' : '')).join(' ');
+            (en.wichtig ? ' [[wichtig]]' : '') +
+            (en.aus ? ' [[aus]]' : '')).join(' ');
     }
 
     function readClip() {

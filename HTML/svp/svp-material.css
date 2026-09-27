@@ -139,6 +139,37 @@ tr.wk-edit .mat-block a.mat-pill:has(> .mat-ico) { padding-right: 26px; }
 }
 @media print { .mat-pill-wrap .mat-x { display: none; } }
 
+/* Hidden from the class ([[aus]] in the material text, Doc 27.09.2026): visitors never get the pill
+   (svp-plan-material.js); the owner sees it only while the week is being edited, faded - outside the
+   edit mode the plan looks exactly as the class sees it, on the board in class too. */
+.mat-pill-wrap.mat-aus { display: none; }
+tr.wk-edit .mat-pill-wrap.mat-aus { display: inline-block; }
+tr.wk-edit .mat-pill-wrap.mat-aus > a { opacity: 0.4; }
+/* The eye that switches it: in the middle over the label, only while editing (Doc: "in die Mitte
+   über den Text ein Auge"). Open = the class sees it; struck through and red = hidden. */
+.mat-pill-wrap .mat-auge {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+    width: 26px;
+    height: 26px;
+    padding: 4px;
+    border: 1px solid rgb(20, 44, 92);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    color: rgb(20, 44, 92);
+    cursor: pointer;
+}
+tr.wk-edit .mat-pill-wrap .mat-auge { display: block; }
+.mat-pill-wrap .mat-auge svg { display: block; width: 100%; height: 100%; }
+.mat-pill-wrap.mat-aus .mat-auge,
+.mat-pill-wrap .mat-auge:hover,
+.mat-pill-wrap .mat-auge:focus-visible { color: rgb(176, 36, 24); border-color: rgb(176, 36, 24); background: #fff; }
+@media (hover: none) { tr.wk-edit .mat-pill-wrap .mat-auge { width: 32px; height: 32px; } }
+@media print { .mat-pill-wrap .mat-auge { display: none; } }
+
 /* Sub-row side zone (under Bemerkungen/Material) + section label */
 /* Material als ein Streifen unter den Stichpunkten (Doc, 07.09.2026): in der
    alten schmalen Seitenzelle stapelten sich fuenf Pillen auf fuenf Zeilen,

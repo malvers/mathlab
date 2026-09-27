@@ -825,6 +825,9 @@ window.svpPlanParts.push(function (P) {
         entries.sort(function (a, b) { return matRang(a) - matRang(b); });
         entries.forEach(function (en) {
             if (skip && skip(en)) return;   /* drawn elsewhere (Aufgaben-Pille) */
+            /* hidden from the class ([[aus]]): only the owner gets it at all - and sees it only
+               while the week is being edited (svp-material.css), with the eye to bring it back */
+            if (en.aus && !(ref && P.CAN_EDIT_MAT)) return;
             const label = en.label;
             const a = document.createElement('a');
             a.dataset.rang = matRang(en);      /* die Spalte, in die sie gehoert */
@@ -861,8 +864,10 @@ window.svpPlanParts.push(function (P) {
                         e.stopPropagation();
                         P.removeMatEntry(ref, urlU);
                     });
+                    if (en.aus) wrapU.classList.add('mat-aus');
                     wrapU.appendChild(a);
                     wrapU.appendChild(xU);
+                    wrapU.appendChild(augeKnopf(ref, urlU, en.aus, label));
                     el.appendChild(wrapU);
                     return;
                 }
@@ -911,8 +916,10 @@ window.svpPlanParts.push(function (P) {
                    are not wired at all and keep the browser menu. */
                 P.wirePillMenu(a, ref, url, label, en.datei);
                 P.wirePillTouch(a, ref, en, true);
+                if (en.aus) wrap.classList.add('mat-aus');
                 wrap.appendChild(a);
                 wrap.appendChild(x);
+                wrap.appendChild(augeKnopf(ref, url, en.aus, label));
                 el.appendChild(wrap);
                 return;
             }
@@ -926,6 +933,44 @@ window.svpPlanParts.push(function (P) {
             note.textContent = tail;
             el.appendChild(note);
         }
+    }
+
+    /* The eye over a pill while its week is being edited (Doc, 27.09.2026: "in die Mitte ueber den
+       Text ein Auge"): open = the class sees the pill, a tap hides it; struck through = hidden, a tap
+       shows it again. Only in edit mode (svp-material.css), never in print. */
+    const AUGE_PATH = 'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z';
+    function augeKnopf(ref, url, aus, label) {
+        const ns = 'http://www.w3.org/2000/svg';
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'mat-auge';
+        b.title = aus ? 'Für die Klasse einblenden' : 'Für die Klasse ausblenden';
+        b.setAttribute('aria-label', b.title + ': ' + (label || url));
+        const svg = document.createElementNS(ns, 'svg');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('aria-hidden', 'true');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.setAttribute('stroke-width', '2');
+        svg.setAttribute('stroke-linecap', 'round');
+        svg.setAttribute('stroke-linejoin', 'round');
+        [AUGE_PATH].concat(aus ? ['M4 4 L20 20'] : []).forEach(function (d) {
+            const pfad = document.createElementNS(ns, 'path');
+            pfad.setAttribute('d', d);
+            svg.appendChild(pfad);
+        });
+        const pupille = document.createElementNS(ns, 'circle');
+        pupille.setAttribute('cx', '12');
+        pupille.setAttribute('cy', '12');
+        pupille.setAttribute('r', '3');
+        svg.appendChild(pupille);
+        b.appendChild(svg);
+        b.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            P.toggleMatAus(ref, url);
+        });
+        return b;
     }
 
     // --- Description tooltip -------------------------------------------
