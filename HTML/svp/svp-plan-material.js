@@ -128,11 +128,49 @@ window.svpPlanParts.push(function (P) {
        haette matKind ihr das PDF-Programmsymbol gegeben. */
     function festesIcon(e) {
         if (e.icon === 'link') return drawnIcon('mat-ico-drawn mat-ico-link', LINK_PATH, 'rgb(120, 160, 220)');
-        /* the board of a lesson (svp-plan-tafel.js): a board on its stand, an "=" on it */
-        if (e.icon === 'tafel') return drawnIcon('mat-ico-drawn mat-ico-tafel', TAFEL_PATH, 'rgb(121, 158, 49)', 1.8);
+        /* the board of a lesson (svp-plan-tafel.js): a blackboard of its own, not a link and not the D */
+        if (e.icon === 'tafel') return tafelIcon();
         return null;   /* ohne icon: das Zeichen, das matKind gewaehlt hat */
     }
-    const TAFEL_PATH = 'M3 4.5h18v11.5H3z M12 16v3.5 M8 20.5h8 M8 9h8 M8 12h8';
+
+    /* Die Tafel einer Stunde als eigenes Hauszeichen (Doc, 27.09.2026: "ein Icon, was so aussieht wie
+       ein Blackboard ... damit wir das noch ordentlich unterscheiden koennen" - vom Link und vom D der
+       Decks): das gelbe Kaestchen wie Lambda und D, darin die dunkelblaue Tafel mit Kreide - eine
+       Welle, ein "=", ein Strich darunter - und unten die Ablage mit einem Stueck Kreide. */
+    function tafelIcon() {
+        const ns = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(ns, 'svg');
+        svg.setAttribute('class', 'mat-ico mat-ico-drawn mat-tafel');
+        svg.setAttribute('viewBox', '0 0 64 64');
+        svg.setAttribute('aria-hidden', 'true');
+        const flaeche = function (x, y, w, h, rx, fill) {
+            const r = document.createElementNS(ns, 'rect');
+            [['x', x], ['y', y], ['width', w], ['height', h], ['rx', rx], ['fill', fill]].forEach(function (a) { r.setAttribute(a[0], a[1]); });
+            svg.appendChild(r);
+        };
+        flaeche(0, 0, 64, 64, 14, 'rgb(245, 194, 66)');
+        flaeche(7, 7, 50, 38, 4, 'rgb(14, 36, 78)');         /* the board */
+        const g = document.createElementNS(ns, 'g');
+        g.setAttribute('fill', 'none');
+        g.setAttribute('stroke', '#ffffff');
+        g.setAttribute('stroke-width', '3.6');
+        g.setAttribute('stroke-linecap', 'round');
+        g.setAttribute('stroke-linejoin', 'round');
+        ['M14 20 Q16.5 14 19 20 T24 20 T29 20', 'M35 17.5 H43 M35 23 H43', 'M47 15 V26'].forEach(function (d) {
+            const pfad = document.createElementNS(ns, 'path');
+            pfad.setAttribute('d', d);
+            g.appendChild(pfad);
+        });
+        const zeile = document.createElementNS(ns, 'path');  /* a second line in lighter chalk */
+        zeile.setAttribute('d', 'M14 34 H36');
+        zeile.setAttribute('stroke-width', '3');
+        zeile.setAttribute('opacity', '0.75');
+        g.appendChild(zeile);
+        svg.appendChild(g);
+        flaeche(11, 49, 42, 4, 2, 'rgb(14, 36, 78)');        /* the ledge */
+        flaeche(38, 46, 11, 4.2, 1.6, '#ffffff');            /* the chalk */
+        return svg;
+    }
 
     /* Die Tafel einer Stunde (Doc, 26.09.2026) haengt an ihrer Woche, nicht am Fach -
        sie kommt deshalb mit der Zeile (ref) und steht vor der Formelsammlung. */
@@ -236,6 +274,9 @@ window.svpPlanParts.push(function (P) {
        25.09.2026: "gib dem auch das D icon"). */
     function istDeck(url) {
         return eigenerPfad(url, /^\/(?:decks|tours)\/[\w-]+\.html$/i);
+    }
+    function istTafel(url) {
+        return eigenerPfad(url, /^\/decks\/tafel\.html$/i);
     }
 
     /* Beide Pruefungen fragen dasselbe: zeigt die Adresse ins eigene Haus, und
@@ -398,7 +439,9 @@ window.svpPlanParts.push(function (P) {
         if (kind === 'yt') return drawnIcon('mat-ico-drawn', YT_PATH, 'rgb(255, 0, 0)');
         if (kind === 'link') return drawnIcon('mat-ico-drawn mat-ico-link', LINK_PATH, 'rgb(120, 160, 220)');
         if (kind === 'lab') return lambdaIcon();
-        if (kind === 'deck') return deckIcon();
+        /* a board deck (decks/tafel.html - a lesson's board, or all tasks of vorrechnen) is a deck like the
+           others in order and tabs, but it shows the blackboard, not the D (Doc, 27.09.2026) */
+        if (kind === 'deck') return istTafel(url) ? tafelIcon() : deckIcon();
         /* Farbe kommt aus svp.css, nicht von hier: dunkelblau im hellen Thema
            (Doc, 08.09.2026), hell im dunklen - eine feste Farbe waere in einem
            der beiden Themen kaum zu sehen. */

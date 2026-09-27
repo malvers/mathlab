@@ -10,7 +10,8 @@
   vorrechnen.html sends what was worked out on the board ("Tafel senden") to the table svp_tafel: one
   row per plan page and day, the tasks and under each the lines of its working as LaTeX. Everyone reads
   it, only Doc's account writes. The plan shows the row as a pill "Tafel 26.09." (svp-plan-tafel.js);
-  the pill opens this page: ?id=<row id>. ?demo shows three tasks without a row, to look at the page.
+  the pill opens this page: ?id=<row id>. ?aufgaben shows every task of vorrechnen.html with its whole
+  solution (js/vorrechnen-aufgaben.js), ?demo three of them, to look at the page.
 
   The slides are built here from that row - a title, then one slide per task with its working lined
   up at the "=" and the result underlined twice, the rule of vorrechnen.html. Every line of the working
@@ -299,7 +300,33 @@
     return { kurz: tailOf(page), lang: tailOf(page) };
   }
 
+  function ladeSkript(src) {
+    return new Promise(function (ok, fehler) {
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = ok;
+      s.onerror = function () { fehler(new Error(src + ' fehlt')); };
+      document.head.appendChild(s);
+    });
+  }
+
+  /* ?aufgaben: every task of the Vorrechnen lab with its whole solution, from the same source the
+     lab reads (js/vorrechnen-aufgaben.js) - Doc, 27.09.2026: "mach das ganze Deck fertig, also nicht
+     nur das Demo-Deck". A collection, not a lesson: it has a name instead of a day. */
+  async function ladeSammlung() {
+    await ladeSkript('../js/vorrechnen-aufgaben.js');
+    return {
+      sammlung: true, titel: 'Gleichungen umstellen', kicker: 'Vorrechnen · alle Aufgaben',
+      aufgaben: AUFGABEN.map(function (t, i) {
+        const b = aufgabenBlock(i), l = LOESUNGEN[t[0]] || [];
+        return { schluessel: t[0], nr: i - b.ab + 1, block: b.titel, latex: t[1], nach: t[2],
+          rechenweg: l.map(function (st) { return st[0]; }), umformungen: l.map(function (st) { return st[1]; }) };
+      })
+    };
+  }
+
   async function ladeZeile() {
+    if (params.has('aufgaben')) return ladeSammlung();
     if (params.has('demo')) {
       const d = new Date();
       return Object.assign({}, DEMO, { datum: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') });
@@ -373,34 +400,69 @@
     document.body.appendChild(s);
   }
 
+  /* A chapter slide where the block changes ("Level 2 · Anforderungsbereich II" -> "Level 2" and the rest
+     below it), when the board holds tasks of more than one block. */
+  function kapitelFolie(nr, block, anzahl) {
+    const teile = String(block).split(' · ');
+    const sl = document.createElement('section');
+    sl.className = 'slide chapter';
+    sl.innerHTML = '<div class="chapter-bar"></div><p class="kicker">Kapitel ' + String(nr).padStart(2, '0') + '</p>' +
+      '<h2>' + esc(teile[0]) + '</h2><p class="sub">' + esc(teile.slice(1).concat(anzahl === 1 ? 'eine Aufgabe' : anzahl + ' Aufgaben').join(' · ')) +
+      '</p><div class="hair"></div>' + FOOT;
+    return sl;
+  }
+
   async function bauen() {
     if (document.readyState === 'loading') await new Promise(function (ok) { document.addEventListener('DOMContentLoaded', ok); });
     const summary = {};
+    let n = 0;                                      // the slide being added - Solita's overview counts by it
+    const dazu = function (sl, zeile) { deckEl.appendChild(sl); summary[String(n++)] = zeile; };
     try {
       const zeile = await ladeZeile();
-      const d = new Date(zeile.datum + 'T12:00:00');
-      const tag = String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear();
-      const name = zeile.klasse ? { kurz: zeile.klasse, lang: zeile.klasse } : await planName(zeile.page);
       const aufgaben = zeile.aufgaben || [];
-      document.title = 'Tafel ' + name.kurz + ' ' + tag;
-      const titel = titelFolie('Tafel' + (zeile.kw ? ' · KW ' + zeile.kw : ''), name.lang,
-        TAGE[d.getDay()] + ', ' + tag + ' · ' + (aufgaben.length === 1 ? 'eine Aufgabe' : aufgaben.length + ' Aufgaben') +
-        ', gerechnet in der Stunde');
-      wegKnopf(titel);
-      deckEl.appendChild(titel);
-      summary['0'] = 'Titel: die Tafel der ' + name.lang + ' vom ' + tag + ', die Rechnungen aus der Stunde';
-      if (!aufgaben.length) deckEl.appendChild(meldungFolie('Auf dieser Tafel steht nichts.'));
+      const wieviele = aufgaben.length === 1 ? 'eine Aufgabe' : aufgaben.length + ' Aufgaben';
+      let titel;
+      if (zeile.sammlung) {
+        document.title = zeile.titel + ' - alle Aufgaben';
+        titel = titelFolie(zeile.kicker, zeile.titel, wieviele + ' mit Musterlösung, Schritt für Schritt');
+        dazu(titel, 'Titel: ' + zeile.titel + ', ' + wieviele + ' mit Musterlösung');
+      } else {
+        const d = new Date(zeile.datum + 'T12:00:00');
+        const tag = String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear();
+        const name = zeile.klasse ? { kurz: zeile.klasse, lang: zeile.klasse } : await planName(zeile.page);
+        document.title = 'Tafel ' + name.kurz + ' ' + tag;
+        titel = titelFolie('Tafel' + (zeile.kw ? ' · KW ' + zeile.kw : ''), name.lang,
+          TAGE[d.getDay()] + ', ' + tag + ' · ' + wieviele + ', gerechnet in der Stunde');
+        wegKnopf(titel);
+        dazu(titel, 'Titel: die Tafel der ' + name.lang + ' vom ' + tag + ', die Rechnungen aus der Stunde');
+      }
+      if (!aufgaben.length) dazu(meldungFolie('Auf dieser Tafel steht nichts.'), 'leer');
+      const bloecke = [...new Set(aufgaben.map(function (a) { return a.block || ''; }))];
+      let block = null, kapitel = 0;
       aufgaben.forEach(function (a, k) {
-        deckEl.appendChild(aufgabeFolie(a, k));
+        if (bloecke.length > 1 && a.block && a.block !== block) {
+          block = a.block;
+          const anzahl = aufgaben.filter(function (b) { return b.block === block; }).length;
+          dazu(kapitelFolie(++kapitel, block, anzahl), 'Kapitel: ' + block);
+        }
         const weg = a.rechenweg || [];
-        summary[String(k + 1)] = (a.nr ? 'Aufgabe ' + a.nr : 'Rechnung ' + (k + 1)) +
+        dazu(aufgabeFolie(a, k), (a.nr ? 'Aufgabe ' + a.nr : 'Rechnung ' + (k + 1)) + (a.block ? ' (' + a.block + ')' : '') +
           (a.nach ? ', umstellen nach ' + a.nach : '') + ': ' + (a.latex ? '$' + a.latex + '$' : '') +
-          (weg.length ? ' - Ergebnis $' + weg[weg.length - 1] + '$' : '');
+          (weg.length ? ' - Ergebnis $' + weg[weg.length - 1] + '$' : ''));
       });
     } catch (e) {
-      deckEl.appendChild(meldungFolie(e.message));
+      dazu(meldungFolie(e.message), 'Meldung');
     }
     document.getElementById('summary').textContent = JSON.stringify(summary);
+    /* deck.js keeps the slide it was on per path - one path for every board here, so a board of its own
+       must not open at the place of another one in the same tab ('deck-pos:' is deck.js's key) */
+    try {
+      if (sessionStorage.getItem('tafel-pos-von') !== location.search) {
+        sessionStorage.removeItem('deck-pos:' + location.pathname);
+        sessionStorage.removeItem('deck-pos:' + location.pathname + ':presenter');
+        sessionStorage.setItem('tafel-pos-von', location.search);
+      }
+    } catch (e) { }
     await einpassen();
     deckStarten();
   }
