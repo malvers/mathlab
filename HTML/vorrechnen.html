@@ -2357,7 +2357,8 @@
         // "Tafel senden" (right rail) puts today's working into the table svp_tafel: one row
         // per plan page and day, the class reads it, only Doc's account writes. The plan shows
         // it as a pill "Tafel 26.09." in its week (svp/svp-plan-tafel.js); the pill opens
-        // svp/tafel.html, which sets it with KaTeX and makes the PDF.
+        // decks/tafel.html, the working as a deck with Solita to ask about every step (the PDF is gone,
+        // Doc 27.09.: "viel besser, wenn wir davon ein Deck machen").
         const TAFEL_ZIEL = 'vorrechnen-tafel-ziel';
         let tafelPlaene = null, tafelZiel = null, tafelAus = new Set(), tafelUntis = null;
         function tagIso(d) {
@@ -2393,10 +2394,15 @@
             try { a = JSON.parse(localStorage.getItem('vorrechnen-erledigt') || '[]'); } catch (_) {}
             if (!Array.isArray(a)) a = [];
             // the number within its block ("Level 2", Aufgabe 3), as the counter on the board says it
+            // with every line the step that made it ("-3x", ":4") from LOESUNGEN - the deck of the board
+            // shows it beside the line before (Doc, 27.09.: "die Anweisung pro Zeile, was zu machen ist")
             const eintrag = (schluessel, latex, zeilen, zeit) => {
                 const i = AUFGABEN.findIndex(t => t[0] === schluessel), b = i >= 0 ? aufgabenBlock(i) : null;
+                const loesung = (schluessel && LOESUNGEN[schluessel]) || [];
+                const umformung = l => { const s = loesung.find(([st]) => schrittNorm(st) === schrittNorm(l.latex)); return s ? s[1] : null; };
                 return { schluessel: schluessel || 'frei-' + heute, nr: b ? i - b.ab + 1 : null, block: b ? b.titel : null,
-                    latex: latex || null, nach: i >= 0 ? AUFGABEN[i][2] : null, rechenweg: zeilen.map(l => l.latex), zeit };
+                    latex: latex || null, nach: i >= 0 ? AUFGABEN[i][2] : null, rechenweg: zeilen.map(l => l.latex),
+                    umformungen: zeilen.map(umformung), zeit };
             };
             const liste = a.filter(e => e && e.zeit && tagIso(new Date(e.zeit)) === heute && (e.rechenweg || []).length &&
                 (!e.tafel || e.tafel === ziel)).map(e => eintrag(e.aufgabe, e.latex, e.rechenweg, e.zeit));
@@ -2473,7 +2479,7 @@
                     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6 L18 18 M18 6 L6 18" fill="none"' +
                     ' stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>' +
                     '<h3>Tafel senden</h3>' +
-                    '<div class="ts-text">In den Stoffverteilungsplan – die Klasse sieht die Rechnung und kann sie als PDF laden.</div>' +
+                    '<div class="ts-text">In den Stoffverteilungsplan – die Klasse geht die Rechnung als Deck durch und kann Solita zu jedem Schritt fragen.</div>' +
                     '<div class="ts-label">KLASSE</div><div class="ts-reihe ts-plaene"></div><div class="ts-woche"></div>' +
                     '<div class="ts-label">AUFGABEN</div><div class="ts-reihe ts-aufgaben"></div>' +
                     '<div class="ts-status" role="status"></div>' +
@@ -2565,7 +2571,7 @@
                 los.textContent = 'NOCHMAL SENDEN';
                 const ansehen = o.querySelector('.ts-ansehen');
                 ansehen.hidden = false;
-                ansehen.onclick = () => window.open('svp/tafel.html?id=' + encodeURIComponent(zeilen[0].id), '_blank', 'noopener');
+                ansehen.onclick = () => window.open('decks/tafel.html?id=' + encodeURIComponent(zeilen[0].id), '_blank', 'noopener');
             } catch (e) {
                 tafelStatus('Nicht gesendet: ' + e.message, true);
             }

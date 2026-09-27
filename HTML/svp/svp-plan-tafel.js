@@ -8,12 +8,13 @@
 // Here every board becomes a pill "Tafel 26.09." in the week of its day, next to the
 // Formelsammlung: a fixed pill (festePillen), never part of the week's stored material text -
 // so no open plan tab can push it away again with an older edit state (the ts trap of
-// svp_plan_edits). The pill opens tafel.html, which sets the working and makes the PDF.
+// svp_plan_edits). The pill opens decks/tafel.html: the working as a deck, one slide per task, with
+// Solita to ask about every step (Doc, 27.09.2026: "viel besser ... ein Deck", the PDF is gone).
 window.svpPlanParts.push(function (P) {
     Object.assign(P, { tafelLinks });
 
     const me = document.querySelector('script[src*="svp-plan-tafel.js"]');
-    const TAFEL_URL = new URL('tafel.html', me ? me.src : location.href).href;
+    const TAFEL_URL = new URL('../decks/tafel.html', me ? me.src : location.href).href;
 
     let tafeln = [];    /* [{ id, kw, datum, titel }] of this page, this school year */
 
@@ -32,7 +33,7 @@ window.svpPlanParts.push(function (P) {
             label: 'Tafel ' + tag(t.datum),
             url: TAFEL_URL + '?id=' + encodeURIComponent(t.id),
             icon: 'tafel',
-            titel: 'Tafelbild vom ' + tag(t.datum) + ' - die Rechnung aus der Stunde, als PDF zum Mitnehmen'
+            titel: 'Tafelbild vom ' + tag(t.datum) + ' - die Rechnung aus der Stunde als Deck, mit Solita zu jedem Schritt'
         }));
     }
 
@@ -44,7 +45,7 @@ window.svpPlanParts.push(function (P) {
     }
 
     /* Read without a session - the class sees the plan without logging in. Only the
-       handful of fields for the pills; the working itself is fetched by tafel.html. */
+       handful of fields for the pills; the working itself is fetched by decks/tafel.html. */
     (function laden() {
         if (!/\.html$/.test(location.pathname) || !window.svpAuth) return;
         const url = svpAuth.DB_URL + '/rest/v1/svp_tafel?page=eq.' + encodeURIComponent(location.pathname) +

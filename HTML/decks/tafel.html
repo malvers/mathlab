@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="de">
+<!--
+  Tafel - the board of one lesson as a deck, for the class.
+
+  Doc, 27.09.2026: "ich finde das eigentlich viel besser, wenn wir davon ein Deck machen ... weil die
+  Schülerinnen und Schüler dann ... sich mit Solita nochmal zu den einzelnen Aufgaben gegebenenfalls
+  Erklärungen holen können" - and: "wir lassen das PDF vollständig weg".
+
+  vorrechnen.html sends what was worked out on the board ("Tafel senden") to the table svp_tafel: one
+  row per plan page and day, the tasks and under each the lines of its working as LaTeX. Everyone reads
+  it, only Doc's account writes. The plan shows the row as a pill "Tafel 26.09." (svp-plan-tafel.js);
+  the pill opens this page: ?id=<row id>. ?demo shows three tasks without a row, to look at the page.
+
+  The slides are built here from that row - a title, then one slide per task with its working lined
+  up at the "=" and the result underlined twice, the rule of vorrechnen.html. Every line of the working
+  is a click group, so the class can go through it step by step. The central deck.js does the rest:
+  turning, the step marks, the overview, and Solita, who reads the slide on screen with the formulas
+  put back as LaTeX (data-tex) and can explain the step the class is stuck on.
+
+  deck.js reads the slides when it runs, so it is loaded only after they are built; hooks it hangs on
+  "load" are called by hand if the page has finished loading by then.
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tafel</title>
+<meta name="description" content="Die Rechnung aus der Stunde als Deck - mit Solita zu jedem Schritt">
+<link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+<link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+<link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
+<script defer src="../morpheus/vendor/katex/katex.min.js"></script>
+<script defer src="../js/solita-listen.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+<style>
+/* Only what this deck adds - the slides, the marks and Solita come from deck.css. */
+
+/* what the task is (block, solved for), small beside the heading */
+.slide h3 .tf-dazu{margin-left:14px;font-size:15px;font-weight:600;color:var(--muted);letter-spacing:.3px}
+.slide h3 .tf-var{color:var(--red)}               /* the variable solved for, red as in vorrechnen */
+.slide h3 .tf-var .katex{font-size:1.35em}
+
+/* The working lined up at the "=", and the "=" in the middle of the slide (Doc, 27.09.2026: "das
+   Gleichheitszeichen doch in die Mitte ... so ist der größte Teil der Folie leer"): two equal outer
+   columns, the left side flush right, the right side flush left. Each line is ONE element across the three
+   columns (subgrid), so the step mark belongs to the whole line. No column gap: the air around the "=" is
+   set inside the formulas (\;), so the double line under the result runs through without a break. The font
+   size is set per slide so the working fills the body and never spills. */
+.tf-rechnung{position:absolute;left:72px;top:146px;width:816px;display:grid;grid-template-columns:1fr max-content 1fr;
+  row-gap:.5em;color:var(--ink)}
+.tf-zeile{grid-column:1/-1;display:grid;grid-template-columns:subgrid;align-items:baseline;position:relative}
+.tf-links{justify-self:end}
+.tf-gleich{justify-self:center}
+.tf-rechts{justify-self:start}
+.tf-ganz{grid-column:1/-1;justify-self:center}
+.tf-rechnung .katex{font-size:1em}
+
+/* What is done to a line to get the next one ("-3x", ":4"), in green beside it - one column for all
+   lines of the slide, right of the widest right side (--tf-op, measured) (Doc, 27.09.2026: "die
+   Anweisung pro Zeile, was zu machen ist"), with the bar in front: "| -3x". */
+.tf-op{position:absolute;left:calc(50% + var(--tf-op, 200px));top:50%;transform:translateY(-50%);
+  font-size:.8em;color:var(--green);white-space:nowrap}
+
+/* The step mark on a line of the working: the triangle in front, a thin box with the same overhang on both
+   sides - both around the widest line of the slide, symmetric about the middle (--tf-halb: half its width,
+   measured when the slide is built), so every line of a task is marked at the same place. */
+@media screen{
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-zeile.step.now::after{left:calc(50% - var(--tf-halb, 300px) - 24px)}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-zeile.step.now::before{content:"";position:absolute;
+    left:calc(50% - var(--tf-halb, 300px) - 34px);right:calc(50% - var(--tf-halb, 300px) - 34px);
+    top:-6px;bottom:-6px;border:1.5px solid var(--orange);pointer-events:none;animation:step-now .25s ease-out}
+}
+
+/* a message instead of the board (no id, gone, offline) */
+.tf-meldung{position:absolute;left:72px;top:146px;width:816px;font-size:20px;line-height:1.4;color:var(--body)}
+
+/* Doc only, on the title slide: take the board out of the plan again - two taps */
+.tf-weg{position:absolute;left:72px;top:452px;padding:7px 16px;border-radius:6px;cursor:pointer;
+  font:600 12px Orbitron,sans-serif;letter-spacing:1.5px;color:#AFBCD8;background:transparent;border:1px solid rgba(175,188,216,.5)}
+.tf-weg:hover{color:#fff;border-color:#fff}
+.tf-weg.wirklich{color:#E8604C;border-color:#E8604C}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck"></div></div>
+<div id="bar"></div>
+<div id="nav"><button id="nav-prev" type="button" title="Vorige Folie, fertig aufgebaut (Shift+←)" aria-label="Vorige Folie"></button><button id="nav-next" type="button" title="Nächste Folie, fertig aufgebaut (Shift+→)" aria-label="Nächste Folie"></button></div>
+<div id="hud"><button id="play" title="Solita erklärt" aria-label="Solita erklärt" hidden></button><button id="full" title="Vollbild (f)" aria-label="Vollbild"></button></div>
+<div id="ask">
+  <div id="ask-panel" hidden>
+    <div id="ask-head"><span>Frag Solita zur Folie oder Präsi<b id="ask-cost" title="Kosten der letzten Frage"></b></span><button id="ask-close" type="button" title="Schließen (Esc)" aria-label="Schließen">&times;</button></div>
+    <div id="ask-out" aria-live="polite"></div>
+    <label for="ask-in" hidden></label>
+    <div id="ask-row"><button id="ask-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen"></button><button id="ask-tts" type="button" title="Solita liest vor" aria-label="Vorlesen an/aus"></button><input id="ask-in" type="text" autocomplete="off" placeholder="Warum wird hier durch 3 geteilt?" aria-label="Deine Frage an Solita"><button id="ask-send" type="button" title="Abschicken (Enter)" aria-label="Abschicken">?</button></div>
+  </div>
+  <button id="ask-btn" class="invite" type="button" title="Frag Solita" aria-label="Frag Solita"><img src="../resources/solita-avatar.png" alt="Solita" width="46" height="46"></button>
+</div>
+<script id="narration" type="application/json"></script>
+<script id="summary" type="application/json">{}</script>
+<script src="../svp/svp-auth.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  const deckEl = document.getElementById('deck');
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id') || '';
+  const FOOT = '<p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p>';
+  const TAGE = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+  // the room under the heading, in slide px - the width leaves the box's overhang free on both sides
+  const BODY_W = 740, BODY_H = 330, SCHRIFT = 36, KLEINSTE = 13;
+
+  /* ?demo: three tasks of vorrechnen.html with their working, to look at the page without a board */
+  const DEMO = {
+    page: '', datum: null, kw: null, klasse: 'Demo-Klasse',
+    aufgaben: [
+      { nr: 4, block: 'Level 1', nach: 'x', latex: '7x-4=3x+8', rechenweg: ['4x-4=8', '4x=12', 'x=3'],
+        umformungen: ['-3x', '+4', ':4'] },
+      { nr: 9, block: 'Level 1', nach: 'x', latex: '\\frac{x}{2}+\\frac{x}{3}=10', rechenweg: ['3x+2x=60', '5x=60', 'x=12'],
+        umformungen: ['\\cdot 6', '\\text{zusammenfassen}', ':5'] },
+      { nr: 14, block: 'Level 1', nach: 'h', latex: 'A=\\frac{g\\cdot h}{2}', rechenweg: ['2A=g\\cdot h', 'h=\\frac{2A}{g}'],
+        umformungen: ['\\cdot 2', ':g'] }
+    ]
+  };
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+  }
+
+  /* ---- the formulas (the same rules as the old svp/tafel.html) ---------------------- */
+  function setze(el, tex) {
+    try { katex.render('\\displaystyle ' + tex, el, { throwOnError: false }); }
+    catch (e) { el.textContent = tex; }
+  }
+
+  /* The first "=" outside any braces and \left ... \right: "\frac{a}{b=c}" is no split. */
+  function teileAmGleich(tex) {
+    let tiefe = 0;
+    for (let k = 0; k < tex.length; k++) {
+      const c = tex[k];
+      if (c === '\\') {
+        const cmd = /^\\([a-zA-Z]+)/.exec(tex.slice(k));
+        if (cmd && cmd[1] === 'left') tiefe++;
+        else if (cmd && cmd[1] === 'right') tiefe--;
+        k += cmd ? cmd[0].length - 1 : 1;
+        continue;
+      }
+      if (c === '{') tiefe++;
+      else if (c === '}') tiefe--;
+      else if (c === '=' && tiefe === 0) return [tex.slice(0, k), tex.slice(k + 1)];
+    }
+    return null;
+  }
+
+  function norm(tex) { return String(tex || '').replace(/\\(?:left|right|displaystyle|[,;:! ])|\s|\{\}/g, ''); }
+
+  /* The variable solved for, red in every line (Doc, 27.09.2026: "7x rot und so weiter") - the rule of
+     hebeVariable in vorrechnen.html: an indexed variable (R_1, T_2) as a whole, a letter as a token of its
+     own, so the "a" of \frac stays ink. Red is Doc's red on light ground, as vorrechnen uses it there. */
+  const ROT = '#B02418';
+  function hebeVariable(latex, v) {
+    if (!v) return latex;
+    const farbig = '{\\textcolor{' + ROT + '}{' + v + '}}';     // a group of its own: 2^x, (...)^n
+    if (v.length > 1) return latex.split(v).join(farbig);
+    return latex.replace(/\\[a-zA-Z]+|./g, function (t) { return t === v ? farbig : t; });
+  }
+
+  /* One line of the working as one element: data-tex carries the whole line and what is done to it for
+     Solita (deck.js puts it back as $...$ when she reads the slide), the cells show it lined up at the "=". */
+  function zeileBauen(tex, ergebnis, op, nach) {
+    const zeile = document.createElement('div');
+    zeile.className = 'tf-zeile';
+    zeile.dataset.tex = op ? tex + ' \\quad \\big|\\; ' + op : tex;
+    if (op) {
+      const u = document.createElement('div');
+      u.className = 'tf-op';
+      /* with the bar in front, as on paper (Doc, 27.09.2026: "bitte den senkrechten Strich machen");
+         ":5", not ": 5" - KaTeX sets a bare colon as a relation, with air after it */
+      const tex = '\\vert\\;\\; ' + op.replace(/^\s*:/, '{:}');
+      try { katex.render(tex, u, { throwOnError: false }); } catch (e) { u.textContent = op; }
+      zeile.appendChild(u);
+    }
+    const teile = teileAmGleich(tex);
+    if (!teile) {
+      const ganz = document.createElement('div');
+      ganz.className = 'tf-ganz';
+      setze(ganz, hebeVariable(tex, nach));
+      zeile.appendChild(ganz);
+      return zeile;
+    }
+    /* The result is underlined twice in the formula itself: each part carries the height and depth of
+       both sides (\vphantom), so the three lines lie at one height even when only one side has a fraction.
+       {=}: a plain sign, without the spacing of a relation - the air is the \; */
+    const beide = '\\vphantom{' + teile[0] + '}\\vphantom{' + teile[1] + '}';
+    const links = hebeVariable(teile[0], nach), rechts = hebeVariable(teile[1], nach);
+    [['tf-links', '{' + links + '}\\;'], ['tf-gleich', '{=}'], ['tf-rechts', '\\;{' + rechts + '}']].forEach(function (t) {
+      const zelle = document.createElement('div');
+      zelle.className = t[0];
+      setze(zelle, ergebnis ? '\\underline{\\underline{' + t[1] + beide + '}}' : t[1]);
+      zeile.appendChild(zelle);
+    });
+    return zeile;
+  }
+
+  /* One task, one slide. The task itself stands from the start; every line of the working is a click group.
+     The last line "x = ..." (x = what is solved for, no x on the right) is the result, underlined twice. */
+  function aufgabeFolie(a, k) {
+    const sl = document.createElement('section');
+    sl.className = 'slide content';
+    const titel = a.nr ? 'Aufgabe ' + a.nr : 'Rechnung ' + (k + 1);
+    /* the variable it is solved for as a formula, in red - as vorrechnen.html colours it (variablenFarbe) */
+    const dazu = [a.block ? esc(a.block) : '', a.nach ? 'umstellen nach <span class="tf-var"></span>' : ''].filter(Boolean).join(' · ');
+    sl.innerHTML = '<h3>' + esc(titel) + (dazu ? '<span class="tf-dazu">' + dazu + '</span>' : '') + '</h3>' +
+      '<div class="rules"></div>';
+    const v = sl.querySelector('.tf-var');
+    if (v) {
+      v.dataset.tex = a.nach;                     // Solita reads it as $x$
+      try { katex.render(a.nach, v, { throwOnError: false }); } catch (e) { v.textContent = a.nach; }
+    }
+    const rechnung = document.createElement('div');
+    rechnung.className = 'tf-rechnung';
+    const zeilen = (a.latex ? [a.latex] : []).concat(a.rechenweg || []);
+    const erste = a.latex ? 1 : 0;                // the task is no step - it stands from the start
+    /* umformungen[k] made rechenweg[k] - it is written beside the line it is done to, the one before */
+    const ops = a.umformungen || [];
+    zeilen.forEach(function (tex, z) {
+      const letzte = z === zeilen.length - 1 && z > 0;
+      const teile = teileAmGleich(tex);
+      /* the right side without its commands: the "a" in \frac is no variable */
+      const ergebnis = letzte && a.nach && teile && norm(teile[0]) === a.nach &&
+        norm(teile[1]).replace(/\\[a-zA-Z]+/g, '').indexOf(a.nach) < 0;
+      const zeile = zeileBauen(tex, ergebnis, ops[z + 1 - erste] || null, a.nach);
+      if (z >= erste) { zeile.classList.add('step'); zeile.dataset.g = z - erste; }
+      rechnung.appendChild(zeile);
+    });
+    sl.appendChild(rechnung);
+    sl.insertAdjacentHTML('beforeend', FOOT);
+    return sl;
+  }
+
+  function titelFolie(kicker, h1, sub) {
+    const sl = document.createElement('section');
+    sl.className = 'slide title';
+    sl.innerHTML = '<div class="ring"></div><div class="ring-inner"></div><div class="orbit-dot"></div>' +
+      '<div class="title-bar"></div><p class="kicker">' + esc(kicker) + '</p><h1>' + esc(h1) + '</h1>' +
+      '<p class="sub">' + esc(sub) + '</p>' + FOOT;
+    return sl;
+  }
+
+  function meldungFolie(text) {
+    const sl = document.createElement('section');
+    sl.className = 'slide content';
+    sl.innerHTML = '<h3>Tafel</h3><div class="rules"></div><p class="tf-meldung">' + esc(text) + '</p>' + FOOT;
+    return sl;
+  }
+
+  /* The working fills the room under the heading: measured at full size, then set to the size that fits.
+     A slide is display:none until it is on - and a hidden formula loads no font, so all slides are laid out
+     (invisibly) first, KaTeX's fonts come in, and only then is anything measured. */
+  async function einpassen() {
+    const alle = [...deckEl.querySelectorAll('.slide')];
+    deckEl.style.visibility = 'hidden';
+    alle.forEach(function (sl) { sl.style.display = 'block'; });
+    deckEl.querySelectorAll('.tf-rechnung').forEach(function (r) { r.style.fontSize = SCHRIFT + 'px'; });
+    void deckEl.offsetHeight;                     // lay out now, so the fonts are asked for
+    try { await document.fonts.ready; } catch (e) { }
+    /* The "=" stands in the middle, so the wider half decides: the left side, or the right side with the
+       column of steps behind it. A line without "=" stands centred as a whole. All from the middle, in px. */
+    function breiten(r) {
+      const max = function (sel) { return Math.max(0, ...[...r.querySelectorAll(sel)].map(function (e) { return e.offsetWidth; })); };
+      const gleich = max('.tf-gleich') / 2, ganz = max('.tf-ganz') / 2, op = max('.tf-op');
+      const rechtsBis = Math.max(gleich + max('.tf-rechts'), ganz);
+      const luft = op ? 0.9 * parseFloat(r.style.fontSize) : 0;   // between the right side and its step
+      const halb = Math.max(gleich + max('.tf-links'), ganz, rechtsBis + luft + op);
+      return { halb: halb, op: rechtsBis + luft };
+    }
+    deckEl.querySelectorAll('.tf-rechnung').forEach(function (r) {
+      const f = Math.min(1, BODY_W / (2 * breiten(r).halb), BODY_H / r.offsetHeight);
+      r.style.fontSize = Math.max(KLEINSTE, Math.floor(SCHRIFT * f)) + 'px';
+      const b = breiten(r);
+      r.style.setProperty('--tf-halb', Math.ceil(b.halb) + 'px');
+      r.style.setProperty('--tf-op', Math.ceil(b.op) + 'px');
+    });
+    alle.forEach(function (sl) { sl.style.display = ''; });
+    deckEl.style.visibility = '';
+  }
+
+  /* ---- the class, from the plan index (the name the Fahrplan shows) ------------------ */
+  function tailOf(p) {
+    return String(p || '').split(/[?#]/)[0].split('/').filter(Boolean).slice(-2).join('/');
+  }
+  async function planName(page) {
+    try {
+      const idx = await (await fetch('../svp/plan-suchindex.json')).json();
+      const p = (idx.plaene || []).find(function (q) { return tailOf(q.href) === tailOf(page); });
+      if (p) return { kurz: p.kurz || '', lang: String(p.lang || p.kurz || '').replace(/\s*\([^)]*\)\s*$/, '').replace(/\bKlasse\s+/, '') };
+    } catch (e) { /* without the index: the page name */ }
+    return { kurz: tailOf(page), lang: tailOf(page) };
+  }
+
+  async function ladeZeile() {
+    if (params.has('demo')) {
+      const d = new Date();
+      return Object.assign({}, DEMO, { datum: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') });
+    }
+    if (!/^[0-9a-f-]{36}$/i.test(id)) throw new Error('Keine Tafel angegeben.');
+    let rows;
+    try {
+      const res = await fetch(svpAuth.DB_URL + '/rest/v1/svp_tafel?id=eq.' + id + '&select=id,page,datum,kw,aufgaben',
+        { headers: { apikey: svpAuth.DB_KEY } });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      rows = await res.json();
+    } catch (e) {
+      throw new Error('Die Tafel lässt sich gerade nicht laden (' + e.message + ').');
+    }
+    if (!rows.length) throw new Error('Diese Tafel gibt es nicht (mehr).');
+    return rows[0];
+  }
+
+  /* Doc only (RLS decides, the button only shows with a session): two taps, no native dialog -
+     the first one asks, the second one within four seconds deletes. */
+  function wegKnopf(sl) {
+    if (!id || !window.svpAuth || !svpAuth.hasSession()) return;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'tf-weg';
+    b.textContent = 'Aus dem Plan nehmen';
+    let fragt = null;
+    b.addEventListener('click', async function (e) {
+      e.stopPropagation();                          // a tap here does not turn the page
+      if (!fragt) {
+        b.textContent = 'Wirklich aus dem Plan nehmen?';
+        b.classList.add('wirklich');
+        fragt = setTimeout(function () { fragt = null; b.textContent = 'Aus dem Plan nehmen'; b.classList.remove('wirklich'); }, 4000);
+        return;
+      }
+      clearTimeout(fragt);
+      fragt = null;
+      b.disabled = true;
+      try {
+        const res = await svpAuth.api('svp_tafel?id=eq.' + id, { method: 'DELETE', headers: { Prefer: 'return=representation' } });
+        const weg = res.ok ? await res.json() : [];
+        if (!weg.length) throw new Error(res.ok ? 'nichts gelöscht - angemeldet als ' + (svpAuth.whoami() || '?') : 'HTTP ' + res.status);
+        b.textContent = 'Aus dem Plan genommen';
+        b.classList.remove('wirklich');
+      } catch (err) {
+        b.textContent = 'Nicht gelöscht: ' + err.message;
+        b.disabled = false;
+      }
+    });
+    sl.appendChild(b);
+  }
+
+  /* deck.js takes the slides as they are when it runs. Its "load" hooks (docking the buttons, the page number
+     line) would never fire if the page has finished loading before the board came in - they are collected
+     while it runs and called at once. If the page is still loading, the script holds the load event back
+     and they get the real one. */
+  function deckStarten() {
+    const s = document.createElement('script');
+    s.src = 'deck.js';
+    const spaet = [];
+    const add = window.addEventListener;
+    if (document.readyState === 'complete') {
+      window.addEventListener = function (typ, fn, opt) {
+        if (typ === 'load') spaet.push(fn); else add.call(window, typ, fn, opt);
+      };
+    }
+    s.onload = s.onerror = function () {
+      delete window.addEventListener;              // back to the prototype's own
+      spaet.forEach(function (fn) { try { fn.call(window, new Event('load')); } catch (e) { console.error(e); } });
+    };
+    document.body.appendChild(s);
+  }
+
+  async function bauen() {
+    if (document.readyState === 'loading') await new Promise(function (ok) { document.addEventListener('DOMContentLoaded', ok); });
+    const summary = {};
+    try {
+      const zeile = await ladeZeile();
+      const d = new Date(zeile.datum + 'T12:00:00');
+      const tag = String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear();
+      const name = zeile.klasse ? { kurz: zeile.klasse, lang: zeile.klasse } : await planName(zeile.page);
+      const aufgaben = zeile.aufgaben || [];
+      document.title = 'Tafel ' + name.kurz + ' ' + tag;
+      const titel = titelFolie('Tafel' + (zeile.kw ? ' · KW ' + zeile.kw : ''), name.lang,
+        TAGE[d.getDay()] + ', ' + tag + ' · ' + (aufgaben.length === 1 ? 'eine Aufgabe' : aufgaben.length + ' Aufgaben') +
+        ', gerechnet in der Stunde');
+      wegKnopf(titel);
+      deckEl.appendChild(titel);
+      summary['0'] = 'Titel: die Tafel der ' + name.lang + ' vom ' + tag + ', die Rechnungen aus der Stunde';
+      if (!aufgaben.length) deckEl.appendChild(meldungFolie('Auf dieser Tafel steht nichts.'));
+      aufgaben.forEach(function (a, k) {
+        deckEl.appendChild(aufgabeFolie(a, k));
+        const weg = a.rechenweg || [];
+        summary[String(k + 1)] = (a.nr ? 'Aufgabe ' + a.nr : 'Rechnung ' + (k + 1)) +
+          (a.nach ? ', umstellen nach ' + a.nach : '') + ': ' + (a.latex ? '$' + a.latex + '$' : '') +
+          (weg.length ? ' - Ergebnis $' + weg[weg.length - 1] + '$' : '');
+      });
+    } catch (e) {
+      deckEl.appendChild(meldungFolie(e.message));
+    }
+    document.getElementById('summary').textContent = JSON.stringify(summary);
+    await einpassen();
+    deckStarten();
+  }
+
+  bauen();
+})();
+</script>
+</body>
+</html>
