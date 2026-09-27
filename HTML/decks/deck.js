@@ -114,12 +114,26 @@ function dock(){
   if (nav) { nav.style.left = Math.max(8, Math.round(r.left + 16 * s)) + 'px'; nav.style.bottom = 'auto';
              nav.style.top = Math.round(cy - btn / 2) + 'px'; }
   const left = hud.getBoundingClientRect().left;
-  deck.style.setProperty('--pnright', Math.max(16, (r.right - left + 12) / s) + 'px');
+  // the slide triangles frame the page number, ◀ 9 / 23 ▶, right before the HUD (Doc, 27.09.2026: "vor und nach den
+  // Seitenzahlen"); the H stays alone at the left end. Fixed inside #nav, so they keep its looks and its hiding.
+  const prevB = document.getElementById('nav-prev'), nextB = document.getElementById('nav-next');
+  const pn = slides[si] && slides[si].querySelector('.pageno');
+  const gap = 6, top = Math.round(cy - btn / 2) + 'px';
+  const nextX = left - 8 - btn;                     // screen px
+  deck.style.setProperty('--pnright', Math.max(16, (r.right - (nextB ? nextX - gap : left - 12)) / s) + 'px');
+  if (prevB && nextB) {
+    const w = pn ? pn.getBoundingClientRect() : null;
+    const prevX = w && w.width ? w.left - gap - btn : nextX - 4 - btn;
+    [[prevB, prevX], [nextB, nextX]].forEach(([b, x]) => {
+      b.style.position = 'fixed'; b.style.left = Math.round(x) + 'px'; b.style.top = top;
+    });
+  }
   const jump = document.getElementById('jump');     // the typed slide number floats above the dock
   if (jump) { jump.style.right = right + 'px'; jump.style.bottom = Math.round(innerHeight - cy + av / 2 + 8) + 'px'; }
 }
 addEventListener('resize', fit); fit();
 addEventListener('load', dock);                      // the overview and play buttons join the HUD later
+painted.push(dock);                                  // "9 / 23" and "10 / 23" differ in width: the ◀ moves along
 
 function groups(sl){
   return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
@@ -488,7 +502,15 @@ const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenEle
 // "no beamer" look the same to the browser, so it also shows on the laptop alone), green = extended and ready
 // to present (Doc, 21.09.2026).
 const SCREEN_KNOWN = 'isExtended' in screen;
+// presenting, the talk's title stands at the left end of the footer line (deck.css shows it only then)
+(function () {
+  const name = document.createElement('div');
+  name.className = 'deck-name';
+  name.textContent = document.title;
+  deck.appendChild(name);
+})();
 function paintFull(){
+  document.documentElement.classList.toggle('fs-on', fsOn());   // presenting: deck.css hides the buttons
   const ext = !!screen.isExtended;
   fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
     + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'

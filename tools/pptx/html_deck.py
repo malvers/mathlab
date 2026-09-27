@@ -850,6 +850,21 @@ html.dark-slide #hud button:hover,html.dark-slide #nav button:hover{background:r
    Folie zu Folie springen, anis rolled out") - placed by dock() on the footer line like the HUD */
 #nav{position:fixed;left:calc(10px + env(safe-area-inset-left, 0px));bottom:8px;z-index:9;display:flex;gap:4px}
 #nav button:disabled{opacity:.35;cursor:default}
+/* presenting (fullscreen): the class sees the page number and nothing to press - triangles, H, overview, pen, play
+   and fullscreen go; keys, clicks and the tablet still steer, Esc leaves (Doc, 27.09.2026: "sollten die eigentlich
+   nicht sehen, nur die Seitenzahlen ... in Präsentationsmodus finde ich das eher störend"). The help still opens
+   with H. Only where a mouse is: on a touch screen the buttons are the only way back. */
+@media (hover:hover) and (pointer:fine){
+  html.fs-on:not(.ink-remote) #nav,html.fs-on:not(.ink-remote) #hud{visibility:hidden}
+  html.fs-on:not(.ink-remote) #help{visibility:visible}
+  /* the footer line framed by text alone: the page number flush with its right end, the talk's title quietly at
+     its left end where the H was (Doc, 27.09.2026: "Seitenzahlen rechtsbündig mit dem Strich ... links ...
+     vielleicht den Titel des Talks, wenn das nicht zu aufdringlich") - not on the greeting and title slides */
+  html.fs-on:not(.ink-remote) .pageno{right:16px!important}
+  html.fs-on:not(.ink-remote):not(.dark-slide) #deck > .deck-name{display:block}
+}
+#deck > .deck-name{display:none;position:absolute;left:16px;top:516px;max-width:300px;overflow:hidden;white-space:nowrap;
+  text-overflow:ellipsis;line-height:12px;font-size:10px;letter-spacing:1.2px;color:var(--muted);pointer-events:none}
 /* "H" right of the triangles: every key the deck knows, in a card like Solita's panel (Doc, 17.09.2026).
    A capital letter has no descender, so centring its line box leaves it sitting high and looking large -
    smaller than the "?" was, and pushed down by half the gap it leaves (Doc, 23.09.2026: "zu groß / oben") */
@@ -1296,12 +1311,26 @@ function dock(){
   if (nav) { nav.style.left = Math.max(8, Math.round(r.left + 16 * s)) + 'px'; nav.style.bottom = 'auto';
              nav.style.top = Math.round(cy - btn / 2) + 'px'; }
   const left = hud.getBoundingClientRect().left;
-  deck.style.setProperty('--pnright', Math.max(16, (r.right - left + 12) / s) + 'px');
+  // the slide triangles frame the page number, ◀ 9 / 23 ▶, right before the HUD (Doc, 27.09.2026: "vor und nach den
+  // Seitenzahlen"); the H stays alone at the left end. Fixed inside #nav, so they keep its looks and its hiding.
+  const prevB = document.getElementById('nav-prev'), nextB = document.getElementById('nav-next');
+  const pn = slides[si] && slides[si].querySelector('.pageno');
+  const gap = 6, top = Math.round(cy - btn / 2) + 'px';
+  const nextX = left - 8 - btn;                     // screen px
+  deck.style.setProperty('--pnright', Math.max(16, (r.right - (nextB ? nextX - gap : left - 12)) / s) + 'px');
+  if (prevB && nextB) {
+    const w = pn ? pn.getBoundingClientRect() : null;
+    const prevX = w && w.width ? w.left - gap - btn : nextX - 4 - btn;
+    [[prevB, prevX], [nextB, nextX]].forEach(([b, x]) => {
+      b.style.position = 'fixed'; b.style.left = Math.round(x) + 'px'; b.style.top = top;
+    });
+  }
   const jump = document.getElementById('jump');     // the typed slide number floats above the dock
   if (jump) { jump.style.right = right + 'px'; jump.style.bottom = Math.round(innerHeight - cy + av / 2 + 8) + 'px'; }
 }
 addEventListener('resize', fit); fit();
 addEventListener('load', dock);                      // the overview and play buttons join the HUD later
+painted.push(dock);                                  // "9 / 23" and "10 / 23" differ in width: the ◀ moves along
 
 function groups(sl){
   return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
@@ -1613,7 +1642,15 @@ const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenEle
 // button: at the board that means mirrored -> Cmd F1 / Win P. Mirroring and "no beamer" look the same to the
 // browser, so the dot also shows on the laptop alone; extended shows nothing (Doc, 18.09.2026).
 const SCREEN_KNOWN = 'isExtended' in screen;
+// presenting, the talk's title stands at the left end of the footer line (deck.css shows it only then)
+(function () {
+  const name = document.createElement('div');
+  name.className = 'deck-name';
+  name.textContent = document.title;
+  deck.appendChild(name);
+})();
 function paintFull(){
+  document.documentElement.classList.toggle('fs-on', fsOn());   // presenting: deck.css hides the buttons
   const ext = !!screen.isExtended;
   fullBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
     + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'

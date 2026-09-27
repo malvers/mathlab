@@ -276,6 +276,21 @@ html.dark-slide #hud button:hover,html.dark-slide #nav button:hover{background:r
    Folie zu Folie springen, anis rolled out") - placed by dock() on the footer line like the HUD */
 #nav{position:fixed;left:calc(10px + env(safe-area-inset-left, 0px));bottom:8px;z-index:9;display:flex;gap:4px}
 #nav button:disabled{opacity:.35;cursor:default}
+/* presenting (fullscreen): the class sees the page number and nothing to press - triangles, H, overview, pen, play
+   and fullscreen go; keys, clicks and the tablet still steer, Esc leaves (Doc, 27.09.2026: "sollten die eigentlich
+   nicht sehen, nur die Seitenzahlen ... in Präsentationsmodus finde ich das eher störend"). The help still opens
+   with H. Only where a mouse is: on a touch screen the buttons are the only way back. */
+@media (hover:hover) and (pointer:fine){
+  html.fs-on:not(.ink-remote) #nav,html.fs-on:not(.ink-remote) #hud{visibility:hidden}
+  html.fs-on:not(.ink-remote) #help{visibility:visible}
+  /* the footer line framed by text alone: the page number flush with its right end, the talk's title quietly at
+     its left end where the H was (Doc, 27.09.2026: "Seitenzahlen rechtsbündig mit dem Strich ... links ...
+     vielleicht den Titel des Talks, wenn das nicht zu aufdringlich") - not on the greeting and title slides */
+  html.fs-on:not(.ink-remote) .pageno{right:16px!important}
+  html.fs-on:not(.ink-remote):not(.dark-slide) #deck > .deck-name{display:block}
+}
+#deck > .deck-name{display:none;position:absolute;left:16px;top:516px;max-width:300px;overflow:hidden;white-space:nowrap;
+  text-overflow:ellipsis;line-height:12px;font-size:10px;letter-spacing:1.2px;color:var(--muted);pointer-events:none}
 /* "H" right of the triangles: every key the deck knows, in a card like Solita's panel (Doc, 17.09.2026).
    A capital letter has no descender, so centring its line box leaves it sitting high and looking large -
    smaller than the "?" was, and pushed down by half the gap it leaves (Doc, 23.09.2026: "zu groß / oben") */
