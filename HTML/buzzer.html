@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<!--
+    Buzzer - "nicht verstanden", for the class. One button, anonymous.
+
+    Doc, 26.09.2026: "dass ich nur sehe, vorne bei mir ... dass irgendjemand gesagt hat, er versteht das nie. So dass
+    ich es nochmal erklären kann ... dass die Kinder sich nicht schämen, zum 25. Mal zu fragen". The code comes from
+    the QR on the board (?c=1234) or is typed in. A tap writes one row into the table buzzer: the code, and the time the
+    database adds - no device, no name, nothing stored here that could tell who it was. The teacher's page
+    (js/buzzer.js) counts the rows of its code and shows them silently. One tap a minute per phone, so nobody drowns
+    the signal; the database brakes at 40 a minute per code as well.
+-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Buzzer | Doc Alvers Mathe-Labor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <meta name="theme-color" content="#08142a">
+    <style>
+        :root {
+            --grund: #08142a;
+            --text: #eaf0f7;
+            --leise: #8a93a3;
+            --orange: rgb(245, 194, 66);
+            --gruen: rgb(121, 158, 49);
+            --rot: rgb(176, 36, 24);
+        }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; min-height: 100%; background: var(--grund); color: var(--text); }
+        body {
+            min-height: 100vh; min-height: 100dvh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 28px; padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+            font-family: 'Orbitron', sans-serif; text-align: center;
+            -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
+        }
+        [hidden] { display: none !important; }
+
+        /* the one button: a large ring, the question mark drawn (no font glyph) */
+        #knopf {
+            width: min(78vw, 58vh, 380px); aspect-ratio: 1; border-radius: 50%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+            padding: 0 12%; cursor: pointer; touch-action: manipulation;
+            font-family: inherit; font-size: clamp(1rem, 4.6vw, 1.35rem); letter-spacing: 0.06em; line-height: 1.35;
+            color: var(--grund); background: var(--orange); border: none;
+            box-shadow: 0 0 0 10px rgba(245, 194, 66, 0.18), 0 0 60px rgba(245, 194, 66, 0.35);
+            transition: transform 0.12s ease, background 0.3s ease, box-shadow 0.3s ease;
+        }
+        #knopf:active { transform: scale(0.96); }
+        #knopf:focus { outline: none; }
+        #knopf svg { width: 34%; height: auto; }
+        #knopf.angekommen { background: var(--gruen); color: #fff; box-shadow: 0 0 0 10px rgba(121, 158, 49, 0.2), 0 0 60px rgba(121, 158, 49, 0.35); }
+        #knopf.pause { background: #1c2c4a; color: var(--leise); box-shadow: none; cursor: default; }
+
+        #hinweis { min-height: 1.4em; font-size: clamp(0.8rem, 3.6vw, 0.95rem); letter-spacing: 0.04em; color: var(--leise); }
+        #hinweis.fehler { color: var(--rot); }
+
+        /* the code, when no QR brought it */
+        #code-feld { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+        #code-feld label { font-size: 0.9rem; letter-spacing: 0.1em; color: var(--leise); }
+        #code {
+            width: 7ch; padding: 10px 0; text-align: center;
+            font-family: inherit; font-size: 2.4rem; letter-spacing: 0.3em; text-indent: 0.3em;
+            color: var(--orange); background: transparent; border: 1px solid rgba(245, 194, 66, 0.5); border-radius: 12px;
+        }
+        #code:focus { outline: none; border-color: var(--orange); }
+        #los {
+            min-width: 160px; min-height: 48px; padding: 0 22px; cursor: pointer;
+            font-family: inherit; font-size: 0.9rem; letter-spacing: 0.1em;
+            color: var(--text); background: rgba(0, 210, 255, 0.08); border: 1px solid rgba(0, 210, 255, 0.4); border-radius: 10px;
+        }
+
+        footer { font-size: 0.72rem; letter-spacing: 0.05em; line-height: 1.6; color: var(--leise); max-width: 34em; }
+        footer b { color: var(--text); font-weight: 400; }
+    </style>
+</head>
+
+<body>
+    <div id="code-feld" hidden>
+        <label for="code">CODE VON DER TAFEL</label>
+        <input id="code" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" aria-label="Code von der Tafel">
+        <button type="button" id="los">WEITER</button>
+    </div>
+
+    <button type="button" id="knopf" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M8.2 8.6 A3.9 3.9 0 1 1 13.6 12.2 C12.6 12.8 12 13.6 12 14.8 V15.6" fill="none" stroke="currentColor"
+                stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="12" cy="19.6" r="1.5" fill="currentColor" />
+        </svg>
+        <span id="knopf-text">HAB ICH NICHT VERSTANDEN</span>
+    </button>
+    <div id="hinweis" role="status"></div>
+
+    <footer>
+        <b>Anonym:</b> Gezählt wird nur, dass jemand gedrückt hat – kein Name, kein Gerät.<br>
+        Doc Alvers Mathe-Labor
+    </footer>
+
+    <script>
+        (function () {
+            'use strict';
+            const DB_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
+            const DB_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';   // publishable (public by design)
+            const PAUSE_MS = 60000;                                             // one tap a minute per phone
+            const $ = id => document.getElementById(id);
+            const knopf = $('knopf'), text = $('knopf-text'), hinweis = $('hinweis');
+            let code = (new URLSearchParams(location.search).get('c') || '').trim();
+            let uhr = null;
+
+            const zuletzt = () => { try { return +localStorage.getItem('buzzer-zuletzt:' + code) || 0; } catch (_) { return 0; } };
+            const merke = t => { try { localStorage.setItem('buzzer-zuletzt:' + code, String(t)); } catch (_) {} };
+            function sag(t, fehler) { hinweis.textContent = t; hinweis.classList.toggle('fehler', !!fehler); }
+
+            // the minute after a tap: grey, counting down, then ready again
+            function pauseZeigen() {
+                clearInterval(uhr);
+                const tick = () => {
+                    const rest = Math.ceil((zuletzt() + PAUSE_MS - Date.now()) / 1000);
+                    if (rest <= 0) {
+                        clearInterval(uhr);
+                        knopf.className = '';
+                        knopf.disabled = false;
+                        text.textContent = 'HAB ICH NICHT VERSTANDEN';
+                        sag('');
+                        return;
+                    }
+                    if (!knopf.classList.contains('angekommen')) {
+                        knopf.className = 'pause';
+                        text.textContent = 'GLEICH WIEDER';
+                    }
+                    knopf.disabled = true;
+                    sag('Wieder möglich in ' + rest + ' s');
+                };
+                tick();
+                uhr = setInterval(tick, 1000);
+            }
+
+            async function buzz() {
+                if (Date.now() - zuletzt() < PAUSE_MS) return;
+                knopf.disabled = true;
+                try {
+                    const res = await fetch(DB_URL + '/rest/v1/buzzer', {
+                        method: 'POST',
+                        headers: { apikey: DB_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+                        body: JSON.stringify({ code })
+                    });
+                    if (!res.ok) throw new Error(res.status === 400 ? 'Gerade drücken sehr viele – gleich nochmal.' : 'HTTP ' + res.status);
+                } catch (e) {
+                    knopf.disabled = false;
+                    sag('Nicht angekommen – bitte nochmal tippen. ' + (e.message || ''), true);
+                    return;
+                }
+                merke(Date.now());
+                knopf.className = 'angekommen';
+                text.textContent = 'ANGEKOMMEN';
+                if (navigator.vibrate) navigator.vibrate(40);
+                setTimeout(() => { knopf.classList.remove('angekommen'); pauseZeigen(); }, 2500);
+                pauseZeigen();
+            }
+
+            function bereit() {
+                $('code-feld').hidden = true;
+                knopf.hidden = false;
+                if (Date.now() - zuletzt() < PAUSE_MS) pauseZeigen();
+            }
+
+            knopf.addEventListener('click', buzz);
+            // no QR, no code: type it from the board
+            if (/^\d{4}$/.test(code)) bereit();
+            else {
+                $('code-feld').hidden = false;
+                const feld = $('code');
+                const weiter = () => {
+                    const c = feld.value.replace(/\D/g, '');
+                    if (!/^\d{4}$/.test(c)) { sag('Der Code hat vier Ziffern.', true); return; }
+                    code = c;
+                    history.replaceState(null, '', '?c=' + c);
+                    sag('');
+                    bereit();
+                };
+                $('los').addEventListener('click', weiter);
+                feld.addEventListener('keydown', e => { if (e.key === 'Enter') weiter(); });
+                feld.focus();
+            }
+        })();
+    </script>
+</body>
+
+</html>

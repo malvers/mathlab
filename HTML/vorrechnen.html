@@ -352,6 +352,11 @@
         .erk-fehler { color: rgb(176, 36, 24); }
         .erk-info { opacity: 0.6; font-size: 0.8rem; }
 
+        /* Doc, 26./27.09.: the buzzer's QR card (js/buzzer.js) in the central modal - wide enough for the code */
+        #buzzer-overlay .cyber-modal { max-width: min(760px, 94vw); padding: 52px 28px 24px; }
+        #buzzer-overlay .bz-knoepfe { display: flex; gap: 12px; margin-top: 22px; }
+        #buzzer-overlay .bz-knoepfe .cyber-btn { flex: 1; }
+
         /* Doc, 26.09.: "Tafel senden" - today's working into the plan, in the central modal;
            chips for the class and the tasks, light on sand with ink like the task panel */
         #tafel-overlay { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -461,6 +466,7 @@
     <script src="js/branding/nav.js"></script>
     <script src="js/branding.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/buzzer.js"></script>
     <script src="js/stroke-symbols.js"></script>
     <script src="morpheus/vendor/katex/katex.min.js"></script>
     <!-- Morph building blocks from morpheus: contour tracing and polygon helpers. -->
@@ -2414,6 +2420,69 @@
             if (e.key === 'Escape') tafelDialog(false);
             if (e.key === 'Escape' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') e.stopPropagation();
         }, true);
+
+        // Doc, 26.09. night: "Ich würde den Kindern gerne einen Buzzer geben ... dass ich nur sehe, vorne bei mir ...
+        // dass irgendjemand gesagt hat, er versteht das nie" - 27.09.: "mach mal für allgemein ... aber jetzt für vorr".
+        // The buzzer is central (js/buzzer.js, buzzer.html); here only its button on the rail. The first tap listens
+        // and puts the QR on the board (on the beamer as a twin); a buzz lights the button orange with its count and
+        // the screen's edge glows once - the rail and the glow never reach the beamer; a tap then means "seen".
+        // Which task was on the board when a buzz came is kept on this device (vorrechnen-buzzer), for later.
+        function buzzerMeldung(n, neu) {
+            if (anzeigeModus) return;                        // the beamer window never shows it
+            Buzzer.markiere(document.getElementById('werkzeug-buzzer'), n);
+            if (!neu) return;
+            Buzzer.blitz();
+            try {
+                const log = JSON.parse(localStorage.getItem('vorrechnen-buzzer') || '[]');
+                log.push({ zeit: Date.now(), aufgabe: aufgabenModus ? AUFGABEN[aufgabeIdx][0] : null });
+                localStorage.setItem('vorrechnen-buzzer', JSON.stringify(log.slice(-500)));
+            } catch (_) {}
+        }
+        function buzzerKnopf() {
+            if (!window.Buzzer) return;
+            if (!Buzzer.aktiv()) { Buzzer.start(buzzerMeldung); buzzerKarte(); return; }
+            if (document.querySelector('#werkzeug-buzzer > .buzz-zahl')) { Buzzer.gesehen(); return; }
+            buzzerKarte();
+        }
+        let buzzerZwilling = null;
+        async function buzzerKarte(auf = true) {
+            let o = document.getElementById('buzzer-overlay');
+            if (buzzerZwilling) { buzzerZwilling.remove(); buzzerZwilling = null; }
+            if (!auf) { if (o) o.classList.remove('open'); return; }
+            if (!o) {
+                o = document.createElement('div');
+                o.id = 'buzzer-overlay';
+                o.className = 'cyber-overlay';
+                o.innerHTML = '<div class="cyber-modal cyber-modal--neon" role="dialog" aria-label="Buzzer">' +
+                    '<button type="button" class="cyber-modal-x" title="Schließen" aria-label="Schließen">' +
+                    '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6 L18 18 M18 6 L6 18" fill="none"' +
+                    ' stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>' +
+                    '<div class="bz-karte"></div>' +
+                    '<div class="bz-knoepfe"><button type="button" class="cyber-btn bz-neu">NEUER CODE</button>' +
+                    '<button type="button" class="cyber-btn bz-zu">FERTIG</button></div></div>';
+                o.addEventListener('click', e => { if (e.target === o) buzzerKarte(false); });
+                o.querySelector('.cyber-modal-x').addEventListener('click', () => buzzerKarte(false));
+                o.querySelector('.bz-zu').addEventListener('click', () => buzzerKarte(false));
+                // another class: a fresh code, the phones with the old one no longer count
+                o.querySelector('.bz-neu').addEventListener('click', () => { Buzzer.neuerCode(); buzzerKarte(); });
+                document.body.appendChild(o);
+            }
+            const karte = await Buzzer.karteBereit();
+            o.querySelector('.bz-karte').replaceChildren(karte);
+            // the class has to see it: with the beamer running, the same card as a twin over the board
+            const bild = document.createElement('div');
+            bild.style.cssText = 'position:absolute;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;' +
+                'background:rgba(5, 13, 28, 0.95)';
+            bild.appendChild(karte.cloneNode(true));
+            buzzerZwilling = anzeigeZwilling(bild);
+            requestAnimationFrame(() => o.classList.add('open'));
+        }
+        window.addEventListener('keydown', e => {
+            if (!document.querySelector('#buzzer-overlay.open')) return;
+            if (e.key === 'Escape') buzzerKarte(false);
+            if (e.key === 'Escape' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') e.stopPropagation();
+        }, true);
+
         function rechenwegHochScrollen() {
             const teile = ['vorlage-schicht', 'rechenweg-schicht'].map(id => document.getElementById(id)).filter(Boolean);
             if (!teile.length) return;
@@ -3369,6 +3438,10 @@
                   '<path d="M4.5 8.5 H14 A5.5 5.5 0 0 1 14 19.5 H10" fill="none" stroke="currentColor" stroke-linecap="round"/>',
             redo: '<path d="M15 13 L19.5 8.5 L15 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>' +
                   '<path d="M19.5 8.5 H10 A5.5 5.5 0 0 0 10 19.5 H14" fill="none" stroke="currentColor" stroke-linecap="round"/>',
+            // the buzzer: a speech bubble with a question mark, drawn
+            buzzer: '<path d="M4.5 5.5 A2 2 0 0 1 6.5 3.5 H17.5 A2 2 0 0 1 19.5 5.5 V14 A2 2 0 0 1 17.5 16 H10 L6 20 V16 A2 2 0 0 1 4.5 14 Z" fill="none" stroke="currentColor" stroke-linejoin="round"/>' +
+                    '<path d="M10.2 7.9 A1.9 1.9 0 1 1 12.9 9.6 C12.3 9.9 12 10.3 12 11 V11.3" fill="none" stroke="currentColor" stroke-linecap="round"/>' +
+                    '<circle cx="12" cy="13.4" r="0.9" fill="currentColor"/>',
             // light / dark: a circle, half filled
             hell: '<circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor"/>' +
                   '<path d="M12 4.5 A7.5 7.5 0 0 0 12 19.5 Z" fill="currentColor"/>',
@@ -3493,7 +3566,9 @@
                     // in mission control it ends the projection
                     ['beamer', STEUERUNG ? 'Beamer beenden' : 'Beamer: nur die Rechnung projizieren',
                         () => { if (STEUERUNG) window.close(); else beamerStart(); }, false],
-                    ['hell', 'Hell / Dunkel', () => setzeHell(!hell), false]]);
+                    ['hell', 'Hell / Dunkel', () => setzeHell(!hell), false],
+                    // Doc, 26./27.09.: the anonymous "nicht verstanden" buzzer (js/buzzer.js)
+                    ['buzzer', 'Buzzer – „nicht verstanden“, anonym (erster Tipp: QR aufs Board)', () => buzzerKnopf(), false]]);
                 // "... die Farbknöpfe, C und Undo, Redo über den Hard Reload-Button, der
                 // jetzt rechts unten ist" - the rail is a column, from the colours down
                 // everything sits at its foot
@@ -4164,6 +4239,8 @@
 
         document.fonts.ready.then(() => {
             buildPanel(); holeStriche(); recompute(); init(); zeigeVorlage();
+            // the buzzer listens on after a reload (live reload, mission control) - if it was on today
+            if (window.Buzzer) Buzzer.weiter(buzzerMeldung);
             let warBeispiel = false;
             try { warBeispiel = localStorage.getItem('vorrechnen-beispiel') === '1'; } catch (_) {}
             if (testModus && (!strokes.length || warBeispiel)) beispiel();
