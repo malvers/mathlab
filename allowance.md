@@ -21,6 +21,6 @@ Grenze. Im Zweifel: NICHT tun, aufschreiben, auf Doc warten.
 ## Release-Checkliste In-App-Update (WICHTIG)
 Damit das Self-Update greift, bei JEDEM neuen APK-Release:
 1. `tracker-app/android/app/build.gradle`: `versionCode` +1 (und ggf. `versionName`).
-2. `./gradlew assembleDebug` → APK nach `HTML/tracker/doc-alvers-tracker.apk` kopieren.
+2. `./gradlew assembleDebug` → `node tools/media_publish.mjs tracker-app/android/app/build/outputs/apk/debug/app-debug.apk tracker/doc-alvers-tracker.apk` (R2-Bucket „media", seit 27.09.2026 nicht mehr ins Git).
 3. `HTML/tracker/version.json`: `versionCode`/`versionName` auf denselben Stand.
 4. Doc: committen + pushen. Geräte sehen beim nächsten App-Öffnen das Banner.

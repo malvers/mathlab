@@ -28,7 +28,7 @@ Design: **standalone** Vollbild (wie `glocken`, KEIN Cyber-Grid). KISS — „Ö
 | `HTML/tracker/tracker.html` | **DIE App** — eine Datei (HTML+CSS+JS). Hier wird editiert. |
 | `HTML/tracker/index.html` | Landing-Page (VGP-Stil): Header + 2 Kacheln (Im Browser → `tracker.html`, Android-App → APK). |
 | `HTML/tracker/icon.svg` | Brand-Icon (dunkelblau, oranger GPS-Trail, grüner Start-, roter Positions-Punkt). |
-| `HTML/tracker/doc-alvers-tracker.apk` | Herunterladbare APK (Kopie aus dem Build; **committen**, nicht git-ignored). |
+| R2 `media/tracker/doc-alvers-tracker.apk` | Herunterladbare APK — seit 27.09.2026 **nicht mehr im Git**: `node tools/media_publish.mjs <app-debug.apk> tracker/doc-alvers-tracker.apk`; Links und `version.json` zeigen auf `pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev`. |
 | `HTML/tracker.html` (Root) | Nur **Redirect** → `tracker/tracker.html`. |
 | `HTML/tracker/{bugfixes,feature-requests,ideen}.md` | **Die 3 gepflegten Queues** — Bugs / entschiedene Features / Ideen-Triage. Alles andere (Quell-Notizen) liegt archiviert unter `archive/`. |
 | `tracker-app/` | Capacitor-Projekt (native APK). **git-ignored**, lokales Build-Projekt. appId `de.docalvers.tracker`, `webDir: www`. |
@@ -55,7 +55,7 @@ bash tracker-app/sync-web.sh                 # tracker.html → www/index.html
 cd tracker-app && npx cap copy android       # www → android assets
 cd android && ./gradlew assembleDebug        # → app/build/outputs/apk/debug/app-debug.apk  (~15-40 s)
 adb install -r app/build/outputs/apk/debug/app-debug.apk
-cp app/build/outputs/apk/debug/app-debug.apk ../../HTML/tracker/doc-alvers-tracker.apk   # Download aktualisieren
+node ../../tools/media_publish.mjs app/build/outputs/apk/debug/app-debug.apk tracker/doc-alvers-tracker.apk   # Download aktualisieren (R2 „media", nicht git)
 ```
 Toolchain (Doc's Mac): Android SDK `~/Library/Android/sdk`, `minSdkVersion 22`. APK ist **Debug-signiert** → kein In-place-Update auf einen Release-Build (erst deinstallieren). `adb` findet das Pixel per USB-Debugging.
 

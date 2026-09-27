@@ -190,3 +190,15 @@ npm run cap:open       # Android Studio → Build → APK
 
 > **Reihenfolge fürs nächste Mal:** erst Hardware in Chrome gegenchecken (Modul an 12 V, Protokoll
 > FFE0/FFE1/A0 bestätigen) → **Koppel-Knopf** → **BLE-Plugin in die Solita-APK** → im Auto verdrahten.
+
+## Material (R2-Bucket „media“, seit 27.09.2026 nicht mehr im Git)
+
+Fotos, Schaltplan, Verkabelungs-PDF und die beiden Testvideos, vorher unter `pagode-app/resources/Solita goes Pagode/`:
+
+- [PXL_20260626_035750704.jpg](https://pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev/pagode-doku/PXL_20260626_035750704.jpg)
+- [PXL_20260626_035759694.jpg](https://pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev/pagode-doku/PXL_20260626_035759694.jpg)
+- [PXL_20260626_035830714.jpg](https://pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev/pagode-doku/PXL_20260626_035830714.jpg)
+- [Schaltplan Solita goes Pagode.png](https://pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev/pagode-doku/Schaltplan%20Solita%20goes%20Pagode.png)
+- [pagode-verkabelung.pdf](https://pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev/pagode-doku/pagode-verkabelung.pdf)
+- [Test Pagode 01.mp4](https://pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev/pagode-doku/Test%20Pagode%2001.mp4)
+- [Test Pagode 02.mp4](https://pub-5e3b331002a14e5a8532e12ebae95bf9.r2.dev/pagode-doku/Test%20Pagode%2002.mp4)
