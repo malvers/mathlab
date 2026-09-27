@@ -8,8 +8,8 @@
     ich es nochmal erklären kann ... dass die Kinder sich nicht schämen, zum 25. Mal zu fragen". The code comes from
     the QR on the board (?c=1234) or is typed in. A tap writes one row into the table buzzer: the code, and the time the
     database adds - no device, no name, nothing stored here that could tell who it was. The teacher's page
-    (js/buzzer.js) counts the rows of its code and shows them silently. One tap a minute per phone, so nobody drowns
-    the signal; the database brakes at 40 a minute per code as well.
+    (js/buzzer.js) counts the rows of its code and shows them silently. No pause between two taps (Doc, 27.09.2026:
+    "nimm die Minute raus ... Ich vertraue den Kids einfach"); only the database brakes, at 40 a minute per code.
 -->
 
 <head>
@@ -108,43 +108,16 @@
             'use strict';
             const DB_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
             const DB_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';   // publishable (public by design)
-            const PAUSE_MS = 60000;                                             // one tap a minute per phone
             const $ = id => document.getElementById(id);
             const knopf = $('knopf'), text = $('knopf-text'), hinweis = $('hinweis');
             let code = (new URLSearchParams(location.search).get('c') || '').trim();
-            let uhr = null;
+            let zurueck = null;
 
-            const zuletzt = () => { try { return +localStorage.getItem('buzzer-zuletzt:' + code) || 0; } catch (_) { return 0; } };
-            const merke = t => { try { localStorage.setItem('buzzer-zuletzt:' + code, String(t)); } catch (_) {} };
             function sag(t, fehler) { hinweis.textContent = t; hinweis.classList.toggle('fehler', !!fehler); }
 
-            // the minute after a tap: grey, counting down, then ready again
-            function pauseZeigen() {
-                clearInterval(uhr);
-                const tick = () => {
-                    const rest = Math.ceil((zuletzt() + PAUSE_MS - Date.now()) / 1000);
-                    if (rest <= 0) {
-                        clearInterval(uhr);
-                        knopf.className = '';
-                        knopf.disabled = false;
-                        text.textContent = 'HAB ICH NICHT VERSTANDEN';
-                        sag('');
-                        return;
-                    }
-                    if (!knopf.classList.contains('angekommen')) {
-                        knopf.className = 'pause';
-                        text.textContent = 'GLEICH WIEDER';
-                    }
-                    knopf.disabled = true;
-                    sag('Wieder möglich in ' + rest + ' s');
-                };
-                tick();
-                uhr = setInterval(tick, 1000);
-            }
-
             async function buzz() {
-                if (Date.now() - zuletzt() < PAUSE_MS) return;
-                knopf.disabled = true;
+                knopf.disabled = true;                 // only while the tap is on its way
+                clearTimeout(zurueck);
                 try {
                     const res = await fetch(DB_URL + '/rest/v1/buzzer', {
                         method: 'POST',
@@ -157,18 +130,18 @@
                     sag('Nicht angekommen – bitte nochmal tippen. ' + (e.message || ''), true);
                     return;
                 }
-                merke(Date.now());
+                // arrived: green for a moment, and at once ready for the next tap
+                knopf.disabled = false;
                 knopf.className = 'angekommen';
                 text.textContent = 'ANGEKOMMEN';
+                sag('');
                 if (navigator.vibrate) navigator.vibrate(40);
-                setTimeout(() => { knopf.classList.remove('angekommen'); pauseZeigen(); }, 2500);
-                pauseZeigen();
+                zurueck = setTimeout(() => { knopf.className = ''; text.textContent = 'HAB ICH NICHT VERSTANDEN'; }, 1500);
             }
 
             function bereit() {
                 $('code-feld').hidden = true;
                 knopf.hidden = false;
-                if (Date.now() - zuletzt() < PAUSE_MS) pauseZeigen();
             }
 
             knopf.addEventListener('click', buzz);
