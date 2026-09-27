@@ -78,8 +78,10 @@
     /* Papier, in JEDEM Schema: var(--card)/var(--ink) sind im dunklen Schema beide
        dunkelblau, das Blatt war damit unlesbar. Leicht blaeuliches Papier mit
        dunkelblauer Schrift (Doc, 20.09.2026: "Mach den HG leich blauisch und die
-       Schrift dunkel blau") - dasselbe Navy wie in Docs Decks. */
-    background: #d8e6f8;
+       Schrift dunkel blau") - dasselbe Navy wie in Docs Decks.
+       A step darker since 27.09.2026 (Doc: "ein bisschen dunkler, damit man das
+       Gelb besser sieht"); fahrplan.html carries the same value for its paper. */
+    background: #b6cdea;
     color: #002060;
     /* Das ist der GROESSTE Grad, nicht der einzige: das Blatt waechst mit dem
        Text bis an seine max-height, und was dann noch dazukommt, wird kleiner
@@ -96,7 +98,9 @@
     grid-column: 1;
     grid-row: 1;
     display: flex;
-    align-items: center;
+    /* Top aligned with the thought of the week on the right (Doc, 27.09.2026:
+       "bitte top aligned") - title, bar and card share one upper edge. */
+    align-items: flex-start;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 8px 16px;
@@ -108,6 +112,10 @@
     font-size: 0.86em;
     font-weight: 600;
     color: #002060;
+    /* The line box starts ~11 px above the capitals (measured 27.09.2026); trimming
+       its top to the cap height puts the letters on the card's upper edge. Only the
+       top is trimmed, so the gap to the first bullet stays as it was. */
+    text-box: trim-start cap alphabetic;
 }
 /* Die Leiste ist im Navy der Schrift gehalten und nur da, solange der Cursor im
    Text steht - ihre Knoepfe schlucken den Mausdruck, der Fokus bleibt also im
