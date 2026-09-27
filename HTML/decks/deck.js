@@ -121,12 +121,28 @@ addEventListener('load', dock);                      // the overview and play bu
 function groups(sl){
   return [...new Set([...sl.querySelectorAll('.step')].map(e => +e.dataset.g))].length;
 }
+// every line is in view from the start; the group clicked last carries the triangle and the box - on its first
+// element, so a line with sub-lines gets one mark, not five; what was shown before steps back a little
+// (Doc, 27.09.2026: "alle sichtbar ... ein Dreieck davor", "die schon gezeigten ein klein wenig heller")
+function stepMarks(root, st){
+  const all = [...root.querySelectorAll('.step')];
+  let top = -1;
+  all.forEach(e => { const g = +e.dataset.g; if (g < st && g > top) top = g; });
+  const cur = all.find(e => +e.dataset.g === top);
+  all.forEach(e => {
+    const g = +e.dataset.g;
+    e.classList.toggle('on', g < st); e.classList.toggle('past', g < top); e.classList.toggle('now', e === cur);
+  });
+  // a card that is one group as a whole is its own box - a box around the heading alone would cut into the card
+  root.querySelectorAll('.card').forEach(c => c.classList.toggle('now', !!cur && c.contains(cur) &&
+    [...c.querySelectorAll('.step')].every(e => +e.dataset.g === top)));
+}
 function paint(){
   slides.forEach((s, i) => s.classList.toggle('on', i === si));
   const sl = slides[si];
   // dark slides (greeting, title at night): the buttons turn light (Doc, 18.09.2026: "wenn der HG dunkel ist kaum zu sehen")
   document.documentElement.classList.toggle('dark-slide', sl.matches('.greet, .title'));
-  sl.querySelectorAll('.step').forEach(e => e.classList.toggle('on', +e.dataset.g < step));
+  stepMarks(sl, step);
   const shown = slides.filter((s, i) => !skipped(i)).length;          // the bar counts what the class sees
   const at = slides.filter((s, i) => i <= si && !skipped(i)).length;
   document.getElementById('bar').style.width = (at / (shown || 1) * 100) + '%';
@@ -493,10 +509,40 @@ fullBtn.addEventListener('click', function (e) {
   if (!e.target || !e.target.classList || !e.target.classList.contains('scr-dot')) return;
   e.preventDefault(); e.stopPropagation();          // the dot does not send the deck into fullscreen
   paintFull();
-  if (window.DeckNote) DeckNote(screen.isExtended
+  const say = screen.isExtended
     ? 'Bildschirm ist erweitert – f startet Beamer und Referentenansicht'
-    : 'Nur ein Bildschirm. Am Mac Cmd F1, an Windows Win P – dann f');
+    : 'Nur ein Bildschirm. Am Mac Cmd F1, an Windows Win P – dann f';
+  if (window.DeckNote) DeckNote(say);
+  screenProbe().then(function (m) {
+    const txt = say + '\n\n' + m;
+    const done = ok => { if (window.DeckNote) DeckNote(txt + '\n' + (ok ? '(kopiert)' : '(nicht kopiert – bitte abfotografieren)'), 30000, 'probe'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => done(true), () => done(false));
+    else done(false);
+  });
 }, true);
+// Measuring for a three-colour dot (Doc, 27.09.2026: red = no second screen, yellow = there but mirrored, green =
+// extended). Mirrored and alone both look like ONE screen to the browser - maybe the resolution or the screen's
+// name gives it away. A click on the dot shows what this machine reports and copies it: once alone, once mirrored
+// at the board, then compare. getScreenDetails may ask "Fenster verwalten" once - the click is the user's gesture.
+async function screenProbe(){
+  const r = n => Math.round(n * 100) / 100;
+  const out = ['Messwerte',
+    'Bildschirm: ' + screen.width + '×' + screen.height + ' · DPR ' + r(devicePixelRatio)
+      + ' · frei ' + screen.availWidth + '×' + screen.availHeight,
+    'erweitert: ' + (screen.isExtended ? 'ja' : 'nein')];
+  let sd = null;
+  if (window.getScreenDetails) { try { sd = await window.getScreenDetails(); } catch (e) { } }
+  if (sd) sd.screens.forEach(function (s, i) {
+    out.push((i + 1) + ': „' + (s.label || '?') + '“ · intern ' + (s.isInternal ? 'ja' : 'nein')
+      + ' · primär ' + (s.isPrimary ? 'ja' : 'nein') + ' · ' + s.width + '×' + s.height + ' · DPR ' + r(s.devicePixelRatio));
+  });
+  else out.push('Bildschirmliste: nicht erlaubt');
+  const ua = navigator.userAgentData;
+  out.push('System: ' + ((ua && ua.platform) || navigator.platform) + ' · '
+    + (ua && ua.brands ? ua.brands.filter(b => b.brand.indexOf('Not') < 0).map(b => b.brand + ' ' + b.version).join(', ')
+                       : navigator.userAgent));
+  return out.join('\n');
+}
 function full(){
   const el = document.documentElement;
   if (fsOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
@@ -2067,14 +2113,15 @@ const link = (function () {
   })();
 
   window.DeckNote = toast;                            // the deck's one message box, also for the screen badge
-  function toast(t) {
+  function toast(t, ms, cls) {                        // ms and cls: the screen probe stays longer, in Arial
     let b = document.getElementById('linkmsg');
     if (!b) {
       b = document.createElement('div'); b.id = 'linkmsg'; b.setAttribute('role', 'status');
+      b.addEventListener('click', function () { b.hidden = true; });   // a tap closes it
       document.body.appendChild(b);
     }
-    b.textContent = t; b.hidden = false;
-    clearTimeout(tt); tt = setTimeout(function () { b.hidden = true; }, 4500);
+    b.textContent = t; b.className = cls || ''; b.hidden = false;
+    clearTimeout(tt); tt = setTimeout(function () { b.hidden = true; }, ms || 4500);
   }
   function openPresenter(scr) {
     const url = location.href.split('#')[0].split('?')[0] + '?presenter';
@@ -2253,7 +2300,7 @@ const link = (function () {
         });
       } else standIns(c);                            // previews and strip: pictures, not live labs
       c.classList.add('on');
-      c.querySelectorAll('.step').forEach(function (e) { e.classList.toggle('on', +e.dataset.g < st); });
+      stepMarks(c, st);
       return c;
     }
     function put(box, node) { if (node) box.replaceChildren(node); else box.replaceChildren(); scaleIn(box); }
@@ -2347,7 +2394,7 @@ const link = (function () {
       if (!cells.length) buildStrip();
       const n1 = ahead({ si: si, step: step }), n2 = ahead(n1);
       if (si !== liveSi || !liveNode) { liveSi = si; liveNode = shot(si, step, true); put(frames[0], liveNode); }
-      else liveNode.querySelectorAll('.step').forEach(function (e) { e.classList.toggle('on', +e.dataset.g < step); });
+      else stepMarks(liveNode, step);
       put(frames[1], n1 ? shot(n1.si, n1.step) : theEnd());
       put(frames[2], n2 ? shot(n2.si, n2.step) : n1 ? theEnd() : null);
       caps[0].textContent = n1 ? 'Nächste Folie: ' + rank(n1.si) : '';

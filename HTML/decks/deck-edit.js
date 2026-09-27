@@ -134,7 +134,7 @@
     // under the toolbar, never over it (Doc, 23.09.2026: "mindestens UNTER die Toolbar")
     const r = !tools.hidden && tools.getBoundingClientRect();
     b.style.top = r && r.height ? Math.round(r.bottom + 10) + 'px' : '';
-    b.textContent = t; b.hidden = false;
+    b.textContent = t; b.classList.remove('probe'); b.hidden = false;   // the screen probe's look must not stick
     clearTimeout(tt); tt = setTimeout(function () { b.hidden = true; }, 4500);
   }
 

@@ -69,7 +69,7 @@ p.line:first-child{margin-top:0}
    formula (fractions on arrows) kept it floating above the text (Doc, 17.09.2026). Net width 0: the
    negative margin pulls it into the padding, wrapped lines keep their hanging indent. */
 p.line::before{content:"";display:inline-block;width:7px;height:7px;margin:0 13px 0 -20px;vertical-align:.05em}
-p.line.l0::before{background:var(--red)}
+p.line.l0::before{background:var(--ink)}   /* dark blue like the headings, not red (Doc, 27.09.2026: "probier mal ... dunkelblau") */
 p.line.l1::before{background:var(--green);width:6px;height:6px;margin-right:14px}
 p.line.l2::before{background:#4A79C9;width:6px;height:6px;margin-right:14px}
 
@@ -86,7 +86,7 @@ p.col.l0{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;
   text-transform:uppercase;line-height:1.2}
 p.col.l1{font-size:17px;color:var(--body);margin-top:10px;padding-left:20px}
 p.col.l1::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px}
-.card.left p.col.l1::before{background:var(--red)}
+.card.left p.col.l1::before{background:var(--ink)}
 .card.right p.col.l1::before{background:var(--green)}
 
 /* --- title -------------------------------------------------------------- */
@@ -223,8 +223,32 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 .labframe.full{inset:0 !important;width:auto;height:auto !important;border-radius:0;box-shadow:none;z-index:3}
 
 /* --- click build -------------------------------------------------------- */
-.step{opacity:.2;transition:opacity .4s ease}   /* not yet clicked: faintly there, so the slide keeps its shape (Doc, 22.09.2026) */
-.step.on{opacity:1}
+/* every line is there from the start; an orange triangle points at the one being talked about - the group
+   clicked last - and a thin box holds line and triangle, the same overhang left and right.
+   Everything but the current group steps back a little - shown before and still to come alike (Doc, 27.09.2026:
+   "nicht nacheinander aufpoppen ... ein Dreieck davor", "die schon gezeigten ein klein wenig heller", "eine duenne
+   Kiste ... symmetrisch", "auch mit denen, die noch nicht gezeigt sind - nicht so krass") */
+.step{opacity:.65;transition:opacity .3s ease}
+.step.on:not(.past){opacity:1}
+@keyframes step-now{from{opacity:0}}
+:root{--tri:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='14'%3E%3Cpath d='M0 0L11 7L0 14Z' fill='%23F5C242'/%3E%3C/svg%3E")}
+/* the marks only on a live slide - not in the overview tiles, not while editing, not on paper. On a bullet line
+   the triangle takes the bullet's place, centred on it (Doc, 27.09.2026: "das Dreieck ueber den Bullet legen -
+   davor sieht komisch aus"), and in the middle of the box, also on a line that wraps ("nicht Y-zentriert").
+   The bullet's own box has no net width, so taking it out of the flow moves no text. The box holds the line
+   with the same overhang left and right */
+@media screen{
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .step.now::after{content:"";position:absolute;left:-20px;top:calc(50% - 7px);width:11px;height:14px;
+    background:var(--tri) no-repeat;pointer-events:none;animation:step-now .25s ease-out}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide p.line.step.now::before{position:absolute;left:-2px;top:calc(50% - 7px);width:11px;height:14px;margin:0;
+    background:var(--tri) no-repeat;animation:step-now .25s ease-out}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide p.line.step.now::after{left:-14px;right:-14px;top:-5px;bottom:-5px;width:auto;height:auto;
+    border:1.5px solid var(--orange);background:none}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide p.col.l1.step.now::before{left:-2px;top:calc(50% - 7px);width:11px;height:14px;
+    background:var(--tri) no-repeat;animation:step-now .25s ease-out}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide p.col.l1.step.now::after{display:none}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .card.now{outline:1.5px solid var(--orange);animation:step-now .25s ease-out}
+}
 
 /* --- HUD ---------------------------------------------------------------- */
 #hud{position:fixed;right:calc(10px + env(safe-area-inset-right, 0px));bottom:8px;z-index:9;display:flex;gap:6px}
@@ -421,6 +445,8 @@ html.laser-on .p-cur .p-fit{cursor:none}
   background:rgba(255,255,255,.94);box-shadow:0 2px 10px rgba(0,0,0,.3);color:#0E244E;
   font:600 14px Raleway,system-ui,sans-serif}
 #linkmsg[hidden]{display:none}
+#linkmsg.probe{font:13px/1.45 Arial,sans-serif;white-space:pre-line;text-align:left;max-width:min(92vw,620px);
+  cursor:pointer}   /* the screen probe: measured values to read off and compare (Doc, 27.09.2026) */
 /* start card after Chrome's one-time question "Fenster verwalten" - that question ate the first click */
 #linkgo{position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:rgba(14,36,78,.55)}
 #linkgo[hidden]{display:none}
