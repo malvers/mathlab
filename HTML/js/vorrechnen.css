@@ -197,7 +197,7 @@ body.anzeige::before {
     background: var(--anzeige-grund, #050d1c);
 }
 body.anzeige :is(#cyber-left-chrome, #mini-rail, #side-panel, #right-rail, #tafel-pfeil-vor, #tafel-pfeil-zurueck, #formel-schicht, #erkennen-klein,
-    #schritt-hinweis, #schritt-op, #notiz-rand, #notiz-leeren, #seite-leeren, #radierer, #radier-rahmen, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play,
+    #schritt-hinweis, #schritt-op, #schritt-hoch, #notiz-rand, #notiz-leeren, #seite-leeren, #radierer, #radier-rahmen, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play,
     #buzz-aufgabe, #buzzer-overlay, #tafel-overlay, #namen-overlay, #namen-pille) {
     display: none !important;
 }
@@ -240,7 +240,7 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
    --knopf scales both when the margin is narrow (erkennenKlein) */
 /* Doc, 26.09.: the notes' C "im gleichen Stil wie Erkennen, auch die
    Buchstabengröße und Font" - one look for both buttons in the margin */
-:is(#erkennen-klein, #notiz-leeren, #seite-leeren, #radierer) {
+:is(#erkennen-klein, #notiz-leeren, #seite-leeren, #radierer, #schritt-hoch) {
     position: absolute; z-index: 5;
     display: flex; align-items: center; justify-content: center; box-sizing: border-box;
     bottom: 6px; height: calc(46px * var(--knopf, 1)); border-radius: 8px; cursor: pointer; touch-action: manipulation;
@@ -250,7 +250,7 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
     background: linear-gradient(rgba(0, 210, 255, 0.14), rgba(0, 210, 255, 0.14)) #07162f;
     box-shadow: 0 0 14px rgba(0, 210, 255, 0.35);
 }
-#canvas-container.hell :is(#erkennen-klein, #notiz-leeren, #seite-leeren, #radierer) {
+#canvas-container.hell :is(#erkennen-klein, #notiz-leeren, #seite-leeren, #radierer, #schritt-hoch) {
     color: rgb(31, 64, 150); border-color: rgba(31, 64, 150, 0.85);
     background: linear-gradient(rgba(31, 64, 150, 0.08), rgba(31, 64, 150, 0.08)) #f4ecd8;
     box-shadow: none;
@@ -313,6 +313,18 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
    is one square of the paper (Doc, 26.09.) */
 #radierer { width: calc(46px * var(--knopf, 1)); padding: 0; transform: translateX(-50%); }
 #radierer svg { width: calc(24px * var(--knopf, 1)); height: calc(24px * var(--knopf, 1)); }
+/* the arrow bottom left: the grey next step goes up (vorschauHoch, Doc 27.09.) - shown by zeigeHinweis */
+#schritt-hoch { left: 12px; width: calc(46px * var(--knopf, 1)); padding: 0; }
+#schritt-hoch svg { width: calc(24px * var(--knopf, 1)); height: calc(24px * var(--knopf, 1)); }
+/* the steps' numbers (1), (2), ... beside the working, grey like the task's counter (Doc, 27.09.) - by the
+   container, not #rechenweg-schicht: the glide at a task change and the history show copies without ids */
+#canvas-container .rw-nummer { color: #8a93a3; }
+#canvas-container.hell .rw-nummer { color: #5d6678; }
+/* what was done to a row, "| -3x", in the palette's green (Doc, 27.09.: "die ausgeführten Schritte mit dem
+   vertikalen Strich dahinter") */
+#canvas-container .rw-op { color: rgb(121, 158, 49); }
+/* two columns: the thin line between them, in the colour of the line above the squares (Doc, 27.09.) */
+#canvas-container .rw-trenner { position: absolute; width: 0; border-left: 1px solid var(--papier-grenze); pointer-events: none; }
 #radierer.an { background: linear-gradient(rgba(0, 210, 255, 0.4), rgba(0, 210, 255, 0.4)) #07162f; box-shadow: 0 0 20px rgba(0, 210, 255, 0.75); }
 #canvas-container.hell #radierer.an { background: linear-gradient(rgba(31, 64, 150, 0.25), rgba(31, 64, 150, 0.25)) #f4ecd8; }
 #radier-rahmen {

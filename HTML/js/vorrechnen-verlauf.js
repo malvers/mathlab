@@ -63,6 +63,53 @@ function verlaufMerken(html, hoehe) {
     zeigeVerlauf();
 }
 // the tasks done, stacked upwards from the top of the board
+// Doc, 27.09.: the steps' numbers "bei den anderen überall" - the tasks done before the numbers came are
+// pictures of the board as it stood (verlaufMerken keeps the html): their steps get them here, flush right
+// behind the widest step of the task, on each row's baseline, in the look zeigeRechenweg gives them (0.7
+// of the row, 1.5 em of air). A picture that has them already stays as it is.
+let verlaufWartet = false;
+function nummernNachtragen(block, breite) {
+    if (block.querySelector('.rw-nummer')) return;
+    const gruppen = new Map();
+    block.querySelectorAll('[data-schritt]').forEach(z => {
+        const k = z.dataset.schritt;
+        if (!/^\d+$/.test(k) || !z.querySelector('.katex')) return;       // not the task, not an underline
+        if (!gruppen.has(k)) gruppen.set(k, []);
+        gruppen.get(k).push(z);
+    });
+    if (!gruppen.size) return;
+    // a row's column is its "=": the right cell starts there (zeigeRechenweg) - two columns, two ends
+    const zeilen = [...gruppen].map(([k, zellen]) => {
+        const z0 = zellen[zellen.length - 1], sonde = z0.lastElementChild;       // the probe on the baseline
+        return { nr: +k + 1, eltern: z0.parentElement, basis: parseFloat(z0.style.top) + (sonde ? sonde.offsetTop : 0),
+            fs: parseFloat(getComputedStyle(z0).fontSize), spalte: Math.round(parseFloat(z0.style.left)),
+            rechts: Math.max(...zellen.map(z => parseFloat(z.style.left) + z.offsetWidth)) };
+    });
+    const nummern = zeilen.map(z => {
+        const d = document.createElement('div');
+        d.className = 'rw-nummer';
+        d.style.cssText = `position:absolute;left:0;top:0;white-space:nowrap;line-height:normal;font-size:${(NUMMER_GROESSE * z.fs).toFixed(2)}px`;
+        try { katex.render(alsDisplay('(' + z.nr + ')'), d, { throwOnError: false }); } catch (_) { d.textContent = '(' + z.nr + ')'; }
+        const sonde = document.createElement('span');
+        sonde.style.cssText = 'display:inline-block;width:0;height:0';
+        d.appendChild(sonde);
+        z.eltern.appendChild(d);
+        return d;
+    });
+    const spalten = new Map();
+    zeilen.forEach((z, i) => {
+        if (!spalten.has(z.spalte)) spalten.set(z.spalte, []);
+        spalten.get(z.spalte).push(i);
+    });
+    spalten.forEach(idx => {
+        const luft = Math.max(...idx.map(i => NUMMER_LUFT * 1.21 * zeilen[i].fs));     // KaTeX's em is 1.21 of the cell's size
+        const ende = Math.min(breite - 16, Math.max(...idx.map(i => zeilen[i].rechts)) + luft + Math.max(...idx.map(i => nummern[i].offsetWidth)));
+        idx.forEach(i => {
+            nummern[i].style.left = (ende - nummern[i].offsetWidth) + 'px';
+            nummern[i].style.top = (zeilen[i].basis - nummern[i].lastElementChild.offsetTop) + 'px';
+        });
+    });
+}
 function zeigeVerlauf() {
     if (anzeigeModus) return;
     let v = document.getElementById('verlauf-schicht');
@@ -80,6 +127,12 @@ function zeigeVerlauf() {
         d.style.cssText = `position:absolute;left:0;right:0;top:${y}px;height:${verlaufBloecke[i].hoehe}px`;
         d.innerHTML = verlaufBloecke[i].html;
         v.appendChild(d);
+        nummernNachtragen(d, container.getBoundingClientRect().width);
+    }
+    // measured with a stand-in font the numbers would miss: once more when KaTeX's fonts are in
+    if (document.fonts && document.fonts.status === 'loading' && !verlaufWartet) {
+        verlaufWartet = true;
+        document.fonts.ready.then(() => { verlaufWartet = false; if (document.getElementById('verlauf-schicht')) zeigeVerlauf(); });
     }
     verlaufSetzen(verlaufY);
 }

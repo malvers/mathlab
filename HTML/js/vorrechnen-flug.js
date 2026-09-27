@@ -63,7 +63,8 @@ function flugWeg(f) {
 function flugLandet(f) {
     flugWeg(f);
     imFlug.delete(f.schritt);
-    document.querySelectorAll(`#rechenweg-schicht [data-schritt="${f.schritt}"]`).forEach(z => { z.style.visibility = ''; });
+    document.querySelectorAll(`#rechenweg-schicht :is([data-schritt="${f.schritt}"], [data-nummer="${f.schritt}"], [data-mit="${f.schritt}"])`)
+        .forEach(z => { z.style.visibility = ''; });
 }
 function flugZurueck(f) {
     flugWeg(f);
@@ -77,10 +78,12 @@ function flugZurueck(f) {
 function schaetzeZiel(b, k) {
     const host = document.getElementById('rechenweg-schicht');
     const c = container.getBoundingClientRect(), glyph = 1.21 * parseFloat(getComputedStyle(host).fontSize);
-    let gleich = c.width / 2;
+    let gleich = c.width / 2, linie = rechenwegLinie;
     if (host.children[0]) gleich = host.children[0].getBoundingClientRect().right - c.left;
+    // two columns: the next step goes on under the right one (zeigeRechenweg sets it)
+    if (rechenwegZiel) { gleich = rechenwegZiel.gleich; linie = rechenwegZiel.linie; }
     const s = Math.min(1, 1.2 * glyph / Math.max(1, b.h));
-    const mitte = (rechenwegLinie + k + 0.5) * ZEILE - 1;
+    const mitte = (linie + k + 0.5) * ZEILE - 1;
     return { s, tx: gleich - s * (b.x + b.w / 2), ty: mitte - s * (b.y + b.h / 2) };
 }
 function starteFluege(zeilen) {
@@ -218,11 +221,38 @@ function rechenwegHoch() {
     verwerfeErkennung();
     recompute();
     merkeStriche();
+    schritteLanden(erster, latexe, farben, von, c);
+}
+// the steps from erster on are in the working now: laid out hidden, each glides as KaTeX from where it
+// stood (von, in the container) onto its row, its twin on the beamer - for a line swiped up
+// (rechenwegHoch) and for a grey step sent up with the arrow (vorschauHoch)
+// Doc, 27.09.: "unten links in das untere Panel ... ein Button mit einem Pfeil, so dass ich das, was da
+// steht, hochpushen kann. Ohne dass ich es jetzt jedes Mal abtippen muss" - the next grey step goes up as
+// if written: from its place in the preview onto its row, in ink; undo takes it back. Not while written
+// lines are in the air - they keep their order (and one of them may be this very step).
+function vorschauHoch() {
+    const naechster = vorschau && naechsterSchritt();          // P off: nothing grey, nothing to send
+    if (!naechster || fluege.length) return;
+    verlaufZurueck();
+    merkeVerlauf();
+    const c = container.getBoundingClientRect();
+    const k = document.querySelector('#schritt-hinweis > .sh-zeile .katex-html');
+    const r = k && k.getBoundingClientRect();
+    const von = r && r.width ? { x: r.left - c.left, y: r.top - c.top, w: r.width }
+        : { x: HINWEIS_LINKS, y: papierGrenze(c.height) + 4, w: 1 };
+    const erster = rechenweg.length;
+    rechenweg.push({ latex: naechster[0], farbe: INK });
+    merkeRechenweg();
+    schritteLanden(erster, [naechster[0]], [INK], [von], c);
+}
+function schritteLanden(erster, latexe, farben, von, c) {
     zeigeRechenweg(erster);
     const host = document.getElementById('rechenweg-schicht');
     latexe.forEach((latex, k) => {
         const zellen = [...host.querySelectorAll(`[data-schritt="${erster + k}"]`)];
-        const zeigen = () => zellen.forEach(z => { z.style.visibility = ''; });
+        // its number and the operation that made it show with it
+        const mit = [...host.querySelectorAll(`[data-nummer="${erster + k}"], [data-mit="${erster + k}"]`)];
+        const zeigen = () => [...zellen, ...mit].forEach(z => { z.style.visibility = ''; });
         let x0 = Infinity, y0 = Infinity;
         zellen.forEach(z => {
             const r = (z.querySelector('.katex-html') || z).getBoundingClientRect();
@@ -430,11 +460,31 @@ async function erwarteterSchritt(line, striche = strokes, ab = null) {
 const HINWEIS_SCHRITTE = 5, HINWEIS_GROESSE = 1.2;            // rows, rem per row
 const HINWEIS_LINKS = 8;                  // px from the left edge - the task arrows' tips too
 const HINWEIS_ABSTAND = 0.6;              // em of the steps between one row's ink and the next
+// the arrow bottom left that sends the grey step up (vorschauHoch) - with the eraser and the Cs (zeigeNotizRand)
+function hochKnopf() {
+    let k = document.getElementById('schritt-hoch');
+    if (!k) {
+        k = document.createElement('button');
+        k.id = 'schritt-hoch';
+        k.type = 'button';
+        k.title = 'Nächsten Schritt hochschicken';
+        k.setAttribute('aria-label', 'Nächsten Schritt hochschicken');
+        k.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor"' +
+            ' stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20 V5"/><path d="M6 11 L12 5 L18 11"/></g></svg>';
+        k.addEventListener('click', () => vorschauHoch());
+        container.appendChild(k);
+    }
+    return k;
+}
 function zeigeHinweis() {
     if (anzeigeModus) return;
     const schritte = vorschau ? naechsteSchritte(HINWEIS_SCHRITTE) : [];   // P off: nothing grey
     let el = document.getElementById('schritt-hinweis'), opEl = document.getElementById('schritt-op');
-    if (!schritte.length) { [el, opEl].forEach(e => { if (e) e.style.display = 'none'; }); return; }
+    // the arrow stays (Doc, 27.09.: "auch wenn nicht mehr hochzuschieben ist ... symmetrischer mit dem
+    // Radiergummi und dem C"), pale like the C over an empty field while no grey step shows
+    const hk = document.getElementById('schritt-hoch');
+    if (!schritte.length) { [el, opEl].forEach(e => { if (e) e.style.display = 'none'; }); if (hk) hk.style.opacity = '0.35'; return; }
+    hochKnopf().style.opacity = '';
     if (!el) {
         el = document.createElement('div');
         el.id = 'schritt-hinweis';
@@ -510,7 +560,7 @@ function zeigeHinweis() {
     // as many steps as fit above the buttons at the bottom (ERKENNEN, the Cs, the
     // eraser) - from the first that does not, none: a step left out would be a gap.
     // The next step always shows.
-    const knoepfe = ['erkennen-klein', 'seite-leeren', 'notiz-leeren', 'radierer']
+    const knoepfe = ['erkennen-klein', 'seite-leeren', 'notiz-leeren', 'radierer', 'schritt-hoch']
         .map(id => document.getElementById(id)).filter(k => k && k.style.display !== 'none' && k.offsetParent)
         .map(k => k.getBoundingClientRect().top - 6);
     const grenze = Math.min(r.bottom - 8, ...knoepfe);
@@ -534,7 +584,7 @@ function zeigeNotizRand() {
     let el = document.getElementById('notiz-rand');
     if (modus === 'beispiele') {
         if (el) el.style.display = 'none';
-        ['notiz-leeren', 'seite-leeren', 'radierer'].forEach(id => { const k = document.getElementById(id); if (k) k.style.display = 'none'; });
+        ['notiz-leeren', 'seite-leeren', 'radierer', 'schritt-hoch'].forEach(id => { const k = document.getElementById(id); if (k) k.style.display = 'none'; });
         setzeRadieren(false);
         return;
     }
@@ -599,6 +649,10 @@ function zeigeNotizRand() {
     rk.style.left = Math.round(notizX(r.width) / 2) + 'px';
     radiererBlass();
     rk.style.display = '';
+    // the arrow bottom left, pale until a grey step shows (zeigeHinweis)
+    const hk = hochKnopf();
+    if (!vorschau || !naechsterSchritt()) hk.style.opacity = '0.35';
+    hk.style.display = '';
 }
 // the writing field without the notes: what is written there goes (undo brings
 // it back), the notes and the working stay; its recognition is void
