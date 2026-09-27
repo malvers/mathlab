@@ -33,7 +33,7 @@
         ['mathe/mathe13.html', 'MA 13', 'b-grey', 'Mathematik Klasse 13 (BGY)'],
         ['mathe/abitur.html', 'Abi MA', 'b-grey', 'Training Abitur Mathematik (BGY)'],
         ['physik/phygy10.html', 'PH 10', 'b-grey', 'Physik Klasse 10 (Gymnasium)'],
-        ['wr/wr11.html', 'W/R 11', 'b-grey', 'Wirtschaftslehre/Recht Klasse 11 (BGY)'],
+        /* wr/wr11.html (W/R 11) is parked, not linked - see the note in svp/index.html (27.09.2026) */
         ['informatik/informatik9.html', 'INF 9', 'b-grey', 'Informatik Klasse 9'],
         ['informatik/inf11.html', 'INF 11', 'b-grey', 'Informatik Klasse 11 (BGY)'],
         ['informatik/inf12.html', 'INF 12', 'b-grey', 'Informatik Klasse 12 (BGY)'],
@@ -124,8 +124,7 @@
                             'mathe/abitur.html']],
             ['Informatik', ['informatik/inf11.html', 'informatik/inf12.html', 'informatik/inf13.html']],
             ['Informatiksysteme', ['informatik/informatik11.html', 'informatik/informatik12.html',
-                                   'informatik/informatik13.html']],
-            ['Wirtschaft/Recht', ['wr/wr11.html']]
+                                   'informatik/informatik13.html']]
         ]],
         ['Fachoberschule', [
             ['Mathematik', ['mathe/mathefos11.html', 'mathe/mathefos12.html']],
