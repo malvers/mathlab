@@ -224,7 +224,9 @@
     sl.className = 'slide content';
     const titel = a.nr ? 'Aufgabe ' + a.nr : 'Rechnung ' + (k + 1);
     /* the variable it is solved for as a formula, in red - as vorrechnen.html colours it (variablenFarbe) */
-    const dazu = [a.block ? esc(a.block) : '', a.nach ? 'umstellen nach <span class="tf-var"></span>' : ''].filter(Boolean).join(' · ');
+    /* a term to simplify has '' instead of a variable (Doc, 28.09.2026) - a free board has none at all */
+    const dazu = [a.block ? esc(a.block) : '', a.nach ? 'umstellen nach <span class="tf-var"></span>' : a.nach === '' ? 'vereinfachen' : '']
+      .filter(Boolean).join(' · ');
     sl.innerHTML = '<h3>' + esc(titel) + (dazu ? '<span class="tf-dazu">' + dazu + '</span>' : '') + '</h3>' +
       '<div class="rules"></div>';
     const v = sl.querySelector('.tf-var');
@@ -242,8 +244,8 @@
       const letzte = z === zeilen.length - 1 && z > 0;
       const teile = teileAmGleich(tex);
       /* the right side without its commands: the "a" in \frac is no variable */
-      const ergebnis = letzte && a.nach && teile && norm(teile[0]) === a.nach &&
-        norm(teile[1]).replace(/\\[a-zA-Z]+/g, '').indexOf(a.nach) < 0;
+      const ergebnis = letzte && (a.nach === '' ? !!a.ende && norm(tex) === norm(a.ende) :     // a term: its solution's last step
+        a.nach && teile && norm(teile[0]) === a.nach && norm(teile[1]).replace(/\\[a-zA-Z]+/g, '').indexOf(a.nach) < 0);
       const zeile = zeileBauen(tex, ergebnis, ops[z + 1 - erste] || null, a.nach, z >= erste ? z - erste + 1 : null);
       if (z >= erste) { zeile.classList.add('step'); zeile.dataset.g = z - erste; }
       rechnung.appendChild(zeile);
@@ -322,11 +324,12 @@
      nur das Demo-Deck". A collection, not a lesson: it has a name instead of a day. */
   async function ladeSammlung() {
     await ladeSkript('../js/vorrechnen-aufgaben.js');
+    await ladeSkript('../js/vorrechnen-aufgaben-wurzeln.js');
     return {
-      sammlung: true, titel: 'Gleichungen umstellen', kicker: 'Vorrechnen · alle Aufgaben',
+      sammlung: true, titel: 'Umstellen und Vereinfachen', kicker: 'Vorrechnen · alle Aufgaben',
       aufgaben: AUFGABEN.map(function (t, i) {
         const b = aufgabenBlock(i), l = LOESUNGEN[t[0]] || [];
-        return { schluessel: t[0], nr: i - b.ab + 1, block: b.titel, latex: t[1], nach: t[2],
+        return { schluessel: t[0], nr: i - b.ab + 1, block: b.titel, latex: t[1], nach: t[2], ende: l.length ? l[l.length - 1][0] : null,
           rechenweg: l.map(function (st) { return st[0]; }), umformungen: l.map(function (st) { return st[1]; }) };
       })
     };

@@ -43,7 +43,7 @@ function tafelSammeln(ziel) {
         const umformung = l => { const s = loesung.find(([st]) => schrittNorm(st) === schrittNorm(l.latex)); return s ? s[1] : null; };
         return { schluessel: schluessel || 'frei-' + heute, nr: b ? i - b.ab + 1 : null, block: b ? b.titel : null,
             latex: latex || null, nach: i >= 0 ? AUFGABEN[i][2] : null, rechenweg: zeilen.map(l => l.latex),
-            umformungen: zeilen.map(umformung), zeit };
+            umformungen: zeilen.map(umformung), ende: loesung.length ? loesung[loesung.length - 1][0] : null, zeit };
     };
     const liste = a.filter(e => e && e.zeit && tagIso(new Date(e.zeit)) === heute && (e.rechenweg || []).length &&
         (!e.tafel || e.tafel === ziel)).map(e => eintrag(e.aufgabe, e.latex, e.rechenweg, e.zeit));

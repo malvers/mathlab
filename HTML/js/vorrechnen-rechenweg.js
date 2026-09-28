@@ -55,7 +55,9 @@ function zeigeVorlage(hinweis) {
         // block the counter counts in ("Level 3 · echte Nüsse"), right before ▶ (placed by zeigeRechenweg)
         (aufgabenModus ? `<span id="vorlage-block" style="${RAND};right:24px">${aufgabenBlock(nr).titel}</span>` : '') +
         (testModus ? `<span id="vorlage-formel" style="font-size:2.4rem;color:${anzeige(INK)}"></span>` : '') +
-        (nach ? `<span id="vorlage-nach" style="${RAND};right:24px">umstellen nach <span style="font-size:1.4em"></span></span>` : '');
+        (nach ? `<span id="vorlage-nach" style="${RAND};right:24px">umstellen nach <span style="font-size:1.4em"></span></span>`
+            // Doc, 28.09.: a term to simplify (Wurzeln · Stolperfallen, no variable) - "vereinfachen" in its place
+            : aufgabenModus && nach === '' ? `<span id="vorlage-nach" style="${RAND};right:24px">vereinfachen</span>` : '');
     if (nach) {
         const v = host.querySelector('#vorlage-nach span');
         try { katex.render(nach, v, { throwOnError: false }); } catch (e) { v.textContent = nach; }
@@ -151,6 +153,12 @@ const linieAb = s => ZEILE / 2 - ACHSE_EM * rechenEm() * s;
 function ergebnisSchritt() {
     if (!aufgabenModus) return -1;
     const v = AUFGABEN[aufgabeIdx][2];
+    // a term to simplify (no variable, Doc 28.09.): its result is the last step of its solution
+    if (v === '') {
+        const l = LOESUNGEN[AUFGABEN[aufgabeIdx][0]], ende = l && l.length ? schrittNorm(l[l.length - 1][0]) : null;
+        for (let i = rechenweg.length - 1; i >= 0; i--) if (ende && schrittNorm(rechenweg[i].latex) === ende) return i;
+        return -1;
+    }
     for (let i = rechenweg.length - 1; i >= 0; i--) {
         const [l, r] = amGleich(rechenweg[i].latex.replace(UNGEFAEHR, '='));
         const links = l.replace(/\\displaystyle|[\s{}]/g, '');
