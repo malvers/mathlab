@@ -365,7 +365,15 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
   const hudBox = document.getElementById('hud');   // bottom right, next to play and fullscreen
   if (hudBox) hudBox.insertBefore(btn, hudBox.firstChild); else document.body.appendChild(btn);
   let built = false;
-  function close() { ov.hidden = true; }
+  // In fullscreen the browser keeps Esc for itself: a press left fullscreen and ended the show, the overview still
+  // open. While the overview is open, Esc is locked to the page (Keyboard Lock API, Chrome/Edge) and only closes it;
+  // holding Esc still leaves fullscreen (Doc, 28.09.2026: "im overview soll ESC nur den Mode schließen").
+  const kb = navigator.keyboard;
+  function escLock(on) {
+    if (!kb || !kb.lock) return;
+    if (on) kb.lock(['Escape']).catch(function () { }); else kb.unlock();
+  }
+  function close() { ov.hidden = true; escLock(false); }
   function build() {
     slides.forEach(function (s, i) {
       const cell = document.createElement('div');
@@ -437,6 +445,7 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
     if (typeof narr !== 'undefined') narr.stop();
     if (!built) build();
     ov.hidden = false;
+    escLock(true);
     marks();
     [].forEach.call(ov.children, function (c, i) { c.classList.toggle('cur', i === si); });
     scale();
@@ -2556,6 +2565,16 @@ const link = (function () {
     q('.p-prev').onclick = function () { prev(); };
     q('.p-next').onclick = function () { next(); };
     fits[0].addEventListener('click', function () { next(); });   // a click on the slide goes on, as on the beamer
+    // a click on a preview goes there - one click ahead, or two (Doc, 28.09.2026: "die großen rechts ... bitte da auch")
+    [1, 2].forEach(function (k) {
+      fits[k].title = k === 1 ? 'Klick: zur nächsten Folie' : 'Klick: zur übernächsten Folie';
+      fits[k].addEventListener('click', function () {
+        let p = { si: si, step: step };
+        for (let n = 0; n < k && p; n++) p = ahead(p);
+        if (!p) return;                              // "Ende" or empty: nothing ahead
+        si = p.si; step = p.step; paint();
+      });
+    });
     // a clicked button must not keep the focus: the space bar would press it again on top of turning the page
     root.addEventListener('mousedown', function (e) { if (e.target.closest('button')) e.preventDefault(); });
     setInterval(tick, 500); tick(); showPause();
