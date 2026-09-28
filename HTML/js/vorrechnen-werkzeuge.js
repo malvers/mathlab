@@ -77,11 +77,8 @@ function wiederholen() {
 // never a font glyph), the C too;
 // their stroke is the rail's (1.5, js/cyber-lab-overrides.css).
 const WERKZEUG_ICONS = {
-    // clear everything: a bin (Doc, 28.09.: "im Rail das C um in Papierkorb" - the C is the board's own now,
-    // bottom right above the line); Lucide "trash-2" (ISC)
-    clear: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">' +
-           '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>' +
-           '<path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><path d="M10 11v6M14 11v6"/></g>',
+    // clear everything: a bin (Doc, 28.09.: "im Rail das C um in Papierkorb"), the one of js/vorrechnen-flug.js
+    clear: PAPIERKORB,
     undo: '<path d="M9 13 L4.5 8.5 L9 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>' +
           '<path d="M4.5 8.5 H14 A5.5 5.5 0 0 1 14 19.5 H10" fill="none" stroke="currentColor" stroke-linecap="round"/>',
     redo: '<path d="M15 13 L19.5 8.5 L15 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>' +

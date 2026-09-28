@@ -577,6 +577,12 @@ function karoBisRand() {
     const rest = (modus === 'beispiele' ? 0 : Math.round(b - notizX(b))) + 'px';
     if (p.style.getPropertyValue('--notiz-breite') !== rest) p.style.setProperty('--notiz-breite', rest);
 }
+// the bin of every clear button - the rail's (js/vorrechnen-werkzeuge.js) and the three on the board
+// (Doc, 28.09.: "mach die C bitte auch Papierk."); Lucide "trash-2" (ISC)
+const PAPIERKORB = '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>' +
+    '<path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><path d="M10 11v6M14 11v6"/></g>';
+const PAPIERKORB_KNOPF = `<svg viewBox="0 0 24 24" stroke-width="1.8" aria-hidden="true" focusable="false">${PAPIERKORB}</svg>`;
 // the margin's edge, a solid line for Doc only (not mirrored, hidden on the beamer)
 function zeigeNotizRand() {
     if (anzeigeModus) return;
@@ -607,7 +613,7 @@ function zeigeNotizRand() {
         k.type = 'button';
         k.title = 'Notizen löschen';
         k.setAttribute('aria-label', 'Notizen löschen');
-        k.textContent = 'C';           // Doc: "im gleichen Stil wie Erkennen ... Buchstabengröße und Font"
+        k.innerHTML = PAPIERKORB_KNOPF;   // was a C "im gleichen Stil wie Erkennen" (Doc, 26.09.)
         k.addEventListener('click', () => notizenLeeren());
         container.appendChild(k);
         k.style.opacity = strokes.some(notizPruefer()) ? '' : '0.35';
@@ -622,7 +628,7 @@ function zeigeNotizRand() {
         sk.type = 'button';
         sk.title = 'Schreibfeld löschen';
         sk.setAttribute('aria-label', 'Schreibfeld löschen');
-        sk.textContent = 'C';
+        sk.innerHTML = PAPIERKORB_KNOPF;
         sk.addEventListener('click', () => seiteLeeren());
         container.appendChild(sk);
         const istNotiz = notizPruefer();
@@ -640,7 +646,7 @@ function zeigeNotizRand() {
         ok.type = 'button';
         ok.title = 'Tafel oben löschen';
         ok.setAttribute('aria-label', 'Tafel oben löschen');
-        ok.textContent = 'C';
+        ok.innerHTML = PAPIERKORB_KNOPF;
         ok.addEventListener('click', () => { ok.blur(); obenLeeren(); });
         container.appendChild(ok);
     }
