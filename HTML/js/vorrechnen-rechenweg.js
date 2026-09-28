@@ -197,7 +197,7 @@ let rechenwegZiel = null;          // in two columns: { gleich, linie } where th
 let rechenwegMass = null;          // what the last layout measured and decided - for a look from outside (DevTools)
 function zeigeRechenweg(verborgenAb) {
     if (anzeigeModus) return;
-    if (typeof obenBlass === 'function') obenBlass();   // the board's C: dimmed without a working (js/vorrechnen-flug.js)
+    if (typeof obenBlass === 'function') obenBlass();   // the board's C: dimmed without ink up there (js/vorrechnen-flug.js)
     let host = document.getElementById('rechenweg-schicht');
     if (!host) {
         host = document.createElement('div');

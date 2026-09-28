@@ -644,8 +644,8 @@ function zeigeNotizRand() {
         ok = document.createElement('button');
         ok.id = 'oben-leeren';
         ok.type = 'button';
-        ok.title = 'Tafel oben löschen';
-        ok.setAttribute('aria-label', 'Tafel oben löschen');
+        ok.title = 'Anmerkungen oben löschen – die Rechnung bleibt';
+        ok.setAttribute('aria-label', 'Anmerkungen oben löschen – die Rechnung bleibt');
         ok.innerHTML = PAPIERKORB_KNOPF;
         ok.addEventListener('click', () => { ok.blur(); obenLeeren(); });
         container.appendChild(ok);
@@ -695,26 +695,23 @@ function seiteLeeren() {
     recompute();
     merkeStriche();
 }
-// only the board above the line goes: the working, the lines still in the air and the ink written up there;
-// the task, the writing field and the notes stay. Undo brings it back.
+// only the ink written on the board above the line goes (Doc, 28.09.: "nicht die Formeln clearen ... nur die
+// Annotations"); the working, the lines still in the air, the task, the writing field and the notes stay.
+// Undo brings it back.
 function obenLeeren() {
     const istOben = obenPruefer();
-    if (!rechenweg.length && !fluege.length && !strokes.some(istOben)) return;
+    if (!strokes.some(istOben)) return;
     merkeVerlauf();
-    flugAbbrechen();
-    rechenweg.length = 0;
-    merkeRechenweg();
-    zeigeRechenweg();
     const bleiben = strokes.filter(st => !istOben(st));
     strokes.length = 0;
     bleiben.forEach(st => strokes.push(st));
     recompute();
     merkeStriche();
 }
-// nothing up there: dimmed, like the other Cs
+// no ink up there: dimmed, like the other Cs
 function obenBlass() {
     const k = document.getElementById('oben-leeren');
-    if (k) k.style.opacity = rechenweg.length || fluege.length || strokes.some(obenPruefer()) ? '' : '0.35';
+    if (k) k.style.opacity = strokes.some(obenPruefer()) ? '' : '0.35';
 }
 // only the notes go; undo brings them back. The line read before stays read:
 // in class only its LaTeX is used later, and the flight reads its own strokes
