@@ -321,7 +321,7 @@ function zeigeWerkzeuge() {
                 zeigeWerkzeuge();
             }, false]], leiste);
         werkzeuge([
-            ['clear', 'Alles leeren', () => clearAll(), true],
+            ['clear', 'Alles leeren', () => clearAll(true), true],
             ['undo', 'Rückgängig', () => rueckgaengig(), false],
             ['redo', 'Wiederholen', () => wiederholen(), false],
             ['neuladen', 'Neu laden – frisch vom Server (wie Strg F5)', () => neuLaden(), true]]);

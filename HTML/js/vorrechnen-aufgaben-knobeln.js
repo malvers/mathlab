@@ -203,13 +203,16 @@
     // number words it goes as \textrm (the same font, a class of its own), js/vorrechnen.css sets it at 95.4 %.
     // A digit there ("die 0 zu klein": 0.666 against 0.683) goes as \textup, set like the round O (to 0.705).
     const buchstabe = z => z === 'A' ? '\\textrm{A}' : /\d/.test(z) ? '\\textup{' + z + '}' : '\\mathrm{' + z + '}';
+    // The exponent takes no width (\mathrlap): the "10" stands centred over its letter, the power hangs out to the
+    // right - centred as a whole, 10³ sat left of the letter (Doc, 28.09.: "sitzen nicht x-symmetrisch").
     const stellen = (w, potenz) => [...w].map((z, i) => {
         const k = w.length - 1 - i;
-        return '\\overset{\\color{#8a93a3}\\scriptstyle ' + (potenz ? '10^{' + k + '}' : 10 ** k) + '}' +
+        return '\\overset{\\color{#8a93a3}\\scriptstyle ' + (potenz ? '10^{\\mathrlap{' + k + '}}' : 10 ** k) + '}' +
             '{' + buchstabe(z) + '\\vphantom{\\mathrm{A}}}';        // vphantom: over the 0 at letter height
     }).join('');
+    // one letter is a number word too: the H of MATH + ATH + TH + H, the A of A + A + A ("warum hat H keine?")
     AUFGABEN.slice(ab).forEach((a, j) => {
-        a[1] = a[1].replace(/\\mathrm\{([A-Z0-9]{2,})\}/g, (_, w) => stellen(w, j >= AUSGESCHRIEBEN));
+        a[1] = a[1].replace(/\\mathrm\{([A-Z0-9]+)\}/g, (_, w) => stellen(w, j >= AUSGESCHRIEBEN));
     });
     const ENG = '\\mkern-0.5mu\\cdot\\mkern-0.5mu ';
     const woerter = s => s.replace(/\\mathrm\{([A-Z0-9]{2,})\}/g, (_, w) => [...w].map(buchstabe).join(''));
