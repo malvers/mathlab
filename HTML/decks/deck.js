@@ -24,8 +24,9 @@ function shotKey(f) {
 // WebGL context): a stand-in keeps the place and wears the screenshot if there is one - asked once per picture,
 // a missing one keeps the label
 const shotHas = {};
-function standIns(node) {
+function standIns(node, keep) {
   node.querySelectorAll('iframe').forEach(function (f) {
+    if (keep && keep(f)) return;                    // the tablet keeps its labs live (deck-ink.js)
     const d = document.createElement('div');
     d.className = 'p-live';
     if (f.classList.contains('live-frame')) { d.classList.add('dice'); d.style.cssText = f.style.cssText; d.textContent = '3D-Würfel'; }
@@ -1900,10 +1901,13 @@ const link = (function () {
       for (let i = 0; el && i < path.length; i++) el = el.children[path[i]];
       return el || null;
     }
-    // presenter: listen to one live iframe of the current slide (capture phase, before the lab itself)
-    function watch(f, slide, k, gesture) {
+    // presenter: listen to one live iframe of the current slide (capture phase, before the lab itself).
+    // own: the deck window's own lab (no presenter view) - what a hand does there goes to the tablet alone
+    // (Doc, 28.09.2026: "wenn auch auf dem gespiegelten Lenovo die Labs live zu sehen wären")
+    function watch(f, slide, k, gesture, own) {
       let w;
       try { w = f.contentWindow; if (!w.document) return; } catch (e) { return; }   // another origin: no mirror
+      if (own) { if (w.__deckTap) return; w.__deckTap = true; }   // one watch per lab window
       TYPES.forEach(function (type) {
         w.addEventListener(type, function (e) {
           if (!e.isTrusted) return;
@@ -1930,9 +1934,11 @@ const link = (function () {
           if (e.key !== undefined) { m.key = e.key; m.code = e.code; m.rep = e.repeat; m.kc = e.keyCode; }
           if (type === 'input' || type === 'change') { m.val = tgt && tgt.value; m.chk = tgt && tgt.checked; }
           if (type === 'scroll' && tgt) { m.st = tgt.scrollTop; m.sl = tgt.scrollLeft; }
-          send(m);
+          if (!own) send(m);                          // to the beamer window
+          if (window.DeckLabTap) window.DeckLabTap(m);  // and to the tablet, when one is linked (deck-ink.js)
         }, true);
       });
+      if (own) return;                                // the laser below belongs to the presenter view
       // the laser follows the mouse over a lab as well - its moves never reach this document
       w.addEventListener('pointermove', function (e) {
         const r = f.getBoundingClientRect(), k = r.width / (f.offsetWidth || 1);
@@ -2012,6 +2018,23 @@ const link = (function () {
     }
     return { watch: watch, replay: replay };
   })();
+  window.DeckLabMirror = mirror;                      // the tablet replays with it (deck-ink.js)
+  // The deck window watches its own labs as well: only input that really comes from a hand counts (isTrusted),
+  // so the beamer's copy, which only replays, never sends anything on. Without a linked tablet nothing leaves.
+  if (!PRESENTER) {
+    slides.forEach(function (s, i) {
+      s.querySelectorAll('iframe').forEach(function (f, k) {
+        if (!f.closest('.labframe')) return;
+        const hook = function () {
+          // not the frame's first empty page: Chrome may keep that window for the lab, and the mark would stick
+          try { if (!f.contentWindow || f.contentWindow.location.href === 'about:blank') return; } catch (e) { return; }
+          mirror.watch(f, i, k, function () { }, true);
+        };
+        f.addEventListener('load', hook);
+        hook();                                       // loaded already (a lab from the cache)
+      });
+    });
+  }
 
   // Laser pointer (Doc, 16.09.2026: "wenn ich die Maus auf presenter bewege, könnte da ein Laser im Show sein?",
   // then "lass mal immer kommen" and "l schalten ihn!"). The mouse over the presenter's current slide shows as a

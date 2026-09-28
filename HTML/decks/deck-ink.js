@@ -214,6 +214,33 @@ function send(m) {
 }
 function op(m) { m.t = 'ink'; applyInk(m); send(m); }
 
+// ---- labs live on the tablet (Doc, 28.09.2026: "wenn auch auf dem gespiegelten Lenovo die Labs live zu sehen
+// wären ... geht?" - "ja"). deck.js watches every lab a hand works in - the presenter's live slide or the deck window's
+// own - and hands each input here (DeckLabTap). It goes to the tablet only, bundled every 40 ms like the pen's points;
+// the tablet keeps its labs live and plays the input again on its own copy (DeckLabMirror.replay). The lab has the
+// same inner size everywhere (the frame is scaled, not resized), so a press lands on the same spot. Limits as between
+// presenter and beamer: the tablet's lab starts fresh when its page loads - "Labor zuruecksetzen" puts both in step.
+const LAB_TYPES = new Set(['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'mousedown', 'mousemove',
+  'mouseup', 'click', 'dblclick', 'wheel', 'keydown', 'keyup', 'input', 'change', 'scroll']);
+let labQ = [], labT = 0;
+window.DeckLabTap = function (m) {
+  if (REMOTE || !net || !netUp) return;
+  labQ.push(Object.assign({}, m));
+  if (labT) return;
+  labT = setTimeout(function () {
+    labT = 0;
+    const evs = labQ; labQ = [];
+    if (!evs.length || !net || !netUp) return;
+    const out = { t: 'lab', evs: evs, from: me, deck: DECK };
+    try { Promise.resolve(net.send({ type: 'broadcast', event: 'm', payload: out })).catch(function () { }); } catch (e) { }
+  }, 40);
+};
+// what comes in is a replay order for one of the tablet's own labs - checked field by field before it runs
+function labOk(e) {
+  return e && typeof e === 'object' && LAB_TYPES.has(e.type) && Number.isInteger(e.si) && Number.isInteger(e.k)
+    && e.si >= 0 && e.si < slides.length && e.k >= 0 && e.k < 8;
+}
+
 function loadScript(src) {
   return new Promise(function (ok, no) {
     const s = document.createElement('script');
@@ -274,6 +301,10 @@ function receive(m) {
   }
   if (m.deck !== DECK) return;
   if (m.t === 'ink') applyInk(m);
+  else if (m.t === 'lab') {                           // a hand in a lab on the Mac: the same on the tablet's copy
+    if (!REMOTE || !Array.isArray(m.evs) || !window.DeckLabMirror) return;
+    m.evs.forEach(function (e) { if (labOk(e)) try { DeckLabMirror.replay(e); } catch (err) { } });
+  }
   else if (m.t === 'hello') {                         // asked for this very deck: answered, seen or not
     if (REMOTE || PRESENTER) return;
     send({ t: 'state', to: m.from, si: si, step: step, ink: ink });
@@ -540,7 +571,8 @@ if (REMOTE) {
   document.documentElement.classList.add('ink-remote');
   const c = params.get('stift');
   if (/^\d{6}$/.test(c || '')) { schreib(KEY_CODE, c); history.replaceState(null, '', location.pathname + '?stift' + location.hash); }
-  try { standIns(deck); } catch (e) { }              // labs do not run on the tablet: their pictures stand in
+  // the labs run on the tablet too and follow the Mac (DeckLabTap above); the 3D dice stay pictures
+  try { standIns(deck, function (f) { return !!f.closest('.labframe'); }); } catch (e) { }
   // a click beside the slide must not turn it - on the tablet only the triangles do
   addEventListener('click', function (e) {
     if (e.target && e.target.closest && e.target.closest('#nav, #hud, #ink-bar, #ink-card, #overview, a')) return;
