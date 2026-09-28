@@ -4,6 +4,8 @@
 // and decks/tafel.html (Doc, 28.09.: "einhängen"). No variable (third field ''): the head says
 // "vereinfachen", the result is the solution's last step. The task has no "=", so it ends at the
 // "=" axis and the steps ("= ...") start on it. The block is for week 41 (kw) - the lab opens it then.
+// w-17 and w-neunzig come from two more of Doc's pictures: "∛289 = 17" (289 is 17², not 17³) and the
+// 90th root of 9^99/9^9.
 // Every step was checked with sympy: it has exactly the value of the task. All formulas and
 // operations render with the lab's KaTeX 0.16.8 (strict, no warnings).
 (function () {
@@ -15,6 +17,7 @@
         ['w-summe',     '\\sqrt{9+16}-\\sqrt{9}-\\sqrt{16}',                           ''],
         ['w-bruch',     '\\frac{\\sqrt{9}+\\sqrt{16}}{\\sqrt{9+16}}',                  ''],
         ['w-doppelt',   '\\sqrt{\\sqrt{81}}+\\sqrt{\\sqrt{16}}',                       ''],
+        ['w-17',        '\\sqrt{289}-\\sqrt[3]{4913}',                                 ''],
         ['w-vier',      '\\frac{\\sqrt{2}+\\sqrt{2}+\\sqrt{2}+\\sqrt{2}}{\\sqrt{8}}',  ''],
         ['w-acht',      '\\frac{\\sqrt{8}+\\sqrt{2}}{\\sqrt{2}}',                      ''],
         ['w-minus',     '\\frac{\\sqrt{50}-\\sqrt{2}}{\\sqrt{2}}',                     ''],
@@ -23,6 +26,7 @@
         ['w-gesetz',    '\\sqrt{12}\\cdot\\sqrt{3}-\\sqrt{12}:\\sqrt{3}',              ''],
         ['w-produkt',   '\\frac{\\sqrt{6}\\cdot\\sqrt{15}}{\\sqrt{10}}',               ''],
         ['w-potenz',    '\\frac{(\\sqrt{2})^6}{\\sqrt{2}\\cdot\\sqrt{8}}',             ''],
+        ['w-neunzig',   '\\sqrt[90]{\\frac{9^{99}}{9^9}}',                             ''],
         ['w-binom',     '(\\sqrt{5}+\\sqrt{3})(\\sqrt{5}-\\sqrt{3})',                  ''],
         ['w-achtzehn',  '(\\sqrt{2}+\\sqrt{8})^2',                                     ''],
         ['w-kubik',     '\\frac{\\sqrt[3]{16}+\\sqrt[3]{2}}{\\sqrt[3]{2}}',            ''],
@@ -38,6 +42,8 @@
         'w-summe':     [['=\\sqrt{25}-\\sqrt{9}-\\sqrt{16}', '\\text{zusammenfassen}'], ['=5-3-4', '\\text{Wurzel ziehen}'], ['=-2', '\\text{ausrechnen}']],
         'w-bruch':     [['=\\frac{\\sqrt{9}+\\sqrt{16}}{\\sqrt{25}}', '\\text{zusammenfassen}'], ['=\\frac{3+4}{5}', '\\text{Wurzel ziehen}'], ['=\\frac{7}{5}', '\\text{ausrechnen}']],
         'w-doppelt':   [['=\\sqrt{9}+\\sqrt{4}', '\\text{Wurzel ziehen}'], ['=3+2', '\\text{Wurzel ziehen}'], ['=5', '\\text{ausrechnen}']],
+        'w-17':        [['=\\sqrt{17^2}-\\sqrt[3]{17^3}', '\\text{als Potenz schreiben}'], ['=17-17', '\\text{Wurzel ziehen}'], ['=0', '\\text{ausrechnen}']],
+        'w-neunzig':   [['=\\sqrt[90]{9^{90}}', '\\text{Potenzgesetz}'], ['=9', '\\text{Wurzel ziehen}']],
         'w-vier':      [['=\\frac{4\\sqrt{2}}{\\sqrt{8}}', '\\text{zusammenfassen}'], ['=\\frac{4\\sqrt{2}}{\\sqrt{4\\cdot 2}}', '\\text{zerlegen}'], ['=\\frac{4\\sqrt{2}}{\\sqrt{4}\\cdot\\sqrt{2}}', '\\text{Wurzelgesetz}'], ['=\\frac{4\\sqrt{2}}{2\\sqrt{2}}', '\\text{Wurzel ziehen}'], ['=2', '\\text{kürzen}']],
         'w-acht':      [['=\\frac{\\sqrt{4\\cdot 2}+\\sqrt{2}}{\\sqrt{2}}', '\\text{zerlegen}'], ['=\\frac{\\sqrt{4}\\cdot\\sqrt{2}+\\sqrt{2}}{\\sqrt{2}}', '\\text{Wurzelgesetz}'], ['=\\frac{2\\sqrt{2}+\\sqrt{2}}{\\sqrt{2}}', '\\text{Wurzel ziehen}'], ['=\\frac{3\\sqrt{2}}{\\sqrt{2}}', '\\text{zusammenfassen}'], ['=3', '\\text{kürzen}']],
         'w-minus':     [['=\\frac{\\sqrt{25\\cdot 2}-\\sqrt{2}}{\\sqrt{2}}', '\\text{zerlegen}'], ['=\\frac{\\sqrt{25}\\cdot\\sqrt{2}-\\sqrt{2}}{\\sqrt{2}}', '\\text{Wurzelgesetz}'], ['=\\frac{5\\sqrt{2}-\\sqrt{2}}{\\sqrt{2}}', '\\text{Wurzel ziehen}'], ['=\\frac{4\\sqrt{2}}{\\sqrt{2}}', '\\text{zusammenfassen}'], ['=4', '\\text{kürzen}']],
