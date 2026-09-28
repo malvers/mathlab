@@ -118,6 +118,18 @@ window.svpPlanParts.push(function (P) {
             ],
             marker: 'rgba(245, 194, 66, 0.45)'
         }));
+        /* Doc, 28.09.2026: "bau mir den klein bitte oben links neben den GDW" - the gong of svp-gong.js at
+           the end of the head row, the thought of the week right of it; a click rings it at once */
+        if (window.svpGong) {
+            const gongKnopf = document.createElement('button');
+            gongKnopf.type = 'button';
+            gongKnopf.className = 'fahr-gong';
+            gongKnopf.title = 'Gong';
+            gongKnopf.setAttribute('aria-label', 'Gong');
+            gongKnopf.innerHTML = svpGong.ICON;
+            gongKnopf.addEventListener('click', function (ev) { ev.stopPropagation(); svpGong.test(); });
+            kopf.appendChild(gongKnopf);
+        }
         /* Der Gedanke der Woche in der Ecke: derselbe Klick wie in der Wochenzeile
            (Doc, 20.09.2026: "mach rechts oben ein thumb vom GDW"). */
         bild = document.createElement('button');

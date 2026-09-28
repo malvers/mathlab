@@ -54,6 +54,8 @@
         + '<script src="' + dir + 'svp-termine.js"><\/script>'
         + '<script src="' + dir + 'svp-falten.js"><\/script>'
         + '<script src="' + dir + 'svp-fmtbar.js"><\/script>'
+        /* the gong at the start of a lesson, and its button on the Fahrplan sheet (Doc, 28.09.2026) */
+        + '<script src="' + dir + 'svp-gong.js"><\/script>'
         + PARTS.map(function (p) {
             return '<script src="' + dir + 'svp-plan-' + p + '.js"><\/script>';
         }).join(''));
