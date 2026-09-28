@@ -1,8 +1,9 @@
 // A gong at the start of a lesson (Doc, 28.09.2026: "in den Fahrplan zum Stundenanfang ein schönen Gong").
 // Today's lessons come from WebUntis (svp_untis, all plans); a gong rings where a block starts - a lesson
 // with no lesson of the same day ending right before it (45 minutes earlier), so a double lesson rings once.
-// The sound is made here (Web Audio, a long Asian gong - Doc: "asiatisch ... so ein langer Gong"), no file. Browsers only play after a first tap
-// on the page, so any tap unlocks it. Try it: svpGong.test() in the console, or ?gong=test in the URL.
+// The sound is Doc's gong, audio/gong.mp3 (28.09.: "den will ich bitte"); a long Asian gong made here in Web
+// Audio stands in while the file is not there. Browsers only play after a first tap on the page, so any tap
+// unlocks it. Try it: svpGong.test() in the console, or ?gong=test in the URL.
 // Needs svp-auth.js (svpAuth.api).
 (function (global) {
     'use strict';
@@ -23,16 +24,15 @@
 
     /* an Asian gong, about 18 s: sine partials [ratio, amp, attack s, decay end s] over a low fundamental -
        close pairs beat (the shimmer), the high ones bloom late; every pitch sinks 1 % in the first 3 s;
-       a soft mallet thump (noise through a low pass). Heard first as a WAV on Doc's Mac (28.09.) */
+       a soft mallet thump (noise through a low pass). Heard first as a WAV on Doc's Mac (28.09.); now only the
+       stand-in for the file below */
     const F0 = 92.5;
     const TEILE = [
         [0.50, 0.30, 0.03, 16], [1.00, 1.00, 0.02, 18], [1.004, 0.55, 0.02, 15],
         [1.52, 0.45, 0.06, 12], [2.00, 0.30, 0.08, 10], [2.41, 0.40, 0.35, 11],
         [2.43, 0.25, 0.40, 9],  [2.97, 0.28, 0.55, 9],  [3.76, 0.22, 0.75, 8],
         [4.53, 0.16, 0.95, 7],  [5.90, 0.10, 1.20, 6],  [7.30, 0.06, 1.40, 5]];
-    function gong() {
-        const c = unlock();
-        if (!c) return;
+    function synth(c) {
         const out = c.createGain();
         out.gain.value = 0.35;
         out.connect(c.destination);
@@ -57,6 +57,20 @@
         lp.frequency.value = 300;
         q.connect(lp).connect(out);
         q.start(t0);
+    }
+
+    /* Doc's gong: large-gong-2 from his SOUNDS folder, as MP3 at -16 LUFS. Fetched at once, decoded at the
+       first gong (the context may still be locked before) */
+    const DATEI = new URL('../audio/gong.mp3', (document.currentScript && document.currentScript.src) || location.href).href;
+    let bytes = null, puffer = null;
+    fetch(DATEI).then(function (r) { return r.ok ? r.arrayBuffer() : null; }).then(function (b) { bytes = b; }).catch(function () {});
+    function gong() {
+        const c = unlock();
+        if (!c) return;
+        const los = function (b) { const q = c.createBufferSource(); q.buffer = b; q.connect(c.destination); q.start(); };
+        if (puffer) los(puffer);
+        else if (bytes) c.decodeAudioData(bytes.slice(0)).then(function (b) { puffer = b; los(b); }, function () { synth(c); });
+        else synth(c);
     }
 
     /* today's block starts, "HH:MM" */
