@@ -120,19 +120,11 @@
     setInterval(pruefe, 5000);
     if (/[?&]gong=test/.test(location.search)) global.addEventListener('pointerdown', function () { gong(); }, { once: true });
 
-    /* the button's icon (Doc, 28.09.: "bau mir den klein bitte oben links neben den GDW", after a photo of a
-       table gong): a wavy crossbar on two posts and a base in navy, the disc in the house's gold (lambda)
-       with a ring and a boss, hung on two cords, the mallet beside it */
-    const ICON = '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">' +
-        '<path d="M2.5 10.5 C7 5.5 13 10.5 24 8 C35 10.5 41 5.5 45.5 10.5 L45.5 13.5 C41 9.5 35 13.5 24 11.2 C13 13.5 7 9.5 2.5 13.5 Z" fill="#002060"/>' +
-        '<rect x="7.5" y="11" width="3" height="31" fill="#002060"/><rect x="37.5" y="11" width="3" height="31" fill="#002060"/>' +
-        '<rect x="3.5" y="41" width="41" height="4.5" rx="1" fill="#002060"/>' +
-        '<path d="M13.5 12 L16.8 20.5 M28.5 12 L25.2 20.5" stroke="#002060" stroke-width="1.1" fill="none"/>' +
-        '<circle cx="21" cy="29" r="9.8" fill="rgb(245, 194, 66)" stroke="#002060" stroke-width="1.1"/>' +
-        '<circle cx="21" cy="29" r="6.2" fill="none" stroke="#002060" stroke-width="0.8"/>' +
-        '<circle cx="21" cy="29" r="2.6" fill="#002060"/>' +
-        '<path d="M34 12 V31" stroke="#002060" stroke-width="1.6"/><circle cx="34" cy="33.2" r="2.8" fill="#002060"/>' +
-        '</svg>';
+    /* the button's picture (Doc, 28.09.: "bau mir den klein bitte oben links neben den GDW" - "ich hatte ein
+       Bild geschickt ... bitte da nehmen"): his photo of a table gong, the white around it cut free
+       (svp-gong.png, 148 x 160, next to this file) */
+    const BILD = new URL('svp-gong.png', (document.currentScript && document.currentScript.src) || location.href).href;
+    const ICON = '<img src="' + BILD + '" alt="" draggable="false">';
 
     global.svpGong = { test: gong, starts: function () { return starts.slice(); }, lade: lade, ICON: ICON };
 })(window);
