@@ -38,7 +38,7 @@
         'w-summe':     [['=\\sqrt{25}-\\sqrt{9}-\\sqrt{16}', '\\text{zusammenfassen}'], ['=5-3-4', '\\text{Wurzel ziehen}'], ['=-2', '\\text{ausrechnen}']],
         'w-bruch':     [['=\\frac{\\sqrt{9}+\\sqrt{16}}{\\sqrt{25}}', '\\text{zusammenfassen}'], ['=\\frac{3+4}{5}', '\\text{Wurzel ziehen}'], ['=\\frac{7}{5}', '\\text{ausrechnen}']],
         'w-doppelt':   [['=\\sqrt{9}+\\sqrt{4}', '\\text{Wurzel ziehen}'], ['=3+2', '\\text{Wurzel ziehen}'], ['=5', '\\text{ausrechnen}']],
-        'w-vier':      [['=\\frac{4\\sqrt{2}}{\\sqrt{8}}', '\\text{zusammenfassen}'], ['=\\frac{4\\sqrt{2}}{2\\sqrt{2}}', '\\text{teilweise Wurzel ziehen}'], ['=2', '\\text{kürzen}']],
+        'w-vier':      [['=\\frac{4\\sqrt{2}}{\\sqrt{8}}', '\\text{zusammenfassen}'], ['=\\frac{4\\sqrt{2}}{\\sqrt{4\\cdot 2}}', '\\text{zerlegen}'], ['=\\frac{4\\sqrt{2}}{\\sqrt{4}\\cdot\\sqrt{2}}', '\\text{Wurzelgesetz}'], ['=\\frac{4\\sqrt{2}}{2\\sqrt{2}}', '\\text{Wurzel ziehen}'], ['=2', '\\text{kürzen}']],
         'w-acht':      [['=\\frac{2\\sqrt{2}+\\sqrt{2}}{\\sqrt{2}}', '\\text{teilweise Wurzel ziehen}'], ['=\\frac{3\\sqrt{2}}{\\sqrt{2}}', '\\text{zusammenfassen}'], ['=3', '\\text{kürzen}']],
         'w-minus':     [['=\\frac{5\\sqrt{2}-\\sqrt{2}}{\\sqrt{2}}', '\\text{teilweise Wurzel ziehen}'], ['=\\frac{4\\sqrt{2}}{\\sqrt{2}}', '\\text{zusammenfassen}'], ['=4', '\\text{kürzen}']],
         'w-sieben':    [['=\\frac{3\\sqrt{2}+4\\sqrt{2}}{\\sqrt{2}}', '\\text{teilweise Wurzel ziehen}'], ['=\\frac{7\\sqrt{2}}{\\sqrt{2}}', '\\text{zusammenfassen}'], ['=7', '\\text{kürzen}']],
