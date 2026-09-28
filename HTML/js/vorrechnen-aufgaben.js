@@ -81,6 +81,9 @@ const ERKLAERUNGEN = {};
 // top left under "Aufgabe x / y", for the class too (the head layer is mirrored); by slug: { zeilen, zeichen,
 // ergebnis } - the rows, the sign before the last one, the result (schemaHtml, js/vorrechnen-rechenweg.js)
 const SCHEMATA = {};
+// Doc, 28.09.: a task's source, small and grey right above the line to the writing field (on the beamer too) -
+// "schreib's über die Trennlinie ... das ist eine Quelle"; by slug, plain text
+const QUELLEN = {};
 // Doc, 26.09.: "Gib mir bitte pro Aufgabe ... den jeweils nächsten Schritt in Grau,
 // so dass ich ihn nachschreiben könnte, dass ich da keine Fehler mache" - the
 // solution of each task, step by step: [equation, operation]. Every step was

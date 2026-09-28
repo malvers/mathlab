@@ -78,7 +78,12 @@ function zeigeVorlage(hinweis) {
         // Doc, 28.09.: the puzzles written "untereinander", grey, top left under the counter (placed by
         // zeigeRechenweg) - only a task with a SCHEMATA entry (the Knobeln block: "Nur bei den Rätseln!")
         (aufgabenModus && SCHEMATA[slug] ? '<span id="vorlage-schema" style="position:absolute;white-space:nowrap;' +
-            'color:#8a93a3;font-size:1.2rem"></span>' : '');
+            'color:#8a93a3;font-size:1.2rem"></span>' : '') +
+        // its source right above the line to the writing field (QUELLEN; placed by zeigeRechenweg)
+        (aufgabenModus && QUELLEN[slug] ? '<span id="vorlage-quelle" style="position:absolute;white-space:nowrap;' +
+            'font-family:Orbitron,sans-serif;font-size:0.7rem;letter-spacing:0.06em;color:#8a93a3"></span>' : '');
+    const quelle = host.querySelector('#vorlage-quelle');
+    if (quelle) quelle.textContent = QUELLEN[slug];
     const schema = host.querySelector('#vorlage-schema');
     if (schema) schema.innerHTML = schemaHtml(SCHEMATA[slug]);
     if (nach) {
@@ -391,6 +396,13 @@ function zeigeRechenweg(verborgenAb) {
         const block = document.getElementById('vorlage-block');
         const pfeilVor = document.querySelector('#tafel-pfeil-vor svg'), pv = pfeilVor && pfeilVor.getBoundingClientRect();
         if (block) block.style.right = ((pv && pv.width ? c.right - pv.left : 32) + 8) + 'px';
+        // the source centred just above the line (Doc, 28.09.: "x-zentriert" - on the right it ran into the bin)
+        const quelle = document.getElementById('vorlage-quelle');
+        if (quelle) {
+            quelle.style.left = (c.width / 2) + 'px';
+            quelle.style.transform = 'translateX(-50%)';
+            quelle.style.top = (papierGrenze(c.height) - quelle.offsetHeight - 6) + 'px';
+        }
         if (nach) { nach.style.right = 'auto'; nach.style.left = (c.width / 2) + 'px'; nach.style.transform = 'translate(-50%, -50%)'; }
         obenFrei = Math.max(0, ...[zaehler, block, nach].filter(Boolean).map(e => e.getBoundingClientRect().bottom - c.top)) + ZEILE / 4;
     }

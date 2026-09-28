@@ -579,24 +579,68 @@ let erklWeg = new Set(), erklVorschau = vorschau;
 try { erklWeg = new Set(JSON.parse(localStorage.getItem(ERKL_WEG) || '[]')); } catch (_) {}
 function merkeErklWeg() { try { localStorage.setItem(ERKL_WEG, JSON.stringify([...erklWeg])); } catch (_) {} }
 // every letter of a formula upright, as \mathrm (Doc, 28.09.: the letters blue - js/vorrechnen.css - "bitte nicht
-// kursiv"); commands (\cdot, \ge, \mathrm) stay as they are
-const aufrecht = tex => tex.replace(/\\[a-zA-Z]+|[A-Za-z]/g, m => m.length > 1 ? m : '\\mathrm{' + m + '}');
-// paragraphs by a blank line, KaTeX between $...$
+// kursiv"); commands (\cdot, \ge, \mathrm) and words in \text{...} stay as they are
+const aufrecht = tex => tex.replace(/\\text\{[^}]*\}|\\[a-zA-Z]+|[A-Za-z]/g, m => m.length > 1 ? m : '\\mathrm{' + m + '}');
+// Paragraphs by a blank line. $$equation | operation$$ is an equation set off, as in a LaTeX text, with what was
+// done to get it behind it as on the board's working, "| −A" (Doc, 28.09.: "dass diese Gleichungen so in der Zeile
+// im Text stehen ... ordentliche Gleichungen ... und natürlich LaTeX", "hinter die Gleichung immer die Operation");
+// $...$ stays in the sentence - a value, a letter, a term.
+// Every "=" of the box stands on its middle line, text between or not ("die Gleichheitszeichen immer in die Mitte
+// der Box ... auch über Text ... alle aligned"): a row of two halves, the left side flush right before the middle,
+// "=" centred on it and the right side after it (js/vorrechnen.css, .erkl-gl); the operations in one column behind
+// the widest right side (erklSpalte, once the box is laid out).
+function erklGleichung(s) {
+    const [gl, op] = s.slice(2, -2).split(' | '), i = gl.indexOf('=');
+    const zeile = document.createElement('div');
+    zeile.className = 'erkl-gl';
+    const links = document.createElement('span'), rechts = document.createElement('span');
+    links.className = 'erkl-l';
+    rechts.className = 'erkl-r';
+    const seite = document.createElement('span'), setze = (el, tex) => {
+        try { katex.render('\\displaystyle ' + tex, el, { throwOnError: false }); } catch (_) { el.textContent = tex; }
+    };
+    seite.className = 'erkl-seite';
+    setze(links, aufrecht(i < 0 ? gl : gl.slice(0, i)));
+    setze(seite, i < 0 ? '' : '{}' + aufrecht(gl.slice(i)));    // {}: a space after the "=" as well as before
+    rechts.appendChild(seite);
+    if (op) {
+        const o = document.createElement('span');
+        o.className = 'erkl-op';
+        setze(o, '\\vert\\;\\; ' + aufrecht(op.replace(/^:/, '{:}\\,')));
+        rechts.appendChild(o);
+    }
+    zeile.append(links, rechts);
+    return zeile;
+}
+// the operations' column: every right side as wide as the widest of the box
+function erklSpalte(el) {
+    const seiten = [...el.querySelectorAll('.erkl-seite')];
+    seiten.forEach(s => { s.style.minWidth = ''; });
+    const breit = Math.max(0, ...seiten.map(s => s.getBoundingClientRect().width));
+    seiten.forEach(s => { s.style.minWidth = breit + 'px'; });
+}
 function erklaerungSetzen(el, text) {
     el.textContent = '';
     text.split('\n\n').forEach(absatz => {
         const p = document.createElement('p');
-        // a paragraph that is one formula stands centred, set off (the column sum of SEND + MORE)
-        if (/^\$[^$]+\$$/.test(absatz)) {
-            try { katex.render(aufrecht(absatz.slice(1, -1)), p, { throwOnError: false, displayMode: true }); } catch (_) { p.textContent = absatz; }
-            el.appendChild(p);
-            return;
-        }
         let formel = null;
-        absatz.split(/(\$[^$]+\$)/).forEach(t => {
+        absatz.split(/(\$\$[^$]+\$\$|\$[^$]+\$)/).forEach(t => {
             if (!t) return;
+            if (t.startsWith('$$')) {
+                // the first and the last equation of a block keep more room from the text ("zwischen den Texten und
+                // den Gleichungsblöcken noch ein bisschen mehr")
+                const z = erklGleichung(t), davor = p.lastChild;
+                if (!(davor && davor.classList && davor.classList.contains('erkl-gl'))) z.classList.add('erkl-anfang');
+                p.appendChild(z);
+                formel = null;
+                return;
+            }
+            const davor = p.lastChild;
+            if (t.trim() && davor && davor.classList && davor.classList.contains('erkl-gl')) davor.classList.add('erkl-ende');
+            if (!t.trim() && !formel) return;                 // blanks between two equations
             if (t[0] === '$') {
                 formel = document.createElement('span');
+                formel.className = 'erkl-inline';            // never broken inside (js/vorrechnen.css)
                 try { katex.render(aufrecht(t.slice(1, -1)), formel, { throwOnError: false }); } catch (_) { formel.textContent = t; }
                 p.appendChild(formel);
                 return;
@@ -614,6 +658,23 @@ function erklaerungSetzen(el, text) {
         el.appendChild(p);
     });
 }
+// The box scrolls when its text does not fit (Doc: "auch wenn ... wir am Ende scrollen müssen"): the canvas lies
+// over it and takes the pen, so the wheel over it moves it, and a slim bar under the × shows where one is and
+// takes a tap or a drag (the arrows ▲ ▼ that were there first: "passen nicht ... mach sie weg").
+function erklPfeile() {
+    const el = document.getElementById('erklaerung');
+    if (!el) return;
+    const zuViel = el.style.display !== 'none' && el.scrollHeight > el.clientHeight + 1;
+    // the slim bar under the ×: its thumb is the part in view, as large and where it is (Doc, 28.09.: "zeige
+    // rechts bitte eine kleine Scrollbar ... sieht man jetzt nicht, in welchem Ausschnitt man ist")
+    const leiste = document.getElementById('erklaerung-leiste');
+    if (!leiste) return;
+    leiste.style.display = zuViel ? '' : 'none';
+    if (!zuViel) return;
+    const h = leiste.clientHeight, daumen = Math.max(24, h * el.clientHeight / el.scrollHeight);
+    leiste.firstChild.style.height = daumen + 'px';
+    leiste.firstChild.style.top = el.scrollTop / (el.scrollHeight - el.clientHeight) * (h - daumen) + 'px';
+}
 function zeigeErklaerung() {
     if (anzeigeModus) return;
     if (vorschau && !erklVorschau && erklWeg.size) { erklWeg.clear(); merkeErklWeg(); }   // P on again: all back
@@ -625,7 +686,18 @@ function zeigeErklaerung() {
     // mach die box groß") - hidden, not removed: the operations in the margin keep their rows' places
     const grau = document.getElementById('schritt-hinweis');
     if (grau) grau.style.visibility = zeigt ? 'hidden' : '';
-    if (!zeigt) { [el, zu].forEach(e => { if (e) e.style.display = 'none'; }); return; }
+    // and the notes margin out of sight, the box runs over it (Doc, 28.09.: "in diesen Rätselaufgaben rechts diese
+    // Box wegmachen und unsere Erklärbox über die ganze Breite ziehen" - the light way): its line, the grey
+    // operations and its bin. Hidden, not gone: ink written there still counts as a note, never read
+    ['notiz-rand', 'schritt-op', 'notiz-leeren'].forEach(id => {
+        const e = document.getElementById(id);
+        if (e) e.style.visibility = zeigt ? 'hidden' : '';
+    });
+    if (!zeigt) {
+        [el, zu, document.getElementById('erklaerung-leiste')]
+            .forEach(e => { if (e) e.style.display = 'none'; });
+        return;
+    }
     if (!el) {
         el = document.createElement('div');
         el.id = 'erklaerung';
@@ -644,24 +716,46 @@ function zeigeErklaerung() {
             zeigeErklaerung();
         });
         container.appendChild(zu);
+        const leiste = document.createElement('div');
+        leiste.id = 'erklaerung-leiste';
+        leiste.innerHTML = '<i></i>';
+        const ziehe = e => {
+            const k = leiste.getBoundingClientRect(), f = Math.min(1, Math.max(0, (e.clientY - k.top) / k.height));
+            el.scrollTop = f * (el.scrollHeight - el.clientHeight);
+        };
+        leiste.addEventListener('pointerdown', e => { leiste.setPointerCapture(e.pointerId); ziehe(e); e.preventDefault(); });
+        leiste.addEventListener('pointermove', e => { if (leiste.hasPointerCapture(e.pointerId)) ziehe(e); });
+        container.appendChild(leiste);
+        el.addEventListener('scroll', erklPfeile);
+        container.addEventListener('wheel', e => {
+            const k = el.getBoundingClientRect();
+            if (el.style.display === 'none' || el.scrollHeight <= el.clientHeight + 1 ||
+                e.clientX < k.left || e.clientX > k.right || e.clientY < k.top || e.clientY > k.bottom) return;
+            el.scrollTop += e.deltaY;
+            e.preventDefault();
+        }, { passive: false });
     }
     if (el.dataset.slug !== slug) { el.dataset.slug = slug; el.dataset.fit = ''; erklaerungSetzen(el, text); }
-    // the whole writing field, flush with the buttons under it ("Box an den buttons alignen"): the arrow's left
-    // edge (12 px) to the bin's right edge (12 px before the margin's line), from just under the line down to
-    // above them; the font as large as fits, up to 1.6 rem ("Schrift größer", then "bei allen Boxen ... einen Tick
-    // größer") - a short text reaches the top, a long one (SEND + MORE) takes what its box allows
-    const ERKL_SCHRIFT = 1.6;
-    const r = container.getBoundingClientRect(), nx = notizX(r.width), oben = papierGrenze(r.height) + 16;
-    const links = 12, breite = Math.max(240, nx - 12 - links), hoehe = Math.max(80, r.height - 52 - oben);
+    // the whole width, over the notes margin too ("über die ganze Breite"), 12 px in from either side like the
+    // buttons under it ("Box an den buttons alignen"), from just under the line down to
+    // above them; one font for every box, the size of the first puzzle ("die Schriftgröße überall so wie bei
+    // Aufgabe 1") - a longer text scrolls
+    const ERKL_SCHRIFT = 1.45;                 // was 1.6: "ein bisschen kleiner, überall"
+    const r = container.getBoundingClientRect(), oben = papierGrenze(r.height) + 16;
+    const links = 12, breite = Math.max(240, r.width - 12 - links), hoehe = Math.max(80, r.height - 52 - oben);
     Object.assign(el.style, { left: links + 'px', top: oben + 'px', width: breite + 'px', height: hoehe + 'px', display: '' });
     Object.assign(zu.style, { left: (links + breite - 36) + 'px', top: (oben + 4) + 'px', display: '' });
+    Object.assign(document.getElementById('erklaerung-leiste').style,
+        { left: (links + breite - 28) + 'px', top: (oben + 40) + 'px', height: Math.max(24, hoehe - 56) + 'px' });
     // again only when the size or the fonts change
     const sig = [slug, breite, hoehe, document.fonts ? document.fonts.status : ''].join('|');
-    if (el.dataset.fit === sig) return;
-    el.dataset.fit = sig;
-    let g = ERKL_SCHRIFT;
-    el.style.fontSize = g + 'rem';
-    while (el.scrollHeight > el.clientHeight + 1 && g > 0.62) { g -= 0.02; el.style.fontSize = g + 'rem'; }
+    if (el.dataset.fit !== sig) {
+        el.dataset.fit = sig;
+        el.style.fontSize = ERKL_SCHRIFT + 'rem';
+        erklSpalte(el);
+        el.scrollTop = 0;
+    }
+    erklPfeile();
 }
 // the squares stop at the margin (Beispiele has none: squares all across) - set only
 // when it changes, the beamer mirrors every change of the paper

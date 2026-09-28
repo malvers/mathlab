@@ -197,7 +197,7 @@ body.anzeige::before {
     background: var(--anzeige-grund, #050d1c);
 }
 body.anzeige :is(#cyber-left-chrome, #mini-rail, #side-panel, #right-rail, #tafel-pfeil-vor, #tafel-pfeil-zurueck, #formel-schicht, #erkennen-klein,
-    #schritt-hinweis, #schritt-op, #schritt-hoch, #erklaerung, #erklaerung-zu, #notiz-rand, #notiz-leeren, #seite-leeren, #oben-leeren, #radierer, #radier-rahmen, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play,
+    #schritt-hinweis, #schritt-op, #schritt-hoch, #erklaerung, #erklaerung-zu, #erklaerung-leiste, #notiz-rand, #notiz-leeren, #seite-leeren, #oben-leeren, #radierer, #radier-rahmen, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play,
     #buzz-aufgabe, #buzzer-overlay, #tafel-overlay, #namen-overlay, #namen-pille) {
     display: none !important;
 }
@@ -301,12 +301,29 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
    placed and fitted by zeigeErklaerung. Its × lies over the ink and takes the tap */
 #erklaerung {
     position: absolute; z-index: -1; pointer-events: none; box-sizing: border-box; overflow: hidden;
-    padding: 10px 44px 8px 16px; border: 1px solid rgba(138, 147, 163, 0.45); border-radius: 8px;
+    padding: 10px 44px 8px; border: 1px solid rgba(138, 147, 163, 0.45);   /* even left and right: the middle is the box's */ border-radius: 8px;
     color: #8a93a3; font-family: 'CMU Serif', KaTeX_Main, 'Times New Roman', serif; line-height: 1.45;
 }
 #erklaerung p { margin: 0 0 0.45em; }
 #erklaerung p:last-child { margin-bottom: 0; }
 #erklaerung .katex { font-size: 1.1em; }
+/* an equation set off (erklGleichung, Doc 28.09.: "die Gleichheitszeichen immer in die Mitte der Box ... alle
+   aligned"): two halves, the "=" centred on the box's middle line, so every "=" of the box stands under the others,
+   text between or not (the middle of the box: its padding is even left and right). KaTeX's "=" is 0.778em wide
+   with a 0.278em space either side: the left side ends a space before its left half, the right half ("{}=")
+   starts a space and half an "=" before the middle. The operations follow the right side
+   in one column (erklSpalte sets every right side as wide as the widest) */
+#erklaerung .erkl-gl { display: grid; grid-template-columns: 1fr 1fr; align-items: baseline; margin: 0.15em 0; white-space: nowrap; }
+#erklaerung .erkl-anfang { margin-top: 0.75em; }
+#erklaerung .erkl-ende { margin-bottom: 0.75em; }
+#erklaerung .erkl-l { text-align: right; }
+#erklaerung .erkl-l > .katex { margin-right: 0.667em; }
+#erklaerung .erkl-seite { display: inline-block; }
+#erklaerung .erkl-seite > .katex { margin-left: -0.667em; }   /* {}=: the space before it, then half the "=" */
+#erklaerung .erkl-op { margin-left: 1.2em; }
+/* a formula in the sentence is short (a value, a term): it goes to the next line whole, never "H =" here and
+   "5" there (Doc, 28.09.: "dass nicht irgendwie eine Gleichung auseinandergerissen wird") */
+#erklaerung .erkl-inline { white-space: nowrap; }
 #canvas-container.hell #erklaerung { color: #7a8294; border-color: rgba(122, 130, 148, 0.45); }
 /* its letters in the task's ink - royal blue on sand, the ink's white on the board (INK / TINTE,
    js/vorrechnen-zustand.js); digits and words stay grey (Doc, 28.09.: "die Buchstaben so blau wie oben" -
@@ -319,6 +336,12 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
     touch-action: manipulation; -webkit-tap-highlight-color: transparent; outline: none;
 }
 #canvas-container.hell #erklaerung-zu { color: #7a8294; }
+/* the slim scrollbar under the × (erklPfeile): a pale track, the thumb is the part in view; 16 px wide
+   to hit, 4 px to see */
+#erklaerung-leiste { position: absolute; z-index: 5; width: 16px; cursor: pointer; touch-action: none; }
+#erklaerung-leiste::before { content: ''; position: absolute; left: 6px; top: 0; bottom: 0; width: 4px; border-radius: 2px;
+    background: rgba(138, 147, 163, 0.18); }
+#erklaerung-leiste > i { position: absolute; left: 6px; width: 4px; border-radius: 2px; background: rgba(138, 147, 163, 0.75); }
 /* the edge of the notes margin (right quarter of the squares), under the ink - solid
    like the line above the squares (Doc, 27.09.: "die Dashline nach unten bitte durchgezogen") */
 #notiz-rand {
