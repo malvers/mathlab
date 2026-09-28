@@ -206,6 +206,13 @@ addEventListener('click', e => {
   if (e.target.closest('.labbar button')) { next(); return; }
   next();
 });   // clicks inside a lab stay in the lab - they never reach this document
+// Chrome's own menu (save image, copy image, inspect ...) never comes up in a deck: a right click or a long press
+// on the board opened it over the slide (Doc, 28.09.2026: "das dumme Menu von Chrome ... unbedingt überschreiben
+// (nix)"). The deck's own menus (Solita's box, the overview's slide menu) still open; text fields keep theirs, to paste.
+addEventListener('contextmenu', e => {
+  if (e.target.closest && e.target.closest('input, textarea, [contenteditable]:not([contenteditable="false"])')) return;
+  e.preventDefault();
+});
 // the lab bar sits right on top of its lab: each slide places its lab frame itself, so read that frame's top.
 // A note that runs under the bar (a long one, mathe11-nichtlinear) pushes it up above the note instead.
 function placeLabBar(s) {

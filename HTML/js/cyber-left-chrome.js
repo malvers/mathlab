@@ -23,6 +23,15 @@
 (function () {
     'use strict';
 
+    // Chrome's own menu (save image, copy image, inspect ...) never comes up in a lab: a right click or a long
+    // press on the touch board opened it over the canvas (Doc, 28.09.2026: "das dumme Menu von Chrome ... unbedingt
+    // überschreiben (nix)"; the decks do the same in decks/deck.js). Here: every page with the lab shell. A lab's own
+    // menus (right click on a canvas, the name panel ...) still open; text fields keep theirs, to paste.
+    window.addEventListener('contextmenu', function (e) {
+        if (e.target.closest && e.target.closest('input, textarea, [contenteditable]:not([contenteditable="false"])')) return;
+        e.preventDefault();
+    });
+
     /**
      * Lab shown on a deck slide (iframe inside .labframe, also in the presenter view clones):
      * the mini-rail is always gone there (Doc, 17.09.2026) - the deck has its own navigation.
