@@ -297,7 +297,7 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
     ...('isExtended' in screen ? [['<span class="help-dot one"></span>',
       'Oranger Punkt am Vollbild-Knopf: nur ein Bildschirm – am Board heißt das gespiegelt'],
       ['<span class="help-dot ext"></span>', 'Grüner Punkt: Bildschirm erweitert – Präsentation kann starten']] : []),
-    [K(['L']), 'Pointer an / aus (in der Präsentation)'],
+    [K(['L']), 'Laserpointer an / aus – auch der Knopf rechts neben H'],
     null,
     [K(['Shift', 'Leertaste', '/', 'P']), 'Solita zuhören lassen – die Frage sprechen'
       + (avatar ? ' <img class="navpic" src="' + avatar.src + '" alt="">' : '')],
@@ -2094,20 +2094,78 @@ const link = (function () {
     function show(m) {
       if (m.x !== undefined) at = { x: m.x, y: m.y };   // follow the hand even while the dot is out, so L lights it where he points now
       if (!on || m.x === undefined) { if (dot) dot.classList.remove('on'); cursor(); return; }
-      const box = stage();
-      if (!box || !box.width) return;                // the preview is not built yet
+      if (!place(m)) return;                         // the preview is not built yet
+      cursor();
+    }
+    // the dot at a fraction of the stage - the slide on the beamer, the preview in the presenter view
+    function place(m) {
+      const r = stage();
+      if (!r || !r.width) return false;
       if (!dot) {
         dot = document.createElement('div');
         dot.id = 'laser'; dot.setAttribute('aria-hidden', 'true');
         dot.style.backgroundImage = grating();
         document.body.appendChild(dot);
       }
-      const r = box;                                 // the slide on the beamer, the preview in the presenter view
       dot.style.setProperty('--lz', (SIZE * r.width / 960).toFixed(1) + 'px');
       dot.style.transform = 'translate(' + (r.left + m.x * r.width).toFixed(1) + 'px,'
                                          + (r.top + m.y * r.height).toFixed(1) + 'px)';
       dot.classList.add('on');
-      cursor();
+      return true;
+    }
+    // Laser by hand (Doc, 28.09.2026: "mach mir da ein kleines Laser icon wenn an roter strahl"): the button right of
+    // the H - or L in a window without a presenter view - makes the mouse itself the red dot on the slide, for one
+    // screen at the board. Off at the start; over the buttons, Solita or the pen the arrow comes back.
+    let hand = false, handBtn = null;
+    function handAt(x, y, away) {
+      if (!hand) return;
+      const r = deck.getBoundingClientRect();
+      if (away || !r.width || x < r.left || x > r.right || y < r.top || y > r.bottom) { handOff(); return; }
+      place({ x: (x - r.left) / r.width, y: (y - r.top) / r.height });
+      document.documentElement.classList.add('laser-hand');   // the dot stands there: the mouse shows nothing
+    }
+    function handOff() {
+      if (dot) dot.classList.remove('on');
+      document.documentElement.classList.remove('laser-hand');
+    }
+    // a lab's moves never reach this document - listen inside it, as the presenter does (a reloaded lab is a new window)
+    function hookLabs() {
+      deck.querySelectorAll('iframe').forEach(function (f) {
+        if (!f.__laserLoad) { f.__laserLoad = true; f.addEventListener('load', hookLabs); }
+        let w;
+        try { w = f.contentWindow; if (!w || !w.document || w.__laserHand) return; } catch (e) { return; }   // another origin
+        w.__laserHand = true;
+        w.addEventListener('pointermove', function (e) {
+          const r = f.getBoundingClientRect(), k = r.width / (f.offsetWidth || 1);
+          handAt(r.left + (f.clientLeft + e.clientX) * k, r.top + (f.clientTop + e.clientY) * k, false);
+        }, true);
+      });
+    }
+    function handToggle() {
+      hand = !hand;
+      if (handBtn) handBtn.setAttribute('aria-pressed', String(hand));
+      if (hand) hookLabs(); else handOff();
+      toast(hand ? 'Laser an (l)' : 'Laser aus (l)');
+    }
+    const helpBtn = document.getElementById('nav-help');
+    if (!PRESENTER && helpBtn) {
+      handBtn = document.createElement('button');
+      handBtn.id = 'nav-laser'; handBtn.type = 'button'; handBtn.title = 'Laserpointer (L)';
+      handBtn.setAttribute('aria-label', 'Laserpointer'); handBtn.setAttribute('aria-pressed', 'false');
+      // a pointer held aslant, its beam goes red while it is on (deck.css)
+      handBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"'
+        + ' stroke-linejoin="round" aria-hidden="true"><path d="M2.6 18.6l8.5-8.5 2.8 2.8-8.5 8.5z"/>'
+        + '<path d="M6.3 16.3l1.4 1.4"/><g class="beam"><path d="M14.6 9.4L20 4"/>'
+        + '<circle cx="20.6" cy="3.4" r="1.3" fill="currentColor" stroke="none"/></g></svg>';
+      handBtn.addEventListener('click', function (e) { e.stopPropagation(); handToggle(); });
+      helpBtn.after(handBtn);
+    }
+    if (!PRESENTER) {
+      addEventListener('pointermove', function (e) {
+        handAt(e.clientX, e.clientY, !(e.target && e.target.closest && e.target.closest('#deck')));
+      }, true);
+      document.addEventListener('mouseout', function (e) { if (!e.relatedTarget) handOff(); });   // out of the window
+      painted.push(function () { if (hand) hookLabs(); });
     }
     // L puts the dot back where it stood, at once - waiting for the next mouse move looked broken (Doc, 23.09.2026:
     // "l bringt nicht den Punkt sofort! Man muss erst bewegen!")
@@ -2129,7 +2187,9 @@ const link = (function () {
     addEventListener('keydown', function (e) {
       if ((e.key !== 'l' && e.key !== 'L') || e.metaKey || e.ctrlKey || e.altKey) return;
       // L works on both screens, whichever window has the focus, linked or not (Doc, 23.09.2026: "lass l auf
-      // beiden screens zu") - whoever presses it sets the state and the other window mirrors it (laser-on)
+      // beiden screens zu") - whoever presses it sets the state and the other window mirrors it (laser-on).
+      // Without a presenter view there is nobody to point from: L is the button right of the H.
+      if (!PRESENTER && !linked) { handToggle(); return; }
       toggle();
     });
     cursor();                                        // no dot yet: the arrow stays

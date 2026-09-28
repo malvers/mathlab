@@ -83,7 +83,8 @@
     return b;
   }
   const nav = document.getElementById('nav');
-  const anchor = document.getElementById('nav-help') || document.getElementById('nav-next') || nav;
+  // after the H and the laser, so those two stand in the same place on Doc's machine and live
+  const anchor = document.getElementById('nav-laser') || document.getElementById('nav-help') || document.getElementById('nav-next') || nav;
   if (!nav) return;                                   // a deck without the footer: no editor controls
   const btn = navButton('nav-edit', '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>', anchor);
   const live = navButton('nav-live', '<path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 17.6 8.6 4 4 0 0 1 17 18"/>'
