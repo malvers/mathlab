@@ -41,7 +41,10 @@ self.addEventListener('fetch', (e) => {
 async function netzZuerst(req) {
     const cache = await caches.open(CACHE);
     try {
-        const res = await fetch(req);
+        /* no-cache: ask the server every time instead of the browser's HTTP cache. GitHub Pages sends
+           max-age=600, so after a push the Fon kept the old page for up to ten minutes (Doc,
+           28.09.2026: „Fon noch nix zu sehen"). Unchanged files cost a 304 without a body. */
+        const res = await fetch(req, { cache: 'no-cache' });
         if (res && res.ok) cache.put(req, res.clone());
         return res;
     } catch (e) {
