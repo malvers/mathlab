@@ -202,7 +202,8 @@ def nullstellen():
 
 
 def achsenabschnitt():
-    """Slide 'y-Achsenabschnitt': 3x - 5 crosses the y-axis at -5; (2|3) lies on x^2 - 1."""
+    """Slide 'y-Achsenabschnitt': 3x - 5 crosses the y-axis at -5, x^2 - 1 at -1 - the same f(0) twice
+    (Doc, 28.09.2026: the point test (2|3) had nothing to do with the intercept - "rechts ist der y = -1")."""
     a = plot((-2, 4), (-6, 4), 330, ystep=2)
     a.curve(lambda x: 3 * x - 5, -2, 4, S.INK)
     dot(a, 0, -5)
@@ -211,9 +212,8 @@ def achsenabschnitt():
     a.draw_labels()
     b = plot((-3, 3), (-2, 5), 330, ystep=1)
     b.curve(lambda x: x * x - 1, -3, 3, S.INK)
-    b.dashto(2, 3)
-    dot(b, 2, 3, S.GREEN)
-    formula(b, b.X(2) - 10, b.Y(3) - 6, "(2 \\mid 3)", 14, S.GREEN, anchor="end")
+    dot(b, 0, -1)
+    formula(b, b.X(0) + 10, b.Y(-1) + 17, "(0 \\mid -1)", 14, S.RED, anchor="start")
     formula(b, b.X(0.25), b.Y(4.15), "y = x^2 - 1", anchor="start")
     b.draw_labels()
     return side(a, b)
