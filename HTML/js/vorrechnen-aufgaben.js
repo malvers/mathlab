@@ -73,6 +73,14 @@ const BLOECKE = [
     { titel: 'Level 3 · echte Nüsse', ab: 37, bis: AUFGABEN.length },
 ];
 function aufgabenBlock(i) { return BLOECKE.find(b => i >= b.ab && i < b.bis) || BLOECKE[0]; }
+// Doc, 28.09.: "Blende mir hier im Preview einen ausführlichen Erklärungstext ein ... oben rechts x zum
+// wegklicken (pro Aufgabe)" - a task's explanation for Doc, by its slug: paragraphs split by a blank line,
+// formulas between $...$ (KaTeX). A block's file adds its own; a task without one shows none.
+const ERKLAERUNGEN = {};
+// Doc, 28.09. (over SEND + MORE = MONEY): the task written "untereinander", as on paper - grey on the board,
+// top left under "Aufgabe x / y", for the class too (the head layer is mirrored); by slug: { zeilen, zeichen,
+// ergebnis } - the rows, the sign before the last one, the result (schemaHtml, js/vorrechnen-rechenweg.js)
+const SCHEMATA = {};
 // Doc, 26.09.: "Gib mir bitte pro Aufgabe ... den jeweils nächsten Schritt in Grau,
 // so dass ich ihn nachschreiben könnte, dass ich da keine Fehler mache" - the
 // solution of each task, step by step: [equation, operation]. Every step was

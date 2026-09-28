@@ -5,6 +5,22 @@
 // a callback that can fire in between (a resolved promise, a timer) must not either.
 
 // ── Vorlage: the formula to copy, shown above the writing area ──────
+// A puzzle "untereinander" (SCHEMATA): a grid, one character a cell, in KaTeX's face - not a KaTeX array,
+// whose wide fixed column gaps and own sign column put the + far off (Doc, 28.09.). One column more than the
+// widest row: the sign stands right before the first digit of the last row, wherever that begins.
+function schemaHtml(s) {
+    const n = Math.max(s.ergebnis.length, ...s.zeilen.map(w => w.length)) + 1;
+    const zeile = (w, zeichen) => {
+        const c = [...w.padStart(n)];
+        if (zeichen) c[n - w.length - 1] = zeichen;
+        return c.map(z => `<span>${z === ' ' ? '' : z}</span>`).join('');
+    };
+    return `<span style="display:inline-grid;grid-template-columns:repeat(${n}, auto);column-gap:0.32em;` +
+        'justify-items:center;line-height:1.25;font-family:KaTeX_Main,serif">' +
+        s.zeilen.map((w, i) => zeile(w, i === s.zeilen.length - 1 ? s.zeichen : '')).join('') +
+        '<span style="grid-column:1 / -1;justify-self:stretch;border-top:1px solid currentColor;margin:0.12em 0"></span>' +
+        zeile(s.ergebnis, '') + '</span>';
+}
 function zeigeVorlage(hinweis) {
     if (anzeigeModus) return;
     let host = document.getElementById('vorlage-schicht');
@@ -58,7 +74,13 @@ function zeigeVorlage(hinweis) {
         (nach ? `<span id="vorlage-nach" style="${RAND};right:24px">umstellen nach <span style="font-size:1.4em"></span></span>`
             // Doc, 28.09.: a term to simplify (Wurzeln · Stolperfallen, no variable) - "vereinfachen" in its place,
             // or what its block says (Knobeln: "Ziffern finden")
-            : aufgabenModus && nach === '' ? `<span id="vorlage-nach" style="${RAND};right:24px">${aufgabenBlock(nr).kopf || 'vereinfachen'}</span>` : '');
+            : aufgabenModus && nach === '' ? `<span id="vorlage-nach" style="${RAND};right:24px">${aufgabenBlock(nr).kopf || 'vereinfachen'}</span>` : '') +
+        // Doc, 28.09.: the puzzles written "untereinander", grey, top left under the counter (placed by
+        // zeigeRechenweg) - only a task with a SCHEMATA entry (the Knobeln block: "Nur bei den Rätseln!")
+        (aufgabenModus && SCHEMATA[slug] ? '<span id="vorlage-schema" style="position:absolute;white-space:nowrap;' +
+            'color:#8a93a3;font-size:1.2rem"></span>' : '');
+    const schema = host.querySelector('#vorlage-schema');
+    if (schema) schema.innerHTML = schemaHtml(SCHEMATA[slug]);
     if (nach) {
         const v = host.querySelector('#vorlage-nach span');
         try { katex.render(nach, v, { throwOnError: false }); } catch (e) { v.textContent = nach; }
@@ -362,6 +384,9 @@ function zeigeRechenweg(verborgenAb) {
         kopf.style.height = ZEILE + 'px';                  // the labels' top:50% is the arrows' middle
         const pfeil = document.querySelector('#tafel-pfeil-zurueck svg'), pr = pfeil && pfeil.getBoundingClientRect();
         if (zaehler) { zaehler.style.right = 'auto'; zaehler.style.left = ((pr && pr.width ? pr.right - c.left : 32) + 8) + 'px'; }
+        // a puzzle's column sum under the counter, flush with it (Doc, 28.09., his red frame)
+        const schema = document.getElementById('vorlage-schema');
+        if (schema) schema.style.left = zaehler ? zaehler.style.left : '32px';   // its top: at the end, by the task
         // the block's name the same way before the right arrow
         const block = document.getElementById('vorlage-block');
         const pfeilVor = document.querySelector('#tafel-pfeil-vor svg'), pv = pfeilVor && pfeilVor.getBoundingClientRect();
@@ -539,6 +564,19 @@ function zeigeRechenweg(verborgenAb) {
             if (r.width) { links = Math.min(links, r.left); rechts = Math.max(rechts, r.right); }
         });
         if (isFinite(links)) nach.style.left = ((links + rechts) / 2 - c.left) + 'px';
+    }
+    // a puzzle's column sum stands under the counter - under the task instead where the task reaches that far
+    // left (a narrow window: MATH + ATH + TH + H ran into it, Doc 28.09.)
+    const schema = aufgabenModus && document.getElementById('vorlage-schema');
+    if (schema) {
+        schema.style.top = (ZEILE + 4) + 'px';
+        let links = Infinity, unten = -Infinity;
+        host.querySelectorAll('[data-schritt="aufgabe"] .katex-html').forEach(z => {
+            const r = z.getBoundingClientRect();
+            if (r.width) { links = Math.min(links, r.left); unten = Math.max(unten, r.bottom); }
+        });
+        const s = schema.getBoundingClientRect();
+        if (isFinite(links) && s.right > links - 16 && s.top < unten) schema.style.top = (unten - c.top + 8) + 'px';
     }
     zeigeBuzzAufgabe();                // the buzzer's pill goes behind the newest row
     anzeigeBald();

@@ -351,7 +351,8 @@ function erkennenKlein() {
 // so the beamer never gets it. Where the working stands: its last line among
 // the steps (a skipped or merged step), else by the number of lines.
 function schrittNorm(s) {
-    return String(s).replace(/\\(?:left|right|displaystyle|cdot|times|[,;:! ])|\s|\{\}/g, '').replace(/\\[dt]frac/g, '\\frac');
+    // (\mkern: the tighter dot of the Knobeln block, js/vorrechnen-aufgaben-knobeln.js)
+    return String(s).replace(/\\mkern-?[\d.]+mu|\\(?:left|right|displaystyle|cdot|times|[,;:! ])|\s|\{\}/g, '').replace(/\\[dt]frac/g, '\\frac');
 }
 function naechsterIndex(loesung) {
     const letzte = rechenweg.length ? schrittNorm(rechenweg[rechenweg.length - 1].latex) : null;
@@ -483,7 +484,7 @@ function zeigeHinweis() {
     // the arrow stays (Doc, 27.09.: "auch wenn nicht mehr hochzuschieben ist ... symmetrischer mit dem
     // Radiergummi und dem C"), pale like the C over an empty field while no grey step shows
     const hk = document.getElementById('schritt-hoch');
-    if (!schritte.length) { [el, opEl].forEach(e => { if (e) e.style.display = 'none'; }); if (hk) hk.style.opacity = '0.35'; return; }
+    if (!schritte.length) { [el, opEl].forEach(e => { if (e) e.style.display = 'none'; }); if (hk) hk.style.opacity = '0.35'; zeigeErklaerung(); return; }
     hochKnopf().style.opacity = '';
     if (!el) {
         el = document.createElement('div');
@@ -567,6 +568,96 @@ function zeigeHinweis() {
     const kopf = el.getBoundingClientRect().top;
     const zuViel = zeilen.findIndex((z, k) => k > 0 && kopf + parseFloat(z.dataset.unten) > grenze);
     if (zuViel > 0) zeilen.slice(zuViel).forEach((z, k) => { z.style.display = ops[zuViel + k].style.display = 'none'; });
+    zeigeErklaerung();
+}
+// Doc, 28.09.: "Blende mir hier im Preview einen ausführlichen Erklärungstext ein ... oben rechts x zum wegklicken
+// (pro Aufgabe)" - the task's explanation (ERKLAERUNGEN, js/vorrechnen-aufgaben.js) in the writing field, where
+// he drew it: right of the grey steps, under the ink like them (he writes straight over it), for Doc only. Part
+// of the preview: P off, it goes; the × puts it away for this task; P on again brings every one back.
+const ERKL_WEG = 'vorrechnen-erklaerung-weg';
+let erklWeg = new Set(), erklVorschau = vorschau;
+try { erklWeg = new Set(JSON.parse(localStorage.getItem(ERKL_WEG) || '[]')); } catch (_) {}
+function merkeErklWeg() { try { localStorage.setItem(ERKL_WEG, JSON.stringify([...erklWeg])); } catch (_) {} }
+// paragraphs by a blank line, KaTeX between $...$
+function erklaerungSetzen(el, text) {
+    el.textContent = '';
+    text.split('\n\n').forEach(absatz => {
+        const p = document.createElement('p');
+        // a paragraph that is one formula stands centred, set off (the column sum of SEND + MORE)
+        if (/^\$[^$]+\$$/.test(absatz)) {
+            try { katex.render(absatz.slice(1, -1), p, { throwOnError: false, displayMode: true }); } catch (_) { p.textContent = absatz; }
+            el.appendChild(p);
+            return;
+        }
+        let formel = null;
+        absatz.split(/(\$[^$]+\$)/).forEach(t => {
+            if (!t) return;
+            if (t[0] === '$') {
+                formel = document.createElement('span');
+                try { katex.render(t.slice(1, -1), formel, { throwOnError: false }); } catch (_) { formel.textContent = t; }
+                p.appendChild(formel);
+                return;
+            }
+            // a stop right after a formula goes into its last piece: the line may break inside the formula,
+            // never between it and its "." (Doc, 28.09.: ". auf nächster Zeile")
+            const zeichen = formel && t.match(/^[.,;:!?)]+/), stuecke = formel && formel.querySelectorAll('.base');
+            if (zeichen && stuecke.length) {
+                stuecke[stuecke.length - 1].appendChild(document.createTextNode(zeichen[0]));
+                t = t.slice(zeichen[0].length);
+            }
+            formel = null;
+            if (t) p.appendChild(document.createTextNode(t));
+        });
+        el.appendChild(p);
+    });
+}
+function zeigeErklaerung() {
+    if (anzeigeModus) return;
+    if (vorschau && !erklVorschau && erklWeg.size) { erklWeg.clear(); merkeErklWeg(); }   // P on again: all back
+    erklVorschau = vorschau;
+    const slug = aufgabenModus ? AUFGABEN[aufgabeIdx][0] : null, text = slug && ERKLAERUNGEN[slug];
+    let el = document.getElementById('erklaerung'), zu = document.getElementById('erklaerung-zu');
+    const zeigt = !!text && vorschau && !erklWeg.has(slug);
+    // with an explanation the grey steps on the left go (Doc, 28.09.: "lass bei den Aufgaben das links weg und
+    // mach die box groß") - hidden, not removed: the operations in the margin keep their rows' places
+    const grau = document.getElementById('schritt-hinweis');
+    if (grau) grau.style.visibility = zeigt ? 'hidden' : '';
+    if (!zeigt) { [el, zu].forEach(e => { if (e) e.style.display = 'none'; }); return; }
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'erklaerung';
+        el.setAttribute('aria-hidden', 'true');
+        container.appendChild(el);
+        zu = document.createElement('button');
+        zu.id = 'erklaerung-zu';
+        zu.type = 'button';
+        zu.title = 'Erklärung ausblenden – P aus und wieder an holt sie zurück';
+        zu.setAttribute('aria-label', 'Erklärung ausblenden');
+        zu.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">' +
+            '<path d="M6 6 L18 18 M18 6 L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+        zu.addEventListener('click', () => {
+            zu.blur();
+            if (el.dataset.slug) { erklWeg.add(el.dataset.slug); merkeErklWeg(); }
+            zeigeErklaerung();
+        });
+        container.appendChild(zu);
+    }
+    if (el.dataset.slug !== slug) { el.dataset.slug = slug; el.dataset.fit = ''; erklaerungSetzen(el, text); }
+    // the whole writing field, flush with the buttons under it ("Box an den buttons alignen"): the arrow's left
+    // edge (12 px) to the bin's right edge (12 px before the margin's line), from just under the line down to
+    // above them; the font 1.35 rem ("Schrift größer"), smaller only if a text does not fit
+    const ERKL_SCHRIFT = 1.35;
+    const r = container.getBoundingClientRect(), nx = notizX(r.width), oben = papierGrenze(r.height) + 16;
+    const links = 12, breite = Math.max(240, nx - 12 - links), hoehe = Math.max(80, r.height - 52 - oben);
+    Object.assign(el.style, { left: links + 'px', top: oben + 'px', width: breite + 'px', height: hoehe + 'px', display: '' });
+    Object.assign(zu.style, { left: (links + breite - 36) + 'px', top: (oben + 4) + 'px', display: '' });
+    // again only when the size or the fonts change
+    const sig = [slug, breite, hoehe, document.fonts ? document.fonts.status : ''].join('|');
+    if (el.dataset.fit === sig) return;
+    el.dataset.fit = sig;
+    let g = ERKL_SCHRIFT;
+    el.style.fontSize = g + 'rem';
+    while (el.scrollHeight > el.clientHeight + 1 && g > 0.62) { g -= 0.04; el.style.fontSize = g + 'rem'; }
 }
 // the squares stop at the margin (Beispiele has none: squares all across) - set only
 // when it changes, the beamer mirrors every change of the paper

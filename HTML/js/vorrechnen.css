@@ -197,7 +197,7 @@ body.anzeige::before {
     background: var(--anzeige-grund, #050d1c);
 }
 body.anzeige :is(#cyber-left-chrome, #mini-rail, #side-panel, #right-rail, #tafel-pfeil-vor, #tafel-pfeil-zurueck, #formel-schicht, #erkennen-klein,
-    #schritt-hinweis, #schritt-op, #schritt-hoch, #notiz-rand, #notiz-leeren, #seite-leeren, #oben-leeren, #radierer, #radier-rahmen, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play,
+    #schritt-hinweis, #schritt-op, #schritt-hoch, #erklaerung, #erklaerung-zu, #notiz-rand, #notiz-leeren, #seite-leeren, #oben-leeren, #radierer, #radier-rahmen, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play,
     #buzz-aufgabe, #buzzer-overlay, #tafel-overlay, #namen-overlay, #namen-pille) {
     display: none !important;
 }
@@ -296,6 +296,24 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
     white-space: nowrap; color: #8a93a3; font-size: 1.76rem;
 }
 #canvas-container.hell #schritt-op { color: #7a8294; }
+/* the task's explanation under the preview (Doc, 28.09.: "ausführlichen Erklärungstext ... oben rechts x"):
+   grey like the grey steps and under the ink like them (z-index -1 after #papier), in the LaTeX text face;
+   placed and fitted by zeigeErklaerung. Its × lies over the ink and takes the tap */
+#erklaerung {
+    position: absolute; z-index: -1; pointer-events: none; box-sizing: border-box; overflow: hidden;
+    padding: 10px 44px 8px 16px; border: 1px solid rgba(138, 147, 163, 0.45); border-radius: 8px;
+    color: #8a93a3; font-family: 'CMU Serif', KaTeX_Main, 'Times New Roman', serif; line-height: 1.45;
+}
+#erklaerung p { margin: 0 0 0.45em; }
+#erklaerung p:last-child { margin-bottom: 0; }
+#erklaerung .katex { font-size: 1.1em; }
+#canvas-container.hell #erklaerung { color: #7a8294; border-color: rgba(122, 130, 148, 0.45); }
+#erklaerung-zu {
+    position: absolute; z-index: 5; width: 32px; height: 32px; padding: 0; border: none; background: transparent;
+    color: #8a93a3; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent; outline: none;
+}
+#canvas-container.hell #erklaerung-zu { color: #7a8294; }
 /* the edge of the notes margin (right quarter of the squares), under the ink - solid
    like the line above the squares (Doc, 27.09.: "die Dashline nach unten bitte durchgezogen") */
 #notiz-rand {
@@ -312,6 +330,17 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
 /* the board's own C: bottom right of the board above the line, right over the notes' C (Doc, 28.09.);
    bottom set by zeigeNotizRand */
 #oben-leeren { right: 12px; width: calc(46px * var(--knopf, 1)); padding: 0; letter-spacing: 0; }
+/* Knobeln block (js/vorrechnen-aufgaben-knobeln.js), Doc 28.09.:
+   - the A of a number word goes as \textrm (nowhere else in the lab's tasks): Computer Modern's A reaches 0.716,
+     the flat capitals 0.683 - 0.683 / 0.716 sets it level ("nur das A ist höher"); a digit there goes as \textup:
+     0.666 high, 1.057 sets it like the round O (0.705, both reach -0.022 below) ("die 0 zu klein")
+   - the place values over a number word ("zu groß", "grau", "so klein, dass das nicht passiert"): KaTeX stops at
+     half size, the label's own size span (reset-size6 - the exponent of 10^3 has one of its own) goes to 0.266em,
+     at which 1000 still fits over the narrow S. Found by the grey inside it, the only KaTeX \color #8a93a3 in the
+     lab; katex.render writes it back through the DOM as rgb(), renderToString keeps the hex */
+body .katex .mord.textrm { font-size: 0.954em; }
+body .katex .mord.textup { font-size: 1.057em; }
+body .katex .sizing.reset-size6.mtight:has(> .mord > [style*="138, 147, 163"], > .mord > [style*="#8a93a3"]) { font-size: 0.266em; }
 /* the three clear buttons wear a bin now, sized like the eraser (Doc, 28.09.: "mach die C bitte auch Papierk.") */
 :is(#notiz-leeren, #seite-leeren, #oben-leeren) svg { width: calc(24px * var(--knopf, 1)); height: calc(24px * var(--knopf, 1)); }
 /* the eraser: bottom centre of the writing field, lit while it rubs; its frame

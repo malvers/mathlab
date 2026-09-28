@@ -22,61 +22,61 @@
     );
     BLOECKE.push({ titel: 'Knobeln · Ziffernrätsel', ab, bis: AUFGABEN.length, kopf: 'Ziffern finden' });
     Object.assign(LOESUNGEN, {
-        'k-dreimal':  [['3A=10B+A', '\\text{Stellenwerte}'],
-                      ['2A=10B', '-A'],
-                      ['A=5B', ':2'],
+        'k-dreimal':  [['A\\cdot 3=B\\cdot 10+A', '\\text{Stellenwerte}'],
+                      ['A\\cdot 2=B\\cdot 10', '-A'],
+                      ['A=B\\cdot 5', ':2'],
                       ['B=1', 'A\\le 9,\\;B\\ne 0'],
                       ['A=5', '\\text{einsetzen}'],
                       ['\\mathrm{BA}=15', '\\text{einsetzen}']],
-        'k-summe':    [['10A+B+10B+A=121', '\\text{Stellenwerte}'],
-                      ['11A+11B=121', '\\text{zusammenfassen}'],
+        'k-summe':    [['A\\cdot 10+B+B\\cdot 10+A=121', '\\text{Stellenwerte}'],
+                      ['A\\cdot 11+B\\cdot 11=121', '\\text{zusammenfassen}'],
                       ['A+B=11', ':11']],
-        'k-neun':     [['90A+9B=100A+B', '\\text{Stellenwerte}'],
-                      ['8B=10A', '-90A-B'],
-                      ['4B=5A', ':2'],
+        'k-neun':     [['A\\cdot 90+B\\cdot 9=A\\cdot 100+B', '\\text{Stellenwerte}'],
+                      ['B\\cdot 8=A\\cdot 10', '-A\\cdot 90-B'],
+                      ['B\\cdot 4=A\\cdot 5', ':2'],
                       ['A=4', '\\text{A durch 4 teilbar, }B\\le 9'],
                       ['B=5', '\\text{einsetzen}'],
                       ['\\mathrm{AB}=45', '\\text{einsetzen}']],
-        'k-cab':      [['30A+3B=100C+10A+B', '\\text{Stellenwerte}'],
-                      ['20A+2B=100C', '-10A-B'],
-                      ['10A+B=50C', ':2'],
+        'k-cab':      [['A\\cdot 30+B\\cdot 3=C\\cdot 100+A\\cdot 10+B', '\\text{Stellenwerte}'],
+                      ['A\\cdot 20+B\\cdot 2=C\\cdot 100', '-A\\cdot 10-B'],
+                      ['A\\cdot 10+B=C\\cdot 50', ':2'],
                       ['C=1', '\\text{AB ist zweistellig}'],
                       ['\\mathrm{AB}=50', '\\text{einsetzen}'],
                       ['\\mathrm{CAB}=150', '\\text{einsetzen}']],
-        'k-cac':      [['11A+11B=101C+10A', '\\text{Stellenwerte}'],
+        'k-cac':      [['A\\cdot 11+B\\cdot 11=C\\cdot 101+A\\cdot 10', '\\text{Stellenwerte}'],
                       ['C=1', '\\text{Summe kleiner als 200}'],
-                      ['11A+11B=101+10A', '\\text{einsetzen}'],
-                      ['A+11B=101', '-10A'],
+                      ['A\\cdot 11+B\\cdot 11=101+A\\cdot 10', '\\text{einsetzen}'],
+                      ['A+B\\cdot 11=101', '-A\\cdot 10'],
                       ['B=9', '1\\le A\\le 9'],
                       ['A=2', '\\text{einsetzen}'],
                       ['\\mathrm{CAC}=121', '\\text{einsetzen}']],
-        'k-abc':      [['11A+11B+11C=100A+10B+C', '\\text{Stellenwerte}'],
-                      ['B+10C=89A', '-11A-10B-C'],
+        'k-abc':      [['A\\cdot 11+B\\cdot 11+C\\cdot 11=A\\cdot 100+B\\cdot 10+C', '\\text{Stellenwerte}'],
+                      ['B+C\\cdot 10=A\\cdot 89', '-A\\cdot 11-B\\cdot 10-C'],
                       ['A=1', '\\text{links höchstens 99}'],
-                      ['B+10C=89', '\\text{einsetzen}'],
+                      ['B+C\\cdot 10=89', '\\text{einsetzen}'],
                       ['\\mathrm{CB}=89', '\\text{Stellenwerte}'],
                       ['\\mathrm{ABC}=198', '\\text{einsetzen}']],
-        'k-ccc':      [['300A+30B+3C=111C', '\\text{Stellenwerte}'],
-                      ['300A+30B=108C', '-3C'],
-                      ['50A+5B=18C', ':6'],
+        'k-ccc':      [['A\\cdot 300+B\\cdot 30+C\\cdot 3=C\\cdot 111', '\\text{Stellenwerte}'],
+                      ['A\\cdot 300+B\\cdot 30=C\\cdot 108', '-C\\cdot 3'],
+                      ['A\\cdot 50+B\\cdot 5=C\\cdot 18', ':6'],
                       ['C=5', '\\text{links durch 5 teilbar, }C\\ne 0'],
-                      ['50A+5B=90', '\\text{einsetzen}'],
-                      ['10A+B=18', ':5'],
+                      ['A\\cdot 50+B\\cdot 5=90', '\\text{einsetzen}'],
+                      ['A\\cdot 10+B=18', ':5'],
                       ['\\mathrm{ABC}=185', '\\text{Stellenwerte}']],
         'k-1089':     [['A=1', '\\text{Produkt höchstens vierstellig}'],
-                      ['D=9', '9D\\text{ endet auf }1'],
+                      ['D=9', 'D\\cdot 9\\text{ endet auf }1'],
                       ['B=0', 'B\\le 1,\\;B\\ne A'],
-                      ['C=8', '9C+8\\text{ endet auf }0'],
+                      ['C=8', 'C\\cdot 9+8\\text{ endet auf }0'],
                       ['\\mathrm{ABCD}=1089', '\\text{Probe: }1089\\cdot 9=9801']],
-        'k-math':     [['1000M+200A+30T+4H=5000', '\\text{Stellenwerte}'],
+        'k-math':     [['M\\cdot 1000+A\\cdot 200+T\\cdot 30+H\\cdot 4=5000', '\\text{Stellenwerte}'],
                       ['H=5', '\\text{Einerstelle}'],
-                      ['1000M+200A+30T+20=5000', '\\text{einsetzen}'],
-                      ['1000M+200A+30T=4980', '-20'],
-                      ['100M+20A+3T=498', ':10'],
-                      ['T=6', '3T\\text{ endet auf }8'],
-                      ['100M+20A+18=498', '\\text{einsetzen}'],
-                      ['100M+20A=480', '-18'],
-                      ['5M+A=24', ':20'],
+                      ['M\\cdot 1000+A\\cdot 200+T\\cdot 30+20=5000', '\\text{einsetzen}'],
+                      ['M\\cdot 1000+A\\cdot 200+T\\cdot 30=4980', '-20'],
+                      ['M\\cdot 100+A\\cdot 20+T\\cdot 3=498', ':10'],
+                      ['T=6', 'T\\cdot 3\\text{ endet auf }8'],
+                      ['M\\cdot 100+A\\cdot 20+18=498', '\\text{einsetzen}'],
+                      ['M\\cdot 100+A\\cdot 20=480', '-18'],
+                      ['M\\cdot 5+A=24', ':20'],
                       ['M=3', 'A\\le 9,\\;A\\ne M'],
                       ['A=9', '\\text{einsetzen}'],
                       ['M+A+T+H=23', '\\text{addieren}']],
@@ -92,4 +92,129 @@
                       ['Y=2', '\\text{einsetzen}'],
                       ['\\mathrm{MONEY}=10652', '\\text{einsetzen}']],
     });
+    // Every task also stands "untereinander" on the board (SCHEMATA, Doc 28.09.), as on paper: the rows
+    // right-aligned digit by digit, the sign right before the last row, a rule, the result. The two products
+    // have none ("lass es bei den beiden Produkten links oben weg")
+    Object.assign(SCHEMATA, {
+        'k-dreimal': { zeilen: ['A', 'A', 'A'], zeichen: '+', ergebnis: 'BA' },
+        'k-summe':   { zeilen: ['AB', 'BA'], zeichen: '+', ergebnis: '121' },
+        'k-cab':     { zeilen: ['AB', 'AB', 'AB'], zeichen: '+', ergebnis: 'CAB' },
+        'k-cac':     { zeilen: ['AB', 'BA'], zeichen: '+', ergebnis: 'CAC' },
+        'k-abc':     { zeilen: ['AA', 'BB', 'CC'], zeichen: '+', ergebnis: 'ABC' },
+        'k-ccc':     { zeilen: ['ABC', 'ABC', 'ABC'], zeichen: '+', ergebnis: 'CCC' },
+        'k-math':    { zeilen: ['MATH', 'ATH', 'TH', 'H'], zeichen: '+', ergebnis: '5000' },
+        'k-money':   { zeilen: ['SEND', 'MORE'], zeichen: '+', ergebnis: 'MONEY' },
+    });
+    // Doc, 28.09.: "Blende mir hier im Preview einen ausführlichen Erklärungstext ein" - the reasoning behind
+    // the steps above, for Doc under the preview (ERKLAERUNGEN, js/vorrechnen-aufgaben.js); every claim checked
+    // against the steps and by hand (which digits are left, which cases fall away)
+    Object.assign(ERKLAERUNGEN, {
+        'k-dreimal':
+            'Jeder Buchstabe ist eine Ziffer, verschiedene Buchstaben sind verschiedene Ziffern, und keine Zahl beginnt mit 0.\n\n' +
+            '$\\mathrm{BA}$ ist zweistellig: B Zehner und A Einer, also $\\mathrm{BA}=B\\cdot 10+A$. Die Aufgabe heißt damit ' +
+            '$A\\cdot 3=B\\cdot 10+A$. Auf beiden Seiten $A$ weg: $A\\cdot 2=B\\cdot 10$, halbiert $A=B\\cdot 5$.\n\n' +
+            '$A$ ist eine Ziffer, also höchstens 9, und $B$ steht vorne, ist also nicht 0. Das lässt nur $B=1$ und $A=5$. ' +
+            'Probe: $5+5+5=15$.',
+        'k-summe':
+            'Stellenwerte: $\\mathrm{AB}=A\\cdot 10+B$ und $\\mathrm{BA}=B\\cdot 10+A$. Zusammen $A\\cdot 11+B\\cdot 11=121$, ' +
+            'durch 11 geteilt: $A+B=11$.\n\n' +
+            'Welche Ziffern es sind, verrät die Aufgabe nicht: $29+92$, $38+83$, $47+74$, $56+65$ und dieselben Paare ' +
+            'andersherum – acht Lösungen. In allen ist $A+B=11$, und nur danach ist gefragt.\n\n' +
+            'Zum Weiterdenken: Zahl plus Spiegelzahl ist immer ein Vielfaches von 11.',
+        'k-neun':
+            'Links die zweistellige Zahl $\\mathrm{AB}=A\\cdot 10+B$, mal 9. Rechts die dreistellige ' +
+            '$\\mathrm{A0B}=A\\cdot 100+B$ (null Zehner).\n\n' +
+            'Also $(A\\cdot 10+B)\\cdot 9=A\\cdot 100+B$, ausmultipliziert $A\\cdot 90+B\\cdot 9=A\\cdot 100+B$. Alles mit $A$ ' +
+            'nach rechts, alles mit $B$ nach links: $B\\cdot 8=A\\cdot 10$, halbiert $B\\cdot 4=A\\cdot 5$.\n\n' +
+            'Links steht ein Vielfaches von 4 – dann muss auch $A\\cdot 5$ durch 4 teilbar sein, und weil 5 und 4 keinen ' +
+            'gemeinsamen Teiler haben, ist $A$ selbst durch 4 teilbar: $A=4$ oder $A=8$. Mit $A=8$ wäre $B=10$, keine ' +
+            'Ziffer. Also $A=4$, $B=5$. Probe: $45\\cdot 9=405$.',
+        'k-cab':
+            'Dreimal die zweistellige Zahl $\\mathrm{AB}$ ergibt die dreistellige $\\mathrm{CAB}$ – hinten steht wieder ' +
+            '$\\mathrm{AB}$.\n\n' +
+            'Stellenwerte: $A\\cdot 30+B\\cdot 3=C\\cdot 100+A\\cdot 10+B$. Einmal $\\mathrm{AB}$ abziehen: ' +
+            '$A\\cdot 20+B\\cdot 2=C\\cdot 100$, halbiert $A\\cdot 10+B=C\\cdot 50$. Das heißt: $\\mathrm{AB}=C\\cdot 50$.\n\n' +
+            '$\\mathrm{AB}$ ist zweistellig, also höchstens 99, und $C$ steht vorne, ist also nicht 0. Nur $C=1$ passt: ' +
+            '$\\mathrm{AB}=50$, $\\mathrm{CAB}=150$. Probe: $50+50+50=150$. Die 0 ist erlaubt – sie steht ja nicht vorne.',
+        'k-cac':
+            'Wie bei $\\mathrm{AB}+\\mathrm{BA}=121$: links $A\\cdot 11+B\\cdot 11$. Rechts ' +
+            '$\\mathrm{CAC}=C\\cdot 100+A\\cdot 10+C=C\\cdot 101+A\\cdot 10$.\n\n' +
+            'Zwei zweistellige Zahlen ergeben zusammen weniger als 200, also ist $C=1$. Eingesetzt: ' +
+            '$A\\cdot 11+B\\cdot 11=101+A\\cdot 10$, und $A\\cdot 10$ auf beiden Seiten weg: $A+B\\cdot 11=101$.\n\n' +
+            '$A$ liegt zwischen 1 und 9, also muss $B\\cdot 11$ zwischen 92 und 100 liegen. Das schafft nur $B=9$ mit 99. ' +
+            'Dann $A=101-99=2$ und $\\mathrm{CAC}=121$. Probe: $29+92=121$.',
+        'k-abc':
+            'Eine Schnapszahl wie $\\mathrm{AA}$ ist $A\\cdot 10+A=A\\cdot 11$, ebenso $\\mathrm{BB}=B\\cdot 11$ und ' +
+            '$\\mathrm{CC}=C\\cdot 11$. Rechts $\\mathrm{ABC}=A\\cdot 100+B\\cdot 10+C$.\n\n' +
+            'Alles auf eine Seite sortiert: $B+C\\cdot 10=A\\cdot 89$. Links steht die zweistellige Zahl $\\mathrm{CB}$, ' +
+            'höchstens 99; rechts ein Vielfaches von 89. Das geht nur mit $A=1$.\n\n' +
+            'Dann $\\mathrm{CB}=89$, also $C=8$ und $B=9$, und $\\mathrm{ABC}=198$. Probe: $11+99+88=198$.',
+        'k-ccc':
+            'Dreimal $\\mathrm{ABC}$ ergibt die Schnapszahl $\\mathrm{CCC}=C\\cdot 111$. Stellenwerte: ' +
+            '$A\\cdot 300+B\\cdot 30+C\\cdot 3=C\\cdot 111$.\n\n' +
+            '$C\\cdot 3$ abziehen: $A\\cdot 300+B\\cdot 30=C\\cdot 108$, durch 6: $A\\cdot 50+B\\cdot 5=C\\cdot 18$. Links ' +
+            'steht ein Vielfaches von 5, also muss $C\\cdot 18$ durch 5 teilbar sein – das geht nur mit $C=0$ oder $C=5$, ' +
+            'und $C=0$ scheidet aus, vorne steht keine 0.\n\n' +
+            'Mit $C=5$: $A\\cdot 50+B\\cdot 5=90$, durch 5: $A\\cdot 10+B=18$, also $\\mathrm{AB}=18$ und ' +
+            '$\\mathrm{ABC}=185$. Probe: $185\\cdot 3=555$.',
+        'k-1089':
+            'Eine vierstellige Zahl mal 9 soll vierstellig bleiben und rückwärts herauskommen. Schon $1112\\cdot 9=10008$ ' +
+            'ist fünfstellig – also ist $\\mathrm{ABCD}$ höchstens 1111: $A=1$, und $B$ ist höchstens 1.\n\n' +
+            'Das Ergebnis $\\mathrm{DCBA}$ endet auf $A=1$. Die Einerstelle von $D\\cdot 9$ ist 1 nur für $D=9$ ' +
+            '(81, Übertrag 8). $B$ ist höchstens 1 und nicht gleich $A$, also $B=0$.\n\n' +
+            'Zehnerstelle: $C\\cdot 9$ plus Übertrag 8 muss auf $B=0$ enden. $C\\cdot 9+8$ endet auf 0 nur für $C=8$ (80). ' +
+            'Also $\\mathrm{ABCD}=1089$. Probe: $1089\\cdot 9=9801$ – rückwärts gelesen.',
+        'k-math':
+            'Stellenwerte, Spalte für Spalte: M steht einmal als Tausender, A zweimal als Hunderter, T dreimal als ' +
+            'Zehner, H viermal als Einer: $M\\cdot 1000+A\\cdot 200+T\\cdot 30+H\\cdot 4=5000$.\n\n' +
+            'Einerstelle: $H\\cdot 4$ endet auf 0, also $H=0$ oder $H=5$. Mit $H=0$ müsste auch $T\\cdot 3$ auf 0 enden, ' +
+            'also $T=0$ – zweimal dieselbe Ziffer, verboten. Also $H=5$, und nach $-20$ und $:10$ bleibt ' +
+            '$M\\cdot 100+A\\cdot 20+T\\cdot 3=498$.\n\n' +
+            '$T\\cdot 3$ endet auf 8: $T=6$. Dann $M\\cdot 100+A\\cdot 20=480$, durch 20: $M\\cdot 5+A=24$. $A$ ist ' +
+            'höchstens 9, also $M=3$ mit $A=9$ ($M=4$ gäbe $A=4=M$). Gefragt: $M+A+T+H=3+9+6+5=23$. ' +
+            'Probe: $3965+965+65+5=5000$.',
+        // Doc, 28.09.: "10 versteh ich ja noch nicht mal mit Erklärung ... und was ist Y ???" - column by column,
+        // as one adds on paper (the sum itself stands on the board, SCHEMATA); Y gets a step of its own
+        'k-money':
+            'Ganz vorne: Zwei vierstellige Zahlen ergeben höchstens $19998$ – die fünfte Ziffer $M$ ist nur der ' +
+            'Übertrag: $M=1$. Die Tausenderspalte $S+1$ (plus Übertrag) ergibt also 10 oder 11, und $O$ ist deren ' +
+            'Einer: $O=0$, denn die 1 hat schon $M$.\n\n' +
+            'Hunderter: $E+0$ soll $N$ ergeben, aber $N\\ne E$. Also kommt von den Zehnern eine 1 dazu: $N=E+1$. ' +
+            'Nach vorne geht kein Übertrag (sonst $E=9$ und $N=0$ wie $O$), also $S+1=10$: $S=9$.\n\n' +
+            'Zehner: $N+R$ plus Übertrag $c$ von den Einern ergibt $E+10$. Mit $N=E+1$ fällt $E$ heraus: $R=9-c$. ' +
+            'Die 9 hat schon $S$, also $c=1$ und $R=8$.\n\n' +
+            'Einer: $D+E=Y+10$ – $Y$ ist die Einerziffer von $D+E$, die 1 geht als Übertrag $c$ weiter. Frei sind noch ' +
+            '2 bis 7, und $Y\\ge 2$ heißt $D+E\\ge 12$. Das geht nur mit $E=5$, $N=6$, $D=7$ ($E=2,3,4$: $D$ zu groß; ' +
+            '$E=6$: $N=7$, kein $D$ frei; $E=7$: $N=8$ wie $R$). Dann $7+5=12$: $Y=2$.\n\n' +
+            'Probe: $9567+1085=10652$.',
+    });
+    // Doc, 28.09.: a dot wherever a number stands with a letter - "damit klar ist, das ist ja jetzt ein ganz
+    // anderer Typ von Aufgaben" - the letter first ("A mal zehn": A = 5 reads 5 · 10), and the dot's gaps
+    // "gefühlte 10 %" tighter: KaTeX keeps 4 mu a side for the operator, 0.5 mu less there (-12.5 %)
+    // Doc, 28.09.: over every digit of a number written in letters its place value, very small ("schreib da
+    // ganz klein drüber 10 1 (etc.)", then "zu groß", "grau") - in the tasks: AB gets 10 and 1, MONEY 10000 down
+    // to 1. Grey, and half size is KaTeX's smallest: js/vorrechnen.css takes them further down by that grey.
+    // As powers of ten, 10^3 for 1000 (Doc: "1000 -> 10^3 (hoch 3) probier mal das Muster"): all as wide as "10",
+    // the exponent a size smaller (scriptstyle, its exponent scriptscript). Then: "bei den ersten 5 ... 100 10 1
+    // dann Potenz" - the first five tasks written out, the harder five as powers
+    const AUSGESCHRIEBEN = 5;
+    // The A of Computer Modern reaches 0.716, the flat capitals 0.683 (measured in KaTeX_Main; O, S, C overshoot
+    // a little, as round letters do) - Doc, 28.09.: "ich denke nur das A ist höher ... bissl kleiner". In the
+    // number words it goes as \textrm (the same font, a class of its own), js/vorrechnen.css sets it at 95.4 %.
+    // A digit there ("die 0 zu klein": 0.666 against 0.683) goes as \textup, set like the round O (to 0.705).
+    const buchstabe = z => z === 'A' ? '\\textrm{A}' : /\d/.test(z) ? '\\textup{' + z + '}' : '\\mathrm{' + z + '}';
+    const stellen = (w, potenz) => [...w].map((z, i) => {
+        const k = w.length - 1 - i;
+        return '\\overset{\\color{#8a93a3}\\scriptstyle ' + (potenz ? '10^{' + k + '}' : 10 ** k) + '}' +
+            '{' + buchstabe(z) + '\\vphantom{\\mathrm{A}}}';        // vphantom: over the 0 at letter height
+    }).join('');
+    AUFGABEN.slice(ab).forEach((a, j) => {
+        a[1] = a[1].replace(/\\mathrm\{([A-Z0-9]{2,})\}/g, (_, w) => stellen(w, j >= AUSGESCHRIEBEN));
+    });
+    const ENG = '\\mkern-0.5mu\\cdot\\mkern-0.5mu ';
+    const woerter = s => s.replace(/\\mathrm\{([A-Z0-9]{2,})\}/g, (_, w) => [...w].map(buchstabe).join(''));
+    AUFGABEN.slice(ab).forEach(([slug]) => LOESUNGEN[slug].forEach(z => {
+        z[0] = woerter(z[0].replace(/\\cdot /g, ENG));
+        z[1] = z[1].replace(/\\cdot /g, ENG);
+    }));
 })();
