@@ -114,12 +114,17 @@ window.svpPlanParts.push(function (P) {
         const termine = [];
         /* Gruppe -> die Themen-Ids, die sie zu vergeben hat (siehe markTalksDone) */
         const themen = {};
+        /* Gruppe -> unter welchem Schluessel ihre Namen in svp_vortrag_namen
+           stehen: der Buchstabe, oder bei Plaenen mit Lerngruppen der Gruppenname
+           aus ?g= (inf12: "BGY25") - so, wie vortraege.js ihn speichert */
+        const dbKlasse = {};
         klassen.forEach(function (k) {
             const m = edits(metaPage(k));
             const fundus = new Set((Array.isArray(m.fundus) ? m.fundus : []).map(Number));
             const order = Array.isArray(m.order) ? m.order.map(Number) : null;
             const list = V.arrange(catOf(k), order).filter(function (e) { return !fundus.has(e.id); });
             themen[k[0]] = list.map(function (e) { return e.id; });
+            dbKlasse[k[0]] = [k[0]].concat(k[1] ? [slug(k[1])] : []);
             const own = V.datesFor(def, k[0]);
             const md = m.dates && typeof m.dates === 'object' ? m.dates : {};
             list.forEach(function (e, pos) {
@@ -147,7 +152,7 @@ window.svpPlanParts.push(function (P) {
             paintTalk(ref);
         });
         if (P.newsTalks) P.newsTalks(termine);
-        markTalksDone(key, themen).catch(function (e) { console.warn('svp talks done:', e); });
+        markTalksDone(key, themen, dbKlasse).catch(function (e) { console.warn('svp talks done:', e); });
     }
 
     /* Der Vortraege-Knopf wird gruen, sobald jedes Thema dieser Lerngruppe
@@ -173,18 +178,26 @@ window.svpPlanParts.push(function (P) {
         });
     }
 
-    async function markTalksDone(plan, themen) {
+    async function markTalksDone(plan, themen, dbKlasse) {
         const btns = talkButtons();
         const keys = Object.keys(themen);
         if (!btns.length || !keys.length || !window.svpAuth) return;
         /* eine Abfrage fuer den ganzen Plan, danach je Lerngruppe getrennt -
-           informatik9 hat zwei Knoepfe (9a und 9b) mit je eigener Liste. */
+           informatik9 hat zwei Knoepfe (9a und 9b) mit je eigener Liste.
+           Eine Zeile ist ein belegter Platz, also ein Name. */
         const res = await fetch(svpAuth.DB_URL + '/rest/v1/svp_vortrag_namen' +
             '?plan=eq.' + encodeURIComponent(plan) +
             '&taken=is.true&select=klasse,idx',
             { headers: { apikey: svpAuth.DB_KEY, Authorization: 'Bearer ' + svpAuth.DB_KEY } });
         if (!res.ok) return;
         const rows = await res.json();
+        /* die belegten Plaetze einer Gruppe, nur an Themen, die gerade auf ihrer
+           Liste stehen - ein Name an einem Thema im Fundus zaehlt nicht */
+        const belegtVon = function (k) {
+            const unter = dbKlasse[k] || [k];
+            const liste = new Set(themen[k] || []);
+            return rows.filter(function (r) { return unter.indexOf(r.klasse) >= 0 && liste.has(r.idx); });
+        };
         btns.forEach(function (btn) {
             /* "informatik9b-vortraege.html" -> "informatik9b" endet auf den
                Schluessel "b". Mit ?g= zaehlt die gewaehlte Gruppe, sonst die
@@ -193,20 +206,38 @@ window.svpPlanParts.push(function (P) {
             const treffer = keys.find(function (k) { return seite.endsWith(k); });
             /* Laesst sich der Knopf keiner einzelnen Gruppe zuordnen (fos12 ohne
                ?g=), dann zaehlen ALLE - gruen heisst dort: bei jeder Gruppe ist
-               alles vergeben. Frueher entschied stumm die erste Gruppe. */
-            const zu = P.GROUP ? [P.GROUP] : (treffer ? [treffer] : keys);
+               alles vergeben. Frueher entschied stumm die erste Gruppe.
+               Mit ?g= die Gruppe, zu der dieser Schluessel gehoert - bei inf12
+               heisst sie in der URL "BGY25", in den Themen "a". */
+            const zu = P.GROUP
+                ? keys.filter(function (k) {
+                    return (dbKlasse[k] || [k]).some(function (x) { return P.groupKey(x) === P.GROUP_KEY; });
+                })
+                : (treffer ? [treffer] : keys);
             const ids = zu.reduce(function (a, k) { return a.concat(themen[k] || []); }, []);
             if (!ids.length) return;
+            let namen = 0;
             const offen = zu.reduce(function (n, k) {
-                const belegt = new Set(rows.filter(function (r) { return r.klasse === k; })
-                    .map(function (r) { return r.idx; }));
-                return n + (themen[k] || []).filter(function (id) { return !belegt.has(id); }).length;
+                const belegt = belegtVon(k);
+                namen += belegt.length;
+                const vergeben = new Set(belegt.map(function (r) { return r.idx; }));
+                return n + (themen[k] || []).filter(function (id) { return !vergeben.has(id); }).length;
             }, 0);
             btn.classList.toggle('vortraege-voll', !offen);
+            /* Hinter "Vortraege" steht, wie viele Namen eingetragen sind
+               (Doc, 28.09.2026: "wieviele vergeben sind (Name count)"). */
+            let zahl = btn.querySelector('.vortraege-zahl');
+            if (!zahl) {
+                zahl = document.createElement('span');
+                zahl.className = 'vortraege-zahl';
+                btn.appendChild(zahl);
+            }
+            zahl.textContent = namen;
             /* Der Titel sagt, warum der Knopf gruen ist - oder wie viel noch fehlt. */
-            btn.title = btn.title.replace(/\s—\s(alle vergeben|noch\s\d+.*)$/, '') +
-                (offen ? ' — noch ' + offen + (offen === 1 ? ' Thema' : ' Themen') + ' ohne Namen'
-                       : ' — alle vergeben');
+            btn.title = btn.title.replace(/\s—\s(\d+\sNamen?\b.*|alle vergeben|noch\s\d+.*)$/, '') +
+                ' — ' + namen + (namen === 1 ? ' Name, ' : ' Namen, ') +
+                (offen ? 'noch ' + offen + (offen === 1 ? ' Thema' : ' Themen') + ' ohne Namen'
+                       : 'alle vergeben');
         });
     }
 });
