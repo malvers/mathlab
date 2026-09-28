@@ -163,6 +163,35 @@ function klappeAuf(an) {
     k.setAttribute('aria-expanded', an ? 'true' : 'false');
     leuchte(k, an);
 }
+// Doc, 28.09.: "Zeigt das aber bitte nur, wenn kein Platz ist" - with room in the rail the row's buttons stand
+// in it, in the toggle's place, and the toggle goes; only when they would not fit does the row slide out.
+// The room is the colours' auto margin above farbe-0 (layout units: offset*, the rail's scale does not count)
+function klappePlatz() {
+    const inner = document.getElementById('right-rail-inner'), k = document.getElementById('werkzeug-klappe'),
+          l = document.getElementById('werkzeug-leiste'), f = document.getElementById('farbe-0');
+    if (!inner || !k || !l || !f) return;
+    const knoepfe = ['hell', 'tafel', 'vorschau'].map(id => document.getElementById('werkzeug-' + id));
+    const imRail = knoepfe[0].parentNode === inner;
+    let passt;
+    if (imRail) passt = inner.scrollHeight <= inner.clientHeight;
+    else {
+        const gap = parseFloat(getComputedStyle(inner).rowGap) || 0;
+        let p = f.previousElementSibling;
+        while (p && !p.offsetHeight) p = p.previousElementSibling;       // hidden ones (beamer, ...) take no room
+        const frei = f.offsetTop - (p ? p.offsetTop + p.offsetHeight : f.offsetTop) - gap;
+        // the visible ones need their height and a gap each, the toggle gives its own back
+        const noetig = knoepfe.reduce((s, b) => s + (b.offsetHeight ? b.offsetHeight + gap : 0), 0) - k.offsetHeight - gap;
+        passt = frei >= noetig;
+    }
+    if (passt === imRail) return;
+    if (passt) klappeAuf(false);
+    knoepfe.forEach(b => (passt ? inner.insertBefore(b, k) : l.appendChild(b)));
+    knoepfe[0].style.marginTop = passt ? '12px' : '';                  // the group's gap, as the toggle had
+    if (passt) k.style.setProperty('display', 'none', 'important');
+    else k.style.removeProperty('display');
+}
+// the rail's scale comes a frame after the resize (js/cyber-left-chrome.js)
+addEventListener('cyber-left-chrome-zoom', () => klappePlatz());
 document.addEventListener('pointerdown', e => {
     if (klappeOffen() && !(e.target.closest && e.target.closest('#werkzeug-leiste, #werkzeug-klappe'))) klappeAuf(false);
 }, true);
@@ -332,6 +361,7 @@ function zeigeWerkzeuge() {
     if (testModus) tk.style.setProperty('display', 'none', 'important');
     else tk.style.removeProperty('display');
     zeigeBuzzAufgabe();                // another task, mode or size: the count of that task
+    klappePlatz();                     // buttons shown or hidden above: room in the rail again?
     // nothing to undo or redo: dimmed
     document.getElementById('werkzeug-undo').style.opacity = verlauf.length ? '1' : '0.35';
     document.getElementById('werkzeug-redo').style.opacity = vorwaerts.length ? '1' : '0.35';
