@@ -311,8 +311,9 @@
         if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
             CyberLeftChrome.configure({ viewportOnlyZoom: true });
         }
-        // on a narrow screen the stage needs the room more than the controls do
-        if (window.innerWidth < 900) document.getElementById('side-panel').classList.add('collapsed');
+        // on a narrow screen the stage needs the room more than the controls do - but 0 is no screen: a lab that
+        // starts in a hidden deck slide measures 0 and lost its controls (28.09.2026)
+        if (window.innerWidth > 0 && window.innerWidth < 900) document.getElementById('side-panel').classList.add('collapsed');
 
         // ------------------------------------------------------------------
         // Chapter list — the order a learner works through, 1 to 11

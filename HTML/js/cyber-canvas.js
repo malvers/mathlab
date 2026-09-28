@@ -221,15 +221,22 @@ class CyberCanvas {
         this.canvas.style.width = this.width + 'px';
         this.canvas.style.height = this.height + 'px';
 
-        // ASPRECT RATIO SYNC: Maintain 1:1 units
-        const currentYRange = this.view.maxY - this.view.minY;
-        const aspect = this.width / this.height;
-        const targetXRange = currentYRange * aspect;
+        // ASPRECT RATIO SYNC: Maintain 1:1 units - only with a real size. A lab that starts hidden (a deck slide
+        // that is not shown yet, display:none around its iframe) measures 0 x 0 here: 0/0 made the x range NaN, and
+        // every later resize kept it NaN - the graph stayed empty until "Labor zuruecksetzen" (Doc, 28.09.2026:
+        // "die Labs starten in der Praesi so, erst nach reset ok"). Hidden: keep the view, the resize that comes
+        // when the frame is shown syncs it.
+        if (this.width > 0 && this.height > 0) {
+            const currentYRange = this.view.maxY - this.view.minY;
+            const aspect = this.width / this.height;
+            const targetXRange = currentYRange * aspect;
 
-        // Center the new X range around the current center
-        const centerX = (this.view.minX + this.view.maxX) / 2;
-        this.view.minX = centerX - targetXRange / 2;
-        this.view.maxX = centerX + targetXRange / 2;
+            // Center the new X range around the current center (0 if it was ever lost)
+            let centerX = (this.view.minX + this.view.maxX) / 2;
+            if (!Number.isFinite(centerX)) centerX = 0;
+            this.view.minX = centerX - targetXRange / 2;
+            this.view.maxX = centerX + targetXRange / 2;
+        }
 
         this.ctx.resetTransform();
         this.ctx.scale(this.dpr, this.dpr);
@@ -248,9 +255,9 @@ class CyberCanvas {
         this.view.minX = -1; // Temporary, resize() will fix it
         this.view.maxX = 1;
 
-        // Ensure we center at X=0
+        // Ensure we center at X=0 (hidden, i.e. 0 x 0: square for now - resize() syncs it once the canvas is shown)
         const currentYRange = this.view.maxY - this.view.minY;
-        const aspect = this.width / this.height;
+        const aspect = this.width > 0 && this.height > 0 ? this.width / this.height : 1;
         const targetXRange = currentYRange * aspect;
 
         this.view.minX = -targetXRange / 2;
