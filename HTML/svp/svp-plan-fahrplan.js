@@ -118,8 +118,9 @@ window.svpPlanParts.push(function (P) {
             ],
             marker: 'rgba(245, 194, 66, 0.45)'
         }));
-        /* Doc, 28.09.2026: "bau mir den klein bitte oben links neben den GDW" - the gong of svp-gong.js at
-           the end of the head row, the thought of the week right of it; a click rings it at once */
+        /* Doc, 28.09.2026: "bau mir den klein bitte oben links neben den GDW", then "Rück Inhalte ein und mach
+           es vor Inhalte so hoch wie Inhalte" - the gong of svp-gong.js in front of the title, as tall as its
+           letters; a click rings it at once */
         if (window.svpGong) {
             const gongKnopf = document.createElement('button');
             gongKnopf.type = 'button';
@@ -128,7 +129,7 @@ window.svpPlanParts.push(function (P) {
             gongKnopf.setAttribute('aria-label', 'Gong');
             gongKnopf.innerHTML = svpGong.ICON;
             gongKnopf.addEventListener('click', function (ev) { ev.stopPropagation(); svpGong.test(); });
-            kopf.appendChild(gongKnopf);
+            kopf.insertBefore(gongKnopf, titel);
         }
         /* Der Gedanke der Woche in der Ecke: derselbe Klick wie in der Wochenzeile
            (Doc, 20.09.2026: "mach rechts oben ein thumb vom GDW"). */

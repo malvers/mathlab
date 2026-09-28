@@ -110,34 +110,40 @@
     gap: 8px 16px;
     margin: 0 0 0.5em;
 }
-/* Die feste Ueberschrift - etwas ruhiger als die Punkte darunter. */
+/* Die feste Ueberschrift - etwas ruhiger als die Punkte darunter. Doc, 28.09.2026: "mach den Inhalte
+   groesser bitte ... und nicht bold", then "bissl kleiner" - as large as the points, in the regular weight. Its size is
+   --fahr-titel on the head row, so the gong in front of it (.fahr-gong) takes the same. */
+.fahr-head { --fahr-titel: 1em; }
 .fahr-title {
     margin: 0;
-    font-size: 0.86em;
-    font-weight: 600;
+    font-size: var(--fahr-titel);
+    font-weight: 400;
     color: #002060;
     /* The line box starts ~11 px above the capitals (measured 27.09.2026); trimming
        its top to the cap height puts the letters on the card's upper edge. Only the
        top is trimmed, so the gap to the first bullet stays as it was. */
     text-box: trim-start cap alphabetic;
 }
-/* The gong (svp-gong.js, Doc 28.09.2026: "klein ... oben links neben den GDW"): last in the head row, so it
-   sits at the right end of the text column, left of the thought of the week; the bar before it keeps
-   to the right as well (margin-left: auto), the title stays left. */
+/* The gong (svp-gong.js, Doc 28.09.2026: "Rück Inhalte ein und mach es vor Inhalte so hoch wie Inhalte"):
+   first in the head row, the title moved in after it; the bar keeps to the right (margin-left: auto).
+   As tall as the title's letters: the title's font size, 1.1 cap high and 0.12 cap up - measured
+   28.09.2026, the word "Inhalte" (its h, l, t reach above the caps) and the gong then share top and foot. The padding only widens what a finger hits; the negative
+   margin takes it back out of the layout. */
 .fahr-head .fmtbar { margin-left: auto; }
 .fahr-gong {
     flex: 0 0 auto;
-    width: 40px;
-    height: 40px;
-    padding: 2px;
-    margin: -2px 0 0;           /* the crossbar level with the card's upper edge */
+    font: inherit;
+    font-size: var(--fahr-titel);   /* the title's (.fahr-title), so 1cap is its letters' height */
+    height: calc(1.1cap + 12px);
+    padding: 6px;
+    margin: -6px -14px -6px -6px;   /* 16px row gap - 8: the title close by */
     border: 0;
     border-radius: 6px;
     background: none;
     cursor: pointer;
     line-height: 0;
 }
-.fahr-gong img { width: 100%; height: 100%; display: block; object-fit: contain; }
+.fahr-gong img { height: 1.1cap; width: auto; aspect-ratio: 148 / 160; margin-top: -0.12cap; display: block; }
 .fahr-gong:hover { background: rgba(0, 32, 96, 0.08); }
 .fahr-gong:active { transform: scale(0.94); }
 .fahr-gong:focus { outline: none; }
