@@ -111,7 +111,7 @@
     border-right: none !important;
 }
 
-:is(#mini-rail, #right-rail) .nav-btn {
+:is(#mini-rail, #right-rail, .rail-klappe) .nav-btn {
     flex: 0 0 auto !important;
     min-width: 52px !important;
     min-height: 52px !important;
@@ -131,7 +131,7 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
 }
 
-:is(#mini-rail, #right-rail) .nav-btn:hover {
+:is(#mini-rail, #right-rail, .rail-klappe) .nav-btn:hover {
     transform: translateY(-3px) scale(1.05);
     background: rgba(0, 210, 255, 0.2) !important;
     border-color: #00d2ff !important;
@@ -149,7 +149,7 @@
 }
 
 /* Stroke width like coffee cup (1.5); overrides cyber-layout .nav-btn svg (2.8) */
-:is(#mini-rail, #right-rail) .nav-btn svg {
+:is(#mini-rail, #right-rail, .rail-klappe) .nav-btn svg {
     width: 26px !important;
     height: 26px !important;
     stroke-width: 1.5 !important;
@@ -705,6 +705,37 @@ body.cyber-shell-grid #right-rail-inner {
     gap: 4px;
     padding: var(--cyber-nav-band-top) 0 22px 0;
 }
+/* A flyout of the right rail (Doc, 28.09.2026, vorrechnen: "ausklappbar ... zur linken Seite ausfährt"): what
+ * is seldom needed sits in a row of rail buttons that slides out to the left of its toggle. The rail clips
+ * (overflow hidden), so the row lives in <body>, fixed: the page sets its right (the rail's left edge) and top
+ * (the toggle's middle) and toggles .auf. Same look and scale as the rail. */
+.rail-klappe {
+    position: fixed;
+    z-index: 2101;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    padding: 6px;
+    background: rgba(5, 10, 20, 0.95);
+    border: 1px solid rgba(0, 210, 255, 0.2);
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    transform: translateY(-50%) scale(min(var(--cyber-left-scale, 1), 1.12));
+    transform-origin: right center;
+    /* shut: cut away from the left up to the rail; open: all of it, with room for the buttons' glow */
+    clip-path: inset(-40px 0 -40px 100%);
+    visibility: hidden;
+    transition: clip-path 0.28s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s 0.28s;
+}
+.rail-klappe.auf {
+    clip-path: inset(-40px -40px -40px -40px);
+    visibility: visible;
+    transition: clip-path 0.28s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s;
+}
+/* its toggle: the double chevron points left while shut, right while open */
+.rail-klappe-knopf svg { transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1); }
+.rail-klappe-knopf[aria-expanded="true"] svg { transform: scaleX(-1); }
 
 /* cyber-layout.css: #canvas-container war absolute/inset-eligible; Overrides setzen sonst nur
  * position:relative + 100%/100% — bei canvas/orbit-WebGL können dadurch Layers schief gegenüber #cyber-left-chrome (z≈2100) liegen. */

@@ -79,6 +79,9 @@ function wiederholen() {
 const WERKZEUG_ICONS = {
     // clear everything: a bin (Doc, 28.09.: "im Rail das C um in Papierkorb"), the one of js/vorrechnen-flug.js
     clear: PAPIERKORB,
+    // the toggle of the row that slides out to the left: Lucide "chevrons-left" (ISC), mirrored while open
+    klappe: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="m11 17-5-5 5-5"/><path d="m18 17-5-5 5-5"/></g>',
     undo: '<path d="M9 13 L4.5 8.5 L9 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>' +
           '<path d="M4.5 8.5 H14 A5.5 5.5 0 0 1 14 19.5 H10" fill="none" stroke="currentColor" stroke-linecap="round"/>',
     redo: '<path d="M15 13 L19.5 8.5 L15 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>' +
@@ -128,7 +131,7 @@ function neuLaden() {
     if (typeof CyberUI.hardReload === 'function') CyberUI.hardReload();
     else location.reload();
 }
-function railKnopf(id, text, inhalt, tun, neueGruppe) {
+function railKnopf(id, text, inhalt, tun, neueGruppe, ziel) {
     const b = document.createElement('button');
     b.type = 'button';
     b.id = id;
@@ -139,9 +142,32 @@ function railKnopf(id, text, inhalt, tun, neueGruppe) {
     if (neueGruppe) b.style.marginTop = '12px';
     b.innerHTML = inhalt;
     b.addEventListener('click', e => tun(e));
-    document.getElementById('right-rail-inner').appendChild(b);
+    (ziel || document.getElementById('right-rail-inner')).appendChild(b);
     return b;
 }
+// The row that slides out of the rail (Doc, 28.09.): placed at the rail's left edge, level with its toggle,
+// each time it opens; a tap anywhere else, Esc or a new window size shut it again
+function klappeOffen() {
+    const l = document.getElementById('werkzeug-leiste');
+    return !!l && l.classList.contains('auf');
+}
+function klappeAuf(an) {
+    const l = document.getElementById('werkzeug-leiste'), k = document.getElementById('werkzeug-klappe');
+    if (!l || !k || an === klappeOffen()) return;
+    if (an) {
+        const r = k.getBoundingClientRect(), rail = document.getElementById('right-rail').getBoundingClientRect();
+        l.style.right = (innerWidth - rail.left) + 'px';
+        l.style.top = (r.top + r.height / 2) + 'px';
+    }
+    l.classList.toggle('auf', an);
+    k.setAttribute('aria-expanded', an ? 'true' : 'false');
+    leuchte(k, an);
+}
+document.addEventListener('pointerdown', e => {
+    if (klappeOffen() && !(e.target.closest && e.target.closest('#werkzeug-leiste, #werkzeug-klappe'))) klappeAuf(false);
+}, true);
+addEventListener('keydown', e => { if (e.key === 'Escape') klappeAuf(false); });
+addEventListener('resize', () => klappeAuf(false));
 function vollbildUmschalten() {
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     else document.documentElement.requestFullscreen().catch(() => {});
@@ -202,9 +228,9 @@ function leuchte(b, an) {
 function zeigeWerkzeuge() {
     if (!document.getElementById('right-rail-inner')) return;
     if (!document.getElementById('farbe-0')) {
-        const werkzeuge = liste => liste.forEach(([id, text, tun, neueGruppe]) => {
+        const werkzeuge = (liste, ziel) => liste.forEach(([id, text, tun, neueGruppe]) => {
             railKnopf('werkzeug-' + id, text,
-                `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${WERKZEUG_ICONS[id]}</svg>`, tun, neueGruppe);
+                `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${WERKZEUG_ICONS[id]}</svg>`, tun, neueGruppe, ziel);
         });
         // Doc, 26.09.: "den Fullscreen-Button, den Projection-Button und den
         // Hell-Dunkel-Button ganz nach oben in dieser Leiste"
@@ -215,7 +241,6 @@ function zeigeWerkzeuge() {
             // in mission control it ends the projection
             ['beamer', STEUERUNG ? 'Beamer beenden' : 'Beamer: nur die Rechnung projizieren',
                 () => { if (STEUERUNG) window.close(); else beamerStart(); }, false],
-            ['hell', 'Hell / Dunkel', () => setzeHell(!hell), false],
             // Doc, 26./27.09.: the anonymous "nicht verstanden" buzzer (js/buzzer.js)
             ['buzzer', 'Buzzer – „nicht verstanden“, anonym (erster Tipp: QR aufs Board)', () => buzzerKnopf(), false],
             // Doc, 27.09.: "rechts einen Button mit einem Porträt" - a name drawn (js/namen-ziehen.js)
@@ -242,16 +267,30 @@ function zeigeWerkzeuge() {
         // das C, wo ich mir alle Aufgaben in einem Panel anzeigen lassen kann"
         // Doc, 26.09.: "über dem Button der die ganzen Aufgaben anzeigt, einen Button
         // mit P" - the grey preview on / off, lit while it shows
+        // Doc, 28.09.: "rechts ... ausklappbar, wo man da reinpacken hell dunkel, dann das Upload ... und P für
+        // Preview auch da rein ... zur linken Seite" - the seldom ones sit in a row that slides out of the rail
+        // to the left (.rail-klappe, js/cyber-lab-overrides.css); the toggle takes the P's place
         werkzeuge([
+            ['klappe', 'Mehr: Hell / Dunkel, Tafel senden, Vorschau', () => klappeAuf(!klappeOffen()), true],
+            ['aufgaben', 'Alle Aufgaben', () => aufgabenPanel(true), false]]);
+        const kk = document.getElementById('werkzeug-klappe');
+        kk.classList.add('rail-klappe-knopf');
+        kk.setAttribute('aria-expanded', 'false');
+        kk.setAttribute('aria-controls', 'werkzeug-leiste');
+        const leiste = document.createElement('div');
+        leiste.id = 'werkzeug-leiste';       // werkzeug-: hidden on the beamer with the rail's buttons
+        leiste.className = 'rail-klappe';
+        document.body.appendChild(leiste);
+        werkzeuge([
+            ['hell', 'Hell / Dunkel', () => setzeHell(!hell), false],
+            // Doc, 26.09.: the working of today into the Stoffverteilungsplan, for the class
+            ['tafel', 'Tafel senden – in den Stoffverteilungsplan, für alle', () => { klappeAuf(false); tafelSenden(); }, false],
             ['vorschau', 'Vorschau: der graue nächste Schritt (P)', () => {
                 vorschau = !vorschau;
                 try { localStorage.setItem('vorrechnen-vorschau', vorschau ? '1' : '0'); } catch (_) {}
                 zeigeHinweis();
                 zeigeWerkzeuge();
-            }, true],
-            ['aufgaben', 'Alle Aufgaben', () => aufgabenPanel(true), false],
-            // Doc, 26.09.: the working of today into the Stoffverteilungsplan, for the class
-            ['tafel', 'Tafel senden – in den Stoffverteilungsplan, für alle', () => tafelSenden(), false]]);
+            }, false]], leiste);
         werkzeuge([
             ['clear', 'Alles leeren', () => clearAll(), true],
             ['undo', 'Rückgängig', () => rueckgaengig(), false],
