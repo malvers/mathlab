@@ -124,28 +124,32 @@
        top is trimmed, so the gap to the first bullet stays as it was. */
     text-box: trim-start cap alphabetic;
 }
-/* The gong (svp-gong.js, Doc 28.09.2026: "Rück Inhalte ein und mach es vor Inhalte so hoch wie Inhalte"):
-   first in the head row, the title moved in after it; the bar keeps to the right (margin-left: auto).
-   As tall as the title's letters: the title's font size, 1.1 cap high and 0.12 cap up - measured
-   28.09.2026, the word "Inhalte" (its h, l, t reach above the caps) and the gong then share top and foot. The padding only widens what a finger hits; the negative
-   margin takes it back out of the layout. */
+/* The gong (svp-gong.js, Doc 28.09.2026: "Rück Inhalte ein und mach es vor Inhalte so hoch wie Inhalte",
+   then "der Gong zentriert über bullets und Inhalte aligned with text"): the title starts where the
+   points' text does (the list's padding, 1.1em), the gong hangs in that gap, centred over the points'
+   dots (--fahr-punkt, measured 28.09.2026: 0.467em from the column's edge). The bar keeps to the right
+   (margin-left: auto). As tall as the title's letters: the title's font size, 1.1 cap high and 0.07 cap
+   up - the word "Inhalte" (its h, l, t reach above the caps) and the gong share top and foot. The
+   padding only widens what a finger hits; top: -6px takes it back out. */
+.fahr-head { position: relative; padding-left: 1.1em; --fahr-punkt: 0.467em; }
 .fahr-head .fmtbar { margin-left: auto; }
 .fahr-gong {
-    flex: 0 0 auto;
+    position: absolute;
+    left: var(--fahr-punkt);
+    top: -6px;
+    transform: translateX(-50%);
     font: inherit;
     font-size: var(--fahr-titel);   /* the title's (.fahr-title), so 1cap is its letters' height */
-    height: calc(1.1cap + 12px);
     padding: 6px;
-    margin: -6px -14px -6px -6px;   /* 16px row gap - 8: the title close by */
     border: 0;
     border-radius: 6px;
     background: none;
     cursor: pointer;
     line-height: 0;
 }
-.fahr-gong img { height: 1.1cap; width: auto; aspect-ratio: 148 / 160; margin-top: -0.12cap; display: block; }
+.fahr-gong img { height: 1.1cap; width: auto; aspect-ratio: 148 / 160; margin-top: -0.07cap; display: block; }
 .fahr-gong:hover { background: rgba(0, 32, 96, 0.08); }
-.fahr-gong:active { transform: scale(0.94); }
+.fahr-gong:active { transform: translateX(-50%) scale(0.94); }
 .fahr-gong:focus { outline: none; }
 /* Die Leiste ist im Navy der Schrift gehalten und nur da, solange der Cursor im
    Text steht - ihre Knoepfe schlucken den Mausdruck, der Fokus bleibt also im
