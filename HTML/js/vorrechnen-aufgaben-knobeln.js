@@ -188,6 +188,24 @@
             '$E=6$: $N=7$, kein $D$ frei; $E=7$: $N=8$ wie $R$). Dann $7+5=12$: $Y=2$.\n\n' +
             'Probe: $9567+1085=10652$.',
     });
+    // Doc, 28.09.: "ganz ans Ende ... als letzten Satz ... in alphabetischer Reihenfolge, welche Werte die
+    // einzelnen Buchstaben annehmen" - the values, sorted A to Z here (put back into every task: it holds, and
+    // no two letters share a digit). AB + BA = 121 has eight solutions: what holds instead.
+    const WERTE = {
+        'k-dreimal': { A: 5, B: 1 },
+        'k-neun':    { A: 4, B: 5 },
+        'k-cab':     { A: 5, B: 0, C: 1 },
+        'k-cac':     { A: 2, B: 9, C: 1 },
+        'k-abc':     { A: 1, B: 9, C: 8 },
+        'k-ccc':     { A: 1, B: 8, C: 5 },
+        'k-1089':    { A: 1, B: 0, C: 8, D: 9 },
+        'k-math':    { M: 3, A: 9, T: 6, H: 5 },
+        'k-money':   { S: 9, E: 5, N: 6, D: 7, M: 1, O: 0, R: 8, Y: 2 },
+    };
+    Object.entries(WERTE).forEach(([slug, w]) => {
+        ERKLAERUNGEN[slug] += '\n\nDie Werte: ' + Object.keys(w).sort().map(b => '$' + b + '=' + w[b] + '$').join(', ') + '.';
+    });
+    ERKLAERUNGEN['k-summe'] += '\n\nDie Werte: nicht eindeutig – $A$ von 2 bis 9 und $B=11-A$.';
     // Doc, 28.09.: a dot wherever a number stands with a letter - "damit klar ist, das ist ja jetzt ein ganz
     // anderer Typ von Aufgaben" - the letter first ("A mal zehn": A = 5 reads 5 · 10), and the dot's gaps
     // "gefühlte 10 %" tighter: KaTeX keeps 4 mu a side for the operator, 0.5 mu less there (-12.5 %)

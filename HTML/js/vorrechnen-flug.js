@@ -578,6 +578,9 @@ const ERKL_WEG = 'vorrechnen-erklaerung-weg';
 let erklWeg = new Set(), erklVorschau = vorschau;
 try { erklWeg = new Set(JSON.parse(localStorage.getItem(ERKL_WEG) || '[]')); } catch (_) {}
 function merkeErklWeg() { try { localStorage.setItem(ERKL_WEG, JSON.stringify([...erklWeg])); } catch (_) {} }
+// every letter of a formula upright, as \mathrm (Doc, 28.09.: the letters blue - js/vorrechnen.css - "bitte nicht
+// kursiv"); commands (\cdot, \ge, \mathrm) stay as they are
+const aufrecht = tex => tex.replace(/\\[a-zA-Z]+|[A-Za-z]/g, m => m.length > 1 ? m : '\\mathrm{' + m + '}');
 // paragraphs by a blank line, KaTeX between $...$
 function erklaerungSetzen(el, text) {
     el.textContent = '';
@@ -585,7 +588,7 @@ function erklaerungSetzen(el, text) {
         const p = document.createElement('p');
         // a paragraph that is one formula stands centred, set off (the column sum of SEND + MORE)
         if (/^\$[^$]+\$$/.test(absatz)) {
-            try { katex.render(absatz.slice(1, -1), p, { throwOnError: false, displayMode: true }); } catch (_) { p.textContent = absatz; }
+            try { katex.render(aufrecht(absatz.slice(1, -1)), p, { throwOnError: false, displayMode: true }); } catch (_) { p.textContent = absatz; }
             el.appendChild(p);
             return;
         }
@@ -594,7 +597,7 @@ function erklaerungSetzen(el, text) {
             if (!t) return;
             if (t[0] === '$') {
                 formel = document.createElement('span');
-                try { katex.render(t.slice(1, -1), formel, { throwOnError: false }); } catch (_) { formel.textContent = t; }
+                try { katex.render(aufrecht(t.slice(1, -1)), formel, { throwOnError: false }); } catch (_) { formel.textContent = t; }
                 p.appendChild(formel);
                 return;
             }
@@ -645,8 +648,9 @@ function zeigeErklaerung() {
     if (el.dataset.slug !== slug) { el.dataset.slug = slug; el.dataset.fit = ''; erklaerungSetzen(el, text); }
     // the whole writing field, flush with the buttons under it ("Box an den buttons alignen"): the arrow's left
     // edge (12 px) to the bin's right edge (12 px before the margin's line), from just under the line down to
-    // above them; the font 1.35 rem ("Schrift größer"), smaller only if a text does not fit
-    const ERKL_SCHRIFT = 1.35;
+    // above them; the font as large as fits, up to 1.6 rem ("Schrift größer", then "bei allen Boxen ... einen Tick
+    // größer") - a short text reaches the top, a long one (SEND + MORE) takes what its box allows
+    const ERKL_SCHRIFT = 1.6;
     const r = container.getBoundingClientRect(), nx = notizX(r.width), oben = papierGrenze(r.height) + 16;
     const links = 12, breite = Math.max(240, nx - 12 - links), hoehe = Math.max(80, r.height - 52 - oben);
     Object.assign(el.style, { left: links + 'px', top: oben + 'px', width: breite + 'px', height: hoehe + 'px', display: '' });
@@ -657,7 +661,7 @@ function zeigeErklaerung() {
     el.dataset.fit = sig;
     let g = ERKL_SCHRIFT;
     el.style.fontSize = g + 'rem';
-    while (el.scrollHeight > el.clientHeight + 1 && g > 0.62) { g -= 0.04; el.style.fontSize = g + 'rem'; }
+    while (el.scrollHeight > el.clientHeight + 1 && g > 0.62) { g -= 0.02; el.style.fontSize = g + 'rem'; }
 }
 // the squares stop at the margin (Beispiele has none: squares all across) - set only
 // when it changes, the beamer mirrors every change of the paper
