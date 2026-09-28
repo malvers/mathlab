@@ -148,6 +148,9 @@
         .fp-list > *:last-child { margin-bottom: 0; }
         /* Bold means 600 - Outfit 300 turns "bolder" into 400 only (svp-fahrplan.css). */
         .fp-list b { font-weight: 600; }
+        /* A group in termin mode (FO 12) gets one card per appointment: its two double lessons are two
+           plan rows, their bullets one list after the other on the same paper. */
+        .fp-list + .fp-list { margin-top: 0.9em; padding-top: 0.8em; border-top: 1px solid rgba(0, 32, 96, 0.18); }
 
         .fp-hinweis { max-width: 1200px; margin: 18px auto 0; color: var(--muted); font-size: 0.92rem; }
         .fp-hinweis:empty { display: none; }
@@ -197,6 +200,7 @@
     <script src="svp-auth.js"></script>
     <script src="svp-fmtbar.js"></script>
     <script src="svp-woche.js"></script>
+    <script src="svp-termine.js"></script>
     <script>
         (function () {
             'use strict';
@@ -214,6 +218,11 @@
             let wochen = [];    /* [{ key, kw, datum }] in school-year order */
             let pos = -1;       /* cursor into wochen */
             let fahr = {};      /* "mathe/mathe11.html" -> { "5": "line\nline" } */
+            /* Plans in termin mode (FO 12): per plan the learning groups and their appointment days, from
+               WebUntis (svp_untis) - "informatik/fos12.html" -> [{ klasse: "FOG25-1", tage: ["20260928", ...] }].
+               A group's row is then in the week of ITS appointment, not in the calendar week of the plan
+               (Doc, 28.09.2026: "in der Fahrplan App ist das nicht zu sehen"). */
+            let gruppen = {};
 
             /* ---- week and address --------------------------------------------------
                Dieselbe ISO-Wochennummer, mit der der Plan seine laufende Woche
@@ -237,7 +246,8 @@
                 if (!res.ok) throw new Error('plan-suchindex.json fehlt');
                 const idx = await res.json();
                 plaene = (idx.plaene || []).map(function (p) {
-                    return { href: p.href, kurz: p.kurz, lang: p.lang, wochen: p.wochen || [], tail: tailOf(p.href) };
+                    return { href: p.href, kurz: p.kurz, lang: p.lang, wochen: p.wochen || [], tail: tailOf(p.href),
+                             termin: !!p.termin, pfad: new URL(p.href, BASE).pathname };
                 });
                 const map = new Map();
                 plaene.forEach(function (p) {
@@ -260,8 +270,37 @@
                 const rows = await res.json();
                 fahr = {};
                 rows.forEach(function (r) { if (r && r.page) fahr[tailOf(r.page)] = r.fahrplan || {}; });
-                try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), fahr: fahr })); }
+                await ladeTermine();
+                try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), fahr: fahr, gruppen: gruppen })); }
                 catch (e) { /* full or locked - then simply without a store */ }
+            }
+
+            /* The appointments of the plans in termin mode - the same svp_untis row the plan's group view
+               reads, counted by the same svp-termine.js. A plan without that row (or a failed request)
+               keeps the last known groups, and without any it falls back to the calendar week. */
+            async function ladeTermine() {
+                for (const p of plaene) {
+                    if (!p.termin) continue;
+                    try {
+                        const res = await svpAuth.api('svp_untis?page=eq.' + encodeURIComponent(p.pfad) + '&select=data');
+                        if (!res.ok) continue;
+                        const rows = await res.json();
+                        if (!rows.length || !rows[0].data) continue;
+                        /* one group per groupKey, as the group view matches it - coupled classes may come
+                           as "FOG25-2,FOW25-2" or "FOW25-2,FOG25-2" */
+                        const nachKey = new Map();
+                        svpTermine.termine(rows[0].data).forEach(function (tage, klasse) {
+                            const key = svpTermine.groupKey(klasse);
+                            if (!key) return;
+                            const g = nachKey.get(key) || { klasse: klasse, tage: [] };
+                            tage.forEach(function (t) { if (g.tage.indexOf(t[0].date) < 0) g.tage.push(t[0].date); });
+                            nachKey.set(key, g);
+                        });
+                        gruppen[p.tail] = Array.from(nachKey.values()).map(function (g) {
+                            return { klasse: g.klasse, tage: g.tage.sort() };
+                        });
+                    } catch (e) { /* offline: keep what the store had */ }
+                }
             }
 
             /* ---- showing ----------------------------------------------------------- */
@@ -294,7 +333,7 @@
                 [].forEach.call(liste.querySelectorAll('.fp-klasse'), breiteFuellen);
             }
 
-            function karte(p, w, text) {
+            function karte(p, w, texte, klasse) {
                 const art = document.createElement('article');
                 art.className = 'fp-card';
 
@@ -302,15 +341,20 @@
                 kopf.className = 'fp-card-head';
                 const a = document.createElement('a');
                 a.className = 'fp-klasse';
-                a.href = p.href;
+                /* a group card names the group like the head of the group view ("Informatik · FOG25-1")
+                   and opens that view */
+                a.href = klasse ? p.href + '?g=' + String(klasse).replace(/[^A-Za-z0-9-]+/g, '_') : p.href;
                 a.target = '_blank';
                 a.rel = 'noopener';
-                a.textContent = klasseName(p);
+                a.textContent = klasse
+                    ? klasseName(p).split(/\s+/)[0] + ' \u00b7 ' + String(klasse).split(',').join(' + ')
+                    : klasseName(p);
                 kopf.appendChild(a);
                 art.appendChild(kopf);
 
                 const papier = document.createElement('div');
                 papier.className = 'fp-paper';
+                [].concat(texte).forEach(function (text) {
                 const ul = document.createElement('ul');
                 ul.className = 'fp-list';
                 String(text).split('\n').forEach(function (z) {
@@ -324,6 +368,7 @@
                     ul.appendChild(li);
                 });
                 papier.appendChild(ul);
+                });
                 art.appendChild(papier);
                 return art;
             }
@@ -342,12 +387,17 @@
 
                 let karten = 0;
                 plaene.forEach(function (p) {
+                    const gr = p.termin && gruppen[p.tail];
+                    if (gr && gr.length) {
+                        terminKarten(p, gr, w).forEach(function (k) { liste.appendChild(k); karten++; });
+                        return;
+                    }
                     const zeilen = p.wochen.filter(function (x) { return x.kw === w.kw; });
                     if (!zeilen.length) return;
                     zeilen.forEach(function (z) {
                         const text = (fahr[p.tail] || {})[String(z.i)];
                         if (!text || !svpFmtBar.textOf(text)) return;
-                        liste.appendChild(karte(p, z, text));
+                        liste.appendChild(karte(p, z, [text]));
                         karten++;
                     });
                 });
@@ -362,6 +412,31 @@
                         ? 'Für diese Woche steht noch kein Fahrplan.'
                         : 'Bitte anmelden — der Fahrplan gehört zum eigenen Konto.';
                 }
+            }
+
+            /* The cards of a termin plan in week w: per group every appointment that falls into w, with the
+               Fahrplan of the plan rows it carries (svpTermine.slot - the same counting as the group view).
+               In the order of the days, so the group of Monday comes before the one of Thursday. */
+            function terminKarten(p, gr, w) {
+                const reihen = [];
+                p.wochen.forEach(function (x) { reihen[x.i] = x; });
+                for (let k = 0; k < reihen.length; k++) if (!reihen[k]) reihen[k] = {};
+                const eintraege = fahr[p.tail] || {};
+                const treffer = [];
+                gr.forEach(function (g) {
+                    g.tage.forEach(function (ymd, block) {
+                        if (svpTermine.kwOf(ymd) !== w.kw) return;
+                        const texte = [];
+                        reihen.forEach(function (x, i) {
+                            if (x.ferien || svpTermine.slot(reihen, i).block !== block) return;
+                            const t = eintraege[String(i)];
+                            if (t && svpFmtBar.textOf(t)) texte.push(t);
+                        });
+                        if (texte.length) treffer.push({ ymd: ymd, klasse: g.klasse, texte: texte });
+                    });
+                });
+                treffer.sort(function (a, b) { return a.ymd === b.ymd ? a.klasse.localeCompare(b.klasse) : (a.ymd < b.ymd ? -1 : 1); });
+                return treffer.map(function (t) { return karte(p, w, t.texte, t.klasse); });
             }
 
             /* Entries sitting in a row without a week number (holidays) have no week
@@ -494,6 +569,7 @@
             try {
                 const c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
                 if (c && c.fahr) fahr = c.fahr;
+                if (c && c.gruppen) gruppen = c.gruppen;
             } catch (e) { fahr = {}; }
 
             /* The worker around the page: it makes Chrome offer a real install (an app icon

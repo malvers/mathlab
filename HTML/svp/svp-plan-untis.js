@@ -115,37 +115,11 @@ window.svpPlanParts.push(function (P) {
     const TERMIN_MODE = !!window.UNTIS_TERMIN;
 
     /* je Klasse die geordnete Terminliste, je Termin die Stunden des Tages */
-    function untisTermine(data) {
-        const byClass = new Map();
-        for (const kw of Object.keys((data && data.weeks) || {})) {
-            for (const e of data.weeks[kw]) {
-                /* Ein Feiertag loescht den Termin in WebUntis ganz, er taucht hier
-                   also gar nicht erst auf - die Zaehlung rutscht von allein und nur
-                   fuer die betroffene Gruppe. Ein AUSFALL steht dagegen weiter da,
-                   nur mit code "cancelled": auch der ist kein Termin, sonst bekaeme
-                   die Gruppe den Stoff dieses Tages nie (Doc, 16.09.2026). */
-                if (e.code === 'cancelled') continue;
-                const k = e.klasse || '';
-                if (!byClass.has(k)) byClass.set(k, new Map());
-                const days = byClass.get(k);
-                if (!days.has(e.date)) days.set(e.date, []);
-                days.get(e.date).push(e);
-            }
-        }
-        const out = new Map();
-        for (const [k, days] of byClass) {
-            out.set(k, [...days.keys()].sort().map(d =>
-                days.get(d).slice().sort((a, b) => String(a.start).localeCompare(String(b.start)))));
-        }
-        return out;
-    }
+    /* Termine and slots: svp-termine.js, shared with the Fahrplan app (28.09.2026). */
+    function untisTermine(data) { return svpTermine.termine(data); }
 
     /* Planzeile -> welcher Termin, welche Haelfte. Ferienzeilen zaehlen nicht. */
-    function untisSlotOf(i) {
-        let n = 0;
-        for (let k = 0; k < i && k < P.planRows.length; k++) if (!P.planRows[k].ferien) n++;
-        return { block: Math.floor(n / 2), half: n % 2 };
-    }
+    function untisSlotOf(i) { return svpTermine.slot(P.planRows, i); }
 
     /* Die Stunden EINER Planzeile: je Klasse ihr Termin Nr. block, davon die
        erste oder zweite Doppelstunde. Hat ein Tag weniger als vier Stunden

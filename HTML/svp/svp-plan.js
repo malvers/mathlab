@@ -51,6 +51,7 @@
     /* Die Formatierleiste ebenso: der Fahrplan (Teil "fahrplan") haengt sie in
        sein Blatt, und notes.html soll dieselbe bekommen. */
     document.write('<script src="' + dir + 'svp-woche.js"><\/script>'
+        + '<script src="' + dir + 'svp-termine.js"><\/script>'
         + '<script src="' + dir + 'svp-falten.js"><\/script>'
         + '<script src="' + dir + 'svp-fmtbar.js"><\/script>'
         + PARTS.map(function (p) {

@@ -29,10 +29,7 @@ window.svpPlanParts.push(function (P) {
        dort als "FOG25-2,FOW25-2", im Slug als "FOG25-2_FOW25-2" und im Live-Abruf
        als Array - auf dieselbe REIHENFOLGE kann man sich nirgends verlassen,
        also werden beide Seiten sortiert verglichen. */
-    function groupKey(v) {
-        return (Array.isArray(v) ? v : String(v || '').split(/[,_]/))
-            .map(x => x.trim()).filter(Boolean).sort().join('_');
-    }
+    function groupKey(v) { return svpTermine.groupKey(v); }   /* svp-termine.js */
     const GROUP_KEY = P.GROUP_KEY = groupKey(GROUP);
     function inGroup(klasse) { return !GROUP || groupKey(klasse) === GROUP_KEY; }
 

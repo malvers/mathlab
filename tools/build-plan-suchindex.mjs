@@ -110,7 +110,12 @@ for (const s of seiten) {
        der gerade offenen Seite gilt nur fuer DIESEN Plan. */
     const labels = {};
     if (badge) Object.keys(badge).forEach(function (k) { if (badge[k] && badge[k][1]) labels[k] = badge[k][1]; });
-    plaene.push({ href: s.href, kurz: s.kurz, lang: s.lang, marken: labels, wochen: list });
+    /* Termin-Modus (window.UNTIS_TERMIN, heute nur FO 12): die Zeilen folgen den WebUntis-Terminen jeder
+       Lerngruppe, nicht der Kalenderwoche - die Fahrplan-App rechnet die Woche dann pro Gruppe
+       (svp-termine.js), statt das kw dieser Liste zu nehmen (Doc, 28.09.2026). */
+    const termin = /window\.UNTIS_TERMIN\s*=\s*true/.test(src);
+    plaene.push(Object.assign({ href: s.href, kurz: s.kurz, lang: s.lang, marken: labels },
+        termin ? { termin: true } : {}, { wochen: list }));
     console.log(s.kurz.padEnd(8) + s.href.padEnd(32) + list.length + ' Wochen');
 }
 
@@ -122,6 +127,7 @@ const teile = plaene.map(p => '  {\n'
     + '   "kurz": ' + JSON.stringify(p.kurz) + ',\n'
     + '   "lang": ' + JSON.stringify(p.lang) + ',\n'
     + '   "marken": ' + JSON.stringify(p.marken) + ',\n'
+    + (p.termin ? '   "termin": true,\n' : '')
     + '   "wochen": [\n'
     + p.wochen.map(w => '    ' + JSON.stringify(w)).join(',\n')
     + '\n   ]\n  }');
