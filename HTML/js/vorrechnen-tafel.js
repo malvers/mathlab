@@ -41,7 +41,7 @@ function tafelSammeln(ziel) {
         const i = AUFGABEN.findIndex(t => t[0] === schluessel), b = i >= 0 ? aufgabenBlock(i) : null;
         const loesung = (schluessel && LOESUNGEN[schluessel]) || [];
         const umformung = l => { const s = loesung.find(([st]) => schrittNorm(st) === schrittNorm(l.latex)); return s ? s[1] : null; };
-        return { schluessel: schluessel || 'frei-' + heute, nr: b ? i - b.ab + 1 : null, block: b ? b.titel : null,
+        return { schluessel: schluessel || 'frei-' + heute, nr: b ? i - b.ab + 1 : null, block: b ? b.titel : null, kopf: (b && b.kopf) || null,
             latex: latex || null, nach: i >= 0 ? AUFGABEN[i][2] : null, rechenweg: zeilen.map(l => l.latex),
             umformungen: zeilen.map(umformung), ende: loesung.length ? loesung[loesung.length - 1][0] : null, zeit };
     };

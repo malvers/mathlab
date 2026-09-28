@@ -65,7 +65,8 @@ const AUFGABEN = [
 ];
 // The tasks in blocks: ◀ ▶ and the arrow keys stay within one, the counter counts
 // within it, the panel shows each under its small title. kw (optional): the calendar
-// week the block is for - the lab opens it once at the first start in that week
+// week the block is for - the lab opens it once at the first start in that week. kopf (optional):
+// what the head says over a task without a variable (default "vereinfachen")
 const BLOECKE = [
     { titel: 'Level 1', ab: 0, bis: 20 },
     { titel: 'Level 2 · Anforderungsbereich II', ab: 20, bis: 37 },
