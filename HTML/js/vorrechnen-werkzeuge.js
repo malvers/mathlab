@@ -77,7 +77,11 @@ function wiederholen() {
 // never a font glyph), the C too;
 // their stroke is the rail's (1.5, js/cyber-lab-overrides.css).
 const WERKZEUG_ICONS = {
-    clear: '<path d="M16.5 7.2 A6.8 6.8 0 1 0 16.5 16.8" fill="none" stroke="currentColor" stroke-linecap="round"/>',
+    // clear everything: a bin (Doc, 28.09.: "im Rail das C um in Papierkorb" - the C is the board's own now,
+    // bottom right above the line); Lucide "trash-2" (ISC)
+    clear: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">' +
+           '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>' +
+           '<path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><path d="M10 11v6M14 11v6"/></g>',
     undo: '<path d="M9 13 L4.5 8.5 L9 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>' +
           '<path d="M4.5 8.5 H14 A5.5 5.5 0 0 1 14 19.5 H10" fill="none" stroke="currentColor" stroke-linecap="round"/>',
     redo: '<path d="M15 13 L19.5 8.5 L15 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>' +
@@ -252,7 +256,7 @@ function zeigeWerkzeuge() {
             // Doc, 26.09.: the working of today into the Stoffverteilungsplan, for the class
             ['tafel', 'Tafel senden – in den Stoffverteilungsplan, für alle', () => tafelSenden(), false]]);
         werkzeuge([
-            ['clear', 'Seite leeren (C)', () => clearAll(), true],
+            ['clear', 'Alles leeren', () => clearAll(), true],
             ['undo', 'Rückgängig', () => rueckgaengig(), false],
             ['redo', 'Wiederholen', () => wiederholen(), false],
             ['neuladen', 'Neu laden – frisch vom Server (wie Strg F5)', () => neuLaden(), true]]);

@@ -584,7 +584,7 @@ function zeigeNotizRand() {
     let el = document.getElementById('notiz-rand');
     if (modus === 'beispiele') {
         if (el) el.style.display = 'none';
-        ['notiz-leeren', 'seite-leeren', 'radierer', 'schritt-hoch'].forEach(id => { const k = document.getElementById(id); if (k) k.style.display = 'none'; });
+        ['notiz-leeren', 'seite-leeren', 'oben-leeren', 'radierer', 'schritt-hoch'].forEach(id => { const k = document.getElementById(id); if (k) k.style.display = 'none'; });
         setzeRadieren(false);
         return;
     }
@@ -631,6 +631,22 @@ function zeigeNotizRand() {
     }
     sk.style.right = (r.width - notizX(r.width) + 12) + 'px';
     sk.style.display = '';
+    // Doc, 28.09.: "in die rechte untere Ecke vom oberen Display ein C button der nur das cleared" - the board
+    // above the line: bottom right, over the notes' C; in class only (frei has no board up there)
+    let ok = document.getElementById('oben-leeren');
+    if (!ok) {
+        ok = document.createElement('button');
+        ok.id = 'oben-leeren';
+        ok.type = 'button';
+        ok.title = 'Tafel oben löschen';
+        ok.setAttribute('aria-label', 'Tafel oben löschen');
+        ok.textContent = 'C';
+        ok.addEventListener('click', () => { ok.blur(); obenLeeren(); });
+        container.appendChild(ok);
+    }
+    ok.style.bottom = (r.height - papierGrenze(r.height) + 6) + 'px';
+    ok.style.display = aufgabenModus ? '' : 'none';
+    obenBlass();
     // the eraser, bottom centre of the writing field (Doc, 26.09.)
     let rk = document.getElementById('radierer');
     if (!rk) {
@@ -672,6 +688,27 @@ function seiteLeeren() {
     verwerfeErkennung();
     recompute();
     merkeStriche();
+}
+// only the board above the line goes: the working, the lines still in the air and the ink written up there;
+// the task, the writing field and the notes stay. Undo brings it back.
+function obenLeeren() {
+    const istOben = obenPruefer();
+    if (!rechenweg.length && !fluege.length && !strokes.some(istOben)) return;
+    merkeVerlauf();
+    flugAbbrechen();
+    rechenweg.length = 0;
+    merkeRechenweg();
+    zeigeRechenweg();
+    const bleiben = strokes.filter(st => !istOben(st));
+    strokes.length = 0;
+    bleiben.forEach(st => strokes.push(st));
+    recompute();
+    merkeStriche();
+}
+// nothing up there: dimmed, like the other Cs
+function obenBlass() {
+    const k = document.getElementById('oben-leeren');
+    if (k) k.style.opacity = rechenweg.length || fluege.length || strokes.some(obenPruefer()) ? '' : '0.35';
 }
 // only the notes go; undo brings them back. The line read before stays read:
 // in class only its LaTeX is used later, and the flight reads its own strokes

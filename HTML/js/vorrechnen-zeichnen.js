@@ -477,6 +477,7 @@ function recompute() {
     const sk = document.getElementById('seite-leeren');
     if (sk) sk.style.opacity = nr.length ? '' : '0.35';                     // nothing written: dimmed
     radiererBlass();
+    if (typeof obenBlass === 'function') obenBlass();                        // the board's C (js/vorrechnen-flug.js)
     redraw();
     updateStats();
 }

@@ -197,7 +197,7 @@ body.anzeige::before {
     background: var(--anzeige-grund, #050d1c);
 }
 body.anzeige :is(#cyber-left-chrome, #mini-rail, #side-panel, #right-rail, #tafel-pfeil-vor, #tafel-pfeil-zurueck, #formel-schicht, #erkennen-klein,
-    #schritt-hinweis, #schritt-op, #schritt-hoch, #notiz-rand, #notiz-leeren, #seite-leeren, #radierer, #radier-rahmen, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play,
+    #schritt-hinweis, #schritt-op, #schritt-hoch, #notiz-rand, #notiz-leeren, #seite-leeren, #oben-leeren, #radierer, #radier-rahmen, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play,
     #buzz-aufgabe, #buzzer-overlay, #tafel-overlay, #namen-overlay, #namen-pille) {
     display: none !important;
 }
@@ -240,7 +240,7 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
    --knopf scales both when the margin is narrow (erkennenKlein) */
 /* Doc, 26.09.: the notes' C "im gleichen Stil wie Erkennen, auch die
    Buchstabengröße und Font" - one look for both buttons in the margin */
-:is(#erkennen-klein, #notiz-leeren, #seite-leeren, #radierer, #schritt-hoch) {
+:is(#erkennen-klein, #notiz-leeren, #seite-leeren, #oben-leeren, #radierer, #schritt-hoch) {
     position: absolute; z-index: 5;
     display: flex; align-items: center; justify-content: center; box-sizing: border-box;
     bottom: 6px; height: calc(46px * var(--knopf, 1)); border-radius: 8px; cursor: pointer; touch-action: manipulation;
@@ -250,7 +250,7 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
     background: linear-gradient(rgba(0, 210, 255, 0.14), rgba(0, 210, 255, 0.14)) #07162f;
     box-shadow: 0 0 14px rgba(0, 210, 255, 0.35);
 }
-#canvas-container.hell :is(#erkennen-klein, #notiz-leeren, #seite-leeren, #radierer, #schritt-hoch) {
+#canvas-container.hell :is(#erkennen-klein, #notiz-leeren, #seite-leeren, #oben-leeren, #radierer, #schritt-hoch) {
     color: rgb(31, 64, 150); border-color: rgba(31, 64, 150, 0.85);
     background: linear-gradient(rgba(31, 64, 150, 0.08), rgba(31, 64, 150, 0.08)) #f4ecd8;
     box-shadow: none;
@@ -309,6 +309,9 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
    (Doc, 26.09.: "in dem Feld, wo ich die Formel schreibe, links neben die
    gestrichelte Linie"); right set by zeigeNotizRand */
 #seite-leeren { width: calc(46px * var(--knopf, 1)); padding: 0; letter-spacing: 0; }
+/* the board's own C: bottom right of the board above the line, right over the notes' C (Doc, 28.09.);
+   bottom set by zeigeNotizRand */
+#oben-leeren { right: 12px; width: calc(46px * var(--knopf, 1)); padding: 0; letter-spacing: 0; }
 /* the eraser: bottom centre of the writing field, lit while it rubs; its frame
    is one square of the paper (Doc, 26.09.) */
 #radierer { width: calc(46px * var(--knopf, 1)); padding: 0; transform: translateX(-50%); }
