@@ -829,12 +829,21 @@ async function patchStatus(session, entries, ticked = []) {
   // The short list stundenplan.html reads: add what now carries text, drop what lost it.
   const outW = untisCacheFile(WRITTEN_ROW);
   let written = [], checked = [], hadCache = false;
+  /* Build on the row IN SUPABASE, not the local copy - as refreshChecked does. The Edge Function
+     adds its L and A there when Doc uses the Klassenbuch button on a plan page; the local copy
+     knows nothing of them, and building on it would write them away again (28.09.2026). The
+     local copy only if Supabase does not answer. */
+  let cache = null;
   try {
-    const cache = JSON.parse(fs.readFileSync(outW, 'utf8'));
+    const got = await supaQuery(`select data from public.svp_untis where page = '${WRITTEN_ROW}'`);
+    if (got.length && got[0].data) cache = got[0].data;
+  } catch (e) { /* offline or no token - the local copy below */ }
+  try { if (!cache) cache = JSON.parse(fs.readFileSync(outW, 'utf8')); } catch (e) { /* starts empty */ }
+  if (cache) {
     written = cache.written || [];
     checked = cache.checked || [];
     hadCache = true;
-  } catch (e) { /* starts empty */ }
+  }
   /* Nur Haken gesetzt und keine Liste da? Dann NICHT schreiben - eine frisch gebaute Zeile
      haette kein `written` mehr, und alle U waeren weg. Das A kommt dann beim naechsten
      status-Lauf (06:00/12:30). */
@@ -1360,15 +1369,19 @@ async function main() {
           if (back.trim() === p.text.trim()) { done++; ticked.push(p.l.ttId); } else bad.push(label);
         } catch (e) { bad.push(`${label} (${e.message})`); }
       }
-      if (patched.length) await patchStatus(session, patched);
       // the tick rides on the same click - for every lesson of the range that has begun, not only
       // for the ones just written (see markAbsencesChecked)
-      let tick = '';
+      let tick = '', getickt = [];
       if (tickable.length) {
         const ids = tickable.map(l => l.ttId);
-        try { await markAbsencesChecked(session, tickable); tick = ` \u00b7 Anwesenheit kontrolliert: ${ids.length}`; }
+        try { await markAbsencesChecked(session, tickable); getickt = tickable; tick = ` \u00b7 Anwesenheit kontrolliert: ${ids.length}`; }
         catch (e) { bad.push(`Anwesenheit kontrolliert (${e.message})`); }
       }
+      /* The tile marks only AFTER the tick, and with it - as the verbose path below does. Until
+         28.09.2026 this ran before the tick and without it: the button set the tick in WebUntis,
+         but the timetable showed the L without its A until the next background run (Doc, after
+         an Eintragen at 18:01: "L, aber ich habe nicht das A"). */
+      if (patched.length || getickt.length) await patchStatus(session, patched, getickt);
       console.log('KLASSENBUCH: ' + `${done} Stunde${done === 1 ? '' : 'n'} eingetragen` + tick
         + (bad.length ? ` \u00b7 ${bad.length} FEHLGESCHLAGEN: ${bad.join(', ')}` : ''));
       process.exitCode = bad.length ? 1 : 0;
