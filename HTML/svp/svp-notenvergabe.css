@@ -1,0 +1,268 @@
+/* svp-notenvergabe.css - the Notenvergabe pages (bewertungen.html = BGY, notenvergabe-fos.html = FOS):
+   Leistungsnachweise and Notenberechnung as tables in the house palette. Moved out of bewertungen.html
+   unchanged when the FOS page came (Doc, 29.09.2026), so every school's page shares one look. */
+
+/* The teal band of the printed sheet, mixed from the house cyan so the
+   table stays in the palette in all three schemes (dark, grey, light).
+   Everything here derives from --g-cyan; the deviating Wiederholer row
+   is the one place that takes lambda - the original marked it magenta,
+   and orange is what this house uses for "Achtung, Ausnahme". */
+:root {
+    --bw-band: rgba(var(--g-cyan), 0.20);
+    --bw-band-ink: var(--head);
+    --bw-band-line: rgba(var(--g-cyan), 0.45);
+    --bw-row-a: rgba(var(--g-cyan), 0.05);
+    --bw-row-b: rgba(var(--g-cyan), 0.09);
+    --bw-grid: rgba(var(--tint), 0.18);
+    --bw-edge: rgba(var(--g-cyan), 0.25);
+    --bw-warn-ink: var(--lambda);
+}
+
+html.svp-light {
+    --bw-band: rgb(214, 238, 244);
+    --bw-band-ink: rgb(16, 82, 110);
+    --bw-band-line: rgb(150, 200, 214);
+    --bw-row-a: rgb(255, 255, 255);
+    --bw-row-b: rgb(243, 250, 252);
+    --bw-grid: rgba(40, 70, 120, 0.18);
+    --bw-edge: rgba(28, 118, 158, 0.3);
+    --bw-warn-ink: rgb(150, 108, 8);
+}
+
+.bw-wrap {
+    /* Doc, 22.09.2026: "ganze Breite bitte" - the cards line up with the
+       heading, which svp-gate.css caps at 1200 px. */
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    /* grid items default to min-width:auto and would refuse to shrink
+       below the table, pushing the cards past the window on a phone */
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+}
+
+.bw-card {
+    min-width: 0;
+    background: var(--card-soft);
+    border: 1px solid var(--bw-edge);
+    border-radius: 12px;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* What holds for every kleine Note, whatever the subject and the year -
+   it stands once, above both tables, instead of in every second cell. */
+.bw-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.bw-chip {
+    font-size: 0.82rem;
+    color: var(--bw-warn-ink);
+    border: 1px solid rgba(var(--g-orange), 0.45);
+    background: rgba(var(--g-orange), 0.1);
+    border-radius: 999px;
+    padding: 3px 12px;
+}
+
+table.bw {
+    /* svp-table.css gives every table min-width: 760px for the plan
+       sheets - here the table has to be able to shrink instead. */
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+table.bw col.c1 { width: 30%; }
+
+table.bw th,
+table.bw td {
+    padding: 10px 14px;
+    text-align: left;
+    vertical-align: top;
+    border-right: 1px solid var(--bw-grid);
+    border-bottom: 1px solid var(--bw-grid);
+    font-size: 0.92rem;
+    line-height: 1.45;
+}
+
+table.bw th:last-child,
+table.bw td:last-child { border-right: 0; }
+
+table.bw tbody tr:last-child th,
+table.bw tbody tr:last-child td { border-bottom: 0; }
+
+/* Head band: Klassenstufe left, the two Fachgruppen right. */
+table.bw thead th {
+    position: static;
+    background: var(--bw-band);
+    color: var(--bw-band-ink);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: none;
+    border-bottom: 1px solid var(--bw-band-line);
+    white-space: normal;
+}
+
+/* "je Halbjahr" in the Klassenstufe head, and the example subject in a
+   Fachgruppe head: both are asides, so they step out of Orbitron. */
+table.bw thead th .bw-hj-note,
+table.bw thead th .bw-eg {
+    display: block;
+    margin-top: 3px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    opacity: 0.8;
+}
+
+/* Row labels: Leistungsnachweise, Notenberechnung. */
+table.bw tbody th {
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bw-row-b);
+}
+
+table.bw tbody td { background: var(--bw-row-a); color: var(--text); }
+table.bw tbody tr.alt th { background: var(--bw-row-b); }
+table.bw tbody tr.alt td { background: var(--bw-row-b); }
+
+/* One statement per line - the sheet sets them under each other. */
+.bw-line { display: block; }
+.bw-line + .bw-line { margin-top: 2px; }
+
+.bw-pc { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* The note wrote the same weighting as a ratio: 1:1 and 1:2 are the
+   50/50 and the 33,3/66,6 above them, so they sit in the same cell
+   instead of in a block of their own. */
+.bw-ratio {
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.bw-ratio b {
+    font-weight: 600;
+    color: var(--bw-warn-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+/* The closing line of a Klassenstufe: what is added up at the end.
+   It spans both Fachgruppen, because it holds for both. */
+table.bw tbody tr.bw-sum td {
+    background: rgba(var(--g-cyan), 0.07);
+    font-size: 0.88rem;
+}
+
+html.svp-light table.bw tbody tr.bw-sum td { background: rgb(238, 248, 251); }
+
+table.bw tbody tr.bw-sum td b { font-weight: 600; }
+
+/* A warning inside a closing line (FOS: WebUntis gets the weighted average wrong) - orange, as the house
+   says "Achtung", on a line of its own under the rule it belongs to. */
+.bw-achtung { display: block; margin-top: 6px; color: var(--bw-warn-ink); }
+.bw-achtung b { font-weight: 600; }
+
+.bw-hj-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.bw-hj-list span {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text);
+    background: var(--bw-row-b);
+    border: 1px solid var(--bw-grid);
+    border-radius: 7px;
+    padding: 3px 10px;
+}
+
+/* The deviating rule for the BGY24 repeaters - magenta in the original. */
+table.bw tbody tr.bw-warn th,
+table.bw tbody tr.bw-warn td {
+    color: var(--bw-warn-ink);
+    background: rgba(var(--g-orange), 0.07);
+}
+
+html.svp-light table.bw tbody tr.bw-warn th,
+html.svp-light table.bw tbody tr.bw-warn td {
+    background: rgba(var(--g-orange), 0.16);
+}
+
+/* The closing note sits in a plain card, without the table's teal rim. */
+.bw-card.note {
+    padding: 14px 16px;
+    border-color: var(--line);
+}
+
+.bw-foot {
+    max-width: 46rem;
+    margin: 0 auto;
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.55;
+}
+
+.bw-foot a { color: var(--cyan); text-decoration: none; }
+.bw-foot a:hover { text-decoration: underline; }
+
+/* Phones: the three columns stack. Each cell then needs the column head
+   it belongs to - it is written in by script from the thead, so the
+   heading text lives in exactly one place. */
+@media (max-width: 680px) {
+    table.bw, table.bw thead, table.bw tbody, table.bw tr,
+    table.bw th, table.bw td { display: block; }
+    table.bw col.c1 { width: auto; }
+
+    /* The Klassenstufe stays as the card's title; the two Fachgruppen
+       move into the cells they head (data-col, see below). */
+    table.bw thead th + th { display: none; }
+
+    table.bw th,
+    table.bw td { border-right: 0; }
+
+    table.bw tbody th {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.8rem;
+        letter-spacing: 0.03em;
+        background: var(--bw-band);
+        color: var(--bw-band-ink);
+        border-bottom: 1px solid var(--bw-band-line);
+    }
+
+    /* the heads keep their own spelling - uppercased, "ElCh" reads
+       as a word of its own */
+    table.bw tbody td::before {
+        content: attr(data-col);
+        display: block;
+        font-size: 0.74rem;
+        letter-spacing: 0.04em;
+        color: var(--muted);
+        margin-bottom: 3px;
+    }
+
+    table.bw tbody tr.bw-warn th { background: rgba(var(--g-orange), 0.18); }
+
+    /* stacked, an empty cell would still print its column head */
+    table.bw tbody td:empty { display: none; }
+}
+
+@media print {
+    .bw-card { break-inside: avoid; }
+}

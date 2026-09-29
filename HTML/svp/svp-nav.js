@@ -60,9 +60,15 @@
         ['punktetabelle.html', 'BGY', 'b-grey', 'Notenspiegel BGY - Klasse 11 und 12/13'],
         ['punktetabelle.html?s=osgy', 'OS GY', 'b-grey', 'Notenspiegel Oberschule und Gymnasium'],
         /* Doc, 22.09.2026: die Schuluebersicht "Bewertungen" (Leistungsnachweise
-           und Notenberechnung) gehoert neben die beiden Notenspiegel. */
-        ['bewertungen.html', 'Bewertungen BGY', 'b-grey',
-         'Bewertungen BGY - Leistungsnachweise und Notenberechnung'],
+           und Notenberechnung) gehoert neben die beiden Notenspiegel. Named
+           "Notenvergabe BGY" (Doc, 29.09.2026), the file keeps its name. */
+        ['bewertungen.html', 'Notenvergabe BGY', 'b-grey',
+         'Notenvergabe BGY - Leistungsnachweise und Notenberechnung'],
+        /* Doc, 29.09.2026: the same for the FOS, below the BGY one */
+        ['notenvergabe-fos.html', 'Notenvergabe FOS', 'b-grey',
+         'Notenvergabe FOS - Leistungsnachweise und Notenberechnung'],
+        ['notenvergabe-osgy.html', 'Notenvergabe OS GY', 'b-grey',
+         'Notenvergabe Oberschule und Gymnasium - Beschlüsse zur Notengebung'],
         ['bewertungsmatrix.html', 'Bewertungsmatrix', 'b-grey',
          'Bewertungsmatrix Vortrag - Coach- und Publikumsbogen'],
         /* the live poll, host screen - same target as the bar icon on the SVP start page
@@ -102,7 +108,8 @@
     // The Stundenplan no longer does (Doc, 10.09.2026: "auf click SP unter dem
     // Header wie alles sonst") - it opens in place, below this nav band.
     const NEW_TAB = new Set(['notes.html', 'fahrplan.html', 'konzepte.html', 'operatoren.html',
-        'punktetabelle.html', 'punktetabelle.html?s=osgy', 'bewertungen.html', '../fokus.html']);
+        'punktetabelle.html', 'punktetabelle.html?s=osgy', 'bewertungen.html', 'notenvergabe-fos.html',
+        'notenvergabe-osgy.html', '../fokus.html']);
 
     // The pill row only carries Home, Notizen and one dropdown per Schulart —
     // everything else lives inside those. [pill label, [[caption|null, hrefs]],
@@ -136,10 +143,12 @@
         ['Mehr', [
             /* Doc, 09.09.2026: "BM ganz unten" - die Bewertungsmatrix schliesst
                das Menue ab, hinter dem Timer. */
-            /* An entry is an href or a sub-menu { sub: label, hrefs: [...] }. */
+            /* An entry is an href or a sub-menu { sub: label, hrefs: [...] }.
+               The grade sub-menu is just "Noten" (Doc, 29.09.2026). */
             [null, ['notes.html', 'fahrplan.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
-                    { sub: 'Notenspiegel', hrefs: ['punktetabelle.html', 'punktetabelle.html?s=osgy',
-                                                  'bewertungen.html'] },
+                    { sub: 'Noten', hrefs: ['punktetabelle.html', 'punktetabelle.html?s=osgy',
+                                                  'bewertungen.html', 'notenvergabe-fos.html',
+                                                  'notenvergabe-osgy.html'] },
                     '../fokus.html', 'bewertungsmatrix.html', '../vote.html?host']],
             /* Doc, 10.09.2026: the demo class last, below a divider; the poll is the
                second-to-last entry (18.09.2026) and sits ABOVE the divider, closing
