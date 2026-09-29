@@ -907,7 +907,7 @@ fromHash();
   // mein Bild"). A deck that set its own picture for Doc (set_avatar) keeps that one for him.
   const faceImg = document.querySelector('#ask-btn img');
   const SOLITA_PIC = '../resources/solita-avatar.png';
-  const DOC_PIC = faceImg && document.body.dataset.voice === 'doc' ? faceImg.getAttribute('src') : '../resources/team/alvers_blick.png';
+  const DOC_PIC = faceImg && document.body.dataset.voice === 'doc' ? faceImg.getAttribute('src') : '../resources/team/alvers_avatar.jpg';
   function showFace() {
     if (!faceImg) return;
     const doc = VOICE === 'doc';

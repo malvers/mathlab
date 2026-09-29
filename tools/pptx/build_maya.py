@@ -26,7 +26,7 @@ d = Deck("zahlensystem-maya.pptx")
 
 # Doc himself sits in the Frag-Solita row of this deck, with his team photo (Doc, 24.09.2026)
 if hasattr(d, "set_avatar") and hasattr(d, "set_voice"):
-    d.set_avatar("../resources/team/alvers_blick.png", "Doc Alvers")   # looking at the viewer (25.09.2026)
+    d.set_avatar("../resources/team/alvers_avatar.jpg", "Doc Alvers")   # the frontal KI portrait of the Maya tour (29.09.2026)
     d.set_voice("doc")                       # ... and answers in his own voice
 
 
