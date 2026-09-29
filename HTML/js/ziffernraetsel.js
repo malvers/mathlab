@@ -241,13 +241,27 @@
     function klartext(html) { return String(html).replace(/<\/(p|li|tr)>/gi, '\n').replace(/<[^>]+>/g, ' ').replace(/[ \t]+/g, ' ').replace(/\n\s+/g, '\n').trim(); }
     // a letter on the board with the digit it shows, if it is found already
     function mitWert(ch, st) { return /\d/.test(ch) || !(ch in st.werte) ? ch : ch + ' (zeigt ' + st.werte[ch] + ')'; }
+    // A product's board is Vorrechnen's formula with the place value over every letter (\overset ... \vphantom, see
+    // js/vorrechnen-aufgaben-knobeln.js): read back per number, "Über 4A: 10 über der 4, 1 über dem A"
+    function stellenAusTex(tex) {
+        const re = /\\overset\{\\color\{#8a93a3\}\\scriptstyle (?:10\^\{\\mathrlap\{(\d+)\}\}|(\d+))\}\{\\(?:mathrm|textrm|textup)\{([A-Z0-9])\}\\vphantom/g;
+        const zahlen = [];
+        let zahl = null, m;
+        while ((m = re.exec(String(tex)))) {
+            const wert = m[1] !== undefined ? 10 ** +m[1] : +m[2], z = m[3];
+            if (!zahl) zahlen.push(zahl = { name: '', teile: [] });
+            zahl.name += z;
+            zahl.teile.push((m[1] !== undefined ? '10^' + m[1] + ' (= ' + wert + ')' : wert) + ' über ' + (/\d/.test(z) ? 'der ' : 'dem ') + z);
+            if (wert === 1) zahl = null;                 // the ones place closes a number
+        }
+        return zahlen.map(x => 'über ' + x.name + ': ' + x.teile.join(', ')).join('; ') || 'keine';
+    }
     function tafel(st, spalte) {
         const s = SCHEMATA[id];
         if (!s) {
             return 'Die Aufgabe als Formel: $' + TEX_SCHLICHT[id] + '$\n' +
-                'Klein und grau über jedem Buchstaben und jeder Ziffer: ihr Stellenwert, 1 über der Einerstelle, 10 über ' +
-                'der Zehnerstelle, 100 über der Hunderterstelle und so weiter' +
-                (/10\^\{/.test(TEX[id]) ? ', hier als Zehnerpotenz geschrieben (10^3 für 1000)' : '') + '.';
+                'Klein und grau über jeder Stelle der Rätselzahlen steht ihr Stellenwert – das sind keine Ziffern des ' +
+                'Rätsels: ' + stellenAusTex(TEX[id]) + '.';
         }
         const n = Math.max(...s.zeilen.concat([s.ergebnis]).map(w => w.length));
         const zeilen = ['Die Rechnung untereinander: ' + s.zeilen.map((w, r) => (r ? s.zeichen + ' ' : '') + w).join(' / ') +
@@ -258,7 +272,7 @@
             zeilen.push('- ' + (STELLE[k] ? STELLE[k] + 'spalte' : 'Spalte ' + (k + 1)) + (k === spalte ? ' (leuchtet orange)' : '') +
                 ': klein darüber der Stellenwert ' + 10 ** k +
                 (k in st.ueber ? ', darunter klein der Übertrag ' + st.ueber[k] : '') + '; ' +
-                (oben.join(' ' + s.zeichen + ' ') || 'oben leer') + ' ergibt ' + (unten ? mitWert(unten, st) : 'nichts'));
+                (oben.join(' ' + s.zeichen + ' ') || 'darüber steht nichts, nur der Übertrag') + ' ergibt ' + (unten ? mitWert(unten, st) : 'nichts'));
         }
         return zeilen.join('\n');
     }
@@ -279,13 +293,13 @@
             'LINKS, DIE TAFEL - so steht sie jetzt da:\n' +
             tafel(st, typeof cur.s.spalte === 'number' ? cur.s.spalte : -1) + '\n' + leiste(st) + '\n\n' +
             'RECHTS, DIE ERKLÄRSPALTE:\n' +
-            'Oben die Aufgabe: $' + TEX_SCHLICHT[id] + '$' + (quelle ? ' – Quelle: ' + quelle : '') + '\n' +
+            'Oben die Aufgabe: $' + TEX_SCHLICHT[id] + '$' + (quelle ? ' – ' + quelle : '') + '\n' +
             'Darunter, gerade dran: Schritt ' + (pos + 1) + ' von ' + vis.length + ', „' + cur.s.titel + '“:\n' +
             klartext(mitWer(cur.s.html));
     }
     window.zrKontext = kontext;
     const solita = window.SolitaFrage ? SolitaFrage.mount(docEl.querySelector('.zr-sf'), {
-        kontext, system: SYSTEM,
+        kontext, system: SYSTEM, platzhalter: 'Frag {name} zu diesem Schritt',
         ueberschrift: docEl.querySelector('.zr-solita > h3'),     // "Frag Solita" / "Frag Doc"
         vorschlaege: [
             { label: 'Genauer erklären', frage: 'Erklär mir diesen Schritt bitte genauer.' },

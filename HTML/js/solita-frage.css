@@ -10,16 +10,21 @@
 .sf-out:empty { display: none; }
 .sf-out::-webkit-scrollbar { width: 7px; }
 .sf-out::-webkit-scrollbar-thumb { background: rgba(2, 100, 123, 0.75); border-radius: 4px; }
+/* calm: two quiet greys, no gold and no cyan frame - colour is left to the formulas (Doc, 29.09.2026: "viel zu bunt") */
 .sf-q { align-self: flex-end; max-width: 88%; padding: 6px 10px; border-radius: 10px 10px 2px 10px;
-    background: rgba(245, 194, 66, 0.12); border: 0.5px solid rgba(245, 194, 66, 0.55); color: #f3e3b8;
+    background: rgba(255, 255, 255, 0.06); border: 0.5px solid rgba(143, 163, 189, 0.3); color: #cfd8e6;
     font-size: 1.02rem; line-height: 1.4; overflow-wrap: anywhere; }
 .sf-a { align-self: flex-start; max-width: 100%; padding: 8px 11px; border-radius: 10px 10px 10px 2px;
-    background: rgba(2, 100, 123, 0.14); border: 0.5px solid rgba(2, 100, 123, 0.8); color: #dbe3ef;
+    background: rgba(255, 255, 255, 0.025); border: 0.5px solid rgba(143, 163, 189, 0.18); color: #dbe3ef;
     font-size: 1.06rem; line-height: 1.5; overflow-wrap: anywhere; }
 .sf-a p { margin: 0 0 7px; }
 .sf-a p:last-child { margin-bottom: 0; }
 .sf-a .katex { font-size: 1em; white-space: normal; }
 .sf-a .katex-display { margin: 6px 0; overflow-x: auto; overflow-y: hidden; }
+/* what this question cost, behind the answer's last word, a shade lighter - in Raleway as in the decks (decks/deck.css
+   #ask-cost), never the page's font: a lab setting its digits in the LaTeX font made it look like Times (Doc, 29.09.2026) */
+.sf-cost { margin-left: 6px; font-family: Raleway, system-ui, sans-serif; font-size: 0.85em; font-variant-numeric: normal;
+    color: #8fa3bd; white-space: nowrap; cursor: help; }
 .sf-err { align-self: flex-start; color: rgb(236, 120, 104); font-size: 0.98rem; }
 
 /* karaoke: the word Solita is saying right now - as in the decks (decks/deck.css .ask-w.on) */
@@ -52,8 +57,12 @@
 .sf-in { flex: 1; min-width: 0; height: 36px; padding: 0 10px; border-radius: 8px; outline: none;
     background: rgba(255, 255, 255, 0.05); border: 0.5px solid rgba(2, 100, 123, 0.9); color: #fff;
     font-family: Raleway, system-ui, sans-serif; font-size: 1rem; }
-.sf-in:focus { border-color: rgb(245, 194, 66); box-shadow: 0 0 0 2px rgba(245, 194, 66, 0.18); }
+.sf-in:focus { border-color: rgba(143, 163, 189, 0.7); box-shadow: none; }
 .sf-in::placeholder { color: rgba(207, 216, 230, 0.45); }
+/* only "..." in the field: large and spaced, never a speck (Doc, 29.09.2026: "viel zu klein") - round points in
+   Times New Roman, Raleway's are squares ("Rechtecke, die total dicht beieinander sind") */
+.sf-in.sf-punkte::placeholder { font-family: 'Times New Roman', Times, serif; font-size: 1.9rem; letter-spacing: 0.1em;
+    transform: translateY(3px); }   /* a little lower (Doc: "ein Stück weiter runter") */
 .sf-row button { flex: none; width: 36px; height: 36px; padding: 0; border-radius: 8px; cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center;
     background: rgba(2, 100, 123, 0.18); border: 0.5px solid rgba(2, 100, 123, 0.9); color: #7fd8ee;
@@ -62,12 +71,15 @@
 .sf-row button:disabled { opacity: .45; cursor: default; }
 .sf-row button[hidden] { display: none; }
 .sf-row svg { width: 20px; height: 20px; }
-.sf-send { background: rgba(245, 194, 66, 0.16) !important; border-color: rgba(245, 194, 66, 0.8) !important; color: rgb(245, 194, 66) !important; }
-.sf-mic.on { color: #fff; background: rgba(176, 36, 24, 0.55); border-color: rgb(176, 36, 24); animation: sfmic 1.2s ease-in-out infinite; }
+/* send and stop look like the other buttons; only the microphone shows red while it listens - outline, not a block */
+.sf-mic.on { color: rgb(236, 120, 104); background: transparent; border-color: rgb(176, 36, 24); animation: sfmic 1.2s ease-in-out infinite; }
 @keyframes sfmic { 50% { box-shadow: 0 0 0 4px rgba(176, 36, 24, 0.3); } }
+/* a click on the face: the microphone flashes twice in orange - you can also speak (Doc, 29.09.2026) */
+.sf-mic.sf-zeig { animation: sfzeig 0.55s ease-in-out 2; }
+@keyframes sfzeig { 50% { color: rgb(245, 194, 66); border-color: rgb(245, 194, 66); background: rgba(245, 194, 66, 0.2);
+    box-shadow: 0 0 0 4px rgba(245, 194, 66, 0.25); } }
 
 /* stop her voice: in the row while she speaks */
-.sf-stop { color: rgb(245, 194, 66) !important; }
 .sf-note { font-size: 0.85rem; color: #8fa3bd; }
 .sf-note[hidden] { display: none; }
 

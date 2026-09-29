@@ -2,6 +2,8 @@
    0 to 9, the step dots. Layout (tab strip, stage, explanation column) comes from js/chapter-lab.css.
    Colours: the palette - orange = what this step looks at or found, green = found before. */
 
+/* the explanation column's text face (Raleway, numbers in LaTeX) comes from js/lab-schrift.css via chapter-lab.css */
+
 /* the stage measures itself: every size on the board follows its width and height (container units) */
 #v-canvas-wrap.zr-buehne { container-type: size; display: flex; flex-direction: column; }
 .zr-mitte {
@@ -107,10 +109,12 @@
     background: rgba(2, 100, 123, 0.2); border: 0.5px solid rgba(2, 100, 123, 0.9);
 }
 .zr-grund .cyber-checkbox:hover { background: rgba(2, 100, 123, 0.42); }
+/* ticked it stays quiet: a see-through box with the orange only in frame and tick, no glow (Doc, 29.09.2026:
+   "etwas zurück ... transparent", "darf da unten nie so rausknallen") */
 .zr-grund .cyber-checkbox:checked {
-    background: rgb(245, 194, 66); border-color: rgb(245, 194, 66); box-shadow: 0 0 8px rgba(245, 194, 66, 0.45);
+    background: rgba(245, 194, 66, 0.1); border-color: rgba(245, 194, 66, 0.55); box-shadow: none;
 }
-.zr-grund .cyber-checkbox::after { width: 5px; height: 10px; border-color: rgb(14, 36, 78); border-width: 0 2.5px 2.5px 0; }
+.zr-grund .cyber-checkbox::after { width: 5px; height: 10px; border-color: rgba(245, 194, 66, 0.85); border-width: 0 2px 2px 0; }
 .zr-grund .cyber-label { font-size: 0.68rem; letter-spacing: 1px; color: #8fa3bd; }
 .zr-grund .cyber-checkbox:checked + .cyber-label { color: #cfd8e6; }
 .zr-pfeil {

@@ -138,8 +138,15 @@
     }
     // What the voice is given: formulas as words, no emoji or markdown - and no HTML tags (a lab's step text)
     function sprechbar(text) {
-        return buchstabenNamen(satzendZahlen(ohneFormeln(text))).replace(/:\s*\./g, ':').replace(/,\s*\./g, '.')
+        return buchstabenNamen(satzendZahlen(zifferUndBuchstabe(ohneFormeln(text)))).replace(/:\s*\./g, ':').replace(/,\s*\./g, '.')
             .replace(/\s+([.,;:!?])/g, '$1').replace(/([.!?])\s*\.+/g, '$1').replace(/\s+/g, ' ').trim();
+    }
+    // A puzzle's number as the model writes it, "4A" or "A0B", in the text or in $...$: digits and capitals apart, each
+    // letter then by its name - the voice pulled "4A" together into "viera" (Doc, 29.09.2026: "vier A"). Only words of
+    // capitals and digits with both in them; "10A" stays "10 A", "H2O" becomes "H 2 O".
+    function zifferUndBuchstabe(t) {
+        return t.replace(/(^|[^0-9A-Za-zÄÖÜäöüß_])((?=[A-ZÄÖÜ0-9]*\d)(?=[A-ZÄÖÜ0-9]*[A-ZÄÖÜ])[A-ZÄÖÜ0-9]+)(?![0-9A-Za-zÄÖÜäöüß_])/g,
+            function (m, vor, w) { return vor + w.match(/\d+|[A-ZÄÖÜ]/g).join(' '); });
     }
     // a capital letter standing alone in the running text as well ("1 Zehner und A Einer", "N plus R") - German has
     // no one-letter capital words, so this only meets the letters of a formula or a puzzle

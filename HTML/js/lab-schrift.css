@@ -1,0 +1,26 @@
+/* lab-schrift.css — the running text of the labs' explanation column (#v-doc) and of Solita's answers in it:
+   Raleway, with numbers and the signs of an equation in the LaTeX font. ONE place for every lab.
+   Doc, 29.09.2026: Times New Roman "sieht ... altbacken aus", Raleway "sieht einfach moderner und besser aus und die
+   kann man genauso gut lesen", "dass ich die Zahlen in LaTeX ... da gut absetzen, finde ich auch toll".
+   Used by js/chapter-lab.css (Trigonometrie, Ziffernrätsel) and vektoren.html (its own copy of the chapter layout):
+       font-family: var(--lab-schrift);
+   Formulas stay KaTeX; boards, canvases and buttons keep their own fonts. */
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,600;0,700;1,400;1,700&display=swap');
+
+/* Numbers in a sentence wear the LaTeX font, so a 7 in the text is the same 7 as in the formula beside it - also in
+   Solita's answers, without anyone writing $7$. KaTeX_Main is Computer Modern, the files KaTeX loads anyway;
+   unicode-range takes only digits and + < = > × ÷ −, never the hyphen of "3-mal".
+   size-adjust 121% = KaTeX's own .katex size: a digit in the sentence is exactly as tall as the same digit in a formula
+   (measured: KaTeX_Main 7 = 0.676 em, x = 0.431 em; Raleway H = 0.710 em, x = 0.521 em - at 121% the x-heights meet). */
+@font-face { font-family: 'Lab Ziffern'; src: url('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/fonts/KaTeX_Main-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal;
+    size-adjust: 121%; unicode-range: U+0030-0039, U+002B, U+003C-003E, U+00D7, U+00F7, U+2212; }
+@font-face { font-family: 'Lab Ziffern'; src: url('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/fonts/KaTeX_Main-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal;
+    size-adjust: 121%; unicode-range: U+0030-0039, U+002B, U+003C-003E, U+00D7, U+00F7, U+2212; }
+@font-face { font-family: 'Lab Ziffern'; src: url('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/fonts/KaTeX_Main-Italic.woff2') format('woff2'); font-weight: 400; font-style: italic;
+    size-adjust: 121%; unicode-range: U+0030-0039, U+002B, U+003C-003E, U+00D7, U+00F7, U+2212; }
+@font-face { font-family: 'Lab Ziffern'; src: url('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/fonts/KaTeX_Main-BoldItalic.woff2') format('woff2'); font-weight: 700; font-style: italic;
+    size-adjust: 121%; unicode-range: U+0030-0039, U+002B, U+003C-003E, U+00D7, U+00F7, U+2212; }
+
+/* the LaTeX digits first, Raleway for everything else; the pages add font-variant-numeric: lining-nums - Raleway's own
+   digits are old-style and would dance, should the LaTeX file not come */
+:root { --lab-schrift: 'Lab Ziffern', Raleway, system-ui, sans-serif; }
