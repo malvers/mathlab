@@ -18,7 +18,8 @@ let steuerFenster = null, anzeigeFrame = null, buehne = { w: 0, h: 0 };
 // not 'formel-schicht': the recognised line is Doc's GO, the class sees
 // only the ink fly up and turn into LaTeX
 // 'erklaerung-schicht': the explanation box, only while Doc has pushed it up over the line (29.09.)
-const SPIEGEL_SCHICHTEN = ['papier', 'verlauf-schicht', 'vorlage-schicht', 'rechenweg-schicht', 'satz-schicht', 'erklaerung-schicht'];
+// 'buzz-aufgabe': the buzzer's count behind the step's number, for the class too (29.09., zeigeBuzzAufgabe)
+const SPIEGEL_SCHICHTEN = ['papier', 'verlauf-schicht', 'vorlage-schicht', 'rechenweg-schicht', 'satz-schicht', 'erklaerung-schicht', 'buzz-aufgabe'];
 const spiegelCache = {};
 function anzeigeLaeuft() { return anzeigeModus; }
 function anzeigeZiel() {

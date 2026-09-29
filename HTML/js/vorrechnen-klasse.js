@@ -36,13 +36,16 @@ function buzzerMeldung(n, neu, frisch = []) {
 // "eigentlich müsste ja die Pille pro Rechenschritt erscheinen ... wenn der nächste Schritt kommt, kommt
 // die einfach dahinter und ist wieder null", "am rechten Rand" - one pill on the newest row's height (the
 // task's before the first step), since 29.09. right behind its number (1), (2), ..., counting the buzzes of that step (today, this
-// code). For Doc only: no mirrored layer,
-// so it never reaches the beamer; hidden while the finished tasks are pulled down.
+// code); hidden while the finished tasks are pulled down.
+// Doc, 29.09.: "Zeig bitte die Feedback-Pille rechts neben der Gleichungsnummer auch für die Zuschauer" - the
+// count goes to the beamer as a mirrored layer of its own (SPIEGEL_SCHICHTEN); the faint pill behind the row
+// stays Doc's. The beamer window never draws either itself: it shows mission control's copy.
 function zeigeBuzzAufgabe() {
+    if (anzeigeModus) return;
     let el = document.getElementById('buzz-aufgabe'), grund = document.getElementById('buzz-zeile');
     const schritt = rechenweg.length;
     const zellen = [...document.querySelectorAll(`#rechenweg-schicht [data-schritt="${schritt ? schritt - 1 : 'aufgabe'}"] .katex-html`)];
-    if (anzeigeModus || !aufgabenModus || !window.Buzzer || !Buzzer.aktiv() || verlaufY > 0 || !zellen.length) {
+    if (!aufgabenModus || !window.Buzzer || !Buzzer.aktiv() || verlaufY > 0 || !zellen.length) {
         if (el) el.style.display = 'none';
         if (grund) grund.style.display = 'none';
         return;
@@ -153,6 +156,7 @@ function zeigeBuzzAufgabe() {
     el.style.right = 'auto';
     // Doc, 29.09.: "das Badge 20% nach rechts" - a fifth of its own width further away from the number
     el.style.left = Math.round(Math.min(hinter + h * 0.4 + el.offsetWidth * 0.2, grenze - el.offsetWidth)) + 'px';
+    anzeigeBald();                                   // the first count: its layer is not watched yet
 }
 function buzzerKnopf() {
     if (!window.Buzzer) return;
