@@ -2082,7 +2082,11 @@
        sind in OneDrive anonym. */
     function uploadHtml() {
         const href = uploadFor();
-        const ico = '<span class="mat-upload-ico" aria-hidden="true">&uarr;</span>Abgabe';
+        /* the drawn upload sign of the plan's Abgabe pill (Doc, 29.09.2026: "mach den bitte dann genauso") -
+           Lucide "upload" (ISC) */
+        const ico = '<svg class="mat-upload-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M17 8l-5-5-5 5' +
+            'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" fill="none" stroke="currentColor" stroke-width="2"' +
+            ' stroke-linecap="round" stroke-linejoin="round"/></svg>Abgabe';
         if (!href) {
             return '<span class="badge mat-upload vt-up off" ' +
                 'title="Der Abgabe-Ordner ist noch nicht freigegeben">' + ico + '</span>';

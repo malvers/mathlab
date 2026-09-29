@@ -351,7 +351,8 @@ window.svpPlanParts.push(function (P) {
         const schwanz = [];                       /* .mat-note haengt hinten dran */
         kinder.forEach(function (k) {
             const a = pille(k);
-            if (!a) { schwanz.push(k); return; }
+            /* the Abgabe button is a pill now (29.09.2026) but keeps its place at the end */
+            if (!a || a.classList.contains('mat-upload')) { schwanz.push(k); return; }
             const r = +a.dataset.rang;
             let i = a.classList.contains('mat-fest') ? spalten.length - 1
                 : SPALTEN.findIndex(function (rs) { return rs.indexOf(r) >= 0; });
@@ -417,6 +418,8 @@ window.svpPlanParts.push(function (P) {
     // Plain link: drawn, not typed — the \u2197 character sits too high in its
     // line in most fonts, an SVG is centred by construction.
     const LINK_PATH = 'M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h5v2H7v10h10v-3h2v5H5V5z';
+    /* Lucide "upload" (ISC, lucide-static 1.48.0), the three strokes in one path - the Abgabe button's sign */
+    const UPLOAD_PATH = 'M12 3v12M17 8l-5-5-5 5M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4';
 
     // fill = Farbe fuer eine Flaeche; strichbreite > 0 zeichnet stattdessen eine
     // Linie - so passt ein Symbol zu den duennen getippten Zeichen im Menue.
@@ -850,17 +853,16 @@ window.svpPlanParts.push(function (P) {
             /* Der Abgabe-Knopf oeffnet IMMER einen echten Tab: der Upload
                braucht das volle SharePoint-Fenster, das kleine Material-
                Fenster (openMat) kann das nicht. */
+            /* Doc, 29.09.2026: "mach den bitte genauso groß wie die anderen, aber mit diesem orangen Blau" - a
+               material pill of the page's one width and height, in the orange with navy of an important pill,
+               with a drawn upload sign; it stays at the end of the row (matSpalten) */
             if (isUploadEntry(en)) {
-                a.className = 'badge mat-upload';
+                a.className = 'badge b-green mat-pill mat-wichtig mat-upload';
                 a.href = siteHref(en.url);
                 a.target = '_blank';
                 a.rel = 'noopener';
                 a.title = 'Dateien hochladen — öffnet OneDrive';
-                const ico = document.createElement('span');
-                ico.className = 'mat-upload-ico';
-                ico.textContent = '\u2191';
-                ico.setAttribute('aria-hidden', 'true');
-                a.appendChild(ico);
+                a.appendChild(drawnIcon('mat-ico-drawn mat-ico-upload', UPLOAD_PATH, 'currentColor', 2));
                 a.appendChild(matLabelEl(label));
                 if (en.desc) wireMatTip(a, en.desc);
                 /* Dasselbe ✕ wie an jeder Pille - eigener Wrapper, damit der
