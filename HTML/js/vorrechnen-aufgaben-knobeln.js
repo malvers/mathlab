@@ -292,6 +292,10 @@
     // SEND + MORE = MONEY is Dudeney's (checked 28.09.2026: Strand Magazine vol. 68, July 1924, pp. 97 and 214)
     QUELLEN['k-money'] = 'Quelle: Henry E. Dudeney, The Strand Magazine 68, Juli 1924, S. 97 (Lösung S. 214)';
     ERKLAERUNGEN['k-summe'] += '\n\nDie Werte: nicht eindeutig – $A$ von 2 bis 9 und $B=11-A$.';
+    // the operations behind the line they are applied to, as on the board (umformungenVorziehen, js/vorrechnen-aufgaben.js)
+    AUFGABEN.slice(ab).forEach(([slug]) => {
+        if (ERKLAERUNGEN[slug]) ERKLAERUNGEN[slug] = umformungenVorziehen(ERKLAERUNGEN[slug]);
+    });
     // Doc, 28.09.: a dot wherever a number stands with a letter - "damit klar ist, das ist ja jetzt ein ganz
     // anderer Typ von Aufgaben" - the letter first ("A mal zehn": A = 5 reads 5 · 10), and the dot's gaps
     // "gefühlte 10 %" tighter: KaTeX keeps 4 mu a side for the operator, 0.5 mu less there (-12.5 %)

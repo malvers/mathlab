@@ -90,24 +90,14 @@
     // ---- the steps of a puzzle -----------------------------------------------------------------------------------
     const REGELN = '<p>Jeder Buchstabe steht für eine Ziffer von 0 bis 9. Gleiche Buchstaben sind gleiche Ziffern, ' +
         'verschiedene Buchstaben verschiedene Ziffern, und vorne steht nie eine 0.</p>';
-    // Vorrechnen writes a derivation as "$$equation | operation$$", the operation behind the line it PRODUCED. Here, as
-    // on paper and in the board decks, it stands behind the line it is APPLIED to (Doc, 29.09.2026: "bei -A muss nochmal
-    // die Zeile 1 hin"): in a run of equations every operation moves up one line; the first line keeps its own note
-    // (Stellenwerte) and comes once more with the first operation. Vorrechnen's data stay as they are.
+    // Vorrechnen's explanations come with the operation behind the line it is applied to already (umformungenVorziehen,
+    // js/vorrechnen-aufgaben.js - Doc, 29.09.2026: "Bitte IMMER so machen! Auch in der EB!"); here "$$equation |
+    // operation$$" only gets the lab's bar, and paragraphs at blank lines
     function vorrechnenText(t) {
         return String(t).split(/\n\s*\n/).map(p =>
-            '<p>' + p.replace(/\$\$[^$]+\$\$(?:\s*\$\$[^$]+\$\$)*/g, lauf => {
-                const zeilen = lauf.match(/\$\$[^$]+\$\$/g).map(bl => {
-                    const t2 = bl.slice(2, -2).split(' | ');
-                    return { gl: t2[0], op: t2.length === 2 ? t2[1] : '' };
-                });
-                let raus = zeilen;
-                if (zeilen.length > 1) {
-                    raus = [];
-                    if (zeilen[0].op) raus.push(zeilen[0]);
-                    zeilen.forEach((z, i) => raus.push({ gl: z.gl, op: i + 1 < zeilen.length ? zeilen[i + 1].op : '' }));
-                }
-                return raus.map(z => '$$' + z.gl + (z.op ? ' ' + OP + z.op : '') + '$$').join('');
+            '<p>' + p.replace(/\$\$([^$]+)\$\$/g, (m, inner) => {
+                const teil = inner.split(' | ');
+                return '$$' + (teil.length === 2 ? teil[0] + ' ' + OP + teil[1] : inner) + '$$';
             }) + '</p>').join('');
     }
     // Equations one under the other stand aligned (Doc, 29.09.2026: "bitte schön aligned"): a run of display formulas
@@ -152,7 +142,9 @@
         const liste = [{
             titel: 'Das Rätsel',
             html: '$$' + TEX_SCHLICHT[id] + '$$' + REGELN +
-                '<p class="v-aha">Hier gehen wir die Rechnung aus Vorrechnen Schritt für Schritt durch. Solita erklärt ' +
+                // {WER}: Solita or Doc, whoever is chosen in the question box (Doc, 29.09.2026: "Doc erklärt dir jeden
+                // Schritt genauer", and not "aus Vorrechnen" - that means nothing to the class)
+                '<p class="v-aha">Hier gehen wir die Rechnung Schritt für Schritt durch. {WER} erklärt ' +
                 'dir jeden Schritt genauer – so einfach, wie du es brauchst.</p>',
         }];
         // one step, one operation: the equation before it with the operation behind it, the new one below - aligned
@@ -218,27 +210,83 @@
     const titelEl = docEl.querySelector('.zr-titel');
     const textEl = docEl.querySelector('.zr-text');
 
-    // ---- Solita: the step on screen travels with every question -------------------------------------------------
-    const SYSTEM = 'Hier im Ziffernrätsel-Labor lösen Schülerinnen und Schüler Buchstabenrätsel wie ' +
-        'SEND + MORE = MONEY Schritt für Schritt: Jeder Buchstabe ist eine Ziffer, gleiche Buchstaben gleiche Ziffern, ' +
-        'verschiedene Buchstaben verschiedene Ziffern, vorne nie eine 0. Du bekommst das Rätsel, alle Schritte im ' +
-        'Überblick und den Schritt, der gerade auf dem Bildschirm steht. Erkläre genau diesen Schritt – gründlicher ' +
-        'und langsamer als der Text: mit konkreten Zahlen, einem kleinen Beispiel oder einem Bild aus dem Alltag. ' +
-        'Wer es einfacher haben möchte, bekommt es so erklärt, dass es auch Schülerinnen und Schüler der Grundschule ' +
-        'verstehen: Stellenwerte, Einer, Zehner, Übertrag und Plusrechnen – setz nichts voraus. Verrate keine Ziffern ' +
-        'aus späteren Schritten, außer jemand fragt ausdrücklich danach. Höchstens sechs Sätze.';
+    // ---- Solita: the whole lab once, and with every question exactly what is on screen --------------------------
+    // As a deck sends the slide, the lab sends its two halves: the board on the left and the explanation column on the
+    // right, as they stand at this moment (Doc, 29.09.2026: "die muss zwingend die linke Seite sehen", "die Frage im
+    // Kontext des gesamten Labs und der momentanen Situation"). Asked about "die kleine 10 über der 4" and "die 1 über
+    // dem A" she had answered nonsense - nothing had told her that the small grey numbers are place values.
+    // window.zrKontext() shows exactly what goes out.
+    const SYSTEM = 'DAS LABOR. Im Ziffernrätsel-Labor lösen Schülerinnen und Schüler Buchstabenrätsel wie ' +
+        'SEND + MORE = MONEY Schritt für Schritt, bis hinunter auf Grundschulniveau. Regeln: Jeder Buchstabe ist eine ' +
+        'Ziffer, gleiche Buchstaben gleiche Ziffern, verschiedene Buchstaben verschiedene Ziffern, vorne nie eine 0.\n' +
+        'SO SIEHT DER BILDSCHIRM AUS. Links die Tafel: Bei einer Plusaufgabe steht die Rechnung untereinander wie auf ' +
+        'Papier. Ganz oben über jeder Spalte steht klein und grau ihr Stellenwert (1, 10, 100 und so weiter) – das sind ' +
+        'keine Ziffern des Rätsels und keine Überträge. Eine Reihe darunter stehen, ebenfalls klein, die schon ' +
+        'gefundenen Überträge, jeweils über der Spalte, in die sie hineinkommen. Dann die Zeilen, ein Strich und das ' +
+        'Ergebnis. Die Spalte, um die es im Schritt geht, leuchtet orange; ein gefundener Buchstabe zeigt seine Ziffer, ' +
+        'ein gerade gefundener ist hervorgehoben. Bei einem Produkt steht die Aufgabe als Formel auf der Tafel, der ' +
+        'Stellenwert klein über jedem Buchstaben. Unter der Tafel die Ziffernleiste 0 bis 9: unter jeder vergebenen ' +
+        'Ziffer der Buchstabe, der sie hat. Darunter die Schrittpunkte zum Blättern und der Schalter „Grundlagen ' +
+        'erklären“, der die Grundlagen-Schritte ein- oder ausblendet. Rechts die Erklärspalte: oben die Aufgabe mit ' +
+        'Quelle, darunter der Schritt, der gerade dran ist, mit Nummer, Titel und Text, ganz unten diese Frage-Box. Am ' +
+        'linken Rand lassen sich die anderen Rätsel wählen.\n' +
+        'SO ANTWORTEST DU. Mit jeder Frage bekommst du, was in diesem Moment zu sehen ist: links die Tafel, rechts die ' +
+        'Erklärspalte. Antworte genau im Blick darauf. Fragt jemand nach etwas, das man sieht – eine kleine Zahl über ' +
+        'einem Buchstaben, die orange Spalte, eine Ziffer in der Leiste –, such es in der Beschreibung und erkläre es an ' +
+        'genau dieser Stelle. Erkläre den Schritt gründlicher und langsamer als der Text: mit konkreten Zahlen, einem ' +
+        'kleinen Beispiel oder einem Bild aus dem Alltag. Wer es einfacher haben möchte, bekommt es so erklärt, dass es ' +
+        'auch Schülerinnen und Schüler der Grundschule verstehen: Stellenwerte, Einer, Zehner, Übertrag und Plusrechnen ' +
+        '– setz nichts voraus. Verrate keine Ziffern aus späteren Schritten, außer jemand fragt ausdrücklich danach. ' +
+        'Höchstens sechs Sätze.';
     function klartext(html) { return String(html).replace(/<\/(p|li|tr)>/gi, '\n').replace(/<[^>]+>/g, ' ').replace(/[ \t]+/g, ' ').replace(/\n\s+/g, '\n').trim(); }
+    // a letter on the board with the digit it shows, if it is found already
+    function mitWert(ch, st) { return /\d/.test(ch) || !(ch in st.werte) ? ch : ch + ' (zeigt ' + st.werte[ch] + ')'; }
+    function tafel(st, spalte) {
+        const s = SCHEMATA[id];
+        if (!s) {
+            return 'Die Aufgabe als Formel: $' + TEX_SCHLICHT[id] + '$\n' +
+                'Klein und grau über jedem Buchstaben und jeder Ziffer: ihr Stellenwert, 1 über der Einerstelle, 10 über ' +
+                'der Zehnerstelle, 100 über der Hunderterstelle und so weiter' +
+                (/10\^\{/.test(TEX[id]) ? ', hier als Zehnerpotenz geschrieben (10^3 für 1000)' : '') + '.';
+        }
+        const n = Math.max(...s.zeilen.concat([s.ergebnis]).map(w => w.length));
+        const zeilen = ['Die Rechnung untereinander: ' + s.zeilen.map((w, r) => (r ? s.zeichen + ' ' : '') + w).join(' / ') +
+            ' / Strich / ' + s.ergebnis, 'Die Spalten, von rechts:'];
+        for (let k = 0; k < n; k++) {
+            const oben = s.zeilen.map(w => w[w.length - 1 - k]).filter(Boolean).map(ch => mitWert(ch, st));
+            const unten = s.ergebnis[s.ergebnis.length - 1 - k];
+            zeilen.push('- ' + (STELLE[k] ? STELLE[k] + 'spalte' : 'Spalte ' + (k + 1)) + (k === spalte ? ' (leuchtet orange)' : '') +
+                ': klein darüber der Stellenwert ' + 10 ** k +
+                (k in st.ueber ? ', darunter klein der Übertrag ' + st.ueber[k] : '') + '; ' +
+                (oben.join(' ' + s.zeichen + ' ') || 'oben leer') + ' ergibt ' + (unten ? mitWert(unten, st) : 'nichts'));
+        }
+        return zeilen.join('\n');
+    }
+    function leiste(st) {
+        const wer = {};
+        Object.keys(st.werte).forEach(b => { wer[st.werte[b]] = b; });
+        const vergeben = [], frei = [];
+        for (let d = 0; d <= 9; d++) (d in wer ? vergeben : frei).push(d in wer ? d + ' hat ' + wer[d] + (wer[d] in st.neu ? ' (gerade gefunden)' : '') : d);
+        return 'Ziffernleiste: ' + (vergeben.length ? 'vergeben ' + vergeben.join(', ') : 'noch keine Ziffer vergeben') +
+            (frei.length ? '; frei ' + frei.join(', ') : '');
+    }
     function kontext() {
         const vis = sichtbar(), cur = vis[pos], st = stand(cur.i);
-        const bekannt = Object.keys(st.werte).map(b => b + ' = ' + st.werte[b]).join(', ');
+        const quelle = QUELLEN[id] || '';
         return 'Rätsel: ' + name(id) + '\n' +
-            'Alle Schritte: ' + vis.map((x, k) => (k + 1) + '. ' + x.s.titel).join(' · ') + '\n' +
-            'Auf dem Bildschirm: Schritt ' + (pos + 1) + ' von ' + vis.length + ', „' + cur.s.titel + '“\n' +
-            'Text des Schritts:\n' + klartext(cur.s.html) + '\n' +
-            'Bis hierher gefunden: ' + (bekannt || 'noch nichts');
+            'Die Schritte (Grundlagen-Schritte ' + (mitBasis ? 'eingeblendet' : 'ausgeblendet') + '): ' +
+            vis.map((x, k) => (k + 1) + '. ' + x.s.titel).join(' · ') + '\n\n' +
+            'LINKS, DIE TAFEL - so steht sie jetzt da:\n' +
+            tafel(st, typeof cur.s.spalte === 'number' ? cur.s.spalte : -1) + '\n' + leiste(st) + '\n\n' +
+            'RECHTS, DIE ERKLÄRSPALTE:\n' +
+            'Oben die Aufgabe: $' + TEX_SCHLICHT[id] + '$' + (quelle ? ' – Quelle: ' + quelle : '') + '\n' +
+            'Darunter, gerade dran: Schritt ' + (pos + 1) + ' von ' + vis.length + ', „' + cur.s.titel + '“:\n' +
+            klartext(mitWer(cur.s.html));
     }
+    window.zrKontext = kontext;
     const solita = window.SolitaFrage ? SolitaFrage.mount(docEl.querySelector('.zr-sf'), {
-        kontext, system: SYSTEM, platzhalter: 'Frag Solita zu diesem Schritt',
+        kontext, system: SYSTEM,
+        ueberschrift: docEl.querySelector('.zr-solita > h3'),     // "Frag Solita" / "Frag Doc"
         vorschlaege: [
             { label: 'Genauer erklären', frage: 'Erklär mir diesen Schritt bitte genauer.' },
             { label: 'Noch einfacher', frage: 'Erklär mir diesen Schritt bitte noch einfacher – so, dass man es schon in der Grundschule versteht.' },
@@ -246,7 +294,7 @@
     }) : null;
     docEl.querySelector('.zr-vorlesen').addEventListener('click', () => {
         const cur = sichtbar()[pos];
-        if (solita) solita.vorlesen(cur.s.sprich || cur.s.html);
+        if (solita) solita.vorlesen(mitWer(cur.s.sprich || cur.s.html));
     });
 
     // ---- drawing -----------------------------------------------------------------------------------------------
@@ -400,7 +448,7 @@
         quelleEl.hidden = !QUELLEN[id];
         nrEl.textContent = (pos + 1) + ' / ' + vis.length;
         titelEl.textContent = cur.s.titel;
-        textEl.innerHTML = ausrichten(cur.s.html);
+        textEl.innerHTML = ausrichten(mitWer(cur.s.html));
         mathe(texEl); mathe(textEl);
         passeFormeln(docEl);
         karteInsBild(docEl.querySelector('.zr-schritt'));
@@ -468,6 +516,9 @@
         if (r.top < v.top) box.scrollTop += r.top - v.top - 8;
         else if (r.bottom > v.bottom) box.scrollTop += r.bottom - v.bottom + 8;
     }
+    // who explains - Solita or Doc, as chosen in the question box
+    function mitWer(html) { return String(html).replace(/\{WER\}/g, window.SolitaFrage && SolitaFrage.wer ? SolitaFrage.wer() : 'Solita'); }
+    document.addEventListener('solita-wer', () => { if (typeof zeichne === 'function' && textEl.childNodes.length) zeichne(); });
     function geh(k) {
         const vis = sichtbar();
         if (k < 0 || k >= vis.length || k === pos) return;

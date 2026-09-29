@@ -77,6 +77,24 @@ function aufgabenBlock(i) { return BLOECKE.find(b => i >= b.ab && i < b.bis) || 
 // wegklicken (pro Aufgabe)" - a task's explanation for Doc, by its slug: paragraphs split by a blank line,
 // formulas between $...$ (KaTeX). A block's file adds its own; a task without one shows none.
 const ERKLAERUNGEN = {};
+// Doc, 29.09.2026: "Bitte IMMER so machen! Auch in der EB!" - an operation stands behind the line it is APPLIED to,
+// as on the board (js/vorrechnen-rechenweg.js hangs it on the line before). The explanations are written
+// "$$equation | operation$$" with the operation behind the line it PRODUCED; a block's file turns its own round once
+// with this, so every place that shows them - the explanation box here and the Ziffernrätsel lab - gets them the
+// board's way: in a run of equations every operation moves up one line, the first line keeps its own note and comes
+// once more with the first operation ("bei -A muss nochmal die Zeile 1 hin"), the last line has none. A single
+// equation between text stays as it is.
+function umformungenVorziehen(text) {
+    return String(text).replace(/\$\$[^$]+\$\$(?:\s*\$\$[^$]+\$\$)+/g, lauf => {
+        const zeilen = lauf.match(/\$\$[^$]+\$\$/g).map(b => {
+            const t = b.slice(2, -2).split(' | ');
+            return { gl: t[0], op: t.length === 2 ? t[1] : '' };
+        });
+        const raus = zeilen[0].op ? [zeilen[0]] : [];
+        zeilen.forEach((z, i) => raus.push({ gl: z.gl, op: i + 1 < zeilen.length ? zeilen[i + 1].op : '' }));
+        return raus.map(z => '$$' + z.gl + (z.op ? ' | ' + z.op : '') + '$$').join('');
+    });
+}
 // Doc, 28.09. (over SEND + MORE = MONEY): the task written "untereinander", as on paper - grey on the board,
 // top left under "Aufgabe x / y", for the class too (the head layer is mirrored); by slug: { zeilen, zeichen,
 // ergebnis } - the rows, the sign before the last one, the result (schemaHtml, js/vorrechnen-rechenweg.js)

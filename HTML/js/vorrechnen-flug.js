@@ -654,8 +654,9 @@ function hutKnopf(zeigen, aktiv) {
 // every letter of a formula upright, as \mathrm (Doc, 28.09.: the letters blue - js/vorrechnen.css - "bitte nicht
 // kursiv"); commands (\cdot, \ge, \mathrm) and words in \text{...} stay as they are
 const aufrecht = tex => tex.replace(/\\text\{[^}]*\}|\\[a-zA-Z]+|[A-Za-z]/g, m => m.length > 1 ? m : '\\mathrm{' + m + '}');
-// Paragraphs by a blank line. $$equation | operation$$ is an equation set off, as in a LaTeX text, with what was
-// done to get it behind it as on the board's working, "| −A" (Doc, 28.09.: "dass diese Gleichungen so in der Zeile
+// Paragraphs by a blank line. $$equation | operation$$ is an equation set off, as in a LaTeX text, with what is done
+// to it next behind it as on the board's working, "| −A" (since 29.09.2026 the data come that way:
+// umformungenVorziehen, js/vorrechnen-aufgaben.js - Doc: "Auch in der EB!") (Doc, 28.09.: "dass diese Gleichungen so in der Zeile
 // im Text stehen ... ordentliche Gleichungen ... und natürlich LaTeX", "hinter die Gleichung immer die Operation");
 // $...$ stays in the sentence - a value, a letter, a term.
 // Every "=" of the box stands on its middle line, text between or not ("die Gleichheitszeichen immer in die Mitte
