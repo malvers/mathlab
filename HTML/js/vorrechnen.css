@@ -158,7 +158,7 @@
 }
 #papier .karo {
     position: absolute; left: 0; right: 0; bottom: 0;
-    border-top: 2px solid var(--papier-grenze);
+    border-top: 1px solid var(--papier-grenze);      /* Doc, 29.09.: "mach die Trennlinien dünner" (was 2px) */
 }
 /* the squares - not in the notes margin (Doc, 27.09.: "in dem Bereich rechts keine
    Karos ... Die Schrift passt mit den Karos eigentlich nie so richtig zusammen");
@@ -197,8 +197,8 @@ body.anzeige::before {
     background: var(--anzeige-grund, #050d1c);
 }
 body.anzeige :is(#cyber-left-chrome, #mini-rail, #side-panel, #right-rail, #tafel-pfeil-vor, #tafel-pfeil-zurueck, #formel-schicht, #erkennen-klein,
-    #schritt-hinweis, #schritt-op, #schritt-hoch, #erklaerung, #erklaerung-zu, #erklaerung-leiste, #notiz-rand, #notiz-leeren, #seite-leeren, #oben-leeren, #radierer, #radier-rahmen, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play,
-    #buzz-aufgabe, #buzzer-overlay, #tafel-overlay, #namen-overlay, #namen-pille) {
+    #schritt-hinweis, #schritt-op, #schritt-hoch, #erklaerung, #erklaerung-zu, #erklaerung-hut, #erklaerung-leiste, #notiz-rand, #notiz-leeren, #seite-leeren, #oben-leeren, #radierer, #radier-rahmen, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play,
+    #buzz-aufgabe, #buzz-zeile, #buzzer-overlay, #tafel-overlay, #namen-overlay, #namen-pille) {
     display: none !important;
 }
 /* Doc, 26.09.: "nimm bitte HIER das LOCAL rechts oben nach links unten
@@ -240,7 +240,7 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
    --knopf scales both when the margin is narrow (erkennenKlein) */
 /* Doc, 26.09.: the notes' C "im gleichen Stil wie Erkennen, auch die
    Buchstabengröße und Font" - one look for both buttons in the margin */
-:is(#erkennen-klein, #notiz-leeren, #seite-leeren, #oben-leeren, #radierer, #schritt-hoch) {
+:is(#erkennen-klein, #notiz-leeren, #seite-leeren, #oben-leeren, #radierer, #schritt-hoch, #erklaerung-hut) {
     position: absolute; z-index: 5;
     display: flex; align-items: center; justify-content: center; box-sizing: border-box;
     bottom: 6px; height: calc(46px * var(--knopf, 1)); border-radius: 8px; cursor: pointer; touch-action: manipulation;
@@ -250,7 +250,7 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
     background: linear-gradient(rgba(0, 210, 255, 0.14), rgba(0, 210, 255, 0.14)) #07162f;
     box-shadow: 0 0 14px rgba(0, 210, 255, 0.35);
 }
-#canvas-container.hell :is(#erkennen-klein, #notiz-leeren, #seite-leeren, #oben-leeren, #radierer, #schritt-hoch) {
+#canvas-container.hell :is(#erkennen-klein, #notiz-leeren, #seite-leeren, #oben-leeren, #radierer, #schritt-hoch, #erklaerung-hut) {
     color: rgb(31, 64, 150); border-color: rgba(31, 64, 150, 0.85);
     background: linear-gradient(rgba(31, 64, 150, 0.08), rgba(31, 64, 150, 0.08)) #f4ecd8;
     box-shadow: none;
@@ -346,7 +346,7 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
    like the line above the squares (Doc, 27.09.: "die Dashline nach unten bitte durchgezogen") */
 #notiz-rand {
     position: absolute; bottom: 0; width: 0; z-index: -1; pointer-events: none;
-    border-left: 2px solid var(--papier-grenze);
+    border-left: 1px solid var(--papier-grenze);     /* thinner like the line above the squares (29.09., was 2px) */
 }
 /* the notes' own C, bottom right in the margin (Doc only) - a letter like
    ERKENNEN's (Doc asked for its size and font), its look shared above */
@@ -358,6 +358,10 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
 /* the board's own C: bottom right of the board above the line, right over the notes' C (Doc, 28.09.);
    bottom set by zeigeNotizRand */
 #oben-leeren { right: 12px; width: calc(46px * var(--knopf, 1)); padding: 0; letter-spacing: 0; }
+/* the mortarboard that brings the explanation box (Doc, 29.09.: "im Stil so wie unten"): the field's bin's look and
+   width, at the top of the field instead of the bottom - right and top set by hutKnopf */
+#erklaerung-hut { bottom: auto; width: calc(46px * var(--knopf, 1)); padding: 0; }
+#erklaerung-hut svg { width: calc(26px * var(--knopf, 1)); height: calc(26px * var(--knopf, 1)); }
 /* Knobeln block (js/vorrechnen-aufgaben-knobeln.js), Doc 28.09.:
    - the A of a number word goes as \textrm (nowhere else in the lab's tasks): Computer Modern's A reaches 0.716,
      the flat capitals 0.683 - 0.683 / 0.716 sets it level ("nur das A ist höher"); a digit there goes as \textup:
@@ -382,9 +386,11 @@ body .katex .sizing.reset-size6.mtight:has(> .mord > [style*="138, 147, 163"], >
    container, not #rechenweg-schicht: the glide at a task change and the history show copies without ids */
 #canvas-container .rw-nummer { color: #8a93a3; }
 #canvas-container.hell .rw-nummer { color: #5d6678; }
-/* what was done to a row, "| -3x", in the palette's green (Doc, 27.09.: "die ausgeführten Schritte mit dem
-   vertikalen Strich dahinter") */
-#canvas-container .rw-op { color: rgb(121, 158, 49); }
+/* what was done to a row, "| -3x" (Doc, 27.09.: "die ausgeführten Schritte mit dem vertikalen Strich
+   dahinter") - in the palette's green until Doc, 29.09.: "probier mal grau", then "bissl heller": on sand
+   the light grey of the grey steps (#schritt-hinweis), a touch lighter than the numbers */
+#canvas-container .rw-op { color: #8a93a3; }
+#canvas-container.hell .rw-op { color: #7a8294; }
 /* two columns: the thin line between them, in the colour of the line above the squares (Doc, 27.09.) */
 #canvas-container .rw-trenner { position: absolute; width: 0; border-left: 1px solid var(--papier-grenze); pointer-events: none; }
 #radierer.an { background: linear-gradient(rgba(0, 210, 255, 0.4), rgba(0, 210, 255, 0.4)) #07162f; box-shadow: 0 0 20px rgba(0, 210, 255, 0.75); }
@@ -407,7 +413,7 @@ body .katex .sizing.reset-size6.mtight:has(> .mord > [style*="138, 147, 163"], >
 #buzzer-overlay .cyber-modal { max-width: min(760px, 94vw); padding: 52px 28px 24px; }
 #buzzer-overlay .bz-knoepfe { display: flex; gap: 12px; margin-top: 22px; }
 #buzzer-overlay .bz-knoepfe .cyber-btn { flex: 1; }
-/* the count per step, at the right edge on the newest row's height (zeigeBuzzAufgabe sets place and size) */
+/* the count per step, right behind the newest row's number (zeigeBuzzAufgabe sets place and size) */
 /* the ground runs green - orange - red with the count (zeigeBuzzAufgabe), the number alone on it */
 #buzz-aufgabe {
     position: absolute; z-index: 3; pointer-events: none; box-sizing: border-box;   /* left/top: zeigeBuzzAufgabe */
@@ -415,6 +421,9 @@ body .katex .sizing.reset-size6.mtight:has(> .mord > [style*="138, 147, 163"], >
     /* Doc, 27.09.: "keine Orbi-Zahlen, die kann man doch relativ schlecht lesen ... Arial" */
     border-radius: 999px; font-family: Arial, Helvetica, sans-serif; font-weight: 700; line-height: 1;
 }
+/* Doc, 29.09.: the newest row on a faint pill in the count's colour - under the ink like the grey steps
+   (z-index -1 after #papier: over the paper), for Doc only; place, size and colour: zeigeBuzzAufgabe */
+#buzz-zeile { position: absolute; z-index: -1; pointer-events: none; border-radius: 999px; }
 
 /* Doc, 26.09.: "Tafel senden" - today's working into the plan, in the central modal;
    chips for the class and the tasks, light on sand with ink like the task panel */

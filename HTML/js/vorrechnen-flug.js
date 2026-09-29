@@ -535,23 +535,26 @@ function zeigeHinweis() {
     opEl.style.left = (nx + 2 + 12) + 'px';                 // like ERKENNEN: 12 px right of the line
     el.style.display = opEl.style.display = '';
     const zeilen = [...el.children], ops = [...opEl.children];
+    const hutRaum = erklStand().hutSteht ? hutPlatz() - 12 : 0;   // the first row keeps clear of the mortarboard (29.09.)
     zeilen.forEach((z, k) => {
         const o = ops[k];
         z.style.display = o.style.display = '';
         z.style.top = o.style.top = '0px';
         z.style.fontSize = o.style.fontSize = HINWEIS_GROESSE + 'rem';
-        passeEin(z, nx - links - 12, HINWEIS_GROESSE);
+        passeEin(z, nx - links - 12 - (k ? 0 : hutRaum), HINWEIS_GROESSE);
         passeEin(o, r.width - 16 - (nx + 2 + 12), HINWEIS_GROESSE);   // "ausmultiplizieren" fits the margin
     });
     // Doc, 27.09.: "dass bei der Vorschau der Formeln der Abstand auch gleich ist" - stacked by
     // their ink, not by their KaTeX boxes (a fraction's box is far taller than its ink): a
     // row's ink starts one gap under the ink before it, as legenFrei lays the board (tinte);
-    // the operation sits on the middle of its equation's ink. The first row stays at the top.
+    // the operation sits on the middle of its equation's ink. Doc, 29.09.: "zur Linie mehr Platz" - the
+    // first row's ink keeps that gap to the line above the squares too (it was 3 px under it): the line's
+    // lower edge, 1 px under papierGrenze, stands 3 px above this layer's top.
     const abstand = HINWEIS_ABSTAND * HINWEIS_GROESSE * parseFloat(getComputedStyle(document.documentElement).fontSize);
-    let unten = null;
+    let unten = -3;
     zeilen.forEach((z, k) => {
         const o = ops[k], zk = z.getBoundingClientRect(), zt = tinte(z) || { o: zk.top, u: zk.bottom };
-        const oben = unten === null ? 0 : unten + abstand - (zt.o - zk.top);
+        const oben = unten + abstand - (zt.o - zk.top);
         z.style.top = oben + 'px';
         const ok = o.getBoundingClientRect(), ot = tinte(o) || { o: ok.top, u: ok.bottom };
         o.style.top = (oben + (zt.o + zt.u) / 2 - zk.top - ((ot.o + ot.u) / 2 - ok.top)) + 'px';
@@ -578,6 +581,62 @@ const ERKL_WEG = 'vorrechnen-erklaerung-weg';
 let erklWeg = new Set(), erklVorschau = vorschau;
 try { erklWeg = new Set(JSON.parse(localStorage.getItem(ERKL_WEG) || '[]')); } catch (_) {}
 function merkeErklWeg() { try { localStorage.setItem(ERKL_WEG, JSON.stringify([...erklWeg])); } catch (_) {} }
+// Doc, 29.09.: "mach da ein icon mit einem brain, das die Box einblendet", then "im Stil so wie unten und das
+// Brain doch Dr. Hut und finer" - outside the puzzles the box no longer comes by itself (in a lesson it would cover
+// the grey steps): a mortarboard top right in the writing field, over the field's bin and like it, brings it, its
+// × puts it away again - for this visit only (erklDa). The puzzles (their block says erklaerung: 'sofort',
+// js/vorrechnen-aufgaben-knobeln.js) show theirs until the ×; the mortarboard brings it back.
+const erklDa = new Set();
+const erklSofort = () => aufgabenBlock(aufgabeIdx).erklaerung === 'sofort';
+// the task's explanation, whether its box shows now, and whether the mortarboard is wanted instead
+function erklStand() {
+    if (vorschau && !erklVorschau) {                                   // P on again: all as they start
+        erklDa.clear();
+        if (erklWeg.size) { erklWeg.clear(); merkeErklWeg(); }
+    }
+    erklVorschau = vorschau;
+    const slug = aufgabenModus ? AUFGABEN[aufgabeIdx][0] : null, text = slug && ERKLAERUNGEN[slug];
+    const zeigt = !!text && vorschau && (erklSofort() ? !erklWeg.has(slug) : erklDa.has(slug));
+    // the mortarboard stands wherever the field's bin does (not in Beispiele) while the box is shut - pale like
+    // the empty bin when there is nothing to show (Doc, 29.09.: "zeigt den Dr. Hut auch, wenn nichts da ist, aber
+    // eben so grayed out wie der Papierkorb unten")
+    return { slug, text, zeigt, hut: !!text && vorschau && !zeigt, hutSteht: !zeigt && modus !== 'beispiele' };
+}
+// the room the mortarboard's button takes left of the margin's line: 12 px to the line, its width (46 px at
+// --knopf, js/vorrechnen.css) and 8 px of air - the first grey row keeps clear of it
+function hutPlatz() {
+    return 12 + 46 * (parseFloat(container.style.getPropertyValue('--knopf')) || 1) + 8;
+}
+// Lucide "graduation-cap" (ISC, lucide-static 1.48.0), finer than the board's other icons (1.8); the part on the
+// head 1.5 longer than Lucide's (Doc, 29.09.: "der Zylinder, der dann auf dem Kopf sitzt ... länger")
+const DOKTORHUT = '<g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/>' +
+    '<path d="M22 10v6"/><path d="M6 12.5V17.5a6 3 0 0 0 12 0V12.5"/></g>';
+function hutKnopf(zeigen, aktiv) {
+    let k = document.getElementById('erklaerung-hut');
+    if (!zeigen) { if (k) k.style.display = 'none'; return; }
+    if (!k) {
+        k = document.createElement('button');
+        k.id = 'erklaerung-hut';
+        k.type = 'button';
+        k.title = 'Erklärung einblenden';
+        k.setAttribute('aria-label', 'Erklärung einblenden');
+        k.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${DOKTORHUT}</svg>`;
+        k.addEventListener('click', () => {
+            k.blur();
+            const { slug, hut } = erklStand();
+            if (!slug || !hut) return;                // pale: nothing to show
+            if (erklSofort()) { erklWeg.delete(slug); merkeErklWeg(); } else erklDa.add(slug);
+            zeigeHinweis();                    // the grey steps and the box, laid out anew
+        });
+        container.appendChild(k);
+    }
+    // right over the field's bin (#seite-leeren, zeigeNotizRand): 12 px left of the margin's line
+    const r = container.getBoundingClientRect();
+    Object.assign(k.style, { right: (r.width - notizX(r.width) + 12) + 'px', top: (papierGrenze(r.height) + 6) + 'px', display: '' });
+    k.style.opacity = aktiv ? '' : '0.35';                // as pale as the empty bin (zeigeNotizRand)
+    k.title = aktiv ? 'Erklärung einblenden' : 'Keine Erklärung zu dieser Aufgabe';
+}
 // every letter of a formula upright, as \mathrm (Doc, 28.09.: the letters blue - js/vorrechnen.css - "bitte nicht
 // kursiv"); commands (\cdot, \ge, \mathrm) and words in \text{...} stay as they are
 const aufrecht = tex => tex.replace(/\\text\{[^}]*\}|\\[a-zA-Z]+|[A-Za-z]/g, m => m.length > 1 ? m : '\\mathrm{' + m + '}');
@@ -677,11 +736,9 @@ function erklPfeile() {
 }
 function zeigeErklaerung() {
     if (anzeigeModus) return;
-    if (vorschau && !erklVorschau && erklWeg.size) { erklWeg.clear(); merkeErklWeg(); }   // P on again: all back
-    erklVorschau = vorschau;
-    const slug = aufgabenModus ? AUFGABEN[aufgabeIdx][0] : null, text = slug && ERKLAERUNGEN[slug];
     let el = document.getElementById('erklaerung'), zu = document.getElementById('erklaerung-zu');
-    const zeigt = !!text && vorschau && !erklWeg.has(slug);
+    const { slug, text, zeigt, hut, hutSteht } = erklStand();
+    hutKnopf(hutSteht, hut);
     // with an explanation the grey steps on the left go (Doc, 28.09.: "lass bei den Aufgaben das links weg und
     // mach die box groß") - hidden, not removed: the operations in the margin keep their rows' places
     const grau = document.getElementById('schritt-hinweis');
@@ -706,14 +763,15 @@ function zeigeErklaerung() {
         zu = document.createElement('button');
         zu.id = 'erklaerung-zu';
         zu.type = 'button';
-        zu.title = 'Erklärung ausblenden – P aus und wieder an holt sie zurück';
+        zu.title = 'Erklärung ausblenden – der Doktorhut holt sie zurück';
         zu.setAttribute('aria-label', 'Erklärung ausblenden');
         zu.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">' +
             '<path d="M6 6 L18 18 M18 6 L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
         zu.addEventListener('click', () => {
             zu.blur();
-            if (el.dataset.slug) { erklWeg.add(el.dataset.slug); merkeErklWeg(); }
-            zeigeErklaerung();
+            const s = el.dataset.slug;
+            if (s && erklSofort()) { erklWeg.add(s); merkeErklWeg(); } else if (s) erklDa.delete(s);
+            zeigeHinweis();                    // the grey steps back, the first one clear of the mortarboard
         });
         container.appendChild(zu);
         const leiste = document.createElement('div');
@@ -779,7 +837,7 @@ function zeigeNotizRand() {
     let el = document.getElementById('notiz-rand');
     if (modus === 'beispiele') {
         if (el) el.style.display = 'none';
-        ['notiz-leeren', 'seite-leeren', 'oben-leeren', 'radierer', 'schritt-hoch'].forEach(id => { const k = document.getElementById(id); if (k) k.style.display = 'none'; });
+        ['notiz-leeren', 'seite-leeren', 'oben-leeren', 'radierer', 'schritt-hoch', 'erklaerung-hut'].forEach(id => { const k = document.getElementById(id); if (k) k.style.display = 'none'; });
         setzeRadieren(false);
         return;
     }

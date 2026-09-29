@@ -222,5 +222,5 @@ async function tafelHochladen() {
 window.addEventListener('keydown', e => {
     if (!document.querySelector('#tafel-overlay.open')) return;
     if (e.key === 'Escape') tafelDialog(false);
-    if (e.key === 'Escape' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') e.stopPropagation();
+    if (e.key === 'Escape' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp') e.stopPropagation();
 }, true);

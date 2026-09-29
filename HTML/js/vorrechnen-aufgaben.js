@@ -142,3 +142,26 @@ const LOESUNGEN = {
     'kepler':      [['T_1^2 a_2^3=T_2^2 a_1^3', '\\cdot T_2^2 a_2^3'], ['a_2^3=\\frac{T_2^2 a_1^3}{T_1^2}', ':T_1^2'], ['a_2=a_1\\sqrt[3]{\\frac{T_2^2}{T_1^2}}', '\\sqrt[3]{\\;}']],
     'zeit':        [['t^2=\\frac{t_0^2}{1-\\frac{v^2}{c^2}}', '\\text{quadrieren}'], ['t^2\\left(1-\\frac{v^2}{c^2}\\right)=t_0^2', '\\cdot\\left(1-\\frac{v^2}{c^2}\\right)'], ['1-\\frac{v^2}{c^2}=\\frac{t_0^2}{t^2}', ':t^2'], ['1=\\frac{t_0^2}{t^2}+\\frac{v^2}{c^2}', '+\\frac{v^2}{c^2}'], ['1-\\frac{t_0^2}{t^2}=\\frac{v^2}{c^2}', '-\\frac{t_0^2}{t^2}'], ['c^2\\left(1-\\frac{t_0^2}{t^2}\\right)=v^2', '\\cdot c^2'], ['v=c\\sqrt{1-\\frac{t_0^2}{t^2}}', '\\sqrt{\\;}']],
 };
+// Doc, 29.09.: "warum man nicht an dem Schritt, wo Hauptnenner steht, jeden einzelnen Bruch sofort den Kehrwert
+// bilden könnte" - the answer as the box behind the brain (outside the puzzles it waits for a tap, see
+// zeigeErklaerung). Every number checked by hand: 1/10 - 1/30 = 2/30 = 1/15, and 10 * 30 / (30 - 10) = 15.
+Object.assign(ERKLAERUNGEN, {
+    'linse':
+        'Nach $b$ auflösen – zuerst $\\frac{1}{g}$ auf die andere Seite:' +
+        '$$\\frac{1}{f}-\\frac{1}{g}=\\frac{1}{b} | -\\frac{1}{g}$$' +
+        'Warum jetzt nicht jeden Bruch einzeln umdrehen, zu $f-g=b$? Der Kehrwert gilt nur für eine ganze Seite: ' +
+        'aus $A=B$ folgt $\\frac{1}{A}=\\frac{1}{B}$. Links steht aber die ganze Differenz – ihr Kehrwert ist ' +
+        '$\\frac{1}{\\frac{1}{f}-\\frac{1}{g}}$, nicht $f-g$.' +
+        '\n\nGegenbeispiel: $\\frac{1}{2}+\\frac{1}{2}=1$ stimmt. Jeden Bruch umgedreht hieße das $2+2=1$.' +
+        '\n\nMit Linsenzahlen, $f=10$ cm und $g=30$ cm:' +
+        '$$\\frac{1}{b}=\\frac{1}{10}-\\frac{1}{30}=\\frac{2}{30}=\\frac{1}{15}$$' +
+        'also $b=15$ cm. Einzeln umgedreht käme $b=f-g=-20$ cm heraus: anderer Wert, falsches Vorzeichen.' +
+        '\n\nMerkregel: Der Kehrwert verträgt sich mit Mal und Geteilt, $\\frac{1}{a\\cdot b}=\\frac{1}{a}\\cdot\\frac{1}{b}$, ' +
+        'aber nicht mit Plus und Minus, $\\frac{1}{a+b}\\ne\\frac{1}{a}+\\frac{1}{b}$. Derselbe Fehler wie ' +
+        '$(a+b)^2=a^2+b^2$ oder $\\sqrt{9+16}=3+4$ – richtig ist $\\sqrt{25}=5$, nicht $7$.' +
+        '\n\nDarum zuerst der Hauptnenner $fg$ – er macht aus der Differenz einen einzigen Bruch:' +
+        '$$\\frac{g-f}{fg}=\\frac{1}{b} | \\text{Hauptnenner}$$' +
+        'Jetzt steht auf jeder Seite nur ein Bruch, und der Kehrwert ist erlaubt:' +
+        '$$b=\\frac{fg}{g-f} | \\text{Kehrwert}$$' +
+        'Nebenbei: $g\\ne f$. Steht der Gegenstand im Brennpunkt, entsteht kein Bild – es liegt im Unendlichen.',
+});

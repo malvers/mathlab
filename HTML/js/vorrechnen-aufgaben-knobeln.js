@@ -26,7 +26,8 @@
         ['k-math',     '\\mathrm{MATH}+\\mathrm{ATH}+\\mathrm{TH}+\\mathrm{H}=5000,\\quad M+A+T+H=\\,?',    ''],
         ['k-money',    '\\mathrm{SEND}+\\mathrm{MORE}=\\mathrm{MONEY}',                                     ''],
     );
-    BLOECKE.push({ titel: 'Knobeln · Ziffernrätsel', ab, bis: AUFGABEN.length, kopf: 'Ziffern finden' });
+    // erklaerung: 'sofort' - the explanation box shows by itself here; elsewhere it waits for the brain (29.09.)
+    BLOECKE.push({ titel: 'Knobeln · Ziffernrätsel', ab, bis: AUFGABEN.length, kopf: 'Ziffern finden', erklaerung: 'sofort' });
     Object.assign(LOESUNGEN, {
         'k-einsa':    [['A\\cdot 3=10+A', '\\text{Stellenwerte}'],
                       ['A\\cdot 2=10', '-A'],

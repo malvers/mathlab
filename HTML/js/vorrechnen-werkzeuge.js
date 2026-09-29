@@ -472,17 +472,19 @@ function aufgabenPanel(auf) {
 // ◀ ▶. A tapped button, slider or radio keeps the focus: it lets go first, so
 // no focus ring turns up ("bitte keine selects") and a radio does not switch
 // the mode. Text fields keep their keys; holding a key does not race on.
+// Doc, 29.09.: the arrow bottom left "auf arrow up" - ↑ sends the next grey step up like that button.
 document.addEventListener('keydown', e => {
     if (document.querySelector('#aufgaben-overlay.open')) {
         if (e.key === 'Escape') aufgabenPanel(false);
         return;
     }
-    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'ArrowUp') return;
     if (anzeigeModus || modus === 'frei' || e.repeat || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
     const f = document.activeElement;
     if (f && (f.isContentEditable || f.tagName === 'TEXTAREA' || f.tagName === 'SELECT' ||
         (f.tagName === 'INPUT' && !/^(range|checkbox|radio|button)$/.test(f.type)))) return;
     e.preventDefault();
     if (f && f !== document.body && typeof f.blur === 'function') f.blur();
+    if (e.key === 'ArrowUp') { vorschauHoch(); return; }
     naechsteVorlage(e.key === 'ArrowLeft' ? -1 : 1);
 });

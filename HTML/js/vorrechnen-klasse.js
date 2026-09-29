@@ -34,16 +34,17 @@ function buzzerMeldung(n, neu, frisch = []) {
 }
 // Doc, 27.09.: first "in die erste Zeile ... ein Icon ... wie viele gebuzzert haben ... pro Aufgabe", then
 // "eigentlich müsste ja die Pille pro Rechenschritt erscheinen ... wenn der nächste Schritt kommt, kommt
-// die einfach dahinter und ist wieder null", "am rechten Rand" - one pill at the board's right edge on the
-// newest row's height (the task's before the first step), counting the buzzes of that step (today, this
+// die einfach dahinter und ist wieder null", "am rechten Rand" - one pill on the newest row's height (the
+// task's before the first step), since 29.09. right behind its number (1), (2), ..., counting the buzzes of that step (today, this
 // code). For Doc only: no mirrored layer,
 // so it never reaches the beamer; hidden while the finished tasks are pulled down.
 function zeigeBuzzAufgabe() {
-    let el = document.getElementById('buzz-aufgabe');
+    let el = document.getElementById('buzz-aufgabe'), grund = document.getElementById('buzz-zeile');
     const schritt = rechenweg.length;
     const zellen = [...document.querySelectorAll(`#rechenweg-schicht [data-schritt="${schritt ? schritt - 1 : 'aufgabe'}"] .katex-html`)];
     if (anzeigeModus || !aufgabenModus || !window.Buzzer || !Buzzer.aktiv() || verlaufY > 0 || !zellen.length) {
         if (el) el.style.display = 'none';
+        if (grund) grund.style.display = 'none';
         return;
     }
     if (!el) {
@@ -53,47 +54,89 @@ function zeigeBuzzAufgabe() {
         el.innerHTML = '<span></span>';
         container.appendChild(el);
     }
+    if (!grund) {                                        // the row's faint pill (see below)
+        grund = document.createElement('div');
+        grund.id = 'buzz-zeile';
+        grund.setAttribute('aria-hidden', 'true');
+        container.appendChild(grund);
+    }
     const heute = new Date().toDateString(), key = AUFGABEN[aufgabeIdx][0], code = Buzzer.code();
     const n = buzzLog().filter(e => e.aufgabe === key && e.schritt === schritt && e.code === code &&
         new Date(e.zeit).toDateString() === heute).length;
+    // Doc, 29.09.: "bei 0 keine Pille und kein badge rechts" - both only once somebody has buzzed
+    if (!n) { el.style.display = 'none'; grund.style.display = 'none'; return; }
     el.lastElementChild.textContent = String(n);
     // Doc, 27.09.: "grün, wenn null gebuzzert haben, und rot, wenn zwanzig ... Sind immer zwanzig in der
     // Klasse. Also unser üblicher Farbverlauf" - green, orange at ten, red from twenty on (the palette)
     const t = Math.min(1, n / 20), mix = (a, b, u) => a.map((v, i) => Math.round(v + (b[i] - v) * u));
     const GRUEN = [121, 158, 49], ORANGE = [245, 194, 66], ROT = [176, 36, 24];
     const c = t <= 0.5 ? mix(GRUEN, ORANGE, t * 2) : mix(ORANGE, ROT, (t - 0.5) * 2);
-    el.style.background = `rgb(${c.join(', ')})`;
-    el.style.color = t > 0.7 ? '#fff' : '#0b1a33';
+    // Doc, 29.09.: "mach das badge genauso transp wie die Eq. Pille" - one faint ground for both (until then
+    // the badge was solid); on it the number in the board's ink, dark on sand, light on the dark board
+    const grundFarbe = `rgba(${c.join(', ')}, 0.14)`;
+    el.style.background = grundFarbe;
+    el.style.color = anzeige(INK);
     el.title = n === 1 ? '1 × nicht verstanden bei diesem Schritt' : n + ' × nicht verstanden bei diesem Schritt';
     // right behind the row's ink, on its middle
     const c0 = container.getBoundingClientRect();
-    let rechts = -Infinity, oben = Infinity, unten = -Infinity;
+    let links = Infinity, rechts = -Infinity, oben = Infinity, unten = -Infinity;
     zellen.forEach(z => {
         const r = z.getBoundingClientRect();
-        if (r.width) { rechts = Math.max(rechts, r.right); oben = Math.min(oben, r.top); unten = Math.max(unten, r.bottom); }
+        if (r.width) { links = Math.min(links, r.left); rechts = Math.max(rechts, r.right); oben = Math.min(oben, r.top); unten = Math.max(unten, r.bottom); }
     });
-    if (!isFinite(rechts)) { el.style.display = 'none'; return; }
+    if (!isFinite(rechts)) { el.style.display = 'none'; grund.style.display = 'none'; return; }
     // Doc, 27.09.: "macht das bitte am rechten Rand" - on the step's height, at the board's right edge;
     // "wenn dann Bruch steht ... auf Y zentriert auf den Bruchstrich" - with a fraction in the row its bar
     // (the widest, the main one) is the middle, else the middle of the ink
-    let mitte = (oben + unten) / 2, breit = 0;
+    // Doc, 29.09.: "die Pille sitzt zu tief" - the middle of the INK, from KaTeX's struts (each spans its
+    // formula from its top to its depth); the rows' boxes carry the line height and reach further down than
+    // the ink (measured on 4x = 12: 6 px too low)
+    let so = Infinity, su = -Infinity;
+    zellen.forEach(z => z.querySelectorAll('.strut').forEach(st => {
+        const r = st.getBoundingClientRect();
+        if (r.height) { so = Math.min(so, r.top); su = Math.max(su, r.bottom); }
+    }));
+    const tinte = isFinite(so) ? (so + su) / 2 : (oben + unten) / 2;
+    let mitte = tinte, breit = 0;
     document.querySelectorAll(`#rechenweg-schicht [data-schritt="${schritt ? schritt - 1 : 'aufgabe'}"] .frac-line`).forEach(f => {
         const r = f.getBoundingClientRect();
         if (r.width > breit) { breit = r.width; mitte = r.top + r.height / 2; }
     });
+    // Doc, 29.09.: "bitte y zent" - behind a number the pill is centred on it: the middle of the (1)'s box
+    // (its brackets reach as far above the axis as below it, so that is where a fraction bar sits too);
+    // the middle of the row's boxes stood about 7 px above it (measured on x = 5 with its (1))
+    const nummer = schritt ? document.querySelector(`#rechenweg-schicht .rw-nummer[data-nummer="${schritt - 1}"]`) : null;
+    const nr = nummer && (nummer.querySelector('.katex-html') || nummer).getBoundingClientRect();
+    if (nr && nr.height) mitte = nr.top + nr.height / 2;
     const h = Math.round(ZEILE * 0.62);                 // it fits a row with air above and below
     const top = Math.round(mitte - c0.top - h / 2);
     el.style.height = h + 'px';
-    // Doc, 27.09.: "zieh die Pille genauso weit nach rechts wie das Dreieck" - its right edge where the tip
-    // of ▶ ends (read off the arrow, 9 px when there is none); the arrow sits in the top right corner (the
-    // first row, 48 px, the right 56 px): a pill that would reach up there steps left of it
-    const spitze = document.querySelector('#tafel-pfeil-vor path');
-    const sr = spitze && spitze.getBoundingClientRect();
-    const rand = sr && sr.width ? Math.round(c0.right - sr.right) : 9;
-    el.style.right = (top < ZEILE / 2 + 24 + 4 ? rand + 56 : rand) + 'px';
     el.style.top = top + 'px';
     el.style.fontSize = Math.round(h * 0.6) + 'px';
     el.style.display = '';
+    // Doc, 29.09.: "hinterleg die Gleichung mit einer dezenten Pille mit der Farbe, aber trans" - the row
+    // itself on a faint pill in the count's colour, under the ink; as high as the row's box with a little
+    // air, but on the ink's middle (on the box's it sat too low)
+    const halb = (unten - oben) / 2 + Math.round(ZEILE * 0.08), luftX = Math.round(ZEILE * 0.4);
+    grund.style.left = Math.round(links - c0.left - luftX) + 'px';
+    grund.style.width = Math.round(rechts - links + 2 * luftX) + 'px';
+    grund.style.top = Math.round(tinte - c0.top - halb) + 'px';
+    grund.style.height = Math.round(2 * halb) + 'px';
+    grund.style.background = grundFarbe;
+    grund.style.display = '';
+    // Doc, 29.09.: "bring die feedback pille hinter die (#)" - right behind the step's number (1), (2), ...;
+    // the task has none, there right behind its ink. Never further right than the tip of ▶ ends (Doc,
+    // 27.09.: "genauso weit nach rechts wie das Dreieck" - read off the arrow, 9 px when there is none), and
+    // in the first row not under the arrow itself (the top right corner, the right 56 px): a pill that would
+    // reach there stands flush against that limit instead
+    const hinter = (nr && nr.width ? nr.right : rechts) - c0.left;
+    const spitze = document.querySelector('#tafel-pfeil-vor path');
+    const sr = spitze && spitze.getBoundingClientRect();
+    const rand = sr && sr.width ? Math.round(c0.right - sr.right) : 9;
+    const grenze = c0.width - (top < ZEILE / 2 + 24 + 4 ? rand + 56 : rand);
+    el.style.right = 'auto';
+    // Doc, 29.09.: "das Badge 20% nach rechts" - a fifth of its own width further away from the number
+    el.style.left = Math.round(Math.min(hinter + h * 0.4 + el.offsetWidth * 0.2, grenze - el.offsetWidth)) + 'px';
 }
 function buzzerKnopf() {
     if (!window.Buzzer) return;
@@ -154,5 +197,5 @@ function namenKnopf() {
 window.addEventListener('keydown', e => {
     if (!document.querySelector('#buzzer-overlay.open')) return;
     if (e.key === 'Escape') buzzerKarte(false);
-    if (e.key === 'Escape' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') e.stopPropagation();
+    if (e.key === 'Escape' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp') e.stopPropagation();
 }, true);
