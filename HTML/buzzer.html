@@ -56,6 +56,10 @@
         #knopf:focus { outline: none; }
         #knopf svg { width: 34%; height: auto; }
         #knopf.angekommen { background: var(--gruen); color: #fff; box-shadow: 0 0 0 10px rgba(121, 158, 49, 0.2), 0 0 60px rgba(121, 158, 49, 0.35); }
+        /* Doc, 29.09.: "mit dem weißen Ausrufezeichen. Vielen Dank für das Feedback" - arrived: the question mark
+           turns into an exclamation mark (same dot), white on green */
+        #knopf .ausruf, #knopf.angekommen .frage { display: none; }
+        #knopf.angekommen .ausruf { display: inline; }
         #knopf.pause { background: #1c2c4a; color: var(--leise); box-shadow: none; cursor: default; }
 
         #hinweis { min-height: 1.4em; font-size: clamp(0.8rem, 3.6vw, 0.95rem); letter-spacing: 0.04em; color: var(--leise); }
@@ -90,8 +94,9 @@
 
     <button type="button" id="knopf" hidden>
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M8.2 8.6 A3.9 3.9 0 1 1 13.6 12.2 C12.6 12.8 12 13.6 12 14.8 V15.6" fill="none" stroke="currentColor"
+            <path class="frage" d="M8.2 8.6 A3.9 3.9 0 1 1 13.6 12.2 C12.6 12.8 12 13.6 12 14.8 V15.6" fill="none" stroke="currentColor"
                 stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+            <path class="ausruf" d="M12 4.6 V15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
             <circle cx="12" cy="19.6" r="1.5" fill="currentColor" />
         </svg>
         <span id="knopf-text">HAB ICH NICHT VERSTANDEN</span>
@@ -133,7 +138,7 @@
                 // arrived: green for a moment, and at once ready for the next tap
                 knopf.disabled = false;
                 knopf.className = 'angekommen';
-                text.textContent = 'ANGEKOMMEN';
+                text.textContent = 'VIELEN DANK FÜR DAS FEEDBACK';
                 sag('');
                 if (navigator.vibrate) navigator.vibrate(40);
                 zurueck = setTimeout(() => { knopf.className = ''; text.textContent = 'HAB ICH NICHT VERSTANDEN'; }, 1500);
