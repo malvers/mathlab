@@ -1,0 +1,190 @@
+/* ziffernraetsel.css — the board of the Ziffernrätsel lab: the sum written as on paper, a strip of the digits
+   0 to 9, the step dots. Layout (tab strip, stage, explanation column) comes from js/chapter-lab.css.
+   Colours: the palette - orange = what this step looks at or found, green = found before. */
+
+/* the stage measures itself: every size on the board follows its width and height (container units) */
+#v-canvas-wrap.zr-buehne { container-type: size; display: flex; flex-direction: column; }
+.zr-mitte {
+    /* one cell size for board and strip: from the stage's width and height (--cols, --rows set by the lab) */
+    --c: min(86px, calc((100cqw - 32px) / (var(--cols, 6) * 1.12)), calc((100cqh - 194px) / (var(--rows, 3) + 2.6)));
+    /* the board's width - the digit strip below spans exactly that, but never gets narrower than ten fingertips */
+    --breite: max(calc(var(--cols, 6) * var(--c) * 1.12 - var(--c) * 0.12), min(calc(100cqw - 32px), 460px));
+    position: relative; z-index: 1; flex: 1 1 auto; min-height: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: clamp(14px, 4cqh, 30px); padding: 16px 16px 106px;
+}
+
+/* ---- the sum ---- */
+.zr-brett {
+    display: grid; grid-template-columns: repeat(var(--cols, 6), var(--c));
+    column-gap: calc(var(--c) * 0.12); row-gap: calc(var(--c) * 0.1);
+    font-family: 'CMU Serif', KaTeX_Main, 'Times New Roman', serif;
+}
+.zr-z, .zr-leer, .zr-zeichen { width: var(--c); height: var(--c); }
+.zr-z {
+    position: relative; display: grid; place-items: center; border-radius: calc(var(--c) * 0.14);
+    background: rgba(10, 21, 38, 0.92); border: 1.5px solid rgba(2, 100, 123, 0.85);
+    transition: border-color .25s, box-shadow .25s, background .25s;
+}
+.zr-b { color: #e6ecf5; line-height: 1; }
+.zr-b.gross { font-size: calc(var(--c) * 0.56); }
+.zr-z.bekannt .zr-b { position: absolute; left: 8%; top: 5%; font-size: calc(var(--c) * 0.24); color: #8fa3bd; }
+.zr-d { font-size: calc(var(--c) * 0.6); line-height: 1; color: #fff; }
+.zr-z.bekannt { border-color: rgb(121, 158, 49); }
+.zr-z.neu { border-color: rgb(245, 194, 66); box-shadow: 0 0 calc(var(--c) * 0.18) rgba(245, 194, 66, 0.55); }
+.zr-z.neu .zr-d { color: rgb(245, 194, 66); animation: zrrein .5s ease-out; }
+.zr-z.fest { border-style: dashed; border-color: rgba(143, 163, 189, 0.55); background: rgba(10, 21, 38, 0.6); }
+.zr-z.fest .zr-d { color: #cfd8e6; }
+@keyframes zrrein { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* the column this step looks at */
+.zr-z.hot, .zr-leer.hot { background: rgba(245, 194, 66, 0.12); }
+.zr-z.hot:not(.bekannt):not(.fest) { border-color: rgb(245, 194, 66); }
+.zr-leer.hot { border-radius: calc(var(--c) * 0.14); }
+
+/* place values over the columns, small and grey (as in Vorrechnen), and the carries */
+.zr-stelle { text-align: center; align-self: end; font-size: calc(var(--c) * 0.2); color: #8a93a3; line-height: 1.1; }
+.zr-stelle.hot { color: rgb(245, 194, 66); }
+.zr-ueber { height: calc(var(--c) * 0.4); display: grid; place-items: end center; font-size: calc(var(--c) * 0.32);
+    color: rgb(245, 194, 66); line-height: 1; }
+.zr-ueber.null { color: #6d8199; }
+.zr-zeichen { display: grid; place-items: center; font-size: calc(var(--c) * 0.6); color: #cfd8e6; }
+.zr-strich { grid-column: 1 / -1; height: 2px; background: #cfd8e6; border-radius: 1px; }
+
+/* a product: the task itself */
+.zr-brett.zr-formel { display: block; font-size: min(46px, calc(100cqw / 16), calc(100cqh / 7)); color: #e6ecf5; }
+
+/* ---- digits 0 to 9 and who has them: square digits, the letter in a pill below, as wide as the board ---- */
+.zr-mitte.formel { --breite: min(calc(100cqw - 32px), 620px); --c: min(64px, calc((100cqh - 194px) / 4)); }
+.zr-leiste {
+    --f: calc(var(--breite) * 0.082);                /* ten boxes and nine gaps of a fifth box fill the width */
+    width: var(--breite); display: grid; grid-template-columns: repeat(10, 1fr); column-gap: calc(var(--breite) * 0.02);
+}
+.zr-f { display: flex; flex-direction: column; align-items: stretch; gap: calc(var(--f) * 0.12); }
+.zr-fq {
+    aspect-ratio: 1; display: grid; place-items: center; border-radius: calc(var(--f) * 0.16);
+    background: rgba(10, 21, 38, 0.85); border: 1px solid rgba(2, 100, 123, 0.6);
+    font-family: 'CMU Serif', KaTeX_Main, serif; transition: border-color .25s, box-shadow .25s;
+}
+.zr-fd { font-size: calc(var(--f) * 0.56); color: #e6ecf5; line-height: 1; }
+.zr-fp {
+    /* the letter in a box of its own, shaped like the digit's (Doc, 29.09.2026: "Buchstaben wie Zahlen pls",
+       "Buchstaben Pillen so wie die Zahlen Pillen") - the frame says whether it is found */
+    aspect-ratio: 1; display: grid; place-items: center; border-radius: calc(var(--f) * 0.16);
+    background: rgba(10, 21, 38, 0.85); border: 1px solid rgba(2, 100, 123, 0.6);
+    font-family: 'CMU Serif', KaTeX_Main, serif; font-size: calc(var(--f) * 0.56); font-weight: 400; line-height: 1;
+    color: #e6ecf5; transition: border-color .25s, background .25s, box-shadow .25s;
+}
+.zr-f.weg .zr-fq { border-color: rgb(121, 158, 49); }
+.zr-f.weg .zr-fd { color: #6d8199; }
+.zr-f.weg .zr-fp { border-color: rgb(121, 158, 49); }
+.zr-f.neu .zr-fq { border-color: rgb(245, 194, 66); box-shadow: 0 0 10px rgba(245, 194, 66, 0.45); }
+.zr-f.neu .zr-fp { border-color: rgb(245, 194, 66); color: rgb(245, 194, 66); box-shadow: 0 0 10px rgba(245, 194, 66, 0.45); }
+
+/* hover light: the same letter or digit everywhere (js: zeigeGleiche) - the palette's red (Doc, 29.09.2026: "rot pls"),
+   apart from the step's orange and the found green */
+.zr-z.hilite { border-color: rgb(176, 36, 24); background: rgba(176, 36, 24, 0.14); box-shadow: 0 0 14px rgba(176, 36, 24, 0.75); }
+.zr-f.hilite .zr-fq, .zr-f.hilite .zr-fp { border-color: rgb(176, 36, 24); background: rgba(176, 36, 24, 0.14);
+    box-shadow: 0 0 14px rgba(176, 36, 24, 0.75); }
+.zr-f.hilite .zr-fd { color: #fff; }
+
+/* ---- step navigation at the foot of the stage ---- */
+.zr-fuss {
+    position: absolute; z-index: 2; left: 0; right: 0; bottom: 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0 12px;
+}
+.zr-nav { display: flex; align-items: center; justify-content: center; gap: 8px; }
+/* "Grundlagen erklären" under the step bar, in the stage's colours instead of the panel's cyan (Doc, 29.09.2026:
+   "check design anpassen", "cyan dort :-/"): framed like the arrow buttons, ticked in the orange of the step dots */
+.zr-grund .cyber-checkbox-wrapper { margin: 0; gap: 9px; width: auto; }
+.zr-grund .cyber-checkbox {
+    width: 20px; height: 20px; border-radius: 5px;
+    background: rgba(2, 100, 123, 0.2); border: 0.5px solid rgba(2, 100, 123, 0.9);
+}
+.zr-grund .cyber-checkbox:hover { background: rgba(2, 100, 123, 0.42); }
+.zr-grund .cyber-checkbox:checked {
+    background: rgb(245, 194, 66); border-color: rgb(245, 194, 66); box-shadow: 0 0 8px rgba(245, 194, 66, 0.45);
+}
+.zr-grund .cyber-checkbox::after { width: 5px; height: 10px; border-color: rgb(14, 36, 78); border-width: 0 2.5px 2.5px 0; }
+.zr-grund .cyber-label { font-size: 0.68rem; letter-spacing: 1px; color: #8fa3bd; }
+.zr-grund .cyber-checkbox:checked + .cyber-label { color: #cfd8e6; }
+.zr-pfeil {
+    flex: none; width: 46px; height: 46px; border-radius: 10px; cursor: pointer; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(2, 100, 123, 0.2); border: 0.5px solid rgba(2, 100, 123, 0.9); color: #7fd8ee;
+    transition: background .15s, color .15s;
+}
+.zr-pfeil:hover:not(:disabled) { background: rgba(2, 100, 123, 0.42); color: #fff; }
+.zr-pfeil:disabled { opacity: .3; cursor: default; }
+.zr-pfeil svg { width: 22px; height: 22px; }
+.zr-punkte { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; max-width: min(60cqw, 520px); margin: 0 6px; }
+.zr-punkt {
+    width: 13px; height: 13px; padding: 0; border-radius: 50%; cursor: pointer;
+    background: transparent; border: 1.5px solid rgba(245, 194, 66, 0.7); transition: background .2s, transform .2s;
+}
+.zr-punkt.basis { border-style: dotted; }
+.zr-punkt.fertig { background: rgba(245, 194, 66, 0.45); }
+.zr-punkt.an { background: rgb(245, 194, 66); transform: scale(1.25); box-shadow: 0 0 8px rgba(245, 194, 66, 0.6); }
+
+/* ---- explanation column ---- */
+.zr-aufgabe .zr-tex .katex-display { margin: 4px 0; }
+.zr-aufgabe .zr-tex .katex { font-size: 1.45em; color: #fff; }
+.zr-quelle { text-align: center; font-size: 0.85rem; color: #8a93a3; margin-top: 4px; }
+.zr-quelle[hidden] { display: none; }
+.zr-schritt > h3 { display: flex; align-items: center; gap: 10px; }
+.zr-nr { flex: none; font-family: 'Orbitron', sans-serif; font-size: 0.66rem; letter-spacing: 1px; color: #8fa3bd; font-weight: 400; }
+.zr-titel { flex: 1 1 auto; min-width: 0; }
+.zr-vorlesen {
+    flex: none; width: 34px; height: 34px; padding: 0; border-radius: 8px; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(2, 100, 123, 0.18); border: 0.5px solid rgba(2, 100, 123, 0.9); color: #7fd8ee;
+}
+.zr-vorlesen:hover { background: rgba(2, 100, 123, 0.4); color: #fff; }
+.zr-vorlesen svg { width: 19px; height: 19px; }
+.zr-schritt .v-doc-body ul { padding-left: 20px; }
+.zr-schritt .v-doc-body li { margin-bottom: 6px; }
+.zr-ja, .zr-nein { text-align: left !important; white-space: nowrap; }
+.zr-ja::before, .zr-nein::before {
+    content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; vertical-align: 1px;
+}
+.zr-ja::before { background: rgb(121, 158, 49); box-shadow: 0 0 6px rgba(121, 158, 49, 0.8); }
+.zr-nein::before { background: rgb(176, 36, 24); box-shadow: 0 0 6px rgba(176, 36, 24, 0.9); }
+.zr-solita .sf { font-family: inherit; }
+
+/* ---- side panel: one card per puzzle ---- */
+.zr-liste { display: flex; flex-direction: column; gap: 5px; }
+.zr-karte {
+    display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 9px; row-gap: 0;
+    align-items: baseline; width: 100%; padding: 6px 10px 5px; border-radius: 8px; cursor: pointer; text-align: left;
+    background: rgba(10, 21, 38, 0.85); border: 0.5px solid rgba(2, 100, 123, 0.75); color: #cfd8e6;
+    transition: background .15s, border-color .15s, box-shadow .15s;
+}
+.zr-karte:hover { background: rgba(2, 100, 123, 0.22); border-color: rgba(2, 100, 123, 1); }
+.zr-karte:focus { outline: none; }
+.zr-karte:focus-visible { box-shadow: 0 0 0 2px rgba(245, 194, 66, 0.55); }
+.zr-karte.an { background: rgba(245, 194, 66, 0.12); border-color: rgb(245, 194, 66); box-shadow: 0 0 10px rgba(245, 194, 66, 0.25); }
+.zr-karte-nr { grid-row: 1 / 3; align-self: center; min-width: 1.6em; text-align: center;
+    font-family: 'Orbitron', sans-serif; font-size: 0.8rem; color: rgba(245, 194, 66, 0.65); }
+.zr-karte.an .zr-karte-nr { color: rgb(245, 194, 66); }
+/* the puzzle in the LaTeX face of the board - in Orbitron an A reads like a Λ and a B like an 8. On ONE line
+   (Doc, 29.09.2026: "möglichst eine Zeile, cards bissl flacher"): a long one is set smaller by fitNames() */
+.zr-karte-name { font-family: 'CMU Serif', KaTeX_Main, 'Times New Roman', serif; font-size: 1rem; letter-spacing: 0.2px;
+    line-height: 1.25; color: #e6ecf5; white-space: nowrap; overflow: hidden; min-width: 0; }
+.zr-karte.an .zr-karte-name { color: #fff; }
+.zr-karte-info { grid-column: 2; font-family: 'Orbitron', sans-serif; font-size: 0.5rem; letter-spacing: 0.8px; color: #8fa3bd; line-height: 1.3; }
+
+/* the branding stands at the top right of the page - without a tab strip it would lie over the first card */
+#v-doc { padding-top: 64px; }
+
+/* ---- narrow screens: board on top, explanation below (chapter-lab.css) ---- */
+@media (max-width: 900px) {
+    #v-doc { padding-top: 14px; }
+    .zr-mitte { padding-top: 60px; }
+    #v-canvas-wrap.zr-buehne { height: min(64vh, 540px); }
+}
+@media (max-width: 560px) {
+    #v-canvas-wrap.zr-buehne { height: min(60vh, 460px); }
+    .zr-mitte { padding: 60px 10px 98px; }
+    .zr-pfeil { width: 42px; height: 42px; }
+    .zr-ja, .zr-nein { white-space: normal; }
+}

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOC ALVERS MATHE-LABORE | Ziffernrätsel</title>
+    <meta name="description" content="SEND + MORE = MONEY und andere Ziffernrätsel – jeder Schritt genau erklärt, bis hinunter zu Stellenwert und Übertrag, mit Solita als Tutorin.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/cyber-layout.css">
+    <link rel="stylesheet" href="js/buttons-ultra.css">
+    <link rel="stylesheet" href="js/cyber-lab-overrides.css">
+    <link rel="stylesheet" href="js/branding.styles.extracted.css">
+    <link rel="stylesheet" href="js/lab-shell-minimal.css">
+    <link rel="stylesheet" href="js/cyber-tabbar.css">
+    <link rel="stylesheet" href="js/chapter-lab.css">
+    <link rel="stylesheet" href="js/solita-frage.css">
+    <link rel="stylesheet" href="js/ziffernraetsel.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+</head>
+
+<body>
+    <nav id="mini-rail">
+        <div class="nav-btn" onclick="toggleSidebar()" title="Toggle Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <aside id="side-panel">
+        <header id="sidebar-header"></header>
+        <div id="ui-container"></div>
+    </aside>
+
+    <main id="main-content" class="has-tabbar">
+        <div id="tab-stage">
+            <div id="v-stage">
+                <div id="v-canvas-wrap" class="zr-buehne">
+                    <div class="zr-mitte">
+                        <div id="zr-brett" class="zr-brett"></div>
+                        <div id="zr-leiste" class="zr-leiste" aria-label="Ziffern 0 bis 9 und wer sie hat"></div>
+                    </div>
+                    <div class="zr-fuss">
+                        <nav id="zr-nav" class="zr-nav" aria-label="Schritte"></nav>
+                        <div id="zr-grund" class="zr-grund"></div>
+                    </div>
+                </div>
+            </div>
+            <aside id="v-doc"></aside>
+        </div>
+    </main>
+
+    <script src="js/cyber-left-chrome.js"></script>
+    <script src="js/branding/briefings.js"></script>
+    <script src="js/branding/overlays.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/branding/nav.js"></script>
+    <script src="js/branding.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="window.dispatchEvent(new Event('katex-ready'))"></script>
+    <!-- the puzzles: Vorrechnen's block "Knobeln · Ziffernrätsel" - one source for both labs -->
+    <script src="js/vorrechnen-aufgaben.js"></script>
+    <script src="js/vorrechnen-aufgaben-knobeln.js"></script>
+    <script src="js/ziffernraetsel-schritte.js"></script>
+    <script src="js/solita-listen.js"></script>
+    <script src="js/solita-frage.js"></script>
+    <script>
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            panel.classList.toggle('collapsed');
+            if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                CyberLeftChrome.publishResolvedScale();
+            }
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                if (window.CyberLeftChrome && typeof CyberLeftChrome.publishResolvedScale === 'function') {
+                    CyberLeftChrome.publishResolvedScale();
+                }
+            }, 400);
+        }
+
+        CyberBranding.init({
+            useExternalStyles: true,
+            title: CyberI18n.get('ui.coach_title'),
+            subtitle: 'Ziffernrätsel',
+        });
+        // worked through on a tablet and at the board as well - the explanation column stacks under the board
+        // below 900px, so only a genuinely tiny screen gets the warning
+        CyberUI.init({ screenWarning: false });
+        CyberUI.ensureScreenWarning({
+            minWidth: 360, minHeight: 480,
+            message: 'Für das Ziffernrätsel-Labor ist der Bildschirm sehr klein – quer halten hilft.',
+        });
+        if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
+            CyberLeftChrome.configure({ viewportOnlyZoom: true });
+        }
+        // on a narrow screen the board needs the room more than the controls do (0 is no screen, see trigonometrie)
+        if (window.innerWidth > 0 && window.innerWidth < 900) document.getElementById('side-panel').classList.add('collapsed');
+    </script>
+    <script src="js/ziffernraetsel.js"></script>
+</body>
+
+</html>
