@@ -587,6 +587,20 @@ function merkeErklWeg() { try { localStorage.setItem(ERKL_WEG, JSON.stringify([.
 // × puts it away again - for this visit only (erklDa). The puzzles (their block says erklaerung: 'sofort',
 // js/vorrechnen-aufgaben-knobeln.js) show theirs until the ×; the mortarboard brings it back.
 const erklDa = new Set();
+// Doc, 29.09.: "oben an die Box ... sechs kleine Punkte ... wo ich anfassen kann und die Box nach oben schieben kann.
+// Und wenn ich sie nach oben schiebe, wird sie visible für alle" - px the box is pushed up from its place under the
+// line; once its top is above the line it goes into a mirrored layer (erklaerungSchicht), so the beamer shows it
+let erklHoch = 0;
+function erklaerungSchicht() {
+    let s = document.getElementById('erklaerung-schicht');
+    if (!s) {
+        s = document.createElement('div');
+        s.id = 'erklaerung-schicht';
+        s.style.cssText = 'position:absolute;left:0;top:0;right:0;height:0;pointer-events:none';
+        container.appendChild(s);
+    }
+    return s;
+}
 const erklSofort = () => aufgabenBlock(aufgabeIdx).erklaerung === 'sofort';
 // the task's explanation, whether its box shows now, and whether the mortarboard is wanted instead
 function erklStand() {
@@ -751,8 +765,9 @@ function zeigeErklaerung() {
         if (e) e.style.visibility = zeigt ? 'hidden' : '';
     });
     if (!zeigt) {
-        [el, zu, document.getElementById('erklaerung-leiste')]
+        [el, zu, document.getElementById('erklaerung-leiste'), document.getElementById('erklaerung-griff')]
             .forEach(e => { if (e) e.style.display = 'none'; });
+        erklHoch = 0;                          // it opens again in its place, for Doc only
         return;
     }
     if (!el) {
@@ -771,6 +786,7 @@ function zeigeErklaerung() {
             zu.blur();
             const s = el.dataset.slug;
             if (s && erklSofort()) { erklWeg.add(s); merkeErklWeg(); } else if (s) erklDa.delete(s);
+            erklHoch = 0;
             zeigeHinweis();                    // the grey steps back, the first one clear of the mortarboard
         });
         container.appendChild(zu);
@@ -785,6 +801,28 @@ function zeigeErklaerung() {
         leiste.addEventListener('pointermove', e => { if (leiste.hasPointerCapture(e.pointerId)) ziehe(e); });
         container.appendChild(leiste);
         el.addEventListener('scroll', erklPfeile);
+        // the beamer's copy shows the part Doc has scrolled to (anzeigeEmpfang reads data-scroll)
+        el.addEventListener('scroll', () => { el.dataset.scroll = Math.round(el.scrollTop); });
+        // ten dots inside the box at its top, for Doc only: dragged up, the box's top goes up with them
+        const griff = document.createElement('div');
+        griff.id = 'erklaerung-griff';
+        griff.title = 'Nach oben ziehen – über der Linie sehen es alle';
+        griff.innerHTML = '<i></i>'.repeat(10);
+        let zug = null;
+        griff.addEventListener('pointerdown', e => {
+            griff.setPointerCapture(e.pointerId);
+            zug = { y: e.clientY, hoch: erklHoch };
+            e.preventDefault();
+        });
+        griff.addEventListener('pointermove', e => {
+            if (!zug || !griff.hasPointerCapture(e.pointerId)) return;
+            erklHoch = Math.max(0, zug.hoch + zug.y - e.clientY);
+            zeigeErklaerung();
+        });
+        const los = () => { zug = null; };
+        griff.addEventListener('pointerup', los);
+        griff.addEventListener('pointercancel', los);
+        container.appendChild(griff);
         container.addEventListener('wheel', e => {
             const k = el.getBoundingClientRect();
             if (el.style.display === 'none' || el.scrollHeight <= el.clientHeight + 1 ||
@@ -793,7 +831,7 @@ function zeigeErklaerung() {
             e.preventDefault();
         }, { passive: false });
     }
-    if (el.dataset.slug !== slug) { el.dataset.slug = slug; el.dataset.fit = ''; erklaerungSetzen(el, text); }
+    if (el.dataset.slug !== slug) { el.dataset.slug = slug; el.dataset.fit = ''; erklHoch = 0; erklaerungSetzen(el, text); }
     // the whole width, over the notes margin too ("über die ganze Breite"), 12 px in from either side like the
     // buttons under it ("Box an den buttons alignen"), from just under the line down to
     // above them; one font for every box, the size of the first puzzle ("die Schriftgröße überall so wie bei
@@ -801,10 +839,24 @@ function zeigeErklaerung() {
     const ERKL_SCHRIFT = 1.45;                 // was 1.6: "ein bisschen kleiner, überall"
     const r = container.getBoundingClientRect(), oben = papierGrenze(r.height) + 16;
     const links = 12, breite = Math.max(240, r.width - 12 - links), hoehe = Math.max(80, r.height - 52 - oben);
-    Object.assign(el.style, { left: links + 'px', top: oben + 'px', width: breite + 'px', height: hoehe + 'px', display: '' });
-    Object.assign(zu.style, { left: (links + breite - 36) + 'px', top: (oben + 4) + 'px', display: '' });
+    // pushed up by its dots (erklHoch), never above the board's first line - under the head row with the counter,
+    // "umstellen nach" and the arrows (Doc, 29.09.: "bitte nicht höher ziehbar als da"); the bottom stays where it is,
+    // the box grows (Doc, 29.09.: "die untere Linie ruhig da unten bleiben ... die ganze Box soll größer werden").
+    // Above the line it is the class's too: into the mirrored layer, on the board's ground and over the working
+    // (.oben, js/vorrechnen.css)
+    erklHoch = Math.min(erklHoch, oben - ZEILE);
+    const hoch = hoehe + erklHoch;
+    const top = oben - erklHoch, fuerAlle = top < papierGrenze(r.height);
+    el.classList.toggle('oben', fuerAlle);
+    const heim = fuerAlle ? erklaerungSchicht() : container;
+    // a change of layer sends at once: the mirrored layer is watched only from its first sending on
+    if (el.parentNode !== heim) { heim.appendChild(el); anzeigeBald(); }
+    Object.assign(el.style, { left: links + 'px', top: top + 'px', width: breite + 'px', height: hoch + 'px', display: '' });
+    Object.assign(zu.style, { left: (links + breite - 36) + 'px', top: (top + 4) + 'px', display: '' });
     Object.assign(document.getElementById('erklaerung-leiste').style,
-        { left: (links + breite - 28) + 'px', top: (oben + 40) + 'px', height: Math.max(24, hoehe - 56) + 'px' });
+        { left: (links + breite - 28) + 'px', top: (top + 40) + 'px', height: Math.max(24, hoch - 56) + 'px' });
+    Object.assign(document.getElementById('erklaerung-griff').style,
+        { left: (links + breite / 2 - 22) + 'px', top: (top - 1) + 'px', display: '' });   // "ein kleines Stück hoch"
     // again only when the size or the fonts change
     const sig = [slug, breite, hoehe, document.fonts ? document.fonts.status : ''].join('|');
     if (el.dataset.fit !== sig) {

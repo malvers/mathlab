@@ -17,7 +17,8 @@
 let steuerFenster = null, anzeigeFrame = null, buehne = { w: 0, h: 0 };
 // not 'formel-schicht': the recognised line is Doc's GO, the class sees
 // only the ink fly up and turn into LaTeX
-const SPIEGEL_SCHICHTEN = ['papier', 'verlauf-schicht', 'vorlage-schicht', 'rechenweg-schicht', 'satz-schicht'];
+// 'erklaerung-schicht': the explanation box, only while Doc has pushed it up over the line (29.09.)
+const SPIEGEL_SCHICHTEN = ['papier', 'verlauf-schicht', 'vorlage-schicht', 'rechenweg-schicht', 'satz-schicht', 'erklaerung-schicht'];
 const spiegelCache = {};
 function anzeigeLaeuft() { return anzeigeModus; }
 function anzeigeZiel() {
@@ -83,6 +84,8 @@ function anzeigeEmpfang(d) {
         el.dataset.version = String(version);
         el.style.cssText = css;
         el.innerHTML = html;
+        // a box that scrolls shows the part Doc scrolled to (the explanation box pushed up, 29.09.)
+        el.querySelectorAll('[data-scroll]').forEach(e => { e.scrollTop = +e.dataset.scroll || 0; });
     });
 }
 function anzeigeKlon(html) {

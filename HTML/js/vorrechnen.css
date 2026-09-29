@@ -197,7 +197,7 @@ body.anzeige::before {
     background: var(--anzeige-grund, #050d1c);
 }
 body.anzeige :is(#cyber-left-chrome, #mini-rail, #side-panel, #right-rail, #tafel-pfeil-vor, #tafel-pfeil-zurueck, #formel-schicht, #erkennen-klein,
-    #schritt-hinweis, #schritt-op, #schritt-hoch, #erklaerung, #erklaerung-zu, #erklaerung-hut, #erklaerung-leiste, #notiz-rand, #notiz-leeren, #seite-leeren, #oben-leeren, #radierer, #radier-rahmen, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play,
+    #schritt-hinweis, #schritt-op, #schritt-hoch, #erklaerung:not(.oben), #erklaerung-zu, #erklaerung-hut, #erklaerung-griff, #erklaerung-leiste, #notiz-rand, #notiz-leeren, #seite-leeren, #oben-leeren, #radierer, #radier-rahmen, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play,
     #buzz-aufgabe, #buzz-zeile, #buzzer-overlay, #tafel-overlay, #namen-overlay, #namen-pille) {
     display: none !important;
 }
@@ -301,7 +301,7 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
    placed and fitted by zeigeErklaerung. Its × lies over the ink and takes the tap */
 #erklaerung {
     position: absolute; z-index: -1; pointer-events: none; box-sizing: border-box; overflow: hidden;
-    padding: 10px 44px 8px; border: 1px solid rgba(138, 147, 163, 0.45);   /* even left and right: the middle is the box's */ border-radius: 8px;
+    padding: 20px 44px 8px; border: 1px solid rgba(138, 147, 163, 0.45);   /* even left and right: the middle is the box's */ border-radius: 8px;
     color: #8a93a3; font-family: 'CMU Serif', KaTeX_Main, 'Times New Roman', serif; line-height: 1.45;
 }
 #erklaerung p { margin: 0 0 0.45em; }
@@ -331,14 +331,30 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
 #erklaerung .katex :is(.mathnormal, .mathrm) { color: #eaf0f7; }
 #canvas-container.hell #erklaerung .katex :is(.mathnormal, .mathrm) { color: rgb(31, 64, 150); }
 #erklaerung-zu {
-    position: absolute; z-index: 5; width: 32px; height: 32px; padding: 0; border: none; background: transparent;
+    position: absolute; z-index: 8; width: 32px; height: 32px; padding: 0; border: none; background: transparent;
     color: #8a93a3; cursor: pointer; display: flex; align-items: center; justify-content: center;
     touch-action: manipulation; -webkit-tap-highlight-color: transparent; outline: none;
 }
 #canvas-container.hell #erklaerung-zu { color: #7a8294; }
+/* Doc, 29.09.: dots to push the box up (zeigeErklaerung) - "acht Punkte und die Punkte kleiner und in die Box rein":
+   then "zehn ... noch etwas dezenter": five by two, 3 px, grey like the × at half strength, a 44 x 18 px grip
+   inside the box at its top (its padding makes room) */
+#erklaerung-griff {
+    position: absolute; z-index: 8; width: 44px; height: 18px; box-sizing: border-box;
+    display: grid; grid-template-columns: repeat(5, 3px); grid-auto-rows: 3px; gap: 3px; place-content: center;
+    cursor: grab; touch-action: none; -webkit-tap-highlight-color: transparent;
+}
+#erklaerung-griff:active { cursor: grabbing; }
+#erklaerung-griff > i { border-radius: 50%; background: #8a93a3; opacity: 0.5; }
+#canvas-container.hell #erklaerung-griff > i { background: #7a8294; }
+/* pushed up over the line: the class sees it (mirrored layer) - on the board's own ground, over everything on the
+   board (Doc, 29.09.: "über alles andere legen" - the upper board's bin, the eraser's frame too); and it takes the
+   taps itself, so none reaches a button hidden under it. Its ×, dots and bar stay on top of it (z-index 8) */
+#erklaerung.oben { z-index: 7; pointer-events: auto; background: #07162f; }
+#canvas-container.hell #erklaerung.oben { background: #f4ecd8; }
 /* the slim scrollbar under the × (erklPfeile): a pale track, the thumb is the part in view; 16 px wide
    to hit, 4 px to see */
-#erklaerung-leiste { position: absolute; z-index: 5; width: 16px; cursor: pointer; touch-action: none; }
+#erklaerung-leiste { position: absolute; z-index: 8; width: 16px; cursor: pointer; touch-action: none; }
 #erklaerung-leiste::before { content: ''; position: absolute; left: 6px; top: 0; bottom: 0; width: 4px; border-radius: 2px;
     background: rgba(138, 147, 163, 0.18); }
 #erklaerung-leiste > i { position: absolute; left: 6px; width: 4px; border-radius: 2px; background: rgba(138, 147, 163, 0.75); }
