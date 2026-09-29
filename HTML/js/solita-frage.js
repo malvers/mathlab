@@ -297,32 +297,67 @@
         function sprich(text, zeigen) {
             let shown = false, el = null;
             function once() { if (!shown) { shown = true; if (zeigen) el = zeigen(); } }
-            const clean = sprechbar(text);
-            if (!ttsOn || !clean) { once(); return; }
-            const ctl = global.AbortController ? new AbortController() : null;
-            const timer = setTimeout(function () { if (ctl) ctl.abort(); }, TTS_WAIT);
+            const whole = sprechbar(text);
+            if (!ttsOn || !whole) { once(); return; }
+            // Doc's voice needs ~5 s a sentence (16 s for a long step, measured 29.09.2026) - past the wait, so it comes
+            // sentence by sentence as in the decks: the first piece at once, the next fetched while one plays. Each
+            // piece lights up exactly its share of the answer's words; if the shares do not add up, one piece.
+            const W = { absaetze: true };
+            let parts = (VOICE === 'doc' && SK() ? SK().stuecke(text) : [String(text)]).map(function (raw) {
+                return { clean: sprechbar(raw), n: SK() ? SK().woerter(raw, W) : 0 };
+            }).filter(function (p) { return p.clean; });
+            if (parts.length > 1 && SK() && parts.reduce(function (x, p) { return x + p.n; }, 0) !== SK().woerter(text, W)) {
+                parts = [{ clean: whole, n: SK().woerter(text, W) }];
+            }
             const meine = seq;
-            post(TTS_URL, { text: clean.slice(0, 4800), voice: VOICE, languageCode: 'de-DE', speakingRate: 1.0 }, ctl ? ctl.signal : undefined)
-                .then(function (r) { return r.json(); })
-                .then(function (j) {
-                    clearTimeout(timer);
-                    once();
-                    if (!j || !j.audioContent) throw new Error('keine Stimme');
-                    if (!ttsOn || meine !== seq) return;       // switched off, or something newer took over
-                    stop();
+            let voice = VOICE;                                // a piece that fell back to Studio-C takes the rest along
+            const got = [];
+            function get(i) {
+                if (got[i]) return got[i];
+                const ctl = global.AbortController ? new AbortController() : null;
+                const timer = setTimeout(function () { if (ctl) ctl.abort(); }, TTS_WAIT);
+                got[i] = post(TTS_URL, { text: parts[i].clean.slice(0, 4800), voice: voice, languageCode: 'de-DE', speakingRate: 1.0 },
+                              ctl ? ctl.signal : undefined)
+                    .then(function (r) { return r.json(); })
+                    .then(function (j) {
+                        clearTimeout(timer);
+                        if (!j || !j.audioContent) throw new Error('keine Stimme');
+                        if (j.fallback) voice = 'de-DE-Studio-C';
+                        return j;
+                    }, function (e) { clearTimeout(timer); throw e; });
+                return got[i];
+            }
+            let first = 0;                                    // the word spans before piece i
+            function play(i, before) {
+                get(i).then(function (j) {
+                    if (i === 0) once();
+                    if (!ttsOn || meine !== seq) return;         // switched off, or something newer took over
+                    if (i === 0) stop();
+                    else if (audio !== before) return;           // stopped meanwhile
                     const a = audio = new Audio('data:' + (j.mime || 'audio/mp3') + ';base64,' + j.audioContent);
                     stopBtn.hidden = false;
+                    if (i + 1 < parts.length) get(i + 1);         // the next piece comes while this one plays
                     // the word she is saying lights up, as in the decks
-                    if (el && SK()) SK().spielen(el, a, null, { wort: WORT, box: out, aktiv: function () { return audio === a; } });
-                    a.addEventListener('ended', function () { if (audio === a) { audio = null; stopBtn.hidden = true; } });
+                    if (el && SK()) {
+                        const alle = el.querySelectorAll('.' + WORT);
+                        SK().spielen(el, a, [].slice.call(alle, first, first + parts[i].n),
+                            { wort: WORT, box: out, aktiv: function () { return audio === a; } });
+                    }
+                    first += parts[i].n;
+                    a.addEventListener('ended', function () {
+                        if (audio !== a) return;
+                        if (i + 1 < parts.length) play(i + 1, a);
+                        else { audio = null; stopBtn.hidden = true; }
+                    });
                     a.play().catch(function () { stopBtn.hidden = true; });
-                })
-                .catch(function (e) {
-                    clearTimeout(timer);
+                }).catch(function (e) {
+                    if (i > 0) return;                            // the text stands; the rest simply stays silent
                     once();
                     hinweis('Solitas Stimme war gerade nicht erreichbar.');
                     dbg('tts failed: ' + (e && e.message));
                 });
+            }
+            play(0, null);
         }
         function stop() {
             if (audio) { try { audio.pause(); } catch (e) { } audio = null; }
@@ -403,9 +438,10 @@
         });
         clearBtn.addEventListener('click', function () { leeren(); menu.hidden = true; input.focus(); });
         root.addEventListener('contextmenu', function (e) {
-            // the field keeps the browser's own menu, to paste - the password from the clipboard (Doc, 29.09.2026:
-            // "im Clip steht das pwd ... geht aba ni")
-            if (e.target.closest && e.target.closest('input, textarea')) return;
+            // the PASSWORD field keeps the browser's own menu, to paste from the clipboard (Doc, 29.09.2026: "im Clip
+            // steht das pwd ... geht aba ni"); on the question field it is Solita's menu, as in the decks ("wo ist das
+            // Kontext pop aus dem Deck?") - Cmd+V pastes there
+            if (e.target === input && input.type === 'password') return;
             e.preventDefault();
             showWho();
             const sel = getSelection();
