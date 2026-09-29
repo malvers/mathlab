@@ -45,7 +45,9 @@ window.svpPlanParts.push(function (P) {
        wieder raus (Doc: "doch nicht ueberall! KW 39", "das Lab auch nicht!",
        "nur KW 39").
        Die Liste steht HIER, weil zwei Stellen sie brauchen: die Zeile im Plan
-       und das Fahrplan-Blatt. */
+       und das Fahrplan-Blatt.
+       Since 29.09.2026 the week pill is gone again (see festeLinks); address and page list
+       stay here for the Formelsammlung button at the top right (svp-plan-search.js). */
     const FORMELN_URL = P.FORMELN_URL = 'https://www.iqb.hu-berlin.de/media/documents/' +
         'N_Mathematisch-naturwissenschaftliche_Formelsammlung.pdf';
     const FORMELN_ON = P.FORMELN_ON = ['mathe11', 'mathe12', 'mathe13'];
@@ -188,18 +190,12 @@ window.svpPlanParts.push(function (P) {
     }
 
     /* Die Tafel einer Stunde (Doc, 26.09.2026) haengt an ihrer Woche, nicht am Fach -
-       sie kommt deshalb mit der Zeile (ref) und steht vor der Formelsammlung. */
+       sie kommt deshalb mit der Zeile (ref).
+       The Formelsammlung is no longer a pill in every week (Doc, 29.09.2026: "Die Formelsammlung
+       braucht nicht mehr in jeder Woche sein. Wir haben ja rechts oben einen Button, also nimm die
+       ueberall raus") - FORMELN_URL/FORMELN_ON now only feed that button (svp-plan-search.js). */
     function festeLinks(ref) {
-        const seite = location.pathname.replace(/.*\//, '').replace(/\.html$/, '');
-        const raus = P.tafelLinks ? P.tafelLinks(ref) : [];
-        if (FORMELN_ON.indexOf(seite) >= 0) {
-            raus.push({
-                label: 'Formelsammlung', url: FORMELN_URL, icon: 'link',
-                titel: 'Mathematisch-Naturwissenschaftliche Formelsammlung (IQB/KMK) - ' +
-                    'das einzige zugelassene Hilfsmittel der Abiturprüfung'
-            });
-        }
-        return raus;
+        return P.tafelLinks ? P.tafelLinks(ref) : [];
     }
 
     /* Haengt die festen Pillen an ein Kaestchen. renderMaterial leert seinen
