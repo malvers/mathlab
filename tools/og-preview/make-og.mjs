@@ -218,7 +218,7 @@ function injectMeta(lab) {
         // A hand-written description would be duplicated by ours — drop it.
         let body = block;
         if (/<meta\s+name=["']description["']/i.test(src)) {
-            src = src.replace(/[ \t]*<meta\s+name=["']description["'][^>]*>\s*\n?/gi, '');
+            src = src.replace(/[ \t]*<meta\s+name=["']description["'][^>]*>[ \t]*\n?/gi, '');   // keep the next line's indent
         }
         const mm = src.match(/<title>[\s\S]*?<\/title>/i);
         next = src.slice(0, mm.index + mm[0].length) + '\n' + body + src.slice(mm.index + mm[0].length);
@@ -239,7 +239,7 @@ const main = async () => {
 
     let browser, srv;
     if (!META_ONLY) {
-        browser = await chromium.launch();
+        browser = await chromium.launch({ args: ['--mute-audio'] });   // tours and labs may talk
         srv = await startServer();
     }
 
