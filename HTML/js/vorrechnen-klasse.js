@@ -96,8 +96,7 @@ function zeigeBuzzAufgabe() {
         const r = st.getBoundingClientRect();
         if (r.height) { so = Math.min(so, r.top); su = Math.max(su, r.bottom); }
     }));
-    const tinte = isFinite(so) ? (so + su) / 2 : (oben + unten) / 2;
-    let mitte = tinte, breit = 0;
+    let mitte = isFinite(so) ? (so + su) / 2 : (oben + unten) / 2, breit = 0;
     document.querySelectorAll(`#rechenweg-schicht [data-schritt="${schritt ? schritt - 1 : 'aufgabe'}"] .frac-line`).forEach(f => {
         const r = f.getBoundingClientRect();
         if (r.width > breit) { breit = r.width; mitte = r.top + r.height / 2; }
@@ -115,13 +114,30 @@ function zeigeBuzzAufgabe() {
     el.style.fontSize = Math.round(h * 0.6) + 'px';
     el.style.display = '';
     // Doc, 29.09.: "hinterleg die Gleichung mit einer dezenten Pille mit der Farbe, aber trans" - the row
-    // itself on a faint pill in the count's colour, under the ink; as high as the row's box with a little
-    // air, but on the ink's middle (on the box's it sat too low)
-    const halb = (unten - oben) / 2 + Math.round(ZEILE * 0.08), luftX = Math.round(ZEILE * 0.4);
+    // itself on a faint pill in the count's colour, under the ink.
+    // Doc, 29.09.: "wenn da ein Bruch steht oder wenn da ... ist gleich 2 doppelt unterstrichen steht, dann
+    // passt die Pille nie wirklich" - it hugs the row's real ink now (tinte(), vorrechnen-erkennen.js): the
+    // KaTeX boxes it took before are taller than the glyphs, and a denominator raised by engeBrueche keeps
+    // its full depth there. The result's double underline is an element of its own under the row (same
+    // data-schritt, no formula) and is taken in too.
+    let io = Infinity, iu = -Infinity;
+    document.querySelectorAll(`#rechenweg-schicht [data-schritt="${schritt ? schritt - 1 : 'aufgabe'}"]`).forEach(d => {
+        const k = d.querySelector('.katex-html'), r = d.getBoundingClientRect();
+        const t = k ? tinte(k) : (r.width && r.height ? { o: r.top, u: r.bottom } : null);
+        if (t) { io = Math.min(io, t.o); iu = Math.max(iu, t.u); }
+    });
+    if (!isFinite(io)) { io = oben; iu = unten; }
+    const luftY = Math.round(ZEILE * 0.14), halb = (iu - io) / 2 + luftY;
+    // a row of one line stays a pill; a taller one (a fraction, a root over a fraction) rounds its corners
+    // by half a line only - fully round ends grew so wide they ran under the count behind the row. The air
+    // at the sides is enough that the ink's corners stay inside the rounding.
+    const rund = Math.min(halb, ZEILE * 0.5);
+    const luftX = Math.max(Math.round(ZEILE * 0.4), Math.ceil(rund - Math.sqrt(rund * rund - (rund - luftY) ** 2)) + 2);
+    grund.style.borderRadius = Math.round(rund) + 'px';
     grund.style.left = Math.round(links - c0.left - luftX) + 'px';
     grund.style.width = Math.round(rechts - links + 2 * luftX) + 'px';
-    grund.style.top = Math.round(tinte - c0.top - halb) + 'px';
-    grund.style.height = Math.round(2 * halb) + 'px';
+    grund.style.top = Math.round(io - c0.top - luftY) + 'px';
+    grund.style.height = Math.round(iu - io + 2 * luftY) + 'px';
     grund.style.background = grundFarbe;
     grund.style.display = '';
     // Doc, 29.09.: "bring die feedback pille hinter die (#)" - right behind the step's number (1), (2), ...;
