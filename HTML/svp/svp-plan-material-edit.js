@@ -96,11 +96,7 @@ window.svpPlanParts.push(function (P) {
            und behielte sonst einen Reiter, hinter dem nichts liegt. Verschwindet
            der letzte Film, waehrend der Reiter offen ist, springt die Anzeige
            zurueck, sonst zeigt die Haelfte ins Leere. */
-        /* what the Zusatzmaterial tab holds: no exercises, no films; free text alone
-           still counts as one, like the paperclip */
-        const zusatz = (alle.filter(en => !P.isExerciseEntry(en) && !P.isVideoEntry(en)).length
-            || (matTail(text) ? 1 : 0)) + tafeln;
-        P.setVideoReiter(ref, vids, zusatz, P.fillAufgabenPane(ref, text, ex));
+        P.setVideoReiter(ref, vids, P.zusatzZahl(ref, text, alle), P.fillAufgabenPane(ref, text, ex));
         decorateMatCell(ref);
         /* renderMaterial builds every pill from scratch, so the width measured
            earlier is gone by now. Without this the pills are equally wide only

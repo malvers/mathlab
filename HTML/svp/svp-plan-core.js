@@ -3,8 +3,16 @@
 window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
-        groupKey, inGroup, lbPdfLink, linkBadge
+        groupKey, inGroup, lbPdfLink, linkBadge, weekOf, isoWeek
     });
+
+    /* Which week does a row carry? In the group view the one of this group's Termin (gkw, set by
+       paintTerminDates), otherwise the plan's. Here in the first part, not in "keys": the rows are built
+       before "keys" runs, and the first build already asks (pptWeg) - asked of a missing P.weekOf, every
+       PowerPoint counted as to come and was gone in the weeks already taught too, until the next redraw
+       (Doc, 29.09.2026: "Hier geht was schief!!!! da ist die github"). */
+    function weekOf(r) { return String(r.gkw != null ? r.gkw : r.kw); }
+    function isoWeek(d) { return svpIsoWeek(d); }   // svp-woche.js, loaded by svp-plan.js before the parts
 
     const tbody = P.tbody = document.querySelector('#plan-table tbody');
     if (!tbody || !window.PLAN || !window.BADGE) return false;

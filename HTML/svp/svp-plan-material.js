@@ -5,7 +5,7 @@ window.svpPlanParts.push(function (P) {
     Object.assign(P, {
         drawnIcon, deckIcon, lambdaIcon, matLabelEl, matIconEl, siteHref, lokalHref,
         keinMausfokus, equalizeMatPills,
-        equalizeRefPills, setVideoReiter, isVideoEntry, isExerciseEntry, officeEdit,
+        equalizeRefPills, setVideoReiter, zusatzZahl, isVideoEntry, isExerciseEntry, officeEdit,
         matDefaultLabel, openMat, renderMaterial, hideMatTip, showMatTip,
         festeLinks, festePillen, matSpalten, pptWeg
     });
@@ -644,6 +644,17 @@ window.svpPlanParts.push(function (P) {
             p.aufgaben.btn.disabled = !aufgaben;
             if (!aufgaben && p.aufgaben.btn.classList.contains('on') && ref.showRechts) ref.showRechts('zusatz');
         }
+    }
+
+    /* The number behind "Zusatzmaterial": the pills the class sees - no exercises, no films, nothing hidden
+       ([[aus]]) and no PowerPoint that pptWeg takes out; free text alone still counts as one, a board as one
+       more (svp-plan-tafel.js). One count for the row and for every update after it (Doc, 29.09.2026: "da steht
+       5 Zusatzmateri. sind aber nur 2" - the update still counted the hidden pills). */
+    function zusatzZahl(ref, text, alle) {
+        const n = alle.filter(function (en) {
+            return !isExerciseEntry(en) && !isVideoEntry(en) && !en.aus && !pptWeg(en, ref);
+        }).length;
+        return (n || (P.matTail(text) ? 1 : 0)) + (P.tafelLinks ? P.tafelLinks(ref).length : 0);
     }
 
     function isVideoEntry(en) {

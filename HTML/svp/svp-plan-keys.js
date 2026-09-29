@@ -3,8 +3,9 @@
 window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
-        setAllDetails, isoWeek, gotoWeek, weekOf
+        setAllDetails, gotoWeek
     });
+    const weekOf = P.weekOf, isoWeek = P.isoWeek;   // svp-plan-core.js - the rows ask before this part runs
 
     function setAllDetails(open) {
         document.querySelectorAll('tr.detail-row').forEach(r => {
@@ -17,10 +18,6 @@ window.svpPlanParts.push(function (P) {
     /* Aus dem Stundenplan kommend: ?kw=36 klappt diese Woche auf, scrollt sie
        in die Mitte und laesst sie kurz aufleuchten (Doc, 01.09.2026 - Klick auf
        eine Stunde soll beim richtigen Stoff landen, nicht am Seitenanfang). */
-    /* Welche Woche traegt eine Zeile? In der Gruppen-Ansicht die des Termins
-       dieser Gruppe (gkw, von paintTerminDates gesetzt), sonst die des Plans. */
-    function weekOf(r) { return String(r.gkw != null ? r.gkw : r.kw); }
-
     /* Zu einer Woche springen: Ferien aufklappen, die Woche oeffnen, in die
        Mitte scrollen, kurz aufleuchten lassen. ?kw= geht so, und seit dem
        20.09.2026 auch ein Klick im Neuigkeiten-Band (svp-plan-news.js) -
@@ -69,7 +66,6 @@ window.svpPlanParts.push(function (P) {
        der Nummer genuegt also. In den Ferien trifft nichts zu - die Ferienzeilen
        tragen keine kw, dann bleibt der Plan eben unmarkiert. Zentral hier, damit
        alle Plaene es bekommen. */
-    function isoWeek(d) { return svpIsoWeek(d); }   // svp-woche.js, loaded by svp-plan.js before the parts
 
     (function markCurrentWeek() {
         const now = String(isoWeek(new Date()));
