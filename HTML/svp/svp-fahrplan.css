@@ -26,6 +26,8 @@
     stroke-linecap: round;
 }
 #plan-table .detail-row .sub-head-l .fahr-btn:hover { color: var(--head); }
+/* the class sees the stack only where a week has a Fahrplan (markiere sets hidden) - display above would win */
+#plan-table .detail-row .sub-head-l .fahr-btn[hidden] { display: none; }
 /* Steht ein Fahrplan drin, faerbt sich der Stapel gruen - wie der Reiter
    "Notizen" es tut (Doc, 07.09.2026). */
 #plan-table .detail-row .sub-head-l .fahr-btn.has-fahr { color: var(--phi); }
@@ -178,6 +180,8 @@
 }
 /* A text cursor over the still unwritable text: it is one click away from being editable. */
 .fahr-list:not([contenteditable="true"]) { cursor: text; }
+/* ... for Doc: the class cannot write in it, for them it is a sheet to read (29.09.2026) */
+.fahr-list.nur-lesen:not([contenteditable="true"]) { cursor: default; }
 /* The sheet is written on as paper: no dashed edit frame and no tinted ground from the
    plan's edit mode (svp-toolbar.css) - Doc, 27.09.2026: "unbedingt raus den HG und dashed".
    The format bar above is the sign that the text is being written in. */

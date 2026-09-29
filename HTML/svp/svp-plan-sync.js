@@ -419,6 +419,22 @@ window.svpPlanParts.push(function (P) {
         } catch (e) { /* offline: the local copy stays */ }
     }
 
+    /* Doc, 29.09.2026: "mach den sichtbar für die Kids aber block edit!" - without a login the Fahrplan is read
+       like the plan edits below: public to READ (RLS select for anon since migration 20260929), written by Doc
+       alone. It replaces whatever this browser held; nothing is ever sent from here. */
+    async function fetchPublicFahrplan() {
+        try {
+            const res = await fetch(svpAuth.DB_URL + '/rest/v1/svp_plan_fahrplan?page=eq.' +
+                encodeURIComponent(location.pathname) + '&select=fahrplan', {
+                headers: { apikey: svpAuth.DB_KEY, Authorization: 'Bearer ' + svpAuth.DB_KEY }
+            });
+            if (!res.ok) return;
+            const rows = await res.json();
+            P.replaceFahrplaene((rows[0] && rows[0].fahrplan) || {});
+            P.markFahrplaene();
+        } catch (e) { /* offline: no Fahrplan for the class */ }
+    }
+
     /* Paint the current planNotes into the table (after a cloud pull). */
     function applyNotes() {
         for (const r of P.rendered) {
@@ -519,6 +535,7 @@ window.svpPlanParts.push(function (P) {
                 if (row) cloudZeile(row);
             } catch (e) { /* offline: local state stays */ }
             if (svpAuth.hasSession()) { syncFromRemote(); pullNotes(); pullFahrplan(); }
+            else fetchPublicFahrplan();
         })();
     }
 });

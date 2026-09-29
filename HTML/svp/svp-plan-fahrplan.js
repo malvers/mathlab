@@ -48,8 +48,9 @@ window.svpPlanParts.push(function (P) {
 
     /* The stack in front of the tabs. Called while the sub-row is being built, so it lands
        before everything else in that half - "vor Inhalt". */
+    /* Doc, 29.09.2026: "mach den sichtbar für die Kids aber block edit!" - the class gets the stack too, but only
+       where a week has a Fahrplan (markiere), and the sheet opens for them to read only (bearbeiten, save). */
     function fahrplanBtn(ref, subHeadL) {
-        if (!P.notesAllowed()) return;          /* the run of the lesson is Doc's, not the class's */
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'fahr-btn';
@@ -69,7 +70,11 @@ window.svpPlanParts.push(function (P) {
 
     /* A week that has a run of its own says so - like "Notizen" turning green when something
        stands in it (Doc, 07.09.2026). */
-    function markiere(b, text) { b.classList.toggle('has-fahr', !!svpFmtBar.textOf(text)); }
+    function markiere(b, text) {
+        const hat = !!svpFmtBar.textOf(text);
+        b.classList.toggle('has-fahr', hat);
+        if (!P.notesAllowed()) b.hidden = !hat;         /* the class: only where there is one */
+    }
 
     // --- the sheet -------------------------------------------------------
     let box = null, blatt = null, leiste = null, feld = null, bild = null, mat = null, offen = null, timer = null;
@@ -96,7 +101,7 @@ window.svpPlanParts.push(function (P) {
         /* Eine echte Liste, kein Textfeld: dann setzt der Browser bei Enter von selbst
            den naechsten Punkt (Doc, 20.09.2026: "bullets"). */
         feld = document.createElement('ul');
-        feld.className = 'fahr-list';
+        feld.className = 'fahr-list' + (P.notesAllowed() ? '' : ' nur-lesen');   /* the class reads (29.09.2026) */
         /* Doc, 24.09.2026: "wenn ich das aufmache bitte nicht im Edit" - the sheet opens as a
            sheet to READ; a click into it turns it into one to write in (bearbeiten below).
            It stays focusable with tabindex, because the focus is also what keeps the keys off
@@ -317,7 +322,7 @@ window.svpPlanParts.push(function (P) {
 
     function save() {
         clearTimeout(timer);
-        if (!offen) return;
+        if (!offen || !P.notesAllowed()) return;
         const text = zeilen().join('\n');
         /* Reading is now the normal case, and closing a sheet that was only read must not
            write anything - it would push the same text into the cloud on every peek. */
@@ -383,6 +388,7 @@ window.svpPlanParts.push(function (P) {
     /* From reading to writing. Called by the first click into the text; every further click
        finds it editable already and runs through. */
     function bearbeiten(ev) {
+        if (!P.notesAllowed()) return;                   /* the class reads, only Doc writes (29.09.2026) */
         if (feld.getAttribute('contenteditable') === 'true') return;
         feld.setAttribute('contenteditable', 'true');
         feld.focus();
