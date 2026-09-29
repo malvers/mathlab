@@ -71,10 +71,12 @@
 .fmtbar-bilder .fmtbar-btn { width: 28px; padding: 0; border: 0; border-radius: 6px; overflow: hidden; }
 .fmtbar-bilder .fmtbar-btn img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .fmtbar-bilder .fmtbar-btn:hover { filter: brightness(1.08); }
+/* Doc, 29.09.2026: "Pass bitte die Höhe des Bildes an ... die Cap Letters" - as tall as the capitals (1cap of
+   the font around), its foot on the baseline: top and foot level with an R or an F */
 .fmtbar-bild {
-    height: 1.1em;
+    height: 1cap;
     width: auto;
-    vertical-align: -0.2em;
+    vertical-align: baseline;
     border-radius: 22%;
 }
 /* Ein- und Ausruecken (Option einzug, Doc 29.09.2026): in der zweiten Reihe, der erste Knopf genau
@@ -100,4 +102,10 @@
 .fmtbar-groessen { display: flex; gap: 4px; margin-left: 8px; }
 .fmtbar-groessen .fmtbar-btn { display: flex; align-items: center; justify-content: center; }
 .fmtbar-groessen svg { display: block; }
+/* Ein ganzer Punkt in klein oder gross (punktGroesse): der Punkt selbst traegt die Groesse, damit
+   Zeilenabstand und Abstand zum naechsten Punkt mitgehen; die Spanne darin rechnet dann nicht noch
+   einmal mal 0,75. */
+.fmtbar-punkt-klein { font-size: 0.75em; }
+.fmtbar-punkt-gross { font-size: 1.35em; }
+:is(.fmtbar-punkt-klein, .fmtbar-punkt-gross) span[style*="font-size"] { font-size: inherit !important; }
 @media print { .fmtbar { display: none !important; } }

@@ -173,6 +173,7 @@ window.svpPlanParts.push(function (P) {
         feld.addEventListener('input', function () {
             clearTimeout(timer);
             timer = setTimeout(save, 600);      /* typing saves itself, like the notes field */
+            [].forEach.call(feld.children, svpFmtBar.punktGroesse);   /* a point small as a whole: its lines too */
             fitFont();                          /* mehr Text -> kleinere Schrift */
         });
         /* Eingefuegt wird nur der Text: was aus einer Mail oder einem Deck kommt,
@@ -336,6 +337,7 @@ window.svpPlanParts.push(function (P) {
                as they are, a line from the cloud is trusted no further than a typed one */
             li.innerHTML = svpFmtBar.clean(z.html);
             if (z.ebene) li.dataset.ebene = String(z.ebene);        // its level (einzug)
+            svpFmtBar.punktGroesse(li);                              // small or large as a whole: its lines too
             feld.appendChild(li);
         });
         /* das Bild der Woche in die Ecke - ohne Gedanken bleibt die Ecke leer */

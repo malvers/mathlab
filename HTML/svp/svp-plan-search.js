@@ -117,8 +117,8 @@ window.svpPlanParts.push(function (P) {
     function vtEintraege(r) {
         const src = r.matTd ? (r.matTd.dataset.src || '') : '';
         if (!src || !P.parseMat) return [];
-        /* a pill hidden from the class ([[aus]]) is not found either */
-        return P.parseMat(src).filter(function (en) { return !en.aus; }).map(function (en) {
+        /* a pill hidden from the class ([[aus]]) is not found either, nor a PowerPoint of a week to come (pptWeg) */
+        return P.parseMat(src).filter(function (en) { return !en.aus && !(P.pptWeg && P.pptWeg(en, r)); }).map(function (en) {
             return { url: en.url, adresse: vtAdresse(en.url), meta: vtMeta(en) };
         });
     }

@@ -34,6 +34,23 @@
        no span at all. Only these two come through clean(). */
     const GROESSEN = [['klein', '0.75em', 9], ['normal', '', 12.5], ['groß', '1.35em', 16]];
     const GROESSEN_OK = ['0.75em', '1.35em'];
+    /* Doc, 29.09.2026: "wenn die Font-Size kleiner ist, mach bitte auch den Zeilenabstand ein bisschen" - a point
+       sized as a whole takes the size itself (.fmtbar-punkt-klein / -gross, svp-fmtbar.css), so its line height
+       and its gap to the next point go along; a size on only part of a point leaves the lines as they are.
+       Nothing of it is stored: it is read off the span that covers all the point's text, wherever it is shown. */
+    function punktGroesse(punkt) {
+        const text = punkt.textContent.trim();
+        let g = '';
+        if (text) {
+            [].some.call(punkt.querySelectorAll('span[style]'), function (sp) {
+                if (GROESSEN_OK.indexOf(sp.style.fontSize) < 0 || sp.textContent.trim() !== text) return false;
+                g = sp.style.fontSize;
+                return true;
+            });
+        }
+        punkt.classList.toggle('fmtbar-punkt-klein', g === GROESSEN_OK[0]);
+        punkt.classList.toggle('fmtbar-punkt-gross', g === GROESSEN_OK[1]);
+    }
     /* an A, drawn (not a font glyph), at the size it stands for */
     function aSvg(px) {
         return '<svg viewBox="0 0 24 24" width="' + px + '" height="' + px + '" aria-hidden="true" focusable="false">' +
@@ -315,5 +332,6 @@
         return out.innerHTML;
     }
 
-    window.svpFmtBar = { build: build, clean: clean, safe: safe, textOf: textOf, zeile: zeile, mitEbene: mitEbene, EBENEN_MAX: EBENEN_MAX };
+    window.svpFmtBar = { build: build, clean: clean, safe: safe, textOf: textOf, zeile: zeile, mitEbene: mitEbene, EBENEN_MAX: EBENEN_MAX,
+        punktGroesse: punktGroesse };
 })();

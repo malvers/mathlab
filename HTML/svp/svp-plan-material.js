@@ -7,8 +7,23 @@ window.svpPlanParts.push(function (P) {
         keinMausfokus, equalizeMatPills,
         equalizeRefPills, setVideoReiter, isVideoEntry, isExerciseEntry, officeEdit,
         matDefaultLabel, openMat, renderMaterial, hideMatTip, showMatTip,
-        festeLinks, festePillen, matSpalten
+        festeLinks, festePillen, matSpalten, pptWeg
     });
+
+    /* Doc, 29.09.2026: "Die PowerPoints ... nehmen wir ab heute im Stoffverteilungsplan alle raus ... bis zum
+       Schuljahresende" - the HTML decks have moved on (the Funktionen deck most of all) and the exported .pptx
+       no longer match them. A PowerPoint pill of this week or a later one is not shown, for nobody - drawn,
+       counted in the tab or found by the search; the weeks already taught keep theirs, they record what was
+       used. Nothing is deleted: the material text keeps the link, taking this out brings every pill back.
+       A week's place in the school year: August to December first, then January to July. A row without a
+       week of its own counts as to come. */
+    function schuljahrPos(kw) { kw = +kw; return kw >= 32 ? kw : kw + 53; }
+    function pptWeg(en, ref) {
+        if (!en || matKind(en.url || '', en.label || '') !== 'ppt') return false;
+        const kw = ref && P.weekOf ? +P.weekOf(ref) : NaN;
+        if (!(kw >= 1)) return true;
+        return schuljahrPos(kw) >= schuljahrPos(P.isoWeek(new Date()));
+    }
 
     /* Adressen neben dem svp-Ordner: gerechnet wird gegen die Adresse DIESER
        Datei und nicht gegen die der Seite - die Plaene liegen in Unterordnern
@@ -828,6 +843,7 @@ window.svpPlanParts.push(function (P) {
             /* hidden from the class ([[aus]]): only the owner gets it at all - and sees it only
                while the week is being edited (svp-material.css), with the eye to bring it back */
             if (en.aus && !(ref && P.CAN_EDIT_MAT)) return;
+            if (pptWeg(en, ref)) return;      /* PowerPoint from this week on: out (pptWeg) */
             const label = en.label;
             const a = document.createElement('a');
             a.dataset.rang = matRang(en);      /* die Spalte, in die sie gehoert */
