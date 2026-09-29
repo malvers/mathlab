@@ -418,6 +418,49 @@ window.svpPlanParts.push(function (P) {
     // Plain link: drawn, not typed — the \u2197 character sits too high in its
     // line in most fonts, an SVG is centred by construction.
     const LINK_PATH = 'M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h5v2H7v10h10v-3h2v5H5V5z';
+    /* Doc, 29.09.2026: "Könnte man den Button updaten? Je nachdem, wie viele Files da drin sind" - how many entries
+       the Abgabe folder holds, after the label: "Upload · 6". The number comes from the Edge Function upload-zahl
+       (it opens the share link like an anonymous visitor; SharePoint lets no page read it itself). Asked when the
+       pill is drawn and once a minute while the page is shown and the pill in view - one question per link and
+       minute, shared by every pill of that link. No answer: the pill simply stays without a number. */
+    const UPLOAD_ZAHL = {};
+    function uploadZahl(url) {
+        const z = UPLOAD_ZAHL[url] || (UPLOAD_ZAHL[url] = { n: null, t: 0, laeuft: null });
+        if (z.laeuft) return z.laeuft;
+        if (Date.now() - z.t < 55000) return Promise.resolve(z.n);
+        z.laeuft = fetch(svpAuth.DB_URL + '/functions/v1/upload-zahl', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', apikey: svpAuth.DB_KEY },
+            body: JSON.stringify({ url: url })
+        }).then(function (r) { return r.ok ? r.json() : null; })
+            .catch(function () { return null; })
+            .then(function (j) {
+                if (j && typeof j.n === 'number') z.n = j.n;
+                z.t = Date.now();
+                z.laeuft = null;
+                return z.n;
+            });
+        return z.laeuft;
+    }
+    function zeigeUploadZahl(a) {
+        uploadZahl(a.dataset.uploadUrl).then(function (n) {
+            if (n == null) return;
+            let s = a.querySelector('.mat-upload-zahl');
+            if (!s) {
+                s = document.createElement('span');
+                s.className = 'mat-upload-zahl';
+                a.appendChild(s);
+            }
+            const text = '· ' + n;
+            if (s.textContent !== text) { s.textContent = text; equalizeMatPills(); }
+        });
+    }
+    setInterval(function () {
+        if (document.visibilityState !== 'visible') return;
+        document.querySelectorAll('a.mat-upload[data-upload-url]').forEach(function (a) {
+            if (a.offsetParent) zeigeUploadZahl(a);
+        });
+    }, 60000);
     /* Lucide "upload" (ISC, lucide-static 1.48.0), the three strokes in one path - the Abgabe button's sign */
     const UPLOAD_PATH = 'M12 3v12M17 8l-5-5-5 5M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4';
 
@@ -864,6 +907,7 @@ window.svpPlanParts.push(function (P) {
                 a.title = 'Dateien hochladen — öffnet OneDrive';
                 a.appendChild(drawnIcon('mat-ico-drawn mat-ico-upload', UPLOAD_PATH, 'currentColor', 2));
                 a.appendChild(matLabelEl(label));
+                if (/\/:f:\//.test(en.url)) { a.dataset.uploadUrl = en.url; zeigeUploadZahl(a); }   /* "Upload · 6" */
                 if (en.desc) wireMatTip(a, en.desc);
                 /* Dasselbe ✕ wie an jeder Pille - eigener Wrapper, damit der
                    Knopf im Bearbeiten-Modus genauso entfernbar ist. */
