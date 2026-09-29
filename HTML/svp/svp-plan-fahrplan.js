@@ -119,6 +119,7 @@ window.svpPlanParts.push(function (P) {
             // Doc, 29.09.2026: "ein paar übliche Smileys, die cool sind", "ein paar weniger", 🎉 -> 🤔, then in the panel
             // "noch ein paar Smileys rein, denn wir haben jetzt Platz" - faces first, then signs
             emojis: ['😀', '😎', '😅', '🤔', '🤯', '🥳', '👍', '💡', '🚀', '⭐'],
+            bilder: [['/svp/emo/kuh.webp', 'Kuh']],    // Doc, 29.09.2026: the cow
             einzug: { rein: function () { einzug(1); }, raus: function () { einzug(-1); } },   // indent, outdent (29.09.2026)
             colors: [
                 ['rgb(176, 36, 24)', 'Rot (\u03a5)'],
