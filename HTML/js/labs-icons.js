@@ -4,6 +4,21 @@
  */
 
 const LAB_ICONS = {
+    "ziffernraetsel": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- the MONEY stack itself (Doc, 29.09.2026: "icon -> MONEY stack"): SEND over MORE, a rule, MONEY in gold -
+                 one letter per column, so the columns stand as on paper -->
+            <g font-family="CMU Serif, Georgia, Times New Roman, serif" font-size="19" font-weight="bold" text-anchor="middle">
+                <g fill="rgba(255, 255, 255, 0.85)">
+                    <text x="43.5" y="27">S</text><text x="60" y="27">E</text><text x="76.5" y="27">N</text><text x="93" y="27">D</text>
+                    <text x="43.5" y="51">M</text><text x="60" y="51">O</text><text x="76.5" y="51">R</text><text x="93" y="51">E</text>
+                </g>
+                <g fill="#F5C242">
+                    <text x="27" y="85">M</text><text x="43.5" y="85">O</text><text x="60" y="85">N</text><text x="76.5" y="85">E</text><text x="93" y="85">Y</text>
+                </g>
+            </g>
+            <path d="M12 44.5 H24 M18 38.5 V50.5" stroke="#F5C242" stroke-width="2.6" stroke-linecap="round" />
+            <line x1="10" y1="62" x2="99" y2="62" stroke="rgba(255, 255, 255, 0.75)" stroke-width="2.2" stroke-linecap="round" />
+        </svg>`,
     "trigonometrie": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- axes: the circle's own and the graph's -->
             <line x1="5" y1="50" x2="97" y2="50" stroke="rgba(255, 255, 255, 0.35)" stroke-width="1.1" />

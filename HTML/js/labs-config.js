@@ -17,12 +17,23 @@
  * JG 10–12: cmaes, opti-lens
  * JG 11–12: integralreaktor, fourier, mandelbrot-deep, atomorbitale, differentiallabor
  * uni (zusätzlich): stanford-portal (externer Link), lissajous, atomorbitale, mandelbrot-deep, fourier, integralreaktor, differentiallabor, cmaes, opti-lens
- * top5 (Hub-Kachel "TOP LABS"): kovarianz, irisvis (Conway's Iris), fourier, mandelbrot-deep (Fraktale), atomorbitale, galtonboard, opti-lens (Linsenoptimierung), jacquard (Webstuhl / Lochkarte)
+ * top5 (Hub-Kachel "TOP LABS"): ziffernraetsel, kovarianz, irisvis (Conway's Iris), fourier, mandelbrot-deep (Fraktale), atomorbitale, galtonboard, opti-lens (Linsenoptimierung), jacquard (Webstuhl / Lochkarte)
  * Keine Jahrgangs-Tags: cinematic-intro, happy-birthday-ulf (Show / Spaß).
  * ————————————————————————————————————————————————————————————————
  */
 
 const LABS_DATA = [
+    {
+        "id": "ziffernraetsel",
+        "href": "ziffernraetsel.html",
+        "title": "Ziffernrätsel",
+        "description": "SEND + MORE = MONEY: Jeder Buchstabe ist eine Ziffer \u2014 aber welche? Das Labor löst das berühmte Rätsel von Henry Dudeney aus dem Jahr 1924 in 19 Schritten, ohne zu raten: von Stellenwert und Übertrag bis zur letzten Ziffer. Auf dem Brett steht die Rechnung wie auf Papier, die Spalte des Schritts leuchtet, und jede gefundene Ziffer wandert in die Ziffernleiste. Solita erklärt jeden Schritt genauer \u2014 auf Wunsch so einfach, dass man es schon in der Grundschule versteht. Dazu zwölf weitere Ziffernrätsel aus Vorrechnen, von A + A + A = 1A bis ABCD \u00b7 9 = DCBA.",
+        "tagline": "Knobeln / Ziffernrätsel / Schritt für Schritt",
+        "icon": LAB_ICONS["ziffernraetsel"],
+        "category": "neu top5",
+        "keywords": "ziffernraetsel ziffern raetsel buchstabenraetsel kryptarithmus kryptogramm alphametik send more money dudeney strand magazine knobeln logik stellenwert uebertrag schriftliche addition einer zehner hunderter tausender zehntausender buchstaben ziffernleiste solita schritt fuer schritt grundschule vorrechnen",
+        "color": "gold"
+    },
     {
         "id": "trigonometrie",
         "href": "trigonometrie.html",
