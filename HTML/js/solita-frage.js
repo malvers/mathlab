@@ -10,8 +10,11 @@
 //       kontext: () => 'what the page shows now',   // travels with every question
 //       system: 'the lab's own instructions',
 //       vorschlaege: [{ label: 'Genauer', frage: 'Erklär mir das genauer.' }],   // ready-made questions
-//       platzhalter: 'Frag Solita',
+//       platzhalter: 'Frag {name}',                 // {name}: Solita or Doc, whoever is chosen - only without a heading
+//       ueberschrift: h3,                           // its text becomes "Frag Solita" / "Frag Doc", the field then says "…"
 //   });
+//   A click on the face switches between Solita and Doc; the page hears it as the event 'solita-wer' on document
+//   (detail.name) and SolitaFrage.wer() says who it is now.
 //   s.frage(text)       ask, as if typed
 //   s.vorlesen(text)    read a text in her voice ($...$ formulas are spoken, HTML tags dropped)
 //   s.stop()            stop her voice
@@ -31,7 +34,7 @@
     const TTS_WAIT = 20000;              // ms — a hanging voice must not hide the answer
     const HIER = document.currentScript ? document.currentScript.src : location.href;
     const SOLITA_PIC = new URL('../resources/solita-avatar.png', HIER).href;
-    const DOC_PIC = new URL('../resources/team/alvers_blick.png', HIER).href;
+    const DOC_PIC = new URL('../resources/team/alvers_avatar.jpg', HIER).href;
 
     const ICON = {
         send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M13 6l6 6-6 6"/></svg>',
@@ -68,6 +71,44 @@
     }
     function dbg(msg) { if (global.DebugWindow && global.DebugWindow.log) global.DebugWindow.log('[solita-frage] ' + msg); }
 
+    // What ONE question cost, behind its answer, as in the decks (decks/deck.js: RATE and why) - Doc, 29.09.2026:
+    // "schreib auch da dahinter, was der jeweilige Call gerade gekostet hat". Claude is billed from the first token;
+    // the voice is characters against Google's free monthly quota, so the figure is Claude's and the voice stands in
+    // the tooltip, with the list price it WOULD cost (Studio-C; Doc's own voice only as characters).
+    const RATE = { in: 1, out: 5, cacheRead: 0.1, cacheWrite: 1.25, eur: 0.92, ttsUsd: 160 };
+    function geld(eur) {
+        if (eur >= 1) return eur.toFixed(2).replace('.', ',') + ' \u20ac';
+        const ct = eur * 100;
+        return (ct < 1 ? ct.toFixed(2) : ct.toFixed(1)).replace('.', ',') + ' ct';
+    }
+    function sek(ms) { return ms ? (ms / 1000).toFixed(1).replace('.', ',') + ' s' : '-'; }
+    function kosten(usage, ms) {
+        const u = usage || {};
+        return {
+            claude: ((u.input_tokens || 0) * RATE.in + (u.cache_read_input_tokens || 0) * RATE.in * RATE.cacheRead
+                + (u.cache_creation_input_tokens || 0) * RATE.in * RATE.cacheWrite + (u.output_tokens || 0) * RATE.out) / 1e6 * RATE.eur,
+            tin: (u.input_tokens || 0) + (u.cache_read_input_tokens || 0), tout: u.output_tokens || 0,
+            chars: 0, doc: false, msAi: ms, msVoice: 0,
+        };
+    }
+    // the figure behind the answer's last word, in its type, a shade lighter (solita-frage.css .sf-cost)
+    function kostenZeigen(el, k) {
+        if (!k || !usageDa(k)) return;
+        const c = document.createElement('span');
+        c.className = 'sf-cost';
+        c.textContent = geld(k.claude);
+        c.title = 'Diese Frage\nClaude (Haiku): ' + geld(k.claude) + ' – ' + k.tin + ' Token rein, ' + k.tout + ' raus, '
+            + 'wird ab dem ersten Token berechnet\n'
+            + (!k.chars ? 'Stimme: aus'
+                : k.doc ? 'Docs Stimme: ' + k.chars + ' Zeichen'
+                : 'Stimme: ' + k.chars + ' Zeichen – frei im Monatskontingent, zum Listenpreis wären es '
+                    + geld(k.chars / 1e6 * RATE.ttsUsd * RATE.eur))
+            + '\nWartezeit: Claude ' + sek(k.msAi) + (k.msVoice ? ' + Stimme ' + sek(k.msVoice) : '');
+        const p = el.lastElementChild && el.lastElementChild.tagName === 'P' ? el.lastElementChild : el;
+        p.appendChild(c);
+    }
+    function usageDa(k) { return k.tin > 0 || k.tout > 0; }
+
     let zaehler = 0;
     function mount(host, opt) {
         opt = opt || {};
@@ -95,7 +136,11 @@
         const stopBtn = root.querySelector('.sf-stop');
         const face = root.querySelector('.sf-face');
         const note = root.querySelector('.sf-note');
-        const PLATZ = opt.platzhalter || 'Frag Solita';
+        const PLATZ = opt.platzhalter || 'Frag {name}';
+        // Solita or Doc - chosen in the right-click menu or by a click on the face; every text of the box says who
+        // (Doc, 29.09.2026: "wenn ich da selektiert bin, muss da natürlich stehen Frag Doc")
+        function wer() { return VOICE === 'doc' ? 'Doc' : 'Solita'; }
+        function platz() { return PLATZ.replace(/\{name\}/g, wer()); }
 
         const hist = [];
         let busy = false, audio = null, ear = null, seq = 0;
@@ -175,7 +220,11 @@
         let pen = null;
         function hint() {
             if (input.type === 'password') return;
-            const liste = [PLATZ, 'Frag Solita'];
+            // with a heading the name already stands above the box - the field only says "…" (Doc, 29.09.2026:
+            // "das steht ja drüber. Mach da drinnen nur Punkt, Punkt, Punkt")
+            // three single periods, not the one-glyph '…' - only they take the letter-spacing
+            const liste = opt.ueberschrift ? ['...'] : [platz(), 'Frag ' + wer()];
+            input.classList.toggle('sf-punkte', !!opt.ueberschrift);   // the dots are set large (solita-frage.css)
             const cs = getComputedStyle(input);
             const room = input.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 2;
             if (!(room > 0)) { input.placeholder = liste[0]; return; }
@@ -214,14 +263,14 @@
         function frage(v) {
             v = String(v || '').trim();
             if (!v || busy) return;
-            if (!pwd()) { askPassword(); input.focus(); say('Einmal das Passwort, dann kann Solita antworten.', 'sf-err'); return; }
+            if (!pwd()) { askPassword(); input.focus(); say('Einmal das Passwort, dann kann ' + wer() + ' antworten.', 'sf-err'); return; }
             busy = true; sendBtn.disabled = true;
             stop();
             const meine = ++seq;
             say(esc(v), 'sf-q');
-            const wait = say('<span class="sf-wave" role="status" aria-label="Solita denkt nach"><i></i><i></i><i></i><i></i><i></i></span>', 'sf-a');
+            const wait = say('<span class="sf-wave" role="status" aria-label="' + wer() + ' denkt nach"><i></i><i></i><i></i><i></i><i></i></span>', 'sf-a');
             const kontext = typeof opt.kontext === 'function' ? String(opt.kontext() || '') : '';
-            const messages = [{ role: 'system', content: SYSTEM_BASIS + (opt.system ? '\n\n' + opt.system : '') }]
+            const messages = [{ role: 'system', content: (VOICE === 'doc' ? SYSTEM_DOC : SYSTEM_SOLITA) + SYSTEM_BASIS + (opt.system ? '\n\n' + opt.system : '') }]
                 .concat(hist.reduce(function (m, h) {
                     return m.concat({ role: 'user', content: 'Frage: ' + h.q }, { role: 'assistant', content: h.a });
                 }, []))
@@ -232,7 +281,7 @@
                         return r.json().catch(function () { return {}; }).then(function (j) {
                             const text = r.ok && j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
                             return {
-                                text: text || '', status: r.status,
+                                text: text || '', status: r.status, usage: j && j.usage,
                                 error: text ? '' : r.status === 401 && url === DS_URL ? 'DeepSeek gibt es nur mit Docs Passwort.'
                                     : String((j && j.error && (j.error.message || j.error)) || 'Das hat nicht geklappt.'),
                             };
@@ -248,12 +297,12 @@
             }
             function fertig() { busy = false; sendBtn.disabled = false; }
             function fail(msg) { fertig(); wait.className = 'sf-err'; wait.textContent = msg; }
-            function answer(text, zeigen) {                  // the answer she speaks: memory, voice, then on screen
+            function answer(text, zeigen, k) {               // the answer she speaks: memory, voice, then on screen
                 hist.push({ q: v, a: text });
                 if (hist.length > HIST_MAX) hist.shift();
                 const auf = function () { fertig(); const el = zeigen(); out.scrollTop = out.scrollHeight; return el; };
                 if (meine !== seq) { auf(); return; }        // something else was read out meanwhile: silent
-                sprich(text, auf);                           // the text shows once her voice has arrived
+                sprich(text, auf, k);                        // the text shows once her voice has arrived
             }
             const withClaude = who.claude || !who.ds, withDs = who.ds;
             // DeepSeek beside her: silent, below, and only once her answer is on screen, so she is read first
@@ -278,13 +327,15 @@
                     .catch(function () { fail('Kein Netz.'); });
                 return;
             }
+            const t0 = Date.now();
             ask(AI_URL, MODEL)
                 .then(function (res) {
                     if (!res.text) {
                         if (res.status === 401) { try { localStorage.removeItem('dev_access'); } catch (e) { } askPassword(); res.error = 'Das Passwort gilt nicht mehr.'; }
                         fail(res.error); herTurn = true; dsShow(); return;
                     }
-                    answer(res.text, function () { render(wait, res.text); herTurn = true; dsShow(); return wait; });
+                    const k = kosten(res.usage, Date.now() - t0);
+                    answer(res.text, function () { render(wait, res.text); kostenZeigen(wait, k); herTurn = true; dsShow(); return wait; }, k);
                 })
                 .catch(function () { fail('Kein Netz.'); herTurn = true; dsShow(); });
         }
@@ -294,8 +345,9 @@
         // browser-voice fallback (Doc: "NIEMALS Browserstimme") - if the cloud voice fails, the text just stands there.
         // zeigen() runs once the voice is there (or not coming). Doc's voice may come back as Studio-C when it is too
         // slow for a long text (j.fallback) - the tts function decides.
-        function sprich(text, zeigen) {
+        function sprich(text, zeigen, k) {                 // k: the question's cost - the voice adds its characters
             let shown = false, el = null;
+            const tv = Date.now();
             function once() { if (!shown) { shown = true; if (zeigen) el = zeigen(); } }
             const whole = sprechbar(text);
             if (!ttsOn || !whole) { once(); return; }
@@ -330,6 +382,7 @@
             let first = 0;                                    // the word spans before piece i
             function play(i, before) {
                 get(i).then(function (j) {
+                    if (i === 0 && k) { k.chars = whole.length; k.doc = voice === 'doc'; k.msVoice = Date.now() - tv; }
                     if (i === 0) once();
                     if (!ttsOn || meine !== seq) return;         // switched off, or something newer took over
                     if (i === 0) stop();
@@ -353,7 +406,7 @@
                 }).catch(function (e) {
                     if (i > 0) return;                            // the text stands; the rest simply stays silent
                     once();
-                    hinweis('Solitas Stimme war gerade nicht erreichbar.');
+                    hinweis((VOICE === 'doc' ? 'Docs' : 'Solitas') + ' Stimme war gerade nicht erreichbar.');
                     dbg('tts failed: ' + (e && e.message));
                 });
             }
@@ -365,7 +418,7 @@
         }
         function vorlesen(text) {
             seq++;                                          // an answer still on its way stays silent
-            if (!ttsOn) { hinweis('Vorlesen ist aus – Rechtsklick auf Solita schaltet es ein.'); return; }
+            if (!ttsOn) { hinweis('Vorlesen ist aus – Rechtsklick auf ' + wer() + ' schaltet es ein.'); return; }
             sprich(text, null);
         }
         function leeren() { seq++; stop(); hist.length = 0; out.textContent = ''; busy = false; sendBtn.disabled = false; }
@@ -392,6 +445,7 @@
         const voiceChecks = menu.querySelectorAll('input[data-voice]');
         const ttsBox = menu.querySelector('input[data-act="tts"]');
         const copyBtn = menu.querySelector('[data-act="copy"]'), clearBtn = menu.querySelector('[data-act="clear"]');
+        let gemeldet = null;
         function showWho() {
             ttsBox.checked = ttsOn;
             ttsBox.parentNode.querySelector('i').textContent = VOICE === 'doc' ? 'Docs Stimme' : 'Solitas Stimme';
@@ -404,7 +458,39 @@
             // the face goes with the voice (as in the decks): Solita shows her photo, Doc his own
             face.src = VOICE === 'doc' ? DOC_PIC : SOLITA_PIC;
             face.alt = VOICE === 'doc' ? 'Doc Alvers' : 'Solita';
+            face.title = 'Klick: zu ' + (VOICE === 'doc' ? 'Solita' : 'Doc') + ' wechseln';
+            if (opt.ueberschrift) opt.ueberschrift.textContent = 'Frag ' + wer();
+            root.querySelector('.sf-vh').textContent = 'Deine Frage an ' + wer();
+            if (input.type !== 'password') hint();
+            if (gemeldet !== wer()) {
+                gemeldet = wer();
+                document.dispatchEvent(new CustomEvent('solita-wer', { detail: { name: gemeldet } }));
+            }
         }
+        // a click on the face switches between Solita and Doc, as the menu does (Doc, 29.09.2026: "einfacher Klick ...
+        // auf den Avatar soll zwischen Solita und mir switchen")
+        function wechsle() {
+            VOICE = VOICE === 'doc' ? 'de-DE-Studio-C' : 'doc';
+            merke(VOICE_KEY, VOICE);
+            stop();
+            showWho();
+            einladen();
+        }
+        // after the switch the cursor blinks in the field and the microphone lights up once - here you can type,
+        // or speak (Doc, 29.09.2026: "lass den Cursor gleich auch blinken", "das Mikrofon auch mal kurz aufflashen")
+        function einladen() {
+            input.focus();
+            if (micBtn.hidden || micBtn.classList.contains('on')) return;   // hidden, or listening already
+            micBtn.classList.remove('sf-zeig');
+            void micBtn.offsetWidth;                           // restart the flash on a quick second click
+            micBtn.classList.add('sf-zeig');
+        }
+        micBtn.addEventListener('animationend', function (e) { if (e.animationName === 'sfzeig') micBtn.classList.remove('sf-zeig'); });
+        face.setAttribute('role', 'button');
+        face.setAttribute('tabindex', '0');
+        face.style.cursor = 'pointer';
+        face.addEventListener('click', wechsle);
+        face.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); wechsle(); } });
         voiceChecks.forEach(function (c) {                 // the two voices work like radio buttons: one is always on
             c.addEventListener('change', function () { VOICE = c.dataset.voice; merke(VOICE_KEY, VOICE); showWho(); });
         });
@@ -425,7 +511,7 @@
                 if (d.hidden || d.querySelector('.sf-wave')) return;
                 const src = d.dataset.src !== undefined ? d : d.querySelector('[data-src]');
                 if (d.classList.contains('sf-q')) lines.push('Frage: ' + d.textContent);
-                else if (src) lines.push((d.classList.contains('sf-ds') ? 'DeepSeek: ' : 'Solita: ') + src.dataset.src);
+                else if (src) lines.push((d.classList.contains('sf-ds') ? 'DeepSeek: ' : wer() + ': ') + src.dataset.src);
                 else if (d.textContent.trim()) lines.push(d.textContent.trim());
             });
             return lines.join('\n\n');
@@ -437,6 +523,14 @@
                 .then(function () { done('Kopiert'); }, function () { done('Kopieren ging nicht'); });
         });
         clearBtn.addEventListener('click', function () { leeren(); menu.hidden = true; input.focus(); });
+        // Live reload (only on Doc's machine, tools/live_reload.py) waits while the box is in use: she thinks or
+        // speaks, her menu is open, or a talk stands in it - as in the decks, where the open panel holds it. A right
+        // click to copy took the cursor out of the field, the lab reloaded under it and the answer was gone (Doc,
+        // 29.09.2026: "ich wollte es kopieren ... das Labor wurde wieder neu gestartet"). Leeren lets it reload again.
+        const frueher = global.__liveReloadBusy;
+        global.__liveReloadBusy = function () {
+            return busy || !!audio || !menu.hidden || out.children.length > 0 || (typeof frueher === 'function' && !!frueher());
+        };
         root.addEventListener('contextmenu', function (e) {
             // the PASSWORD field keeps the browser's own menu, to paste from the clipboard (Doc, 29.09.2026: "im Clip
             // steht das pwd ... geht aba ni"); on the question field it is Solita's menu, as in the decks ("wo ist das
@@ -487,13 +581,19 @@
         return { frage: frage, vorlesen: vorlesen, stop: stop, leeren: leeren };
     }
 
-    const SYSTEM_BASIS = 'Du bist Solita, die Tutorin in Doc Alvers Mathe-Labor. '
-        + 'Antworte auf Deutsch in gesprochener Sprache – die Antwort wird vorgelesen. Keine Aufzählungen, '
+    // who speaks: Solita, or Doc himself when he is chosen (his voice, his name over the box)
+    const SYSTEM_SOLITA = 'Du bist Solita, die Tutorin in Doc Alvers Mathe-Labor. ';
+    const SYSTEM_DOC = 'Du bist Doc Alvers, der Lehrer, der dieses Mathe-Labor gebaut hat. Du sprichst in der Ich-Form und '
+        + 'duzt die Schülerinnen und Schüler. ';
+    const SYSTEM_BASIS = 'Antworte auf Deutsch in gesprochener Sprache – die Antwort wird vorgelesen. Keine Aufzählungen, '
         + 'keine Emojis, kein Markdown. Formeln in LaTeX zwischen Dollarzeichen. Kurze Nachfragen wie "und warum?" '
         + 'beziehen sich auf das bisherige Gespräch. Sprich nie über deinen Kontext oder darüber, ob eine Frage '
         + 'zum Thema passt – antworte einfach. Jede Frage wissenschaftlicher Natur beantwortest du, auch wenn sie mit '
         + 'der Seite nichts zu tun hat; nur bei etwas, das mit Wissenschaft und Unterricht gar nichts zu tun hat, '
         + 'lenkst du in einem Satz freundlich zurück. Lob die Frage nicht.';
 
-    global.SolitaFrage = { mount: mount, sprechbar: sprechbar };
+    global.SolitaFrage = {
+        mount: mount, sprechbar: sprechbar,
+        wer: function () { try { return localStorage.getItem(VOICE_KEY) === 'doc' ? 'Doc' : 'Solita'; } catch (e) { return 'Solita'; } },
+    };
 })(window);
