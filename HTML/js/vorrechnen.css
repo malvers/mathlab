@@ -378,17 +378,8 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
    width, at the top of the field instead of the bottom - right and top set by hutKnopf */
 #erklaerung-hut { bottom: auto; width: calc(46px * var(--knopf, 1)); padding: 0; }
 #erklaerung-hut svg { width: calc(26px * var(--knopf, 1)); height: calc(26px * var(--knopf, 1)); }
-/* Knobeln block (js/vorrechnen-aufgaben-knobeln.js), Doc 28.09.:
-   - the A of a number word goes as \textrm (nowhere else in the lab's tasks): Computer Modern's A reaches 0.716,
-     the flat capitals 0.683 - 0.683 / 0.716 sets it level ("nur das A ist höher"); a digit there goes as \textup:
-     0.666 high, 1.057 sets it like the round O (0.705, both reach -0.022 below) ("die 0 zu klein")
-   - the place values over a number word ("zu groß", "grau", "so klein, dass das nicht passiert"): KaTeX stops at
-     half size, the label's own size span (reset-size6 - the exponent of 10^3 has one of its own) goes to 0.266em,
-     at which 1000 still fits over the narrow S. Found by the grey inside it, the only KaTeX \color #8a93a3 in the
-     lab; katex.render writes it back through the DOM as rgb(), renderToString keeps the hex */
-body .katex .mord.textrm { font-size: 0.954em; }
-body .katex .mord.textup { font-size: 1.057em; }
-body .katex .sizing.reset-size6.mtight:has(> .mord > [style*="138, 147, 163"], > .mord > [style*="#8a93a3"]) { font-size: 0.266em; }
+/* the Knobeln block's number words and place values: js/vorrechnen-aufgaben-knobeln.css (shared with the
+   Ziffernrätsel lab since 29.09.2026) */
 /* the three clear buttons wear a bin now, sized like the eraser (Doc, 28.09.: "mach die C bitte auch Papierk.") */
 :is(#notiz-leeren, #seite-leeren, #oben-leeren) svg { width: calc(24px * var(--knopf, 1)); height: calc(24px * var(--knopf, 1)); }
 /* the eraser: bottom centre of the writing field, lit while it rubs; its frame

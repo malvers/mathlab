@@ -355,8 +355,17 @@
         titelEl.textContent = cur.s.titel;
         textEl.innerHTML = cur.s.html;
         mathe(texEl); mathe(textEl);
-        docEl.querySelector('.zr-schritt').scrollIntoView({ block: 'nearest' });
+        karteInsBild(docEl.querySelector('.zr-schritt'));
         try { history.replaceState(null, '', '?r=' + encodeURIComponent(id) + '&s=' + (pos + 1)); } catch (e) { }
+    }
+    // The step card into view - by scrolling the explanation column ONLY. scrollIntoView scrolled every ancestor,
+    // the page itself too (overflow: hidden does not stop it): the whole lab slid left and up, the side panel was cut
+    // off and the branding lay over the task (Doc, 29.09.2026, screenshot). On a narrow screen the column does not
+    // scroll by itself - nothing to do then.
+    function karteInsBild(karte) {
+        if (!karte || docEl.scrollHeight <= docEl.clientHeight + 1) return;
+        const r = karte.getBoundingClientRect(), v = docEl.getBoundingClientRect();
+        if (r.top < v.top || r.top > v.bottom - 80) docEl.scrollTop += r.top - v.top - 12;
     }
     function geh(k) {
         const vis = sichtbar();
