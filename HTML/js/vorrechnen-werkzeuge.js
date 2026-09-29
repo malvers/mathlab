@@ -321,7 +321,9 @@ function zeigeWerkzeuge() {
                 zeigeWerkzeuge();
             }, false]], leiste);
         werkzeuge([
-            ['clear', 'Alles leeren', () => clearAll(true), true],
+            // two taps again (Doc, 29.09.: "Hatte ich einstufig gesagt? Nee, ich glaub 2"): the first clears the
+            // ink, the second - on the empty page - the working too; undo brings either back
+            ['clear', 'Leeren – 1. Tipp die Tinte, 2. Tipp auch der Rechenweg', () => clearAll(), true],
             ['undo', 'Rückgängig', () => rueckgaengig(), false],
             ['redo', 'Wiederholen', () => wiederholen(), false],
             ['neuladen', 'Neu laden – frisch vom Server (wie Strg F5)', () => neuLaden(), true]]);

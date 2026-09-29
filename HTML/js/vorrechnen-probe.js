@@ -229,8 +229,8 @@ function clearAll(alles = false) {
     if (strokes.length || tipp || rechenweg.length) merkeVerlauf();   // C / LEEREN can be undone
     // The working survives a LEEREN of the page (a botched step must not
     // cost the lesson's board); LEEREN on an empty page clears it too.
-    // The rail's bin (alles) takes both in one go - "Alles leeren", the
-    // parts have bins of their own, undo brings it back (Doc, 28.09.: "ja 1 Stufe")
+    // alles takes both in one go (the rail's bin 28.09., "ja 1 Stufe"); since
+    // 29.09. the rail's bin is two taps again ("Nee, ich glaub 2") and nothing passes it
     if ((alles || (!strokes.length && !current && !tipp)) && (rechenweg.length || fluege.length)) {
         flugAbbrechen();
         rechenweg.length = 0;
