@@ -16,7 +16,9 @@
     box-sizing: border-box;
     min-width: 28px;
     height: 26px;
-    padding: 0 7px;
+    /* no side padding: every button 28 px wide, Tx and M too (Doc, 29.09.2026: "Das M und das TX ... sind
+       breiter als die anderen") - what is in them is narrower than that */
+    padding: 0;
     border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
     border-radius: 6px;
     background: none;
@@ -47,10 +49,55 @@
 }
 /* Smileys vor B (Option emojis, Doc 29.09.2026): das Zeichen selbst, etwas groesser, in der
    Farbschrift des Systems; ein Stueck Luft zwischen dem letzten und B. */
-.fmtbar-btn.fmtbar-emo { padding: 0 4px; }
 .fmtbar-emoji {
     font-size: 16px;
     font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
 }
 .fmtbar-emo + .fmtbar-btn:not(.fmtbar-emo) { margin-left: 8px; }
+/* Eigene kleine Bilder (Option bilder, Doc 29.09.2026: die Kuh): eine zweite Reihe rechtsbuendig
+   unter Tx, frei unter die Leiste gehaengt - so bleibt die Leiste so breit wie ihre eine Reihe.
+   Der Knopf ohne seitliches Polster: so breit wie die Smiley-Knoepfe. Im Text so hoch wie die
+   Buchstaben. */
+.fmtbar { position: relative; }
+.fmtbar-bilder {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    display: flex;
+    gap: 4px;
+}
+/* Doc, 29.09.2026: "so groß wie das ganze Icon. Ohne dass da drinnen noch ein Rahmen ist" - the picture is
+   the button: square at the bar's height, no border, the buttons' round corners */
+.fmtbar-bilder .fmtbar-btn { width: 28px; padding: 0; border: 0; border-radius: 6px; overflow: hidden; }
+.fmtbar-bilder .fmtbar-btn img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.fmtbar-bilder .fmtbar-btn:hover { filter: brightness(1.08); }
+.fmtbar-bild {
+    height: 1.1em;
+    width: auto;
+    vertical-align: -0.2em;
+    border-radius: 22%;
+}
+/* Ein- und Ausruecken (Option einzug, Doc 29.09.2026): in der zweiten Reihe, der erste Knopf genau
+   unter B (left setzt build). */
+.fmtbar-einzug {
+    position: absolute;
+    top: calc(100% + 4px);
+    display: flex;
+    gap: 4px;
+}
+.fmtbar-einzug .fmtbar-btn { display: flex; align-items: center; justify-content: center; }
+.fmtbar-einzug svg { width: 16px; height: 16px; display: block; }
+/* Die eingerueckten Punkte - im Blatt wie in der Fahrplan-App: eine Stufe 1,2em nach rechts mit
+   Kreis, zwei Stufen 2,4em mit Quadrat, wie in jeder Textverarbeitung. */
+:is(.fahr-list, .fp-list) > [data-ebene="1"] { margin-left: 1.2em; list-style-type: circle; }
+:is(.fahr-list, .fp-list) > [data-ebene="2"] { margin-left: 2.4em; list-style-type: square; }
+/* Alles in einer Reihe (Option eineReihe, Doc 29.09.2026: das eigene Panel ueber dem Fahrplan-Blatt):
+   Einzug und Bilder stehen mit in der Reihe, je 8 px Luft um die Gruppen. */
+.fmtbar.eine-reihe :is(.fmtbar-einzug, .fmtbar-bilder) { position: static; }
+.fmtbar.eine-reihe > .fmtbar-einzug { margin: 0 8px; }
+.fmtbar.eine-reihe > .fmtbar-bilder { margin-left: 8px; }
+/* Schriftgroessen (Option groessen, Doc 29.09.2026): drei A nach U, gezeichnet in drei Groessen */
+.fmtbar-groessen { display: flex; gap: 4px; margin-left: 8px; }
+.fmtbar-groessen .fmtbar-btn { display: flex; align-items: center; justify-content: center; }
+.fmtbar-groessen svg { display: block; }
 @media print { .fmtbar { display: none !important; } }

@@ -364,10 +364,11 @@
                     /* through the same cleaning as in the sheet: marks and colours stay,
                        everything else falls away - a line from the cloud is trusted
                        no further than a typed one */
-                    const sauber = svpFmtBar.clean(z);
+                    const zl = svpFmtBar.zeile(z), sauber = svpFmtBar.clean(zl.html);
                     if (!svpFmtBar.textOf(sauber)) return;
                     const li = document.createElement('li');
                     li.innerHTML = sauber;
+                    if (zl.ebene) li.dataset.ebene = String(zl.ebene);   // indented in the sheet (29.09.2026)
                     ul.appendChild(li);
                 });
                 papier.appendChild(ul);

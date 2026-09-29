@@ -72,7 +72,7 @@ window.svpPlanParts.push(function (P) {
     function markiere(b, text) { b.classList.toggle('has-fahr', !!svpFmtBar.textOf(text)); }
 
     // --- the sheet -------------------------------------------------------
-    let box = null, blatt = null, feld = null, bild = null, mat = null, offen = null, timer = null;
+    let box = null, blatt = null, leiste = null, feld = null, bild = null, mat = null, offen = null, timer = null;
 
 
     function ensureBox() {
@@ -87,10 +87,8 @@ window.svpPlanParts.push(function (P) {
         const titel = document.createElement('p');
         titel.className = 'fahr-title';
         titel.textContent = 'Inhalte';
-        /* Die Ueberschrift und die Formatierleiste teilen sich die erste Zeile
-           des Blattes; die Leiste zeigt sich nur, solange der Cursor im Text
-           steht (svp-fahrplan.css). Die Farben sind die des Hauses, exakt,
-           dazu das Navy der Schrift als Weg zurueck. */
+        /* Die erste Zeile des Blattes: die Ueberschrift (die Formatierleiste steht seit
+           29.09.2026 in einem eigenen Panel ueber dem Blatt, siehe unten). */
         const kopf = document.createElement('div');
         kopf.className = 'fahr-head';
         kopf.appendChild(titel);
@@ -108,9 +106,20 @@ window.svpPlanParts.push(function (P) {
         feld.setAttribute('role', 'textbox');
         feld.setAttribute('aria-label', 'Inhalte der Stunde');
         blatt.appendChild(feld);
-        kopf.appendChild(svpFmtBar.build({
+        /* Doc, 29.09.2026: "über dem Fahrplanpanel, wenn man im Edit-Mode ist, ein Panel gleicher Breite ...
+           viel flacher und packe all die Icons da oben rein. Und wenn Edit vorbei ist, wird das Panel
+           ausgeblendet" - the bar left the sheet's head for a flat panel of its own over the sheet, all in one
+           row (eineReihe); it shows while the sheet is written in (svp-fahrplan.css, .fahr-leiste) */
+        leiste = document.createElement('div');
+        leiste.className = 'fahr-leiste';
+        leiste.appendChild(svpFmtBar.build({
             target: feld,
-            emojis: ['😀', '😎', '👍', '🤔'],    // Doc, 29.09.2026: "ein paar übliche Smileys, die cool sind", "ein paar weniger", 🎉 -> 🤔
+            eineReihe: true,
+            groessen: true,    // klein, mittel, groß (Doc, 29.09.2026)
+            // Doc, 29.09.2026: "ein paar übliche Smileys, die cool sind", "ein paar weniger", 🎉 -> 🤔, then in the panel
+            // "noch ein paar Smileys rein, denn wir haben jetzt Platz" - faces first, then signs
+            emojis: ['😀', '😎', '😅', '🤔', '🤯', '🥳', '👍', '💡', '🚀', '⭐'],
+            einzug: { rein: function () { einzug(1); }, raus: function () { einzug(-1); } },   // indent, outdent (29.09.2026)
             colors: [
                 ['rgb(176, 36, 24)', 'Rot (\u03a5)'],
                 ['rgb(121, 158, 49)', 'Gr\u00fcn (\u03c6)'],
@@ -154,7 +163,11 @@ window.svpPlanParts.push(function (P) {
         mat.className = 'fahr-mat mat-block';
         mat.hidden = true;
         blatt.appendChild(mat);
-        box.appendChild(blatt);
+        /* the panel hangs over the sheet in a stack of the two: the sheet stays where it is when it shows */
+        const stapel = document.createElement('div');
+        stapel.className = 'fahr-stapel';
+        stapel.append(leiste, blatt);
+        box.appendChild(stapel);
         document.body.appendChild(box);
 
         feld.addEventListener('input', function () {
@@ -174,6 +187,11 @@ window.svpPlanParts.push(function (P) {
         feld.addEventListener('keydown', function (ev) {
             if (ev.key === 'Escape') { hide(); return; }
             ev.stopPropagation();
+            /* Tab and Shift+Tab indent and outdent like the two buttons (29.09.2026) - before, Tab left the sheet */
+            if (ev.key === 'Tab' && feld.getAttribute('contenteditable') === 'true') {
+                ev.preventDefault();
+                einzug(ev.shiftKey ? -1 : 1);
+            }
         });
         /* Into the text = into edit mode. The caret goes where the finger or the mouse went,
            not to the end: on a sheet of ten points, being thrown back to the first one is
@@ -272,9 +290,27 @@ window.svpPlanParts.push(function (P) {
     function zeilen() {
         /* Reads the direct children, whatever the browser made of them while typing -
            a stray <div> or a bare text node counts as its own point, same as an <li>. */
+        /* a point's level (data-ebene, einzug) goes in front of its line as tabs (svpFmtBar.mitEbene) */
         return [].map.call(feld.childNodes, function (n) {
-            return svpFmtBar.clean(n);
-        }).filter(function (z) { return svpFmtBar.textOf(z); });
+            const z = svpFmtBar.clean(n);
+            return svpFmtBar.textOf(z) ? svpFmtBar.mitEbene(z, n.dataset ? +n.dataset.ebene || 0 : 0) : '';
+        }).filter(Boolean);
+    }
+
+    /* Doc, 29.09.2026: "wenn du eine Bullet-List hast, die zweite Ebene nach innen schieben" - every point the
+       selection touches one level in (1) or out (-1), up to svpFmtBar.EBENEN_MAX; a new point made with Enter
+       takes its level along (the browser copies the point). Saved like typing: through the input event. */
+    function einzug(schritt) {
+        if (!feld || feld.getAttribute('contenteditable') !== 'true') return;
+        const sel = window.getSelection();
+        if (!sel.rangeCount || !feld.contains(sel.anchorNode)) return;
+        const r = sel.getRangeAt(0);
+        [].forEach.call(feld.children, function (li) {
+            if (!r.intersectsNode(li)) return;
+            const e = Math.max(0, Math.min(svpFmtBar.EBENEN_MAX, (+li.dataset.ebene || 0) + schritt));
+            if (e) li.dataset.ebene = String(e); else delete li.dataset.ebene;
+        });
+        feld.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
     function save() {
@@ -295,10 +331,11 @@ window.svpPlanParts.push(function (P) {
         feld.textContent = '';
         /* an empty plan still needs one point, otherwise the cursor has nowhere to sit */
         (zn.length ? zn : ['']).forEach(function (t) {
-            const li = document.createElement('li');
+            const li = document.createElement('li'), z = svpFmtBar.zeile(t);
             /* through clean() also on the way in: older lines are plain text and pass
                as they are, a line from the cloud is trusted no further than a typed one */
-            li.innerHTML = svpFmtBar.clean(t);
+            li.innerHTML = svpFmtBar.clean(z.html);
+            if (z.ebene) li.dataset.ebene = String(z.ebene);        // its level (einzug)
             feld.appendChild(li);
         });
         /* das Bild der Woche in die Ecke - ohne Gedanken bleibt die Ecke leer */
