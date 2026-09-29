@@ -68,8 +68,8 @@ const AUFGABEN = [
 // week the block is for - the lab opens it once at the first start in that week. kopf (optional):
 // what the head says over a task without a variable (default "vereinfachen")
 const BLOECKE = [
-    { titel: 'Level 1', ab: 0, bis: 20 },
-    { titel: 'Level 2 · Anforderungsbereich II', ab: 20, bis: 37 },
+    { titel: 'Level 1 · leicht', ab: 0, bis: 20 },                     // Doc, 29.09.: "Level 1 dahinter leicht"
+    { titel: 'Level 2 · mittelschwer', ab: 20, bis: 37 },               // was "Anforderungsbereich II" (29.09.)
     { titel: 'Level 3 · echte Nüsse', ab: 37, bis: AUFGABEN.length },
 ];
 function aufgabenBlock(i) { return BLOECKE.find(b => i >= b.ab && i < b.bis) || BLOECKE[0]; }

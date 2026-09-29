@@ -406,6 +406,7 @@ function zeigeRechenweg(verborgenAb) {
         if (nach) { nach.style.right = 'auto'; nach.style.left = (c.width / 2) + 'px'; nach.style.transform = 'translate(-50%, -50%)'; }
         obenFrei = Math.max(0, ...[zaehler, block, nach].filter(Boolean).map(e => e.getBoundingClientRect().bottom - c.top)) + ZEILE / 4;
     }
+    levelKnopf(aufgabenModus ? document.getElementById('vorlage-block') : null);   // Doc's tap on the block's name
     const nummerBreite = (s, idx) => Math.max(0, ...idx.filter(i => zeilen[i].n)
         .map(i => s[i] * (NUMMER_LUFT * rechenEm() + NUMMER_GROESSE * zeilen[i].n.w)));
     const umformungBreite = (s, idx) => Math.max(0, ...idx.filter(i => zeilen[i].o)

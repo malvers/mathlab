@@ -197,7 +197,7 @@ body.anzeige::before {
     background: var(--anzeige-grund, #050d1c);
 }
 body.anzeige :is(#cyber-left-chrome, #mini-rail, #side-panel, #right-rail, #tafel-pfeil-vor, #tafel-pfeil-zurueck, #formel-schicht, #erkennen-klein,
-    #schritt-hinweis, #schritt-op, #schritt-hoch, #erklaerung:not(.oben), #erklaerung-zu, #erklaerung-hut, #erklaerung-griff, #erklaerung-leiste, #notiz-rand, #notiz-leeren, #seite-leeren, #oben-leeren, #radierer, #radier-rahmen, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play,
+    #schritt-hinweis, #schritt-op, #schritt-hoch, #erklaerung:not(.oben), #erklaerung-zu, #erklaerung-hut, #erklaerung-griff, #erklaerung-leiste, #level-knopf, #level-menue, #notiz-rand, #notiz-leeren, #seite-leeren, #oben-leeren, #radierer, #radier-rahmen, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play,
     #buzz-aufgabe, #buzz-zeile, #buzzer-overlay, #tafel-overlay, #namen-overlay, #namen-pille) {
     display: none !important;
 }
@@ -509,3 +509,30 @@ body .katex .sizing.reset-size6.mtight:has(> .mord > [style*="138, 147, 163"], >
 #aufgaben-overlay.hell .aufgabe-karte.aktuell { border-color: rgb(31, 64, 150); box-shadow: 0 0 14px rgba(31, 64, 150, 0.35); }
 #aufgaben-overlay.hell .ak-nr { color: #5d6678; }
 #aufgaben-overlay.hell .cyber-modal-x { color: rgba(31, 64, 150, 0.7); border-color: rgba(31, 64, 150, 0.3); }
+
+/* Doc, 29.09.: a tap on the block's name top right ("Level 1") opens all blocks right under it (levelKnopf,
+   levelMenue) - for Doc only. The button over the name is clear; the menu in the look of the board's buttons */
+#level-knopf {
+    position: absolute; z-index: 5; padding: 0; border: none; background: transparent; cursor: pointer;
+    -webkit-tap-highlight-color: transparent; outline: none;
+}
+#level-menue {
+    position: absolute; z-index: 9; display: none; flex-direction: column; gap: 2px;
+    min-width: 260px; max-width: calc(100% - 16px); padding: 6px; box-sizing: border-box; border-radius: 8px;
+    font-family: 'Orbitron', sans-serif;
+    border: 1px solid rgba(0, 210, 255, 0.85); background: #07162f; box-shadow: 0 0 14px rgba(0, 210, 255, 0.35);
+}
+#level-menue.offen { display: flex; }
+#level-menue button {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 18px; padding: 10px 12px;
+    border: none; border-radius: 6px; background: transparent; color: #eaf0f7; text-align: left; cursor: pointer;
+    font: inherit; font-size: 0.85rem; letter-spacing: 0.08em; white-space: nowrap;
+    -webkit-tap-highlight-color: transparent; outline: none;
+}
+#level-menue .lm-zahl { font-size: 0.7rem; opacity: 0.6; }
+#level-menue button:hover, #level-menue button.aktuell { background: rgba(0, 210, 255, 0.14); }
+#level-menue button.aktuell { box-shadow: inset 3px 0 0 rgba(0, 210, 255, 0.85); }
+#canvas-container.hell #level-menue { border-color: rgba(31, 64, 150, 0.85); background: #f4ecd8; box-shadow: 0 4px 14px rgba(31, 64, 150, 0.18); }
+#canvas-container.hell #level-menue button { color: rgb(31, 64, 150); }
+#canvas-container.hell #level-menue button:hover, #canvas-container.hell #level-menue button.aktuell { background: rgba(31, 64, 150, 0.08); }
+#canvas-container.hell #level-menue button.aktuell { box-shadow: inset 3px 0 0 rgba(31, 64, 150, 0.85); }

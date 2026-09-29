@@ -403,6 +403,60 @@ function zeigeAufgabe(i) {
     zeigeVorlage();
     if (wechsel) aufgabeEinblenden();
 }
+// Doc, 29.09.: "Oben rechts steht ja Level 1. Wenn ich da auf Level 1 klicke ... ein Pop-up ..., wo ich alle Levels
+// sehe und auswählen kann, direkt hier ... im Vorrechenmodus". The block's name sits in the head layer, which the
+// beamer mirrors - so a clear button of Doc's own lies over it (placed by zeigeRechenweg), and a small menu of all
+// blocks opens right under it: each with its number of tasks, the current one marked; a tap goes to a block's first
+// task. A tap elsewhere or Escape closes it.
+function levelKnopf(block) {
+    let k = document.getElementById('level-knopf');
+    if (!block || anzeigeModus) { if (k) k.style.display = 'none'; levelMenue(false); return; }
+    if (!k) {
+        k = document.createElement('button');
+        k.id = 'level-knopf';
+        k.type = 'button';
+        k.title = 'Level wählen';
+        k.setAttribute('aria-label', 'Level wählen');
+        k.addEventListener('click', () => { k.blur(); levelMenue(!document.querySelector('#level-menue.offen')); });
+        container.appendChild(k);
+    }
+    const c = container.getBoundingClientRect(), r = block.getBoundingClientRect();
+    Object.assign(k.style, { left: (r.left - c.left - 8) + 'px', top: (r.top - c.top - 8) + 'px',
+        width: (r.width + 16) + 'px', height: (r.height + 16) + 'px', display: '' });
+}
+function levelMenue(auf) {
+    let m = document.getElementById('level-menue');
+    if (!auf) { if (m) m.classList.remove('offen'); return; }
+    if (!m) {
+        m = document.createElement('div');
+        m.id = 'level-menue';
+        m.setAttribute('role', 'menu');
+        container.appendChild(m);
+        document.addEventListener('pointerdown', e => {
+            if (m.classList.contains('offen') && !m.contains(e.target) && e.target.id !== 'level-knopf') levelMenue(false);
+        }, true);
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && m.classList.contains('offen')) levelMenue(false); });
+    }
+    const jetzt = aufgabenBlock(aufgabeIdx);
+    m.textContent = '';
+    BLOECKE.forEach(blk => {
+        const b = document.createElement('button'), n = blk.bis - blk.ab;
+        b.type = 'button';
+        b.setAttribute('role', 'menuitem');
+        b.classList.toggle('aktuell', blk === jetzt);
+        b.innerHTML = `<span class="lm-titel"></span><span class="lm-zahl">${n} Aufgabe${n === 1 ? '' : 'n'}</span>`;
+        b.firstChild.textContent = blk.titel;
+        b.addEventListener('click', () => {
+            levelMenue(false);
+            if (blk !== jetzt) zeigeAufgabe(blk.ab);
+        });
+        m.appendChild(b);
+    });
+    // right under the block's name, flush with its right edge
+    const k = document.getElementById('level-knopf'), c = container.getBoundingClientRect(), r = k.getBoundingClientRect();
+    Object.assign(m.style, { right: (c.right - r.right + 8) + 'px', top: (r.bottom - c.top) + 'px' });
+    m.classList.add('offen');
+}
 // All tasks in one panel (Doc, 26.09.), for Doc only: a tap on one goes there.
 // The look is the central modal (ui.js: .cyber-overlay, .cyber-modal--wide,
 // .cyber-modal-x). Night: "die Kacheln sind schön, aber zu groß ... flacher ...
