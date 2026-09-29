@@ -90,13 +90,54 @@
     // ---- the steps of a puzzle -----------------------------------------------------------------------------------
     const REGELN = '<p>Jeder Buchstabe steht für eine Ziffer von 0 bis 9. Gleiche Buchstaben sind gleiche Ziffern, ' +
         'verschiedene Buchstaben verschiedene Ziffern, und vorne steht nie eine 0.</p>';
-    // Vorrechnen writes a derivation as "$$equation | operation$$" - here the operation stands behind a bar
+    // Vorrechnen writes a derivation as "$$equation | operation$$", the operation behind the line it PRODUCED. Here, as
+    // on paper and in the board decks, it stands behind the line it is APPLIED to (Doc, 29.09.2026: "bei -A muss nochmal
+    // die Zeile 1 hin"): in a run of equations every operation moves up one line; the first line keeps its own note
+    // (Stellenwerte) and comes once more with the first operation. Vorrechnen's data stay as they are.
     function vorrechnenText(t) {
         return String(t).split(/\n\s*\n/).map(p =>
-            '<p>' + p.replace(/\$\$([\s\S]*?)\$\$/g, (m, inner) => {
-                const teil = inner.split(' | ');
-                return '$$' + (teil.length === 2 ? teil[0] + ' \\qquad \\big|\\; ' + teil[1] : inner) + '$$';
+            '<p>' + p.replace(/\$\$[^$]+\$\$(?:\s*\$\$[^$]+\$\$)*/g, lauf => {
+                const zeilen = lauf.match(/\$\$[^$]+\$\$/g).map(bl => {
+                    const t2 = bl.slice(2, -2).split(' | ');
+                    return { gl: t2[0], op: t2.length === 2 ? t2[1] : '' };
+                });
+                let raus = zeilen;
+                if (zeilen.length > 1) {
+                    raus = [];
+                    if (zeilen[0].op) raus.push(zeilen[0]);
+                    zeilen.forEach((z, i) => raus.push({ gl: z.gl, op: i + 1 < zeilen.length ? zeilen[i + 1].op : '' }));
+                }
+                return raus.map(z => '$$' + z.gl + (z.op ? ' ' + OP + z.op : '') + '$$').join('');
             }) + '</p>').join('');
+    }
+    // Equations one under the other stand aligned (Doc, 29.09.2026: "bitte schön aligned"): a run of display formulas
+    // with nothing but space between them, each with an "=", becomes ONE aligned block - the "=" one under the other,
+    // the operation behind its bar in a column of its own. The operation is written "\qquad \big|\; op" (Vorrechnen's
+    // " | " is turned into that). A run with a formula without "=" stays as it is.
+    const OP = '\\qquad \\big|\\; ';
+    function gleichTeilen(tex) {                     // at the first "=" outside braces
+        let tiefe = 0;
+        for (let i = 0; i < tex.length; i++) {
+            const c = tex[i];
+            if (c === '{') tiefe++;
+            else if (c === '}') tiefe--;
+            else if (c === '=' && tiefe === 0) return [tex.slice(0, i), tex.slice(i + 1)];
+        }
+        return null;
+    }
+    function ausrichten(html) {
+        return String(html).replace(/\$\$[^$]+\$\$(?:\s*\$\$[^$]+\$\$)+/g, lauf => {
+            const zeilen = lauf.match(/\$\$[^$]+\$\$/g).map(b => {
+                const tex = b.slice(2, -2).trim();
+                const k = tex.indexOf(OP.trim());
+                const gl = k < 0 ? tex : tex.slice(0, k).trim(), op = k < 0 ? '' : tex.slice(k + OP.trim().length).trim();
+                const teile = gleichTeilen(gl);
+                return teile ? { l: teile[0].trim(), r: teile[1].trim(), op } : null;
+            });
+            if (zeilen.some(z => !z)) return lauf;
+            return '$$\\begin{aligned}' + zeilen.map(z => z.l + ' &= ' + z.r + (z.op ? ' &&\\big|\\; ' + z.op : '')   /* the last line: no bar */).join(' \\\\ ') +
+                '\\end{aligned}$$';
+        });
     }
     function probe(id, w) {                           // the sum with digits, as on paper
         const s = SCHEMATA[id];
@@ -114,11 +155,16 @@
                 '<p class="v-aha">Hier gehen wir die Rechnung aus Vorrechnen Schritt für Schritt durch. Solita erklärt ' +
                 'dir jeden Schritt genauer – so einfach, wie du es brauchst.</p>',
         }];
-        (LOESUNGEN[id] || []).forEach((z, k) => {
+        // one step, one operation: the equation before it with the operation behind it, the new one below - aligned
+        // (Doc, 29.09.2026: the operation behind the line it is applied to); step 1 starts from the task itself
+        const L = LOESUNGEN[id] || [];
+        L.forEach((z, k) => {
             const m = /^([A-Z])=(\d)$/.exec(z[0].replace(/\s/g, ''));
+            // step 1 starts from the task's equation - without the question after the comma ("M+A+T+H = ?")
+            const vorher = k === 0 ? TEX_SCHLICHT[id].split(',\\quad')[0] : L[k - 1][0];
             liste.push({
                 titel: 'Schritt ' + (k + 1),
-                html: '$$' + z[0] + ' \\qquad \\big|\\; ' + z[1] + '$$',
+                html: '$$' + vorher + ' ' + OP + z[1] + '$$$$' + z[0] + '$$',
                 setzt: m ? { [m[1]]: +m[2] } : null,
             });
         });
@@ -160,7 +206,7 @@
 
     docEl.innerHTML =
         '<div class="v-doc-card zr-aufgabe"><div class="zr-tex"></div><div class="zr-quelle"></div></div>' +
-        '<div class="v-doc-card zr-schritt"><h3><span class="zr-nr"></span><span class="zr-titel"></span>' +
+        '<div class="v-doc-card zr-schritt"><h3><span class="zr-titel"></span><span class="zr-nr"></span>' +
         '<button type="button" class="zr-vorlesen" title="Vorlesen" aria-label="Schritt vorlesen">' +
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
         '<path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.5 7.5 0 0 1 0 10.4"/></svg>' +
@@ -344,6 +390,7 @@
             const an = b.dataset.id === id;
             b.classList.toggle('an', an);
             b.setAttribute('aria-pressed', String(an));
+            if (an) karteImPanel(b);
         });
         zeichneBrett(cur.s, st);
         zeichneLeiste(st);
@@ -353,8 +400,9 @@
         quelleEl.hidden = !QUELLEN[id];
         nrEl.textContent = (pos + 1) + ' / ' + vis.length;
         titelEl.textContent = cur.s.titel;
-        textEl.innerHTML = cur.s.html;
+        textEl.innerHTML = ausrichten(cur.s.html);
         mathe(texEl); mathe(textEl);
+        passeFormeln(docEl);
         karteInsBild(docEl.querySelector('.zr-schritt'));
         try { history.replaceState(null, '', '?r=' + encodeURIComponent(id) + '&s=' + (pos + 1)); } catch (e) { }
     }
@@ -366,6 +414,59 @@
         if (!karte || docEl.scrollHeight <= docEl.clientHeight + 1) return;
         const r = karte.getBoundingClientRect(), v = docEl.getBoundingClientRect();
         if (r.top < v.top || r.top > v.bottom - 80) docEl.scrollTop += r.top - v.top - 12;
+    }
+    // A display formula wider than the column is set smaller until it fits, down to 60 % - never a scrollbar under
+    // it, never a cut-off operation (Doc, 29.09.2026, puzzle 3: "| Stell..." cut off; "scroll immer weg"). Below 80 %
+    // an aligned block breaks its lines instead, as in LaTeX: the left side alone, "= right side | operation" under
+    // it (puzzle 9: "A·11+B·11+C·11 = A·100+B·10+C | -A·11-B·10-C").
+    function brechen(tex) {
+        const m = /^\\begin\{aligned\}([\s\S]*)\\end\{aligned\}$/.exec(String(tex).trim());
+        if (!m) return null;
+        const breit = r => r.replace(/\\mkern-?[\d.]+mu/g, '').replace(/\\(?:mathrm|textrm|textup|text)\{([^{}]*)\}/g, '$1')
+            .replace(/\\[a-zA-Z]+/g, 'x').replace(/[{}&\s]/g, '').length;
+        // one long line breaks the whole block, every line the same way - a short line left unbroken kept the left
+        // column as wide as its own left side and pushed the broken ones and their operations out to the right
+        const zeilen = m[1].split(' \\\\ ');
+        if (!zeilen.some(r => r.indexOf(' &= ') > 0 && breit(r) > 22)) return tex;
+        return '\\begin{aligned}' + zeilen.map(r => {
+            const i = r.indexOf(' &= ');
+            return i > 0 ? '& ' + r.slice(0, i) + ' \\\\ &= ' + r.slice(i + 4) : r;
+        }).join(' \\\\ ') + '\\end{aligned}';
+    }
+    function passe(d, darfBrechen) {
+        const k = d.querySelector(':scope > .katex');
+        if (!k) return;
+        k.style.fontSize = '';
+        if (!d.clientWidth) return;                     // not on screen: measured when it is
+        const start = parseFloat(getComputedStyle(k).fontSize);
+        let f = start;
+        while (k.scrollWidth > d.clientWidth + 1 && f > start * 0.6) { f -= start * 0.03; k.style.fontSize = f + 'px'; }
+        if (!darfBrechen || f >= start * 0.8 || !window.katex) return;
+        const ann = d.querySelector('annotation');
+        const alt = ann && ann.textContent, neu = alt && brechen(alt);
+        if (!neu || neu === alt) return;
+        const tmp = document.createElement('div');
+        katex.render(neu, tmp, { displayMode: true, throwOnError: false });
+        const nd = tmp.firstElementChild;
+        if (!nd) return;
+        d.replaceWith(nd);
+        passe(nd, false);
+    }
+    function passeFormeln(el) { el.querySelectorAll('.katex-display').forEach(d => passe(d, true)); }
+    if (window.ResizeObserver) new ResizeObserver(() => passeFormeln(docEl)).observe(docEl);
+    document.fonts.ready.then(() => passeFormeln(docEl));
+    // the chosen puzzle card into view: the side panel's own scroll box moves, the page never does
+    function karteImPanel(b) {
+        let box = b.parentElement;
+        while (box && box !== document.body) {
+            const oy = getComputedStyle(box).overflowY;
+            if ((oy === 'auto' || oy === 'scroll') && box.scrollHeight > box.clientHeight + 1) break;
+            box = box.parentElement;
+        }
+        if (!box || box === document.body) return;
+        const r = b.getBoundingClientRect(), v = box.getBoundingClientRect();
+        if (r.top < v.top) box.scrollTop += r.top - v.top - 8;
+        else if (r.bottom > v.bottom) box.scrollTop += r.bottom - v.bottom + 8;
     }
     function geh(k) {
         const vis = sichtbar();
@@ -436,6 +537,13 @@
         if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
         if (e.key === 'ArrowRight' || e.key === 'PageDown') { geh(pos + 1); e.preventDefault(); }
         if (e.key === 'ArrowLeft' || e.key === 'PageUp') { geh(pos - 1); e.preventDefault(); }
+        // up / down: the puzzle before or after, as the cards stand in the side panel (Doc, 29.09.2026: "gib mir arrow
+        // up/d um in den Gleichungen zu wechseln")
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            const i = IDS.indexOf(id) + (e.key === 'ArrowDown' ? 1 : -1);
+            if (i >= 0 && i < IDS.length) waehle(IDS[i], 0);
+            e.preventDefault();
+        }
     });
 
     // deep link ?r=k-money&s=6

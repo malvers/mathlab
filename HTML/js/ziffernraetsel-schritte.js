@@ -4,7 +4,8 @@
 // Vorrechnen's own steps instead (js/ziffernraetsel.js).
 //
 // A step:  titel     heading of the step card
-//          html      the explanation - $...$ inline and $$...$$ display maths (KaTeX); v-key / v-aha / v-warn
+//          html      the explanation - $...$ inline and $$...$$ display maths (KaTeX), an operation written
+//                    "\qquad \big|\; op" behind the equation it is APPLIED to; v-key / v-aha / v-warn
 //                    boxes and v-table from js/chapter-lab.css
 //          spalte    the column the step looks at, 0 = Einer (lit up on the board)
 //          setzt     letters found in this step, { M: 1 } (they stay found in every later step)
@@ -97,19 +98,21 @@ $$S+1=10$$
             titel: 'Die Zehnerspalte', spalte: 1,
             html: T`<p>In der Zehnerspalte rechnen wir $N+R$, dazu vielleicht ein Übertrag von den Einern. Wir nennen ihn kurz $\text{Ü}$ – er ist 0 oder 1.</p>
 <p>Unten steht $E$, und eine 1 geht zu den Hundertern weiter – das haben wir bei der Hunderterspalte gesehen. Das Ergebnis der Spalte ist also $E+10$:</p>
-$$N+R+\text{Ü}=E+10$$
+$$N+R+\text{Ü}=E+10 \qquad \big|\; N=E+1$$
 <p>Für $N$ setzen wir $E+1$ ein:</p>
-$$E+1+R+\text{Ü}=E+10 \qquad \big|\; N=E+1$$
+$$E+1+R+\text{Ü}=E+10 \qquad \big|\; -E$$
 <p>Stell dir eine Waage vor: Auf beiden Seiten liegt ein $E$. Nimmst du auf beiden Seiten das $E$ weg, bleibt die Waage im Gleichgewicht:</p>
-$$1+R+\text{Ü}=10 \qquad \big|\; -E$$
-$$R+\text{Ü}=9 \qquad \big|\; -1$$`,
+$$1+R+\text{Ü}=10 \qquad \big|\; -1$$
+$$R+\text{Ü}=9$$`,
             sprich: T`In der Zehnerspalte rechnen wir N plus R, dazu vielleicht ein Übertrag von den Einern. Er ist 0 oder 1. Unten steht E, und eine 1 geht zu den Hundertern weiter. Das Ergebnis der Spalte ist also E plus 10. Für N setzen wir E plus 1 ein. Stell dir eine Waage vor: Auf beiden Seiten liegt ein E. Nimmst du auf beiden Seiten das E weg, bleibt die Waage im Gleichgewicht. Dann nehmen wir noch auf beiden Seiten 1 weg, und es bleibt: R plus Übertrag gleich 9.`,
         },
         {
             titel: 'Das R', spalte: 1, setzt: { R: 8 }, uebertrag: { 1: 1 },
             html: T`<p>$R+\text{Ü}=9$, und der Übertrag $\text{Ü}$ ist 0 oder 1.</p>
 <p>Wäre $\text{Ü}=0$, dann wäre $R=9$. Die 9 gehört aber schon dem $S$. Also ist $\text{Ü}=1$ – von den Einern kommt eine 1 herüber.</p>
-$$R+1=9 \qquad \big|\; \text{Ü}=1$$
+$$R+\text{Ü}=9 \qquad \big|\; \text{Ü}=1$$
+$$R+1=9 \qquad \big|\; -1$$
+$$R=8$$
 <p class="v-key">$R=8$</p>`,
             sprich: T`R plus Übertrag gleich 9, und der Übertrag ist 0 oder 1. Wäre der Übertrag 0, dann wäre R gleich 9. Die 9 gehört aber schon dem S. Also ist der Übertrag 1 – von den Einern kommt eine 1 herüber. R plus 1 gleich 9, also ist R gleich 8.`,
         },
@@ -148,8 +151,9 @@ $$E=5 \qquad N=6 \qquad D=7$$
         {
             titel: 'Das Y', spalte: 0, setzt: { Y: 2 },
             html: T`<p>Einerspalte: $D+E=7+5=12$. Die 2 kommt unten hin, die 1 geht als Übertrag zu den Zehnern – genau der Übertrag, den wir beim $R$ gefunden haben.</p>
-$$7+5=Y+10 \qquad \big|\; \text{einsetzen}$$
-$$Y=2 \qquad \big|\; -10$$
+$$Y+10=D+E \qquad \big|\; \text{einsetzen}$$
+$$Y+10=12 \qquad \big|\; -10$$
+$$Y=2$$
 <p class="v-key">$Y=2$ – und die 2 war noch frei.</p>`,
         },
         {
@@ -161,7 +165,9 @@ $$\begin{array}{r} 9567\\ +\;1085\\ \hline 10652 \end{array}$$
         },
         {
             titel: 'Die Lösung',
-            html: T`$$\mathrm{SEND}=9567 \qquad \mathrm{MORE}=1085 \qquad \mathrm{MONEY}=10652$$
+            html: T`$$\mathrm{SEND}=9567$$
+$$\mathrm{MORE}=1085$$
+$$\mathrm{MONEY}=10652$$
 <p>Wir haben nie geraten: Jede Ziffer folgt aus den Regeln, und am Ende blieb für jeden Buchstaben genau eine Möglichkeit. Das Rätsel hat also <b>genau eine Lösung</b>.</p>
 <p>Die Werte: $D=7$, $E=5$, $M=1$, $N=6$, $O=0$, $R=8$, $S=9$, $Y=2$.</p>`,
         },
