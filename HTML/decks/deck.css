@@ -301,6 +301,10 @@ html.dark-slide #hud button:hover,html.dark-slide #nav button:hover{background:r
 #nav #nav-laser .beam{opacity:.4}
 #nav #nav-laser[aria-pressed="true"] .beam{opacity:1;color:#f00;stroke-width:2;filter:drop-shadow(0 0 1.5px #f00)}
 html.laser-hand #deck,html.laser-hand #deck *{cursor:none!important}
+/* laser on: a finger or pen dragged over the slide moves the dot - the browser must not take the drag for panning,
+   that cancels the pointer after a few pixels (Doc, 29.09.2026: "auf dem HP bewegt sich der Laser nicht mit dem
+   stift/Finger?") */
+html.laser-armed #deck{touch-action:none}
 #help{position:absolute;left:0;bottom:calc(100% + 10px);width:max-content;max-width:calc(100vw - 24px);
   background:#EAF0FA;color:#0E244E;border-radius:10px;box-shadow:0 6px 24px rgba(14,36,78,.4);
   padding:11px 16px 12px;font:400 13px/1.35 Raleway,system-ui,sans-serif;cursor:default}

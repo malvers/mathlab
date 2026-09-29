@@ -2183,6 +2183,9 @@ const link = (function () {
     function handToggle() {
       hand = !hand;
       if (handBtn) handBtn.setAttribute('aria-pressed', String(hand));
+      // a finger or pen on the board drags the dot - without this the browser takes the drag for panning and
+      // cancels the pointer after a few pixels (deck.css: touch-action)
+      document.documentElement.classList.toggle('laser-armed', hand);
       if (hand) hookLabs(); else handOff();
       toast(hand ? 'Laser an (l)' : 'Laser aus (l)');
     }
@@ -2200,8 +2203,22 @@ const link = (function () {
       helpBtn.after(handBtn);
     }
     if (!PRESENTER) {
+      // pointerdown too: a finger or pen puts the dot where it lands, not only once it moves (Doc, 29.09.2026:
+      // "auf dem HP bewegt sich der Laser nicht mit dem stift/Finger?")
+      function handEv(e) { handAt(e.clientX, e.clientY, !(e.target && e.target.closest && e.target.closest('#deck'))); }
+      addEventListener('pointerdown', handEv, true);
+      addEventListener('pointermove', handEv, true);
+      // pointing with a finger or pen is a drag - lifting it must not turn the page
+      let down = null, dragged = false;
+      addEventListener('pointerdown', function (e) {
+        down = hand && e.pointerType !== 'mouse' ? { x: e.clientX, y: e.clientY } : null;
+        dragged = false;
+      }, true);
       addEventListener('pointermove', function (e) {
-        handAt(e.clientX, e.clientY, !(e.target && e.target.closest && e.target.closest('#deck')));
+        if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 12) dragged = true;
+      }, true);
+      addEventListener('click', function (e) {
+        if (dragged) { dragged = false; e.stopImmediatePropagation(); e.preventDefault(); }
       }, true);
       document.addEventListener('mouseout', function (e) { if (!e.relatedTarget) handOff(); });   // out of the window
       painted.push(function () { if (hand) hookLabs(); });
@@ -2322,8 +2339,7 @@ const link = (function () {
       if (fsOn()) { presFull = true; return; }
       if (!presFull) return;
       presFull = false;
-      send({ t: 'end' });
-      setTimeout(function () { window.close(); }, 80);
+      endShow();
       return;
     }
     if (fsOn() || !showing || Date.now() - showAt < 1500) return;
@@ -2331,12 +2347,15 @@ const link = (function () {
     send({ t: 'end' });
     linked = false; mine = false; peer = null;
   });
+  function endShow() {                               // presenter: Esc, leaving fullscreen or the end button in the bar
+    send({ t: 'end' });
+    setTimeout(function () { window.close(); }, 80);   // let the message leave first
+  }
   if (PRESENTER) addEventListener('keydown', function (e) {
     if (e.key !== 'Escape' || e.metaKey || e.ctrlKey || e.altKey) return;
     const j = document.getElementById('jump');
     if (j && !j.hidden) return;                      // Esc first drops a typed slide number
-    send({ t: 'end' });
-    setTimeout(function () { window.close(); }, 80);   // let the message leave first
+    endShow();
   }, true);   // capture: before the slide-number handler clears its box; an open overview still gets Esc first
 
   function presenterView() {
@@ -2353,7 +2372,9 @@ const link = (function () {
       + '<button type="button" class="p-pause"></button>'
       + '<button type="button" class="p-reset" title="Timer neu starten" aria-label="Timer neu starten">' + svg(RESET) + '</button>'
       + '<button type="button" class="p-ov" title="Übersicht aller Folien (o)" aria-label="Übersicht aller Folien"></button>'
-      + '<span class="p-clock" title="Uhrzeit"></span></div>'
+      + '<span class="p-clock" title="Uhrzeit"></span>'
+      + '<button type="button" class="p-end-btn" title="Präsentation beenden (Esc)" aria-label="Präsentation beenden">'
+      + svg('<path d="M18 6 6 18M6 6l12 12"/>') + '</button></div>'
       + '<div class="p-cur"><div class="p-fit" title="Klick: weiter"><div class="p-frame"></div></div>'
       + '<div class="p-nav"><button type="button" class="p-prev" title="Zurück" aria-label="Zurück">' + svg('<path d="m15 5-7 7 7 7"/>') + '</button>'
       + '<div class="p-pos"><span class="p-count"></span><div class="p-prog"><i></i></div></div>'
@@ -2564,6 +2585,8 @@ const link = (function () {
       showPause(); tick();
     };
     q('.p-reset').onclick = function () { acc = 0; t0 = Date.now(); tick(); };
+    // Esc without a keyboard (Doc, 29.09.2026: "im Presentermode brauch ich noch einen ESC bzw. beenden button")
+    q('.p-end-btn').onclick = endShow;
     // the overview over everything, here too (Doc, 17.09.2026: "auch im Presenter den Overview possible") - the
     // deck's own grid button sits in the hidden HUD, this one borrows its icon and its click
     const ovBtn = document.getElementById('ovbtn');
