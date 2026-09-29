@@ -6,12 +6,12 @@
 #v-canvas-wrap.zr-buehne { container-type: size; display: flex; flex-direction: column; }
 .zr-mitte {
     /* one cell size for board and strip: from the stage's width and height (--cols, --rows set by the lab) */
-    --c: min(86px, calc((100cqw - 32px) / (var(--cols, 6) * 1.12)), calc((100cqh - 194px) / (var(--rows, 3) + 2.6)));
+    --c: min(86px, calc((100cqw - 32px) / (var(--cols, 6) * 1.12)), calc((100cqh - 206px) / (var(--rows, 3) + 3.1)));
     /* the board's width - the digit strip below spans exactly that, but never gets narrower than ten fingertips */
     --breite: max(calc(var(--cols, 6) * var(--c) * 1.12 - var(--c) * 0.12), min(calc(100cqw - 32px), 460px));
     position: relative; z-index: 1; flex: 1 1 auto; min-height: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: clamp(14px, 4cqh, 30px); padding: 16px 16px 106px;
+    gap: clamp(14px, 4cqh, 30px); padding: 16px 16px 118px;
 }
 
 /* ---- the sum ---- */
@@ -55,10 +55,13 @@
 .zr-brett.zr-formel { display: block; font-size: min(46px, calc(100cqw / 16), calc(100cqh / 7)); color: #e6ecf5; }
 
 /* ---- digits 0 to 9 and who has them: square digits, the letter in a pill below, as wide as the board ---- */
-.zr-mitte.formel { --breite: min(calc(100cqw - 32px), 620px); --c: min(64px, calc((100cqh - 194px) / 4)); }
+.zr-mitte.formel { --breite: min(calc(100cqw - 32px), 620px); --c: min(64px, calc((100cqh - 206px) / 4.5)); }
 .zr-leiste {
     --f: calc(var(--breite) * 0.082);                /* ten boxes and nine gaps of a fifth box fill the width */
     width: var(--breite); display: grid; grid-template-columns: repeat(10, 1fr); column-gap: calc(var(--breite) * 0.02);
+    /* half a board tile lower, the sum stays where it is (Doc, 29.09.2026: "die Hälfte der Höhe einer Kachel") -
+       the half tile is reserved in --c above */
+    translate: 0 calc(var(--c) * 0.5);
 }
 .zr-f { display: flex; flex-direction: column; align-items: stretch; gap: calc(var(--f) * 0.12); }
 .zr-fq {
@@ -90,8 +93,10 @@
 
 /* ---- step navigation at the foot of the stage ---- */
 .zr-fuss {
-    position: absolute; z-index: 2; left: 0; right: 0; bottom: 8px;
-    display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0 12px;
+    /* the step bar lifted off the stage's lower edge, "Grundlagen erklären" apart from it below (Doc, 29.09.2026:
+       "nicht so geklatscht", "weiter runter klebt dran") - the bar stays where it is, .zr-mitte keeps its room */
+    position: absolute; z-index: 2; left: 0; right: 0; bottom: 12px;
+    display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 0 12px;
 }
 .zr-nav { display: flex; align-items: center; justify-content: center; gap: 8px; }
 /* "Grundlagen erklären" under the step bar, in the stage's colours instead of the panel's cyan (Doc, 29.09.2026:
