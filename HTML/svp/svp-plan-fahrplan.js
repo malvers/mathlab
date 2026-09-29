@@ -110,6 +110,7 @@ window.svpPlanParts.push(function (P) {
         blatt.appendChild(feld);
         kopf.appendChild(svpFmtBar.build({
             target: feld,
+            emojis: ['😀', '😎', '👍', '🤔'],    // Doc, 29.09.2026: "ein paar übliche Smileys, die cool sind", "ein paar weniger", 🎉 -> 🤔
             colors: [
                 ['rgb(176, 36, 24)', 'Rot (\u03a5)'],
                 ['rgb(121, 158, 49)', 'Gr\u00fcn (\u03c6)'],

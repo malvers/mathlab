@@ -81,8 +81,10 @@ RELOAD_JS = r"""// Live reload - only on Doc's machine: serve.py puts this into 
 (function () {
   if (window.__liveReload) return;
   const page = location.pathname;
+  // not [contenteditable="false"]: the Fahrplan sheet keeps the focus while it is only read, with exactly that -
+  // and waited for ever as if typed in (Doc, 29.09.2026: "wenn dieses Panel auf ist, kommt nichts")
   const TYPING = 'input:not([type]),input[type=text],input[type=search],input[type=number],input[type=password],'
-    + 'input[type=email],input[type=url],textarea,[contenteditable]';
+    + 'input[type=email],input[type=url],textarea,[contenteditable]:not([contenteditable="false"])';
   let first = null, firstRefs = '';
   // What the page really loaded - including the scripts another script pulled in (svp-plan.js writes its parts with
   // document.write; nothing in the HTML names them). Same origin and only .js/.mjs/.css: the server watches nothing

@@ -1,5 +1,5 @@
-// A formatting bar for a contenteditable: bold, italic, underline, a few text colours, a marker
-// and "Tx" to take it all off again. Shared, so every rich box in the SVP looks and behaves the
+// A formatting bar for a contenteditable: optional smileys to type, bold, italic, underline, a few
+// text colours, a marker and "Tx" to take it all off again. Shared, so every rich box in the SVP looks and behaves the
 // same (Doc, 23.09.2026, for the Fahrplan sheet: "wenn ich in der Editbox bin paar Farben Bold
 // etc."). notes.html still carries an older twin of this bar inline.
 //
@@ -16,7 +16,8 @@
     /* The tags a stored line may carry, and what they are normalised to. */
     const MARKS = { B: 'b', STRONG: 'b', I: 'i', EM: 'i', U: 'u', S: 's', STRIKE: 's', DEL: 's' };
 
-    /* opts.colors:   [[css colour, name], ...] - one dot per entry, in this order
+    /* opts.emojis:   ['😀', ...] - one button each, in front of B, typing it at the caret
+       opts.colors:   [[css colour, name], ...] - one dot per entry, in this order
        opts.marker:   background colour of the marker button (omit for no marker)
        opts.target:   the contenteditable the bar works on; the marks light up while the
                       selection in it carries them
@@ -60,6 +61,12 @@
             try { document.execCommand(cmd, false, value === undefined ? null : value); } catch (e) { /* not in an editable */ }
         }
 
+        /* Doc, 29.09.2026 (Fahrplan): "vor das Bold, einfach ein paar übliche Smileys, die cool sind" - each
+           button shows the character it types (content, not an icon); insertText keeps undo and the caret */
+        (opts.emojis || []).forEach(function (e) {
+            mk('<span class="fmtbar-emoji">' + e + '</span>', e + ' einfügen', '', function () { exec('insertText', e); })
+                .classList.add('fmtbar-emo');
+        });
         mk('<b>B</b>', 'Fett (Cmd+B)', 'bold', mark('bold'));
         mk('<i>I</i>', 'Kursiv (Cmd+I)', 'italic', mark('italic'));
         mk('<u>U</u>', 'Unterstrichen (Cmd+U)', 'underline', mark('underline'));
