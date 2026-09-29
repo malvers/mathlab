@@ -727,6 +727,7 @@ fromHash();
 // the Supabase edge functions, never here (Rule 21) - the shared password gates the proxy and is
 // remembered per device in localStorage 'dev_access', the same key solita.html uses.
 (function () {
+  const DECK_JS = (document.currentScript && document.currentScript.src) || location.href;
   const box = document.getElementById('ask');
   if (!box) return;
   const AI_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/claude';
@@ -1180,114 +1181,23 @@ fromHash();
   }
   window.askSolitaContext = context;   // debug: askSolitaContext('F15?') shows exactly what goes out
 
+  // Word spans, formulas as words and the karaoke live in js/solita-karaoke.js since 29.09.2026 - one place for the
+  // decks and the labs' Solita (js/solita-frage.js) (Doc: "das word hiliting wie im Deck (zentralisieren!)"). deck.js
+  // loads it itself, so no deck page needs a new line - and a deck page still in the browser's cache gets it too.
+  // Everything here is needed only once an answer comes, long after the file has arrived; should it be missing
+  // after all, the answer still shows, only without the light.
+  if (!window.SolitaKaraoke && !document.querySelector('script[src*="solita-karaoke.js"]')) {
+    const s = document.createElement('script');
+    s.src = new URL('../js/solita-karaoke.js', DECK_JS).href;
+    document.head.appendChild(s);
+  }
+  const SK = function () { return window.SolitaKaraoke; };
   function render(el, text) {       // formulas the model wrote in $...$ come out as real maths
-    el.textContent = '';
-    el.dataset.src = text;                          // "Kopieren" takes the text as written, $...$ and all
-    String(text).split(/(\$[^$\n]+\$)/).forEach(function (part) {
-      if (/^\$[^$\n]+\$$/.test(part)) {
-        const span = document.createElement('span');
-        try { katex.render(part.slice(1, -1), span, { throwOnError: false, displayMode: false }); }
-        catch (e) { span.textContent = part; }
-        // the whole formula is one word for the karaoke, and it knows how long it takes to say: since the voice
-        // reads formulas, leaving them out let everything after them run ahead (Doc, 23.09.2026: "das Hiliting
-        // kommt durch die Formel durcheinander")
-        span.className = 'ask-w'; span.dataset.spoken = texWords(part.slice(1, -1));
-        el.appendChild(span);
-      } else if (part) {                          // one span per word, so her voice can light it up
-        part.split(/(\s+)/).forEach(function (tok) {
-          if (!tok) return;
-          if (/^\s+$/.test(tok)) { el.appendChild(document.createTextNode(tok)); return; }
-          const w = document.createElement('span');
-          w.className = 'ask-w'; w.textContent = tok;
-          el.appendChild(w);
-        });
-      }
-    });
+    if (SK()) SK().render(el, text);
+    else { el.textContent = text; el.dataset.src = text; }
   }
-
-  // Karaoke (Doc, 16.09.2026): the word Solita is saying lights up. Google returns no word timestamps
-  // for Studio voices - they do not support SSML <mark> - so the times are ESTIMATED: syllables per
-  // word, a pause after commas and sentence ends, spread over the length of the audio. Measured on
-  // 16.09.2026 against Studio-C syntheses of the answer cut off after every word: mean error 0.13 s,
-  // worst 0.24 s, on an answer the weights were NOT tuned on. Letters instead of syllables were twice
-  // as far off, and anchoring on the pauses found in the audio made it worse, not better.
-  // lead/tail: the silence Google puts before and after the speech (measured 0.10 s and 0.09 s).
-  const KARA = { lead: 0.10, tail: 0.09, base: 0.3, sentence: 1.5, comma: 0.6 };
-  // Syllables of what is SAID, token by token: a number counts as its German words ("216000" = zwei-hun-dert-sech-
-  // zehn-tau-send), decimals digit by digit after "Komma". Before 25.09.2026 a formula span like "1 plus 24 durch 60"
-  // counted only plus and durch, and a bare number 1.5 per digit - the light ran ahead over every formula (Doc: "out of
-  // sync"). Measured on a formula-heavy answer against Studio-C cut off after every word: mean error 0.20 s -> 0.13 s,
-  // worst 0.72 s -> 0.43 s. Anchoring on the pauses in the audio was tried again and doubled the error (0.40 s).
-  const UNIT = [1, 1, 1, 1, 1, 1, 1, 2, 1, 1];     // null eins zwei drei vier fünf sechs sieben acht neun
-  function below100(n) {
-    if (n < 10) return UNIT[n];
-    if (n < 13) return 1;                            // zehn elf zwölf
-    if (n < 20) return n === 16 || n === 17 ? 2 : UNIT[n - 10] + 1;
-    const u = n % 10;
-    return 2 + (u ? UNIT[u] + 1 : 0);                // zwanzig ... / einundzwanzig
-  }
-  function numSyl(n) {
-    if (n === 0) return 1;
-    if (n >= 1000000) return 6;
-    let s = 0;
-    const th = Math.floor(n / 1000), h = Math.floor(n % 1000 / 100), r = n % 100;
-    if (th) s += (th === 1 ? 1 : numSyl(th)) + 2;    // (ein)tausend
-    if (h) s += (h === 1 ? 1 : UNIT[h]) + 2;          // (ein)hundert
-    if (r) s += below100(r);
-    return s;
-  }
-  function syllables(w) {
-    let s = 0;
-    w.split(/\s+/).forEach(function (t) {
-      const m = t.match(/^\D*?(\d+)(?:([,.])(\d+))?\D*$/);
-      if (m) {
-        if (m[2] === '.' && m[3].length === 3) { s += numSyl(+(m[1] + m[3])); return; }   // 3.800 - a thousands dot
-        s += numSyl(+m[1]);
-        if (m[3]) s += 2 + m[3].split('').reduce(function (a, c) { return a + UNIT[+c]; }, 0);   // Komma, digit by digit
-        return;
-      }
-      const v = t.toLowerCase().match(/[aeiouyäöü]+/g);
-      if (v) s += v.length;
-    });
-    return s;
-  }
-  function karaoke(el, a, spans) {                // spans: a piece's share of the answer (default: all of it)
-    const items = [];
-    let pos = 0;
-    (spans || el.querySelectorAll('.ask-w')).forEach(function (sp) {
-      const w = (sp.dataset.spoken || sp.textContent).replace(/[*_`#>]/g, '');   // a formula counts as what is said of it
-      const k = w.split(/\s+/).filter(Boolean).length || 1;   // a formula is several words in one span
-      const n = syllables(w);
-      if (n) { items.push({ sp: sp, s: pos, n: n, k: k }); pos += n + KARA.base * k; }
-      if (/[.!?]["')\]]*$/.test(w)) pos += KARA.sentence;
-      else if (/[,;:]["')\]]*$/.test(w)) pos += KARA.comma;
-    });
-    if (!items.length) return;
-    const last = items[items.length - 1];
-    const total = last.s + last.n + KARA.base * last.k;
-    let on = null;
-    function mark(sp) {
-      if (sp === on) return;
-      if (on) on.classList.remove('on');
-      on = sp;
-      if (!sp) return;
-      sp.classList.add('on');
-      // her word stays in the middle of the box, as far as the scroll range allows (Doc, 23.09.2026)
-      const r = sp.getBoundingClientRect(), o = out.getBoundingClientRect();
-      const want = out.scrollTop + (r.top + r.bottom) / 2 - (o.top + o.bottom) / 2;
-      if (Math.abs(want - out.scrollTop) > 2) out.scrollTo({ top: want, behavior: 'smooth' });
-    }
-    function frame() {
-      if (audio !== a || a.paused) { mark(null); return; }   // stopped, closed or finished
-      if (isFinite(a.duration) && a.duration > 0) {
-        const u = (a.currentTime - KARA.lead) / Math.max(0.1, a.duration - KARA.lead - KARA.tail) * total;
-        let i = -1;
-        while (i + 1 < items.length && items[i + 1].s <= u) i++;
-        mark(i >= 0 ? items[i].sp : null);
-      }
-      requestAnimationFrame(frame);
-    }
-    a.addEventListener('playing', function () { requestAnimationFrame(frame); });
+  function karaoke(el, a, spans) {  // spans: a piece's share of the answer (default: all of it)
+    if (SK()) SK().spielen(el, a, spans, { box: out, aktiv: function () { return audio === a; } });
   }
 
   // Solita's own voice via the tts edge function. NO browser-voice fallback (Doc: "NIEMALS
@@ -1299,28 +1209,7 @@ fromHash();
   // The full path TeX -> KaTeX MathML -> Speech Rule Engine only runs offline (HTML/js/latex-speech.js feeds the
   // recorded page formeln-vorlesen.html); here a short rewrite turns school formulas into German words. Numbers stay
   // digits - the voice says them in German by itself ("10 hoch 11" comes out as "zehn hoch elf").
-  const TEX_SIGNS = [
-    [/\\left|\\right|\\displaystyle|\\limits|\\!|\\,|\;|\\:|\\ /g, ' '],
-    [/\\(?:mathrm|mathbf|mathit|boldsymbol|bm|operatorname|text|textbf|mathsf)\s*\{([^{}]*)\}/g, ' $1 '],
-    [/\\sqrt\s*\[\s*([^\]]*)\]\s*\{([^{}]*)\}/g, ' $1-te Wurzel aus $2 '],
-    [/\\sqrt\s*\{([^{}]*)\}/g, ' Wurzel aus $1 '],
-    [/\\d?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, ' $1 durch $2 '],
-    [/\{\s*,\s*\}/g, ','],                           // 0{,}5 is one number: "null Komma fünf", not "null , fünf"
-    [/\^\s*\{?\\circ\}?/g, ' Grad '],                // before the general power, which would eat the \c of \circ
-    [/\\(sum|prod|int)\s*_\s*\{?([^{}\s]*)\}?\s*\^\s*\{?([^{}\s]*)\}?/g,
-     (m, w, a, b) => ' ' + { sum: 'Summe', prod: 'Produkt', int: 'Integral' }[w] + ' von ' + a + ' bis ' + b + ' '],
-    [/\^\s*\{([^{}]*)\}/g, ' hoch $1 '], [/\^\s*\\?(\w)/g, ' hoch $1 '],
-    [/_\s*\{([^{}]*)\}/g, ' Index $1 '], [/_\s*\\?(\w)/g, ' Index $1 '],
-    [/\\cdot|\\times|\\ast/g, ' mal '], [/\\div/g, ' geteilt durch '], [/\\pm/g, ' plus minus '],
-    [/\\approx/g, ' ungefähr '], [/\\neq|\\ne\b/g, ' ungleich '], [/\\leq|\\le\b/g, ' kleiner gleich '],
-    [/\\geq|\\ge\b/g, ' größer gleich '], [/\\ll\b/g, ' viel kleiner '], [/\\gg\b/g, ' viel größer '],
-    [/\\infty/g, ' unendlich '], [/\\sum/g, ' Summe '], [/\\prod/g, ' Produkt '], [/\\int/g, ' Integral '],
-    [/\\partial/g, ' partiell '], [/\\nabla/g, ' Nabla '], [/\\circ\b/g, ' Grad '], [/\\%|%/g, ' Prozent '],
-    [/\\(?:rightarrow|to|Rightarrow|implies)\b/g, ' ergibt '], [/\\(?:ldots|cdots|dots)/g, ' und so weiter '],
-    [/\\in\b/g, ' aus '], [/\\cap\b/g, ' und '], [/\\cup\b/g, ' oder '], [/\\mid\b/g, ' unter der Bedingung '],
-    [/\\(alpha|beta|gamma|delta|epsilon|zeta|eta|theta|kappa|lambda|mu|nu|xi|pi|rho|sigma|tau|phi|chi|psi|omega)/gi,
-     (m, g) => ' ' + g.charAt(0).toUpperCase() + g.slice(1) + ' ']
-  ];
+  // the list itself: js/solita-karaoke.js (TEX_SIGNS)
   // The invitation in the field, as long as it fits - on a narrow screen the short form, never a cut sentence
   // (Doc, 23.09.2026: "oder zum gesamten Deck").
   const HINTS = ['Frag Solita zur Folie oder zum gesamten Deck', 'Frag Solita zur Folie oder zum Deck', 'Frag Solita'];
@@ -1334,57 +1223,16 @@ fromHash();
     pen.font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
     input.placeholder = HINTS.find(function (t) { return pen.measureText(t).width <= room; }) || HINTS[HINTS.length - 1];
   }
-  function texWords(tex) {
-    let t = ' ' + String(tex) + ' ';
-    for (let i = 0; i < 4; i++) TEX_SIGNS.forEach(function (r) { t = t.replace(r[0], r[1]); });   // unwrap nested braces
-    t = t.replace(/([a-zA-Z])\s*\(/g, '$1 von (')     // f(x) is "f von x", not "f Klammer auf x"
-         .replace(/[{}()[\]]/g, ' ')
-         .replace(/\\[a-zA-Z]+/g, ' ')                // anything this list does not know stays silent
-         .replace(/=/g, ' gleich ').replace(/\+/g, ' plus ').replace(/(\d|\w)\s*-\s*(?=[\w\\])/g, '$1 minus ')
-         .replace(/</g, ' kleiner ').replace(/>/g, ' größer ').replace(/\|/g, ' ');
-    return t.replace(/\s+/g, ' ').trim();
-  }
+  function texWords(tex) { return SK() ? SK().texWords(tex) : String(tex); }
   const TTS_WAIT = 20000;                            // ms - a hanging voice must not hide the answer
   // What the voice is given: formulas as words, no emoji or markdown.
-  function cleanOf(text) {
-    return String(text)
-        .replace(/\$\$([\s\S]*?)\$\$/g, function (m, t) { return ' ' + texWords(t) + ' '; })   // maths is read too
-        .replace(/\$([^$\n]*?)\$/g, function (m, t) { return ' ' + texWords(t) + ' '; })
-        .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}️‍]/gu, '')
-        .replace(/[*_`#>]/g, '')
-        .replace(/\s+/g, ' ').trim();
-  }
+  function cleanOf(text) { return SK() ? SK().sprechbar(text) : String(text).replace(/\s+/g, ' ').trim(); }
   // Doc's voice needs ~5 s for a sentence and 16 s for a long answer, past the tts function's 15 s (then Studio-C
   // steps in). So it comes sentence by sentence: the first piece at once, the next fetched while one plays, played on
   // without a gap (Doc, 25.09.2026, forloop-73's proposal). Pieces end at sentence ends outside $...$, so each one
   // renders into exactly its share of the answer's word spans - the karaoke runs piece by piece over those.
-  function pieces(text) {
-    const src = String(text), ends = [];
-    let inMath = false;
-    for (let i = 0; i < src.length; i++) {
-      const ch = src[i];
-      if (ch === '$') inMath = !inMath;
-      else if (!inMath && /[.!?]/.test(ch) && (i + 1 === src.length || /\s/.test(src[i + 1]))) ends.push(i + 1);
-    }
-    const out = [];
-    let from = 0, cur = '';
-    ends.concat(src.length).forEach(function (e) {
-      if (e <= from) return;
-      cur += src.slice(from, e); from = e;
-      const want = out.length ? 120 : 60;            // a short first piece: the voice starts sooner
-      if (cur.trim().length >= want) { out.push(cur.trim()); cur = ''; }
-    });
-    if (cur.trim()) { if (out.length && cur.trim().length < 40) out[out.length - 1] += ' ' + cur.trim(); else out.push(cur.trim()); }
-    return out;
-  }
-  function wordsIn(raw) {                             // how many .ask-w spans render() makes of this text
-    let n = 0;
-    String(raw).split(/(\$[^$\n]+\$)/).forEach(function (part) {
-      if (/^\$[^$\n]+\$$/.test(part)) n++;
-      else if (part) n += part.split(/\s+/).filter(Boolean).length;
-    });
-    return n;
-  }
+  function pieces(text) { return SK() ? SK().stuecke(text) : [String(text)]; }
+  function wordsIn(raw) { return SK() ? SK().woerter(raw) : String(raw).split(/\s+/).filter(Boolean).length; }
   function speak(text, show) {
     let shown = false, el = null;
     function once() { if (!shown) { shown = true; el = show(); } }

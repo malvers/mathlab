@@ -42,70 +42,23 @@
         aus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 5 6"/><path d="m21 9-5 6"/></svg>',
     };
 
-    // ---- formulas as words for her voice (from decks/deck.js, TEX_SIGNS / texWords) --------------------------
-    // Numbers stay digits — the voice says them in German by itself. Additions for the labs: a column sum written
-    // as \begin{array} ... \hline reads "9567 plus 1085 gleich 10652".
-    const TEX_SIGNS = [
-        [/\\begin\{array\}\{[^}]*\}|\\end\{array\}/g, ' '], [/\\hline/g, ' gleich '], [/\\\\/g, ' '],
-        [/\\left|\\right|\\displaystyle|\\limits|\\!|\\,|\\;|\\:|\\ |\\qquad|\\quad|\\big|\\Big/g, ' '],
-        [/\\mkern-?[\d.]+mu/g, ' '],
-        [/\\(?:mathrm|mathbf|mathit|boldsymbol|bm|operatorname|text|textbf|textrm|textup|mathsf)\s*\{([^{}]*)\}/g, ' $1 '],
-        [/\\overset\s*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}\s*\{([^{}]*)\}/g, ' $1 '],
-        [/\\sqrt\s*\[\s*([^\]]*)\]\s*\{([^{}]*)\}/g, ' $1-te Wurzel aus $2 '],
-        [/\\sqrt\s*\{([^{}]*)\}/g, ' Wurzel aus $1 '],
-        [/\\d?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, ' $1 durch $2 '],
-        [/\{\s*,\s*\}/g, ','],
-        [/\^\s*\{([^{}]*)\}/g, ' hoch $1 '], [/\^\s*\\?(\w)/g, ' hoch $1 '],
-        [/_\s*\{([^{}]*)\}/g, ' Index $1 '], [/_\s*\\?(\w)/g, ' Index $1 '],
-        [/\\cdot|\\times|\\ast/g, ' mal '], [/\\div/g, ' geteilt durch '], [/\\pm/g, ' plus minus '],
-        [/\\approx/g, ' ungefähr '], [/\\neq|\\ne\b/g, ' ungleich '], [/\\leq|\\le\b/g, ' kleiner gleich '],
-        [/\\geq|\\ge\b/g, ' größer gleich '], [/\\(?:ldots|cdots|dots)/g, ' und so weiter '],
-        [/\\(?:rightarrow|to|Rightarrow|implies)\b/g, ' ergibt '], [/\\%|%/g, ' Prozent '],
-    ];
-    function texWords(tex) {
-        let t = ' ' + String(tex) + ' ';
-        for (let i = 0; i < 4; i++) TEX_SIGNS.forEach(function (r) { t = t.replace(r[0], r[1]); });   // unwrap nested braces
-        t = t.replace(/[{}()[\]]/g, ' ')
-             .replace(/\\[a-zA-Z]+/g, ' ')                 // anything this list does not know stays silent
-             .replace(/=/g, ' gleich ').replace(/\+/g, ' plus ').replace(/(\d|\w)\s*-\s*(?=[\w\\])/g, '$1 minus ')
-             .replace(/(^|\s)-\s*(?=\w)/g, '$1 minus ')
-             .replace(/</g, ' kleiner ').replace(/>/g, ' größer ').replace(/\|/g, ' ');
-        return t.replace(/\s+/g, ' ').trim();
-    }
-    // What the voice is given: tags gone, formulas as words, no emoji or markdown.
-    function sprechbar(text) {
-        return String(text)
-            .replace(/<\/(p|li|h\d|tr|div)>/gi, '. ').replace(/<br\s*\/?>/gi, '. ').replace(/<[^>]+>/g, ' ')
-            .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-            .replace(/\$\$([\s\S]*?)\$\$/g, function (m, t) { return ' ' + texWords(t) + '. '; })
-            .replace(/\$([^$\n]*?)\$/g, function (m, t) { return ' ' + texWords(t) + ' '; })
-            .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}️‍]/gu, '')
-            .replace(/[*_`#>]/g, '')
-            .replace(/\s+([.,;:!?])/g, '$1').replace(/([.!?])\s*\.(\s|$)/g, '$1$2').replace(/^\s*\.\s*/, '')
-            .replace(/\s+/g, ' ').trim();
-    }
-
-    // formulas the model wrote in $...$ or $$...$$ come out as real maths; paragraphs at blank lines
+    // Word spans, formulas as words, the voice's text and the karaoke: js/solita-karaoke.js, shared with the decks
+    // (Doc, 29.09.2026: "das word hiliting wie im Deck (zentralisieren!)"). The page loads it before this file.
+    const SK = function () { return global.SolitaKaraoke; };
+    const WORT = 'sf-w';                            // class of a word span in the answers
     function render(el, text) {
-        el.textContent = '';
-        el.dataset.src = text;                          // "Kopieren" takes the text as written, $...$ and all
-        String(text).split(/\n\s*\n/).forEach(function (absatz) {
-            const p = document.createElement('p');
-            absatz.split(/(\$\$[\s\S]+?\$\$|\$[^$\n]+\$)/).forEach(function (teil) {
-                if (!teil) return;
-                const display = /^\$\$[\s\S]+\$\$$/.test(teil), inline = !display && /^\$[^$\n]+\$$/.test(teil);
-                if (!display && !inline) { p.appendChild(document.createTextNode(teil)); return; }
-                const span = document.createElement(display ? 'div' : 'span');
-                const tex = display ? teil.slice(2, -2) : teil.slice(1, -1);
-                try { global.katex.render(tex, span, { throwOnError: false, displayMode: display }); }
-                catch (e) { span.textContent = teil; }
-                p.appendChild(span);
-            });
-            el.appendChild(p);
-        });
+        if (SK()) SK().render(el, text, { absaetze: true, wort: WORT });
+        else { el.textContent = text; el.dataset.src = text; }
     }
+    function sprechbar(text) { return SK() ? SK().sprechbar(text) : String(text).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(); }
 
     function pwd() { try { return localStorage.getItem('dev_access') || ''; } catch (e) { return ''; } }
+    // A password as it comes from the clipboard: without the invisible passengers a copy brings along - line breaks,
+    // no-break spaces, zero-width and direction marks - and without spaces at either end
+    function sauber(t) {
+        return String(t || '').replace(/[\u00AD\u200B-\u200F\u2028-\u202E\u2060-\u2064\uFEFF\r\n\t]/g, '')
+            .replace(/^[\s\u00A0]+|[\s\u00A0]+$/g, '');
+    }
     function lies(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
     function merke(key, v) { try { localStorage.setItem(key, v); } catch (e) { } }
     // Every call is a CORS "simple request": no custom headers, the password rides in the body (see deck.js:
@@ -123,7 +76,6 @@
         root.className = 'sf';
         root.innerHTML =
             '<div class="sf-out" aria-live="polite"></div>' +
-            '<div class="sf-chips"></div>' +
             '<div class="sf-row">' +
             '  <img class="sf-face" src="' + SOLITA_PIC + '" alt="Solita">' +
             '  <label class="sf-vh" for="sf-in-' + nr + '">Deine Frage an Solita</label>' +
@@ -132,6 +84,7 @@
             '  <button class="sf-stop" type="button" hidden title="Stimme anhalten" aria-label="Stimme anhalten">' + ICON.stop + '</button>' +
             '  <button class="sf-send" type="button" title="Frage senden" aria-label="Frage senden">' + ICON.send + '</button>' +
             '</div>' +
+            '<div class="sf-chips"></div>' +             // the ready-made questions under the line (Doc, 29.09.2026)
             '<div class="sf-note" hidden></div>';
         host.appendChild(root);
         const out = root.querySelector('.sf-out');
@@ -184,6 +137,17 @@
                 e.stopPropagation();                         // typing must not turn the lab's steps
                 if (e.key === 'Enter') { e.preventDefault(); submit(); }
             });
+            // The password from the clipboard (Doc, 29.09.2026: "im Clip steht das pwd ... geht aba ni", "pwd fixen
+            // (clip)"): the pasted text REPLACES the field - Chrome may have filled in another saved password for this
+            // address before, and the paste only hung itself onto it - is cleaned and checked at once.
+            input.addEventListener('paste', function (e) {
+                if (input.type !== 'password') return;
+                const t = e.clipboardData && e.clipboardData.getData('text');
+                if (t == null) return;
+                e.preventDefault();
+                input.value = sauber(t);
+                submit();
+            });
         }
         bindInput();
         function askPassword() {
@@ -199,18 +163,33 @@
                 const fresh = input.cloneNode(false);
                 input.replaceWith(fresh); input = fresh; bindInput();
             }
-            input.type = 'text'; input.value = ''; input.placeholder = PLATZ;
+            input.type = 'text'; input.value = ''; hint();
             input.setAttribute('autocomplete', 'off');
             input.removeAttribute('aria-label');
             sendBtn.innerHTML = ICON.send; sendBtn.setAttribute('aria-label', 'Frage senden');
             micBtn.hidden = !(global.SpeechRecognition || global.webkitSpeechRecognition);
             chips.hidden = false;
         }
+        // The invitation in the field, as long as it fits - on a narrow field the short form, never a cut sentence
+        // (the decks' rule, Doc 23.09.2026)
+        let pen = null;
+        function hint() {
+            if (input.type === 'password') return;
+            const liste = [PLATZ, 'Frag Solita'];
+            const cs = getComputedStyle(input);
+            const room = input.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 2;
+            if (!(room > 0)) { input.placeholder = liste[0]; return; }
+            if (!pen) pen = document.createElement('canvas').getContext('2d');
+            pen.font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+            input.placeholder = liste.find(function (t) { return pen.measureText(t).width <= room; }) || liste[liste.length - 1];
+        }
+        if (global.ResizeObserver) new ResizeObserver(function () { hint(); }).observe(root);
+        if (document.fonts) document.fonts.ready.then(function () { hint(); });
         if (pwd()) askQuestion(); else askPassword();
         sendBtn.addEventListener('click', submit);
 
         function submit() {
-            const v = input.value.trim();
+            const v = input.type === 'password' ? sauber(input.value) : input.value.trim();
             if (!v || busy) return;
             if (ear && ear.active) ear.stop();
             if (!pwd()) {                                    // first use on this device: verify and remember
@@ -219,7 +198,8 @@
                     .then(function (r) {
                         busy = false; sendBtn.disabled = false;
                         out.querySelectorAll('.sf-err').forEach(function (e) { e.remove(); });
-                        if (!r.ok) { say('Passwort stimmt nicht.', 'sf-err'); input.value = ''; return; }
+                        // the length helps to see what arrived - the password itself is never shown
+                        if (!r.ok) { say('Passwort stimmt nicht (' + v.length + ' Zeichen angekommen).', 'sf-err'); input.value = ''; return; }
                         merke('dev_access', v);
                         askQuestion(); input.focus();
                     })
@@ -271,7 +251,7 @@
             function answer(text, zeigen) {                  // the answer she speaks: memory, voice, then on screen
                 hist.push({ q: v, a: text });
                 if (hist.length > HIST_MAX) hist.shift();
-                const auf = function () { fertig(); zeigen(); out.scrollTop = out.scrollHeight; };
+                const auf = function () { fertig(); const el = zeigen(); out.scrollTop = out.scrollHeight; return el; };
                 if (meine !== seq) { auf(); return; }        // something else was read out meanwhile: silent
                 sprich(text, auf);                           // the text shows once her voice has arrived
             }
@@ -293,7 +273,7 @@
                 ask(DS_URL, DS_MODEL)
                     .then(function (res) {
                         if (!res.text) { fail(res.error); return; }
-                        answer(res.text, function () { grau(wait, res.text); });
+                        answer(res.text, function () { grau(wait, res.text); return wait; });
                     })
                     .catch(function () { fail('Kein Netz.'); });
                 return;
@@ -304,7 +284,7 @@
                         if (res.status === 401) { try { localStorage.removeItem('dev_access'); } catch (e) { } askPassword(); res.error = 'Das Passwort gilt nicht mehr.'; }
                         fail(res.error); herTurn = true; dsShow(); return;
                     }
-                    answer(res.text, function () { render(wait, res.text); herTurn = true; dsShow(); });
+                    answer(res.text, function () { render(wait, res.text); herTurn = true; dsShow(); return wait; });
                 })
                 .catch(function () { fail('Kein Netz.'); herTurn = true; dsShow(); });
         }
@@ -315,8 +295,8 @@
         // zeigen() runs once the voice is there (or not coming). Doc's voice may come back as Studio-C when it is too
         // slow for a long text (j.fallback) - the tts function decides.
         function sprich(text, zeigen) {
-            let shown = false;
-            function once() { if (!shown) { shown = true; if (zeigen) zeigen(); } }
+            let shown = false, el = null;
+            function once() { if (!shown) { shown = true; if (zeigen) el = zeigen(); } }
             const clean = sprechbar(text);
             if (!ttsOn || !clean) { once(); return; }
             const ctl = global.AbortController ? new AbortController() : null;
@@ -332,6 +312,8 @@
                     stop();
                     const a = audio = new Audio('data:' + (j.mime || 'audio/mp3') + ';base64,' + j.audioContent);
                     stopBtn.hidden = false;
+                    // the word she is saying lights up, as in the decks
+                    if (el && SK()) SK().spielen(el, a, null, { wort: WORT, box: out, aktiv: function () { return audio === a; } });
                     a.addEventListener('ended', function () { if (audio === a) { audio = null; stopBtn.hidden = true; } });
                     a.play().catch(function () { stopBtn.hidden = true; });
                 })
@@ -421,6 +403,9 @@
         });
         clearBtn.addEventListener('click', function () { leeren(); menu.hidden = true; input.focus(); });
         root.addEventListener('contextmenu', function (e) {
+            // the field keeps the browser's own menu, to paste - the password from the clipboard (Doc, 29.09.2026:
+            // "im Clip steht das pwd ... geht aba ni")
+            if (e.target.closest && e.target.closest('input, textarea')) return;
             e.preventDefault();
             showWho();
             const sel = getSelection();
