@@ -18,11 +18,31 @@
     // The full path TeX -> KaTeX MathML -> Speech Rule Engine only runs offline (js/latex-speech.js feeds the recorded
     // page formeln-vorlesen.html); here a short rewrite turns school formulas into German words. Numbers stay digits -
     // the voice says them in German by itself ("10 hoch 11" comes out as "zehn hoch elf").
+    // an operation behind its bar ("| -A", "| :2", "| \text{Stellenwerte}") is announced: "Umformung: minus A";
+    // a note in words is said as it is (Doc, 29.09.2026: the lab read "-A" and ":2" bare)
+    function umformung(op) {
+        const o = String(op).trim();
+        if (/^\\text\s*\{/.test(o)) return ' , ' + o + ' . ';
+        const w = o.replace(/^:/, '\\div ').replace(/^-/, '\\minusop ').replace(/^\+/, '\\plusop ').replace(/^\\cdot/, '\\malop ');
+        return ' , \\text{Umformung:} ' + w + ' . ';
+    }
+    // a column sum set as on paper - the sign stands only before the last row, but it goes between all of them
+    function spaltensumme(m, body) {
+        const teile = body.split(/\\hline/);
+        const zeilen = teile[0].split(/\\\\/).map(function (z) { return z.replace(/^\s*(?:\+|\\plus)\s*(?:\\[;,:!]\s*)*/, '').trim(); })
+            .filter(Boolean);
+        return ' ' + zeilen.join(' + ') + (teile[1] ? ' = ' + teile[1].replace(/\\\\/g, ' ').trim() : '') + ' ';
+    }
     const TEX_SIGNS = [
         // the labs (Ziffernrätsel, 29.09.2026): a column sum as \begin{array} ... \hline reads "9567 plus 1085 gleich
-        // 10652", spacing and Vorrechnen's place-value marks say nothing
-        [/\\begin\{array\}\{[^}]*\}|\\end\{array\}/g, ' '], [/\\hline/g, ' gleich '], [/\\\\/g, ' '],
-        [/\\qquad|\\quad|\\big|\\Big|\\;/g, ' '], [/\\mkern-?[\d.]+mu/g, ' '],
+        // 10652"; an aligned block line by line, each line a sentence; spacing and place-value marks say nothing
+        [/\\begin\{array\}\{[^}]*\}([\s\S]*?)\\end\{array\}/g, spaltensumme],
+        [/\\begin\{aligned\}|\\end\{aligned\}/g, ' '],
+        [/(?:\\qquad\s*)?(?:&&\s*)?\\big\|\\;\s*((?:\\text\s*\{[^{}]*\})|[^\\&]*?(?:\\[a-zA-Z]+[^\\&]*?)*?)(?=\\\\|\s*$)/g,
+         function (m, op) { return umformung(op); }],
+        [/\\\\/g, ' . '], [/&/g, ' '],
+        // formulas side by side ("E=5 \\qquad N=6") are said with a pause between them
+        [/\\qquad|\\quad/g, ' , '], [/\\big|\\Big|\\;/g, ' '], [/\\mkern-?[\d.]+mu/g, ' '],
         [/\\overset\s*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}\s*\{([^{}]*)\}/g, ' $1 '],
         // the decks' list, as it stood in deck.js
         [/\\left|\\right|\\displaystyle|\\limits|\\!|\\,|\;|\\:|\\ /g, ' '],
@@ -36,6 +56,7 @@
          (m, w, a, b) => ' ' + { sum: 'Summe', prod: 'Produkt', int: 'Integral' }[w] + ' von ' + a + ' bis ' + b + ' '],
         [/\^\s*\{([^{}]*)\}/g, ' hoch $1 '], [/\^\s*\\?(\w)/g, ' hoch $1 '],
         [/_\s*\{([^{}]*)\}/g, ' Index $1 '], [/_\s*\\?(\w)/g, ' Index $1 '],
+        [/\\minusop/g, ' minus '], [/\\plusop/g, ' plus '], [/\\malop/g, ' mal '],
         [/\\cdot|\\times|\\ast/g, ' mal '], [/\\div/g, ' geteilt durch '], [/\\pm/g, ' plus minus '],
         [/\\approx/g, ' ungefähr '], [/\\neq|\\ne\b/g, ' ungleich '], [/\\leq|\\le\b/g, ' kleiner gleich '],
         [/\\geq|\\ge\b/g, ' größer gleich '], [/\\ll\b/g, ' viel kleiner '], [/\\gg\b/g, ' viel größer '],
@@ -46,23 +67,97 @@
         [/\\(alpha|beta|gamma|delta|epsilon|zeta|eta|theta|kappa|lambda|mu|nu|xi|pi|rho|sigma|tau|phi|chi|psi|omega)/gi,
          (m, g) => ' ' + g.charAt(0).toUpperCase() + g.slice(1) + ' ']
     ];
+    // A capital letter standing alone in a formula goes to the voice by its German name - bare, Solita's Studio voice
+    // read "A + A + A = 1A" as "ö plus ö plus ö ..." (Doc, 29.09.2026). The puzzles' number words come letter by
+    // letter already ("SEND" -> Ess Eh Enn De, "1A" -> eins Ah); lower-case variables stay as they are (x, m, r).
+    const BUCHSTABE = { A: 'Ah', B: 'Be', C: 'Ze', D: 'De', E: 'Eh', F: 'Eff', G: 'Ge', H: 'Ha', I: 'Ih', J: 'Jott', K: 'Ka',
+        L: 'Ell', M: 'Emm', N: 'Enn', O: 'Oh', P: 'Pe', Q: 'Ku', R: 'Err', S: 'Ess', T: 'Te', U: 'Uh', V: 'Fau', W: 'We',
+        X: 'Ix', Y: 'Üpsilon', Z: 'Zett', 'Ä': 'Äh', 'Ö': 'Öh', 'Ü': 'Üh' };
+    // A puzzle's number word (Vorrechnen's Knobeln block writes it letter by letter, \mathrm{S}\mathrm{E}... or
+    // \textup{1}\textrm{A}): with a digit in it, it is read by its place values - "1A" is 1 ten and A ones, "10 plus A",
+    // not "eins A" (Doc, 29.09.2026: "eigentlich müsste man sagen 10 plus A"); "A0B" is "A mal 100 plus B". Letters
+    // alone are spelled ("SEND" -> S E N D) - by place values that would run on and on.
+    function zahlwortLesen(z) {
+        if (!/[A-Z]/.test(z)) return z;
+        if (!/\d/.test(z)) return z.split('').join(' ');
+        const n = z.length, teile = [];
+        z.split('').forEach(function (c, i) {
+            const stelle = Math.pow(10, n - 1 - i);
+            if (/\d/.test(c)) { if (+c) teile.push(String(+c * stelle)); }
+            else teile.push(stelle > 1 ? c + ' mal ' + stelle : c);
+        });
+        return teile.join(' plus ');
+    }
     function texWords(tex) {
         let t = ' ' + String(tex) + ' ';
+        t = t.replace(/(?:\\(?:mathrm|textrm|textup)\s*\{[A-Z0-9]+\})+/g, function (m) {
+            return ' ' + zahlwortLesen(m.replace(/\\(?:mathrm|textrm|textup)\s*\{([A-Z0-9]+)\}/g, '$1')) + ' ';
+        });
         for (let i = 0; i < 4; i++) TEX_SIGNS.forEach(function (r) { t = t.replace(r[0], r[1]); });   // unwrap nested braces
         t = t.replace(/([a-zA-Z])\s*\(/g, '$1 von (')     // f(x) is "f von x", not "f Klammer auf x"
              .replace(/[{}()[\]]/g, ' ')
              .replace(/\\[a-zA-Z]+/g, ' ')                // anything this list does not know stays silent
-             .replace(/=/g, ' gleich ').replace(/\+/g, ' plus ').replace(/(\d|\w)\s*-\s*(?=[\w\\])/g, '$1 minus ')
+             // "ist gleich", as one says it (Doc, 29.09.2026: "A plus A plus A ist gleich ...")
+             .replace(/=/g, ' ist gleich ').replace(/\+/g, ' plus ').replace(/(\d|\w)\s*-\s*(?=[\w\\])/g, '$1 minus ')
              .replace(/</g, ' kleiner ').replace(/>/g, ' größer ').replace(/\|/g, ' ');
-        return t.replace(/\s+/g, ' ').trim();
+        return t.replace(/\s+/g, ' ').trim().split(' ').map(function (w) { return BUCHSTABE[w] || w; }).join(' ');
+    }
+    // A number that ends a sentence is a number, not an ordinal: the voice read "höchstens eine 1." as "erstens"
+    // (Doc, 29.09.2026: "wir müssten hier also noch einen Sentence Segmentizer haben oder eine Heuristik"). Such a
+    // number goes to the voice as a word ("eine eins."). Ordinals stay as they are: after an article or preposition
+    // ("am 1.", "der 3.") and before a month ("1. Juli"); a lower-case word after the dot means no sentence ends there.
+    // Not after "bis" / "ab" / "seit": "von 0 bis 9." came out as "neunte" (Doc) - a date there has its month after it.
+    const EINER = ['null', 'eins', 'zwei', 'drei', 'vier', 'fünf', 'sechs', 'sieben', 'acht', 'neun', 'zehn', 'elf', 'zwölf',
+        'dreizehn', 'vierzehn', 'fünfzehn', 'sechzehn', 'siebzehn', 'achtzehn', 'neunzehn'];
+    const ZEHNER = ['', '', 'zwanzig', 'dreißig', 'vierzig', 'fünfzig', 'sechzig', 'siebzig', 'achtzig', 'neunzig'];
+    function unter100(n) { return n < 20 ? EINER[n] : (n % 10 ? (n % 10 === 1 ? 'ein' : EINER[n % 10]) + 'und' : '') + ZEHNER[Math.floor(n / 10)]; }
+    function unter1000(n) {
+        const h = Math.floor(n / 100), r = n % 100;
+        return (h ? (h === 1 ? 'ein' : EINER[h]) + 'hundert' : '') + (r ? unter100(r) : '');
+    }
+    function zahlwort(n) {
+        if (n === 0) return 'null';
+        const t = Math.floor(n / 1000), r = n % 1000;
+        return (t ? (t === 1 ? 'ein' : unter1000(t)) + 'tausend' : '') + (r ? unter1000(r) : '');
+    }
+    const ORDINAL_DAVOR = new Set(['der', 'die', 'das', 'den', 'dem', 'des', 'am', 'im', 'vom', 'zum', 'zur', 'beim',
+        'jeder', 'jede', 'jedes', 'jeden', 'dieser', 'diese', 'dieses', 'diesen', 'ihr', 'ihre', 'sein', 'seine']);
+    const MONATE = new Set(['januar', 'jänner', 'februar', 'märz', 'april', 'mai', 'juni', 'juli', 'august', 'september',
+        'oktober', 'november', 'dezember']);
+    const SATZANFANG = new Set(['Es', 'Er', 'Sie', 'Das', 'Die', 'Der', 'Den', 'Dem', 'Wir', 'Ich', 'Du', 'Und', 'Aber',
+        'Also', 'Dann', 'Da', 'So', 'Jetzt', 'Nun', 'Hier', 'Nur', 'Auch', 'Mit', 'Wenn', 'Weil', 'Damit', 'Probe']);
+    function satzendZahlen(t) {
+        return t.replace(/(^|[^\d.,])(\d{1,6})\.(?=\s|$)/g, function (m, vor, zahl, i, alles) {
+            const davor = alles.slice(Math.max(0, i - 16), i + vor.length).toLowerCase().match(/([a-zäöüß]+)\s*$/);
+            const danach = alles.slice(i + m.length).match(/^\s+([A-Za-zÄÖÜäöüß]+)/);
+            // "die 1. Es stimmt!" - after an article the dot still ends a sentence when a sentence starts behind it
+            if (davor && ORDINAL_DAVOR.has(davor[1]) && !(danach && SATZANFANG.has(danach[1]))) return m;
+            if (danach && (MONATE.has(danach[1].toLowerCase()) || /^[a-zäöüß]/.test(danach[1]))) return m;
+            return vor + zahlwort(+zahl) + '.';
+        });
     }
     // What the voice is given: formulas as words, no emoji or markdown - and no HTML tags (a lab's step text)
     function sprechbar(text) {
+        return buchstabenNamen(satzendZahlen(ohneFormeln(text))).replace(/:\s*\./g, ':').replace(/,\s*\./g, '.')
+            .replace(/\s+([.,;:!?])/g, '$1').replace(/([.!?])\s*\.+/g, '$1').replace(/\s+/g, ' ').trim();
+    }
+    // a capital letter standing alone in the running text as well ("1 Zehner und A Einer", "N plus R") - German has
+    // no one-letter capital words, so this only meets the letters of a formula or a puzzle
+    function buchstabenNamen(t) {
+        return t.replace(/(^|[\s(„"'–-])([A-ZÄÖÜ])(?=$|[\s,.;:!?)“"'–-])/g, function (m, vor, b) { return vor + (BUCHSTABE[b] || b); });
+    }
+    function ohneFormeln(text) {
         return String(text)
             .replace(/<\/(p|li|h\d|tr|div)>/gi, '. ').replace(/<br\s*\/?>/gi, '. ').replace(/<[^>]+>/g, ' ')
             .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-            .replace(/\$\$([\s\S]*?)\$\$/g, function (m, t) { return ' ' + texWords(t) + ' '; })   // maths is read too
-            .replace(/\$([^$\n]*?)\$/g, function (m, t) { return ' ' + texWords(t) + ' '; })
+            // maths is read too; a formula set off ends like a sentence - a pause before the text goes on
+            .replace(/\$\$([\s\S]*?)\$\$/g, function (m, t) { return ' ' + texWords(t) + '. '; })
+            // "Also ist $M=1$" is "also ist M gleich 1", not "... ist M ist gleich 1"
+            .replace(/\$([^$\n]*?)\$/g, function (m, t, i, alles) {
+                let w = texWords(t);
+                if (/\bist\s*$/.test(alles.slice(Math.max(0, i - 8), i))) w = w.replace(/\bist gleich\b/, 'gleich');
+                return ' ' + w + ' ';
+            })
             .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\uFE0F\u200D]/gu, '')
             .replace(/[*_`#>]/g, '')
             .replace(/\s+([.,;:!?])/g, '$1').replace(/([.!?])\s*\.(\s|$)/g, '$1$2').replace(/^\s*\.\s*/, '')
