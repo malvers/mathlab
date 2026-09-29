@@ -48,6 +48,10 @@
 #v-doc::-webkit-scrollbar-track { background: #060e1c; }
 #v-doc::-webkit-scrollbar-thumb { background: rgba(2, 100, 123, 0.75); border-radius: 5px; }
 #v-doc { scrollbar-width: thin; scrollbar-color: rgba(2, 100, 123, 0.75) #060e1c; }
+/* the scrollbar always there beside the column (Doc, 29.09.2026: "scroll immer sonst springt es (zumindest
+   Platzhalter)") - coming and going with the length of the text, it made the whole column jump by its width.
+   Only where the column scrolls by itself: below 900px the page scrolls, not the column */
+@media (min-width: 901px) { #v-doc { overflow-y: scroll; scrollbar-gutter: stable; } }
 .v-doc-tab { display: none; }
 .v-doc-tab.active { display: block; }
 .v-plan {
