@@ -3,8 +3,8 @@
 window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
-        updateMaterial, removeMatEntry, toggleMatAus, closeMatModal, parseMat, matTail, matToSrc, wirePillMenu,
-        wirePillTouch, decorateMatCell, wireMaterialDrop
+        updateMaterial, removeMatEntry, toggleMatAus, wocheSetzen, closeMatModal, parseMat, matTail, matToSrc,
+        wirePillMenu, wirePillTouch, decorateMatCell, wireMaterialDrop
     });
 
     // Renders a ref's material state: pills into the sub-row block, a compact
@@ -123,13 +123,20 @@ window.svpPlanParts.push(function (P) {
         src = (src || '').trim();
         updateMaterial(ref, src);
         if (src) ref.openSubRow();
+        wocheSetzen(ref, 'material', src);
+    }
+
+    /* One field of a week into this tab's state and on to the cloud: the material text, or a switch the table
+       does not show (the eye of the pill "Vorrechnen", svp-plan-tafel.js). Empty takes the field out. */
+    function wocheSetzen(ref, feld, wert) {
+        const leer = wert == null || wert === '';
         if (!P.saved[ref.i]) P.saved[ref.i] = {};
-        if (src) P.saved[ref.i].material = src;
-        else delete P.saved[ref.i].material;
+        if (leer) delete P.saved[ref.i][feld];
+        else P.saved[ref.i][feld] = wert;
         /* the table shows it now too (svp-plan-sync.js: P.domBasis) */
         if (P.domBasis) {
             if (!P.domBasis[ref.i]) P.domBasis[ref.i] = {};
-            if (src) P.domBasis[ref.i].material = src; else delete P.domBasis[ref.i].material;
+            if (leer) delete P.domBasis[ref.i][feld]; else P.domBasis[ref.i][feld] = wert;
         }
         localStorage.setItem(P.KEY, JSON.stringify(P.saved));
         localStorage.setItem(P.TS_KEY, new Date().toISOString());

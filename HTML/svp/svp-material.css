@@ -140,11 +140,12 @@ tr.wk-edit .mat-block a.mat-pill:has(> .mat-ico) { padding-right: 26px; }
 @media print { .mat-pill-wrap .mat-x { display: none; } }
 
 /* Hidden from the class ([[aus]] in the material text, Doc 27.09.2026): visitors never get the pill
-   (svp-plan-material.js); the owner sees it only while the week is being edited, faded - outside the
-   edit mode the plan looks exactly as the class sees it, on the board in class too. */
-.mat-pill-wrap.mat-aus { display: none; }
-tr.wk-edit .mat-pill-wrap.mat-aus { display: inline-block; }
-tr.wk-edit .mat-pill-wrap.mat-aus > a { opacity: 0.4; }
+   (svp-plan-material.js); the owner sees it always, in grey - the grey outside the edit mode is the struck eye
+   inside it (Doc, 30.09.2026: "ein ausgeblendetes Deck soll grau sein und das soll korrespondieren mit dem
+   durchgestrichenen Auge"; before it showed only while editing, and he looked for the deck he had hidden
+   himself: "oh, wo ist denn das Deck hin?"). Not on paper: a printed plan reads as the class reads it. */
+.mat-pill-wrap.mat-aus > a { filter: grayscale(1); opacity: 0.45; }
+@media print { .mat-pill-wrap.mat-aus { display: none; } }
 /* The eye that switches it: in the middle over the label, only while editing (Doc: "in die Mitte
    über den Text ein Auge"). Open = the class sees it; struck through and red = hidden. Small and
    light, so the label stays readable around it (Doc, 27.09.2026: "zu schwer und groß"). */

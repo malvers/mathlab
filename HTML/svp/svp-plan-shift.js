@@ -165,6 +165,9 @@ window.svpPlanParts.push(function (P) {
             ['ziel', 'mth', 'med', 'lnw'].forEach(function (k) {
                 entry[k] = c[k] != null ? c[k] : '';
             });
+            /* the pill "Vorrechnen" hangs on the calendar week, not on the content: its eye stays with the row
+               (svp-plan-tafel.js) */
+            if (P.saved[i] && P.saved[i].vorrechnenAn) entry.vorrechnenAn = true;
             P.saved[i] = entry;
         });
 

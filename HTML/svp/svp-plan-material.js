@@ -223,7 +223,11 @@ window.svpPlanParts.push(function (P) {
         if (!links.length) return;
         const behelf = document.createElement('div');
         behelf.className = 'mat-block';
-        renderMaterial(behelf, links.map(function (e) { return e.label + ' ' + e.url; }).join(' '), ref);
+        /* a fixed pill can be hidden from the class as well (e.aus, the pill "Vorrechnen" in svp-plan-tafel.js): the
+           same mark as in a week's material text, so it is drawn grey with the struck eye like every hidden pill */
+        renderMaterial(behelf, links.map(function (e) {
+            return e.label + ' ' + e.url + (e.aus ? ' [[aus]]' : '');
+        }).join(' '), ref);
         const nach = {};
         links.forEach(function (e) { nach[e.label] = e; });
         Array.from(behelf.children).forEach(function (kind) {
@@ -234,6 +238,10 @@ window.svpPlanParts.push(function (P) {
                    Reihenfolge: renderMaterial darf einen Eintrag auslassen. */
                 const lbl = a.querySelector('.mat-label');
                 const e = nach[((lbl || a).textContent || '').trim()];
+                /* its eye switches the link's own state (e.schalte) - the week's material text, which the eye
+                   of renderMaterial would change, does not hold a fixed pill */
+                const auge = e && e.schalte && kind.querySelector('.mat-auge');
+                if (auge) auge.replaceWith(augeKnopf(ref, e.url, e.aus, e.label, e.schalte));
                 if (e) {
                     /* Das Symbol des festen Links statt des Dateityp-Zeichens
                        (Pfeil fuer die Formelsammlung, Lambda fuers Lab; der
@@ -657,12 +665,14 @@ window.svpPlanParts.push(function (P) {
     /* The number behind "Zusatzmaterial": the pills the class sees - no exercises, no films, nothing hidden
        ([[aus]]) and no PowerPoint that pptWeg takes out; free text alone still counts as one, a board as one
        more (svp-plan-tafel.js). One count for the row and for every update after it (Doc, 29.09.2026: "da steht
-       5 Zusatzmateri. sind aber nur 2" - the update still counted the hidden pills). */
+       5 Zusatzmateri. sind aber nur 2" - the update still counted the hidden pills). A hidden pill "Vorrechnen"
+       counts as little as any other hidden one. */
     function zusatzZahl(ref, text, alle) {
         const n = alle.filter(function (en) {
             return !isExerciseEntry(en) && !isVideoEntry(en) && !en.aus && !pptWeg(en, ref);
         }).length;
-        return (n || (P.matTail(text) ? 1 : 0)) + (P.tafelLinks ? P.tafelLinks(ref).length : 0);
+        const fest = P.tafelLinks ? P.tafelLinks(ref).filter(function (e) { return !e.aus; }).length : 0;
+        return (n || (P.matTail(text) ? 1 : 0)) + fest;
     }
 
     function isVideoEntry(en) {
@@ -1014,9 +1024,10 @@ window.svpPlanParts.push(function (P) {
 
     /* The eye over a pill while its week is being edited (Doc, 27.09.2026: "in die Mitte ueber den
        Text ein Auge"): open = the class sees the pill, a tap hides it; struck through = hidden, a tap
-       shows it again. Only in edit mode (svp-material.css), never in print. */
+       shows it again. Only in edit mode (svp-material.css), never in print. schalte: what a tap does instead of
+       marking the link in the week's material text - a fixed pill keeps its state elsewhere (festePillen). */
     const AUGE_PATH = 'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z';
-    function augeKnopf(ref, url, aus, label) {
+    function augeKnopf(ref, url, aus, label, schalte) {
         const ns = 'http://www.w3.org/2000/svg';
         const b = document.createElement('button');
         b.type = 'button';
@@ -1045,7 +1056,8 @@ window.svpPlanParts.push(function (P) {
         b.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            P.toggleMatAus(ref, url);
+            if (schalte) schalte();
+            else P.toggleMatAus(ref, url);
         });
         return b;
     }

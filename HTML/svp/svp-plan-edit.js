@@ -127,6 +127,8 @@ window.svpPlanParts.push(function (P) {
                 ['ziel', 'mth', 'med', 'lnw'].forEach(function (k) {
                     if (vorher[k] != null) entry[k] = vorher[k];
                 });
+                /* the eye of the week's pill "Vorrechnen" is no cell of the table either (svp-plan-tafel.js) */
+                if (vorher.vorrechnenAn) entry.vorrechnenAn = true;
                 entry.details = r.ul
                     ? Array.from(r.ul.querySelectorAll('li'))
                         .map(li => quelleVon(r, li).trim())

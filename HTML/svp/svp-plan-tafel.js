@@ -32,17 +32,38 @@ window.svpPlanParts.push(function (P) {
         return m ? m[3] + '.' + m[2] + '.' : '';
     }
 
+    /* Doc, 30.09.2026: "Alle Decks, die jetzt da drin sind, bitte ausblenden programmatisch, weil ich nicht jedes
+       einzelne klicken will" - the pill "Vorrechnen" of a week is hidden from the class until Doc opens it with the
+       eye over it (edit mode, svp-plan-material.js). Hidden is the rule, so nothing had to be written for the weeks
+       there are; the eye sets vorrechnenAn in the week's stored edits (svp_plan_edits, read by everyone) and takes it
+       out again. The switch belongs to the calendar week like the pill: saving the table and a shift leave it with
+       its row (svp-plan-edit.js, svp-plan-shift.js). */
+    function vorrechnenAn(ref) {
+        const woche = P.saved && P.saved[ref.i];
+        return !!(woche && woche.vorrechnenAn);
+    }
+    function vorrechnenSchalten(ref) {
+        P.wocheSetzen(ref, 'vorrechnenAn', vorrechnenAn(ref) ? null : true);
+        P.updateMaterial(ref, ref.matTd.dataset.src || '');
+        if (ref.refreshExpandable) ref.refreshExpandable();
+    }
+
     /* The pills of one week: every board whose day lies in the week's calendar week.
        Pages that count appointments instead of weeks (UNTIS_TERMIN, FO) have no week
-       number per row - the board is not placed there rather than placed wrongly. */
+       number per row - the board is not placed there rather than placed wrongly.
+       A hidden pill "Vorrechnen" (aus) goes to Doc alone - grey, with its eye (schalte); the class never gets it. */
     function tafelLinks(ref) {
         if (!ref || window.UNTIS_TERMIN || ref.kw == null || ref.kw === '') return [];
         const woche = vorrechnen[String(ref.kw)];
-        return (woche ? [{
+        const an = !!woche && vorrechnenAn(ref);
+        return (woche && (an || P.CAN_EDIT_MAT) ? [{
             label: 'Vorrechnen',
             url: TAFEL_URL + '?kw=' + encodeURIComponent(ref.kw),
             icon: 'tafel',
-            titel: 'Vorrechnen der Woche: ' + woche + ' - alle Aufgaben mit Musterlösung Schritt für Schritt, mit Solita'
+            titel: 'Vorrechnen der Woche: ' + woche + ' - alle Aufgaben mit Musterlösung Schritt für Schritt, mit Solita' +
+                (an ? '' : ' (für die Klasse ausgeblendet)'),
+            aus: !an,
+            schalte: function () { vorrechnenSchalten(ref); }
         }] : []).concat(tafeln.filter(t => String(t.kw) === String(ref.kw)).map(t => ({
             label: 'Tafel ' + tag(t.datum),
             url: TAFEL_URL + '?id=' + encodeURIComponent(t.id),
@@ -56,7 +77,8 @@ window.svpPlanParts.push(function (P) {
        block the blackboard stands there and opens vorrechnen.html on that block (?kw=, js/vorrechnen-zustand.js), in
        a tab of its own; in the other weeks nothing. Built with the week's head (svp-plan-rows.js), shown once the
        blocks are read (vorrechnenLaden). Same day: "mach das Tafel Icon hinter Aufgaben und so klein wie die
-       anderen" - it stands behind the tabs now, before the pen. */
+       anderen" - it stands behind the tabs now, before the pen. And: "das Vorrechen-Icon bitte nur, wenn ich
+       eingeloggt bin. Das sollen die Schüler nicht sehen" - built for Doc alone, like the pen next to it. */
     const knoepfe = [];
     function knopfZeigen(k) {
         const woche = vorrechnen[String(k.ref.kw)];
@@ -64,6 +86,7 @@ window.svpPlanParts.push(function (P) {
         if (woche) k.b.title = 'Vorrechnen: ' + woche;
     }
     function vorrechnenKnopf(ref, kopf) {
+        if (!P.CAN_EDIT_MAT) return;
         if (!VORRECHNEN_SEITE.test(location.pathname) || window.UNTIS_TERMIN || ref.kw == null || ref.kw === '') return;
         const b = document.createElement('button');
         b.type = 'button';
