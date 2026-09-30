@@ -8,6 +8,13 @@
 .sf-out { max-height: 46vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
     scrollbar-width: thin; scrollbar-color: rgba(2, 100, 123, 0.75) transparent; }
 .sf-out:empty { display: none; }
+/* a line cut off at the top or bottom fades out instead of being sliced, as in the decks (decks/deck.css #ask-out) -
+   JS sets sf-cut-top/-bot from the scroll position, so a first or last line fully in view stays crisp */
+.sf-out { --sf-cut-t: 0px; --sf-cut-b: 0px;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--sf-cut-t), #000 calc(100% - var(--sf-cut-b)), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 var(--sf-cut-t), #000 calc(100% - var(--sf-cut-b)), transparent 100%); }
+.sf-out.sf-cut-top { --sf-cut-t: 26px; }
+.sf-out.sf-cut-bot { --sf-cut-b: 26px; }
 .sf-out::-webkit-scrollbar { width: 7px; }
 .sf-out::-webkit-scrollbar-thumb { background: rgba(2, 100, 123, 0.75); border-radius: 4px; }
 /* calm: two quiet greys, no gold and no cyan frame - colour is left to the formulas (Doc, 29.09.2026: "viel zu bunt") */
@@ -26,6 +33,17 @@
 .sf-cost { margin-left: 6px; font-family: Raleway, system-ui, sans-serif; font-size: 0.85em; font-variant-numeric: normal;
     color: #8fa3bd; white-space: nowrap; cursor: help; }
 .sf-err { align-self: flex-start; color: rgb(236, 120, 104); font-size: 0.98rem; }
+/* the whole talk in ONE bubble, as in the decks (decks/deck.css #ask-out, .ask-q): each question in bold above her
+   answer, no bubble for each (Doc, 30.09.2026, Vorrechnen: "so wie in Decks ... alles in einer Blase") - mount option
+   blase; the page gives the bubble its colours. The hull carries the look, the answers scroll inside it */
+.sf.sf-blase .sf-huelle { display: flex; flex-direction: column; min-height: 0; padding: 10px 13px; border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04); border: 0.5px solid rgba(143, 163, 189, 0.3); }
+.sf.sf-blase .sf-huelle:has(> .sf-out:empty) { display: none; }
+.sf.sf-blase .sf-out { gap: 6px; }
+.sf.sf-blase :is(.sf-q, .sf-a, .sf-err) { align-self: stretch; max-width: none; padding: 0; border: 0; border-radius: 0;
+    background: none; box-shadow: none; }
+.sf.sf-blase .sf-q { font-weight: 600; }
+.sf.sf-blase :is(.sf-a, .sf-err) + .sf-q { margin-top: 10px; }   /* the next question: some air above it */
 
 /* karaoke: the word Solita is saying right now - as in the decks (decks/deck.css .ask-w.on) */
 .sf-w { border-radius: 3px; transition: background-color .12s, box-shadow .12s; }

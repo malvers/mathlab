@@ -1,9 +1,10 @@
 // Vorrechnen (vorrechnen.html): Solita at the board. Doc, 30.09.2026: "Bau bitte auch hier SolitaDoc ein wie im Lab und
-// in den Decks links in die Ecke über der Trennlinie sichtbar für alle". Her picture sits in the bottom left corner of
-// the lined part, right above the line to the writing field, in a button like the board's others (Doc: "sie so wie Dr.
-// Hut"); a tap opens the central question box (js/solita-frage.js) - only its line, to the right of her picture, her
-// answers above it, no card (Doc: "bitte nur die Zeile rechts neben Solita keine extrabox", as her picture leads the
-// line in the decks' presenter). Solita or Doc: the box's right-click menu (its voices); the corner follows.
+// in den Decks links in die Ecke über der Trennlinie sichtbar für alle". Her picture sits in a button like the board's
+// others (Doc: "sie so wie Dr. Hut") - since 30.09. midday in the writing field's bottom left corner, right above the
+// arrow that sends the grey step up (Doc: "doch da runter"); a tap opens the central question box (js/solita-frage.js):
+// its line to the right of her picture, as her picture leads the line in the decks' presenter, and above it the whole
+// talk in ONE bubble, question and answer, as in the decks ("so wie in Decks ... alles in einer Blase (sollen alle
+// sehen)"). Solita or Doc: the box's right-click menu (its voices); the corner follows.
 // The layer is mirrored to the beamer (SPIEGEL_SCHICHTEN in js/vorrechnen-beamer.js), so the class sees her, the
 // question and the answer. With every question she gets the task, the rows on the board, the solution and the task's
 // explanation. Only functions here: zeigeRechenweg places the corner (solitaEcke), the beamer gets the mirrored copy.
@@ -52,7 +53,7 @@ function solitaSchicht() {
     s.id = 'solita-schicht';
     s.innerHTML =
         '<div class="vs-karte" role="dialog" aria-label="Frag Solita"><div class="vs-sf"></div></div>' +
-        '<button type="button" class="vs-knopf" title="Frag Solita" aria-label="Frag Solita" aria-expanded="false">' +
+        '<button type="button" class="vs-knopf" id="solita-knopf" title="Frag Solita" aria-label="Frag Solita" aria-expanded="false">' +
         '<img alt="" src="' + SOLITA_BILD.Solita + '"></button>';
     container.appendChild(s);
     const knopf = s.querySelector('.vs-knopf');
@@ -60,6 +61,7 @@ function solitaSchicht() {
     if (window.SolitaFrage) {
         solita = SolitaFrage.mount(s.querySelector('.vs-sf'), {
             kontext: solitaKontext, system: SOLITA_SYSTEM, platzhalter: 'Frag {name} zur Aufgabe',   // no heading, no chips
+            blase: true,                 // question and answer in one bubble, as in the decks (30.09.)
         });
         // the beamer shows the part of her answers Doc scrolled to (anzeigeEmpfang reads data-scroll)
         const out = s.querySelector('.sf-out');
@@ -82,13 +84,13 @@ function solitaOffen(auf) {
     if (auf) { const i = s.querySelector('.sf-in'); if (i) i.focus({ preventScroll: true }); }
     else if (solita) solita.stop();
 }
-// the corner: the lined part down to the line to the writing field (called by zeigeRechenweg, which the beamer skips);
-// a new task starts a new talk
+// the corner (called by zeigeRechenweg, which the beamer skips): her line reaches up to the notes' column on the right
+// (--vs-platz, js/vorrechnen.css); a new task starts a new talk
 function solitaEcke() {
     if (anzeigeModus) return;
     const s = solitaSchicht();
-    const hoehe = Math.round(papierGrenze(container.getBoundingClientRect().height));
-    if (s.style.height !== hoehe + 'px') s.style.height = hoehe + 'px';
+    const platz = Math.round(notizX(container.getBoundingClientRect().width)) + 'px';
+    if (s.style.getPropertyValue('--vs-platz') !== platz) s.style.setProperty('--vs-platz', platz);
     const aufgabe = aufgabenModus ? AUFGABEN[aufgabeIdx][0] : null;
     if (aufgabe !== solitaAufgabe) {
         if (solitaAufgabe !== null && solita) solita.leeren();

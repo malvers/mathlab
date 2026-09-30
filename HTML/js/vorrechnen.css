@@ -569,9 +569,11 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
    ink frame, pale at rest), her photo round in it. A tap opens only the question line beside it, on the button's middle,
    and her answers above it - "bitte nur die Zeile rechts neben Solita keine extrabox": no card, no heading, no chips, not
    the box's own little face (Solita or Doc via its right-click menu). The layer goes to the beamer: the class sees her */
-#solita-schicht { position: absolute; left: 0; top: 0; width: 100%; height: 0; z-index: 7; pointer-events: none; }
+/* over the whole board; her button in the writing field's bottom left corner, 8 px above the arrow (#schritt-hoch:
+   bottom 6 px, 46 px scaled) - Doc, 30.09.: "doch da runter" (it stood above the line to the writing field) */
+#solita-schicht { position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 7; pointer-events: none; }
 #solita-schicht .vs-knopf {
-    position: absolute; left: 12px; bottom: 6px; width: calc(46px * var(--knopf, 1)); height: calc(46px * var(--knopf, 1));
+    position: absolute; left: 12px; bottom: calc(14px + 46px * var(--knopf, 1)); width: calc(46px * var(--knopf, 1)); height: calc(46px * var(--knopf, 1));
     display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 0; border-radius: 8px;
     cursor: pointer; pointer-events: auto; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
     border: 1px solid rgba(0, 210, 255, 0.85); background: linear-gradient(rgba(0, 210, 255, 0.14), rgba(0, 210, 255, 0.14)) #07162f;
@@ -588,11 +590,13 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
     width: calc(46px * var(--knopf, 1) - 6px); height: calc(46px * var(--knopf, 1) - 6px); border-radius: 50%; object-fit: cover; display: block;
 }
 /* the line: 8 px right of the button, its 36 px on the button's middle - the button scales with --knopf (a narrow
-   margin, the Lenovo: 0.73), so the line follows its real size ("zeile bitte y aligned", 30.09.); as wide as the lined
-   part allows up to the bin on the right (#oben-leeren: 12 + 46) */
+   margin, the Lenovo: 0.73), so the line follows its real size ("zeile bitte y aligned", 30.09.); as wide as the
+   writing field allows up to 12 px before the notes' column (--vs-platz: its left edge, solitaEcke); the bubble above
+   it may grow up to 30 px under the board's top */
 #solita-schicht .vs-karte {
-    position: absolute; left: calc(20px + 46px * var(--knopf, 1)); bottom: calc(6px + (46px * var(--knopf, 1) - 36px) / 2);
-    width: min(560px, calc(100% - 20px - 46px * var(--knopf, 1) - 70px)); max-height: calc(100% - 30px);
+    position: absolute; left: calc(20px + 46px * var(--knopf, 1)); bottom: calc(14px + 46px * var(--knopf, 1) + (46px * var(--knopf, 1) - 36px) / 2);
+    width: min(560px, calc(var(--vs-platz, 100%) - 32px - 46px * var(--knopf, 1)));
+    max-height: calc(100% - 30px - (14px + 46px * var(--knopf, 1) + (46px * var(--knopf, 1) - 36px) / 2));
     display: none; flex-direction: column; pointer-events: auto; text-align: left;
     font-family: var(--lab-schrift); font-variant-numeric: lining-nums; color: #eaf0f7;
 }
@@ -602,17 +606,19 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
 #solita-schicht .vs-karte { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; touch-action: manipulation; }
 #solita-schicht .vs-sf { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 #solita-schicht .vs-sf .sf { flex: 1 1 auto; min-height: 0; }
+/* the bubble's height is capped, as in the decks (their line: 200 px at 14 px, here about as many lines of the board's
+   larger type - Doc, 30.09.: "boxhöhe begrenzen wie in Decks schrift ausfaden"); a cut line fades (solita-frage.css) */
+#solita-schicht .sf-huelle { flex: 1 1 auto; max-height: 15rem; box-sizing: border-box; }
 #solita-schicht .sf-out { max-height: none; min-height: 0; flex: 1 1 auto; }
 #solita-schicht :is(.sf-face, .sf-chips) { display: none; }
-/* the bubbles stand on the board: opaque, so rows and lines behind them do not show through */
-#solita-schicht .sf-q { background: #0d2140; }
-#solita-schicht .sf-a { background: #07162f; border-color: rgba(0, 210, 255, 0.35); }
+/* the one bubble (solita-frage.css .sf-blase) stands on the board: opaque, so rows and lines behind it do not show through */
+#solita-schicht .sf-huelle { background: #07162f; border-color: rgba(0, 210, 255, 0.35); }
 #solita-schicht .sf-in { background: #07162f; }
 /* on sand: the board's look - sand, royal blue ink, the controls like the board's buttons */
 #canvas-container.hell #solita-schicht .vs-karte { color: rgb(31, 64, 150); }
-#canvas-container.hell #solita-schicht .sf-q { background: #ebe2cb; border-color: rgba(31, 64, 150, 0.3); color: rgb(31, 64, 150); }
-#canvas-container.hell #solita-schicht .sf-a { background: #f4ecd8; border-color: rgba(31, 64, 150, 0.35); color: rgb(31, 64, 150);
+#canvas-container.hell #solita-schicht .sf-huelle { background: #f4ecd8; border-color: rgba(31, 64, 150, 0.35);
     box-shadow: 0 4px 14px rgba(31, 64, 150, 0.12); }
+#canvas-container.hell #solita-schicht :is(.sf-q, .sf-a) { color: rgb(31, 64, 150); }
 #canvas-container.hell #solita-schicht :is(.sf-cost, .sf-note, .sf-ds) { color: #5d6678; }
 #canvas-container.hell #solita-schicht .sf-w.on { background: rgba(31, 64, 150, 0.14); box-shadow: 0 0 0 2px rgba(31, 64, 150, 0.14); }
 #canvas-container.hell #solita-schicht .sf-in { background: #efe6d0; border-color: rgba(31, 64, 150, 0.45); color: rgb(31, 64, 150); }

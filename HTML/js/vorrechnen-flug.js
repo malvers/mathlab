@@ -590,7 +590,7 @@ function zeigeHinweis() {
     // as many steps as fit above the buttons at the bottom (ERKENNEN, the Cs, the
     // eraser) - from the first that does not, none: a step left out would be a gap.
     // The next step always shows.
-    const knoepfe = ['erkennen-klein', 'seite-leeren', 'notiz-leeren', 'radierer', 'schritt-hoch']
+    const knoepfe = ['erkennen-klein', 'seite-leeren', 'notiz-leeren', 'radierer', 'schritt-hoch', 'solita-knopf']
         .map(id => document.getElementById(id)).filter(k => k && k.style.display !== 'none' && k.offsetParent)
         .map(k => k.getBoundingClientRect().top - 6);
     const grenze = Math.min(r.bottom - 8, ...knoepfe);

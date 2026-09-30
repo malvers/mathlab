@@ -12,6 +12,7 @@
 //       vorschlaege: [{ label: 'Genauer', frage: 'Erklär mir das genauer.' }],   // ready-made questions
 //       platzhalter: 'Frag {name}',                 // {name}: Solita or Doc, whoever is chosen - only without a heading
 //       ueberschrift: h3,                           // its text becomes "Frag Solita" / "Frag Doc", the field then says "…"
+//       blase: true,                                // the whole talk in ONE bubble, as in the decks (solita-frage.css)
 //   });
 //   A click on the face switches between Solita and Doc; the page hears it as the event 'solita-wer' on document
 //   (detail.name) and SolitaFrage.wer() says who it is now.
@@ -127,9 +128,12 @@
         opt = opt || {};
         const nr = ++zaehler;
         const root = document.createElement('div');
-        root.className = 'sf';
+        root.className = 'sf' + (opt.blase ? ' sf-blase' : '');
+        // one bubble: a hull around the answers carries its look, so the fade of a cut line (sf-cut-*) takes the
+        // text only, never the bubble's edge
+        const OUT = '<div class="sf-out" aria-live="polite"></div>';
         root.innerHTML =
-            '<div class="sf-out" aria-live="polite"></div>' +
+            (opt.blase ? '<div class="sf-huelle">' + OUT + '</div>' : OUT) +
             '<div class="sf-row">' +
             '  <img class="sf-face" src="' + SOLITA_PIC + '" alt="Solita">' +
             '  <label class="sf-vh" for="sf-in-' + nr + '">Deine Frage an Solita</label>' +
@@ -177,6 +181,16 @@
             chips.appendChild(b);
         });
 
+        // A line cut off at the box's top or bottom fades out instead of being sliced - only on the edge that really
+        // hides text, from the scroll position, as in the decks (decks/deck.js cutEdges; Doc, 30.09.2026, Vorrechnen:
+        // "boxhöhe begrenzen wie in Decks schrift ausfaden"). The look: solita-frage.css
+        function kanten() {
+            out.classList.toggle('sf-cut-top', out.scrollTop > 1);
+            out.classList.toggle('sf-cut-bot', out.scrollTop + out.clientHeight < out.scrollHeight - 1);
+        }
+        out.addEventListener('scroll', kanten, { passive: true });
+        if (global.ResizeObserver) new ResizeObserver(kanten).observe(out);
+        new MutationObserver(kanten).observe(out, { childList: true, subtree: true, characterData: true });
         function say(html, cls) {
             const d = document.createElement('div');
             d.className = cls || 'sf-a';

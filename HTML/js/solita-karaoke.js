@@ -33,6 +33,8 @@
             .filter(Boolean);
         return ' ' + zeilen.join(' + ') + (teile[1] ? ' = ' + teile[1].replace(/\\\\/g, ' ').trim() : '') + ' ';
     }
+    const FUNKTION_WORT = { sin: 'Sinus', cos: 'Kosinus', tan: 'Tangens', cot: 'Kotangens', ln: 'l n', lg: 'Logarithmus',
+        log: 'Logarithmus', exp: 'e hoch', lim: 'Limes', max: 'Maximum', min: 'Minimum' };
     const TEX_SIGNS = [
         // the labs (Ziffernrätsel, 29.09.2026): a column sum as \begin{array} ... \hline reads "9567 plus 1085 gleich
         // 10652"; an aligned block line by line, each line a sentence; spacing and place-value marks say nothing
@@ -63,13 +65,16 @@
         [/\\infty/g, ' unendlich '], [/\\sum/g, ' Summe '], [/\\prod/g, ' Produkt '], [/\\int/g, ' Integral '],
         [/\\partial/g, ' partiell '], [/\\nabla/g, ' Nabla '], [/\\circ\b/g, ' Grad '], [/\\%|%/g, ' Prozent '],
         [/\\(?:rightarrow|to|Rightarrow|implies)\b/g, ' ergibt '], [/\\(?:ldots|cdots|dots)/g, ' und so weiter '],
+        // the functions by their names - as a command they fell silent with every unknown one ("\\sin x" was read "x")
+        [/\\(sin|cos|tan|cot|ln|lg|log|exp|lim|max|min)\b/g, (m, f) => ' ' + FUNKTION_WORT[f] + ' '],
         [/\\in\b/g, ' aus '], [/\\cap\b/g, ' und '], [/\\cup\b/g, ' oder '], [/\\mid\b/g, ' unter der Bedingung '],
         [/\\(alpha|beta|gamma|delta|epsilon|zeta|eta|theta|kappa|lambda|mu|nu|xi|pi|rho|sigma|tau|phi|chi|psi|omega)/gi,
          (m, g) => ' ' + g.charAt(0).toUpperCase() + g.slice(1) + ' ']
     ];
     // A capital letter standing alone in a formula goes to the voice by its German name - bare, Solita's Studio voice
     // read "A + A + A = 1A" as "ö plus ö plus ö ..." (Doc, 29.09.2026). The puzzles' number words come letter by
-    // letter already ("SEND" -> Ess Eh Enn De, "1A" -> eins Ah); lower-case variables stay as they are (x, m, r).
+    // letter already ("SEND" -> Ess Eh Enn De, "1A" -> eins Ah); lower-case variables stay as they are (x, m, r) - only
+    // after a number the ones that are also units get their names (keineEinheit).
     const BUCHSTABE = { A: 'Ah', B: 'Be', C: 'Ze', D: 'De', E: 'Eh', F: 'Eff', G: 'Ge', H: 'Ha', I: 'Ih', J: 'Jott', K: 'Ka',
         L: 'Ell', M: 'Emm', N: 'Enn', O: 'Oh', P: 'Pe', Q: 'Ku', R: 'Err', S: 'Ess', T: 'Te', U: 'Uh', V: 'Fau', W: 'We',
         X: 'Ix', Y: 'Üpsilon', Z: 'Zett', 'Ä': 'Äh', 'Ö': 'Öh', 'Ü': 'Üh' };
@@ -88,8 +93,23 @@
         });
         return teile.join(' plus ');
     }
+    // Letters written side by side are a product - "Gm_1m_2" is G times m1 times m2 and goes to the voice letter by
+    // letter; a run of two or three plain letters only, so a word set in a formula without \text ("Anzahl") and the
+    // functions written bare (sin, max) stay whole, and so do commands, \text{...} and an index ("v_{max}")
+    const FUNKTION = new Set(['sin', 'cos', 'tan', 'cot', 'log', 'ln', 'lg', 'lim', 'max', 'min', 'exp', 'ggT', 'kgV', 'mod']);
+    function buchstabenEinzeln(t) {
+        return t.replace(/\\(?:text\w*|math\w+|operatorname|boldsymbol|bm|begin|end|color|textcolor)\s*\{[^{}]*\}|\\[a-zA-Z]+|(?<![a-zA-ZäöüÄÖÜß]|_\{)[a-zA-Z]{2,3}(?![a-zA-ZäöüÄÖÜß])/g,
+            function (m) { return m.charAt(0) === '\\' || FUNKTION.has(m) ? m : m.split('').join(' '); });
+    }
+    // A small letter that stands after a number in a formula is a variable, never a unit - the voice read the "1 m" of
+    // "m_1 m_2" as "1 Meter" (Doc, 30.09.2026, Vorrechnen: "G m Index 1 Meter ... blödsinn"). The letters that are
+    // also units go to it by their names; a unit set apart ("5\,m", "5\,\text{m}") stays one
+    const EINHEIT = { m: 'Emm', g: 'Ge', s: 'Ess', l: 'Ell', h: 'Ha', t: 'Te' };
+    function keineEinheit(t) {
+        return t.replace(/(\d\}?\s*)([mgslht])(?![a-zA-Z])/g, function (m, vor, b) { return vor + '\\text{' + EINHEIT[b] + '}'; });
+    }
     function texWords(tex) {
-        let t = ' ' + String(tex) + ' ';
+        let t = ' ' + keineEinheit(buchstabenEinzeln(String(tex))) + ' ';
         t = t.replace(/(?:\\(?:mathrm|textrm|textup)\s*\{[A-Z0-9]+\})+/g, function (m) {
             return ' ' + zahlwortLesen(m.replace(/\\(?:mathrm|textrm|textup)\s*\{([A-Z0-9]+)\}/g, '$1')) + ' ';
         });
@@ -100,7 +120,8 @@
              // "ist gleich", as one says it (Doc, 29.09.2026: "A plus A plus A ist gleich ...")
              .replace(/=/g, ' ist gleich ').replace(/\+/g, ' plus ').replace(/(\d|\w)\s*-\s*(?=[\w\\])/g, '$1 minus ')
              .replace(/</g, ' kleiner ').replace(/>/g, ' größer ').replace(/\|/g, ' ');
-        return t.replace(/\s+/g, ' ').trim().split(' ').map(function (w) { return BUCHSTABE[w] || w; }).join(' ');
+        // written bare, only the functions one says by name - an index "max" stays "max" ("v Index max")
+        return t.replace(/\s+/g, ' ').trim().split(' ').map(function (w) { return BUCHSTABE[w] || (/^(sin|cos|tan|cot|ln|lg|log)$/.test(w) ? FUNKTION_WORT[w] : w); }).join(' ');
     }
     // A number that ends a sentence is a number, not an ordinal: the voice read "höchstens eine 1." as "erstens"
     // (Doc, 29.09.2026: "wir müssten hier also noch einen Sentence Segmentizer haben oder eine Heuristik"). Such a
