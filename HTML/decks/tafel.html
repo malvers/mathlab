@@ -10,9 +10,9 @@
   vorrechnen.html sends what was worked out on the board ("Tafel senden") to the table svp_tafel: one
   row per plan page and day, the tasks and under each the lines of its working as LaTeX. Everyone reads
   it, only Doc's account writes. The plan shows the row as a pill "Tafel 26.09." (svp-plan-tafel.js);
-  the pill opens this page: ?id=<row id>. ?aufgaben shows every task of vorrechnen.html with its whole
-  solution (js/vorrechnen-aufgaben*.js), ?kw=44 the block of that week (the week's pill in the plan),
-  ?demo three of them, to look at the page.
+  the pill opens this page: ?id=<row id>. ?aufgaben shows the tasks of vorrechnen.html that belong to no week,
+  with their whole solution (js/vorrechnen-aufgaben*.js: the levels, the puzzles, mental arithmetic), ?kw=44 the
+  block of that week (the week's pill in the plan), ?demo three of them, to look at the page.
 
   The slides are built here from that row - a title, then one slide per task with its working set as on
   the board of vorrechnen.html (legeRechnung). Every line of the working is a click group and comes as it
@@ -228,6 +228,13 @@
       function (_, hoch, zahl) { return '\\overset{\\mathrlap{\\color{#8a93a3}' + (hoch !== undefined ? '1' + '0'.repeat(+hoch) : zahl) + '}}'; });
   }
 
+  /* What Solita reads of such a task: the letters alone. The place values over them are for the eye - as TeX they
+     made one line of her overview a thousand characters long, thirteen puzzles two thirds of what a question
+     carried (measured 30.09.2026). */
+  function ohneStellen(tex) {
+    return String(tex).replace(/\\overset\{\\color\{#8a93a3\}\\scriptstyle (?:10\^\{\\mathrlap\{\d+\}\}|\d+)\}\{(\\(?:textrm|textup|mathrm)\{[A-Z0-9]\})\\vphantom\{\\mathrm\{A\}\}\}/g, '$1');
+  }
+
   /* One task, one slide. The task itself stands from the start; every line of the working is a click group, ONE
      element (data-tex: the whole line and what is done to it, for Solita - deck.js puts it back as $...$ when she
      reads the slide). The last line "x = ..." (x = what is solved for, no x on the right) is the result, underlined
@@ -268,6 +275,7 @@
     const farbig = function (tex) { return hebeVariable(tex, a.nach, ROT); };
     const weg = a.rechenweg || [];
     const texte = (a.latex ? [stellenSchraeg(a.latex)] : []).concat(weg);
+    const gelesen = (a.latex ? [ohneStellen(a.latex)] : []).concat(weg);   // the same lines as Solita reads them
     const erste = a.latex ? 1 : 0;                // the task is no step - it stands from the start
     /* umformungen[k] made rechenweg[k] - it is written beside the line it is done to, the one before */
     const ops = a.umformungen || [];
@@ -282,7 +290,7 @@
       const op = ops[schritt + 1] || null;        // what is done to this line to get the next one
       const el = document.createElement('div');
       el.className = 'tf-zeile';
-      el.dataset.tex = op ? tex + ' \\quad \\big|\\; ' + op : tex;
+      el.dataset.tex = op ? gelesen[z] + ' \\quad \\big|\\; ' + op : gelesen[z];
       if (schritt >= 0) { el.classList.add('step'); el.dataset.g = schritt; }
       rechnung.appendChild(el);
       const letzte = z === texte.length - 1 && z > 0;
@@ -690,7 +698,11 @@
 
   /* ?aufgaben: every task of the Vorrechnen lab with its whole solution, from the same source the
      lab reads (js/vorrechnen-aufgaben.js) - Doc, 27.09.2026: "mach das ganze Deck fertig, also nicht
-     nur das Demo-Deck". A collection, not a lesson: it has a name instead of a day. */
+     nur das Demo-Deck". A collection, not a lesson: it has a name instead of a day.
+     Only the blocks that belong to no week: the levels, the Ziffernrätsel and mental arithmetic, 88 tasks - what Doc
+     can show at any time ("so ein extra Ding ... was ich immer zeigen könnte"). With the 33 week blocks in the same
+     source the deck had grown to 751 tasks and 931 slides, slow to load and 6.8 ct a question; a week's tasks are in
+     its own deck (Doc, 30.09.2026: "warum machen wir überhaupt ein riesengroßes Deck? ... wirklich aufsplitten"). */
   /* ?kw=44: the block of that week only - its deck, the pill in the plan's week (svp/svp-plan-tafel.js) (Doc,
      30.09.2026: "pro Woche Vorrechnen von 10 (20?) Aufgaben zum Thema ... und das Deck pro Woche").
      The task files are the ones vorrechnen.html loads, in its order: the list stands there only, a new block is
@@ -718,11 +730,11 @@
     if (woche && !woche.length) throw new Error('Für KW ' + kw + ' gibt es noch keine Vorrechnen-Aufgaben.');
     return {
       sammlung: true,
-      titel: woche ? woche.map(function (b) { return b.titel; }).join(' + ') : 'Umstellen · Vereinfachen · Knobeln',
-      kicker: woche ? 'Vorrechnen · KW ' + kw : 'Vorrechnen · alle Aufgaben',
+      titel: woche ? woche.map(function (b) { return b.titel; }).join(' + ') : 'Umstellen · Knobeln · Kopfrechnen',
+      kicker: woche ? 'Vorrechnen · KW ' + kw : 'Vorrechnen · für jede Woche',
       aufgaben: AUFGABEN.map(function (t, i) {
         const b = aufgabenBlock(i), l = LOESUNGEN[t[0]] || [];
-        if (woche && woche.indexOf(b) < 0) return null;
+        if (woche ? woche.indexOf(b) < 0 : b.kw !== undefined) return null;   // no week asked for: the blocks without one
         return { schluessel: t[0], nr: i - b.ab + 1, block: b.titel, kopf: b.kopf || null, latex: t[1], nach: t[2], ende: l.length ? l[l.length - 1][0] : null,
           text: (typeof TEXTE !== 'undefined' && TEXTE[t[0]]) || null,
           erklaerung: erklaerungOhneText(t[0]),
@@ -856,7 +868,7 @@
         }
         const weg = a.rechenweg || [];
         dazu(aufgabeFolie(a, k), (a.nr ? 'Aufgabe ' + a.nr : 'Rechnung ' + (k + 1)) + (a.block ? ' (' + a.block + ')' : '') +
-          (a.nach ? ', umstellen nach ' + a.nach : '') + ': ' + (a.latex ? '$' + a.latex + '$' : '') +
+          (a.nach ? ', umstellen nach ' + a.nach : '') + ': ' + (a.latex ? '$' + ohneStellen(a.latex) + '$' : '') +
           (weg.length ? ' - Ergebnis $' + weg[weg.length - 1] + '$' : ''));
         if (a.erklaerung) dazu(erklaerFolie(a, k), 'Erklärung zu ' + (a.nr ? 'Aufgabe ' + a.nr : 'Rechnung ' + (k + 1)) +
           (a.block ? ' (' + a.block + ')' : ''));

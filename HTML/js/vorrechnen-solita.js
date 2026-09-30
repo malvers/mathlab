@@ -68,6 +68,9 @@ function solitaSchicht() {
         solita = SolitaFrage.mount(s.querySelector('.vs-sf'), {
             kontext: solitaKontext, system: SOLITA_SYSTEM, platzhalter: 'Frag {name} zur Aufgabe',   // no heading, no chips
             blase: true,                 // question and answer in one bubble, as in the decks (30.09.)
+            // a spoken question sends itself after 2 s of quiet, as in the decks (Doc, 30.09.2026: "Ja, nach zwei
+            // Sekunden Stille abschicken") - it waited in the field for Enter
+            mic: { stille: 2000, selbst: true },
             beiEscape: () => solitaOffen(false),   // Esc in the field closes her line - the field keeps its keys to itself
         });
         // the beamer shows the part of her answers Doc scrolled to (anzeigeEmpfang reads data-scroll)
@@ -79,8 +82,8 @@ function solitaSchicht() {
     // button still opens and closes.
     if (solita) solita.bild(knopf, { offen: () => s.classList.contains('offen'), oeffnen: () => solitaOffen(true) });
     else knopf.addEventListener('click', () => solitaOffen(!s.classList.contains('offen')));
-    // Shift+Space is the mic's key, the box's own (Doc, 30.09.2026: "shift Space Mic (zentral bitte wie im Deck)"): it
-    // opens her line first; not under a dialog (the tasks' panel, the buzzer, the Tafel)
+    // Space is the mic's key, the box's own (Doc, 30.09.2026: "shift Space Mic (zentral bitte wie im Deck)", then
+    // "nur mit Space"): it opens her line first; not under a dialog (the tasks' panel, the buzzer, the Tafel)
     if (solita) solita.sprechtaste({
         offen: () => s.classList.contains('offen'), oeffnen: () => solitaOffen(true), innen: s,
         wenn: () => !document.querySelector('.cyber-overlay.open'),

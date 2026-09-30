@@ -89,6 +89,19 @@
 .sf-row button:disabled { opacity: .45; cursor: default; }
 .sf-row button[hidden] { display: none; }
 .sf-row svg { width: 20px; height: 20px; }
+/* While she listens the field shows sound instead of letters, as a voice message does (hoertZu, js/solita-frage.js;
+   Doc, 30.09.2026: "genau wie das WhatsApp macht"): a row of bars over the field's text room, in the row's ink, calm
+   until words arrive (.laut). The field's own text, invitation and cursor are hidden meanwhile - a host's colour for
+   the field must not bring them back */
+.sf-row { position: relative; }
+.sf-in.sf-hoert, .sf-in.sf-hoert::placeholder { color: transparent !important; caret-color: transparent !important; }
+.sf-ton { position: absolute; display: flex; align-items: center; gap: 3px; overflow: hidden; pointer-events: none; opacity: .75; }
+.sf-ton[hidden] { display: none; }
+.sf-ton i { flex: none; width: 3px; height: 12%; border-radius: 2px; background: currentColor; --h: var(--leise);
+    animation: sfton 1s ease-in-out infinite; animation-delay: var(--d); }
+.sf-ton.laut i { --h: var(--laut); animation-duration: .5s; }
+@keyframes sfton { 0%, 100% { height: 12%; } 50% { height: var(--h); } }
+@media (prefers-reduced-motion: reduce) { .sf-ton i { animation-duration: 2.4s; } }
 /* who answers (zeigeKi, js/solita-frage.js): the marks of Claude and DeepSeek at the right end of the question
    field, small and in the field's ink (Doc, 30.09.2026). The element follows the field in the row and is drawn back
    into it: 9 px from the field's edge, the row's gap of 6 px between them taken back - what follows stands where it
@@ -113,7 +126,8 @@
 
 /* DeepSeek beside her: grey, its name in front (as in the decks) */
 .sf-ds { align-self: flex-start; max-width: 100%; padding: 6px 11px; color: #8fa3bd; font-size: 1rem; line-height: 1.45; }
-.sf-ds b { font: 700 9px/1 'Orbitron', sans-serif; letter-spacing: 1px; text-transform: uppercase; margin-right: 6px; color: inherit; }
+.sf-ds b, .sf-a > b.sf-wer { font: 700 9px/1 'Orbitron', sans-serif; letter-spacing: 1px; text-transform: uppercase; margin-right: 6px; color: inherit; }
+.sf-a > b.sf-wer { display: block; margin-bottom: 4px; opacity: .7; }   /* "Claude" over her answer when DeepSeek answers too */
 .sf-ds p { margin: 0 0 6px; }
 .sf-ds .katex { font-size: 1em; }
 

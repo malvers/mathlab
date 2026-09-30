@@ -21,7 +21,7 @@
 //       maxTokens: 600,     the answer's length (default 700)
 //       hinweise: ['Frag {name} zur Folie', 'Frag {name}'],   the field's invitations, the longest that fits
 //       mic: { stille: 2000, selbst: true },   dictation ends after 2 s of quiet and sends itself
-//       liveZeile: true,    a dictated question already stands in the answers while it is spoken
+//       liveZeile: true,    (every box does that since 30.09.2026 - the option is kept for hosts that pass it)
 //       senden(frage)       true: the host takes the question away (the presenter hands it to the beamer)
 //       diktat(text)        true: the host shows the dictated line itself (the presenter: on the beamer)
 //       beimMikro()         the mic starts (the presenter: her voice on the beamer goes quiet)
@@ -32,7 +32,7 @@
 //   s.hoert(), s.senden(), s.live(text), s.auffrischen() (password or question, as it stands now), s.aufwaermen(),
 //   s.wechsle() (Solita <-> Doc, as a click on her face), s.bild(el, { offen, oeffnen }) (the host's own picture of
 //   her: a click shows her line, with the line shown it switches - see bild()), s.sprechtaste({ offen, oeffnen, innen,
-//   tasten, wenn }) (Shift+Space is the mic's key on every page with the box; the host says how its line opens),
+//   tasten, wenn }) (Space is the mic's key on every page with the box; the host says how its line opens),
 //   s.beschaeftigt(), s.spiegel(m) (the presenter shows the beamer's answers: { html, zu, busy, st }). The host
 //   may fold the answers away with the class sf-zu on s.out; the next text takes it off.
 //   A click on the face switches between Solita and Doc; the page hears it as the event 'solita-wer' on document
@@ -129,6 +129,31 @@
             chars: 0, doc: false, msAi: ms, msVoice: 0,
         };
     }
+    // DeepSeek's answer gets a figure too (Doc, 30.09.2026: "bei DeepSeek hätte ich auch unten gerne eine
+    // Kosteneinschätzung") - an estimate from its list prices: $ per million tokens at peak hours [input from the cache,
+    // input, output], half of that off-peak (api-docs.deepseek.com/quick_start/pricing, read 30.09.2026; peak is
+    // 01-04 and 06-10 UTC, Monday to Friday - Chinese holidays are not known here). Which row: the model the answer
+    // names; a name the list no longer shows ("deepseek-chat", what the box asks for) counts as Flash.
+    const DS_RATE = { flash: [0.006, 0.30, 1.20], pro: [0.044, 1.32, 3.96] };
+    function kostenDs(usage, modell) {
+        const u = usage || {}, d = new Date(), h = d.getUTCHours(), tag = d.getUTCDay();
+        const spitze = tag >= 1 && tag <= 5 && ((h >= 1 && h < 4) || (h >= 6 && h < 10));
+        const r = DS_RATE[/pro|reasoner/i.test(modell || '') ? 'pro' : 'flash'], f = spitze ? 1 : 0.5;
+        const rein = u.prompt_tokens || 0, cache = u.prompt_cache_hit_tokens || 0, raus = u.completion_tokens || 0;
+        return { eur: ((rein - cache) * r[1] + cache * r[0] + raus * r[2]) * f / 1e6 * RATE.eur,
+            tin: rein, cache: cache, tout: raus, spitze: spitze, modell: modell || DS_MODEL };
+    }
+    function kostenZeigenDs(el, k) {
+        if (!k || !(k.tin > 0 || k.tout > 0)) return;
+        const c = document.createElement('span');
+        c.className = 'sf-cost';
+        c.textContent = geld(k.eur);
+        c.title = 'Diese Frage, geschätzt\nDeepSeek (' + k.modell + '): ' + geld(k.eur) + ' – ' + k.tin + ' Token rein'
+            + (k.cache ? ', davon ' + k.cache + ' aus dem Cache' : '') + ', ' + k.tout + ' raus\n'
+            + 'Listenpreis ' + (k.spitze ? 'zur Hauptzeit' : 'zur Nebenzeit (halber Preis)') + ', Stand 30.09.2026';
+        const p = el.lastElementChild && el.lastElementChild.tagName === 'P' ? el.lastElementChild : el;
+        p.appendChild(c);
+    }
     // the figure behind the answer's last word, in its type, a shade lighter (solita-frage.css .sf-cost)
     function kostenZeigen(el, k) {
         if (!k || !usageDa(k)) return;
@@ -166,6 +191,7 @@
             '  <label class="sf-vh" for="sf-in-' + nr + '">Deine Frage an Solita</label>' +
             '  <input class="sf-in" id="sf-in-' + nr + '" type="text" autocomplete="off">' +
             '  <span class="sf-ki" role="img" hidden></span>' +   // who answers, drawn into the field's right end (zeigeKi)
+            '  <span class="sf-ton" hidden aria-hidden="true"></span>' +   // sound instead of letters while she listens (hoertZu)
             '  <button class="sf-eye" type="button" hidden title="Passwort zeigen" aria-label="Passwort zeigen" aria-pressed="false">' + ICON.auge + '</button>' +
             '  <button class="sf-stop" type="button" hidden title="Stimme anhalten" aria-label="Stimme anhalten">' + ICON.stop + '</button>' +
             '  <button class="sf-send" type="button" title="Frage senden" aria-label="Frage senden">' + ICON.send + '</button>' +
@@ -180,6 +206,7 @@
         const micBtn = root.querySelector('.sf-mic');
         const eyeBtn = root.querySelector('.sf-eye');
         const kiEl = root.querySelector('.sf-ki');
+        const tonEl = root.querySelector('.sf-ton');
         const stopBtn = root.querySelector('.sf-stop');
         const face = root.querySelector('.sf-face');
         const note = root.querySelector('.sf-note');
@@ -214,7 +241,7 @@
         // --ki is the marks' size (solita-frage.css, the decks' footer line smaller).
         let dsZu = false;
         function zeigeKi() {
-            const d = who.ds && !dsZu, c = who.claude || !who.ds, n = (c ? 1 : 0) + (d ? 1 : 0);
+            const d = who.ds && !dsZu, c = who.claude || !d, n = (c ? 1 : 0) + (d ? 1 : 0);   // no DeepSeek: Claude answers
             kiEl.hidden = pw || !n;
             kiEl.innerHTML = (c ? ICON.claude : '') + (d ? ICON.deepseek : '');
             kiEl.style.setProperty('--n', String(n || 1));
@@ -262,8 +289,8 @@
                 if (e.key === 'Enter') { e.preventDefault(); submit(); }
                 else if (e.key === 'Escape' && opt.beiEscape) { e.preventDefault(); opt.beiEscape(); }
             });
-            // typed corrections of a dictated question follow it in the answers (liveZeile)
-            input.addEventListener('input', function () { bereit(); if (!pw && opt.liveZeile && (live || diktiert)) spiegeln(); });
+            // typed corrections of a dictated question follow it in the answers
+            input.addEventListener('input', function () { bereit(); if (!pw && (live || diktiert)) spiegeln(); });
             // The password from the clipboard (Doc, 29.09.2026: "im Clip steht das pwd ... geht aba ni", "pwd fixen
             // (clip)"): the pasted text REPLACES the field - Chrome may have filled in another saved password for this
             // address before, and the paste only hung itself onto it - is cleaned and checked at once.
@@ -392,9 +419,12 @@
         }
         // a question in the field: the send button may show it (sf-bereit - the decks let it breathe)
         function bereit() { sendBtn.classList.toggle('sf-bereit', !busy && !pw && input.value.trim() !== ''); }
-        // The dictated question already stands in the answers while it is spoken, and the field scrolls along so its
-        // end stays in view (the decks, Doc 23.09.2026: "lass den Text auch schon oben erscheinen und in der
-        // Eingabebox mit scrollen"); sent, that line becomes the question. liveZeile only.
+        // The dictated question already stands in the answers while it is spoken (the decks, Doc 23.09.2026: "lass
+        // den Text auch schon oben erscheinen"); sent, that line becomes the question. In every box since 30.09.2026,
+        // and the field itself shows sound meanwhile, not the words (Doc: "in dem Feld unten ... eher nur was
+        // soundmäßiges zeigen. Also genau wie das WhatsApp macht. Und die eigentliche Frage ... schon oben in der
+        // Box") - hoertZu below. The words still go into the field: it is what gets sent, and what can be corrected
+        // once she stops listening.
         let live = null, diktiert = false, spaet = false;
         function spiegeln() {
             const v = input.value.trim();
@@ -409,7 +439,32 @@
             input.value = t; input.scrollLeft = input.scrollWidth;
             try { input.setSelectionRange(t.length, t.length); } catch (e) { }
             bereit();
-            if (opt.liveZeile) { diktiert = true; spiegeln(); }
+            lautBis = Date.now() + 700;                      // the sound in the field moves with what is heard
+            diktiert = true; spiegeln();
+        }
+        // While she listens the field shows a row of bars, as a voice message does: calm while nothing is heard, lively
+        // for a moment with every word that arrives. It follows the recognised words, not the microphone's level - a
+        // second tap on the microphone beside the speech recognition silences that on Android. The bars lie over the
+        // field's text room (tonLegen, again and again: a deck's line is still growing when she starts), in the row's
+        // ink; the field's own text and cursor are hidden meanwhile (sf-hoert, solita-frage.css).
+        tonEl.innerHTML = Array.from({ length: 56 }, function (_, i) {
+            return '<i style="--d:-' + ((i * 137) % 900) + 'ms;--leise:' + (14 + (i * 53) % 14) + '%;--laut:' + (34 + (i * 71) % 58) + '%"></i>';
+        }).join('');
+        let tonUhr = 0, lautBis = 0;
+        function tonLegen() {
+            const cs = getComputedStyle(input), l = parseFloat(cs.paddingLeft) || 0, r = parseFloat(cs.paddingRight) || 0;
+            tonEl.style.left = (input.offsetLeft + l) + 'px';
+            tonEl.style.top = input.offsetTop + 'px';
+            tonEl.style.width = Math.max(0, input.offsetWidth - l - r) + 'px';
+            tonEl.style.height = input.offsetHeight + 'px';
+            tonEl.classList.toggle('laut', Date.now() < lautBis);
+        }
+        function hoertZu(an) {
+            micBtn.classList.toggle('on', an);
+            input.classList.toggle('sf-hoert', an);
+            tonEl.hidden = !an;
+            clearInterval(tonUhr);
+            if (an) { lautBis = 0; tonLegen(); tonUhr = setInterval(tonLegen, 200); }
         }
         // Wake both functions while the question is still being typed, at no cost: an empty tts call is refused before
         // Google is asked, a ping only checks the password. At most once a minute (the decks, 16.09.2026: the first
@@ -447,19 +502,20 @@
                         return r.json().catch(function () { return {}; }).then(function (j) {
                             const text = r.ok && j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
                             return {
-                                text: text || '', status: r.status, usage: j && j.usage, grund: j && j.reason,
+                                text: text || '', status: r.status, usage: j && j.usage, modell: j && j.model, grund: j && j.reason,
                                 error: text ? '' : r.status === 401 && url === DS_URL ? 'DeepSeek gibt es nur mit Docs Passwort.'
                                     : String((j && j.error && (j.error.message || j.error)) || 'Das hat nicht geklappt.'),
                             };
                         });
                     });
             }
-            function grau(el, text) {                        // DeepSeek's answer: grey, its name in front (as in the decks)
+            function grau(el, res) {                         // DeepSeek's answer: grey, its name in front (as in the decks)
                 el.className = 'sf-ds';
                 el.innerHTML = '<b>DeepSeek</b>';
                 const body = document.createElement('div');
                 el.appendChild(body);
-                render(body, text);
+                render(body, res.text);
+                kostenZeigenDs(body, kostenDs(res.usage, res.modell));
             }
             function fertig() { busy = false; sendBtn.disabled = false; bereit(); }
             function fail(msg) { fertig(); wait.className = 'sf-err'; wait.textContent = msg; }
@@ -470,14 +526,15 @@
                 if (meine !== seq) { auf(); return; }        // something else was read out meanwhile: silent
                 sprich(text, auf, k);                        // the text shows once her voice has arrived
             }
-            const withClaude = who.claude || !who.ds, withDs = who.ds;
+            // DeepSeek that refused this password is not asked again (dsZu, zeigeKi)
+            const withClaude = who.claude || !who.ds || dsZu, withDs = who.ds && !dsZu;
             // DeepSeek beside her: silent, below, and only once her answer is on screen, so she is read first
             const ds = withClaude && withDs ? say('', 'sf-ds') : null;
             if (ds) ds.hidden = true;
             let dsRes = null, herTurn = false;
             function dsShow() {
                 if (!ds || !dsRes || !herTurn) return;
-                if (dsRes.text) grau(ds, dsRes.text);
+                if (dsRes.text) grau(ds, dsRes);
                 else if (dsRes.status !== 401) { ds.className = 'sf-err'; ds.textContent = 'DeepSeek: ' + dsRes.error; }
                 else return;                                  // the students' password: no DeepSeek, not a word about it
                 ds.hidden = false;
@@ -488,7 +545,7 @@
                 ask(DS_URL, DS_MODEL)
                     .then(function (res) {
                         if (!res.text) { fail(res.error); return; }
-                        answer(res.text, function () { grau(wait, res.text); return wait; });
+                        answer(res.text, function () { grau(wait, res); return wait; });
                     })
                     .catch(function () { fail('Kein Netz.'); });
                 return;
@@ -503,7 +560,13 @@
                         fail(res.error); herTurn = true; dsShow(); return;
                     }
                     const k = kosten(res.usage, Date.now() - t0);
-                    answer(res.text, function () { render(wait, res.text); kostenZeigen(wait, k); herTurn = true; dsShow(); return wait; }, k);
+                    // two answers: Claude's carries its name as DeepSeek's does (Doc, 30.09.2026: "bei dem Text von Claude
+                    // auch drüber geschrieben, Claude")
+                    answer(res.text, function () {
+                        render(wait, res.text); kostenZeigen(wait, k);
+                        if (ds) { const b = document.createElement('b'); b.className = 'sf-wer'; b.textContent = 'Claude'; wait.insertBefore(b, wait.firstChild); }
+                        herTurn = true; dsShow(); return wait;
+                    }, k);
                 })
                 .catch(function () { fail('Kein Netz.'); herTurn = true; dsShow(); });
         }
@@ -764,10 +827,10 @@
             if (!ear) ear = global.SolitaListen({
                 lang: 'de-DE',
                 silenceMs: MIC.stille,
-                onState: function (s) { micBtn.classList.toggle('on', s === 'listening'); },
+                onState: function (s) { hoertZu(s === 'listening'); },
                 onPartial: function (t) { if (!spaet) gehoert(t); },
                 onFinal: function (t) {
-                    micBtn.classList.remove('on');
+                    hoertZu(false);
                     if (spaet) { spaet = false; return; }
                     if (t) gehoert(t);
                     input.focus();
@@ -780,11 +843,13 @@
         });
 
         function mikro() { if (micBtn.hidden) return false; micBtn.click(); return true; }   // false: no mic here (the password)
-        // Shift+Space is the mic's key on every page with the box: on, and again: off - from anywhere on the page, not
-        // only in her field (Doc, 23.09.2026 for the decks: "shift space ... soll das Mic starten auf der ganzen Folie",
-        // 30.09.2026 for Vorrechnen: "shift Space Mic (zentral bitte wie im Deck)"). While she listens, plain Space in
-        // her line sends what was heard and never lands in the field ("auch space soll im Mic Mode abschicken").
-        // Capture, and nobody else sees the key: a deck turns its page on Space.
+        // Space is the mic's key on every page with the box: on, and again: off - from anywhere on the page, not only
+        // in her field (Doc, 30.09.2026: "Wir haben jetzt Shift Space auf Mikrofon. Wir machen das nur mit Space" - the
+        // decks no longer turn a page on it; before: Shift+Space, 23.09.2026 for the decks, then central). In her own
+        // field Space still types once a question stands there - it is the mic's key while the field is empty, and
+        // with Shift always. While she listens, Space sends what was heard and never lands in the field ("auch space
+        // soll im Mic Mode abschicken"); nothing heard yet, it stops her. A held key does nothing more.
+        // Capture, and nobody else sees the key.
         // The host says more with s.sprechtaste({ ... }), all optional:
         //   offen(), oeffnen()   a line that can be shut: the key shows it first, then she listens
         //   innen: el            the host's element around the box, its moved line and her picture
@@ -803,17 +868,21 @@
         addEventListener('keydown', function (e) {
             if (e.metaKey || e.ctrlKey || e.altKey) return;
             const t = e.target && e.target.closest ? e.target : null;
-            const leer = e.code === 'Space';
+            const leer = e.code === 'Space', hoert = !!(ear && ear.active);
+            if (t && menu.contains(t)) return;               // her menu's boxes take their own Space
             if (t && (root.contains(t) || row.contains(t) || (taste.innen && taste.innen.contains(t)))) {
-                if (leer && e.shiftKey) { if (micTaste()) e.preventDefault(); }
-                else if (leer && ear && ear.active) { e.preventDefault(); submit(); }
+                if (!leer) return;
+                if (t === input && input.value && !e.shiftKey && !hoert) return;   // a question is being typed
+                if (e.repeat) { e.preventDefault(); return; }
+                if (hoert) { e.preventDefault(); if (input.value.trim()) submit(); else mikro(); return; }
+                if (micTaste()) e.preventDefault();          // no mic here (the password): the space is typed
                 return;
             }
-            if (t && t.closest('input, textarea, [contenteditable]')) return;   // typing elsewhere on the page
-            if (!(leer && e.shiftKey) && (taste.tasten || []).indexOf(e.key) < 0) return;
+            if (t && t.closest('input, textarea, select, [contenteditable]')) return;   // typing elsewhere on the page
+            if (!leer && (taste.tasten || []).indexOf(e.key) < 0) return;
             if (taste.wenn && !taste.wenn()) return;
             e.preventDefault(); e.stopImmediatePropagation();
-            micTaste();
+            if (!e.repeat) micTaste();
         }, true);
 
         // keys inside the box stay there: they must not turn the lab's steps

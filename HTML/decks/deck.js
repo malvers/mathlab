@@ -193,9 +193,11 @@ function jump(d){
 addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;     // never eat Cmd-Shift-R
   const k = e.key;
-  if (/^(Arrow|Page|Home|End| )/.test(k)) narr.stop();   // turning pages by hand pauses Solita
+  if (/^(Arrow|Page|Home|End)/.test(k)) narr.stop();   // turning pages by hand pauses Solita
   if (e.shiftKey && (k === 'ArrowRight' || k === 'ArrowLeft')) { jump(k === 'ArrowRight' ? 1 : -1); e.preventDefault(); }
-  else if (k === 'ArrowRight' || k === 'ArrowDown' || k === ' ' || k === 'PageDown') { next(); e.preventDefault(); }
+  // not Space: it is the mic's key (Doc, 30.09.2026: "das Space, das die Folien weiterschaltet, nehmen wir raus, denn
+  // dafür haben wir ja die Pfeiltasten") - js/solita-frage.js takes it
+  else if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown') { next(); e.preventDefault(); }
   else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { prev(); e.preventDefault(); }
   else if (k === 'Home') { si = Math.max(0, seek(0, 1)); step = 0; paint(); }
   else if (k === 'End') { si = Math.max(0, seek(slides.length - 1, -1)); step = groups(slides[si]); paint(); }
@@ -296,7 +298,7 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
   const avatar = document.querySelector('#ask-btn img');   // her photo bottom right, shown small in the Solita row
   // null = a thin line between the groups: navigate | present | Solita | help (Doc, 17.09.2026)
   const rows = [
-    [K(['→', '|', 'Leertaste']), 'Nächster Schritt – auch ein Klick auf die Folie'],
+    [K(['→']), 'Nächster Schritt – auch ein Klick auf die Folie'],
     [K(['←']), 'Einen Schritt zurück'],
     [K(['A']) + hint('Alles'), 'Alles auf der Folie zeigen'],
     [K(['Shift', '→', '/', 'Shift', '←']), 'Ganze Folie vor / zurück – wie '
@@ -313,7 +315,7 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
       ['<span class="help-dot ext"></span>', 'Grüner Punkt: Bildschirm erweitert – Präsentation kann starten']] : []),
     [K(['L']), 'Laserpointer an / aus – auch der Knopf rechts neben H'],
     null,
-    [K(['Shift', 'Leertaste', '/', 'P']), 'Solita zuhören lassen – die Frage sprechen'
+    [K(['Leertaste', '/', 'P']), 'Solita zuhören lassen – die Frage sprechen'
       + (avatar ? ' <img class="navpic" src="' + avatar.src + '" alt="">' : '')],
     null,
     [K(['Esc']), 'Schließen – beendet auch die Präsentation'],
@@ -748,7 +750,7 @@ fromHash();
   const panel = document.getElementById('ask-panel');
   // The box's files come from here, so no deck page needs a new line. The version rides along: a browser still holding
   // an older copy of the box (from a lab - Pages keeps files 10 minutes) takes this one.
-  const SF_VERSION = '2026-09-30g';             // raise it with every change of the box or deck-solita.css
+  const SF_VERSION = '2026-09-30i';             // raise it with every change of the box or deck-solita.css
   function load(src, then) {
     const s = document.createElement('script');
     s.src = new URL(src, DECK_JS).href;
@@ -811,8 +813,20 @@ fromHash();
   function context(q) {
     const ahead = ((NARR && NARR.hold) || []).filter(function (h) { return h >= si; });
     const last = ahead.length ? Math.min.apply(null, ahead) : slides.length - 1;
-    const lines = ['Deck: ' + document.title, 'Übersicht, eine Zeile je Folie:'];
-    for (let i = 0; i <= last; i++) lines.push('F' + (i + 1) + ': ' + overviewLine(i));
+    // A deck whose overview is a small book - every task of Vorrechnen: 931 slides, 107,000 characters with EVERY
+    // question, 6.8 ct each (Doc, 30.09.2026: "brutal viel. Was ist denn da passiert?") - sends only the slides
+    // around the class's, 15 before and after; she is told so. Any other deck goes whole, as before.
+    const UEBERSICHT_MAX = 20000, NAH = 15;
+    let zeilen = [];
+    for (let i = 0; i <= last; i++) zeilen.push('F' + (i + 1) + ': ' + overviewLine(i));
+    let kopf = 'Übersicht, eine Zeile je Folie:';
+    if (zeilen.join('\n').length > UEBERSICHT_MAX) {
+      const von = Math.max(0, si - NAH), bis = Math.min(last, si + NAH);
+      zeilen = zeilen.slice(von, bis + 1);
+      kopf = 'Das Deck hat ' + slides.length + ' Folien. Übersicht der Folien ' + (von + 1) + ' bis ' + (bis + 1)
+        + ', rund um die Folie der Klasse, eine Zeile je Folie:';
+    }
+    const lines = ['Deck: ' + document.title, kopf].concat(zeilen);
     const full = [si];
     String(q).replace(/\b(?:folie|seite|slide|f)\s*(\d{1,3})\b/gi, function (m, n) {
       const i = +n - 1;
@@ -1071,10 +1085,10 @@ fromHash();
     btn.addEventListener('click', function () { btn.classList.remove('invite'); });   // found her - no more inviting on this page
     sf.bild(btn, { offen: function () { return PRESENTER || !panel.hidden; }, oeffnen: open });
     document.getElementById('ask-close').onclick = close;
-    // Shift+Space and P start the mic from anywhere on the slide, not only inside her panel; a closed line slides
-    // open first (Doc, 23.09.2026: "shift space und P sollen das Mic starten auf der ganzen Folie wenn eingeklappt,
-    // animiert ausklappen"). The key itself is the box's, for the labs too (30.09.2026: "zentral bitte wie im Deck") -
-    // it also sends on plain Space while she listens; here only how the line opens, and P.
+    // Space and P start the mic from anywhere on the slide, not only inside her panel; a closed line slides open
+    // first (Doc, 23.09.2026: "shift space und P sollen das Mic starten auf der ganzen Folie wenn eingeklappt,
+    // animiert ausklappen"; 30.09.2026: Space alone). The key itself is the box's, for the labs too ("zentral bitte
+    // wie im Deck") - it also sends on Space while she listens; here only how the line opens, and P.
     sf.sprechtaste({
       offen: function () { return !panel.hidden; },
       oeffnen: function () { open(); slideRow(); },    // out of her picture, then listen
