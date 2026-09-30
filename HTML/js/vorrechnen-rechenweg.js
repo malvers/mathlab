@@ -181,13 +181,14 @@ const linieAb = s => ZEILE / 2 - ACHSE_EM * rechenEm() * s;
 function ergebnisSchritt() {
     if (!aufgabenModus) return -1;
     const v = AUFGABEN[aufgabeIdx][2];
-    // a term to simplify (no variable, Doc 28.09.): its result is the last step of its solution
-    if (v === '') {
-        const l = LOESUNGEN[AUFGABEN[aufgabeIdx][0]], ende = l && l.length ? schrittNorm(l[l.length - 1][0]) : null;
-        for (let i = rechenweg.length - 1; i >= 0; i--) if (ende && schrittNorm(rechenweg[i].latex) === ende) return i;
-        return -1;
-    }
+    // the last step of the task's solution is its result: a term to simplify (no variable, Doc 28.09.) has no other,
+    // and an equation's may hold two solutions side by side, "x_1=2\quad x_2=-3" (Doc, 30.09.2026: a block for every
+    // week of the school year - quadratic equations, sine), which VAR = ... below does not read
+    const loesung = LOESUNGEN[AUFGABEN[aufgabeIdx][0]];
+    const ende = loesung && loesung.length ? schrittNorm(loesung[loesung.length - 1][0]) : null;
     for (let i = rechenweg.length - 1; i >= 0; i--) {
+        if (ende && schrittNorm(rechenweg[i].latex) === ende) return i;
+        if (v === '') continue;
         const [l, r] = amGleich(rechenweg[i].latex.replace(UNGEFAEHR, '='));
         const links = l.replace(/\\displaystyle|[\s{}]/g, '');
         // every letter left once the commands (\frac, \cdot) are gone is a variable

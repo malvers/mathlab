@@ -54,6 +54,9 @@
 .tf-zeile{position:absolute;left:0;top:0;width:0;height:0}
 .tf-zelle{position:absolute;left:0;top:0;white-space:nowrap;line-height:normal}
 .tf-sonde{display:inline-block;width:0;height:0}          /* a probe on the cell's baseline */
+/* the task's setting in a sentence, under the heading's rule (a week block's TEXTE) */
+.tf-text{position:absolute;left:72px;top:132px;width:816px;margin:0;font-size:17px;line-height:1.35;color:var(--body)}
+.tf-text .katex{font-size:1.08em}
 .tf-op{color:#7a8294}
 .tf-nr{color:#5d6678}
 /* two columns: the thin line between them, in the colour of the line above vorrechnen's squares */
@@ -148,7 +151,8 @@
   const NUMMER_GROESSE = 0.7, NUMMER_LUFT = 1.5;         // (1), (2), ...: the same
   const UNTER_EM = 0.12;                  // the result's double underline: this far under the ink, its lines this far apart (em)
 
-  /* The first "=" outside any braces and \left ... \right: "\frac{a}{b=c}" is no split. */
+  /* The first "=" outside any braces and \left ... \right: "\frac{a}{b=c}" is no split. A rounded step lines up on
+     its "≈" the same way ("\approx 2{,}81", the week blocks, 30.09.2026): [left, right, the sign]. */
   function teileAmGleich(tex) {
     let tiefe = 0;
     for (let k = 0; k < tex.length; k++) {
@@ -157,12 +161,13 @@
         const cmd = /^\\([a-zA-Z]+)/.exec(tex.slice(k));
         if (cmd && cmd[1] === 'left') tiefe++;
         else if (cmd && cmd[1] === 'right') tiefe--;
+        else if (cmd && cmd[1] === 'approx' && tiefe === 0) return [tex.slice(0, k), tex.slice(k + cmd[0].length), '\\approx'];
         k += cmd ? cmd[0].length - 1 : 1;
         continue;
       }
       if (c === '{') tiefe++;
       else if (c === '}') tiefe--;
-      else if (c === '=' && tiefe === 0) return [tex.slice(0, k), tex.slice(k + 1)];
+      else if (c === '=' && tiefe === 0) return [tex.slice(0, k), tex.slice(k + 1), '='];
     }
     return null;
   }
@@ -211,6 +216,21 @@
       v.dataset.tex = a.nach;                     // Solita reads it as $x$
       try { katex.render(a.nach, v, { throwOnError: false }); } catch (e) { v.textContent = a.nach; }
     }
+    /* the task's setting in a sentence under the heading (TEXTE, js/vorrechnen-aufgaben.js: the urn, the taxi, the
+       fence - a week block's bare term says nothing by itself), formulas between $...$; the working starts below it
+       (einpassen) */
+    if (a.text) {
+      const p = document.createElement('p');
+      p.className = 'tf-text';
+      String(a.text).split(/\$([^$]+)\$/).forEach(function (teil, i) {
+        if (i % 2 === 0) { p.appendChild(document.createTextNode(teil)); return; }
+        const f = document.createElement('span');
+        f.dataset.tex = teil;                     // Solita reads it as $...$
+        try { katex.render(teil, f, { throwOnError: false }); } catch (e) { f.textContent = teil; }
+        p.appendChild(f);
+      });
+      sl.appendChild(p);
+    }
     const rechnung = document.createElement('div');
     rechnung.className = 'tf-rechnung';
     const farbig = function (tex) { return hebeVariable(tex, a.nach, ROT); };
@@ -236,9 +256,11 @@
       const letzte = z === texte.length - 1 && z > 0;
       const teile = teileAmGleich(tex);
       /* the right side without its commands: the "a" in \frac is no variable */
-      const ergebnis = letzte && (a.nach === '' ? !!a.ende && norm(tex) === norm(a.ende) :     // a term: its solution's last step
+      /* the solution's last step is the result as well - two solutions side by side, "x_1=2\quad x_2=-3" (vorrechnen's
+         ergebnisSchritt, 30.09.2026) */
+      const ergebnis = letzte && (!!a.ende && norm(tex) === norm(a.ende) || a.nach !== '' &&
         !!a.nach && !!teile && norm(teile[0]) === a.nach && norm(teile[1]).replace(/\\[a-zA-Z]+/g, '').indexOf(a.nach) < 0);
-      const rechts = teile ? zelle(el, '{}=' + farbig(teile[1]), 'tf-rechts') : null;   // "{}=": the "=" with its air
+      const rechts = teile ? zelle(el, '{}' + teile[2] + farbig(teile[1]), 'tf-rechts') : null;   // "{}=": the "=" with its air
       if (schritt === 0 && neben) {
         Object.assign(zeilen[0], { el: el, rechts: rechts, schritt: 0, ergebnis: ergebnis, neben: true });
         return;
@@ -286,6 +308,14 @@
     deckEl.querySelectorAll('.tf-rechnung').forEach(function (r) { r.style.fontSize = SCHRIFT + 'px'; });
     void deckEl.offsetHeight;                     // lay out now, so the fonts are asked for
     try { await document.fonts.ready; } catch (e) { }
+    /* a task with its setting in a sentence: the working's room starts under the text */
+    deckEl.querySelectorAll('.tf-text').forEach(function (p) {
+      const r = p.parentNode.querySelector('.tf-rechnung');
+      if (!r) return;
+      const oben = p.offsetTop + p.offsetHeight + 14, unten = r.offsetTop + r.offsetHeight;
+      r.style.top = oben + 'px';
+      r.style.height = Math.max(120, unten - oben) + 'px';
+    });
     deckEl.querySelectorAll('.tf-rechnung').forEach(legeRechnung);
     alle.forEach(function (sl) { sl.style.display = ''; });
     deckEl.style.visibility = '';
@@ -520,6 +550,7 @@
         const b = aufgabenBlock(i), l = LOESUNGEN[t[0]] || [];
         if (woche && woche.indexOf(b) < 0) return null;
         return { schluessel: t[0], nr: i - b.ab + 1, block: b.titel, kopf: b.kopf || null, latex: t[1], nach: t[2], ende: l.length ? l[l.length - 1][0] : null,
+          text: (typeof TEXTE !== 'undefined' && TEXTE[t[0]]) || null,
           rechenweg: l.map(function (st) { return st[0]; }), umformungen: l.map(function (st) { return st[1]; }) };
       }).filter(Boolean)
     };

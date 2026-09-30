@@ -102,6 +102,16 @@ const SCHEMATA = {};
 // Doc, 28.09.: a task's source, small and grey right above the line to the writing field (on the beamer too) -
 // "schreib's über die Trennlinie ... das ist eine Quelle"; by slug, plain text
 const QUELLEN = {};
+// Doc, 30.09.2026 (a block for every week of the school year: "immer an den schon vorhandenen Aufgaben orientieren"):
+// a task that is a bare term or equation on the board can carry its setting in a sentence - the urn, the taxi, the
+// fence - by slug, formulas between $...$. The deck of the tasks shows it under the heading (decks/tafel.html); in the
+// lab it opens the task's explanation box (the mortarboard). A block's file calls aufgabenTexte({...}) after its own
+// ERKLAERUNGEN.
+const TEXTE = {};
+function aufgabenTexte(texte) {
+    Object.assign(TEXTE, texte);
+    Object.keys(texte).forEach(s => { ERKLAERUNGEN[s] = texte[s] + (ERKLAERUNGEN[s] ? '\n\n' + ERKLAERUNGEN[s] : ''); });
+}
 // Doc, 26.09.: "Gib mir bitte pro Aufgabe ... den jeweils nächsten Schritt in Grau,
 // so dass ich ihn nachschreiben könnte, dass ich da keine Fehler mache" - the
 // solution of each task, step by step: [equation, operation]. Every step was
