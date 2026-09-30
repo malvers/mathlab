@@ -2,31 +2,44 @@
    Leistungsnachweise and Notenberechnung as tables in the house palette. Moved out of bewertungen.html
    unchanged when the FOS page came (Doc, 29.09.2026), so every school's page shares one look. */
 
-/* The teal band of the printed sheet, mixed from the house cyan so the
-   table stays in the palette in all three schemes (dark, grey, light).
-   Everything here derives from --g-cyan; the deviating Wiederholer row
-   is the one place that takes lambda - the original marked it magenta,
-   and orange is what this house uses for "Achtung, Ausnahme". */
+/* The head band and the rows are mixed from the house blue (--tint, the blue of
+   the SVP's lines, rims and pills), so the tables sit in the same blues as the
+   pages around them in all three schemes; the grey scheme turns them grey with
+   its --tint. They were teal, after the printed sheet's band, and that clashed
+   (Doc, 30.09.2026: "Nimm bitte unsere Blaus"). The chip, the "Achtung" lines
+   and the deviating Wiederholer row take lambda: orange in the dark schemes,
+   the pill blue in the light one - no yellow and no brown there ("das hatte
+   ich ... schon hundertmal verbannt"). */
 :root {
-    --bw-band: rgba(var(--g-cyan), 0.20);
+    --bw-band: rgba(var(--tint), 0.20);
     --bw-band-ink: var(--head);
-    --bw-band-line: rgba(var(--g-cyan), 0.45);
-    --bw-row-a: rgba(var(--g-cyan), 0.05);
-    --bw-row-b: rgba(var(--g-cyan), 0.09);
+    --bw-band-line: rgba(var(--tint), 0.45);
+    --bw-row-a: rgba(var(--tint), 0.05);
+    --bw-row-b: rgba(var(--tint), 0.09);
+    --bw-sum: rgba(var(--tint), 0.07);
     --bw-grid: rgba(var(--tint), 0.18);
-    --bw-edge: rgba(var(--g-cyan), 0.25);
+    --bw-edge: rgba(var(--tint), 0.25);
     --bw-warn-ink: var(--lambda);
+    --bw-warn-line: rgba(var(--g-orange), 0.45);
+    --bw-warn-fill: rgba(var(--g-orange), 0.1);
+    --bw-warn-row: rgba(var(--g-orange), 0.07);
+    --bw-warn-head: rgba(var(--g-orange), 0.18);
 }
 
 html.svp-light {
-    --bw-band: rgb(214, 238, 244);
-    --bw-band-ink: rgb(16, 82, 110);
-    --bw-band-line: rgb(150, 200, 214);
+    --bw-band: var(--panel);
+    --bw-band-ink: var(--lambda);
+    --bw-band-line: rgba(40, 70, 120, 0.3);
     --bw-row-a: rgb(255, 255, 255);
-    --bw-row-b: rgb(243, 250, 252);
+    --bw-row-b: rgb(246, 248, 252);
+    --bw-sum: rgb(240, 244, 250);
     --bw-grid: rgba(40, 70, 120, 0.18);
-    --bw-edge: rgba(28, 118, 158, 0.3);
-    --bw-warn-ink: rgb(150, 108, 8);
+    --bw-edge: rgba(40, 70, 120, 0.3);
+    /* the material pills' blue, as in svp-material.css */
+    --bw-warn-line: rgba(40, 70, 120, 0.45);
+    --bw-warn-fill: rgba(40, 70, 120, 0.09);
+    --bw-warn-row: rgba(40, 70, 120, 0.09);
+    --bw-warn-head: rgba(40, 70, 120, 0.16);
 }
 
 .bw-wrap {
@@ -65,8 +78,8 @@ html.svp-light {
 .bw-chip {
     font-size: 0.82rem;
     color: var(--bw-warn-ink);
-    border: 1px solid rgba(var(--g-orange), 0.45);
-    background: rgba(var(--g-orange), 0.1);
+    border: 1px solid var(--bw-warn-line);
+    background: var(--bw-warn-fill);
     border-radius: 999px;
     padding: 3px 12px;
 }
@@ -163,15 +176,13 @@ table.bw tbody tr.alt td { background: var(--bw-row-b); }
 /* The closing line of a Klassenstufe: what is added up at the end.
    It spans both Fachgruppen, because it holds for both. */
 table.bw tbody tr.bw-sum td {
-    background: rgba(var(--g-cyan), 0.07);
+    background: var(--bw-sum);
     font-size: 0.88rem;
 }
 
-html.svp-light table.bw tbody tr.bw-sum td { background: rgb(238, 248, 251); }
-
 table.bw tbody tr.bw-sum td b { font-weight: 600; }
 
-/* A warning inside a closing line (FOS: WebUntis gets the weighted average wrong) - orange, as the house
+/* A warning inside a closing line (FOS: WebUntis gets the weighted average wrong) - in lambda, as the house
    says "Achtung", on a line of its own under the rule it belongs to. */
 .bw-achtung { display: block; margin-top: 6px; color: var(--bw-warn-ink); }
 .bw-achtung b { font-weight: 600; }
@@ -197,15 +208,10 @@ table.bw tbody tr.bw-sum td b { font-weight: 600; }
 table.bw tbody tr.bw-warn th,
 table.bw tbody tr.bw-warn td {
     color: var(--bw-warn-ink);
-    background: rgba(var(--g-orange), 0.07);
+    background: var(--bw-warn-row);
 }
 
-html.svp-light table.bw tbody tr.bw-warn th,
-html.svp-light table.bw tbody tr.bw-warn td {
-    background: rgba(var(--g-orange), 0.16);
-}
-
-/* The closing note sits in a plain card, without the table's teal rim. */
+/* The closing note sits in a plain card, without the table's rim. */
 .bw-card.note {
     padding: 14px 16px;
     border-color: var(--line);
@@ -257,11 +263,97 @@ html.svp-light table.bw tbody tr.bw-warn td {
         margin-bottom: 3px;
     }
 
-    table.bw tbody tr.bw-warn th { background: rgba(var(--g-orange), 0.18); }
+    table.bw tbody tr.bw-warn th { background: var(--bw-warn-head); }
 
     /* stacked, an empty cell would still print its column head */
     table.bw tbody td:empty { display: none; }
 }
+
+/* ---- How many Klassenarbeiten per subject and grade (OS GY page): a grid of numbers ----
+   Not a .bw table - it never stacks on a phone; it swipes sideways instead, the subject staying at the left edge. */
+.nz-scroll { overflow-x: auto; }
+.nz-scroll::-webkit-scrollbar { height: 8px; }
+.nz-scroll::-webkit-scrollbar-track { background: var(--trough); }
+.nz-scroll::-webkit-scrollbar-thumb { background: var(--thumb); border-radius: 4px; }
+@supports (-moz-appearance: none) {
+    .nz-scroll { scrollbar-width: thin; scrollbar-color: var(--thumb) var(--trough); }
+}
+
+table.nz {
+    /* svp-table.css sets 760 px for every table - here the width follows the columns */
+    width: 100%;
+    min-width: 460px;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+table.nz.nz-gy { min-width: 860px; }
+
+table.nz th,
+table.nz td {
+    padding: 7px 8px;
+    text-align: center;
+    vertical-align: middle;
+    border-right: 1px solid var(--bw-grid);
+    border-bottom: 1px solid var(--bw-grid);
+    font-size: 0.9rem;
+    line-height: 1.3;
+}
+
+table.nz tr > :last-child { border-right: 0; }
+table.nz tbody tr:last-child > * { border-bottom: 0; }
+
+table.nz thead th {
+    position: static;
+    background: var(--bw-band);
+    color: var(--bw-band-ink);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: none;
+    white-space: nowrap;
+    text-align: center;
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--bw-band-line);
+}
+
+table.nz thead th.nz-fach { text-align: left; padding-left: 12px; }
+table.nz thead th .bw-hj-note {
+    display: block;
+    margin-top: 3px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    opacity: 0.8;
+}
+
+/* the subject stays in view while the grades swipe past - opaque, or the numbers would show through */
+table.nz tbody th {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    text-align: left;
+    padding-left: 12px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    background: linear-gradient(var(--bw-row-b), var(--bw-row-b)), var(--bg);
+}
+
+table.nz tbody td { background: var(--bw-row-a); color: var(--text); }
+table.nz tbody tr:nth-child(even) td { background: var(--bw-row-b); }
+
+/* at least one Klassenarbeit stands out; 0 steps back; - = the subject is not taught in that grade */
+table.nz td.nz-n { font-weight: 600; }
+table.nz td.nz-0 { color: var(--muted); }
+table.nz td.nz-x { color: var(--muted); opacity: 0.5; }
+
+/* "+ BLF", "Vorabitur" under the number; "nur KL" behind a subject */
+.nz-note { display: block; font-size: 0.68rem; font-weight: 400; color: var(--muted); white-space: nowrap; }
+.nz-art { margin-left: 6px; font-size: 0.72rem; font-weight: 400; color: var(--muted); }
 
 @media print {
     .bw-card { break-inside: avoid; }
