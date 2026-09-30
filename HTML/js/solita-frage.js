@@ -1,7 +1,7 @@
 // js/solita-frage.js — Solita's question box for labs: ask about what the page shows right now, Claude (Haiku)
 // answers, her DocPad voice (Studio-C via the tts edge function) reads it out — NEVER the browser voice (Doc).
-// Same endpoints, password key ('dev_access'), request shape and right-click menu as the box in the decks
-// (decks/deck.js, "Ask Solita"); deck.js still carries its own copy of this until it is switched over to this file.
+// ONE box for the labs and the decks: since 30.09.2026 decks/deck.js mounts this one too and keeps only what is the
+// deck's own (its context, the footer line, the presenter view) - Doc: "ist das SolitaDoc Modul zentralisiert????".
 // The API keys live in the Supabase edge functions, never here (Rule 21) — the shared password gates the proxy.
 // First used by the Ziffernrätsel lab (Doc, 29.09.2026: "Bau auch wie in Decks Solita ein, die pro step Fragen
 // noch gründlicher erklären kann").
@@ -14,6 +14,24 @@
 //       ueberschrift: h3,                           // its text becomes "Frag Solita" / "Frag Doc", the field then says "…"
 //       blase: true,                                // the whole talk in ONE bubble, as in the decks (solita-frage.css)
 //   });
+//   For a host that places the box itself - the decks (decks/deck.js, since 30.09.2026) - all optional:
+//       kontext(frage)      gets the question too ("Folie 15" puts that slide into the context)
+//       kontextKopf: '',    what stands before the context (default 'Was die Seite gerade zeigt:\n')
+//       frageWort: 'Frage der Klasse',   how a question is introduced to the model (default 'Frage')
+//       maxTokens: 600,     the answer's length (default 700)
+//       hinweise: ['Frag {name} zur Folie', 'Frag {name}'],   the field's invitations, the longest that fits
+//       mic: { stille: 2000, selbst: true },   dictation ends after 2 s of quiet and sends itself
+//       liveZeile: true,    a dictated question already stands in the answers while it is spoken
+//       senden(frage)       true: the host takes the question away (the presenter hands it to the beamer)
+//       diktat(text)        true: the host shows the dictated line itself (the presenter: on the beamer)
+//       beimMikro()         the mic starts (the presenter: her voice on the beamer goes quiet)
+//       beiEscape()         Esc in the field
+//       menueAuf: el        where the right click opens her menu (default: the box)
+//       stimme: 'doc'       the voice while none is chosen on this device (default Solita's)
+//   The handle also gives: s.out, s.row (the question line - a host may move it elsewhere), s.feld(), s.mikro(),
+//   s.hoert(), s.senden(), s.live(text), s.auffrischen() (password or question, as it stands now), s.aufwaermen(),
+//   s.beschaeftigt(), s.spiegel(m) (the presenter shows the beamer's answers: { html, zu, busy, st }). The host
+//   may fold the answers away with the class sf-zu on s.out; the next text takes it off.
 //   A click on the face switches between Solita and Doc; the page hears it as the event 'solita-wer' on document
 //   (detail.name) and SolitaFrage.wer() says who it is now.
 //   s.frage(text)       ask, as if typed
@@ -155,7 +173,11 @@
         const stopBtn = root.querySelector('.sf-stop');
         const face = root.querySelector('.sf-face');
         const note = root.querySelector('.sf-note');
+        // taken now: a host may move the question line out of the box (the decks put it in the footer)
+        const row = root.querySelector('.sf-row'), vh = root.querySelector('.sf-vh');
         const PLATZ = opt.platzhalter || 'Frag {name}';
+        const FRAGE = opt.frageWort || 'Frage';            // how a question is introduced to the model
+        const MIC = opt.mic || {};
         // Solita or Doc - chosen in the right-click menu or by a click on the face; every text of the box says who
         // (Doc, 29.09.2026: "wenn ich da selektiert bin, muss da natürlich stehen Frag Doc")
         function wer() { return VOICE === 'doc' ? 'Doc' : 'Solita'; }
@@ -165,7 +187,9 @@
         let busy = false, audio = null, ear = null, seq = 0;
         // device settings, shared with solita.html and the decks
         let ttsOn = lies(TTS_KEY) !== '0';
-        let VOICE = lies(VOICE_KEY) === 'doc' ? 'doc' : 'de-DE-Studio-C';
+        // nothing chosen on this device yet: the page's own voice (a deck built for Doc's voice, data-voice="doc")
+        const gewaehlt = lies(VOICE_KEY);
+        let VOICE = gewaehlt === 'doc' || gewaehlt === 'de-DE-Studio-C' ? gewaehlt : opt.stimme === 'doc' ? 'doc' : 'de-DE-Studio-C';
         const who = { claude: true, ds: false };
         try {
             const kept = JSON.parse(lies(WHO_KEY) || 'null');
@@ -195,6 +219,7 @@
             const d = document.createElement('div');
             d.className = cls || 'sf-a';
             d.innerHTML = html;
+            out.classList.remove('sf-zu');                   // text arrives: a box the host folded away opens again
             out.appendChild(d);
             out.scrollTop = out.scrollHeight;
             return d;
@@ -210,7 +235,10 @@
             input.addEventListener('keydown', function (e) {
                 e.stopPropagation();                         // typing must not turn the lab's steps
                 if (e.key === 'Enter') { e.preventDefault(); submit(); }
+                else if (e.key === 'Escape' && opt.beiEscape) { e.preventDefault(); opt.beiEscape(); }
             });
+            // typed corrections of a dictated question follow it in the answers (liveZeile)
+            input.addEventListener('input', function () { bereit(); if (!pw && opt.liveZeile && (live || diktiert)) spiegeln(); });
             // The password from the clipboard (Doc, 29.09.2026: "im Clip steht das pwd ... geht aba ni", "pwd fixen
             // (clip)"): the pasted text REPLACES the field - Chrome may have filled in another saved password for this
             // address before, and the paste only hung itself onto it - is cleaned and checked at once.
@@ -285,7 +313,9 @@
             // with a heading the name already stands above the box - the field only says "…" (Doc, 29.09.2026:
             // "das steht ja drüber. Mach da drinnen nur Punkt, Punkt, Punkt")
             // three single periods, not the one-glyph '…' - only they take the letter-spacing
-            const liste = opt.ueberschrift ? ['...'] : [platz(), 'Frag ' + wer()];
+            const liste = opt.ueberschrift ? ['...']
+                : opt.hinweise ? opt.hinweise.map(function (h) { return h.replace(/\{name\}/g, wer()); })
+                : [platz(), 'Frag ' + wer()];
             input.classList.toggle('sf-punkte', !!opt.ueberschrift);   // the dots are set large (solita-frage.css)
             const cs = getComputedStyle(input);
             const room = input.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 2;
@@ -302,7 +332,7 @@
         function submit() {
             const v = pw ? sauber(input.value) : input.value.trim();
             if (!v || busy) return;
-            if (ear && ear.active) ear.stop();
+            if (ear && ear.active) { spaet = true; ear.stop(); }   // its late result must not land behind the answer
             if (!pwd()) {                                    // first use on this device: verify and remember
                 busy = true; sendBtn.disabled = true;
                 post(AI_URL, { ping: true, pass: v })
@@ -329,8 +359,40 @@
                     .catch(function () { busy = false; sendBtn.disabled = false; say('Kein Netz.', 'sf-err'); });
                 return;
             }
-            input.value = '';
+            input.value = ''; diktiert = false; bereit();
+            if (opt.senden && opt.senden(v)) { live = null; return; }   // the host took it (the presenter)
             frage(v);
+        }
+        // a question in the field: the send button may show it (sf-bereit - the decks let it breathe)
+        function bereit() { sendBtn.classList.toggle('sf-bereit', !busy && !pw && input.value.trim() !== ''); }
+        // The dictated question already stands in the answers while it is spoken, and the field scrolls along so its
+        // end stays in view (the decks, Doc 23.09.2026: "lass den Text auch schon oben erscheinen und in der
+        // Eingabebox mit scrollen"); sent, that line becomes the question. liveZeile only.
+        let live = null, diktiert = false, spaet = false;
+        function spiegeln() {
+            const v = input.value.trim();
+            if (!v) diktiert = false;
+            if (opt.diktat && opt.diktat(v)) return;       // the host shows it (the presenter: on the beamer)
+            if (live && !live.isConnected) live = null;     // "Leeren" took it away
+            if (!v) { if (live) { live.remove(); live = null; } return; }
+            if (!live) live = say('', 'sf-q');
+            live.innerHTML = esc(v); out.scrollTop = out.scrollHeight;
+        }
+        function gehoert(t) {                                // recognised text into the field, its end in view
+            input.value = t; input.scrollLeft = input.scrollWidth;
+            try { input.setSelectionRange(t.length, t.length); } catch (e) { }
+            bereit();
+            if (opt.liveZeile) { diktiert = true; spiegeln(); }
+        }
+        // Wake both functions while the question is still being typed, at no cost: an empty tts call is refused before
+        // Google is asked, a ping only checks the password. At most once a minute (the decks, 16.09.2026: the first
+        // call after a pause waited for a cold start).
+        let warmAt = 0;
+        function aufwaermen() {
+            if (Date.now() - warmAt < 60000) return;
+            warmAt = Date.now();
+            post(TTS_URL, {}).catch(function () { });
+            if (pwd()) post(AI_URL, { ping: true, pass: pwd() }).catch(function () { });
         }
 
         // --- a question -----------------------------------------------------------------------------------------
@@ -338,19 +400,21 @@
             v = String(v || '').trim();
             if (!v || busy) return;
             if (!pwd()) { askPassword(); input.focus(); say('Einmal das Passwort, dann kann ' + wer() + ' antworten.', 'sf-err'); return; }
-            busy = true; sendBtn.disabled = true;
+            busy = true; sendBtn.disabled = true; bereit();
             stop();
             const meine = ++seq;
-            say(esc(v), 'sf-q');
+            const q = live && live.isConnected ? live : say('', 'sf-q');   // dictated: the line standing there is it
+            q.innerHTML = esc(v); live = null;
             const wait = say('<span class="sf-wave" role="status" aria-label="' + wer() + ' denkt nach"><i></i><i></i><i></i><i></i><i></i></span>', 'sf-a');
-            const kontext = typeof opt.kontext === 'function' ? String(opt.kontext() || '') : '';
+            const kontext = typeof opt.kontext === 'function' ? String(opt.kontext(v) || '') : '';
+            const kopf = opt.kontextKopf !== undefined ? opt.kontextKopf : 'Was die Seite gerade zeigt:\n';
             const messages = [{ role: 'system', content: (VOICE === 'doc' ? SYSTEM_DOC : SYSTEM_SOLITA) + SYSTEM_BASIS + (opt.system ? '\n\n' + opt.system : '') }]
                 .concat(hist.reduce(function (m, h) {
-                    return m.concat({ role: 'user', content: 'Frage: ' + h.q }, { role: 'assistant', content: h.a });
+                    return m.concat({ role: 'user', content: FRAGE + ': ' + h.q }, { role: 'assistant', content: h.a });
                 }, []))
-                .concat({ role: 'user', content: (kontext ? 'Was die Seite gerade zeigt:\n' + kontext + '\n\n' : '') + 'Frage: ' + v });
+                .concat({ role: 'user', content: (kontext ? kopf + kontext + '\n\n' : '') + FRAGE + ': ' + v });
             function ask(url, model) {
-                return post(url, { pass: pwd(), model: model, max_tokens: 700, messages: messages })
+                return post(url, { pass: pwd(), model: model, max_tokens: opt.maxTokens || 700, messages: messages })
                     .then(function (r) {
                         return r.json().catch(function () { return {}; }).then(function (j) {
                             const text = r.ok && j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
@@ -369,7 +433,7 @@
                 el.appendChild(body);
                 render(body, text);
             }
-            function fertig() { busy = false; sendBtn.disabled = false; }
+            function fertig() { busy = false; sendBtn.disabled = false; bereit(); }
             function fail(msg) { fertig(); wait.className = 'sf-err'; wait.textContent = msg; }
             function answer(text, zeigen, k) {               // the answer she speaks: memory, voice, then on screen
                 hist.push({ q: v, a: text });
@@ -517,6 +581,9 @@
             + '<button type="button" data-act="copy">Kopieren</button>'
             + '<button type="button" data-act="clear">Leeren</button>';
         document.body.appendChild(menu);                   // fixed on the page: no card clips it
+        // what happens in her menu stays there: a click on a check reached the page and turned a deck's slide
+        menu.addEventListener('click', function (e) { e.stopPropagation(); });
+        menu.addEventListener('keydown', function (e) { e.stopPropagation(); });
         const whoChecks = menu.querySelectorAll('input[data-who]');
         const voiceChecks = menu.querySelectorAll('input[data-voice]');
         const ttsBox = menu.querySelector('input[data-act="tts"]');
@@ -536,7 +603,7 @@
             face.alt = VOICE === 'doc' ? 'Doc Alvers' : 'Solita';
             face.title = 'Klick: zu ' + (VOICE === 'doc' ? 'Solita' : 'Doc') + ' wechseln';
             if (opt.ueberschrift) opt.ueberschrift.textContent = 'Frag ' + wer();
-            root.querySelector('.sf-vh').textContent = 'Deine Frage an ' + wer();
+            vh.textContent = 'Deine Frage an ' + wer();
             if (!pw) hint();
             if (gemeldet !== wer()) {
                 gemeldet = wer();
@@ -607,7 +674,7 @@
         global.__liveReloadBusy = function () {
             return busy || !!audio || !menu.hidden || out.children.length > 0 || (typeof frueher === 'function' && !!frueher());
         };
-        root.addEventListener('contextmenu', function (e) {
+        (opt.menueAuf || root).addEventListener('contextmenu', function (e) {
             // the PASSWORD field keeps the browser's own menu, to paste from the clipboard (Doc, 29.09.2026: "im Clip
             // steht das pwd ... geht aba ni"); on the question field it is Solita's menu, as in the decks ("wo ist das
             // Kontext pop aus dem Deck?") - Cmd+V pastes there
@@ -639,22 +706,52 @@
         // Recognised text lands in the field - sending stays a deliberate press, so a misheard question never costs money.
         micBtn.hidden = micBtn.hidden || !(global.SpeechRecognition || global.webkitSpeechRecognition);
         micBtn.addEventListener('mousedown', function (e) { e.preventDefault(); });
+        // mic.stille: quiet that ends the question (the decks: 2 s, Doc 25.09.2026: 3 s "zu lang"); mic.selbst: it then
+        // sends itself ("nach ... s Pause selbst abschicken") - a question sent from the field meanwhile drops the late text
         micBtn.addEventListener('click', function () {
+            if (ear && ear.active) { ear.stop(); return; }
             if (!global.SolitaListen) { say('Spracheingabe ist hier nicht geladen.', 'sf-err'); return; }
+            stop();                                          // otherwise the mic hears her
+            if (opt.beimMikro) opt.beimMikro();
             if (!ear) ear = global.SolitaListen({
                 lang: 'de-DE',
+                silenceMs: MIC.stille,
                 onState: function (s) { micBtn.classList.toggle('on', s === 'listening'); },
-                onPartial: function (t) { input.value = t; input.scrollLeft = input.scrollWidth; },
-                onFinal: function (t) { if (t) input.value = t; input.focus(); },
+                onPartial: function (t) { if (!spaet) gehoert(t); },
+                onFinal: function (t) {
+                    micBtn.classList.remove('on');
+                    if (spaet) { spaet = false; return; }
+                    if (t) gehoert(t);
+                    input.focus();
+                    if (MIC.selbst && input.value.trim()) submit();
+                },
                 log: dbg,
             });
-            if (ear.active) ear.stop(); else { stop(); ear.start(); }
+            spaet = false;
+            ear.start();
         });
 
         // keys inside the box stay there: they must not turn the lab's steps
         root.addEventListener('keydown', function (e) { e.stopPropagation(); });
 
-        return { frage: frage, vorlesen: vorlesen, stop: stop, leeren: leeren };
+        return {
+            frage: frage, vorlesen: vorlesen, stop: stop, leeren: leeren,
+            out: out, row: row,
+            feld: function () { return input; },             // a new field after the password - never keep the old one
+            mikro: function () { if (micBtn.hidden) return false; micBtn.click(); return true; },   // false: no mic here (the password)
+            hoert: function () { return !!(ear && ear.active); },
+            senden: submit,
+            live: function (t) { input.value = t || ''; if (live || t) spiegeln(); bereit(); },
+            auffrischen: function () { if (pwd() && pw) askQuestion(); else if (!pwd() && !pw) askPassword(); hint(); },
+            aufwaermen: aufwaermen,
+            beschaeftigt: function () { return busy; },
+            spiegel: function (m) {
+                out.innerHTML = m.html || '';
+                out.classList.toggle('sf-zu', !!m.zu);
+                busy = !!m.busy; sendBtn.disabled = busy; bereit();
+                out.scrollTop = m.st || 0;
+            },
+        };
     }
 
     // who speaks: Solita, or Doc himself when he is chosen (his voice, his name over the box)

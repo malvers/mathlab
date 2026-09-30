@@ -1,0 +1,94 @@
+/* decks/deck-solita.css - the decks' look for Solita's box (js/solita-frage.js), which the decks mount since 30.09.2026
+   (Doc: "ist das SolitaDoc Modul zentralisiert????"). deck.js loads this file itself, after deck.css and
+   js/solita-frage.css and with a version, so a browser holding an older deck.css (Pages keeps files 10 minutes, the
+   HP got "half new" pages before) still dresses the box right - with the old deck.css alone it wore the labs' look
+   and showed her picture twice (Doc, 30.09.: "eine Solita reicht ;-)", "das war vorher besser/anders").
+   The old box's rules in deck.css (#ask-out, #ask-row, ...) no longer find their elements; they stay there for a
+   deck.js still in a cache. Everything below is scoped to #ask; her menu is the box's (js/solita-frage.css .sf-menu). */
+#ask #ask-line .sf-row{flex:1;min-width:0;height:var(--hudbtn,22px);overflow:hidden}   /* it grows out of her picture, see slideRow() */
+#ask #ask-line .sf-row button{width:var(--hudbtn,22px);height:100%;border-radius:5px}
+#ask #ask-line .sf-row svg{width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6)}
+#ask #ask-line .sf-in{height:100%;padding:0 8px;border-radius:5px;font-size:13px}
+#ask #ask-line .sf-send{width:var(--hudbtn,22px);height:100%;min-width:0;padding:0;border-radius:5px;font-size:14px;
+  display:grid;place-items:center}   /* square like the others (Doc, 23.09.2026) */
+#ask .sf-send svg{width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6);display:block}
+/* in the footer line the answer box grows to about eight lines and no further (Doc, 23.09.2026: "und die Box nicht
+   höher als so") - longer answers scroll inside it, with the fading edges */
+#ask.inline .sf-out{max-height:var(--askmax,200px)}
+#ask.inline #ask-panel.sized .sf-out{height:min(var(--askh),var(--askmax,200px));max-height:var(--askmax,200px)}
+#ask .sf{gap:0}
+#ask .sf-out{display:block;font-size:14px;line-height:1.45;color:var(--body);max-height:calc(100vh - var(--askrest,200px));overflow:auto;
+  margin-bottom:9px;padding-top:9px}
+/* a line cut off at the top or bottom fades out instead of being sliced (Doc, 23.09.2026: "wenn eine Zeile
+   angeschnitten ist ... lass ausfaden") - the box does it itself now (js/solita-frage.css, sf-cut-top / sf-cut-bot) */
+/* Nothing to show - or folded away by a page turn (sf-zu) - and the box stands at zero height, only the mic line
+   remains; the next text slides it open again, up to the height Doc pulled it to (23.09.2026: "wenn da noch nix
+   steht eingefahren und dann mit dem Text bis zu dieser Höhe ausfahren", "beim Seitenwechsel bis auf die Mic Zeile
+   einfahren (animiert)"). interpolate-size lets Chrome animate 0 <-> auto; elsewhere the box just jumps. */
+#ask .sf-out{interpolate-size:allow-keywords;transition:height .4s ease,margin-bottom .4s ease,padding-top .4s ease}
+#ask .sf-out:empty,#ask .sf-out.sf-zu{display:block;height:0;margin-bottom:0;padding-top:0;overflow:hidden}
+/* the whole talk in the panel, as before: the question in bold, her answer below it - no bubble for each */
+#ask :is(.sf-q,.sf-a,.sf-err,.sf-ds){align-self:auto;max-width:none;padding:0;border:0;border-radius:0;background:none;
+  box-shadow:none;font-size:inherit;line-height:inherit}
+#ask .sf-q{color:var(--ink);font-weight:600}
+#ask .sf-a{color:var(--body)}
+#ask .sf-a p{margin:0 0 6px}
+#ask .sf-a p:last-child{margin-bottom:0}
+#ask .sf-err{color:var(--red)}
+/* DeepSeek's answer to the same question, silent, for comparison (Doc, 17.09.2026: "mach den Text von DS rot (China ;-)") */
+#ask .sf-ds{color:var(--muted);margin-top:6px}   /* grey, not red (Doc, 25.09.2026) */
+#ask .sf-ds b{color:inherit;font:700 9px/1 Orbitron,sans-serif;letter-spacing:1px;text-transform:uppercase;margin-right:6px}
+/* karaoke: the word Solita is saying right now */
+#ask .sf-w{border-radius:3px;transition:background-color .12s,box-shadow .12s}
+#ask .sf-w.on{background:color-mix(in srgb,#7E8FB5 30%,transparent);   /* Dostojewski blue, light (Doc: "hellblauer") */
+  box-shadow:0 0 0 2px color-mix(in srgb,#7E8FB5 30%,transparent)}
+/* Solita is thinking: a travelling wave of bars, until her voice is ready to play - quieter since 17.09.2026
+   (Doc: "die wave dezenter"): thinner, lower, the light Dostojewski blue of the karaoke, slower */
+#ask .sf-wave{display:flex;align-items:center;gap:3px;height:14px;padding:4px 0}
+#ask .sf-wave i{display:block;width:2px;height:100%;border-radius:1px;background:#7E8FB5;opacity:.7;
+  transform:scaleY(.25);animation:askwave 1.5s ease-in-out infinite}
+#ask .sf-wave i:nth-child(2){animation-delay:.1s}
+#ask .sf-wave i:nth-child(3){animation-delay:.2s}
+#ask .sf-wave i:nth-child(4){animation-delay:.3s}
+#ask .sf-wave i:nth-child(5){animation-delay:.4s}
+#ask .sf-wave i:nth-child(6){animation-delay:.5s}
+#ask .sf-wave i:nth-child(7){animation-delay:.6s}
+@media (prefers-reduced-motion:reduce){#ask .sf-wave i{animation-duration:2.4s}}
+/* the scrollbar barely there: 4 px, half-transparent (Doc, 23.09.2026: "scroll noch dezenter") */
+#ask .sf-out::-webkit-scrollbar{width:4px}
+#ask .sf-out::-webkit-scrollbar-thumb{background:rgba(184,198,223,.55);border-radius:2px}
+#ask .sf-out{scrollbar-width:thin;scrollbar-color:rgba(184,198,223,.55) transparent}
+/* no label over the field: the field says itself what it wants (Doc, 16.09.2026: "weg") */
+#ask .sf-out:empty + .sf-row,#ask .sf-out.sf-zu + .sf-row{margin-top:10px}
+#ask .sf-row{display:flex;gap:6px;align-items:stretch;transition:margin-top .4s ease}
+/* her picture is the deck's own (bottom right, or leading the footer line); no ready-made questions here */
+#ask .sf-face,#ask .sf-chips{display:none}
+#ask .sf-note{font-size:12px;color:var(--muted);margin-top:6px}
+/* the cost figure stands behind the answer, in its type, a shade lighter (Doc, 23.09.2026) */
+#ask .sf-cost{margin-left:6px;font:inherit;color:var(--muted);cursor:help;white-space:nowrap}
+#ask-panel.sized .sf-out{height:min(var(--askh),calc(100vh - var(--askrest,200px)));max-height:none}
+#ask-panel.sized .sf-out:empty,#ask-panel.sized .sf-out.sf-zu{height:0}   /* pulled taller or not: empty stays folded (23.09.2026) */
+/* while the grip is dragged the box shows at the dragged height, empty or not, and follows the hand without easing */
+#ask-panel.drag .sf-out{transition:none;height:min(var(--askh),calc(100vh - var(--askrest,200px)))}
+#ask .sf-row button{flex:none;width:34px;height:auto;padding:0;display:grid;place-items:center;cursor:pointer;color:var(--ink);
+  background:var(--askfield);border:1px solid var(--askline);border-radius:7px}
+#ask .sf-row button:hover{background:var(--askfield);color:var(--ink)}
+#ask .sf-row button[hidden]{display:none}
+#ask .sf-row svg{width:16px;height:16px}
+#ask .sf-mic.on{background:var(--red);border-color:var(--red);color:#fff;animation:none}   /* listening */
+/* the speaker lives in the right-click menu (Doc, 22.09.2026) */
+#ask .sf-in{flex:1;min-width:0;height:auto;padding:7px 9px;border:1px solid var(--askline);border-radius:7px;
+  font:400 14px Raleway,system-ui,sans-serif;color:var(--ink);background:var(--askfield)}
+#ask .sf-in::placeholder{color:rgba(14,36,78,.45)}
+#ask .sf-in:focus{outline:none;border-color:#7E8FB5}   /* thin and light, also when selected (Doc, 16.09.2026) */
+#ask .sf-send{border:0;border-radius:7px;padding:0 12px;min-width:44px;cursor:pointer;background:var(--green);
+  color:#fff;font-family:Orbitron,sans-serif;font-size:17px;font-weight:700;line-height:1}
+#ask .sf-send:hover{filter:brightness(1.08)}
+/* no send button: Enter sends, dictation sends itself after 2 s of quiet (Doc, 25.09.2026: "nimm ? grün mal raus") */
+#ask .sf-row .sf-send,#ask #ask-line .sf-send{display:none}
+/* the mic in front of the field, as the decks always had it; the eye and her stop button behind it */
+#ask .sf-mic{order:-1}
+#ask .sf-send:disabled{opacity:.5;cursor:default}
+/* a question in the field: the "?" breathes gently until it is sent - by click or Enter (Doc, 16.09.2026) */
+#ask .sf-send.sf-bereit{animation:askwaber 1.6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){#ask .sf-send.sf-bereit{animation-duration:3.2s}}

@@ -98,7 +98,7 @@ css.textContent = [
   '#ink-bar .net[data-s="ok"]{background:#799E31}#ink-bar .net[data-s="off"]{background:#B02418}',
   '#ink-bar .tab.linked::after{content:"";position:absolute;right:5px;top:5px;width:8px;height:8px;border-radius:50%;',
   '  background:#799E31}',
-  '#hud #penbtn[aria-pressed="true"]{color:#F5C242}',
+  '#hud #penbtn[aria-pressed="true"],#nav #penbtn[aria-pressed="true"]{color:#F5C242}',
   'html.ink-remote #ask,html.ink-remote #play{display:none!important}',
   '#ink-card{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(7,22,48,.72);',
   '  font-family:Orbitron,sans-serif}',
@@ -462,7 +462,10 @@ if (hud && !REMOTE) {                                // the pen in the HUD, for 
   penBtn.setAttribute('aria-label', 'Stift'); penBtn.setAttribute('aria-pressed', 'false');
   penBtn.innerHTML = icon(PEN);
   penBtn.addEventListener('click', function (e) { e.stopPropagation(); pen(!penOn); });
-  hud.insertBefore(penBtn, hud.firstChild);
+  // on the left, right beside the H (Doc, 30.09.2026: "den Edit button linke Seite rechts neben Help") - it stood first
+  // among the buttons on the right; a page without the H keeps it there
+  const helpBtn = document.getElementById('nav-help');
+  if (helpBtn) helpBtn.after(penBtn); else hud.insertBefore(penBtn, hud.firstChild);
   if (typeof dock === 'function') dock();
 }
 

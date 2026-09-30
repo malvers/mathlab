@@ -38,6 +38,7 @@ body{font-family:Raleway,system-ui,sans-serif;color:var(--body)}
   color:var(--muted)}
 .pageno{position:absolute;right:var(--pnright,72px);top:516px;line-height:12px;font-size:10px;letter-spacing:1.2px;
   color:var(--muted)}
+.pageno .pn-sl{margin:0 .1em}   /* "34/35" a little apart - with whole spaces the gap was too wide (Doc, 30.09.2026) */
 
 h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
 b{font-weight:600;color:var(--fg,var(--ink))}   /* bold inside a colour keeps that colour (Doc, 22.09.2026) */
@@ -262,16 +263,16 @@ html.dark-slide #hud button,html.dark-slide #nav button{background:rgba(7,22,48,
   box-shadow:inset 0 0 0 1px rgba(230,236,248,.3)}   /* dark glass, light rim: carries on the night and on the photo */
 html.dark-slide #hud button:hover,html.dark-slide #nav button:hover{background:rgba(7,22,48,.82)}
 #hud button svg,#nav button svg{display:block;width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6);margin:0;stroke-width:1.4;flex:none}
-#hud button[hidden]{display:none}   /* flex would otherwise show a hidden button */
+#hud button[hidden],#nav button[hidden]{display:none}   /* flex would otherwise show a hidden button */
 /* dot on the fullscreen button = the screen state before presenting: orange = one screen only, i.e. mirrored
    (or no beamer); green = extended, ready to present (Doc, 21.09.2026: "ohne Linie und gruen wenn er auf
    erweitern ist"). A mirrored screen is invisible to the browser, so "mirrored" and "laptop alone" look the
    same. Only where the browser can tell (screen.isExtended, Chrome). */
-#hud #full{position:relative}
+#full{position:relative}
 /* the badge says what the screens do; a click on it asks the screen again (Doc, 23.09.2026: "etwas größer") */
-#hud #full .scr-dot{position:absolute;top:-4px;right:-4px;width:11px;height:11px;border-radius:50%;cursor:pointer}
-#hud #full .scr-dot.one{background:#F5C242}
-#hud #full .scr-dot.ext{background:#799E31}
+#full .scr-dot{position:absolute;top:-4px;right:-4px;width:11px;height:11px;border-radius:50%;cursor:pointer}
+#full .scr-dot.one{background:#F5C242}
+#full .scr-dot.ext{background:#799E31}
 /* footer left: two triangles that jump a whole slide, fully built (Doc, 17.09.2026: "zwei Dreiecke, die von
    Folie zu Folie springen, anis rolled out") - placed by dock() on the footer line like the HUD */
 #nav{position:fixed;left:calc(10px + env(safe-area-inset-left, 0px));bottom:8px;z-index:9;display:flex;gap:4px}
@@ -343,7 +344,7 @@ html.laser-armed #deck{touch-action:none}
   font:600 14px Raleway,system-ui,sans-serif}
 /* overview of all slides (o, grid button in the HUD bottom right) */
 #hud{display:flex;gap:4px}          /* overview, play and fullscreen side by side */
-#hud #ovbtn svg{width:calc(var(--hudbtn,22px) * .64);height:calc(var(--hudbtn,22px) * .64)}
+#hud #ovbtn svg,#nav #ovbtn svg{width:calc(var(--hudbtn,22px) * .64);height:calc(var(--hudbtn,22px) * .64)}
 #overview{position:fixed;inset:0;z-index:20;background:rgba(7,22,48,.94);overflow:auto;padding:28px;
   display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:18px;
   align-content:safe center;justify-content:safe center;   /* layout() sets the columns; "safe": a taller grid scrolls from the top */

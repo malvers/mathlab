@@ -56,6 +56,8 @@
         [/\^\s*\{?\\circ\}?/g, ' Grad '],                // before the general power, which would eat the \c of \circ
         [/\\(sum|prod|int)\s*_\s*\{?([^{}\s]*)\}?\s*\^\s*\{?([^{}\s]*)\}?/g,
          (m, w, a, b) => ' ' + { sum: 'Summe', prod: 'Produkt', int: 'Integral' }[w] + ' von ' + a + ' bis ' + b + ' '],
+        // the square as one says it: "6 Quadrat", not "6 hoch 2" (Doc, 30.09.2026: "lesen: 6 hoch 2 -> 6 quadrat")
+        [/\^\s*(?:\{\s*2\s*\}|2(?![\d.,]))/g, ' Quadrat '],
         [/\^\s*\{([^{}]*)\}/g, ' hoch $1 '], [/\^\s*\\?(\w)/g, ' hoch $1 '],
         [/_\s*\{([^{}]*)\}/g, ' Index $1 '], [/_\s*\\?(\w)/g, ' Index $1 '],
         [/\\minusop/g, ' minus '], [/\\plusop/g, ' plus '], [/\\malop/g, ' mal '],

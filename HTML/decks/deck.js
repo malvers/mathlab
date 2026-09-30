@@ -81,7 +81,10 @@ function renumber() {
     const p = s.querySelector('.pageno');
     if (!p) return;
     if (hiddenSlide(i)) { p.textContent = 'ausgeblendet'; return; }   // only ever seen while editing
-    p.textContent = (++k) + ' / ' + total;
+    // a bar between the numbers, no spaces around it, a small margin instead (deck.css .pn-sl): with spaces they stood
+    // wide apart, and thin ones gave back only 2 px - every character carries the letter-spacing (Doc, 30.09.2026:
+    // "den Abstand zwischen den 34 / 35 kleiner", then "/ -> |")
+    p.innerHTML = (++k) + '<span class="pn-sl">|</span>' + total;
   });
 }
 renumber();
@@ -119,8 +122,11 @@ function dock(){
   // Seitenzahlen"); the H stays alone at the left end. Fixed inside #nav, so they keep its looks and its hiding.
   const prevB = document.getElementById('nav-prev'), nextB = document.getElementById('nav-next');
   const pn = slides[si] && slides[si].querySelector('.pageno');
-  const gap = 6, top = Math.round(cy - btn / 2) + 'px';
-  const nextX = left - 8 - btn;                     // screen px
+  // closer to the number, and flush with the right end of the footer line when no button stands in the HUD any more -
+  // the overview and fullscreen went left (Doc, 30.09.2026: "enger rechtsbündig")
+  const hudUsed = [].some.call(hud.children, b => !b.hidden && b.getBoundingClientRect().width);
+  const gap = 3, top = Math.round(cy - btn / 2) + 'px';
+  const nextX = left - (hudUsed ? 8 : 0) - btn;     // screen px
   deck.style.setProperty('--pnright', Math.max(16, (r.right - (nextB ? nextX - gap : left - 12)) / s) + 'px');
   if (prevB && nextB) {
     const w = pn ? pn.getBoundingClientRect() : null;
@@ -369,8 +375,10 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
   btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">'
     + '<rect x="2.5" y="2.5" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="2.5" width="8.5" height="8.5" rx="1.2"/>'
     + '<rect x="2.5" y="13" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="13" width="8.5" height="8.5" rx="1.2"/></svg>';
-  const hudBox = document.getElementById('hud');   // bottom right, next to play and fullscreen
-  if (hudBox) hudBox.insertBefore(btn, hudBox.firstChild); else document.body.appendChild(btn);
+  // bottom left since 30.09.2026, behind the H, the pen and the laser, with the fullscreen button after it (Doc: "die
+  // auch nach links") - it stood bottom right, next to play and fullscreen
+  const navBox = document.getElementById('nav'), hudBox = document.getElementById('hud');
+  if (navBox) navBox.appendChild(btn); else if (hudBox) hudBox.insertBefore(btn, hudBox.firstChild); else document.body.appendChild(btn);
   let built = false;
   // In fullscreen the browser keeps Esc for itself: a press left fullscreen and ended the show, the overview still
   // open. While the overview is open, Esc is locked to the page (Keyboard Lock API, Chrome/Edge) and only closes it;
@@ -513,6 +521,8 @@ const ICON_ENTER = '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1
 const ICON_EXIT = '<path d="M3 8h3a2 2 0 0 0 2-2V3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/>'
   + '<path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/>';
 const fullBtn = document.getElementById('full');
+// with the overview on the left (Doc, 30.09.2026: "die auch nach links") - the deck pages still put it in the HUD
+{ const ov = document.getElementById('ovbtn'); if (fullBtn && ov && ov.parentNode.id === 'nav') ov.after(fullBtn); }
 const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
 // screen.isExtended only exists where the browser can tell (Chrome). The dot on the button says what the
 // screen is doing: orange = not extended, at the board that means mirrored -> Cmd F1 / Win P (mirroring and
@@ -726,22 +736,41 @@ fromHash();
 // voice reads it out (Doc, 16.09.2026: "bau mal mit Haiku (solita nur voice)"). The API keys live in
 // the Supabase edge functions, never here (Rule 21) - the shared password gates the proxy and is
 // remembered per device in localStorage 'dev_access', the same key solita.html uses.
+// Since 30.09.2026 the box itself - password (with the eye), question, her voice and the karaoke, DeepSeek, the cost,
+// the right-click menu, the mic - is the labs' box, js/solita-frage.js (Doc: "ist das SolitaDoc Modul
+// zentralisiert????", then "ran an den Speck"): one place, so what changes there reaches decks and labs alike. What
+// stays here is the deck's own: the slides as her context, her picture and the panel above it, the question line in
+// the footer, folding at a page turn, the grip that makes the panel taller, the keys, and the presenter view.
 (function () {
   const DECK_JS = (document.currentScript && document.currentScript.src) || location.href;
   const box = document.getElementById('ask');
   if (!box) return;
-  const AI_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/claude';
-  const TTS_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/tts';
-  const MODEL = 'claude-haiku-4-5';        // ~0.3 ct per question; the voice costs far more than the answer
-  // Solita's DocPad voice - NEVER the browser voice (Doc). A deck can speak in Doc's own voice instead:
-  // <body data-voice="doc"> (html_deck set_voice), the tts function then answers in wav, or in
-  // Studio-C mp3 when his voice is too slow - j.mime says which.
-  // Which voice is the deck's default; the right-click menu switches it, remembered per deck on this device
-  // (Doc, 25.09.2026: "meine Stimme in (u.a.) das Maya Deck schaltbar im Pop"). speak() reads it at every call.
-  const VOICE_KEY = 'solita_voice:' + location.pathname;
-  let VOICE = (document.body && document.body.dataset.voice === 'doc') ? 'doc' : 'de-DE-Studio-C';
-  try { const kept = localStorage.getItem(VOICE_KEY); if (kept === 'doc' || kept === 'de-DE-Studio-C') VOICE = kept; } catch (e) { }
-  const SYS = 'Du bist Solita, die Tutorin in Doc Alvers Mathe-Labor. Du hilfst Schülerinnen und '
+  const panel = document.getElementById('ask-panel');
+  // The box's files come from here, so no deck page needs a new line. The version rides along: a browser still holding
+  // an older copy of the box (from a lab - Pages keeps files 10 minutes) takes this one.
+  const SF_VERSION = '2026-09-30';
+  function load(src, then) {
+    const s = document.createElement('script');
+    s.src = new URL(src, DECK_JS).href;
+    if (then) s.onload = then;
+    document.head.appendChild(s);
+  }
+  // the box's own look, then the decks' look for it (decks/deck-solita.css) after deck.css - both versioned: with an older
+  // deck.css from a cache the box wore the labs' look and showed her picture twice (Doc, 30.09.: "eine Solita reicht")
+  function css(href, before) {
+    const l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = new URL(href + '?v=' + SF_VERSION, DECK_JS).href;
+    document.head.insertBefore(l, before || null);
+  }
+  if (!document.querySelector('link[href*="solita-frage.css"]')) css('../js/solita-frage.css', document.querySelector('link[href*="deck.css"]'));
+  if (!document.querySelector('link[href*="deck-solita.css"]')) css('deck-solita.css');
+  // the words of her formulas and the light on the word she says (js/solita-karaoke.js) - the box uses them
+  if (!window.SolitaKaraoke && !document.querySelector('script[src*="solita-karaoke.js"]')) load('../js/solita-karaoke.js');
+  load('../js/solita-frage.js?v=' + SF_VERSION, start);
+
+  // Her instructions for the decks; who she is (Solita, or Doc with his voice) the box puts in front
+  const SYS = 'Du hilfst Schülerinnen und '
     + 'Schülern der Klassen 11 bis 13 am Beruflichen Gymnasium und an der Fachoberschule. '
     + 'Du bekommst eine Übersicht der Präsentation und die Folie, auf der die Klasse gerade steht. '
     + 'Antworte auf Deutsch, kurz und klar: höchstens vier Sätze, gesprochene Sprache - die Antwort wird '
@@ -756,374 +785,6 @@ fromHash();
     + 'Nur bei etwas, das mit Wissenschaft und Unterricht gar nichts zu tun hat, lenk in einem Satz freundlich zurück. '
     + 'Lob die Frage nicht ("Das ist eine gute Frage!" und Ähnliches) - nur wenn sie wirklich '
     + 'außergewöhnlich klug ist, darfst du das einmal kurz sagen. Keine Emojis, keine Aufzählungen.';
-  // Doc, 16.09.2026: "war der Engländer?" after a question about Efron came back as "passt nicht zum
-  // Thema, ich kenne keinen Kontext". Two causes: every question went out alone, without the talk
-  // before it, and the prompt forbade anything not on the slides. Now the last HIST_MAX exchanges
-  // travel along (plain text, no slide context - that only rides with the new question).
-  const HIST_MAX = 4;
-  const hist = [];
-  // DeepSeek answers the same question below her, in red and silent - Doc's comparison (17.09.2026: "ich möchte DS
-  // und EINE Solita"). Its proxy opens only for Doc's own password: with the students' password it says 401 before
-  // DeepSeek is ever called - no cost, and nothing shows.
-  const DS_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/deepseek';
-  const DS_MODEL = 'deepseek-chat';
-
-  // What a question REALLY costs (worked out 16.09.2026, after Doc asked why nothing ever turns up on
-  // the Google bill): Claude is billed from the first token - no free tier - while Google grants a free
-  // quota of characters per voice type per CALENDAR MONTH, and a lesson never gets near it. The counter
-  // therefore keeps two different things apart: euros for Claude, characters for the voice, and it turns
-  // characters into euros only for what runs OVER the monthly quota.
-  // ttsFree/ttsUsd are list values: Google's pricing table is built by JS and cannot be read from here.
-  // Third-party sources say 30 $ per 1M, the older note in supabase/functions/tts says 160 $ - the higher
-  // one is used on purpose, so the counter warns early rather than late. The truth is in Cloud Billing
-  // (console.cloud.google.com/billing/reports, Service = Cloud Text-to-Speech API). Doc's account carries
-  // a 10 EUR/month budget alert - a mail, not a tap that closes.
-  const RATE = { in: 1, out: 5, cacheRead: 0.1, cacheWrite: 1.25, eur: 0.92,
-                 ttsUsd: 160, ttsFree: 1e6 };
-
-  const panel = document.getElementById('ask-panel');
-  const out = document.getElementById('ask-out');
-  let input = document.getElementById('ask-in');    // exchanged once the password is in - see askQuestion()
-  const send = document.getElementById('ask-send');
-  const label = box.querySelector('label');
-  const micBtn = document.getElementById('ask-mic');
-  const ttsBtn = document.getElementById('ask-tts');
-  const costEl = document.getElementById('ask-cost');
-  let audio = null, busy = false, ear = null;
-
-  // What THIS question cost - not a running total (Doc, 16.09.2026: the sum belongs in the 08:00
-  // mail, where it covers every device). Claude is real money from the first token; the voice is
-  // characters against Google's monthly free quota, so it shows as characters, with the list price
-  // it WOULD cost only in the tooltip. The figure stands behind the answer it belongs to, in the
-  // answer's own type, a shade lighter (Doc, 23.09.2026: "hinter den Text ... so wie Text, bissl heller").
-  let last = null;
-  function money(eur) {
-    if (eur >= 1) return eur.toFixed(2).replace('.', ',') + ' \u20ac';
-    const ct = eur * 100;
-    return (ct < 1 ? ct.toFixed(2) : ct.toFixed(1)).replace('.', ',') + ' ct';
-  }
-  function showCost() {
-    if (!last) { costEl.textContent = ''; costEl.title = 'Kosten der letzten Frage'; return; }
-    costEl.textContent = money(last.claude);         // voice characters only in the tooltip (Doc, 16.09.2026)
-    costEl.title = 'Diese Frage\n'
-      + 'Claude (Haiku): ' + money(last.claude) + ' - ' + last.tin + ' Token rein, '
-      + last.tout + ' raus, wird ab dem ersten Token berechnet\n'
-      + (last.chars
-          ? 'Stimme: ' + last.chars + ' Zeichen - frei im Monatskontingent, zum Listenpreis waere es '
-            + money(last.chars / 1e6 * RATE.ttsUsd * RATE.eur)
-          : 'Stimme: aus')
-      + '\nWartezeit: Claude ' + secs(last.msAi) + (last.msVoice ? ' + Stimme ' + secs(last.msVoice) : '');
-  }
-  function secs(ms) { return ms ? (ms / 1000).toFixed(1).replace('.', ',') + ' s' : '-'; }
-  function addClaude(usage, ms) {
-    const u = usage || {};
-    last = {
-      claude: ((u.input_tokens || 0) * RATE.in
-             + (u.cache_read_input_tokens || 0) * RATE.in * RATE.cacheRead
-             + (u.cache_creation_input_tokens || 0) * RATE.in * RATE.cacheWrite
-             + (u.output_tokens || 0) * RATE.out) / 1e6 * RATE.eur,
-      tin: (u.input_tokens || 0) + (u.cache_read_input_tokens || 0),
-      tout: u.output_tokens || 0,
-      chars: 0,
-      msAi: ms, msVoice: 0,
-    };
-  }
-  function addVoice(chars, ms) { if (last) { last.chars = chars; last.msVoice = ms; } }
-  function placeCost(el) { el.appendChild(costEl); showCost(); }   // after render(): render() empties the element first
-  // Reading aloud on/off. Same localStorage key as solita.html, so switching her quiet holds here
-  // too - and with it off, no TTS request goes out at all (the voice is 97 % of what a question costs).
-  const TTS_KEY = 'solita_tts';
-  let ttsOn = true;
-  try { ttsOn = localStorage.getItem(TTS_KEY) !== '0'; } catch (e) { }
-  // the send button while the password is asked - an icon, never a letter (Doc's rule for icons)
-  const TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" '
-    + 'stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17.5 19 7"/></svg>';
-  const SPK_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
-    + 'stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/>'
-    + '<path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
-  const SPK_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
-    + 'stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/>'
-    + '<path d="m16 9 5 6"/><path d="m21 9-5 6"/></svg>';
-  function showTts() {
-    ttsBtn.innerHTML = ttsOn ? SPK_ON : SPK_OFF;
-    ttsBtn.classList.toggle('off', !ttsOn);
-    const t = ttsOn ? 'Solita liest vor' : 'Solita liest NICHT vor (keine Stimm-Kosten)';
-    ttsBtn.title = t; ttsBtn.setAttribute('aria-label', t);
-  }
-  ttsBtn.hidden = true;                           // lives in the right-click menu now (Doc, 22.09.2026)
-  ttsBtn.onclick = function () {
-    ttsOn = !ttsOn;
-    try { localStorage.setItem(TTS_KEY, ttsOn ? '1' : '0'); } catch (e) { }
-    if (!ttsOn) stopAudio();
-    showTts();
-  };
-  showTts();
-
-  costEl.onclick = function () { last = null; showCost(); };
-  showCost();
-
-  // Who answers - Solita (Claude Haiku), DeepSeek or both: a right click anywhere in the panel opens a small menu with
-  // a check for each (Doc, 17.09.2026: "mach ein popup mit check für beide"), remembered on this device. One always
-  // stays on. Both: DeepSeek's answer comes red and silent below hers. DeepSeek alone: her voice reads its answer, the
-  // text stays red. DeepSeek's proxy opens only for Doc's own password.
-  const WHO_KEY = 'solita_ai';
-  const who = { claude: true, ds: false };
-  try {
-    const kept = JSON.parse(localStorage.getItem(WHO_KEY) || 'null');
-    if (kept) { who.claude = kept.claude !== false; who.ds = kept.ds === true; }
-    else if (localStorage.getItem('solita_ds') === '1') who.ds = true;   // the plain switch before the menu
-  } catch (e) { }
-  if (!who.claude && !who.ds) who.claude = true;
-  const menu = document.createElement('div');
-  menu.id = 'ask-menu';
-  menu.hidden = true;
-  menu.setAttribute('role', 'menu');
-  // Brain = who speaks (Solita's voice or Doc's), Model = which AI answers (Doc, 25.09.2026: two mini headers)
-  menu.innerHTML = '<div class="ask-mhead">Brain</div>'
-    + '<label><input type="checkbox" data-voice="de-DE-Studio-C"><span>Solita</span></label>'
-    + '<label><input type="checkbox" data-voice="doc"><span>Doc</span></label>'
-    + '<div class="ask-mhead">Model</div>'
-    + '<label><input type="checkbox" data-who="claude"><span>Claude<i>Haiku</i></span></label>'
-    + '<label class="ds"><input type="checkbox" data-who="ds"><span>DeepSeek</span></label>'
-    + '<div class="ask-msep"></div>'
-    + '<label><input type="checkbox" data-act="tts"><span><em class="ask-spk"></em>Vorlesen<i></i></span></label>'
-    + '<div class="ask-msep"></div>'
-    + '<button type="button" data-act="copy">Kopieren</button>'
-    + '<button type="button" data-act="clear">Leeren</button>';
-  box.appendChild(menu);
-  const checks = menu.querySelectorAll('input[data-who]');
-  const ttsBox = menu.querySelector('input[data-act="tts"]');
-  ttsBox.addEventListener('change', function () { ttsBtn.onclick(); });
-  // the two voices work like radio buttons: one is always on
-  const voiceChecks = menu.querySelectorAll('input[data-voice]');
-  voiceChecks.forEach(function (c) {
-    c.addEventListener('change', function () {
-      VOICE = c.dataset.voice;
-      try { localStorage.setItem(VOICE_KEY, VOICE); } catch (e) { }
-      showWho();
-    });
-  });
-  // the face goes with the voice: Brain = Solita shows her photo, Doc his own (Doc, 25.09.2026: "Solita selected aber
-  // mein Bild"). A deck that set its own picture for Doc (set_avatar) keeps that one for him.
-  const faceImg = document.querySelector('#ask-btn img');
-  const SOLITA_PIC = '../resources/solita-avatar.png';
-  const DOC_PIC = faceImg && document.body.dataset.voice === 'doc' ? faceImg.getAttribute('src') : '../resources/team/alvers_avatar.jpg';
-  function showFace() {
-    if (!faceImg) return;
-    const doc = VOICE === 'doc';
-    faceImg.setAttribute('src', doc ? DOC_PIC : SOLITA_PIC);
-    faceImg.alt = doc ? 'Doc Alvers' : 'Solita';
-  }
-  function showWho() {
-    ttsBox.checked = ttsOn;
-    ttsBox.parentNode.querySelector('i').textContent = VOICE === 'doc' ? 'Docs Stimme' : 'Solitas Stimme';
-    showFace();
-    voiceChecks.forEach(function (c) { c.checked = c.dataset.voice === VOICE; });
-    menu.querySelector('.ask-spk').innerHTML = ttsOn ? SPK_ON : SPK_OFF;
-    checks.forEach(function (c) {
-      c.checked = who[c.dataset.who];
-      c.disabled = c.checked && !(who.claude && who.ds);   // the last one on cannot be switched off
-    });
-    input.classList.toggle('ds', who.ds);
-  }
-  checks.forEach(function (c) {
-    c.addEventListener('change', function () {
-      who[c.dataset.who] = c.checked;
-      try { localStorage.setItem(WHO_KEY, JSON.stringify(who)); } catch (e) { }
-      showWho();
-    });
-  });
-  // Kopieren: the marked text if there is some in the answers, otherwise the whole talk; Leeren: talk and memory gone
-  // (Doc, 17.09.2026: "bau da noch copy und clear ein also Deutsch" - the browser's own menu is gone here)
-  const copyBtn = menu.querySelector('[data-act="copy"]'), clearBtn = menu.querySelector('[data-act="clear"]');
-  let marked = '';
-  function transcript() {
-    const lines = [];
-    [].forEach.call(out.children, function (d) {
-      if (d.hidden || d.querySelector('.ask-wave')) return;
-      const q = d.querySelector('.ask-q');
-      const src = d.dataset.src !== undefined ? d : d.querySelector('[data-src]');
-      if (q) lines.push('Frage: ' + q.textContent);
-      else if (src) lines.push((d.classList.contains('ask-ds') ? 'DeepSeek: ' : 'Solita: ') + src.dataset.src);
-      else if (d.textContent.trim()) lines.push(d.textContent.trim());
-    });
-    return lines.join('\n\n');
-  }
-  copyBtn.addEventListener('click', function () {
-    const text = marked || transcript();
-    const done = function (label) { copyBtn.textContent = label; setTimeout(function () { menu.hidden = true; }, 700); };
-    (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject())
-      .then(function () { done('Kopiert ✓'); }, function () { done('Kopieren ging nicht'); });
-  });
-  clearBtn.addEventListener('click', function () {
-    stopAudio();
-    out.textContent = '';
-    hist.length = 0;                                  // she forgets the talk too, a fresh start
-    last = null; showCost();
-    menu.hidden = true;
-    input.focus();
-  });
-  box.addEventListener('contextmenu', function (e) {   // panel, footer line or her picture (23.09.2026: the line lives in the footer)
-    e.preventDefault();
-    showWho();
-    const sel = getSelection();
-    marked = sel && !sel.isCollapsed && out.contains(sel.anchorNode) ? String(sel).trim() : '';
-    copyBtn.textContent = marked ? 'Markierung kopieren' : 'Gespräch kopieren';
-    copyBtn.disabled = !marked && !out.children.length;
-    clearBtn.disabled = !out.children.length;
-    menu.hidden = false;
-    const w = menu.offsetWidth, h = menu.offsetHeight;
-    menu.style.left = Math.max(8, Math.min(e.clientX, innerWidth - w - 8)) + 'px';
-    menu.style.top = Math.max(8, Math.min(e.clientY, innerHeight - h - 8)) + 'px';
-  });
-  // a click elsewhere or Esc only closes the menu - no page turn, the panel stays open
-  addEventListener('click', function (e) {
-    if (menu.hidden || menu.contains(e.target)) return;
-    menu.hidden = true; e.stopPropagation(); e.preventDefault();
-  }, true);
-  addEventListener('keydown', function (e) {
-    if (menu.hidden || e.key !== 'Escape') return;
-    menu.hidden = true; e.stopPropagation(); e.preventDefault();
-  }, true);
-  showWho();
-
-  // Drag the header up and the answers get more room; the height stays on this device (Doc, 17.09.2026: "lass mich
-  // das Fenster nach oben größer ziehen ... persist"). The panel hangs from its bottom edge, so it grows upwards.
-  const H_KEY = 'solita_ask_h', H_MIN = 90, TOP_GAP = 48;   // 48: clear of the edit pencil and the LOCAL badge
-  const head = document.getElementById('ask-head');
-  (function slimHead() {                           // no header: title and × are hidden by .slim, only the grip above the panel remains
-    const span = head.querySelector('span');
-    if (span && span.firstChild && span.firstChild.nodeType === 3) span.firstChild.remove();
-    head.classList.add('slim');
-  })();
-  function rest() {                                  // everything but the answers, plus the gap to the screen top
-    const r = panel.getBoundingClientRect();
-    const gap = out.offsetHeight ? 0 : parseFloat(getComputedStyle(out).marginBottom) || 0;   // hidden: its margin comes along
-    const px = r.height - out.offsetHeight + gap + (innerHeight - r.bottom) + TOP_GAP;
-    panel.style.setProperty('--askrest', Math.round(px) + 'px');
-    return px;
-  }
-  function setHeight(h) {
-    panel.style.setProperty('--askh', Math.round(h) + 'px');
-    panel.classList.add('sized');
-  }
-  try { const h = +localStorage.getItem(H_KEY); if (h >= H_MIN) setHeight(h); } catch (e) { }
-  head.addEventListener('pointerdown', function (e) {
-    if (e.button !== 0 || e.target.closest('button')) return;   // no answer yet is fine: the empty panel grows too (Doc, 17.09.2026)
-    e.preventDefault();
-    const y0 = e.clientY, h0 = out.offsetHeight, max = innerHeight - rest();
-    head.setPointerCapture(e.pointerId);
-    panel.classList.add('drag'); setHeight(h0);      // follows the hand without easing; a folded box starts from zero
-    function move(ev) { setHeight(Math.max(H_MIN, Math.min(max, h0 + y0 - ev.clientY))); }
-    function up() {
-      head.removeEventListener('pointermove', move);
-      head.removeEventListener('pointerup', up);
-      head.removeEventListener('pointercancel', up);
-      try { localStorage.setItem(H_KEY, String(out.offsetHeight)); } catch (err) { }
-      panel.classList.remove('drag');                // empty or folded: it eases shut again now
-    }
-    head.addEventListener('pointermove', move);
-    head.addEventListener('pointerup', up);
-    head.addEventListener('pointercancel', up);
-  });
-  addEventListener('resize', function () { if (!panel.hidden) rest(); });
-
-  // Keys and clicks inside the panel stay there: typing a question must not turn pages, open the
-  // overview ('o') or pause Solita ('p'). Measured 16.09.2026: a capture listener on window is the
-  // wrong tool - it kills the event before the button's own handler sees it, yet window's own bubble
-  // listeners (page keys, slide jump, overview) still fire. Stopping on the way up from #ask does
-  // both right: handlers inside #ask run, nothing reaches the deck.
-  box.addEventListener('keydown', function (e) { e.stopPropagation(); });
-  box.addEventListener('click', function (e) { e.stopPropagation(); });
-
-  function pwd() { try { return localStorage.getItem('dev_access') || ''; } catch (e) { return ''; } }
-  // Every call goes out as a CORS "simple request": no custom headers, the body is plain text (both
-  // functions read it with req.json() anyway) and the password rides in the body, which the claude
-  // function accepts as well as x-app-pass. Custom headers (apikey, Authorization, x-app-pass) made
-  // the browser send an OPTIONS preflight before EVERY call - measured in the Supabase logs on
-  // 16.09.2026, those preflights took 4.6-13.3 s from Doc's Chrome, 62 % of the whole wait. The
-  // gateway does not need the anon key: both functions run with --no-verify-jwt, and the tts guard
-  // accepts the browser's Origin header instead.
-  function post(url, body, signal) {
-    return fetch(url, { method: 'POST', body: JSON.stringify(body), signal: signal });
-  }
-  // Wake both functions while the question is still being typed, at no cost: an empty tts call is
-  // refused before Google is asked, a ping only checks the password. At most once a minute.
-  let warmAt = 0;
-  function warm() {
-    if (Date.now() - warmAt < 60000) return;
-    warmAt = Date.now();
-    post(TTS_URL, {}).catch(function () { });
-    if (pwd()) post(AI_URL, { ping: true, pass: pwd() }).catch(function () { });
-  }
-  function askPassword() {          // no password yet: the same field asks for it once, then remembers
-    label.hidden = true;                            // no note above the line - the field says it itself (Doc, 23.09.2026: "Erklärung weg")
-    input.setAttribute('aria-label', 'Passwort — wird auf diesem Gerät gemerkt');
-    input.type = 'password'; input.value = ''; input.placeholder = 'Passwort';
-    input.setAttribute('autocomplete', 'current-password');
-    send.innerHTML = TICK;                          // a tick, not the word OK, which sat badly in the small square ("OK ist nicht schön")
-    micBtn.hidden = true; ttsBtn.hidden = true;
-    bare(); placeRow();                             // the row just lost the mic - the box above follows the field
-  }
-  function askQuestion() {
-    // Chrome keeps its password manager on a field that once was type=password - it then drops its list of saved
-    // logins over the question line (Doc, 23.09.2026: "wenn pwd eingegeben darf das kein pwd mehr sein"). Changing
-    // the type back is not enough; a brand new field carries none of that history.
-    if (input.type === 'password') {
-      const fresh = input.cloneNode(false);
-      input.replaceWith(fresh);
-      input = fresh;
-      bindInput();
-    }
-    label.hidden = true;                            // a question needs no label (Doc, 16.09.2026: "weg")
-    input.setAttribute('aria-label', 'Deine Frage an Solita');   // the field still has a name (Doc's label rule)
-    input.type = 'text'; input.value = ''; hint();
-    input.setAttribute('autocomplete', 'off');
-    send.textContent = '?';                         // her sign again, in place of the tick
-    micBtn.hidden = !(window.SpeechRecognition || window.webkitSpeechRecognition);
-    // the speaker stays hidden: it lives in the right-click menu (Doc, 23.09.2026: "den hier weg")
-    bare(); placeRow();                             // the mic is back and the field is narrower - measure again
-  }
-  // a line cut off at the edge of the box fades out (Doc, 23.09.2026) - only on the edge that really hides text
-  function cutEdges() {
-    out.classList.toggle('cut-top', out.scrollTop > 1);
-    out.classList.toggle('cut-bot', out.scrollTop + out.clientHeight < out.scrollHeight - 1);
-  }
-  out.addEventListener('scroll', function () { cutEdges(); syncSoon(); });
-  if (window.ResizeObserver) new ResizeObserver(cutEdges).observe(out);        // pulled taller or shorter
-  new MutationObserver(function () { cutEdges(); bare(); syncSoon(); })   // text came or went, or the box folded (.shut)
-    .observe(out, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class'] });
-  // The presenter view mirrors this box (Doc, 23.09.2026: "Solita AI kann ich im Präsi Mode nicht bedienen ... WICHTIG"):
-  // every change and every scroll goes out as HTML, at most every 16 ms, and the presenter shows the same, scrolled the same.
-  // Her voice and the karaoke run here on the beamer only - what the class hears and sees.
-  let syncTimer = 0;                                 // a timer, not rAF: a window hidden behind the presenter gets no frames
-  function syncSoon() { if (!PRESENTER && !syncTimer) syncTimer = setTimeout(sync, 16); }
-  function sync() {
-    syncTimer = 0;
-    if (PRESENTER || !window.DeckLink) return;
-    window.DeckLink.send({ t: 'ask-out', html: panel.hidden ? '' : out.innerHTML, shut: out.classList.contains('shut'),
-                           busy: busy, st: out.scrollTop });
-  }
-  function shown(m) {                                // presenter: the beamer's box, word for word
-    out.innerHTML = m.html || '';
-    out.classList.toggle('shut', !!m.shut);
-    busy = !!m.busy; send.disabled = busy; ready();
-    out.scrollTop = m.st || 0;
-  }
-  // The panel above Solita shows only when it has something: an answer or the password label. Empty, or folded away
-  // by a page turn, it fades out and only the question line in the footer remains (Doc, 23.09.2026). Opacity, not
-  // display: the box underneath still slides open from zero when the next text arrives.
-  function bare() {
-    panel.classList.toggle('bare', (!out.children.length || out.classList.contains('shut')) && label.hidden);
-  }
-  function say(html, cls) {
-    const p = document.createElement('div');
-    if (cls) p.className = cls;
-    p.innerHTML = html;
-    out.classList.remove('shut');                    // text arrives: the box slides open again
-    out.appendChild(p); out.scrollTop = out.scrollHeight;
-    return p;
-  }
 
   // the deck is its own source: slide text with the TeX put back in - minus the footer and page
   // number, which every slide repeats (13 % of the old context was "Nicht verzagen, ..." 24 times)
@@ -1181,476 +842,297 @@ fromHash();
   }
   window.askSolitaContext = context;   // debug: askSolitaContext('F15?') shows exactly what goes out
 
-  // Word spans, formulas as words and the karaoke live in js/solita-karaoke.js since 29.09.2026 - one place for the
-  // decks and the labs' Solita (js/solita-frage.js) (Doc: "das word hiliting wie im Deck (zentralisieren!)"). deck.js
-  // loads it itself, so no deck page needs a new line - and a deck page still in the browser's cache gets it too.
-  // Everything here is needed only once an answer comes, long after the file has arrived; should it be missing
-  // after all, the answer still shows, only without the light.
-  if (!window.SolitaKaraoke && !document.querySelector('script[src*="solita-karaoke.js"]')) {
-    const s = document.createElement('script');
-    s.src = new URL('../js/solita-karaoke.js', DECK_JS).href;
-    document.head.appendChild(s);
-  }
-  const SK = function () { return window.SolitaKaraoke; };
-  function render(el, text) {       // formulas the model wrote in $...$ come out as real maths
-    if (SK()) SK().render(el, text);
-    else { el.textContent = text; el.dataset.src = text; }
-  }
-  function karaoke(el, a, spans) {  // spans: a piece's share of the answer (default: all of it)
-    if (SK()) SK().spielen(el, a, spans, { box: out, aktiv: function () { return audio === a; } });
-  }
+  function start() {
+    if (!window.SolitaFrage) return;                 // the box did not come: her picture stays, nothing else happens
+    // the deck pages carry the old box (html_deck.py): the box brings its own answers, field and buttons
+    ['ask-out', 'ask-row'].forEach(function (id) { const e = document.getElementById(id); if (e) e.remove(); });
+    panel.querySelectorAll(':scope > label').forEach(function (e) { e.remove(); });
 
-  // Solita's own voice via the tts edge function. NO browser-voice fallback (Doc: "NIEMALS
-  // Browserstimme") - if the cloud voice fails, the answer just stays on screen.
-  // show() puts the answer on screen only once her voice has arrived (Doc, 16.09.2026: "den Text erst
-  // zeigen, wenn die audiodaten da sind"), so reading and hearing start together. Speaker off, nothing
-  // to say, no voice or a voice that hangs: the answer shows anyway.
-  // Formulas are spoken, not skipped (Doc, 23.09.2026: "10 hoch 11 wird gar nicht gelesen", then the law of gravity).
-  // The full path TeX -> KaTeX MathML -> Speech Rule Engine only runs offline (HTML/js/latex-speech.js feeds the
-  // recorded page formeln-vorlesen.html); here a short rewrite turns school formulas into German words. Numbers stay
-  // digits - the voice says them in German by itself ("10 hoch 11" comes out as "zehn hoch elf").
-  // the list itself: js/solita-karaoke.js (TEX_SIGNS)
-  // The invitation in the field, as long as it fits - on a narrow screen the short form, never a cut sentence
-  // (Doc, 23.09.2026: "oder zum gesamten Deck").
-  const HINTS = ['Frag Solita zur Folie oder zum gesamten Deck', 'Frag Solita zur Folie oder zum Deck', 'Frag Solita'];
-  let pen = null;
-  function hint() {
-    if (input.type === 'password') return;
-    const cs = getComputedStyle(input);
-    const room = input.getBoundingClientRect().width - 2 * parseFloat(cs.paddingLeft) - 2;
-    if (!room) { input.placeholder = HINTS[0]; return; }   // not on screen yet - placeRow() asks again
-    if (!pen) pen = document.createElement('canvas').getContext('2d');
-    pen.font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
-    input.placeholder = HINTS.find(function (t) { return pen.measureText(t).width <= room; }) || HINTS[HINTS.length - 1];
-  }
-  function texWords(tex) { return SK() ? SK().texWords(tex) : String(tex); }
-  const TTS_WAIT = 20000;                            // ms - a hanging voice must not hide the answer
-  // What the voice is given: formulas as words, no emoji or markdown.
-  function cleanOf(text) { return SK() ? SK().sprechbar(text) : String(text).replace(/\s+/g, ' ').trim(); }
-  // Doc's voice needs ~5 s for a sentence and 16 s for a long answer, past the tts function's 15 s (then Studio-C
-  // steps in). So it comes sentence by sentence: the first piece at once, the next fetched while one plays, played on
-  // without a gap (Doc, 25.09.2026, forloop-73's proposal). Pieces end at sentence ends outside $...$, so each one
-  // renders into exactly its share of the answer's word spans - the karaoke runs piece by piece over those.
-  function pieces(text) { return SK() ? SK().stuecke(text) : [String(text)]; }
-  function wordsIn(raw) { return SK() ? SK().woerter(raw) : String(raw).split(/\s+/).filter(Boolean).length; }
-  function speak(text, show) {
-    let shown = false, el = null;
-    function once() { if (!shown) { shown = true; el = show(); } }
-    const whole = cleanOf(text);
-    if (!ttsOn || !whole) { once(); return; }        // speaker off: no request, no cost
-    let parts = (VOICE === 'doc' ? pieces(text) : [String(text)]).map(function (raw) {
-      return { clean: cleanOf(raw), n: wordsIn(raw) };
-    }).filter(function (p) { return p.clean; });
-    // the pieces must add up to the spans of the whole answer, or the light would wander - then one piece
-    if (parts.length > 1 && parts.reduce(function (a, p) { return a + p.n; }, 0) !== wordsIn(text)) {
-      parts = [{ clean: whole, n: wordsIn(text) }];
+    // the face goes with the voice: Brain = Solita shows her photo, Doc his own (Doc, 25.09.2026: "Solita selected aber
+    // mein Bild"). A deck that set its own picture for Doc (set_avatar) keeps that one for him. The box says who it is.
+    const faceImg = document.querySelector('#ask-btn img');
+    const SOLITA_PIC = '../resources/solita-avatar.png';
+    const DOC_PIC = faceImg && document.body.dataset.voice === 'doc' ? faceImg.getAttribute('src') : '../resources/team/alvers_avatar.jpg';
+    document.addEventListener('solita-wer', function (e) {
+      if (!faceImg) return;
+      const doc = !!(e.detail && e.detail.name === 'Doc');
+      faceImg.setAttribute('src', doc ? DOC_PIC : SOLITA_PIC);
+      faceImg.alt = doc ? 'Doc Alvers' : 'Solita';
+    });
+
+    const sf = window.SolitaFrage.mount(panel, {
+      kontext: context, kontextKopf: '', frageWort: 'Frage der Klasse', system: SYS, maxTokens: 600,
+      // Solita's voice, or Doc's where the deck was built for it (<body data-voice="doc">, html_deck set_voice) - the
+      // right-click menu switches it, remembered per deck on this device (Doc, 25.09.2026)
+      stimme: document.body && document.body.dataset.voice === 'doc' ? 'doc' : '',
+      // the invitation in the field, as long as it fits - never a cut sentence (Doc, 23.09.2026: "oder zum gesamten Deck")
+      hinweise: ['Frag {name} zur Folie oder zum gesamten Deck', 'Frag {name} zur Folie oder zum Deck', 'Frag {name}'],
+      // 2 s quiet ends a spoken question and sends it (Doc, 25.09.2026: 3 s "zu lang"); while it is spoken it already
+      // stands in the answers (23.09.2026: "lass den Text auch schon oben erscheinen")
+      mic: { stille: 2000, selbst: true }, liveZeile: true,
+      menueAuf: box,                                  // panel, footer line or her picture
+      // presenter view: the beamer window asks, shows and speaks, this one sends (Doc, 23.09.2026)
+      senden: function (v) { if (!PRESENTER) return false; link.send({ t: 'ask', q: v }); return true; },
+      diktat: function (v) { if (!PRESENTER) return false; link.send({ t: 'ask-live', q: v }); return true; },
+      beimMikro: function () { if (PRESENTER) link.send({ t: 'ask-hush' }); },   // on the beamer too, where she really speaks
+      beiEscape: function () { close(); },
+    });
+    const out = sf.out, row = sf.row, sfRoot = row.parentNode, rowHome = row.nextSibling;
+
+    // Drag the header up and the answers get more room; the height stays on this device (Doc, 17.09.2026: "lass mich
+    // das Fenster nach oben größer ziehen ... persist"). The panel hangs from its bottom edge, so it grows upwards.
+    const H_KEY = 'solita_ask_h', H_MIN = 90, TOP_GAP = 48;   // 48: clear of the edit pencil and the LOCAL badge
+    const head = document.getElementById('ask-head');
+    (function slimHead() {                           // no header: title and × are hidden by .slim, only the grip above the panel remains
+      const span = head.querySelector('span');
+      if (span && span.firstChild && span.firstChild.nodeType === 3) span.firstChild.remove();
+      head.classList.add('slim');
+    })();
+    function rest() {                                  // everything but the answers, plus the gap to the screen top
+      const r = panel.getBoundingClientRect();
+      const gap = out.offsetHeight ? 0 : parseFloat(getComputedStyle(out).marginBottom) || 0;   // hidden: its margin comes along
+      const px = r.height - out.offsetHeight + gap + (innerHeight - r.bottom) + TOP_GAP;
+      panel.style.setProperty('--askrest', Math.round(px) + 'px');
+      return px;
     }
-    const t0 = Date.now();
-    let voice = VOICE;                                // a piece that fell back to Studio-C takes the rest along
-    const got = [];
-    function get(i) {                                 // no password here: the tts function has no password gate
-      if (got[i]) return got[i];
-      const ctl = window.AbortController ? new AbortController() : null;
-      const timer = setTimeout(function () { if (ctl) ctl.abort(); }, TTS_WAIT);
-      got[i] = post(TTS_URL, { text: parts[i].clean.slice(0, 4800), voice: voice, languageCode: 'de-DE', speakingRate: 1.0 },
-                    ctl ? ctl.signal : undefined)
-        .then(function (r) { return r.json(); })
-        .then(function (j) {
-          clearTimeout(timer);
-          if (!j || !j.audioContent) throw new Error('keine Stimme');
-          if (j.fallback) voice = 'de-DE-Studio-C';
-          return j;
-        }, function (e) { clearTimeout(timer); throw e; });
-      return got[i];
+    function setHeight(h) {
+      panel.style.setProperty('--askh', Math.round(h) + 'px');
+      panel.classList.add('sized');
     }
-    let first = 0;                                    // the spans before piece i
-    function play(i, before) {
-      get(i).then(function (j) {
-        if (i === 0) { addVoice(whole.length, Date.now() - t0); once(); }   // Google bills it even if it is not played
-        if (!ttsOn || panel.hidden) return;          // switched off or closed while she was fetching
-        if (i === 0) stopAudio();
-        else if (audio !== before) return;           // stopped, or a new answer took over
-        const a = audio = new Audio('data:' + (j.mime || 'audio/mp3') + ';base64,' + j.audioContent);
-        if (i + 1 < parts.length) get(i + 1);         // the next piece comes while this one plays
-        if (el) {
-          const all = el.querySelectorAll('.ask-w');
-          karaoke(el, a, [].slice.call(all, first, first + parts[i].n));
+    try { const h = +localStorage.getItem(H_KEY); if (h >= H_MIN) setHeight(h); } catch (e) { }
+    head.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0 || e.target.closest('button')) return;   // no answer yet is fine: the empty panel grows too (Doc, 17.09.2026)
+      e.preventDefault();
+      const y0 = e.clientY, h0 = out.offsetHeight, max = innerHeight - rest();
+      head.setPointerCapture(e.pointerId);
+      panel.classList.add('drag'); setHeight(h0);      // follows the hand without easing; a folded box starts from zero
+      function move(ev) { setHeight(Math.max(H_MIN, Math.min(max, h0 + y0 - ev.clientY))); }
+      function up() {
+        head.removeEventListener('pointermove', move);
+        head.removeEventListener('pointerup', up);
+        head.removeEventListener('pointercancel', up);
+        try { localStorage.setItem(H_KEY, String(out.offsetHeight)); } catch (err) { }
+        panel.classList.remove('drag');                // empty or folded: it eases shut again now
+      }
+      head.addEventListener('pointermove', move);
+      head.addEventListener('pointerup', up);
+      head.addEventListener('pointercancel', up);
+    });
+    addEventListener('resize', function () { if (!panel.hidden) rest(); });
+
+    // Keys and clicks inside the panel stay there: typing a question must not turn pages, open the
+    // overview ('o') or pause Solita ('p'). Measured 16.09.2026: a capture listener on window is the
+    // wrong tool - it kills the event before the button's own handler sees it, yet window's own bubble
+    // listeners (page keys, slide jump, overview) still fire. Stopping on the way up from #ask does
+    // both right: handlers inside #ask run, nothing reaches the deck.
+    box.addEventListener('keydown', function (e) { e.stopPropagation(); });
+    box.addEventListener('click', function (e) { e.stopPropagation(); });
+
+    // The presenter view mirrors this box (Doc, 23.09.2026: "Solita AI kann ich im Präsi Mode nicht bedienen ... WICHTIG"):
+    // every change and every scroll goes out as HTML, at most every 16 ms, and the presenter shows the same, scrolled the same.
+    // Her voice and the karaoke run here on the beamer only - what the class hears and sees.
+    out.addEventListener('scroll', function () { syncSoon(); });
+    new MutationObserver(function () { bare(); syncSoon(); })   // text came or went, or the box folded (sf-zu)
+      .observe(out, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class'] });
+    let syncTimer = 0;                                 // a timer, not rAF: a window hidden behind the presenter gets no frames
+    function syncSoon() { if (!PRESENTER && !syncTimer) syncTimer = setTimeout(sync, 16); }
+    function sync() {
+      syncTimer = 0;
+      if (PRESENTER || !window.DeckLink) return;
+      window.DeckLink.send({ t: 'ask-out', html: panel.hidden ? '' : out.innerHTML, shut: out.classList.contains('sf-zu'),
+                             busy: sf.beschaeftigt(), st: out.scrollTop });
+    }
+    function shown(m) { sf.spiegel({ html: m.html, zu: m.shut, busy: m.busy, st: m.st }); }   // presenter: the beamer's box, word for word
+    // The panel above Solita shows only when it has something to show. Empty, or folded away by a page turn, it fades
+    // out and only the question line in the footer remains (Doc, 23.09.2026). Opacity, not display: the box underneath
+    // still slides open from zero when the next text arrives.
+    function bare() { panel.classList.toggle('bare', !out.children.length || out.classList.contains('sf-zu')); }
+
+    // While the panel is open, the question line (mic, field) stands in the footer: behind "... Doc Alvers fragen!"
+    // and in front of the page number, centred on that text line; the answers stay above Solita (Doc, 23.09.2026:
+    // "nicht dauerhaft, nur wenn Solita clicked wie jetzt"). Too little room (a phone, a short footer text) and the
+    // line stays in the panel as before.
+    const btn = document.getElementById('ask-btn'), btnHome = btn.nextSibling;   // her picture: bottom right, or leading the footer line
+    const line = document.createElement('div');
+    line.id = 'ask-line';
+    panel.parentNode.insertBefore(line, panel.nextSibling);   // inside #ask, so the line inherits its font and colours
+    const LINE_GAP = 14, LINE_MIN = 220;
+    const edge = window.ResizeObserver && new ResizeObserver(function () { placeRow(); });   // the page number's width jumps when its font arrives
+    let edgeOn = null;                                  // the page number the observer watches - re-observing it in its own callback would fire every frame
+    let again = false;                                  // one re-measure after the corner emptied or filled, never a loop
+    function placeRow() {
+      if (PRESENTER) { placePres(); return; }
+      const s = slides[si], foot = s && s.querySelector('.foot'), pn = s && s.querySelector('.pageno');
+      let fits = false;
+      // her greeting page shows her large already: nothing of her below the slide, no picture, no corner - and the
+      // corner is not reserved either (Doc, 23.09.2026: "auf der 1. Seite nicht bitte", then "nimm sie ganz raus")
+      const greet = !!s && s.classList.contains('greet');
+      if (greet !== box.classList.contains('greet')) { box.classList.toggle('greet', greet); if (typeof dock === 'function') dock(); }
+      if (greet) return;
+      if (edge && pn !== edgeOn) { edge.disconnect(); if (pn) edge.observe(pn); edgeOn = pn; }
+      if (foot && pn && foot.textContent.trim()) {
+        const rg = document.createRange();
+        rg.selectNodeContents(foot);                    // the text itself - .foot spans the whole slide
+        const t = rg.getBoundingClientRect(), p = pn.getBoundingClientRect();
+        // no wider than about before the overview and fullscreen went left (Doc, 30.09.2026: "zu breit"): the field
+        // at most 11 buttons wide, beside her picture and the mic
+        const b = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hudbtn')) || 22;
+        const left = t.right + LINE_GAP, width = Math.min(p.left - LINE_GAP - left, 13 * b + 12);
+        if (width >= LINE_MIN) {
+          // on the same middle as the buttons on the right, not on the footer text's own box - that sat 1.5 px higher
+          // (Doc, 23.09.2026: "bitte alles so hoch wie die butt rechts")
+          // the right group may stand empty now that the overview and fullscreen went left (30.09.2026): then the left one
+          const h = ['hud', 'nav'].map(function (id) { const e = document.getElementById(id); return e && !e.hidden && e.getBoundingClientRect(); })
+            .find(function (b) { return b && b.height; });
+          const mid = h && h.height ? h.top + h.height / 2 : t.top + t.height / 2;
+          line.style.left = left + 'px'; line.style.width = width + 'px'; line.style.top = mid + 'px';
+          fits = true;
         }
-        first += parts[i].n;
-        a.addEventListener('ended', function () { if (audio === a && i + 1 < parts.length) play(i + 1, a); });
-        a.play().catch(function () { });
-      }).catch(function () {
-        if (i > 0) return;                            // the answer stands; the rest simply stays silent
-        once();
-        say('Solitas Stimme war gerade nicht erreichbar.', 'ask-err');
-      });
-    }
-    play(0, null);
-  }
-  function stopAudio() { if (audio) { try { audio.pause(); } catch (e) { } audio = null; } }
-
-  function submit() {
-    const v = input.value.trim();
-    if (!v || busy) return;
-    if (!pwd()) {                                   // first use on this device: verify and remember
-      busy = true; send.disabled = true;
-      post(AI_URL, { ping: true, pass: v })
-        .then(function (r) {
-          // a 401 carries its reason ('wrong' | 'locked', supabase/functions/claude) - as in js/solita-frage.js
-          return r.ok ? r : r.json().catch(function () { return {}; }).then(function (j) { r.grund = j && j.reason; return r; });
-        })
-        .then(function (r) {
-          busy = false; send.disabled = false;
-          out.querySelectorAll('.ask-err').forEach(function (e) { e.remove(); });   // the last verdict goes, whichever way this one went (Doc, 22.09.2026)
-          // the students' password outside its window is right, not wrong (Doc, 30.09.2026: "die Meldung pwd falsch
-          // aber nicht perfekt"); a server that names no reason is not taken to mean "wrong" for sure
-          if (!r.ok) {
-            say(r.status !== 401 ? 'Der Server antwortet mit HTTP ' + r.status + ' – am Passwort liegt es nicht.'
-              : r.grund === 'locked' ? 'Das Passwort ist richtig, aber gerade gesperrt – das Schülerpasswort ist nicht freigegeben.'
-              : r.grund === 'wrong' ? 'Passwort stimmt nicht.' : 'Passwort nicht angenommen – falsch oder gesperrt.', 'ask-err');
-            input.value = ''; return;
-          }
-          try { localStorage.setItem('dev_access', v); } catch (e) { }
-          askQuestion(); input.focus();
-        })
-        .catch(function () { busy = false; send.disabled = false; say('Kein Netz.', 'ask-err'); });
-      return;
-    }
-    if (PRESENTER) {                                  // presenter view: the beamer window asks, shows and speaks (Doc, 23.09.2026)
-      if (ear && ear.active) { heardLate = true; ear.stop(); }
-      input.value = ''; liveOn = false; ready();
-      link.send({ t: 'ask', q: v });
-      return;
-    }
-    busy = true; send.disabled = true;
-    if (ear && ear.active) { heardLate = true; ear.stop(); }   // its late result is dropped, see onFinal
-    input.value = '';
-    ready();
-    const q = live && live.isConnected ? live : say('');   // dictated: the line already standing there becomes the question
-    q.innerHTML = qHtml(v); live = null;
-    // the wave runs while Claude thinks AND while her voice is fetched - it gives way to the answer
-    const wait = say('<span class="ask-wave" role="status" aria-label="Solita denkt nach">'
-      + '<i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>');
-    const t0 = Date.now();
-    const messages = [{ role: 'system', content: SYS }]
-      .concat(hist.reduce(function (m, h) {
-        return m.concat({ role: 'user', content: 'Frage der Klasse: ' + h.q },
-                        { role: 'assistant', content: h.a });
-      }, []))
-      .concat({ role: 'user', content: context(v) + '\n\nFrage der Klasse: ' + v });
-    // Solita (Claude) and/or DeepSeek get the very same messages - who answers is set in the right-click menu
-    const withClaude = who.claude || !who.ds, withDs = who.ds;
-    function ask(url, model) {
-      return post(url, { pass: pwd(), model: model, max_tokens: 600, messages: messages })
-        .then(function (r) {
-          return r.json().catch(function () { return {}; }).then(function (j) {
-            const text = r.ok && j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
-            return { text: text || '', status: r.status, j: j,
-                     error: text ? '' : r.status === 401 && url === DS_URL ? 'DeepSeek gibt es nur mit Docs Passwort.'
-                          : String((j && j.error && (j.error.message || j.error)) || 'Das hat nicht geklappt.') };
-          });
-        });
-    }
-    function red(el, text) {                          // DeepSeek's answer: red, its name in front
-      el.className = 'ask-ds';
-      el.innerHTML = '<b>DeepSeek</b>';
-      const body = document.createElement('span');
-      el.appendChild(body);
-      render(body, text);
-    }
-    function fail(msg) { busy = false; send.disabled = false; wait.className = 'ask-err'; wait.textContent = msg; }
-    function answer(text, show) {                     // the answer she speaks: history, voice, then on screen
-      hist.push({ q: v, a: text });
-      if (hist.length > HIST_MAX) hist.shift();
-      speak(text, function () {
-        busy = false; send.disabled = false;
-        show();
-        out.scrollTop = out.scrollHeight;
-        input.value = ''; input.focus();             // done - empty line for the next question
-        return wait;                                 // karaoke lights up the words in here
-      });
-    }
-    // DeepSeek beside her: silent, below, and only once her answer is on screen, so she is read first
-    const ds = withClaude && withDs ? say('', 'ask-ds') : null;
-    if (ds) ds.hidden = true;
-    let dsRes = null, herTurn = false;
-    function dsShow() {
-      if (!ds || !dsRes || !herTurn) return;
-      if (dsRes.text) red(ds, dsRes.text);
-      else if (dsRes.status !== 401) { ds.className = 'ask-err'; ds.textContent = 'DeepSeek: ' + dsRes.error; }
-      else return;                                    // the students' password: no DeepSeek, not a word about it
-      ds.hidden = false;
-      out.scrollTop = out.scrollHeight;
-    }
-    if (ds) ask(DS_URL, DS_MODEL).then(function (res) { dsRes = res; dsShow(); }).catch(function () { });
-    if (!withClaude) {                                // DeepSeek alone: her voice reads its answer
-      ask(DS_URL, DS_MODEL)
-        .then(function (res) {
-          last = null; showCost();
-          if (!res.text) { fail(res.error); return; }
-          answer(res.text, function () { red(wait, res.text); });
-        })
-        .catch(function () { fail('Kein Netz.'); });
-      return;
-    }
-    ask(AI_URL, MODEL)
-      .then(function (res) {
-        if (!res.text) { fail(res.error); herTurn = true; dsShow(); return; }
-        addClaude(res.j.usage, Date.now() - t0);
-        answer(res.text, function () { render(wait, res.text); placeCost(wait); herTurn = true; dsShow(); });
-      })
-      .catch(function () { fail('Kein Netz.'); herTurn = true; dsShow(); });
-  }
-
-  // Speaking the question: the shared engine from js/solita-listen.js (it survives mid-sentence
-  // pauses and Android's cumulative results). Recognised text lands in the field - sending stays a
-  // deliberate press, so a misheard question never costs money on its own.
-  micBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
-    + 'stroke-linecap="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/>'
-    + '<path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>';
-  if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) micBtn.hidden = true;
-  micBtn.title = 'Frage sprechen (Shift+Leertaste)'; micBtn.setAttribute('aria-label', 'Frage sprechen, Shift+Leertaste');
-  micBtn.addEventListener('mousedown', function (e) { e.preventDefault(); });   // the field keeps the caret
-  micBtn.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
-  let heardLate = false;                             // stop() still delivers the text - not after it was sent
-  // While a question is spoken, it already stands in the answer box, and the field scrolls along so its end
-  // stays in view (Doc, 23.09.2026: "lass den Text auch schon oben erscheinen und in der Eingabebox mit scrollen").
-  // The line mirrors the field until the question is sent - typed corrections follow, an emptied field takes it away.
-  let live = null, liveOn = false;                   // liveOn: presenter view, the dictated line already stands on the beamer
-  function qHtml(v) { return '<span class="ask-q">' + v.replace(/[<&]/g, function (c) { return c === '<' ? '&lt;' : '&amp;'; }) + '</span>'; }
-  function mirror() {
-    if (PRESENTER) {                                 // the beamer shows the line, this window only sends it
-      if (!liveOn) return;
-      const v = input.value.trim();
-      link.send({ t: 'ask-live', q: v });
-      if (!v) liveOn = false;
-      return;
-    }
-    if (live && !live.isConnected) live = null;      // "Leeren" took it away
-    const v = input.value.trim();
-    if (!v) { if (live) { live.remove(); live = null; } return; }
-    if (!live) live = say('');
-    live.innerHTML = qHtml(v); out.scrollTop = out.scrollHeight;
-  }
-  function heard(t) {                                // recognised text into the field, its end in view
-    input.value = t; input.scrollLeft = input.scrollWidth;
-    try { input.setSelectionRange(t.length, t.length); } catch (e) { }
-    if (PRESENTER) liveOn = true;
-    ready(); mirror();
-  }
-  micBtn.onclick = function () {
-    if (ear && ear.active) { ear.stop(); return; }
-    if (!window.SolitaListen) { say('Spracheingabe ist hier nicht geladen.', 'ask-err'); return; }
-    stopAudio();                                    // otherwise the mic hears Solita herself
-    if (PRESENTER) link.send({ t: 'ask-hush' });     // ... on the beamer too, where she really speaks
-    if (!ear) ear = window.SolitaListen({
-      lang: 'de-DE',
-      silenceMs: 2000,                               // 2 s quiet ends the question - and sends it (Doc, 25.09.2026: 3 s "zu lang")
-      onState: function (st) { micBtn.classList.toggle('on', st === 'listening'); },
-      onPartial: function (t) { if (heardLate) return; heard(t); },
-      onFinal: function (t) {
-        micBtn.classList.remove('on');
-        if (heardLate) { heardLate = false; return; }   // already sent from the field - nothing lands behind the answer
-        input.focus(); heard(t);
-        if (input.value.trim()) submit();              // "nach ... s Pause selbst abschicken" - no Enter needed
       }
-    });
-    ear.start();
-  };
-
-  // While the panel is open, the question line (mic, field, ?) stands in the footer: behind "... Doc Alvers fragen!"
-  // and in front of the page number, centred on that text line; the answers stay above Solita (Doc, 23.09.2026:
-  // "nicht dauerhaft, nur wenn Solita clicked wie jetzt"). Too little room (a phone, a short footer text) and the
-  // line stays in the panel as before.
-  const row = document.getElementById('ask-row'), rowHome = row.nextSibling;
-  const btn = document.getElementById('ask-btn'), btnHome = btn.nextSibling;   // her picture: bottom right, or leading the footer line
-  const line = document.createElement('div');
-  line.id = 'ask-line';
-  panel.parentNode.insertBefore(line, panel.nextSibling);   // inside #ask, so the line inherits its font and colours
-  const LINE_GAP = 14, LINE_MIN = 220;
-  const edge = window.ResizeObserver && new ResizeObserver(function () { placeRow(); });   // the page number's width jumps when its font arrives
-  let edgeOn = null;                                  // the page number the observer watches - re-observing it in its own callback would fire every frame
-  let again = false;                                  // one re-measure after the corner emptied or filled, never a loop
-  function placeRow() {
-    if (PRESENTER) { placePres(); return; }
-    const s = slides[si], foot = s && s.querySelector('.foot'), pn = s && s.querySelector('.pageno');
-    let fits = false;
-    // her greeting page shows her large already: nothing of her below the slide, no picture, no corner - and the
-    // corner is not reserved either (Doc, 23.09.2026: "auf der 1. Seite nicht bitte", then "nimm sie ganz raus")
-    const greet = !!s && s.classList.contains('greet');
-    if (greet !== box.classList.contains('greet')) { box.classList.toggle('greet', greet); if (typeof dock === 'function') dock(); }
-    if (greet) return;
-    if (edge && pn !== edgeOn) { edge.disconnect(); if (pn) edge.observe(pn); edgeOn = pn; }
-    if (foot && pn && foot.textContent.trim()) {
-      const rg = document.createRange();
-      rg.selectNodeContents(foot);                    // the text itself - .foot spans the whole slide
-      const t = rg.getBoundingClientRect(), p = pn.getBoundingClientRect();
-      const left = t.right + LINE_GAP, width = p.left - LINE_GAP - left;
-      if (width >= LINE_MIN) {
-        // on the same middle as the buttons on the right, not on the footer text's own box - that sat 1.5 px higher
-        // (Doc, 23.09.2026: "bitte alles so hoch wie die butt rechts")
-        const hud = document.getElementById('hud'), h = hud && !hud.hidden && hud.getBoundingClientRect();
-        const mid = h && h.height ? h.top + h.height / 2 : t.top + t.height / 2;
-        line.style.left = left + 'px'; line.style.width = width + 'px'; line.style.top = mid + 'px';
-        fits = true;
+      // Her picture always stands behind "... fragen!", the corner stays empty; the row (mic, field) joins her while the
+      // panel is open (Doc, 23.09.2026: "Solita pille rechts weg und immer nach fragen!"). No room: everything in the corner.
+      const was = btn.parentNode === line;
+      if (fits) {
+        line.classList.add('on'); lead();
+        if (panel.hidden) move(sfRoot, home()); else move(line, null);
+        // the answers hang right above the line like a speech bubble, centred over the field itself and never beyond the
+        // line's ends (Doc, 23.09.2026: "die Box kommt an der falschen Stelle" in the corner, then "über der Suchzeile")
+        const h = line.offsetHeight || parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hudbtn')) || 22;
+        // exactly the width of the field it belongs to, flush with it (Doc, 23.09.2026: "Box zu breit", then "so breit
+        // wie die Eingabe"). While the panel is closed the field sits inside it and has no width - then the line's.
+        const f = sf.feld().getBoundingClientRect();
+        if (!sliding && f.width) { fieldW = f.width; fieldL = f.left; }   // its real size, kept for the moments it has none
+        const good = !sliding && f.width;                // a clipped field says nothing about its real size
+        const w = fieldW || (good ? f.width : parseFloat(line.style.width));
+        panel.style.left = Math.round(fieldW ? fieldL : good ? f.left : parseFloat(line.style.left)) + 'px';
+        panel.style.width = Math.round(w) + 'px';
+        sf.auffrischen();                              // the field just changed width: the invitation that fits
+        panel.style.bottom = Math.round(innerHeight - (parseFloat(line.style.top) - h / 2) + 8) + 'px';
+      }
+      else rowBack();
+      box.classList.toggle('inline', fits);            // the panel is then placed from here, not from the corner ('foot' is the slide's footer class - never that)
+      if (was !== fits && !again && typeof dock === 'function') {   // the HUD and the page number move with the corner - measure once more
+        again = true; dock(); placeRow(); again = false;
       }
     }
-    // Her picture always stands behind "... fragen!", the corner stays empty; the row (mic, field, ?) joins her while the
-    // panel is open (Doc, 23.09.2026: "Solita pille rechts weg und immer nach fragen!"). No room: everything in the corner.
-    const was = btn.parentNode === line;
-    if (fits) {
-      line.classList.add('on'); lead();
-      if (panel.hidden) move(panel, home()); else move(line, null);
-      // the answers hang right above the line like a speech bubble, centred over the field itself and never beyond the
-      // line's ends (Doc, 23.09.2026: "die Box kommt an der falschen Stelle" in the corner, then "über der Suchzeile")
-      const h = line.offsetHeight || parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hudbtn')) || 22;
-      // exactly the width of the field it belongs to, flush with it (Doc, 23.09.2026: "Box zu breit", then "so breit
-      // wie die Eingabe"). While the panel is closed the field sits inside it and has no width - then the line's.
-      const f = input.getBoundingClientRect();
-      if (!sliding && f.width) { fieldW = f.width; fieldL = f.left; }   // its real size, kept for the moments it has none
-      const good = !sliding && f.width;                // a clipped field says nothing about its real size
-      const w = fieldW || (good ? f.width : parseFloat(line.style.width));
-      panel.style.left = Math.round(fieldW ? fieldL : good ? f.left : parseFloat(line.style.left)) + 'px';
-      panel.style.width = Math.round(w) + 'px';
-      hint();                                        // the field just changed width
-      panel.style.bottom = Math.round(innerHeight - (parseFloat(line.style.top) - h / 2) + 8) + 'px';
+    function lead() { if (btn.parentNode !== line) line.insertBefore(btn, line.firstChild); }
+    function home() { return rowHome && rowHome.parentNode === sfRoot ? rowHome : null; }
+    function move(to, before) {                        // moving a focused field blurs it - Doc keeps typing
+      if (row.parentNode === to) return;
+      const typing = document.activeElement === sf.feld();
+      to.insertBefore(row, before);
+      if (typing) sf.feld().focus();
     }
-    else rowBack();
-    box.classList.toggle('inline', fits);            // the panel is then placed from here, not from the corner ('foot' is the slide's footer class - never that)
-    if (was !== fits && !again && typeof dock === 'function') {   // the HUD and the page number move with the corner - measure once more
-      again = true; dock(); placeRow(); again = false;
+    function rowBack() {                               // everything back to the corner: the line off, the row in the panel, her picture under it
+      line.classList.remove('on');
+      panel.style.left = panel.style.width = panel.style.bottom = '';   // the panel hangs from the corner again (deck.css)
+      move(sfRoot, home());
+      if (btn.parentNode === line) box.insertBefore(btn, btnHome && btnHome.parentNode === box ? btnHome : null);
     }
-  }
-  function lead() { if (btn.parentNode !== line) line.insertBefore(btn, line.firstChild); }
-  function home() { return rowHome && rowHome.parentNode === panel ? rowHome : null; }
-  function move(to, before) {                        // moving a focused field blurs it - Doc keeps typing
-    if (row.parentNode === to) return;
-    const typing = document.activeElement === input;
-    to.insertBefore(row, before);
-    if (typing) input.focus();
-  }
-  function rowBack() {                               // everything back to the corner: the line off, the row in the panel, her picture under it
-    line.classList.remove('on');
-    panel.style.left = panel.style.width = panel.style.bottom = '';   // the panel hangs from the corner again (deck.css)
-    move(panel, home());
-    if (btn.parentNode === line) box.insertBefore(btn, btnHome && btnHome.parentNode === box ? btnHome : null);
-  }
-  // Presenter view (Doc, 23.09.2026: "Solita AI kann ich im Präsi Mode nicht bedienen ... WICHTIG"): the line rides on the
-  // .p-ask slot under the page turner, her picture in front; the answers hang over the live slide's corner, where the
-  // class sees them on the beamer. The beamer window asks, shows and speaks - this one sends and mirrors (DeckAsk below).
-  function placePres() {
-    const slot = document.querySelector('#pres .p-ask'), frame = document.querySelector('#pres .p-cur .p-frame');
-    if (!slot || !frame) return;                     // the presenter view is not built yet
-    const r = slot.getBoundingClientRect(), f = frame.getBoundingClientRect();
-    line.style.left = r.left + 'px'; line.style.width = r.width + 'px'; line.style.top = (r.top + r.height / 2) + 'px';
-    move(line, null); line.classList.add('on'); lead();
-    box.style.right = Math.round(innerWidth - f.right + 8) + 'px';
-    box.style.top = 'auto';                          // dock() hangs it from the top of the (hidden) footer band
-    box.style.bottom = Math.round(innerHeight - f.bottom + 8) + 'px';
-  }
-  painted.push(placeRow);                             // the footer moves with the slide scale and the page
-  addEventListener('resize', placeRow);
-  if (document.fonts) {                               // Orbitron arrives late: the page number's edge moves with it
-    document.fonts.ready.then(placeRow);
-    document.fonts.addEventListener('loadingdone', placeRow);
-  }
+    // Presenter view (Doc, 23.09.2026: "Solita AI kann ich im Präsi Mode nicht bedienen ... WICHTIG"): the line rides on the
+    // .p-ask slot under the page turner, her picture in front; the answers hang over the live slide's corner, where the
+    // class sees them on the beamer. The beamer window asks, shows and speaks - this one sends and mirrors (DeckAsk below).
+    function placePres() {
+      const slot = document.querySelector('#pres .p-ask'), frame = document.querySelector('#pres .p-cur .p-frame');
+      if (!slot || !frame) return;                     // the presenter view is not built yet
+      const r = slot.getBoundingClientRect(), f = frame.getBoundingClientRect();
+      line.style.left = r.left + 'px'; line.style.width = r.width + 'px'; line.style.top = (r.top + r.height / 2) + 'px';
+      move(line, null); line.classList.add('on'); lead();
+      box.style.right = Math.round(innerWidth - f.right + 8) + 'px';
+      box.style.top = 'auto';                          // dock() hangs it from the top of the (hidden) footer band
+      box.style.bottom = Math.round(innerHeight - f.bottom + 8) + 'px';
+    }
+    painted.push(placeRow);                             // the footer moves with the slide scale and the page
+    addEventListener('resize', placeRow);
+    if (document.fonts) {                               // Orbitron arrives late: the page number's edge moves with it
+      document.fonts.ready.then(placeRow);
+      document.fonts.addEventListener('loadingdone', placeRow);
+    }
 
-  function open() {
-    if (typeof narr !== 'undefined') narr.stop();   // asking pauses the talk, like turning a page
-    // decide "empty" BEFORE it shows: on the first open the panel had no .bare yet, stood there at full opacity
-    // and faded out over 250 ms (Doc, 25.09.2026: "flashed ... beim ersten Mal")
-    bare();
-    panel.hidden = false;
-    if (!pwd()) askPassword(); else askQuestion();
-    bare();
+    function open() {
+      if (typeof narr !== 'undefined') narr.stop();   // asking pauses the talk, like turning a page
+      // decide "empty" BEFORE it shows: on the first open the panel had no .bare yet, stood there at full opacity
+      // and faded out over 250 ms (Doc, 25.09.2026: "flashed ... beim ersten Mal")
+      bare();
+      panel.hidden = false;
+      sf.auffrischen();                               // the password once, then the question
+      bare();
+      placeRow();
+      requestAnimationFrame(function () { requestAnimationFrame(placeRow); });   // once the footer has settled after the click
+      rest();                                           // the stored height never pushes the panel off the top
+      sf.feld().focus();
+      sf.aufwaermen();
+    }
+    function close() { if (PRESENTER) return; panel.hidden = true; placeRow(); sf.stop(); }   // the row goes home, her picture stays in the footer; the presenter's line stays
+
+    btn.onclick = function () {
+      this.classList.remove('invite');                 // found her - no more inviting on this page
+      if (PRESENTER) return;                           // there she leads the question line - nothing to open or close
+      if (panel.hidden) open(); else close();
+    };
+    document.getElementById('ask-close').onclick = close;
+    // Shift+Space and P start the mic from anywhere on the slide, not only inside her panel; a closed line slides
+    // open first (Doc, 23.09.2026: "shift space und P sollen das Mic starten auf der ganzen Folie wenn eingeklappt,
+    // animiert ausklappen"). Capture, because the deck's own keys turn the page on Space.
+    function talk() {
+      const shut = panel.hidden;
+      if (shut) { open(); slideRow(); }                // out of her picture, then listen
+      if (shut) setTimeout(function () { sf.mikro(); }, 120);   // after the line stands
+      else sf.mikro();                                 // running: the same key stops it
+    }
+    addEventListener('keydown', function (e) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target;
+      if (t && t.closest && (t.closest('#ask') || t.closest('input, textarea, [contenteditable]'))) return;   // typing
+      if ((e.code === 'Space' && e.shiftKey) || e.key === 'p' || e.key === 'P') {
+        e.preventDefault(); e.stopImmediatePropagation();   // no page turn - the deck's own keys must not see it
+        talk();
+      }
+    }, true);
+    // the mic line grows out of her picture instead of jumping there. While it grows the field is clipped, so its
+    // width says nothing - the box above would become a pencil (Doc, 23.09.2026, screenshot).
+    let sliding = false, fieldW = 0, fieldL = 0;
+    function slideRow() {
+      if (!line.classList.contains('on') || row.parentNode !== line) return;
+      const w = row.getBoundingClientRect().width;
+      if (!w) return;
+      sliding = true;
+      row.style.transition = 'none'; row.style.maxWidth = '0px'; row.style.opacity = '0';
+      requestAnimationFrame(function () {
+        row.style.transition = 'max-width .3s ease, opacity .3s ease';
+        row.style.maxWidth = Math.ceil(w) + 'px'; row.style.opacity = '1';
+        setTimeout(function () {
+          row.style.transition = row.style.maxWidth = row.style.opacity = '';
+          sliding = false; placeRow();                 // now the field has its real width again
+        }, 360);
+      });
+    }
+    box.addEventListener('keydown', function (e) {     // Shift+Space anywhere in the panel or the footer line: mic on, again: off (Doc, 23.09.2026)
+      if (e.code === 'Space' && e.shiftKey) { if (sf.mikro()) e.preventDefault(); }
+      // plain Space while the mic listens sends what was heard - and never lands in the field as a stray space
+      // (Doc, 23.09.2026: "auch space soll im Mic Mode abschicken")
+      else if (e.code === 'Space' && sf.hoert()) { e.preventDefault(); sf.senden(); }
+    }, true);
+    // a page turn folds the answers away, down to the mic line; the next text opens the box again (Doc, 23.09.2026:
+    // "beim Seitenwechsel bis auf die Mic Zeile einfahren (animiert)") - clicks through the steps of one slide leave it
+    let foldedAt = si;
+    painted.push(function () { if (si !== foldedAt) { foldedAt = si; out.classList.add('sf-zu'); } });
+    // the two windows of a show talk through DeckLink (link.receive): the presenter sends ask, ask-live and ask-hush,
+    // the beamer sends its box back as ask-out
+    window.DeckAsk = {
+      // the field is emptied as by Enter; the dictated line standing there becomes the question
+      ask: function (q) { if (PRESENTER || !q) return; if (panel.hidden) open(); sf.feld().value = ''; sf.frage(q); },
+      live: function (q) { if (PRESENTER) return; if (panel.hidden) open(); sf.live(q); },
+      hush: function () { sf.stop(); }, shown: shown, sync: sync, place: placeRow,
+      words: function (tex) { return window.SolitaKaraoke ? window.SolitaKaraoke.texWords(tex) : String(tex); }
+    };
+    if (PRESENTER) panel.hidden = false;              // the line is always there; the answers come from the beamer
+    // The ordinary window starts with her picture alone behind "... fragen!" - password stored or not - and the line (mic,
+    // field) comes with the click on her (Doc, 23.09.2026: "default: nur Solita"; before that day the stored password
+    // opened the line at load). No focus and no warm-up here: the keys stay with the deck until Doc clicks into the field.
     placeRow();
-    requestAnimationFrame(function () { requestAnimationFrame(placeRow); });   // once the footer has settled after the click
-    rest();                                           // the stored height never pushes the panel off the top
-    input.focus();
-    warm();
+    if (document.readyState !== 'complete') addEventListener('load', placeRow);   // dock() moves the page number at load
   }
-  function close() { if (PRESENTER) return; panel.hidden = true; placeRow(); stopAudio(); }   // the row goes home, her picture stays in the footer; the presenter's line stays
-
-  document.getElementById('ask-btn').onclick = function () {
-    this.classList.remove('invite');                 // found her - no more inviting on this page
-    if (PRESENTER) return;                           // there she leads the question line - nothing to open or close
-    if (panel.hidden) open(); else close();
-  };
-  document.getElementById('ask-close').onclick = close;
-  send.onclick = submit;
-  // a question in the field makes the button breathe (not while Solita is busy, not for the password)
-  function ready() { send.classList.toggle('ready', !busy && input.type === 'text' && input.value.trim() !== ''); }
-  function bindInput() {                           // everything the field itself listens to - a new field gets it too
-    input.addEventListener('input', function () { if (live || liveOn) mirror(); });   // dictated text on the slide
-    input.addEventListener('input', ready);
-    input.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { e.preventDefault(); submit(); }
-      else if (e.key === 'Escape') { e.preventDefault(); close(); }
-    });
-  }
-  bindInput();
-  // Shift+Space and P start the mic from anywhere on the slide, not only inside her panel; a closed line slides
-  // open first (Doc, 23.09.2026: "shift space und P sollen das Mic starten auf der ganzen Folie wenn eingeklappt,
-  // animiert ausklappen"). Capture, because the deck's own keys turn the page on Space.
-  function talk() {
-    const shut = panel.hidden;
-    if (shut) { open(); slideRow(); }                // out of her picture, then listen
-    if (micBtn.hidden) return;                       // no speech recognition in this browser
-    if (shut) setTimeout(function () { micBtn.click(); }, 120);   // after the line stands
-    else micBtn.click();                             // running: the same key stops it
-  }
-  addEventListener('keydown', function (e) {
-    if (e.metaKey || e.ctrlKey || e.altKey) return;
-    const t = e.target;
-    if (t && t.closest && (t.closest('#ask') || t.closest('input, textarea, [contenteditable]'))) return;   // typing
-    if ((e.code === 'Space' && e.shiftKey) || e.key === 'p' || e.key === 'P') {
-      e.preventDefault(); e.stopImmediatePropagation();   // no page turn - the deck's own keys must not see it
-      talk();
-    }
-  }, true);
-  // the mic line grows out of her picture instead of jumping there. While it grows the field is clipped, so its
-  // width says nothing - the box above would become a pencil (Doc, 23.09.2026, screenshot).
-  let sliding = false, fieldW = 0, fieldL = 0;
-  function slideRow() {
-    if (!line.classList.contains('on') || row.parentNode !== line) return;
-    const w = row.getBoundingClientRect().width;
-    if (!w) return;
-    sliding = true;
-    row.style.transition = 'none'; row.style.maxWidth = '0px'; row.style.opacity = '0';
-    requestAnimationFrame(function () {
-      row.style.transition = 'max-width .3s ease, opacity .3s ease';
-      row.style.maxWidth = Math.ceil(w) + 'px'; row.style.opacity = '1';
-      setTimeout(function () {
-        row.style.transition = row.style.maxWidth = row.style.opacity = '';
-        sliding = false; placeRow();                 // now the field has its real width again
-      }, 360);
-    });
-  }
-  box.addEventListener('keydown', function (e) {     // Shift+Space anywhere in the panel or the footer line: mic on, again: off (Doc, 23.09.2026)
-    if (e.code === 'Space' && e.shiftKey && !micBtn.hidden) { e.preventDefault(); micBtn.click(); }
-    // plain Space while the mic listens sends what was heard - and never lands in the field as a stray space
-    // (Doc, 23.09.2026: "auch space soll im Mic Mode abschicken")
-    else if (e.code === 'Space' && ear && ear.active) { e.preventDefault(); if (input.value.trim()) submit(); }
-  });
-  // a page turn folds the answers away, down to the mic line; the next text opens the box again (Doc, 23.09.2026:
-  // "beim Seitenwechsel bis auf die Mic Zeile einfahren (animiert)") - clicks through the steps of one slide leave it
-  let foldedAt = si;
-  painted.push(function () { if (si !== foldedAt) { foldedAt = si; out.classList.add('shut'); } });
-  // the two windows of a show talk through DeckLink (link.receive): the presenter sends ask, ask-live and ask-hush,
-  // the beamer sends its box back as ask-out
-  window.DeckAsk = {
-    ask: function (q) { if (PRESENTER || !q) return; if (panel.hidden) open(); heardLate = false; input.value = q; ready(); submit(); },
-    live: function (q) { if (PRESENTER) return; if (panel.hidden) open(); input.value = q || ''; if (live || q) mirror(); ready(); },
-    hush: stopAudio, shown: shown, sync: sync, place: placeRow, words: texWords
-  };
-  if (PRESENTER) {                                    // the line is always there; the answers come from the beamer
-    panel.hidden = false;
-    if (!pwd()) askPassword(); else askQuestion();
-  }
-  // The ordinary window starts with her picture alone behind "... fragen!" - password stored or not - and the line (mic,
-  // field, ?) comes with the click on her (Doc, 23.09.2026: "default: nur Solita"; before that day the stored password
-  // opened the line at load). No focus and no warm-up here: the keys stay with the deck until Doc clicks into the field.
-  addEventListener('load', placeRow);                 // dock() has just moved the page number - place the line after it
 })();
 
 // Presenter view (Doc, 16.09.2026: "im Präsimode (full screen) auf einen ggf. ersten Monitor ... Vorschau
@@ -2124,7 +1606,10 @@ const link = (function () {
     clearTimeout(tt); tt = setTimeout(function () { b.hidden = true; }, ms || 4500);
   }
   function openPresenter(scr) {
-    const url = location.href.split('#')[0].split('?')[0] + '?presenter';
+    // the page's own parameters stay: the board (decks/tafel.html?id=... or ?aufgaben) lost them and its presenter said
+    // "Keine Tafel angegeben." (Doc, 30.09.2026: "???")
+    const base = location.href.split('#')[0];
+    const url = base + (base.indexOf('?') >= 0 ? '&' : '?') + 'presenter';
     const where = scr ? ',left=' + scr.availLeft + ',top=' + scr.availTop
                         + ',width=' + scr.availWidth + ',height=' + scr.availHeight
                       : ',width=1280,height=800';
