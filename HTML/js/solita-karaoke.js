@@ -118,6 +118,27 @@
         const z = +n, besonders = { 1: 'erste', 3: 'dritte', 7: 'siebte', 8: 'achte' };
         return z < 20 ? besonders[z] || zahlwort(z) + 'te' : zahlwort(z) + 'ste';
     }
+    // Parentheses are spoken (Doc, 30.09.2026: "warum nicht? Geht?") - they were dropped, and "(a+b)^2" came out as
+    // "a plus b Quadrat", which is a + b². Innermost first:
+    //   a function's argument is "von": f(x), a function word (Sinus ...), and any letter before ONE number or
+    //     letter - s(t), N(0) - as one reads them
+    //   one number or letter alone stands without words: (x), (3); after a digit it is a product, "2 mal 3"
+    //   everything else is "Klammer auf ... Klammer zu": (a+b), (-3), x(x+1)
+    const FUNKTION_VOR = /(?:^|[\s(])(?:[fghFGHP]|Sinus|Kosinus|Tangens|Kotangens|Logarithmus|l n|Limes|Maximum|Minimum)\s*$/;
+    function klammern(t) {
+        let vor;
+        do {
+            vor = t;
+            t = t.replace(/\(([^()]*)\)/, function (m, innen, i, alles) {
+                const kern = innen.replace(/\s+/g, ' ').trim(), davor = alles.slice(0, i);
+                const einfach = /^[^\s+\-=<>,;]+(?: Index [^\s+\-=<>,;]+)?$/.test(kern);   // one number or letter, no sign
+                if (FUNKTION_VOR.test(davor) || (einfach && /[a-zA-Z]\s*$/.test(davor))) return ' von ' + kern + ' ';
+                if (einfach) return (/\d\s*$/.test(davor) ? ' mal ' : ' ') + kern + ' ';
+                return ' Klammer auf ' + kern + ' Klammer zu ';
+            });
+        } while (t !== vor);
+        return t;
+    }
     function texWords(tex) {
         // an index raised by hand, \sqrt[{}^{90}\,] (vorrechnen's w-neunzig: KaTeX set the 90 on the root's hook), is
         // just its number
@@ -127,7 +148,7 @@
             return ' ' + zahlwortLesen(m.replace(/\\(?:mathrm|textrm|textup)\s*\{([A-Z0-9]+)\}/g, '$1')) + ' ';
         });
         for (let i = 0; i < 4; i++) TEX_SIGNS.forEach(function (r) { t = t.replace(r[0], r[1]); });   // unwrap nested braces
-        t = t.replace(/([a-zA-Z])\s*\(/g, '$1 von (')     // f(x) is "f von x", not "f Klammer auf x"
+        t = klammern(t)
              .replace(/[{}()[\]]/g, ' ')
              .replace(/\\[a-zA-Z]+/g, ' ')                // anything this list does not know stays silent
              // "ist gleich", as one says it (Doc, 29.09.2026: "A plus A plus A ist gleich ...")
