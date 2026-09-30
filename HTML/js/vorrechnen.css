@@ -398,6 +398,12 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
    the light grey of the grey steps (#schritt-hinweis), a touch lighter than the numbers */
 #canvas-container .rw-op { color: #8a93a3; }
 #canvas-container.hell .rw-op { color: #7a8294; }
+/* exponents smaller (Doc, 30.09.2026, at sqrt(17^2) - cbrt(17^3): "die Potenzen sind sehr groß") - KaTeX sets them
+   at 70 %, here 60 %. Only a superscript on a full-size base: the lone one of x^2, the second (upper) of T_1^2;
+   subscripts R_1 stay, and so do the smaller levels (the place values 10^k over the Ziffernrätsel letters). The
+   baseline stays where KaTeX put it, the row height too - the flight and the line layout measure the rendered box */
+.katex .msupsub > .vlist-t:not(.vlist-t2) > .vlist-r > .vlist > span > .sizing.reset-size6.size3,
+.katex .msupsub > .vlist-t2 > .vlist-r > .vlist > span:nth-child(2) > .sizing.reset-size6.size3 { font-size: 0.6em; }
 /* two columns: the thin line between them, in the colour of the line above the squares (Doc, 27.09.) */
 #canvas-container .rw-trenner { position: absolute; width: 0; border-left: 1px solid var(--papier-grenze); pointer-events: none; }
 #radierer.an { background: linear-gradient(rgba(0, 210, 255, 0.4), rgba(0, 210, 255, 0.4)) #07162f; box-shadow: 0 0 20px rgba(0, 210, 255, 0.75); }
@@ -467,7 +473,7 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
 /* Doc, 26.09.: all tasks in one panel (central modal, the grid is the lab's); night:
    flatter tiles, no heading, no "nach x", a small cross, light on sand with ink */
 #aufgaben-overlay { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
-#aufgaben-overlay .cyber-modal { padding: 52px 24px 24px; }          /* room for the cross */
+#aufgaben-overlay .cyber-modal { padding: 52px 24px 24px; }          /* room for the cross (the tabs take the top, below) */
 #aufgaben-overlay .aufgaben-liste {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px;
 }
@@ -483,13 +489,36 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
     font-family: 'Orbitron', sans-serif; font-size: 0.72rem; letter-spacing: 0.08em; color: #8a93a3;
 }
 #aufgaben-overlay .ak-formel { font-size: 1.3rem; white-space: nowrap; }
-/* a block's small title (Level 1, Level 2 ...) above its grid */
-#aufgaben-overlay .ak-block {
-    text-align: left; margin: 12px 2px 6px; font-family: 'Orbitron', sans-serif; font-size: 0.78rem;
-    letter-spacing: 0.12em; text-transform: uppercase; color: #8a93a3;
+/* Doc, 30.09.: "mach mal den Overview mit Tabs" - one tab per block (was: its small title above its grid), in the
+   look of the labs' tab strip (js/cyber-tabbar.css: Orbitron, the active tab white with the orange line). The strip
+   sits in the cross's row, left of it (the cross: 12px from the top, 34px high), and stays on top while the page
+   scrolls; the pages share one height (aufgabenPanel), so the tabs do not move */
+#aufgaben-overlay .cyber-modal { padding-top: 12px; }
+#aufgaben-overlay .ak-tabs {
+    position: sticky; top: 0; z-index: 1; display: flex; overflow-x: auto; scrollbar-width: none;
+    margin: 0 30px 16px 0; background: rgb(15, 23, 42); border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
-#aufgaben-overlay .ak-block:first-of-type { margin-top: 0; }
-#aufgaben-overlay.hell .ak-block { color: #5d6678; }
+#aufgaben-overlay .ak-tabs::-webkit-scrollbar { display: none; }
+#aufgaben-overlay .ak-tab {
+    flex: none; padding: 10px 16px; border: none; border-bottom: 2px solid transparent; border-radius: 0;
+    background: transparent; cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent;
+    font-family: 'Orbitron', sans-serif; font-size: 0.72rem; letter-spacing: 1.2px; color: rgba(255, 255, 255, 0.62);
+    transition: color 0.2s, border-color 0.2s;
+}
+#aufgaben-overlay .ak-tab:hover { color: rgba(255, 255, 255, 0.9); }
+#aufgaben-overlay .ak-tab.aktiv {
+    color: #fff; text-shadow: 0 0 8px rgba(245, 194, 66, 0.35); border-bottom-color: rgb(245, 194, 66);
+}
+#aufgaben-overlay .ak-tab:focus { outline: none; }
+#aufgaben-overlay .ak-tab:focus-visible { color: #fff; }
+#aufgaben-overlay .aufgaben-liste[hidden] { display: none; }
+#aufgaben-overlay.hell .ak-tabs { background: #f4ecd8; border-bottom-color: rgba(31, 64, 150, 0.2); }
+#aufgaben-overlay.hell .ak-tab { color: rgba(31, 64, 150, 0.6); }
+#aufgaben-overlay.hell :is(.ak-tab:hover, .ak-tab:focus-visible, .ak-tab.aktiv) { color: rgb(31, 64, 150); }
+#aufgaben-overlay.hell .ak-tab.aktiv { text-shadow: none; border-bottom-color: rgb(31, 64, 150); }
+@media (max-width: 600px) {
+    #aufgaben-overlay .ak-tab { padding: 8px 10px; font-size: 0.6rem; letter-spacing: 0.6px; }
+}
 /* light: sand and royal blue ink, like the board */
 #aufgaben-overlay.hell { background: rgba(244, 236, 216, 0.72); }
 #aufgaben-overlay.hell .cyber-modal {

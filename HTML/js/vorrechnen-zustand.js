@@ -151,17 +151,39 @@ let linienZeigen = false;
 try { linienZeigen = localStorage.getItem('vorrechnen-linien') === '1'; } catch (_) {}
 let aufgabeIdx = 0;
 try { aufgabeIdx = Math.min(AUFGABEN.length - 1, parseInt(localStorage.getItem('vorrechnen-aufgabe') || '0', 10) || 0); } catch (_) {}
+// Doc, 30.09.2026: "noch nicht richtig oder?" - a task put in front of the one on the board had moved the stored
+// number onto the new task, under the old one's working. The task is kept by its slug too and found by it; the
+// number is the fallback. Stored before there was a slug (once per device): a working whose first line is a step of
+// exactly one task's solution says whose it is - ↑ and the recognition put the solution's own LaTeX there.
+try {
+    const slug = localStorage.getItem('vorrechnen-aufgabe-slug');
+    let j = slug ? AUFGABEN.findIndex(a => a[0] === slug) : -1;
+    if (!slug && rechenweg.length) {
+        const passt = AUFGABEN.map((a, k) => k)
+            .filter(k => (LOESUNGEN[AUFGABEN[k][0]] || []).some(s => s[0] === rechenweg[0].latex));
+        if (passt.length === 1) j = passt[0];
+    }
+    if (j >= 0) aufgabeIdx = j;
+} catch (_) {}
+function merkeAufgabe() {
+    try {
+        localStorage.setItem('vorrechnen-aufgabe', String(aufgabeIdx));
+        localStorage.setItem('vorrechnen-aufgabe-slug', AUFGABEN[aufgabeIdx][0]);
+    } catch (_) {}
+}
 // Doc, 28.09.2026: "wenn ich pro Woche andere Aufgaben will" - a block can carry the calendar week it
 // is for (BLOECKE kw, the week number the Stoffverteilungsplan counts by). The first start in that week
 // opens its first task, once per device - after that the lab stays where Doc went (live reload, ◀ ▶, panel).
+// The working on the board belongs to the task before: it does not come along (30.09.).
 try {
     const kw = svpIsoWeek(new Date()), b = BLOECKE.find(x => x.kw === kw);
     if (b && localStorage.getItem('vorrechnen-woche') !== String(kw)) {
+        if (aufgabeIdx !== b.ab) { rechenweg.length = 0; localStorage.setItem('vorrechnen-rechenweg', '[]'); }
         aufgabeIdx = b.ab;
         localStorage.setItem('vorrechnen-woche', String(kw));
-        localStorage.setItem('vorrechnen-aufgabe', String(b.ab));
     }
 } catch (_) {}
+merkeAufgabe();
 // Does the server take probes? Checked once at load; otherwise the probe
 // is offered as a download, the way SICHERN does it.
 let speichernApi = false;

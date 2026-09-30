@@ -4,6 +4,14 @@
 // vorrechnen.html matters: code that runs while the files load must not reach into a later file, and
 // a callback that can fire in between (a resolved promise, a timer) must not either.
 
+// Doc, 30.09.2026: "die Quelle immer unten mittig an die Trennlinie (wie bei Money)" - a task's source stands at the
+// line to the writing field, far under its working; the copy that glides up (and waits in the day's history) moves
+// only by the working's height, so the source hung into the next task. The copies go without it; a block kept
+// before has it as a lone span "Quelle: ..." (the class came later)
+function ohneQuelle(el) {
+    el.querySelectorAll('.vorlage-quelle').forEach(q => q.remove());
+    el.querySelectorAll('span').forEach(q => { if (!q.children.length && q.textContent.startsWith('Quelle: ')) q.remove(); });
+}
 function rechenwegHochScrollen() {
     const teile = ['vorlage-schicht', 'rechenweg-schicht'].map(id => document.getElementById(id)).filter(Boolean);
     if (!teile.length) return;
@@ -13,6 +21,7 @@ function rechenwegHochScrollen() {
     const zug = document.createElement('div');
     zug.style.cssText = 'position:absolute;inset:0';
     teile.forEach(el => zug.appendChild(el.cloneNode(true)));
+    ohneQuelle(zug);
     zug.querySelectorAll('[id]').forEach(e => e.removeAttribute('id'));
     fenster.appendChild(zug);
     container.appendChild(fenster);
@@ -126,6 +135,7 @@ function zeigeVerlauf() {
         const d = document.createElement('div');
         d.style.cssText = `position:absolute;left:0;right:0;top:${y}px;height:${verlaufBloecke[i].hoehe}px`;
         d.innerHTML = verlaufBloecke[i].html;
+        ohneQuelle(d);                 // a block kept before 30.09. may still carry one
         v.appendChild(d);
         nummernNachtragen(d, container.getBoundingClientRect().width);
     }

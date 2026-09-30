@@ -396,7 +396,7 @@ function zeigeAufgabe(i) {
     verlaufZurueck();
     if (wechsel) { rechenwegArchivieren(); rechenwegHochScrollen(); }
     aufgabeIdx = ((i % n) + n) % n;
-    try { localStorage.setItem('vorrechnen-aufgabe', String(aufgabeIdx)); } catch (_) {}
+    merkeAufgabe();
     flugAbbrechen();
     rechenweg.length = 0;
     merkeRechenweg();
@@ -485,17 +485,27 @@ function aufgabenPanel(auf) {
         o.innerHTML = '<div class="cyber-modal cyber-modal--neon cyber-modal--wide" role="dialog" aria-label="Alle Aufgaben">' +
             '<button type="button" class="cyber-modal-x" title="Schließen" aria-label="Schließen">' +
             '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6 L18 18 M18 6 L6 18" fill="none"' +
-            ' stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>';
+            ' stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>' +
+            '<div class="ak-tabs" role="tablist" aria-label="Blöcke"></div><div class="ak-buehne"></div></div>';
         o.addEventListener('click', e => { if (e.target === o) aufgabenPanel(false); });
         o.querySelector('.cyber-modal-x').addEventListener('click', () => aufgabenPanel(false));
-        // one grid per block under its small title; a tile counts within its block
-        const modal = o.querySelector('.cyber-modal');
-        BLOECKE.forEach(blk => {
-            const titel = document.createElement('div');
-            titel.className = 'ak-block';
-            titel.textContent = blk.titel;
+        // Doc, 30.09.: "mach mal den Overview mit Tabs" - one tab per block, its grid the page under it (was: every
+        // block's grid under its small title, one below the other); a tile counts within its block
+        const tabs = o.querySelector('.ak-tabs'), buehne = o.querySelector('.ak-buehne');
+        BLOECKE.forEach((blk, k) => {
+            const tab = document.createElement('button');
+            tab.type = 'button';
+            tab.className = 'ak-tab';
+            tab.id = 'ak-tab-' + k;
+            tab.textContent = blk.titel;
+            tab.setAttribute('role', 'tab');
+            tab.setAttribute('aria-controls', 'ak-seite-' + k);
+            tab.addEventListener('click', () => aufgabenTab(k));
             const liste = document.createElement('div');
             liste.className = 'aufgaben-liste';
+            liste.id = 'ak-seite-' + k;
+            liste.setAttribute('role', 'tabpanel');
+            liste.setAttribute('aria-labelledby', tab.id);
             for (let i = blk.ab; i < blk.bis; i++) {
                 const b = document.createElement('button');
                 b.type = 'button';
@@ -505,14 +515,20 @@ function aufgabenPanel(auf) {
                 b.addEventListener('click', () => { aufgabenPanel(false); zeigeAufgabe(i); });
                 liste.appendChild(b);
             }
-            modal.append(titel, liste);
+            tabs.appendChild(tab);
+            buehne.appendChild(liste);
         });
         document.body.appendChild(o);
     }
     // light or dark like the board; the formulas are set again for their colour, and
-    // one line each: a long one shrinks to its tile (the overlay is laid out while hidden)
+    // one line each: a long one shrinks to its tile (the overlay is laid out while hidden).
+    // Every page is shown for that, and measured: the stage keeps the tallest page's height, so the
+    // modal does not jump (it is centred) and the tabs stay under the finger from page to page
     o.classList.toggle('hell', hell);
-    const farbe = variablenFarbe();
+    const farbe = variablenFarbe(), seiten = [...o.querySelectorAll('.aufgaben-liste')];
+    const buehne = o.querySelector('.ak-buehne');
+    seiten.forEach(s => { s.hidden = false; });
+    buehne.style.minHeight = '';
     o.querySelectorAll('.aufgabe-karte').forEach(b => {
         const i = +b.dataset.i, [, latex, nach] = AUFGABEN[i];
         const f = b.querySelector('.ak-formel');
@@ -522,25 +538,55 @@ function aufgabenPanel(auf) {
         passeEin(f, b.clientWidth - 24, 1.3);
         b.classList.toggle('aktuell', i === aufgabeIdx);
     });
+    buehne.style.minHeight = Math.max(...seiten.map(s => s.offsetHeight)) + 'px';
+    aufgabenTab(BLOECKE.indexOf(aufgabenBlock(aufgabeIdx)));      // it opens at the block of the task on the board
     requestAnimationFrame(() => o.classList.add('open'));
+}
+// one tab of the panel: its page shows, the others hide; ← → step through them while the panel is open
+function aufgabenTab(k) {
+    const o = document.getElementById('aufgaben-overlay');
+    if (!o) return;
+    k = Math.max(0, Math.min(BLOECKE.length - 1, k));
+    o.dataset.tab = String(k);
+    o.querySelectorAll('.ak-tab').forEach((t, j) => {
+        t.classList.toggle('aktiv', j === k);
+        t.setAttribute('aria-selected', String(j === k));
+        t.tabIndex = j === k ? 0 : -1;
+    });
+    o.querySelectorAll('.aufgaben-liste').forEach((s, j) => { s.hidden = j !== k; });
+    o.querySelector('.cyber-modal').scrollTop = 0;
+    o.querySelector('#ak-tab-' + k).scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
 // Doc, 26.09.: "left arrow key & right arrow key" - the arrow keys step like
 // ◀ ▶. A tapped button, slider or radio keeps the focus: it lets go first, so
 // no focus ring turns up ("bitte keine selects") and a radio does not switch
 // the mode. Text fields keep their keys; holding a key does not race on.
-// Doc, 29.09.: the arrow bottom left "auf arrow up" - ↑ sends the next grey step up like that button.
+// Doc, 29.09.: the arrow bottom left "auf arrow up" - ↑ sends the next grey step up like that button;
+// ↓ takes the newest row back (vorschauRunter, 30.09.: "arrow down einen Schritt zurück").
+// Doc, 30.09.: "gib mir auf key o den Overview" - o opens the panel with all tasks like its button in the
+// rail, in every mode; o again closes it. Not while another dialog (buzzer, Tafel, names) is open.
 document.addEventListener('keydown', e => {
-    if (document.querySelector('#aufgaben-overlay.open')) {
-        if (e.key === 'Escape') aufgabenPanel(false);
+    const o = (e.key === 'o' || e.key === 'O') && !e.repeat && !e.altKey && !e.ctrlKey && !e.metaKey;
+    const panel = document.querySelector('#aufgaben-overlay.open');
+    if (panel) {
+        if (e.key === 'Escape' || o) aufgabenPanel(false);
+        else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.repeat) {
+            e.preventDefault();
+            aufgabenTab(+panel.dataset.tab + (e.key === 'ArrowLeft' ? -1 : 1));
+        }
         return;
     }
-    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'ArrowUp') return;
-    if (anzeigeModus || modus === 'frei' || e.repeat || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'ArrowUp' && e.key !== 'ArrowDown' && !o) return;
+    if (anzeigeModus || e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (!o && (modus === 'frei' || e.shiftKey)) return;
+    if (o && document.querySelector('.cyber-overlay.open')) return;
     const f = document.activeElement;
     if (f && (f.isContentEditable || f.tagName === 'TEXTAREA' || f.tagName === 'SELECT' ||
         (f.tagName === 'INPUT' && !/^(range|checkbox|radio|button)$/.test(f.type)))) return;
     e.preventDefault();
     if (f && f !== document.body && typeof f.blur === 'function') f.blur();
+    if (o) { aufgabenPanel(true); return; }
     if (e.key === 'ArrowUp') { vorschauHoch(); return; }
+    if (e.key === 'ArrowDown') { vorschauRunter(); return; }
     naechsteVorlage(e.key === 'ArrowLeft' ? -1 : 1);
 });

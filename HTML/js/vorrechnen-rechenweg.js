@@ -80,7 +80,7 @@ function zeigeVorlage(hinweis) {
         (aufgabenModus && SCHEMATA[slug] ? '<span id="vorlage-schema" style="position:absolute;white-space:nowrap;' +
             'color:#8a93a3;font-size:1.2rem"></span>' : '') +
         // its source right above the line to the writing field (QUELLEN; placed by zeigeRechenweg)
-        (aufgabenModus && QUELLEN[slug] ? '<span id="vorlage-quelle" style="position:absolute;white-space:nowrap;' +
+        (aufgabenModus && QUELLEN[slug] ? '<span id="vorlage-quelle" class="vorlage-quelle" style="position:absolute;white-space:nowrap;' +
             'font-family:Orbitron,sans-serif;font-size:0.7rem;letter-spacing:0.06em;color:#8a93a3"></span>' : '');
     const quelle = host.querySelector('#vorlage-quelle');
     if (quelle) quelle.textContent = QUELLEN[slug];
@@ -217,7 +217,26 @@ function umformungen() {
         }
         vorher = j >= 0 ? j : null;                // a row off the solution: the next one has no "before"
     });
+    // Doc, 30.09.2026: "die kommen zu spät" - an operation showed only once the row after it had landed (only then
+    // is it known which steps were skipped). The newest row (or the task, before any) gets the next step's
+    // operation at once, as one writes "| -3x" before the next line; a row that skips steps joins them as above
+    if (vorher !== null && vorher + 1 < loesung.length) {
+        const op = (loesung[vorher + 1][1] || '').replace(/^\s*:/, '{:}');
+        if (op) ops.set(rechenweg.length ? rechenweg.length - 1 : 'aufgabe', op);
+    }
     return ops;
+}
+// Doc, 30.09.2026: "lass in der letzten Zeile hinter | immer einen freundlichen Smiley kommen" - the result's row gets
+// one in the operations' column: Apple's 😊 ("Bitte bitte schöne Smileys die von Apple, die wir sonst auch verwenden"),
+// as an image from the set the VGP uses too (iamcal/emoji-data img-apple-160 on jsdelivr, js/vgp-setup.js) - the
+// same on the HP and the Lenovo, whose own fonts draw other faces
+const SMILEY_APPLE = 'https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/1f60a.png';
+function smileyIcon() {
+    const i = document.createElement('img');
+    i.src = SMILEY_APPLE;
+    i.alt = '😊';
+    i.style.cssText = 'width:1.15em;height:1.15em;vertical-align:-0.25em';
+    return i;
 }
 let rechenwegWartet = false;
 let rechenwegLinie = 0;            // the last line the working takes (schaetzeZiel)
@@ -264,7 +283,25 @@ function zeigeRechenweg(verborgenAb) {
     // Doc, 27.09.: "in der Aufgabe ist ja T2 rot. Mach das bitte auch in den anderen rot und
     // alles, was hochfliegt, ist blau" - every row in ink (also one stored in green before)
     const farbig = latex => aufgabenModus ? hebeVariable(latex, AUFGABEN[aufgabeIdx][2], variablenFarbe()) : latex;
-    rechenweg.forEach((e, i) => zeile(farbig(e.latex.replace(UNGEFAEHR, '=')), i, (verborgenAb !== undefined && i >= verborgenAb) || imFlug.has(i), null));
+    // Doc, 30.09.2026: "bring die rechte Formel (immer) hoch" - a task without "=" (a term) and a first step that
+    // starts with "=": the step stands beside the task on its line, as one writes a chain of terms, the next ones
+    // under it on the same "=" column. It is the task's row with the step as its right part (neben): data-schritt 0,
+    // so the flight, the landing and the number find it as step 0; the row's operation is the step's (the one
+    // applied to the line's last term - the task's own gives way to it once the step is there)
+    const nebenAufgabe = aufgabenModus && zeilen.length && !amGleich(AUFGABEN[aufgabeIdx][1])[1];
+    rechenweg.forEach((e, i) => {
+        const latex = farbig(e.latex.replace(UNGEFAEHR, '='));
+        const weg = (verborgenAb !== undefined && i >= verborgenAb) || imFlug.has(i);
+        const [l, r] = amGleich(latex);
+        if (i === 0 && nebenAufgabe && !l) {
+            const z = zeilen[0];
+            z.rechts.remove();
+            z.rechts = zelle(r, 0, weg, null);
+            Object.assign(z, { schritt: 0, verborgen: weg, ergebnis: ergebnis === 0, neben: true });
+            return;
+        }
+        zeile(latex, i, weg, null);
+    });
     // Doc, 27.09.: "im vernünftigen Abstand und zwar aligned untereinander ... welcher Schritt das ist, wie
     // das so in wissenschaftlichen Publikationen üblich ist ... dahinter in Klammern" - every step gets its
     // number, (1), (2), ..., grey and smaller, flush right in a column of its own beside its column of
@@ -280,16 +317,18 @@ function zeigeRechenweg(verborgenAb) {
         z.nummer = d;
     });
     // the operations (umformungen), green like the deck's, in a column of their own between the rows and the
-    // numbers; each shows with the row it made (data-mit: flugLandet, schritteLanden)
+    // numbers; each shows with the row it stands behind (data-mit: flugLandet, schritteLanden) - until 30.09. with
+    // the row it made, one step late ("die kommen zu spät"); the task's is there from the start
     const ops = umformungen();
     zeilen.forEach(z => {
-        const op = ops.get(z.schritt);
-        if (!op) return;
-        const macht = z.schritt === 'aufgabe' ? 0 : z.schritt + 1;
-        const weg = (verborgenAb !== undefined && macht >= verborgenAb) || imFlug.has(macht);
-        const d = zelle('\\textstyle\\vert\\;\\; ' + op, macht, weg, null);
+        const op = z.ergebnis ? '' : ops.get(z.schritt);     // the result's row: the smiley (smileyIcon)
+        if (!op && !z.ergebnis) return;
+        const mit = z.schritt === 'aufgabe' ? null : z.schritt;
+        const weg = mit !== null && ((verborgenAb !== undefined && mit >= verborgenAb) || imFlug.has(mit));
+        const d = zelle('\\textstyle\\vert\\;\\; ' + op, mit, weg, null);
+        if (z.ergebnis) d.insertBefore(smileyIcon(), d.lastChild);
         delete d.dataset.schritt;
-        d.dataset.mit = macht;
+        if (mit !== null) d.dataset.mit = mit;
         d.className = 'rw-op';
         z.umformung = d;
     });
@@ -310,6 +349,26 @@ function zeigeRechenweg(verborgenAb) {
         return { w: r.width, auf: b - r.top, hoch: b - t.o, tief: t.u - b, bruchHoch, bruchTief };
     };
     zeilen.forEach(z => { z.l = mass(z.links); z.r = mass(z.rechts); if (z.nummer) z.n = mass(z.nummer); if (z.umformung) z.o = mass(z.umformung); });
+    // Doc, 30.09.2026: "irgendwie zuckt es immer noch ... gegen Ende weniger" - the "=" column is centred by the widest
+    // rows, operations and numbers, so a new step that was wider (or brought a wider operation) moved the whole
+    // working sideways, less so towards the end. In a task the solution is known: its steps, operations and last
+    // number count from the start (set once, measured, taken away again - geist), and the column stands still
+    const geist = { l: 0, r: 0, o: 0, n: 0 };
+    const loesungJetzt = aufgabenModus && LOESUNGEN[AUFGABEN[aufgabeIdx][0]];
+    if (loesungJetzt) {
+        const miss = (tex, feld) => { const d = zelle(tex, 'geist', true, null); geist[feld] = Math.max(geist[feld], mass(d).w); d.remove(); };
+        loesungJetzt.forEach(([st, op]) => {
+            const [l, r] = amGleich(farbig(st));
+            if (l) miss(l, 'l');
+            if (r) miss(r, 'r');
+            if (op) miss('\\textstyle\\vert\\;\\; ' + op.replace(/^\s*:/, '{:}'), 'o');
+        });
+        miss('(' + loesungJetzt.length + ')', 'n');
+        const d = zelle('\\textstyle\\vert\\;\\; ', 'geist', true, null);    // the result's "|" and smiley
+        d.insertBefore(smileyIcon(), d.lastChild);
+        geist.o = Math.max(geist.o, mass(d).w);
+        d.remove();
+    }
     // down the lines, from the second line (or under the template strip).
     // Line n runs from (n-1)*ZEILE - 1 to n*ZEILE - 1. A row takes a line
     // of its own plus every line above and below that it reaches more
@@ -413,9 +472,12 @@ function zeigeRechenweg(verborgenAb) {
         .map(i => s[i] * (UMFORMUNG_LUFT * rechenEm() + UMFORMUNG_GROESSE * zeilen[i].o.w)));
     // the "=" column of the rows idx within [links, links + breite]: centred by their widest parts,
     // the operations' column (ob) and the numbers' (nb) right of them counted in
-    const spalteIn = (s, idx, links, breite) => {
-        const lm = Math.max(0, ...idx.map(i => s[i] * zeilen[i].l.w)), rm = Math.max(0, ...idx.map(i => s[i] * zeilen[i].r.w));
-        const ob = umformungBreite(s, idx), nb = nummerBreite(s, idx);
+    // (mitGeist: the solution still to come counts too, at the rows' size - not for the task alone across the board)
+    const spalteIn = (s, idx, links, breite, mitGeist = true) => {
+        const t = mitGeist && idx.length ? s[idx[0]] : 0;
+        const lm = Math.max(t * geist.l, ...idx.map(i => s[i] * zeilen[i].l.w)), rm = Math.max(t * geist.r, ...idx.map(i => s[i] * zeilen[i].r.w));
+        const ob = Math.max(umformungBreite(s, idx), geist.o ? t * (UMFORMUNG_LUFT * rechenEm() + UMFORMUNG_GROESSE * geist.o) : 0);
+        const nb = Math.max(nummerBreite(s, idx), geist.n ? t * (NUMMER_LUFT * rechenEm() + NUMMER_GROESSE * geist.n) : 0);
         return { lm, rm, ob, nb, x: links + (breite - lm - rm - ob - nb) / 2 + lm };
     };
     const alle = zeilen.map((_, i) => i);
@@ -495,7 +557,7 @@ function zeigeRechenweg(verborgenAb) {
         zeilen[i].nummerRechts = sp.x + sp.rm + sp.ob + sp.nb;
     });
     if (zwei) {
-        setze(kopfIdx, spalteIn(s, kopfIdx, 0, c.width));
+        setze(kopfIdx, spalteIn(s, kopfIdx, 0, c.width, false));
         setze(zwei.links, spalteIn(s, zwei.links, 0, HALB));
         setze(zwei.rechts, spalteIn(s, zwei.rechts, HALB, HALB));
     } else setze(alle, spalte(s));
@@ -524,7 +586,9 @@ function zeigeRechenweg(verborgenAb) {
     });
     rechenwegLinie = zeilen.length ? gelegt.linie : Math.max(erste, 1);
     // in two columns the next step goes on under the right one - the flight's first guess (schaetzeZiel)
-    rechenwegZiel = zwei ? { gleich: zeilen[zwei.rechts[0]].gleichX, linie: zwei.rechtsLinie } : null;
+    // - and a first step that will stand beside the task goes onto the task's line (its middle half a line up)
+    rechenwegZiel = zwei ? { gleich: zeilen[zwei.rechts[0]].gleichX, linie: zwei.rechtsLinie }
+        : nebenAufgabe && !rechenweg.length ? { gleich: zeilen[0].gleichX, linie: zeilen[0].basis / ZEILE - 1 } : null;
     // Doc, 27.09.: "wenn wir zwei Spalten haben, muss in der Mitte unbedingt ein senkrechter dünner Strich
     // sein. Sonst sieht das irgendwie durcheinander aus", in the colour of the line above the squares
     // (.rw-trenner) - then "nach unten bitte nur auf die Baseline der tiefliegendsten Formel ... und oben
@@ -548,7 +612,8 @@ function zeigeRechenweg(verborgenAb) {
         const em = rechenEm() * s[i], dicke = unterDicke(em);
         const u = document.createElement('div');
         u.dataset.schritt = z.schritt;
-        u.style.cssText = `position:absolute;left:${z.gleichX - s[i] * z.l.w}px;width:${s[i] * (z.l.w + z.r.w)}px;` +
+        const lw = z.neben ? 0 : z.l.w;             // beside the task: under the step only
+        u.style.cssText = `position:absolute;left:${z.gleichX - s[i] * lw}px;width:${s[i] * (lw + z.r.w)}px;` +
             `top:${z.basis + s[i] * Math.max(z.l.tief, z.r.tief) + UNTER_EM * em}px;height:${UNTER_EM * em + dicke}px;` +
             `box-sizing:border-box;border-top:${dicke}px solid currentColor;border-bottom:${dicke}px solid currentColor`;
         if (z.farbe && z.farbe !== INK) u.style.color = z.farbe;
@@ -577,6 +642,14 @@ function zeigeRechenweg(verborgenAb) {
             if (r.width) { links = Math.min(links, r.left); rechts = Math.max(rechts, r.right); }
         });
         if (isFinite(links)) nach.style.left = ((links + rechts) / 2 - c.left) + 'px';
+        // ... but clear of the counter and the block's name on the same line: a term's first line (task and first step)
+        // puts the task far left, and "ohne Taschenrechner" lay over "Aufgabe 7 / 13" (30.09.)
+        const n = nach.getBoundingClientRect(), z = zaehler && zaehler.getBoundingClientRect();
+        const bl = document.getElementById('vorlage-block'), b = bl && bl.getBoundingClientRect();
+        let schub = 0;
+        if (z && z.width && n.left < z.right + 24) schub = z.right + 24 - n.left;
+        if (b && b.width && n.right + schub > b.left - 24) schub = ((z && z.width ? z.right : c.left) + b.left) / 2 - (n.left + n.right) / 2;   // then midway
+        if (schub) nach.style.left = (parseFloat(nach.style.left) + schub) + 'px';
     }
     // a puzzle's column sum stands under the counter - under the task instead where the task reaches that far
     // left (a narrow window: MATH + ATH + TH + H ran into it, Doc 28.09.)

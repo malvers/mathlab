@@ -217,5 +217,5 @@ function namenKnopf() {
 window.addEventListener('keydown', e => {
     if (!document.querySelector('#buzzer-overlay.open')) return;
     if (e.key === 'Escape') buzzerKarte(false);
-    if (e.key === 'Escape' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp') e.stopPropagation();
+    if (e.key === 'Escape' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowDown') e.stopPropagation();
 }, true);

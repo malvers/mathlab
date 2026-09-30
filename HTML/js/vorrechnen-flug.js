@@ -166,10 +166,12 @@ async function erkenneFlug(f) {
         imFlug.add(i);
         zeigeRechenweg();
         const c = container.getBoundingClientRect();
-        let x0 = Infinity, y0 = Infinity, x1 = -Infinity;
-        document.querySelectorAll(`#rechenweg-schicht [data-schritt="${i}"]`).forEach(z => {
+        const zellen = [...document.querySelectorAll(`#rechenweg-schicht [data-schritt="${i}"]`)];
+        const { x0, y0 } = zellenEcke(zellen);       // on the "=" of a step that starts with it (zellenEcke)
+        let x1 = -Infinity;
+        zellen.forEach(z => {
             const r = (z.querySelector('.katex-html') || z).getBoundingClientRect();
-            if (r.width) { x0 = Math.min(x0, r.left); y0 = Math.min(y0, r.top); x1 = Math.max(x1, r.right); }
+            if (r.width) x1 = Math.max(x1, r.right);
         });
         f.schritt = i;
         f.bereit = true;
@@ -245,6 +247,33 @@ function vorschauHoch() {
     merkeRechenweg();
     schritteLanden(erster, [naechster[0]], [INK], [von], c);
 }
+// Doc, 30.09.2026: "gib mir bitte arrow down einen Schritt zurück" - ↓ the other way: the newest row of the working
+// comes off the board again (and is the next grey step once more, where it was one); undo brings it back. Not
+// while lines are in the air, as with ↑.
+function vorschauRunter() {
+    if (!rechenweg.length || fluege.length) return;
+    verlaufZurueck();
+    merkeVerlauf();
+    rechenweg.pop();
+    merkeRechenweg();
+    zeigeRechenweg();
+}
+// Where a step's typeset copy in flight is laid: the top left of its cells' formulas. A step that starts with "=" is
+// set "{}=" in its cell (the "=" column), and KaTeX puts a relation's space after the empty group - the copy begins
+// with the "=" itself, so it goes onto that "=", not onto the cell's edge (Doc, 30.09.2026: "Die springen nach dem
+// Flug leicht nach rechts"). Only the formulas count: a result's double underline starts at the cell's edge too.
+function zellenEcke(zellen) {
+    let x0 = Infinity, y0 = Infinity;
+    zellen.forEach(z => {
+        const k = z.querySelector('.katex-html');
+        const r = k && k.getBoundingClientRect();
+        if (!r || !r.width) return;
+        const gleich = k.querySelector('.base > .mord:empty + .mspace + .mrel');
+        x0 = Math.min(x0, gleich ? gleich.getBoundingClientRect().left : r.left);
+        y0 = Math.min(y0, r.top);
+    });
+    return { x0, y0 };
+}
 function schritteLanden(erster, latexe, farben, von, c) {
     zeigeRechenweg(erster);
     const host = document.getElementById('rechenweg-schicht');
@@ -253,11 +282,7 @@ function schritteLanden(erster, latexe, farben, von, c) {
         // its number and the operation that made it show with it
         const mit = [...host.querySelectorAll(`[data-nummer="${erster + k}"], [data-mit="${erster + k}"]`)];
         const zeigen = () => [...zellen, ...mit].forEach(z => { z.style.visibility = ''; });
-        let x0 = Infinity, y0 = Infinity;
-        zellen.forEach(z => {
-            const r = (z.querySelector('.katex-html') || z).getBoundingClientRect();
-            if (r.width) { x0 = Math.min(x0, r.left); y0 = Math.min(y0, r.top); }
-        });
+        const { x0, y0 } = zellenEcke(zellen);
         if (!isFinite(x0)) { zeigen(); return; }
         // one piece in flight, set at the step's size (smaller when newer
         // steps came with it) and nudged onto its spot
