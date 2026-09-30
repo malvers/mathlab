@@ -89,6 +89,16 @@
 .sf-row button:disabled { opacity: .45; cursor: default; }
 .sf-row button[hidden] { display: none; }
 .sf-row svg { width: 20px; height: 20px; }
+/* who answers (zeigeKi, js/solita-frage.js): the marks of Claude and DeepSeek at the right end of the question
+   field, small and in the field's ink (Doc, 30.09.2026). The element follows the field in the row and is drawn back
+   into it: 9 px from the field's edge, the row's gap of 6 px between them taken back - what follows stands where it
+   stood. --n: one mark or two, --ki: their size. A click goes through to the field */
+.sf-row { --ki: 18px; }   /* was 14: "icons größer" (Doc, 30.09.2026) */
+.sf-ki { flex: none; display: inline-flex; align-items: center; gap: 5px; pointer-events: none; opacity: .55;
+    width: calc(var(--n, 1) * var(--ki) + (var(--n, 1) - 1) * 5px);
+    margin-left: calc(-15px - var(--n, 1) * var(--ki) - (var(--n, 1) - 1) * 5px); margin-right: 9px; }
+.sf-ki[hidden] { display: none; }
+.sf-row .sf-ki svg { width: var(--ki); height: var(--ki); flex: none; }
 /* send and stop look like the other buttons; only the microphone shows red while it listens - outline, not a block */
 .sf-mic.on { color: rgb(236, 120, 104); background: transparent; border-color: rgb(176, 36, 24); animation: sfmic 1.2s ease-in-out infinite; }
 @keyframes sfmic { 50% { box-shadow: 0 0 0 4px rgba(176, 36, 24, 0.3); } }

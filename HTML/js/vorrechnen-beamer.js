@@ -52,7 +52,9 @@ function anzeigeSenden() {
     if (!ziel) return;
     const r = container.getBoundingClientRect();
     try {
+        // knopf: the buttons' scale (--knopf, erkennenKlein) - Solita's line is measured with it, there as here
         ziel.anzeigeEmpfang({ w: Math.round(r.width), h: Math.round(r.height), hell, leinwand: canvas,
+            knopf: container.style.getPropertyValue('--knopf'),
             schichten: SPIEGEL_SCHICHTEN.map(spiegelSchicht).filter(Boolean) });
     } catch (_) {}
 }
@@ -68,6 +70,7 @@ function anzeigeZwilling(el) {
 function anzeigeEmpfang(d) {
     if (!anzeigeModus) return;
     if (d.w !== buehne.w || d.h !== buehne.h) { buehne = { w: d.w, h: d.h }; anzeigeEinpassen(); }
+    if (container.style.getPropertyValue('--knopf') !== (d.knopf || '')) container.style.setProperty('--knopf', d.knopf || '');
     if (container.classList.contains('hell') !== d.hell) {
         container.classList.toggle('hell', d.hell);
         document.documentElement.style.setProperty('--anzeige-grund', d.hell ? '#f4ecd8' : '#050d1c');

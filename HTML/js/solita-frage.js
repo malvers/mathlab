@@ -31,7 +31,8 @@
 //   The handle also gives: s.out, s.row (the question line - a host may move it elsewhere), s.feld(), s.mikro(),
 //   s.hoert(), s.senden(), s.live(text), s.auffrischen() (password or question, as it stands now), s.aufwaermen(),
 //   s.wechsle() (Solita <-> Doc, as a click on her face), s.bild(el, { offen, oeffnen }) (the host's own picture of
-//   her: a click shows her line, with the line shown it switches - see bild()),
+//   her: a click shows her line, with the line shown it switches - see bild()), s.sprechtaste({ offen, oeffnen, innen,
+//   tasten, wenn }) (Shift+Space is the mic's key on every page with the box; the host says how its line opens),
 //   s.beschaeftigt(), s.spiegel(m) (the presenter shows the beamer's answers: { html, zu, busy, st }). The host
 //   may fold the answers away with the class sf-zu on s.out; the next text takes it off.
 //   A click on the face switches between Solita and Doc; the page hears it as the event 'solita-wer' on document
@@ -64,6 +65,9 @@
         stop: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1.5" fill="currentColor"/></svg>',
         an: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
         aus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 5 6"/><path d="m21 9-5 6"/></svg>',
+        // who answers: the marks of Claude and DeepSeek from Simple Icons 16.33.0 (CC0-1.0), in the field's own ink
+        claude: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg>',
+        deepseek: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.748 4.651c-.254-.124-.364.113-.512.233-.051.04-.094.09-.137.137-.372.397-.806.657-1.373.626-.829-.046-1.537.214-2.163.848-.133-.782-.575-1.248-1.247-1.548-.352-.155-.708-.311-.955-.65-.172-.24-.219-.509-.305-.774-.055-.16-.11-.323-.293-.35-.2-.031-.278.136-.356.276-.313.572-.434 1.202-.422 1.84.027 1.436.633 2.58 1.838 3.393.137.094.172.187.129.323-.082.28-.18.553-.266.833-.055.179-.137.218-.328.14a5.5 5.5 0 0 1-1.737-1.179c-.857-.828-1.631-1.743-2.597-2.46a12 12 0 0 0-.689-.47c-.985-.957.13-1.743.387-1.836.27-.098.094-.433-.778-.428-.872.003-1.67.295-2.687.685a3 3 0 0 1-.465.136 9.6 9.6 0 0 0-2.883-.101c-1.885.21-3.39 1.1-4.497 2.622C.082 8.776-.231 10.854.152 13.02c.403 2.284 1.568 4.175 3.36 5.653 1.857 1.533 3.997 2.284 6.438 2.14 1.482-.085 3.132-.284 4.994-1.86.47.234.962.328 1.78.398.629.058 1.235-.031 1.705-.129.735-.155.684-.836.418-.961-2.155-1.004-1.682-.595-2.112-.926 1.095-1.295 2.768-3.598 3.284-6.733.05-.346.115-.834.108-1.114-.004-.171.035-.238.23-.257a4.2 4.2 0 0 0 1.545-.475c1.397-.763 1.96-2.016 2.093-3.517.02-.23-.004-.467-.247-.588M11.58 18.168c-2.088-1.642-3.101-2.183-3.52-2.16-.39.024-.32.472-.234.763.09.288.207.487.371.74.114.167.192.416-.113.603-.673.416-1.842-.14-1.897-.168-1.361-.801-2.5-1.86-3.301-3.306-.775-1.393-1.225-2.888-1.299-4.482-.02-.385.094-.522.477-.592a4.7 4.7 0 0 1 1.53-.038c2.131.311 3.946 1.264 5.467 2.774.868.86 1.525 1.887 2.202 2.89.72 1.066 1.494 2.082 2.48 2.915.348.291.626.513.892.677-.802.09-2.14.109-3.055-.615zm1.001-6.44a.306.306 0 0 1 .415-.287.3.3 0 0 1 .113.074.3.3 0 0 1 .086.214c0 .17-.136.307-.308.307a.303.303 0 0 1-.306-.307m3.11 1.596c-.2.081-.4.151-.591.16a1.25 1.25 0 0 1-.798-.254c-.274-.23-.47-.358-.551-.758a1.7 1.7 0 0 1 .015-.588c.07-.327-.007-.537-.238-.727-.188-.156-.426-.199-.689-.199a.6.6 0 0 1-.254-.078.253.253 0 0 1-.114-.358 1 1 0 0 1 .192-.21c.356-.202.767-.136 1.146.016.352.144.618.408 1.001.782.392.451.462.576.685.915.176.264.336.536.446.848.066.194-.02.353-.25.45"/></svg>',
         // Lucide "eye" and "eye-off" (ISC)
         auge: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>',
         augeZu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>',
@@ -156,10 +160,13 @@
             (opt.blase ? '<div class="sf-huelle">' + OUT + '</div>' : OUT) +
             '<div class="sf-row">' +
             '  <img class="sf-face" src="' + SOLITA_PIC + '" alt="Solita">' +
+            // the mic in front of the field on every page, as the decks always had it (Doc, 30.09.2026: "das Mikrofon
+            // auf die linke Seite. Bitte zentral. Das Ding soll immer gleich aussehen")
+            '  <button class="sf-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen">' + ICON.mic + '</button>' +
             '  <label class="sf-vh" for="sf-in-' + nr + '">Deine Frage an Solita</label>' +
             '  <input class="sf-in" id="sf-in-' + nr + '" type="text" autocomplete="off">' +
+            '  <span class="sf-ki" role="img" hidden></span>' +   // who answers, drawn into the field's right end (zeigeKi)
             '  <button class="sf-eye" type="button" hidden title="Passwort zeigen" aria-label="Passwort zeigen" aria-pressed="false">' + ICON.auge + '</button>' +
-            '  <button class="sf-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen">' + ICON.mic + '</button>' +
             '  <button class="sf-stop" type="button" hidden title="Stimme anhalten" aria-label="Stimme anhalten">' + ICON.stop + '</button>' +
             '  <button class="sf-send" type="button" title="Frage senden" aria-label="Frage senden">' + ICON.send + '</button>' +
             '</div>' +
@@ -172,6 +179,7 @@
         const sendBtn = root.querySelector('.sf-send');
         const micBtn = root.querySelector('.sf-mic');
         const eyeBtn = root.querySelector('.sf-eye');
+        const kiEl = root.querySelector('.sf-ki');
         const stopBtn = root.querySelector('.sf-stop');
         const face = root.querySelector('.sf-face');
         const note = root.querySelector('.sf-note');
@@ -198,6 +206,21 @@
             if (kept) { who.claude = kept.claude !== false; who.ds = kept.ds === true; }
         } catch (e) { }
         if (!who.claude && !who.ds) who.claude = true;
+        // Who answers stands at the right end of the question field, small, on every page with the box: Claude's
+        // mark ("Claude icon nicht Anthropic") while Claude Haiku answers, DeepSeek's while DeepSeek does, both when both are on (Doc, 30.09.2026:
+        // "zentral bitte ... in die Suchzeile ganz rechts ein kleines Icon von Anthropic ... von DeepSeek ... beide
+        // Icons"). Not over the password. DeepSeek opens only for Doc's own password: once it has refused this one,
+        // its mark goes (dsZu). The field keeps its text clear of them - inline, a host's own padding does not undo it;
+        // --ki is the marks' size (solita-frage.css, the decks' footer line smaller).
+        let dsZu = false;
+        function zeigeKi() {
+            const d = who.ds && !dsZu, c = who.claude || !who.ds, n = (c ? 1 : 0) + (d ? 1 : 0);
+            kiEl.hidden = pw || !n;
+            kiEl.innerHTML = (c ? ICON.claude : '') + (d ? ICON.deepseek : '');
+            kiEl.style.setProperty('--n', String(n || 1));
+            kiEl.setAttribute('aria-label', 'Es antwortet ' + [c && 'Claude Haiku', d && 'DeepSeek'].filter(Boolean).join(' und '));
+            input.style.paddingRight = kiEl.hidden ? '' : 'calc(' + n + ' * var(--ki, 18px) + ' + ((n - 1) * 5 + 16) + 'px)';
+        }
         stopBtn.addEventListener('click', stop);
 
         (opt.vorschlaege || []).forEach(function (v) {
@@ -291,6 +314,7 @@
             auge(false); eyeBtn.hidden = false;
             sendBtn.innerHTML = ICON.tick; sendBtn.setAttribute('aria-label', 'Passwort bestätigen');
             micBtn.hidden = true; chips.hidden = true;
+            zeigeKi();
         }
         function askQuestion() {
             // a field that once was type=password keeps Chrome's login list over it - a fresh one carries none
@@ -300,6 +324,7 @@
                 input.replaceWith(fresh); input = fresh; bindInput();
             }
             pw = false; eigen = ''; eyeBtn.hidden = true;
+            zeigeKi();                                       // before the invitation is fitted: the marks take room
             input.type = 'text'; input.value = ''; hint();
             input.setAttribute('autocomplete', 'off');
             input.removeAttribute('aria-label');
@@ -418,6 +443,7 @@
             function ask(url, model) {
                 return post(url, { pass: pwd(), model: model, max_tokens: opt.maxTokens || 700, messages: messages })
                     .then(function (r) {
+                        if (url === DS_URL && r.status === 401 && !dsZu) { dsZu = true; zeigeKi(); }   // not with this password
                         return r.json().catch(function () { return {}; }).then(function (j) {
                             const text = r.ok && j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
                             return {
@@ -606,6 +632,7 @@
             face.title = 'Klick: zu ' + (VOICE === 'doc' ? 'Solita' : 'Doc') + ' wechseln';
             if (opt.ueberschrift) opt.ueberschrift.textContent = 'Frag ' + wer();
             vh.textContent = 'Deine Frage an ' + wer();
+            zeigeKi();
             if (!pw) hint();
             if (gemeldet !== wer()) {
                 gemeldet = wer();
@@ -752,6 +779,43 @@
             ear.start();
         });
 
+        function mikro() { if (micBtn.hidden) return false; micBtn.click(); return true; }   // false: no mic here (the password)
+        // Shift+Space is the mic's key on every page with the box: on, and again: off - from anywhere on the page, not
+        // only in her field (Doc, 23.09.2026 for the decks: "shift space ... soll das Mic starten auf der ganzen Folie",
+        // 30.09.2026 for Vorrechnen: "shift Space Mic (zentral bitte wie im Deck)"). While she listens, plain Space in
+        // her line sends what was heard and never lands in the field ("auch space soll im Mic Mode abschicken").
+        // Capture, and nobody else sees the key: a deck turns its page on Space.
+        // The host says more with s.sprechtaste({ ... }), all optional:
+        //   offen(), oeffnen()   a line that can be shut: the key shows it first, then she listens
+        //   innen: el            the host's element around the box, its moved line and her picture
+        //   tasten: ['p', 'P']   more keys that do the same outside of her line and of any field
+        //   wenn()               false: not now (a dialog is open)
+        let taste = {};
+        function micTaste() {                                // not "sprich": that is her voice reading an answer
+            if (taste.offen && taste.oeffnen && !taste.offen()) {
+                taste.oeffnen();
+                setTimeout(mikro, 120);                      // after the line stands
+                return true;
+            }
+            if (!row.offsetParent) return false;             // a box nobody sees does not listen
+            return mikro();
+        }
+        addEventListener('keydown', function (e) {
+            if (e.metaKey || e.ctrlKey || e.altKey) return;
+            const t = e.target && e.target.closest ? e.target : null;
+            const leer = e.code === 'Space';
+            if (t && (root.contains(t) || row.contains(t) || (taste.innen && taste.innen.contains(t)))) {
+                if (leer && e.shiftKey) { if (micTaste()) e.preventDefault(); }
+                else if (leer && ear && ear.active) { e.preventDefault(); submit(); }
+                return;
+            }
+            if (t && t.closest('input, textarea, [contenteditable]')) return;   // typing elsewhere on the page
+            if (!(leer && e.shiftKey) && (taste.tasten || []).indexOf(e.key) < 0) return;
+            if (taste.wenn && !taste.wenn()) return;
+            e.preventDefault(); e.stopImmediatePropagation();
+            micTaste();
+        }, true);
+
         // keys inside the box stay there: they must not turn the lab's steps
         root.addEventListener('keydown', function (e) { e.stopPropagation(); });
 
@@ -759,7 +823,8 @@
             frage: frage, vorlesen: vorlesen, stop: stop, leeren: leeren, wechsle: wechsle, bild: bild,
             out: out, row: row,
             feld: function () { return input; },             // a new field after the password - never keep the old one
-            mikro: function () { if (micBtn.hidden) return false; micBtn.click(); return true; },   // false: no mic here (the password)
+            mikro: mikro,
+            sprechtaste: function (h) { taste = h || {}; },
             hoert: function () { return !!(ear && ear.active); },
             senden: submit,
             live: function (t) { input.value = t || ''; if (live || t) spiegeln(); bereit(); },

@@ -79,6 +79,12 @@ function solitaSchicht() {
     // button still opens and closes.
     if (solita) solita.bild(knopf, { offen: () => s.classList.contains('offen'), oeffnen: () => solitaOffen(true) });
     else knopf.addEventListener('click', () => solitaOffen(!s.classList.contains('offen')));
+    // Shift+Space is the mic's key, the box's own (Doc, 30.09.2026: "shift Space Mic (zentral bitte wie im Deck)"): it
+    // opens her line first; not under a dialog (the tasks' panel, the buzzer, the Tafel)
+    if (solita) solita.sprechtaste({
+        offen: () => s.classList.contains('offen'), oeffnen: () => solitaOffen(true), innen: s,
+        wenn: () => !document.querySelector('.cyber-overlay.open'),
+    });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && s.classList.contains('offen')) solitaOffen(false); });
     return s;
 }
@@ -90,12 +96,16 @@ function solitaOffen(auf) {
     else if (solita) solita.stop();
 }
 // the corner (called by zeigeRechenweg, which the beamer skips): her line reaches up to the notes' column on the right
-// (--vs-platz, js/vorrechnen.css); a new task starts a new talk
+// (--vs-platz, js/vorrechnen.css) and her answers up to the line above the writing field (--vs-feld: the field's
+// height); a new task starts a new talk
 function solitaEcke() {
     if (anzeigeModus) return;
     const s = solitaSchicht();
-    const platz = Math.round(notizX(container.getBoundingClientRect().width)) + 'px';
+    const r = container.getBoundingClientRect();
+    const platz = Math.round(notizX(r.width)) + 'px';
     if (s.style.getPropertyValue('--vs-platz') !== platz) s.style.setProperty('--vs-platz', platz);
+    const feld = Math.round(r.height - papierGrenze(r.height)) + 'px';
+    if (s.style.getPropertyValue('--vs-feld') !== feld) s.style.setProperty('--vs-feld', feld);
     const aufgabe = aufgabenModus ? AUFGABEN[aufgabeIdx][0] : null;
     if (aufgabe !== solitaAufgabe) {
         if (solitaAufgabe !== null && solita) solita.leeren();

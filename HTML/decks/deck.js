@@ -748,7 +748,7 @@ fromHash();
   const panel = document.getElementById('ask-panel');
   // The box's files come from here, so no deck page needs a new line. The version rides along: a browser still holding
   // an older copy of the box (from a lab - Pages keeps files 10 minutes) takes this one.
-  const SF_VERSION = '2026-09-30b';                // raise it with every change of the box or deck-solita.css
+  const SF_VERSION = '2026-09-30g';             // raise it with every change of the box or deck-solita.css
   function load(src, then) {
     const s = document.createElement('script');
     s.src = new URL(src, DECK_JS).href;
@@ -1073,22 +1073,14 @@ fromHash();
     document.getElementById('ask-close').onclick = close;
     // Shift+Space and P start the mic from anywhere on the slide, not only inside her panel; a closed line slides
     // open first (Doc, 23.09.2026: "shift space und P sollen das Mic starten auf der ganzen Folie wenn eingeklappt,
-    // animiert ausklappen"). Capture, because the deck's own keys turn the page on Space.
-    function talk() {
-      const shut = panel.hidden;
-      if (shut) { open(); slideRow(); }                // out of her picture, then listen
-      if (shut) setTimeout(function () { sf.mikro(); }, 120);   // after the line stands
-      else sf.mikro();                                 // running: the same key stops it
-    }
-    addEventListener('keydown', function (e) {
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-      const t = e.target;
-      if (t && t.closest && (t.closest('#ask') || t.closest('input, textarea, [contenteditable]'))) return;   // typing
-      if ((e.code === 'Space' && e.shiftKey) || e.key === 'p' || e.key === 'P') {
-        e.preventDefault(); e.stopImmediatePropagation();   // no page turn - the deck's own keys must not see it
-        talk();
-      }
-    }, true);
+    // animiert ausklappen"). The key itself is the box's, for the labs too (30.09.2026: "zentral bitte wie im Deck") -
+    // it also sends on plain Space while she listens; here only how the line opens, and P.
+    sf.sprechtaste({
+      offen: function () { return !panel.hidden; },
+      oeffnen: function () { open(); slideRow(); },    // out of her picture, then listen
+      innen: box,                                      // panel, footer line or her picture
+      tasten: ['p', 'P'],
+    });
     // the mic line grows out of her picture instead of jumping there. While it grows the field is clipped, so its
     // width says nothing - the box above would become a pencil (Doc, 23.09.2026, screenshot).
     let sliding = false, fieldW = 0, fieldL = 0;
@@ -1107,12 +1099,6 @@ fromHash();
         }, 360);
       });
     }
-    box.addEventListener('keydown', function (e) {     // Shift+Space anywhere in the panel or the footer line: mic on, again: off (Doc, 23.09.2026)
-      if (e.code === 'Space' && e.shiftKey) { if (sf.mikro()) e.preventDefault(); }
-      // plain Space while the mic listens sends what was heard - and never lands in the field as a stray space
-      // (Doc, 23.09.2026: "auch space soll im Mic Mode abschicken")
-      else if (e.code === 'Space' && sf.hoert()) { e.preventDefault(); sf.senden(); }
-    }, true);
     // a page turn folds the answers away, down to the mic line; the next text opens the box again (Doc, 23.09.2026:
     // "beim Seitenwechsel bis auf die Mic Zeile einfahren (animiert)") - clicks through the steps of one slide leave it
     let foldedAt = si;

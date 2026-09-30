@@ -3,6 +3,9 @@
 // A classic script: its functions are globals. The same functions still live in the Vorrechnen scripts
 // (engeBrueche, alsDisplay, tinte: js/vorrechnen-erkennen.js; hebeVariable: js/vorrechnen-werkzeuge.js;
 // smileyIcon: js/vorrechnen-rechenweg.js) - they are meant to come from here once Vorrechnen loads this file.
+// Vorrechnen loads it since 30.09.2026, before its own scripts, whose five functions of the same name still win;
+// the explanation's setting at the end (erklaerungSetzen and its helpers) lives here only - the lab's explanation
+// box and the deck's explanation slides are set by the same code.
 // No top-level const/let here: the Vorrechnen scripts share one global scope and declare their own.
 
 // Doc: "Wurzel und Summenzeichen sehen noch falsch aus" - by hand a formula is written in display style.
@@ -113,4 +116,95 @@ function smileyIcon() {
     i.alt = '😊';
     i.style.cssText = 'width:1.15em;height:1.15em;vertical-align:-0.25em';
     return i;
+}
+
+// ── a task's explanation (ERKLAERUNGEN, js/vorrechnen-aufgaben.js) ──────────────────────────────────────────
+// Moved here from js/vorrechnen-flug.js (30.09.2026), when the deck of the tasks got a slide for each explanation
+// (decks/tafel.html, Doc: "eine Erklärbox ... in das Deck als Folie danach mit einbauen"). The look comes from the
+// page (#erklaerung in js/vorrechnen.css, .tf-erkl in the deck); the layout of .erkl-gl and its parts: js/formel-satz.css.
+// every letter of a formula upright, as \mathrm (Doc, 28.09.: the letters blue - js/vorrechnen.css - "bitte nicht
+// kursiv"); commands (\cdot, \ge, \mathrm) and words in \text{...} stay as they are
+function formelAufrecht(tex) {
+    return tex.replace(/\\text\{[^}]*\}|\\[a-zA-Z]+|[A-Za-z]/g, m => m.length > 1 ? m : '\\mathrm{' + m + '}');
+}
+// Paragraphs by a blank line. $$equation | operation$$ is an equation set off, as in a LaTeX text, with what is done
+// to it next behind it as on the board's working, "| −A" (since 29.09.2026 the data come that way:
+// umformungenVorziehen, js/vorrechnen-aufgaben.js - Doc: "Auch in der EB!") (Doc, 28.09.: "dass diese Gleichungen so in der Zeile
+// im Text stehen ... ordentliche Gleichungen ... und natürlich LaTeX", "hinter die Gleichung immer die Operation");
+// $...$ stays in the sentence - a value, a letter, a term.
+// Every "=" of the box stands on its middle line, text between or not ("die Gleichheitszeichen immer in die Mitte
+// der Box ... auch über Text ... alle aligned"): a row of two halves, the left side flush right before the middle,
+// "=" centred on it and the right side after it (.erkl-gl); the operations in one column behind the widest right
+// side (erklSpalte, once the box is laid out).
+// data-tex: the formula as LaTeX, for Solita - a deck puts it back as $...$ when she reads the slide (decks/deck.js)
+function erklGleichung(s) {
+    const [gl, op] = s.slice(2, -2).split(' | '), i = gl.indexOf('=');
+    const zeile = document.createElement('div');
+    zeile.className = 'erkl-gl';
+    zeile.dataset.tex = op ? gl + ' \\quad \\big|\\; ' + op : gl;
+    const links = document.createElement('span'), rechts = document.createElement('span');
+    links.className = 'erkl-l';
+    rechts.className = 'erkl-r';
+    const seite = document.createElement('span'), setze = (el, tex) => {
+        try { katex.render('\\displaystyle ' + tex, el, { throwOnError: false }); } catch (_) { el.textContent = tex; }
+    };
+    seite.className = 'erkl-seite';
+    setze(links, formelAufrecht(i < 0 ? gl : gl.slice(0, i)));
+    setze(seite, i < 0 ? '' : '{}' + formelAufrecht(gl.slice(i)));    // {}: a space after the "=" as well as before
+    rechts.appendChild(seite);
+    if (op) {
+        const o = document.createElement('span');
+        o.className = 'erkl-op';
+        setze(o, '\\vert\\;\\; ' + formelAufrecht(op.replace(/^:/, '{:}\\,')));
+        rechts.appendChild(o);
+    }
+    zeile.append(links, rechts);
+    return zeile;
+}
+// the operations' column: every right side as wide as the widest of the box
+function erklSpalte(el) {
+    const seiten = [...el.querySelectorAll('.erkl-seite')];
+    seiten.forEach(s => { s.style.minWidth = ''; });
+    const breit = Math.max(0, ...seiten.map(s => s.getBoundingClientRect().width));
+    seiten.forEach(s => { s.style.minWidth = breit + 'px'; });
+}
+function erklaerungSetzen(el, text) {
+    el.textContent = '';
+    text.split('\n\n').forEach(absatz => {
+        const p = document.createElement('p');
+        let formel = null;
+        absatz.split(/(\$\$[^$]+\$\$|\$[^$]+\$)/).forEach(t => {
+            if (!t) return;
+            if (t.startsWith('$$')) {
+                // the first and the last equation of a block keep more room from the text ("zwischen den Texten und
+                // den Gleichungsblöcken noch ein bisschen mehr")
+                const z = erklGleichung(t), davor = p.lastChild;
+                if (!(davor && davor.classList && davor.classList.contains('erkl-gl'))) z.classList.add('erkl-anfang');
+                p.appendChild(z);
+                formel = null;
+                return;
+            }
+            const davor = p.lastChild;
+            if (t.trim() && davor && davor.classList && davor.classList.contains('erkl-gl')) davor.classList.add('erkl-ende');
+            if (!t.trim() && !formel) return;                 // blanks between two equations
+            if (t[0] === '$') {
+                formel = document.createElement('span');
+                formel.className = 'erkl-inline';            // never broken inside (js/formel-satz.css)
+                formel.dataset.tex = t.slice(1, -1);
+                try { katex.render(formelAufrecht(t.slice(1, -1)), formel, { throwOnError: false }); } catch (_) { formel.textContent = t; }
+                p.appendChild(formel);
+                return;
+            }
+            // a stop right after a formula goes into its last piece: the line may break inside the formula,
+            // never between it and its "." (Doc, 28.09.: ". auf nächster Zeile")
+            const zeichen = formel && t.match(/^[.,;:!?)]+/), stuecke = formel && formel.querySelectorAll('.base');
+            if (zeichen && stuecke.length) {
+                stuecke[stuecke.length - 1].appendChild(document.createTextNode(zeichen[0]));
+                t = t.slice(zeichen[0].length);
+            }
+            formel = null;
+            if (t) p.appendChild(document.createTextNode(t));
+        });
+        el.appendChild(p);
+    });
 }

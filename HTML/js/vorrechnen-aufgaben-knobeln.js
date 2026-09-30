@@ -313,6 +313,8 @@
     const buchstabe = z => z === 'A' ? '\\textrm{A}' : /\d/.test(z) ? '\\textup{' + z + '}' : '\\mathrm{' + z + '}';
     // The exponent takes no width (\mathrlap): the "10" stands centred over its letter, the power hangs out to the
     // right - centred as a whole, 10³ sat left of the letter (Doc, 28.09.: "sitzen nicht x-symmetrisch").
+    // decks/tafel.html rewrites exactly this "\overset{\color{#8a93a3}\scriptstyle ...}" for its slides (stellenSchraeg:
+    // written out and turned by 45 degrees, Doc 30.09.) - change the form here and there together.
     const stellen = (w, potenz) => [...w].map((z, i) => {
         const k = w.length - 1 - i;
         return '\\overset{\\color{#8a93a3}\\scriptstyle ' + (potenz ? '10^{\\mathrlap{' + k + '}}' : 10 ** k) + '}' +

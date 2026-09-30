@@ -681,87 +681,9 @@ function hutKnopf(zeigen, aktiv) {
     k.style.opacity = '0.35';
     k.title = 'Erklärung einblenden';
 }
-// every letter of a formula upright, as \mathrm (Doc, 28.09.: the letters blue - js/vorrechnen.css - "bitte nicht
-// kursiv"); commands (\cdot, \ge, \mathrm) and words in \text{...} stay as they are
-const aufrecht = tex => tex.replace(/\\text\{[^}]*\}|\\[a-zA-Z]+|[A-Za-z]/g, m => m.length > 1 ? m : '\\mathrm{' + m + '}');
-// Paragraphs by a blank line. $$equation | operation$$ is an equation set off, as in a LaTeX text, with what is done
-// to it next behind it as on the board's working, "| −A" (since 29.09.2026 the data come that way:
-// umformungenVorziehen, js/vorrechnen-aufgaben.js - Doc: "Auch in der EB!") (Doc, 28.09.: "dass diese Gleichungen so in der Zeile
-// im Text stehen ... ordentliche Gleichungen ... und natürlich LaTeX", "hinter die Gleichung immer die Operation");
-// $...$ stays in the sentence - a value, a letter, a term.
-// Every "=" of the box stands on its middle line, text between or not ("die Gleichheitszeichen immer in die Mitte
-// der Box ... auch über Text ... alle aligned"): a row of two halves, the left side flush right before the middle,
-// "=" centred on it and the right side after it (js/vorrechnen.css, .erkl-gl); the operations in one column behind
-// the widest right side (erklSpalte, once the box is laid out).
-function erklGleichung(s) {
-    const [gl, op] = s.slice(2, -2).split(' | '), i = gl.indexOf('=');
-    const zeile = document.createElement('div');
-    zeile.className = 'erkl-gl';
-    const links = document.createElement('span'), rechts = document.createElement('span');
-    links.className = 'erkl-l';
-    rechts.className = 'erkl-r';
-    const seite = document.createElement('span'), setze = (el, tex) => {
-        try { katex.render('\\displaystyle ' + tex, el, { throwOnError: false }); } catch (_) { el.textContent = tex; }
-    };
-    seite.className = 'erkl-seite';
-    setze(links, aufrecht(i < 0 ? gl : gl.slice(0, i)));
-    setze(seite, i < 0 ? '' : '{}' + aufrecht(gl.slice(i)));    // {}: a space after the "=" as well as before
-    rechts.appendChild(seite);
-    if (op) {
-        const o = document.createElement('span');
-        o.className = 'erkl-op';
-        setze(o, '\\vert\\;\\; ' + aufrecht(op.replace(/^:/, '{:}\\,')));
-        rechts.appendChild(o);
-    }
-    zeile.append(links, rechts);
-    return zeile;
-}
-// the operations' column: every right side as wide as the widest of the box
-function erklSpalte(el) {
-    const seiten = [...el.querySelectorAll('.erkl-seite')];
-    seiten.forEach(s => { s.style.minWidth = ''; });
-    const breit = Math.max(0, ...seiten.map(s => s.getBoundingClientRect().width));
-    seiten.forEach(s => { s.style.minWidth = breit + 'px'; });
-}
-function erklaerungSetzen(el, text) {
-    el.textContent = '';
-    text.split('\n\n').forEach(absatz => {
-        const p = document.createElement('p');
-        let formel = null;
-        absatz.split(/(\$\$[^$]+\$\$|\$[^$]+\$)/).forEach(t => {
-            if (!t) return;
-            if (t.startsWith('$$')) {
-                // the first and the last equation of a block keep more room from the text ("zwischen den Texten und
-                // den Gleichungsblöcken noch ein bisschen mehr")
-                const z = erklGleichung(t), davor = p.lastChild;
-                if (!(davor && davor.classList && davor.classList.contains('erkl-gl'))) z.classList.add('erkl-anfang');
-                p.appendChild(z);
-                formel = null;
-                return;
-            }
-            const davor = p.lastChild;
-            if (t.trim() && davor && davor.classList && davor.classList.contains('erkl-gl')) davor.classList.add('erkl-ende');
-            if (!t.trim() && !formel) return;                 // blanks between two equations
-            if (t[0] === '$') {
-                formel = document.createElement('span');
-                formel.className = 'erkl-inline';            // never broken inside (js/vorrechnen.css)
-                try { katex.render(aufrecht(t.slice(1, -1)), formel, { throwOnError: false }); } catch (_) { formel.textContent = t; }
-                p.appendChild(formel);
-                return;
-            }
-            // a stop right after a formula goes into its last piece: the line may break inside the formula,
-            // never between it and its "." (Doc, 28.09.: ". auf nächster Zeile")
-            const zeichen = formel && t.match(/^[.,;:!?)]+/), stuecke = formel && formel.querySelectorAll('.base');
-            if (zeichen && stuecke.length) {
-                stuecke[stuecke.length - 1].appendChild(document.createTextNode(zeichen[0]));
-                t = t.slice(zeichen[0].length);
-            }
-            formel = null;
-            if (t) p.appendChild(document.createTextNode(t));
-        });
-        el.appendChild(p);
-    });
-}
+// The explanation's setting - erklaerungSetzen, erklGleichung, erklSpalte and the upright letters - lives in
+// js/formel-satz.js since 30.09.2026: the deck of the tasks sets its explanation slides with the same code
+// (decks/tafel.html). vorrechnen.html loads that file before the lab's own scripts.
 // The box scrolls when its text does not fit (Doc: "auch wenn ... wir am Ende scrollen müssen"): the canvas lies
 // over it and takes the pen, so the wheel over it moves it, and a slim bar under the × shows where one is and
 // takes a tap or a drag (the arrows ▲ ▼ that were there first: "passen nicht ... mach sie weg").

@@ -37,6 +37,7 @@
 <script defer src="../js/solita-listen.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="deck.css">
+<link rel="stylesheet" href="../js/formel-satz.css">
 <style>
 /* Only what this deck adds - the slides, the marks and Solita come from deck.css. */
 
@@ -51,6 +52,7 @@
    and the numbers (1), (2), ... grey (js/vorrechnen.css, .hell). A line is ONE element (.tf-zeile) holding its
    cells, so a click group is the whole line; it has no box of its own, its cells stand where the layout puts them. */
 .tf-rechnung{position:absolute;left:72px;top:146px;width:816px;height:350px;color:rgb(31, 64, 150)}
+.tf-rechnung:not(.tf-gelegt){visibility:hidden}     /* its cells still lie in the corner (a large deck lays out late) */
 .tf-zeile{position:absolute;left:0;top:0;width:0;height:0}
 .tf-zelle{position:absolute;left:0;top:0;white-space:nowrap;line-height:normal}
 .tf-sonde{display:inline-block;width:0;height:0}          /* a probe on the cell's baseline */
@@ -59,6 +61,13 @@
 .tf-text .katex{font-size:1.08em}
 .tf-op{color:#7a8294}
 .tf-nr{color:#5d6678}
+/* a Ziffernrätsel's place values over its letters (stellenSchraeg, below): small, rising at 45 degrees from the
+   middle of the letter - found by their grey, the only \color #8a93a3 in the tasks (KaTeX writes it as rgb()).
+   Turned about the box's bottom left corner, which stands over the letter's middle; the digits' baseline lies 0.3em
+   above that bottom, so turned it would start 0.21em left of and above the corner - the shift brings the first digit
+   over the letter's middle and down to the letter (measured, 30.09.2026) */
+.tf-rechnung .katex .rlap:has([style*="138, 147, 163"], [style*="#8a93a3"]) > .inner{font-size:.62em;
+  transform:translate(.44em,.45em) rotate(-45deg);transform-origin:0 100%}
 /* two columns: the thin line between them, in the colour of the line above vorrechnen's squares */
 .tf-trenner{position:absolute;width:0;border-left:1px solid rgba(31, 64, 150, .35);pointer-events:none}
 /* exponents at 60 % instead of KaTeX's 70 %, as in vorrechnen (js/vorrechnen.css) */
@@ -83,6 +92,17 @@
   html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-rechnung:not(:has(.tf-spalte2.on:not(.tf-fliegt))) > .tf-trenner{visibility:hidden}
 }
 @keyframes tf-smiley-ein{from{opacity:0}}
+
+/* A task's explanation on the slide after it (erklaerFolie): the room of the working, the deck's text face, the
+   formulas in the board's ink, what is done to an equation grey like "| -3x" beside the working. How an equation set
+   off is laid out (.erkl-gl) comes from ../js/formel-satz.css, shared with the lab's explanation box; the size is
+   set by legeErklaerung. */
+.tf-erkl{position:absolute;left:72px;top:146px;width:816px;height:350px;overflow:hidden;
+  font-size:24px;line-height:1.4;color:var(--body)}
+.tf-erkl p{margin:0 0 .55em}
+.tf-erkl p:last-child,.tf-erkl p.tf-vor{margin-bottom:0}   /* .tf-vor: cut for a slide's end, no new paragraph (erklTeilen) */
+.tf-erkl .katex{font-size:1.08em;color:rgb(31, 64, 150)}
+.tf-erkl .erkl-op .katex{color:#7a8294}
 
 /* a message instead of the board (no id, gone, offline) */
 .tf-meldung{position:absolute;left:72px;top:146px;width:816px;font-size:20px;line-height:1.4;color:var(--body)}
@@ -196,6 +216,18 @@
     return d;
   }
 
+  /* A Ziffernrätsel carries each letter's place value over it, grey (js/vorrechnen-aufgaben-knobeln.js, stellen:
+     "\overset{\color{#8a93a3}\scriptstyle 10^{\mathrlap{3}}}{...}", the easy ones "... 1000"). At a slide's size the
+     powers ran into each other (Doc, 30.09.2026: "die 10er-Potenzen ... Mist. Vorschlag: Winkel 45 Grad, 1, 10, 100
+     ... Dort" - the lab keeps its powers: "bitte mit Potenzen im Vorrechnen"): here every one is written out, 1, 10,
+     100, ..., and turned by 45 degrees from the middle of its letter (the CSS above finds it by its grey); it takes
+     no width (\mathrlap), so the letters stand as they do without it. A board sent from a lesson brings the lab's
+     form too, so it is rewritten here, not in the tasks' file. */
+  function stellenSchraeg(tex) {
+    return String(tex).replace(/\\overset\{\\color\{#8a93a3\}\\scriptstyle (?:10\^\{\\mathrlap\{(\d+)\}\}|(\d+))\}/g,
+      function (_, hoch, zahl) { return '\\overset{\\mathrlap{\\color{#8a93a3}' + (hoch !== undefined ? '1' + '0'.repeat(+hoch) : zahl) + '}}'; });
+  }
+
   /* One task, one slide. The task itself stands from the start; every line of the working is a click group, ONE
      element (data-tex: the whole line and what is done to it, for Solita - deck.js puts it back as $...$ when she
      reads the slide). The last line "x = ..." (x = what is solved for, no x on the right) is the result, underlined
@@ -235,7 +267,7 @@
     rechnung.className = 'tf-rechnung';
     const farbig = function (tex) { return hebeVariable(tex, a.nach, ROT); };
     const weg = a.rechenweg || [];
-    const texte = (a.latex ? [a.latex] : []).concat(weg);
+    const texte = (a.latex ? [stellenSchraeg(a.latex)] : []).concat(weg);
     const erste = a.latex ? 1 : 0;                // the task is no step - it stands from the start
     /* umformungen[k] made rechenweg[k] - it is written beside the line it is done to, the one before */
     const ops = a.umformungen || [];
@@ -282,6 +314,79 @@
     return sl;
   }
 
+  /* A task's explanation as a slide of its own, right after the task (Doc, 30.09.2026: "bei manchen Aufgaben ... eine
+     Erklärbox ... bitte jeweils in das Deck als Folie danach mit einbauen"): the text of the lab's explanation box
+     (ERKLAERUNGEN, js/vorrechnen-aufgaben*.js), set by the same code as there (erklaerungSetzen, js/formel-satz.js) -
+     paragraphs, formulas in the sentence, equations set off on one "=" column with what is done to them. It stands
+     whole, no click groups; einpassen gives it the size that fits the room (legeErklaerung). */
+  const ERKL_SCHRIFT = 24, ERKL_KLEINSTE = 18;    // px: the explanation's largest size, and the smallest a beamer still shows well
+  const ERKL_NOT = 11;                            // px: one paragraph alone that is longer than a slide - down to this
+  function erklaerFolie(a, k) {
+    const sl = document.createElement('section');
+    sl.className = 'slide content';
+    const titel = a.nr ? 'Aufgabe ' + a.nr : 'Rechnung ' + (k + 1);
+    /* .tf-seite: "1/3", when the explanation goes over several slides */
+    sl.innerHTML = '<h3>' + esc(titel) + '<span class="tf-dazu">' + (a.block ? esc(a.block) + ' · ' : '') + 'Erklärung<span class="tf-seite"></span></span></h3>' +
+      '<div class="rules"></div>';
+    const e = document.createElement('div');
+    e.className = 'tf-erkl';
+    erklaerungSetzen(e, a.erklaerung);
+    sl.appendChild(e);
+    sl.insertAdjacentHTML('beforeend', FOOT);
+    return sl;
+  }
+  /* The largest size at which the explanation fits its room, in height and in width (an equation set off never
+     breaks). One that is too long even at the smallest size goes on on further slides, paragraph by paragraph, each
+     slide filled as far as it goes, the heading counting "1/3" (the puzzles' explanations run to a page and more - at
+     one slide's size nobody could read them). Called while every slide is laid out (einpassen). */
+  function erklPasst(e) { return e.scrollHeight <= e.clientHeight + 1 && e.scrollWidth <= e.clientWidth + 1; }
+  function erklGroesse(e, s) {
+    e.style.fontSize = s + 'px';
+    erklSpalte(e);                                // the operations in one column, at this size
+    return erklPasst(e);
+  }
+  /* A paragraph may run "text, equations, text, equations, ...": it is cut after every run of equations, so a slide
+     can end there - a sentence stays with the equations it leads to. The parts keep the distance they had (.tf-vor). */
+  function erklTeilen(e) {
+    const gl = function (n) { return !!n && n.nodeType === 1 && n.classList.contains('erkl-gl'); };
+    [...e.children].forEach(function (p) {
+      const knoten = [...p.childNodes];
+      const schnitt = knoten.map(function (n, i) { return i > 0 && gl(knoten[i - 1]) && !gl(n); });
+      let ziel = p;
+      knoten.forEach(function (n, i) {
+        if (schnitt[i]) {
+          const neu = document.createElement('p');
+          ziel.classList.add('tf-vor');
+          ziel.parentNode.insertBefore(neu, ziel.nextSibling);
+          ziel = neu;
+        }
+        if (ziel !== p) ziel.appendChild(n);
+      });
+    });
+  }
+  function legeErklaerung(e) {
+    for (let s = ERKL_SCHRIFT; s >= ERKL_KLEINSTE; s--) if (erklGroesse(e, s)) return;
+    erklTeilen(e);
+    const seiten = [e];
+    for (let seite = e; !erklPasst(seite) && seite.children.length > 1;) {
+      const sl = seite.parentNode, neu = sl.cloneNode(true), weiter = neu.querySelector('.tf-erkl');
+      weiter.textContent = '';
+      neu._kurz = sl._kurz;                       // Solita's overview: the same line
+      neu.style.display = 'block';                // laid out like the others, to be measured
+      sl.parentNode.insertBefore(neu, sl.nextSibling);
+      while (!erklPasst(seite) && seite.children.length > 1) weiter.insertBefore(seite.lastChild, weiter.firstChild);
+      erklSpalte(seite);
+      erklGroesse(weiter, ERKL_KLEINSTE);
+      seiten.push(weiter);
+      seite = weiter;
+    }
+    seiten.forEach(function (seite, i) {
+      /* a single paragraph longer than a slide: that slide alone in smaller type */
+      for (let s = ERKL_KLEINSTE - 1; s >= ERKL_NOT && !erklPasst(seite); s--) erklGroesse(seite, s);
+      if (seiten.length > 1) seite.parentNode.querySelector('.tf-seite').textContent = ' ' + (i + 1) + '/' + seiten.length;
+    });
+  }
+
   function titelFolie(kicker, h1, sub) {
     const sl = document.createElement('section');
     sl.className = 'slide title';
@@ -300,25 +405,85 @@
 
   /* The working fills the room under the heading: measured at the largest size, then set to the size that fits.
      A slide is display:none until it is on - and a hidden formula loads no font, so all slides are laid out
-     (invisibly) first, KaTeX's fonts come in, and only then is anything measured. */
-  async function einpassen() {
-    const alle = [...deckEl.querySelectorAll('.slide')];
-    deckEl.style.visibility = 'hidden';
-    alle.forEach(function (sl) { sl.style.display = 'block'; });
-    deckEl.querySelectorAll('.tf-rechnung').forEach(function (r) { r.style.fontSize = SCHRIFT + 'px'; });
-    void deckEl.offsetHeight;                     // lay out now, so the fonts are asked for
-    try { await document.fonts.ready; } catch (e) { }
+     (invisibly) first, KaTeX's fonts come in, and only then is anything measured.
+     A large deck - every task of the lab, 751 of them since 30.09.2026 - took 8 s that way, 10 ms a working (Doc:
+     "das lädt sehr langsam"): from FAUL_AB slides on only the explanations are laid out at the start (they may add
+     slides, and deck.js takes the slides as they are when it runs), a working when its slide comes on (legeNah, after
+     every paint) and the rest behind the scenes, nearest first (legeRest). Until then a working does not show
+     (.tf-gelegt, the CSS above). The presenter view copies its slides while it paints - it keeps the whole layout. */
+  const FAUL_AB = 60;
+  let faul = false;
+  /* one slide's working; the browser must have laid the slide out (display: block) */
+  function legeFolie(sl) {
+    const r = sl.querySelector('.tf-rechnung');
+    if (!r || r._gelegt) return;
+    r._gelegt = true;
     /* a task with its setting in a sentence: the working's room starts under the text */
-    deckEl.querySelectorAll('.tf-text').forEach(function (p) {
-      const r = p.parentNode.querySelector('.tf-rechnung');
-      if (!r) return;
+    const p = sl.querySelector('.tf-text');
+    if (p) {
       const oben = p.offsetTop + p.offsetHeight + 14, unten = r.offsetTop + r.offsetHeight;
       r.style.top = oben + 'px';
       r.style.height = Math.max(120, unten - oben) + 'px';
-    });
-    deckEl.querySelectorAll('.tf-rechnung').forEach(legeRechnung);
-    alle.forEach(function (sl) { sl.style.display = ''; });
+    }
+    legeRechnung(r);
+    r.classList.add('tf-gelegt');
+  }
+  /* a slide that is not on: laid out unseen for the moment it is measured */
+  function legeVersteckt(sl) {
+    const r = sl.querySelector('.tf-rechnung');
+    if (!r || r._gelegt) return;
+    if (sl.classList.contains('on')) { legeFolie(sl); return; }
+    sl.style.visibility = 'hidden'; sl.style.display = 'block';
+    legeFolie(sl);
+    sl.style.display = sl.style.visibility = '';
+  }
+  /* every font of KaTeX, so a working measured later finds its glyphs (a root, a brace, a bold letter come from
+     files of their own, and only a formula on screen asks for them) */
+  async function katexSchriften() {
+    const lade = [];
+    try { document.fonts.forEach(function (f) { if (/KaTeX/.test(f.family)) lade.push(f.load().catch(function () { })); }); } catch (e) { }
+    await Promise.all(lade);
+  }
+  async function einpassen() {
+    const alle = [...deckEl.querySelectorAll('.slide')];
+    faul = alle.length > FAUL_AB && !/[?&]presenter(&|=|$)/.test(location.search);
+    deckEl.style.visibility = 'hidden';
+    deckEl.querySelectorAll('.tf-rechnung').forEach(function (r) { r.style.fontSize = SCHRIFT + 'px'; });
+    if (faul) await katexSchriften();
+    (faul ? alle.filter(function (sl) { return sl.querySelector('.tf-erkl'); }) : alle).forEach(function (sl) { sl.style.display = 'block'; });
+    void deckEl.offsetHeight;                     // lay out now, so the fonts are asked for
+    try { await document.fonts.ready; } catch (e) { }
+    if (!faul) alle.forEach(legeFolie);
+    deckEl.querySelectorAll('.tf-erkl').forEach(legeErklaerung);
+    deckEl.querySelectorAll('.slide').forEach(function (sl) { sl.style.display = ''; });   // a long explanation added slides
     deckEl.style.visibility = '';
+  }
+  /* after every paint of a large deck: the slide on screen, and the ones around it - the next click finds them ready */
+  function legeNah() {
+    if (!faul) return;
+    const alle = [...deckEl.querySelectorAll(':scope > .slide')], i = alle.findIndex(function (sl) { return sl.classList.contains('on'); });
+    if (i < 0) return;
+    legeFolie(alle[i]);
+    [i + 1, i + 2, i - 1].forEach(function (j) { if (alle[j]) legeVersteckt(alle[j]); });
+  }
+  /* the rest of a large deck, from the slide on screen outwards, a few at a time between the frames. The overview
+     copies every slide when it first opens (deck.js): copies taken before their working was laid out get it now. */
+  function legeRest() {
+    const alle = [...deckEl.querySelectorAll(':scope > .slide')];
+    const hier = Math.max(0, alle.findIndex(function (sl) { return sl.classList.contains('on'); }));
+    const offen = alle.map(function (sl, i) { return { sl: sl, fern: Math.abs(i - hier) }; })
+      .filter(function (x) { const r = x.sl.querySelector('.tf-rechnung'); return r && !r._gelegt; })
+      .sort(function (a, b) { return a.fern - b.fern; });
+    let i = 0;
+    (function weiter() {
+      const t0 = performance.now();
+      while (i < offen.length && performance.now() - t0 < 24) legeVersteckt(offen[i++].sl);
+      if (i < offen.length) { setTimeout(weiter, 30); return; }
+      document.querySelectorAll('.ov-thumb > .slide').forEach(function (kopie, k) {
+        const alt = kopie.querySelector('.tf-rechnung:not(.tf-gelegt)'), neu = alle[k] && alle[k].querySelector('.tf-rechnung');
+        if (alt && neu) alt.replaceWith(neu.cloneNode(true));
+      });
+    })();
   }
 
   /* One working laid out as zeigeRechenweg lays it out (js/vorrechnen-rechenweg.js), in the room of .tf-rechnung, in
@@ -499,6 +664,7 @@
   }
   /* after every paint of deck.js: exactly one line more on the same slide - that one flies */
   function kommen() {
+    legeNah();                                    // a large deck: this slide's working is laid out now
     const sl = deckEl.querySelector(':scope > .slide.on');
     const an = sl ? sl.querySelectorAll('.tf-zeile.step.on') : [];
     deckEl.querySelectorAll('.tf-fliegt:not(.on)').forEach(gelandet);     // taken back while in the air
@@ -537,6 +703,14 @@
     } catch (e) { /* without the page: at least the levels */ }
     return ['../js/vorrechnen-aufgaben.js'];
   }
+  /* A task's explanation without its setting: aufgabenTexte (js/vorrechnen-aufgaben.js) puts the task's text in front
+     of it for the lab's box, and that text stands on the task's slide already - a task with nothing but its text has
+     no explanation slide. */
+  function erklaerungOhneText(schluessel) {
+    const e = (typeof ERKLAERUNGEN !== 'undefined' && ERKLAERUNGEN[schluessel]) || '';
+    const t = (typeof TEXTE !== 'undefined' && TEXTE[schluessel]) || '';
+    return (t && e.indexOf(t) === 0 ? e.slice(t.length) : e).trim() || null;
+  }
   async function ladeSammlung() {
     for (const datei of await aufgabenDateien()) await ladeSkript(datei);
     const kw = params.get('kw');
@@ -551,6 +725,7 @@
         if (woche && woche.indexOf(b) < 0) return null;
         return { schluessel: t[0], nr: i - b.ab + 1, block: b.titel, kopf: b.kopf || null, latex: t[1], nach: t[2], ende: l.length ? l[l.length - 1][0] : null,
           text: (typeof TEXTE !== 'undefined' && TEXTE[t[0]]) || null,
+          erklaerung: erklaerungOhneText(t[0]),
           rechenweg: l.map(function (st) { return st[0]; }), umformungen: l.map(function (st) { return st[1]; }) };
       }).filter(Boolean)
     };
@@ -629,6 +804,7 @@
       spaet.forEach(function (fn) { try { fn.call(window, new Event('load')); } catch (e) { console.error(e); } });
       /* the lines come after every paint (deck.js's hooks, "painted"); the first paint was before this */
       if (typeof painted !== 'undefined') { painted.push(kommen); kommen(); }
+      if (faul) legeRest();
     };
     document.body.appendChild(s);
   }
@@ -647,9 +823,9 @@
 
   async function bauen() {
     if (document.readyState === 'loading') await new Promise(function (ok) { document.addEventListener('DOMContentLoaded', ok); });
-    const summary = {};
-    let n = 0;                                      // the slide being added - Solita's overview counts by it
-    const dazu = function (sl, zeile) { deckEl.appendChild(sl); summary[String(n++)] = zeile; };
+    /* Solita's overview counts by the slide's place in the deck: each slide keeps its line (_kurz), and the overview
+       is written once the deck is laid out - a long explanation grows by slides there (legeErklaerung) */
+    const dazu = function (sl, zeile) { sl._kurz = zeile; deckEl.appendChild(sl); };
     try {
       const zeile = await ladeZeile();
       const aufgaben = zeile.aufgaben || [];
@@ -682,11 +858,12 @@
         dazu(aufgabeFolie(a, k), (a.nr ? 'Aufgabe ' + a.nr : 'Rechnung ' + (k + 1)) + (a.block ? ' (' + a.block + ')' : '') +
           (a.nach ? ', umstellen nach ' + a.nach : '') + ': ' + (a.latex ? '$' + a.latex + '$' : '') +
           (weg.length ? ' - Ergebnis $' + weg[weg.length - 1] + '$' : ''));
+        if (a.erklaerung) dazu(erklaerFolie(a, k), 'Erklärung zu ' + (a.nr ? 'Aufgabe ' + a.nr : 'Rechnung ' + (k + 1)) +
+          (a.block ? ' (' + a.block + ')' : ''));
       });
     } catch (e) {
       dazu(meldungFolie(e.message), 'Meldung');
     }
-    document.getElementById('summary').textContent = JSON.stringify(summary);
     /* deck.js keeps the slide it was on per path - one path for every board here, so a board of its own
        must not open at the place of another one in the same tab ('deck-pos:' is deck.js's key) */
     try {
@@ -697,6 +874,9 @@
       }
     } catch (e) { }
     await einpassen();
+    const summary = {};
+    deckEl.querySelectorAll(':scope > .slide').forEach(function (sl, n) { summary[String(n)] = sl._kurz || ''; });
+    document.getElementById('summary').textContent = JSON.stringify(summary);
     deckStarten();
   }
 

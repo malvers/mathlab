@@ -1,0 +1,21 @@
+/* formel-satz.css - how a task's explanation is laid out, wherever js/formel-satz.js sets one (erklaerungSetzen):
+   the lab's explanation box (vorrechnen.html, #erklaerung) and the explanation slides of the tasks' deck
+   (decks/tafel.html, .tf-erkl). Only the layout the code relies on - face, size and colours are the page's. */
+
+/* an equation set off (erklGleichung, Doc 28.09.: "die Gleichheitszeichen immer in die Mitte der Box ... alle
+   aligned"): two halves, the "=" centred on the box's middle line, so every "=" of the box stands under the others,
+   text between or not (the middle of the box: its padding is even left and right). KaTeX's "=" is 0.778em wide
+   with a 0.278em space either side: the left side ends a space before its left half, the right half ("{}=")
+   starts a space and half an "=" before the middle. The operations follow the right side
+   in one column (erklSpalte sets every right side as wide as the widest) */
+.erkl-gl { display: grid; grid-template-columns: 1fr 1fr; align-items: baseline; margin: 0.15em 0; white-space: nowrap; }
+.erkl-anfang { margin-top: 0.75em; }
+.erkl-ende { margin-bottom: 0.75em; }
+.erkl-l { text-align: right; }
+.erkl-l > .katex { margin-right: 0.667em; }
+.erkl-seite { display: inline-block; }
+.erkl-seite > .katex { margin-left: -0.667em; }   /* {}=: the space before it, then half the "=" */
+.erkl-op { margin-left: 1.2em; }
+/* a formula in the sentence is short (a value, a term): it goes to the next line whole, never "H =" here and
+   "5" there (Doc, 28.09.: "dass nicht irgendwie eine Gleichung auseinandergerissen wird") */
+.erkl-inline { white-space: nowrap; }

@@ -307,23 +307,8 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
 #erklaerung p { margin: 0 0 0.45em; }
 #erklaerung p:last-child { margin-bottom: 0; }
 #erklaerung .katex { font-size: 1.1em; }
-/* an equation set off (erklGleichung, Doc 28.09.: "die Gleichheitszeichen immer in die Mitte der Box ... alle
-   aligned"): two halves, the "=" centred on the box's middle line, so every "=" of the box stands under the others,
-   text between or not (the middle of the box: its padding is even left and right). KaTeX's "=" is 0.778em wide
-   with a 0.278em space either side: the left side ends a space before its left half, the right half ("{}=")
-   starts a space and half an "=" before the middle. The operations follow the right side
-   in one column (erklSpalte sets every right side as wide as the widest) */
-#erklaerung .erkl-gl { display: grid; grid-template-columns: 1fr 1fr; align-items: baseline; margin: 0.15em 0; white-space: nowrap; }
-#erklaerung .erkl-anfang { margin-top: 0.75em; }
-#erklaerung .erkl-ende { margin-bottom: 0.75em; }
-#erklaerung .erkl-l { text-align: right; }
-#erklaerung .erkl-l > .katex { margin-right: 0.667em; }
-#erklaerung .erkl-seite { display: inline-block; }
-#erklaerung .erkl-seite > .katex { margin-left: -0.667em; }   /* {}=: the space before it, then half the "=" */
-#erklaerung .erkl-op { margin-left: 1.2em; }
-/* a formula in the sentence is short (a value, a term): it goes to the next line whole, never "H =" here and
-   "5" there (Doc, 28.09.: "dass nicht irgendwie eine Gleichung auseinandergerissen wird") */
-#erklaerung .erkl-inline { white-space: nowrap; }
+/* how an equation set off and a formula in the sentence are laid out (.erkl-gl, .erkl-inline): js/formel-satz.css,
+   shared with the explanation slides of the tasks' deck (decks/tafel.html) since 30.09.2026 */
 #canvas-container.hell #erklaerung { color: #7a8294; border-color: rgba(122, 130, 148, 0.45); }
 /* its letters in the task's ink - royal blue on sand, the ink's white on the board (INK / TINTE,
    js/vorrechnen-zustand.js); digits and words stay grey (Doc, 28.09.: "die Buchstaben so blau wie oben" -
@@ -386,8 +371,9 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
    is one square of the paper (Doc, 26.09.) */
 #radierer { width: calc(46px * var(--knopf, 1)); padding: 0; transform: translateX(-50%); }
 #radierer svg { width: calc(24px * var(--knopf, 1)); height: calc(24px * var(--knopf, 1)); }
-/* the arrow bottom left: the grey next step goes up (vorschauHoch, Doc 27.09.) - shown by zeigeHinweis */
-#schritt-hoch { left: 12px; width: calc(46px * var(--knopf, 1)); padding: 0; }
+/* the arrow bottom left: the grey next step goes up (vorschauHoch, Doc 27.09.) - shown by zeigeHinweis; 8 px above
+   Solita's button, which stands in the corner (Doc, 30.09.: "tauschen bitte") */
+#schritt-hoch { left: 12px; bottom: calc(14px + 46px * var(--knopf, 1)); width: calc(46px * var(--knopf, 1)); padding: 0; }
 #schritt-hoch svg { width: calc(24px * var(--knopf, 1)); height: calc(24px * var(--knopf, 1)); }
 /* the steps' numbers (1), (2), ... beside the working, grey like the task's counter (Doc, 27.09.) - by the
    container, not #rechenweg-schicht: the glide at a task change and the history show copies without ids */
@@ -569,11 +555,12 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
    ink frame, pale at rest), her photo round in it. A tap opens only the question line beside it, on the button's middle,
    and her answers above it - "bitte nur die Zeile rechts neben Solita keine extrabox": no card, no heading, no chips, not
    the box's own little face (Solita or Doc via its right-click menu). The layer goes to the beamer: the class sees her */
-/* over the whole board; her button in the writing field's bottom left corner, 8 px above the arrow (#schritt-hoch:
-   bottom 6 px, 46 px scaled) - Doc, 30.09.: "doch da runter" (it stood above the line to the writing field) */
+/* over the whole board; her button in the writing field's bottom left corner, in the row of the eraser and the Cs
+   (bottom 6 px), the arrow 8 px above it (#schritt-hoch) - Doc, 30.09.: "doch da runter" (it stood above the line to
+   the writing field), then "tauschen bitte" (she stood above the arrow) */
 #solita-schicht { position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 7; pointer-events: none; }
 #solita-schicht .vs-knopf {
-    position: absolute; left: 12px; bottom: calc(14px + 46px * var(--knopf, 1)); width: calc(46px * var(--knopf, 1)); height: calc(46px * var(--knopf, 1));
+    position: absolute; left: 12px; bottom: 6px; width: calc(46px * var(--knopf, 1)); height: calc(46px * var(--knopf, 1));
     display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 0; border-radius: 8px;
     cursor: pointer; pointer-events: auto; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
     border: 1px solid rgba(0, 210, 255, 0.85); background: linear-gradient(rgba(0, 210, 255, 0.14), rgba(0, 210, 255, 0.14)) #07162f;
@@ -590,13 +577,16 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
     width: calc(46px * var(--knopf, 1) - 6px); height: calc(46px * var(--knopf, 1) - 6px); border-radius: 50%; object-fit: cover; display: block;
 }
 /* the line: 8 px right of the button, its 36 px on the button's middle - the button scales with --knopf (a narrow
-   margin, the Lenovo: 0.73), so the line follows its real size ("zeile bitte y aligned", 30.09.); as wide as the
-   writing field allows up to 12 px before the notes' column (--vs-platz: its left edge, solitaEcke); the bubble above
-   it may grow up to 30 px under the board's top */
+   margin, the Lenovo: 0.73), so the line follows its real size ("zeile bitte y aligned", 30.09.). It stands in the
+   eraser's row now and ends 8 px before it (Doc, 30.09.: "nicht so breit" - 560 px lay over the eraser): the eraser's
+   middle is half of --vs-platz (the notes' column's left edge, solitaEcke; #radierer). On a field too narrow for that
+   it keeps 240 px, or what the field allows up to 12 px before the notes' column. The bubble above it may grow up to
+   30 px under the board's top */
 #solita-schicht .vs-karte {
-    position: absolute; left: calc(20px + 46px * var(--knopf, 1)); bottom: calc(14px + 46px * var(--knopf, 1) + (46px * var(--knopf, 1) - 36px) / 2);
-    width: min(560px, calc(var(--vs-platz, 100%) - 32px - 46px * var(--knopf, 1)));
-    max-height: calc(100% - 30px - (14px + 46px * var(--knopf, 1) + (46px * var(--knopf, 1) - 36px) / 2));
+    position: absolute; left: calc(20px + 46px * var(--knopf, 1)); bottom: calc(6px + (46px * var(--knopf, 1) - 36px) / 2);
+    width: min(560px, max(calc(var(--vs-platz, 100%) / 2 - 28px - 69px * var(--knopf, 1)),
+        min(240px, calc(var(--vs-platz, 100%) - 32px - 46px * var(--knopf, 1)))));
+    max-height: calc(100% - 30px - (6px + (46px * var(--knopf, 1) - 36px) / 2));
     display: none; flex-direction: column; pointer-events: auto; text-align: left;
     font-family: var(--lab-schrift); font-variant-numeric: lining-nums; color: #eaf0f7;
 }
@@ -607,8 +597,12 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
 #solita-schicht .vs-sf { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 #solita-schicht .vs-sf .sf { flex: 1 1 auto; min-height: 0; }
 /* the bubble's height is capped, as in the decks (their line: 200 px at 14 px, here about as many lines of the board's
-   larger type - Doc, 30.09.: "boxhöhe begrenzen wie in Decks schrift ausfaden"); a cut line fades (solita-frage.css) */
-#solita-schicht .sf-huelle { flex: 1 1 auto; max-height: 15rem; box-sizing: border-box; }
+   larger type - Doc, 30.09.: "boxhöhe begrenzen wie in Decks schrift ausfaden"); a cut line fades (solita-frage.css).
+   Where the writing field is higher than that, a long answer reaches up to 6 px under the line that parts it from the
+   working (Doc, 30.09.: "noch ein bisschen höher ... dass sie bis an den Trennstrich da rangeht"): --vs-feld is the
+   field's height (solitaEcke); under the bubble stand the box's gap and the line (9 + 36 px) and the card's bottom */
+#solita-schicht .sf-huelle { flex: 1 1 auto; box-sizing: border-box;
+    max-height: max(15rem, calc(var(--vs-feld, 0px) - 57px - (46px * var(--knopf, 1) - 36px) / 2)); }
 #solita-schicht .sf-out { max-height: none; min-height: 0; flex: 1 1 auto; }
 #solita-schicht :is(.sf-face, .sf-chips) { display: none; }
 /* the one bubble (solita-frage.css .sf-blase) stands on the board: opaque, so rows and lines behind it do not show through */
@@ -628,3 +622,11 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
 #canvas-container.hell #solita-schicht .sf-row button:hover { background: #e6dcc2; color: rgb(31, 64, 150); }
 #canvas-container.hell #solita-schicht .sf-out { scrollbar-color: rgba(31, 64, 150, 0.4) transparent; }
 #canvas-container.hell #solita-schicht .sf-out::-webkit-scrollbar-thumb { background: rgba(31, 64, 150, 0.4); }
+/* the class's view (the beamer): bottom centre of the board, only the field and her answers, one as wide as the other -
+   no picture, no mic, no arrow (Doc, 30.09.: "in der Zuschaueransicht ... unten zentral in der Mitte", "brauchen wir
+   eigentlich nur die Box und die Antwort", "gleich breit"). As wide and as high as on mission control (--knopf comes
+   along, anzeigeEmpfang), so the text breaks alike and the part Doc scrolled to is the same. The layer arrives without
+   its class: her button's aria-expanded says whether the line is open */
+body.anzeige #solita-schicht .vs-knopf, body.anzeige #solita-schicht .sf-row button { display: none; }
+body.anzeige #solita-schicht .vs-karte { left: 0; right: 0; margin: 0 auto; pointer-events: none; }
+body.anzeige #solita-schicht:has(.vs-knopf[aria-expanded="true"]) .vs-karte { display: flex; }
