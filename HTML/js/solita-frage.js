@@ -43,6 +43,9 @@
         stop: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1.5" fill="currentColor"/></svg>',
         an: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
         aus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 5 6"/><path d="m21 9-5 6"/></svg>',
+        // Lucide "eye" and "eye-off" (ISC)
+        auge: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>',
+        augeZu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>',
     };
 
     // Word spans, formulas as words, the voice's text and the karaoke: js/solita-karaoke.js, shared with the decks
@@ -57,9 +60,10 @@
 
     function pwd() { try { return localStorage.getItem('dev_access') || ''; } catch (e) { return ''; } }
     // A password as it comes from the clipboard: without the invisible passengers a copy brings along - line breaks,
-    // no-break spaces, zero-width and direction marks - and without spaces at either end
+    // no-break spaces, zero-width and direction marks - and without spaces at either end; a letter with an accent in
+    // its one-character form (a copy off a Mac can carry "ä" as "a" + dots, which looks the same and is not)
     function sauber(t) {
-        return String(t || '').replace(/[\u00AD\u200B-\u200F\u2028-\u202E\u2060-\u2064\uFEFF\r\n\t]/g, '')
+        return String(t || '').normalize('NFC').replace(/[\u00AD\u200B-\u200F\u2028-\u202E\u2060-\u2064\uFEFF\r\n\t]/g, '')
             .replace(/^[\s\u00A0]+|[\s\u00A0]+$/g, '');
     }
     function lies(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
@@ -121,6 +125,7 @@
             '  <img class="sf-face" src="' + SOLITA_PIC + '" alt="Solita">' +
             '  <label class="sf-vh" for="sf-in-' + nr + '">Deine Frage an Solita</label>' +
             '  <input class="sf-in" id="sf-in-' + nr + '" type="text" autocomplete="off">' +
+            '  <button class="sf-eye" type="button" hidden title="Passwort zeigen" aria-label="Passwort zeigen" aria-pressed="false">' + ICON.auge + '</button>' +
             '  <button class="sf-mic" type="button" title="Frage sprechen" aria-label="Frage sprechen">' + ICON.mic + '</button>' +
             '  <button class="sf-stop" type="button" hidden title="Stimme anhalten" aria-label="Stimme anhalten">' + ICON.stop + '</button>' +
             '  <button class="sf-send" type="button" title="Frage senden" aria-label="Frage senden">' + ICON.send + '</button>' +
@@ -133,6 +138,7 @@
         let input = root.querySelector('.sf-in');
         const sendBtn = root.querySelector('.sf-send');
         const micBtn = root.querySelector('.sf-mic');
+        const eyeBtn = root.querySelector('.sf-eye');
         const stopBtn = root.querySelector('.sf-stop');
         const face = root.querySelector('.sf-face');
         const note = root.querySelector('.sf-note');
@@ -186,28 +192,61 @@
             // (clip)"): the pasted text REPLACES the field - Chrome may have filled in another saved password for this
             // address before, and the paste only hung itself onto it - is cleaned and checked at once.
             input.addEventListener('paste', function (e) {
-                if (input.type !== 'password') return;
+                if (!pw) return;
                 const t = e.clipboardData && e.clipboardData.getData('text');
                 if (t == null) return;
                 e.preventDefault();
-                input.value = sauber(t);
+                input.value = eigen = sauber(t);
                 submit();
             });
+            // What the user did not put into the password field himself goes with his first key: on docalvers.de
+            // Chrome fills in the password it saved for the plans' login, unasked and as dots, and the typed one
+            // only hung itself onto it (Doc, 30.09.2026, the HP: "geht das pwd nicht ... ich werde wahnsinnig").
+            // Chrome's filling comes without a beforeinput, so only real typing counts as the user's own.
+            input.addEventListener('beforeinput', function (e) {
+                if (!pw || e.inputType === 'insertLineBreak') return;
+                if (input.value !== eigen) input.value = '';
+                tippt = true;
+            });
+            input.addEventListener('input', function () { if (pw && tippt) { eigen = input.value; tippt = false; } });
         }
+        // pw: the field asks for the password - a flag, not the field's type, which the eye switches to text;
+        // eigen: what the user typed or pasted there himself
+        let pw = false, eigen = '', tippt = false;
         bindInput();
+        // The eye (Doc, 30.09.2026: "ja Auge"): the password as text, to SEE what is in the field - dots hide a wrong
+        // clipboard, a filled-in password and a keyboard layout alike. Closed again with every new request for it;
+        // the beamer's mirror carries no field content (it copies the markup), so the class never sees it.
+        function auge(offen) {
+            input.type = offen ? 'text' : 'password';
+            eyeBtn.innerHTML = offen ? ICON.augeZu : ICON.auge;
+            eyeBtn.title = offen ? 'Passwort verbergen' : 'Passwort zeigen';
+            eyeBtn.setAttribute('aria-label', eyeBtn.title);
+            eyeBtn.setAttribute('aria-pressed', String(offen));
+        }
+        eyeBtn.addEventListener('mousedown', function (e) { e.preventDefault(); });   // the field keeps the focus
+        eyeBtn.addEventListener('click', function () { if (pw) auge(input.type === 'password'); });
         function askPassword() {
-            input.type = 'password'; input.value = ''; input.placeholder = 'Passwort';
+            pw = true; eigen = '';
+            input.value = ''; input.placeholder = 'Passwort';
             input.setAttribute('autocomplete', 'current-password');
             input.setAttribute('aria-label', 'Passwort – wird auf diesem Gerät gemerkt');
+            // shown as text it must stay as typed: no spell check, no capital first letter, no correction
+            input.setAttribute('spellcheck', 'false');
+            input.setAttribute('autocapitalize', 'off');
+            input.setAttribute('autocorrect', 'off');
+            auge(false); eyeBtn.hidden = false;
             sendBtn.innerHTML = ICON.tick; sendBtn.setAttribute('aria-label', 'Passwort bestätigen');
             micBtn.hidden = true; chips.hidden = true;
         }
         function askQuestion() {
             // a field that once was type=password keeps Chrome's login list over it - a fresh one carries none
-            if (input.type === 'password') {
+            if (pw) {
                 const fresh = input.cloneNode(false);
+                ['spellcheck', 'autocapitalize', 'autocorrect'].forEach(function (a) { fresh.removeAttribute(a); });
                 input.replaceWith(fresh); input = fresh; bindInput();
             }
+            pw = false; eigen = ''; eyeBtn.hidden = true;
             input.type = 'text'; input.value = ''; hint();
             input.setAttribute('autocomplete', 'off');
             input.removeAttribute('aria-label');
@@ -219,7 +258,7 @@
         // (the decks' rule, Doc 23.09.2026)
         let pen = null;
         function hint() {
-            if (input.type === 'password') return;
+            if (pw) return;
             // with a heading the name already stands above the box - the field only says "…" (Doc, 29.09.2026:
             // "das steht ja drüber. Mach da drinnen nur Punkt, Punkt, Punkt")
             // three single periods, not the one-glyph '…' - only they take the letter-spacing
@@ -238,7 +277,7 @@
         sendBtn.addEventListener('click', submit);
 
         function submit() {
-            const v = input.type === 'password' ? sauber(input.value) : input.value.trim();
+            const v = pw ? sauber(input.value) : input.value.trim();
             if (!v || busy) return;
             if (ear && ear.active) ear.stop();
             if (!pwd()) {                                    // first use on this device: verify and remember
@@ -247,8 +286,16 @@
                     .then(function (r) {
                         busy = false; sendBtn.disabled = false;
                         out.querySelectorAll('.sf-err').forEach(function (e) { e.remove(); });
-                        // the length helps to see what arrived - the password itself is never shown
-                        if (!r.ok) { say('Passwort stimmt nicht (' + v.length + ' Zeichen angekommen).', 'sf-err'); input.value = ''; return; }
+                        // only a 401 is about the password - anything else is the server's trouble and says so
+                        if (!r.ok && r.status !== 401) { say('Der Server antwortet mit HTTP ' + r.status + ' – am Passwort liegt es nicht.', 'sf-err'); return; }
+                        // the length helps to see what arrived, and the field keeps it for the eye - marked, so the
+                        // next key replaces it; what the user did not type himself stays foreign (see beforeinput)
+                        if (!r.ok) {
+                            say('Passwort stimmt nicht (' + v.length + ' Zeichen angekommen) – das Auge zeigt, was im Feld steht.', 'sf-err');
+                            if (input.value === eigen) eigen = v;
+                            input.value = v; input.focus(); input.select();
+                            return;
+                        }
                         merke('dev_access', v);
                         askQuestion(); input.focus();
                     })
@@ -461,7 +508,7 @@
             face.title = 'Klick: zu ' + (VOICE === 'doc' ? 'Solita' : 'Doc') + ' wechseln';
             if (opt.ueberschrift) opt.ueberschrift.textContent = 'Frag ' + wer();
             root.querySelector('.sf-vh').textContent = 'Deine Frage an ' + wer();
-            if (input.type !== 'password') hint();
+            if (!pw) hint();
             if (gemeldet !== wer()) {
                 gemeldet = wer();
                 document.dispatchEvent(new CustomEvent('solita-wer', { detail: { name: gemeldet } }));
@@ -535,7 +582,7 @@
             // the PASSWORD field keeps the browser's own menu, to paste from the clipboard (Doc, 29.09.2026: "im Clip
             // steht das pwd ... geht aba ni"); on the question field it is Solita's menu, as in the decks ("wo ist das
             // Kontext pop aus dem Deck?") - Cmd+V pastes there
-            if (e.target === input && input.type === 'password') return;
+            if (e.target === input && pw) return;
             e.preventDefault();
             showWho();
             const sel = getSelection();
