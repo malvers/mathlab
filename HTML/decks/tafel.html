@@ -13,11 +13,11 @@
   the pill opens this page: ?id=<row id>. ?aufgaben shows every task of vorrechnen.html with its whole
   solution (js/vorrechnen-aufgaben.js), ?demo three of them, to look at the page.
 
-  The slides are built here from that row - a title, then one slide per task with its working lined
-  up at the "=" and the result underlined twice, the rule of vorrechnen.html. Every line of the working
-  is a click group, so the class can go through it step by step. The central deck.js does the rest:
-  turning, the step marks, the overview, and Solita, who reads the slide on screen with the formulas
-  put back as LaTeX (data-tex) and can explain the step the class is stuck on.
+  The slides are built here from that row - a title, then one slide per task with its working set as on
+  the board of vorrechnen.html (legeRechnung). Every line of the working is a click group and comes as it
+  comes there (kommen), so the class can go through it step by step. The central deck.js does the rest:
+  turning, the overview, and Solita, who reads the slide on screen with the formulas put back as LaTeX
+  (data-tex) and can explain the step the class is stuck on.
 
   deck.js reads the slides when it runs, so it is loaded only after they are built; hooks it hangs on
   "load" are called by hand if the page has finished loading by then.
@@ -31,6 +31,7 @@
 <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
 <link rel="stylesheet" href="../morpheus/vendor/katex/katex.min.css">
 <script src="../js/lade-skript.js"></script>
+<script src="../js/formel-satz.js"></script>
 <script defer src="../morpheus/vendor/katex/katex.min.js"></script>
 <script defer src="../js/solita-listen.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
@@ -43,41 +44,41 @@
 .slide h3 .tf-var{color:var(--red)}               /* the variable solved for, red as in vorrechnen */
 .slide h3 .tf-var .katex{font-size:1.35em}
 
-/* The working lined up at the "=", and the "=" in the middle of the slide (Doc, 27.09.2026: "das
-   Gleichheitszeichen doch in die Mitte ... so ist der größte Teil der Folie leer"): two equal outer
-   columns, the left side flush right, the right side flush left. Each line is ONE element across the three
-   columns (subgrid), so the step mark belongs to the whole line. No column gap: the air around the "=" is
-   set inside the formulas (\;), so the double line under the result runs through without a break. The font
-   size is set per slide so the working fills the body and never spills. */
-.tf-rechnung{position:absolute;left:72px;top:146px;width:816px;display:grid;grid-template-columns:1fr max-content 1fr;
-  row-gap:.5em;color:var(--ink)}
-.tf-zeile{grid-column:1/-1;display:grid;grid-template-columns:subgrid;align-items:baseline;position:relative}
-.tf-links{justify-self:end}
-.tf-gleich{justify-self:center}
-.tf-rechts{justify-self:start}
-.tf-ganz{grid-column:1/-1;justify-self:center}
-.tf-rechnung .katex{font-size:1em}
+/* The working as on the light board of vorrechnen.html (Doc, 30.09.2026: "die Optik in Tafel ist noch anders als
+   Vorrechnen. Bitte angleichen (zu VR) ... auch ist der Platz auf den Slides nicht so gut ausgenutzt"): the room
+   under the heading, every cell placed by legeRechnung (below) - ink royal blue, what was done to a row ("| -3x")
+   and the numbers (1), (2), ... grey (js/vorrechnen.css, .hell). A line is ONE element (.tf-zeile) holding its
+   cells, so a click group is the whole line; it has no box of its own, its cells stand where the layout puts them. */
+.tf-rechnung{position:absolute;left:72px;top:146px;width:816px;height:350px;color:rgb(31, 64, 150)}
+.tf-zeile{position:absolute;left:0;top:0;width:0;height:0}
+.tf-zelle{position:absolute;left:0;top:0;white-space:nowrap;line-height:normal}
+.tf-sonde{display:inline-block;width:0;height:0}          /* a probe on the cell's baseline */
+.tf-op{color:#7a8294}
+.tf-nr{color:#5d6678}
+/* two columns: the thin line between them, in the colour of the line above vorrechnen's squares */
+.tf-trenner{position:absolute;width:0;border-left:1px solid rgba(31, 64, 150, .35);pointer-events:none}
+/* exponents at 60 % instead of KaTeX's 70 %, as in vorrechnen (js/vorrechnen.css) */
+.tf-rechnung .katex .msupsub > .vlist-t:not(.vlist-t2) > .vlist-r > .vlist > span > .sizing.reset-size6.size3,
+.tf-rechnung .katex .msupsub > .vlist-t2 > .vlist-r > .vlist > span:nth-child(2) > .sizing.reset-size6.size3{font-size:.6em}
 
-/* What is done to a line to get the next one ("-3x", ":4"), in green beside it - one column for all
-   lines of the slide, right of the widest right side (--tf-op, measured) (Doc, 27.09.2026: "die
-   Anweisung pro Zeile, was zu machen ist"), with the bar in front: "| -3x". */
-.tf-op{position:absolute;left:calc(50% + var(--tf-op, 200px));top:50%;transform:translateY(-50%);
-  font-size:.8em;color:var(--green);white-space:nowrap}
-/* The step's number (1), (2), ... flush right at the end of the lines, grey and smaller - as vorrechnen.html
-   numbers its working (Doc, 27.09.2026: "wie das so in wissenschaftlichen Publikationen üblich ist ...
-   dahinter in Klammern", then "bei den anderen überall"). --tf-halb counts it in (einpassen). */
-.tf-nr{position:absolute;right:calc(50% - var(--tf-halb, 300px));top:50%;transform:translateY(-50%);
-  font-size:.7em;color:var(--muted);white-space:nowrap}
-
-/* The step mark on a line of the working: the triangle in front, a thin box with the same overhang on both
-   sides - both around the widest line of the slide, symmetric about the middle (--tf-halb: half its width,
-   measured when the slide is built), so every line of a task is marked at the same place. */
+/* The lines of the working come as on the board of vorrechnen.html (Doc, 30.09.2026: "die gelbe Box weg und die
+   Gleichungen wie in Vorrechnen kommen lassen"): a line is not there before its click, then it glides up from the
+   bottom left onto its place (kommen, below) and stands in ink - no triangle, no box, nothing dimmed. What was done
+   to a line ("| -5") comes with the line it leads to, once that has landed, never in advance; the result's "| 😊"
+   a second after its landing, fading in over a second. Only on a live slide: the overview, editing and paper show
+   the whole working. */
+.slide .tf-zeile.step{opacity:1;transition:none}
 @media screen{
-  html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-zeile.step.now::after{left:calc(50% - var(--tf-halb, 300px) - 24px)}
-  html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-zeile.step.now::before{content:"";position:absolute;
-    left:calc(50% - var(--tf-halb, 300px) - 34px);right:calc(50% - var(--tf-halb, 300px) - 34px);
-    top:-6px;bottom:-6px;border:1.5px solid var(--orange);pointer-events:none;animation:step-now .25s ease-out}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-zeile.step:not(.on){visibility:hidden}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-zeile.step.now::after{content:none}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-zeile:not(:has(+ .tf-zeile.on)) > .tf-op:not(.tf-smiley),
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-zeile:has(+ .tf-fliegt) > .tf-op,
+  #deck .tf-fliegt > .tf-nr, #deck .tf-fliegt > .tf-op{visibility:hidden}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-zeile.on:not(.tf-fliegt) > .tf-smiley{animation:tf-smiley-ein 1s ease 1s both}
+  /* the line between two columns comes with the first line of the second one */
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .tf-rechnung:not(:has(.tf-spalte2.on:not(.tf-fliegt))) > .tf-trenner{visibility:hidden}
 }
+@keyframes tf-smiley-ein{from{opacity:0}}
 
 /* a message instead of the board (no id, gone, offline) */
 .tf-meldung{position:absolute;left:72px;top:146px;width:816px;font-size:20px;line-height:1.4;color:var(--body)}
@@ -115,8 +116,9 @@
   const id = params.get('id') || '';
   const FOOT = '<p class="foot">Nicht verzagen, Doc Alvers fragen!</p><p class="pageno"></p>';
   const TAGE = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
-  // the room under the heading, in slide px - the width leaves the box's overhang free on both sides
-  const BODY_W = 740, BODY_H = 330, SCHRIFT = 36, KLEINSTE = 13;
+  // the working's largest and smallest size: px of the font around KaTeX (which sets itself 1.21 times that) - the
+  // room it fills is .tf-rechnung (Doc, 30.09.2026: "der Platz auf den Slides nicht so gut ausgenutzt", was 36 at 1.0)
+  const SCHRIFT = 52, KLEINSTE = 13;
 
   /* ?demo: three tasks of vorrechnen.html with their working, to look at the page without a board */
   const DEMO = {
@@ -135,11 +137,15 @@
     return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
   }
 
-  /* ---- the formulas (the same rules as the old svp/tafel.html) ---------------------- */
-  function setze(el, tex) {
-    try { katex.render('\\displaystyle ' + tex, el, { throwOnError: false }); }
-    catch (e) { el.textContent = tex; }
-  }
+  /* ---- the working, set as on the board of vorrechnen.html ------------------------------ */
+  /* The rules of zeigeRechenweg (js/vorrechnen-rechenweg.js) on its light board (Doc, 30.09.2026: "die Optik in Tafel
+     ist noch anders als Vorrechnen. Bitte angleichen (zu VR)"); formulas in display style with tight fractions, the
+     variable in colour and the smiley from js/formel-satz.js. */
+  const ROT = '#B02418';                  // the variable solved for, red as vorrechnen colours it on light ground
+  const KLAMMER = 0.85;                   // KaTeX's em is this share of a line (vorrechnen: rechenEm)
+  const UMFORMUNG_GROESSE = 0.8, UMFORMUNG_LUFT = 1.0;   // "| -3x": this share of the row's size, after this much air (em)
+  const NUMMER_GROESSE = 0.7, NUMMER_LUFT = 1.5;         // (1), (2), ...: the same
+  const UNTER_EM = 0.12;                  // the result's double underline: this far under the ink, its lines this far apart (em)
 
   /* The first "=" outside any braces and \left ... \right: "\frac{a}{b=c}" is no split. */
   function teileAmGleich(tex) {
@@ -162,63 +168,32 @@
 
   function norm(tex) { return String(tex || '').replace(/\\(?:left|right|displaystyle|[,;:! ])|\s|\{\}/g, ''); }
 
-  /* The variable solved for, red in every line (Doc, 27.09.2026: "7x rot und so weiter") - the rule of
-     hebeVariable in vorrechnen.html: an indexed variable (R_1, T_2) as a whole, a letter as a token of its
-     own, so the "a" of \frac stays ink. Red is Doc's red on light ground, as vorrechnen uses it there. */
-  const ROT = '#B02418';
-  function hebeVariable(latex, v) {
-    if (!v) return latex;
-    const farbig = '{\\textcolor{' + ROT + '}{' + v + '}}';     // a group of its own: 2^x, (...)^n
-    if (v.length > 1) return latex.split(v).join(farbig);
-    return latex.replace(/\\[a-zA-Z]+|./g, function (t) { return t === v ? farbig : t; });
+  /* A cell: the formula in display style with a probe on its baseline at the end (vorrechnen's zelle) - placed by
+     legeRechnung */
+  function zelle(el, tex, klasse) {
+    const d = document.createElement('div');
+    d.className = 'tf-zelle ' + klasse;
+    try { katex.render(alsDisplay(tex), d, { throwOnError: false }); } catch (e) { d.textContent = tex; }
+    const sonde = document.createElement('span');
+    sonde.className = 'tf-sonde';
+    d.appendChild(sonde);
+    el.appendChild(d);
+    return d;
   }
 
-  /* One line of the working as one element: data-tex carries the whole line and what is done to it for
-     Solita (deck.js puts it back as $...$ when she reads the slide), the cells show it lined up at the "=". */
-  function zeileBauen(tex, ergebnis, op, nach, nr) {
-    const zeile = document.createElement('div');
-    zeile.className = 'tf-zeile';
-    zeile.dataset.tex = op ? tex + ' \\quad \\big|\\; ' + op : tex;
-    /* the step's number - Solita does not read it: the line is read as its data-tex */
-    if (nr) {
-      const n = document.createElement('div');
-      n.className = 'tf-nr';
-      try { katex.render('(' + nr + ')', n, { throwOnError: false }); } catch (e) { n.textContent = '(' + nr + ')'; }
-      zeile.appendChild(n);
-    }
-    if (op) {
-      const u = document.createElement('div');
-      u.className = 'tf-op';
-      /* with the bar in front, as on paper (Doc, 27.09.2026: "bitte den senkrechten Strich machen");
-         ":5", not ": 5" - KaTeX sets a bare colon as a relation, with air after it */
-      const tex = '\\vert\\;\\; ' + op.replace(/^\s*:/, '{:}');
-      try { katex.render(tex, u, { throwOnError: false }); } catch (e) { u.textContent = op; }
-      zeile.appendChild(u);
-    }
-    const teile = teileAmGleich(tex);
-    if (!teile) {
-      const ganz = document.createElement('div');
-      ganz.className = 'tf-ganz';
-      setze(ganz, hebeVariable(tex, nach));
-      zeile.appendChild(ganz);
-      return zeile;
-    }
-    /* The result is underlined twice in the formula itself: each part carries the height and depth of
-       both sides (\vphantom), so the three lines lie at one height even when only one side has a fraction.
-       {=}: a plain sign, without the spacing of a relation - the air is the \; */
-    const beide = '\\vphantom{' + teile[0] + '}\\vphantom{' + teile[1] + '}';
-    const links = hebeVariable(teile[0], nach), rechts = hebeVariable(teile[1], nach);
-    [['tf-links', '{' + links + '}\\;'], ['tf-gleich', '{=}'], ['tf-rechts', '\\;{' + rechts + '}']].forEach(function (t) {
-      const zelle = document.createElement('div');
-      zelle.className = t[0];
-      setze(zelle, ergebnis ? '\\underline{\\underline{' + t[1] + beide + '}}' : t[1]);
-      zeile.appendChild(zelle);
-    });
-    return zeile;
+  /* What was done to a line to get the next one, "| -3x" with the bar in front as on paper (Doc, 27.09.2026: "bitte
+     den senkrechten Strich machen") - ":5", not ": 5": KaTeX sets a bare colon as a relation. Without an operation:
+     the result's line, Apple's 😊 behind its bar. */
+  function opZelle(el, op) {
+    const d = zelle(el, '\\textstyle\\vert\\;\\; ' + (op ? op.replace(/^\s*:/, '{:}') : ''), op ? 'tf-op' : 'tf-op tf-smiley');
+    if (!op) d.insertBefore(smileyIcon(), d.lastChild);
+    return d;
   }
 
-  /* One task, one slide. The task itself stands from the start; every line of the working is a click group.
-     The last line "x = ..." (x = what is solved for, no x on the right) is the result, underlined twice. */
+  /* One task, one slide. The task itself stands from the start; every line of the working is a click group, ONE
+     element (data-tex: the whole line and what is done to it, for Solita - deck.js puts it back as $...$ when she
+     reads the slide). The last line "x = ..." (x = what is solved for, no x on the right) is the result, underlined
+     twice. The lines as laid out go with the working (_zeilen): their cells, and which element each one comes with. */
   function aufgabeFolie(a, k) {
     const sl = document.createElement('section');
     sl.className = 'slide content';
@@ -237,20 +212,48 @@
     }
     const rechnung = document.createElement('div');
     rechnung.className = 'tf-rechnung';
-    const zeilen = (a.latex ? [a.latex] : []).concat(a.rechenweg || []);
+    const farbig = function (tex) { return hebeVariable(tex, a.nach, ROT); };
+    const weg = a.rechenweg || [];
+    const texte = (a.latex ? [a.latex] : []).concat(weg);
     const erste = a.latex ? 1 : 0;                // the task is no step - it stands from the start
     /* umformungen[k] made rechenweg[k] - it is written beside the line it is done to, the one before */
     const ops = a.umformungen || [];
-    zeilen.forEach(function (tex, z) {
-      const letzte = z === zeilen.length - 1 && z > 0;
+    /* Doc, 30.09.2026: "bring die rechte Formel (immer) hoch" - a task without "=" (a term) whose first step starts
+       with "=": the step stands beside the task on its line, the next ones under it on the same "=" column; that
+       line's operation and number are the step's (the task's own gives way), as in vorrechnen */
+    const neben = !!a.latex && !teileAmGleich(a.latex) && weg.length > 0 &&
+      (function (t) { return !!t && norm(t[0]) === ''; })(teileAmGleich(weg[0]));
+    const zeilen = [];
+    texte.forEach(function (tex, z) {
+      const schritt = z - erste;                  // -1: the task
+      const op = ops[schritt + 1] || null;        // what is done to this line to get the next one
+      const el = document.createElement('div');
+      el.className = 'tf-zeile';
+      el.dataset.tex = op ? tex + ' \\quad \\big|\\; ' + op : tex;
+      if (schritt >= 0) { el.classList.add('step'); el.dataset.g = schritt; }
+      rechnung.appendChild(el);
+      const letzte = z === texte.length - 1 && z > 0;
       const teile = teileAmGleich(tex);
       /* the right side without its commands: the "a" in \frac is no variable */
       const ergebnis = letzte && (a.nach === '' ? !!a.ende && norm(tex) === norm(a.ende) :     // a term: its solution's last step
-        a.nach && teile && norm(teile[0]) === a.nach && norm(teile[1]).replace(/\\[a-zA-Z]+/g, '').indexOf(a.nach) < 0);
-      const zeile = zeileBauen(tex, ergebnis, ops[z + 1 - erste] || null, a.nach, z >= erste ? z - erste + 1 : null);
-      if (z >= erste) { zeile.classList.add('step'); zeile.dataset.g = z - erste; }
-      rechnung.appendChild(zeile);
+        !!a.nach && !!teile && norm(teile[0]) === a.nach && norm(teile[1]).replace(/\\[a-zA-Z]+/g, '').indexOf(a.nach) < 0);
+      const rechts = teile ? zelle(el, '{}=' + farbig(teile[1]), 'tf-rechts') : null;   // "{}=": the "=" with its air
+      if (schritt === 0 && neben) {
+        Object.assign(zeilen[0], { el: el, rechts: rechts, schritt: 0, ergebnis: ergebnis, neben: true });
+        return;
+      }
+      const links = !teile ? zelle(el, farbig(tex), 'tf-links') : norm(teile[0]) ? zelle(el, farbig(teile[0]), 'tf-links') : null;
+      zeilen.push({ el: el, links: links, rechts: rechts, schritt: schritt, ergebnis: ergebnis, aufgabe: schritt < 0 });
     });
+    /* the step's number, and the operation that leads on (or the result's smiley), with the element the line comes
+       with - the number shows with its line, the operation with the next one (the CSS above) */
+    zeilen.forEach(function (z) {
+      if (z.schritt >= 0) z.nr = zelle(z.el, '(' + (z.schritt + 1) + ')', 'tf-nr');
+      const op = ops[z.schritt + 1];
+      if (z.ergebnis) z.op = opZelle(z.el, null);
+      else if (op) z.op = opZelle(z.el, op);
+    });
+    rechnung._zeilen = zeilen;
     sl.appendChild(rechnung);
     sl.insertAdjacentHTML('beforeend', FOOT);
     return sl;
@@ -272,7 +275,7 @@
     return sl;
   }
 
-  /* The working fills the room under the heading: measured at full size, then set to the size that fits.
+  /* The working fills the room under the heading: measured at the largest size, then set to the size that fits.
      A slide is display:none until it is on - and a hidden formula loads no font, so all slides are laid out
      (invisibly) first, KaTeX's fonts come in, and only then is anything measured. */
   async function einpassen() {
@@ -282,27 +285,195 @@
     deckEl.querySelectorAll('.tf-rechnung').forEach(function (r) { r.style.fontSize = SCHRIFT + 'px'; });
     void deckEl.offsetHeight;                     // lay out now, so the fonts are asked for
     try { await document.fonts.ready; } catch (e) { }
-    /* The "=" stands in the middle, so the wider half decides: the left side, or the right side with the
-       column of steps behind it. A line without "=" stands centred as a whole. All from the middle, in px. */
-    function breiten(r) {
-      const max = function (sel) { return Math.max(0, ...[...r.querySelectorAll(sel)].map(function (e) { return e.offsetWidth; })); };
-      const gleich = max('.tf-gleich') / 2, ganz = max('.tf-ganz') / 2, op = max('.tf-op');
-      const rechtsBis = Math.max(gleich + max('.tf-rechts'), ganz);
-      const luft = op ? 0.9 * parseFloat(r.style.fontSize) : 0;   // between the right side and its step
-      /* the numbers flush right behind it all, after 1.5 em of air (as on the board) */
-      const nr = max('.tf-nr'), nrLuft = nr ? 1.5 * parseFloat(r.style.fontSize) : 0;
-      const halb = Math.max(gleich + max('.tf-links'), ganz, rechtsBis + luft + op + nrLuft + nr);
-      return { halb: halb, op: rechtsBis + luft };
-    }
-    deckEl.querySelectorAll('.tf-rechnung').forEach(function (r) {
-      const f = Math.min(1, BODY_W / (2 * breiten(r).halb), BODY_H / r.offsetHeight);
-      r.style.fontSize = Math.max(KLEINSTE, Math.floor(SCHRIFT * f)) + 'px';
-      const b = breiten(r);
-      r.style.setProperty('--tf-halb', Math.ceil(b.halb) + 'px');
-      r.style.setProperty('--tf-op', Math.ceil(b.op) + 'px');
-    });
+    deckEl.querySelectorAll('.tf-rechnung').forEach(legeRechnung);
     alle.forEach(function (sl) { sl.style.display = ''; });
     deckEl.style.visibility = '';
+  }
+
+  /* One working laid out as zeigeRechenweg lays it out (js/vorrechnen-rechenweg.js), in the room of .tf-rechnung, in
+     slide px: every cell measured once at SCHRIFT (s = 1), everything else scales with s. The "=" column is centred
+     by the widest left and right sides with the column of operations and the numbers counted in; the lines go down
+     half a line apart, ink to ink (legenFrei). All lines take one size, as large as the room's width allows; a
+     working too tall for the room shrinks - or goes on in a second column, when that makes the writing clearly
+     larger: the task on top across the room, the steps down the left half as far as it goes, the rest down the
+     right half, each half with its own "=" column, a thin line between them, the two in the middle of the room
+     below the task. */
+  function legeRechnung(r) {
+    const zeilen = r._zeilen || [];
+    if (!zeilen.length) return;
+    const k = r.getBoundingClientRect().width / r.offsetWidth || 1;     // the stage's scale, if it has one yet
+    const W = r.offsetWidth, H = r.offsetHeight;
+    const katexEl = r.querySelector('.katex');
+    const E0 = katexEl ? parseFloat(getComputedStyle(katexEl).fontSize) : 1.21 * SCHRIFT;   // KaTeX's em at s = 1
+    /* width, where the baseline lies in the cell, and how far the ink reaches above and below it */
+    const mass = function (d) {
+      if (!d) return { w: 0, auf: 0, hoch: 0, tief: 0 };
+      const b = d.getBoundingClientRect(), y = d.lastChild.getBoundingClientRect().top;
+      const t = tinte(d, k) || { o: y, u: y };
+      return { w: b.width / k, auf: (y - b.top) / k, hoch: (y - t.o) / k, tief: (t.u - y) / k };
+    };
+    zeilen.forEach(function (z) { z.l = mass(z.links); z.r = mass(z.rechts); z.o = mass(z.op); z.n = mass(z.nr); });
+    const dicke = function (em) { return Math.max(1.5, 0.05 * em); };
+    const hoch = function (z, s) { return s * Math.max(z.l.hoch, z.r.hoch); };
+    /* the result's double underline takes its room below the ink */
+    const tief = function (z, s) { return s * Math.max(z.l.tief, z.r.tief) + (z.ergebnis ? 2 * UNTER_EM * s * E0 + dicke(s * E0) : 0); };
+    /* the lines idx at size s, going on under vor (or from the top of the room) */
+    const legen = function (s, idx, vor) {
+      const abstand = s * E0 / KLAMMER / 2;       // half a line
+      const lage = {};
+      idx.forEach(function (i) {
+        const z = zeilen[i];
+        const basis = vor ? vor.basis + vor.tief + abstand + hoch(z, s) : hoch(z, s);
+        vor = lage[i] = { basis: basis, tief: tief(z, s) };
+      });
+      return { lage: lage, vor: vor, ende: vor ? vor.basis + vor.tief : 0 };
+    };
+    /* the "=" column of the lines idx within [links, links + breite] */
+    const spalteIn = function (s, idx, links, breite) {
+      const max = function (f) { return Math.max(0, ...idx.map(function (i) { return f(zeilen[i]); })); };
+      const lm = max(function (z) { return s * z.l.w; }), rm = max(function (z) { return s * z.r.w; });
+      const ob = max(function (z) { return z.op ? s * (UMFORMUNG_LUFT * E0 + UMFORMUNG_GROESSE * z.o.w) : 0; });
+      const nb = max(function (z) { return z.nr ? s * (NUMMER_LUFT * E0 + NUMMER_GROESSE * z.n.w) : 0; });
+      return { rm: rm, ob: ob, nb: nb, breit: lm + rm + ob + nb, x: links + (breite - lm - rm - ob - nb) / 2 + lm };
+    };
+    const alle = zeilen.map(function (_, i) { return i; });
+    const kopf = zeilen[0].aufgabe ? [0] : [];
+    const schritte = alle.filter(function (i) { return kopf.indexOf(i) < 0; });
+    const MIN = KLEINSTE / SCHRIFT, HALB = W / 2;
+    const SPALT_RAND = 32;                        // air to the line between the columns and to the edge
+    const ZWEI_VORZUG = 1.1;                      // two columns only when they make the writing a tenth larger
+    let g = 1;
+    while (g > MIN && spalteIn(g, alle, 0, W).breit > W) g -= 0.02;
+    let t1 = g, einzeln = legen(t1, alle, null);
+    while (einzeln.ende > H && t1 - 0.02 >= MIN) { t1 -= 0.02; einzeln = legen(t1, alle, null); }
+    const zweiSpalten = function (s) {
+      const oben = legen(s, kopf, null);
+      let n = schritte.length - 1, l1 = legen(s, schritte.slice(0, n), oben.vor);
+      while (n > 1 && l1.ende > H) { n--; l1 = legen(s, schritte.slice(0, n), oben.vor); }
+      const l2 = legen(s, schritte.slice(n), oben.vor);
+      return { lage: Object.assign({}, oben.lage, l1.lage, l2.lage), ende: Math.max(oben.ende, l1.ende, l2.ende),
+        links: schritte.slice(0, n), rechts: schritte.slice(n) };
+    };
+    const passtHalb = function (s) { return spalteIn(s, schritte, 0, HALB).breit <= HALB - 2 * SPALT_RAND; };
+    let s = t1, gelegt = einzeln, zwei = null;
+    if (t1 < g && schritte.length >= 2) {
+      let t = g;
+      while (t > MIN && !passtHalb(t)) t -= 0.02;
+      if (passtHalb(t)) {
+        let versuch = zweiSpalten(t);
+        while (versuch.ende > H && t - 0.02 >= MIN) { t -= 0.02; versuch = zweiSpalten(t); }
+        if (versuch.ende <= H && t >= ZWEI_VORZUG * t1) { zwei = versuch; s = t; gelegt = versuch; }
+      }
+    }
+    const setze = function (idx, sp) { idx.forEach(function (i) { zeilen[i].sp = sp; }); };
+    if (zwei) {
+      /* the columns in the middle of the room left under the task */
+      let unten = -Infinity;
+      schritte.forEach(function (i) { unten = Math.max(unten, gelegt.lage[i].basis + gelegt.lage[i].tief); });
+      const schub = Math.max(0, (H - unten) / 2);
+      schritte.forEach(function (i) { gelegt.lage[i].basis += schub; });
+      setze(kopf, spalteIn(s, kopf, 0, W));
+      setze(zwei.links, spalteIn(s, zwei.links, 0, HALB));
+      setze(zwei.rechts, spalteIn(s, zwei.rechts, HALB, HALB));
+      zeilen[zwei.rechts[0]].el.classList.add('tf-spalte2');
+    } else setze(alle, spalteIn(s, alle, 0, W));
+    const px = function (v) { return v.toFixed(2) + 'px'; };
+    const em = s * E0;
+    zeilen.forEach(function (z, i) {
+      const sp = z.sp, basis = gelegt.lage[i].basis;
+      z.basis = basis;
+      if (z.links) { z.links.style.fontSize = px(s * SCHRIFT); z.links.style.left = px(sp.x - s * z.l.w); z.links.style.top = px(basis - s * z.l.auf); }
+      if (z.rechts) { z.rechts.style.fontSize = px(s * SCHRIFT); z.rechts.style.left = px(sp.x); z.rechts.style.top = px(basis - s * z.r.auf); }
+      if (z.op) {
+        const os = s * UMFORMUNG_GROESSE;
+        z.op.style.fontSize = px(os * SCHRIFT);
+        z.op.style.left = px(sp.x + sp.rm + UMFORMUNG_LUFT * em);
+        z.op.style.top = px(basis - os * z.o.auf);
+      }
+      if (z.nr) {
+        const ns = s * NUMMER_GROESSE;
+        z.nr.style.fontSize = px(ns * SCHRIFT);
+        z.nr.style.left = px(sp.x + sp.rm + sp.ob + sp.nb - ns * z.n.w);
+        z.nr.style.top = px(basis - ns * z.n.auf);
+      }
+      /* the double underline under the whole line (beside the task: under the step only); it comes with the line */
+      if (z.ergebnis) {
+        const d = dicke(em), lw = z.neben ? 0 : s * z.l.w;
+        const u = document.createElement('div');
+        u.style.cssText = 'position:absolute;left:' + px(sp.x - lw) + ';width:' + px(lw + s * z.r.w) + ';top:' +
+          px(basis + s * Math.max(z.l.tief, z.r.tief) + UNTER_EM * em) + ';height:' + px(UNTER_EM * em + d) +
+          ';box-sizing:border-box;border-top:' + d + 'px solid currentColor;border-bottom:' + d + 'px solid currentColor';
+        z.el.appendChild(u);
+      }
+    });
+    /* a second look: each cell exactly on its line (a cell may lay out a little differently at its size) */
+    const oben = r.getBoundingClientRect().top;
+    zeilen.forEach(function (z) {
+      [z.links, z.rechts, z.op, z.nr].forEach(function (d) {
+        if (!d) return;
+        const ist = (d.lastChild.getBoundingClientRect().top - oben) / k;
+        if (Math.abs(ist - z.basis) > 0.25) d.style.top = px(parseFloat(d.style.top) + z.basis - ist);
+      });
+    });
+    /* two columns: the thin line between them, from the top of the highest step's ink to the bottom of the lowest */
+    if (zwei) {
+      let von = Infinity, bis = -Infinity;
+      schritte.forEach(function (i) {
+        const z = zeilen[i];
+        von = Math.min(von, z.basis - hoch(z, s));
+        bis = Math.max(bis, z.basis + s * Math.max(z.l.tief, z.r.tief));
+      });
+      const t = document.createElement('div');
+      t.className = 'tf-trenner';
+      t.style.left = px(HALB);
+      t.style.top = px(von);
+      t.style.height = px(Math.max(0, bis - von));
+      r.appendChild(t);
+    }
+  }
+
+  /* ---- the lines come as on the board of vorrechnen.html -------------------------------- */
+  /* A click brings the next line: it glides up from the bottom left of the room, small, onto its place - as the grey
+     step sent up with the arrow does there (schritteLanden: 0.7 s on the same curve); its number, the "| -5" that
+     led to it and the line between two columns show once it has landed (the CSS above). A line taken back goes at
+     once; a slide shown fully built (Shift+arrow, a jump, a reload) has everything standing. The beamer is turned
+     by the presenter's paint and flies along. */
+  const VON_X = 0, VON_Y = 322, VON_S = 0.6;    // where a line starts: the ink's top left in the room (slide px), its size
+  let stand = null;                             // the slide that was on and how many of its lines stood, at the last paint
+  function gelandet(z) {
+    z.classList.remove('tf-fliegt');
+    z.style.transition = z.style.transform = z.style.transformOrigin = '';
+  }
+  function fliegen(z, sl) {
+    const k = sl.getBoundingClientRect().width / sl.offsetWidth || 1;
+    gelandet(z);
+    let x0 = Infinity, y0 = Infinity;
+    z.querySelectorAll('.tf-links .katex-html, .tf-rechts .katex-html').forEach(function (e) {
+      const b = e.getBoundingClientRect();
+      if (b.width) { x0 = Math.min(x0, b.left); y0 = Math.min(y0, b.top); }
+    });
+    if (!isFinite(x0)) return;
+    const o = z.getBoundingClientRect(), raum = z.parentNode.getBoundingClientRect();
+    const flug = (z._flug || 0) + 1;
+    z._flug = flug;
+    z.classList.add('tf-fliegt');
+    /* scaled about the ink's corner, so start and end are exact */
+    z.style.transformOrigin = ((x0 - o.left) / k) + 'px ' + ((y0 - o.top) / k) + 'px';
+    z.style.transform = 'translate(' + (VON_X - (x0 - raum.left) / k) + 'px, ' + (VON_Y - (y0 - raum.top) / k) + 'px) scale(' + VON_S + ')';
+    void z.getBoundingClientRect();               // it starts there
+    z.style.transition = 'transform 0.7s cubic-bezier(0.3, 0.7, 0.3, 1)';
+    z.style.transform = 'none';
+    z.ontransitionend = function (e) { if (e.target === z && z._flug === flug) gelandet(z); };
+    setTimeout(function () { if (z._flug === flug) gelandet(z); }, 1000);
+  }
+  /* after every paint of deck.js: exactly one line more on the same slide - that one flies */
+  function kommen() {
+    const sl = deckEl.querySelector(':scope > .slide.on');
+    const an = sl ? sl.querySelectorAll('.tf-zeile.step.on') : [];
+    deckEl.querySelectorAll('.tf-fliegt:not(.on)').forEach(gelandet);     // taken back while in the air
+    const eine = !!stand && stand.sl === sl && an.length === stand.n + 1;
+    stand = { sl: sl, n: an.length };
+    if (eine) fliegen(an[an.length - 1], sl);
   }
 
   /* ---- the class, from the plan index (the name the Fahrplan shows) ------------------ */
@@ -409,6 +580,8 @@
     s.onload = s.onerror = function () {
       delete window.addEventListener;              // back to the prototype's own
       spaet.forEach(function (fn) { try { fn.call(window, new Event('load')); } catch (e) { console.error(e); } });
+      /* the lines come after every paint (deck.js's hooks, "painted"); the first paint was before this */
+      if (typeof painted !== 'undefined') { painted.push(kommen); kommen(); }
     };
     document.body.appendChild(s);
   }
