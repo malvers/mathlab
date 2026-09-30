@@ -49,7 +49,8 @@
         // the decks' list, as it stood in deck.js
         [/\\left|\\right|\\displaystyle|\\limits|\\!|\\,|\;|\\:|\\ /g, ' '],
         [/\\(?:mathrm|mathbf|mathit|boldsymbol|bm|operatorname|text|textbf|mathsf|textrm|textup)\s*\{([^{}]*)\}/g, ' $1 '],
-        [/\\sqrt\s*\[\s*([^\]]*)\]\s*\{([^{}]*)\}/g, ' $1-te Wurzel aus $2 '],
+        // "dritte Wurzel", "neunzigste Wurzel" - "3-te" came out as "3 minus te" (the minus below took the hyphen)
+        [/\\sqrt\s*\[\s*([^\]]*)\]\s*\{([^{}]*)\}/g, (m, n, r) => ' ' + wurzelGrad(n) + ' Wurzel aus ' + r + ' '],
         [/\\sqrt\s*\{([^{}]*)\}/g, ' Wurzel aus $1 '],
         [/\\d?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, ' $1 durch $2 '],
         [/\{\s*,\s*\}/g, ','],                           // 0{,}5 is one number: "null Komma fünf", not "null , fünf"
@@ -110,8 +111,18 @@
     function keineEinheit(t) {
         return t.replace(/(\d\}?\s*)([mgslht])(?![a-zA-Z])/g, function (m, vor, b) { return vor + '\\text{' + EINHEIT[b] + '}'; });
     }
+    // the root's degree as a word: a number as its ordinal, anything else as "n-te" with a hyphen that is no minus
+    function wurzelGrad(n) {
+        n = String(n).trim();
+        if (!/^\d{1,6}$/.test(n)) return n + '\u2011te';
+        const z = +n, besonders = { 1: 'erste', 3: 'dritte', 7: 'siebte', 8: 'achte' };
+        return z < 20 ? besonders[z] || zahlwort(z) + 'te' : zahlwort(z) + 'ste';
+    }
     function texWords(tex) {
-        let t = ' ' + keineEinheit(buchstabenEinzeln(String(tex))) + ' ';
+        // an index raised by hand, \sqrt[{}^{90}\,] (vorrechnen's w-neunzig: KaTeX set the 90 on the root's hook), is
+        // just its number
+        tex = String(tex).replace(/\\sqrt\s*\[\s*\{\s*\}\s*\^\s*\{?([^{}\]]*)\}?\s*(?:\\[,;:!]\s*)*\]/g, '\\sqrt[$1]');
+        let t = ' ' + keineEinheit(buchstabenEinzeln(tex)) + ' ';
         t = t.replace(/(?:\\(?:mathrm|textrm|textup)\s*\{[A-Z0-9]+\})+/g, function (m) {
             return ' ' + zahlwortLesen(m.replace(/\\(?:mathrm|textrm|textup)\s*\{([A-Z0-9]+)\}/g, '$1')) + ' ';
         });

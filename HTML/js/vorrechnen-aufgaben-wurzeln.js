@@ -29,7 +29,10 @@
         ['w-gesetz',    '\\sqrt{12}\\cdot\\sqrt{3}-\\sqrt{12}:\\sqrt{3}',              ''],
         ['w-produkt',   '\\frac{\\sqrt{6}\\cdot\\sqrt{15}}{\\sqrt{10}}',               ''],
         ['w-potenz',    '\\frac{(\\sqrt{2})^6}{\\sqrt{2}\\cdot\\sqrt{8}}',             ''],
-        ['w-neunzig',   '\\sqrt[90]{\\frac{9^{99}}{9^9}}',                             ''],
+        // the index raised and a little to the left ({}^{90}\,): over the tall fraction KaTeX set the 90 right on the
+        // hook of the root sign (Doc, 30.09.2026: "sieht nicht so gut aus") - no letters in it, the board sets every
+        // letter upright (aufrecht), so no \raisebox{0.35em}
+        ['w-neunzig',   '\\sqrt[{}^{90}\\,]{\\frac{9^{99}}{9^9}}',                       ''],
         ['w-binom',     '(\\sqrt{5}+\\sqrt{3})(\\sqrt{5}-\\sqrt{3})',                  ''],
         ['w-achtzehn',  '(\\sqrt{2}+\\sqrt{8})^2',                                     ''],
         ['w-kubik',     '\\frac{\\sqrt[3]{16}+\\sqrt[3]{2}}{\\sqrt[3]{2}}',            ''],
