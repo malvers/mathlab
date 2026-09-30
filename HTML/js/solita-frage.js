@@ -66,6 +66,15 @@
         return String(t || '').normalize('NFC').replace(/[\u00AD\u200B-\u200F\u2028-\u202E\u2060-\u2064\uFEFF\r\n\t]/g, '')
             .replace(/^[\s\u00A0]+|[\s\u00A0]+$/g, '');
     }
+    // What a rejected password is told (Doc, 30.09.2026: "dann war die Meldung pwd falsch aber nicht perfekt" - the
+    // students' password was RIGHT, only not unlocked for the day, and the box said "Passwort stimmt nicht"). The
+    // server names the reason; one that does not yet is not called wrong for sure.
+    const GESPERRT = 'Das Passwort ist richtig, aber gerade gesperrt – das Schülerpasswort ist nicht freigegeben.';
+    function abgelehnt(grund, n) {
+        if (grund === 'locked') return GESPERRT;
+        return (grund === 'wrong' ? 'Passwort stimmt nicht (' : 'Passwort nicht angenommen – falsch oder gesperrt (')
+            + n + ' Zeichen angekommen) – das Auge zeigt, was im Feld steht.';
+    }
     function lies(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
     function merke(key, v) { try { localStorage.setItem(key, v); } catch (e) { } }
     // Every call is a CORS "simple request": no custom headers, the password rides in the body (see deck.js:
@@ -284,6 +293,10 @@
                 busy = true; sendBtn.disabled = true;
                 post(AI_URL, { ping: true, pass: v })
                     .then(function (r) {
+                        // a 401 carries its reason ('wrong' | 'locked', supabase/functions/claude)
+                        return r.ok ? r : r.json().catch(function () { return {}; }).then(function (j) { r.grund = j && j.reason; return r; });
+                    })
+                    .then(function (r) {
                         busy = false; sendBtn.disabled = false;
                         out.querySelectorAll('.sf-err').forEach(function (e) { e.remove(); });
                         // only a 401 is about the password - anything else is the server's trouble and says so
@@ -291,7 +304,7 @@
                         // the length helps to see what arrived, and the field keeps it for the eye - marked, so the
                         // next key replaces it; what the user did not type himself stays foreign (see beforeinput)
                         if (!r.ok) {
-                            say('Passwort stimmt nicht (' + v.length + ' Zeichen angekommen) – das Auge zeigt, was im Feld steht.', 'sf-err');
+                            say(abgelehnt(r.grund, v.length), 'sf-err');
                             if (input.value === eigen) eigen = v;
                             input.value = v; input.focus(); input.select();
                             return;
@@ -328,7 +341,7 @@
                         return r.json().catch(function () { return {}; }).then(function (j) {
                             const text = r.ok && j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
                             return {
-                                text: text || '', status: r.status, usage: j && j.usage,
+                                text: text || '', status: r.status, usage: j && j.usage, grund: j && j.reason,
                                 error: text ? '' : r.status === 401 && url === DS_URL ? 'DeepSeek gibt es nur mit Docs Passwort.'
                                     : String((j && j.error && (j.error.message || j.error)) || 'Das hat nicht geklappt.'),
                             };
@@ -378,7 +391,9 @@
             ask(AI_URL, MODEL)
                 .then(function (res) {
                     if (!res.text) {
-                        if (res.status === 401) { try { localStorage.removeItem('dev_access'); } catch (e) { } askPassword(); res.error = 'Das Passwort gilt nicht mehr.'; }
+                        // a locked password is still the right one: it stays remembered, the box says what is the matter
+                        if (res.status === 401 && res.grund === 'locked') res.error = GESPERRT;
+                        else if (res.status === 401) { try { localStorage.removeItem('dev_access'); } catch (e) { } askPassword(); res.error = 'Das Passwort gilt nicht mehr.'; }
                         fail(res.error); herTurn = true; dsShow(); return;
                     }
                     const k = kosten(res.usage, Date.now() - t0);

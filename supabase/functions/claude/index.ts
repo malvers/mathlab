@@ -84,8 +84,12 @@ Deno.serve(async (req) => {
   // A student request is held to what the deck needs - Haiku, short answers, no tools - and every hop is logged
   // with label 'sus' (failures as 'sus-err'), so the class's spend can be measured on its own.
   const susPass = Deno.env.get('SUS_PASSWORD') || '';
-  const sus = !!susPass && given === susPass && given !== pass && Date.now() < Date.parse(Deno.env.get('SUS_UNTIL') || '');
-  if (given !== pass && !sus) return json({ error: 'unauthorized' }, 401);
+  const susRight = !!susPass && given === susPass && given !== pass;
+  const sus = susRight && Date.now() < Date.parse(Deno.env.get('SUS_UNTIL') || '');
+  // The 401 says why (Doc, 30.09.2026: "dann war die Meldung pwd falsch aber nicht perfekt"): the right student
+  // password outside its window is 'locked', not 'wrong' - the boxes said "Passwort stimmt nicht" to a password
+  // that was right, and an hour went into clipboards and fields. Still a 401 with error 'unauthorized' for old clients.
+  if (given !== pass && !sus) return json({ error: 'unauthorized', reason: susRight ? 'locked' : 'wrong' }, 401);
 
   // Password-only check (used by the login overlay) — no Claude call, no cost.
   if (b.ping) return json({ ok: true });

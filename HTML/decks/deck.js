@@ -1296,9 +1296,20 @@ fromHash();
       busy = true; send.disabled = true;
       post(AI_URL, { ping: true, pass: v })
         .then(function (r) {
+          // a 401 carries its reason ('wrong' | 'locked', supabase/functions/claude) - as in js/solita-frage.js
+          return r.ok ? r : r.json().catch(function () { return {}; }).then(function (j) { r.grund = j && j.reason; return r; });
+        })
+        .then(function (r) {
           busy = false; send.disabled = false;
           out.querySelectorAll('.ask-err').forEach(function (e) { e.remove(); });   // the last verdict goes, whichever way this one went (Doc, 22.09.2026)
-          if (!r.ok) { say('Passwort stimmt nicht.', 'ask-err'); input.value = ''; return; }
+          // the students' password outside its window is right, not wrong (Doc, 30.09.2026: "die Meldung pwd falsch
+          // aber nicht perfekt"); a server that names no reason is not taken to mean "wrong" for sure
+          if (!r.ok) {
+            say(r.status !== 401 ? 'Der Server antwortet mit HTTP ' + r.status + ' – am Passwort liegt es nicht.'
+              : r.grund === 'locked' ? 'Das Passwort ist richtig, aber gerade gesperrt – das Schülerpasswort ist nicht freigegeben.'
+              : r.grund === 'wrong' ? 'Passwort stimmt nicht.' : 'Passwort nicht angenommen – falsch oder gesperrt.', 'ask-err');
+            input.value = ''; return;
+          }
           try { localStorage.setItem('dev_access', v); } catch (e) { }
           askQuestion(); input.focus();
         })
