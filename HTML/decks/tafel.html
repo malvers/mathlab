@@ -10,9 +10,10 @@
   vorrechnen.html sends what was worked out on the board ("Tafel senden") to the table svp_tafel: one
   row per plan page and day, the tasks and under each the lines of its working as LaTeX. Everyone reads
   it, only Doc's account writes. The plan shows the row as a pill "Tafel 26.09." (svp-plan-tafel.js);
-  the pill opens this page: ?id=<row id>. ?aufgaben shows the tasks of vorrechnen.html that belong to no week,
-  with their whole solution (js/vorrechnen-aufgaben*.js: the levels, the puzzles, mental arithmetic), ?kw=44 the
-  block of that week (the week's pill in the plan), ?demo three of them, to look at the page.
+  the pill opens this page: ?id=<row id>. The tasks of vorrechnen.html with their whole solution
+  (js/vorrechnen-aufgaben*.js) come as decks too: ?kw=44 the block of that week (the week's pill in the plan), and
+  for the blocks that belong to no week one deck by theme - ?aufgaben the levels (Umstellen), ?aufgaben=knobeln the
+  Ziffernrätsel, ?aufgaben=kopfrechnen mental arithmetic. ?demo shows three tasks, to look at the page.
 
   The slides are built here from that row - a title, then one slide per task with its working set as on
   the board of vorrechnen.html (legeRechnung). Every line of the working is a click group and comes as it
@@ -702,7 +703,20 @@
      Only the blocks that belong to no week: the levels, the Ziffernrätsel and mental arithmetic, 88 tasks - what Doc
      can show at any time ("so ein extra Ding ... was ich immer zeigen könnte"). With the 33 week blocks in the same
      source the deck had grown to 751 tasks and 931 slides, slow to load and 6.8 ct a question; a week's tasks are in
-     its own deck (Doc, 30.09.2026: "warum machen wir überhaupt ein riesengroßes Deck? ... wirklich aufsplitten"). */
+     its own deck (Doc, 30.09.2026: "warum machen wir überhaupt ein riesengroßes Deck? ... wirklich aufsplitten").
+     Those 88 were still 144 slides and 1.1 ct a question ("dieses eine Deck ... durchaus auch noch aufspalten"): one
+     deck by theme now, THEMEN below. ?aufgaben alone keeps the levels - the plan's pill "Gleichungen umstellen - alle
+     Aufgaben" points there - and takes every block without a week that no other theme claims, so a new one is never
+     lost. */
+  const THEMEN = {
+    knobeln: { titel: 'Ziffernrätsel', kicker: 'Vorrechnen · Knobeln', block: /^Knobeln\b/ },
+    kopfrechnen: { titel: 'Kopfrechnen', kicker: 'Vorrechnen · Tricks und Denkaufgaben', block: /^Kopfrechnen\b/ },
+    '': { titel: 'Umstellen · Vereinfachen', kicker: 'Vorrechnen · Level 1 bis 3', block: null },   // the rest
+  };
+  function themaVon(b) {
+    const name = Object.keys(THEMEN).find(function (k) { return THEMEN[k].block && THEMEN[k].block.test(b.titel); });
+    return name || '';
+  }
   /* ?kw=44: the block of that week only - its deck, the pill in the plan's week (svp/svp-plan-tafel.js) (Doc,
      30.09.2026: "pro Woche Vorrechnen von 10 (20?) Aufgaben zum Thema ... und das Deck pro Woche").
      The task files are the ones vorrechnen.html loads, in its order: the list stands there only, a new block is
@@ -728,13 +742,17 @@
     const kw = params.get('kw');
     const woche = kw ? BLOECKE.filter(function (b) { return String(b.kw) === kw; }) : null;
     if (woche && !woche.length) throw new Error('Für KW ' + kw + ' gibt es noch keine Vorrechnen-Aufgaben.');
+    const name = woche ? null : String(params.get('aufgaben') || '').toLowerCase();
+    const thema = woche ? null : THEMEN[name];
+    if (!woche && !thema) throw new Error('Das Aufgaben-Deck „' + name + '“ gibt es nicht – es gibt ?aufgaben, ?aufgaben=knobeln und ?aufgaben=kopfrechnen.');
     return {
       sammlung: true,
-      titel: woche ? woche.map(function (b) { return b.titel; }).join(' + ') : 'Umstellen · Knobeln · Kopfrechnen',
-      kicker: woche ? 'Vorrechnen · KW ' + kw : 'Vorrechnen · für jede Woche',
+      titel: woche ? woche.map(function (b) { return b.titel; }).join(' + ') : thema.titel,
+      kicker: woche ? 'Vorrechnen · KW ' + kw : thema.kicker,
       aufgaben: AUFGABEN.map(function (t, i) {
         const b = aufgabenBlock(i), l = LOESUNGEN[t[0]] || [];
-        if (woche ? woche.indexOf(b) < 0 : b.kw !== undefined) return null;   // no week asked for: the blocks without one
+        // no week asked for: the blocks without one, those of the theme asked for
+        if (woche ? woche.indexOf(b) < 0 : b.kw !== undefined || themaVon(b) !== name) return null;
         return { schluessel: t[0], nr: i - b.ab + 1, block: b.titel, kopf: b.kopf || null, latex: t[1], nach: t[2], ende: l.length ? l[l.length - 1][0] : null,
           text: (typeof TEXTE !== 'undefined' && TEXTE[t[0]]) || null,
           erklaerung: erklaerungOhneText(t[0]),

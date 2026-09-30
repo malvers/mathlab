@@ -1,7 +1,8 @@
 // The tasks of the Vorrechnen lab: what is on the board in class, in blocks, and the
 // solution of each step by step. One source for vorrechnen.html (the board) and
-// decks/tafel.html?aufgaben (all tasks as a deck, with Solita - Doc, 27.09.2026: "mach das
-// ganze Deck fertig"). Plain globals, loaded before the page's own script.
+// decks/tafel.html (the tasks as decks, with Solita - Doc, 27.09.2026: "mach das ganze Deck
+// fertig"; since 30.09.2026 one deck a week, ?kw=, and one by theme for the blocks without a
+// week, ?aufgaben). Plain globals, loaded before the page's own script.
 
 // Doc, 25.09. evening: without "Meine Beispiele" the head strip holds a
 // task to work through in class - year 11, revision, rearranging

@@ -55,11 +55,24 @@
     const HIST_MAX = 4;                  // exchanges that travel along, so "und warum?" makes sense
     const TTS_WAIT = 20000;              // ms — a hanging voice must not hide the answer
     // A pause after every sentence she reads (Doc, 30.09.2026: "Die redet sehr schnell. Ich würde zwischen den Sätzen
-    // immer noch ein bisschen Pause lassen", "probieren wir mal 0,4 Sekunden"): an SSML break of 400 ms between the
-    // sentences of Solita's voice. Measured on Studio-C the same day: four sentences 8.98 s without, 10.46 s with
-    // three breaks - 0.49 s each, which is what the light on her words counts with (SATZPAUSE_IST). Doc's own voice
-    // comes in pieces anyway: the same wait between two pieces.
-    const SATZPAUSE_MS = 400, SATZPAUSE_IST = 0.49;
+    // immer noch ein bisschen Pause lassen", "probieren wir mal 0,4 Sekunden"): an SSML break between the sentences
+    // of Solita's voice. 400 ms gave 0.49 s of silence each (measured on Studio-C: four sentences 8.98 s without,
+    // 10.46 s with three breaks) - Doc did not notice them ("die Pausen zwischen den Sätzen nehme ich jedenfalls
+    // nicht wahr"). Now 800 ms: 0.89 s each (11.66 s, the silences 0.90, 0.90 and 0.84 s), which is what the light
+    // on her words counts with (SATZPAUSE_IST). Doc's own voice comes in pieces anyway: the same wait between two.
+    // A TRIAL at 2 s: Doc heard no change at 0.8 s either ("gib da mal zwei Sekunden rein. Da müsste man es ja
+    // definitiv hören, wenn es ankäme") - 2.09 s is reckoned from the two measurements (each 0.09 s more than
+    // asked for), not measured. The figure behind an answer says in its tooltip how many pauses were asked for.
+    const SATZPAUSE_MS = 2000, SATZPAUSE_IST = 2.09;
+    // The words of a bracket, "Klammer auf, a plus b, Klammer zu", set off so one hears them (Doc, 30.09.2026: "die
+    // rattert das runter ... Das müssen wir noch tunen"): the commas solita-karaoke puts there do next to nothing in
+    // Studio-C (measured: 3.96 s -> 4.08 s), a break of 250 ms after "Klammer auf" and before "Klammer zu" gives
+    // 0.33 s of silence and a voice that slows down into it - three of them made 5.95 s of the 3.96 s, 0.66 s each.
+    const KLAMMERPAUSE_MS = 250, KLAMMERPAUSE_IST = 0.66;
+    function klammerPausen(s) {                       // the same two places solita-karaoke's spielen counts
+        const b = '<break time="' + KLAMMERPAUSE_MS + 'ms"/>';
+        return s.replace(/Klammer auf,/g, 'Klammer auf' + b).replace(/,\s*Klammer zu/g, b + ' Klammer zu');
+    }
     function xml(s) { return String(s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
     const HIER = document.currentScript ? document.currentScript.src : location.href;
     const SOLITA_PIC = new URL('../resources/solita-avatar.png', HIER).href;
@@ -171,7 +184,9 @@
             + 'wird ab dem ersten Token berechnet\n'
             + (!k.chars ? 'Stimme: aus'
                 : k.doc ? 'Docs Stimme: ' + k.chars + ' Zeichen'
-                : 'Stimme: ' + k.chars + ' Zeichen – frei im Monatskontingent, zum Listenpreis wären es '
+                : 'Stimme: ' + k.chars + ' Zeichen' + (k.pausen ? ', ' + k.pausen + (k.pausen === 1 ? ' Satzpause' : ' Satzpausen') + ' à '
+                    + (SATZPAUSE_MS / 1000).toFixed(1).replace('.', ',') + ' s' : ', ohne Satzpausen')
+                    + ' – frei im Monatskontingent, zum Listenpreis wären es '
                     + geld(k.chars / 1e6 * RATE.ttsUsd * RATE.eur))
             + '\nWartezeit: Claude ' + sek(k.msAi) + (k.msVoice ? ' + Stimme ' + sek(k.msVoice) : '');
         const p = el.lastElementChild && el.lastElementChild.tagName === 'P' ? el.lastElementChild : el;
@@ -599,15 +614,22 @@
             if (parts.length > 1 && SK() && parts.reduce(function (x, p) { return x + p.n; }, 0) !== SK().woerter(text, W)) {
                 parts = [{ clean: whole, n: SK().woerter(text, W) }];
             }
-            // Solita's voice: one request as before, her sentences parted by breaks - if they are found one by one and
-            // their word spans add up (else the plain text, without pauses)
+            // a letter the voice names best when it spells it itself (SolitaKaraoke.selbst), standing alone in the text
+            function buchstabenSelbst(s) {
+                const L = SK() && SK().selbst;
+                if (!L) return s;
+                return s.replace(new RegExp('(^|[\\s(„"\'–-])([' + L + '])(?=$|[\\s,.;:!?)“"\'–-])', 'g'),
+                    '$1<say-as interpret-as="characters">$2</say-as>');
+            }
+            // Solita's voice: one request as before, her sentences parted by breaks and a bracket's words set off - if
+            // the sentences are found one by one and their word spans add up (else the plain text, without pauses)
             let ssml = null;
             const pausen = [];
             if (VOICE !== 'doc' && SK() && parts.length === 1) {
                 const saetze = SK().stuecke(text, true).map(function (raw) { return { clean: sprechbar(raw), n: SK().woerter(raw, W) }; })
                     .filter(function (p) { return p.clean; });
-                if (saetze.length > 1 && saetze.reduce(function (x, p) { return x + p.n; }, 0) === parts[0].n) {
-                    const s = '<speak>' + saetze.map(function (p) { return xml(p.clean); }).join('<break time="' + SATZPAUSE_MS + 'ms"/> ') + '</speak>';
+                if (saetze.length && saetze.reduce(function (x, p) { return x + p.n; }, 0) === parts[0].n) {
+                    const s = '<speak>' + saetze.map(function (p) { return klammerPausen(buchstabenSelbst(xml(p.clean))); }).join('<break time="' + SATZPAUSE_MS + 'ms"/> ') + '</speak>';
                     if (s.length <= 4900) {
                         ssml = s;
                         let c = 0;
@@ -637,7 +659,7 @@
             let first = 0;                                    // the word spans before piece i
             function play(i, before) {
                 get(i).then(function (j) {
-                    if (i === 0 && k) { k.chars = whole.length; k.doc = voice === 'doc'; k.msVoice = Date.now() - tv; }
+                    if (i === 0 && k) { k.chars = whole.length; k.doc = voice === 'doc'; k.msVoice = Date.now() - tv; k.pausen = ssml ? pausen.length : 0; }
                     if (i === 0) once();
                     if (!ttsOn || meine !== seq) return;         // switched off, or something newer took over
                     if (i === 0) stop();
@@ -650,7 +672,7 @@
                         const alle = el.querySelectorAll('.' + WORT);
                         SK().spielen(el, a, [].slice.call(alle, first, first + parts[i].n),
                             { wort: WORT, box: out, aktiv: function () { return audio === a; },
-                              pausen: ssml ? pausen : null, pause: SATZPAUSE_IST });
+                              pausen: ssml ? pausen : null, pause: SATZPAUSE_IST, klammer: ssml ? KLAMMERPAUSE_IST : 0 });
                     }
                     first += parts[i].n;
                     a.addEventListener('ended', function () {

@@ -78,9 +78,17 @@
     // read "A + A + A = 1A" as "ö plus ö plus ö ..." (Doc, 29.09.2026). The puzzles' number words come letter by
     // letter already ("SEND" -> Ess Eh Enn De, "1A" -> eins Ah); lower-case variables stay as they are (x, m, r) - only
     // after a number the ones that are also units get their names (keineEinheit).
-    const BUCHSTABE = { A: 'Ah', B: 'Be', C: 'Ze', D: 'De', E: 'Eh', F: 'Eff', G: 'Ge', H: 'Ha', I: 'Ih', J: 'Jott', K: 'Ka',
-        L: 'Ell', M: 'Emm', N: 'Enn', O: 'Oh', P: 'Pe', Q: 'Ku', R: 'Err', S: 'Ess', T: 'Te', U: 'Uh', V: 'Fau', W: 'We',
-        X: 'Ix', Y: 'Üpsilon', Z: 'Zett', 'Ä': 'Äh', 'Ö': 'Öh', 'Ü': 'Üh' };
+    // The letters that end in e are written with "eh", a long German e like "Eh" and "Ah": as "Be" and "De" the
+    // Studio voice read them as foreign words, "Bi" and "Dü" (Doc, 30.09.2026: "D spricht sie Dü -> Dee", "Bi ->
+    // Bee", "das müssen wir überall machen"). Not "Bee": that could be English again.
+    // O, M, T, U and Ä stay the bare letter: of a spelled name, the voice spelling the letter itself and the plain letter, Doc
+    // chose the last by ear, letter by letter (played to him over the speaker, 30.09.2026); for Ü he chose "Üü".
+    // SELBST: the letters he liked best when the voice spells them itself (SSML say-as) - they go as the bare letter,
+    // and the box wraps them for Solita's voice (js/solita-frage.js, buchstabenSelbst).
+    const SELBST = 'I';
+    const BUCHSTABE = { A: 'Ah', B: 'Beh', C: 'Zeh', D: 'Deh', E: 'Eh', F: 'Eff', G: 'Geh', H: 'Ha', I: 'I', J: 'Jott', K: 'Ka',
+        L: 'Ell', M: 'M', N: 'Enn', O: 'O', P: 'Peh', Q: 'Ku', R: 'Err', S: 'Ess', T: 'T', U: 'U', V: 'Fau', W: 'Weh',
+        X: 'Ix', Y: 'Üpsilon', Z: 'Zett', 'Ä': 'Ä', 'Ö': 'Öh', 'Ü': 'Üü' };
     // A puzzle's number word (Vorrechnen's Knobeln block writes it letter by letter, \mathrm{S}\mathrm{E}... or
     // \textup{1}\textrm{A}): with a digit in it, it is read by its place values - "1A" is 1 ten and A ones, "10 plus A",
     // not "eins A" (Doc, 29.09.2026: "eigentlich müsste man sagen 10 plus A"); "A0B" is "A mal 100 plus B". Letters
@@ -107,7 +115,7 @@
     // A small letter that stands after a number in a formula is a variable, never a unit - the voice read the "1 m" of
     // "m_1 m_2" as "1 Meter" (Doc, 30.09.2026, Vorrechnen: "G m Index 1 Meter ... blödsinn"). The letters that are
     // also units go to it by their names; a unit set apart ("5\,m", "5\,\text{m}") stays one
-    const EINHEIT = { m: 'Emm', g: 'Ge', s: 'Ess', l: 'Ell', h: 'Ha', t: 'Te' };
+    const EINHEIT = { m: 'Emm', g: 'Geh', s: 'Ess', l: 'Ell', h: 'Ha', t: 'Teh' };   // "eh" as in BUCHSTABE
     function keineEinheit(t) {
         return t.replace(/(\d\}?\s*)([mgslht])(?![a-zA-Z])/g, function (m, vor, b) { return vor + '\\text{' + EINHEIT[b] + '}'; });
     }
@@ -124,6 +132,11 @@
     //     letter - s(t), N(0) - as one reads them
     //   one number or letter alone stands without words: (x), (3); after a digit it is a product, "2 mal 3"
     //   everything else is "Klammer auf ... Klammer zu": (a+b), (-3), x(x+1)
+    // The words of a bracket are set off by commas, so the voice takes a breath there: "Klammer auf, a plus b,
+    // Klammer zu, Quadrat" (Doc, 30.09.2026: "man muss ganz deutlich sagen, Klammer auf, A plus B, Klammer zu, die
+    // rattert das runter"). The commas travel as words of their own until the letters have their names (texWords).
+    // Measured on Studio-C the same day: the commas alone change next to nothing (3.96 s -> 4.08 s, no silence); the
+    // box therefore turns them into SSML breaks for Solita's voice (js/solita-frage.js, KLAMMERPAUSE).
     const FUNKTION_VOR = /(?:^|[\s(])(?:[fghFGHP]|Sinus|Kosinus|Tangens|Kotangens|Logarithmus|l n|Limes|Maximum|Minimum)\s*$/;
     function klammern(t) {
         let vor;
@@ -134,7 +147,7 @@
                 const einfach = /^[^\s+\-=<>,;]+(?: Index [^\s+\-=<>,;]+)?$/.test(kern);   // one number or letter, no sign
                 if (FUNKTION_VOR.test(davor) || (einfach && /[a-zA-Z]\s*$/.test(davor))) return ' von ' + kern + ' ';
                 if (einfach) return (/\d\s*$/.test(davor) ? ' mal ' : ' ') + kern + ' ';
-                return ' Klammer auf ' + kern + ' Klammer zu ';
+                return ' Klammer auf , ' + kern + ' , Klammer zu , ';
             });
         } while (t !== vor);
         return t;
@@ -155,7 +168,8 @@
              .replace(/=/g, ' ist gleich ').replace(/\+/g, ' plus ').replace(/(\d|\w)\s*-\s*(?=[\w\\])/g, '$1 minus ')
              .replace(/</g, ' kleiner ').replace(/>/g, ' größer ').replace(/\|/g, ' ');
         // written bare, only the functions one says by name - an index "max" stays "max" ("v Index max")
-        return t.replace(/\s+/g, ' ').trim().split(' ').map(function (w) { return BUCHSTABE[w] || (/^(sin|cos|tan|cot|ln|lg|log)$/.test(w) ? FUNKTION_WORT[w] : w); }).join(' ');
+        return t.replace(/\s+/g, ' ').trim().split(' ').map(function (w) { return BUCHSTABE[w] || (/^(sin|cos|tan|cot|ln|lg|log)$/.test(w) ? FUNKTION_WORT[w] : w); }).join(' ')
+            .replace(/\s+,/g, ',').replace(/,(?:\s*,)+/g, ',').replace(/^,\s*/, '');   // a bracket's commas onto their words, never two in a row
     }
     // A number that ends a sentence is a number, not an ordinal: the voice read "höchstens eine 1." as "erstens"
     // (Doc, 29.09.2026: "wir müssten hier also noch einen Sentence Segmentizer haben oder eine Heuristik"). Such a
@@ -194,6 +208,7 @@
     // What the voice is given: formulas as words, no emoji or markdown - and no HTML tags (a lab's step text)
     function sprechbar(text) {
         return buchstabenNamen(satzendZahlen(zifferUndBuchstabe(ohneFormeln(text)))).replace(/:\s*\./g, ':').replace(/,\s*\./g, '.')
+            .replace(/,\s*([!?;:,])/g, '$1')                 // a bracket's closing comma before the sentence's own sign
             .replace(/\s+([.,;:!?])/g, '$1').replace(/([.!?])\s*\.+/g, '$1').replace(/\s+/g, ' ').trim();
     }
     // A puzzle's number as the model writes it, "4A" or "A0B", in the text or in $...$: digits and capitals apart, each
@@ -356,18 +371,24 @@
     // opt.pausen, opt.pause: silence put into the audio on purpose (SSML breaks between sentences) - before which
     // spans (their index), and how many seconds each; that time is no speech, so it is taken off before the syllables
     // are spread over the audio and put back where the pauses are.
+    // opt.klammer: seconds a break around a bracket's words takes ("Klammer auf," and ", Klammer zu" in a formula's
+    // spoken words) - the formula's span lasts that much longer.
     function spielen(el, a, spans, opt) {
         opt = opt || {};
         const aktiv = opt.aktiv || function () { return true; };
         const box = opt.box || null;
         const items = [];
         const P = opt.pause || 0, vor = P ? (opt.pausen || []) : [];
-        let pos = 0;
+        const K = opt.klammer || 0;
+        let pos = 0, extra = 0;
         (spans || el.querySelectorAll('.' + (opt.wort || 'ask-w'))).forEach(function (sp, idx) {
             const w = (sp.dataset.spoken || sp.textContent).replace(/[*_`#>]/g, '');   // a formula counts as what is said of it
             const k = w.split(/\s+/).filter(Boolean).length || 1;   // a formula is several words in one span
             const n = syllables(w);
-            if (n) { items.push({ sp: sp, s: pos, n: n, k: k, p: vor.filter(function (c) { return c <= idx; }).length }); pos += n + KARA.base * k; }
+            if (n) { items.push({ sp: sp, s: pos, n: n, k: k, p: vor.filter(function (c) { return c <= idx; }).length, e: extra }); pos += n + KARA.base * k; }
+            // a bracket's breaks inside a formula's words: real seconds where the voice was told to pause, else commas
+            if (K) extra += K * (w.match(/Klammer auf,|,\s*Klammer zu/g) || []).length;
+            else pos += KARA.comma * (w.match(/[,;:](?=\s)/g) || []).length;
             if (/[.!?]["')\]]*$/.test(w)) pos += KARA.sentence;
             else if (/[,;:]["')\]]*$/.test(w)) pos += KARA.comma;
         });
@@ -389,10 +410,10 @@
         function frame() {
             if (!aktiv() || a.paused) { mark(null); return; }   // stopped, closed or finished
             if (isFinite(a.duration) && a.duration > 0) {
-                const sek = Math.max(0.1, a.duration - KARA.lead - KARA.tail - P * vor.length) / total;   // seconds a unit of speech
+                const sek = Math.max(0.1, a.duration - KARA.lead - KARA.tail - P * vor.length - extra) / total;   // seconds a unit of speech
                 const t = a.currentTime - KARA.lead;
                 let i = -1;
-                while (i + 1 < items.length && items[i + 1].s * sek + items[i + 1].p * P <= t) i++;
+                while (i + 1 < items.length && items[i + 1].s * sek + items[i + 1].p * P + items[i + 1].e <= t) i++;
                 mark(i >= 0 ? items[i].sp : null);
             }
             requestAnimationFrame(frame);
@@ -400,6 +421,6 @@
         a.addEventListener('playing', function () { requestAnimationFrame(frame); });
     }
 
-    global.SolitaKaraoke = { texWords: texWords, sprechbar: sprechbar, render: render, woerter: woerter,
+    global.SolitaKaraoke = { texWords: texWords, sprechbar: sprechbar, render: render, woerter: woerter, selbst: SELBST,
                              stuecke: stuecke, spielen: spielen, syllables: syllables };
 })(window);
