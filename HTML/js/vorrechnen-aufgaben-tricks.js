@@ -145,3 +145,129 @@
             'Die Wurzel daraus ist $3\\cdot 111=333$. Genauso ist $\\sqrt{1111-22}=33$ und $\\sqrt{11-2}=3$.',
     });
 })();
+
+// Block "Kopfrechnen · Denkaufgaben" (Doc, 30.09.2026: "mach mehr solche Denkaufgaben ... die sind der Knaller") - the
+// same kind, new ideas: tauschen, Paare bilden, gleiche Grundzahl, Teleskop. Easy to hard; every step checked in Python
+// with exact fractions, every formula rendered with the lab's KaTeX (strict). The little Gauss gets his source as it is:
+// Sartorius tells the story, but without the numbers 1 to 100 (Brian Hayes, "Gauss's Day of Reckoning", 2006).
+(function () {
+    const ab = AUFGABEN.length;
+    AUFGABEN.push(
+        ['d-125',       '125\\cdot 56',                                                                                   ''],
+        ['d-37',        '37\\cdot 99+37',                                                                                 ''],
+        ['d-prozent',   '8\\,\\%\\text{ von }25',                                                                         ''],
+        ['d-48mal52',   '48\\cdot 52',                                                                                    ''],
+        ['d-65quadrat', '65^2',                                                                                           ''],
+        ['d-wurzel',    '\\sqrt{16\\cdot 25\\cdot 36}',                                                                   ''],
+        ['d-123123',    '\\frac{123123}{1001}',                                                                           ''],
+        ['d-basis',     '\\frac{4^5}{2^9}',                                                                               ''],
+        ['d-8hoch',     '\\frac{8^{10}}{4^{15}}',                                                                         ''],
+        ['d-gauss',     '1+2+3+\\ldots+100',                                                                              ''],
+        ['d-2026',      '2026^2-2025\\cdot 2027',                                                                         ''],
+        ['d-teleskop',  '\\left(1-\\frac{1}{2}\\right)\\cdot\\left(1-\\frac{1}{3}\\right)\\cdot\\ldots\\cdot\\left(1-\\frac{1}{10}\\right)', ''],
+        ['d-kehrsumme', '\\frac{1}{1\\cdot 2}+\\frac{1}{2\\cdot 3}+\\ldots+\\frac{1}{9\\cdot 10}',                         ''],
+    );
+    BLOECKE.push({ titel: 'Kopfrechnen · Denkaufgaben', ab, bis: AUFGABEN.length, kopf: 'ohne Taschenrechner' });
+    Object.assign(LOESUNGEN, {
+        'd-125':       [['=125\\cdot 8\\cdot 7', '\\text{zerlegen}'],
+                        ['=1000\\cdot 7', '\\text{ausrechnen}'],
+                        ['=7000', '\\text{ausrechnen}']],
+        'd-37':        [['=37\\cdot 99+37\\cdot 1', '\\text{zerlegen}'],
+                        ['=37\\cdot(99+1)', '\\text{ausklammern}'],
+                        ['=37\\cdot 100', '\\text{ausrechnen}'],
+                        ['=3700', '\\text{ausrechnen}']],
+        'd-prozent':   [['=\\frac{8}{100}\\cdot 25', '\\text{umschreiben}'],
+                        ['=\\frac{25}{100}\\cdot 8', '\\text{vertauschen}'],
+                        ['=\\frac{1}{4}\\cdot 8', '\\text{kürzen}'],
+                        ['=2', '\\text{ausrechnen}']],
+        'd-48mal52':   [['=(50-2)\\cdot(50+2)', '\\text{zerlegen}'],
+                        ['=50^2-2^2', '\\text{binomische Formel}'],
+                        ['=2500-4', '\\text{ausrechnen}'],
+                        ['=2496', '\\text{ausrechnen}']],
+        'd-65quadrat': [['=(60+5)^2', '\\text{zerlegen}'],
+                        ['=60^2+2\\cdot 60\\cdot 5+5^2', '\\text{binomische Formel}'],
+                        ['=3600+600+25', '\\text{ausrechnen}'],
+                        ['=4225', '\\text{ausrechnen}']],
+        'd-wurzel':    [['=\\sqrt{16}\\cdot\\sqrt{25}\\cdot\\sqrt{36}', '\\text{Wurzelgesetz}'],
+                        ['=4\\cdot 5\\cdot 6', '\\text{Wurzel ziehen}'],
+                        ['=120', '\\text{ausrechnen}']],
+        'd-123123':    [['=\\frac{123\\cdot 1001}{1001}', '\\text{zerlegen}'],
+                        ['=123', '\\text{kürzen}']],
+        'd-basis':     [['=\\frac{(2^2)^5}{2^9}', '\\text{zerlegen}'],
+                        ['=\\frac{2^{10}}{2^9}', '\\text{Potenzgesetz}'],
+                        ['=2', '\\text{Potenzgesetz}']],
+        'd-8hoch':     [['=\\frac{(2^3)^{10}}{(2^2)^{15}}', '\\text{zerlegen}'],
+                        ['=\\frac{2^{30}}{2^{30}}', '\\text{Potenzgesetz}'],
+                        ['=1', '\\text{kürzen}']],
+        'd-gauss':     [['=(1+100)+(2+99)+\\ldots+(50+51)', '\\text{Paare bilden}'],
+                        ['=50\\cdot 101', '\\text{zusammenfassen}'],
+                        ['=5050', '\\text{ausrechnen}']],
+        'd-2026':      [['=2026^2-(2026-1)\\cdot(2026+1)', '\\text{zerlegen}'],
+                        ['=2026^2-(2026^2-1)', '\\text{binomische Formel}'],
+                        ['=2026^2-2026^2+1', '\\text{Klammer auflösen}'],
+                        ['=1', '\\text{zusammenfassen}']],
+        'd-teleskop':  [['=\\frac{1}{2}\\cdot\\frac{2}{3}\\cdot\\frac{3}{4}\\cdot\\ldots\\cdot\\frac{9}{10}', '\\text{ausrechnen}'],
+                        ['=\\frac{1\\cdot 2\\cdot 3\\cdot\\ldots\\cdot 9}{2\\cdot 3\\cdot 4\\cdot\\ldots\\cdot 10}', '\\text{zusammenfassen}'],
+                        ['=\\frac{1}{10}', '\\text{kürzen}']],
+        'd-kehrsumme': [['=1-\\frac{1}{2}+\\frac{1}{2}-\\frac{1}{3}+\\ldots+\\frac{1}{9}-\\frac{1}{10}', '\\text{zerlegen}'],
+                        ['=1-\\frac{1}{10}', '\\text{zusammenfassen}'],
+                        ['=\\frac{9}{10}', '\\text{ausrechnen}']],
+    });
+    // checked 30.09.2026 (Brian Hayes, "Gauss's Day of Reckoning", American Scientist, May-June 2006; Wikipedia)
+    QUELLEN['d-gauss'] = 'Anekdote: W. Sartorius von Waltershausen, „Gauss zum Gedächtnis“, 1856 – die Zahlen 1 bis 100 stehen dort noch nicht (B. Hayes, American Scientist 2006)';
+    Object.assign(ERKLAERUNGEN, {
+        'd-125':
+            'Die 125 ist ein Achtel von 1000, also $125\\cdot 8=1000$. Darum die 56 als $8\\cdot 7$ schreiben:' +
+            '$$125\\cdot 56=125\\cdot 8\\cdot 7=1000\\cdot 7=7000$$',
+        'd-37':
+            'Die 37 kommt zweimal vor – einmal 99-mal und einmal allein, zusammen also 100-mal:' +
+            '$$37\\cdot 99+37\\cdot 1=37\\cdot(99+1)=37\\cdot 100=3700$$',
+        'd-prozent':
+            'Prozent heißt „von Hundert“: $8\\,\\%$ von 25 ist $\\frac{8}{100}\\cdot 25$. Beim Malnehmen darf man tauschen – ' +
+            'also ist es dasselbe wie $25\\,\\%$ von 8, ein Viertel von 8:' +
+            '$$\\frac{8}{100}\\cdot 25=\\frac{25}{100}\\cdot 8=\\frac{1}{4}\\cdot 8=2$$' +
+            'Das klappt immer: $x\\,\\%$ von $y$ ist $y\\,\\%$ von $x$.',
+        'd-48mal52':
+            'Wie bei $99\\cdot 101$: 48 und 52 liegen gleich weit neben der 50. Mit der dritten binomischen Formel' +
+            '$$(50-2)\\cdot(50+2)=50^2-2^2=2500-4=2496$$',
+        'd-65quadrat':
+            'Mit der ersten binomischen Formel geht es immer. Für Zahlen mit 5 am Ende gibt es eine Abkürzung: die ' +
+            'Zehnerziffer mal ihre Nachfolgerin, hier $6\\cdot 7=42$, und 25 dahinter – 4225. Genauso ist $35^2=1225$, ' +
+            'weil $3\\cdot 4=12$.',
+        'd-wurzel':
+            'Nicht erst malnehmen! Unter der Wurzel stehen drei Quadratzahlen, und die Wurzel aus einem Produkt ist das ' +
+            'Produkt der Wurzeln:' +
+            '$$\\sqrt{a\\cdot b}=\\sqrt{a}\\cdot\\sqrt{b}$$' +
+            'Also $4\\cdot 5\\cdot 6=120$. Der lange Weg hätte erst 14400 gebraucht.',
+        'd-123123':
+            'Es ist $1001=1000+1$, also $123\\cdot 1001=123000+123=123123$ – jede dreistellige Zahl zweimal ' +
+            'hintereinander ist durch 1001 teilbar. Und weil $1001=7\\cdot 11\\cdot 13$, auch durch 7, 11 und 13.',
+        'd-basis':
+            'Verschiedene Grundzahlen, aber $4=2^2$. Dann ist $4^5=(2^2)^5=2^{10}$ – beim Potenzieren einer Potenz werden ' +
+            'die Hochzahlen malgenommen. Und $2^{10}$ durch $2^9$ ist 2.',
+        'd-8hoch':
+            'Beides sind Zweierpotenzen: $8=2^3$ und $4=2^2$. Dann ist $8^{10}=2^{30}$ und $4^{15}=2^{30}$ – Zähler und ' +
+            'Nenner sind gleich.',
+        'd-gauss':
+            'Der erste und der letzte Summand ergeben 101, der zweite und der vorletzte auch – und so weiter. Das sind ' +
+            '50 Paare:' +
+            '$$50\\cdot 101=5050$$' +
+            'Allgemein: $1+2+\\ldots+n=\\frac{n\\cdot(n+1)}{2}$. Erzählt wird das vom neunjährigen Carl Friedrich Gauß – ' +
+            'welche Zahlen er wirklich addieren sollte, ist aber nicht überliefert.',
+        'd-2026':
+            '2025 und 2027 liegen gleich weit neben 2026. Mit der dritten binomischen Formel ist ' +
+            '$2025\\cdot 2027=2026^2-1$ – und dann bleibt von der ganzen Rechnung nur die 1 übrig. Das klappt mit jeder ' +
+            'Zahl:' +
+            '$$n^2-(n-1)\\cdot(n+1)=1$$',
+        'd-teleskop':
+            'Jede Klammer erst ausrechnen: $1-\\frac{1}{2}=\\frac{1}{2}$, $1-\\frac{1}{3}=\\frac{2}{3}$ und so weiter. ' +
+            'Dann steht jeder Zähler auch im Nenner davor – 2 gegen 2, 3 gegen 3, bis 9 gegen 9. Übrig bleiben nur die 1 ' +
+            'oben und die 10 unten.',
+        'd-kehrsumme':
+            'Der Trick:' +
+            '$$\\frac{1}{n\\cdot(n+1)}=\\frac{1}{n}-\\frac{1}{n+1}$$' +
+            'zum Beispiel $\\frac{1}{2\\cdot 3}=\\frac{1}{2}-\\frac{1}{3}=\\frac{1}{6}$. Schreibt man alle Brüche so, hebt ' +
+            'sich fast alles auf, $-\\frac{1}{2}$ gegen $+\\frac{1}{2}$ und so weiter. Übrig bleibt ' +
+            '$1-\\frac{1}{10}=\\frac{9}{10}$.',
+    });
+})();

@@ -665,6 +665,7 @@ function zeigeRechenweg(verborgenAb) {
         if (isFinite(links) && s.right > links - 16 && s.top < unten) schema.style.top = (unten - c.top + 8) + 'px';
     }
     zeigeBuzzAufgabe();                // the buzzer's pill goes behind the newest row
+    if (typeof solitaEcke === 'function') solitaEcke();   // Solita's corner over the line (js/vorrechnen-solita.js)
     anzeigeBald();
 }
 // Doc, 26.09.: "wenn die Rechnung fertig ist ... und ich tippe das rechte

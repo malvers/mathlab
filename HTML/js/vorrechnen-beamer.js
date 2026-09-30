@@ -19,7 +19,8 @@ let steuerFenster = null, anzeigeFrame = null, buehne = { w: 0, h: 0 };
 // only the ink fly up and turn into LaTeX
 // 'erklaerung-schicht': the explanation box, only while Doc has pushed it up over the line (29.09.)
 // 'buzz-aufgabe': the buzzer's count behind the step's number, for the class too (29.09., zeigeBuzzAufgabe)
-const SPIEGEL_SCHICHTEN = ['papier', 'verlauf-schicht', 'vorlage-schicht', 'rechenweg-schicht', 'satz-schicht', 'erklaerung-schicht', 'buzz-aufgabe'];
+// 'solita-schicht': Solita in the corner above the line, her box and answers - "sichtbar für alle" (30.09.)
+const SPIEGEL_SCHICHTEN = ['papier', 'verlauf-schicht', 'vorlage-schicht', 'rechenweg-schicht', 'satz-schicht', 'erklaerung-schicht', 'buzz-aufgabe', 'solita-schicht'];
 const spiegelCache = {};
 function anzeigeLaeuft() { return anzeigeModus; }
 function anzeigeZiel() {

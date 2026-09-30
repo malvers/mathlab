@@ -648,7 +648,7 @@ function hutPlatz() {
 }
 // Lucide "graduation-cap" (ISC, lucide-static 1.48.0), finer than the board's other icons (1.8); the part on the
 // head 1.5 longer than Lucide's (Doc, 29.09.: "der Zylinder, der dann auf dem Kopf sitzt ... länger")
-const DOKTORHUT = '<g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">' +
+const DOKTORHUT = '<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
     '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/>' +
     '<path d="M22 10v6"/><path d="M6 12.5V17.5a6 3 0 0 0 12 0V12.5"/></g>';
 function hutKnopf(zeigen, aktiv) {
@@ -673,8 +673,12 @@ function hutKnopf(zeigen, aktiv) {
     // right over the field's bin (#seite-leeren, zeigeNotizRand): 12 px left of the margin's line
     const r = container.getBoundingClientRect();
     Object.assign(k.style, { right: (r.width - notizX(r.width) + 12) + 'px', top: (papierGrenze(r.height) + 6) + 'px', display: '' });
-    k.style.opacity = aktiv ? '' : '0.35';                // as pale as the empty bin (zeigeNotizRand)
-    k.title = aktiv ? 'Erklärung einblenden' : 'Keine Erklärung zu dieser Aufgabe';
+    // Doc, 30.09.2026: "mach das icon hier so wie die anderen" - pale like the board's other buttons at rest (the bins,
+    // the arrow, the eraser), with their stroke and size; a task without an explanation shows no hat at all (it was
+    // the pale one, the one with an explanation stood out in full ink)
+    if (!aktiv) { k.style.display = 'none'; return; }
+    k.style.opacity = '0.35';
+    k.title = 'Erklärung einblenden';
 }
 // every letter of a formula upright, as \mathrm (Doc, 28.09.: the letters blue - js/vorrechnen.css - "bitte nicht
 // kursiv"); commands (\cdot, \ge, \mathrm) and words in \text{...} stay as they are

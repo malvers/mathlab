@@ -377,7 +377,7 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
 /* the mortarboard that brings the explanation box (Doc, 29.09.: "im Stil so wie unten"): the field's bin's look and
    width, at the top of the field instead of the bottom - right and top set by hutKnopf */
 #erklaerung-hut { bottom: auto; width: calc(46px * var(--knopf, 1)); padding: 0; }
-#erklaerung-hut svg { width: calc(26px * var(--knopf, 1)); height: calc(26px * var(--knopf, 1)); }
+#erklaerung-hut svg { width: calc(24px * var(--knopf, 1)); height: calc(24px * var(--knopf, 1)); }   /* as the others (30.09.) */
 /* the Knobeln block's number words and place values: js/vorrechnen-aufgaben-knobeln.css (shared with the
    Ziffernrätsel lab since 29.09.2026) */
 /* the three clear buttons wear a bin now, sized like the eraser (Doc, 28.09.: "mach die C bitte auch Papierk.") */
@@ -556,3 +556,63 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
 #canvas-container.hell #level-menue button { color: rgb(31, 64, 150); }
 #canvas-container.hell #level-menue button:hover, #canvas-container.hell #level-menue button.aktuell { background: rgba(31, 64, 150, 0.08); }
 #canvas-container.hell #level-menue button.aktuell { box-shadow: inset 3px 0 0 rgba(31, 64, 150, 0.85); }
+
+/* Doc, 30.09.2026: "Bau bitte auch hier SolitaDoc ein wie im Lab und in den Decks links in die Ecke über der Trennlinie
+   sichtbar für alle" - her picture bottom left in the lined part, 6 px over the line (the layer reaches down to the line,
+   solitaEcke). "sie so wie Dr. Hut": in a button like the board's others (#erklaerung-hut: 46 px, 8 px corners, the thin
+   ink frame, pale at rest), her photo round in it. A tap opens only the question line beside it, on the button's middle,
+   and her answers above it - "bitte nur die Zeile rechts neben Solita keine extrabox": no card, no heading, no chips, not
+   the box's own little face (Solita or Doc via its right-click menu). The layer goes to the beamer: the class sees her */
+#solita-schicht { position: absolute; left: 0; top: 0; width: 100%; height: 0; z-index: 7; pointer-events: none; }
+#solita-schicht .vs-knopf {
+    position: absolute; left: 12px; bottom: 6px; width: calc(46px * var(--knopf, 1)); height: calc(46px * var(--knopf, 1));
+    display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 0; border-radius: 8px;
+    cursor: pointer; pointer-events: auto; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    border: 1px solid rgba(0, 210, 255, 0.85); background: linear-gradient(rgba(0, 210, 255, 0.14), rgba(0, 210, 255, 0.14)) #07162f;
+    box-shadow: 0 0 14px rgba(0, 210, 255, 0.35); opacity: 0.35; transition: opacity 0.15s;
+}
+#canvas-container.hell #solita-schicht .vs-knopf {
+    border-color: rgba(31, 64, 150, 0.85); background: linear-gradient(rgba(31, 64, 150, 0.08), rgba(31, 64, 150, 0.08)) #f4ecd8;
+    box-shadow: none;
+}
+#solita-schicht .vs-knopf:hover, #solita-schicht.offen .vs-knopf { opacity: 1; }
+#solita-schicht .vs-knopf:focus { outline: none; }
+/* her photo nearly fills the button, 3 px inside its frame (Doc, 30.09.: "Sol sieht kleiner aus" - it was 34 of 46) */
+#solita-schicht .vs-knopf img {
+    width: calc(46px * var(--knopf, 1) - 6px); height: calc(46px * var(--knopf, 1) - 6px); border-radius: 50%; object-fit: cover; display: block;
+}
+/* the line: 8 px right of the button, its 36 px on the button's middle - the button scales with --knopf (a narrow
+   margin, the Lenovo: 0.73), so the line follows its real size ("zeile bitte y aligned", 30.09.); as wide as the lined
+   part allows up to the bin on the right (#oben-leeren: 12 + 46) */
+#solita-schicht .vs-karte {
+    position: absolute; left: calc(20px + 46px * var(--knopf, 1)); bottom: calc(6px + (46px * var(--knopf, 1) - 36px) / 2);
+    width: min(560px, calc(100% - 20px - 46px * var(--knopf, 1) - 70px)); max-height: calc(100% - 30px);
+    display: none; flex-direction: column; pointer-events: auto; text-align: left;
+    font-family: var(--lab-schrift); font-variant-numeric: lining-nums; color: #eaf0f7;
+}
+#solita-schicht.offen .vs-karte { display: flex; }
+/* the field must take a paste: the board's surface forbids selecting and the long-press menu (#canvas-container, for the
+   pen) - inherited, the tablet offered no "Einfügen" in the field (Doc, 30.09.: "das pwd passt wieder nicht (clipboard)") */
+#solita-schicht .vs-karte { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; touch-action: manipulation; }
+#solita-schicht .vs-sf { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+#solita-schicht .vs-sf .sf { flex: 1 1 auto; min-height: 0; }
+#solita-schicht .sf-out { max-height: none; min-height: 0; flex: 1 1 auto; }
+#solita-schicht :is(.sf-face, .sf-chips) { display: none; }
+/* the bubbles stand on the board: opaque, so rows and lines behind them do not show through */
+#solita-schicht .sf-q { background: #0d2140; }
+#solita-schicht .sf-a { background: #07162f; border-color: rgba(0, 210, 255, 0.35); }
+#solita-schicht .sf-in { background: #07162f; }
+/* on sand: the board's look - sand, royal blue ink, the controls like the board's buttons */
+#canvas-container.hell #solita-schicht .vs-karte { color: rgb(31, 64, 150); }
+#canvas-container.hell #solita-schicht .sf-q { background: #ebe2cb; border-color: rgba(31, 64, 150, 0.3); color: rgb(31, 64, 150); }
+#canvas-container.hell #solita-schicht .sf-a { background: #f4ecd8; border-color: rgba(31, 64, 150, 0.35); color: rgb(31, 64, 150);
+    box-shadow: 0 4px 14px rgba(31, 64, 150, 0.12); }
+#canvas-container.hell #solita-schicht :is(.sf-cost, .sf-note, .sf-ds) { color: #5d6678; }
+#canvas-container.hell #solita-schicht .sf-w.on { background: rgba(31, 64, 150, 0.14); box-shadow: 0 0 0 2px rgba(31, 64, 150, 0.14); }
+#canvas-container.hell #solita-schicht .sf-in { background: #efe6d0; border-color: rgba(31, 64, 150, 0.45); color: rgb(31, 64, 150); }
+#canvas-container.hell #solita-schicht .sf-in:focus { border-color: rgb(31, 64, 150); }
+#canvas-container.hell #solita-schicht .sf-in::placeholder { color: rgba(31, 64, 150, 0.45); }
+#canvas-container.hell #solita-schicht .sf-row button { background: #efe6d0; border-color: rgba(31, 64, 150, 0.6); color: rgb(31, 64, 150); }
+#canvas-container.hell #solita-schicht .sf-row button:hover { background: #e6dcc2; color: rgb(31, 64, 150); }
+#canvas-container.hell #solita-schicht .sf-out { scrollbar-color: rgba(31, 64, 150, 0.4) transparent; }
+#canvas-container.hell #solita-schicht .sf-out::-webkit-scrollbar-thumb { background: rgba(31, 64, 150, 0.4); }
