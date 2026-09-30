@@ -469,6 +469,8 @@ window.svpPlanParts.push(function (P) {
             const rTabs = document.createElement('div');
             rTabs.className = 'sub-tabs';
             subHeadR.appendChild(rTabs);
+            /* die Tafel vor den Reitern: Vorrechnen mit den Aufgaben der Woche (svp-plan-tafel.js) */
+            if (P.vorrechnenKnopf) P.vorrechnenKnopf(ref, subHeadR, rTabs);
             subSide = document.createElement('div');
             subSide.className = 'sub-side';
             rPanes = {};

@@ -292,8 +292,9 @@ const LAB_ICONS = {
 
     "vorrechnen": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- the board with a handwritten row: 1 · 1 = 1, the result underlined twice;
-                 shifted so the board lines up with the card title (measured 4.5 px) -->
-            <g transform="translate(-4.8 0)">
+                 the board in the middle across (Doc, 30.09.2026: "Tafel x zentral" - it was shifted to line up with
+                 the card title), a tenth smaller so the pen stays inside -->
+            <g transform="translate(50 41) scale(0.9) translate(-46 -41)">
             <rect x="6" y="12" width="80" height="58" rx="5" fill="none" stroke="rgba(255, 255, 255, 0.6)" stroke-width="1.6" />
             <path d="M15.5 32.5 Q18.5 30 21.5 26.5 L21 50 M35.5 32.5 Q38.5 30 41.5 26.5 L41 50 M48.5 35 Q54 34 59.5 35.5 M48.5 43 Q54 42 59.5 43.5" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
             <circle cx="30" cy="39" r="2.2" fill="#ffffff" />

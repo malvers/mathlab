@@ -3,7 +3,7 @@
 window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
-        drawnIcon, deckIcon, lambdaIcon, matLabelEl, matIconEl, siteHref, lokalHref,
+        drawnIcon, deckIcon, lambdaIcon, tafelIcon, matLabelEl, matIconEl, siteHref, lokalHref,
         keinMausfokus, equalizeMatPills,
         equalizeRefPills, setVideoReiter, zusatzZahl, isVideoEntry, isExerciseEntry, officeEdit,
         matDefaultLabel, openMat, renderMaterial, hideMatTip, showMatTip,
@@ -165,27 +165,35 @@ window.svpPlanParts.push(function (P) {
             [['x', x], ['y', y], ['width', w], ['height', h], ['rx', rx], ['fill', fill]].forEach(function (a) { r.setAttribute(a[0], a[1]); });
             svg.appendChild(r);
         };
+        /* Doc, 30.09.2026: the ledge and the chalk "raus und Tafel stück runter" - the board in the middle of the
+           square; "und da auch 1 5 x y rein (random)" - a second row of chalk, each sign a little askew */
         flaeche(0, 0, 64, 64, 14, 'rgb(245, 194, 66)');
-        flaeche(7, 7, 50, 38, 4, 'rgb(14, 36, 78)');         /* the board */
+        flaeche(7, 13, 50, 38, 4, 'rgb(14, 36, 78)');        /* the board */
         const g = document.createElementNS(ns, 'g');
         g.setAttribute('fill', 'none');
         g.setAttribute('stroke', '#ffffff');
         g.setAttribute('stroke-width', '3.6');
         g.setAttribute('stroke-linecap', 'round');
         g.setAttribute('stroke-linejoin', 'round');
-        ['M14 20 Q16.5 14 19 20 T24 20 T29 20', 'M35 17.5 H43 M35 23 H43', 'M47 15 V26'].forEach(function (d) {
+        /* the bar after the "=" is gone (Doc, 30.09.2026: "Pfeil: den raus") */
+        ['M14 25 Q16.5 19 19 25 T24 25 T29 25', 'M35 22.5 H43 M35 28 H43'].forEach(function (d) {
             const pfad = document.createElementNS(ns, 'path');
             pfad.setAttribute('d', d);
             g.appendChild(pfad);
         });
-        const zeile = document.createElementNS(ns, 'path');  /* a second line in lighter chalk */
-        zeile.setAttribute('d', 'M14 34 H36');
-        zeile.setAttribute('stroke-width', '3');
-        zeile.setAttribute('opacity', '0.75');
-        g.appendChild(zeile);
+        /* 1, 5, x, y in lighter chalk, apart and a little up and down: [path, moved by, turned by, about] */
+        [['M13.5 38.5 L16 36 V45', '-0.5 -0.8', -6, '15 40'],
+         ['M26.5 36.5 H22.5 L22 40.5 Q25.5 39.2 26.6 41.6 Q27.2 44.4 24.4 45 Q22.6 45.3 21.6 44.2', '2.2 0.8', 5, '24 41'],
+         ['M33 39.5 L38.5 45 M38.5 39.5 L33 45', '1.8 -0.6', -4, '36 42'],
+         ['M43.5 39.5 L46.2 44.2 M49.5 39 L44.6 47.6', '2.4 0.3', 8, '46 43']].forEach(function (z) {
+            const pfad = document.createElementNS(ns, 'path');
+            pfad.setAttribute('d', z[0]);
+            pfad.setAttribute('stroke-width', '2.8');
+            pfad.setAttribute('opacity', '0.85');
+            pfad.setAttribute('transform', 'translate(' + z[1] + ') rotate(' + z[2] + ' ' + z[3] + ')');
+            g.appendChild(pfad);
+        });
         svg.appendChild(g);
-        flaeche(11, 49, 42, 4, 2, 'rgb(14, 36, 78)');        /* the ledge */
-        flaeche(38, 46, 11, 4.2, 1.6, '#ffffff');            /* the chalk */
         return svg;
     }
 

@@ -280,6 +280,29 @@ html.svp-light #plan-table .detail-row .sub-talk b {
     width: 27px;
     justify-content: center;
 }
+/* The blackboard left of the tabs (Doc, 30.09.2026: "gib mir da das Tafelicon. Wenn click: zeig Vorrechnen"): only in
+   a week with Vorrechnen tasks (svp-plan-tafel.js), as tall as the tabs so the grey line stays where it is */
+#plan-table .detail-row .sub-head-r .sub-vorrechnen {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    height: 26px;
+    padding: 0;
+    margin-right: 14px;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+#plan-table .detail-row .sub-head-r .sub-vorrechnen[hidden] { display: none; }
+/* Doc, 30.09.2026: "mach den deutlich größer" (was 22 px) - 32 px, its middle on the middle of the tabs' writing
+   (measured): 3 px past the 26 px of the head above and below, its margin box stays 26 px, so the half does not grow
+   and the grey line stays where it is; at 34 px it reached into the week's row above */
+#plan-table .detail-row .sub-head-r .sub-vorrechnen svg { display: block; width: 32px; height: 32px; margin: -3px 0;
+    transition: transform .15s ease; }
+#plan-table .detail-row .sub-head-r .sub-vorrechnen:hover svg { transform: scale(1.1); }
+#plan-table .detail-row .sub-head-r .sub-vorrechnen:focus { outline: none; }
+#plan-table .detail-row .sub-head-r .sub-vorrechnen:focus-visible { outline: 2px solid var(--head); outline-offset: 2px; border-radius: 4px; }
+@media print { #plan-table .detail-row .sub-head-r .sub-vorrechnen { display: none; } }
 /* Gemalte Beschriftung der beiden Haelften - sieht aus wie ein Reiter, laesst
    sich aber nicht anklicken. Farbe wie die grosse Tabellenkopfzeile (Doc,
    07.09.2026), damit es als Spaltenueberschrift gelesen wird. */

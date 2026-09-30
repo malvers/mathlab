@@ -11,7 +11,8 @@
   row per plan page and day, the tasks and under each the lines of its working as LaTeX. Everyone reads
   it, only Doc's account writes. The plan shows the row as a pill "Tafel 26.09." (svp-plan-tafel.js);
   the pill opens this page: ?id=<row id>. ?aufgaben shows every task of vorrechnen.html with its whole
-  solution (js/vorrechnen-aufgaben.js), ?demo three of them, to look at the page.
+  solution (js/vorrechnen-aufgaben*.js), ?kw=44 the block of that week (the week's pill in the plan),
+  ?demo three of them, to look at the page.
 
   The slides are built here from that row - a title, then one slide per task with its working set as on
   the board of vorrechnen.html (legeRechnung). Every line of the working is a click group and comes as it
@@ -494,23 +495,38 @@
   /* ?aufgaben: every task of the Vorrechnen lab with its whole solution, from the same source the
      lab reads (js/vorrechnen-aufgaben.js) - Doc, 27.09.2026: "mach das ganze Deck fertig, also nicht
      nur das Demo-Deck". A collection, not a lesson: it has a name instead of a day. */
+  /* ?kw=44: the block of that week only - its deck, the pill in the plan's week (svp/svp-plan-tafel.js) (Doc,
+     30.09.2026: "pro Woche Vorrechnen von 10 (20?) Aufgaben zum Thema ... und das Deck pro Woche").
+     The task files are the ones vorrechnen.html loads, in its order: the list stands there only, a new block is
+     entered once (the plan's pill reads it the same way). */
+  async function aufgabenDateien() {
+    try {
+      const html = await (await fetch('../vorrechnen.html', { cache: 'no-cache' })).text();
+      const dateien = [...html.matchAll(/<script\s+src="(js\/vorrechnen-aufgaben[\w-]*\.js)"/g)].map(function (m) { return '../' + m[1]; });
+      if (dateien.length) return dateien;
+    } catch (e) { /* without the page: at least the levels */ }
+    return ['../js/vorrechnen-aufgaben.js'];
+  }
   async function ladeSammlung() {
-    await ladeSkript('../js/vorrechnen-aufgaben.js');
-    await ladeSkript('../js/vorrechnen-aufgaben-wurzeln.js');
-    await ladeSkript('../js/vorrechnen-aufgaben-knobeln.js');
-    await ladeSkript('../js/vorrechnen-aufgaben-tricks.js');
+    for (const datei of await aufgabenDateien()) await ladeSkript(datei);
+    const kw = params.get('kw');
+    const woche = kw ? BLOECKE.filter(function (b) { return String(b.kw) === kw; }) : null;
+    if (woche && !woche.length) throw new Error('Für KW ' + kw + ' gibt es noch keine Vorrechnen-Aufgaben.');
     return {
-      sammlung: true, titel: 'Umstellen · Vereinfachen · Knobeln', kicker: 'Vorrechnen · alle Aufgaben',
+      sammlung: true,
+      titel: woche ? woche.map(function (b) { return b.titel; }).join(' + ') : 'Umstellen · Vereinfachen · Knobeln',
+      kicker: woche ? 'Vorrechnen · KW ' + kw : 'Vorrechnen · alle Aufgaben',
       aufgaben: AUFGABEN.map(function (t, i) {
         const b = aufgabenBlock(i), l = LOESUNGEN[t[0]] || [];
+        if (woche && woche.indexOf(b) < 0) return null;
         return { schluessel: t[0], nr: i - b.ab + 1, block: b.titel, kopf: b.kopf || null, latex: t[1], nach: t[2], ende: l.length ? l[l.length - 1][0] : null,
           rechenweg: l.map(function (st) { return st[0]; }), umformungen: l.map(function (st) { return st[1]; }) };
-      })
+      }).filter(Boolean)
     };
   }
 
   async function ladeZeile() {
-    if (params.has('aufgaben')) return ladeSammlung();
+    if (params.has('aufgaben') || params.has('kw')) return ladeSammlung();
     if (params.has('demo')) {
       const d = new Date();
       return Object.assign({}, DEMO, { datum: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') });

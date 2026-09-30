@@ -238,3 +238,19 @@ try {
     else if (localStorage.getItem('vorrechnen-testmodus') === '1') modus = 'beispiele';
 } catch (_) {}
 let testModus = modus === 'beispiele', aufgabenModus = modus === 'aufgaben';
+// Doc, 30.09.2026 (the blackboard left of the week's tabs in the plan): "gib mir da das Tafelicon. Wenn click: zeig
+// Vorrechnen - das Tool mit den Aufgaben!" - vorrechnen.html?kw=44 opens the tasks on that week's block, its first
+// task (svp/svp-plan-tafel.js); the working of the task before stays behind, as at the week's first start above. The
+// parameter leaves the address at once, so a live reload stays where Doc went.
+try {
+    const p = new URLSearchParams(location.search), kw = p.get('kw');
+    const b = kw && BLOECKE.find(x => String(x.kw) === kw);
+    if (b) {
+        modus = 'aufgaben'; testModus = false; aufgabenModus = true;
+        localStorage.setItem('vorrechnen-modus', modus);
+        if (aufgabeIdx !== b.ab) { rechenweg.length = 0; localStorage.setItem('vorrechnen-rechenweg', '[]'); }
+        aufgabeIdx = b.ab;
+        merkeAufgabe();
+    }
+    if (kw) { p.delete('kw'); history.replaceState(null, '', location.pathname + (p.toString() ? '?' + p : '') + location.hash); }
+} catch (_) {}
