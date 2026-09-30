@@ -29,7 +29,7 @@
         ['eg-summe',        '2^x+2^{x+1}=24',                             'x'],
         ['eg-nuss',         '2^{x+3}=5^x',                                'x'],
     );
-    BLOECKE.push({ titel: 'Exponentialgleichungen · mit Logarithmus', ab, bis: AUFGABEN.length, kw: 3 });
+    wochenBlock('exponentialgleichungen', ab);
     Object.assign(LOESUNGEN, {
         'eg-zweiunddreissig': [['x=\\log_2 32', '\\text{Logarithmus}'], ['x=5', '2^5=32']],
         'eg-siebenundzwanzigstel': [['3^x=3^{-3}', '\\text{als Potenz schreiben}'], ['x=-3', '\\text{Exponenten vergleichen}']],

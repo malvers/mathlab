@@ -30,7 +30,7 @@
         ['q-scheitel-faktor', '2x^2-8x+5',                                ''],
         ['q-wurf',          '-5t^2+20t',                                  ''],
     );
-    BLOECKE.push({ titel: 'Beschleunigte Bewegung · quadratische Funktionen', ab, bis: AUFGABEN.length, kw: 46 });
+    wochenBlock('quadratisch', ab);
     Object.assign(LOESUNGEN, {
         'q-fall':            [['s=5\\cdot 9', '\\text{ausrechnen}'], ['s=45', '\\text{ausrechnen}']],
         'q-geschwindigkeit': [['t=3', ':10']],

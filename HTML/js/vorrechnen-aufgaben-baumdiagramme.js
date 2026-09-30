@@ -31,7 +31,7 @@
         ['bd-treffer',      'p^2=0{,}49\\quad(p>0)',                                      'p'],
         ['bd-nuss',         '1-\\left(\\frac{5}{6}\\right)^n=0{,}5',                      'n'],
     );
-    BLOECKE.push({ titel: 'Baumdiagramme · Pfadregeln', ab, bis: AUFGABEN.length, kw: 15, kopf: 'berechnen' });
+    wochenBlock('baumdiagramme', ab, { kopf: 'berechnen' });
     Object.assign(LOESUNGEN, {
         'bd-muenze':        [['=\\frac{1}{4}', '\\text{Pfadregel}']],
         'bd-rot':           [['=\\frac{3}{5}', '\\text{günstige durch mögliche}']],

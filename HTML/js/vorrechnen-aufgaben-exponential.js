@@ -33,7 +33,7 @@
         ['e-wurzel',      '2^x=\\sqrt{8}',                                            'x'],
         ['e-basen',       '4^x=8^{x-1}',                                              'x'],
     );
-    BLOECKE.push({ titel: 'Wachstum und Zerfall · Exponentialgleichungen', ab, bis: AUFGABEN.length, kw: 44 });
+    wochenBlock('exponential', ab);
     Object.assign(LOESUNGEN, {
         'e-32':          [['2^x=2^5', '\\text{als Potenz schreiben}'], ['x=5', '\\text{Exponenten vergleichen}']],
         'e-81':          [['3^x=3^4', '\\text{als Potenz schreiben}'], ['x=4', '\\text{Exponenten vergleichen}']],

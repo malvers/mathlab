@@ -30,7 +30,7 @@
         ['un-reihe',        '\\frac{\\frac{1}{2}}{1-\\frac{1}{2}}',       ''],
         ['un-nuss',         '\\frac{0{,}9}{1-0{,}1}',                     ''],
     );
-    BLOECKE.push({ titel: 'Das unendlich Große · Hilbert, Cantor, Zenon', ab, bis: AUFGABEN.length, kw: 24, kopf: 'berechnen' });
+    wochenBlock('unendlich', ab, { kopf: 'berechnen' });
     Object.assign(LOESUNGEN, {
         'un-umzug':         [['=8', '\\text{ausrechnen}']],
         'un-gerade':        [['n=50', ':2']],

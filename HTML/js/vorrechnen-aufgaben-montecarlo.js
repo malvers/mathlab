@@ -30,7 +30,7 @@
         ['mc-wuerfe',       '\\frac{1}{\\sqrt{n}}=0{,}001\\quad(n>0)',    'n'],
         ['mc-nuss',         '4\\cdot\\frac{k}{2000}=3{,}14',              'k'],
     );
-    BLOECKE.push({ titel: 'Monte-Carlo-Methode · Flächen aus dem Zufall', ab, bis: AUFGABEN.length, kw: 22, kopf: 'berechnen' });
+    wochenBlock('montecarlo', ab, { kopf: 'berechnen' });
     Object.assign(LOESUNGEN, {
         'mc-innen':         [['=0{,}36+0{,}49', '\\text{quadrieren}'], ['=0{,}85', '\\text{addieren}']],
         'mc-aussen':        [['=0{,}64+0{,}49', '\\text{quadrieren}'], ['=1{,}13', '\\text{addieren}']],

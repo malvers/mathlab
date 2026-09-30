@@ -30,7 +30,7 @@
         ['mo-feld',         'x(100-2x)',                                  ''],
         ['mo-nuss',         '0{,}9^t=\\frac{1}{6}',                       't'],
     );
-    BLOECKE.push({ titel: 'Modellieren · Anwendungsaufgaben', ab, bis: AUFGABEN.length, kw: 9 });
+    wochenBlock('modellieren', ab);
     Object.assign(LOESUNGEN, {
         'mo-taxi':          [['K=3{,}50+26{,}40', '\\text{ausrechnen}'], ['K=29{,}90', '\\text{ausrechnen}']],
         'mo-kuehl-start':   [['T=20+60', '0{,}9^0=1'], ['T=80', '\\text{ausrechnen}']],

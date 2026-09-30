@@ -30,7 +30,7 @@
         ['fq-halbwert',     '0{,}9^t=0{,}5',                              't'],
         ['fq-nuss',         '\\frac{x^2-9}{x-3}',                         ''],
     );
-    BLOECKE.push({ titel: 'Fehlerquellen · richtig gerechnet', ab, bis: AUFGABEN.length, kw: 20, kopf: 'richtig rechnen' });
+    wochenBlock('fehlerquellen', ab, { kopf: 'richtig rechnen' });
     Object.assign(LOESUNGEN, {
         'fq-klammer':       [['=-3x+6', '\\text{ausmultiplizieren}']],
         'fq-potenz':        [['=2^{3+4}', '\\text{Potenzgesetz}'], ['=2^7', '\\text{ausrechnen}'], ['=128', '\\text{ausrechnen}']],

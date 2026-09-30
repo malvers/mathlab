@@ -29,7 +29,7 @@
         ['lg-gesetze',      '2\\log_2 6-\\log_2 9',                       ''],
         ['lg-nuss',         '\\log_2 x+\\log_2(x+2)=3\\quad(x>0)',        'x'],
     );
-    BLOECKE.push({ titel: 'Logarithmus · Begriff und Gesetze', ab, bis: AUFGABEN.length, kw: 2 });
+    wochenBlock('logarithmus', ab);
     Object.assign(LOESUNGEN, {
         'lg-acht':          [['=\\log_2 2^3', '\\text{als Potenz schreiben}'], ['=3', '\\text{Logarithmus}']],
         'lg-tausend':       [['=\\log_{10} 10^3', '\\text{als Potenz schreiben}'], ['=3', '\\text{Logarithmus}']],

@@ -29,7 +29,7 @@
         ['s1-pythagoras',   '\\sin^2 x+\\cos^2 x',                                        ''],
         ['s1-nuss',         '2\\sin^2(x)=\\sin(x)\\quad(0\\le x<2\\pi)',                  'x'],
     );
-    BLOECKE.push({ titel: 'Periodische Vorgänge · Sinus am Einheitskreis', ab, bis: AUFGABEN.length, kw: 49 });
+    wochenBlock('sinus1', ab);
     Object.assign(LOESUNGEN, {
         's1-neunzig':      [['=\\frac{1}{2}\\cdot\\pi', '\\text{kürzen}'], ['=\\frac{\\pi}{2}', '\\text{zusammenfassen}']],
         's1-sechzig':      [['x=\\frac{1}{3}\\cdot\\pi', '\\text{kürzen}'], ['x=\\frac{\\pi}{3}', '\\text{zusammenfassen}']],

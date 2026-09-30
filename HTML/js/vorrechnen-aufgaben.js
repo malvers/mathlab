@@ -73,6 +73,51 @@ const BLOECKE = [
     { titel: 'Level 3 · echte Nüsse', ab: 37, bis: AUFGABEN.length },
 ];
 function aufgabenBlock(i) { return BLOECKE.find(b => i >= b.ab && i < b.bis) || BLOECKE[0]; }
+// The week blocks of Mathe BGY 11 (Doc, 30.09.2026: a block for every week of the school year, then "und die Tabelle find
+// ich eine gute Idee!"): a block file's name (js/vorrechnen-aufgaben-<name>.js) -> the calendar week it is for and its
+// title, in the order of the school year. THE place for both: a block's file registers itself with
+// wochenBlock('<name>', ab), and the plan reads this table alone for the pills in its weeks (svp/svp-plan-tafel.js)
+// instead of loading every task file. A new week: its file, its <script> in vorrechnen.html, its row here.
+const WOCHEN = {
+    'wurzeln':                  [41, 'Wurzeln · Stolperfallen'],
+    'exponential':              [44, 'Wachstum und Zerfall · Exponentialgleichungen'],
+    'ka1':                      [45, 'Wiederholung · Klassenarbeit 1'],
+    'quadratisch':              [46, 'Beschleunigte Bewegung · quadratische Funktionen'],
+    'quadratische-gleichungen': [47, 'Quadratische Gleichungen · ohne Hilfsmittel'],
+    'quadratisch-anwendung':    [48, 'Quadratische Modelle · Anwendungen'],
+    'sinus1':                   [49, 'Periodische Vorgänge · Sinus am Einheitskreis'],
+    'sinus2':                   [50, 'Periodische Vorgänge · Amplitude und Periode'],
+    'funktionen-vertiefung':    [51, 'Funktionen · Vertiefung'],
+    'regression':               [52, 'Regression · Modelle aus Messwerten'],
+    'umkehrfunktion':           [1, 'Umkehrfunktionen · Wurzeln'],
+    'logarithmus':              [2, 'Logarithmus · Begriff und Gesetze'],
+    'exponentialgleichungen':   [3, 'Exponentialgleichungen · mit Logarithmus'],
+    'ka2':                      [4, 'Wiederholung · Klassenarbeit 2'],
+    'graphen':                  [5, 'Graphen-Repertoire · Grundfunktionen'],
+    'parameter':                [8, 'Parameter · verschieben, strecken, spiegeln'],
+    'modellieren':              [9, 'Modellieren · Anwendungsaufgaben'],
+    'matrizen':                 [10, 'Matrizen · Begriff und Schreibweise'],
+    'gauss':                    [11, 'Gauß-Verfahren · LGS ohne Hilfsmittel'],
+    'loesungsmengen':           [12, 'Lösungsmengen · keine, eine, unendlich viele'],
+    'cas-lgs':                  [14, 'Matrizenoperationen · Probe und Anwendung'],
+    'baumdiagramme':            [15, 'Baumdiagramme · Pfadregeln'],
+    'vierfeldertafel':          [16, 'Vierfeldertafel · bedingte Wahrscheinlichkeit'],
+    'simulation':               [17, 'Simulation · Zufall mit dem Rechner'],
+    'stochastik-uebung':        [18, 'Stochastik · Übung'],
+    'ka3':                      [19, 'Wiederholung · Klassenarbeit 3'],
+    'fehlerquellen':            [20, 'Fehlerquellen · richtig gerechnet'],
+    'numerik':                  [21, 'Numerische Verfahren · Bisektion und Streifen'],
+    'montecarlo':               [22, 'Monte-Carlo-Methode · Flächen aus dem Zufall'],
+    'vermischt':                [23, 'Vermischte Übungen · Grundlagen sichern'],
+    'unendlich':                [24, 'Das unendlich Große · Hilbert, Cantor, Zenon'],
+    'jahresrueckblick':         [25, 'Jahresrückblick · Ausblick Klasse 12'],
+    'ausklang':                 [26, 'Ausklang · Knobelaufgaben'],
+};
+// mehr: what else the block says about itself (kopf)
+function wochenBlock(name, ab, mehr) {
+    const w = WOCHEN[name];
+    BLOECKE.push(Object.assign({ titel: w[1], ab, bis: AUFGABEN.length, kw: w[0] }, mehr));
+}
 // Doc, 28.09.: "Blende mir hier im Preview einen ausführlichen Erklärungstext ein ... oben rechts x zum
 // wegklicken (pro Aufgabe)" - a task's explanation for Doc, by its slug: paragraphs split by a blank line,
 // formulas between $...$ (KaTeX). A block's file adds its own; a task without one shows none.

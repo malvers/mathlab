@@ -30,7 +30,7 @@
         ['si-laeufe',       '\\frac{1}{\\sqrt{n}}=0{,}01\\quad(n>0)',     'n'],
         ['si-nuss',         '1-\\left(\\frac{5}{6}\\right)^4',            ''],
     );
-    BLOECKE.push({ titel: 'Simulation · Zufall mit dem Rechner', ab, bis: AUFGABEN.length, kw: 17, kopf: 'berechnen' });
+    wochenBlock('simulation', ab, { kopf: 'berechnen' });
     Object.assign(LOESUNGEN, {
         'si-erwartet':      [['=100', '\\text{ausrechnen}']],
         'si-haeufigkeit':   [['=\\frac{19}{120}', '\\text{kürzen}'], ['\\approx 0{,}158', '\\text{Taschenrechner}']],

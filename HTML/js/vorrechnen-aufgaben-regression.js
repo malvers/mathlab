@@ -29,7 +29,7 @@
         ['rg-parabel',      '10=a\\cdot 2^2+2',                           'a'],
         ['rg-drei-punkte',  '4a+2(1-a)+1=5',                              'a'],
     );
-    BLOECKE.push({ titel: 'Regression · Modelle aus Messwerten', ab, bis: AUFGABEN.length, kw: 52 });
+    wochenBlock('regression', ab);
     Object.assign(LOESUNGEN, {
         'rg-anstieg':       [['m=\\frac{6}{3}', '\\text{ausrechnen}'], ['m=2', '\\text{kürzen}']],
         'rg-achse':         [['2=2+b', '\\text{ausrechnen}'], ['b=0', '-2']],

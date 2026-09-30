@@ -29,7 +29,7 @@
         ['pa-scheitelform', '2x^2+8x+3',                                  ''],
         ['pa-nuss',         '\\left(\\frac{1}{a}\\right)^2-\\frac{1}{a}=0\\quad(a\\ne 0)', 'a'],
     );
-    BLOECKE.push({ titel: 'Parameter · verschieben, strecken, spiegeln', ab, bis: AUFGABEN.length, kw: 8 });
+    wochenBlock('parameter', ab);
     Object.assign(LOESUNGEN, {
         'pa-oben':          [['=1+3', '2^0=1'], ['=4', '\\text{ausrechnen}']],
         'pa-gestaucht':     [['=0{,}5\\cdot 16', '\\text{Potenz ausrechnen}'], ['=8', '\\text{ausrechnen}']],

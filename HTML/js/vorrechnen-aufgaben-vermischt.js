@@ -30,7 +30,7 @@
         ['vm-exp',          '3\\cdot 1{,}5^x=20',                         'x'],
         ['vm-nuss',         '\\sqrt{2x+1}=x-1\\quad(x\\ge 1)',            'x'],
     );
-    BLOECKE.push({ titel: 'Vermischte Übungen · Grundlagen sichern', ab, bis: AUFGABEN.length, kw: 23, kopf: 'berechnen' });
+    wochenBlock('vermischt', ab, { kopf: 'berechnen' });
     Object.assign(LOESUNGEN, {
         'vm-linear':        [['3x-7=8', '-2x'], ['3x=15', '+7'], ['x=5', ':3']],
         'vm-potenz':        [['2^x=2^6', '\\text{als Potenz schreiben}'], ['x=6', '\\text{Exponenten vergleichen}']],

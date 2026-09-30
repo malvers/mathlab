@@ -31,7 +31,7 @@
         ['qg-quadrate',     '(x+1)^2+(x-1)^2=10',                         'x'],
         ['qg-nuss',         '\\frac{6}{x}=x-1\\quad(x\\ne 0)',            'x'],
     );
-    BLOECKE.push({ titel: 'Quadratische Gleichungen · ohne Hilfsmittel', ab, bis: AUFGABEN.length, kw: 47 });
+    wochenBlock('quadratische-gleichungen', ab);
     Object.assign(LOESUNGEN, {
         'qg-ausklammern':  [['x(x-7)=0', '\\text{ausklammern}'], ['x_1=0\\quad x_2=7', '\\text{Nullprodukt}']],
         'qg-rein':         [['2x^2=8', '+8'], ['x^2=4', ':2'], ['x_1=2\\quad x_2=-2', '\\sqrt{\\;}']],

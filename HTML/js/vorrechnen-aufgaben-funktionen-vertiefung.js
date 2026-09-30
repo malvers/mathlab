@@ -29,7 +29,7 @@
         ['fv-schnitt-wurzel', '2x+1=x^2',                                 'x'],
         ['fv-beruehren',    'x^2+1=2x',                                   'x'],
     );
-    BLOECKE.push({ titel: 'Funktionen · Vertiefung', ab, bis: AUFGABEN.length, kw: 51 });
+    wochenBlock('funktionen-vertiefung', ab);
     Object.assign(LOESUNGEN, {
         'fv-tarif':         [['x=60', ':0{,}20']],
         'fv-tarife':        [['5=0{,}1x', '-0{,}1x'], ['x=50', ':0{,}1']],

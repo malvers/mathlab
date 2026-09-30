@@ -40,7 +40,7 @@
         ['w-rational',  '\\frac{1}{\\sqrt{2}-1}-\\sqrt{2}',                            ''],
         ['w-nuss',      '\\frac{\\sqrt{3}+1}{\\sqrt{3}-1}',                            ''],
     );
-    BLOECKE.push({ titel: 'Wurzeln · Stolperfallen', ab, bis: AUFGABEN.length, kw: 41 });
+    wochenBlock('wurzeln', ab);
     Object.assign(LOESUNGEN, {
         'w-drei':      [['=\\frac{3\\sqrt{7}}{\\sqrt{7}}', '\\text{zusammenfassen}'], ['=3', '\\text{kürzen}']],
         'w-halb':      [['=\\frac{\\sqrt{10}}{2\\sqrt{10}}', '\\text{zusammenfassen}'], ['=\\frac{1}{2}', '\\text{kürzen}']],

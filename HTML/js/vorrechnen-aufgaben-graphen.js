@@ -29,7 +29,7 @@
         ['gr-kehrwerte',    '\\frac{1}{x}=\\frac{1}{x^2}\\quad(x\\ne 0)', 'x'],
         ['gr-nuss',         '\\frac{1}{x}+\\frac{1}{x^2}=2\\quad(x\\ne 0)', 'x'],
     );
-    BLOECKE.push({ titel: 'Graphen-Repertoire · Grundfunktionen', ab, bis: AUFGABEN.length, kw: 5 });
+    wochenBlock('graphen', ab);
     Object.assign(LOESUNGEN, {
         'gr-wurzel':        [['y=3', '\\text{Wurzel ziehen}']],
         'gr-parabel':       [['y=-9', '\\text{Potenz vor Vorzeichen}']],

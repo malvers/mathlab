@@ -31,7 +31,7 @@
         ['jr-aenderung',    '\\frac{3^2-1^2}{3-1}',                       ''],
         ['jr-nuss',         '\\frac{(x+h)^2-x^2}{h}',                     ''],
     );
-    BLOECKE.push({ titel: 'Jahresrückblick · Ausblick Klasse 12', ab, bis: AUFGABEN.length, kw: 25, kopf: 'berechnen' });
+    wochenBlock('jahresrueckblick', ab, { kopf: 'berechnen' });
     Object.assign(LOESUNGEN, {
         'jr-linear':        [['3x-12=2x+1', '\\text{ausmultiplizieren}'], ['x-12=1', '-2x'], ['x=13', '+12']],
         'jr-log':           [['=\\log_2 2^7', '\\text{als Potenz schreiben}'], ['=7', '\\text{Logarithmus}']],

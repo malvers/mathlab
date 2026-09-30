@@ -30,7 +30,7 @@
         ['su-mindestens',   '1-\\left(\\frac{5}{6}\\right)^4',            ''],
         ['su-nuss',         '\\frac{\\frac{1}{36}}{\\frac{11}{36}}',      ''],
     );
-    BLOECKE.push({ titel: 'Stochastik · Übung', ab, bis: AUFGABEN.length, kw: 18, kopf: 'berechnen' });
+    wochenBlock('stochastik-uebung', ab, { kopf: 'berechnen' });
     Object.assign(LOESUNGEN, {
         'su-gerade':        [['=\\frac{1}{2}', '\\text{kürzen}']],
         'su-folgen':        [['=16', '\\text{ausrechnen}']],

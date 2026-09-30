@@ -114,23 +114,21 @@ window.svpPlanParts.push(function (P) {
             .catch(() => { /* offline or no table: the plan stays as it is */ });
     })();
 
-    /* The weeks of the Vorrechnen blocks, from the task files themselves: the list of vorrechnen.html (its
-       <script> tags - the one list, decks/tafel.html reads it the same way), the files run together in one
-       function of their own, so nothing of them lands in this page's globals. */
+    /* The weeks of the Vorrechnen blocks: the table WOCHEN in js/vorrechnen-aufgaben.js (name -> [week, title]), THE
+       place for both - one file instead of all the task files (36 of them, 339 kB, for one pill a week; Doc,
+       30.09.2026: "die Tabelle find ich eine gute Idee!"). The file runs in a function of its own, so nothing of it
+       lands in this page's globals. */
     (function vorrechnenLaden() {
         if (!VORRECHNEN_SEITE.test(location.pathname)) return;
-        fetch(WURZEL + 'vorrechnen.html')
+        fetch(WURZEL + 'js/vorrechnen-aufgaben.js')
             .then(res => (res.ok ? res.text() : ''))
-            .then(html => Promise.all([...html.matchAll(/<script\s+src="(js\/vorrechnen-aufgaben[\w-]*\.js)"/g)]
-                .map(m => fetch(WURZEL + m[1]).then(res => (res.ok ? res.text() : '')))))
-            .then(texte => {
-                if (!texte.length) return;
-                const bloecke = new Function(texte.join('\n;\n') + '\n;return BLOECKE;')();
+            .then(text => {
+                if (!text) return;
+                const tabelle = new Function(text + '\n;return WOCHEN;')();
                 const wochen = {};
-                bloecke.forEach(b => {
-                    if (b.kw == null) return;
-                    const k = String(b.kw);
-                    wochen[k] = wochen[k] ? wochen[k] + ' + ' + b.titel : b.titel;
+                Object.keys(tabelle).forEach(name => {
+                    const k = String(tabelle[name][0]), titel = tabelle[name][1];
+                    wochen[k] = wochen[k] ? wochen[k] + ' + ' + titel : titel;
                 });
                 vorrechnen = wochen;
                 neuZeichnen();

@@ -31,7 +31,7 @@
         ['ak-papier',       '0{,}1\\cdot 2^{42}',                         ''],
         ['ak-nuss',         'x+(x+1)+(x+2)=72',                           'x'],
     );
-    BLOECKE.push({ titel: 'Ausklang · Knobelaufgaben', ab, bis: AUFGABEN.length, kw: 26, kopf: 'knobeln' });
+    wochenBlock('ausklang', ab, { kopf: 'knobeln' });
     Object.assign(LOESUNGEN, {
         'ak-seerosen':      [['=47', '\\text{ein Tag vorher}']],
         'ak-quadrate':      [['=14', '\\text{addieren}']],

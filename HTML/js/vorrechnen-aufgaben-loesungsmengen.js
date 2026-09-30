@@ -29,7 +29,7 @@
         ['lm-drei-viele-b', '{\\begin{cases}x+2y-z=1\\\\2x+4y-2z=2\\\\y+z=3\\end{cases}}', ''],
         ['lm-nuss', '{\\begin{cases}x+y+z=6\\\\x+2y+3z=14\\\\2x+3y+4z=20\\end{cases}}', ''],
     );
-    BLOECKE.push({ titel: 'Lösungsmengen · keine, eine, unendlich viele', ab, bis: AUFGABEN.length, kw: 12, kopf: 'LGS lösen' });
+    wochenBlock('loesungsmengen', ab, { kopf: 'LGS lösen' });
     Object.assign(LOESUNGEN, {
         'lm-eine': [['\\left(\\begin{array}{cc|c}1&1&4\\\\1&-1&2\\end{array}\\right)', '\\text{Koeffizientenmatrix}'], ['\\left(\\begin{array}{cc|c}1&1&4\\\\0&-2&-2\\end{array}\\right)', '\\text{II}-\\text{I}'], ['x=3\\quad y=1', '\\text{rückwärts einsetzen}']],
         'lm-keine': [['\\left(\\begin{array}{cc|c}1&1&4\\\\1&1&9\\end{array}\\right)', '\\text{Koeffizientenmatrix}'], ['\\left(\\begin{array}{cc|c}1&1&4\\\\0&0&5\\end{array}\\right)', '\\text{II}-\\text{I}'], ['L=\\{\\}', '\\text{Widerspruch}']],

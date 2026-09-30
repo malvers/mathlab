@@ -30,7 +30,7 @@
         ['mx-linear',       '2\\cdot\\begin{pmatrix}1&0\\\\2&1\\end{pmatrix}-3\\cdot\\begin{pmatrix}0&1\\\\1&1\\end{pmatrix}', ''],
         ['mx-nuss',         '{\\begin{cases}2x+y=40\\\\x+3y=45\\end{cases}}',                                ''],
     );
-    BLOECKE.push({ titel: 'Matrizen · Begriff und Schreibweise', ab, bis: AUFGABEN.length, kw: 10, kopf: 'berechnen' });
+    wochenBlock('matrizen', ab, { kopf: 'berechnen' });
     Object.assign(LOESUNGEN, {
         'mx-anzahl':        [['=20', '\\text{Zeilen mal Spalten}']],
         'mx-gleich':        [['a=3', '-1']],

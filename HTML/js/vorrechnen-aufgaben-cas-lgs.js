@@ -30,7 +30,7 @@
         ['ca-gleiche-zeilen', '{\\begin{cases}x+y+z=6\\\\x+y+z=6\\\\x-y=0\\end{cases}}',                    ''],
         ['ca-nuss',         '\\begin{pmatrix}1&2\\\\2&1\\end{pmatrix}^{\\mathsf{T}}-\\begin{pmatrix}1&2\\\\2&1\\end{pmatrix}', ''],
     );
-    BLOECKE.push({ titel: 'Matrizenoperationen · Probe und Anwendung', ab, bis: AUFGABEN.length, kw: 14, kopf: 'berechnen' });
+    wochenBlock('cas-lgs', ab, { kopf: 'berechnen' });
     Object.assign(LOESUNGEN, {
         'ca-vielfaches':    [['=\\begin{pmatrix}2&6\\\\0&-4\\end{pmatrix}', '\\text{jeder Eintrag mal 2}']],
         'ca-transponiert':  [['=\\begin{pmatrix}1&3\\\\2&4\\end{pmatrix}', '\\text{Zeilen werden Spalten}']],

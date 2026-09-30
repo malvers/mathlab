@@ -29,7 +29,7 @@
         ['k2-loggl',        '\\log_3(x-2)=2\\quad(x>2)',                  'x'],
         ['k2-nuss',         '2^{x+1}=3^x',                                'x'],
     );
-    BLOECKE.push({ titel: 'Wiederholung · Klassenarbeit 2', ab, bis: AUFGABEN.length, kw: 4 });
+    wochenBlock('ka2', ab);
     Object.assign(LOESUNGEN, {
         'k2-periode':       [['p=\\frac{\\pi}{2}', '\\text{kürzen}']],
         'k2-log':           [['=\\log_2 2^6', '\\text{als Potenz schreiben}'], ['=6', '\\text{Logarithmus}']],

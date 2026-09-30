@@ -29,7 +29,7 @@
         ['uk-betrag',       '\\sqrt{x^2}=5',                              'x'],
         ['uk-nuss',         '\\sqrt{x+6}=x\\quad(x\\ge 0)',               'x'],
     );
-    BLOECKE.push({ titel: 'Umkehrfunktionen · Wurzeln', ab, bis: AUFGABEN.length, kw: 1 });
+    wochenBlock('umkehrfunktion', ab);
     Object.assign(LOESUNGEN, {
         'uk-sieben':        [['x=49', '\\text{quadrieren}']],
         'uk-summe':         [['=9+4', '\\text{Wurzel ziehen}'], ['=13', '\\text{ausrechnen}']],

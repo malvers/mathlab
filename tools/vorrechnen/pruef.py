@@ -18,6 +18,8 @@ def vor(tex):
     t = re.sub(r'\\(left|right)\\([{}])', r'\\\2', t)
     t = re.sub(r'\\(?:[,;:! ]|quad|qquad)', ' ', t)
     t = t.replace('\\textcolor', '')
+    # a root's index lifted off the hook, "\sqrt[{}^{90} ]{..}" (js/vorrechnen-aufgaben-wurzeln.js): the plain index
+    t = re.sub(r'\\sqrt\[\s*\{\}\^\{?(\d+)\}?\s*\]', r'\\sqrt[\1]', t)
     # logarithms: the base in braces, a plain argument in brackets - parse_latex reads "\log_2 32" as base 23 and takes
     # everything after "\log_3 9" into the argument
     t = re.sub(r'\\log_([0-9a-zA-Z])', r'\\log_{\1}', t)

@@ -31,7 +31,7 @@
         ['k3-drei',         '{\\begin{cases}x+y+z=2\\\\2x-y+z=2\\\\x+2y-z=5\\end{cases}}',                    ''],
         ['k3-nuss',         '{\\begin{cases}x+y+z=4\\\\x+2y+3z=9\\\\2x+3y+4z=13\\end{cases}}',                ''],
     );
-    BLOECKE.push({ titel: 'Wiederholung · Klassenarbeit 3', ab, bis: AUFGABEN.length, kw: 19, kopf: 'berechnen' });
+    wochenBlock('ka3', ab, { kopf: 'berechnen' });
     Object.assign(LOESUNGEN, {
         'k3-muenze':        [['=\\frac{1}{4}', '\\text{Pfadregel}']],
         'k3-pfade':         [['=9', '\\text{ausrechnen}']],

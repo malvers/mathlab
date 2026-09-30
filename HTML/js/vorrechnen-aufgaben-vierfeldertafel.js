@@ -30,7 +30,7 @@
         ['vf-krank',        '\\frac{0{,}0099}{0{,}0594}',                 ''],
         ['vf-nuss',         '\\frac{0{,}4\\cdot 0{,}75}{0{,}4\\cdot 0{,}75+0{,}6\\cdot 0{,}5}', ''],
     );
-    BLOECKE.push({ titel: 'Vierfeldertafel · bedingte Wahrscheinlichkeit', ab, bis: AUFGABEN.length, kw: 16, kopf: 'berechnen' });
+    wochenBlock('vierfeldertafel', ab, { kopf: 'berechnen' });
     Object.assign(LOESUNGEN, {
         'vf-jungen-brille': [['=10', '\\text{Randfeld minus Innenfeld}']],
         'vf-ohne-brille':   [['=6', '\\text{Randfeld minus Innenfeld}']],

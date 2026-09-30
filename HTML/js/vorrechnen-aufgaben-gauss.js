@@ -31,7 +31,7 @@
         ['ga-negativ', '{\\begin{cases}x+2y-z=-3\\\\2x-y+z=9\\\\x+y+z=4\\end{cases}}', ''],
         ['ga-nuss', '{\\begin{cases}x+4y-2z=7\\\\2x+y+3z=7\\\\3x-2y+z=-7\\end{cases}}', ''],
     );
-    BLOECKE.push({ titel: 'Gauß-Verfahren · LGS ohne Hilfsmittel', ab, bis: AUFGABEN.length, kw: 11, kopf: 'LGS lösen' });
+    wochenBlock('gauss', ab, { kopf: 'LGS lösen' });
     Object.assign(LOESUNGEN, {
         'ga-plus': [['\\left(\\begin{array}{cc|c}1&1&5\\\\1&-1&1\\end{array}\\right)', '\\text{Koeffizientenmatrix}'], ['\\left(\\begin{array}{cc|c}1&1&5\\\\0&-2&-4\\end{array}\\right)', '\\text{II}-\\text{I}'], ['x=3\\quad y=2', '\\text{rückwärts einsetzen}']],
         'ga-zwei': [['\\left(\\begin{array}{cc|c}2&1&8\\\\1&-1&1\\end{array}\\right)', '\\text{Koeffizientenmatrix}'], ['\\left(\\begin{array}{cc|c}2&1&8\\\\0&-3&-6\\end{array}\\right)', '2\\cdot\\text{II}-\\text{I}'], ['x=3\\quad y=2', '\\text{rückwärts einsetzen}']],

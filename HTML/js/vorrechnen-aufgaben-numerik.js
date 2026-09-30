@@ -30,7 +30,7 @@
         ['nu-schritte',     '\\left(\\frac{1}{2}\\right)^n=0{,}001',      'n'],
         ['nu-nuss',         '\\frac{1}{2}\\cdot\\left(1{,}5+\\frac{2}{1{,}5}\\right)', ''],
     );
-    BLOECKE.push({ titel: 'Numerische Verfahren · Bisektion und Streifen', ab, bis: AUFGABEN.length, kw: 21, kopf: 'berechnen' });
+    wochenBlock('numerik', ab, { kopf: 'berechnen' });
     Object.assign(LOESUNGEN, {
         'nu-mitte':         [['=1{,}5', '\\text{ausrechnen}']],
         'nu-wert':          [['=2{,}25-2', '\\text{quadrieren}'], ['=0{,}25', '\\text{ausrechnen}']],

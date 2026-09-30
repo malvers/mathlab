@@ -30,7 +30,7 @@
         ['anw-erloes',      'x(80-x)=40x+300',                            'x'],
         ['anw-diagonale',   'x^2+(x+2)^2=100\\quad(x>0)',                 'x'],
     );
-    BLOECKE.push({ titel: 'Quadratische Modelle · Anwendungen', ab, bis: AUFGABEN.length, kw: 48 });
+    wochenBlock('quadratisch-anwendung', ab);
     Object.assign(LOESUNGEN, {
         'anw-turm':       [['-5t^2=-45', '-45'], ['t^2=9', ':(-5)'], ['t=3', '\\sqrt{\\;},\\ t>0']],
         'anw-kosten':     [['0{,}5x^2=32', '-20'], ['x^2=64', ':0{,}5'], ['x=8', '\\sqrt{\\;},\\ x>0']],

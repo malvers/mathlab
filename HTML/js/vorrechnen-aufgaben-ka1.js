@@ -28,7 +28,7 @@
         ['ka1-klammerquadrat', '(x-3)^2=16',                              'x'],
         ['ka1-nuss',        '(x+2)^2-(x-2)^2=24',                         'x'],
     );
-    BLOECKE.push({ titel: 'Wiederholung · Klassenarbeit 1', ab, bis: AUFGABEN.length, kw: 45 });
+    wochenBlock('ka1', ab);
     Object.assign(LOESUNGEN, {
         'ka1-linear':      [['3x+9=-6', '-x'], ['3x=-15', '-9'], ['x=-5', ':3']],
         'ka1-nullstelle':  [['-3x=-12', '-12'], ['x=4', ':(-3)']],

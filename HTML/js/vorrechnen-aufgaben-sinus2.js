@@ -29,7 +29,7 @@
         ['s2-wasser',        '3\\sin\\left(\\frac{\\pi}{6}t\\right)+5=\\frac{13}{2}\\quad(0\\le t<12)', 't'],
         ['s2-nuss',          '2\\sin(2x)=\\sqrt{3}\\quad(0\\le x<\\pi)',                   'x'],
     );
-    BLOECKE.push({ titel: 'Periodische Vorgänge · Amplitude und Periode', ab, bis: AUFGABEN.length, kw: 50 });
+    wochenBlock('sinus2', ab);
     Object.assign(LOESUNGEN, {
         's2-periode-zwei':   [['p=\\pi', '\\text{kürzen}']],
         's2-periode-halb':   [['p=2\\pi\\cdot 2', '\\text{durch Bruch teilen}'], ['p=4\\pi', '\\text{ausrechnen}']],
