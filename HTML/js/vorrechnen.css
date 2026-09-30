@@ -398,6 +398,12 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
    the light grey of the grey steps (#schritt-hinweis), a touch lighter than the numbers */
 #canvas-container .rw-op { color: #8a93a3; }
 #canvas-container.hell .rw-op { color: #7a8294; }
+/* the result's "| 😊" comes by itself: a second after its row has landed, fading in over a second (Doc, 30.09.:
+   "lass den smiley auto zeitverzög. 1 s einfaden", "den | auch verzögert"; smileySetzen). By #rechenweg-schicht on
+   purpose - the glide at a task change and the history are copies without ids, and there it simply stands */
+#rechenweg-schicht .rw-op[data-smiley="warte"] { opacity: 0; }
+#rechenweg-schicht .rw-op[data-smiley="ein"] { animation: rw-smiley-ein 1s ease 1s both; }
+@keyframes rw-smiley-ein { from { opacity: 0; } to { opacity: 1; } }
 /* exponents smaller (Doc, 30.09.2026, at sqrt(17^2) - cbrt(17^3): "die Potenzen sind sehr groß") - KaTeX sets them
    at 70 %, here 60 %. Only a superscript on a full-size base: the lone one of x^2, the second (upper) of T_1^2;
    subscripts R_1 stay, and so do the smaller levels (the place values 10^k over the Ziffernrätsel letters). The

@@ -201,6 +201,9 @@ function ergebnisSchritt() {
 // done to, once the next one stands: from the task's solution (LOESUNGEN) and only where both rows are its
 // steps - a step skipped joins its operations, a row of another way has none. Keyed like the rows:
 // 'aufgabe', 0, 1, ...
+// Doc, 30.09.2026: "alle & immer später | #" - never before the step it leads to: an operation standing in advance
+// gave the step away before anyone had thought ("| -5 darf erst kommen, wenn ein Schritt gelöst ist"). From 06:28
+// to now the newest row (and the task) got the next step's operation at once ("die kommen zu spät") - gone again.
 function umformungen() {
     const ops = new Map();
     const loesung = aufgabenModus && LOESUNGEN[AUFGABEN[aufgabeIdx][0]];
@@ -217,13 +220,6 @@ function umformungen() {
         }
         vorher = j >= 0 ? j : null;                // a row off the solution: the next one has no "before"
     });
-    // Doc, 30.09.2026: "die kommen zu spät" - an operation showed only once the row after it had landed (only then
-    // is it known which steps were skipped). The newest row (or the task, before any) gets the next step's
-    // operation at once, as one writes "| -3x" before the next line; a row that skips steps joins them as above
-    if (vorher !== null && vorher + 1 < loesung.length) {
-        const op = (loesung[vorher + 1][1] || '').replace(/^\s*:/, '{:}');
-        if (op) ops.set(rechenweg.length ? rechenweg.length - 1 : 'aufgabe', op);
-    }
     return ops;
 }
 // Doc, 30.09.2026: "lass in der letzten Zeile hinter | immer einen freundlichen Smiley kommen" - the result's row gets
@@ -237,6 +233,37 @@ function smileyIcon() {
     i.alt = '😊';
     i.style.cssText = 'width:1.15em;height:1.15em;vertical-align:-0.25em';
     return i;
+}
+// Doc, 30.09.2026: "lass den smiley auto zeitverzög. 1 s einfaden", "den | auch verzögert" - the result's "| 😊"
+// comes by itself a second after its row has landed and fades in over a second (data-smiley on its cell,
+// js/vorrechnen.css; the beamer's copy carries the attribute and fades along). Once per result: the board is laid
+// out again and again (a resize, the next landing) - a smiley that has come just stands, one laid out again during
+// its fade goes on where it was.
+const SMILEY_WARTEN = 1000;            // ms after the landing; the fade takes as long (js/vorrechnen.css)
+let smileyEin = null;                  // { key, ab }: whose smiley has started, and when
+let smileyWartet = null;               // { el, key }: the smiley's cell laid out with its row still in the air
+function smileySetzen(el, i, weg) {
+    const key = aufgabeIdx + '|' + i + '|' + rechenweg[i].latex;
+    const seit = smileyEin && smileyEin.key === key ? Date.now() - smileyEin.ab : null;
+    if (seit !== null && seit >= 2 * SMILEY_WARTEN) return;
+    if (seit !== null) { smileyFade(el); el.style.animationDelay = (SMILEY_WARTEN - seit) + 'ms'; return; }
+    el.dataset.smiley = 'warte';
+    smileyWartet = { el, key };
+    if (!weg) smileyLandet();
+}
+// the result's row is on the board (flugLandet, schritteLanden, or laid out visible): its smiley starts
+function smileyLandet() {
+    const w = smileyWartet;
+    if (!w || !w.el.isConnected || w.el.style.visibility === 'hidden') return;
+    smileyWartet = null;
+    smileyEin = { key: w.key, ab: Date.now() };
+    smileyFade(w.el);
+}
+// faded in, it drops the attribute: the beamer rebuilds a layer from its markup at every change and would fade it
+// in again
+function smileyFade(el) {
+    el.dataset.smiley = 'ein';
+    el.addEventListener('animationend', () => { delete el.dataset.smiley; el.style.animationDelay = ''; }, { once: true });
 }
 let rechenwegWartet = false;
 let rechenwegLinie = 0;            // the last line the working takes (schaetzeZiel)
@@ -317,21 +344,24 @@ function zeigeRechenweg(verborgenAb) {
         z.nummer = d;
     });
     // the operations (umformungen), green like the deck's, in a column of their own between the rows and the
-    // numbers; each shows with the row it stands behind (data-mit: flugLandet, schritteLanden) - until 30.09. with
-    // the row it made, one step late ("die kommen zu spät"); the task's is there from the start
+    // numbers; each shows with the row it made, once that has landed (data-mit: flugLandet, schritteLanden) - never
+    // in advance (Doc, 30.09.: "alle & immer später"); the result's smiley with the result's own row
     const ops = umformungen();
     zeilen.forEach(z => {
         const op = z.ergebnis ? '' : ops.get(z.schritt);     // the result's row: the smiley (smileyIcon)
         if (!op && !z.ergebnis) return;
-        const mit = z.schritt === 'aufgabe' ? null : z.schritt;
-        const weg = mit !== null && ((verborgenAb !== undefined && mit >= verborgenAb) || imFlug.has(mit));
+        const mit = z.ergebnis ? z.schritt : z.schritt === 'aufgabe' ? 0 : z.schritt + 1;
+        const weg = (verborgenAb !== undefined && mit >= verborgenAb) || imFlug.has(mit);
         const d = zelle('\\textstyle\\vert\\;\\; ' + op, mit, weg, null);
         if (z.ergebnis) d.insertBefore(smileyIcon(), d.lastChild);
         delete d.dataset.schritt;
-        if (mit !== null) d.dataset.mit = mit;
+        d.dataset.mit = mit;
         d.className = 'rw-op';
         z.umformung = d;
+        if (z.ergebnis) smileySetzen(d, z.schritt, weg);
     });
+    // no result on the board (↓ took it back, another task): the next result's smiley fades in afresh
+    if (!zeilen.some(z => z.ergebnis)) smileyEin = smileyWartet = null;
     // the double underline of the result: two lines UNTER_EM apart under
     // the ink, the first as far below it (in em of the row)
     const UNTER_EM = 0.12, unterDicke = em => Math.max(1.5, 0.05 * em);

@@ -65,6 +65,7 @@ function flugLandet(f) {
     imFlug.delete(f.schritt);
     document.querySelectorAll(`#rechenweg-schicht :is([data-schritt="${f.schritt}"], [data-nummer="${f.schritt}"], [data-mit="${f.schritt}"])`)
         .forEach(z => { z.style.visibility = ''; });
+    smileyLandet();
 }
 function flugZurueck(f) {
     flugWeg(f);
@@ -281,7 +282,7 @@ function schritteLanden(erster, latexe, farben, von, c) {
         const zellen = [...host.querySelectorAll(`[data-schritt="${erster + k}"]`)];
         // its number and the operation that made it show with it
         const mit = [...host.querySelectorAll(`[data-nummer="${erster + k}"], [data-mit="${erster + k}"]`)];
-        const zeigen = () => [...zellen, ...mit].forEach(z => { z.style.visibility = ''; });
+        const zeigen = () => { [...zellen, ...mit].forEach(z => { z.style.visibility = ''; }); smileyLandet(); };
         const { x0, y0 } = zellenEcke(zellen);
         if (!isFinite(x0)) { zeigen(); return; }
         // one piece in flight, set at the step's size (smaller when newer
