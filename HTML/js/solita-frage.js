@@ -30,6 +30,8 @@
 //       stimme: 'doc'       the voice while none is chosen on this device (default Solita's)
 //   The handle also gives: s.out, s.row (the question line - a host may move it elsewhere), s.feld(), s.mikro(),
 //   s.hoert(), s.senden(), s.live(text), s.auffrischen() (password or question, as it stands now), s.aufwaermen(),
+//   s.wechsle() (Solita <-> Doc, as a click on her face), s.bild(el, { offen, oeffnen }) (the host's own picture of
+//   her: a click shows her line, with the line shown it switches - see bild()),
 //   s.beschaeftigt(), s.spiegel(m) (the presenter shows the beamer's answers: { html, zu, busy, st }). The host
 //   may fold the answers away with the class sf-zu on s.out; the next text takes it off.
 //   A click on the face switches between Solita and Doc; the page hears it as the event 'solita-wer' on document
@@ -612,13 +614,32 @@
         }
         // a click on the face switches between Solita and Doc, as the menu does (Doc, 29.09.2026: "einfacher Klick ...
         // auf den Avatar soll zwischen Solita und mir switchen")
-        function wechsle() {
+        function wechsle(ohneFokus) {
             VOICE = VOICE === 'doc' ? 'de-DE-Studio-C' : 'doc';
             merke(VOICE_KEY, VOICE);
             stop();
             showWho();
-            einladen();
+            if (!ohneFokus) einladen();
         }
+        // The host's own picture of her (the decks' footer, Vorrechnen's corner): a click or tap shows her line, and with
+        // the line shown switches between Solita and Doc - the same on the pad, where the line then stays open (Doc,
+        // 30.09.2026: "zeile nicht sichtbar -> show zeile, sichtbar -> switch", on a long press for the pad: "nee, passt
+        // so"). A finger or pen puts no cursor in the field: the pad's keyboard would come up with every switch.
+        function bild(el, h) {
+            let art = 'mouse';
+            el.addEventListener('pointerdown', function (e) { art = e.pointerType || 'mouse'; });
+            el.addEventListener('click', function () {
+                const wie = art; art = 'mouse';                // a key (Enter) on the picture counts as a click
+                if (h.offen()) wechsle(wie !== 'mouse'); else h.oeffnen();
+            });
+        }
+        // switched in another window of this page - the presenter view and the beamer, two tabs - this one follows
+        addEventListener('storage', function (e) {
+            if (e.key !== VOICE_KEY || (e.newValue !== 'doc' && e.newValue !== 'de-DE-Studio-C') || e.newValue === VOICE) return;
+            VOICE = e.newValue;
+            stop();
+            showWho();
+        });
         // after the switch the cursor blinks in the field and the microphone lights up once - here you can type,
         // or speak (Doc, 29.09.2026: "lass den Cursor gleich auch blinken", "das Mikrofon auch mal kurz aufflashen")
         function einladen() {
@@ -735,7 +756,7 @@
         root.addEventListener('keydown', function (e) { e.stopPropagation(); });
 
         return {
-            frage: frage, vorlesen: vorlesen, stop: stop, leeren: leeren,
+            frage: frage, vorlesen: vorlesen, stop: stop, leeren: leeren, wechsle: wechsle, bild: bild,
             out: out, row: row,
             feld: function () { return input; },             // a new field after the password - never keep the old one
             mikro: function () { if (micBtn.hidden) return false; micBtn.click(); return true; },   // false: no mic here (the password)

@@ -9,6 +9,23 @@
 #ask #ask-line .sf-row button{width:var(--hudbtn,22px);height:100%;border-radius:5px}
 #ask #ask-line .sf-row svg{width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6)}
 #ask #ask-line .sf-in{height:100%;padding:0 8px;border-radius:5px;font-size:13px}
+/* the field in the footer on the buttons' ground, as a test (Doc, 30.09.2026: "den Hintergrund von der Suchzeile genauso
+   wie die Hintergründe der Buttons"): their Dostojewski blue at .32, which their opacity of .9 takes to .29 (deck.css
+   #hud button) - and on a dark slide their dark glass, with light type */
+#ask #ask-line .sf-in{background:rgba(126,143,181,.29)}
+/* no frame, not even with the focus - the blinking cursor says where you type (Doc, 30.09.2026: "den Rahmen von der
+   Suchbox wegzulassen ... wenn der Cursor blinkt, reicht das") */
+#ask #ask-line .sf-in,#ask #ask-line .sf-in:focus{border:0}
+html.dark-slide #ask #ask-line .sf-in{background:rgba(7,22,48,.54);color:#E6ECF8}
+html.dark-slide #ask #ask-line .sf-in::placeholder{color:rgba(230,236,248,.55)}
+/* the mic (and the eye, her stop) in the footer as the footer's buttons (Doc, 30.09.2026: "das Mic auch so") - listening
+   it stays red */
+#ask #ask-line .sf-row button{border:0;background:rgba(126,143,181,.32);box-shadow:0 1px 1px rgba(0,0,0,.08);color:#3E4F7A;
+  opacity:.9;transition:opacity .2s,background-color .2s}
+#ask #ask-line .sf-row button:hover{opacity:1;background:rgba(126,143,181,.5)}
+html.dark-slide #ask #ask-line .sf-row button{background:rgba(7,22,48,.6);color:#E6ECF8;box-shadow:inset 0 0 0 1px rgba(230,236,248,.3)}
+html.dark-slide #ask #ask-line .sf-row button:hover{background:rgba(7,22,48,.82)}
+#ask #ask-line .sf-mic.on,html.dark-slide #ask #ask-line .sf-mic.on{background:var(--red);color:#fff;opacity:1;box-shadow:none}
 #ask #ask-line .sf-send{width:var(--hudbtn,22px);height:100%;min-width:0;padding:0;border-radius:5px;font-size:14px;
   display:grid;place-items:center}   /* square like the others (Doc, 23.09.2026) */
 #ask .sf-send svg{width:calc(var(--hudbtn,22px) * .6);height:calc(var(--hudbtn,22px) * .6);display:block}

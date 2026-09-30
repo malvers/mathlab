@@ -748,7 +748,7 @@ fromHash();
   const panel = document.getElementById('ask-panel');
   // The box's files come from here, so no deck page needs a new line. The version rides along: a browser still holding
   // an older copy of the box (from a lab - Pages keeps files 10 minutes) takes this one.
-  const SF_VERSION = '2026-09-30';
+  const SF_VERSION = '2026-09-30b';                // raise it with every change of the box or deck-solita.css
   function load(src, then) {
     const s = document.createElement('script');
     s.src = new URL(src, DECK_JS).href;
@@ -1065,11 +1065,11 @@ fromHash();
     }
     function close() { if (PRESENTER) return; panel.hidden = true; placeRow(); sf.stop(); }   // the row goes home, her picture stays in the footer; the presenter's line stays
 
-    btn.onclick = function () {
-      this.classList.remove('invite');                 // found her - no more inviting on this page
-      if (PRESENTER) return;                           // there she leads the question line - nothing to open or close
-      if (panel.hidden) open(); else close();
-    };
+    // Her picture: a click or tap opens the line, and with the line open switches between Solita and Doc - the box does
+    // it (Doc, 30.09.2026: "click auf Avatar switch Doc Solita (zentral bitte)"). Esc closes. The presenter's line is
+    // always open.
+    btn.addEventListener('click', function () { btn.classList.remove('invite'); });   // found her - no more inviting on this page
+    sf.bild(btn, { offen: function () { return PRESENTER || !panel.hidden; }, oeffnen: open });
     document.getElementById('ask-close').onclick = close;
     // Shift+Space and P start the mic from anywhere on the slide, not only inside her panel; a closed line slides
     // open first (Doc, 23.09.2026: "shift space und P sollen das Mic starten auf der ganzen Folie wenn eingeklappt,

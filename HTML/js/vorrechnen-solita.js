@@ -57,23 +57,28 @@ function solitaSchicht() {
         '<img alt="" src="' + SOLITA_BILD.Solita + '"></button>';
     container.appendChild(s);
     const knopf = s.querySelector('.vs-knopf');
-    knopf.addEventListener('click', () => solitaOffen(!s.classList.contains('offen')));
-    if (window.SolitaFrage) {
-        solita = SolitaFrage.mount(s.querySelector('.vs-sf'), {
-            kontext: solitaKontext, system: SOLITA_SYSTEM, platzhalter: 'Frag {name} zur Aufgabe',   // no heading, no chips
-            blase: true,                 // question and answer in one bubble, as in the decks (30.09.)
-        });
-        // the beamer shows the part of her answers Doc scrolled to (anzeigeEmpfang reads data-scroll)
-        const out = s.querySelector('.sf-out');
-        if (out) out.addEventListener('scroll', () => { out.dataset.scroll = String(Math.round(out.scrollTop)); }, { passive: true });
-    }
-    // Solita or Doc - the corner shows who answers
+    // Solita or Doc - the corner shows who answers; heard before the box is built, which says it once at the start
     document.addEventListener('solita-wer', e => {
         const img = knopf.querySelector('img'), wer = e.detail && e.detail.name === 'Doc' ? 'Doc' : 'Solita';
         img.src = SOLITA_BILD[wer];
         knopf.title = 'Frag ' + wer;
         knopf.setAttribute('aria-label', 'Frag ' + wer);
     });
+    if (window.SolitaFrage) {
+        solita = SolitaFrage.mount(s.querySelector('.vs-sf'), {
+            kontext: solitaKontext, system: SOLITA_SYSTEM, platzhalter: 'Frag {name} zur Aufgabe',   // no heading, no chips
+            blase: true,                 // question and answer in one bubble, as in the decks (30.09.)
+            beiEscape: () => solitaOffen(false),   // Esc in the field closes her line - the field keeps its keys to itself
+        });
+        // the beamer shows the part of her answers Doc scrolled to (anzeigeEmpfang reads data-scroll)
+        const out = s.querySelector('.sf-out');
+        if (out) out.addEventListener('scroll', () => { out.dataset.scroll = String(Math.round(out.scrollTop)); }, { passive: true });
+    }
+    // a click or tap opens her line, and with the line open switches between Solita and Doc - the box does it, as in the
+    // decks (Doc, 30.09.2026: "click auf Avatar switch Doc Solita (zentral bitte)"). Esc closes. Without the box the
+    // button still opens and closes.
+    if (solita) solita.bild(knopf, { offen: () => s.classList.contains('offen'), oeffnen: () => solitaOffen(true) });
+    else knopf.addEventListener('click', () => solitaOffen(!s.classList.contains('offen')));
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && s.classList.contains('offen')) solitaOffen(false); });
     return s;
 }
