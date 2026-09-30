@@ -6,6 +6,8 @@
 // "=" axis and the steps ("= ...") start on it. The block is for week 41 (kw) - the lab opens it then.
 // w-17 and w-neunzig come from two more of Doc's pictures: "∛289 = 17" (289 is 17², not 17³) and the
 // 90th root of 9^99/9^9.
+// w-sechs in front of w-17 is the same idea with numbers one knows (Doc, 30.09.: "mach mal vor die noch eine so
+// aber einfacher", between 6 and 7 - "6 ist schon so ähnlich").
 // Every step was checked with sympy: it has exactly the value of the task. All formulas and
 // operations render with the lab's KaTeX 0.16.8 (strict, no warnings).
 (function () {
@@ -17,6 +19,7 @@
         ['w-summe',     '\\sqrt{9+16}-\\sqrt{9}-\\sqrt{16}',                           ''],
         ['w-bruch',     '\\frac{\\sqrt{9}+\\sqrt{16}}{\\sqrt{9+16}}',                  ''],
         ['w-doppelt',   '\\sqrt{\\sqrt{81}}+\\sqrt{\\sqrt{16}}',                       ''],
+        ['w-sechs',     '\\sqrt{36}-\\sqrt[3]{216}',                                   ''],
         ['w-17',        '\\sqrt{289}-\\sqrt[3]{4913}',                                 ''],
         ['w-vier',      '\\frac{\\sqrt{2}+\\sqrt{2}+\\sqrt{2}+\\sqrt{2}}{\\sqrt{8}}',  ''],
         ['w-acht',      '\\frac{\\sqrt{8}+\\sqrt{2}}{\\sqrt{2}}',                      ''],
@@ -42,6 +45,7 @@
         'w-summe':     [['=\\sqrt{25}-\\sqrt{9}-\\sqrt{16}', '\\text{zusammenfassen}'], ['=5-3-4', '\\text{Wurzel ziehen}'], ['=-2', '\\text{ausrechnen}']],
         'w-bruch':     [['=\\frac{\\sqrt{9}+\\sqrt{16}}{\\sqrt{25}}', '\\text{zusammenfassen}'], ['=\\frac{3+4}{5}', '\\text{Wurzel ziehen}'], ['=\\frac{7}{5}', '\\text{ausrechnen}']],
         'w-doppelt':   [['=\\sqrt{9}+\\sqrt{4}', '\\text{Wurzel ziehen}'], ['=3+2', '\\text{Wurzel ziehen}'], ['=5', '\\text{ausrechnen}']],
+        'w-sechs':     [['=\\sqrt{6^2}-\\sqrt[3]{6^3}', '\\text{als Potenz schreiben}'], ['=6-6', '\\text{Wurzel ziehen}'], ['=0', '\\text{ausrechnen}']],
         'w-17':        [['=\\sqrt{17^2}-\\sqrt[3]{17^3}', '\\text{als Potenz schreiben}'], ['=17-17', '\\text{Wurzel ziehen}'], ['=0', '\\text{ausrechnen}']],
         'w-neunzig':   [['=\\sqrt[90]{9^{90}}', '\\text{Potenzgesetz}'], ['=9', '\\text{Wurzel ziehen}']],
         'w-vier':      [['=\\frac{4\\sqrt{2}}{\\sqrt{8}}', '\\text{zusammenfassen}'], ['=\\frac{4\\sqrt{2}}{\\sqrt{4\\cdot 2}}', '\\text{zerlegen}'], ['=\\frac{4\\sqrt{2}}{\\sqrt{4}\\cdot\\sqrt{2}}', '\\text{Wurzelgesetz}'], ['=\\frac{4\\sqrt{2}}{2\\sqrt{2}}', '\\text{Wurzel ziehen}'], ['=2', '\\text{kürzen}']],
