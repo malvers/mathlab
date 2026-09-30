@@ -11,8 +11,11 @@ Decks (HTML/decks/*.html) also get the text editor (decks/deck-edit.js) and its 
 Every page also gets live reload (/__live/reload.js, tools/live_reload.py): it reloads itself when its file or
 the scripts and styles it loads change (Doc, 17.09.2026).
 
-    python3 serve.py            # 127.0.0.1:8765, serves the HTML/ folder
+    python3 serve.py            # http://localhost:8765, serves the HTML/ folder
     python3 serve.py 8080       # other port
+
+The address to open and to hand out is ALWAYS localhost, never 127.0.0.1: a page opened under 127.0.0.1 is
+redirected there (Handler.one_address), so everything a page remembers lives under one address.
 """
 import http.server
 import importlib
@@ -165,7 +168,29 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self.proben_api()
         self.send_error(405, 'read-only server')
 
+    def one_address(self):
+        """A page opened under 127.0.0.1 is sent on to localhost - True when the redirect went out.
+
+        To the browser the two are different sites, each with its own localStorage: what a page remembers
+        under one (Solita's password, the plans' login, settings) is missing under the other, and the page
+        asks again as if nothing had ever been stored (Doc, 30.09.2026: an hour lost on vorrechnen.html,
+        "unbedingt merken/fixen"). Only a page a browser navigates to is redirected (Sec-Fetch-Mode) -
+        scripts, curl and the page's own requests get their answer as before.
+        """
+        if self.headers.get('Sec-Fetch-Mode') != 'navigate':
+            return False
+        host, _, port = (self.headers.get('Host') or '').rpartition(':')
+        if host not in ('127.0.0.1', '[::1]'):
+            return False
+        self.send_response(307)
+        self.send_header('Location', 'http://localhost:' + port + self.path)
+        self.send_header('Content-Length', '0')
+        self.end_headers()
+        return True
+
     def do_GET(self):
+        if self.one_address():
+            return
         if self.path.startswith('/__deck/'):
             return self.deck_api()
         if self.path.startswith('/__proben/'):
@@ -200,7 +225,7 @@ if __name__ == '__main__':
     if not os.path.isdir(HTML_DIR):
         sys.exit('HTML/ not found next to serve.py: ' + HTML_DIR)
     server = http.server.ThreadingHTTPServer((BIND, PORT), Handler)
-    print(f'LOCAL server: http://{BIND}:{PORT}/  ->  {HTML_DIR}')
+    print(f'LOCAL server: http://localhost:{PORT}/  ->  {HTML_DIR}')   # the one address to hand out (one_address)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
