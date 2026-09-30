@@ -55,14 +55,15 @@ window.svpPlanParts.push(function (P) {
        das Tafelicon. Wenn click: zeig Vorrechnen - das Tool mit den Aufgaben! Genial" - in a week with a Vorrechnen
        block the blackboard stands there and opens vorrechnen.html on that block (?kw=, js/vorrechnen-zustand.js), in
        a tab of its own; in the other weeks nothing. Built with the week's head (svp-plan-rows.js), shown once the
-       blocks are read (vorrechnenLaden). */
+       blocks are read (vorrechnenLaden). Same day: "mach das Tafel Icon hinter Aufgaben und so klein wie die
+       anderen" - it stands behind the tabs now, before the pen. */
     const knoepfe = [];
     function knopfZeigen(k) {
         const woche = vorrechnen[String(k.ref.kw)];
         k.b.hidden = !woche;
         if (woche) k.b.title = 'Vorrechnen: ' + woche;
     }
-    function vorrechnenKnopf(ref, kopf, vor) {
+    function vorrechnenKnopf(ref, kopf) {
         if (!VORRECHNEN_SEITE.test(location.pathname) || window.UNTIS_TERMIN || ref.kw == null || ref.kw === '') return;
         const b = document.createElement('button');
         b.type = 'button';
@@ -74,7 +75,7 @@ window.svpPlanParts.push(function (P) {
             ev.stopPropagation();   /* sonst klappt der Zeilenklick zu */
             window.open(WURZEL + 'vorrechnen.html?kw=' + encodeURIComponent(ref.kw), '_blank', 'noopener');
         });
-        kopf.insertBefore(b, vor);
+        kopf.appendChild(b);
         const k = { ref, b };
         knoepfe.push(k);
         knopfZeigen(k);
