@@ -54,6 +54,13 @@
     const VOICE_KEY = 'solita_voice:' + location.pathname;
     const HIST_MAX = 4;                  // exchanges that travel along, so "und warum?" makes sense
     const TTS_WAIT = 20000;              // ms — a hanging voice must not hide the answer
+    // A pause after every sentence she reads (Doc, 30.09.2026: "Die redet sehr schnell. Ich würde zwischen den Sätzen
+    // immer noch ein bisschen Pause lassen", "probieren wir mal 0,4 Sekunden"): an SSML break of 400 ms between the
+    // sentences of Solita's voice. Measured on Studio-C the same day: four sentences 8.98 s without, 10.46 s with
+    // three breaks - 0.49 s each, which is what the light on her words counts with (SATZPAUSE_IST). Doc's own voice
+    // comes in pieces anyway: the same wait between two pieces.
+    const SATZPAUSE_MS = 400, SATZPAUSE_IST = 0.49;
+    function xml(s) { return String(s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
     const HIER = document.currentScript ? document.currentScript.src : location.href;
     const SOLITA_PIC = new URL('../resources/solita-avatar.png', HIER).href;
     const DOC_PIC = new URL('../resources/team/alvers_avatar.jpg', HIER).href;
@@ -133,7 +140,7 @@
     // Kosteneinschätzung") - an estimate from its list prices: $ per million tokens at peak hours [input from the cache,
     // input, output], half of that off-peak (api-docs.deepseek.com/quick_start/pricing, read 30.09.2026; peak is
     // 01-04 and 06-10 UTC, Monday to Friday - Chinese holidays are not known here). Which row: the model the answer
-    // names; a name the list no longer shows ("deepseek-chat", what the box asks for) counts as Flash.
+    // names; the old name the box asks for ("deepseek-chat") stands for Flash - the deepseek function translates it.
     const DS_RATE = { flash: [0.006, 0.30, 1.20], pro: [0.044, 1.32, 3.96] };
     function kostenDs(usage, modell) {
         const u = usage || {}, d = new Date(), h = d.getUTCHours(), tag = d.getUTCDay();
@@ -592,6 +599,22 @@
             if (parts.length > 1 && SK() && parts.reduce(function (x, p) { return x + p.n; }, 0) !== SK().woerter(text, W)) {
                 parts = [{ clean: whole, n: SK().woerter(text, W) }];
             }
+            // Solita's voice: one request as before, her sentences parted by breaks - if they are found one by one and
+            // their word spans add up (else the plain text, without pauses)
+            let ssml = null;
+            const pausen = [];
+            if (VOICE !== 'doc' && SK() && parts.length === 1) {
+                const saetze = SK().stuecke(text, true).map(function (raw) { return { clean: sprechbar(raw), n: SK().woerter(raw, W) }; })
+                    .filter(function (p) { return p.clean; });
+                if (saetze.length > 1 && saetze.reduce(function (x, p) { return x + p.n; }, 0) === parts[0].n) {
+                    const s = '<speak>' + saetze.map(function (p) { return xml(p.clean); }).join('<break time="' + SATZPAUSE_MS + 'ms"/> ') + '</speak>';
+                    if (s.length <= 4900) {
+                        ssml = s;
+                        let c = 0;
+                        saetze.slice(0, -1).forEach(function (p) { c += p.n; pausen.push(c); });   // a pause before the span with this index
+                    }
+                }
+            }
             const meine = seq;
             let voice = VOICE;                                // a piece that fell back to Studio-C takes the rest along
             const got = [];
@@ -599,7 +622,8 @@
                 if (got[i]) return got[i];
                 const ctl = global.AbortController ? new AbortController() : null;
                 const timer = setTimeout(function () { if (ctl) ctl.abort(); }, TTS_WAIT);
-                got[i] = post(TTS_URL, { text: parts[i].clean.slice(0, 4800), voice: voice, languageCode: 'de-DE', speakingRate: 1.0 },
+                got[i] = post(TTS_URL, Object.assign(ssml ? { ssml: ssml } : { text: parts[i].clean.slice(0, 4800) },
+                                  { voice: voice, languageCode: 'de-DE', speakingRate: 1.0 }),
                               ctl ? ctl.signal : undefined)
                     .then(function (r) { return r.json(); })
                     .then(function (j) {
@@ -625,12 +649,13 @@
                     if (el && SK()) {
                         const alle = el.querySelectorAll('.' + WORT);
                         SK().spielen(el, a, [].slice.call(alle, first, first + parts[i].n),
-                            { wort: WORT, box: out, aktiv: function () { return audio === a; } });
+                            { wort: WORT, box: out, aktiv: function () { return audio === a; },
+                              pausen: ssml ? pausen : null, pause: SATZPAUSE_IST });
                     }
                     first += parts[i].n;
                     a.addEventListener('ended', function () {
                         if (audio !== a) return;
-                        if (i + 1 < parts.length) play(i + 1, a);
+                        if (i + 1 < parts.length) setTimeout(function () { play(i + 1, a); }, SATZPAUSE_MS);   // Doc's voice: the pause between two pieces
                         else { audio = null; stopBtn.hidden = true; }
                     });
                     a.play().catch(function () { stopBtn.hidden = true; });

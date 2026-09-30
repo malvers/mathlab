@@ -16,6 +16,17 @@
 
 const DEEPSEEK = 'https://api.deepseek.com/v1/chat/completions';
 
+// DeepSeek's models are deepseek-flash (V4.1 Flash) and deepseek-v4-pro (api-docs.deepseek.com, read 30.09.2026).
+// Our pages still ask for the old names; DeepSeek announced their end for 2026-07-24, until then they stood for
+// Flash without and with thinking. They are translated here, in one place, so no page has to change and the cost
+// log names the model that is billed (Doc, 30.09.2026: "bitte korrigieren"). The new models THINK by default -
+// slower and dearer; a chat name gets thinking switched off, as it always was. [model, thinking]
+const ALT: Record<string, [string, boolean]> = {
+  'deepseek-chat': ['deepseek-flash', false],
+  'deepseek-reasoner': ['deepseek-flash', true],
+  'deepseek-v4-flash': ['deepseek-flash', false],
+};
+
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-app-pass',
@@ -70,24 +81,42 @@ Deno.serve(async (req) => {
 
   if (!Array.isArray(b.messages)) return json({ error: 'keine messages übergeben' }, 400);
 
-  const body = {
-    model: typeof b.model === 'string' ? b.model : 'deepseek-chat',
+  const wanted = typeof b.model === 'string' ? b.model : 'deepseek-chat';
+  const asked: Record<string, unknown> = {
+    model: wanted,
     messages: b.messages,
     temperature: (typeof b.temperature === 'number') ? b.temperature : 0.6,
     max_tokens: (typeof b.max_tokens === 'number') ? b.max_tokens : 3000,
   };
+  // an old name: today's model, thinking as that name meant it (or as the page says: thinking true/false)
+  const neu = ALT[wanted];
+  let body: Record<string, unknown> = asked;
+  if (neu) {
+    const denkt = typeof b.thinking === 'boolean' ? b.thinking : neu[1];
+    body = { ...asked, model: neu[0], thinking: { type: denkt ? 'enabled' : 'disabled' } };
+  } else if (typeof b.thinking === 'boolean') {
+    body = { ...asked, thinking: { type: b.thinking ? 'enabled' : 'disabled' } };
+  }
+
+  const call = (payload: Record<string, unknown>) => fetch(DEEPSEEK, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+    body: JSON.stringify(payload),
+  });
 
   try {
-    const r = await fetch(DEEPSEEK, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-      body: JSON.stringify(body),
-    });
-    const data = await r.json().catch(() => ({}));
+    let r = await call(body);
+    let data = await r.json().catch(() => ({}));
+    // the translated request refused: once more exactly as the page asked, as before this change - never worse
+    if (!r.ok && body !== asked) {
+      const r2 = await call(asked);
+      const d2 = await r2.json().catch(() => ({}));
+      if (r2.ok) { r = r2; data = d2; body = asked; }
+    }
     if (r.ok && data && data.usage) {   // cost mail: record this call's tokens in the background (zero latency)
       try {
         const er = (globalThis as { EdgeRuntime?: { waitUntil?: (p: Promise<unknown>) => void } }).EdgeRuntime;
-        const p = logAiCost(body.model, data.usage);
+        const p = logAiCost(String(body.model), data.usage);
         if (er?.waitUntil) er.waitUntil(p);
       } catch (_) { /* never affect the chat */ }
     }

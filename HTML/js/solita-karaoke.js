@@ -278,23 +278,30 @@
     // steps in). So it comes sentence by sentence: the first piece at once, the next fetched while one plays, played on
     // without a gap (Doc, 25.09.2026, forloop-73's proposal). Pieces end at sentence ends outside $...$, so each one
     // renders into exactly its share of the answer's word spans - the karaoke runs piece by piece over those.
-    function stuecke(text) {
+    // jeder: every sentence a piece of its own, however short - for the pauses Solita's voice makes between her
+    // sentences (js/solita-frage.js, 30.09.2026). There a full stop after a single letter, a number or a short form
+    // ("z. B.", "3. Wurzel", "bzw.") ends no sentence: a pause in the middle of one would be wrong.
+    const KEIN_ENDE = /(?:^|[\s(])(?:[A-Za-zÄÖÜäöü]|\d+|bzw|ca|vgl|ggf|evtl|inkl|usw|etc|Nr|Abb|Dr|Prof|St|sog|max|min)$/;
+    function stuecke(text, jeder) {
         const src = String(text), ends = [];
         let inMath = false;
         for (let i = 0; i < src.length; i++) {
             const ch = src[i];
             if (ch === '$') inMath = !inMath;
-            else if (!inMath && /[.!?]/.test(ch) && (i + 1 === src.length || /\s/.test(src[i + 1]))) ends.push(i + 1);
+            else if (!inMath && /[.!?]/.test(ch) && (i + 1 === src.length || /\s/.test(src[i + 1]))) {
+                if (jeder && ch === '.' && i + 1 < src.length && KEIN_ENDE.test(src.slice(Math.max(0, i - 8), i))) continue;
+                ends.push(i + 1);
+            }
         }
         const out = [];
         let from = 0, cur = '';
         ends.concat(src.length).forEach(function (e) {
             if (e <= from) return;
             cur += src.slice(from, e); from = e;
-            const want = out.length ? 120 : 60;            // a short first piece: the voice starts sooner
+            const want = jeder ? 1 : out.length ? 120 : 60;   // a short first piece: the voice starts sooner
             if (cur.trim().length >= want) { out.push(cur.trim()); cur = ''; }
         });
-        if (cur.trim()) { if (out.length && cur.trim().length < 40) out[out.length - 1] += ' ' + cur.trim(); else out.push(cur.trim()); }
+        if (cur.trim()) { if (!jeder && out.length && cur.trim().length < 40) out[out.length - 1] += ' ' + cur.trim(); else out.push(cur.trim()); }
         return out;
     }
 
@@ -346,17 +353,21 @@
     }
     // el: the answer; a: the audio playing it; spans: this piece's share of el's word spans (default: all of them,
     // class opt.wort or 'ask-w'); opt.box: the scrolling box her word stays centred in; opt.aktiv(): still current?
+    // opt.pausen, opt.pause: silence put into the audio on purpose (SSML breaks between sentences) - before which
+    // spans (their index), and how many seconds each; that time is no speech, so it is taken off before the syllables
+    // are spread over the audio and put back where the pauses are.
     function spielen(el, a, spans, opt) {
         opt = opt || {};
         const aktiv = opt.aktiv || function () { return true; };
         const box = opt.box || null;
         const items = [];
+        const P = opt.pause || 0, vor = P ? (opt.pausen || []) : [];
         let pos = 0;
-        (spans || el.querySelectorAll('.' + (opt.wort || 'ask-w'))).forEach(function (sp) {
+        (spans || el.querySelectorAll('.' + (opt.wort || 'ask-w'))).forEach(function (sp, idx) {
             const w = (sp.dataset.spoken || sp.textContent).replace(/[*_`#>]/g, '');   // a formula counts as what is said of it
             const k = w.split(/\s+/).filter(Boolean).length || 1;   // a formula is several words in one span
             const n = syllables(w);
-            if (n) { items.push({ sp: sp, s: pos, n: n, k: k }); pos += n + KARA.base * k; }
+            if (n) { items.push({ sp: sp, s: pos, n: n, k: k, p: vor.filter(function (c) { return c <= idx; }).length }); pos += n + KARA.base * k; }
             if (/[.!?]["')\]]*$/.test(w)) pos += KARA.sentence;
             else if (/[,;:]["')\]]*$/.test(w)) pos += KARA.comma;
         });
@@ -378,9 +389,10 @@
         function frame() {
             if (!aktiv() || a.paused) { mark(null); return; }   // stopped, closed or finished
             if (isFinite(a.duration) && a.duration > 0) {
-                const u = (a.currentTime - KARA.lead) / Math.max(0.1, a.duration - KARA.lead - KARA.tail) * total;
+                const sek = Math.max(0.1, a.duration - KARA.lead - KARA.tail - P * vor.length) / total;   // seconds a unit of speech
+                const t = a.currentTime - KARA.lead;
                 let i = -1;
-                while (i + 1 < items.length && items[i + 1].s <= u) i++;
+                while (i + 1 < items.length && items[i + 1].s * sek + items[i + 1].p * P <= t) i++;
                 mark(i >= 0 ? items[i].sp : null);
             }
             requestAnimationFrame(frame);

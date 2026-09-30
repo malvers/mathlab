@@ -750,7 +750,7 @@ fromHash();
   const panel = document.getElementById('ask-panel');
   // The box's files come from here, so no deck page needs a new line. The version rides along: a browser still holding
   // an older copy of the box (from a lab - Pages keeps files 10 minutes) takes this one.
-  const SF_VERSION = '2026-09-30i';             // raise it with every change of the box or deck-solita.css
+  const SF_VERSION = '2026-09-30j';             // raise it with every change of the box or deck-solita.css
   function load(src, then) {
     const s = document.createElement('script');
     s.src = new URL(src, DECK_JS).href;
@@ -768,7 +768,7 @@ fromHash();
   if (!document.querySelector('link[href*="solita-frage.css"]')) css('../js/solita-frage.css', document.querySelector('link[href*="deck.css"]'));
   if (!document.querySelector('link[href*="deck-solita.css"]')) css('deck-solita.css');
   // the words of her formulas and the light on the word she says (js/solita-karaoke.js) - the box uses them
-  if (!window.SolitaKaraoke && !document.querySelector('script[src*="solita-karaoke.js"]')) load('../js/solita-karaoke.js');
+  if (!window.SolitaKaraoke && !document.querySelector('script[src*="solita-karaoke.js"]')) load('../js/solita-karaoke.js?v=' + SF_VERSION);
   load('../js/solita-frage.js?v=' + SF_VERSION, start);
 
   // Her instructions for the decks; who she is (Solita, or Doc with his voice) the box puts in front

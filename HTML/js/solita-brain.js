@@ -100,11 +100,14 @@
         // Rechnet je API-Hop (AUCH jeder Tool-Loop-Schritt) aus `usage` die € aus, loggt ins DEBUG-Fenster mit
         // Cache-Trefferquote (springt nach dem Caching-Deploy von 0% hoch) und summiert in localStorage.
         const PRICES = { 'claude-sonnet-4-6': [3, 15], 'claude-opus-4-8': [5, 25], 'claude-haiku-4-5': [1, 5],
-                         'deepseek-chat': [0.27, 1.10], 'deepseek-reasoner': [0.55, 2.19],
-                         // DeepSeek V4 (live ~Mitte Juli 2026). Werte = REGULÄRE (Off-Peak) cache-miss Preise $/1M [in,out].
-                         // Peak-Stunden ~verdoppeln (UTC 01–04 & 06–10 = CEST 03–06 & 08–12); der Zähler kennt Peak nicht,
-                         // daher Off-Peak als Schätz-Baseline. Bei Umstellung auf v4-Modelnamen aktivieren:
-                         'deepseek-v4-flash': [0.14, 0.28], 'deepseek-v4-pro': [0.435, 0.87] }; // [in,out] $/1M (DeepSeek ~10× günstiger; Preise können sich ändern)
+                         // DeepSeek: Liste von api-docs.deepseek.com/quick_start/pricing, gelesen am 30.09.2026 (Doc: "bitte
+                         // korrigieren" - hier standen noch 0,27/1,10 für deepseek-chat). Werte = HAUPTZEIT-Preise $/1M
+                         // [in,out] (UTC 01–04 & 06–10, Mo–Fr = CEST 03–06 & 08–12); sonst die Hälfte - der Zähler rechnet
+                         // jeden Aufruf zu seiner Uhrzeit (accountUsage). Die Kosten-Mail (supabase/functions/infra-usage)
+                         // kennt nur Tagessummen und nimmt den Hauptzeit-Preis als Obergrenze.
+                         // Die alten Namen deepseek-chat / deepseek-reasoner zeigen auf Flash (die deepseek-Funktion übersetzt sie).
+                         'deepseek-flash': [0.30, 1.20], 'deepseek-v4-flash': [0.30, 1.20], 'deepseek-v4-pro': [1.32, 3.96],
+                         'deepseek-chat': [0.30, 1.20], 'deepseek-reasoner': [0.30, 1.20] }; // [in,out] $/1M (Preise können sich ändern)
         const USD_EUR = 0.92;
         const COST_KEY = STORE.cost || 'solita_cost_total';
         // Hard DAILY €-brake (Doc: die 5€ sollen halten). accountUsage only ever counted UP, never blocked —
@@ -130,10 +133,13 @@
             const cw = u.cache_creation_input_tokens || 0;
             const p = priceFor(model);
             // Cache pricing differs by provider: Anthropic bills cache-READ ~0.1× and cache-WRITE 1.25×.
-            // DeepSeek has no write premium and its cache-HIT input ≈ 0.26× ($0.07 vs 0.27 / $0.14 vs 0.55).
+            // DeepSeek has no write premium and its cache-HIT input ≈ 0.02× (Flash: $0.006 vs 0.30) or 0.033× (Pro).
             const isDS = /^deepseek/.test(model || '');
-            const readMul = isDS ? 0.26 : 0.1, writeMul = isDS ? 1 : 1.25;
-            const eur = (inTok * p[0] + cr * p[0] * readMul + cw * p[0] * writeMul + outTok * p[1]) / 1e6 * USD_EUR;
+            const readMul = isDS ? (/pro/.test(model || '') ? 0.033 : 0.02) : 0.1, writeMul = isDS ? 1 : 1.25;
+            // DeepSeek outside its peak hours (01–04 and 06–10 UTC, Monday to Friday) costs half
+            const jetzt = new Date(), std = jetzt.getUTCHours(), tag = jetzt.getUTCDay();
+            const dsHalb = isDS && !(tag >= 1 && tag <= 5 && ((std >= 1 && std < 4) || (std >= 6 && std < 10))) ? 0.5 : 1;
+            const eur = (inTok * p[0] + cr * p[0] * readMul + cw * p[0] * writeMul + outTok * p[1]) / 1e6 * USD_EUR * dsHalb;
             let total = 0; try { total = parseFloat(localStorage.getItem(COST_KEY) || '0') || 0; } catch (e) { }
             total += eur;
             try { localStorage.setItem(COST_KEY, String(total)); } catch (e) { }

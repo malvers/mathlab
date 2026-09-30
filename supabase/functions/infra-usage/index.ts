@@ -138,11 +138,17 @@ const gbDe = (b: number) => de(b / GB, b < GB ? 3 : 2);                         
 
 // ── AI-Kosten (Phase 1: GEMESSENE Tokens × Listenpreis → ~die echte Rechnung; Phase 2 holt die echten
 //    Provider-Zahlen). Preistabelle spiegelt solita-brain.js. Cache: Anthropic read 0.1×/write 1.25×,
-//    DeepSeek hit 0.26×/kein Write-Aufschlag. Gemini: pro Token, kein Cache hier. ──
+//    DeepSeek hit 0.02× (Flash) bzw. 0.033× (Pro)/kein Write-Aufschlag. Gemini: pro Token, kein Cache hier.
+//    DeepSeek (Doc, 30.09.2026: "bitte korrigieren" - die Mail rechnete noch 0,27/1,10 $ fuer deepseek-chat):
+//    Liste von api-docs.deepseek.com/quick_start/pricing, gelesen am 30.09.2026 - Flash 0,30/1,20 $ und
+//    Pro 1,32/3,96 $ je 1M zur HAUPTZEIT (01-04 und 06-10 UTC, Mo-Fr), sonst die Haelfte. Die Mail kennt nur
+//    Tagessummen, keine Uhrzeit: sie rechnet den Hauptzeit-Preis, also eine OBERGRENZE (Docs Unterricht am
+//    Vormittag liegt in der Hauptzeit). Die alten Namen deepseek-chat / deepseek-reasoner zeigen auf Flash. ──
 const USD_EUR = 0.92;
 const PRICES: Record<string, [number, number]> = {   // [in, out] $/1M tokens
   'claude-sonnet-4-6': [3, 15], 'claude-opus-4-8': [5, 25], 'claude-haiku-4-5': [1, 5],
-  'deepseek-chat': [0.27, 1.10], 'deepseek-reasoner': [0.55, 2.19],
+  'deepseek-flash': [0.30, 1.20], 'deepseek-v4-flash': [0.30, 1.20], 'deepseek-v4-pro': [1.32, 3.96],
+  'deepseek-chat': [0.30, 1.20], 'deepseek-reasoner': [0.30, 1.20],
   'gemini-2.5-flash': [0.30, 2.50], 'gemini-2.5-flash-lite': [0.10, 0.40], 'gemini-2.5-pro': [1.25, 10],
 };
 function priceFor(model: string): [number, number] {
@@ -155,7 +161,7 @@ function rowEur(provider: string, model: string, inTok: number, outTok: number, 
   if (provider === 'google-tts') return 0;
   const p = priceFor(model || '');
   const isDS = /^deepseek/.test(provider) || /^deepseek/.test(model || '');
-  const readMul = isDS ? 0.26 : 0.1, writeMul = isDS ? 1 : 1.25;
+  const readMul = isDS ? (/pro/.test(model || '') ? 0.033 : 0.02) : 0.1, writeMul = isDS ? 1 : 1.25;
   return (inTok * p[0] + cr * p[0] * readMul + cw * p[0] * writeMul + outTok * p[1]) / 1e6 * USD_EUR;
 }
 // Google's free Text-to-Speech quota per voice type and CALENDAR MONTH. The pricing table is built by
