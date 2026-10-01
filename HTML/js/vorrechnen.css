@@ -445,9 +445,10 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
 /* ... and under the row the box with the comments, "klein drunter mit genau den gleichen Rundungen ... ohne großes
    Zinnober": the pills' corner (half their 26 px), their faint ground, the board's ink (set by pillenZeichnen) */
 #tempo-pille .tx-box {
-    /* Doc, 01.10.: "Die Box ist viel zu breit ... die Hintergrundfarbe ... so gelb ... wie die von der Blase" - as wide
-       as its words (at most 420 px), on the unread bubble's yellow */
-    pointer-events: auto; box-sizing: border-box; width: max-content; max-width: min(420px, 50vw); max-height: 220px; overflow-y: auto;
+    /* Doc, 01.10.: "Die Box ist viel zu breit ... die Hintergrundfarbe ... so gelb ... wie die von der Blase", then "so
+       breit wie alle drei Pillen zusammen. Das sieht cooler aus" - the row of pills sets the width (contain: the box's
+       own words do not widen it, they wrap), on the unread bubble's yellow */
+    pointer-events: auto; box-sizing: border-box; align-self: stretch; contain: inline-size; max-height: 220px; overflow-y: auto;
     display: flex; flex-direction: column; gap: 6px; padding: 8px 14px; border-radius: 13px; text-align: left;
     background: rgba(245, 194, 66, 0.22); font: 400 15px/1.4 Raleway, system-ui, sans-serif;
 }
