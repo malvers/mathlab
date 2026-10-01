@@ -14,19 +14,37 @@
 // task on the board when it ARRIVED: the look every 5 s (school Wi-Fi drops the websocket) or a page busy for a
 // moment brought the last taps of the old task onto the new one. Now it goes to the task and step that stood on
 // the board when it was PRESSED (its row's time on the server; the laptop's clock is taken to be right, a buzz
-// "from the future" counts as now). The board's states of this session, one entry per change:
-const tafelStaende = [];
+// "from the future" counts as now). The board's states of today, one entry per change - kept over a reload, so a
+// buzz pressed before it and arriving after still finds its task; while the page is closed nothing stood there.
+const TAFEL_STAENDE = 'vorrechnen-tafelstaende';
+const tafelStaende = (() => {
+    try {
+        const s = JSON.parse(localStorage.getItem(TAFEL_STAENDE) || '{}');
+        return s.tag === new Date().toDateString() && Array.isArray(s.staende) ? s.staende : [];
+    } catch (_) { return []; }
+})();
+// Doc, 01.10.: "Immer, wenn eine neue Aufgabe kommt oder ich die Seite neu lade oder ich von vorne anfange, müssen
+// die Votes null sein" - the pill counts what was pressed since then; the history keeps everything (Wiedervorlage)
+let pillenStart = Date.now();
+function pilleNull() { pillenStart = Date.now(); }           // also zeigeAufgabe: a task picked or started again
+function tafelStandDazu(aufgabe, schritt) {
+    tafelStaende.push({ t: Date.now(), aufgabe, schritt });
+    if (tafelStaende.length > 1000) tafelStaende.splice(0, tafelStaende.length - 1000);
+    try { localStorage.setItem(TAFEL_STAENDE, JSON.stringify({ tag: new Date().toDateString(), staende: tafelStaende })); } catch (_) {}
+}
 function merkeTafelStand() {
+    if (anzeigeModus) return;
     const aufgabe = aufgabenModus && AUFGABEN[aufgabeIdx] ? AUFGABEN[aufgabeIdx][0] : null, schritt = rechenweg.length;
     const l = tafelStaende[tafelStaende.length - 1];
     if (l && l.aufgabe === aufgabe && l.schritt === schritt) return;
-    tafelStaende.push({ t: Date.now(), aufgabe, schritt });
-    if (tafelStaende.length > 3000) tafelStaende.splice(0, 1000);
+    if (!l || l.aufgabe !== aufgabe) pilleNull();
+    tafelStandDazu(aufgabe, schritt);
 }
-// what stood on the board at time t; before this page was opened: what stands now (as it was before)
+addEventListener('pagehide', () => { if (!anzeigeModus) tafelStandDazu(null, 0); });
+// what stood on the board at time t; before the first state known today: nothing (not shown, not kept)
 function tafelStandUm(t) {
     for (let k = tafelStaende.length - 1; k >= 0; k--) if (tafelStaende[k].t <= t) return tafelStaende[k];
-    return tafelStaende[tafelStaende.length - 1];
+    return { aufgabe: null, schritt: 0 };
 }
 function buzzLog() {
     try { const l = JSON.parse(localStorage.getItem('vorrechnen-buzzer') || '[]'); return Array.isArray(l) ? l : []; }
@@ -63,8 +81,80 @@ function buzzerMeldung(n, neu, frisch = [], zeiten = {}, bezuege = {}) {
             if (frage) frage.verstanden = Math.min(zeiten[id] || jetzt, jetzt);
         });
         try { localStorage.setItem('vorrechnen-buzzer', JSON.stringify(log.slice(-500))); } catch (_) {}
+        feedbackSenden();
     }
     zeigeBuzzAufgabe();
+}
+
+// Doc, 01.10.: "Die Idee ist aber trotzdem, sich das im Hintergrund zu merken ... welche Aufgabe wurde nicht wirklich
+// verstanden ... das Feedback dazu nutzen, was wir üben müssen", "ja mit Tabelle in supa bitte", "Wiedervorlage nach
+// Verstandengrad!" - every question with its task, step and time, and its "verstanden" once it came, in the table
+// vorrechnen_feedback (one row per buzz, buzz_id; only the signed-in teacher's own rows: user_id = auth.uid()).
+// The log on this device stays the source: what has not gone up yet (gesendet) goes with the next buzz or the next
+// look at the Wiedervorlage - without a session, or offline, nothing is lost. The beamer window never sends.
+const FEEDBACK_TABELLE = 'vorrechnen_feedback';
+let feedbackLaeuft = null;
+function feedbackStand(e) { return e.aufgabe + '|' + (e.schritt || 0) + '|' + (e.verstanden || ''); }
+function feedbackSenden() {
+    if (anzeigeModus) return Promise.resolve(false);
+    if (feedbackLaeuft) return feedbackLaeuft;
+    feedbackLaeuft = (async () => {
+        try {
+            await svpAnmeldungLaden();                         // js/vorrechnen-tafel.js
+            if (!svpAuth.hasSession()) return false;
+            const offen = buzzLog().filter(e => e.aufgabe && e.gesendet !== feedbackStand(e));
+            if (!offen.length) return true;
+            const res = await svpAuth.api(FEEDBACK_TABELLE + '?on_conflict=buzz_id', {
+                method: 'POST',
+                headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+                body: JSON.stringify(offen.map(e => ({
+                    buzz_id: e.id, aufgabe: e.aufgabe, schritt: e.schritt || 0, code: e.code || null,
+                    gedrueckt: new Date(e.zeit).toISOString(),
+                    verstanden: e.verstanden ? new Date(e.verstanden).toISOString() : null })))
+            });
+            if (!res.ok) return false;
+            // marked on the log as it is now: a buzz or a "verstanden" that came meanwhile stays to be sent
+            const stand = new Map(offen.map(e => [e.id, feedbackStand(e)])), log = buzzLog();
+            log.forEach(e => { if (stand.get(e.id) === feedbackStand(e)) e.gesendet = stand.get(e.id); });
+            try { localStorage.setItem('vorrechnen-buzzer', JSON.stringify(log.slice(-500))); } catch (_) {}
+            return true;
+        } catch (_) { return false; }
+        finally { feedbackLaeuft = null; }
+    })();
+    return feedbackLaeuft;
+}
+// the whole history per task: this device's log (the newest state) and the cloud's rows, each buzz once.
+// {proAufgabe: Map key -> {nicht, verstanden, zuletzt, schritte: {step: n}}, wolke: the cloud was read}
+async function feedbackUebersicht() {
+    const proAufgabe = new Map(), gezaehlt = new Set();
+    const zaehle = (id, aufgabe, schritt, gedrueckt, verstanden) => {
+        if (!aufgabe || gezaehlt.has(id)) return;
+        gezaehlt.add(id);
+        let a = proAufgabe.get(aufgabe);
+        if (!a) proAufgabe.set(aufgabe, a = { nicht: 0, verstanden: 0, zuletzt: 0, schritte: {} });
+        a.nicht++;
+        if (verstanden) a.verstanden++;
+        a.zuletzt = Math.max(a.zuletzt, gedrueckt || 0);
+        a.schritte[schritt] = (a.schritte[schritt] || 0) + 1;
+    };
+    buzzLog().forEach(e => zaehle(e.id, e.aufgabe, e.schritt || 0, e.zeit, e.verstanden));
+    let wolke = false;
+    try {
+        await feedbackSenden();
+        if (window.svpAuth && svpAuth.hasSession()) {
+            // PostgREST hands out 1000 rows at a time
+            for (let ab = 0; ; ab += 1000) {
+                const res = await svpAuth.api(FEEDBACK_TABELLE + '?select=buzz_id,aufgabe,schritt,gedrueckt,verstanden' +
+                    '&order=buzz_id&limit=1000&offset=' + ab);
+                if (!res.ok) break;
+                const zeilen = await res.json();
+                zeilen.forEach(r => zaehle(r.buzz_id, r.aufgabe, r.schritt || 0, Date.parse(r.gedrueckt), r.verstanden));
+                wolke = true;
+                if (zeilen.length < 1000) break;
+            }
+        }
+    } catch (_) { /* offline: this device's log alone */ }
+    return { proAufgabe, wolke };
 }
 // Doc, 27.09.: first "in die erste Zeile ... ein Icon ... wie viele gebuzzert haben ... pro Aufgabe", then
 // "eigentlich müsste ja die Pille pro Rechenschritt erscheinen ... wenn der nächste Schritt kommt, kommt
@@ -100,7 +190,7 @@ function zeigeBuzzAufgabe() {
     }
     const heute = new Date().toDateString(), key = AUFGABEN[aufgabeIdx][0], code = Buzzer.code();
     const n = buzzLog().filter(e => e.aufgabe === key && e.schritt === schritt && e.code === code && !e.verstanden &&
-        new Date(e.zeit).toDateString() === heute).length;
+        e.zeit >= pillenStart && new Date(e.zeit).toDateString() === heute).length;
     // Doc, 29.09.: "bei 0 keine Pille und kein badge rechts" - both only once somebody has buzzed
     if (!n) { el.style.display = 'none'; grund.style.display = 'none'; return; }
     el.lastElementChild.textContent = String(n);

@@ -522,6 +522,72 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
 #aufgaben-overlay.hell .ak-nr { color: #5d6678; }
 #aufgaben-overlay.hell .cyber-modal-x { color: rgba(31, 64, 150, 0.7); border-color: rgba(31, 64, 150, 0.3); }
 
+/* Doc, 01.10.: "Wiedervorlage nach Verstandengrad!" - the first tab of the panel: one row per task the class did not
+   understand (aufgabenTab(-1), wiedervorlageTabelle); the heads sort, a row brings the task back. A tile with a
+   history carries its number of questions top right, in the colour of its Verstandengrad */
+#aufgaben-overlay .ak-wv-zahl {
+    position: absolute; top: 5px; right: 6px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box;
+    border-radius: 9px; font-family: 'Orbitron', sans-serif; font-size: 0.62rem; line-height: 18px; color: #fff;
+}
+#aufgaben-overlay .ak-wv[hidden] { display: none; }
+#aufgaben-overlay .wv-tabelle { display: flex; flex-direction: column; gap: 6px; }
+#aufgaben-overlay :is(.wv-kopf, .wv-zeile) {
+    display: grid; grid-template-columns: minmax(0, 1fr) 6.5rem 6.5rem 10rem 5rem; align-items: center; gap: 12px;
+}
+#aufgaben-overlay .wv-kopf { padding: 0 12px 4px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+#aufgaben-overlay .wv-spalte {
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 6px 0;
+    border: none; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent;
+    font-family: 'Orbitron', sans-serif; font-size: 0.62rem; letter-spacing: 1px; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+}
+#aufgaben-overlay .wv-s-aufgabe { justify-content: flex-start; }
+#aufgaben-overlay .wv-spalte[aria-sort] { color: #fff; }
+#aufgaben-overlay .wv-spalte svg { width: 10px; height: 10px; flex: none; }
+#aufgaben-overlay .wv-spalte:focus { outline: none; }
+#aufgaben-overlay .wv-kurz { display: none; }
+#aufgaben-overlay .wv-spalte .wv-zeichen { width: 18px; height: 18px; display: block; }
+#aufgaben-overlay .wv-zeile {
+    width: 100%; min-height: 64px; padding: 8px 12px; box-sizing: border-box; cursor: pointer; text-align: center;
+    color: #eaf0f7; background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.25); border-radius: 10px;
+    font-family: 'Orbitron', sans-serif; touch-action: manipulation;
+}
+#aufgaben-overlay .wv-zeile:hover:not(:disabled) { border-color: rgba(0, 210, 255, 0.6); }
+#aufgaben-overlay .wv-zeile:focus { outline: none; }
+#aufgaben-overlay .wv-zeile:disabled { cursor: default; opacity: 0.55; }
+#aufgaben-overlay .wv-aufgabe { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; text-align: left; }
+#aufgaben-overlay .wv-block {
+    max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-size: 0.62rem; letter-spacing: 0.08em; color: #8a93a3;
+}
+#aufgaben-overlay .wv-formel { font-size: 1.15rem; white-space: nowrap; }
+#aufgaben-overlay .wv-zahl { font-size: 1rem; }
+#aufgaben-overlay .wv-grad { display: flex; align-items: center; gap: 8px; }
+#aufgaben-overlay .wv-balken { flex: 1; height: 8px; border-radius: 4px; overflow: hidden; background: rgba(255, 255, 255, 0.08); }
+#aufgaben-overlay .wv-balken i { display: block; height: 100%; border-radius: 4px; }
+#aufgaben-overlay .wv-prozent { flex: none; width: 3.4rem; text-align: right; font-size: 0.8rem; }
+#aufgaben-overlay .wv-zuletzt { font-size: 0.75rem; color: #8a93a3; }
+#aufgaben-overlay .wv-hinweis {
+    margin: 18px 4px 4px; font-family: 'Orbitron', sans-serif; font-size: 0.72rem; letter-spacing: 0.05em; line-height: 1.6;
+    color: #8a93a3; text-align: center;
+}
+#aufgaben-overlay.hell .wv-kopf { border-bottom-color: rgba(31, 64, 150, 0.2); }
+#aufgaben-overlay.hell .wv-spalte { color: rgba(31, 64, 150, 0.6); }
+#aufgaben-overlay.hell .wv-spalte[aria-sort] { color: rgb(31, 64, 150); }
+#aufgaben-overlay.hell .wv-zeile { color: rgb(31, 64, 150); background: rgba(31, 64, 150, 0.05); border-color: rgba(31, 64, 150, 0.25); }
+#aufgaben-overlay.hell .wv-zeile:hover:not(:disabled) { border-color: rgba(31, 64, 150, 0.6); }
+#aufgaben-overlay.hell :is(.wv-block, .wv-zuletzt, .wv-hinweis) { color: #5d6678; }
+#aufgaben-overlay.hell .wv-balken { background: rgba(31, 64, 150, 0.1); }
+/* the phone: the date goes, the heads get short, the bar gives way to its number */
+@media (max-width: 600px) {
+    #aufgaben-overlay :is(.wv-kopf, .wv-zeile) { grid-template-columns: minmax(0, 1fr) 2.6rem 2.6rem 3.2rem; gap: 6px; }
+    #aufgaben-overlay :is(.wv-zuletzt, .wv-s-zuletzt, .wv-balken, .wv-lang) { display: none; }
+    #aufgaben-overlay .wv-kurz { display: inline-flex; }
+    #aufgaben-overlay .wv-kopf, #aufgaben-overlay .wv-zeile { padding-left: 8px; padding-right: 8px; }
+    #aufgaben-overlay .wv-prozent { width: auto; }
+    #aufgaben-overlay .wv-zahl { font-size: 0.85rem; }
+}
+
 /* Doc, 29.09.: a tap on the block's name top right ("Level 1") opens all blocks right under it (levelKnopf,
    levelMenue) - for Doc only. The button over the name is clear; the menu in the look of the board's buttons */
 #level-knopf {

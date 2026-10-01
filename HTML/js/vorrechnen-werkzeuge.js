@@ -396,6 +396,7 @@ function zeigeAufgabe(i) {
     verlaufZurueck();
     if (wechsel) { rechenwegArchivieren(); rechenwegHochScrollen(); }
     aufgabeIdx = ((i % n) + n) % n;
+    if (typeof pilleNull === 'function') pilleNull();          // the buzzer's pill starts at 0 (js/vorrechnen-klasse.js)
     merkeAufgabe();
     flugAbbrechen();
     rechenweg.length = 0;
@@ -506,6 +507,24 @@ function aufgabenPanel(auf, sofort = false) {
         // Doc, 30.09.: "mach mal den Overview mit Tabs" - one tab per block, its grid the page under it (was: every
         // block's grid under its small title, one below the other); a tile counts within its block
         const tabs = o.querySelector('.ak-tabs'), buehne = o.querySelector('.ak-buehne');
+        // Doc, 01.10.: "Wiedervorlage nach Verstandengrad!" - the first tab (index -1): every task the class did not
+        // understand, from the buzzer's history (feedbackUebersicht, js/vorrechnen-klasse.js); a row brings it back
+        const wvTab = document.createElement('button');
+        wvTab.type = 'button';
+        wvTab.className = 'ak-tab';
+        wvTab.id = 'ak-tab-wv';
+        wvTab.textContent = 'Wiedervorlage';
+        wvTab.setAttribute('role', 'tab');
+        wvTab.setAttribute('aria-controls', 'ak-seite-wv');
+        wvTab.addEventListener('click', () => aufgabenTab(-1));
+        const wv = document.createElement('div');
+        wv.className = 'ak-wv';
+        wv.id = 'ak-seite-wv';
+        wv.hidden = true;
+        wv.setAttribute('role', 'tabpanel');
+        wv.setAttribute('aria-labelledby', wvTab.id);
+        tabs.appendChild(wvTab);
+        buehne.appendChild(wv);
         BLOECKE.forEach((blk, k) => {
             const tab = document.createElement('button');
             tab.type = 'button';
@@ -564,6 +583,7 @@ function aufgabenPanel(auf, sofort = false) {
     o.querySelectorAll('.aufgabe-karte').forEach(b => b.classList.toggle('aktuell', +b.dataset.i === aufgabeIdx));
     aufgabenTab(BLOECKE.indexOf(aufgabenBlock(aufgabeIdx)));      // it opens at the block of the task on the board
     requestAnimationFrame(() => { if (o.dataset.auf) o.classList.add('open'); });      // not when closed before the frame
+    wiedervorlageLaden(o);                                        // the history comes after: the table and the tiles' counts
 }
 // every page shown for a moment and measured in ONE layout: the widths read first, then the sizes written (a long
 // formula shrinks to its tile as passeEin does, basis 1.3rem); the stage keeps the tallest page's height
@@ -580,20 +600,153 @@ function aufgabenEinpassen(o) {
     buehne.style.minHeight = Math.max(...seiten.map(s => s.offsetHeight)) + 'px';
     seiten.forEach((s, n) => { s.hidden = versteckt[n]; });
 }
-// one tab of the panel: its page shows, the others hide; ← → step through them while the panel is open
+// one tab of the panel: its page shows, the others hide; ← → step through them while the panel is open.
+// -1 is the Wiedervorlage, the first tab
 function aufgabenTab(k) {
-    const o = document.getElementById('aufgaben-overlay');
-    if (!o) return;
-    k = Math.max(0, Math.min(BLOECKE.length - 1, k));
+    const o = akOverlay;
+    if (!o || !o.isConnected) return;
+    k = Math.max(-1, Math.min(BLOECKE.length - 1, k));
     o.dataset.tab = String(k);
     o.querySelectorAll('.ak-tab').forEach((t, j) => {
-        t.classList.toggle('aktiv', j === k);
-        t.setAttribute('aria-selected', String(j === k));
-        t.tabIndex = j === k ? 0 : -1;
+        const an = j === k + 1;
+        t.classList.toggle('aktiv', an);
+        t.setAttribute('aria-selected', String(an));
+        t.tabIndex = an ? 0 : -1;
     });
+    o.querySelector('.ak-wv').hidden = k !== -1;
     o.querySelectorAll('.aufgaben-liste').forEach((s, j) => { s.hidden = j !== k; });
     o.querySelector('.cyber-modal').scrollTop = 0;
-    o.querySelector('#ak-tab-' + k).scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    o.querySelector(k === -1 ? '#ak-tab-wv' : '#ak-tab-' + k).scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    if (k === -1) wiedervorlageEinpassen(o);
+}
+
+// ── Wiedervorlage ───────────────────────────────────────────────────
+// Verstandengrad = the share of a task's "nicht verstanden" that a "verstanden" answered later (0 to 1); the
+// colour runs from Doc's red (nothing understood) over his orange to his green. Sorted by a tap on a column's
+// head; at first by the Verstandengrad, the least understood first, then by the number of questions.
+let wvDaten = null, wvSortierung = { spalte: 'grad', auf: true };
+// on the phone the two counts' heads are the buzzer's own signs (buzzer.html): its question mark and its tick
+const WV_FRAGE = '<svg class="wv-zeichen" viewBox="0 0 24 24" aria-label="nicht verstanden" role="img"><path d="M8.2 8.6 A3.9 3.9 0 1 1' +
+    ' 13.6 12.2 C12.6 12.8 12 13.6 12 14.8 V15.6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"' +
+    ' stroke-linejoin="round"/><circle cx="12" cy="19.6" r="1.5" fill="currentColor"/></svg>';
+const WV_HAKEN = '<svg class="wv-zeichen" viewBox="0 0 24 24" aria-label="verstanden" role="img"><path d="M4.8 12.8 L9.8 17.6 L19.2 6.8"' +
+    ' fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const WV_SPALTEN = [['aufgabe', 'Aufgabe', 'Aufgabe'], ['nicht', 'Nicht verstanden', WV_FRAGE],
+    ['verstanden', 'Verstanden', WV_HAKEN], ['grad', 'Verstandengrad', 'Grad'], ['zuletzt', 'Zuletzt', 'Zuletzt']];
+function gradFarbe(g) {
+    const ROT = [176, 36, 24], ORANGE = [245, 194, 66], GRUEN = [121, 158, 49];
+    const mix = (a, b, u) => a.map((v, i) => Math.round(v + (b[i] - v) * u));
+    return 'rgb(' + (g <= 0.5 ? mix(ROT, ORANGE, g * 2) : mix(ORANGE, GRUEN, (g - 0.5) * 2)).join(', ') + ')';
+}
+async function wiedervorlageLaden(o) {
+    const seite = o.querySelector('.ak-wv');
+    if (!wvDaten) seite.innerHTML = '<p class="wv-hinweis">Lade das Feedback …</p>';
+    const { proAufgabe, wolke } = await feedbackUebersicht();          // js/vorrechnen-klasse.js
+    const index = new Map(AUFGABEN.map((a, i) => [a[0], i]));
+    wvDaten = { wolke, zeilen: [...proAufgabe].map(([key, a]) => Object.assign({ key, i: index.has(key) ? index.get(key) : -1,
+        grad: a.nicht ? a.verstanden / a.nicht : 1 }, a)) };
+    if (akOverlay !== o) return;
+    // every tile with a history carries its number of questions, coloured by its Verstandengrad
+    const proKey = new Map(wvDaten.zeilen.map(z => [z.key, z]));
+    o.querySelectorAll('.aufgabe-karte').forEach(b => {
+        const z = proKey.get(AUFGABEN[+b.dataset.i][0]);
+        let el = b.querySelector('.ak-wv-zahl');
+        if (!z) { if (el) el.remove(); return; }
+        if (!el) { el = document.createElement('span'); el.className = 'ak-wv-zahl'; b.appendChild(el); }
+        el.textContent = String(z.nicht);
+        el.style.background = gradFarbe(z.grad);
+        el.title = z.nicht + ' × nicht verstanden, ' + z.verstanden + ' × danach verstanden';
+    });
+    wiedervorlageTabelle(o);
+}
+function wiedervorlageTabelle(o) {
+    const seite = o.querySelector('.ak-wv');
+    if (!wvDaten) return;
+    seite.textContent = '';
+    if (!wvDaten.zeilen.length) {
+        seite.innerHTML = '<p class="wv-hinweis">Noch kein Feedback – sobald jemand „nicht verstanden“ drückt, steht die Aufgabe hier.</p>';
+    } else {
+        const { spalte, auf } = wvSortierung, r = auf ? 1 : -1;
+        const wert = z => spalte === 'aufgabe' ? (z.i < 0 ? 1e9 : z.i) : z[spalte];
+        const zeilen = wvDaten.zeilen.slice().sort((a, b) => r * (wert(a) - wert(b)) || b.nicht - a.nicht || a.i - b.i);
+        const tabelle = document.createElement('div');
+        tabelle.className = 'wv-tabelle';
+        tabelle.setAttribute('role', 'table');
+        const kopf = document.createElement('div');
+        kopf.className = 'wv-kopf';
+        kopf.setAttribute('role', 'row');
+        WV_SPALTEN.forEach(([s, lang, kurz]) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'wv-spalte wv-s-' + s;
+            b.setAttribute('role', 'columnheader');
+            if (s === spalte) b.setAttribute('aria-sort', auf ? 'ascending' : 'descending');
+            b.innerHTML = '<span class="wv-lang"></span><span class="wv-kurz"></span>' + (s === spalte
+                ? '<svg viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="' + (auf ? 'M1.5 7 L5 3 L8.5 7' : 'M1.5 3 L5 7 L8.5 3') +
+                  '" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '');
+            b.children[0].textContent = lang;
+            if (kurz.startsWith('<svg')) b.children[1].innerHTML = kurz; else b.children[1].textContent = kurz;
+            // a column tapped again turns round; a new one starts with what matters: few understood, many questions, the newest
+            b.addEventListener('click', () => {
+                wvSortierung = s === spalte ? { spalte, auf: !auf } : { spalte: s, auf: s === 'grad' || s === 'aufgabe' };
+                wiedervorlageTabelle(o);
+            });
+            kopf.appendChild(b);
+        });
+        tabelle.appendChild(kopf);
+        const farbe = variablenFarbe();
+        zeilen.forEach(z => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'wv-zeile';
+            b.setAttribute('role', 'row');
+            b.disabled = z.i < 0;                                       // a task no longer in the lab: its key only
+            const blk = z.i < 0 ? null : aufgabenBlock(z.i);
+            // where most of the questions came: the task itself or the row (k) of the working
+            const [meist] = Object.entries(z.schritte).sort((x, y) => y[1] - x[1]);
+            const wo = meist && Object.keys(z.schritte).length > 1 || meist && +meist[0] > 0
+                ? ' · meist bei ' + (+meist[0] === 0 ? 'der Aufgabe' : '(' + meist[0] + ')') : '';
+            const datum = new Date(z.zuletzt);
+            b.innerHTML = '<span class="wv-aufgabe" role="cell"><span class="wv-block"></span><span class="wv-formel"></span></span>' +
+                '<span class="wv-zahl wv-nicht" role="cell"></span><span class="wv-zahl wv-verstanden" role="cell"></span>' +
+                '<span class="wv-grad" role="cell"><span class="wv-balken"><i></i></span><span class="wv-prozent"></span></span>' +
+                '<span class="wv-zuletzt" role="cell"></span>';
+            b.querySelector('.wv-block').textContent = blk ? blk.titel + ' · ' + (z.i - blk.ab + 1) + wo : z.key;
+            const f = b.querySelector('.wv-formel');
+            if (z.i >= 0) {
+                const [, latex, nach] = AUFGABEN[z.i];
+                try { katex.render(alsDisplay(hebeVariable(latex, nach, farbe)), f, { throwOnError: false }); }
+                catch (e) { f.textContent = latex; }
+            }
+            b.querySelector('.wv-nicht').textContent = String(z.nicht);
+            b.querySelector('.wv-verstanden').textContent = String(z.verstanden);
+            const balken = b.querySelector('.wv-balken i');
+            balken.style.width = Math.round(z.grad * 100) + '%';
+            balken.style.background = gradFarbe(z.grad);
+            b.querySelector('.wv-prozent').textContent = Math.round(z.grad * 100) + ' %';
+            b.querySelector('.wv-zuletzt').textContent = z.zuletzt
+                ? String(datum.getDate()).padStart(2, '0') + '.' + String(datum.getMonth() + 1).padStart(2, '0') + '.' : '';
+            if (z.i >= 0) b.addEventListener('click', () => { aufgabenPanel(false, true); zeigeAufgabe(z.i); });
+            tabelle.appendChild(b);
+        });
+        seite.appendChild(tabelle);
+    }
+    if (!wvDaten.wolke) {
+        const p = document.createElement('p');
+        p.className = 'wv-hinweis';
+        p.textContent = 'Nur der Verlauf dieses Geräts – die Cloud war nicht erreichbar (im Stoffverteilungsplan angemeldet?).';
+        seite.appendChild(p);
+    }
+    wiedervorlageEinpassen(o);
+}
+// a long formula shrinks to its cell - all widths read in one layout, then the sizes written; only while it shows
+function wiedervorlageEinpassen(o) {
+    const seite = o.querySelector('.ak-wv');
+    if (!seite || seite.hidden || !o.isConnected) return;
+    const formeln = [...seite.querySelectorAll('.wv-formel')];
+    formeln.forEach(f => { f.style.fontSize = ''; });
+    const masse = formeln.map(f => [f.parentElement.clientWidth, f.getBoundingClientRect().width]);
+    masse.forEach(([frei, breit], n) => { if (frei > 0 && breit > frei) formeln[n].style.fontSize = (1.15 * frei / breit).toFixed(3) + 'rem'; });
 }
 // Doc, 26.09.: "left arrow key & right arrow key" - the arrow keys step like
 // ◀ ▶. A tapped button, slider or radio keeps the focus: it lets go first, so
