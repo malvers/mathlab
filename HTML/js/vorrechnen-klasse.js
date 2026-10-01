@@ -363,21 +363,27 @@ function pillenZeichnen(neuTempo, neuText) {
     }
     el.textContent = '';
     const puls = p => { if (p.animate) p.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.15)' }, { transform: 'scale(1)' }], { duration: 600, easing: 'ease-out' }); };
-    // the colour as on the count behind a step: the more pressed, the redder (buzzGrund)
-    if (s) [['schnell', 'zu schnell'], ['langsam', 'zu langsam']].forEach(([art, wort]) => {
+    // the colour as on the count behind a step: the more pressed, the redder (buzzGrund). Doc, 01.10.: "die Pille mit
+    // dem Icon finde ich super ... bei den zu schnell und zu langsam auch ... Runner und Schnecke" - Apple's 🏃 and 🐌
+    // with the number, the words in the tooltip
+    if (s) [['schnell', 'zu schnell', '1f3c3'], ['langsam', 'zu langsam', '1f40c']].forEach(([art, wort, bildCode]) => {
         if (!s[art]) return;
         const p = document.createElement('span');
-        p.textContent = wort + ' ' + s[art];
+        p.className = 'ic-pille';
+        const bild = document.createElement('img');
+        bild.src = 'https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/' + bildCode + '.png';
+        bild.alt = '';
+        p.append(bild, document.createTextNode(String(s[art])));
         p.style.background = buzzGrund(s[art]);
         p.style.color = anzeige(INK);
-        p.title = 'Tempo-Feedback zu dieser Aufgabe';
+        p.title = s[art] + ' × ' + wort + ' bei dieser Aufgabe';
         el.appendChild(p);
         if (neuTempo === art) puls(p);
     });
     if (texte.length) {
         const gelesen = texteGelesen(), neu = texte.filter(x => x.id > gelesen).length;
         const p = document.createElement('span');
-        p.className = 'tx-pille' + (neu ? ' ungelesen' : '');
+        p.className = 'ic-pille tx-pille' + (neu ? ' ungelesen' : '');
         p.style.color = anzeige(INK);
         p.title = texte.length + ' Feedback-Nachricht' + (texte.length === 1 ? '' : 'en') + ' heute' + (neu ? ', ' + neu + ' neu' : '') + ' – antippen';
         const bild = document.createElement('img');
