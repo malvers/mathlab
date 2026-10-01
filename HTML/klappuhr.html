@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOC ALVERS MATHE-LABORE | Klappuhr</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="resources/favicon.png">
+    <link rel="stylesheet" href="js/klappuhr.css">
+    <style>
+        /* The flip clock of the SVP box, just big (Doc, 01.10.2026: "Bauen wir
+           mal aus Spass eine Seite, wo die Uhr so richtig schoen gross drauf
+           ist"). Cards and flips: js/klappuhr.js + js/klappuhr.css. */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4vmin;
+            overflow: hidden;
+            /* Dark blue, never black. */
+            background: radial-gradient(ellipse at 50% 40%, rgb(16, 36, 72), rgb(6, 16, 36) 75%);
+            font-family: 'Orbitron', sans-serif;
+            cursor: default;
+            user-select: none;
+        }
+
+        /* Taller cards and fuller digits than in the box, bright ink. Sized
+           by the narrower of width and height, so the whole clock always fits
+           (three cards plus two colons are about 7.3 em wide). */
+        .gross {
+            --kl-face: rgb(26, 48, 88);
+            --kl-hi: rgb(36, 60, 104);
+            --kl-lo: rgb(20, 40, 76);
+            --kl-ink: rgb(226, 234, 248);
+            --kl-rim: rgba(120, 160, 220, 0.22);
+            --kl-pin: rgb(90, 112, 150);
+            --kl-h: 1.3em;
+            --kl-z: 0.95em;
+            --kl-r: 0.06em;
+            font-size: min(12.5vw, 36vh);
+            /* The colons take the text colour, which this page otherwise
+               leaves at black. */
+            color: var(--kl-ink);
+        }
+
+        .gross .kl-karte {
+            box-shadow: 0 0 0 1px var(--kl-rim), 0 0.04em 0.12em rgba(0, 0, 0, 0.45);
+        }
+
+        /* The date underneath, smaller and quieter. */
+        .klein {
+            --kl-ink: rgb(168, 186, 214);
+            --kl-h: 1.3em;
+            --kl-z: 0.95em;
+            font-size: min(5vw, 14vh);
+            color: var(--kl-ink);
+        }
+
+        .hinweis {
+            position: fixed;
+            bottom: 2vmin;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+            letter-spacing: 0.15em;
+            color: rgba(168, 186, 214, 0.35);
+            transition: opacity 0.6s;
+        }
+
+        body.vollbild .hinweis {
+            opacity: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <span class="gross" data-klappuhr="sekunden"></span>
+    <span class="klein" data-klappuhr="datumjahr"></span>
+    <div class="hinweis">DOPPELKLICK = VOLLBILD</div>
+
+    <script src="js/klappuhr.js"></script>
+    <script>
+        // Double click (or F) toggles full screen.
+        function vollbild() {
+            if (document.fullscreenElement) document.exitFullscreen();
+            else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+        }
+        document.addEventListener('dblclick', vollbild);
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'f' || e.key === 'F') vollbild();
+        });
+        document.addEventListener('fullscreenchange', function () {
+            document.body.classList.toggle('vollbild', !!document.fullscreenElement);
+        });
+    </script>
+</body>
+
+</html>

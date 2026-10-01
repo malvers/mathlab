@@ -1149,9 +1149,16 @@
     band.appendChild(nav);
     document.body.insertBefore(band, document.body.firstChild);
 
-    const uhrScript = document.createElement('script');
-    uhrScript.src = base + 'svp-klappuhr.js';
-    document.head.appendChild(uhrScript);
+    // The flip cards are a shared widget (js/klappuhr.js); svp-klappuhr.js
+    // puts them into the box once it is there.
+    const klappScript = document.createElement('script');
+    klappScript.src = new URL('../js/klappuhr.js', script.src).href;
+    klappScript.onload = function () {
+        const uhrScript = document.createElement('script');
+        uhrScript.src = base + 'svp-klappuhr.js';
+        document.head.appendChild(uhrScript);
+    };
+    document.head.appendChild(klappScript);
 
     /* Doc, 22.09.2026: "das nicht scrollen bitte", dann "das auch nicht" - auf
        den Seiten mit klebendem Kopf (body.head-sticky) bleibt nicht nur die

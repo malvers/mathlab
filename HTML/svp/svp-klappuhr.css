@@ -1,12 +1,11 @@
 /* Klappuhr in the school-year box (Doc, 01.10.2026: "eine Digitaluhr wie sie
    frueher waren. So mit halben Plastikblaettchen die nach unten klappen. Links
-   das aktuelle Datum"). Built by svp-klappuhr.js into .ny-datum / .ny-uhr of
-   the box from svp-nav.js.
-
-   One card per group, like the old Copal / Twemco clocks: [01].[10] on
-   the left, [14]:[27] on the right. Each card is two clipped halves; on a
-   change the upper leaf with the old value falls forward and down, the lower
-   leaf with the new one lands with a small bounce. */
+   das aktuelle Datum"). The cards themselves are the shared widget
+   js/klappuhr.js + js/klappuhr.css (pulled out the same day: "Vielleicht
+   braucht man die ja nochmal woanders"); here only what the box adds - its
+   colours per scheme and the title's size. svp-klappuhr.js mounts the cards
+   into .ny-datum / .ny-uhr of the box from svp-nav.js. */
+@import url("../js/klappuhr.css");
 
 .ny-datum,
 .ny-uhr {
@@ -17,15 +16,14 @@
     --kl-hi: rgb(30, 52, 90);
     --kl-lo: rgb(18, 36, 70);
     --kl-ink: rgb(168, 186, 214);
-    --kl-rim: rgba(var(--tint), 0.2);
+    /* Doc, 01.10.2026: "probier mal im Stoffverteilungsplan das auch ohne
+       dieses Raehmchen" - the 1 px rim went in every scheme. Before:
+       rgba(var(--tint), 0.2) here, rgba(56, 80, 124, 0.22) light,
+       rgba(212, 212, 216, 0.25) grey. */
+    --kl-rim: transparent;
     --kl-pin: rgb(78, 98, 132);
-    display: flex;
-    align-items: center;
-    gap: 0.16em;
     /* Same size as the title, so the cards grow and shrink with it. */
     font-size: var(--ny-jahr-size);
-    letter-spacing: 0;
-    line-height: 1;
 }
 
 /* Light scheme: a soft blue-grey plastic, well lighter than the title's
@@ -36,8 +34,11 @@ html.svp-light .ny-uhr {
     --kl-hi: rgb(124, 148, 186);
     --kl-lo: rgb(102, 126, 166);
     --kl-ink: rgb(236, 241, 250);
-    --kl-rim: rgba(56, 80, 124, 0.22);
-    --kl-pin: rgb(176, 190, 212);
+    /* The old pale rgb(176, 190, 212) vanished on the light box (Doc,
+       01.10.2026: "die sieht man ... gar nicht"), a dark metal rgb(84, 106,
+       146) was "viel zu viel ... sieht durcheinander aus". Now between box
+       and card. */
+    --kl-pin: rgb(140, 160, 194);
 }
 
 /* Grey scheme: zinc instead of navy. */
@@ -47,7 +48,6 @@ html.svp-grey .ny-uhr {
     --kl-hi: rgb(56, 56, 60);
     --kl-lo: rgb(40, 40, 44);
     --kl-ink: rgb(161, 161, 170);
-    --kl-rim: rgba(212, 212, 216, 0.25);
     --kl-pin: rgb(113, 113, 122);
 }
 
@@ -61,144 +61,12 @@ html.svp-grey .ny-uhr {
 .nav-year .ny-uhr {
     --kl-h: 0.72em;
     --kl-z: 0.6em;
+    /* A click opens the big clock page (svp-klappuhr.js). */
+    cursor: pointer;
 }
 /* Stacked under the title (phone): readable instead of flat. */
 .nav-year.ny-eng .ny-datum,
 .nav-year.ny-eng .ny-uhr {
     --kl-h: 1em;
     --kl-z: 0.75em;
-}
-
-/* Dot / colon between the number cards. */
-.kl-trenner {
-    font-size: var(--kl-z);
-    opacity: 0.8;
-}
-
-.kl-karte {
-    position: relative;
-    display: inline-grid;
-    height: var(--kl-h);
-    border-radius: 0.08em;
-    color: var(--kl-ink);
-    box-shadow: 0 0 0 1px var(--kl-rim), 0 0.03em 0.06em rgba(0, 0, 0, 0.12);
-    /* The falling leaves tilt in 3D around the middle of the card. */
-    perspective: 3.2em;
-}
-
-/* Invisible stack of every value the card can show: the widest one sets the
-   width, so the card never changes size when it flips. */
-.kl-mass {
-    display: grid;
-    visibility: hidden;
-    font-size: var(--kl-z);
-    padding: 0 0.25em;
-}
-.kl-mass > span { grid-area: 1 / 1; align-self: center; }
-
-/* Upper and lower half: each clips a full-height text box. */
-.kl-halb {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 50%;
-    overflow: hidden;
-}
-.kl-halb.kl-oben {
-    top: 0;
-    border-radius: 0.08em 0.08em 0 0;
-    background: linear-gradient(180deg, var(--kl-hi), var(--kl-face));
-    transform-origin: 50% 100%;
-}
-.kl-halb.kl-unten {
-    bottom: 0;
-    border-radius: 0 0 0.08em 0.08em;
-    background: linear-gradient(180deg, var(--kl-face), var(--kl-lo));
-    transform-origin: 50% 0;
-}
-.kl-txt {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 200%;
-    font-size: var(--kl-z);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.kl-oben .kl-txt { top: 0; }
-.kl-unten .kl-txt { bottom: 0; }
-
-/* The two leaves of a flip lie above the resting halves. */
-.kl-blatt {
-    z-index: 2;
-    backface-visibility: hidden;
-}
-.kl-blatt::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-}
-.kl-blatt.kl-oben {
-    animation: kl-fall-oben 0.22s ease-in forwards;
-}
-.kl-blatt.kl-oben::after {
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.55));
-    animation: kl-dunkel 0.22s ease-in forwards;
-}
-.kl-blatt.kl-unten {
-    transform: rotateX(90deg);
-    animation: kl-fall-unten 0.34s ease-out 0.22s forwards;
-}
-.kl-blatt.kl-unten::after {
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.15));
-    animation: kl-hell 0.34s ease-out 0.22s forwards;
-}
-
-@keyframes kl-fall-oben {
-    from { transform: rotateX(0deg); }
-    to { transform: rotateX(-90deg); }
-}
-/* Lands, bounces up a little, settles. */
-@keyframes kl-fall-unten {
-    0% { transform: rotateX(90deg); }
-    65% { transform: rotateX(0deg); }
-    82% { transform: rotateX(16deg); }
-    100% { transform: rotateX(0deg); }
-}
-@keyframes kl-dunkel { from { opacity: 0; } to { opacity: 1; } }
-@keyframes kl-hell { from { opacity: 1; } to { opacity: 0; } }
-
-/* The split between the halves ... */
-.kl-karte::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: calc(50% - 0.5px);
-    height: 1px;
-    background: rgba(0, 0, 0, 0.3);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
-    z-index: 3;
-}
-/* ... and the two pins left and right that the leaves hang on. */
-.kl-karte::before {
-    content: '';
-    position: absolute;
-    left: -0.04em;
-    right: -0.04em;
-    top: calc(50% - 0.09em);
-    height: 0.18em;
-    background: linear-gradient(90deg,
-        var(--kl-pin) 0 0.07em,
-        transparent 0.07em calc(100% - 0.07em),
-        var(--kl-pin) calc(100% - 0.07em));
-    border-radius: 0.04em;
-    z-index: 4;
-}
-
-@media print {
-    .ny-datum,
-    .ny-uhr { display: none; }
 }
