@@ -674,11 +674,12 @@ function hutKnopf(zeigen, aktiv) {
     // right over the field's bin (#seite-leeren, zeigeNotizRand): 12 px left of the margin's line
     const r = container.getBoundingClientRect();
     Object.assign(k.style, { right: (r.width - notizX(r.width) + 12) + 'px', top: (papierGrenze(r.height) + 6) + 'px', display: '' });
-    // Doc, 30.09.2026: "mach das icon hier so wie die anderen" - pale like the board's other buttons at rest (the bins,
-    // the arrow, the eraser), with their stroke and size; a task without an explanation shows no hat at all (it was
-    // the pale one, the one with an explanation stood out in full ink)
+    // Doc, 30.09.2026: "mach das icon hier so wie die anderen" - the board's buttons' stroke and size; a task without
+    // an explanation shows no hat at all. Doc, 01.10.2026: "wenn es eine Erklärung gab, da war der eigentlich auch
+    // immer so blau" - like the arrow when there is a step to send up: full, not pale (it was 0.35, the arrow's
+    // look when there is nothing to send, and read as "no explanation here")
     if (!aktiv) { k.style.display = 'none'; return; }
-    k.style.opacity = '0.35';
+    k.style.opacity = '';
     k.title = 'Erklärung einblenden';
 }
 // The explanation's setting - erklaerungSetzen, erklGleichung, erklSpalte and the upright letters - lives in
