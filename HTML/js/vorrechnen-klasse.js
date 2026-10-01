@@ -342,16 +342,29 @@ function tempoMeldung(s) {
     pillenZeichnen(s && s.neu, false);
 }
 // Doc, 01.10.: "mach unten ein Feld. Für Feedback ... wo man das dann bei mir im Mission Control ... zeigen" - the
-// phones' written feedback (js/buzzer.js: Buzzer.texte, readable with Doc's SVP session only) as a 💬 pill in the
-// same row, with the number not read yet; a tap opens the list (texteZeigen). Today's, of today's code.
+// phones' written feedback (js/buzzer.js: Buzzer.texte, readable with Doc's SVP session only) as a 💬 pill with the
+// number not read yet, then "das Kommentarding in die Mitte. Zwischen Runner und Schnecke ... keinen extra Dialog ...
+// wenn ich auf die Blase ticke, soll klein drunter mit genau den gleichen Rundungen eine Box kommen mit den
+// Kommentaren ... wenn ich noch mal klicke, soll es wieder einklappen": 🏃 💬 🐌 in one row, a tap on 💬 folds the
+// box under it open and shut; shutting it marks them read. Today's, of today's code.
 const TEXTE_GELESEN = 'vorrechnen-texte-gelesen';
+let texteOffen = false;
 function texteGelesen() { try { return +localStorage.getItem(TEXTE_GELESEN) || 0; } catch (_) { return 0; } }
 function texteMeldung(t) {
     if (anzeigeModus) return;
     texteLetzt = t || { texte: [] };
+    if (!(texteLetzt.texte || []).length) texteOffen = false;
     pillenZeichnen(null, !!(t && t.neu));
-    if (document.getElementById('texte-overlay') && document.getElementById('texte-overlay').classList.contains('open')) texteListe();
 }
+function texteKlappen() {
+    if (texteOffen) {                                   // shut: what was open is read now
+        const max = Math.max(texteGelesen(), ...(texteLetzt.texte || []).map(x => x.id));
+        try { localStorage.setItem(TEXTE_GELESEN, String(max)); } catch (_) {}
+    }
+    texteOffen = !texteOffen;
+    pillenZeichnen(null, false);
+}
+const APPLE_BILD = 'https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/';
 function pillenZeichnen(neuTempo, neuText) {
     const s = tempoLetzt, texte = texteLetzt.texte || [];
     let el = document.getElementById('tempo-pille');
@@ -362,101 +375,69 @@ function pillenZeichnen(neuTempo, neuText) {
         container.appendChild(el);
     }
     el.textContent = '';
+    const reihe = document.createElement('div');
+    reihe.className = 'pillen-reihe';
+    el.appendChild(reihe);
+    const ink = anzeige(INK);
     const puls = p => { if (p.animate) p.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.15)' }, { transform: 'scale(1)' }], { duration: 600, easing: 'ease-out' }); };
-    // the colour as on the count behind a step: the more pressed, the redder (buzzGrund). Doc, 01.10.: "die Pille mit
-    // dem Icon finde ich super ... bei den zu schnell und zu langsam auch ... Runner und Schnecke" - Apple's 🏃 and 🐌
-    // with the number, the words in the tooltip
-    if (s) [['schnell', 'zu schnell', '1f3c3'], ['langsam', 'zu langsam', '1f40c']].forEach(([art, wort, bildCode]) => {
-        if (!s[art]) return;
+    const pille = (code, klasse) => {
         const p = document.createElement('span');
-        p.className = 'ic-pille';
+        p.className = 'ic-pille' + (klasse ? ' ' + klasse : '');
+        p.style.color = ink;
         const bild = document.createElement('img');
-        bild.src = 'https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/' + bildCode + '.png';
-        bild.alt = '';
-        p.append(bild, document.createTextNode(String(s[art])));
-        p.style.background = buzzGrund(s[art]);
-        p.style.color = anzeige(INK);
-        p.title = s[art] + ' × ' + wort + ' bei dieser Aufgabe';
-        el.appendChild(p);
-        if (neuTempo === art) puls(p);
-    });
-    if (texte.length) {
-        const gelesen = texteGelesen(), neu = texte.filter(x => x.id > gelesen).length;
-        const p = document.createElement('span');
-        p.className = 'ic-pille tx-pille' + (neu ? ' ungelesen' : '');
-        p.style.color = anzeige(INK);
-        p.title = texte.length + ' Feedback-Nachricht' + (texte.length === 1 ? '' : 'en') + ' heute' + (neu ? ', ' + neu + ' neu' : '') + ' – antippen';
-        const bild = document.createElement('img');
-        bild.src = 'https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/1f4ac.png';
+        bild.src = APPLE_BILD + code + '.png';
         bild.alt = '';
         p.appendChild(bild);
+        return p;
+    };
+    // the colour as on the count behind a step: the more pressed, the redder (buzzGrund). Doc, 01.10.: "die Pille mit
+    // dem Icon finde ich super ... Runner und Schnecke" - Apple's 🏃 (mirrored: "den Runner bitte spiegeln") and 🐌
+    // with the number, the words in the tooltip
+    const tempo = (art, wort, code, klasse) => {
+        if (!s || !s[art]) return;
+        const p = pille(code, klasse);
+        p.appendChild(document.createTextNode(String(s[art])));
+        p.style.background = buzzGrund(s[art]);
+        p.title = s[art] + ' × ' + wort + ' bei dieser Aufgabe';
+        reihe.appendChild(p);
+        if (neuTempo === art) puls(p);
+    };
+    tempo('schnell', 'zu schnell', '1f3c3', 'gespiegelt');
+    if (texte.length) {
+        const gelesen = texteGelesen(), neu = texte.filter(x => x.id > gelesen).length;
+        const p = pille('1f4ac', 'tx-pille' + (neu ? ' ungelesen' : '') + (texteOffen ? ' offen' : ''));
         if (neu) p.appendChild(document.createTextNode(String(neu)));
-        p.addEventListener('click', () => texteZeigen(true));
-        el.appendChild(p);
+        p.title = texte.length + ' Feedback-Nachricht' + (texte.length === 1 ? '' : 'en') + ' heute' + (neu ? ', ' + neu + ' neu' : '') +
+            (texteOffen ? ' – antippen zum Einklappen' : ' – antippen');
+        p.addEventListener('click', texteKlappen);
+        reihe.appendChild(p);
         if (neuText) puls(p);
+    }
+    tempo('langsam', 'zu langsam', '1f40c');
+    // the box under the row: newest first, the time and the words - as text only, never as markup (any phone wrote them)
+    if (texteOffen && texte.length) {
+        const box = document.createElement('div');
+        box.className = 'tx-box';
+        box.style.color = ink;
+        const gelesen = texteGelesen();
+        texte.slice().sort((a, b) => b.id - a.id).forEach(x => {
+            const d = document.createElement('div');
+            d.className = 'tx' + (x.id > gelesen ? ' neu' : '');
+            const zeit = document.createElement('span');
+            zeit.className = 'tx-zeit';
+            const t = new Date(x.t);
+            zeit.textContent = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+            const text = document.createElement('span');
+            text.className = 'tx-text';
+            text.textContent = x.text;
+            d.append(zeit, text);
+            box.appendChild(d);
+        });
+        el.appendChild(box);
     }
     el.style.display = 'flex';
     tempoLegen(el);
 }
-// the list: newest first, the time and the words - as text only, never as markup (they come from any phone)
-function texteListe() {
-    const o = document.getElementById('texte-overlay');
-    if (!o) return;
-    const liste = o.querySelector('.tx-liste'), gelesen = texteGelesen();
-    liste.textContent = '';
-    const texte = (texteLetzt.texte || []).slice().sort((a, b) => b.id - a.id);
-    if (!texte.length) {
-        const leer = document.createElement('p');
-        leer.className = 'tx-leer';
-        leer.textContent = texteLetzt.angemeldet ? 'Heute noch keine Nachricht.' : 'Nur mit Anmeldung im Stoffverteilungsplan lesbar.';
-        liste.appendChild(leer);
-    }
-    texte.forEach(x => {
-        const d = document.createElement('div');
-        d.className = 'tx' + (x.id > gelesen ? ' neu' : '');
-        const zeit = document.createElement('div');
-        zeit.className = 'tx-zeit';
-        const t = new Date(x.t);
-        zeit.textContent = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
-        const text = document.createElement('div');
-        text.className = 'tx-text';
-        text.textContent = x.text;
-        d.append(zeit, text);
-        liste.appendChild(d);
-    });
-}
-function texteZeigen(auf = true) {
-    let o = document.getElementById('texte-overlay');
-    if (!auf) {
-        if (o) o.classList.remove('open');
-        // what was open is read now
-        const max = Math.max(texteGelesen(), ...(texteLetzt.texte || []).map(x => x.id));
-        try { localStorage.setItem(TEXTE_GELESEN, String(max)); } catch (_) {}
-        pillenZeichnen(null, false);
-        return;
-    }
-    if (!o) {
-        o = document.createElement('div');
-        o.id = 'texte-overlay';
-        o.className = 'cyber-overlay';
-        o.innerHTML = '<div class="cyber-modal cyber-modal--neon" role="dialog" aria-label="Feedback der Klasse">' +
-            '<button type="button" class="cyber-modal-x" title="Schließen" aria-label="Schließen">' +
-            '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6 L18 18 M18 6 L6 18" fill="none"' +
-            ' stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>' +
-            '<h3>FEEDBACK</h3><div class="tx-liste"></div></div>';
-        o.addEventListener('click', e => { if (e.target === o) texteZeigen(false); });
-        o.querySelector('.cyber-modal-x').addEventListener('click', () => texteZeigen(false));
-        document.body.appendChild(o);
-    }
-    texteListe();
-    requestAnimationFrame(() => o.classList.add('open'));
-}
-document.addEventListener('keydown', e => {
-    const o = document.getElementById('texte-overlay');
-    if (!o || !o.classList.contains('open')) return;
-    if (e.key === 'Escape') texteZeigen(false);
-    if (e.key === 'Escape' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowDown') e.stopPropagation();
-}, true);
 // the texts are read with Doc's SVP session: its script comes along (the login itself stays the SVP's)
 function texteAnmelden() {
     Buzzer.texte(texteMeldung);
