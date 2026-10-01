@@ -477,7 +477,7 @@ function hebeVariable(latex, v, farbe) {
 }
 function aufgabenPanel(auf) {
     let o = document.getElementById('aufgaben-overlay');
-    if (!auf) { if (o) o.classList.remove('open'); return; }
+    if (!auf) { if (o) { o.classList.remove('open'); delete o.dataset.auf; } return; }
     if (!o) {
         o = document.createElement('div');
         o.id = 'aufgaben-overlay';
@@ -524,23 +524,45 @@ function aufgabenPanel(auf) {
     // one line each: a long one shrinks to its tile (the overlay is laid out while hidden).
     // Every page is shown for that, and measured: the stage keeps the tallest page's height, so the
     // modal does not jump (it is centred) and the tabs stay under the finger from page to page
+    // Doc, 01.10.: the HP froze for half a minute and more on opening it - every one of the 758 tiles was set
+    // anew on every opening and measured right after its own write, so the browser laid out the whole panel
+    // 758 times. Now the formulas are set once and kept (again only for the other colour), and fitted in one
+    // layout (again when the window's size changes, and once more when KaTeX's fonts have come in).
     o.classList.toggle('hell', hell);
-    const farbe = variablenFarbe(), seiten = [...o.querySelectorAll('.aufgaben-liste')];
-    const buehne = o.querySelector('.ak-buehne');
+    o.dataset.auf = '1';                                          // open from here on: another o does not start it again
+    const farbe = variablenFarbe(), mass = innerWidth + 'x' + innerHeight;
+    if (o.dataset.farbe !== farbe) {
+        o.querySelectorAll('.aufgabe-karte').forEach(b => {
+            const [, latex, nach] = AUFGABEN[+b.dataset.i], f = b.querySelector('.ak-formel');
+            try { katex.render(alsDisplay(hebeVariable(latex, nach, farbe)), f, { throwOnError: false }); }
+            catch (e) { f.textContent = latex; }
+        });
+        o.dataset.farbe = farbe;
+        o.dataset.mass = '';
+    }
+    if (o.dataset.mass !== mass) {
+        aufgabenEinpassen(o);
+        o.dataset.mass = mass;
+        // a font KaTeX asked for only now measures wrong until it is there
+        if (document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(() => aufgabenEinpassen(o));
+    }
+    o.querySelectorAll('.aufgabe-karte').forEach(b => b.classList.toggle('aktuell', +b.dataset.i === aufgabeIdx));
+    aufgabenTab(BLOECKE.indexOf(aufgabenBlock(aufgabeIdx)));      // it opens at the block of the task on the board
+    requestAnimationFrame(() => { if (o.dataset.auf) o.classList.add('open'); });      // not when closed before the frame
+}
+// every page shown for a moment and measured in ONE layout: the widths read first, then the sizes written (a long
+// formula shrinks to its tile as passeEin does, basis 1.3rem); the stage keeps the tallest page's height
+function aufgabenEinpassen(o) {
+    const seiten = [...o.querySelectorAll('.aufgaben-liste')], buehne = o.querySelector('.ak-buehne');
+    const versteckt = seiten.map(s => s.hidden);
+    const karten = [...o.querySelectorAll('.aufgabe-karte')], formeln = karten.map(b => b.querySelector('.ak-formel'));
     seiten.forEach(s => { s.hidden = false; });
     buehne.style.minHeight = '';
-    o.querySelectorAll('.aufgabe-karte').forEach(b => {
-        const i = +b.dataset.i, [, latex, nach] = AUFGABEN[i];
-        const f = b.querySelector('.ak-formel');
-        try { katex.render(alsDisplay(hebeVariable(latex, nach, farbe)), f, { throwOnError: false }); }
-        catch (e) { f.textContent = latex; }
-        f.style.fontSize = '';
-        passeEin(f, b.clientWidth - 24, 1.3);
-        b.classList.toggle('aktuell', i === aufgabeIdx);
-    });
+    formeln.forEach(f => { f.style.fontSize = ''; });
+    const masse = karten.map((b, n) => [b.clientWidth - 24, formeln[n].getBoundingClientRect().width]);
+    masse.forEach(([frei, breit], n) => { if (frei > 0 && breit > frei) formeln[n].style.fontSize = (1.3 * frei / breit).toFixed(3) + 'rem'; });
     buehne.style.minHeight = Math.max(...seiten.map(s => s.offsetHeight)) + 'px';
-    aufgabenTab(BLOECKE.indexOf(aufgabenBlock(aufgabeIdx)));      // it opens at the block of the task on the board
-    requestAnimationFrame(() => o.classList.add('open'));
+    seiten.forEach((s, n) => { s.hidden = versteckt[n]; });
 }
 // one tab of the panel: its page shows, the others hide; ← → step through them while the panel is open
 function aufgabenTab(k) {
@@ -567,7 +589,7 @@ function aufgabenTab(k) {
 // rail, in every mode; o again closes it. Not while another dialog (buzzer, Tafel, names) is open.
 document.addEventListener('keydown', e => {
     const o = (e.key === 'o' || e.key === 'O') && !e.repeat && !e.altKey && !e.ctrlKey && !e.metaKey;
-    const panel = document.querySelector('#aufgaben-overlay.open');
+    const panel = document.querySelector('#aufgaben-overlay[data-auf]');      // open, or opening (the class comes a frame later)
     if (panel) {
         if (e.key === 'Escape' || o) aufgabenPanel(false);
         else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.repeat) {
