@@ -368,7 +368,9 @@ const APPLE_BILD = 'https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-app
 function pillenZeichnen(neuTempo, neuText) {
     const s = tempoLetzt, texte = texteLetzt.texte || [];
     let el = document.getElementById('tempo-pille');
-    if ((!s || (!s.schnell && !s.langsam)) && !texte.length) { if (el) el.style.display = 'none'; return; }
+    // Doc, 01.10.: "Wenn überhaupt kein zu langsam oder zu schnell da ist, mal die Bubbles immer aber grau in dem
+    // üblichen Stil wie ... der Papierkorb ... wenn sie da sind, werden sie bunt ... das Icon soll vorher auch da sein
+    // aber grayed" - the three always stand while the buzzer listens; empty they are pale with a grey icon, no number
     if (!el) {
         el = document.createElement('div');
         el.id = 'tempo-pille';
@@ -394,16 +396,22 @@ function pillenZeichnen(neuTempo, neuText) {
     // dem Icon finde ich super ... Runner und Schnecke" - Apple's 🏃 (mirrored: "den Runner bitte spiegeln") and 🐌
     // with the number, the words in the tooltip
     const tempo = (art, wort, code, klasse) => {
-        if (!s || !s[art]) return;
-        const p = pille(code, klasse);
-        p.appendChild(document.createTextNode(String(s[art])));
-        p.style.background = buzzGrund(s[art]);
-        p.title = s[art] + ' × ' + wort + ' bei dieser Aufgabe';
+        const n = s && s[art] || 0;
+        const p = pille(code, (klasse ? klasse + ' ' : '') + (n ? '' : 'leer'));
+        if (n) {
+            p.appendChild(document.createTextNode(String(n)));
+            p.style.background = buzzGrund(n);
+        }
+        p.title = n ? n + ' × ' + wort + ' bei dieser Aufgabe' : 'noch kein „' + wort + '“ bei dieser Aufgabe';
         reihe.appendChild(p);
-        if (neuTempo === art) puls(p);
+        if (n && neuTempo === art) puls(p);
     };
     tempo('schnell', 'zu schnell', '1f3c3', 'gespiegelt');
-    if (texte.length) {
+    if (!texte.length) {
+        const p = pille('1f4ac', 'tx-pille leer');
+        p.title = texteLetzt.angemeldet === false ? 'Feedback-Nachrichten – nur mit Anmeldung im Stoffverteilungsplan' : 'heute noch keine Feedback-Nachricht';
+        reihe.appendChild(p);
+    } else {
         const gelesen = texteGelesen(), neu = texte.filter(x => x.id > gelesen).length;
         const p = pille('1f4ac', 'tx-pille' + (neu ? ' ungelesen' : '') + (texteOffen ? ' offen' : ''));
         // all of today's (Doc, 01.10.: "die eins ... passt nicht. Das sind vier Kommentare"); what is new shows in the
