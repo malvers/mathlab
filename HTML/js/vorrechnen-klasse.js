@@ -10,13 +10,31 @@
 // and puts the QR on the board (on the beamer as a twin); a buzz lights the button orange with its count and
 // the screen's edge glows once - the rail and the glow never reach the beamer; a tap then means "seen".
 // Which task was on the board when a buzz came is kept on this device (vorrechnen-buzzer), for later.
+// Doc, 01.10.: two "nicht verstanden" on a task the moment it came up, with nobody pressing - a buzz went to the
+// task on the board when it ARRIVED: the look every 5 s (school Wi-Fi drops the websocket) or a page busy for a
+// moment brought the last taps of the old task onto the new one. Now it goes to the task and step that stood on
+// the board when it was PRESSED (its row's time on the server; the laptop's clock is taken to be right, a buzz
+// "from the future" counts as now). The board's states of this session, one entry per change:
+const tafelStaende = [];
+function merkeTafelStand() {
+    const aufgabe = aufgabenModus && AUFGABEN[aufgabeIdx] ? AUFGABEN[aufgabeIdx][0] : null, schritt = rechenweg.length;
+    const l = tafelStaende[tafelStaende.length - 1];
+    if (l && l.aufgabe === aufgabe && l.schritt === schritt) return;
+    tafelStaende.push({ t: Date.now(), aufgabe, schritt });
+    if (tafelStaende.length > 3000) tafelStaende.splice(0, 1000);
+}
+// what stood on the board at time t; before this page was opened: what stands now (as it was before)
+function tafelStandUm(t) {
+    for (let k = tafelStaende.length - 1; k >= 0; k--) if (tafelStaende[k].t <= t) return tafelStaende[k];
+    return tafelStaende[tafelStaende.length - 1];
+}
 function buzzLog() {
     try { const l = JSON.parse(localStorage.getItem('vorrechnen-buzzer') || '[]'); return Array.isArray(l) ? l : []; }
     catch (_) { return []; }
 }
 // one entry per buzz (by its id): which task was on the board, with today's code - a reload that brings
 // the unseen ones back does not count them twice, and only a really new one makes the edge glow
-function buzzerMeldung(n, neu, frisch = []) {
+function buzzerMeldung(n, neu, frisch = [], zeiten = {}) {
     if (anzeigeModus) return;                        // the beamer window never shows it
     // Doc, 27.09.: the count on the QR button "weg bitte und auch nicht gelb, denn wir haben ja die Pille
     // rechts oben" - the rail button stays plain (Buzzer.markiere is not used here)
@@ -26,8 +44,12 @@ function buzzerMeldung(n, neu, frisch = []) {
         // no glow along the edge any more (Doc, 27.09.: "so einen kurzen Flash ... in Gelb bitte nicht
         // machen") - the pill alone tells it; Buzzer.blitz() stays in js/buzzer.js for other pages
         // the step on the board: 0 = the task itself, k = the k-th line of the working
-        const aufgabe = aufgabenModus ? AUFGABEN[aufgabeIdx][0] : null, code = Buzzer.code(), schritt = rechenweg.length;
-        neue.forEach(id => log.push({ id, zeit: Date.now(), code, aufgabe, schritt }));
+        merkeTafelStand();
+        const code = Buzzer.code(), jetzt = Date.now();
+        neue.forEach(id => {
+            const zeit = Math.min(zeiten[id] || jetzt, jetzt), { aufgabe, schritt } = tafelStandUm(zeit);
+            log.push({ id, zeit, code, aufgabe, schritt });
+        });
         try { localStorage.setItem('vorrechnen-buzzer', JSON.stringify(log.slice(-500))); } catch (_) {}
     }
     zeigeBuzzAufgabe();
@@ -42,6 +64,7 @@ function buzzerMeldung(n, neu, frisch = []) {
 // stays Doc's. The beamer window never draws either itself: it shows mission control's copy.
 function zeigeBuzzAufgabe() {
     if (anzeigeModus) return;
+    merkeTafelStand();                                   // every change of task or step passes here
     let el = document.getElementById('buzz-aufgabe'), grund = document.getElementById('buzz-zeile');
     const schritt = rechenweg.length;
     const zellen = [...document.querySelectorAll(`#rechenweg-schicht [data-schritt="${schritt ? schritt - 1 : 'aufgabe'}"] .katex-html`)];
