@@ -314,6 +314,7 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
       'Oranger Punkt am Vollbild-Knopf: nur ein Bildschirm – am Board heißt das gespiegelt'],
       ['<span class="help-dot ext"></span>', 'Grüner Punkt: Bildschirm erweitert – Präsentation kann starten']] : []),
     [K(['L']), 'Laserpointer an / aus – auch der Knopf rechts neben H'],
+    [K(['N']) + hint('Natur'), 'Naturbild hinter den Folien wechseln – nach dem letzten wieder ohne'],
     null,
     [K(['Leertaste', '/', 'P']), 'Solita zuhören lassen – die Frage sprechen'
       + (avatar ? ' <img class="navpic" src="' + avatar.src + '" alt="">' : '')],
@@ -333,6 +334,13 @@ addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the no
     if (e.key === 'h' || e.key === 'H') { help.hidden = !help.hidden; e.preventDefault(); }   // only H - the ? belongs to Solita's line (Doc, 23.09.2026)
     else if (e.key === 'Escape' && !help.hidden) help.hidden = true;
   });
+})();
+// a nature photo under the light slides, deeply dimmed - N cycles (Doc, 01.10.2026). The picking lives in
+// js/natur-bild.js, shared with Vorrechnen; deck.css puts the picture under the slides.
+(function () {
+  const s = document.createElement('script');
+  s.src = new URL('../js/natur-bild.js', (document.currentScript && document.currentScript.src) || location.href).href;
+  document.head.appendChild(s);
 })();
 // type the slide number, then Enter: 1 7 Enter jumps to slide 17 (Doc, 15.09.2026) - like
 // PowerPoint the slide starts unbuilt; Esc or a 2.5 s pause drops the typed number

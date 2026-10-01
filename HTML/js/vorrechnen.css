@@ -227,6 +227,29 @@ body.anzeige:has(> #canvas-container:not(.hell))::before {
 }
 body.anzeige #canvas-container:not(.hell) { background: transparent; }
 
+/* Doc, 01.10.: "im Vorrechnen-Modus. Mach das da auch mal rein. Das sieht immer so ... Whiteboard-mäßig aus" -
+   the decks' nature photo under the board, deeply dimmed: N picks it (js/natur-bild.js sets html.natur and
+   --natur). The board's own colour lies over it: --natur-hell of the sand, --natur-dunkel of the night.
+   On the beamer the photo fills the whole screen behind a clear board, so it shows no box */
+html.natur { --natur-hell: 0.82; --natur-dunkel: 0.86; }
+html.natur #canvas-container {
+    background: radial-gradient(circle at 50% 50%, rgb(5 25 55 / var(--natur-dunkel)) 0%, rgb(8 20 42 / var(--natur-dunkel)) 100%),
+        var(--natur) center / cover no-repeat, #08142a;
+}
+html.natur #canvas-container.hell {
+    background: linear-gradient(rgb(244 236 216 / var(--natur-hell)), rgb(244 236 216 / var(--natur-hell))),
+        var(--natur) center / cover no-repeat, #f4ecd8;
+}
+html.natur body.anzeige #canvas-container { background: transparent; }
+html.natur body.anzeige:has(> #canvas-container:not(.hell))::before {
+    background: radial-gradient(circle at 50% 50%, rgb(5 25 55 / var(--natur-dunkel)) 0%, rgb(8 20 42 / var(--natur-dunkel)) 100%),
+        var(--natur) center / cover no-repeat, #08142a;
+}
+html.natur body.anzeige:has(> #canvas-container.hell)::before {
+    background: linear-gradient(rgb(244 236 216 / var(--natur-hell)), rgb(244 236 216 / var(--natur-hell))),
+        var(--natur) center / cover no-repeat, #f4ecd8;
+}
+
 /* Doc, 26.09.: "mach in der unteren Zeile dann doch den Erkennen-Button" -
    small, bottom centre, until the recognised line takes its place */
 /* Doc, 26.09.: "mache den Erkennen-Button unten etwas deutlicher, denn den
