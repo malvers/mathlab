@@ -63,6 +63,14 @@
             ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 5H11"/><path d="M21 12H11"/>' +
             '<path d="M21 19H11"/><path d="' + pfeil + '"/></g></svg>';
     };
+    /* Doc, 01.10.2026 (the division sign among the smileys): "nicht ganz Y-zentriert ... ein Stück größer" - a
+       sign's glyph sits wherever its font puts it, so the button's face is drawn; what is typed stays the
+       character. Lucide "divide" (ISC, lucide-static 1.48.0) */
+    const ZEICHEN_SVG = {
+        '÷': '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor"' +
+            ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="6" r="1"/>' +
+            '<path d="M5 12h14"/><circle cx="12" cy="18" r="1"/></g></svg>'
+    };
     function bildHtml(src, name) {
         const img = document.createElement('img');
         img.className = 'fmtbar-bild';
@@ -121,8 +129,10 @@
         /* Doc, 29.09.2026 (Fahrplan): "vor das Bold, einfach ein paar übliche Smileys, die cool sind" - each
            button shows the character it types (content, not an icon); insertText keeps undo and the caret */
         (opts.emojis || []).forEach(function (e) {
-            mk('<span class="fmtbar-emoji">' + e + '</span>', e + ' einfügen', '', function () { exec('insertText', e); })
-                .classList.add('fmtbar-emo');
+            const b = mk(ZEICHEN_SVG[e] || '<span class="fmtbar-emoji">' + e + '</span>', e + ' einfügen', '',
+                function () { exec('insertText', e); });
+            b.classList.add('fmtbar-emo');
+            if (ZEICHEN_SVG[e]) b.classList.add('fmtbar-zeichen');
         });
         mk('<b>B</b>', 'Fett (Cmd+B)', 'bold', mark('bold'));
         mk('<i>I</i>', 'Kursiv (Cmd+I)', 'italic', mark('italic'));

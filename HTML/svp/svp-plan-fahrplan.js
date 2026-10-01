@@ -123,7 +123,9 @@ window.svpPlanParts.push(function (P) {
             groessen: true,    // klein, mittel, groß (Doc, 29.09.2026)
             // Doc, 29.09.2026: "ein paar übliche Smileys, die cool sind", "ein paar weniger", 🎉 -> 🤔, then in the panel
             // "noch ein paar Smileys rein, denn wir haben jetzt Platz" - faces first, then signs
-            emojis: ['😀', '😎', '😅', '🤔', '🤯', '🥳', '👍', '💡', '🚀', '⭐'],
+            // Doc, 01.10.2026: "rechts neben den Stern-Smiley noch das Zeichen ... für Division" - the plain
+            // character (U+00F7), so it takes the text's colour and size; its button is drawn (ZEICHEN_SVG, svp-fmtbar.js)
+            emojis: ['😀', '😎', '😅', '🤔', '🤯', '🥳', '👍', '💡', '🚀', '⭐', '÷'],
             bilder: [['/svp/emo/kuh.webp', 'Kuh']],    // Doc, 29.09.2026: the cow
             einzug: { rein: function () { einzug(1); }, raus: function () { einzug(-1); } },   // indent, outdent (29.09.2026)
             colors: [
