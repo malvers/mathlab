@@ -343,7 +343,7 @@ function tempoMeldung(s) {
 }
 // Doc, 01.10.: "mach unten ein Feld. Für Feedback ... wo man das dann bei mir im Mission Control ... zeigen" - the
 // phones' written feedback (js/buzzer.js: Buzzer.texte, readable with Doc's SVP session only) as a 💬 pill with the
-// number not read yet, then "das Kommentarding in die Mitte. Zwischen Runner und Schnecke ... keinen extra Dialog ...
+// number of today's comments, then "das Kommentarding in die Mitte. Zwischen Runner und Schnecke ... keinen extra Dialog ...
 // wenn ich auf die Blase ticke, soll klein drunter mit genau den gleichen Rundungen eine Box kommen mit den
 // Kommentaren ... wenn ich noch mal klicke, soll es wieder einklappen": 🏃 💬 🐌 in one row, a tap on 💬 folds the
 // box under it open and shut; shutting it marks them read. Today's, of today's code.
@@ -406,7 +406,9 @@ function pillenZeichnen(neuTempo, neuText) {
     if (texte.length) {
         const gelesen = texteGelesen(), neu = texte.filter(x => x.id > gelesen).length;
         const p = pille('1f4ac', 'tx-pille' + (neu ? ' ungelesen' : '') + (texteOffen ? ' offen' : ''));
-        if (neu) p.appendChild(document.createTextNode(String(neu)));
+        // all of today's (Doc, 01.10.: "die eins ... passt nicht. Das sind vier Kommentare"); what is new shows in the
+        // yellow ground and the bold lines in the box
+        p.appendChild(document.createTextNode(String(texte.length)));
         p.title = texte.length + ' Feedback-Nachricht' + (texte.length === 1 ? '' : 'en') + ' heute' + (neu ? ', ' + neu + ' neu' : '') +
             (texteOffen ? ' – antippen zum Einklappen' : ' – antippen');
         p.addEventListener('click', texteKlappen);
