@@ -1,0 +1,41 @@
+/* The decks' nature photo behind the whole SVP, deeply dimmed (Doc, 01.10.2026: "in den Stoffverteilungsplan hinter
+   alles dieses Naturbild ... an den Seiten, wo keine Tabelle ist, und wo Elemente sind, so ein ganz kleines bisschen
+   durchscheinen lassen"). js/natur-bild.js (loaded by svp-gate.js) sets html.natur and --natur; N picks another.
+   The page ground lies over the photo as a veil, --natur-deckung of it, in every scheme its own --bg.
+   The photo is a fixed layer behind the page (cheap to scroll); the sticky head carries the same photo, fixed to the
+   window too, so it still hides the rows that pass under it and shows no seam. Cards and the table are --card-soft,
+   already a little transparent: there the photo shines through only faintly. */
+html.natur { --natur-deckung: 86%; }
+html.natur.svp-light { --natur-deckung: 82%; }
+html.natur {
+    --natur-schleier: linear-gradient(color-mix(in srgb, var(--bg) var(--natur-deckung), transparent),
+        color-mix(in srgb, var(--bg) var(--natur-deckung), transparent));
+}
+html.natur body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--natur-schleier), var(--natur) center / cover no-repeat, var(--bg);
+}
+html.natur .plan-sticky,
+html.natur .svp-sticktop,
+html.natur .svp-sticktop::before {
+    background: var(--natur-schleier), var(--natur) center / cover no-repeat fixed, var(--bg);
+}
+/* the head is no block of its own: the band at the top (year, clock, pills) has no ground, and the sticky head
+   casts no shadow - the photo runs on under everything (Doc, 01.10.2026: "die obere Bar müsste auch noch durchsichtig
+   sein", "das sieht irgendwie abgehackt aus. Es müsste unter allem sozusagen zu sehen sein") */
+html.natur .nav-band { background: transparent; border-bottom-color: transparent; }   /* and no line under it (Doc, 01.10.2026: "nehmen die Linie mal noch raus") */
+html.natur .plan-sticky.stuck { box-shadow: none; }
+/* the plan table a little more see-through than its --card-soft (white 85 %, dark 55 %), so the photo shows under the
+   weeks too (Doc, 01.10.2026: "nur die Tabelle unten, die ab Sommerferien beginnt. Ganz leicht transparent").
+   Its sticky head row keeps its full --panel, so the rows still vanish under it */
+html.natur { --natur-tabelle: 25%; }   /* 40 % first, then "noch ein bisschen transparenter" */
+html.natur.svp-light { --natur-tabelle: 55%; }   /* 70 % first */
+html.natur .table-wrap { background: color-mix(in srgb, var(--card) var(--natur-tabelle), transparent); }
+@media print {
+    html.natur body::before { display: none; }
+    html.natur .plan-sticky, html.natur .svp-sticktop, html.natur .svp-sticktop::before, html.natur .nav-band { background: none; }
+}

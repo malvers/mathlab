@@ -20,6 +20,15 @@
         if (t === 'grey') document.documentElement.classList.add('svp-grey');
     } catch (e) { }
 })();
+// The decks' nature photo behind every SVP page (Doc, 01.10.2026) - js/natur-bild.js picks it, svp-natur.css places it.
+// From here because this file is the one every SVP page loads first, so the photo is there before first paint.
+(function () {
+    const me = document.currentScript;
+    if (!me || !me.src || window.NaturBild) return;
+    const s = document.createElement('script');
+    s.src = new URL('../js/natur-bild.js', me.src).href;
+    document.head.appendChild(s);
+})();
 
 (function () {
     // TEMP (2026-08-19, Doc): global gate disabled — set GATE_OFF to false to re-enable.
