@@ -513,7 +513,7 @@ function aufgabenPanel(auf, sofort = false) {
         wvTab.type = 'button';
         wvTab.className = 'ak-tab';
         wvTab.id = 'ak-tab-wv';
-        wvTab.textContent = 'Wiedervorlage';
+        wvTab.textContent = 'Wiederholung';                   // Doc, 01.10.: "Wiederholung bitte"
         wvTab.setAttribute('role', 'tab');
         wvTab.setAttribute('aria-controls', 'ak-seite-wv');
         wvTab.addEventListener('click', () => aufgabenTab(-1));
@@ -530,7 +530,9 @@ function aufgabenPanel(auf, sofort = false) {
             tab.type = 'button';
             tab.className = 'ak-tab';
             tab.id = 'ak-tab-' + k;
-            tab.textContent = blk.titel;
+            // Doc, 01.10.: "Die Überschriften weniger Text Level # weg" - "Level 2 · mittelschwer" is "mittelschwer"
+            // on its tab; the title itself stays (the board's counter, Solita and the collections read it)
+            tab.textContent = blk.titel.replace(/^Level \d+ · /, '');
             tab.setAttribute('role', 'tab');
             tab.setAttribute('aria-controls', 'ak-seite-' + k);
             tab.addEventListener('click', () => aufgabenTab(k));
