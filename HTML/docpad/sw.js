@@ -24,7 +24,7 @@ self.addEventListener('fetch', e => {
       // ?v= is a fresh URL, so a password page still in the HTTP cache (GitHub Pages: 10 min) cannot answer
       if (v && v !== bounced && !(await caches.has('docpad-' + v))) { bounced = v; return Response.redirect(LOADER + '?v=' + v, 302); }
     }
-    const path = url.pathname.endsWith('/') ? url.pathname + 'index.html' : url.pathname;
+    const path = url.pathname.endsWith('/') ? url.pathname + 'docpad.html' : url.pathname;   // the calculator (web/index.html only forwards)
     const hit = await caches.match(url.origin + path);
     if (!hit) return new Response('DOCPAD: ' + path + ' not found - please open the page again', { status: 404 });
     const range = e.request.headers.get('range');
