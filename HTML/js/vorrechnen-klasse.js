@@ -415,7 +415,7 @@ function pillenZeichnen(neuTempo, neuText) {
         const gelesen = texteGelesen(), neu = texte.filter(x => x.id > gelesen).length;
         const p = pille('1f4ac', 'tx-pille' + (neu ? ' ungelesen' : '') + (texteOffen ? ' offen' : ''));
         // all of today's (Doc, 01.10.: "die eins ... passt nicht. Das sind vier Kommentare"); what is new shows in the
-        // yellow ground and the bold lines in the box
+        // pill's yellow ground only (the new lines in bold: "sieht irgendwie komisch aus ... lass das mal weg")
         p.appendChild(document.createTextNode(String(texte.length)));
         p.title = texte.length + ' Feedback-Nachricht' + (texte.length === 1 ? '' : 'en') + ' heute' + (neu ? ', ' + neu + ' neu' : '') +
             (texteOffen ? ' – antippen zum Einklappen' : ' – antippen');
