@@ -2,7 +2,7 @@
 // Vorrechnen (Doc, 01.10.2026: "ein schönes Bild ... Natur ... total gedimmt ... macht das Ganze noch lebendiger",
 // "im Vorrechnen-Modus ... mach das da auch mal rein"). This file only picks the picture: it sets class "natur" and
 // --natur (a url) on <html>; each page's CSS decides where the picture goes and how much lies over it.
-// N cycles through the pictures and back to none. The choice is kept per browser under one key for decks and
+// It starts with the clouds (START); N cycles through the pictures and back to none. The choice is kept per browser under one key for decks and
 // Vorrechnen, and a second window (beamer, presenter) follows at once. ?natur=3 picks one by link, ?natur=0 none.
 // The pictures are CC0 from StockSnap - decks/natur/credits.json
 (function () {
@@ -10,9 +10,11 @@
   const PICS = [['nebelsee', 'Nebelsee'], ['schneeberge', 'Schneeberge im Nebel'], ['bergketten', 'Bergketten im Gegenlicht'],
     ['wolkenmeer', 'Berge über den Wolken'], ['wiese', 'Wiese unter Wolken'], ['bergsee', 'Bergsee'], ['spiegelung', 'Spiegelung im Bergsee']];
   const KEY = 'deck-natur';
+  // until N is pressed: the mountains above the clouds (Doc, 01.10.2026: "Wolkenbild ... really slick", "Das machen wir so")
+  const START = 4;
   const base = (document.currentScript && document.currentScript.src) || location.href;
-  let n = 0;                                                 // 0 = none, 1..7 = PICS[n - 1]
-  try { n = +localStorage.getItem(KEY) || 0; } catch (e) { }
+  let n = START;                                             // 0 = none, 1..7 = PICS[n - 1]
+  try { const v = localStorage.getItem(KEY); if (v !== null) n = +v || 0; } catch (e) { }   // a chosen "none" stays none
   const m = /[?&]natur=(\d+)/.exec(location.search);
   if (m) n = +m[1];
 
