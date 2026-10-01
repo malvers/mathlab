@@ -285,8 +285,16 @@ function zeigeBuzzAufgabe() {
 }
 function buzzerKnopf() {
     if (!window.Buzzer) return;
+    Buzzer.tempo(tempoMeldung);
     if (!Buzzer.aktiv()) Buzzer.start(buzzerMeldung);
     buzzerKarte();                                   // always the QR - the count is the pill in the first row
+}
+// Doc, 01.10.: "Das soll mir Feedback geben, ob ich zu schnell erkläre oder zu langsam erkläre ... bei mir ... in
+// Mission Control" - the phones' tempo of the last two minutes beside the buzzer's rail button (js/buzzer.js:
+// tempoMarke); the rail is never on the beamer, and the beamer window draws nothing of it either
+function tempoMeldung(s) {
+    if (anzeigeModus) return;
+    Buzzer.tempoMarke(document.getElementById('werkzeug-buzzer'), s);
 }
 let buzzerZwilling = null;
 async function buzzerKarte(auf = true) {
@@ -301,14 +309,11 @@ async function buzzerKarte(auf = true) {
             '<button type="button" class="cyber-modal-x" title="Schließen" aria-label="Schließen">' +
             '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6 L18 18 M18 6 L6 18" fill="none"' +
             ' stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>' +
-            '<div class="bz-karte"></div>' +
-            '<div class="bz-knoepfe"><button type="button" class="cyber-btn bz-neu">NEUER CODE</button>' +
-            '<button type="button" class="cyber-btn bz-zu">FERTIG</button></div></div>';
+            // the QR alone (Doc, 01.10.: "alles raus bitte auch den Header") - no "NEUER CODE" / "FERTIG" any more:
+            // the ✕, a click beside it or Esc closes; the code is a new one every day anyway
+            '<div class="bz-karte"></div></div>';
         o.addEventListener('click', e => { if (e.target === o) buzzerKarte(false); });
         o.querySelector('.cyber-modal-x').addEventListener('click', () => buzzerKarte(false));
-        o.querySelector('.bz-zu').addEventListener('click', () => buzzerKarte(false));
-        // another class: a fresh code, the phones with the old one no longer count
-        o.querySelector('.bz-neu').addEventListener('click', () => { Buzzer.neuerCode(); buzzerKarte(); });
         document.body.appendChild(o);
     }
     const karte = await Buzzer.karteBereit();

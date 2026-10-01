@@ -86,6 +86,21 @@
         #knopf.offen .haken { display: inline; }
         #knopf.pause { background: #1c2c4a; color: var(--leise); box-shadow: none; cursor: default; }
 
+        /* Doc, 01.10.: "Das soll mir Feedback geben, ob ich zu schnell erkläre oder zu langsam erkläre" - two quiet keys
+           under the big one, as wide as it; a tap goes to the table buzzer_tempo, the teacher sees it beside her buzzer
+           key. After a tap both rest for 20 s, so one phone cannot drown the class */
+        #tempo { display: flex; gap: 12px; width: min(78vw, 58vh, 380px); }
+        #tempo button {
+            flex: 1; min-height: 52px; padding: 0 8px; cursor: pointer; touch-action: manipulation;
+            font-family: inherit; font-size: clamp(0.72rem, 3.4vw, 0.9rem); letter-spacing: 0.08em;
+            color: var(--text); background: rgba(0, 210, 255, 0.08); border: 1px solid rgba(0, 210, 255, 0.4); border-radius: 12px;
+            transition: background 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+        }
+        #tempo button:active { transform: scale(0.97); }
+        #tempo button:focus { outline: none; }
+        #tempo button.danke { background: var(--gruen); border-color: var(--gruen); color: #fff; }
+        #tempo button:disabled:not(.danke) { opacity: 0.35; cursor: default; }
+
         #hinweis { min-height: 1.4em; font-size: clamp(0.8rem, 3.6vw, 0.95rem); letter-spacing: 0.04em; color: var(--leise); }
         #hinweis.fehler { color: var(--rot); }
 
@@ -127,6 +142,10 @@
         </svg>
         <span id="knopf-text">HAB ICH NICHT VERSTANDEN</span>
     </button>
+    <div id="tempo" hidden>
+        <button type="button" data-art="schnell">ZU SCHNELL</button>
+        <button type="button" data-art="langsam">ZU LANGSAM</button>
+    </div>
     <div id="hinweis" role="status"></div>
 
 
@@ -209,9 +228,38 @@
                 else { zeige('frage'); sag(''); }
             }
 
+            // "zu schnell" / "zu langsam": a row of its own table (buzzer_tempo); the key says thanks, both rest 20 s
+            const TEMPO_RUHE = 20000;
+            const tempoKnoepfe = [...document.querySelectorAll('#tempo button')];
+            async function tempo(b) {
+                const art = b.dataset.art, wort = b.textContent;
+                tempoKnoepfe.forEach(k => { k.disabled = true; });
+                let res;
+                try {
+                    res = await fetch(DB_URL + '/rest/v1/buzzer_tempo', {
+                        method: 'POST',
+                        headers: { apikey: DB_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+                        body: JSON.stringify({ code, art })
+                    });
+                } catch (_) { res = null; }
+                if (!res || !res.ok) {
+                    tempoKnoepfe.forEach(k => { k.disabled = false; });
+                    sag(res && res.status === 400 ? 'Gerade drücken sehr viele – gleich nochmal.' : 'Nicht angekommen – bitte nochmal tippen.', true);
+                    return;
+                }
+                sag('');
+                if (navigator.vibrate) navigator.vibrate(40);
+                b.classList.add('danke');
+                b.textContent = 'DANKE!';
+                setTimeout(() => { b.classList.remove('danke'); b.textContent = wort; }, 1500);
+                setTimeout(() => tempoKnoepfe.forEach(k => { k.disabled = false; }), TEMPO_RUHE);
+            }
+            tempoKnoepfe.forEach(b => b.addEventListener('click', () => tempo(b)));
+
             function bereit() {
                 $('code-feld').hidden = true;
                 knopf.hidden = false;
+                $('tempo').hidden = false;
                 if (offeneFrage()) zeige('offen');
             }
 
