@@ -150,6 +150,12 @@
 // same kind, new ideas: tauschen, Paare bilden, gleiche Grundzahl, Teleskop. Easy to hard; every step checked in Python
 // with exact fractions, every formula rendered with the lab's KaTeX (strict). The little Gauss gets his source as it is:
 // Sartorius tells the story, but without the numbers 1 to 100 (Brian Hayes, "Gauss's Day of Reckoning", 2006).
+// Doc, 01.10.2026 (four pictures: "Bau die doch bitte in die Decks ein (sinnvoll, logisch ;-)", "das auch", "auch"):
+// 50^50/25^25 and 8^x = 4^2026 + 4^2026 (x = 1351) after the other powers, then the letters at the end - MATH (letters side by side are a product: 240, not
+// the number word 2385 of the Ziffernrätsel), LOVE (the first binomial formula gives the products without the
+// numbers) and x! = x^3 - x (ausklammern, the third one, then trying). Checked with sympy: every step holds in all four
+// real solutions of LOVE, x = 5 is the only natural solution (x = 0 to 199). No source: the pictures circulate without
+// one (searched 01.10.2026).
 (function () {
     const ab = AUFGABEN.length;
     AUFGABEN.push(
@@ -162,10 +168,16 @@
         ['d-123123',    '\\frac{123123}{1001}',                                                                           ''],
         ['d-basis',     '\\frac{4^5}{2^9}',                                                                               ''],
         ['d-8hoch',     '\\frac{8^{10}}{4^{15}}',                                                                         ''],
+        ['d-50hoch',    '\\frac{50^{50}}{25^{25}}',                                                                       ''],
+        ['d-achthoch',  '8^x=4^{2026}+4^{2026}',                                                                          'x'],
         ['d-gauss',     '1+2+3+\\ldots+100',                                                                              ''],
         ['d-2026',      '2026^2-2025\\cdot 2027',                                                                         ''],
         ['d-teleskop',  '\\left(1-\\frac{1}{2}\\right)\\cdot\\left(1-\\frac{1}{3}\\right)\\cdot\\ldots\\cdot\\left(1-\\frac{1}{10}\\right)', ''],
         ['d-kehrsumme', '\\frac{1}{1\\cdot 2}+\\frac{1}{2\\cdot 3}+\\ldots+\\frac{1}{9\\cdot 10}',                         ''],
+        // the systems in braces: their "=" stay out of the "=" column, the steps start under them
+        ['d-math',      '{\\begin{cases}M=2\\\\A=M+1\\\\T=8\\\\H=T-A\\end{cases}\\quad MATH=\\,?}',                      ''],
+        ['d-love',     '{\\begin{cases}L^2+O^2=122\\\\L+O=12\\\\V^2+E^2=170\\\\V+E=14\\end{cases}\\quad LOVE=\\,?}',    ''],
+        ['d-fakultaet', 'x!=x^3-x',                                                                                       'x'],
     );
     BLOECKE.push({ titel: 'Kopfrechnen · Denkaufgaben', ab, bis: AUFGABEN.length, kopf: 'ohne Taschenrechner' });
     Object.assign(LOESUNGEN, {
@@ -199,6 +211,18 @@
         'd-8hoch':     [['=\\frac{(2^3)^{10}}{(2^2)^{15}}', '\\text{zerlegen}'],
                         ['=\\frac{2^{30}}{2^{30}}', '\\text{Potenzgesetz}'],
                         ['=1', '\\text{kürzen}']],
+        'd-50hoch':    [['=\\frac{(2\\cdot 25)^{50}}{25^{25}}', '\\text{zerlegen}'],
+                        ['=\\frac{2^{50}\\cdot 25^{50}}{25^{25}}', '\\text{Potenzgesetz}'],
+                        ['=2^{50}\\cdot 25^{25}', '\\text{kürzen}'],
+                        ['=2^{50}\\cdot(5^2)^{25}', '\\text{zerlegen}'],
+                        ['=2^{50}\\cdot 5^{50}', '\\text{Potenzgesetz}'],
+                        ['=10^{50}', '\\text{Potenzgesetz}']],
+        'd-achthoch':  [['8^x=2\\cdot 4^{2026}', '\\text{zusammenfassen}'],
+                        ['(2^3)^x=2\\cdot(2^2)^{2026}', '\\text{zerlegen}'],
+                        ['2^{3x}=2\\cdot 2^{4052}', '\\text{Potenzgesetz}'],
+                        ['2^{3x}=2^{4053}', '\\text{Potenzgesetz}'],
+                        ['3x=4053', '\\text{Exponentenvergleich}'],
+                        ['x=1351', ':3']],
         'd-gauss':     [['=(1+100)+(2+99)+\\ldots+(50+51)', '\\text{Paare bilden}'],
                         ['=50\\cdot 101', '\\text{zusammenfassen}'],
                         ['=5050', '\\text{ausrechnen}']],
@@ -212,6 +236,24 @@
         'd-kehrsumme': [['=1-\\frac{1}{2}+\\frac{1}{2}-\\frac{1}{3}+\\ldots+\\frac{1}{9}-\\frac{1}{10}', '\\text{zerlegen}'],
                         ['=1-\\frac{1}{10}', '\\text{zusammenfassen}'],
                         ['=\\frac{9}{10}', '\\text{ausrechnen}']],
+        'd-math':      [['A=3', '\\text{einsetzen}'],
+                        ['H=5', '\\text{einsetzen}'],
+                        ['MATH=2\\cdot 3\\cdot 8\\cdot 5', '\\text{einsetzen}'],
+                        ['MATH=10\\cdot 24', '\\text{vertauschen}'],
+                        ['MATH=240', '\\text{ausrechnen}']],
+        'd-love':      [['(L+O)^2=144', '\\text{quadrieren}'],
+                        ['L^2+2LO+O^2=144', '\\text{binomische Formel}'],
+                        ['122+2LO=144', '\\text{einsetzen}'],
+                        ['2LO=22', '-122'],
+                        ['LO=11', ':2'],
+                        ['VE=13', '\\text{genauso mit }V,\\,E'],
+                        ['LOVE=11\\cdot 13', '\\text{einsetzen}'],
+                        ['LOVE=143', '\\text{ausrechnen}']],
+        'd-fakultaet': [['x!=x\\cdot(x^2-1)', '\\text{ausklammern}'],
+                        ['x!=x\\cdot(x-1)\\cdot(x+1)', '\\text{binomische Formel}'],
+                        ['x\\cdot(x-1)\\cdot(x-2)!=x\\cdot(x-1)\\cdot(x+1)', '\\text{zerlegen},\\;x\\ge 2'],
+                        ['(x-2)!=x+1', ':x\\cdot(x-1)'],
+                        ['x=5', '\\text{probieren}']],
     });
     // checked 30.09.2026 (Brian Hayes, "Gauss's Day of Reckoning", American Scientist, May-June 2006; Wikipedia)
     QUELLEN['d-gauss'] = 'Anekdote: W. Sartorius von Waltershausen, „Gauss zum Gedächtnis“, 1856 – die Zahlen 1 bis 100 stehen dort noch nicht (B. Hayes, American Scientist 2006)';
@@ -248,6 +290,24 @@
         'd-8hoch':
             'Beides sind Zweierpotenzen: $8=2^3$ und $4=2^2$. Dann ist $8^{10}=2^{30}$ und $4^{15}=2^{30}$ – Zähler und ' +
             'Nenner sind gleich.',
+        'd-50hoch':
+            'Riesige Zahlen, aber $50=2\\cdot 25$. Dann ist' +
+            '$$50^{50}=(2\\cdot 25)^{50}=2^{50}\\cdot 25^{50}$$' +
+            'und durch $25^{25}$ bleibt $2^{50}\\cdot 25^{25}$. Jetzt noch $25=5^2$, also $25^{25}=5^{50}$ – dieselbe ' +
+            'Hochzahl wie bei der 2, und die Grundzahlen dürfen zusammen:' +
+            '$$2^{50}\\cdot 5^{50}=(2\\cdot 5)^{50}=10^{50}$$' +
+            'Eine 1 mit fünfzig Nullen.\n\nDie Falle: $\\frac{50}{25}=2$ teilen und die Hochzahlen auch – das ergäbe ' +
+            '$2^2$. Zusammenfassen darf man nur bei gleicher Grundzahl, $\\frac{a^m}{a^n}=a^{m-n}$, oder bei gleicher ' +
+            'Hochzahl, $\\frac{a^n}{b^n}=\\left(\\frac{a}{b}\\right)^n$.',
+        'd-achthoch':
+            'Zweimal dasselbe ist das Doppelte: $4^{2026}+4^{2026}=2\\cdot 4^{2026}$. Jetzt alles als Zweierpotenz, mit ' +
+            '$8=2^3$ und $4=2^2$:' +
+            '$$2^{3x}=2\\cdot 2^{4052}=2^{4053}$$' +
+            'Links und rechts dieselbe Grundzahl – also sind auch die Hochzahlen gleich:' +
+            '$$3x=4053$$' +
+            '$$x=1351$$' +
+            'Die Falle heißt 2026: Wer die Grundzahlen addiert, schreibt $4^{2026}+4^{2026}=8^{2026}$. Das stimmt nur bei ' +
+            'der Hochzahl 1 – schon $4^2+4^2=32$, aber $8^2=64$.',
         'd-gauss':
             'Der erste und der letzte Summand ergeben 101, der zweite und der vorletzte auch – und so weiter. Das sind ' +
             '50 Paare:' +
@@ -269,5 +329,40 @@
             'zum Beispiel $\\frac{1}{2\\cdot 3}=\\frac{1}{2}-\\frac{1}{3}=\\frac{1}{6}$. Schreibt man alle Brüche so, hebt ' +
             'sich fast alles auf, $-\\frac{1}{2}$ gegen $+\\frac{1}{2}$ und so weiter. Übrig bleibt ' +
             '$1-\\frac{1}{10}=\\frac{9}{10}$.',
+        'd-math':
+            'Erst die Buchstaben, von oben nach unten: $A=M+1=3$ und $H=T-A=8-3=5$. Und dann? In der Mathematik heißt ' +
+            '$MATH$ dasselbe wie $M\\cdot A\\cdot T\\cdot H$ – Buchstaben nebeneinander werden malgenommen, wie bei $2ab$:' +
+            '$$MATH=2\\cdot 3\\cdot 8\\cdot 5=240$$' +
+            'Im Kopf geht es mit Vertauschen am schnellsten: $2\\cdot 5=10$ und $3\\cdot 8=24$, zusammen $10\\cdot 24=240$.' +
+            '\n\nWer die Ziffern einfach hintereinander schreibt, erhält 2385 – so liest man $\\mathrm{MATH}$ bei den ' +
+            'Ziffernrätseln, dort ist es eine vierstellige Zahl. In einer Rechnung mit $=$ und $+$ gilt aber die Regel ' +
+            'der Algebra: 240.',
+        'd-love':
+            'Wie bei $MATH$ heißt $LOVE$ hier $L\\cdot O\\cdot V\\cdot E$. Die vier Zahlen braucht man dafür nicht einzeln, nur die Produkte $LO$ und $VE$. Die liefert die erste ' +
+            'binomische Formel, sie verbindet die Summe mit den Quadraten:' +
+            '$$(L+O)^2=L^2+2LO+O^2$$' +
+            'Links steht $12^2=144$, rechts $122+2LO$. Also ist $2LO=22$ und $LO=11$. Genauso mit $V$ und $E$:' +
+            '$$14^2=170+2VE$$' +
+            'also $2VE=26$ und $VE=13$. Zusammen:' +
+            '$$LOVE=LO\\cdot VE=11\\cdot 13=143$$' +
+            '\n\nZum Weiterdenken: Die vier Zahlen gibt es auch. Summe 12 und Produkt 11 haben nur 1 und 11, Summe 14 ' +
+            'und Produkt 13 nur 1 und 13. Welcher Buchstabe welche Zahl ist, verrät die Aufgabe nicht – das Produkt ist ' +
+            'trotzdem immer 143. Und anders als bei den Ziffernrätseln dürfen hier zwei Buchstaben dieselbe Zahl sein: ' +
+            'In jedem Paar steckt eine 1. Probe: $1^2+11^2=122$ und $1^2+13^2=170$.',
+        'd-fakultaet':
+            'Rechts lässt sich $x$ ausklammern, und was in der Klammer bleibt, ist die dritte binomische Formel:' +
+            '$$x^3-x=x\\cdot(x^2-1)=x\\cdot(x-1)\\cdot(x+1)$$' +
+            'Links steht auch ein Produkt, $x!=1\\cdot 2\\cdot\\ldots\\cdot(x-1)\\cdot x$. Ab $x=2$ lassen sich die beiden ' +
+            'größten Faktoren abspalten – dann stehen $x$ und $x-1$ auf beiden Seiten:' +
+            '$$x\\cdot(x-1)\\cdot(x-2)!=x\\cdot(x-1)\\cdot(x+1)$$' +
+            'Für $x\\ge 2$ ist $x\\cdot(x-1)$ nicht 0, man darf dadurch teilen:' +
+            '$$(x-2)!=x+1$$' +
+            'Jetzt probieren: Für $x=2$, $3$, $4$ steht links 1, 1, 2 und rechts 3, 4, 5. Bei $x=5$ steht links $3!=6$ ' +
+            'und rechts auch 6. Danach wird die linke Seite mit jedem Schritt mindestens viermal so groß, die rechte ' +
+            'wächst nur um 1 – es kommt keine Lösung mehr.' +
+            '\n\n$x=0$ und $x=1$ gehen nicht: $0!=1!=1$, rechts steht aber 0. Also ist $x=5$ die einzige Lösung. Probe:' +
+            '$$5!=120=125-5$$',
     });
+    // the picture's four answers, under the heading in the deck (TEXTE)
+    aufgabenTexte({ 'd-achthoch': 'Zur Auswahl: 2026, 4052, 1013 oder 1351.' });
 })();

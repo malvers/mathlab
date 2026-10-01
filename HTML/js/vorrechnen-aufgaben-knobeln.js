@@ -9,6 +9,8 @@
 // Three easy ones in front (Doc, 28.09.: "selbst die zweite Aufgabe und die erste Aufgabe sind schon ganz
 // schön ... drei einfache vorne dran"): one letter with the tens given, one letter times 6, then two letters -
 // each with exactly one solution (brute force).
+// AAA + AA + A = 738 (Doc, 01.10.2026, a picture: "auch") after A + A + A = BA, its kind with three rows - one solution
+// (brute force), A = 6; ABCD * 4 = DCBA (the same day) after its sister ABCD * 9 = DCBA - one solution, 2178.
 (function () {
     const ab = AUFGABEN.length;
     AUFGABEN.push(
@@ -16,13 +18,15 @@
         ['k-mal6',     '\\mathrm{A}\\cdot 6=\\mathrm{4A}',                                                  ''],
         ['k-ab5a',     '\\mathrm{AB}+\\mathrm{B}=\\mathrm{5A}',                                             ''],
         ['k-dreimal',  '\\mathrm{A}+\\mathrm{A}+\\mathrm{A}=\\mathrm{BA}',                                  ''],
-        ['k-summe',    '\\mathrm{AB}+\\mathrm{BA}=121,\\quad A+B=\\,?',                                     ''],
+        ['k-aaa',      '\\mathrm{AAA}+\\mathrm{AA}+\\mathrm{A}=738',                                        ''],
+        ['k-summe',   '\\mathrm{AB}+\\mathrm{BA}=121,\\quad A+B=\\,?',                                     ''],
         ['k-neun',     '\\mathrm{AB}\\cdot 9=\\mathrm{A0B}',                                                ''],
         ['k-cab',      '\\mathrm{AB}+\\mathrm{AB}+\\mathrm{AB}=\\mathrm{CAB}',                              ''],
         ['k-cac',      '\\mathrm{AB}+\\mathrm{BA}=\\mathrm{CAC}',                                           ''],
         ['k-abc',      '\\mathrm{AA}+\\mathrm{BB}+\\mathrm{CC}=\\mathrm{ABC}',                              ''],
         ['k-ccc',      '\\mathrm{ABC}+\\mathrm{ABC}+\\mathrm{ABC}=\\mathrm{CCC}',                           ''],
         ['k-1089',     '\\mathrm{ABCD}\\cdot 9=\\mathrm{DCBA}',                                             ''],
+        ['k-2178',     '\\mathrm{ABCD}\\cdot 4=\\mathrm{DCBA}',                                             ''],
         ['k-math',     '\\mathrm{MATH}+\\mathrm{ATH}+\\mathrm{TH}+\\mathrm{H}=5000,\\quad M+A+T+H=\\,?',    ''],
         ['k-money',    '\\mathrm{SEND}+\\mathrm{MORE}=\\mathrm{MONEY}',                                     ''],
     );
@@ -47,6 +51,9 @@
                       ['B=1', 'A\\le 9,\\;B\\ne 0'],
                       ['A=5', '\\text{einsetzen}'],
                       ['\\mathrm{BA}=15', '\\text{einsetzen}']],
+        'k-aaa':      [['A\\cdot 111+A\\cdot 11+A=738', '\\text{Stellenwerte}'],
+                      ['A\\cdot 123=738', '\\text{zusammenfassen}'],
+                      ['A=6', ':123']],
         'k-summe':    [['A\\cdot 10+B+B\\cdot 10+A=121', '\\text{Stellenwerte}'],
                       ['A\\cdot 11+B\\cdot 11=121', '\\text{zusammenfassen}'],
                       ['A+B=11', ':11']],
@@ -87,6 +94,11 @@
                       ['B=0', 'B\\le 1,\\;B\\ne A'],
                       ['C=8', 'C\\cdot 9+8\\text{ endet auf }0'],
                       ['\\mathrm{ABCD}=1089', '\\text{Probe: }1089\\cdot 9=9801']],
+        'k-2178':     [['A=2', '\\text{Produkt vierstellig, A gerade}'],
+                      ['D=8', 'D\\cdot 4\\text{ endet auf }2,\\;D\\ge 8'],
+                      ['B=1', 'B\\le 2,\\;B\\text{ ungerade}'],
+                      ['C=7', '\\text{Zehner und Hunderter}'],
+                      ['\\mathrm{ABCD}=2178', '\\text{Probe: }2178\\cdot 4=8712']],
         'k-math':     [['M\\cdot 1000+A\\cdot 200+T\\cdot 30+H\\cdot 4=5000', '\\text{Stellenwerte}'],
                       ['H=5', '\\text{Einerstelle}'],
                       ['M\\cdot 1000+A\\cdot 200+T\\cdot 30+20=5000', '\\text{einsetzen}'],
@@ -118,6 +130,7 @@
         'k-einsa':   { zeilen: ['A', 'A', 'A'], zeichen: '+', ergebnis: '1A' },
         'k-ab5a':    { zeilen: ['AB', 'B'], zeichen: '+', ergebnis: '5A' },
         'k-dreimal': { zeilen: ['A', 'A', 'A'], zeichen: '+', ergebnis: 'BA' },
+        'k-aaa':     { zeilen: ['AAA', 'AA', 'A'], zeichen: '+', ergebnis: '738' },
         'k-summe':   { zeilen: ['AB', 'BA'], zeichen: '+', ergebnis: '121' },
         'k-cab':     { zeilen: ['AB', 'AB', 'AB'], zeichen: '+', ergebnis: 'CAB' },
         'k-cac':     { zeilen: ['AB', 'BA'], zeichen: '+', ergebnis: 'CAC' },
@@ -162,6 +175,14 @@
             '$$A=B\\cdot 5 | :2$$' +
             '$A$ ist eine Ziffer, also höchstens 9, und $B$ steht vorne, ist also nicht 0. Das lässt nur $B=1$ und $A=5$. ' +
             'Probe:$$5+5+5=15$$',
+        'k-aaa':
+            'Eine Schnapszahl wie $\\mathrm{AAA}$ ist $A\\cdot 111$ – A Hunderter, A Zehner und A Einer. Genauso ist ' +
+            '$\\mathrm{AA}=A\\cdot 11$. Mit Stellenwerten heißt die Aufgabe' +
+            '$$A\\cdot 111+A\\cdot 11+A=738 | \\text{Stellenwerte}$$' +
+            '$$A\\cdot 123=738 | \\text{zusammenfassen}$$' +
+            '$$A=6 | :123$$' +
+            'Es geht auch ohne Teilen, über die Einerspalte: Dort steht dreimal $A$, und das endet auf 8. Das schafft nur ' +
+            '$A=6$, denn $3\\cdot 6=18$. Probe:$$666+66+6=738$$',
         'k-summe':
             'Mit Stellenwerten heißt die Aufgabe' +
             '$$A\\cdot 10+B+B\\cdot 10+A=121 | \\text{Stellenwerte}$$' +
@@ -229,6 +250,18 @@
             '(81, Übertrag 8). $B$ ist höchstens 1 und nicht gleich $A$, also $B=0$.\n\n' +
             'Zehnerstelle: $C\\cdot 9$ plus Übertrag 8 muss auf $B=0$ enden, und $C\\cdot 9+8$ endet auf 0 nur für ' +
             '$C=8$ (80). Also $\\mathrm{ABCD}=1089$. Probe, rückwärts gelesen:$$1089\\cdot 9=9801$$',
+        'k-2178':
+            'Wie bei der Aufgabe mit 9: Eine vierstellige Zahl mal 4 soll vierstellig bleiben und rückwärts herauskommen. ' +
+            'Schon $2500\\cdot 4=10000$ ist fünfstellig – also ist $A$ höchstens 2. Und $A$ ist die letzte Ziffer von ' +
+            '$D\\cdot 4$, also gerade. Das lässt nur $A=2$.\n\n' +
+            'Vorne im Ergebnis steht $D$, und $\\mathrm{DCBA}$ ist mindestens $2000\\cdot 4=8000$: $D$ ist 8 oder 9. Die ' +
+            'Einerstelle von $D\\cdot 4$ ist $A=2$ – das schafft nur $D=8$ (32, Übertrag 3).\n\n' +
+            'Weil schon $2\\cdot 4=8=D$ ist, darf von den Hundertern nichts nach vorne übertragen werden: $B$ ist ' +
+            'höchstens 2. In der Zehnerspalte steht $C\\cdot 4+3$ – eine ungerade Zahl, und ihre Einerziffer ist $B$. ' +
+            'Also $B=1$.\n\n' +
+            '$C\\cdot 4+3$ endet auf 1 für $C=2$ (11) und für $C=7$ (31). Die Hunderterspalte entscheidet: $1\\cdot 4$ plus ' +
+            'Übertrag muss $C$ ergeben – mit $C=7$ ist das $4+3=7$, mit $C=2$ wäre es $4+1=5$. Also $\\mathrm{ABCD}=2178$. ' +
+            'Probe, rückwärts gelesen:$$2178\\cdot 4=8712$$',
         'k-math':
             'Stellenwerte, Spalte für Spalte: M steht einmal als Tausender, A zweimal als Hunderter, T dreimal als ' +
             'Zehner, H viermal als Einer:' +
@@ -277,12 +310,14 @@
         'k-mal6':    { A: 8 },
         'k-ab5a':    { A: 4, B: 7 },
         'k-dreimal': { A: 5, B: 1 },
-        'k-neun':    { A: 4, B: 5 },
+        'k-aaa':     { A: 6 },
+        'k-neun':   { A: 4, B: 5 },
         'k-cab':     { A: 5, B: 0, C: 1 },
         'k-cac':     { A: 2, B: 9, C: 1 },
         'k-abc':     { A: 1, B: 9, C: 8 },
         'k-ccc':     { A: 1, B: 8, C: 5 },
         'k-1089':    { A: 1, B: 0, C: 8, D: 9 },
+        'k-2178':    { A: 2, B: 1, C: 7, D: 8 },
         'k-math':    { M: 3, A: 9, T: 6, H: 5 },
         'k-money':   { S: 9, E: 5, N: 6, D: 7, M: 1, O: 0, R: 8, Y: 2 },
     };
@@ -291,6 +326,10 @@
     });
     // SEND + MORE = MONEY is Dudeney's (checked 28.09.2026: Strand Magazine vol. 68, July 1924, pp. 97 and 214)
     QUELLEN['k-money'] = 'Quelle: Henry E. Dudeney, The Strand Magazine 68, Juli 1924, S. 97 (Lösung S. 214)';
+    // the two reversals are Hardy's example of a theorem that is not "serious" (checked 01.10.2026: cut-the-knot,
+    // "Hardy's Example of Non-Serious Theorems"; arXiv math/0511366, "Digit Reversal Without Apology")
+    QUELLEN['k-1089'] = QUELLEN['k-2178'] = 'Bekannt aus: G. H. Hardy, „A Mathematician’s Apology“, 1940 – 8712 und 9801 ' +
+        'sind die einzigen vierstelligen Vielfachen ihrer Spiegelzahl';
     ERKLAERUNGEN['k-summe'] += '\n\nDie Werte: nicht eindeutig – $A$ von 2 bis 9 und $B=11-A$.';
     // the operations behind the line they are applied to, as on the board (umformungenVorziehen, js/vorrechnen-aufgaben.js)
     AUFGABEN.slice(ab).forEach(([slug]) => {
@@ -305,7 +344,7 @@
     // As powers of ten, 10^3 for 1000 (Doc: "1000 -> 10^3 (hoch 3) probier mal das Muster"): all as wide as "10",
     // the exponent a size smaller (scriptstyle, its exponent scriptscript). Then: "bei den ersten 5 ... 100 10 1
     // dann Potenz" - the easier tasks written out, the last five as powers
-    const AUSGESCHRIEBEN = 8;                // the three easy ones in front and the first five after them
+    const AUSGESCHRIEBEN = 9;                // the three easy ones in front and the first six after them (AAA + AA + A: 01.10.)
     // The A of Computer Modern reaches 0.716, the flat capitals 0.683 (measured in KaTeX_Main; O, S, C overshoot
     // a little, as round letters do) - Doc, 28.09.: "ich denke nur das A ist höher ... bissl kleiner". In the
     // number words it goes as \textrm (the same font, a class of its own), js/vorrechnen.css sets it at 95.4 %.

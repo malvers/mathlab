@@ -39,7 +39,8 @@
         // the labs (Ziffernrätsel, 29.09.2026): a column sum as \begin{array} ... \hline reads "9567 plus 1085 gleich
         // 10652"; an aligned block line by line, each line a sentence; spacing and place-value marks say nothing
         [/\\begin\{array\}\{[^}]*\}([\s\S]*?)\\end\{array\}/g, spaltensumme],
-        [/\\begin\{aligned\}|\\end\{aligned\}/g, ' '],
+        // a system ({\begin{cases} ...) line by line as well - "cases" was read out (01.10.2026)
+        [/\\begin\{(?:aligned|cases)\}|\\end\{(?:aligned|cases)\}/g, ' '],
         [/(?:\\qquad\s*)?(?:&&\s*)?\\big\|\\;\s*((?:\\text\s*\{[^{}]*\})|[^\\&]*?(?:\\[a-zA-Z]+[^\\&]*?)*?)(?=\\\\|\s*$)/g,
          function (m, op) { return umformung(op); }],
         [/\\\\/g, ' . '], [/&/g, ' '],
@@ -48,6 +49,7 @@
         [/\\overset\s*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}\s*\{([^{}]*)\}/g, ' $1 '],
         // the decks' list, as it stood in deck.js
         [/\\left|\\right|\\displaystyle|\\limits|\\!|\\,|\;|\\:|\\ /g, ' '],
+        [/\\fakultaet/g, ' Fakultät '],                 // marked by texWords
         [/\\(?:mathrm|mathbf|mathit|boldsymbol|bm|operatorname|text|textbf|mathsf|textrm|textup)\s*\{([^{}]*)\}/g, ' $1 '],
         // "dritte Wurzel", "neunzigste Wurzel" - "3-te" came out as "3 minus te" (the minus below took the hyphen)
         [/\\sqrt\s*\[\s*([^\]]*)\]\s*\{([^{}]*)\}/g, (m, n, r) => ' ' + wurzelGrad(n) + ' Wurzel aus ' + r + ' '],
@@ -156,6 +158,9 @@
         // an index raised by hand, \sqrt[{}^{90}\,] (vorrechnen's w-neunzig: KaTeX set the 90 on the root's hook), is
         // just its number
         tex = String(tex).replace(/\\sqrt\s*\[\s*\{\s*\}\s*\^\s*\{?([^{}\]]*)\}?\s*(?:\\[,;:!]\s*)*\]/g, '\\sqrt[$1]');
+        // the factorial, "x! = x^3 - x" (Doc, 01.10.2026) - the voice dropped the "!". Marked here, once: a "!" in
+        // \text{...} is none, and the list below takes \text apart
+        tex = tex.replace(/\\text\w*\s*\{[^{}]*\}|\\!|!/g, function (m) { return m === '!' ? '\\fakultaet ' : m; });
         let t = ' ' + keineEinheit(buchstabenEinzeln(tex)) + ' ';
         t = t.replace(/(?:\\(?:mathrm|textrm|textup)\s*\{[A-Z0-9]+\})+/g, function (m) {
             return ' ' + zahlwortLesen(m.replace(/\\(?:mathrm|textrm|textup)\s*\{([A-Z0-9]+)\}/g, '$1')) + ' ';
@@ -168,7 +173,8 @@
              .replace(/=/g, ' ist gleich ').replace(/\+/g, ' plus ').replace(/(\d|\w)\s*-\s*(?=[\w\\])/g, '$1 minus ')
              .replace(/</g, ' kleiner ').replace(/>/g, ' größer ').replace(/\|/g, ' ');
         // written bare, only the functions one says by name - an index "max" stays "max" ("v Index max")
-        return t.replace(/\s+/g, ' ').trim().split(' ').map(function (w) { return BUCHSTABE[w] || (/^(sin|cos|tan|cot|ln|lg|log)$/.test(w) ? FUNKTION_WORT[w] : w); }).join(' ')
+        // a number before a capital is a product, "2LO" is 2 times L times O - "2L" alone went out as a word
+        return t.replace(/\s+/g, ' ').trim().replace(/(\d)([A-ZÄÖÜ])(?= |$)/g, '$1 $2').split(' ').map(function (w) { return BUCHSTABE[w] || (/^(sin|cos|tan|cot|ln|lg|log)$/.test(w) ? FUNKTION_WORT[w] : w); }).join(' ')
             .replace(/\s+,/g, ',').replace(/,(?:\s*,)+/g, ',').replace(/^,\s*/, '');   // a bracket's commas onto their words, never two in a row
     }
     // A number that ends a sentence is a number, not an ordinal: the voice read "höchstens eine 1." as "erstens"
