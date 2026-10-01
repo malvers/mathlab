@@ -464,29 +464,96 @@
             lautBis = Date.now() + 700;                      // the sound in the field moves with what is heard
             diktiert = true; spiegeln();
         }
-        // While she listens the field shows a row of bars, as a voice message does: calm while nothing is heard, lively
-        // for a moment with every word that arrives. It follows the recognised words, not the microphone's level - a
-        // second tap on the microphone beside the speech recognition silences that on Android. The bars lie over the
-        // field's text room (tonLegen, again and again: a deck's line is still growing when she starts), in the row's
-        // ink; the field's own text and cursor are hidden meanwhile (sf-hoert, solita-frage.css).
-        tonEl.innerHTML = Array.from({ length: 56 }, function (_, i) {
-            return '<i style="--d:-' + ((i * 137) % 900) + 'ms;--leise:' + (14 + (i * 53) % 14) + '%;--laut:' + (34 + (i * 71) % 58) + '%"></i>';
-        }).join('');
-        let tonUhr = 0, lautBis = 0;
+        // While she listens the field shows sound, as a voice message does (Doc, 01.10.2026: "bei WhatsApp läuft beim
+        // Mic von rechts eine Soundwave rein. Bitte bau das auch so mit Bezug zum Sound"): a bar every 70 ms enters at
+        // the right edge as tall as the sound just then, and the row moves on to the left; silence leaves small dots.
+        // The level is the microphone's own (an AnalyserNode on a second stream) - except on Android, where a second
+        // stream beside the speech recognition silences it: there the bars follow the recognised words (lautBis).
+        // No stream either (refused, no AudioContext): the same words-driven bars. The canvas lies over the field's
+        // text room (tonLegen, again and again: a deck's line is still growing when she starts), in the row's ink; the
+        // field's own text and cursor are hidden meanwhile (sf-hoert, solita-frage.css).
+        const tonBild = document.createElement('canvas');
+        tonEl.appendChild(tonBild);
+        const TON_TAKT = 70, TON_BALKEN = 3, TON_ABSTAND = 5;          // ms per bar, bar width and pitch in CSS px
+        const TON_EIGENES_MIKRO = !/Android/i.test(navigator.userAgent);
+        let tonUhr = 0, lautBis = 0, tonLauf = 0, tonPegel = [], tonTakt = 0, tonSpitze = 0, tonZug = 0;
+        let tonStrom = null, tonKontext = null, tonAnalyse = null, tonDaten = null;
         function tonLegen() {
             const cs = getComputedStyle(input), l = parseFloat(cs.paddingLeft) || 0, r = parseFloat(cs.paddingRight) || 0;
             tonEl.style.left = (input.offsetLeft + l) + 'px';
             tonEl.style.top = input.offsetTop + 'px';
             tonEl.style.width = Math.max(0, input.offsetWidth - l - r) + 'px';
             tonEl.style.height = input.offsetHeight + 'px';
-            tonEl.classList.toggle('laut', Date.now() < lautBis);
+        }
+        // the loudness right now, 0 … 1
+        function tonJetzt() {
+            if (tonAnalyse) {
+                tonAnalyse.getFloatTimeDomainData(tonDaten);
+                let s = 0;
+                for (let i = 0; i < tonDaten.length; i++) s += tonDaten[i] * tonDaten[i];
+                const db = 20 * Math.log10(Math.sqrt(s / tonDaten.length) + 1e-9);
+                return Math.min(1, Math.max(0, (db + 52) / 40));        // -52 dB: a dot, -12 dB and louder: full height
+            }
+            // words-driven: lively while words arrive, a few dots otherwise
+            return Date.now() < lautBis ? 0.3 + 0.6 * Math.abs(Math.sin(Date.now() / 53)) : 0;
+        }
+        function tonMalen(t) {
+            tonLauf = requestAnimationFrame(tonMalen);
+            tonSpitze = Math.max(tonSpitze, tonJetzt());                 // the loudest moment of the bar's 70 ms
+            if (!tonTakt) tonTakt = t;
+            while (t - tonTakt >= TON_TAKT) { tonPegel.push(tonSpitze); tonSpitze = 0; tonTakt += TON_TAKT; }
+            const dpr = global.devicePixelRatio || 1, w = tonEl.clientWidth, h = tonEl.clientHeight;
+            if (!w || !h) return;
+            if (tonBild.width !== Math.round(w * dpr) || tonBild.height !== Math.round(h * dpr)) {
+                tonBild.width = Math.round(w * dpr); tonBild.height = Math.round(h * dpr);
+            }
+            const max = Math.ceil(w / TON_ABSTAND) + 2;
+            if (tonPegel.length > max) tonPegel.splice(0, tonPegel.length - max);
+            const g = tonBild.getContext('2d');
+            g.setTransform(dpr, 0, 0, dpr, 0, 0);
+            g.clearRect(0, 0, w, h);
+            g.fillStyle = getComputedStyle(tonEl).color;
+            // the newest bar at the right edge; between two bars the row glides on by the share of the 70 ms gone
+            const gleiten = Math.min(1, (t - tonTakt) / TON_TAKT) * TON_ABSTAND;
+            for (let k = tonPegel.length - 1, x = w - TON_BALKEN - gleiten; k >= 0 && x > -TON_BALKEN; k--, x -= TON_ABSTAND) {
+                const hb = Math.max(TON_BALKEN, tonPegel[k] * h * 0.72);
+                const y = (h - hb) / 2, r = TON_BALKEN / 2;
+                g.beginPath();
+                if (g.roundRect) g.roundRect(x, y, TON_BALKEN, hb, r); else g.rect(x, y, TON_BALKEN, hb);
+                g.fill();
+            }
+        }
+        function tonStart() {
+            tonPegel = []; tonTakt = 0; tonSpitze = 0;
+            cancelAnimationFrame(tonLauf);
+            tonLauf = requestAnimationFrame(tonMalen);
+            const AC = global.AudioContext || global.webkitAudioContext;
+            if (!TON_EIGENES_MIKRO || !AC || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+            const zug = ++tonZug;                                         // a stop before the stream arrives wins
+            navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }).then(function (s) {
+                if (zug !== tonZug) { s.getTracks().forEach(function (tr) { tr.stop(); }); return; }
+                tonStrom = s;
+                tonKontext = new AC();
+                tonAnalyse = tonKontext.createAnalyser();
+                tonAnalyse.fftSize = 1024;
+                tonDaten = new Float32Array(tonAnalyse.fftSize);
+                tonKontext.createMediaStreamSource(s).connect(tonAnalyse);
+            }).catch(function (e) { dbg('sound wave: no level of its own, the words drive it (' + (e && e.name) + ')'); });
+        }
+        function tonStopp() {
+            tonZug++;
+            cancelAnimationFrame(tonLauf); tonLauf = 0;
+            if (tonStrom) tonStrom.getTracks().forEach(function (tr) { tr.stop(); });
+            if (tonKontext) tonKontext.close().catch(function () { });
+            tonStrom = tonKontext = tonAnalyse = tonDaten = null;
         }
         function hoertZu(an) {
             micBtn.classList.toggle('on', an);
             input.classList.toggle('sf-hoert', an);
             tonEl.hidden = !an;
             clearInterval(tonUhr);
-            if (an) { lautBis = 0; tonLegen(); tonUhr = setInterval(tonLegen, 200); }
+            tonStopp();
+            if (an) { lautBis = 0; tonLegen(); tonUhr = setInterval(tonLegen, 200); tonStart(); }
         }
         // Wake both functions while the question is still being typed, at no cost: an empty tts call is refused before
         // Google is asked, a ping only checks the password. At most once a minute (the decks, 16.09.2026: the first

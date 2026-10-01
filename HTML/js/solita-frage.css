@@ -72,7 +72,9 @@
 .sf-face { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex: none;
     box-shadow: 0 0 0 1px rgba(245, 194, 66, 0.6); }
 /* the field in the decks' Raleway - the lab's serif came out as Times New Roman (Doc, 29.09.2026: "nimm diese Schrift") */
-.sf-in { flex: 1; min-width: 0; height: 36px; padding: 0 10px; border-radius: 8px; outline: none;
+/* border-box like the buttons: a page without a global box-sizing (DOCPAD) had the field 2 px taller than the arrow
+   (Doc, 01.10.2026: "Der Pfeilbutton ist flacher als die Zeile, oder?" - measured 38 against 36) */
+.sf-in { flex: 1; min-width: 0; height: 36px; box-sizing: border-box; padding: 0 10px; border-radius: 8px; outline: none;
     background: rgba(255, 255, 255, 0.05); border: 0.5px solid rgba(2, 100, 123, 0.9); color: #fff;
     font-family: Raleway, system-ui, sans-serif; font-size: 1rem; }
 .sf-in:focus { border-color: rgba(143, 163, 189, 0.7); box-shadow: none; }
@@ -90,18 +92,15 @@
 .sf-row button[hidden] { display: none; }
 .sf-row svg { width: 20px; height: 20px; }
 /* While she listens the field shows sound instead of letters, as a voice message does (hoertZu, js/solita-frage.js;
-   Doc, 30.09.2026: "genau wie das WhatsApp macht"): a row of bars over the field's text room, in the row's ink, calm
-   until words arrive (.laut). The field's own text, invitation and cursor are hidden meanwhile - a host's colour for
-   the field must not bring them back */
+   Doc, 30.09.2026: "genau wie das WhatsApp macht"; 01.10.2026: "von rechts eine Soundwave ... mit Bezug zum Sound"):
+   a canvas over the field's text room, in the row's ink, where the microphone's level runs in from the right. The
+   field's own text, invitation and cursor are hidden meanwhile - a host's colour for the field must not bring them
+   back */
 .sf-row { position: relative; }
 .sf-in.sf-hoert, .sf-in.sf-hoert::placeholder { color: transparent !important; caret-color: transparent !important; }
-.sf-ton { position: absolute; display: flex; align-items: center; gap: 3px; overflow: hidden; pointer-events: none; opacity: .75; }
+.sf-ton { position: absolute; overflow: hidden; pointer-events: none; opacity: .75; }
 .sf-ton[hidden] { display: none; }
-.sf-ton i { flex: none; width: 3px; height: 12%; border-radius: 2px; background: currentColor; --h: var(--leise);
-    animation: sfton 1s ease-in-out infinite; animation-delay: var(--d); }
-.sf-ton.laut i { --h: var(--laut); animation-duration: .5s; }
-@keyframes sfton { 0%, 100% { height: 12%; } 50% { height: var(--h); } }
-@media (prefers-reduced-motion: reduce) { .sf-ton i { animation-duration: 2.4s; } }
+.sf-ton canvas { display: block; width: 100%; height: 100%; }
 /* who answers (zeigeKi, js/solita-frage.js): the marks of Claude and DeepSeek at the right end of the question
    field, small and in the field's ink (Doc, 30.09.2026). The element follows the field in the row and is drawn back
    into it: 9 px from the field's edge, the row's gap of 6 px between them taken back - what follows stands where it
