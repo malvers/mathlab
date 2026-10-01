@@ -38,9 +38,42 @@ nav.quick-nav .badge { text-decoration: none; line-height: 14px; }
        und sehr klein darunter die Daten"): das Jahr traegt den Kopf, die Spanne
        steht als Fussnote darunter. Erst Raleway, dann "daten arial und etwas
        groesser" - Arial ist der einzige Ort im SVP, wo nicht Orbitron steht. */
+    /* The title size is shared with the flaps of the Klappuhr
+       (svp-klappuhr.css), so both scale together. */
+    --ny-jahr-size: clamp(1.1rem, 2.6vw, 1.6rem);
+    /* Three columns (Doc, 01.10.2026): date flaps | the two lines | clock
+       flaps. The side columns may shrink to nothing, so the middle keeps its
+       natural width and stays exactly centred; svp-klappuhr.js switches to
+       .ny-eng before the flaps would run into the text. */
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-areas: "datum mitte uhr";
+    align-items: center;
+    column-gap: 16px;
 }
+.nav-year .ny-mitte { grid-area: mitte; min-width: 0; }
+/* Vertically centred in the box (Doc, 01.10.2026: "y zentriert"). */
+.nav-year .ny-datum { grid-area: datum; justify-self: start; align-self: center; }
+.nav-year .ny-uhr { grid-area: uhr; justify-self: end; align-self: center; }
+/* Doc, 01.10.2026: "weiter nach rechts links" - out into the side padding,
+   6 px from the rim like the 6 px above the cards. */
+.nav-year:not(.ny-eng) .ny-datum { margin-left: -14px; }
+.nav-year:not(.ny-eng) .ny-uhr { margin-right: -14px; }
+/* Narrow box: title on top over the full width, date and clock side by side
+   underneath, meeting in the middle. */
+.nav-year.ny-eng {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "mitte mitte" "datum uhr";
+    column-gap: 24px;
+    row-gap: 6px;
+    padding-bottom: 8px;
+}
+.nav-year.ny-eng .ny-datum { justify-self: end; }
+.nav-year.ny-eng .ny-uhr { justify-self: start; }
+/* Measuring pass of svp-klappuhr.js: the title's width on a single line. */
+.nav-year.ny-messen .ny-mitte { white-space: nowrap; }
 .nav-year .ny-jahr {
-    font-size: clamp(1.1rem, 2.6vw, 1.6rem);
+    font-size: var(--ny-jahr-size);
     line-height: 1.25;
 }
 .nav-year .ny-spanne {

@@ -1123,10 +1123,24 @@
     const spanne = document.createElement('div');
     spanne.className = 'ny-spanne';
     spanne.textContent = 'Mo 17.08.2026 – Fr 09.07.2027';
-    year.appendChild(jahr);
-    year.appendChild(spanne);
     /* Die kleine Zeile steht in Arial (Doc, 20.09.2026) - ein Systemfont,
        also kein Nachladen und kein Google-Fonts-Link je Planseite. */
+
+    /* Klappuhr (Doc, 01.10.2026: "eine Digitaluhr wie sie frueher waren ...
+       links das aktuelle Datum"): the two lines move into a middle column,
+       the date flaps sit left of it, the clock flaps right. svp-klappuhr.js
+       fills both and stacks them under the title when the box is too narrow. */
+    const mitte = document.createElement('div');
+    mitte.className = 'ny-mitte';
+    mitte.appendChild(jahr);
+    mitte.appendChild(spanne);
+    const datum = document.createElement('div');
+    datum.className = 'ny-datum';
+    const uhr = document.createElement('div');
+    uhr.className = 'ny-uhr';
+    year.appendChild(datum);
+    year.appendChild(mitte);
+    year.appendChild(uhr);
 
     // Full-width blue band across the page top; year + pills are centered in it.
     const band = document.createElement('div');
@@ -1134,6 +1148,10 @@
     band.appendChild(year);
     band.appendChild(nav);
     document.body.insertBefore(band, document.body.firstChild);
+
+    const uhrScript = document.createElement('script');
+    uhrScript.src = base + 'svp-klappuhr.js';
+    document.head.appendChild(uhrScript);
 
     /* Doc, 22.09.2026: "das nicht scrollen bitte", dann "das auch nicht" - auf
        den Seiten mit klebendem Kopf (body.head-sticky) bleibt nicht nur die
