@@ -168,6 +168,7 @@ window.svpPlanParts.push(function (P) {
             /* the pill "Vorrechnen" hangs on the calendar week, not on the content: its eye stays with the row
                (svp-plan-tafel.js) */
             if (P.saved[i] && P.saved[i].vorrechnenAn) entry.vorrechnenAn = true;
+            if (P.saved[i] && P.saved[i].sammlungAn) entry.sammlungAn = P.saved[i].sammlungAn;   /* the decks by theme */
             P.saved[i] = entry;
         });
 

@@ -705,16 +705,12 @@
      source the deck had grown to 751 tasks and 931 slides, slow to load and 6.8 ct a question; a week's tasks are in
      its own deck (Doc, 30.09.2026: "warum machen wir überhaupt ein riesengroßes Deck? ... wirklich aufsplitten").
      Those 88 were still 144 slides and 1.1 ct a question ("dieses eine Deck ... durchaus auch noch aufspalten"): one
-     deck by theme now, THEMEN below. ?aufgaben alone keeps the levels - the plan's pill "Gleichungen umstellen - alle
-     Aufgaben" points there - and takes every block without a week that no other theme claims, so a new one is never
-     lost. */
-  const THEMEN = {
-    knobeln: { titel: 'Ziffernrätsel', kicker: 'Vorrechnen · Knobeln', block: /^Knobeln\b/ },
-    kopfrechnen: { titel: 'Kopfrechnen', kicker: 'Vorrechnen · Tricks und Denkaufgaben', block: /^Kopfrechnen\b/ },
-    '': { titel: 'Umstellen · Vereinfachen', kicker: 'Vorrechnen · Level 1 bis 3', block: null },   // the rest
-  };
+     deck by theme now. ?aufgaben alone keeps the levels - the plan's pill "Gleichungen umstellen - alle Aufgaben" points
+     there - and takes every block without a week that no other theme claims, so a new one is never lost. The themes
+     stand in SAMMLUNGEN (js/vorrechnen-aufgaben.js) since 01.10.2026: the plan's pills and its Aufgabensammlung read
+     them from there too. */
   function themaVon(b) {
-    const name = Object.keys(THEMEN).find(function (k) { return THEMEN[k].block && THEMEN[k].block.test(b.titel); });
+    const name = Object.keys(SAMMLUNGEN).find(function (k) { return SAMMLUNGEN[k].block && SAMMLUNGEN[k].block.test(b.titel); });
     return name || '';
   }
   /* ?kw=44: the block of that week only - its deck, the pill in the plan's week (svp/svp-plan-tafel.js) (Doc,
@@ -743,8 +739,9 @@
     const woche = kw ? BLOECKE.filter(function (b) { return String(b.kw) === kw; }) : null;
     if (woche && !woche.length) throw new Error('Für KW ' + kw + ' gibt es noch keine Vorrechnen-Aufgaben.');
     const name = woche ? null : String(params.get('aufgaben') || '').toLowerCase();
-    const thema = woche ? null : THEMEN[name];
-    if (!woche && !thema) throw new Error('Das Aufgaben-Deck „' + name + '“ gibt es nicht – es gibt ?aufgaben, ?aufgaben=knobeln und ?aufgaben=kopfrechnen.');
+    const thema = woche ? null : SAMMLUNGEN[name];
+    if (!woche && !thema) throw new Error('Das Aufgaben-Deck „' + name + '“ gibt es nicht – es gibt ' +
+      Object.keys(SAMMLUNGEN).map(function (k) { return '?aufgaben' + (k ? '=' + k : ''); }).join(', ') + '.');
     return {
       sammlung: true,
       titel: woche ? woche.map(function (b) { return b.titel; }).join(' + ') : thema.titel,

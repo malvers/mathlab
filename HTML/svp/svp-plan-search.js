@@ -3,8 +3,23 @@
 window.svpPlanParts.push(function (P) {
     // functions the other parts call
     Object.assign(P, {
-        planSearchRun, planSearchClear
+        planSearchRun, planSearchClear, kopfKnoepfe
     });
+
+    /* The buttons at the right end of the head (.head-btns, svp-head.css): the Formelsammlung and, left of it, Doc's
+       Aufgabensammlung (svp-plan-tafel.js, 01.10.2026). One group, or the head's space-between would set the second
+       button in the middle of the line. */
+    function kopfKnoepfe() {
+        const row = document.querySelector('.page-head .head-row');
+        if (!row) return null;
+        let gruppe = row.querySelector(':scope > .head-btns');
+        if (!gruppe) {
+            gruppe = document.createElement('div');
+            gruppe.className = 'head-btns';
+            row.appendChild(gruppe);
+        }
+        return gruppe;
+    }
 
     /* ---- Suche im Plan ---------------------------------------------------
        Doc, 08.09.2026: a search box between the toolbar buttons and the legend,
@@ -492,7 +507,7 @@ window.svpPlanParts.push(function (P) {
             b.addEventListener('click', function () {
                 window.open(FORMELN_URL, '_blank', 'noopener');
             });
-            headRow.appendChild(b);
+            kopfKnoepfe().appendChild(b);
         }
         /* Aus der Suche unter dem Laufband kommend: ?q=<wort> fuellt das Feld und
            laesst die Suche laufen, damit der Treffer hier auch angemalt ist -

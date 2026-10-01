@@ -114,6 +114,17 @@ const WOCHEN = {
     'jahresrueckblick':         [25, 'Jahresrückblick · Ausblick Klasse 12'],
     'ausklang':                 [26, 'Ausklang · Knobelaufgaben'],
 };
+// The decks by theme, decks/tafel.html?aufgaben=<key>: the blocks that belong to no week, one deck per theme (Doc,
+// 30.09.2026: "dieses eine Deck ... durchaus auch noch aufspalten"). block: the blocks it takes by title - '' takes every
+// block without a week that no other theme claims, so a new one is never lost. kw: the week whose row carries its pill
+// in the plan (svp/svp-plan-tafel.js; Doc, 01.10.2026: "die noch nicht verlinkt sind, in diese Woche verlinken") - a
+// week that links the deck in its own material keeps that pill instead (Gleichungen umstellen, KW 40 since 27.09.).
+// THE place for all of it: decks/tafel.html builds its decks from here, the plan its pills and its Aufgabensammlung.
+const SAMMLUNGEN = {
+    '':          { titel: 'Umstellen · Vereinfachen', kicker: 'Vorrechnen · Level 1 bis 3', block: null, kw: 40 },
+    knobeln:     { titel: 'Ziffernrätsel', kicker: 'Vorrechnen · Knobeln', block: /^Knobeln\b/, kw: 40 },
+    kopfrechnen: { titel: 'Kopfrechnen', kicker: 'Vorrechnen · Tricks und Denkaufgaben', block: /^Kopfrechnen\b/, kw: 40 },
+};
 // mehr: what else the block says about itself (kopf)
 function wochenBlock(name, ab, mehr) {
     const w = WOCHEN[name];

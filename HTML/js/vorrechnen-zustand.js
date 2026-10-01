@@ -242,9 +242,19 @@ let testModus = modus === 'beispiele', aufgabenModus = modus === 'aufgaben';
 // Vorrechnen - das Tool mit den Aufgaben!" - vorrechnen.html?kw=44 opens the tasks on that week's block, its first
 // task (svp/svp-plan-tafel.js); the working of the task before stays behind, as at the week's first start above. The
 // parameter leaves the address at once, so a live reload stays where Doc went.
+// Doc, 01.10.2026 (the plan's Aufgabensammlung: "ich brauche den Button fürs Vorrechnen" - for the decks by theme as
+// well): ?aufgaben=knobeln opens the first task of that theme (SAMMLUNGEN, js/vorrechnen-aufgaben.js), ?aufgaben alone
+// the levels - the blocks without a week that no other theme claims, as decks/tafel.html takes them.
+function themaBlock(key) {
+    const s = typeof SAMMLUNGEN !== 'undefined' && SAMMLUNGEN[key];
+    if (!s) return null;
+    const anderes = b => Object.keys(SAMMLUNGEN).some(k => SAMMLUNGEN[k].block && SAMMLUNGEN[k].block.test(b.titel));
+    return BLOECKE.find(b => b.kw === undefined && (s.block ? s.block.test(b.titel) : !anderes(b))) || null;
+}
 try {
     const p = new URLSearchParams(location.search), kw = p.get('kw');
-    const b = kw && BLOECKE.find(x => String(x.kw) === kw);
+    const thema = p.has('aufgaben') ? String(p.get('aufgaben') || '').toLowerCase() : null;
+    const b = kw ? BLOECKE.find(x => String(x.kw) === kw) : thema !== null ? themaBlock(thema) : null;
     if (b) {
         modus = 'aufgaben'; testModus = false; aufgabenModus = true;
         localStorage.setItem('vorrechnen-modus', modus);
@@ -252,5 +262,8 @@ try {
         aufgabeIdx = b.ab;
         merkeAufgabe();
     }
-    if (kw) { p.delete('kw'); history.replaceState(null, '', location.pathname + (p.toString() ? '?' + p : '') + location.hash); }
+    if (kw || thema !== null) {
+        p.delete('kw'); p.delete('aufgaben');
+        history.replaceState(null, '', location.pathname + (p.toString() ? '?' + p : '') + location.hash);
+    }
 } catch (_) {}

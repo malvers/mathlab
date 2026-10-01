@@ -38,6 +38,76 @@
 /* Der Knopf der Gruppenwahl sagt schon zu, welche Gruppe eingestellt ist. */
 .group-drop > button.export-toggle.on-group { border-color: var(--cyan); }
 
+/* Where the head has no room left for the pair (narrow screens; with the label "Aufgabensammlung" even next to the
+   long title of Mathe 11 - 316 px free, 352 needed, measured 01.10.2026, now "Aufgaben"), it wraps and keeps to the
+   right, where the Formelsammlung stood */
+.page-head .head-row > .head-btns:has(.aufg-drop) { margin-left: auto; }
+/* Doc's Aufgabensammlung (svp-plan-tafel.js, 01.10.2026): the Export menu's panel with a table of every deck of the
+   year - width and left edge set by the script (under the button, never past the screen), the list scrolls inside */
+.export-menu.aufg-menu {
+    display: block;
+    white-space: normal;
+    max-height: min(70vh, 640px);
+    overflow-y: auto;
+    padding: 12px 14px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--thumb) transparent;
+}
+.export-menu.aufg-menu[hidden] { display: none; }
+.aufg-menu::-webkit-scrollbar { width: 6px; }
+.aufg-menu::-webkit-scrollbar-track { background: transparent; }
+.aufg-menu::-webkit-scrollbar-thumb { background: var(--thumb); border-radius: 3px; }
+.aufg-kopf {
+    font-family: Orbitron, sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    color: var(--head);
+    margin-bottom: 8px;
+}
+/* min-width: svp-table.css gives every table 760 px for the plan - on the phone the panel's titles ran off its edge */
+.aufg-tab { width: 100%; min-width: 0; border-collapse: collapse; font-size: 0.9rem; }
+.aufg-tab th, .aufg-tab td { padding: 5px 6px; vertical-align: middle; text-align: left; }
+.aufg-tab td { border-top: 1px solid var(--row-line); }
+.aufg-tab tr.aufg-teil th {
+    padding-top: 14px;
+    font-family: Orbitron, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+}
+.aufg-tab tr.aufg-teil:first-child th { padding-top: 2px; }
+.aufg-tab td.aufg-wann { white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; width: 1%; }
+.aufg-tab .aufg-datum { margin-left: 6px; font-size: 0.8em; opacity: 0.8; }
+.aufg-tab a { color: var(--text); text-decoration: none; }
+.aufg-tab a:hover { color: var(--lambda); text-decoration: underline; }
+.aufg-tab td.aufg-dazu { width: 1%; text-align: right; }
+/* the button into Vorrechnen: the blackboard and its word (the blackboard alone read as the deck - Doc, 01.10.2026) */
+.aufg-tab a.aufg-lab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px 3px 4px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-family: Orbitron, sans-serif;
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    color: var(--text);
+}
+.aufg-tab a.aufg-lab:hover { border-color: var(--lambda); color: var(--lambda); text-decoration: none; }
+.aufg-tab a.aufg-lab svg { width: 20px; height: 20px; padding: 0; }   /* the pill's inner padding left a dot of 9 px */
+/* on the phone the blackboard alone - the word would squeeze the titles */
+@media (max-width: 520px) {
+    .aufg-tab a.aufg-lab { padding: 3px; }
+    .aufg-tab a.aufg-lab span { display: none; }
+}
+/* this week */
+.aufg-tab tr.aufg-jetzt td { background: var(--panel-soft); }
+.aufg-tab tr.aufg-jetzt td.aufg-wann { color: var(--lambda); }
+@media print { .aufg-drop { display: none; } }
+
 /* "Zurücksetzen" wirft alles weg — es gehört zum Bearbeiten und ist
    ausserhalb dieses Modus gar nicht erst zu sehen. */
 .toolbar button.action.plan-reset,

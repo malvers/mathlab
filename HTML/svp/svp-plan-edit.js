@@ -129,6 +129,7 @@ window.svpPlanParts.push(function (P) {
                 });
                 /* the eye of the week's pill "Vorrechnen" is no cell of the table either (svp-plan-tafel.js) */
                 if (vorher.vorrechnenAn) entry.vorrechnenAn = true;
+                if (vorher.sammlungAn) entry.sammlungAn = vorher.sammlungAn;   /* and of the decks by theme (01.10.) */
                 entry.details = r.ul
                     ? Array.from(r.ul.querySelectorAll('li'))
                         .map(li => quelleVon(r, li).trim())
