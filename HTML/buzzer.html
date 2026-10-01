@@ -53,8 +53,9 @@
         html, body { margin: 0; min-height: 100%; background: var(--grund); color: var(--text); }
         body {
             min-height: 100vh; min-height: 100dvh;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            gap: 28px; padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+            /* Doc, 01.10.: "alles insgesamt ein Stück nach oben" - from the top with a little air, not centred */
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            gap: 28px; padding: clamp(28px, 6vh, 56px) 16px calc(24px + env(safe-area-inset-bottom));
             font-family: 'Orbitron', sans-serif; text-align: center;
             -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
         }
@@ -86,7 +87,11 @@
         /* Doc, 01.10.: "Das soll mir Feedback geben, ob ich zu schnell erkläre oder zu langsam erkläre" - two quiet keys
            under the big one, as wide as it; a tap goes to the table buzzer_tempo, the teacher sees it beside her buzzer
            key. After a tap both rest for 20 s, so one phone cannot drown the class */
-        #tempo { display: flex; gap: 12px; width: min(78vw, 58vh, 380px); }
+        /* Doc, 01.10.: "über die beiden Knöpfe ... Erklärung. Und rückt die ein Stück ... von der mittleren Taste nach
+           unten" - a heading over them, and more room to the big key */
+        #tempo { display: flex; flex-direction: column; gap: 10px; width: min(78vw, 58vh, 380px); margin-top: 18px; }
+        #tempo-frage { font-size: clamp(0.8rem, 3.6vw, 0.95rem); letter-spacing: 0.12em; color: var(--leise); }   /* Doc: "einfach eine Überschrift Erklärung Punkt, Punkt, Punkt" */
+        #tempo-knoepfe { display: flex; gap: 12px; }
         #tempo button {
             flex: 1; min-height: 52px; padding: 0 8px; cursor: pointer; touch-action: manipulation;
             display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -99,6 +104,29 @@
         #tempo button img { width: 1.9em; height: 1.9em; flex: none; pointer-events: none; -webkit-user-drag: none; }
         #tempo button.danke { background: var(--gruen); border-color: var(--gruen); color: #fff; }
         #tempo button:disabled:not(.danke) { opacity: 0.35; cursor: default; }
+
+        /* Doc, 01.10.: "mach unten ein Feld. Für Feedback. Wo die mir also tatsächlich irgendwas schreiben können" -
+           anonymous like the rest, at most 280 characters; only the teacher reads it (table buzzer_text) */
+        #text-feld { display: flex; flex-direction: column; gap: 10px; width: min(78vw, 58vh, 380px); margin-top: 6px; }
+        #text-feld label { font-size: clamp(0.8rem, 3.6vw, 0.95rem); letter-spacing: 0.12em; color: var(--leise); }
+        #text {
+            width: 100%; min-height: 88px; resize: none; padding: 10px 12px; border-radius: 12px; outline: none;
+            -webkit-user-select: text; user-select: text;
+            font: 400 1rem/1.4 Raleway, system-ui, sans-serif; color: var(--text); text-align: left;
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.4);
+        }
+        #text:focus { border-color: rgba(0, 210, 255, 0.8); }
+        #text::placeholder { color: rgba(138, 147, 163, 0.7); }
+        #text-zeile { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        #text-rest { font-size: 0.75rem; letter-spacing: 0.06em; color: var(--leise); }
+        #text-los {
+            min-width: 130px; min-height: 44px; padding: 0 18px; cursor: pointer; touch-action: manipulation;
+            font-family: inherit; font-size: 0.85rem; letter-spacing: 0.1em;
+            color: var(--text); background: rgba(0, 210, 255, 0.08); border: 1px solid rgba(0, 210, 255, 0.4); border-radius: 10px;
+            transition: background 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+        }
+        #text-los:disabled:not(.danke) { opacity: 0.35; cursor: default; }
+        #text-los.danke { background: var(--gruen); border-color: var(--gruen); color: #fff; }
 
         #hinweis { min-height: 1.4em; font-size: clamp(0.8rem, 3.6vw, 0.95rem); letter-spacing: 0.04em; color: var(--leise); }
         #hinweis.fehler { color: var(--rot); }
@@ -135,8 +163,16 @@
         <img id="knopf-bild" alt="" draggable="false" src="https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/1f914.png">
     </button>
     <div id="tempo" hidden>
+        <div id="tempo-frage">ERKLÄRUNG …</div>
+        <div id="tempo-knoepfe">
         <button type="button" data-art="schnell"><img alt="" draggable="false" src="https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/1f635-200d-1f4ab.png"><span>ZU SCHNELL</span></button>
         <button type="button" data-art="langsam"><img alt="" draggable="false" src="https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/1f971.png"><span>ZU LANGSAM</span></button>
+        </div>
+    </div>
+    <div id="text-feld" hidden>
+        <label for="text">DEIN FEEDBACK – ANONYM</label>
+        <textarea id="text" maxlength="280" rows="3" placeholder="Was möchtest du mir sagen?"></textarea>
+        <div id="text-zeile"><span id="text-rest">280</span><button type="button" id="text-los" disabled>SENDEN</button></div>
     </div>
     <div id="hinweis" role="status"></div>
 
@@ -255,8 +291,47 @@
             }
             tempoKnoepfe.forEach(b => b.addEventListener('click', () => tempo(b)));
 
+            // written feedback: a row of buzzer_text (code and text), read by the teacher alone; the field empties
+            // and the key says thanks
+            const textFeld = $('text'), los = $('text-los'), rest = $('text-rest');
+            const TEXT_MAX = 280;
+            function textStand() {
+                const n = textFeld.value.length;
+                rest.textContent = String(TEXT_MAX - n);
+                if (!los.classList.contains('danke')) los.disabled = !textFeld.value.trim();
+            }
+            async function textSenden() {
+                const t = textFeld.value.trim().slice(0, TEXT_MAX);
+                if (!t) return;
+                los.disabled = true;
+                let res;
+                try {
+                    res = await fetch(DB_URL + '/rest/v1/buzzer_text', {
+                        method: 'POST',
+                        headers: { apikey: DB_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+                        body: JSON.stringify({ code, text: t })
+                    });
+                } catch (_) { res = null; }
+                if (!res || !res.ok) {
+                    los.disabled = false;
+                    sag(res && res.status === 400 ? 'Gerade schreiben sehr viele – gleich nochmal.' : 'Nicht angekommen – bitte nochmal senden.', true);
+                    return;
+                }
+                sag('');
+                textFeld.value = '';
+                textFeld.blur();
+                if (navigator.vibrate) navigator.vibrate(40);
+                los.classList.add('danke');
+                los.textContent = 'DANKE!';
+                setTimeout(() => { los.classList.remove('danke'); los.textContent = 'SENDEN'; textStand(); }, 1800);
+                textStand();
+            }
+            textFeld.addEventListener('input', textStand);
+            los.addEventListener('click', textSenden);
+
             function bereit() {
                 $('code-feld').hidden = true;
+                $('text-feld').hidden = false;
                 knopf.hidden = false;
                 $('tempo').hidden = false;
                 if (offeneFrage()) zeige('offen');

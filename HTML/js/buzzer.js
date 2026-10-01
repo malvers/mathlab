@@ -28,6 +28,8 @@
 //                            neu}) with the counts since ab() (Vorrechnen: since the task came on the board; without
 //                            ab: the last two minutes), at every change and every 5 s; Buzzer.tempoJetzt() at once
 //   Buzzer.tempoMarke(el, s) shows such a count beside a button, left of it (the teacher's side only)
+//   Buzzer.texte(onTexte)    the phones' written feedback of today (table buzzer_text, Doc 01.10.2026): onTexte({texte,
+//                            angemeldet, neu}) every 5 s; readable only with the teacher's svpAuth session
 //   Buzzer.aktiv(), Buzzer.code()
 (function () {
     'use strict';
@@ -138,17 +140,42 @@
             if (res.ok) tempoDazu(await res.json());
         } catch (_) { /* offline for a moment - the next look catches up */ }
     }
+    // ---- written feedback (Doc, 01.10.2026: "ein Feld. Für Feedback. Wo die mir also tatsächlich irgendwas schreiben
+    // können ... bei mir im Mission Control"): rows of buzzer_text, today's of this code. Only a signed-in teacher may
+    // read them (svpAuth - the page brings it along), so without a session there is nothing to show.
+    let texteMelde = null, texte = new Map();                              // id -> {id, text, t}
+    async function texteNachsehen() {
+        if (!texteMelde) return;
+        const auth = window.svpAuth;
+        if (!auth || !auth.hasSession || !auth.hasSession()) { texteMelde({ texte: [], angemeldet: false, neu: false }); return; }
+        try {
+            const heute0 = new Date(); heute0.setHours(0, 0, 0, 0);
+            const res = await auth.api('buzzer_text?code=eq.' + code() + '&created_at=gt.' + encodeURIComponent(heute0.toISOString()) +
+                '&select=id,text,created_at&order=id');
+            if (!res.ok) return;
+            const zeilen = await res.json(), zeiten = zeitenAus(zeilen);
+            let neu = false;
+            zeilen.forEach(r => {
+                if (!r || texte.has(r.id)) return;
+                texte.set(r.id, { id: r.id, text: String(r.text || ''), t: zeiten[r.id] || Date.now() });
+                neu = true;
+            });
+            texteMelde({ texte: [...texte.values()], angemeldet: true, neu });
+        } catch (_) { /* offline for a moment - the next look catches up */ }
+    }
     async function verbinden() {
         ids = new Set();
         offen = new Set();
         bisher = 0;
         tempoZeilen = new Map();
+        texte = new Map();
         if (melde) melde(0, false);
         if (tempoMelde) tempoMelde(tempoStand());
         clearInterval(timer);
-        timer = setInterval(() => { nachsehen(); tempoNachsehen(); }, 5000);
+        timer = setInterval(() => { nachsehen(); tempoNachsehen(); texteNachsehen(); }, 5000);
         nachsehen();
         tempoNachsehen();
+        texteNachsehen();
         try {
             if (!window.supabase) await ladeSkript(DIR + 'vendor/supabase.min.js');
             if (!sb) sb = window.supabase.createClient(DB_URL, DB_KEY, { auth: { persistSession: false } });
@@ -294,5 +321,7 @@
         // minutes), neu = the kind just come; tempoJetzt(): count again now (the page's ab() moved on)
         tempo: (cb, ab) => { tempoMelde = cb; tempoAb = ab || null; if (laeuft && cb) cb(tempoStand()); },
         tempoJetzt: () => { if (tempoMelde) tempoMelde(tempoStand()); },
+        // texte(onTexte): onTexte({texte: [{id, text, t}], angemeldet, neu}) - today's written feedback of this code
+        texte: cb => { texteMelde = cb; if (laeuft && cb) texteNachsehen(); },
         aktiv: () => laeuft };
 })();
