@@ -38,9 +38,15 @@ function buzzerMeldung(n, neu, frisch = [], zeiten = {}, bezuege = {}) {
     if (anzeigeModus) return;                        // the beamer window never shows it
     // Doc, 27.09.: the count on the QR button "weg bitte und auch nicht gelb, denn wir haben ja die Pille
     // rechts oben" - the rail button stays plain (Buzzer.markiere is not used here)
-    const log = buzzLog(), bekannt = new Set(log.map(e => e.id));
+    let log = buzzLog();
+    // an answer that an older script logged as a question of its own (Doc, 01.10.: "die Rücknahme sehe ich nicht" -
+    // the board still had yesterday's js/buzzer.js from the cache) is taken out again, and then counts as what it is
+    const falsch = new Set(frisch.filter(id => bezuege[id]));
+    const vorher = log.length;
+    log = log.filter(e => !falsch.has(e.id));
+    const bekannt = new Set(log.map(e => e.id));
     const neue = frisch.filter(id => !bekannt.has(id));
-    if (neue.length) {
+    if (neue.length || log.length !== vorher) {
         // no glow along the edge any more (Doc, 27.09.: "so einen kurzen Flash ... in Gelb bitte nicht
         // machen") - the pill alone tells it; Buzzer.blitz() stays in js/buzzer.js for other pages
         // the step on the board: 0 = the task itself, k = the k-th line of the working
