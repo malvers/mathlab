@@ -10,9 +10,14 @@
 // at most 40 a minute per code). This side listens - realtime, and a look every 5 s as a net, because school Wi-Fi
 // drops websockets (see vote.html) - and tells its page, which shows it silently where only the teacher looks.
 //
-//   Buzzer.start(onBuzz)     listen to today's code; onBuzz(n, neu, frisch, zeiten): n buzzes not seen yet, neu = one
-//                            just came, frisch = the ids of those that came just now, zeiten = {id: ms} when each was
-//                            pressed (the server's time of its row - it may arrive seconds later)
+//   Buzzer.start(onBuzz)     listen to today's code; onBuzz(n, neu, frisch, zeiten, bezuege): n buzzes not seen and
+//                            not understood yet, neu = one just came, frisch = the ids of the rows that came just now,
+//                            zeiten = {id: ms} when each was pressed (the server's time of its row - it may arrive
+//                            seconds later), bezuege = {id: the buzz it answers} for a "verstanden"
+//
+// Doc, 01.10.2026: "wenn die Zahl wieder runter geht habe ich gut erklärt" - after its "nicht verstanden" a phone's
+// button turns red ("DRÜCKEN, WENN VERSTANDEN"); that tap is a row of its own with bezug = the id it answers (one
+// per question, of the same code and day - the table's insert policy), and the count goes down again.
 //   Buzzer.weiter(onBuzz)    the same, but only if it was listening today already (a reload keeps it running)
 //   Buzzer.gesehen()         the teacher has seen them: back to 0
 //   Buzzer.neuerCode()       a fresh code - for the next class; phones with the old one no longer count
@@ -52,18 +57,24 @@
     function link() { return SEITE + '?c=' + code(); }
 
     // ---- listening ----------------------------------------------------------------------------------------------
-    let laeuft = false, melde = null, ids = new Set(), kanal = null, sb = null, timer = null, bisher = 0;
+    let laeuft = false, melde = null, ids = new Set(), offen = new Set(), kanal = null, sb = null, timer = null, bisher = 0;
     // ladeSkript: js/lade-skript.js, loaded before this file
     // onBuzz(n, neu, frisch): frisch = the ids that came just now - a page that keeps a log counts by id, so two
     // buzzes in one look count twice and a reload does not count the unseen ones again
-    function zaehlen(neue, zeiten = {}) {
+    function zaehlen(neue, zeiten = {}, bezuege = {}) {
         const gesehen = lies(KEY_GESEHEN, 0) || 0, frisch = [];
         neue.forEach(id => { if (id > gesehen && !ids.has(id)) { ids.add(id); frisch.push(id); } });
-        if (ids.size !== bisher) {
-            const neu = ids.size > bisher;
-            bisher = ids.size;
-            if (melde) melde(bisher, neu, frisch, zeiten);
-        }
+        if (!frisch.length) return;
+        frisch.forEach(id => { if (!bezuege[id]) offen.add(id); });            // the questions first, then
+        frisch.forEach(id => { if (bezuege[id]) offen.delete(bezuege[id]); });  // what answers them (one look may bring both)
+        bisher = offen.size;
+        if (melde) melde(bisher, frisch.some(id => !bezuege[id]), frisch, zeiten, bezuege);
+    }
+    // rows -> {id: the buzz a "verstanden" answers} (before the column existed: none)
+    function bezuegeAus(zeilen) {
+        const b = {};
+        zeilen.forEach(r => { if (r && r.bezug) b[r.id] = r.bezug; });
+        return b;
     }
     // rows -> {id: ms of created_at}; a timestamptz may come as "2026-10-01 06:27:05.25+00" or without a zone (UTC)
     function zeitenAus(zeilen) {
@@ -81,13 +92,15 @@
     async function nachsehen() {
         const c = code(), gesehen = lies(KEY_GESEHEN, 0) || 0;
         try {
-            const res = await fetch(DB_URL + '/rest/v1/buzzer?code=eq.' + c + '&id=gt.' + gesehen + '&select=id,created_at',
+            // select=*: the column bezug is read where the table has it
+            const res = await fetch(DB_URL + '/rest/v1/buzzer?code=eq.' + c + '&id=gt.' + gesehen + '&select=*&order=id',
                 { headers: { apikey: DB_KEY }, cache: 'no-store' });
-            if (res.ok) { const zeilen = await res.json(); zaehlen(zeilen.map(r => r.id), zeitenAus(zeilen)); }
+            if (res.ok) { const zeilen = await res.json(); zaehlen(zeilen.map(r => r.id), zeitenAus(zeilen), bezuegeAus(zeilen)); }
         } catch (_) { /* offline for a moment - the next look catches up */ }
     }
     async function verbinden() {
         ids = new Set();
+        offen = new Set();
         bisher = 0;
         if (melde) melde(0, false);
         clearInterval(timer);
@@ -100,7 +113,7 @@
             const c = code();
             kanal = sb.channel('buzzer:' + c)
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'buzzer', filter: 'code=eq.' + c },
-                    p => { if (p.new && p.new.code === code()) zaehlen([p.new.id], zeitenAus([p.new])); })
+                    p => { if (p.new && p.new.code === code()) zaehlen([p.new.id], zeitenAus([p.new]), bezuegeAus([p.new])); })
                 .subscribe();
         } catch (_) { /* no realtime (school Wi-Fi): the look every 5 s carries it alone */ }
     }
@@ -118,6 +131,7 @@
         const max = Math.max(lies(KEY_GESEHEN, 0) || 0, ...ids);
         schreib(KEY_GESEHEN, max);
         ids = new Set();
+        offen = new Set();
         bisher = 0;
         if (melde) melde(0, false);
     }

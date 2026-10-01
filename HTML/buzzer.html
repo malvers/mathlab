@@ -78,6 +78,12 @@
            turns into an exclamation mark (same dot), white on green */
         #knopf .ausruf, #knopf.angekommen .frage { display: none; }
         #knopf.angekommen .ausruf { display: inline; }
+        /* Doc, 01.10.: "Nicht Verstanden -> Danke fürs feedback ... kurz danach wird der button rot mit: drücken, wenn
+           verstanden" - the open question in Doc's red with a white tick; a tap tells the board it is understood
+           ("wenn die Zahl wieder runter geht habe ich gut erklärt") */
+        #knopf.offen { background: var(--rot); color: #fff; box-shadow: 0 0 0 10px rgba(176, 36, 24, 0.22), 0 0 60px rgba(176, 36, 24, 0.4); }
+        #knopf .haken, #knopf.offen .frage, #knopf.offen circle { display: none; }
+        #knopf.offen .haken { display: inline; }
         #knopf.pause { background: #1c2c4a; color: var(--leise); box-shadow: none; cursor: default; }
 
         #hinweis { min-height: 1.4em; font-size: clamp(0.8rem, 3.6vw, 0.95rem); letter-spacing: 0.04em; color: var(--leise); }
@@ -115,6 +121,8 @@
             <path class="frage" d="M8.2 8.6 A3.9 3.9 0 1 1 13.6 12.2 C12.6 12.8 12 13.6 12 14.8 V15.6" fill="none" stroke="currentColor"
                 stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
             <path class="ausruf" d="M12 4.6 V15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
+            <path class="haken" d="M4.8 12.8 L9.8 17.6 L19.2 6.8" fill="none" stroke="currentColor" stroke-width="2.4"
+                stroke-linecap="round" stroke-linejoin="round" />
             <circle cx="12" cy="19.6" r="1.5" fill="currentColor" />
         </svg>
         <span id="knopf-text">HAB ICH NICHT VERSTANDEN</span>
@@ -130,40 +138,87 @@
             const $ = id => document.getElementById(id);
             const knopf = $('knopf'), text = $('knopf-text'), hinweis = $('hinweis');
             let code = (new URLSearchParams(location.search).get('c') || '').trim();
-            let zurueck = null;
+            let zurueck = null, zustand = 'frage';           // 'frage' (orange), 'danke' (green, a moment), 'offen' (red)
+            // my "nicht verstanden" still open: {code, id, tag} - a reload or a locked phone keeps the red button
+            const KEY_OFFEN = 'buzzer-offen', heute = () => new Date().toDateString();
+            const lies = () => { try { return JSON.parse(localStorage.getItem(KEY_OFFEN) || 'null'); } catch (_) { return null; } };
+            const merke = v => { try { if (v) localStorage.setItem(KEY_OFFEN, JSON.stringify(v)); else localStorage.removeItem(KEY_OFFEN); } catch (_) {} };
+            function offeneFrage() { const o = lies(); return o && o.code === code && o.tag === heute() && o.id ? o : null; }
 
             function sag(t, fehler) { hinweis.textContent = t; hinweis.classList.toggle('fehler', !!fehler); }
+            function zeige(z) {
+                zustand = z;
+                knopf.className = z === 'frage' ? '' : z === 'offen' ? 'offen' : 'angekommen';
+                if (z === 'frage') text.textContent = 'HAB ICH NICHT VERSTANDEN';
+                if (z === 'offen') text.textContent = 'DRÜCKEN, WENN VERSTANDEN';
+            }
+            function danke(t, danach) {
+                zeige('danke');
+                text.textContent = t;
+                sag('');
+                if (navigator.vibrate) navigator.vibrate(40);
+                zurueck = setTimeout(() => zeige(danach), 1500);
+            }
+            async function senden(daten) {
+                return fetch(DB_URL + '/rest/v1/buzzer?select=id', {
+                    method: 'POST',
+                    headers: { apikey: DB_KEY, 'Content-Type': 'application/json', Prefer: 'return=representation' },
+                    body: JSON.stringify(daten)
+                });
+            }
 
+            // "nicht verstanden": its row's id is kept for the "verstanden" that answers it
             async function buzz() {
                 knopf.disabled = true;                 // only while the tap is on its way
                 clearTimeout(zurueck);
+                let id = null;
                 try {
-                    const res = await fetch(DB_URL + '/rest/v1/buzzer', {
-                        method: 'POST',
-                        headers: { apikey: DB_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-                        body: JSON.stringify({ code })
-                    });
+                    const res = await senden({ code });
                     if (!res.ok) throw new Error(res.status === 400 ? 'Gerade drücken sehr viele – gleich nochmal.' : 'HTTP ' + res.status);
+                    try { const z = await res.json(); id = z && z[0] && z[0].id; } catch (_) { /* arrived all the same */ }
                 } catch (e) {
                     knopf.disabled = false;
                     sag('Nicht angekommen – bitte nochmal tippen. ' + (e.message || ''), true);
                     return;
                 }
-                // arrived: green for a moment, and at once ready for the next tap
                 knopf.disabled = false;
-                knopf.className = 'angekommen';
-                text.textContent = 'VIELEN DANK FÜR DAS FEEDBACK';
-                sag('');
-                if (navigator.vibrate) navigator.vibrate(40);
-                zurueck = setTimeout(() => { knopf.className = ''; text.textContent = 'HAB ICH NICHT VERSTANDEN'; }, 1500);
+                if (id) merke({ code, id, tag: heute() });
+                // arrived: green for a moment, then red - unless the id did not come back (then orange as before)
+                danke('VIELEN DANK FÜR DAS FEEDBACK', id ? 'offen' : 'frage');
+            }
+            // "verstanden": a row that refers to the open one - the board counts it down
+            async function verstanden() {
+                const o = offeneFrage();
+                if (!o) { zeige('frage'); return; }
+                knopf.disabled = true;
+                clearTimeout(zurueck);
+                let res;
+                try { res = await senden({ code, bezug: o.id }); }
+                catch (e) {
+                    knopf.disabled = false;
+                    sag('Nicht angekommen – bitte nochmal tippen.', true);
+                    return;
+                }
+                knopf.disabled = false;
+                let fehler = '';
+                if (!res.ok && res.status !== 409) { try { fehler = (await res.json()).message || ''; } catch (_) {} }
+                if (/zu viele/.test(fehler)) { sag('Gerade drücken sehr viele – gleich nochmal.', true); return; }
+                merke(null);
+                // 409: it was counted already; any other refusal (the question too old, ...): nothing left to answer
+                if (res.ok || res.status === 409) danke('SUPER – DANKE!', 'frage');
+                else { zeige('frage'); sag(''); }
             }
 
             function bereit() {
                 $('code-feld').hidden = true;
                 knopf.hidden = false;
+                if (offeneFrage()) zeige('offen');
             }
 
-            knopf.addEventListener('click', buzz);
+            knopf.addEventListener('click', () => {
+                if (zustand === 'offen') verstanden();
+                else if (zustand === 'frage') buzz();           // the green moment takes no tap
+            });
             // no QR, no code: type it from the board
             if (/^\d{4}$/.test(code)) bereit();
             else {

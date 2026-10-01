@@ -34,7 +34,7 @@ function buzzLog() {
 }
 // one entry per buzz (by its id): which task was on the board, with today's code - a reload that brings
 // the unseen ones back does not count them twice, and only a really new one makes the edge glow
-function buzzerMeldung(n, neu, frisch = [], zeiten = {}) {
+function buzzerMeldung(n, neu, frisch = [], zeiten = {}, bezuege = {}) {
     if (anzeigeModus) return;                        // the beamer window never shows it
     // Doc, 27.09.: the count on the QR button "weg bitte und auch nicht gelb, denn wir haben ja die Pille
     // rechts oben" - the rail button stays plain (Buzzer.markiere is not used here)
@@ -46,9 +46,15 @@ function buzzerMeldung(n, neu, frisch = [], zeiten = {}) {
         // the step on the board: 0 = the task itself, k = the k-th line of the working
         merkeTafelStand();
         const code = Buzzer.code(), jetzt = Date.now();
-        neue.forEach(id => {
+        neue.filter(id => !bezuege[id]).forEach(id => {
             const zeit = Math.min(zeiten[id] || jetzt, jetzt), { aufgabe, schritt } = tafelStandUm(zeit);
             log.push({ id, zeit, code, aufgabe, schritt });
+        });
+        // Doc, 01.10.: "wenn die Zahl wieder runter geht habe ich gut erklärt" - a "verstanden" marks the question it
+        // answers (js/buzzer.js), which then no longer counts on its step's pill
+        neue.filter(id => bezuege[id]).forEach(id => {
+            const frage = log.find(e => e.id === bezuege[id]);
+            if (frage) frage.verstanden = Math.min(zeiten[id] || jetzt, jetzt);
         });
         try { localStorage.setItem('vorrechnen-buzzer', JSON.stringify(log.slice(-500))); } catch (_) {}
     }
@@ -87,7 +93,7 @@ function zeigeBuzzAufgabe() {
         container.appendChild(grund);
     }
     const heute = new Date().toDateString(), key = AUFGABEN[aufgabeIdx][0], code = Buzzer.code();
-    const n = buzzLog().filter(e => e.aufgabe === key && e.schritt === schritt && e.code === code &&
+    const n = buzzLog().filter(e => e.aufgabe === key && e.schritt === schritt && e.code === code && !e.verstanden &&
         new Date(e.zeit).toDateString() === heute).length;
     // Doc, 29.09.: "bei 0 keine Pille und kein badge rechts" - both only once somebody has buzzed
     if (!n) { el.style.display = 'none'; grund.style.display = 'none'; return; }
