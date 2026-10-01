@@ -475,9 +475,23 @@ function hebeVariable(latex, v, farbe) {
     if (v.length > 1) return latex.split(v).join(farbig);
     return latex.replace(/\\[a-zA-Z]+|./g, t => t === v ? farbig : t);
 }
-function aufgabenPanel(auf) {
-    let o = document.getElementById('aufgaben-overlay');
-    if (!auf) { if (o) { o.classList.remove('open'); delete o.dataset.auf; } return; }
+// Doc, 01.10. in class: "Jeder click dauert sehr lange ... auch die formeln hochzuschieben" - once opened, the
+// panel's 758 formulas (61,000 nodes) stayed in the page and every measuring on the board paid for them, hidden
+// or not: picking a task 270 ms instead of 35 (measured). Closed, it now leaves the page after its fade and
+// is kept here, set and fitted, for the next opening.
+let akOverlay = null, akWeg = null;
+function aufgabenPanel(auf, sofort = false) {
+    let o = akOverlay;
+    clearTimeout(akWeg);
+    if (!auf) {
+        if (o) {
+            o.classList.remove('open');
+            delete o.dataset.auf;
+            if (sofort) o.remove();                                       // a task picked: no fade, the board is new anyway
+            else akWeg = setTimeout(() => { if (!o.dataset.auf) o.remove(); }, 350);     // after the fade (ui.js: 0.3s)
+        }
+        return;
+    }
     if (!o) {
         o = document.createElement('div');
         o.id = 'aufgaben-overlay';
@@ -512,14 +526,15 @@ function aufgabenPanel(auf) {
                 b.className = 'aufgabe-karte';
                 b.dataset.i = String(i);
                 b.innerHTML = `<span class="ak-nr">${i - blk.ab + 1}</span><span class="ak-formel"></span>`;
-                b.addEventListener('click', () => { aufgabenPanel(false); zeigeAufgabe(i); });
+                b.addEventListener('click', () => { aufgabenPanel(false, true); zeigeAufgabe(i); });     // out first: the board measures
                 liste.appendChild(b);
             }
             tabs.appendChild(tab);
             buehne.appendChild(liste);
         });
-        document.body.appendChild(o);
+        akOverlay = o;
     }
+    if (!o.isConnected) document.body.appendChild(o);
     // light or dark like the board; the formulas are set again for their colour, and
     // one line each: a long one shrinks to its tile (the overlay is laid out while hidden).
     // Every page is shown for that, and measured: the stage keeps the tallest page's height, so the
@@ -553,6 +568,7 @@ function aufgabenPanel(auf) {
 // every page shown for a moment and measured in ONE layout: the widths read first, then the sizes written (a long
 // formula shrinks to its tile as passeEin does, basis 1.3rem); the stage keeps the tallest page's height
 function aufgabenEinpassen(o) {
+    if (!o.isConnected) { o.dataset.mass = ''; return; }          // closed meanwhile: fitted at the next opening
     const seiten = [...o.querySelectorAll('.aufgaben-liste')], buehne = o.querySelector('.ak-buehne');
     const versteckt = seiten.map(s => s.hidden);
     const karten = [...o.querySelectorAll('.aufgabe-karte')], formeln = karten.map(b => b.querySelector('.ak-formel'));
