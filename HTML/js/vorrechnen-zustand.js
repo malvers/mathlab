@@ -204,7 +204,7 @@ let stiftFarbe = INK;
 try { const f = localStorage.getItem('vorrechnen-farbe'); if (FARBEN.some(x => x[1] === f)) stiftFarbe = f; } catch (_) {}
 // Light mode: sand paper, and the white pen writes in royal blue ink. A
 // stroke keeps "white" - only its look changes, so toggling repaints all.
-const TINTE = 'rgb(31, 64, 150)';            // royal blue, like a school fountain pen
+const TINTE = 'rgb(25, 52, 130)';            // royal blue, like a school fountain pen - a touch darker (Doc, 01.10.2026: "ein kleines bisschen dunkler", was rgb(31, 64, 150)); decks/deck.css --formel matches
 let hell = false;
 try { hell = localStorage.getItem('vorrechnen-hell') === '1'; } catch (_) {}
 container.classList.toggle('hell', hell);
