@@ -729,7 +729,27 @@ function wiedervorlageTabelle(o) {
             b.querySelector('.wv-zuletzt').textContent = z.zuletzt
                 ? String(datum.getDate()).padStart(2, '0') + '.' + String(datum.getMonth() + 1).padStart(2, '0') + '.' : '';
             if (z.i >= 0) b.addEventListener('click', () => { aufgabenPanel(false, true); zeigeAufgabe(z.i); });
-            tabelle.appendChild(b);
+            // Doc, 01.10.: "rechts ein x" - off the list (feedbackErledigt, js/vorrechnen-klasse.js); beside the row,
+            // not in it - a button holds no button. The row goes at once, the cloud follows.
+            const reihe = document.createElement('div');
+            reihe.className = 'wv-reihe';
+            const weg = document.createElement('button');
+            weg.type = 'button';
+            weg.className = 'wv-weg';
+            weg.title = 'Aus der Wiederholung nehmen – ein neues „nicht verstanden“ bringt sie zurück';
+            weg.setAttribute('aria-label', 'Aus der Wiederholung nehmen');
+            weg.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6 L18 18 M18 6 L6 18" fill="none"' +
+                ' stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+            weg.addEventListener('click', () => {
+                feedbackErledigt(z.key);
+                wvDaten.zeilen = wvDaten.zeilen.filter(w => w.key !== z.key);
+                o.querySelectorAll('.aufgabe-karte').forEach(k => {      // its tile loses its number of questions
+                    if (AUFGABEN[+k.dataset.i][0] === z.key) { const el = k.querySelector('.ak-wv-zahl'); if (el) el.remove(); }
+                });
+                wiedervorlageTabelle(o);
+            });
+            reihe.append(b, weg);
+            tabelle.appendChild(reihe);
         });
         seite.appendChild(tabelle);
     }

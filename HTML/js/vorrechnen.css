@@ -198,7 +198,7 @@ body.anzeige::before {
 }
 body.anzeige :is(#cyber-left-chrome, #mini-rail, #side-panel, #right-rail, #tafel-pfeil-vor, #tafel-pfeil-zurueck, #formel-schicht, #erkennen-klein,
     #schritt-hinweis, #schritt-op, #schritt-hoch, #erklaerung:not(.oben), #erklaerung-zu, #erklaerung-hut, #erklaerung-griff, #erklaerung-leiste, #level-knopf, #level-menue, #notiz-rand, #notiz-leeren, #seite-leeren, #oben-leeren, #radierer, #radier-rahmen, #aufgaben-overlay, [id^="werkzeug-"], [id^="farbe-"], #zeitleiste, #zl-play,
-    #buzz-zeile, #buzzer-overlay, #tafel-overlay, #namen-overlay, #namen-pille) {
+    #buzz-zeile, #tempo-pille, #buzzer-overlay, #tafel-overlay, #namen-overlay, #namen-pille) {
     display: none !important;
 }
 /* Doc, 26.09.: "nimm bitte HIER das LOCAL rechts oben nach links unten
@@ -428,6 +428,13 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
 /* Doc, 29.09.: the newest row on a faint pill in the count's colour - under the ink like the grey steps
    (z-index -1 after #papier: over the paper), for Doc only; place, size and colour: zeigeBuzzAufgabe */
 #buzz-zeile { position: absolute; z-index: -1; pointer-events: none; border-radius: 999px; }
+/* Doc, 01.10.: the phones' tempo under the line over the squares, in its middle, as faint as the count's pill
+   (tempoMeldung: top, colours); Doc's alone - hidden in the beamer window with the rail */
+#tempo-pille { position: absolute; left: 50%; transform: translateX(-50%); z-index: 3; pointer-events: none; display: none; gap: 8px; }
+#tempo-pille span {
+    padding: 0.35em 0.9em; border-radius: 999px; white-space: nowrap;
+    font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 15px; line-height: 1;
+}
 
 /* Doc, 26.09.: "Tafel senden" - today's working into the plan, in the central modal;
    chips for the class and the tasks, light on sand with ink like the task panel */
@@ -552,6 +559,20 @@ body.anzeige #canvas-container:not(.hell) { background: transparent; }
     font-family: 'Orbitron', sans-serif; touch-action: manipulation;
 }
 #aufgaben-overlay .wv-zeile:hover:not(:disabled) { border-color: rgba(0, 210, 255, 0.6); }
+/* Doc, 01.10.: "rechts ein x" - the row and its x side by side; the heads step in by the x and its gap, so the
+   columns stay over each other */
+#aufgaben-overlay .wv-reihe { display: grid; grid-template-columns: minmax(0, 1fr) 28px; gap: 8px; align-items: center; }
+#aufgaben-overlay .wv-kopf { margin-right: 36px; }
+#aufgaben-overlay .wv-weg {
+    width: 28px; height: 28px; padding: 0; display: grid; place-items: center; cursor: pointer; border-radius: 50%;
+    color: #8a93a3; background: transparent; border: 1px solid rgba(255, 255, 255, 0.14);
+    transition: color .15s, border-color .15s, background .15s; -webkit-tap-highlight-color: transparent;
+}
+#aufgaben-overlay .wv-weg svg { width: 14px; height: 14px; }
+#aufgaben-overlay .wv-weg:hover { color: #fff; border-color: rgb(176, 36, 24); background: rgba(176, 36, 24, 0.35); }
+#aufgaben-overlay .wv-weg:focus { outline: none; }
+#aufgaben-overlay.hell .wv-weg { color: #5d6678; border-color: rgba(31, 64, 150, 0.25); }
+#aufgaben-overlay.hell .wv-weg:hover { color: #fff; border-color: rgb(176, 36, 24); background: rgb(176, 36, 24); }
 #aufgaben-overlay .wv-zeile:focus { outline: none; }
 #aufgaben-overlay .wv-zeile:disabled { cursor: default; opacity: 0.55; }
 #aufgaben-overlay .wv-aufgabe { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; text-align: left; }

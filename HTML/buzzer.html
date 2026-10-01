@@ -72,18 +72,15 @@
         }
         #knopf:active { transform: scale(0.96); }
         #knopf:focus { outline: none; }
-        #knopf svg { width: 34%; height: auto; }
+        /* Doc, 01.10.: "Nehmen wir den Text nach oben, und mach da, wo das Fragezeichen ist ... diesen fragenden Smiley
+           ... die Hand so am Kinn ... bitte die Apple-Smileys" - the words on top, under them Apple's face as an image
+           (iamcal/emoji-data img-apple-160, as in the VGP and Vorrechnen), the same on every phone */
+        #knopf-bild { width: 36%; height: auto; pointer-events: none; -webkit-user-drag: none; }
         #knopf.angekommen { background: var(--gruen); color: #fff; box-shadow: 0 0 0 10px rgba(121, 158, 49, 0.2), 0 0 60px rgba(121, 158, 49, 0.35); }
-        /* Doc, 29.09.: "mit dem weißen Ausrufezeichen. Vielen Dank für das Feedback" - arrived: the question mark
-           turns into an exclamation mark (same dot), white on green */
-        #knopf .ausruf, #knopf.angekommen .frage { display: none; }
-        #knopf.angekommen .ausruf { display: inline; }
         /* Doc, 01.10.: "Nicht Verstanden -> Danke fürs feedback ... kurz danach wird der button rot mit: drücken, wenn
-           verstanden" - the open question in Doc's red with a white tick; a tap tells the board it is understood
+           verstanden" - the open question in Doc's red; a tap tells the board it is understood
            ("wenn die Zahl wieder runter geht habe ich gut erklärt") */
         #knopf.offen { background: var(--rot); color: #fff; box-shadow: 0 0 0 10px rgba(176, 36, 24, 0.22), 0 0 60px rgba(176, 36, 24, 0.4); }
-        #knopf .haken, #knopf.offen .frage, #knopf.offen circle { display: none; }
-        #knopf.offen .haken { display: inline; }
         #knopf.pause { background: #1c2c4a; color: var(--leise); box-shadow: none; cursor: default; }
 
         /* Doc, 01.10.: "Das soll mir Feedback geben, ob ich zu schnell erkläre oder zu langsam erkläre" - two quiet keys
@@ -92,12 +89,14 @@
         #tempo { display: flex; gap: 12px; width: min(78vw, 58vh, 380px); }
         #tempo button {
             flex: 1; min-height: 52px; padding: 0 8px; cursor: pointer; touch-action: manipulation;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
             font-family: inherit; font-size: clamp(0.72rem, 3.4vw, 0.9rem); letter-spacing: 0.08em;
             color: var(--text); background: rgba(0, 210, 255, 0.08); border: 1px solid rgba(0, 210, 255, 0.4); border-radius: 12px;
             transition: background 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
         }
         #tempo button:active { transform: scale(0.97); }
         #tempo button:focus { outline: none; }
+        #tempo button img { width: 1.9em; height: 1.9em; flex: none; pointer-events: none; -webkit-user-drag: none; }
         #tempo button.danke { background: var(--gruen); border-color: var(--gruen); color: #fff; }
         #tempo button:disabled:not(.danke) { opacity: 0.35; cursor: default; }
 
@@ -132,19 +131,12 @@
     </div>
 
     <button type="button" id="knopf" hidden>
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path class="frage" d="M8.2 8.6 A3.9 3.9 0 1 1 13.6 12.2 C12.6 12.8 12 13.6 12 14.8 V15.6" fill="none" stroke="currentColor"
-                stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
-            <path class="ausruf" d="M12 4.6 V15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
-            <path class="haken" d="M4.8 12.8 L9.8 17.6 L19.2 6.8" fill="none" stroke="currentColor" stroke-width="2.4"
-                stroke-linecap="round" stroke-linejoin="round" />
-            <circle cx="12" cy="19.6" r="1.5" fill="currentColor" />
-        </svg>
         <span id="knopf-text">HAB ICH NICHT VERSTANDEN</span>
+        <img id="knopf-bild" alt="" draggable="false" src="https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/1f914.png">
     </button>
     <div id="tempo" hidden>
-        <button type="button" data-art="schnell">ZU SCHNELL</button>
-        <button type="button" data-art="langsam">ZU LANGSAM</button>
+        <button type="button" data-art="schnell"><img alt="" draggable="false" src="https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/1f635-200d-1f4ab.png"><span>ZU SCHNELL</span></button>
+        <button type="button" data-art="langsam"><img alt="" draggable="false" src="https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/1f971.png"><span>ZU LANGSAM</span></button>
     </div>
     <div id="hinweis" role="status"></div>
 
@@ -155,7 +147,13 @@
             const DB_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co';
             const DB_KEY = 'sb_publishable_ubQDiMD-X3N0vZvPVi229Q_-5Zootfk';   // publishable (public by design)
             const $ = id => document.getElementById(id);
-            const knopf = $('knopf'), text = $('knopf-text'), hinweis = $('hinweis');
+            const knopf = $('knopf'), text = $('knopf-text'), bild = $('knopf-bild'), hinweis = $('hinweis');
+            // Apple's faces (Doc, 01.10.: "bitte die Apple-Smileys"): 🤔 asking, 🤗 thanks, 😃 "drücken, wenn
+            // verstanden", 🥳 understood - all fetched once, so a state's face is there the moment it shows
+            const APPLE = 'https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/';
+            const GESICHT = { frage: '1f914', danke: '1f917', offen: '1f603', super: '1f973' };
+            Object.values(GESICHT).forEach(c => { new Image().src = APPLE + c + '.png'; });
+            const gesicht = g => { bild.src = APPLE + GESICHT[g] + '.png'; };
             let code = (new URLSearchParams(location.search).get('c') || '').trim();
             let zurueck = null, zustand = 'frage';           // 'frage' (orange), 'danke' (green, a moment), 'offen' (red)
             // my "nicht verstanden" still open: {code, id, tag} - a reload or a locked phone keeps the red button
@@ -168,12 +166,13 @@
             function zeige(z) {
                 zustand = z;
                 knopf.className = z === 'frage' ? '' : z === 'offen' ? 'offen' : 'angekommen';
-                if (z === 'frage') text.textContent = 'HAB ICH NICHT VERSTANDEN';
-                if (z === 'offen') text.textContent = 'DRÜCKEN, WENN VERSTANDEN';
+                if (z === 'frage') { text.textContent = 'HAB ICH NICHT VERSTANDEN'; gesicht('frage'); }
+                if (z === 'offen') { text.textContent = 'DRÜCKEN, WENN VERSTANDEN'; gesicht('offen'); }
             }
-            function danke(t, danach) {
+            function danke(t, danach, g) {
                 zeige('danke');
                 text.textContent = t;
+                gesicht(g || 'danke');
                 sag('');
                 if (navigator.vibrate) navigator.vibrate(40);
                 zurueck = setTimeout(() => zeige(danach), 1500);
@@ -224,7 +223,7 @@
                 if (/zu viele/.test(fehler)) { sag('Gerade drücken sehr viele – gleich nochmal.', true); return; }
                 merke(null);
                 // 409: it was counted already; any other refusal (the question too old, ...): nothing left to answer
-                if (res.ok || res.status === 409) danke('SUPER – DANKE!', 'frage');
+                if (res.ok || res.status === 409) danke('SUPER – DANKE!', 'frage', 'super');
                 else { zeige('frage'); sag(''); }
             }
 
@@ -232,7 +231,7 @@
             const TEMPO_RUHE = 20000;
             const tempoKnoepfe = [...document.querySelectorAll('#tempo button')];
             async function tempo(b) {
-                const art = b.dataset.art, wort = b.textContent;
+                const art = b.dataset.art, schrift = b.querySelector('span'), wort = schrift.textContent;
                 tempoKnoepfe.forEach(k => { k.disabled = true; });
                 let res;
                 try {
@@ -250,8 +249,8 @@
                 sag('');
                 if (navigator.vibrate) navigator.vibrate(40);
                 b.classList.add('danke');
-                b.textContent = 'DANKE!';
-                setTimeout(() => { b.classList.remove('danke'); b.textContent = wort; }, 1500);
+                schrift.textContent = 'DANKE!';
+                setTimeout(() => { b.classList.remove('danke'); schrift.textContent = wort; }, 1500);
                 setTimeout(() => tempoKnoepfe.forEach(k => { k.disabled = false; }), TEMPO_RUHE);
             }
             tempoKnoepfe.forEach(b => b.addEventListener('click', () => tempo(b)));

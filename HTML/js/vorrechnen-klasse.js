@@ -26,7 +26,11 @@ const tafelStaende = (() => {
 // Doc, 01.10.: "Immer, wenn eine neue Aufgabe kommt oder ich die Seite neu lade oder ich von vorne anfange, müssen
 // die Votes null sein" - the pill counts what was pressed since then; the history keeps everything (Wiedervorlage)
 let pillenStart = Date.now();
-function pilleNull() { pillenStart = Date.now(); }           // also zeigeAufgabe: a task picked or started again
+function pilleNull() {                                       // also zeigeAufgabe: a task picked or started again
+    pillenStart = Date.now();
+    // the tempo counts per task too (Doc, 01.10.: "neutralisiert ... wenn wir eine neue Aufgabe machen"): 0 at once
+    if (window.Buzzer && Buzzer.tempoJetzt) Buzzer.tempoJetzt();
+}
 function tafelStandDazu(aufgabe, schritt) {
     tafelStaende.push({ t: Date.now(), aufgabe, schritt });
     if (tafelStaende.length > 1000) tafelStaende.splice(0, tafelStaende.length - 1000);
@@ -123,38 +127,76 @@ function feedbackSenden() {
     })();
     return feedbackLaeuft;
 }
-// the whole history per task: this device's log (the newest state) and the cloud's rows, each buzz once.
+// Doc, 01.10.: "Wiederholung ... rechts ein x" - the x takes a task off the list (feedbackErledigt): everything pressed
+// for it up to then is done with, a newer "nicht verstanden" brings it back with the new questions only. The moment
+// is kept on this device (vorrechnen-wiederholung-aus) and in the cloud (erledigt on each of the task's rows), so
+// another device learns it from the rows it reads. Nothing is deleted.
+const ERLEDIGT_KEY = 'vorrechnen-wiederholung-aus';
+function erledigtHier() {
+    try { const m = JSON.parse(localStorage.getItem(ERLEDIGT_KEY) || '{}'); return m && typeof m === 'object' ? m : {}; }
+    catch (_) { return {}; }
+}
+async function feedbackErledigt(aufgabe) {
+    const jetzt = Date.now(), hier = erledigtHier();
+    hier[aufgabe] = jetzt;
+    try { localStorage.setItem(ERLEDIGT_KEY, JSON.stringify(hier)); } catch (_) {}
+    try {
+        await feedbackSenden();                         // its rows must be up there to be marked
+        if (!(window.svpAuth && svpAuth.hasSession())) return false;
+        const res = await svpAuth.api(FEEDBACK_TABELLE + '?aufgabe=eq.' + encodeURIComponent(aufgabe) + '&erledigt=is.null', {
+            method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ erledigt: new Date(jetzt).toISOString() })
+        });
+        return res.ok;
+    } catch (_) { return false; }
+}
+// the whole history per task: this device's log (the newest state) and the cloud's rows, each buzz once; what an x
+// has done with (erledigtHier, the rows' erledigt) does not count.
 // {proAufgabe: Map key -> {nicht, verstanden, zuletzt, schritte: {step: n}}, wolke: the cloud was read}
 async function feedbackUebersicht() {
-    const proAufgabe = new Map(), gezaehlt = new Set();
-    const zaehle = (id, aufgabe, schritt, gedrueckt, verstanden) => {
-        if (!aufgabe || gezaehlt.has(id)) return;
-        gezaehlt.add(id);
-        let a = proAufgabe.get(aufgabe);
-        if (!a) proAufgabe.set(aufgabe, a = { nicht: 0, verstanden: 0, zuletzt: 0, schritte: {} });
-        a.nicht++;
-        if (verstanden) a.verstanden++;
-        a.zuletzt = Math.max(a.zuletzt, gedrueckt || 0);
-        a.schritte[schritt] = (a.schritte[schritt] || 0) + 1;
+    const proAufgabe = new Map(), eintraege = new Map(), bis = new Map(Object.entries(erledigtHier()));
+    const merke = (id, aufgabe, schritt, gedrueckt, verstanden) => {
+        if (aufgabe && !eintraege.has(id)) eintraege.set(id, { aufgabe, schritt, gedrueckt, verstanden });
     };
-    buzzLog().forEach(e => zaehle(e.id, e.aufgabe, e.schritt || 0, e.zeit, e.verstanden));
+    buzzLog().forEach(e => merke(e.id, e.aufgabe, e.schritt || 0, e.zeit, e.verstanden));
     let wolke = false;
     try {
         await feedbackSenden();
         if (window.svpAuth && svpAuth.hasSession()) {
             // PostgREST hands out 1000 rows at a time
             for (let ab = 0; ; ab += 1000) {
-                const res = await svpAuth.api(FEEDBACK_TABELLE + '?select=buzz_id,aufgabe,schritt,gedrueckt,verstanden' +
+                const res = await svpAuth.api(FEEDBACK_TABELLE + '?select=buzz_id,aufgabe,schritt,gedrueckt,verstanden,erledigt' +
                     '&order=buzz_id&limit=1000&offset=' + ab);
                 if (!res.ok) break;
                 const zeilen = await res.json();
-                zeilen.forEach(r => zaehle(r.buzz_id, r.aufgabe, r.schritt || 0, Date.parse(r.gedrueckt), r.verstanden));
+                zeilen.forEach(r => {
+                    merke(r.buzz_id, r.aufgabe, r.schritt || 0, Date.parse(r.gedrueckt), r.verstanden);
+                    if (r.erledigt) bis.set(r.aufgabe, Math.max(bis.get(r.aufgabe) || 0, Date.parse(r.erledigt)));
+                });
                 wolke = true;
                 if (zeilen.length < 1000) break;
             }
         }
     } catch (_) { /* offline: this device's log alone */ }
+    eintraege.forEach(e => {
+        if ((e.gedrueckt || 0) <= (bis.get(e.aufgabe) || 0)) return;      // done with by an x
+        let a = proAufgabe.get(e.aufgabe);
+        if (!a) proAufgabe.set(e.aufgabe, a = { nicht: 0, verstanden: 0, zuletzt: 0, schritte: {} });
+        a.nicht++;
+        if (e.verstanden) a.verstanden++;
+        a.zuletzt = Math.max(a.zuletzt, e.gedrueckt || 0);
+        a.schritte[e.schritt] = (a.schritte[e.schritt] || 0) + 1;
+    });
     return { proAufgabe, wolke };
+}
+// Doc, 27.09.: "grün, wenn null gebuzzert haben, und rot, wenn zwanzig ... Sind immer zwanzig in der Klasse. Also
+// unser üblicher Farbverlauf" - green, orange at ten, red from twenty on (the palette), as a faint ground (0.14).
+// Shared by the count behind a step and the tempo pills (Doc, 01.10.: "die Farbgebung genauso wie bei der grünen
+// Pille ... je mehr gedrückt haben, desto rot").
+function buzzGrund(n) {
+    const t = Math.min(1, n / 20), mix = (a, b, u) => a.map((v, i) => Math.round(v + (b[i] - v) * u));
+    const GRUEN = [121, 158, 49], ORANGE = [245, 194, 66], ROT = [176, 36, 24];
+    const c = t <= 0.5 ? mix(GRUEN, ORANGE, t * 2) : mix(ORANGE, ROT, (t - 0.5) * 2);
+    return `rgba(${c.join(', ')}, 0.14)`;
 }
 // Doc, 27.09.: first "in die erste Zeile ... ein Icon ... wie viele gebuzzert haben ... pro Aufgabe", then
 // "eigentlich müsste ja die Pille pro Rechenschritt erscheinen ... wenn der nächste Schritt kommt, kommt
@@ -194,14 +236,10 @@ function zeigeBuzzAufgabe() {
     // Doc, 29.09.: "bei 0 keine Pille und kein badge rechts" - both only once somebody has buzzed
     if (!n) { el.style.display = 'none'; grund.style.display = 'none'; return; }
     el.lastElementChild.textContent = String(n);
-    // Doc, 27.09.: "grün, wenn null gebuzzert haben, und rot, wenn zwanzig ... Sind immer zwanzig in der
-    // Klasse. Also unser üblicher Farbverlauf" - green, orange at ten, red from twenty on (the palette)
-    const t = Math.min(1, n / 20), mix = (a, b, u) => a.map((v, i) => Math.round(v + (b[i] - v) * u));
-    const GRUEN = [121, 158, 49], ORANGE = [245, 194, 66], ROT = [176, 36, 24];
-    const c = t <= 0.5 ? mix(GRUEN, ORANGE, t * 2) : mix(ORANGE, ROT, (t - 0.5) * 2);
+    // the colour by the count: buzzGrund (green, orange at ten, red from twenty on)
     // Doc, 29.09.: "mach das badge genauso transp wie die Eq. Pille" - one faint ground for both (until then
     // the badge was solid); on it the number in the board's ink, dark on sand, light on the dark board
-    const grundFarbe = `rgba(${c.join(', ')}, 0.14)`;
+    const grundFarbe = buzzGrund(n);
     el.style.background = grundFarbe;
     el.style.color = anzeige(INK);
     el.title = n === 1 ? '1 × nicht verstanden bei diesem Schritt' : n + ' × nicht verstanden bei diesem Schritt';
@@ -285,17 +323,57 @@ function zeigeBuzzAufgabe() {
 }
 function buzzerKnopf() {
     if (!window.Buzzer) return;
-    Buzzer.tempo(tempoMeldung);
+    Buzzer.tempo(tempoMeldung, () => pillenStart);
     if (!Buzzer.aktiv()) Buzzer.start(buzzerMeldung);
     buzzerKarte();                                   // always the QR - the count is the pill in the first row
 }
 // Doc, 01.10.: "Das soll mir Feedback geben, ob ich zu schnell erkläre oder zu langsam erkläre ... bei mir ... in
-// Mission Control" - the phones' tempo of the last two minutes beside the buzzer's rail button (js/buzzer.js:
-// tempoMarke); the rail is never on the beamer, and the beamer window draws nothing of it either
+// Mission Control" - the phones' tempo since the task came on the board, "pro Aufgabe" like the count (js/buzzer.js:
+// Buzzer.tempo, pillenStart), then "bitte unten unter
+// die Trennlinie oben in die Mitte ... muss nicht so krass sein ... so transparent wie die Zahl selbst": centred just
+// under the line over the squares (namenLinie), faint pills like the count behind a step's number - coloured like
+// it, green to red with the number of presses, the board's ink on them. Not a mirrored layer, and hidden in the beamer
+// window (vorrechnen.css): his alone.
 function tempoMeldung(s) {
     if (anzeigeModus) return;
-    Buzzer.tempoMarke(document.getElementById('werkzeug-buzzer'), s);
+    let el = document.getElementById('tempo-pille');
+    if (!s || (!s.schnell && !s.langsam)) { if (el) el.style.display = 'none'; return; }
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'tempo-pille';
+        el.setAttribute('aria-hidden', 'true');
+        container.appendChild(el);
+    }
+    el.textContent = '';
+    // the colour as on the count behind a step: the more pressed, the redder (buzzGrund)
+    [['schnell', 'zu schnell'], ['langsam', 'zu langsam']].forEach(([art, wort]) => {
+        if (!s[art]) return;
+        const p = document.createElement('span');
+        p.textContent = wort + ' ' + s[art];
+        p.style.background = buzzGrund(s[art]);
+        p.style.color = anzeige(INK);
+        el.appendChild(p);
+        if (s.neu === art && p.animate) p.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.15)' }, { transform: 'scale(1)' }], { duration: 600, easing: 'ease-out' });
+    });
+    el.title = 'Tempo-Feedback zu dieser Aufgabe';
+    el.style.display = 'flex';
+    tempoLegen(el);
 }
+// Doc, 01.10.: "mittig in der linken Box, also sozusagen über den Radiergummi, denn das ist der Bereich, wo ich im
+// Wesentlichen arbeite" - over the eraser's middle (it sits centred at the foot of the left box); without it the
+// middle between the board's left edge and the line of the notes (#notiz-rand)
+function tempoLegen(el) {
+    const c0 = container.getBoundingClientRect();
+    const rad = document.getElementById('radierer'), rand = document.getElementById('notiz-rand');
+    const r = rad && rad.getBoundingClientRect(), n = rand && rand.getBoundingClientRect();
+    const mitte = r && r.width ? r.left + r.width / 2 : n && n.width ? (c0.left + n.left) / 2 : c0.left + c0.width / 2;
+    el.style.left = Math.round(mitte - c0.left) + 'px';
+    el.style.top = Math.round(namenLinie() + 10) + 'px';
+}
+addEventListener('resize', () => {
+    const el = document.getElementById('tempo-pille');
+    if (el && el.style.display !== 'none') tempoLegen(el);
+});
 let buzzerZwilling = null;
 async function buzzerKarte(auf = true) {
     let o = document.getElementById('buzzer-overlay');

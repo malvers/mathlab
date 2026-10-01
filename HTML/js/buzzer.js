@@ -24,8 +24,9 @@
 //   Buzzer.karte()           an element with inline styles only: the QR (for an overlay, or a beamer twin)
 //   Buzzer.markiere(el, n)   the central mark on a button: orange, a number, one pulse when it rises
 //   Buzzer.blitz()           a short orange glow along the screen edge (never on a mirrored layer)
-//   Buzzer.tempo(onTempo)    the phones' "zu schnell" / "zu langsam" (Doc, 01.10.2026): onTempo({schnell, langsam,
-//                            neu}) with the counts of the last two minutes, at every change and every 5 s
+//   Buzzer.tempo(onTempo, ab) the phones' "zu schnell" / "zu langsam" (Doc, 01.10.2026): onTempo({schnell, langsam,
+//                            neu}) with the counts since ab() (Vorrechnen: since the task came on the board; without
+//                            ab: the last two minutes), at every change and every 5 s; Buzzer.tempoJetzt() at once
 //   Buzzer.tempoMarke(el, s) shows such a count beside a button, left of it (the teacher's side only)
 //   Buzzer.aktiv(), Buzzer.code()
 (function () {
@@ -103,28 +104,35 @@
     }
     // ---- the tempo (Doc, 01.10.2026: "Das soll mir Feedback geben, ob ich zu schnell erkläre oder zu langsam
     // erkläre"): the phones' "zu schnell" / "zu langsam" are rows of the table buzzer_tempo - a table of its own, since
-    // a tab with the old code counts every row of buzzer as a question. Counted over the last two minutes only, so the
-    // mark fades by itself; the look every 5 s refreshes it.
+    // a tab with the old code counts every row of buzzer as a question. Counted from the moment the page names (then
+    // "pro Aufgabe ... neutralisiert, wenn wir eine neue Aufgabe machen": Vorrechnen gives the time its task came on
+    // the board), else over the last two minutes; the look every 5 s refreshes it.
     const TEMPO_FENSTER = 120000;
-    let tempoMelde = null, tempoZeilen = new Map();                         // id -> {art, t}
+    let tempoMelde = null, tempoAb = null, tempoZeilen = new Map();         // id -> {art, t}
+    function tempoSeit() {
+        const a = tempoAb ? tempoAb() : NaN;
+        return a > 0 ? a : Date.now() - TEMPO_FENSTER;
+    }
     function tempoStand(neu) {
-        const jetzt = Date.now(), s = { schnell: 0, langsam: 0, neu: neu || null };
-        tempoZeilen.forEach((z, id) => { if (jetzt - z.t > TEMPO_FENSTER) tempoZeilen.delete(id); else s[z.art]++; });
+        const seit = tempoSeit(), s = { schnell: 0, langsam: 0, neu: neu || null };
+        tempoZeilen.forEach((z, id) => { if (z.t < seit) tempoZeilen.delete(id); else s[z.art]++; });
         return s;
     }
     function tempoDazu(zeilen) {
-        const zeiten = zeitenAus(zeilen);
+        const zeiten = zeitenAus(zeilen), seit = tempoSeit();
         let neu = null;
         zeilen.forEach(r => {
             if (!r || (r.art !== 'schnell' && r.art !== 'langsam') || tempoZeilen.has(r.id)) return;
-            tempoZeilen.set(r.id, { art: r.art, t: zeiten[r.id] || Date.now() });
+            const t = zeiten[r.id] || Date.now();
+            if (t < seit) return;                                           // pressed before what counts now
+            tempoZeilen.set(r.id, { art: r.art, t });
             neu = r.art;
         });
         if (tempoMelde) tempoMelde(tempoStand(neu));
     }
     async function tempoNachsehen() {
         try {
-            const ab = new Date(Date.now() - TEMPO_FENSTER).toISOString();
+            const ab = new Date(tempoSeit()).toISOString();
             const res = await fetch(DB_URL + '/rest/v1/buzzer_tempo?code=eq.' + code() + '&created_at=gt.' + encodeURIComponent(ab) +
                 '&select=id,art,created_at&order=id', { headers: { apikey: DB_KEY }, cache: 'no-store' });
             if (res.ok) tempoDazu(await res.json());
@@ -265,7 +273,7 @@
             addEventListener('resize', () => { if (el._buzzTempo === m) tempoLegen(el, m); });
         }
         tempoLegen(el, m);
-        m.title = 'Tempo-Feedback der letzten 2 Minuten';
+        m.title = 'Tempo-Feedback';
         m.textContent = '';
         [['schnell', 'ZU SCHNELL', ROT, '#fff'], ['langsam', 'ZU LANGSAM', ORANGE, '#0b1a33']].forEach(([art, wort, grund, tinte]) => {
             if (!s[art]) return;
@@ -282,7 +290,9 @@
     }
 
     window.Buzzer = { start, weiter, gesehen, neuerCode, code, link, karte, karteBereit, markiere, blitz, tempoMarke,
-        // tempo(onTempo): onTempo({schnell, langsam, neu}) - the counts of the last two minutes, neu = the kind just come
-        tempo: cb => { tempoMelde = cb; if (laeuft && cb) cb(tempoStand()); },
+        // tempo(onTempo, ab): onTempo({schnell, langsam, neu}) - the counts since ab() (ms; without it: the last two
+        // minutes), neu = the kind just come; tempoJetzt(): count again now (the page's ab() moved on)
+        tempo: (cb, ab) => { tempoMelde = cb; tempoAb = ab || null; if (laeuft && cb) cb(tempoStand()); },
+        tempoJetzt: () => { if (tempoMelde) tempoMelde(tempoStand()); },
         aktiv: () => laeuft };
 })();
