@@ -725,6 +725,26 @@
     } catch (e) { /* without the page: at least the levels */ }
     return ['../js/vorrechnen-aufgaben.js'];
   }
+  /* Slides in front of the tasks, right after the title (Doc, 02.10.2026: Marilyn vos Savant and the Ziegenproblem,
+     "das Deck zum Vorrechnen ... machs da AUCH rein"): a file under vorspann/ holds the <section>s - the same ones
+     the plain decks carry - and this list says which boards show it: a collection (?aufgaben=...) or a week (?kw=...) */
+  const VORSPANN = [
+    { aufgaben: 'einmaleins', datei: 'vorspann/vos-savant.html' },   // Info 9, KW 40
+    { kw: '41', datei: 'vorspann/vos-savant.html' },                 // Mathe 11, KW 41
+  ];
+  async function vorspann() {
+    const v = VORSPANN.find(function (e) {
+      return e.aufgaben ? String(params.get('aufgaben') || '').toLowerCase() === e.aufgaben : params.get('kw') === e.kw;
+    });
+    if (!v) return [];
+    try {
+      const res = await fetch(v.datei, { cache: 'no-cache' });
+      if (!res.ok) return [];
+      const t = document.createElement('template');
+      t.innerHTML = await res.text();
+      return [...t.content.querySelectorAll('section.slide')];
+    } catch (e) { return []; }   // without it the board still comes
+  }
   /* A task's explanation without its setting: aufgabenTexte (js/vorrechnen-aufgaben.js) puts the task's text in front
      of it for the lab's box, and that text stands on the task's slide already - a task with nothing but its text has
      no explanation slide. */
@@ -872,6 +892,7 @@
         wegKnopf(titel);
         dazu(titel, 'Titel: die Tafel der ' + name.lang + ' vom ' + tag + ', die Rechnungen aus der Stunde');
       }
+      for (const sl of await vorspann()) dazu(sl, 'Vorspann: ' + ((sl.querySelector('h3') || {}).textContent || ''));
       if (!aufgaben.length) dazu(meldungFolie('Auf dieser Tafel steht nichts.'), 'leer');
       const bloecke = [...new Set(aufgaben.map(function (a) { return a.block || ''; }))];
       let block = null, kapitel = 0;
