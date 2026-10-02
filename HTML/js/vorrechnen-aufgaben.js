@@ -120,10 +120,16 @@ const WOCHEN = {
 // in the plan (svp/svp-plan-tafel.js; Doc, 01.10.2026: "die noch nicht verlinkt sind, in diese Woche verlinken") - a
 // week that links the deck in its own material keeps that pill instead (Gleichungen umstellen, KW 40 since 27.09.).
 // THE place for all of it: decks/tafel.html builds its decks from here, the plan its pills and its Aufgabensammlung.
+// seite (optional): the plan page whose week carries the pill, by its path - without it Mathe 11. A deck pinned to a page
+// of its own is not in Mathe 11's Aufgabensammlung; its week gets the blackboard to Vorrechnen instead (Doc, 02.10.2026:
+// "bau mir die, das Vorrechnen und das Deck dazu in Info 9 heute ein" - the Aufgaben panel "lassen wir bei Info weg").
+// A new page there: its path in VORRECHNEN_SEITEN as well (svp/svp-plan-tafel.js).
 const SAMMLUNGEN = {
     '':          { titel: 'Umstellen · Vereinfachen', kicker: 'Vorrechnen · Level 1 bis 3', block: null, kw: 40 },
     knobeln:     { titel: 'Ziffernrätsel', kicker: 'Vorrechnen · Knobeln', block: /^Knobeln\b/, kw: 40 },
     kopfrechnen: { titel: 'Kopfrechnen', kicker: 'Vorrechnen · Tricks und Denkaufgaben', block: /^Kopfrechnen\b/, kw: 40 },
+    einmaleins:  { titel: 'Eins mal eins', kicker: 'Vorrechnen · Aufwärmen', block: /^Eins mal eins\b/, kw: 40,
+                   seite: '/svp/informatik/informatik9.html' },
 };
 // mehr: what else the block says about itself (kopf)
 function wochenBlock(name, ab, mehr) {

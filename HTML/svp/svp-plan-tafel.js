@@ -21,7 +21,11 @@ window.svpPlanParts.push(function (P) {
     const me = document.querySelector('script[src*="svp-plan-tafel.js"]');
     const TAFEL_URL = new URL('../decks/tafel.html', me ? me.src : location.href).href;
     const WURZEL = new URL('../', me ? me.src : location.href).href;
-    const VORRECHNEN_SEITE = /\/svp\/mathe\/mathe11\.html$/;
+    const VORRECHNEN_SEITE = /\/svp\/mathe\/mathe11\.html$/;    /* the week blocks and the Aufgabensammlung */
+    /* the pages that read the Vorrechnen blocks: Mathe 11 and every page a deck by theme is pinned to (SAMMLUNGEN seite,
+       js/vorrechnen-aufgaben.js - Doc, 02.10.2026: "Eins mal eins" in Informatik 9) */
+    const VORRECHNEN_SEITEN = [VORRECHNEN_SEITE, /\/svp\/informatik\/informatik9\.html$/];
+    function vorrechnenSeite() { return VORRECHNEN_SEITEN.some(r => r.test(location.pathname)); }
 
     let tafeln = [];    /* [{ id, kw, datum, titel }] of this page, this school year */
     let vorrechnen = {};    /* { kw: the titles of its blocks } */
@@ -121,14 +125,22 @@ window.svpPlanParts.push(function (P) {
        anderen" - it stands behind the tabs now, before the pen. And: "das Vorrechen-Icon bitte nur, wenn ich
        eingeloggt bin. Das sollen die Schüler nicht sehen" - built for Doc alone, like the pen next to it. */
     const knoepfe = [];
+    /* Doc, 02.10.2026, Informatik 9: "als Vorrechenlink und als [Deck]" - a deck by theme pinned to a page of its own
+       (SAMMLUNGEN seite) has no Aufgabensammlung there to open Vorrechnen from, so its week's blackboard opens it */
+    function labZiel(ref) {
+        const woche = vorrechnen[String(ref.kw)];
+        if (woche) return { param: 'kw=' + encodeURIComponent(ref.kw), titel: woche };
+        const k = Object.keys(sammlungen).find(k => sammlungen[k].seite && String(sammlungen[k].kw) === String(ref.kw));
+        return k == null ? null : { param: 'aufgaben' + (k ? '=' + encodeURIComponent(k) : ''), titel: sammlungen[k].titel };
+    }
     function knopfZeigen(k) {
-        const woche = vorrechnen[String(k.ref.kw)];
-        k.b.hidden = !woche;
-        if (woche) k.b.title = 'Vorrechnen: ' + woche;
+        const ziel = labZiel(k.ref);
+        k.b.hidden = !ziel;
+        if (ziel) k.b.title = 'Vorrechnen: ' + ziel.titel;
     }
     function vorrechnenKnopf(ref, kopf) {
         if (!P.CAN_EDIT_MAT) return;
-        if (!VORRECHNEN_SEITE.test(location.pathname) || window.UNTIS_TERMIN || ref.kw == null || ref.kw === '') return;
+        if (!vorrechnenSeite() || window.UNTIS_TERMIN || ref.kw == null || ref.kw === '') return;
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'sub-vorrechnen';
@@ -137,7 +149,8 @@ window.svpPlanParts.push(function (P) {
         b.addEventListener('mousedown', P.keinMausfokus);
         b.addEventListener('click', function (ev) {
             ev.stopPropagation();   /* sonst klappt der Zeilenklick zu */
-            window.open(WURZEL + 'vorrechnen.html?kw=' + encodeURIComponent(ref.kw), '_blank', 'noopener');
+            const ziel = labZiel(ref);
+            if (ziel) window.open(WURZEL + 'vorrechnen.html?' + ziel.param, '_blank', 'noopener');
         });
         kopf.appendChild(b);
         const k = { ref, b };
@@ -339,7 +352,7 @@ window.svpPlanParts.push(function (P) {
        30.09.2026: "die Tabelle find ich eine gute Idee!"). The file runs in a function of its own, so nothing of it
        lands in this page's globals. */
     (function vorrechnenLaden() {
-        if (!VORRECHNEN_SEITE.test(location.pathname)) return;
+        if (!vorrechnenSeite()) return;
         fetch(WURZEL + 'js/vorrechnen-aufgaben.js')
             .then(res => (res.ok ? res.text() : ''))
             .then(text => {
@@ -352,9 +365,15 @@ window.svpPlanParts.push(function (P) {
                     if (!wochen[k]) liste.push(k);
                     wochen[k] = wochen[k] ? wochen[k] + ' + ' + titel : titel;
                 });
-                vorrechnen = wochen;
-                wochenListe = liste.map(k => [k, wochen[k]]);
-                sammlungen = daten.sammlungen;
+                /* the week blocks are Mathe 11's; a deck by theme belongs to its page (seite, else Mathe 11) */
+                const mathe11 = VORRECHNEN_SEITE.test(location.pathname);
+                vorrechnen = mathe11 ? wochen : {};
+                wochenListe = mathe11 ? liste.map(k => [k, wochen[k]]) : [];
+                sammlungen = {};
+                Object.keys(daten.sammlungen).forEach(k => {
+                    const seite = daten.sammlungen[k].seite;
+                    if (seite ? location.pathname.endsWith(seite) : mathe11) sammlungen[k] = daten.sammlungen[k];
+                });
                 neuZeichnen();
                 aufgabensammlung();
             })
