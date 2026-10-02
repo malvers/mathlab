@@ -62,10 +62,13 @@
         [hidden] { display: none !important; }
 
         /* the one button: a large ring, the question mark drawn (no font glyph) */
+        /* Doc, 02.10.: "verzerrt on pad" - a % padding counts from the page width, not the button's: on the wide pad
+           the inner box shrank to ~100 px (text in three lines). Everything inside now counts from --knopf */
         #knopf {
-            width: min(78vw, 58vh, 380px); aspect-ratio: 1; border-radius: 50%;
+            --knopf: min(78vw, 58vh, 380px);
+            width: var(--knopf); aspect-ratio: 1; border-radius: 50%;
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-            padding: 0 12%; cursor: pointer; touch-action: manipulation;
+            padding: 0 calc(var(--knopf) * 0.14); cursor: pointer; touch-action: manipulation;
             font-family: inherit; font-size: clamp(1rem, 4.6vw, 1.35rem); letter-spacing: 0.06em; line-height: 1.35;
             color: var(--grund); background: var(--orange); border: none;
             box-shadow: 0 0 0 10px rgba(245, 194, 66, 0.18), 0 0 60px rgba(245, 194, 66, 0.35);
@@ -76,7 +79,9 @@
         /* Doc, 01.10.: "Nehmen wir den Text nach oben, und mach da, wo das Fragezeichen ist ... diesen fragenden Smiley
            ... die Hand so am Kinn ... bitte die Apple-Smileys" - the words on top, under them Apple's face as an image
            (iamcal/emoji-data img-apple-160, as in the VGP and Vorrechnen), the same on every phone */
-        #knopf-bild { width: 36%; height: auto; pointer-events: none; -webkit-user-drag: none; }
+        /* Safari takes the face's natural 160 px as its height when the width is a % in a flex column - so a fixed
+           square: width from the button, aspect-ratio 1, never stretched or shrunk by the flexbox */
+        #knopf-bild { width: calc(var(--knopf) * 0.26); height: auto; aspect-ratio: 1; flex: none; object-fit: contain; pointer-events: none; -webkit-user-drag: none; }
         #knopf.angekommen { background: var(--gruen); color: #fff; box-shadow: 0 0 0 10px rgba(121, 158, 49, 0.2), 0 0 60px rgba(121, 158, 49, 0.35); }
         /* Doc, 01.10.: "Nicht Verstanden -> Danke fürs feedback ... kurz danach wird der button rot mit: drücken, wenn
            verstanden" - the open question in Doc's red; a tap tells the board it is understood
