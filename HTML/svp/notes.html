@@ -66,6 +66,36 @@
 
         .note-card.open .note-chev { transform: rotate(90deg); }
 
+        /* Doc, 02.10.2026: "neben den 6 Punkten links einen Stift, der die Tools einblendet" - the format bar
+           shows only while a note's pen is on (per note, remembered in this browser like the open ones) */
+        .note-pen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            background: none;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            color: var(--muted);
+            cursor: pointer;
+        }
+
+        .note-pen svg { width: 16px; height: 16px; display: block; }
+
+        .note-pen:hover { border-color: rgba(245, 194, 66, 0.5); }
+
+        .note-card.tools .note-pen {
+            color: var(--text);
+            background: rgba(245, 194, 66, 0.25);
+            border-color: rgba(245, 194, 66, 0.6);
+        }
+
+        .note-card:not(.tools) .note-fmtbar { display: none; }
+
+        @media print { .note-pen { display: none; } }
+
         .note-card:not(.open) .note-body { display: none; }
 
         .note-card:not(.open) .note-head { margin-bottom: 0; }
@@ -350,6 +380,16 @@
         let openSet;
         try { openSet = new Set(JSON.parse(localStorage.getItem(OPEN_KEY)) || []); } catch (e) { openSet = new Set(); }
         function persistOpen() { localStorage.setItem(OPEN_KEY, JSON.stringify([...openSet])); }
+        /* Notes whose pen is on - their format bar shows (Doc, 02.10.2026) */
+        const TOOLS_KEY = 'svp-notes-tools';
+        let toolsSet;
+        try { toolsSet = new Set(JSON.parse(localStorage.getItem(TOOLS_KEY)) || []); } catch (e) { toolsSet = new Set(); }
+        function persistTools() { try { localStorage.setItem(TOOLS_KEY, JSON.stringify([...toolsSet])); } catch (e) { } }
+        /* Lucide "pencil" (ISC) */
+        const PEN_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor"' +
+            ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987' +
+            'L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>' +
+            '<path d="m15 5 4 4"/></g></svg>';
 
         /* Save status is shown by the cloud badge alone: gray = pending, green = synced. */
         function save() {
@@ -736,6 +776,7 @@
                 /* While searching every hit is open, otherwise the match would be invisible. */
                 card.className = 'note-card' + (query || openSet.has(note.id) ? ' open' : '');
                 card.dataset.id = note.id;
+                if (toolsSet.has(note.id)) card.classList.add('tools');
 
                 const head = document.createElement('div');
                 head.className = 'note-head';
@@ -754,6 +795,22 @@
                     const open = card.classList.toggle('open');
                     if (open) openSet.add(note.id); else openSet.delete(note.id);
                     persistOpen();
+                });
+
+                const pen = document.createElement('button');
+                pen.type = 'button';
+                pen.className = 'note-pen';
+                pen.innerHTML = PEN_SVG;
+                pen.title = 'Werkzeuge ein/aus';
+                pen.setAttribute('aria-label', 'Werkzeuge ein-/ausblenden');
+                pen.setAttribute('aria-pressed', String(toolsSet.has(note.id)));
+                pen.addEventListener('click', () => {
+                    const on = card.classList.toggle('tools');
+                    if (on) toolsSet.add(note.id); else toolsSet.delete(note.id);
+                    persistTools();
+                    pen.setAttribute('aria-pressed', String(on));
+                    /* tools on a closed note: open it - the bar stands over its text */
+                    if (on && !card.classList.contains('open')) chev.click();
                 });
 
                 const title = document.createElement('input');
@@ -796,6 +853,7 @@
                 });
 
                 head.appendChild(grip);
+                head.appendChild(pen);
                 head.appendChild(chev);
                 head.appendChild(title);
                 head.appendChild(date);
