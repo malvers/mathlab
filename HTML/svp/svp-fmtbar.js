@@ -1,7 +1,8 @@
 // A formatting bar for a contenteditable: optional smileys to type, bold, italic, underline, a few
 // text colours, a marker and "Tx" to take it all off again. Shared, so every rich box in the SVP looks and behaves the
 // same (Doc, 23.09.2026, for the Fahrplan sheet: "wenn ich in der Editbox bin paar Farben Bold
-// etc."). notes.html still carries an older twin of this bar inline.
+// etc."). The tools themselves are one set, WERKZEUGE below - the Fahrplan sheet and the notes take
+// the same (Doc, 02.10.2026: "die gleichen Werkzeuge wie in Fahrplan! Mach das zentral bitte").
 //
 // Everything goes through document.execCommand - deprecated on paper, but every browser keeps
 // it, and it is the only thing that knows how to split a <b> at the caret. Cmd+B/I/U work in a
@@ -71,6 +72,36 @@
             ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="6" r="1"/>' +
             '<path d="M5 12h14"/><circle cx="12" cy="18" r="1"/></g></svg>'
     };
+    /* Lucide "list" / "list-ordered" (ISC, lucide-static 1.48.0) - the two list buttons (opts.listen) */
+    const LISTE_SVG = {
+        punkte: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor"' +
+            ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h.01"/><path d="M3 12h.01"/>' +
+            '<path d="M3 19h.01"/><path d="M8 5h13"/><path d="M8 12h13"/><path d="M8 19h13"/></g></svg>',
+        zahlen: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor"' +
+            ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5h10"/><path d="M11 12h10"/>' +
+            '<path d="M11 19h10"/><path d="M4 4h1v5"/><path d="M4 9h2"/>' +
+            '<path d="M6.5 20H3.4c0-1 2.6-1.925 2.6-3.5a1.5 1.5 0 0 0-2.6-1.02"/></g></svg>'
+    };
+    /* The tools of the Fahrplan sheet as one set (Doc, 02.10.2026, for the notes: "die gleichen Werkzeuge wie in
+       Fahrplan! Mach das zentral bitte") - a box that wants them builds with
+       Object.assign({}, svpFmtBar.WERKZEUGE, { target: ..., ... }), so a smiley or a colour added here shows up
+       in every such box. */
+    const WERKZEUGE = {
+        groessen: true,    // klein, mittel, groß (Doc, 29.09.2026)
+        // Doc, 29.09.2026: "ein paar übliche Smileys, die cool sind", "ein paar weniger", 🎉 -> 🤔, then in the panel
+        // "noch ein paar Smileys rein, denn wir haben jetzt Platz" - faces first, then signs
+        // Doc, 01.10.2026: "rechts neben den Stern-Smiley noch das Zeichen ... für Division" - the plain
+        // character (U+00F7), so it takes the text's colour and size; its button is drawn (ZEICHEN_SVG)
+        emojis: ['😀', '😎', '😅', '🤔', '🤯', '🥳', '👍', '💡', '🚀', '⭐', '÷'],
+        bilder: [['/svp/emo/kuh.webp', 'Kuh']],    // Doc, 29.09.2026: the cow
+        colors: [
+            ['rgb(176, 36, 24)', 'Rot (Υ)'],
+            ['rgb(121, 158, 49)', 'Grün (φ)'],
+            ['rgb(245, 194, 66)', 'Orange (λ)'],
+            ['#002060', 'Navy (Standard)']
+        ],
+        marker: 'rgba(245, 194, 66, 0.45)'
+    };
     function bildHtml(src, name) {
         const img = document.createElement('img');
         img.className = 'fmtbar-bild';
@@ -81,6 +112,11 @@
 
     /* opts.eineReihe: everything in one row - indent and pictures inline instead of in a second row
        opts.groessen: three A after U - small, the text's own size, large (GROESSEN)
+       opts.durch:    S for strike-through, right after U
+       opts.listen:   bullets and a numbered list, after the sizes - for a box of free text (the notes), not
+                      for one that is a list already (the Fahrplan sheet)
+       opts.einzug:   {rein, raus} - indent and outdent as the caller does them; or true - the browser's own
+                      (nests a list, shifts a paragraph), and Tab / Shift+Tab in opts.target do the same
        opts.emojis:   ['😀', ...] - one button each, in front of B, typing it at the caret
        opts.colors:   [[css colour, name], ...] - one dot per entry, in this order
        opts.marker:   background colour of the marker button (omit for no marker)
@@ -136,17 +172,29 @@
         });
         mk('<b>B</b>', 'Fett (Cmd+B)', 'bold', mark('bold'));
         mk('<i>I</i>', 'Kursiv (Cmd+I)', 'italic', mark('italic'));
-        const uKnopf = mk('<u>U</u>', 'Unterstrichen (Cmd+U)', 'underline', mark('underline'));
+        let hinterU = mk('<u>U</u>', 'Unterstrichen (Cmd+U)', 'underline', mark('underline'));
+        if (opts.durch) hinterU = mk('<s>S</s>', 'Durchgestrichen', 'strikeThrough', mark('strikeThrough'));
         /* font sizes (opts.groessen): three A right after the marks */
-        let hinterU = uKnopf;
         if (opts.groessen) {
             const gruppe = document.createElement('div');
             gruppe.className = 'fmtbar-groessen';
             GROESSEN.forEach(function (g) {
                 gruppe.appendChild(mk(aSvg(g[2]), 'Schrift ' + g[0], '', function () { groesse(g[1]); }));
             });
-            bar.insertBefore(gruppe, uKnopf.nextSibling);
+            bar.insertBefore(gruppe, hinterU.nextSibling);
             hinterU = gruppe;
+        }
+        /* Doc, 16.09.2026 (notes): "gib mir hier bitte auch bullets Zahlen" - a second click on the same button
+           turns the list back into paragraphs, execCommand does that by itself */
+        if (opts.listen) {
+            const listen = document.createElement('div');
+            listen.className = 'fmtbar-listen';
+            listen.appendChild(mk(LISTE_SVG.punkte, 'Aufzählung', 'insertUnorderedList',
+                function () { exec('insertUnorderedList'); }));
+            listen.appendChild(mk(LISTE_SVG.zahlen, 'Nummerierte Liste', 'insertOrderedList',
+                function () { exec('insertOrderedList'); }));
+            bar.insertBefore(listen, hinterU.nextSibling);
+            hinterU = listen;
         }
         /* The selection - or, with only the caret, its whole point - at a size. execCommand marks the stretch
            with <font size="7">, the one thing that splits marks and points correctly; each such mark becomes our
@@ -155,8 +203,11 @@
             const t = opts.target, sel = window.getSelection();
             if (!t || !sel.rangeCount || !t.contains(sel.anchorNode)) return;
             if (sel.isCollapsed) {
+                /* the point the caret is in: its list item, else the block right in the box - in free text
+                   (the notes) a list sits in the box as a whole; a bare line of text there is its own point */
                 let el = sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentNode;
-                while (el && el.parentNode !== t) el = el.parentNode;
+                while (el && el !== t && el.nodeName !== 'LI' && el.parentNode !== t) el = el.parentNode;
+                if (el === t) el = sel.anchorNode.nodeType === 3 ? sel.anchorNode : null;
                 if (!el) return;
                 const r = document.createRange();
                 r.selectNodeContents(el);
@@ -197,13 +248,25 @@
         /* Doc, 29.09.2026: "unter dem B ein Indent-Button. Und einen Outdent-Button" - opts.einzug {rein, raus},
            the caller knows its list; in the second row, the first one right under B: past the smileys (28 px and
            4 px of gap each) and the 8 px of air before B */
-        if (opts.einzug) {
+        let ein = opts.einzug;
+        if (ein === true) {
+            /* the browser's own (02.10.2026, the notes): in a list it nests the point, else it shifts the line */
+            ein = { rein: function () { exec('indent'); }, raus: function () { exec('outdent'); } };
+            if (opts.target) {
+                opts.target.addEventListener('keydown', function (ev) {
+                    if (ev.key !== 'Tab' || ev.altKey || ev.ctrlKey || ev.metaKey) return;
+                    ev.preventDefault();
+                    (ev.shiftKey ? ein.raus : ein.rein)();
+                });
+            }
+        }
+        if (ein) {
             const einzug = document.createElement('div');
             einzug.className = 'fmtbar-einzug';
             const n = (opts.emojis || []).length;
             if (!opts.eineReihe) einzug.style.left = (n ? n * 32 + 8 : 0) + 'px';
-            einzug.appendChild(mk(EINZUG_SVG('m3 8 4 4-4 4'), 'Einrücken (Tab)', '', opts.einzug.rein));
-            einzug.appendChild(mk(EINZUG_SVG('m7 8-4 4 4 4'), 'Ausrücken (Shift+Tab)', '', opts.einzug.raus));
+            einzug.appendChild(mk(EINZUG_SVG('m3 8 4 4-4 4'), 'Einrücken (Tab)', '', ein.rein));
+            einzug.appendChild(mk(EINZUG_SVG('m7 8-4 4 4 4'), 'Ausrücken (Shift+Tab)', '', ein.raus));
             /* in one row (opts.eineReihe) right after U, with the marks; else in the second row */
             if (opts.eineReihe) bar.insertBefore(einzug, hinterU.nextSibling); else bar.appendChild(einzug);
         }
@@ -223,7 +286,12 @@
 
         /* Which marks the selection carries - only while the caret sits in our box, the
            bar of a closed sheet must not read a selection elsewhere on the page. */
+        /* A bar that was on the page and is gone (the notes build theirs anew on every search key) lets go of
+           the document - else every old bar would stay alive and answer every selection change. */
+        let warDa = false;
         function state() {
+            if (bar.isConnected) warDa = true;
+            else if (warDa) { document.removeEventListener('selectionchange', state); return; }
             const inside = opts.target && document.activeElement === opts.target;
             bar.querySelectorAll('[data-cmd]').forEach(function (b) {
                 let on = false;
@@ -343,5 +411,5 @@
     }
 
     window.svpFmtBar = { build: build, clean: clean, safe: safe, textOf: textOf, zeile: zeile, mitEbene: mitEbene, EBENEN_MAX: EBENEN_MAX,
-        punktGroesse: punktGroesse };
+        punktGroesse: punktGroesse, WERKZEUGE: WERKZEUGE };
 })();

@@ -155,34 +155,11 @@
             color: var(--muted);
         }
 
+        /* The shared format bar (svp-fmtbar.js, the Fahrplan's tools) over the text; it draws itself
+           in the colour it is given */
         .note-fmtbar {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            flex-wrap: wrap;
             margin: 2px 0 8px;
-        }
-
-        .fmt-btn {
-            background: none;
-            border: 1px solid var(--line);
-            border-radius: 6px;
             color: var(--text);
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.8rem;
-            min-width: 28px;
-            padding: 3px 7px;
-            cursor: pointer;
-        }
-
-        .fmt-btn:hover { border-color: rgba(245, 194, 66, 0.5); }
-
-        .fmt-dot {
-            display: inline-block;
-            width: 13px;
-            height: 13px;
-            border-radius: 50%;
-            vertical-align: -2px;
         }
 
         .note-card:not(.open) .note-fmtbar { display: none; }
@@ -342,6 +319,7 @@
     </footer>
 
     <script src="svp-auth.js"></script>
+    <script src="svp-fmtbar.js"></script>
     <script>
         /* Dev-only cleanup: old service workers on localhost used to serve stale pages and
            intercepted/hung fetches (login!). Unregister them + purge the Cache API, then reload
@@ -832,6 +810,8 @@
                 body.setAttribute('role', 'textbox');
                 if (note.fmt) { body.innerHTML = note.body; } else { body.innerText = note.body || ''; }
                 body.addEventListener('input', () => {
+                    /* a point small or large as a whole: its lines too (as on the Fahrplan sheet) */
+                    body.querySelectorAll('li').forEach(svpFmtBar.punktGroesse);
                     note.body = body.innerHTML;
                     note.fmt = 1;
                     note.ts = Date.now();
@@ -840,7 +820,18 @@
                     supaUpsert(note);
                 });
 
-                const fmtbar = buildFmtBar();
+                /* Doc, 02.10.2026: "gib mir hier bitte die gleichen Werkzeuge wie in Fahrplan! Mach das
+                   Zentral bitte" - the shared set (svpFmtBar.WERKZEUGE), plus what free text needs on top:
+                   strike-through, bullets and numbers (Doc, 16.09.2026), indent with Tab */
+                const fmtbar = document.createElement('div');
+                fmtbar.className = 'note-fmtbar';
+                fmtbar.appendChild(svpFmtBar.build(Object.assign({}, svpFmtBar.WERKZEUGE, {
+                    target: body,
+                    eineReihe: true,
+                    durch: true,
+                    listen: true,
+                    einzug: true
+                })));
 
                 card.appendChild(head);
                 card.appendChild(fmtbar);
@@ -860,56 +851,6 @@
                 }).observe(body);
             }
             paintHits();
-        }
-
-        // Formatting toolbar: bold/italic/underline/strike, page colors, marker, clear.
-        // mousedown is prevented so the text selection in the note survives the click.
-        function buildFmtBar() {
-            const bar = document.createElement('div');
-            bar.className = 'note-fmtbar';
-            const mk = (html, title, fn) => {
-                const b = document.createElement('button');
-                b.className = 'fmt-btn';
-                b.innerHTML = html;
-                b.title = title;
-                b.setAttribute('aria-label', title);
-                b.addEventListener('mousedown', e => e.preventDefault());
-                b.addEventListener('click', fn);
-                return b;
-            };
-            const cmd = (c, v) => () => document.execCommand(c, false, v || null);
-
-            bar.appendChild(mk('<b>B</b>', 'Fett (Cmd+B)', cmd('bold')));
-            bar.appendChild(mk('<i>I</i>', 'Kursiv (Cmd+I)', cmd('italic')));
-            bar.appendChild(mk('<u>U</u>', 'Unterstrichen (Cmd+U)', cmd('underline')));
-            bar.appendChild(mk('<s>S</s>', 'Durchgestrichen', cmd('strikeThrough')));
-
-            /* Doc, 16.09.2026: "gib mir hier bitte auch bullets Zahlen und bul" -
-               Aufzaehlung und nummerierte Liste. Ein zweiter Klick auf denselben
-               Knopf macht die Liste wieder zu Absaetzen, das kann execCommand
-               von Haus aus. */
-            bar.appendChild(mk('&bull;', 'Aufzählung', cmd('insertUnorderedList')));
-            bar.appendChild(mk('1.', 'Nummerierte Liste', cmd('insertOrderedList')));
-
-            const colors = [
-                ['rgb(245, 194, 66)', 'Orange (λ)'],
-                ['rgb(121, 158, 49)', 'Grün (φ)'],
-                ['rgb(235, 120, 105)', 'Rot (Υ)'],
-                ['rgb(90, 190, 230)', 'Cyan'],
-                ['rgb(225, 235, 250)', 'Weiß (Standard)']
-            ];
-            for (const [col, name] of colors) {
-                bar.appendChild(mk('<span class="fmt-dot" style="background:' + col + '"></span>',
-                    'Textfarbe ' + name, cmd('foreColor', col)));
-            }
-
-            bar.appendChild(mk('<span style="background: rgba(245,194,66,0.35); padding: 0 4px; border-radius: 3px">M</span>',
-                'Marker', cmd('hiliteColor', 'rgba(245, 194, 66, 0.3)')));
-            bar.appendChild(mk('Tx', 'Formatierung entfernen', () => {
-                document.execCommand('removeFormat');
-                document.execCommand('unlink');
-            }));
-            return bar;
         }
 
         function addNote() {

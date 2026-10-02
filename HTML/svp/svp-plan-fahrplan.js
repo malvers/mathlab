@@ -117,25 +117,13 @@ window.svpPlanParts.push(function (P) {
            row (eineReihe); it shows while the sheet is written in (svp-fahrplan.css, .fahr-leiste) */
         leiste = document.createElement('div');
         leiste.className = 'fahr-leiste';
-        leiste.appendChild(svpFmtBar.build({
+        /* the tools are the shared set (svpFmtBar.WERKZEUGE: smileys, sizes, colours, marker, the cow - the notes
+           take the same, 02.10.2026); the sheet adds its own indent, a level per point */
+        leiste.appendChild(svpFmtBar.build(Object.assign({}, svpFmtBar.WERKZEUGE, {
             target: feld,
             eineReihe: true,
-            groessen: true,    // klein, mittel, groß (Doc, 29.09.2026)
-            // Doc, 29.09.2026: "ein paar übliche Smileys, die cool sind", "ein paar weniger", 🎉 -> 🤔, then in the panel
-            // "noch ein paar Smileys rein, denn wir haben jetzt Platz" - faces first, then signs
-            // Doc, 01.10.2026: "rechts neben den Stern-Smiley noch das Zeichen ... für Division" - the plain
-            // character (U+00F7), so it takes the text's colour and size; its button is drawn (ZEICHEN_SVG, svp-fmtbar.js)
-            emojis: ['😀', '😎', '😅', '🤔', '🤯', '🥳', '👍', '💡', '🚀', '⭐', '÷'],
-            bilder: [['/svp/emo/kuh.webp', 'Kuh']],    // Doc, 29.09.2026: the cow
-            einzug: { rein: function () { einzug(1); }, raus: function () { einzug(-1); } },   // indent, outdent (29.09.2026)
-            colors: [
-                ['rgb(176, 36, 24)', 'Rot (\u03a5)'],
-                ['rgb(121, 158, 49)', 'Gr\u00fcn (\u03c6)'],
-                ['rgb(245, 194, 66)', 'Orange (\u03bb)'],
-                ['#002060', 'Navy (Standard)']
-            ],
-            marker: 'rgba(245, 194, 66, 0.45)'
-        }));
+            einzug: { rein: function () { einzug(1); }, raus: function () { einzug(-1); } }   // indent, outdent (29.09.2026)
+        })));
         /* Doc, 28.09.2026: "bau mir den klein bitte oben links neben den GDW", then "Rück Inhalte ein und mach
            es vor Inhalte so hoch wie Inhalte" - the gong of svp-gong.js in front of the title, as tall as its
            letters; a click rings it at once */
