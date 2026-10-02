@@ -305,6 +305,17 @@
         }
 
         // --- the field: password once per device, then questions -------------------------------------------------
+        // On a touch screen the cursor set by the code comes without the keyboard (inputmode none); a finger on the
+        // field brings it (Doc 02.10.2026, DOCPAD on the Lenovo pad: "wenn wir den Cursor programmatisch da reinstellen,
+        // dann soll die Tastatur nicht kommen. Nur wenn ich explizit mit dem Finger da drauf tippe")
+        const TOUCH = !!(global.matchMedia && global.matchMedia('(hover: none) and (pointer: coarse)').matches);
+        function fokus() {
+            if (TOUCH) input.setAttribute('inputmode', 'none');
+            input.focus();
+        }
+        root.addEventListener('pointerdown', function (e) {
+            if (e.target === input && input.getAttribute('inputmode') === 'none') input.removeAttribute('inputmode');
+        }, true);
         function bindInput() {
             input.addEventListener('keydown', function (e) {
                 e.stopPropagation();                         // typing must not turn the lab's steps
@@ -426,11 +437,11 @@
                         if (!r.ok) {
                             say(abgelehnt(r.grund, v.length), 'sf-err');
                             if (input.value === eigen) eigen = v;
-                            input.value = v; input.focus(); input.select();
+                            input.value = v; fokus(); input.select();
                             return;
                         }
                         merke('dev_access', v);
-                        askQuestion(); input.focus();
+                        askQuestion(); fokus();
                     })
                     .catch(function () { busy = false; sendBtn.disabled = false; say('Kein Netz.', 'sf-err'); });
                 return;
@@ -570,7 +581,7 @@
         function frage(v) {
             v = String(v || '').trim();
             if (!v || busy) return;
-            if (!pwd()) { askPassword(); input.focus(); say('Einmal das Passwort, dann kann ' + wer() + ' antworten.', 'sf-err'); return; }
+            if (!pwd()) { askPassword(); fokus(); say('Einmal das Passwort, dann kann ' + wer() + ' antworten.', 'sf-err'); return; }
             busy = true; sendBtn.disabled = true; bereit();
             stop();
             const meine = ++seq;
@@ -847,7 +858,7 @@
         // after the switch the cursor blinks in the field and the microphone lights up once - here you can type,
         // or speak (Doc, 29.09.2026: "lass den Cursor gleich auch blinken", "das Mikrofon auch mal kurz aufflashen")
         function einladen() {
-            input.focus();
+            fokus();
             if (micBtn.hidden || micBtn.classList.contains('on')) return;   // hidden, or listening already
             micBtn.classList.remove('sf-zeig');
             void micBtn.offsetWidth;                           // restart the flash on a quick second click
@@ -890,7 +901,7 @@
             (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject())
                 .then(function () { done('Kopiert'); }, function () { done('Kopieren ging nicht'); });
         });
-        clearBtn.addEventListener('click', function () { leeren(); menu.hidden = true; input.focus(); });
+        clearBtn.addEventListener('click', function () { leeren(); menu.hidden = true; fokus(); });
         // Live reload (only on Doc's machine, tools/live_reload.py) waits while the box is in use: she thinks or
         // speaks, her menu is open, or a talk stands in it - as in the decks, where the open panel holds it. A right
         // click to copy took the cursor out of the field, the lab reloaded under it and the answer was gone (Doc,
@@ -947,7 +958,7 @@
                     hoertZu(false);
                     if (spaet) { spaet = false; return; }
                     if (t) gehoert(t);
-                    input.focus();
+                    fokus();                                     // the cursor back into the line (no keyboard on touch: fokus)
                     if (MIC.selbst && input.value.trim()) submit();
                 },
                 log: dbg,
