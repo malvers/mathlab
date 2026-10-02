@@ -35,6 +35,12 @@ html.natur .plan-sticky.stuck { box-shadow: none; }
 html.natur { --natur-tabelle: 25%; }   /* 40 % first, then "noch ein bisschen transparenter" */
 html.natur.svp-light { --natur-tabelle: 55%; }   /* 70 % first */
 html.natur .table-wrap { background: color-mix(in srgb, var(--card) var(--natur-tabelle), transparent); }
+/* without the shadow nothing marks the plan table's head row once it sticks - so then it gets a line above and below
+   (Doc, 02.10.2026: "wenn man da wegscrollt sollten oben und unten Linien sein"), in the rim of the search box and
+   the other fields: 1 px of --line ("dünner und heller", "so wie die Rahmen der zB suchbox") */
+html.natur body:has(.plan-sticky.stuck) #plan-table :is(thead th, tr.col-head th) {
+    box-shadow: inset 0 1px 0 var(--line), inset 0 -1px 0 var(--line);
+}
 @media print {
     html.natur body::before { display: none; }
     html.natur .plan-sticky, html.natur .svp-sticktop, html.natur .svp-sticktop::before, html.natur .nav-band { background: none; }
