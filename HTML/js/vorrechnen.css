@@ -557,7 +557,29 @@ html.natur body.anzeige:has(> #canvas-container.hell)::before {
 }
 #aufgaben-overlay .ak-tab:focus { outline: none; }
 #aufgaben-overlay .ak-tab:focus-visible { color: #fff; }
-#aufgaben-overlay .aufgaben-liste[hidden] { display: none; }
+#aufgaben-overlay .ak-seite[hidden] { display: none; }
+/* Doc, 02.10.2026: a tab per stretch between the holidays - on its page every block under its heading (aufgabenSeiten) */
+#aufgaben-overlay .ak-kopf {
+    margin: 22px 0 10px; text-align: left; font-family: 'Orbitron', sans-serif; font-size: 0.72rem; font-weight: 400;
+    letter-spacing: 1.2px; color: #8a93a3;
+}
+/* such a page is taller than the screen: only the stage scrolls, the tabs and the cross stay where they are (the whole
+   modal scrolled before - the cross went with it, and the tiles showed above and below the sticky strip) */
+#aufgaben-overlay .cyber-modal { display: flex; flex-direction: column; overflow: hidden; }
+#aufgaben-overlay .ak-tabs { flex: none; }
+#aufgaben-overlay .ak-buehne {
+    position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto;
+    scrollbar-width: thin; scrollbar-color: rgba(72, 88, 112, 0.95) transparent;      /* the thumb of index.html's */
+    /* Doc, 02.10.2026: "Scrollbar deutlich weiter nach rechts ... rechtsbündig mit dem X" - the stage reaches into the
+       modal's right padding (24px) up to the cross's right edge (12px from the rim); its own padding keeps the tiles
+       where they were */
+    margin-right: -12px; padding-right: 12px;
+}
+#aufgaben-overlay.hell .ak-buehne { scrollbar-color: rgba(31, 64, 150, 0.4) transparent; }
+#aufgaben-overlay .ak-kopf:first-child { margin-top: 2px; }
+#aufgaben-overlay .ak-kw { color: rgb(245, 194, 66); }
+#aufgaben-overlay.hell .ak-kopf { color: #5d6678; }
+#aufgaben-overlay.hell .ak-kw { color: rgb(31, 64, 150); }
 #aufgaben-overlay.hell .ak-tabs { background: #f4ecd8; border-bottom-color: rgba(31, 64, 150, 0.2); }
 #aufgaben-overlay.hell .ak-tab { color: rgba(31, 64, 150, 0.6); }
 #aufgaben-overlay.hell :is(.ak-tab:hover, .ak-tab:focus-visible, .ak-tab.aktiv) { color: rgb(31, 64, 150); }
@@ -598,6 +620,10 @@ html.natur body.anzeige:has(> #canvas-container.hell)::before {
 #aufgaben-overlay .wv-s-aufgabe { justify-content: flex-start; }
 #aufgaben-overlay .wv-spalte[aria-sort] { color: #fff; }
 #aufgaben-overlay .wv-spalte svg { width: 10px; height: 10px; flex: none; }
+#aufgaben-overlay .wv-spalte svg.wv-dreieck { width: 12px; height: 10px; }
+#aufgaben-overlay .wv-spalte svg.wv-sortierbar { opacity: 0.45; }
+#aufgaben-overlay .wv-spalte:hover:not([aria-sort]) { color: rgba(255, 255, 255, 0.85); }
+#aufgaben-overlay.hell .wv-spalte:hover:not([aria-sort]) { color: rgba(31, 64, 150, 0.85); }
 #aufgaben-overlay .wv-spalte:focus { outline: none; }
 #aufgaben-overlay .wv-kurz { display: none; }
 #aufgaben-overlay .wv-spalte .wv-zeichen { width: 18px; height: 18px; display: block; }
@@ -624,12 +650,22 @@ html.natur body.anzeige:has(> #canvas-container.hell)::before {
 #aufgaben-overlay .wv-zeile:focus { outline: none; }
 #aufgaben-overlay .wv-zeile:disabled { cursor: default; opacity: 0.55; }
 #aufgaben-overlay .wv-aufgabe { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; text-align: left; }
+/* Doc, 02.10.2026, the rows all as tall as the tallest: "nimm die Header bitte immer oben unter die Top-Line" - the
+   block's line sits at the top of every row, the formula in the room left under it, centred */
+#aufgaben-overlay .wv-aufgabe { align-self: stretch; }
+#aufgaben-overlay .wv-formel { margin: auto 0; }
 #aufgaben-overlay .wv-block {
     max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     font-size: 0.62rem; letter-spacing: 0.08em; color: #8a93a3;
 }
 #aufgaben-overlay .wv-formel { font-size: 1.15rem; white-space: nowrap; }
 #aufgaben-overlay .wv-zahl { font-size: 1rem; }
+/* Doc, 02.10.2026: "Mach die bitte in eine Pille mit der entsprechenden Farbe" - the number of questions, white on the
+   colour of its count (anzahlFarbe), in the shape of the tiles' small number */
+#aufgaben-overlay .wv-pille {
+    display: inline-block; min-width: 2.6em; height: 1.8em; padding: 0 0.7em; box-sizing: border-box;
+    border-radius: 0.9em; line-height: 1.8em; font-size: 0.85rem; color: #fff;
+}
 #aufgaben-overlay .wv-grad { display: flex; align-items: center; gap: 8px; }
 #aufgaben-overlay .wv-balken { flex: 1; height: 8px; border-radius: 4px; overflow: hidden; background: rgba(255, 255, 255, 0.08); }
 #aufgaben-overlay .wv-balken i { display: block; height: 100%; border-radius: 4px; }
@@ -654,6 +690,7 @@ html.natur body.anzeige:has(> #canvas-container.hell)::before {
     #aufgaben-overlay .wv-kopf, #aufgaben-overlay .wv-zeile { padding-left: 8px; padding-right: 8px; }
     #aufgaben-overlay .wv-prozent { width: auto; }
     #aufgaben-overlay .wv-zahl { font-size: 0.85rem; }
+    #aufgaben-overlay .wv-pille { min-width: 2.2em; padding: 0 0.4em; font-size: 0.75rem; }
 }
 
 /* Doc, 29.09.: a tap on the block's name top right ("Level 1") opens all blocks right under it (levelKnopf,

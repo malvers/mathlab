@@ -481,6 +481,35 @@ function hebeVariable(latex, v, farbe) {
 // or not: picking a task 270 ms instead of 35 (measured). Closed, it now leaves the page after its fade and
 // is kept here, set and fitted, for the next opening.
 let akOverlay = null, akWeg = null;
+// Doc, 02.10.2026: one tab per block had grown to 41, the newest far out of sight at the right ("die Tab-Leiste ... müssen
+// wir irgendwie reorganisieren ... zu den Wochen zwischen den Ferien"; the idea agreed: "Machen, toll"). The pages of
+// the panel now: Sammlungen - every block without a week, in load order - and one page per stretch of school weeks
+// between two holidays. The stretches are read from the gaps in the blocks' weeks (WOCHEN), so there is no second
+// list of the holidays; a page is named after the holidays that end it, the last one "bis Sommer". On a page every
+// block is a section: its heading, its tiles under it. [{ titel, hinweis, bloecke: [block index] }]
+const FERIEN_NACH_KW = [[40, 45, 'Herbst'], [50, 53, 'Weihnachten'], [1, 1, 'Weihnachten'], [5, 9, 'Winter'], [10, 17, 'Ostern']];
+function schulRang(kw) { return kw >= 31 ? kw - 31 : kw + 22; }      // the school year starts in August
+function aufgabenSeiten() {
+    const ohne = [], wochen = [];
+    BLOECKE.forEach((b, k) => (b.kw === undefined ? ohne : wochen).push(k));
+    wochen.sort((a, b) => schulRang(BLOECKE[a].kw) - schulRang(BLOECKE[b].kw));
+    const seiten = ohne.length ? [{ titel: 'Sammlungen', hinweis: 'Alle Blöcke ohne Woche', bloecke: ohne }] : [];
+    let lauf = [];
+    const abschliessen = letzte => {
+        const von = BLOECKE[lauf[0]].kw, bis = BLOECKE[lauf[lauf.length - 1]].kw, frei = bis % 53 + 1;
+        const ferien = letzte ? 'Sommer' : (FERIEN_NACH_KW.find(([a, b]) => frei >= a && frei <= b) || [])[2];
+        const kws = 'KW ' + von + (bis !== von ? '–' + bis : '');
+        seiten.push({ titel: ferien ? 'bis ' + ferien : kws, hinweis: kws, bloecke: lauf });
+        lauf = [];
+    };
+    wochen.forEach((k, n) => {
+        if (lauf.length && schulRang(BLOECKE[k].kw) - schulRang(BLOECKE[lauf[lauf.length - 1]].kw) > 1) abschliessen(false);
+        lauf.push(k);
+        if (n === wochen.length - 1) abschliessen(true);
+    });
+    return seiten;
+}
+let akSeiten = [];
 function aufgabenPanel(auf, sofort = false) {
     let o = akOverlay;
     clearTimeout(akWeg);
@@ -525,33 +554,50 @@ function aufgabenPanel(auf, sofort = false) {
         wv.setAttribute('aria-labelledby', wvTab.id);
         tabs.appendChild(wvTab);
         buehne.appendChild(wv);
-        BLOECKE.forEach((blk, k) => {
+        akSeiten = aufgabenSeiten();
+        akSeiten.forEach((s, k) => {
             const tab = document.createElement('button');
             tab.type = 'button';
             tab.className = 'ak-tab';
             tab.id = 'ak-tab-' + k;
-            // Doc, 01.10.: "Die Überschriften weniger Text Level # weg" - "Level 2 · mittelschwer" is "mittelschwer"
-            // on its tab; the title itself stays (the board's counter, Solita and the collections read it)
-            tab.textContent = blk.titel.replace(/^Level \d+ · /, '');
+            tab.textContent = s.titel;
+            tab.title = s.hinweis;
             tab.setAttribute('role', 'tab');
             tab.setAttribute('aria-controls', 'ak-seite-' + k);
             tab.addEventListener('click', () => aufgabenTab(k));
-            const liste = document.createElement('div');
-            liste.className = 'aufgaben-liste';
-            liste.id = 'ak-seite-' + k;
-            liste.setAttribute('role', 'tabpanel');
-            liste.setAttribute('aria-labelledby', tab.id);
-            for (let i = blk.ab; i < blk.bis; i++) {
-                const b = document.createElement('button');
-                b.type = 'button';
-                b.className = 'aufgabe-karte';
-                b.dataset.i = String(i);
-                b.innerHTML = `<span class="ak-nr">${i - blk.ab + 1}</span><span class="ak-formel"></span>`;
-                b.addEventListener('click', () => { aufgabenPanel(false, true); zeigeAufgabe(i); });     // out first: the board measures
-                liste.appendChild(b);
-            }
+            const seite = document.createElement('div');
+            seite.className = 'ak-seite';
+            seite.id = 'ak-seite-' + k;
+            seite.setAttribute('role', 'tabpanel');
+            seite.setAttribute('aria-labelledby', tab.id);
+            s.bloecke.forEach(n => {
+                const blk = BLOECKE[n];
+                // the block's heading: a week's with its calendar week in front, "KW 44 · Wachstum und Zerfall · ..."
+                const kopf = document.createElement('h3');
+                kopf.className = 'ak-kopf';
+                kopf.id = 'ak-block-' + n;
+                if (blk.kw !== undefined) {
+                    const kw = document.createElement('span');
+                    kw.className = 'ak-kw';
+                    kw.textContent = 'KW ' + blk.kw;
+                    kopf.append(kw, ' · ');
+                }
+                kopf.append(blk.titel);
+                const liste = document.createElement('div');
+                liste.className = 'aufgaben-liste';
+                for (let i = blk.ab; i < blk.bis; i++) {
+                    const b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'aufgabe-karte';
+                    b.dataset.i = String(i);
+                    b.innerHTML = `<span class="ak-nr">${i - blk.ab + 1}</span><span class="ak-formel"></span>`;
+                    b.addEventListener('click', () => { aufgabenPanel(false, true); zeigeAufgabe(i); });     // out first: the board measures
+                    liste.appendChild(b);
+                }
+                seite.append(kopf, liste);
+            });
             tabs.appendChild(tab);
-            buehne.appendChild(liste);
+            buehne.appendChild(seite);
         });
         akOverlay = o;
     }
@@ -583,7 +629,11 @@ function aufgabenPanel(auf, sofort = false) {
         if (document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(() => aufgabenEinpassen(o));
     }
     o.querySelectorAll('.aufgabe-karte').forEach(b => b.classList.toggle('aktuell', +b.dataset.i === aufgabeIdx));
-    aufgabenTab(BLOECKE.indexOf(aufgabenBlock(aufgabeIdx)));      // it opens at the block of the task on the board
+    // it opens at the block of the task on the board: on that block's page, scrolled to its heading
+    const n = BLOECKE.indexOf(aufgabenBlock(aufgabeIdx));
+    aufgabenTab(Math.max(0, akSeiten.findIndex(s => s.bloecke.indexOf(n) >= 0)));
+    const kopf = o.querySelector('#ak-block-' + n);
+    if (kopf) o.querySelector('.ak-buehne').scrollTop = kopf.offsetTop - 2;          // the stage scrolls, the tabs stay
     requestAnimationFrame(() => { if (o.dataset.auf) o.classList.add('open'); });      // not when closed before the frame
     wiedervorlageLaden(o);                                        // the history comes after: the table and the tiles' counts
 }
@@ -591,7 +641,7 @@ function aufgabenPanel(auf, sofort = false) {
 // formula shrinks to its tile as passeEin does, basis 1.3rem); the stage keeps the tallest page's height
 function aufgabenEinpassen(o) {
     if (!o.isConnected) { o.dataset.mass = ''; return; }          // closed meanwhile: fitted at the next opening
-    const seiten = [...o.querySelectorAll('.aufgaben-liste')], buehne = o.querySelector('.ak-buehne');
+    const seiten = [...o.querySelectorAll('.ak-seite')], buehne = o.querySelector('.ak-buehne');
     const versteckt = seiten.map(s => s.hidden);
     const karten = [...o.querySelectorAll('.aufgabe-karte')], formeln = karten.map(b => b.querySelector('.ak-formel'));
     seiten.forEach(s => { s.hidden = false; });
@@ -599,7 +649,12 @@ function aufgabenEinpassen(o) {
     formeln.forEach(f => { f.style.fontSize = ''; });
     const masse = karten.map((b, n) => [b.clientWidth - 24, formeln[n].getBoundingClientRect().width]);
     masse.forEach(([frei, breit], n) => { if (frei > 0 && breit > frei) formeln[n].style.fontSize = (1.3 * frei / breit).toFixed(3) + 'rem'; });
-    buehne.style.minHeight = Math.max(...seiten.map(s => s.offsetHeight)) + 'px';
+    // a page of 13 weeks is far taller than the screen: the stage keeps the tallest page's height only up to what the
+    // modal shows at most (92vh, ui.js), so a short page does not scroll into empty space
+    const modal = o.querySelector('.cyber-modal'), stil = getComputedStyle(modal);
+    const rand = parseFloat(stil.paddingTop) + parseFloat(stil.paddingBottom) + parseFloat(stil.borderTopWidth) +
+        parseFloat(stil.borderBottomWidth) + o.querySelector('.ak-tabs').offsetHeight + 16;     // the tabs' margin below
+    buehne.style.minHeight = Math.min(Math.max(...seiten.map(s => s.offsetHeight)), innerHeight * 0.92 - rand) + 'px';
     seiten.forEach((s, n) => { s.hidden = versteckt[n]; });
 }
 // one tab of the panel: its page shows, the others hide; ← → step through them while the panel is open.
@@ -607,7 +662,7 @@ function aufgabenEinpassen(o) {
 function aufgabenTab(k) {
     const o = akOverlay;
     if (!o || !o.isConnected) return;
-    k = Math.max(-1, Math.min(BLOECKE.length - 1, k));
+    k = Math.max(-1, Math.min(akSeiten.length - 1, k));
     o.dataset.tab = String(k);
     o.querySelectorAll('.ak-tab').forEach((t, j) => {
         const an = j === k + 1;
@@ -616,8 +671,8 @@ function aufgabenTab(k) {
         t.tabIndex = an ? 0 : -1;
     });
     o.querySelector('.ak-wv').hidden = k !== -1;
-    o.querySelectorAll('.aufgaben-liste').forEach((s, j) => { s.hidden = j !== k; });
-    o.querySelector('.cyber-modal').scrollTop = 0;
+    o.querySelectorAll('.ak-seite').forEach((s, j) => { s.hidden = j !== k; });
+    o.querySelector('.ak-buehne').scrollTop = 0;
     o.querySelector(k === -1 ? '#ak-tab-wv' : '#ak-tab-' + k).scrollIntoView({ block: 'nearest', inline: 'nearest' });
     if (k === -1) wiedervorlageEinpassen(o);
 }
@@ -640,6 +695,10 @@ function gradFarbe(g) {
     const mix = (a, b, u) => a.map((v, i) => Math.round(v + (b[i] - v) * u));
     return 'rgb(' + (g <= 0.5 ? mix(ROT, ORANGE, g * 2) : mix(ORANGE, GRUEN, (g - 0.5) * 2)).join(', ') + ')';
 }
+// Doc, 02.10.2026: the number of "nicht verstanden" in the table as a pill in its colour - "alles, was über 20 ist, ist
+// rot": green for a single question, orange at 10, red from 20 on, the same three colours as the Verstandengrad
+const WV_ROT_AB = 20;
+function anzahlFarbe(n) { return gradFarbe(1 - Math.min(n, WV_ROT_AB) / WV_ROT_AB); }
 async function wiedervorlageLaden(o) {
     const seite = o.querySelector('.ak-wv');
     if (!wvDaten) seite.innerHTML = '<p class="wv-hinweis">Lade das Feedback …</p>';
@@ -683,14 +742,19 @@ function wiedervorlageTabelle(o) {
             b.className = 'wv-spalte wv-s-' + s;
             b.setAttribute('role', 'columnheader');
             if (s === spalte) b.setAttribute('aria-sort', auf ? 'ascending' : 'descending');
-            b.innerHTML = '<span class="wv-lang"></span><span class="wv-kurz"></span>' + (s === spalte
-                ? '<svg viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="' + (auf ? 'M1.5 7 L5 3 L8.5 7' : 'M1.5 3 L5 7 L8.5 3') +
-                  '" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '');
+            // Doc, 02.10.2026: "Mach bitte, dass ich nach nicht verstanden, verstanden auch sortieren kann" - every head
+            // sorted already, but only the active one showed it. Then: "die Pfeile sind zu klein ... mach daraus bitte
+            // ein Dreieck. Und bei den anderen auch ein Dreieck und nur eins" - one filled triangle on every head: up
+            // ascending, down descending; pale on the others, pointing the way their first tap sorts
+            const hoch = s === spalte ? auf : s === 'grad' || s === 'aufgabe';
+            b.innerHTML = '<span class="wv-lang"></span><span class="wv-kurz"></span>' +
+                '<svg class="wv-dreieck' + (s === spalte ? '' : ' wv-sortierbar') + '" viewBox="0 0 12 10" aria-hidden="true" ' +
+                'focusable="false"><path d="' + (hoch ? 'M1 9 L6 1 L11 9 Z' : 'M1 1 L6 9 L11 1 Z') + '" fill="currentColor"/></svg>';
             b.children[0].textContent = lang;
             if (kurz.startsWith('<svg')) b.children[1].innerHTML = kurz; else b.children[1].textContent = kurz;
             // a column tapped again turns round; a new one starts with what matters: few understood, many questions, the newest
             b.addEventListener('click', () => {
-                wvSortierung = s === spalte ? { spalte, auf: !auf } : { spalte: s, auf: s === 'grad' || s === 'aufgabe' };
+                wvSortierung = s === spalte ? { spalte, auf: !auf } : { spalte: s, auf: hoch };
                 wiedervorlageTabelle(o);
             });
             kopf.appendChild(b);
@@ -720,7 +784,11 @@ function wiedervorlageTabelle(o) {
                 try { katex.render(alsDisplay(hebeVariable(latex, nach, farbe)), f, { throwOnError: false }); }
                 catch (e) { f.textContent = latex; }
             }
-            b.querySelector('.wv-nicht').textContent = String(z.nicht);
+            const pille = document.createElement('span');
+            pille.className = 'wv-pille';
+            pille.textContent = String(z.nicht);
+            pille.style.background = anzahlFarbe(z.nicht);
+            b.querySelector('.wv-nicht').appendChild(pille);
             b.querySelector('.wv-verstanden').textContent = String(z.verstanden);
             const balken = b.querySelector('.wv-balken i');
             balken.style.width = Math.round(z.grad * 100) + '%';
@@ -769,6 +837,13 @@ function wiedervorlageEinpassen(o) {
     formeln.forEach(f => { f.style.fontSize = ''; });
     const masse = formeln.map(f => [f.parentElement.clientWidth, f.getBoundingClientRect().width]);
     masse.forEach(([frei, breit], n) => { if (frei > 0 && breit > frei) formeln[n].style.fontSize = (1.15 * frei / breit).toFixed(3) + 'rem'; });
+    // Doc, 02.10.2026: "mach bitte die Boxen alle gleich groß. Also so groß wie die größte. Sonst springt das" - a row
+    // with a fraction stood taller than one without, and a new sorting moved every row below it; now every row is as
+    // tall as the tallest (measured once the formulas are fitted)
+    const zeilen = [...seite.querySelectorAll('.wv-zeile')];
+    zeilen.forEach(z => { z.style.minHeight = ''; });
+    const hoehe = Math.max(0, ...zeilen.map(z => z.offsetHeight));
+    zeilen.forEach(z => { z.style.minHeight = hoehe + 'px'; });
 }
 // Doc, 26.09.: "left arrow key & right arrow key" - the arrow keys step like
 // ◀ ▶. A tapped button, slider or radio keeps the focus: it lets go first, so
