@@ -28,19 +28,10 @@ window.svpPlanParts.push(function (P) {
             line.appendChild(document.createTextNode(' ' + part[1] + (n < ref.talk.length - 1 ? '   ' : '')));
         });
         box.title = line.textContent.trim();
-        if (ref.talkTicker) {
-            /* ticker: the line twice in a row, moved left by one copy (-50 %) and
-               started again - seamless; the speed follows the length */
-            box.classList.add('ticker');
-            const run = document.createElement('span');
-            run.className = 'sub-talk-run';
-            run.appendChild(line);
-            run.appendChild(line.cloneNode(true));
-            run.style.animationDuration = Math.max(10, Math.round(line.textContent.length / 5)) + 's';
-            box.appendChild(run);
-        } else {
-            box.appendChild(line);
-        }
+        /* Doc, 02.10.2026: the ticker for a week with more than one talk (built for FOS 12, 18.09.2026) is gone - "das
+           ist zu aufgeregt. Bitte rausnehmen". The line stands still; what does not fit ends in "…", the title holds
+           all of it. */
+        box.appendChild(line);
         head.classList.add('has-talk');
         head.appendChild(box);
     }
@@ -67,10 +58,14 @@ window.svpPlanParts.push(function (P) {
         /* per-group dates (FOS 12): the groups are the keys of that object, and a
            group's order is filed under its key; ?g= shows only that group */
         const perGroup = def.dates && !Array.isArray(def.dates);
-        const klassen = (perGroup
+        const alle = perGroup
             ? Object.keys(def.dates).map(function (g) { return [g, g.replace(/_/g, ' + ')]; })
-            : (def.klassen || [['a', '']]))
-            .filter(function (k) { return !perGroup || !P.GROUP || P.groupKey(k[0]) === P.GROUP_KEY; });
+            : (def.klassen || [['a', '']]);
+        /* ?g= shows one Lerngruppe: its talks alone - by the group key (FOS 12) or by the class name (informatik9:
+           "9b"; Doc, 02.10.2026: "Warum steht jetzt bei der 9b die Vorträge der 9a auch drin?"). A plan whose one list
+           serves all its classes (inf11) matches no name and keeps it. */
+        const passend = P.GROUP ? alle.filter(function (k) { return P.groupKey(perGroup ? k[0] : k[1]) === P.GROUP_KEY; }) : alle;
+        const klassen = passend.length || perGroup ? passend : alle;
         const base = '/svp/vortraege/' + key;
         const metaPages = klassen.map(function (k) { return base + '/' + k[0]; }).concat(
             klassen.filter(function (k) { return k[1]; }).map(function (k) { return base + '/' + String(k[1]).replace(/[^A-Za-z0-9-]+/g, '_'); }));
@@ -141,13 +136,12 @@ window.svpPlanParts.push(function (P) {
             if (!g || !ref.ensureSubRow) return;
             const labels = Object.keys(g);
             const texts = labels.map(function (l) { return g[l].join(' · '); });
-            /* the same talk in every Lerngruppe: one line without the group */
-            ref.talk = texts.every(function (t) { return t === texts[0]; })
+            /* the same talk in every Lerngruppe: one line without the group. Every one of them must have it - a week
+               with a talk in 9a alone read as both groups' talk (Doc, 02.10.2026, after 9b moved to KW 46: "Big Data und
+               Empfehlungsalgorithmen sind noch da oben") */
+            ref.talk = labels.length === klassen.length && texts.every(function (t) { return t === texts[0]; })
                 ? [['Vortrag', texts[0]]]
                 : labels.map(function (l, n) { return [(n ? '' : 'Vortrag ') + l, texts[n]]; });
-            /* Doc, 18.09.2026: more than one talk in the week (inf11: two per day, FOS 12:
-               two per group) - "laufbandmaessig durchlaufen" */
-            ref.talkTicker = labels.some(function (l) { return g[l].length > 1; }) || ref.talk.length > 1;
             ref.ensureSubRow();
             paintTalk(ref);
         });
