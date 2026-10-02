@@ -902,12 +902,27 @@ window.svpPlanParts.push(function (P) {
         else openMatWindow(url);
     }
 
+    /* Doc, 02.10.2026: "in dem Tooltip wird noch Bezug genommen auf die alte PowerPoint ... da was Sinnvolles
+       reinschreiben" - a deck pill said "Derselbe Foliensatz als Webseite: Pfeiltasten zum Blättern." and meant the
+       PowerPoint pill next to it, hidden from the plan since KW 40 (pptWeg). Such a deck shows its twin's own
+       description instead: the pill of the same label in the same week (all 173 have one, counted in the stored plans
+       on 02.10.2026). Only what is shown changes; the week's stored text stays as it is. */
+    const ZWILLING_VERWEIS = /^Derselbe Foliensatz\b/;
+    function matTipText(en, alle) {
+        if (!en.desc || !ZWILLING_VERWEIS.test(en.desc)) return en.desc || '';
+        const zwilling = alle.find(function (x) {
+            return x !== en && x.label === en.label && x.desc && !ZWILLING_VERWEIS.test(x.desc);
+        });
+        return zwilling ? zwilling.desc : 'Der Foliensatz im Browser – mit den Pfeiltasten blättern.';
+    }
+
     function renderMaterial(el, text, ref, skip) {
         text = text == null ? '' : String(text).trim();
         el.dataset.src = text;
         el.textContent = '';
         const entries = P.parseMat(text);
         if (!entries.length) { el.textContent = text; return; }
+        entries.forEach(function (en) { en.tip = matTipText(en, entries); });   /* what the tooltip says (matTipText) */
         entries.sort(function (a, b) { return matRang(a) - matRang(b); });
         entries.forEach(function (en) {
             if (skip && skip(en)) return;   /* drawn elsewhere (Aufgaben-Pille) */
@@ -933,7 +948,7 @@ window.svpPlanParts.push(function (P) {
                 a.appendChild(drawnIcon('mat-ico-drawn mat-ico-upload', UPLOAD_PATH, 'currentColor', 2));
                 a.appendChild(matLabelEl(label));
                 if (/\/:f:\//.test(en.url)) { a.dataset.uploadUrl = en.url; zeigeUploadZahl(a); }   /* "Upload · 6" */
-                if (en.desc) wireMatTip(a, en.desc);
+                if (en.tip) wireMatTip(a, en.tip);
                 /* Dasselbe ✕ wie an jeder Pille - eigener Wrapper, damit der
                    Knopf im Bearbeiten-Modus genauso entfernbar ist. */
                 if (ref && P.CAN_EDIT_MAT) {
@@ -976,7 +991,7 @@ window.svpPlanParts.push(function (P) {
                 e.preventDefault();
                 openMat(en.url, label);
             });
-            if (en.desc) wireMatTip(a, en.desc); /* pretty tooltip, no raw URL */
+            if (en.tip) wireMatTip(a, en.tip); /* pretty tooltip, no raw URL */
             else a.title = en.url;
             /* Owner: every pill carries its own ✕. Deliberately NOT tied to
                the edit mode — there the cell holds the raw text, and hunting

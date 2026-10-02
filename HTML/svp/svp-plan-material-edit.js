@@ -553,10 +553,11 @@ window.svpPlanParts.push(function (P) {
                 if (timer) { clearTimeout(timer); timer = null; }
                 if (moved) return;
                 if (fired) { e.preventDefault(); return; }       /* long press handled */
-                if (!en.desc) return;                            /* short tap: navigate */
+                const tip = en.tip != null ? en.tip : en.desc;   /* what the tooltip says (matTipText, svp-plan-material.js) */
+                if (!tip) return;                                /* short tap: navigate */
                 e.preventDefault();                              /* short tap: tooltip */
                 if (P.matTip && P.matTip.dataset.for === en.url) P.hideMatTip();
-                else P.showMatTip(a, en.desc, en.url);
+                else P.showMatTip(a, tip, en.url);
             });
         });
     }
