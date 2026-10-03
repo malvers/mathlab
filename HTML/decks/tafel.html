@@ -727,23 +727,28 @@
   }
   /* Slides in front of the tasks, right after the title (Doc, 02.10.2026: Marilyn vos Savant and the Ziegenproblem,
      "das Deck zum Vorrechnen ... machs da AUCH rein"): a file under vorspann/ holds the <section>s - the same ones
-     the plain decks carry - and this list says which boards show it: a collection (?aufgaben=...) or a week (?kw=...) */
+     the plain decks carry - and this list says which boards show it: a collection (?aufgaben=...) or a week (?kw=...).
+     A board may show several files, in the order of the list (Doc, 03.10.2026: "The Calculus of Life" for Monday). */
   const VORSPANN = [
     { aufgaben: 'einmaleins', datei: 'vorspann/vos-savant.html' },   // Info 9, KW 40
     { kw: '41', datei: 'vorspann/vos-savant.html' },                 // Mathe 11, KW 41
+    { kw: '41', datei: 'vorspann/calculus-of-life.html' },           // Mathe 11, KW 41
   ];
   async function vorspann() {
-    const v = VORSPANN.find(function (e) {
+    const passend = VORSPANN.filter(function (e) {
       return e.aufgaben ? String(params.get('aufgaben') || '').toLowerCase() === e.aufgaben : params.get('kw') === e.kw;
     });
-    if (!v) return [];
-    try {
-      const res = await fetch(v.datei, { cache: 'no-cache' });
-      if (!res.ok) return [];
-      const t = document.createElement('template');
-      t.innerHTML = await res.text();
-      return [...t.content.querySelectorAll('section.slide')];
-    } catch (e) { return []; }   // without it the board still comes
+    const folien = [];
+    for (const v of passend) {
+      try {
+        const res = await fetch(v.datei, { cache: 'no-cache' });
+        if (!res.ok) continue;
+        const t = document.createElement('template');
+        t.innerHTML = await res.text();
+        folien.push(...t.content.querySelectorAll('section.slide'));
+      } catch (e) { /* without it the board still comes */ }
+    }
+    return folien;
   }
   /* A task's explanation without its setting: aufgabenTexte (js/vorrechnen-aufgaben.js) puts the task's text in front
      of it for the lab's box, and that text stands on the task's slide already - a task with nothing but its text has
