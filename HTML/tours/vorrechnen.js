@@ -93,7 +93,8 @@
     CyberTour.define({
         id: 'vorrechnen',
         title: 'Vorrechnen',
-        card: { title: 'Vorrechnen', sub: 'Die Klasse sagt, wo es hakt – anonym, Zeile für Zeile' },
+        // the stage as a still behind the title (Drehbuch scene 1) - also the link preview (tools/og-preview shoots the card)
+        card: { title: 'Vorrechnen', sub: 'Die Klasse sagt, wo es hakt – anonym, Zeile für Zeile', img: '../resources/tour-vorrechnen.jpg' },
 
         async prepare(t) {
             // The pages' storage: their own, in memory, seeded here (js/tour-hook.js -> storageFor) - online the tour runs
@@ -112,6 +113,7 @@
                 'vorrechnen-hell': hell ? '1' : '0', dev_access: 'tour', solita_tts: '0',
             } });
             t.card(true);
+            t.cardImage(true, false);
             t.caption('', '');
             t.float(false);
             await Promise.all([t.load('board', BOARD), t.load('control', BOARD + '&steuerung')]);
@@ -136,6 +138,7 @@
                     t.caption('', '');
                     await t.at(L(t, 4) + 0.6);               /* "Diese Tour zeigt ...": the stage comes up */
                     t.card(false);
+                    t.cardImage(false, false);
                     await t.rest();
                 },
             },
@@ -373,6 +376,7 @@
                     t.hideCursor();
                     await t.at(L(t, 1) + 0.4);
                     t.card(true);                                                                  /* back to the title card */
+                    t.cardImage(true, true);
                     await t.rest();
                 },
             },
