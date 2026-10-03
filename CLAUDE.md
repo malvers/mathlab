@@ -15,7 +15,6 @@ A few ground rules:
 7. Please always (!!!) use central layouts.
 8. Always use Orbitron unless I ask for something else; LaTeX if applicable.
 9. All filenames are lowercase (e.g. mandelbrot.html)
-10. Never open Chrome without asking me first!
 11. NEVER TRANSLATE: "Doc Alvers Mathe-Labor"
 12. NA = nur antworten, SS = screen shot, KÄ = keine Änderung nach bugfix durch den Agnten
 13. @Agent: Diese Datei bei größeren Aufgaben oder wenn der Kontext lang wird noch einmal lesen — damit die Regeln nicht „aus dem Fenster“ fallen.
