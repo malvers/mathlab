@@ -191,6 +191,9 @@ async function erkenneFlug(f) {
 function rechenwegHoch() {
     const zeilen = analysis.lines.filter(l => !zuKlein(l));
     if (!zeilen.length) return;
+    // ?aufnahme: the lines with their strokes, for the tour (js/vorrechnen-aufnahme.js) - guarded, so a cached page
+    // without that script (Pages: the HTML and the scripts can come from different hours) still sends lines up
+    if (typeof aufnahmeZeilen === 'function') aufnahmeZeilen(zeilen);
     verlaufZurueck();
     merkeVerlauf();
     // Doc, 25.09.: "wenn ich mit zwei Fingern nach oben schiebe, die

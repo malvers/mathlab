@@ -801,3 +801,42 @@ html.natur body.anzeige:has(> #canvas-container.hell)::before {
 body.anzeige #solita-schicht .vs-knopf, body.anzeige #solita-schicht .sf-row button { display: none; }
 body.anzeige #solita-schicht .vs-karte { left: 0; right: 0; margin: 0 auto; pointer-events: none; }
 body.anzeige #solita-schicht:has(.vs-knopf[aria-expanded="true"]) .vs-karte { display: flex; }
+
+/* ?aufnahme: the recording bar (js/vorrechnen-aufnahme.js) - top right under the head line, left of the rail, where
+   it covers neither the head nor the task; outside the board, so never on the beamer */
+#aufnahme-leiste {
+    position: fixed;
+    top: 112px;
+    right: 64px;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px 6px 14px;
+    background: rgba(5, 14, 28, 0.92);
+    border: 1px solid rgba(176, 36, 24, 0.7);
+    border-radius: 999px;
+    font-family: Orbitron, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: #eaf0f7;
+}
+#aufnahme-leiste .an-punkt {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgb(176, 36, 24);
+    animation: an-puls 1.6s ease-in-out infinite;
+}
+@keyframes an-puls { 50% { opacity: 0.35; } }
+#aufnahme-leiste button {
+    font: inherit;
+    color: #eaf0f7;
+    background: #0c1c3a;
+    border: 1px solid rgba(0, 210, 255, 0.45);
+    border-radius: 999px;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+#aufnahme-leiste button:disabled { opacity: 0.4; cursor: default; }
+#aufnahme-leiste .an-neu { border-color: rgba(176, 36, 24, 0.7); }
