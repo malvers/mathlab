@@ -58,7 +58,7 @@ export const NARRATION = {
     s8: speak(`Also nochmal erklären. ${b()} Der Doktorhut holt die Erklärung zu dieser Aufgabe, ${b(1500)} ` +
         `erst einmal nur für dich. ${b()} Zieh sie über die Linie, ${b(2000)} dann steht sie auch vorne. ${b()} ` +
         `Der Knopf auf dem Fon ist inzwischen rot: ${b(300)} Drücken, wenn verstanden. ${b(1500)} ` +
-        `Und die Zahl geht wieder runter. ${b(1500)} Wenn sie runtergeht, ${b(300)} war die Erklärung gut.`),
+        `Und die Zahl geht wieder runter. ${b(1500)} Wenn sie runtergeht, ${b(300)} war die Erklärung hilfreich.`),
 
     // 9 · the rectangle: the task panel, then five steps sent up by the arrow
     s9: speak(`Jetzt eine echte Aufgabe. ${b()} Unter Aufgaben liegen alle Blöcke des Schuljahres, ${b(300)} ` +
