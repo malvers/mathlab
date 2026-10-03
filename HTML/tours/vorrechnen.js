@@ -348,7 +348,12 @@
                     backend().understood(c);
                     await t.wait(300);
                     backend().understood(c);
-                    await schreibe(t, L(t, 14) + 1.2, 1);                                          /* "und es geht weiter" */
+                    /* her line and her answer go before the pen goes on (Doc, 03.10.2026: "die Antwort und die Fragebox von
+                       ihr steht da, wenn die Aufgabe mit Stift vorgerechnet wird ... wieder wegmachen") - as Esc closes it;
+                       a tap on her picture would switch to Doc */
+                    await t.at(L(t, 14) - 0.3);                                                    /* "und es geht weiter" */
+                    ev(t, 'control', () => solitaOffen(false));
+                    await schreibe(t, L(t, 14) + 1.2, 1);
                     await hoch(t, L(t, 15) + 0.2);                                                 /* "Zehn hoch zehn ..." */
                     await schreibe(t, L(t, 15) + 1.4, 2);
                     await hoch(t, L(t, 16) - 0.2);                                                 /* "ist zehn." */
