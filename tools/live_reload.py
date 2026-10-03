@@ -17,6 +17,7 @@ DECKS = os.path.join(HTML_DIR, "decks")
 # what a page loads itself: <script src>, <link href> (only .css counts below), and ES module imports in the page
 REFS = re.compile(r'<script\b[^>]*\bsrc="([^"#?]+)"|<link\b[^>]*\bhref="([^"#?]+)"|\bfrom\s+[\'"]([^\'"#?]+\.m?js)[\'"]', re.I)
 WATCHED = (".js", ".mjs", ".css")
+VORSPANN = re.compile(r"\bvorspann/[a-z0-9_-]+\.html")
 
 
 def _local(ref, base):
@@ -47,6 +48,8 @@ def files_for(page):
             out.append(p)
     if base == DECKS:                                 # serve.py injects the editor into decks - not in the file
         out += [os.path.join(DECKS, f) for f in ("deck-edit.js", "deck-image.js", "deck-label.js")]
+        # slides a deck fills from a file of their own (deck.js data-aus, tafel.html VORSPANN): that file changed is the deck changed
+        out += [p for p in (os.path.join(DECKS, f) for f in sorted(set(VORSPANN.findall(text)))) if os.path.isfile(p)]
     return out
 
 

@@ -28,7 +28,7 @@
     '#nav #nav-live{background:rgb(121,158,49);color:#fff}',
     '#nav #nav-live[hidden]{display:none}',
     '#nav #nav-live:disabled{opacity:.55;cursor:progress}',
-    'html.deck-edit .slide .step{opacity:1!important}',
+    'html.deck-edit .slide .step{opacity:1!important;filter:none!important}',
     /* thin and grey: the frames say where a text is, they are not the thing to look at
        (Doc, 22.09.2026: "alle Linien duenner und gray") - the deck's own muted blue-grey, never black */
     'html.deck-edit [data-ed]{cursor:text;outline:.5px dashed rgba(110,126,159,.5);outline-offset:3px}',
@@ -393,6 +393,7 @@
         document.querySelectorAll('[data-ed]').forEach(function (el) { el.removeAttribute('data-ed'); });
         let skipped = 0;
         slides.forEach(function (sl, i) {
+          if (sl.hasAttribute('data-aus')) return;   // filled from its own file (deck.js): its text is edited there
           const els = sl.querySelectorAll(m.selector), src = m.slides[i];
           if (els.length !== src.length) { skipped++; return; }   // counted differently: leave this slide alone
           els.forEach(function (el, n) {

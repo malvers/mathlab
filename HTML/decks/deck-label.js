@@ -100,7 +100,7 @@
   addEventListener('pointerdown', function (e) {
     if (!E.on() || e.button !== 0 || !e.target.closest) return;
     const handle = e.target.closest('#lbl-box [data-c]');
-    const el = handle ? sel : e.target.closest('#deck .slide.on .pic p.fl');
+    const el = handle ? sel : e.target.closest('#deck .slide.on:not([data-aus]) .pic p.fl');   // data-aus: from its own file
     if (!el) {
       if (sel && e.target.closest('#deck')) unselect();
       return;

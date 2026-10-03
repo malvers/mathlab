@@ -215,6 +215,7 @@
 
   function insert(file, cx, cy) {
     const slide = slides[si], i = si;
+    if (slide.hasAttribute('data-aus')) { E.msg('Diese Folie kommt aus ' + slide.getAttribute('data-aus').split('#')[0] + ' – dort ändern'); return; }
     E.msg('Bild wird eingefügt …');
     prepare(file)
       .then(function (p) {
@@ -280,7 +281,7 @@
   addEventListener('pointerdown', function (e) {
     if (!E.on() || e.button !== 0 || !e.target.closest) return;
     const handle = e.target.closest('#pic-box [data-c]');
-    const img = handle ? sel : e.target.closest('#deck .slide.on img:not(.greet-pic)');
+    const img = handle ? sel : e.target.closest('#deck .slide.on:not([data-aus]) img:not(.greet-pic)');   // data-aus: from its own file
     if (!img) {
       if (sel && e.target.closest('#deck')) unselect();
       return;

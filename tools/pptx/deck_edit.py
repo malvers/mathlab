@@ -518,14 +518,27 @@ LEAKS = re.compile(r"sk-ant-[\w-]{10,}|sk-[A-Za-z0-9]{20,}|gh[pousr]_[A-Za-z0-9]
                    r"|-----BEGIN [A-Z ]*PRIVATE KEY-----|eyJ[\w-]{15,}\.[\w-]{15,}\.[\w-]{10,}")
 
 
-def _assets(page, base):
-    """Pictures the deck points to (img/..., morning/...) that origin/main does not have yet."""
+AUS = re.compile(r'\bdata-aus="([^"#?:]+\.html)')    # a slide filled from a file of its own (deck.js)
+
+
+def _assets(page, base, own=True):
+    """Pictures the deck points to (img/..., morning/...) that origin/main does not have yet - and the files its stubs
+    fill slides from (data-aus, vorspann/...) when main lacks them, with the pictures those point to."""
     out = []
+    for ref in sorted(set(AUS.findall(page))) if own else ():   # one level: such a file holds no stubs
+        rel = os.path.normpath("HTML/decks/" + ref)
+        if not (rel.startswith("HTML/decks/") and os.path.isfile(os.path.join(REPO, rel))):
+            continue
+        if not _blob_at(base, rel):
+            out.append(rel)
+        with open(os.path.join(REPO, rel), encoding="utf-8") as f:
+            out += [p for p in _assets(f.read(), base, False) if p not in out]   # written for the deck's folder too
     for ref in sorted(set(re.findall(r'(?:src|href)="([^"#?:]+)"', page))):
         if ref.startswith(("/", "../")) or ref.endswith((".html", ".js", ".css")):
             continue
         rel = os.path.normpath("HTML/decks/" + ref)
-        if rel.startswith("HTML/decks/") and os.path.isfile(os.path.join(REPO, rel)) and not _blob_at(base, rel):
+        if rel.startswith("HTML/decks/") and os.path.isfile(os.path.join(REPO, rel)) and not _blob_at(base, rel) \
+                and rel not in out:
             out.append(rel)
     return out
 

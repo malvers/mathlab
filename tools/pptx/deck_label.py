@@ -17,7 +17,8 @@ import sys
 from urllib.parse import urlsplit
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-LABEL = re.compile(r'<p class="fl" style="([^"]*)">')
+# a label that comes with a click carries its step classes and group too (class="fl step ghost" data-g="1", ziegen_svg.py)
+LABEL = re.compile(r'<p class="(fl(?: [^"]*)?)"((?: data-g="\d+")?) style="([^"]*)">')
 
 
 def _edit():
@@ -55,9 +56,9 @@ def move(q):
         if not 0 <= n < len(found):
             return 409, {"error": "Diese Beschriftung gibt es in der Datei nicht (mehr) – bitte neu laden."}
         m = found[n]
-        if m.group(1) != q["old"]:
+        if m.group(3) != q["old"]:
             return 409, {"error": "Die Beschriftung wurde inzwischen verändert – bitte neu laden."}
-        body = body[:m.start()] + '<p class="fl" style="%s">' % style + body[m.end():]
+        body = body[:m.start()] + '<p class="%s"%s style="%s">' % (m.group(1), m.group(2), style) + body[m.end():]
         e._write(deck, page[:a] + body + page[b:], gen, what="Beschriftung verschoben")   # "Rückgängig: ..."
     return 200, {"style": style, "mtime": e._mtime(deck), "pending": e.pending(deck)}
 

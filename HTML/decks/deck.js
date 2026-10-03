@@ -9,6 +9,44 @@
   if (el) el.textContent = t;
 })();
 
+/* A slide that lives in a file of its own and is shown by several decks: the deck holds an empty stub,
+   <section class="slide" data-aus="vorspann/vos-savant.html#2"></section> (the 2nd slide of that file), and the stub is
+   filled from there when the deck opens - changed in one place, the same in every deck (Doc, 03.10.2026: "die macht man an
+   einer Stelle und dann ist die überall so"). The Tafel deck reads the same files (tafel.html, VORSPANN). The stub keeps
+   its place and its own classes (skip), so moving and hiding it stay the deck's business; its text is edited in the file.
+   Synchronous on purpose: everything below takes the slides as they stand, and deck-edit.js and the others share its
+   globals - a fill that came later would find the deck already counted. */
+(function () {
+  const files = {};
+  document.querySelectorAll('section.slide[data-aus]').forEach(function (stub) {
+    const ref = stub.getAttribute('data-aus').split('#'), file = ref[0], nr = +ref[1] || 1;
+    if (!(file in files)) {
+      files[file] = [];
+      try {
+        const x = new XMLHttpRequest();
+        x.open('GET', file, false);
+        x.setRequestHeader('Cache-Control', 'no-cache');        // a changed file shows at once, not after the cache
+        x.send();
+        if (x.status === 200) {
+          const t = document.createElement('template');
+          t.innerHTML = x.responseText;
+          files[file] = [...t.content.querySelectorAll('section.slide')];
+        }
+      } catch (e) { /* the stub says so below */ }
+    }
+    const src = files[file][nr - 1], own = [...stub.classList];
+    if (!src) {
+      stub.className = 'slide content';
+      stub.innerHTML = '<h3>Folie fehlt</h3><div class="rules"></div><div class="body"><p class="line l0">' +
+        file + ' (Folie ' + nr + ') lässt sich nicht laden.</p></div><p class="pageno"></p>';
+    } else {
+      [...src.attributes].forEach(function (a) { if (a.name !== 'data-aus') stub.setAttribute(a.name, a.value); });
+      own.forEach(function (c) { stub.classList.add(c); });
+      stub.innerHTML = src.innerHTML;
+    }
+  });
+})();
+
 const deck = document.getElementById('deck');
 const slides = [...document.querySelectorAll('.slide')];
 let si = 0, step = 0;
