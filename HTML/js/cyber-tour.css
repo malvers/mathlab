@@ -159,6 +159,28 @@ iframe.tour-over.on { opacity: 1; pointer-events: auto; }
 
 .tour-col.phone { flex: 0 0 auto; align-items: flex-start; }
 
+/* a phone floating over the stage, small in a corner until a scene zooms it up (t.float) - Doc, 03.10.2026, for
+   Vorrechnen: "klein ... die Buzzer App, die wir dann kurz groß zoomt ... und dann wieder klein in die Ecke".
+   It is laid out at its BIG size, so its page is zoomed for that size and is sharp when it matters; small is a
+   transform of the finished picture (soft, but nobody reads it there). The corner: --float-x / --float-y. */
+.tour-stage:has(> .tour-phone.float) { container-type: inline-size; }
+.tour-phone.float {
+    position: absolute;
+    z-index: 4;
+    left: var(--float-x, 32px);
+    bottom: var(--float-y, 24px);
+    height: calc(100% - 48px);
+    transform-origin: left bottom;
+    transform: scale(var(--float-small, 0.3));
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45), 0 0 0 100vmax rgba(2, 6, 14, 0);
+    transition: transform 0.9s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.9s;
+}
+/* big: in the middle of the stage, the rest of the stage dimmed behind it */
+.tour-phone.float.big {
+    transform: translateX(calc(50cqw - 50% - var(--float-x, 32px))) translateY(calc(var(--float-y, 24px) - 24px));
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45), 0 0 0 100vmax rgba(2, 6, 14, 0.6);
+}
+
 .tour-screen { position: relative; width: 100%; height: 100%; border-radius: 24px; overflow: hidden; background: #0a1a36; }
 /* the rounded clip lets a light hairline shine through along the corners - thin white arcs over a red lock screen
    (Doc, 19.09.2026: "in den Ecken ... ganz leichte weiße Linien", then "immer noch ... sieht wie ein Fehler aus").

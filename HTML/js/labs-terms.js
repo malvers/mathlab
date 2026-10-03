@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 96 labs, 1702 terms, 2026-09-29
+ * 97 labs, 1719 terms, 2026-10-03
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -22,7 +22,7 @@ const LABS_TERMS = {
     "brahmagupta": ["ABWEICHUNG VON 90°", "ALLE VIER LOTE", "BEWEIS", "BEWEIS (SCHRITT FÜR SCHRITT)", "Bogen", "BRETSCHNEIDER", "DIE ANDERE SEITE", "DIE KETTE", "DIFFERENZ", "ECKEN AUF DEM KREIS", "FLÄCHE (GAUSS)", "FORMEL (FLÄCHE)", "FORMEL VON BRAHMAGUPTA", "GEGENSEITE", "GLEICHE ERGÄNZUNG", "GLEICHSCHENKLIG", "INNENWINKELSATZ", "K (BRAHMAGUPTA)", "KONSTRUKTION", "LÖSUNG ZEIGEN", "M ↔ MITTE", "MESSWERTE", "PERIPHERIEWINKEL", "SATZ (LOT & MITTE)", "SATZ VON BRAHMAGUPTA", "SCHEITELWINKEL", "SCHRITT 1 • PERIPHERIEWINKEL", "SCHRITT 2 • INNENWINKELSATZ", "SCHRITT 3 • GLEICHE ERGÄNZUNG", "SCHRITT 4 • SCHEITELWINKEL", "SCHRITT 5 • DIE KETTE", "SCHRITT 6 • GLEICHSCHENKLIG", "SCHRITT 7 • DIE ANDERE SEITE", "SEITE", "Summe", "Umfang", "VORAUSSETZUNG", "VORAUSSETZUNG & BEHAUPTUNG"],
     "burningship": ["Burning Ship", "Detail", "Fraktal-Explorer", "Iterationen", "NAVIGATION", "Zoom", "Zurücksetzen"],
     "butterfly": ["ANIMATION ENGINE", "Animation zurücksetzen", "Basis-Farbton", "Cos Amp", "Cos Freq", "Exp Amp", "GLOW", "Glow Effekt AN/AUS", "KURVEN-PARAMETER", "MESSWERTE", "SCHMETTERLINGS-LABOR", "Sin Amp", "Sin Div"],
-    "buzzer": ["CODE VON DER TAFEL", "HAB ICH NICHT VERSTANDEN"],
+    "buzzer": ["CODE VON DER TAFEL", "DEIN ANONYMES FEEDBACK", "HAB ICH NICHT VERSTANDEN", "SENDEN", "ZU LANGSAM", "ZU SCHNELL"],
     "cmaes": ["EVOLUTIONSDATEN", "FITNESS", "FLÄCHE", "FLÄCHENOPTIMIERUNG", "GENERATION", "MAX 5000", "OPTIMIERUNG KREIS", "OPTIMIERUNG LINSE", "OPTIMIERUNG: KREIS", "STEP 1", "STEP 10", "UMFANG"],
     "collatz": ["Collatz", "Härtester Start", "Weg ablaufen"],
     "conuslab": ["FORMELN", "ZÜNDEN"],
@@ -88,6 +88,7 @@ const LABS_TERMS = {
     "tour-maya": ["Der Pfeil", "Die zwanzig Ziffern", "Die Zwanziger-Stelle", "Ein leeres Brett", "Eine Zahl eintippen", "Eine Ziffer legen", "Farben", "Hochkant", "Kalender oder rein zwanzig", "Maya-Zahlen", "Übertrag", "Wie viele Stellen", "Würfeln und legen"],
     "tour-mission-control": ["Abgabe", "Der rote Knopf", "Die ganze Klasse im Blick", "Die Klasse als Ganzes", "Die Klasse legt los", "Die Zettel", "Frage für Frage", "Kein Name auf dem Server", "Kurz mal weg", "Offline", "QR scannen"],
     "tour-trigonometrie": ["Das Bogenmaß", "Das rechtwinklige Dreieck", "Der Einheitskreis", "Der Tangens", "Die Ableitung", "Die Kosinuskurve", "Die Sinuskurve", "Gleichungen", "Tageslänge in Dresden", "Trigonometrie", "Vier Parameter", "Vom Dreieck zur Welle", "Zwei Dreiecke"],
+    "tour-vorrechnen": ["Aufwärmen", "Das Fon, ganz nah", "Das Rechteck", "Der Code an der Tafel", "Eins durch null", "Frag Solita", "Kein Name, nur ein Code", "Mit der Hand", "Nochmal erklären", "Vorrechnen", "Wiederholung", "Zu schnell!", "Zwei Bildschirme"],
     "tour-wuerfelspiel": ["Abspann", "An jedes Ende", "Das Paradox nachgerechnet", "Das Rezept", "Der wichtigste Trick", "Der Würfel-Kreis", "Die Lösung", "Die Pfadregel", "Die Sieben schlägt die Sechs", "Die Summenregel", "Eine Fläche, und das Spiel ist fair", "Fehler 1: die halbe Wahrheit", "Fehler 2: Wahrscheinlichkeit fünf", "Fehler 3: der vergessene Weg", "Fehler 4 und 5", "Fünf von neun", "Gleiche Würfel, kein Halbe-halbe", "Jetzt ihr", "Sechs Flächen, nicht drei Zahlen", "Stimmt das wirklich?", "Stufe 1", "Tauschen und Zufall", "Zählen statt raten", "Zwei Stufen", "Zwei Würfel, eine Frage"],
     "tracker": ["Doc Alvers Tracker", "Ohne App tracken", "Samsung-Gerät? So klappt die Installation", "Samsung: App installieren"],
     "transformationen": ["ACHSE SPIEGELN", "HL FIXIEREN", "KONGRUENT", "MESSWERTE", "NICHT KONGRUENT", "PUNKT SPIEGELN", "ROTATION", "SKALIERUNG", "Transformationen", "URBILD (START)"],

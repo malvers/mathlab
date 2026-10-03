@@ -1,0 +1,745 @@
+<!doctype html>
+<!-- Drehbuch "Die Klasse sagt, wo es hakt" - the live tour through Vorrechnen (vorrechnen.html + buzzer.html),
+     its stage in tours/vorrechnen.html. Made from _template.html (see the instructions there). Round 1: plot only -
+     Solita's words come after Doc's release. -->
+
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+
+<style>
+:focus-visible { outline: 2px solid #00d2ff; outline-offset: 2px; }
+</style>
+<title>Vorrechnen — Drehbuch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Outfit:wght@200;300;400;600&display=swap">
+
+<link rel="stylesheet" href="drehbuch.css">
+<style>
+/* Palette and faces are the lab's own (bb84.html): Orbitron + Outfit,
+   deep blue ground, cyan = the image under A, orange/green = the two
+   principal axes. Single-theme on purpose - this is the lab's world. */
+:root {
+    --ground:      #081428;
+    --ground-deep: #050e1c;
+    --surface:     #0c1c3a;
+    --surface-2:   #0e244e;
+    --line:        #1c3565;
+    --line-soft:   #16294d;
+
+    --ink:         #e6eefa;
+    --ink-dim:     #b3c5de;
+    --ink-faint:   #8ba1c0;
+
+    --cyan:        #00d2ff;
+    --lambda:      #f5c242;
+    --phi:         #799e31;
+    --violet:      #c07fe8;
+    --red:         #b02418;
+
+    --step: clamp(0.9rem, 0.55rem + 1.1vw, 1.5rem);
+}
+
+body {
+    margin: 0;
+    background: var(--ground);
+    background-image:
+        radial-gradient(1100px 620px at 12% -8%, #0f2a55 0%, transparent 62%),
+        radial-gradient(900px 520px at 92% 4%, #10203f 0%, transparent 58%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 300;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+em { font-style: italic; color: #eaf2fd; }
+strong { font-weight: 600; color: #f2f7ff; }
+
+/* mathematical symbols, set apart without a formula engine */
+.m {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--cyan);
+    white-space: nowrap;
+}
+.m.l { color: var(--lambda); }
+.m.g { color: var(--phi); }
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--lambda);
+    border: 1px solid #4a3a15;
+    background: #1b1607;
+    border-radius: 2px;
+    padding: 0.34rem 0.7rem;
+    margin-top: 1.1rem;
+}
+.status::before {
+    content: "";
+    width: 5px; height: 5px;
+    background: var(--lambda);
+    border-radius: 50%;
+}
+.meta a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid #05506b; }
+.meta a:hover, .meta a:focus-visible { border-bottom-color: var(--cyan); }
+
+/* ---------- hero canvas + thesis ---------- */
+.thesis {
+    display: grid;
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    gap: clamp(1.2rem, 3vw, 2.6rem);
+    align-items: center;
+    margin: clamp(1.6rem, 4vw, 2.6rem) 0 clamp(2.4rem, 6vw, 4rem);
+    padding: clamp(1.2rem, 3vw, 2rem);
+    background: linear-gradient(160deg, var(--surface) 0%, var(--ground-deep) 100%);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+}
+@media (max-width: 700px) { .thesis { grid-template-columns: 1fr; } }
+
+#stage {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: block;
+    border-radius: 2px;
+    background: #04101f;
+}
+
+.thesis blockquote {
+    margin: 0;
+    font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem);
+    line-height: 1.42;
+    font-weight: 200;
+    color: #eef4fd;
+    text-wrap: balance;
+}
+.head .n {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--cyan);
+}
+.prose strong { color: #eaf2fd; }
+.arc span.key { color: #eef4fd; background: var(--surface-2); }
+.timeline i {
+    position: relative;
+    display: block;
+    border-right: 1px solid var(--ground-deep);
+    background: var(--lambda);
+    font-style: normal;
+    transition: background 0.15s;
+}
+.timeline i.core { background: var(--phi); }
+.timeline i::after {
+    content: attr(data-n);
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #1a1305;
+}
+.timeline i.core::after { color: #0d1a06; }
+.timeline i.cut::after  { color: #ffdcd7; font-weight: 700; }
+
+.scene {
+    display: grid;
+    grid-template-columns: 3.6rem minmax(0, 1fr);
+    gap: 0 1.1rem;
+    padding: 1.4rem 1.55rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--lambda);
+    border-radius: 2px;
+}
+.scene.core { border-left-color: var(--phi); background: linear-gradient(90deg, #16240f 0%, var(--surface) 34%); }
+
+.scene .idx {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--lambda);
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.1rem;
+}
+.scene.core .idx { color: var(--phi); }
+.scene h3 { font-size: 1.16rem; font-weight: 700; letter-spacing: 0.01em; color: #f0f6ff; }
+.tag.core { color: #0d1a06; border-color: var(--phi); background: var(--phi); }
+
+/* what Solita actually says - generated from narration.mjs, never hand-edited */
+.say {
+    margin-top: 1.1rem;
+    padding: 0.95rem 1.2rem;
+    background: #0a1830;
+    border: 1px solid var(--line-soft);
+    border-left: 2px solid var(--cyan);
+    border-radius: 2px;
+}
+.say h4 {
+    margin: 0 0 0.45rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.64rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+.say p {
+    margin: 0;
+    font-size: 1.06rem;
+    line-height: 1.62;
+    color: var(--ink);
+}
+.say .pause {
+    display: inline-block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 500;
+    color: var(--lambda);
+    background: #241c07;
+    border: 1px solid #4a3a15;
+    border-radius: 2px;
+    padding: 0.05rem 0.4rem;
+    margin: 0 0.22rem;
+    vertical-align: 0.08em;
+    white-space: nowrap;
+}
+.say .beat {
+    display: inline-block;
+    width: 0.5em;
+    height: 0.5em;
+    margin: 0 0.1em;
+    background: radial-gradient(circle, var(--cyan) 1.6px, transparent 1.8px);
+    vertical-align: 0.05em;
+    opacity: 0.55;
+}
+.say .spell {
+    border-bottom: 1px dotted var(--ink-faint);
+    letter-spacing: 0.12em;
+}
+
+/* ---------- rules / lists ---------- */
+.rules { display: grid; gap: 0.6rem; counter-reset: r; max-width: 74ch; }
+.rules li::before {
+    counter-increment: r;
+    content: counter(r, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 0.28rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: var(--violet);
+}
+.rules { padding: 0; margin: 0; }
+.notes strong { color: #eaf2fd; }
+
+code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.85em;
+    color: var(--cyan);
+    background: #0a1a33;
+    border: 1px solid var(--line-soft);
+    border-radius: 2px;
+    padding: 0.06em 0.34em;
+}
+.budget dd {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--cyan);
+    font-variant-numeric: tabular-nums;
+}
+
+.solved { color: var(--phi); }
+
+/* Apple's emoji as pictures (Doc: always Apple's, as in the VGP) */
+img.emo { display: inline-block; height: 1.2em; width: auto; vertical-align: -0.22em; margin: 0 0.06em; }
+</style>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+    <p class="eyebrow">Doc Alvers Mathe-Labor · Live-Tour</p>
+    <h1>Die Klasse sagt, wo es hakt</h1>
+    <p class="lede">Der Plot für die Live-Tour zum Vorrechnen. Links steht, was die Klasse auf dem Beamer sieht,
+        rechts Mission Control mit allem drum und dran. Unten in der Ecke liegt ein Fon mit dem Buzzer: Für seine Szene
+        wird es groß, danach geht es wieder klein in die Ecke. Gerechnet werden „Eins mal eins“ und zwei echte Aufgaben,
+        damit es nie nach Pille-Palle aussieht.</p>
+    <p class="status">Plot · wartet auf Freigabe</p>
+
+    <dl class="meta">
+        <div><dt>Seiten</dt><dd><a href="https://docalvers.de/vorrechnen.html">vorrechnen.html</a> +
+            <a href="https://docalvers.de/buzzer.html">buzzer.html</a></dd></div>
+        <div><dt>Sprecherin</dt><dd>Solita · de-DE-Studio</dd></div>
+        <div><dt>Bühne</dt><dd><a href="http://localhost:8769/tours/vorrechnen.html">tours/vorrechnen.html</a> · steht</dd></div>
+        <div><dt>Szenen</dt><dd>15</dd></div>
+        <div><dt>Laufzeit</dt><dd>~4:40, geschätzt</dd></div>
+    </dl>
+</header>
+
+<div class="thesis">
+    <canvas id="stage" width="600" height="600" role="img"
+            aria-label="Simulation: eine Rechnung an der Tafel, Zeile für Zeile. Unten zwanzig Fons der Klasse. Wer
+            nicht mitkommt, drückt: Das Fon wird rot, und hinter der Zeile, an der es hakt, steht eine Zahl. Nach der
+            Erklärung drücken sie „verstanden“, und die Zahl geht wieder herunter."></canvas>
+    <div>
+        <blockquote>An der Tafel wird vorgerechnet, und wer nicht mitkommt, sagt es anonym, <strong>genau an der
+            Zeile, an der es hakt</strong>.</blockquote>
+        <p class="after">Die ganze Tour ist die Antwort auf eine einzige Frage:
+            <em>Woher weiß ich beim Vorrechnen, ob die Klasse mitkommt, ohne dass sich jemand melden muss?</em></p>
+    </div>
+</div>
+
+<section>
+    <div class="head"><span class="n">A</span><h2>Der dramaturgische Bogen</h2></div>
+    <div class="arc" id="arc"></div>
+    <div class="prose">
+        <p>Die ersten Szenen bauen die Bühne auf: zwei Bildschirme, der Code an der Tafel, das Fon ganz nah, das
+           Aufwärmen. Bei 1 : 0 dreht es: Die Fons drücken, und hinter der Aufgabe steht eine Zahl. <strong>Das ist die
+           lehrreichste Stelle</strong>, denn hier sieht man, wie die Klasse und die Lehrkraft verbunden sind, ohne dass
+           jemand die Hand hebt. Die Erklärung holt die Zahl wieder herunter.</p>
+        <p>Danach wird es ernst: das Rechteck mit der pq-Formel, „zu schnell“ von der Klasse, die Zehner-Aufgabe in
+           deiner Handschrift, und an der Zeile, an der es hakt, fragt jemand Solita. Am Ende steht die Ernte: Was hakte, landet in der Wiederholung, und die Tafel der Stunde im Plan.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">B</span><h2>Die fünfzehn Szenen</h2>
+        <span class="note" id="tl-note">Breite = Sprechzeit</span></div>
+    <div class="timeline" id="timeline"></div>
+    <div class="legend">
+        <span><s style="background:#799e31"></s><b>Kernszene — wird nicht gekürzt</b></span>
+        <span><s style="background:#b02418"></s><b>Notbremse, falls der Schnitt zäh wirkt</b></span>
+        <span><s style="background:#f5c242"></s><b>Regelszene</b></span>
+    </div>
+    <div class="scenes" id="scenes" style="margin-top:1.5rem"></div>
+</section>
+
+<section>
+    <div class="head"><span class="n">C</span><h2>Didaktische Leitplanken</h2>
+        <span class="note">bindend für den Sprechertext</span></div>
+    <ol class="rules">
+        <li><strong>Erst sieht man es, dann heißt es so.</strong> Jede Funktion wird in dem Moment gezeigt, in dem sie
+            genannt wird.</li>
+        <li><strong>Bei jeder Funktion sagen, wer sie sieht:</strong> „die Klasse“ oder „nur du“. Dafür gibt es die zwei
+            Bildschirme. Der graue Schritt, die Erklärung vor dem Hochschieben, die Reihe 🏃 💬 🐌 und die Wiederholung
+            sind nur rechts. Solita, ihre Frage und ihre Antwort sehen alle.</li>
+        <li><strong>Ein neuer Begriff pro Szene.</strong> Code, Buzzer, Tempo, Kommentar, Erklärung, Solita,
+            Wiederholung, jeder bekommt seine eigene Szene.</li>
+        <li><strong>Verbotene Vokabeln:</strong> „Kinder“ und „Kids“, immer „die Schülerinnen und Schüler“ oder „die
+            Klasse“. „Überwachung“ und „Abstimmung“, denn der Buzzer ist eine Rückmeldung und keine Wahl.</li>
+        <li><strong>„Anonym“ ist hier wahr und darf fallen.</strong> Ein Druck schreibt nur den Code der Stunde und die
+            Uhrzeit, kein Gerät und keinen Namen. Die Lehrkraft sieht eine Zahl und nie, wer es war.</li>
+        <li><strong>Zahlen nur vorlesen, wenn sie im Bild stehen.</strong> Formeln spricht Solita wie in den Decks.</li>
+        <li><strong>Nichts versprechen, was die Erkennung nicht kann.</strong> Die Seite gleicht eine Zeile mit dem
+            nächsten Schritt der Lösung ab, sonst liest sie ein Sprachmodell, und eine Zeile, die nicht gelesen wird,
+            fliegt zurück. Kein „erkennt jede Handschrift“.</li>
+        <li><strong>Keine echten Schülerinnen und Schüler.</strong> Gezogen wird nur aus der Vorführklasse GENII, deren
+            Namen von Wissenschaftlerinnen und Wissenschaftlern stammen.</li>
+    </ol>
+</section>
+
+<section>
+    <div class="head"><span class="n">D</span><h2>Zeitbudget</h2>
+        <span class="note">geplant</span></div>
+    <dl class="budget" id="budget"></dl>
+    <div class="prose">
+        <p>Fünfzehn Szenen, zusammen rund 250 Sekunden Sprache, dazu etwa 24 Sekunden Luft: gut viereinhalb Minuten.
+           Das ist länger als die Klasse im Blick (3:30), denn hier wird wirklich gerechnet, eine Rechnung braucht ihre
+           Zeilen, und Solita an der Tafel kommt dazu (Doc, 03.10.: „ganz schön lang, aber es ist eine komplexe
+           Tour“).</p>
+        <p>Wenn es zäh wirkt, sparen die <strong>Notbremsen</strong> zusammen 26 Sekunden: Szene 5 (Namen ziehen) und
+           Szene 14 (die Tafel im Plan). Das Aufwärmen in Szene 6 lässt sich auf eine Zeile kürzen.</p>
+    </div>
+</section>
+
+<section>
+    <div class="head"><span class="n">E</span><h2>Choreografie-Notizen</h2>
+        <span class="note">für den Bau</span></div>
+    <ul class="notes">
+        <li><strong>Die Bühne steht</strong> (Doc, 03.10.: „genauso, wie ich es wollte“): links der Beamer, rechts
+            Mission Control, beide in Originalgröße, denn vorrechnen.html rechnet in vw/vh, und ein Zoom würde die
+            Fläche nicht füllen. Die Tafel ist hell, der Rahmen dunkel (Doc: „total cool“). Das Fon schwebt unten links
+            in der Schreibfläche, die auf dem Beamer leer ist. <code>t.float(true)</code> holt es groß in die Mitte.</li>
+        <li><strong>Eigener Server:</strong> <code>python3 tools/tourkritik.py vorrechnen</code> auf Port 8769. Das ist
+            eine eigene Herkunft, damit deine echte Tafel auf localhost:8765 unberührt bleibt.</li>
+        <li><strong>Die Verbindung Beamer ↔ Mission Control:</strong> Im Unterricht öffnet der Beamer Mission Control
+            mit <code>window.open</code>. In der Tour reicht die Tour die beiden Rahmen einander
+            (<code>steuerFenster</code>, <code>opener</code>). Das läuft schon in der Probe.</li>
+        <li><strong>Handschrift (aufgenommen 03.10. am HP mit dem Stift):</strong> die Zehner-Aufgabe, drei Zeilen,
+            mit <code>vorrechnen.html?aufnahme</code>. Die Datei liegt als <code>tours/vorrechnen-handschrift.json</code>
+            bei der Tour, und die Tour spielt die Striche mit ihrer echten Zeit ab. Aufwärmen und Rechteck gehen mit dem
+            Pfeil hoch, dafür muss niemand etwas aufnehmen (Doc: „die zum Vorführen für die Handschriftgeschichte“).</li>
+        <li><strong>Erkennung, gelöst:</strong> Beim Vorrechnen gleicht die Seite eine Zeile zuerst mit dem nächsten
+            Schritt der Lösung ab und braucht dann kein Gemini. Deine drei Zeilen hat sie am HP genau so erkannt. Die Tour
+            braucht also keine vorgetäuschte Erkennung, es läuft der echte Weg.</li>
+        <li><strong>Buzzer ohne echte Datenbank:</strong> Wie bei der Klasse im Blick spielt eine Klasse im Browser mit
+            (Muster <code>js/quiz-demo-backend.js</code>), auch lokal. In buzzer, buzzer_tempo, buzzer_text und
+            vorrechnen_feedback landet nichts. Der Code ist 0000, den bekommt keine echte Klasse. Der Druck auf das
+            sichtbare Fon ist ein echter Tipp auf buzzer.html, gespielt ist nur die Datenbank dahinter.</li>
+        <li><strong>Wechsel in Szene 9:</strong> „Eins mal eins“ ist eine eigene Sammlung, die Mathe-11-Aufgaben
+            und das Aufgaben-Panel gibt es nur ohne <code>?aufgaben</code>. Beide Tafeln laden dort neu, hinter einer
+            kurzen Blende.</li>
+        <li><strong>Solita an der Tafel (Szene 12):</strong> Sie bekommt mit jeder Frage die Aufgabe, die Zeilen an der
+            Tafel, die Lösung und die Erklärung (js/vorrechnen-solita.js). Online hat die Tour kein Passwort für sie,
+            und eine Antwort, die jedes Mal anders ausfällt, passt nicht zur Stimme. Die Tour spielt deshalb eine Antwort
+            ab, die sie einmal wirklich an dieser Tafel gegeben hat, Text und Stimme. <strong>Doc entscheidet</strong>,
+            ob das so in Ordnung ist.</li>
+        <li><strong>Wiederholung (Szene 13)</strong> liest das Log des Geräts, die Cloud nur mit Login. Die Tour hat
+            kein Login und zeigt deshalb das Log der Tour.</li>
+        <li><strong>Tafel senden (Szene 14)</strong> schreibt in svp_tafel und braucht dein Login. In der Tour ist das
+            gespielt, links erscheint ein Vorführ-Plan mit der Pille. Den Weg dafür kläre ich noch.</li>
+        <li><strong>Timing-kritisch, als Erstes proben:</strong> Szene 11 (deine Striche, Flug und Morph auf einer anderen
+            Bildschirmgröße als am HP) und die Szenen 7 und 8 (Zählpille rauf und wieder runter).</li>
+        <li>Die Tour entfernt das rote <strong>LOCAL</strong>-Schild selbst. Während eines Laufs nichts an den Dateien
+            ändern, die Seiten laden in der Tour aber auch nicht von selbst neu.</li>
+    </ul>
+</section>
+
+<section>
+    <div class="head"><span class="n">F</span><h2>Bewusst weggelassen</h2>
+        <span class="note">Kandidaten für Teil 2</span></div>
+    <div class="prose">
+        <p><strong>Der Tagesverlauf mit zwei Fingern</strong>, <strong>Frei und Beispiele</strong>, der
+           <strong>Testmodus</strong> und die <strong>Ziffernrätsel</strong>. Das sind Werkzeuge für die Lehrkraft, und
+           jedes würde den Bogen vom Buzzer weglenken.</p>
+        <p><strong>Die Nuss 2^(x+3) = 5^x</strong>: Doc, 03.10.: „muss nicht ganz so eine harte Nuss sein“. Die
+           Zehner-Aufgabe zeigt die Handschrift, das Rechteck die echte Rechnung.</p>
+        <p><strong>Die Tafel als Deck mit Solita</strong> (decks/tafel.html): Szene 14 zeigt nur, dass es sie gibt.</p>
+    </div>
+</section>
+
+<footer>
+    <p><strong>Nächster Schritt:</strong> Doc liest den Plot. Danach entstehen Solitas Sätze, und dann baue ich die
+        Szenen in tours/vorrechnen.js.</p>
+    <p class="eyebrow sig">Doc Alvers Mathe-Labor</p>
+</footer>
+
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   One source of truth: the scene list feeds both the timeline and
+   the cards below it.
+   --------------------------------------------------------------- */
+const SCENES = [
+    /* n = Nummer · s = geplante Sekunden (nach der Vertonung von SPOKEN ueberschrieben)
+       t = Titel · img = was im Bild passiert · aha = der Gedanke, der fallen soll
+       core: true = Kernszene · cut: true = Notbremse · card: true = eigene Karte */
+    { n: 1, s: 10, t: 'Die Klasse sagt, wo es hakt', card: true,
+      img: 'Titelkarte „Vorrechnen“. Dahinter die Bühne als Standbild: links die helle Tafel auf dem Beamer, rechts Mission Control, unten links klein das Fon.',
+      aha: 'Vorrechnen an der digitalen Tafel, und die Klasse kann anonym sagen, wo sie nicht mitkommt.' },
+
+    { n: 2, s: 20, t: 'Zwei Bildschirme', core: true,
+      img: 'Links der Beamer mit nur der Aufgabe „1 · 1“ und der Kopfzeile „Aufgabe 1 / 20 · ohne Taschenrechner · Eins mal eins · Aufwärmen“. Rechts dieselbe Tafel in Mission Control, dazu die Werkzeugleiste und unten grau der nächste Schritt „= 1 · ausrechnen“. Der Zeiger fährt über die Leiste und auf den grauen Schritt.',
+      aha: 'Die Klasse sieht nur die Rechnung. Werkzeuge und Spickzettel bleiben bei der Lehrkraft.' },
+
+    { n: 3, s: 14, t: 'Der Code an der Tafel',
+      img: 'Rechts ein Tipp auf das QR-Symbol in der Leiste, links auf dem Beamer erscheint die Karte „FEEDBACK“ mit dem QR. Das Fon unten links scannt, und der orange Knopf „HAB ICH NICHT VERSTANDEN“ erscheint.',
+      aha: 'Ein Code für die Stunde: kein Name, kein Login, keine App zum Installieren.' },
+
+    { n: 4, s: 22, t: 'Das Fon, ganz nah', core: true,
+      img: 'Das Fon zoomt in die Mitte, die Tafeln dunkeln ab. Der Zeiger zeigt nacheinander auf den orangen Knopf mit 🤔, auf „Erklärungen sind … 🏃 zu schnell / 🐌 zu langsam“ und auf das Feld „Dein anonymes Feedback“ mit seinen 280 Zeichen. Danach geht das Fon zurück in die Ecke.',
+      aha: 'Drei Wege zu sagen, wie es läuft, und keiner verrät, wer es war.' },
+
+    { n: 5, s: 12, t: 'Wer rechnet vor?', cut: true,
+      img: 'Rechts ein Tipp auf das Porträt in der Leiste: Ein Name aus der Vorführklasse wird gezogen und vorgelesen und steht auf beiden Bildschirmen.',
+      aha: 'Gezogen wird aus einem Beutel: Alle sind einmal dran, bevor jemand zum zweiten Mal muss.' },
+
+    { n: 6, s: 16, t: 'Aufwärmen',
+      img: 'Rechts ein Tipp auf den Pfeil unten links in der Schreibfläche: Der graue Schritt „= 1“ fliegt hoch, als wäre er geschrieben, und landet als Formel unter der Aufgabe. Links landet er genauso. Danach kommen „1 + 1“ und „1 : 1“ im Schnelldurchlauf.',
+      aha: 'Für die Routine reicht ein Tipp: Der nächste Schritt geht hoch, ohne dass die Lehrkraft ihn abschreibt.' },
+
+    { n: 7, s: 20, t: 'Eins durch null', core: true,
+      img: 'Aufgabe „1 : 0“. Unten links wird der Knopf am Fon gedrückt, er wird kurz grün („Vielen Dank für das Feedback“), dann rot. Im Hintergrund drücken weitere Fons. Rechts leuchtet die Zählpille, hinter der Aufgabe steht eine 1, dann 3, dann 5. Links steht dieselbe Zahl hinter der Aufgabe.',
+      aha: 'Die Lehrkraft sieht sofort, an welcher Stelle es hakt: an der Aufgabe, nicht an der Person.' },
+
+    { n: 8, s: 20, t: 'Nochmal erklären', core: true,
+      img: 'Rechts ein Tipp auf den Doktorhut: Die Erklärung „durch null teilt man nicht“ erscheint in der Schreibfläche, zunächst nur rechts. Ein Wisch schiebt sie über die Linie, jetzt steht sie auch links. Das Fon zoomt kurz heran, der rote Knopf „DRÜCKEN, WENN VERSTANDEN“ wird gedrückt. Die Zahl geht von 5 auf 2 herunter.',
+      aha: 'Wenn die Zahl wieder heruntergeht, war die Erklärung gut.' },
+
+    { n: 9, s: 22, t: 'Das Rechteck',
+      img: 'Rechts öffnet „Aufgaben ▾“ das Panel mit den Reitern „bis Herbst“, „bis Weihnachten“ und so weiter. Ein Sprung zur Aufgabe x(10 − x) = 21 aus „Quadratische Gleichungen“. Zeile für Zeile schickt der Pfeil hoch: 10x − x² = 21, x² − 10x + 21 = 0, x = 5 ± √(25 − 21), x = 5 ± 2, x₁ = 7 und x₂ = 3. Die Gleichheitszeichen stehen untereinander, rechts daneben grau die Umformung.',
+      aha: 'Ein Rechteck mit Umfang 20 und Fläche 21 wird an der Tafel zu einer sauberen Rechnung, Zeile für Zeile.' },
+
+    { n: 10, s: 14, t: 'Zu schnell!',
+      img: 'Während der Zeile mit der pq-Formel tippen Fons im Hintergrund auf „🏃 zu schnell“. Rechts färbt sich in der Reihe 🏃 💬 🐌 der Läufer und zählt 3. Ein Kommentar kommt: 💬 wird gelb, ein Tipp klappt die Box auf: „Woher kommt die 5?“ Links ist von alldem nichts zu sehen.',
+      aha: 'Tempo und Kommentare sieht nur die Lehrkraft, nie der Beamer.' },
+
+    { n: 11, s: 24, t: 'Mit der Hand', core: true,
+      img: 'Aufgabe 2¹⁰ · 5¹⁰ / 10⁹. Rechts schreibt der Stift in deiner Handschrift (aufgenommen am HP): „= (2 · 5)¹⁰ / 10⁹“. Ein Wisch nach oben, und die Tinte fliegt hoch, wird blau und verwandelt sich im Flug in die gesetzte Formel. Links fliegt sie genauso. Bei dieser Zeile kommen zwei Buzzes, die Zahl steht hinter genau dieser Zeile (die Zahl steht immer nur hinter der neuesten Zeile, deshalb kommen die Zeilen zwei und drei erst nach Solita).',
+      aha: 'Mit dem Stift geschrieben, als saubere Formel an der Tafel, und die Rückmeldung kommt pro Zeile.' },
+
+    { n: 12, s: 20, t: 'Frag Solita', core: true,
+      img: 'Hinter der ersten Zeile stehen noch zwei. Rechts ein Tipp auf Solitas Bild unten links in der Schreibfläche: Ihre Zeile öffnet sich, und die Frage „Warum darf ich 2¹⁰ · 5¹⁰ zu (2 · 5)¹⁰ zusammenfassen?“ erscheint. Solita antwortet in einer Blase über der Zeile und nimmt die Rechnung an der Tafel als Bezug. Links stehen Frage und Antwort genauso. Danach geht die Zahl hinter der Zeile auf null, und die Hand schreibt weiter: „= 10¹⁰ / 10⁹“ und „= 10“.',
+      aha: 'Solita kennt die Aufgabe, die Zeilen an der Tafel und die Lösung, und sie antwortet für alle sichtbar.' },
+
+    { n: 13, s: 16, t: 'Wiederholung', core: true,
+      img: 'Rechts im Aufgaben-Panel der Reiter „Wiederholung“: die Aufgaben nach Verstandengrad, oben 1 : 0 und die Zehner-Aufgabe mit ihrer ersten Zeile. Ein X nimmt eine Aufgabe von der Liste.',
+      aha: 'Was heute nicht verstanden wurde, kommt in einer der nächsten Stunden wieder dran.' },
+
+    { n: 14, s: 14, t: 'Die Tafel im Plan', cut: true,
+      img: 'Rechts ein Tipp auf „Tafel senden“. Links wechselt das Bild auf den Stoffverteilungsplan der Klasse, in der Woche steht die Pille „Tafel 03.10.“. Ein Tipp öffnet die Rechnung als Deck.',
+      aha: 'Die Musterlösung der Stunde liegt danach bei allen im Plan.' },
+
+    { n: 15, s: 10, t: 'Kein Name, nur ein Code', card: true,
+      img: 'Zurück zur Bühne mit dem Endstand, dann Abblende auf die Titelkarte. Schluss auf Dunkelblau, nie auf Schwarz.',
+      aha: 'Die Klasse sagt, wo es hakt, und niemand muss sich dafür melden.' }
+];
+
+/* SAY:START - generated by videopipeline/vorrechnen/sync-drehbuch.mjs, do not edit */
+const SAY = {
+};
+const SPOKEN = {};
+/* SAY:END */
+
+const ARC = [
+    { t: 'Bühne',              c: '#93a8c6' },
+    { t: 'Code',               c: '#93a8c6' },
+    { t: 'Fon',                c: '#f5c242' },
+    { t: 'Aufwärmen',          c: '#f5c242' },
+    { t: '1 : 0',              c: '#b02418', key: true },
+    { t: 'Erklären',           c: '#799e31', key: true },
+    { t: 'Rechteck',           c: '#00d2ff' },
+    { t: 'Zu<br>schnell',      c: '#b02418' },
+    { t: 'Hand&shy;schrift',     c: '#00d2ff', key: true },
+    { t: 'Solita',             c: '#00d2ff', key: true },
+    { t: 'Wieder&shy;holung',  c: '#799e31', key: true },
+    { t: 'Plan',               c: '#799e31' }
+];
+
+/* --- the arc --- */
+document.getElementById('arc').innerHTML = ARC.map(a =>
+    `<span class="${a.key ? 'key' : ''}" style="--stop:${a.c}">${a.t}</span>`).join('');
+
+/* --- timeline: each scene as wide as it is long --- */
+const secs = (x) => SPOKEN['s' + x.n] ?? x.s;
+const total = SCENES.reduce((s, x) => s + secs(x), 0);
+document.getElementById('timeline').innerHTML = SCENES.map(x =>
+    `<i class="${x.core ? 'core' : x.cut ? 'cut' : ''}" data-n="${x.n}"
+        style="flex:0 0 ${(secs(x) / total * 100).toFixed(3)}%"
+        title="Szene ${x.n} · ${secs(x).toFixed(1)} s"></i>`).join('');
+
+/* --- budget, from the measured durations when they exist --- */
+(function () {
+    const spoken = Object.values(SPOKEN).reduce((a, b) => a + b, 0);
+    const planned = SCENES.reduce((a, x) => a + x.s, 0);
+    const air = SCENES.length * 1.6;
+    const film = (spoken || planned) + air;
+    const mmss = (t) => Math.floor(t / 60) + ':' + String(Math.round(t % 60)).padStart(2, '0');
+    const cell = (dt, dd, sub) => `<div><dt>${dt}</dt><dd>${dd}<small>${sub}</small></dd></div>`;
+    document.getElementById('budget').innerHTML =
+        cell('Sprache', (spoken || planned).toFixed(0) + ' s',
+             spoken ? 'gemessen' : 'geplant') +
+        cell('Luft', '~' + air.toFixed(0) + ' s', '1,6 s je Szene') +
+        cell('Tour', mmss(film), spoken ? 'nach der Vertonung' : 'geschätzt') +
+        cell('Bett-Loop', '142,778 s', '64 Takte · 107,58 BPM');
+    if (spoken) {
+        const n = document.getElementById('tl-note');
+        if (n) n.textContent = 'Breite = gemessene Sprechzeit';
+    }
+})();
+
+/* --- the emoji in the text as Apple's pictures, as the buzzer shows them (iamcal img-apple-160) --- */
+const EMOJI = { '🤔': '1f914', '🏃': '1f3c3', '🐌': '1f40c', '💬': '1f4ac' };
+const emo = (s) => s.replace(/🤔|🏃|🐌|💬/gu, (e) =>
+    `<img class="emo" src="https://cdn.jsdelivr.net/gh/iamcal/emoji-data@master/img-apple-160/${EMOJI[e]}.png" alt="${e}">`);
+document.querySelectorAll('.rules li').forEach((li) => { li.innerHTML = emo(li.innerHTML); });
+
+/* --- scene cards --- */
+document.getElementById('scenes').innerHTML = SCENES.map(x => `
+    <article class="scene ${x.core ? 'core' : x.cut ? 'cut' : ''}">
+        <div class="idx">${String(x.n).padStart(2, '0')}</div>
+        <div>
+            <div class="top">
+                <h3>${x.t}</h3>
+                ${x.core ? '<span class="tag core">Kernszene</span>' : ''}
+                ${x.cut ? '<span class="tag cut">Notbremse</span>' : ''}
+                <span class="secs">${secs(x).toFixed(1)} s</span>
+            </div>
+            <div class="body">
+                <div><h4>Was im Bild passiert</h4><p>${emo(x.img)}</p></div>
+                <div class="aha"><h4>Der Aha</h4><p>${x.aha}</p></div>
+            </div>
+            ${SAY['s' + x.n] ? `<div class="say"><h4>Solita sagt</h4><p>${SAY['s' + x.n]}</p></div>` : ''}
+        </div>
+    </article>`).join('');
+
+/* ---------------------------------------------------------------
+   Hero: the board and the class, simulated. The rectangle's working
+   comes up line by line on the light board (the tour's look, Doc
+   03.10.2026), under it twenty phones with the buzzer's round button
+   (orange = ready). A pupil who loses the thread presses: the phone
+   thanks in green, then stays red, and the line it pressed at gets a
+   count, coloured like the board's pill (green, orange at ten, red
+   from twenty). After the explanation most of them press "verstanden"
+   and the counts go down again. A click runs a new class.
+   --------------------------------------------------------------- */
+(function () {
+    const cv = document.getElementById('stage');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const N = 20, LOOP = 26;                       /* pupils, seconds per run */
+    const FIRST = 0.8, STEP = 2.4;                 /* the first line, seconds between lines */
+    const EXPLAIN = 16.5;                          /* the explanation: "verstanden" from here on */
+    const LINES = [
+        ['x(10 − x)', '= 21', ''],
+        ['10x − x²', '= 21', 'ausmultiplizieren'],
+        ['x² − 10x + 21', '= 0', 'umstellen'],
+        ['x', '= 5 ± √(25 − 21)', 'pq-Formel'],
+        ['x', '= 5 ± 2', 'Wurzel ziehen'],
+        ['x₁', '= 7     x₂ = 3', 'ausrechnen']
+    ];
+    const HARD = [0.02, 0.06, 0.08, 0.32, 0.12, 0.04];    /* chance to lose the thread at each line */
+    const COL = { ground: '#04101f', board: '#f4ecd8', ink: '#1d3f8f', grey: '#9a9384', head: '#8a8478',
+                  phone: '#0c1c3a', rim: '#2a3f66', ready: '#f5c242', open: '#b02418', thanks: '#799e31' };
+    let kids = [], t0 = 0;
+
+    /* small seeded generator, so one click = one reproducible class */
+    function rng(seed) {
+        return function () {
+            seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+            let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+            t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        };
+    }
+    /* each pupil presses at most once, at the first line that loses them; most understand after the explanation */
+    function newClass() {
+        const r = rng((Math.random() * 1e9) | 0);
+        kids = [];
+        for (let i = 0; i < N; i++) {
+            const k = { line: -1, at: Infinity, ok: Infinity };
+            for (let l = 0; l < LINES.length && k.line < 0; l++) {
+                if (r() < HARD[l]) { k.line = l; k.at = FIRST + l * STEP + 0.5 + r() * (STEP - 0.8); }
+            }
+            if (k.line >= 0 && r() < 0.8) k.ok = EXPLAIN + r() * 4.5;
+            kids.push(k);
+        }
+        t0 = performance.now();
+    }
+
+    const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+    function mix(a, b, f) {
+        const A = hex(a), B = hex(b);
+        return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * f)).join(',') + ')';
+    }
+    /* the board's scale (vorrechnen-klasse.js): green at none, orange at ten, red from twenty */
+    const buzzCol = (n) => n <= 10 ? mix('#799e31', '#f5c242', n / 10) : mix('#f5c242', '#b02418', Math.min(1, (n - 10) / 10));
+
+    function fit() {
+        const r = cv.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.max(1, Math.round(r.width * dpr));
+        cv.height = Math.max(1, Math.round(r.height * dpr));
+    }
+
+    function draw() {
+        let t = (performance.now() - t0) / 1000;
+        if (t > LOOP) { newClass(); t = 0; }
+        const W = cv.width, H = cv.height, px = W / 600;
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = COL.ground;
+        ctx.fillRect(0, 0, W, H);
+
+        /* the board */
+        const bx = 36 * px, by = 30 * px, bw = 528 * px, bh = 390 * px;
+        ctx.fillStyle = COL.board;
+        ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 6 * px); ctx.fill();
+        ctx.font = '500 ' + (10.5 * px) + 'px Orbitron, sans-serif';
+        ctx.fillStyle = COL.head;
+        ctx.textBaseline = 'alphabetic';
+        ctx.textAlign = 'left';
+        ctx.fillText('AUFGABE 9 / 20', bx + 18 * px, by + 28 * px);
+        ctx.textAlign = 'right';
+        ctx.fillText('QUADRATISCHE GLEICHUNGEN', bx + bw - 18 * px, by + 28 * px);
+
+        /* the working, the equals signs in one column */
+        const eqX = bx + 0.38 * bw, y0 = by + 84 * px, dy = 52 * px;
+        LINES.forEach(([left, right, op], l) => {
+            const start = FIRST + l * STEP;
+            if (t < start) return;
+            const a = Math.min(1, (t - start) / 0.6);
+            const y = y0 + l * dy + (1 - a) * 16 * px;
+            ctx.globalAlpha = a;
+            ctx.font = 'italic 400 ' + (21 * px) + 'px "Cambria Math", "Times New Roman", serif';
+            ctx.fillStyle = COL.ink;
+            ctx.textAlign = 'right';
+            ctx.fillText(left, eqX - 6 * px, y);
+            ctx.textAlign = 'left';
+            ctx.fillText(right, eqX, y);
+            if (op) {
+                ctx.font = 'italic 400 ' + (12.5 * px) + 'px "Times New Roman", serif';
+                ctx.fillStyle = COL.grey;
+                ctx.textAlign = 'right';
+                ctx.fillText(op, bx + bw - 16 * px, y);
+            }
+            /* the count behind the line: pressed and not understood yet */
+            const n = kids.filter((k) => k.line === l && k.at <= t && k.ok > t).length;
+            if (n > 0) {
+                const cx = bx + 30 * px, cy = y - 7 * px;
+                ctx.fillStyle = buzzCol(n);
+                ctx.beginPath(); ctx.arc(cx, cy, 13 * px, 0, Math.PI * 2); ctx.fill();
+                ctx.font = '700 ' + (12 * px) + 'px Orbitron, sans-serif';
+                ctx.fillStyle = '#0d1a06';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(String(n), cx, cy + 0.5 * px);
+                ctx.textBaseline = 'alphabetic';
+            }
+            ctx.globalAlpha = 1;
+        });
+
+        /* the class: twenty phones, the buzzer's button on each */
+        const pw = 30 * px, ph = 50 * px, gap = 16 * px;
+        const x0 = (W - (10 * pw + 9 * gap)) / 2;
+        kids.forEach((k, i) => {
+            const x = x0 + (i % 10) * (pw + gap), y = (446 + Math.floor(i / 10) * 70) * px;
+            ctx.fillStyle = COL.phone;
+            ctx.strokeStyle = COL.rim;
+            ctx.lineWidth = 1.2 * px;
+            ctx.beginPath(); ctx.roundRect(x, y, pw, ph, 6 * px); ctx.fill(); ctx.stroke();
+            let c = COL.ready;
+            if (t >= k.ok) c = t < k.ok + 1.2 ? COL.thanks : COL.ready;
+            else if (t >= k.at) c = t < k.at + 1.2 ? COL.thanks : COL.open;
+            ctx.fillStyle = c;
+            ctx.beginPath(); ctx.arc(x + pw / 2, y + 19 * px, 9 * px, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#16294d';
+            ctx.fillRect(x + 6 * px, y + 36 * px, pw - 12 * px, 3 * px);
+        });
+        requestAnimationFrame(draw);
+    }
+
+    fit();
+    newClass();
+    requestAnimationFrame(draw);
+    addEventListener('resize', fit, { passive: true });
+    cv.style.cursor = 'pointer';
+    cv.addEventListener('click', newClass);
+})();
+</script>
+</body>
+</html>

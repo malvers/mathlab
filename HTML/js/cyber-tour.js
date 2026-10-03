@@ -29,6 +29,8 @@
  *   t.callout(text, xy) t.hideCursor() t.caption(n, title)
  *   t.card(on) t.cardImage(on, animate) t.sound(url, vol) t.hook(name, args) t.every(ms, fn) t.later(ms, fn)
  *   t.addFrame(name, url, opts) t.leave(frame, on) t.offline(frame) t.data (shared by all scenes of one run)
+ *   t.float(big) (the floating phone, .tour-phone.float: zoomed up to the middle, or back small in its corner)
+ *   t.write(frame, strokes, opts) (handwriting: recorded pen strokes at their own pace)
  *
  * HOW IT KEEPS TIME: one pausable clock. Every wait of a scene is a point on that clock, so SPACE freezes the
  * choreography, Solita's voice and every background task at once; nothing the tour does runs on the wall
@@ -342,7 +344,8 @@
         d.hasFocus = () => !w.__tourAway;
         const block = (e) => { if (!w.__tourPass) e.stopImmediatePropagation(); };
         ['visibilitychange', 'blur', 'fullscreenchange', 'webkitfullscreenchange'].forEach((ev) => w.addEventListener(ev, block, true));
-        ['localStorage', 'sessionStorage'].forEach((k) => {
+        // a page that has its storage from the tour already (js/tour-hook.js: the backend's storageFor) keeps it
+        if (!w.__tourStorage) ['localStorage', 'sessionStorage'].forEach((k) => {
             try { Object.defineProperty(w, k, { configurable: true, value: memStorage() }); } catch (e) { dbg('eigener Speicher: ' + e.message); }
         });
         // the viewer's key press activates every same-origin frame (user activation v2): a device's "Test starten"
@@ -393,6 +396,18 @@
     function toTour(f, x, y) {
         const k = coordScale(f), R = f.getBoundingClientRect(), s = f.offsetWidth ? R.width / f.offsetWidth : 1;
         return [R.left + x * k * s, R.top + y * k * s];
+    }
+    /* A handle that takes the pointer (setPointerCapture, as the explanation's dots in vorrechnen.html) threw for the
+       tour's finger - the browser knows no pointer 1 - and never moved (Vorrechnen tour, 03.10.2026). While the tour's
+       finger or pen is down, the page's capture calls answer for it, and the events go where it was captured. */
+    function fingerCapture(w) {
+        const P = w.Element.prototype, own = { set: P.setPointerCapture, has: P.hasPointerCapture, rel: P.releasePointerCapture };
+        const c = { held: null };
+        P.setPointerCapture = function (id) { if (id === 1) { c.held = this; return; } return own.set.call(this, id); };
+        P.hasPointerCapture = function (id) { return id === 1 ? c.held === this : own.has.call(this, id); };
+        P.releasePointerCapture = function (id) { if (id === 1) { if (c.held === this) c.held = null; return; } return own.rel.call(this, id); };
+        c.restore = () => Object.assign(P, { setPointerCapture: own.set, hasPointerCapture: own.has, releasePointerCapture: own.rel });
+        return c;
     }
     function ripple(x, y) {
         const r = document.createElement('div');
@@ -549,6 +564,12 @@
                 return f.contentWindow;
             },
             show(name, on) { frameEl(name).classList.toggle('on', on); },
+            /* the floating phone (.tour-phone.float): big in the middle of the stage, or back small in its corner */
+            float(big) {
+                check(run);
+                const p = document.querySelector('.tour-stage .tour-phone.float');
+                if (p) p.classList.toggle('big', !!big);
+            },
             scroll(name, sel, block = 'start') {
                 check(run);
                 const el = t.$(name, sel);
@@ -622,12 +643,13 @@
                 check(run);
                 ripple(xy0[0], xy0[1]);
                 const el = w.document.elementFromPoint(p0[0], p0[1]) || w.document.body;
-                const send = (type, xy, buttons) => el.dispatchEvent(new w.PointerEvent(type, { bubbles: true, cancelable: true,
+                const cap = fingerCapture(w);
+                const send = (type, xy, buttons) => (cap.held || el).dispatchEvent(new w.PointerEvent(type, { bubbles: true, cancelable: true,
                     composed: true, view: w, clientX: xy[0], clientY: xy[1], button: 0, buttons, pointerId: 1, pointerType: 'mouse', isPrimary: true }));
-                send('pointerdown', p0, 1);
                 const n = Math.max(2, Math.round(ms / 40));
                 let xy = p0;
                 try {
+                    send('pointerdown', p0, 1);
                     for (let i = 1; i <= n; i++) {
                         await t.wait(ms / n);
                         xy = await path(i / n);
@@ -637,9 +659,50 @@
                     }
                 } finally {
                     send('pointerup', xy, 0);           // a jump mid-drag must not leave a finger down in the page
+                    cap.restore();
                 }
                 await t.wait(150);
                 return xy;
+            },
+            /* Handwriting (Vorrechnen tour, 03.10.2026: Doc's own strokes, recorded with ?aufnahme on the HP): strokes as
+               a pen draws them - [{ points: [{ x, y, t }], width }] in the page's client coordinates, t in ms of the
+               recording (only the differences count). Each stroke is a pointerdown, pointermoves at its own pace and a
+               pointerup with pointerType 'pen', sent to the element under its first point; between two strokes the pen
+               lifts as long as it did, at most `gap` ms. speed > 1 writes faster. The cursor rides on the pen.
+               pressure(stroke) may give the pen's pressure for a stroke (a page that widens the line with it). */
+            async write(name, strokes, { speed = 1, gap = 600, pressure = () => 0.5 } = {}) {
+                const f = frameEl(name), w = f.contentWindow;
+                const first = strokes.find((s) => s.points && s.points.length);
+                if (!first) return;
+                await t.pointAt(name, first.points[0].x, first.points[0].y);     // the pen comes in
+                check(run);
+                let last = null;
+                for (const s of strokes) {
+                    const pts = s.points || [];
+                    if (!pts.length) continue;
+                    if (last !== null) await t.wait(Math.min(gap, Math.max(0, pts[0].t - last)) / speed);
+                    const el = w.document.elementFromPoint(pts[0].x, pts[0].y) || w.document.body;
+                    const cap = fingerCapture(w), pr = pressure(s);
+                    const send = (type, p, buttons) => (cap.held || el).dispatchEvent(new w.PointerEvent(type, { bubbles: true,
+                        cancelable: true, composed: true, view: w, clientX: p.x, clientY: p.y, button: 0, buttons, pointerId: 1,
+                        pointerType: 'pen', isPrimary: true, pressure: buttons ? pr : 0 }));
+                    try {
+                        send('pointerdown', pts[0], 1);
+                        let due = 0;
+                        for (let i = 1; i < pts.length; i++) {
+                            due += Math.max(0, pts[i].t - pts[i - 1].t) / speed;
+                            if (due >= 12) { await t.wait(due); due = 0; }
+                            const T = toTour(f, pts[i].x, pts[i].y);
+                            cursorTo(T[0], T[1], true);
+                            send('pointermove', pts[i], 1);
+                        }
+                    } finally {
+                        send('pointerup', pts[pts.length - 1], 0);   // a jump mid-stroke must not leave the pen down
+                        cap.restore();
+                    }
+                    last = pts[pts.length - 1].t;
+                }
+                await t.wait(150);
             },
             /* A slider moved by the finger: from its value now to `to`, each step an input event as a real drag sends it
                (the page's own handler runs, the browser snaps to the slider's step), a change event at the end. The

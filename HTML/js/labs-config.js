@@ -1118,6 +1118,17 @@ const LABS_DATA = [
         "color": "blue"
     },
     {
+        "id": "tour-vorrechnen",
+        "href": "tours/vorrechnen.html",
+        "title": "Tour: Die Klasse sagt, wo es hakt",
+        "description": "Live-Tour durch Vorrechnen: links die Tafel, wie die Klasse sie vorne sieht, rechts Mission Control mit allem drum und dran, dazu ein Fon mit dem Buzzer. Vom QR-Code an der Tafel über „nicht verstanden“ per Tipp, die Zahl hinter der Zeile, „zu schnell“ und Kommentare bis zur echten Handschrift, die zur Formel wird, Solita, die an der Tafel antwortet, und der Wiederholung. Gespielt wird mit einer Vorführ-Klasse im Browser, ganz ohne echte Daten. 13 Szenen, etwa 6 Minuten.",
+        "tagline": "Live-Tour / Vorrechnen / Buzzer",
+        "icon": LAB_ICONS["vorrechnen"],
+        "category": "touren",
+        "keywords": "tour touren live-tour rundgang fuehrung solita stimme untertitel vorrechnen tafel beamer mission control buzzer feedback anonym nicht verstanden qr zu schnell kommentar handschrift erklaerung wiederholung lehrer",
+        "color": "blue"
+    },
+    {
         "id": "tour-maya",
         "href": "tours/maya.html",
         "title": "Tour: Punkt, Strich, Muschel",

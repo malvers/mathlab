@@ -1,0 +1,57 @@
+<!doctype html>
+<!-- Live tour "Vorrechnen" (Doc, 03.10.2026: "zwei Panels ... links, was die Schüler sehen ... rechts mit allen
+     drum und dran, was ich sehe ... die Buzzer App ... kurz groß zoomt ... wieder klein in die Ecke").
+     Left the board on the beamer (vorrechnen.html in its display mode), right mission control (?steuerung), the
+     buzzer phone floats over the stage (.tour-phone.float, js/cyber-tour.css). Made from mission-control.html.
+     Needs its server, so the tour never touches the real board stored on localhost:8765:
+         python3 tools/tourkritik.py vorrechnen   ->   http://localhost:8769/tours/vorrechnen.html
+     The Drehbuch is vorrechnen.js next to this page. -->
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vorrechnen — Live-Tour</title>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Outfit:wght@300;400&display=swap">
+    <link rel="stylesheet" href="../js/cyber-tour.css">
+</head>
+<body>
+    <div class="tour-stage">
+        <div class="tour-col grow">
+            <div class="tour-label">Die Klasse sieht · Beamer</div>
+            <div class="tour-pane">
+                <iframe name="board" title="Beamer" data-device src="about:blank"></iframe>
+            </div>
+        </div>
+        <div class="tour-col grow">
+            <div class="tour-label">Du siehst · Mission Control</div>
+            <div class="tour-pane">
+                <!-- data-timers: the buzzer looks every 5 s for new taps (js/buzzer.js); in the tour every second -->
+                <iframe name="control" title="Mission Control" data-device data-timers="5000:1000" src="about:blank"></iframe>
+            </div>
+        </div>
+        <div class="tour-phone float">
+            <div class="tour-screen">
+                <!-- the camera before the QR is scanned (scene 3), as in the Klasse-im-Blick tour (js/cyber-tour.css) -->
+                <div class="off tour-scan">
+                    <div class="finder">
+                        <i></i><i></i><i></i><i></i>
+                        <svg viewBox="0 0 21 21" fill="#8ba1c0" aria-hidden="true">
+                            <path d="M0 0h7v7H0zM1 1v5h5V1zM2 2h3v3H2zM14 0h7v7h-7zm1 1v5h5V1zm1 1h3v3h-3zM0 14h7v7H0zm1 1v5h5v-5zm1 1h3v3H2z" fill-rule="evenodd"/>
+                            <path d="M9 0h2v2H9zM9 3h1v3H9zM11 4h2v1h-2zM8 8h3v1H8zM12 8h2v2h-2zM16 9h3v1h-3zM0 9h2v1H0zM3 8h1v3H3zM9 11h1v2H9zM11 12h3v1h-3zM15 11h1v3h-1zM18 12h3v2h-3zM9 15h2v2H9zM12 15h1v3h-1zM14 17h3v1h-3zM18 16h1v2h-1zM16 19h5v2h-5zM9 19h3v2H9zM19 8h2v2h-2z"/>
+                        </svg>
+                        <b></b>
+                    </div>
+                    <div class="lbl">QR-Code scannen</div>
+                </div>
+                <iframe name="phone" title="Buzzer" data-width="390" data-device src="about:blank"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/kritik-recorder.js"></script>
+    <script src="../js/buzzer-demo-backend.js"></script>
+    <script src="../js/cyber-tour.js"></script>
+    <script src="vorrechnen.js"></script>
+</body>
+</html>
