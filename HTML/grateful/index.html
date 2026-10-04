@@ -93,6 +93,14 @@
             font: 700 15px Orbitron, sans-serif; letter-spacing: .04em;
         }
         a.cloudlink svg { width: 26px; height: 26px; fill: var(--lambda); }
+        ol.list { list-style: none; margin: 20px 0 0; padding: 0; }
+        ol.list li {
+            display: grid; grid-template-columns: 6.2em 1fr; gap: 10px; padding: 10px 4px;
+            border-top: 1px solid var(--line); cursor: pointer; font: 15px/1.45 Raleway, sans-serif;
+        }
+        ol.list li:first-child { border-top: 0; }
+        ol.list li:hover { background: rgba(120, 160, 220, .06); }
+        ol.list time { color: var(--muted); font-variant-numeric: lining-nums tabular-nums; }
 
         .gate { text-align: center; padding: 30px 16px; }
         .gate p { font: 15px/1.5 Raleway, sans-serif; color: var(--muted); margin: 0 0 18px; }
@@ -130,6 +138,9 @@
 
             <!-- cloud: Material Symbols "cloud" (Apache 2.0) -->
             <a class="cloudlink" href="wolke.html"><svg viewBox="0 -960 960 960" aria-hidden="true"><path d="M251-160q-88 0-149.5-61.5T40-371q0-78 50-137t127-71q20-97 94-158.5T482-799q112 0 189 81.5T748-522v24q72-2 122 46.5T920-329q0 69-50 119t-119 50H251Z"/></svg>Wortwolke</a>
+
+            <!-- the latest entries; tap one to edit it (also older than the strip) -->
+            <ol class="list" id="list" aria-label="Letzte Einträge"></ol>
         </div>
     </div>
 
@@ -151,6 +162,7 @@
             const todayIso = () => iso(new Date());
             const shortDate = s => `${WD[new Date(s + 'T12:00:00').getDay()]} ${s.slice(8, 10)}.${s.slice(5, 7)}.`;
             const byId = id => entries.find(x => x.id === id);
+            const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
             /* remember what is typed for an empty day (per day) */
             function keepNew() {
                 if (editing) return;
@@ -216,6 +228,9 @@
                     b.onclick = () => { status(''); showDay(d); };
                     days.appendChild(b);
                 }
+                $('list').innerHTML = entries.slice(0, 30).map(e =>
+                    `<li data-id="${e.id}"><time datetime="${e.day}">${shortDate(e.day)}</time><span>${esc(e.text)}</span></li>`
+                ).join('');
             }
 
             async function save() {
@@ -318,6 +333,13 @@
                     if (e) { $('text').value = e.text; buttons(); saveDraft(); }
                     status('');
                 };
+                $('list').addEventListener('click', e => {
+                    const li = e.target.closest('li[data-id]');
+                    if (!li) return;
+                    status('');
+                    showEntry(Number(li.dataset.id));
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
                 $('loginBtn').onclick = () => auth.loginDialog(showApp, 'Anmelden für dein Dankbarkeits-Tagebuch');
 
                 if (auth.hasSession()) showApp(); else $('gate').hidden = false;
