@@ -14,6 +14,8 @@
     <!-- Doc's own Supabase account (shared SVP login): only that uid may read or write table grateful (RLS) -->
     <script src="../svp/svp-gate.js"></script>
     <script src="../svp/svp-auth.js"></script>
+    <!-- dictation: the shared tap-to-talk engine (listens through pauses, "bin fertig" ends) -->
+    <script src="../js/solita-listen.js"></script>
     <style>
         /* --- plain standalone page (like vote.html), deliberately no lab shell CSS --- */
         :root {
@@ -40,22 +42,22 @@
         .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
         label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 6px; letter-spacing: .03em; }
 
-        .days { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; margin-bottom: 14px; }
+        .days { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
         .day {
-            aspect-ratio: 1; border-radius: 6px; border: 1px solid var(--line); background: var(--bg);
-            padding: 0; cursor: pointer; font: 600 10px Raleway, sans-serif; color: var(--muted);
-            font-variant-numeric: lining-nums;
+            height: 58px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg);
+            padding: 0; cursor: pointer; color: var(--muted); line-height: 1.2;
+            font: 600 15px Raleway, sans-serif; font-variant-numeric: lining-nums;
         }
+        .day small { display: block; font-size: 11px; font-weight: 400; }
         .day.has { background: var(--phi); border-color: var(--phi); color: var(--bg); }
-        .day.on { outline: 2px solid var(--lambda); outline-offset: 1px; }
+        .day.on { outline: 2px solid var(--lambda); outline-offset: 2px; }
 
-        input[type=date], textarea {
+        textarea {
             width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--line);
-            border-radius: 10px; padding: 12px; font: 17px/1.45 Raleway, sans-serif; color-scheme: dark;
+            border-radius: 10px; padding: 12px; font: 17px/1.45 Raleway, sans-serif;
+            min-height: 130px; resize: vertical;
         }
-        input[type=date] { font-variant-numeric: lining-nums; margin-bottom: 14px; }
-        textarea { min-height: 130px; resize: vertical; }
-        input:focus, textarea:focus { outline: 2px solid var(--lambda); outline-offset: 0; border-color: transparent; }
+        textarea:focus { outline: 2px solid var(--lambda); outline-offset: 0; border-color: transparent; }
 
         .row { display: flex; gap: 10px; margin-top: 14px; }
         button.main, button.ghost {
@@ -63,6 +65,13 @@
             font: 700 15px Orbitron, sans-serif; letter-spacing: .04em;
         }
         button.main { background: var(--lambda); color: var(--bg); border: 0; }
+        button.mic {
+            flex: 0 0 58px; height: 58px; border-radius: 12px; cursor: pointer; display: grid; place-items: center;
+            background: transparent; color: var(--text); border: 1px solid var(--line);
+        }
+        button.mic svg { width: 26px; height: 26px; fill: currentColor; }
+        button.mic.on { background: var(--upsilon); border-color: var(--upsilon); animation: pulse 1.2s ease-in-out infinite; }
+        @keyframes pulse { 50% { box-shadow: 0 0 0 6px rgba(176, 36, 24, .35); } }
         button.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
         button:disabled { opacity: .5; cursor: default; }
         .status { min-height: 1.4em; margin-top: 10px; font: 14px Raleway, sans-serif; color: var(--muted); }
@@ -98,16 +107,16 @@
 
         <div id="app" hidden>
             <div class="card">
-                <label>Letzte 14 Tage</label>
+                <label>Letzte 5 Tage</label>
                 <div class="days" id="days"></div>
 
-                <label for="day">Tag</label>
-                <input type="date" id="day">
-
-                <label for="text" id="textLabel">Wofür bist du dankbar?</label>
-                <textarea id="text" placeholder="Dass …"></textarea>
+                <textarea id="text" placeholder="Dass …" aria-label="Wofür bist du dankbar?"></textarea>
 
                 <div class="row">
+                    <!-- mic: Material Icons "mic" (Apache 2.0) -->
+                    <button class="mic" id="micBtn" type="button" aria-label="Diktieren">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+                    </button>
                     <button class="ghost" id="cancelBtn" type="button" hidden>Abbrechen</button>
                     <button class="main" id="saveBtn" type="button">Speichern</button>
                 </div>
@@ -125,14 +134,19 @@
             const $ = id => document.getElementById(id);
             const DRAFT_KEY = 'grateful-draft';
             const WD = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+            const DAYS = 5;          // length of the day strip, today included
 
             let entries = [];        // newest first: { id, day, text }
             let editing = null;      // id of the entry being edited, else null
+            let selectedDay = null;  // YYYY-MM-DD the text is for - shown in the head line, picked in the strip
 
             /* local calendar date as YYYY-MM-DD (sv-SE formats exactly like that) */
             const iso = d => d.toLocaleDateString('sv-SE');
             const todayIso = () => iso(new Date());
             const shortDate = s => `${WD[new Date(s + 'T12:00:00').getDay()]} ${s.slice(8, 10)}.${s.slice(5, 7)}.`;
+            const longDate = s => new Intl.DateTimeFormat('de-DE', {
+                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+            }).format(new Date(s + 'T12:00:00'));
             const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
             function status(msg, cls) {
@@ -144,7 +158,7 @@
             /* the draft survives a failed save, a closed tab or a dead network */
             function saveDraft() {
                 try {
-                    localStorage.setItem(DRAFT_KEY, JSON.stringify({ day: $('day').value, text: $('text').value, editing }));
+                    localStorage.setItem(DRAFT_KEY, JSON.stringify({ day: selectedDay, text: $('text').value, editing }));
                 } catch (e) { }
             }
             function loadDraft() {
@@ -162,19 +176,23 @@
                 render();
             }
 
+            function selectDay(d) {
+                selectedDay = d;
+                $('today').textContent = longDate(d);
+            }
+
             function render() {
                 const byDay = new Set(entries.map(e => e.day));
                 const days = $('days');
                 days.innerHTML = '';
-                for (let i = 13; i >= 0; i--) {
+                for (let i = DAYS - 1; i >= 0; i--) {
                     const d = iso(new Date(Date.now() - i * 864e5));
                     const b = document.createElement('button');
                     b.type = 'button';
-                    b.className = 'day' + (byDay.has(d) ? ' has' : '') + (d === $('day').value ? ' on' : '');
-                    b.textContent = d.slice(8, 10);
-                    b.title = shortDate(d) + (byDay.has(d) ? ' – eingetragen' : ' – noch leer');
-                    b.setAttribute('aria-label', b.title);
-                    b.onclick = () => { $('day').value = d; render(); $('text').focus(); };
+                    b.className = 'day' + (byDay.has(d) ? ' has' : '') + (d === selectedDay ? ' on' : '');
+                    b.innerHTML = `<small>${WD[new Date(d + 'T12:00:00').getDay()]}</small>${d.slice(8, 10)}.${d.slice(5, 7)}.`;
+                    b.setAttribute('aria-label', shortDate(d) + (byDay.has(d) ? ' – eingetragen' : ' – noch leer'));
+                    b.onclick = () => { selectDay(d); saveDraft(); render(); $('text').focus(); };
                     days.appendChild(b);
                 }
                 $('list').innerHTML = entries.slice(0, 30).map(e =>
@@ -186,9 +204,8 @@
                 const e = entries.find(x => x.id === id);
                 if (!e) return;
                 editing = id;
-                $('day').value = e.day;
+                selectDay(e.day);
                 $('text').value = e.text;
-                $('textLabel').textContent = 'Eintrag ändern';
                 $('saveBtn').textContent = 'Ändern';
                 $('cancelBtn').hidden = false;
                 status('');
@@ -199,8 +216,8 @@
 
             function stopEdit() {
                 editing = null;
+                selectDay(todayIso());
                 $('text').value = '';
-                $('textLabel').textContent = 'Wofür bist du dankbar?';
                 $('saveBtn').textContent = 'Speichern';
                 $('cancelBtn').hidden = true;
                 clearDraft();
@@ -208,8 +225,10 @@
             }
 
             async function save() {
-                const day = $('day').value, text = $('text').value.trim();
-                if (!day || !text) { status('Bitte Tag und Text ausfüllen.', 'err'); return; }
+                // still dictating: end it first, the final text is saved right after (onFinal)
+                if (ear && ear.active) { saveAfterDictation = true; ear.stop(); return; }
+                const day = selectedDay, text = $('text').value.trim();
+                if (!text) { status('Bitte erst etwas schreiben.', 'err'); return; }
                 saveDraft();
                 $('saveBtn').disabled = true;
                 status('Speichere …');
@@ -235,6 +254,37 @@
                 }
             }
 
+            /* Dictation: the spoken text lands behind what is already typed, live while speaking */
+            let ear = null, dictBase = '', saveAfterDictation = false;
+            const join = (a, b) => (a && b ? a + ' ' + b : a || b);
+            const capital = t => t.charAt(0).toUpperCase() + t.slice(1);
+            function setMic(on) {
+                $('micBtn').classList.toggle('on', on);
+                $('micBtn').setAttribute('aria-label', on ? 'Diktat beenden' : 'Diktieren');
+            }
+            function dictate() {
+                if (ear && ear.active) { ear.stop(); return; }
+                if (!window.SolitaListen) { status('Diktieren ist hier nicht geladen.', 'err'); return; }
+                if (!ear) ear = window.SolitaListen({
+                    lang: 'de-DE',
+                    onState: st => {
+                        if (st === 'unsupported') status('Diktieren geht in diesem Browser nicht – die Mikrofon-Taste der Tastatur geht immer.', 'err');
+                        setMic(st === 'listening');
+                    },
+                    onPartial: t => { if (t) $('text').value = join(dictBase, dictBase ? t : capital(t)); },
+                    onFinal: t => {
+                        $('text').value = join(dictBase, dictBase ? t : capital(t));
+                        setMic(false);
+                        saveDraft();
+                        if (saveAfterDictation) { saveAfterDictation = false; save(); }
+                    },
+                    log: m => console.log('[grateful]', m)
+                });
+                dictBase = $('text').value.trim();
+                status('');
+                ear.start();
+            }
+
             function showApp() {
                 $('gate').hidden = true;
                 $('app').hidden = false;
@@ -242,19 +292,14 @@
             }
 
             function init() {
-                $('today').textContent = new Intl.DateTimeFormat('de-DE', {
-                    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-                }).format(new Date());
-                $('day').value = todayIso();
-                $('day').max = todayIso();
+                selectDay(todayIso());
 
                 const draft = loadDraft();
                 if (draft && draft.text) {
-                    $('day').value = draft.day || todayIso();
+                    selectDay(draft.day || todayIso());
                     $('text').value = draft.text;
                     if (draft.editing) {
                         editing = draft.editing;
-                        $('textLabel').textContent = 'Eintrag ändern';
                         $('saveBtn').textContent = 'Ändern';
                         $('cancelBtn').hidden = false;
                     }
@@ -262,8 +307,8 @@
 
                 $('text').addEventListener('input', saveDraft);
                 $('text').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) save(); });
-                $('day').addEventListener('change', () => { saveDraft(); render(); });
                 $('saveBtn').onclick = save;
+                $('micBtn').onclick = dictate;
                 $('cancelBtn').onclick = () => { stopEdit(); status(''); };
                 $('list').addEventListener('click', e => {
                     const li = e.target.closest('li[data-id]');
