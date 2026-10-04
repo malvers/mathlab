@@ -257,7 +257,8 @@
     return { open, close, key, show, isOpen: () => !!layer };
   }
 
-  const CPQuiz = { create, nextTask, taskTex, taskText, opText, OPS, GOAL, TIME, timeOf };
+  const opName = (op, de) => TEXT[de ? 'de' : 'en'].tag[op] || '';   // the quiz's name, e.g. for its own high-score list
+  const CPQuiz = { create, nextTask, taskTex, taskText, opText, opName, OPS, GOAL, TIME, timeOf };
   if (typeof module === 'object' && module.exports) module.exports = CPQuiz;
   else root.CPQuiz = CPQuiz;
 })(typeof self !== 'undefined' ? self : this);

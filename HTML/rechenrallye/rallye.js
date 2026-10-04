@@ -322,7 +322,7 @@
       board = { top: null, err: '', mine: null, rank: 0, busy: false, seconds: Math.max(3, Math.round(time)) };
       card();
       const mine = board;
-      scores({ action: 'top' }).then(j => { if (board === mine) { board.top = j.top || []; card(true); } })
+      scores(op === 'mix' ? { action: 'top' } : { action: 'top', op }).then(j => { if (board === mine) { board.top = j.top || []; card(true); } })
         .catch(() => { if (board === mine) { board.err = T().offline; card(); } });
       tone(392, 160); setTimeout(() => tone(262, 320), 170);
     }
@@ -686,7 +686,7 @@
         const form = canSave(), b = board;
         panel.innerHTML = '<div class="qz-head lost">' + esc(t.over) + '</div><div class="qz-big rl-score">' + score() + ' ' + esc(t.points) + '</div>' +
           '<div class="qz-how' + (newBest ? ' rl-record' : '') + '">' + esc(newBest ? t.record : t.best + ' ' + best) + '</div>' +
-          '<div class="rl-board"><div class="rl-bhead">' + esc(t.board) + '</div>' +
+          '<div class="rl-board"><div class="rl-bhead">' + esc(t.board) + (op === 'mix' ? '' : ' – ' + root.CPQuiz.opName(op, lang() === 'de')) + '</div>' +
           (form ? '<div class="rl-form"><input class="rl-name" maxlength="12" autocomplete="off" spellcheck="false" placeholder="' + esc(t.name) + '" value="' + esc(draft) + '"' + (b.busy ? ' disabled' : '') + '>' +
             '</div><div class="rl-note">' + esc(t.note) + '</div>' : '') +
           (b.mine ? '<div class="rl-ok">' + esc(t.saved(b.rank)) + '</div>' : '') +
@@ -694,7 +694,7 @@
           (b.err ? '<div class="rl-err">' + esc(b.err) + '</div>' : '') +
           (b.top === null ? (b.err ? '' : '<div class="rl-note">' + esc(t.loading) + '</div>') : b.top.length ? '<ol class="rl-list">' + b.top.map((e, i) =>
             '<li' + (e.id === b.mine ? ' class="me"' : '') + '><span class="rl-rank">' + (i + 1) + '.</span><span class="rl-who">' + esc(e.name) + '</span>' +
-            '<span class="rl-op">' + root.CPQuiz.opText({ op: e.op }, lang() === 'de') + '</span><span class="rl-pts">' + e.score + '</span></li>').join('') + '</ol>'
+            (op === 'mix' ? '<span class="rl-op">' + root.CPQuiz.opText({ op: e.op }, lang() === 'de') + '</span>' : '') + '<span class="rl-pts">' + e.score + '</span></li>').join('') + '</ol>'
             : '<div class="rl-note">' + esc(t.empty) + '</div>') + '</div>' +
           '<div class="qz-pills">' + (form ? pill('EXE', t.save, 'go') + pill('▲', t.again) : pill('EXE', t.again, 'go')) + pill('Clear', t.end) + '</div>';
         const inp = panel.querySelector('.rl-name');
