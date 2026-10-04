@@ -1104,9 +1104,11 @@ window.svpPlanParts.push(function (P) {
         P.matTip = tip;
     }
     function wireMatTip(a, text) {
-        a.addEventListener('mouseenter', function () { showMatTip(a, text); });
+        /* A real mouse and the keyboard only: a tap (finger or pen) also sends mouseenter and focuses the link, and
+           the tooltip then stayed behind the deck it opened (wirePillTouch: tap opens, long press shows it). */
+        a.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') showMatTip(a, text); });
         a.addEventListener('mouseleave', hideMatTip);
-        a.addEventListener('focus', function () { showMatTip(a, text); });
+        a.addEventListener('focus', function () { if (a.matches(':focus-visible')) showMatTip(a, text); });
         a.addEventListener('blur', hideMatTip);
     }
     window.addEventListener('scroll', hideMatTip, true);

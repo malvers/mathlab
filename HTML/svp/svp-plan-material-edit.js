@@ -530,8 +530,12 @@ window.svpPlanParts.push(function (P) {
     }
 
     // Touch gestures on a pill (Doc's rule for the pad):
-    //   short tap  -> description tooltip (if the link has one, else navigate)
-    //   long press -> open the link; for the owner: the pill context menu
+    //   short tap  -> open the link, like a mouse click
+    //   long press -> for the owner: the pill context menu; for everybody else: the description tooltip
+    // Doc, 04.10.2026: "Klar, direkt öffnen" - the short tap used to show only the description, and every deck pill
+    // has one, so on the HP in tablet mode neither pen nor finger ever opened a deck. The short tap is left to the
+    // browser's own click, which the pill's click handler opens: a click carries the user activation a popup window
+    // needs, the long-press timer did not (the old long press opened from there).
     // The timer is cancelled by moving the finger or lifting early.
     function wirePillTouch(a, ref, en, editable) {
         let timer = null, moved = false, fired = false;
@@ -543,8 +547,9 @@ window.svpPlanParts.push(function (P) {
                 if (moved) return;
                 fired = true;
                 P.hideMatTip();
-                if (editable) openPillMenu(t.clientX, t.clientY, ref, en.url, en.label, en.datei);
-                else P.openMat(en.url, en.label);
+                if (editable) { openPillMenu(t.clientX, t.clientY, ref, en.url, en.label, en.datei); return; }
+                const tip = en.tip != null ? en.tip : en.desc;   /* what the tooltip says (matTipText, svp-plan-material.js) */
+                if (tip) P.showMatTip(a, tip, en.url);
             }, 500);
         }, { passive: true });
         a.addEventListener('touchmove', function () { moved = true; }, { passive: true });
@@ -553,11 +558,7 @@ window.svpPlanParts.push(function (P) {
                 if (timer) { clearTimeout(timer); timer = null; }
                 if (moved) return;
                 if (fired) { e.preventDefault(); return; }       /* long press handled */
-                const tip = en.tip != null ? en.tip : en.desc;   /* what the tooltip says (matTipText, svp-plan-material.js) */
-                if (!tip) return;                                /* short tap: navigate */
-                e.preventDefault();                              /* short tap: tooltip */
-                if (P.matTip && P.matTip.dataset.for === en.url) P.hideMatTip();
-                else P.showMatTip(a, tip, en.url);
+                P.hideMatTip();                                  /* short tap: the click opens it */
             });
         });
     }
