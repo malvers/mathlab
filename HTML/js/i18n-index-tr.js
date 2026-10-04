@@ -107,6 +107,7 @@
                 "steigung": { title: "Şev Laboratuvarı", description: "Bir eğrinin herhangi bir noktasındaki eğimi anlayın. Analizin temeli." },
                 "winkellabor": { title: "Açı Laboratuvarı", description: "Açı toplamları ve üçgen türlerinin etkileşimli incelenmesi." },
                 "uhrzeitwinkel": { title: "Açı-Saat Laboratuvarı", description: "Günün herhangi bir saatinde saatin ibreleri arasındaki açıyı inceleyin." },
+                "rechenrallye": { title: "Hesap Rallisi", description: "Zihinden hesap için bir yarış oyunu: önce çarpım ya da bölme tablosu – 2 dakikada 20 doğru –, sonra 3D virajlı bir Alp yoluna. Tabela köprülerinde doğru şerit cevaptır; arka arkaya üç doğru kapı nitroyu ateşler, 3. seviyeden itibaren gün batımına sürülür. Rekor listesiyle – ve denemek için serbest sürüşle." },
                 "logikspiel": { title: "Sayı Bulmaca", description: "Matrisin ustası olun! Karmaşık sayı ızgaralarını çözün." },
                 "integralreaktor": { title: "İntegraller", description: "Bölgenin enerjisi. Riemann toplamlarını ve yaklaşım yöntemlerini görselleştirin." },
                 "lissajous": { title: "Lissajous", description: "İki harmonik salınımın süperpozisyonu: frekans ve faz." },

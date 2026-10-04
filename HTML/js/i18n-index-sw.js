@@ -107,6 +107,7 @@
                 "steigung": { title: "Maabara ya Mteremko", description: "Kuelewa mteremko wakati wowote kwenye curve. Msingi wa uchambuzi." },
                 "winkellabor": { title: "Maabara ya pembe", description: "Uchunguzi shirikishi wa jumla ya pembe na aina za pembetatu." },
                 "uhrzeitwinkel": { title: "Maabara ya Angle-Clock", description: "Chunguza pembe kati ya mikono ya saa wakati wowote wa siku." },
+                "rechenrallye": { title: "Mbio za Hesabu", description: "Mchezo wa mbio kwa hesabu za kichwa: kwanza jedwali la kuzidisha au kugawanya – majibu 20 sahihi kwa dakika 2 –, kisha barabara ya milima yenye kona kwa 3D. Kwenye milango, njia sahihi ndiyo jibu; milango mitatu sahihi mfululizo huwasha nitro, na kuanzia kiwango cha 3 unaendesha kuelekea machweo. Pamoja na orodha ya alama za juu – na safari huru ya kujaribu." },
                 "logikspiel": { title: "Puzzle ya Nambari", description: "Kuwa bwana wa matrix! Tatua gridi za nambari changamano." },
                 "integralreaktor": { title: "Viunganishi", description: "Nishati ya eneo hilo. Taswira ya hesabu za Riemann na mbinu za kukadiria." },
                 "lissajous": { title: "Lissajous", description: "Superposition ya oscillations mbili harmonic: frequency na awamu." },

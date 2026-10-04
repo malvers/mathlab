@@ -107,6 +107,7 @@
                 "steigung": { title: "Lab delle Pendenze", description: "Comprendi la pendenza in qualsiasi punto di una curva. Base dell'analisi." },
                 "winkellabor": { title: "Lab degli Angoli", description: "Indagine interattiva delle somme degli angoli e dei tipi di triangoli." },
                 "uhrzeitwinkel": { title: "Lab dell'Orologio", description: "Esamina l'angolo tra le lancette dell'orologio a qualsiasi ora." },
+                "rechenrallye": { title: "Rally del calcolo", description: "Un gioco di corse per il calcolo mentale: prima le tabelline o le divisioni – 20 risposte giuste in 2 minuti –, poi su una tortuosa strada alpina in 3D. Ai portali la corsia giusta è la risposta, tre porte giuste di fila accendono il nitro e dal livello 3 si guida verso il tramonto. Con classifica – e una corsa libera per provare." },
                 "logikspiel": { title: "Puzzle Numerico", description: "Diventa un maestro della matrice! Risolvi complesse griglie di numeri." },
                 "integralreaktor": { title: "Integrali", description: "L'energia dell'area. Visualizza le somme di Riemann e i metodi di approssimazione." },
                 "lissajous": { title: "Lissajous", description: "Sovrapposizione di due oscillazioni armoniche: frequenza e fase." },

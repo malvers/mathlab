@@ -107,6 +107,7 @@
                 "steigung": { title: "Lab. de Inclinação", description: "Entenda a inclinação em qualquer ponto." },
                 "winkellabor": { title: "Lab. de Ângulos", description: "Investigação interativa de ângulos." },
                 "uhrzeitwinkel": { title: "Lab. Relógio", description: "Examine o ângulo entre os ponteiros do relógio." },
+                "rechenrallye": { title: "Rali do cálculo", description: "Um jogo de corrida para o cálculo mental: primeiro a tabuada de multiplicar ou de dividir – 20 certas em 2 minutos –, depois para uma sinuosa estrada alpina em 3D. Nos pórticos, a faixa certa é a resposta; três portas certas seguidas acendem o nitro, e a partir do nível 3 conduz-se para o pôr do sol. Com tabela de recordes – e uma volta livre para experimentar." },
                 "logikspiel": { title: "Quebra-cabeça de Números", description: "Torne-se um mestre da matriz! Resolve grades complexas." },
                 "integralreaktor": { title: "Integrais", description: "A energia da área. Visualize somas de Riemann." },
                 "lissajous": { title: "Lissajous", description: "Superposição de duas oscilações harmônicas." },

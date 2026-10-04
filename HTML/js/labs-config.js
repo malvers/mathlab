@@ -673,13 +673,24 @@ const LABS_DATA = [
         "color": "orange"
     },
     {
+        "id": "rechenrallye",
+        "href": "rechenrallye/index.html",
+        "title": "Rechen-Rallye",
+        "description": "Ein Rennspiel fürs Kopfrechnen: erst das kleine 1⋅1 oder 1÷1 – 20 Aufgaben richtig in 2 Minuten –, dann geht es auf eine kurvige Alpenstraße in 3D. An Schilderbrücken ist die richtige Spur die Antwort, drei richtige Tore hintereinander zünden den Nitro, ab Level 3 fährt man in den Sonnenuntergang. Mit Hitliste – und einer freien Fahrt zum Ausprobieren.",
+        "tagline": "Kopfrechnen / 1⋅1 und 1÷1 / 3D-Rennen",
+        "icon": LAB_ICONS["rechenrallye"],
+        "category": "games arithmetik neu hot grade5",
+        "keywords": "rechen rallye rallye rennen rennspiel auto spiel game einmaleins einsdurcheins 1x1 kleines einmaleins teilen dividieren multiplizieren kopfrechnen quiz hitliste highscore nitro alpen 3d",
+        "color": "gold"
+    },
+    {
         "id": "logikspiel",
         "href": "logikspiel2.html",
         "title": "Zahlen-Puzzle",
         "description": "Werde zum Meister der Matrix! Löse komplexe Zahlen-Gitter durch Addition oder Multiplikation. Ein hochmoderner Strategie-Hacker für Mathe-Profis.",
         "tagline": "Logik / Arithmetik / Matrix-Hacking",
         "icon": LAB_ICONS["logikspiel"],
-        "category": "arithmetik logik hot grade5",
+        "category": "games arithmetik logik hot grade5",
         "keywords": "spiel game logik summen rätsel puzzle logic arithmetic sum grid multiplikation",
         "color": "green"
     },

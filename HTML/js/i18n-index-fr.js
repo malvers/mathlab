@@ -107,6 +107,7 @@
                 "steigung": { title: "Labo de Pente", description: "Comprenez la pente en tout point d'une courbe. Base de l'analyse." },
                 "winkellabor": { title: "Labo d'Angles", description: "Investigation interactive des sommes d'angles et des types de triangles." },
                 "uhrzeitwinkel": { title: "Labo Horloge", description: "Examinez l'angle entre les aiguilles d'une horloge à n'importe quelle heure." },
+                "rechenrallye": { title: "Rallye du calcul", description: "Un jeu de course pour le calcul mental : d’abord les tables de multiplication ou de division – 20 bonnes réponses en 2 minutes –, puis en route sur une route alpine sinueuse en 3D. Aux portiques, la bonne voie est la réponse ; trois bonnes portes d’affilée allument le nitro, et dès le niveau 3 on roule vers le coucher du soleil. Avec tableau des records – et une course libre pour essayer." },
                 "logikspiel": { title: "Puzzle Numérique", description: "Devenez un maître de la matrice ! Résolvez des grilles de nombres complexes." },
                 "integralreaktor": { title: "Intégrales", description: "L'énergie de l'aire. Visualisez les sommes de Riemann et les méthodes d'approximation." },
                 "lissajous": { title: "Lissajous", description: "Superposition de deux oscillations harmoniques : fréquence et phase." },

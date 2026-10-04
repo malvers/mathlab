@@ -107,6 +107,7 @@
                 "steigung": { title: "Hellingslab", description: "Begrijp de helling in elk punt van een kromme. Basis van analyse." },
                 "winkellabor": { title: "Hoekenlab", description: "Interactief onderzoek naar hoekensommen en driehoekstypes." },
                 "uhrzeitwinkel": { title: "Klokhoeken-lab", description: "Onderzoek de hoek tussen de wijzers op elk moment van de dag." },
+                "rechenrallye": { title: "Rekenrally", description: "Een racespel voor hoofdrekenen: eerst de tafels van vermenigvuldigen of delen – 20 goed in 2 minuten –, dan de bochtige alpenweg op in 3D. Bij de portalen is de juiste rijstrook het antwoord, drie goede poorten op rij ontsteken de nitro, en vanaf level 3 rijd je de zonsondergang in. Met highscorelijst – en een vrije rit om te proberen." },
                 "logikspiel": { title: "Getallenpuzzel", description: "Word meester van de matrix! Los complexe getallenroosters op." },
                 "integralreaktor": { title: "Integralen", description: "De energie van het oppervlak. Visualiseer Riemannsommen en benaderingen." },
                 "lissajous": { title: "Lissajous", description: "Superpositie van twee harmonische trillingen: frequentie en fase." },

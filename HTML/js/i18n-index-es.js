@@ -107,6 +107,7 @@
                 "steigung": { title: "Laboratorio de Pendientes", description: "Entienda la pendiente en cualquier punto de una curva. Base del análisis." },
                 "winkellabor": { title: "Laboratorio de Ángulos", description: "Investigación interactiva de sumas de ángulos y tipos de triángulos." },
                 "uhrzeitwinkel": { title: "Laboratorio de Reloj de Ángulos", description: "Examine el ángulo entre las manecillas del reloj en cualquier momento del día." },
+                "rechenrallye": { title: "Rally de cálculo", description: "Un juego de carreras para el cálculo mental: primero las tablas de multiplicar o de dividir – 20 aciertos en 2 minutos –, luego a una sinuosa carretera alpina en 3D. En los pórticos, el carril correcto es la respuesta; tres aciertos seguidos encienden el nitro, y desde el nivel 3 se conduce hacia el atardecer. Con tabla de récords – y un paseo libre para probar." },
                 "logikspiel": { title: "Puzzle de Números", description: "¡Conviértase en un maestro de la matriz! Resuelva cuadrículas de números complejas." },
                 "integralreaktor": { title: "Integrales", description: "La energía del área. Visualice sumas de Riemann y métodos de aproximación." },
                 "lissajous": { title: "Lissajous", description: "Superposición de dos oscilaciones armónicas: frecuencia y fase." },

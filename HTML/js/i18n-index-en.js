@@ -107,6 +107,7 @@
                 "steigung": { title: "Slope Lab", description: "Understand the slope at any point on a curve. Basis of analysis." },
                 "winkellabor": { title: "Angle Lab", description: "Interactive investigation of angle sums and triangle types." },
                 "uhrzeitwinkel": { title: "Angle-Clock Lab", description: "Examine the angle between clock hands at any time of day." },
+                "rechenrallye": { title: "Math Rally", description: "A racing game for mental arithmetic: first the small times or division tables – 20 right in 2 minutes –, then onto a winding alpine road in 3D. At sign bridges the right lane is the answer, three right gates in a row light the nitro, and from level 3 you drive into the sunset. With a high-score list – and a free ride to try it out." },
                 "logikspiel": { title: "Number Puzzle", description: "Become a master of the matrix! Solve complex number grids." },
                 "integralreaktor": { title: "Integrals", description: "The energy of the area. Visualize Riemann sums and approximation methods." },
                 "lissajous": { title: "Lissajous", description: "Superposition of two harmonic oscillations: frequency and phase." },

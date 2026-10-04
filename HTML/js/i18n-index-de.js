@@ -34,7 +34,7 @@
                 tools_universe_aria: "Universe · Labor-Galerie im Weltraum öffnen",
                 tools_doc_title: "Cyber-Labor | Mission Control",
                 education: "EDUCATION",
-                games: "Spiele",
+                games: "Games",                 // Doc 04.10.2026: "Gaming oder Spiele. English"
                 lgs: "Gleichungssysteme",
                 pythagoras: "Pythagoras",
                 triangles: "Dreiecke",
@@ -108,6 +108,7 @@
                 "steigung": { title: "Steigungs-Labor", description: "Verstehe die Steigung an jedem Punkt einer Kurve. Basis der Analysis." },
                 "winkellabor": { title: "Winkel-Labor", description: "Interaktive Untersuchung von Winkelsummen und Dreieckstypen." },
                 "uhrzeitwinkel": { title: "Winkel-Uhr Labor", description: "Untersuche den Winkel zwischen Zeigern zu jeder Tageszeit." },
+                "rechenrallye": { title: "Rechen-Rallye", description: "Ein Rennspiel fürs Kopfrechnen: erst das kleine 1⋅1 oder 1÷1 – 20 Aufgaben richtig in 2 Minuten –, dann geht es auf eine kurvige Alpenstraße in 3D. An Schilderbrücken ist die richtige Spur die Antwort, drei richtige Tore hintereinander zünden den Nitro, ab Level 3 fährt man in den Sonnenuntergang. Mit Hitliste – und einer freien Fahrt zum Ausprobieren." },
                 "logikspiel": { title: "Zahlen-Puzzle", description: "Werde zum Meister der Matrix! Löse komplexe Zahlen-Gitter." },
                 "integralreaktor": { title: "Integrale", description: "Die Energie der Fläche. Visualisiere Riemann-Summen und Näherungsverfahren." },
                 "lissajous": { title: "Lissajous", description: "Überlagerung zweier harmonischer Schwingungen: Frequenz und Phase." },

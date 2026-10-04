@@ -36,6 +36,21 @@ const LAB_ICONS = {
             <circle cx="36.0" cy="34.4" r="3.2" fill="rgb(121, 158, 49)" />
             <circle cx="59.2" cy="34.4" r="3.2" fill="#F5C242" />
         </svg>`,
+    "rechenrallye": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- Rechen-Rallye, in the tiles' neon lines: the mountains, the road running to them, a sign bridge with a
+                 task, the orange car from behind -->
+            <polyline points="4,48 22,27 33,38 52,17 70,39 80,31 96,48" fill="none" stroke="rgba(157, 232, 255, 0.75)" stroke-width="2" stroke-linejoin="round" />
+            <line x1="4" y1="50" x2="96" y2="50" stroke="rgba(157, 232, 255, 0.3)" stroke-width="1.4" />
+            <g stroke="#DBE8F7" stroke-width="2.6" stroke-linecap="round"><line x1="45" y1="50" x2="14" y2="96" /><line x1="55" y1="50" x2="86" y2="96" /></g>
+            <g stroke="#F5C242" stroke-width="2.2" stroke-linecap="round"><line x1="50" y1="54" x2="50" y2="59" /><line x1="50" y1="64" x2="50" y2="71" /></g>
+            <g stroke="#5A96FF" stroke-width="1.8"><line x1="34" y1="33" x2="34" y2="50" /><line x1="66" y1="33" x2="66" y2="50" /></g>
+            <rect x="31" y="25" width="38" height="10" rx="2.5" fill="rgba(90, 150, 255, 0.22)" stroke="#5A96FF" stroke-width="1.8" />
+            <text x="50" y="32.6" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="7" fill="#DBE8F7">7 · 8 = ?</text>
+            <path d="M38 80 Q38 74 44 73.5 L56 73.5 Q62 74 62 80" fill="none" stroke="#F5C242" stroke-width="2.2" stroke-linejoin="round" />
+            <rect x="33" y="79" width="34" height="11" rx="4" fill="rgba(245, 194, 66, 0.28)" stroke="#F5C242" stroke-width="2.4" />
+            <g fill="#E06A5E"><rect x="36" y="82.4" width="7" height="2.6" rx="1.2" /><rect x="57" y="82.4" width="7" height="2.6" rx="1.2" /></g>
+            <g stroke="#DBE8F7" stroke-width="3" stroke-linecap="round"><line x1="36.5" y1="92" x2="36.5" y2="95" /><line x1="63.5" y1="92" x2="63.5" y2="95" /></g>
+        </svg>`,
     "wuerfelspiel": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- tree diagram: Lena's three branches, Mia's two on every end, green = Lena wins -->
             <g stroke="rgba(157, 232, 255, 0.85)" stroke-width="2" stroke-linecap="round">
