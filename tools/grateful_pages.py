@@ -31,17 +31,17 @@ FILES = {
     'svp/svp-gate.js': 'svp/svp-gate.js',
     'js/natur-bild.js': 'js/natur-bild.js',          # svp-gate.js loads it from ../js/
     'js/solita-listen.js': 'js/solita-listen.js',    # dictation
-    'resources/favicon.svg': 'icons/favicon.svg',
-    'resources/apple-touch-icon.png': 'icons/apple-touch-icon.png',
-    'resources/app-192.png': 'icons/app-192.png',
-    'resources/app-512.png': 'icons/app-512.png',
-    'resources/app-512-maskable.png': 'icons/app-512-maskable.png',
+    # the app's own icon (hand with heart), see grateful/icons/icon.svg
+    'grateful/icons/icon.svg': 'icons/icon.svg',
+    'grateful/icons/apple-touch-icon.png': 'icons/apple-touch-icon.png',
+    'grateful/icons/app-192.png': 'icons/app-192.png',
+    'grateful/icons/app-512.png': 'icons/app-512.png',
+    'grateful/icons/app-512-maskable.png': 'icons/app-512-maskable.png',
 }
 
 # the page sits one level deeper in forloop (HTML/grateful/) than in the mirror (its root)
 REWRITE = {
-    'index.html': [('../svp/', 'svp/'), ('../js/', 'js/'), ('../resources/', 'icons/')],
-    'manifest.webmanifest': [('../resources/', 'icons/')],
+    'index.html': [('../svp/', 'svp/'), ('../js/', 'js/')],
 }
 
 README = """# I'm grateful for

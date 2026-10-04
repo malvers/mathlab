@@ -8,8 +8,8 @@
     <meta name="theme-color" content="#08142a">
     <title>I'm grateful for</title>
     <link rel="manifest" href="manifest.webmanifest">
-    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
-    <link rel="apple-touch-icon" href="../resources/apple-touch-icon.png">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
     <!-- Doc's own Supabase account (shared SVP login): only that uid may read or write table grateful (RLS) -->
     <script src="../svp/svp-gate.js"></script>
@@ -36,10 +36,18 @@
             padding: max(20px, env(safe-area-inset-top)) 16px max(40px, env(safe-area-inset-bottom));
         }
         .wrap { max-width: 640px; margin: 0 auto; }
-        h1 { font-size: clamp(22px, 6vw, 30px); font-weight: 700; margin: 0 0 4px; letter-spacing: .04em; }
-        .today { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+        h1 {
+            font-size: clamp(22px, 6vw, 30px); font-weight: 700; margin: 0 0 18px; letter-spacing: .04em;
+            display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+        }
 
         .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+        /* the entry panel takes half of the space below the heading (~76px: body padding + h1), the text field grows */
+        .card.entry {
+            display: flex; flex-direction: column;
+            min-height: calc((100vh - 76px) / 2); min-height: calc((100dvh - 76px) / 2);
+        }
+        .card.entry textarea { flex: 1 1 auto; }
         label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 6px; letter-spacing: .03em; }
 
         .days { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
@@ -75,6 +83,7 @@
         button.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
         button:disabled { opacity: .5; cursor: default; }
         .status { min-height: 1.4em; margin-top: 10px; font: 14px Raleway, sans-serif; color: var(--muted); }
+        .status:empty { min-height: 0; margin-top: 0; }   /* no gap while there is nothing to say - the text field gets it */
         .status.ok { color: var(--phi); }
         .status.err { color: var(--lambda); }
 
@@ -97,8 +106,8 @@
 
 <body>
     <div class="wrap">
-        <h1>I'm grateful for …</h1>
-        <div class="today" id="today"></div>
+        <!-- the year of the selected day; the day itself is the yellow frame in the strip -->
+        <h1><span>I'm grateful for …</span><span id="year"></span></h1>
 
         <div class="card gate" id="gate" hidden>
             <p>Bitte einmal anmelden, danach merkt sich das Gerät die Anmeldung.</p>
@@ -106,19 +115,18 @@
         </div>
 
         <div id="app" hidden>
-            <div class="card">
-                <label>Letzte 5 Tage</label>
-                <div class="days" id="days"></div>
+            <div class="card entry">
+                <div class="days" id="days" role="group" aria-label="Letzte 5 Tage"></div>
 
                 <textarea id="text" placeholder="Dass …" aria-label="Wofür bist du dankbar?"></textarea>
 
                 <div class="row">
+                    <button class="ghost" id="cancelBtn" type="button" hidden>Abbrechen</button>
+                    <button class="main" id="saveBtn" type="button">Speichern</button>
                     <!-- mic: Material Icons "mic" (Apache 2.0) -->
                     <button class="mic" id="micBtn" type="button" aria-label="Diktieren">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
                     </button>
-                    <button class="ghost" id="cancelBtn" type="button" hidden>Abbrechen</button>
-                    <button class="main" id="saveBtn" type="button">Speichern</button>
                 </div>
                 <div class="status" id="status" role="status"></div>
             </div>
@@ -137,17 +145,22 @@
             const DAYS = 5;          // length of the day strip, today included
 
             let entries = [];        // newest first: { id, day, text }
-            let editing = null;      // id of the entry being edited, else null
-            let selectedDay = null;  // YYYY-MM-DD the text is for - shown in the head line, picked in the strip
+            let selectedDay = null;  // YYYY-MM-DD the form is for - yellow frame in the strip, its year in the head
+            let editing = null;      // id of the selected day's entry, null while the day is still empty
+            let newTexts = {};       // day -> text typed for a day without entry, kept while other days are looked at
 
             /* local calendar date as YYYY-MM-DD (sv-SE formats exactly like that) */
             const iso = d => d.toLocaleDateString('sv-SE');
             const todayIso = () => iso(new Date());
             const shortDate = s => `${WD[new Date(s + 'T12:00:00').getDay()]} ${s.slice(8, 10)}.${s.slice(5, 7)}.`;
-            const longDate = s => new Intl.DateTimeFormat('de-DE', {
-                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-            }).format(new Date(s + 'T12:00:00'));
             const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const byId = id => entries.find(x => x.id === id);
+            /* remember what is typed for an empty day (per day) */
+            function keepNew() {
+                if (editing) return;
+                const t = $('text').value;
+                if (t.trim()) newTexts[selectedDay] = t; else delete newTexts[selectedDay];
+            }
 
             function status(msg, cls) {
                 const el = $('status');
@@ -158,14 +171,11 @@
             /* the draft survives a failed save, a closed tab or a dead network */
             function saveDraft() {
                 try {
-                    localStorage.setItem(DRAFT_KEY, JSON.stringify({ day: selectedDay, text: $('text').value, editing }));
+                    localStorage.setItem(DRAFT_KEY, JSON.stringify({ day: selectedDay, editing, text: $('text').value, newTexts }));
                 } catch (e) { }
             }
             function loadDraft() {
-                try { return JSON.parse(localStorage.getItem(DRAFT_KEY)); } catch (e) { return null; }
-            }
-            function clearDraft() {
-                try { localStorage.removeItem(DRAFT_KEY); } catch (e) { }
+                try { return JSON.parse(localStorage.getItem(DRAFT_KEY)) || {}; } catch (e) { return {}; }
             }
 
             async function load() {
@@ -173,13 +183,28 @@
                 const res = await auth.api(`grateful?select=id,day,text&day=gte.${since}&order=day.desc,id.desc`);
                 if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? 'Kein Zugriff mit diesem Konto' : 'HTTP ' + res.status);
                 entries = await res.json();
-                render();
             }
 
-            function selectDay(d) {
-                selectedDay = d;
-                $('today').textContent = longDate(d);
+            /* Save button names what happens; "Abbrechen" only while a stored entry has unsaved changes (it reverts) */
+            function buttons() {
+                const e = editing && byId(editing);
+                $('saveBtn').textContent = editing ? 'Ändern' : 'Speichern';
+                $('cancelBtn').hidden = !(e && $('text').value !== e.text);
             }
+
+            /* The form always shows the selected day: its stored entry, or the text typed for a new one */
+            function fill(day, entry) {
+                if (ear && ear.active) ear.stop();       // a running dictation belongs to the day it started on
+                selectedDay = day;
+                $('year').textContent = day.slice(0, 4);
+                editing = entry ? entry.id : null;
+                $('text').value = entry ? entry.text : (newTexts[day] || '');
+                buttons();
+                render();
+                saveDraft();
+            }
+            const showDay = d => fill(d, entries.find(x => x.day === d));   // newest entry of that day
+            const showEntry = id => { const e = byId(id); if (e) fill(e.day, e); };
 
             function render() {
                 const byDay = new Set(entries.map(e => e.day));
@@ -192,36 +217,12 @@
                     b.className = 'day' + (byDay.has(d) ? ' has' : '') + (d === selectedDay ? ' on' : '');
                     b.innerHTML = `<small>${WD[new Date(d + 'T12:00:00').getDay()]}</small>${d.slice(8, 10)}.${d.slice(5, 7)}.`;
                     b.setAttribute('aria-label', shortDate(d) + (byDay.has(d) ? ' – eingetragen' : ' – noch leer'));
-                    b.onclick = () => { selectDay(d); saveDraft(); render(); $('text').focus(); };
+                    b.onclick = () => { status(''); showDay(d); };
                     days.appendChild(b);
                 }
                 $('list').innerHTML = entries.slice(0, 30).map(e =>
                     `<li data-id="${e.id}"><time datetime="${e.day}">${shortDate(e.day)}</time><span>${esc(e.text)}</span></li>`
                 ).join('');
-            }
-
-            function startEdit(id) {
-                const e = entries.find(x => x.id === id);
-                if (!e) return;
-                editing = id;
-                selectDay(e.day);
-                $('text').value = e.text;
-                $('saveBtn').textContent = 'Ändern';
-                $('cancelBtn').hidden = false;
-                status('');
-                render();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                $('text').focus();
-            }
-
-            function stopEdit() {
-                editing = null;
-                selectDay(todayIso());
-                $('text').value = '';
-                $('saveBtn').textContent = 'Speichern';
-                $('cancelBtn').hidden = true;
-                clearDraft();
-                render();
             }
 
             async function save() {
@@ -233,9 +234,10 @@
                 $('saveBtn').disabled = true;
                 status('Speichere …');
                 try {
-                    const res = editing
+                    const wasEdit = !!editing;
+                    const res = wasEdit
                         ? await auth.api(`grateful?id=eq.${editing}`, {
-                            method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ day, text })
+                            method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ text })
                         })
                         : await auth.api('grateful', {
                             method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify([{ day, text }])
@@ -243,9 +245,9 @@
                     if (!res.ok) throw new Error('HTTP ' + res.status);
                     const rows = await res.json();
                     if (!rows.length) throw new Error('nichts gespeichert');
-                    const wasEdit = !!editing;
-                    stopEdit();
+                    if (!wasEdit) delete newTexts[day];
                     await load();
+                    showEntry(rows[0].id);
                     status(wasEdit ? 'Geändert.' : 'Gespeichert. Schön!', 'ok');
                 } catch (e) {
                     status('Nicht gespeichert (' + e.message + ') – der Text bleibt hier stehen.', 'err');
@@ -255,12 +257,18 @@
             }
 
             /* Dictation: the spoken text lands behind what is already typed, live while speaking */
-            let ear = null, dictBase = '', saveAfterDictation = false;
+            let ear = null, dictBase = '', dictDay = null, saveAfterDictation = false;
             const join = (a, b) => (a && b ? a + ' ' + b : a || b);
             const capital = t => t.charAt(0).toUpperCase() + t.slice(1);
             function setMic(on) {
                 $('micBtn').classList.toggle('on', on);
                 $('micBtn').setAttribute('aria-label', on ? 'Diktat beenden' : 'Diktieren');
+            }
+            function dictated(t) {
+                if (selectedDay !== dictDay) return;    // the day was switched meanwhile
+                $('text').value = join(dictBase, dictBase ? t : capital(t));
+                keepNew();
+                buttons();
             }
             function dictate() {
                 if (ear && ear.active) { ear.stop(); return; }
@@ -271,9 +279,9 @@
                         if (st === 'unsupported') status('Diktieren geht in diesem Browser nicht – die Mikrofon-Taste der Tastatur geht immer.', 'err');
                         setMic(st === 'listening');
                     },
-                    onPartial: t => { if (t) $('text').value = join(dictBase, dictBase ? t : capital(t)); },
+                    onPartial: t => { if (t) dictated(t); },
                     onFinal: t => {
-                        $('text').value = join(dictBase, dictBase ? t : capital(t));
+                        dictated(t);
                         setMic(false);
                         saveDraft();
                         if (saveAfterDictation) { saveAfterDictation = false; save(); }
@@ -281,38 +289,48 @@
                     log: m => console.log('[grateful]', m)
                 });
                 dictBase = $('text').value.trim();
+                dictDay = selectedDay;
                 status('');
                 ear.start();
             }
 
-            function showApp() {
+            async function showApp() {
                 $('gate').hidden = true;
                 $('app').hidden = false;
-                load().catch(e => status(e.message, 'err'));
+                try { await load(); } catch (e) { status(e.message, 'err'); }
+                // back to where the last visit stopped, unsaved text included
+                const d = loadDraft();
+                newTexts = d.newTexts || {};
+                if (d.editing && byId(d.editing)) showEntry(d.editing);
+                else showDay(d.day && !d.editing ? d.day : todayIso());
+                if (typeof d.text === 'string' && d.day === selectedDay && d.text !== $('text').value) {
+                    $('text').value = d.text;
+                    keepNew();
+                    buttons();
+                }
             }
 
             function init() {
-                selectDay(todayIso());
-
-                const draft = loadDraft();
-                if (draft && draft.text) {
-                    selectDay(draft.day || todayIso());
-                    $('text').value = draft.text;
-                    if (draft.editing) {
-                        editing = draft.editing;
-                        $('saveBtn').textContent = 'Ändern';
-                        $('cancelBtn').hidden = false;
-                    }
-                }
-
-                $('text').addEventListener('input', saveDraft);
+                $('year').textContent = todayIso().slice(0, 4);
+                $('text').addEventListener('input', () => {
+                    keepNew();
+                    buttons();
+                    saveDraft();
+                });
                 $('text').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) save(); });
                 $('saveBtn').onclick = save;
                 $('micBtn').onclick = dictate;
-                $('cancelBtn').onclick = () => { stopEdit(); status(''); };
+                $('cancelBtn').onclick = () => {   // revert the stored entry
+                    const e = editing && byId(editing);
+                    if (e) { $('text').value = e.text; buttons(); saveDraft(); }
+                    status('');
+                };
                 $('list').addEventListener('click', e => {
                     const li = e.target.closest('li[data-id]');
-                    if (li) startEdit(Number(li.dataset.id));
+                    if (!li) return;
+                    status('');
+                    showEntry(Number(li.dataset.id));
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
                 $('loginBtn').onclick = () => auth.loginDialog(showApp, 'Anmelden für dein Dankbarkeits-Tagebuch');
 
