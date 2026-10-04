@@ -5,8 +5,11 @@
    The photo is a fixed layer behind the page (cheap to scroll); the sticky head carries the same photo, fixed to the
    window too, so it still hides the rows that pass under it and shows no seam. Cards and the table are --card-soft,
    already a little transparent: there the photo shines through only faintly. */
-html.natur { --natur-deckung: 86%; }
-html.natur.svp-light { --natur-deckung: 82%; }
+/* 14 % of the photo shows through, 18 % in the light scheme - times --natur-mal, the transparency slider in the picker
+   (js/natur-bild.js; Doc, 04.10.2026: "gib mir unten noch einen Slider für die Transparenz"): 0 hides the photo, 1 is
+   the standard, 5 lets five times as much through */
+html.natur { --natur-deckung: calc(100% - 14% * var(--natur-mal, 1)); }
+html.natur.svp-light { --natur-deckung: calc(100% - 18% * var(--natur-mal, 1)); }
 html.natur {
     --natur-schleier: linear-gradient(color-mix(in srgb, var(--bg) var(--natur-deckung), transparent),
         color-mix(in srgb, var(--bg) var(--natur-deckung), transparent));
@@ -29,6 +32,13 @@ html.natur .svp-sticktop::before {
    sein", "das sieht irgendwie abgehackt aus. Es müsste unter allem sozusagen zu sehen sein") */
 html.natur .nav-band { background: transparent; border-bottom-color: transparent; }   /* and no line under it (Doc, 01.10.2026: "nehmen die Linie mal noch raus") */
 html.natur .plan-sticky.stuck { box-shadow: none; }
+/* with no ground and no line under the band, the pills keep the same 8 px to the ticker as the ticker keeps to the
+   search row (Doc, 04.10.2026: "so groß wie Abstand Ticker und die darunterliegende Suchzeile"; it was 25.5 px).
+   The sticky head starts flush under the pills (transparent 1 px line + 9 px margin - its own -10 px margin = 0) and
+   brings the 8 px as its top padding: with the 10 px it had, its photo ground covered the pills' lower 2 px. Stuck,
+   the ticker so sits 8 px under the window edge - the same rhythm as ticker, search row and heading below */
+html.natur .nav-band:has(+ .plan-sticky > .nav-news-dock) { padding-bottom: 0; margin-bottom: 9px; }
+html.natur .plan-sticky:has(> .nav-news-dock) { padding-top: 8px; }
 /* the plan table a little more see-through than its --card-soft (white 85 %, dark 55 %), so the photo shows under the
    weeks too (Doc, 01.10.2026: "nur die Tabelle unten, die ab Sommerferien beginnt. Ganz leicht transparent").
    Its sticky head row keeps its full --panel, so the rows still vanish under it */

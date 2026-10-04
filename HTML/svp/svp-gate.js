@@ -29,6 +29,21 @@
     s.src = new URL('../js/natur-bild.js', me.src).href;
     document.head.appendChild(s);
 })();
+// A right click opens the picker for that photo instead of Chrome's menu (Doc, 04.10.2026: "das doofe Menü von Chrome
+// ... Mach das da weg. Und gib mir da irgendwie ein Menü, wo ich die Hintergrundbilder einstellen kann"). Text fields
+// keep Chrome's menu (paste), Shift + right click brings it back anywhere (Inspect). Menus of their own (the owner's
+// pill menu) stop the event before it gets here. Mouse only: a long press with finger or pen stays as it was.
+(function () {
+    let lastPointer = 'mouse';
+    addEventListener('pointerdown', function (e) { lastPointer = e.pointerType; }, true);
+    addEventListener('contextmenu', function (e) {
+        if (e.defaultPrevented || e.shiftKey || !window.NaturBild || !window.NaturBild.menu) return;
+        if ((e.pointerType || lastPointer) !== 'mouse') return;
+        if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"])')) return;
+        e.preventDefault();
+        window.NaturBild.menu(e.clientX, e.clientY);
+    });
+})();
 
 (function () {
     // TEMP (2026-08-19, Doc): global gate disabled — set GATE_OFF to false to re-enable.
