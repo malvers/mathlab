@@ -125,6 +125,16 @@
                 pwd.focus();
                 return;
             }
+            /* The dialog is no <form>, so Chrome never sees a login and never offers to save the password.
+               Hand it over explicitly (capped, store() can hang without a password manager) - Doc 04.10.2026. */
+            if (window.PasswordCredential && navigator.credentials) {
+                try {
+                    await Promise.race([
+                        navigator.credentials.store(new PasswordCredential({ id: email.value.trim(), password: pwd.value.replace(/[\r\n]+$/, '') })),
+                        new Promise(r => setTimeout(r, 1500))
+                    ]);
+                } catch (e) { }
+            }
             overlay.remove();
             if (onOk) onOk();
         }

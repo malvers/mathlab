@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#08142a">
+    <title>I'm grateful for</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="apple-touch-icon" href="../resources/apple-touch-icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Doc's own Supabase account (shared SVP login): only that uid may read or write table grateful (RLS) -->
+    <script src="../svp/svp-gate.js"></script>
+    <script src="../svp/svp-auth.js"></script>
+    <style>
+        /* --- plain standalone page (like vote.html), deliberately no lab shell CSS --- */
+        :root {
+            --bg: rgb(8, 20, 42);
+            --card: rgb(14, 36, 78);
+            --line: rgba(120, 160, 220, .22);
+            --text: rgb(214, 226, 245);
+            --muted: rgb(110, 128, 160);
+            --lambda: rgb(245, 194, 66);
+            --upsilon: rgb(176, 36, 24);
+            --phi: rgb(121, 158, 49);
+        }
+
+        * { box-sizing: border-box; }
+        html, body { margin: 0; background: var(--bg); color: var(--text); }
+        body {
+            font-family: Orbitron, sans-serif;
+            padding: max(20px, env(safe-area-inset-top)) 16px max(40px, env(safe-area-inset-bottom));
+        }
+        .wrap { max-width: 640px; margin: 0 auto; }
+        h1 { font-size: clamp(22px, 6vw, 30px); font-weight: 700; margin: 0 0 4px; letter-spacing: .04em; }
+        .today { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+
+        .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+        label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 6px; letter-spacing: .03em; }
+
+        .days { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; margin-bottom: 14px; }
+        .day {
+            aspect-ratio: 1; border-radius: 6px; border: 1px solid var(--line); background: var(--bg);
+            padding: 0; cursor: pointer; font: 600 10px Raleway, sans-serif; color: var(--muted);
+            font-variant-numeric: lining-nums;
+        }
+        .day.has { background: var(--phi); border-color: var(--phi); color: var(--bg); }
+        .day.on { outline: 2px solid var(--lambda); outline-offset: 1px; }
+
+        input[type=date], textarea {
+            width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--line);
+            border-radius: 10px; padding: 12px; font: 17px/1.45 Raleway, sans-serif; color-scheme: dark;
+        }
+        input[type=date] { font-variant-numeric: lining-nums; margin-bottom: 14px; }
+        textarea { min-height: 130px; resize: vertical; }
+        input:focus, textarea:focus { outline: 2px solid var(--lambda); outline-offset: 0; border-color: transparent; }
+
+        .row { display: flex; gap: 10px; margin-top: 14px; }
+        button.main, button.ghost {
+            flex: 1; height: 58px; border-radius: 12px; cursor: pointer;
+            font: 700 15px Orbitron, sans-serif; letter-spacing: .04em;
+        }
+        button.main { background: var(--lambda); color: var(--bg); border: 0; }
+        button.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+        button:disabled { opacity: .5; cursor: default; }
+        .status { min-height: 1.4em; margin-top: 10px; font: 14px Raleway, sans-serif; color: var(--muted); }
+        .status.ok { color: var(--phi); }
+        .status.err { color: var(--lambda); }
+
+        h2 { font-size: 14px; font-weight: 600; letter-spacing: .03em; margin: 26px 0 10px; }
+        ol.list { list-style: none; margin: 0; padding: 0; }
+        ol.list li {
+            display: grid; grid-template-columns: 6.2em 1fr; gap: 10px; padding: 10px 4px;
+            border-top: 1px solid var(--line); cursor: pointer; font: 15px/1.45 Raleway, sans-serif;
+        }
+        ol.list li:first-child { border-top: 0; }
+        ol.list li:hover { background: rgba(120, 160, 220, .06); }
+        ol.list time { color: var(--muted); font-variant-numeric: lining-nums tabular-nums; }
+
+        .gate { text-align: center; padding: 30px 16px; }
+        .gate p { font: 15px/1.5 Raleway, sans-serif; color: var(--muted); margin: 0 0 18px; }
+        .gate button { max-width: 260px; }
+        [hidden] { display: none !important; }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <h1>I'm grateful for …</h1>
+        <div class="today" id="today"></div>
+
+        <div class="card gate" id="gate" hidden>
+            <p>Bitte einmal anmelden, danach merkt sich das Gerät die Anmeldung.</p>
+            <button class="main" id="loginBtn" type="button">Anmelden</button>
+        </div>
+
+        <div id="app" hidden>
+            <div class="card">
+                <label>Letzte 14 Tage</label>
+                <div class="days" id="days"></div>
+
+                <label for="day">Tag</label>
+                <input type="date" id="day">
+
+                <label for="text" id="textLabel">Wofür bist du dankbar?</label>
+                <textarea id="text" placeholder="Dass …"></textarea>
+
+                <div class="row">
+                    <button class="ghost" id="cancelBtn" type="button" hidden>Abbrechen</button>
+                    <button class="main" id="saveBtn" type="button">Speichern</button>
+                </div>
+                <div class="status" id="status" role="status"></div>
+            </div>
+
+            <h2>Zuletzt</h2>
+            <ol class="list" id="list"></ol>
+        </div>
+    </div>
+
+    <script>
+        (() => {
+            const auth = window.svpAuth;
+            const $ = id => document.getElementById(id);
+            const DRAFT_KEY = 'grateful-draft';
+            const WD = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
+            let entries = [];        // newest first: { id, day, text }
+            let editing = null;      // id of the entry being edited, else null
+
+            /* local calendar date as YYYY-MM-DD (sv-SE formats exactly like that) */
+            const iso = d => d.toLocaleDateString('sv-SE');
+            const todayIso = () => iso(new Date());
+            const shortDate = s => `${WD[new Date(s + 'T12:00:00').getDay()]} ${s.slice(8, 10)}.${s.slice(5, 7)}.`;
+            const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+            function status(msg, cls) {
+                const el = $('status');
+                el.textContent = msg || '';
+                el.className = 'status' + (cls ? ' ' + cls : '');
+            }
+
+            /* the draft survives a failed save, a closed tab or a dead network */
+            function saveDraft() {
+                try {
+                    localStorage.setItem(DRAFT_KEY, JSON.stringify({ day: $('day').value, text: $('text').value, editing }));
+                } catch (e) { }
+            }
+            function loadDraft() {
+                try { return JSON.parse(localStorage.getItem(DRAFT_KEY)); } catch (e) { return null; }
+            }
+            function clearDraft() {
+                try { localStorage.removeItem(DRAFT_KEY); } catch (e) { }
+            }
+
+            async function load() {
+                const since = iso(new Date(Date.now() - 60 * 864e5));
+                const res = await auth.api(`grateful?select=id,day,text&day=gte.${since}&order=day.desc,id.desc`);
+                if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? 'Kein Zugriff mit diesem Konto' : 'HTTP ' + res.status);
+                entries = await res.json();
+                render();
+            }
+
+            function render() {
+                const byDay = new Set(entries.map(e => e.day));
+                const days = $('days');
+                days.innerHTML = '';
+                for (let i = 13; i >= 0; i--) {
+                    const d = iso(new Date(Date.now() - i * 864e5));
+                    const b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'day' + (byDay.has(d) ? ' has' : '') + (d === $('day').value ? ' on' : '');
+                    b.textContent = d.slice(8, 10);
+                    b.title = shortDate(d) + (byDay.has(d) ? ' – eingetragen' : ' – noch leer');
+                    b.setAttribute('aria-label', b.title);
+                    b.onclick = () => { $('day').value = d; render(); $('text').focus(); };
+                    days.appendChild(b);
+                }
+                $('list').innerHTML = entries.slice(0, 30).map(e =>
+                    `<li data-id="${e.id}"><time datetime="${e.day}">${shortDate(e.day)}</time><span>${esc(e.text)}</span></li>`
+                ).join('');
+            }
+
+            function startEdit(id) {
+                const e = entries.find(x => x.id === id);
+                if (!e) return;
+                editing = id;
+                $('day').value = e.day;
+                $('text').value = e.text;
+                $('textLabel').textContent = 'Eintrag ändern';
+                $('saveBtn').textContent = 'Ändern';
+                $('cancelBtn').hidden = false;
+                status('');
+                render();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                $('text').focus();
+            }
+
+            function stopEdit() {
+                editing = null;
+                $('text').value = '';
+                $('textLabel').textContent = 'Wofür bist du dankbar?';
+                $('saveBtn').textContent = 'Speichern';
+                $('cancelBtn').hidden = true;
+                clearDraft();
+                render();
+            }
+
+            async function save() {
+                const day = $('day').value, text = $('text').value.trim();
+                if (!day || !text) { status('Bitte Tag und Text ausfüllen.', 'err'); return; }
+                saveDraft();
+                $('saveBtn').disabled = true;
+                status('Speichere …');
+                try {
+                    const res = editing
+                        ? await auth.api(`grateful?id=eq.${editing}`, {
+                            method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ day, text })
+                        })
+                        : await auth.api('grateful', {
+                            method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify([{ day, text }])
+                        });
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const rows = await res.json();
+                    if (!rows.length) throw new Error('nichts gespeichert');
+                    const wasEdit = !!editing;
+                    stopEdit();
+                    await load();
+                    status(wasEdit ? 'Geändert.' : 'Gespeichert. Schön!', 'ok');
+                } catch (e) {
+                    status('Nicht gespeichert (' + e.message + ') – der Text bleibt hier stehen.', 'err');
+                } finally {
+                    $('saveBtn').disabled = false;
+                }
+            }
+
+            function showApp() {
+                $('gate').hidden = true;
+                $('app').hidden = false;
+                load().catch(e => status(e.message, 'err'));
+            }
+
+            function init() {
+                $('today').textContent = new Intl.DateTimeFormat('de-DE', {
+                    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+                }).format(new Date());
+                $('day').value = todayIso();
+                $('day').max = todayIso();
+
+                const draft = loadDraft();
+                if (draft && draft.text) {
+                    $('day').value = draft.day || todayIso();
+                    $('text').value = draft.text;
+                    if (draft.editing) {
+                        editing = draft.editing;
+                        $('textLabel').textContent = 'Eintrag ändern';
+                        $('saveBtn').textContent = 'Ändern';
+                        $('cancelBtn').hidden = false;
+                    }
+                }
+
+                $('text').addEventListener('input', saveDraft);
+                $('text').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) save(); });
+                $('day').addEventListener('change', () => { saveDraft(); render(); });
+                $('saveBtn').onclick = save;
+                $('cancelBtn').onclick = () => { stopEdit(); status(''); };
+                $('list').addEventListener('click', e => {
+                    const li = e.target.closest('li[data-id]');
+                    if (li) startEdit(Number(li.dataset.id));
+                });
+                $('loginBtn').onclick = () => auth.loginDialog(showApp, 'Anmelden für dein Dankbarkeits-Tagebuch');
+
+                if (auth.hasSession()) showApp(); else $('gate').hidden = false;
+            }
+
+            init();
+        })();
+    </script>
+</body>
+
+</html>
