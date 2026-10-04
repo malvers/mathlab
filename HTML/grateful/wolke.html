@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#08142a">
+    <title>Wortwolke – I'm grateful for</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Doc's own Supabase account (shared SVP login): only that uid may read table grateful (RLS) -->
+    <script src="../svp/svp-gate.js"></script>
+    <script src="../svp/svp-auth.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.2.2/wordcloud2.min.js"></script>
+    <style>
+        /* --- plain standalone page like index.html, same palette --- */
+        :root {
+            --bg: rgb(8, 20, 42);
+            --card: rgb(14, 36, 78);
+            --line: rgba(120, 160, 220, .22);
+            --text: rgb(214, 226, 245);
+            --muted: rgb(110, 128, 160);
+            --lambda: rgb(245, 194, 66);
+            --phi: rgb(121, 158, 49);
+        }
+
+        * { box-sizing: border-box; }
+        html, body { margin: 0; background: var(--bg); color: var(--text); }
+        body {
+            font-family: Orbitron, sans-serif;
+            padding: max(20px, env(safe-area-inset-top)) 16px max(40px, env(safe-area-inset-bottom));
+        }
+        .wrap { max-width: 1100px; margin: 0 auto; }
+
+        h1 {
+            font-size: clamp(22px, 6vw, 30px); font-weight: 700; margin: 0 0 4px; letter-spacing: .04em;
+            display: flex; align-items: center; gap: 10px;
+        }
+        a.back { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; color: var(--text); }
+        a.back svg { width: 26px; height: 26px; fill: currentColor; }
+        .sub { color: var(--muted); font: 13px Raleway, sans-serif; margin: 0 0 14px 50px; }
+
+        .years { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; }
+        .years button {
+            font: 600 13px Orbitron, sans-serif; color: var(--text); background: var(--card);
+            border: 1px solid var(--line); border-radius: 10px; padding: 10px 11px; cursor: pointer;
+            font-variant-numeric: lining-nums;
+        }
+        .years button.on { background: var(--lambda); color: var(--bg); border-color: var(--lambda); }
+        .years button.nav { padding: 8px 9px; display: inline-flex; }
+        .years button.nav svg { width: 18px; height: 18px; fill: currentColor; }
+        .years button:disabled { opacity: .35; cursor: default; }
+        @media (max-width: 600px) { .years button.nav { display: none; } }   /* phone: swipe the cloud instead */
+
+        .cloud { position: relative; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; touch-action: pan-y; }
+        .cloud canvas { display: block; width: 100%; }
+        .tip {
+            position: absolute; pointer-events: none; background: var(--card); border: 1px solid var(--line);
+            border-radius: 8px; padding: 4px 8px; font-size: 12px; display: none; white-space: nowrap;
+        }
+        .loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font: 15px Raleway, sans-serif; }
+
+        .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 12px Raleway, sans-serif; color: var(--muted); margin: 10px 2px 18px; }
+        .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+        .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media (max-width: 720px) { .cols { grid-template-columns: 1fr; } }
+        .panel { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+        .panel h2 { font-size: 13px; margin: 0 0 10px; font-weight: 600; letter-spacing: .03em; }
+        .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .chip {
+            font: 500 13px Orbitron, sans-serif; background: var(--bg); color: var(--text);
+            border: 1px solid var(--line); border-radius: 999px; padding: 7px 11px; cursor: pointer;
+        }
+        .chip small { color: var(--muted); margin-left: 6px; font: 600 12px Raleway, sans-serif; font-variant-numeric: lining-nums tabular-nums; }
+        .chip.up { border-color: var(--phi); }
+        .chip.new { border-color: var(--lambda); }
+        .empty { color: var(--muted); font: 14px Raleway, sans-serif; }
+
+        #entries { margin-top: 14px; }
+        #entries ol { list-style: none; margin: 0; padding: 0; font: 15px/1.5 Raleway, sans-serif; }
+        #entries li { padding: 8px 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 7.5em 1fr; gap: 12px; }
+        #entries li:first-child { border-top: 0; }
+        #entries time { color: var(--muted); font-variant-numeric: lining-nums tabular-nums; }
+        #entries mark { background: none; color: var(--lambda); font-weight: 600; }
+        @media (max-width: 480px) { #entries li { grid-template-columns: 1fr; gap: 2px; } }
+
+        .gate { text-align: center; padding: 30px 16px; }
+        .gate p { font: 15px/1.5 Raleway, sans-serif; color: var(--muted); margin: 0 0 18px; }
+        .gate button {
+            height: 58px; padding: 0 28px; border-radius: 12px; border: 0; cursor: pointer;
+            background: var(--lambda); color: var(--bg); font: 700 15px Orbitron, sans-serif;
+        }
+        [hidden] { display: none !important; }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <h1>
+            <!-- arrow: Material Symbols "arrow_back" (Apache 2.0) -->
+            <a class="back" href="./" aria-label="Zurück zur Eingabe"><svg viewBox="0 -960 960 960" aria-hidden="true"><path d="m274-450 227 227q9 9 9 21t-9 21q-9 9-21 9t-21-9L181-459q-5-5-7-10t-2-11q0-6 2-11t7-10l278-278q9-9 21-9t21 9q9 9 9 21t-9 21L274-510h496q13 0 21.5 8.5T800-480q0 13-8.5 21.5T770-450H274Z"/></svg></a>
+            <span>Wortwolke</span>
+        </h1>
+        <div class="sub" id="sub">&nbsp;</div>
+
+        <div class="panel gate" id="gate" hidden>
+            <p>Bitte einmal anmelden, danach merkt sich das Gerät die Anmeldung.</p>
+            <button id="loginBtn" type="button">Anmelden</button>
+        </div>
+
+        <div id="app" hidden>
+            <div class="years" id="years"></div>
+
+            <div class="cloud" id="cloudBox">
+                <canvas id="cloud"></canvas>
+                <div class="tip" id="tip"></div>
+                <div class="loading" id="loading">Lade alle Einträge …</div>
+            </div>
+            <div class="legend" id="legend"></div>
+
+            <div class="cols">
+                <div class="panel"><h2 id="upTitle"></h2><div class="chips" id="up"></div></div>
+                <div class="panel"><h2 id="downTitle"></h2><div class="chips" id="down"></div></div>
+            </div>
+
+            <div class="panel" id="entries" hidden></div>
+        </div>
+    </div>
+
+    <script>
+        (() => {
+            const auth = window.svpAuth;
+            const $ = id => document.getElementById(id);
+            const ALL = 'Alle';
+
+            // Function words and generic praise words that would drown out the content
+            const STOP = new Set((`
+                das dass daß ich und die der den dem des ein eine einen einem einer eines mit in im ist hat habe hab
+                haben hatte hatten bin war waren sind sein seine seinen bei beim von vom für mich mir mein meine meinen
+                meinem meiner es zu zum zur am an auf aus nach so da nicht noch wieder auch nur schon mal doch als
+                über unter vor wie was wer wo sich sie ihr ihre ihn ihm er wir uns unser unsere kann konnte können
+                darf durfte will wollte werde wird wurde werden geht gibt kommt gekommen gemacht machen lassen lässt
+                sehr ganz wirklich so viel viele vielen mehr alles alle allem etwas heute gestern morgen dann denn
+                oder aber weil wenn ob um bis durch gegen ohne einfach eben echt wohl fast immer total richtig
+                toll tolle tollen toller tolles schön schöne schönen schöner schönes gut gute guten guter gutes
+                nett nette netten netter nettes super klasse irre unglaublich extrem tag tage
+                neu neue neuen neuer neues erste ersten zwei drei kleine kleinen großen große großer
+                dankbar dankbarkeit
+                the and for my a an of to that is it i was with in on at be have had this so me very de co
+            `).split(/\s+/).filter(Boolean));
+
+            const COL = {
+                new: 'rgb(245, 194, 66)',   // λ
+                up: 'rgb(121, 158, 49)',    // φ
+                down: 'rgb(110, 128, 160)',
+                plain: 'rgb(214, 226, 245)'
+            };
+            const WORD_RE = /[\p{L}]+/gu;
+            const WD = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+            const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+            let DATA = {}, YEARS = [], STATS = {}, current = null, selected = null, cls = new Map();
+            const canvas = $('cloud'), tip = $('tip');
+
+            /* all entries - PostgREST hands out at most 1000 rows per request, so page through */
+            async function loadAll() {
+                const all = [];
+                for (let from = 0; ; from += 1000) {
+                    const res = await auth.api(`grateful?select=day,text&order=day.asc,id.asc&limit=1000&offset=${from}`);
+                    if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? 'Kein Zugriff mit diesem Konto' : 'HTTP ' + res.status);
+                    const rows = await res.json();
+                    all.push(...rows);
+                    if (rows.length < 1000) return all;
+                }
+            }
+
+            // Count each word once per entry, remember the most frequent spelling
+            function countWords(entries) {
+                const counts = new Map(), forms = new Map();
+                for (const e of entries) {
+                    const seen = new Set();
+                    for (const raw of e.text.match(WORD_RE) || []) {
+                        const k = raw.toLowerCase();
+                        if (k.length < 2 || STOP.has(k) || seen.has(k)) continue;
+                        seen.add(k);
+                        counts.set(k, (counts.get(k) || 0) + 1);
+                        const f = forms.get(k) || new Map();
+                        f.set(raw, (f.get(raw) || 0) + 1);
+                        forms.set(k, f);
+                    }
+                }
+                const display = new Map();
+                for (const [k, f] of forms) display.set(k, [...f].sort((a, b) => b[1] - a[1])[0][0]);
+                return { counts, display, n: entries.length };
+            }
+
+            function prevYear(y) {
+                const i = YEARS.indexOf(y);
+                return i > 0 ? YEARS[i - 1] : null;
+            }
+
+            // Classify each word against the previous year by share of entries
+            function classify(y) {
+                const s = STATS[y], p = prevYear(y) && STATS[prevYear(y)];
+                const out = new Map();
+                [...s.counts].sort((a, b) => b[1] - a[1]).forEach(([k, c], i) => {
+                    if (!p) { out.set(k, i < 8 ? 'new' : 'plain'); return; }
+                    const pc = p.counts.get(k) || 0;
+                    const share = c / s.n, pshare = pc / p.n;
+                    if (pc === 0 && c >= 2) out.set(k, 'new');
+                    else if (c >= 3 && share >= pshare * 1.6) out.set(k, 'up');
+                    else if (pshare > 0 && share <= pshare * 0.6) out.set(k, 'down');
+                    else out.set(k, 'plain');
+                });
+                return out;
+            }
+
+            function renderYears() {
+                const box = $('years');
+                box.innerHTML = '';
+                const nav = (dir, path) => {
+                    const b = document.createElement('button');
+                    b.className = 'nav';
+                    b.setAttribute('aria-label', dir < 0 ? 'Vorheriges Jahr' : 'Nächstes Jahr');
+                    b.innerHTML = `<svg viewBox="0 0 24 24"><path d="${path}"/></svg>`;
+                    const i = YEARS.indexOf(current);
+                    b.disabled = current === ALL || (dir < 0 ? i <= 0 : i >= YEARS.length - 1);
+                    b.onclick = () => step(dir);
+                    return b;
+                };
+                box.appendChild(nav(-1, 'M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z'));
+                for (const y of [...YEARS, ALL]) {
+                    const b = document.createElement('button');
+                    b.textContent = y;
+                    if (y === current) b.className = 'on';
+                    b.onclick = () => show(y);
+                    box.appendChild(b);
+                }
+                box.appendChild(nav(1, 'M8.6 18.6 10 20l8-8-8-8-1.4 1.4 6.6 6.6z'));
+            }
+
+            function step(dir) {
+                if (current === ALL) return;
+                const i = YEARS.indexOf(current) + dir;
+                if (i >= 0 && i < YEARS.length) show(YEARS[i]);
+            }
+
+            function drawCloud() {
+                const s = STATS[current];
+                const minCount = current === ALL ? 3 : 2;
+                const limit = current === ALL ? 170 : 120;
+                const words = [...s.counts].filter(([, c]) => c >= minCount)
+                    .sort((a, b) => b[1] - a[1]).slice(0, limit);
+
+                const w = $('cloudBox').clientWidth;
+                const h = Math.round(Math.min(window.innerHeight * 0.62, Math.max(300, w * 0.6), 700));
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = Math.round(w * dpr);
+                canvas.height = Math.round(h * dpr);
+                canvas.style.height = h + 'px';
+                if (!words.length) return;
+
+                const cmax = words[0][1], cmin = words[words.length - 1][1];
+                const base = c => 1 + 5 * Math.sqrt((c - cmin) / Math.max(1, cmax - cmin));
+                // Scale so the estimated ink area fills a fixed share of the canvas (Orbitron is wide: ~0.8 em per letter)
+                const ink = words.reduce((a, [k, c]) => a + s.display.get(k).length * 0.8 * base(c) ** 2 * 1.15, 0);
+                const scale = Math.min(Math.sqrt(0.75 * w * h / ink), w * 0.16 / 6);
+                const size = c => Math.max(9, base(c) * scale) * dpr;
+
+                const byDisplay = new Map(words.map(([k]) => [s.display.get(k), k]));
+                WordCloud(canvas, {
+                    list: words.map(([k, c]) => [s.display.get(k), c]),
+                    weightFactor: size,
+                    gridSize: Math.round(6 * dpr),
+                    fontFamily: 'Orbitron, sans-serif',
+                    fontWeight: '600',
+                    color: word => COL[cls.get(byDisplay.get(word))] || COL.plain,
+                    backgroundColor: 'rgb(8, 20, 42)',
+                    rotateRatio: 0,
+                    shrinkToFit: true,
+                    drawOutOfBound: false,
+                    hover: (item, dim, ev) => {
+                        if (!item) { tip.style.display = 'none'; canvas.style.cursor = ''; return; }
+                        canvas.style.cursor = 'pointer';
+                        tip.textContent = `${item[0]} — ${item[1]}×`;
+                        tip.style.display = 'block';
+                        const r = canvas.getBoundingClientRect();
+                        tip.style.left = Math.min(ev.clientX - r.left + 12, r.width - tip.offsetWidth - 4) + 'px';
+                        tip.style.top = (ev.clientY - r.top + 14) + 'px';
+                    },
+                    click: item => item && pick(byDisplay.get(item[0]))
+                });
+            }
+
+            function chip(k, label, count, extra) {
+                const b = document.createElement('button');
+                b.className = 'chip' + (extra ? ' ' + extra : '');
+                b.innerHTML = `${esc(label)}<small>${count}</small>`;
+                b.onclick = () => pick(k);
+                return b;
+            }
+
+            function renderLists() {
+                const s = STATS[current], py = current === ALL ? null : prevYear(current);
+                const up = $('up'), down = $('down');
+                up.innerHTML = down.innerHTML = '';
+                if (!py) {
+                    $('upTitle').textContent = current === ALL ? 'Die häufigsten Wörter' : `Die häufigsten Wörter ${current}`;
+                    $('downTitle').textContent = 'Seltener als im Vorjahr';
+                    [...s.counts].sort((a, b) => b[1] - a[1]).slice(0, 24)
+                        .forEach(([k, c]) => up.appendChild(chip(k, s.display.get(k), c)));
+                    down.innerHTML = '<div class="empty">Kein Vorjahr zum Vergleich.</div>';
+                    return;
+                }
+                const p = STATS[py];
+                $('upTitle').textContent = `Neu oder häufiger als ${py}`;
+                $('downTitle').textContent = `Seltener als ${py}`;
+                const keys = new Set([...s.counts.keys(), ...p.counts.keys()]);
+                const diff = [...keys].map(k => {
+                    const c = s.counts.get(k) || 0, pc = p.counts.get(k) || 0;
+                    return { k, c, pc, d: c / s.n - pc / p.n };
+                });
+                diff.filter(x => x.d > 0 && x.c >= 2).sort((a, b) => b.d - a.d).slice(0, 18)
+                    .forEach(x => up.appendChild(chip(x.k, s.display.get(x.k), x.pc ? `${x.pc} → ${x.c}` : `neu ${x.c}`, x.pc ? 'up' : 'new')));
+                diff.filter(x => x.d < 0 && x.pc >= 2).sort((a, b) => a.d - b.d).slice(0, 18)
+                    .forEach(x => down.appendChild(chip(x.k, p.display.get(x.k) || s.display.get(x.k), `${x.pc} → ${x.c}`)));
+            }
+
+            function renderLegend() {
+                const py = current === ALL ? null : prevYear(current);
+                $('legend').innerHTML = py
+                    ? `<span><i style="background:${COL.new}"></i>neu ggü. ${py}</span>
+                       <span><i style="background:${COL.up}"></i>deutlich häufiger</span>
+                       <span><i style="background:${COL.down}"></i>deutlich seltener</span>
+                       <span><i style="background:${COL.plain}"></i>ähnlich</span>`
+                    : `<span><i style="background:${COL.new}"></i>die acht häufigsten</span>`;
+            }
+
+            /* tap a word: every sentence with it, the word marked */
+            function pick(k) {
+                selected = k;
+                const years = current === ALL ? YEARS : [current];
+                const re = new RegExp(`(^|[^\\p{L}])(${reEsc(k)})(?=[^\\p{L}]|$)`, 'giu');
+                const hits = years.flatMap(y => DATA[y]).filter(e => { re.lastIndex = 0; return re.test(e.text); }).reverse();
+                const label = STATS[current].display.get(k) || k;
+                const box = $('entries');
+                box.hidden = false;
+                box.innerHTML = `<h2>${esc(label)} — ${hits.length} ${hits.length === 1 ? 'Eintrag' : 'Einträge'}${current === ALL ? '' : ' in ' + current}</h2>
+                    <ol>${hits.map(e => {
+                        const d = new Date(e.day + 'T12:00:00');
+                        const date = `${WD[d.getDay()]} ${e.day.slice(8, 10)}.${e.day.slice(5, 7)}.${e.day.slice(0, 4)}`;
+                        return `<li><time datetime="${e.day}">${date}</time><span>${esc(e.text).replace(re, '$1<mark>$2</mark>')}</span></li>`;
+                    }).join('')}</ol>`;
+                box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            function show(y) {
+                current = y;
+                const s = STATS[y];
+                $('sub').textContent = y === ALL
+                    ? `${s.n} Einträge von ${YEARS[0]} bis ${YEARS[YEARS.length - 1]}`
+                    : `${s.n} Einträge in ${y}`;
+                cls = classify(y);
+                renderYears();
+                renderLegend();
+                renderLists();
+                drawCloud();
+                if (selected && s.counts.has(selected)) pick(selected); else $('entries').hidden = true;
+            }
+
+            /* phone: swipe the cloud left/right for the next/previous year */
+            let touchX = null, touchY = null;
+            $('cloudBox').addEventListener('touchstart', e => { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; }, { passive: true });
+            $('cloudBox').addEventListener('touchend', e => {
+                if (touchX === null) return;
+                const dx = e.changedTouches[0].clientX - touchX, dy = e.changedTouches[0].clientY - touchY;
+                touchX = null;
+                if (Math.abs(dx) > 60 && Math.abs(dx) > 1.5 * Math.abs(dy)) step(dx < 0 ? 1 : -1);
+            }, { passive: true });
+
+            document.addEventListener('keydown', e => {
+                if (e.key === 'ArrowLeft') step(-1);
+                if (e.key === 'ArrowRight') step(1);
+            });
+
+            let lastW = 0, t;
+            window.addEventListener('resize', () => {
+                clearTimeout(t);
+                t = setTimeout(() => {
+                    const w = $('cloudBox').clientWidth;
+                    if (current && Math.abs(w - lastW) > 20) { lastW = w; drawCloud(); }
+                }, 200);
+            });
+
+            async function start() {
+                $('gate').hidden = true;
+                $('app').hidden = false;
+                try {
+                    const [rows] = await Promise.all([loadAll(), document.fonts.load('600 20px Orbitron').catch(() => { })]);
+                    DATA = {};
+                    for (const r of rows) (DATA[r.day.slice(0, 4)] = DATA[r.day.slice(0, 4)] || []).push(r);
+                    YEARS = Object.keys(DATA).sort();
+                    if (!YEARS.length) { $('loading').textContent = 'Noch keine Einträge.'; return; }
+                    STATS = {};
+                    for (const y of YEARS) STATS[y] = countWords(DATA[y]);
+                    STATS[ALL] = countWords(rows);
+                    $('loading').hidden = true;
+                    lastW = $('cloudBox').clientWidth;
+                    show(YEARS[YEARS.length - 1]);
+                } catch (e) {
+                    $('loading').textContent = 'Konnte nicht laden: ' + e.message;
+                }
+            }
+
+            $('loginBtn').onclick = () => auth.loginDialog(start, 'Anmelden für dein Dankbarkeits-Tagebuch');
+            if (auth.hasSession()) start(); else $('gate').hidden = false;
+        })();
+    </script>
+</body>
+
+</html>

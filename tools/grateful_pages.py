@@ -26,6 +26,7 @@ PROJECT = 'doc-grateful'
 # forloop path (relative to HTML/) -> path in the mirror
 FILES = {
     'grateful/index.html': 'index.html',
+    'grateful/wolke.html': 'wolke.html',
     'grateful/manifest.webmanifest': 'manifest.webmanifest',
     'svp/svp-auth.js': 'svp/svp-auth.js',
     'svp/svp-gate.js': 'svp/svp-gate.js',
@@ -42,6 +43,7 @@ FILES = {
 # the page sits one level deeper in forloop (HTML/grateful/) than in the mirror (its root)
 REWRITE = {
     'index.html': [('../svp/', 'svp/'), ('../js/', 'js/')],
+    'wolke.html': [('../svp/', 'svp/')],
 }
 
 README = """# I'm grateful for
