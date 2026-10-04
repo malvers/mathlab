@@ -9,41 +9,69 @@
 // DOM-free parts (nextTask) also in Node for the tests.
 (function (root) {
   'use strict';
-  const GOAL = 20, TIME = 120;                              // 20 right in two minutes
+  // 20 right in two minutes - the big times table gets three (Doc 04.10.2026: "da müssten wir dann mehr Zeit geben")
+  const GOAL = 20, TIME = 120, TIMES = { big: 180 };
+  const timeOf = kind => TIMES[kind] || TIME;
   const TEXT = {
-    de: { tag: { mul: 'Kleines 1⋅1', div: 'Kleines 1÷1' }, intro: GOAL + ' Aufgaben richtig in 2 Minuten – dann wartet die Rechen-Rallye!',
+    de: { tag: { mul: 'Kleines 1⋅1', div: 'Kleines 1÷1', big: 'Großes 1⋅1', sq: 'Quadratzahlen', sqrt: 'Quadratwurzeln' },
+      intro: min => GOAL + ' Aufgaben richtig in ' + min + ' Minuten – dann wartet die Rechen-Rallye!',
       how: 'Tippe die Lösung mit den Zifferntasten. Falsch? Dann siehst du die richtige Lösung und die nächste Aufgabe kommt – die Uhr läuft weiter.',
       go: 'Los', end: 'Ende', again: 'Nochmal', play: 'Rechen-Rallye!', won: 'Geschafft!', lost: 'Zeit um!',
       wonIn: (n, t) => n + ' richtig in ' + t, errors: n => n === 0 ? 'ohne Fehler' : n === 1 ? '1 Fehler' : n + ' Fehler',
-      of: (n, g) => n + ' von ' + g + ' richtig', left: 'Sekunden' },
-    en: { tag: { mul: 'Times tables', div: 'Division tables' }, intro: GOAL + ' right in 2 minutes – then the Math Rally is yours!',
+      // time up: how many right and wrong, and how many were missing to the goal - "18 von 20 richtig" with "12 Fehler" read
+      // as twenty tasks, though there were thirty (Doc 04.10.2026: "da stimmt was nie. Nach Adam Ries")
+      tally: (r, w) => r + ' richtig, ' + w + ' falsch', missing: (g, m) => g + ' richtige waren das Ziel – ' + (m === 1 ? '1 hat' : m + ' haben') + ' gefehlt.',
+      left: 'Sekunden' },
+    en: { tag: { mul: 'Times tables', div: 'Division tables', big: 'Big times tables', sq: 'Square numbers', sqrt: 'Square roots' },
+      intro: min => GOAL + ' right in ' + min + ' minutes – then the Math Rally is yours!',
       how: 'Type the answer with the number keys. Wrong? You see the right answer and the next task comes – the clock runs on.',
       go: 'Go', end: 'End', again: 'Again', play: 'Math Rally!', won: 'Well done!', lost: 'Time is up!',
       wonIn: (n, t) => n + ' right in ' + t, errors: n => n === 0 ? 'no mistakes' : n === 1 ? '1 mistake' : n + ' mistakes',
-      of: (n, g) => n + ' of ' + g + ' right', left: 'seconds' }
+      tally: (r, w) => r + ' right, ' + w + ' wrong', missing: (g, m) => g + ' right was the goal – ' + m + ' ' + (m === 1 ? 'was' : 'were') + ' missing.',
+      left: 'seconds' }
   };
 
-  // The next task of the small times table (mul: a · b) or the small division table (div: a·b : a, Doc 04.10.2026: "das
-  // kleine Eins durch Eins ... als zweiten"): both factors 2 … 10 (1 · n is no task), never a task of the last six again -
-  // a·b and b·a counting as one; { a, b, r, op } with r = a · b or a : b
+  // The next task: the small times table (mul: a · b), the small division table (div: a·b ÷ a, Doc 04.10.2026: "das kleine
+  // Eins durch Eins ... als zweiten") - both factors 2 … 10 (1 · n is no task), a·b and b·a counting as one -, the square
+  // numbers (sq: n²) and the square roots (sqrt: √n², Doc 04.10.2026: "noch zwei Quizze ... Wurzel ... Quadrat") for n
+  // 2 … 12 ("erstmal nur bis zwölf" - to 20 would be a second level), the big times table (big: 11 … 20 times 2 … 9, either
+  // way round, "das große Einmaleins ... als extra Quiz"); never a task of the last six again.
+  // { a, b, r, op }: r = a · b, a ÷ b, a², √a
+  const OPS = ['mul', 'div', 'big', 'sq', 'sqrt'];
   function nextTask(recent, rng, op) {
     rng = rng || Math.random;
-    op = op === 'div' ? 'div' : 'mul';
+    op = OPS.includes(op) ? op : 'mul';
     for (let tries = 0; ; tries++) {
-      const x = 2 + Math.floor(rng() * 9), y = 2 + Math.floor(rng() * 9);
-      const k = op === 'div' ? 'd' + x + ':' + y : 'm' + Math.min(x, y) + 'x' + Math.max(x, y);
+      let t, k;
+      if (op === 'sq' || op === 'sqrt') {
+        const n = 2 + Math.floor(rng() * 11);
+        k = op + n;
+        t = op === 'sq' ? { a: n, b: 2, r: n * n, op } : { a: n * n, b: 2, r: n, op };
+      } else if (op === 'big') {
+        const x = 11 + Math.floor(rng() * 10), y = 2 + Math.floor(rng() * 8);
+        k = 'b' + x + 'x' + y;
+        t = rng() < .5 ? { a: x, b: y, r: x * y, op } : { a: y, b: x, r: x * y, op };
+      } else {
+        const x = 2 + Math.floor(rng() * 9), y = 2 + Math.floor(rng() * 9);
+        k = op === 'div' ? 'd' + x + ':' + y : 'm' + Math.min(x, y) + 'x' + Math.max(x, y);
+        t = op === 'div' ? { a: x * y, b: x, r: y, op } : { a: x, b: y, r: x * y, op };
+      }
       if (!recent.includes(k) || tries > 50) {
         recent.push(k);
         if (recent.length > 6) recent.shift();
-        return op === 'div' ? { a: x * y, b: x, r: y, op } : { a: x, b: y, r: x * y, op };
+        return t;
       }
     }
   }
   // a task's operator as on the calculator: ÷ for division; times a dot in German, × in English (Doc 04.10.2026: "das
   // geteilt durch Zeichen, so wie auf dem Taschenrechner ... beim Eins X eins, das ist die englische Schreibweise")
-  const opText = (t, de) => t.op === 'div' ? '÷' : de ? '⋅' : '×';   // ⋅ U+22C5, the dot of \\cdot (fonts.css)
-  // a task as TeX, the answer left out or given: 7 · 8 = …, 56 ÷ 8 = …
-  const taskTex = (t, r, de) => t.a + (t.op === 'div' ? '\\div ' : de ? '\\cdot ' : '\\times ') + t.b + ' =' + (r === undefined ? '' : ' ' + r);
+  // ⋅ U+22C5 is the dot of \\cdot (fonts.css); squares and roots show ² and √ (the high-score list's column)
+  const opText = (t, de) => ({ div: '÷', sq: '²', sqrt: '√' }[t.op] || (de ? '⋅' : '×'));
+  // a task as plain text, for the game's bridges: 7 ⋅ 8, 56 ÷ 8, 13², √169
+  const taskText = (t, de) => t.op === 'sq' ? t.a + '²' : t.op === 'sqrt' ? '√' + t.a : t.a + ' ' + opText(t, de) + ' ' + t.b;
+  // a task as TeX, the answer left out or given: 7 · 8 = …, 56 ÷ 8 = …, 13² = …, √169 = …
+  const taskTex = (t, r, de) => (t.op === 'sq' ? t.a + '^{2}' : t.op === 'sqrt' ? '\\sqrt{' + t.a + '}' :
+    t.a + (t.op === 'div' ? '\\div ' : de ? '\\cdot ' : '\\times ') + t.b) + ' =' + (r === undefined ? '' : ' ' + r);
   const mmss = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
 
   // rally: further options for the game (rallye.js create), e.g. { startLevel } from rallye.html
@@ -69,7 +97,7 @@
 
     function open(which) {
       if (layer) return;
-      kind = which === '1d1' || which === 'div' ? 'div' : which === 'mix' ? 'mix' : 'mul';
+      kind = { '1d1': 'div', div: 'div', big: 'big', sq: 'sq', sqrt: 'sqrt', mix: 'mix' }[which] || 'mul';
       layer = document.createElement('div');
       layer.className = 'qz-layer';
       layer.addEventListener('pointerdown', ev => {
@@ -95,7 +123,7 @@
 
     function intro() {
       phase = 'intro';
-      frame('<div class="qz-big">' + esc(L().intro) + '</div><div class="qz-how">' + esc(L().how) + '</div>' +
+      frame('<div class="qz-big">' + esc(L().intro(timeOf(kind) / 60)) + '</div><div class="qz-how">' + esc(L().how) + '</div>' +
         '<div class="qz-pills">' + pill('EXE', L().go, 'go') + pill('Clear', L().end) + '</div>');
     }
     function start() {
@@ -111,12 +139,12 @@
       clock = setInterval(tickClock, 100);
       tickClock();
     }
-    const left = () => Math.max(0, TIME - (performance.now() - t0) / 1000);
+    const left = () => Math.max(0, timeOf(kind) - (performance.now() - t0) / 1000);
     function tickClock() {
       if (phase !== 'run') return;
       const s = left(), ring = layer.querySelector('.qz-ring');
       ring.querySelector('b').textContent = Math.ceil(s);
-      ring.querySelector('.arc').style.strokeDashoffset = 276.5 * (1 - s / TIME);
+      ring.querySelector('.arc').style.strokeDashoffset = 276.5 * (1 - s / timeOf(kind));
       ring.classList.toggle('late', s <= 15);
       if (s <= 0) finish(false);
     }
@@ -150,12 +178,12 @@
     }
     function finish(won) {
       clearInterval(clock); clock = 0;
-      const used = TIME - left();
+      const used = timeOf(kind) - left();
       phase = won ? 'won' : 'lost';
       if (won) { tone(660, 120); setTimeout(() => tone(990, 260), 130); }
       frame('<div class="qz-head ' + phase + '">' + esc(won ? L().won : L().lost) + '</div>' +
-        '<div class="qz-big">' + esc(won ? L().wonIn(GOAL, mmss(used)) : L().of(right, GOAL)) + '</div>' +
-        '<div class="qz-how">' + esc(L().errors(wrong)) + '</div>' +
+        '<div class="qz-big">' + esc(won ? L().wonIn(GOAL, mmss(used)) : L().tally(right, wrong)) + '</div>' +
+        '<div class="qz-how">' + esc(won ? L().errors(wrong) : L().missing(GOAL, GOAL - right)) + '</div>' +
         '<div class="qz-pills">' + (won ? pill('EXE', L().play, 'go') : pill('EXE', L().again, 'go')) + pill('Clear', L().end) + '</div>');
     }
     // Vorführmodus (Doc 04.10.2026: "dass ich nicht jedes Mal erst die ganze zwanzig Aufgaben lösen muss"): the game at
@@ -229,7 +257,7 @@
     return { open, close, key, show, isOpen: () => !!layer };
   }
 
-  const CPQuiz = { create, nextTask, taskTex, opText, GOAL, TIME };
+  const CPQuiz = { create, nextTask, taskTex, taskText, opText, OPS, GOAL, TIME, timeOf };
   if (typeof module === 'object' && module.exports) module.exports = CPQuiz;
   else root.CPQuiz = CPQuiz;
 })(typeof self !== 'undefined' ? self : this);

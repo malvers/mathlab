@@ -71,11 +71,16 @@
     for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
     return a;
   }
-  // The gate's three answers: the right one and two near misses, shuffled - for 1·1 a factor too many or too few, one or
-  // ten off; for 1÷1 one or two off and the divisor itself (a classic slip)
+  // The gate's three answers: the right one and two near misses, shuffled - the slips that happen: for 1·1 a factor too
+  // many or too few, one or ten off; for 1÷1 one or two off and the divisor itself; for n² the neighbours' squares, n·(n±1)
+  // and 2n (doubled instead of squared); for √ the neighbours and half the radicand
   function gateAnswers(t, rng) {
     rng = rng || Math.random;
-    const r = t.r, pool = t.op === 'div' ? [r + 1, r - 1, r + 2, r - 2, t.b] : [r + t.a, r - t.a, r + t.b, r - t.b, r + 1, r - 1, r + 10, r - 10];
+    const r = t.r, n = t.op === 'sq' ? t.a : r;
+    const pool = t.op === 'div' ? [r + 1, r - 1, r + 2, r - 2, t.b]
+      : t.op === 'sq' ? [(n - 1) * (n - 1), (n + 1) * (n + 1), n * (n - 1), n * (n + 1), 2 * n, r + 10, r - 10]
+      : t.op === 'sqrt' ? [r + 1, r - 1, r + 2, r - 2].concat(t.a % 2 ? [] : [t.a / 2])
+      : [r + t.a, r - t.a, r + t.b, r - t.b, r + 1, r - 1, r + 10, r - 10];
     const near = shuffle([...new Set(pool)].filter(v => v > 0 && v !== r), rng);
     return shuffle([r, near[0], near[1]], rng);
   }
@@ -133,7 +138,6 @@
       if (i % 7 === 0) put(s, { kind: 'tree', x: -(1.5 + rng() * 1.6), k: .8 + rng() * .5, v: Math.floor(rng() * 3) });
       if (i % 7 === 3) put(s, { kind: 'tree', x: 1.5 + rng() * 1.6, k: .8 + rng() * .5, v: Math.floor(rng() * 3) });
       if (i % 11 === 5) put(s, { kind: 'bush', x: side() * (1.3 + rng() * .4), k: .8 + rng() * .4 });
-      if (i % 53 === 20) put(s, { kind: 'sign', x: side() * 1.35, k: 1, t: '+−⋅÷='[Math.floor(rng() * 5)] });
       // a little herd on a meadow: cows, horses or sheep, facing either way
       if (i % 29 === 14 && rng() < .7) {
         const x0 = side() * (2.1 + rng() * 1.6), kind = ART.animals[Math.floor(rng() * 3)], n = 1 + Math.floor(rng() * 3);
@@ -166,6 +170,7 @@
     let objs = [], fx = [], spawnZ = 0, gateZ = 0, recent = [], best = 0, newBest = false, flash = null;
     const held = { UP: false, DOWN: false };                 // ▲ ▼ held on the keyboard: a pedal
     let dusk = 0, streak = 0, nitro = 0, cheated = false;    // evening light 0 … 1; right gates in a row; nitro seconds left
+    let gateTask = null, warned = false;                     // the next bridge's task, chosen early; its warning signs set
     // speed in segments per second (4 km/h each): 16 at first, 3 more each level, at most 42 - braking goes down to MIN in
     // every level, gas adds up to GAS (Doc 04.10.2026: 30 was "brutal schnell", then "das Langsamste ist immer noch zu schnell")
     const MIN = 4, GAS = 14, base = () => Math.min(16 + (level - 1) * 3, 42);
@@ -174,8 +179,8 @@
     const lerp = (a, b, p) => a + (b - a) * p;
     const segAt = z => track[Math.floor(((z % L) + L) % L / SEG) % track.length];
     const score = () => Math.floor(pos / SEG / 2 + bonus);  // whole points (nitro adds parts of one)
-    const sign = t => root.CPQuiz.opText(t, lang() === 'de');   // ÷, and · or × by the language (quiz.js)
-    const ask = t => t.a + ' ' + sign(t) + ' ' + t.b + ' = ?';
+    const said = t => root.CPQuiz.taskText(t, lang() === 'de');   // 7 ⋅ 8, 56 ÷ 8, 13², √169 - the language's signs (quiz.js)
+    const ask = t => said(t) + ' = ?';
 
     // the screen: the horizon at 40 % of the height, the player's plane at 86 %; the road at that plane as wide as the
     // view (a wide case gets wide verges, the road does not stretch)
@@ -198,6 +203,7 @@
       mountains = ridge(rng, 18, .05, .16); hills = ridge(rng, 26, .02, .07);
       lane = 1; px = 0; speed = 0; boost = 0; pos = 0; bonus = 0; lives = 3; hurt = 0; time = 0; level = 1;
       objs = []; fx = []; spawnZ = 60 * SEG; gateZ = 130 * SEG; recent = []; newBest = false; flash = null;
+      gateTask = nextTask(); warned = false;
       dusk = 0; streak = 0; nitro = 0; cheated = false;
     }
     function start() { reset(); state = 'ready'; resize(); card(); loop(performance.now()); }
@@ -234,7 +240,8 @@
       else { const q = (ev.clientX - r.left) / r.width; if (q < .4) key('LEFT'); else if (q > .6) key('RIGHT'); }
     });
 
-    const nextTask = () => root.CPQuiz.nextTask(recent, rng, op === 'mix' ? (rng() < .5 ? 'mul' : 'div') : op);
+    const OPS = root.CPQuiz.OPS;                            // show mode mixes every kind of task
+    const nextTask = () => root.CPQuiz.nextTask(recent, rng, op === 'mix' ? OPS[Math.floor(rng() * OPS.length)] : op);
     // --- the world moves: speed in segments per second ---
     function update(dt) {
       time += dt;
@@ -255,10 +262,17 @@
       skyOff += .0012 * ps.curve * speed * dt; hillOff += .0024 * ps.curve * speed * dt;
       // what lies ahead: rows of obstacles, and now and then a sign bridge with a clear stretch before and after it
       while (spawnZ < pos + DRAW * SEG) {
+        // the warning signs, both sides, about two seconds before the bridge at this level's speed
+        const warnZ = gateZ - Math.max(30, base() * 2.2) * SEG;
+        if (!warned && spawnZ >= warnZ) {
+          for (const side of [-1, 1]) objs.push({ kind: 'warn', side, z: warnZ, task: gateTask });
+          warned = true;
+        }
         if (spawnZ >= gateZ) {
-          const t = nextTask();
+          const t = gateTask;
           objs.push({ kind: 'gate', z: gateZ, task: t, answers: gateAnswers(t, rng), done: false });
           spawnZ = gateZ + 22 * SEG; gateZ += (165 + Math.floor(rng() * 60)) * SEG;   // a bridge every 8 to 11 s
+          gateTask = nextTask(); warned = false;
           continue;
         }
         if (gateZ - spawnZ < 22 * SEG) { spawnZ = gateZ; continue; }
@@ -284,13 +298,13 @@
                 setTimeout(() => { tone(523, 70); setTimeout(() => tone(784, 70), 70); setTimeout(() => tone(1047, 160), 140); }, 250);
               }
             } else {
-              fx.push({ text: o.task.a + ' ' + sign(o.task) + ' ' + o.task.b + ' = ' + o.task.r, x: W / 2, y: H * .5, t: 0, color: C.red, big: true });
+              fx.push({ text: said(o.task) + ' = ' + o.task.r, x: W / 2, y: H * .5, t: 0, color: C.red, big: true });
               hit();
             }
           }
           continue;
         }
-        if (o.hit || Math.abs(o.z - me) > SEG * .6 || Math.abs(LANE_X[o.lane] - px) > .42) continue;
+        if (o.kind === 'warn' || o.hit || Math.abs(o.z - me) > SEG * .6 || Math.abs(LANE_X[o.lane] - px) > .42) continue;
         o.hit = true;
         if (o.kind === 'star') { bonus += 25; fx.push({ text: '+25', x: W / 2, y: H * .62, t: 0, color: C.car }); tone(1320, 70); }
         else if (!hurt) hit();
@@ -468,13 +482,29 @@
       } else if (sp.kind === 'bush') {
         const s = 260 * sp.k * k;
         ctx.fillStyle = C.tree; ctx.beginPath(); ctx.ellipse(x, y - s * .35, s * .6, s * .38, 0, 0, 7); ctx.fill();
-      } else {                                              // a sign with a sign of arithmetic
-        const s = 300 * k;
-        ctx.fillStyle = '#666'; ctx.fillRect(x - s * .05, y - s * 1.3, s * .1, s * 1.3);
-        ctx.fillStyle = C.paper; rrect(x - s * .45, y - s * 2.1, s * .9, s * .9, s * .12); ctx.fill();
-        ctx.lineWidth = Math.max(1, s * .06); ctx.strokeStyle = C.ink; ctx.stroke();
-        if (s > 6) { ctx.fillStyle = C.ink; ctx.font = font(700, s * .7); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(sp.t, x, y - s * 1.62); }
       }
+    }
+    // the warning sign before a bridge (Doc 04.10.2026: "mach echte Vorwarnschilder"): a red-bordered triangle on a post,
+    // as on the road, with the sign of the task that comes - ⋅ (× in English), ÷, x², √
+    function warnSign(x, y, k, sym) {
+      const s = 360 * k, post = s * 1.05, top = y - post - s * .9;
+      ctx.fillStyle = '#6b7079'; ctx.fillRect(x - s * .035, y - post, s * .07, post);
+      ctx.lineJoin = 'round'; ctx.lineWidth = Math.max(1, s * .05); ctx.strokeStyle = '#d8dbe0';
+      ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x + s * .52, y - post); ctx.lineTo(x - s * .52, y - post); ctx.closePath();
+      ctx.fillStyle = C.kerb; ctx.fill(); ctx.stroke();
+      const i = s * .17;                                    // the white inside of the red border
+      ctx.beginPath(); ctx.moveTo(x, top + i * 1.15); ctx.lineTo(x + s * .52 - i, y - post - i * .55); ctx.lineTo(x - s * .52 + i, y - post - i * .55); ctx.closePath();
+      ctx.fillStyle = '#fff'; ctx.fill(); ctx.lineJoin = 'miter';
+      if (s < 8) return;
+      // the sign, big enough to read from afar: the dot and ÷ drawn as shapes (a glyph's dot is tiny), × as two strokes
+      const cx = x, cy = y - post - s * .29, d = s * .085;
+      ctx.fillStyle = '#111'; ctx.strokeStyle = '#111'; ctx.lineCap = 'round';
+      const dot = (u, v, r) => { ctx.beginPath(); ctx.arc(u, v, r, 0, 7); ctx.fill(); };
+      if (sym === '⋅') dot(cx, cy, d * 1.05);
+      else if (sym === '÷') { ctx.lineWidth = d * .9; ctx.beginPath(); ctx.moveTo(cx - s * .16, cy); ctx.lineTo(cx + s * .16, cy); ctx.stroke(); dot(cx, cy - s * .12, d * .75); dot(cx, cy + s * .12, d * .75); }
+      else if (sym === '×') { ctx.lineWidth = d * .9; const e = s * .11; ctx.beginPath(); ctx.moveTo(cx - e, cy - e); ctx.lineTo(cx + e, cy + e); ctx.moveTo(cx + e, cy - e); ctx.lineTo(cx - e, cy + e); ctx.stroke(); }
+      else { ctx.font = font(700, s * (sym.length > 1 ? .4 : .5)); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(sym, cx, cy + s * .02); }
+      ctx.lineCap = 'butt';
     }
     function gate(o, x, y, k) {                             // the sign bridge: the task on the banner, an answer over each lane
       const post = 1.14 * ROADW * k, top = y - 1500 * k;
@@ -529,6 +559,11 @@
         (at[n] || []).sort((a, b) => b.pct - a.pct).forEach(({ o, pct }) => {
           const k = lerp(s.p1.scale, s.p2.scale, pct) * f.fx, cx = lerp(s.p1.x, s.p2.x, pct), y = lerp(s.p1.y, s.p2.y, pct);
           if (o.kind === 'gate') { gate(o, cx, y, k); return; }
+          if (o.kind === 'warn') {
+            const t = o.task, sym = t.op === 'sq' ? 'x²' : t.op === 'sqrt' ? '√' : root.CPQuiz.opText(t, lang() === 'de');
+            warnSign(cx + o.side * 1.4 * ROADW * k, y, k, sym);
+            return;
+          }
           const ox = cx + LANE_X[o.lane] * ROADW * k;
           if (o.kind === 'car') {
             const im = pic(ART.traffic[o.look || 0]);

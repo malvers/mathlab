@@ -5,6 +5,7 @@
 //
 //   POST { action: 'top' }                                   -> { top: [{ id, name, score, op }] }   (the ten best)
 //   POST { action: 'add', name, score, op, seconds }         -> { top, id, rank }                    (only into the top ten)
+//   op: the quiz that earned the ride - mul (1⋅1), div (1÷1), big (big 1⋅1), sq (square numbers), sqrt (square roots)
 //
 // What it checks, as far as a browser game can be checked: a nickname of 1 to 12 letters, digits, space . _ - without
 // rude words (also spelled with digits: 4 = a, 3 = e ...); a whole score that fits the time played (at most 60 points a
@@ -76,7 +77,7 @@ Deno.serve(async (req) => {
     const score = Number(body.score), seconds = Math.round(Number(body.seconds)), op = String(body.op || '');
     if (!NAME.test(name)) return json({ error: 'Spitzname: 1 bis 12 Buchstaben oder Ziffern' }, 400);
     if (rude(name)) return json({ error: 'Bitte einen anderen Spitznamen' }, 400);
-    if (op !== 'mul' && op !== 'div') return json({ error: 'op: mul | div' }, 400);
+    if (!['mul', 'div', 'big', 'sq', 'sqrt'].includes(op)) return json({ error: 'op: mul | div | big | sq | sqrt' }, 400);
     if (!Number.isInteger(score) || score < 0 || score > 100000) return json({ error: 'Punkte?' }, 400);
     if (!(seconds >= 3 && seconds <= 7200) || score > 60 * seconds + 200) return json({ error: 'Punkte passen nicht zur Spielzeit' }, 400);
 
