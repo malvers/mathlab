@@ -37,8 +37,8 @@
         }
         .wrap { max-width: 640px; margin: 0 auto; }
         h1 {
-            font-size: clamp(22px, 6vw, 30px); font-weight: 700; margin: 0 0 18px; letter-spacing: .04em;
-            display: flex; justify-content: space-between; align-items: center; gap: 12px;
+            font-size: clamp(21px, 6vw, 30px); font-weight: 700; margin: 0 0 18px; letter-spacing: .04em;
+            display: flex; justify-content: space-between; align-items: center; gap: 8px;
         }
 
         .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
@@ -88,8 +88,9 @@
         .status.err { color: var(--lambda); }
 
         /* the small gold cloud right in the heading opens the word cloud */
-        a.cloudlink { display: grid; place-items: center; width: 48px; height: 48px; margin: -8px -6px -8px 0; border-radius: 12px; }
-        a.cloudlink svg { width: 38px; height: 38px; fill: var(--lambda); }
+        h1 .right { display: flex; align-items: center; gap: 4px; flex: none; }
+        a.cloudlink { display: grid; place-items: center; width: 42px; height: 44px; margin: -8px -2px -8px -10px; border-radius: 12px; }   /* big tap area, small footprint */
+        a.cloudlink svg { width: 30px; height: 30px; fill: var(--lambda); }
         ol.list { list-style: none; margin: 20px 0 0; padding: 0; }
         ol.list li {
             display: grid; grid-template-columns: 6.2em 1fr; gap: 10px; padding: 10px 4px;
@@ -108,8 +109,8 @@
 
 <body>
     <div class="wrap">
-        <!-- the selected day is the yellow frame in the strip; the cloud (Material Symbols "cloud", Apache 2.0) opens the word cloud -->
-        <h1><span>I'm grateful for …</span><a class="cloudlink" href="wolke.html" aria-label="Wortwolke"><svg viewBox="0 -960 960 960" aria-hidden="true"><path d="M251-160q-88 0-149.5-61.5T40-371q0-78 50-137t127-71q20-97 94-158.5T482-799q112 0 189 81.5T748-522v24q72-2 122 46.5T920-329q0 69-50 119t-119 50H251Z"/></svg></a></h1>
+        <!-- year of the selected day (the day itself = yellow frame in the strip); the cloud (Material Symbols "cloud", Apache 2.0) opens the word cloud -->
+        <h1><span>I'm grateful for …</span><span class="right"><a class="cloudlink" href="wolke.html" aria-label="Wortwolke"><svg viewBox="0 -960 960 960" aria-hidden="true"><path d="M251-160q-88 0-149.5-61.5T40-371q0-78 50-137t127-71q20-97 94-158.5T482-799q112 0 189 81.5T748-522v24q72-2 122 46.5T920-329q0 69-50 119t-119 50H251Z"/></svg></a><span id="year"></span></span></h1>
 
         <div class="card gate" id="gate" hidden>
             <p>Bitte einmal anmelden, danach merkt sich das Gerät die Anmeldung.</p>
@@ -147,7 +148,7 @@
             const DAYS = 5;          // length of the day strip, today included
 
             let entries = [];        // newest first: { id, day, text }
-            let selectedDay = null;  // YYYY-MM-DD the form is for - the yellow frame in the strip
+            let selectedDay = null;  // YYYY-MM-DD the form is for - yellow frame in the strip, its year in the head
             let editing = null;      // id of the selected day's entry, null while the day is still empty
             let newTexts = {};       // day -> text typed for a day without entry, kept while other days are looked at
 
@@ -198,6 +199,7 @@
             function fill(day, entry) {
                 if (ear && ear.active) ear.stop();       // a running dictation belongs to the day it started on
                 selectedDay = day;
+                $('year').textContent = day.slice(0, 4);
                 editing = entry ? entry.id : null;
                 $('text').value = entry ? entry.text : (newTexts[day] || '');
                 buttons();
@@ -312,6 +314,7 @@
             }
 
             function init() {
+                $('year').textContent = todayIso().slice(0, 4);
                 $('text').addEventListener('input', () => {
                     keepNew();
                     buttons();
