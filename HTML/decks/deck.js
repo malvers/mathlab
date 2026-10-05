@@ -319,11 +319,8 @@ document.querySelectorAll('.labframe.bare iframe').forEach(bareLab);
       f.style.transform = 'scale(' + s + ')';
     } else f.style.cssText = f.dataset.small;
     try { f.contentWindow.dispatchEvent(new f.contentWindow.Event('deck-lab-full')); } catch (e) { }
-  }
-  document.addEventListener('lab-slide-full', function (e) {
-    const frame = e.target.closest && e.target.closest('.labframe');
     try { f.contentWindow.document.dispatchEvent(new f.contentWindow.Event('fullscreenchange')); } catch (e) { }
-    if (frame) labFull(frame, !frame.classList.contains('full'));
+  }
   // A lab that goes full screen on its own - requestFullscreen on its page instead of the icon above (DOCPAD: a double
   // click on the case) - took the whole screen while every other lab took the slide (Doc, 05.10.2026: "beim Docpad wird
   // es zum ganzen Screen gemacht ... dass ich das auf die Folie beim Docpad bezieht"). So every page in a lab frame
@@ -346,6 +343,9 @@ document.querySelectorAll('.labframe.bare iframe').forEach(bareLab);
   }
   document.addEventListener('load', e => { if (e.target.tagName === 'IFRAME') labFullscreenOnSlide(e.target); }, true);
   document.querySelectorAll('.labframe iframe').forEach(labFullscreenOnSlide);
+  document.addEventListener('lab-slide-full', function (e) {
+    const frame = e.target.closest && e.target.closest('.labframe');
+    if (frame) labFull(frame, !frame.classList.contains('full'));
   });
   addEventListener('keydown', function (e) {
     if (e.key === 'Escape') document.querySelectorAll('.labframe.full').forEach(fr => labFull(fr, false));
