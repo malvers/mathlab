@@ -58,6 +58,19 @@ b{font-weight:600;color:var(--fg,var(--ink))}   /* bold inside a colour keeps th
 .f2{font-family:Orbitron,system-ui,sans-serif}
 .f3{font-family:"Times New Roman",Times,Georgia,serif}
 .f4{font-family:Menlo,Consolas,monospace;font-size:.92em}
+/* type sizes for marked words, against the text around them - the small and big A of the deck editor step through
+   them (Doc, 05.10.2026: "das, was selektiert ist, soll größer gemacht werden"); z1-z4 smaller, z5-z9 larger */
+.z1{font-size:.5em}.z2{font-size:.6em}.z3{font-size:.72em}.z4{font-size:.85em}
+.z5{font-size:1.2em}.z6{font-size:1.45em}.z7{font-size:1.75em}.z8{font-size:2.1em}.z9{font-size:2.6em}
+/* the Fahrplan's marker and its little pictures in a text (deck editor, Doc 05.10.2026) - the marker's colour is
+   svp-fmtbar.js WERKZEUGE.marker; a picture as tall as the capitals, its foot on the baseline, as in the Fahrplan */
+.m1{background:rgba(245,194,66,.45);border-radius:2px}
+img.emo{height:1cap;width:auto;vertical-align:baseline;border-radius:22%}
+/* a line whose first letters are sized (data-lead, deck.js deckLead): its square sits at their middle - the same
+   factors as .z1-.z9 above, keep both in step (Doc, 05.10.2026: "der Bullet nicht mehr ganz in der Mitte") */
+p.line[data-lead=z1]{--lead:.5}p.line[data-lead=z2]{--lead:.6}p.line[data-lead=z3]{--lead:.72}p.line[data-lead=z4]{--lead:.85}
+p.line[data-lead=z5]{--lead:1.2}p.line[data-lead=z6]{--lead:1.45}p.line[data-lead=z7]{--lead:1.75}
+p.line[data-lead=z8]{--lead:2.1}p.line[data-lead=z9]{--lead:2.6}
 
 /* --- content ------------------------------------------------------------ */
 .slide h3{position:absolute;left:72px;top:56px;width:816px;font-size:28px;font-weight:700;
@@ -77,10 +90,15 @@ p.line:first-child{margin-top:0}
 /* the square rides on the first line's baseline, not at the top of the paragraph - a line with a tall
    formula (fractions on arrows) kept it floating above the text (Doc, 17.09.2026). Net width 0: the
    negative margin pulls it into the padding, wrapped lines keep their hanging indent. */
-p.line::before{content:"";display:inline-block;width:7px;height:7px;margin:0 13px 0 -20px;vertical-align:.05em}
+/* Its middle exactly where the orange triangle of the line being talked about has its middle (Doc, 05.10.2026: "das
+   Bullet ist immer noch zu niedrig ... Das Dreieck, das gelbe, das ist richtig"): measured in the layout, that is .325em
+   above the baseline, and .375em more per step of --lead above 1 - the first letters' own size (data-lead, deck.js
+   deckLead); smaller first letters leave the line's height and so the middle as it is. Half the square below that. */
+p.line::before{content:"";display:inline-block;width:7px;height:7px;margin:0 13px 0 -20px;
+  vertical-align:calc(.325em + (max(var(--lead, 1), 1) - 1) * .375em - 3.5px)}
 p.line.l0::before{background:var(--ink)}   /* dark blue like the headings, not red (Doc, 27.09.2026: "probier mal ... dunkelblau") */
-p.line.l1::before{background:var(--green);width:6px;height:6px;margin-right:14px}
-p.line.l2::before{background:#4A79C9;width:6px;height:6px;margin-right:14px}
+p.line.l1::before{background:var(--green);width:6px;height:6px;margin-right:14px;vertical-align:calc(.325em + (max(var(--lead, 1), 1) - 1) * .375em - 3px)}
+p.line.l2::before{background:#4A79C9;width:6px;height:6px;margin-right:14px;vertical-align:calc(.325em + (max(var(--lead, 1), 1) - 1) * .375em - 3px)}
 
 /* --- two columns -------------------------------------------------------- */
 .colgrid{position:absolute;left:72px;top:146px;width:816px;height:304px;

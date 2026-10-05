@@ -15,6 +15,16 @@
   const root = document.documentElement;
   const DECK = decodeURIComponent(location.pathname.split('/').pop());
   const SRC = new WeakMap();                          // element -> its source text, as the file holds it
+  // element -> where the file holds it: {deck, slide, n}. A slide a stub fills from a file of its own (deck.js data-aus,
+  // decks/vorspann) is written there - in every deck that shows it (Doc, 05.10.2026: "Ich kann die ganze Textbox nicht
+  // editieren. Die beginnt mit geboren 1946 ... Möchte ich bitte.")
+  const ADDR = new WeakMap();
+  let AUS = [];                                       // those files, for Cmd-Z across the page
+  const where = el => ADDR.get(el) || { deck: DECK, slide: +el.dataset.ed.split(':')[0], n: +el.dataset.ed.split(':')[1] };
+  // a reply of the server: the page's own file time only from the deck itself; "not live yet" from either
+  function took(j, to) {
+    if (to.deck === DECK) { known = j.mtime; pending = j.pending; } else pending = pending || j.pending;
+  }
   let on = false, cur = null, busy = false, tt = 0, selector = '', pending = false, publishing = false, dirty = false;
   let held = 0;                                       // when a drag ended (deck-label.js): its click, if one comes at all, opens no text
   let known = Math.floor(Date.parse(document.lastModified) / 1000) || 0;   // file time this page was loaded with
@@ -36,25 +46,36 @@
     'html.deck-edit [data-ed].ed-on{outline:1px solid rgba(110,126,159,.95);background:rgba(110,126,159,.10);',
     '  white-space:pre-wrap;caret-color:rgb(176,36,24)}',
     'html.deck-edit [data-ed].ed-busy{opacity:.5}',
-    '#ed-bar{position:fixed;z-index:31;transform:translateX(-50%);display:flex;align-items:center;gap:4px;',
-    '  flex-wrap:wrap;justify-content:center;max-width:min(96vw,980px);',
+    // one row over the whole slide - the Fahrplan's tools came along (Doc, 05.10.2026: "Wir haben ja hier Platz über
+    // die ganze Folie ... mach erst mal eine Zeile"); place() lets it grow as wide as the slide, narrower it wraps
+    // width:max-content - left at the middle and shrink-to-fit, a fixed bar only ever got the right half of the window
+    // and broke into two rows at half its width
+    '#ed-bar{position:fixed;z-index:31;transform:translateX(-50%);display:flex;align-items:center;gap:2px;',
+    '  flex-wrap:wrap;justify-content:center;width:max-content;max-width:96vw;',
     '  padding:6px;border-radius:10px;background:rgba(7,22,48,.98);border:1px solid rgba(245,194,66,.55);',
     '  box-shadow:0 10px 30px rgba(0,0,0,.45)}',
     '#ed-bar[hidden],#ed-menu[hidden]{display:none}',
-    '#ed-bar button{display:flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;',
+    '#ed-bar button{display:flex;align-items:center;justify-content:center;width:28px;height:30px;padding:0;',
     '  border:0;border-radius:7px;background:none;color:#eaf1ff;cursor:pointer;',
     '  font:700 16px Raleway,system-ui,sans-serif}',
     '#ed-bar button:hover:not(:disabled){background:rgba(245,194,66,.22)}',
     '#ed-bar button.on{background:rgba(245,194,66,.34);color:rgb(245,194,66)}',
     '#ed-bar button:disabled{opacity:.35;cursor:default}',
     '#ed-bar button svg{width:22px;height:22px}',
-    '#ed-bar .ed-dot{width:25px;height:25px}',
+    '#ed-bar .ed-dot{width:23px;height:25px}',
     '#ed-bar .ed-dot svg{width:19px;height:19px}',
     '#ed-bar .ed-kursiv{font-weight:500;font-style:italic;font-family:Georgia,serif}',
     '#ed-bar .ed-unter{text-decoration:underline}',
     '#ed-bar .ed-durch{text-decoration:line-through}',
     '#ed-bar .ed-schrift{width:auto;gap:6px;padding:0 10px;font-weight:500;font-size:14px}',
-    '#ed-bar .ed-sep{width:1px;height:20px;margin:0 3px;background:rgba(255,255,255,.18)}',
+    '#ed-bar .ed-sep{width:1px;height:20px;margin:0 4px;background:rgba(255,255,255,.18)}',
+    '#ed-bar .ed-slot{display:contents}',
+    // the Fahrplan's smileys and pictures (svp-fmtbar.js WERKZEUGE) - apple-emoji.js draws the faces
+    '#ed-bar .ed-emo{font:400 18px/1 system-ui,sans-serif}',
+    '#ed-bar .ed-emo svg{width:20px;height:20px}',
+    '#ed-bar .ed-pic img{display:block;width:22px;height:22px;object-fit:cover;border-radius:5px}',
+    '#ed-bar .ed-mark span{padding:1px 4px;border-radius:3px;background:rgba(245,194,66,.45);color:#fff;font-size:14px}',
+    '#ed-bar .ed-tx{font-size:14px}',
     '#ed-menu{position:fixed;z-index:32;min-width:180px;padding:6px;border-radius:10px;',
     '  background:rgba(7,22,48,.98);border:1px solid rgba(245,194,66,.55);box-shadow:0 10px 30px rgba(0,0,0,.45)}',
     '#ed-menu button{display:block;width:100%;padding:9px 12px;border:0;border-radius:7px;background:none;',
@@ -139,6 +160,9 @@
     clearTimeout(tt); tt = setTimeout(function () { b.hidden = true; }, 4500);
   }
 
+  // a line's square follows the size of its first letters (deck.js deckLead) - while typing and once written
+  const lead = el => { if (window.deckLead && el.matches('p.line')) window.deckLead(el); };
+
   function tex(el) {
     if (!window.katex) return;
     el.querySelectorAll('.tex').forEach(function (t) {
@@ -160,8 +184,9 @@
     return esc(part)
       .replace(/\*\*((?:[^*]|\*(?!\*))+?)\*\*/g, '<b>$1</b>')   // a lone * may sit inside: **COUNT(*)**
       .replace(/&lt;(\/?)([bius])&gt;/g, '<$1$2>')
-      .replace(/&lt;([cf])([1-9])&gt;/g, '<span class="$1$2">')
-      .replace(/&lt;\/[cf][1-9]&gt;/g, '</span>');
+      .replace(/&lt;([cfmz])([1-9])&gt;/g, '<span class="$1$2">')
+      .replace(/&lt;\/[cfmz][1-9]&gt;/g, '</span>')
+      .replace(/&lt;emo:([a-z0-9-]+)\.(webp|png)&gt;/g, '<img class="emo" src="../svp/emo/$1.$2" alt="$1">');
   }
 
   function srcToHtml(src) {
@@ -172,7 +197,8 @@
       .join('').split(B0).join('<b>').split(B1).join('</b>');
   }
 
-  // a colour is <c1>..<c9>, a typeface <f1>..<f4> - one span each, so a word can carry both
+  // a colour is <c1>..<c9>, a typeface <f1>..<f4>, a type size <z1>..<z9>, the marker <m1> - one span each, so a word
+  // can carry all of them
   function kindOf(n, k) {
     if (n.nodeType !== 1 || !n.classList) return '';
     for (let i = 0; i < n.classList.length; i++) {
@@ -191,9 +217,14 @@
       if (n.nodeType === 3) { out += n.nodeValue; return; }
       if (n.nodeType !== 1) return;
       if (n.nodeName === 'BR') { out += ' '; return; }
+      if (n.nodeName === 'IMG') {                     // one of the Fahrplan's pictures - any other picture falls away
+        const m = n.classList.contains('emo') && /^\.\.\/svp\/emo\/([a-z0-9-]+\.(?:webp|png))$/.exec(n.getAttribute('src') || '');
+        if (m) out += '<emo:' + m[1] + '>';
+        return;
+      }
       const inner = htmlToSrc(n);
       if (!inner) return;
-      const c = kindOf(n, 'c') || kindOf(n, 'f');
+      const c = kindOf(n, 'c') || kindOf(n, 'f') || kindOf(n, 'z') || kindOf(n, 'm');
       const t = n.nodeName;
       if (!inner.trim()) out += inner;                // nothing but blanks: no tag around it
       else if (c) out += '<' + c + '>' + inner + '</' + c + '>';
@@ -229,14 +260,30 @@
     ['f3', 'Times', '"Times New Roman",Times,Georgia,serif'],
     ['f4', 'Menlo', 'Menlo,Consolas,monospace']
   ];
+  // Lucide "indent-increase" / "indent-decrease" (ISC) - as in the Fahrplan's bar (svp-fmtbar.js)
+  const INDENT = a => ICON('<path d="M21 5H11"/><path d="M21 12H11"/><path d="M21 19H11"/><path d="' + a + '"/>');
+  // In the Fahrplan's order - smileys, marks, sizes, colours, marker, Tx, indent (Doc, 05.10.2026: "in Fahrplan haben
+  // wir ein großes Edit-Menü. Versuch mal alles, was dort ist, auch hierher zu bringen, aber die Farben, die wir hier
+  // haben"). A 'slot:' entry is a place others fill: the smileys once svp-fmtbar.js is here, the sizes (deck-label.js).
   const TOOLS = [
+    ['slot:emos'],
+    null,
     ['bold', 'F', '', 'Fett (' + K + 'B)'],
     ['italic', 'K', 'ed-kursiv', 'Kursiv (' + K + 'I)'],
     ['underline', 'U', 'ed-unter', 'Unterstrichen (' + K + 'U)'],
     ['strikeThrough', 'S', 'ed-durch', 'Durchgestrichen'],
+    null,
+    ['slot:size'],
     null
   ].concat(TONE.map(function (c) { return [c, '', 'ed-dot', NAME[c]]; }),
-           [['c0', '', 'ed-dot', 'Farbe weg'], null, ['schrift', 'Aa', 'ed-schrift', 'Schrift waehlen']]);
+           [['c0', '', 'ed-dot', 'Farbe weg'], null,
+            ['marker', '', 'ed-mark', 'Marker'],
+            ['clear', 'Tx', 'ed-tx', 'Formatierung entfernen'],
+            null,
+            ['in', '', '', 'Einrücken (Tab)'],
+            ['out', '', '', 'Ausrücken (Shift+Tab)'],
+            null,
+            ['schrift', 'Aa', 'ed-schrift', 'Schrift waehlen']]);
 
   const tools = document.createElement('div');
   tools.id = 'ed-bar';
@@ -246,6 +293,8 @@
     b.type = 'button'; b.dataset.cmd = t[0]; b.title = t[3]; b.setAttribute('aria-label', t[3]);
     b.className = t[2] || '';
     if (t[0] === 'schrift') b.innerHTML = '<span>Aa</span>' + CHEV;
+    else if (t[0] === 'marker') b.innerHTML = '<span>M</span>';
+    else if (t[0] === 'in' || t[0] === 'out') b.innerHTML = INDENT(t[0] === 'in' ? 'm3 8 4 4-4 4' : 'm7 8-4 4 4 4');
     else if (t[1]) b.textContent = t[1];
     else b.innerHTML = t[0] === 'c0' ? NODOT : DOT('var(--' + VAR[t[0]] + ')');
     // mousedown would take the caret out of the text and save it on its own - the click does the work
@@ -258,9 +307,57 @@
   }
   TOOLS.forEach(function (t) {
     if (!t) { const sep = document.createElement('span'); sep.className = 'ed-sep'; tools.appendChild(sep); return; }
+    if (t[0].indexOf('slot:') === 0) {
+      const slot = document.createElement('span'); slot.className = 'ed-slot'; slot.dataset.slot = t[0].slice(5);
+      tools.appendChild(slot);
+      return;
+    }
     tools.appendChild(toolButton(t));
   });
   if (!PRES) document.body.appendChild(tools);
+
+  // The Fahrplan's smileys and pictures come from its own list (HTML/svp/svp-fmtbar.js WERKZEUGE), so one added there
+  // shows up here too. A smiley is typed as its character; a picture goes in as <emo:kuh.webp> (deck_markup.py).
+  // Doc, 01.10.2026: the division sign is drawn, its glyph sat off centre - Lucide "divide" (ISC), as there.
+  const DRAWN = { '÷': ICON('<circle cx="12" cy="6" r="1"/><path d="M5 12h14"/><circle cx="12" cy="18" r="1"/>') };
+  function emoButton(html, cls, title, fn) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.dataset.cmd = 'emo'; b.className = cls; b.title = title; b.setAttribute('aria-label', title);
+    b.innerHTML = html;
+    b.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    b.addEventListener('click', function (e) {
+      e.stopPropagation(); closeFonts();
+      if (!cur || busy) { msg('Erst einen Text anklicken - dann kommt es an die Stelle des Cursors'); return; }
+      cur.el.focus(); fn(); if (cur.input) cur.input(); state();
+    });
+    return b;
+  }
+  function fahrplan(W) {
+    const slot = tools.querySelector('[data-slot=emos]');
+    if (!slot || !W) return;
+    (W.emojis || []).forEach(function (e) {
+      slot.appendChild(emoButton(DRAWN[e] || '<span>' + e + '</span>', 'ed-emo', e + ' einfügen',
+        function () { document.execCommand('insertText', false, e); }));
+    });
+    (W.bilder || []).forEach(function (p) {
+      const m = /^\/svp\/emo\/([a-z0-9-]+\.(?:webp|png))$/.exec(p[0]);   // only our own folder, as deck_markup._EMO
+      if (!m) return;
+      slot.appendChild(emoButton('<img src="' + p[0] + '" alt="">', 'ed-pic', p[1] + ' einfügen', function () {
+        document.execCommand('insertHTML', false, srcToHtml('<emo:' + m[1] + '>'));
+      }));
+    });
+    state(); place();
+  }
+  if (!PRES) {
+    if (window.svpFmtBar) fahrplan(window.svpFmtBar.WERKZEUGE);
+    else {
+      const fp = document.createElement('script');
+      fp.src = '/svp/svp-fmtbar.js';
+      fp.onload = function () { if (window.svpFmtBar) fahrplan(window.svpFmtBar.WERKZEUGE); };
+      fp.onerror = function () { fp.remove(); };
+      document.head.appendChild(fp);
+    }
+  }
 
   // the typefaces sit in a little list instead of the row: each entry is set in its own face, so Doc
   // picks what he sees (Doc, 22.09.2026: "Fonts ... Raleway Times etc.")
@@ -292,6 +389,7 @@
     const d = document.getElementById('deck');
     if (!d || tools.hidden) return;
     const r = d.getBoundingClientRect();
+    tools.style.maxWidth = Math.round(Math.min(innerWidth * 0.98, Math.max(r.width, 640))) + 'px';
     tools.style.left = Math.round(r.left + r.width / 2) + 'px';
     tools.style.top = Math.max(8, Math.round(r.top - tools.offsetHeight - 12)) + 'px';
   }
@@ -350,12 +448,104 @@
     }
   }
 
+  // Type size of the marked words - the small and big A in the bar (deck-label.js) step through deck.css .z1-.z9
+  // (Doc, 05.10.2026: "das, was selektiert ist, soll größer gemacht werden ... So wie es immer ist"). Nothing marked:
+  // the whole open text. The text's own size sits between z4 and z5 and carries no class. A size span never sits
+  // inside another one - em on em would multiply - so the marked words are lifted out of the one around them first.
+  const SIZES = ['z1', 'z2', 'z3', 'z4', '', 'z5', 'z6', 'z7', 'z8', 'z9'];
+  function firstText(r) {                             // the first letter the range holds: whose size the A buttons show
+    const w = document.createTreeWalker(cur.el, NodeFilter.SHOW_TEXT);
+    for (let n = w.nextNode(); n; n = w.nextNode()) if (n.nodeValue.trim() && r.intersectsNode(n)) return n;
+    return null;
+  }
+  function sizeOf(n) {                                // the size class a node carries, read upwards to the open text
+    for (let p = n; p && p !== cur.el; p = p.parentNode) { const z = kindOf(p, 'z'); if (z) return z; }
+    return '';
+  }
+  function lift(r, kind) {                            // the range out of the span of this kind around it; before and after keep it
+    let p = r.commonAncestorContainer;
+    while (p && p !== cur.el && !kindOf(p, kind)) p = p.parentNode;
+    if (!p || p === cur.el) return;
+    const a = document.createRange(), b = document.createRange();
+    a.setStart(r.endContainer, r.endOffset); a.setEnd(p, p.childNodes.length);
+    const after = a.extractContents();                 // the end first: the start's offsets stay as they are
+    b.setStart(p, 0); b.setEnd(r.startContainer, r.startOffset);
+    const before = b.extractContents();
+    if (after.textContent) { const s = p.cloneNode(false); s.appendChild(after); p.after(s); }
+    if (before.textContent) { const s = p.cloneNode(false); s.appendChild(before); p.before(s); }
+    const first = p.firstChild, last = p.lastChild;   // p holds just the marked words now: they step out of it
+    unwrap(p);
+    if (first) { r.setStartBefore(first); r.setEndAfter(last); }
+  }
+  function size(d) {
+    if (!cur || busy) return false;
+    cur.el.focus();
+    const sel = getSelection();
+    if (!sel.rangeCount || !cur.el.contains(sel.getRangeAt(0).commonAncestorContainer)) return false;
+    if (sel.isCollapsed) {
+      const all = document.createRange(); all.selectNodeContents(cur.el);
+      sel.removeAllRanges(); sel.addRange(all);
+    }
+    const r = sel.getRangeAt(0), t = firstText(r);
+    if (!t) { msg('Erst ein Stueck Text markieren'); return false; }
+    const now = SIZES.indexOf(sizeOf(t));
+    const next = SIZES[Math.max(0, Math.min(SIZES.length - 1, now + d))];
+    lift(r, 'z');
+    sel.removeAllRanges(); sel.addRange(r);
+    wrap('z', next);
+    // a size span cut open at a text's edge leaves an empty shell behind - nothing the file should see
+    cur.el.querySelectorAll('span').forEach(function (sp) { if (kindOf(sp, 'z') && !sp.textContent) sp.remove(); });
+    if (cur.input) cur.input();
+    state();
+    return true;
+  }
+  function sizePx() {                                 // what the A buttons show: the size they will step from, in px
+    if (!cur) return 0;
+    const sel = getSelection();
+    let r = sel.rangeCount && !sel.isCollapsed ? sel.getRangeAt(0) : null;
+    if (!r) { r = document.createRange(); r.selectNodeContents(cur.el); }   // nothing marked: the whole text, as size()
+    const t = firstText(r);
+    return parseFloat(getComputedStyle(t ? t.parentNode : cur.el).fontSize) || 0;
+  }
+
   const MARKS = ['bold', 'italic', 'underline', 'strikeThrough'];
+
+  // nothing marked: the whole open text (as the sizes do)
+  function marked() {
+    const sel = getSelection();
+    if (!sel.rangeCount || !cur.el.contains(sel.getRangeAt(0).commonAncestorContainer)) return null;
+    if (sel.isCollapsed) { const all = document.createRange(); all.selectNodeContents(cur.el); sel.removeAllRanges(); sel.addRange(all); }
+    return sel.getRangeAt(0);
+  }
+  // the marker as in the Fahrplan (its WERKZEUGE.marker colour, deck.css .m1): on, or off again where it is
+  function marker() {
+    const sel = getSelection();
+    if (!sel.rangeCount || sel.isCollapsed) { msg('Erst ein Stueck Text markieren'); return; }
+    const r = sel.getRangeAt(0), off = !!here('m');
+    lift(r, 'm'); sel.removeAllRanges(); sel.addRange(r);
+    wrap('m', off ? '' : 'm1');
+  }
+  // Tx: every mark, colour, face, size and marker off the marked words - nothing marked: the whole text
+  function clear() {
+    if (!marked()) return;
+    try { document.execCommand('removeFormat'); } catch (e) { }   // b, i, u, s
+    const sel = getSelection();
+    if (!sel.rangeCount || sel.isCollapsed) return;
+    ['c', 'f', 'z', 'm'].forEach(function (k) {
+      const r = sel.getRangeAt(0);
+      lift(r, k); sel.removeAllRanges(); sel.addRange(r);
+      wrap(k, '');
+    });
+    cur.el.querySelectorAll('span').forEach(function (sp) { if (!sp.textContent && !sp.querySelector('img')) sp.remove(); });
+  }
 
   function apply(what) {
     if (!cur || busy) { msg('Erst einen Text anklicken - dann wirken die Werkzeuge'); return; }
+    if (what === 'in' || what === 'out') { level(what); return; }
     cur.el.focus();
-    if (MARKS.indexOf(what) >= 0) {
+    if (what === 'marker') marker();
+    else if (what === 'clear') clear();
+    else if (MARKS.indexOf(what) >= 0) {
       try { document.execCommand('styleWithCSS', false, false); } catch (e) { }   // <b>, not <span style>
       document.execCommand(what);
     } else {
@@ -365,41 +555,56 @@
     state();
   }
 
-  // which tools are on right now - grey while no text is open, lit while the selection carries them
+  // which tools are on right now - lit while the selection carries them. Never greyed out: in edit mode the bar stands
+  // there in full (Doc, 05.10.2026: "Du zeigst die manchmal grayed out. Wenn man im Edit-Modus ist, zeigt sie richtig
+  // bitte. Voll") - a click with no text open says what to do first (apply(), level(), the smileys).
   function state() {
     const open = !!cur && !busy;
     tools.querySelectorAll('button').forEach(function (b) {
-      if (b.dataset.own) return;                     // not ours: it says itself when it is on (deck-label.js's type size).
-      // Two owners of the same disabled attribute plus a MutationObserver on it = an endless round trip that blocks the
-      // page (Doc, 23.09.2026: "die local site lädt nicht") - every button here belongs to exactly one of them.
-      b.disabled = !open;
+      if (b.dataset.own) return;                     // not ours: it says itself when it is on (deck-label.js's type size)
       const c = b.dataset.cmd;
       let act = false;
       if (open && MARKS.indexOf(c) >= 0) { try { act = document.queryCommandState(c); } catch (e) { } }
       if (open && /^c[1-9]$/.test(c)) act = here('c') === c;
       if (open && c === 'schrift') act = !!here('f');
+      if (open && c === 'marker') act = !!here('m');
       b.classList.toggle('on', act);
     });
+    document.dispatchEvent(new Event('deck-edit-state'));   // a text opened, closed or marked: deck-label.js's size number
   }
   document.addEventListener('selectionchange', function () { if (on && !PRES) state(); });
 
+  function source(file) {
+    return fetch('/__deck/source?deck=' + encodeURIComponent(file), { cache: 'no-store' })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status); return j; }); });
+  }
   function load() {
-    return fetch('/__deck/source?deck=' + encodeURIComponent(DECK), { cache: 'no-store' })
-      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status); return j; }); })
-      .then(function (m) {
+    const aus = [...new Set(slides.filter(function (sl) { return sl.hasAttribute('data-aus'); })
+      .map(function (sl) { return sl.getAttribute('data-aus').split('#')[0]; }))];
+    // a vorspann file that does not answer leaves only its slides alone, not the deck
+    return Promise.all([source(DECK)].concat(aus.map(function (f) { return source(f).catch(function () { return null; }); })))
+      .then(function (maps) {
+        const m = maps[0], from = {};
+        aus.forEach(function (f, k) { from[f] = maps[k + 1]; });
         if (m.mtime > known + 1) throw new Error('Die Datei ist neuer als diese Seite – bitte neu laden (Cmd-Shift-R).');
         if (m.slides.length !== slides.length) throw new Error('Folienzahl passt nicht zur Datei – bitte neu laden.');
-        selector = m.selector; pending = m.pending;
+        selector = m.selector; pending = m.pending; AUS = aus;
         document.querySelectorAll('[data-ed]').forEach(function (el) { el.removeAttribute('data-ed'); });
         let skipped = 0;
         slides.forEach(function (sl, i) {
-          if (sl.hasAttribute('data-aus')) return;   // filled from its own file (deck.js): its text is edited there
-          const els = sl.querySelectorAll(m.selector), src = m.slides[i];
+          let src = m.slides[i], to = null;
+          if (sl.hasAttribute('data-aus')) {          // filled from its own file (deck.js): its texts are written there
+            const ref = sl.getAttribute('data-aus').split('#'), f = from[ref[0]], k = (+ref[1] || 1) - 1;
+            if (!f || !f.slides[k]) { skipped++; return; }
+            src = f.slides[k]; to = { deck: ref[0], slide: k };
+          }
+          const els = sl.querySelectorAll(m.selector);
           if (els.length !== src.length) { skipped++; return; }   // counted differently: leave this slide alone
           els.forEach(function (el, n) {
             if (src[n] === null) return;
-            el.dataset.ed = i + ':' + n;
+            el.dataset.ed = i + ':' + n;               // where it stands on this page (the overview's copies)
             SRC.set(el, src[n]);
+            if (to) ADDR.set(el, { deck: to.deck, slide: to.slide, n: n }); else ADDR.delete(el);
           });
         });
         return skipped;
@@ -430,7 +635,7 @@
   function undo(redo) {
     if (busy || publishing) return;
     busy = true;
-    fetch('/__deck/undo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ deck: DECK, redo: !!redo }) })
+    fetch('/__deck/undo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ deck: DECK, redo: !!redo, also: AUS }) })
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status); return j; }); })
       .then(function (j) {
         try { sessionStorage.setItem('deck-edit-resume', (redo ? 'Wiederhergestellt: ' : 'Rückgängig: ') + (j.what || 'Änderung')); } catch (e) { }
@@ -452,7 +657,7 @@
     el.setAttribute('contenteditable', 'true');
     cur.blur = function () { if (cur && cur.el === el && document.hasFocus()) end(true); };   // not when Doc only switches apps
     // the button turns to "Änderungen speichern" with the first typed letter, not only after Enter (Doc, 17.09.2026)
-    cur.input = function () { dirty = !!cur && el.innerHTML !== cur.open; label(); };
+    cur.input = function () { dirty = !!cur && el.innerHTML !== cur.open; lead(el); label(); };
     // what is pasted comes in as plain text - a deck knows four kinds of markup, not a web page's worth
     cur.paste = function (e) {
       e.preventDefault();
@@ -480,21 +685,21 @@
     el.removeEventListener('paste', c.paste);
     el.removeAttribute('contenteditable');
     if (!keep || text === c.src) {
-      el.innerHTML = c.html; el.classList.remove('ed-on'); cur = null; dirty = false; label(); state();
+      el.innerHTML = c.html; lead(el); el.classList.remove('ed-on'); cur = null; dirty = false; label(); state();
       return Promise.resolve(keep);
     }
-    const at = el.dataset.ed.split(':').map(Number);
+    const at = el.dataset.ed.split(':').map(Number), to = where(el);
     busy = true; el.classList.add('ed-busy');
     return fetch('/__deck/save', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ deck: DECK, slide: at[0], n: at[1], old: c.src, new: text })
+      body: JSON.stringify({ deck: to.deck, slide: to.slide, n: to.n, old: c.src, new: text })
     })
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status); return j; }); })
       .then(function (j) {
-        el.innerHTML = j.html; tex(el); SRC.set(el, j.src); known = j.mtime; pending = j.pending; rebase();
+        el.innerHTML = j.html; tex(el); lead(el); SRC.set(el, j.src); took(j, to); rebase();
         const tile = document.querySelectorAll('#overview .ov-thumb')[at[0]];   // the overview keeps copies
         const copy = tile && tile.querySelectorAll(selector)[at[1]];
-        if (copy) { copy.innerHTML = j.html; tex(copy); }
+        if (copy) { copy.innerHTML = j.html; tex(copy); lead(copy); }
         el.classList.remove('ed-on'); cur = null; dirty = false;
         msg('Gespeichert – live erst mit „Änderungen speichern“'); label(); state();
         return true;
@@ -536,15 +741,15 @@
     // copy: what was typed is saved first; remove: what was typed goes with the line
     end(op === 'dup').then(function (ok) {
       if (op === 'dup' && !ok) return;               // not saved - the message says why, nothing is copied
-      const at = el.dataset.ed.split(':').map(Number);
+      const at = el.dataset.ed.split(':').map(Number), to = where(el);
       busy = true; el.classList.add('ed-busy');
       return fetch('/__deck/line', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ deck: DECK, slide: at[0], n: at[1], old: SRC.get(el), op: op })
+        body: JSON.stringify({ deck: to.deck, slide: to.slide, n: to.n, old: SRC.get(el), op: op })
       })
         .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status); return j; }); })
         .then(function (j) {
-          known = j.mtime; pending = j.pending; rebase();
+          took(j, to); rebase();
           const copy = restructure(slides[at[0]], at[1], op, j.own, j.g);
           const tile = document.querySelectorAll('#overview .ov-thumb')[at[0]];
           if (tile) restructure(tile, at[1], op, j.own, j.g);
@@ -559,6 +764,32 @@
           msg((op === 'dup' ? 'Nicht kopiert: ' : 'Nicht gelöscht: ') + (/fetch/i.test(err.message) ? 'serve.py antwortet nicht' : err.message));
         })
         .finally(function () { busy = false; el.classList.remove('ed-busy'); });
+    });
+  }
+
+  // Tab / Shift-Tab and the two indent buttons: a bullet line one level in or out (l0 .. l2, deck_edit.line). What was
+  // typed is written first; the line stays open for typing afterwards, as in the Fahrplan.
+  function level(op) {
+    if (!cur || busy) return;
+    const el = cur.el;
+    if (!el.matches('p.line')) { msg('Ein- und Ausrücken geht nur bei Aufzählungszeilen.'); return; }
+    end(true).then(function (ok) {
+      if (!ok) return;
+      const at = el.dataset.ed.split(':').map(Number), to = where(el);
+      busy = true; el.classList.add('ed-busy');
+      return fetch('/__deck/line', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deck: to.deck, slide: to.slide, n: to.n, old: SRC.get(el), op: op })
+      })
+        .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status); return j; }); })
+        .then(function (j) {
+          took(j, to); rebase(); label();
+          const tile = document.querySelectorAll('#overview .ov-thumb')[at[0]];
+          const copy = tile && tile.querySelectorAll(selector)[at[1]];
+          [el, copy].forEach(function (x) { if (x) { x.classList.remove('l0', 'l1', 'l2'); x.classList.add('l' + j.level); } });
+        })
+        .catch(function (err) { msg('Nicht gerückt: ' + (/fetch/i.test(err.message) ? 'serve.py antwortet nicht' : err.message)); })
+        .finally(function () { busy = false; el.classList.remove('ed-busy'); begin(el); });
     });
   }
 
@@ -696,7 +927,16 @@
   addEventListener('click', function (e) {
     if (PRES || !on || !e.target.closest || !e.target.closest('#deck')) return;
     e.stopPropagation();
-    if (e.target.closest('a')) e.preventDefault();   // picture credits stay put while editing
+    // a link (picture credits, Wikipedia, the video) opens in a new tab while editing too - the deck stays where it is
+    // (Doc, 05.10.2026: "wenn man auf dem Wikipedia-Link klickt, dann wird die Seite nicht geöffnet. Bitte öffnen in
+    // einem neuen Tab"); only inside a text open for typing the click is for the caret
+    const a = e.target.closest('a');
+    if (a) e.preventDefault();
+    if (a && a.href && !(cur && cur.el.contains(a))) {
+      if (cur) end(true);
+      window.open(a.href, '_blank', 'noopener');
+      return;
+    }
     if (cur && cur.el.contains(e.target)) return;
     if (cur) end(true);
     if (held && Date.now() - held < 400) { held = 0; return; }   // a label was just dragged - nothing to open
@@ -715,6 +955,7 @@
       else if (cmd(e) && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); apply('underline'); }
       else if (cmd(e) && (e.key === 'd' || e.key === 'D')) { e.preventDefault(); line('dup'); }
       else if (cmd(e) && e.key === 'Backspace') { e.preventDefault(); line('del'); }
+      else if (e.key === 'Tab') { e.preventDefault(); level(e.shiftKey ? 'out' : 'in'); }
       else if (e.key === 'Enter') { e.preventDefault(); end(true); }
       else if (e.key === 'Escape') { e.preventDefault(); end(false); }
       else if ((e.metaKey || e.ctrlKey) && (e.key === 's' || e.key === 'S')) { e.preventDefault(); end(true); }
@@ -754,13 +995,21 @@
       label();
     },
     msg: msg,
-    hold: function () { held = Date.now(); }         // deck-label.js: a click inside #deck right now is a drag's end
+    text: function () { return cur && !busy ? cur.el : null; },   // the text open for typing (deck-label.js: the A buttons)
+    size: size,
+    sizePx: sizePx,
+    hold: function () { held = Date.now(); },        // deck-label.js: a click inside #deck right now is a drag's end
+    // deck-label.js: a text box went - the page comes back from the file, in edit mode, on the same slide (as after Cmd-Z)
+    resume: function (note) {
+      try { sessionStorage.setItem('deck-edit-resume', note); } catch (e) { }
+      location.reload();
+    }
   };
   const pics = document.createElement('script');
   pics.src = '/decks/deck-image.js';
   pics.onerror = function () { pics.remove(); };      // not there yet: the text editor works without it
   document.head.appendChild(pics);
-  const labels = document.createElement('script');    // a figure's words: moved and sized (deck-label.js)
+  const labels = document.createElement('script');    // a figure's words and the text boxes: moved, sized, removed (deck-label.js)
   labels.src = '/decks/deck-label.js';
   labels.onerror = function () { labels.remove(); };
   document.head.appendChild(labels);

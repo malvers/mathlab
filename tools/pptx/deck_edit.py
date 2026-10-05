@@ -4,12 +4,14 @@ Only the local dev server (serve.py, 127.0.0.1:8765) talks to this module; the l
 
     GET  /__deck/source?deck=<name>.html  -> {selector, slides: [[source or null, ...], ...]}
     POST /__deck/save  {deck, slide, n, old, new}  -> {html, src}   one element rewritten in the file
-    POST /__deck/line  {deck, slide, n, old, op}  -> {own, g}   Cmd-D copies a line below itself, Cmd-Backspace removes it
+    POST /__deck/line  {deck, slide, n, old, op}  -> {own, g}   Cmd-D copies a line below itself, Cmd-Backspace removes it,
+                                                    op in/out (Tab, Shift-Tab) -> {level}: the bullet one level in or out
     POST /__deck/slide {deck, index, op, to}  -> {order|hidden|at}   the overview: move, hide, show, insert, dup, del
     POST /__deck/publish  {deck}  -> {commit, files}   the deck (and pictures it needs) onto origin/main
     POST /__deck/undo  {deck, redo}  -> {what, mtime, pending}   one step back or forward (deck_undo.py)
     *    /__deck/image/...   pictures on slides - handled by deck_image.py
     *    /__deck/label       a figure's words moved or sized - handled by deck_label.py
+    *    /__deck/box         a slide's text box moved, widened or removed - handled by deck_label.py too
 
 Publishing is Doc's click on "Änderungen speichern" - his standing go-ahead for exactly these pushes (Doc,
 17.09.2026: "Nur von/für hier um Änderungen zu pushen ja: Dauerfreigabe"). The commit is built on origin/main in a
@@ -47,7 +49,9 @@ EDITABLE_TAGS = ("h1", "h2", "h3", "th", "td")
 EDITABLE_P = ("kicker", "sub", "line", "col", "satz", "label", "labnote", "greet-quote", "greet-author",
               "fl")   # a figure's words over its SVG (html_deck.figure)
 SELECTOR = ",".join(EDITABLE_TAGS + tuple("p." + c for c in EDITABLE_P))
-DECK_NAME = re.compile(r"[a-z0-9][a-z0-9._-]*\.html")
+# a deck, or a file of slides several decks show (decks/vorspann, deck.js data-aus) - edited from the deck that shows it
+# (Doc, 05.10.2026: "Ich kann die ganze Textbox nicht editieren. Die beginnt mit geboren 1946 ... Möchte ich bitte.")
+DECK_NAME = re.compile(r"(?:vorspann/)?[a-z0-9][a-z0-9._-]*\.html")
 _lock = threading.Lock()
 
 
@@ -104,10 +108,18 @@ class _Ranges(HTMLParser):
             self.open = None
 
 
+def _area(page, gen):
+    """Where a file's slides are: a deck between its deck markers; a file of slides several decks show (decks/vorspann)
+    has no markers - all of it."""
+    if gen._DECK_START not in page:
+        return 0, len(page)
+    a = page.index(gen._DECK_START) + len(gen._DECK_START)
+    return a, page.index(gen._DECK_END, a)
+
+
 def elements(page, gen):
     """Per slide its editable elements (offsets into the whole page) and each slide's (start, end)."""
-    a = page.index(gen._DECK_START) + len(gen._DECK_START)
-    b = page.index(gen._DECK_END, a)
+    a, b = _area(page, gen)
     p = _Ranges(page[a:b])
     p.feed(page[a:b])
     p.close()
@@ -134,9 +146,15 @@ class _Source(HTMLParser):
         elif tag == "span" and cls == ["tex"]:
             self.out.append("$" + (dict(attrs).get("data-tex") or "") + "$")
             self.stack.append("tex")
-        elif tag == "span" and len(cls) == 1 and re.fullmatch(r"[cf][1-9]", cls[0]):
+        elif tag == "span" and len(cls) == 1 and re.fullmatch(r"[cfmz][1-9]", cls[0]):   # colour, face, marker, size
             self.out.append("<%s>" % cls[0])
             self.stack.append("</%s>" % cls[0])
+        elif tag == "img" and cls == ["emo"]:          # a picture of HTML/svp/emo (deck_markup._EMO), no end tag
+            m = re.fullmatch(r"\.\./svp/emo/([a-z0-9-]+\.(?:webp|png))", dict(attrs).get("src") or "")
+            if m:
+                self.out.append("<emo:%s>" % m.group(1))
+            else:
+                self.bad = True
         elif tag == "b" and not attrs:
             self.out.append("**" if self.bold else "<b>")
             self.stack.append("**" if self.bold else "</b>")
@@ -243,6 +261,18 @@ def line(deck, slide, n, old, op):
         el = els[slide][n]
         if to_source(page[el["s"]:el["e"]], gen.markup) != old:
             return 409, {"error": "Die Datei hat sich inzwischen geändert – bitte neu laden."}
+        if op in ("in", "out"):                      # Tab / Shift-Tab: the bullet's level, l0 .. l2 - the class, not the text
+            if el["tag"] != "p" or "line" not in el["cls"]:
+                return 422, {"error": "Ein- und Ausrücken geht nur bei Aufzählungszeilen."}
+            lv = next((int(c[1]) for c in el["cls"] if re.fullmatch(r"l[0-2]", c)), 0)
+            to = max(0, min(2, lv + (1 if op == "in" else -1)))
+            if to == lv:
+                return 200, {"level": lv, "mtime": _mtime(deck), "pending": pending(deck)}
+            end = page.index(">", el["os"]) + 1
+            cls = [("l%d" % to) if re.fullmatch(r"l[0-2]", c) else c for c in el["cls"]]
+            tag = CLASS_ATTR.sub(lambda m: 'class="%s"' % " ".join(cls), page[el["os"]:end], count=1)
+            _write(deck, page[:el["os"]] + tag + page[end:], gen, what="Zeile eingerückt" if op == "in" else "Zeile ausgerückt")
+            return 200, {"level": to, "mtime": _mtime(deck), "pending": pending(deck)}
         if el["tag"] != "p" or not set(el["cls"]) & set(LINES):
             return 422, {"error": "Kopieren und Löschen geht nur bei Aufzählungszeilen."}
         lines = [x for x in els[slide] if x["tag"] == "p" and set(x["cls"]) & set(LINES)]
@@ -460,7 +490,7 @@ def _write(deck, page, gen, record=True, what="Änderung", stuck=False):
     """Write the deck atomically, with EDITED_MARK so html_deck.py leaves it alone from now on. Every write is one
     undo step (deck_undo.py, Doc 17.09.2026: "Undo gemeinsam angehen ... intelligent klein") - texts, lines and pictures
     alike; `stuck` marks a step that cannot be undone (Solita's clips were moved), record=False is the undo itself."""
-    if EDITED_MARK not in page:
+    if EDITED_MARK not in page and gen._DECK_START in page:   # a vorspann file is no deck: no build ever writes it
         a = page.index(gen._DECK_START) + len(gen._DECK_START)
         page = page[:a] + EDITED_MARK + page[a:]
     path = os.path.join(DECKS, deck)
@@ -500,13 +530,23 @@ def _blob_at(ref, rel):
         return None
 
 
+def _changed(rel):
+    """This file differs from origin/main as last fetched."""
+    return _git("hash-object", rel) != _blob_at("origin/" + BRANCH, rel)
+
+
 def pending(deck):
-    """True while a deck edited in the browser differs from origin/main as last fetched - not live yet."""
+    """True while a deck edited in the browser differs from origin/main as last fetched - not live yet; so does a
+    vorspann file its stubs show (it goes live with the deck, _assets). A vorspann file asked for itself: any change."""
     rel = "HTML/decks/" + deck
     try:
-        if EDITED_MARK not in _read(deck):
+        page = _read(deck)
+        if "/" in deck:
+            return _changed(rel)
+        if EDITED_MARK not in page:
             return False                              # other changes (a rebuild) are not this button's business
-        return _git("hash-object", rel) != _blob_at("origin/" + BRANCH, rel)
+        return _changed(rel) or any(_changed(os.path.normpath("HTML/decks/" + ref)) for ref in set(AUS.findall(page))
+                                    if DECK_NAME.fullmatch(ref) and os.path.isfile(os.path.join(DECKS, ref)))
     except (RuntimeError, OSError, subprocess.SubprocessError):
         return False
 
@@ -523,13 +563,14 @@ AUS = re.compile(r'\bdata-aus="([^"#?:]+\.html)')    # a slide filled from a fil
 
 def _assets(page, base, own=True):
     """Pictures the deck points to (img/..., morning/...) that origin/main does not have yet - and the files its stubs
-    fill slides from (data-aus, vorspann/...) when main lacks them, with the pictures those point to."""
+    fill slides from (data-aus, vorspann/...) when they differ from main (edited from this deck, 05.10.2026), with the
+    pictures those point to."""
     out = []
     for ref in sorted(set(AUS.findall(page))) if own else ():   # one level: such a file holds no stubs
         rel = os.path.normpath("HTML/decks/" + ref)
         if not (rel.startswith("HTML/decks/") and os.path.isfile(os.path.join(REPO, rel))):
             continue
-        if not _blob_at(base, rel):
+        if _git("hash-object", rel) != _blob_at(base, rel):
             out.append(rel)
         with open(os.path.join(REPO, rel), encoding="utf-8") as f:
             out += [p for p in _assets(f.read(), base, False) if p not in out]   # written for the deck's folder too
@@ -578,11 +619,17 @@ def publish(deck):
                 before = _git("cat-file", "-p", old) if old else ""
                 seen = set(before.splitlines())
                 added = [l for l in page.splitlines() if l not in seen]
+                clips, gone = _clips(page, base)
+                paths = [rel] + _assets(page, base) + clips
+                for p in paths[1:]:                  # a vorspann file that goes along: its new lines are checked too
+                    if p.endswith(".html"):
+                        was = _blob_at(base, p)
+                        seen = set((_git("cat-file", "-p", was) if was else "").splitlines())
+                        with open(os.path.join(REPO, p), encoding="utf-8") as f:
+                            added += [l for l in f.read().splitlines() if l not in seen]
                 hit = next((m.group(0) for l in added for m in [LEAKS.search(l)] if m), None)
                 if hit:
                     return 422, {"error": "Nicht live gestellt: das sieht aus wie ein Schlüssel oder Passwort (%s…)." % hit[:10]}
-                clips, gone = _clips(page, base)
-                paths = [rel] + _assets(page, base) + clips
                 blobs = [(p, _git("hash-object", "-w", p)) for p in paths]
                 if not gone and all(_blob_at(base, p) == b for p, b in blobs):
                     return 200, {"commit": base[:8], "files": [], "pending": False}
@@ -642,8 +689,8 @@ def handle(method, path, headers, body):
         return 403, {"error": "origin"}
     url = urlsplit(path)
     try:
-        if url.path == "/__deck/label":
-            # a figure's words moved or sized (deck_label.py) - reloaded per call like deck_image
+        if url.path in ("/__deck/label", "/__deck/box"):
+            # a figure's words moved or sized, a text box moved or removed (deck_label.py) - reloaded per call like deck_image
             if HERE not in sys.path:
                 sys.path.insert(0, HERE)
             import deck_label
@@ -679,7 +726,10 @@ def handle(method, path, headers, body):
             if HERE not in sys.path:
                 sys.path.insert(0, HERE)
             import deck_undo
-            return importlib.reload(deck_undo).back(sys.modules[__name__], q["deck"], bool(q.get("redo")))
+            u, redo = importlib.reload(deck_undo), bool(q.get("redo"))
+            # the deck and the vorspann files its stubs show are one page: Cmd-Z takes the step that is next among them
+            files = [q["deck"]] + [f for f in q.get("also") or [] if isinstance(f, str) and DECK_NAME.fullmatch(f)]
+            return u.back(sys.modules[__name__], u.latest(sys.modules[__name__], files, redo), redo)
         if method == "POST" and url.path == "/__deck/publish":
             if not (headers.get("Content-Type") or "").startswith("application/json"):
                 return 415, {"error": "json only"}

@@ -79,6 +79,17 @@ def record(e, deck, before, after, what="Änderung", stuck=False):
     _save(folder, steps)
 
 
+def latest(e, decks, forward=False):
+    """Of several files one page shows (a deck and the vorspann files its stubs come from), the one whose step is
+    next: undo takes the newest step, redo the one undone last - the oldest of the tops waiting to be redone."""
+    take, best = ("redo" if forward else "undo"), None
+    for d in decks:
+        steps = _load(os.path.join(_root(e), d))[take]
+        if steps and (best is None or (steps[-1]["t"] < best[0] if forward else steps[-1]["t"] > best[0])):
+            best = (steps[-1]["t"], d)
+    return best[1] if best else decks[0]
+
+
 def back(e, deck, forward=False):
     """Undo (or redo with forward=True) the last step of this deck. Returns (status, reply).
     deck_edit._write must be called with record=False here - moving through the steps is not a new step."""

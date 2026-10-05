@@ -261,10 +261,13 @@ addEventListener('contextmenu', e => {
 });
 // the lab bar sits right on top of its lab: each slide places its lab frame itself, so read that frame's top.
 // A note that runs under the bar (a long one, mathe11-nichtlinear) pushes it up above the note instead.
+// A bar Doc placed himself in the deck editor (deck-label.js: it has a left of its own) stays where he put it; the
+// file's own style is kept aside first, so the editor can tell the file what it held (data-file-style).
 function placeLabBar(s) {
   const bar = s && s.querySelector('.labbar'), frame = s && s.querySelector('.labframe');
   const top = frame ? parseFloat(frame.style.top) : NaN;
-  if (!bar || !(top > 0)) return;
+  if (!bar || !(top > 0) || bar.style.left) return;
+  if (bar.dataset.fileStyle === undefined) bar.dataset.fileStyle = bar.getAttribute('style') || '';
   bar.style.top = 'auto';
   bar.style.bottom = (540 - top + 3) + 'px';
   const note = s.querySelector('.labnote');
@@ -703,6 +706,29 @@ function fromHash(){
   if (n >= 1 && n <= slides.length) { si = nth(n); step = groups(slides[si]); paint(); }
 }
 addEventListener('hashchange', fromHash);
+
+// A line whose first letters carry a type size of their own (deck.css .z1-.z9, the editor's A buttons): its square
+// rides at their middle, not at the line's own size - data-lead names that size (Doc, 05.10.2026: "Wenn man es größer
+// macht, dann ist der Bullet nicht mehr ganz in der Mitte"). Before any copy of a slide is made (overview, presenter),
+// so the copies carry it too; the deck editor calls window.deckLead for a line it just wrote.
+function deckLead(p) {
+  const w = document.createTreeWalker(p, NodeFilter.SHOW_TEXT);
+  let n = w.nextNode();
+  while (n && !n.nodeValue.trim()) n = w.nextNode();
+  let z = '';
+  for (let e = n && n.parentNode; e && e !== p && !z; e = e.parentNode) z = [...e.classList].find(c => /^z[1-9]$/.test(c)) || '';
+  if (z) p.dataset.lead = z; else delete p.dataset.lead;
+}
+window.deckLead = deckLead;
+document.querySelectorAll('p.line').forEach(deckLead);
+
+// Emojis as Apple draws them, on the Windows beamer too (js/apple-emoji.js; Doc: "Emoji IMMER Apple") - the deck editor
+// types the Fahrplan's smileys into slides (05.10.2026). An open text is contenteditable: apple-emoji leaves it alone.
+if (!window.AppleEmoji) {
+  const ae = document.createElement('script');
+  ae.src = '/js/apple-emoji.js';
+  document.head.appendChild(ae);
+}
 
 // formulas: KaTeX renders every $...$ the build script wrote
 addEventListener('load', () => {
