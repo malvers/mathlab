@@ -52,51 +52,31 @@ window.svpPlanParts.push(function (P) {
         'N_Mathematisch-naturwissenschaftliche_Formelsammlung.pdf';
     const FORMELN_ON = P.FORMELN_ON = ['mathe11', 'mathe12', 'mathe13'];
 
-    /* Das Zeichen des Labors vor dem Lab-Link: das gelbe Kaestchen mit dem
-       dunkelblauen Lambda aus resources/favicon.svg - GEZEICHNET, nicht als
-       Bild geladen. serve.py tauscht /resources/favicon.svg lokal gegen das
-       rote favicon-local.svg (das Reiter-Zeichen soll lokal von live zu
-       unterscheiden sein), und genau dieses Rot kam in der Pille an (Doc,
-       21.09.2026: "GELBES Lambda bitte"). Hier geht es nicht um den Reiter,
-       sondern um das Zeichen des Labors - das ist immer gelb.
+    /* Das Zeichen des Labors vor dem Lab-Link: das gelbe Kaestchen mit einem
+       geschwungenen L, gebaut wie das D der Foliensaetze (Doc, 05.10.2026:
+       "besorg mal ein geschwungenes L (wie D) fuer die Labs"; welches L: siehe
+       LAB_L). Vorher stand hier das Lambda aus resources/favicon.svg.
+       Gezeichnet, nicht als Bild geladen: serve.py tauscht
+       /resources/favicon.svg lokal gegen das rote favicon-local.svg, und
+       genau dieses Rot kam in der Pille an (Doc,
+       21.09.2026: "GELBES Lambda bitte") - das Zeichen des Labors ist immer gelb.
        Es traegt .mat-ico wie jedes andere Symbol: an dieser Klasse haengt die
        Geometrie der Pille (:has(> .mat-ico) in svp-viewer.css). Ohne sie fiel
        die Pille niedriger und schmaler aus als die der Woche (Doc: "beide
-       Pillen unten so wie die anderen").
+       Pillen unten so wie die anderen"). Die Klasse mat-lambda bleibt, an ihr
+       haengt svp-material.css.
        Es steht an JEDEM Link ins eigene Labor, egal in welcher Woche er haengt
        (siehe istLab) - so ist ein Lab in der Materialzeile auf einen Blick von
        einem Foliensatz oder einem fremden Link zu unterscheiden. */
     function lambdaIcon() {
-        const ns = 'http://www.w3.org/2000/svg';
-        const svg = document.createElementNS(ns, 'svg');
-        svg.setAttribute('class', 'mat-ico mat-ico-drawn mat-lambda');
-        svg.setAttribute('viewBox', '0 0 64 64');
-        svg.setAttribute('aria-hidden', 'true');
-        const kasten = document.createElementNS(ns, 'rect');
-        kasten.setAttribute('width', '64');
-        kasten.setAttribute('height', '64');
-        kasten.setAttribute('rx', '14');
-        kasten.setAttribute('fill', 'rgb(245, 194, 66)');
-        svg.appendChild(kasten);
-        const g = document.createElementNS(ns, 'g');
-        g.setAttribute('fill', 'none');
-        g.setAttribute('stroke', 'rgb(14, 36, 78)');
-        g.setAttribute('stroke-width', '9');
-        g.setAttribute('stroke-linecap', 'round');
-        ['M22 11 L46 53', 'M34.5 32.5 L18 53'].forEach(function (d) {
-            const pfad = document.createElementNS(ns, 'path');
-            pfad.setAttribute('d', d);
-            g.appendChild(pfad);
-        });
-        svg.appendChild(g);
-        return svg;
+        return schriftIcon(LAB_L, LAB_L_LAGE, LAB_L_FETT, 'mat-lambda');
     }
 
     /* Das Zeichen eines eigenen Foliensatzes: dasselbe gelbe Kaestchen wie beim
-       Lambda, darin ein geschwungenes D (Doc, 22.09.2026: "nimm das Lambda und
+       Lab, darin ein geschwungenes D (Doc, 22.09.2026: "nimm das Lambda und
        mach ein geschweiftes D rein. Deck -> Doc"). Das D steht fuer Deck und
        fuer Doc: ein Foliensatz aus dem eigenen Haus ist damit auf einen Blick
-       von einer fremden PPT zu unterscheiden, so wie das Lambda ein eigenes Lab
+       von einer fremden PPT zu unterscheiden, so wie das L ein eigenes Lab
        auszeichnet.
        Der Buchstabe ist aus der Schreibschrift GREAT VIBES geschnitten (SIL
        Open Font License, Google Fonts) - von Hand gezeichnet war er Doc nicht
@@ -116,10 +96,28 @@ window.svpPlanParts.push(function (P) {
        3,2 von 64 Kaestcheneinheiten sind hier 71.4. */
     const DECK_D_FETT = 71.4;
 
+    /* Das L der Labs ist das L aus dem Vorspann "The Calculus of Life"
+       (decks/vorspann/calculus-of-life.html, Doc 05.10.2026: "nee, schau mal in
+       das!"): KaTeX_Script, dort schon aufgerichtet (geschert um 0.42) und als
+       Pfad gezeichnet - hier derselbe Pfad. Er steht in SVG-Richtung (y nach
+       unten), die Lage dreht ihn deshalb nicht um; sie passt seine viewBox
+       (1.4 -717 776.9 734) mit 46 Einheiten Breite mittig ins Kaestchen.
+       KaTeX_Script hat dicke und duenne Striche, eine halb so starke Kontur wie
+       beim D (1,6 von 64 Einheiten) gibt ihm dasselbe Gewicht. */
+    const LAB_L = 'M643.9 -717Q684.9 -717 718.2 -696Q751.5 -675 767.5 -637Q786.4 -592 772.4 -530Q749.1 -433 640.1 -376Q591.7 -353 527.5 -337L511.1 -333Q510.1 -333 506.6 -320Q474.1 -207 466.3 -185Q445.1 -126 393.2 -78L384.4 -68H385.4Q468.3 -47 555.3 -47Q586.3 -47 611.1 -57Q676 -81 696.6 -139L699.8 -148H716.8Q739.8 -148 742.4 -142Q744.5 -137 740.8 -129Q726.9 -86 693.7 -49.5Q660.5 -13 618.7 4Q584.7 16 550.7 16Q522.7 16 514.3 15Q456.2 10 357.6 -20L328.8 -29L320.9 -24Q269.7 4 205.3 15Q186.1 17 148.1 17Q119.1 17 107.7 16Q19 12 4.8 -22Q1 -31 1.5 -37Q5 -81 63.1 -95Q83.6 -101 137.6 -101Q192.6 -101 233.1 -95Q240.5 -94 254.9 -92Q269.2 -90 281 -88Q292.9 -86 293.9 -86Q295.9 -86 309.7 -103Q323.6 -120 332.3 -135Q340.3 -147 346.7 -159Q353.2 -171 356.6 -179.5Q360 -188 365 -203.5Q370 -219 372.2 -224.5Q374.4 -230 379.9 -251.5Q385.3 -273 387.4 -280L399.8 -322H373.8Q235.8 -322 153.7 -384Q114.7 -415 99.2 -452Q95.4 -461 91 -481Q74.4 -561 133.8 -632.5Q193.3 -704 276.3 -704Q305.3 -704 313.3 -697Q319.4 -692 315.7 -677Q313.4 -668 311.1 -664H309.1Q307.1 -664 304.8 -663.5Q302.5 -663 299.5 -663Q265.4 -661 233.5 -640.5Q201.6 -620 182 -588Q164.6 -558 161.6 -522.5Q158.5 -487 171.1 -457Q184.1 -426 217.6 -401Q261.2 -371 329.4 -361Q338.8 -360 375.8 -360H410.8Q412.5 -363 419.4 -383.5Q426.3 -404 434.6 -429.5Q442.9 -455 446.1 -464Q480.5 -556 511.8 -610Q548.3 -673 585.3 -697Q613.9 -717 643.9 -717ZM711.3 -635Q701.6 -658 689.8 -666Q677.9 -674 652.4 -680Q643.4 -680 640.7 -677Q606.6 -651 524.6 -382L523.7 -377L531.4 -380Q653.9 -417 698.1 -495Q728.9 -555 717.9 -617Q716.8 -622 711.3 -635ZM171.1 -64Q167.1 -64 155.9 -64.5Q144.7 -65 138.7 -65Q93.7 -65 79.1 -45Q71.3 -35 75.4 -30Q85.6 -20 150.6 -20Q188.6 -20 210.2 -28Q255.5 -44 253 -50Q250.5 -56 171.1 -64Z';
+    const LAB_L_LAGE = 'translate(8.92 52.72) scale(0.05921)';
+    const LAB_L_FETT = 27.0;
+
     function deckIcon() {
+        return schriftIcon(DECK_D, DECK_D_LAGE, DECK_D_FETT, 'mat-deck');
+    }
+
+    /* Kaestchen und geschwungener Buchstabe: D und L teilen alles ausser
+       Umriss, Lage, Kontur und Klasse. */
+    function schriftIcon(umriss, lage, fett, klasse) {
         const ns = 'http://www.w3.org/2000/svg';
         const svg = document.createElementNS(ns, 'svg');
-        svg.setAttribute('class', 'mat-ico mat-ico-drawn mat-deck');
+        svg.setAttribute('class', 'mat-ico mat-ico-drawn ' + klasse);
         svg.setAttribute('viewBox', '0 0 64 64');
         svg.setAttribute('aria-hidden', 'true');
         const kasten = document.createElementNS(ns, 'rect');
@@ -129,11 +127,11 @@ window.svpPlanParts.push(function (P) {
         kasten.setAttribute('fill', 'rgb(245, 194, 66)');
         svg.appendChild(kasten);
         const d = document.createElementNS(ns, 'path');
-        d.setAttribute('d', DECK_D);
-        d.setAttribute('transform', DECK_D_LAGE);
+        d.setAttribute('d', umriss);
+        d.setAttribute('transform', lage);
         d.setAttribute('fill', 'rgb(14, 36, 78)');
         d.setAttribute('stroke', 'rgb(14, 36, 78)');
-        d.setAttribute('stroke-width', DECK_D_FETT);
+        d.setAttribute('stroke-width', fett);
         d.setAttribute('stroke-linejoin', 'round');
         svg.appendChild(d);
         return svg;
@@ -318,7 +316,12 @@ window.svpPlanParts.push(function (P) {
         return muster.test(pfad);
     }
 
+    /* Ein Lab, das als eigene App in einem Ordner wohnt, statt als Seite unter
+       der Wurzel (Doc, 05.10.2026: die Rechen-Rallye bekommt das L). */
+    const LAB_ORDNER = /^\/rechenrallye\/(?:index\.html)?$/i;
+
     function istLab(url) {
+        if (eigenerPfad(url, LAB_ORDNER)) return true;
         if (!eigenerPfad(url, /^\/[\w-]+\.html$/i)) return false;
         const pfad = new URL(String(url), location.href).pathname;
         return !/test/i.test(pfad) && !/^\/index\.html$/i.test(pfad);
