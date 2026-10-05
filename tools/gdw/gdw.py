@@ -210,10 +210,10 @@ def html(bl):
         teile.append('''
     <section class="blatt %s" data-nr="%s">
         <div class="spruch">%s</div>
-        <div class="bild">%s</div>
+        <div class="bild%s">%s</div>
         %s%s
         <div class="bildquelle">%s</div>
-    </section>''' % (groesse(b), nn(b['nr']), b['text'],
+    </section>''' % (groesse(b), nn(b['nr']), b['text'], ' frei' if bild.get('freigestellt') else '',
                      '<img src="bilder/%s" alt="">' % bild['datei'] if bild.get('datei') else '',
                      '<div class="quelle">%s</div>' % b['wer'] if b.get('wer') else '',
                      '<div class="rolle">%s</div>' % b['rolle'] if b.get('rolle') else '',
