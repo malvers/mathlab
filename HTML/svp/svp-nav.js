@@ -155,15 +155,14 @@
                das Menue ab, hinter dem Timer. */
             /* An entry is an href or a sub-menu { sub: label, hrefs: [...] }.
                The grade sub-menu is just "Noten" (Doc, 29.09.2026). */
-            [null, ['notes.html', 'fahrplan.html', 'schuljahr.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
+            /* Doc, 05.10.2026: Doc's own tools fold into one sub-menu "MRA" (Michael R. Alvers) at the
+               top, so the menu gets shorter - the demo class used to close the menu below a divider. */
+            [null, [{ sub: 'MRA', hrefs: ['notes.html', 'fahrplan.html', '../vote.html?host', 'genii.html'] },
+                    'schuljahr.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
                     { sub: 'Noten', hrefs: ['punktetabelle.html', 'punktetabelle.html?s=osgy',
                                                   'bewertungen.html', 'notenvergabe-fos.html',
                                                   'notenvergabe-osgy.html'] },
-                    '../fokus.html', 'bewertungsmatrix.html', '../vote.html?host']],
-            /* Doc, 10.09.2026: the demo class last, below a divider; the poll is the
-               second-to-last entry (18.09.2026) and sits ABOVE the divider, closing
-               the tools group (Doc, 19.09.2026: "den Divider unter Umfragen") */
-            [null, ['genii.html']]
+                    '../fokus.html', 'bewertungsmatrix.html']]
         ], true, true]
     ];
 
