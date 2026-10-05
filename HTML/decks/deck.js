@@ -276,6 +276,20 @@ function placeLabBar(s) {
 }
 painted.push(() => placeLabBar(slides[si]));
 addEventListener('load', () => placeLabBar(slides[si]));   // formulas in the note are wider once KaTeX has drawn them
+// a lab that stands free (.labframe.bare, deck.css): its page's ground goes, and a lab that can widen fills the frame's
+// width - DOCPAD's CPWide, the call its Mac shell makes (Doc, 05.10.2026: "Zieh den ruhig breit"); it is not kept as
+// DOCPAD's own width. Every page the frame loads (DOCPAD's password page first, then the app), copies in the presenter too.
+function bareLab(f) {
+  if (!f || f.tagName !== 'IFRAME' || !f.closest('.labframe.bare')) return;
+  try {
+    const d = f.contentDocument;
+    if (!d || !d.body) return;
+    d.documentElement.style.background = d.body.style.background = 'transparent';
+    if (f.contentWindow.CPWide) f.contentWindow.CPWide(99);
+  } catch (e) { }                                     // a lab from elsewhere keeps its ground
+}
+document.addEventListener('load', e => bareLab(e.target), true);   // a frame's load does not bubble: caught on the way down
+document.querySelectorAll('.labframe.bare iframe').forEach(bareLab);
 // the footer triangles: one whole slide back or forth, shown fully built - no click steps
 (function () {
   const prevB = document.getElementById('nav-prev'), nextB = document.getElementById('nav-next');
