@@ -57,6 +57,8 @@ function zeigeVorlage(hinweis) {
     // with what to solve for at the right edge
     const liste = testModus ? VORLAGEN : AUFGABEN, nr = testModus ? vorlageIdx : aufgabeIdx;
     const [slug, latex, nach] = liste[nr];
+    // "umstellen nach x" (kopfText null), "vereinfachen" or "ausrechnen" (aufgabenKopf, js/formel-satz.js)
+    const kopfText = aufgabenKopf(latex, nach, aufgabenModus ? KOEPFE[slug] || aufgabenBlock(nr).kopf : '');
     // Doc, 26.09.: "7 von 20 ... und nach x - bring das links und rechts an die
     // Formel ran, mach's größer, in der Y-Mitte der Zeile; rechts 'umstellen
     // nach x'" - in class larger, placed beside the task by zeigeRechenweg
@@ -71,10 +73,10 @@ function zeigeVorlage(hinweis) {
         // block the counter counts in ("Level 3 · echte Nüsse"), right before ▶ (placed by zeigeRechenweg)
         (aufgabenModus ? `<span id="vorlage-block" style="${RAND};right:24px">${aufgabenBlock(nr).titel}</span>` : '') +
         (testModus ? `<span id="vorlage-formel" style="font-size:2.4rem;color:${anzeige(INK)}"></span>` : '') +
-        (nach ? `<span id="vorlage-nach" style="${RAND};right:24px">umstellen nach <span style="font-size:1.4em"></span></span>`
+        (nach && !kopfText ? `<span id="vorlage-nach" style="${RAND};right:24px">umstellen nach <span style="font-size:1.4em"></span></span>`
             // Doc, 28.09.: a term to simplify (Wurzeln · Stolperfallen, no variable) - "vereinfachen" in its place,
-            // or what its block says (Knobeln: "Ziffern finden")
-            : aufgabenModus && nach === '' ? `<span id="vorlage-nach" style="${RAND};right:24px">${aufgabenBlock(nr).kopf || 'vereinfachen'}</span>` : '') +
+            // or what its block says (Knobeln: "Ziffern finden"); a variable alone on the left already: "ausrechnen"
+            : kopfText && (nach || aufgabenModus) ? `<span id="vorlage-nach" style="${RAND};right:24px">${kopfText}</span>` : '') +
         // Doc, 28.09.: the puzzles written "untereinander", grey, top left under the counter (placed by
         // zeigeRechenweg) - only a task with a SCHEMATA entry (the Knobeln block: "Nur bei den Rätseln!")
         (aufgabenModus && SCHEMATA[slug] ? '<span id="vorlage-schema" style="position:absolute;white-space:nowrap;' +
@@ -86,7 +88,7 @@ function zeigeVorlage(hinweis) {
     if (quelle) quelle.textContent = QUELLEN[slug];
     const schema = host.querySelector('#vorlage-schema');
     if (schema) schema.innerHTML = schemaHtml(SCHEMATA[slug]);
-    if (nach) {
+    if (nach && !kopfText) {
         const v = host.querySelector('#vorlage-nach span');
         try { katex.render(nach, v, { throwOnError: false }); } catch (e) { v.textContent = nach; }
         v.style.color = variablenFarbe();          // the same colour as in the task (Doc, 27.09.)
@@ -494,6 +496,16 @@ function zeigeRechenweg(verborgenAb) {
             quelle.style.top = (papierGrenze(c.height) - quelle.offsetHeight - 6) + 'px';
         }
         if (nach) { nach.style.right = 'auto'; nach.style.left = (c.width / 2) + 'px'; nach.style.transform = 'translate(-50%, -50%)'; }
+        // Doc, 05.10.2026: "Achsenabschnitt berechnen" between "Aufgabe 27 / 27" and a long block's name ran into both on
+        // a narrow board - the three labels shrink together until the middle one clears its neighbours
+        const labels = [zaehler, block, nach].filter(Boolean);
+        labels.forEach(e => { e.dataset.fs = e.dataset.fs || getComputedStyle(e).fontSize; e.style.fontSize = e.dataset.fs; });
+        for (let i = 0, s = 1; nach && i < 12; i++) {
+            const n = nach.getBoundingClientRect(), z = zaehler && zaehler.getBoundingClientRect(), b = block && block.getBoundingClientRect();
+            if ((!z || z.right + 16 <= n.left) && (!b || n.right + 16 <= b.left)) break;
+            s *= 0.92;
+            labels.forEach(e => { e.style.fontSize = parseFloat(e.dataset.fs) * s + 'px'; });
+        }
         obenFrei = Math.max(0, ...[zaehler, block, nach].filter(Boolean).map(e => e.getBoundingClientRect().bottom - c.top)) + ZEILE / 4;
     }
     levelKnopf(aufgabenModus ? document.getElementById('vorlage-block') : null);   // Doc's tap on the block's name

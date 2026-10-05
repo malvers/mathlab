@@ -46,6 +46,10 @@ def gleichungen(tex, vars_, parse):
         links, rechts = t.split('=', 1) if re.search(r'\\end\{pmatrix\}\s*=', t) else (None, None)
         L, R = matrix_ausdruck(links, parse), matrix_ausdruck(rechts, parse)
         return [simplify(a - b) for a, b in zip(list(L), list(R))]
+    # a point, "S(3\mid 5)": its coordinates in the order of the unknowns (the intersection of two lines)
+    m = re.fullmatch(r'[A-Z](?:_\{?\w+\}?)?\s*(?:\\left)?\((.*?)(?:\\right)?\)', t)
+    if m and '\\mid' in m.group(1):
+        return [v - parse(c) for v, c in zip(vars_, m.group(1).split('\\mid'))]
     out = []
     for s in re.split(r'\\quad|\\qquad|\;|,\\ ', t):
         if s.strip():

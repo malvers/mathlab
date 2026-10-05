@@ -34,7 +34,7 @@ function solitaKontext() {
     const [slug, tex, nach] = AUFGABEN[aufgabeIdx], b = aufgabenBlock(aufgabeIdx), l = LOESUNGEN[slug] || [];
     const teile = [
         'Block „' + b.titel + '“, Aufgabe ' + (aufgabeIdx - b.ab + 1) + ' von ' + (b.bis - b.ab) + '.',
-        'Die Aufgabe: $' + tex + '$ – ' + (nach ? 'umstellen nach $' + nach + '$' : (b.kopf || 'vereinfachen')) + '.',
+        'Die Aufgabe: $' + tex + '$ – ' + (aufgabenKopf(tex, nach, KOEPFE[slug] || b.kopf) || 'umstellen nach $' + nach + '$') + '.',
     ];
     if (QUELLEN[slug]) teile.push(QUELLEN[slug] + '.');
     teile.push(rechenweg.length

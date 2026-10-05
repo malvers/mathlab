@@ -80,6 +80,7 @@ function aufgabenBlock(i) { return BLOECKE.find(b => i >= b.ab && i < b.bis) || 
 // wochenBlock('<name>', ab), and the plan reads this table alone for the pills in its weeks (svp/svp-plan-tafel.js)
 // instead of loading every task file. A new week: its file, its <script> in vorrechnen.html, its row here.
 const WOCHEN = {
+    'linear':                   [41, 'Lineare Funktionen · Anstieg und Achsenabschnitt'],
     'wurzeln':                  [41, 'Wurzeln · Stolperfallen'],
     'exponential':              [44, 'Wachstum und Zerfall · Exponentialgleichungen'],
     'ka1':                      [45, 'Wiederholung · Klassenarbeit 1'],
@@ -165,6 +166,10 @@ const SCHEMATA = {};
 // Doc, 28.09.: a task's source, small and grey right above the line to the writing field (on the beamer too) -
 // "schreib's über die Trennlinie ... das ist eine Quelle"; by slug, plain text
 const QUELLEN = {};
+// Doc, 05.10.2026: "du schreibst eine lineare Gleichung auf und sagst, berechne die Nullstellen ... zwei lineare
+// Gleichungen ... berechne den Schnittpunkt" - what the head says over one task without a variable, by slug, before its
+// block's kopf (aufgabenKopf, js/formel-satz.js); the checker reads it too (tools/vorrechnen/pruef.py: "Nullstelle ...")
+const KOEPFE = {};
 // Doc, 30.09.2026 (a block for every week of the school year: "immer an den schon vorhandenen Aufgaben orientieren"):
 // a task that is a bare term or equation on the board can carry its setting in a sentence - the urn, the taxi, the
 // fence - by slug, formulas between $...$. The deck of the tasks shows it under the heading (decks/tafel.html); in the

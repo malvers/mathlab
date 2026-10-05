@@ -8,6 +8,20 @@
 // box and the deck's explanation slides are set by the same code.
 // No top-level const/let here: the Vorrechnen scripts share one global scope and declare their own.
 
+// What the head says over a task - beside it in vorrechnen.html, over it on the slides of decks/tafel.html, in Solita's
+// context: null for "umstellen nach x" (the caller sets the variable in red), else the words. A term ('' instead of a
+// variable) is simplified, or does what its block says (kopf; Knobeln: "Ziffern finden"). A task whose variable stands
+// alone on the left already, with none of it on the right, is worked out, not rearranged (Doc, 05.10.2026, over
+// "umstellen nach y" above y = 3·4 - 2: "verstehe nicht ... ist doch schon?" - 60 such tasks over the year).
+function aufgabenKopf(latex, nach, kopf) {
+    if (nach === '') return kopf || 'vereinfachen';
+    if (!nach) return null;
+    const k = String(latex).indexOf('=');
+    if (k < 0 || latex.slice(0, k).trim() !== nach) return null;
+    const v = nach.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
+    return new RegExp('(^|[^a-zA-Z\\\\])' + v + '(?![a-zA-Z])').test(latex.slice(k + 1)) ? null : 'ausrechnen';
+}
+
 // Doc: "Wurzel und Summenzeichen sehen noch falsch aus" - by hand a formula is written in display style.
 function alsDisplay(latex) { return '\\displaystyle ' + engeBrueche(latex); }
 

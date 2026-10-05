@@ -246,8 +246,10 @@
     const titel = a.nr ? 'Aufgabe ' + a.nr : 'Rechnung ' + (k + 1);
     /* the variable it is solved for as a formula, in red - as vorrechnen.html colours it (variablenFarbe) */
     /* a term to simplify has '' instead of a variable (Doc, 28.09.2026), its block may say what to do instead
-       (Knobeln: "Ziffern finden") - a free board has none at all */
-    const dazu = [a.block ? esc(a.block) : '', a.nach ? 'umstellen nach <span class="tf-var"></span>' : a.nach === '' ? esc(a.kopf || 'vereinfachen') : '']
+       (Knobeln: "Ziffern finden"), a variable alone on the left already says "ausrechnen" (aufgabenKopf,
+       js/formel-satz.js) - a free board has none at all */
+    const kopf = aufgabenKopf(a.latex || '', a.nach, a.kopf);
+    const dazu = [a.block ? esc(a.block) : '', kopf ? esc(kopf) : a.nach ? 'umstellen nach <span class="tf-var"></span>' : '']
       .filter(Boolean).join(' · ');
     sl.innerHTML = '<h3>' + esc(titel) + (dazu ? '<span class="tf-dazu">' + dazu + '</span>' : '') + '</h3>' +
       '<div class="rules"></div>';
@@ -775,7 +777,7 @@
         const b = aufgabenBlock(i), l = LOESUNGEN[t[0]] || [];
         // no week asked for: the blocks without one, those of the theme asked for
         if (woche ? woche.indexOf(b) < 0 : b.kw !== undefined || themaVon(b) !== name) return null;
-        return { schluessel: t[0], nr: i - b.ab + 1, block: b.titel, kopf: b.kopf || null, latex: t[1], nach: t[2], ende: l.length ? l[l.length - 1][0] : null,
+        return { schluessel: t[0], nr: i - b.ab + 1, block: b.titel, kopf: (typeof KOEPFE !== 'undefined' && KOEPFE[t[0]]) || b.kopf || null, latex: t[1], nach: t[2], ende: l.length ? l[l.length - 1][0] : null,
           text: (typeof TEXTE !== 'undefined' && TEXTE[t[0]]) || null,
           erklaerung: erklaerungOhneText(t[0]),
           rechenweg: l.map(function (st) { return st[0]; }), umformungen: l.map(function (st) { return st[1]; }) };
@@ -909,7 +911,7 @@
         }
         const weg = a.rechenweg || [];
         dazu(aufgabeFolie(a, k), (a.nr ? 'Aufgabe ' + a.nr : 'Rechnung ' + (k + 1)) + (a.block ? ' (' + a.block + ')' : '') +
-          (a.nach ? ', umstellen nach ' + a.nach : '') + ': ' + (a.latex ? '$' + ohneStellen(a.latex) + '$' : '') +
+          (a.nach ? ', ' + (aufgabenKopf(a.latex || '', a.nach) || 'umstellen nach ' + a.nach) : '') + ': ' + (a.latex ? '$' + ohneStellen(a.latex) + '$' : '') +
           (weg.length ? ' - Ergebnis $' + weg[weg.length - 1] + '$' : ''));
         if (a.erklaerung) dazu(erklaerFolie(a, k), 'Erklärung zu ' + (a.nr ? 'Aufgabe ' + a.nr : 'Rechnung ' + (k + 1)) +
           (a.block ? ' (' + a.block + ')' : ''));

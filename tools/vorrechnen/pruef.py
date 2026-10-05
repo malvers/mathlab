@@ -18,6 +18,9 @@ def vor(tex):
     t = re.sub(r'\\(left|right)\\([{}])', r'\\\2', t)
     t = re.sub(r'\\(?:[,;:! ]|quad|qquad)', ' ', t)
     t = t.replace('\\textcolor', '')
+    # looks only (js/vorrechnen-aufgaben-wurzeln.js, w-doppelt: two roots the same size): a phantom adds nothing, a
+    # smash stands for its content
+    t = re.sub(r'\\vphantom\{\\rule\{[^{}]*\}\{[^{}]*\}\}', '', t).replace('\\smash[b]', '')
     # a root's index lifted off the hook, "\sqrt[{}^{90} ]{..}" (js/vorrechnen-aufgaben-wurzeln.js): the plain index
     t = re.sub(r'\\sqrt\[\s*\{\}\^\{?(\d+)\}?\s*\]', r'\\sqrt[\1]', t)
     # logarithms: the base in braces, a plain argument in brackets - parse_latex reads "\log_2 32" as base 23 and takes
@@ -118,6 +121,10 @@ for block in json.load(open(sys.argv[1])):
                         ok = all(simplify(e.subs(dict(zip(vs, tup)))) == 0 for e in ziel)
                         frei = len(vs) - Matrix([[e.coeff(v) for v in vs] for e in ziel]).rank()
                         ok = ok and frei == 1
+                    elif eqs is not None and 0 < len(teil := [v for v in vs if any(e.has(v) for e in eqs)]) < len(vs):
+                        # a step about some of the unknowns only ("3x-4=x+2" after setting equal, "y=3+2" after
+                        # inserting): its solutions are the task's, read in those unknowns
+                        ok = set(lgs.loesung(eqs, teil)) == {tuple(tup[vs.index(v)] for v in teil) for tup in lgs.loesung(ziel, vs)}
                     else:
                         ok = lgs.gleich(ziel, eqs, vs)
                     if not ok:
@@ -135,6 +142,16 @@ for block in json.load(open(sys.argv[1])):
                         print(f'  FALSCH {slug} Schritt {k}: {st} = {w} statt {wert}')
                 print(f'  ok {slug}: {wert}')
                 continue
+            if (a.get('kopf') or '').startswith('Nullstelle') and re.match(r'\s*y\s*=', a['latex']):
+                # "Nullstelle berechnen" over y = f(x) (KOEPFE, js/vorrechnen-aufgaben.js): the task is f(x) = 0, for x
+                a, nach = dict(a, latex=re.sub(r'^\s*y\s*=', '', a['latex']) + '=0'), 'x'
+            pkt = re.fullmatch(r'\s*y\s*=(.*?)\\quad\s*[A-Z]\((.*?)\\mid(.*?)\)\s*', a['latex'])
+            if (a.get('kopf') or '').startswith('Achsenabschnitt') and pkt:
+                # "Achsenabschnitt berechnen" over y = mx + n and a point P(a | b): the point put in, the task is for n
+                px, py = pkt.group(2).strip(), pkt.group(3).strip()
+                rechts = re.sub(r'(?<=[0-9}])x', '\\\\cdot(' + px + ')', pkt.group(1))
+                rechts = re.sub(r'(?<![a-zA-Z\\])x(?![a-zA-Z])', '(' + px + ')', rechts)
+                a, nach = dict(a, latex='(' + py + ')=' + rechts), 'n'
             if nach:
                 v = parse(nach)
                 aufg, dom = bereich(a['latex'])

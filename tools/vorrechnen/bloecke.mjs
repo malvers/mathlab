@@ -13,8 +13,8 @@ const ctx = { console };
 vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(WURZEL + 'js/formel-satz.js', 'utf8'), ctx);
 vm.runInContext(dateien.map(d => fs.readFileSync(WURZEL + d, 'utf8')).join('\n;\n') +
-    '\n;this.R = { AUFGABEN, BLOECKE, LOESUNGEN, ERKLAERUNGEN, TEXTE };', ctx);
-const { AUFGABEN, BLOECKE, LOESUNGEN, ERKLAERUNGEN, TEXTE } = ctx.R;
+    '\n;this.R = { AUFGABEN, BLOECKE, LOESUNGEN, ERKLAERUNGEN, TEXTE, KOEPFE };', ctx);
+const { AUFGABEN, BLOECKE, LOESUNGEN, ERKLAERUNGEN, TEXTE, KOEPFE } = ctx.R;
 let ohneText = 0;
 const wochen = process.argv.slice(3).map(Number);
 const fehler = [];
@@ -35,7 +35,7 @@ BLOECKE.forEach(b => {
         const erk = ERKLAERUNGEN[slug];
         if (erk) (erk.match(/\$\$?[^$]+\$\$?/g) || []).forEach(f => satz(f.replace(/^\$+|\$+$/g, '').split(' | ')[0], slug + ' Erklärung'));
         if (!TEXTE[slug]) ohneText++;
-        block.aufgaben.push({ slug, latex, nach, schritte: (l || []).map(s => s[0]), ops: (l || []).map(s => s[1]) });
+        block.aufgaben.push({ slug, latex, nach, kopf: KOEPFE[slug] || b.kopf || null, schritte: (l || []).map(s => s[0]), ops: (l || []).map(s => s[1]) });
     }
     raus.push(block);
 });
@@ -44,6 +44,7 @@ slugs.forEach((s, i) => { if (slugs.indexOf(s) !== i) fehler.push('doppelter Slu
 Object.keys(TEXTE).forEach(k => { if (!slugs.includes(k)) fehler.push('Text ohne Aufgabe: ' + k); });
 Object.keys(LOESUNGEN).forEach(k => { if (!slugs.includes(k)) fehler.push('Lösung ohne Aufgabe: ' + k); });
 Object.keys(ERKLAERUNGEN).forEach(k => { if (!slugs.includes(k)) fehler.push('Erklärung ohne Aufgabe: ' + k); });
+Object.keys(KOEPFE).forEach(k => { if (!slugs.includes(k)) fehler.push('Kopf ohne Aufgabe: ' + k); });
 fs.writeFileSync(process.argv[2], JSON.stringify(raus, null, 1));
 console.log('Blöcke:', raus.map(b => 'KW' + b.kw + ' ' + b.aufgaben.length).join(', '));
 console.log('KaTeX/Format-Fehler:', fehler.length, '· Aufgaben ohne Text:', ohneText);

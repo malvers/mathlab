@@ -18,7 +18,11 @@
         ['w-quadrat',   '(\\sqrt{3}+\\sqrt{3})^2',                                     ''],
         ['w-summe',     '\\sqrt{9+16}-\\sqrt{9}-\\sqrt{16}',                           ''],
         ['w-bruch',     '\\frac{\\sqrt{9}+\\sqrt{16}}{\\sqrt{9+16}}',                  ''],
-        ['w-doppelt',   '\\sqrt{\\sqrt{81}}+\\sqrt{\\sqrt{16}}',                       ''],
+        // both signs of a root in a root the same size, so they rise equally steep (Doc, 05.10.2026: "kriegt man das hin,
+        // dass die Wurzeln gleich steil ansteigen") - KaTeX gives the outer one a larger sign, and every size is a glyph of
+        // its own, steeper the taller (slope 2.1 / 3.2 / 4.3). The phantom lifts the inner root into the outer one's size,
+        // the smash keeps its depth from pushing the outer one a size further; the inner tick then hangs a little lower.
+        ['w-doppelt',   '\\sqrt{\\smash[b]{\\sqrt{\\vphantom{\\rule{0em}{1.1em}}81}}}+\\sqrt{\\smash[b]{\\sqrt{\\vphantom{\\rule{0em}{1.1em}}16}}}', ''],
         ['w-sechs',     '\\sqrt{36}-\\sqrt[3]{216}',                                   ''],
         ['w-17',        '\\sqrt{289}-\\sqrt[3]{4913}',                                 ''],
         ['w-vier',      '\\frac{\\sqrt{2}+\\sqrt{2}+\\sqrt{2}+\\sqrt{2}}{\\sqrt{8}}',  ''],
