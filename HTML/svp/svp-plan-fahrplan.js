@@ -48,7 +48,7 @@ window.svpPlanParts.push(function (P) {
 
     /* The stack in front of the tabs. Called while the sub-row is being built, so it lands
        before everything else in that half - "vor Inhalt". */
-    /* Doc, 29.09.2026: "mach den sichtbar für die Kids aber block edit!" - the class gets the stack too, but only
+    /* Doc, 29.09.2026: "mach den sichtbar für die Kids aber block edit!" - the class gets the stack too, usable only
        where a week has a Fahrplan (markiere), and the sheet opens for them to read only (bearbeiten, save). */
     function fahrplanBtn(ref, subHeadL) {
         const b = document.createElement('button');
@@ -73,7 +73,9 @@ window.svpPlanParts.push(function (P) {
     function markiere(b, text) {
         const hat = !!svpFmtBar.textOf(text);
         b.classList.toggle('has-fahr', hat);
-        if (!P.notesAllowed()) b.hidden = !hat;         /* the class: only where there is one */
+        /* the class sees the stack in every week, greyed out and dead where there is none yet - like the Videos tab
+           of a week without a film (Doc, 05.10.2026: "man könnte ihn zeigen, aber grayed out") */
+        if (!P.notesAllowed()) b.disabled = !hat;
     }
 
     // --- the sheet -------------------------------------------------------
