@@ -188,16 +188,17 @@
     }
     // Vorführmodus (Doc 04.10.2026: "dass ich nicht jedes Mal erst die ganze zwanzig Aufgaben lösen muss"): the game at
     // once, its gates mixing 1×1 and 1:1 - only by Option+R, on no menu, so the class still earns it
-    function show() {
+    // more: options for this one ride on top of rally, e.g. { cruise: true } - the Spazierfahrt (rallye.html)
+    function show(more) {
       if (!layer) { open('mix'); kind = 'mix'; }
       clearInterval(clock); clock = 0;
       if (game) { game.stop(); game = null; }
-      play();
+      play(more);
     }
-    function play() {
+    function play(more) {
       phase = 'game';
       layer.innerHTML = '<span class="qz-x" data-qz="close" title="' + L().end + '">✕</span><canvas class="rl-canvas"></canvas>';
-      game = root.CPRallye.create(Object.assign({ canvas: layer.querySelector('canvas'), lang, tone, onExit: close, op: kind }, rally || {}));
+      game = root.CPRallye.create(Object.assign({ canvas: layer.querySelector('canvas'), lang, tone, onExit: close, op: kind }, rally || {}, more || {}));
       game.start();
       window.CPRallyeNow = game;                           // for testing from the console: CPRallyeNow.info()
     }

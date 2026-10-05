@@ -29,13 +29,15 @@
       right: 'Richtig!', level: n => 'Level ' + n, nitro: 'NITRO!',
       board: 'Hitliste', name: 'Dein Spitzname', note: 'Bitte keinen echten Namen', save: 'Eintragen', loading: 'Hitliste lädt …',
       saved: n => 'Eingetragen – Platz ' + n + '!', offline: 'Hitliste gerade nicht erreichbar', empty: 'Noch leer – sei die oder der Erste!',
-      demo: 'Vorführung: hier wird nichts eingetragen', pick: 'Dein Auto  ◀ ▶', levels: 'Vorführung: 1 – 9 springt im Rennen ins Level' },
+      demo: 'Vorführung: hier wird nichts eingetragen', pick: 'Dein Auto  ◀ ▶', levels: 'Vorführung: 1 – 9 springt im Rennen ins Level',
+      cruise: 'Spazierfahrt: keine Hindernisse, kein Game over – einfach fahren', cruiseLevels: '1 – 9: Tempo, ab 3 Abendlicht' },
     en: { title: 'Math Rally', lanes: 'In the race: ◀ ▶ lanes', gas: '▲ gas   ▼ brake', gate: 'Drive through the right answer!',
       go: 'Go', over: 'Game over', again: 'Again', end: 'End', points: 'Points', best: 'Best', record: 'New record!',
       right: 'Right!', level: n => 'Level ' + n, nitro: 'NITRO!',
       board: 'High scores', name: 'Your nickname', note: 'Please no real names', save: 'Enter', loading: 'Loading high scores …',
       saved: n => 'Entered – place ' + n + '!', offline: 'High scores out of reach right now', empty: 'Still empty – be the first!',
-      demo: 'Show mode: nothing is entered here', pick: 'Your car  ◀ ▶', levels: 'Show mode: 1 – 9 jump to a level in the race' }
+      demo: 'Show mode: nothing is entered here', pick: 'Your car  ◀ ▶', levels: 'Show mode: 1 – 9 jump to a level in the race',
+      cruise: 'Cruise: no obstacles, no game over – just drive', cruiseLevels: '1 – 9: speed, from 3 the evening light' }
   };
   // the high-score list (Doc 04.10.2026: "ein Spieler gibt sich einen Namen, und wir machen dann eine Hitliste"): the
   // edge function rallye-scores (forloop/supabase/functions) - it checks the nickname and the score and keeps the top ten
@@ -59,7 +61,10 @@
   // the land beside the road (Doc 04.10.2026: "den grünen Rasen nicht ganz so gleichmäßig"): meadows of their own green,
   // now and then a yellowish field or a lake - long stretches each, so nothing flickers
   const MEADOW = ['rgb(121, 158, 49)', 'rgb(106, 146, 46)', 'rgb(132, 166, 60)', 'rgb(114, 150, 62)', 'rgb(128, 152, 52)'];
-  const CROP = 'rgb(178, 170, 86)', VERGE = 'rgb(104, 140, 42)', WATER = 'rgb(74, 124, 166)', GLINT = 'rgb(132, 176, 210)';
+  const CROP = 'rgb(178, 170, 86)', VERGE = 'rgb(104, 140, 42)', BANK = 'rgb(170, 156, 110)';
+  // a lake's water: deep near by, the sky's light far off (water mirrors the sky at a low angle), warm in the evening
+  const WATER = { near: 'rgb(34, 84, 124)', far: 'rgb(136, 178, 210)', duskNear: 'rgb(46, 52, 92)', duskFar: 'rgb(206, 146, 140)' };
+  const frac = v => v - Math.floor(v);
   const IMG = {};
   const pic = name => {
     if (!IMG[name] && typeof Image !== 'undefined') { const im = new Image(); im.decoding = 'async'; im.src = 'rallye/' + name + '.webp'; IMG[name] = im; }
@@ -127,7 +132,13 @@
       for (let i = 0; i < segs.length;) {
         const len = 30 + Math.floor(rng() * 60), r = rng();
         const kind = i > 80 && len > 45 && r < .1 ? 'lake' : r < .2 ? 'crop' : 'meadow', shade = Math.floor(rng() * MEADOW.length);
-        for (let j = i; j < Math.min(segs.length, i + len); j++) segs[j][side] = { kind, shade };
+        // a lake's shore (Doc 05.10.2026: "ein bisschen realistischer"): it winds a little, and towards both ends it bends
+        // away from the road, so the lake closes like an oval instead of a straight cut across; o0 / o1: how far out it
+        // runs at the segment's near and far edge, in road half-widths
+        const ph = kind === 'lake' ? rng() * 7 : 0;
+        const shore = j => 1.75 + .25 * (1 + Math.sin(j * .23 + ph)) + .12 * (1 + Math.sin(j * .61 + 2 * ph)) +
+          .5 / Math.max(Math.sin(Math.PI * (j - i) / len), .04) - .5;
+        for (let j = i; j < Math.min(segs.length, i + len); j++) segs[j][side] = kind === 'lake' ? { kind, shade, o0: shore(j), o1: shore(j + 1) } : { kind, shade };
         i += len;
       }
     }
@@ -138,6 +149,11 @@
       if (i % 7 === 0) put(s, { kind: 'tree', x: -(1.5 + rng() * 1.6), k: .8 + rng() * .5, v: Math.floor(rng() * 3) });
       if (i % 7 === 3) put(s, { kind: 'tree', x: 1.5 + rng() * 1.6, k: .8 + rng() * .5, v: Math.floor(rng() * 3) });
       if (i % 11 === 5) put(s, { kind: 'bush', x: side() * (1.3 + rng() * .4), k: .8 + rng() * .4 });
+      // reeds in the shallow water along a lake's shore - the one thing that stands on the water
+      for (const [sd, dir] of [['L', -1], ['R', 1]]) {
+        const fl = s[sd];
+        if (fl.kind === 'lake' && fl.o0 < 3.5 && rng() < .45) s.sprites.push({ kind: 'reed', x: dir * (fl.o0 + .04 + rng() * .12), k: .7 + rng() * .6 });
+      }
       // a little herd on a meadow: cows, horses or sheep, facing either way
       if (i % 29 === 14 && rng() < .7) {
         const x0 = side() * (2.1 + rng() * 1.6), kind = ART.animals[Math.floor(rng() * 3)], n = 1 + Math.floor(rng() * 3);
@@ -161,7 +177,11 @@
   const ridge = (rng, n, lo, hi) => Array.from({ length: n }, () => lo + rng() * (hi - lo));
 
   // startLevel: the level a show-mode ride starts in (rallye.html?level=5)
-  function create({ canvas, lang, tone, onExit, op, startLevel }) {
+  // cruise: the Spazierfahrt (Doc 05.10.2026: "überhaupt keine Hindernisse ... andere Autos können da sein ... Das Spiel soll
+  // nicht aus sein. Ich will einfach die Szene anschauen"): only traffic, no cones, stars or bridges, no lives, no end; the
+  // level stays until 1 - 9 changes it. The cars keep their lanes, one steers round them oneself (Doc: "Die Autos kannst
+  // du lassen ... Ich probiere es"); touching one is a bump - the flash and the blinking, no life lost
+  function create({ canvas, lang, tone, onExit, op, startLevel, cruise }) {
     const ctx = canvas.getContext('2d'), rng = Math.random;
     Object.values(ART).flat().forEach(pic);                 // ask for every picture now, so they are there for the ride
     let W = 0, H = 0, dpr = 1, raf = 0, last = 0, alive = true, f = null;
@@ -251,7 +271,7 @@
     function update(dt) {
       time += dt;
       const lv = 1 + Math.floor(time / 20);
-      if (lv > level) { level = lv; fx.push({ text: T().level(level), x: W / 2, y: H * .3, t: 0, color: C.paper, big: true }); tone(784, 120); }
+      if (lv > level && !cruise) { level = lv; fx.push({ text: T().level(level), x: W / 2, y: H * .3, t: 0, color: C.paper, big: true }); tone(784, 120); }
       if (held.UP) boost = Math.min(boost + 10 * dt, GAS);     // held: gas and brake as long as the key is down
       if (held.DOWN) boost = Math.max(boost - 14 * dt, MIN - base());
       // from level 3 the evening comes, over some ten seconds (Doc: "Ausbau der Stufe 1": the ride into the sunset)
@@ -267,6 +287,14 @@
       skyOff += .0012 * ps.curve * speed * dt; hillOff += .0024 * ps.curve * speed * dt;
       // what lies ahead: rows of obstacles, and now and then a sign bridge with a clear stretch before and after it
       while (spawnZ < pos + DRAW * SEG) {
+        if (cruise) {                                       // the Spazierfahrt: now and then a car, nothing else
+          if (rng() < .8) {
+            const l = Math.floor(rng() * LANES);
+            objs.push({ kind: 'car', lane: l, z: spawnZ, v: 5 + rng() * 5, look: Math.floor(rng() * ART.traffic.length) });
+          }
+          spawnZ += (22 + Math.floor(rng() * 14)) * SEG;
+          continue;
+        }
         // the warning signs, both sides, about two seconds before the bridge at this level's speed
         const warnZ = gateZ - Math.max(30, base() * 2.2) * SEG;
         if (!warned && spawnZ >= warnZ) {
@@ -288,8 +316,9 @@
         spawnZ += Math.max(24, 42 - (level - 1) * 3) * SEG;     // about 2 s apart at first, closer each level
       }
       const me = pos + PZ;
+      if (cruise) traffic(dt);
       for (const o of objs) {
-        if (o.v) o.z += o.v * SEG * dt;                     // slow traffic drives ahead of us
+        if (o.v && !cruise) o.z += o.v * SEG * dt;          // slow traffic drives ahead of us (the Spazierfahrt's: traffic())
         if (o.kind === 'gate') {
           if (!o.done && o.z <= me) {
             o.done = true;
@@ -316,9 +345,18 @@
       }
       objs = objs.filter(o => o.z > was - SEG * 4 && !(o.hit && o.kind === 'star'));
     }
+    // the Spazierfahrt's traffic: a car never drives into the one ahead of it in its lane, it keeps that one's speed
+    function traffic(dt) {
+      const cars = objs.slice().sort((a, b) => b.z - a.z);  // the front one first
+      for (const o of cars) {
+        const ahead = cars.find(p => p !== o && p.lane === o.lane && p.z > o.z && p.z - o.z < 4 * SEG);
+        o.z += Math.min(o.v, ahead ? ahead.v : Infinity) * SEG * dt;
+      }
+    }
     function hit() {
       streak = 0;
-      lives--; hurt = 1.4; flash = { color: 'rgba(176,36,24,.35)', t: .35 }; tone(150, 260, 'sawtooth');
+      if (!cruise) lives--;                                 // the Spazierfahrt: a bump, no life lost, never the end
+      hurt = 1.4; flash = { color: 'rgba(176,36,24,.35)', t: .35 }; tone(150, 260, 'sawtooth');
       if (lives <= 0) over();
     }
     function over() {
@@ -468,20 +506,35 @@
       const fog = 1 - Math.exp(-Math.pow(n / DRAW * 1.8, 2));
       if (fog > .02) { ctx.globalAlpha = fog; ctx.fillStyle = fogC(); ctx.fillRect(0, top, W, h); ctx.globalAlpha = 1; }
     }
-    // the land of one band: each side its field; a lake from 1.7 road widths out, a strip of meadow before it; a crop
-    // field with a green verge; now and then a glint on the water
+    // the land of one band: each side its field; a crop field with a green verge; a lake behind a strip of meadow
     function field(s, a, b, top, h) {
       const mid = (a.x + b.x) / 2;
       for (const [f2, dir] of [[s.L, -1], [s.R, 1]]) {
-        const fl = f2 || { kind: 'meadow', shade: 0 }, x0 = dir < 0 ? 0 : mid, x1 = dir < 0 ? mid : W;
+        const fl = f2 || { kind: 'meadow', shade: 0 }, x0 = dir < 0 ? 0 : mid, x1 = dir < 0 ? mid : W, edge = dir < 0 ? 0 : W;
         ctx.fillStyle = fl.kind === 'meadow' ? MEADOW[fl.shade] : VERGE; ctx.fillRect(x0, top, x1 - x0, h);
-        if (fl.kind === 'meadow') continue;
-        const o = fl.kind === 'lake' ? 1.7 : 1.4, ea = a.x + dir * a.w * o, eb = b.x + dir * b.w * o, edge = dir < 0 ? 0 : W;
-        poly(fl.kind === 'lake' ? WATER : CROP, ea, a.y + 1, eb, b.y, edge, b.y, edge, a.y + 1);
-        if (fl.kind === 'lake' && s.index % 5 === 0) {
-          const ga = a.x + dir * a.w * 2.4, gb = b.x + dir * b.w * 2.4, gy = b.y + h * .3;
-          ctx.fillStyle = GLINT; ctx.fillRect(Math.min(ga, gb, edge), gy, Math.abs(edge - (ga + gb) / 2), Math.max(1, h * .25));
-        }
+        if (fl.kind === 'crop') poly(CROP, a.x + dir * a.w * 1.4, a.y + 1, b.x + dir * b.w * 1.4, b.y, edge, b.y, edge, a.y + 1);
+        else if (fl.kind === 'lake') lake(s, fl, a, b, h, dir, edge);
+      }
+    }
+    // a band of lake: a sandy bank, then the water out to the screen's edge along the winding shore (o0 / o1, buildTrack),
+    // its colour by how far off it lies; glints of light on it that come and go, on the clouds' clock
+    function lake(s, fl, a, b, h, dir, edge) {
+      const at = (p, o) => p.x + dir * p.w * o, out = (u, v) => dir > 0 ? Math.min(u, v) >= W : Math.max(u, v) <= 0;
+      const ba = at(a, fl.o0 - .16), bb = at(b, fl.o1 - .16), wa = at(a, fl.o0), wb = at(b, fl.o1);
+      if (out(ba, bb)) return;                              // the lake's tips: out past the screen's edge
+      poly(BANK, ba, a.y + 1, bb, b.y, edge, b.y, edge, a.y + 1);
+      if (out(wa, wb)) return;
+      const u = Math.pow(Math.min(1, Math.max(0, (b.y - f.hy) / (H - f.hy))), .3);   // 0 at the horizon, 1 at the bottom: the sky's light only far off
+      poly(mix(mix(WATER.far, WATER.duskFar, dusk), mix(WATER.near, WATER.duskNear, dusk), u), wa, a.y + 1, wb, b.y, edge, b.y, edge, a.y + 1);
+      const w = (a.w + b.w) / 2, mid = (a.x + b.x) / 2, o = (fl.o0 + fl.o1) / 2;
+      for (let g = 0; g < 2; g++) {                         // at most two per band, where from the band's own number
+        const r = frac(Math.sin(s.index * 12.9898 + g * 78.233 + dir * 4.1) * 43758.5453);
+        if (r > .5) continue;
+        const x = mid + dir * w * (o + .4 + r * 9), len = w * (.15 + r * .7);
+        if (dir > 0 ? x - len / 2 >= W : x + len / 2 <= 0) continue;
+        const al = .1 + .22 * (.5 + .5 * Math.sin(cloudT * 2.4 + s.index * 1.7 + g * 2));
+        ctx.fillStyle = (dusk > .5 ? 'rgba(255, 214, 176, ' : 'rgba(255, 255, 255, ') + al.toFixed(3) + ')';
+        ctx.fillRect(x - len / 2, b.y + h * .3, len, Math.max(1, h * .35));
       }
     }
     // nitro: two flickering flames out of the exhausts, towards us (in the car's own frame: 0,0 is its foot)
@@ -538,6 +591,21 @@
       } else if (sp.kind === 'bush') {
         const s = 260 * sp.k * k;
         ctx.fillStyle = C.tree; ctx.beginPath(); ctx.ellipse(x, y - s * .35, s * .6, s * .38, 0, 0, 7); ctx.fill();
+      } else if (sp.kind === 'reed') {                      // a tuft of reed: bent blades and a few brown cattails
+        const s = 300 * sp.k * k;
+        if (s < 2) return;
+        ctx.lineCap = 'round'; ctx.lineWidth = Math.max(1, s * .03);
+        ctx.strokeStyle = mix('rgb(96, 116, 46)', 'rgb(70, 62, 52)', dusk * .6);
+        for (let i = -3; i <= 3; i++) {
+          const tip = .62 + .3 * frac(i * .37 + .5);
+          ctx.beginPath(); ctx.moveTo(x + i * s * .05, y); ctx.quadraticCurveTo(x + i * s * .07, y - s * tip * .6, x + i * s * .15, y - s * tip); ctx.stroke();
+        }
+        ctx.fillStyle = 'rgb(108, 70, 38)';
+        for (const i of [-2, 1, 2]) {
+          ctx.beginPath(); ctx.moveTo(x + i * s * .04, y); ctx.lineTo(x + i * s * .07, y - s * .78); ctx.stroke();
+          ctx.beginPath(); ctx.ellipse(x + i * s * .07, y - s * .84, s * .03, s * .09, 0, 0, 7); ctx.fill();
+        }
+        ctx.lineCap = 'butt';
       }
     }
     // the warning sign before a bridge (Doc 04.10.2026: "mach echte Vorwarnschilder"): a red-bordered triangle on a post,
@@ -660,6 +728,7 @@
     function hud() {
       const s = H * .05, pad = s * .5, right = pad + s * 1.5;   // right: room for the layer's ✕ (quiz.css .qz-x)
       ctx.textBaseline = 'middle';
+      if (cruise) { if (state === 'run') tacho(pad, s); return; }   // the Spazierfahrt: no points, no lives, no tasks
       ctx.fillStyle = 'rgba(16,24,44,.55)'; rrect(pad, pad, s * 4.6, s * 1.25, s * .4); ctx.fill();
       ctx.fillStyle = C.paper; ctx.textAlign = 'left'; ctx.font = font(700, s * .8); ctx.fillText(String(score()), pad + s * .45, pad + s * .66);
       ctx.font = font(700, s * .5); ctx.lineWidth = s * .12; ctx.strokeStyle = 'rgba(16,24,44,.55)';   // the level under the score
@@ -736,8 +805,8 @@
           '<div class="rl-pick"><div class="rl-bhead">' + esc(t.pick) + '</div><div class="rl-cars">' + ART.cars.map((c, i) =>
             '<span class="rl-car' + (i === mycar ? ' on' : '') + '" data-car="' + i + '"><img src="rallye/' + c + '.webp" alt=""></span>').join('') + '</div></div>' +
           '<div class="qz-big">' + esc(t.lanes) + '<br>' + esc(t.gas) + '</div>' +
-          '<div class="qz-how">' + esc(t.gate) + (best ? '<br>' + esc(t.best) + ' ' + best : '') + '</div>' +
-          (op === 'mix' ? '<div class="rl-note">' + esc(t.levels) + '</div>' : '') + '<div class="qz-pills">' + pill('EXE', t.go, 'go') + '</div>';
+          '<div class="qz-how">' + (cruise ? esc(t.cruise) : esc(t.gate) + (best ? '<br>' + esc(t.best) + ' ' + best : '')) + '</div>' +
+          (op === 'mix' ? '<div class="rl-note">' + esc(cruise ? t.cruiseLevels : t.levels) + '</div>' : '') + '<div class="qz-pills">' + pill('EXE', t.go, 'go') + '</div>';
       } else if (state === 'over') {
         const form = canSave(), b = board;
         panel.innerHTML = '<div class="qz-head lost">' + esc(t.over) + '</div><div class="qz-big rl-score">' + score() + ' ' + esc(t.points) + '</div>' +
@@ -798,7 +867,7 @@
       if ('nitro' in o) nitro = +o.nitro;
       if ('level' in o) { level = +o.level; time = (level - 1) * 20; }
     }
-    return { start, stop, key, hold, debug, info: () => ({ state, speed, boost, lane, level, lives, score: score(), dusk, nitro, streak, gate: nextGate() }) };
+    return { start, stop, key, hold, debug, info: () => ({ state, cruise: !!cruise, speed, boost, lane, level, lives, score: score(), dusk, nitro, streak, gate: nextGate() }) };
   }
 
   const CPRallye = { create, gateAnswers, obstacleRow, buildTrack, LANES };
