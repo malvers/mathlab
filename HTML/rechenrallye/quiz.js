@@ -80,7 +80,7 @@
     let layer = null, phase = '', task = null, input = '', right = 0, wrong = 0, t0 = 0, clock = 0, lock = false, recent = [], kind = 'mul';
     let game = null, actx = null;
     const L = () => TEXT[lang() === 'de' ? 'de' : 'en'];
-    const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const esc = (root.CPHtml || require('./esc.js')).esc;   // HTML escape (esc.js, one for all modules)
     const pill = (k, t, cls) => '<span class="qz-pill' + (cls ? ' ' + cls : '') + '"><b>' + k + '</b>' + esc(t) + '</span>';
 
     // a short tone (only with the key click switched on: ⚙ ▸ sound, off by default - quiet in class)

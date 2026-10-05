@@ -793,7 +793,7 @@
       tone(660, 50);
       card();
     }
-    const esc = v => String(v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const esc = (root.CPHtml || require('./esc.js')).esc;   // HTML escape (esc.js, one for all modules)
     const pill = (k, label, cls) => '<span class="qz-pill' + (cls ? ' ' + cls : '') + '" data-k="' + ({ Clear: 'CLEAR', '▲': 'UP' }[k] || k) + '"><b>' + k + '</b>' + esc(label) + '</span>';
     let board = null, draft = '';
     try { draft = localStorage.getItem('cp.rallye.name') || ''; } catch (e) { /* private window */ }
