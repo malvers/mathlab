@@ -319,7 +319,30 @@ document.querySelectorAll('.labframe.bare iframe').forEach(bareLab);
   }
   document.addEventListener('lab-slide-full', function (e) {
     const frame = e.target.closest && e.target.closest('.labframe');
+    try { f.contentWindow.document.dispatchEvent(new f.contentWindow.Event('fullscreenchange')); } catch (e) { }
     if (frame) labFull(frame, !frame.classList.contains('full'));
+  // A lab that goes full screen on its own - requestFullscreen on its page instead of the icon above (DOCPAD: a double
+  // click on the case) - took the whole screen while every other lab took the slide (Doc, 05.10.2026: "beim Docpad wird
+  // es zum ganzen Screen gemacht ... dass ich das auf die Folie beim Docpad bezieht"). So every page in a lab frame
+  // has its full screen bent onto the slide: requestFullscreen grows the frame, exitFullscreen shrinks it,
+  // fullscreenElement answers for the slide, and 'fullscreenchange' comes as before (labFull). At every load again:
+  // DOCPAD moves on from its password page to app/.
+  function labFullscreenOnSlide(f) {
+    const frame = f.closest && f.closest('.labframe');
+    let w = null;
+    try { w = f.contentWindow; if (w) void w.document; } catch (e) { return; }   // another origin: not ours to bend
+    if (!frame || !w || w.__deckFullscreen) return;
+    w.__deckFullscreen = true;
+    const an = () => { labFull(frame, true); return Promise.resolve(); };
+    const aus = () => { labFull(frame, false); return Promise.resolve(); };
+    ['requestFullscreen', 'webkitRequestFullscreen'].forEach(k => { w.Element.prototype[k] = an; });
+    ['exitFullscreen', 'webkitExitFullscreen'].forEach(k => { w.Document.prototype[k] = aus; });
+    ['fullscreenElement', 'webkitFullscreenElement'].forEach(k => Object.defineProperty(w.Document.prototype, k,
+      { configurable: true, get() { return frame.classList.contains('full') ? this.documentElement : null; } }));
+    w.addEventListener('keydown', e => { if (e.key === 'Escape') labFull(frame, false); });   // Esc as the real one
+  }
+  document.addEventListener('load', e => { if (e.target.tagName === 'IFRAME') labFullscreenOnSlide(e.target); }, true);
+  document.querySelectorAll('.labframe iframe').forEach(labFullscreenOnSlide);
   });
   addEventListener('keydown', function (e) {
     if (e.key === 'Escape') document.querySelectorAll('.labframe.full').forEach(fr => labFull(fr, false));

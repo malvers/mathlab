@@ -265,7 +265,10 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
 .labbar button:hover{border-color:var(--red);color:var(--red)}
 #deck > .slide:last-child .labnext{display:none}   /* a lab on the last slide: nothing to go on to (Doc, 16.09.2026) */
 /* the lab's fullscreen icon grows the lab to the whole slide, over title, note and lab bar (Doc, 17.09.2026) */
-.labframe.full{inset:0 !important;width:auto;height:auto !important;border-radius:0;box-shadow:none;z-index:3}
+.labframe.full{inset:0 !important;width:auto !important;height:auto !important;border-radius:0;box-shadow:none;z-index:3}
+/* a free-standing lab on the whole slide (DOCPAD, Doc 05.10.2026: "auf die Folie beziehen"): its frame has no ground of
+   its own, so the rest of the slide steps aside instead of showing through - the lab stands alone before the photo */
+.slide:has(> .labframe.bare.full) > :not(.labframe){visibility:hidden}
 
 /* --- click build -------------------------------------------------------- */
 /* every line is there from the start; an orange triangle points at the one being talked about - the group
