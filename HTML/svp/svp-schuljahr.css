@@ -1,0 +1,129 @@
+/* Schuljahresablauf (schuljahr.html): the school's year plan, one row per school week,
+   the days as columns. Rows, holiday bands, the current week and the past weeks wear the
+   plan pages' own rules (svp-table.css, svp-detail.css) - only the day cells are new here. */
+
+#sj-table { table-layout: fixed; min-width: 680px; }
+#sj-table col.c-kw { width: 52px; }
+#sj-table col.c-wk { width: 132px; }
+#sj-table tbody tr > td { height: 46px; vertical-align: middle; }
+#sj-table td.kw { padding-left: 16px; color: var(--muted); font-variant-numeric: tabular-nums; }
+#sj-table td.wk { white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+#sj-table td.tag {
+    position: relative;
+    font-size: 0.88rem;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+    border-left: 1px solid var(--row-line);
+}
+#sj-table td.tag .e { display: block; }
+#sj-table td.tag .e + .e { margin-top: 2px; }
+
+/* a day without lessons: the holiday green of the plan pages ("Ferien alle immer gruen") */
+#sj-table td.tag.frei { background: rgba(var(--g-ferien), 0.28); }
+#sj-table td.tag .zusatz {
+    display: block;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    color: rgb(20, 44, 92);
+}
+html:not(.svp-light) #sj-table td.tag .zusatz { color: var(--text); }
+
+/* today: the bar colour of the current week, around the one cell */
+#sj-table td.tag.heute { box-shadow: inset 0 0 0 2px rgb(240, 160, 24); }
+
+/* corrected against the school's file: an orange dot, the reason in the tooltip and below the table */
+#sj-table td.tag.korr::after {
+    content: "";
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--lambda);
+}
+#sj-table tr.flash > td { animation: sj-flash 1.6s ease-out; }
+@keyframes sj-flash { from { background-color: rgba(var(--g-orange), 0.55); } }
+
+#sj-table tr.sj-msg td {
+    height: auto;
+    padding: 28px 16px;
+    text-align: center;
+    color: var(--muted);
+}
+#sj-table tr.sj-msg .action { margin-left: 10px; }
+
+.sj-warn {
+    max-width: 1200px;
+    margin: 0 auto 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(176, 36, 24, 0.6);
+    background: rgba(176, 36, 24, 0.14);
+    font-size: 0.88rem;
+}
+
+.sj-korr {
+    max-width: 1200px;
+    margin: 18px auto 0;
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--panel-soft);
+}
+.sj-korr h2 {
+    margin: 0 0 8px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--head);
+}
+.sj-korr ul { margin: 0; padding-left: 0; list-style: none; }
+.sj-korr li { position: relative; padding: 3px 0 3px 18px; font-size: 0.88rem; }
+.sj-korr li::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 0.72em;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--lambda);
+}
+.sj-korr a { color: inherit; text-decoration: underline dotted; cursor: pointer; }
+
+/* Phone: every week becomes a small card, the days stack, empty days drop out */
+@media (max-width: 720px) {
+    #sj-table { min-width: 0; table-layout: auto; }
+    #sj-table thead, #sj-table colgroup { display: none; }
+    #sj-table, #sj-table tbody, #sj-table tr, #sj-table td { display: block; width: auto; }
+    #sj-table tr.woche { padding: 6px 0 8px; border-bottom: 1px solid var(--row-line); }
+    #sj-table tbody tr.woche > td { height: auto; border: 0; }
+    #sj-table tr.woche td.kw,
+    #sj-table tr.woche td.wk { display: inline-block; padding: 4px 6px 2px 12px; }
+    #sj-table tr.woche td.tag {
+        display: grid;
+        grid-template-columns: 6.2em 1fr;
+        column-gap: 8px;
+        margin: 2px 8px;
+        padding: 5px 8px;
+        border-radius: 6px;
+    }
+    #sj-table tr.woche td.tag::before {
+        content: attr(data-tag);
+        grid-row: 1 / span 9;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+    }
+    #sj-table tr.woche td.tag.leer:not(.heute) { display: none; }
+    #sj-table tr.ferien td { display: block; height: auto; }
+}
+
+@media print {
+    #sj-table td.tag.frei { background: #eef3e4; }
+    #sj-table td.tag.korr::after { background: #c80; }
+    .sj-korr { background: #fff; border-color: #bbb; }
+}

@@ -52,6 +52,8 @@
         /* Doc, 24.09.2026: the run of every lesson of the week, across all plans -
            read on the phone during the lesson, not in the plan page. */
         ['fahrplan.html', 'Fahrplan', 'b-grey', 'Fahrplan der Woche'],
+        /* Doc, 05.10.2026: the school's year plan from Teams, sorted and corrected - login only (LOGIN_ONLY) */
+        ['schuljahr.html', 'Schuljahr', 'b-grey', 'Schuljahresablauf BGY - Termine der Schule'],
         ['konzepte.html', 'Konzepte', 'b-grey', 'Konzepte'],
         ['operatoren.html', 'Operatoren', 'b-grey', 'Operatoren'],
         /* Doc, 12.09.2026: "Notenschluessel" with a sub-menu BGY / OS GY - one
@@ -81,6 +83,14 @@
         [PLAN_HREF, 'Stundenplan', 'b-grey', PLAN_TITLE],
     ];
 
+    /* Pages whose content only Doc's account may read (Supabase, RLS on his uid): logged out
+       they leave the nav altogether - pill, menu entry, gear panel and link card - so the
+       class never meets a page that only asks for a password. */
+    const LOGIN_ONLY = new Set(['schuljahr.html']);
+    if (!hasSession()) {
+        for (let i = LINKS.length - 1; i >= 0; i--) if (LOGIN_ONLY.has(LINKS[i][0])) LINKS.splice(i, 1);
+    }
+
     /* The settings panel wears the Stundenplan's subject colours (Doc,
        03.09.2026: "die Farben aus den SP") - the nav row itself stays grey
        (02.09.). Pinned as in stundenplan.html: Mat = blue, Inf = orange,
@@ -107,7 +117,7 @@
     // These open in a new tab so the current plan stays put.
     // The Stundenplan no longer does (Doc, 10.09.2026: "auf click SP unter dem
     // Header wie alles sonst") - it opens in place, below this nav band.
-    const NEW_TAB = new Set(['notes.html', 'fahrplan.html', 'konzepte.html', 'operatoren.html',
+    const NEW_TAB = new Set(['notes.html', 'fahrplan.html', 'schuljahr.html', 'konzepte.html', 'operatoren.html',
         'punktetabelle.html', 'punktetabelle.html?s=osgy', 'bewertungen.html', 'notenvergabe-fos.html',
         'notenvergabe-osgy.html', '../fokus.html']);
 
@@ -145,7 +155,7 @@
                das Menue ab, hinter dem Timer. */
             /* An entry is an href or a sub-menu { sub: label, hrefs: [...] }.
                The grade sub-menu is just "Noten" (Doc, 29.09.2026). */
-            [null, ['notes.html', 'fahrplan.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
+            [null, ['notes.html', 'fahrplan.html', 'schuljahr.html', 'mathe/uebung.html', 'konzepte.html', 'operatoren.html',
                     { sub: 'Noten', hrefs: ['punktetabelle.html', 'punktetabelle.html?s=osgy',
                                                   'bewertungen.html', 'notenvergabe-fos.html',
                                                   'notenvergabe-osgy.html'] },
@@ -961,6 +971,7 @@
         /* A card may name the pills it stands for: data-nav="a.html b.html".
            Only when every one of them is switched off does the card go. */
         const named = (card.dataset.nav || '').split(/\s+/).filter(Boolean);
+        if (!hasSession() && named.some(h => LOGIN_ONLY.has(h))) return true;
         if (named.length) return named.every(h => hidden.has(h));
         const path = norm(card.pathname);
         const href = pathToHref[path];

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schuljahresablauf BGY</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+            rel="stylesheet">
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="../resources/favicon.svg">
+    <link rel="icon" type="image/png" sizes="256x256" href="../resources/favicon.png">
+    <link rel="stylesheet" href="svp.css">
+    <link rel="stylesheet" href="svp-schuljahr.css">
+    <script src="svp-gate.js"></script>
+</head>
+
+<body>
+    <!-- The school's year plan (Teams: BGY > 02 Schuljahresplanung > Schuljahresablauf .docx),
+         sorted by date and checked against the Saxon calendar by tools/schuljahr.py, which keeps
+         it in Supabase (svp_untis, row _schuljahr). Only Doc's account can read that row, so the
+         page shows nothing without his login - nothing of the plan is in this file. -->
+    <header class="page-head">
+        <div class="head-row">
+            <div class="title-group">
+                <h1>Schuljahresablauf BGY <span id="sj-jahr"></span></h1>
+            </div>
+        </div>
+        <div class="subtitle" id="sj-sub">Termine der Schule &middot; aus Teams</div>
+    </header>
+
+    <div class="toolbar">
+        <button class="action" onclick="window.print()">Drucken</button>
+        <button class="action" id="sj-jetzt" type="button">Diese Woche</button>
+        <div class="legend">
+            <span><span class="dot" style="background: rgba(var(--g-ferien), 0.8)"></span>unterrichtsfrei</span>
+            <span><span class="dot" style="background: var(--lambda)"></span>bei uns korrigiert</span>
+        </div>
+    </div>
+
+    <div class="sj-warn" id="sj-warn" hidden></div>
+
+    <div class="table-wrap">
+        <table id="sj-table">
+            <colgroup>
+                <col class="c-kw"><col class="c-wk"><col><col><col><col><col>
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>KW</th>
+                    <th>Woche</th>
+                    <th>Montag</th>
+                    <th>Dienstag</th>
+                    <th>Mittwoch</th>
+                    <th>Donnerstag</th>
+                    <th>Freitag</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="sj-msg"><td colspan="7">Plan wird geladen &hellip;</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <section class="sj-korr" id="sj-korr" hidden>
+        <h2>Bei uns korrigiert</h2>
+        <ul></ul>
+    </section>
+
+    <footer class="page-foot" id="sj-foot"></footer>
+
+    <script src="svp-auth.js"></script>
+    <script src="svp-nav.js"></script>
+    <script>
+        (function () {
+            const ROW = '_schuljahr';
+            const TAGE = ['Mo', 'Di', 'Mi', 'Do', 'Fr'];
+            const tbody = document.querySelector('#sj-table tbody');
+            const pad = n => String(n).padStart(2, '0');
+
+            function datum(iso) { const p = iso.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+            function plus(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+            function iso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+            function tm(d) { return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.'; }
+            /* "17.–21.08.26" / "31.08.–04.09.26", like the Woche column of the plans */
+            function spanne(a, b, jahr4) {
+                const jahr = d => jahr4 ? String(d.getFullYear()) : String(d.getFullYear()).slice(2);
+                const links = a.getFullYear() !== b.getFullYear() ? tm(a) + jahr(a)
+                    : a.getMonth() === b.getMonth() ? pad(a.getDate()) + '.' : tm(a);
+                return links + '–' + tm(b) + jahr(b);
+            }
+            function stempel(s) {
+                const d = new Date(s);
+                return isNaN(d) ? s : tm(d) + d.getFullYear() + ', ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ' Uhr';
+            }
+            function el(tag, cls, text) {
+                const e = document.createElement(tag);
+                if (cls) e.className = cls;
+                if (text != null) e.textContent = text;
+                return e;
+            }
+            function meldung(text, knopf) {
+                tbody.innerHTML = '';
+                const tr = el('tr', 'sj-msg'), td = el('td', null, text);
+                td.colSpan = 7;
+                if (knopf) td.appendChild(knopf);
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+            }
+
+            function zeichne(data) {
+                const heute = iso(new Date());
+                document.getElementById('sj-jahr').textContent = data.schuljahr || '';
+                const q = data.quelle || {};
+                document.getElementById('sj-sub').textContent = (data.titel || 'Schuljahresplanung') +
+                    ' · aus Teams, Stand der Datei ' + stempel(q.geaendert);
+
+                /* corrections by day: the dot in the cell and the line below the table */
+                const korrAm = {};
+                (data.korrekturen || []).forEach(k => { if (k.d) (korrAm[k.d] = korrAm[k.d] || []).push(k.text); });
+
+                tbody.innerHTML = '';
+                const zeileVon = {};
+                (data.zeilen || []).forEach(function (z) {
+                    if (z.art === 'ferien') {
+                        const tr = el('tr', 'ferien');
+                        const td = el('td');
+                        td.colSpan = 7;
+                        const von = z.von && datum(z.von), bis = z.bis && datum(z.bis);
+                        td.textContent = z.name + (von ? ' · ' + spanne(von, bis, true) : '');
+                        tr.appendChild(td);
+                        if (von && heute >= z.von && heute <= z.bis) tr.dataset.jetzt = '1';
+                        tbody.appendChild(tr);
+                        return;
+                    }
+                    const mo = datum(z.mo), so = iso(plus(mo, 6));
+                    const tr = el('tr', 'woche');
+                    tr.dataset.mo = z.mo;
+                    if (heute >= z.mo && heute <= so) { tr.classList.add('kw-now'); tr.dataset.jetzt = '1'; }
+                    else if (so < heute) tr.classList.add('kw-past');
+                    tr.appendChild(el('td', 'kw', z.kw));
+                    tr.appendChild(el('td', 'wk', spanne(mo, plus(mo, 4))));
+                    z.tage.forEach(function (t, k) {
+                        const td = el('td', 'tag');
+                        td.dataset.tag = TAGE[k] + ' ' + tm(datum(t.d));
+                        (t.e || []).forEach(x => td.appendChild(el('span', 'e', x)));
+                        if (t.zusatz) td.appendChild(el('span', 'zusatz', t.zusatz));
+                        if (t.frei) td.classList.add('frei');
+                        if (!(t.e || []).length && !t.zusatz) td.classList.add('leer');
+                        if (t.d === heute) td.classList.add('heute');
+                        if (korrAm[t.d]) { td.classList.add('korr'); td.title = korrAm[t.d].join('\n'); }
+                        zeileVon[t.d] = tr;
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+
+                const box = document.getElementById('sj-korr'), ul = box.querySelector('ul');
+                ul.innerHTML = '';
+                (data.korrekturen || []).forEach(function (k) {
+                    const li = el('li');
+                    if (k.d && zeileVon[k.d]) {
+                        const a = el('a', null, k.text);
+                        a.addEventListener('click', () => springe(zeileVon[k.d]));
+                        li.appendChild(a);
+                    } else li.textContent = k.text;
+                    ul.appendChild(li);
+                });
+                box.hidden = !ul.children.length;
+
+                const warn = document.getElementById('sj-warn');
+                warn.hidden = !data.fehler;
+                if (data.fehler) warn.textContent = 'Die Teams-Datei ließ sich am ' + stempel(data.fehler.zeit) +
+                    ' nicht lesen (' + data.fehler.text + ') – hier steht weiter der letzte gute Stand.';
+
+                document.getElementById('sj-foot').textContent = 'Quelle: Teams › ' +
+                    String(q.pfad || '').split('/').join(' › ') + ' · Stand der Datei ' + stempel(q.geaendert) +
+                    (data.abgeglichen ? ' · abgeglichen ' + stempel(data.abgeglichen) : '') +
+                    ' · Feiertage Sachsen, Ferientermine SMK. Nur mit Anmeldung sichtbar.';
+            }
+
+            function springe(tr) {
+                tr.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                tr.classList.remove('flash');
+                void tr.offsetWidth;
+                tr.classList.add('flash');
+            }
+            document.getElementById('sj-jetzt').addEventListener('click', function () {
+                const tr = tbody.querySelector('tr[data-jetzt]');
+                if (tr) springe(tr);
+            });
+
+            async function lade() {
+                if (!svpAuth.hasSession()) {
+                    const b = el('button', 'action', 'Anmelden');
+                    b.type = 'button';
+                    b.addEventListener('click', () => svpAuth.loginDialog(lade, 'Anmelden, um den Schuljahresablauf zu sehen'));
+                    meldung('Der Schuljahresablauf ist nur mit Anmeldung sichtbar.', b);
+                    return;
+                }
+                try {
+                    const res = await svpAuth.api('svp_untis?page=eq.' + ROW + '&select=data');
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const rows = await res.json();
+                    if (!rows.length || !rows[0].data) {
+                        meldung('Für dieses Konto liegt kein Schuljahresablauf vor.');
+                        return;
+                    }
+                    zeichne(rows[0].data);
+                } catch (e) {
+                    meldung('Der Schuljahresablauf ließ sich nicht laden (' + e.message + ').');
+                }
+            }
+            lade();
+        })();
+    </script>
+</body>
+
+</html>
