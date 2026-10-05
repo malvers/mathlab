@@ -171,6 +171,11 @@
     const held = { UP: false, DOWN: false };                 // ▲ ▼ held on the keyboard: a pedal
     let dusk = 0, streak = 0, nitro = 0, cheated = false;    // evening light 0 … 1; right gates in a row; nitro seconds left
     let gateTask = null, warned = false;                     // the next bridge's task, chosen early; its warning signs set
+    // clouds drifting over the sky (Doc 05.10.2026: "dass da oben so kleine Wolken … durch die Gegend ziehen", like the
+    // clouds of Apple's Weather): a few soft ones at different depths - the far ones smaller, fainter and slower;
+    // they drift on the start card and after the end too, on their own wind, and turn with the mountains in the bends
+    let cloudT = 0, cloudArt = null;
+    const CLOUDS = Array.from({ length: 11 }, (_, i) => ({ k: i % 3, x: (i + Math.random() * .7) / 11, y: Math.random(), d: .35 + .65 * Math.random() }));
     // speed in segments per second (4 km/h each): 16 at first, 3 more each level, at most 42 - braking goes down to MIN in
     // every level, gas adds up to GAS (Doc 04.10.2026: 30 was "brutal schnell", then "das Langsamste ist immer noch zu schnell")
     const MIN = 4, GAS = 14, base = () => Math.min(16 + (level - 1) * 3, 42);
@@ -359,7 +364,58 @@
         range(mountains, C.mount, skyOff, H * .09);
         range(hills, C.hill, hillOff, H * .035);
       }
+      clouds();
       ctx.fillStyle = C.grass; ctx.fillRect(0, f.hy, W, H - f.hy);
+    }
+    // the clouds: drawn once as soft sprites (many fading puffs along a flat band, a shaded underside), a day and an
+    // evening set; then each frame only placed - their wind drift and the panorama's turn, wrapping round a span wider
+    // than the screen so none pops up
+    function cloudSprites() {
+      let seed = 7;
+      const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      const one = (shade) => {
+        const c = document.createElement('canvas'); c.width = 420; c.height = 170;
+        const g = c.getContext('2d');
+        if ('filter' in g) g.filter = 'blur(7px)';          // fuzzy (Doc 05.10.: "ein bisschen mehr fuzzy")
+        for (let i = 0; i < 30; i++) {
+          const t = rnd(), x = 210 + (t - .5) * 300 * (.6 + .4 * rnd()), top = 1 - Math.abs(t - .5) * 1.6;
+          const y = 108 - top * 40 * rnd(), r = 18 + 34 * top * (.5 + .5 * rnd());
+          const rg = g.createRadialGradient(x, y, 0, x, y, r);
+          rg.addColorStop(0, 'rgba(255,255,255,.6)'); rg.addColorStop(.5, 'rgba(255,255,255,.28)'); rg.addColorStop(1, 'rgba(255,255,255,0)');
+          g.fillStyle = rg; g.fillRect(x - r, y - r, 2 * r, 2 * r);
+        }
+        g.filter = 'none'; g.globalCompositeOperation = 'source-atop';
+        const sh = g.createLinearGradient(0, 40, 0, 150);
+        sh.addColorStop(0, shade[0]); sh.addColorStop(1, shade[1]);
+        g.fillStyle = sh; g.fillRect(0, 0, c.width, c.height);
+        return c;
+      };
+      const day = [], eve = [];
+      for (let k = 0; k < 3; k++) {
+        const s = seed;
+        day.push(one(['rgba(255,255,255,0)', 'rgba(150,165,195,.45)']));
+        seed = s;                                           // the evening cloud has the same shape, other light
+        // evening: a dusky mauve on top, a muted rose underneath where the low sun lights them - between the first (too bright
+        // in the dark) and the second try (gone in the sky) (Doc 05.10.: "noch ein bisschen hell", then "ein bisschen heller")
+        eve.push(one(['rgba(150,110,145,.85)', 'rgba(210,135,135,.85)']));
+      }
+      return { day, eve };
+    }
+    function clouds() {
+      if (!cloudArt) cloudArt = cloudSprites();
+      const span = W * 1.7, alps = pic(ART.alps);
+      // far away like the mountains: in a bend they turn exactly as the panorama does (its offset), and drift on their
+      // own wind - so they stay in the sky, not on the windscreen (Doc 05.10.: "bewegen sich immer noch mit dem Auto mit")
+      const turn = skyOff * 2 * (alps ? f.hy * 1.02 * alps.naturalWidth / alps.naturalHeight : W);
+      CLOUDS.forEach(c => {
+        const w = W * (.07 + .11 * c.d), h = w * 170 / 420;
+        const run = c.x * span - cloudT * W * .012 * c.d - turn;
+        const x = ((run % span) + span) % span - w, y = f.hy * (.02 + .3 * (1 - c.d) + .1 * c.y) - h * .3;
+        const a = .55 + .45 * c.d;
+        if (dusk < .99) { ctx.globalAlpha = a * (1 - dusk); ctx.drawImage(cloudArt.day[c.k], x, y, w, h); }
+        if (dusk > .01) { ctx.globalAlpha = a * dusk * .9; ctx.drawImage(cloudArt.eve[c.k], x, y, w, h); }   // a little fainter in the dark
+      });
+      ctx.globalAlpha = 1;
     }
     // colours between day and evening
     const rgb = c => c.match(/[\d.]+/g).map(Number);
@@ -729,7 +785,7 @@
       if (!alive) return;
       const dt = Math.min(.05, (now - (last || now)) / 1000);
       last = now;
-      if (!document.hidden) { if (state === 'run') update(dt); fade(dt); }
+      if (!document.hidden) { if (state === 'run') update(dt); fade(dt); cloudT += dt; }
       draw();
       raf = requestAnimationFrame(loop);
     }
