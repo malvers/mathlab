@@ -51,6 +51,11 @@
             menu.hidden = !on;
             toggle.setAttribute('aria-expanded', on ? 'true' : 'false');
             toggle.classList.toggle('on', !!on);
+            /* the toggle's tooltip lists the entries - with the menu open it
+               only covers the first of them (Doc, 06.10.2026: "wo ist
+               Bearbeiten?"), so it is off while the menu is open */
+            if (on) toggle.removeAttribute('title');
+            else if (o.title) toggle.title = o.title;
         }
 
         toggle.addEventListener('click', function (e) { e.stopPropagation(); open(menu.hidden); });
