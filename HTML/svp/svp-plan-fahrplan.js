@@ -174,13 +174,9 @@ window.svpPlanParts.push(function (P) {
             [].forEach.call(feld.children, svpFmtBar.punktGroesse);   /* a point small as a whole: its lines too */
             fitFont();                          /* mehr Text -> kleinere Schrift */
         });
-        /* Eingefuegt wird nur der Text: was aus einer Mail oder einem Deck kommt,
-           bringt sonst seine Schrift, Groesse und Farbe mit auf das Blatt. */
-        feld.addEventListener('paste', function (ev) {
-            ev.preventDefault();
-            const cb = ev.clipboardData;
-            document.execCommand('insertText', false, cb ? (cb.getData('text/plain') || '') : '');
-        });
+        /* Copy and paste (svpFmtBar.zwischenablage): from one Fahrplan into another with colours, marks, sizes
+           and levels (Doc, 06.10.2026); from a mail or a deck only the text, it would bring its font along. */
+        svpFmtBar.zwischenablage(feld);
         /* typing must not reach the plan: it walks its rows with the arrow keys and folds
            weeks on Enter */
         feld.addEventListener('keydown', function (ev) {

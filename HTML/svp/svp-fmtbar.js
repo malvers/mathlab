@@ -43,7 +43,8 @@
         const text = punkt.textContent.trim();
         let g = '';
         if (text) {
-            [].some.call(punkt.querySelectorAll('span[style]'), function (sp) {
+            /* a pasted size sits on a <font> until the point is stored (alsFont) */
+            [].some.call(punkt.querySelectorAll('span[style], font[style]'), function (sp) {
                 if (GROESSEN_OK.indexOf(sp.style.fontSize) < 0 || sp.textContent.trim() !== text) return false;
                 g = sp.style.fontSize;
                 return true;
@@ -410,6 +411,103 @@
         return out.innerHTML;
     }
 
+    /* ---- Copy and paste between our lists of points ---------------------
+       Doc, 06.10.2026, copied the Fahrplan of 11 into the one of 12: "dann war rot weg und die ganze Formatierung
+       war im Prinzip weg. Kann man das gegebenenfalls mitnehmen?" - a paste took only the text, so that a mail or
+       a deck would not bring its fonts along. Now a copy out of such a list puts the points into the clipboard the
+       way they are stored (clean(), the level as data-ebene) under a mark of its own, PUNKTE_MARKE; a paste that
+       finds the mark takes them with colours, marks, sizes and levels. Anything else still comes in as bare text.
+       The clipboard is the system's, so it works between pages and tabs. */
+    const PUNKTE_MARKE = 'data-svp-punkte';
+
+    /* The selected points as [{ebene, html}]. A selection inside one point keeps its marks: when it sits inside
+       a coloured span, cloneContents() gives the bare text, so the elements around it up to the point are put
+       back around it. */
+    function auswahlPunkte(liste, r) {
+        const frag = r.cloneContents();
+        if ([].some.call(frag.childNodes, function (n) { return n.nodeName === 'LI'; })) {
+            return [].map.call(frag.childNodes, function (n) {
+                return { ebene: n.dataset ? +n.dataset.ebene || 0 : 0, html: clean(n) };
+            }).filter(function (p) { return textOf(p.html); });
+        }
+        let stueck = frag;
+        for (let n = r.commonAncestorContainer; n && n !== liste && n.parentNode !== liste; n = n.parentNode) {
+            if (n.nodeType !== 1) continue;
+            const huelle = n.cloneNode(false);
+            huelle.appendChild(stueck);
+            stueck = huelle;
+        }
+        const box = document.createElement('div');      // clean() reads the children of what it gets
+        box.appendChild(stueck);
+        const html = clean(box);
+        return textOf(html) ? [{ ebene: 0, html: html }] : [];
+    }
+
+    /* The points of a clipboard HTML that carries our mark - through clean() again, a page of anyone could
+       have put the mark there. */
+    function punkteAus(html) {
+        if (html.indexOf(PUNKTE_MARKE) < 0) return [];
+        const t = document.createElement('template');
+        t.innerHTML = html;
+        const ul = t.content.querySelector('[' + PUNKTE_MARKE + ']');
+        if (!ul) return [];
+        return [].filter.call(ul.children, function (li) { return li.nodeName === 'LI'; }).map(function (li) {
+            return { ebene: Math.max(0, Math.min(EBENEN_MAX, +li.getAttribute('data-ebene') || 0)), html: clean(li) };
+        }).filter(function (p) { return textOf(p.html); });
+    }
+
+    /* Chrome drops the style of a <span> that opens a fragment given to insertHTML (measured 06.10.2026:
+       '<span style="color: ...">rot</span> und' came in as plain "rot und"); a <font> with the same style it
+       leaves alone. clean() makes it a span again when the point is stored. */
+    function alsFont(html) {
+        const t = document.createElement('template');
+        t.innerHTML = html;
+        [].slice.call(t.content.querySelectorAll('span[style]')).forEach(function (sp) {
+            const f = document.createElement('font');
+            f.setAttribute('style', sp.getAttribute('style'));
+            while (sp.firstChild) f.appendChild(sp.firstChild);
+            sp.replaceWith(f);
+        });
+        return t.innerHTML;
+    }
+
+    /* Copy, cut and paste for a list of points: a <ul> whose <li> children are the points, each with its level
+       in data-ebene (the Fahrplan sheet). Everything goes in through execCommand, so Cmd+Z takes a paste back;
+       several points go in as points of their own (Chrome splits the point at the caret). */
+    function zwischenablage(liste) {
+        function kopieren(ev, schneiden) {
+            const sel = window.getSelection();
+            if (!sel.rangeCount || sel.isCollapsed || !ev.clipboardData) return;
+            const r = sel.getRangeAt(0);
+            if (!liste.contains(r.commonAncestorContainer)) return;
+            const punkte = auswahlPunkte(liste, r);
+            if (!punkte.length) return;
+            ev.preventDefault();
+            ev.clipboardData.setData('text/plain', sel.toString());   // Mail, Word, Teams: the text as it reads
+            ev.clipboardData.setData('text/html', '<ul ' + PUNKTE_MARKE + '="1">' + punkte.map(function (p) {
+                return '<li' + (p.ebene ? ' data-ebene="' + p.ebene + '"' : '') + '>' + p.html + '</li>';
+            }).join('') + '</ul>');
+            if (schneiden && liste.isContentEditable) document.execCommand('delete');
+        }
+        liste.addEventListener('copy', function (ev) { kopieren(ev, false); });
+        liste.addEventListener('cut', function (ev) { kopieren(ev, true); });
+        liste.addEventListener('paste', function (ev) {
+            ev.preventDefault();
+            const cb = ev.clipboardData;
+            const punkte = cb ? punkteAus(cb.getData('text/html') || '') : [];
+            if (punkte.length === 1) {
+                document.execCommand('insertHTML', false, alsFont(punkte[0].html));   // a piece of a point: at the caret
+            } else if (punkte.length) {
+                document.execCommand('insertHTML', false, '<ul>' + punkte.map(function (p) {
+                    return '<li' + (p.ebene ? ' data-ebene="' + p.ebene + '"' : '') + '>' + alsFont(p.html) + '</li>';
+                }).join('') + '</ul>');
+            } else {
+                /* from anywhere else only the text: a mail or a deck would bring its font, size and colour */
+                document.execCommand('insertText', false, cb ? (cb.getData('text/plain') || '') : '');
+            }
+        });
+    }
+
     window.svpFmtBar = { build: build, clean: clean, safe: safe, textOf: textOf, zeile: zeile, mitEbene: mitEbene, EBENEN_MAX: EBENEN_MAX,
-        punktGroesse: punktGroesse, WERKZEUGE: WERKZEUGE };
+        punktGroesse: punktGroesse, zwischenablage: zwischenablage, WERKZEUGE: WERKZEUGE };
 })();
