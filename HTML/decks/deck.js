@@ -1235,7 +1235,9 @@ fromHash();
       hush: function () { sf.stop(); }, shown: shown, sync: sync, place: placeRow,
       words: function (tex) { return window.SolitaKaraoke ? window.SolitaKaraoke.texWords(tex) : String(tex); }
     };
-    if (PRESENTER) panel.hidden = false;              // the line is always there; the answers come from the beamer
+    // the line is always there; the answers come from the beamer. Empty is decided before it shows, as in open() -
+    // otherwise the bare panel stood white over the live slide's corner until the first answer (Doc, 06.10.2026)
+    if (PRESENTER) { bare(); panel.hidden = false; }
     // The ordinary window starts with her picture alone behind "... fragen!" - password stored or not - and the line (mic,
     // field) comes with the click on her (Doc, 23.09.2026: "default: nur Solita"; before that day the stored password
     // opened the line at load). No focus and no warm-up here: the keys stay with the deck until Doc clicks into the field.

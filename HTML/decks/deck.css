@@ -293,16 +293,17 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
    clicked last - and a thin box holds line and triangle, the same overhang left and right.
    Everything but the current group steps back a little - shown before and still to come alike (Doc, 27.09.2026:
    "nicht nacheinander aufpoppen ... ein Dreieck davor", "die schon gezeigten ein klein wenig heller", "eine duenne
-   Kiste ... symmetrisch", "auch mit denen, die noch nicht gezeigt sind - nicht so krass") */
-.step{opacity:.65;transition:opacity .3s ease}
-.step.on:not(.past){opacity:1}
+   Kiste ... symmetrisch", "auch mit denen, die noch nicht gezeigt sind - nicht so krass").
+   No line steps back any more - shown, current and still to come all at full strength; the box and the triangle alone
+   mark the current group (Doc, 06.10.2026: "die noch nicht/schon gezeigten sind leicht grauer ... Nimm das ganz raus
+   bitte. Die gelbe Box ist ok") */
 /* a part of a figure that comes with a click (svg <g> and its .fl words, class "step ghost"): very faint and grey until its
    click, then it fades in to full colour and stays - no triangle, no box, the colour coming is the mark (Doc, 03.10.2026:
    "am Anfang ganz schwach grau zu sehen ... beide sollen animiert kommen") */
 .step.ghost{opacity:.13;filter:grayscale(1);transition:opacity .7s ease,filter .7s ease}
 .step.ghost.on{opacity:1;filter:none}
 @keyframes step-now{from{opacity:0}}
-:root{--tri:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='14'%3E%3Cpath d='M0 0L11 7L0 14Z' fill='%23F5C242'/%3E%3C/svg%3E")}
+:root{--tri:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='14'%3E%3Cpath d='M0 0L11 7L0 14Z' fill='%23B02418'/%3E%3C/svg%3E")}   /* dark red like the box (Doc, 06.10.2026: "das Dreieck auch bitte") - was %23F5C242 */
 /* the marks only on a live slide - not in the overview tiles, not while editing, not on paper. On a bullet line
    the triangle takes the bullet's place, centred on it (Doc, 27.09.2026: "das Dreieck ueber den Bullet legen -
    davor sieht komisch aus"), and in the middle of the box, also on a line that wraps ("nicht Y-zentriert").
@@ -313,8 +314,11 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
     background:var(--tri) no-repeat;pointer-events:none;animation:step-now .25s ease-out}
   html:not(.deck-edit) :not(.ov-thumb) > .slide p.line.step.now::before{position:absolute;left:-2px;top:calc(50% - 7px);width:11px;height:14px;margin:0;
     background:var(--tri) no-repeat;animation:step-now .25s ease-out}
+  /* the box frames the text, not the whole width of the slide (Doc, 06.10.2026: "die gelben Boxen sollen bitte nur den
+     Text Rahmen (nicht bis rüber gehen)") - a step line is as wide as its text; fit-content breaks lines exactly as before */
+  p.line.step{width:fit-content}
   html:not(.deck-edit) :not(.ov-thumb) > .slide p.line.step.now::after{left:-14px;right:-14px;top:-5px;bottom:-5px;width:auto;height:auto;
-    border:1.5px solid var(--orange);background:none}
+    border:1.5px solid var(--red);background:none}   /* dark red, trial (Doc, 06.10.2026: "probier mal rot (dunkel)") - was var(--orange) */
   html:not(.deck-edit) :not(.ov-thumb) > .slide p.col.l1.step.now::before{left:-2px;top:calc(50% - 7px);width:11px;height:14px;
     background:var(--tri) no-repeat;animation:step-now .25s ease-out}
   html:not(.deck-edit) :not(.ov-thumb) > .slide p.col.l1.step.now::after{display:none}
