@@ -74,9 +74,13 @@
             klassen: [['a', 'BGY26-1 + BGY26-2']],
             /* Talk dates by PLACE: two talks per Tuesday double lesson (one per
                lesson), since 18.09.2026 starting after the autumn holidays (Doc:
-               "lass alle nach den Herbstferien beginnen"). Doc's date wins. */
-            dates: twice(['2026-10-27', '2026-11-03', '2026-11-10', '2026-11-17', '2026-11-24',
-                          '2026-12-01', '2026-12-08']),
+               "lass alle nach den Herbstferien beginnen"). Doc's date wins.
+               Doc, 06.10.2026: "schieb bitte alle Vorträge zwei Wochen nach hinten. In der Info elf" - every
+               Tuesday two weeks later; 22.12. is in the Christmas holidays, so the seventh pair goes to 05.01. */
+            /* dates: twice(['2026-10-27', '2026-11-03', '2026-11-10', '2026-11-17', '2026-11-24',
+                          '2026-12-01', '2026-12-08']), */
+            dates: twice(['2026-11-10', '2026-11-17', '2026-11-24', '2026-12-01', '2026-12-08',
+                          '2026-12-15', '2027-01-05']),
             labels: { lb1: ['LB 1', 'b-orange'], lb2: ['LB 2', 'b-cyan'], lb3: ['LB 3', 'b-violet'], lb4: ['LB 4', 'b-teal'], wb: ['Wahlbereich', 'b-green'] },
             topics: [
                 { lb: 'lb1', title: 'Meilensteine der Rechentechnik', sub: 'Von Schickard und Zuse bis zum Rechenzentrum: Welche Idee war jeweils der eigentliche Sprung?' },
