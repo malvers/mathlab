@@ -168,13 +168,24 @@ def figure_label(lab):
     """One word of a drawn figure as <p class="fl">, centred on (x, y) in the picture box.
     A label is (centre x, centre y, width, text) and may carry a fifth item: its own CSS, e.g.
     "font-size:24px;color:#0E244E" for a word that belongs inside a drawn box. The line height
-    follows the type size (deck.css: line-height 1.28), so a bigger label stays centred."""
+    follows the type size (deck.css: line-height 1.28), so a bigger label stays centred.
+    A sixth item is the click group the label comes with - faint and grey until then, like the svg <g> of its part
+    (deck.css .step.ghost; ziegen_svg.py writes the same by hand); None or missing: always there. It may also be a
+    dict: {"g": 3} as the number, {"g": 3, "kommt": True} not there at all before its click (deck.css .step.kommt),
+    {"bis": 7} gone again once group 7 is on (data-bis) - with or without a g; "sanft": True fades it in and out
+    (deck.css .sanft)."""
     x, y, w, text = lab[:4]
     css = lab[4] if len(lab) > 4 else ""
+    k = lab[5] if len(lab) > 5 else None
+    k = k if isinstance(k, dict) else {"g": k}
     m = re.search(r"font-size:\s*([\d.]+)px", css)
     line = float(m.group(1)) * 1.28 if m else 16.0
-    return ('<p class="fl" style="left:%gpx;top:%gpx;width:%gpx%s">%s</p>'
-            % (x - w / 2, y - line / 2, w, ";" + css if css else "", markup(text)))
+    cls = (" step %s" % ("kommt" if k.get("kommt") else "ghost")) if k.get("g") is not None else ""
+    cls += " sanft" if k.get("sanft") else ""
+    data = (' data-g="%d"' % k["g"] if k.get("g") is not None else "") + \
+           (' data-bis="%d"' % k["bis"] if k.get("bis") is not None else "")
+    return ('<p class="fl%s"%s style="left:%gpx;top:%gpx;width:%gpx%s">%s</p>'
+            % (cls, data, x - w / 2, y - line / 2, w, ";" + css if css else "", markup(text)))
 
 
 # -------------------------------------------------------------------- deck ---

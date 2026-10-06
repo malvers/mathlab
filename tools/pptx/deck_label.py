@@ -32,8 +32,9 @@ from html.parser import HTMLParser
 from urllib.parse import urlsplit
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-# a label that comes with a click carries its step classes and group too (class="fl step ghost" data-g="1", ziegen_svg.py)
-LABEL = re.compile(r'<p class="(fl(?: [^"]*)?)"((?: data-g="\d+")?) style="([^"]*)">')
+# a label that comes with a click carries its step classes and group too (class="fl step ghost" data-g="1", ziegen_svg.py),
+# one that goes again its data-bis (html_deck.figure_label)
+LABEL = re.compile(r'<p class="(fl(?: [^"]*)?)"((?: data-g="\d+")?(?: data-bis="\d+")?) style="([^"]*)">')
 # the text boxes that stand on a slide as html_deck.py writes them - tag.class, or a bare heading (deck-label.js: KINDS)
 KINDS = ("div.body", "div.colgrid", "div.codepanel", "table.dtable", "h1", "h2", "h3", "p.kicker", "p.sub",
          "p.satz", "p.label", "p.labnote", "p.greet-lead", "p.greet-quote", "p.greet-author", "div.labbar")

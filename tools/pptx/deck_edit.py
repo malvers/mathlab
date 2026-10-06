@@ -228,6 +228,7 @@ def save(deck, slide, n, old, new):
 LINES = ("line", "col")
 STEP_TAG = re.compile(r'<[a-z][a-z0-9]*\b[^>]*>')
 DATA_G = re.compile(r'\bdata-g="(\d+)"')
+DATA_BIS = re.compile(r'\bdata-bis="(\d+)"')
 NARRATION = re.compile(r'(<script id="narration" type="application/json">)(.*?)(</script>)', re.S)
 
 
@@ -239,10 +240,13 @@ def _group(tag):
 
 
 def _shift(text, above, by):
-    """Every step in text whose click group is above `above` moves `by` groups."""
+    """Every step in text whose click group is above `above` moves `by` groups - and every part that goes again with
+    such a group (data-bis, html_deck.figure_label) moves along."""
     def one(m):
-        g = _group(m.group(0))
-        return DATA_G.sub('data-g="%d"' % (g + by), m.group(0)) if g is not None and g > above else m.group(0)
+        tag, g = m.group(0), _group(m.group(0))
+        if g is not None and g > above:
+            tag = DATA_G.sub('data-g="%d"' % (g + by), tag)
+        return DATA_BIS.sub(lambda b: 'data-bis="%d"' % (int(b.group(1)) + (by if int(b.group(1)) > above else 0)), tag)
     return STEP_TAG.sub(one, text)
 
 

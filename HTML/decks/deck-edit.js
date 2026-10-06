@@ -162,6 +162,8 @@
 
   // a line's square follows the size of its first letters (deck.js deckLead) - while typing and once written
   const lead = el => { if (window.deckLead && el.matches('p.line')) window.deckLead(el); };
+  // a number that names something (Beweis 1) back in the text's font (deck.js deckNr) - once written, never while typing
+  const nr = el => { if (window.deckNr) window.deckNr(el); };
 
   function tex(el) {
     if (!window.katex) return;
@@ -696,10 +698,10 @@
     })
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status); return j; }); })
       .then(function (j) {
-        el.innerHTML = j.html; tex(el); lead(el); SRC.set(el, j.src); took(j, to); rebase();
+        el.innerHTML = j.html; tex(el); lead(el); nr(el); SRC.set(el, j.src); took(j, to); rebase();
         const tile = document.querySelectorAll('#overview .ov-thumb')[at[0]];   // the overview keeps copies
         const copy = tile && tile.querySelectorAll(selector)[at[1]];
-        if (copy) { copy.innerHTML = j.html; tex(copy); lead(copy); }
+        if (copy) { copy.innerHTML = j.html; tex(copy); lead(copy); nr(copy); }
         el.classList.remove('ed-on'); cur = null; dirty = false;
         msg('Gespeichert – live erst mit „Änderungen speichern“'); label(); state();
         return true;

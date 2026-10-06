@@ -28,6 +28,9 @@ html,body{height:100%;background:var(--night);overflow:hidden}
 @font-face{font-family:'Deck Ziffern';src:url('../morpheus/vendor/katex/fonts/KaTeX_Main-BoldItalic.woff2') format('woff2');font-weight:700;font-style:italic;size-adjust:121%;unicode-range:U+0030-0039,U+002B,U+003C-003E,U+00D7,U+00F7,U+2212}
 :root{--deck-schrift:'Deck Ziffern',Raleway,system-ui,sans-serif}
 body{font-family:var(--deck-schrift);font-variant-numeric:lining-nums;color:var(--body)}
+/* ... but a number that names something - Beweis 1, Kapitel 2, Klasse 9 - wears the text's font: LaTeX only for
+   mathematics (Doc, 06.10.2026: "wenn da steht Beweis 1, dann ... so wie die Schrift"). deck.js deckNr sets the span. */
+.nr{font-family:Raleway,system-ui,sans-serif}
 /* centred by offsets, not by a grid: on a phone the grid track grows to the unscaled
    deck size and pushes the scaled deck off-centre, half out of the screen */
 #stage{position:fixed;inset:0;overflow:hidden}
@@ -96,6 +99,7 @@ p.line[data-lead=z8]{--lead:2.1}p.line[data-lead=z9]{--lead:2.6}
 
 p.line{position:relative;line-height:1.25}
 p.line.l0{font-size:20px;color:var(--formel);margin-top:12px;padding-left:20px}   /* the text as blue as the formulas, trial (Doc, 06.10.2026: "probier mal die Schrift (nicht Header) so blau wie x") - was var(--body) */
+p.line.apart{margin-top:44px}   /* a bullet set apart from the ones above it (Doc, 06.10.2026: "ein dritter Bullet, der aber abgesetzt ist") */
 p.line.l1{font-size:17px;color:var(--formel);margin-top:6px;margin-left:24px;padding-left:20px;
   line-height:1.2}
 p.line.l2{font-size:15px;color:var(--formel);margin-top:4px;margin-left:48px;padding-left:20px}   /* l1 and l2 blue like l0, no longer grey (Doc, 06.10.2026: "mach blau") */
@@ -196,6 +200,7 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
    runs out of the box; here they resolve against the box - shrink to fit, never upscale */
 .pic img{max-width:100%;max-height:100%;object-fit:contain}
 .pic svg,.below svg{max-width:100%;max-height:100%;display:block}   /* a drawn figure (inline SVG) fits the box like a picture */
+.pic .katex svg,.below .katex svg{max-width:none;max-height:none}   /* ... but not KaTeX's own small svgs in a figure's words (a root, a stroke through a term): the fit squeezed them to 0 px high (06.10.2026) */
 .pic .fl{position:absolute;margin:0;text-align:center;font-size:12.5px;line-height:1.28;color:var(--muted)}   /* a figure's words, laid over the SVG - the editor's text; unitless line height, so a label scaled up keeps its own */
 .pic.left{justify-content:flex-start}
 /* a small drawn figure in the free room right of the heading, above a hero formula (Doc, 03.10.2026: "oben wo die freie
@@ -315,6 +320,24 @@ a.chap-credit:hover{color:var(--red);text-decoration:underline}
    "am Anfang ganz schwach grau zu sehen ... beide sollen animiert kommen") */
 .step.ghost{opacity:.13;filter:grayscale(1);transition:opacity .7s ease,filter .7s ease}
 .step.ghost.on{opacity:1;filter:none}
+/* a part that is not there at all before its click (class "step kommt"), and one that goes again (data-bis="k": gone once
+   click group k is on - deck.js stepMarks) - Doc's PowerPoints bring a calculation term by term, let a frame walk from
+   pair to pair and cover a line (Doc, 06.10.2026, his slides 110/111 on Leibniz: "nachbauen ... natürlich animierend").
+   The overview and paper show the end: what goes is gone there */
+@media screen{
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .step.kommt:not(.on),
+  html:not(.deck-edit) .slide .bis-vorbei,
+  html:not(.deck-edit) .ov-thumb > .slide [data-bis]{visibility:hidden}
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .step.kommt.now::after{display:none}
+}
+@media print{.slide [data-bis]{visibility:hidden}}
+/* "sanft" with either: it fades in and out over 0.6 s instead of standing there at once - a pair fading out while its
+   "+ 0" fades in (Doc, 06.10.2026: "minus ein halb, plus ein halb ausfaden und da einfach schreiben plus null") */
+.slide .sanft{transition:opacity .6s ease,visibility 0s linear 0s}
+@media screen{
+  html:not(.deck-edit) :not(.ov-thumb) > .slide .step.kommt.sanft:not(.on){opacity:0}
+  html:not(.deck-edit) .slide .bis-vorbei.sanft{opacity:0;transition:opacity .6s ease,visibility 0s linear .6s}
+}
 @keyframes step-now{from{opacity:0}}
 :root{--tri:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='14'%3E%3Cpath d='M0 0L11 7L0 14Z' fill='%23B02418'/%3E%3C/svg%3E")}   /* dark red like the box (Doc, 06.10.2026: "das Dreieck auch bitte") - was %23F5C242 */
 /* the marks only on a live slide - not in the overview tiles, not while editing, not on paper. On a bullet line

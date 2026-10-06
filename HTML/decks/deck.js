@@ -198,6 +198,9 @@ function stepMarks(root, st){
   // a card that is one group as a whole is its own box - a box around the heading alone would cut into the card
   root.querySelectorAll('.card').forEach(c => c.classList.toggle('now', !!cur && c.contains(cur) &&
     [...c.querySelectorAll('.step')].every(e => +e.dataset.g === top)));
+  // a part that goes again: data-bis="k" - gone once group k is on (deck.css .bis-vorbei; Doc, 06.10.2026: a frame that
+  // walks from pair to pair, a line covered)
+  root.querySelectorAll('[data-bis]').forEach(e => e.classList.toggle('bis-vorbei', +e.dataset.bis < st));
 }
 function paint(){
   slides.forEach((s, i) => s.classList.toggle('on', i === si));
@@ -721,6 +724,43 @@ function deckLead(p) {
 }
 window.deckLead = deckLead;
 document.querySelectorAll('p.line').forEach(deckLead);
+
+// Digits wear the LaTeX font in the slide text (deck.css 'Deck Ziffern') - but only where they are mathematics. A number
+// that names or counts something - Beweis 1, Kapitel 2, Aufgabe 3, Klasse 9 - is part of the words and wears the text's
+// font (Doc, 06.10.2026: "LaTeX eigentlich nur für mathematische Sachen ... wenn da steht Beweis 1, dann ... so wie die
+// Schrift"). Such a number follows one of these words and gets <span class="nr"> (deck.css); formulas (.tex) and texts
+// in another font (the Orbitron headings) are left alone. Before any copy of a slide is made; the deck editor calls
+// window.deckNr for a text it just wrote.
+const NR_WORT = new RegExp('(\\b(?:Beweise?|Kapitel|Folien?|Aufgaben?|Teil|Schritt|Klassen?|Klassenstufe|Stufe|Seiten?|' +
+  'Woche|KW|Lektion|Stunde|Runde|Level|Band|Buch|Satz|Nr\\.|Nummer|Version|Phase|Station|Gruppe|Beispiel|Lösung|Frage|' +
+  'Abschnitt|Zeile|Spalte|Tabelle|Abbildung|Abb\\.|Bild|LB|Lernbereich|Proof|Chapter|Step|Part|Task|Exercise|Lesson|' +
+  'Week|Grade|Page|Round|Example|Question|Section|Figure|Table)\\s+)(\\d+[a-z]?(?:\\s*(?:,|und|oder|bis|and|or|to|–)\\s*' +
+  '\\d+[a-z]?)*)', 'g');
+function deckNr(root) {
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const hits = [];
+  for (let n = w.nextNode(); n; n = w.nextNode()) {
+    NR_WORT.lastIndex = 0;
+    const e = n.parentElement;
+    if (!e || !NR_WORT.test(n.nodeValue) || e.closest('.tex,.katex,.nr,[contenteditable]')) continue;
+    if (getComputedStyle(e).fontFamily.indexOf('Deck Ziffern') < 0) continue;
+    hits.push(n);
+  }
+  hits.forEach(function (n) {
+    const t = n.nodeValue, f = document.createDocumentFragment();
+    let at = 0;
+    t.replace(NR_WORT, function (m, wort, nr, i) {
+      f.append(t.slice(at, i + wort.length));
+      const s = document.createElement('span');
+      s.className = 'nr'; s.textContent = nr; f.append(s);
+      at = i + m.length;
+    });
+    f.append(t.slice(at));
+    n.replaceWith(f);
+  });
+}
+window.deckNr = deckNr;
+document.querySelectorAll('section.slide').forEach(deckNr);
 
 // Emojis as Apple draws them, on the Windows beamer too (js/apple-emoji.js; Doc: "Emoji IMMER Apple") - the deck editor
 // types the Fahrplan's smileys into slides (05.10.2026). An open text is contenteditable: apple-emoji leaves it alone.
