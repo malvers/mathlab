@@ -1092,7 +1092,7 @@
         catalogue = mergeCatalogue(catalogue, list.concat(fundusTopics()));
         const ts = new Date().toISOString();
         saveJSON(KEY_TOPICS, { v: 2, list: catalogue, ts: ts });
-        pushTopics(ts);
+        pushTopics();
     }
 
     window.vtToggleEdit = function () {
@@ -1776,6 +1776,9 @@
     /* the shared topics as the cloud has them: { list, ts } or null */
     let cloudCat = null;
     let metaLoaded = false;
+    /* this Lerngruppe's rows as last read, { ts, daten } or null - the base a
+       save builds on (postEdits) */
+    const cloudBase = {};
     const logged = () => !!(A() && A().hasSession());
     const gradesVisible = () => logged() && unlocked();
 
@@ -1815,6 +1818,10 @@
             });
             if (!res.ok) return;
             const rows = await res.json();
+            [TOPICS_PAGE, META_PAGE].forEach((p) => {
+                const r = rows.find((x) => x.page === p);
+                cloudBase[p] = r ? { ts: r.ts, daten: r.edits || {} } : null;
+            });
             const own = rows.find((r) => r.page === META_PAGE);
             /* this Lerngruppe's own list - until it has one, the plan-wide template */
             const ownCat = rows.find((r) => r.page === TOPICS_PAGE);
@@ -1849,13 +1856,21 @@
         return run;
     }
 
-    async function postEdits(page, edits, ts) {
-        const res = await A().api('svp_plan_edits', {
-            method: 'POST',
-            headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-            body: JSON.stringify([{ page: page, edits: edits, ts: ts || new Date().toISOString() }])
+    /* Since 27.09.2026 the database refuses an update that does not name the
+       row it builds on (trigger svp_plan_edits_basis, HTTP 409). The plain
+       upsert used here before was turned away from then on: no change of the
+       list, the order, a date or a mark reached the cloud any more (found
+       06.10.2026, Doc: "bitte fix! Wichtig"). So the save goes through
+       svpAuth.sicherSpeichern like the plan pages: it lands only on the row
+       last read (cloudBase), and if another device wrote meanwhile, both are
+       merged instead of one wiping the other. */
+    async function postEdits(page, edits) {
+        const r = await A().sicherSpeichern({
+            tabelle: 'svp_plan_edits', spalte: 'edits', seite: page,
+            lokal: edits, basis: cloudBase[page] || null
         });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
+        if (!r.ok) throw new Error(r.stop || ('HTTP ' + r.status));
+        cloudBase[page] = { ts: r.ts, daten: r.daten };
     }
 
     /* `change(meta)` edits the freshly read row of this Lerngruppe, which is
@@ -1875,13 +1890,12 @@
        list - into the rows of THIS Lerngruppe only. Logged out nothing leaves
        the browser - and the buttons that change the list are not even shown
        then (updateEditBtns). `note` replaces the usual status text. */
-    function pushTopics(ts, note) {
+    function pushTopics(note) {
         if (!logged()) return Promise.resolve();
         const cat = catalogue.map((e) => ({ id: e.id, lb: e.lb, title: e.title, sub: e.sub }));
         const order = list.map((e) => e.id);
-        ts = ts || new Date().toISOString();
         return queueCloud(async () => {
-            await postEdits(TOPICS_PAGE, { v: 2, list: cat }, ts);
+            await postEdits(TOPICS_PAGE, { v: 2, list: cat });
             metaLoaded = false;
             await loadMeta();
             if (!metaLoaded) throw new Error('Cloud nicht erreichbar');
@@ -1915,8 +1929,8 @@
         }
         list = arrange(catalogue, meta.order).filter((e) => !inFundus(e.id));
         list.forEach((e) => S(e.id));
-        if (push) pushTopics(local.ts || undefined);
-        else if (copy) pushTopics(undefined, 'Themenliste für diese Lerngruppe angelegt — ab jetzt unabhängig von den anderen.');
+        if (push) pushTopics();
+        else if (copy) pushTopics('Themenliste für diese Lerngruppe angelegt — ab jetzt unabhängig von den anderen.');
     }
 
     /* Changing the list changes it for every pupil of this Lerngruppe, so only
