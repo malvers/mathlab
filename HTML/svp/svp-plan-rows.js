@@ -20,9 +20,15 @@ window.svpPlanParts.push(function (P) {
        heisst nicht mehr "Alle auf/zu", sondern sagt, was ein Klick tut. Steht
        auch nur eine Woche offen, ist die naechste Tat das Zuklappen. */
     function syncToggleAllLabel() {
+        const anyOpen = !!document.querySelector('tr.detail-row.open');
+        /* the triangle in the table head (svp-plan-core.js) points down while a week is open, like a row's */
+        const chev = document.querySelector('#plan-table thead .head-chev');
+        if (chev) {
+            chev.classList.toggle('open', anyOpen);
+            chev.title = anyOpen ? 'Alle Wochen zuklappen (W)' : 'Alle Wochen aufklappen (W)';
+        }
         const btn = document.querySelector('.toolbar button[onclick*="togglePlanDetails"]');
         if (!btn) return;
-        const anyOpen = !!document.querySelector('tr.detail-row.open');
         btn.textContent = anyOpen ? 'Wochen zu' : 'Wochen auf';
         btn.title = anyOpen ? 'Alle Wochen zuklappen (W)' : 'Alle Wochen aufklappen (W)';
     }

@@ -32,6 +32,7 @@
         'untis',            // WebUntis: chips, dates, the class book dialog
         'cards',            // Lernbereich pills inside the cards
         'search',           // search in the plan
+        'listen',           // "Zusatzmaterial" and "Videos" in the toolbar: the decks, labs and films of every week
         'keys',             // all weeks open/closed, ?kw= jump, current week, keyboard
         'edit',             // edit mode: gate, save, cancel, reset
         'shift',            // moving the content by a week ("Verschieben")

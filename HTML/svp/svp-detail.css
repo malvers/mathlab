@@ -24,6 +24,24 @@ tr.leerwoche .chev {
 
 tr.expandable.open .chev { transform: rotate(90deg); }
 
+/* The triangle of all weeks in the table head (svp-plan-core.js, Doc 06.10.2026): the rows' triangle over theirs,
+   turned while any week is open (syncToggleAllLabel). */
+#plan-table thead .head-chev {
+    display: inline-block;
+    width: 12px;
+    /* -5px: a head cell has 21 px padding, a row cell 16 px - without it the triangle stood 5 px right of the
+       rows' (measured 06.10.2026, Doc: "sitzt nicht richtig in X"); "SW" moves along over the week numbers */
+    margin-left: -5px;
+    margin-right: 4px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: transform 0.15s;
+}
+#plan-table thead .head-chev:hover { color: var(--text); }
+#plan-table thead .head-chev.open { transform: rotate(90deg); }
+
 tr.detail-row { display: none; }
 tr.detail-row.open { display: table-row; }
 

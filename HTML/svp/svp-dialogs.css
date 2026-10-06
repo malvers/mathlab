@@ -104,9 +104,39 @@
     .aufg-tab a.aufg-lab span { display: none; }
 }
 /* this week */
-.aufg-tab tr.aufg-jetzt td { background: var(--panel-soft); }
+/* .aufg-tab tr.aufg-jetzt td { background: var(--panel-soft); } */
+/* Doc, 06.10.2026: "die Farbe nicht weiß von der aktuellen Woche, sondern genauso wie die aktuelle Woche unten, so
+   mit diesem Verlauf" - the plan's current week (tr.kw-now, svp-table.css): its gradient across the row, in every
+   colour scheme through the same variables, and its orange bar at both edges. */
+.aufg-tab tr.aufg-jetzt {
+    background-image: linear-gradient(90deg,
+        rgba(var(--g-week), var(--a-week-edge)) 0%,
+        rgba(var(--g-week), var(--a-week-mid)) 50%,
+        rgba(var(--g-week), var(--a-week-edge)) 100%);
+}
+.aufg-tab tr.aufg-jetzt > td:first-child { box-shadow: inset 2px 0 0 rgb(240, 160, 24); }
+.aufg-tab tr.aufg-jetzt > td:last-child { box-shadow: inset -2px 0 0 rgb(240, 160, 24); }
 .aufg-tab tr.aufg-jetzt td.aufg-wann { color: var(--lambda); }
 @media print { .aufg-drop { display: none; } }
+
+/* Doc, 06.10.2026: "Mach bitte den allgemeinen Bearbeiten-Knopf weg, kann man auskommentieren" and "macht bitte
+   noch den Knopf Wochen auf weg" - both toolbar buttons are out of sight on every plan. "Bearbeiten" takes E with
+   it (svp-plan-keys.js asks for the visible button), a week is edited through its pencil; all weeks open and close
+   with the triangle in the table head (svp-plan-core.js) and with W. The buttons stay in the pages' markup: delete
+   a line here and that button is back. */
+.toolbar button.action[onclick*="togglePlanEdit"],
+.toolbar button.action[onclick*="togglePlanDetails"] { display: none; }
+/* "Zusatzmaterial" and "Videos" in their place (svp-plan-listen.js): the Aufgabensammlung's panel, the entries of a
+   week stacked in one cell, a line of description under each title */
+.liste-menu .aufg-tab td { vertical-align: top; }   /* the week stays level with the first title */
+.liste-eintrag + .liste-eintrag { margin-top: 8px; }
+.liste-desc { margin-top: 2px; font-size: 0.82em; line-height: 1.35; color: var(--muted); }
+/* a pill's sign (.mat-ico, svp-viewer.css) brought down to the word - before "Videos" and before each entry */
+.liste-drop > button .mat-ico,
+.liste-eintrag > a .mat-ico { width: 1.3em; height: 1.3em; padding: 0; margin: -0.3em 7px -0.3em 0; vertical-align: -0.02em; }
+/* negative block margins: the button keeps the 34.4 px of its neighbours; -0.02em sets the sign's ink on the button's
+   middle (measured 06.10.2026: 17.2 of 34.4 px - with -0.25em it sat 2.6 px low, Doc: "Y-nicht-zentriert") */
+@media print { .liste-drop { display: none; } }
 
 /* "Zurücksetzen" wirft alles weg — es gehört zum Bearbeiten und ist
    ausserhalb dieses Modus gar nicht erst zu sehen. */

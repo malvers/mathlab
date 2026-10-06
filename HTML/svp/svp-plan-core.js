@@ -275,6 +275,18 @@ window.svpPlanParts.push(function (P) {
                Tooltip (Doc, 07.09.2026). Zentral hier, damit alle 17 Plaene sie
                bekommen, ohne dass jede Seite angefasst werden muss. */
             if (t === 'Nr.') { th.textContent = 'SW'; th.title = 'Schulwoche'; }
+            /* Doc, 06.10.2026: "im Header, da steht ja Schulwoche, Kalenderwoche, Woche. Macht da einfach ein
+               Dreieck hin für auf und zu" - in place of the toolbar's "Wochen auf", the triangle the week rows
+               carry, over theirs; syncToggleAllLabel (svp-plan-rows.js) turns it with the weeks. */
+            if (t === 'Nr.') {
+                const chev = document.createElement('span');
+                chev.className = 'chev head-chev';
+                chev.textContent = '▸';
+                chev.title = 'Alle Wochen aufklappen (W)';
+                chev.setAttribute('role', 'button');
+                chev.addEventListener('click', function () { window.togglePlanDetails(); });
+                th.insertBefore(chev, th.firstChild);
+            }
             if (t === 'Woche') th.classList.add('date-col');
             /* Bemerkungen-Spalte entfaellt (Doc, 07.09.2026: "ganz raus") - sie war
                das Letzte, was Wochenzeilen noch mehrzeilig machte. Der Text bleibt in

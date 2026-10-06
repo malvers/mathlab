@@ -7,7 +7,7 @@ window.svpPlanParts.push(function (P) {
         keinMausfokus, equalizeMatPills,
         equalizeRefPills, setVideoReiter, zusatzZahl, isVideoEntry, isExerciseEntry, officeEdit,
         matDefaultLabel, openMat, renderMaterial, hideMatTip, showMatTip,
-        festeLinks, festePillen, matSpalten, pptWeg
+        festeLinks, festePillen, matSpalten, pptWeg, schuljahrPos, matTipText, matKind
     });
 
     /* Doc, 29.09.2026: "Die PowerPoints ... nehmen wir ab heute im Stoffverteilungsplan alle raus ... bis zum
@@ -16,10 +16,18 @@ window.svpPlanParts.push(function (P) {
        counted in the tab or found by the search; the weeks already taught keep theirs, they record what was
        used. Nothing is deleted: the material text keeps the link, taking this out brings every pill back.
        A week's place in the school year: August to December first, then January to July. A row without a
-       week of its own counts as to come. */
+       week of its own counts as to come.
+       Doc, 06.10.2026: "die Regel soll sich bitte nur auf das beziehen ... wenn ich jetzt mal eine so direkt
+       reinbringe, die dann nicht ausblenden" - only a PowerPoint that has its own deck twin goes: a deck pill of
+       the same label in the same week (alle = all entries of that week). A PowerPoint brought in on its own,
+       without a web version, stays. */
     function schuljahrPos(kw) { kw = +kw; return kw >= 32 ? kw : kw + 53; }
-    function pptWeg(en, ref) {
+    function pptWeg(en, ref, alle) {
         if (!en || matKind(en.url || '', en.label || '') !== 'ppt') return false;
+        const zwilling = (alle || []).some(function (x) {
+            return x !== en && x.label === en.label && matKind(x.url || '', x.label || '') === 'deck';
+        });
+        if (!zwilling) return false;
         const kw = ref && P.weekOf ? +P.weekOf(ref) : NaN;
         if (!(kw >= 1)) return true;
         return schuljahrPos(kw) >= schuljahrPos(P.isoWeek(new Date()));
@@ -672,7 +680,7 @@ window.svpPlanParts.push(function (P) {
        counts as little as any other hidden one. */
     function zusatzZahl(ref, text, alle) {
         const n = alle.filter(function (en) {
-            return !isExerciseEntry(en) && !isVideoEntry(en) && !en.aus && !pptWeg(en, ref);
+            return !isExerciseEntry(en) && !isVideoEntry(en) && !en.aus && !pptWeg(en, ref, alle);
         }).length;
         const fest = P.tafelLinks ? P.tafelLinks(ref).filter(function (e) { return !e.aus; }).length : 0;
         return (n || (P.matTail(text) ? 1 : 0)) + fest;
@@ -932,7 +940,7 @@ window.svpPlanParts.push(function (P) {
             /* hidden from the class ([[aus]]): only the owner gets it at all - and sees it only
                while the week is being edited (svp-material.css), with the eye to bring it back */
             if (en.aus && !(ref && P.CAN_EDIT_MAT)) return;
-            if (pptWeg(en, ref)) return;      /* PowerPoint from this week on: out (pptWeg) */
+            if (pptWeg(en, ref, entries)) return;      /* PowerPoint with a deck twin, from this week on: out (pptWeg) */
             const label = en.label;
             const a = document.createElement('a');
             a.dataset.rang = matRang(en);      /* die Spalte, in die sie gehoert */

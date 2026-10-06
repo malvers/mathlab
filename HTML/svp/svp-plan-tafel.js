@@ -16,7 +16,7 @@
 // carries a calendar week (BLOECKE kw) is a pill "Vorrechnen" in that week, before the boards: decks/tafel.html?kw=<week>,
 // every task of the week with its solution step by step. A fixed pill as well.
 window.svpPlanParts.push(function (P) {
-    Object.assign(P, { tafelLinks, vorrechnenKnopf });
+    Object.assign(P, { tafelLinks, vorrechnenKnopf, montag });   /* montag: also the lists of the toolbar (svp-plan-listen.js) */
 
     const me = document.querySelector('script[src*="svp-plan-tafel.js"]');
     const TAFEL_URL = new URL('../decks/tafel.html', me ? me.src : location.href).href;
