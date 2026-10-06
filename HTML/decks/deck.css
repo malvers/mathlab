@@ -53,8 +53,11 @@ body{font-family:var(--deck-schrift);font-variant-numeric:lining-nums;color:var(
    (Doc, 17.09.2026: "die ganze footer y zentriert") - a fixed line height, so the text's middle is where it should be */
 .foot{position:absolute;left:0;right:0;text-align:center;top:516px;line-height:12px;font-size:10px;letter-spacing:1.2px;   /* centred (Doc, 16.09.2026) */
   color:var(--muted)}
-.pageno{position:absolute;right:var(--pnright,72px);top:516px;line-height:12px;font-size:10px;letter-spacing:1.2px;
-  color:var(--muted)}
+/* the page number in Arial, not the slide text's LaTeX digits (Doc, 06.10.2026: "Die Foliennummern lassen wir bitte in
+   Arial"). Half a pixel lower than the footer text: Chrome gives the single pixel of leading to the bottom, so the
+   digits sat ~.6px above the triangles' middle (measured 06.10.2026, Doc: "nicht y-zentriert") */
+.pageno{position:absolute;right:var(--pnright,72px);top:516.5px;line-height:12px;font-size:10px;letter-spacing:1.2px;
+  font-family:Arial,Helvetica,sans-serif;color:var(--muted)}
 .pageno .pn-sl{margin:0 .1em}   /* "34/35" a little apart - with whole spaces the gap was too wide (Doc, 30.09.2026) */
 
 h1,h2,h3,.kicker,.label,.card>.col.l0{font-family:Orbitron,system-ui,sans-serif}
