@@ -567,21 +567,46 @@ def teilsummen():
 
 def teleskop_vorbereitung():
     """Before the board, as Doc's slide 108 ("Vorbereitung - Übung: Berechne und kürze"): the differences the proof is
-    made of, one per row - the left side stands, the class works it out, the result comes with a click."""
+    made of, one per row - the left side stands, the class works it out. With a click the step between (Doc, 06.10.2026:
+    "immer einen Zwischenschritt mitschreiben"): the left one expanded to the right one's denominator, both in one colour
+    - the summands' colours of the board; "erweitern mit 2" once over that column, the factor is 2 in every row (as
+    "Summe bis n" over the board's column); with a click the result. Every sign in a
+    column of its own, the minus signs under each other as the equals signs ("richtig schön ordentlich"), each fraction
+    centred in its column."""
     c = S.Canvas(W, H)
     B = LB_B
     fr = lambda a, b: r"\dfrac{%d}{%d}" % (a, b)
     fb = lambda n: B["f1"] if n < 10 else B["f2"]
     kl = lambda g: {"g": g, "kommt": True}
-    words, EQ = [], 400                          # the "=" column
-    zeilen = (("1", B["z1"], 2), (fr(1, 2), B["f1"], 4), (fr(1, 4), B["f1"], 8), (fr(1, 8), B["f1"], 16),
-              (fr(1, 16), B["f2"], 32))
-    for k, (links, lb, n) in enumerate(zeilen):
-        y = 38 + k * 62
-        teile = [(links, lb, None), ("-", B["op"], None), (fr(1, n), fb(n), None)]
-        x0 = EQ - sum(t[1] for t in teile)
-        words += lb_reihe(x0, y, teile + [("=", B["gl"], None)])[0]
-        words += lb_reihe(EQ + B["gl"], y, [(fr(1, n), fb(n), kl(k))])[0]
+    F = LB_FARBEN
+    words = []
+    # the columns: task, "=", the step between, "=", result - a fraction's column, a minus sign's, an equals sign's
+    SL, SO, SG = 32, 40, 52
+    spalten, x = [], (W - 5 * SL - 2 * SO - 2 * SG) / 2
+    for w in (SL, SO, SL, SG, SL, SO, SL, SG, SL):
+        spalten.append(x + w / 2)
+        x += w
+    def setze(i, y, tex, w, klick):
+        words.extend(lb_reihe(spalten[i] - w / 2, y, [(tex, w, klick)])[0])
+    # rows 68 apart, the boxes 54 high - a fraction's box as tall as on the boards (Doc, 06.10.2026: "beim Bruch sind die
+    # zu flach"), the last one still inside the picture (the svg cuts at 330)
+    words.append((spalten[4], -12, 140, "erweitern mit 2", "font-size:13px;color:#0E244E", kl(0)))
+    for k, (n, farbe) in enumerate(((1, F[5]), (2, F[0]), (4, F[1]), (8, F[2]), (16, F[3]))):
+        y, g, m = 29 + 68 * k, 2 * k, 2 * n
+        links, lb = ("1", B["z1"]) if n == 1 else (fr(1, n), fb(n))
+        setze(0, y, links, lb, None)
+        setze(1, y, "-", SO, None)
+        setze(2, y, fr(1, m), fb(m), None)
+        setze(3, y, "=", SG, None)
+        setze(4, y, fr(2, m), fb(m), kl(g))
+        setze(5, y, "-", SO, kl(g))
+        setze(6, y, fr(1, m), fb(m), kl(g))
+        setze(7, y, "=", SG, kl(g + 1))
+        setze(8, y, fr(1, m), fb(m), kl(g + 1))
+        lb_g(c, g)
+        for i, w in ((0, lb), (4, fb(m))):
+            c.rect(spalten[i] - w / 2, y - 27 + LB_TINTE_DY, w, 54, fill=farbe, rx=3)
+        c.raw("</g>")
     return c.svg("Vorbereitung: 1 minus ein Halb, ein Halb minus ein Viertel und so weiter"), words
 
 
@@ -590,7 +615,8 @@ def teleskop_tafel():
     willst, ist das so, wie ich es da mal gemacht habe, besser" - "bauen wir den ersten Beweis, Teleskop"): one board that
     grows. S = 1/2 + 1/4 + ... term by term, "?"; every term as its double minus itself, each in its colour together
     with its term above; the brackets gone, a red frame and "= 0" on each pair that cancels, the pair fading into "+ 0";
-    the rest "-> 0"; S = 1 is left, then the whole sum in its box."""
+    the last minus, -1/32, cancelled too by the next bracket's plus, then the dots; S = 1 is left, then the whole sum in
+    its box."""
     c = S.Canvas(W, H)
     B = LB_B
     fr = lambda a, b: r"\dfrac{%d}{%d}" % (a, b)
@@ -623,16 +649,17 @@ def teleskop_tafel():
         mitte = k2[2 + 2 * i] + b / 2 + 1.8
         c.rect(mitte - (b - 6) / 2, R2 + 5.9 - 33.5, b - 6, 67, fill=LB_FARBEN[i], rx=3)
         c.raw("</g>")
-    # row 3: the brackets gone - every fraction once with minus and right after with plus
-    DECKEL = 25
+    # row 3: the brackets gone - every fraction once with minus and right after with plus; the last minus, -1/32, gets its
+    # plus too from the next bracket (1/32 - 1/64), so it becomes 0 as well, and only then the dots (Doc, 06.10.2026: "das
+    # Minus 1/32 dann doch noch ausführen, sodass dann eben da auch 0 steht. Und dann danach Punkt, Punkt, Punkt")
+    DECKEL = 26
     paar = lambda j: dict(kl(15), bis=17 + 2 * j, sanft=True)
     teile = [("S", B["S"], kl(15)), ("=", B["gl"], kl(15)), ("1", B["z1"], kl(15))]
-    for j, n in enumerate(nenner[:4]):
+    for j, n in enumerate(nenner):
         teile += [("-", B["op"], paar(j)), (fr(1, n), fb(n), paar(j)), ("+", B["op"], paar(j)), (fr(1, n), fb(n), paar(j))]
-    rest = dict(kl(15), bis=DECKEL)
-    w3, k3 = lb_reihe(X0, R3, teile + [("-", B["op"], rest), (fr(1, 32), B["f2"], dict(rest)), (r"\cdots", B["dots"], dict(rest))])
+    w3, k3 = lb_reihe(X0, R3, teile + [(r"\cdots", B["dots"], dict(kl(15), bis=DECKEL))])
     words += w3
-    for j, n in enumerate(nenner[:4]):
+    for j, n in enumerate(nenner):
         g = 16 + 2 * j
         links, rechts = k3[3 + 4 * j], k3[6 + 4 * j] + fb(n)
         mitte = (links + rechts) / 2
@@ -642,10 +669,6 @@ def teleskop_tafel():
         words.append((mitte, R3 + 40, 60, r"$\textcolor{#B02418}{=0}$", "font-size:%dpx" % (LB_FS - 2), dict(kl(g), bis=g + 1)))
         words.append((mitte, R3 - LB_DY, 60, r"$%s+\textcolor{#B02418}{0}$" % LB_PH, "font-size:%dpx" % LB_FS,
                       dict(kl(g + 1), bis=DECKEL, sanft=True)))
-    # what is left at the end gets smaller and smaller: "-> 0"
-    links, rechts = k3[-3], k3[-1] + B["dots"]
-    words.append(((links + rechts) / 2, R3 + 40, rechts - links, r"$\textcolor{#B02418}{\to 0}$", "font-size:%dpx" % (LB_FS - 2),
-                  dict(kl(24), bis=DECKEL)))
     lb_g(c, DECKEL)
     c.raw("</g>")                                # this click shows nothing - it takes the rest away (data-bis above)
     # row 4: the whole sum in its box, in the middle
@@ -664,10 +687,294 @@ def teleskop_tafel():
     return c.svg("Teleskop: jeder Summand als Differenz, die Klammern weg, je zwei heben sich auf, übrig bleibt 1"), words
 
 
+# a fraction's colour by its VALUE, the same on every board: 1/2 yellow, 1/4 blue, 1/8 green, 1/16 orange, 1/32 grey-blue,
+# 1 lavender - the Teilsummen board, the Teleskop board and the Übung use them so
+WERT_FARBE = {1: LB_FARBEN[5], 2: LB_FARBEN[0], 4: LB_FARBEN[1], 8: LB_FARBEN[2], 16: LB_FARBEN[3], 32: LB_FARBEN[4]}
+
+
+def _pfeil_mal2(c, words, x, y1, y2, text=r"\cdot 2"):
+    """The red bent arrow at the left margin from one row to the next with what is done ("·2"), as on the Leibniz
+    boards (":2")."""
+    pfeil = c.arrowhead(S.RED)
+    c.raw('<path d="M %s %s C %s %s %s %s %s %s" fill="none" stroke="%s" stroke-width="1.8" marker-end="url(#%s)"/>'
+          % (x, y1 + 4, x - 46, y1 + 16, x - 46, y2 - 16, x - 2, y2 - 4, S.RED, pfeil))
+    return (x - 58, (y1 + y2) / 2, 40, r"$\textcolor{#B02418}{%s}$" % text, "font-size:%dpx" % (LB_FS - 2))
+
+
+def verdoppeln_tafel():
+    """Proof 2 as a board in Doc's way (Doc, 06.10.2026, on the old slide with 2S_n over S_n: "verstehe ich ehrlich gesagt
+    überhaupt nicht" - "du kennst jetzt den Stil, mach alle Beweise so"): concrete, with S_4 = 1/2 + 1/4 + 1/8 + 1/16 -
+    the sum of the Teilsummen board. Doubled term by term (the step between: 2·1/2 + 2·1/4 + ...), then the doubled
+    sum written over the sum so that equal terms stand in one column - every term in the colour of its value -, a red
+    frame round each pair that cancels and its 0 below; left are 1 and -1/16: S_4 = 1 - 1/16 = 15/16, as on the
+    Teilsummen board. Then the same with S_10 and the whole sum in its box."""
+    c = S.Canvas(W, H)
+    B = LB_B
+    fr = lambda a, b: r"\dfrac{%d}{%d}" % (a, b)
+    fb = lambda n: B["f1"] if n < 10 else B["f2"]
+    kl = lambda g: {"g": g, "kommt": True}
+    fs = "font-size:%dpx;color:#0E244E" % LB_FS
+    words = []
+    R1, R2, R3, R4, R5, LINIE = 26, 86, 146, 206, 270, 239
+    EQ = 130                                     # the "=" column; the left sides end at it
+    TS, OS, T0 = 44, 36, 160                     # a term's column, a sign's column between two, the first column
+    tc = [T0 + k * (TS + OS) + TS / 2 for k in range(5)]
+    oc = [T0 + k * (TS + OS) - OS / 2 for k in range(5)]
+
+    def setze(x, y, tex, w, klick):
+        words.extend(lb_reihe(x - w / 2, y, [(tex, w, klick)])[0])
+
+    def links(y, tex, w, klick):
+        setze(EQ - w / 2, y, tex, w, klick)
+        setze(EQ + B["gl"] / 2, y, "=", B["gl"], klick)
+
+    def kasten(x, y, w, n, g):
+        lb_g(c, g)
+        c.rect(x - w / 2, y - 25 + LB_TINTE_DY, w, 50, fill=WERT_FARBE[n], rx=3)
+        c.raw("</g>")
+
+    def summe(y, spalten, g, boxen=True):
+        """S_4's terms 1/2 .. 1/16 in the given columns, "+" between, each in the colour of its value."""
+        for i, (k, n) in enumerate(zip(spalten, (2, 4, 8, 16))):
+            if i:
+                setze(oc[k], y, "+", OS, kl(g))
+            setze(tc[k], y, fr(1, n), fb(n), kl(g))
+            if boxen:
+                kasten(tc[k], y, fb(n), n, g)
+
+    # click 0: the sum; 1: times 2 - the red arrow; 2: each term doubled
+    links(R1, "S_4", 28, kl(0))
+    summe(R1, (1, 2, 3, 4), 0)
+    lb_g(c, 1)
+    w = _pfeil_mal2(c, words, EQ - 40, R1, R2)
+    c.raw("</g>")
+    words.append(w + (kl(1),))
+    links(R2, "2S_4", 38, kl(2))
+    for i, (k, n) in enumerate(zip((1, 2, 3, 4), (2, 4, 8, 16))):
+        if i:
+            setze(oc[k], R2, "+", OS, kl(2))
+        setze(tc[k], R2, r"2\cdot%s" % fr(1, n), 52 if n < 10 else 64, kl(2))
+    # click 3: what that is - every term one column to the front (thin grey arrows), each in the colour of its value
+    links(R3, "2S_4", 38, kl(3))
+    for i, (k, n) in enumerate(zip((0, 1, 2, 3), (1, 2, 4, 8))):
+        if i:
+            setze(oc[k], R3, "+", OS, kl(3))
+        setze(tc[k], R3, "1" if n == 1 else fr(1, n), B["z1"] if n == 1 else fb(n), kl(3))
+        kasten(tc[k], R3, B["z1"] + 6 if n == 1 else fb(n), n, 3)
+    lb_g(c, 3)
+    spitze = c.arrowhead(LB_GRAU)
+    for k in range(1, 5):
+        c.raw('<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="%s" stroke-width="1.2" marker-end="url(#%s)"/>'
+              % (S.fmt(tc[k] - 6), R2 + 24, S.fmt(tc[k - 1] + 8), R3 - 26, LB_GRAU, spitze))
+    c.raw("</g>")
+    # click 4: the sum once more under it, to be taken away - the minus at the margin, the line
+    setze(EQ - 66, R4, "-", 24, kl(4))
+    links(R4, "S_4", 28, kl(4))
+    summe(R4, (1, 2, 3, 4), 4)
+    lb_g(c, 4)
+    c.line(36, LINIE, tc[4] + 30, LINIE, S.INK, 1.6)
+    c.raw("</g>")
+    # click 5: what is left in front; 6-8: a red frame round each pair that cancels, its 0 below; 9: what is left behind
+    links(R5, "2S_4-S_4", 88, kl(5))
+    setze(tc[0], R5, "1", B["z1"], kl(5))
+    for j in (1, 2, 3):
+        g = 5 + j
+        lb_g(c, g)
+        c.rect(tc[j] - 21, R3 - 27 + LB_TINTE_DY, 42, R4 - R3 + 54, stroke=S.RED, width=2.4, rx=3)
+        c.raw("</g>")
+        setze(oc[j], R5, "+", OS, kl(g))
+        setze(tc[j], R5, r"\textcolor{#B02418}{0}", B["z1"], kl(g))
+    setze(oc[4], R5, "-", OS, kl(9))
+    setze(tc[4], R5, fr(1, 16), fb(16), kl(9))
+    # 10: so S_4 is 1 minus the last summand; 11: the value - the Teilsummen board's 15/16
+    words.extend(lb_reihe(tc[4] + 44, R5, [(r"\Rightarrow", 36, kl(10)), ("S_4", 28, kl(10)), ("=", B["gl"], kl(10)),
+                                           ("1", B["z1"], kl(10)), ("-", B["op"], kl(10)), (fr(1, 16), fb(16), kl(10)),
+                                           ("=", B["gl"], kl(11)), (fr(15, 16), fb(16), kl(11))])[0])
+    # 12: the same with ten summands - top right; 13: the whole sum in its box
+    words.append((690, -12, 120, "genauso", "font-size:13px;color:#0E244E", kl(12)))
+    words.extend(lb_reihe(613, R1, [("S_{10}", 34, kl(12)), ("=", B["gl"], kl(12)), ("1", B["z1"], kl(12)),
+                                    ("-", B["op"], kl(12)), (fr(1, 1024), 52, kl(12))])[0])
+    teile = []
+    for i, n in enumerate((2, 4, 8)):
+        teile += ([("+", B["op"], kl(13))] if i else []) + [(fr(1, n), fb(n), kl(13))]
+    teile += [("+", B["op"], kl(13)), (r"\cdots", B["dots"], kl(13)), ("=", B["gl"], kl(13)), ("1", B["z1"], kl(13))]
+    breite = sum(t[1] for t in teile)
+    x0 = 798 - breite
+    lb_g(c, 13)
+    c.raw('<rect x="%s" y="%s" width="%s" height="64" rx="4" fill="#DCE8F6" fill-opacity="0.35" stroke="%s" '
+          'stroke-width="1"/>' % (S.fmt(x0 - 14), S.fmt(R2 + 4 - 32 + LB_TINTE_DY), S.fmt(breite + 28), S.INK))
+    c.raw("</g>")
+    words += lb_reihe(x0, R2 + 4, teile)[0]
+    return c.svg("Verdoppeln: S4 mal 2, darunter S4 abgezogen, gleiche Summanden heben sich auf, übrig bleiben 1 und "
+                 "minus ein Sechzehntel"), words
+
+
+def falle_tafel():
+    """The trap as a board (Doc, 06.10.2026: "mach alle Beweise so"): the same trick, done fast without stopping - with
+    T = 1 + 2 + 4 + 8 + ... - "gives" T = -1, a red "?"; then the partial sums beside it, 1, 3, 7, 15, ..., 1023 - they
+    grow beyond every bound, T is no number at all, the -1 struck out. The bound: why proof 2 counts S_4, S_10 first."""
+    c = S.Canvas(W, H)
+    B = LB_B
+    kl = lambda g: {"g": g, "kommt": True}
+    words = []
+    R1, R2, R3, R4, R5, LINIE = 26, 84, 140, 200, 262, 172
+    EQ, TS, OS, T0 = 112, 30, 26, 142
+    tc = [T0 + k * (TS + OS) + TS / 2 for k in range(6)]
+    oc = [T0 + k * (TS + OS) - OS / 2 for k in range(6)]
+    z = lambda v: B["z1"] if v < 10 else B["z2"]
+
+    def setze(x, y, tex, w, klick):
+        words.extend(lb_reihe(x - w / 2, y, [(tex, w, klick)], hoch=False)[0])
+
+    def links(y, tex, w, klick):
+        setze(EQ - w / 2, y, tex, w, klick)
+        setze(EQ + B["gl"] / 2, y, "=", B["gl"], klick)
+
+    def reihe(y, werte, spalte0, g):
+        for i, v in enumerate(werte):
+            if i:
+                setze(oc[spalte0 + i], y, "+", OS, kl(g))
+            setze(tc[spalte0 + i], y, r"\cdots" if v is None else str(v), B["dots"] if v is None else z(v), kl(g))
+
+    links(R1, "T", 20, kl(0))
+    reihe(R1, (1, 2, 4, 8, None), 0, 0)
+    lb_g(c, 1)
+    w = _pfeil_mal2(c, words, EQ - 30, R1, R2)
+    c.raw("</g>")
+    words.append(w + (kl(1),))
+    links(R2, "2T", 30, kl(2))
+    reihe(R2, (2, 4, 8, 16, None), 1, 2)
+    setze(EQ - 54, R3, "-", 24, kl(3))
+    links(R3, "T", 20, kl(3))
+    reihe(R3, (1, 2, 4, 8, 16, None), 0, 3)
+    lb_g(c, 3)
+    c.line(30, LINIE, tc[5] + 24, LINIE, S.INK, 1.6)
+    c.raw("</g>")
+    links(R4, "2T-T", 84, kl(4))
+    setze(tc[0], R4, "-1", 30, kl(4))
+    for j in (1, 2, 3, 4):
+        g = 4 + j
+        lb_g(c, g)
+        c.rect(tc[j] - 15, R2 - 19, 30, R3 - R2 + 38, stroke=S.RED, width=2.4, rx=3)   # the "+" between keeps its air
+        c.raw("</g>")
+        setze(oc[j], R4, "+", OS, kl(g))
+        setze(tc[j], R4, r"\textcolor{#B02418}{0}", B["z1"], kl(g))
+    setze(oc[5], R4, "+", OS, kl(9))
+    setze(tc[5], R4, r"\cdots", B["dots"], kl(9))
+    # 10: so T would be -1 - lauter positive Zahlen ... the red question
+    words.extend(lb_reihe(EQ - 30, R5, [(r"\Rightarrow", 36, kl(10)), ("T", 20, kl(10)), ("=", B["gl"], kl(10)),
+                                        ("-1", 30, kl(10))], hoch=False)[0])
+    words.append((EQ + 110, R5, 30, r"$\textcolor{#B02418}{?}$", "font-size:%dpx" % (LB_FS + 9), kl(10)))
+    # 11-15: the partial sums beside it, as on the Teilsummen board - the results in one column
+    X, EC = 496, 716
+    RX = EC + B["gl"] + 22
+    words.append((RX, -12, 110, "Summe bis $n$", "font-size:13px;color:#0E244E", kl(11)))
+    werte = (1, 2, 4, 8)
+    for k, y in enumerate((22, 70, 118, 166), 1):
+        g = 10 + k
+        teile = [("T_{%d}" % k, 26, kl(g)), ("=", B["gl"], kl(g))]
+        for i, v in enumerate(werte[:k]):
+            teile += ([("+", 26, kl(g))] if i else []) + [(str(v), 18, kl(g))]
+        words.extend(lb_reihe(X, y, teile, hoch=False)[0])
+        setze(EC + B["gl"] / 2, y, "=", B["gl"], kl(g))
+        setze(RX, y, str(2 ** k - 1), z(2 ** k - 1), kl(g))
+    setze(X + 13, 202, r"\vdots", 30, kl(15))
+    setze(RX, 202, r"\vdots", 30, kl(15))
+    setze(X + 13, 240, "T_{10}", 34, kl(15))
+    setze(EC + B["gl"] / 2, 240, "=", B["gl"], kl(15))
+    setze(RX, 240, "1023", 44, kl(15))
+    # 16: they grow beyond every bound - T is no number, the -1 is wrong
+    setze(RX - 6, 290, r"\textcolor{#B02418}{\to\infty}", 80, kl(16))
+    lb_g(c, 16)
+    c.line(EQ + 6, R5 + 14, EQ + 96, R5 - 14, S.RED, 2.6)
+    c.raw("</g>")
+    return c.svg("Die Falle: derselbe Trick mit 1 + 2 + 4 + 8 + ... ergibt scheinbar minus 1, die Teilsummen wachsen "
+                 "aber über jede Grenze"), words
+
+
+def quadrat_tafel():
+    """Proof 3, the square, in Doc's way (06.10.2026: "mach alle Beweise so"): the pieces in the colours of their values
+    - as on all boards -, the red outlined rest that is still missing, as big as the last piece; beside it the partial
+    sums with "Summe bis n" and "fehlt bis 1", row by row as the pieces come, down to 1/32 as in the square (Doc: "wenn
+    du dort bis 1/32 gehst, würde ich das in der Rechnung rechts auch machen" - the square further left, the columns
+    further right); then the rest in tiny pieces and the whole sum in its box. Each fraction sits in the middle of its
+    piece: its bar on the piece's middle (Doc: "die müssen in die Mitte der jeweiligen Rechtecke")."""
+    c = S.Canvas(W, H)
+    B = LB_B
+    fr = lambda a, b: r"\dfrac{%d}{%d}" % (a, b)
+    fb = lambda n: B["f1"] if n < 10 else B["f2"]
+    kl = lambda g: {"g": g, "kommt": True}
+    words = []
+    side, x, y = 300, 6, 15
+    c.rect(x, y, side, side, fill="#FFFFFF", opacity=0.55)
+    rest = [x, y, float(side), float(side)]
+    groesse = {2: 28, 4: 24, 8: 20, 16: 15, 32: 9}
+    BALKEN = 0.655                               # a fraction's bar lies this many times its type size below its label's
+                                                 # middle (measured in the deck: 18.5 px at 28 px ... 5.6 px at 9 px)
+    ZEILEN = (24, 78, 132, 186, 240)
+    X, EC = 334, 566
+    RX, LX = EC + B["gl"] + 22, 770
+    words.append((RX, -12, 110, "Summe bis $n$", "font-size:13px;color:#0E244E", kl(1)))
+    words.append((LX, -12, 90, "fehlt bis 1", "font-size:13px;color:#B02418", kl(1)))
+    for k in range(1, 11):
+        n = 2 ** k
+        g = 2 * (k - 1) if k <= 5 else 10        # pieces 1-5 a click each (its row the click after), 6-10 together
+        px, py, w, h = rest
+        if abs(w - h) < 1e-9:                    # a square: its top half
+            stueck, rest = (px, py, w, h / 2), [px, py + h / 2, w, h / 2]
+        else:                                    # a lying rectangle: its left half
+            stueck, rest = (px, py, w / 2, h), [px + w / 2, py, w / 2, h]
+        lb_g(c, g)
+        c.rect(*stueck, fill=WERT_FARBE.get(n, "#D9DEE8"))
+        c.rect(*stueck, stroke=S.INK, width=1.3 if k <= 5 else 0.7)
+        c.raw("</g>")
+        if n in groesse:
+            cx, cy = stueck[0] + stueck[2] / 2, stueck[1] + stueck[3] / 2
+            words.append((cx, cy - BALKEN * groesse[n], max(stueck[2], 30), "$%s$" % fr(1, n),
+                          "font-size:%gpx;color:#0E244E" % groesse[n], kl(g)))
+        if k <= 5:
+            # what is still missing: the rest, red outlined, gone with the next piece
+            lb_g(c, g, g + 2)
+            c.rect(*rest, stroke=S.RED, width=2.2)
+            c.raw("</g>")
+            # the row: the summands so far = the partial sum, and what is missing
+            yy = ZEILEN[k - 1]
+            teile = []
+            for i in range(1, k + 1):
+                teile += ([("+", B["op"], kl(g + 1))] if i > 1 else []) + [(fr(1, 2 ** i), fb(2 ** i), kl(g + 1))]
+            wr, kr = lb_reihe(X, yy, teile)
+            words += wr
+            lb_g(c, g + 1)                       # each summand in the colour of its piece
+            for i in range(1, k + 1):
+                c.rect(kr[2 * i - 2], yy - 25 + LB_TINTE_DY, fb(2 ** i), 50, fill=WERT_FARBE[2 ** i], rx=3)
+            c.raw("</g>")
+            words += lb_reihe(EC, yy, [("=", B["gl"], kl(g + 1))])[0]
+            words += lb_reihe(RX - fb(n) / 2, yy, [(fr(n - 1, n), fb(n), kl(g + 1))])[0]
+            words += lb_reihe(LX - fb(n) / 2, yy, [(r"\textcolor{#B02418}{%s}" % fr(1, n), fb(n), kl(g + 1))])[0]
+    c.rect(x, y, side, side, stroke=S.INK, width=2.2)
+    for xx in (RX, LX):
+        words.append((xx, 296, 30, r"$\vdots$", "font-size:%dpx;color:#0E244E" % LB_FS, kl(10)))
+    # 11: the whole sum in its box, under the summands
+    teile = []
+    for i, n in enumerate((2, 4, 8)):
+        teile += ([("+", B["op"], kl(11))] if i else []) + [(fr(1, n), fb(n), kl(11))]
+    teile += [("+", B["op"], kl(11)), (r"\cdots", B["dots"], kl(11)), ("=", B["gl"], kl(11)), ("1", B["z1"], kl(11))]
+    breite = sum(t[1] for t in teile)
+    x0 = X + 10
+    lb_g(c, 11)
+    c.raw('<rect x="%s" y="%s" width="%s" height="56" rx="4" fill="#DCE8F6" fill-opacity="0.35" stroke="%s" '
+          'stroke-width="1"/>' % (S.fmt(x0 - 14), S.fmt(300 - 28 + LB_TINTE_DY), S.fmt(breite + 28), S.INK))
+    c.raw("</g>")
+    words += lb_reihe(x0, 300, teile)[0]
+    return c.svg("Ein Quadrat der Fläche 1: die Hälfte, ein Viertel, ein Achtel und so weiter, der rot umrandete Rest "
+                 "so groß wie das letzte Stück"), words
+
+
 FIGURES = {"zenon": zenon, "quadrat": quadrat, "teleskop": teleskop, "verdoppeln": verdoppeln, "leibniz": leibniz,
            "dreieckszahlen": dreieckszahlen, "teleskop_vorbereitung": teleskop_vorbereitung,
            "teleskop_tafel": teleskop_tafel, "teilsummen": teilsummen, "uebung": uebung,
-           "leibniz2": lambda: leibniz(2, ende=False)}
+           "leibniz2": lambda: leibniz(2, ende=False), "verdoppeln_tafel": verdoppeln_tafel, "falle_tafel": falle_tafel,
+           "quadrat_tafel": quadrat_tafel}
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

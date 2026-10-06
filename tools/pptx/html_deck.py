@@ -458,8 +458,12 @@ class HtmlDeck:
         on any beamer - and the words as <p class="fl"> laid over it, which the deck editor changes like any
         line (Doc, 23.09.2026: "solche Bilder immer im HTML malen ... kann ich dann editieren?"). A label is
         (centre x, centre y, width, text[, css]) in the box's 816 x 330 coordinates; the SVG must fill the box for
-        them to line up, so `lines` (the smaller .below box) takes no labels. `png`: the .pptx twin only."""
+        them to line up, so `lines` (the smaller .below box) takes no labels. `png`: the .pptx twin only.
+        `source`: (text, url) - a small linked source under the picture box (deck.css .fig-source)."""
         words = "".join(figure_label(lab) for lab in (labels or []))
+        src = kw.get("source")
+        quelle = ('<a class="fig-source" href="%s" target="_blank" rel="noopener">%s</a>'
+                  % (_html.escape(src[1], quote=True), _html.escape(src[0], quote=False))) if src else ""
         if lines:
             assert not labels, "labels need the full picture box - no lines= with labels"
             self._slide("content has-below", '<h3>%s</h3><div class="rules"></div>'
@@ -468,9 +472,9 @@ class HtmlDeck:
                            " left" if align == "left" else "", svg, live_frames(frames)))
         else:
             self._slide("content", '<h3>%s</h3><div class="rules"></div>'
-                        '<div class="%s">%s%s</div>%s'
+                        '<div class="%s">%s%s</div>%s%s'
                         % (markup(title), "pic left" if align == "left" else "pic",
-                           svg, words, live_frames(frames)))
+                           svg, words, quelle, live_frames(frames)))
 
     @staticmethod
     def fit(path, box_w, box_h):

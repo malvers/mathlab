@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from omml import MathDeck
 from mathe11_unendliche_summe_svg import (zenon, verdoppeln, quadrat, leibniz, dreieckszahlen,
                                           teleskop_vorbereitung, teleskop_tafel, teilsummen,
-                                          uebung)
+                                          uebung, verdoppeln_tafel, falle_tafel, quadrat_tafel)
 
 d = MathDeck("mathe11-unendliche-summe.pptx")
 
@@ -64,13 +64,23 @@ svg, labels = teleskop_vorbereitung()
 d.figure("Vorbereitung", svg, labels)
 
 svg, labels = teleskop_tafel()
-d.figure("Beweis 1: das Teleskop", svg, labels)
+# the name and its oldest known statement, with a link (Doc, 06.10.2026: "Torricelli - den sollte man dann bitte unbedingt
+# zitieren. Und auch einen Link mit dazu"): Wikipedia "Telescoping series" after A. Weil, Prehistory of the zeta-function
+# (1989), doi:10.1016/B978-0-12-067570-8.50009-3
+d.figure("Beweis 1: das Teleskop", svg, labels,
+         source=("Der Name: wie ein ausziehbares Fernrohr. Früh schon bei Evangelista Torricelli, De dimensione "
+                 "parabolae (1644) – nach André Weil (1989)", "https://en.wikipedia.org/wiki/Telescoping_series"))
 
 # ------------------------------------------------------- 2 Verdoppeln ---
 d.chapter(2, "Verdoppeln", "Die Summe steckt in sich selbst")
 
-svg, labels = verdoppeln()
-d.figure("Mal 2 und abziehen", svg, labels)
+# Doc, 06.10.2026, on the slide with 2S_n over S_n ("verstehe ich ehrlich gesagt überhaupt nicht") and the trap in bullets:
+# "du kennst jetzt den Stil, mach alle Beweise so" - both as boards; the old slides stay in the deck HTML, hidden (skip)
+svg, labels = verdoppeln_tafel()
+d.figure("Beweis 2: verdoppeln", svg, labels)
+
+svg, labels = falle_tafel()
+d.figure("Die Falle", svg, labels)
 
 d.bullets("Die Falle: erst mit $n$ rechnen", [
     ("Ohne $n$ geht es scheinbar schneller: $2S=1+\\frac{1}{2}+\\frac{1}{4}+\\ldots=1+S$, also $S=1$", 0),
@@ -83,8 +93,8 @@ d.bullets("Die Falle: erst mit $n$ rechnen", [
 # ---------------------------------------------------------- 3 Quadrat ---
 d.chapter(3, "Das Quadrat", "Ein Beweis ohne Worte")
 
-svg, labels = quadrat()
-d.figure("Die Hälfte, die Hälfte vom Rest, …", svg, labels)
+svg, labels = quadrat_tafel()
+d.figure("Beweis 3: das Quadrat", svg, labels)
 
 # ----------------------------------------------------------- 4 Leibniz ---
 # Doc, 06.10.2026: his slides 106-112 of Gebrochene Zahlen.pptx (2025), "speziell die 110 und die 111 bitte nachbauen in
