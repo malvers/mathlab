@@ -19,14 +19,19 @@
 // The private key is wrapped as  p1.<salt>.<iv>.<ciphertext>  with
 // PBKDF2-SHA256 (250 000 rounds) over the passphrase.
 //
-// The unwrapped key is held in sessionStorage, never in localStorage: closing
-// the tab locks it again, so a classroom machine keeps nothing.
+// The unwrapped key is kept in localStorage for as long as Doc stays logged in
+// on that device: unlocked once, the names are always visible there (Doc,
+// 06.10.2026: "mach die Namen bitte immer sichtbar", and on the trade-off
+// below: "mir egal, Hauptsache Namen sichtbar"). Logging out (svp-nav's
+// Logout pill, or a session that is gone) drops it again - so on a classroom
+// machine, Logout is what leaves nothing behind. Until then it was
+// sessionStorage, and every new tab asked for the passphrase again.
 //
 // Needs svp-auth.js (DB_URL/DB_KEY, session for reading the wrapped key).
 // Exposes window.svpCrypto.
 (function () {
     const KEY_ID = 'doc';                       /* one key pair for all pages */
-    const SS_KEY = 'svp-vortrag-priv';          /* sessionStorage: unwrapped private JWK */
+    const PRIV_KEY = 'svp-vortrag-priv';        /* localStorage: unwrapped private JWK, until logout */
     const ROUNDS = 250000;
     const TABLE = 'svp_vortrag_key';
 
@@ -150,7 +155,7 @@
         pubKey = null;
         pubMissing = false;
         await useJwk(privJwk);
-        try { sessionStorage.setItem(SS_KEY, JSON.stringify(privJwk)); } catch (e) { }
+        keep(privJwk);
         return true;
     }
 
@@ -164,22 +169,36 @@
         if (!rows.length || !rows[0].wrapped_priv) throw new Error('Es ist noch kein Schlüssel eingerichtet');
         const jwk = await unwrapPrivate(rows[0].wrapped_priv, pass);
         await useJwk(jwk);
-        try { sessionStorage.setItem(SS_KEY, JSON.stringify(jwk)); } catch (e) { }
+        keep(jwk);
         return true;
+    }
+
+    function keep(jwk) {
+        try { localStorage.setItem(PRIV_KEY, JSON.stringify(jwk)); } catch (e) { }
     }
 
     function lock() {
         privKey = null;
-        try { sessionStorage.removeItem(SS_KEY); } catch (e) { }
+        try { localStorage.removeItem(PRIV_KEY); } catch (e) { }
+        try { sessionStorage.removeItem(PRIV_KEY); } catch (e) { }   /* where it lived until 06.10.2026 */
     }
 
-    /* Re-arm from sessionStorage after a reload, before anything renders. */
+    /* Re-arm after a reload, before anything renders - but only while this
+       browser is still logged in: the key belongs to the session. A tab that
+       was unlocked under the old code hands its key over to localStorage. */
     const ready = (async function () {
         if (!subtle) return false;
-        let raw = null;
-        try { raw = sessionStorage.getItem(SS_KEY); } catch (e) { }
+        let raw = null, session = null;
+        try { session = localStorage.getItem('svp-session'); } catch (e) { }
+        if (!session) { lock(); return false; }
+        try { raw = localStorage.getItem(PRIV_KEY) || sessionStorage.getItem(PRIV_KEY); } catch (e) { }
         if (!raw) return false;
-        try { await useJwk(JSON.parse(raw)); return true; } catch (e) { lock(); return false; }
+        try {
+            await useJwk(JSON.parse(raw));
+            keep(JSON.parse(raw));
+            try { sessionStorage.removeItem(PRIV_KEY); } catch (e) { }
+            return true;
+        } catch (e) { lock(); return false; }
     })();
 
     /* ---------- passphrase dialog (never a native prompt) ---------- */
@@ -194,8 +213,8 @@
        fills it in next time (Doc, 12.09.2026). The username is a fixed label
        and NOT the login e-mail: on the same origin Chrome would otherwise mix
        the passphrase up with the account password. Only the passphrase is
-       stored there - the unlocked key itself still lives in sessionStorage
-       alone, never on disk. */
+       stored there - the unlocked key itself lives in this site's localStorage
+       until logout (see the top of this file). */
     const PM_USER = 'SVP-Schlüssel';
 
     function passDialog(mode, onOk, title) {

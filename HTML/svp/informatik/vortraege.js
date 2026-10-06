@@ -1017,10 +1017,11 @@
         const b = $('btn-key');
         if (!b) return;
         const logged = !!(A() && A().hasSession());
-        b.hidden = !logged || !window.svpCrypto || !svpCrypto.available;
+        /* once unlocked the names stay visible - no "Namen verbergen" any more
+           (Doc, 06.10.2026: "Namen verbergen weg"); Logout locks them again */
+        b.hidden = !logged || !window.svpCrypto || !svpCrypto.available || (keyExists && unlocked());
         if (b.hidden) { if (vtMenu) vtMenu.sync(); return; }
         if (!keyExists) { b.textContent = '🔑 Schlüssel einrichten'; b.title = 'Einmalig: Schlüsselpaar für die Vortragsnamen anlegen'; }
-        else if (unlocked()) { b.textContent = '🔒 Namen verbergen'; b.title = 'Schlüssel wieder sperren'; }
         else { b.textContent = '🔓 Namen anzeigen'; b.title = 'Schlüssel-Passwort eingeben, um die Namen zu entschlüsseln'; }
         if (vtMenu) vtMenu.sync();
     }
@@ -1043,7 +1044,7 @@
             });
             return;
         }
-        if (unlocked()) { svpCrypto.lock(); await decryptAll(); await loadNoten(); render(); setStatus(''); return; }
+        if (unlocked()) return;                   /* nothing to do - the entry is hidden then anyway */
         svpCrypto.passDialog('unlock', async () => { await refresh(); setStatus('Namen entschlüsselt.'); });
     }
 
