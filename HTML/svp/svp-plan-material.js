@@ -20,10 +20,20 @@ window.svpPlanParts.push(function (P) {
        Doc, 06.10.2026: "die Regel soll sich bitte nur auf das beziehen ... wenn ich jetzt mal eine so direkt
        reinbringe, die dann nicht ausblenden" - only a PowerPoint that has its own deck twin goes: a deck pill of
        the same label in the same week (alle = all entries of that week). A PowerPoint brought in on its own,
-       without a web version, stays. */
+       without a web version, stays.
+       Doc, 06.10.2026 ("bitte zeigen", on "Wiederholung Gleichungssysteme", Mathe 11 KW 41): a PowerPoint Doc
+       made himself stays even beside a deck of the same name - there the deck was rebuilt from his file, the
+       file is no export of the deck. Our exports carry lowercase file names (mathe11-gauss.pptx), a file Doc
+       named himself has capitals or spaces (Wiederholung%20Gleichungssysteme.pptx), read from [[datei:]].
+       Without [[datei:]] there is no name to tell by: such a twin goes as before. */
     function schuljahrPos(kw) { kw = +kw; return kw >= 32 ? kw : kw + 53; }
+    function eigenePpt(en) {
+        const name = String(en.datei || '').split('/').pop().replace(/%20/g, ' ');
+        return /\.pptx?$/i.test(name) && (name !== name.toLowerCase() || name.indexOf(' ') >= 0);
+    }
     function pptWeg(en, ref, alle) {
         if (!en || matKind(en.url || '', en.label || '') !== 'ppt') return false;
+        if (eigenePpt(en)) return false;
         const zwilling = (alle || []).some(function (x) {
             return x !== en && x.label === en.label && matKind(x.url || '', x.label || '') === 'deck';
         });
