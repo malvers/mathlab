@@ -17,6 +17,10 @@
         partial sum stands on the right with six decimals - until 1/2^21, where the rounded sum reads 1,000000
         (it is 0,99999952...: never exactly 1 - the point of the limit). A click pauses and goes on; at the end a click
         starts again. Transparent page: the slide shows through.
+        ?modus=formel (Beweis 2, Doc, the same day: "könnten wir da auch ein Widget machen?"): it starts as the board's
+        "S_10 = 1 - 1/1024", with its value behind it (Doc: "dahinter die Summe schreiben, ist gleich ..."); a click
+        counts on - S_11 = 1 - 1/2048 = 0,999512, ... S_21 = 1 - 1/2097152 = 1,000000: the same sums, written as 1 minus
+        the gap, the gap ever smaller.
         Sizes are the board's (html_deck LB_B, at 19 px) times Z: the deck renders a frame at FRAME_ZOOM = 2 and
         shrinks it back.
     -->
@@ -44,7 +48,7 @@
             white-space: nowrap;
             cursor: pointer;
             transform: translateY(-50%);
-            transform-origin: 0 50%;
+            transform-origin: 0 50%;           /* shrinks at once - a smooth shrink lagged behind the new numbers and cut them */
             user-select: none;
             -webkit-user-select: none;
         }
@@ -65,6 +69,9 @@
 
         /* only while it comes or goes does a slot cut its content - the board's "+" is wider than its slot */
         .t.weg { opacity: 0; overflow: hidden; }
+        /* a slot that changes in place (S_10 -> S_11, its value) only fades in: its new width at once, nothing cut
+           (Doc, 07.10.2026: "da sind Zahlen angeschnitten, wenn die kommen") */
+        .t.blass { opacity: 0; }
 
         #mess { position: absolute; left: -9999px; top: 0; visibility: hidden; white-space: nowrap; font-size: 38px; }
     </style>
@@ -116,14 +123,24 @@
             return slot((1 - Math.pow(2, -k)).toFixed(6).replace('.', '{,}'), null);
         }
 
-        let k, timer = null, vorn, hinten, gleich, ergebnis;
+        let k, timer = null, vorn, hinten, gleich, ergebnis, name, luecke, zahl;
+        const FORMEL = new URLSearchParams(location.search).get('modus') === 'formel';
 
         function anfang() {                             // the board's box
             clearInterval(timer); timer = null;
             reihe.textContent = '';
+            if (FORMEL) {                               // S_10 = 1 - 1/1024
+                k = 10;
+                name = slot('S_{10}', 34);
+                luecke = bruch(1024);
+                zahl = wert(10);
+                reihe.append(name, slot('{}={}', 30), slot('1', 14), slot('{}-{}', 24), luecke, slot('{}={}', 30), zahl);
+                passen();
+                return;
+            }
             k = 5;
             vorn = slot('\\cdots{}+{}', 56);            // stands for the summands gone - hidden at first
-            vorn.style.width = '0px'; vorn.classList.add('weg');
+            vorn.style.width = '0px'; vorn.classList.add('weg', 'aus');
             reihe.append(vorn);
             for (let i = 1; i <= 5; i++) {
                 if (i > 1) reihe.append(plus());
@@ -137,7 +154,7 @@
         }
 
         function geh(el) {                              // a slot leaves: it shrinks to nothing, the rest slides left
-            el.classList.add('weg');
+            el.classList.add('weg', 'aus');
             el.style.width = '0px';
             setTimeout(() => el.remove(), 600);
         }
@@ -153,11 +170,26 @@
             }));
         }
 
+        function tausch(alt, neu) {                     // a slot changes: the new one fades in, at its own width
+            neu.classList.add('blass');
+            alt.replaceWith(neu);
+            requestAnimationFrame(() => requestAnimationFrame(() => neu.classList.remove('blass')));
+            return neu;
+        }
+
         function schritt() {
             if (k >= ENDE) { clearInterval(timer); timer = null; return; }
             k++;
+            if (FORMEL) {                               // the index and the gap, one more halving
+                name = tausch(name, slot('S_{' + k + '}', 34));
+                luecke = tausch(luecke, bruch(Math.pow(2, k)));
+                zahl = tausch(zahl, wert(k));
+                passen();
+                if (k >= ENDE) { clearInterval(timer); timer = null; }
+                return;
+            }
             if (hinten) { geh(hinten); hinten = null; }
-            if (vorn.classList.contains('weg')) { vorn.style.width = 56 * Z + 'px'; vorn.classList.remove('weg'); }
+            if (vorn.classList.contains('aus')) { vorn.style.width = 56 * Z + 'px'; vorn.classList.remove('weg', 'aus'); }
             // the first summand and the "+" after it go
             const erster = vorn.nextElementSibling, sein = erster && erster.nextElementSibling;
             if (erster) geh(erster);
@@ -167,15 +199,18 @@
             const neu = wert(k);
             ergebnis.replaceWith(neu);
             ergebnis = neu;
-            setTimeout(passen, 620);
+            passen();
             if (k >= ENDE) { clearInterval(timer); timer = null; }
         }
 
-        // wider than the frame (seven-digit denominators): the box shrinks to fit, from its left edge
+        // wider than the frame (seven-digit denominators): the row shrinks to fit, from its left edge - reckoned from
+        // the widths the slots are going to (not from the moment's width while they still move), so it shrinks while
+        // the new numbers come, never after they were cut
         function passen() {
-            box.style.transform = 'translateY(-50%)';
-            const frei = innerWidth - 12, b = box.getBoundingClientRect().width;
-            if (b > frei) box.style.transform = 'translateY(-50%) scale(' + (frei / b) + ')';
+            const ziel = [...reihe.children].filter(e => !e.classList.contains('aus'))
+                .reduce((a, e) => a + (+e.dataset.w) * Z, 0);
+            const frei = innerWidth - 12;
+            box.style.transform = 'translateY(-50%)' + (ziel > frei ? ' scale(' + (frei / ziel) + ')' : '');
         }
 
         function klick() {

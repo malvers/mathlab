@@ -457,6 +457,16 @@ def teleskop_box():
                 title="Die Summe läuft gegen 1 - klicken")
 
 
+def verdoppeln_box():
+    """The live "S_10 = 1 - 1/1024 = 0,999023" of the Beweis 2 board (unendliche-summe-live.html?modus=formel) as
+    html_deck's frame dict: its S right above the S_4 of the board's last row (b2_s4_mitte; its first slot is 34 wide,
+    the sum 4 px into the frame); 90 px high around row R3 = 184 of verdoppeln_tafel (the row 2S_4 = 1 + ...), on the
+    row's ink middle - its "=" on that row's "=" (measured); room to 816; with click 12, with the arrow from S_4."""
+    links = b2_s4_mitte() - 17 - 4
+    return dict(src="unendliche-summe-live.html?modus=formel", x=72 + links, y=146 + 184 + LB_TINTE_DY - 45, w=816 - links,
+                h=90, g=12, title="Teilsummen: S10, S11, ... - klicken")
+
+
 def teilsummen():
     """Bullets 3 and 4 of "Die Behauptung" as a board (Doc, 06.10.2026: "S1 = 1/2, S2 = 3/4 - warum S3 = 7/8? Wo kommt
     die Teilsumme her? ... die wollen das ja gerade lernen"): row k is S_k, the first k summands - the old ones at once,
@@ -706,6 +716,20 @@ def _pfeil_mal2(c, words, x, y1, y2, text=r"\cdot 2"):
     return (x - 58, (y1 + y2) / 2, 40, r"$\textcolor{#B02418}{%s}$" % text, "font-size:%dpx" % (LB_FS - 2))
 
 
+# Beweis 2's columns - the board and its live S_n both reckon with them. The whole calculation as far left as it goes,
+# the columns as close as the "2 ·" allows (Doc, 07.10.2026: "nimm bitte die S4 und so alle weiter nach links", "S4 und
+# S21 untereinander, gegebenenfalls alles noch ein Stück nach links")
+B2_EQ, B2_TS, B2_OS, B2_T0 = 94, 44, 36, 124     # the "=" column; a term's column, a sign's column, the first column
+B2_SCHLUSS = 34                                  # the last row's "=> S_4 = ..." begins this far right of the 4th column
+PFEIL_MITTE = 43.3                               # its arrow's middle: halfway between the ink of 1/16 and of S_4
+
+
+def b2_s4_mitte():
+    """x of the middle of "S_4" in Beweis 2's last row "=> S_4 = 1 - 1/16 = 15/16"."""
+    tc4 = B2_T0 + 4 * (B2_TS + B2_OS) + B2_TS / 2
+    return tc4 + B2_SCHLUSS + 36 + 14
+
+
 def verdoppeln_tafel():
     """Proof 2 as a board in Doc's way (Doc, 06.10.2026, on the old slide with 2S_n over S_n: "verstehe ich ehrlich gesagt
     überhaupt nicht" - "du kennst jetzt den Stil, mach alle Beweise so"): concrete, with S_4 = 1/2 + 1/4 + 1/8 + 1/16 -
@@ -720,9 +744,9 @@ def verdoppeln_tafel():
     kl = lambda g: {"g": g, "kommt": True}
     fs = "font-size:%dpx;color:#0E244E" % LB_FS
     words = []
-    R1, R2, R3, R4, R5, LINIE = 26, 86, 146, 206, 270, 239
-    EQ = 130                                     # the "=" column; the left sides end at it
-    TS, OS, T0 = 44, 36, 160                     # a term's column, a sign's column between two, the first column
+    # the rows further apart, the one with the grey arrows too (Doc, 07.10.2026: "die Y-Abstände müssen größer")
+    R1, R2, R3, R4, R5, LINIE = 24, 98, 184, 250, 316, 284
+    EQ, TS, OS, T0 = B2_EQ, B2_TS, B2_OS, B2_T0  # the "=" column; a term's column, a sign's column, the first column
     tc = [T0 + k * (TS + OS) + TS / 2 for k in range(5)]
     oc = [T0 + k * (TS + OS) - OS / 2 for k in range(5)]
 
@@ -755,10 +779,17 @@ def verdoppeln_tafel():
     c.raw("</g>")
     words.append(w + (kl(1),))
     links(R2, "2S_4", 38, kl(2))
+    # each fraction right under its fraction in the row above, the "2 ·" in front of it (Doc, 07.10.2026: "die Brüche
+    # sollen bitte untereinander stehen"); the "+" in the middle of the gap left between two
+    ZWEI = 28                                    # "2·" with its spaces, measured at 19 px
     for i, (k, n) in enumerate(zip((1, 2, 3, 4), (2, 4, 8, 16))):
+        rechts = tc[k] - fb(n) / 2 - 1           # where "2·" ends
         if i:
-            setze(oc[k], R2, "+", OS, kl(2))
-        setze(tc[k], R2, r"2\cdot%s" % fr(1, n), 52 if n < 10 else 64, kl(2))
+            links_frei = tc[k - 1] + fb(n // 2) / 2
+            setze((links_frei + rechts - ZWEI) / 2, R2, "+", OS, kl(2))
+        words.append((rechts - 20, R2 - LB_DY, 40, r"$%s2\cdot{}$" % LB_PH, "font-size:%dpx;color:#0E244E;text-align:right"
+                      % LB_FS, kl(2)))
+        setze(tc[k], R2, fr(1, n), fb(n), kl(2))
     # click 3: what that is - every term one column to the front (thin grey arrows), each in the colour of its value
     links(R3, "2S_4", 38, kl(3))
     for i, (k, n) in enumerate(zip((0, 1, 2, 3), (1, 2, 4, 8))):
@@ -770,7 +801,9 @@ def verdoppeln_tafel():
     spitze = c.arrowhead(LB_GRAU)
     for k in range(1, 5):
         c.raw('<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="%s" stroke-width="1.2" marker-end="url(#%s)"/>'
-              % (S.fmt(tc[k] - 6), R2 + 24, S.fmt(tc[k - 1] + 8), R3 - 26, LB_GRAU, spitze))
+              % (S.fmt(tc[k] - 14), R2 + 31, S.fmt(tc[k - 1] + 4), R3 - 32, LB_GRAU, spitze))
+        # from under the middle of "2 · 1/n", clear of its denominator, to just above its box below - not touching
+        # either (Doc, 07.10.2026: "die Pfeile passen noch nicht so")
     c.raw("</g>")
     # click 4: the sum once more under it, to be taken away - the minus at the margin, the line
     setze(EQ - 66, R4, "-", 24, kl(4))
@@ -792,24 +825,25 @@ def verdoppeln_tafel():
     setze(oc[4], R5, "-", OS, kl(9))
     setze(tc[4], R5, fr(1, 16), fb(16), kl(9))
     # 10: so S_4 is 1 minus the last summand; 11: the value - the Teilsummen board's 15/16
-    words.extend(lb_reihe(tc[4] + 44, R5, [(r"\Rightarrow", 36, kl(10)), ("S_4", 28, kl(10)), ("=", B["gl"], kl(10)),
-                                           ("1", B["z1"], kl(10)), ("-", B["op"], kl(10)), (fr(1, 16), fb(16), kl(10)),
-                                           ("=", B["gl"], kl(11)), (fr(15, 16), fb(16), kl(11))])[0])
+    # a plain arrow with one shaft, in the middle between the 1/16 before it and S_4 (Doc, 07.10.2026: "ein Pfeil mit nur
+    # einem Schaft. Und in die Mitte zwischen 1/16 und S4") - S_4 keeps its place under the live S_n
+    words.extend(lb_reihe(tc[4] + PFEIL_MITTE - 18, R5, [(r"\rightarrow", 36, kl(10))])[0])
+    words.extend(lb_reihe(tc[4] + B2_SCHLUSS + 36, R5, [("S_4", 28, kl(10)), ("=", B["gl"], kl(10)),
+                                                        ("1", B["z1"], kl(10)), ("-", B["op"], kl(10)), (fr(1, 16), fb(16), kl(10)),
+                                                        ("=", B["gl"], kl(11)), (fr(15, 16), fb(16), kl(11))])[0])
     # 12: the same with ten summands - top right; 13: the whole sum in its box
-    words.append((690, -12, 120, "genauso", "font-size:13px;color:#0E244E", kl(12)))
-    words.extend(lb_reihe(613, R1, [("S_{10}", 34, kl(12)), ("=", B["gl"], kl(12)), ("1", B["z1"], kl(12)),
-                                    ("-", B["op"], kl(12)), (fr(1, 1024), 52, kl(12))])[0])
-    teile = []
-    for i, n in enumerate((2, 4, 8)):
-        teile += ([("+", B["op"], kl(13))] if i else []) + [(fr(1, n), fb(n), kl(13))]
-    teile += [("+", B["op"], kl(13)), (r"\cdots", B["dots"], kl(13)), ("=", B["gl"], kl(13)), ("1", B["z1"], kl(13))]
-    breite = sum(t[1] for t in teile)
-    x0 = 798 - breite
-    lb_g(c, 13)
-    c.raw('<rect x="%s" y="%s" width="%s" height="64" rx="4" fill="#DCE8F6" fill-opacity="0.35" stroke="%s" '
-          'stroke-width="1"/>' % (S.fmt(x0 - 14), S.fmt(R2 + 4 - 32 + LB_TINTE_DY), S.fmt(breite + 28), S.INK))
+    # 12: the same with more summands - S_10 = 1 - 1/1024 alive on the row of 2S_4 (verdoppeln_box: a click counts on
+    # to S_21), a red arrow from the S_4 of the last row up to it; no "genauso" over it (Doc, 07.10.2026: "das Wort
+    # genauso oben drüber weg. Und dann ... ein Pfeil vom S4 unten hoch zu S21 ... und das S21 aber weiter runter")
+    # S_4 and the live S_10 ... S_21 stand under each other (Doc: "S4 und S21 untereinander"): the arrow goes straight up
+    lb_g(c, 12)
+    spitze_r = c.arrowhead(S.RED)
+    x_s4 = b2_s4_mitte()
+    c.raw('<path d="M %s %s L %s %s" fill="none" stroke="%s" stroke-width="1.8" marker-end="url(#%s)"/>'
+          % (S.fmt(x_s4), R5 - 27, S.fmt(x_s4), R3 + 29, S.RED, spitze_r))
     c.raw("</g>")
-    words += lb_reihe(x0, R2 + 4, teile)[0]
+    # (the box with the whole sum is gone: the live S_n says it - Doc, 07.10.2026: "brauchen wir dann die Box drunter
+    # noch? ... Ich glaube nicht")
     return c.svg("Verdoppeln: S4 mal 2, darunter S4 abgezogen, gleiche Summanden heben sich auf, übrig bleiben 1 und "
                  "minus ein Sechzehntel"), words
 

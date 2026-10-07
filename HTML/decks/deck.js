@@ -202,6 +202,7 @@ function stepMarks(root, st){
   // walks from pair to pair, a line covered)
   root.querySelectorAll('[data-bis]').forEach(e => e.classList.toggle('bis-vorbei', +e.dataset.bis < st));
 }
+let gestartet = false;   // the start has read the #7 of a link (fromHash) - only from then on may paint() drop it
 function paint(){
   slides.forEach((s, i) => s.classList.toggle('on', i === si));
   const sl = slides[si];
@@ -212,6 +213,14 @@ function paint(){
   const at = slides.filter((s, i) => i <= si && !skipped(i)).length;
   document.getElementById('bar').style.width = (at / (shown || 1) * 100) + '%';
   try { sessionStorage.setItem(KEEP, si + ':' + step + ':' + groups(sl)); } catch (e) { }
+  // a link with #7 opened slide 7 - once the page has moved on, the #7 goes from the address: a reload (live reload
+  // too) then comes back where we are, from the kept position, not on slide 7 again (Doc, 07.10.2026: "der öffnet
+  // immer auf Seite 4. Why is that?" - the address still ended in #4 from a link). replaceState: no hashchange, no
+  // history entry
+  const h = parseInt(location.hash.slice(1), 10);
+  if (gestartet && location.hash && !(h >= 1 && h <= slides.length && nth(h) === si)) {
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
+  }
   painted.forEach(f => f());
 }
 function next(){
@@ -882,6 +891,7 @@ if (!location.hash) {
 if (skipped(si)) { const j = seek(si, 1); si = j >= 0 ? j : Math.max(0, seek(si, -1)); step = 0; }
 paint();
 fromHash();
+gestartet = true;
 
 // Ask Solita about the slide on screen: Claude Haiku answers from the deck's own text, her DocPad
 // voice reads it out (Doc, 16.09.2026: "bau mal mit Haiku (solita nur voice)"). The API keys live in

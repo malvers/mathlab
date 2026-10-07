@@ -20,7 +20,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from omml import MathDeck
 from mathe11_unendliche_summe_svg import (zenon, verdoppeln, quadrat, leibniz, dreieckszahlen,
                                           teleskop_vorbereitung, teleskop_tafel, teilsummen,
-                                          uebung, verdoppeln_tafel, falle_tafel, quadrat_tafel, teleskop_box)
+                                          uebung, verdoppeln_tafel, falle_tafel, quadrat_tafel, teleskop_box,
+                                          verdoppeln_box)
 
 d = MathDeck("mathe11-unendliche-summe.pptx")
 
@@ -77,7 +78,7 @@ d.chapter(2, "Verdoppeln", "Die Summe steckt in sich selbst")
 # Doc, 06.10.2026, on the slide with 2S_n over S_n ("verstehe ich ehrlich gesagt überhaupt nicht") and the trap in bullets:
 # "du kennst jetzt den Stil, mach alle Beweise so" - both as boards; the old slides stay in the deck HTML, hidden (skip)
 svg, labels = verdoppeln_tafel()
-d.figure("Beweis 2: verdoppeln", svg, labels)
+d.figure("Beweis 2: verdoppeln", svg, labels, frames=[verdoppeln_box()])
 
 svg, labels = falle_tafel()
 d.figure("Die Falle", svg, labels)
