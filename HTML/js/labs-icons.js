@@ -330,6 +330,14 @@ const LAB_ICONS = {
             <rect x="7" y="80" width="86" height="13" rx="4" fill="none" stroke="rgba(255, 255, 255, 0.6)" stroke-width="2" />
             </g>
         </svg>`,
+    "rueckmeldung": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- the buzzer's teacher side: a question in a speech bubble, a gold badge counts how many asked -->
+            <path d="M22 22 H70 Q78 22 78 30 V62 Q78 70 70 70 H42 L28 84 L30 70 H22 Q14 70 14 62 V30 Q14 22 22 22 Z" fill="none" stroke="rgba(255, 255, 255, 0.75)" stroke-width="3" stroke-linejoin="round" />
+            <path d="M39 39 Q39 31 46 31 Q53 31 53 37.5 Q53 42.5 46 45 L46 50" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="46" cy="58" r="3" fill="#ffffff" />
+            <circle cx="79" cy="23" r="15" fill="#F5C242" />
+            <path d="M73.5 16 H84.5 L78.5 22 Q85 22 85 26.5 Q85 31 79 31 Q75 31 73.5 28.5" fill="none" stroke="#0b1a33" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>`,
     "babylon": `<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <!-- a Babylonian twenty-three: two corner wedges, three upright wedges -->
             <g fill="#F5C242">

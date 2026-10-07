@@ -112,6 +112,17 @@ const LABS_DATA = [
         "color": "orange"
     },
     {
+        "id": "rueckmeldung",
+        "href": "rueckmeldung.html",
+        "title": "Rückmeldung",
+        "description": "Die Seite der Lehrkraft zum Buzzer – für jedes Fach. Die Klasse scannt den QR-Code, und vorne steht groß, wie viele gerade etwas nicht verstanden haben. Wer es danach doch verstanden hat, drückt noch einmal, und die Zahl geht wieder runter. Dazu „zu schnell“ und „zu langsam“. Anonym: nur Code und Uhrzeit, kein Name, kein Gerät. Auf Null für ein neues Thema, ein neuer Code für die nächste Klasse.",
+        "tagline": "Unterricht / Feedback / jedes Fach",
+        "icon": LAB_ICONS["rueckmeldung"],
+        "category": "unterricht neu",
+        "keywords": "rueckmeldung feedback buzzer nicht verstanden verstanden zuruecknehmen anonym klasse unterricht lehrkraft lehrer kollegen jedes fach qr code zaehler zu schnell zu langsam tempo",
+        "color": "orange"
+    },
+    {
         "id": "koerperzaehlen",
         "href": "koerperzaehlen.html",
         "title": "Z\u00e4hlen in Papua-Neuguinea",

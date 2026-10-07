@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 97 labs, 1719 terms, 2026-10-03
+ * 99 labs, 1735 terms, 2026-10-07
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -79,6 +79,8 @@ const LABS_TERMS = {
     "pythagoras": ["ALLGEMEINER PYTHAGORAS", "ANALYSE: FLÄCHEN", "Crazy Star 🌟", "Gleichseitige Dreiecke", "GROSSE FLÄCHE [A₃]", "Halbkreise", "KONSTRUKTION", "Pac-Man Mode 🕹️", "Quadrate", "WÄHLE MODUS"],
     "pythagorasbeweis": ["AUẞERHALB DES RAHMENS", "BEWEIS RESET", "FLÄCHE CM²", "KOLLISION ERKANNT", "MISSIONS-STATUS", "Pythagoras-Beweis", "Summe Dreiecke", "SUMME Σ", "TRIANGULIERUNG AN", "TRIANGULIERUNG AUS", "TRIANGULIERUNG DEAKTIVIERT", "Zielfläche [ABCD]"],
     "reaction-diffusion": ["Eis", "Feuer", "Graustufen", "Grün", "LEEREN", "SÄEN", "Violett"],
+    "rechenrallye": ["armenian", "brahmic", "cjk", "cyrillic", "Dein Spitzname", "georgian", "hangul", "latin", "Math Rally", "Rechen-Rallye", "Your nickname"],
+    "rueckmeldung": ["AUF NULL", "Code für die Klasse", "NEUER CODE", "QR-CODE AUSBLENDEN", "Rückmeldung"],
     "shell": ["DAS BILD IST EIN PROTOKOLL", "DAS SUBSTRAT IST DIE ERKLÄRUNG", "EINE ZELLE STECKT AN", "FORMELN", "SUBSTRAT-SCHATTEN", "VIELE ZÜNDUNGEN - ZELTE", "WEITER &rarr", "WENIGE ZÜNDUNGEN - LINIEN", "ZWEI WELLEN LÖSCHEN SICH AUS"],
     "solita-avatar": ["Ansicht: Kopf", "Frage an Solita", "Sprechen", "Stimmung: neutral"],
     "steigung": ["DREIECK BREITE (ΔX)", "DREIECK POSITION (X)", "FUNKTION", "GERADEN-STEIGUNG M", "LINEARE FUNKTIONEN", "NULLSTELLE X₀", "STEIGUNG M", "Y-ABSCHNITT N"],
