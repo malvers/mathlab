@@ -21,7 +21,7 @@ from omml import MathDeck
 from mathe11_unendliche_summe_svg import (zenon, verdoppeln, quadrat, leibniz, dreieckszahlen,
                                           teleskop_vorbereitung, teleskop_tafel, teilsummen,
                                           uebung, verdoppeln_tafel, falle_tafel, quadrat_tafel, teleskop_box,
-                                          verdoppeln_box)
+                                          verdoppeln_box, falle_t4_tafel)
 
 d = MathDeck("mathe11-unendliche-summe.pptx")
 
@@ -82,6 +82,10 @@ d.figure("Beweis 2: verdoppeln", svg, labels, frames=[verdoppeln_box()])
 
 svg, labels = falle_tafel()
 d.figure("Die Falle", svg, labels)
+
+# where the error hides and that T is no number (Doc, 07.10.2026: "bitte unbedingt ergänzen")
+svg, labels = falle_t4_tafel()
+d.figure("Die Falle: mit $T_4$ gerechnet", svg, labels)
 
 d.bullets("Die Falle: erst mit $n$ rechnen", [
     ("Ohne $n$ geht es scheinbar schneller: $2S=1+\\frac{1}{2}+\\frac{1}{4}+\\ldots=1+S$, also $S=1$", 0),

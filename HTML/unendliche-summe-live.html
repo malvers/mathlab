@@ -16,7 +16,7 @@
         summand comes in on the right, the first one goes on the left ("..." stands for the ones gone), and the
         partial sum stands on the right with six decimals - until 1/2^21, where the rounded sum reads 1,000000
         (it is 0,99999952...: never exactly 1 - the point of the limit). A click pauses and goes on; at the end a click
-        starts again. Transparent page: the slide shows through.
+        starts again; a double click goes back to the start at any time. Transparent page: the slide shows through.
         ?modus=formel (Beweis 2, Doc, the same day: "könnten wir da auch ein Widget machen?"): it starts as the board's
         "S_10 = 1 - 1/1024", with its value behind it (Doc: "dahinter die Summe schreiben, ist gleich ..."); a click
         counts on - S_11 = 1 - 1/2048 = 0,999512, ... S_21 = 1 - 1/2097152 = 1,000000: the same sums, written as 1 minus
@@ -116,7 +116,11 @@
             katex.render(PH + tex, s, { throwOnError: false });
             return s;
         }
-        const bruch = n => slot('\\dfrac{1}{' + n + '}', bruchBreite(n));
+        // a denominator from 1000 on with the German thousands dot - 1.024, 1.048.576 (Doc, 07.10.2026: "beim Bruch im
+        // Widget noch den Tausender drin, Deutsch, also ein Punkt"); such a fraction measured, the board's own ones keep
+        // the board's widths
+        const tausender = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '{.}');
+        const bruch = n => slot('\\dfrac{1}{' + tausender(n) + '}', n < 1000 ? bruchBreite(n) : null);
         const plus = () => slot('{}+{}', 24);
 
         function wert(k) {                              // 1 - 1/2^k with six decimals, German comma
@@ -213,13 +217,21 @@
             box.style.transform = 'translateY(-50%)' + (ziel > frei ? ' scale(' + (frei / ziel) + ')' : '');
         }
 
+        // a second click within 350 ms is a double click: back to the start - counted here, not by the browser's
+        // dblclick, which never came when a step had just swapped the numbers under the pointer (S_13 -> S_14)
+        let letzterKlick = 0;
         function klick() {
+            const jetzt = performance.now();
+            if (jetzt - letzterKlick < 350) { letzterKlick = 0; anfang(); return; }
+            letzterKlick = jetzt;
             if (k >= ENDE) { anfang(); return; }        // at the end: back to the board's box
             if (timer) { clearInterval(timer); timer = null; return; }   // running: pause
             schritt();
             timer = setInterval(schritt, TAKT);
         }
 
+        // a double click: back to the start at any time, also in the middle of a run (Doc, 07.10.2026: "haben wir eine
+        // Möglichkeit, das Widget zu resetten?") - klick() tells it from a single one
         box.addEventListener('click', klick);
         addEventListener('resize', passen);
         document.fonts.load('38px KaTeX_Main').then(passen).catch(() => { });

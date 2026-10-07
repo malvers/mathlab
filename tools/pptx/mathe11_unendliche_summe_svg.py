@@ -721,7 +721,9 @@ def _pfeil_mal2(c, words, x, y1, y2, text=r"\cdot 2"):
 # S21 untereinander, gegebenenfalls alles noch ein Stück nach links")
 B2_EQ, B2_TS, B2_OS, B2_T0 = 94, 44, 36, 124     # the "=" column; a term's column, a sign's column, the first column
 B2_SCHLUSS = 34                                  # the last row's "=> S_4 = ..." begins this far right of the 4th column
-PFEIL_MITTE = 43.3                               # its arrow's middle: halfway between the ink of 1/16 and of S_4
+PFEIL_MITTE = 40.3                               # its arrow's middle: 3 px left of halfway between the ink of 1/16 and
+                                                 # of S_4 - measured halfway it looked too far right (Doc, 07.10.2026:
+                                                 # "ein Tick nach links, er sieht optisch zu weit rechts aus")
 
 
 def b2_s4_mitte():
@@ -745,7 +747,7 @@ def verdoppeln_tafel():
     fs = "font-size:%dpx;color:#0E244E" % LB_FS
     words = []
     # the rows further apart, the one with the grey arrows too (Doc, 07.10.2026: "die Y-Abstände müssen größer")
-    R1, R2, R3, R4, R5, LINIE = 24, 98, 184, 250, 316, 284
+    R1, R2, R3, R4, R5, LINIE = 24, 98, 184, 250, 316, 287
     EQ, TS, OS, T0 = B2_EQ, B2_TS, B2_OS, B2_T0  # the "=" column; a term's column, a sign's column, the first column
     tc = [T0 + k * (TS + OS) + TS / 2 for k in range(5)]
     oc = [T0 + k * (TS + OS) - OS / 2 for k in range(5)]
@@ -810,7 +812,12 @@ def verdoppeln_tafel():
     links(R4, "S_4", 28, kl(4))
     summe(R4, (1, 2, 3, 4), 4)
     lb_g(c, 4)
-    c.line(36, LINIE, tc[4] + 30, LINIE, S.INK, 1.6)
+    # the line under the subtraction a little lower and grey like the arrows (Doc, 07.10.2026: "den schwarzen Strich ...
+    # ein kleines Stück runter und so grau wie die Pfeile")
+    # thinner, from the "2S_4" of the last row to the end of its 1/16 (measured in the deck: 6.9 and tc[4] + 14.3) - Doc:
+    # "ein bisschen dünner, und auch weiter nach links, so dass die bündig ist mit den zwei S4 unten, und rechts geht es
+    # ein bisschen zu weit"
+    c.line(6.9, LINIE, tc[4] + 14.3, LINIE, LB_GRAU, 1.1)
     c.raw("</g>")
     # click 5: what is left in front; 6-8: a red frame round each pair that cancels, its 0 below; 9: what is left behind
     links(R5, "2S_4-S_4", 88, kl(5))
@@ -842,6 +849,13 @@ def verdoppeln_tafel():
     c.raw('<path d="M %s %s L %s %s" fill="none" stroke="%s" stroke-width="1.8" marker-end="url(#%s)"/>'
           % (S.fmt(x_s4), R5 - 27, S.fmt(x_s4), R3 + 29, S.RED, spitze_r))
     c.raw("</g>")
+    # 13: why the trick works here, in one sentence - top right, the free room over the live S_n (Doc, 07.10.2026: "bei
+    # der anderen Folie müsste man eigentlich drunter schreiben, warum: das geht nur, wenn sowas gegen null konvergiert");
+    # its twin on the trap board says why it fails there
+    words.append((b2_s4_mitte() - 17 + 135, 30, 270, "Der Trick geht, weil der Rest hinten gegen 0 geht – "
+                  r"$\textcolor{#B02418}{\tfrac{1}{16}}$, $\textcolor{#B02418}{\tfrac{1}{1{.}024}}$, "
+                  r"$\textcolor{#B02418}{\ldots}$",   # two lines in the room there
+                  "font-size:16px;color:var(--formel);text-align:left;line-height:1.5", kl(13)))
     # (the box with the whole sum is gone: the live S_n says it - Doc, 07.10.2026: "brauchen wir dann die Box drunter
     # noch? ... Ich glaube nicht")
     return c.svg("Verdoppeln: S4 mal 2, darunter S4 abgezogen, gleiche Summanden heben sich auf, übrig bleiben 1 und "
@@ -850,14 +864,14 @@ def verdoppeln_tafel():
 
 def falle_tafel():
     """The trap as a board (Doc, 06.10.2026: "mach alle Beweise so"): the same trick, done fast without stopping - with
-    T = 1 + 2 + 4 + 8 + ... - "gives" T = -1, a red "?"; then the partial sums beside it, 1, 3, 7, 15, ..., 1023 - they
-    grow beyond every bound, T is no number at all, the -1 struck out. The bound: why proof 2 counts S_4, S_10 first."""
+    T = 1 + 2 + 4 + 8 + ... - "gives" T = -1, a red "?": the open question. Where the error hides and that T is no
+    number: the next board, falle_t4_tafel."""
     c = S.Canvas(W, H)
     B = LB_B
     kl = lambda g: {"g": g, "kommt": True}
     words = []
     R1, R2, R3, R4, R5, LINIE = 26, 84, 140, 200, 262, 172
-    EQ, TS, OS, T0 = 112, 30, 26, 142
+    EQ, TS, OS, T0 = 112 + 140, 30, 26, 142 + 140   # alone on its board now: nearer the middle
     tc = [T0 + k * (TS + OS) + TS / 2 for k in range(6)]
     oc = [T0 + k * (TS + OS) - OS / 2 for k in range(6)]
     z = lambda v: B["z1"] if v < 10 else B["z2"]
@@ -887,7 +901,7 @@ def falle_tafel():
     links(R3, "T", 20, kl(3))
     reihe(R3, (1, 2, 4, 8, 16, None), 0, 3)
     lb_g(c, 3)
-    c.line(30, LINIE, tc[5] + 24, LINIE, S.INK, 1.6)
+    c.line(EQ - 84, LINIE, tc[5] + 16, LINIE, LB_GRAU, 1.1)   # grey and thin as on Beweis 2, flush with "2T - T"
     c.raw("</g>")
     links(R4, "2T-T", 84, kl(4))
     setze(tc[0], R4, "-1", 30, kl(4))
@@ -904,31 +918,118 @@ def falle_tafel():
     words.extend(lb_reihe(EQ - 30, R5, [(r"\Rightarrow", 36, kl(10)), ("T", 20, kl(10)), ("=", B["gl"], kl(10)),
                                         ("-1", 30, kl(10))], hoch=False)[0])
     words.append((EQ + 110, R5, 30, r"$\textcolor{#B02418}{?}$", "font-size:%dpx" % (LB_FS + 9), kl(10)))
-    # 11-15: the partial sums beside it, as on the Teilsummen board - the results in one column
-    X, EC = 496, 716
-    RX = EC + B["gl"] + 22
-    words.append((RX, -12, 110, "Summe bis $n$", "font-size:13px;color:#0E244E", kl(11)))
-    werte = (1, 2, 4, 8)
-    for k, y in enumerate((22, 70, 118, 166), 1):
-        g = 10 + k
-        teile = [("T_{%d}" % k, 26, kl(g)), ("=", B["gl"], kl(g))]
-        for i, v in enumerate(werte[:k]):
-            teile += ([("+", 26, kl(g))] if i else []) + [(str(v), 18, kl(g))]
-        words.extend(lb_reihe(X, y, teile, hoch=False)[0])
-        setze(EC + B["gl"] / 2, y, "=", B["gl"], kl(g))
-        setze(RX, y, str(2 ** k - 1), z(2 ** k - 1), kl(g))
-    setze(X + 13, 202, r"\vdots", 30, kl(15))
-    setze(RX, 202, r"\vdots", 30, kl(15))
-    setze(X + 13, 240, "T_{10}", 34, kl(15))
-    setze(EC + B["gl"] / 2, 240, "=", B["gl"], kl(15))
-    setze(RX, 240, "1023", 44, kl(15))
-    # 16: they grow beyond every bound - T is no number, the -1 is wrong
-    setze(RX - 6, 290, r"\textcolor{#B02418}{\to\infty}", 80, kl(16))
-    lb_g(c, 16)
-    c.line(EQ + 6, R5 + 14, EQ + 96, R5 - 14, S.RED, 2.6)
-    c.raw("</g>")
+    # the partial sums and why T is no number: on the next board, falle_t4_tafel (Doc, 07.10.2026: "bitte unbedingt
+    # ergänzen, denn so versteht man das nicht. Und es steht auch nirgends, dass T keine Zahl ist")
     return c.svg("Die Falle: derselbe Trick mit 1 + 2 + 4 + 8 + ... ergibt scheinbar minus 1, die Teilsummen wachsen "
                  "aber über jede Grenze"), words
+
+
+T4_PFEIL = 39.5                                  # falle_t4_tafel: the arrow before T_4, right of the 4th column - a tick
+                                                 # left of halfway between 16 and T_4, as PFEIL_MITTE on Beweis 2
+
+
+def falle_t4_tafel():
+    """Where the trap's error hides (Doc, 07.10.2026, on the trap: "bitte unbedingt ergänzen, denn so versteht man das
+    nicht. Und es steht auch nirgends, dass T keine Zahl ist"): the same trick counted, with T_4 = 1 + 2 + 4 + 8, as
+    Beweis 2 does with S_4 - doubled, written over T_4, the pairs framed to 0; what is left: -1 in front and, behind,
+    the 16 that has no partner - red: the term the fast calculation lost in its dots. T_4 = 16 - 1 = 15. Then the same
+    with ten and twenty summands, T_10 = 1.024 - 1, T_20 = 1.048.576 - 1, "-> oo": what is left behind grows beyond
+    every bound - with S it went to 0 - so T is no number."""
+    c = S.Canvas(W, H)
+    B = LB_B
+    kl = lambda g: {"g": g, "kommt": True}
+    words = []
+    # everything well down, room on top for "T_n -> oo" over T_20 (Doc, 07.10.2026: "schiebt den ganzen Zinnober auf
+    # Folie 14 deutlich nach unten und macht das T von n geht gegen unendlich über das T20 ganz oben")
+    R0, R1, R2, R3, R4, R5, LINIE = 8, 72, 140, 200, 266, 318, 234
+    EQ, TS, OS, T0 = 100, 30, 30, 130
+    tc = [T0 + k * (TS + OS) + TS / 2 for k in range(5)]
+    oc = [T0 + k * (TS + OS) - OS / 2 for k in range(5)]
+    z = lambda v: B["z1"] if v < 10 else B["z2"]
+    rot = lambda t: r"\textcolor{#B02418}{%s}" % t
+
+    def setze(x, y, tex, w, klick):
+        words.extend(lb_reihe(x - w / 2, y, [(tex, w, klick)], hoch=False)[0])
+
+    def links(y, tex, w, klick):
+        setze(EQ - w / 2, y, tex, w, klick)
+        setze(EQ + B["gl"] / 2, y, "=", B["gl"], klick)
+
+    def reihe(y, werte, spalte0, g):
+        for i, v in enumerate(werte):
+            if i:
+                setze(oc[spalte0 + i], y, "+", OS, kl(g))
+            setze(tc[spalte0 + i], y, str(v), z(v), kl(g))
+
+    links(R1, "T_4", 26, kl(0))
+    reihe(R1, (1, 2, 4, 8), 0, 0)
+    lb_g(c, 1)
+    w = _pfeil_mal2(c, words, EQ - 34, R1, R2)
+    c.raw("</g>")
+    words.append(w + (kl(1),))
+    links(R2, "2T_4", 36, kl(2))
+    reihe(R2, (2, 4, 8, 16), 1, 2)
+    setze(EQ - 60, R3, "-", 24, kl(3))
+    links(R3, "T_4", 26, kl(3))
+    reihe(R3, (1, 2, 4, 8), 0, 3)
+    lb_g(c, 3)
+    c.line(EQ - 94, LINIE, tc[4] + 14, LINIE, LB_GRAU, 1.1)
+    c.raw("</g>")
+    links(R4, "2T_4-T_4", 96, kl(4))
+    setze(tc[0], R4, "-1", 30, kl(4))
+    for j in (1, 2, 3):
+        g = 4 + j
+        lb_g(c, g)
+        c.rect(tc[j] - 15, R2 - 19, 30, R3 - R2 + 38, stroke=S.RED, width=2.4, rx=3)
+        c.raw("</g>")
+        setze(oc[j], R4, "+", OS, kl(g))
+        setze(tc[j], R4, rot("0"), B["z1"], kl(g))
+    # 8: the 16 has no partner below - it stays, red: what the fast calculation lost in its dots
+    lb_g(c, 8)
+    c.rect(tc[4] - 17, R2 - 19, 34, 38, fill="#F6D5D1", stroke=S.RED, width=2.4, rx=3)
+    c.raw("</g>")
+    setze(oc[4], R4, "+", OS, kl(8))
+    setze(tc[4], R4, rot("16"), B["z2"], kl(8))
+    # 9: so T_4 = 16 - 1 = 15 - the T over each other with T_10 and T_20 above it
+    X = tc[4] + 34
+    # the arrow in the middle between 16 and T_4, a tick left, as on Beweis 2 (Doc, 07.10.2026: "den Pfeil zwischen 16
+    # und T4 unten bitte wieder so wie vorhin zentral, mit einem Tick nach links")
+    words.extend(lb_reihe(tc[4] + T4_PFEIL - 18, R4, [(r"\rightarrow", 36, kl(9))], hoch=False)[0])
+    words.extend(lb_reihe(X + 36, R4, [("T_4", 26, kl(9)), ("=", B["gl"], kl(9)),
+                                  (rot("16"), B["z2"], kl(9)), ("-", B["op"], kl(9)), ("1", B["z1"], kl(9)),
+                                  ("=", B["gl"], kl(9)), ("15", B["z2"], kl(9))], hoch=False)[0])
+    xt = X + 36                                  # where the T stand, one under the other
+    # the column of T on its own rows, more air between them (Doc: "in Y bitte mehr Luft"): T_4 on the row of its sum
+    Y10, Y20, YN = R4 - 90, R4 - 178, R4 - 264
+    pfeil = c.arrowhead(S.RED)
+    # each arrow shorter, round the same middle (Doc, 07.10.2026: "die roten Pfeile nach oben bitte noch etwas kürzer
+    # ... das Zentrum der Pfeile an der Position lassen")
+    for g, y0, y1 in ((10, R4 - 16, Y10 + 16), (11, Y10 - 16, Y20 + 16), (12, Y20 - 16, YN + 16)):
+        mitte = (y0 + y1) / 2
+        lb_g(c, g)
+        c.raw('<path d="M %s %s L %s %s" fill="none" stroke="%s" stroke-width="1.8" marker-end="url(#%s)"/>'
+              % (S.fmt(xt + 10), S.fmt(mitte + 19), S.fmt(xt + 10), S.fmt(mitte - 19), S.RED, pfeil))
+        c.raw("</g>")
+    words.extend(lb_reihe(xt, Y10, [("T_{10}", 34, kl(10)), ("=", B["gl"], kl(10)), (rot("1{.}024"), 56, kl(10)),
+                                   ("-", B["op"], kl(10)), ("1", B["z1"], kl(10)), ("=", B["gl"], kl(10)),
+                                   ("1{.}023", 56, kl(10))], hoch=False)[0])
+    words.extend(lb_reihe(xt, Y20, [("T_{20}", 34, kl(11)), ("=", B["gl"], kl(11)), (rot("1{.}048{.}576"), 96, kl(11)),
+                                   ("-", B["op"], kl(11)), ("1", B["z1"], kl(11)), ("=", B["gl"], kl(11)),
+                                   ("1{.}048{.}575", 96, kl(11))], hoch=False)[0])
+    # 12: they grow beyond every bound - on top, over T_20; 13: and oo is no number - right behind it (Doc: "da oben
+    # steht T von n gegen unendlich. Und dahinter ... ist keine Zahl. Und unten das 'T ist keine Zahl' raus")
+    words.extend(lb_reihe(xt, YN, [(rot(r"T_n\to\infty"), 90, kl(12))], hoch=False)[0])
+    # 2.5 px lower than the formula's label: then its baseline is the formula's (seen in the deck)
+    words.append((xt + 94 + 75, YN + 2.5, 150, "ist keine Zahl", "font-size:%dpx;color:#B02418;text-align:left" % (LB_FS - 1),
+                  kl(13)))
+    # 14: why the trick fails here, in one sentence (Doc: "runter bitte noch einen Satz schreiben, warum das bei dem hier
+    # nicht geht - weil es eben immer wächst"); its twin on Beweis 2 says why it works there
+    words.append((6 + 400, R5, 800, "Hier geht der Trick nicht: Der Rest hinten wächst immer weiter – "
+                  r"$\textcolor{#B02418}{16}$, $\textcolor{#B02418}{1{.}024}$, $\textcolor{#B02418}{1{.}048{.}576}$, "
+                  r"$\textcolor{#B02418}{\ldots}$",   # the formula's dots - Raleway's are squares
+                  "font-size:16px;color:var(--formel);text-align:left", kl(14)))
+    return c.svg("Die Falle mit T4 gerechnet: hinten bleibt 16 übrig, T4 = 15; T10 = 1023, T20 = 1048575 - T wächst über "
+                 "jede Grenze, T ist keine Zahl"), words
 
 
 def quadrat_tafel():
@@ -1013,7 +1114,7 @@ FIGURES = {"zenon": zenon, "quadrat": quadrat, "teleskop": teleskop, "verdoppeln
            "dreieckszahlen": dreieckszahlen, "teleskop_vorbereitung": teleskop_vorbereitung,
            "teleskop_tafel": teleskop_tafel, "teilsummen": teilsummen, "uebung": uebung,
            "leibniz2": lambda: leibniz(2, ende=False), "verdoppeln_tafel": verdoppeln_tafel, "falle_tafel": falle_tafel,
-           "quadrat_tafel": quadrat_tafel}
+           "quadrat_tafel": quadrat_tafel, "falle_t4_tafel": falle_t4_tafel}
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
