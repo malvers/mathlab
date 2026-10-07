@@ -447,6 +447,16 @@ def uebung():
     return c.svg("Übung: Brüche addieren - erst auf den gleichen Nenner"), words
 
 
+def teleskop_box():
+    """The live sum of the Teleskop board as html_deck's frame dict: slide coordinates (the picture box starts at 72,
+    146), 90 px high around the row "S = ..." (R3 = 240 of teleskop_tafel); its sum 4 px in, so it starts where the
+    row's "1" stood - right after "S =" (16 + 18 + 30 = 64), room to grow to the right; with click 27 (teleskop_tafel's
+    DECKEL + 1), when the pairs are gone and the "1" goes."""
+    # 1.5 px higher than the row's ink middle: its fraction bars then lie exactly on the board's "=" (measured in the deck)
+    return dict(src="unendliche-summe-live.html", x=72 + 60, y=146 + 240 + LB_TINTE_DY - 45 - 1.5, w=756, h=90, g=27,
+                title="Die Summe läuft gegen 1 - klicken")
+
+
 def teilsummen():
     """Bullets 3 and 4 of "Die Behauptung" as a board (Doc, 06.10.2026: "S1 = 1/2, S2 = 3/4 - warum S3 = 7/8? Wo kommt
     die Teilsumme her? ... die wollen das ja gerade lernen"): row k is S_k, the first k summands - the old ones at once,
@@ -616,14 +626,14 @@ def teleskop_tafel():
     grows. S = 1/2 + 1/4 + ... term by term, "?"; every term as its double minus itself, each in its colour together
     with its term above; the brackets gone, a red frame and "= 0" on each pair that cancels, the pair fading into "+ 0";
     the last minus, -1/32, cancelled too by the next bracket's plus, then the dots; S = 1 is left, then the whole sum in
-    its box."""
+    its box on that row."""
     c = S.Canvas(W, H)
     B = LB_B
     fr = lambda a, b: r"\dfrac{%d}{%d}" % (a, b)
     fb = lambda n: B["f1"] if n < 10 else B["f2"]
     kl = lambda g: {"g": g, "kommt": True}
     words = []
-    R1, R2, R3, R4 = 40, 118, 206, 288
+    R1, R2, R3 = 40, 132, 240                    # three rows - the box stands on the last (no row 4 any more)
     X0 = 16                                      # all rows begin with "S =" in one column
     nenner = (2, 4, 8, 16, 32)
     # row 1: the sum, term by term, and the question
@@ -654,7 +664,9 @@ def teleskop_tafel():
     # Minus 1/32 dann doch noch ausführen, sodass dann eben da auch 0 steht. Und dann danach Punkt, Punkt, Punkt")
     DECKEL = 26
     paar = lambda j: dict(kl(15), bis=17 + 2 * j, sanft=True)
-    teile = [("S", B["S"], kl(15)), ("=", B["gl"], kl(15)), ("1", B["z1"], kl(15))]
+    # its "1" makes way for the live sum when that comes (Doc, 07.10.2026: "nimm vorne hinter dem S die 1 weg, rück das
+    # Ganze tatsächlich an das S ran") - the row then reads S = 1/2 + 1/4 + ... = 1
+    teile = [("S", B["S"], kl(15)), ("=", B["gl"], kl(15)), ("1", B["z1"], dict(kl(15), bis=DECKEL + 1, sanft=True))]
     for j, n in enumerate(nenner):
         teile += [("-", B["op"], paar(j)), (fr(1, n), fb(n), paar(j)), ("+", B["op"], paar(j)), (fr(1, n), fb(n), paar(j))]
     w3, k3 = lb_reihe(X0, R3, teile + [(r"\cdots", B["dots"], dict(kl(15), bis=DECKEL))])
@@ -671,19 +683,12 @@ def teleskop_tafel():
                       dict(kl(g + 1), bis=DECKEL, sanft=True)))
     lb_g(c, DECKEL)
     c.raw("</g>")                                # this click shows nothing - it takes the rest away (data-bis above)
-    # row 4: the whole sum in its box, in the middle
-    teile = []
-    for i, n in enumerate(nenner):
-        teile += ([("+", B["op"], kl(DECKEL + 1))] if i else []) + [(fr(1, n), fb(n), kl(DECKEL + 1))]
-    teile += [("+", B["op"], kl(DECKEL + 1)), (r"\cdots", B["dots"], kl(DECKEL + 1)), ("=", B["gl"], kl(DECKEL + 1)),
-              ("1", B["z1"], kl(DECKEL + 1))]
-    breite = sum(t[1] for t in teile)
-    x0 = (W - breite) / 2
+    # the whole sum in its box, on the row "S = 1" - as on the Leibniz boards (Doc, 07.10.2026: "irgendwie stört mich das,
+    # dass die Box so da unten steht. Mach die bitte echt wie bei Leibniz auf die Zeile von S ist gleich 1"), and alive:
+    # HTML/unendliche-summe-live.html in a frame (Doc, the same morning: "Bau uns ein Widget, was genauso aussieht ...
+    # weiter links ... genau auf der Seite, da läuft, wenn man es klickt") - teleskop_box() places it, with click DECKEL + 1
     lb_g(c, DECKEL + 1)
-    c.raw('<rect x="%s" y="%s" width="%s" height="64" rx="4" fill="#DCE8F6" fill-opacity="0.35" stroke="%s" '
-          'stroke-width="1"/>' % (S.fmt(x0 - 16), S.fmt(R4 - 32 + LB_TINTE_DY), S.fmt(breite + 32), S.INK))
     c.raw("</g>")
-    words += lb_reihe(x0, R4, teile)[0]
     return c.svg("Teleskop: jeder Summand als Differenz, die Klammern weg, je zwei heben sich auf, übrig bleibt 1"), words
 
 

@@ -58,14 +58,16 @@ def live_frames(frames):
     """Small live pages laid over a slide at design coordinates - Doc, 16.09.2026: real 3D dice
     (wuerfel3d.html) next to the die nets. Each frame is dict(src=path under HTML/, x, y, w, h,
     title). Inline styles only, no CSS rule: decks without frames stay byte-identical. A click
-    inside a frame stays there (the slide does not turn); the page passes keys back up."""
+    inside a frame stays there (the slide does not turn); the page passes keys back up.
+    g: the click group the frame comes with (deck.css .step.kommt) - not there before it."""
     out = []
     for f in frames or ():
-        out.append('<iframe class="live-frame" src="../%s" title="%s" loading="lazy" '
+        kommt = ' step kommt" data-g="%d' % f["g"] if f.get("g") is not None else ""
+        out.append('<iframe class="live-frame%s" src="../%s" title="%s" loading="lazy" '
                    'allowtransparency="true" style="position:absolute;left:%gpx;top:%gpx;'
                    'width:%gpx;height:%gpx;border:0;background:transparent;'
                    'transform:scale(%g);transform-origin:0 0"></iframe>'
-                   % (_html.escape(f["src"], quote=True), _html.escape(f.get("title", ""), quote=True),
+                   % (kommt, _html.escape(f["src"], quote=True), _html.escape(f.get("title", ""), quote=True),
                       f["x"], f["y"], f["w"] * FRAME_ZOOM, f["h"] * FRAME_ZOOM, 1 / FRAME_ZOOM))
     return "".join(out)
 

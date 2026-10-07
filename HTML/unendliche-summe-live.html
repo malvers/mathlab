@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOC ALVERS MATHE-LABORE | Summe gegen 1</title>
+    <!--
+        The box of the Teleskop board, alive - for an <iframe> in a deck slide (tools/pptx/html_deck.py, frames=...),
+        made from wuerfel3d.html. Doc, 07.10.2026: "ein Widget, was genauso aussieht ... wenn man draufklickt, immer
+        ein neuer [Bruch] dazukommt ... es rückt eins nach links und die Summe rechts steht dann nicht 1, sondern die
+        aktuelle Zahl ... sechs Nachkommastellen, bis die sechs Nachkommastellen alle 0 sind".
+        It starts as the board's sum: 1/2 + 1/4 + 1/8 + 1/16 + 1/32 + ... = 1, right after the board's "S =" - no box
+        round it, the formulas' blue (Doc, the same morning: "rück das Ganze tatsächlich an das S ran und die Box um das
+        Widget machen wir weg. Und die Zahlen zur Blau wie die anderen"). A click runs it: every step one more
+        summand comes in on the right, the first one goes on the left ("..." stands for the ones gone), and the
+        partial sum stands on the right with six decimals - until 1/2^21, where the rounded sum reads 1,000000
+        (it is 0,99999952...: never exactly 1 - the point of the limit). A click pauses and goes on; at the end a click
+        starts again. Transparent page: the slide shows through.
+        Sizes are the board's (html_deck LB_B, at 19 px) times Z: the deck renders a frame at FRAME_ZOOM = 2 and
+        shrinks it back.
+    -->
+    <link rel="stylesheet" href="morpheus/vendor/katex/katex.min.css">
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        /* the row of the sum - no frame round it any more: it continues the board's "S =" */
+        #box {
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            height: 128px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            box-sizing: border-box;
+            color: rgb(25, 52, 130);           /* deck.css --formel - read from the deck below, this is the fallback */
+            font-size: 38px;
+            white-space: nowrap;
+            cursor: pointer;
+            transform: translateY(-50%);
+            transform-origin: 0 50%;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* no focus ring after a click - the browser drew a box round the sum (Doc, 07.10.2026: "da ist noch eine Box,
+           wenn man draufklickt"); the keys go to the deck anyway */
+        #box:focus, #box:focus-visible { outline: none; }
+        #box { -webkit-tap-highlight-color: transparent; }
+
+        #reihe { display: flex; align-items: center; }
+
+        /* one term in its slot, centred - like the board's labels; a slot that comes or goes changes its width */
+        .t {
+            display: inline-flex;
+            justify-content: center;
+            transition: width .55s ease, opacity .45s ease;
+        }
+
+        /* only while it comes or goes does a slot cut its content - the board's "+" is wider than its slot */
+        .t.weg { opacity: 0; overflow: hidden; }
+
+        #mess { position: absolute; left: -9999px; top: 0; visibility: hidden; white-space: nowrap; font-size: 38px; }
+    </style>
+</head>
+
+<body>
+    <div id="box" role="button" tabindex="0" aria-label="Die Summe läuft gegen 1 - klicken"><div id="reihe"></div></div>
+    <span id="mess"></span>
+
+    <script src="morpheus/vendor/katex/katex.min.js"></script>
+    <script>
+        'use strict';
+        const Z = 2;                                    // html_deck.py FRAME_ZOOM
+        const ENDE = 21;                                // 1/2^21: the rounded sum reads 1,000000
+        const TAKT = 900;                               // ms per step
+        const reihe = document.getElementById('reihe');
+        const box = document.getElementById('box');
+        // the deck's blue for numbers and formulas (deck.css --formel), so the sum wears the board's ink
+        try {
+            const blau = getComputedStyle(window.parent.document.documentElement).getPropertyValue('--formel').trim();
+            if (blau) box.style.color = blau;
+        } catch (err) { }
+
+        // a slot's width as on the board (LB_B at 19 px): a fraction 22 with a one-digit denominator, 32 with two,
+        // ~10 more per further digit; "+" 24, "=" 30, dots 32, "1" 14
+        const bruchBreite = n => n < 10 ? 22 : 32 + 10 * (String(n).length - 2);
+        const PH = '\\vphantom{\\dfrac{1}{2}}';         // every slot as tall as a fraction: one baseline
+
+        // a slot as wide as its formula really is - for the running sum, whose digits fill their slot to the edge
+        const mess = document.getElementById('mess');
+        function gemessen(tex) {
+            katex.render(PH + tex, mess, { throwOnError: false });
+            return Math.ceil(mess.getBoundingClientRect().width / Z) + 4;
+        }
+
+        function slot(tex, w) {
+            if (w === null) w = gemessen(tex);
+            const s = document.createElement('span');
+            s.className = 't';
+            s.dataset.w = w;
+            s.style.width = w * Z + 'px';
+            katex.render(PH + tex, s, { throwOnError: false });
+            return s;
+        }
+        const bruch = n => slot('\\dfrac{1}{' + n + '}', bruchBreite(n));
+        const plus = () => slot('{}+{}', 24);
+
+        function wert(k) {                              // 1 - 1/2^k with six decimals, German comma
+            return slot((1 - Math.pow(2, -k)).toFixed(6).replace('.', '{,}'), null);
+        }
+
+        let k, timer = null, vorn, hinten, gleich, ergebnis;
+
+        function anfang() {                             // the board's box
+            clearInterval(timer); timer = null;
+            reihe.textContent = '';
+            k = 5;
+            vorn = slot('\\cdots{}+{}', 56);            // stands for the summands gone - hidden at first
+            vorn.style.width = '0px'; vorn.classList.add('weg');
+            reihe.append(vorn);
+            for (let i = 1; i <= 5; i++) {
+                if (i > 1) reihe.append(plus());
+                reihe.append(bruch(Math.pow(2, i)));
+            }
+            hinten = slot('{}+{}\\cdots', 56);          // "+ ..." - only while the sum is the whole one
+            gleich = slot('{}={}', 30);
+            ergebnis = slot('1', 14);
+            reihe.append(hinten, gleich, ergebnis);
+            passen();
+        }
+
+        function geh(el) {                              // a slot leaves: it shrinks to nothing, the rest slides left
+            el.classList.add('weg');
+            el.style.width = '0px';
+            setTimeout(() => el.remove(), 600);
+        }
+
+        function komm(el, vor) {                        // a slot comes: from nothing to its width
+            const w = el.style.width;
+            el.style.width = '0px';
+            el.classList.add('weg');
+            reihe.insertBefore(el, vor);
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                el.style.width = w;
+                el.classList.remove('weg');
+            }));
+        }
+
+        function schritt() {
+            if (k >= ENDE) { clearInterval(timer); timer = null; return; }
+            k++;
+            if (hinten) { geh(hinten); hinten = null; }
+            if (vorn.classList.contains('weg')) { vorn.style.width = 56 * Z + 'px'; vorn.classList.remove('weg'); }
+            // the first summand and the "+" after it go
+            const erster = vorn.nextElementSibling, sein = erster && erster.nextElementSibling;
+            if (erster) geh(erster);
+            if (sein) geh(sein);
+            komm(plus(), gleich);
+            komm(bruch(Math.pow(2, k)), gleich);
+            const neu = wert(k);
+            ergebnis.replaceWith(neu);
+            ergebnis = neu;
+            setTimeout(passen, 620);
+            if (k >= ENDE) { clearInterval(timer); timer = null; }
+        }
+
+        // wider than the frame (seven-digit denominators): the box shrinks to fit, from its left edge
+        function passen() {
+            box.style.transform = 'translateY(-50%)';
+            const frei = innerWidth - 12, b = box.getBoundingClientRect().width;
+            if (b > frei) box.style.transform = 'translateY(-50%) scale(' + (frei / b) + ')';
+        }
+
+        function klick() {
+            if (k >= ENDE) { anfang(); return; }        // at the end: back to the board's box
+            if (timer) { clearInterval(timer); timer = null; return; }   // running: pause
+            schritt();
+            timer = setInterval(schritt, TAKT);
+        }
+
+        box.addEventListener('click', klick);
+        addEventListener('resize', passen);
+        document.fonts.load('38px KaTeX_Main').then(passen).catch(() => { });
+        anfang();
+
+        // Inside a deck the keys belong to the deck: pass them up, so arrows, space, p, o
+        // still work after a click on the box (as wuerfel3d.html)
+        if (window.parent !== window) {
+            addEventListener('keydown', e => {
+                if (e.metaKey || e.ctrlKey || e.altKey) return;   // Cmd-Shift-R stays with the browser
+                try {
+                    window.parent.dispatchEvent(new KeyboardEvent('keydown', { key: e.key, code: e.code, shiftKey: e.shiftKey, bubbles: true }));
+                    e.preventDefault();
+                } catch (err) { }
+            });
+        }
+    </script>
+</body>
+
+</html>

@@ -37,7 +37,10 @@ BADGE = (b'<div id="local-badge" style="position:fixed;top:8px;right:8px;z-index
          b'pointer-events:none;font:700 15px/1 Arial,sans-serif;letter-spacing:.14em;'
          b'padding:7px 11px;border-radius:5px;background:rgb(176,36,24);color:#fff;'
          b'box-shadow:0 2px 8px rgba(0,0,0,.35)">LOCAL</div>'
-         b'<style>@media print{#local-badge{display:none}}</style>\n')
+         b'<style>@media print{#local-badge{display:none}}</style>'
+         # a page in a frame (a deck's live widget, the 3D die) is part of the page around it, which wears the badge
+         # already - a second one sat inside the slide (07.10.2026, unendliche-summe-live.html on slide 10)
+         b'<script>if(window.top!==window){var lb=document.getElementById("local-badge");if(lb)lb.remove()}</script>\n')
 
 BODY_END = re.compile(rb'</body\s*>', re.IGNORECASE)
 

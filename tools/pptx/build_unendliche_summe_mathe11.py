@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from omml import MathDeck
 from mathe11_unendliche_summe_svg import (zenon, verdoppeln, quadrat, leibniz, dreieckszahlen,
                                           teleskop_vorbereitung, teleskop_tafel, teilsummen,
-                                          uebung, verdoppeln_tafel, falle_tafel, quadrat_tafel)
+                                          uebung, verdoppeln_tafel, falle_tafel, quadrat_tafel, teleskop_box)
 
 d = MathDeck("mathe11-unendliche-summe.pptx")
 
@@ -67,7 +67,7 @@ svg, labels = teleskop_tafel()
 # the name and its oldest known statement, with a link (Doc, 06.10.2026: "Torricelli - den sollte man dann bitte unbedingt
 # zitieren. Und auch einen Link mit dazu"): Wikipedia "Telescoping series" after A. Weil, Prehistory of the zeta-function
 # (1989), doi:10.1016/B978-0-12-067570-8.50009-3
-d.figure("Beweis 1: das Teleskop", svg, labels,
+d.figure("Beweis 1: das Teleskop", svg, labels, frames=[teleskop_box()],
          source=("Der Name: wie ein ausziehbares Fernrohr. Früh schon bei Evangelista Torricelli, De dimensione "
                  "parabolae (1644) – nach André Weil (1989)", "https://en.wikipedia.org/wiki/Telescoping_series"))
 
