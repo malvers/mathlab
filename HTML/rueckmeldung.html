@@ -63,7 +63,7 @@
             gap: clamp(28px, 6vw, 96px); padding: 24px 16px;
             box-sizing: border-box; font-family: 'Orbitron', sans-serif; color: #eaf0f7;
         }
-        #rm-qr { display: flex; justify-content: center; }
+        #rm-qr { display: flex; flex-direction: column; align-items: center; }
         #rm-stand { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
         #rm-zahl {
             font: 700 clamp(6rem, 26vh, 15rem)/1 'Orbitron', sans-serif;
@@ -87,6 +87,16 @@
         .rm-knoepfe { display: flex; flex-direction: column; gap: 10px; }
         .rm-hilfe { margin: 4px 0 0; font: 400 0.9rem/1.55 'Outfit', sans-serif; color: #c8d2e0; text-wrap: pretty; }
         .rm-hilfe b { color: #eaf0f7; font-weight: 600; }
+
+        /* the phone (Doc, 07.10.2026: "auf dem Phone sieht das mit dem Bar links nicht so gut aus"): the panel starts
+           folded away, its keys stand under the count, the code under the QR */
+        .rm-fon { display: none !important; }
+        @media (max-width: 700px) {
+            .rm-fon { display: flex !important; }
+        }
+        #rm-fon-knoepfe { flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 18px; }
+        #rm-fon-knoepfe .cyber-btn { width: auto; min-width: 0; padding: 0 16px; }
+        .rm-code-fon { margin-top: 12px; font-size: 0.9rem; letter-spacing: 0.2em; color: var(--rm-leise); }
 
         /* the class's texts: a dialog, newest first - the words as text only (any phone wrote them) */
         #rm-nachrichten .cyber-modal { max-width: 560px; max-height: 84vh; display: flex; flex-direction: column; padding: 28px 24px 20px; }
@@ -120,10 +130,10 @@
                 <div id="rm-code">----</div>
             </div>
             <div class="cyber-control-group rm-knoepfe">
-                <button type="button" class="cyber-btn" id="rm-texte-knopf">NACHRICHTEN</button>
-                <button type="button" class="cyber-btn" id="rm-qr-knopf">QR-CODE AUSBLENDEN</button>
-                <button type="button" class="cyber-btn" id="rm-null">AUF NULL</button>
-                <button type="button" class="cyber-btn" id="rm-neu">NEUER CODE</button>
+                <button type="button" class="cyber-btn" data-aktion="texte">NACHRICHTEN</button>
+                <button type="button" class="cyber-btn" data-aktion="qr" id="rm-qr-knopf">QR-CODE AUSBLENDEN</button>
+                <button type="button" class="cyber-btn" data-aktion="null">AUF NULL</button>
+                <button type="button" class="cyber-btn" data-aktion="neu">NEUER CODE</button>
             </div>
             <div class="cyber-control-group">
                 <p class="rm-hilfe">Die Klasse scannt den QR-Code mit dem Handy. Wer etwas <b>nicht versteht</b>, drückt –
@@ -148,6 +158,12 @@
                     <div id="rm-tempo">
                         <span class="rm-pille" data-art="schnell">ZU SCHNELL <span>0</span></span>
                         <span class="rm-pille" data-art="langsam">ZU LANGSAM <span>0</span></span>
+                    </div>
+                    <!-- the panel's keys, on the phone only -->
+                    <div id="rm-fon-knoepfe" class="rm-fon">
+                        <button type="button" class="cyber-btn" data-aktion="texte">NACHRICHTEN</button>
+                        <button type="button" class="cyber-btn" data-aktion="null">AUF NULL</button>
+                        <button type="button" class="cyber-btn" data-aktion="neu">NEUER CODE</button>
                     </div>
                 </section>
             </div>
@@ -189,6 +205,8 @@
         if (window.CyberLeftChrome && typeof CyberLeftChrome.configure === 'function') {
             CyberLeftChrome.configure({ viewportOnlyZoom: true });
         }
+        // on the phone the panel starts folded away (the menu key still opens it); its keys stand under the count
+        if (matchMedia('(max-width: 700px)').matches) toggleSidebar();
 
         (function () {
             'use strict';
@@ -244,11 +262,14 @@
             // the QR card of js/buzzer.js - the same one Vorrechnen puts on the board
             async function zeigeQr() {
                 $('rm-code').textContent = Buzzer.code();
-                try { qrFeld.replaceChildren(await Buzzer.karteBereit()); }
+                const code = document.createElement('div');                  // the panel's code, on the phone
+                code.className = 'rm-fon rm-code-fon';
+                code.textContent = 'CODE ' + Buzzer.code();
+                try { qrFeld.replaceChildren(await Buzzer.karteBereit(), code); }
                 catch (_) { qrFeld.textContent = Buzzer.link(); }
             }
             // the texts: a key in the panel with the count of the unread, a dialog with all of today's
-            const KEY_GELESEN = 'rueckmeldung-gelesen', texteKnopf = $('rm-texte-knopf');
+            const KEY_GELESEN = 'rueckmeldung-gelesen', texteKnoepfe = document.querySelectorAll('[data-aktion="texte"]');
             let texte = [];
             const gelesen = () => (g => g && g.code === Buzzer.code() && g.tag === heute() ? g.bis : 0)(lies(KEY_GELESEN, null));
             const offen = () => { const o = $('rm-nachrichten'); return !!(o && o.classList.contains('open')); };
@@ -258,8 +279,10 @@
             function texteZeigen() {
                 if (offen()) alleGelesen();
                 const neu = texte.filter(x => x.id > gelesen()).length;
-                Buzzer.markiere(texteKnopf, neu);
-                texteKnopf.title = texte.length ? texte.length + ' Nachricht' + (texte.length === 1 ? '' : 'en') + ' heute' : 'heute noch keine Nachricht';
+                texteKnoepfe.forEach(k => {
+                    Buzzer.markiere(k, neu);
+                    k.title = texte.length ? texte.length + ' Nachricht' + (texte.length === 1 ? '' : 'en') + ' heute' : 'heute noch keine Nachricht';
+                });
                 const liste = $('rm-liste');
                 if (!liste) return;
                 liste.textContent = '';
@@ -301,7 +324,6 @@
                 o.classList.add('open');
                 texteZeigen();
             }
-            texteKnopf.addEventListener('click', () => nachrichten(true));
             addEventListener('keydown', e => { if (e.key === 'Escape' && offen()) nachrichten(false); });
 
             function qrSichtbar(an) {
@@ -310,19 +332,24 @@
                 schreib(KEY_QR, an);
             }
 
-            qrKnopf.addEventListener('click', () => qrSichtbar(qrFeld.hidden));
-            $('rm-null').addEventListener('click', () => {
-                Buzzer.gesehen();
-                abSetzen();
-                Buzzer.tempoJetzt();
-                vonVorn();
-            });
-            $('rm-neu').addEventListener('click', () => {
-                vonVorn();
-                Buzzer.neuerCode();
-                abSetzen();
-                zeigeQr();
-            });
+            // the keys, in the panel and (on the phone) under the count
+            const aktionen = {
+                texte: () => nachrichten(true),
+                qr: () => qrSichtbar(qrFeld.hidden),
+                null: () => {
+                    Buzzer.gesehen();
+                    abSetzen();
+                    Buzzer.tempoJetzt();
+                    vonVorn();
+                },
+                neu: () => {
+                    vonVorn();
+                    Buzzer.neuerCode();
+                    abSetzen();
+                    zeigeQr();
+                }
+            };
+            document.querySelectorAll('[data-aktion]').forEach(k => k.addEventListener('click', () => aktionen[k.dataset.aktion]()));
 
             // another page claimed this code today: js/buzzer.js took a fresh one - the class needs the new QR
             addEventListener('buzzer-code', () => { vonVorn(); abSetzen(); zeigeQr(); });
