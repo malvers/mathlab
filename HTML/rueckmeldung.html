@@ -10,6 +10,9 @@
     buzzer.html (QR -> "HAB ICH NICHT VERSTANDEN", then "DRÜCKEN, WENN VERSTANDEN"); everything here goes through the
     central js/buzzer.js: the QR card, the count of open questions (a "verstanden" takes one back) and the phones'
     "zu schnell" / "zu langsam" since the last zero. No name, no device - only the code and the time.
+    The written feedback too ("das will ich definitiv haben"): colleagues have no SVP login, so the code is claimed
+    for the day with a key of this device (Buzzer.texte with schluessel) - the texts behind a key in the panel, a
+    tap shows them, so they never stand on the beamer by themselves.
 -->
 
 <head>
@@ -84,6 +87,16 @@
         .rm-knoepfe { display: flex; flex-direction: column; gap: 10px; }
         .rm-hilfe { margin: 4px 0 0; font: 400 0.9rem/1.55 'Outfit', sans-serif; color: #c8d2e0; text-wrap: pretty; }
         .rm-hilfe b { color: #eaf0f7; font-weight: 600; }
+
+        /* the class's texts: a dialog, newest first - the words as text only (any phone wrote them) */
+        #rm-nachrichten .cyber-modal { max-width: 560px; max-height: 84vh; display: flex; flex-direction: column; padding: 28px 24px 20px; }
+        #rm-nachrichten h3 { font-size: 1rem; margin: 0 40px 16px; }
+        #rm-liste { overflow-y: auto; text-align: left; }
+        .rm-tx { display: flex; gap: 14px; padding: 10px 2px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+        .rm-tx:last-child { border-bottom: none; }
+        .rm-tx-zeit { flex: none; padding-top: 3px; font: 400 0.75rem/1.4 'Orbitron', sans-serif; letter-spacing: 0.06em; color: var(--rm-leise); }
+        .rm-tx-text { font: 400 1rem/1.5 'Outfit', sans-serif; color: #eaf0f7; white-space: pre-wrap; overflow-wrap: anywhere; }
+        .rm-leer { margin: 6px 0 10px; font: 400 0.95rem/1.5 'Outfit', sans-serif; color: var(--rm-leise); text-align: center; }
     </style>
 </head>
 
@@ -107,6 +120,7 @@
                 <div id="rm-code">----</div>
             </div>
             <div class="cyber-control-group rm-knoepfe">
+                <button type="button" class="cyber-btn" id="rm-texte-knopf">NACHRICHTEN</button>
                 <button type="button" class="cyber-btn" id="rm-qr-knopf">QR-CODE AUSBLENDEN</button>
                 <button type="button" class="cyber-btn" id="rm-null">AUF NULL</button>
                 <button type="button" class="cyber-btn" id="rm-neu">NEUER CODE</button>
@@ -115,6 +129,8 @@
                 <p class="rm-hilfe">Die Klasse scannt den QR-Code mit dem Handy. Wer etwas <b>nicht versteht</b>, drückt –
                     die Zahl steigt. Wer es danach verstanden hat, drückt <b>noch einmal</b> – die Zahl geht wieder
                     runter. Dazu „zu schnell“ und „zu langsam“.</p>
+                <p class="rm-hilfe"><b>NACHRICHTEN</b> – was die Klasse anonym schreibt. Lesen kann das nur dieses
+                    Gerät, die Zahl am Knopf zeigt, was neu ist.</p>
                 <p class="rm-hilfe">Anonym: Gespeichert werden nur der Code und die Uhrzeit, kein Name, kein Gerät.</p>
                 <p class="rm-hilfe"><b>AUF NULL</b> – ein neues Thema. <b>NEUER CODE</b> – die nächste Klasse.</p>
             </div>
@@ -231,6 +247,63 @@
                 try { qrFeld.replaceChildren(await Buzzer.karteBereit()); }
                 catch (_) { qrFeld.textContent = Buzzer.link(); }
             }
+            // the texts: a key in the panel with the count of the unread, a dialog with all of today's
+            const KEY_GELESEN = 'rueckmeldung-gelesen', texteKnopf = $('rm-texte-knopf');
+            let texte = [];
+            const gelesen = () => (g => g && g.code === Buzzer.code() && g.tag === heute() ? g.bis : 0)(lies(KEY_GELESEN, null));
+            const offen = () => { const o = $('rm-nachrichten'); return !!(o && o.classList.contains('open')); };
+            function alleGelesen() {
+                schreib(KEY_GELESEN, { code: Buzzer.code(), tag: heute(), bis: Math.max(gelesen(), ...texte.map(x => x.id)) });
+            }
+            function texteZeigen() {
+                if (offen()) alleGelesen();
+                const neu = texte.filter(x => x.id > gelesen()).length;
+                Buzzer.markiere(texteKnopf, neu);
+                texteKnopf.title = texte.length ? texte.length + ' Nachricht' + (texte.length === 1 ? '' : 'en') + ' heute' : 'heute noch keine Nachricht';
+                const liste = $('rm-liste');
+                if (!liste) return;
+                liste.textContent = '';
+                if (!texte.length) {
+                    const p = document.createElement('p');
+                    p.className = 'rm-leer';
+                    p.textContent = 'Noch keine Nachricht. Auf dem Handy steht unten das Feld „Dein anonymes Feedback“.';
+                    liste.appendChild(p);
+                    return;
+                }
+                texte.slice().sort((a, b) => b.id - a.id).forEach(x => {
+                    const d = document.createElement('div'), zeit = document.createElement('span'), text = document.createElement('span');
+                    d.className = 'rm-tx';
+                    zeit.className = 'rm-tx-zeit';
+                    const t = new Date(x.t);
+                    zeit.textContent = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+                    text.className = 'rm-tx-text';
+                    text.textContent = x.text;
+                    d.append(zeit, text);
+                    liste.appendChild(d);
+                });
+            }
+            function nachrichten(auf) {
+                let o = $('rm-nachrichten');
+                if (!auf) { if (o) o.classList.remove('open'); texteZeigen(); return; }
+                if (!o) {
+                    o = document.createElement('div');
+                    o.id = 'rm-nachrichten';
+                    o.className = 'cyber-overlay';
+                    o.innerHTML = '<div class="cyber-modal cyber-modal--neon" role="dialog" aria-label="Nachrichten der Klasse">' +
+                        '<button type="button" class="cyber-modal-x" title="Schließen" aria-label="Schließen">' +
+                        '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6 L18 18 M18 6 L6 18" fill="none"' +
+                        ' stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>' +
+                        '<h3>NACHRICHTEN</h3><div id="rm-liste"></div></div>';
+                    o.addEventListener('click', e => { if (e.target === o) nachrichten(false); });
+                    o.querySelector('.cyber-modal-x').addEventListener('click', () => nachrichten(false));
+                    document.body.appendChild(o);
+                }
+                o.classList.add('open');
+                texteZeigen();
+            }
+            texteKnopf.addEventListener('click', () => nachrichten(true));
+            addEventListener('keydown', e => { if (e.key === 'Escape' && offen()) nachrichten(false); });
+
             function qrSichtbar(an) {
                 qrFeld.hidden = !an;
                 qrKnopf.textContent = an ? 'QR-CODE AUSBLENDEN' : 'QR-CODE ZEIGEN';
@@ -251,7 +324,11 @@
                 zeigeQr();
             });
 
+            // another page claimed this code today: js/buzzer.js took a fresh one - the class needs the new QR
+            addEventListener('buzzer-code', () => { vonVorn(); abSetzen(); zeigeQr(); });
+
             Buzzer.tempo(tempo, () => ab);
+            Buzzer.texte(t => { texte = t.texte || []; texteZeigen(); }, { schluessel: true });
             Buzzer.start(meldung);
             qrSichtbar(lies(KEY_QR, true) !== false);
             zeigeQr();

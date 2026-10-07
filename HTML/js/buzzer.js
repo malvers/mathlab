@@ -30,6 +30,9 @@
 //   Buzzer.tempoMarke(el, s) shows such a count beside a button, left of it (the teacher's side only)
 //   Buzzer.texte(onTexte)    the phones' written feedback of today (table buzzer_text, Doc 01.10.2026): onTexte({texte,
 //                            angemeldet, neu}) every 5 s; readable only with the teacher's svpAuth session
+//   Buzzer.texte(onTexte, { schluessel: true })   the same without a session (rueckmeldung.html, Doc 07.10.2026):
+//                            the code is claimed for the day with a key of this device; if another has claimed it,
+//                            a fresh code follows and window hears 'buzzer-code'
 //   Buzzer.aktiv(), Buzzer.code()
 (function () {
     'use strict';
@@ -143,24 +146,85 @@
     // ---- written feedback (Doc, 01.10.2026: "ein Feld. Für Feedback. Wo die mir also tatsächlich irgendwas schreiben
     // können ... bei mir im Mission Control"): rows of buzzer_text, today's of this code. Only a signed-in teacher may
     // read them (svpAuth - the page brings it along), so without a session there is nothing to show.
-    let texteMelde = null, texte = new Map();                              // id -> {id, text, t}
+    let texteMelde = null, texteMitSchluessel = false, texte = new Map();  // id -> {id, text, t}
+    function texteDazu(zeilen) {
+        const zeiten = zeitenAus(zeilen);
+        let neu = false;
+        zeilen.forEach(r => {
+            if (!r || texte.has(r.id)) return;
+            texte.set(r.id, { id: r.id, text: String(r.text || ''), t: zeiten[r.id] || Date.now() });
+            neu = true;
+        });
+        texteMelde({ texte: [...texte.values()], angemeldet: true, neu });
+    }
     async function texteNachsehen() {
         if (!texteMelde) return;
         const auth = window.svpAuth;
-        if (!auth || !auth.hasSession || !auth.hasSession()) { texteMelde({ texte: [], angemeldet: false, neu: false }); return; }
+        if (!auth || !auth.hasSession || !auth.hasSession()) {
+            if (texteMitSchluessel) texteMitSchluesselNachsehen();
+            else texteMelde({ texte: [], angemeldet: false, neu: false });
+            return;
+        }
         try {
             const heute0 = new Date(); heute0.setHours(0, 0, 0, 0);
             const res = await auth.api('buzzer_text?code=eq.' + code() + '&created_at=gt.' + encodeURIComponent(heute0.toISOString()) +
                 '&select=id,text,created_at&order=id');
-            if (!res.ok) return;
-            const zeilen = await res.json(), zeiten = zeitenAus(zeilen);
-            let neu = false;
-            zeilen.forEach(r => {
-                if (!r || texte.has(r.id)) return;
-                texte.set(r.id, { id: r.id, text: String(r.text || ''), t: zeiten[r.id] || Date.now() });
-                neu = true;
-            });
-            texteMelde({ texte: [...texte.values()], angemeldet: true, neu });
+            if (res.ok) texteDazu(await res.json());
+        } catch (_) { /* offline for a moment - the next look catches up */ }
+    }
+    // ---- the texts without a session (Doc, 07.10.2026: rueckmeldung.html for colleagues, who have no SVP login):
+    // a 4-digit code alone must not open what a class wrote, so the page claims its code for the day with a random
+    // key that never leaves this device - the first claim of a code wins, and only that key reads the texts written
+    // since (functions buzzer_anmelden / buzzer_texte, supabase/migrations/20261007_buzzer_besitz.sql). A code
+    // another page has claimed today is given up for a fresh one, a few times at most.
+    const KEY_SCHLUESSEL = 'buzzer-schluessel';
+    let besitzVersuche = 0;
+    function neuerSchluessel() {
+        const b = new Uint8Array(16);
+        crypto.getRandomValues(b);
+        return Array.from(b, x => x.toString(16).padStart(2, '0')).join('');
+    }
+    function rpc(name, args) {
+        return fetch(DB_URL + '/rest/v1/rpc/' + name, {
+            method: 'POST', cache: 'no-store',
+            headers: { apikey: DB_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify(args)
+        });
+    }
+    // the key of today's code, claimed if need be; null: offline, or the code is another's (a fresh one follows).
+    // One claim at a time: on the first start of a day the connection is made twice, and two claims racing each
+    // other could take the page's own code for another's.
+    let besitzLaeuft = null;
+    function schluessel() {
+        if (!besitzLaeuft) besitzLaeuft = anmelden().finally(() => { besitzLaeuft = null; });
+        return besitzLaeuft;
+    }
+    async function anmelden() {
+        const c = code(), s = lies(KEY_SCHLUESSEL, null);
+        const meins = s && s.code === c && s.tag === heute() && typeof s.key === 'string';
+        if (meins && s.ok) return s.key;
+        // kept before it is sent, so a reload in between claims with the same key
+        const key = meins ? s.key : neuerSchluessel();
+        schreib(KEY_SCHLUESSEL, { code: c, tag: heute(), key, ok: false });
+        const res = await rpc('buzzer_anmelden', { p_code: c, p_schluessel: key });
+        if (!res.ok || c !== code()) return null;                     // the code changed meanwhile: the next look
+        if (await res.json() === true) {
+            schreib(KEY_SCHLUESSEL, { code: c, tag: heute(), key, ok: true });
+            besitzVersuche = 0;
+            return key;
+        }
+        if (++besitzVersuche <= 5) {
+            neuerCode();
+            dispatchEvent(new CustomEvent('buzzer-code', { detail: code() }));
+        }
+        return null;
+    }
+    async function texteMitSchluesselNachsehen() {
+        try {
+            const c = code(), key = await schluessel();
+            if (!key || c !== code()) return;
+            const res = await rpc('buzzer_texte', { p_code: c, p_schluessel: key });
+            if (res.ok && c === code()) texteDazu(await res.json());
         } catch (_) { /* offline for a moment - the next look catches up */ }
     }
     async function verbinden() {
@@ -321,7 +385,8 @@
         // minutes), neu = the kind just come; tempoJetzt(): count again now (the page's ab() moved on)
         tempo: (cb, ab) => { tempoMelde = cb; tempoAb = ab || null; if (laeuft && cb) cb(tempoStand()); },
         tempoJetzt: () => { if (tempoMelde) tempoMelde(tempoStand()); },
-        // texte(onTexte): onTexte({texte: [{id, text, t}], angemeldet, neu}) - today's written feedback of this code
-        texte: cb => { texteMelde = cb; if (laeuft && cb) texteNachsehen(); },
+        // texte(onTexte, {schluessel}): onTexte({texte: [{id, text, t}], angemeldet, neu}) - today's written feedback
+        // of this code; schluessel: true reads them without a session, with the code claimed by this device
+        texte: (cb, opts) => { texteMelde = cb; texteMitSchluessel = !!(opts && opts.schluessel); if (laeuft && cb) texteNachsehen(); },
         aktiv: () => laeuft };
 })();
