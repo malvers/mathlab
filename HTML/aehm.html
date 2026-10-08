@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ähm-Detektor</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #0b1120; --red: rgb(176, 36, 24); --text: #e5e7eb; --dim: #64748b; --panel: #111827; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg); color: var(--text); font-family: 'Orbitron', sans-serif;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+    padding: 24px 16px;
+  }
+  body.flash { animation: flash 0.6s ease-out; }
+  @keyframes flash { 0% { background: var(--red); } 100% { background: var(--bg); } }
+  h1 { margin: 0; font-size: clamp(1.2rem, 4vw, 2rem); letter-spacing: 2px; }
+  #count { font-size: clamp(3rem, 14vw, 7rem); font-weight: 700; line-height: 1; }
+  #status { color: var(--dim); font-size: 0.85rem; min-height: 1.2em; text-align: center; }
+  button {
+    font-family: inherit; font-size: 1rem; height: 58px; padding: 0 28px;
+    border-radius: 10px; border: 1px solid #334155; background: #1e293b; color: var(--text); cursor: pointer;
+  }
+  button.on { border-color: var(--red); }
+  button:disabled { opacity: 0.4; cursor: default; }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+  .wrap { width: 100%; max-width: 900px; }
+  /* Steadiness meter: fills while a sound stays steady, red once it counts */
+  #meter { height: 10px; background: var(--panel); border-radius: 5px; overflow: hidden; }
+  #meter div { height: 100%; width: 0; background: var(--dim); transition: width 0.05s linear; }
+  #meter div.hit { background: var(--red); }
+  #debug { color: var(--dim); font-size: 0.7rem; margin-top: 6px; min-height: 1em; }
+  .knobs { display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 0.75rem; color: var(--dim); }
+  .knobs label { display: flex; align-items: center; gap: 8px; }
+  .knobs input { width: 140px; }
+  #text {
+    flex: 1; overflow-y: auto; min-height: 120px;
+    background: var(--panel); border-radius: 10px; padding: 16px;
+    font-size: 1rem; line-height: 1.7; white-space: pre-wrap;
+  }
+  #text .interim { color: var(--dim); }
+  #text mark { background: var(--red); color: white; border-radius: 4px; padding: 0 4px; }
+</style>
+</head>
+<body>
+  <h1>Ähm-Detektor</h1>
+  <div id="count">0</div>
+  <div class="row">
+    <button id="toggle">Start</button>
+    <button id="save" disabled>Aufnahme sichern</button>
+  </div>
+  <div id="status"></div>
+  <div class="wrap">
+    <div id="meter"><div></div></div>
+    <div id="debug"></div>
+  </div>
+  <div class="wrap knobs">
+    <label>Mindestdauer <input id="minMs" type="range" min="150" max="600" step="10" value="300"> <span id="minMsVal"></span></label>
+    <label>Toleranz <input id="tol" type="range" min="0.5" max="2" step="0.1" value="1"> <span id="tolVal"></span></label>
+  </div>
+  <div id="text" class="wrap"></div>
+
+<script>
+/*
+ * Filled-pause detector (after Goto et al., Eurospeech 1999):
+ * an "ähm" is a voiced sound with a flat pitch and a steady spectral envelope
+ * that lasts longer than normal syllables. Chrome's speech recognition drops
+ * fillers from its text, so the flash comes from the audio alone; the
+ * recognizer only provides the transcript, into which the detected "ähm" are inserted.
+ */
+const HOP_MS = 25;           // analysis step
+const MIN_RMS = 0.004;       // absolute loudness floor for "voiced"
+const CLARITY = 0.75;        // minimum pitch clarity (NSDF peak)
+const F0_MIN = 70, F0_MAX = 400;
+const MAX_F0_JUMP = 1.0;     // semitones against the run's smoothed pitch (x tolerance)
+const MAX_SPEC_DIFF = 6;     // dB mean deviation from the run's envelope (x tolerance)
+const MAX_GAP = 2;           // frames a run survives a glitch
+const FILLER = /(?<!\p{L})(ä+h*m*|[eö]+h+m+)(?!\p{L})/giu;
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const $ = id => document.getElementById(id);
+const $count = $('count'), $toggle = $('toggle'), $status = $('status'), $text = $('text');
+const $bar = document.querySelector('#meter div'), $debug = $('debug');
+const $minMs = $('minMs'), $tol = $('tol');
+
+let running = false, total = 0;
+let audio = null;            // { ctx, stream, analyser, timer }
+let rec = null;
+let take = { chunks: [], sr: 48000 };   // raw session audio for "Aufnahme sichern"
+const MAX_TAKE_S = 60;
+window.aehmLog = [];                     // per-frame values, for offline tuning
+let finalText = '', curInterim = '', marks = [];
+
+// ---------- UI helpers ----------
+function flash() {
+  document.body.classList.remove('flash');
+  void document.body.offsetWidth; // restart the animation
+  document.body.classList.add('flash');
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+}
+function highlight(s) { return escapeHtml(s).replace(FILLER, '<mark>$1</mark>'); }
+
+function render() {
+  const pending = marks.length ? ' ähm' : '';
+  $text.innerHTML = highlight(finalText) + '<span class="interim">' + highlight(curInterim + pending) + '</span>';
+  $text.scrollTop = $text.scrollHeight;
+}
+
+function showKnobs() {
+  $('minMsVal').textContent = $minMs.value + ' ms';
+  $('tolVal').textContent = Number($tol.value).toFixed(1);
+}
+$minMs.oninput = $tol.oninput = showKnobs;
+showKnobs();
+
+// ---------- Pitch: McLeod normalized square difference ----------
+function pitch(buf, sr) {
+  const minLag = Math.floor(sr / F0_MAX), maxLag = Math.ceil(sr / F0_MIN);
+  const n = buf.length, nsdf = new Float32Array(maxLag + 2);
+  let best = 0;
+  for (let lag = minLag; lag <= maxLag + 1; lag++) {
+    let ac = 0, m = 0;
+    for (let i = 0; i < n - lag; i++) {
+      const a = buf[i], b = buf[i + lag];
+      ac += a * b; m += a * a + b * b;
+    }
+    nsdf[lag] = m ? 2 * ac / m : 0;
+    if (nsdf[lag] > best) best = nsdf[lag];
+  }
+  if (best < CLARITY) return { f0: null, clarity: best };
+  // First peak close to the maximum avoids octave-down errors
+  for (let lag = minLag + 1; lag <= maxLag; lag++) {
+    const a = nsdf[lag - 1], b = nsdf[lag], c = nsdf[lag + 1];
+    if (b >= 0.85 * best && b >= a && b >= c) {
+      const shift = (a - c) / (2 * (a - 2 * b + c)) || 0;
+      return { f0: sr / (lag + shift), clarity: b };
+    }
+  }
+  return { f0: null, clarity: best };
+}
+
+// ---------- Spectral envelope: log-spaced bands, loudness removed ----------
+function makeBands(sr, fftSize) {
+  const edges = [], lo = 200, hi = 4000, nb = 16;
+  for (let k = 0; k <= nb; k++) edges.push(Math.round(lo * Math.pow(hi / lo, k / nb) / (sr / fftSize)));
+  return edges;
+}
+function envelope(spec, edges) {
+  const env = [];
+  for (let k = 0; k < edges.length - 1; k++) {
+    let s = 0, c = 0;
+    for (let i = edges[k]; i < Math.max(edges[k + 1], edges[k] + 1); i++) { s += spec[i]; c++; }
+    env.push(s / c);
+  }
+  const mean = env.reduce((a, b) => a + b, 0) / env.length;
+  return env.map(v => v - mean);
+}
+function envDist(a, b) {
+  let d = 0;
+  for (let i = 0; i < a.length; i++) d += Math.abs(a[i] - b[i]);
+  return d / a.length;
+}
+
+// ---------- Detector loop ----------
+async function startAudio() {
+  const stream = await navigator.mediaDevices.getUserMedia({
+    // Raw signal: noise suppression would flatten exactly the steady sounds we look for
+    audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+  });
+  const ctx = new AudioContext();
+  const analyser = ctx.createAnalyser();
+  analyser.fftSize = 2048;
+  analyser.smoothingTimeConstant = 0;
+  const src = ctx.createMediaStreamSource(stream);
+  src.connect(analyser);
+
+  // Pitch and level from a 150-1000 Hz band: removes train/road rumble that
+  // masks the voice (measured: 0 -> 5 hits on a recording from the train)
+  const hp = new BiquadFilterNode(ctx, { type: 'highpass', frequency: 150 });
+  const lp = new BiquadFilterNode(ctx, { type: 'lowpass', frequency: 1000 });
+  const voice = ctx.createAnalyser();
+  voice.fftSize = 2048;
+  src.connect(hp).connect(lp).connect(voice);
+
+  // Keep the raw signal (last 60 s) so a take can be saved and analysed
+  take = { chunks: [], sr: ctx.sampleRate };
+  const tap = ctx.createScriptProcessor(4096, 1, 1);
+  let kept = 0;
+  tap.onaudioprocess = e => {
+    const c = new Float32Array(e.inputBuffer.getChannelData(0));
+    take.chunks.push(c); kept += c.length;
+    while (kept > MAX_TAKE_S * ctx.sampleRate) kept -= take.chunks.shift().length;
+  };
+  src.connect(tap);
+  tap.connect(ctx.destination);   // silent, but a processor only runs when connected
+  window.aehmLog = [];
+
+  const buf = new Float32Array(analyser.fftSize);
+  const spec = new Float32Array(analyser.frequencyBinCount);
+  const edges = makeBands(ctx.sampleRate, analyser.fftSize);
+  let floor = 0.002;
+  const run = { len: 0, gap: 0, f0: 0, env: null, fired: false };
+
+  const tick = () => {
+    voice.getFloatTimeDomainData(buf);
+    analyser.getFloatFrequencyData(spec);
+    let rms = 0;
+    for (let i = 0; i < buf.length; i++) rms += buf[i] * buf[i];
+    rms = Math.sqrt(rms / buf.length);
+    // Slowly rising noise floor, drops at once in quiet moments
+    floor = Math.max(1e-4, rms < floor ? rms : floor * 1.005);
+
+    const tol = Number($tol.value), minMs = Number($minMs.value);
+    const gate = Math.max(MIN_RMS, floor * 2.5);
+    const pr = pitch(buf, ctx.sampleRate);
+    const p = rms > gate && pr.f0 ? pr : null;
+    const env = p ? envelope(spec, edges) : null;
+    let df = 0, ds = 0, steady = false;
+
+    if (p && run.len > 0) {
+      df = Math.abs(12 * Math.log2(p.f0 / run.f0));
+      ds = envDist(env, run.env);
+      steady = df < MAX_F0_JUMP * tol && ds < MAX_SPEC_DIFF * tol;
+    }
+
+    if (p && (run.len === 0 || steady)) {
+      if (run.len === 0) { run.f0 = p.f0; run.env = env; }
+      else {
+        // Smoothed reference allows a slow (falling) glide
+        run.f0 = 0.7 * run.f0 + 0.3 * p.f0;
+        run.env = run.env.map((v, i) => 0.7 * v + 0.3 * env[i]);
+      }
+      run.len++; run.gap = 0;
+    } else if (run.len > 0 && run.gap < MAX_GAP) {
+      run.gap++;
+    } else {
+      run.len = 0; run.gap = 0; run.fired = false;
+    }
+
+    const ms = run.len * HOP_MS;
+    if (ms >= minMs && !run.fired) { run.fired = true; detected(); }
+
+    $bar.style.width = Math.min(100, 100 * ms / minMs) + '%';
+    $bar.classList.toggle('hit', run.fired);
+    // Why a frame counts or not: level vs. gate, pitch clarity, steadiness
+    $debug.textContent = `Pegel ${(rms * 1000).toFixed(1)}/${(gate * 1000).toFixed(1)} · Klarheit ${pr.clarity.toFixed(2)}` +
+      (p ? ` · f0 ${p.f0.toFixed(0)} Hz · Δf0 ${df.toFixed(2)} HT · ΔSpektrum ${ds.toFixed(1)} dB · ruhig ${ms} ms` : '');
+    window.aehmLog.push({ t: audio ? Math.round(audio.ctx.currentTime * 1000) : 0, rms, gate,
+      clarity: pr.clarity, f0: pr.f0, df, ds, ms, fired: run.fired });
+    if (window.aehmLog.length > MAX_TAKE_S * 1000 / HOP_MS) window.aehmLog.shift();
+  };
+
+  audio = { ctx, stream, analyser, tap, timer: setInterval(tick, HOP_MS) };
+}
+
+function stopAudio() {
+  if (!audio) return;
+  clearInterval(audio.timer);
+  audio.tap.disconnect();
+  audio.stream.getTracks().forEach(t => t.stop());
+  audio.ctx.close();
+  audio = null;
+  $bar.style.width = '0';
+  $debug.textContent = '';
+}
+
+function saveTake() {
+  const n = take.chunks.reduce((a, c) => a + c.length, 0);
+  if (!n) return;
+  const view = new DataView(new ArrayBuffer(44 + 2 * n));
+  const str = (o, s) => [...s].forEach((ch, i) => view.setUint8(o + i, ch.charCodeAt(0)));
+  str(0, 'RIFF'); view.setUint32(4, 36 + 2 * n, true); str(8, 'WAVE');
+  str(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+  view.setUint32(24, take.sr, true); view.setUint32(28, 2 * take.sr, true);
+  view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+  str(36, 'data'); view.setUint32(40, 2 * n, true);
+  let o = 44;
+  for (const c of take.chunks) for (const v of c) { view.setInt16(o, Math.max(-1, Math.min(1, v)) * 32767, true); o += 2; }
+  const stamp = new Date().toISOString().slice(0, 19).replace(/[-:T]/g, '');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([view], { type: 'audio/wav' }));
+  a.download = `aehm-${stamp}.wav`;
+  a.click();
+}
+$('save').onclick = saveTake;
+
+function detected() {
+  total++;
+  $count.textContent = total;
+  flash();
+  // Remember where in the running sentence it happened
+  marks.push(curInterim.length);
+  render();
+}
+
+// ---------- Transcript (text only, the flash does not depend on it) ----------
+function insertMarks(t) {
+  // Insert from the back so earlier positions stay valid
+  marks.sort((a, b) => b - a).forEach(pos => {
+    let i = Math.min(pos, t.length);
+    while (i < t.length && t[i] !== ' ') i++;
+    t = t.slice(0, i) + ' ähm' + t.slice(i);
+  });
+  marks = [];
+  return t;
+}
+
+function startRec() {
+  rec = new SR();
+  rec.lang = 'de-DE';
+  rec.continuous = true;
+  rec.interimResults = true;
+
+  rec.onresult = e => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) finalText += insertMarks(t).trim() + ' ';
+      else interim += t;
+    }
+    curInterim = interim;
+    render();
+  };
+
+  let broken = false;
+  rec.onerror = e => {
+    if (e.error === 'no-speech' || e.error === 'aborted') return;
+    broken = true;   // no endless restarts, the detector keeps running
+    $status.textContent = 'Spracherkennung: ' + e.error + ' – Zähler läuft weiter, nur ohne Text.';
+  };
+
+  // Chrome ends the run after silence: restart while still switched on
+  rec.onend = () => { if (running && !broken) startRec(); };
+
+  rec.start();
+}
+
+$toggle.onclick = async () => {
+  running = !running;
+  $toggle.textContent = running ? 'Stopp' : 'Start';
+  $toggle.classList.toggle('on', running);
+  if (running) {
+    try {
+      await startAudio();
+    } catch (err) {
+      running = false;
+      $toggle.textContent = 'Start';
+      $toggle.classList.remove('on');
+      $status.textContent = 'Kein Mikrofon: ' + err.message;
+      return;
+    }
+    $('save').disabled = false;
+    $status.textContent = SR ? 'Ich höre zu …' : 'Ich höre zu – Text gibt es nur in Chrome.';
+    if (SR) startRec();
+  } else {
+    stopAudio();
+    if (rec) rec.stop();
+    // Keep fillers that never got a final sentence
+    if (marks.length) { finalText += insertMarks(curInterim).trim() + ' '; curInterim = ''; render(); }
+    $status.textContent = '';
+  }
+};
+</script>
+</body>
+</html>
