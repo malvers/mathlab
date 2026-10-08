@@ -48,50 +48,19 @@
 <script>
 (function () {
   'use strict';
-  const VERSION = '7a01c78302bf', CACHE = 'docpad-' + VERSION, KEY_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/docpad-key';
+  const VERSION = 'e23ac67d7a12', KEY_URL = 'https://fyfhxzyymmurlaenmzse.supabase.co/functions/v1/docpad-key', STORE = 'https://fyfhxzyymmurlaenmzse.supabase.co/storage/v1/object/public/docpad/';
+  const APP = new URL('app/', location.href).href, fileUrl = h => APP + '__f/' + h, META_URL = APP + '__meta';
   const $ = id => document.getElementById(id);
   const say = (t, err) => { $('msg').textContent = t; $('msg').className = 'msg' + (err ? ' err' : ''); };
-  async function startSW() {                                // the worker that serves ./app/ from the cache
-    const reg = await navigator.serviceWorker.register('sw.js', { scope: './app/' });
-    const sw = reg.installing || reg.waiting || reg.active;
-    if (sw.state !== 'activated') await new Promise(r => sw.addEventListener('statechange', () => { if (sw.state === 'activated') r(); }));
-  }
-  // The doorman: the Supabase function "docpad-key" checks the password and hands out the bundle key
-  async function fetchKey(pw) {
-    say('Prüfe Passwort …');
-    let res;
-    try { res = await fetch(KEY_URL, { method: 'POST', body: JSON.stringify({ pass: pw }) }); }   // simple request, no preflight
-    catch (e) { throw new Error('Kein Netz - zum Entsperren bitte online sein'); }
-    if (res.status === 401) { const x = new Error('Passwort falsch'); x.pw = true; throw x; }
-    if (res.status === 429) throw new Error('Zu viele Versuche - bitte in ein paar Minuten noch einmal');
-    const j = await res.json().catch(() => ({}));
-    if (!res.ok || !j.key) throw new Error(j.error || 'Schlüssel nicht erhalten (' + res.status + ')');
-    const raw = Uint8Array.from(atob(j.key), c => c.charCodeAt(0));
-    return crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);   // non-extractable
-  }
-  async function unlock(key) {                            // key: the bundle's AES-GCM key
-    say('Lade …');
-    const res = await fetch('https://fyfhxzyymmurlaenmzse.supabase.co/storage/v1/object/public/docpad/docpad-' + VERSION + '.bin');   // Supabase Storage - one file per version, never changes
-    if (!res.ok) throw new Error('Paket nicht gefunden (' + res.status + ')');
-    const bin = new Uint8Array(await res.arrayBuffer());
-    if (String.fromCharCode(...bin.slice(0, 4)) !== 'DPK2') throw new Error('Paket beschädigt');
-    say('Entschlüssele …');
+  // "DPF1" | iv 12 | AES-GCM ciphertext -> the file's bytes, gunzipped where the list says z
+  async function unseal(key, bin, z) {
+    if (String.fromCharCode(...bin.subarray(0, 4)) !== 'DPF1') throw new Error('Datei beschädigt');
     let plain;
-    try { plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bin.slice(4, 16) }, key, bin.slice(16)); }
+    try { plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bin.subarray(4, 16) }, key, bin.subarray(16)); }
     catch (e) { const x = new Error('Schlüssel passt nicht'); x.key = true; throw x; }
-    const raw = new Uint8Array(await new Response(new Blob([plain]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
-    const n = new DataView(raw.buffer, raw.byteOffset, 4).getUint32(0, true);
-    const index = JSON.parse(new TextDecoder().decode(raw.subarray(4, 4 + n))), data = raw.subarray(4 + n);
-    say('Richte ein …');
-    for (const k of await caches.keys()) if (k.indexOf('docpad-') === 0) await caches.delete(k);   // older bundles
-    const cache = await caches.open(CACHE), app = new URL('app/', location.href);
-    await Promise.all(index.map(f => cache.put(new URL(f.p, app).href,
-      new Response(data.slice(f.o, f.o + f.n), { headers: { 'Content-Type': f.t } }))));
-    await startSW();
+    return z ? new Uint8Array(await new Response(new Blob([plain]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer()) : new Uint8Array(plain);
   }
-  // "Remember on this device" (Doc 15.09.: "ich möchte nicht immer dich fragen müssen"): the bundle key stays in
-  // IndexedDB - non-extractable, the password itself is never stored - so a new bundle opens without typing and
-  // without the doorman. The decrypted app sits in this browser's Cache Storage anyway, so this exposes nothing new.
+  // the key remembered on this device (IndexedDB "docpad", store "keys": 'data'; 'base' = PBKDF2 key before 17.09.)
   function idb(mode, fn) {
     return new Promise((res, rej) => {
       const rq = indexedDB.open('docpad', 1);
@@ -105,6 +74,63 @@
     });
   }
   const loadKey = name => idb('readonly', s => s.get(name)).catch(() => null);
+  // the cache "docpad-files" holds every file under its name, "docpad-meta" the list of the version on this device
+  const FILES = 'docpad-files', META = 'docpad-meta';
+  async function startSW() {                                // the worker that serves ./app/ from the cache
+    const reg = await navigator.serviceWorker.register('sw.js', { scope: './app/' });
+    await reg.update().catch(() => {});                     // a changed sw.js takes over now, not some visits later
+    const sw = reg.installing || reg.waiting || reg.active;
+    if (sw.state !== 'activated') await Promise.race([new Promise(r => setTimeout(r, 10000)),
+      new Promise(r => sw.addEventListener('statechange', () => { if (sw.state === 'activated') r(); }))]);
+  }
+  // The doorman: the Supabase function "docpad-key" checks the password and hands out the key
+  async function fetchKey(pw) {
+    say('Prüfe Passwort …');
+    let res;
+    try { res = await fetch(KEY_URL, { method: 'POST', body: JSON.stringify({ pass: pw }) }); }   // simple request, no preflight
+    catch (e) { throw new Error('Kein Netz - zum Entsperren bitte online sein'); }
+    if (res.status === 401) { const x = new Error('Passwort falsch'); x.pw = true; throw x; }
+    if (res.status === 429) throw new Error('Zu viele Versuche - bitte in ein paar Minuten noch einmal');
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok || !j.key) throw new Error(j.error || 'Schlüssel nicht erhalten (' + res.status + ')');
+    const raw = Uint8Array.from(atob(j.key), c => c.charCodeAt(0));
+    return crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);   // non-extractable
+  }
+  const ready = async () => {                               // this version set up on the device before
+    const r = await caches.open(META).then(c => c.match(META_URL)).catch(() => null);
+    return !!r && ((await r.json().catch(() => ({}))).v === VERSION);
+  };
+  async function unlock(key) {                            // key: the AES-GCM key of all files
+    say('Lade …');
+    const res = await fetch(STORE + 'm/' + VERSION + '.bin');   // the version's list - Supabase Storage, never changes
+    if (!res.ok) throw new Error('Version nicht gefunden (' + res.status + ')');
+    const list = JSON.parse(new TextDecoder().decode(await unseal(key, new Uint8Array(await res.arrayBuffer()), 1)));
+    // only what the device does not hold from an earlier version; Solita's voice not even that (sw.js fetches it)
+    const files = await caches.open(FILES), have = new Set((await files.keys()).map(r => r.url)), todo = new Map();
+    for (const f of list.files) if (!f.l && !have.has(fileUrl(f.h))) todo.set(f.h, f);
+    const need = [...todo.values()], mb = (need.reduce((s, f) => s + f.n, 0) / 1e6).toFixed(1).replace('.', ',');
+    let done = 0, i = 0;
+    const tell = () => say('Lade ' + done + ' von ' + need.length + (need.length === 1 ? ' Datei' : ' Dateien') + ' (' + mb + ' MB) …');
+    if (need.length) tell();
+    await Promise.all([0, 1, 2, 3, 4, 5].map(async () => {
+      while (i < need.length) {
+        const f = need[i++], r = await fetch(STORE + 'f/' + f.h + '.bin');
+        if (!r.ok) throw new Error('Datei fehlt (' + r.status + ')');
+        await files.put(fileUrl(f.h), new Response(await unseal(key, new Uint8Array(await r.arrayBuffer()), f.z), { headers: { 'Content-Type': f.t } }));
+        done++; tell();
+      }
+    }));
+    say('Richte ein …');
+    await (await caches.open(META)).put(META_URL, new Response(JSON.stringify({ v: VERSION, files: list.files }), { headers: { 'Content-Type': 'application/json' } }));
+    await startSW();
+    // what no longer belongs: files only earlier versions had, and the whole bundles before 08.10.2026 - not the app's own caches
+    const keep = new Set(list.files.map(f => fileUrl(f.h)));
+    for (const r of await files.keys()) if (!keep.has(r.url)) await files.delete(r);
+    for (const k of await caches.keys()) if (/^docpad-[0-9a-f]{12}$/.test(k)) await caches.delete(k);
+  }
+  // "Remember on this device" (Doc 15.09.: "ich möchte nicht immer dich fragen müssen"): the key stays in
+  // IndexedDB - non-extractable, the password itself is never stored - so a new version opens without typing and
+  // without the doorman. The decrypted app sits in this browser's Cache Storage anyway, so this exposes nothing new.
   const saveKey = key => idb('readwrite', s => s.put(key, 'data')).catch(() => {});
   const dropKey = name => idb('readwrite', s => s.delete(name)).catch(() => {});   // 'data'; 'base' = PBKDF2 key before 17.09.
   // Chrome's password manager: the page moves on by script, so Chrome would not notice the login by itself
@@ -119,8 +145,8 @@
     try {
       const pw = $('pw').value;
       const key = await fetchKey(pw);
+      await saveKey(key);                                 // before unlock: the worker fetches the voice with it
       await unlock(key);
-      await saveKey(key);
       await dropKey('base');
       await rememberInChrome(pw);
       location.replace('app/');
@@ -132,9 +158,9 @@
     $('go').disabled = true;
     return;
   }
-  caches.has(CACHE).then(async ok => {
-    if (ok) { say('Öffne …'); await startSW(); location.replace('app/'); return; }   // this bundle unlocked before
-    const key = await loadKey('data');                     // a new bundle: the key remembered on this device
+  ready().then(async ok => {
+    if (ok) { say('Öffne …'); await startSW(); location.replace('app/'); return; }   // this version set up before
+    const key = await loadKey('data');                     // a new version: the key remembered on this device
     if (!key) {
       if (await loadKey('base')) say('DOCPAD hat ein neues Schloss - bitte einmal das Passwort eingeben');   // remembered before 17.09.
       else if (/[?&]v=/.test(location.search)) say('Neue DOCPAD-Version - bitte Passwort eingeben');   // sent here by sw.js
