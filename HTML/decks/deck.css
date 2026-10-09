@@ -26,7 +26,10 @@ html,body{height:100%;background:var(--night);overflow:hidden}
 @font-face{font-family:'Deck Ziffern';src:url('../morpheus/vendor/katex/fonts/KaTeX_Main-Bold.woff2') format('woff2');font-weight:700;font-style:normal;size-adjust:121%;unicode-range:U+0030-0039,U+002B,U+003C-003E,U+00D7,U+00F7,U+2212}
 @font-face{font-family:'Deck Ziffern';src:url('../morpheus/vendor/katex/fonts/KaTeX_Main-Italic.woff2') format('woff2');font-weight:400;font-style:italic;size-adjust:121%;unicode-range:U+0030-0039,U+002B,U+003C-003E,U+00D7,U+00F7,U+2212}
 @font-face{font-family:'Deck Ziffern';src:url('../morpheus/vendor/katex/fonts/KaTeX_Main-BoldItalic.woff2') format('woff2');font-weight:700;font-style:italic;size-adjust:121%;unicode-range:U+0030-0039,U+002B,U+003C-003E,U+00D7,U+00F7,U+2212}
-:root{--deck-schrift:'Deck Ziffern',Raleway,system-ui,sans-serif}
+/* Since 09.10.2026 the text no longer takes these faces: LaTeX digits ONLY inside a formula ($...$ = KaTeX), every
+   other number - 11 Kapitel, 107 €, 37 % - stands in Raleway with lining figures (Doc: "nur mathematische Formeln
+   LaTeX und sonst Raleway"), headings stay Orbitron. The faces stay defined; deckNr in deck.js now finds nothing to do. */
+:root{--deck-schrift:Raleway,system-ui,sans-serif}
 body{font-family:var(--deck-schrift);font-variant-numeric:lining-nums;color:var(--body)}
 /* ... but a number that names something - Beweis 1, Kapitel 2, Klasse 9 - wears the text's font: LaTeX only for
    mathematics (Doc, 06.10.2026: "wenn da steht Beweis 1, dann ... so wie die Schrift"). deck.js deckNr sets the span. */
