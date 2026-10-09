@@ -500,6 +500,14 @@
         }
     }
 
+    // ---------- Solita in the header, as in the decks (Doc, 09.10.2026): js/buch-solita.js loads the shared box itself ----------
+    function buildSolita() {
+        if (!ME || !document.querySelector('.b-top') || document.querySelector('script[src*="buch-solita.js"]')) return;
+        const sc = document.createElement('script');
+        sc.src = ME.replace(/buch\.js(\?.*)?$/, 'buch-solita.js');
+        document.head.appendChild(sc);
+    }
+
     // ---------- widgets ----------
     const widgets = {};
     function widget(name, init) { widgets[name] = init; }
@@ -537,6 +545,7 @@
         buildBook();
         buildIndex();
         buildOverview();
+        buildSolita();
         dbg('ready ' + KEY);
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);

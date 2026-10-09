@@ -1,0 +1,51 @@
+/* js/buch-solita.css — Solita in the textbook's header (js/buch-solita.js, Doc 09.10.2026): her picture in the middle,
+   the question line beside it, the answers in a card under the header. Drawn for the book's dark scheme like
+   js/buch.css; js/farbschema.js translates it for Grau and Hell. The box's own look is js/solita-frage.css - here only
+   what is the book's, everything scoped to .b-solita. js/buch-solita.js loads this file with a version. */
+.b-solita { flex: 1 1 0; min-width: 42px; align-self: stretch; display: flex; align-items: center; justify-content: center; }
+.b-solita-in { display: flex; align-items: center; min-width: 0; transition: transform .3s ease; }
+.b-solita-btn { flex: none; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%; overflow: hidden; cursor: pointer;
+    background: none; box-shadow: 0 0 0 1px rgba(245, 194, 66, 0.6); opacity: .92;
+    transition: transform .2s, opacity .2s, box-shadow .2s; }
+.b-solita-btn:hover, .b-solita.offen .b-solita-btn { opacity: 1; box-shadow: 0 0 0 1.5px rgb(245, 194, 66); }
+.b-solita-btn:hover { transform: scale(1.06); }
+.b-solita-btn img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* the line grows out of her picture (its width comes from js/buch-solita.js) */
+.b-solita-line { display: flex; width: 0; overflow: hidden; transition: width .3s ease, margin-left .3s ease; }
+.b-solita.offen .b-solita-line { margin-left: 8px; }
+.b-solita-line .sf-row { flex: 1; min-width: 0; }
+.b-solita-line .sf-row button { width: 32px; height: 32px; }
+.b-solita-line .sf-row svg { width: 18px; height: 18px; }
+.b-solita-line .sf-in { height: 32px; font-size: 0.95rem; }
+.b-solita-line .sf-row { --ki: 15px; }
+/* her picture is the header's; no ready-made questions; Enter sends, dictation sends itself (as in the decks) */
+.b-solita .sf-face, .b-solita .sf-chips, .b-solita .sf-send { display: none; }
+
+/* the answers: a card under the header, the whole talk in it - the question in bold, her answer below */
+.b-solita-panel { position: absolute; top: calc(100% + 8px); z-index: 2; padding: 12px 7px 12px 15px; border-radius: 12px;
+    background: rgb(10, 21, 38); border: 0.5px solid rgba(143, 163, 189, 0.3);   /* opaque: the page must not shine through */
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45); }
+.b-solita-panel[hidden] { display: none; }
+/* the scrollbar runs along the card's edge and the text keeps clear of it; the × stands centred over the scrollbar
+   (Doc, 09.10.2026: "das X und die Scrollbar so weit innen. Das ist Platzverschwendung" - "das Kreuz bitte x-zentriert
+   über die Scrollbar"): the box's own 7 px scrollbar (js/solita-frage.css - Chrome draws it only while scrollbar-width
+   and -color are auto), 0.5 + 7 px from the edge, centre 11 px in; the 20 px × at right 0.5 px likewise, and the
+   track starts under it (measured 09.10.2026) */
+.b-solita-panel .sf-out { max-height: calc(100vh - var(--b-head-h) - 110px); padding-right: 11px; scrollbar-width: auto; scrollbar-color: auto; }
+.b-solita-panel .sf-out::-webkit-scrollbar-track { margin-top: 20px; }
+.b-solita-panel .sf-out > :first-child { padding-right: 8px; }
+.b-solita-panel.unten .sf-row { order: -1; margin-right: 20px; }   /* narrow screen: the line on top of the card, the answers below it */
+.b-solita :is(.sf-q, .sf-a, .sf-err, .sf-ds) { align-self: stretch; max-width: none; padding: 0; border: 0; border-radius: 0;
+    background: none; box-shadow: none; }
+.b-solita .sf-q { font-weight: 600; color: #fff; }
+.b-solita :is(.sf-a, .sf-err, .sf-ds) + .sf-q { margin-top: 10px; }
+.b-solita-x { position: absolute; top: 7px; right: 0.5px; width: 20px; height: 20px; padding: 0; display: grid; place-items: center;
+    border: 0; border-radius: 6px; background: none; color: #8fa3bd; cursor: pointer; }
+.b-solita-x:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+.b-solita-x svg { width: 16px; height: 16px; }
+/* the phone: her picture a little smaller and without a gap of its own, so "Doc Alvers Mathe-Labor" stays whole at
+   390 px (measured 09.10.2026: 33 px were missing with 34 px and the header's 14 px gap) */
+@media (max-width: 560px) {
+    .b-solita { min-width: 30px; margin: 0 -6px; }
+    .b-solita-btn { width: 30px; height: 30px; }
+}

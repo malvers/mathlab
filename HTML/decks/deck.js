@@ -909,7 +909,7 @@ gestartet = true;
   const panel = document.getElementById('ask-panel');
   // The box's files come from here, so no deck page needs a new line. The version rides along: a browser still holding
   // an older copy of the box (from a lab - Pages keeps files 10 minutes) takes this one.
-  const SF_VERSION = '2026-10-02a';             // raise it with every change of the box or deck-solita.css
+  const SF_VERSION = '2026-10-09a';             // raise it with every change of the box or deck-solita.css
   function load(src, then) {
     const s = document.createElement('script');
     s.src = new URL(src, DECK_JS).href;

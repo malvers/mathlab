@@ -309,9 +309,12 @@
         // field brings it (Doc 02.10.2026, DOCPAD on the Lenovo pad: "wenn wir den Cursor programmatisch da reinstellen,
         // dann soll die Tastatur nicht kommen. Nur wenn ich explizit mit dem Finger da drauf tippe")
         const TOUCH = !!(global.matchMedia && global.matchMedia('(hover: none) and (pointer: coarse)').matches);
+        // Never scroll the page to the field: it stands where the click was. In the textbook's sticky header Chrome took
+        // it for hidden under the page's scroll-padding and jumped the book by up to 1,000 px (Doc, 09.10.2026: "Wenn man
+        // die Pille ... drückt, scrollt das Buch")
         function fokus() {
             if (TOUCH) input.setAttribute('inputmode', 'none');
-            input.focus();
+            input.focus({ preventScroll: true });
         }
         root.addEventListener('pointerdown', function (e) {
             if (e.target === input && input.getAttribute('inputmode') === 'none') input.removeAttribute('inputmode');
