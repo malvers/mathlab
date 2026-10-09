@@ -1,6 +1,6 @@
 /* buch-integral.js — widgets for the chapters on integral calculus (Lernbereich 3, Klasse 13) of the textbook
  * (js/buch.js, js/buch-plot.js). Numerical integration with rectangles and trapezoids lives in js/buch-numerik.js ("flaeche").
- *   titelbild13      the cover of book 13: an area under a curve, a test histogram with its rejection region, a plane
+ *   titelbild13      the cover of book 13: the bell curve over a test histogram, area and rejection region, a plane in space
  *   stammfunktion    f and its antiderivatives F + C: the slope of F at x0 is f(x0)
  *   bestand          a rate of change over time and the reconstructed stock (water tank, car journey)
  *   integral         the definite integral between draggable limits: signed pieces and the area
@@ -41,42 +41,83 @@
     }
 
     /* ---------- the cover of book 13 ---------- */
+    // Reworked 09.10.2026 (Doc: "das Cover von 13 … ist auch noch nicht so doll"), in the style of book 12's new cover:
+    // ONE picture for integral and test - the bell curve over the binomial histogram of a test, its bars the rectangles
+    // under the curve, the area under it in gold, the rejection region in red (bars and tail), the critical value dashed.
+    // The plane stands in space where book 12 has its vector: the triangle through its three axis intercepts, a line
+    // piercing it (the part behind the plane dashed) and the normal as an arrow on the piercing point. Soft blur glow, no wide bands.
     W('titelbild13', function (box) {
         const Wd = 600, Ht = 850, X = x => (x + 3) / 9 * Wd, Y = y => (10 - y) / 13 * Ht;
-        const f = x => 0.12 * (x + 2.6) * (x - 1.2) * (x - 5.4) + 1.6;
-        let path = '', area = 'M' + X(-0.6) + ' ' + Y(-1.2);
-        for (let i = 0; i <= 160; i++) { const x = -3 + 9 * i / 160; path += (i ? 'L' : 'M') + X(x).toFixed(1) + ' ' + Y(f(x)).toFixed(1); }
-        for (let i = 0; i <= 80; i++) { const x = -0.6 + 4.2 * i / 80; area += 'L' + X(x).toFixed(1) + ' ' + Y(f(x)).toFixed(1); }
-        area += 'L' + X(3.6) + ' ' + Y(-1.2) + 'Z';
-        // Riemann strips under the left part of the curve
-        let strips = '';
-        for (let k = 0; k < 6; k++) { const x = -2.4 + k * 0.3, h = f(x + 0.15) + 1.2; strips += '<rect x="' + X(x).toFixed(1) + '" y="' + Y(-1.2 + h).toFixed(1) + '" width="' + (X(0.27) - X(0)).toFixed(1) + '" height="' + (Y(-1.2) - Y(-1.2 + h)).toFixed(1) + '"/>'; }
-        // a test histogram with a red rejection region at the bottom
-        let bars = '';
-        const n = 12, p = 0.5;
-        let c = 1;
+        const n1 = v => v.toFixed(1);
+        // B(20; 0,5): k sits at x = mu + (k - 10) * step; the bell is the normal density with the same mean and spread
+        // right-sided test at 10 %: P(X >= 14) = 5.8 % - at 5 % (k >= 15) the red bars were too small to be seen
+        const n = 20, p = 0.5, mu = 1.0, step = 0.42, yb = -1.8, kKrit = 14, HOCH = 4.8;
+        const sd2 = n * p * (1 - p), H = HOCH / (1 / Math.sqrt(2 * Math.PI * sd2));
+        const kx = x => n * p + (x - mu) / step, xk = k => mu + (k - n * p) * step;
+        const g = x => yb + H * Math.exp(-((kx(x) - n * p) ** 2) / (2 * sd2)) / Math.sqrt(2 * Math.PI * sd2);
+        const curve = (a, b, m = 160) => {
+            let d = '';
+            for (let i = 0; i <= m; i++) { const x = a + (b - a) * i / m; d += (i ? 'L' : 'M') + n1(X(x)) + ' ' + n1(Y(g(x))); }
+            return d;
+        };
+        const flaeche = (a, b) => curve(a, b) + 'L' + n1(X(b)) + ' ' + n1(Y(yb)) + 'L' + n1(X(a)) + ' ' + n1(Y(yb)) + 'Z';
+        const xKrit = xk(kKrit - 0.5);
+        let grid = '';
+        for (let x = -3; x <= 6; x++) grid += '<line x1="' + X(x) + '" y1="' + Y(5.8) + '" x2="' + X(x) + '" y2="' + Ht + '" />';
+        for (let y = -3; y <= 5; y++) grid += '<line x1="0" y1="' + Y(y) + '" x2="' + Wd + '" y2="' + Y(y) + '" />';
+        // the histogram: P(X = k) as bars of width 1 in k, so their area is the probability - red from the critical value on
+        let bars = '', c = 1;
         for (let k = 0; k <= n; k++) {
             if (k) c = c * (n - k + 1) / k;
-            const P = c * p ** k * (1 - p) ** (n - k), x = -2.7 + k * 0.62, h = P * 9;
-            bars += '<rect x="' + X(x).toFixed(1) + '" y="' + Y(-3 + h).toFixed(1) + '" width="' + (X(0.5) - X(0)).toFixed(1) + '" height="' + (Y(-3) - Y(-3 + h)).toFixed(1) + '" rx="2" style="fill:' +
-                (k >= 10 ? 'rgba(226,102,90,0.55);stroke:#e2665a' : 'rgba(127,216,238,0.22);stroke:rgba(127,216,238,0.6)') + '"/>';
+            const P = c * p ** k * (1 - p) ** (n - k), h = H * P, top = Y(yb + h), bot = Y(yb);
+            if (bot - top < 0.6) continue;
+            const rot = k >= kKrit;
+            bars += '<rect x="' + n1(X(xk(k) - step / 2) + 1.5) + '" y="' + n1(top) + '" width="' + n1(X(step) - X(0) - 3) + '" height="' + n1(bot - top) + '" rx="2"' +
+                (rot ? ' fill="#e2665a" fill-opacity="0.45" stroke="#e2665a" stroke-opacity="0.9"' : ' fill="#7fd8ee" fill-opacity="0.1" stroke="#7fd8ee" stroke-opacity="0.5"') + '/>';
         }
-        // a plane as a tilted parallelogram with its normal
-        const P0 = [X(3.2), Y(5.2)], u = [130, -40], v = [60, 70];
-        const pl = [P0, [P0[0] + u[0], P0[1] + u[1]], [P0[0] + u[0] + v[0], P0[1] + u[1] + v[1]], [P0[0] + v[0], P0[1] + v[1]]].map(q => q.map(z => z.toFixed(1)).join(',')).join(' ');
-        const mid = [P0[0] + (u[0] + v[0]) / 2, P0[1] + (u[1] + v[1]) / 2];
-        box.innerHTML = '<svg viewBox="0 0 ' + Wd + ' ' + Ht + '" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Titelbild: Fläche unter einer Kurve, ein Testhistogramm und eine Ebene">' +
+        let art = '';
+        art += '<path d="' + flaeche(-3, xKrit) + '" fill="url(#tb13-gold)"/>';
+        art += '<path d="' + flaeche(xKrit, 6) + '" fill="#e2665a" fill-opacity="0.32"/>';
+        art += '<g stroke-width="1.2">' + bars + '</g>';
+        art += '<line x1="0" y1="' + n1(Y(yb)) + '" x2="' + Wd + '" y2="' + n1(Y(yb)) + '" stroke="#cfe4f5" stroke-opacity="0.3" stroke-width="1.2"/>';
+        art += '<line x1="' + n1(X(xKrit)) + '" y1="' + n1(Y(yb)) + '" x2="' + n1(X(xKrit)) + '" y2="' + n1(Y(yb + 3.1)) + '" stroke="#cfe4f5" stroke-opacity="0.55" stroke-width="1.4" stroke-dasharray="4 5" stroke-linecap="round"/>';
+        art += '<path d="' + curve(-3, 6) + '" stroke="#F5C242" stroke-width="3.6" fill="none" stroke-linecap="round" filter="url(#tb13-glow)"/>';
+        // the plane in space: same axes and place as the vector of book 12
+        function pfeil(a, q, s, col, w, extra) {
+            const ang = Math.atan2(q[1] - a[1], q[0] - a[0]), cs = Math.cos(ang), sn = Math.sin(ang);
+            const at = (back, side) => n1(q[0] - back * cs - side * sn) + ',' + n1(q[1] - back * sn + side * cs);
+            return '<line x1="' + n1(a[0]) + '" y1="' + n1(a[1]) + '" x2="' + n1(q[0] - 0.62 * s * cs) + '" y2="' + n1(q[1] - 0.62 * s * sn) +
+                '" stroke="' + col + '" stroke-width="' + w + '" stroke-linecap="round"' + (extra || '') + '/>' +
+                '<polygon points="' + at(0, 0) + ' ' + at(s, 0.42 * s) + ' ' + at(0.68 * s, 0) + ' ' + at(s, -0.42 * s) + '" fill="' + col + '"' + (extra || '') + '/>';
+        }
+        const O = [412, 407], ex = [-36, 26], ey = [100, 0], ez = [0, -92];
+        const pt = (i, j, k) => [O[0] + i * ex[0] + j * ey[0] + k * ez[0], O[1] + i * ex[1] + j * ey[1] + k * ez[1]];
+        const strich = (a, q, attr) => '<line x1="' + n1(a[0]) + '" y1="' + n1(a[1]) + '" x2="' + n1(q[0]) + '" y2="' + n1(q[1]) + '" ' + attr + '/>';
+        // E: x/a + y/b + z/c = 1, its normal (1/a, 1/b, 1/c); the line g through Q on E with direction d
+        const ea = 1.6, eb = 1.3, ec = 1.3, nv = [1 / ea, 1 / eb, 1 / ec];
+        const nl = Math.hypot(...nv), nn = nv.map(v => v / nl * 1.3);   // long enough to stand out of the plane
+        const Q = [0.35, 0.45, ec * (1 - 0.35 / ea - 0.45 / eb)], d = [1.0, -0.35, 0.75];
+        const auf = (P0, t, v) => P0.map((z, i) => z + t * v[i]);
+        let raum = '';
+        [[1.9, 0, 0], [0, 1.5, 0], [0, 0, 1.45]].forEach(e => { raum += pfeil(O, pt(...e), 10, '#cfe4f5', 1.6, ' opacity="0.6"'); });
+        raum += strich(pt(...auf(Q, -0.95, d)), pt(...Q), 'stroke="#7fd8ee" stroke-opacity="0.7" stroke-width="2" stroke-dasharray="4 5" stroke-linecap="round"');
+        raum += '<polygon points="' + [pt(ea, 0, 0), pt(0, eb, 0), pt(0, 0, ec)].map(q => n1(q[0]) + ',' + n1(q[1])).join(' ') +
+            '" fill="#B8A4F2" fill-opacity="0.24" stroke="#B8A4F2" stroke-width="1.8" stroke-linejoin="round"/>';
+        raum += strich(pt(...Q), pt(...auf(Q, 0.8, d)), 'stroke="#7fd8ee" stroke-width="2.4" stroke-linecap="round" filter="url(#tb13-glow)"');
+        // the normal stands on the piercing point: one point in the plane where line and normal meet - at the centroid it was
+        // right, but looked as if it had slipped off the white point (Doc, 09.10.2026: "sieht einfach optisch falsch aus")
+        raum += '<g filter="url(#tb13-glow)">' + pfeil(pt(...Q), pt(...auf(Q, 1, nn)), 17, '#e682be', 3.2) + '</g>';
+        raum += '<circle cx="' + n1(pt(...Q)[0]) + '" cy="' + n1(pt(...Q)[1]) + '" r="4.5" fill="#fff"/>';
+        raum += '<circle cx="' + O[0] + '" cy="' + O[1] + '" r="3.5" fill="#cfe4f5" fill-opacity="0.8"/>';
+        box.innerHTML = '<svg viewBox="0 0 ' + Wd + ' ' + Ht + '" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Titelbild: Glockenkurve über dem Histogramm eines Tests mit Ablehnungsbereich, eine Ebene im Raum mit Normalenvektor und Gerade">' +
             '<defs><linearGradient id="tb13-fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="0.45" stop-color="#fff" stop-opacity="1"/>' +
             '<stop offset="0.86" stop-color="#fff" stop-opacity="1"/><stop offset="0.97" stop-color="#fff" stop-opacity="0.2"/></linearGradient>' +
-            '<mask id="tb13-mask"><rect width="' + Wd + '" height="' + Ht + '" fill="url(#tb13-fade)"/></mask></defs>' +
-            '<g mask="url(#tb13-mask)">' +
-            '<path d="' + area + '" style="fill:rgba(245,194,66,0.28);stroke:none"/>' +
-            '<g style="fill:rgba(127,216,238,0.16);stroke:rgba(127,216,238,0.55);stroke-width:1">' + strips + '</g>' +
-            '<path d="' + path + '" stroke="#F5C242" stroke-width="12" stroke-opacity="0.13" fill="none"/><path d="' + path + '" stroke="#F5C242" stroke-width="3.4" fill="none" stroke-linecap="round"/>' +
-            '<polygon points="' + pl + '" style="fill:rgba(184,164,242,0.2);stroke:#B8A4F2;stroke-width:2"/>' +
-            '<line x1="' + mid[0] + '" y1="' + mid[1] + '" x2="' + (mid[0] + 28) + '" y2="' + (mid[1] - 95) + '" stroke="#e682be" stroke-width="3.2" stroke-linecap="round"/>' +
-            '<circle cx="' + (mid[0] + 28) + '" cy="' + (mid[1] - 95) + '" r="6" fill="#e682be"/>' +
-            bars + '</g></svg>';
+            '<mask id="tb13-mask"><rect width="' + Wd + '" height="' + Ht + '" fill="url(#tb13-fade)"/></mask>' +
+            '<linearGradient id="tb13-gold" gradientUnits="userSpaceOnUse" x1="0" y1="' + n1(Y(yb + HOCH)) + '" x2="0" y2="' + n1(Y(yb)) + '">' +
+            '<stop offset="0" stop-color="#F5C242" stop-opacity="0.38"/><stop offset="1" stop-color="#F5C242" stop-opacity="0.06"/></linearGradient>' +
+            '<filter id="tb13-glow" filterUnits="userSpaceOnUse" x="0" y="0" width="' + Wd + '" height="' + Ht + '"><feGaussianBlur stdDeviation="5" result="b"/>' +
+            '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>' +
+            '<g mask="url(#tb13-mask)"><g stroke="#7fd8ee" stroke-opacity="0.08" stroke-width="1">' + grid + '</g>' + art + '</g>' + raum + '</svg>';
     });
 
     /* ---------- antiderivatives ---------- */
