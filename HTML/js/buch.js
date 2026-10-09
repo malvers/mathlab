@@ -395,6 +395,94 @@
         box.innerHTML = html;
     }
 
+    // ---------- overview of the print pages: O (or the grid pill in the header) ----------
+    // Doc, 09.10.2026: "wie in den Decks auf O … alle Seiten, die dann im PDF stehen werden … auf einen Blick … eine
+    // auswählen und reinspringen". The pages exist only once Paged.js has set the print edition, so the overview is
+    // druck.html?uebersicht in a frame over the book (built on the first O, a few seconds, kept for the next one).
+    // Every block of a section carries data-ziel="file|section|n" - set here and in js/buch-druck.js from the same
+    // source order, so a printed page knows where its first block lives online and the book knows where the reader is.
+    function ziele(root, file) {
+        root.querySelectorAll('.b-sec[id]').forEach(s => Array.from(s.children).forEach((ch, n) => { ch.dataset.ziel = file + '|' + s.id + '|' + n; }));
+    }
+    const FILE = location.pathname.split('/').pop() || 'index.html';
+    function headOffset() {
+        const top = document.querySelector('.b-top'), strip = document.querySelector('.b-strip');
+        return (top ? top.offsetHeight : 0) + (strip && strip.offsetParent !== null ? strip.offsetHeight : 0);
+    }
+    // where the reader is: the first block not yet scrolled away under the header
+    function wo() {
+        const off = headOffset() + 10;
+        const e = Array.from(document.querySelectorAll('.b-main [data-ziel]')).find(x => x.getBoundingClientRect().bottom > off);
+        return e ? e.dataset.ziel : FILE + '||';
+    }
+    function hin(ziel) {
+        const [f, s, n] = ziel.split('|');
+        let e = n ? document.querySelector('[data-ziel="' + ziel.replace(/"/g, '') + '"]') : null;
+        if (!e && s) e = document.getElementById(s);
+        // instant: the page scrolls smoothly (buch.css), a jump across half a chapter would crawl
+        scrollTo({ top: e ? Math.max(0, e.getBoundingClientRect().top + scrollY - headOffset() - 14) : 0, behavior: 'instant' });
+    }
+    // a jump into another chapter: the hash gets the section, sessionStorage the exact block
+    function sprung(ziel) {
+        const f = ziel.split('|')[0];
+        if (f === FILE) { zu(); hin(ziel); return; }
+        try { sessionStorage.setItem('buch-sprung', ziel); } catch (_) { }
+        const s = ziel.split('|')[1];
+        location.href = f + (s ? '#' + s : '');
+    }
+    let ov = null, frame = null, ovBtn = null;
+    function auf() {
+        if (!ov) {
+            ov = document.createElement('div');
+            ov.className = 'b-ov';
+            frame = document.createElement('iframe');
+            frame.title = 'Alle Seiten der Druckausgabe';
+            frame.src = 'druck.html?uebersicht';
+            ov.appendChild(frame);
+            document.body.appendChild(ov);
+        }
+        ov.hidden = false;
+        document.documentElement.classList.add('b-ov-open');
+        const w = frame.contentWindow;
+        if (w && w.BuchDruckOv) w.BuchDruckOv.zeige(wo());              // already built: mark the reader's page at once
+        frame.focus();
+    }
+    function zu() {
+        if (!ov || ov.hidden) return;
+        ov.hidden = true;
+        document.documentElement.classList.remove('b-ov-open');
+        if (ovBtn) ovBtn.focus({ preventScroll: true });
+    }
+    function buildOverview() {
+        const top = document.querySelector('.b-top');
+        if (!top || !window.BUCH) return;
+        ovBtn = document.createElement('button');
+        ovBtn.type = 'button'; ovBtn.className = 'b-ovbtn';
+        ovBtn.title = 'Alle Seiten der Druckausgabe (O)';
+        ovBtn.setAttribute('aria-label', 'Alle Seiten der Druckausgabe');
+        ovBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">' +
+            '<rect x="2.5" y="2.5" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="2.5" width="8.5" height="8.5" rx="1.2"/>' +
+            '<rect x="2.5" y="13" width="8.5" height="8.5" rx="1.2"/><rect x="13" y="13" width="8.5" height="8.5" rx="1.2"/></svg><span class="b-ovbtn-l">Seiten</span>';
+        const book = top.querySelector('.b-top-book');
+        if (book) book.after(ovBtn); else top.appendChild(ovBtn);
+        ovBtn.addEventListener('click', () => { if (ov && !ov.hidden) zu(); else auf(); });
+        addEventListener('keydown', e => {
+            if (e.metaKey || e.ctrlKey || e.altKey) return;
+            if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
+            if (e.key === 'o' || e.key === 'O') { e.preventDefault(); if (ov && !ov.hidden) zu(); else auf(); }
+            else if (e.key === 'Escape' && ov && !ov.hidden) zu();
+        });
+        // the frame calls back: where the reader is, close, jump
+        window.BuchUebersicht = { wo, zu, sprung };
+        // arrived from the overview of another chapter: to the exact block, once the page stands
+        let ziel = null;
+        try { ziel = sessionStorage.getItem('buch-sprung'); sessionStorage.removeItem('buch-sprung'); } catch (_) { }
+        if (ziel && ziel.split('|')[0] === FILE) {
+            requestAnimationFrame(() => hin(ziel));
+            addEventListener('load', () => hin(ziel), { once: true });
+        }
+    }
+
     // ---------- widgets ----------
     const widgets = {};
     function widget(name, init) { widgets[name] = init; }
@@ -421,14 +509,16 @@
     function start() {
         if (document.body.classList.contains('b-print')) return;                // the print page renders itself
         const main = document.querySelector('.b-main') || document.body;
+        ziele(main, FILE);                                                       // before render: the source order
         render(main);
         buildToc();
         buildBook();
         buildIndex();
+        buildOverview();
         dbg('ready ' + KEY);
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
     else start();
 
-    window.Buch = { widget, math, Frac, gcd, fmt, texNum, pct, parseAnswer, matches, dbg, icon: ICON, range, seg, div, render };
+    window.Buch = { widget, math, Frac, gcd, fmt, texNum, pct, parseAnswer, matches, dbg, icon: ICON, range, seg, div, render, ziele };
 })();

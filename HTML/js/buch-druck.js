@@ -14,7 +14,8 @@
     const SITE = 'https://docalvers.de';
     const here = location.pathname.replace(/[^/]*$/, '');            // /buch/mathe11/
     const status = document.getElementById('d-status');
-    const say = t => { if (status) status.textContent = t; };
+    let ovWait = null;                                                   // the waiting card of the overview mode (below)
+    const say = t => { if (status) status.textContent = t; if (ovWait) ovWait.textContent = t; };
     const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
     const wait = ms => new Promise(r => setTimeout(r, ms));
 
@@ -34,6 +35,7 @@
         const src = await (await fetch(c.file)).text();
         const doc = new DOMParser().parseFromString(src, 'text/html');
         const main = doc.querySelector('.b-main');
+        Buch.ziele(main, c.file);                                        // where every block lives online (overview, O)
         const sec = el('section', 'd-chapter');
         const pre = c.file.replace(/\.html$/, '');
         sec.id = 'kap-' + pre;
@@ -43,6 +45,7 @@
             '<div><p class="d-kkick">KAPITEL ' + c.k + ' · ' + c.lb.toUpperCase() + ' · ' + c.when.toUpperCase() + '</p>' +
             '<h1 class="d-ktitle">' + c.title + '</h1><p class="d-ksub">' + c.sub + '</p></div>' +
             '<a class="d-qr" href="' + url + '">' + qrSvg(url) + '<span>Interaktiv:<br>' + url.replace('https://', '') + '</span></a>'));
+        sec.lastChild.dataset.ziel = c.file + '||';
         Array.from(main.children).forEach(ch => {
             if (ch.matches('.b-foot, .b-chapnav, footer')) return;
             sec.appendChild(document.importNode(ch, true));
@@ -87,6 +90,9 @@
     function harvest(sec, c) {
         const part = el('div', 'd-loes-kap');
         part.appendChild(el('h3', 'd-loes-h', 'Kapitel ' + c.k + ' · ' + c.title));
+        part.lastChild.dataset.ziel = c.file + '||';
+        // a solution leads back to its task
+        const from = (row, src) => { const z = src.closest('[data-ziel]'); if (z) row.dataset.ziel = z.dataset.ziel; };
         let any = false;
         sec.querySelectorAll('.b-tasks').forEach(list => {
             list.querySelectorAll(':scope > .b-task').forEach(t => {
@@ -94,7 +100,7 @@
                 t.querySelectorAll(':scope > .b-hint, :scope > .b-sol').forEach(x => x.remove());
                 if (!sol) return;
                 any = true;
-                const row = el('div', 'd-loes'); row.appendChild(el('span', 'd-loes-no', no ? no.textContent : '•'));
+                const row = el('div', 'd-loes'); row.appendChild(el('span', 'd-loes-no', no ? no.textContent : '•')); from(row, t);
                 const body = el('div', 'd-loes-body'); body.innerHTML = sol.innerHTML; row.appendChild(body);
                 part.appendChild(row);
             });
@@ -107,7 +113,7 @@
             qs.forEach((q, i) => {
                 const sol = q.querySelector(':scope > .b-sol'); if (!sol) return;
                 has = true; sol.remove();
-                const row = el('div', 'd-loes'); row.appendChild(el('span', 'd-loes-no', String(i + 1)));
+                const row = el('div', 'd-loes'); row.appendChild(el('span', 'd-loes-no', String(i + 1))); from(row, q);
                 const body = el('div', 'd-loes-body'); body.innerHTML = sol.innerHTML; row.appendChild(body);
                 sub.appendChild(row);
             });
@@ -119,7 +125,10 @@
 
     async function build() {
         const book = document.getElementById('d-book');
-        // cover and how-to: already in druck.html; contents next
+        // cover and how-to: already in druck.html, online they are the start page; contents next
+        const tag = (sel, z) => { const e = book.querySelector(sel); if (e) e.dataset.ziel = z; };
+        tag('.d-cover', 'index.html|start|');
+        tag('.d-front', 'index.html|sogehts|');
         const toc = el('section', 'd-toc');
         toc.appendChild(el('h1', 'd-toc-h', 'Inhalt'));
         const list = el('ol', 'd-toc-list');
@@ -127,6 +136,7 @@
             '<small>' + c.lb + ' · ' + c.when + '</small></span></a>')));
         list.appendChild(el('li', 'd-toc-loes', '<a href="#loesungen"><span class="d-toc-k">L</span><span class="d-toc-t">Lösungen</span></a>'));
         toc.appendChild(list);
+        toc.dataset.ziel = 'index.html|kapitel|';
         book.appendChild(toc);
 
         const loes = el('section', 'd-loesungen'); loes.id = 'loesungen';
@@ -166,6 +176,105 @@
         const badge = document.getElementById('local-badge');
         if (badge) { badge.style.position = 'static'; badge.style.marginLeft = '10px'; document.querySelector('.d-bar')?.appendChild(badge); }
         window.__druckFertig = pages;
+        if (OV) ovReady();
+    }
+
+    // ---------- overview mode: druck.html?uebersicht in a frame over the online book (js/buch.js, key O) ----------
+    // Doc, 09.10.2026: "alle Seiten, die dann im PDF stehen werden … auf einen Blick … eine auswählen und reinspringen".
+    // The sheets become tiles, as large as the window allows for all of them at once (+ and − make them bigger and
+    // smaller); the reader's page glows gold, its chapter a little; a click jumps to the first block of that page online.
+    const OV = new URLSearchParams(location.search).has('uebersicht');
+    const host = () => { try { return window.parent !== window ? window.parent.BuchUebersicht : null; } catch (_) { return null; } };
+    let ovScale = 1, pageW = 0, pageH = 0, picked = null;
+    function ovLayout() {
+        root.classList.toggle('d-ov-narrow', innerWidth <= 640);
+        const box = document.querySelector('.pagedjs_pages');
+        if (!box || !pageW) return;
+        const n = box.querySelectorAll('.pagedjs_page').length, bar = document.querySelector('.d-bar');
+        const PAD = 22, GAP = 12, R = pageH / pageW;
+        const W = innerWidth - 2 * PAD, H = innerHeight - (bar ? bar.offsetHeight : 0) - 2 * PAD;
+        let w = 0;
+        for (let k = 1; k <= n; k++) {
+            const r = Math.ceil(n / k);
+            w = Math.max(w, Math.min((W - GAP * (k - 1)) / k, (H - GAP * (r - 1)) / r / R));
+        }
+        w = Math.min(W, Math.max(w, 56) * ovScale);                       // 56 px: below that a page is only a grey patch
+        const cols = Math.max(1, Math.floor((W + GAP) / (w + GAP)));
+        root.style.setProperty('--z', (w / pageW).toFixed(4));
+        box.style.gridTemplateColumns = 'repeat(' + cols + ', ' + Math.floor(w) + 'px)';
+    }
+    function zeige(z) {
+        z = String(z || '').replace(/"/g, '');
+        const [f, s] = z.split('|');
+        const pages = Array.from(document.querySelectorAll('.pagedjs_page'));
+        pages.forEach(p => { p.classList.remove('d-ov-cur'); p.classList.toggle('d-ov-kap', !!f && p.dataset.ovZiel.startsWith(f + '|')); });
+        // the page clicked last, when the reader is still where it led (its first block may have begun a page earlier)
+        let hit = picked && picked.dataset.ovZiel === z ? picked : null;
+        if (!hit) for (const sel of ['[data-ziel="' + z + '"]', '[data-ziel^="' + f + '|' + s + '|"]', '[data-ziel^="' + f + '|"]']) {
+            const e = f && document.querySelector('.pagedjs_pages ' + sel);
+            if (e) { hit = e.closest('.pagedjs_page'); break; }
+        }
+        if (hit) { hit.classList.add('d-ov-cur'); hit.scrollIntoView({ block: 'center' }); }
+    }
+    function ovReady() {
+        const pages = Array.from(document.querySelectorAll('.pagedjs_page'));
+        if (!pages.length) return;
+        const r = pages[0].getBoundingClientRect(); pageW = r.width; pageH = r.height;   // before the zoom
+        let last = '';
+        pages.forEach((p, i) => {
+            const e = p.querySelector('[data-ziel]');
+            p.dataset.ovZiel = last = e ? e.dataset.ziel : last;
+            const c = B.chapters.find(c => last.startsWith(c.file + '|'));
+            p.title = 'Seite ' + (i + 1) + (c ? ' · Kapitel ' + c.k + ' · ' + c.title : '');
+            p.appendChild(el('span', 'd-ov-no', String(i + 1)));
+        });
+        root.classList.add('d-ov-ready');
+        ovLayout();
+        say(pages.length + ' Seiten · Klick springt ins Online-Buch · + − Größe · O oder Esc schließt');
+        const h = host();
+        zeige(h ? h.wo() : '');
+        window.BuchDruckOv = { zeige };
+        addEventListener('resize', ovLayout);
+    }
+    function ovSize(f) {
+        ovScale = Math.min(6, Math.max(1, ovScale * f));
+        ovLayout();
+        const cur = document.querySelector('.pagedjs_page.d-ov-cur');
+        if (cur) cur.scrollIntoView({ block: 'center' });
+    }
+    if (OV) {
+        document.documentElement.classList.add('d-ov');
+        document.documentElement.classList.toggle('d-ov-narrow', innerWidth <= 640);   // already while it is built
+        document.getElementById('d-book')?.classList.add('d-ov-src');            // hidden while it is built (js/buch-druck.css)
+        document.getElementById('d-pages')?.classList.add('d-ov-pages');
+        const bar = document.querySelector('.d-bar');
+        if (bar) {
+            bar.querySelector('b').textContent = 'DRUCKAUSGABE · ALLE SEITEN';
+            if (status) status.classList.add('d-ov-hint');
+            const btn = (txt, title, fn) => { const b = el('button', 'd-ov-btn', txt); b.type = 'button'; b.title = title; b.addEventListener('click', fn); bar.appendChild(b); };
+            btn('−', 'Kleiner (−)', () => ovSize(1 / 1.5));
+            bar.lastChild.classList.add('d-ov-first');
+            btn('+', 'Größer (+)', () => ovSize(1.5));
+            btn('×', 'Schließen (O oder Esc)', () => { const h = host(); if (h) h.zu(); });
+        }
+        ovWait = document.body.appendChild(el('div', 'd-ov-wait', 'Wird vorbereitet …'));
+        // a click on a sheet jumps, beside the sheets closes; links on the sheets (QR, contents) do not navigate the frame
+        document.addEventListener('click', e => {
+            if (e.target.closest('.d-bar')) return;
+            e.preventDefault(); e.stopPropagation();
+            const p = e.target.closest('.pagedjs_page'), h = host();
+            if (!p) { if (h) h.zu(); return; }
+            const z = p.dataset.ovZiel; if (!z) return;
+            picked = p;
+            if (h) h.sprung(z);
+            else { const [f, s] = z.split('|'); location.href = f + (s ? '#' + s : ''); }
+        }, true);
+        addEventListener('keydown', e => {
+            if (e.metaKey || e.ctrlKey || e.altKey) return;
+            if (e.key === 'Escape' || e.key === 'o' || e.key === 'O') { e.preventDefault(); const h = host(); if (h) h.zu(); }
+            else if (e.key === '+' || e.key === '=') ovSize(1.5);
+            else if (e.key === '-' || e.key === '−') ovSize(1 / 1.5);
+        });
     }
 
     // screen decoration (grey desk, gaps, shadows, status bar) only on screen: off while printing (js/buch-druck.css)
