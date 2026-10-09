@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ähm-Detektor</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #0b1120; --red: rgb(176, 36, 24); --text: #e5e7eb; --dim: #64748b; --panel: #111827; }
+  :root { --bg: #0b1120; --red: rgb(176, 36, 24); --gold: rgb(245, 194, 66); --text: #e5e7eb; --dim: #64748b; --panel: #111827; }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; }
   body {
-    background: var(--bg); color: var(--text); font-family: 'Orbitron', sans-serif;
+    background: var(--bg); color: var(--text); font-family: 'Raleway', system-ui, sans-serif; font-variant-numeric: lining-nums;
     display: flex; flex-direction: column; align-items: center; gap: 16px;
     padding: 24px 16px;
   }
   body.flash { animation: flash 0.6s ease-out; }
   @keyframes flash { 0% { background: var(--red); } 100% { background: var(--bg); } }
-  h1 { margin: 0; font-size: clamp(1.2rem, 4vw, 2rem); letter-spacing: 2px; }
+  h1 { margin: 0; font-size: clamp(1.2rem, 4vw, 2rem); letter-spacing: 1px; }
   #count { font-size: clamp(3rem, 14vw, 7rem); font-weight: 700; line-height: 1; }
   #status { color: var(--dim); font-size: 0.85rem; min-height: 1.2em; text-align: center; }
   button {
@@ -25,16 +25,49 @@
   }
   button.on { border-color: var(--red); }
   button:disabled { opacity: 0.4; cursor: default; }
+  button.mini { height: 28px; padding: 0 10px; font-size: 0.75rem; border-radius: 6px; color: var(--dim); }
+  .knobs .right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
   .row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
   .wrap { width: 100%; max-width: 900px; }
-  /* Steadiness meter: fills while a sound stays steady, red once it counts */
-  #meter { height: 10px; background: var(--panel); border-radius: 5px; overflow: hidden; }
-  #meter div { height: 100%; width: 0; background: var(--dim); transition: width 0.05s linear; }
-  #meter div.hit { background: var(--red); }
   #debug { color: var(--dim); font-size: 0.7rem; margin-top: 6px; min-height: 1em; }
   .knobs { display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 0.75rem; color: var(--dim); }
   .knobs label { display: flex; align-items: center; gap: 8px; }
-  .knobs input { width: 140px; }
+  /* Sliders: dark track, filled part and knob in lambda gold (--p = fill in %) */
+  .knobs input[type="range"] {
+    -webkit-appearance: none; appearance: none; width: 140px; height: 24px;
+    background: transparent; cursor: pointer; margin: 0;
+  }
+  .knobs input[type="range"]::-webkit-slider-runnable-track {
+    height: 6px; border-radius: 3px;
+    background: linear-gradient(to right, var(--gold) var(--p, 0%), #1e293b var(--p, 0%));
+  }
+  .knobs input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 18px; height: 18px; margin-top: -6px; border-radius: 50%;
+    background: var(--gold); border: 3px solid var(--bg); box-shadow: 0 0 8px rgba(245, 194, 66, 0.5);
+  }
+  .knobs input[type="range"]::-moz-range-track { height: 6px; border-radius: 3px; background: #1e293b; }
+  .knobs input[type="range"]::-moz-range-progress { height: 6px; border-radius: 3px; background: var(--gold); }
+  .knobs input[type="range"]::-moz-range-thumb {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--gold); border: 3px solid var(--bg); box-shadow: 0 0 8px rgba(245, 194, 66, 0.5);
+  }
+  .knobs span { color: var(--gold); min-width: 4.5em; }
+  /* Buzzer switch in the same dark/gold look */
+  .switch { cursor: pointer; }
+  .switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .switch .track {
+    position: relative; width: 40px; height: 22px; min-width: 40px; border-radius: 11px;
+    background: #1e293b; transition: background 0.2s;
+  }
+  .switch .track::after {
+    content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--dim); transition: transform 0.2s, background 0.2s;
+  }
+  .switch input:checked + .track { background: rgba(245, 194, 66, 0.35); }
+  .switch input:checked + .track::after {
+    transform: translateX(18px); background: var(--gold); box-shadow: 0 0 8px rgba(245, 194, 66, 0.5);
+  }
+  .switch input:focus-visible + .track { outline: 2px solid var(--gold); outline-offset: 2px; }
   #text {
     flex: 1; overflow-y: auto; min-height: 120px;
     background: var(--panel); border-radius: 10px; padding: 16px;
@@ -49,16 +82,18 @@
   <div id="count">0</div>
   <div class="row">
     <button id="toggle">Start</button>
-    <button id="save" disabled>Aufnahme sichern</button>
   </div>
   <div id="status"></div>
   <div class="wrap">
-    <div id="meter"><div></div></div>
     <div id="debug"></div>
   </div>
   <div class="wrap knobs">
-    <label>Mindestdauer <input id="minMs" type="range" min="150" max="600" step="10" value="300"> <span id="minMsVal"></span></label>
+    <label>Mindestdauer <input id="minMs" type="range" min="100" max="600" step="10" value="150"> <span id="minMsVal"></span></label>
     <label>Toleranz <input id="tol" type="range" min="0.5" max="2" step="0.1" value="1"> <span id="tolVal"></span></label>
+    <div class="right">
+      <button id="save" class="mini" disabled>Aufnahme sichern</button>
+      <label class="switch">Buzzer <input id="buzzer" type="checkbox"><span class="track"></span></label>
+    </div>
   </div>
   <div id="text" class="wrap"></div>
 
@@ -66,9 +101,10 @@
 /*
  * Filled-pause detector (after Goto et al., Eurospeech 1999):
  * an "ähm" is a voiced sound with a flat pitch and a steady spectral envelope
- * that lasts longer than normal syllables. Chrome's speech recognition drops
- * fillers from its text, so the flash comes from the audio alone; the
- * recognizer only provides the transcript, into which the detected "ähm" are inserted.
+ * that lasts longer than normal syllables. Short "ä" and stretched last
+ * syllables sound alike, so a steady sound is only a candidate: Chrome's speech
+ * recognition drops fillers from its text, and if it writes a word for the
+ * sound within a second, it was speech and does not flash.
  */
 const HOP_MS = 25;           // analysis step
 const MIN_RMS = 0.004;       // absolute loudness floor for "voiced"
@@ -77,21 +113,37 @@ const F0_MIN = 70, F0_MAX = 400;
 const MAX_F0_JUMP = 1.0;     // semitones against the run's smoothed pitch (x tolerance)
 const MAX_SPEC_DIFF = 6;     // dB mean deviation from the run's envelope (x tolerance)
 const MAX_GAP = 2;           // frames a run survives a glitch
+// Any text change within this window after a candidate means "word". It starts
+// at 0: Chrome often writes the stretched word at once ("Dresden" +0.23 s, Doc's
+// log 09.10.: a 250 ms gap let 3 of 4 flashes through on words).
+const VETO_FROM_MS = 0, VETO_TO_MS = 900;
 const FILLER = /(?<!\p{L})(ä+h*m*|[eö]+h+m+)(?!\p{L})/giu;
 
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 const $ = id => document.getElementById(id);
 const $count = $('count'), $toggle = $('toggle'), $status = $('status'), $text = $('text');
-const $bar = document.querySelector('#meter div'), $debug = $('debug');
+const $debug = $('debug');
+// Live values only with ?debug in the URL (Doc: nothing jumping while speaking)
+$debug.hidden = !new URLSearchParams(location.search).has('debug');
 const $minMs = $('minMs'), $tol = $('tol');
 
 let running = false, total = 0;
 let audio = null;            // { ctx, stream, analyser, timer }
 let rec = null;
-let take = { chunks: [], sr: 48000 };   // raw session audio for "Aufnahme sichern"
+let take = { chunks: [], sr: 48000, end: 0 };   // raw session audio for "Aufnahme sichern"
+let events = [];             // candidates, decisions and Chrome's text changes, saved with the take
+
+function logEvent(type, extra) {
+  const t = performance.now();
+  events.push({ t, type, ...extra });
+  while (events.length && events[0].t < t - (MAX_TAKE_S + 10) * 1000) events.shift();
+}
 const MAX_TAKE_S = 60;
 window.aehmLog = [];                     // per-frame values, for offline tuning
-let finalText = '', curInterim = '', marks = [];
+let finalWords = [], interimWords = [];
+let marks = [];              // detected fillers as word positions in the whole transcript
+let deafUntil = 0;           // the detector ignores the page's own buzzer
+let lastChange = 0, dropped = 0;   // time of the last transcript change, candidates that were words
 
 // ---------- UI helpers ----------
 function flash() {
@@ -105,15 +157,27 @@ function escapeHtml(s) {
 }
 function highlight(s) { return escapeHtml(s).replace(FILLER, '<mark>$1</mark>'); }
 
+function words(s) { return s.trim().split(/\s+/).filter(Boolean); }
+
 function render() {
-  const pending = marks.length ? ' ähm' : '';
-  $text.innerHTML = highlight(finalText) + '<span class="interim">' + highlight(curInterim + pending) + '</span>';
+  const all = finalWords.concat(interimWords);
+  const m = marks.slice().sort((a, b) => a - b);
+  let html = '', k = 0;
+  for (let i = 0; i <= all.length; i++) {
+    // A mark at position i stands before word i (marks past the end stay at the end)
+    while (k < m.length && (m[k] <= i || i === all.length)) { html += '<mark>ähm</mark> '; k++; }
+    if (i === all.length) break;
+    const w = highlight(all[i]) + ' ';
+    html += i < finalWords.length ? w : '<span class="interim">' + w + '</span>';
+  }
+  $text.innerHTML = html;
   $text.scrollTop = $text.scrollHeight;
 }
 
 function showKnobs() {
+  for (const el of [$minMs, $tol]) el.style.setProperty('--p', 100 * (el.value - el.min) / (el.max - el.min) + '%');
   $('minMsVal').textContent = $minMs.value + ' ms';
-  $('tolVal').textContent = Number($tol.value).toFixed(1);
+  $('tolVal').textContent = Number($tol.value).toFixed(1).replace('.', ',');
 }
 $minMs.oninput = $tol.oninput = showKnobs;
 showKnobs();
@@ -188,12 +252,14 @@ async function startAudio() {
   src.connect(hp).connect(lp).connect(voice);
 
   // Keep the raw signal (last 60 s) so a take can be saved and analysed
-  take = { chunks: [], sr: ctx.sampleRate };
+  take = { chunks: [], sr: ctx.sampleRate, end: 0 };
+  events = [];
   const tap = ctx.createScriptProcessor(4096, 1, 1);
   let kept = 0;
   tap.onaudioprocess = e => {
     const c = new Float32Array(e.inputBuffer.getChannelData(0));
     take.chunks.push(c); kept += c.length;
+    take.end = performance.now();
     while (kept > MAX_TAKE_S * ctx.sampleRate) kept -= take.chunks.shift().length;
   };
   src.connect(tap);
@@ -218,7 +284,7 @@ async function startAudio() {
     const tol = Number($tol.value), minMs = Number($minMs.value);
     const gate = Math.max(MIN_RMS, floor * 2.5);
     const pr = pitch(buf, ctx.sampleRate);
-    const p = rms > gate && pr.f0 ? pr : null;
+    const p = rms > gate && pr.f0 && performance.now() >= deafUntil ? pr : null;
     const env = p ? envelope(spec, edges) : null;
     let df = 0, ds = 0, steady = false;
 
@@ -243,13 +309,12 @@ async function startAudio() {
     }
 
     const ms = run.len * HOP_MS;
-    if (ms >= minMs && !run.fired) { run.fired = true; detected(); }
+    if (ms >= minMs && !run.fired) { run.fired = true; candidate(); }
 
-    $bar.style.width = Math.min(100, 100 * ms / minMs) + '%';
-    $bar.classList.toggle('hit', run.fired);
     // Why a frame counts or not: level vs. gate, pitch clarity, steadiness
     $debug.textContent = `Pegel ${(rms * 1000).toFixed(1)}/${(gate * 1000).toFixed(1)} · Klarheit ${pr.clarity.toFixed(2)}` +
-      (p ? ` · f0 ${p.f0.toFixed(0)} Hz · Δf0 ${df.toFixed(2)} HT · ΔSpektrum ${ds.toFixed(1)} dB · ruhig ${ms} ms` : '');
+      (p ? ` · f0 ${p.f0.toFixed(0)} Hz · Δf0 ${df.toFixed(2)} HT · ΔSpektrum ${ds.toFixed(1)} dB · ruhig ${ms} ms` : '') +
+      ` · als Wort verworfen ${dropped}`;
     window.aehmLog.push({ t: audio ? Math.round(audio.ctx.currentTime * 1000) : 0, rms, gate,
       clarity: pr.clarity, f0: pr.f0, df, ds, ms, fired: run.fired });
     if (window.aehmLog.length > MAX_TAKE_S * 1000 / HOP_MS) window.aehmLog.shift();
@@ -265,7 +330,6 @@ function stopAudio() {
   audio.stream.getTracks().forEach(t => t.stop());
   audio.ctx.close();
   audio = null;
-  $bar.style.width = '0';
   $debug.textContent = '';
 }
 
@@ -286,30 +350,64 @@ function saveTake() {
   a.href = URL.createObjectURL(new Blob([view], { type: 'audio/wav' }));
   a.download = `aehm-${stamp}.wav`;
   a.click();
+
+  // Same name as JSON: every event with its second in the WAV ("s")
+  const secs = n / take.sr;
+  const log = {
+    wavSeconds: secs,
+    text: finalWords.concat(interimWords).join(' '),
+    events: events.map(e => ({ s: +(secs - (take.end - e.t) / 1000).toFixed(2), type: e.type, text: e.text }))
+      .filter(e => e.s >= 0)
+  };
+  const b = document.createElement('a');
+  b.href = URL.createObjectURL(new Blob([JSON.stringify(log, null, 1)], { type: 'application/json' }));
+  b.download = `aehm-${stamp}.json`;
+  setTimeout(() => b.click(), 300);
 }
 $('save').onclick = saveTake;
 
-function detected() {
-  total++;
-  $count.textContent = total;
-  flash();
-  // Remember where in the running sentence it happened
-  marks.push(curInterim.length);
-  render();
+// ---------- Buzzer: two detuned saws, game-show style ----------
+const $buzzer = $('buzzer');
+const BUZZ_S = 0.5;
+try { $buzzer.checked = localStorage.getItem('aehm-buzzer') === '1'; } catch (e) {}
+$buzzer.onchange = () => { try { localStorage.setItem('aehm-buzzer', $buzzer.checked ? '1' : '0'); } catch (e) {} };
+
+function buzz() {
+  if (!$buzzer.checked || !audio) return;
+  const ctx = audio.ctx, t = ctx.currentTime;
+  const out = ctx.createGain();
+  const lp = new BiquadFilterNode(ctx, { type: 'lowpass', frequency: 1800 });
+  out.gain.setValueAtTime(0.0001, t);
+  out.gain.exponentialRampToValueAtTime(0.3, t + 0.01);
+  out.gain.setValueAtTime(0.3, t + BUZZ_S - 0.05);
+  out.gain.exponentialRampToValueAtTime(0.0001, t + BUZZ_S);
+  lp.connect(out).connect(ctx.destination);
+  for (const f of [110, 116]) {
+    const o = new OscillatorNode(ctx, { type: 'sawtooth', frequency: f });
+    o.connect(lp); o.start(t); o.stop(t + BUZZ_S);
+  }
+  // The mic hears the buzzer, a steady tone like an "ä": stay deaf meanwhile
+  deafUntil = performance.now() + BUZZ_S * 1000 + 250;   // + room echo and audio latency
+}
+
+function candidate() {
+  const t = performance.now();
+  logEvent('kandidat');
+  setTimeout(() => {
+    if (!running) return;
+    // Chrome wrote a word for this sound: it was speech
+    if (lastChange > t + VETO_FROM_MS) { dropped++; logEvent('wort'); return; }
+    logEvent('aehm');
+    total++;
+    $count.textContent = total;
+    flash();
+    buzz();
+    marks.push(finalWords.length + interimWords.length);
+    render();
+  }, VETO_TO_MS);
 }
 
 // ---------- Transcript (text only, the flash does not depend on it) ----------
-function insertMarks(t) {
-  // Insert from the back so earlier positions stay valid
-  marks.sort((a, b) => b - a).forEach(pos => {
-    let i = Math.min(pos, t.length);
-    while (i < t.length && t[i] !== ' ') i++;
-    t = t.slice(0, i) + ' ähm' + t.slice(i);
-  });
-  marks = [];
-  return t;
-}
-
 function startRec() {
   rec = new SR();
   rec.lang = 'de-DE';
@@ -317,13 +415,19 @@ function startRec() {
   rec.interimResults = true;
 
   rec.onresult = e => {
+    const before = finalWords.concat(interimWords).join(' ');
     let interim = '';
     for (let i = e.resultIndex; i < e.results.length; i++) {
       const t = e.results[i][0].transcript;
-      if (e.results[i].isFinal) finalText += insertMarks(t).trim() + ' ';
-      else interim += t;
+      if (e.results[i].isFinal) finalWords.push(...words(t));
+      else interim += ' ' + t;
     }
-    curInterim = interim;
+    interimWords = words(interim);
+    // Only real text changes count, not the same words turning final
+    if (finalWords.concat(interimWords).join(' ') !== before) {
+      lastChange = performance.now();
+      logEvent('text', { text: finalWords.concat(interimWords).slice(-12).join(' ') });
+    }
     render();
   };
 
@@ -355,13 +459,13 @@ $toggle.onclick = async () => {
       return;
     }
     $('save').disabled = false;
-    $status.textContent = SR ? 'Ich höre zu …' : 'Ich höre zu – Text gibt es nur in Chrome.';
+    $status.textContent = SR ? '' : 'Text gibt es nur in Chrome.';
     if (SR) startRec();
   } else {
     stopAudio();
     if (rec) rec.stop();
-    // Keep fillers that never got a final sentence
-    if (marks.length) { finalText += insertMarks(curInterim).trim() + ' '; curInterim = ''; render(); }
+    // Keep words that never became final
+    finalWords.push(...interimWords); interimWords = []; render();
     $status.textContent = '';
   }
 };
