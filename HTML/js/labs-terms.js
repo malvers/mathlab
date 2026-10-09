@@ -5,7 +5,7 @@
  * matches against these so a lab is found by any word it contains.
  *
  * Rebuild after changing a lab's wording:  node tools/build-labs-terms.mjs
- * 102 labs, 1786 terms, 2026-10-09
+ * 103 labs, 1801 terms, 2026-10-09
  */
 const LABS_TERMS = {
     "addition": ["SCHRIFTLICHE ADDITION", "Summand"],
@@ -64,6 +64,7 @@ const LABS_TERMS = {
     "lehrbuch-mathe11": ["Abkühlen", "Bremsweg", "Ein Mathebuch, das mitrechnet", "exponentiell", "Funktionen und ihre Eigenschaften", "Gleichungen, Formeln, Figuren", "Graphen und Parameter", "Kerze", "linear", "Lineare Gleichungssysteme und Matrizen", "Mathematik", "Mathematik · Berufliches Gymnasium 11", "Numerische Verfahren und Simulationen", "Periodische Vorgänge", "Quadratische Funktionen und Gleichungen", "Regression", "sin x", "Tag des Jahres", "Umkehrfunktionen und Logarithmus", "Wachstum und Zerfall", "Weltbevölkerung", "Zeitraum"],
     "lehrbuch-mathe12": ["Ableitungsregeln", "Bedingte Wahrscheinlichkeit", "Die Ableitung", "Die Binomialverteilung", "Ein Mathebuch, das mitrechnet", "Graphen untersuchen", "Grenzwerte", "Mathematik", "Mathematik · Berufliches Gymnasium 12", "Monotonie, Extrema, Wendepunkte", "Skalarprodukt und Winkel", "Steckbriefe und Extremwertprobleme", "Vektoren im Raum", "Zufallsgrößen"],
     "lehrbuch-mathe13": ["Das bestimmte Integral", "Ein Mathebuch, das mitrechnet", "Fit fürs Abitur", "Flächeninhalte", "Geraden und Ebenen", "Grundgesamtheit und Stichprobe", "Koordinatengleichung und Lagebeziehungen", "Mathematik", "Mathematik · Berufliches Gymnasium 13", "Numerische Integration und Anwendungen", "Schnittwinkel, Prismen und Pyramiden", "Signifikanztests", "Stammfunktionen", "Weitere Anwendungen"],
+    "lehrbuch-mathefos11": ["Abzählen, Urnenmodell und Bernoulli-Ketten", "Ein Mathebuch, das mitrechnet", "Finanzmathematik", "Funktionen und lineare Funktionen", "Ganzrationale Funktionen", "Geraden und lineare Gleichungssysteme", "Komplexe Zahlen und Schaltalgebra", "Lineare Gleichungen und Ungleichungen", "Mathematik", "Mathematik · Fachoberschule 11", "Mehrstufige Zufallsexperimente", "Parabeln nach Maß", "Quadratische Funktionen und Gleichungen", "Zahlen, Terme und Formeln", "Zufall und Wahrscheinlichkeit"],
     "lissajous": ["Amplitude A", "Amplitude B", "Kurvenfarbe (Hue)", "LISSAJOUS · PARAMETRISCHE KURVEN", "Pfad-Umfang (× Perioden)", "Phase δ (Grad)", "SIMULATION", "ωₓ (Kreisfrequenz)", "ωᵧ (Kreisfrequenz)"],
     "litchi3d": ["Form-Faktor (Y)", "Frucht-Reife", "SDF KONTROLLE", "Stachel-Intensität"],
     "logikspiel": ["Antwort", "BESTÄTIGEN", "HILFE ANFORDERN", "HILFE-PROTOKOLL", "LEVEL", "MISSIONS-STATUS", "MUL (X)", "NÄCHSTES PROTOKOLL", "PROTOKOLL GELÖST!", "PROTOKOLL NEUSTART", "PROTOKOLL-AUSWAHL", "RECHEN-MODUS", "Zahlen-Puzzle", "ZEIT", "ZÜGE"],

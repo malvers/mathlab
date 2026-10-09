@@ -2,11 +2,13 @@
  *   waage    equivalence transformations: type "| −3", "| :4", "| −2x" and watch the equation change until x stands alone
  *   binom    (a + b)² as a square of four pieces
  *   koerper  cylinder, cone, sphere: volume and surface with sliders, formulas and a sketch
+ *   ungleichung  a·x + b < c step by step (the sign turns when dividing by a negative number), solution set on the number line,
+ *                a draggable test point (book Fachoberschule 11)
  */
 (function () {
     'use strict';
     const B = window.Buch;
-    const { Frac, fmt, texNum, math, range, seg, div } = B;
+    const { Frac, fmt, texNum, math, range, seg, div, co, sg } = B;
     const W = B.widget;
 
     /* ---------- equivalence transformations ---------- */
@@ -166,6 +168,80 @@
             out.innerHTML = '<p style="margin:0;line-height:2">' + t + '</p>';
             math(out);
         }
+        render();
+    });
+    /* ---------- linear inequalities on the number line ---------- */
+    const REL = { lt: '<', le: '\\le', gt: '>', ge: '\\ge' };
+    const FLIP = { lt: 'gt', le: 'ge', gt: 'lt', ge: 'le' };
+    const HOLDS = { lt: (u, v) => u < v - 1e-9, le: (u, v) => u <= v + 1e-9, gt: (u, v) => u > v + 1e-9, ge: (u, v) => u >= v - 1e-9 };
+    W('ungleichung', function (box) {
+        const S = { a: -2, b: 3, c: -5, rel: 'lt', t: 1 };
+        const ctl = div(box, 'b-ctrls');
+        seg(ctl, [['lt', '$<$'], ['le', '$\\le$'], ['gt', '$>$'], ['ge', '$\\ge$']], S.rel, v => { S.rel = v; render(); }, 'Relationszeichen');
+        const sl = div(box, '');
+        range(sl, { label: '$a$ (Zahl vor dem $x$)', min: -4, max: 4, step: 0.5, value: S.a, onInput: v => { S.a = v; render(); } });
+        range(sl, { label: '$b$', min: -8, max: 8, step: 1, value: S.b, onInput: v => { S.b = v; render(); } });
+        range(sl, { label: '$c$ (rechte Seite)', min: -8, max: 8, step: 1, value: S.c, onInput: v => { S.c = v; render(); } });
+        math(ctl); math(sl);
+        const steps = div(box, 'b-out ug-steps');
+        const nl = div(box, 'b-svgbox ug-line');
+        const test = div(box, 'b-help'); test.setAttribute('aria-live', 'polite');
+        const X0 = 30, X1 = 610, px = x => X0 + (x + 10) / 20 * (X1 - X0), wx = p => (p - X0) / (X1 - X0) * 20 - 10;
+        const lhs = (a, b) => (Math.abs(a) < 1e-9 ? '0 \\cdot x' : co(a) + 'x') + sg(b, 2);
+        function render() {
+            const { a, b, c, rel } = S;
+            let html, sol;            // sol: null = no solution, 'all' = every x, else { s, rel }
+            if (Math.abs(a) < 1e-9) {
+                const ok = HOLDS[rel](b, c);
+                sol = ok ? 'all' : null;
+                html = '$' + lhs(a, b) + ' ' + REL[rel] + ' ' + c + '$ <span class="ug-op">heißt $' + b + ' ' + REL[rel] + ' ' + c + '$</span><br>' +
+                    (ok ? 'Das stimmt für jede Zahl: <span class="b-res">$L = \\mathbb{R}$</span>' : 'Das stimmt für keine Zahl: <span class="b-res">$L = \\{\\,\\}$</span>');
+            } else {
+                const r2 = a < 0 ? FLIP[rel] : rel, s = new Frac(Math.round(2 * (c - b)), Math.round(2 * a));
+                sol = { s: s.value, rel: r2 };
+                const rows = ['$' + lhs(a, b) + ' ' + REL[rel] + ' ' + c + '$' + (b ? ' <span class="ug-op">$\\big|\\; ' + (b > 0 ? '-' + b : '+' + -b) + '$</span>' : '')];
+                if (b) rows.push('$' + co(a) + 'x ' + REL[rel] + ' ' + (c - b) + '$');
+                if (Math.abs(a - 1) > 1e-9) {
+                    rows[rows.length - 1] += ' <span class="ug-op">$\\big|\\; : ' + (a < 0 ? '(' + texNum(a, 1) + ')' : texNum(a, 1)) + '$</span>' +
+                        (a < 0 ? ' <span class="ug-flip">durch eine negative Zahl: Das Zeichen dreht sich um!</span>' : '');
+                    rows.push('$x ' + REL[r2] + ' ' + s.tex() + '$');
+                }
+                html = rows.join('<br>') + '<br><span class="b-res">$L = \\{\\, x \\in \\mathbb{R} \\mid x ' + REL[r2] + ' ' + s.tex() + ' \\,\\}$</span>';
+            }
+            steps.innerHTML = html;
+            math(steps);
+            // number line
+            let g = '<svg viewBox="0 0 640 112" role="img" aria-label="Zahlenstrahl mit der Lösungsmenge">';
+            if (sol === 'all') g += '<line class="ug-ray" x1="' + X0 + '" y1="56" x2="' + X1 + '" y2="56"/>';
+            else if (sol) {
+                const sx = Math.min(Math.max(px(sol.s), X0 - 20), X1 + 20), right = sol.rel === 'gt' || sol.rel === 'ge';
+                const ex = right ? X1 : X0;
+                if ((right && sx < X1) || (!right && sx > X0)) g += '<line class="ug-ray" x1="' + Math.min(Math.max(sx, X0), X1) + '" y1="56" x2="' + ex + '" y2="56"/>' +
+                    '<path class="ug-head" d="M' + (right ? X1 + 12 : X0 - 12) + ' 56 L' + ex + ' 49 L' + ex + ' 63 Z"/>';
+                if (sx >= X0 && sx <= X1) g += '<circle class="ug-end' + (sol.rel === 'le' || sol.rel === 'ge' ? ' in' : '') + '" cx="' + sx + '" cy="56" r="7"/>';
+            }
+            g += '<line class="ug-axis" x1="' + (X0 - 14) + '" y1="56" x2="' + (X1 + 14) + '" y2="56"/>';
+            for (let k = -10; k <= 10; k++) {
+                g += '<line class="ug-tick" x1="' + px(k) + '" y1="' + (k % 5 ? 51 : 47) + '" x2="' + px(k) + '" y2="' + (k % 5 ? 61 : 65) + '"/>';
+                if (k % 2 === 0) g += '<text class="ug-num" x="' + px(k) + '" y="86" text-anchor="middle">' + String(k).replace('-', '−') + '</text>';
+            }
+            // the test point: a marker above the line
+            const tx = px(S.t), val = a * S.t + b, ok = HOLDS[rel](val, c);
+            g += '<g class="ug-test' + (ok ? ' ok' : '') + '"><path d="M' + tx + ' 44 L' + (tx - 9) + ' 26 L' + (tx + 9) + ' 26 Z"/><line x1="' + tx + '" y1="44" x2="' + tx + '" y2="56"/>' +
+                '<text x="' + tx + '" y="18" text-anchor="middle">Probe</text></g>';
+            nl.innerHTML = g + '</svg>';
+            test.innerHTML = 'Zieh die <b>Probe</b> über den Zahlenstrahl. $x = ' + texNum(S.t, 1) + '$: $\\;' + texNum(a, 1) + ' \\cdot ' + (S.t < 0 ? '(' + texNum(S.t, 1) + ')' : texNum(S.t, 1)) +
+                (b < 0 ? ' - ' + -b : ' + ' + b) + ' = ' + texNum(val, 2) + ' ' + REL[rel] + ' ' + c + '$ ist ' + (ok ? '<b class="ug-yes">wahr</b>: Die Zahl gehört zur Lösungsmenge.' : '<b class="ug-no">falsch</b>: Die Zahl gehört nicht dazu.');
+            math(test);
+        }
+        // drag the test point (pointer events on the box, the svg inside is redrawn)
+        let drag = false;
+        nl.style.touchAction = 'pan-y';
+        const toX = e => { const svg = nl.querySelector('svg'), r = svg.getBoundingClientRect(); return Math.round(wx((e.clientX - r.left) / r.width * 640) * 2) / 2; };
+        nl.addEventListener('pointerdown', e => { drag = true; nl.setPointerCapture(e.pointerId); S.t = Math.min(10, Math.max(-10, toX(e))); render(); });
+        nl.addEventListener('pointermove', e => { if (!drag) return; const t = Math.min(10, Math.max(-10, toX(e))); if (t !== S.t) { S.t = t; render(); } });
+        const end = () => { drag = false; };
+        nl.addEventListener('pointerup', end); nl.addEventListener('pointercancel', end);
         render();
     });
 })();

@@ -4,7 +4,7 @@
  *   p.draw([
  *     { fn: x => x * x, color: 'lambda', label: 'f' },               // graph (breaks at poles by itself)
  *     { pts: [[1, 1], [2, 4]], color: 'cyan' },                      // points
- *     { seg: [[0, 0], [2, 4]], color: 'dim', dash: true },          // segment
+ *     { seg: [[0, 0], [2, 4]], color: 'dim', dash: true },          // segment (arrow: true → arrow head at the end)
  *     { hline: 1 }, { vline: 2 },                                    // helper lines
  *     { area: x => x * x, from: 0, to: 2, color: 'lambda' },         // area under a graph
  *     { rects: [[x0, x1, h], …], color: 'cyan' },                    // bars (Riemann sums)
@@ -184,7 +184,13 @@
             }
             if (L.seg) {
                 ctx.strokeStyle = c; ctx.lineWidth = L.width || 1.6;
-                ctx.beginPath(); ctx.moveTo(this.X(L.seg[0][0]), this.Y(L.seg[0][1])); ctx.lineTo(this.X(L.seg[1][0]), this.Y(L.seg[1][1])); ctx.stroke();
+                const ax0 = this.X(L.seg[0][0]), ay0 = this.Y(L.seg[0][1]), ax1 = this.X(L.seg[1][0]), ay1 = this.Y(L.seg[1][1]);
+                ctx.beginPath(); ctx.moveTo(ax0, ay0); ctx.lineTo(ax1, ay1); ctx.stroke();
+                if (L.arrow && Math.hypot(ax1 - ax0, ay1 - ay0) > 4) {            // arrow head at the end (vectors, complex numbers)
+                    const t = Math.atan2(ay1 - ay0, ax1 - ax0), s = 7 + (L.width || 1.6) * 2;
+                    ctx.setLineDash([]); ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(ax1, ay1);
+                    ctx.lineTo(ax1 - s * Math.cos(t - 0.4), ay1 - s * Math.sin(t - 0.4)); ctx.lineTo(ax1 - s * Math.cos(t + 0.4), ay1 - s * Math.sin(t + 0.4)); ctx.fill();
+                }
             }
             if (L.hline != null) { ctx.strokeStyle = L.color ? c : 'rgba(255,255,255,0.35)'; ctx.lineWidth = 1.2; ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.moveTo(0, this.Y(L.hline)); ctx.lineTo(w, this.Y(L.hline)); ctx.stroke(); }
             if (L.vline != null) { ctx.strokeStyle = L.color ? c : 'rgba(255,255,255,0.35)'; ctx.lineWidth = 1.2; ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.moveTo(this.X(L.vline), 0); ctx.lineTo(this.X(L.vline), h); ctx.stroke(); }

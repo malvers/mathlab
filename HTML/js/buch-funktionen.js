@@ -14,6 +14,10 @@
  *   expgleichung     a^x = b solved with the logarithm, step by step
  *   parameter        c·f(x), f(x) + c, f(c·x), f(x + c) for the basic functions
  *   graphquiz        which term belongs to the graph?
+ *   funktion         function or not? the vertical line test on six curves, then domain and range (book FOS 11)
+ *   lage             two lines y = m·x + n: intersecting, orthogonal, parallel or identical; intersection point and angles (book FOS 11)
+ *   parabelschar     families of parabolas with a case distinction on the parameter: number of zeros, vertex, locus (book FOS 11)
+ *   ganzrational     f(x) = a·(x − x1)^k1·(x − x2)^k2·(x − x3)^k3: draggable zeros, multiplicities, behaviour at infinity (book FOS 11)
  */
 (function () {
     'use strict';
@@ -596,5 +600,183 @@
         });
         foot.querySelector('button').addEventListener('click', next);
         next();
+    });
+    /* ---------- function or not: the vertical line test ---------- */
+    const CURVES = {
+        parabel: { k: 'Parabel', parts: [[x => 0.5 * x * x - 2, -6, 6]], fn: true, D: '\\mathbb{R}', W: '\\{\\, y \\in \\mathbb{R} \\mid y \\geq -2 \\,\\}', tex: 'y = \\tfrac12 x^2 - 2' },
+        spitze: { k: 'Liegende Spitze', parts: [[x => x + 1, -1, 6], [x => -(x + 1), -1, 6]], fn: false, tex: 'x = |y| - 1',
+                  why: 'Rechts von $x = -1$ trifft jede senkrechte Gerade die Kurve zweimal: Zu $x = 1$ gehören $y = 2$ und $y = -2$.' },
+        liegend: { k: 'Liegende Parabel', parts: [[x => Math.sqrt(2 * x), 0, 6], [x => -Math.sqrt(2 * x), 0, 6]], fn: false, tex: 'x = \\tfrac12 y^2',
+                   why: 'Zu $x = 2$ gehören $y = 2$ und $y = -2$. Eine Funktion ordnet jedem $x$ aber genau ein $y$ zu.' },
+        wurzel: { k: 'Wurzel', parts: [[x => Math.sqrt(x + 4), -4, 6]], fn: true, D: '\\{\\, x \\in \\mathbb{R} \\mid x \\geq -4 \\,\\}', W: '\\{\\, y \\in \\mathbb{R} \\mid y \\geq 0 \\,\\}', tex: 'y = \\sqrt{x + 4}' },
+        hyperbel: { k: 'Hyperbel', parts: [[x => 2 / x, -6, -0.01], [x => 2 / x, 0.01, 6]], fn: true, D: '\\mathbb{R} \\setminus \\{0\\}', W: '\\mathbb{R} \\setminus \\{0\\}', tex: 'y = \\tfrac{2}{x}' },
+        betrag: { k: 'Betrag', parts: [[x => Math.abs(x) - 1, -6, 6]], fn: true, D: '\\mathbb{R}', W: '\\{\\, y \\in \\mathbb{R} \\mid y \\geq -1 \\,\\}', tex: 'y = |x| - 1' }
+    };
+    W('funktion', function (box) {
+        let C = CURVES.parabel, answered = false;
+        const h = [{ x: 1, y: -4.6, color: 'cyan', fixY: true, snap: 0.25 }];
+        const ctl = div(box, 'b-ctrls');
+        seg(ctl, Object.keys(CURVES).map(k => [k, CURVES[k].k]), 'parabel', v => { C = CURVES[v]; answered = false; render(); }, 'Kurve');
+        div(box, 'b-help', 'Zieh den türkisen Punkt unten: Die senkrechte Gerade wandert mit. Wie oft trifft sie die Kurve?');
+        const p = new Plot(div(box, ''), { x: [-6, 6], y: [-5, 5], height: 330, aria: 'Kurve mit verschiebbarer senkrechter Gerade' });
+        const ask = div(box, 'b-ctrls');
+        ask.innerHTML = '<span class="b-ctrl">Ist die Kurve der Graph einer Funktion?</span><button type="button" class="b-btn" data-a="1">Funktion</button><button type="button" class="b-btn" data-a="0">keine Funktion</button>';
+        const out = div(box, 'b-out');
+        p.handles(h, () => render());
+        ask.addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (!b) return; answered = (b.dataset.a === '1') === C.fn ? 'ok' : 'no'; render(); });
+        function render() {
+            const c = h[0].x, hits = [];
+            const L = C.parts.map(([f, a, b]) => ({ fn: f, color: 'lambda', domain: [a, b] }));
+            C.parts.forEach(([f, a, b]) => { if (c >= a - 1e-9 && c <= b + 1e-9) { const y = f(c); if (isFinite(y)) hits.push(y); } });
+            const ys = hits.filter((y, i) => hits.findIndex(z => Math.abs(z - y) < 1e-6) === i);
+            L.push({ vline: c, color: ys.length > 1 ? 'red' : 'cyan' }, { pts: ys.map(y => [c, y]), color: ys.length > 1 ? 'red' : 'white', r: 6 });
+            p.draw(L);
+            let t = '<p style="margin:0 0 6px">$' + C.tex + '$ · Bei $x = ' + texNum(c, 2) + '$ trifft die Senkrechte die Kurve <b>' + (ys.length === 0 ? 'gar nicht' : ys.length === 1 ? 'genau einmal' : ys.length + '-mal') + '</b>' +
+                (ys.length ? ': $y = ' + ys.map(y => texNum(y, 2)).join('$ und $y = ') + '$' : '') + '.</p>';
+            if (answered) {
+                t += '<p style="margin:0">' + (answered === 'ok' ? '<b class="ug-yes">Richtig.</b> ' : '<b class="ug-no">Nicht ganz.</b> ') +
+                    (C.fn ? 'Jede senkrechte Gerade trifft die Kurve höchstens einmal: eine Funktion. <span class="b-res">$D = ' + C.D + '$, $W = ' + C.W + '$</span>' : C.why) + '</p>';
+            } else t += '<p style="margin:0" class="b-help">Entscheide mit den Knöpfen. Danach siehst du Definitions- und Wertebereich.</p>';
+            out.innerHTML = t;
+            math(out);
+        }
+        render();
+    });
+
+    /* ---------- two lines: position relative to each other ---------- */
+    const lineTex = (m, n) => 'y = ' + (Math.abs(m) < 1e-9 ? texNum(n, 2) : co(m, 2) + 'x' + sg(n, 2));
+    W('lage', function (box) {
+        const S = { m1: 0.5, n1: 1, m2: -2, n2: 4 };
+        const PRE = { schneidend: [0.5, 1, -1, 4], orthogonal: [0.5, 1, -2, 4], parallel: [0.5, 1, 0.5, -2], identisch: [0.5, 1, 0.5, 1] };
+        const ctl = div(box, 'b-ctrls');
+        seg(ctl, Object.keys(PRE).map(k => [k, k]), 'orthogonal', v => { [S.m1, S.n1, S.m2, S.n2] = PRE[v]; R.forEach((r, i) => r.set(PRE[v][i])); render(); }, 'Beispiel');
+        const sl = div(box, '');
+        const R = [
+            range(sl, { label: '$g$: Anstieg $m_1$', min: -4, max: 4, step: 0.25, value: S.m1, fmt: v => fmt(v, 2), onInput: v => { S.m1 = v; render(); } }),
+            range(sl, { label: '$g$: Achsenabschnitt $n_1$', min: -5, max: 5, step: 0.5, value: S.n1, onInput: v => { S.n1 = v; render(); } }),
+            range(sl, { label: '$h$: Anstieg $m_2$', min: -4, max: 4, step: 0.25, value: S.m2, fmt: v => fmt(v, 2), onInput: v => { S.m2 = v; render(); } }),
+            range(sl, { label: '$h$: Achsenabschnitt $n_2$', min: -5, max: 5, step: 0.5, value: S.n2, onInput: v => { S.n2 = v; render(); } })
+        ];
+        math(sl);
+        const p = new Plot(div(box, ''), { x: [-6, 6], y: [-5, 7], height: 330, equal: true, aria: 'Zwei Geraden und ihre Lage zueinander' });
+        const out = div(box, 'b-out');
+        const slopeDeg = m => { const t = Math.atan(m) * 180 / Math.PI; return t < 0 ? 180 + t : t; };
+        function render() {
+            const { m1, n1, m2, n2 } = S;
+            const L = [{ fn: x => m1 * x + n1, color: 'lambda', label: 'g', labelAt: 4.2 }, { fn: x => m2 * x + n2, color: 'cyan', label: 'h', labelAt: -5.4 }];
+            let rel, res;
+            if (Math.abs(m1 - m2) < 1e-9) {
+                rel = Math.abs(n1 - n2) < 1e-9 ? 'identisch' : 'parallel';
+                res = rel === 'identisch' ? 'Gleicher Anstieg und gleicher Achsenabschnitt: <b>identisch</b>. Jeder Punkt ist gemeinsam.'
+                    : 'Gleicher Anstieg $m_1 = m_2$, verschiedene Achsenabschnitte: <b>parallel</b>. Es gibt keinen Schnittpunkt.';
+            } else {
+                const xs = (n2 - n1) / (m1 - m2), ys = m1 * xs + n1;
+                let d = Math.abs(slopeDeg(m1) - slopeDeg(m2)); if (d > 90) d = 180 - d;
+                rel = Math.abs(m1 * m2 + 1) < 1e-9 ? 'orthogonal' : 'schneidend';
+                L.push({ pts: [[xs, ys]], color: 'white', r: 6 }, { text: 'S', at: [xs, ys], color: 'white' });
+                res = (rel === 'orthogonal' ? '$m_1 \\cdot m_2 = ' + texNum(m1 * m2, 2) + '$: Die Geraden sind <b>orthogonal</b> (senkrecht zueinander).' : 'Verschiedene Anstiege: Die Geraden <b>schneiden</b> sich.') +
+                    '<br>Gleichsetzen: $' + co(m1, 2) + 'x' + sg(n1, 2) + ' = ' + co(m2, 2) + 'x' + sg(n2, 2) + '$ ergibt $x = \\dfrac{n_2 - n_1}{m_1 - m_2} = ' + texNum(xs, 3) + '$, also <span class="b-res">$S(' + texNum(xs, 3) + ' \\mid ' + texNum(ys, 3) + ')$</span> · Schnittwinkel $' + texNum(d, 1) + '^\\circ$';
+            }
+            p.draw(L);
+            const ang = m => Math.abs(m) < 1e-9 ? 'parallel zur $x$-Achse' : '$\\tan \\alpha = ' + texNum(m, 2) + '$, $\\alpha \\approx ' + texNum(slopeDeg(m), 1) + '^\\circ$';
+            out.innerHTML = '<p style="margin:0 0 6px"><span class="b-res">$g$</span>: $' + lineTex(m1, n1) + '$ · ' + ang(m1) + ' &nbsp; <span style="color:#7fd8ee">$h$</span>: $' + lineTex(m2, n2) + '$ · ' + ang(m2) + '</p>' +
+                '<p style="margin:0">' + res + '</p>';
+            math(out);
+        }
+        render();
+    });
+
+    /* ---------- families of parabolas: case distinction on the parameter ---------- */
+    const SCHAREN = {
+        q: { k: 'fₐ(x) = x² − 2x + a', tex: a => 'x^2 - 2x' + sg(a, 2), f: (a, x) => x * x - 2 * x + a, a: 0,
+             zeros: a => a < 1 - 1e-9 ? [1 - Math.sqrt(1 - a), 1 + Math.sqrt(1 - a)] : Math.abs(a - 1) < 1e-9 ? [1] : [],
+             vertex: a => [1, a - 1], locus: null, locusTex: 'x = 1',
+             cases: [['a < 1', 'zwei Nullstellen $x = 1 \\pm \\sqrt{1 - a}$', a => a < 1 - 1e-9], ['a = 1', 'eine (doppelte) Nullstelle $x = 1$', a => Math.abs(a - 1) < 1e-9], ['a > 1', 'keine Nullstelle', a => a > 1 + 1e-9]],
+             why: 'Diskriminante: $x^2 - 2x + a = 0$ hat $D = 1 - a$.' },
+        p: { k: 'fₐ(x) = x² + a·x', tex: a => 'x^2' + sgx(a, 'x', 2), f: (a, x) => x * x + a * x, a: 2,
+             zeros: a => Math.abs(a) < 1e-9 ? [0] : [Math.min(0, -a), Math.max(0, -a)],
+             vertex: a => [-a / 2, -a * a / 4], locus: x => -x * x, locusTex: 'y = -x^2',
+             cases: [['a \\neq 0', 'zwei Nullstellen $x = 0$ und $x = -a$', a => Math.abs(a) > 1e-9], ['a = 0', 'eine doppelte Nullstelle $x = 0$', a => Math.abs(a) < 1e-9]],
+             why: 'Ausklammern: $x^2 + ax = x(x + a) = 0$. Die Scheitel $S\\left(-\\tfrac{a}{2} \\mid -\\tfrac{a^2}{4}\\right)$ liegen alle auf der Parabel $y = -x^2$ (gestrichelt).' },
+        k: { k: 'fₖ(x) = k·x² − 4', tex: a => (Math.abs(a) < 1e-9 ? '-4' : co(a, 2) + 'x^2 - 4'), f: (a, x) => a * x * x - 4, a: 1,
+             zeros: a => a > 1e-9 ? [-2 / Math.sqrt(a), 2 / Math.sqrt(a)] : [],
+             vertex: a => (Math.abs(a) < 1e-9 ? null : [0, -4]), locus: null, locusTex: '',
+             cases: [['k > 0', 'zwei Nullstellen $x = \\pm \\tfrac{2}{\\sqrt{k}}$', a => a > 1e-9], ['k = 0', 'keine Parabel, sondern die Gerade $y = -4$: keine Nullstelle', a => Math.abs(a) < 1e-9],
+                     ['k < 0', 'nach unten geöffnet mit dem Scheitel $(0 \\mid -4)$: keine Nullstelle', a => a < -1e-9]],
+             why: '$kx^2 = 4$ hat nur für $k > 0$ Lösungen. Der Fall $k = 0$ muss extra betrachtet werden, weil dann das $x^2$ verschwindet.' }
+    };
+    W('parabelschar', function (box) {
+        let G = SCHAREN[box.dataset.schar] || SCHAREN.q, a = G.a;
+        const ctl = div(box, 'b-ctrls');
+        seg(ctl, Object.keys(SCHAREN).map(k => [k, SCHAREN[k].k]), box.dataset.schar || 'q', v => { G = SCHAREN[v]; a = G.a; r.set(a); render(); }, 'Funktionenschar');
+        const sl = div(box, '');
+        const r = range(sl, { label: 'Parameter', min: -3, max: 3, step: 0.25, value: a, fmt: v => fmt(v, 2), onInput: v => { a = v; render(); } });
+        const p = new Plot(div(box, ''), { x: [-5, 5], y: [-6, 6], height: 330, aria: 'Schar von Parabeln mit einem hervorgehobenen Mitglied' });
+        const out = div(box, 'b-out');
+        function render() {
+            const L = [];
+            for (let b = -3; b <= 3; b += 1) if (Math.abs(b - a) > 1e-9) L.push({ fn: x => G.f(b, x), color: 'dim', width: 1 });
+            if (G.locus) L.push({ fn: G.locus, color: 'violet', dash: true, width: 1.8 });
+            if (G === SCHAREN.q) L.push({ vline: 1, color: 'violet' });
+            L.push({ fn: x => G.f(a, x), color: 'lambda', label: G === SCHAREN.k ? 'fₖ' : 'fₐ', labelAt: 2.6 });
+            const Z = G.zeros(a), V = G.vertex(a);
+            if (V) L.push({ pts: [V], color: 'violet', r: 5 });
+            L.push({ pts: Z.map(z => [z, 0]), color: 'white', r: 6 });
+            p.draw(L);
+            const par = G === SCHAREN.k ? 'k' : 'a';
+            out.innerHTML = '<p style="margin:0 0 6px">$' + (par === 'k' ? 'f_k' : 'f_a') + '(x) = ' + G.tex(a) + '$ für $' + par + ' = ' + texNum(a, 2) + '$ · ' +
+                (Z.length ? 'Nullstellen: $' + Z.map(z => 'x = ' + texNum(z, 3)).join('$, $') + '$' : 'keine Nullstelle') + (V ? ' · Scheitel $(' + texNum(V[0], 3) + ' \\mid ' + texNum(V[1], 3) + ')$' : '') + '</p>' +
+                '<div class="b-table-wrap"><table class="b-table" style="min-width:0">' + G.cases.map(([c, t, test]) => '<tr' + (test(a) ? ' class="sc-row-on"' : '') + '><th>$' + c + '$</th><td style="text-align:left">' + t + '</td></tr>').join('') + '</table></div>' +
+                '<p style="margin:8px 0 0" class="b-help">' + G.why + '</p>';
+            math(out);
+        }
+        render();
+    });
+
+    /* ---------- polynomial functions from their zeros ---------- */
+    const ZCOL = ['lambda', 'cyan', 'phi'];
+    const factorTex = (z, k) => {
+        const base = Math.abs(z) < 1e-9 ? 'x' : '(x ' + (z > 0 ? '- ' : '+ ') + texNum(Math.abs(z), 1) + ')';
+        return k > 1 ? base + '^{' + k + '}' : base;
+    };
+    W('ganzrational', function (box) {
+        const Z = [{ x: -2, y: 0, k: 1 }, { x: 1, y: 0, k: 2 }, { x: 3, y: 0, k: 1 }].map((z, i) => Object.assign(z, { color: ZCOL[i], fixY: true, snap: 0.5 }));
+        let a = 0.5;
+        const ctl = div(box, 'b-ctrls');
+        ctl.innerHTML = Z.map((z, i) => '<div class="b-ctrl"><span class="gr-dot gr-' + ZCOL[i] + '"></span>Vielfachheit <span class="b-stepper"><button type="button" data-i="' + i + '" data-d="-1" aria-label="Vielfachheit kleiner">−</button>' +
+            '<output data-o="' + i + '"></output><button type="button" data-i="' + i + '" data-d="1" aria-label="Vielfachheit größer">+</button></span></div>').join('');
+        const sl = div(box, '');
+        range(sl, { label: 'Faktor $a$', min: -2, max: 2, step: 0.1, value: a, fmt: v => fmt(v, 1), onInput: v => { a = Math.abs(v) < 0.05 ? 0.1 : v; render(); } });
+        math(sl);
+        div(box, 'b-help', 'Zieh die Nullstellen auf der $x$-Achse. Vielfachheit 0 nimmt den Linearfaktor heraus.');
+        const p = new Plot(div(box, ''), { x: [-5, 5], y: [-8, 8], height: 340, aria: 'Ganzrationale Funktion mit verschiebbaren Nullstellen' });
+        const out = div(box, 'b-out');
+        p.handles(Z, () => render());
+        ctl.addEventListener('click', e => {
+            const b = e.target.closest('[data-d]'); if (!b) return;
+            const i = +b.dataset.i, k = Z[i].k + +b.dataset.d;
+            if (k < 0 || k > 3 || Z.reduce((s, z, j) => s + (j === i ? k : z.k), 0) < 1) return;
+            Z[i].k = k; render();
+        });
+        const KIND = ['', 'einfach', 'doppelt', 'dreifach', 'vierfach', 'fünffach', 'sechsfach', 'siebenfach', 'achtfach', 'neunfach'];
+        function render() {
+            const m = new Map();                                   // zeros at the same place add up
+            Z.forEach(z => { if (z.k) m.set(z.x, (m.get(z.x) || 0) + z.k); });
+            const zs = [...m.entries()].sort((u, v) => u[0] - v[0]);
+            const n = zs.reduce((s, [, k]) => s + k, 0);
+            const f = x => a * zs.reduce((s, [z, k]) => s * (x - z) ** k, 1);
+            Z.forEach((z, i) => { ctl.querySelector('[data-o="' + i + '"]').textContent = z.k; z.color = z.k ? ZCOL[i] : 'dim'; });
+            p.draw([{ fn: f, color: 'violet', label: 'f', labelAt: 3.9 }]);
+            const sgn = v => v > 0 ? '+\\infty' : '-\\infty';
+            const list = zs.map(([z, k]) => '<li>$x = ' + texNum(z, 1) + '$: ' + KIND[k] + ' → ' +
+                (k % 2 ? (k === 1 ? 'Vorzeichenwechsel, der Graph <b>schneidet</b> die $x$-Achse' : 'Vorzeichenwechsel, der Graph schneidet die $x$-Achse <b>flach</b> (Sattelpunkt)')
+                    : 'kein Vorzeichenwechsel, der Graph <b>berührt</b> die $x$-Achse') + '</li>').join('');
+            out.innerHTML = '<p style="margin:0 0 6px">$f(x) = ' + co(a, 1) + zs.map(([z, k]) => factorTex(z, k)).join('') + '$ · Grad $' + n + '$ · $f(0) = ' + texNum(f(0), 2) + '$</p>' +
+                '<ul class="gr-list">' + list + '</ul>' +
+                '<p style="margin:6px 0 0">Für $x \\to +\\infty$ geht $f(x) \\to ' + sgn(a) + '$, für $x \\to -\\infty$ geht $f(x) \\to ' + sgn(n % 2 ? -a : a) + '$. ' +
+                'Es entscheidet nur der Summand mit der höchsten Potenz: $' + co(a, 1) + 'x' + (n > 1 ? '^{' + n + '}' : '') + '$.</p>';
+            math(out);
+        }
+        render();
     });
 })();

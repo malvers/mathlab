@@ -8,7 +8,7 @@
  *   kurve         f(x) = ax³ + bx² + cx + d: monotony, extrema and inflection point with f' and f''
  *   tangente      tangent and normal at a draggable point, both equations
  *   ableiten      derivative trainer: random terms, type f'(x), checked numerically
- *   steckbrief    a function from conditions: draggable points, the system of equations and its solution
+ *   steckbrief    a function from conditions: draggable points, the system of equations and its solution (data-modes="p3 ext wp")
  *   optimieren    box from a sheet, tin can, fence at a wall: target function, slider, maximum by f' = 0
  *   schar         a family f_a with its members, the extreme points and their locus (Klasse 13, Lernbereich 6)
  *   gewinn        costs, revenue and profit: break-even points and maximum profit for a chosen price
@@ -496,9 +496,11 @@
             ext: { k: 'Kubisch: Extrempunkt + 2 Punkte', pts: [[-1, 3], [0, 0], [3, -1]], names: ['E', 'P', 'Q'] },
             wp: { k: 'Kubisch: Wendepunkt mit Tangente + Punkt', pts: [[1, 1], [-2, -1]], names: ['W', 'P'] }
         };
-        let mode = 'ext', mW = -1;
+        // data-modes="p3" limits the choice (book FOS 11: only the parabola); without it all three, starting with 'ext'
+        const keys = (box.dataset.modes || 'p3 ext wp').split(/\s+/).filter(k => MODES[k]);
+        let mode = box.dataset.modes ? keys[0] : 'ext', mW = -1;
         const ctl = div(box, 'b-ctrls');
-        segBox(ctl, Object.keys(MODES).map(k => [k, MODES[k].k]), mode, v => { mode = v; setup(); }, 'Bedingungen');
+        if (keys.length > 1) segBox(ctl, keys.map(k => [k, MODES[k].k]), mode, v => { mode = v; setup(); }, 'Bedingungen');
         const mBox = div(box, '');
         range(mBox, { label: 'Steigung im Wendepunkt $m$', min: -4, max: 4, step: 0.5, value: mW, onInput: v => { mW = v; render(); } });
         const p = new Plot(div(box, ''), { x: [-5, 5], y: [-5, 6], height: 330, aria: 'Funktion aus Bedingungen' });

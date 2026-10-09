@@ -12,6 +12,10 @@
  *   bernoulli-baum   the tree of a Bernoulli chain, every path with exactly k hits lit
  *   stichprobe       many samples from one population: the sample shares scatter around p (Klasse 13)
  *   signifikanztest  test of H0: p = p0, left/right/two-sided, rejection region, decision, error of the second kind
+ *   venn             events as sets on a wheel with 12 fields: union, intersection, complement, de Morgan, addition rule (FOS 11)
+ *   urne             the urn model: n balls, k draws, with/without order and replacement - formula, count, all outcomes (FOS 11)
+ *                    (start values data-n, data-k, data-ord, data-rep)
+ *   pascal           Pascal's triangle: pick n and k, the binomial coefficient, its two parents and its mirror image (FOS 11)
  * Looks: js/buch.css (section "Widgets of the stochastics chapters").
  */
 (function () {
@@ -852,5 +856,213 @@
             math(out);
         }
         render(); math(sl); math(c2); math(c3);
+    });
+    /* ---------- events as sets: union, intersection, complement, de Morgan ---------- */
+    const VOPS = {
+        u: { tex: 'A \\cup B', f: (a, b) => a || b, say: '$A$ oder $B$ (oder beide)' },
+        n: { tex: 'A \\cap B', f: (a, b) => a && b, say: '$A$ und $B$' },
+        ca: { tex: '\\overline{A}', f: a => !a, say: 'nicht $A$' },
+        cu: { tex: '\\overline{A \\cup B}', f: (a, b) => !(a || b), say: 'weder $A$ noch $B$', twin: 'cacb' },
+        cacb: { tex: '\\overline{A} \\cap \\overline{B}', f: (a, b) => !a && !b, say: 'nicht $A$ und nicht $B$', twin: 'cu' },
+        cn: { tex: '\\overline{A \\cap B}', f: (a, b) => !(a && b), say: 'nicht beide', twin: 'cacub' },
+        cacub: { tex: '\\overline{A} \\cup \\overline{B}', f: (a, b) => !a || !b, say: 'nicht $A$ oder nicht $B$', twin: 'cn' }
+    };
+    const VPRE = {
+        g3: ['gerade · Vielfaches von 3', [2, 4, 6, 8, 10, 12], [3, 6, 9, 12]],
+        pr: ['Primzahl · größer als 6', [2, 3, 5, 7, 11], [7, 8, 9, 10, 11, 12]],
+        uv: ['unvereinbar', [1, 2, 3], [10, 11, 12]]
+    };
+    let vennNo = 0;
+    W('venn', function (box) {
+        const Bk = window.Buch, N = 12, id = 'vn' + (++vennNo);
+        let A = new Set(VPRE.g3[1]), Bv = new Set(VPRE.g3[2]), op = 'u', edit = 'A';
+        Bk.div(box, 'b-help', 'Ein Glücksrad hat 12 gleich große Felder: $\\Omega = \\{1; 2; \\ldots; 12\\}$. Wähle eine Vorlage oder stell $A$ und $B$ selbst zusammen: Ereignis wählen, dann Zahlen antippen.');
+        const c1 = Bk.div(box, 'b-ctrls');
+        Bk.seg(c1, Object.keys(VPRE).map(k => [k, VPRE[k][0]]), 'g3', v => { A = new Set(VPRE[v][1]); Bv = new Set(VPRE[v][2]); render(); }, 'Vorlage');
+        const c2 = Bk.div(box, 'b-ctrls');
+        Bk.seg(c2, [['A', '$A$ bearbeiten'], ['B', '$B$ bearbeiten']], 'A', v => { edit = v; }, 'Ereignis bearbeiten');
+        const chips = Bk.div(box, 'vn-chips');
+        chips.innerHTML = Array.from({ length: N }, (_, i) => '<button type="button" class="vn-chip" data-k="' + (i + 1) + '">' + (i + 1) + '</button>').join('');
+        const c3 = Bk.div(box, 'b-ctrls');
+        c3.innerHTML = '<span class="b-ctrl">Verknüpfung:</span>';
+        Bk.seg(c3, Object.keys(VOPS).map(k => [k, '$' + VOPS[k].tex + '$']), op, v => { op = v; render(); }, 'Verknüpfung');
+        math(c2); math(c3); math(box.querySelector('.b-help'));
+        const svgBox = Bk.div(box, 'b-svgbox');
+        const out = Bk.div(box, 'b-out');
+        chips.addEventListener('click', e => {
+            const b = e.target.closest('[data-k]'); if (!b) return;
+            const k = +b.dataset.k, S = edit === 'A' ? A : Bv;
+            S.has(k) ? S.delete(k) : S.add(k);
+            render();
+        });
+        // geometry: two circles in Ω, number slots per region picked greedily on a fine grid
+        const CA = [200, 158], CB = [320, 158], RAD = 118, M = 15;
+        const inA = (x, y) => Math.hypot(x - CA[0], y - CA[1]), inB = (x, y) => Math.hypot(x - CB[0], y - CB[1]);
+        const slots = [[], [], [], []];                    // 0 outside, 1 only A, 2 both, 3 only B
+        (function () {
+            const anchor = [[260, 0], [135, 158], [260, 158], [385, 158]], cand = [[], [], [], []];
+            for (let x = 22; x <= 498; x += 8) for (let y = 24; y <= 296; y += 8) {
+                const da = inA(x, y), db = inB(x, y);
+                if (Math.abs(da - RAD) < M || Math.abs(db - RAD) < M) continue;
+                if (x < 70 && y < 52) continue;                        // the Ω label
+                cand[da < RAD ? (db < RAD ? 2 : 1) : (db < RAD ? 3 : 0)].push([x, y]);
+            }
+            cand.forEach((list, r) => {
+                const [ax, ay] = anchor[r];
+                list.sort((p, q) => r ? Math.hypot(p[0] - ax, p[1] - ay) - Math.hypot(q[0] - ax, q[1] - ay) : Math.hypot(q[0] - 260, q[1] - 158) - Math.hypot(p[0] - 260, p[1] - 158));
+                list.forEach(p => { if (slots[r].length < N && slots[r].every(q => Math.hypot(p[0] - q[0], p[1] - q[1]) >= 31)) slots[r].push(p); });
+            });
+        })();
+        const setTex = S => S.length ? '\\{' + S.join(';\\,') + '\\}' : '\\{\\,\\}';
+        const prob = k => { const f = new Frac(k, N); return '\\tfrac{' + k + '}{' + N + '}' + (f.d !== N ? ' = ' + f.tex() : ''); };
+        function render() {
+            const O = VOPS[op], f = k => O.f(A.has(k), Bv.has(k));
+            const regOn = [O.f(false, false), O.f(true, false), O.f(true, true), O.f(false, true)];
+            chips.querySelectorAll('.vn-chip').forEach(b => {
+                const k = +b.dataset.k;
+                b.classList.toggle('a', A.has(k)); b.classList.toggle('b', Bv.has(k)); b.classList.toggle('res', f(k));
+            });
+            const used = [0, 0, 0, 0];
+            let nums = '';
+            for (let k = 1; k <= N; k++) {
+                const r = A.has(k) ? (Bv.has(k) ? 2 : 1) : (Bv.has(k) ? 3 : 0), p = slots[r][used[r]++];
+                if (p) nums += '<text class="vn-num' + (f(k) ? ' on' : '') + '" x="' + p[0] + '" y="' + (p[1] + 6) + '" text-anchor="middle">' + k + '</text>';
+            }
+            const cA = '<circle cx="' + CA[0] + '" cy="' + CA[1] + '" r="' + RAD + '"/>', cB = '<circle cx="' + CB[0] + '" cy="' + CB[1] + '" r="' + RAD + '"/>';
+            svgBox.innerHTML = '<svg viewBox="0 0 520 316" role="img" aria-label="Mengendiagramm der Ereignisse A und B">' +
+                '<defs><clipPath id="' + id + '-cA">' + cA + '</clipPath>' +
+                '<mask id="' + id + '-mA"><rect width="520" height="316" fill="#fff"/><g fill="#000">' + cA + '</g></mask>' +
+                '<mask id="' + id + '-mB"><rect width="520" height="316" fill="#fff"/><g fill="#000">' + cB + '</g></mask>' +
+                '<mask id="' + id + '-mAB"><rect width="520" height="316" fill="#fff"/><g fill="#000">' + cA + cB + '</g></mask></defs>' +
+                '<rect class="vn-reg' + (regOn[0] ? ' on' : '') + '" x="6" y="6" width="508" height="304" rx="14" mask="url(#' + id + '-mAB)"/>' +
+                '<g class="vn-reg' + (regOn[1] ? ' on' : '') + '" mask="url(#' + id + '-mB)">' + cA + '</g>' +
+                '<g class="vn-reg' + (regOn[2] ? ' on' : '') + '" clip-path="url(#' + id + '-cA)">' + cB + '</g>' +
+                '<g class="vn-reg' + (regOn[3] ? ' on' : '') + '" mask="url(#' + id + '-mA)">' + cB + '</g>' +
+                '<rect class="vn-omega" x="6" y="6" width="508" height="304" rx="14"/><g class="vn-ca">' + cA + '</g><g class="vn-cb">' + cB + '</g>' +
+                '<text class="vn-name" x="20" y="36">Ω</text><text class="vn-name vn-na" x="' + (CA[0] - 92) + '" y="' + (CA[1] - 86) + '">A</text><text class="vn-name vn-nb" x="' + (CB[0] + 80) + '" y="' + (CB[1] - 86) + '">B</text>' +
+                nums + '</svg>';
+            const all = Array.from({ length: N }, (_, i) => i + 1), E = all.filter(f);
+            const aL = all.filter(k => A.has(k)), bL = all.filter(k => Bv.has(k)), abL = aL.filter(k => Bv.has(k));
+            let extra = '';
+            if (op === 'u') extra = 'Additionssatz: $P(A \\cup B) = P(A) + P(B) - P(A \\cap B) = \\tfrac{' + aL.length + '}{12} + \\tfrac{' + bL.length + '}{12} - \\tfrac{' + abL.length + '}{12} = \\tfrac{' + E.length + '}{12}$' +
+                (abL.length ? '' : ' · $A$ und $B$ sind <b>unvereinbar</b> ($A \\cap B = \\emptyset$), es wird nichts doppelt gezählt.');
+            else if (op === 'ca') extra = 'Gegenereignis: $P(\\overline{A}) = 1 - P(A) = 1 - \\tfrac{' + aL.length + '}{12} = \\tfrac{' + E.length + '}{12}$';
+            else if (op === 'n') extra = abL.length ? 'Die Zahlen, die in beiden Ereignissen liegen.' : '$A \\cap B = \\emptyset$: Die Ereignisse sind <b>unvereinbar</b>, sie können nicht zusammen eintreten.';
+            else extra = 'Regel von de Morgan: $' + O.tex + ' = ' + VOPS[O.twin].tex + '$. Wähle die andere Seite und vergleiche: Es ist dieselbe Menge.';
+            out.innerHTML = '<p style="margin:0 0 6px">$A = ' + setTex(aL) + '$ · $B = ' + setTex(bL) + '$</p>' +
+                '<p style="margin:0 0 6px">$' + O.tex + '$ (' + O.say + ') $= ' + setTex(E) + '$ · <span class="b-res">$P = ' + prob(E.length) + '$</span></p>' +
+                '<p style="margin:0">' + extra + '</p>';
+            math(out);
+        }
+        render();
+    });
+
+    /* ---------- the urn model: four basic cases of counting ---------- */
+    const fact = n => (n <= 1 ? 1 : n * fact(n - 1));
+    W('urne', function (box) {
+        const Bk = window.Buch, d = box.dataset;                     // start values: data-n, data-k, data-ord ("1"/"0"), data-rep ("1"/"0")
+        const S = { n: +d.n || 5, k: +d.k || 2, ord: d.ord || '1', rep: d.rep || '0' };
+        const c1 = Bk.div(box, 'b-ctrls');
+        c1.innerHTML = ['n', 'k'].map(v => '<div class="b-ctrl">' + (v === 'n' ? 'Kugeln $n$' : 'Ziehungen $k$') + ' <span class="b-stepper"><button type="button" data-d="' + v + '-" aria-label="' + v + ' kleiner">−</button>' +
+            '<output data-o="' + v + '"></output><button type="button" data-d="' + v + '+" aria-label="' + v + ' größer">+</button></span></div>').join('');
+        const c2 = Bk.div(box, 'b-ctrls');
+        Bk.seg(c2, [['1', 'mit Reihenfolge'], ['0', 'ohne Reihenfolge']], S.ord, v => { S.ord = v; render(); }, 'Reihenfolge');
+        Bk.seg(c2, [['0', 'ohne Zurücklegen'], ['1', 'mit Zurücklegen']], S.rep, v => { S.rep = v; fix(); render(); }, 'Zurücklegen');
+        math(c1);
+        const urn = Bk.div(box, 'ur-urn');
+        const out = Bk.div(box, 'b-out');
+        const c3 = Bk.div(box, 'b-ctrls');
+        c3.innerHTML = '<button type="button" class="b-btn b-go" data-draw>Einmal ziehen</button><span class="b-help" data-last style="margin:0"></span>';
+        const list = Bk.div(box, 'ur-list b-scroll');
+        let last = null;
+        function fix() { if (S.rep === '0' && S.k > S.n) S.k = S.n; }
+        c1.addEventListener('click', e => {
+            const b = e.target.closest('[data-d]'); if (!b) return;
+            const v = b.dataset.d[0], d = b.dataset.d[1] === '+' ? 1 : -1;
+            if (v === 'n') S.n = Math.min(9, Math.max(2, S.n + d)); else S.k = Math.min(S.rep === '1' ? 6 : Math.min(6, S.n), Math.max(1, S.k + d));
+            fix(); last = null; render();
+        });
+        const show = t => S.ord === '1' ? '(' + t.join('; ') + ')' : '{' + t.join('; ') + '}';
+        function outcomes() {
+            const res = [], rep = S.rep === '1', ord = S.ord === '1';
+            (function gen(pre) {
+                if (pre.length === S.k) { res.push(pre); return; }
+                for (let v = 1; v <= S.n; v++) {
+                    if (!rep && pre.includes(v)) continue;
+                    if (!ord && pre.length && v < pre[pre.length - 1]) continue;
+                    gen(pre.concat(v));
+                }
+            })([]);
+            return res;
+        }
+        c3.querySelector('[data-draw]').addEventListener('click', () => {
+            const pool = Array.from({ length: S.n }, (_, i) => i + 1), t = [];
+            for (let i = 0; i < S.k; i++) { const j = rnd(pool.length); t.push(pool[j]); if (S.rep === '0') pool.splice(j, 1); }
+            if (S.ord === '0') t.sort((a, b) => a - b);
+            last = show(t);
+            render();
+        });
+        function render() {
+            const { n, k } = S, ord = S.ord === '1', rep = S.rep === '1';
+            c1.querySelector('[data-o="n"]').textContent = n; c1.querySelector('[data-o="k"]').textContent = k;
+            urn.innerHTML = '<span class="ur-k">URNE</span>' + Array.from({ length: n }, (_, i) => '<span class="ur-ball">' + (i + 1) + '</span>').join('');
+            let name, tex, count, ex;
+            if (ord && rep) { count = n ** k; name = 'Variation mit Wiederholung'; tex = 'n^k = ' + n + '^{' + k + '} = ' + count; ex = 'ein Zahlenschloss mit ' + k + ' Rädern zu je ' + n + ' Ziffern'; }
+            else if (ord) {
+                count = fact(n) / fact(n - k);
+                const prod = Array.from({ length: k }, (_, i) => n - i).join(' \\cdot ');
+                name = k === n ? 'Permutation (alle Kugeln, mit Reihenfolge)' : 'Variation ohne Wiederholung';
+                tex = (k === n ? 'n! = ' + n + '! = ' : '\\dfrac{n!}{(n - k)!} = \\dfrac{' + n + '!}{' + (n - k) + '!} = ') + prod + ' = ' + count;
+                ex = k === n ? n + ' Personen stellen sich in eine Reihe' : 'ein Siegerpodest: ' + k + ' von ' + n + ' Startern auf die Plätze 1 bis ' + k;
+            } else if (!rep) {
+                count = Math.round(binom(n, k)); name = 'Kombination ohne Wiederholung';
+                tex = '\\binom{n}{k} = \\binom{' + n + '}{' + k + '} = \\dfrac{' + n + '!}{' + k + '! \\cdot ' + (n - k) + '!} = ' + count;
+                ex = 'Lotto: ' + k + ' aus ' + n + ' Zahlen, die Reihenfolge der Ziehung zählt nicht';
+            } else {
+                count = Math.round(binom(n + k - 1, k)); name = 'Kombination mit Wiederholung';
+                tex = '\\binom{n + k - 1}{k} = \\binom{' + (n + k - 1) + '}{' + k + '} = ' + count;
+                ex = k + ' Kugeln Eis aus ' + n + ' Sorten, eine Sorte darf mehrfach vorkommen';
+            }
+            out.innerHTML = '<p style="margin:0 0 6px"><b>' + name + '</b> · Beispiel: ' + ex + '</p><p style="margin:0">Anzahl der Möglichkeiten: <span class="b-res">$' + tex + '$</span></p>';
+            math(out);
+            c3.querySelector('[data-last]').innerHTML = last ? 'Gezogen: <b>' + last + '</b>' : (ord ? 'Ergebnisse als Tupel $(\\ldots)$: Die Reihenfolge zählt.' : 'Ergebnisse als Mengen $\\{\\ldots\\}$: Die Reihenfolge zählt nicht.');
+            math(c3);
+            if (count <= 126) {
+                list.innerHTML = outcomes().map(t => { const s = show(t); return '<span class="ur-chip' + (s === last ? ' on' : '') + '">' + s + '</span>'; }).join('');
+            } else list.innerHTML = '<p class="b-help" style="margin:0">' + count.toLocaleString('de-DE') + ' Möglichkeiten sind zu viele zum Auflisten. Genau dafür gibt es die Formel.</p>';
+        }
+        render();
+    });
+    /* ---------- Pascal's triangle ---------- */
+    W('pascal', function (box) {
+        const Bk = window.Buch, N = 10, S = { n: 5, k: 2 };
+        const sl = Bk.div(box, '');
+        const rn = Bk.range(sl, { label: '$n$ (Zeile)', min: 0, max: N, step: 1, value: S.n, fmt: v => String(v), onInput: v => { S.n = v; if (S.k > v) { S.k = v; rk.set(v); } render(); } });
+        const rk = Bk.range(sl, { label: '$k$ (Stelle)', min: 0, max: N, step: 1, value: S.k, fmt: v => String(v), onInput: v => { S.k = Math.min(v, S.n); rk.set(S.k); render(); } });
+        math(sl);
+        const svgBox = Bk.div(box, 'b-svgbox pa-svg');
+        const out = Bk.div(box, 'b-out');
+        svgBox.addEventListener('click', e => {
+            const c = e.target.closest('[data-nk]'); if (!c) return;
+            const [n, k] = c.dataset.nk.split(',').map(Number);
+            S.n = n; S.k = k; rn.set(n); rk.set(k); render();
+        });
+        function render() {
+            const { n, k } = S, dx = 50, dy = 40, W0 = (N + 1) * dx;
+            let g = '<svg viewBox="0 0 ' + W0 + ' ' + ((N + 1) * dy + 10) + '" role="img" aria-label="Pascalsches Dreieck bis zur Zeile ' + N + '">';
+            for (let r = 0; r <= N; r++) for (let c = 0; c <= r; c++) {
+                const x = W0 / 2 + (c - r / 2) * dx, y = 24 + r * dy, v = Math.round(binom(r, c));
+                const cls = r === n && c === k ? ' on' : (r === n - 1 && (c === k || c === k - 1)) ? ' par' : (r === n && c === n - k) ? ' mir' : '';
+                g += '<g class="pa-cell' + cls + '" data-nk="' + r + ',' + c + '"><rect x="' + (x - 23) + '" y="' + (y - 16) + '" width="46" height="30" rx="8"/>' +
+                    '<text x="' + x + '" y="' + (y + 5) + '" text-anchor="middle">' + v + '</text></g>';
+            }
+            svgBox.innerHTML = g + '</svg>';
+            const v = Math.round(binom(n, k));
+            out.innerHTML = '<p style="margin:0 0 6px"><span class="b-res">$\\binom{' + n + '}{' + k + '} = \\dfrac{' + n + '!}{' + k + '! \\cdot ' + (n - k) + '!} = ' + v + '$</span>: So viele Möglichkeiten gibt es, $' + k + '$ aus $' + n + '$ auszuwählen.</p>' +
+                (n > 0 && k > 0 && k < n ? '<p style="margin:0 0 6px">Summenregel (grün umrandet): $\\binom{' + (n - 1) + '}{' + (k - 1) + '} + \\binom{' + (n - 1) + '}{' + k + '} = ' + Math.round(binom(n - 1, k - 1)) + ' + ' + Math.round(binom(n - 1, k)) + ' = ' + v + '$</p>' : '') +
+                (2 * k !== n ? '<p style="margin:0">Symmetrie (gestrichelt): $\\binom{' + n + '}{' + k + '} = \\binom{' + n + '}{' + (n - k) + '}$, denn $' + k + '$ auswählen heißt $' + (n - k) + '$ weglassen.</p>' : '<p style="margin:0">Die Mitte der Zeile: $\\binom{' + n + '}{' + k + '}$ ist hier sein eigenes Spiegelbild.</p>');
+            math(out);
+        }
+        render();
     });
 })();

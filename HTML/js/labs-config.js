@@ -57,6 +57,17 @@ const LABS_DATA = [
         "color": "gold"
     },
     {
+        "id": "lehrbuch-mathefos11",
+        "href": "buch/mathefos11/index.html",
+        "title": "Mathematik FOS 11",
+        "description": "Unser viertes Buch: das interaktive Lehrbuch Mathematik für die Fachoberschule, Klasse 11, nach dem sächsischen Lehrplan und dem Stoffverteilungsplan. Zwölf Kapitel in der Reihenfolge des Schuljahres – Zahlen, Terme und Formeln, lineare Funktionen und Gleichungssysteme, Ungleichungen und Bruchgleichungen, Parabeln bis zu Funktionenscharen mit Fallunterscheidung, ganzrationale Funktionen, Wahrscheinlichkeiten, Baumdiagramme, Abzählen, Urnenmodell und Bernoulli-Ketten, Finanzmathematik und zum Schluss Ausblicke auf komplexe Zahlen und Schaltalgebra. Zum Ausprobieren: Zahlen in Zahlenbereiche sortieren, eine Ungleichung am Zahlenstrahl testen, zwei Geraden orthogonal drehen, Nullstellen mit Vielfachheit ziehen, Ereignisse im Mengenbild verknüpfen, ein Pascalsches Dreieck, ein Tilgungsplan und Schalter für UND, ODER und das Treppenhaus. Mit Druckausgabe, QR-Code je Kapitel und Lösungsanhang.",
+        "tagline": "Buch / Mathematik FOS 11 / 12 Kapitel",
+        "icon": LAB_ICONS["lehrbuch-mathefos11"],
+        "category": "buecher neu funktionen stochastik",
+        "keywords": "buch buecher lehrbuch schulbuch mathebuch mathematik klasse 11 fachoberschule fos fo sachsen lehrplan kapitel zahlenbereiche natuerliche ganze rationale reelle zahlen betrag terme binomische formeln formeln umstellen prozent potenzgesetze funktionsbegriff definitionsbereich wertebereich lineare funktion anstieg achsenabschnitt proportionalitaet steigungswinkel geradengleichung regression ungleichung zahlenstrahl bruchgleichung scheinloesung lagebeziehung orthogonal parallel gleichungssystem lgs gleichsetzungsverfahren einsetzungsverfahren additionsverfahren quadratische funktion parabel scheitelpunktform loesungsformel diskriminante vieta linearfaktor funktionenschar fallunterscheidung ganzrationale funktion substitution vielfachheit zufallsexperiment ereignis laplace gesetz der grossen zahlen de morgan additionssatz unabhaengigkeit baumdiagramm pfadregel zaehlprinzip permutation variation kombination binomialkoeffizient pascalsches dreieck urnenmodell lotto bernoulli kette finanzmathematik zinseszins sparplan tilgung annuitaet komplexe zahlen gausssche zahlenebene schaltalgebra wahrheitstafel aufgaben loesungen selbsttest druckausgabe pdf",
+        "color": "gold"
+    },
+    {
         "id": "ziffernraetsel",
         "href": "ziffernraetsel.html",
         "title": "Ziffernrätsel",
